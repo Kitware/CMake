@@ -2,7 +2,7 @@ find_program
 ------------
 
 .. |FIND_XXX| replace:: find_program
-.. |NAMES| replace:: NAMES name1 [name2 ...] [NAMES_PER_DIR]
+.. |NAMES| replace:: NAMES <name>... [NAMES_PER_DIR]
 .. |SEARCH_XXX| replace:: program
 .. |SEARCH_XXX_DESC| replace:: program
 .. |prefix_XXX_SUBDIR| replace:: ``<prefix>/[s]bin``

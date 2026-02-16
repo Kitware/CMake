@@ -15,8 +15,8 @@ Main Form
 .. code-block:: cmake
 
   target_precompile_headers(<target>
-    <INTERFACE|PUBLIC|PRIVATE> [header1...]
-    [<INTERFACE|PUBLIC|PRIVATE> [header2...] ...])
+    {INTERFACE|PUBLIC|PRIVATE} <header>...
+    [{INTERFACE|PUBLIC|PRIVATE} <header>...]...)
 
 The command adds header files to the :prop_tgt:`PRECOMPILE_HEADERS` and/or
 :prop_tgt:`INTERFACE_PRECOMPILE_HEADERS` target properties of ``<target>``.

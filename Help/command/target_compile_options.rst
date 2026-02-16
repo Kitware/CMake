@@ -6,8 +6,8 @@ Add compile options to a target.
 .. code-block:: cmake
 
   target_compile_options(<target> [BEFORE]
-    <INTERFACE|PUBLIC|PRIVATE> [items1...]
-    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
+    {INTERFACE|PUBLIC|PRIVATE} <item>...
+    [{INTERFACE|PUBLIC|PRIVATE} <item>...]...)
 
 Adds options to the :prop_tgt:`COMPILE_OPTIONS` or
 :prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties. These options

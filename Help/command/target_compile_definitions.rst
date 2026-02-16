@@ -6,8 +6,8 @@ Add compile definitions to a target.
 .. code-block:: cmake
 
   target_compile_definitions(<target>
-    <INTERFACE|PUBLIC|PRIVATE> [items1...]
-    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
+    <INTERFACE|PUBLIC|PRIVATE> <definition>...
+    [<INTERFACE|PUBLIC|PRIVATE> <definition>... ...])
 
 Specifies compile definitions to use when compiling a given ``<target>``.  The
 named ``<target>`` must have been created by a command such as

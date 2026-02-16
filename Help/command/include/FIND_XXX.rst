@@ -2,7 +2,7 @@ A short-hand signature is:
 
 .. parsed-literal::
 
-   |FIND_XXX| (<VAR> name1 [path1 path2 ...])
+   |FIND_XXX| (<VAR> <name> [<path>...])
 
 The general signature is:
 
@@ -10,12 +10,12 @@ The general signature is:
 
    |FIND_XXX| (
              <VAR>
-             name | |NAMES|
-             [HINTS [path | ENV var]...]
-             [PATHS [path | ENV var]...]
-             [REGISTRY_VIEW (64|32|64_32|32_64|HOST|TARGET|BOTH)]
-             [PATH_SUFFIXES suffix1 [suffix2 ...]]
-             [VALIDATOR function]
+             {<name> | |NAMES|}
+             [HINTS {<path> | ENV <var>}...]
+             [PATHS {<path> | ENV <var>}...]
+             [REGISTRY_VIEW {64|32|64_32|32_64|HOST|TARGET|BOTH}]
+             [PATH_SUFFIXES <suffix>...]
+             [VALIDATOR <function>]
              [DOC "cache documentation string"]
              [NO_CACHE]
              [REQUIRED|OPTIONAL]

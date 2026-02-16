@@ -2,7 +2,7 @@ find_library
 ------------
 
 .. |FIND_XXX| replace:: find_library
-.. |NAMES| replace:: NAMES name1 [name2 ...] [NAMES_PER_DIR]
+.. |NAMES| replace:: NAMES <name>... [NAMES_PER_DIR]
 .. |SEARCH_XXX| replace:: library
 .. |SEARCH_XXX_DESC| replace:: library
 .. |prefix_XXX_SUBDIR| replace:: ``<prefix>/lib``

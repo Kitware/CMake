@@ -8,8 +8,8 @@ Add link directories to a target.
 .. code-block:: cmake
 
   target_link_directories(<target> [BEFORE]
-    <INTERFACE|PUBLIC|PRIVATE> [items1...]
-    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
+    {INTERFACE|PUBLIC|PRIVATE} <dir>...
+    [{INTERFACE|PUBLIC|PRIVATE} <dir>...]...)
 
 Specifies the paths in which the linker should search for libraries when
 linking a given target.  Each item can be an absolute or relative path,

@@ -193,7 +193,7 @@ specify the output directory as an include directory:
 
 .. code-block:: cmake
 
-  target_include_directories(<target> [SYSTEM] <INTERFACE|PUBLIC|PRIVATE> "${CMAKE_CURRENT_BINARY_DIR}")
+  target_include_directories(<target> [SYSTEM] {INTERFACE|PUBLIC|PRIVATE} "${CMAKE_CURRENT_BINARY_DIR}")
 
 so that sources may include the header as ``#include <foo.h>``.
 

@@ -137,10 +137,10 @@ Basic Signature
 
 .. code-block:: cmake
 
-  find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
-               [REQUIRED|OPTIONAL] [[COMPONENTS] [components...]]
-               [OPTIONAL_COMPONENTS components...]
-               [REGISTRY_VIEW  (64|32|64_32|32_64|HOST|TARGET|BOTH)]
+  find_package(<PackageName> [<version>] [EXACT] [QUIET] [MODULE]
+               [REQUIRED|OPTIONAL] [[COMPONENTS] <component>...]
+               [OPTIONAL_COMPONENTS <component>...]
+               [REGISTRY_VIEW {64|32|64_32|32_64|HOST|TARGET|BOTH}]
                [GLOBAL]
                [NO_POLICY_SCOPE]
                [BYPASS_PROVIDER]
@@ -211,7 +211,7 @@ target package:
 
 .. _FIND_PACKAGE_VERSION_FORMAT:
 
-The ``[version]`` argument requests a version with which the package found
+The ``<version>`` argument requests a version with which the package found
 should be compatible. There are two possible forms in which it may be
 specified:
 
@@ -236,10 +236,10 @@ specified:
 The ``EXACT`` option requests that the version be matched exactly. This option
 is incompatible with the specification of a version range.
 
-If no ``[version]`` and/or component list is given to a recursive invocation
+If no ``<version>`` and/or component list is given to a recursive invocation
 inside a find-module, the corresponding arguments are forwarded
 automatically from the outer call (including the ``EXACT`` flag for
-``[version]``).
+``<version>``).
 
 See the :command:`cmake_policy` command documentation for discussion
 of the ``NO_POLICY_SCOPE`` option.
@@ -275,18 +275,18 @@ Full Signature
 .. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET]
-               [REQUIRED|OPTIONAL] [[COMPONENTS] [components...]]
-               [OPTIONAL_COMPONENTS components...]
+               [REQUIRED|OPTIONAL] [[COMPONENTS] <component>...]
+               [OPTIONAL_COMPONENTS <component>...]
                [CONFIG|NO_MODULE]
                [GLOBAL]
                [NO_POLICY_SCOPE]
                [BYPASS_PROVIDER]
-               [NAMES name1 [name2 ...]]
-               [CONFIGS config1 [config2 ...]]
-               [HINTS path1 [path2 ...]]
-               [PATHS path1 [path2 ...]]
-               [REGISTRY_VIEW  (64|32|64_32|32_64|HOST|TARGET|BOTH)]
-               [PATH_SUFFIXES suffix1 [suffix2 ...]]
+               [NAMES <name>...]
+               [CONFIGS <config>...]
+               [HINTS <path>...]
+               [PATHS <path>...]
+               [REGISTRY_VIEW {64|32|64_32|32_64|HOST|TARGET|BOTH}]
+               [PATH_SUFFIXES <suffix>...]
                [NO_DEFAULT_PATH]
                [NO_PACKAGE_ROOT_PATH]
                [NO_CMAKE_PATH]
@@ -690,7 +690,7 @@ Config Mode Version Selection
   regardless of whether the :ref:`full <full signature>` or
   :ref:`basic <basic signature>` signature was given.
 
-When the ``[version]`` argument is given, Config mode will only find a
+When the ``<version>`` argument is given, Config mode will only find a
 version of the package that claims compatibility with the requested
 version (see :ref:`format specification <FIND_PACKAGE_VERSION_FORMAT>`).  If
 the ``EXACT`` option is given, only a version of the package claiming an exact
@@ -987,7 +987,7 @@ the full requested version string as specified.
 In Module mode the loaded find module is responsible to honor the
 request detailed by these variables; see the find module for details.
 In Config mode ``find_package`` handles ``REQUIRED``, ``QUIET``, and
-``[version]`` options automatically but leaves it to the package
+``<version>`` options automatically but leaves it to the package
 configuration file to handle components in a way that makes sense
 for the package.  The package configuration file may set
 ``<PackageName>_FOUND`` to false to tell ``find_package`` that component
