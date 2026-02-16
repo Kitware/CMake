@@ -31,7 +31,9 @@ bool cmExportBuildSbomGenerator::GenerateMainFile(std::ostream& os)
   cmSbomDocument doc;
   doc.Graph.reserve(256);
 
-  cmSpdxDocument* project = insert_back(doc.Graph, this->GenerateSbom());
+  cmSpdxCreationInfo const* ci =
+    insert_back(doc.Graph, this->GenerateCreationInfo());
+  cmSpdxDocument* project = insert_back(doc.Graph, this->GenerateSbom(ci));
   std::vector<TargetProperties> targets;
 
   for (auto const& exp : this->Exports) {
@@ -44,13 +46,14 @@ bool cmExportBuildSbomGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateLinkLibrariesProperty(
       target, cmGeneratorExpression::BuildInterface, properties);
 
-    targets.push_back(TargetProperties{
-      insert_back(project->RootElements, this->GenerateImportTarget(target)),
-      target, std::move(properties) });
+    targets.push_back(
+      TargetProperties{ insert_back(project->RootElements,
+                                    this->GenerateImportTarget(ci, target)),
+                        target, std::move(properties) });
   }
 
   for (auto const& target : targets) {
-    this->GenerateProperties(doc, project, target, targets);
+    this->GenerateProperties(doc, project, ci, target, targets);
   }
 
   this->WriteSbom(doc, os);

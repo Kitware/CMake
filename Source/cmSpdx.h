@@ -39,11 +39,12 @@ struct cmSpdxExternalRef
 
 struct cmSpdxCreationInfo
 {
+  cm::optional<std::string> Id;
   cm::optional<std::string> SpdxId;
   cm::optional<SemVer> SpecVersion;
   cm::optional<std::string> Comment;
   cm::optional<Datetime> Created;
-  std::vector<cmSbomObject> CreatedBy;
+  std::vector<std::string> CreatedBy;
   std::vector<cmSbomObject> CreatedUsing;
 
   void Serialize(cmSbomSerializer&) const;

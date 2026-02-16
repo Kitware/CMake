@@ -85,7 +85,9 @@ bool cmExportSbomGenerator::AddPackageInformation(
   }
 
   cmSpdxOrganization org;
+  org.SpdxId = cmStrCat("urn:", name, "#Organization");
   org.Name = name;
+  org.CreationInfo = artifact.CreationInfo;
   artifact.OriginatedBy.emplace_back(std::move(org));
 
   if (package.Description) {
@@ -111,20 +113,23 @@ bool cmExportSbomGenerator::AddPackageInformation(
   return true;
 }
 
-cmSpdxDocument cmExportSbomGenerator::GenerateSbom() const
+cmSpdxCreationInfo cmExportSbomGenerator::GenerateCreationInfo() const
 {
-  cmSpdxTool tool;
-  tool.SpdxId = "CMake#Agent";
-  tool.Name = "CMake";
-
   cmSpdxCreationInfo ci;
+  ci.SpdxId = "_:Build#CreationInfo";
   ci.Created = cmSystemTools::GetCurrentDateTime("%FT%TZ");
-  ci.CreatedUsing = { tool };
+  ci.CreatedBy = { "https://gitlab.kitware.com/cmake/cmake" };
   ci.Comment = "This SBOM was generated from the CMakeLists.txt File";
+  ci.SpecVersion = "3.0.1";
+  return ci;
+}
 
+cmSpdxDocument cmExportSbomGenerator::GenerateSbom(
+  cmSpdxCreationInfo const* ci) const
+{
   cmSpdxDocument proj;
   proj.Name = PackageName;
-  proj.SpdxId = cmStrCat(PackageName, "#SPDXDocument");
+  proj.SpdxId = cmStrCat("urn:", PackageName, "#SPDXDocument");
   proj.ProfileConformance = { "core", "software" };
   proj.CreationInfo = ci;
 
@@ -140,18 +145,13 @@ cmSpdxDocument cmExportSbomGenerator::GenerateSbom() const
 }
 
 cmSpdxPackage cmExportSbomGenerator::GenerateImportTarget(
-  cmGeneratorTarget const* target) const
+  cmSpdxCreationInfo const* ci, cmGeneratorTarget const* target) const
 {
   cmSpdxPackage package;
-  package.SpdxId = cmStrCat(target->GetName(), "#Package");
+  package.SpdxId = cmStrCat("urn:", target->GetName(), "#Package");
   package.Name = target->GetName();
   package.PrimaryPurpose = GetPurpose(target->GetType());
-
-  cmSpdxExternalRef buildSystem;
-  buildSystem.Locator = "CMake#Agent";
-  buildSystem.ExternalRefType = "buildSystem";
-  buildSystem.Comment = "Build System used for this target";
-  package.ExternalRef = { buildSystem };
+  package.CreationInfo = ci;
 
   if (!this->PackageVersion.empty()) {
     package.PackageVersion = this->PackageVersion;
@@ -169,8 +169,8 @@ cmSpdxPackage cmExportSbomGenerator::GenerateImportTarget(
 }
 
 void cmExportSbomGenerator::GenerateLinkProperties(
-  cmSbomDocument& doc, cmSpdxDocument* project, std::string const& libraries,
-  TargetProperties const& current,
+  cmSbomDocument& doc, cmSpdxDocument* project, cmSpdxCreationInfo const* ci,
+  std::string const& libraries, TargetProperties const& current,
   std::vector<TargetProperties> const& allTargets) const
 {
   auto itProp = current.Properties.find(libraries);
@@ -187,17 +187,19 @@ void cmExportSbomGenerator::GenerateLinkProperties(
     return;
   }
 
-  auto makeRel = [&](char const* desc) {
+  auto makeRel = [&](char const* id, char const* desc) {
     cmSpdxRelationship r;
+    r.SpdxId = cmStrCat("urn:", id, "#Relationship");
     r.RelationshipType = cmSpdxRelationship::RelationshipTypeId::DEPENDS_ON;
     r.Description = desc;
     r.From = current.Package;
+    r.CreationInfo = ci;
     return r;
   };
 
-  auto linkLibraries = makeRel("Linked Libraries");
-  auto linkRequires = makeRel("Required Runtime Libraries");
-  auto buildRequires = makeRel("Required Build-Time Libraries");
+  auto linkLibraries = makeRel("Static", "Linked Libraries");
+  auto linkRequires = makeRel("Dynamic", "Required Runtime Libraries");
+  auto buildRequires = makeRel("Shared", "Required Build-Time Libraries");
 
   auto addArtifact =
     [&](std::string const& name) -> std::pair<bool, cmSpdxPackage const*> {
@@ -215,7 +217,8 @@ void cmExportSbomGenerator::GenerateLinkProperties(
         cmStrCat(linkInfo.Package, ":", linkInfo.Component);
       cmSpdxPackage pkg;
       pkg.Name = pkgName;
-      pkg.SpdxId = cmStrCat(pkgName, "#Package");
+      pkg.SpdxId = cmStrCat("urn:", pkgName, "#Package");
+      pkg.CreationInfo = ci;
       if (!linkInfo.Package.empty()) {
         auto const& pkgIt = this->Requirements.find(linkInfo.Package);
         if (pkgIt != this->Requirements.end() &&
@@ -223,13 +226,13 @@ void cmExportSbomGenerator::GenerateLinkProperties(
           this->AddPackageInformation(pkg, pkgIt->first, pkgIt->second);
         }
       }
-
       return { true, insert_back(project->Elements, std::move(pkg)) };
     }
 
     cmSpdxPackage pkg;
-    pkg.SpdxId = cmStrCat(name, "#Package");
+    pkg.SpdxId = cmStrCat("urn:", name, "#Package");
     pkg.Name = name;
+    pkg.CreationInfo = ci;
     return { false, insert_back(project->Elements, std::move(pkg)) };
   };
 
@@ -266,13 +269,14 @@ void cmExportSbomGenerator::GenerateLinkProperties(
 }
 
 bool cmExportSbomGenerator::GenerateProperties(
-  cmSbomDocument& doc, cmSpdxDocument* proj, TargetProperties const& current,
+  cmSbomDocument& doc, cmSpdxDocument* proj, cmSpdxCreationInfo const* ci,
+  TargetProperties const& current,
   std::vector<TargetProperties> const& allTargets) const
 {
-  this->GenerateLinkProperties(doc, proj, "LINK_LIBRARIES", current,
+  this->GenerateLinkProperties(doc, proj, ci, "LINK_LIBRARIES", current,
                                allTargets);
-  this->GenerateLinkProperties(doc, proj, "INTERFACE_LINK_LIBRARIES", current,
-                               allTargets);
+  this->GenerateLinkProperties(doc, proj, ci, "INTERFACE_LINK_LIBRARIES",
+                               current, allTargets);
   return true;
 }
 
@@ -348,7 +352,6 @@ bool cmExportSbomGenerator::NoteLinkedTarget(
     cmPackageInformation& req =
       this->Requirements.insert(std::move(*pkgInfo)).first->second;
     req.Components.emplace(std::move(component));
-
     return true;
   }
 
