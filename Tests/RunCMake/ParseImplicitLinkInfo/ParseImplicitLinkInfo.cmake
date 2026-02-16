@@ -66,6 +66,7 @@ set(targets
   windows_x86_64-Fortran-LLVMFlang-18.0.0-MSVC
   windows_x86_64-C-Intel-2021.9.0.20230302 windows_x86_64-CXX-Intel-2021.9.0.20230302 windows_x86_64-Fortran-Intel-2021.9.0.20230302
   windows_x86_64-C-IntelLLVM-2023.1.0 windows_x86_64-CXX-IntelLLVM-2023.1.0 windows_x86_64-Fortran-IntelLLVM-2023.1.0
+  windows-x86_64-CUDA-NVIDIA-13.1.115
   windows_arm64-C-Clang-17.0.1-MSVC windows_arm64-CXX-Clang-17.0.1-MSVC windows_arm64-Fortran-LLVMFlang-17.0.1-MSVC
   )
 
@@ -170,14 +171,26 @@ foreach(t ${targets})
       endif()
     endforeach()
 
-    cmake_parse_implicit_link_info2("${input}" log
-        "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
-        LANGUAGE ${lang}
-        COMPUTE_LINKER linker_tool
-        COMPUTE_IMPLICIT_LIBS implicit_libs
-        COMPUTE_IMPLICIT_DIRS idirs
-        COMPUTE_IMPLICIT_FWKS implicit_fwks
-        COMPUTE_IMPLICIT_OBJECTS implicit_objs)
+    if(DEFINED CMAKE_${lang}_USE_NVCC_PARSE_IMPLICIT_INFO)
+      include(${CMAKE_ROOT}/Modules/Internal/CMakeNVCCParseImplicitInfo.cmake)
+      include(${CMAKE_ROOT}/Modules/Internal/CMakeCUDAFilterImplicitLibs.cmake)
+      set(CMAKE_${lang}_COMPILER_PRODUCED_OUTPUT "${input}")
+      cmake_nvcc_parse_implicit_info("${lang}" "CMAKE_${lang}_")
+      cmake_cuda_filter_implicit_libs(CMAKE_${lang}_HOST_IMPLICIT_LINK_LIBRARIES)
+      set(linker_tool "${CMAKE_${lang}_HOST_LINK_LAUNCHER}")
+      set(implicit_libs "${CMAKE_${lang}_HOST_IMPLICIT_LINK_LIBRARIES}")
+      set(idirs "${CMAKE_${lang}_HOST_IMPLICIT_LINK_DIRECTORIES}")
+      set(implicit_objs )
+    else()
+      cmake_parse_implicit_link_info2("${input}" log
+          "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
+          LANGUAGE ${lang}
+          COMPUTE_LINKER linker_tool
+          COMPUTE_IMPLICIT_LIBS implicit_libs
+          COMPUTE_IMPLICIT_DIRS idirs
+          COMPUTE_IMPLICIT_FWKS implicit_fwks
+          COMPUTE_IMPLICIT_OBJECTS implicit_objs)
+    endif()
 
     set(library_arch)
     cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)

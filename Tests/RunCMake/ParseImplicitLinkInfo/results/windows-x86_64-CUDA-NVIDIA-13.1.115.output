@@ -1,0 +1,3 @@
+libs=
+dirs=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14\.44\.35207/atlmfc/lib/x64;C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13\.1/lib/x64
+linker_tool=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14\.44\.35207/bin/Hostx64/x64/link\.exe
