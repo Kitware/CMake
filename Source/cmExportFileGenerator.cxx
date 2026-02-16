@@ -674,9 +674,9 @@ bool PropertyTypeIsForPaths(PropertyType pt)
 bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
   cmGeneratorTarget const* gte, ImportPropertyMap& properties,
   cmGeneratorExpression::PreprocessContext ctx,
-  std::string const& includesDestinationDirs, std::string& errorMessage)
+  std::string const& includesDestinationDirs, std::string&)
 {
-  if (!gte->HaveCxx20ModuleSources(&errorMessage)) {
+  if (!gte->HaveCxx20ModuleSources()) {
     return true;
   }
 

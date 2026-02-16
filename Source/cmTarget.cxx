@@ -21,6 +21,7 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -98,18 +99,18 @@ cmValue cmTargetPropertyComputer::GetSources<cmTarget>(cmTarget const* tgt)
 namespace {
 struct FileSetEntries
 {
-  FileSetEntries(cm::static_string_view propertyName)
+  FileSetEntries(cm::string_view propertyName)
     : PropertyName(propertyName)
   {
   }
 
-  cm::static_string_view const PropertyName;
+  cm::string_view const PropertyName;
   std::vector<BT<std::string>> Entries;
 };
 
 struct FileSetType
 {
-  FileSetType(cm::static_string_view typeName,
+  FileSetType(cm::string_view typeName,
               cm::static_string_view defaultDirectoryProperty,
               cm::static_string_view defaultPathProperty,
               cm::static_string_view directoryPrefix,
@@ -131,7 +132,7 @@ struct FileSetType
   {
   }
 
-  cm::static_string_view const TypeName;
+  cm::string_view const TypeName;
   cm::static_string_view const DefaultDirectoryProperty;
   cm::static_string_view const DefaultPathProperty;
   cm::static_string_view const DirectoryPrefix;
@@ -157,7 +158,7 @@ struct FileSetType
                                           cmTargetInternals const* impl,
                                           std::string const& prop) const;
 
-  void AddFileSet(std::string const& name, cmFileSet::Visibility vis,
+  void AddFileSet(std::string const& name, cm::FileSetMetadata::Visibility vis,
                   cmListFileBacktrace bt);
 };
 
@@ -703,19 +704,19 @@ cmTargetInternals::cmTargetInternals()
       "IMPORTED_CXX_MODULES_COMPILE_FEATURES"_s)
   , ImportedCxxModulesCompileOptions("IMPORTED_CXX_MODULES_COMPILE_OPTIONS"_s)
   , ImportedCxxModulesLinkLibraries("IMPORTED_CXX_MODULES_LINK_LIBRARIES"_s)
-  , FileSetTypes{
-    { cmFileSet::HEADERS,
-      { cmFileSet::HEADERS, "HEADER_DIRS"_s, "HEADER_SET"_s, "HEADER_DIRS_"_s,
-        "HEADER_SET_"_s, "Header"_s, "The default header set"_s,
-        "Header set"_s, FileSetEntries{ "HEADER_SETS"_s },
-        FileSetEntries{ "INTERFACE_HEADER_SETS"_s } } },
-    { cmFileSet::CXX_MODULES,
-      { cmFileSet::CXX_MODULES, "CXX_MODULE_DIRS"_s, "CXX_MODULE_SET"_s,
-        "CXX_MODULE_DIRS_"_s, "CXX_MODULE_SET_"_s, "C++ module"_s,
-        "The default C++ module set"_s, "C++ module set"_s,
-        FileSetEntries{ "CXX_MODULE_SETS"_s },
-        FileSetEntries{ "INTERFACE_CXX_MODULE_SETS"_s } } }
-  }
+  , FileSetTypes{ { cm::FileSetMetadata::HEADERS,
+                    { cm::FileSetMetadata::HEADERS, "HEADER_DIRS"_s,
+                      "HEADER_SET"_s, "HEADER_DIRS_"_s, "HEADER_SET_"_s,
+                      "Header"_s, "The default header set"_s, "Header set"_s,
+                      FileSetEntries{ "HEADER_SETS"_s },
+                      FileSetEntries{ "INTERFACE_HEADER_SETS"_s } } },
+                  { cm::FileSetMetadata::CXX_MODULES,
+                    { cm::FileSetMetadata::CXX_MODULES, "CXX_MODULE_DIRS"_s,
+                      "CXX_MODULE_SET"_s, "CXX_MODULE_DIRS_"_s,
+                      "CXX_MODULE_SET_"_s, "C++ module"_s,
+                      "The default C++ module set"_s, "C++ module set"_s,
+                      FileSetEntries{ "CXX_MODULE_SETS"_s },
+                      FileSetEntries{ "INTERFACE_CXX_MODULE_SETS"_s } } } }
 {
 }
 
@@ -805,12 +806,13 @@ std::pair<bool, cmValue> FileSetType::ReadProperties(
 }
 
 void FileSetType::AddFileSet(std::string const& name,
-                             cmFileSet::Visibility vis, cmListFileBacktrace bt)
+                             cm::FileSetMetadata::Visibility vis,
+                             cmListFileBacktrace bt)
 {
-  if (cmFileSet::VisibilityIsForSelf(vis)) {
+  if (cm::FileSetMetadata::VisibilityIsForSelf(vis)) {
     this->SelfEntries.Entries.emplace_back(name, bt);
   }
-  if (cmFileSet::VisibilityIsForInterface(vis)) {
+  if (cm::FileSetMetadata::VisibilityIsForInterface(vis)) {
     this->InterfaceEntries.Entries.emplace_back(name, std::move(bt));
   }
 }
@@ -1771,10 +1773,10 @@ void cmTarget::CopyCxxModulesEntries(cmTarget const* tgt)
 
   // Copy the C++ module fileset entries from `tgt`'s `INTERFACE` to this
   // target's `PRIVATE`.
-  auto& entries =
-    this->impl->FileSetTypes.at(cmFileSet::CXX_MODULES).SelfEntries.Entries;
+  auto& entries = this->impl->FileSetTypes.at(cm::FileSetMetadata::CXX_MODULES)
+                    .SelfEntries.Entries;
   entries.clear();
-  entries = tgt->impl->FileSetTypes.at(cmFileSet::CXX_MODULES)
+  entries = tgt->impl->FileSetTypes.at(cm::FileSetMetadata::CXX_MODULES)
               .InterfaceEntries.Entries;
 }
 
@@ -3154,7 +3156,8 @@ cmFileSet* cmTarget::GetFileSet(std::string const& name)
 }
 
 std::pair<cmFileSet*, bool> cmTarget::GetOrCreateFileSet(
-  std::string const& name, std::string const& type, cmFileSet::Visibility vis)
+  std::string const& name, std::string const& type,
+  cm::FileSetMetadata::Visibility vis)
 {
   auto result = this->impl->FileSets.emplace(
     name, cmFileSet(this->GetMakefile(), name, type, vis));

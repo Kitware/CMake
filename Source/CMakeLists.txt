@@ -268,6 +268,8 @@ add_library(
   cmFilePathChecksum.h
   cmFileSet.cxx
   cmFileSet.h
+  cmFileSetMetadata.cxx
+  cmFileSetMetadata.h
   cmFileTime.cxx
   cmFileTime.h
   cmFileTimeCache.cxx
@@ -300,6 +302,10 @@ add_library(
   cmGeneratorExpressionParser.h
   cmGeneratorExpression.cxx
   cmGeneratorExpression.h
+  cmGeneratorFileSet.cxx
+  cmGeneratorFileSet.h
+  cmGeneratorFileSets.cxx
+  cmGeneratorFileSets.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
   cmGeneratorTarget_CompatibleInterface.cxx

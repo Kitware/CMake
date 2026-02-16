@@ -13,15 +13,21 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmAlgorithms.h"
-#include "cmFileSet.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmValue.h"
+
+namespace cm {
+namespace FileSetMetadata {
+enum class Visibility;
+}
+}
 
 class cmCustomCommand;
 class cmFileSet;
@@ -344,9 +350,9 @@ public:
 
   cmFileSet const* GetFileSet(std::string const& name) const;
   cmFileSet* GetFileSet(std::string const& name);
-  std::pair<cmFileSet*, bool> GetOrCreateFileSet(std::string const& name,
-                                                 std::string const& type,
-                                                 cmFileSet::Visibility vis);
+  std::pair<cmFileSet*, bool> GetOrCreateFileSet(
+    std::string const& name, std::string const& type,
+    cm::FileSetMetadata::Visibility vis);
 
   std::vector<std::string> GetAllFileSetNames() const;
   std::vector<std::string> GetAllInterfaceFileSets() const;

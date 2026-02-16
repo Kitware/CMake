@@ -360,6 +360,7 @@ CMAKE_CXX_SOURCES="\
   cmFileCopier \
   cmFileInstaller \
   cmFileSet \
+  cmFileSetMetadata \
   cmFileTime \
   cmFileTimeCache \
   cmFileTimes \
@@ -385,6 +386,8 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpressionLexer \
   cmGeneratorExpressionNode \
   cmGeneratorExpressionParser \
+  cmGeneratorFileSet \
+  cmGeneratorFileSets \
   cmGeneratorTarget \
   cmGeneratorTarget_CompatibleInterface \
   cmGeneratorTarget_IncludeDirectories \

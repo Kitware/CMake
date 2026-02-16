@@ -10,6 +10,8 @@
 #include "cmListFileCache.h"
 
 namespace cm {
+class TargetPropertyEntry;
+
 namespace GenEx {
 struct Context;
 }
@@ -40,8 +42,7 @@ struct EvaluatedTargetPropertyEntry
 
 EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
   cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  cmGeneratorTarget::TargetPropertyEntry& entry);
+  cmGeneratorExpressionDAGChecker* dagChecker, cm::TargetPropertyEntry& entry);
 
 struct EvaluatedTargetPropertyEntries
 {
@@ -52,8 +53,7 @@ struct EvaluatedTargetPropertyEntries
 EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
   cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>> const&
-    in);
+  std::vector<std::unique_ptr<cm::TargetPropertyEntry>> const& in);
 
 // IncludeRuntimeInterface is used to break the cycle in computing
 // the necessary transitive dependencies of targets that can occur

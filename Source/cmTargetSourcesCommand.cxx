@@ -12,6 +12,7 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -232,17 +233,18 @@ bool TargetSourcesImpl::HandleOneFileSet(
     return false;
   }
 
-  if (!args.Type.empty() && !cmFileSet::IsKnownType(args.Type)) {
-    this->SetError(cmStrCat("File set TYPE may only be \"",
-                            cmFileSet::GetKnownTypes().join("\", \""), '"'));
+  if (!args.Type.empty() && !cm::FileSetMetadata::IsKnownType(args.Type)) {
+    this->SetError(
+      cmStrCat("File set TYPE may only be \"",
+               cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""), '"'));
     return false;
   }
   if (args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
-      !cmFileSet::IsKnownType(args.FileSet)) {
+      !cm::FileSetMetadata::IsKnownType(args.FileSet)) {
     this->SetError(
       cmStrCat("FILE_SET names starting with a capital letter are reserved "
                "for built-in file sets and may only be \"",
-               cmFileSet::GetKnownTypes().join("\", \""), '"'));
+               cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""), '"'));
     return false;
   }
   if (!args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
@@ -254,9 +256,9 @@ bool TargetSourcesImpl::HandleOneFileSet(
   }
 
   bool const isDefault = args.Type == args.FileSet ||
-    (args.Type.empty() && cmFileSet::IsKnownType(args.FileSet));
+    (args.Type.empty() && cm::FileSetMetadata::IsKnownType(args.FileSet));
 
-  if (!isDefault && !cmFileSet::IsValidName(args.FileSet)) {
+  if (!isDefault && !cm::FileSetMetadata::IsValidName(args.FileSet)) {
     this->SetError("Non-default file set name must contain only letters, "
                    "numbers, and underscores, and must not start with a "
                    "capital letter or underscore");
@@ -264,8 +266,8 @@ bool TargetSourcesImpl::HandleOneFileSet(
   }
 
   std::string type = isDefault ? args.FileSet : args.Type;
-  cmFileSet::Visibility visibility =
-    cmFileSet::VisibilityFromName(scope, this->Makefile);
+  cm::FileSetMetadata::Visibility visibility =
+    cm::FileSetMetadata::VisibilityFromName(scope, this->Makefile);
 
   auto fileSet =
     this->Target->GetOrCreateFileSet(args.FileSet, type, visibility);
@@ -275,12 +277,12 @@ bool TargetSourcesImpl::HandleOneFileSet(
       return false;
     }
 
-    if (cmFileSet::VisibilityIsForSelf(visibility) &&
+    if (cm::FileSetMetadata::VisibilityIsForSelf(visibility) &&
         this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
         !this->Target->IsImported()) {
-      if (type == cmFileSet::CXX_MODULES) {
+      if (type == cm::FileSetMetadata::CXX_MODULES) {
         this->SetError(
-          cmStrCat(R"(File set TYPE ")", cmFileSet::CXX_MODULES,
+          cmStrCat(R"(File set TYPE ")", cm::FileSetMetadata::CXX_MODULES,
                    R"(" may not have "PUBLIC" )"
                    R"(or "PRIVATE" visibility on INTERFACE libraries.)"));
         return false;
@@ -289,11 +291,12 @@ bool TargetSourcesImpl::HandleOneFileSet(
 
     // FIXME(https://wg21.link/P3470): This condition can go
     // away when interface-only module units are a thing.
-    if (cmFileSet::VisibilityIsForInterface(visibility) &&
-        !cmFileSet::VisibilityIsForSelf(visibility) &&
+    if (cm::FileSetMetadata::VisibilityIsForInterface(visibility) &&
+        !cm::FileSetMetadata::VisibilityIsForSelf(visibility) &&
         !this->Target->IsImported()) {
-      if (type == cmFileSet::CXX_MODULES) {
-        this->SetError(cmStrCat(R"(File set TYPE ")", cmFileSet::CXX_MODULES,
+      if (type == cm::FileSetMetadata::CXX_MODULES) {
+        this->SetError(cmStrCat(R"(File set TYPE ")",
+                                cm::FileSetMetadata::CXX_MODULES,
                                 R"(" may not have "INTERFACE" visibility)"));
         return false;
       }
@@ -312,10 +315,11 @@ bool TargetSourcesImpl::HandleOneFileSet(
     }
 
     if (visibility != fileSet.first->GetVisibility()) {
-      this->SetError(
-        cmStrCat("Scope ", scope, " for file set \"", args.FileSet,
-                 "\" does not match original scope ",
-                 cmFileSet::VisibilityToName(fileSet.first->GetVisibility())));
+      this->SetError(cmStrCat("Scope ", scope, " for file set \"",
+                              args.FileSet,
+                              "\" does not match original scope ",
+                              cm::FileSetMetadata::VisibilityToName(
+                                fileSet.first->GetVisibility())));
       return false;
     }
   }
@@ -332,16 +336,16 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (!baseDirectories.empty()) {
     fileSet.first->AddDirectoryEntry(
       BT<std::string>(baseDirectories, this->Makefile->GetBacktrace()));
-    if (type == cmFileSet::HEADERS) {
+    if (type == cm::FileSetMetadata::HEADERS) {
       for (auto const& dir : cmList{ baseDirectories }) {
         auto interfaceDirectoriesGenex =
           cmStrCat("$<BUILD_INTERFACE:", dir, '>');
-        if (cmFileSet::VisibilityIsForSelf(visibility)) {
+        if (cm::FileSetMetadata::VisibilityIsForSelf(visibility)) {
           this->Target->AppendProperty("INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex,
                                        this->Makefile->GetBacktrace());
         }
-        if (cmFileSet::VisibilityIsForInterface(visibility)) {
+        if (cm::FileSetMetadata::VisibilityIsForInterface(visibility)) {
           this->Target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex,
                                        this->Makefile->GetBacktrace());

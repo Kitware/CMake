@@ -12,7 +12,7 @@
 #include "cmExportInstallFileGenerator.h"
 #include "cmExportPackageInfoGenerator.h"
 
-class cmFileSet;
+class cmGeneratorFileSet;
 class cmGeneratorTarget;
 class cmInstallExportGenerator;
 class cmPackageInfoArguments;
@@ -71,7 +71,8 @@ protected:
   std::string GetCxxModulesDirectory() const override;
 
   cm::optional<std::string> GetFileSetDirectory(
-    cmGeneratorTarget* gte, cmTargetExport const* te, cmFileSet* fileSet,
+    cmGeneratorTarget* gte, cmTargetExport const* te,
+    cmGeneratorFileSet const* fileSet,
     cm::optional<std::string> const& config = {});
 
   bool GenerateFileSetProperties(Json::Value& component,

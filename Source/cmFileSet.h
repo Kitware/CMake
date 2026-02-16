@@ -3,62 +3,46 @@
 #pragma once
 
 #include <cstddef>
-#include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
 #include <cm/string_view>
-#include <cmext/string_view>
 
-#include "cmList.h"
+#include "cmFileSetMetadata.h"
 #include "cmListFileCache.h"
 #include "cmPropertyMap.h"
 #include "cmValue.h"
 
-namespace cm {
-namespace GenEx {
-struct Context;
-}
-}
-
-class cmCompiledGeneratorExpression;
-struct cmGeneratorExpressionDAGChecker;
-class cmGeneratorTarget;
 class cmMakefile;
 
 class cmFileSet
 {
 public:
-  enum class Visibility
-  {
-    Private,
-    Public,
-    Interface,
-  };
-  static cm::static_string_view VisibilityToName(Visibility vis);
-  static Visibility VisibilityFromName(cm::string_view name, cmMakefile* mf);
-
-  static bool VisibilityIsForSelf(Visibility vis);
-  static bool VisibilityIsForInterface(Visibility vis);
-
-  static bool IsKnownType(std::string const& type);
-  static bool TypeCanBeIncluded(std::string const& type);
-
-  // Pre-defined FileSet types
-  static cm::static_string_view const HEADERS;
-  static cm::static_string_view const CXX_MODULES;
-
-  static cmList const& GetKnownTypes();
-
   cmFileSet(cmMakefile* makefile, std::string name, std::string type,
-            Visibility visibility);
+            cm::FileSetMetadata::Visibility visibility);
 
   std::string const& GetName() const { return this->Name; }
   std::string const& GetType() const { return this->Type; }
-  Visibility GetVisibility() const { return this->FSVisibility; }
+  cm::FileSetMetadata::Visibility GetVisibility() const
+  {
+    return this->Visibility;
+  }
 
   cmMakefile* GetMakefile() const { return this->Makefile; }
+
+  bool IsForSelf() const
+  {
+    return cm::FileSetMetadata::VisibilityIsForSelf(this->GetVisibility());
+  }
+  bool IsForInterface() const
+  {
+    return cm::FileSetMetadata::VisibilityIsForInterface(
+      this->GetVisibility());
+  }
+  bool CanBeIncluded() const
+  {
+    return this->Type == cm::FileSetMetadata::HEADERS;
+  }
 
   void CopyEntries(cmFileSet const* fs);
 
@@ -75,26 +59,6 @@ public:
   {
     return this->FileEntries;
   }
-
-  std::vector<std::unique_ptr<cmCompiledGeneratorExpression>>
-  CompileFileEntries() const;
-
-  std::vector<std::unique_ptr<cmCompiledGeneratorExpression>>
-  CompileDirectoryEntries() const;
-
-  std::vector<std::string> EvaluateDirectoryEntries(
-    std::vector<std::unique_ptr<cmCompiledGeneratorExpression>> const& cges,
-    cm::GenEx::Context const& context, cmGeneratorTarget const* target,
-    cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
-
-  void EvaluateFileEntry(
-    std::vector<std::string> const& dirs,
-    std::map<std::string, std::vector<std::string>>& filesPerDir,
-    std::unique_ptr<cmCompiledGeneratorExpression> const& cge,
-    cm::GenEx::Context const& context, cmGeneratorTarget const* target,
-    cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
-
-  static bool IsValidName(std::string const& name);
 
   //! Set/Get a property of this file set
   void SetProperty(std::string const& prop, cmValue value);
@@ -115,12 +79,10 @@ public:
   cmValue GetProperty(std::string const& prop) const;
 
 private:
-  static cmList KnownTypes;
-
   cmMakefile* Makefile;
   std::string Name;
   std::string Type;
-  Visibility FSVisibility;
+  cm::FileSetMetadata::Visibility Visibility;
   std::vector<BT<std::string>> DirectoryEntries;
   std::vector<BT<std::string>> FileEntries;
   cmPropertyMap Properties;

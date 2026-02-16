@@ -15,7 +15,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmStateTypes.h"
 
-class cmFileSet;
+class cmGeneratorFileSet;
 class cmGeneratorTarget;
 class cmTargetExport;
 
@@ -91,10 +91,10 @@ protected:
   void GenerateCxxModuleInformation(std::string const& name, std::ostream& os);
 
   virtual std::string GetFileSetDirectories(cmGeneratorTarget* gte,
-                                            cmFileSet* fileSet,
+                                            cmGeneratorFileSet const* fileSet,
                                             cmTargetExport const* te) = 0;
   virtual std::string GetFileSetFiles(cmGeneratorTarget* gte,
-                                      cmFileSet* fileSet,
+                                      cmGeneratorFileSet const* fileSet,
                                       cmTargetExport const* te) = 0;
 
   void SetRequiredCMakeVersion(unsigned int major, unsigned int minor,
