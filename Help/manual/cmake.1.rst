@@ -1218,7 +1218,8 @@ Available commands are:
 
 .. program:: cmake-E
 
-.. option:: copy <file>... <destination>, copy -t <destination> <file>...
+.. option:: copy <file>... <destination>,
+            copy -t <destination> <file>...
 
   Copy files to ``<destination>`` (either file or directory).
   If multiple files are specified, or if ``-t`` is specified, the
@@ -1233,10 +1234,13 @@ Available commands are:
   .. versionadded:: 3.26
     Support for ``-t`` argument.
 
-.. option:: copy_directory <dir>... <destination>
+.. option:: copy_directory <dir>... <destination>,
+            copy_directory -t <destination> <dir>...
 
-  Copy content of ``<dir>...`` directories to ``<destination>`` directory.
-  If ``<destination>`` directory does not exist it will be created.
+  Copy content of ``<dir>...`` directories to a ``<destination>`` directory.
+  If the ``<destination>`` directory does not exist it will be created.
+  If ``-t`` is not specified, the last argument is assumed to be the
+  ``<destination>``.
   ``copy_directory`` does follow symlinks.
 
   .. versionadded:: 3.5
@@ -1246,28 +1250,43 @@ Available commands are:
     The command now fails when the source directory does not exist.
     Previously it succeeded by creating an empty destination directory.
 
-.. option:: copy_directory_if_different <dir>... <destination>
+  .. versionadded:: 4.4
+    Support for the ``-t`` argument.
+
+.. option:: copy_directory_if_different <dir>... <destination>,
+            copy_directory_if_different -t <destination> <dir>...
 
   .. versionadded:: 3.26
 
-  Copy changed content of ``<dir>...`` directories to ``<destination>`` directory.
-  If ``<destination>`` directory does not exist it will be created.
+  Copy changed content of ``<dir>...`` directories to a ``<destination>`` directory.
+  If the ``<destination>`` directory does not exist it will be created.
+  If ``-t`` is not specified, the last argument is assumed to be the
+  ``<destination>``.
 
   ``copy_directory_if_different`` does follow symlinks.
   The command fails when the source directory does not exist.
 
-.. option:: copy_directory_if_newer <dir>... <destination>
+  .. versionadded:: 4.4
+    Support for the ``-t`` argument.
+
+.. option:: copy_directory_if_newer <dir>... <destination>,
+            copy_directory_if_newer -t <destination> <dir>...
 
   .. versionadded:: 4.2
 
-  Copy content of ``<dir>...`` directories to ``<destination>`` directory
+  Copy content of ``<dir>...`` directories to a ``<destination>`` directory
   if source files are newer than destination files (based on file timestamps).
-  If ``<destination>`` directory does not exist it will be created.
+  If the ``<destination>`` directory does not exist it will be created.
+  If ``-t`` is not specified, the last argument is assumed to be the
+  ``<destination>``.
 
   ``copy_directory_if_newer`` does follow symlinks.
   The command fails when the source directory does not exist.
   This is faster than ``copy_directory_if_different`` as it only compares
   file timestamps instead of file contents.
+
+  .. versionadded:: 4.4
+    Support for the ``-t`` argument.
 
 .. option:: copy_if_different <file>... <destination>,
             copy_if_different -t <destination> <file>...

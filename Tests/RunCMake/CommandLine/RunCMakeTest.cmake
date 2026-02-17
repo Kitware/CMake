@@ -690,8 +690,16 @@ file(REMOVE_RECURSE "${out}")
 file(MAKE_DIRECTORY ${out})
 run_cmake_command(E_copy_directory_if_different
   ${CMAKE_COMMAND} -E copy_directory_if_different ${in} ${out})
+run_cmake_command(E_copy_directory_if_different-t-argument
+  ${CMAKE_COMMAND} -E copy_directory_if_different -t ${out} ${in})
+run_cmake_command(E_copy_directory_if_different-t-argument-no-source-dirs
+  ${CMAKE_COMMAND} -E copy_directory_if_different -t ${out})
 run_cmake_command(E_copy_directory_if_newer
   ${CMAKE_COMMAND} -E copy_directory_if_newer ${in} ${out})
+run_cmake_command(E_copy_directory_if_newer-t-argument
+  ${CMAKE_COMMAND} -E copy_directory_if_newer -t ${out} ${in})
+run_cmake_command(E_copy_directory_if_newer-t-argument-no-source-dirs
+  ${CMAKE_COMMAND} -E copy_directory_if_newer -t ${out})
 run_cmake_command(E_copy_directory_if_newer-nonexistent-source
   ${CMAKE_COMMAND} -E copy_directory_if_newer ${in}/nonexistent ${out}/target)
 unset(in)
@@ -709,6 +717,10 @@ run_cmake_command(E_copy_directory-three-source-files-target-is-file
   ${CMAKE_COMMAND} -E copy_directory ${in}/d1 ${in}/d2 ${in}/d3 ${outfile})
 run_cmake_command(E_copy_directory-three-source-files-target-is-not-exist
   ${CMAKE_COMMAND} -E copy_directory ${in}/d1 ${in}/d2 ${in}/d3 ${out}/not_existing_directory)
+run_cmake_command(E_copy_directory-t-argument
+  ${CMAKE_COMMAND} -E copy_directory -t ${out} ${in}/d1 ${in}/d2 ${in}/d3)
+run_cmake_command(E_copy_directory-t-argument-no-source-dirs
+  ${CMAKE_COMMAND} -E copy_directory -t ${out})
 unset(in)
 unset(out)
 unset(outfile)
