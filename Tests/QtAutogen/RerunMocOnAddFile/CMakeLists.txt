@@ -27,6 +27,21 @@ endmacro()
 
 macro(rebuild buildName)
   message(STATUS "Starting build ${buildName}.")
+  # Work around CMake issue #27611: The Xcode build system creates its build
+  # plan at the start of a build and does not pick up project file changes
+  # made by ZERO_CHECK during the build. Explicitly re-run CMake to ensure
+  # the project file includes new sources before the native build tool starts.
+  if(CMAKE_GENERATOR MATCHES "Xcode")
+    execute_process(
+      COMMAND "${CMAKE_COMMAND}" -S "${testProjectSrc}" -B "${testProjectBinDir}"
+      RESULT_VARIABLE result
+      OUTPUT_VARIABLE output
+      ERROR_VARIABLE output
+    )
+    if (result)
+      message(FATAL_ERROR "CMake reconfigure for build ${buildName} failed. Output: ${output}")
+    endif()
+  endif()
   execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${testProjectBinDir}" RESULT_VARIABLE result)
   if (result)
     message(FATAL_ERROR "Build ${buildName} failed.")
