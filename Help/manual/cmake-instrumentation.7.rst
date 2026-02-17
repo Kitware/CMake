@@ -52,6 +52,8 @@ than the previous indexing.
 Indexing and can also be performed by manually invoking
 :option:`ctest --collect-instrumentation`.
 
+.. _`cmake-instrumentation Callbacks`:
+
 Callbacks
 ---------
 
@@ -580,6 +582,8 @@ Each CMake content file contains the following:
 
     ``labels``
       The :prop_tgt:`LABELS` property of the target.
+
+.. _`cmake-instrumentation Google Trace File`:
 
 Google Trace File
 -----------------
