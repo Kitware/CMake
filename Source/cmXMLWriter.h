@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "cmDuration.h"
 #include "cmXMLSafe.h"
 
 class cmXMLWriter
@@ -113,10 +114,8 @@ private:
     return std::chrono::system_clock::to_time_t(value);
   }
 
-  static long long SafeContent(std::chrono::milliseconds value)
-  {
-    return value.count();
-  }
+  /* Some code paths use time_since_epoch despite the unspecified epoch.  */
+  static double SafeContent(cmDuration value) { return value.count(); }
 
   template <typename T>
   static T SafeContent(T value)
