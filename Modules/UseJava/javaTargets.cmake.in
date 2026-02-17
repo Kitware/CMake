@@ -1,5 +1,5 @@
 cmake_policy(PUSH)
-cmake_policy(VERSION 2.8.12...4.1)
+cmake_policy(VERSION 2.8.12...4.2)
 
 #----------------------------------------------------------------
 # Generated CMake Java target import file.
