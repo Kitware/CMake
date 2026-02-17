@@ -256,6 +256,12 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "")
   endif()
 
+  if(CMAKE_GENERATOR MATCHES "^FASTBuild"
+      AND CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+    cmake_determine_msvc_i18n_dir(${lang})
+    set(CMAKE_${lang}_MSVC_I18N_DIR ${CMAKE_${lang}_MSVC_I18N_DIR} PARENT_SCOPE)
+  endif()
+
   if(CMAKE_EFFECTIVE_SYSTEM_NAME STREQUAL "Apple" AND CMAKE_${lang}_COMPILER_ID MATCHES "Clang$")
     cmake_path(GET src EXTENSION LAST_ONLY ext)
     set(apple_sdk_dir "${CMAKE_${lang}_COMPILER_ID_DIR}")
@@ -1339,4 +1345,41 @@ function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang userflags)
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "" PARENT_SCOPE)
   endif()
   message(CONFIGURE_LOG "Detecting ${lang} compiler /showIncludes prefix:\n${msg}\n")
+endfunction()
+
+function(CMAKE_DETERMINE_MSVC_I18N_DIR lang)
+  # The FASTBuild generator needs the full path to clui.dll:
+  cmake_path(GET CMAKE_${lang}_COMPILER PARENT_PATH cldir)
+
+  # if the VSLANG env.var is set, prefer that.
+  # If that doesn't exist, try 1033, the US version.
+  # Otherwise, search for any clui.dll, and use the first one that is found.
+  if(DEFINED ENV{VSLANG})
+    if(EXISTS "${cldir}/$ENV{VSLANG}/clui.dll")
+      set(MSVC_I18N_DIR "$ENV{VSLANG}")
+    else()
+      message(WARNING "The environment variable VSLANG is set to $ENV{VSLANG}, but could not find ${cldir}/$ENV{VSLANG}/clui.dll")
+    endif()
+  endif()
+
+  if (NOT MSVC_I18N_DIR)
+    if(EXISTS "${cldir}/1033/clui.dll")
+      set(MSVC_I18N_DIR "1033")
+    endif()
+  endif()
+
+  if(NOT MSVC_I18N_DIR)
+    file(GLOB_RECURSE cluis "${cldir}/*/clui.dll")
+    list(GET cluis 0 firstClui)
+    if (firstClui)
+      cmake_path(GET firstClui PARENT_PATH cluiParentPath)
+      cmake_path(GET cluiParentPath FILENAME MSVC_I18N_DIR)
+    endif()
+  endif()
+
+  if(MSVC_I18N_DIR)
+    set(CMAKE_${lang}_MSVC_I18N_DIR ${MSVC_I18N_DIR} PARENT_SCOPE )
+  else()
+    message(FATAL_ERROR "Could not find clui.dll !")
+  endif()
 endfunction()
