@@ -4095,14 +4095,15 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   // Deprecate old policies.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0151 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0155 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
           id == cmPolicies::CMP0083 || id == cmPolicies::CMP0091 ||
           id == cmPolicies::CMP0104 || id == cmPolicies::CMP0123 ||
           id == cmPolicies::CMP0126 || id == cmPolicies::CMP0128 ||
-          id == cmPolicies::CMP0136 || id == cmPolicies::CMP0141)) &&
+          id == cmPolicies::CMP0136 || id == cmPolicies::CMP0141 ||
+          id == cmPolicies::CMP0155)) &&
       (!this->IsSet("CMAKE_WARN_DEPRECATED") ||
        this->IsOn("CMAKE_WARN_DEPRECATED"))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,
