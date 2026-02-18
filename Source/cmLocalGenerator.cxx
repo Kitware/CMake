@@ -2901,6 +2901,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
   std::string const copy_script = cmStrCat(target->GetSupportDirectory(),
                                            "/copy_idb_pdb_", config, ".cmake");
   cmGeneratedFileStream file(copy_script);
+  file.SetCopyIfDifferent(true);
 
   file << "# CMake generated file\n";
 
