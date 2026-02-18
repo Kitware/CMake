@@ -3384,17 +3384,20 @@ void cmLocalGenerator::AddPerLanguageLinkFlags(std::string& flags,
       // their wishes), while also exempting cases when the latter variable
       // (substituted for the former spelling under the NEW behavior) is being
       // used legitimately by CMake.
+      // Additionally, WARN at most once per language, instead of on every
+      // target.
       if (!langLinkFlags.empty() &&
           target->GetType() != cmStateEnums::EXECUTABLE &&
           langLinkFlags !=
             this->Makefile->GetSafeDefinition(
-              cmStrCat("CMAKE_EXECUTABLE_CREATE_", lang, "_FLAGS"))) {
+              cmStrCat("CMAKE_EXECUTABLE_CREATE_", lang, "_FLAGS")) &&
+          this->GlobalGenerator->ShouldWarnCMP0210(lang)) {
         this->IssueMessage(
           MessageType::AUTHOR_WARNING,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0210), "\n",
                    "For compatibility with older versions of CMake, ",
-                   "CMAKE_", lang, "_LINK_FLAGS will be ignored for target '",
-                   target->GetName(), "'."));
+                   "CMAKE_", lang, "_LINK_FLAGS will be ignored for all ",
+                   "non-EXECUTABLE targets which use these flags."));
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
