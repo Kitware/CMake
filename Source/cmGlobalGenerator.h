@@ -715,6 +715,8 @@ public:
     return configs;
   }
 
+  bool ShouldWarnCMP0210(std::string const& lang);
+
   bool ShouldWarnExperimental(cm::string_view featureName,
                               cm::string_view featureUuid);
 
@@ -966,6 +968,8 @@ private:
 
   // track targets to issue CMP0068 warning for.
   std::set<std::string> CMP0068WarnTargets;
+
+  std::unordered_set<std::string> WarnedCMP0210Languages;
 
   std::unordered_set<std::string> WarnedExperimental;
 

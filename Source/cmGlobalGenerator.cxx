@@ -1386,6 +1386,11 @@ void cmGlobalGenerator::AddCMP0068WarnTarget(std::string const& target)
   this->CMP0068WarnTargets.insert(target);
 }
 
+bool cmGlobalGenerator::ShouldWarnCMP0210(std::string const& lang)
+{
+  return this->WarnedCMP0210Languages.insert(lang).second;
+}
+
 bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
 {
   // If the property is not enabled then okay.
@@ -2101,6 +2106,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->RuntimeDependencySets.clear();
   this->RuntimeDependencySetsByName.clear();
   this->WarnedExperimental.clear();
+  this->WarnedCMP0210Languages.clear();
 }
 
 bool cmGlobalGenerator::SupportsShortObjectNames() const
