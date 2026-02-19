@@ -80,10 +80,16 @@ modules includes:
 Support for ``import std`` is limited to the following toolchain and standard
 library combinations:
 
-* Clang 18.1.2 and newer with ``-stdlib=libc++`` or ``-stdlib=libstdc++``
-* MSVC toolset 14.36 and newer (provided with Visual Studio 17.6 Preview 2 and
-  newer)
+* Clang 18.1.2 and newer with standard library ``libc++`` or ``libstdc++``
+* MSVC toolset 14.36 and newer (provided with Visual Studio 17.6 and newer)
 * GCC 15 and newer
+
+  .. note::
+
+    Ubuntu prior to 26.04 ships broken ``libstdc++.modules.json`` files.
+    See `Ubuntu issue 2141579`_.
+
+.. _`Ubuntu issue 2141579`: https://bugs.launchpad.net/ubuntu/+source/gcc-15/+bug/2141579
 
 The :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable lists standard levels
 which have support for ``import std`` in the active C++ toolchain.
