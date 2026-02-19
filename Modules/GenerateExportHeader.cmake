@@ -258,11 +258,9 @@ library's other public headers:
         FILES example.h
       FILE_SET generated_headers
         TYPE HEADERS
-        BASE_DIRS $<TARGET_PROPERTY:example,BINARY_DIR>
+        BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
         FILES ${CMAKE_CURRENT_BINARY_DIR}/example_export.h
   )
-
-  target_include_directories(example PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
   install(
     TARGETS example
