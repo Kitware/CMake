@@ -65,8 +65,10 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
     run_cmake_target(CMAKE_LANG_LINK_FLAGS-CMP0210-OLD exe)
 
     run_cmake(CMAKE_LANG_LINK_FLAGS-CMP0210-WARN)
-    run_cmake_target(CMAKE_LANG_LINK_FLAGS-CMP0210-WARN shared)
-    run_cmake_target(CMAKE_LANG_LINK_FLAGS-CMP0210-WARN exe)
+    run_cmake_target(CMAKE_LANG_LINK_FLAGS-CMP0210-WARN shared_C)
+    run_cmake_target(CMAKE_LANG_LINK_FLAGS-CMP0210-WARN exe_C)
+    run_cmake_target(CMAKE_LANG_LINK_FLAGS-CMP0210-WARN shared_CXX)
+    run_cmake_target(CMAKE_LANG_LINK_FLAGS-CMP0210-WARN exe_CXX)
   endif()
 
   unset(RunCMake_TEST_OPTIONS)
