@@ -477,6 +477,10 @@ void ToolchainCompilerSetup::setToolchainFile(QString const& t)
 
 FirstConfigure::FirstConfigure()
 {
+#ifdef _WIN32
+  // FIXME(QTBUG-123853): Fix window style init for dark mode.
+  this->setWizardStyle(this->wizardStyle());
+#endif
   char const* env_generator = std::getenv("CMAKE_GENERATOR");
   char const* env_generator_platform = nullptr;
   char const* env_generator_toolset = nullptr;
