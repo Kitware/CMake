@@ -68,8 +68,9 @@ bool cmExportInstallSbomGenerator::GenerateMainFile(std::ostream& os)
   cmSbomDocument doc;
   doc.Graph.reserve(256);
 
-  cmSpdxDocument* project = insert_back(doc.Graph, this->GenerateSbom());
-
+  cmSpdxCreationInfo const* ci =
+    insert_back(doc.Graph, this->GenerateCreationInfo());
+  cmSpdxDocument* project = insert_back(doc.Graph, this->GenerateSbom(ci));
   std::vector<TargetProperties> targets;
   targets.reserve(allTargets.size());
 
@@ -84,14 +85,14 @@ bool cmExportInstallSbomGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateInterfaceLinkLibrariesProperty(
       gt, cmGeneratorExpression::InstallInterface, properties);
 
-    targets.push_back(
-      TargetProperties{ insert_back(project->RootElements,
-                                    this->GenerateImportTarget(te->Target)),
-                        te->Target, std::move(properties) });
+    targets.push_back(TargetProperties{
+      insert_back(project->RootElements,
+                  this->GenerateImportTarget(ci, te->Target)),
+      te->Target, std::move(properties) });
   }
 
   for (auto const& target : targets) {
-    this->GenerateProperties(doc, project, target, targets);
+    this->GenerateProperties(doc, project, ci, target, targets);
   }
 
   this->WriteSbom(doc, os);
@@ -104,7 +105,9 @@ void cmExportInstallSbomGenerator::GenerateImportTargetsConfig(
   cmSbomDocument doc;
   doc.Graph.reserve(256);
 
-  cmSpdxDocument* project = insert_back(doc.Graph, this->GenerateSbom());
+  cmSpdxCreationInfo const* ci =
+    insert_back(doc.Graph, this->GenerateCreationInfo());
+  cmSpdxDocument* project = insert_back(doc.Graph, this->GenerateSbom(ci));
 
   std::vector<TargetProperties> targets;
   std::string cfg = (config.empty() ? "noconfig" : config);
@@ -124,14 +127,14 @@ void cmExportInstallSbomGenerator::GenerateImportTargetsConfig(
     this->PopulateLinkLibrariesProperty(
       te->Target, cmGeneratorExpression::InstallInterface, properties);
 
-    targets.push_back(
-      TargetProperties{ insert_back(project->RootElements,
-                                    this->GenerateImportTarget(te->Target)),
-                        te->Target, std::move(properties) });
+    targets.push_back(TargetProperties{
+      insert_back(project->RootElements,
+                  this->GenerateImportTarget(ci, te->Target)),
+      te->Target, std::move(properties) });
   }
 
   for (auto const& target : targets) {
-    this->GenerateProperties(doc, project, target, targets);
+    this->GenerateProperties(doc, project, ci, target, targets);
   }
 
   this->WriteSbom(doc, os);

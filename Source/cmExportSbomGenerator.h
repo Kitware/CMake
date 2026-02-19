@@ -18,6 +18,7 @@ class cmGeneratorTarget;
 struct cmSbomDocument;
 struct cmSpdxDocument;
 struct cmSpdxPackage;
+struct cmSpdxCreationInfo;
 
 class cmExportSbomGenerator : virtual public cmExportFileGenerator
 {
@@ -37,8 +38,10 @@ protected:
 
   void WriteSbom(cmSbomDocument& doc, std::ostream& os) const;
 
-  cmSpdxDocument GenerateSbom() const;
-  cmSpdxPackage GenerateImportTarget(cmGeneratorTarget const* target) const;
+  cmSpdxCreationInfo GenerateCreationInfo() const;
+  cmSpdxDocument GenerateSbom(cmSpdxCreationInfo const* ci) const;
+  cmSpdxPackage GenerateImportTarget(cmSpdxCreationInfo const* ci,
+                                     cmGeneratorTarget const* target) const;
 
   std::string const& GetPackageName() const { return this->PackageName; }
 
@@ -47,13 +50,13 @@ protected:
                              cmPackageInformation const& package) const;
 
   bool GenerateProperties(
-    cmSbomDocument& doc, cmSpdxDocument* project,
+    cmSbomDocument& doc, cmSpdxDocument* project, cmSpdxCreationInfo const* ci,
     TargetProperties const& current,
     std::vector<TargetProperties> const& allTargets) const;
 
   void GenerateLinkProperties(
-    cmSbomDocument& doc, cmSpdxDocument* project, std::string const& libraries,
-    TargetProperties const& current,
+    cmSbomDocument& doc, cmSpdxDocument* project, cmSpdxCreationInfo const* ci,
+    std::string const& libraries, TargetProperties const& current,
     std::vector<TargetProperties> const& allTargets) const;
 
   bool NoteLinkedTarget(cmGeneratorTarget const* target,
