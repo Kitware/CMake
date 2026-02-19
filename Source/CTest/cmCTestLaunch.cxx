@@ -210,6 +210,9 @@ void cmCTestLaunch::RunChild()
   cmUVProcessChainBuilder builder;
   builder.AddCommand(this->RealArgV);
 
+  // We always share the input pipe.
+  builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, stdin);
+
   cmsys::ofstream fout;
   cmsys::ofstream ferr;
   if (this->Reporter.Passthru) {
