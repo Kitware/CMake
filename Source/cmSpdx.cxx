@@ -60,29 +60,29 @@ std::string to_string(cmSpdxSoftwareArtifact::PurposeId id)
 {
   switch (id) {
     case cmSpdxSoftwareArtifact::PurposeId::APPLICATION:
-      return "APPLICATION";
+      return "application";
     case cmSpdxSoftwareArtifact::PurposeId::ARCHIVE:
-      return "ARCHIVE";
+      return "archive";
     case cmSpdxSoftwareArtifact::PurposeId::CONTAINER:
-      return "CONTAINER";
+      return "container";
     case cmSpdxSoftwareArtifact::PurposeId::DATA:
-      return "DATA";
+      return "data";
     case cmSpdxSoftwareArtifact::PurposeId::DEVICE:
-      return "DEVICE";
+      return "device";
     case cmSpdxSoftwareArtifact::PurposeId::FIRMWARE:
-      return "FIRMWARE";
+      return "firmware";
     case cmSpdxSoftwareArtifact::PurposeId::FILE:
-      return "FILE";
+      return "file";
     case cmSpdxSoftwareArtifact::PurposeId::INSTALL:
-      return "INSTALL";
+      return "install";
     case cmSpdxSoftwareArtifact::PurposeId::LIBRARY:
-      return "LIBRARY";
+      return "library";
     case cmSpdxSoftwareArtifact::PurposeId::MODULE:
-      return "MODULE";
+      return "module";
     case cmSpdxSoftwareArtifact::PurposeId::OPERATING_SYSTEM:
-      return "OPERATING_SYSTEM";
+      return "operatingSystem";
     case cmSpdxSoftwareArtifact::PurposeId::SOURCE:
-      return "SOURCE";
+      return "source";
   }
   throw std::invalid_argument("Unknown PurposeId");
 }
@@ -91,19 +91,19 @@ std::string to_string(cmSpdxSbom::TypeId id)
 {
   switch (id) {
     case cmSpdxSbom::TypeId::ANALYZED:
-      return "ANALYZED";
+      return "analyzed";
     case cmSpdxSbom::TypeId::BUILD:
-      return "BUILD";
+      return "build";
     case cmSpdxSbom::TypeId::DEPLOYED:
-      return "DEPLOYED";
+      return "deployed";
     case cmSpdxSbom::TypeId::DESIGN:
-      return "DESIGN";
+      return "design";
     case cmSpdxSbom::TypeId::RUNTIME:
-      return "RUNTIME";
+      return "runtime";
     case cmSpdxSbom::TypeId::SOURCE:
-      return "SOURCE";
+      return "source";
     case cmSpdxSbom::TypeId::TEST:
-      return "TEST";
+      return "test";
   }
   throw std::invalid_argument("Unknown Sbom::TypeId");
 }
@@ -112,9 +112,9 @@ std::string to_string(cmSpdxFile::FileKindId id)
 {
   switch (id) {
     case cmSpdxFile::FileKindId::DIRECTORY:
-      return "DIRECTORY";
+      return "directory";
     case cmSpdxFile::FileKindId::FILE:
-      return "FILE";
+      return "file";
   }
   throw std::invalid_argument("Unknown File::FileKindId");
 }
@@ -123,13 +123,13 @@ std::string to_string(cmSpdxRelationship::RelationshipTypeId id)
 {
   switch (id) {
     case cmSpdxRelationship::RelationshipTypeId::DESCRIBES:
-      return "DESCRIBES";
+      return "describes";
     case cmSpdxRelationship::RelationshipTypeId::CONTAINS:
-      return "CONTAINS";
+      return "contains";
     case cmSpdxRelationship::RelationshipTypeId::DEPENDS_ON:
-      return "DEPENDS_ON";
+      return "dependsOn";
     case cmSpdxRelationship::RelationshipTypeId::OTHER:
-      return "OTHER";
+      return "other";
   }
   throw std::invalid_argument("Unknown RelationshipTypeId");
 }
@@ -138,13 +138,13 @@ std::string to_string(cmSpdxLifecycleScopedRelationship::ScopeId id)
 {
   switch (id) {
     case cmSpdxLifecycleScopedRelationship::ScopeId::BUILD:
-      return "BUILD";
+      return "build";
     case cmSpdxLifecycleScopedRelationship::ScopeId::DESIGN:
-      return "DESIGN";
+      return "design";
     case cmSpdxLifecycleScopedRelationship::ScopeId::RUNTIME:
-      return "RUNTIME";
+      return "runtime";
     case cmSpdxLifecycleScopedRelationship::ScopeId::TEST:
-      return "TEST";
+      return "test";
   }
   throw std::invalid_argument("Unknown Lifecycle ScopeId");
 }
@@ -153,9 +153,9 @@ std::string to_string(cmSpdxAnnotation::AnnotationTypeId id)
 {
   switch (id) {
     case cmSpdxAnnotation::AnnotationTypeId::REVIEW:
-      return "REVIEW";
+      return "review";
     case cmSpdxAnnotation::AnnotationTypeId::OTHER:
-      return "OTHER";
+      return "other";
   }
   throw std::invalid_argument("Unknown AnnotationTypeId");
 }
@@ -164,11 +164,11 @@ std::string to_string(cmSpdxArtifact::SupportTypeId id)
 {
   switch (id) {
     case cmSpdxArtifact::SupportTypeId::COMMUNITY:
-      return "COMMUNITY";
+      return "community";
     case cmSpdxArtifact::SupportTypeId::COMMERCIAL:
-      return "COMMERCIAL";
+      return "commercial";
     case cmSpdxArtifact::SupportTypeId::NONE:
-      return "NONE";
+      return "none";
   }
   throw std::invalid_argument("Unknown SupportTypeId");
 }
@@ -226,7 +226,7 @@ void cmSpdxIntegrityMethod::Serialize(cmSbomSerializer& serializer) const
 void cmSpdxElement::Serialize(cmSbomSerializer& serializer) const
 {
   serializer.AddString("type", "Element");
-  SerializeIfPresent(serializer, "@id", SpdxId);
+  SerializeIfPresent(serializer, "spdxId", SpdxId);
   SerializeIfPresent(serializer, "name", Name);
   SerializeIfPresent(serializer, "summary", Summary);
   SerializeIfPresent(serializer, "description", Description);
@@ -437,30 +437,32 @@ void cmSpdxSoftwareArtifact::Serialize(cmSbomSerializer& serializer) const
   cmSpdxArtifact::Serialize(serializer);
   serializer.AddString("type", "software_SoftwareArtifact");
   if (PrimaryPurpose) {
-    serializer.AddString("primaryPurpose", to_string(*PrimaryPurpose));
+    serializer.AddString("software_primaryPurpose",
+                         to_string(*PrimaryPurpose));
   }
   if (AdditionalPurpose) {
     for (auto const& p : *AdditionalPurpose) {
-      serializer.AddString("additionalPurpose", to_string(p));
+      serializer.AddString("software_AdditionalPurpose", to_string(p));
     }
   }
-  SerializeIfPresent(serializer, "copyrightText", CopyrightText);
-  SerializeIfPresent(serializer, "attributionText", AttributionText);
+  SerializeIfPresent(serializer, "software_copyrightText", CopyrightText);
+  SerializeIfPresent(serializer, "software_attributionText", AttributionText);
   if (ContentIdentifier) {
-    serializer.AddVisitable("contentIdentifier", *ContentIdentifier);
+    serializer.AddVisitable("software_contentIdentifier", *ContentIdentifier);
   }
-  SerializeIfPresent(serializer, "artifactSize", ArtifactSize);
+  SerializeIfPresent(serializer, "software_artifactSize", ArtifactSize);
 }
 
 void cmSpdxPackage::Serialize(cmSbomSerializer& serializer) const
 {
   cmSpdxSoftwareArtifact::Serialize(serializer);
   serializer.AddString("type", "software_Package");
-  SerializeIfPresent(serializer, "downloadLocation", DownloadLocation);
-  SerializeIfPresent(serializer, "homePage", Homepage);
-  SerializeIfPresent(serializer, "packageVersion", PackageVersion);
-  SerializeIfPresent(serializer, "packageUrl", PackageUrl);
-  SerializeIfPresent(serializer, "sourceInfo", SourceInfo);
+  SerializeIfPresent(serializer, "software_downloadLocation",
+                     DownloadLocation);
+  SerializeIfPresent(serializer, "software_homePage", Homepage);
+  SerializeIfPresent(serializer, "software_packageVersion", PackageVersion);
+  SerializeIfPresent(serializer, "software_packageUrl", PackageUrl);
+  SerializeIfPresent(serializer, "software_sourceInfo", SourceInfo);
 }
 
 void cmSpdxFile::Serialize(cmSbomSerializer& serializer) const
@@ -468,30 +470,30 @@ void cmSpdxFile::Serialize(cmSbomSerializer& serializer) const
   cmSpdxArtifact::Serialize(serializer);
   serializer.AddString("type", "software_File");
   if (ContentType) {
-    serializer.AddString("contentType", *ContentType);
+    serializer.AddString("software_contentType", *ContentType);
   }
   if (FileType) {
-    serializer.AddString("fileType", to_string(*FileType));
+    serializer.AddString("software_fileType", to_string(*FileType));
   }
 }
 
 void cmSpdxContentIdentifier::Serialize(cmSbomSerializer& serializer) const
 {
   cmSpdxIntegrityMethod::Serialize(serializer);
-  serializer.AddString("type", "software_ContentIdentifier");
-  SerializeIfPresent(serializer, "contentIdentifierType",
+  serializer.AddString("type", "software_contentIdentifier");
+  SerializeIfPresent(serializer, "software_contentIdentifierType",
                      ContentIdentifierType);
-  SerializeIfPresent(serializer, "contentValue", ContentValue);
+  SerializeIfPresent(serializer, "software_contentValue", ContentValue);
 }
 
 void cmSpdxSnippet::Serialize(cmSbomSerializer& serializer) const
 {
   cmSpdxSoftwareArtifact::Serialize(serializer);
-  serializer.AddString("type", "software_Snippet");
-  SerializeIfPresent(serializer, "byteRange", ByteRange);
-  SerializeIfPresent(serializer, "lineRange", LineRange);
+  serializer.AddString("type", "software_snippet");
+  SerializeIfPresent(serializer, "software_byteRange", ByteRange);
+  SerializeIfPresent(serializer, "software_lineRange", LineRange);
   if (SnippetFromFile) {
-    serializer.AddVisitable("snippetFromFile", *SnippetFromFile);
+    serializer.AddVisitable("software_snippetFromFile", *SnippetFromFile);
   }
 }
 

@@ -62,7 +62,7 @@ bool testSerializeSpdxJson()
     Json::Value const& docValue = graph[0];
     ASSERT_TRUE(docValue.isObject());
     ASSERT_EQUAL(docValue["type"].asString(), "SpdxDocument");
-    ASSERT_EQUAL(docValue["@id"].asString(), "_:SPDXRef-Document");
+    ASSERT_EQUAL(docValue["spdxId"].asString(), "_:SPDXRef-Document");
 
     auto const& creationInfo = docValue["creationInfo"];
     ASSERT_EQUAL(creationInfo["@id"].asString(), "_:SPDXRef-CreationInfo");
@@ -70,7 +70,7 @@ bool testSerializeSpdxJson()
 
     auto const& package = docValue["rootElement"][0];
     ASSERT_EQUAL(package["type"].asString(), "software_Package");
-    ASSERT_EQUAL(package["@id"].asString(), "_:SPDXRef-Package");
+    ASSERT_EQUAL(package["spdxId"].asString(), "_:SPDXRef-Package");
   }
 
   return true;
