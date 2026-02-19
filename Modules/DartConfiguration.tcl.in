@@ -111,3 +111,4 @@ CTestSubmitRetryCount: @CTEST_SUBMIT_RETRY_COUNT@
 # Invoke each test with environment variables configuring tool's collection.
 CTestTestCoverageTool: @CTEST_TEST_COVERAGE_TOOL@
 CTestTestCoverageMergeExecutable: @CTEST_TEST_COVERAGE_MERGE_EXECUTABLE@
+CTestTestCoverageDataExecutable: @CTEST_TEST_COVERAGE_DATA_EXECUTABLE@

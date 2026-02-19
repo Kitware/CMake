@@ -255,6 +255,11 @@ int cmCTestCoverageHandler::ProcessHandler()
   if (file_count < 0) {
     return error;
   }
+  file_count += this->HandleClangSourceCodeCoverage(&cont);
+  error = cont.Error;
+  if (file_count < 0) {
+    return error;
+  }
   file_count += this->HandleTracePyCoverage(&cont);
   error = cont.Error;
   if (file_count < 0) {
@@ -393,6 +398,11 @@ int cmCTestCoverageHandler::ProcessHandler()
       this->CTest->GetShortPathToFile(fullFileName);
     cmCTestCoverageHandlerContainer::SingleFileCoverageVector const& fcov =
       file.second;
+    cmCTestCoverageHandlerContainer::SingleFileBranchCoverageVector fBranchcov;
+    if (cont.TotalBranchCoverage.find(file.first) !=
+        cont.TotalBranchCoverage.end()) {
+      fBranchcov = cont.TotalBranchCoverage[file.first];
+    }
     covLogXML.StartElement("File");
     covLogXML.Attribute("Name", fileName);
     covLogXML.Attribute("FullPath", shortFileName);
@@ -409,7 +419,8 @@ int cmCTestCoverageHandler::ProcessHandler()
 
     int tested = 0;
     int untested = 0;
-
+    int branchestested = 0;
+    int branchesuntested = 0;
     cmCTestCoverageHandlerContainer::SingleFileCoverageVector::size_type cc;
     std::string line;
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -429,6 +440,14 @@ int cmCTestCoverageHandler::ProcessHandler()
       covLogXML.StartElement("Line");
       covLogXML.Attribute("Number", cc);
       covLogXML.Attribute("Count", fcov[cc]);
+      if (!fBranchcov.empty()) {
+        covLogXML.Attribute("BranchesTested", fBranchcov[cc][0]);
+        covLogXML.Attribute("BranchesUntested",
+                            fBranchcov[cc][1] - fBranchcov[cc][0]);
+
+        branchestested += fBranchcov[cc][0];
+        branchesuntested += fBranchcov[cc][1] - fBranchcov[cc][0];
+      }
       covLogXML.Content(line);
       covLogXML.EndElement(); // Line
       if (fcov[cc] == 0) {
@@ -462,6 +481,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     covSumXML.Attribute("Covered", tested + untested > 0 ? "true" : "false");
     covSumXML.Element("LOCTested", tested);
     covSumXML.Element("LOCUnTested", untested);
+    covSumXML.Element("BranchesTested", branchestested);
+    covSumXML.Element("BranchesUnTested", branchesuntested);
     covSumXML.Element("PercentCoverage", cper);
     covSumXML.Element("CoverageMetric", cmet);
     this->WriteXMLLabels(covSumXML, shortFileName);
@@ -1243,6 +1264,175 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   }
 
   return file_count;
+}
+
+int cmCTestCoverageHandler::HandleClangSourceCodeCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  cmCTestOptionalLog(
+    this->CTest, HANDLER_VERBOSE_OUTPUT,
+    "Looking for Clang Source Code Coverage data: " << std::endl, this->Quiet);
+  // find all *.profraw files
+  cmsys::Glob gl;
+  gl.RecurseOn();
+  gl.RecurseThroughSymlinksOff();
+  std::string dir;
+  std::vector<std::string> profRawFiles;
+  dir = this->CTest->GetBinaryDir();
+  std::string daGlob;
+  daGlob = cmStrCat(dir, "/*.profdata");
+  cmCTestOptionalLog(
+    this->CTest, HANDLER_VERBOSE_OUTPUT,
+    "   looking for .profdata files in: " << daGlob << std::endl, this->Quiet);
+  gl.FindFiles(daGlob);
+  // Keep a list of all LCOV files
+  cm::append(profRawFiles, gl.GetFiles());
+  if (profRawFiles.empty()) {
+    cmCTestOptionalLog(
+      this->CTest, HANDLER_VERBOSE_OUTPUT,
+      " Cannot find any profdata coverage files." << std::endl, this->Quiet);
+    // No coverage files is a valid thing, so the exit code is 0
+    return 0;
+  }
+  // Write filenames to input file
+  cmGeneratedFileStream manifestStr;
+  manifestStr.open(cmStrCat(dir, "/coverage.manifest"));
+  for (std::string const& f : profRawFiles) {
+    manifestStr << f << "\n";
+  }
+  manifestStr.close();
+  // execute merge command :
+  // (xcrun) llvm-profdata merge -sparse <>.profraw <.....> -o default.profdata
+  std::vector<std::string> covargs;
+#ifdef __APPLE__
+  covargs.push_back("xcrun");
+#endif
+  covargs.push_back(
+    this->CTest->GetCTestConfiguration("CTestTestCoverageMergeExecutable"));
+  covargs.push_back("merge");
+  covargs.push_back("-sparse");
+  covargs.push_back("--input-files=" + cmStrCat(dir, "/coverage.manifest"));
+  covargs.push_back("-o");
+  covargs.push_back("default.profdata");
+  covargs.push_back("--failure-mode=all");
+
+  std::string output;
+  std::string errors;
+  int retVal = 0;
+  this->CTest->RunCommand(covargs, &output, &errors, &retVal, dir.c_str(),
+                          cmDuration::zero() /*this->TimeOut*/);
+
+  if (!cmSystemTools::FileExists("default.profdata")) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Something went wrong while merging .profraw data.\n");
+    return 0;
+  }
+  // Loop through object files and export LCOV format for each one
+  std::vector<std::string> objectFiles;
+  daGlob = cmStrCat(dir, "/*.o");
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     "   looking for .o files in: " << daGlob << std::endl,
+                     this->Quiet);
+  gl.FindFiles(daGlob);
+  // Keep a list of all LCOV files
+  cm::append(objectFiles, gl.GetFiles());
+  if (objectFiles.empty()) {
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                       " Cannot find any object files." << std::endl,
+                       this->Quiet);
+    // No coverage files is a valid thing, so the exit code is 0
+    return 0;
+  }
+
+  // (xcrun) llvm-cov export ./hello -instr-profile=default.profdata
+  std::vector<std::string> covExportArgs;
+#ifdef __APPLE__
+  covExportArgs.push_back("xcrun");
+#endif
+  covExportArgs.push_back(
+    this->CTest->GetCTestConfiguration("CTestTestCoverageDataExecutable"));
+  covExportArgs.push_back("export");
+  covExportArgs.push_back("-instr-profile=default.profdata");
+  covExportArgs.push_back("-format=lcov");
+  for (std::string const& f : objectFiles) {
+
+    covExportArgs.push_back(f);
+    this->CTest->RunCommand(covExportArgs, &output, &errors, &retVal,
+                            dir.c_str(), cmDuration::zero() /*this->TimeOut*/);
+    this->HandleClangSourceCodeCoverageFile(cont, output);
+    covExportArgs.pop_back();
+  }
+  // Clean up created file
+  cmSystemTools::RemoveFile("default.profdata");
+  cmSystemTools::RemoveFile("coverage.manifest");
+  return static_cast<int>(cont->TotalCoverage.size());
+}
+
+void cmCTestCoverageHandler::HandleClangSourceCodeCoverageFile(
+  cmCTestCoverageHandlerContainer* cont, std::string output)
+{
+  int coveredLineIndex = 0;
+  int coveredLineHits = 0;
+  std::string line;
+  std::string lineType;
+  std::istringstream stream(output);
+  std::string coveredFile;
+  bool pauseCollecting = false;
+  while (cmSystemTools::GetLineFromStream(stream, line)) {
+    lineType = line.substr(0, line.find(':'));
+    // SF is the full path to the source file
+    if (lineType == "SF") {
+      coveredFile =
+        cmSystemTools::CollapseFullPath(line.substr(line.find(':') + 1));
+      if (cont->TotalCoverage[coveredFile].empty()) {
+        pauseCollecting = false;
+        cmCTestCoverageHandlerContainer::SingleFileCoverageVector& vec =
+          cont->TotalCoverage[coveredFile];
+        cmCTestCoverageHandlerContainer::SingleFileBranchCoverageVector&
+          branchVec = cont->TotalBranchCoverage[coveredFile];
+
+        cmsys::ifstream in(coveredFile);
+        if (!in) {
+          cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                             "Cannot find " << coveredFile << std::endl,
+                             this->Quiet);
+          pauseCollecting = true;
+        } else {
+          while (cmSystemTools::GetLineFromStream(in, line)) {
+            vec.push_back(-1);
+            branchVec.push_back({ { 0, 0 } });
+          }
+        }
+      } else {
+        // Dont parse repeat copies of data, skip all lines of coverage info
+        // until we reach the next file name
+        pauseCollecting = true;
+      }
+
+    }
+    // DA represents the line and number of hits DA:<LineNo>,<NumHits>
+    else if (lineType == "DA" && !pauseCollecting) {
+      // Starts at 1, so subtract one from index to get real line data
+      coveredLineIndex =
+        std::atoi(line.substr(line.find(':') + 1, line.find(',')).c_str()) - 1;
+      coveredLineHits = std::atoi(line.substr(line.find(',') + 1).c_str());
+      cont->TotalCoverage[coveredFile][coveredLineIndex] = coveredLineHits;
+    }
+    // BRDA represents the line and number of Branch hits
+    // BRDA:<LineNo>,<blockNo>,<BranchNo>,<NumHits>
+    else if (lineType == "BRDA" && !pauseCollecting) {
+      // First increment count of branches for this line
+      coveredLineIndex =
+        std::atoi(line.substr(line.find(':') + 1, line.find(',')).c_str()) - 1;
+      cont->TotalBranchCoverage[coveredFile][coveredLineIndex][1]++;
+      // If lines hit > 0, increment the first number to indicate the branch
+      // was hit
+      coveredLineHits = std::atoi(line.substr(line.rfind(',') + 1).c_str());
+      if (coveredLineHits > 0) {
+        cont->TotalBranchCoverage[coveredFile][coveredLineIndex][0]++;
+      }
+    }
+  }
 }
 
 int cmCTestCoverageHandler::HandleLCovCoverage(
