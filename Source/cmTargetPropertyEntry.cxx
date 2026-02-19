@@ -1,8 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
-/* clang-format off */
-#include "cmGeneratorTarget.h"
-/* clang-format on */
+
+#include "cmTargetPropertyEntry.h"
 
 #include <map>
 #include <string>
@@ -19,14 +18,15 @@
 
 class cmake;
 
-cmLinkItem cmGeneratorTarget::TargetPropertyEntry::NoLinkItem;
+namespace cm {
+cmLinkItem TargetPropertyEntry::NoLinkItem;
 
-class TargetPropertyEntryString : public cmGeneratorTarget::TargetPropertyEntry
+class TargetPropertyEntryString : public TargetPropertyEntry
 {
 public:
   TargetPropertyEntryString(BT<std::string> propertyValue,
                             cmLinkItem const& item = NoLinkItem)
-    : cmGeneratorTarget::TargetPropertyEntry(item)
+    : TargetPropertyEntry(item)
     , PropertyValue(std::move(propertyValue))
   {
   }
@@ -51,12 +51,12 @@ private:
   BT<std::string> PropertyValue;
 };
 
-class TargetPropertyEntryGenex : public cmGeneratorTarget::TargetPropertyEntry
+class TargetPropertyEntryGenex : public TargetPropertyEntry
 {
 public:
   TargetPropertyEntryGenex(std::unique_ptr<cmCompiledGeneratorExpression> cge,
                            cmLinkItem const& item = NoLinkItem)
-    : cmGeneratorTarget::TargetPropertyEntry(item)
+    : TargetPropertyEntry(item)
     , ge(std::move(cge))
   {
   }
@@ -84,15 +84,14 @@ private:
   std::unique_ptr<cmCompiledGeneratorExpression> const ge;
 };
 
-class TargetPropertyEntryFileSet
-  : public cmGeneratorTarget::TargetPropertyEntry
+class TargetPropertyEntryFileSet : public TargetPropertyEntry
 {
 public:
   TargetPropertyEntryFileSet(
     std::vector<std::string> dirs, bool contextSensitiveDirs,
     std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
     cmFileSet const* fileSet, cmLinkItem const& item = NoLinkItem)
-    : cmGeneratorTarget::TargetPropertyEntry(item)
+    : TargetPropertyEntry(item)
     , BaseDirs(std::move(dirs))
     , ContextSensitiveDirs(contextSensitiveDirs)
     , EntryCge(std::move(entryCge))
@@ -142,8 +141,7 @@ private:
   cmFileSet const* FileSet;
 };
 
-std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
-cmGeneratorTarget::TargetPropertyEntry::Create(
+std::unique_ptr<TargetPropertyEntry> TargetPropertyEntry::Create(
   cmake& cmakeInstance, const BT<std::string>& propertyValue,
   bool evaluateForBuildsystem)
 {
@@ -152,16 +150,15 @@ cmGeneratorTarget::TargetPropertyEntry::Create(
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(propertyValue.Value);
     cge->SetEvaluateForBuildsystem(evaluateForBuildsystem);
-    return std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>(
+    return std::unique_ptr<TargetPropertyEntry>(
       cm::make_unique<TargetPropertyEntryGenex>(std::move(cge)));
   }
 
-  return std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>(
+  return std::unique_ptr<TargetPropertyEntry>(
     cm::make_unique<TargetPropertyEntryString>(propertyValue));
 }
 
-std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
-cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
+std::unique_ptr<TargetPropertyEntry> TargetPropertyEntry::CreateFileSet(
   std::vector<std::string> dirs, bool contextSensitiveDirs,
   std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
   cmFileSet const* fileSet, cmLinkItem const& item)
@@ -170,14 +167,13 @@ cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
     std::move(dirs), contextSensitiveDirs, std::move(entryCge), fileSet, item);
 }
 
-cmGeneratorTarget::TargetPropertyEntry::TargetPropertyEntry(
-  cmLinkItem const& item)
+TargetPropertyEntry::TargetPropertyEntry(cmLinkItem const& item)
   : LinkItem(item)
 {
 }
 
-bool cmGeneratorTarget::TargetPropertyEntry::GetHadContextSensitiveCondition()
-  const
+bool TargetPropertyEntry::GetHadContextSensitiveCondition() const
 {
   return false;
+}
 }

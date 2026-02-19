@@ -79,11 +79,11 @@ cmTargetPropertyComputer::ImportedLocation<cmGeneratorTarget>(
 
 static void CreatePropertyGeneratorExpressions(
   cmake& cmakeInstance, cmBTStringRange entries,
-  std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>>& items,
+  std::vector<std::unique_ptr<cm::TargetPropertyEntry>>& items,
   bool evaluateForBuildsystem = false)
 {
   for (auto const& entry : entries) {
-    items.emplace_back(cmGeneratorTarget::TargetPropertyEntry::Create(
+    items.emplace_back(cm::TargetPropertyEntry::Create(
       cmakeInstance, entry, evaluateForBuildsystem));
   }
 }

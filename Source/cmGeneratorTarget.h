@@ -27,6 +27,7 @@
 #include "cmSourceFile.h"
 #include "cmStandardLevel.h"
 #include "cmStateTypes.h"
+#include "cmTargetPropertyEntry.h"
 #include "cmValue.h"
 
 namespace cm {
@@ -53,6 +54,8 @@ struct cmGeneratorExpressionDAGChecker;
 class cmGeneratorTarget
 {
 public:
+  using TargetPropertyEntry = cm::TargetPropertyEntry;
+
   cmGeneratorTarget(cmTarget*, cmLocalGenerator* lg);
   ~cmGeneratorTarget();
 
@@ -1014,8 +1017,6 @@ public:
                             std::string const& report,
                             std::string const& compatibilityType) const;
 
-  class TargetPropertyEntry;
-
   std::string EvaluateInterfaceProperty(
     std::string const& prop, cm::GenEx::Evaluation* eval,
     cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage) const;
@@ -1575,32 +1576,4 @@ private:
   bool PchReused = false;
   mutable bool ComputingPchReuse = false;
   mutable bool PchReuseCycleDetected = false;
-};
-
-class cmGeneratorTarget::TargetPropertyEntry
-{
-protected:
-  static cmLinkItem NoLinkItem;
-
-public:
-  TargetPropertyEntry(cmLinkItem const& item);
-  virtual ~TargetPropertyEntry() = default;
-
-  static std::unique_ptr<TargetPropertyEntry> Create(
-    cmake& cmakeInstance, const BT<std::string>& propertyValue,
-    bool evaluateForBuildsystem = false);
-  static std::unique_ptr<TargetPropertyEntry> CreateFileSet(
-    std::vector<std::string> dirs, bool contextSensitiveDirs,
-    std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
-    cmFileSet const* fileSet, cmLinkItem const& item = NoLinkItem);
-
-  virtual std::string const& Evaluate(
-    cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
-
-  virtual cmListFileBacktrace GetBacktrace() const = 0;
-  virtual std::string const& GetInput() const = 0;
-  virtual bool GetHadContextSensitiveCondition() const;
-
-  cmLinkItem const& LinkItem;
 };

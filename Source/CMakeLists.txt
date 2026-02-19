@@ -308,7 +308,6 @@ add_library(
   cmGeneratorTarget_LinkDirectories.cxx
   cmGeneratorTarget_Options.cxx
   cmGeneratorTarget_Sources.cxx
-  cmGeneratorTarget_TargetPropertyEntry.cxx
   cmGeneratorTarget_TransitiveProperty.cxx
   cmLinkItemGraphVisitor.cxx
   cmLinkItemGraphVisitor.h
@@ -503,6 +502,8 @@ add_library(
   cmTarget.h
   cmTargetPropertyComputer.cxx
   cmTargetPropertyComputer.h
+  cmTargetPropertyEntry.cxx
+  cmTargetPropertyEntry.h
   cmTargetExport.h
   cmTargetTraceDependencies.cxx
   cmTargetTraceDependencies.h
