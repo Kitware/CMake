@@ -1192,6 +1192,10 @@ Available commands are:
 
     ``cat`` can now print the standard input by passing the ``-`` argument.
 
+  .. versionadded:: 4.4
+
+    ``cat`` will print the standard input when no arguments are passed.
+
 .. program:: cmake-E
 
 .. option:: chdir <dir> <cmd> [<arg>...]

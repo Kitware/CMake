@@ -203,7 +203,7 @@ bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
   return true;
 }
 
-void cmCatFile(std::string const& fileToAppend)
+void cmCatFile(cm::optional<std::string> fileToAppend)
 {
 #ifdef _WIN32
   _setmode(fileno(stdin), _O_BINARY);
@@ -211,8 +211,8 @@ void cmCatFile(std::string const& fileToAppend)
 #endif
   std::streambuf* buf = std::cin.rdbuf();
   cmsys::ifstream source;
-  if (fileToAppend != "-") {
-    source.open(fileToAppend.c_str(), (std::ios::binary | std::ios::in));
+  if (fileToAppend.has_value()) {
+    source.open(fileToAppend->c_str(), (std::ios::binary | std::ios::in));
     buf = source.rdbuf();
   }
   std::cout << buf;
@@ -1535,7 +1535,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 
     // Command to concat files into one
-    if (args[1] == "cat" && args.size() >= 3) {
+    if (args[1] == "cat") {
+      if (args.size() == 2) {
+        // Destroy console buffers to drop cout/cerr encoding transform.
+        console.reset();
+        cmCatFile(cm::nullopt);
+        return 0;
+      }
       int return_value = 0;
       bool doing_options = true;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
@@ -1543,7 +1549,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           doing_options = false;
           // Destroy console buffers to drop cout/cerr encoding transform.
           console.reset();
-          cmCatFile(arg);
+          cmCatFile(cm::nullopt);
         } else if (doing_options && cmHasPrefix(arg, '-')) {
           if (arg == "--") {
             doing_options = false;
