@@ -339,38 +339,15 @@ set(_Vulkan_hint_executable_search_paths "")
 set(_Vulkan_hint_library_search_paths "")
 
 if(DEFINED ENV{VULKAN_SDK} AND IS_DIRECTORY "$ENV{VULKAN_SDK}")
-  if(WIN32)
-    set(_Vulkan_hint_include_search_paths
-      "$ENV{VULKAN_SDK}/include"
-    )
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(_Vulkan_hint_executable_search_paths
-        "$ENV{VULKAN_SDK}/bin"
-      )
-      set(_Vulkan_hint_library_search_paths
-        "$ENV{VULKAN_SDK}/lib"
-      )
-    else()
-      set(_Vulkan_hint_executable_search_paths
-        "$ENV{VULKAN_SDK}/bin32"
-        "$ENV{VULKAN_SDK}/bin"
-      )
-      set(_Vulkan_hint_library_search_paths
-        "$ENV{VULKAN_SDK}/lib32"
-        "$ENV{VULKAN_SDK}/lib"
-      )
-    endif()
-  else()
-    set(_Vulkan_hint_include_search_paths
-      "$ENV{VULKAN_SDK}/include"
-    )
-    set(_Vulkan_hint_executable_search_paths
-      "$ENV{VULKAN_SDK}/bin"
-    )
-    set(_Vulkan_hint_library_search_paths
-      "$ENV{VULKAN_SDK}/lib"
-    )
-  endif()
+  set(_Vulkan_hint_include_search_paths
+    "$ENV{VULKAN_SDK}/include"
+  )
+  set(_Vulkan_hint_executable_search_paths
+    "$ENV{VULKAN_SDK}/bin"
+  )
+  set(_Vulkan_hint_library_search_paths
+    "$ENV{VULKAN_SDK}/lib"
+  )
   if(APPLE)
     cmake_path(SET _MoltenVK_path NORMALIZE "$ENV{VULKAN_SDK}/../MoltenVK")
     if(IS_DIRECTORY "${_MoltenVK_path}")
