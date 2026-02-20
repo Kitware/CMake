@@ -349,7 +349,6 @@ if(DEFINED ENV{VULKAN_SDK} AND IS_DIRECTORY "$ENV{VULKAN_SDK}")
       )
       set(_Vulkan_hint_library_search_paths
         "$ENV{VULKAN_SDK}/lib"
-        "$ENV{VULKAN_SDK}/bin"
       )
     else()
       set(_Vulkan_hint_executable_search_paths
@@ -358,9 +357,7 @@ if(DEFINED ENV{VULKAN_SDK} AND IS_DIRECTORY "$ENV{VULKAN_SDK}")
       )
       set(_Vulkan_hint_library_search_paths
         "$ENV{VULKAN_SDK}/lib32"
-        "$ENV{VULKAN_SDK}/bin32"
         "$ENV{VULKAN_SDK}/lib"
-        "$ENV{VULKAN_SDK}/bin"
       )
     endif()
   else()
