@@ -10,6 +10,27 @@ Changes made since CMake 4.2 include the following.
 New Features
 ============
 
+Common Package Specification
+----------------------------
+
+* Support for importing and exporting packages described using the |CPS|_
+  (CPS) was added.  This improves build system interoperability by allowing
+  expressive, feature-rich package descriptions to be exchanged in a format
+  other than CMake Language.
+
+  * The :command:`find_package` now searches for and can import CPS packages.
+
+  * The :command:`install` and :command:`export` commands gained a new
+    ``PACKAGE_INFO`` sub-command to generate CPS package descriptions.
+
+  * The :command:`project` command gained new ``COMPAT_VERSION`` and
+    ``SPDX_LICENSE`` options.  These values may be inherited when creating a
+    CPS package description.  See the :command:`install(PACKAGE_INFO)`
+    documentation for details.
+
+.. _CPS: https://cps-org.github.io/cps/
+.. |CPS| replace:: Common Package Specification
+
 Instrumentation
 ---------------
 
@@ -94,10 +115,6 @@ Commands
 
 * The :command:`get_property` and :command:`set_property` commands
   now support a ``FILE_SET`` scope for file set properties of a target.
-
-* The :command:`install(PACKAGE_INFO)` and :command:`export(PACKAGE_INFO)`
-  commands now support specifying ``CXX_MODULES_DIRECTORY`` for exporting
-  C++20 modules.
 
 * The :command:`string(JSON)` command gained new ``GET_RAW`` and
   ``STRING_ENCODE`` modes.
