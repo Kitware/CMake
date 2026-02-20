@@ -44,7 +44,7 @@ else()
         set(CMAKE_CXX_COMPILER_ARG1 "${CMAKE_CXX_FLAGS_ENV_INIT}" CACHE STRING "Arguments to CXX compiler")
       endif()
       if(NOT EXISTS ${CMAKE_CXX_COMPILER_INIT})
-        message(FATAL_ERROR "Could not find compiler set in environment variable CXX:\n$ENV{CXX}.\n${CMAKE_CXX_COMPILER_INIT}")
+        message(FATAL_ERROR "Could not find the compiler specified in the environment variable CXX:\n$ENV{CXX}.\n${CMAKE_CXX_COMPILER_INIT}")
       endif()
     endif()
 

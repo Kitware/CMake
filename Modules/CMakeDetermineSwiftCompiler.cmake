@@ -37,7 +37,7 @@ elseif("${CMAKE_GENERATOR}" MATCHES "^Ninja")
           STRING "Arguments to the Swift compiler")
       endif()
       if(NOT EXISTS ${CMAKE_Swift_COMPILER_INIT})
-        message(FATAL_ERROR "Could not find compiler set in environment variable SWIFTC\n$ENV{SWIFTC}.\n${CMAKE_Swift_COMPILER_INIT}")
+        message(FATAL_ERROR "Could not find the compiler specified in the environment variable SWIFTC\n$ENV{SWIFTC}.\n${CMAKE_Swift_COMPILER_INIT}")
       endif()
     endif()
 
