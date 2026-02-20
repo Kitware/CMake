@@ -16,6 +16,7 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratedFileStream.h"
 #include "cmJSONState.h"
 #include "cmListFileCache.h"
@@ -448,8 +449,10 @@ void cmCxxModuleMetadata::PopulateTarget(
   std::string metadataDir =
     cmSystemTools::GetFilenamePath(meta.MetadataFilePath);
 
-  auto fileSet = target.GetOrCreateFileSet("CXX_MODULES", "CXX_MODULES",
-                                           cmFileSetVisibility::Interface);
+  auto fileSet =
+    target.GetOrCreateFileSet(std::string{ cm::FileSetMetadata::CXX_MODULES },
+                              std::string{ cm::FileSetMetadata::CXX_MODULES },
+                              cm::FileSetMetadata::Visibility::Interface);
 
   for (auto const& module : meta.Modules) {
     std::string sourcePath = module.SourcePath;

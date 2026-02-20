@@ -19,8 +19,9 @@
 
 #include "cmAlgorithms.h"
 #include "cmExportSet.h"
-#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFileSetGenerator.h"
@@ -220,8 +221,8 @@ std::string cmExportInstallPackageInfoGenerator::GetCxxModulesDirectory() const
 
 cm::optional<std::string>
 cmExportInstallPackageInfoGenerator::GetFileSetDirectory(
-  cmGeneratorTarget* gte, cmTargetExport const* te, cmFileSet* fileSet,
-  cm::optional<std::string> const& config)
+  cmGeneratorTarget* gte, cmTargetExport const* te,
+  cmGeneratorFileSet const* fileSet, cm::optional<std::string> const& config)
 {
   cmGeneratorExpression ge(*gte->Makefile->GetCMakeInstance());
   auto cge =
@@ -240,7 +241,7 @@ cmExportInstallPackageInfoGenerator::GetFileSetDirectory(
   }
 
   std::string const& type = fileSet->GetType();
-  if (config && (type == "CXX_MODULES"_s)) {
+  if (config && (type == cm::FileSetMetadata::CXX_MODULES)) {
     // C++ modules do not support interface file sets which are dependent
     // upon the configuration.
     cmMakefile* mf = gte->LocalGenerator->GetMakefile();
@@ -270,7 +271,7 @@ bool cmExportInstallPackageInfoGenerator::GenerateFileSetProperties(
   bool hasModules = false;
   std::set<std::string> seenIncludeDirectories;
   for (auto const& name : gte->Target->GetAllInterfaceFileSets()) {
-    cmFileSet* fileSet = gte->Target->GetFileSet(name);
+    cmGeneratorFileSet const* fileSet = gte->GetFileSet(name);
 
     if (!fileSet) {
       gte->Makefile->IssueMessage(
@@ -284,13 +285,13 @@ bool cmExportInstallPackageInfoGenerator::GenerateFileSetProperties(
     cm::optional<std::string> const& fileSetDirectory =
       this->GetFileSetDirectory(gte, te, fileSet, config);
 
-    if (fileSet->GetType() == "HEADERS"_s) {
+    if (fileSet->GetType() == cm::FileSetMetadata::HEADERS) {
       if (fileSetDirectory &&
           !cm::contains(seenIncludeDirectories, *fileSetDirectory)) {
         component["includes"].append(*fileSetDirectory);
         seenIncludeDirectories.insert(*fileSetDirectory);
       }
-    } else if (fileSet->GetType() == "CXX_MODULES"_s) {
+    } else if (fileSet->GetType() == cm::FileSetMetadata::CXX_MODULES) {
       hasModules = true;
       this->RequiresConfigFiles = true;
     }

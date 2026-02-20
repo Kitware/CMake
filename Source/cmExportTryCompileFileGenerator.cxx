@@ -8,10 +8,10 @@
 #include <cm/memory>
 #include <cmext/string_view>
 
-#include "cmFileSet.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
@@ -176,14 +176,16 @@ std::string cmExportTryCompileFileGenerator::InstallNameDir(
 }
 
 std::string cmExportTryCompileFileGenerator::GetFileSetDirectories(
-  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport const* /*te*/)
+  cmGeneratorTarget* /*gte*/, cmGeneratorFileSet const* fileSet,
+  cmTargetExport const* /*te*/)
 {
   return cmOutputConverter::EscapeForCMake(
     cmList::to_string(fileSet->GetDirectoryEntries()));
 }
 
 std::string cmExportTryCompileFileGenerator::GetFileSetFiles(
-  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport const* /*te*/)
+  cmGeneratorTarget* /*gte*/, cmGeneratorFileSet const* fileSet,
+  cmTargetExport const* /*te*/)
 {
   return cmOutputConverter::EscapeForCMake(
     cmList::to_string(fileSet->GetFileEntries()));

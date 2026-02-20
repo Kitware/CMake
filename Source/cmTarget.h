@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
@@ -21,6 +22,12 @@
 #include "cmStringAlgorithms.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmValue.h"
+
+namespace cm {
+namespace FileSetMetadata {
+enum class Visibility;
+}
+}
 
 class cmCustomCommand;
 class cmFileSet;
@@ -32,8 +39,6 @@ class cmPropertyMap;
 class cmSourceFile;
 class cmTargetExport;
 class cmTargetInternals;
-
-enum class cmFileSetVisibility;
 
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
@@ -324,11 +329,9 @@ public:
   void CopyCxxModulesEntries(cmTarget const* tgt);
   void CopyCxxModulesProperties(cmTarget const* tgt);
 
-  cmBTStringRange GetHeaderSetsEntries() const;
-  cmBTStringRange GetCxxModuleSetsEntries() const;
+  cmBTStringRange GetFileSetsEntries(cm::string_view type) const;
 
-  cmBTStringRange GetInterfaceHeaderSetsEntries() const;
-  cmBTStringRange GetInterfaceCxxModuleSetsEntries() const;
+  cmBTStringRange GetInterfaceFileSetsEntries(cm::string_view type) const;
 
   enum class ImportArtifactMissingOk
   {
@@ -347,15 +350,15 @@ public:
 
   cmFileSet const* GetFileSet(std::string const& name) const;
   cmFileSet* GetFileSet(std::string const& name);
-  std::pair<cmFileSet*, bool> GetOrCreateFileSet(std::string const& name,
-                                                 std::string const& type,
-                                                 cmFileSetVisibility vis);
+  std::pair<cmFileSet*, bool> GetOrCreateFileSet(
+    std::string const& name, std::string const& type,
+    cm::FileSetMetadata::Visibility vis);
 
   std::vector<std::string> GetAllFileSetNames() const;
   std::vector<std::string> GetAllInterfaceFileSets() const;
 
-  static std::string GetFileSetsPropertyName(std::string const& type);
-  static std::string GetInterfaceFileSetsPropertyName(std::string const& type);
+  std::string GetFileSetsPropertyName(std::string const& type) const;
+  std::string GetInterfaceFileSetsPropertyName(std::string const& type) const;
 
   bool HasFileSets() const;
 

@@ -13,8 +13,9 @@
 #include <cmext/string_view>
 
 #include "cmExportSet.h"
-#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFileSetGenerator.h"
@@ -212,8 +213,8 @@ std::string cmExportInstallSbomGenerator::GetCxxModuleFile(
 }
 
 cm::optional<std::string> cmExportInstallSbomGenerator::GetFileSetDirectory(
-  cmGeneratorTarget* gte, cmTargetExport const* te, cmFileSet* fileSet,
-  cm::optional<std::string> const& config)
+  cmGeneratorTarget* gte, cmTargetExport const* te,
+  cmGeneratorFileSet const* fileSet, cm::optional<std::string> const& config)
 {
   cmGeneratorExpression ge(*gte->Makefile->GetCMakeInstance());
   auto cge =
@@ -228,7 +229,7 @@ cm::optional<std::string> cmExportInstallSbomGenerator::GetFileSetDirectory(
   }
 
   std::string const& type = fileSet->GetType();
-  if (config && (type == "CXX_MODULES"_s)) {
+  if (config && (type == cm::FileSetMetadata::CXX_MODULES)) {
     cmMakefile* mf = gte->LocalGenerator->GetMakefile();
     std::ostringstream e;
     e << "The \"" << gte->GetName() << "\" target's interface file set \""

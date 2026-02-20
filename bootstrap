@@ -360,6 +360,7 @@ CMAKE_CXX_SOURCES="\
   cmFileCopier \
   cmFileInstaller \
   cmFileSet \
+  cmFileSetMetadata \
   cmFileTime \
   cmFileTimeCache \
   cmFileTimes \
@@ -385,6 +386,8 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpressionLexer \
   cmGeneratorExpressionNode \
   cmGeneratorExpressionParser \
+  cmGeneratorFileSet \
+  cmGeneratorFileSets \
   cmGeneratorTarget \
   cmGeneratorTarget_CompatibleInterface \
   cmGeneratorTarget_IncludeDirectories \
@@ -392,7 +395,6 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorTarget_LinkDirectories \
   cmGeneratorTarget_Options \
   cmGeneratorTarget_Sources \
-  cmGeneratorTarget_TargetPropertyEntry \
   cmGeneratorTarget_TransitiveProperty \
   cmGetCMakePropertyCommand \
   cmGetDirectoryPropertyCommand \
@@ -512,6 +514,7 @@ CMAKE_CXX_SOURCES="\
   cmTargetPrecompileHeadersCommand \
   cmTargetPropCommandBase \
   cmTargetPropertyComputer \
+  cmTargetPropertyEntry \
   cmTargetSourcesCommand \
   cmTargetTraceDependencies \
   cmTest \

@@ -10,7 +10,7 @@
 #include "cmInstallGenerator.h"
 
 class cmGeneratorTarget;
-class cmFileSet;
+class cmGeneratorFileSet;
 class cmListFileBacktrace;
 class cmLocalGenerator;
 
@@ -38,7 +38,7 @@ public:
   std::string GetDestination() const { return this->Destination; }
   bool GetOptional() const { return this->Optional; }
   std::string GetFileSetName() const { return this->FileSetName; }
-  cmFileSet const* GetFileSet() const { return this->FileSet; };
+  cmGeneratorFileSet const* GetFileSet() const { return this->FileSet; };
   cmGeneratorTarget* GetTarget() const { return this->Target; }
 
 protected:
@@ -48,7 +48,7 @@ protected:
 private:
   std::string TargetName;
   cmLocalGenerator* LocalGenerator;
-  cmFileSet const* FileSet;
+  cmGeneratorFileSet const* FileSet;
   std::string const FileSetName;
   std::string const FilePermissions;
   cmFileSetDestinations FileSetDestinations;

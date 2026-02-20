@@ -27,9 +27,10 @@
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
-#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -2711,13 +2712,13 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       if (si.Kind == cmGeneratorTarget::SourceKindObjectSource ||
           si.Kind == cmGeneratorTarget::SourceKindUnityBatched) {
         this->OutputSourceSpecificFlags(e2, si.Source);
-      } else if (fs && fs->GetType() == "CXX_MODULES"_s) {
+      } else if (fs && fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
         this->GeneratorTarget->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
           cmStrCat("Target \"", this->GeneratorTarget->GetName(),
                    "\" has source file\n  ", si.Source->GetFullPath(),
-                   "\nin a \"FILE_SET TYPE CXX_MODULES\" but it is not "
-                   "scheduled for compilation."));
+                   "\nin a \"FILE_SET TYPE ", cm::FileSetMetadata::CXX_MODULES,
+                   "\" but it is not scheduled for compilation."));
       }
       if (si.Source->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
         e2.Element("PrecompiledHeader", "NotUsing");
@@ -2753,13 +2754,13 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       }
 
       this->FinishWritingSource(e2, toolSettings);
-    } else if (fs && fs->GetType() == "CXX_MODULES"_s) {
+    } else if (fs && fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
       this->GeneratorTarget->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("Target \"", this->GeneratorTarget->GetName(),
                  "\" has source file\n  ", si.Source->GetFullPath(),
-                 "\nin a \"FILE_SET TYPE CXX_MODULES\" but it is not "
-                 "scheduled for compilation."));
+                 "\nin a \"FILE_SET TYPE ", cm::FileSetMetadata::CXX_MODULES,
+                 "\" but it is not scheduled for compilation."));
     }
   }
 
@@ -2884,9 +2885,9 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     auto const* fs =
       this->GeneratorTarget->GetFileSetForSource(config, source);
     char const* compileAsPerConfig = compileAs;
-    if (fs && fs->GetType() == "CXX_MODULES"_s) {
+    if (fs && fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
       if (lang == "CXX"_s) {
-        if (fs->GetType() == "CXX_MODULES"_s) {
+        if (fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
           isCppModule = true;
           if (shouldScanForModules &&
               this->GlobalGenerator->IsScanDependenciesSupported()) {

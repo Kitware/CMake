@@ -17,16 +17,16 @@
 
 #include <cm/string_view>
 #include <cmext/algorithm>
-#include <cmext/string_view>
 
 #include <cm3p/json/value.h>
 
 #include "cmCryptoHash.h"
 #include "cmExportSet.h"
 #include "cmFileAPI.h"
-#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallCxxModuleBmiGenerator.h"
@@ -48,7 +48,6 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
@@ -465,7 +464,7 @@ class Target
 
   using FileSetDatabase = std::map<std::string, Json::ArrayIndex>;
 
-  std::vector<cmFileSetVisibility> FileSetVisibilities;
+  std::vector<cm::FileSetMetadata::Visibility> FileSetVisibilities;
 
   template <typename T>
   JBT<T> ToJBT(BT<T> const& bt)
@@ -502,7 +501,7 @@ class Target
   Json::Value DumpLanguageStandard(JBTs<std::string> const& standard);
   Json::Value DumpDefine(JBT<std::string> const& def);
   std::pair<Json::Value, FileSetDatabase> DumpFileSets();
-  Json::Value DumpFileSet(cmFileSet const* fs,
+  Json::Value DumpFileSet(cmGeneratorFileSet const* fs,
                           std::vector<std::string> const& directories);
   Json::Value DumpSources(FileSetDatabase const& fsdb);
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
@@ -1148,18 +1147,11 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
     auto* target = installFileSet->GetTarget();
 
     cm::GenEx::Context context(target->LocalGenerator, this->Config);
-
-    auto dirCges = fileSet->CompileDirectoryEntries();
-    auto dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, target);
-
-    auto entryCges = fileSet->CompileFileEntries();
-    std::map<std::string, std::vector<std::string>> entries;
-    for (auto const& entryCge : entryCges) {
-      fileSet->EvaluateFileEntry(dirs, entries, entryCge, context, target);
-    }
+    auto dirs = fileSet->GetDirectories(context, target);
+    auto entries = fileSet->GetFiles(context, target);
 
     Json::Value files = Json::arrayValue;
-    for (auto const& it : entries) {
+    for (auto const& it : entries.first) {
       auto dir = it.first;
       if (!dir.empty()) {
         dir += '/';
@@ -1174,7 +1166,7 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
     installer["fileSetName"] = fileSet->GetName();
     installer["fileSetType"] = fileSet->GetType();
     installer["fileSetDirectories"] = Json::arrayValue;
-    for (auto const& dir : dirs) {
+    for (auto const& dir : dirs.first) {
       installer["fileSetDirectories"].append(
         RelativeIfUnder(this->TopSource, dir));
     }
@@ -1726,41 +1718,22 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
   this->FileSetVisibilities.clear();
 
   // Build the fileset database.
-  auto const* tgt = this->GT->Target;
-  auto const& fs_names = tgt->GetAllFileSetNames();
+  auto const& fileSets = this->GT->GetAllFileSets();
 
-  if (!fs_names.empty()) {
+  if (!fileSets.empty()) {
     fsJson = Json::arrayValue;
     size_t fsIndex = 0;
-    for (auto const& fs_name : fs_names) {
-      auto const* fs = tgt->GetFileSet(fs_name);
-      if (!fs) {
-        this->GT->Makefile->IssueMessage(
-          MessageType::INTERNAL_ERROR,
-          cmStrCat("Target \"", tgt->GetName(),
-                   "\" is tracked to have file set \"", fs_name,
-                   "\", but it was not found."));
-        continue;
-      }
-
+    for (auto const* fs : fileSets) {
       cm::GenEx::Context context(this->GT->LocalGenerator, this->Config);
 
-      auto fileEntries = fs->CompileFileEntries();
-      auto directoryEntries = fs->CompileDirectoryEntries();
+      auto directories = fs->GetDirectories(context, this->GT);
 
-      auto directories =
-        fs->EvaluateDirectoryEntries(directoryEntries, context, this->GT);
-
-      fsJson.append(this->DumpFileSet(fs, directories));
+      fsJson.append(this->DumpFileSet(fs, directories.first));
       this->FileSetVisibilities.push_back(fs->GetVisibility());
 
-      std::map<std::string, std::vector<std::string>> files_per_dirs;
-      for (auto const& entry : fileEntries) {
-        fs->EvaluateFileEntry(directories, files_per_dirs, entry, context,
-                              this->GT);
-      }
+      auto files_per_dirs = fs->GetFiles(context, this->GT);
 
-      for (auto const& files_per_dir : files_per_dirs) {
+      for (auto const& files_per_dir : files_per_dirs.first) {
         auto const& dir = files_per_dir.first;
         for (auto const& file : files_per_dir.second) {
           std::string sf_path;
@@ -1780,7 +1753,7 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
   return std::make_pair(fsJson, fsdb);
 }
 
-Json::Value Target::DumpFileSet(cmFileSet const* fs,
+Json::Value Target::DumpFileSet(cmGeneratorFileSet const* fs,
                                 std::vector<std::string> const& directories)
 {
   Json::Value fileSet = Json::objectValue;
@@ -1788,7 +1761,7 @@ Json::Value Target::DumpFileSet(cmFileSet const* fs,
   fileSet["name"] = fs->GetName();
   fileSet["type"] = fs->GetType();
   fileSet["visibility"] =
-    std::string(cmFileSetVisibilityToName(fs->GetVisibility()));
+    std::string(cm::FileSetMetadata::VisibilityToName(fs->GetVisibility()));
 
   Json::Value baseDirs = Json::arrayValue;
   for (auto const& directory : directories) {
@@ -1888,7 +1861,8 @@ Json::Value Target::DumpInterfaceSources(FileSetDatabase const& fsdb)
     Json::ArrayIndex const index = fsIter.second;
     // FileSetVisibilities was populated by DumpFileSets() and will always
     // have the same size as the file sets array that index is indexing into
-    if (this->FileSetVisibilities[index] != cmFileSetVisibility::Private) {
+    if (this->FileSetVisibilities[index] !=
+        cm::FileSetMetadata::Visibility::Private) {
       dumpFile(fsIter.first);
     }
   }

@@ -28,11 +28,14 @@
 #include "cmCxxModuleUsageEffects.h"
 #include "cmExperimental.h"
 #include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmFileTimes.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorOptions.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
@@ -79,17 +82,18 @@ cmTargetPropertyComputer::ImportedLocation<cmGeneratorTarget>(
 
 static void CreatePropertyGeneratorExpressions(
   cmake& cmakeInstance, cmBTStringRange entries,
-  std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>>& items,
+  std::vector<std::unique_ptr<cm::TargetPropertyEntry>>& items,
   bool evaluateForBuildsystem = false)
 {
   for (auto const& entry : entries) {
-    items.emplace_back(cmGeneratorTarget::TargetPropertyEntry::Create(
+    items.emplace_back(cm::TargetPropertyEntry::Create(
       cmakeInstance, entry, evaluateForBuildsystem));
   }
 }
 
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   : Target(t)
+  , FileSets(cm::make_unique<cmGeneratorFileSets>(this, lg))
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = lg;
@@ -1122,8 +1126,8 @@ bool cmGeneratorTarget::IsInBuildSystem() const
       // An INTERFACE library is in the build system if it has SOURCES
       // or C++ module filesets.
       if (!this->SourceEntries.empty() ||
-          !this->Target->GetHeaderSetsEntries().empty() ||
-          !this->Target->GetCxxModuleSetsEntries().empty()) {
+          !this->GetFileSets(cm::FileSetMetadata::HEADERS).empty() ||
+          !this->GetFileSets(cm::FileSetMetadata::CXX_MODULES).empty()) {
         return true;
       }
       break;
@@ -2342,7 +2346,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     std::string bmiFlags;
 
     auto const* fs = this->GetFileSetForSource(config, sf);
-    if (fs && fs->GetType() == "CXX_MODULES"_s) {
+    if (fs && fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
       if (lang != "CXX"_s) {
         mf->IssueMessage(
           MessageType::FATAL_ERROR,
@@ -5369,21 +5373,13 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(
 
       // Copy file sets.
       {
-        auto fsNames = model->GetAllFileSetNames();
-        for (auto const& fsName : fsNames) {
-          auto const* fs = model->GetFileSet(fsName);
-          if (!fs) {
-            mf->IssueMessage(MessageType::INTERNAL_ERROR,
-                             cmStrCat("Failed to find file set named '",
-                                      fsName, "' on target '", tgt->GetName(),
-                                      '\''));
-            continue;
-          }
-          auto* newFs = tgt
-                          ->GetOrCreateFileSet(fs->GetName(), fs->GetType(),
-                                               fs->GetVisibility())
-                          .first;
-          newFs->CopyEntries(fs);
+        for (auto const* gfs : gt->GetAllFileSets()) {
+          auto* newFs =
+            tgt
+              ->GetOrCreateFileSet(gfs->GetName(), gfs->GetType(),
+                                   cm::FileSetMetadata::Visibility::Public)
+              .first;
+          newFs->CopyEntries(gfs->GetFileSet());
         }
       }
 
@@ -5782,16 +5778,14 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
         allVerifyTargetName, { cmStateEnums::TargetDomain::NATIVE });
 
     auto fileSetEntries = isInterface
-      ? this->Target->GetInterfaceHeaderSetsEntries()
-      : this->Target->GetHeaderSetsEntries();
+      ? this->GetInterfaceFileSets(cm::FileSetMetadata::HEADERS)
+      : this->GetFileSets(cm::FileSetMetadata::HEADERS);
 
-    std::set<cmFileSet*> fileSets;
-    for (auto const& entry : fileSetEntries) {
-      for (auto const& name : cmList{ entry.Value }) {
-        if (all || verifySet.count(name)) {
-          fileSets.insert(this->Target->GetFileSet(name));
-          verifySet.erase(name);
-        }
+    std::set<cmGeneratorFileSet const*> fileSets;
+    for (auto const& fileSet : fileSetEntries) {
+      if (all || verifySet.count(fileSet->GetName())) {
+        fileSets.insert(fileSet);
+        verifySet.erase(fileSet->GetName());
       }
     }
 
@@ -5828,9 +5822,9 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
     }
 
     cm::optional<std::set<std::string>> languages;
-    for (auto* fileSet : fileSets) {
-      auto dirCges = fileSet->CompileDirectoryEntries();
-      auto fileCges = fileSet->CompileFileEntries();
+    for (auto const* fileSet : fileSets) {
+      auto const& dirCges = fileSet->CompileDirectoryEntries();
+      auto const& fileCges = fileSet->CompileFileEntries();
 
       static auto const contextSensitive =
         [](std::unique_ptr<cmCompiledGeneratorExpression> const& cge) {
@@ -6143,28 +6137,14 @@ bool cmGeneratorTarget::HaveFortranSources() const
   return have_direct || have_via_target_objects;
 }
 
-bool cmGeneratorTarget::HaveCxx20ModuleSources(std::string* errorMessage) const
+bool cmGeneratorTarget::HaveCxx20ModuleSources() const
 {
-  auto const& fs_names = this->Target->GetAllFileSetNames();
-  return std::any_of(
-    fs_names.begin(), fs_names.end(),
-    [this, errorMessage](std::string const& name) -> bool {
-      auto const* file_set = this->Target->GetFileSet(name);
-      if (!file_set) {
-        auto message = cmStrCat("Target \"", this->Target->GetName(),
-                                "\" is tracked to have file set \"", name,
-                                "\", but it was not found.");
-        if (errorMessage) {
-          *errorMessage = std::move(message);
-        } else {
-          this->Makefile->IssueMessage(MessageType::INTERNAL_ERROR, message);
-        }
-        return false;
-      }
-
-      auto const& fs_type = file_set->GetType();
-      return fs_type == "CXX_MODULES"_s;
-    });
+  auto const& fileSets = this->GetAllFileSets();
+  return std::any_of(fileSets.begin(), fileSets.end(),
+                     [](cmGeneratorFileSet const* file_set) -> bool {
+                       auto const& fs_type = file_set->GetType();
+                       return fs_type == cm::FileSetMetadata::CXX_MODULES;
+                     });
 }
 
 cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
@@ -6306,21 +6286,6 @@ bool cmGeneratorTarget::NeedDyndep(std::string const& lang,
   return lang == "Fortran"_s || this->NeedCxxModuleSupport(lang, config);
 }
 
-cmFileSet const* cmGeneratorTarget::GetFileSetForSource(
-  std::string const& config, cmSourceFile const* sf) const
-{
-  this->BuildFileSetInfoCache(config);
-
-  auto const& path = sf->GetFullPath();
-  auto const& per_config = this->Configs[config];
-
-  auto const fsit = per_config.FileSetCache.find(path);
-  if (fsit == per_config.FileSetCache.end()) {
-    return nullptr;
-  }
-  return fsit->second;
-}
-
 bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
                                             std::string const& config,
                                             cmSourceFile const* sf) const
@@ -6337,7 +6302,7 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
   // Any file in `CXX_MODULES` file sets need scanned (it being `CXX` is
   // enforced elsewhere).
   auto const* fs = this->GetFileSetForSource(config, sf);
-  if (fs && fs->GetType() == "CXX_MODULES"_s) {
+  if (fs && fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
     return true;
   }
 
@@ -6395,6 +6360,40 @@ cmGeneratorTarget::CxxModuleSupport cmGeneratorTarget::NeedCxxDyndep(
   return policyAnswer;
 }
 
+bool cmGeneratorTarget::HasFileSets() const
+{
+  return !this->FileSets->Empty();
+}
+
+std::vector<cmGeneratorFileSet const*> const&
+cmGeneratorTarget::GetAllFileSets() const
+{
+  return this->FileSets->GetAllFileSets();
+}
+
+std::vector<cmGeneratorFileSet const*> const& cmGeneratorTarget::GetFileSets(
+  cm::string_view type) const
+{
+  return this->FileSets->GetFileSets(type);
+}
+std::vector<cmGeneratorFileSet const*> const&
+cmGeneratorTarget::GetInterfaceFileSets(cm::string_view type) const
+{
+  return this->FileSets->GetInterfaceFileSets(type);
+}
+
+cmGeneratorFileSet const* cmGeneratorTarget::GetFileSet(
+  std::string const& name) const
+{
+  return this->FileSets->GetFileSet(name);
+}
+
+cmGeneratorFileSet const* cmGeneratorTarget::GetFileSetForSource(
+  std::string const& config, cmSourceFile const* sf) const
+{
+  return this->FileSets->GetFileSetForSource(config, sf);
+}
+
 std::string cmGeneratorTarget::BuildDatabasePath(
   std::string const& lang, std::string const& config) const
 {
@@ -6418,50 +6417,6 @@ std::string cmGeneratorTarget::BuildDatabasePath(
 
   return cmStrCat(this->GetSupportDirectory(), '/', lang,
                   "_build_database.json");
-}
-
-void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const
-{
-  auto& per_config = this->Configs[config];
-
-  if (per_config.BuiltFileSetCache) {
-    return;
-  }
-
-  auto const* tgt = this->Target;
-
-  for (auto const& name : tgt->GetAllFileSetNames()) {
-    auto const* file_set = tgt->GetFileSet(name);
-    if (!file_set) {
-      tgt->GetMakefile()->IssueMessage(
-        MessageType::INTERNAL_ERROR,
-        cmStrCat("Target \"", tgt->GetName(),
-                 "\" is tracked to have file set \"", name,
-                 "\", but it was not found."));
-      continue;
-    }
-
-    cm::GenEx::Context context(this->LocalGenerator, config);
-
-    auto fileEntries = file_set->CompileFileEntries();
-    auto directoryEntries = file_set->CompileDirectoryEntries();
-    auto directories =
-      file_set->EvaluateDirectoryEntries(directoryEntries, context, this);
-
-    std::map<std::string, std::vector<std::string>> files;
-    for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files, entry, context, this);
-    }
-
-    for (auto const& it : files) {
-      for (auto const& filename : it.second) {
-        auto collapsedFile = cmSystemTools::CollapseFullPath(filename);
-        per_config.FileSetCache[collapsedFile] = file_set;
-      }
-    }
-  }
-
-  per_config.BuiltFileSetCache = true;
 }
 
 std::string cmGeneratorTarget::GetSwiftModuleName() const

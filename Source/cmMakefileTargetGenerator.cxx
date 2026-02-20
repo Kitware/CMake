@@ -24,10 +24,11 @@
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
-#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -347,28 +348,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   std::map<std::string, std::string> file_set_map;
 
   auto const* tgt = this->GeneratorTarget->Target;
-  for (auto const& name : tgt->GetAllFileSetNames()) {
-    auto const* file_set = tgt->GetFileSet(name);
-    if (!file_set) {
-      this->Makefile->IssueMessage(
-        MessageType::INTERNAL_ERROR,
-        cmStrCat("Target \"", tgt->GetName(),
-                 "\" is tracked to have file set \"", name,
-                 "\", but it was not found."));
-      continue;
-    }
-
-    auto fileEntries = file_set->CompileFileEntries();
-    auto directoryEntries = file_set->CompileDirectoryEntries();
-    auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, context, this->GeneratorTarget);
-
-    std::map<std::string, std::vector<std::string>> files;
-    for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files, entry, context,
-                                  this->GeneratorTarget);
-    }
-
+  for (auto const* file_set : this->GeneratorTarget->GetAllFileSets()) {
+    auto files = file_set->GetFiles(context, this->GeneratorTarget).first;
     for (auto const& it : files) {
       for (auto const& filename : it.second) {
         file_set_map[filename] = file_set->GetType();
@@ -394,7 +375,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     auto const it = file_set_map.find(path);
     if (it != file_set_map.end()) {
       auto const& file_set_type = it->second;
-      if (file_set_type == "CXX_MODULES"_s) {
+      if (file_set_type == cm::FileSetMetadata::CXX_MODULES) {
         if (sf->GetLanguage() != "CXX"_s) {
           this->Makefile->IssueMessage(
             MessageType::FATAL_ERROR,

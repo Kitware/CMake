@@ -36,9 +36,11 @@ protected:
   void GenerateImportTargetsConfig(std::ostream& os, std::string const& config,
                                    std::string const& suffix) override;
 
-  std::string GetFileSetDirectories(cmGeneratorTarget* gte, cmFileSet* fileSet,
+  std::string GetFileSetDirectories(cmGeneratorTarget* gte,
+                                    cmGeneratorFileSet const* fileSet,
                                     cmTargetExport const* te) override;
-  std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
+  std::string GetFileSetFiles(cmGeneratorTarget* gte,
+                              cmGeneratorFileSet const* fileSet,
                               cmTargetExport const* te) override;
 
   void GenerateCxxModuleConfigInformation(std::string const&,

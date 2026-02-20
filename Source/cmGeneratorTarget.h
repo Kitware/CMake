@@ -27,6 +27,7 @@
 #include "cmSourceFile.h"
 #include "cmStandardLevel.h"
 #include "cmStateTypes.h"
+#include "cmTargetPropertyEntry.h"
 #include "cmValue.h"
 
 namespace cm {
@@ -36,12 +37,11 @@ struct Evaluation;
 }
 }
 
-class cmake;
 enum class cmBuildStep;
-class cmCompiledGeneratorExpression;
 class cmComputeLinkInformation;
 class cmCustomCommand;
-class cmFileSet;
+class cmGeneratorFileSets;
+class cmGeneratorFileSet;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
@@ -53,6 +53,8 @@ struct cmGeneratorExpressionDAGChecker;
 class cmGeneratorTarget
 {
 public:
+  using TargetPropertyEntry = cm::TargetPropertyEntry;
+
   cmGeneratorTarget(cmTarget*, cmLocalGenerator* lg);
   ~cmGeneratorTarget();
 
@@ -1014,8 +1016,6 @@ public:
                             std::string const& report,
                             std::string const& compatibilityType) const;
 
-  class TargetPropertyEntry;
-
   std::string EvaluateInterfaceProperty(
     std::string const& prop, cm::GenEx::Evaluation* eval,
     cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage) const;
@@ -1499,6 +1499,18 @@ public:
   bool HaveFortranSources() const;
   bool HaveFortranSources(std::string const& config) const;
 
+  // File sets support queries
+
+  bool HasFileSets() const;
+  std::vector<cmGeneratorFileSet const*> const& GetAllFileSets() const;
+  std::vector<cmGeneratorFileSet const*> const& GetFileSets(
+    cm::string_view type) const;
+  std::vector<cmGeneratorFileSet const*> const& GetInterfaceFileSets(
+    cm::string_view type) const;
+  cmGeneratorFileSet const* GetFileSet(std::string const& name) const;
+  cmGeneratorFileSet const* GetFileSetForSource(std::string const& config,
+                                                cmSourceFile const* sf) const;
+
   // C++20 module support queries.
 
   /**
@@ -1506,11 +1518,8 @@ public:
    *
    * This will inspect the target itself to see if C++20 module
    * support is expected to work based on its sources.
-   *
-   * If `errorMessage` is given a non-`nullptr`, any error message will be
-   * stored in it, otherwise the error will be reported directly.
    */
-  bool HaveCxx20ModuleSources(std::string* errorMessage = nullptr) const;
+  bool HaveCxx20ModuleSources() const;
 
   enum class Cxx20SupportLevel
   {
@@ -1523,6 +1532,7 @@ public:
     // C++20 modules are available and working.
     Supported,
   };
+
   /**
    * Query whether the target has C++20 module support available (regardless of
    * whether it is required or not).
@@ -1535,8 +1545,6 @@ public:
   bool NeedCxxModuleSupport(std::string const& lang,
                             std::string const& config) const;
   bool NeedDyndep(std::string const& lang, std::string const& config) const;
-  cmFileSet const* GetFileSetForSource(std::string const& config,
-                                       cmSourceFile const* sf) const;
   bool NeedDyndepForSource(std::string const& lang, std::string const& config,
                            cmSourceFile const* sf) const;
   enum class CxxModuleSupport
@@ -1562,45 +1570,15 @@ public:
   static MsvcCharSet GetMsvcCharSet(std::string const& singleDefine);
 
 private:
-  void BuildFileSetInfoCache(std::string const& config) const;
   struct InfoByConfig
   {
-    bool BuiltFileSetCache = false;
-    std::map<std::string, cmFileSet const*> FileSetCache;
     std::map<cmGeneratorTarget const*, std::vector<cmGeneratorTarget const*>>
       SyntheticDeps;
     std::map<cmSourceFile const*, ClassifiedFlags> SourceFlags;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
+  std::unique_ptr<cmGeneratorFileSets> FileSets;
   bool PchReused = false;
   mutable bool ComputingPchReuse = false;
   mutable bool PchReuseCycleDetected = false;
-};
-
-class cmGeneratorTarget::TargetPropertyEntry
-{
-protected:
-  static cmLinkItem NoLinkItem;
-
-public:
-  TargetPropertyEntry(cmLinkItem const& item);
-  virtual ~TargetPropertyEntry() = default;
-
-  static std::unique_ptr<TargetPropertyEntry> Create(
-    cmake& cmakeInstance, const BT<std::string>& propertyValue,
-    bool evaluateForBuildsystem = false);
-  static std::unique_ptr<TargetPropertyEntry> CreateFileSet(
-    std::vector<std::string> dirs, bool contextSensitiveDirs,
-    std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
-    cmFileSet const* fileSet, cmLinkItem const& item = NoLinkItem);
-
-  virtual std::string const& Evaluate(
-    cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
-
-  virtual cmListFileBacktrace GetBacktrace() const = 0;
-  virtual std::string const& GetInput() const = 0;
-  virtual bool GetHadContextSensitiveCondition() const;
-
-  cmLinkItem const& LinkItem;
 };

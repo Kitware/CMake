@@ -5,6 +5,7 @@
 /* clang-format on */
 
 #include <cstddef>
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
@@ -16,15 +17,16 @@
 
 #include <cm/string_view>
 #include <cmext/algorithm>
-#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmEvaluatedTargetProperty.h"
-#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
@@ -80,91 +82,23 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
   }
 }
 
-void addFileSetEntry(cmGeneratorTarget const* headTarget,
-                     cm::GenEx::Context const& context,
-                     cmGeneratorExpressionDAGChecker* dagChecker,
-                     cmFileSet const* fileSet,
-                     EvaluatedTargetPropertyEntries& entries)
-{
-  auto dirCges = fileSet->CompileDirectoryEntries();
-  auto dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, headTarget,
-                                                dagChecker);
-  bool contextSensitiveDirs = false;
-  for (auto const& dirCge : dirCges) {
-    if (dirCge->GetHadContextSensitiveCondition()) {
-      contextSensitiveDirs = true;
-      break;
-    }
-  }
-  cmake* cm = headTarget->GetLocalGenerator()->GetCMakeInstance();
-  for (auto& entryCge : fileSet->CompileFileEntries()) {
-    auto targetPropEntry =
-      cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
-        dirs, contextSensitiveDirs, std::move(entryCge), fileSet);
-    entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-      headTarget, context, dagChecker, *targetPropEntry));
-    EvaluatedTargetPropertyEntry const& entry = entries.Entries.back();
-    for (auto const& file : entry.Values) {
-      auto* sf = headTarget->Makefile->GetOrCreateSource(file);
-      if (fileSet->GetType() == "HEADERS"_s) {
-        sf->SetProperty("HEADER_FILE_ONLY", "TRUE");
-      }
-
-#ifndef CMAKE_BOOTSTRAP
-      std::string e;
-      std::string w;
-      auto path = sf->ResolveFullPath(&e, &w);
-      if (!w.empty()) {
-        cm->IssueMessage(MessageType::AUTHOR_WARNING, w, entry.Backtrace);
-      }
-      if (path.empty()) {
-        if (!e.empty()) {
-          cm->IssueMessage(MessageType::FATAL_ERROR, e, entry.Backtrace);
-        }
-        return;
-      }
-      bool found = false;
-      for (auto const& sg : headTarget->Makefile->GetSourceGroups()) {
-        if (sg->MatchChildrenFiles(path)) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        if (fileSet->GetType() == "HEADERS"_s) {
-          headTarget->Makefile->GetOrCreateSourceGroup("Header Files")
-            ->AddGroupFile(path);
-        }
-      }
-#endif
-    }
-  }
-}
-
 void AddFileSetEntries(cmGeneratorTarget const* headTarget,
+                       cmGeneratorFileSets const* fileSets,
                        cm::GenEx::Context const& context,
                        cmGeneratorExpressionDAGChecker* dagChecker,
                        EvaluatedTargetPropertyEntries& entries)
 {
-  for (auto const& entry : headTarget->Target->GetHeaderSetsEntries()) {
-    for (auto const& name : cmList{ entry.Value }) {
-      auto const* headerSet = headTarget->Target->GetFileSet(name);
-      addFileSetEntry(headTarget, context, dagChecker, headerSet, entries);
-    }
-  }
-  for (auto const& entry : headTarget->Target->GetCxxModuleSetsEntries()) {
-    for (auto const& name : cmList{ entry.Value }) {
-      auto const* cxxModuleSet = headTarget->Target->GetFileSet(name);
-      addFileSetEntry(headTarget, context, dagChecker, cxxModuleSet, entries);
-    }
-  }
+  auto sources = fileSets->GetSources(context, headTarget, dagChecker);
+  entries =
+    EvaluateTargetPropertyEntries(headTarget, context, dagChecker, sources);
 }
 
 bool processSources(cmGeneratorTarget const* tgt,
                     EvaluatedTargetPropertyEntries& entries,
                     std::vector<BT<std::string>>& srcs,
                     std::unordered_set<std::string>& uniqueSrcs,
-                    bool debugSources)
+                    bool debugSources,
+                    std::function<void(cmSourceFile*)> postProcess = {})
 {
   cmMakefile* mf = tgt->Target->GetMakefile();
 
@@ -209,6 +143,10 @@ bool processSources(cmGeneratorTarget const* tgt,
         return contextDependent;
       }
       src = fullPath;
+
+      if (postProcess) {
+        postProcess(sf);
+      }
     }
     std::string usedSources;
     for (std::string const& src : entry.Values) {
@@ -280,9 +218,33 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 
   // Collect this target's file sets.
   EvaluatedTargetPropertyEntries fileSetEntries;
-  AddFileSetEntries(this, context, &dagChecker, fileSetEntries);
+  AddFileSetEntries(this, this->FileSets.get(), context, &dagChecker,
+                    fileSetEntries);
+  auto processFileSetEntry = [this, &config](cmSourceFile* sf) {
+    auto const* fileSet = this->GetFileSetForSource(config, sf);
+    if (fileSet->GetType() == cm::FileSetMetadata::HEADERS) {
+      sf->SetProperty("HEADER_FILE_ONLY", "TRUE");
+    }
+#if !defined(CMAKE_BOOTSTRAP)
+    cmMakefile* mf = this->Target->GetMakefile();
+    auto const& path = sf->GetFullPath();
+    bool found = false;
+    for (auto const& sg : mf->GetSourceGroups()) {
+      if (sg->MatchChildrenFiles(path)) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      if (fileSet->GetType() == cm::FileSetMetadata::HEADERS) {
+        mf->GetOrCreateSourceGroup("Header Files")->AddGroupFile(path);
+      }
+    }
+#endif
+  };
   bool contextDependentFileSets =
-    processSources(this, fileSetEntries, files, uniqueSrcs, debugSources);
+    processSources(this, fileSetEntries, files, uniqueSrcs, debugSources,
+                   processFileSetEntry);
 
   // Determine if sources are context-dependent or not.
   if (!contextDependentDirectSources && !contextDependentInterfaceSources &&
@@ -396,11 +358,11 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     // Compute the kind (classification) of this source file.
     SourceKind kind;
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
-    cmFileSet const* fs = this->GetFileSetForSource(config, sf);
+    cmGeneratorFileSet const* fs = this->GetFileSetForSource(config, sf);
     if (sf->GetCustomCommand()) {
       kind = SourceKindCustomCommand;
     } else if (!this->Target->IsNormal() && !this->Target->IsImported() &&
-               fs && (fs->GetType() == "CXX_MODULES"_s)) {
+               fs && (fs->GetType() == cm::FileSetMetadata::CXX_MODULES)) {
       kind = SourceKindCxxModuleSource;
     } else if (this->Target->GetType() == cmStateEnums::UTILITY ||
                this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY

@@ -16,6 +16,7 @@
 #include "cmDebuggerStackFrame.h"
 #include "cmDebuggerVariables.h"
 #include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -195,18 +196,19 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
     return {};
   }
 
-  static auto visibilityString = [](cmFileSetVisibility visibility) {
-    switch (visibility) {
-      case cmFileSetVisibility::Private:
-        return "Private";
-      case cmFileSetVisibility::Public:
-        return "Public";
-      case cmFileSetVisibility::Interface:
-        return "Interface";
-      default:
-        return "Unknown";
-    }
-  };
+  static auto visibilityString =
+    [](cm::FileSetMetadata::Visibility visibility) {
+      switch (visibility) {
+        case cm::FileSetMetadata::Visibility::Private:
+          return "Private";
+        case cm::FileSetMetadata::Visibility::Public:
+          return "Public";
+        case cm::FileSetMetadata::Visibility::Interface:
+          return "Interface";
+        default:
+          return "Unknown";
+      }
+    };
 
   auto variables = std::make_shared<cmDebuggerVariables>(
     variablesManager, name, supportsVariableType, [=]() {
@@ -305,15 +307,15 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "CompileOptions", supportsVariableType,
                   target->GetCompileOptionsEntries()));
-    targetVariables->AddSubVariables(
-      CreateIfAny(variablesManager, "CxxModuleSets", supportsVariableType,
-                  target->GetCxxModuleSetsEntries()));
+    targetVariables->AddSubVariables(CreateIfAny(
+      variablesManager, "CxxModuleSets", supportsVariableType,
+      target->GetFileSetsEntries(cm::FileSetMetadata::CXX_MODULES)));
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "HeaderSets", supportsVariableType,
-                  target->GetHeaderSetsEntries()));
+                  target->GetFileSetsEntries(cm::FileSetMetadata::HEADERS)));
     targetVariables->AddSubVariables(CreateIfAny(
       variablesManager, "InterfaceHeaderSets", supportsVariableType,
-      target->GetInterfaceHeaderSetsEntries()));
+      target->GetInterfaceFileSetsEntries(cm::FileSetMetadata::HEADERS)));
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "LinkDirectories", supportsVariableType,
                   target->GetLinkDirectoriesEntries()));

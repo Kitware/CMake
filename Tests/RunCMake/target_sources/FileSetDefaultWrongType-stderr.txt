@@ -1,4 +1,5 @@
 ^CMake Error at FileSetDefaultWrongType\.cmake:[0-9]+ \(target_sources\):
-  target_sources File set TYPE may only be "HEADERS" or "CXX_MODULES"
+  target_sources FILE_SET names starting with a capital letter are reserved
+  for built-in file sets and may only be "HEADERS", "CXX_MODULES"
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

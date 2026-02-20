@@ -9,11 +9,11 @@
 #include <vector>
 
 #include <cm/string_view>
-#include <cmext/string_view>
 
-#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallType.h"
@@ -54,8 +54,7 @@ bool cmInstallFileSetGenerator::Compute(cmLocalGenerator* lg)
       lg->GetGlobalGenerator()->FindGeneratorTarget(this->TargetName);
   }
 
-  auto const& target = *this->Target->Target;
-  this->FileSet = target.GetFileSet(this->FileSetName);
+  this->FileSet = this->Target->GetFileSet(this->FileSetName);
 
   if (!this->FileSet) {
     // No file set of the given name was ever provided for this target, nothing
@@ -63,12 +62,13 @@ bool cmInstallFileSetGenerator::Compute(cmLocalGenerator* lg)
     return true;
   }
 
+  auto const& target = *this->Target->Target;
   cmList interfaceFileSetEntries{ target.GetSafeProperty(
-    cmTarget::GetInterfaceFileSetsPropertyName(this->FileSet->GetType())) };
+    target.GetInterfaceFileSetsPropertyName(this->FileSet->GetType())) };
 
   if (std::find(interfaceFileSetEntries.begin(), interfaceFileSetEntries.end(),
                 this->FileSetName) != interfaceFileSetEntries.end()) {
-    if (this->FileSet->GetType() == "HEADERS"_s) {
+    if (this->FileSet->GetType() == cm::FileSetMetadata::HEADERS) {
       this->Destination = this->FileSetDestinations.Headers;
     } else {
       this->Destination = this->FileSetDestinations.CXXModules;
@@ -121,19 +121,7 @@ std::map<std::string, std::vector<std::string>>
 cmInstallFileSetGenerator::CalculateFilesPerDir(
   std::string const& config) const
 {
-  std::map<std::string, std::vector<std::string>> result;
-
   cm::GenEx::Context context(this->LocalGenerator, config);
 
-  auto dirCges = this->FileSet->CompileDirectoryEntries();
-  auto dirs =
-    this->FileSet->EvaluateDirectoryEntries(dirCges, context, this->Target);
-
-  auto fileCges = this->FileSet->CompileFileEntries();
-  for (auto const& fileCge : fileCges) {
-    this->FileSet->EvaluateFileEntry(dirs, result, fileCge, context,
-                                     this->Target);
-  }
-
-  return result;
+  return this->FileSet->GetFiles(context, this->Target).first;
 }

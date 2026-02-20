@@ -13,9 +13,10 @@
 #include <cmext/string_view>
 
 #include "cmExportSet.h"
-#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -607,7 +608,7 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
        << targetName << '\n';
 
     for (auto const& name : interfaceFileSets) {
-      auto* fileSet = gte->Target->GetFileSet(name);
+      auto const* fileSet = gte->GetFileSet(name);
       if (!fileSet) {
         gte->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
@@ -629,7 +630,7 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
     os << "  )\nelse()\n  set_property(TARGET " << targetName
        << "\n    APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES";
     for (auto const& name : interfaceFileSets) {
-      auto* fileSet = gte->Target->GetFileSet(name);
+      auto const* fileSet = gte->GetFileSet(name);
       if (!fileSet) {
         gte->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
@@ -639,7 +640,7 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
         return;
       }
 
-      if (fileSet->GetType() == "HEADERS"_s) {
+      if (fileSet->GetType() == cm::FileSetMetadata::HEADERS) {
         os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
       }
     }

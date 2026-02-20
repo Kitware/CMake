@@ -29,12 +29,12 @@
 #include "cmCMakePath.h"
 #include "cmCMakeString.hxx"
 #include "cmComputeLinkInformation.h"
-#include "cmFileSet.h"
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionEvaluator.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
@@ -3582,11 +3582,11 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
 namespace {
 bool GetFileSet(std::vector<std::string> const& parameters,
                 cm::GenEx::Evaluation* eval,
-                GeneratorExpressionContent const* content, cmFileSet*& fileSet)
+                GeneratorExpressionContent const* content,
+                cmGeneratorFileSet const*& fileSet)
 {
   auto const& fileSetName = parameters[0];
   auto targetName = parameters[1];
-  auto* makefile = eval->Context.LG->GetMakefile();
   fileSet = nullptr;
 
   auto const TARGET = "TARGET:"_s;
@@ -3598,7 +3598,11 @@ bool GetFileSet(std::vector<std::string> const& parameters,
                   cmStrCat("No value provided for the ", TARGET, " option."));
       return false;
     }
-    auto* target = makefile->FindTargetToUse(targetName);
+
+    cmLocalGenerator const* lg = eval->CurrentTarget
+      ? eval->CurrentTarget->GetLocalGenerator()
+      : eval->Context.LG;
+    auto const* target = lg->FindGeneratorTargetToUse(targetName);
     if (!target) {
       reportError(eval, content->GetOriginalExpression(),
                   cmStrCat("Non-existent target: ", targetName));
@@ -3634,7 +3638,7 @@ static const struct FileSetExistsNode : public cmGeneratorExpressionNode
       return std::string{};
     }
 
-    cmFileSet* fileSet = nullptr;
+    cmGeneratorFileSet const* fileSet = nullptr;
     if (!GetFileSet(parameters, eval, content, fileSet)) {
       return std::string{};
     }
@@ -3686,7 +3690,7 @@ static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
       return std::string{};
     }
 
-    cmFileSet* fileSet = nullptr;
+    cmGeneratorFileSet const* fileSet = nullptr;
     if (!GetFileSet(parameters, eval, content, fileSet)) {
       return std::string{};
     }

@@ -10,6 +10,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
+#include "cmTargetPropertyEntry.h"
 
 struct cmGeneratorExpressionDAGChecker;
 
@@ -22,8 +23,7 @@ EvaluatedTargetPropertyEntry::EvaluatedTargetPropertyEntry(
 
 EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
   cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  cmGeneratorTarget::TargetPropertyEntry& entry)
+  cmGeneratorExpressionDAGChecker* dagChecker, cm::TargetPropertyEntry& entry)
 {
   EvaluatedTargetPropertyEntry ee(entry.LinkItem, entry.GetBacktrace());
   cmExpandList(entry.Evaluate(context, thisTarget, dagChecker), ee.Values);
@@ -36,8 +36,7 @@ EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
 EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
   cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>> const&
-    in)
+  std::vector<std::unique_ptr<cm::TargetPropertyEntry>> const& in)
 {
   EvaluatedTargetPropertyEntries out;
   out.Entries.reserve(in.size());

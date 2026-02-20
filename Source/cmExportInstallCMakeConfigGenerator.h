@@ -59,9 +59,11 @@ protected:
 
   virtual void CleanupTemporaryVariables(std::ostream&);
 
-  std::string GetFileSetDirectories(cmGeneratorTarget* gte, cmFileSet* fileSet,
+  std::string GetFileSetDirectories(cmGeneratorTarget* gte,
+                                    cmGeneratorFileSet const* fileSet,
                                     cmTargetExport const* te) override;
-  std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
+  std::string GetFileSetFiles(cmGeneratorTarget* gte,
+                              cmGeneratorFileSet const* fileSet,
                               cmTargetExport const* te) override;
 
   std::string GetCxxModulesDirectory() const override;

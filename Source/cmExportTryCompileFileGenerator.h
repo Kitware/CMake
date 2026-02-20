@@ -57,10 +57,11 @@ protected:
                              std::string const& config) override;
 
   std::string GetFileSetDirectories(cmGeneratorTarget* target,
-                                    cmFileSet* fileSet,
+                                    cmGeneratorFileSet const* fileSet,
                                     cmTargetExport const* te) override;
 
-  std::string GetFileSetFiles(cmGeneratorTarget* target, cmFileSet* fileSet,
+  std::string GetFileSetFiles(cmGeneratorTarget* target,
+                              cmGeneratorFileSet const* fileSet,
                               cmTargetExport const* te) override;
 
   std::string GetCxxModulesDirectory() const override { return {}; }
