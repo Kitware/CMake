@@ -11,13 +11,26 @@
 cmRulePlaceholderExpander::cmRulePlaceholderExpander(
   cmBuildStep buildStep, std::map<std::string, std::string> compilers,
   std::map<std::string, std::string> variableMappings,
-  std::string compilerSysroot, std::string linkerSysroot)
+  std::string compilerSysroot, std::string linkerSysroot,
+  UseShortPaths useShortPaths)
   : BuildStep(buildStep)
   , Compilers(std::move(compilers))
   , VariableMappings(std::move(variableMappings))
   , CompilerSysroot(std::move(compilerSysroot))
   , LinkerSysroot(std::move(linkerSysroot))
 {
+  if (useShortPaths == UseShortPaths::Yes) {
+    this->ConvertToOutputForExisting =
+      [this](cm::string_view path) -> std::string {
+      return this->OutputConverter->ConvertToOutputForExisting(path);
+    };
+  } else {
+    this->ConvertToOutputForExisting =
+      [this](cm::string_view path) -> std::string {
+      return this->OutputConverter->ConvertToOutputFormat(
+        path, cmOutputConverter::SHELL);
+    };
+  }
 }
 
 std::string cmRulePlaceholderExpander::ExpandVariable(
@@ -30,8 +43,8 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
   }
   if (this->ReplaceValues->Linker) {
     if (variable == "CMAKE_LINKER") {
-      auto result = this->OutputConverter->ConvertToOutputForExisting(
-        this->ReplaceValues->Linker);
+      auto result =
+        this->ConvertToOutputForExisting(this->ReplaceValues->Linker);
       if (this->ReplaceValues->Launcher) {
         // Add launcher as part of expansion so that it always appears
         // immediately before the command itself, regardless of whether the
@@ -301,8 +314,9 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
   auto compIt = this->Compilers.find(variable);
 
   if (compIt != this->Compilers.end()) {
-    std::string ret = this->OutputConverter->ConvertToOutputForExisting(
-      this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER"]);
+    std::string const& compilerPath =
+      this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER"];
+    std::string ret = this->ConvertToOutputForExisting(compilerPath);
     std::string const& compilerArg1 =
       this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER_ARG1"];
     std::string const& compilerTarget =
@@ -365,7 +379,7 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
   auto mapIt = this->VariableMappings.find(variable);
   if (mapIt != this->VariableMappings.end()) {
     if (variable.find("_FLAG") == std::string::npos) {
-      return this->OutputConverter->ConvertToOutputForExisting(mapIt->second);
+      return this->ConvertToOutputForExisting(mapIt->second);
     }
     return mapIt->second;
   }
