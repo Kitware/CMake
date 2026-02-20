@@ -99,12 +99,6 @@ cmTest* cmTestGenerator::GetTest() const
   return this->Test;
 }
 
-void cmTestGenerator::GenerateScriptConfigs(std::ostream& os, Indent indent)
-{
-  // Create the tests.
-  this->cmScriptGenerator::GenerateScriptConfigs(os, indent);
-}
-
 void cmTestGenerator::GenerateScriptActions(std::ostream& os, Indent indent)
 {
   if (this->ActionsPerConfig) {

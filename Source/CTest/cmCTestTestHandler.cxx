@@ -2441,36 +2441,13 @@ bool cmCTestTestHandler::AddTest(std::vector<std::string> const& args)
       this->ExcludeTestsRegularExpression.find(testname)) {
     return true;
   }
-  if (this->MemCheck) {
-    std::vector<std::string>::iterator it;
-    bool found = false;
-    for (it = this->CustomTestsIgnore.begin();
-         it != this->CustomTestsIgnore.end(); ++it) {
-      if (*it == testname) {
-        found = true;
-        break;
-      }
-    }
-    if (found) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "Ignore memcheck: " << *it << std::endl, this->Quiet);
-      return true;
-    }
-  } else {
-    std::vector<std::string>::iterator it;
-    bool found = false;
-    for (it = this->CustomTestsIgnore.begin();
-         it != this->CustomTestsIgnore.end(); ++it) {
-      if (*it == testname) {
-        found = true;
-        break;
-      }
-    }
-    if (found) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "Ignore test: " << *it << std::endl, this->Quiet);
-      return true;
-    }
+
+  if (cm::contains(this->CustomTestsIgnore, testname)) {
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                       "Ignore " << (this->MemCheck ? "memcheck" : "test")
+                                 << ": " << testname << std::endl,
+                       this->Quiet);
+    return true;
   }
 
   cmCTestTestProperties test;
@@ -2487,7 +2464,7 @@ bool cmCTestTestHandler::AddTest(std::vector<std::string> const& args)
         this->ExcludeTestsRegularExpression.find(testname)))) {
     test.IsInBasedOnREOptions = false;
   }
-  this->TestList.push_back(test);
+  this->TestList.push_back(std::move(test));
   return true;
 }
 
