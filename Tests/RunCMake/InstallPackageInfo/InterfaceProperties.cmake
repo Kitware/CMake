@@ -1,6 +1,6 @@
 add_library(foo INTERFACE)
 
-target_compile_features(foo INTERFACE cxx_std_23)
+target_compile_features(foo INTERFACE c_std_17 cxx_std_23)
 target_compile_options(foo INTERFACE -ffast-math)
 target_compile_definitions(foo INTERFACE -DFOO -DBAR=BAR)
 target_include_directories(
