@@ -48,6 +48,15 @@ Instrumentation
     :ref:`Google Trace Event Format <cmake-instrumentation Google Trace File>`
     files may be generated to visualize instrumentation data.
 
+Presets
+-------
+
+* :manual:`cmake-presets(7)` files now support schema version ``11``.
+  The ``jobs`` field under test presets now supports an empty string, to
+  match the behavior of :option:`ctest --parallel` with the value omitted.
+* The ``jobs`` field under both build and test presets no longer accept
+  negative integer values, regardless of the schema version.
+
 File-Based API
 --------------
 
