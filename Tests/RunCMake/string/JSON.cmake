@@ -393,3 +393,320 @@ string(JSON result STRING_ENCODE {})
 assert_strequal("${result}" "\"{}\"")
 string(JSON result STRING_ENCODE [])
 assert_strequal("${result}" "\"[]\"")
+
+string(JSON result PARTIAL_EQUAL
+[=[
+{
+  "foo":"bar"
+}
+]=]
+[=[
+{
+  "foo": "bar",
+  "extra": 1
+}
+]=])
+
+if(NOT result)
+  message(SEND_ERROR "Expected ON got ${result}")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+{
+  "foo":"bar"
+}
+]=]
+[=[
+{
+  "foo1": "bar"
+}
+]=])
+if(result)
+  message(SEND_ERROR "EXPECTED OFF got ${result}")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+{
+  "types" : {
+    "number" : 5
+  }
+}
+]=]
+[=[
+{
+  "foo" : "bar",
+  "array" : [5, "val", {"some": "other"}, null],
+  "types" : {
+    "null" : null,
+    "number" : 5,
+    "string" : "foo",
+    "boolean" : false,
+    "array" : [1,2,3],
+    "object" : {}
+  },
+  "values" : {
+    "null" : null,
+    "number" : 5,
+    "string" : "foo",
+    "false" : false,
+    "true" : true
+  },
+  "object": {
+    "foo": "bar"
+  },
+  "special" : {
+    "foo;bar" : "value1",
+    ";" : "value2",
+    "semicolon" : ";",
+    "list" : ["one", "two;three", "four"],
+    "quote" : "\"",
+    "\"" : "quote",
+    "backslash" : "\\",
+    "\\" : "backslash",
+    "slash" : "\/",
+    "\/" : "slash",
+    "newline" : "\n",
+    "\n" : "newline",
+    "return" : "\r",
+    "\r" : "return",
+    "tab" : "\t",
+    "\t" : "tab",
+    "backspace" : "\b",
+    "\b" : "backspace",
+    "formfeed" : "\f",
+    "\f" : "formfeed"
+   }
+}
+]=])
+if(NOT result)
+  message(SEND_ERROR "EXPECTED ON got ${result} for nested subset")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+{
+  "types" : {
+    "number" : 6
+  }
+}
+]=]
+[=[
+{
+  "foo" : "bar",
+  "array" : [5, "val", {"some": "other"}, null],
+  "types" : {
+    "null" : null,
+    "number" : 5,
+    "string" : "foo",
+    "boolean" : false,
+    "array" : [1,2,3],
+    "object" : {}
+  },
+  "values" : {
+    "null" : null,
+    "number" : 5,
+    "string" : "foo",
+    "false" : false,
+    "true" : true
+  },
+  "object": {
+    "foo": "bar"
+  },
+  "special" : {
+    "foo;bar" : "value1",
+    ";" : "value2",
+    "semicolon" : ";",
+    "list" : ["one", "two;three", "four"],
+    "quote" : "\"",
+    "\"" : "quote",
+    "backslash" : "\\",
+    "\\" : "backslash",
+    "slash" : "\/",
+    "\/" : "slash",
+    "newline" : "\n",
+    "\n" : "newline",
+    "return" : "\r",
+    "\r" : "return",
+    "tab" : "\t",
+    "\t" : "tab",
+    "backspace" : "\b",
+    "\b" : "backspace",
+    "formfeed" : "\f",
+    "\f" : "formfeed"
+   }
+}
+]=])
+if(result)
+  message(SEND_ERROR "EXPECTED OFF got ${result} for nested mismatch")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+[
+  2,
+  1
+]
+]=]
+[=[
+[
+  1,
+  2,
+  3
+]
+]=])
+if(NOT result)
+  message(SEND_ERROR "Expected ON got ${result} for unordered array subset")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+[
+  2,
+  4
+]
+]=]
+[=[
+[
+  1,
+  2,
+  3
+]
+]=])
+if(result)
+  message(SEND_ERROR "Expected OFF got ${result} for missing array element")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+[
+  1,
+  2,
+  3
+]
+]=]
+[=[
+[
+  1,
+  2
+]
+]=])
+if(result)
+  message(SEND_ERROR "Expected OFF got ${result} for pattern larger than actual")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+  [=[
+[
+  1,
+  1
+]
+]=]
+[=[
+[
+  1,
+  2,
+  1
+]
+]=])
+if(NOT result)
+  message(SEND_ERROR "EXPECTED ON got ${result} for duplicate match")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+  [=[
+[
+  {
+    "id":2
+  },
+  {
+    "id":1
+  }
+]
+]=]
+[=[
+[
+  {
+    "id":1,
+    "name":"A"
+  },
+  {
+    "id":2,
+    "name":"B"
+  },
+  {
+    "id":3,
+    "name":"C"
+  }
+]
+]=])
+if(NOT result)
+  message(SEND_ERROR "EXPECTED ON got ${result} for array of object subset")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+[
+  {
+    "id":4
+  }
+]
+]=]
+[=[
+[
+  {
+    "id":1
+  },
+  {
+    "id":2
+  }
+]
+]=])
+if(result)
+  message(SEND_ERROR "Expected OFF got ${result} for array of object mismatch")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+{
+  "tags": [
+    "b",
+    "a"
+  ]
+}
+]=]
+[=[
+{
+  "tags": [
+    "a",
+    "b",
+    "c"
+  ],
+  "other": 123
+}
+]=])
+if(NOT result)
+  message(SEND_ERROR "EXPECTED ON got ${result} for object+array partial match")
+endif()
+
+string(JSON result PARTIAL_EQUAL
+[=[
+{
+  "tags": [
+    "a",
+    "a"
+  ]
+}
+]=]
+[=[
+{
+  "tags": [
+    "a",
+    "b"
+  ]
+}
+]=])
+if(result)
+  message(SEND_ERROR "Expected OFF got ${result} for duplicate array mismatch in object")
+endif()

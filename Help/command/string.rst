@@ -60,6 +60,8 @@ Synopsis
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
            `EQUAL <JSON-EQUAL_>`__ <json-string1> <json-string2>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `PARTIAL_EQUAL <JSON-EQUAL_>`__ <json-string1> <json-string2>)
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
            `STRING_ENCODE <STRING-ENCODE_>`__ <string>)
 
 Search and Replace
@@ -636,6 +638,42 @@ string is passed as a single argument even if it contains semicolons.
   and ``<json-string2>`` should be valid JSON.  The ``<out-var>``
   will be set to a true value if the JSON objects are considered equal,
   or a false value otherwise.
+
+.. signature::
+  string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+         PARTIAL_EQUAL <json-pattern> <json-actual>)
+  :target: JSON-PARTIAL_EQUAL
+
+  .. versionadded:: 4.4
+
+  Compare two JSON values using *partial* equality.  The first argument
+  (``<json-pattern>``) is treated as a pattern to match against the second
+  argument (``<json-actual>``), which is treated as the complete JSON value.
+  The contents of ``<json-pattern>`` and ``<json-actual>`` must be valid JSON.
+
+  The ``<out-var>`` will be set to a true value if ``<json-pattern>`` is
+  contained within ``<json-actual>`` according to the rules below, or a false
+  value otherwise.
+
+  Partial equality is not symmetric.  In general,
+  ``PARTIAL_EQUAL(A, B)`` and ``PARTIAL_EQUAL(B, A)`` may produce different
+  results.
+
+  Matching rules:
+
+  * **Scalars** (null, number, string, boolean) must match exactly.
+  * **Objects** match if every member in ``<json-pattern>`` exists in
+    ``<json-actual>`` and the corresponding values also match recursively.
+    Extra members in ``<json-actual>`` are ignored.
+  * **Arrays** match if every element in ``<json-pattern>`` matches a
+    distinct element in ``<json-actual>`` recursively. Once an element in
+    ``<json-actual>`` successfully matches an element in ``<json-pattern>``,
+    it is consumed and cannot be reused to match any subsequent elements.
+    Array element order is not significant.  Extra elements in
+    ``<json-actual>`` are ignored.
+
+  Type differences do not match (for example, an object does not match an
+  array, and a string does not match a number).
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
