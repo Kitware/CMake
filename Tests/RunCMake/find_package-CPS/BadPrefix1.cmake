@@ -8,4 +8,4 @@ set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 ###############################################################################
 # Test reporting when trying to read a .cps whose absolute prefix cannot be
 # determined.
-find_package(BadPrefix REQUIRED)
+find_package(BadPrefix1 REQUIRED)
