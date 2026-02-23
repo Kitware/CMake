@@ -569,9 +569,11 @@ string is passed as a single argument even if it contains semicolons.
          GET_RAW <json-string> [<member|index> ...])
   :target: JSON-GET-RAW
 
+  .. versionadded:: 4.3
+
   Get an element from ``<json-string>`` at the location given
   by the list of ``<member|index>`` arguments. Similar to
-  `GET <JSON-GET_>`__, but does not convert number, string,
+  :cref:`GET <JSON-GET_>`, but does not convert number, string,
   boolean, or null elements.
 
 .. signature::
@@ -639,6 +641,8 @@ string is passed as a single argument even if it contains semicolons.
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
          STRING_ENCODE <string>)
   :target: STRING-ENCODE
+
+  .. versionadded:: 4.3
 
   Turn a raw string into a JSON string surrounded by quotes. Special characters
   will be properly escaped inside the JSON string.
