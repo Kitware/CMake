@@ -22,6 +22,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
+#include "cmScriptGenerator.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -472,7 +473,7 @@ void cmExportCMakeConfigGenerator::GenerateFindDependencyCalls(
     if (it.second.Enabled == cmExportSet::PackageDependencyExportEnabled::On) {
       os << "__find_dependency_no_return(" << it.first;
       for (auto const& arg : it.second.ExtraArguments) {
-        os << ' ' << cmOutputConverter::EscapeForCMake(arg);
+        os << ' ' << cmScriptGenerator::Quote(arg);
       }
       os << " ${_cmake_unwind_arg})\n";
       os << "if(NOT " << it.first << "_FOUND)\n"
@@ -619,9 +620,8 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
       }
 
       os << "    INTERFACE"
-         << "\n      FILE_SET " << cmOutputConverter::EscapeForCMake(name)
-         << "\n      TYPE "
-         << cmOutputConverter::EscapeForCMake(fileSet->GetType())
+         << "\n      FILE_SET " << cmScriptGenerator::Quote(name)
+         << "\n      TYPE " << cmScriptGenerator::Quote(fileSet->GetType())
          << "\n      BASE_DIRS "
          << this->GetFileSetDirectories(gte, fileSet, te) << "\n      FILES "
          << this->GetFileSetFiles(gte, fileSet, te) << '\n';
