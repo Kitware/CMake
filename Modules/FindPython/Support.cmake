@@ -1155,7 +1155,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
 
     if (WIN32)
       # In this case, check if the interpreter is compatible with the target processor architecture
-      if (NOT CMAKE_GENERATOR_PLATFORM AND CMAKE_SYSTEM_PROCESSOR MATCHES "ARM" OR CMAKE_GENERATOR_PLATFORM MATCHES "ARM")
+      if (_$_PYTHON_PREFIX}_ARCHITECTURE_ID MATCHES "ARM")
         set(target_arm TRUE)
       else()
         set(target_arm FALSE)
@@ -1698,6 +1698,35 @@ if (DEFINED ${_PYTHON_PREFIX}_FIND_STRATEGY)
   endif()
 endif()
 
+# Define what is the current architecture
+unset(_${_PYTHON_PREFIX}_ARCHITECTURE_ID)
+block (SCOPE_FOR VARIABLES PROPAGATE _${_PYTHON_PREFIX}_ARCHITECTURE_ID)
+  while(TRUE)
+    ## First, try to use the variables CMAKE_<LANG>_COMPILER_ARCHITECTURE_ID which is
+    ## the most reliable way, especially on Windows, to get the current architecture
+    get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    foreach (lang IN LISTS languages)
+      if (CMAKE_${lang}_COMPILER_ARCHITECTURE_ID)
+        list(GET CMAKE_${lang}_COMPILER_ARCHITECTURE_ID 0 _${_PYTHON_PREFIX}_ARCHITECTURE_ID)
+        break()
+      endif()
+    endforeach()
+    if (_${_PYTHON_PREFIX}_ARCHITECTURE_ID)
+      break()
+    endif()
+    ## Second, try to use the CMAKE_VS_PLATFORM_NAME for Visual Studio generators
+    if (CMAKE_GENERATOR MATCHES "Visual Studio")
+      set (_${_PYTHON_PREFIX}_ARCHITECTURE_ID "${CMAKE_VS_PLATFORM_NAME}")
+      if (_${_PYTHON_PREFIX}_ARCHITECTURE_ID)
+        break()
+      endif()
+    endif()
+    ## Finally, use the CMAKE_SYSTEM_PROCESSOR variable
+    set (_${_PYTHON_PREFIX}_ARCHITECTURE_ID "${CMAKE_SYSTEM_PROCESSOR}")
+    break()
+  endwhile()
+endblock()
+
 # Python and Anaconda distributions: define which architectures can be used
 unset (_${_PYTHON_PREFIX}_REGISTRY_VIEW)
 if (CMAKE_SIZEOF_VOID_P)
@@ -1707,8 +1736,7 @@ if (CMAKE_SIZEOF_VOID_P)
       OR "Development.Embed" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS)
     # In this case, search only for 64bit or 32bit
     set (_${_PYTHON_PREFIX}_REGISTRY_VIEW REGISTRY_VIEW ${_${_PYTHON_PREFIX}_ARCH})
-    if (WIN32 AND (NOT CMAKE_GENERATOR_PLATFORM AND CMAKE_SYSTEM_PROCESSOR MATCHES "ARM"
-                   OR CMAKE_GENERATOR_PLATFORM MATCHES "ARM"))
+    if (WIN32 AND _${_PYTHON_PREFIX}_ARCHITECTURE_ID MATCHES "ARM")
       # search exclusively ARM architecture: 64bit or 32bit
       if (_${_PYTHON_PREFIX}_ARCH EQUAL 64)
         set (_${_PYTHON_PREFIX}_ARCH ARM64)
@@ -1718,13 +1746,13 @@ if (CMAKE_SIZEOF_VOID_P)
     endif()
   else()
     if (_${_PYTHON_PREFIX}_ARCH EQUAL "32")
-      if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM")
+      if (_${_PYTHON_PREFIX}_ARCHITECTURE_ID MATCHES "ARM")
         # search first ARM architectures: 32bit and then 64bit
         list (PREPEND _${_PYTHON_PREFIX}_ARCH ARM ARM64)
       endif()
       list (APPEND _${_PYTHON_PREFIX}_ARCH 64)
     else()
-      if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM")
+      if (_${_PYTHON_PREFIX}_ARCHITECTURE_ID MATCHES "ARM")
         # search first ARM architectures: 64bit and then 32bit
         list (PREPEND _${_PYTHON_PREFIX}_ARCH ARM64 ARM)
       endif()
@@ -1734,7 +1762,7 @@ if (CMAKE_SIZEOF_VOID_P)
 else()
   # architecture unknown, search for both 64bit and 32bit
   set (_${_PYTHON_PREFIX}_ARCH 64 32)
-  if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM")
+  if (_${_PYTHON_PREFIX}_ARCHITECTURE_ID MATCHES "ARM")
     list (PREPEND _${_PYTHON_PREFIX}_ARCH ARM64 ARM)
   endif()
 endif()
