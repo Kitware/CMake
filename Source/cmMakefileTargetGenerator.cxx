@@ -46,6 +46,7 @@
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
+#include "cmScriptGenerator.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmState.h"
@@ -1445,9 +1446,9 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
       << "set(CMAKE_MULTIPLE_OUTPUT_PAIRS\n";
     /* clang-format on */
     for (auto const& pi : this->MultipleOutputPairs) {
-      *this->InfoFileStream
-        << "  " << cmOutputConverter::EscapeForCMake(pi.first) << " "
-        << cmOutputConverter::EscapeForCMake(pi.second) << "\n";
+      *this->InfoFileStream << "  " << cmScriptGenerator::Quote(pi.first)
+                            << ' ' << cmScriptGenerator::Quote(pi.second)
+                            << '\n';
     }
     *this->InfoFileStream << "  )\n\n";
   }
