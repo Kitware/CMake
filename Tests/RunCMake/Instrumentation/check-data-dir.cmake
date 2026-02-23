@@ -88,7 +88,7 @@ foreach(snippet IN LISTS snippets)
       endif()
       json_missing_key("${snippet}" "${contents}" target)
     # unrecognized outputs
-    else()
+    elseif (NOT outputs MATCHES "shell_redirect\\.out")
       json_error("${snippet}" "Custom command has unexpected outputs\n${outputs}")
     endif()
   endif()
@@ -187,6 +187,10 @@ if (ARGS_INSTALL AND NOT EXISTS ${RunCMake_TEST_BINARY_DIR}/install)
 endif()
 if (ARGS_TEST AND NOT EXISTS ${RunCMake_TEST_BINARY_DIR}/Testing)
   add_error("ctest --instrument launcher failed to test the project")
+endif()
+# Ensure shell_redirect command ran successfully
+if (ARGS_BUILD AND NOT EXISTS ${RunCMake_TEST_BINARY_DIR}/shell_redirect.out)
+  add_error("custom command with shell redirection did not run")
 endif()
 
 # Look for build snippet, which may not appear immediately

@@ -109,7 +109,7 @@ function(instrument test)
       "${RunCMake_TEST_BINARY_DIR}/cmake-command-workflow.cmake"
       @ONLY
     )
-    foreach(f IN ITEMS CMakeLists.txt main.cxx lib.cxx lib.h)
+    foreach(f IN ITEMS CMakeLists.txt main.cxx lib.cxx lib.h shell_redirect.txt)
       configure_file(
         "${RunCMake_TEST_SOURCE_DIR}/${f}"
         "${RunCMake_TEST_BINARY_DIR}/${f}"
