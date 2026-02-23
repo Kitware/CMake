@@ -16,7 +16,7 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
       set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARG1 "${CMAKE_ASM${ASM_DIALECT}_FLAGS_ENV_INIT}" CACHE STRING "Arguments to ASM${ASM_DIALECT} compiler")
     endif()
     if(NOT EXISTS ${CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT})
-      message(FATAL_ERROR "Could not find compiler set in environment variable ASM${ASM_DIALECT}:\n$ENV{ASM${ASM_DIALECT}}.")
+      message(FATAL_ERROR "Could not find the compiler specified in the environment variable ASM${ASM_DIALECT}:\n$ENV{ASM${ASM_DIALECT}}.")
     endif()
   endif()
 

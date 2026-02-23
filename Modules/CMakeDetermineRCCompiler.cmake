@@ -17,7 +17,7 @@ if(NOT CMAKE_RC_COMPILER)
     endif()
     if(EXISTS ${CMAKE_RC_COMPILER_INIT})
     else()
-      message(FATAL_ERROR "Could not find compiler set in environment variable RC:\n$ENV{RC}.")
+      message(FATAL_ERROR "Could not find the compiler specified in the environment variable RC:\n$ENV{RC}.")
     endif()
   endif()
 
