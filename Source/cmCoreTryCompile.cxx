@@ -25,9 +25,9 @@
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmScriptGenerator.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -738,7 +738,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       std::string langFlags = cmStrCat("CMAKE_", li, "_FLAGS");
       cmValue flags = this->Makefile->GetDefinition(langFlags);
       fprintf(fout, "set(CMAKE_%s_FLAGS %s)\n", li.c_str(),
-              cmOutputConverter::EscapeForCMake(*flags).c_str());
+              cmScriptGenerator::Quote(*flags).str().c_str());
       fprintf(fout,
               "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
               " ${COMPILE_DEFINITIONS}\")\n",
@@ -775,7 +775,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
             cmStrCat("CMAKE_", li, "_FLAGS_", cfg);
           cmValue flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
           fprintf(fout, "set(%s %s)\n", langFlagsCfg.c_str(),
-                  cmOutputConverter::EscapeForCMake(*flagsCfg).c_str());
+                  cmScriptGenerator::Quote(*flagsCfg).str().c_str());
           if (flagsCfg) {
             cmakeVariables.emplace(langFlagsCfg, *flagsCfg);
           }
@@ -786,7 +786,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       cmValue exeLinkFlags =
         this->Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
       fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS %s)\n",
-              cmOutputConverter::EscapeForCMake(*exeLinkFlags).c_str());
+              cmScriptGenerator::Quote(*exeLinkFlags).str().c_str());
       if (exeLinkFlags) {
         cmakeVariables.emplace("CMAKE_EXE_LINKER_FLAGS", *exeLinkFlags);
       }
@@ -812,14 +812,14 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           std::string langLinkFlags = cmStrCat("CMAKE_", li, "_LINK_FLAGS");
           cmValue flags = this->Makefile->GetDefinition(langLinkFlags);
           fprintf(fout, "set(CMAKE_%s_LINK_FLAGS %s)\n", li.c_str(),
-                  cmOutputConverter::EscapeForCMake(*flags).c_str());
+                  cmScriptGenerator::Quote(*flags).str().c_str());
           std::string langLinkFlagsConfig =
             cmStrCat("CMAKE_", li, "_LINK_FLAGS_", tcConfig);
           cmValue flagsConfig =
             this->Makefile->GetDefinition(langLinkFlagsConfig);
           fprintf(fout, "set(CMAKE_%s_LINK_FLAGS_%s %s)\n", li.c_str(),
                   tcConfig.c_str(),
-                  cmOutputConverter::EscapeForCMake(*flagsConfig).c_str());
+                  cmScriptGenerator::Quote(*flagsConfig).str().c_str());
 
           if (flags) {
             cmakeVariables.emplace(langLinkFlags, *flags);
@@ -1058,15 +1058,15 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       }
       fprintf(fout, "set_property(TARGET %s PROPERTY %s %s)\n",
               targetName.c_str(),
-              cmOutputConverter::EscapeForCMake(p.first).c_str(),
-              cmOutputConverter::EscapeForCMake(p.second).c_str());
+              cmScriptGenerator::Quote(p.first).str().c_str(),
+              cmScriptGenerator::Quote(p.second).str().c_str());
     }
 
     if (!arguments.LinkOptions.empty()) {
       std::vector<std::string> options;
       options.reserve(arguments.LinkOptions.size());
       for (auto const& option : arguments.LinkOptions) {
-        options.emplace_back(cmOutputConverter::EscapeForCMake(option));
+        options.emplace_back(cmScriptGenerator::Quote(option));
       }
 
       if (targetType == cmStateEnums::STATIC_LIBRARY) {
