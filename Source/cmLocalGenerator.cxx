@@ -48,6 +48,7 @@
 #include "cmObjectLocation.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
+#include "cmScriptGenerator.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
@@ -392,8 +393,7 @@ void cmLocalGenerator::GenerateTestFiles()
     // TODO: Use add_subdirectory instead?
     std::string outP = i.GetDirectory().GetCurrentBinary();
     outP = this->MaybeRelativeToCurBinDir(outP);
-    outP = cmOutputConverter::EscapeForCMake(outP);
-    fout << "subdirs(" << outP << ")\n";
+    fout << "subdirs(" << cmScriptGenerator::Quote(outP) << ")\n";
   }
 
   // Add directory labels property
@@ -404,13 +404,13 @@ void cmLocalGenerator::GenerateTestFiles()
   if (labels || directoryLabels) {
     fout << "set_directory_properties(PROPERTIES LABELS ";
     if (labels) {
-      fout << cmOutputConverter::EscapeForCMake(*labels);
+      fout << cmScriptGenerator::Quote(*labels);
     }
     if (labels && directoryLabels) {
       fout << ";";
     }
     if (directoryLabels) {
-      fout << cmOutputConverter::EscapeForCMake(*directoryLabels);
+      fout << cmScriptGenerator::Quote(*directoryLabels);
     }
     fout << ")\n";
   }
