@@ -30,7 +30,7 @@ else()
       endif()
       if(EXISTS ${CMAKE_Fortran_COMPILER_INIT})
       else()
-        message(FATAL_ERROR "Could not find compiler set in environment variable FC:\n$ENV{FC}.")
+        message(FATAL_ERROR "Could not find the compiler specified in the environment variable FC:\n$ENV{FC}.")
       endif()
     endif()
 
