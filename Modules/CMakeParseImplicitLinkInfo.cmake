@@ -119,7 +119,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
         if("${line}" MATCHES " --with-ld=([^ ]+/${linker})( |$)")
           set(linker_tool_fallback "${CMAKE_MATCH_1}")
         endif()
-      elseif("${line}" MATCHES "vs_link.*-- +([^\"]*[/\\](${linker})) ") # cmake -E vs_link_exe
+      elseif("${line}" MATCHES "vs_link.*-- +\"?([^\"]*[/\\](${linker}))\"? ") # cmake -E vs_link_exe
         set(linker_tool "${CMAKE_MATCH_1}")
       elseif("${line}" MATCHES "${linker_tool_regex}")
         set(linker_tool "${CMAKE_MATCH_2}")

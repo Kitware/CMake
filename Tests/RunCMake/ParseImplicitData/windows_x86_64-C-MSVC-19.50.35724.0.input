@@ -1,0 +1,19 @@
+CMAKE_LANG=C
+CMAKE_LINKER=C:/Program Files/Microsoft Visual Studio/18/Professional/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/link.exe
+CMAKE_C_COMPILER_ABI=
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=MSVC
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=19.50.35724.0
+CMAKE_C_COMPILER_VERSION_INTERNAL=
+CMAKE_HOST_SYSTEM_NAME=Windows
+Change Dir: 'C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): C:/DoesNotExist/ninja/bin/ninja.exe -v cmTC_42252
+[1/2] "C:\Program Files\Microsoft Visual Studio\18\Professional\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe"  /nologo -D_MBCS  /DWIN32 /D_WINDOWS /W3  /MDd /Zi /Ob0 /Od /RTC1 /showIncludes /FoCMakeFiles\cmTC_42252.dir\CMakeCCompilerABI.c.obj /FdCMakeFiles\cmTC_42252.dir\ /FS -c "C:\DoesNotExist\CMake\Modules\CMakeCCompilerABI.c"
+[2/2] C:\WINDOWS\system32\cmd.exe /C "cd . && "C:\DoesNotExist\CMake\build\bin\cmake.exe" -E vs_link_exe --msvc-ver=1950 --intdir=CMakeFiles\cmTC_42252.dir --rc="C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe" --mt="C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\mt.exe" --manifests  -- "C:\Program Files\Microsoft Visual Studio\18\Professional\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\link.exe" /nologo CMakeFiles\cmTC_42252.dir\CMakeCCompilerABI.c.obj  /out:cmTC_42252.exe /implib:cmTC_42252.lib /pdb:cmTC_42252.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
