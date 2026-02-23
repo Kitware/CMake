@@ -465,6 +465,9 @@ void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
   xml.StartElement("Build");
   xml.Element("StartDateTime", this->StartBuild);
   xml.Element("StartBuildTime", this->StartBuildTime);
+  xml.Element("SourceDirectory",
+              this->CTest->GetCTestConfiguration("SourceDirectory"));
+  xml.Element("BinaryDirectory", this->CTest->GetBinaryDir());
   xml.Element("BuildCommand", this->GetMakeCommand());
 }
 
