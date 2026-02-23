@@ -52,7 +52,7 @@ macro(write_test_to_file)
   # Handle disabled tests
   set(maybe_DISABLED "")
   if(pretty_test_suite MATCHES "^DISABLED_" OR pretty_test_name MATCHES "^DISABLED_")
-    set(maybe_DISABLED DISABLED YES)
+    set(maybe_DISABLED "DISABLED YES")
     string(REGEX REPLACE "^DISABLED_" "" pretty_test_suite "${pretty_test_suite}")
     string(REGEX REPLACE "^DISABLED_" "" pretty_test_name "${pretty_test_name}")
   endif()
@@ -98,6 +98,10 @@ macro(write_test_to_file)
   # Add to script. Do not use add_command() here because it messes up the
   # handling of empty values when forwarding arguments, and we need to
   # preserve those carefully for arg_TEST_EXECUTOR and arg_EXTRA_ARGS.
+  # Test properties with values that are lists are also not handled
+  # correctly because the properties need to be expressed as a list
+  # of key-value pairs, but that list is flattened, so any values
+  # that are lists can't be differentiated from the next key.
   string(APPEND script "add_test(${guarded_testname} ${launcherArgs}")
   foreach(arg IN ITEMS
     "${arg_TEST_EXECUTABLE}"
@@ -121,18 +125,40 @@ macro(write_test_to_file)
 
   set(maybe_LOCATION "")
   if(NOT current_test_file STREQUAL "" AND NOT current_test_line STREQUAL "")
-    set(maybe_LOCATION DEF_SOURCE_LINE "${current_test_file}:${current_test_line}")
+    set(maybe_LOCATION "DEF_SOURCE_LINE [==[${current_test_file}:${current_test_line}]==]")
   endif()
 
-  add_command(set_tests_properties
-    "${guarded_testname}"
-    PROPERTIES
-      ${maybe_DISABLED}
-      ${maybe_LOCATION}
-      WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
-      SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
-      ${arg_TEST_PROPERTIES}
+  string(APPEND script
+    "set_tests_properties(${guarded_testname}\n"
+    "  PROPERTIES\n"
+    "    ${maybe_DISABLED}\n"
+    "    ${maybe_LOCATION}\n"
+    "    WORKING_DIRECTORY [==[${arg_TEST_WORKING_DIR}]==]\n"
+    "    SKIP_REGULAR_EXPRESSION [==[\\[  SKIPPED \\]]==]\n"
   )
+  if(arg_TEST_PROPERTIES)
+    # Making local copy of arg_TEST_PROPERTIES, as write_test_to_file is
+    # called in a loop and we don't want to destroy the parsed arg value
+    # by POP_FRONT-ing from it.
+    set(test_properties "${arg_TEST_PROPERTIES}")
+    list(LENGTH test_properties test_properties_length)
+    math(EXPR test_properties_length_mod2 "${test_properties_length} % 2")
+    if(NOT test_properties_length_mod2 EQUAL 0)
+      message(FATAL_ERROR
+        "gtest_discover_tests() received a key-value list of properties with an uneven number of elements.\n"
+        "Check the supplied TEST_PROPERTIES argument and LIST_SEPARATOR if used."
+      )
+    endif()
+    while(NOT test_properties_length EQUAL 0)
+      list(POP_FRONT test_properties property_name property_value)
+      list(LENGTH test_properties test_properties_length)
+      if(NOT "${arg_LIST_SEPARATOR}" STREQUAL "")
+        string(REPLACE "${arg_LIST_SEPARATOR}" ";" property_value "${property_value}")
+      endif()
+      string(APPEND script "    ${property_name} [==[${property_value}]==]\n")
+    endwhile()
+  endif()
+  string(APPEND script ")\n")
 
   # possibly unbalanced square brackets render lists invalid so skip such
   # tests in ${arg_TEST_LIST}
@@ -281,6 +307,7 @@ function(gtest_discover_tests_impl)
   set(oneValueArgs
     NO_PRETTY_TYPES   # These two take a value, unlike gtest_discover_tests()
     NO_PRETTY_VALUES  #
+    LIST_SEPARATOR
     TEST_TARGET
     TEST_EXECUTABLE
     TEST_WORKING_DIR
@@ -435,5 +462,6 @@ if(CMAKE_SCRIPT_MODE_FILE)
     TEST_EXTRA_ARGS "${TEST_EXTRA_ARGS}"
     TEST_DISCOVERY_EXTRA_ARGS "${TEST_DISCOVERY_EXTRA_ARGS}"
     TEST_PROPERTIES "${TEST_PROPERTIES}"
+    LIST_SEPARATOR "${LIST_SEPARATOR}"
   )
 endif()

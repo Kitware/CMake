@@ -174,6 +174,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [TEST_SUFFIX suffix]
                          [TEST_FILTER expr]
                          [NO_PRETTY_TYPES] [NO_PRETTY_VALUES]
+                         [LIST_SEPARATOR sep]
                          [PROPERTIES name1 value1...]
                          [TEST_LIST var]
                          [DISCOVERY_TIMEOUT seconds]
@@ -327,6 +328,14 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     Empty values in the :prop_tgt:`TEST_LAUNCHER` and
     :prop_tgt:`CROSSCOMPILING_EMULATOR` target properties are preserved,
     see policy :policy:`CMP0178`.
+
+  ``LIST_SEPARATOR``
+    .. versionadded:: 4.4
+
+    By default, ``PROPERTIES`` key-value pairs cannot have lists as their
+    values. By providing a non-semicolon character delimiter, it is possible to
+    pass lists as property values. Note that when doing so, the chosen character
+    cannot appear in any of the property values.
 
 #]=======================================================================]
 
@@ -562,6 +571,7 @@ function(gtest_discover_tests target)
     DISCOVERY_TIMEOUT
     XML_OUTPUT_DIR
     DISCOVERY_MODE
+    LIST_SEPARATOR
   )
   set(multiValueArgs
     EXTRA_ARGS
@@ -699,6 +709,7 @@ function(gtest_discover_tests target)
               -D "TEST_FILTER=${arg_TEST_FILTER}"
               -D "NO_PRETTY_TYPES=${arg_NO_PRETTY_TYPES}"
               -D "NO_PRETTY_VALUES=${arg_NO_PRETTY_VALUES}"
+              -D "LIST_SEPARATOR=${arg_LIST_SEPARATOR}"
               -D "TEST_LIST=${arg_TEST_LIST}"
               -D "CTEST_FILE=${ctest_tests_file}"
               -D "TEST_DISCOVERY_TIMEOUT=${arg_DISCOVERY_TIMEOUT}"
