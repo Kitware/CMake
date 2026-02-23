@@ -3,10 +3,54 @@
 #include "cmScriptGenerator.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <sstream>
 #include <utility>
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+namespace {
+
+int RequiredBracketLength(cm::string_view s)
+{
+  for (int n = 0;; ++n) {
+    std::string const needle = "]" + std::string(n, '=');
+
+    bool ok = true;
+    std::size_t pos = s.find(needle);
+    while (pos != cm::string_view::npos) {
+      std::size_t const next = pos + needle.size();
+      if (next == s.size() || s[next] == ']') {
+        ok = false;
+        break;
+      }
+      pos = s.find(needle, pos + 1);
+    }
+
+    if (ok) {
+      return n;
+    }
+  }
+}
+
+} // namespace
+
+std::ostream& operator<<(std::ostream& os, cmScriptGeneratorQuoted const& self)
+{
+  if (self.BracketLength == -1) {
+    return os << '"' << self.Value << '"';
+  }
+  auto const sep = std::string(self.BracketLength, '=');
+  return os << '[' << sep << '[' << self.Value << ']' << sep << ']';
+}
+
+std::string cmScriptGeneratorQuoted::str() const
+{
+  std::stringstream out;
+  out << *this;
+  return out.str();
+}
 
 cmScriptGenerator::cmScriptGenerator(std::string config_var,
                                      std::vector<std::string> configurations)
@@ -26,6 +70,14 @@ void cmScriptGenerator::Generate(
   this->GenerateScript(os);
   this->ConfigurationName.clear();
   this->ConfigurationTypes = nullptr;
+}
+
+cmScriptGeneratorQuoted cmScriptGenerator::Quote(cm::string_view value)
+{
+  if (value.find_first_of("\"$\\") == std::string::npos) {
+    return cmScriptGeneratorQuoted(value, -1);
+  }
+  return cmScriptGeneratorQuoted(value, RequiredBracketLength(value));
 }
 
 static void cmScriptGeneratorEncodeConfig(std::string const& config,
