@@ -23,7 +23,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmObjectLocation.h"
-#include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmScriptGenerator.h"
 #include "cmStateTypes.h"
@@ -714,9 +713,8 @@ void cmInstallTargetGenerator::AddRPathCheckRule(
     default: {
       // Get the install RPATH from the link information and
       // escape any CMake syntax in the install RPATH.
-      std::string escapedNewRpath =
-        cmOutputConverter::EscapeForCMake(cli->GetChrpathString());
-      os << indent << "     RPATH " << escapedNewRpath << ")\n";
+      os << indent << "     RPATH "
+         << cmScriptGenerator::Quote(cli->GetChrpathString()) << ")\n";
       break;
     }
   }
@@ -829,14 +827,11 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
       return;
     }
 
-    // Escape any CMake syntax in the RPATHs.
-    std::string escapedOldRpath = cmOutputConverter::EscapeForCMake(oldRpath);
-    std::string escapedNewRpath = cmOutputConverter::EscapeForCMake(newRpath);
-
     // Write a rule to run chrpath to set the install-tree RPATH
     os << indent << "file(RPATH_CHANGE\n"
        << indent << "     FILE \"" << toDestDirPath << "\"\n"
-       << indent << "     OLD_RPATH " << escapedOldRpath << "\n";
+       << indent << "     OLD_RPATH " << cmScriptGenerator::Quote(oldRpath)
+       << "\n";
 
     // CMP0095: ``RPATH`` entries are properly escaped in the intermediary
     // CMake install script.
@@ -848,7 +843,8 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
         os << indent << "     NEW_RPATH \"" << newRpath << "\"";
         break;
       default:
-        os << indent << "     NEW_RPATH " << escapedNewRpath;
+        os << indent << "     NEW_RPATH "
+           << cmScriptGenerator::Quote(newRpath);
         break;
     }
 

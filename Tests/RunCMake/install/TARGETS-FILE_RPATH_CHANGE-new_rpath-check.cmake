@@ -29,7 +29,7 @@ check()
 
 set(target "exe2_cmp0095_new")
 string(CONCAT regex "${prefix}${target}\"${wssl}"
-              [[NEW_RPATH "\\\$ORIGIN/../lib]])
+              [[NEW_RPATH \[\[\$ORIGIN/../lib]])
 check()
 
 set(target "exe3_cmp0095_old")
@@ -44,7 +44,7 @@ check()
 
 set(target "exe3_cmp0095_new")
 string(CONCAT regex "${prefix}${target}\"${wssl}"
-              [[NEW_RPATH "\\\${ORIGIN}/../lib]])
+              [[NEW_RPATH \[\[\${ORIGIN}/../lib]])
 check()
 
 set(target "exe4_cmp0095_old")
@@ -59,5 +59,5 @@ check()
 
 set(target "exe4_cmp0095_new")
 string(CONCAT regex "${prefix}${target}\"${wssl}"
-              [[NEW_RPATH "/foo/bar/\\\${PLATFORM}]])
+              [[NEW_RPATH \[\[/foo/bar/\${PLATFORM}]])
 check()

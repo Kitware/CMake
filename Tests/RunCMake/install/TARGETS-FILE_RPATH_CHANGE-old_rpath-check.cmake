@@ -11,6 +11,6 @@ check()
 if("x${CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN}" STREQUAL "x\$ORIGIN")
   set(target "exe2")
   string(CONCAT regex "${prefix}${target}\"${wsnl}"
-                [[OLD_RPATH "\\\$ORIGIN]])
+                [[OLD_RPATH \[\[\$ORIGIN]])
   check()
 endif()
