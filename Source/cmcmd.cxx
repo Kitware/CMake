@@ -632,13 +632,16 @@ int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
 
   // Create the default manifest ruleset file when not found
   if (!cmSystemTools::FileExists("cstat_sel_checks.txt")) {
-    std::string ichecks_cmd = cmSystemTools::GetFilenamePath(orig_cmd[0]);
-    ichecks_cmd = cmStrCat(ichecks_cmd, "/ichecks --default stdchecks");
+    std::vector<std::string> ichecks_cmd;
+    ichecks_cmd.emplace_back(
+      cmStrCat(cmSystemTools::GetFilenamePath(orig_cmd[0]), "/ichecks"));
+    ichecks_cmd.emplace_back("--default");
+    ichecks_cmd.emplace_back("stdchecks");
     if (!cmSystemTools::RunSingleCommand(ichecks_cmd, &stdOut, &stdErr, &ret,
                                          nullptr,
                                          cmSystemTools::OUTPUT_NONE)) {
-      std::cerr << "Error generating default manifest file '" << ichecks_cmd
-                << "'. " << stdOut << '\n';
+      std::cerr << "Error generating default manifest file '" << ichecks_cmd[0]
+                << "': " << stdOut << '\n';
       return 1;
     }
   }
