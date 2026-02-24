@@ -77,3 +77,27 @@ The generated test driver supports the following command-line arguments:
 
     Any additional arguments after ``-A`` are interpreted as exact test names
     to skip.
+
+``-N``
+  .. versionadded:: 4.4
+
+    List all available test names (one per line) and exit.
+
+Example
+^^^^^^^
+
+.. code-block:: cmake
+
+  create_test_sourcelist(SRCS main.c test1.c test2.c)
+  add_executable(MyTests ${SRCS})
+  discover_tests(COMMAND MyTests
+    DISCOVERY_ARGS -N
+    DISCOVERY_MATCH "^(.+)$"
+    TEST_NAME "${PROJECT_NAME}.\\1"
+    TEST_ARGS "\\1"
+  )
+
+See Also
+^^^^^^^^
+
+* :command:`discover_tests`
