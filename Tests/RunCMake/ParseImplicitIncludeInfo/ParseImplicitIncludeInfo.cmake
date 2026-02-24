@@ -51,7 +51,7 @@ set(targets
   sunos-C-SunPro-5.13.0 sunos-CXX-SunPro-5.13.0 sunos-Fortran-SunPro-8.8.0
   sunos5.10_sparc32-C-GNU-5.5.0 sunos5.10_sparc32-CXX-GNU-5.5.0 sunos5.10_sparc32-Fortran-GNU-5.5.0
   sunos5.11_i386-C-GNU-5.5.0 sunos5.11_i386-CXX-GNU-5.5.0 sunos5.11_i386-Fortran-GNU-5.5.0
-  windows-x86_64-CUDA-NVIDIA-13.1.115
+  windows_x86_64-CUDA-NVIDIA-13.1.115
   )
 
 if(CMAKE_HOST_WIN32)
