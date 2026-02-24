@@ -94,6 +94,7 @@ These commands are available only in CMake projects.
    /command/cmake_instrumentation
    /command/create_test_sourcelist
    /command/define_property
+   /command/discover_tests
    /command/enable_language
    /command/enable_testing
    /command/export
