@@ -331,62 +331,79 @@ endif()
 
 if(WIN32)
   set(_Vulkan_library_name vulkan-1)
-  set(_Vulkan_hint_include_search_paths
-    "$ENV{VULKAN_SDK}/include"
-  )
-  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(_Vulkan_hint_executable_search_paths
-      "$ENV{VULKAN_SDK}/bin"
-    )
-    set(_Vulkan_hint_library_search_paths
-      "$ENV{VULKAN_SDK}/lib"
-      "$ENV{VULKAN_SDK}/bin"
-    )
-  else()
-    set(_Vulkan_hint_executable_search_paths
-      "$ENV{VULKAN_SDK}/bin32"
-      "$ENV{VULKAN_SDK}/bin"
-    )
-    set(_Vulkan_hint_library_search_paths
-      "$ENV{VULKAN_SDK}/lib32"
-      "$ENV{VULKAN_SDK}/bin32"
-      "$ENV{VULKAN_SDK}/lib"
-      "$ENV{VULKAN_SDK}/bin"
-    )
-  endif()
 else()
   set(_Vulkan_library_name vulkan)
+endif()
+set(_Vulkan_hint_include_search_paths "")
+set(_Vulkan_hint_executable_search_paths "")
+set(_Vulkan_hint_library_search_paths "")
+
+if(DEFINED ENV{VULKAN_SDK} AND IS_DIRECTORY "$ENV{VULKAN_SDK}")
   set(_Vulkan_hint_include_search_paths
     "$ENV{VULKAN_SDK}/include"
   )
   set(_Vulkan_hint_executable_search_paths
     "$ENV{VULKAN_SDK}/bin"
   )
-  set(_Vulkan_hint_library_search_paths
-    "$ENV{VULKAN_SDK}/lib"
-  )
-endif()
-if(APPLE AND DEFINED ENV{VULKAN_SDK})
-  cmake_path(SET _MoltenVK_path NORMALIZE "$ENV{VULKAN_SDK}/../MoltenVK")
-  if(EXISTS "${_MoltenVK_path}")
-    list(APPEND _Vulkan_hint_include_search_paths
-      "${_MoltenVK_path}/include"
-    )
-    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-      list(APPEND _Vulkan_hint_library_search_paths
-        "${_MoltenVK_path}/dylib/iOS"
-      )
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "tvOS")
-      list(APPEND _Vulkan_hint_library_search_paths
-        "${_MoltenVK_path}/dylib/tvOS"
-      )
-    else()
-      list(APPEND _Vulkan_hint_library_search_paths
-        "${_MoltenVK_path}/dylib/macOS"
-      )
+  if(WIN32)
+    # Detect the target architecture from one of:
+    # - the C++ compiler,
+    # - the C compiler,
+    # - the VS generator,
+    # - the command-line environment,
+    # - fallback to CMAKE_SYSTEM_PROCESSOR.
+    if(CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID)
+      set(_Vulkan_arch_name "${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
+    elseif(CMAKE_C_COMPILER_LOADED AND CMAKE_C_COMPILER_ARCHITECTURE_ID)
+      set(_Vulkan_arch_name "${CMAKE_C_COMPILER_ARCHITECTURE_ID}")
+    elseif(CMAKE_VS_PLATFORM_NAME)
+      set(_Vulkan_arch_name "${CMAKE_VS_PLATFORM_NAME}")
+    elseif(DEFINED ENV{VSCMD_ARG_TGT_ARCH})
+      set(_Vulkan_arch_name "$ENV{VSCMD_ARG_TGT_ARCH}")
+    elseif(CMAKE_SYSTEM_PROCESSOR)
+      set(_Vulkan_arch_name "${CMAKE_SYSTEM_PROCESSOR}")
     endif()
+    # The Vulkan SDK may provide arch-specific directories for cross-compiling.
+    if(_Vulkan_arch_name MATCHES "^(ARM64|arm64|aarch64)" AND IS_DIRECTORY "$ENV{VULKAN_SDK}/lib-arm64")
+      # On X64 hosts the Vulkan SDK provides `-arm64` dirs for cross-compiling to ARM64.
+      set(_Vulkan_arch_suffix "-arm64")
+    elseif(_Vulkan_arch_name MATCHES "^(X64|x64|x86_64)" AND IS_DIRECTORY "$ENV{VULKAN_SDK}/lib-x64")
+      # On ARM64 hosts the Vulkan SDK provides `-x64` dirs for cross-compiling to x64.
+      set(_Vulkan_arch_suffix "-x64")
+    else()
+      # Otherwise assume we are compiling for the host.
+      set(_Vulkan_arch_suffix "")
+    endif()
+    unset(_Vulkan_arch_name)
+  else()
+    set(_Vulkan_arch_suffix "")
   endif()
-  unset(_MoltenVK_path)
+  set(_Vulkan_hint_library_search_paths
+    "$ENV{VULKAN_SDK}/lib${_Vulkan_arch_suffix}"
+  )
+  unset(_Vulkan_arch_suffix)
+  if(APPLE)
+    cmake_path(SET _MoltenVK_path NORMALIZE "$ENV{VULKAN_SDK}/../MoltenVK")
+    if(IS_DIRECTORY "${_MoltenVK_path}")
+      list(APPEND _Vulkan_hint_include_search_paths
+        "${_MoltenVK_path}/include"
+      )
+      if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        list(APPEND _Vulkan_hint_library_search_paths
+          "${_MoltenVK_path}/dylib/iOS"
+        )
+      elseif(CMAKE_SYSTEM_NAME STREQUAL "tvOS")
+        list(APPEND _Vulkan_hint_library_search_paths
+          "${_MoltenVK_path}/dylib/tvOS"
+        )
+      else()
+        list(APPEND _Vulkan_hint_library_search_paths
+          "${_MoltenVK_path}/dylib/macOS"
+        )
+      endif()
+    endif()
+    unset(_MoltenVK_path)
+  endif()
 endif()
 
 find_path(Vulkan_INCLUDE_DIR
