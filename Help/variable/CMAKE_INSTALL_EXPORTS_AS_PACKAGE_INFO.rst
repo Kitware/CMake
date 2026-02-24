@@ -10,8 +10,10 @@ CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO
 
 A list of directives instructing CMake to install |CPS| package information
 when exported target information is installed via :command:`install(EXPORT)`.
-The value is treated as a list, with each directive having the form
-``<export-name>:<package-name>[/[l][a<appendix-name>][/<destination>]]``.
+The value is treated as a list, with each directive having the form::
+
+  <export-name>:<package-name>[/[l][a<appendix-name>][/<destination>]]
+
 Slashes are used to separate different components of the directive.
 
 Note that this feature is intended for package distributors, and should
