@@ -61,10 +61,10 @@ public:
   bool GetOldStyle() const { return this->OldStyle; }
   void SetOldStyle(bool b) { this->OldStyle = b; }
 
-  /** Get if CMP0158 policy is NEW */
-  bool GetCMP0158IsNew() const
+  /** Get the CMP0158 policy setting */
+  cmPolicies::PolicyStatus GetCMP0158() const
   {
-    return this->PolicyStatusCMP0158 == cmPolicies::NEW;
+    return this->PolicyStatusCMP0158;
   }
 
   /** Get/Set the CMP0178 policy setting */

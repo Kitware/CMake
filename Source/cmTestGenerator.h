@@ -8,8 +8,10 @@
 #include <string>
 #include <vector>
 
+#include "cmPolicies.h"
 #include "cmScriptGenerator.h"
 
+class cmListFileBacktrace;
 class cmGeneratorExpression;
 class cmLocalGenerator;
 class cmTest;
@@ -37,12 +39,18 @@ public:
   cmTest* GetTest() const;
 
 private:
-  void GenerateInternalProperties(std::ostream& os);
   std::vector<std::string> EvaluateCommandLineArguments(
     std::vector<std::string> const& argv, cmGeneratorExpression& ge,
     std::string const& config) const;
 
 protected:
+  void GenerateBacktrace(std::ostream& os, cmListFileBacktrace bt);
+  void GenerateCommand(std::ostream& os,
+                       std::vector<std::string> const& command,
+                       std::string const& config, bool expand,
+                       cmGeneratorExpression& ge,
+                       cmPolicies::PolicyStatus cmp0158 = cmPolicies::NEW,
+                       cmPolicies::PolicyStatus cmp0178 = cmPolicies::NEW);
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
   void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
