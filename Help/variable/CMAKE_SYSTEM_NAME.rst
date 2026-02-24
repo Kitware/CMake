@@ -59,7 +59,7 @@ Value                     Name
 ``GHS-MULTI``             Green Hills Software MULTI environment
 ``GNU``                   GNU/Hurd-based operating system
 ``Haiku``                 Unix operating system inspired by BeOS
-``HP-UX``                 Hewlett Packard Unix
+``HP-UX``                 Hewlett Packard Unix (discontinued)
 ``iOS``                   Apple mobile phone operating system
 ``Linux``                 All Linux-based distributions
 ``Midipix``               POSIX-compatible layer for Windows
