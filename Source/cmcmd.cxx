@@ -105,13 +105,19 @@ char const* const HELP_AVAILABLE_COMMANDS = R"(Available commands:
   cat [--] <files>...       - concat the files and print them to the standard output
   chdir dir cmd [args...]   - run command in a given directory
   compare_files [--ignore-eol] file1 file2
-                              - check if file1 is same as file2
-  copy <file>... destination  - copy files to destination (either file or directory)
-  copy_directory <dir>... destination   - copy content of <dir>... directories to 'destination' directory
-  copy_directory_if_different <dir>... destination   - copy changed content of <dir>... directories to 'destination' directory
-  copy_directory_if_newer <dir>... destination   - copy newer content of <dir>... directories to 'destination' directory
-  copy_if_different <file>... destination  - copy files if it has changed
-  copy_if_newer <file>... destination  - copy files if source is newer than destination
+                            - check if file1 is same as file2
+  copy <file>... destination | -t <destination> <file>...
+                            - copy files to destination (either file or directory)
+  copy_directory <dir>... destination | -t <destination> <dir>...
+                            - copy content of <dir>... directories to 'destination' directory
+  copy_directory_if_different <dir>... destination | -t <destination> <dir>...
+                            - copy changed content of <dir>... directories to 'destination' directory
+  copy_directory_if_newer <dir>... destination | -t <destination> <dir>...
+                            - copy newer content of <dir>... directories to 'destination' directory
+  copy_if_different <file>... destination | -t <destination> <file>...
+                            - copy files if source has changed
+  copy_if_newer <file>... destination | -t <destination> <file>...
+                            - copy files if source is newer than destination
   echo [<string>...]        - displays arguments as text
   echo_append [<string>...] - displays arguments as text but no new line
   env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]
@@ -1005,8 +1011,26 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 {
   // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1) {
-    // Copy file
-    if (args[1] == "copy" && args.size() > 3) {
+    // Copy file, copy file if different, copy file if newer.
+    if ((args[1] == "copy" || args[1] == "copy_if_different" ||
+         args[1] == "copy_if_newer") &&
+        args.size() > 3) {
+      using CopyFn = cmsys::SystemTools::CopyStatus (*)(std::string const&,
+                                                        std::string const&);
+      CopyFn copyFn;
+      std::string copyErrPrefix;
+      if (args[1] == "copy") {
+        copyFn = cmSystemTools::CopyFileAlways;
+        copyErrPrefix = "Error copying file";
+      } else if (args[1] == "copy_if_different") {
+        copyFn = cmSystemTools::CopyFileIfDifferent;
+        copyErrPrefix = "Error copying file (if different) from";
+      } else {
+        copyFn = cmSystemTools::CopyFileIfNewer;
+        copyErrPrefix = "Error copying file (if newer) from";
+      }
+      std::string const& cmdName = args[1];
+
       using CommandArgument =
         cmCommandLineArgument<bool(std::string const& value)>;
 
@@ -1041,14 +1065,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         files.pop_back();
       }
       if (targetArg && (!cmSystemTools::FileIsDirectory(*targetArg))) {
-        std::cerr << "Error: Target (for copy command) \"" << *targetArg
-                  << "\" is not a directory.\n";
+        std::cerr << "Error: Target (for " << cmdName << " command) \""
+                  << *targetArg << "\" is not a directory.\n";
         return 1;
       }
       if (!targetArg) {
         if (files.size() < 2) {
-          std::cerr
-            << "Error: No files or target specified (for copy command).\n";
+          std::cerr << "Error: No files or target specified (for " << cmdName
+                    << " command).\n";
           return 1;
         }
         targetArg = files.back();
@@ -1057,10 +1081,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       // If error occurs we want to continue copying next files.
       bool return_value = false;
       for (auto const& file : files) {
-        cmsys::SystemTools::CopyStatus const status =
-          cmSystemTools::CopyFileAlways(file, *targetArg);
+        cmsys::SystemTools::CopyStatus const status = copyFn(file, *targetArg);
         if (!status) {
-          std::cerr << "Error copying file \"" << file << "\" to \""
+          std::cerr << copyErrPrefix << " \"" << file << "\" to \""
                     << *targetArg << "\": " << status.GetString() << '\n';
           return_value = true;
         }
@@ -1068,77 +1091,68 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       return return_value;
     }
 
-    // Copy file if different.
-    if (args[1] == "copy_if_different" && args.size() > 3) {
-      // If multiple source files specified,
-      // then destination must be directory
-      if ((args.size() > 4) &&
-          (!cmSystemTools::FileIsDirectory(args.back()))) {
-        std::cerr << "Error: Target (for copy_if_different command) \""
-                  << args.back() << "\" is not a directory.\n";
-        return 1;
-      }
-      // If error occurs we want to continue copying next files.
-      bool return_value = false;
-      for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
-        cmsys::SystemTools::CopyStatus const status =
-          cmSystemTools::CopyFileIfDifferent(arg, args.back());
-        if (!status) {
-          std::cerr << "Error copying file (if different) from \"" << arg
-                    << "\" to \"" << args.back()
-                    << "\": " << status.GetString() << '\n';
-          return_value = true;
-        }
-      }
-      return return_value;
-    }
-
-    // Copy file if newer.
-    if (args[1] == "copy_if_newer" && args.size() > 3) {
-      // If multiple source files specified,
-      // then destination must be directory
-      if ((args.size() > 4) &&
-          (!cmSystemTools::FileIsDirectory(args.back()))) {
-        std::cerr << "Error: Target (for copy_if_newer command) \""
-                  << args.back() << "\" is not a directory.\n";
-        return 1;
-      }
-      // If error occurs we want to continue copying next files.
-      bool return_value = false;
-      for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
-        cmsys::SystemTools::CopyStatus const status =
-          cmSystemTools::CopyFileIfNewer(arg, args.back());
-        if (!status) {
-          std::cerr << "Error copying file (if newer) from \"" << arg
-                    << "\" to \"" << args.back()
-                    << "\": " << status.GetString() << '\n';
-          return_value = true;
-        }
-      }
-      return return_value;
-    }
-
     // Copy directory contents
-    if ((args[1] == "copy_directory" ||
-         args[1] == "copy_directory_if_different" ||
-         args[1] == "copy_directory_if_newer") &&
-        args.size() > 3) {
-      // If error occurs we want to continue copying next files.
-      bool return_value = false;
-
+    if (args[1] == "copy_directory" ||
+        args[1] == "copy_directory_if_different" ||
+        args[1] == "copy_directory_if_newer") {
       cmsys::SystemTools::CopyWhen when = cmsys::SystemTools::CopyWhen::Always;
       if (args[1] == "copy_directory_if_different") {
         when = cmsys::SystemTools::CopyWhen::OnlyIfDifferent;
       } else if (args[1] == "copy_directory_if_newer") {
         when = cmsys::SystemTools::CopyWhen::OnlyIfNewer;
       }
+      std::string const& cmdName = args[1];
 
-      for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
+      using CommandArgument =
+        cmCommandLineArgument<bool(std::string const& value)>;
+
+      cm::optional<std::string> targetArg;
+      std::vector<CommandArgument> argParsers{
+        { "-t", CommandArgument::Values::One,
+          CommandArgument::setToValue(targetArg) },
+      };
+
+      std::vector<std::string> dirs;
+      for (decltype(args.size()) i = 2; i < args.size(); i++) {
+        std::string const& arg = args[i];
+        bool matched = false;
+        for (auto const& m : argParsers) {
+          if (m.matches(arg)) {
+            matched = true;
+            if (m.parse(arg, i, args)) {
+              break;
+            }
+            return 1; // failed to parse
+          }
+        }
+        if (!matched) {
+          dirs.push_back(arg);
+        }
+      }
+
+      if (!targetArg) {
+        if (dirs.size() < 2) {
+          std::cerr << "Error: No directories or target specified (for "
+                    << cmdName << " command).\n";
+          return 1;
+        }
+        targetArg = dirs.back();
+        dirs.pop_back();
+      }
+      if (dirs.empty()) {
+        std::cerr << "Error: No source directories specified (for " << cmdName
+                  << " command).\n";
+        return 1;
+      }
+
+      // If error occurs we want to continue copying next files.
+      bool return_value = false;
+      for (auto const& dir : dirs) {
         cmsys::Status const status =
-          cmSystemTools::CopyADirectory(arg, args.back(), when);
+          cmSystemTools::CopyADirectory(dir, *targetArg, when);
         if (!status) {
-          std::cerr << "Error copying directory from \"" << arg << "\" to \""
-                    << args.back() << "\": " << status.GetString() << '\n';
+          std::cerr << "Error copying directory from \"" << dir << "\" to \""
+                    << *targetArg << "\": " << status.GetString() << '\n';
           return_value = true;
         }
       }
