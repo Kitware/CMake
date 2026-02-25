@@ -611,6 +611,7 @@ add_RunCMake_test(Swift -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
 add_RunCMake_test(TargetArtifacts -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetProperties)
+add_RunCMake_test(FileSetProperties)
 add_RunCMake_test(ToolchainFile)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)

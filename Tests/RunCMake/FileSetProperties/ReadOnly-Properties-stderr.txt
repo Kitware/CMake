@@ -1,0 +1,12 @@
+CMake Error at ReadOnly-Properties\.cmake:[0-9]+ \(set_property\):
+  TYPE property is read-only for the file set "HEADERS of the target "foo"
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at ReadOnly-Properties\.cmake:[0-9]+ \(set_property\):
+  SCOPE property is read-only for the file set "HEADERS of the target "foo"
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

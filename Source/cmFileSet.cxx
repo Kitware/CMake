@@ -3,20 +3,28 @@
 #include "cmFileSet.h"
 
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
+#include "cmTarget.h"
 
 namespace Metadata = cm::FileSetMetadata;
 
-cmFileSet::cmFileSet(cmMakefile* makefile, std::string name, std::string type,
-                     Metadata::Visibility visibility)
+cmFileSet::cmFileSet(cmMakefile* makefile, cmTarget* target, std::string name,
+                     std::string type, Metadata::Visibility visibility)
   : Makefile(makefile)
+  , Target(target)
   , Name(std::move(name))
   , Type(std::move(type))
   , Visibility(visibility)
@@ -49,25 +57,139 @@ void cmFileSet::AddFileEntry(BT<std::string> files)
   this->FileEntries.push_back(std::move(files));
 }
 
-std::string const cmFileSet::propCOMPILE_DEFINITIONS = "COMPILE_DEFINITIONS";
-std::string const cmFileSet::propCOMPILE_OPTIONS = "COMPILE_OPTIONS";
-std::string const cmFileSet::propINCLUDE_DIRECTORIES = "INCLUDE_DIRECTORIES";
+namespace {
+enum class ReadOnlyCondition
+{
+  All,
+  Imported,
+  NonImported,
+};
+
+struct ReadOnlyProperty
+{
+  ReadOnlyProperty(ReadOnlyCondition cond)
+    : Condition{ cond }
+  {
+  }
+  // ReadOnlyProperty(ReadOnlyCondition cond, cmPolicies::PolicyID id)
+  //   : Condition{ cond }
+  //   , Policy{ id }
+  // {
+  // }
+
+  ReadOnlyCondition Condition;
+  cm::optional<cmPolicies::PolicyID> Policy;
+
+  std::string message(std::string const& prop, cmTarget* target,
+                      cmFileSet* fileSet) const
+  {
+    std::string msg;
+    if (this->Condition == ReadOnlyCondition::All) {
+      msg = cmStrCat(" property is read-only for the file set \"",
+                     fileSet->GetName(), " of the target \"");
+    } else if (this->Condition == ReadOnlyCondition::Imported) {
+      msg = " property can't be set on a file set attached to the imported "
+            "target \"";
+    } else if (this->Condition == ReadOnlyCondition::NonImported) {
+      msg =
+        " property can't be set on a file set attached to the non-imported "
+        "target \"";
+    }
+    return cmStrCat(prop, msg, target->GetName(), "\"\n");
+  }
+
+  bool isReadOnly(std::string const& prop, cmMakefile* context,
+                  cmTarget* target, cmFileSet* fileSet) const
+  {
+    auto importedTarget = target->IsImported();
+    bool matchingCondition = true;
+    if ((!importedTarget && this->Condition == ReadOnlyCondition::Imported) ||
+        (importedTarget &&
+         this->Condition == ReadOnlyCondition::NonImported)) {
+      matchingCondition = false;
+    }
+    if (!matchingCondition) {
+      // Not read-only in this scenario
+      return false;
+    }
+
+    bool readOnly = true;
+    if (!this->Policy) {
+      // No policy associated, so is always read-only
+      context->IssueMessage(MessageType::FATAL_ERROR,
+                            this->message(prop, target, fileSet));
+    }
+    return readOnly;
+  }
+};
+
+bool IsSettableProperty(cmMakefile* context, cmTarget* target,
+                        cmFileSet* fileSet, std::string const& prop)
+{
+  using ROC = ReadOnlyCondition;
+  static std::unordered_map<std::string, ReadOnlyProperty> const readOnlyProps{
+    { "TYPE", { ROC::All } }, { "SCOPE", { ROC::All } }
+  };
+
+  auto it = readOnlyProps.find(prop);
+
+  if (it != readOnlyProps.end()) {
+    return !(it->second.isReadOnly(prop, context, target, fileSet));
+  }
+  return true;
+}
+
+cm::string_view const BASE_DIRS = "BASE_DIRS"_s;
+cm::string_view const SOURCES = "SOURCES"_s;
+cm::string_view const INTERFACE_SOURCES = "INTERFACE_SOURCES"_s;
+cm::string_view const COMPILE_DEFINITIONS = "COMPILE_DEFINITIONS"_s;
+cm::string_view const COMPILE_OPTIONS = "COMPILE_OPTIONS"_s;
+cm::string_view const INCLUDE_DIRECTORIES = "INCLUDE_DIRECTORIES"_s;
+}
 
 void cmFileSet::SetProperty(std::string const& prop, cmValue value)
 {
-  if (prop == propINCLUDE_DIRECTORIES) {
+  if (!IsSettableProperty(this->Makefile, this->Target, this, prop)) {
+    return;
+  }
+
+  if (prop == BASE_DIRS) {
+    this->ClearDirectoryEntries();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->AddDirectoryEntry(BT<std::string>{ value, lfbt });
+    }
+  } else if (prop == SOURCES) {
+    if (!this->IsForSelf()) {
+      return;
+    }
+    this->ClearFileEntries();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->AddFileEntry(BT<std::string>{ value, lfbt });
+    }
+  } else if (prop == INTERFACE_SOURCES) {
+    if (!this->IsForInterface()) {
+      return;
+    }
+    this->ClearFileEntries();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->AddFileEntry(BT<std::string>{ value, lfbt });
+    }
+  } else if (prop == INCLUDE_DIRECTORIES) {
     this->IncludeDirectories.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->IncludeDirectories.emplace_back(value, lfbt);
     }
-  } else if (prop == propCOMPILE_OPTIONS) {
+  } else if (prop == COMPILE_OPTIONS) {
     this->CompileOptions.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->CompileOptions.emplace_back(value, lfbt);
     }
-  } else if (prop == propCOMPILE_DEFINITIONS) {
+  } else if (prop == COMPILE_DEFINITIONS) {
     this->CompileDefinitions.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
@@ -81,17 +203,42 @@ void cmFileSet::SetProperty(std::string const& prop, cmValue value)
 void cmFileSet::AppendProperty(std::string const& prop,
                                std::string const& value, bool asString)
 {
-  if (prop == propINCLUDE_DIRECTORIES) {
+  if (!IsSettableProperty(this->Makefile, this->Target, this, prop)) {
+    return;
+  }
+
+  if (prop == BASE_DIRS) {
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->AddDirectoryEntry(BT<std::string>{ value, lfbt });
+    }
+  } else if (prop == SOURCES) {
+    if (!this->IsForSelf()) {
+      return;
+    }
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->AddFileEntry(BT<std::string>{ value, lfbt });
+    }
+  } else if (prop == INTERFACE_SOURCES) {
+    if (!this->IsForInterface()) {
+      return;
+    }
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->AddFileEntry(BT<std::string>{ value, lfbt });
+    }
+  } else if (prop == INCLUDE_DIRECTORIES) {
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->IncludeDirectories.emplace_back(value, lfbt);
     }
-  } else if (prop == propCOMPILE_OPTIONS) {
+  } else if (prop == COMPILE_OPTIONS) {
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->CompileOptions.emplace_back(value, lfbt);
     }
-  } else if (prop == propCOMPILE_DEFINITIONS) {
+  } else if (prop == COMPILE_DEFINITIONS) {
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->CompileDefinitions.emplace_back(value, lfbt);
@@ -104,7 +251,32 @@ void cmFileSet::AppendProperty(std::string const& prop,
 cmValue cmFileSet::GetProperty(std::string const& prop) const
 {
   // Check for the properties with backtraces.
-  if (prop == propINCLUDE_DIRECTORIES) {
+  if (prop == BASE_DIRS) {
+
+    static std::string output;
+    output = cmList::to_string(this->GetDirectoryEntries());
+    return cmValue(output);
+  }
+  if (prop == SOURCES) {
+    if (!this->IsForSelf() || this->GetFileEntries().empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmList::to_string(this->GetFileEntries());
+    return cmValue(output);
+  }
+  if (prop == INTERFACE_SOURCES) {
+    if (!this->IsForInterface() || this->GetFileEntries().empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmList::to_string(this->GetFileEntries());
+    return cmValue(output);
+  }
+
+  if (prop == INCLUDE_DIRECTORIES) {
     if (this->IncludeDirectories.empty()) {
       return nullptr;
     }
@@ -114,7 +286,7 @@ cmValue cmFileSet::GetProperty(std::string const& prop) const
     return cmValue(output);
   }
 
-  if (prop == propCOMPILE_OPTIONS) {
+  if (prop == COMPILE_OPTIONS) {
     if (this->CompileOptions.empty()) {
       return nullptr;
     }
@@ -124,7 +296,7 @@ cmValue cmFileSet::GetProperty(std::string const& prop) const
     return cmValue(output);
   }
 
-  if (prop == propCOMPILE_DEFINITIONS) {
+  if (prop == COMPILE_DEFINITIONS) {
     if (this->CompileDefinitions.empty()) {
       return nullptr;
     }
@@ -132,6 +304,15 @@ cmValue cmFileSet::GetProperty(std::string const& prop) const
     static std::string output;
     output = cmList::to_string(this->CompileDefinitions);
     return cmValue(output);
+  }
+
+  if (prop == "TYPE"_s) {
+    return cmValue{ this->GetType() };
+  }
+  if (prop == "SCOPE"_s) {
+    static std::string scope =
+      std::string{ Metadata::VisibilityToName(this->GetVisibility()) };
+    return cmValue{ scope };
   }
 
   return this->Properties.GetPropertyValue(prop);

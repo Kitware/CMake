@@ -1,0 +1,7 @@
+
+add_library(foo STATIC)
+
+target_sources(foo PUBLIC FILE_SET HEADERS)
+
+set_property(FILE_SET HEADERS TARGET foo PROPERTY TYPE CXX_MODULES)
+set_property(FILE_SET HEADERS TARGET foo PROPERTY SCOPE PRIVATE)

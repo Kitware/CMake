@@ -14,12 +14,13 @@
 #include "cmValue.h"
 
 class cmMakefile;
+class cmTarget;
 
 class cmFileSet
 {
 public:
-  cmFileSet(cmMakefile* makefile, std::string name, std::string type,
-            cm::FileSetMetadata::Visibility visibility);
+  cmFileSet(cmMakefile* makefile, cmTarget* target, std::string name,
+            std::string type, cm::FileSetMetadata::Visibility visibility);
 
   std::string const& GetName() const { return this->Name; }
   std::string const& GetType() const { return this->Type; }
@@ -80,6 +81,7 @@ public:
 
 private:
   cmMakefile* Makefile;
+  cmTarget* Target;
   std::string Name;
   std::string Type;
   cm::FileSetMetadata::Visibility Visibility;
@@ -89,8 +91,4 @@ private:
   std::vector<BT<std::string>> CompileOptions;
   std::vector<BT<std::string>> CompileDefinitions;
   std::vector<BT<std::string>> IncludeDirectories;
-
-  static std::string const propCOMPILE_DEFINITIONS;
-  static std::string const propCOMPILE_OPTIONS;
-  static std::string const propINCLUDE_DIRECTORIES;
 };
