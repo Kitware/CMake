@@ -1351,11 +1351,13 @@ cmNinjaBuild GetScanBuildStatement(std::string const& ruleName,
 
   // Tell dependency scanner the object file that will result from
   // compiling the source.
-  scanBuild.Variables["OBJ_FILE"] = objectFileName;
+  scanBuild.Variables["OBJ_FILE"] =
+    tg->ConvertToOutputFormatForShell(objectFileName);
 
   // Tell dependency scanner where to store dyndep intermediate results.
   std::string ddiFileName = cmStrCat(objectFileName, ".ddi");
-  scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFileName;
+  scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] =
+    tg->ConvertToOutputFormatForShell(ddiFileName);
   scanBuild.RspFile = cmStrCat(ddiFileName, ".rsp");
 
   // Outputs of the scan/preprocessor build statement.
@@ -1364,7 +1366,8 @@ cmNinjaBuild GetScanBuildStatement(std::string const& ruleName,
     scanBuild.ImplicitOuts.push_back(ddiFileName);
   } else {
     scanBuild.Outputs.push_back(ddiFileName);
-    scanBuild.Variables["PREPROCESSED_OUTPUT_FILE"] = ppFileName;
+    scanBuild.Variables["PREPROCESSED_OUTPUT_FILE"] =
+      tg->ConvertToOutputFormatForShell(ppFileName);
     if (!compilationPreprocesses) {
       // Compilation does not preprocess and we are not compiling an
       // already-preprocessed source.  Make compilation depend on the scan
@@ -1650,7 +1653,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       // `cmNinjaTargetGenerator::ExportObjectCompileCommand` to expect the
       // corresponding file path.
       std::string ddModmapFile = cmStrCat(objectFileName, ".modmap");
-      vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
+      vars["DYNDEP_MODULE_MAP_FILE"] =
+        this->ConvertToOutputFormatForShell(ddModmapFile);
       objBuild.ImplicitDeps.push_back(ddModmapFile);
       scanningFiles.ModuleMapFile = std::move(ddModmapFile);
     }
@@ -1877,7 +1881,8 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
     if (!modmapFormat.empty()) {
       std::string ddModmapFile = cmStrCat(bmiFileName, ".modmap");
-      vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
+      vars["DYNDEP_MODULE_MAP_FILE"] =
+        this->ConvertToOutputFormatForShell(ddModmapFile);
       scanningFiles.ModuleMapFile = std::move(ddModmapFile);
     }
 
