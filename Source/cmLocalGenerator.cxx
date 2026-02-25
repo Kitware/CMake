@@ -231,7 +231,10 @@ cmLocalGenerator::CreateRulePlaceholderExpander(cmBuildStep buildStep) const
 {
   return cm::make_unique<cmRulePlaceholderExpander>(
     buildStep, this->Compilers, this->VariableMappings, this->CompilerSysroot,
-    this->LinkerSysroot);
+    this->LinkerSysroot,
+    this->GetState()->UseWatcomWMake() || this->GetState()->UseBorlandMake()
+      ? cmRulePlaceholderExpander::UseShortPaths::Yes
+      : cmRulePlaceholderExpander::UseShortPaths::No);
 }
 
 cmLocalGenerator::~cmLocalGenerator() = default;

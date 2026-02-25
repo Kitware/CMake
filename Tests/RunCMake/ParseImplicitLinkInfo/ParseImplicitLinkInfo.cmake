@@ -62,6 +62,7 @@ set(targets
   sunos5.11_i386-C-GNU-5.5.0 sunos5.11_i386-CXX-GNU-5.5.0 sunos5.11_i386-Fortran-GNU-5.5.0
   windows_x86_64-C-MSVC-19.36.32543.0 windows_x86_64-CXX-MSVC-19.36.32543.0
   windows_x86_64-C-MSVC-19.38.33130.0-VS windows_x86_64-CXX-MSVC-19.38.33130.0-VS
+  windows_x86_64-C-MSVC-19.50.35724.0 windows_x86_64-CXX-MSVC-19.50.35724.0
   windows_x86_64-C-Clang-17.0.1-MSVC windows_x86_64-CXX-Clang-17.0.1-MSVC windows_x86_64-Fortran-LLVMFlang-17.0.1-MSVC
   windows_x86_64-Fortran-LLVMFlang-18.0.0-MSVC
   windows_x86_64-C-Intel-2021.9.0.20230302 windows_x86_64-CXX-Intel-2021.9.0.20230302 windows_x86_64-Fortran-Intel-2021.9.0.20230302

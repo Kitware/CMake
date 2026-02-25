@@ -2310,9 +2310,12 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
       responseFlag = "@";
     }
     std::string const name = cmStrCat("includes_", lang, ".rsp");
-    std::string const arg = std::move(responseFlag) +
-      this->CreateResponseFile(name, includeFlags, this->FlagFileDepends[lang],
-                               lang);
+    std::string const includes_rsp = this->CreateResponseFile(
+      name, includeFlags, this->FlagFileDepends[lang], lang);
+    std::string const arg =
+      cmStrCat(std::move(responseFlag),
+               this->LocalGenerator->ConvertToOutputFormat(
+                 includes_rsp, cmOutputConverter::SHELL));
     this->LocalGenerator->AppendFlags(flags, arg);
   } else {
     this->LocalGenerator->AppendFlags(flags, includeFlags);
