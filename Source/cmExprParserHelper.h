@@ -34,6 +34,14 @@ public:
 
   std::string const& GetWarning() const { return this->WarningString; }
 
+  std::int64_t ShL(std::int64_t l, std::int64_t r);
+  std::int64_t ShR(std::int64_t l, std::int64_t r);
+  std::int64_t Add(std::int64_t l, std::int64_t r);
+  std::int64_t Sub(std::int64_t l, std::int64_t r);
+  std::int64_t Mul(std::int64_t l, std::int64_t r);
+  std::int64_t Div(std::int64_t l, std::int64_t r);
+  std::int64_t Mod(std::int64_t l, std::int64_t r);
+
 private:
   std::string::size_type InputBufferPos;
   std::string InputBuffer;

@@ -118,3 +118,44 @@ void cmExprParserHelper::SetError(std::string errorString)
 {
   this->ErrorString = std::move(errorString);
 }
+
+std::int64_t cmExprParserHelper::ShL(std::int64_t l, std::int64_t r)
+{
+  return l << r;
+}
+
+std::int64_t cmExprParserHelper::ShR(std::int64_t l, std::int64_t r)
+{
+  return l >> r;
+}
+
+std::int64_t cmExprParserHelper::Add(std::int64_t l, std::int64_t r)
+{
+  return l + r;
+}
+
+std::int64_t cmExprParserHelper::Sub(std::int64_t l, std::int64_t r)
+{
+  return l - r;
+}
+
+std::int64_t cmExprParserHelper::Mul(std::int64_t l, std::int64_t r)
+{
+  return l * r;
+}
+
+std::int64_t cmExprParserHelper::Div(std::int64_t l, std::int64_t r)
+{
+  if (r == 0) {
+    throw std::overflow_error("divide by zero");
+  }
+  return l / r;
+}
+
+std::int64_t cmExprParserHelper::Mod(std::int64_t l, std::int64_t r)
+{
+  if (r == 0) {
+    throw std::overflow_error("modulo by zero");
+  }
+  return l % r;
+}
