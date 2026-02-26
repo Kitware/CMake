@@ -109,7 +109,7 @@ void cmExprParserHelper::UnexpectedChar(char c)
   this->WarningString += ostr.str();
 }
 
-void cmExprParserHelper::SetResult(KWIML_INT_int64_t value)
+void cmExprParserHelper::SetResult(std::int64_t value)
 {
   this->Result = value;
 }
