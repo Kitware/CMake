@@ -58,6 +58,30 @@ int cmCPackAppImageGenerator::InitializeInternal()
     return 0;
   }
 
+  if (cmValue packageVersion = this->GetOption("CPACK_PACKAGE_VERSION")) {
+    this->SetOptionIfNotSet("CPACK_APPIMAGE_VERSION", packageVersion);
+  }
+
+  if (!this->IsSet("CPACK_APPIMAGE_ARCH")) {
+    if (cmValue systemProcessor = this->GetOption("CMAKE_SYSTEM_PROCESSOR")) {
+      if (systemProcessor == "x86_64" || systemProcessor == "amd64") {
+        this->SetOption("CPACK_APPIMAGE_ARCH", "x86_64");
+      } else if (systemProcessor == "i386" || systemProcessor == "i686" ||
+                 systemProcessor == "x86") {
+        this->SetOption("CPACK_APPIMAGE_ARCH", "i686");
+      } else if (systemProcessor == "aarch64" || systemProcessor == "arm64") {
+        this->SetOption("CPACK_APPIMAGE_ARCH", "aarch64");
+      } else if (cmSystemTools::StringStartsWith(systemProcessor, "arm")) {
+        this->SetOption("CPACK_APPIMAGE_ARCH", "armhf");
+      } else {
+        cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                      "Could not transform CMAKE_SYSTEM_PROCESSOR, counting "
+                      "on appimagetool architecture detection."
+                        << std::endl);
+      }
+    }
+  }
+
   return Superclass::InitializeInternal();
 }
 
@@ -298,6 +322,13 @@ int cmCPackAppImageGenerator::PackageFiles()
     }
   };
 
+  auto addEnvOption = [this](std::string const& op, std::string envName) {
+    auto opt = this->GetOption(op);
+    if (opt) {
+      cmSystemTools::PutEnv(cmStrCat(envName, '=', *opt));
+    }
+  };
+
   addOption("CPACK_APPIMAGE_UPDATE_INFORMATION", "--updateinformation");
 
   addOptionFlag("CPACK_APPIMAGE_GUESS_UPDATE_INFORMATION", "--guess");
@@ -315,6 +346,13 @@ int cmCPackAppImageGenerator::PackageFiles()
   addOptionFlag("CPACK_APPIMAGE_SIGN", "--sign");
 
   addOption("CPACK_APPIMAGE_SIGN_KEY", "--sign-key");
+
+  addEnvOption("CPACK_APPIMAGE_ARCH", "ARCH");
+
+  addEnvOption("CPACK_APPIMAGE_SIGN_PASSPHRASE",
+               "APPIMAGETOOL_SIGN_PASSPHRASE");
+
+  addEnvOption("CPACK_APPIMAGE_VERSION", "VERSION");
 
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                 "Running AppImageTool: "

@@ -58,6 +58,14 @@ Qt plugins.
 You must also set :variable:`CPACK_PACKAGE_ICON` with the same value
 listed in the Desktop file.
 
+.. note::
+
+  The ``appimagetool`` uses environment variables to define its behavior.
+  These variables are exposed here for convenience, but it is also possible
+  to pass environment variables to it by setting the environment of a
+  :ref:`Package Preset` in a ``CMakePresets.json`` file, see
+  :manual:`cmake-presets(7)`.
+
 Variables Specific to CPack AppImage Generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -166,3 +174,34 @@ Variables Specific to CPack AppImage Generator
   :variable:`CPACK_APPIMAGE_SIGN`.
 
   :Default: Unset
+
+.. variable:: CPACK_APPIMAGE_SIGN_PASSPHRASE
+
+  .. versionadded:: 4.6
+
+  If the :variable:`CPACK_APPIMAGE_SIGN_KEY` is encrypted and requires a
+  passphrase to be used for signing (and, for some reason, GnuPG cannot be
+  used interactively, e.g., in a CI environment), this environment variable
+  can be used to safely pass the key.
+
+  :Default: Unset
+
+.. variable:: CPACK_APPIMAGE_ARCH
+
+  .. versionadded:: 4.6
+
+  Needs to be set whenever :variable:`CMAKE_SYSTEM_PROCESSOR` is not transformed
+  to a proper architecture and ``appimagetool`` cannot automatically determine the
+  architecture of the binaries inside the AppDir to choose a suitable runtime
+  (e.g., when binaries for multiple architectures or just shell scripts are
+  contained in there).
+
+  :Default: CMAKE_SYSTEM_PROCESSOR
+
+.. variable:: CPACK_APPIMAGE_VERSION
+
+  .. versionadded:: 4.6
+
+  This value will be inserted by appimagetool into the root desktop file.
+
+  :Default: :variable:`CPACK_PACKAGE_VERSION`
