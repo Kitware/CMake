@@ -80,6 +80,15 @@ void InheritVector(std::vector<T>& child, std::vector<T> const& parent)
   }
 }
 
+template <typename T>
+void InheritMap(std::map<std::string, T>& child,
+                std::map<std::string, T> const& parent)
+{
+  for (auto const& v : parent) {
+    child.insert(v);
+  }
+}
+
 /**
  * Check preset inheritance for cycles (using a DAG check algorithm) while
  * also bubbling up fields through the inheritance hierarchy, then verify
@@ -142,9 +151,7 @@ bool VisitPreset(
       return false;
     }
 
-    for (auto const& v : parentPreset.Environment) {
-      preset.Environment.insert(v);
-    }
+    InheritMap(preset.Environment, parentPreset.Environment);
 
     if (!preset.ConditionEvaluator) {
       preset.ConditionEvaluator = parentPreset.ConditionEvaluator;
@@ -788,10 +795,7 @@ bool cmCMakePresetsGraph::ConfigurePreset::VisitPresetInherit(
   InheritOptionalValue(preset.WarnUninitialized, parent.WarnUninitialized);
   InheritOptionalValue(preset.WarnUnusedCli, parent.WarnUnusedCli);
   InheritOptionalValue(preset.WarnSystemVars, parent.WarnSystemVars);
-
-  for (auto const& v : parent.CacheVariables) {
-    preset.CacheVariables.insert(v);
-  }
+  InheritMap(preset.CacheVariables, parent.CacheVariables);
 
   return true;
 }
@@ -994,11 +998,7 @@ bool cmCMakePresetsGraph::PackagePreset::VisitPresetInherit(
                        parent.InheritConfigureEnvironment);
   InheritVector(preset.Generators, parent.Generators);
   InheritVector(preset.Configurations, parent.Configurations);
-
-  for (auto const& v : parent.Variables) {
-    preset.Variables.insert(v);
-  }
-
+  InheritMap(preset.Variables, parent.Variables);
   InheritOptionalValue(preset.DebugOutput, parent.DebugOutput);
   InheritOptionalValue(preset.VerboseOutput, parent.VerboseOutput);
   InheritString(preset.PackageName, parent.PackageName);
