@@ -1066,7 +1066,10 @@ Available commands are:
     Format from a template file. The template file contains placeholders for
     the array and optionally the length (which will be a non-negative decimal
     integer). Such placeholders are enclosed in ``@`` at the beginning and end
-    of the placeholder.
+    of the placeholder. This functionality is similar to
+    :command:`configure_file` called with the ``@ONLY`` argument, but only the
+    array and length placeholders will be replaced, and any other placeholders
+    will be left as-is.
 
     An example of a potential template file:
 
