@@ -377,10 +377,20 @@ run_cmake_presets(HostSystemNameFuture)
 
 # Test ${fileDir} macro
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/FileDir.json.in")
+set(FileDir_include_subdir "subdir/FileDirv4.json")
 set(CMakePresets_EXTRA_FILES
-  "${RunCMake_SOURCE_DIR}/subdir/FileDir.json.in"
-  )
-run_cmake_presets(FileDir)
+  "${RunCMake_SOURCE_DIR}/${FileDir_include_subdir}.in"
+)
+run_cmake_presets(FileDirv4 --preset FileDir)
+run_cmake_presets(FileDirv4 --preset FileDirExt)
+set(FileDir_include_subdir "subdir/FileDirv12.json")
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/${FileDir_include_subdir}.in"
+  "${RunCMake_SOURCE_DIR}/subdir/FileDirInclude.json.in"
+)
+run_cmake_presets(FileDirv12 --preset FileDir)
+run_cmake_presets(FileDirv12 --preset FileDirExt)
+run_cmake_presets(FileDirv12 --preset FileDirInclude)
 unset(CMakePresets_EXTRA_FILES)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/FileDirFuture.json.in")
 run_cmake_presets(FileDirFuture)

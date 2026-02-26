@@ -1,6 +1,15 @@
 {
   "version": 4,
   "include": [
-    "subdir/FileDir.json"
+    "@FileDir_include_subdir@"
+  ],
+  "configurePresets": [
+    {
+      "name": "FileDirExt",
+      "inherits": "FileDir",
+      "cacheVariables": {
+        "PRESET": "FileDirExt"
+      }
+    }
   ]
 }

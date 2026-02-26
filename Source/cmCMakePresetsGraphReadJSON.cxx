@@ -38,9 +38,10 @@ using MacroExpander = cmCMakePresetsGraphInternal::MacroExpander;
 using MacroExpanderVector = cmCMakePresetsGraphInternal::MacroExpanderVector;
 using cmCMakePresetsGraphInternal::BaseMacroExpander;
 using cmCMakePresetsGraphInternal::ExpandMacros;
+using cmCMakePresetsGraphInternal::ExpandImmediateMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 11;
+constexpr int MAX_VERSION = 12;
 
 struct CMakeVersion
 {
@@ -591,6 +592,12 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
       return false;
     }
 
+    if (!ExpandImmediateMacros<ConfigurePreset>(preset)) {
+      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
+                                                    &this->parseState);
+      return false;
+    }
+
     PresetPair<ConfigurePreset> presetPair;
     presetPair.Unexpanded = preset;
     presetPair.Expanded = cm::nullopt;
@@ -642,6 +649,12 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
       return false;
     }
 
+    if (!ExpandImmediateMacros<BuildPreset>(preset)) {
+      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
+                                                    &this->parseState);
+      return false;
+    }
+
     PresetPair<BuildPreset> presetPair;
     presetPair.Unexpanded = preset;
     presetPair.Expanded = cm::nullopt;
@@ -663,6 +676,12 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
     preset.OriginFile = file;
     if (preset.Name.empty()) {
       // No error, already handled by PresetNameHelper
+      return false;
+    }
+
+    if (!ExpandImmediateMacros<TestPreset>(preset)) {
+      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
+                                                    &this->parseState);
       return false;
     }
 
@@ -710,6 +729,12 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
       return false;
     }
 
+    if (!ExpandImmediateMacros<PackagePreset>(preset)) {
+      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
+                                                    &this->parseState);
+      return false;
+    }
+
     PresetPair<PackagePreset> presetPair;
     presetPair.Unexpanded = preset;
     presetPair.Expanded = cm::nullopt;
@@ -728,6 +753,12 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
     preset.OriginFile = file;
     if (preset.Name.empty()) {
       // No error, already handled by PresetNameHelper
+      return false;
+    }
+
+    if (!ExpandImmediateMacros<WorkflowPreset>(preset)) {
+      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
+                                                    &this->parseState);
       return false;
     }
 

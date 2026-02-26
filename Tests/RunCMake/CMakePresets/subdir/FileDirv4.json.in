@@ -4,9 +4,10 @@
     {
       "name": "FileDir",
       "generator": "@RunCMake_GENERATOR@",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${fileDir}/build",
       "cacheVariables": {
-        "TEST_FILE_DIR": "${fileDir}"
+        "TEST_FILE_DIR": "${fileDir}",
+        "PRESET": "FileDir"
       }
     }
   ]

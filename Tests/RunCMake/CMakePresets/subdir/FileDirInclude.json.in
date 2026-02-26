@@ -1,0 +1,13 @@
+{
+  "version": 9,
+  "configurePresets": [
+    {
+      "name": "FileDirInclude",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${fileDir}/build",
+      "cacheVariables": {
+        "PRESET": "FileDirInclude"
+      }
+    }
+  ]
+}

@@ -27,6 +27,8 @@
       case ExpandMacroResult::Ignore:                                         \
         out.reset();                                                          \
         return true;                                                          \
+      case ExpandMacroResult::Defer:                                          \
+        CM_FALLTHROUGH;                                                       \
       case ExpandMacroResult::Ok:                                             \
         break;                                                                \
     }                                                                         \
@@ -54,6 +56,9 @@ using BaseMacroExpander = cmCMakePresetsGraphInternal::BaseMacroExpander;
 template <typename T>
 using PresetMacroExpander =
   cmCMakePresetsGraphInternal::PresetMacroExpander<T>;
+template <typename T>
+using ImmediateMacroExpander =
+  cmCMakePresetsGraphInternal::ImmediateMacroExpander<T>;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 void InheritString(std::string& child, std::string const& parent)
@@ -453,6 +458,8 @@ bool ExpandMacros(cmCMakePresetsGraph* graph, T const& preset,
         case ExpandMacroResult::Ignore:
           out.reset();
           return true;
+        case ExpandMacroResult::Defer:
+          CM_FALLTHROUGH;
         case ExpandMacroResult::Ok:
           break;
       }
@@ -497,6 +504,30 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
   return ExpandMacroResult::Ok;
 }
 }
+
+template <typename T>
+bool cmCMakePresetsGraphInternal::ExpandImmediateMacros(T& preset)
+{
+  MacroExpanderVector macroExpanders{};
+  macroExpanders.push_back(cm::make_unique<ImmediateMacroExpander<T>>(preset));
+  cm::optional<T> out = preset;
+  bool result = CheckExpandMacros(preset, out, macroExpanders);
+  if (out.has_value()) {
+    preset = out.value();
+  };
+  return result;
+}
+
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<
+  ConfigurePreset>(ConfigurePreset&);
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<BuildPreset>(
+  BuildPreset&);
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<TestPreset>(
+  TestPreset&);
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<
+  PackagePreset>(PackagePreset&);
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<
+  WorkflowPreset>(WorkflowPreset&);
 
 ExpandMacroResult cmCMakePresetsGraphInternal::ExpandMacros(
   std::string& out, MacroExpanderVector const& macroExpanders, int version)
