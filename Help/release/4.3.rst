@@ -143,18 +143,6 @@ Variables
   to support per-language link flags for all target types.
   See policy :policy:`CMP0210`.
 
-* The :variable:`CMAKE_CXX_MODULE_STD` variable and corresponding
-  :prop_tgt:`CXX_MODULE_STD` target property were added to control the
-  availability of ``import std`` for C++ targets.
-
-* The read-only :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable was added
-  to list the C++ standard levels for which ``import std`` is available on
-  the current toolchain.
-
-* The :variable:`CMAKE_CXX_STDLIB_MODULES_JSON` variable was added to specify
-  an ``import std`` module metadata file instead of relying on automatic
-  detection from the C++ compiler.
-
 * The :variable:`CMAKE_VERIFY_PRIVATE_HEADER_SETS` variable and corresponding
   :prop_tgt:`VERIFY_PRIVATE_HEADER_SETS` target property were added to
   enable build rules that verify all headers in private file sets can be used
