@@ -61,31 +61,32 @@ function(make_rpm_spec_path var path)
 endfunction()
 
 function(get_file_permissions FILE RETURN_VAR)
-  execute_process(COMMAND ls -l ${FILE}
-          OUTPUT_VARIABLE permissions_
-          ERROR_QUIET
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(
+      COMMAND stat --format=%A "${FILE}"
+      OUTPUT_VARIABLE permissions_str
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-  string(REPLACE " " ";" permissions_ "${permissions_}")
-  list(GET permissions_ 0 permissions_)
+  string(REGEX REPLACE "(.)" "\\1;" permissions "${permissions_str}")
+  list(POP_FRONT permissions _)  # drop the very first char (entry type)
 
-  unset(text_notation_)
-  set(any_chars_ ".")
-  foreach(PERMISSION_TYPE "OWNER" "GROUP" "WORLD")
-    if(permissions_ MATCHES "${any_chars_}r.*")
-      list(APPEND text_notation_ "${PERMISSION_TYPE}_READ")
+  unset(result)
+  foreach(PERMISSION_TYPE IN ITEMS OWNER GROUP WORLD)
+    list(POP_FRONT permissions r_ w_ x_)
+    if(r_ STREQUAL "r")
+      list(APPEND result ${PERMISSION_TYPE}_READ)
     endif()
-    string(APPEND any_chars_ ".")
-    if(permissions_ MATCHES "${any_chars_}w.*")
-      list(APPEND text_notation_ "${PERMISSION_TYPE}_WRITE")
+    if(w_ STREQUAL "w")
+      list(APPEND result ${PERMISSION_TYPE}_WRITE)
     endif()
-    string(APPEND any_chars_ ".")
-    if(permissions_ MATCHES "${any_chars_}x.*")
-      list(APPEND text_notation_ "${PERMISSION_TYPE}_EXECUTE")
+    if(x_ STREQUAL "x")
+      list(APPEND result ${PERMISSION_TYPE}_EXECUTE)
     endif()
   endforeach()
 
-  set(${RETURN_VAR} "${text_notation_}" PARENT_SCOPE)
+  set(${RETURN_VAR} "${result}")
+  return(PROPAGATE ${RETURN_VAR})
 endfunction()
 
 function(get_unix_permissions_octal_notation PERMISSIONS_VAR RETURN_VAR)
