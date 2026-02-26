@@ -1,0 +1,63 @@
+^CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  left shift of negative value in:
+
+    -4 << 1
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  shift exponent is negative in:
+
+    4 << -63
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  shift exponent is negative in:
+
+    4 >> -63
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  shift exponent is too large in:
+
+    4 << 65
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  shift exponent is too large in:
+
+    4 >> 65
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  signed integer overflow in:
+
+    9223372036854775807 \+ 1
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  signed integer overflow in:
+
+    -9223372036854775807 - 2
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  signed integer overflow in:
+
+    9223372036854775807 \* 2
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

@@ -23,6 +23,7 @@ public:
 
   int LexInput(char* buf, int maxlen);
   void Error(char const* str);
+  void Warning(std::string str);
 
   void SetResult(std::int64_t value);
 
@@ -41,6 +42,13 @@ public:
   std::int64_t Mul(std::int64_t l, std::int64_t r);
   std::int64_t Div(std::int64_t l, std::int64_t r);
   std::int64_t Mod(std::int64_t l, std::int64_t r);
+
+  static bool AddOverflow(long l, long r, long* p);
+  static bool AddOverflow(long long l, long long r, long long* p);
+  static bool SubOverflow(long l, long r, long* p);
+  static bool SubOverflow(long long l, long long r, long long* p);
+  static bool MulOverflow(long l, long r, long* p);
+  static bool MulOverflow(long long l, long long r, long long* p);
 
 private:
   std::string::size_type InputBufferPos;

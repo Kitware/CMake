@@ -8,3 +8,7 @@ run_cmake(MATH-InvalidExpression)
 run_cmake(MATH-ToleratedExpression)
 run_cmake(MATH-DivideByZero)
 run_cmake(MATH-ModByZero)
+
+if(CMake_TEST_MATH_OVERFLOW)
+  run_cmake_script(Overflow)
+endif()
