@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/string_view>
+
 #include <cm3p/json/value.h>
 
 #include "cmCommonTargetGenerator.h"
@@ -41,6 +43,8 @@ public:
   virtual void Generate(std::string const& config) = 0;
 
   std::string GetTargetName() const;
+
+  std::string ConvertToOutputFormatForShell(cm::string_view path) const;
 
   void AddDepfileBinding(cmNinjaVars& vars, std::string depfile) const;
   void RemoveDepfileBinding(cmNinjaVars& vars) const;
