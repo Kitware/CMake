@@ -148,15 +148,15 @@ std::string CxxModuleMapContentClang(CxxModuleLocations const& loc,
       // extension.
       mm << "-x c++-module\n";
 
-      mm << "-fmodule-output=" << bmi_loc.Location() << '\n';
+      mm << "-fmodule-output=\"" << bmi_loc.Location() << "\"\n";
       break;
     }
   }
 
   auto all_usages = GetTransitiveUsages(loc, obj.Requires, usages);
   for (auto const& usage : all_usages) {
-    mm << "-fmodule-file=" << usage.LogicalName << '=' << usage.Location
-       << '\n';
+    mm << "-fmodule-file=\"" << usage.LogicalName << '=' << usage.Location
+       << "\"\n";
   }
 
   return mm.str();
@@ -229,7 +229,7 @@ std::string CxxModuleMapContentMsvc(CxxModuleLocations const& loc,
 
     auto bmi_loc = loc.BmiGeneratorPathForModule(p.LogicalName);
     if (bmi_loc.IsKnown()) {
-      mm << "-ifcOutput " << bmi_loc.Location() << '\n';
+      mm << "-ifcOutput \"" << bmi_loc.Location() << "\"\n";
     }
   }
 
@@ -237,7 +237,8 @@ std::string CxxModuleMapContentMsvc(CxxModuleLocations const& loc,
   for (auto const& usage : all_usages) {
     auto flag = flag_for_method(usage.Method);
 
-    mm << flag << ' ' << usage.LogicalName << '=' << usage.Location << '\n';
+    mm << flag << " \"" << usage.LogicalName << '=' << usage.Location
+       << "\"\n";
   }
 
   return mm.str();

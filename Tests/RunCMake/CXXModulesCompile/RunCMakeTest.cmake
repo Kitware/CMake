@@ -157,6 +157,10 @@ run_cxx_module_test(scan-with-pch)
 # Tests which use named modules.
 if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(simple)
+  # FIXME(GCC): `g++ -c "with space.cpp" -M -fdeps-format=p1689r5` fails.
+  if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    run_cxx_module_test(subdir)
+  endif ()
   run_cxx_module_test(file-sets-with-dot)
   run_cxx_module_test(vs-without-flags)
   run_cxx_module_test(library library-static -DBUILD_SHARED_LIBS=OFF)
