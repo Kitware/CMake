@@ -512,18 +512,9 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
     if(IS_SYMLINK "${WDIR}/${F}")
       if(IS_RELOCATABLE)
         # check that symlink has relocatable format
-        get_filename_component(SYMLINK_LOCATION_ "${WDIR}/${F}" DIRECTORY)
-        execute_process(COMMAND ls -la "${WDIR}/${F}"
-                  WORKING_DIRECTORY "${WDIR}"
-                  OUTPUT_VARIABLE SYMLINK_POINT_
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-        string(FIND "${SYMLINK_POINT_}" "->" SYMLINK_POINT_INDEX_ REVERSE)
-        math(EXPR SYMLINK_POINT_INDEX_ ${SYMLINK_POINT_INDEX_}+3)
-        string(LENGTH "${SYMLINK_POINT_}" SYMLINK_POINT_LENGTH_)
-
-        # get destination path
-        string(SUBSTRING "${SYMLINK_POINT_}" ${SYMLINK_POINT_INDEX_} ${SYMLINK_POINT_LENGTH_} SYMLINK_POINT_)
+        cmake_path(APPEND WDIR "${F}" OUTPUT_VARIABLE SYMLINK_LOCATION_)
+        cmake_path(GET SYMLINK_LOCATION_ PARENT_PATH SYMLINK_LOCATION_)
+        file(READ_SYMLINK "${WDIR}/${F}" SYMLINK_POINT_)
 
         # check if path is relative or absolute
         string(SUBSTRING "${SYMLINK_POINT_}" 0 1 SYMLINK_IS_ABSOLUTE_)
