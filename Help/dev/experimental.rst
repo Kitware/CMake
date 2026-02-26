@@ -56,6 +56,9 @@ When activated, this experimental feature provides the following:
 * Setting ``CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO`` enables generation of
   package information in the |CPS|_ format via the ``install(EXPORT)`` command.
 
+.. _CPS: https://cps-org.github.io/cps/
+.. |CPS| replace:: Common Package Specification
+
 Build database support
 ======================
 
