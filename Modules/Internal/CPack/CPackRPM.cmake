@@ -98,10 +98,10 @@ function(get_unix_permissions_octal_notation PERMISSIONS_VAR RETURN_VAR)
     message(FATAL_ERROR "${PERMISSIONS_VAR} contains duplicate values.")
   endif()
 
-  foreach(PERMISSION_TYPE "OWNER" "GROUP" "WORLD")
+  foreach(PERMISSION_TYPE IN ITEMS OWNER GROUP WORLD)
     set(${PERMISSION_TYPE}_PERMISSIONS 0)
 
-    foreach(PERMISSION ${PERMISSIONS})
+    foreach(PERMISSION IN LISTS PERMISSIONS)
       if("${PERMISSION}" STREQUAL "${PERMISSION_TYPE}_READ")
         math(EXPR ${PERMISSION_TYPE}_PERMISSIONS "${${PERMISSION_TYPE}_PERMISSIONS} + 4")
       elseif("${PERMISSION}" STREQUAL "${PERMISSION_TYPE}_WRITE")
@@ -150,7 +150,7 @@ function(cpack_rpm_prepare_relocation_paths)
   endif()
 
   # set other path prefixes
-  foreach(RELOCATION_PATH ${RPM_RELOCATION_PATHS})
+  foreach(RELOCATION_PATH IN LISTS RPM_RELOCATION_PATHS)
     if(IS_ABSOLUTE "${RELOCATION_PATH}")
       set(PREPARED_RELOCATION_PATH "${RELOCATION_PATH}")
     elseif(PATH_PREFIX STREQUAL "/")
@@ -175,12 +175,12 @@ function(cpack_rpm_prepare_relocation_paths)
 
   # warn about all the paths that are not relocatable
   file(GLOB_RECURSE FILE_PATHS_ "${WDIR}/*")
-  foreach(TMP_PATH ${FILE_PATHS_})
+  foreach(TMP_PATH IN LISTS FILE_PATHS_)
     string(LENGTH "${WDIR}" WDIR_LEN)
     string(SUBSTRING "${TMP_PATH}" ${WDIR_LEN} -1 TMP_PATH)
     unset(TMP_PATH_FOUND_)
 
-    foreach(RELOCATION_PATH ${RPM_USED_PACKAGE_PREFIXES})
+    foreach(RELOCATION_PATH IN LISTS RPM_USED_PACKAGE_PREFIXES)
       file(RELATIVE_PATH REL_PATH_ "${RELOCATION_PATH}" "${TMP_PATH}")
       string(SUBSTRING "${REL_PATH_}" 0 2 PREFIX_)
 
@@ -215,7 +215,7 @@ function(cpack_rpm_prepare_content_list)
     # from the RPM's content-list)
     list(SORT RPM_USED_PACKAGE_PREFIXES)
     set(_DISTINCT_PATH "NOT_SET")
-    foreach(_RPM_RELOCATION_PREFIX ${RPM_USED_PACKAGE_PREFIXES})
+    foreach(_RPM_RELOCATION_PREFIX IN LISTS RPM_USED_PACKAGE_PREFIXES)
       if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
         set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
 
@@ -223,7 +223,7 @@ function(cpack_rpm_prepare_content_list)
         list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
         unset(_TMP_LIST)
         # Now generate all of the parent dirs of the relocation path
-        foreach(_PREFIX_PATH_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
+        foreach(_PREFIX_PATH_ELEM IN LISTS _CPACK_RPM_PACKAGE_PREFIX_ELEMS)
           list(APPEND _TMP_LIST "${_PREFIX_PATH_ELEM}")
           string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
           separate_arguments(_OMIT_DIR)
@@ -1098,7 +1098,7 @@ function(cpack_rpm_generate_package)
       ERROR_QUIET
       RESULT_VARIABLE RPM_SUGGESTS_RESULT)
     if(NOT RPM_SUGGESTS_RESULT EQUAL 0)
-      foreach(_WEAK_DEP SUGGESTS RECOMMENDS SUPPLEMENTS ENHANCES)
+      foreach(_WEAK_DEP IN ITEMS SUGGESTS RECOMMENDS SUPPLEMENTS ENHANCES)
         list(REMOVE_ITEM RPMBUILD_TAG_LIST ${_WEAK_DEP})
       endforeach()
     endif()
@@ -1112,7 +1112,13 @@ function(cpack_rpm_generate_package)
   # There may be some COMPONENT specific variables as well
   # If component specific var is not provided we use the global one
   # for each component
-  foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS RECOMMENDS SUPPLEMENTS ENHANCES PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
+  set(
+      tags_
+      URL REQUIRES SUGGESTS RECOMMENDS SUPPLEMENTS ENHANCES PROVIDES
+      OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV
+      REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN
+    )
+  foreach(_RPM_SPEC_HEADER IN LISTS tags_)
 
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
@@ -1200,8 +1206,8 @@ function(cpack_rpm_generate_package)
   # May be used to embed a pre installation/uninstallation/transaction script in the spec file.
   # The referred script file(s) will be read and directly
   # put after the %pre or %preun or %pretrans section
-  foreach(RPM_SCRIPT_FILE_TYPE_ "INSTALL" "UNINSTALL" "TRANS")
-    foreach(RPM_SCRIPT_FILE_TIME_ "PRE" "POST")
+  foreach(RPM_SCRIPT_FILE_TYPE_ IN ITEMS INSTALL UNINSTALL TRANS)
+    foreach(RPM_SCRIPT_FILE_TIME_ IN ITEMS PRE POST)
       set("CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE"
         "${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE}")
 
@@ -1527,7 +1533,7 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
     )
 
   # set default user and group
-  foreach(_PERM_TYPE "USER" "GROUP")
+  foreach(_PERM_TYPE IN ITEMS USER GROUP)
     if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE})
       set(TMP_DEFAULT_${_PERM_TYPE} "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}}")
     elseif(CPACK_RPM_DEFAULT_${_PERM_TYPE})
@@ -1538,7 +1544,7 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
   endforeach()
 
   # set default file and dir permissions
-  foreach(_PERM_TYPE "FILE" "DIR")
+  foreach(_PERM_TYPE IN ITEMS FILE DIR)
     if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS)
       get_unix_permissions_octal_notation("CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS" "TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
       set(_PERMISSIONS_VAR "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
