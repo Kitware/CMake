@@ -209,12 +209,13 @@ int main(int argc, char const* const* argv)
     return 1;
   }
 
+  bool const haveTestfile = cmSystemTools::FileExists("CTestTestfile.cmake") ||
+    cmSystemTools::FileExists("DartTestfile.txt");
+
   // If there is a testing input file, check for documentation options
   // only if there are actually arguments.  We want running without
   // arguments to run tests.
-  if (argc > 1 ||
-      !(cmSystemTools::FileExists("CTestTestfile.cmake") ||
-        cmSystemTools::FileExists("DartTestfile.txt"))) {
+  if (argc > 1 || !haveTestfile) {
     if (argc == 1) {
       std::cerr << "*********************************\n"
                    "No test configuration file found!\n"
@@ -228,7 +229,8 @@ int main(int argc, char const* const* argv)
       doc.SetSection("Name", cmDocumentationName);
       doc.SetSection("Usage", cmDocumentationUsage);
       doc.PrependSection("Options", cmDocumentationOptions);
-      return !doc.PrintRequestedDocumentation(std::cout);
+      return !doc.PrintRequestedDocumentation(std::cout) ||
+        (argc == 1 && !haveTestfile);
     }
   }
 

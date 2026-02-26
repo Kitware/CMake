@@ -424,6 +424,8 @@ add_test(test2 \"${CMAKE_COMMAND}\" -E echo \"not running\")
 endfunction()
 run_stop_on_failure()
 
+run_cmake_command(usage ${CMAKE_CTEST_COMMAND})
+
 function(run_TestAffinity)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestAffinity)
   set(RunCMake_TEST_NO_CLEAN 1)

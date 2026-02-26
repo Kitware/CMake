@@ -54,6 +54,9 @@ in the following cases:
 
 * An error occurs, such as failure to process invalid arguments.
 
+* .. versionadded:: 4.4
+    No arguments are given and no ``CTestTestfile.cmake`` exists.
+
 * The :option:`--no-tests=error <ctest --no-tests>` argument is given and no
   tests are executed, e.g., when ``CTestTestfile.cmake`` defines no tests,
   or when the given arguments exclude all tests.
