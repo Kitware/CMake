@@ -173,7 +173,7 @@
         "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV10" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV10" },
-        "buildPresets": { "$ref": "#/definitions/buildPresetsV11" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV10" },
         "testPresets": { "$ref": "#/definitions/testPresetsV11" },
         "packagePresets": { "$ref": "#/definitions/packagePresetsV10" },
         "workflowPresets": { "$ref": "#/definitions/workflowPresetsV10" },
@@ -812,15 +812,6 @@
         "unevaluatedProperties": false
       }
     },
-    "buildPresetsJobsV11": {
-      "type": "integer",
-      "description": "An optional integer. Equivalent to passing --parallel or -j on the command line.",
-      "minimum": 0
-    },
-    "buildPresetsJobsV2": {
-      "type": "integer",
-      "description": "An optional integer. Equivalent to passing --parallel or -j on the command line."
-    },
     "buildPresetsItemsV4": {
       "properties": {
         "resolvePackageReferences": {
@@ -869,6 +860,11 @@
               "type": "boolean",
               "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited build preset environments, but before environment variables explicitly specified in this build preset."
             },
+            "jobs": {
+              "type": "integer",
+              "description": "An optional non-negative integer. Equivalent to passing --parallel or -j on the command line.",
+              "minimum": 0
+            },
             "targets": {
               "anyOf": [
                 {
@@ -912,42 +908,14 @@
         "name"
       ]
     },
-    "buildPresetsAdditionalPropertiesV11": {
-      "properties": {
-        "condition": { "$ref": "#/definitions/topConditionV10" },
-        "jobs": { "$ref": "#/definitions/buildPresetsJobsV11" }
-      }
-    },
     "buildPresetsAdditionalPropertiesV10": {
       "properties": {
-        "condition": { "$ref": "#/definitions/topConditionV10" },
-        "jobs": { "$ref": "#/definitions/buildPresetsJobsV2" }
+        "condition": { "$ref": "#/definitions/topConditionV10" }
       }
     },
     "buildPresetsAdditionalPropertiesV3": {
       "properties": {
-        "condition": { "$ref": "#/definitions/topConditionV3" },
-        "jobs": { "$ref": "#/definitions/buildPresetsJobsV2" }
-      }
-    },
-    "buildPresetsAdditionalPropertiesV2": {
-      "properties": {
-        "jobs": { "$ref": "#/definitions/buildPresetsJobsV2" }
-      }
-    },
-    "buildPresetsV11": {
-      "type": "array",
-      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 10 and higher.",
-      "items": {
-        "type": "object",
-        "description": "A build preset object.",
-        "allOf": [
-          { "$ref": "#/definitions/buildPresetsItemsV4" },
-          { "$ref": "#/definitions/buildPresetsItemsV2" },
-          { "$ref": "#/definitions/buildPresetsAdditionalPropertiesV11" },
-          { "$ref": "#/definitions/commentAsProperty" }
-        ],
-        "unevaluatedProperties": false
+        "condition": { "$ref": "#/definitions/topConditionV3" }
       }
     },
     "buildPresetsV10": {
@@ -999,8 +967,7 @@
         "type": "object",
         "description": "A build preset object.",
         "allOf": [
-          { "$ref": "#/definitions/buildPresetsItemsV2" },
-          { "$ref": "#/definitions/buildPresetsAdditionalPropertiesV2" }
+          { "$ref": "#/definitions/buildPresetsItemsV2" }
         ],
         "unevaluatedProperties": false
       }
@@ -1009,12 +976,12 @@
       "oneOf": [
         {
           "type": "integer",
-          "description": "An optional integer. Equivalent to passing --parallel on the command line.",
+          "description": "An optional non-negative integer. Equivalent to passing --parallel or -j on the command line.",
           "minimum": 0
         },
         {
           "type": "string",
-          "description": "An optional string. Equivalent to passing --parallel on the command line with the number of jobs omitted.",
+          "description": "An optional string. Equivalent to passing --parallel or -j on the command line with the number of jobs omitted.",
           "minLength": 0,
           "maxLength": 0
         }
@@ -1022,7 +989,8 @@
     },
     "testPresetsExecutionJobsV2": {
       "type": "integer",
-      "description": "An optional integer. Equivalent to passing --parallel on the command line."
+      "description": "An optional non-negative integer. Equivalent to passing --parallel or -j on the command line.",
+      "minimum": 0
     },
     "testPresetsExecutionRepeatV10": {
       "type": "object",
