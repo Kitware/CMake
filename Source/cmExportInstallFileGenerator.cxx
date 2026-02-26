@@ -439,11 +439,11 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
     if (cmHasPrefix(li, this->GetImportPrefixWithSlash())) {
       continue;
     }
-    std::ostringstream e;
     if (genexPos != std::string::npos) {
       hadFatalError = true;
     }
     if (!cmSystemTools::FileIsFullPath(li)) {
+      std::ostringstream e;
       /* clang-format off */
       e << "Target \"" << target->GetName() << "\" " << prop <<
            " property contains relative path:\n"
@@ -465,6 +465,7 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
       }
     }
     if (inBinary) {
+      std::ostringstream e;
       /* clang-format off */
       e << "Target \"" << target->GetName() << "\" " << prop <<
            " property contains path:\n"
@@ -475,6 +476,7 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
     }
     if (!inSourceBuild) {
       if (inSource) {
+        std::ostringstream e;
         e << "Target \"" << target->GetName() << "\" " << prop
           << " property contains path:\n"
              "  \""
