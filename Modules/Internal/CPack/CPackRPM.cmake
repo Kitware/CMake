@@ -54,10 +54,11 @@ endmacro()
 function(make_rpm_spec_path var path)
   # RPM supports either whitespace with quoting or globbing without quoting.
   if(path MATCHES "[ \t]")
-    set("${var}" "\"${path}\"" PARENT_SCOPE)
+    set(${var} "\"${path}\"")
   else()
-    set("${var}" "${path}" PARENT_SCOPE)
+    set(${var} "${path}")
   endif()
+  return(PROPAGATE ${var})
 endfunction()
 
 function(get_file_permissions FILE RETURN_VAR)
@@ -115,12 +116,13 @@ function(get_unix_permissions_octal_notation PERMISSIONS_VAR RETURN_VAR)
     endforeach()
   endforeach()
 
-  set(${RETURN_VAR} "${OWNER_PERMISSIONS}${GROUP_PERMISSIONS}${WORLD_PERMISSIONS}" PARENT_SCOPE)
+  set(${RETURN_VAR} "${OWNER_PERMISSIONS}${GROUP_PERMISSIONS}${WORLD_PERMISSIONS}")
+  return(PROPAGATE ${RETURN_VAR})
 endfunction()
 
 function(cpack_rpm_exact_regex regex_var string)
-  string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" regex "${string}")
-  set("${regex_var}" "${regex}" PARENT_SCOPE)
+  string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" ${regex_var} "${string}")
+  return(PROPAGATE ${regex_var})
 endfunction()
 
 function(cpack_rpm_prepare_relocation_paths)
@@ -195,9 +197,7 @@ function(cpack_rpm_prepare_relocation_paths)
       message(AUTHOR_WARNING "CPackRPM:Warning: Path ${TMP_PATH} is not on one of the relocatable paths! Package will be partially relocatable.")
     endif()
   endforeach()
-
-  set(RPM_USED_PACKAGE_PREFIXES "${RPM_USED_PACKAGE_PREFIXES}" PARENT_SCOPE)
-  set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}" PARENT_SCOPE)
+  return(PROPAGATE RPM_USED_PACKAGE_PREFIXES TMP_RPM_PREFIXES)
 endfunction()
 
 function(cpack_rpm_prepare_content_list)
@@ -299,18 +299,18 @@ function(cpack_rpm_prepare_content_list)
     endforeach()
   endforeach()
 
-  set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}" PARENT_SCOPE)
+  return(PROPAGATE CPACK_RPM_INSTALL_FILES)
 endfunction()
 
 function(cpack_rpm_symlink_get_relocation_prefixes LOCATION PACKAGE_PREFIXES RETURN_VARIABLE)
+  unset(${RETURN_VARIABLE})
   foreach(PKG_PREFIX IN LISTS PACKAGE_PREFIXES)
-    string(REGEX MATCH "^${PKG_PREFIX}/.*" FOUND_ "${LOCATION}")
-    if(FOUND_)
-      list(APPEND TMP_PREFIXES "${PKG_PREFIX}")
+    if(LOCATION MATCHES "^${PKG_PREFIX}/.*")
+      list(APPEND ${RETURN_VARIABLE} "${PKG_PREFIX}")
     endif()
   endforeach()
 
-  set(${RETURN_VARIABLE} "${TMP_PREFIXES}" PARENT_SCOPE)
+  return(PROPAGATE ${RETURN_VARIABLE})
 endfunction()
 
 function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
@@ -442,7 +442,8 @@ function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
     endforeach()
   endif()
 
-  set(RPM_SYMLINK_POSTINSTALL "${SCRIPT}" PARENT_SCOPE)
+  set(RPM_SYMLINK_POSTINSTALL "${SCRIPT}")
+  return(PROPAGATE RPM_SYMLINK_POSTINSTALL)
 endfunction()
 
 function(cpack_rpm_symlink_add_for_relocation_script PACKAGE_PREFIXES SYMLINK SYMLINK_RELOCATION_PATHS POINT POINT_RELOCATION_PATHS)
@@ -486,13 +487,9 @@ function(cpack_rpm_symlink_add_for_relocation_script PACKAGE_PREFIXES SYMLINK SY
   list(APPEND _RPM_RELOCATION_SCRIPT_X_X "${PAIR_NO}")
   list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_X_X")
 
-  # place variables into parent scope
-  foreach(VAR IN LISTS RELOCATION_VARS)
-    set(${VAR} "${${VAR}}" PARENT_SCOPE)
-  endforeach()
-  set(_RPM_RELOCATION_SCRIPT_PAIRS "${_RPM_RELOCATION_SCRIPT_PAIRS}" PARENT_SCOPE)
-  set(REQUIRES_SYMLINK_RELOCATION_SCRIPT "true" PARENT_SCOPE)
-  set(DIRECTIVE "%ghost " PARENT_SCOPE)
+  set(REQUIRES_SYMLINK_RELOCATION_SCRIPT "true")
+  set(DIRECTIVE "%ghost ")
+  return(PROPAGATE _RPM_RELOCATION_SCRIPT_PAIRS REQUIRES_SYMLINK_RELOCATION_SCRIPT DIRECTIVE ${RELOCATION_VARS})
 endfunction()
 
 function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXES IS_RELOCATABLE)
@@ -611,8 +608,8 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
     cpack_rpm_symlink_create_relocation_script("${PACKAGE_PREFIXES}")
   endif()
 
-  set(RPM_SYMLINK_POSTINSTALL "${RPM_SYMLINK_POSTINSTALL}" PARENT_SCOPE)
-  set(CPACK_RPM_INSTALL_FILES "${INSTALL_FILES}" PARENT_SCOPE)
+  set(CPACK_RPM_INSTALL_FILES "${INSTALL_FILES}")
+  return(PROPAGATE RPM_SYMLINK_POSTINSTALL CPACK_RPM_INSTALL_FILES)
 endfunction()
 
 if(CMAKE_BINARY_DIR)
@@ -789,9 +786,7 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
     endforeach()
   endif()
 
-  set(TMP_RPM_DEBUGINFO_INSTALL "${TMP_RPM_DEBUGINFO_INSTALL}" PARENT_SCOPE)
-  set(TMP_DEBUGINFO_ADDITIONAL_SOURCES "${TMP_DEBUGINFO_ADDITIONAL_SOURCES}"
-    PARENT_SCOPE)
+  return(PROPAGATE TMP_RPM_DEBUGINFO_INSTALL TMP_DEBUGINFO_ADDITIONAL_SOURCES)
 endfunction()
 
 function(cpack_rpm_variable_fallback OUTPUT_VAR_NAME)
@@ -799,8 +794,8 @@ function(cpack_rpm_variable_fallback OUTPUT_VAR_NAME)
 
   foreach(variable_name IN LISTS FALLBACK_VAR_NAMES)
     if(DEFINED ${variable_name})
-      set(${OUTPUT_VAR_NAME} "${${variable_name}}" PARENT_SCOPE)
-      break()
+      set(${OUTPUT_VAR_NAME} "${${variable_name}}")
+      return(PROPAGATE ${OUTPUT_VAR_NAME})
     endif()
   endforeach()
 endfunction()
@@ -1918,10 +1913,10 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
     endif()
 
     # find generated rpm files and take their names
-    file(GLOB_RECURSE GENERATED_FILES "${CPACK_RPM_DIRECTORY}/RPMS/*.rpm"
+    file(GLOB_RECURSE GEN_CPACK_OUTPUT_FILES "${CPACK_RPM_DIRECTORY}/RPMS/*.rpm"
       "${CPACK_RPM_DIRECTORY}/SRPMS/*.rpm")
 
-    if(NOT GENERATED_FILES)
+    if(NOT GEN_CPACK_OUTPUT_FILES)
       message(FATAL_ERROR "RPM package was not generated! ${CPACK_RPM_DIRECTORY}")
     endif()
 
@@ -1962,7 +1957,7 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
     endif()
 
     if(expected_filenames_)
-      foreach(F IN LISTS GENERATED_FILES)
+      foreach(F IN LISTS GEN_CPACK_OUTPUT_FILES)
         unset(matched_)
         foreach(expected_ IN LISTS expected_filenames_)
           if(F MATCHES ".*/${expected_}")
@@ -1982,15 +1977,15 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
         endif()
       endforeach()
 
-      set(GENERATED_FILES "${new_files_list_}")
+      set(GEN_CPACK_OUTPUT_FILES "${new_files_list_}")
     endif()
   endif()
 
-  set(GEN_CPACK_OUTPUT_FILES "${GENERATED_FILES}" PARENT_SCOPE)
-
   if(CPACK_RPM_PACKAGE_DEBUG)
-     message("CPackRPM:Debug: GEN_CPACK_OUTPUT_FILES = ${GENERATED_FILES}")
+     message("CPackRPM:Debug: GEN_CPACK_OUTPUT_FILES = ${GEN_CPACK_OUTPUT_FILES}")
   endif()
+
+  return(PROPAGATE GEN_CPACK_OUTPUT_FILES)
 endfunction()
 
 cpack_rpm_generate_package()
