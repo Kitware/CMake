@@ -98,6 +98,8 @@ enum class FastbuildTargetDepType
   REGULAR,
   // Utility target dep.
   UTIL,
+  // A physical file on disk.
+  ARTIFACT,
 };
 struct FastbuildTargetDep
 {
@@ -137,6 +139,7 @@ struct FastbuildTargetBase
   std::set<FastbuildTargetDep> PreBuildDependencies;
   bool Hidden = true;
   FastbuildTargetType Type;
+  bool ExcludeFromAll = false;
   explicit FastbuildTargetBase(FastbuildTargetType TargetType)
     : Type(TargetType)
   {
@@ -146,7 +149,6 @@ using FastbuildTargetPtrT = std::unique_ptr<FastbuildTargetBase>;
 
 struct FastbuildAliasNode : public FastbuildTargetBase
 {
-  bool ExcludeFromAll = false;
   FastbuildAliasNode()
     : FastbuildTargetBase(FastbuildTargetType::ALIAS)
   {
@@ -169,7 +171,6 @@ struct FastbuildExecNode : public FastbuildTargetBase
   FastbuildAliasNode OutputsAlias;
   FastbuildAliasNode ByproductsAlias;
   std::string ConcurrencyGroupName;
-  bool ExcludeFromAll = false;
   FastbuildExecNode()
     : FastbuildTargetBase(FastbuildTargetType::EXEC)
   {
@@ -331,7 +332,6 @@ struct FastbuildTarget : public FastbuildTargetBase
   FastbuildExecNodes PreLinkExecNodes;
   FastbuildExecNodes PostBuildExecNodes;
   bool IsGlobal = false;
-  bool ExcludeFromAll = false;
   bool AllowDistribution = true;
   FastbuildTarget()
     : FastbuildTargetBase(FastbuildTargetType::LINK)
