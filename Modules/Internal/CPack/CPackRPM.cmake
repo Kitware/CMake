@@ -203,8 +203,7 @@ endfunction()
 function(cpack_rpm_prepare_content_list)
   # get files list
   file(GLOB_RECURSE CPACK_RPM_INSTALL_FILES LIST_DIRECTORIES true RELATIVE "${WDIR}" "${WDIR}/*")
-  set(CPACK_RPM_INSTALL_FILES "/${CPACK_RPM_INSTALL_FILES}")
-  string(REPLACE ";" ";/" CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}")
+  list(TRANSFORM CPACK_RPM_INSTALL_FILES PREPEND "/")
 
   # if we are creating a relocatable package, omit parent directories of
   # CPACK_RPM_PACKAGE_PREFIX. This is achieved by building a "filter list"
