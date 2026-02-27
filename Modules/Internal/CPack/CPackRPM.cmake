@@ -21,32 +21,32 @@ macro(set_spec_scripts PACKAGE_NAME)
   # on shell
 
   set_spec_script_if_enabled(
-    "post"
+    post
     "${PACKAGE_NAME}"
     "${RPM_SYMLINK_POSTINSTALL}\n${CPACK_RPM_SPEC_POSTINSTALL}")
 
   set_spec_script_if_enabled(
-    "posttrans"
+    posttrans
     "${PACKAGE_NAME}"
     "${CPACK_RPM_SPEC_POSTTRANS}")
 
   set_spec_script_if_enabled(
-    "postun"
+    postun
     "${PACKAGE_NAME}"
     "${CPACK_RPM_SPEC_POSTUNINSTALL}")
 
   set_spec_script_if_enabled(
-    "pre"
+    pre
     "${PACKAGE_NAME}"
     "${CPACK_RPM_SPEC_PREINSTALL}")
 
   set_spec_script_if_enabled(
-    "pretrans"
+    pretrans
     "${PACKAGE_NAME}"
     "${CPACK_RPM_SPEC_PRETRANS}")
 
   set_spec_script_if_enabled(
-    "preun"
+    preun
     "${PACKAGE_NAME}"
     "${CPACK_RPM_SPEC_PREUNINSTALL}")
 endmacro()
@@ -104,11 +104,11 @@ function(get_unix_permissions_octal_notation PERMISSIONS_VAR RETURN_VAR)
     set(${PERMISSION_TYPE}_PERMISSIONS 0)
 
     foreach(PERMISSION IN LISTS PERMISSIONS)
-      if("${PERMISSION}" STREQUAL "${PERMISSION_TYPE}_READ")
+      if(PERMISSION STREQUAL "${PERMISSION_TYPE}_READ")
         math(EXPR ${PERMISSION_TYPE}_PERMISSIONS "${${PERMISSION_TYPE}_PERMISSIONS} + 4")
-      elseif("${PERMISSION}" STREQUAL "${PERMISSION_TYPE}_WRITE")
+      elseif(PERMISSION STREQUAL "${PERMISSION_TYPE}_WRITE")
         math(EXPR ${PERMISSION_TYPE}_PERMISSIONS "${${PERMISSION_TYPE}_PERMISSIONS} + 2")
-      elseif("${PERMISSION}" STREQUAL "${PERMISSION_TYPE}_EXECUTE")
+      elseif(PERMISSION STREQUAL "${PERMISSION_TYPE}_EXECUTE")
         math(EXPR ${PERMISSION_TYPE}_PERMISSIONS "${${PERMISSION_TYPE}_PERMISSIONS} + 1")
       elseif(PERMISSION MATCHES "${PERMISSION_TYPE}.*")
         message(FATAL_ERROR "${PERMISSIONS_VAR} contains invalid values.")
@@ -187,7 +187,7 @@ function(cpack_rpm_prepare_relocation_paths)
       file(RELATIVE_PATH REL_PATH_ "${RELOCATION_PATH}" "${TMP_PATH}")
       string(SUBSTRING "${REL_PATH_}" 0 2 PREFIX_)
 
-      if(NOT "${PREFIX_}" STREQUAL "..")
+      if(NOT PREFIX_ STREQUAL "..")
         set(TMP_PATH_FOUND_ TRUE)
         break()
       endif()
@@ -214,7 +214,7 @@ function(cpack_rpm_prepare_content_list)
     # final element (so the install-prefix dir itself is not omitted
     # from the RPM's content-list)
     list(SORT RPM_USED_PACKAGE_PREFIXES)
-    set(_DISTINCT_PATH "NOT_SET")
+    set(_DISTINCT_PATH NOT_SET)
     foreach(_RPM_RELOCATION_PREFIX IN LISTS RPM_USED_PACKAGE_PREFIXES)
       if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
         set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
@@ -334,7 +334,7 @@ function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
       string(LENGTH "${POINT_PATH}" POINT_PATH_LEN)
 
       if(_RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX})
-        if("${SYMLINK_INDEX}" EQUAL "${POINT_INDEX}")
+        if(SYMLINK_INDEX EQUAL POINT_INDEX)
           set(INDENT "")
         else()
           string(APPEND SCRIPT_PART "  if [ \"$RPM_INSTALL_PREFIX${POINT_INDEX}\" != \"${POINT_PATH}\" ]; then\n")
@@ -360,7 +360,7 @@ function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
           string(APPEND SCRIPT_PART "  ${INDENT}fi\n")
         endforeach()
 
-        if(NOT "${SYMLINK_INDEX}" EQUAL "${POINT_INDEX}")
+        if(NOT SYMLINK_INDEX EQUAL POINT_INDEX)
           string(APPEND SCRIPT_PART "  fi\n")
         endif()
       endif()
@@ -458,18 +458,18 @@ function(cpack_rpm_symlink_add_for_relocation_script PACKAGE_PREFIXES SYMLINK SY
 
       # source path relocated
       list(APPEND _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_X "${PAIR_NO}")
-      list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_X")
+      list(APPEND RELOCATION_VARS _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_X)
 
       foreach(POINT_RELOC_PATH IN LISTS POINT_RELOCATION_PATHS)
         list(FIND PACKAGE_PREFIXES "${POINT_RELOC_PATH}" POINT_INDEX)
 
         # both paths relocated
-        list(APPEND _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX} "${PAIR_NO}")
-        list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX}")
+        list(APPEND _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX} ${PAIR_NO})
+        list(APPEND RELOCATION_VARS _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX})
 
         # point path relocated
-        list(APPEND _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX} "${PAIR_NO}")
-        list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_X_${POINT_INDEX}")
+        list(APPEND _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX} ${PAIR_NO})
+        list(APPEND RELOCATION_VARS _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX})
       endforeach()
     endforeach()
   elseif(POINT_PATHS_COUNT)
@@ -477,14 +477,14 @@ function(cpack_rpm_symlink_add_for_relocation_script PACKAGE_PREFIXES SYMLINK SY
       list(FIND PACKAGE_PREFIXES "${POINT_RELOC_PATH}" POINT_INDEX)
 
       # point path relocated
-      list(APPEND _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX} "${PAIR_NO}")
-      list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_X_${POINT_INDEX}")
+      list(APPEND _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX} ${PAIR_NO})
+      list(APPEND RELOCATION_VARS _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX})
     endforeach()
   endif()
 
   # no path relocated
-  list(APPEND _RPM_RELOCATION_SCRIPT_X_X "${PAIR_NO}")
-  list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_X_X")
+  list(APPEND _RPM_RELOCATION_SCRIPT_X_X ${PAIR_NO})
+  list(APPEND RELOCATION_VARS _RPM_RELOCATION_SCRIPT_X_X)
 
   set(REQUIRES_SYMLINK_RELOCATION_SCRIPT "true")
   set(DIRECTIVE "%ghost ")
@@ -534,8 +534,8 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
         if(SYMLINK_POINT_ MATCHES "${IN_SYMLINK_POINT_REGEX}")
           # only symlinks that are pointing inside the packaging structure should be checked for relocation
           string(SUBSTRING "${SYMLINK_POINT_}" ${WDR_LEN_} -1 SYMLINK_POINT_WD_)
-          cpack_rpm_symlink_get_relocation_prefixes("${F}" "${PACKAGE_PREFIXES}" "SYMLINK_RELOCATIONS")
-          cpack_rpm_symlink_get_relocation_prefixes("${SYMLINK_POINT_WD_}" "${PACKAGE_PREFIXES}" "POINT_RELOCATIONS")
+          cpack_rpm_symlink_get_relocation_prefixes("${F}" "${PACKAGE_PREFIXES}" SYMLINK_RELOCATIONS)
+          cpack_rpm_symlink_get_relocation_prefixes("${SYMLINK_POINT_WD_}" "${PACKAGE_PREFIXES}" POINT_RELOCATIONS)
 
           list(LENGTH SYMLINK_RELOCATIONS SYMLINK_RELOCATIONS_COUNT)
           list(LENGTH POINT_RELOCATIONS POINT_RELOCATIONS_COUNT)
@@ -555,17 +555,17 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
           # find matching
           foreach(SYMLINK_RELOCATION_PREFIX IN LISTS SYMLINK_RELOCATIONS)
             list(FIND POINT_RELOCATIONS "${SYMLINK_RELOCATION_PREFIX}" FOUND_INDEX)
-            if(NOT ${FOUND_INDEX} EQUAL -1)
+            if(NOT FOUND_INDEX EQUAL -1)
               break()
             endif()
           endforeach()
 
-          if(NOT ${FOUND_INDEX} EQUAL -1)
+          if(NOT FOUND_INDEX EQUAL -1)
             # symlinks have the same subpath
-            if(${SYMLINK_RELOCATIONS_COUNT} EQUAL 1 AND ${POINT_RELOCATIONS_COUNT} EQUAL 1)
+            if(SYMLINK_RELOCATIONS_COUNT EQUAL 1 AND POINT_RELOCATIONS_COUNT EQUAL 1)
               # permanent symlink
               get_filename_component(SYMLINK_LOCATION_ "${F}" DIRECTORY)
-              file(RELATIVE_PATH FINAL_PATH_ ${SYMLINK_LOCATION_} ${SYMLINK_POINT_WD_})
+              file(RELATIVE_PATH FINAL_PATH_ "${SYMLINK_LOCATION_}" "${SYMLINK_POINT_WD_}")
               execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${FINAL_PATH_}" "${WDIR}/${F}")
             else()
               # relocation subpaths
@@ -644,7 +644,7 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
       continue()
     endif()
 
-    execute_process(COMMAND "${CPACK_OBJDUMP_EXECUTABLE}" -h ${WORKING_DIR}/${F}
+    execute_process(COMMAND "${CPACK_OBJDUMP_EXECUTABLE}" -h "${WORKING_DIR}/${F}"
                     WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}"
                     RESULT_VARIABLE OBJDUMP_EXEC_RESULT
                     OUTPUT_VARIABLE OBJDUMP_OUT
@@ -700,7 +700,7 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
          NOT "GROUP_EXECUTE" IN_LIST permissions_ AND
          NOT "WORLD_EXECUTE" IN_LIST permissions_)
         if(CPACK_RPM_INSTALL_WITH_EXEC)
-          execute_process(COMMAND chmod a+x ${WORKING_DIR}/${F}
+          execute_process(COMMAND chmod a+x "${WORKING_DIR}/${F}"
                   RESULT_VARIABLE res_
                   ERROR_VARIABLE err_
                   OUTPUT_QUIET)
@@ -829,7 +829,7 @@ function(cpack_rpm_generate_package)
       string(REGEX REPLACE "\n" ", "
              LSB_RELEASE_OUTPUT
              ${_TMP_LSB_RELEASE_OUTPUT})
-    else ()
+    else()
       set(LSB_RELEASE_OUTPUT "lsb_release not installed/found!")
     endif()
     message("CPackRPM:Debug: LSB_RELEASE  = ${LSB_RELEASE_OUTPUT}")
@@ -845,7 +845,7 @@ function(cpack_rpm_generate_package)
 
   # Are we packaging components ?
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    string(TOUPPER ${CPACK_RPM_PACKAGE_COMPONENT} CPACK_RPM_PACKAGE_COMPONENT_UPPER)
+    string(TOUPPER "${CPACK_RPM_PACKAGE_COMPONENT}" CPACK_RPM_PACKAGE_COMPONENT_UPPER)
   endif()
 
   set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}")
@@ -862,9 +862,9 @@ function(cpack_rpm_generate_package)
   # CPACK_RPM_PACKAGE_SUMMARY (mandatory)
 
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_SUMMARY"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_SUMMARY")
+    cpack_rpm_variable_fallback(CPACK_RPM_PACKAGE_SUMMARY
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_SUMMARY)
   endif()
 
   if(NOT CPACK_RPM_PACKAGE_SUMMARY)
@@ -886,15 +886,14 @@ function(cpack_rpm_generate_package)
   endif()
 
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    string(TOUPPER "${CPACK_RPM_MAIN_COMPONENT}"
-      CPACK_RPM_MAIN_COMPONENT_UPPER)
+    string(TOUPPER "${CPACK_RPM_MAIN_COMPONENT}" CPACK_RPM_MAIN_COMPONENT_UPPER)
 
     if(NOT CPACK_RPM_MAIN_COMPONENT_UPPER STREQUAL CPACK_RPM_PACKAGE_COMPONENT_UPPER)
       string(APPEND CPACK_RPM_PACKAGE_NAME "-${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}")
 
-      cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_NAME"
-        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME"
-        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_NAME")
+      cpack_rpm_variable_fallback(CPACK_RPM_PACKAGE_NAME
+        CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME
+        CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_NAME)
     endif()
   endif()
 
@@ -923,9 +922,9 @@ function(cpack_rpm_generate_package)
   endif()
 
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_ARCHITECTURE"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_ARCHITECTURE")
+    cpack_rpm_variable_fallback(CPACK_RPM_PACKAGE_ARCHITECTURE
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_ARCHITECTURE)
 
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: using component build arch = ${CPACK_RPM_PACKAGE_ARCHITECTURE}")
@@ -947,7 +946,7 @@ function(cpack_rpm_generate_package)
   # This is the case when the packaging is buggy (not) the software :=)
   # If not set, 1 is a good candidate
   if(NOT CPACK_RPM_PACKAGE_RELEASE)
-    set(CPACK_RPM_PACKAGE_RELEASE "1")
+    set(CPACK_RPM_PACKAGE_RELEASE 1)
   endif()
 
   if(CPACK_RPM_PACKAGE_RELEASE_DIST)
@@ -956,18 +955,18 @@ function(cpack_rpm_generate_package)
 
   # CPACK_RPM_PACKAGE_LICENSE
   if(NOT CPACK_RPM_PACKAGE_LICENSE)
-    set(CPACK_RPM_PACKAGE_LICENSE "unknown")
+    set(CPACK_RPM_PACKAGE_LICENSE unknown)
   endif()
 
   # CPACK_RPM_PACKAGE_GROUP
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_GROUP"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_GROUP"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_GROUP")
+    cpack_rpm_variable_fallback(CPACK_RPM_PACKAGE_GROUP
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_GROUP
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_GROUP)
   endif()
 
   if(NOT CPACK_RPM_PACKAGE_GROUP)
-    set(CPACK_RPM_PACKAGE_GROUP "unknown")
+    set(CPACK_RPM_PACKAGE_GROUP unknown)
   endif()
 
   # CPACK_RPM_PACKAGE_VENDOR
@@ -975,7 +974,7 @@ function(cpack_rpm_generate_package)
     if(CPACK_PACKAGE_VENDOR)
       set(CPACK_RPM_PACKAGE_VENDOR "${CPACK_PACKAGE_VENDOR}")
     else()
-      set(CPACK_RPM_PACKAGE_VENDOR "unknown")
+      set(CPACK_RPM_PACKAGE_VENDOR unknown)
     endif()
   endif()
 
@@ -991,23 +990,23 @@ function(cpack_rpm_generate_package)
   #
 
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_DESCRIPTION"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_DESCRIPTION"
-      "CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION")
+    cpack_rpm_variable_fallback(CPACK_RPM_PACKAGE_DESCRIPTION
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_DESCRIPTION
+      CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION)
   endif()
 
   if(NOT CPACK_RPM_PACKAGE_DESCRIPTION)
     if(CPACK_PACKAGE_DESCRIPTION_FILE)
-      file(READ ${CPACK_PACKAGE_DESCRIPTION_FILE} CPACK_RPM_PACKAGE_DESCRIPTION)
-    else ()
+      file(READ "${CPACK_PACKAGE_DESCRIPTION_FILE}" CPACK_RPM_PACKAGE_DESCRIPTION)
+    else()
       set(CPACK_RPM_PACKAGE_DESCRIPTION "no package description available")
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # CPACK_RPM_COMPRESSION_TYPE
   #
-  if (CPACK_RPM_COMPRESSION_TYPE)
+  if(CPACK_RPM_COMPRESSION_TYPE)
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: User Specified RPM compression type: ${CPACK_RPM_COMPRESSION_TYPE}")
     endif()
@@ -1111,9 +1110,9 @@ function(cpack_rpm_generate_package)
     endif()
 
     if(CPACK_RPM_PACKAGE_COMPONENT)
-      cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}"
-        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}"
-        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_${_RPM_SPEC_HEADER}")
+      cpack_rpm_variable_fallback(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}
+        CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}
+        CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_${_RPM_SPEC_HEADER})
     endif()
 
     if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
@@ -1194,27 +1193,27 @@ function(cpack_rpm_generate_package)
   # put after the %pre or %preun or %pretrans section
   foreach(RPM_SCRIPT_FILE_TYPE_ IN ITEMS INSTALL UNINSTALL TRANS)
     foreach(RPM_SCRIPT_FILE_TIME_ IN ITEMS PRE POST)
-      set("CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE"
+      set(CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE
         "${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE}")
 
       if(CPACK_RPM_PACKAGE_COMPONENT)
-        cpack_rpm_variable_fallback("CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE"
-          "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE"
-          "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE")
+        cpack_rpm_variable_fallback(CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE
+          CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE
+          CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE)
       endif()
 
       # Handle file if it has been specified
       if(CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE)
         if(EXISTS ${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE})
-          file(READ ${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE}
-            "CPACK_RPM_SPEC_${RPM_SCRIPT_FILE_TIME_}${RPM_SCRIPT_FILE_TYPE_}")
+          file(READ "${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE}"
+            CPACK_RPM_SPEC_${RPM_SCRIPT_FILE_TIME_}${RPM_SCRIPT_FILE_TYPE_})
         else()
           message("CPackRPM:Warning: CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE <${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE}> does not exist - ignoring")
         endif()
       else()
         # reset SPEC var value if no file has been specified
         # (either globally or component-wise)
-        set("CPACK_RPM_SPEC_${RPM_SCRIPT_FILE_TIME_}${RPM_SCRIPT_FILE_TYPE_}" "")
+        set(CPACK_RPM_SPEC_${RPM_SCRIPT_FILE_TIME_}${RPM_SCRIPT_FILE_TYPE_} "")
       endif()
     endforeach()
   endforeach()
@@ -1224,7 +1223,7 @@ function(cpack_rpm_generate_package)
   # The referred file will be read and directly put after the %changelog section
   if(CPACK_RPM_CHANGELOG_FILE)
     if(EXISTS ${CPACK_RPM_CHANGELOG_FILE})
-      file(READ ${CPACK_RPM_CHANGELOG_FILE} CPACK_RPM_SPEC_CHANGELOG)
+      file(READ "${CPACK_RPM_CHANGELOG_FILE}" CPACK_RPM_SPEC_CHANGELOG)
     else()
       message(SEND_ERROR "CPackRPM:Warning: CPACK_RPM_CHANGELOG_FILE <${CPACK_RPM_CHANGELOG_FILE}> does not exist - ignoring")
     endif()
@@ -1267,9 +1266,9 @@ function(cpack_rpm_generate_package)
   # This must be done BEFORE the CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL handling
   if(CPACK_RPM_PACKAGE_COMPONENT)
     if(CPACK_ABSOLUTE_DESTINATION_FILES)
-      cpack_rpm_variable_fallback("COMPONENT_FILES_TAG"
-        "CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT}"
-        "CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}")
+      cpack_rpm_variable_fallback(COMPONENT_FILES_TAG
+        CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT}
+        CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT_UPPER})
       set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${${COMPONENT_FILES_TAG}}")
       if(CPACK_RPM_PACKAGE_DEBUG)
         message("CPackRPM:Debug: Handling Absolute Destination Files: <${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}>")
@@ -1285,9 +1284,9 @@ function(cpack_rpm_generate_package)
   # In component case, set CPACK_RPM_USER_FILELIST_INTERNAL with CPACK_RPM_<COMPONENT>_USER_FILELIST.
   set(CPACK_RPM_USER_FILELIST_INTERNAL "")
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    cpack_rpm_variable_fallback("CPACK_RPM_USER_FILELIST_INTERNAL"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_FILELIST")
+    cpack_rpm_variable_fallback(CPACK_RPM_USER_FILELIST_INTERNAL
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_FILELIST)
 
     if(CPACK_RPM_PACKAGE_DEBUG AND CPACK_RPM_USER_FILELIST_INTERNAL)
       message("CPackRPM:Debug: Handling User Filelist: <${CPACK_RPM_USER_FILELIST_INTERNAL}>")
@@ -1332,7 +1331,7 @@ function(cpack_rpm_generate_package)
       # Remove from CPACK_RPM_INSTALL_FILES and CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
       list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${F_PATH})
       # ABSOLUTE destination files list may not exists at all
-      if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
+      if(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
         list(REMOVE_ITEM CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL ${F_PATH})
       endif()
     endforeach()
@@ -1347,7 +1346,7 @@ function(cpack_rpm_generate_package)
     set(CPACK_RPM_USER_INSTALL_FILES "")
   endif()
 
-  if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
+  if(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: Handling Absolute Destination Files: ${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}")
     endif()
@@ -1380,15 +1379,15 @@ function(cpack_rpm_generate_package)
     set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
   endif()
 
-  cpack_rpm_variable_fallback("CPACK_RPM_DEBUGINFO_PACKAGE"
-    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_DEBUGINFO_PACKAGE"
-    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEBUGINFO_PACKAGE"
-    "CPACK_RPM_DEBUGINFO_PACKAGE")
+  cpack_rpm_variable_fallback(CPACK_RPM_DEBUGINFO_PACKAGE
+    CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_DEBUGINFO_PACKAGE
+    CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEBUGINFO_PACKAGE
+    CPACK_RPM_DEBUGINFO_PACKAGE)
   if(CPACK_RPM_DEBUGINFO_PACKAGE OR (CPACK_RPM_DEBUGINFO_SINGLE_PACKAGE AND NOT GENERATE_SPEC_PARTS))
-    cpack_rpm_variable_fallback("CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_BUILD_SOURCE_DIRS_PREFIX"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_BUILD_SOURCE_DIRS_PREFIX"
-      "CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX")
+    cpack_rpm_variable_fallback(CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_BUILD_SOURCE_DIRS_PREFIX
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_BUILD_SOURCE_DIRS_PREFIX
+      CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX)
     if(NOT CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX)
       set(CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX "/usr/src/debug/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}")
     endif()
@@ -1465,8 +1464,7 @@ function(cpack_rpm_generate_package)
             endif()
 
             file(MAKE_DIRECTORY "${WDIR}/${dir_path_}")
-            file(RENAME "${src_file_}"
-              "${WDIR}/${f_}")
+            file(RENAME "${src_file_}" "${WDIR}/${f_}")
           endforeach()
         endforeach()
 
@@ -1525,25 +1523,34 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
     elseif(CPACK_RPM_DEFAULT_${_PERM_TYPE})
       set(TMP_DEFAULT_${_PERM_TYPE} "${CPACK_RPM_DEFAULT_${_PERM_TYPE}}")
     else()
-      set(TMP_DEFAULT_${_PERM_TYPE} "root")
+      set(TMP_DEFAULT_${_PERM_TYPE} root)
     endif()
   endforeach()
 
   # set default file and dir permissions
   foreach(_PERM_TYPE IN ITEMS FILE DIR)
     if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS)
-      get_unix_permissions_octal_notation("CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS" "TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
-      set(_PERMISSIONS_VAR "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
+      get_unix_permissions_octal_notation(
+          CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS
+          TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS
+        )
+      set(_PERMISSIONS_VAR CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS)
     elseif(CPACK_RPM_DEFAULT_${_PERM_TYPE}_PERMISSIONS)
-      get_unix_permissions_octal_notation("CPACK_RPM_DEFAULT_${_PERM_TYPE}_PERMISSIONS" "TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
-      set(_PERMISSIONS_VAR "CPACK_RPM_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
+      get_unix_permissions_octal_notation(
+          CPACK_RPM_DEFAULT_${_PERM_TYPE}_PERMISSIONS
+          TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS
+        )
+      set(_PERMISSIONS_VAR CPACK_RPM_DEFAULT_${_PERM_TYPE}_PERMISSIONS)
     else()
-      set(TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS "-")
+      set(TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS -)
     endif()
   endforeach()
 
   # The name of the final spec file to be used by rpmbuild
-  set(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}.spec")
+  cmake_path(
+      APPEND CPACK_RPM_ROOTDIR "SPECS/${CPACK_RPM_PACKAGE_NAME}.spec"
+      OUTPUT_VARIABLE CPACK_RPM_BINARY_SPECFILE
+    )
 
   # Print out some debug information if we were asked for that
   if(CPACK_RPM_PACKAGE_DEBUG)
@@ -1564,15 +1571,15 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
 
   # We can have a component specific spec file.
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    cpack_rpm_variable_fallback("CPACK_RPM_USER_BINARY_SPECFILE"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_BINARY_SPECFILE")
+    cpack_rpm_variable_fallback(CPACK_RPM_USER_BINARY_SPECFILE
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE
+      CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_BINARY_SPECFILE)
   endif()
 
-  cpack_rpm_variable_fallback("CPACK_RPM_FILE_NAME"
-    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_FILE_NAME"
-    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_FILE_NAME"
-    "CPACK_RPM_FILE_NAME")
+  cpack_rpm_variable_fallback(CPACK_RPM_FILE_NAME
+    CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_FILE_NAME
+    CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_FILE_NAME
+    CPACK_RPM_FILE_NAME)
   if(NOT CPACK_RPM_FILE_NAME STREQUAL "RPM-DEFAULT")
     if(CPACK_RPM_FILE_NAME)
       if(NOT CPACK_RPM_FILE_NAME MATCHES ".*\\.rpm")
@@ -1580,9 +1587,7 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
       endif()
     else()
       # old file name format for back compatibility
-      string(TOUPPER "${CPACK_RPM_MAIN_COMPONENT}"
-        CPACK_RPM_MAIN_COMPONENT_UPPER)
-
+      string(TOUPPER "${CPACK_RPM_MAIN_COMPONENT}" CPACK_RPM_MAIN_COMPONENT_UPPER)
       if(CPACK_RPM_MAIN_COMPONENT_UPPER STREQUAL CPACK_RPM_PACKAGE_COMPONENT_UPPER)
         # this is the main component so ignore the component filename part
         set(CPACK_RPM_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}.rpm")
@@ -1642,7 +1647,7 @@ mv *.rpm %_rpmdir"
       )
     set(TMP_RPM_PREP "%setup -c")
 
-    set(RPMBUILD_FLAGS "-bs")
+    set(RPMBUILD_FLAGS -bs)
 
      file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
       "# Restore old style debuginfo creation for rpm >= 4.14.
@@ -1765,7 +1770,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
     # We should generate a USER spec file template:
     #  - either because the user asked for it : CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
     #  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
-    set(RPMBUILD_FLAGS "-bb")
+    set(RPMBUILD_FLAGS -bb)
     if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
 
       set_spec_scripts("")
@@ -1919,10 +1924,10 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
     endif()
 
     if(CPACK_RPM_DEBUGINFO_PACKAGE)
-      cpack_rpm_variable_fallback("CPACK_RPM_DEBUGINFO_FILE_NAME"
-        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_DEBUGINFO_FILE_NAME"
-        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEBUGINFO_FILE_NAME"
-        "CPACK_RPM_DEBUGINFO_FILE_NAME")
+      cpack_rpm_variable_fallback(CPACK_RPM_DEBUGINFO_FILE_NAME
+        CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_DEBUGINFO_FILE_NAME
+        CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEBUGINFO_FILE_NAME
+        CPACK_RPM_DEBUGINFO_FILE_NAME)
 
       if(CPACK_RPM_DEBUGINFO_FILE_NAME AND
         NOT CPACK_RPM_DEBUGINFO_FILE_NAME STREQUAL "RPM-DEFAULT")
