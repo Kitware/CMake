@@ -123,11 +123,17 @@ endfunction()
 function(cpack_rpm_prepare_relocation_paths)
   # set appropriate prefix, remove possible trailing slash and convert backslashes to slashes
   if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX)
-    file(TO_CMAKE_PATH "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX}" PATH_PREFIX)
+    cmake_path(
+      CONVERT "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX}"
+      TO_CMAKE_PATH_LIST PATH_PREFIX NORMALIZE
+    )
   elseif(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_PREFIX)
-    file(TO_CMAKE_PATH "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_PREFIX}" PATH_PREFIX)
+    cmake_path(
+      CONVERT "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_PREFIX}"
+      TO_CMAKE_PATH_LIST PATH_PREFIX NORMALIZE
+    )
   else()
-    file(TO_CMAKE_PATH "${CPACK_PACKAGING_INSTALL_PREFIX}" PATH_PREFIX)
+    cmake_path(CONVERT "${CPACK_PACKAGING_INSTALL_PREFIX}" TO_CMAKE_PATH_LIST PATH_PREFIX NORMALIZE )
   endif()
 
   set(RPM_RELOCATION_PATHS "${CPACK_RPM_RELOCATION_PATHS}")
@@ -151,21 +157,16 @@ function(cpack_rpm_prepare_relocation_paths)
   foreach(RELOCATION_PATH IN LISTS RPM_RELOCATION_PATHS)
     if(IS_ABSOLUTE "${RELOCATION_PATH}")
       set(PREPARED_RELOCATION_PATH "${RELOCATION_PATH}")
-    elseif(PATH_PREFIX STREQUAL "/")
-      # don't prefix path with a second slash as "//" is treated as network path
-      # by get_filename_component() so it remains in path even inside rpm
-      # package where it may cause problems with relocation
-      set(PREPARED_RELOCATION_PATH "/${RELOCATION_PATH}")
     else()
       set(PREPARED_RELOCATION_PATH "${PATH_PREFIX}/${RELOCATION_PATH}")
     endif()
 
     # handle cases where path contains extra slashes (e.g. /a//b/ instead of
     # /a/b)
-    get_filename_component(PREPARED_RELOCATION_PATH
-      "${PREPARED_RELOCATION_PATH}" ABSOLUTE)
+    cmake_path(ABSOLUTE_PATH PREPARED_RELOCATION_PATH NORMALIZE)
 
     if(EXISTS "${WDIR}/${PREPARED_RELOCATION_PATH}")
+      string(REGEX REPLACE "/*$" "" PREPARED_RELOCATION_PATH "${PREPARED_RELOCATION_PATH}")
       string(APPEND TMP_RPM_PREFIXES "Prefix: ${PREPARED_RELOCATION_PATH}\n")
       list(APPEND RPM_USED_PACKAGE_PREFIXES "${PREPARED_RELOCATION_PATH}")
     endif()
@@ -179,7 +180,7 @@ function(cpack_rpm_prepare_relocation_paths)
     unset(TMP_PATH_FOUND_)
 
     foreach(RELOCATION_PATH IN LISTS RPM_USED_PACKAGE_PREFIXES)
-      file(RELATIVE_PATH REL_PATH_ "${RELOCATION_PATH}" "${TMP_PATH}")
+      cmake_path(RELATIVE_PATH TMP_PATH BASE_DIRECTORY "${RELOCATION_PATH}" OUTPUT_VARIABLE REL_PATH_)
       string(SUBSTRING "${REL_PATH_}" 0 2 PREFIX_)
 
       if(NOT PREFIX_ STREQUAL "..")
@@ -506,19 +507,17 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
     if(IS_SYMLINK "${WDIR}/${F}")
       if(IS_RELOCATABLE)
         # check that symlink has relocatable format
-        cmake_path(APPEND WDIR "${F}" OUTPUT_VARIABLE SYMLINK_LOCATION_)
+        cmake_path(APPEND_STRING WDIR "${F}" OUTPUT_VARIABLE SYMLINK_LOCATION_)
         cmake_path(GET SYMLINK_LOCATION_ PARENT_PATH SYMLINK_LOCATION_)
         file(READ_SYMLINK "${WDIR}/${F}" SYMLINK_POINT_)
 
         # check if path is relative or absolute
-        string(SUBSTRING "${SYMLINK_POINT_}" 0 1 SYMLINK_IS_ABSOLUTE_)
-
-        if(${SYMLINK_IS_ABSOLUTE_} STREQUAL "/")
+        if(IS_ABSOLUTE "${SYMLINK_POINT_}")
           # prevent absolute paths from having /../ or /./ section inside of them
-          get_filename_component(SYMLINK_POINT_ "${SYMLINK_POINT_}" ABSOLUTE)
+          cmake_path(NORMAL_PATH SYMLINK_POINT_)
         else()
           # handle relative path
-          get_filename_component(SYMLINK_POINT_ "${SYMLINK_LOCATION_}/${SYMLINK_POINT_}" ABSOLUTE)
+          cmake_path(ABSOLUTE_PATH SYMLINK_POINT_ BASE_DIRECTORY "${SYMLINK_LOCATION_}" NORMALIZE)
         endif()
 
         # recalculate path length after conversion to canonical form
@@ -559,8 +558,12 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
             # symlinks have the same subpath
             if(SYMLINK_RELOCATIONS_COUNT EQUAL 1 AND POINT_RELOCATIONS_COUNT EQUAL 1)
               # permanent symlink
-              get_filename_component(SYMLINK_LOCATION_ "${F}" DIRECTORY)
-              file(RELATIVE_PATH FINAL_PATH_ "${SYMLINK_LOCATION_}" "${SYMLINK_POINT_WD_}")
+              cmake_path(GET F PARENT_PATH SYMLINK_LOCATION_)
+              cmake_path(
+                  RELATIVE_PATH SYMLINK_POINT_WD_
+                  BASE_DIRECTORY "${SYMLINK_LOCATION_}"
+                  OUTPUT_VARIABLE FINAL_PATH_
+                )
               execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${FINAL_PATH_}" "${WDIR}/${F}")
             else()
               # relocation subpaths
@@ -662,21 +665,29 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
               " CPACK_RPM_DEBUGINFO_PACKAGE variable for details.")
           endif()
 
-          file(REMOVE "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}/debugsources_add.list")
-          execute_process(COMMAND "${DEBUGEDIT_EXECUTABLE}" -b "${source_dir_}" -d "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}" -i -l "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}/debugsources_add.list" "${WORKING_DIR}/${F}"
+          cmake_path(
+              APPEND CPACK_RPM_DIRECTORY "${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}/debugsources_add.list"
+              OUTPUT_VARIABLE debugsources_file_
+            )
+          file(REMOVE "${debugsources_file_}")
+          execute_process(
+              COMMAND "${DEBUGEDIT_EXECUTABLE}"
+                -b "${source_dir_}"
+                -d "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}"
+                -i
+                -l "${debugsources_file_}"
+                "${WORKING_DIR}/${F}"
               RESULT_VARIABLE res_
               OUTPUT_VARIABLE opt_
               ERROR_VARIABLE err_
             )
 
-          file(STRINGS
-            "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}/debugsources_add.list"
-            sources_)
+          file(STRINGS "${debugsources_file_}" sources_)
           list(REMOVE_DUPLICATES sources_)
 
           foreach(source_ IN LISTS sources_)
             if(EXISTS "${source_dir_}/${source_}" AND NOT IS_DIRECTORY "${source_dir_}/${source_}")
-              get_filename_component(path_part_ "${source_}" DIRECTORY)
+              cmake_path(GET source_ PARENT_PATH path_part_)
               list(APPEND mkdir_list_ "%{buildroot}${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${path_part_}")
               list(APPEND cp_list_ "cp \"${source_dir_}/${source_}\" \"%{buildroot}${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${path_part_}\"")
 
@@ -843,7 +854,10 @@ function(cpack_rpm_generate_package)
     string(TOUPPER "${CPACK_RPM_PACKAGE_COMPONENT}" CPACK_RPM_PACKAGE_COMPONENT_UPPER)
   endif()
 
-  set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}")
+  cmake_path(
+      APPEND CPACK_TOPLEVEL_DIRECTORY "${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
+      OUTPUT_VARIABLE WDIR
+    )
 
   #
   # Use user-defined RPM specific variables value
@@ -1240,13 +1254,15 @@ function(cpack_rpm_generate_package)
     message("CPackRPM:Debug: Using CPACK_RPM_ROOTDIR=${CPACK_RPM_ROOTDIR}")
   endif()
   # Prepare RPM build tree
-  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR})
-  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/tmp)
-  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/BUILD)
-  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/RPMS)
-  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SOURCES)
-  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SPECS)
-  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SRPMS)
+  file(
+      MAKE_DIRECTORY
+      ${CPACK_RPM_ROOTDIR}/tmp
+      ${CPACK_RPM_ROOTDIR}/BUILD
+      ${CPACK_RPM_ROOTDIR}/RPMS
+      ${CPACK_RPM_ROOTDIR}/SOURCES
+      ${CPACK_RPM_ROOTDIR}/SPECS
+      ${CPACK_RPM_ROOTDIR}/SRPMS
+    )
 
   # it seems rpmbuild can't handle spaces in the path
   # neither escaping (as below) nor putting quotes around the path seem to help
@@ -1389,9 +1405,7 @@ function(cpack_rpm_generate_package)
 
     # handle cases where path contains extra slashes (e.g. /a//b/ instead of
     # /a/b)
-    get_filename_component(CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX
-      "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}" ABSOLUTE)
-
+    cmake_path(ABSOLUTE_PATH CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX NORMALIZE)
     if(CPACK_RPM_DEBUGINFO_SINGLE_PACKAGE AND GENERATE_SPEC_PARTS)
       file(WRITE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_COMPONENT}.files"
         "${CPACK_RPM_INSTALL_FILES}")
@@ -1442,7 +1456,7 @@ function(cpack_rpm_generate_package)
               continue()
             endif()
 
-            get_filename_component(dir_path_ "${f_}" DIRECTORY)
+            cmake_path(GET f_ PARENT_PATH dir_path_)
 
             # check that we are not overriding an existing file that doesn't
             # match the file that we want to copy
@@ -1948,15 +1962,15 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 
     if(expected_filenames_)
       foreach(F IN LISTS GEN_CPACK_OUTPUT_FILES)
-        unset(matched_)
+        set(matched_ FALSE)
         foreach(expected_ IN LISTS expected_filenames_)
           if(F MATCHES ".*/${expected_}")
             list(FIND expected_filenames_ "${expected_}" idx_)
             list(GET filenames_ ${idx_} filename_)
-            get_filename_component(FILE_PATH "${F}" DIRECTORY)
+            cmake_path(GET F PARENT_PATH FILE_PATH)
             file(RENAME "${F}" "${FILE_PATH}/${filename_}")
             list(APPEND new_files_list_ "${FILE_PATH}/${filename_}")
-            set(matched_ "YES")
+            set(matched_ TRUE)
 
             break()
           endif()
