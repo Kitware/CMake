@@ -12,7 +12,7 @@ set(CMAKE_SKIP_BOOTSTRAP_TEST TRUE CACHE BOOL "")
 set(ENV{KWSYS_TEST_PROCESS_1_COUNT} 11)
 
 set(CMake_TEST_GUI "ON" CACHE BOOL "")
-set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database" CACHE STRING "")
+set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database,import_std23" CACHE STRING "")
 set(CMake_TEST_TLS_VERIFY_URL "https://gitlab.kitware.com" CACHE STRING "")
 set(CMake_TEST_TLS_VERIFY_URL_BAD "https://badtls-expired.kitware.com" CACHE STRING "")
 set(CMake_TEST_TLS_VERSION "1.3" CACHE STRING "")
