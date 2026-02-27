@@ -77,6 +77,16 @@ public:
 #undef DIAGNOSTIC_CATEGORY_INFO
     };
 
+  //! convert an action identifier into a string
+  static cm::string_view GetActionString(DiagnosticAction);
+
+  //! convert a category identifier into a string
+  static cm::string_view GetCategoryString(DiagnosticCategory);
+
+  //! Convert a string action into an identifier
+  static cm::optional<DiagnosticAction> GetDiagnosticAction(
+    cm::string_view name);
+
   //! Convert a string category into an identifier
   static cm::optional<DiagnosticCategory> GetDiagnosticCategory(
     cm::string_view name);

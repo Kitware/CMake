@@ -17,6 +17,7 @@
 #include "cmBlockCommand.h"
 #include "cmBreakCommand.h"
 #include "cmBuildCommand.h"
+#include "cmCMakeDiagnosticCommand.h"
 #include "cmCMakeLanguageCommand.h"
 #include "cmCMakeMinimumRequired.h"
 #include "cmCMakePathCommand.h"
@@ -124,6 +125,7 @@ void GetScriptingCommands(cmState* state)
   state->AddFlowControlCommand("while", cmWhileCommand);
   state->AddFlowControlCommand("block", cmBlockCommand);
 
+  state->AddBuiltinCommand("cmake_diagnostic", cmCMakeDiagnosticCommand);
   state->AddBuiltinCommand("cmake_language", cmCMakeLanguageCommand);
   state->AddBuiltinCommand("cmake_minimum_required", cmCMakeMinimumRequired);
   state->AddBuiltinCommand("cmake_path", cmCMakePathCommand);

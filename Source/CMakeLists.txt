@@ -582,6 +582,8 @@ add_library(
   cmBreakCommand.h
   cmBuildCommand.cxx
   cmBuildCommand.h
+  cmCMakeDiagnosticCommand.cxx
+  cmCMakeDiagnosticCommand.h
   cmCMakeHostSystemInformationCommand.cxx
   cmCMakeHostSystemInformationCommand.h
   cmCMakeLanguageCommand.cxx

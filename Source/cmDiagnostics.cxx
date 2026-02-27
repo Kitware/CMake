@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <map>
+#include <string>
 #include <utility>
 
 #include <cmext/string_view>
@@ -40,6 +41,56 @@ cm::optional<cmDiagnostics::DiagnosticCategory> stringToCategory(
 constexpr cmDiagnostics::DiagnosticCategoryInformation
   cmDiagnostics::CategoryInfo[cmDiagnostics::CategoryCount];
 #endif
+
+cm::string_view cmDiagnostics::GetActionString(DiagnosticAction action)
+{
+  switch (action) {
+    case Ignore:
+      return "IGNORE"_s;
+    case Warn:
+      return "WARN"_s;
+    case SendError:
+      return "SEND_ERROR"_s;
+    case FatalError:
+      return "FATAL_ERROR"_s;
+    default:
+      return {};
+  }
+}
+
+cm::string_view cmDiagnostics::GetCategoryString(DiagnosticCategory category)
+{
+  static cm::string_view const names[CategoryCount] = {
+    {}, // CMD_NONE
+#define CATEGORY_NAME(C) #C ""_s,
+    CM_FOR_EACH_DIAGNOSTIC_CATEGORY(CATEGORY_NAME)
+#undef CATEGORY_MAP
+  };
+
+  if (category < CategoryCount) {
+    return names[category];
+  }
+  return {};
+}
+
+cm::optional<cmDiagnostics::DiagnosticAction>
+cmDiagnostics::GetDiagnosticAction(cm::string_view name)
+{
+  if (name == "IGNORE"_s) {
+    return DiagnosticAction::Ignore;
+  }
+  if (name == "WARN"_s) {
+    return DiagnosticAction::Warn;
+  }
+  if (name == "SEND_ERROR"_s) {
+    return DiagnosticAction::SendError;
+  }
+  if (name == "FATAL_ERROR"_s) {
+    return DiagnosticAction::FatalError;
+  }
+
+  return cm::nullopt;
+}
 
 cm::optional<cmDiagnostics::DiagnosticCategory>
 cmDiagnostics::GetDiagnosticCategory(cm::string_view name)

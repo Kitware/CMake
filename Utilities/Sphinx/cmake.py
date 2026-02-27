@@ -461,6 +461,8 @@ class CMakeSignatureObject(CMakeObject):
             sigargs = self.targetnames[sig]
         else:
             def extract_keywords(params):
+                if params[-1].endswith(')'):
+                    params[-1] = params[-1][:-1]
                 for p in params:
                     if p[0].isalpha():
                         yield p
