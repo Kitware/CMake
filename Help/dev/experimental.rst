@@ -56,6 +56,31 @@ When activated, this experimental feature provides the following:
 * Setting ``CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO`` enables generation of
   package information in the |CPS|_ format via the ``install(EXPORT)`` command.
 
+.. _CPS: https://cps-org.github.io/cps/
+.. |CPS| replace:: Common Package Specification
+
+C++ ``import std`` support
+==========================
+
+In order to activate support for ``import std`` in C++23 and newer targets,
+set
+
+* variable ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` to
+* value ``451f2fe2-a8a2-47c3-bc32-94786d8fc91b``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.  It must be set before the ``CXX`` toolchain is discovered by
+CMake, usually as part of a ``project()`` call.
+
+When activated, this experimental feature provides the following:
+
+* The ``CXX_MODULE_STD`` target property and its initializing variable
+  ``CMAKE_CXX_MODULE_STD``.
+
+* Targets with the property set to a true value and at least ``cxx_std_23``
+  may use ``import std;`` in any scanned C++ source file.
+
 Build database support
 ======================
 

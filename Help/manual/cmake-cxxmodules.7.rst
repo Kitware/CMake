@@ -75,8 +75,6 @@ modules includes:
 ``import std`` Support
 ======================
 
-.. versionadded:: 4.3
-
 Support for ``import std`` is limited to the following toolchain and standard
 library combinations:
 
@@ -97,6 +95,12 @@ which have support for ``import std`` in the active C++ toolchain.
 Additionally, only the :ref:`Ninja Generators` currently support
 ``import std`` at this time because :ref:`Visual Studio Generators` do not
 support building :term:`BMIs <BMI>` for ``IMPORTED`` targets.
+
+.. note::
+
+   This support is provided only when experimental support for
+   ``import std`` has been enabled by the
+   ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` gate.
 
 Generator Support
 =================
