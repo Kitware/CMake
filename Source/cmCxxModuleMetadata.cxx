@@ -435,99 +435,140 @@ cmCxxModuleMetadata::SaveResult cmCxxModuleMetadata::SaveToFile(
   return st;
 }
 
-void cmCxxModuleMetadata::PopulateTarget(
-  cmTarget& target, cmCxxModuleMetadata const& meta,
-  std::vector<std::string> const& configs)
+namespace {
+
+struct MetaDataProperties
 {
-  std::set<cm::string_view> allIncludeDirectories;
-  std::set<cm::string_view> allCompileOptions;
-  std::set<cm::string_view> allCompileFeatures;
-  std::set<std::string> allCompileDefinitions;
-  std::set<std::string> baseDirs;
+  std::string MetadataDir;
+  std::set<cm::string_view> AllCompileFeatures;
+  std::set<cm::string_view> AllCompileOptions;
+  std::set<cm::string_view> AllIncludeDirectories;
+  std::set<std::string> AllCompileDefinitions;
+  std::set<std::string> BaseDirs;
+  std::set<std::string> Sources;
 
-  std::string metadataDir =
-    cmSystemTools::GetFilenamePath(meta.MetadataFilePath);
+  std::string NormalizePath(std::string const& in) const
+  {
+    std::string out = in;
+    if (!cmSystemTools::FileIsFullPath(in)) {
+      out = cmStrCat(MetadataDir, '/', in);
+    }
+    return cmSystemTools::CollapseFullPath(out);
+  }
+};
 
-  auto fileSet = target.GetOrCreateFileSet("CXX_MODULES", "CXX_MODULES",
-                                           cmFileSetVisibility::Interface);
+MetaDataProperties CollectMetaProperties(cmCxxModuleMetadata const& meta)
+{
+  MetaDataProperties props;
+
+  props.MetadataDir = cmSystemTools::GetFilenamePath(meta.MetadataFilePath);
 
   for (auto const& module : meta.Modules) {
-    std::string sourcePath = module.SourcePath;
-    if (!cmSystemTools::FileIsFullPath(sourcePath)) {
-      sourcePath = cmStrCat(metadataDir, '/', sourcePath);
-    }
-
-    sourcePath = cmSystemTools::ToNormalizedPathOnDisk(std::move(sourcePath));
+    std::string sourcePath = props.NormalizePath(module.SourcePath);
+    props.Sources.insert(sourcePath);
 
     // Module metadata files can reference files in different roots,
     // just use the immediate parent directory as a base directory
-    baseDirs.insert(cmSystemTools::GetFilenamePath(sourcePath));
-
-    fileSet.first->AddFileEntry(sourcePath);
+    props.BaseDirs.insert(cmSystemTools::GetFilenamePath(sourcePath));
 
     if (module.LocalArguments) {
       for (auto const& incDir : module.LocalArguments->IncludeDirectories) {
-        allIncludeDirectories.emplace(incDir);
+        props.AllIncludeDirectories.emplace(incDir);
       }
       for (auto const& sysIncDir :
            module.LocalArguments->SystemIncludeDirectories) {
-        allIncludeDirectories.emplace(sysIncDir);
+        props.AllIncludeDirectories.emplace(sysIncDir);
       }
       for (auto const& opt : module.LocalArguments->CompileOptions) {
-        allCompileOptions.emplace(opt);
+        props.AllCompileOptions.emplace(opt);
       }
       for (auto const& opt : module.LocalArguments->CompileFeatures) {
-        allCompileFeatures.emplace(opt);
+        props.AllCompileFeatures.emplace(opt);
       }
 
       for (auto const& def : module.LocalArguments->Definitions) {
         if (!def.Undef) {
           if (def.Value) {
-            allCompileDefinitions.emplace(
+            props.AllCompileDefinitions.emplace(
               cmStrCat(def.Name, "="_s, *def.Value));
           } else {
-            allCompileDefinitions.emplace(def.Name);
+            props.AllCompileDefinitions.emplace(def.Name);
           }
         }
       }
     }
   }
 
-  for (auto const& baseDir : baseDirs) {
+  return props;
+}
+
+void PopulateFileSet(cmTarget& target, MetaDataProperties const& props)
+{
+  auto fileSet = target.GetOrCreateFileSet("CXX_MODULES", "CXX_MODULES",
+                                           cmFileSetVisibility::Public);
+
+  for (auto const& source : props.Sources) {
+    fileSet.first->AddFileEntry(source);
+  }
+
+  for (auto const& baseDir : props.BaseDirs) {
     fileSet.first->AddDirectoryEntry(baseDir);
   }
+}
 
-  if (!allIncludeDirectories.empty()) {
+void PopulateLocalTarget(cmTarget& target, MetaDataProperties const& props)
+{
+  if (!props.AllIncludeDirectories.empty()) {
+    target.AppendProperty("INCLUDE_DIRECTORIES",
+                          cmJoin(props.AllIncludeDirectories, ";"));
+  }
+
+  if (!props.AllCompileDefinitions.empty()) {
+    target.AppendProperty("COMPILE_DEFINITIONS",
+                          cmJoin(props.AllCompileDefinitions, ";"));
+  }
+
+  if (!props.AllCompileOptions.empty()) {
+    target.AppendProperty("COMPILE_OPTIONS",
+                          cmJoin(props.AllCompileOptions, ";"));
+  }
+
+  if (!props.AllCompileFeatures.empty()) {
+    target.AppendProperty("COMPILE_FEATURES",
+                          cmJoin(props.AllCompileFeatures, ";"));
+  }
+}
+
+void PopulateImportedTarget(cmTarget& target, MetaDataProperties const& props,
+                            cmCxxModuleMetadata const& meta,
+                            std::vector<std::string> const& configs)
+{
+  if (!props.AllIncludeDirectories.empty()) {
     target.SetProperty("IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES",
-                       cmJoin(allIncludeDirectories, ";"));
+                       cmJoin(props.AllIncludeDirectories, ";"));
   }
 
-  if (!allCompileDefinitions.empty()) {
+  if (!props.AllCompileDefinitions.empty()) {
     target.SetProperty("IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS",
-                       cmJoin(allCompileDefinitions, ";"));
+                       cmJoin(props.AllCompileDefinitions, ";"));
   }
 
-  if (!allCompileOptions.empty()) {
+  if (!props.AllCompileOptions.empty()) {
     target.SetProperty("IMPORTED_CXX_MODULES_COMPILE_OPTIONS",
-                       cmJoin(allCompileOptions, ";"));
+                       cmJoin(props.AllCompileOptions, ";"));
   }
 
-  if (!allCompileFeatures.empty()) {
+  if (!props.AllCompileFeatures.empty()) {
     target.SetProperty("IMPORTED_CXX_MODULES_COMPILE_FEATURES",
-                       cmJoin(allCompileFeatures, ";"));
+                       cmJoin(props.AllCompileFeatures, ";"));
   }
 
   for (auto const& config : configs) {
     std::vector<std::string> moduleList;
     for (auto const& module : meta.Modules) {
       if (module.IsInterface) {
-        std::string sourcePath = module.SourcePath;
-        if (!cmSystemTools::FileIsFullPath(sourcePath)) {
-          sourcePath = cmStrCat(metadataDir, '/', sourcePath);
-        }
-        sourcePath =
-          cmSystemTools::ToNormalizedPathOnDisk(std::move(sourcePath));
-        moduleList.push_back(cmStrCat(module.LogicalName, "="_s, sourcePath));
+        moduleList.push_back(cmStrCat(module.LogicalName, "="_s,
+                                      props.NormalizePath(module.SourcePath)));
       }
     }
 
@@ -537,5 +578,21 @@ void cmCxxModuleMetadata::PopulateTarget(
         cmStrCat("IMPORTED_CXX_MODULES_"_s, upperConfig);
       target.SetProperty(propertyName, cmJoin(moduleList, ";"));
     }
+  }
+}
+
+} // namespace
+
+void cmCxxModuleMetadata::PopulateTarget(
+  cmTarget& target, cmCxxModuleMetadata const& meta,
+  std::vector<std::string> const& configs)
+{
+  auto props = CollectMetaProperties(meta);
+  PopulateFileSet(target, props);
+
+  if (target.IsImported()) {
+    PopulateImportedTarget(target, props, meta, configs);
+  } else {
+    PopulateLocalTarget(target, props);
   }
 }
