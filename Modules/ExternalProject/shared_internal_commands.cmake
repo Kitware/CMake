@@ -397,6 +397,8 @@ function(_ep_write_gitclone_script
   gitclone_stampfile
   tls_version
   tls_verify
+  git_clone_retries
+  git_clone_retry_delay
 )
 
   if(NOT Git_VERSION VERSION_LESS 1.8.5)
@@ -979,6 +981,16 @@ CMP0097=${_EP_CMP0097}
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
 
+    # Get retry configuration from variables with defaults
+    set(git_clone_retries "${CMAKE_EP_GIT_CLONE_RETRY_COUNT}")
+    if("${git_clone_retries}" STREQUAL "")
+      set(git_clone_retries 2)
+    endif()
+    set(git_clone_retry_delay "${CMAKE_EP_GIT_CLONE_RETRY_DELAY}")
+    if("${git_clone_retry_delay}" STREQUAL "")
+      set(git_clone_retry_delay 0)
+    endif()
+
     # Since git clone doesn't succeed if the non-empty source_dir exists,
     # create a cmake script to invoke as download command.
     # The script will delete the source directory and then call git clone.
@@ -1003,6 +1015,8 @@ CMP0097=${_EP_CMP0097}
       ${stamp_dir}/${name}-gitclone-lastrun.txt
       "${tls_version}"
       "${tls_verify}"
+      "${git_clone_retries}"
+      "${git_clone_retry_delay}"
     )
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND}

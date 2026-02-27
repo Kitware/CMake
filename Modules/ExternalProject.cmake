@@ -446,6 +446,31 @@ is used.
   unintended changes or failed builds resulting from conflicts during
   rebase operations.
 
+The following variables can be set to control the retry behavior for
+``git clone`` operations:
+
+.. variable:: CMAKE_EP_GIT_CLONE_RETRY_COUNT
+
+  .. versionadded:: 4.4
+
+  Specifies the number of times to retry a ``git clone`` operation if it
+  fails.  The default is ``2`` retries.  The first attempt is not counted
+  as a retry, so the total number of attempts is the retry count plus one.
+  This variable should not be set by a project, it is intended for the user
+  to set.  It is primarily useful when dealing with intermittent network
+  issues or rate limiting from git hosting services.
+
+.. variable:: CMAKE_EP_GIT_CLONE_RETRY_DELAY
+
+  .. versionadded:: 4.4
+
+  Specifies the delay in seconds between retry attempts for git clone
+  operations.  The default is ``0`` seconds (no delay between retries).
+  This variable should not be set by a project, it is intended for the
+  user to set.  Setting a delay can be helpful when dealing with rate
+  limiting from git hosting services, where immediate retries would
+  also be rejected.
+
 Subversion
 ~~~~~~~~~~
 

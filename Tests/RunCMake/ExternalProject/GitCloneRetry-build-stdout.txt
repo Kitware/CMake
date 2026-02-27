@@ -1,0 +1,9 @@
+ *-- Retry #1, waiting 1 seconds before next attempt\.\.\..*
+ *-- Retry #2, waiting 1 seconds before next attempt\.\.\..*
+ *-- Retry #3, waiting 1 seconds before next attempt\.\.\..*
+ *Had to git clone more than once: 4 times\.
+ *CMake Error at [^
+]*TestGitRetry-prefix/tmp/TestGitRetry-gitclone.cmake:[0-9]+ \(message\):
+ +Failed to clone repository:[
+ ]*
+ +'[^']*/Tests/RunCMake/ExternalProject/GitCloneRetry-build/TestGitRetry.git'
