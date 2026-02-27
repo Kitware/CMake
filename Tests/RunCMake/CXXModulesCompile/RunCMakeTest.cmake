@@ -185,7 +185,8 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   # BMI generation
   if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
       RunCMake_GENERATOR MATCHES "Ninja")
-    run_cxx_module_test(mixed-bmi-compatibility)
+    # FIXME(#27597): Restore per-importer BMI and enable this test.
+    # run_cxx_module_test(mixed-bmi-compatibility)
   endif()
 
   if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
