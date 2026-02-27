@@ -221,7 +221,7 @@ function(cpack_rpm_prepare_content_list)
         # Now generate all of the parent dirs of the relocation path
         foreach(_PREFIX_PATH_ELEM IN LISTS _CPACK_RPM_PACKAGE_PREFIX_ELEMS)
           list(APPEND _TMP_LIST "${_PREFIX_PATH_ELEM}")
-          string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
+          list(JOIN _TMP_LIST "/" _OMIT_DIR)
           separate_arguments(_OMIT_DIR)
           list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
         endforeach()
@@ -350,10 +350,13 @@ function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
           math(EXPR POINT_PATH_START ${SPLIT_INDEX}+1+${POINT_PATH_LEN})
           string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${POINT_PATH_START} -1 POINT_)
 
-          string(APPEND SCRIPT_PART "  ${INDENT}if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n")
-          string(APPEND SCRIPT_PART "    ${INDENT}ln -s \"$RPM_INSTALL_PREFIX${POINT_INDEX}${POINT_}\" \"$RPM_INSTALL_PREFIX${SYMLINK_INDEX}${SYMLINK_}\"\n")
-          string(APPEND SCRIPT_PART "    ${INDENT}CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n")
-          string(APPEND SCRIPT_PART "  ${INDENT}fi\n")
+          string(
+              APPEND SCRIPT_PART
+              "  ${INDENT}if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n"
+              "    ${INDENT}ln -s \"$RPM_INSTALL_PREFIX${POINT_INDEX}${POINT_}\" \"$RPM_INSTALL_PREFIX${SYMLINK_INDEX}${SYMLINK_}\"\n"
+              "    ${INDENT}CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n"
+              "  ${INDENT}fi\n"
+            )
         endforeach()
 
         if(NOT SYMLINK_INDEX EQUAL POINT_INDEX)
@@ -377,10 +380,13 @@ function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
         math(EXPR POINT_PATH_START ${SPLIT_INDEX}+1)
         string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${POINT_PATH_START} -1 POINT_)
 
-        string(APPEND SCRIPT_PART "  if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n")
-        string(APPEND SCRIPT_PART "    ln -s \"${POINT_}\" \"$RPM_INSTALL_PREFIX${SYMLINK_INDEX}${SYMLINK_}\"\n")
-        string(APPEND SCRIPT_PART "    CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n")
-        string(APPEND SCRIPT_PART "  fi\n")
+        string(
+            APPEND SCRIPT_PART
+            "  if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n"
+            "    ln -s \"${POINT_}\" \"$RPM_INSTALL_PREFIX${SYMLINK_INDEX}${SYMLINK_}\"\n"
+            "    CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n"
+            "  fi\n"
+          )
       endforeach()
     endif()
 
@@ -409,10 +415,13 @@ function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
         math(EXPR POINT_PATH_START ${SPLIT_INDEX}+1+${POINT_PATH_LEN})
         string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${POINT_PATH_START} -1 POINT_)
 
-        string(APPEND SCRIPT "  if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n")
-        string(APPEND SCRIPT "    ln -s \"$RPM_INSTALL_PREFIX${POINT_INDEX}${POINT_}\" \"${SYMLINK_}\"\n")
-        string(APPEND SCRIPT "    CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n")
-        string(APPEND SCRIPT "  fi\n")
+        string(
+            APPEND SCRIPT
+            "  if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n"
+            "    ln -s \"$RPM_INSTALL_PREFIX${POINT_INDEX}${POINT_}\" \"${SYMLINK_}\"\n"
+            "    CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n"
+            "  fi\n"
+          )
       endforeach()
 
       string(APPEND SCRIPT "fi\n")
@@ -431,9 +440,12 @@ function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
       math(EXPR POINT_PATH_START ${SPLIT_INDEX}+1)
       string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${POINT_PATH_START} -1 POINT_)
 
-      string(APPEND SCRIPT "if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n")
-      string(APPEND SCRIPT "  ln -s \"${POINT_}\" \"${SYMLINK_}\"\n")
-      string(APPEND SCRIPT "fi\n")
+      string(
+          APPEND SCRIPT
+          "if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n"
+          "  ln -s \"${POINT_}\" \"${SYMLINK_}\"\n"
+          "fi\n"
+        )
     endforeach()
   endif()
 
@@ -519,9 +531,6 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
           # handle relative path
           cmake_path(ABSOLUTE_PATH SYMLINK_POINT_ BASE_DIRECTORY "${SYMLINK_LOCATION_}" NORMALIZE)
         endif()
-
-        # recalculate path length after conversion to canonical form
-        string(LENGTH "${SYMLINK_POINT_}" SYMLINK_POINT_LENGTH_)
 
         string(REGEX QUOTE IN_SYMLINK_POINT_REGEX "${WDIR}")
         string(APPEND IN_SYMLINK_POINT_REGEX "/.*")
@@ -649,8 +658,7 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
                     ERROR_QUIET)
     # Check if the given file is an executable or not
     if(NOT OBJDUMP_EXEC_RESULT)
-      string(FIND "${OBJDUMP_OUT}" "debug" FIND_RESULT)
-      if(FIND_RESULT GREATER -1)
+      if(OBJDUMP_OUT MATCHES "debug")
         set(index_ 0)
         foreach(source_dir_ IN LISTS CPACK_BUILD_SOURCE_DIRS)
           string(LENGTH "${source_dir_}" source_dir_len_)
@@ -845,7 +853,7 @@ function(cpack_rpm_generate_package)
   # to shut down warning about space in buildtree
   # some recent RPM version should support space in different places.
   # not checked [yet].
-  if(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
+  if(CPACK_TOPLEVEL_DIRECTORY MATCHES " ")
     message(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
   endif()
 
@@ -1153,8 +1161,7 @@ function(cpack_rpm_generate_package)
       string(APPEND _PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_TAIL}")
       # The following keywords require parentheses around the "pre" or "post" suffix in the final RPM spec file.
       set(SCRIPTS_REQUIREMENTS_LIST REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
-      list(FIND SCRIPTS_REQUIREMENTS_LIST ${_RPM_SPEC_HEADER} IS_SCRIPTS_REQUIREMENT_FOUND)
-      if(NOT ${IS_SCRIPTS_REQUIREMENT_FOUND} EQUAL -1)
+      if(_RPM_SPEC_HEADER IN_LIST SCRIPTS_REQUIREMENTS_LIST)
         string(REPLACE "_" "(" _PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}")
         string(APPEND _PACKAGE_HEADER_NAME ")")
       endif()
