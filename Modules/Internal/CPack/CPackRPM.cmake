@@ -120,11 +120,6 @@ function(get_unix_permissions_octal_notation PERMISSIONS_VAR RETURN_VAR)
   return(PROPAGATE ${RETURN_VAR})
 endfunction()
 
-function(cpack_rpm_exact_regex regex_var string)
-  string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" ${regex_var} "${string}")
-  return(PROPAGATE ${regex_var})
-endfunction()
-
 function(cpack_rpm_prepare_relocation_paths)
   # set appropriate prefix, remove possible trailing slash and convert backslashes to slashes
   if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX)
@@ -529,7 +524,7 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
         # recalculate path length after conversion to canonical form
         string(LENGTH "${SYMLINK_POINT_}" SYMLINK_POINT_LENGTH_)
 
-        cpack_rpm_exact_regex(IN_SYMLINK_POINT_REGEX "${WDIR}")
+        string(REGEX QUOTE IN_SYMLINK_POINT_REGEX "${WDIR}")
         string(APPEND IN_SYMLINK_POINT_REGEX "/.*")
         if(SYMLINK_POINT_ MATCHES "${IN_SYMLINK_POINT_REGEX}")
           # only symlinks that are pointing inside the packaging structure should be checked for relocation
