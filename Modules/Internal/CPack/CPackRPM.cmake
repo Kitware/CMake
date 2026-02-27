@@ -190,7 +190,11 @@ function(cpack_rpm_prepare_relocation_paths)
     endforeach()
 
     if(NOT TMP_PATH_FOUND_)
-      message(AUTHOR_WARNING "CPackRPM:Warning: Path ${TMP_PATH} is not on one of the relocatable paths! Package will be partially relocatable.")
+      message(
+          AUTHOR_WARNING
+          "CPackRPM:Warning: Path ${TMP_PATH} is not on one of the relocatable paths! "
+          "Package will be partially relocatable."
+        )
     endif()
   endforeach()
   return(PROPAGATE RPM_USED_PACKAGE_PREFIXES TMP_RPM_PREFIXES)
@@ -551,7 +555,11 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
           unset(SYMLINK_RELOCATIONS_COUNT)
           unset(POINT_RELOCATIONS_COUNT)
 
-          message(AUTHOR_WARNING "CPackRPM:Warning: Symbolic link '${F}' points to location that is outside packaging path! Link will possibly not be relocatable.")
+          message(
+              AUTHOR_WARNING
+              "CPackRPM:Warning: Symbolic link '${F}' points to location that is outside packaging path! "
+              "Link will possibly not be relocatable."
+            )
         endif()
 
         if(SYMLINK_RELOCATIONS_COUNT AND POINT_RELOCATIONS_COUNT)
@@ -696,8 +704,14 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
           foreach(source_ IN LISTS sources_)
             if(EXISTS "${source_dir_}/${source_}" AND NOT IS_DIRECTORY "${source_dir_}/${source_}")
               cmake_path(GET source_ PARENT_PATH path_part_)
-              list(APPEND mkdir_list_ "%{buildroot}${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${path_part_}")
-              list(APPEND cp_list_ "cp \"${source_dir_}/${source_}\" \"%{buildroot}${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${path_part_}\"")
+              list(
+                  APPEND mkdir_list_
+                  "%{buildroot}${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${path_part_}"
+                )
+              list(
+                  APPEND cp_list_
+                  "cp \"${source_dir_}/${source_}\" \"%{buildroot}${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${path_part_}\""
+                )
 
               list(APPEND additional_sources_ "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${source_}")
             endif()
@@ -706,7 +720,11 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
           math(EXPR index_ "${index_} + 1")
         endforeach()
       else()
-        message(WARNING "CPackRPM: File: ${F} does not contain debug symbols. They will possibly be missing from debuginfo package!")
+        message(
+            WARNING
+            "CPackRPM: File: ${F} does not contain debug symbols. "
+            "They will possibly be missing from debuginfo package!"
+          )
       endif()
 
       get_file_permissions("${WORKING_DIR}/${F}" permissions_)
@@ -854,7 +872,11 @@ function(cpack_rpm_generate_package)
   # some recent RPM version should support space in different places.
   # not checked [yet].
   if(CPACK_TOPLEVEL_DIRECTORY MATCHES " ")
-    message(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
+    message(
+        FATAL_ERROR
+        "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory "
+        "without spaces for building RPMs."
+      )
   endif()
 
   # Are we packaging components ?
@@ -1058,7 +1080,11 @@ function(cpack_rpm_generate_package)
         message("CPackRPM:Debug: Trying to build a relocatable package")
       endif()
       if(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
-        message("CPackRPM:Warning: CPACK_SET_DESTDIR is set (=${CPACK_SET_DESTDIR}) while requesting a relocatable package (CPACK_RPM_PACKAGE_RELOCATABLE is set): this is not supported, the package won't be relocatable.")
+        message(
+            "CPackRPM:Warning: CPACK_SET_DESTDIR is set (=${CPACK_SET_DESTDIR}) while requesting a "
+            "relocatable package (CPACK_RPM_PACKAGE_RELOCATABLE is set): this is not supported, "
+            "the package won't be relocatable."
+          )
         set(CPACK_RPM_PACKAGE_RELOCATABLE FALSE)
       else()
         set(CPACK_RPM_PACKAGE_PREFIX ${CPACK_PACKAGING_INSTALL_PREFIX}) # kept for back compatibility (provided external RPM spec files)
@@ -1224,7 +1250,10 @@ function(cpack_rpm_generate_package)
           file(READ "${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE}"
             CPACK_RPM_SPEC_${RPM_SCRIPT_FILE_TIME_}${RPM_SCRIPT_FILE_TYPE_})
         else()
-          message("CPackRPM:Warning: CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE <${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE}> does not exist - ignoring")
+          message(
+              "CPackRPM:Warning: CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE "
+              "<${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE}> does not exist - ignoring"
+            )
         endif()
       else()
         # reset SPEC var value if no file has been specified
@@ -1244,7 +1273,12 @@ function(cpack_rpm_generate_package)
       message(SEND_ERROR "CPackRPM:Warning: CPACK_RPM_CHANGELOG_FILE <${CPACK_RPM_CHANGELOG_FILE}> does not exist - ignoring")
     endif()
   else()
-    set(CPACK_RPM_SPEC_CHANGELOG "* Sun Jul 4 2010 Eric Noulard <eric.noulard@gmail.com> - ${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}\n  Generated by CPack RPM (no Changelog file were provided)")
+    set(
+        CPACK_RPM_SPEC_CHANGELOG
+        "* Sun Jul 4 2010 Eric Noulard <eric.noulard@gmail.com> - ${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}"
+        "  Generated by CPack RPM (no Changelog file were provided)"
+      )
+    list(JOIN CPACK_RPM_SPEC_CHANGELOG "\n" CPACK_RPM_SPEC_CHANGELOG)
   endif()
 
   # CPACK_RPM_SPEC_MORE_DEFINE
