@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 class cmScriptGeneratorIndent
 {
 public:
@@ -37,6 +39,26 @@ inline std::ostream& operator<<(std::ostream& os,
   return os;
 }
 
+class cmScriptGeneratorQuoted
+{
+public:
+  cmScriptGeneratorQuoted(cm::string_view value, int bracket_length)
+    : Value(value)
+    , BracketLength(bracket_length)
+  {
+  }
+
+  std::string str() const;
+  operator std::string() const { return str(); }
+
+private:
+  friend std::ostream& operator<<(std::ostream& os,
+                                  cmScriptGeneratorQuoted const& self);
+
+  cm::string_view Value;
+  int BracketLength;
+};
+
 /** \class cmScriptGenerator
  * \brief Support class for generating install and test scripts.
  *
@@ -53,6 +75,8 @@ public:
 
   void Generate(std::ostream& os, std::string const& config,
                 std::vector<std::string> const& configurationTypes);
+
+  static cmScriptGeneratorQuoted Quote(cm::string_view value);
 
 protected:
   using Indent = cmScriptGeneratorIndent;

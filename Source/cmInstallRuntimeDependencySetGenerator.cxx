@@ -14,7 +14,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmOutputConverter.h"
 #include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmake.h"
@@ -142,7 +141,7 @@ void cmInstallRuntimeDependencySetGenerator::GenerateScriptForConfig(
            << GetDestDirPath(
                 ConvertToAbsoluteDestination(this->GetDestination(config)))
            << "/${" << this->TmpVarPrefix << "_dep_name}\" NEW_RPATH "
-           << cmOutputConverter::EscapeForCMake(evaluatedRPath) << ")\n";
+           << cmScriptGenerator::Quote(evaluatedRPath) << ")\n";
       }
     }
   }
@@ -229,8 +228,8 @@ void cmInstallRuntimeDependencySetGenerator::GenerateInstallNameFixup(
        << "\" ${" << this->TmpVarPrefix << "_rpath_args}\n";
     if (!this->NoInstallRPath) {
       for (auto const& rpath : evaluatedRPaths) {
-        os << indent2 << "  -add_rpath "
-           << cmOutputConverter::EscapeForCMake(rpath) << "\n";
+        os << indent2 << "  -add_rpath " << cmScriptGenerator::Quote(rpath)
+           << '\n';
       }
     }
     if (!this->NoInstallName) {

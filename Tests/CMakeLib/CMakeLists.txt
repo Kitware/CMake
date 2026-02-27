@@ -18,6 +18,7 @@ set(CMakeLib_TESTS
   testRange.cxx
   testOptional.cxx
   testPathResolver.cxx
+  testScriptGenerator.cxx
   testSpdxSerializer.cxx
   testStdIo.cxx
   testString.cxx

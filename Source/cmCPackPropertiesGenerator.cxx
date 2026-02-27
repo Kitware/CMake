@@ -1,11 +1,11 @@
 #include "cmCPackPropertiesGenerator.h"
 
 #include <map>
+#include <memory>
 #include <ostream>
 
 #include "cmGeneratorExpression.h"
 #include "cmInstalledFile.h"
-#include "cmOutputConverter.h"
 
 cmCPackPropertiesGenerator::cmCPackPropertiesGenerator(
   cmLocalGenerator* lg, cmInstalledFile const& installedFile,
@@ -31,13 +31,11 @@ void cmCPackPropertiesGenerator::GenerateScriptForConfig(
     cmInstalledFile::Property const& property = i.second;
 
     os << indent << "set_property(INSTALL "
-       << cmOutputConverter::EscapeForCMake(expandedFileName) << " PROPERTY "
-       << cmOutputConverter::EscapeForCMake(name);
+       << cmScriptGenerator::Quote(expandedFileName) << " PROPERTY "
+       << cmScriptGenerator::Quote(name);
 
-    for (cmInstalledFile::ExpressionVectorType::value_type const& j :
-         property.ValueExpressions) {
-      std::string value = j->Evaluate(this->LG, config);
-      os << " " << cmOutputConverter::EscapeForCMake(value);
+    for (auto const& j : property.ValueExpressions) {
+      os << ' ' << cmScriptGenerator::Quote(j->Evaluate(this->LG, config));
     }
 
     os << ")\n";

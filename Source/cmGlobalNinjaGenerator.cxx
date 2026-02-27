@@ -43,6 +43,7 @@
 #include "cmOutputConverter.h"
 #include "cmRange.h"
 #include "cmScanDepFormat.h"
+#include "cmScriptGenerator.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -2030,8 +2031,7 @@ bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
         fout << "  file(REMOVE_RECURSE\n";
         for (std::string const& acf : it->second.AdditionalCleanFiles) {
           fout << "  "
-               << cmOutputConverter::EscapeForCMake(
-                    this->ConvertToNinjaPath(acf))
+               << cmScriptGenerator::Quote(this->ConvertToNinjaPath(acf))
                << '\n';
         }
         fout << "  )\n";

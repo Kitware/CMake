@@ -10,7 +10,6 @@
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
-#include "cmOutputConverter.h"
 #include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 
@@ -69,8 +68,6 @@ void cmInstallCxxModuleBmiGenerator::GenerateScriptForConfig(
   if (loc.empty()) {
     return;
   }
-  os << indent << "include(\""
-     << cmOutputConverter::EscapeForCMake(
-          loc, cmOutputConverter::WrapQuotes::NoWrap)
-     << "\" OPTIONAL)\n";
+  os << indent << "include(" << cmScriptGenerator::Quote(loc)
+     << " OPTIONAL)\n";
 }
