@@ -5198,13 +5198,20 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
     metadata = std::move(*parseResult.Meta);
   }
 
-  auto* stdlibTgt = makefile->AddImportedTarget(
-    cxxTargetName, cmStateEnums::INTERFACE_LIBRARY, true);
+  auto const localTargetName = cmStrCat("__cmake_cxx_std_", stdLevel);
+  cmStandardLevelResolver standardResolver(makefile);
+  auto* stdlibTgt = makefile->AddLibrary(
+    localTargetName, cmStateEnums::STATIC_LIBRARY, {}, true);
   cmCxxModuleMetadata::PopulateTarget(*stdlibTgt, *metadata, configs);
-  stdlibTgt->AppendProperty("IMPORTED_CXX_MODULES_COMPILE_FEATURES",
-                            cmStrCat("cxx_std_", stdLevel));
+  standardResolver.AddRequiredTargetFeature(stdlibTgt,
+                                            cmStrCat("cxx_std_", stdLevel));
+  auto gt = cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
+  for (auto const& config : configs) {
+    gt->ComputeCompileFeatures(config);
+  }
 
-  lg->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg));
+  lg->AddGeneratorTarget(std::move(gt));
+  makefile->AddAlias(cxxTargetName, localTargetName);
 
 #endif // CMAKE_BOOTSTRAP
 
@@ -5295,8 +5302,7 @@ bool cmGeneratorTarget::ApplyCXXStdTargets()
       standardResolver.GetLevelString("CXX", *explicitLevel);
     auto const cxxTargetName = cmStrCat("__CMAKE::CXX", stdLevel);
 
-    // Create the __CMAKE::CXX## IMPORTED interface target if it doesn't
-    // already exist
+    // Create the __CMAKE::CXX## target if it doesn't already exist
     if (!this->Makefile->FindTargetToUse(cxxTargetName) &&
         !CreateCxxStdlibTarget(this->Makefile, this->LocalGenerator,
                                this->GetName(), cxxTargetName, stdLevel,
