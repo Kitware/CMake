@@ -2,28 +2,17 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCxxModuleUsageEffects.h"
 
-#include <cm/optional>
-
-#include "cmCryptoHash.h"
-#include "cmGeneratorTarget.h"
-#include "cmTarget.h"
-
-cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(cmGeneratorTarget const* gt)
+cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(
+  cmGeneratorTarget const* /*gt*/)
+  : Hash("0000000000000000000000000000000000000000")
 {
-  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
-  this->Hash = hasher.HashString(gt->GetName());
-
-  // Collect compile features from the consuming target.
-  for (auto const& feature : gt->Target->GetCompileFeaturesEntries()) {
-    this->CompileFeatures.emplace_back(feature);
-  }
+  // TODO: collect information from the generator target as to what might
+  // affect module consumption.
 }
 
-void cmCxxModuleUsageEffects::ApplyToTarget(cmTarget* tgt)
+void cmCxxModuleUsageEffects::ApplyToTarget(cmTarget* /*tgt*/)
 {
-  for (auto const& feature : this->CompileFeatures) {
-    tgt->AppendProperty("COMPILE_FEATURES", feature.Value, feature.Backtrace);
-  }
+  // TODO: apply the information collected in the constructor
 }
 
 std::string const& cmCxxModuleUsageEffects::GetHash() const
