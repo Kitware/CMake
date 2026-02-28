@@ -15,6 +15,7 @@
 #include "cmGlobalFastbuildGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
@@ -28,6 +29,9 @@ cmFastbuildUtilityTargetGenerator::cmFastbuildUtilityTargetGenerator(
 
 void cmFastbuildUtilityTargetGenerator::Generate()
 {
+  if (!this->GetGeneratorTarget()->IsInBuildSystem()) {
+    return;
+  }
   std::string targetName = GeneratorTarget->GetName();
 
   if (this->GeneratorTarget->GetType() == cmStateEnums::GLOBAL_TARGET) {
@@ -121,14 +125,27 @@ void cmFastbuildUtilityTargetGenerator::Generate()
     }
     this->GetGlobalGenerator()->AddTarget(std::move(exec));
   }
+  // The target has to be in the build system, but has no custom commands
+  // associated with it.
   if (fastbuildTarget.PreBuildDependencies.empty()) {
-    if (fastbuildTarget.ExcludeFromAll) {
-      return;
+    std::vector<cmSourceFile*> sources;
+    this->GetGeneratorTarget()->GetSourceFiles(sources, this->Config);
+    if (sources.empty()) {
+      FastbuildTargetDep dep{ FASTBUILD_NOOP_FILE_NAME };
+      dep.Type = FastbuildTargetDepType::ORDER_ONLY;
+      fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
+    } else {
+      for (cmSourceFile const* source : sources) {
+        FastbuildTargetDep dep{
+          this->GetGlobalGenerator()->ConvertToFastbuildPath(
+            source->GetFullPath())
+        };
+        dep.Type = FastbuildTargetDepType::ARTIFACT;
+        fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
+      }
     }
-    FastbuildTargetDep dep{ FASTBUILD_NOOP_FILE_NAME };
-    dep.Type = FastbuildTargetDepType::ORDER_ONLY;
-    fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
   }
+
   fastbuildTarget.Hidden = false;
   this->AdditionalCleanFiles();
 
