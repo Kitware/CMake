@@ -4,17 +4,16 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstdint>
 #include <string>
 #include <vector>
-
-#include <cm3p/kwiml/int.h>
 
 class cmExprParserHelper
 {
 public:
   struct ParserType
   {
-    KWIML_INT_int64_t Number;
+    std::int64_t Number;
   };
 
   cmExprParserHelper();
@@ -24,16 +23,32 @@ public:
 
   int LexInput(char* buf, int maxlen);
   void Error(char const* str);
+  void Warning(std::string str);
 
-  void SetResult(KWIML_INT_int64_t value);
+  void SetResult(std::int64_t value);
 
-  KWIML_INT_int64_t GetResult() const { return this->Result; }
+  std::int64_t GetResult() const { return this->Result; }
 
   char const* GetError() { return this->ErrorString.c_str(); }
 
   void UnexpectedChar(char c);
 
   std::string const& GetWarning() const { return this->WarningString; }
+
+  std::int64_t ShL(std::int64_t l, std::int64_t r);
+  std::int64_t ShR(std::int64_t l, std::int64_t r);
+  std::int64_t Add(std::int64_t l, std::int64_t r);
+  std::int64_t Sub(std::int64_t l, std::int64_t r);
+  std::int64_t Mul(std::int64_t l, std::int64_t r);
+  std::int64_t Div(std::int64_t l, std::int64_t r);
+  std::int64_t Mod(std::int64_t l, std::int64_t r);
+
+  static bool AddOverflow(long l, long r, long* p);
+  static bool AddOverflow(long long l, long long r, long long* p);
+  static bool SubOverflow(long l, long r, long* p);
+  static bool SubOverflow(long long l, long long r, long long* p);
+  static bool MulOverflow(long l, long r, long* p);
+  static bool MulOverflow(long long l, long long r, long long* p);
 
 private:
   std::string::size_type InputBufferPos;
@@ -46,7 +61,7 @@ private:
 
   void SetError(std::string errorString);
 
-  KWIML_INT_int64_t Result;
+  std::int64_t Result;
   char const* FileName;
   long FileLine;
   std::string ErrorString;

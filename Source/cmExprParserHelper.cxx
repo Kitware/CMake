@@ -100,6 +100,11 @@ void cmExprParserHelper::Error(char const* str)
   this->ErrorString = ostr.str();
 }
 
+void cmExprParserHelper::Warning(std::string str)
+{
+  this->WarningString = cmStrCat(this->WarningString, std::move(str), '\n');
+}
+
 void cmExprParserHelper::UnexpectedChar(char c)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
@@ -109,7 +114,7 @@ void cmExprParserHelper::UnexpectedChar(char c)
   this->WarningString += ostr.str();
 }
 
-void cmExprParserHelper::SetResult(KWIML_INT_int64_t value)
+void cmExprParserHelper::SetResult(std::int64_t value)
 {
   this->Result = value;
 }
@@ -117,4 +122,151 @@ void cmExprParserHelper::SetResult(KWIML_INT_int64_t value)
 void cmExprParserHelper::SetError(std::string errorString)
 {
   this->ErrorString = std::move(errorString);
+}
+
+std::int64_t cmExprParserHelper::ShL(std::int64_t l, std::int64_t r)
+{
+  if (l < 0) {
+    this->Warning(
+      cmStrCat("left shift of negative value in:\n  ", l, " << ", r));
+  }
+  if (r < 0) {
+    this->Warning(
+      cmStrCat("shift exponent is negative in:\n  ", l, " << ", r));
+    r &= 0x3F;
+  }
+  if (r >= 64) {
+    this->Warning(
+      cmStrCat("shift exponent is too large in:\n  ", l, " << ", r));
+    r &= 0x3F;
+  }
+  return static_cast<std::int64_t>(static_cast<std::uint64_t>(l) << r);
+}
+
+std::int64_t cmExprParserHelper::ShR(std::int64_t l, std::int64_t r)
+{
+  if (r < 0) {
+    this->Warning(
+      cmStrCat("shift exponent is negative in:\n  ", l, " >> ", r));
+    r &= 0x3F;
+  }
+  if (r >= 64) {
+    this->Warning(
+      cmStrCat("shift exponent is too large in:\n  ", l, " >> ", r));
+    r &= 0x3F;
+  }
+  return l >> r;
+}
+
+std::int64_t cmExprParserHelper::Add(std::int64_t l, std::int64_t r)
+{
+  std::int64_t sum;
+  if (this->AddOverflow(l, r, &sum)) {
+    this->Warning(cmStrCat("signed integer overflow in:\n  ", l, " + ", r));
+  }
+  return sum;
+}
+
+std::int64_t cmExprParserHelper::Sub(std::int64_t l, std::int64_t r)
+{
+  std::int64_t diff;
+  if (this->SubOverflow(l, r, &diff)) {
+    this->Warning(cmStrCat("signed integer overflow in:\n  ", l, " - ", r));
+  }
+  return diff;
+}
+
+std::int64_t cmExprParserHelper::Mul(std::int64_t l, std::int64_t r)
+{
+  std::int64_t prod;
+  if (this->MulOverflow(l, r, &prod)) {
+    this->Warning(cmStrCat("signed integer overflow in:\n  ", l, " * ", r));
+  }
+  return prod;
+}
+
+std::int64_t cmExprParserHelper::Div(std::int64_t l, std::int64_t r)
+{
+  if (r == 0) {
+    throw std::overflow_error("divide by zero");
+  }
+  return l / r;
+}
+
+std::int64_t cmExprParserHelper::Mod(std::int64_t l, std::int64_t r)
+{
+  if (r == 0) {
+    throw std::overflow_error("modulo by zero");
+  }
+  return l % r;
+}
+
+// The __has_builtin preprocessor check was added in Clang 2.6 and GCC 10.
+// The __builtin_X_overflow intrinsics were added in Clang 3.4 and GCC 5.
+#ifndef __has_builtin
+#  if defined(__GNUC__) && __GNUC__ >= 5
+#    define __has_builtin(x) 1
+#  else
+#    define __has_builtin(x) 0
+#  endif
+#endif
+
+bool cmExprParserHelper::AddOverflow(long l, long r, long* p)
+{
+#if __has_builtin(__builtin_saddl_overflow)
+  return __builtin_saddl_overflow(l, r, p);
+#else
+  *p = l + r;
+  return false;
+#endif
+}
+
+bool cmExprParserHelper::AddOverflow(long long l, long long r, long long* p)
+{
+#if __has_builtin(__builtin_saddll_overflow)
+  return __builtin_saddll_overflow(l, r, p);
+#else
+  *p = l + r;
+  return false;
+#endif
+}
+
+bool cmExprParserHelper::SubOverflow(long l, long r, long* p)
+{
+#if __has_builtin(__builtin_ssubl_overflow)
+  return __builtin_ssubl_overflow(l, r, p);
+#else
+  *p = l - r;
+  return false;
+#endif
+}
+
+bool cmExprParserHelper::SubOverflow(long long l, long long r, long long* p)
+{
+#if __has_builtin(__builtin_ssubll_overflow)
+  return __builtin_ssubll_overflow(l, r, p);
+#else
+  *p = l - r;
+  return false;
+#endif
+}
+
+bool cmExprParserHelper::MulOverflow(long l, long r, long* p)
+{
+#if __has_builtin(__builtin_smull_overflow)
+  return __builtin_smull_overflow(l, r, p);
+#else
+  *p = l * r;
+  return false;
+#endif
+}
+
+bool cmExprParserHelper::MulOverflow(long long l, long long r, long long* p)
+{
+#if __has_builtin(__builtin_smulll_overflow)
+  return __builtin_smulll_overflow(l, r, p);
+#else
+  *p = l * r;
+  return false;
+#endif
 }
