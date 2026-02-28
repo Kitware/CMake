@@ -14,6 +14,7 @@
 
 struct cmGeneratorExpressionDAGChecker;
 
+namespace cm {
 EvaluatedTargetPropertyEntry::EvaluatedTargetPropertyEntry(
   cmLinkItem const& item, cmListFileBacktrace bt)
   : LinkItem(item)
@@ -106,4 +107,5 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
                         impl->Libraries);
     }
   }
+}
 }

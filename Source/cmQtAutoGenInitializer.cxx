@@ -1999,7 +1999,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     info.SetBool("MOC_RELAXED_MODE", this->Moc.RelaxedMode);
     info.SetBool("MOC_PATH_PREFIX", this->Moc.PathPrefix);
 
-    EvaluatedTargetPropertyEntries InterfaceAutoMocMacroNamesEntries;
+    cm::EvaluatedTargetPropertyEntries InterfaceAutoMocMacroNamesEntries;
 
     if (this->MultiConfig) {
       for (auto const& cfg : this->ConfigsList) {
@@ -2008,10 +2008,10 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
           cmGeneratorExpressionDAGChecker dagChecker{
             this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr, context,
           };
-          AddInterfaceEntries(this->GenTarget, "INTERFACE_AUTOMOC_MACRO_NAMES",
-                              context, &dagChecker,
-                              InterfaceAutoMocMacroNamesEntries,
-                              IncludeRuntimeInterface::Yes);
+          cm::AddInterfaceEntries(
+            this->GenTarget, "INTERFACE_AUTOMOC_MACRO_NAMES", context,
+            &dagChecker, InterfaceAutoMocMacroNamesEntries,
+            cm::IncludeRuntimeInterface::Yes);
         }
       }
     } else {
@@ -2021,7 +2021,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       };
       AddInterfaceEntries(
         this->GenTarget, "INTERFACE_AUTOMOC_MACRO_NAMES", context, &dagChecker,
-        InterfaceAutoMocMacroNamesEntries, IncludeRuntimeInterface::Yes);
+        InterfaceAutoMocMacroNamesEntries, cm::IncludeRuntimeInterface::Yes);
     }
 
     for (auto const& entry : InterfaceAutoMocMacroNamesEntries.Entries) {

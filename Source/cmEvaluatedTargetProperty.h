@@ -20,6 +20,7 @@ struct Context;
 class cmLinkItem;
 struct cmGeneratorExpressionDAGChecker;
 
+namespace cm {
 // Represent a target property entry after evaluating generator expressions
 // and splitting up lists.
 struct EvaluatedTargetPropertyEntry
@@ -82,3 +83,4 @@ void AddInterfaceEntries(
   EvaluatedTargetPropertyEntries& entries,
   IncludeRuntimeInterface searchRuntime,
   cmGeneratorTarget::UseTo usage = cmGeneratorTarget::UseTo::Compile);
+}
