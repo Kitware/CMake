@@ -219,6 +219,10 @@ bool cmInstallGenerator::InstallsForConfig(std::string const& config)
 std::string cmInstallGenerator::ConvertToAbsoluteDestination(
   std::string const& dest)
 {
+  if (dest == ".") {
+    return "${CMAKE_INSTALL_PREFIX}";
+  }
+
   std::string result;
   if (!dest.empty() && !cmSystemTools::FileIsFullPath(dest)) {
     result = "${CMAKE_INSTALL_PREFIX}/";
