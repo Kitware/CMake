@@ -28,6 +28,7 @@ for line in lines:
              ("genex", "genex"),
              ("guide", "guide"),
              ("target property", "prop_tgt"),
+             ("file set property", "prop_fs"),
              ("test property", "prop_test"),
              ("source file property", "prop_sf"),
              ("global property", "prop_gbl"),

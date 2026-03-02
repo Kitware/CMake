@@ -525,6 +525,20 @@ Properties on Targets
    /prop_tgt/XCODE_XCCONFIG
    /prop_tgt/XCTEST
 
+.. _`File Set Properties`:
+
+Properties on File Sets
+=======================
+
+.. toctree::
+   :maxdepth: 1
+
+   /prop_fs/BASE_DIRS
+   /prop_fs/INTERFACE_SOURCES
+   /prop_fs/SCOPE
+   /prop_fs/SOURCES
+   /prop_fs/TYPE
+
 .. _`Test Properties`:
 
 Properties on Tests

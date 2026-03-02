@@ -3583,6 +3583,7 @@ namespace {
 bool GetFileSet(std::vector<std::string> const& parameters,
                 cm::GenEx::Evaluation* eval,
                 GeneratorExpressionContent const* content,
+                cmGeneratorTarget const*& target,
                 cmGeneratorFileSet const*& fileSet)
 {
   auto const& fileSetName = parameters[0];
@@ -3602,7 +3603,7 @@ bool GetFileSet(std::vector<std::string> const& parameters,
     cmLocalGenerator const* lg = eval->CurrentTarget
       ? eval->CurrentTarget->GetLocalGenerator()
       : eval->Context.LG;
-    auto const* target = lg->FindGeneratorTargetToUse(targetName);
+    target = lg->FindGeneratorTargetToUse(targetName);
     if (!target) {
       reportError(eval, content->GetOriginalExpression(),
                   cmStrCat("Non-existent target: ", targetName));
@@ -3638,8 +3639,9 @@ static const struct FileSetExistsNode : public cmGeneratorExpressionNode
       return std::string{};
     }
 
+    cmGeneratorTarget const* target = nullptr;
     cmGeneratorFileSet const* fileSet = nullptr;
-    if (!GetFileSet(parameters, eval, content, fileSet)) {
+    if (!GetFileSet(parameters, eval, content, target, fileSet)) {
       return std::string{};
     }
 
@@ -3657,7 +3659,7 @@ static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
   std::string Evaluate(
     std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
     GeneratorExpressionContent const* content,
-    cmGeneratorExpressionDAGChecker* /*dagCheckerParent*/) const override
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
   {
     static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
 
@@ -3690,8 +3692,9 @@ static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
       return std::string{};
     }
 
+    cmGeneratorTarget const* target = nullptr;
     cmGeneratorFileSet const* fileSet = nullptr;
-    if (!GetFileSet(parameters, eval, content, fileSet)) {
+    if (!GetFileSet(parameters, eval, content, target, fileSet)) {
       return std::string{};
     }
     if (!fileSet) {
@@ -3701,7 +3704,32 @@ static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
       return std::string{};
     }
 
-    return fileSet->GetProperty(propertyName);
+    auto result = fileSet->GetProperty(propertyName);
+
+    if (propertyName == "BASE_DIRS"_s || propertyName == "SOURCES"_s ||
+        propertyName == "INTERFACE_SOURCES"_s) {
+      cmGeneratorExpressionDAGChecker dagChecker{
+        target,           propertyName,  content,
+        dagCheckerParent, eval->Context, eval->Backtrace,
+      };
+      switch (dagChecker.Check()) {
+        case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+          dagChecker.ReportError(eval, content->GetOriginalExpression());
+          return std::string{};
+        case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+          // No error. We just skip cyclic references.
+          return std::string{};
+        case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+        case cmGeneratorExpressionDAGChecker::DAG:
+          break;
+      }
+
+      return cmGeneratorExpression::StripEmptyListElements(
+        this->EvaluateDependentExpression(result, eval, target, &dagChecker,
+                                          target));
+    }
+
+    return result;
   }
 } fileSetPropertyNode;
 
