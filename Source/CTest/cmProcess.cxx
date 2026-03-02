@@ -360,7 +360,7 @@ void cmProcess::OnExit(int64_t exit_status, int term_signal)
 void cmProcess::Finish()
 {
   this->TotalTime = std::chrono::steady_clock::now() - this->StartTime;
-  // Because of a processor clock scew the runtime may become slightly
+  // Because of a processor clock skew the runtime may become slightly
   // negative. If someone changed the system clock while the process was
   // running this may be even more. Make sure not to report a negative
   // duration here.

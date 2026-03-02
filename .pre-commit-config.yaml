@@ -113,7 +113,7 @@ repos:
 
     # NOTE See BUG https://github.com/crate-ci/typos/issues/390
   - repo: https://github.com/adhtruong/mirrors-typos
-    rev: v1.39.2
+    rev: v1.44.0
     hooks:
       - id: typos
         # NOTE Override hook's default args to prevent automatic
