@@ -1,1 +1,1 @@
-CPack Error: ERROR The data in files with the same filename is different.*
+CPack Error: ERROR The data in files with the same filename is different: files/symlink2
