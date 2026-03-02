@@ -23,7 +23,8 @@ function (_cmake_cxx_find_modules_json)
       set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Could not find `${_clang_modules_json_impl}.modules.json` resource" PARENT_SCOPE)
       return ()
     endif ()
-    set(CMAKE_CXX_STDLIB_MODULES_JSON "${_clang_libcxx_modules_json_file}" PARENT_SCOPE)
+    cmake_path(CONVERT "${_clang_libcxx_modules_json_file}" TO_CMAKE_PATH_LIST CMAKE_CXX_STDLIB_MODULES_JSON NORMALIZE)
+    set(CMAKE_CXX_STDLIB_MODULES_JSON "${CMAKE_CXX_STDLIB_MODULES_JSON}" PARENT_SCOPE)
   endif ()
 
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "18.1.2" AND
