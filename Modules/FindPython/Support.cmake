@@ -2522,6 +2522,9 @@ else:
                          OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
                          ERROR_QUIET)
         if (NOT _${_PYTHON_PREFIX}_RESULT)
+          if (WIN32)
+            cmake_path (CONVERT "${_${_PYTHON_PREFIX}_LIBPATHS}" TO_CMAKE_PATH_LIST _${_PYTHON_PREFIX}_LIBPATHS)
+          endif()
           list (GET _${_PYTHON_PREFIX}_LIBPATHS 0 ${_PYTHON_PREFIX}_STDLIB)
           list (GET _${_PYTHON_PREFIX}_LIBPATHS 1 ${_PYTHON_PREFIX}_STDARCH)
           list (GET _${_PYTHON_PREFIX}_LIBPATHS 2 ${_PYTHON_PREFIX}_SITELIB)
