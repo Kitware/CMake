@@ -2701,6 +2701,7 @@ int cmake::ActualConfigure()
     this->ConfigureLog = cm::make_unique<cmConfigureLog>(
       cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
       this->FileAPI->GetConfigureLogVersions());
+    this->Instrumentation->ClearGeneratedQueries();
     this->Instrumentation->CheckCDashVariable();
   }
 #endif
@@ -2968,7 +2969,6 @@ void cmake::InitializeInstrumentation()
     this->Instrumentation = cm::make_unique<cmInstrumentation>(
       this->State->GetBinaryDirectory(),
       cmInstrumentation::LoadQueriesAfter::No);
-    this->Instrumentation->ClearGeneratedQueries();
   }
 #endif
 }
