@@ -18,9 +18,9 @@ which generates ``moc`` and ``uic`` files.
 As this :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>` target is created
 at generate-time, it is not possible to define dependencies of it using e.g.
 :command:`add_dependencies`.  Instead the ``AUTOGEN_TARGET_DEPENDS`` target
-property can be set to a :ref:`;-list <CMake Language Lists>` of additional
-dependencies for the :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>`  target.
-Dependencies can be target names or file names.
+property can be set to a :ref:`semicolon-separated list <CMake Language Lists>`
+of additional dependencies for the :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>`
+target. Dependencies can be target names or file names.
 
 In total, the dependencies of the :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>`
 target are composed from
