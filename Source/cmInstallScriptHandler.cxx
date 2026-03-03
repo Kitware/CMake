@@ -33,24 +33,27 @@
 using InstallScript = cmInstallScriptHandler::InstallScript;
 using InstallScriptRunner = cmInstallScriptHandler::InstallScriptRunner;
 
-cmInstallScriptHandler::cmInstallScriptHandler(std::string _binaryDir,
-                                               std::string _component,
-                                               std::string _config,
-                                               std::vector<std::string>& args)
-  : binaryDir(std::move(_binaryDir))
-  , component(std::move(_component))
+cmInstallScriptHandler::cmInstallScriptHandler(
+  std::string _binaryDir, std::vector<std::string> _components,
+  std::string _config, std::vector<std::string>& args)
+  : components(std::move(_components))
+  , binaryDir(std::move(_binaryDir))
 {
+  if (this->components.empty()) {
+    this->components.emplace_back(std::string{});
+  }
+
   std::string const& file =
     cmStrCat(this->binaryDir, "/CMakeFiles/InstallScripts.json");
   this->parallel = false;
 
-  auto addScript = [this, &args](std::string script,
+  auto addScript = [this, &args](std::string script, std::string component,
                                  std::string config) -> void {
     this->scripts.push_back({ script, config, args });
-    if (!this->component.empty()) {
+    if (!component.empty()) {
       this->scripts.back().command.insert(
         this->scripts.back().command.end() - 1,
-        cmStrCat("-DCMAKE_INSTALL_COMPONENT=", this->component));
+        cmStrCat("-DCMAKE_INSTALL_COMPONENT=", component));
     }
     if (!config.empty()) {
       this->scripts.back().command.insert(
@@ -86,15 +89,20 @@ cmInstallScriptHandler::cmInstallScriptHandler(std::string _binaryDir,
       this->configs.push_back(_config);
     }
     for (auto const& script : value["InstallScripts"]) {
-      for (auto const& config : configs) {
-        addScript(script.asCString(), config);
+      for (auto const& component : components) {
+        for (auto const& config : configs) {
+          addScript(script.asCString(), component, config);
+        }
       }
       if (!this->parallel) {
         break;
       }
     }
   } else {
-    addScript(cmStrCat(this->binaryDir, "/cmake_install.cmake"), _config);
+    for (auto const& component : components) {
+      addScript(cmStrCat(this->binaryDir, "/cmake_install.cmake"), component,
+                _config);
+    }
   }
 }
 
@@ -161,30 +169,31 @@ int cmInstallScriptHandler::Install(unsigned int j,
 
   // Write install manifest
   std::string install_manifest;
-  if (this->component.empty()) {
-    install_manifest = "install_manifest.txt";
-  } else {
-    cmsys::RegularExpression regEntry;
-    if (regEntry.compile("^[a-zA-Z0-9_.+-]+$") &&
-        regEntry.find(this->component)) {
-      install_manifest =
-        cmStrCat("install_manifest_", this->component, ".txt");
+  for (auto const& component : this->components) {
+    if (component.empty()) {
+      install_manifest = "install_manifest.txt";
     } else {
-      cmCryptoHash md5(cmCryptoHash::AlgoMD5);
-      md5.Initialize();
-      install_manifest =
-        cmStrCat("install_manifest_", md5.HashString(this->component), ".txt");
+      cmsys::RegularExpression regEntry;
+      if (regEntry.compile("^[a-zA-Z0-9_.+-]+$") && regEntry.find(component)) {
+        install_manifest = cmStrCat("install_manifest_", component, ".txt");
+      } else {
+        cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+        md5.Initialize();
+        install_manifest =
+          cmStrCat("install_manifest_", md5.HashString(component), ".txt");
+      }
     }
-  }
-  cmGeneratedFileStream fout(cmStrCat(this->binaryDir, '/', install_manifest));
-  fout.SetCopyIfDifferent(true);
-  for (auto const& dir : this->directories) {
-    auto local_manifest = cmStrCat(dir, "/install_local_manifest.txt");
-    if (cmSystemTools::FileExists(local_manifest)) {
-      cmsys::ifstream fin(local_manifest.c_str());
-      std::string line;
-      while (std::getline(fin, line)) {
-        fout << line << "\n";
+    cmGeneratedFileStream fout(
+      cmStrCat(this->binaryDir, '/', install_manifest));
+    fout.SetCopyIfDifferent(true);
+    for (auto const& dir : this->directories) {
+      auto local_manifest = cmStrCat(dir, "/install_local_manifest.txt");
+      if (cmSystemTools::FileExists(local_manifest)) {
+        cmsys::ifstream fin(local_manifest.c_str());
+        std::string line;
+        while (std::getline(fin, line)) {
+          fout << line << "\n";
+        }
       }
     }
   }

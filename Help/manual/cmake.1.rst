@@ -917,6 +917,13 @@ The options are:
 
   Component-based install. Only install component ``<comp>``.
 
+  .. versionadded:: 4.4
+
+    Supports installing more than one component:
+
+      * ``--component <compA> <compB>``
+      * ``--component <compA> --component <compB>``
+
 .. option:: --default-directory-permissions <permissions>
 
   Default directory install permissions. Permissions in format ``<u=rwx,g=rx,o=rx>``.
