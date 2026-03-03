@@ -235,7 +235,6 @@ instrument(cmake-command-parallel-install
   CHECK_SCRIPT check-data-dir.cmake)
 instrument(cmake-command-initial-cache
   CONFIGURE_ARG "-C ${RunCMake_BINARY_DIR}/initial.cmake"
-  CHECK_SCRIPT check-data-dir.cmake
 )
 instrument(cmake-command-resets-generated
   COPY_QUERIES_GENERATED

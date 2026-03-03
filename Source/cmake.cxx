@@ -734,14 +734,15 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
           cmSystemTools::Error("No file name specified for -C");
           return false;
         }
+        state->SetInInitialCache(true);
         cmSystemTools::Stdout(
           cmStrCat("loading initial cache file ", value, '\n'));
         // Resolve script path specified on command line
         // relative to $PWD.
         auto path = cmSystemTools::ToNormalizedPathOnDisk(value);
         state->InitializeFileAPI();
-        state->InitializeInstrumentation();
         state->ReadListFile(args, path);
+        state->SetInInitialCache(false);
         return true;
       } },
 

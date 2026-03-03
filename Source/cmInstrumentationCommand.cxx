@@ -22,6 +22,7 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstrumentationQuery.h"
 #include "cmList.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmValue.h"
 #include "cmake.h"
@@ -67,6 +68,13 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
 {
   if (args.empty()) {
     status.SetError("must be called with arguments.");
+    return false;
+  }
+
+  if (status.GetMakefile().GetCMakeInstance()->GetInInitialCache()) {
+    status.GetMakefile().IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Cannot invoke cmake_instrumentation() within an initial cache file.");
     return false;
   }
 
