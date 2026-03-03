@@ -203,6 +203,10 @@ std::int64_t cmExprParserHelper::Mod(std::int64_t l, std::int64_t r)
 
 std::int64_t cmExprParserHelper::Neg(std::int64_t x)
 {
+  if (static_cast<std::uint64_t>(x) == 0x8000000000000000) {
+    this->Warning(cmStrCat("signed integer cannot negate:\n  ", x));
+    return x;
+  }
   return -x;
 }
 
