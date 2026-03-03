@@ -569,7 +569,7 @@ static const yytype_uint8 yyrline[] =
 {
        0,    86,    86,    91,    94,    99,   102,   107,   110,   115,
      118,   122,   128,   131,   135,   141,   144,   148,   152,   158,
-     161,   164,   167,   172,   175
+     161,   164,   168,   173,   176
 };
 #endif
 
@@ -1591,37 +1591,38 @@ yyreduce:
   case 21: /* unary: exp_MINUS unary  */
 #line 164 "cmExprParser.y"
                   {
-    (yyval.Number) = - (yyvsp[0].Number);
+    (yyval.Number) = cmExpr_yyget_extra(yyscanner)
+      ->Neg((yyvsp[0].Number));
   }
-#line 1597 "cmExprParser.cxx"
+#line 1598 "cmExprParser.cxx"
     break;
 
   case 22: /* unary: exp_NOT unary  */
-#line 167 "cmExprParser.y"
+#line 168 "cmExprParser.y"
                 {
     (yyval.Number) = ~ (yyvsp[0].Number);
   }
-#line 1605 "cmExprParser.cxx"
+#line 1606 "cmExprParser.cxx"
     break;
 
   case 23: /* factor: exp_NUMBER  */
-#line 172 "cmExprParser.y"
+#line 173 "cmExprParser.y"
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1613 "cmExprParser.cxx"
+#line 1614 "cmExprParser.cxx"
     break;
 
   case 24: /* factor: exp_OPENPARENT exp exp_CLOSEPARENT  */
-#line 175 "cmExprParser.y"
+#line 176 "cmExprParser.y"
                                      {
     (yyval.Number) = (yyvsp[-1].Number);
   }
-#line 1621 "cmExprParser.cxx"
+#line 1622 "cmExprParser.cxx"
     break;
 
 
-#line 1625 "cmExprParser.cxx"
+#line 1626 "cmExprParser.cxx"
 
       default: break;
     }
@@ -1845,7 +1846,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 180 "cmExprParser.y"
+#line 181 "cmExprParser.y"
 
 /* End of grammar */
 

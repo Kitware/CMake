@@ -201,6 +201,11 @@ std::int64_t cmExprParserHelper::Mod(std::int64_t l, std::int64_t r)
   return l % r;
 }
 
+std::int64_t cmExprParserHelper::Neg(std::int64_t x)
+{
+  return -x;
+}
+
 // The __has_builtin preprocessor check was added in Clang 2.6 and GCC 10.
 // The __builtin_X_overflow intrinsics were added in Clang 3.4 and GCC 5.
 #ifndef __has_builtin

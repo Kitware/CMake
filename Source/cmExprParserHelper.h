@@ -42,6 +42,7 @@ public:
   std::int64_t Mul(std::int64_t l, std::int64_t r);
   std::int64_t Div(std::int64_t l, std::int64_t r);
   std::int64_t Mod(std::int64_t l, std::int64_t r);
+  std::int64_t Neg(std::int64_t x);
 
   static bool AddOverflow(long l, long r, long* p);
   static bool AddOverflow(long long l, long long r, long long* p);

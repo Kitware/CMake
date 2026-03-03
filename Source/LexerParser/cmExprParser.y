@@ -162,7 +162,8 @@ unary:
     $<Number>$ = + $<Number>2;
   }
 | exp_MINUS unary {
-    $<Number>$ = - $<Number>2;
+    $<Number>$ = cmExpr_yyget_extra(yyscanner)
+      ->Neg($<Number>2);
   }
 | exp_NOT unary {
     $<Number>$ = ~ $<Number>2;
