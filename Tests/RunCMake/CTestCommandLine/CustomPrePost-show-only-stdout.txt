@@ -1,0 +1,5 @@
+^Test project [^
+]+/Tests/RunCMake/CTestCommandLine/CustomPrePost
+  Test #1: Echo
+
+Total Tests: 1$

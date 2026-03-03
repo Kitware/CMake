@@ -492,6 +492,22 @@ function(show_only_json_check_python v)
   return(PROPAGATE RunCMake_TEST_FAILED)
 endfunction()
 
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomPrePost)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestCustom.cmake" "
+set(CTEST_CUSTOM_PRE_TEST \"\\\"${CMAKE_COMMAND}\\\" -E echo \\\"Custom Pre-Test\\\"\")
+set(CTEST_CUSTOM_POST_TEST \"\\\"${CMAKE_COMMAND}\\\" -E echo \\\"Custom Post-Test\\\"\")
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+  add_test(Echo \"${CMAKE_COMMAND}\" -E echo)
+")
+  run_cmake_command(CustomPrePost ${CMAKE_CTEST_COMMAND})
+  run_cmake_command(CustomPrePost-show-only ${CMAKE_CTEST_COMMAND} --show-only=human)
+endblock()
+
 function(run_ShowOnly)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ShowOnly)
   set(RunCMake_TEST_NO_CLEAN 1)
