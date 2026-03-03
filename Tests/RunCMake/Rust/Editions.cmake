@@ -1,4 +1,4 @@
-set(CMAKE_EXPERIMENTAL_RUST "6b6e613b-f6cb-402d-8aea-59034fa8c65b")
+set(CMAKE_EXPERIMENTAL_RUST "efaed83b-d73a-48af-999a-bd0a6172c313")
 enable_language(Rust)
 
 # No Edition set, rustc defaults to 2015.

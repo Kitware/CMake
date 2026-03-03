@@ -64,7 +64,7 @@ cmExperimental::FeatureData const LookupTable[] = {
     cmExperimental::TryCompileCondition::Never },
   // Rust support
   { "Rust",
-    "6b6e613b-f6cb-402d-8aea-59034fa8c65b",
+    "efaed83b-d73a-48af-999a-bd0a6172c313",
     "CMAKE_EXPERIMENTAL_RUST",
     "CMake's support for the Rust programming language is experimental. "
     "It is meant only for experimentation and feedback to CMake developers.",
