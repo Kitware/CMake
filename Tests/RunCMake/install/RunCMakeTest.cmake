@@ -127,6 +127,7 @@ if(CMake_TEST_ISPC)
   run_install_test(FILES-EXTRA_ISPC_TARGET_OBJECTS)
 endif()
 
+run_install_test(FILES-DESTINATION-dot)
 
 run_install_test(TARGETS-InstallFromSubDir)
 run_install_test(TARGETS-OPTIONAL)
