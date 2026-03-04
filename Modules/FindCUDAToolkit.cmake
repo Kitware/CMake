@@ -1315,7 +1315,7 @@ if(CUDAToolkit_FOUND)
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0.0)
     _CUDAToolkit_find_and_add_import_lib(nvJitLink)
-    _CUDAToolkit_find_and_add_import_lib(nvJitLink_static DEPS cudart_static_deps)
+    _CUDAToolkit_find_and_add_import_lib(nvJitLink_static DEPS cudart_static_deps nvptxcompiler_static)
   endif()
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.4.0)
