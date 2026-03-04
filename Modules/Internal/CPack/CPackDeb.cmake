@@ -190,8 +190,11 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OFF)
   endif()
 
-  set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_PATH}")
-  set(DBGSYMDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_PATH}-dbgsym")
+  cmake_path(
+      APPEND CPACK_TOPLEVEL_DIRECTORY "${CPACK_PACKAGE_FILE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_PATH}"
+      OUTPUT_VARIABLE WDIR
+    )
+  cmake_path(APPEND_STRING WDIR "-dbgsym" OUTPUT_VARIABLE DBGSYMDIR)
   file(REMOVE_RECURSE "${DBGSYMDIR}")
 
   # per component automatic discover: some of the component might not have
@@ -265,7 +268,11 @@ function(cpack_deb_prepare_package_vars)
       message(FATAL_ERROR "debuginfo packages require the readelf tool")
     endif()
 
-    file(RELATIVE_PATH _DBGSYM_ROOT "${CPACK_TEMPORARY_DIRECTORY}" "${DBGSYMDIR}")
+    cmake_path(
+        RELATIVE_PATH DBGSYMDIR
+        BASE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        OUTPUT_VARIABLE _DBGSYM_ROOT
+      )
     foreach(_FILE IN LISTS CPACK_DEB_UNSTRIPPED_FILES)
 
       # Get the file's Build ID
@@ -288,8 +295,11 @@ function(cpack_deb_prepare_package_vars)
       endif()
 
       # Split out the debug symbols from the binaries
-      set(_FILE_DBGSYM ${_DBGSYM_ROOT}/usr/lib/debug/.build-id/${_BUILD_ID_START}/${_BUILD_ID_REMAINING}.debug)
-      get_filename_component(_OUT_DIR "${_FILE_DBGSYM}" DIRECTORY)
+      cmake_path(
+          APPEND _DBGSYM_ROOT "usr/lib/debug/.build-id/${_BUILD_ID_START}/${_BUILD_ID_REMAINING}.debug"
+          OUTPUT_VARIABLE _FILE_DBGSYM
+        )
+      cmake_path(GET _FILE_DBGSYM PARENT_PATH _OUT_DIR)
       file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/${_OUT_DIR}")
       execute_process(COMMAND ${CPACK_OBJCOPY_EXECUTABLE} --only-keep-debug "${_FILE}" "${_FILE_DBGSYM}"
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
@@ -351,8 +361,9 @@ function(cpack_deb_prepare_package_vars)
         # Create blank control file for running dpkg-shlibdeps
         # There might be some other way to invoke dpkg-shlibdeps without creating this file
         # but standard debian package should not have anything that can collide with this file or directory
-        file(MAKE_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}/debian)
-        file(WRITE ${CPACK_TEMPORARY_DIRECTORY}/debian/control "")
+        cmake_path(APPEND CPACK_TEMPORARY_DIRECTORY debian OUTPUT_VARIABLE _debian_path)
+        file(MAKE_DIRECTORY ${_debian_path})
+        file(WRITE ${_debian_path}/control "")
 
         # Create a DEBIAN directory so that dpkg-shlibdeps can find the package dir when resolving $ORIGIN.
         file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/DEBIAN")
@@ -756,8 +767,8 @@ function(cpack_deb_prepare_package_vars)
   # all files in CPACK_DEB_SHARED_OBJECT_FILES have dot at the beginning
   set(_LDCONF_DEFAULTS "./lib" "./usr/lib")
   foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
-    get_filename_component(_DIR ${_FILE} DIRECTORY)
-    get_filename_component(_PARENT_DIR ${_DIR} DIRECTORY)
+    cmake_path(GET _FILE PARENT_PATH _DIR)
+    cmake_path(GET _DIR PARENT_PATH _PARENT_DIR)
     if(_DIR IN_LIST _LDCONF_DEFAULTS OR _PARENT_DIR IN_LIST _LDCONF_DEFAULTS)
       set(CPACK_ADD_LDCONFIG_CALL 1)
     endif()
@@ -767,7 +778,7 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_GENERATE_POSTINST 1)
     set(CPACK_DEBIAN_GENERATE_POSTRM 1)
     foreach(f IN LISTS CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA)
-      get_filename_component(n "${f}" NAME)
+      cmake_path(GET f FILENAME n)
       if(n STREQUAL "postinst")
         set(CPACK_DEBIAN_GENERATE_POSTINST 0)
       endif()
@@ -800,9 +811,12 @@ function(cpack_deb_prepare_package_vars)
       string(REGEX REPLACE "\.deb$" "-dbgsym.ddeb" CPACK_DBGSYM_OUTPUT_FILE_NAME "${CPACK_DEBIAN_FILE_NAME}")
     endif()
 
-    set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
-    get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
-    set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
+    cmake_path(
+        APPEND CPACK_TOPLEVEL_DIRECTORY "${CPACK_OUTPUT_FILE_NAME}"
+        OUTPUT_VARIABLE CPACK_TEMPORARY_PACKAGE_FILE_NAME
+      )
+    cmake_path(GET CPACK_OUTPUT_FILE_PATH PARENT_PATH BINARY_DIR)
+    cmake_path(APPEND BINARY_DIR "${CPACK_OUTPUT_FILE_NAME}" OUTPUT_VARIABLE CPACK_OUTPUT_FILE_PATH)
   else()
     # back compatibility - don't change the name
     string(REGEX REPLACE "\.deb$" "-dbgsym.ddeb" CPACK_DBGSYM_OUTPUT_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
