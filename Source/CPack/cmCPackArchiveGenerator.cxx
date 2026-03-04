@@ -361,7 +361,8 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
     } else if (status == DeduplicateStatus::Error) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "ERROR The data in files with the "
-                    "same filename is different.");
+                    "same filename is different: "
+                      << rp << std::endl);
       return 0;
     } else {
       cmCPackLogger(cmCPackLog::LOG_DEBUG,
