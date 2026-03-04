@@ -34,52 +34,54 @@ endfunction()
 
 #extract library name and version for given shared object
 function(extract_so_info shared_object libname version)
-  if(CPACK_READELF_EXECUTABLE)
-    execute_process(
-      COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object}"
-      WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
-      RESULT_VARIABLE result
-      OUTPUT_VARIABLE output
-      ERROR_QUIET
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    if(result EQUAL 0)
-      string(REGEX MATCH "\\(?SONAME\\)?[^\n]*\\[([^\n]+)\\.so\\.([^\n]*)\\]" soname "${output}")
-      set(${libname} "${CMAKE_MATCH_1}" PARENT_SCOPE)
-      set(${version} "${CMAKE_MATCH_2}" PARENT_SCOPE)
-    else()
-      message(WARNING "Error running readelf for \"${shared_object}\"")
-    endif()
-  else()
+  if(NOT CPACK_READELF_EXECUTABLE)
     message(FATAL_ERROR "Readelf utility is not available.")
+    return()
+  endif()
+
+  execute_process(
+    COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object}"
+    WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+    RESULT_VARIABLE result
+    OUTPUT_VARIABLE output
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(result EQUAL 0)
+    string(REGEX MATCH "\\(?SONAME\\)?[^\n]*\\[([^\n]+)\\.so\\.([^\n]*)\\]" soname "${output}")
+    set(${libname} "${CMAKE_MATCH_1}" PARENT_SCOPE)
+    set(${version} "${CMAKE_MATCH_2}" PARENT_SCOPE)
+  else()
+    message(WARNING "Error running readelf for \"${shared_object}\"")
   endif()
 endfunction()
 
 #extract RUNPATH and RPATH for given shared object or executable
 function(extract_runpath_and_rpath shared_object_or_executable runpath rpath)
-  if(CPACK_READELF_EXECUTABLE)
-    execute_process(
-      COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object_or_executable}"
-      WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
-      RESULT_VARIABLE result
-      OUTPUT_VARIABLE output
-      ERROR_QUIET
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    if(result EQUAL 0)
-      string(REGEX MATCH "\\(?RUNPATH\\)?[^\n]*\\[([^\n]+)\\]" found_runpath "${output}")
-      string(REPLACE ":" ";" found_runpath "${CMAKE_MATCH_1}")
-      list(REMOVE_DUPLICATES found_runpath)
-      string(REGEX MATCH "\\(?RPATH\\)?[^\n]*\\[([^\n]+)\\]"   found_rpath   "${output}")
-      string(REPLACE ":" ";" found_rpath   "${CMAKE_MATCH_1}")
-      list(REMOVE_DUPLICATES found_rpath)
-      set(${runpath} "${found_runpath}" PARENT_SCOPE)
-      set(${rpath}   "${found_rpath}"   PARENT_SCOPE)
-    else()
-      message(WARNING "Error running readelf for \"${shared_object_or_executable}\"")
-    endif()
-  else()
+  if(NOT CPACK_READELF_EXECUTABLE)
     message(FATAL_ERROR "Readelf utility is not available.")
+    return()
+  endif()
+
+  execute_process(
+    COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object_or_executable}"
+    WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+    RESULT_VARIABLE result
+    OUTPUT_VARIABLE output
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(result EQUAL 0)
+    string(REGEX MATCH "\\(?RUNPATH\\)?[^\n]*\\[([^\n]+)\\]" found_runpath "${output}")
+    string(REPLACE ":" ";" found_runpath "${CMAKE_MATCH_1}")
+    list(REMOVE_DUPLICATES found_runpath)
+    string(REGEX MATCH "\\(?RPATH\\)?[^\n]*\\[([^\n]+)\\]"   found_rpath   "${output}")
+    string(REPLACE ":" ";" found_rpath   "${CMAKE_MATCH_1}")
+    list(REMOVE_DUPLICATES found_rpath)
+    set(${runpath} "${found_runpath}" PARENT_SCOPE)
+    set(${rpath}   "${found_rpath}"   PARENT_SCOPE)
+  else()
+    message(WARNING "Error running readelf for \"${shared_object_or_executable}\"")
   endif()
 endfunction()
 
