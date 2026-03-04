@@ -1,0 +1,4 @@
+  Test #[0-9]*: DT.case_one
+  Test #[0-9]*: DT.case_three
+
+Total Tests: 2

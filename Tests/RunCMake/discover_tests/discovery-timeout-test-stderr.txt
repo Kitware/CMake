@@ -1,0 +1,4 @@
+CMake Error at .* \(discover_tests\):
+  discover_tests failed to run command:.*
+
+  Process terminated due to timeout

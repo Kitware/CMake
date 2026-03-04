@@ -1,0 +1,2 @@
+CMake Error at .* \(discover_tests\):
+  discover_tests DISCOVERY_MATCH failed to compile regex "\(".
