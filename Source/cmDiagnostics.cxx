@@ -12,10 +12,9 @@
 #include "cmStringAlgorithms.h"
 
 namespace {
-cm::optional<cmDiagnostics::DiagnosticCategory> stringToCategory(
-  cm::string_view input)
+cm::optional<cmDiagnosticCategory> stringToCategory(cm::string_view input)
 {
-  using Map = std::map<cm::string_view, cmDiagnostics::DiagnosticCategory>;
+  using Map = std::map<cm::string_view, cmDiagnosticCategory>;
   static Map const mapping = {
 #define CATEGORY_MAP(C) { #C ""_s, cmDiagnostics::C },
     CM_FOR_EACH_DIAGNOSTIC_CATEGORY(CATEGORY_MAP)
@@ -73,8 +72,8 @@ cm::string_view cmDiagnostics::GetCategoryString(DiagnosticCategory category)
   return {};
 }
 
-cm::optional<cmDiagnostics::DiagnosticAction>
-cmDiagnostics::GetDiagnosticAction(cm::string_view name)
+cm::optional<cmDiagnosticAction> cmDiagnostics::GetDiagnosticAction(
+  cm::string_view name)
 {
   if (name == "IGNORE"_s) {
     return DiagnosticAction::Ignore;
@@ -92,8 +91,8 @@ cmDiagnostics::GetDiagnosticAction(cm::string_view name)
   return cm::nullopt;
 }
 
-cm::optional<cmDiagnostics::DiagnosticCategory>
-cmDiagnostics::GetDiagnosticCategory(cm::string_view name)
+cm::optional<cmDiagnosticCategory> cmDiagnostics::GetDiagnosticCategory(
+  cm::string_view name)
 {
   return stringToCategory(name);
 }

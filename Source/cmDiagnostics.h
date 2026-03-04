@@ -94,3 +94,6 @@ public:
   /** Represent a set of diagnostic category actions.  */
   using DiagnosticMap = std::array<DiagnosticAction, CategoryCount>;
 };
+
+using cmDiagnosticCategory = cmDiagnostics::DiagnosticCategory;
+using cmDiagnosticAction = cmDiagnostics::DiagnosticAction;

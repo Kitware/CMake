@@ -58,19 +58,15 @@ public:
   bool PopPolicy();
   bool CanPopPolicyScope() const;
 
-  void SetDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                     cmDiagnostics::DiagnosticAction action, bool recursive);
-  void PromoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                         cmDiagnostics::DiagnosticAction action,
-                         bool recursive);
-  void DemoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                        cmDiagnostics::DiagnosticAction action,
-                        bool recursive);
-  cmDiagnostics::DiagnosticAction GetDiagnostic(
-    cmDiagnostics::DiagnosticCategory category,
-    cmDiagnostics::DiagnosticAction defaultAction) const;
-  cmDiagnostics::DiagnosticAction GetDiagnostic(
-    cmDiagnostics::DiagnosticCategory category) const
+  void SetDiagnostic(cmDiagnosticCategory category, cmDiagnosticAction action,
+                     bool recursive);
+  void PromoteDiagnostic(cmDiagnosticCategory category,
+                         cmDiagnosticAction action, bool recursive);
+  void DemoteDiagnostic(cmDiagnosticCategory category,
+                        cmDiagnosticAction action, bool recursive);
+  cmDiagnosticAction GetDiagnostic(cmDiagnosticCategory category,
+                                   cmDiagnosticAction defaultAction) const;
+  cmDiagnosticAction GetDiagnostic(cmDiagnosticCategory category) const
   {
     return this->GetDiagnostic(
       category, cmDiagnostics::CategoryInfo[category].DefaultAction);
@@ -111,11 +107,10 @@ private:
 
   void InitializeFromParent();
 
-  using AlterDiagnosticFunction =
-    bool (*)(cmDiagnostics::DiagnosticAction current,
-             cmDiagnostics::DiagnosticAction desired);
-  void AlterDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                       cmDiagnostics::DiagnosticAction action,
+  using AlterDiagnosticFunction = bool (*)(cmDiagnosticAction current,
+                                           cmDiagnosticAction desired);
+  void AlterDiagnostic(cmDiagnosticCategory category,
+                       cmDiagnosticAction action,
                        AlterDiagnosticFunction function, bool recursive);
 
   cmState* State;

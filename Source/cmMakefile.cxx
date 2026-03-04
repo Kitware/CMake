@@ -4165,31 +4165,28 @@ void cmMakefile::PopPolicy()
   }
 }
 
-cmDiagnostics::DiagnosticAction cmMakefile::GetDiagnosticAction(
-  cmDiagnostics::DiagnosticCategory category) const
+cmDiagnosticAction cmMakefile::GetDiagnosticAction(
+  cmDiagnosticCategory category) const
 {
   return this->StateSnapshot.GetDiagnostic(category);
 }
 
-bool cmMakefile::SetDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                               cmDiagnostics::DiagnosticAction action,
-                               bool recursive)
+bool cmMakefile::SetDiagnostic(cmDiagnosticCategory category,
+                               cmDiagnosticAction action, bool recursive)
 {
   this->StateSnapshot.SetDiagnostic(category, action, recursive);
   return true;
 }
 
-bool cmMakefile::PromoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                                   cmDiagnostics::DiagnosticAction action,
-                                   bool recursive)
+bool cmMakefile::PromoteDiagnostic(cmDiagnosticCategory category,
+                                   cmDiagnosticAction action, bool recursive)
 {
   this->StateSnapshot.PromoteDiagnostic(category, action, recursive);
   return true;
 }
 
-bool cmMakefile::DemoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                                  cmDiagnostics::DiagnosticAction action,
-                                  bool recursive)
+bool cmMakefile::DemoteDiagnostic(cmDiagnosticCategory category,
+                                  cmDiagnosticAction action, bool recursive)
 {
   this->StateSnapshot.DemoteDiagnostic(category, action, recursive);
   return true;
@@ -4296,9 +4293,8 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
 void cmMakefile::RecordDiagnostics(cmDiagnostics::DiagnosticMap& dm) const
 {
   /* Record the setting of every diagnostic category.  */
-  using DiagnosticCategory = cmDiagnostics::DiagnosticCategory;
-  for (size_t n = 0; n < cmDiagnostics::CategoryCount; ++n) {
-    DiagnosticCategory dc = static_cast<DiagnosticCategory>(n);
+  for (unsigned n = 0; n < cmDiagnostics::CategoryCount; ++n) {
+    cmDiagnosticCategory const dc = static_cast<cmDiagnosticCategory>(n);
     dm[dc] = this->GetDiagnosticAction(dc);
   }
 }

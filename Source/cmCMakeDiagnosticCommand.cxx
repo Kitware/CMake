@@ -11,9 +11,8 @@
 #include "cmStringAlgorithms.h"
 
 namespace {
-using AlterFunction = bool (cmMakefile::*)(cmDiagnostics::DiagnosticCategory,
-                                           cmDiagnostics::DiagnosticAction,
-                                           bool);
+using AlterFunction = bool (cmMakefile::*)(cmDiagnosticCategory,
+                                           cmDiagnosticAction, bool);
 
 bool HandleAlterMode(std::vector<std::string> const& args,
                      cmExecutionStatus& status, AlterFunction function,
@@ -37,7 +36,7 @@ bool HandleAlterMode(std::vector<std::string> const& args,
     }
   }
 
-  cm::optional<cmDiagnostics::DiagnosticAction> const action =
+  cm::optional<cmDiagnosticAction> const action =
     cmDiagnostics::GetDiagnosticAction(args[2]);
   if (!action) {
     status.SetError(cmStrCat(
@@ -45,7 +44,7 @@ bool HandleAlterMode(std::vector<std::string> const& args,
     return false;
   }
 
-  cm::optional<cmDiagnostics::DiagnosticCategory> const category =
+  cm::optional<cmDiagnosticCategory> const category =
     cmDiagnostics::GetDiagnosticCategory(args[1]);
   if (!category) {
     status.SetError(cmStrCat(args[0],
@@ -69,7 +68,7 @@ bool HandleGetMode(std::vector<std::string> const& args,
     return false;
   }
 
-  cm::optional<cmDiagnostics::DiagnosticCategory> const category =
+  cm::optional<cmDiagnosticCategory> const category =
     cmDiagnostics::GetDiagnosticCategory(args[1]);
   if (!category) {
     status.SetError(cmStrCat(args[0],
@@ -78,7 +77,7 @@ bool HandleGetMode(std::vector<std::string> const& args,
     return false;
   }
 
-  cmDiagnostics::DiagnosticAction const action =
+  cmDiagnosticAction const action =
     status.GetMakefile().GetDiagnosticAction(*category);
 
   status.GetMakefile().AddDefinition(args[2],

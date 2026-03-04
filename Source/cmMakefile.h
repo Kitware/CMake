@@ -412,17 +412,13 @@ public:
   /**
    * Set, Push, Pop diagnostics for CMake.
    */
-  bool SetDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                     cmDiagnostics::DiagnosticAction action,
+  bool SetDiagnostic(cmDiagnosticCategory category, cmDiagnosticAction action,
                      bool recursive = false);
-  bool PromoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                         cmDiagnostics::DiagnosticAction action,
-                         bool recursive = false);
-  bool DemoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
-                        cmDiagnostics::DiagnosticAction action,
-                        bool recursive = false);
-  cmDiagnostics::DiagnosticAction GetDiagnosticAction(
-    cmDiagnostics::DiagnosticCategory category) const;
+  bool PromoteDiagnostic(cmDiagnosticCategory category,
+                         cmDiagnosticAction action, bool recursive = false);
+  bool DemoteDiagnostic(cmDiagnosticCategory category,
+                        cmDiagnosticAction action, bool recursive = false);
+  cmDiagnosticAction GetDiagnosticAction(cmDiagnosticCategory category) const;
   void RecordDiagnostics(cmDiagnostics::DiagnosticMap& dm) const;
   //@}
 
