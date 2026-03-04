@@ -393,8 +393,8 @@ commands to :term:`scan` for their dependencies.
 
   There is a known issue with ``ninja`` which can result in an erroneous
   detection of a dependency cycle when the dependency order between two
-  sources reverses (i.e., `a` importing `b` becomes `b` importing `a`) between
-  two builds.  See `ninja issue 2666`_ for details.
+  sources reverses (i.e., ``a`` importing ``b`` becomes ``b`` importing
+  ``a``) between two builds.  See `ninja issue 2666`_ for details.
 
 .. _`ninja issue 2666`: https://github.com/ninja-build/ninja/issues/2666
 
