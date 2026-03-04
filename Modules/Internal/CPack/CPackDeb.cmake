@@ -14,7 +14,7 @@ function(cpack_deb_variable_fallback OUTPUT_VAR_NAME)
   set(FALLBACK_VAR_NAMES ${ARGN})
 
   foreach(variable_name IN LISTS FALLBACK_VAR_NAMES)
-    if(${variable_name})
+    if(DEFINED ${variable_name})
       set(${OUTPUT_VAR_NAME} "${${variable_name}}" PARENT_SCOPE)
       break()
     endif()
@@ -29,18 +29,20 @@ function(get_component_package_name var component)
     string(TOLOWER "${CPACK_DEBIAN_PACKAGE_NAME}-${component}" package_name)
   endif()
 
-  set("${var}" "${package_name}" PARENT_SCOPE)
+  set(${var} "${package_name}" PARENT_SCOPE)
 endfunction()
 
 #extract library name and version for given shared object
 function(extract_so_info shared_object libname version)
   if(CPACK_READELF_EXECUTABLE)
-    execute_process(COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object}"
+    execute_process(
+      COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object}"
       WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
       RESULT_VARIABLE result
       OUTPUT_VARIABLE output
       ERROR_QUIET
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
     if(result EQUAL 0)
       string(REGEX MATCH "\\(?SONAME\\)?[^\n]*\\[([^\n]+)\\.so\\.([^\n]*)\\]" soname "${output}")
       set(${libname} "${CMAKE_MATCH_1}" PARENT_SCOPE)
@@ -56,12 +58,14 @@ endfunction()
 #extract RUNPATH and RPATH for given shared object or executable
 function(extract_runpath_and_rpath shared_object_or_executable runpath rpath)
   if(CPACK_READELF_EXECUTABLE)
-    execute_process(COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object_or_executable}"
+    execute_process(
+      COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object_or_executable}"
       WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
       RESULT_VARIABLE result
       OUTPUT_VARIABLE output
       ERROR_QUIET
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
     if(result EQUAL 0)
       string(REGEX MATCH "\\(?RUNPATH\\)?[^\n]*\\[([^\n]+)\\]" found_runpath "${output}")
       string(REPLACE ":" ";" found_runpath "${CMAKE_MATCH_1}")
@@ -84,7 +88,7 @@ function(get_sanitized_dirname dirname outvar)
   # NOTE: This pattern has to stay in sync with the 'prohibited_chars' variable
   #       defined in the C++ function `CPackGenerator::GetSanitizedDirOrFileName`!
   set(prohibited_chars_pattern "[<]|[>]|[\"]|[/]|[\\]|[|]|[?]|[*]|[`]")
-  if("${dirname}" MATCHES "${prohibited_chars_pattern}")
+  if(dirname MATCHES "${prohibited_chars_pattern}")
     string(MD5 sanitized_dirname "${dirname}")
     set(${outvar} "${sanitized_dirname}" PARENT_SCOPE)
   else()
@@ -212,9 +216,11 @@ function(cpack_deb_prepare_package_vars)
     endif()
   endif()
 
-  cpack_deb_variable_fallback("CPACK_DEBIAN_DEBUGINFO_PACKAGE"
-    "CPACK_DEBIAN_${_local_component_name}_DEBUGINFO_PACKAGE"
-    "CPACK_DEBIAN_DEBUGINFO_PACKAGE")
+  cpack_deb_variable_fallback(
+      CPACK_DEBIAN_DEBUGINFO_PACKAGE
+      CPACK_DEBIAN_${_local_component_name}_DEBUGINFO_PACKAGE
+      CPACK_DEBIAN_DEBUGINFO_PACKAGE
+    )
   if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OR CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS OR CPACK_DEBIAN_DEBUGINFO_PACKAGE)
     # Generating binary list - Get type of all install files
     file(GLOB_RECURSE FILE_PATHS_ LIST_DIRECTORIES false RELATIVE "${WDIR}" "${WDIR}/*")
@@ -227,10 +233,12 @@ function(cpack_deb_prepare_package_vars)
     # get file info so that we can determine if file is executable or not
     unset(CPACK_DEB_INSTALL_FILES)
     foreach(FILE_ IN LISTS FILE_PATHS_)
-      execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${FILE_EXECUTABLE} "./${FILE_}"
+      execute_process(
+        COMMAND "${CMAKE_COMMAND}" -E env LC_ALL=C "${FILE_EXECUTABLE}" "./${FILE_}"
         WORKING_DIRECTORY "${WDIR}"
         RESULT_VARIABLE FILE_RESULT_
-        OUTPUT_VARIABLE INSTALL_FILE_)
+        OUTPUT_VARIABLE INSTALL_FILE_
+      )
       if(NOT FILE_RESULT_ EQUAL 0)
         message(FATAL_ERROR "CPackDeb: execution of command: '${FILE_EXECUTABLE} ./${FILE_}' failed with exit code: ${FILE_RESULT_}")
       endif()
@@ -276,12 +284,14 @@ function(cpack_deb_prepare_package_vars)
     foreach(_FILE IN LISTS CPACK_DEB_UNSTRIPPED_FILES)
 
       # Get the file's Build ID
-      execute_process(COMMAND env LC_ALL=C ${CPACK_READELF_EXECUTABLE} -n "${_FILE}"
+      execute_process(
+        COMMAND env LC_ALL=C "${CPACK_READELF_EXECUTABLE}" -n "${_FILE}"
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
         OUTPUT_VARIABLE READELF_OUTPUT
         RESULT_VARIABLE READELF_RESULT
         ERROR_VARIABLE READELF_ERROR
-        OUTPUT_STRIP_TRAILING_WHITESPACE )
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
       if(NOT READELF_RESULT EQUAL 0)
         message(FATAL_ERROR "CPackDeb: readelf: '${READELF_ERROR}';\n"
             "executed command: '${CPACK_READELF_EXECUTABLE} -n ${_FILE}'")
@@ -301,32 +311,38 @@ function(cpack_deb_prepare_package_vars)
         )
       cmake_path(GET _FILE_DBGSYM PARENT_PATH _OUT_DIR)
       file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/${_OUT_DIR}")
-      execute_process(COMMAND ${CPACK_OBJCOPY_EXECUTABLE} --only-keep-debug "${_FILE}" "${_FILE_DBGSYM}"
+      execute_process(
+        COMMAND "${CPACK_OBJCOPY_EXECUTABLE}" --only-keep-debug "${_FILE}" "${_FILE_DBGSYM}"
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
         OUTPUT_VARIABLE OBJCOPY_OUTPUT
         RESULT_VARIABLE OBJCOPY_RESULT
         ERROR_VARIABLE OBJCOPY_ERROR
-        OUTPUT_STRIP_TRAILING_WHITESPACE )
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
       if(NOT OBJCOPY_RESULT EQUAL 0)
         message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
             "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --only-keep-debug ${_FILE} ${_FILE_DBGSYM}'")
       endif()
-      execute_process(COMMAND ${CPACK_OBJCOPY_EXECUTABLE} --strip-unneeded ${_FILE}
+      execute_process(
+        COMMAND "${CPACK_OBJCOPY_EXECUTABLE}" --strip-unneeded ${_FILE}
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
         OUTPUT_VARIABLE OBJCOPY_OUTPUT
         RESULT_VARIABLE OBJCOPY_RESULT
         ERROR_VARIABLE OBJCOPY_ERROR
-        OUTPUT_STRIP_TRAILING_WHITESPACE )
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
       if(NOT OBJCOPY_RESULT EQUAL 0)
         message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
             "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --strip-debug ${_FILE}'")
       endif()
-      execute_process(COMMAND ${CPACK_OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}
+      execute_process(
+        COMMAND "${CPACK_OBJCOPY_EXECUTABLE}" --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
         OUTPUT_VARIABLE OBJCOPY_OUTPUT
         RESULT_VARIABLE OBJCOPY_RESULT
         ERROR_VARIABLE OBJCOPY_ERROR
-        OUTPUT_STRIP_TRAILING_WHITESPACE )
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
       if(NOT OBJCOPY_RESULT EQUAL 0)
         message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
             "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}'")
@@ -340,10 +356,12 @@ function(cpack_deb_prepare_package_vars)
 
     if(SHLIBDEPS_EXECUTABLE)
       # Check version of the dpkg-shlibdeps tool using CPackDEB method
-      execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
+      execute_process(
+        COMMAND "${CMAKE_COMMAND}" -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
         OUTPUT_VARIABLE _TMP_VERSION
         ERROR_QUIET
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
       if(_TMP_VERSION MATCHES "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)")
         set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
       else()
@@ -369,10 +387,12 @@ function(cpack_deb_prepare_package_vars)
         file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/DEBIAN")
 
         # Add --ignore-missing-info if the tool supports it
-        execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
+        execute_process(
+          COMMAND "${CMAKE_COMMAND}" -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
           OUTPUT_VARIABLE _TMP_HELP
           ERROR_QUIET
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
         if(_TMP_HELP MATCHES "--ignore-missing-info")
           set(IGNORE_MISSING_INFO_FLAG "--ignore-missing-info")
         endif()
@@ -393,15 +413,15 @@ function(cpack_deb_prepare_package_vars)
           get_packaging_dirs_of_dependencies(deps_packaging_dirs)
           foreach(exe IN LISTS CPACK_DEB_BINARY_FILES)
             cmake_path(GET exe PARENT_PATH exe_dir)
-            extract_runpath_and_rpath(${exe} runpath rpath)
+            extract_runpath_and_rpath("${exe}" runpath rpath)
             # If RUNPATH is available, RPATH will be ignored. Therefore we have to do the same here!
-            if (NOT "${runpath}" STREQUAL "")
+            if(runpath)
               set(selected_rpath "${runpath}")
             else()
               set(selected_rpath "${rpath}")
             endif()
             foreach(search_path IN LISTS selected_rpath)
-              if ("${search_path}" MATCHES "^[$]ORIGIN" OR "${search_path}" MATCHES "^[$][{]ORIGIN[}]")
+              if(search_path MATCHES "^[$]ORIGIN" OR search_path MATCHES "^[$][{]ORIGIN[}]")
                 foreach(deps_pkgdir IN LISTS deps_packaging_dirs)
                   string(REPLACE "\$ORIGIN" "${deps_pkgdir}/${exe_dir}" path "${search_path}")
                   string(REPLACE "\${ORIGIN}" "${deps_pkgdir}/${exe_dir}" path "${path}")
@@ -421,15 +441,17 @@ function(cpack_deb_prepare_package_vars)
         # --ignore-missing-info : allow dpkg-shlibdeps to run even if some libs do not belong to a package
         # -l<dir>: make dpkg-shlibdeps also search in this directory for (private) shared library dependencies
         # -O : print to STDOUT
-        execute_process(COMMAND ${SHLIBDEPS_EXECUTABLE} ${PRIVATE_SEARCH_DIR_OPTIONS} ${IGNORE_MISSING_INFO_FLAG} -O ${CPACK_DEB_BINARY_FILES}
+        execute_process(
+          COMMAND "${SHLIBDEPS_EXECUTABLE}" ${PRIVATE_SEARCH_DIR_OPTIONS} ${IGNORE_MISSING_INFO_FLAG} -O ${CPACK_DEB_BINARY_FILES}
           WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
           OUTPUT_VARIABLE SHLIBDEPS_OUTPUT
           RESULT_VARIABLE SHLIBDEPS_RESULT
           ERROR_VARIABLE SHLIBDEPS_ERROR
-          OUTPUT_STRIP_TRAILING_WHITESPACE )
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
 
         # E2K OSL 6.0.1 and prior has broken dpkg-shlibdeps. CPack will deal with that (mocking SHLIBDEPS_OUTPUT), but inform user of this.
-        if("${SHLIBDEPS_ERROR}" MATCHES "unknown gcc system type e2k.*, falling back to default")
+        if(SHLIBDEPS_ERROR MATCHES "unknown gcc system type e2k.*, falling back to default")
           message(WARNING "CPackDeb: broken dpkg-shlibdeps on E2K detected, will fall back to minimal dependencies.\n"
                   "You should expect that dependencies list in the package will be incomplete.")
           set(SHLIBDEPS_OUTPUT "shlibs:Depends=libc6, lcc-libs")
@@ -437,7 +459,7 @@ function(cpack_deb_prepare_package_vars)
 
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
           # dpkg-shlibdeps will throw some warnings if some input files are not binary
-          message( "CPackDeb Debug: dpkg-shlibdeps warnings \n${SHLIBDEPS_ERROR}")
+          message("CPackDeb Debug: dpkg-shlibdeps warnings \n${SHLIBDEPS_ERROR}")
         endif()
         if(NOT SHLIBDEPS_RESULT EQUAL 0)
           message(FATAL_ERROR "CPackDeb: dpkg-shlibdeps: '${SHLIBDEPS_ERROR}';\n"
@@ -551,10 +573,11 @@ function(cpack_deb_prepare_package_vars)
       message(STATUS "CPackDeb: Can not find dpkg in your path, default to i386.")
       set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
     endif()
-    execute_process(COMMAND "${DPKG_CMD}" --print-architecture
+    execute_process(
+      COMMAND "${DPKG_CMD}" --print-architecture
       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
       OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
+    )
   endif()
 
   # Source: (optional)
@@ -629,13 +652,17 @@ function(cpack_deb_prepare_package_vars)
     set(_desc_fallback "CPACK_PACKAGE_DESCRIPTION")
   endif()
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    cpack_deb_variable_fallback("CPACK_DEBIAN_PACKAGE_DESCRIPTION"
-      "CPACK_DEBIAN_${_local_component_name}_DESCRIPTION"
-      "CPACK_COMPONENT_${_local_component_name}_DESCRIPTION")
+    cpack_deb_variable_fallback(
+      CPACK_DEBIAN_PACKAGE_DESCRIPTION
+      CPACK_DEBIAN_${_local_component_name}_DESCRIPTION
+      CPACK_COMPONENT_${_local_component_name}_DESCRIPTION
+    )
   else()
-    cpack_deb_variable_fallback("CPACK_DEBIAN_PACKAGE_DESCRIPTION"
-      "CPACK_DEBIAN_PACKAGE_DESCRIPTION"
-      ${_desc_fallback})
+    cpack_deb_variable_fallback(
+      CPACK_DEBIAN_PACKAGE_DESCRIPTION
+      CPACK_DEBIAN_PACKAGE_DESCRIPTION
+      ${_desc_fallback}
+    )
   endif()
 
   # Still no description? ... and description file has set ...
@@ -777,12 +804,12 @@ function(cpack_deb_prepare_package_vars)
   if(CPACK_ADD_LDCONFIG_CALL)
     set(CPACK_DEBIAN_GENERATE_POSTINST 1)
     set(CPACK_DEBIAN_GENERATE_POSTRM 1)
-    foreach(f IN LISTS CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA)
-      cmake_path(GET f FILENAME n)
-      if(n STREQUAL "postinst")
+    foreach(control_file IN LISTS CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA)
+      cmake_path(GET control_file FILENAME name)
+      if(name STREQUAL "postinst")
         set(CPACK_DEBIAN_GENERATE_POSTINST 0)
       endif()
-      if(n STREQUAL "postrm")
+      if(name STREQUAL "postrm")
         set(CPACK_DEBIAN_GENERATE_POSTRM 0)
       endif()
     endforeach()
@@ -791,9 +818,11 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_GENERATE_POSTRM 0)
   endif()
 
-  cpack_deb_variable_fallback("CPACK_DEBIAN_FILE_NAME"
-    "CPACK_DEBIAN_${_local_component_name}_FILE_NAME"
-    "CPACK_DEBIAN_FILE_NAME")
+  cpack_deb_variable_fallback(
+    CPACK_DEBIAN_FILE_NAME
+    CPACK_DEBIAN_${_local_component_name}_FILE_NAME
+    CPACK_DEBIAN_FILE_NAME
+  )
   if(CPACK_DEBIAN_FILE_NAME)
     if(CPACK_DEBIAN_FILE_NAME STREQUAL "DEB-DEFAULT")
       # Patch package file name to be in correct debian format:
