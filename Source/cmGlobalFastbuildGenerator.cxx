@@ -904,7 +904,12 @@ void cmGlobalFastbuildGenerator::WriteCompilers()
       WriteVariable("AllowDistribution", "false", 1);
     }
 
-    if (compilerDef.UseLightCache && compilerDef.CompilerFamily == "msvc") {
+    if (compilerDef.UseLightCache &&
+        (compilerDef.CompilerFamily == "msvc" ||
+         // FASTBuild supports Light Cache for non-MSVC compilers starting from
+         // version 1.19
+         cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
+                                       this->FastbuildVersion, "1.19"))) {
       WriteVariable("UseLightCache_Experimental", "true", 1);
     }
     if (compilerDef.UseRelativePaths) {
