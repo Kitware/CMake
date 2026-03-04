@@ -390,26 +390,23 @@ if(CPackGen MATCHES "RPM")
     file(GLOB_RECURSE symlink_files RELATIVE "${CPackComponentsForAll_BINARY_DIR}" "${CPackComponentsForAll_BINARY_DIR}/*/symlink_*")
 
     foreach(check_symlink IN LISTS symlink_files)
-      get_filename_component(symlink_name "${check_symlink}" NAME)
-      execute_process(COMMAND ls -la "${check_symlink}"
-                WORKING_DIRECTORY "${CPackComponentsForAll_BINARY_DIR}"
-                OUTPUT_VARIABLE SYMLINK_POINT_
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
+      cmake_path(GET check_symlink FILENAME symlink_name)
+      file(READ_SYMLINK "${check_symlink}" symlink_dst)
 
       if("${symlink_name}" STREQUAL "symlink_samedir_path"
           OR "${symlink_name}" STREQUAL "symlink_samedir_path_current_dir"
           OR "${symlink_name}" STREQUAL "symlink_samedir_path_longer")
-        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}depth_three$" check_symlink "${SYMLINK_POINT_}")
+        string(REGEX MATCH "^depth_three$" check_symlink "${symlink_dst}")
       elseif("${symlink_name}" STREQUAL "symlink_subdir_path")
-        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}depth_two/depth_three$" check_symlink "${SYMLINK_POINT_}")
+        string(REGEX MATCH "^depth_two/depth_three$" check_symlink "${symlink_dst}")
       elseif("${symlink_name}" STREQUAL "symlink_parentdir_path")
-        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}../$" check_symlink "${SYMLINK_POINT_}")
+        string(REGEX MATCH "^\.\.$" check_symlink "${symlink_dst}")
       elseif("${symlink_name}" STREQUAL "symlink_to_non_relocatable_path")
-        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/non_relocatable/depth_two$" check_symlink "${SYMLINK_POINT_}")
+        string(REGEX MATCH "^${CPACK_PACKAGING_INSTALL_PREFIX}/non_relocatable/depth_two$" check_symlink "${symlink_dst}")
       elseif("${symlink_name}" STREQUAL "symlink_outside_package")
-        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}outside_package$" check_symlink "${SYMLINK_POINT_}")
+        string(REGEX MATCH "^outside_package$" check_symlink "${symlink_dst}")
       elseif("${symlink_name}" STREQUAL "symlink_outside_wdr")
-        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}/outside_package_wdr$" check_symlink "${SYMLINK_POINT_}")
+        string(REGEX MATCH "^/outside_package_wdr$" check_symlink "${symlink_dst}")
       elseif("${symlink_name}" STREQUAL "symlink_other_relocatable_path"
           OR "${symlink_name}" STREQUAL "symlink_from_non_relocatable_path"
           OR "${symlink_name}" STREQUAL "symlink_relocatable_subpath")
@@ -419,7 +416,7 @@ if(CPackGen MATCHES "RPM")
       endif()
 
       if(NOT check_symlink)
-        message(FATAL_ERROR "symlink points to unexpected location '${SYMLINK_POINT_}'")
+        message(FATAL_ERROR "symlink points to unexpected location '${symlink_dst}'")
       endif()
     endforeach()
 
