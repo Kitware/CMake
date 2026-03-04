@@ -15,8 +15,8 @@ function(cpack_deb_variable_fallback OUTPUT_VAR_NAME)
 
   foreach(variable_name IN LISTS FALLBACK_VAR_NAMES)
     if(DEFINED ${variable_name})
-      set(${OUTPUT_VAR_NAME} "${${variable_name}}" PARENT_SCOPE)
-      break()
+      set(${OUTPUT_VAR_NAME} "${${variable_name}}")
+      return(PROPAGATE ${OUTPUT_VAR_NAME})
     endif()
   endforeach()
 endfunction()
@@ -29,7 +29,8 @@ function(get_component_package_name var component)
     string(TOLOWER "${CPACK_DEBIAN_PACKAGE_NAME}-${component}" package_name)
   endif()
 
-  set(${var} "${package_name}" PARENT_SCOPE)
+  set(${var} "${package_name}")
+  return(PROPAGATE ${var})
 endfunction()
 
 #extract library name and version for given shared object
@@ -92,10 +93,11 @@ function(get_sanitized_dirname dirname outvar)
   set(prohibited_chars_pattern "[<]|[>]|[\"]|[/]|[\\]|[|]|[?]|[*]|[`]")
   if(dirname MATCHES "${prohibited_chars_pattern}")
     string(MD5 sanitized_dirname "${dirname}")
-    set(${outvar} "${sanitized_dirname}" PARENT_SCOPE)
+    set(${outvar} "${sanitized_dirname}")
   else()
-    set(${outvar} "${dirname}" PARENT_SCOPE)
+    set(${outvar} "${dirname}")
   endif()
+  return(PROPAGATE ${outvar})
 endfunction()
 
 #retrieve packaging directories of components the current component depends on
@@ -114,30 +116,28 @@ function(get_packaging_dirs_of_dependencies outvar)
       cmake_path(NORMAL_PATH dependency_packaging_dir)
       list(APPEND result_list "${dependency_packaging_dir}")
     endforeach()
-    set(${outvar} "${result_list}" PARENT_SCOPE)  # Set return variable.
+    set(${outvar} "${result_list}")  # Set return variable.
   else()
-    set(${outvar} "" PARENT_SCOPE)  # Clear return variable.
+    set(${outvar} "")  # Clear return variable.
   endif()
+  return(PROPAGATE ${outvar})
 endfunction()
 
-function(cpack_deb_check_description SUMMARY LINES RESULT_VARIABLE)
-  set(_result TRUE)
-
+function(cpack_deb_check_description summary lines result_variable)
   # Get the summary line
-  if(NOT SUMMARY MATCHES "^[^\\s].*$")
-    set(_result FALSE)
-    set(${RESULT_VARIABLE} ${_result} PARENT_SCOPE)
-    return()
+  if(NOT summary MATCHES "^[^\\s].*$")
+    set(${result_variable} FALSE)
+  else()
+    set(${result_variable} TRUE)
+    foreach(_line IN LISTS lines)
+      if(NOT _line MATCHES "^ +[^ ]+.*$")
+        set(${result_variable} FALSE)
+        break()
+      endif()
+    endforeach()
   endif()
 
-  foreach(_line IN LISTS LINES)
-    if(NOT _line MATCHES "^ +[^ ]+.*$")
-      set(_result FALSE)
-      break()
-    endif()
-  endforeach()
-
-  set(${RESULT_VARIABLE} ${_result} PARENT_SCOPE)
+  return(PROPAGATE ${result_variable})
 endfunction()
 
 function(cpack_deb_format_package_description TEXT OUTPUT_VAR)
@@ -161,8 +161,8 @@ function(cpack_deb_format_package_description TEXT OUTPUT_VAR)
   cpack_deb_check_description("${_summary}" "${_lines}" _result)
   if(_result)
     # Ok, no formatting required
-    set(${OUTPUT_VAR} "${TEXT}" PARENT_SCOPE)
-    return()
+    set(${OUTPUT_VAR} "${TEXT}")
+    return(PROPAGATE ${OUTPUT_VAR})
   endif()
 
   # Format the summary line
@@ -188,7 +188,8 @@ function(cpack_deb_format_package_description TEXT OUTPUT_VAR)
   list(PREPEND _result "${_summary}")
   list(JOIN _result "\n" _result)
   string(REPLACE "${uuid}"  ";" _result "${_result}")
-  set(${OUTPUT_VAR} "${_result}" PARENT_SCOPE)
+  set(${OUTPUT_VAR} "${_result}")
+  return(PROPAGATE ${OUTPUT_VAR})
 endfunction()
 
 function(cpack_deb_prepare_package_vars)
