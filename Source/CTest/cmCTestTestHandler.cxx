@@ -359,7 +359,7 @@ int cmCTestTestHandler::ProcessHandler()
                        << cmSystemTools::GetLogicalWorkingDirectory()
                        << std::endl,
                      this->Quiet);
-  if (!this->PreProcessHandler()) {
+  if (!this->CTest->GetShowOnly() && !this->PreProcessHandler()) {
     return -1;
   }
 
@@ -428,7 +428,7 @@ int cmCTestTestHandler::ProcessHandler()
     return 1;
   }
 
-  if (!this->PostProcessHandler()) {
+  if (!this->CTest->GetShowOnly() && !this->PostProcessHandler()) {
     this->LogFile = nullptr;
     return -1;
   }
