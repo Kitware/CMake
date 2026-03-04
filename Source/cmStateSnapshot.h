@@ -56,7 +56,7 @@ public:
                                      bool parent_scope = false) const;
   void PushPolicy(cmPolicies::PolicyMap const& entry, bool weak);
   bool PopPolicy();
-  bool CanPopPolicyScope();
+  bool CanPopPolicyScope() const;
 
   void SetDiagnostic(cmDiagnostics::DiagnosticCategory category,
                      cmDiagnostics::DiagnosticAction action, bool recursive);
@@ -77,7 +77,7 @@ public:
   }
   void PushDiagnostic(cmDiagnostics::DiagnosticMap entry, bool weak);
   bool PopDiagnostic();
-  bool CanPopDiagnosticScope();
+  bool CanPopDiagnosticScope() const;
 
   cmState* GetState() const;
 

@@ -169,7 +169,7 @@ bool cmStateSnapshot::PopPolicy()
   return true;
 }
 
-bool cmStateSnapshot::CanPopPolicyScope()
+bool cmStateSnapshot::CanPopPolicyScope() const
 {
   return this->Position->Policies != this->Position->PolicyScope;
 }
@@ -243,7 +243,7 @@ bool cmStateSnapshot::PopDiagnostic()
   return true;
 }
 
-bool cmStateSnapshot::CanPopDiagnosticScope()
+bool cmStateSnapshot::CanPopDiagnosticScope() const
 {
   return this->Position->Diagnostics != this->Position->DiagnosticScope;
 }
