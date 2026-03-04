@@ -101,7 +101,9 @@ endfunction()
 function(get_packaging_dirs_of_dependencies outvar)
   if(CPACK_DEB_PACKAGE_COMPONENT)
     if(NOT DEFINED WDIR OR NOT DEFINED _local_component_name)
-      message(FATAL_ERROR "CPackDeb: Function '${CMAKE_CURRENT_FUNCTION}' not called from correct function scope!")
+      message(
+        FATAL_ERROR "CPackDeb: Function '${CMAKE_CURRENT_FUNCTION}' not called from correct function scope!"
+      )
     endif()
     set(result_list)
     foreach(dependency_name IN LISTS CPACK_COMPONENT_${_local_component_name}_DEPENDS)
@@ -211,7 +213,10 @@ function(cpack_deb_prepare_package_vars)
     if(DEFINED ${_component_shlibdeps_var})
       set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS "${${_component_shlibdeps_var}}")
       if(CPACK_DEBIAN_PACKAGE_DEBUG)
-        message("CPackDeb Debug: component '${CPACK_DEB_PACKAGE_COMPONENT}' dpkg-shlibdeps set to ${CPACK_DEBIAN_PACKAGE_SHLIBDEPS}")
+        message(
+          "CPackDeb Debug: component '${CPACK_DEB_PACKAGE_COMPONENT}' dpkg-shlibdeps set to "
+          "${CPACK_DEBIAN_PACKAGE_SHLIBDEPS}"
+        )
       endif()
     endif()
   endif()
@@ -227,7 +232,11 @@ function(cpack_deb_prepare_package_vars)
 
     find_program(FILE_EXECUTABLE file)
     if(NOT FILE_EXECUTABLE)
-      message(FATAL_ERROR "CPackDeb: file utility is not available. CPACK_DEBIAN_PACKAGE_SHLIBDEPS and CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS options are not available.")
+      message(
+        FATAL_ERROR
+        "CPackDeb: file utility is not available. CPACK_DEBIAN_PACKAGE_SHLIBDEPS and "
+        "CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS options are not available."
+      )
     endif()
 
     # get file info so that we can determine if file is executable or not
@@ -240,7 +249,11 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_VARIABLE INSTALL_FILE_
       )
       if(NOT FILE_RESULT_ EQUAL 0)
-        message(FATAL_ERROR "CPackDeb: execution of command: '${FILE_EXECUTABLE} ./${FILE_}' failed with exit code: ${FILE_RESULT_}")
+        message(
+          FATAL_ERROR
+          "CPackDeb: execution of command: '${FILE_EXECUTABLE} ./${FILE_}' failed with "
+          "exit code: ${FILE_RESULT_}"
+        )
       endif()
       list(APPEND CPACK_DEB_INSTALL_FILES "${INSTALL_FILE_}")
     endforeach()
@@ -320,8 +333,11 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_STRIP_TRAILING_WHITESPACE
       )
       if(NOT OBJCOPY_RESULT EQUAL 0)
-        message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
-            "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --only-keep-debug ${_FILE} ${_FILE_DBGSYM}'")
+        message(
+          FATAL_ERROR
+          "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
+          "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --only-keep-debug ${_FILE} ${_FILE_DBGSYM}'"
+        )
       endif()
       execute_process(
         COMMAND "${CPACK_OBJCOPY_EXECUTABLE}" --strip-unneeded ${_FILE}
@@ -344,8 +360,10 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_STRIP_TRAILING_WHITESPACE
       )
       if(NOT OBJCOPY_RESULT EQUAL 0)
-        message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
-            "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}'")
+        message(
+          FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
+          "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}'"
+        )
       endif()
     endforeach()
   endif()
@@ -434,7 +452,11 @@ function(cpack_deb_prepare_package_vars)
 
           list(REMOVE_DUPLICATES PRIVATE_SEARCH_DIR_OPTIONS)
         elseif(NOT "${CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS}" STREQUAL "")
-          message(WARNING "CPackDeb: dkpg-shlibdeps is too old. \"CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS\" is therefore ignored.")
+          message(
+            WARNING
+            "CPackDeb: dkpg-shlibdeps is too old. \"CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS\" "
+            "is therefore ignored."
+          )
         endif()
 
         # Execute dpkg-shlibdeps
@@ -452,8 +474,11 @@ function(cpack_deb_prepare_package_vars)
 
         # E2K OSL 6.0.1 and prior has broken dpkg-shlibdeps. CPack will deal with that (mocking SHLIBDEPS_OUTPUT), but inform user of this.
         if(SHLIBDEPS_ERROR MATCHES "unknown gcc system type e2k.*, falling back to default")
-          message(WARNING "CPackDeb: broken dpkg-shlibdeps on E2K detected, will fall back to minimal dependencies.\n"
-                  "You should expect that dependencies list in the package will be incomplete.")
+          message(
+            WARNING
+            "CPackDeb: broken dpkg-shlibdeps on E2K detected, will fall back to minimal dependencies.\n"
+            "You should expect that dependencies list in the package will be incomplete."
+          )
           set(SHLIBDEPS_OUTPUT "shlibs:Depends=libc6, lcc-libs")
         endif()
 
@@ -462,18 +487,25 @@ function(cpack_deb_prepare_package_vars)
           message("CPackDeb Debug: dpkg-shlibdeps warnings \n${SHLIBDEPS_ERROR}")
         endif()
         if(NOT SHLIBDEPS_RESULT EQUAL 0)
-          message(FATAL_ERROR "CPackDeb: dpkg-shlibdeps: '${SHLIBDEPS_ERROR}';\n"
-              "executed command: '${SHLIBDEPS_EXECUTABLE} ${PRIVATE_SEARCH_DIR_OPTIONS} ${IGNORE_MISSING_INFO_FLAG} -O ${CPACK_DEB_BINARY_FILES}';\n"
-              "found files: '${INSTALL_FILE_}';\n"
-              "files info: '${CPACK_DEB_INSTALL_FILES}';\n"
-              "binary files: '${CPACK_DEB_BINARY_FILES}'")
+          message(
+            FATAL_ERROR
+            "CPackDeb: dpkg-shlibdeps: '${SHLIBDEPS_ERROR}';\n"
+            "executed command: '${SHLIBDEPS_EXECUTABLE} ${PRIVATE_SEARCH_DIR_OPTIONS} "
+            "${IGNORE_MISSING_INFO_FLAG} -O ${CPACK_DEB_BINARY_FILES}';\n"
+            "found files: '${INSTALL_FILE_}';\n"
+            "files info: '${CPACK_DEB_INSTALL_FILES}';\n"
+            "binary files: '${CPACK_DEB_BINARY_FILES}'"
+          )
         endif()
 
         #Get rid of prefix generated by dpkg-shlibdeps
         string(REGEX REPLACE "^.*Depends=" "" CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS "${SHLIBDEPS_OUTPUT}")
 
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
-          message("CPackDeb Debug: Found dependency: ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS} from output ${SHLIBDEPS_OUTPUT}")
+          message("
+            CPackDeb Debug: Found dependency: ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS} from "
+            "output ${SHLIBDEPS_OUTPUT}"
+          )
         endif()
 
         # Remove blank control file
@@ -484,11 +516,17 @@ function(cpack_deb_prepare_package_vars)
         file(REMOVE_RECURSE "${CPACK_TEMPORARY_DIRECTORY}/DEBIAN")
       else()
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
-          message(AUTHOR_WARNING "CPackDeb Debug: Using only user-provided depends because package does not contain executable files that link to shared libraries.")
+          message(
+            AUTHOR_WARNING
+            "CPackDeb Debug: Using only user-provided depends because package does not "
+            "contain executable files that link to shared libraries."
+          )
         endif()
       endif()
     else()
-      message("CPackDeb: Using only user-provided dependencies because dpkg-shlibdeps is not found.")
+      message(
+        "CPackDeb: Using only user-provided dependencies because dpkg-shlibdeps is not found."
+      )
     endif()
 
   else()
@@ -548,8 +586,11 @@ function(cpack_deb_prepare_package_vars)
     # CMake 3.10 did not check for version format so we have to preserve
     # backward compatibility
     if(CPACK_DEBIAN_PACKAGE_VERSION MATCHES ".*-.*")
-      message(FATAL_ERROR
-        "CPackDeb: Debian package version must not contain hyphens when CPACK_DEBIAN_PACKAGE_RELEASE is not provided!")
+      message(
+        FATAL_ERROR
+        "CPackDeb: Debian package version must not contain hyphens when "
+        "CPACK_DEBIAN_PACKAGE_RELEASE is not provided!"
+      )
     endif()
   endif()
 
@@ -598,7 +639,13 @@ function(cpack_deb_prepare_package_vars)
   # if per-component variable, overrides the global CPACK_DEBIAN_PACKAGE_${variable_type_}
   # automatic dependency discovery will be performed afterwards.
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    foreach(value_type_ IN ITEMS DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES MULTIARCH SOURCE SECTION PRIORITY NAME)
+    set(
+      _value_types
+      DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS
+      CONFLICTS PROVIDES REPLACES MULTIARCH SOURCE SECTION
+      PRIORITY NAME
+    )
+    foreach(value_type_ IN LISTS _value_types)
       set(_component_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_${value_type_}")
 
       # if set, overrides the global variable
@@ -639,7 +686,11 @@ function(cpack_deb_prepare_package_vars)
   # Maintainer: (mandatory)
   if(NOT CPACK_DEBIAN_PACKAGE_MAINTAINER)
     if(NOT CPACK_PACKAGE_CONTACT)
-      message(FATAL_ERROR "CPackDeb: Debian package requires a maintainer for a package, set CPACK_PACKAGE_CONTACT or CPACK_DEBIAN_PACKAGE_MAINTAINER")
+      message(
+        FATAL_ERROR
+        "CPackDeb: Debian package requires a maintainer for a package, set "
+        "CPACK_PACKAGE_CONTACT or CPACK_DEBIAN_PACKAGE_MAINTAINER"
+      )
     endif()
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER ${CPACK_PACKAGE_CONTACT})
   endif()
@@ -681,7 +732,8 @@ function(cpack_deb_prepare_package_vars)
     else()
       # Giving up! Report an error...
       set(_description_failure_message
-        "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
+        "CPackDeb: Debian package requires a summary for a package, set "
+        "CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
       if(CPACK_DEB_PACKAGE_COMPONENT)
         string(APPEND _description_failure_message
           " or CPACK_DEBIAN_${_local_component_name}_DESCRIPTION")
@@ -722,12 +774,16 @@ function(cpack_deb_prepare_package_vars)
 
   if(CPACK_DEBIAN_ARCHIVE_TYPE)
     if(CPACK_DEBIAN_ARCHIVE_TYPE STREQUAL "paxr")
-      message(DEPRECATION "CPACK_DEBIAN_ARCHIVE_TYPE set to old and invalid "
-        "type 'paxr', mapping to 'gnutar'")
+      message(
+        DEPRECATION
+        "CPACK_DEBIAN_ARCHIVE_TYPE set to old and invalid type 'paxr', mapping to 'gnutar'"
+      )
       set(CPACK_DEBIAN_ARCHIVE_TYPE "gnutar")
     elseif(NOT CPACK_DEBIAN_ARCHIVE_TYPE STREQUAL "gnutar")
-      message(FATAL_ERROR "CPACK_DEBIAN_ARCHIVE_TYPE set to unsupported"
-        "type ${CPACK_DEBIAN_ARCHIVE_TYPE}")
+      message(
+        FATAL_ERROR
+        "CPACK_DEBIAN_ARCHIVE_TYPE set to unsupported type ${CPACK_DEBIAN_ARCHIVE_TYPE}"
+      )
     endif()
   else()
     set(CPACK_DEBIAN_ARCHIVE_TYPE "gnutar")
@@ -777,15 +833,24 @@ function(cpack_deb_prepare_package_vars)
       foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
         extract_so_info("${_FILE}" libname soversion)
         if(libname AND DEFINED soversion)
-          list(APPEND CPACK_DEBIAN_PACKAGE_SHLIBS_LIST
-               "${libname} ${soversion} ${CPACK_DEBIAN_PACKAGE_NAME} (${CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY} ${CPACK_DEBIAN_PACKAGE_VERSION})")
+          list(
+            APPEND CPACK_DEBIAN_PACKAGE_SHLIBS_LIST
+            "${libname} ${soversion} ${CPACK_DEBIAN_PACKAGE_NAME} (${CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY} ${CPACK_DEBIAN_PACKAGE_VERSION})"
+          )
         else()
-          message(AUTHOR_WARNING "Shared library '${_FILE}' is missing soname or soversion. Library will not be added to DEBIAN/shlibs control file.")
+          message(
+            AUTHOR_WARNING
+            "Shared library '${_FILE}' is missing soname or soversion. "
+            "Library will not be added to DEBIAN/shlibs control file."
+          )
         endif()
       endforeach()
       list(JOIN CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "\n" CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
     else()
-      message(FATAL_ERROR "Readelf utility is not available. CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS option is not available.")
+      message(
+        FATAL_ERROR
+        "Readelf utility is not available. CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS option is not available."
+      )
     endif()
   endif()
 
@@ -827,10 +892,14 @@ function(cpack_deb_prepare_package_vars)
     if(CPACK_DEBIAN_FILE_NAME STREQUAL "DEB-DEFAULT")
       # Patch package file name to be in correct debian format:
       # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
-      set(CPACK_OUTPUT_FILE_NAME
-        "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
-      set(CPACK_DBGSYM_OUTPUT_FILE_NAME
-        "${CPACK_DEBIAN_PACKAGE_NAME}-dbgsym_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.ddeb")
+      set(
+        CPACK_OUTPUT_FILE_NAME
+        "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb"
+      )
+      set(
+        CPACK_DBGSYM_OUTPUT_FILE_NAME
+        "${CPACK_DEBIAN_PACKAGE_NAME}-dbgsym_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.ddeb"
+      )
     else()
       if(NOT CPACK_DEBIAN_FILE_NAME MATCHES ".*\\.(deb|ipk)")
         set(CPACK_DEBIAN_FILE_NAME "${CPACK_DEBIAN_FILE_NAME}.deb")
