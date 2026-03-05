@@ -124,6 +124,9 @@ STATIC_ASSERT(offsetof(uv_buf_t, len) == offsetof(struct iovec, iov_len));
 
 /* https://github.com/libuv/libuv/issues/1674 */
 int uv_clock_gettime(uv_clock_id clock_id, uv_timespec64_t* ts) {
+#if defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED < 101200
+  return UV_ENOSYS;
+#else
   struct timespec t;
   int r;
 
@@ -148,6 +151,7 @@ int uv_clock_gettime(uv_clock_id clock_id, uv_timespec64_t* ts) {
   ts->tv_nsec = t.tv_nsec;
 
   return 0;
+#endif
 }
 
 

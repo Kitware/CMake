@@ -203,7 +203,7 @@ static ssize_t uv__fs_fdatasync(uv_fs_t* req) {
 }
 
 
-#if defined(__APPLE__)                                                        \
+#if (defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101300)           \
     || defined(_AIX71)                                                        \
     || defined(__DragonFly__)                                                 \
     || defined(__FreeBSD__)                                                   \
@@ -234,7 +234,7 @@ static struct timespec uv__fs_to_timespec(double time) {
 
 
 static ssize_t uv__fs_futime(uv_fs_t* req) {
-#if defined(__APPLE__)                                                        \
+#if (defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101300)           \
     || defined(_AIX71)                                                        \
     || defined(__DragonFly__)                                                 \
     || defined(__FreeBSD__)                                                   \
@@ -1167,7 +1167,7 @@ static ssize_t uv__fs_sendfile(uv_fs_t* req) {
 
 
 static ssize_t uv__fs_utime(uv_fs_t* req) {
-#if defined(__APPLE__)                                                        \
+#if (defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101300)           \
     || defined(_AIX71)                                                        \
     || defined(__DragonFly__)                                                 \
     || defined(__FreeBSD__)                                                   \
@@ -1202,7 +1202,7 @@ static ssize_t uv__fs_utime(uv_fs_t* req) {
 
 
 static ssize_t uv__fs_lutime(uv_fs_t* req) {
-#if defined(__APPLE__)                                                        \
+#if (defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101300)           \
     || defined(_AIX71)                                                        \
     || defined(__DragonFly__)                                                 \
     || defined(__FreeBSD__)                                                   \
@@ -1258,7 +1258,11 @@ static ssize_t uv__fs_copyfile(uv_fs_t* req) {
   uv_file dstfd;
   struct stat src_statsbuf;
   struct stat dst_statsbuf;
+#if defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED < 101300
+  struct timeval times[2];
+#else
   struct timespec times[2];
+#endif
   int dst_flags;
   int result;
   int err;
@@ -1340,8 +1344,15 @@ static ssize_t uv__fs_copyfile(uv_fs_t* req) {
    * Change the timestamps of the destination file to match the source file.
    */
 #if defined(__APPLE__)
+#  if MAC_OS_X_VERSION_MIN_REQUIRED < 101300
+  times[0].tv_sec = src_statsbuf.st_atimespec.tv_sec;
+  times[0].tv_usec = src_statsbuf.st_atimespec.tv_nsec / 1000;
+  times[1].tv_sec = src_statsbuf.st_mtimespec.tv_sec;
+  times[1].tv_usec = src_statsbuf.st_mtimespec.tv_nsec / 1000;
+#  else
   times[0] = src_statsbuf.st_atimespec;
   times[1] = src_statsbuf.st_mtimespec;
+#  endif
 #elif defined(_AIX)
   times[0].tv_sec = src_statsbuf.st_atime;
   times[0].tv_nsec = src_statsbuf.st_atime_n;
@@ -1352,10 +1363,17 @@ static ssize_t uv__fs_copyfile(uv_fs_t* req) {
   times[1] = src_statsbuf.st_mtim;
 #endif
 
+#if defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED < 101300
+  if (futimes(dstfd, times) == -1) {
+    err = UV__ERR(errno);
+    goto out;
+  }
+#else
   if (futimens(dstfd, times) == -1) {
     err = UV__ERR(errno);
     goto out;
   }
+#endif
 
   /*
    * Change the ownership and permissions of the destination file to match the

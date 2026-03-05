@@ -32,6 +32,12 @@
 #include <sys/sysctl.h>
 #include <unistd.h>  /* sysconf */
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 101200
+#  include <dlfcn.h>
+#  define mach_continuous_time uv__mach_continuous_time
+   static uint64_t (*uv__mach_continuous_time)(void);
+#endif
+
 static uv_once_t once = UV_ONCE_INIT;
 static mach_timebase_info_data_t timebase;
 
@@ -54,6 +60,12 @@ void uv__platform_loop_delete(uv_loop_t* loop) {
 static void uv__hrtime_init_once(void) {
   if (KERN_SUCCESS != mach_timebase_info(&timebase))
     abort();
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 101200
+  uv__mach_continuous_time = (uint64_t (*)(void))
+    dlsym(RTLD_DEFAULT, "mach_continuous_time");
+  if (uv__mach_continuous_time == NULL)
+    uv__mach_continuous_time = mach_absolute_time;
+#endif
 }
 
 
