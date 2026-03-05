@@ -2,11 +2,11 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "QCMake.h"
 #include <QCheckBox>
 #include <QStringList>
 #include <QWidget>
 
+#include "QCMake.h"
 #include "ui_AddCacheEntry.h"
 
 class AddCacheEntry

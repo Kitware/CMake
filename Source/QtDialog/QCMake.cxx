@@ -6,7 +6,6 @@
 
 #include <cm/memory>
 
-#include "QCMakeSizeType.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QString>
@@ -18,6 +17,8 @@
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+#include "QCMakeSizeType.h"
 
 #ifdef Q_OS_WIN
 #  include "qt_windows.h" // For SetErrorMode

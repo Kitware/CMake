@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include <iostream>
 
-#include "QCMake.h" // include to disable MS warnings
 #include <QApplication>
 #include <QDir>
 #include <QLocale>
@@ -22,6 +21,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h" // IWYU pragma: keep
 #include "cmake.h"
+
+#include "QCMake.h" // include to disable MS warnings
 
 namespace {
 cmDocumentationEntry const cmDocumentationName = {

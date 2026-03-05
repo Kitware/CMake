@@ -2,12 +2,13 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "QCMake.h"
-#include "QCMakeSizeType.h"
 #include <QItemDelegate>
 #include <QSet>
 #include <QStandardItemModel>
 #include <QTreeView>
+
+#include "QCMake.h"
+#include "QCMakeSizeType.h"
 
 class QSortFilterProxyModel;
 class QCMakeCacheModel;

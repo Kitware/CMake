@@ -2,10 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "QCMake.h"
 #include <QDialog>
 #include <QWidget>
 
+#include "QCMake.h"
 #include "ui_WarningMessagesDialog.h"
 
 /**

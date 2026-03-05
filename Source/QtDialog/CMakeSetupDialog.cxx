@@ -30,16 +30,15 @@
 #  include <QWinTaskbarProgress>
 #endif
 
-#include "QCMake.h"
-#include "QCMakeCacheView.h"
-#include "QCMakeSizeType.h"
-
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
 #include "AddCacheEntry.h"
 #include "EnvironmentDialog.h"
 #include "FirstConfigure.h"
+#include "QCMake.h"
+#include "QCMakeCacheView.h"
+#include "QCMakeSizeType.h"
 #include "RegexExplorer.h"
 #include "WarningMessagesDialog.h"
 

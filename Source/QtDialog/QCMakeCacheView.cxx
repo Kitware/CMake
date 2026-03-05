@@ -2,8 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "QCMakeCacheView.h"
 
-#include "QCMakeSizeType.h"
-#include "QCMakeWidgets.h"
 #include <QApplication>
 #include <QEvent>
 #include <QHBoxLayout>
@@ -12,6 +10,9 @@
 #include <QMetaProperty>
 #include <QSortFilterProxyModel>
 #include <QStyle>
+
+#include "QCMakeSizeType.h"
+#include "QCMakeWidgets.h"
 
 // filter for searches
 class QCMakeSearchFilter : public QSortFilterProxyModel

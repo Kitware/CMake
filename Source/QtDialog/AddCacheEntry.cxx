@@ -2,9 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "AddCacheEntry.h"
 
-#include "QCMakeSizeType.h"
 #include <QCompleter>
 #include <QMetaProperty>
+
+#include "QCMakeSizeType.h"
 
 static int const NumTypes = 4;
 static int const DefaultTypeIndex = 0;

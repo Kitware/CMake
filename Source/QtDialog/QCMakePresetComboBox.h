@@ -2,11 +2,12 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "QCMakePreset.h"
 #include <QComboBox>
 #include <QObject>
 #include <QString>
 #include <QVector>
+
+#include "QCMakePreset.h"
 
 class QCMakePresetItemModel;
 
