@@ -38,11 +38,15 @@ set(uv_sources
   )
 if(WIN32)
   list(APPEND uv_libraries
-    ws2_32
-    psapi
+    advapi32
+    dbghelp
     iphlpapi
+    ole32
+    psapi
     shell32
+    user32
     userenv
+    ws2_32
     )
   list(APPEND uv_includes
     src/win
@@ -57,7 +61,6 @@ if(WIN32)
     )
   list(APPEND uv_sources
     src/win/async.c
-    src/win/atomicops-inl.h
     src/win/core.c
     src/win/detect-wakeup.c
     src/win/dl.c
@@ -98,7 +101,6 @@ else()
     )
   list(APPEND uv_sources
     src/unix/async.c
-    src/unix/atomic-ops.h
     src/unix/core.c
     src/unix/dl.c
     src/unix/fs.c
@@ -111,7 +113,6 @@ else()
     src/unix/poll.c
     src/unix/process.c
     src/unix/signal.c
-    src/unix/spinlock.h
     src/unix/stream.c
     src/unix/tcp.c
     src/unix/thread.c
@@ -205,11 +206,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
   list(APPEND uv_defines _GNU_SOURCE)
   list(APPEND uv_sources
-    src/unix/epoll.c
-    src/unix/linux-core.c
-    src/unix/linux-inotify.c
-    src/unix/linux-syscalls.c
-    src/unix/linux-syscalls.h
+    src/unix/linux.c
     src/unix/procfs-exepath.c
     src/unix/proctitle.c
     src/unix/sysinfo-loadavg.c

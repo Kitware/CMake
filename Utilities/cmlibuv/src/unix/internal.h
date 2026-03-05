@@ -425,7 +425,7 @@ int uv__random_readpath(const char* path, void* buf, size_t buflen);
 int uv__random_sysctl(void* buf, size_t buflen);
 
 /* io_uring */
-#ifdef __linux__
+#if defined(__linux__) && !defined(CMAKE_BOOTSTRAP)
 int uv__iou_fs_close(uv_loop_t* loop, uv_fs_t* req);
 int uv__iou_fs_ftruncate(uv_loop_t* loop, uv_fs_t* req);
 int uv__iou_fs_fsync_or_fdatasync(uv_loop_t* loop,

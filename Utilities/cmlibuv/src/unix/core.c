@@ -1717,6 +1717,7 @@ int uv_os_setpriority(uv_pid_t pid, int priority) {
 #endif
 }
 
+#ifndef CMAKE_BOOTSTRAP
 /**
  * If the function succeeds, the return value is 0.
  * If the function fails, the return value is non-zero.
@@ -1752,6 +1753,7 @@ int uv_thread_getpriority(uv_thread_t tid, int* priority) {
   *priority = param.sched_priority;
   return 0;
 }
+#endif
 
 #ifdef __linux__
 static int set_nice_for_calling_thread(int priority) {
@@ -1770,6 +1772,7 @@ static int set_nice_for_calling_thread(int priority) {
 }
 #endif
 
+#ifndef CMAKE_BOOTSTRAP
 /**
  * If the function succeeds, the return value is 0.
  * If the function fails, the return value is non-zero.
@@ -1846,6 +1849,7 @@ int uv_thread_setpriority(uv_thread_t tid, int priority) {
   return 0;
 #endif  /* !defined(__GNU__) */
 }
+#endif
 
 int uv_os_uname(uv_utsname_t* buffer) {
   struct utsname buf;
