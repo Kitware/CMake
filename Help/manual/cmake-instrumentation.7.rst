@@ -338,6 +338,15 @@ following:
 These files remain in the build tree until after `Indexing`_ occurs and any
 user-specified `Callbacks`_ are executed.
 
+.. note::
+
+  Configure and generate snippet files are not written by CMake until the
+  generate step is complete. When using :manual:`cmake-gui(1)` or
+  :manual:`ccmake(1)`, triggering only configure step(s) without generating the
+  project files will not generate any configure snippets. Once the generate
+  step is run, there will be one configure snippet for each time the configure
+  step was run.
+
 Snippet files have a filename with the syntax
 ``<role>-<hash>-<timestamp>.json`` and contain the following data:
 
@@ -433,7 +442,9 @@ Snippet files have a filename with the syntax
   ``cmakeContent``
     The path to a `v1 CMake Content File`_ located under ``data``, which
     contains information about the CMake configure and generate steps
-    responsible for generating the ``command`` in this snippet.
+    responsible for generating the ``command`` in this snippet. When using
+    :manual:`cmake-gui(1)` or :manual:`ccmake(1)`, this field may be ``null``
+    for all configure steps up to the most recent one before the generate step.
 
   ``showOnly``
     A boolean representing whether the

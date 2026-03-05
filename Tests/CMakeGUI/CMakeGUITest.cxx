@@ -79,6 +79,28 @@ void CMakeGUITest::tryConfigure(int expectedResult, int timeout)
   QCOMPARE(configureDoneSignalArguments.at(0).toInt(), expectedResult);
 }
 
+void CMakeGUITest::tryGenerate(int expectedResult, int timeout)
+{
+  auto* cmake = this->m_window->findChild<QCMakeThread*>()->cmakeInstance();
+
+  CatchShow catchMessages;
+  catchMessages.setCallback<QMessageBox>([](QMessageBox* box) {
+    if (box->text().contains("Error in generation process")) {
+      box->accept();
+    }
+  });
+
+  QSignalSpy generateDoneSpy(cmake, &QCMake::generateDone);
+  QVERIFY(generateDoneSpy.isValid());
+  QMetaObject::invokeMethod(
+    this->m_window, [this]() { this->m_window->GenerateButton->click(); },
+    Qt::QueuedConnection);
+  QVERIFY(generateDoneSpy.wait(timeout));
+
+  QList<QVariant> generateDoneSignalArguments = generateDoneSpy.takeFirst();
+  QCOMPARE(generateDoneSignalArguments.at(0).toInt(), expectedResult);
+}
+
 void CMakeGUITest::sourceBinaryArgs()
 {
   QFETCH(QString, sourceDir);
@@ -149,6 +171,21 @@ void CMakeGUITest::simpleConfigure_data()
                         << CMakeGUITest_BINARY_DIR
     "/simpleConfigure-fail/build"
                         << -1;
+}
+
+void CMakeGUITest::instrumentation()
+{
+  this->m_window->SourceDirectory->setText(CMakeGUITest_BINARY_DIR
+                                           "/instrumentation/src");
+  this->m_window->BinaryDirectory->setCurrentText(CMakeGUITest_BINARY_DIR
+                                                  "/instrumentation/build");
+
+  // Wait a bit for everything to update
+  loopSleep();
+
+  this->tryConfigure();
+  this->tryConfigure();
+  this->tryGenerate();
 }
 
 void CMakeGUITest::environment()
