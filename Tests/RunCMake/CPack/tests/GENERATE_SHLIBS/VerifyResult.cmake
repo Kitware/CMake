@@ -5,5 +5,5 @@ else() # soversion_zero
 endif()
 
 # optional dot at the end of permissions regex is for SELinux enabled systems
-set(shlibs_shlibs_permissions_regex "-rw-r--r--\.? .*")
+set(shlibs_shlibs_permissions "-rw-r--r--")
 verifyDebControl("${FOUND_FILE_1}" "shlibs" "shlibs")
