@@ -2,7 +2,12 @@ include(CMakeParseArguments)
 
 get_property(CMake_QT_MAJOR_VERSION TARGET cmake-gui PROPERTY CMake_QT_MAJOR_VERSION)
 
-find_package(Qt${CMake_QT_MAJOR_VERSION}Test REQUIRED)
+find_package(Qt${CMake_QT_MAJOR_VERSION} REQUIRED COMPONENTS
+  Core
+  Gui
+  Test
+  Widgets
+)
 
 if(MSVC)
   # QTBUG-118993: Qt uses deprecated stdext::checked_array_iterator
