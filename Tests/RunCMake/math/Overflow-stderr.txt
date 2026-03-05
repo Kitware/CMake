@@ -60,4 +60,12 @@ CMake Warning \(dev\) at [^
 
     9223372036854775807 \* 2
 
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at [^
+]+/Tests/RunCMake/math/Overflow\.cmake:[0-9]+ \(math\):
+  signed integer cannot negate:
+
+    -9223372036854775808
+
 This warning is for project developers\.  Use -Wno-dev to suppress it\.$

@@ -8,6 +8,7 @@ foreach(expr IN ITEMS
     " 0x7FFFFFFFFFFFFFFF + 1"
     "-0x7FFFFFFFFFFFFFFF - 2"
     " 0x7FFFFFFFFFFFFFFF * 2"
+    "-~0x7FFFFFFFFFFFFFFF"
   )
   math(EXPR result "${expr}")
   message(STATUS "${expr}: ${result}")
