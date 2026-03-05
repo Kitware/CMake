@@ -2,16 +2,10 @@
 #
 #   sha256sum $files | awk '{ print "set(\"" $2 "_hash\" " $1 ")" }' >> $thisfile
 
-set("5.15.1-0-202009071110qtbase-Windows-Windows_10-MSVC2019-Windows-Windows_10-X86_64.7z_hash" a5635124a135f383d9fb92bf628b018cff9f781addfd388926a367cda5b7cd38)
-set("5.15.1-0-202009071110qtwinextras-Windows-Windows_10-MSVC2019-Windows-Windows_10-X86_64.7z_hash" 908947855b5d7a854886746365ac29e9296b5d64d4e18089641a6988167807d3)
-
-set("5.15.1-0-202009071110qtbase-Windows-Windows_10-MSVC2015-Windows-Windows_10-X86_64.7z_hash" 5d0d2e71e3b00cf88ac4c616b4b314a7e73871f325512821f53c464cdfee961f)
-set("5.15.1-0-202009071110qtwinextras-Windows-Windows_10-MSVC2015-Windows-Windows_10-X86_64.7z_hash" 803e0234169464babb5305dedc21382e90c3266c6f9414ff0cff04be578681e1)
-
-set("5.15.1-0-202009071110qtbase-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64.7z_hash" df2813ce7c6cb4287abd7956cd1cb9d08312e4ac1208b6cb57af4df11b8ebba1)
-
 set("qt-5.9.9-macosx10.10-x86_64-arm64.tar.xz_hash" d4449771afa0bc6a809c14f1e6d939e7732494cf059503ae451e2bfe8fc60cc1)
 set("6.9.3-0-202509261207qtbase-MacOS-MacOS_15-Clang-MacOS-MacOS_15-X86_64-ARM64.7z_hash" 805144e619b7c7b0e9c985d929e1f290241d88b884218db3ad7d56bd579d6b4a)
+
+set("6.9.3-0-202509261208qtbase-Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64.7z_hash" 94f8a097d3078661943446c9ecfee3fb4375d9b992a91a1a2d1856379c749d8d)
 
 set("qt-6.10.1-win-arm64-msvc_v145-1.zip_hash" 59e150883f31c0e31a2890f06b6e434ad44505dba876fda4a7c0994c9b0bdfe1)
 set("qt-6.10.1-win-i386-msvc_v145-1.zip_hash" 09100628aecb7cdde07040d7437c09830ed8c17720960b10339b114cb4bbf18b)
