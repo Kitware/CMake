@@ -313,9 +313,16 @@ public:
       its object file directory for the build.  */
   void GetTargetObjectNames(std::string const& config,
                             std::vector<std::string>& objects) const;
+  void GetTargetObjectNames(std::string const& config,
+                            std::function<bool(cmSourceFile const&)> filter,
+                            std::vector<std::string>& objects) const;
   /** Get the build and install locations of objects for a given context. */
   void GetTargetObjectLocations(
     std::string const& config,
+    std::function<void(cmObjectLocation const&, cmObjectLocation const&)> cb)
+    const;
+  void GetTargetObjectLocations(
+    std::string const& config, std::function<bool(cmSourceFile const&)> filter,
     std::function<void(cmObjectLocation const&, cmObjectLocation const&)> cb)
     const;
 
@@ -1102,10 +1109,11 @@ public:
   std::vector<std::string> GetGeneratedISPCHeaders(
     std::string const& config) const;
 
-  void AddISPCGeneratedObject(std::vector<std::string>&& objs,
-                              std::string const& config);
-  std::vector<std::string> GetGeneratedISPCObjects(
-    std::string const& config) const;
+  void AddISPCGeneratedObject(
+    std::vector<std::pair<cmSourceFile const*, std::string>>&& objs,
+    std::string const& config);
+  std::vector<std::pair<cmSourceFile const*, std::string>>
+  GetGeneratedISPCObjects(std::string const& config) const;
 
   void AddSystemIncludeDirectory(std::string const& inc,
                                  std::string const& lang);
@@ -1362,7 +1370,8 @@ private:
 
   std::unordered_map<std::string, std::vector<std::string>>
     ISPCGeneratedHeaders;
-  std::unordered_map<std::string, std::vector<std::string>>
+  std::unordered_map<std::string,
+                     std::vector<std::pair<cmSourceFile const*, std::string>>>
     ISPCGeneratedObjects;
 
   enum class LinkInterfaceField

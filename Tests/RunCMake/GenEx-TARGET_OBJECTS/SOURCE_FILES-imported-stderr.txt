@@ -1,0 +1,7 @@
+CMake Error at SOURCE_FILES-imported\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<TARGET_OBJECTS:c_objs,SOURCE_FILES:[^
+]*/Tests/RunCMake/GenEx-TARGET_OBJECTS/empty4\.c>
+
+  Cannot use SOURCE_FILES argument on imported target "c_objs"

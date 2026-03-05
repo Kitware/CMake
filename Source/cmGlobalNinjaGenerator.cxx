@@ -1383,17 +1383,18 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
                                  std::string const& targetConfig) {
       if (depTarget->CanCompileSources()) {
         auto headers = depTarget->GetGeneratedISPCHeaders(targetConfig);
+        auto const mapToNinjaPath = gg->MapToNinjaPath();
         if (!headers.empty()) {
           std::transform(headers.begin(), headers.end(), headers.begin(),
-                         gg->MapToNinjaPath());
+                         mapToNinjaPath);
           outputDeps.insert(outputDeps.end(), headers.begin(), headers.end());
         }
         auto objs = depTarget->GetGeneratedISPCObjects(targetConfig);
-        if (!objs.empty()) {
-          std::transform(objs.begin(), objs.end(), objs.begin(),
-                         gg->MapToNinjaPath());
-          outputDeps.insert(outputDeps.end(), objs.begin(), objs.end());
-        }
+        std::transform(
+          objs.begin(), objs.end(), std::back_inserter(outputDeps),
+          [&mapToNinjaPath](
+            std::pair<cmSourceFile const*, std::string> const& obj)
+            -> std::string { return mapToNinjaPath(obj.second); });
       }
     };
 

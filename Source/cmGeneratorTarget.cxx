@@ -4077,8 +4077,16 @@ std::string cmGeneratorTarget::GetObjectDirectory(
 void cmGeneratorTarget::GetTargetObjectNames(
   std::string const& config, std::vector<std::string>& objects) const
 {
+  this->GetTargetObjectNames(
+    config, [](cmSourceFile const&) -> bool { return true; }, objects);
+}
+
+void cmGeneratorTarget::GetTargetObjectNames(
+  std::string const& config, std::function<bool(cmSourceFile const&)> filter,
+  std::vector<std::string>& objects) const
+{
   this->GetTargetObjectLocations(
-    config,
+    config, filter,
     [&objects](cmObjectLocation const& buildLoc, cmObjectLocation const&) {
       objects.push_back(buildLoc.GetPath());
     });
@@ -4086,6 +4094,15 @@ void cmGeneratorTarget::GetTargetObjectNames(
 
 void cmGeneratorTarget::GetTargetObjectLocations(
   std::string const& config,
+  std::function<void(cmObjectLocation const&, cmObjectLocation const&)> cb)
+  const
+{
+  this->GetTargetObjectLocations(
+    config, [](cmSourceFile const&) -> bool { return true; }, cb);
+}
+
+void cmGeneratorTarget::GetTargetObjectLocations(
+  std::string const& config, std::function<bool(cmSourceFile const&)> filter,
   std::function<void(cmObjectLocation const&, cmObjectLocation const&)> cb)
   const
 {
@@ -4105,15 +4122,17 @@ void cmGeneratorTarget::GetTargetObjectLocations(
   auto const installUseShortPaths = this->GetUseShortObjectNamesForInstall();
 
   for (cmSourceFile const* src : objectSources) {
-    // Find the object file name corresponding to this source file.
-    auto map_it = mapping.find(src);
-    auto const& buildLoc = map_it->second.GetLocation(buildUseShortPaths);
-    auto const& installLoc =
-      map_it->second.GetInstallLocation(installUseShortPaths, config);
-    // It must exist because we populated the mapping just above.
-    assert(!buildLoc.GetPath().empty());
-    assert(!installLoc.GetPath().empty());
-    cb(buildLoc, installLoc);
+    if (filter(*src)) {
+      // Find the object file name corresponding to this source file.
+      auto map_it = mapping.find(src);
+      auto const& buildLoc = map_it->second.GetLocation(buildUseShortPaths);
+      auto const& installLoc =
+        map_it->second.GetInstallLocation(installUseShortPaths, config);
+      // It must exist because we populated the mapping just above.
+      assert(!buildLoc.GetPath().empty());
+      assert(!installLoc.GetPath().empty());
+      cb(buildLoc, installLoc);
+    }
   }
 
   // We need to compute the relative path from the root of
@@ -4121,11 +4140,14 @@ void cmGeneratorTarget::GetTargetObjectLocations(
   std::string rootObjectDir = this->GetObjectDirectory(config);
   rootObjectDir = cmSystemTools::CollapseFullPath(rootObjectDir);
   auto ispcObjects = this->GetGeneratedISPCObjects(config);
-  for (std::string const& output : ispcObjects) {
-    auto relativePathFromObjectDir = output.substr(rootObjectDir.size());
-    cmObjectLocation ispcLoc(relativePathFromObjectDir);
-    // FIXME: apply short path to this object if needed.
-    cb(ispcLoc, ispcLoc);
+  for (auto const& output : ispcObjects) {
+    if (filter(*output.first)) {
+      auto relativePathFromObjectDir =
+        output.second.substr(rootObjectDir.size());
+      cmObjectLocation ispcLoc(relativePathFromObjectDir);
+      // FIXME: apply short path to this object if needed.
+      cb(ispcLoc, ispcLoc);
+    }
   }
 }
 
@@ -4389,8 +4411,9 @@ std::vector<std::string> cmGeneratorTarget::GetGeneratedISPCHeaders(
   return iter->second;
 }
 
-void cmGeneratorTarget::AddISPCGeneratedObject(std::vector<std::string>&& objs,
-                                               std::string const& config)
+void cmGeneratorTarget::AddISPCGeneratedObject(
+  std::vector<std::pair<cmSourceFile const*, std::string>>&& objs,
+  std::string const& config)
 {
   std::string config_upper;
   if (!config.empty()) {
@@ -4404,8 +4427,8 @@ void cmGeneratorTarget::AddISPCGeneratedObject(std::vector<std::string>&& objs,
   }
 }
 
-std::vector<std::string> cmGeneratorTarget::GetGeneratedISPCObjects(
-  std::string const& config) const
+std::vector<std::pair<cmSourceFile const*, std::string>>
+cmGeneratorTarget::GetGeneratedISPCObjects(std::string const& config) const
 {
   std::string config_upper;
   if (!config.empty()) {
@@ -4413,7 +4436,7 @@ std::vector<std::string> cmGeneratorTarget::GetGeneratedISPCObjects(
   }
   auto iter = this->ISPCGeneratedObjects.find(config_upper);
   if (iter == this->ISPCGeneratedObjects.end()) {
-    return std::vector<std::string>{};
+    return std::vector<std::pair<cmSourceFile const*, std::string>>{};
   }
   return iter->second;
 }

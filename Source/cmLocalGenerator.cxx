@@ -2688,8 +2688,11 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
           cmStrCat(headerDir, '/', ispcSource, *ispcHeaderSuffixProp);
         target->AddISPCGeneratedHeader(headerPath, config);
         if (extra_objects) {
-          std::vector<std::string> objs = detail::ComputeISPCExtraObjects(
-            objectName, rootObjectDir, ispcArchSuffixes);
+          std::vector<std::pair<cmSourceFile const*, std::string>> objs;
+          for (auto& obj : detail::ComputeISPCExtraObjects(
+                 objectName, rootObjectDir, ispcArchSuffixes)) {
+            objs.push_back({ sf, std::move(obj) });
+          }
           target->AddISPCGeneratedObject(std::move(objs), config);
         }
       }

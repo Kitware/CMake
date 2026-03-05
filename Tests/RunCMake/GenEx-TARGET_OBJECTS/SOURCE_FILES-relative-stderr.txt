@@ -1,0 +1,10 @@
+CMake Error at SOURCE_FILES-relative\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<TARGET_OBJECTS:c_objs,SOURCE_FILES:empty1\.c>
+
+  Source file:
+
+    empty1\.c
+
+  is not an absolute path

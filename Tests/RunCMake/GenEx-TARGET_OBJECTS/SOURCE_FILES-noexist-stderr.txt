@@ -1,0 +1,12 @@
+CMake Error at SOURCE_FILES-noexist\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<TARGET_OBJECTS:c_objs,SOURCE_FILES:[^
+]*/Tests/RunCMake/GenEx-TARGET_OBJECTS/empty4\.c>
+
+  Source file:
+
+    [^
+]*/Tests/RunCMake/GenEx-TARGET_OBJECTS/empty4\.c
+
+  does not exist for target "c_objs"
