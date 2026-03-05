@@ -1110,10 +1110,18 @@ public:
   void AddSystemIncludeDirectory(std::string const& inc,
                                  std::string const& lang);
   bool AddHeaderSetVerification();
-  std::string GenerateHeaderSetVerificationFile(
+  cm::optional<std::string> GenerateHeaderSetVerificationFile(
     cmSourceFile& source, std::string const& dir,
     std::string const& verifyTargetName,
-    cm::optional<std::set<std::string>>& languages) const;
+    cm::optional<cm::optional<std::string>>& defaultLanguage) const;
+
+  cm::optional<std::string> ResolveHeaderLanguage(
+    cmSourceFile& source,
+    cm::optional<cm::optional<std::string>>& defaultLanguage) const;
+
+  cm::optional<std::string> GenerateStubForLanguage(
+    std::string const& language, std::string const& headerFilename,
+    std::string const& verifyTargetName, cmSourceFile& source) const;
 
   std::string GetImportedXcFrameworkPath(std::string const& config) const;
 

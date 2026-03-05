@@ -5839,7 +5839,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
       return false;
     }
 
-    cm::optional<std::set<std::string>> languages;
+    cm::optional<cm::optional<std::string>> defaultLanguage;
     for (auto const* fileSet : fileSets) {
       auto const& dirCges = fileSet->CompileDirectoryEntries();
       auto const& fileCges = fileSet->CompileFileEntries();
@@ -5875,12 +5875,14 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
 
         for (auto const& files : filesPerDir) {
           for (auto const& file : files.second) {
-            std::string filename = this->GenerateHeaderSetVerificationFile(
-              *this->Makefile->GetOrCreateSource(file), files.first,
-              verifyTargetName, languages);
-            if (filename.empty()) {
+            cm::optional<std::string> filenameOpt =
+              this->GenerateHeaderSetVerificationFile(
+                *this->Makefile->GetOrCreateSource(file), files.first,
+                verifyTargetName, defaultLanguage);
+            if (!filenameOpt) {
               continue;
             }
+            std::string filename = *filenameOpt;
 
             if (!verifyTarget) {
               {
@@ -5987,54 +5989,19 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
   return true;
 }
 
-std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
+cm::optional<std::string> cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   cmSourceFile& source, std::string const& dir,
   std::string const& verifyTargetName,
-  cm::optional<std::set<std::string>>& languages) const
+  cm::optional<cm::optional<std::string>>& defaultLanguage) const
 {
-  std::string extension;
-  std::string language = source.GetOrDetermineLanguage();
-
   if (source.GetPropertyAsBool("SKIP_LINTING")) {
-    return std::string{};
+    return cm::nullopt;
   }
 
-  if (language.empty()) {
-    if (!languages) {
-      languages.emplace();
-      for (auto const& tgtSource : this->GetAllConfigSources()) {
-        auto const& tgtSourceLanguage =
-          tgtSource.Source->GetOrDetermineLanguage();
-        if (tgtSourceLanguage == "CXX") {
-          languages->insert("CXX");
-          break; // C++ overrides everything else, so we don't need to keep
-                 // checking.
-        }
-        if (tgtSourceLanguage == "C") {
-          languages->insert("C");
-        }
-      }
-
-      if (languages->empty()) {
-        std::vector<std::string> languagesVector;
-        this->GlobalGenerator->GetEnabledLanguages(languagesVector);
-        languages->insert(languagesVector.begin(), languagesVector.end());
-      }
-    }
-
-    if (languages->count("CXX")) {
-      language = "CXX";
-    } else if (languages->count("C")) {
-      language = "C";
-    }
-  }
-
-  if (language == "C") {
-    extension = ".c";
-  } else if (language == "CXX") {
-    extension = ".cxx";
-  } else {
-    return "";
+  cm::optional<std::string> language =
+    this->ResolveHeaderLanguage(source, defaultLanguage);
+  if (!language) {
+    return cm::nullopt;
   }
 
   std::string headerFilename = dir;
@@ -6043,10 +6010,93 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   }
   headerFilename += source.GetLocation().GetName();
 
-  auto filename =
+  return this->GenerateStubForLanguage(*language, headerFilename,
+                                       verifyTargetName, source);
+}
+
+cm::optional<std::string> cmGeneratorTarget::ResolveHeaderLanguage(
+  cmSourceFile& source,
+  cm::optional<cm::optional<std::string>>& defaultLanguage) const
+{
+  static std::array<cm::string_view, 2> const supportedLangs{ {
+    "C",
+    "CXX",
+  } };
+  auto isSupported = [](cm::string_view lang) -> bool {
+    return std::find(supportedLangs.begin(), supportedLangs.end(), lang) !=
+      supportedLangs.end();
+  };
+
+  // If the source has an explicit language, validate and return it.
+  std::string language = source.GetOrDetermineLanguage();
+  if (!language.empty()) {
+    if (!isSupported(language)) {
+      return cm::nullopt;
+    }
+    return cm::optional<std::string>(std::move(language));
+  }
+
+  /*
+    Compute and cache the default language for unlanguaged headers.
+    The lattice join is run once per file set, not once per header.
+    Lattice: CXX > C
+  */
+  if (!defaultLanguage) {
+    std::set<std::string> langs;
+    for (AllConfigSource const& tgtSource : this->GetAllConfigSources()) {
+      std::string const& lang = tgtSource.Source->GetOrDetermineLanguage();
+      if (isSupported(lang)) {
+        langs.insert(lang);
+      }
+    }
+    if (langs.empty()) {
+      std::vector<std::string> languagesVector;
+      this->GlobalGenerator->GetEnabledLanguages(languagesVector);
+      for (std::string const& lang : languagesVector) {
+        if (isSupported(lang)) {
+          langs.insert(lang);
+        }
+      }
+    }
+
+    cm::optional<std::string> resolved;
+    if (langs.count("CXX")) {
+      resolved = "CXX";
+    } else if (langs.count("C")) {
+      resolved = "C";
+    }
+    defaultLanguage = resolved;
+  }
+
+  return *defaultLanguage;
+}
+
+cm::optional<std::string> cmGeneratorTarget::GenerateStubForLanguage(
+  std::string const& language, std::string const& headerFilename,
+  std::string const& verifyTargetName, cmSourceFile& source) const
+{
+  static std::array<std::pair<cm::string_view, cm::string_view>, 2> const
+    langToExt = { {
+      { "C", ".c" },
+      { "CXX", ".cxx" },
+    } };
+
+  // NOLINTNEXTLINE(readability-qualified-auto)
+  auto const it =
+    std::find_if(langToExt.begin(), langToExt.end(),
+                 [&](std::pair<cm::string_view, cm::string_view> const& p) {
+                   return p.first == language;
+                 });
+  if (it == langToExt.end()) {
+    return cm::nullopt;
+  }
+
+  std::string filename =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-             verifyTargetName, '/', headerFilename, extension);
-  auto* verificationSource = this->Makefile->GetOrCreateSource(filename);
+             verifyTargetName, '/', headerFilename, it->second);
+
+  cmSourceFile* verificationSource =
+    this->Makefile->GetOrCreateSource(filename);
   source.SetSpecialSourceType(
     cmSourceFile::SpecialSourceType::HeaderSetVerificationSource);
   verificationSource->SetProperty("LANGUAGE", language);
@@ -6065,7 +6115,7 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
     << "#include <" << headerFilename << "> /* IWYU pragma: associated */\n";
   fout.close();
 
-  return filename;
+  return cm::optional<std::string>(std::move(filename));
 }
 
 std::string cmGeneratorTarget::GetImportedXcFrameworkPath(
