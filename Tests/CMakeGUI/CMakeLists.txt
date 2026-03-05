@@ -50,6 +50,7 @@ else()
     )
 endif()
 add_executable(CMakeGUITest CMakeGUITest.cxx ${MOC_SRCS})
+set_property(TARGET CMakeGUITest PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMake_BIN_DIR}")
 target_link_libraries(CMakeGUITest CMakeGUIMainLib CMakeGUITestLib
   Qt${CMake_QT_MAJOR_VERSION}::Core
   Qt${CMake_QT_MAJOR_VERSION}::Test

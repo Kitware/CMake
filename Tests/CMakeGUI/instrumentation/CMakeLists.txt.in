@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 4.3)
+project(instrumentation)
+
+add_executable(main main.cxx)
+add_library(lib lib.cxx)
+target_link_libraries(main lib)
+
+cmake_instrumentation(
+  API_VERSION 1
+  DATA_VERSION 1
+  CALLBACK ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/callback.cmake
+)

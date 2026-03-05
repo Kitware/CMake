@@ -734,14 +734,15 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
           cmSystemTools::Error("No file name specified for -C");
           return false;
         }
+        state->SetInInitialCache(true);
         cmSystemTools::Stdout(
           cmStrCat("loading initial cache file ", value, '\n'));
         // Resolve script path specified on command line
         // relative to $PWD.
         auto path = cmSystemTools::ToNormalizedPathOnDisk(value);
         state->InitializeFileAPI();
-        state->InitializeInstrumentation();
         state->ReadListFile(args, path);
+        state->SetInInitialCache(false);
         return true;
       } },
 
@@ -2700,6 +2701,7 @@ int cmake::ActualConfigure()
     this->ConfigureLog = cm::make_unique<cmConfigureLog>(
       cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
       this->FileAPI->GetConfigureLogVersions());
+    this->Instrumentation->ClearGeneratedQueries();
     this->Instrumentation->CheckCDashVariable();
   }
 #endif
@@ -2967,7 +2969,6 @@ void cmake::InitializeInstrumentation()
     this->Instrumentation = cm::make_unique<cmInstrumentation>(
       this->State->GetBinaryDirectory(),
       cmInstrumentation::LoadQueriesAfter::No);
-    this->Instrumentation->ClearGeneratedQueries();
   }
 #endif
 }

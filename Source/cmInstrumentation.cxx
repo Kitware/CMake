@@ -4,6 +4,7 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <iterator>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -108,6 +109,7 @@ cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
 
 void cmInstrumentation::LoadQueries()
 {
+  this->ResetQueries();
   auto const readJSONQueries = [this](std::string const& dir) {
     if (cmSystemTools::FileIsDirectory(dir) && this->ReadJSONQueries(dir)) {
       this->hasQuery = true;
@@ -118,6 +120,16 @@ void cmInstrumentation::LoadQueries()
   if (!this->userTimingDirv1.empty()) {
     readJSONQueries(cmStrCat(this->userTimingDirv1, "/query"));
   }
+}
+
+void cmInstrumentation::ResetQueries()
+{
+  this->hasQuery = false;
+  this->options.clear();
+  this->hooks.clear();
+  this->callbacks.clear();
+  this->queryFiles.clear();
+  this->errorMsg.clear();
 }
 
 void cmInstrumentation::CheckCDashVariable()
@@ -311,6 +323,7 @@ void cmInstrumentation::ClearGeneratedQueries()
   if (cmSystemTools::FileIsDirectory(dir)) {
     cmSystemTools::RemoveADirectory(dir);
   }
+  this->writtenJsonQueries = 0;
 }
 
 bool cmInstrumentation::HasQuery() const
@@ -730,15 +743,21 @@ int cmInstrumentation::InstrumentCommand(
 
   // Don't write configure snippet until generate time
   if (command_type == "configure") {
-    this->configureSnippetData = root;
-    this->configureSnippetName = file_name;
+    this->configureSnippetData[file_name] = root;
   } else {
     // Add reference to CMake content and write out configure snippet after
     // generate
     if (command_type == "generate") {
-      addCMakeContent(this->configureSnippetData);
-      this->WriteInstrumentationJson(this->configureSnippetData, "data",
-                                     this->configureSnippetName);
+      for (auto it = this->configureSnippetData.begin();
+           it != this->configureSnippetData.end(); ++it) {
+        if (std::next(it) != this->configureSnippetData.end()) {
+          it->second["cmakeContent"] = Json::nullValue;
+        } else {
+          addCMakeContent(it->second);
+        }
+        this->WriteInstrumentationJson(it->second, "data", it->first);
+      }
+      this->configureSnippetData.clear();
     }
     this->WriteInstrumentationJson(root, "data", file_name);
   }

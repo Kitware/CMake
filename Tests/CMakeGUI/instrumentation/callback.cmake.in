@@ -1,0 +1,2 @@
+file(TOUCH "instrumentation/build/callback-count.txt")
+file(APPEND "instrumentation/build/callback-count.txt" " \n")

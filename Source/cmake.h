@@ -697,6 +697,9 @@ public:
   void InitializeFileAPI();
   void InitializeInstrumentation();
 
+  bool GetInInitialCache() const { return this->InInitialCache; }
+  void SetInInitialCache(bool v) { this->InInitialCache = v; }
+
   cmState* GetState() const { return this->State.get(); }
   void SetCurrentSnapshot(cmStateSnapshot const& snapshot)
   {
@@ -839,6 +842,7 @@ private:
   bool DebugTryCompile = false;
   bool FreshCache = false;
   bool RegenerateDuringBuild = false;
+  bool InInitialCache = false;
   std::string CMakeListName;
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
   std::string GraphVizFile;
