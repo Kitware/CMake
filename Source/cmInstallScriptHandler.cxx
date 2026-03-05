@@ -47,6 +47,11 @@ cmInstallScriptHandler::cmInstallScriptHandler(std::string _binaryDir,
   auto addScript = [this, &args](std::string script,
                                  std::string config) -> void {
     this->scripts.push_back({ script, config, args });
+    if (!this->component.empty()) {
+      this->scripts.back().command.insert(
+        this->scripts.back().command.end() - 1,
+        cmStrCat("-DCMAKE_INSTALL_COMPONENT=", this->component));
+    }
     if (!config.empty()) {
       this->scripts.back().command.insert(
         this->scripts.back().command.end() - 1,

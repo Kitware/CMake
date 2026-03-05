@@ -896,10 +896,6 @@ int do_install(int ac, char const* const* av)
     args.emplace_back("-DCMAKE_INSTALL_PREFIX=" + prefix);
   }
 
-  if (!component.empty()) {
-    args.emplace_back("-DCMAKE_INSTALL_COMPONENT=" + component);
-  }
-
   if (strip) {
     args.emplace_back("-DCMAKE_INSTALL_DO_STRIP=1");
   }
