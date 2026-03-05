@@ -154,8 +154,7 @@ typedef struct _AFD_RECV_INFO {
 #define IOCTL_AFD_POLL \
     _AFD_CONTROL_CODE(AFD_POLL, METHOD_BUFFERED)
 
-#if (defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)) \
- || (defined(_MSC_VER) && _MSC_VER < 1500)
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
 typedef struct _IP_ADAPTER_UNICAST_ADDRESS_XP {
   /* FIXME: __C89_NAMELESS was removed */
   /* __C89_NAMELESS */ union {
