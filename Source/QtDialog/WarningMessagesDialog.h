@@ -2,11 +2,16 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <map>
+
 #include <QDialog>
 #include <QWidget>
 
-#include "QCMake.h"
 #include "ui_WarningMessagesDialog.h"
+
+class QButtonGroup;
+
+class QCMake;
 
 /**
  * Dialog window for setting the warning message related options.
@@ -17,12 +22,6 @@ class WarningMessagesDialog
 {
   Q_OBJECT
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
-  using CheckState = Qt::CheckState;
-#else
-  using CheckState = int;
-#endif
-
 public:
   WarningMessagesDialog(QWidget* prnt, QCMake* instance);
 
@@ -32,30 +31,9 @@ private slots:
    */
   void doAccept();
 
-  /**
-   * Handler for checked state changed event of the suppress developer warnings
-   * checkbox.
-   */
-  void doSuppressDeveloperWarningsChanged(CheckState state);
-  /**
-   * Handler for checked state changed event of the suppress deprecated
-   * warnings checkbox.
-   */
-  void doSuppressDeprecatedWarningsChanged(CheckState state);
-
-  /**
-   * Handler for checked state changed event of the developer warnings as
-   * errors checkbox.
-   */
-  void doDeveloperWarningsAsErrorsChanged(CheckState state);
-  /**
-   * Handler for checked state changed event of the deprecated warnings as
-   * errors checkbox.
-   */
-  void doDeprecatedWarningsAsErrorsChanged(CheckState state);
-
 private:
   QCMake* cmakeInstance;
+  std::map<unsigned, QButtonGroup*> buttons;
 
   /**
    * Set the initial values of the widgets on this dialog window, using the

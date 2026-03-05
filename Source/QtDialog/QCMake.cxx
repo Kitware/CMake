@@ -30,7 +30,6 @@ QCMake::QCMake(QObject* p)
   , StartEnvironment(QProcessEnvironment::systemEnvironment())
   , Environment(QProcessEnvironment::systemEnvironment())
 {
-  this->WarnUninitializedMode = false;
   qRegisterMetaType<QCMakeProperty>();
   qRegisterMetaType<QCMakePropertyList>();
   qRegisterMetaType<QProcessEnvironment>();
@@ -241,8 +240,6 @@ void QCMake::configure()
     this->CMakeInstance->SetGeneratorPlatform(this->Platform.toStdString());
     this->CMakeInstance->SetGeneratorToolset(this->Toolset.toStdString());
     this->CMakeInstance->LoadCache();
-    // FIXME
-    // this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
     this->CMakeInstance->PreLoadCMakeFiles();
 
     InterruptFlag = 0;
@@ -651,66 +648,17 @@ bool QCMake::getDebugOutput() const
   return this->CMakeInstance->GetDebugOutput();
 }
 
-bool QCMake::getSuppressDevWarnings()
+void QCMake::setDiagnosticAction(cmDiagnostics::DiagnosticCategory category,
+                                 cmDiagnostics::DiagnosticAction action)
 {
-  cmDiagnosticAction const action =
-    this->CMakeInstance->GetCurrentSnapshot().GetDiagnostic(
-      cmDiagnostics::CMD_AUTHOR);
-  return action == cmDiagnostics::Ignore;
+  this->CMakeInstance->GetCurrentSnapshot().SetDiagnostic(category, action,
+                                                          false);
 }
 
-void QCMake::setSuppressDevWarnings(bool value)
+cmDiagnosticAction QCMake::getDiagnosticAction(
+  cmDiagnosticCategory category) const
 {
-  // FIXME
-  // this->CMakeInstance->GetCurrentSnapshot().DemoteDiagnostic();
-  // SetSuppressDevWarnings(value);
-}
-
-bool QCMake::getSuppressDeprecatedWarnings()
-{
-  cmDiagnosticAction const action =
-    this->CMakeInstance->GetCurrentSnapshot().GetDiagnostic(
-      cmDiagnostics::CMD_DEPRECATED);
-  return action == cmDiagnostics::Ignore;
-}
-
-void QCMake::setSuppressDeprecatedWarnings(bool value)
-{
-  // FIXME
-  // this->CMakeInstance->SetSuppressDeprecatedWarnings(value);
-}
-
-bool QCMake::getDevWarningsAsErrors()
-{
-  cmDiagnosticAction const action =
-    this->CMakeInstance->GetCurrentSnapshot().GetDiagnostic(
-      cmDiagnostics::CMD_AUTHOR);
-  return action >= cmDiagnostics::SendError;
-}
-
-void QCMake::setDevWarningsAsErrors(bool value)
-{
-  // FIXME
-  // this->CMakeInstance->SetDevWarningsAsErrors(value);
-}
-
-bool QCMake::getDeprecatedWarningsAsErrors()
-{
-  cmDiagnosticAction const action =
-    this->CMakeInstance->GetCurrentSnapshot().GetDiagnostic(
-      cmDiagnostics::CMD_DEPRECATED);
-  return action >= cmDiagnostics::SendError;
-}
-
-void QCMake::setDeprecatedWarningsAsErrors(bool value)
-{
-  // FIXME
-  // this->CMakeInstance->SetDeprecatedWarningsAsErrors(value);
-}
-
-void QCMake::setWarnUninitializedMode(bool value)
-{
-  this->WarnUninitializedMode = value;
+  return this->CMakeInstance->GetCurrentSnapshot().GetDiagnostic(category);
 }
 
 void QCMake::checkOpenPossible()

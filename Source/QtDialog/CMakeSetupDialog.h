@@ -119,7 +119,6 @@ protected:
   QAction* ExitAction;
   QAction* ConfigureAction;
   QAction* GenerateAction;
-  QAction* WarnUninitializedAction;
   QAction* InstallForCommandLineAction;
   State CurrentState;
   QString DeferredPreset;
