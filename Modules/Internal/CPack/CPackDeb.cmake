@@ -858,18 +858,18 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   # add ldconfig call in default postrm and postint
-  set(CPACK_ADD_LDCONFIG_CALL 0)
+  set(_PACKAGE_HAS_SHARED_LIBS 0)
   # all files in CPACK_DEB_SHARED_OBJECT_FILES have dot at the beginning
   set(_LDCONF_DEFAULTS "./lib" "./usr/lib")
   foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
     cmake_path(GET _FILE PARENT_PATH _DIR)
     cmake_path(GET _DIR PARENT_PATH _PARENT_DIR)
     if(_DIR IN_LIST _LDCONF_DEFAULTS OR _PARENT_DIR IN_LIST _LDCONF_DEFAULTS)
-      set(CPACK_ADD_LDCONFIG_CALL 1)
+      set(_PACKAGE_HAS_SHARED_LIBS 1)
     endif()
   endforeach()
 
-  if(CPACK_ADD_LDCONFIG_CALL)
+  if(_PACKAGE_HAS_SHARED_LIBS)
     set(CPACK_DEBIAN_GENERATE_POSTINST 1)
     set(CPACK_DEBIAN_GENERATE_POSTRM 1)
     foreach(control_file IN LISTS CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA)
