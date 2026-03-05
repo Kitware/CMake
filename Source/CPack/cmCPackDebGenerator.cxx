@@ -37,7 +37,8 @@ public:
                std::map<std::string, std::string> controlValues,
                bool genShLibs, std::string shLibsFilename, bool genPostInst,
                std::string postInst, bool genPostRm, std::string postRm,
-               cmValue controlExtra, bool permissionStrctPolicy,
+               bool genTriggers, std::string triggers, cmValue controlExtra,
+               bool permissionStrctPolicy,
                std::vector<std::string> packageFiles);
 
   bool generate() const;
@@ -65,6 +66,8 @@ private:
   std::string const PostInst;
   bool const GenPostRm;
   std::string const PostRm;
+  bool const GenTriggers;
+  std::string const Triggers;
   cmValue ControlExtra;
   bool const PermissionStrictPolicy;
   std::vector<std::string> const PackageFiles;
@@ -78,8 +81,8 @@ DebGenerator::DebGenerator(
   cmValue debCompressionType, cmValue debCompressionLevel, cmValue numThreads,
   cmValue debianArchiveType, std::map<std::string, std::string> controlValues,
   bool genShLibs, std::string shLibsFilename, bool genPostInst,
-  std::string postInst, bool genPostRm, std::string postRm,
-  cmValue controlExtra, bool permissionStrictPolicy,
+  std::string postInst, bool genPostRm, std::string postRm, bool genTriggers,
+  std::string triggers, cmValue controlExtra, bool permissionStrictPolicy,
   std::vector<std::string> packageFiles)
   : Logger(logger)
   , OutputName(std::move(outputName))
@@ -94,6 +97,8 @@ DebGenerator::DebGenerator(
   , PostInst(std::move(postInst))
   , GenPostRm(genPostRm)
   , PostRm(std::move(postRm))
+  , GenTriggers(genTriggers)
+  , Triggers(std::move(triggers))
   , ControlExtra(controlExtra)
   , PermissionStrictPolicy(permissionStrictPolicy)
   , PackageFiles(std::move(packageFiles))
@@ -429,14 +434,28 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     control_tar.SetPermissions(permission644);
   }
 
+  if (this->GenTriggers) {
+    if (!control_tar.Add(this->Triggers, this->WorkDir.length(), ".")) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: \"triggers\"\n"
+                         "#error:"
+                      << control_tar.GetError() << std::endl);
+      return false;
+    }
+  }
+
   // for the other files, we use
   // -either the original permission on the files
   // -either a permission strictly defined by the Debian policies
   if (this->ControlExtra) {
     // permissions are now controlled by the original file permissions
 
-    static char const* strictFiles[] = { "config", "postinst", "postrm",
-                                         "preinst", "prerm" };
+    static char const* strictFiles[] = { "config",  "postinst", "postrm",
+                                         "preinst", "prerm",    "triggers" };
     std::set<std::string> setStrictFiles(
       strictFiles, strictFiles + sizeof(strictFiles) / sizeof(strictFiles[0]));
 
@@ -837,6 +856,7 @@ bool cmCPackDebGenerator::createDeb()
 
   std::string const postinst = strGenWDIR + "/postinst";
   std::string const postrm = strGenWDIR + "/postrm";
+  std::string const triggers = strGenWDIR + "/triggers";
   if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST")) {
     cmGeneratedFileStream out;
     out.Open(postinst, false, true);
@@ -855,6 +875,11 @@ bool cmCPackDebGenerator::createDeb()
            "\tldconfig\n"
            "fi\n";
   }
+  if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_LDCONFIG_TRIGGERS")) {
+    cmGeneratedFileStream out;
+    out.Open(triggers, false, true);
+    out << "activate-noawait ldconfig\n";
+  }
 
   DebGenerator gen(
     this->Logger, this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"), strGenWDIR,
@@ -866,6 +891,7 @@ bool cmCPackDebGenerator::createDeb()
     this->GetOption("GEN_CPACK_DEBIAN_ARCHIVE_TYPE"), controlValues, gen_shibs,
     shlibsfilename, this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"), postinst,
     this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM"), postrm,
+    this->IsOn("GEN_CPACK_DEBIAN_GENERATE_LDCONFIG_TRIGGERS"), triggers,
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA"),
     this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION"),
     this->packageFiles);
@@ -920,7 +946,7 @@ bool cmCPackDebGenerator::createDbgsymDDeb()
     this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_LEVEL"),
     this->GetOption("CPACK_THREADS"),
     this->GetOption("GEN_CPACK_DEBIAN_ARCHIVE_TYPE"), controlValues, false, "",
-    false, "", false, "", nullptr,
+    false, "", false, "", false, "", nullptr,
     this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION"),
     this->packageFiles);
 
