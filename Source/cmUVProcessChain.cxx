@@ -159,6 +159,13 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetWorkingDirectory(
   return *this;
 }
 
+cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetEnvironment(
+  std::vector<std::string> env)
+{
+  this->Environment = std::move(env);
+  return *this;
+}
+
 cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetDetached()
 {
   this->Detached = true;
@@ -368,6 +375,16 @@ void cmUVProcessChain::InternalData::SpawnProcess(
 #endif
   if (!this->Builder->WorkingDirectory.empty()) {
     options.cwd = this->Builder->WorkingDirectory.c_str();
+  }
+
+  auto env = std::vector<char const*>{};
+  if (!this->Builder->Environment.empty()) {
+    env.reserve(this->Builder->Environment.size() + 1);
+    for (auto const& var : this->Builder->Environment) {
+      env.push_back(var.c_str());
+    }
+    env.push_back(nullptr);
+    options.env = const_cast<char**>(env.data());
   }
 
   std::array<uv_stdio_container_t, 3> stdio;
