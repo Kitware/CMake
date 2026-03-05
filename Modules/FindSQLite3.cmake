@@ -69,7 +69,7 @@ Finding the SQLite library and linking it to a project target:
 .. code-block:: cmake
 
   find_package(SQLite3)
-  target_link_libraries(project_target PRIVATE SQLite::SQLite3)
+  target_link_libraries(project_target PRIVATE SQLite3::SQLite3)
 #]=======================================================================]
 
 cmake_policy(PUSH)
