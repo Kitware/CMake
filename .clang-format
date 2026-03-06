@@ -33,6 +33,8 @@ IncludeCategories:
     Priority:        3
   - Regex:           '^<sys/'
     Priority:        5
+  - Regex:           '^"QCMake'
+    Priority:        11
   - Regex:           '^(<|")Qt?[A-Z]'
     Priority:        6
   - Regex:           '^<cmtp/'

@@ -4,13 +4,14 @@
 
 #include <cm/optional>
 
-#include "QCMakePreset.h"
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QString>
 #include <QVariant>
 #include <QVector>
 #include <QtGlobal>
+
+#include "QCMakePreset.h"
 
 class QObject;
 

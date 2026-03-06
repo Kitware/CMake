@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "EnvironmentDialog.h"
 
-#include "QCMakeWidgets.h"
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QItemSelectionModel>
@@ -10,6 +9,8 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QStandardItem>
+
+#include "QCMakeWidgets.h"
 
 EnvironmentItemModel::EnvironmentItemModel(
   QProcessEnvironment const& environment, QObject* parent)

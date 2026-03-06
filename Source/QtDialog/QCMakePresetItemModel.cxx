@@ -2,8 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "QCMakePresetItemModel.h"
 
-#include "QCMakeSizeType.h"
 #include <QFont>
+
+#include "QCMakeSizeType.h"
 
 QCMakePresetItemModel::QCMakePresetItemModel(QObject* parent)
   : QAbstractItemModel(parent)

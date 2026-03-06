@@ -15,7 +15,6 @@
 #include <memory>
 #include <vector>
 
-#include "QCMakePreset.h"
 #include <QAtomicInt>
 #include <QList>
 #include <QMetaType>
@@ -25,6 +24,8 @@
 #include <QStringList>
 #include <QTimer>
 #include <QVariant>
+
+#include "QCMakePreset.h"
 
 /// struct to represent cmake properties in Qt
 /// Value is of type String or Bool

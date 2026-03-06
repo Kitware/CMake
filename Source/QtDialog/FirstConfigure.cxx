@@ -1,7 +1,6 @@
 
 #include "FirstConfigure.h"
 
-#include "QCMakeSizeType.h"
 #include <QComboBox>
 #include <QRadioButton>
 #include <QSettings>
@@ -10,6 +9,7 @@
 #include "cmStringAlgorithms.h"
 
 #include "Compilers.h"
+#include "QCMakeSizeType.h"
 
 StartCompilerSetup::StartCompilerSetup(QString defaultGeneratorPlatform,
                                        QString defaultGeneratorToolset,

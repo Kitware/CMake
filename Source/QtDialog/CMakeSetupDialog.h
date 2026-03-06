@@ -4,13 +4,13 @@
 
 #include <memory>
 
-#include "QCMake.h"
-#include "QCMakePreset.h"
 #include <QEventLoop>
 #include <QMainWindow>
 #include <QThread>
 #include <QVector>
 
+#include "QCMake.h"
+#include "QCMakePreset.h"
 #include "ui_CMakeSetupDialog.h"
 
 class QCMakePresetItemModel;
