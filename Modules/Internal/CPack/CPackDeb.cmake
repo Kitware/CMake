@@ -612,13 +612,13 @@ function(cpack_deb_prepare_package_vars)
   elseif(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
     # There is no such thing as i686 architecture on debian, you should use i386 instead
     # $ dpkg --print-architecture
-    find_program(DPKG_CMD dpkg)
-    if(NOT DPKG_CMD)
+    find_program(DPKG_EXECUTABLE dpkg)
+    if(NOT DPKG_EXECUTABLE)
       message(STATUS "CPackDeb: Can not find dpkg in your path, default to i386.")
       set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
     endif()
     execute_process(
-      COMMAND "${DPKG_CMD}" --print-architecture
+      COMMAND "${DPKG_EXECUTABLE}" --print-architecture
       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -858,20 +858,49 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   # add ldconfig call in default postrm and postint
-  set(CPACK_ADD_LDCONFIG_CALL 0)
+  set(_PACKAGE_HAS_SHARED_LIBS 0)
   # all files in CPACK_DEB_SHARED_OBJECT_FILES have dot at the beginning
   set(_LDCONF_DEFAULTS "./lib" "./usr/lib")
   foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
     cmake_path(GET _FILE PARENT_PATH _DIR)
     cmake_path(GET _DIR PARENT_PATH _PARENT_DIR)
     if(_DIR IN_LIST _LDCONF_DEFAULTS OR _PARENT_DIR IN_LIST _LDCONF_DEFAULTS)
-      set(CPACK_ADD_LDCONFIG_CALL 1)
+      set(_PACKAGE_HAS_SHARED_LIBS 1)
     endif()
   endforeach()
 
-  if(CPACK_ADD_LDCONFIG_CALL)
-    set(CPACK_DEBIAN_GENERATE_POSTINST 1)
-    set(CPACK_DEBIAN_GENERATE_POSTRM 1)
+  if(_PACKAGE_HAS_SHARED_LIBS)
+    # Expecting a modern distro to generate `debian/triggers` instead
+    # of legacy `ldconfig` calls from postinst/postrm
+    set(_dpkg_is_old FALSE)
+    if(DPKG_EXECUTABLE)
+      execute_process(
+        COMMAND "${DPKG_EXECUTABLE}" --version
+        OUTPUT_VARIABLE DPKG_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+      set(_dpkg_version_re "Debian 'dpkg' package management program version ([0-9]+\.[0-9]+\.[0-9]+).*")
+      if(DPKG_VERSION MATCHES "${_dpkg_version_re}")
+        set(DPKG_VERSION "${CMAKE_MATCH_1}")
+        if(DPKG_VERSION VERSION_LESS 1.18.3)
+          set(_dpkg_is_old TRUE)
+        endif()
+      else()
+        set(_dpkg_is_old TRUE)
+      endif()
+    else()
+        set(_dpkg_is_old TRUE)
+    endif()
+    if(_dpkg_is_old)
+      set(CPACK_DEBIAN_GENERATE_LDCONFIG_TRIGGERS 0)
+      set(CPACK_DEBIAN_GENERATE_POSTINST 1)
+      set(CPACK_DEBIAN_GENERATE_POSTRM 1)
+      message(STATUS "CPackDeb: Providing legacy postinst/postrm.")
+    else()
+      set(CPACK_DEBIAN_GENERATE_LDCONFIG_TRIGGERS 1)
+      set(CPACK_DEBIAN_GENERATE_POSTINST 0)
+      set(CPACK_DEBIAN_GENERATE_POSTRM 0)
+    endif()
     foreach(control_file IN LISTS CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA)
       cmake_path(GET control_file FILENAME name)
       if(name STREQUAL "postinst")
@@ -880,8 +909,12 @@ function(cpack_deb_prepare_package_vars)
       if(name STREQUAL "postrm")
         set(CPACK_DEBIAN_GENERATE_POSTRM 0)
       endif()
+      if(name STREQUAL "triggers")
+        set(CPACK_DEBIAN_GENERATE_LDCONFIG_TRIGGERS 0)
+      endif()
     endforeach()
   else()
+    set(CPACK_DEBIAN_GENERATE_LDCONFIG_TRIGGERS 0)
     set(CPACK_DEBIAN_GENERATE_POSTINST 0)
     set(CPACK_DEBIAN_GENERATE_POSTRM 0)
   endif()
@@ -991,6 +1024,8 @@ function(cpack_deb_prepare_package_vars)
      "${CPACK_DEBIAN_PACKAGE_SOURCE}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_GENERATE_POSTINST "${CPACK_DEBIAN_GENERATE_POSTINST}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_GENERATE_POSTRM "${CPACK_DEBIAN_GENERATE_POSTRM}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_GENERATE_LDCONFIG_TRIGGERS
+    "${CPACK_DEBIAN_GENERATE_LDCONFIG_TRIGGERS}" PARENT_SCOPE)
   set(GEN_WDIR "${WDIR}" PARENT_SCOPE)
 
   set(GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE "${CPACK_DEBIAN_DEBUGINFO_PACKAGE}" PARENT_SCOPE)
