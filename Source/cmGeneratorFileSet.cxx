@@ -6,6 +6,7 @@
 #include <map>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -144,14 +145,19 @@ std::vector<BT<std::string>> const& cmGeneratorFileSet::GetFileEntries() const
 std::vector<std::unique_ptr<cmCompiledGeneratorExpression>> const&
 cmGeneratorFileSet::CompileFileEntries() const
 {
+  std::unordered_set<std::string> uniqueSrcs;
+
   if (this->CompiledFileEntries.empty() &&
       !this->FileSet->GetFileEntries().empty()) {
     for (auto const& entry : this->FileSet->GetFileEntries()) {
       for (auto const& ex : cmList{ entry.Value }) {
-        cmGeneratorExpression ge(
-          *this->FileSet->GetMakefile()->GetCMakeInstance(), entry.Backtrace);
-        auto cge = ge.Parse(ex);
-        this->CompiledFileEntries.push_back(std::move(cge));
+        if (uniqueSrcs.insert(ex).second) {
+          cmGeneratorExpression ge(
+            *this->FileSet->GetMakefile()->GetCMakeInstance(),
+            entry.Backtrace);
+          auto cge = ge.Parse(ex);
+          this->CompiledFileEntries.push_back(std::move(cge));
+        }
       }
     }
   }

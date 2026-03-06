@@ -77,7 +77,13 @@ File Sets
 Adds a file set to a target, or adds files to an existing file set. Targets
 have zero or more named file sets. Each file set has a name, a type, a scope of
 ``INTERFACE``, ``PUBLIC``, or ``PRIVATE``, one or more base directories, and
-files within those directories. The acceptable types include:
+files within those directories.
+
+.. versionchanged:: 4.4
+  A file may only belong to at most one file set in a target. See policy
+  :policy:`CMP0211`.
+
+ The acceptable types include:
 
 ``HEADERS``
 

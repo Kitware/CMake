@@ -4,6 +4,8 @@
 #include "cmGeneratorTarget.h"
 /* clang-format on */
 
+#include "cmConfigure.h"
+
 #include <cstddef>
 #include <functional>
 #include <map>
@@ -34,6 +36,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceGroup.h"
@@ -93,7 +96,7 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
     EvaluateTargetPropertyEntries(headTarget, context, dagChecker, sources);
 }
 
-bool processSources(cmGeneratorTarget const* tgt,
+bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
                     EvaluatedTargetPropertyEntries& entries,
                     std::vector<BT<std::string>>& srcs,
                     std::unordered_set<std::string>& uniqueSrcs,
@@ -155,6 +158,28 @@ bool processSources(cmGeneratorTarget const* tgt,
         if (debugSources) {
           usedSources += cmStrCat(" * ", src, '\n');
         }
+      } else {
+        if (auto const* fileSet =
+              tgt->GetGeneratorFileSets()->GetFileSetForSource(config, src)) {
+          switch (tgt->GetPolicyStatusCMP0211()) {
+            case cmPolicies::WARN:
+              tgt->GetLocalGenerator()->IssueMessage(
+                MessageType::AUTHOR_WARNING,
+                cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0211),
+                         "\nIn target \"", tgt->GetName(), "\" the file\n  ",
+                         src, "\nalready belongs to file set \"",
+                         fileSet->GetName(), "\"."));
+              CM_FALLTHROUGH;
+            case cmPolicies::OLD:
+              break;
+            default:
+              tgt->GetLocalGenerator()->IssueMessage(
+                MessageType::FATAL_ERROR,
+                cmStrCat("In target \"", tgt->GetName(), "\" the file\n  ",
+                         src, "\nalready belongs to file set \"",
+                         fileSet->GetName(), "\"."));
+          }
+        }
       }
     }
     if (!usedSources.empty()) {
@@ -193,23 +218,24 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 
   std::unordered_set<std::string> uniqueSrcs;
   bool contextDependentDirectSources =
-    processSources(this, entries, files, uniqueSrcs, debugSources);
+    processSources(this, config, entries, files, uniqueSrcs, debugSources);
 
   // Collect INTERFACE_SOURCES of all direct link-dependencies.
   EvaluatedTargetPropertyEntries linkInterfaceSourcesEntries;
   AddInterfaceEntries(this, "INTERFACE_SOURCES", context, &dagChecker,
                       linkInterfaceSourcesEntries, IncludeRuntimeInterface::No,
                       UseTo::Compile);
-  bool contextDependentInterfaceSources = processSources(
-    this, linkInterfaceSourcesEntries, files, uniqueSrcs, debugSources);
+  bool contextDependentInterfaceSources =
+    processSources(this, config, linkInterfaceSourcesEntries, files,
+                   uniqueSrcs, debugSources);
 
   // Collect TARGET_OBJECTS of direct object link-dependencies.
   bool contextDependentObjects = false;
   if (this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
     EvaluatedTargetPropertyEntries linkObjectsEntries;
     AddObjectEntries(this, context, &dagChecker, linkObjectsEntries);
-    contextDependentObjects = processSources(this, linkObjectsEntries, files,
-                                             uniqueSrcs, debugSources);
+    contextDependentObjects = processSources(this, config, linkObjectsEntries,
+                                             files, uniqueSrcs, debugSources);
     // Note that for imported targets or multi-config generators supporting
     // cross-config builds the paths to the object files must be per-config,
     // so contextDependentObjects will be true here even if object libraries
@@ -243,8 +269,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 #endif
   };
   bool contextDependentFileSets =
-    processSources(this, fileSetEntries, files, uniqueSrcs, debugSources,
-                   processFileSetEntry);
+    processSources(this, config, fileSetEntries, files, uniqueSrcs,
+                   debugSources, processFileSetEntry);
 
   // Determine if sources are context-dependent or not.
   if (!contextDependentDirectSources && !contextDependentInterfaceSources &&

@@ -94,6 +94,14 @@ Supported Policies
 
 The following policies are supported.
 
+Policies Introduced by CMake 4.4
+--------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0211: A file may belong to at most one file set in a target. </policy/CMP0211>
+
 Policies Introduced by CMake 4.3
 --------------------------------
 
