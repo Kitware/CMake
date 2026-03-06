@@ -46,6 +46,8 @@ public:
 
   std::vector<std::string> GetVariables() const;
 
+  std::string RecordDifference(cmEnvironment const& original) const;
+
 protected:
   struct EnvNameLess
   {

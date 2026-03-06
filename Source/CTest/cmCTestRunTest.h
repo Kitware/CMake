@@ -16,6 +16,8 @@
 #include "cmCTestTestHandler.h"
 #include "cmProcess.h"
 
+class cmEnvironment;
+
 /** \class cmRunTest
  * \brief represents a single test to be run
  *
@@ -113,7 +115,7 @@ private:
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
 
-  void SetupResourcesEnvironment(std::vector<std::string>* log = nullptr);
+  void SetupResourcesEnvironment(cmEnvironment& env);
 
   // Returns "completed/total Test #Index: "
   std::string GetTestPrefix(size_t completed, size_t total) const;

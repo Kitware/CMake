@@ -3,6 +3,7 @@
 #include "cmEnvironment.h"
 
 #include <set>
+#include <sstream>
 #include <utility>
 
 #include <cm/string_view>
@@ -67,6 +68,29 @@ std::vector<std::string> cmEnvironment::GetVariables() const
     }
   }
   return result;
+}
+
+std::string cmEnvironment::RecordDifference(
+  cmEnvironment const& original) const
+{
+  cm::string_view nl;
+  std::ostringstream os;
+  for (auto const& elem : this->Map) {
+    if (!elem.second) {
+      // Signify that this variable is being actively unset
+      os << nl << '#' << elem.first << '=';
+      nl = "\n";
+      continue;
+    }
+    auto const it = original.Map.find(elem.first);
+    if (it != original.Map.end() && *elem.second == it->second) {
+      // Skip variables that are unchanged
+      continue;
+    }
+    os << nl << elem.first << '=' << *elem.second;
+    nl = "\n";
+  }
+  return os.str();
 }
 
 namespace {
