@@ -51,6 +51,10 @@ uv_sGetHostNameW pGetHostNameW;
 /* api-ms-win-core-file-l2-1-4.dll function pointer */
 sGetFileInformationByName pGetFileInformationByName;
 
+#if _WIN32_WINNT < 0x0602 /* _WIN32_WINNT_WIN8 */
+sGetSystemTimePreciseAsFileTime pGetSystemTimePreciseAsFileTime;
+#endif
+
 void uv__winapi_init(void) {
   HMODULE ntdll_module;
   HMODULE powrprof_module;
@@ -58,6 +62,9 @@ void uv__winapi_init(void) {
   HMODULE ws2_32_module;
   HMODULE bcryptprimitives_module;
   HMODULE api_win_core_file_module;
+#if _WIN32_WINNT < 0x0602 /* _WIN32_WINNT_WIN8 */
+  HMODULE kernel32_module;
+#endif
 
   union {
     FARPROC proc;
@@ -75,6 +82,9 @@ void uv__winapi_init(void) {
     sSetWinEventHook pSetWinEventHook;
     uv_sGetHostNameW pGetHostNameW;
     sGetFileInformationByName pGetFileInformationByName;
+#if _WIN32_WINNT < 0x0602 /* _WIN32_WINNT_WIN8 */
+    sGetSystemTimePreciseAsFileTime pGetSystemTimePreciseAsFileTime;
+#endif
   } u;
 
   ntdll_module = GetModuleHandleW(L"ntdll.dll");
@@ -170,4 +180,16 @@ void uv__winapi_init(void) {
                             "GetFileInformationByName");
     pGetFileInformationByName = u.pGetFileInformationByName;
   }
+
+#if _WIN32_WINNT < 0x0602 /* _WIN32_WINNT_WIN8 */
+  kernel32_module = GetModuleHandleW(L"kernel32.dll");
+  if (kernel32_module != NULL) {
+    u.proc = GetProcAddress(kernel32_module,
+                            "GetSystemTimePreciseAsFileTime");
+    pGetSystemTimePreciseAsFileTime = u.pGetSystemTimePreciseAsFileTime;
+    if (pGetSystemTimePreciseAsFileTime == NULL) {
+      pGetSystemTimePreciseAsFileTime = GetSystemTimeAsFileTime;
+    }
+  }
+#endif
 }

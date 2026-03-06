@@ -4840,4 +4840,11 @@ typedef int (WINAPI *uv_sGetHostNameW)
              int);
 extern uv_sGetHostNameW pGetHostNameW;
 
+#if _WIN32_WINNT < 0x0602 /* _WIN32_WINNT_WIN8 */
+typedef VOID (WINAPI *sGetSystemTimePreciseAsFileTime)
+             (LPFILETIME lpSystemTimeAsFileTime);
+extern sGetSystemTimePreciseAsFileTime pGetSystemTimePreciseAsFileTime;
+#define GetSystemTimePreciseAsFileTime pGetSystemTimePreciseAsFileTime
+#endif
+
 #endif /* UV_WIN_WINAPI_H_ */
