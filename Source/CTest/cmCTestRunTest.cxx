@@ -707,6 +707,12 @@ void cmCTestRunTest::ComputeArguments()
     testCommand += "\"";
     this->Arguments.push_back(*j);
   }
+  // Append passthrough arguments from ctest command line (after --)
+  for (std::string const& arg :
+       this->TestHandler->TestOptions.TestPassthroughArguments) {
+    testCommand = cmStrCat(std::move(testCommand), " \"", arg, '"');
+    this->Arguments.push_back(arg);
+  }
   this->TestResult.FullCommandLine = testCommand;
 
   // Print the test command in verbose mode

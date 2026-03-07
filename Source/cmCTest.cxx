@@ -12,6 +12,7 @@
 #include <functional>
 #include <initializer_list>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <ratio>
 #include <sstream>
@@ -2506,8 +2507,20 @@ int cmCTest::Run(std::vector<std::string> const& args)
   };
 
   // process the command line arguments
+  bool hadPassthroughDelimiter = false;
   for (size_t i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
+
+    // The "--" argument terminates processing and passes
+    // all remaining arguments through to the tests.
+    if (arg == "--"_s) {
+      hadPassthroughDelimiter = true;
+      std::copy(
+        args.begin() + i + 1, args.end(),
+        std::back_inserter(this->Impl->TestOptions.TestPassthroughArguments));
+      break;
+    }
+
     bool matched = false;
     for (auto const& m : arguments) {
       if (m.matches(arg)) {
@@ -2577,6 +2590,27 @@ int cmCTest::Run(std::vector<std::string> const& args)
                                                                 << '\'');
         return 1;
       }
+    }
+  }
+
+  // Passthrough arguments (after --) are only supported in direct test
+  // execution mode, not --build-and-test, -S, or -D/-T/-M modes.
+  if (hadPassthroughDelimiter) {
+    if (cmakeAndTest) {
+      cmSystemTools::Error(
+        "The -- option cannot be used with --build-and-test. "
+        "Use --build-options or --test-command to forward arguments.");
+      return 1;
+    }
+    if (!runScripts.empty()) {
+      cmSystemTools::Error(
+        "The -- option cannot be used with -S or -SP script mode.");
+      return 1;
+    }
+    if (processSteps) {
+      cmSystemTools::Error(
+        "The -- option cannot be used with -D, -T, or -M dashboard mode.");
+      return 1;
     }
   }
 

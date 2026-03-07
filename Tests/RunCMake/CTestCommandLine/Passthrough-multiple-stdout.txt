@@ -1,0 +1,6 @@
+1: Test command: [^
+]* "-E" "echo" "base_output" "--flag1" "--flag2" "value"
+.*
+2: Test command: [^
+]* "-E" "echo" "second_test" "--flag1" "--flag2" "value"
+.*

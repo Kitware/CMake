@@ -55,6 +55,8 @@ struct cmCTestTestOptions
   std::string ExcludeTestListFile;
   std::string ResourceSpecFile;
   std::string JUnitXMLFileName;
+
+  std::vector<std::string> TestPassthroughArguments;
 };
 
 /** \class cmCTestTestHandler
