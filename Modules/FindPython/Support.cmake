@@ -4207,13 +4207,13 @@ if ("NumPy" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interp
     endif()
   endif()
 
-  # Workaround Intel MKL library outputting a message in stdout, which cause
-  # incorrect detection of numpy.get_include() and numpy.__version__
-  # See https://github.com/numpy/numpy/issues/23775 and
-  # https://gitlab.kitware.com/cmake/cmake/-/issues/26240
-  if(NOT DEFINED ENV{MKL_ENABLE_INSTRUCTIONS})
-    set(_${_PYTHON_PREFIX}_UNSET_ENV_VAR_MKL_ENABLE_INSTRUCTIONS YES)
-    set(ENV{MKL_ENABLE_INSTRUCTIONS} "SSE4_2")
+  # Work around Intel MKL message to stdout on macOS:
+  #   https://github.com/numpy/numpy/issues/23775
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    if(NOT DEFINED ENV{MKL_ENABLE_INSTRUCTIONS})
+      set(_${_PYTHON_PREFIX}_UNSET_ENV_VAR_MKL_ENABLE_INSTRUCTIONS YES)
+      set(ENV{MKL_ENABLE_INSTRUCTIONS} "SSE4_2")
+    endif()
   endif()
 
   if (NOT _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
