@@ -6,11 +6,16 @@ properties set to true, and its :prop_tgt:`AUTOMOC`, :prop_tgt:`AUTORCC`,
 
 If the header's :prop_sf:`LANGUAGE` property is set, the value of that property
 is used to determine the language with which to compile the header file.
-Otherwise, if the target has any C++ sources, the header is compiled as C++.
-Otherwise, if the target has any C sources, the header is compiled as C.
-Otherwise, if C++ is enabled globally, the header is compiled as C++.
-Otherwise, if C is enabled globally, the header is compiled as C. Otherwise,
-the header file is not compiled.
+The supported languages are ``C``, ``CXX``, ``OBJC``, and ``OBJCXX``.
+If the language is not one of those four, the header file is not compiled.
+
+Otherwise, the language is inferred from the target's sources using the
+following precedence: ``OBJCXX`` takes priority over all others; if both
+``CXX`` and ``OBJC`` sources are present, the header is compiled as
+``OBJCXX``; otherwise ``CXX`` takes precedence over ``OBJC``, and ``OBJC``
+takes precedence over ``C``.  If no matching sources are found, the same
+precedence is applied to the globally enabled languages.  If no supported
+language is found, the header file is not compiled.
 
 If the header's :prop_sf:`SKIP_LINTING` property is set to true, the file is
 not compiled.

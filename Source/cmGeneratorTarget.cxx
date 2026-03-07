@@ -5907,19 +5907,21 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
                 // the same things so we pick up the same transitive
                 // properties. For the <LANG>_... properties, we don't care if
                 // we set them for languages this target won't eventually use.
-                // The verify header sets feature currently only supports the
-                // C and C++ languages, so we just always set those here for
-                // simplicity rather than working out all languages the target
-                // has to compile for.
-                static std::vector<std::string> propertiesToCopy = {
-                  "COMPILE_DEFINITIONS", "COMPILE_FEATURES",
-                  "COMPILE_FLAGS",       "COMPILE_OPTIONS",
-                  "DEFINE_SYMBOL",       "INCLUDE_DIRECTORIES",
-                  "LINK_LIBRARIES",      "C_STANDARD",
-                  "C_STANDARD_REQUIRED", "C_EXTENSIONS",
-                  "CXX_STANDARD",        "CXX_STANDARD_REQUIRED",
-                  "CXX_EXTENSIONS"
-                };
+                // Copy language-standard properties for all supported
+                // languages. We don't care if we set properties for languages
+                // this target won't eventually use.
+                static std::array<std::string, 19> const propertiesToCopy{ {
+                  "COMPILE_DEFINITIONS",    "COMPILE_FEATURES",
+                  "COMPILE_FLAGS",          "COMPILE_OPTIONS",
+                  "DEFINE_SYMBOL",          "INCLUDE_DIRECTORIES",
+                  "LINK_LIBRARIES",         "C_STANDARD",
+                  "C_STANDARD_REQUIRED",    "C_EXTENSIONS",
+                  "CXX_STANDARD",           "CXX_STANDARD_REQUIRED",
+                  "CXX_EXTENSIONS",         "OBJC_STANDARD",
+                  "OBJC_STANDARD_REQUIRED", "OBJC_EXTENSIONS",
+                  "OBJCXX_STANDARD",        "OBJCXX_STANDARD_REQUIRED",
+                  "OBJCXX_EXTENSIONS",
+                } };
                 for (std::string const& prop : propertiesToCopy) {
                   cmValue propValue = this->Target->GetProperty(prop);
                   if (propValue.IsSet()) {
@@ -6018,9 +6020,11 @@ cm::optional<std::string> cmGeneratorTarget::ResolveHeaderLanguage(
   cmSourceFile& source,
   cm::optional<cm::optional<std::string>>& defaultLanguage) const
 {
-  static std::array<cm::string_view, 2> const supportedLangs{ {
+  static std::array<cm::string_view, 4> const supportedLangs{ {
     "C",
     "CXX",
+    "OBJC",
+    "OBJCXX",
   } };
   auto isSupported = [](cm::string_view lang) -> bool {
     return std::find(supportedLangs.begin(), supportedLangs.end(), lang) !=
@@ -6039,7 +6043,11 @@ cm::optional<std::string> cmGeneratorTarget::ResolveHeaderLanguage(
   /*
     Compute and cache the default language for unlanguaged headers.
     The lattice join is run once per file set, not once per header.
-    Lattice: CXX > C
+    Lattice:   OBJCXX
+              /      \
+            CXX      OBJC
+              \      /
+                 C
   */
   if (!defaultLanguage) {
     std::set<std::string> langs;
@@ -6060,8 +6068,12 @@ cm::optional<std::string> cmGeneratorTarget::ResolveHeaderLanguage(
     }
 
     cm::optional<std::string> resolved;
-    if (langs.count("CXX")) {
+    if (langs.count("OBJCXX") || (langs.count("CXX") && langs.count("OBJC"))) {
+      resolved = "OBJCXX"; // promote
+    } else if (langs.count("CXX")) {
       resolved = "CXX";
+    } else if (langs.count("OBJC")) {
+      resolved = "OBJC";
     } else if (langs.count("C")) {
       resolved = "C";
     }
@@ -6075,10 +6087,12 @@ cm::optional<std::string> cmGeneratorTarget::GenerateStubForLanguage(
   std::string const& language, std::string const& headerFilename,
   std::string const& verifyTargetName, cmSourceFile& source) const
 {
-  static std::array<std::pair<cm::string_view, cm::string_view>, 2> const
+  static std::array<std::pair<cm::string_view, cm::string_view>, 4> const
     langToExt = { {
       { "C", ".c" },
       { "CXX", ".cxx" },
+      { "OBJC", ".m" },
+      { "OBJCXX", ".mm" },
     } };
 
   // NOLINTNEXTLINE(readability-qualified-auto)

@@ -3,6 +3,10 @@ VERIFY_INTERFACE_HEADER_SETS
 
 .. versionadded:: 3.24
 
+.. versionchanged:: 4.4
+  ``OBJC`` and ``OBJCXX`` languages are now supported in addition to ``C``
+  and ``CXX``.
+
 Used to verify that all headers in a target's ``PUBLIC`` and ``INTERFACE``
 header sets can be included on their own.
 
