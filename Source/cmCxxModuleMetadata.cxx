@@ -442,7 +442,7 @@ struct MetaDataProperties
   std::string MetadataDir;
   std::set<cm::string_view> AllCompileFeatures;
   std::set<cm::string_view> AllCompileOptions;
-  std::set<cm::string_view> AllIncludeDirectories;
+  std::set<std::string> AllIncludeDirectories;
   std::set<std::string> AllCompileDefinitions;
   std::set<std::string> BaseDirs;
   std::set<std::string> Sources;
@@ -473,11 +473,11 @@ MetaDataProperties CollectMetaProperties(cmCxxModuleMetadata const& meta)
 
     if (module.LocalArguments) {
       for (auto const& incDir : module.LocalArguments->IncludeDirectories) {
-        props.AllIncludeDirectories.emplace(incDir);
+        props.AllIncludeDirectories.emplace(props.NormalizePath(incDir));
       }
       for (auto const& sysIncDir :
            module.LocalArguments->SystemIncludeDirectories) {
-        props.AllIncludeDirectories.emplace(sysIncDir);
+        props.AllIncludeDirectories.emplace(props.NormalizePath(sysIncDir));
       }
       for (auto const& opt : module.LocalArguments->CompileOptions) {
         props.AllCompileOptions.emplace(opt);

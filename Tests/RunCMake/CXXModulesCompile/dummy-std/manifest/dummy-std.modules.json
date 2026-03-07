@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "revision": 1,
+  "modules": [
+    {
+      "is-interface": true,
+      "is-std-library": true,
+      "logical-name": "std",
+      "source-path": "../interface/std.cppm",
+      "local-arguments": {
+        "include-directories": [
+          "../include"
+        ],
+        "system-include-directories": [
+          "../sysinclude"
+        ]
+      }
+    }
+  ]
+}
