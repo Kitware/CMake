@@ -201,6 +201,8 @@ Signatures
       - DLLs (these go to ``RUNTIME``, see below),
       - on macOS when marked as ``FRAMEWORK`` (see below).
 
+    * *Module libraries*
+
   ``RUNTIME``
     Target artifacts of this kind include:
 
