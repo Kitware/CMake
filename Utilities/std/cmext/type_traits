@@ -5,7 +5,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cstddef>
 #include <memory>
+#include <tuple>
 
 #include <cm/type_traits>
 
@@ -36,6 +38,28 @@ struct is_unique_ptr : std::false_type
 };
 template <typename T>
 struct is_unique_ptr<std::unique_ptr<T>> : std::true_type
+{
+};
+
+// type traits for std::pair template
+template <typename, typename = void_t<>>
+struct is_pair : std::false_type
+{
+};
+template <typename T>
+struct is_pair<T, void_t<typename T::first_type, typename T::second_type>>
+  : std::true_type
+{
+};
+
+// type traits for std::tuple template
+template <std::size_t N, typename T, typename = void_t<>>
+struct is_tuple : std::false_type
+{
+};
+template <std::size_t N, typename T>
+struct is_tuple<N, T, void_t<typename std::tuple_element<N - 1, T>::type>>
+  : std::true_type
 {
 };
 
