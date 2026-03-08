@@ -53,3 +53,22 @@ protected:
   };
   std::map<std::string, cm::optional<std::string>, EnvNameLess> Map;
 };
+
+class cmEnvironmentModification
+{
+public:
+  bool Add(std::string const& envmod);
+  bool Add(std::vector<std::string> const& envmod);
+
+  void ApplyTo(cmEnvironment& env);
+
+private:
+  struct Entry
+  {
+    std::string Name;
+    std::string Value;
+    std::string Op;
+  };
+
+  std::vector<Entry> Entries;
+};
