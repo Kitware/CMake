@@ -72,8 +72,8 @@ public:
     Client->bind(server2client, client2server);
     Debugger->bind(client2server, server2client);
   }
-  std::vector<cmListFileFunction> CreateListFileFunctions(char const* str,
-                                                          char const* filename)
+  std::vector<cmListFileFunction> CreateListFileFunctions(
+    char const* str, std::string const& filename)
   {
     cmMessenger messenger;
     cmListFileBacktrace backtrace;
