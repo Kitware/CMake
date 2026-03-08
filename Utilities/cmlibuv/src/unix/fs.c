@@ -1381,7 +1381,10 @@ static ssize_t uv__fs_copyfile(uv_fs_t* req) {
    * `cp -p` does not care about errors here, so we don't either. Reuse the
    * `result` variable to silence a -Wunused-result warning.
    */
-  result = fchown(dstfd, src_statsbuf.st_uid, src_statsbuf.st_gid);
+#ifndef __clang_analyzer__ /* deadcode.DeadStores */
+  result =
+#endif
+    fchown(dstfd, src_statsbuf.st_uid, src_statsbuf.st_gid);
 
   if (fchmod(dstfd, src_statsbuf.st_mode) == -1) {
     err = UV__ERR(errno);

@@ -1497,7 +1497,9 @@ int uv_os_get_group(uv_group_t* grp, uv_uid_t gid) {
   /* Copy the groupname */
   grp->groupname = gr_mem;
   memcpy(grp->groupname, gp.gr_name, name_size);
+#ifndef __clang_analyzer__ /* deadcode.DeadStores */
   gr_mem += name_size;
+#endif
 
   /* Copy the gid */
   grp->gid = gp.gr_gid;

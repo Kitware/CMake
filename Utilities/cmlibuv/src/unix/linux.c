@@ -1246,6 +1246,8 @@ static void uv__epoll_ctl_prep(int epollfd,
                                int op,
                                int fd,
                                struct epoll_event* e) {
+  /* FIXME: Avoid dangling pointer to uv__io_poll stack frame.  */
+#ifndef __clang_analyzer__ /* core.StackAddressEscape */
   struct uv__io_uring_sqe* sqe;
   struct epoll_event* pe;
   uint32_t mask;
@@ -1273,6 +1275,7 @@ static void uv__epoll_ctl_prep(int epollfd,
 
   if ((*ctl->sqhead & mask) == (*ctl->sqtail & mask))
     uv__epoll_ctl_flush(epollfd, ctl, events);
+#endif
 }
 
 
