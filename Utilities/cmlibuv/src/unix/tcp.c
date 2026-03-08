@@ -30,8 +30,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#if defined(CMAKE_BOOTSTRAP) && defined(__sun__)
+#  define SUNOS_NO_IFADDRS
+#endif
+
 /* ifaddrs is not implemented on AIX and IBM i PASE */
-#if !defined(_AIX)
+#if !defined(_AIX) && !defined(SUNOS_NO_IFADDRS)
 #include <ifaddrs.h>
 #endif
 
@@ -249,6 +253,8 @@ static int uv__ipv6_link_local_scope_id(void) {
 
   uv_free_interface_addresses(interfaces, count);
 
+#elif defined(SUNOS_NO_IFADDRS)
+  rv = 0;
 #else
   struct ifaddrs* ifa;
   struct ifaddrs* p;
@@ -527,7 +533,7 @@ int uv__tcp_keepalive(int fd,
 
   if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &cnt, sizeof(cnt)))
     return UV__ERR(errno);
-#else
+#elif defined(TCP_KEEPALIVE_THRESHOLD)
   /* Fall back to the first implementation of tcp-alive mechanism for older Solaris,
    * simulate the tcp-alive mechanism on other platforms via `TCP_KEEPALIVE_THRESHOLD` + `TCP_KEEPALIVE_ABORT_THRESHOLD`.
    */
@@ -540,6 +546,8 @@ int uv__tcp_keepalive(int fd,
   UV_KEEPALIVE_FACTOR(time_to_abort);
   if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE_ABORT_THRESHOLD, &time_to_abort, sizeof(time_to_abort)))
     return UV__ERR(errno);
+#else
+  return UV__ENOPROTOOPT;
 #endif
 
 #else  /* !defined(__sun) */

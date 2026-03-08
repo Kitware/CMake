@@ -28,10 +28,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#if !defined(SUNOS_NO_IFADDRS) && _XOPEN_SOURCE < 600
-#define SUNOS_NO_IFADDRS
-#endif
-
 #ifndef SUNOS_NO_IFADDRS
 # include <ifaddrs.h>
 #endif
@@ -588,6 +584,9 @@ void uv__fs_event_close(uv_fs_event_t* handle) {
 }
 
 #else /* !defined(PORT_SOURCE_FILE) */
+
+void uv__fs_event_read(uv_loop_t* loop, uv__io_t* w, unsigned int revents) {
+}
 
 int uv_fs_event_init(uv_loop_t* loop, uv_fs_event_t* handle) {
   return UV_ENOSYS;

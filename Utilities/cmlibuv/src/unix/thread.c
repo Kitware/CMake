@@ -897,7 +897,8 @@ void uv_key_set(uv_key_t* key, void* value) {
     abort();
 }
 
-#if defined(_AIX) || defined(__MVS__) || defined(__PASE__)
+#if defined(_AIX) || defined(__MVS__) || defined(__PASE__) || \
+    defined(SUNOS_NO_PTHREAD_NAME)
 int uv__thread_setname(const char* name) {
   return UV_ENOSYS;
 }
@@ -938,7 +939,8 @@ int uv__thread_setname(const char* name) {
 #if (defined(__ANDROID_API__) && __ANDROID_API__ < 26) || \
     defined(_AIX) || \
     defined(__MVS__) || \
-    defined(__PASE__)
+    defined(__PASE__) || \
+    defined(SUNOS_NO_PTHREAD_NAME)
 int uv__thread_getname(uv_thread_t* tid, char* name, size_t size) {
   return UV_ENOSYS;
 }
