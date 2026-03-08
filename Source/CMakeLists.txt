@@ -191,6 +191,8 @@ add_library(
   cmDyndepCollation.h
   cmELF.h
   cmELF.cxx
+  cmEnvironment.cxx
+  cmEnvironment.h
   cmEvaluatedTargetProperty.cxx
   cmEvaluatedTargetProperty.h
   cmExprParserHelper.cxx
