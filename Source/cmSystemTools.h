@@ -293,7 +293,8 @@ public:
                                char const* dir = nullptr,
                                OutputOption outputflag = OUTPUT_MERGE,
                                cmDuration timeout = cmDuration::zero(),
-                               Encoding encoding = cmProcessOutput::Auto);
+                               Encoding encoding = cmProcessOutput::Auto,
+                               std::vector<std::string> env = {});
 
   static std::string PrintSingleCommand(std::vector<std::string> const&);
 

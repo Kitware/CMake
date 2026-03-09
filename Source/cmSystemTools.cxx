@@ -847,10 +847,12 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
                                      char const* dir, OutputOption outputflag,
-                                     cmDuration timeout, Encoding encoding)
+                                     cmDuration timeout, Encoding encoding,
+                                     std::vector<std::string> env)
 {
   cmUVProcessChainBuilder builder;
   builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, stdin)
+    .SetEnvironment(std::move(env))
     .AddCommand(command);
   if (dir) {
     builder.SetWorkingDirectory(dir);
