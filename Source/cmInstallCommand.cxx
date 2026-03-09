@@ -31,6 +31,7 @@
 #include "cmInstallCommandArguments.h"
 #include "cmInstallCxxModuleBmiGenerator.h"
 #include "cmInstallDirectoryGenerator.h"
+#include "cmInstallDirs.h"
 #include "cmInstallFileSetGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
@@ -108,12 +109,8 @@ public:
                          std::vector<std::string> const& relFiles,
                          std::vector<std::string>& absFiles);
 
-  std::string GetDestination(cmInstallCommandArguments const* args,
-                             std::string const& varName,
-                             std::string const& guess) const;
   std::string GetRuntimeDestination(
     cmInstallCommandArguments const* args) const;
-  std::string GetSbinDestination(cmInstallCommandArguments const* args) const;
   std::string GetArchiveDestination(
     cmInstallCommandArguments const* args) const;
   std::string GetLibraryDestination(
@@ -121,24 +118,6 @@ public:
   std::string GetCxxModulesBmiDestination(
     cmInstallCommandArguments const* args) const;
   std::string GetIncludeDestination(
-    cmInstallCommandArguments const* args) const;
-  std::string GetSysconfDestination(
-    cmInstallCommandArguments const* args) const;
-  std::string GetSharedStateDestination(
-    cmInstallCommandArguments const* args) const;
-  std::string GetLocalStateDestination(
-    cmInstallCommandArguments const* args) const;
-  std::string GetRunStateDestination(
-    cmInstallCommandArguments const* args) const;
-  std::string GetDataRootDestination(
-    cmInstallCommandArguments const* args) const;
-  std::string GetDataDestination(cmInstallCommandArguments const* args) const;
-  std::string GetInfoDestination(cmInstallCommandArguments const* args) const;
-  std::string GetLocaleDestination(
-    cmInstallCommandArguments const* args) const;
-  std::string GetManDestination(cmInstallCommandArguments const* args) const;
-  std::string GetDocDestination(cmInstallCommandArguments const* args) const;
-  std::string GetProgramExecutablesDestination(
     cmInstallCommandArguments const* args) const;
   std::string GetDestinationForType(cmInstallCommandArguments const* args,
                                     std::string const& type) const;
@@ -2626,42 +2605,31 @@ bool Helper::MakeFilesFullPath(char const* modeName,
   return true;
 }
 
-std::string Helper::GetDestination(cmInstallCommandArguments const* args,
-                                   std::string const& varName,
-                                   std::string const& guess) const
+std::string Helper::GetRuntimeDestination(
+  cmInstallCommandArguments const* args) const
 {
   if (args && !args->GetDestination().empty()) {
     return args->GetDestination();
   }
-  std::string val = this->Makefile->GetSafeDefinition(varName);
-  if (!val.empty()) {
-    return val;
-  }
-  return guess;
-}
-
-std::string Helper::GetRuntimeDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_BINDIR", "bin");
-}
-
-std::string Helper::GetSbinDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_SBINDIR", "sbin");
+  return cm::InstallDirs::GetRuntimeDirectory(this->Makefile);
 }
 
 std::string Helper::GetArchiveDestination(
   cmInstallCommandArguments const* args) const
 {
-  return this->GetDestination(args, "CMAKE_INSTALL_LIBDIR", "lib");
+  if (args && !args->GetDestination().empty()) {
+    return args->GetDestination();
+  }
+  return cm::InstallDirs::GetArchiveDirectory(this->Makefile);
 }
 
 std::string Helper::GetLibraryDestination(
   cmInstallCommandArguments const* args) const
 {
-  return this->GetDestination(args, "CMAKE_INSTALL_LIBDIR", "lib");
+  if (args && !args->GetDestination().empty()) {
+    return args->GetDestination();
+  }
+  return cm::InstallDirs::GetLibraryDirectory(this->Makefile);
 }
 
 std::string Helper::GetCxxModulesBmiDestination(
@@ -2676,81 +2644,10 @@ std::string Helper::GetCxxModulesBmiDestination(
 std::string Helper::GetIncludeDestination(
   cmInstallCommandArguments const* args) const
 {
-  return this->GetDestination(args, "CMAKE_INSTALL_INCLUDEDIR", "include");
-}
-
-std::string Helper::GetSysconfDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_SYSCONFDIR", "etc");
-}
-
-std::string Helper::GetSharedStateDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_SHAREDSTATEDIR", "com");
-}
-
-std::string Helper::GetLocalStateDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_LOCALSTATEDIR", "var");
-}
-
-std::string Helper::GetRunStateDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_RUNSTATEDIR",
-                              this->GetLocalStateDestination(nullptr) +
-                                "/run");
-}
-
-std::string Helper::GetDataRootDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_DATAROOTDIR", "share");
-}
-
-std::string Helper::GetDataDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_DATADIR",
-                              this->GetDataRootDestination(nullptr));
-}
-
-std::string Helper::GetInfoDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_INFODIR",
-                              this->GetDataRootDestination(nullptr) + "/info");
-}
-
-std::string Helper::GetLocaleDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_LOCALEDIR",
-                              this->GetDataRootDestination(nullptr) +
-                                "/locale");
-}
-
-std::string Helper::GetManDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_MANDIR",
-                              this->GetDataRootDestination(nullptr) + "/man");
-}
-
-std::string Helper::GetDocDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_DOCDIR",
-                              this->GetDataRootDestination(nullptr) + "/doc");
-}
-
-std::string Helper::GetProgramExecutablesDestination(
-  cmInstallCommandArguments const* args) const
-{
-  return this->GetDestination(args, "CMAKE_INSTALL_LIBEXECDIR", "libexec");
+  if (args && !args->GetDestination().empty()) {
+    return args->GetDestination();
+  }
+  return cm::InstallDirs::GetIncludeDirectory(this->Makefile);
 }
 
 std::string Helper::GetDestinationForType(
@@ -2759,49 +2656,7 @@ std::string Helper::GetDestinationForType(
   if (args && !args->GetDestination().empty()) {
     return args->GetDestination();
   }
-  if (type == "BIN") {
-    return this->GetRuntimeDestination(nullptr);
-  }
-  if (type == "SBIN") {
-    return this->GetSbinDestination(nullptr);
-  }
-  if (type == "SYSCONF") {
-    return this->GetSysconfDestination(nullptr);
-  }
-  if (type == "SHAREDSTATE") {
-    return this->GetSharedStateDestination(nullptr);
-  }
-  if (type == "LOCALSTATE") {
-    return this->GetLocalStateDestination(nullptr);
-  }
-  if (type == "RUNSTATE") {
-    return this->GetRunStateDestination(nullptr);
-  }
-  if (type == "LIB") {
-    return this->GetLibraryDestination(nullptr);
-  }
-  if (type == "INCLUDE") {
-    return this->GetIncludeDestination(nullptr);
-  }
-  if (type == "DATA") {
-    return this->GetDataDestination(nullptr);
-  }
-  if (type == "INFO") {
-    return this->GetInfoDestination(nullptr);
-  }
-  if (type == "LOCALE") {
-    return this->GetLocaleDestination(nullptr);
-  }
-  if (type == "MAN") {
-    return this->GetManDestination(nullptr);
-  }
-  if (type == "DOC") {
-    return this->GetDocDestination(nullptr);
-  }
-  if (type == "LIBEXEC") {
-    return this->GetProgramExecutablesDestination(nullptr);
-  }
-  return "";
+  return cm::InstallDirs::GetDirectoryForType(this->Makefile, type);
 }
 
 } // namespace
