@@ -2095,7 +2095,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
     realDepends.reserve(ccg.GetDepends().size());
     for (auto const& d : ccg.GetDepends()) {
       std::string dep;
-      if (this->CurrentLocalGenerator->GetRealDependency(d, configName, dep)) {
+      if (this->CurrentLocalGenerator->GetRealDependency(
+            d, configName, dep, cc.GetCMP0212Status())) {
         realDepends.emplace_back(std::move(dep));
       }
     }
@@ -2464,7 +2465,8 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
     realDepends.reserve(ccg.GetDepends().size());
     for (auto const& d : ccg.GetDepends()) {
       std::string dep;
-      if (this->CurrentLocalGenerator->GetRealDependency(d, configName, dep)) {
+      if (this->CurrentLocalGenerator->GetRealDependency(
+            d, configName, dep, command.GetCMP0212Status())) {
         realDepends.emplace_back(std::move(dep));
       }
     }

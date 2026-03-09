@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.4
 .. toctree::
    :maxdepth: 1
 
+   CMP0212: add_custom_command DEPENDS does not strip .exe suffixes. </policy/CMP0212>
    CMP0211: A file may belong to at most one file set in a target. </policy/CMP0211>
 
 Policies Introduced by CMake 4.3

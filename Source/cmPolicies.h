@@ -632,6 +632,9 @@ class cmMakefile;
          3, 0, WARN)                                                          \
   SELECT(POLICY, CMP0211,                                                     \
          "A file may belong to at most one file set in a target.", 4, 4, 0,   \
+         WARN)                                                                \
+  SELECT(POLICY, CMP0212,                                                     \
+         "add_custom_command DEPENDS does not strip .exe suffixes.", 4, 4, 0, \
          WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -692,7 +695,8 @@ class cmMakefile;
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \
-  F(CMP0147)
+  F(CMP0147)                                                                  \
+  F(CMP0212)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

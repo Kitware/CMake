@@ -414,7 +414,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
 {
   for (std::string const& i : ccg.GetDepends()) {
     std::string dep;
-    if (this->GetRealDependency(i, config, dep)) {
+    if (this->GetRealDependency(i, config, dep,
+                                ccg.GetCC().GetCMP0212Status())) {
       ninjaDeps.push_back(
         this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(dep));
     }

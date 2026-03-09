@@ -1867,7 +1867,8 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(
       for (std::string const& d : ccg.GetDepends()) {
         // Get the real name of the dependency in case it is a CMake target.
         std::string dep;
-        if (this->GetRealDependency(d, config, dep)) {
+        if (this->GetRealDependency(d, config, dep,
+                                    command.GetCMP0212Status())) {
           fout << this->ConvertToXMLOutputPath(dep) << ";";
         }
       }
