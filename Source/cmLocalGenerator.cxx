@@ -2331,12 +2331,21 @@ bool cmLocalGenerator::GetRealDependency(std::string const& inName,
   if (name.empty()) {
     return false;
   }
-  if (cmHasSuffix(name, ".exe"_s)) {
-    name = cmSystemTools::GetFilenameWithoutLastExtension(name);
-  }
 
   // Look for a CMake target with the given name.
-  if (cmGeneratorTarget* target = this->FindGeneratorTargetToUse(name)) {
+  cmGeneratorTarget* target = this->FindGeneratorTargetToUse(name);
+  if (!target && cmHasSuffix(name, ".exe"_s)) {
+    // If it doesn't exist, try to strip the `.exe` suffix.
+    std::string strippedName =
+      cmSystemTools::GetFilenameWithoutLastExtension(name);
+    if (cmGeneratorTarget* strippedTarget =
+          this->FindGeneratorTargetToUse(strippedName)) {
+      name = strippedName;
+      target = strippedTarget;
+    }
+  }
+
+  if (target) {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName
     if (cmSystemTools::FileIsFullPath(inName)) {
