@@ -355,6 +355,7 @@ public:
     cm::FileSetMetadata::Visibility vis);
 
   std::vector<std::string> GetAllFileSetNames() const;
+  std::vector<std::string> GetAllPrivateFileSets() const;
   std::vector<std::string> GetAllInterfaceFileSets() const;
 
   std::string GetFileSetsPropertyName(std::string const& type) const;

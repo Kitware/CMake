@@ -14,17 +14,11 @@ class cmGeneratorFileSet;
 class cmListFileBacktrace;
 class cmLocalGenerator;
 
-struct cmFileSetDestinations
-{
-  std::string Headers;
-  std::string CXXModules;
-};
-
 class cmInstallFileSetGenerator : public cmInstallGenerator
 {
 public:
   cmInstallFileSetGenerator(std::string targetName, std::string fileSetName,
-                            cmFileSetDestinations dests,
+                            std::string destination,
                             std::string file_permissions,
                             std::vector<std::string> const& configurations,
                             std::string const& component, MessageLevel message,
@@ -51,7 +45,6 @@ private:
   cmGeneratorFileSet const* FileSet;
   std::string const FileSetName;
   std::string const FilePermissions;
-  cmFileSetDestinations FileSetDestinations;
   bool const Optional;
   cmGeneratorTarget* Target;
 

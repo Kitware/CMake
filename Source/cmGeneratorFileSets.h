@@ -40,6 +40,9 @@ public:
 
   bool Empty() const { return this->FileSets.empty(); }
 
+  std::vector<cm::string_view> GetFileSetTypes() const;
+  std::vector<cm::string_view> GetInterfaceFileSetTypes() const;
+
   std::vector<cmGeneratorFileSet const*> const& GetAllFileSets() const;
   std::vector<cmGeneratorFileSet const*> const& GetFileSets(
     cm::string_view type) const;

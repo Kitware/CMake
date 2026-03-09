@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <iterator>
 #include <map>
 #include <set>
@@ -3202,7 +3203,12 @@ std::vector<std::string> cmTarget::GetAllFileSetNames() const
   return result;
 }
 
-std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
+namespace {
+std::vector<std::string> RetrieveFileSetNames(
+  std::unordered_map<cm::string_view, FileSetType> const& fileSetTypes,
+  std::function<
+    std::vector<BT<std::string>> const&(FileSetType const& fileSetType)>
+    GetFileSets)
 {
   std::vector<std::string> result;
   auto inserter = std::back_inserter(result);
@@ -3214,11 +3220,30 @@ std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
     }
   };
 
-  for (auto const& fileSetType : this->impl->FileSetTypes) {
-    appendEntries(fileSetType.second.InterfaceEntries.Entries);
+  for (auto const& fileSetType : fileSetTypes) {
+    appendEntries(GetFileSets(fileSetType.second));
   }
 
   return result;
+}
+}
+
+std::vector<std::string> cmTarget::GetAllPrivateFileSets() const
+{
+  return RetrieveFileSetNames(
+    this->impl->FileSetTypes,
+    [](FileSetType const& fileSetType) -> std::vector<BT<std::string>> const& {
+      return fileSetType.SelfEntries.Entries;
+    });
+}
+
+std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
+{
+  return RetrieveFileSetNames(
+    this->impl->FileSetTypes,
+    [](FileSetType const& fileSetType) -> std::vector<BT<std::string>> const& {
+      return fileSetType.InterfaceEntries.Entries;
+    });
 }
 
 bool cmTarget::HasFileSets() const

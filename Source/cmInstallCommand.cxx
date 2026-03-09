@@ -178,13 +178,13 @@ std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
 }
 
 std::unique_ptr<cmInstallFileSetGenerator> CreateInstallFileSetGenerator(
-  Helper& helper, cmTarget& target, cmFileSetDestinations dests,
+  Helper& helper, cmTarget& target,
   cmInstallCommandFileSetArguments const& args)
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);
   return cm::make_unique<cmInstallFileSetGenerator>(
-    target.GetName(), args.GetFileSet(), std::move(dests),
+    target.GetName(), args.GetFileSet(), args.GetDestination(),
     args.GetPermissions(), args.GetConfigurations(), args.GetComponent(),
     message, args.GetExcludeFromAll(), args.GetOptional(),
     helper.Makefile->GetBacktrace());
@@ -1126,11 +1126,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
     if (!namelinkOnly) {
       for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
-        cmFileSetDestinations dests;
-        dests.Headers = helper.GetIncludeDestination(&fileSetArgs[i]);
-        dests.CXXModules = fileSetArgs[i].GetDestination();
-        fileSetGenerators.push_back(CreateInstallFileSetGenerator(
-          helper, target, std::move(dests), fileSetArgs[i]));
+        fileSetGenerators.push_back(
+          CreateInstallFileSetGenerator(helper, target, fileSetArgs[i]));
         installsFileSet[i] = true;
       }
     }

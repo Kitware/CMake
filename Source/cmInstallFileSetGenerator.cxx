@@ -16,6 +16,7 @@
 #include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallDirs.h"
 #include "cmInstallType.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -25,16 +26,15 @@
 #include "cmTarget.h"
 
 cmInstallFileSetGenerator::cmInstallFileSetGenerator(
-  std::string targetName, std::string fileSetName, cmFileSetDestinations dests,
+  std::string targetName, std::string fileSetName, std::string destination,
   std::string file_permissions, std::vector<std::string> const& configurations,
   std::string const& component, MessageLevel message, bool exclude_from_all,
   bool optional, cmListFileBacktrace backtrace)
-  : cmInstallGenerator("", configurations, component, message,
-                       exclude_from_all, false, std::move(backtrace))
+  : cmInstallGenerator(std::move(destination), configurations, component,
+                       message, exclude_from_all, false, std::move(backtrace))
   , TargetName(std::move(targetName))
   , FileSetName(std::move(fileSetName))
   , FilePermissions(std::move(file_permissions))
-  , FileSetDestinations(std::move(dests))
   , Optional(optional)
 {
   this->ActionsPerConfig = true;
@@ -69,9 +69,10 @@ bool cmInstallFileSetGenerator::Compute(cmLocalGenerator* lg)
   if (std::find(interfaceFileSetEntries.begin(), interfaceFileSetEntries.end(),
                 this->FileSetName) != interfaceFileSetEntries.end()) {
     if (this->FileSet->GetType() == cm::FileSetMetadata::HEADERS) {
-      this->Destination = this->FileSetDestinations.Headers;
-    } else {
-      this->Destination = this->FileSetDestinations.CXXModules;
+      if (this->Destination.empty()) {
+        this->Destination =
+          cm::InstallDirs::GetIncludeDirectory(lg->GetMakefile());
+      }
     }
   } else {
     // File set of the given name was provided but it's private, so give up
