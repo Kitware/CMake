@@ -1,6 +1,19 @@
 #include "uv.h"
 #include "internal.h"
 
+#ifndef uv__ahafs_event
+void uv__ahafs_event(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+}
+#endif
+
+void uv__async_io(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+}
+
+#ifndef uv__inotify_read
+void uv__inotify_read(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+}
+#endif
+
 void uv__process_title_cleanup(void) {
 }
 
@@ -11,11 +24,26 @@ int uv_udp_open(uv_udp_t* handle, uv_os_sock_t sock) {
   return -EINVAL;
 }
 
+void uv__tty_close(uv_tty_t* handle) {
+}
+
+void uv__udp_io(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+}
+
 void uv__udp_close(uv_udp_t* handle) {
 }
 
 void uv__udp_finish_close(uv_udp_t* handle) {
 }
+
+#ifndef uv__fs_event
+void uv__fs_event(uv_loop_t* loop, uv__io_t* w, unsigned int events){}
+#endif
+
+#ifndef uv__fs_event_read
+void uv__fs_event_read(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+}
+#endif
 
 void uv__fs_poll_close(uv_fs_poll_t* handle) {
 }
@@ -104,6 +132,15 @@ int uv__dup3(int oldfd, int newfd, int flags) {
   return -1;
 }
 
+int uv__get_constrained_cpu(long long* quota) {
+  *quota = 0;
+  return -1;
+}
+
+unsigned uv__kernel_version(void) {
+  return 0;
+}
+
 int uv__pipe2(int pipefd[2], int flags) {
   errno = ENOSYS;
   return -1;
@@ -135,6 +172,9 @@ int uv__statx(int dirfd,
   errno = ENOSYS;
   return -1;
 }
+
+void uv__statx_to_stat(const struct uv__statx* statxbuf, uv_stat_t* buf) {
+}
 #endif
 
 #if defined(__linux__) || defined(__FreeBSD__)
@@ -144,5 +184,11 @@ ssize_t uv__fs_copy_file_range(int fd_in, off_t* off_in,
 {
   errno = ENOSYS;
   return -1;
+}
+#endif
+
+#if defined(_AIX)
+int uv_interface_addresses(uv_interface_address_t** addresses, int* count) {
+  return UV_ENOSYS;
 }
 #endif
