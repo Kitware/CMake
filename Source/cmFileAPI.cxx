@@ -148,6 +148,7 @@ std::vector<std::string> cmFileAPI::LoadDir(std::string const& dir)
   std::vector<std::string> files;
   cmsys::Directory d;
   d.Load(dir);
+  files.reserve(d.GetNumberOfFiles());
   for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
     std::string const& f = d.GetFileName(i);
     if (f != "." && f != "..") {
