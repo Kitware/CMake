@@ -50,7 +50,7 @@ Compilers
 Commands
 --------
 
-* The :ref:`add_custom_command(TARGET) <add_custom_command(TARGET)>`
+* The :command:`add_custom_command(TARGET)`
   signature now supports adding build events through :ref:`Alias Targets`.
 
 * The :command:`cmake_language(EXIT)` sub-command was added to terminate
