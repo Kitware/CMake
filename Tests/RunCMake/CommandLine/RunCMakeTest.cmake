@@ -147,6 +147,15 @@ run_cmake_command(install-unknown-command-long
 run_cmake_command(install-options-to-vars
   ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-install-options-to-vars
   --strip --prefix /var/test --config sample --component pack)
+run_cmake_command(install-no-component-value
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-install-options-to-vars
+  --component)
+run_cmake_command(install-multi-component-1
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-install-options-to-vars
+  --component comp1 comp2)
+run_cmake_command(install-multi-component-2
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-install-options-to-vars
+  --component comp1 --component comp2)
 run_cmake_command(install-default-dir-permissions-all
   ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
   --default-directory-permissions u=rwx,g=rx,o=rx)
