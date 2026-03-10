@@ -299,6 +299,7 @@ public:
       cm::optional<bool> ScheduleRandom;
       cm::optional<int> Timeout;
       cm::optional<NoTestsActionEnum> NoTestsAction;
+      std::vector<std::string> TestPassthroughArguments;
     };
 
     std::string ConfigurePreset;

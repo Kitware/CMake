@@ -189,6 +189,12 @@ void JOBS_PROC_UNSUPPORTED(cmJSONState* state)
                   "processor-count-based jobs preset support");
 }
 
+void PASSTHROUGH_ARGS_UNSUPPORTED(cmJSONState* state)
+{
+  state->AddError("File version must be 12 or higher for "
+                  "testPassthroughArguments preset support");
+}
+
 void CYCLIC_INCLUDE(std::string const& file, cmJSONState* state)
 {
   state->AddError(cmStrCat("Cyclic include among preset files: ", file));

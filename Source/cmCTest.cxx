@@ -1800,6 +1800,11 @@ bool cmCTest::SetArgsFromPreset(std::string const& presetName,
           return false;
       }
     }
+
+    // Assign passthrough arguments from preset.
+    // CLI -- args (parsed later in Run()) will be appended after these.
+    this->Impl->TestOptions.TestPassthroughArguments =
+      expandedPreset->Execution->TestPassthroughArguments;
   }
 
   return true;

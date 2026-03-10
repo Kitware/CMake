@@ -719,6 +719,13 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
       return false;
     }
 
+    // Support for testPassthroughArguments added in version 12.
+    if (v < 12 && preset.Execution &&
+        !preset.Execution->TestPassthroughArguments.empty()) {
+      cmCMakePresetsErrors::PASSTHROUGH_ARGS_UNSUPPORTED(&this->parseState);
+      return false;
+    }
+
     this->TestPresetOrder.push_back(preset.Name);
   }
 

@@ -353,7 +353,10 @@ auto const TestPresetExecutionHelper =
       .Bind("timeout"_s, &TestPreset::ExecutionOptions::Timeout,
             cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false)
       .Bind("noTestsAction"_s, &TestPreset::ExecutionOptions::NoTestsAction,
-            TestPresetOptionalExecutionNoTestsActionHelper, false));
+            TestPresetOptionalExecutionNoTestsActionHelper, false)
+      .Bind("testPassthroughArguments"_s,
+            &TestPreset::ExecutionOptions::TestPassthroughArguments,
+            cmCMakePresetsGraphInternal::PresetVectorStringHelper, false));
 
 auto const TestPresetFilterHelper =
   JSONHelperBuilder::Optional<TestPreset::FilterOptions>(

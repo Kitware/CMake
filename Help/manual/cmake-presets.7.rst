@@ -979,6 +979,17 @@ that may contain the following fields:
       Equivalent to passing :option:`--no-tests=ignore <ctest --no-tests>`
       on the command line.
 
+.. _`CMakePresets test testPassthroughArguments`:
+
+  ``testPassthroughArguments``
+    An optional array of strings. Each element is forwarded as an argument
+    to every test executable, equivalent to passing arguments after
+    :option:`ctest --` on the command line.
+    This is allowed in preset files specifying version ``12`` or above.
+
+    When both preset and command-line passthrough arguments are specified,
+    preset arguments appear first, followed by command-line arguments.
+
 Package Preset
 ^^^^^^^^^^^^^^
 
@@ -1512,6 +1523,11 @@ they were added and a summary of the new features and changes is given below.
         the directory of preset file containing the ``${fileDir}`` macro,
         regardless of whether it is inherited by another preset in a different
         directory.
+
+    * Changes to `Test Presets <Test Preset_>`_
+
+      * The `testPassthroughArguments <CMakePresets test testPassthroughArguments_>`_
+        field was added to forward arguments to test executables.
 
 Schema
 ======
