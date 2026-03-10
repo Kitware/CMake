@@ -642,6 +642,9 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the `getea' function. */
 #cmakedefine HAVE_GETEA 1
 
+/* Define to 1 if you have the `getegid' function. */
+#cmakedefine HAVE_GETEGID 1
+
 /* Define to 1 if you have the `geteuid' function. */
 #cmakedefine HAVE_GETEUID 1
 

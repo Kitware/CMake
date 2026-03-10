@@ -375,6 +375,7 @@ static int rar5_read_data_skip(struct archive_read *a);
 static int push_data_ready(struct archive_read* a, struct rar5* rar,
 	const uint8_t* buf, size_t size, int64_t offset);
 static void clear_data_ready_stack(struct rar5* rar);
+static void rar5_deinit(struct rar5* rar);
 
 /* CDE_xxx = Circular Double Ended (Queue) return values. */
 enum CDE_RETURN_VALUES {
@@ -429,8 +430,7 @@ static int cdeque_front(struct cdeque* d, void** value) {
 		return CDE_OUT_OF_BOUNDS;
 }
 
-/* Pushes a new element into the end of this circular deque object. If current
- * size will exceed capacity, the oldest element will be overwritten. */
+/* Pushes a new element into the end of this circular deque object. */
 static int cdeque_push_back(struct cdeque* d, void* item) {
 	if(d == NULL)
 		return CDE_PARAM;
@@ -554,7 +554,11 @@ static struct filter_info* add_new_filter(struct rar5* rar) {
 		return NULL;
 	}
 
-	cdeque_push_back(&rar->cstate.filters, cdeque_filter(f));
+	if (CDE_OK != cdeque_push_back(&rar->cstate.filters, cdeque_filter(f))) {
+		free(f);
+		return NULL;
+	}
+
 	return f;
 }
 
@@ -3040,7 +3044,9 @@ static int parse_filter(struct archive_read* ar, const uint8_t* p) {
 	if(block_length < 4 ||
 	    block_length > 0x400000 ||
 	    filter_type > FILTER_ARM ||
-	    !is_valid_filter_block_start(rar, block_start))
+	    !is_valid_filter_block_start(rar, block_start) ||
+	    (rar->cstate.window_size > 0 &&
+	     (ssize_t)block_length > rar->cstate.window_size >> 1))
 	{
 		archive_set_error(&ar->archive, ARCHIVE_ERRNO_FILE_FORMAT,
 		    "Invalid filter encountered");
@@ -4328,7 +4334,7 @@ static int rar5_cleanup(struct archive_read *a) {
 	free(rar->vol.push_buf);
 
 	free_filters(rar);
-	cdeque_free(&rar->cstate.filters);
+	rar5_deinit(rar);
 
 	free(rar);
 	a->format->data = NULL;
@@ -4353,6 +4359,7 @@ static int rar5_has_encrypted_entries(struct archive_read *_a) {
 	return ARCHIVE_READ_FORMAT_ENCRYPTION_DONT_KNOW;
 }
 
+/* Must match deallocations in rar5_deinit */
 static int rar5_init(struct rar5* rar) {
 	memset(rar, 0, sizeof(struct rar5));
 
@@ -4366,6 +4373,11 @@ static int rar5_init(struct rar5* rar) {
 	rar->has_encrypted_entries = ARCHIVE_READ_FORMAT_ENCRYPTION_DONT_KNOW;
 
 	return ARCHIVE_OK;
+}
+
+/* Must match allocations in rar5_init */
+static void rar5_deinit(struct rar5* rar) {
+	cdeque_free(&rar->cstate.filters);
 }
 
 int archive_read_support_format_rar5(struct archive *_a) {
@@ -4404,8 +4416,9 @@ int archive_read_support_format_rar5(struct archive *_a) {
 	    rar5_has_encrypted_entries);
 
 	if(ret != ARCHIVE_OK) {
-		(void) rar5_cleanup(ar);
+		rar5_deinit(rar);
+		free(rar);
 	}
 
-	return ret;
+	return ARCHIVE_OK;
 }
