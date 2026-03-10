@@ -21,7 +21,7 @@ cmsys::Status TryToRemoveBinaryDirectoryOnce(std::string const& directoryPath)
 
   // Make sure that CMakeCache.txt is deleted last.
   for (unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i) {
-    std::string path = directory.GetFile(i);
+    std::string const& path = directory.GetFileName(i);
 
     if (path == "." || path == ".." || path == "CMakeCache.txt") {
       continue;

@@ -1770,9 +1770,9 @@ void cmSystemTools::Glob(std::string const& directory,
     unsigned int i;
     numf = d.GetNumberOfFiles();
     for (i = 0; i < numf; i++) {
-      std::string fname = d.GetFile(i);
+      std::string const& fname = d.GetFileName(i);
       if (reg.find(fname)) {
-        files.push_back(std::move(fname));
+        files.push_back(fname);
       }
     }
   }
@@ -1792,9 +1792,9 @@ void cmSystemTools::GlobDirs(std::string const& path,
   cmsys::Directory d;
   if (d.Load(startPath)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
-      if ((std::string(d.GetFile(i)) != ".") &&
-          (std::string(d.GetFile(i)) != "..")) {
-        std::string fname = cmStrCat(startPath, '/', d.GetFile(i));
+      std::string const& f = d.GetFileName(i);
+      if (f != "." && f != "..") {
+        std::string fname = cmStrCat(startPath, '/', f);
         if (cmSystemTools::FileIsDirectory(fname)) {
           fname += finishPath;
           cmSystemTools::GlobDirs(fname, files);
@@ -1823,14 +1823,13 @@ bool cmSystemTools::SimpleGlob(std::string const& glob,
   cmsys::Directory d;
   if (d.Load(path)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
-      if ((std::string(d.GetFile(i)) != ".") &&
-          (std::string(d.GetFile(i)) != "..")) {
+      std::string const& sfname = d.GetFileName(i);
+      if (sfname != "." && sfname != "..") {
         std::string fname = path;
         if (path.back() != '/') {
           fname += "/";
         }
-        fname += d.GetFile(i);
-        std::string sfname = d.GetFile(i);
+        fname += sfname;
         if (type > 0 && cmSystemTools::FileIsDirectory(fname)) {
           continue;
         }

@@ -31,7 +31,7 @@ bool cmParseCacheCoverage::LoadCoverageData(std::string const& d)
   unsigned int i;
   numf = dir.GetNumberOfFiles();
   for (i = 0; i < numf; i++) {
-    std::string file = dir.GetFile(i);
+    std::string const& file = dir.GetFileName(i);
     if (file != "." && file != ".." && !cmSystemTools::FileIsDirectory(file)) {
       std::string path = cmStrCat(d, '/', file);
       if (cmSystemTools::GetFilenameLastExtension(path) == ".cmcov") {

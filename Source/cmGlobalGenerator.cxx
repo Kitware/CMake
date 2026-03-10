@@ -3697,8 +3697,8 @@ std::set<std::string> const& cmGlobalGenerator::GetDirectoryContent(
       if (d.Load(dir)) {
         unsigned long n = d.GetNumberOfFiles();
         for (unsigned long i = 0; i < n; ++i) {
-          char const* f = d.GetFile(i);
-          if (strcmp(f, ".") != 0 && strcmp(f, "..") != 0) {
+          std::string const& f = d.GetFileName(i);
+          if (f != "." && f != "..") {
             dc.All.insert(f);
           }
         }

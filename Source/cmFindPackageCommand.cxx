@@ -113,12 +113,10 @@ public:
 };
 #endif
 
-bool isDirentryToIgnore(char const* const fname)
+bool isDirentryToIgnore(std::string const& fname)
 {
-  assert(fname);
-  assert(fname[0] != 0);
-  return fname[0] == '.' &&
-    (fname[1] == 0 || (fname[1] == '.' && fname[2] == 0));
+  assert(!fname.empty());
+  return fname == "." || fname == "..";
 }
 
 class cmAppendPathSegmentGenerator
@@ -188,12 +186,12 @@ public:
     }
 
     while (this->CurrentIdx < this->DirectoryLister.GetNumberOfFiles()) {
-      char const* const fname =
-        this->DirectoryLister.GetFile(this->CurrentIdx++);
+      std::string const& fname =
+        this->DirectoryLister.GetFileName(this->CurrentIdx++);
       if (isDirentryToIgnore(fname)) {
         continue;
       }
-      if (cmsysString_strcasecmp(fname, this->DirName.data()) == 0) {
+      if (cmsysString_strcasecmp(fname.c_str(), this->DirName.data()) == 0) {
         auto candidate = cmStrCat(parent, fname, '/');
         if (cmSystemTools::FileIsDirectory(candidate)) {
           return candidate;
@@ -243,7 +241,7 @@ public:
       // TODO If so, just start with index 2 and drop the
       // `isDirentryToIgnore(i)` condition to check.
       for (auto i = 0ul; i < directoryLister.GetNumberOfFiles(); ++i) {
-        char const* const fname = directoryLister.GetFile(i);
+        std::string const& fname = directoryLister.GetFileName(i);
         // Skip entries to ignore or that aren't directories.
         if (isDirentryToIgnore(fname)) {
           continue;
@@ -261,8 +259,8 @@ public:
             // Skip entries that don't match.
             auto const equal =
               ((this->ExactMatch
-                  ? cmsysString_strcasecmp(fname, name.c_str())
-                  : cmsysString_strncasecmp(fname, name.c_str(),
+                  ? cmsysString_strcasecmp(fname.c_str(), name.c_str())
+                  : cmsysString_strncasecmp(fname.c_str(), name.c_str(),
                                             name.length())) == 0);
             if (equal) {
               if (directoryLister.FileIsDirectory(i)) {
@@ -2724,7 +2722,7 @@ void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
 
   std::string fname;
   for (unsigned long i = 0; i < files.GetNumberOfFiles(); ++i) {
-    fname = cmStrCat(dir, '/', files.GetFile(i));
+    fname = cmStrCat(dir, '/', files.GetFileName(i));
 
     if (!cmSystemTools::FileIsDirectory(fname)) {
       // Hold this file hostage until it behaves.

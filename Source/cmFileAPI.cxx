@@ -149,9 +149,9 @@ std::vector<std::string> cmFileAPI::LoadDir(std::string const& dir)
   cmsys::Directory d;
   d.Load(dir);
   for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
-    std::string f = d.GetFile(i);
+    std::string const& f = d.GetFileName(i);
     if (f != "." && f != "..") {
-      files.push_back(std::move(f));
+      files.push_back(f);
     }
   }
   std::sort(files.begin(), files.end());

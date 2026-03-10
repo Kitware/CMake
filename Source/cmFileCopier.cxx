@@ -23,7 +23,6 @@
 #  include <cerrno>
 #endif
 
-#include <cstring>
 #include <sstream>
 
 using namespace cmFSPermissions;
@@ -715,10 +714,10 @@ bool cmFileCopier::InstallDirectory(std::string const& source,
   }
   unsigned long numFiles = dir.GetNumberOfFiles();
   for (unsigned long fileNum = 0; fileNum < numFiles; ++fileNum) {
-    if (!(strcmp(dir.GetFile(fileNum), ".") == 0 ||
-          strcmp(dir.GetFile(fileNum), "..") == 0)) {
-      std::string fromPath = cmStrCat(source, '/', dir.GetFile(fileNum));
-      std::string toPath = cmStrCat(destination, '/', dir.GetFile(fileNum));
+    std::string const& file = dir.GetFileName(fileNum);
+    if (file != "." && file != "..") {
+      std::string fromPath = cmStrCat(source, '/', file);
+      std::string toPath = cmStrCat(destination, '/', file);
       if (!this->Install(fromPath, toPath)) {
         return false;
       }

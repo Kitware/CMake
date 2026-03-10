@@ -1933,15 +1933,11 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
 
   int numFiles =
     static_cast<int>(cmsys::Directory::GetNumberOfFilesInDirectory(dirName));
-  std::string pattern = "LastTestsFailed";
   std::string logName;
 
   for (int i = 0; i < numFiles; ++i) {
-    std::string fileName = directory.GetFile(i);
-    // bcc crashes if we attempt a normal substring comparison,
-    // hence the following workaround
-    std::string fileNameSubstring = fileName.substr(0, pattern.length());
-    if (fileNameSubstring != pattern) {
+    std::string const& fileName = directory.GetFileName(i);
+    if (!cmHasLiteralPrefix(fileName, "LastTestsFailed")) {
       continue;
     }
     if (logName.empty()) {

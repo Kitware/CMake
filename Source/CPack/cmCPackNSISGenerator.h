@@ -44,7 +44,7 @@ protected:
   char const* GetOutputExtension() override { return ".exe"; }
   char const* GetOutputPostfix() override { return "win32"; }
 
-  bool GetListOfSubdirectories(char const* dir,
+  bool GetListOfSubdirectories(std::string const& dir,
                                std::vector<std::string>& dirs);
 
   enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir()

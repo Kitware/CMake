@@ -144,10 +144,10 @@ public:
 
 private:
   bool Okay() const { return this->Error.empty(); }
-  bool AddPath(char const* path, size_t skip, char const* prefix,
+  bool AddPath(std::string const& path, size_t skip, char const* prefix,
                bool recursive = true);
-  bool AddFile(char const* file, size_t skip, char const* prefix);
-  bool AddData(char const* file, size_t size);
+  bool AddFile(std::string const& file, size_t skip, char const* prefix);
+  bool AddData(std::string const& file, size_t size);
 
   struct Callback;
   friend struct Callback;
