@@ -26,13 +26,13 @@ check_target_objects(multi_duplicate
 
 add_subdirectory(SOURCE_FILES_subdir)
 
-if(CMake_TEST_CUDA)
+if(CMake_TEST_CUDA STREQUAL "NVIDIA")
   enable_language(CUDA)
 
   include(CheckIPOSupported)
   check_ipo_supported(RESULT ipo_supported LANGUAGES CUDA)
 
-  if(ipo_supported AND CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+  if(ipo_supported)
     add_library(fatbin_objs OBJECT EXCLUDE_FROM_ALL empty1.cu empty2.cu)
     set_target_properties(fatbin_objs PROPERTIES
       CUDA_SEPARABLE_COMPILATION ON

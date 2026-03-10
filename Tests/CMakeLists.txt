@@ -262,6 +262,10 @@ if(BUILD_TESTING)
     unset(_sysctl_stdout)
   endif()
 
+  if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA MATCHES "^(NVIDIA|Clang)$")
+    message(FATAL_ERROR "CMake_TEST_CUDA should be \"NVIDIA\" or \"Clang\", got \"${CMake_TEST_CUDA}\"")
+  endif()
+
   #---------------------------------------------------------------------------
   # Add tests below here.
 
