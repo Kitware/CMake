@@ -75,8 +75,7 @@ static bool testHandleBreakpointRequestAfterFileIsLoaded()
   helper.bind();
   std::string sourcePath = "C:/CMakeLists.txt";
   std::vector<cmListFileFunction> functions = helper.CreateListFileFunctions(
-    "# Comment1\nset(var1 foo)\n# Comment2\nset(var2\nbar)\n",
-    sourcePath.c_str());
+    "# Comment1\nset(var1 foo)\n# Comment2\nset(var2\nbar)\n", sourcePath);
 
   breakpointManager.SourceFileLoaded(sourcePath, functions);
   dap::SetBreakpointsRequest setBreakpointRequest;
@@ -149,8 +148,7 @@ static bool testSourceFileLoadedAfterHandleBreakpointRequest()
   sourceBreakpoints[4].line = 5;
   setBreakpointRequest.breakpoints = sourceBreakpoints;
   std::vector<cmListFileFunction> functions = helper.CreateListFileFunctions(
-    "# Comment1\nset(var1 foo)\n# Comment2\nset(var2\nbar)\n",
-    sourcePath.c_str());
+    "# Comment1\nset(var1 foo)\n# Comment2\nset(var2\nbar)\n", sourcePath);
   auto got = helper.Client->send(setBreakpointRequest).get();
 
   // Act

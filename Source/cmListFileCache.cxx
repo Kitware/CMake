@@ -48,12 +48,12 @@ class cmListFileParser
 {
 public:
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
-                   cmMessenger* messenger);
+                   cmMessenger* messenger, std::string const& filename);
   cmListFileParser(cmListFileParser const&) = delete;
   cmListFileParser& operator=(cmListFileParser const&) = delete;
 
-  bool ParseFile(char const* filename);
-  bool ParseString(cm::string_view str, char const* virtual_filename);
+  bool ParseFile();
+  bool ParseString(cm::string_view str);
 
 private:
   bool Parse();
@@ -75,7 +75,7 @@ private:
   cmListFile* ListFile;
   cmListFileBacktrace Backtrace;
   cmMessenger* Messenger;
-  char const* FileName = nullptr;
+  std::string const& FileName;
   std::unique_ptr<cmListFileLexer, void (*)(cmListFileLexer*)> Lexer;
   std::string FunctionName;
   long FunctionLine;
@@ -84,10 +84,12 @@ private:
 };
 
 cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
-                                   cmMessenger* messenger)
+                                   cmMessenger* messenger,
+                                   std::string const& filename)
   : ListFile(lf)
   , Backtrace(std::move(lfbt))
   , Messenger(messenger)
+  , FileName(filename)
   , Lexer(cmListFileLexer_New(), cmListFileLexer_Delete)
 {
 }
@@ -109,19 +111,20 @@ void cmListFileParser::IssueError(std::string const& text) const
   cmSystemTools::SetFatalErrorOccurred();
 }
 
-bool cmListFileParser::ParseFile(char const* filename)
+bool cmListFileParser::ParseFile()
 {
-  this->FileName = filename;
+  std::string const* filename = &this->FileName;
 
 #ifdef _WIN32
   std::string expandedFileName = cmsys::Encoding::ToNarrow(
-    cmSystemTools::ConvertToWindowsExtendedPath(filename));
-  filename = expandedFileName.c_str();
+    cmSystemTools::ConvertToWindowsExtendedPath(*filename));
+  filename = &expandedFileName;
 #endif
 
   // Open the file.
   cmListFileLexer_BOM bom;
-  if (!cmListFileLexer_SetFileName(this->Lexer.get(), filename, &bom)) {
+  if (!cmListFileLexer_SetFileName(this->Lexer.get(), filename->c_str(),
+                                   &bom)) {
     this->IssueFileOpenError("cmListFileCache: error can not open file.");
     return false;
   }
@@ -137,11 +140,8 @@ bool cmListFileParser::ParseFile(char const* filename)
   return this->Parse();
 }
 
-bool cmListFileParser::ParseString(cm::string_view str,
-                                   char const* virtual_filename)
+bool cmListFileParser::ParseString(cm::string_view str)
 {
-  this->FileName = virtual_filename;
-
   if (!cmListFileLexer_SetString(this->Lexer.get(), str.data(),
                                  str.length())) {
     this->IssueFileOpenError("cmListFileCache: cannot allocate buffer.");
@@ -422,7 +422,7 @@ cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
 
 } // anonymous namespace
 
-bool cmListFile::ParseFile(char const* filename, cmMessenger* messenger,
+bool cmListFile::ParseFile(std::string const& filename, cmMessenger* messenger,
                            cmListFileBacktrace const& lfbt)
 {
   if (!cmSystemTools::FileExists(filename) ||
@@ -430,28 +430,17 @@ bool cmListFile::ParseFile(char const* filename, cmMessenger* messenger,
     return false;
   }
 
-  bool parseError = false;
-
-  {
-    cmListFileParser parser(this, lfbt, messenger);
-    parseError = !parser.ParseFile(filename);
-  }
-
-  return !parseError;
+  cmListFileParser parser(this, lfbt, messenger, filename);
+  return parser.ParseFile();
 }
 
-bool cmListFile::ParseString(cm::string_view str, char const* virtual_filename,
+bool cmListFile::ParseString(cm::string_view str,
+                             std::string const& virtual_filename,
                              cmMessenger* messenger,
                              cmListFileBacktrace const& lfbt)
 {
-  bool parseError = false;
-
-  {
-    cmListFileParser parser(this, lfbt, messenger);
-    parseError = !parser.ParseString(str, virtual_filename);
-  }
-
-  return !parseError;
+  cmListFileParser parser(this, lfbt, messenger, virtual_filename);
+  return parser.ParseString(str);
 }
 
 #include "cmStack.tcc"

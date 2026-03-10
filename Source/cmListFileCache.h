@@ -239,10 +239,10 @@ std::vector<BT<std::string>> cmExpandListWithBacktrace(
 
 struct cmListFile
 {
-  bool ParseFile(char const* path, cmMessenger* messenger,
+  bool ParseFile(std::string const& path, cmMessenger* messenger,
                  cmListFileBacktrace const& lfbt);
 
-  bool ParseString(cm::string_view str, char const* virtual_filename,
+  bool ParseString(cm::string_view str, std::string const& virtual_filename,
                    cmMessenger* messenger, cmListFileBacktrace const& lfbt);
 
   std::vector<cmListFileFunction> Functions;
