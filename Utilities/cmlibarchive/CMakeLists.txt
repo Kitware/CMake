@@ -44,9 +44,11 @@ ENDIF(NOT "${CMAKE_BUILD_TYPE_UPPER}"
        MATCHES "^(DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL|NONE)\$")
 ENDIF()
 
+if(0) # XXX(cmake): not needed for build within cmake
 # On MacOS, prefer MacPorts libraries to system libraries.
 # I haven't come up with a compelling argument for this to be conditional.
 list(APPEND CMAKE_PREFIX_PATH /opt/local)
+endif() # XXX(cmake): end
 # Enable @rpath in the install name.
 # detail in "cmake  --help-policy CMP0042"
 SET(CMAKE_MACOSX_RPATH ON)
