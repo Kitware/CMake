@@ -308,9 +308,9 @@ table.docutils td {
     padding-left: 10px;
   }
 
-  div.deprecated > :first-child,
-  div.versionadded > :first-child,
-  div.versionchanged > :first-child {
+  :not(.footnote) > div.deprecated > :first-child,
+  :not(.footnote) > div.versionadded > :first-child,
+  :not(.footnote) > div.versionchanged > :first-child {
     text-indent: -10px;
   }
 
