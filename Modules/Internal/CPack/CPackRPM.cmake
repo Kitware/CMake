@@ -1747,8 +1747,6 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 %install
 \@TMP_RPM_INSTALL\@
 
-%clean
-
 %changelog
 \@CPACK_RPM_SPEC_CHANGELOG\@
 "
@@ -1889,8 +1887,6 @@ fi
 mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 
 \@TMP_RPM_DEBUGINFO_INSTALL\@
-
-%clean
 
 \@post_\@
 \@posttrans_\@
