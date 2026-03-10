@@ -2,10 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmBuildCommand.h"
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -79,8 +79,9 @@ bool MainSignature(std::vector<std::string> const& args,
 
   cmMakefile& mf = status.GetMakefile();
   if (!project_name.empty()) {
-    mf.IssueMessage(MessageType::AUTHOR_WARNING,
-                    "Ignoring PROJECT_NAME option because it has no effect.");
+    mf.IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
+      "Ignoring PROJECT_NAME option because it has no effect.");
   }
 
   std::string makecommand = mf.GetGlobalGenerator()->GenerateCMakeBuildCommand(

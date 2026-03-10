@@ -7,6 +7,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmDiagnostics.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -206,8 +207,8 @@ bool cmSourceFile::FindFullPath(std::string* error,
               if (cmp0115Warning) {
                 *cmp0115Warning = std::move(warning);
               } else {
-                makefile->GetCMakeInstance()->IssueMessage(
-                  MessageType::AUTHOR_WARNING, warning);
+                makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, warning,
+                                          cmListFileBacktrace{});
               }
             }
             return true;

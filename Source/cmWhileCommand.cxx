@@ -10,6 +10,7 @@
 #include <cmext/string_view>
 
 #include "cmConditionEvaluator.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmFunctionBlocker.h"
@@ -20,7 +21,6 @@
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
@@ -117,19 +117,8 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
 
   if (!errorString.empty() && !enforceError) {
     // This error should only be enforced if CMP0130 is NEW.
-    switch (mf.GetPolicyStatus(cmPolicies::CMP0130)) {
-      case cmPolicies::WARN:
-        // Convert the error to a warning and enforce it.
-        messageType = MessageType::AUTHOR_WARNING;
-        enforceError = true;
-        break;
-      case cmPolicies::OLD:
-        // OLD behavior is to silently ignore the error.
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to enforce the error.
-        enforceError = true;
-        break;
+    if (mf.GetPolicyStatus(cmPolicies::CMP0130) != cmPolicies::OLD) {
+      enforceError = true;
     }
   }
 
@@ -144,10 +133,12 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     if (mf.GetPolicyStatus(cmPolicies::CMP0130) == cmPolicies::WARN) {
       err =
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0130), '\n', err);
-    }
-    mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
-    if (messageType == MessageType::FATAL_ERROR) {
-      cmSystemTools::SetFatalErrorOccurred();
+      mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err, whileBT);
+    } else {
+      mf.IssueMessage(messageType, err, whileBT);
+      if (messageType == MessageType::FATAL_ERROR) {
+        cmSystemTools::SetFatalErrorOccurred();
+      }
     }
   }
 

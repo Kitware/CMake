@@ -14,6 +14,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -208,8 +209,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
           return false;
         }
         if (cmp0175 == cmPolicies::WARN) {
-          mf.IssueMessage(
-            MessageType::AUTHOR_WARNING,
+          mf.IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
             cmStrCat(msg, '\n',
                      cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
         }
@@ -381,8 +382,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
               return false;
             }
             if (cmp0175 == cmPolicies::WARN) {
-              mf.IssueMessage(
-                MessageType::AUTHOR_WARNING,
+              mf.IssueDiagnostic(
+                cmDiagnostics::CMD_AUTHOR,
                 cmStrCat(msg, '\n',
                          cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
             }
@@ -465,8 +466,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         return false;
       }
       if (cmp0175 == cmPolicies::WARN) {
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(msg, ".\n",
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }
@@ -503,8 +504,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         return false;
       }
       if (cmp0175 == cmPolicies::WARN) {
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(msg, '\n',
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }
@@ -525,8 +526,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         return false;
       }
       if (cmp0175 == cmPolicies::WARN) {
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(msg, ".\n",
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }
@@ -552,8 +553,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
           case cmCustomCommandType::POST_BUILD:
             msg += "POST_BUILD";
         }
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(msg, " to preserve backward compatibility.\n",
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }
@@ -576,8 +577,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         return false;
       }
       if (cmp0175 == cmPolicies::WARN) {
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(msg, ".\n",
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }

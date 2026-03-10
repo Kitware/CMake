@@ -9,13 +9,13 @@
 #include <utility>
 #include <vector>
 
+#include "cmDiagnostics.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"
@@ -36,8 +36,8 @@ bool needToQuoteTestName(cmMakefile const& mf, std::string const& name)
     case cmPolicies::WARN:
       // Only warn if a forbidden character is used in the name.
       if (name.find_first_of("$[] #;\t\n\"\\") != std::string::npos) {
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0110),
                    "\nThe following name given to add_test() is invalid if "
                    "CMP0110 is not set or set to OLD:\n  `",
@@ -148,8 +148,8 @@ void cmTestGenerator::GenerateCommand(std::ostream& os,
           cmList argsWithEmptyValuesPreserved(
             propVal, cmList::ExpandElements::Yes, cmList::EmptyElements::Yes);
           if (launcherWithArgs != argsWithEmptyValuesPreserved) {
-            this->LG->GetMakefile()->IssueMessage(
-              MessageType::AUTHOR_WARNING,
+            this->LG->GetMakefile()->IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
               cmStrCat("The ", propertyName, " property of target '",
                        target->GetName(),
                        "' contains empty list items. Those empty items are "

@@ -21,6 +21,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
+#include "cmDiagnostics.h"
 #include "cmFileSet.h"
 #include "cmFileSetMetadata.h"
 #include "cmFindPackageStack.h"
@@ -2059,8 +2060,8 @@ struct ReadOnlyProperty
     } else {
       switch (target->GetPolicyStatus(*this->Policy)) {
         case cmPolicies::WARN:
-          context->IssueMessage(
-            MessageType::AUTHOR_WARNING,
+          context->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0160) + "\n" +
               this->message(prop, target));
           CM_FALLTHROUGH;
@@ -3135,8 +3136,8 @@ std::string cmTarget::ImportedGetFullPath(
 
       switch (this->GetPolicyStatus(cmPolicies::CMP0111)) {
         case cmPolicies::WARN:
-          this->impl->Makefile->IssueMessage(
-            MessageType::AUTHOR_WARNING,
+          this->impl->Makefile->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0111) + "\n" +
               message());
           CM_FALLTHROUGH;
@@ -3326,7 +3327,7 @@ bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
         "\nConfiguration selection for imported target \"", this->GetName(),
         "\" failed, but would select configuration \"", newConfig,
         "\" under the NEW policy.\n");
-      this->GetMakefile()->IssueMessage(MessageType::AUTHOR_WARNING, err);
+      this->GetMakefile()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err);
     }
 
     return false;
@@ -3340,7 +3341,7 @@ bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
                "\nConfiguration selection for imported target \"",
                this->GetName(), "\" selected configuration \"", oldConfig,
                "\", but would fail under the NEW policy.\n");
-    this->GetMakefile()->IssueMessage(MessageType::AUTHOR_WARNING, err);
+    this->GetMakefile()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err);
   } else if (suffix != newSuffix) {
     // OLD and NEW policies found different configurations.
     cm::string_view newConfig = configFromSuffix(newSuffix);
@@ -3350,7 +3351,7 @@ bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
                this->GetName(), "\" selected configuration \"", oldConfig,
                "\", but would select configuration \"", newConfig,
                "\" under the NEW policy.\n");
-    this->GetMakefile()->IssueMessage(MessageType::AUTHOR_WARNING, err);
+    this->GetMakefile()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err);
   }
 
   return true;

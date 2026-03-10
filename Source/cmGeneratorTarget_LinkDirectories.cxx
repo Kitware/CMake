@@ -5,7 +5,6 @@
 /* clang-format on */
 
 #include <map>
-#include <sstream>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -13,6 +12,7 @@
 
 #include <cmext/algorithm>
 
+#include "cmDiagnostics.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -42,37 +42,33 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
     std::string usedDirectories;
     for (std::string& entryDirectory : entry.Values) {
       if (!cmSystemTools::FileIsFullPath(entryDirectory)) {
-        std::ostringstream e;
-        bool noMessage = false;
-        MessageType messageType = MessageType::FATAL_ERROR;
         if (!targetName.empty()) {
-          /* clang-format off */
-          e << "Target \"" << targetName << "\" contains relative "
-            "path in its INTERFACE_LINK_DIRECTORIES:\n"
-            "  \"" << entryDirectory << "\"";
-          /* clang-format on */
-        } else {
-          switch (tgt->GetPolicyStatusCMP0081()) {
-            case cmPolicies::WARN: {
-              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0081) << "\n";
-              messageType = MessageType::AUTHOR_WARNING;
-            } break;
-            case cmPolicies::OLD:
-              noMessage = true;
-              break;
-            case cmPolicies::NEW:
-              // Issue the fatal message.
-              break;
-          }
-          e << "Found relative path while evaluating link directories of "
-               "\""
-            << tgt->GetName() << "\":\n  \"" << entryDirectory << "\"\n";
+          tgt->GetLocalGenerator()->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat("Target \"", targetName,
+                     "\" contains relative path"
+                     " in its INTERFACE_LINK_DIRECTORIES:\n  \"",
+                     entryDirectory, "\""));
+          return;
         }
-        if (!noMessage) {
-          tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
-          if (messageType == MessageType::FATAL_ERROR) {
+        switch (tgt->GetPolicyStatusCMP0081()) {
+          case cmPolicies::WARN:
+            tgt->GetLocalGenerator()->IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
+              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0081),
+                       "\nFound relative path while evaluating"
+                       " link directories of \"",
+                       tgt->GetName(), "\":\n  \"", entryDirectory, "\"\n"));
+            break;
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::NEW:
+            tgt->GetLocalGenerator()->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat("Found relative path while evaluating"
+                       " link directories of \"",
+                       tgt->GetName(), "\":\n  \"", entryDirectory, "\"\n"));
             return;
-          }
         }
       }
 

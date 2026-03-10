@@ -17,6 +17,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCMakePath.h"
+#include "cmDiagnostics.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -666,7 +667,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
              "when the policy is set to NEW.  "
              "Since the policy is not set the OLD behavior will be used.";
 
-        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+        this->Makefile.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e.str());
       }
     }
   }

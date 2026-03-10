@@ -19,6 +19,7 @@
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmDiagnostics.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -28,7 +29,6 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmNinjaTargetGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmPolicies.h"
@@ -713,8 +713,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
                   this->GetBinaryDirectory() ||
                 this->Makefile->PolicyOptionalWarningEnabled(
                   "CMAKE_POLICY_WARNING_CMP0116")) {
-              this->GetCMakeInstance()->IssueMessage(
-                MessageType::AUTHOR_WARNING,
+              this->GetCMakeInstance()->IssueDiagnostic(
+                cmDiagnostics::CMD_AUTHOR,
                 cmPolicies::GetPolicyWarning(cmPolicies::CMP0116),
                 cc->GetBacktrace());
             }

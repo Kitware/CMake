@@ -10,10 +10,10 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -64,10 +64,11 @@ bool cmSetCommand(std::vector<std::string> const& args,
       // if there's extra arguments, warn user
       // that they are ignored by this command.
       if (args.size() > 2) {
-        std::string m = "Only the first value argument is used when setting "
-                        "an environment variable.  Argument '" +
-          args[2] + "' and later are unused.";
-        status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, m);
+        status.GetMakefile().IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
+          cmStrCat("Only the first value argument is used when setting "
+                   "an environment variable.  Argument '",
+                   args[2] + "' and later are unused."));
       }
       return true;
     }
@@ -229,9 +230,10 @@ bool cmSetCommand(std::vector<std::string> const& args,
   if (cache) {
     std::string::size_type cacheStart = args.size() - 3 - (force ? 1 : 0);
     if (!cmState::StringToCacheEntryType(args[cacheStart + 1], type)) {
-      std::string m = "implicitly converting '" + args[cacheStart + 1] +
-        "' to 'STRING' type.";
-      status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, m);
+      status.GetMakefile().IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
+                                           cmStrCat("implicitly converting '",
+                                                    args[cacheStart + 1],
+                                                    "' to 'STRING' type."));
       // Setting this may not be required, since it's
       // initialized as a string. Keeping this here to
       // ensure that the type is actually converting to a string.

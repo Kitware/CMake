@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmEnableLanguageCommand.h"
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -20,8 +21,8 @@ bool cmEnableLanguageCommand(std::vector<std::string> const& args,
   if (!mf.IsNormalDefinitionSet("PROJECT_NAME")) {
     switch (mf.GetPolicyStatus(cmPolicies::CMP0165)) {
       case cmPolicies::WARN:
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           "project() should be called prior to this enable_language() call.");
         break;
       case cmPolicies::OLD:

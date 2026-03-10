@@ -5,6 +5,7 @@
 #include <map>
 #include <utility>
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -87,9 +88,8 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   }
 
   if (fname.empty()) {
-    status.GetMakefile().IssueMessage(
-      MessageType::AUTHOR_WARNING,
-      "include() given empty file name (ignored).");
+    status.GetMakefile().IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR, "include() given empty file name (ignored).");
     return true;
   }
 
@@ -106,8 +106,8 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
           status.GetMakefile().GetPolicyStatus(ModulePolicy->second);
         switch (PolicyStatus) {
           case cmPolicies::WARN: {
-            status.GetMakefile().IssueMessage(
-              MessageType::AUTHOR_WARNING,
+            status.GetMakefile().IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
               cmStrCat(cmPolicies::GetPolicyWarning(ModulePolicy->second),
                        '\n'));
             CM_FALLTHROUGH;

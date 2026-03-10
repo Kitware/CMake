@@ -26,6 +26,7 @@
 #include "cmAlgorithms.h"
 #include "cmConfigureLog.h"
 #include "cmDependencyProvider.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmFindPackageStack.h"
 #include "cmList.h"
@@ -981,8 +982,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Ignore EXACT with no version.
   if (this->VersionComplete.empty() && this->VersionExact) {
     this->VersionExact = false;
-    this->Makefile->IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    this->Makefile->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       "Ignoring EXACT since no version is requested.");
   }
 
@@ -1333,7 +1334,7 @@ bool cmFindPackageCommand::FindPackage(
         aw << "\n"
               "(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this "
               "warning.)";
-        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, aw.str());
+        this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, aw.str());
       }
 
       if (this->FindPackageUsingConfigMode()) {
@@ -1565,8 +1566,8 @@ bool cmFindPackageCommand::FindModule(bool& found)
           this->Makefile->GetPolicyStatus(it->second);
         switch (status) {
           case cmPolicies::WARN: {
-            this->Makefile->IssueMessage(
-              MessageType::AUTHOR_WARNING,
+            this->Makefile->IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
               cmStrCat(cmPolicies::GetPolicyWarning(it->second), '\n'));
             CM_FALLTHROUGH;
           }
@@ -1874,7 +1875,7 @@ bool cmFindPackageCommand::HandlePackageMode(
       }
 
       if (!aw.str().empty()) {
-        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, aw.str());
+        this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, aw.str());
       }
     }
     // output result if in config mode but not in quiet mode

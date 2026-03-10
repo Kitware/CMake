@@ -28,6 +28,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmDiagnostics.h"
 #include "cmEnvironment.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
@@ -370,8 +371,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
           cmProcessOutput::FindEncoding(*arguments.Encoding)) {
       encoding = *maybeEncoding;
     } else {
-      status.GetMakefile().IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      status.GetMakefile().IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmStrCat("ENCODING option given unknown value \"", *arguments.Encoding,
                  "\".  Ignoring."));
     }

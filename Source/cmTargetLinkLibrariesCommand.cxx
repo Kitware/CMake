@@ -12,6 +12,7 @@
 #include <cm/optional>
 #include <cm/string_view>
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -320,8 +321,8 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
 static void LinkLibraryTypeSpecifierWarning(cmMakefile& mf, int left,
                                             int right)
 {
-  mf.IssueMessage(
-    MessageType::AUTHOR_WARNING,
+  mf.IssueDiagnostic(
+    cmDiagnostics::CMD_AUTHOR,
     cmStrCat(
       "Link library type specifier \"", LinkLibraryTypeNames[left],
       "\" is followed by specifier \"", LinkLibraryTypeNames[right],
@@ -443,8 +444,8 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
   }
 
   if (this->WarnRemoteInterface) {
-    this->Makefile.IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    this->Makefile.IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       cmStrCat(
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0079), "\nTarget\n  ",
         this->Target->GetName(),

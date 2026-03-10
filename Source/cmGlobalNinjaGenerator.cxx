@@ -26,6 +26,7 @@
 
 #include "cmCustomCommand.h"
 #include "cmCxxModuleMapper.h"
+#include "cmDiagnostics.h"
 #include "cmDyndepCollation.h"
 #include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
@@ -1927,8 +1928,8 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
         << "\n";
     msg << "Any pre-check scripts, such as those generated for file(GLOB "
            "CONFIGURE_DEPENDS), will not be run by Ninja.";
-    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
-                                           msg.str());
+    this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
+                                              msg.str());
   }
 
   std::sort(reBuild.ImplicitDeps.begin(), reBuild.ImplicitDeps.end());

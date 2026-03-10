@@ -8,9 +8,9 @@
 #include <string> // IWYU pragma: keep
 #include <utility>
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmake.h"
 
 bool cmFunctionBlocker::IsFunctionBlocked(cmListFileFunction const& lff,
@@ -38,7 +38,7 @@ bool cmFunctionBlocker::IsFunctionBlocked(cmListFileFunction const& lff,
           << "  " << closingContext << "\n"
           << "with mis-matching arguments.";  // noqa: spellcheck disable-line
         /* clang-format on */
-        mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+        mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e.str());
       } else if (!this->EndCommandSupportsArguments() &&
                  !lff.Arguments().empty()) {
         std::ostringstream e;
@@ -47,7 +47,7 @@ bool cmFunctionBlocker::IsFunctionBlocked(cmListFileFunction const& lff,
           "  " << closingContext << "\n"
           "has unexpected arguments.";
         /* clang-format on */
-        mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+        mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e.str());
       }
 
       bool replayResult = this->Replay(std::move(this->Functions), status);

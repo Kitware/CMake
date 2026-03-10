@@ -14,12 +14,12 @@
 #include <cmext/algorithm>
 
 #include "cmArgumentParserTypes.h"
+#include "cmDiagnostics.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmList.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmSbomArguments.h"
 #include "cmSbomObject.h"
 #include "cmSpdx.h"
@@ -334,8 +334,8 @@ bool cmExportSbomGenerator::NoteLinkedTarget(
     }(linkedTarget->Target);
 
     if (!pkgInfo) {
-      target->Makefile->IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      target->Makefile->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmStrCat("Target \"", target->GetName(),
                  "\" references imported target \"", linkedName,
                  "\" which does not come from any known package."));
@@ -362,8 +362,8 @@ bool cmExportSbomGenerator::NoteLinkedTarget(
   if (exportInfo.Namespaces.size() == 1 && exportInfo.Sets.size() == 1) {
     auto const& linkNamespace = *exportInfo.Namespaces.begin();
     if (!cmHasSuffix(linkNamespace, "::")) {
-      target->Makefile->IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      target->Makefile->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmStrCat("Target \"", target->GetName(), "\" references target \"",
                  linkedName,
                  "\", which does not use the standard namespace separator. "

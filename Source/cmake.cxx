@@ -48,7 +48,6 @@
 #    include "cmDebuggerPosixPipeConnection.h"
 #  endif //_WIN32
 #endif
-#include "cmDiagnostics.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmDuration.h"
@@ -4511,10 +4510,7 @@ void cmake::RunCheckForUnusedVariables()
       }
     }
     if (haveUnused) {
-      this->IssueMessage(action > cmDiagnostics::Warn
-                           ? MessageType::FATAL_ERROR
-                           : MessageType::WARNING,
-                         msg.str());
+      this->IssueDiagnostic(cmDiagnostics::CMD_UNUSED_CLI, msg.str());
     }
   }
 #endif

@@ -18,6 +18,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmConfigureLog.h"
+#include "cmDiagnostics.h"
 #include "cmExperimental.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
@@ -247,7 +248,7 @@ Arguments cmCoreTryCompile::ParseArgs(
     for (auto const& i : unparsedArguments) {
       m = cmStrCat(m, "\n  \"", i, '"');
     }
-    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
+    this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, m);
   }
   return arguments;
 }
@@ -757,7 +758,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
             "(e.g. CMAKE_C_FLAGS_DEBUG) in the test project."
             ;
           /* clang-format on */
-          this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+          this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1047,7 +1048,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       for (std::string const& vi : warnCMP0067Variables) {
         w << "  " << vi << "\n";
       }
-      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+      this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
     }
 
     for (auto const& p : arguments.LangProps) {

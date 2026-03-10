@@ -34,6 +34,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
+#include "cmDiagnostics.h"
 #include "cmDuration.h"
 #include "cmExperimental.h"
 #include "cmExportBuildFileGenerator.h"
@@ -1025,7 +1026,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
             R"( compiler id "XLClang" to "XL" for compatibility.)"
             ;
           /* clang-format on */
-          mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+          mf->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1050,7 +1051,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
             R"( compiler id "LCC" to "GNU" for compatibility.)"
             ;
           /* clang-format on */
-          mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+          mf->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1337,8 +1338,8 @@ void cmGlobalGenerator::Configure()
     this->CMakeInstance->GetHomeOutputDirectory());
 
   if (this->ExtraGenerator && !this->CMakeInstance->GetIsInTryCompile()) {
-    this->CMakeInstance->IssueMessage(
-      MessageType::DEPRECATION_WARNING,
+    this->CMakeInstance->IssueDiagnostic(
+      cmDiagnostics::CMD_DEPRECATED,
       cmStrCat("Support for \"Extra Generators\" like\n  ",
                this->ExtraGenerator->GetName(),
                "\nis deprecated and will be removed from a future version "
@@ -1783,8 +1784,8 @@ void cmGlobalGenerator::Generate()
     for (std::string const& t : this->CMP0068WarnTargets) {
       w << ' ' << t << '\n';
     }
-    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
-                                           w.str());
+    this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
+                                              w.str());
   }
 }
 
@@ -3098,29 +3099,22 @@ void cmGlobalGenerator::ReserveGlobalTargetCodegen()
     return;
   }
 
-  MessageType messageType = MessageType::AUTHOR_WARNING;
-  std::ostringstream e;
-  bool issueMessage = false;
   switch (policyStatus) {
     case cmPolicies::WARN:
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0171) << '\n';
-      issueMessage = true;
-      CM_FALLTHROUGH;
+      this->GetCMakeInstance()->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0171), '\n',
+                 "The target name \"codegen\" is reserved."),
+        tgt->GetBacktrace());
+      break;
     case cmPolicies::OLD:
       break;
     case cmPolicies::NEW:
-      issueMessage = true;
-      messageType = MessageType::FATAL_ERROR;
-      break;
-  }
-  if (issueMessage) {
-    e << "The target name \"codegen\" is reserved.";
-    this->GetCMakeInstance()->IssueMessage(messageType, e.str(),
-                                           tgt->GetBacktrace());
-    if (messageType == MessageType::FATAL_ERROR) {
+      this->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR, "The target name \"codegen\" is reserved.",
+        tgt->GetBacktrace());
       cmSystemTools::SetFatalErrorOccurred();
-      return;
-    }
+      break;
   }
 }
 

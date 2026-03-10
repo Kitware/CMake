@@ -5,9 +5,9 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -19,8 +19,8 @@ bool cmReturnCommand(std::vector<std::string> const& args,
   if (!args.empty()) {
     switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0140)) {
       case cmPolicies::WARN:
-        status.GetMakefile().IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        status.GetMakefile().IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0140),
             "\n"

@@ -6,8 +6,8 @@
 #include <utility>
 
 #include "cmCMakePath.h"
+#include "cmDiagnostics.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmStringAlgorithms.h"
@@ -34,8 +34,8 @@ void cmBinUtilsLinker::NormalizePath(std::string& path) const
   cmPolicies::PolicyStatus policy =
     this->Archive->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0207);
   if (policy == cmPolicies::WARN) {
-    this->Archive->GetMakefile()->IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    this->Archive->GetMakefile()->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0207),
                "\n"
                "Path\n  \"",

@@ -16,6 +16,7 @@
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmDiagnostics.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiGpj.h"
@@ -679,8 +680,8 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
       std::ostringstream msg;
       msg << "Any pre-check scripts, such as those generated for file(GLOB "
              "CONFIGURE_DEPENDS), will not be run by gbuild.";
-      this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
-                                             msg.str());
+      this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
+                                                msg.str());
     }
 
     // Sort the list of input files and remove duplicates.

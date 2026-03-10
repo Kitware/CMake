@@ -10,6 +10,7 @@
 #include <cmext/string_view>
 
 #include "cmConditionEvaluator.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmFunctionBlocker.h"
@@ -78,7 +79,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
                            this->GetStartingContext().FilePath, func.Line() });
 
       if (this->ElseSeen) {
-        mf.GetCMakeInstance()->IssueMessage(
+        mf.IssueMessage(
           MessageType::FATAL_ERROR,
           "A duplicate ELSE command was found inside an IF block.", elseBT);
         cmSystemTools::SetFatalErrorOccurred();
@@ -100,17 +101,17 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         cmListFileContext{ func.OriginalName(),
                            this->GetStartingContext().FilePath, func.Line() });
       if (this->ElseSeen) {
-        mf.GetCMakeInstance()->IssueMessage(
-          MessageType::FATAL_ERROR,
-          "An ELSEIF command was found after an ELSE command.", elseifBT);
+        mf.IssueMessage(MessageType::FATAL_ERROR,
+                        "An ELSEIF command was found after an ELSE command.",
+                        elseifBT);
         cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
 
       if (func.Arguments().empty()) {
-        mf.GetCMakeInstance()->IssueMessage(
-          MessageType::AUTHOR_WARNING,
-          "ELSEIF called with no arguments, it will be skipped. ", elseifBT);
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
+          "ELSEIF called with no arguments, it will be skipped.", elseifBT);
       }
 
       if (this->HasRun) {
@@ -137,7 +138,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         if (!errorString.empty()) {
           std::string err =
             cmStrCat(cmIfCommandError(expandedArguments), errorString);
-          mf.GetCMakeInstance()->IssueMessage(messType, err, elseifBT);
+          mf.IssueMessage(messType, err, elseifBT);
           if (messType == MessageType::FATAL_ERROR) {
             cmSystemTools::SetFatalErrorOccurred();
             return true;

@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAddLibraryCommand.h"
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -235,8 +236,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       !mf.GetState()->GetGlobalPropertyAsBool("TARGET_SUPPORTS_SHARED_LIBS")) {
     switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0164)) {
       case cmPolicies::WARN:
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(
             "ADD_LIBRARY called with ",
             (type == cmStateEnums::SHARED_LIBRARY ? "SHARED" : "MODULE"),
