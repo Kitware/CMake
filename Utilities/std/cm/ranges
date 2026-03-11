@@ -1,0 +1,126 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
+#pragma once
+
+#if __cplusplus >= 202002L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+#  define CMake_HAVE_CXX_RANGES
+#endif
+
+#if defined(CMake_HAVE_CXX_RANGES)
+#  include <ranges>
+#else
+#  include <algorithm>
+#  include <iterator>
+#  include <tuple>
+#  include <vector>
+
+#  include <cm/type_traits>
+#  include <cmext/type_traits>
+#endif
+
+namespace cm {
+namespace ranges {
+namespace views {
+#if defined(CMake_HAVE_CXX_RANGES)
+
+using std::ranges::views::keys;
+using std::ranges::views::values;
+
+#else
+
+// associative containers
+template <
+  typename Range,
+  cm::enable_if_t<cm::is_associative_container<Range>::value ||
+                    cm::is_unordered_associative_container<Range>::value,
+                  int> = 0>
+std::vector<typename Range::key_type> keys(Range const& range)
+{
+  using key_type = typename Range::key_type;
+
+  std::vector<key_type> keys;
+  keys.reserve(range.size());
+
+  std::transform(range.begin(), range.end(),
+                 std::back_inserter<std::vector<key_type>>(keys),
+                 [](typename Range::value_type const& entry) -> key_type {
+                   return entry.first;
+                 });
+
+  return keys;
+}
+
+template <
+  typename Range,
+  cm::enable_if_t<cm::is_associative_container<Range>::value ||
+                    cm::is_unordered_associative_container<Range>::value,
+                  int> = 0>
+std::vector<typename Range::mapped_type> values(Range const& range)
+{
+  using value_type = typename Range::mapped_type;
+
+  std::vector<value_type> values;
+  values.reserve(range.size());
+
+  std::transform(range.begin(), range.end(),
+                 std::back_inserter<std::vector<value_type>>(values),
+                 [](typename Range::value_type const& entry) -> value_type {
+                   return entry.second;
+                 });
+
+  return values;
+}
+
+// sequence containers with std::pair<> or std::tuple<> as elements
+template <typename Range,
+          cm::enable_if_t<cm::is_sequence_container<Range>::value &&
+                            cm::is_tuple<1, typename Range::value_type>::value,
+                          int> = 0>
+std::vector<typename std::tuple_element<0, typename Range::value_type>::type>
+keys(Range const& range)
+{
+  using key_type =
+    typename std::tuple_element<0, typename Range::value_type>::type;
+
+  std::vector<key_type> keys;
+  keys.reserve(range.size());
+
+  std::transform(range.begin(), range.end(),
+                 std::back_inserter<std::vector<key_type>>(keys),
+                 [](typename Range::value_type const& entry) -> key_type {
+                   return std::get<0>(entry);
+                 });
+
+  return keys;
+}
+
+template <typename Range,
+          cm::enable_if_t<cm::is_sequence_container<Range>::value &&
+                            cm::is_tuple<2, typename Range::value_type>::value,
+                          int> = 0>
+std::vector<typename std::tuple_element<1, typename Range::value_type>::type>
+keys(Range const& range)
+{
+  using value_type =
+    typename std::tuple_element<1, typename Range::value_type>::type;
+
+  std::vector<value_type> values;
+  values.reserve(range.size());
+
+  std::transform(range.begin(), range.end(),
+                 std::back_inserter<std::vector<value_type>>(values),
+                 [](typename Range::value_type const& entry) -> value_type {
+                   return std::get<1>(entry);
+                 });
+
+  return values;
+}
+
+#endif
+}
+}
+namespace views = ranges::views;
+}
