@@ -43,7 +43,13 @@ trap 'rm -f "$out_tmp"' EXIT INT TERM
 # need to be handled differently.
 #
 # [0]: https://www.ibm.com/docs/en/openxl-c-and-cpp-aix/17.1.0?topic=compatibility-link-time-optimization-lto
-NM="$(dirname "$compiler")/../libexec/ibm-llvm-nm"
+if "$compiler" --version 2>/dev/null | grep -qi "IBM Open XL"; then
+    NM="$(dirname "$compiler")/../libexec/ibm-llvm-nm"
+elif "$compiler" --version 2>/dev/null | grep -qi "[cf]lang version"; then
+    NM="$(dirname "$compiler")/../bin/llvm-nm"
+else
+    NM="nm"
+fi
 
 function IsBitcode {
     # N4 = first 4 bytes, -tx = output in hexadecimal, -An = don't display offset
