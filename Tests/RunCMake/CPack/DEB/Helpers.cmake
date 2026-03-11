@@ -145,13 +145,14 @@ function(verifyDebControl FILE PREFIX VERIFY_FILES)
           " Content: '${content_}'")
     endif()
 
-    execute_process(COMMAND ls -l "${CMAKE_CURRENT_BINARY_DIR}/control_${PREFIX}/${FILE_}"
-          OUTPUT_VARIABLE package_permissions_
-          ERROR_VARIABLE package_permissions_error_
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
-
+    execute_process(
+      COMMAND stat --format=%A "${CMAKE_CURRENT_BINARY_DIR}/control_${PREFIX}/${FILE_}"
+      OUTPUT_VARIABLE package_permissions_
+      ERROR_VARIABLE package_permissions_error_
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
     if(NOT package_permissions_error_)
-      if(NOT package_permissions_ MATCHES "${${PREFIX}_${FILE_}_permissions_regex}")
+      if(NOT package_permissions_ STREQUAL ${PREFIX}_${FILE_}_permissions)
         message(FATAL_ERROR "Unexpected file permissions for ${PREFIX}_${FILE_}: '${package_permissions_}'!")
       endif()
     else()
