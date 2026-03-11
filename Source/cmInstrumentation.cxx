@@ -363,11 +363,11 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   if (d.Load(this->dataDir)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
-      std::string fname = d.GetFile(i);
+      std::string const& fname = d.GetFileName(i);
       if (fname.rfind('.', 0) == 0 || d.FileIsDirectory(i)) {
         continue;
       }
-      files.push_back(snippet(std::move(fname), std::move(fpath)));
+      files.push_back(snippet(fname, std::move(fpath)));
     }
   }
 

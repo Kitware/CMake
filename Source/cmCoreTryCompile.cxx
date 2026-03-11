@@ -4,7 +4,6 @@
 
 #include <array>
 #include <cstdio>
-#include <cstring>
 #include <functional>
 #include <set>
 #include <sstream>
@@ -1368,8 +1367,8 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
   dir.Load(binDir);
   std::set<std::string> deletedFiles;
   for (unsigned long i = 0; i < dir.GetNumberOfFiles(); ++i) {
-    char const* fileName = dir.GetFile(i);
-    if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0 &&
+    std::string const& fileName = dir.GetFileName(i);
+    if (fileName != "." && fileName != ".." &&
         // Do not delete NFS temporary files.
         !cmHasPrefix(fileName, ".nfs")) {
       if (deletedFiles.insert(fileName).second) {

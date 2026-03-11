@@ -821,7 +821,7 @@ int cmCTest::ProcessSteps()
     d.Load(notes_dir);
     unsigned long kk;
     for (kk = 0; kk < d.GetNumberOfFiles(); kk++) {
-      char const* file = d.GetFile(kk);
+      std::string const& file = d.GetFileName(kk);
       std::string fullname = cmStrCat(notes_dir, '/', file);
       if (cmSystemTools::FileExists(fullname, true)) {
         if (!this->Impl->NotesFiles.empty()) {
@@ -3654,7 +3654,7 @@ void cmCTest::ConvertInstrumentationSnippetsToXML(cmXMLWriter& xml,
 
   for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
     std::string fpath = d.GetFilePath(i);
-    std::string fname = d.GetFile(i);
+    std::string const& fname = d.GetFileName(i);
     if (fname.rfind('.', 0) == 0) {
       continue;
     }

@@ -46,7 +46,7 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
   if (dir.Load(tdir)) {
     size_t numfiles = dir.GetNumberOfFiles();
     for (size_t i = 0; i < numfiles; ++i) {
-      std::string file = dir.GetFile(static_cast<unsigned long>(i));
+      std::string const& file = dir.GetFileName(i);
       // Split the filename into base and extension
       std::string::size_type dotpos = file.rfind('.');
       if (dotpos != std::string::npos) {
