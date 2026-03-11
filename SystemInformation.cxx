@@ -602,7 +602,7 @@ std::string SystemInformation::GetCPUDescription()
   oss << this->GetNumberOfPhysicalCPU() << " core ";
   if (this->GetModelName().empty()) {
     oss << this->GetProcessorClockFrequency() << " MHz "
-        << this->GetVendorString() << " " << this->GetExtendedProcessorName();
+        << this->GetVendorString() << ' ' << this->GetExtendedProcessorName();
   } else {
     oss << this->GetModelName();
   }
@@ -679,7 +679,7 @@ int SystemInformation::GetOSIsApple()
 std::string SystemInformation::GetOSDescription()
 {
   std::ostringstream oss;
-  oss << this->GetOSName() << " " << this->GetOSRelease() << " "
+  oss << this->GetOSName() << ' ' << this->GetOSRelease() << ' '
       << this->GetOSVersion();
 
   return oss.str();
@@ -961,7 +961,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
   oss << std::endl
       << "========================================================="
       << std::endl
-      << "Process id " << getpid() << " ";
+      << "Process id " << getpid() << ' ';
   switch (sigNo) {
     case SIGINT:
       oss << "Caught SIGINT";
@@ -977,7 +977,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
 
     case SIGFPE:
       oss << "Caught SIGFPE at " << (sigInfo->si_addr ? "" : "0x")
-          << sigInfo->si_addr << " ";
+          << sigInfo->si_addr << ' ';
       switch (sigInfo->si_code) {
 #    if defined(FPE_INTDIV)
         case FPE_INTDIV:
@@ -1025,7 +1025,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
 
     case SIGSEGV:
       oss << "Caught SIGSEGV at " << (sigInfo->si_addr ? "" : "0x")
-          << sigInfo->si_addr << " ";
+          << sigInfo->si_addr << ' ';
       switch (sigInfo->si_code) {
         case SEGV_MAPERR:
           oss << "address not mapped to object";
@@ -1043,7 +1043,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
 
     case SIGBUS:
       oss << "Caught SIGBUS at " << (sigInfo->si_addr ? "" : "0x")
-          << sigInfo->si_addr << " ";
+          << sigInfo->si_addr << ' ';
       switch (sigInfo->si_code) {
         case BUS_ADRALN:
           oss << "invalid address alignment";
@@ -1083,7 +1083,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
 
     case SIGILL:
       oss << "Caught SIGILL at " << (sigInfo->si_addr ? "" : "0x")
-          << sigInfo->si_addr << " ";
+          << sigInfo->si_addr << ' ';
       switch (sigInfo->si_code) {
         case ILL_ILLOPC:
           oss << "illegal opcode";
@@ -1248,8 +1248,8 @@ std::ostream& operator<<(std::ostream& os, SymbolProperties const& sp)
 {
 #  if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
   os << std::hex << sp.GetAddress() << " : " << sp.GetFunction() << " [("
-     << sp.GetBinary() << ") " << sp.GetSourceFile() << ":" << std::dec
-     << sp.GetLineNumber() << "]";
+     << sp.GetBinary() << ") " << sp.GetSourceFile() << ':' << std::dec
+     << sp.GetLineNumber() << ']';
 #  elif defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
   void* addr = sp.GetAddress();
   char** syminfo = backtrace_symbols(&addr, 1);
@@ -3601,7 +3601,7 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
   std::string cpuflags = this->ExtractValueFromCpuInfoFile(buffer, "flags");
   if (!cpurev.empty()) {
     // now we can match every flags as space + flag + space
-    cpuflags = " " + cpuflags + " ";
+    cpuflags = ' ' + cpuflags + ' ';
     if ((cpuflags.find(" fpu ") != std::string::npos)) {
       this->Features.HasFPU = true;
     }
@@ -5068,7 +5068,7 @@ bool SystemInformationImplementation::QueryQNXMemory()
   size_t pos = buffer.find("System RAM:");
   if (pos == std::string::npos)
     return false;
-  pos = buffer.find(":", pos);
+  pos = buffer.find(':', pos);
   size_t pos2 = buffer.find("M (", pos);
   if (pos2 == std::string::npos)
     return false;
@@ -5141,7 +5141,7 @@ bool SystemInformationImplementation::QueryQNXProcessor()
 
   pos2 = buffer.find(" Stepping", pos);
   if (pos2 != std::string::npos) {
-    pos2 = buffer.find(" ", pos2 + 1);
+    pos2 = buffer.find(' ', pos2 + 1);
     if (pos2 != std::string::npos && pos2 < pos3) {
       this->ChipID.Revision =
         atoi(buffer.substr(pos2 + 1, pos3 - pos2).c_str());
@@ -5354,8 +5354,8 @@ bool SystemInformationImplementation::QueryOSInformation()
 #  endif
 
   // Produce the release like it is displayed in `cmd`
-  this->OSRelease = std::to_string(osvi.dwMajorVersion) + "." +
-    std::to_string(osvi.dwMinorVersion) + "." +
+  this->OSRelease = std::to_string(osvi.dwMajorVersion) + '.' +
+    std::to_string(osvi.dwMinorVersion) + '.' +
     std::to_string(osvi.dwBuildNumber & 0xFFFF);
 
   struct VersionNames

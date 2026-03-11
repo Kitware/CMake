@@ -563,7 +563,7 @@ std::string SystemToolsStatic::GetCasePathName(std::string const& pathIn)
   // actual case of servers and shares.
   if (path_components.size() > 2 && path_components[0] == "//") {
     casePath += path_components[idx++];
-    casePath += "/";
+    casePath += '/';
     casePath += path_components[idx++];
     sep = "/";
   }
@@ -2053,7 +2053,7 @@ std::string SystemTools::EscapeChars(char const* str,
 static void ConvertVMSToUnix(std::string& path)
 {
   std::string::size_type rootEnd = path.find(":[");
-  std::string::size_type pathEnd = path.find("]");
+  std::string::size_type pathEnd = path.find(']');
   if (rootEnd != std::string::npos) {
     std::string root = path.substr(0, rootEnd);
     std::string pathPart = path.substr(rootEnd + 2, pathEnd - rootEnd - 2);
@@ -2065,7 +2065,7 @@ static void ConvertVMSToUnix(std::string& path)
       }
       pos0++;
     }
-    path = "/" + root + "/" + pathPart;
+    path = '/' + root + '/' + pathPart;
   }
 }
 #endif
@@ -2660,15 +2660,15 @@ Status SystemTools::CopyADirectory(std::string const& source,
   }
 
   for (size_t fileNum = 0; fileNum < dir.GetNumberOfFiles(); ++fileNum) {
-    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), ".") != 0 &&
-        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), "..") != 0) {
+    std::string const& filename = dir.GetFileName(fileNum);
+    if (filename != "." && filename != "..") {
       std::string fullPath = source;
-      fullPath += "/";
-      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+      fullPath += '/';
+      fullPath += filename;
       if (SystemTools::FileIsDirectory(fullPath)) {
         std::string fullDestPath = destination;
-        fullDestPath += "/";
-        fullDestPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+        fullDestPath += '/';
+        fullDestPath += filename;
         status = SystemTools::CopyADirectory(fullPath, fullDestPath, when);
         if (!status.IsSuccess()) {
           return status;
@@ -2841,11 +2841,11 @@ Status SystemTools::RemoveADirectory(std::string const& source)
 
   size_t fileNum;
   for (fileNum = 0; fileNum < dir.GetNumberOfFiles(); ++fileNum) {
-    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), ".") != 0 &&
-        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), "..") != 0) {
+    std::string const& filename = dir.GetFileName(fileNum);
+    if (filename != "." && filename != "..") {
       std::string fullPath = source;
-      fullPath += "/";
-      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+      fullPath += '/';
+      fullPath += filename;
       if (SystemTools::FileIsDirectory(fullPath) &&
           !SystemTools::FileIsSymlink(fullPath)) {
         status = SystemTools::RemoveADirectory(fullPath);
@@ -3035,9 +3035,13 @@ static char const* RemoveTrailingSlashes(
   size_t length = inName.size();
   char const* name = inName.c_str();
 
+  if (length == 0) {
+    return name;
+  }
+
   size_t last = length - 1;
   if (last > 0 && (name[last] == '/' || name[last] == '\\') &&
-      strcmp(name, "/") != 0 && name[last - 1] != ':') {
+      name[last - 1] != ':') {
     if (last < sizeof(local_buffer)) {
       memcpy(local_buffer, name, last);
       local_buffer[last] = '\0';
@@ -3076,6 +3080,10 @@ bool SystemTools::FileIsDirectory(std::string const& inName)
 
 bool SystemTools::FileIsExecutable(std::string const& inName)
 {
+  if (inName.empty()) {
+    return false;
+  }
+
 #ifdef _WIN32
   char local_buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
   std::string string_buffer;
@@ -3970,7 +3978,7 @@ bool SystemTools::LocateFileInDir(char const* filename, char const* dir,
 
     std::string temp = dir;
     if (need_slash) {
-      temp += "/";
+      temp += '/';
     }
     temp += filename_base;
 
@@ -4000,11 +4008,11 @@ bool SystemTools::LocateFileInDir(char const* filename, char const* dir,
           break;
         }
 
-        filename_dir_bases = filename_dir_base + "/" + filename_dir_bases;
+        filename_dir_bases = filename_dir_base + '/' + filename_dir_bases;
 
         temp = dir;
         if (need_slash) {
-          temp += "/";
+          temp += '/';
         }
         temp += filename_dir_bases;
 
@@ -4128,7 +4136,7 @@ std::string SystemTools::MakeCidentifier(std::string const& s)
 {
   std::string str(s);
   if (str.find_first_of("0123456789") == 0) {
-    str = "_" + str;
+    str = '_' + str;
   }
 
   std::string permited_chars("_"
@@ -4523,10 +4531,10 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
           res += " Advanced Server";
         }
 
-        res += " ";
+        res += ' ';
         snprintf(buffer, sizeof(buffer), "%ld", osvi.dwMajorVersion);
         res += buffer;
-        res += ".";
+        res += '.';
         snprintf(buffer, sizeof(buffer), "%ld", osvi.dwMinorVersion);
         res += buffer;
       }
@@ -4549,26 +4557,26 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
           res += " Service Pack 6a (Build ";
           snprintf(buffer, sizeof(buffer), "%ld", osvi.dwBuildNumber & 0xFFFF);
           res += buffer;
-          res += ")";
+          res += ')';
         } else // Windows NT 4.0 prior to SP6a
         {
-          res += " ";
+          res += ' ';
           res += osvi.szCSDVersion;
           res += " (Build ";
           snprintf(buffer, sizeof(buffer), "%ld", osvi.dwBuildNumber & 0xFFFF);
           res += buffer;
-          res += ")";
+          res += ')';
         }
 
         RegCloseKey(hKey);
       } else // Windows NT 3.51 and earlier or Windows 2000 and later
       {
-        res += " ";
+        res += ' ';
         res += osvi.szCSDVersion;
         res += " (Build ";
         snprintf(buffer, sizeof(buffer), "%ld", osvi.dwBuildNumber & 0xFFFF);
         res += buffer;
-        res += ")";
+        res += ')';
       }
 
       break;
