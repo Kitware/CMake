@@ -242,7 +242,7 @@ int CommandLineArguments::Parse()
           break;
         default:
           std::cerr << "Got unknown argument type: \"" << cs->ArgumentType
-                    << "\"" << std::endl;
+                    << '"' << std::endl;
           this->Internals->LastArgument--;
           return 0;
       }
@@ -259,7 +259,7 @@ int CommandLineArguments::Parse()
         CommandLineArguments_DEBUG("Store unused argument " << arg);
         this->Internals->UnusedArguments.push_back(arg);
       } else {
-        std::cerr << "Got unknown argument: \"" << arg << "\"" << std::endl;
+        std::cerr << "Got unknown argument: \"" << arg << '"' << std::endl;
         this->Internals->LastArgument--;
         return 0;
       }
@@ -566,7 +566,7 @@ void CommandLineArguments::GenerateHelp()
       }
       if (cnt > 0) {
         for (cc = 0; cc < maxlen; cc++) {
-          str << " ";
+          str << ' ';
         }
       }
       CommandLineArguments::Internal::String::size_type skip = len;
@@ -751,8 +751,8 @@ bool CommandLineArguments::PopulateVariable(
           static_cast<std::vector<std::string>*>(cs->Variable), var);
         break;
       default:
-        std::cerr << "Got unknown variable type: \"" << cs->VariableType
-                  << "\"" << std::endl;
+        std::cerr << "Got unknown variable type: \"" << cs->VariableType << '"'
+                  << std::endl;
         this->Internals->LastArgument--;
         return false;
     }

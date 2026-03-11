@@ -125,11 +125,11 @@ std::string Glob::PatternToRegex(std::string const& pattern,
         std::string::const_iterator k = bracket_first;
 
         // Open the regex block.
-        regex += "[";
+        regex += '[';
 
         // A regex range complement uses '^' instead of '!'.
         if (k != bracket_last && *k == '!') {
-          regex += "^";
+          regex += '^';
           ++k;
         }
 
@@ -137,7 +137,7 @@ std::string Glob::PatternToRegex(std::string const& pattern,
         for (; k != bracket_last; ++k) {
           // Backslashes must be escaped.
           if (*k == '\\') {
-            regex += "\\";
+            regex += '\\';
           }
 
           // Store this character.
@@ -145,7 +145,7 @@ std::string Glob::PatternToRegex(std::string const& pattern,
         }
 
         // Close the regex block.
-        regex += "]";
+        regex += ']';
 
         // Jump to the end of the bracket string.
         i = bracket_last;
@@ -156,7 +156,7 @@ std::string Glob::PatternToRegex(std::string const& pattern,
       if (!(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') ||
             ('0' <= ch && ch <= '9'))) {
         // Escape the non-alphanumeric character.
-        regex += "\\";
+        regex += '\\';
       }
 #if defined(KWSYS_GLOB_CASE_INDEPENDENT)
       else {
@@ -174,7 +174,7 @@ std::string Glob::PatternToRegex(std::string const& pattern,
   }
 
   if (require_whole_string) {
-    regex += "$";
+    regex += '$';
   }
   return regex;
 }
@@ -189,7 +189,7 @@ bool Glob::RecurseDirectory(std::string::size_type start,
       if (!errorMessage.empty()) {
         messages->push_back(Message(Glob::warning,
                                     "Error listing directory '" + dir +
-                                      "'! Reason: '" + errorMessage + "'"));
+                                      "'! Reason: '" + errorMessage + '\''));
       }
     }
     return true;
@@ -198,7 +198,7 @@ bool Glob::RecurseDirectory(std::string::size_type start,
   std::string realname;
   std::string fname;
   for (cc = 0; cc < d.GetNumberOfFiles(); cc++) {
-    fname = d.GetFile(cc);
+    fname = d.GetFileName(cc);
     if (fname == "." || fname == "..") {
       continue;
     }
@@ -206,7 +206,7 @@ bool Glob::RecurseDirectory(std::string::size_type start,
     if (start == 0) {
       realname = dir + fname;
     } else {
-      realname = dir + "/" + fname;
+      realname = dir + '/' + fname;
     }
 
 #if defined(KWSYS_GLOB_CASE_INDEPENDENT)
@@ -229,7 +229,7 @@ bool Glob::RecurseDirectory(std::string::size_type start,
             messages->push_back(
               Message(Glob::error,
                       "Canonical path generation from path '" + dir +
-                        "' failed! Reason: '" + realPathErrorMessage + "'"));
+                        "' failed! Reason: '" + realPathErrorMessage + '\''));
           }
           return false;
         }
@@ -257,9 +257,9 @@ bool Glob::RecurseDirectory(std::string::size_type start,
                  std::find(this->VisitedSymlinks.begin(),
                            this->VisitedSymlinks.end(), canonicalPath);
                pathIt != this->VisitedSymlinks.end(); ++pathIt) {
-            message += *pathIt + "\n";
+            message += *pathIt + '\n';
           }
-          message += canonicalPath + "/" + fname;
+          message += canonicalPath + '/' + fname;
           messages->push_back(Message(Glob::cyclicRecursion, message));
         }
       } else {
@@ -305,7 +305,7 @@ void Glob::ProcessDirectory(std::string::size_type start,
   std::string realname;
   std::string fname;
   for (cc = 0; cc < d.GetNumberOfFiles(); cc++) {
-    fname = d.GetFile(cc);
+    fname = d.GetFileName(cc);
     if (fname == "." || fname == "..") {
       continue;
     }
@@ -313,7 +313,7 @@ void Glob::ProcessDirectory(std::string::size_type start,
     if (start == 0) {
       realname = dir + fname;
     } else {
-      realname = dir + "/" + fname;
+      realname = dir + '/' + fname;
     }
 
 #if defined(KWSYS_GLOB_CASE_INDEPENDENT)
@@ -353,7 +353,8 @@ bool Glob::FindFiles(std::string const& inexpr, GlobMessages* messages)
 
   if (!kwsys::SystemTools::FileIsFullPath(expr)) {
     expr = kwsys::SystemTools::GetCurrentWorkingDirectory();
-    expr += "/" + inexpr;
+    expr += '/';
+    expr += inexpr;
   }
   std::string fexpr = expr;
 
@@ -416,7 +417,7 @@ bool Glob::FindFiles(std::string const& inexpr, GlobMessages* messages)
 
   // Handle network paths
   if (skip > 0) {
-    this->ProcessDirectory(0, fexpr.substr(0, skip) + "/", messages);
+    this->ProcessDirectory(0, fexpr.substr(0, skip) + '/', messages);
   } else {
     this->ProcessDirectory(0, "/", messages);
   }

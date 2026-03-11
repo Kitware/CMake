@@ -46,23 +46,23 @@ inline std::wstring getcmode(std::ios_base::openmode const mode)
   std::wstring cmode;
   bool plus = false;
   if (mode & std::ios_base::app) {
-    cmode += L"a";
+    cmode += L'a';
     plus = mode & std::ios_base::in ? true : false;
   } else if (mode & std::ios_base::trunc ||
              (mode & std::ios_base::out && (mode & std::ios_base::in) == 0)) {
-    cmode += L"w";
+    cmode += L'w';
     plus = mode & std::ios_base::in ? true : false;
   } else {
-    cmode += L"r";
+    cmode += L'r';
     plus = mode & std::ios_base::out ? true : false;
   }
   if (plus) {
-    cmode += L"+";
+    cmode += L'+';
   }
   if (mode & std::ios_base::binary) {
-    cmode += L"b";
+    cmode += L'b';
   } else {
-    cmode += L"t";
+    cmode += L't';
   }
   return cmode;
 };
