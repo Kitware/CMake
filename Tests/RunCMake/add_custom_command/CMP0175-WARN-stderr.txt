@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+CMake Warning \(author\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
   The following keywords are not supported when using
   add_custom_command\(TARGET\): DEPENDS, DEPENDS_EXPLICIT_ONLY, DEPFILE,
   JOB_POOL, MAIN_DEPENDENCY\.
@@ -9,9 +9,9 @@ CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
 Call Stack \(most recent call first\):
   CMP0175-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
-CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+CMake Warning \(author\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
   The following keywords are not supported when using
   add_custom_command\(TARGET\): IMPLICIT_DEPENDS\.
 
@@ -21,9 +21,9 @@ CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
 Call Stack \(most recent call first\):
   CMP0175-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
-CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+CMake Warning \(author\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
   Exactly one of PRE_BUILD, PRE_LINK, or POST_BUILD must be given\.  Assuming
   POST_BUILD to preserve backward compatibility\.
 
@@ -33,9 +33,9 @@ CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
 Call Stack \(most recent call first\):
   CMP0175-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
-CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+CMake Warning \(author\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
   Exactly one of PRE_BUILD, PRE_LINK, or POST_BUILD must be given\.  Assuming
   POST_BUILD to preserve backward compatibility\.
 
@@ -45,9 +45,9 @@ CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
 Call Stack \(most recent call first\):
   CMP0175-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
-CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+CMake Warning \(author\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
   At least one COMMAND must be given\.
 
   Policy CMP0175 is not set: add_custom_command\(\) rejects invalid arguments\.
@@ -56,9 +56,9 @@ CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
 Call Stack \(most recent call first\):
   CMP0175-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
-CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+CMake Warning \(author\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
   The following keywords are not supported when using
   add_custom_command\(OUTPUT\): OUTPUTS, POST_BUILD, PRE_BUILD, PRE_LINK,
   SOURCE\.
@@ -69,4 +69,4 @@ CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
 Call Stack \(most recent call first\):
   CMP0175-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.

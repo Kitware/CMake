@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at CMP0152-Common\.cmake:[0-9]+ \(file\):
+^CMake Warning \(author\) at CMP0152-Common\.cmake:[0-9]+ \(file\):
   Policy CMP0152 is not set: file\(REAL_PATH\) resolves symlinks before
   collapsing \.\./ components\.  Run "cmake --help-policy CMP0152" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -24,4 +24,4 @@
 Call Stack \(most recent call first\):
   CMP0152-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.$
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

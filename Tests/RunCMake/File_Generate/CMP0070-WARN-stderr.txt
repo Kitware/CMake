@@ -1,4 +1,4 @@
-^CMake Deprecation Warning at CMakeLists\.txt:[0-9]+ \(cmake_policy\):
+^CMake Warning \(deprecated\) at CMakeLists\.txt:[0-9]+ \(cmake_policy\):
   Compatibility with CMake < 3\.10 will be removed from a future version of
   CMake\.
 
@@ -6,7 +6,7 @@
   to tell CMake that the project requires at least <min> but has been updated
   to work with policies introduced by <max> or earlier\.
 +
-(CMake Warning \(dev\) in CMakeLists\.txt:
+(CMake Warning \(author\) in CMakeLists\.txt:
   Policy CMP0070 is not set: Define file\(GENERATE\) behavior for relative
   paths\.  Run "cmake --help-policy CMP0070" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -18,9 +18,9 @@
   This is not defined behavior unless CMP0070 is set to NEW\.  For
   compatibility with older versions of CMake, the previous undefined behavior
   will be used\.
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +)+
-CMake Warning \(dev\) in CMakeLists\.txt:
+CMake Warning \(author\) in CMakeLists\.txt:
   Policy CMP0070 is not set: Define file\(GENERATE\) behavior for relative
   paths\.  Run "cmake --help-policy CMP0070" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -32,9 +32,9 @@ CMake Warning \(dev\) in CMakeLists\.txt:
   This is not defined behavior unless CMP0070 is set to NEW\.  For
   compatibility with older versions of CMake, the previous undefined behavior
   will be used\.
-This warning is for project developers\.  Use -Wno-dev to suppress it\.(
+This warning is for project developers\.  Use -Wno-author to suppress it\.(
 +
-CMake Warning \(dev\) in CMakeLists\.txt:
+CMake Warning \(author\) in CMakeLists\.txt:
   Policy CMP0070 is not set: Define file\(GENERATE\) behavior for relative
   paths\.  Run "cmake --help-policy CMP0070" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -46,4 +46,4 @@ CMake Warning \(dev\) in CMakeLists\.txt:
   This is not defined behavior unless CMP0070 is set to NEW\.  For
   compatibility with older versions of CMake, the previous undefined behavior
   will be used\.
-This warning is for project developers\.  Use -Wno-dev to suppress it\.)+$
+This warning is for project developers\.  Use -Wno-author to suppress it\.)+$

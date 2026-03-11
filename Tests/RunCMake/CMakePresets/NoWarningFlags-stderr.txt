@@ -1,13 +1,13 @@
-^CMake Warning \(dev\) at [^
+^CMake Warning \(author\) at [^
 ]*/Tests/RunCMake/CMakePresets/WarningsBase\.cmake:[0-9]+ \(message\):
   Dev warning
 Call Stack \(most recent call first\):
   [^
 ]*/Tests/RunCMake/CMakePresets/NoWarningFlags\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
-CMake Deprecation Warning at [^
+CMake Warning \(deprecated\) at [^
 ]*/Tests/RunCMake/CMakePresets/WarningsBase\.cmake:[0-9]+ \(message\):
   Deprecation warning
 Call Stack \(most recent call first\):

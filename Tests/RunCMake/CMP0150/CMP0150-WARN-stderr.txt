@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at .*/Modules/ExternalProject/shared_internal_commands\.cmake:[0-9]+ \(message\):
+CMake Warning \(author\) at .*/Modules/ExternalProject/shared_internal_commands\.cmake:[0-9]+ \(message\):
   Policy CMP0150 is not set: ExternalProject_Add and FetchContent_Declare
   commands treat relative GIT_REPOSITORY paths as being relative to the
   parent project's remote\.  Run "cmake --help-policy CMP0150" for policy
@@ -11,7 +11,7 @@ CMake Warning \(dev\) at .*/Modules/ExternalProject/shared_internal_commands\.cm
 Call Stack \(most recent call first\):
   .*/Modules/ExternalProject\.cmake:[0-9]+ \(_ep_resolve_git_remote\)
 .*
-CMake Warning \(dev\) at .*/Modules/ExternalProject/shared_internal_commands\.cmake:[0-9]+ \(message\):
+CMake Warning \(author\) at .*/Modules/ExternalProject/shared_internal_commands\.cmake:[0-9]+ \(message\):
   Policy CMP0150 is not set: ExternalProject_Add and FetchContent_Declare
   commands treat relative GIT_REPOSITORY paths as being relative to the
   parent project's remote\.  Run "cmake --help-policy CMP0150" for policy

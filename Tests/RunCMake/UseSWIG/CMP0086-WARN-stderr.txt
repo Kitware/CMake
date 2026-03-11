@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at .*/Modules/UseSWIG\.cmake:[0-9]+ \(message\):
+CMake Warning \(author\) at .*/Modules/UseSWIG\.cmake:[0-9]+ \(message\):
   Policy CMP0086 is not set: UseSWIG honors SWIG_MODULE_NAME via -module
   flag\.  Run "cmake --help-policy CMP0086" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -8,4 +8,4 @@ Call Stack \(most recent call first\):
   CMP0086-common\.cmake:[0-9]+ \(swig_add_library\)
   CMP0086-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.$
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

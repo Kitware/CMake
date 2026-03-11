@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at CMP0126-WARN\.cmake:[0-9]+ \(set\):
+CMake Warning \(author\) at CMP0126-WARN\.cmake:[0-9]+ \(set\):
   Policy CMP0126 is not set: set\(CACHE\) does not remove a normal variable of
   the same name\.  Run "cmake --help-policy CMP0126" for policy details\.  Use
   the cmake_policy command to set the policy and suppress this warning\.
@@ -7,4 +7,4 @@ CMake Warning \(dev\) at CMP0126-WARN\.cmake:[0-9]+ \(set\):
   will be removed from the current scope\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.

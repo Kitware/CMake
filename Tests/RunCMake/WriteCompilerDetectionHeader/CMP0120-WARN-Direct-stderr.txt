@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at [^
+^CMake Warning \(author\) at [^
 ]*/Modules/WriteCompilerDetectionHeader\.cmake:[0-9]+ \(message\):
   The WriteCompilerDetectionHeader module will be removed by policy CMP0120\.
   Projects should be ported away from the module, perhaps by bundling a copy
@@ -6,4 +6,4 @@
 Call Stack \(most recent call first\):
   CMP0120-WARN-Direct\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.$
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

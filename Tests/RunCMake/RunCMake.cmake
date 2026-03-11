@@ -234,7 +234,7 @@ function(run_cmake test)
     )
   if(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION)
     string(REGEX REPLACE [[
-^CMake Deprecation Warning at [^
+^CMake Warning \(deprecated\) at [^
 ]*CMakeLists.txt:1 \(cmake_minimum_required\):
   Compatibility with CMake < 3\.10 will be removed from a future version of
   CMake.

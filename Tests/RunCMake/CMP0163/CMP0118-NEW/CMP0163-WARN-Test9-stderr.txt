@@ -1,15 +1,15 @@
-^(CMake Warning \(dev\) at subdir-Common-Test9/CMakeLists\.txt:[0-9]+ \(set_property\):
+^(CMake Warning \(author\) at subdir-Common-Test9/CMakeLists\.txt:[0-9]+ \(set_property\):
   Unsetting the 'GENERATED' property is not allowed under CMP0118!
 
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
-(CMake Warning \(dev\) at CMP0163-Common-Test9\.cmake:[0-9]+ \(add_subdirectory\):
+(CMake Warning \(author\) at CMP0163-Common-Test9\.cmake:[0-9]+ \(add_subdirectory\):
   Unsetting the 'GENERATED' property is not allowed under CMP0118!
 
 Call Stack \(most recent call first\):
   CMP0118-NEW/CMP0163-WARN-Test9\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +)+)+
 Generated_source1\.txt: # 1a # GENERATED = `0`
 Generated_source1\.txt: # 1b # GENERATED = `0`
