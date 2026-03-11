@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TOOL_BINMODE_H
-#define HEADER_CURL_TOOL_BINMODE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,17 +21,29 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curlx/snprintf.h"
 
-#if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
-/* Requires io.h and/or fcntl.h when available */
-#ifdef HAVE__SETMODE
-#  define CURLX_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
-#else
-#  define CURLX_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
-#endif
-#else
-#  define CURLX_SET_BINMODE(stream)  (void)stream
-#endif
+#ifdef _WIN32
+#include <stdarg.h>
 
-#endif /* HEADER_CURL_TOOL_BINMODE_H */
+/* Simplified wrapper for the Windows platform to use the correct symbol and
+   ensuring null-termination. Omit returning a length to keep it simple. */
+void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
+{
+  va_list ap;
+  if(!maxlen)
+    return;
+  va_start(ap, fmt);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+  /* !checksrc! disable BANNEDFUNC 1 */
+  (void)vsnprintf(buf, maxlen, fmt, ap);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+  buf[maxlen - 1] = 0;
+  va_end(ap);
+}
+#endif /* _WIN32 */

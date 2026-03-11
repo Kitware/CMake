@@ -21,10 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "dynbuf.h"
-#include "../curl_printf.h"
+#include "curlx/dynbuf.h"
+#include "curl_printf.h"
 
 #define MIN_FIRST_ALLOC 32
 
@@ -102,8 +102,6 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   }
 
   if(a != s->allc) {
-    /* this logic is not using Curl_saferealloc() to make the tool not have to
-       include that as well when it uses this code */
     void *p = curlx_realloc(s->bufr, a);
     if(!p) {
       curlx_dyn_free(s);

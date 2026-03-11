@@ -17,9 +17,7 @@
  *
  * SPDX-License-Identifier: ISC
  */
-#include "../curl_setup.h"
-
-#include "strparse.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_INET_PTON
 
@@ -33,7 +31,8 @@
 #include <arpa/inet.h>
 #endif
 
-#include "inet_pton.h"
+#include "curlx/inet_pton.h"
+#include "curlx/strparse.h"
 
 #define IN6ADDRSZ       16
 #define INADDRSZ         4
@@ -53,41 +52,7 @@
  * sizeof(int) < 4. sizeof(int) > 4 is fine; all the world's not a VAX.
  */
 
-static int inet_pton4(const char *src, unsigned char *dst);
-static int inet_pton6(const char *src, unsigned char *dst);
-
-/* int
- * inet_pton(af, src, dst)
- *      convert from presentation format (which usually means ASCII printable)
- *      to network format (which is usually some kind of binary format).
- * return:
- *      1 if the address was valid for the specified address family
- *      0 if the address was not valid (`dst' is untouched in this case)
- *      -1 if some other error occurred (`dst' is untouched in this case, too)
- * notice:
- *      On Windows we store the error in the thread errno, not
- *      in the Winsock error code. This is to avoid losing the
- *      actual last Winsock error. When this function returns
- *      -1, check errno not SOCKERRNO.
- * author:
- *      Paul Vixie, 1996.
- */
-int curlx_inet_pton(int af, const char *src, void *dst)
-{
-  switch(af) {
-  case AF_INET:
-    return inet_pton4(src, (unsigned char *)dst);
-  case AF_INET6:
-    return inet_pton6(src, (unsigned char *)dst);
-  default:
-    errno = SOCKEAFNOSUPPORT;
-    return -1;
-  }
-  /* NOTREACHED */
-}
-
-/* int
- * inet_pton4(src, dst)
+/* int inet_pton4(src, dst)
  *      like inet_aton() but without all the hexadecimal and shorthand.
  * return:
  *      1 if `src' is a valid dotted quad, else 0.
@@ -105,7 +70,7 @@ static int inet_pton4(const char *src, unsigned char *dst)
   octets = 0;
   tp = tmp;
   *tp = 0;
-  while((ch = *src++) != '\0') {
+  while((ch = (unsigned char)*src++) != '\0') {
     if(ISDIGIT(ch)) {
       unsigned int val = (*tp * 10) + (ch - '0');
 
@@ -135,8 +100,7 @@ static int inet_pton4(const char *src, unsigned char *dst)
   return 1;
 }
 
-/* int
- * inet_pton6(src, dst)
+/* int inet_pton6(src, dst)
  *      convert presentation level address to network order binary form.
  * return:
  *      1 if `src' is a valid [RFC1884 2.2] address, else 0.
@@ -165,7 +129,7 @@ static int inet_pton6(const char *src, unsigned char *dst)
   curtok = src;
   saw_xdigit = 0;
   val = 0;
-  while((ch = *src++) != '\0') {
+  while((ch = (unsigned char)*src++) != '\0') {
     if(ISXDIGIT(ch)) {
       val <<= 4;
       val |= curlx_hexval(ch);
@@ -223,6 +187,35 @@ static int inet_pton6(const char *src, unsigned char *dst)
     return 0;
   memcpy(dst, tmp, IN6ADDRSZ);
   return 1;
+}
+
+/* int inet_pton(af, src, dst)
+ *      convert from presentation format (which usually means ASCII printable)
+ *      to network format (which is usually some kind of binary format).
+ * return:
+ *      1 if the address was valid for the specified address family
+ *      0 if the address was not valid (`dst' is untouched in this case)
+ *      -1 if some other error occurred (`dst' is untouched in this case, too)
+ * notice:
+ *      On Windows we store the error in the thread errno, not
+ *      in the Winsock error code. This is to avoid losing the
+ *      actual last Winsock error. When this function returns
+ *      -1, check errno not SOCKERRNO.
+ * author:
+ *      Paul Vixie, 1996.
+ */
+int curlx_inet_pton(int af, const char *src, void *dst)
+{
+  switch(af) {
+  case AF_INET:
+    return inet_pton4(src, (unsigned char *)dst);
+  case AF_INET6:
+    return inet_pton6(src, (unsigned char *)dst);
+  default:
+    errno = SOCKEAFNOSUPPORT;
+    return -1;
+  }
+  /* NOTREACHED */
 }
 
 #endif /* HAVE_INET_PTON */

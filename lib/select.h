@@ -71,7 +71,8 @@ struct pollfd {
    therefore defined here */
 #define CURL_CSELECT_IN2 (CURL_CSELECT_ERR << 1)
 
-int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
+int Curl_socket_check(curl_socket_t readfd0,
+                      curl_socket_t readfd1,
                       curl_socket_t writefd,
                       timediff_t timeout_ms);
 #define SOCKET_READABLE(x, z)                               \
@@ -160,22 +161,19 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
                           bool do_in, bool do_out) WARN_UNUSED_RESULT;
 
 #define Curl_pollset_add_in(data, ps, sock) \
-  Curl_pollset_change((data), (ps), (sock), CURL_POLL_IN, 0)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_IN, 0)
 #define Curl_pollset_remove_in(data, ps, sock) \
-  Curl_pollset_change((data), (ps), (sock), 0, CURL_POLL_IN)
+  Curl_pollset_change(data, ps, sock, 0, CURL_POLL_IN)
 #define Curl_pollset_add_out(data, ps, sock) \
-  Curl_pollset_change((data), (ps), (sock), CURL_POLL_OUT, 0)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_OUT, 0)
 #define Curl_pollset_remove_out(data, ps, sock) \
-  Curl_pollset_change((data), (ps), (sock), 0, CURL_POLL_OUT)
+  Curl_pollset_change(data, ps, sock, 0, CURL_POLL_OUT)
 #define Curl_pollset_add_inout(data, ps, sock) \
-  Curl_pollset_change((data), (ps), (sock), \
-                       CURL_POLL_IN | CURL_POLL_OUT, 0)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_IN | CURL_POLL_OUT, 0)
 #define Curl_pollset_set_in_only(data, ps, sock) \
-  Curl_pollset_change((data), (ps), (sock), \
-                       CURL_POLL_IN, CURL_POLL_OUT)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_IN, CURL_POLL_OUT)
 #define Curl_pollset_set_out_only(data, ps, sock) \
-  Curl_pollset_change((data), (ps), (sock), \
-                       CURL_POLL_OUT, CURL_POLL_IN)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN)
 
 /* return < = on error, 0 on timeout or how many sockets are ready */
 int Curl_pollset_poll(struct Curl_easy *data,

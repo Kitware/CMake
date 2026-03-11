@@ -38,40 +38,40 @@
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
 */
 
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 
-#include "../urldata.h"
-#include "../cfilters.h"
+#include "urldata.h"
+#include "cfilters.h"
 
-#include "vtls.h" /* generic SSL protos etc */
-#include "vtls_int.h"
-#include "vtls_scache.h"
+#include "vtls/vtls.h" /* generic SSL protos etc */
+#include "vtls/vtls_int.h"
+#include "vtls/vtls_scache.h"
 
-#include "openssl.h"        /* OpenSSL versions */
-#include "gtls.h"           /* GnuTLS versions */
-#include "wolfssl.h"        /* wolfSSL versions */
-#include "schannel.h"       /* Schannel SSPI version */
-#include "mbedtls.h"        /* mbedTLS versions */
-#include "rustls.h"         /* Rustls versions */
+#include "vtls/openssl.h"        /* OpenSSL versions */
+#include "vtls/gtls.h"           /* GnuTLS versions */
+#include "vtls/wolfssl.h"        /* wolfSSL versions */
+#include "vtls/schannel.h"       /* Schannel SSPI version */
+#include "vtls/mbedtls.h"        /* mbedTLS versions */
+#include "vtls/rustls.h"         /* Rustls versions */
 
-#include "../slist.h"
-#include "../curl_trc.h"
-#include "../strcase.h"
-#include "../url.h"
-#include "../progress.h"
-#include "../curlx/fopen.h"
-#include "../curl_sha256.h"
-#include "../curlx/base64.h"
-#include "../curlx/inet_pton.h"
-#include "../connect.h"
-#include "../select.h"
-#include "../setopt.h"
-#include "../strdup.h"
-#include "../curlx/strcopy.h"
+#include "slist.h"
+#include "curl_trc.h"
+#include "strcase.h"
+#include "url.h"
+#include "progress.h"
+#include "curlx/fopen.h"
+#include "curl_sha256.h"
+#include "curlx/base64.h"
+#include "curlx/inet_pton.h"
+#include "connect.h"
+#include "select.h"
+#include "setopt.h"
+#include "curlx/strdup.h"
+#include "curlx/strcopy.h"
 
 #ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
@@ -133,7 +133,9 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
 static const struct alpn_spec ALPN_SPEC_H11 = {
   { ALPN_HTTP_1_1 }, 1
 };
-#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
+static const struct alpn_spec ALPN_SPEC_H10_H11 = {
+  { ALPN_HTTP_1_0, ALPN_HTTP_1_1 }, 2
+};
 #ifdef USE_HTTP2
 static const struct alpn_spec ALPN_SPEC_H2 = {
   { ALPN_H2 }, 1
@@ -144,15 +146,20 @@ static const struct alpn_spec ALPN_SPEC_H2_H11 = {
 static const struct alpn_spec ALPN_SPEC_H11_H2 = {
   { ALPN_HTTP_1_1, ALPN_H2 }, 2
 };
-#endif
+#endif /* USE_HTTP2 */
 
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
 static const struct alpn_spec *alpn_get_spec(http_majors wanted,
                                              http_majors preferred,
+                                             bool only_http_10,
                                              bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
+  /* If HTTP/1.0 is the wanted protocol then use ALPN http/1.0 and http/1.1.
+     This is for compatibility reasons since some HTTP/1.0 servers with old
+     ALPN implementations understand ALPN http/1.1 but not http/1.0. */
+  if(only_http_10 && (wanted & CURL_HTTP_V1x))
+    return &ALPN_SPEC_H10_H11;
 #ifdef USE_HTTP2
   if(wanted & CURL_HTTP_V2x) {
     if(wanted & CURL_HTTP_V1x)
@@ -164,8 +171,6 @@ static const struct alpn_spec *alpn_get_spec(http_majors wanted,
   (void)wanted;
   (void)preferred;
 #endif
-  /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
-     Avoid "http/1.0" because some servers do not support it. */
   return &ALPN_SPEC_H11;
 }
 #endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
@@ -295,7 +300,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #endif
 
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
       sslc->native_ca_store = TRUE;
 #endif
@@ -341,7 +346,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #ifndef CURL_DISABLE_PROXY
   sslc = &data->set.proxy_ssl;
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
       sslc->native_ca_store = TRUE;
 #endif
@@ -672,12 +677,11 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
 
 /* get length bytes of randomness */
 CURLcode Curl_ssl_random(struct Curl_easy *data,
-                         unsigned char *entropy,
-                         size_t length)
+                         unsigned char *buffer, size_t length)
 {
   DEBUGASSERT(length == sizeof(int));
   if(Curl_ssl->random)
-    return Curl_ssl->random(data, entropy, length);
+    return Curl_ssl->random(data, buffer, length);
   else
     return CURLE_NOT_BUILT_IN;
 }
@@ -689,7 +693,7 @@ CURLcode Curl_ssl_random(struct Curl_easy *data,
 static CURLcode pubkey_pem_to_der(const char *pem,
                                   unsigned char **der, size_t *der_len)
 {
-  char *begin_pos, *end_pos;
+  const char *begin_pos, *end_pos;
   size_t pem_count, pem_len;
   CURLcode result;
   struct dynbuf pbuf;
@@ -752,9 +756,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                               const unsigned char *pubkey, size_t pubkeylen)
 {
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
@@ -1061,7 +1062,7 @@ static size_t multissl_version(char *buffer, size_t size)
 
   if(current != selected) {
     char *p = backends;
-    char *end = backends + sizeof(backends);
+    const char *end = backends + sizeof(backends);
     int i;
 
     selected = current;
@@ -1719,7 +1720,8 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 #else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
                                        data->state.http_neg.preferred,
-                                       conn->bits.tls_enable_alpn));
+                                       (bool)data->state.http_neg.only_10,
+                                       (bool)conn->bits.tls_enable_alpn));
 #endif
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1770,7 +1772,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct ssl_connect_data *ctx;
   CURLcode result;
   /* ALPN is default, but if user explicitly disables it, obey */
-  bool use_alpn = data->set.ssl_enable_alpn;
+  bool use_alpn = (bool)data->set.ssl_enable_alpn;
   http_majors wanted = CURL_HTTP_V1x;
 
   (void)conn;
@@ -1781,7 +1783,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, use_alpn));
+  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, false, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -2042,7 +2044,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-    connssl->negotiated.alpn = Curl_memdup0((const char *)proto, proto_len);
+    connssl->negotiated.alpn = curlx_memdup0((const char *)proto, proto_len);
     if(!connssl->negotiated.alpn)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -2061,6 +2063,36 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   }
 
 out:
+  return result;
+}
+
+CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct alpn_spec *alpns,
+                               struct Curl_ssl_session *scs,
+                               bool *do_early_data, bool early_data_allowed)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  *do_early_data = FALSE;
+
+  if(!early_data_allowed) {
+    CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
+  }
+  else if(!Curl_alpn_contains_proto(alpns, scs->alpn)) {
+    CURL_TRC_CF(data, cf, "SSL session has different ALPN, no early data");
+  }
+  else {
+    infof(data, "SSL session allows %zu bytes of early data, "
+          "reusing ALPN '%s'", connssl->earlydata_max, scs->alpn);
+    connssl->earlydata_state = ssl_earlydata_await;
+    connssl->state = ssl_connection_deferred;
+    result = Curl_alpn_set_negotiated(cf, data, connssl,
+                                      (const unsigned char *)scs->alpn,
+                                      scs->alpn ? strlen(scs->alpn) : 0);
+    *do_early_data = !result;
+  }
   return result;
 }
 

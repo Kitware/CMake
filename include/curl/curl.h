@@ -59,7 +59,7 @@
 #define CURL_IGNORE_DEPRECATION(statements)     statements
 #endif
 
-#include "curlver.h"         /* libcurl version defines   */
+#include "curlver.h"         /* libcurl version defines */
 #include "system.h"          /* determine things runtime */
 
 #include <stdio.h>
@@ -142,7 +142,7 @@ typedef SOCKET curl_socket_t;
 #define CURL_SOCKET_BAD INVALID_SOCKET
 #else
 typedef int curl_socket_t;
-#define CURL_SOCKET_BAD -1
+#define CURL_SOCKET_BAD (-1)
 #endif
 #define curl_socket_typedef
 #endif /* curl_socket_typedef */
@@ -820,7 +820,7 @@ typedef enum {
  * CURLAUTH_NTLM_WB      - HTTP NTLM authentication delegated to winbind helper
  * CURLAUTH_BEARER       - HTTP Bearer token authentication
  * CURLAUTH_ONLY         - Use together with a single other type to force no
- *                         authentication or just that single type
+ *                         authentication or that single type
  * CURLAUTH_ANY          - All fine types set
  * CURLAUTH_ANYSAFE      - All fine types except Basic
  */
@@ -842,10 +842,13 @@ typedef enum {
 #define CURLAUTH_BEARER       (((unsigned long)1) << 6)
 #define CURLAUTH_AWS_SIGV4    (((unsigned long)1) << 7)
 #define CURLAUTH_ONLY         (((unsigned long)1) << 31)
-#define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
-#define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE))
+#define CURLAUTH_ANY          ((~CURLAUTH_DIGEST_IE) & \
+                               ((unsigned long)0xffffffff))
+#define CURLAUTH_ANYSAFE      ((~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE)) & \
+                               ((unsigned long)0xffffffff))
 
-#define CURLSSH_AUTH_ANY       ~0L       /* all types supported by server */
+/* all types supported by server */
+#define CURLSSH_AUTH_ANY       ((unsigned long)0xffffffff)
 #define CURLSSH_AUTH_NONE      0L        /* none allowed, silly but complete */
 #define CURLSSH_AUTH_PUBLICKEY (1L << 0) /* public/private key files */
 #define CURLSSH_AUTH_PASSWORD  (1L << 1) /* password */
@@ -1100,7 +1103,8 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLPROTO_SMBS    (1L << 27)
 #define CURLPROTO_MQTT    (1L << 28)
 #define CURLPROTO_GOPHERS (1L << 29)
-#define CURLPROTO_ALL     (~0L) /* enable everything */
+#define CURLPROTO_ALL     ((unsigned long)0xffffffff) /* old-style enable
+                                                         "everything" */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
@@ -1113,8 +1117,9 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 /* *STRINGPOINT is an alias for OBJECTPOINT to allow tools to extract the
    string options from the header file */
 
-#define CURLOPT(na,t,nu) na = t + nu
-#define CURLOPTDEPRECATED(na,t,nu,v,m) na CURL_DEPRECATED(v,m) = t + nu
+#define CURLOPT(na, t, nu) na = ((t) + (nu))
+#define CURLOPTDEPRECATED(na, t, nu, v, m) na CURL_DEPRECATED(v, m) \
+  = ((t) + (nu))
 
 /* CURLOPT aliases that make no runtime difference */
 
@@ -1244,7 +1249,7 @@ typedef enum {
   CURLOPT(CURLOPT_QUOTE, CURLOPTTYPE_SLISTPOINT, 28),
 
   /* send FILE * or void * to store headers to, if you use a callback it
-     is simply passed to the callback unmodified */
+     is passed to the callback unmodified */
   CURLOPT(CURLOPT_HEADERDATA, CURLOPTTYPE_CBPOINT, 29),
 
   /* point to a file to read the initial cookies from, also enables
@@ -1353,7 +1358,7 @@ typedef enum {
 
   /* Set the krb4/5 security level, this also enables krb4/5 awareness. This
    * is a string, 'clear', 'safe', 'confidential' or 'private'. If the string
-   * is set but does not match one of these, 'private' will be used.  */
+   * is set but does not match one of these, 'private' will be used. */
   CURLOPTDEPRECATED(CURLOPT_KRBLEVEL, CURLOPTTYPE_STRINGPOINT, 63,
                     8.17.0, "removed"),
 
@@ -2119,7 +2124,7 @@ typedef enum {
   /* Specify URL using CURL URL API. */
   CURLOPT(CURLOPT_CURLU, CURLOPTTYPE_OBJECTPOINT, 282),
 
-  /* add trailing data just after no more data is available */
+  /* add trailing data after no more data is available */
   CURLOPT(CURLOPT_TRAILERFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 283),
 
   /* pointer to be passed to HTTP_TRAILER_FUNCTION */
@@ -2198,7 +2203,7 @@ typedef enum {
   CURLOPT(CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256, CURLOPTTYPE_STRINGPOINT, 311),
 
   /* Function that will be called immediately before the initial request
-     is made on a connection (after any protocol negotiation step).  */
+     is made on a connection (after any protocol negotiation step). */
   CURLOPT(CURLOPT_PREREQFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 312),
 
   /* Data passed to the CURLOPT_PREREQFUNCTION callback */
@@ -2278,7 +2283,6 @@ typedef enum {
 #define CURLOPT_SSLCERTPASSWD CURLOPT_KEYPASSWD
 #define CURLOPT_KRB4LEVEL CURLOPT_KRBLEVEL
 
-/* */
 #define CURLOPT_FTP_RESPONSE_TIMEOUT CURLOPT_SERVER_RESPONSE_TIMEOUT
 
 /* Added in 8.2.0 */
@@ -2352,8 +2356,8 @@ typedef enum {
                                   Unless one is set programmatically, the
                                   .netrc will be queried. */
 enum CURL_NETRC_OPTION {
-  /* we set a single member here, just to make sure we still provide the enum,
-     but the values to use are defined above with L suffixes */
+  /* we set a single member here, to make sure we still provide the enum, but
+     the values to use are defined above with L suffixes */
   CURL_NETRC_LAST = 3
 };
 
@@ -2382,7 +2386,7 @@ enum CURL_NETRC_OPTION {
 #define CURL_TLSAUTH_SRP  1L
 
 enum CURL_TLSAUTH {
-  /* we set a single member here, just to make sure we still provide the enum,
+  /* we set a single member here, to make sure we still provide the enum,
      but the values to use are defined above with L suffixes */
   CURL_TLSAUTH_LAST = 2
 };
@@ -2405,7 +2409,7 @@ enum CURL_TLSAUTH {
 #define CURL_TIMECOND_LASTMOD      3L
 
 typedef enum {
-  /* we set a single member here, just to make sure we still provide
+  /* we set a single member here, to make sure we still provide
      the enum typedef, but the values to use are defined above with L
      suffixes */
   CURL_TIMECOND_LAST = 4
@@ -2704,7 +2708,7 @@ CURL_EXTERN char *curl_escape(const char *string,
  *
  * DESCRIPTION
  *
- * Unescapes URL encoding in strings (converts all %XX codes to their 8bit
+ * Unescapes URL encoding in strings (converts all %XX codes to their 8-bit
  * versions). This function returns a new allocated string or NULL if an error
  * occurred.
  * Conversion Note: On non-ASCII platforms the ASCII %XX codes are
@@ -3020,9 +3024,8 @@ typedef enum {
 /* Different data locks for a single share */
 typedef enum {
   CURL_LOCK_DATA_NONE = 0,
-  /*  CURL_LOCK_DATA_SHARE is used internally to say that
-   *  the locking is just made to change the internal state of the share
-   *  itself.
+  /*  CURL_LOCK_DATA_SHARE is used internally to say that the locking is made
+   *  to change the internal state of the share itself.
    */
   CURL_LOCK_DATA_SHARE,
   CURL_LOCK_DATA_COOKIE,
@@ -3096,11 +3099,10 @@ typedef enum {
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
-/* The 'CURLVERSION_NOW' is the symbolic name meant to be used by
-   basically all programs ever that want to get version information. It is
-   meant to be a built-in version number for what kind of struct the caller
-   expects. If the struct ever changes, we redefine the NOW to another enum
-   from above. */
+/* The 'CURLVERSION_NOW' is the symbolic name meant to be used by programs
+   that want to get version information. It is meant to be a built-in
+   version number for what kind of struct the caller expects. If the struct
+   ever changes, we redefine the NOW to another enum from above. */
 #define CURLVERSION_NOW CURLVERSION_TWELFTH
 
 struct curl_version_info_data {
@@ -3183,7 +3185,8 @@ typedef struct curl_version_info_data curl_version_info_data;
                                              supported */
 #define CURL_VERSION_SSPI         (1<<11) /* Built against Windows SSPI */
 #define CURL_VERSION_CONV         (1<<12) /* Character conversions supported */
-#define CURL_VERSION_CURLDEBUG    (1<<13) /* Debug memory tracking supported */
+#define CURL_VERSION_CURLDEBUG    (1<<13) /* Debug memory tracking supported
+                                             (deprecated) */
 #define CURL_VERSION_TLSAUTH_SRP  (1<<14) /* TLS-SRP auth is supported */
 #define CURL_VERSION_NTLM_WB      (1<<15) /* NTLM delegation to winbind helper
                                              is supported */
@@ -3212,7 +3215,7 @@ typedef struct curl_version_info_data curl_version_info_data;
  * This function returns a pointer to a static copy of the version info
  * struct. See above.
  */
-CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion);
+CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion stamp);
 
 /*
  * NAME curl_easy_strerror()
@@ -3223,7 +3226,7 @@ CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion);
  * into the equivalent human readable error string. This is useful
  * for printing meaningful error messages.
  */
-CURL_EXTERN const char *curl_easy_strerror(CURLcode);
+CURL_EXTERN const char *curl_easy_strerror(CURLcode error);
 
 /*
  * NAME curl_share_strerror()
@@ -3234,7 +3237,7 @@ CURL_EXTERN const char *curl_easy_strerror(CURLcode);
  * into the equivalent human readable error string. This is useful
  * for printing meaningful error messages.
  */
-CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
+CURL_EXTERN const char *curl_share_strerror(CURLSHcode error);
 
 /*
  * NAME curl_easy_pause()
@@ -3248,10 +3251,10 @@ CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
 CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 
 #define CURLPAUSE_RECV      (1 << 0)
-#define CURLPAUSE_RECV_CONT (0)
+#define CURLPAUSE_RECV_CONT 0
 
 #define CURLPAUSE_SEND      (1 << 2)
-#define CURLPAUSE_SEND_CONT (0)
+#define CURLPAUSE_SEND_CONT 0
 
 #define CURLPAUSE_ALL       (CURLPAUSE_RECV | CURLPAUSE_SEND)
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT | CURLPAUSE_SEND_CONT)
@@ -3304,7 +3307,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 #endif
 
 /* unfortunately, the easy.h and multi.h include files need options and info
-  stuff before they can be included! */
+   stuff before they can be included! */
 #include "easy.h" /* nothing in curl is fun without the easy stuff */
 #include "multi.h"
 #include "urlapi.h"
@@ -3323,11 +3326,16 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 #if defined(__STDC__) && (__STDC__ >= 1)
 /* This preprocessor magic that replaces a call with the exact same call is
    only done to make sure application authors pass exactly three arguments
-   to these functions. */
-#define curl_easy_setopt(handle,opt,param) curl_easy_setopt(handle,opt,param)
-#define curl_easy_getinfo(handle,info,arg) curl_easy_getinfo(handle,info,arg)
-#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
-#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
+   to these functions. Use recursive macros to allow using these symbols via
+   the C++ global namespace '::' or reusing them as method names. */
+#define curl_easy_setopt(handle, opt, param) \
+  curl_easy_setopt(handle, opt, param)
+#define curl_easy_getinfo(handle, info, arg) \
+  curl_easy_getinfo(handle, info, arg)
+#define curl_share_setopt(share, opt, param) \
+  curl_share_setopt(share, opt, param)
+#define curl_multi_setopt(handle, opt, param) \
+  curl_multi_setopt(handle, opt, param)
 #endif /* __STDC__ >= 1 */
 #endif /* gcc >= 4.3 && !__cplusplus && !CURL_DISABLE_TYPECHECK */
 

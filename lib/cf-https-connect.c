@@ -30,6 +30,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "hostip.h"
+#include "httpsrr.h"
 #include "multiif.h"
 #include "cf-https-connect.h"
 #include "http2.h"
@@ -221,6 +222,8 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   /* install the winning filter below this one. */
   cf->next = winner->cf;
   winner->cf = NULL;
+  /* whatever errors where reported by ballers, clear our errorbuf */
+  Curl_reset_fail(data);
 
 #ifdef USE_NGHTTP2
   {
@@ -546,7 +549,6 @@ static void cf_hc_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
 
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   cf_hc_reset(cf, data);
   Curl_safefree(ctx);

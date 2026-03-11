@@ -50,7 +50,7 @@ struct dynhds {
   int opts;
 };
 
-#define DYNHDS_OPT_NONE          (0)
+#define DYNHDS_OPT_NONE          0
 #define DYNHDS_OPT_LOWERCASE     (1 << 0)
 
 /**
@@ -153,16 +153,14 @@ CURLcode Curl_dynhds_cadd(struct dynhds *dynhds,
                           const char *name, const char *value);
 
 /**
- * Add a single header from an HTTP/1.1 formatted line at the end. Line
- * may contain a delimiting CRLF or just LF. Any characters after
- * that will be ignored.
+ * Add a single header from an HTTP/1.1 formatted line at the end. Line may
+ * contain a delimiting CRLF or LF. Any characters after that will be ignored.
  */
 CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line);
 
 /**
- * Add a single header from an HTTP/1.1 formatted line at the end. Line
- * may contain a delimiting CRLF or just LF. Any characters after
- * that will be ignored.
+ * Add a single header from an HTTP/1.1 formatted line at the end. Line may
+ * contain a delimiting CRLF or LF. Any characters after that will be ignored.
  */
 CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
                                  const char *line, size_t line_len);
@@ -175,7 +173,6 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf);
 
 #ifdef USE_NGHTTP2
 
-#include <stdint.h>
 #include <nghttp2/nghttp2.h>
 
 nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount);

@@ -32,7 +32,7 @@
 struct UserDefined;
 
 enum expect100 {
-  EXP100_SEND_DATA,           /* enough waiting, just send the body now */
+  EXP100_SEND_DATA,           /* enough waiting, send the body now */
   EXP100_AWAITING_CONTINUE,   /* waiting for the 100 Continue header */
   EXP100_SENDING_REQUEST,     /* still sending the request but will wait for
                                  the 100 header once done with the request */
@@ -174,11 +174,11 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
  * they will be buffered. Use `Curl_req_flush()` to make sure
  * bytes are really send.
  * @param data      the transfer making the request
- * @param buf       the complete header bytes, no body
+ * @param req       the complete header bytes, no body
  * @param httpversion version used in request (09, 10, 11, etc.)
  * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
  */
-CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf,
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
                        unsigned char httpversion);
 
 /**

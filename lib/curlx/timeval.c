@@ -21,58 +21,30 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "timeval.h"
+#include "curlx/timeval.h"
 
 #ifdef _WIN32
 
-#include "version_win32.h"
-#include "../system_win32.h"
+#include "system_win32.h"
 
 LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
 
 /* For tool or tests, we must initialize before calling curlx_now().
    Providing this function here is wrong. */
 void curlx_now_init(void)
 {
-  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL))
-    Curl_isVistaOrGreater = true;
-  else
-    Curl_isVistaOrGreater = false;
-
   QueryPerformanceFrequency(&Curl_freq);
 }
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
 void curlx_pnow(struct curltime *pnow)
 {
-  bool isVistaOrGreater;
-  isVistaOrGreater = Curl_isVistaOrGreater;
-  if(isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
-    LARGE_INTEGER count;
-    LARGE_INTEGER freq;
-    freq = Curl_freq;
-    DEBUGASSERT(freq.QuadPart);
-    QueryPerformanceCounter(&count);
-    pnow->tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
-    pnow->tv_usec = (int)((count.QuadPart % freq.QuadPart) * 1000000 /
-                        freq.QuadPart);
-  }
-  else {
-    /* Disable /analyze warning that GetTickCount64 is preferred  */
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:28159)
-#endif
-    DWORD milliseconds = GetTickCount();
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-    pnow->tv_sec = (time_t)(milliseconds / 1000);
-    pnow->tv_usec = (int)((milliseconds % 1000) * 1000);
-  }
+  LARGE_INTEGER count;
+  DEBUGASSERT(Curl_freq.QuadPart);
+  QueryPerformanceCounter(&count);
+  pnow->tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
+  pnow->tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
+                        Curl_freq.QuadPart);
 }
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) || \
@@ -81,19 +53,19 @@ void curlx_pnow(struct curltime *pnow)
 void curlx_pnow(struct curltime *pnow)
 {
   /*
-  ** clock_gettime() is granted to be increased monotonically when the
-  ** monotonic clock is queried. Time starting point is unspecified, it
-  ** could be the system start-up time, the Epoch, or something else,
-  ** in any case the time starting point does not change once that the
-  ** system has started up.
-  */
+   * clock_gettime() is granted to be increased monotonically when the
+   * monotonic clock is queried. Time starting point is unspecified, it
+   * could be the system start-up time, the Epoch, or something else,
+   * in any case the time starting point does not change once that the
+   * system has started up.
+   */
   struct timespec tsnow;
 
   /*
-  ** clock_gettime() may be defined by Apple's SDK as weak symbol thus
-  ** code compiles but fails during runtime if clock_gettime() is
-  ** called on unsupported OS version.
-  */
+   * clock_gettime() may be defined by Apple's SDK as weak symbol thus
+   * code compiles but fails during runtime if clock_gettime() is
+   * called on unsupported OS version.
+   */
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
   (HAVE_BUILTIN_AVAILABLE == 1)
   bool have_clock_gettime = FALSE;
@@ -124,10 +96,10 @@ void curlx_pnow(struct curltime *pnow)
     pnow->tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   /*
-  ** Even when the configure process has truly detected monotonic clock
-  ** availability, it might happen that it is not actually available at
-  ** runtime. When this occurs simply fallback to other time source.
-  */
+   * Even when the configure process has truly detected monotonic clock
+   * availability, it might happen that it is not actually available at
+   * runtime. When this occurs, fallback to other time source.
+   */
 #ifdef HAVE_GETTIMEOFDAY
   else {
     struct timeval now;
@@ -145,17 +117,16 @@ void curlx_pnow(struct curltime *pnow)
 
 #elif defined(HAVE_MACH_ABSOLUTE_TIME)
 
-#include <stdint.h>
 #include <mach/mach_time.h>
 
 void curlx_pnow(struct curltime *pnow)
 {
   /*
-  ** Monotonic timer on macOS is provided by mach_absolute_time(), which
-  ** returns time in Mach "absolute time units," which are platform-dependent.
-  ** To convert to nanoseconds, one must use conversion factors specified by
-  ** mach_timebase_info().
-  */
+   * Monotonic timer on macOS is provided by mach_absolute_time(), which
+   * returns time in Mach "absolute time units," which are platform-dependent.
+   * To convert to nanoseconds, one must use conversion factors specified by
+   * mach_timebase_info().
+   */
   static mach_timebase_info_data_t timebase;
   uint64_t usecs;
 
@@ -176,10 +147,10 @@ void curlx_pnow(struct curltime *pnow)
 void curlx_pnow(struct curltime *pnow)
 {
   /*
-  ** gettimeofday() is not granted to be increased monotonically, due to
-  ** clock drifting and external source time synchronization it can jump
-  ** forward or backward in time.
-  */
+   * gettimeofday() is not granted to be increased monotonically, due to
+   * clock drifting and external source time synchronization it can jump
+   * forward or backward in time.
+   */
   struct timeval now;
   (void)gettimeofday(&now, NULL);
   pnow->tv_sec = now.tv_sec;
@@ -191,8 +162,8 @@ void curlx_pnow(struct curltime *pnow)
 void curlx_pnow(struct curltime *pnow)
 {
   /*
-  ** time() returns the value of time in seconds since the Epoch.
-  */
+   * time() returns the value of time in seconds since the Epoch.
+   */
   pnow->tv_sec = time(NULL);
   pnow->tv_usec = 0;
 }
@@ -220,9 +191,8 @@ timediff_t curlx_ptimediff_ms(const struct curltime *newer,
     return TIMEDIFF_T_MAX;
   else if(diff <= (TIMEDIFF_T_MIN / 1000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000 + (newer->tv_usec - older->tv_usec) / 1000;
+  return (diff * 1000) + ((newer->tv_usec - older->tv_usec) / 1000);
 }
-
 
 timediff_t curlx_timediff_ms(struct curltime newer, struct curltime older)
 {
@@ -241,7 +211,7 @@ timediff_t curlx_timediff_ceil_ms(struct curltime newer,
     return TIMEDIFF_T_MAX;
   else if(diff <= (TIMEDIFF_T_MIN / 1000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000 + (newer.tv_usec - older.tv_usec + 999) / 1000;
+  return (diff * 1000) + ((newer.tv_usec - older.tv_usec + 999) / 1000);
 }
 
 /*
@@ -256,7 +226,7 @@ timediff_t curlx_ptimediff_us(const struct curltime *newer,
     return TIMEDIFF_T_MAX;
   else if(diff <= (TIMEDIFF_T_MIN / 1000000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000000 + newer->tv_usec - older->tv_usec;
+  return (diff * 1000000) + newer->tv_usec - older->tv_usec;
 }
 
 timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)

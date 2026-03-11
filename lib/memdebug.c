@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 
 #include <stddef.h>  /* for offsetof() */
 
@@ -32,7 +32,7 @@
 #include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */
 
 #ifdef USE_BACKTRACE
-#include "backtrace.h"
+#include <backtrace.h>
 #endif
 
 struct memdebug {
@@ -115,6 +115,7 @@ static void curl_dbg_cleanup(void)
   }
 #endif
 }
+
 #ifdef USE_BACKTRACE
 static void error_bt_callback(void *data, const char *message,
                               int error_number)
@@ -218,7 +219,7 @@ void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
   /* alloc at least 64 bytes */
   size = sizeof(struct memdebug) + wantedsize;
 
-  mem = (Curl_cmalloc)(size);
+  mem = Curl_cmalloc(size);
   if(mem) {
     mem->size = wantedsize;
   }
@@ -248,7 +249,7 @@ void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   user_size = wanted_size * wanted_elements;
   size = sizeof(struct memdebug) + user_size;
 
-  mem = (Curl_ccalloc)(1, size);
+  mem = Curl_ccalloc(1, size);
   if(mem)
     mem->size = user_size;
 
@@ -343,7 +344,7 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
 #  pragma warning(pop)
 #endif
 
-  mem = (Curl_crealloc)(mem, size);
+  mem = Curl_crealloc(mem, size);
   if(source)
     curl_dbg_log_locked("MEM %s:%d realloc(%p, %zu) = %p\n",
                         source, line, (void *)ptr, wantedsize,
@@ -379,7 +380,7 @@ void curl_dbg_free(void *ptr, int line, const char *source)
 #endif
 
     /* free for real */
-    (Curl_cfree)(mem);
+    Curl_cfree(mem);
   }
 }
 
@@ -496,8 +497,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
-  /* !checksrc! disable BANNEDFUNC 1 */
-  FILE *res = fdopen(filedes, mode);
+  FILE *res = CURLX_FDOPEN_LOW(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
                  source, line, filedes, mode, (void *)res);
@@ -574,4 +574,4 @@ void curl_dbg_log(const char *format, ...)
   curl_dbg_unlock(was_locked);
 }
 
-#endif /* CURLDEBUG */
+#endif /* CURL_MEMDEBUG */

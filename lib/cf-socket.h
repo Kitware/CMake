@@ -35,8 +35,8 @@ struct Curl_sockaddr_ex;
 struct ip_quadruple;
 
 /*
- * The Curl_sockaddr_ex structure is basically libcurl's external API
- * curl_sockaddr structure with enough space available to directly hold any
+ * The Curl_sockaddr_ex structure is libcurl's external API curl_sockaddr
+ * structure with enough space available to directly hold any
  * protocol-specific address structures. The variable declared here will be
  * used to pass / receive data to/from the fopensocket callback if this has
  * been set, before that, it is initialized from parameters.
@@ -73,23 +73,13 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
                           uint8_t transport,
                           curl_socket_t *sockfd);
 
+#ifdef USE_SO_NOSIGPIPE
+/* Set SO_NOSIGPIPE on socket, return < 0 on error. */
+int Curl_sock_nosigpipe(curl_socket_t sockfd);
+#endif
+
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);
-
-#ifdef USE_WINSOCK
-/* When you run a program that uses the Windows Sockets API, you may
-   experience slow performance when you copy data to a TCP server.
-
-   https://learn.microsoft.com/troubleshoot/windows-server/networking/slow-performance-copy-data-tcp-server-sockets-api
-
-   Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
-   Buffer Size
-
-*/
-void Curl_sndbuf_init(curl_socket_t sockfd);
-#else
-#define Curl_sndbuf_init(y) Curl_nop_stmt
-#endif
 
 /**
  * Creates a cfilter that opens a TCP socket to the given address

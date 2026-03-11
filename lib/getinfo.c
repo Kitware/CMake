@@ -127,7 +127,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     *param_charp = data->info.contenttype;
     break;
   case CURLINFO_PRIVATE:
-    *param_charp = (char *)data->set.private_data;
+    *param_charp = (const char *)data->set.private_data;
     break;
   case CURLINFO_FTP_ENTRY_PATH:
     /* Return the entrypath string from the most recent connection.
@@ -281,7 +281,12 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     *param_longp = data->state.os_errno;
     break;
   case CURLINFO_NUM_CONNECTS:
-    *param_longp = data->info.numconnects;
+#if SIZEOF_LONG < SIZEOF_CURL_OFF_T
+    if(data->info.numconnects > LONG_MAX)
+      *param_longp = LONG_MAX;
+    else
+#endif
+      *param_longp = (long)data->info.numconnects;
     break;
   case CURLINFO_LASTSOCKET:
     sockfd = Curl_getconnectinfo(data, NULL);
@@ -374,7 +379,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   return CURLE_OK;
 }
 
-#define DOUBLE_SECS(x) (double)(x) / 1000000
+#define DOUBLE_SECS(x) ((double)(x) / 1000000)
 
 static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
                              curl_off_t *param_offt)

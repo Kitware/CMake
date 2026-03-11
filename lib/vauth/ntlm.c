@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
 
@@ -34,12 +34,15 @@
 
 #define DEBUG_ME 0
 
-#include "vauth.h"
-#include "../curl_trc.h"
-#include "../curl_ntlm_core.h"
-#include "../rand.h"
-#include "../strdup.h"
-#include "../curl_endian.h"
+#include "vauth/vauth.h"
+#include "curl_trc.h"
+#include "curl_ntlm_core.h"
+#include "rand.h"
+#include "curlx/strdup.h"
+#include "curl_endian.h"
+
+/* "NTLMSSP" signature is always in ASCII regardless of the platform */
+#define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024
@@ -58,6 +61,7 @@
 /* Requests that the server's authentication realm be included in the Type 2
    message. */
 
+#if DEBUG_ME
 /* unknown (1 << 3) */
 #define NTLMFLAG_NEGOTIATE_SIGN                  (1 << 4)
 /* Specifies that authenticated communication between the client and server
@@ -73,10 +77,12 @@
 #define NTLMFLAG_NEGOTIATE_LM_KEY                (1 << 7)
 /* Indicates that the LAN Manager session key should be used for signing and
    sealing authenticated communications. */
+#endif
 
 #define NTLMFLAG_NEGOTIATE_NTLM_KEY              (1 << 9)
 /* Indicates that NTLM authentication is being used. */
 
+#if DEBUG_ME
 /* unknown (1 << 10) */
 
 #define NTLMFLAG_NEGOTIATE_ANONYMOUS             (1 << 11)
@@ -95,11 +101,13 @@
 /* Sent by the server to indicate that the server and client are on the same
    machine. Implies that the client may use a pre-established local security
    context rather than responding to the challenge. */
+#endif
 
 #define NTLMFLAG_NEGOTIATE_ALWAYS_SIGN           (1 << 15)
 /* Indicates that authenticated communication between the client and server
    should be signed with a "dummy" signature. */
 
+#if DEBUG_ME
 #define NTLMFLAG_TARGET_TYPE_DOMAIN              (1 << 16)
 /* Sent by the server in the Type 2 message to indicate that the target
    authentication realm is a domain. */
@@ -112,11 +120,13 @@
 /* Sent by the server in the Type 2 message to indicate that the target
    authentication realm is a share. Presumably, this is for share-level
    authentication. Usage is unclear. */
+#endif
 
 #define NTLMFLAG_NEGOTIATE_NTLM2_KEY             (1 << 19)
 /* Indicates that the NTLM2 signing and sealing scheme should be used for
    protecting authenticated communications. */
 
+#if DEBUG_ME
 #define NTLMFLAG_REQUEST_INIT_RESPONSE           (1 << 20)
 /* unknown purpose */
 
@@ -125,11 +135,13 @@
 
 #define NTLMFLAG_REQUEST_NONNT_SESSION_KEY       (1 << 22)
 /* unknown purpose */
+#endif
 
 #define NTLMFLAG_NEGOTIATE_TARGET_INFO           (1 << 23)
 /* Sent by the server in the Type 2 message to indicate that it is including a
    Target Information block in the message. */
 
+#if DEBUG_ME
 /* unknown (1<24) */
 /* unknown (1<25) */
 /* unknown (1<26) */
@@ -146,10 +158,6 @@
 #define NTLMFLAG_NEGOTIATE_56                    (1 << 31)
 /* Indicates that 56-bit encryption is supported. */
 
-/* "NTLMSSP" signature is always in ASCII regardless of the platform */
-#define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
-
-#if DEBUG_ME
 #define DEBUG_OUT(x) x
 static void ntlm_print_flags(FILE *handle, unsigned long flags)
 {
@@ -254,10 +262,6 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
   const unsigned char *type2 = Curl_bufref_uptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
-
   if(type2len >= 48) {
     target_info_len = Curl_read16_le(&type2[40]);
     target_info_offset = Curl_read32_le(&type2[44]);
@@ -271,8 +275,8 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
       }
 
       curlx_free(ntlm->target_info); /* replace any previous data */
-      ntlm->target_info = Curl_memdup(&type2[target_info_offset],
-                                      target_info_len);
+      ntlm->target_info = curlx_memdup(&type2[target_info_offset],
+                                       target_info_len);
       if(!ntlm->target_info)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -354,10 +358,6 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   const unsigned char *type2 = Curl_bufref_uptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
-
   ntlm->flags = 0;
 
   if((type2len < 32) ||
@@ -398,7 +398,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
   size_t i;
   for(i = 0; i < length; i++) {
     dest[2 * i] = (unsigned char)src[i];
-    dest[2 * i + 1] = '\0';
+    dest[(2 * i) + 1] = '\0';
   }
 }
 
@@ -573,7 +573,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   unsigned int ntrespoff;
   unsigned int ntresplen = 24;
   unsigned char ntresp[24]; /* fixed-size */
-  unsigned char *ptr_ntresp = &ntresp[0];
+  const unsigned char *ptr_ntresp = &ntresp[0];
   unsigned char *ntlmv2resp = NULL;
   bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE);
   /* The fixed hostname we provide, in order to not leak our real local host

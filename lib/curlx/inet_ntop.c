@@ -16,7 +16,7 @@
  *
  * SPDX-License-Identifier: ISC
  */
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_INET_NTOP
 
@@ -30,9 +30,9 @@
 #include <arpa/inet.h>
 #endif
 
-#include "inet_ntop.h"
-#include "snprintf.h"
-#include "strcopy.h"
+#include "curlx/inet_ntop.h"
+#include "curlx/snprintf.h"
+#include "curlx/strcopy.h"
 
 #define IN6ADDRSZ       16
 /* #define INADDRSZ         4 */
@@ -166,7 +166,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
       static const unsigned char ldigits[] = "0123456789abcdef";
 
       unsigned int w = words[i];
-      /* output lowercase 16bit hex number but ignore leading zeroes */
+      /* output lowercase 16-bit hex number but ignore leading zeroes */
       if(w & 0xf000)
         *tp++ = ldigits[(w & 0xf000) >> 12];
       if(w & 0xff00)

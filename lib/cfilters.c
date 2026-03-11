@@ -33,9 +33,6 @@
 #include "select.h"
 #include "curlx/strparse.h"
 
-static void cf_cntrl_update_info(struct Curl_easy *data,
-                                 struct connectdata *conn);
-
 #ifdef UNITTESTS
 /* used by unit2600.c */
 void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -54,9 +51,6 @@ CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
   *done = TRUE;
   return CURLE_OK;
 }
-
-static void conn_report_connect_stats(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data);
 
 CURLcode Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
@@ -142,22 +136,22 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
 }
 
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
-                              struct connectdata *conn, int index)
+                              struct connectdata *conn, int sockindex)
 {
-  Curl_conn_cf_discard_chain(&conn->cfilter[index], data);
+  Curl_conn_cf_discard_chain(&conn->cfilter[sockindex], data);
 }
 
-void Curl_conn_close(struct Curl_easy *data, int index)
+void Curl_conn_close(struct Curl_easy *data, int sockindex)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data->conn);
   /* it is valid to call that without filters being present */
-  cf = data->conn->cfilter[index];
+  cf = data->conn->cfilter[sockindex];
   if(cf) {
     cf->cft->do_close(cf, data);
   }
-  Curl_shutdown_clear(data, index);
+  Curl_shutdown_clear(data, sockindex);
 }
 
 CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
@@ -183,8 +177,6 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
 
   *done = FALSE;
   if(!Curl_shutdown_started(data, sockindex)) {
-    CURL_TRC_M(data, "shutdown start on%s connection",
-               sockindex ? " secondary" : "");
     Curl_shutdown_start(data, sockindex, 0);
   }
   else {
@@ -217,14 +209,14 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   return result;
 }
 
-CURLcode Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
+CURLcode Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
                       size_t len, size_t *pnread)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  cf = data->conn->cfilter[num];
+  cf = data->conn->cfilter[sockindex];
   while(cf && !cf->connected)
     cf = cf->next;
   if(cf)
@@ -235,19 +227,19 @@ CURLcode Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
   return CURLE_FAILED_INIT;
 }
 
-CURLcode Curl_cf_send(struct Curl_easy *data, int num,
-                      const uint8_t *mem, size_t len, bool eos,
+CURLcode Curl_cf_send(struct Curl_easy *data, int sockindex,
+                      const uint8_t *buf, size_t len, bool eos,
                       size_t *pnwritten)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  cf = data->conn->cfilter[num];
+  cf = data->conn->cfilter[sockindex];
   while(cf && !cf->connected)
     cf = cf->next;
   if(cf) {
-    return cf->cft->do_send(cf, data, mem, len, eos, pnwritten);
+    return cf->cft->do_send(cf, data, buf, len, eos, pnwritten);
   }
   failf(data, "send: no filter connected");
   DEBUGASSERT(0);
@@ -336,18 +328,17 @@ out:
 
 void Curl_conn_cf_add(struct Curl_easy *data,
                       struct connectdata *conn,
-                      int index,
+                      int sockindex,
                       struct Curl_cfilter *cf)
 {
-  (void)data;
   DEBUGASSERT(conn);
   DEBUGASSERT(!cf->conn);
   DEBUGASSERT(!cf->next);
 
-  cf->next = conn->cfilter[index];
+  cf->next = conn->cfilter[sockindex];
   cf->conn = conn;
-  cf->sockindex = index;
-  conn->cfilter[index] = cf;
+  cf->sockindex = sockindex;
+  conn->cfilter[sockindex] = cf;
   CURL_TRC_CF(data, cf, "added");
 }
 
@@ -429,7 +420,7 @@ CURLcode Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return CURLE_RECV_ERROR;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static CURLcode cf_verboseconnect(struct Curl_easy *data,
                                   struct Curl_cfilter *cf)
 {
@@ -451,6 +442,51 @@ static CURLcode cf_verboseconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 #endif
+
+static CURLcode cf_cntrl_all(struct connectdata *conn,
+                             struct Curl_easy *data,
+                             bool ignore_result,
+                             int event, int arg1, void *arg2)
+{
+  CURLcode result = CURLE_OK;
+  size_t i;
+
+  for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
+    result = Curl_conn_cf_cntrl(conn->cfilter[i], data, ignore_result,
+                                event, arg1, arg2);
+    if(!ignore_result && result)
+      break;
+  }
+  return result;
+}
+
+static void cf_cntrl_update_info(struct Curl_easy *data,
+                                 struct connectdata *conn)
+{
+  cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
+}
+
+/**
+ * Update connection statistics
+ */
+static void conn_report_connect_stats(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data)
+{
+  if(cf) {
+    struct curltime connected;
+    struct curltime appconnected;
+
+    memset(&connected, 0, sizeof(connected));
+    cf->cft->query(cf, data, CF_QUERY_TIMER_CONNECT, NULL, &connected);
+    if(connected.tv_sec || connected.tv_usec)
+      Curl_pgrsTimeWas(data, TIMER_CONNECT, connected);
+
+    memset(&appconnected, 0, sizeof(appconnected));
+    cf->cft->query(cf, data, CF_QUERY_TIMER_APPCONNECT, NULL, &appconnected);
+    if(appconnected.tv_sec || appconnected.tv_usec)
+      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, appconnected);
+  }
+}
 
 CURLcode Curl_conn_connect(struct Curl_easy *data,
                            int sockindex,
@@ -475,7 +511,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
   }
 
-  *done = cf->connected;
+  *done = (bool)cf->connected;
   if(*done)
     return CURLE_OK;
 
@@ -499,9 +535,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(cf, data);
       data->conn->keepalive = *Curl_pgrs_now(data);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      result = cf_verboseconnect(data, cf);
-#endif
+      VERBOSE(result = cf_verboseconnect(data, cf));
       goto out;
     }
     else if(result) {
@@ -514,7 +548,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     else {
       /* check allowed time left */
-      const timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
+      const timediff_t timeout_ms = Curl_timeleft_ms(data);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       int rc;
 
@@ -572,8 +606,8 @@ bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
     return FALSE;
   cf = conn->cfilter[sockindex];
   if(cf)
-    return cf->connected;
-  else if(conn->handler->flags & PROTOPT_NONETWORK)
+    return (bool)cf->connected;
+  else if(conn->scheme->flags & PROTOPT_NONETWORK)
     return TRUE;
   return FALSE;
 }
@@ -837,7 +871,7 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   for(; cf; cf = cf->next) {
-    if(Curl_cf_def_cntrl == cf->cft->cntrl)
+    if(cf->cft->cntrl == Curl_cf_def_cntrl)
       continue;
     result = cf->cft->cntrl(cf, data, event, arg1, arg2);
     if(!ignore_result && result)
@@ -923,23 +957,6 @@ Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
   return cf ? cf_get_remote_addr(cf, data) : NULL;
 }
 
-static CURLcode cf_cntrl_all(struct connectdata *conn,
-                             struct Curl_easy *data,
-                             bool ignore_result,
-                             int event, int arg1, void *arg2)
-{
-  CURLcode result = CURLE_OK;
-  size_t i;
-
-  for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
-    result = Curl_conn_cf_cntrl(conn->cfilter[i], data, ignore_result,
-                                event, arg1, arg2);
-    if(!ignore_result && result)
-      break;
-  }
-  return result;
-}
-
 CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data)
 {
   return cf_cntrl_all(data->conn, data, FALSE, CF_CTRL_DATA_SETUP, 0, NULL);
@@ -975,34 +992,6 @@ CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause)
 {
   return cf_cntrl_all(data->conn, data, FALSE,
                       CF_CTRL_DATA_PAUSE, do_pause, NULL);
-}
-
-static void cf_cntrl_update_info(struct Curl_easy *data,
-                                 struct connectdata *conn)
-{
-  cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
-}
-
-/**
- * Update connection statistics
- */
-static void conn_report_connect_stats(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
-{
-  if(cf) {
-    struct curltime connected;
-    struct curltime appconnected;
-
-    memset(&connected, 0, sizeof(connected));
-    cf->cft->query(cf, data, CF_QUERY_TIMER_CONNECT, NULL, &connected);
-    if(connected.tv_sec || connected.tv_usec)
-      Curl_pgrsTimeWas(data, TIMER_CONNECT, connected);
-
-    memset(&appconnected, 0, sizeof(appconnected));
-    cf->cft->query(cf, data, CF_QUERY_TIMER_APPCONNECT, NULL, &appconnected);
-    if(appconnected.tv_sec || appconnected.tv_usec)
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, appconnected);
-  }
 }
 
 bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
@@ -1071,23 +1060,23 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
 }
 
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
-                        char *buf, size_t blen, size_t *pnread)
+                        char *buf, size_t len, size_t *pnread)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(data && data->conn && data->conn->recv[sockindex])
-    return data->conn->recv[sockindex](data, sockindex, buf, blen, pnread);
+    return data->conn->recv[sockindex](data, sockindex, buf, len, pnread);
   *pnread = 0;
   return CURLE_FAILED_INIT;
 }
 
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
-                        const void *buf, size_t blen, bool eos,
+                        const void *buf, size_t len, bool eos,
                         size_t *pnwritten)
 {
-  size_t write_len = blen;
+  size_t write_len = len;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
@@ -1100,13 +1089,14 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
     const char *p = getenv("CURL_SMALLSENDS");
     if(p) {
       curl_off_t altsize;
-      if(!curlx_str_number(&p, &altsize, write_len))
+      if(!curlx_str_number(&p, &altsize, write_len)) {
         write_len = (size_t)altsize;
+        if(write_len != len)
+          eos = FALSE;
+      }
     }
   }
 #endif
-  if(write_len != blen)
-    eos = FALSE;
   if(data && data->conn && data->conn->send[sockindex])
     return data->conn->send[sockindex](data, sockindex, buf, write_len, eos,
                                        pnwritten);
