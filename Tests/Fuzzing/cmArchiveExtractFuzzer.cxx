@@ -87,7 +87,7 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size)
 
     // Extract without verbose, with timestamps
     bool result1 = cmSystemTools::ExtractTar(
-      archiveFile, files, cmSystemTools::cmTarExtractTimestamps::Yes, "OEM",
+      archiveFile, files, cmSystemTools::cmTarExtractTimestamps::Yes, "UTF-8",
       false);
     (void)result1;
 
@@ -103,7 +103,7 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size)
       // Extract with verbose, without timestamps
       files.clear();
       bool result2 = cmSystemTools::ExtractTar(
-        archiveFile, files, cmSystemTools::cmTarExtractTimestamps::No, "OEM",
+        archiveFile, files, cmSystemTools::cmTarExtractTimestamps::No, "UTF-8",
         true);
       (void)result2;
 

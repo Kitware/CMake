@@ -1252,7 +1252,7 @@ std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
   files.push_back(file);
 
   if (!cmSystemTools::CreateTar(
-        tarFile, files, {}, cmSystemTools::TarCompressGZip, "OEM", false)) {
+        tarFile, files, {}, cmSystemTools::TarCompressGZip, "UTF-8", false)) {
     cmCTestLog(this, ERROR_MESSAGE,
                "Error creating tar while "
                "encoding file: "

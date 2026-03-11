@@ -614,7 +614,7 @@ int cmCPackArchiveGenerator::GetCompressionLevel() const
 
 std::string cmCPackArchiveGenerator::GetEncoding() const
 {
-  std::string encoding = "OEM";
+  std::string encoding = "UTF-8";
 
   if (cmValue v = this->GetOptionIfSet("CPACK_ARCHIVE_ENCODING")) {
     encoding = *v;

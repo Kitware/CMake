@@ -1705,12 +1705,15 @@ Available commands are:
     ``UTF-8``
       Archive pathnames are encoded as UTF-8.
 
+      This is the default since CMake 4.4.
+
     ``OEM``
       On Windows platforms, pathnames are encoded as using the original
       equipment manufacturer (OEM) code page.  On non-Windows platforms,
       pathnames are encoded according to the current locale.
 
-      This is the default value.
+      In CMake 4.3 and below, the ``OEM`` encoding (current locale)
+      was always used.
 
     ``UTF-16LE``, ``UTF-16BE``
       Archive pathnames are encoded as UTF-16 little-endian or big-endian.

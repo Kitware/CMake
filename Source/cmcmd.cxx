@@ -1920,7 +1920,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         cmSystemTools::TarCompressAuto;
       int nCompress = 0;
       bool doing_options = true;
-      std::string encoding = "OEM";
+      std::string encoding = "UTF-8";
       for (auto const& arg : cmMakeRange(args).advance(4)) {
         if (doing_options && cmHasLiteralPrefix(arg, "--")) {
           if (arg == "--") {
