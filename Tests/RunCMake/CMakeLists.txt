@@ -1500,7 +1500,7 @@ add_RunCMake_test(CMakePresetsWorkflow
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   )
 
-add_RunCMake_test(VerifyHeaderSets)
+add_RunCMake_test(VerifyHeaderSets -DCMake_TEST_OBJC=${CMake_TEST_OBJC})
 add_RunCMake_test(set_tests_properties)
 
 add_RunCMake_test(CMakeListFileName)
