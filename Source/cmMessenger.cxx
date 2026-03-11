@@ -2,10 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMessenger.h"
 
+#include <algorithm>
 #include <sstream>
 #include <utility>
-
-#include <cm/string_view>
 
 #include "cmDocumentationFormatter.h"
 #include "cmMessageMetadata.h"
@@ -47,6 +46,14 @@ char const* getMessageTypeStr(MessageType t)
       break;
   }
   return "Warning";
+}
+
+std::string getDiagnosticCategoryStr(cmDiagnosticCategory category)
+{
+  std::string out = cmSystemTools::LowerCase(
+    cmDiagnostics::GetCategoryString(category).substr(4));
+  std::replace(out.begin(), out.end(), '_', '-');
+  return out;
 }
 
 cm::StdIo::TermAttr getMessageColor(MessageType t)
@@ -250,8 +257,7 @@ void cmMessenger::DisplayMessage(MessageType type,
   // Print the message preamble.
   msg << "CMake " << getMessageTypeStr(type);
   if (category != cmDiagnostics::CMD_NONE) {
-    cm::string_view const cname = cmDiagnostics::GetCategoryString(category);
-    msg << " (" << cname.substr(4) << ')';
+    msg << " (" << getDiagnosticCategoryStr(category) << ')';
   }
 
   // Add the immediate context.
