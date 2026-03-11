@@ -158,6 +158,9 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
   req->shutdown = FALSE;
+  /* Unpause all directions */
+  Curl_rlimit_block(&data->progress.dl.rlimit, FALSE, &t0);
+  Curl_rlimit_block(&data->progress.ul.rlimit, FALSE, &t0);
 }
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
@@ -292,7 +295,7 @@ static CURLcode req_flush(struct Curl_easy *data)
       return result;
     if(!Curl_bufq_is_empty(&data->req.sendbuf)) {
       DEBUGF(infof(data, "Curl_req_flush(len=%zu) -> EAGAIN",
-             Curl_bufq_len(&data->req.sendbuf)));
+                   Curl_bufq_len(&data->req.sendbuf)));
       return CURLE_AGAIN;
     }
   }

@@ -34,17 +34,13 @@
 
 #include "urldata.h"
 #include "bufq.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "select.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "socks.h"
 #include "curlx/inet_pton.h"
-#include "url.h"
-
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-#define DEBUG_AND_VERBOSE
-#endif
 
 /* for the (SOCKS) connect state machine */
 enum socks_state_t {
@@ -71,7 +67,7 @@ enum socks_state_t {
   SOCKS_ST_FAILED
 };
 
-#ifdef DEBUG_AND_VERBOSE
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 static const char * const cf_socks_statename[] = {
   "SOCKS_INIT",
   "SOCKS4_START",
@@ -130,7 +126,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
 
   *pnread = 0;
   for(;;) {
-    timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
+    timediff_t timeout_ms = Curl_timeleft_ms(data);
     if(timeout_ms < 0) {
       /* we already got the timeout */
       return CURLE_OPERATION_TIMEDOUT;
@@ -140,7 +136,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
     if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0)
       return CURLE_OPERATION_TIMEDOUT;
     result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
-    if(CURLE_AGAIN == result)
+    if(result == CURLE_AGAIN)
       continue;
     else if(result)
       return result;
@@ -159,8 +155,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
 }
 #endif
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-#define DEBUG_AND_VERBOSE
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 #define sxstate(x, c, d, y) socksstate(x, c, d, y, __LINE__)
 #else
 #define sxstate(x, c, d, y) socksstate(x, c, d, y)
@@ -171,24 +166,26 @@ static void socksstate(struct socks_state *sx,
                        struct Curl_cfilter *cf,
                        struct Curl_easy *data,
                        enum socks_state_t state
-#ifdef DEBUG_AND_VERBOSE
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
                        , int lineno
 #endif
 )
 {
   enum socks_state_t oldstate = sx->state;
-  (void)cf;
-  (void)data;
+
   if(oldstate == state)
     /* do not bother when the new state is the same as the old state */
     return;
 
   sx->state = state;
 
-#ifdef DEBUG_AND_VERBOSE
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   CURL_TRC_CF(data, cf, "[%s] -> [%s] (line %d)",
               cf_socks_statename[oldstate],
               cf_socks_statename[sx->state], lineno);
+#else
+  (void)cf;
+  (void)data;
 #endif
 }
 
@@ -270,8 +267,8 @@ static CURLproxycode socks4_req_add_hd(struct socks_state *sx,
   (void)data;
   buf[0] = 4; /* version (SOCKS4) */
   buf[1] = 1; /* connect */
-  buf[2] = (unsigned char)((sx->remote_port >> 8) & 0xffu); /* MSB */
-  buf[3] = (unsigned char)(sx->remote_port & 0xffu);        /* LSB */
+  buf[2] = (unsigned char)((sx->remote_port >> 8) & 0xffU); /* MSB */
+  buf[3] = (unsigned char)(sx->remote_port & 0xffU);        /* LSB */
 
   result = Curl_bufq_write(&sx->iobuf, buf, 4, &nwritten);
   if(result || (nwritten != 4))
@@ -344,6 +341,8 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
 
   if(result || !dns) {
     failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.", sx->hostname);
+    if(dns)
+      Curl_resolv_unlink(data, &dns);
     return CURLPX_RESOLVE_HOST;
   }
 
@@ -374,6 +373,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
       return CURLPX_SEND_REQUEST;
   }
   else {
+    Curl_resolv_unlink(data, &dns);
     failf(data, "SOCKS4 connection to %s not supported", sx->hostname);
     return CURLPX_RESOLVE_HOST;
   }
@@ -839,7 +839,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
   struct Curl_dns_entry *dns = NULL;
   struct Curl_addrinfo *hp = NULL;
   char dest[MAX_IPADR_LEN];  /* printable address */
-  unsigned char *destination = NULL;
+  const unsigned char *destination = NULL;
   unsigned char desttype = 1, destlen = 4;
   unsigned char req[2];
   CURLcode result;
@@ -898,7 +898,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
     desttype = 1; /* ATYP: IPv4 = 1 */
     destlen = 4;
     saddr_in = (struct sockaddr_in *)(void *)hp->ai_addr;
-    destination = (unsigned char *)&saddr_in->sin_addr.s_addr;
+    destination = (const unsigned char *)&saddr_in->sin_addr.s_addr;
     CURL_TRC_CF(data, cf, "SOCKS5 connect to %s:%d (locally resolved)",
                 dest, sx->remote_port);
   }
@@ -908,7 +908,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
     desttype = 4; /* ATYP: IPv6 = 4 */
     destlen = 16;
     saddr_in6 = (struct sockaddr_in6 *)(void *)hp->ai_addr;
-    destination = (unsigned char *)&saddr_in6->sin6_addr.s6_addr;
+    destination = (const unsigned char *)&saddr_in6->sin6_addr.s6_addr;
     CURL_TRC_CF(data, cf, "SOCKS5 connect to [%s]:%d (locally resolved)",
                 dest, sx->remote_port);
   }
@@ -932,8 +932,8 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
     goto out;
   }
   /* PORT MSB+LSB */
-  req[0] = (unsigned char)((sx->remote_port >> 8) & 0xffu);
-  req[1] = (unsigned char)(sx->remote_port & 0xffu);
+  req[0] = (unsigned char)((sx->remote_port >> 8) & 0xffU);
+  req[1] = (unsigned char)(sx->remote_port & 0xffU);
   result = Curl_bufq_write(&sx->iobuf, req, 2, &nwritten);
   if(result || (nwritten != 2)) {
     presult = CURLPX_SEND_REQUEST;
@@ -1287,7 +1287,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   else if(sx->state != SOCKS_ST_SUCCESS)
     goto out;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     struct ip_quadruple ipquad;
     bool is_ipv6;
@@ -1307,7 +1307,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   cf->connected = TRUE;
 
 out:
-  *done = cf->connected;
+  *done = (bool)cf->connected;
   return result;
 }
 
@@ -1342,7 +1342,6 @@ static CURLcode socks_cf_adjust_pollset(struct Curl_cfilter *cf,
 static void socks_proxy_cf_close(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
-
   DEBUGASSERT(cf->next);
   cf->connected = FALSE;
   socks_proxy_cf_free(cf);

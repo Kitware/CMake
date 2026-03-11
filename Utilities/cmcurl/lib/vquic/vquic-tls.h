@@ -23,17 +23,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_HTTP3) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
 
-#include "../bufq.h"
-#include "../vtls/vtls.h"
-#include "../vtls/vtls_int.h"
+#include "bufq.h"
+#include "vtls/vtls.h"
+#include "vtls/vtls_int.h"
 
-#include "../vtls/openssl.h"
-#include "../vtls/wolfssl.h"
+#include "vtls/openssl.h"
+#include "vtls/wolfssl.h"
 
 struct ssl_peer;
 struct Curl_ssl_session;
@@ -53,7 +53,7 @@ struct curl_tls_ctx {
  * Callback passed to `Curl_vquic_tls_init()` that can
  * do early initializations on the not otherwise configured TLS
  * instances created. This varies by TLS backend:
- * - openssl/wolfssl: SSL_CTX* has just been created
+ * - openssl/wolfssl: SSL_CTX* has been created
  * - gnutls: gtls_client_init() has run
  */
 typedef CURLcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,

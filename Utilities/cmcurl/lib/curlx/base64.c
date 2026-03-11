@@ -24,9 +24,9 @@
 
 /* Base64 encoding/decoding */
 
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "base64.h"
+#include "curlx/base64.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
 const char curlx_base64encdec[] =
@@ -182,7 +182,7 @@ static CURLcode base64_encode(const char *table64,
   if(insize > CURL_MAX_BASE64_INPUT)
     return CURLE_TOO_LARGE;
 
-  base64data = output = curlx_malloc((insize + 2) / 3 * 4 + 1);
+  base64data = output = curlx_malloc(((insize + 2) / 3 * 4) + 1);
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 

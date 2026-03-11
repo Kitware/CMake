@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_CURL_OSSLQ_H
-#define HEADER_CURL_VQUIC_CURL_OSSLQ_H
+#ifndef HEADER_CURLX_STRDUP_H
+#define HEADER_CURLX_STRDUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,29 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_OPENSSL_QUIC) && \
-  defined(USE_NGHTTP3)
-
-#ifdef HAVE_NETINET_UDP_H
-#include <netinet/udp.h>
+#ifdef _WIN32
+wchar_t *curlx_wcsdup(const wchar_t *src);  /* for curlx_tcsdup() */
 #endif
-
-struct Curl_cfilter;
-
-#include "../urldata.h"
-
-void Curl_osslq_ver(char *p, size_t len);
-
-CURLcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
-                              struct Curl_easy *data,
-                              struct connectdata *conn,
-                              const struct Curl_addrinfo *ai);
-
-bool Curl_conn_is_osslq(const struct Curl_easy *data,
-                        const struct connectdata *conn,
-                        int sockindex);
-#endif
-
-#endif /* HEADER_CURL_VQUIC_CURL_OSSLQ_H */
+void *curlx_memdup(const void *src, size_t length);
+void *curlx_memdup0(const char *src, size_t length);
+#endif /* HEADER_CURLX_STRDUP_H */

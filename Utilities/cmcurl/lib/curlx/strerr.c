@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_STRERROR_R
 #  if (!defined(HAVE_POSIX_STRERROR_R) && \
@@ -31,10 +31,10 @@
 #  endif
 #endif
 
-#include "winapi.h"
-#include "snprintf.h"
-#include "strerr.h"
-#include "strcopy.h"
+#include "curlx/winapi.h"
+#include "curlx/snprintf.h"
+#include "curlx/strerr.h"
+#include "curlx/strcopy.h"
 
 #ifdef USE_WINSOCK
 /* This is a helper function for curlx_strerror that converts Winsock error
@@ -43,17 +43,14 @@
  */
 static const char *get_winsock_error(int err, char *buf, size_t len)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const char *p;
-  size_t alen;
-#endif
+  VERBOSE(const char *p);
 
   if(!len)
     return NULL;
 
   *buf = '\0';
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef CURLVERBOSE
   (void)err;
   return NULL;
 #else
@@ -223,8 +220,7 @@ static const char *get_winsock_error(int err, char *buf, size_t len)
   default:
     return NULL;
   }
-  alen = strlen(p);
-  curlx_strcopy(buf, len, p, alen);
+  curlx_strcopy(buf, len, p, strlen(p));
   return buf;
 #endif
 }
@@ -294,7 +290,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
    */
   {
     char buffer[256];
-    char *msg = strerror_r(err, buffer, sizeof(buffer));
+    const char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg && buflen > 1)
       SNPRINTF(buf, buflen, "%s", msg);
     else if(buflen > sizeof("Unknown error ") + 20)

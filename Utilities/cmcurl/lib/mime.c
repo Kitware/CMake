@@ -30,58 +30,26 @@ struct Curl_easy;
 #include "sendf.h"
 #include "curl_trc.h"
 #include "transfer.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
+#include "curlx/basename.h"
 #include "curlx/strcopy.h"
 #include "curlx/fopen.h"
 #include "curlx/base64.h"
 
-#if !defined(CURL_DISABLE_MIME) && \
-  (!defined(CURL_DISABLE_HTTP) || \
-   !defined(CURL_DISABLE_SMTP) || \
-   !defined(CURL_DISABLE_IMAP))
-
-#if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#include <libgen.h>
-#endif
+#if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
+                                    !defined(CURL_DISABLE_SMTP) ||      \
+                                    !defined(CURL_DISABLE_IMAP))
 
 #include "rand.h"
 #include "slist.h"
 #include "curlx/dynbuf.h"
-
-#ifdef _WIN32
-#  ifndef R_OK
-#  define R_OK 4
-#  endif
-#endif
 
 #define READ_ERROR   ((size_t)-1)
 #define STOP_FILLING ((size_t)-2)
 
 static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
                                  void *instream, bool *hasread);
-
-/* Encoders. */
-static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
-                               curl_mimepart *part);
-static curl_off_t encoder_nop_size(curl_mimepart *part);
-static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part);
-static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
-                                  curl_mimepart *part);
-static curl_off_t encoder_base64_size(curl_mimepart *part);
-static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
-                              curl_mimepart *part);
-static curl_off_t encoder_qp_size(curl_mimepart *part);
 static curl_off_t mime_size(curl_mimepart *part);
-
-static const struct mime_encoder encoders[] = {
-  { "binary", encoder_nop_read, encoder_nop_size },
-  { "8bit", encoder_nop_read, encoder_nop_size },
-  { "7bit", encoder_7bit_read, encoder_nop_size },
-  { "base64", encoder_base64_read, encoder_base64_size },
-  { "quoted-printable", encoder_qp_read, encoder_qp_size },
-  { ZERO_NULL, ZERO_NULL, ZERO_NULL }
-};
 
 /* Quoted-printable character class table.
  *
@@ -123,7 +91,7 @@ static const char aschex[] =
   "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x41\x42\x43\x44\x45\x46";
 
 #ifndef __VMS
-#define filesize(name, stat_data) (stat_data.st_size)
+#define filesize(name, stat_data) stat_data.st_size
 #define fopen_read                curlx_fopen
 
 #else
@@ -139,7 +107,7 @@ static const char aschex[] =
  * and CD/DVD images should be either a STREAM_LF format or a fixed format.
  *
  */
-curl_off_t VmsRealFileSize(const char *name, const struct_stat *stat_buf)
+curl_off_t VmsRealFileSize(const char *name, const curlx_struct_stat *stat_buf)
 {
   char buffer[8192];
   curl_off_t count;
@@ -168,7 +136,8 @@ curl_off_t VmsRealFileSize(const char *name, const struct_stat *stat_buf)
  *  if not to call a routine to get the correct size.
  *
  */
-static curl_off_t VmsSpecialSize(const char *name, const struct_stat *stat_buf)
+static curl_off_t VmsSpecialSize(const char *name,
+                                 const curlx_struct_stat *stat_buf)
 {
   switch(stat_buf->st_fab_rfm) {
   case FAB$C_VAR:
@@ -192,7 +161,7 @@ static curl_off_t VmsSpecialSize(const char *name, const struct_stat *stat_buf)
  */
 static FILE *vmsfopenread(const char *file, const char *mode)
 {
-  struct_stat statbuf;
+  curlx_struct_stat statbuf;
   int result;
 
   result = curlx_stat(file, &statbuf);
@@ -209,56 +178,7 @@ static FILE *vmsfopenread(const char *file, const char *mode)
 }
 
 #define fopen_read vmsfopenread
-#endif
-
-#ifndef HAVE_BASENAME
-/*
-  (Quote from The Open Group Base Specifications Issue 6 IEEE Std 1003.1, 2004
-  Edition)
-
-  The basename() function shall take the pathname pointed to by path and
-  return a pointer to the final component of the pathname, deleting any
-  trailing '/' characters.
-
-  If the string pointed to by path consists entirely of the '/' character,
-  basename() shall return a pointer to the string "/". If the string pointed
-  to by path is exactly "//", it is implementation-defined whether '/' or "//"
-  is returned.
-
-  If path is a null pointer or points to an empty string, basename() shall
-  return a pointer to the string ".".
-
-  The basename() function may modify the string pointed to by path, and may
-  return a pointer to static storage that may then be overwritten by a
-  subsequent call to basename().
-
-  The basename() function need not be reentrant. A function that is not
-  required to be reentrant is not required to be thread-safe.
-
-*/
-static char *Curl_basename(char *path)
-{
-  /* Ignore all the details above for now and make a quick and simple
-     implementation here */
-  char *s1;
-  char *s2;
-
-  s1 = strrchr(path, '/');
-  s2 = strrchr(path, '\\');
-
-  if(s1 && s2) {
-    path = (s1 > s2 ? s1 : s2) + 1;
-  }
-  else if(s1)
-    path = s1 + 1;
-  else if(s2)
-    path = s2 + 1;
-
-  return path;
-}
-
-#define basename(x)  Curl_basename(x)
-#endif
+#endif /* !__VMS */
 
 /* Set readback state. */
 static void mimesetstate(struct mime_state *state,
@@ -348,7 +268,7 @@ static char *strippath(const char *fullfile)
                                         the buffer it works on */
   if(!filename)
     return NULL;
-  base = curlx_strdup(basename(filename));
+  base = curlx_strdup(curlx_basename(filename));
 
   curlx_free(filename); /* free temporary buffer */
 
@@ -363,7 +283,7 @@ static void cleanup_encoder_state(struct mime_encoder_state *p)
   p->bufend = 0;
 }
 
-/* Dummy encoder. This is used for 8bit and binary content encodings. */
+/* Dummy encoder. This is used for 8-bit and binary content encodings. */
 static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
                                struct curl_mimepart *part)
 {
@@ -390,7 +310,7 @@ static curl_off_t encoder_nop_size(curl_mimepart *part)
   return part->datasize;
 }
 
-/* 7bit encoder: the encoder is just a data validity check. */
+/* 7-bit encoder: the encoder is a data validity check. */
 static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
                                 curl_mimepart *part)
 {
@@ -503,10 +423,10 @@ static curl_off_t encoder_base64_size(curl_mimepart *part)
     return size;    /* Unknown size or no data. */
 
   /* Compute base64 character count. */
-  size = 4 * (1 + (size - 1) / 3);
+  size = 4 * (1 + ((size - 1) / 3));
 
   /* Effective character count must include CRLFs. */
-  return size + 2 * ((size - 1) / MAX_ENCODED_LINE_LENGTH);
+  return size + (2 * ((size - 1) / MAX_ENCODED_LINE_LENGTH));
 }
 
 /* Quoted-printable lookahead.
@@ -544,7 +464,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
   while(st->bufbeg < st->bufend) {
     size_t len = 1;
     size_t consumed = 1;
-    int i = st->buf[st->bufbeg];
+    int i = (unsigned char)st->buf[st->bufbeg];
     buf[0] = (char)i;
     buf[1] = aschex[(i >> 4) & 0xF];
     buf[2] = aschex[i & 0xF];
@@ -602,7 +522,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
         }
       }
       if(softlinebreak) {
-        curlx_strcopy(buf, sizeof(buf), "\x3D\x0D\x0A", 3);    /* "=\r\n" */
+        curlx_strcopy(buf, sizeof(buf), STRCONST("\x3D\x0D\x0A")); /* =\r\n */
         len = 3;
         consumed = 0;
       }
@@ -1285,7 +1205,7 @@ curl_mime *curl_mime_init(void *easy)
 /* Initialize a mime part. */
 void Curl_mime_initpart(curl_mimepart *part)
 {
-  memset((char *)part, 0, sizeof(*part));
+  memset(part, 0, sizeof(*part));
   part->lastreadstatus = 1; /* Successful read status. */
   mimesetstate(&part->state, MIMESTATE_BEGIN, NULL);
 }
@@ -1350,18 +1270,18 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
 }
 
 /* Set mime part content from memory data. */
-CURLcode curl_mime_data(curl_mimepart *part, const char *ptr, size_t datasize)
+CURLcode curl_mime_data(curl_mimepart *part, const char *data, size_t datasize)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   cleanup_part_content(part);
 
-  if(ptr) {
+  if(data) {
     if(datasize == CURL_ZERO_TERMINATED)
-      datasize = strlen(ptr);
+      datasize = strlen(data);
 
-    part->data = Curl_memdup0(ptr, datasize);
+    part->data = curlx_memdup0(data, datasize);
     if(!part->data)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1388,7 +1308,7 @@ CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
 
   if(filename) {
     char *base;
-    struct_stat sbuf;
+    curlx_struct_stat sbuf;
 
     if(curlx_stat(filename, &sbuf))
       result = CURLE_READ_ERROR;
@@ -1440,6 +1360,15 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
 
   return CURLE_OK;
 }
+
+static const struct mime_encoder encoders[] = {
+  { "binary", encoder_nop_read, encoder_nop_size },
+  { "8bit", encoder_nop_read, encoder_nop_size },
+  { "7bit", encoder_7bit_read, encoder_nop_size },
+  { "base64", encoder_base64_read, encoder_base64_size },
+  { "quoted-printable", encoder_qp_read, encoder_qp_size },
+  { ZERO_NULL, ZERO_NULL, ZERO_NULL }
+};
 
 /* Set mime data transfer encoder. */
 CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding)
@@ -2057,7 +1986,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     if(ctx->total_len >= 0)
       ctx->seen_eos = (ctx->read_len >= ctx->total_len);
     *pnread = nread;
-    *peos = ctx->seen_eos;
+    *peos = (bool)ctx->seen_eos;
     break;
   }
 
@@ -2194,7 +2123,8 @@ CURLcode Curl_creader_set_mime(struct Curl_easy *data, curl_mimepart *part)
 }
 
 #else /* !CURL_DISABLE_MIME && (!CURL_DISABLE_HTTP ||
-                                !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP) */
+                                !CURL_DISABLE_SMTP ||
+                                !CURL_DISABLE_IMAP) */
 
 /* Mime not compiled in: define stubs for externally-referenced functions. */
 curl_mime *curl_mime_init(CURL *easy)

@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_OPENSSL) || \
   defined(USE_GNUTLS) || \
@@ -30,9 +30,9 @@
   defined(USE_QUICHE) || \
   defined(USE_RUSTLS)
 
-#include "keylog.h"
-#include "../escape.h"
-#include "../curlx/fopen.h"
+#include "vtls/keylog.h"
+#include "escape.h"
+#include "curlx/fopen.h"
 
 /* The fp for the open SSLKEYLOGFILE, or NULL if not open */
 static FILE *keylog_file_fp;
@@ -107,8 +107,9 @@ bool Curl_tls_keylog_write(const char *label,
                          const unsigned char *secret, size_t secretlen)
 {
   size_t pos, i;
-  unsigned char line[KEYLOG_LABEL_MAXLEN + 1 + 2 * CLIENT_RANDOM_SIZE + 1 +
-                     2 * SECRET_MAXLEN + 1 + 1];
+  unsigned char line[KEYLOG_LABEL_MAXLEN + 1 +
+                     (2 * CLIENT_RANDOM_SIZE) + 1 +
+                     (2 * SECRET_MAXLEN) + 1 + 1];
 
   if(!keylog_file_fp) {
     return FALSE;

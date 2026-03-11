@@ -26,67 +26,41 @@
 #include "curlx/dynbuf.h"
 #include "curl_printf.h"
 #include "curlx/strparse.h"
-
-#ifdef HAVE_LONGLONG
-#  define LONG_LONG_TYPE long long
-#  define HAVE_LONG_LONG_TYPE
-#elif defined(_MSC_VER)
-#  define LONG_LONG_TYPE __int64
-#  define HAVE_LONG_LONG_TYPE
-#else
-#  undef LONG_LONG_TYPE
-#  undef HAVE_LONG_LONG_TYPE
-#endif
-
-/*
- * Max integer data types that mprintf.c is capable
- */
-
-#ifdef HAVE_LONG_LONG_TYPE
-#  define mp_intmax_t LONG_LONG_TYPE
-#  define mp_uintmax_t unsigned LONG_LONG_TYPE
-#else
-#  define mp_intmax_t long
-#  define mp_uintmax_t unsigned long
-#endif
+#include "curlx/snprintf.h"  /* for curlx_win32_snprintf() */
 
 #define BUFFSIZE 326 /* buffer for long-to-str and float-to-str calcs, should
                         fit negative DBL_MAX (317 letters) */
 #define MAX_PARAMETERS 128 /* number of input arguments */
 #define MAX_SEGMENTS   128 /* number of output segments */
 
-#ifdef __AMIGA__
-# undef FORMAT_INT
-#endif
-
-/* Lower-case digits.  */
+/* Lower-case digits. */
 const unsigned char Curl_ldigits[] = "0123456789abcdef";
 
-/* Upper-case digits.  */
+/* Upper-case digits. */
 const unsigned char Curl_udigits[] = "0123456789ABCDEF";
 
 #define OUTCHAR(x)                                       \
   do {                                                   \
-    if(stream((unsigned char)x, userp))                  \
+    if(stream((unsigned char)(x), userp))                \
       return TRUE;                                       \
     (*donep)++;                                          \
   } while(0)
 
 /* Data type to read from the arglist */
 typedef enum {
-  FORMAT_STRING,
-  FORMAT_PTR,
-  FORMAT_INTPTR,
-  FORMAT_INT,
-  FORMAT_LONG,
-  FORMAT_LONGLONG,
-  FORMAT_INTU,
-  FORMAT_LONGU,
-  FORMAT_LONGLONGU,
-  FORMAT_DOUBLE,
-  FORMAT_LONGDOUBLE,
-  FORMAT_WIDTH,
-  FORMAT_PRECISION
+  MTYPE_STRING,
+  MTYPE_PTR,
+  MTYPE_INTPTR,
+  MTYPE_INT,
+  MTYPE_LONG,
+  MTYPE_LONGLONG,
+  MTYPE_INTU,
+  MTYPE_LONGU,
+  MTYPE_LONGLONGU,
+  MTYPE_DOUBLE,
+  MTYPE_LONGDOUBLE,
+  MTYPE_WIDTH,
+  MTYPE_PRECISION
 } FormatType;
 
 /* conversion and display flags */
@@ -128,8 +102,8 @@ struct va_input {
   union {
     const char *str;
     void *ptr;
-    mp_intmax_t nums; /* signed */
-    mp_uintmax_t numu; /* unsigned */
+    int64_t nums; /* signed */
+    uint64_t numu; /* unsigned */
     double dnum;
   } val;
 };
@@ -158,9 +132,9 @@ struct asprintf {
 };
 
 /* the provided input number is 1-based but this returns the number 0-based.
-
-   returns -1 if no valid number was provided.
-*/
+ *
+ * returns -1 if no valid number was provided.
+ */
 static int dollarstring(const char *p, const char **end)
 {
   curl_off_t num;
@@ -172,7 +146,7 @@ static int dollarstring(const char *p, const char **end)
 }
 
 #define is_arg_used(x, y)   ((x)[(y) / 8] & (1 << ((y) & 7)))
-#define mark_arg_used(x, y) ((x)[y / 8] |= (unsigned char)(1 << ((y) & 7)))
+#define mark_arg_used(x, y) ((x)[(y) / 8] |= (unsigned char)(1 << ((y) & 7)))
 
 /*
  * Parse the format string.
@@ -250,7 +224,7 @@ static int parsefmt(const char *format,
             /* illegal combo */
             return PFMT_DOLLAR;
 
-          /* we got no positional, just get the next arg */
+          /* we got no positional, get the next arg */
           param = -1;
           use_dollar = DOLLAR_NOPE;
         }
@@ -405,80 +379,80 @@ static int parsefmt(const char *format,
         flags |= FLAGS_ALT;
         FALLTHROUGH();
       case 's':
-        type = FORMAT_STRING;
+        type = MTYPE_STRING;
         break;
       case 'n':
-        type = FORMAT_INTPTR;
+        type = MTYPE_INTPTR;
         break;
       case 'p':
-        type = FORMAT_PTR;
+        type = MTYPE_PTR;
         break;
       case 'd':
       case 'i':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONG;
+          type = MTYPE_LONGLONG;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONG;
+          type = MTYPE_LONG;
         else
-          type = FORMAT_INT;
+          type = MTYPE_INT;
         break;
       case 'u':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONGU;
+          type = MTYPE_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONGU;
+          type = MTYPE_LONGU;
         else
-          type = FORMAT_INTU;
+          type = MTYPE_INTU;
         flags |= FLAGS_UNSIGNED;
         break;
       case 'o':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONGU;
+          type = MTYPE_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONGU;
+          type = MTYPE_LONGU;
         else
-          type = FORMAT_INTU;
+          type = MTYPE_INTU;
         flags |= FLAGS_OCTAL | FLAGS_UNSIGNED;
         break;
       case 'x':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONGU;
+          type = MTYPE_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONGU;
+          type = MTYPE_LONGU;
         else
-          type = FORMAT_INTU;
+          type = MTYPE_INTU;
         flags |= FLAGS_HEX | FLAGS_UNSIGNED;
         break;
       case 'X':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONGU;
+          type = MTYPE_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONGU;
+          type = MTYPE_LONGU;
         else
-          type = FORMAT_INTU;
+          type = MTYPE_INTU;
         flags |= FLAGS_HEX | FLAGS_UPPER | FLAGS_UNSIGNED;
         break;
       case 'c':
-        type = FORMAT_INT;
+        type = MTYPE_INT;
         flags |= FLAGS_CHAR;
         break;
       case 'f':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         break;
       case 'e':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         flags |= FLAGS_FLOATE;
         break;
       case 'E':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         flags |= FLAGS_FLOATE | FLAGS_UPPER;
         break;
       case 'g':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         flags |= FLAGS_FLOATG;
         break;
       case 'G':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         flags |= FLAGS_FLOATG | FLAGS_UPPER;
         break;
       default:
@@ -499,7 +473,7 @@ static int parsefmt(const char *format,
         if(width >= max_param)
           max_param = width;
 
-        in[width].type = FORMAT_WIDTH;
+        in[width].type = MTYPE_WIDTH;
         /* mark as used */
         mark_arg_used(usedinput, width);
       }
@@ -517,7 +491,7 @@ static int parsefmt(const char *format,
         if(precision >= max_param)
           max_param = precision;
 
-        in[precision].type = FORMAT_PRECISION;
+        in[precision].type = MTYPE_PRECISION;
         mark_arg_used(usedinput, precision);
       }
 
@@ -572,42 +546,42 @@ static int parsefmt(const char *format,
 
     /* based on the type, read the correct argument */
     switch(iptr->type) {
-    case FORMAT_STRING:
+    case MTYPE_STRING:
       iptr->val.str = va_arg(arglist, const char *);
       break;
 
-    case FORMAT_INTPTR:
-    case FORMAT_PTR:
+    case MTYPE_INTPTR:
+    case MTYPE_PTR:
       iptr->val.ptr = va_arg(arglist, void *);
       break;
 
-    case FORMAT_LONGLONGU:
-      iptr->val.numu = (mp_uintmax_t)va_arg(arglist, mp_uintmax_t);
+    case MTYPE_LONGLONGU:
+      iptr->val.numu = va_arg(arglist, uint64_t);
       break;
 
-    case FORMAT_LONGLONG:
-      iptr->val.nums = (mp_intmax_t)va_arg(arglist, mp_intmax_t);
+    case MTYPE_LONGLONG:
+      iptr->val.nums = va_arg(arglist, int64_t);
       break;
 
-    case FORMAT_LONGU:
-      iptr->val.numu = (mp_uintmax_t)va_arg(arglist, unsigned long);
+    case MTYPE_LONGU:
+      iptr->val.numu = va_arg(arglist, unsigned long);
       break;
 
-    case FORMAT_LONG:
-      iptr->val.nums = (mp_intmax_t)va_arg(arglist, long);
+    case MTYPE_LONG:
+      iptr->val.nums = va_arg(arglist, long);
       break;
 
-    case FORMAT_INTU:
-      iptr->val.numu = (mp_uintmax_t)va_arg(arglist, unsigned int);
+    case MTYPE_INTU:
+      iptr->val.numu = va_arg(arglist, unsigned int);
       break;
 
-    case FORMAT_INT:
-    case FORMAT_WIDTH:
-    case FORMAT_PRECISION:
-      iptr->val.nums = (mp_intmax_t)va_arg(arglist, int);
+    case MTYPE_INT:
+    case MTYPE_WIDTH:
+    case MTYPE_PRECISION:
+      iptr->val.nums = va_arg(arglist, int);
       break;
 
-    case FORMAT_DOUBLE:
+    case MTYPE_DOUBLE:
       iptr->val.dnum = va_arg(arglist, double);
       break;
 
@@ -623,8 +597,8 @@ static int parsefmt(const char *format,
 }
 
 struct mproperty {
-  int width;            /* Width of a field.  */
-  int prec;             /* Precision of a field.  */
+  int width;            /* Width of a field. */
+  int prec;             /* Precision of a field. */
   unsigned int flags;
 };
 
@@ -634,9 +608,9 @@ static bool out_double(void *userp,
                        double dnum,
                        char *work, int *donep)
 {
-  char formatbuf[32] = "%";
-  char *fptr = &formatbuf[1];
-  size_t left = sizeof(formatbuf) - strlen(formatbuf);
+  char fmt[32] = "%";
+  char *fptr = &fmt[1];
+  size_t left = sizeof(fmt) - strlen(fmt);
   int flags = p->flags;
   int width = p->width;
   int prec = p->prec;
@@ -696,26 +670,25 @@ static bool out_double(void *userp,
 
   *fptr = 0; /* and a final null-termination */
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
-#ifdef HAVE_SNPRINTF
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+#ifdef _WIN32
+  curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
+#elif defined(HAVE_SNPRINTF)
+  /* !checksrc! disable BANNEDFUNC 1 */
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
-  (snprintf)(work, BUFFSIZE, formatbuf, dnum);
-#ifdef _WIN32
-  /* Old versions of the Windows CRT do not terminate the snprintf output
-     buffer if it reaches the max size so we do that here. */
-  work[BUFFSIZE - 1] = 0;
-#endif
+  snprintf(work, BUFFSIZE, fmt, dnum);
 #else
-  (sprintf)(work, formatbuf, dnum);
+  /* float and double outputs do not work without snprintf support */
+  work[0] = 0;
 #endif
-#ifdef __clang__
-#pragma clang diagnostic pop
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
 #endif
   DEBUGASSERT(strlen(work) < BUFFSIZE);
   while(*work) {
@@ -729,8 +702,8 @@ static bool out_double(void *userp,
 static bool out_number(void *userp,
                        int (*stream)(unsigned char, void *),
                        struct mproperty *p,
-                       mp_uintmax_t num,
-                       mp_intmax_t nums,
+                       uint64_t num,
+                       int64_t nums,
                        char *work, int *donep)
 {
   const unsigned char *digits = Curl_ldigits;
@@ -748,7 +721,7 @@ static bool out_number(void *userp,
   char *w;
 
   if(flags & FLAGS_CHAR) {
-    /* Character.  */
+    /* Character. */
     if(!(flags & FLAGS_LEFT))
       while(--width > 0)
         OUTCHAR(' ');
@@ -772,23 +745,23 @@ static bool out_number(void *userp,
     ;
 
   else {
-    /* Decimal integer.  */
+    /* Decimal integer. */
     is_neg = (nums < 0);
     if(is_neg) {
       /* signed_num might fail to hold absolute negative minimum by 1 */
-      mp_intmax_t signed_num; /* Used to convert negative in positive.  */
-      signed_num = nums + (mp_intmax_t)1;
+      int64_t signed_num; /* Used to convert negative in positive. */
+      signed_num = nums + (int64_t)1;
       signed_num = -signed_num;
-      num = (mp_uintmax_t)signed_num;
-      num += (mp_uintmax_t)1;
+      num = (uint64_t)signed_num;
+      num += (uint64_t)1;
     }
   }
 
-  /* Supply a default precision if none was given.  */
+  /* Supply a default precision if none was given. */
   if(prec == -1)
     prec = 1;
 
-  /* Put the number in WORK.  */
+  /* Put the number in WORK. */
   w = workend;
   DEBUGASSERT(base <= 16);
   switch(base) {
@@ -848,7 +821,7 @@ static bool out_number(void *userp,
     while(width-- > 0)
       OUTCHAR('0');
 
-  /* Write the number.  */
+  /* Write the number. */
   while(++w <= workend) {
     OUTCHAR(*w);
   }
@@ -874,7 +847,7 @@ static bool out_string(void *userp,
   size_t len;
 
   if(!str) {
-    /* Write null string if there is space.  */
+    /* Write null string if there is space. */
     if(prec == -1 || prec >= (int)sizeof(nilstr) - 1) {
       str = nilstr;
       len = sizeof(nilstr) - 1;
@@ -921,17 +894,17 @@ static bool out_pointer(void *userp,
                         char *work,
                         int *donep)
 {
-  /* Generic pointer.  */
+  /* Generic pointer. */
   if(ptr) {
     size_t num = (size_t)ptr;
 
-    /* If the pointer is not NULL, write it as a %#x spec.  */
+    /* If the pointer is not NULL, write it as a %#x spec. */
     p->flags |= FLAGS_HEX | FLAGS_ALT;
     if(out_number(userp, stream, p, num, 0, work, donep))
       return TRUE;
   }
   else {
-    /* Write "(nil)" for a nil pointer.  */
+    /* Write "(nil)" for a nil pointer. */
     const char *point;
     int width = p->width;
     int flags = p->flags;
@@ -965,14 +938,14 @@ static bool out_pointer(void *userp,
  * All output is sent to the 'stream()' callback, one byte at a time.
  */
 
-static int formatf(void *userp, /* untouched by format(), just sent to the
+static int formatf(void *userp, /* untouched by format(), sent to the
                                    stream() function in the second argument */
                    /* function pointer called for each output character */
                    int (*stream)(unsigned char, void *),
                    const char *format, /* %-formatted string */
                    va_list ap_save) /* list of parameters */
 {
-  int done = 0;   /* number of characters written  */
+  int done = 0;   /* number of characters written */
   int i;
   int ocount = 0; /* number of output segments */
   int icount = 0; /* number of input arguments */
@@ -999,7 +972,7 @@ static int formatf(void *userp, /* untouched by format(), just sent to the
         done++;
       }
       if(optr->flags & FLAGS_SUBSTR)
-        /* this is just a substring */
+        /* this is a substring */
         continue;
     }
 
@@ -1036,48 +1009,46 @@ static int formatf(void *userp, /* untouched by format(), just sent to the
       p.prec = -1;
 
     switch(iptr->type) {
-    case FORMAT_INTU:
-    case FORMAT_LONGU:
-    case FORMAT_LONGLONGU:
+    case MTYPE_INTU:
+    case MTYPE_LONGU:
+    case MTYPE_LONGLONGU:
       p.flags |= FLAGS_UNSIGNED;
       if(out_number(userp, stream, &p, iptr->val.numu, 0, work, &done))
         return done;
       break;
 
-    case FORMAT_INT:
-    case FORMAT_LONG:
-    case FORMAT_LONGLONG:
+    case MTYPE_INT:
+    case MTYPE_LONG:
+    case MTYPE_LONGLONG:
       if(out_number(userp, stream, &p, iptr->val.numu,
                     iptr->val.nums, work, &done))
         return done;
       break;
 
-    case FORMAT_STRING:
+    case MTYPE_STRING:
       if(out_string(userp, stream, &p, iptr->val.str, &done))
         return done;
       break;
 
-    case FORMAT_PTR:
+    case MTYPE_PTR:
       if(out_pointer(userp, stream, &p, iptr->val.ptr, work, &done))
         return done;
       break;
 
-    case FORMAT_DOUBLE:
+    case MTYPE_DOUBLE:
       if(out_double(userp, stream, &p, iptr->val.dnum, work, &done))
         return done;
       break;
 
-    case FORMAT_INTPTR:
-      /* Answer the count of characters written.  */
-#ifdef HAVE_LONG_LONG_TYPE
+    case MTYPE_INTPTR:
+      /* Answer the count of characters written. */
       if(p.flags & FLAGS_LONGLONG)
-        *(LONG_LONG_TYPE *)iptr->val.ptr = (LONG_LONG_TYPE)done;
+        *(int64_t *)iptr->val.ptr = (int64_t)done;
       else
-#endif
         if(p.flags & FLAGS_LONG)
           *(long *)iptr->val.ptr = (long)done;
       else if(!(p.flags & FLAGS_SHORT))
-        *(int *)iptr->val.ptr = (int)done;
+        *(int *)iptr->val.ptr = done;
       else
         *(short *)iptr->val.ptr = (short)done;
       break;

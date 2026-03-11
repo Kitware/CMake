@@ -71,9 +71,17 @@ macro(curl_dependency_option _option_name _find_name _desc_name)
   set_property(CACHE ${_option_name} PROPERTY STRINGS "AUTO" "ON" "OFF")
 
   if(${_option_name} STREQUAL "AUTO")
-    find_package(${_find_name})
+    if(_find_name STREQUAL "ZLIB")
+      find_package(${_find_name})
+    else()
+      find_package(${_find_name} MODULE)
+    endif()
   elseif(${_option_name})
-    find_package(${_find_name} REQUIRED)
+    if(_find_name STREQUAL "ZLIB")
+      find_package(${_find_name} REQUIRED)
+    else()
+      find_package(${_find_name} MODULE REQUIRED)
+    endif()
   else()
     string(TOUPPER "${_find_name}" _find_name_upper)
     set(${_find_name}_FOUND OFF)  # cmake-lint: disable=C0103
@@ -102,24 +110,24 @@ endmacro()
 
 # Internal: Recurse into target libraries and collect their include directories
 # and macro definitions.
-macro(curl_collect_target_options _target)
-  get_target_property(_val ${_target} INTERFACE_INCLUDE_DIRECTORIES)
-  if(_val)
-    list(APPEND _includes ${_val})
-  endif()
-  get_target_property(_val ${_target} INCLUDE_DIRECTORIES)
-  if(_val)
-    list(APPEND _includes ${_val})
-  endif()
-  get_target_property(_val ${_target} COMPILE_DEFINITIONS)
+macro(curl_collect_target_compile_options _target)
+  get_target_property(_val ${_target} INTERFACE_COMPILE_DEFINITIONS)
   if(_val)
     list(APPEND _definitions ${_val})
+  endif()
+  get_target_property(_val ${_target} INTERFACE_INCLUDE_DIRECTORIES)
+  if(_val)
+    list(APPEND _incsys ${_val})
+  endif()
+  get_target_property(_val ${_target} INTERFACE_COMPILE_OPTIONS)
+  if(_val)
+    list(APPEND _options ${_val})
   endif()
   get_target_property(_val ${_target} LINK_LIBRARIES)
   if(_val)
     foreach(_lib IN LISTS _val)
       if(TARGET "${_lib}")
-        curl_collect_target_options(${_lib})
+        curl_collect_target_compile_options(${_lib})
       endif()
     endforeach()
   endif()
@@ -127,34 +135,93 @@ macro(curl_collect_target_options _target)
 endmacro()
 
 # Create a clang-tidy target for test targets
-macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
+function(curl_add_clang_tidy_test_target _target_clang_tidy _target)
   if(CURL_CLANG_TIDY)
 
-    set(_includes "")
     set(_definitions "")
+    set(_includes "")
+    set(_incsys "")
+    set(_options "")
 
-    # Collect header directories and macro definitions applying to the directory
-    get_directory_property(_val INCLUDE_DIRECTORIES)
-    if(_val)
-      list(APPEND _includes ${_val})
-    endif()
+    # Make a list of known system include directories
+    set(_sys_incdirs "${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
+    foreach(_inc IN LISTS CMAKE_SYSTEM_PREFIX_PATH)
+      if(NOT _inc MATCHES "/$")
+        string(APPEND _inc "/")
+      endif()
+      string(APPEND _inc "include")
+      if(NOT _inc IN_LIST _sys_incdirs AND IS_DIRECTORY "${_inc}")
+        list(APPEND _sys_incdirs "${_inc}")
+      endif()
+    endforeach()
+
+    # Collect options applying to the directory
     get_directory_property(_val COMPILE_DEFINITIONS)
     if(_val)
       list(APPEND _definitions ${_val})
     endif()
-    unset(_val)
+    get_directory_property(_val INCLUDE_DIRECTORIES)
+    if(_val)
+      list(APPEND _includes ${_val})
+    endif()
+    get_directory_property(_val COMPILE_OPTIONS)
+    if(_val)
+      list(APPEND _options ${_val})
+    endif()
+
+    # Collect options applying to the target
+    get_target_property(_val ${_target} COMPILE_DEFINITIONS)
+    if(_val)
+      list(APPEND _definitions ${_val})
+    endif()
+    get_target_property(_val ${_target} INCLUDE_DIRECTORIES)
+    if(_val)
+      list(APPEND _includes ${_val})
+    endif()
+    get_target_property(_val ${_target} COMPILE_OPTIONS)
+    if(_val)
+      list(APPEND _options ${_val})
+    endif()
 
     # Collect header directories and macro definitions from lib dependencies
-    curl_collect_target_options(${_target})
-
-    list(REMOVE_ITEM _includes "")
-    string(REPLACE ";" ";-I" _includes ";${_includes}")
-    list(REMOVE_DUPLICATES _includes)
+    curl_collect_target_compile_options(${_target})
 
     list(REMOVE_ITEM _definitions "")
     string(REPLACE ";" ";-D" _definitions ";${_definitions}")
     list(REMOVE_DUPLICATES _definitions)
     list(SORT _definitions)  # Sort like CMake does
+
+    list(REMOVE_ITEM _includes "")
+    string(REPLACE ";" ";-I" _includes ";${_includes}")
+    list(REMOVE_DUPLICATES _includes)
+
+    set(_incsys_tmp ${_incsys})
+    list(REMOVE_DUPLICATES _incsys_tmp)
+    set(_incsys "")
+    set(_incsystop "")
+    foreach(_inc IN LISTS _incsys_tmp)
+      if(_inc IN_LIST _sys_incdirs)
+        list(APPEND _incsystop "${_inc}")  # Save system prefixes to re-add them later to the end of list
+        continue()
+      endif()
+      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter
+      # evaluates to an empty path in this context. Also skip
+      # '$<BUILD_INTERFACE:curl-include>', as already present in '_includes'.
+      if(_inc AND
+         NOT _inc MATCHES "INSTALL_INTERFACE:" AND
+         NOT _inc MATCHES "BUILD_INTERFACE:")
+        list(APPEND _incsys "-isystem" "${_inc}")
+      endif()
+    endforeach()
+    foreach(_inc IN LISTS _incsystop)
+      list(APPEND _incsys "-isystem" "${_inc}")
+    endforeach()
+
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+      list(REMOVE_DUPLICATES _options)  # Keep the first of duplicates to imitate CMake
+    else()
+      set(_options)
+    endif()
 
     # Assemble source list
     set(_sources "")
@@ -165,14 +232,23 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
       list(APPEND _sources "${_source}")
     endforeach()
 
+    set(_cc "${CMAKE_C_COMPILER}")
+    if(CMAKE_C_COMPILER_TARGET AND CMAKE_C_COMPILE_OPTIONS_TARGET)
+      list(APPEND _cc "${CMAKE_C_COMPILE_OPTIONS_TARGET}${CMAKE_C_COMPILER_TARGET}")
+    endif()
+    if(APPLE AND CMAKE_OSX_SYSROOT)
+      list(APPEND _cc "-isysroot" "${CMAKE_OSX_SYSROOT}")
+    elseif(CMAKE_SYSROOT AND CMAKE_C_COMPILE_OPTIONS_SYSROOT)
+      list(APPEND _cc "${CMAKE_C_COMPILE_OPTIONS_SYSROOT}${CMAKE_SYSROOT}")
+    endif()
+
+    # Pass -clang-diagnostic-unused-function to disable -Wunused-function implied by -Wunused
     add_custom_target(${_target_clang_tidy} USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-      COMMAND ${CMAKE_C_CLANG_TIDY} ${_sources} -- ${_includes} ${_definitions}
+      COMMAND ${CMAKE_C_CLANG_TIDY}
+        "--checks=-clang-diagnostic-unused-function"
+        ${_sources} -- ${_cc} ${_definitions} ${_includes} ${_incsys} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
-
-    unset(_includes)
-    unset(_definitions)
-    unset(_sources)
   endif()
-endmacro()
+endfunction()

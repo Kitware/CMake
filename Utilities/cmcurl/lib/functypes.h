@@ -23,8 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
-
 /* defaults:
 
    ssize_t recv(int, void *, size_t, int);
@@ -37,7 +35,7 @@
    2. For systems with config-*.h files, define them there.
 */
 
-#ifdef _WIN32
+#ifdef USE_WINSOCK
 /* int recv(SOCKET, char *, int, int) */
 #define RECV_TYPE_ARG1 SOCKET
 #define RECV_TYPE_ARG2 char *
@@ -59,9 +57,9 @@
 #define RECV_TYPE_ARG4 long
 #define RECV_TYPE_RETV long
 
-/* int send(int, const char *, int, int); */
+/* int send(int, char *, int, int); */
 #define SEND_TYPE_ARG1 int
-#define SEND_QUAL_ARG2
+#define SEND_NONCONST_ARG2
 #define SEND_TYPE_ARG2 char *
 #define SEND_TYPE_ARG3 int
 #define SEND_TYPE_RETV int
@@ -85,10 +83,6 @@
 
 #ifndef RECV_TYPE_RETV
 #define RECV_TYPE_RETV ssize_t
-#endif
-
-#ifndef SEND_QUAL_ARG2
-#define SEND_QUAL_ARG2 const
 #endif
 
 #ifndef SEND_TYPE_ARG1
