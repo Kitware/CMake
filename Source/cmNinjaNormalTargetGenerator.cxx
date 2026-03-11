@@ -1319,11 +1319,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     linkBuild.ExplicitDeps = this->GetObjects(config);
   }
 
-  std::vector<std::string> extraISPCObjects =
+  auto extraISPCObjects =
     this->GetGeneratorTarget()->GetGeneratedISPCObjects(config);
-  std::transform(extraISPCObjects.begin(), extraISPCObjects.end(),
-                 std::back_inserter(linkBuild.ExplicitDeps),
-                 this->MapToNinjaPath());
+  auto const mapToNinjaPath = this->MapToNinjaPath();
+  std::transform(
+    extraISPCObjects.begin(), extraISPCObjects.end(),
+    std::back_inserter(linkBuild.ExplicitDeps),
+    [&mapToNinjaPath](std::pair<cmSourceFile const*, std::string> const& obj)
+      -> std::string { return mapToNinjaPath(obj.second); });
 
   linkBuild.ImplicitDeps =
     this->ComputeLinkDeps(this->TargetLinkLanguage(config), config);
@@ -1497,7 +1500,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
         std::transform(
           ccByproducts.begin(), ccByproducts.end(),
           std::back_inserter(globalGen->GetByproductsForCleanTarget()),
-          this->MapToNinjaPath());
+          mapToNinjaPath);
       }
     }
   }

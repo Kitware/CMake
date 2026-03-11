@@ -1,0 +1,8 @@
+CMake Error at invalid\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<TARGET_OBJECTS:c_objs,INVALID_ARGUMENT_1,INVALID_ARGUMENT_2>
+
+  Unrecognized argument:
+
+    INVALID_ARGUMENT_1
