@@ -94,6 +94,14 @@ public:
   {
     this->DefaultComponentName = this->Makefile->GetSafeDefinition(
       "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
+    if (this->DefaultComponentName == "<PROJECT_NAME>") {
+      cmValue projectName = this->Makefile->GetDefinition("PROJECT_NAME");
+      if (!projectName->empty()) {
+        this->DefaultComponentName = projectName;
+      } else {
+        this->DefaultComponentName = "Unspecified";
+      }
+    }
     if (this->DefaultComponentName.empty()) {
       this->DefaultComponentName = "Unspecified";
     }
