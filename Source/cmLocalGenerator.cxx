@@ -3914,6 +3914,17 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
   }
 }
 
+void cmLocalGenerator::AppendDefines(
+  std::set<std::string>& defines,
+  std::vector<BT<std::string>> const& defines_vec) const
+{
+  std::set<BT<std::string>> tmp;
+  this->AppendDefines(tmp, defines_vec);
+  for (BT<std::string> const& i : tmp) {
+    defines.emplace(i.Value);
+  }
+}
+
 void cmLocalGenerator::AppendDefines(std::set<BT<std::string>>& defines,
                                      std::string const& defines_list) const
 {

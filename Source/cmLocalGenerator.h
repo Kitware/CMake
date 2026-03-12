@@ -266,6 +266,8 @@ public:
    */
   void AppendDefines(std::set<std::string>& defines,
                      std::string const& defines_list) const;
+  void AppendDefines(std::set<std::string>& defines,
+                     std::vector<BT<std::string>> const& defines_vec) const;
   void AppendDefines(std::set<BT<std::string>>& defines,
                      std::string const& defines_list) const;
   void AppendDefines(std::set<BT<std::string>>& defines,
