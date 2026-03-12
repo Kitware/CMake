@@ -383,9 +383,9 @@ Snippet files have a filename with the syntax
   ``target``
     The CMake target associated with the command. Only included when ``role``
     is ``compile`` or ``link``, or when ``role`` is ``custom`` and the custom
-    command is attached to a target with :ref:`add_custom_command(TARGET)`. In
-    conjunction with ``cmakeContent``, this can be used to look up the target
-    :prop_tgt:`TYPE` and :prop_tgt:`LABELS`.
+    command is attached to a target with :command:`add_custom_command(TARGET)`.
+    In conjunction with ``cmakeContent``, this can be used to look up the
+    target :prop_tgt:`TYPE` and :prop_tgt:`LABELS`.
 
   ``timeStart``
     Time at which the command started, expressed as the number of milliseconds

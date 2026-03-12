@@ -98,7 +98,6 @@ Commands
   * is now supported by the :generator:`Xcode` generator.
 
 * The :command:`add_custom_command(TARGET)` command
-  (for :ref:`Build Events <add_custom_command(TARGET)>`)
   gained support for resolving target-dependent generator expressions.
 
 * The :command:`build_command` command gained a ``PARALLEL_LEVEL`` option.
