@@ -17,6 +17,7 @@
 #include "cmCommandLineArgument.h"
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
+#include "cmEnvironment.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
@@ -1267,7 +1268,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
     if (args[1] == "env") {
 #ifndef CMAKE_BOOTSTRAP
-      cmSystemTools::EnvDiff env;
+      auto envdiff = cmEnvironmentModification{};
 #endif
 
       auto ai = args.cbegin() + 2;
@@ -1285,7 +1286,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 #ifdef CMAKE_BOOTSTRAP
           cmSystemTools::UnPutEnv(a.substr(8));
 #else
-          env.UnPutEnv(a.substr(8));
+          envdiff.Add(a.substr(8) + "=unset:");
 #endif
         } else if (a == "--modify") {
 #ifdef CMAKE_BOOTSTRAP
@@ -1298,7 +1299,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
             return 1;
           }
           std::string const& op = *ai;
-          if (!env.ParseOperation(op)) {
+          if (!envdiff.Add(op)) {
             std::cerr << "cmake -E env: invalid parameter to --modify: " << op
                       << '\n';
             return 1;
@@ -1314,7 +1315,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 #ifdef CMAKE_BOOTSTRAP
           cmSystemTools::PutEnv(a);
 #else
-          env.PutEnv(a);
+          auto const pos = a.find('=');
+          std::string const& name = a.substr(0, pos);
+          std::string const& value = a.substr(pos + 1);
+          envdiff.Add(cmStrCat(name, "=set:", value));
 #endif
         } else {
           // This is the beginning of the command.
@@ -1327,16 +1331,19 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         return 1;
       }
 
+      auto env = cmEnvironment{};
 #ifndef CMAKE_BOOTSTRAP
-      env.ApplyToCurrentEnv();
+      env.Update(cmSystemTools::GetEnvironmentVariables());
+      envdiff.ApplyTo(env);
 #endif
 
       // Execute command from remaining arguments.
       std::vector<std::string> cmd(ai, ae);
       int retval;
-      if (cmSystemTools::RunSingleCommand(cmd, nullptr, nullptr, &retval,
-                                          nullptr,
-                                          cmSystemTools::OUTPUT_PASSTHROUGH)) {
+      if (cmSystemTools::RunSingleCommand(
+            cmd, nullptr, nullptr, &retval, nullptr,
+            cmSystemTools::OUTPUT_PASSTHROUGH, cmDuration::zero(),
+            cmProcessOutput::Auto, env.GetVariables())) {
         return retval;
       }
       return 1;

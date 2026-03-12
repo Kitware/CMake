@@ -35,19 +35,24 @@ cmProcess::cmProcess(std::unique_ptr<cmCTestRunTest> runner)
 
 cmProcess::~cmProcess() = default;
 
-void cmProcess::SetCommand(std::string const& command)
+void cmProcess::SetCommand(std::string command)
 {
-  this->Command = command;
+  this->Command = std::move(command);
 }
 
-void cmProcess::SetCommandArguments(std::vector<std::string> const& args)
+void cmProcess::SetCommandArguments(std::vector<std::string> args)
 {
-  this->Arguments = args;
+  this->Arguments = std::move(args);
 }
 
-void cmProcess::SetWorkingDirectory(std::string const& dir)
+void cmProcess::SetEnvironment(std::vector<std::string> env)
 {
-  this->WorkingDirectory = dir;
+  this->Environment = std::move(env);
+}
+
+void cmProcess::SetWorkingDirectory(std::string dir)
+{
+  this->WorkingDirectory = std::move(dir);
 }
 
 bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
@@ -128,6 +133,15 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 #else
   static_cast<void>(affinity);
 #endif
+  if (!this->Environment.empty()) {
+    this->Env.clear();
+    this->Env.reserve(this->Environment.size() + 1);
+    for (auto const& var : this->Environment) {
+      this->Env.push_back(var.c_str());
+    }
+    this->Env.push_back(nullptr);
+    options.env = const_cast<char**>(this->Env.data());
+  }
 
   status =
     uv_read_start(pipe_reader, &cmProcess::OnAllocateCB, &cmProcess::OnReadCB);

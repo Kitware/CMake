@@ -21,6 +21,7 @@
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmDuration.h"
+#include "cmEnvironment.h"
 #include "cmInstrumentation.h"
 #include "cmProcess.h"
 #include "cmStringAlgorithms.h"
@@ -853,62 +854,36 @@ bool cmCTestRunTest::ForkProcess()
                        this->TestHandler->GetQuiet());
   }
 
-  cmSystemTools::SaveRestoreEnvironment sre;
-  std::ostringstream envMeasurement;
+  // Record the original environment before modifying it
+  auto const originalEnvironment =
+    cmEnvironment{ cmSystemTools::GetEnvironmentVariables() };
 
-  // We split processing ENVIRONMENT and ENVIRONMENT_MODIFICATION into two
-  // phases to ensure that MYVAR=reset: in the latter phase resets to the
-  // former phase's settings, rather than to the original environment.
-  if (!this->TestProperties->Environment.empty()) {
-    cmSystemTools::EnvDiff diff;
-    diff.AppendEnv(this->TestProperties->Environment);
-    diff.ApplyToCurrentEnv(&envMeasurement);
-  }
-
+  auto env = originalEnvironment;
+  env.Update(this->TestProperties->Environment);
   if (!this->TestProperties->EnvironmentModification.empty()) {
-    cmSystemTools::EnvDiff diff;
-    bool env_ok = true;
-
-    for (auto const& envmod : this->TestProperties->EnvironmentModification) {
-      env_ok &= diff.ParseOperation(envmod);
-    }
-
-    if (!env_ok) {
+    auto diff = cmEnvironmentModification{};
+    if (!diff.Add(this->TestProperties->EnvironmentModification)) {
       return false;
     }
-
-    diff.ApplyToCurrentEnv(&envMeasurement);
+    diff.ApplyTo(env);
   }
 
   if (this->UseAllocatedResources) {
-    std::vector<std::string> envLog;
-    this->SetupResourcesEnvironment(&envLog);
-    for (auto const& var : envLog) {
-      envMeasurement << var << std::endl;
-    }
+    this->SetupResourcesEnvironment(env);
   } else {
-    cmSystemTools::UnsetEnv("CTEST_RESOURCE_GROUP_COUNT");
-    // Signify that this variable is being actively unset
-    envMeasurement << "#CTEST_RESOURCE_GROUP_COUNT=" << std::endl;
+    env.UnPutEnv("CTEST_RESOURCE_GROUP_COUNT");
   }
 
-  this->TestResult.Environment = envMeasurement.str();
-  // Remove last newline
-  this->TestResult.Environment.erase(this->TestResult.Environment.length() -
-                                     1);
-
+  this->TestProcess->SetEnvironment(env.GetVariables());
+  this->TestResult.Environment = env.RecordDifference(originalEnvironment);
   return this->TestProcess->StartProcess(*this->MultiTestHandler.Loop,
                                          &this->TestProperties->Affinity);
 }
 
-void cmCTestRunTest::SetupResourcesEnvironment(std::vector<std::string>* log)
+void cmCTestRunTest::SetupResourcesEnvironment(cmEnvironment& env)
 {
-  std::string processCount =
-    cmStrCat("CTEST_RESOURCE_GROUP_COUNT=", this->AllocatedResources.size());
-  cmSystemTools::PutEnv(processCount);
-  if (log) {
-    log->emplace_back(std::move(processCount));
-  }
+  env.PutEnv(
+    cmStrCat("CTEST_RESOURCE_GROUP_COUNT=", this->AllocatedResources.size()));
 
   std::size_t i = 0;
   for (auto const& process : this->AllocatedResources) {
@@ -933,15 +908,9 @@ void cmCTestRunTest::SetupResourcesEnvironment(std::vector<std::string>* log)
         firstName = false;
         var += cmStrCat("id:", it2.Id, ",slots:", it2.Slots);
       }
-      cmSystemTools::PutEnv(var);
-      if (log) {
-        log->push_back(var);
-      }
+      env.PutEnv(var);
     }
-    cmSystemTools::PutEnv(resourceList);
-    if (log) {
-      log->push_back(resourceList);
-    }
+    env.PutEnv(resourceList);
     ++i;
   }
 }

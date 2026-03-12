@@ -847,10 +847,12 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
                                      char const* dir, OutputOption outputflag,
-                                     cmDuration timeout, Encoding encoding)
+                                     cmDuration timeout, Encoding encoding,
+                                     std::vector<std::string> env)
 {
   cmUVProcessChainBuilder builder;
   builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, stdin)
+    .SetEnvironment(std::move(env))
     .AddCommand(command);
   if (dir) {
     builder.SetWorkingDirectory(dir);
@@ -2123,151 +2125,6 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
   return env;
 }
 
-void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
-{
-  for (std::string const& var : env) {
-    cmSystemTools::PutEnv(var);
-  }
-}
-
-void cmSystemTools::EnvDiff::AppendEnv(std::vector<std::string> const& env)
-{
-  for (std::string const& var : env) {
-    this->PutEnv(var);
-  }
-}
-
-void cmSystemTools::EnvDiff::PutEnv(std::string const& env)
-{
-  auto const eq_loc = env.find('=');
-  if (eq_loc != std::string::npos) {
-    std::string name = env.substr(0, eq_loc);
-    diff[name] = env.substr(eq_loc + 1);
-  } else {
-    this->UnPutEnv(env);
-  }
-}
-
-void cmSystemTools::EnvDiff::UnPutEnv(std::string const& env)
-{
-  diff[env] = cm::nullopt;
-}
-
-bool cmSystemTools::EnvDiff::ParseOperation(std::string const& envmod)
-{
-  char path_sep = GetSystemPathlistSeparator();
-
-  auto apply_diff = [this](std::string const& name,
-                           std::function<void(std::string&)> const& apply) {
-    cm::optional<std::string> old_value = diff[name];
-    std::string output;
-    if (old_value) {
-      output = *old_value;
-    } else {
-      char const* curval = cmSystemTools::GetEnv(name);
-      if (curval) {
-        output = curval;
-      }
-    }
-    apply(output);
-    diff[name] = output;
-  };
-
-  // Split on `=`
-  auto const eq_loc = envmod.find_first_of('=');
-  if (eq_loc == std::string::npos) {
-    cmSystemTools::Error(cmStrCat(
-      "Error: Missing `=` after the variable name in: ", envmod, '\n'));
-    return false;
-  }
-
-  auto const name = envmod.substr(0, eq_loc);
-
-  // Split value on `:`
-  auto const op_value_start = eq_loc + 1;
-  auto const colon_loc = envmod.find_first_of(':', op_value_start);
-  if (colon_loc == std::string::npos) {
-    cmSystemTools::Error(
-      cmStrCat("Error: Missing `:` after the operation in: ", envmod, '\n'));
-    return false;
-  }
-  auto const op = envmod.substr(op_value_start, colon_loc - op_value_start);
-
-  auto const value_start = colon_loc + 1;
-  auto const value = envmod.substr(value_start);
-
-  // Determine what to do with the operation.
-  if (op == "reset"_s) {
-    auto entry = diff.find(name);
-    if (entry != diff.end()) {
-      diff.erase(entry);
-    }
-  } else if (op == "set"_s) {
-    diff[name] = value;
-  } else if (op == "unset"_s) {
-    diff[name] = cm::nullopt;
-  } else if (op == "string_append"_s) {
-    apply_diff(name, [&value](std::string& output) { output += value; });
-  } else if (op == "string_prepend"_s) {
-    apply_diff(name,
-               [&value](std::string& output) { output.insert(0, value); });
-  } else if (op == "path_list_append"_s) {
-    apply_diff(name, [&value, path_sep](std::string& output) {
-      if (!output.empty()) {
-        output += path_sep;
-      }
-      output += value;
-    });
-  } else if (op == "path_list_prepend"_s) {
-    apply_diff(name, [&value, path_sep](std::string& output) {
-      if (!output.empty()) {
-        output.insert(output.begin(), path_sep);
-      }
-      output.insert(0, value);
-    });
-  } else if (op == "cmake_list_append"_s) {
-    apply_diff(name, [&value](std::string& output) {
-      if (!output.empty()) {
-        output += ';';
-      }
-      output += value;
-    });
-  } else if (op == "cmake_list_prepend"_s) {
-    apply_diff(name, [&value](std::string& output) {
-      if (!output.empty()) {
-        output.insert(output.begin(), ';');
-      }
-      output.insert(0, value);
-    });
-  } else {
-    cmSystemTools::Error(cmStrCat(
-      "Error: Unrecognized environment manipulation argument: ", op, '\n'));
-    return false;
-  }
-
-  return true;
-}
-
-void cmSystemTools::EnvDiff::ApplyToCurrentEnv(std::ostringstream* measurement)
-{
-  for (auto const& env_apply : diff) {
-    if (env_apply.second) {
-      auto const env_update =
-        cmStrCat(env_apply.first, '=', *env_apply.second);
-      cmSystemTools::PutEnv(env_update);
-      if (measurement) {
-        *measurement << env_update << std::endl;
-      }
-    } else {
-      cmSystemTools::UnsetEnv(env_apply.first.c_str());
-      if (measurement) {
-        // Signify that this variable is being actively unset
-        *measurement << '#' << env_apply.first << "=\n";
-      }
-    }
-  }
-}
-
 cmSystemTools::SaveRestoreEnvironment::SaveRestoreEnvironment()
 {
   this->Env = cmSystemTools::GetEnvironmentVariables();
@@ -2287,7 +2144,9 @@ cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
   }
 
   // Then put back each entry from the original environment:
-  cmSystemTools::AppendEnv(this->Env);
+  for (std::string const& var : this->Env) {
+    cmSystemTools::PutEnv(var);
+  }
 }
 #endif
 

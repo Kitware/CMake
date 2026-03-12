@@ -34,9 +34,10 @@ class cmProcess
 public:
   explicit cmProcess(std::unique_ptr<cmCTestRunTest> runner);
   ~cmProcess();
-  void SetCommand(std::string const& command);
-  void SetCommandArguments(std::vector<std::string> const& arg);
-  void SetWorkingDirectory(std::string const& dir);
+  void SetCommand(std::string command);
+  void SetCommandArguments(std::vector<std::string> arg);
+  void SetEnvironment(std::vector<std::string> env);
+  void SetWorkingDirectory(std::string dir);
   void SetStopTimeout(cmDuration t) { this->StopTimeout = t; }
   void SetTimeout(cmDuration t) { this->Timeout = t; }
   void ChangeTimeout(cmDuration t);
@@ -161,6 +162,8 @@ private:
   std::string WorkingDirectory;
   std::vector<std::string> Arguments;
   std::vector<char const*> ProcessArgs;
+  std::vector<std::string> Environment;
+  std::vector<char const*> Env;
   int Id;
   int64_t ExitValue;
   Termination TerminationStyle = Termination::Normal;
