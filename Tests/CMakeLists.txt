@@ -2465,7 +2465,7 @@ if(BUILD_TESTING)
     --build-options
       "-DUNUSED_CLI_VARIABLE=Unused")
   set_tests_properties(WarnUnusedCliUnused PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
+    PASS_REGULAR_EXPRESSION "CMake Warning \\(unused-cli\\):.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
 
   add_test(WarnUnusedCliUsed ${CMAKE_CTEST_COMMAND}

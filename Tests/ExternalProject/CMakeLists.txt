@@ -435,9 +435,10 @@ if(EP_TEST_GIT)
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
   set(proj TS1-GIT-all-GIT_SUBMODULES-via-CMP0097-OLD)
-  set(CMAKE_WARN_DEPRECATED FALSE) # we are testing CMP0097 OLD behavior
+  cmake_diagnostic(PUSH)
+  cmake_diagnostic(SET CMD_DEPRECATED IGNORE)
   cmake_policy(SET CMP0097 OLD)
-  unset(CMAKE_WARN_DEPRECATED)
+  cmake_diagnostic(POP)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY "${local_git_repo}"
     GIT_SUBMODULES ""

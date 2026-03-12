@@ -16,7 +16,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Warning:
+CMake Warning \(unused-cli\):
   Manually-specified variables were not used by the project:
 
     RunCMake_GENERATOR

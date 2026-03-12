@@ -1,6 +1,6 @@
 
 # Prevent deprecated warnings from new UseSWIG module
-set (CMAKE_WARN_DEPRECATED FALSE)
+cmake_diagnostic(SET CMD_DEPRECATED IGNORE)
 
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
