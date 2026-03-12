@@ -3348,12 +3348,12 @@ int cmMakefile::TryCompile(std::string const& srcdir,
   // to save time we pass the EnableLanguage info directly
   cm.GetGlobalGenerator()->EnableLanguagesFromGenerator(
     this->GetGlobalGenerator(), this);
-  if (this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
-    cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE", "",
-                     cmStateEnums::INTERNAL);
-  } else {
-    cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE", "",
-                     cmStateEnums::INTERNAL);
+  for (unsigned dc = 1; dc < cmDiagnostics::CategoryCount; ++dc) {
+    auto const category = static_cast<cmDiagnosticCategory>(dc);
+    if (this->GetDiagnosticAction(category) == cmDiagnostics::Ignore) {
+      cm.GetCurrentSnapshot().SetDiagnostic(category, cmDiagnostics::Ignore,
+                                            false);
+    }
   }
   if (cm.Configure() != 0) {
     this->IssueMessage(MessageType::FATAL_ERROR,
