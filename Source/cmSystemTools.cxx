@@ -2099,16 +2099,24 @@ bool cmSystemTools::UnsetEnv(char const* value)
 std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 {
   std::vector<std::string> env;
-  int cc;
 #  ifdef _WIN32
-  // if program starts with main, _wenviron is initially NULL, call to
-  // _wgetenv and create wide-character string environment
-  _wgetenv(L"");
-  for (cc = 0; _wenviron[cc]; ++cc) {
-    env.emplace_back(cmsys::Encoding::ToNarrow(_wenviron[cc]));
+  struct EnvDeleter
+  {
+    void operator()(wchar_t* p) const { FreeEnvironmentStringsW(p); }
+  };
+
+  auto block = std::unique_ptr<wchar_t, EnvDeleter>(GetEnvironmentStringsW());
+  if (!block) {
+    return env;
+  }
+
+  for (wchar_t const* p = block.get(); *p; p += wcslen(p) + 1) {
+    if (p[0] != L'=') {
+      env.emplace_back(cmsys::Encoding::ToNarrow(p));
+    }
   }
 #  else
-  for (cc = 0; environ[cc]; ++cc) {
+  for (int cc = 0; environ[cc]; ++cc) {
     env.emplace_back(environ[cc]);
   }
 #  endif
