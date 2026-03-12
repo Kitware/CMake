@@ -150,7 +150,8 @@ void cmFastbuildUtilityTargetGenerator::Generate()
   this->AdditionalCleanFiles();
 
   fastbuildTarget.BasePath = this->GetMakefile()->GetCurrentSourceDirectory();
-  this->GetGlobalGenerator()->AddIDEProject(fastbuildTarget, Config);
-
+  if (this->GetGeneratorTarget()->GetType() != cmStateEnums::GLOBAL_TARGET) {
+    this->GetGlobalGenerator()->AddIDEProject(fastbuildTarget, Config);
+  }
   this->GetGlobalGenerator()->AddTarget(std::move(fastbuildTarget));
 }
