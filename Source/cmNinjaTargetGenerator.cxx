@@ -31,6 +31,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
@@ -238,6 +239,18 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
       flags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
   }
 
+  if (auto const* fileSet =
+        this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
+          config, source)) {
+    auto options = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetCompileOptions(config, language)
+      : fileSet->GetInterfaceCompileOptions(config, language);
+    if (!options.empty()) {
+      this->LocalGenerator->AppendCompileOptions(flags,
+                                                 cm::remove_BT(options));
+    }
+  }
+
   // Add precompile headers compile options.
   if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     std::string pchOptions;
@@ -331,6 +344,17 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
       genexInterpreter.Evaluate(*config_compile_defs, COMPILE_DEFINITIONS));
   }
 
+  if (auto const* fileSet =
+        this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
+          config, source)) {
+    auto fsDefines = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetCompileDefinitions(config, language)
+      : fileSet->GetInterfaceCompileDefinitions(config, language);
+    if (!fsDefines.empty()) {
+      this->LocalGenerator->AppendDefines(defines, fsDefines);
+    }
+  }
+
   std::string definesString = this->GetDefines(language, config);
   this->LocalGenerator->JoinDefines(defines, definesString, language);
 
@@ -342,6 +366,19 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
   std::string const& config)
 {
   std::vector<std::string> includes;
+
+  if (auto const* fileSet =
+        this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
+          config, source)) {
+    auto fsIncludes = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetIncludeDirectories(config, language)
+      : fileSet->GetInterfaceIncludeDirectories(config, language);
+    if (!fsIncludes.empty()) {
+      this->LocalGenerator->AppendIncludeDirectories(
+        includes, cm::remove_BT(fsIncludes), *source);
+    }
+  }
+
   cmGeneratorExpressionInterpreter genexInterpreter(
     this->LocalGenerator, config, this->GeneratorTarget, language);
 

@@ -284,7 +284,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
         this->SetError(
           cmStrCat(R"(File set TYPE ")", cm::FileSetMetadata::CXX_MODULES,
                    R"(" may not have "PUBLIC" )"
-                   R"(or "PRIVATE" visibility on INTERFACE libraries.)"));
+                   R"(or "PRIVATE" scope on INTERFACE libraries.)"));
         return false;
       }
     }
@@ -297,9 +297,19 @@ bool TargetSourcesImpl::HandleOneFileSet(
       if (type == cm::FileSetMetadata::CXX_MODULES) {
         this->SetError(cmStrCat(R"(File set TYPE ")",
                                 cm::FileSetMetadata::CXX_MODULES,
-                                R"(" may not have "INTERFACE" visibility)"));
+                                R"(" may not have "INTERFACE" scope)"));
         return false;
       }
+    }
+
+    if (cm::FileSetMetadata::VisibilityIsForSelf(visibility) &&
+        this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
+        type == cm::FileSetMetadata::SOURCES) {
+      this->SetError(
+        cmStrCat(R"(File set TYPE ")", cm::FileSetMetadata::SOURCES,
+                 R"(" may not have "PUBLIC" )"
+                 R"(or "PRIVATE" scope on INTERFACE libraries.)"));
+      return false;
     }
 
     if (args.BaseDirs.empty()) {

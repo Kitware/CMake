@@ -31,6 +31,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -2883,14 +2884,36 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       configDefines += *ccdefs;
     }
 
+    // lookup for the associated file set, if any.
+    auto const* fileSet =
+      this->GeneratorTarget->GetFileSetForSource(config, source);
+    bool fileSetBelongsToTarget = false;
+    std::vector<std::string> fsOptions;
+    std::vector<std::string> fsDefines;
+    std::vector<std::string> fsIncludes;
+
+    if (fileSet) {
+      fileSetBelongsToTarget = fileSet->BelongsTo(this->GeneratorTarget);
+      fsOptions =
+        cm::remove_BT(fileSetBelongsToTarget
+                        ? fileSet->GetCompileOptions(config, lang)
+                        : fileSet->GetInterfaceCompileOptions(config, lang));
+      fsDefines = cm::remove_BT(
+        fileSetBelongsToTarget
+          ? fileSet->GetCompileDefinitions(config, lang)
+          : fileSet->GetInterfaceCompileDefinitions(config, lang));
+      fsIncludes = cm::remove_BT(
+        fileSetBelongsToTarget
+          ? fileSet->GetIncludeDirectories(config, lang)
+          : fileSet->GetInterfaceIncludeDirectories(config, lang));
+    }
+
     bool const shouldScanForModules = lang == "CXX"_s &&
       this->GeneratorTarget->NeedDyndepForSource(lang, config, source);
-    auto const* fs =
-      this->GeneratorTarget->GetFileSetForSource(config, source);
     char const* compileAsPerConfig = compileAs;
-    if (fs && fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
+    if (fileSet && fileSet->GetType() == cm::FileSetMetadata::CXX_MODULES) {
       if (lang == "CXX"_s) {
-        if (fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
+        if (fileSet->GetType() == cm::FileSetMetadata::CXX_MODULES) {
           isCppModule = true;
           if (shouldScanForModules &&
               this->GlobalGenerator->IsScanDependenciesSupported()) {
@@ -2909,7 +2932,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
           cmStrCat(
             "Target \"", this->GeneratorTarget->Target->GetName(),
             "\" contains the source\n  ", source->GetFullPath(),
-            "\nin a file set of type \"", fs->GetType(),
+            "\nin a file set of type \"", fileSet->GetType(),
             R"(" but the source is not classified as a "CXX" source.)"));
       }
     }
@@ -2935,9 +2958,10 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
 
     // if we have flags or defines for this config then
     // use them
-    if (!flags.empty() || !options.empty() || !configDefines.empty() ||
-        !includes.empty() || compileAsPerConfig || noWinRT ||
-        !options.empty() || needsPCHFlags ||
+    if (!flags.empty() || !options.empty() || !fsOptions.empty() ||
+        !configDefines.empty() || !fsDefines.empty() || !includes.empty() ||
+        !fsIncludes.empty() || compileAsPerConfig || noWinRT ||
+        needsPCHFlags ||
         (shouldScanForModules !=
          this->ScanSourceForModuleDependencies[config])) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
@@ -3010,8 +3034,8 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         }
       }
 
+      std::string expandedOptions;
       if (!options.empty()) {
-        std::string expandedOptions;
         if (configDependentOptions) {
           this->LocalGenerator->AppendCompileOptions(
             expandedOptions,
@@ -3019,6 +3043,12 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         } else {
           this->LocalGenerator->AppendCompileOptions(expandedOptions, options);
         }
+      }
+      // Add flags from file set properties.
+      if (!fsOptions.empty()) {
+        this->LocalGenerator->AppendCompileOptions(expandedOptions, fsOptions);
+      }
+      if (!expandedOptions.empty()) {
         clOptions.Parse(expandedOptions);
       }
       if (clOptions.HasFlag("DisableSpecificWarnings")) {
@@ -3034,7 +3064,16 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       } else {
         clOptions.AddDefines(configDefines);
       }
+      // Add defines from file set properties.
+      if (!fsDefines.empty()) {
+        clOptions.AddDefines(fsDefines);
+      }
       std::vector<std::string> includeList;
+      // Add include directories from file set properties.
+      if (!fsIncludes.empty()) {
+        this->LocalGenerator->AppendIncludeDirectories(includeList, fsIncludes,
+                                                       *source);
+      }
       if (configDependentIncludes) {
         this->LocalGenerator->AppendIncludeDirectories(
           includeList,

@@ -1,3 +1,5 @@
+enable_language(C)
+
 macro(test_target_property PROP)
   add_custom_target(CustomTarget)
   set_property(TARGET CustomTarget PROPERTY ${PROP} x)
@@ -28,8 +30,8 @@ macro(test_directory_property PROP)
 endmacro()
 
 macro(test_file_set_property PROP)
-  add_library(foo INTERFACE)
-  target_sources(foo INTERFACE FILE_SET foo TYPE HEADERS)
+  add_library(foo STATIC foo.c)
+  target_sources(foo PRIVATE FILE_SET foo TYPE HEADERS)
   set_property(FILE_SET foo TARGET foo PROPERTY ${PROP} x)
   set_property(FILE_SET foo TARGET foo PROPERTY ${PROP})
   set_property(FILE_SET foo TARGET foo APPEND PROPERTY ${PROP})

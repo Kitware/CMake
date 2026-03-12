@@ -244,8 +244,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   }
 
   // Collect this target's file sets.
+  cmGeneratorExpressionDAGChecker fsDagChecker{
+    this, "SOURCES", nullptr, nullptr, context,
+  };
+
   cm::EvaluatedTargetPropertyEntries fileSetEntries;
-  AddFileSetEntries(this, this->FileSets.get(), context, &dagChecker,
+  AddFileSetEntries(this, this->FileSets.get(), context, &fsDagChecker,
                     fileSetEntries);
   auto processFileSetEntry = [this, &config](cmSourceFile* sf) {
     auto const* fileSet = this->GetFileSetForSource(config, sf);
@@ -273,9 +277,19 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     processSources(this, config, fileSetEntries, files, uniqueSrcs,
                    debugSources, processFileSetEntry);
 
+  // Collect file sets INTERFACE_SOURCES of all direct link-dependencies.
+  cm::EvaluatedTargetPropertyEntries linkInterfaceFileSetsEntries;
+  cm::AddInterfaceFileSetsEntries(this, cm::FileSetMetadata::SOURCES,
+                                  "INTERFACE_SOURCES", context, &fsDagChecker,
+                                  linkInterfaceFileSetsEntries);
+  bool contextDependentInterfaceFileSets =
+    processSources(this, config, linkInterfaceFileSetsEntries, files,
+                   uniqueSrcs, debugSources);
+
   // Determine if sources are context-dependent or not.
   if (!contextDependentDirectSources && !contextDependentInterfaceSources &&
-      !contextDependentObjects && !contextDependentFileSets) {
+      !contextDependentObjects && !contextDependentFileSets &&
+      !contextDependentInterfaceFileSets) {
     this->SourcesAreContextDependent = Tribool::False;
   } else {
     this->SourcesAreContextDependent = Tribool::True;

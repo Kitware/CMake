@@ -12,10 +12,16 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cm/string_view>
+#include <cmext/string_view>
 
+#include "cmAlgorithms.h"
+#include "cmEvaluatedTargetProperty.h"
 #include "cmFileSet.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorTarget.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -27,6 +33,7 @@
 
 class cmLinkItem;
 
+namespace {
 class FileSetPropertyEntry : public cm::TargetPropertyEntry
 {
 public:
@@ -92,12 +99,105 @@ private:
   mutable std::string Value;
 };
 
+void CreatePropertyGeneratorExpressions(
+  cmake& cmakeInstance, cmBTStringRange entries,
+  std::vector<std::unique_ptr<cm::TargetPropertyEntry>>& items)
+{
+  for (auto const& entry : entries) {
+    items.emplace_back(
+      cm::TargetPropertyEntry::Create(cmakeInstance, entry, false));
+  }
+}
+
+enum class OptionsParse
+{
+  None,
+  Shell
+};
+
+std::vector<BT<std::string>> ProcessOptions(
+  cm::EvaluatedTargetPropertyEntries const& entries,
+  OptionsParse parse = OptionsParse::None)
+{
+  std::vector<BT<std::string>> options;
+  std::unordered_set<std::string> uniqueOptions;
+
+  for (cm::EvaluatedTargetPropertyEntry const& entry : entries.Entries) {
+    for (std::string const& opt : entry.Values) {
+      if (uniqueOptions.insert(opt).second) {
+        if (parse == OptionsParse::Shell &&
+            cmHasLiteralPrefix(opt, "SHELL:")) {
+          std::vector<std::string> tmp;
+          cmSystemTools::ParseUnixCommandLine(opt.c_str() + 6, tmp);
+          for (std::string& o : tmp) {
+            options.emplace_back(std::move(o), entry.Backtrace);
+          }
+        } else {
+          options.emplace_back(opt, entry.Backtrace);
+        }
+      }
+    }
+  }
+  return options;
+}
+std::vector<BT<std::string>> ProcessIncludes(
+  cmGeneratorTarget const* target, std::string const& fileSetName,
+  cm::string_view property, cm::EvaluatedTargetPropertyEntries& entries)
+{
+  std::vector<BT<std::string>> includes;
+  std::unordered_set<std::string> uniqueIncludes;
+
+  for (cm::EvaluatedTargetPropertyEntry& entry : entries.Entries) {
+    for (std::string& include : entry.Values) {
+      if (!cmValue::IsOff(include)) {
+        cmSystemTools::ConvertToUnixSlashes(include);
+      }
+
+      if (!cmSystemTools::FileIsFullPath(include)) {
+        target->GetLocalGenerator()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("File set \"", fileSetName, "\" from the target \"",
+                   target->GetName(), "\" contains relative path in its ",
+                   property, ":\n  \"", include, "\""));
+        return includes;
+      }
+
+      if (uniqueIncludes.insert(include).second) {
+        includes.emplace_back(include, entry.Backtrace);
+      }
+    }
+  }
+  return includes;
+}
+}
+
 //
 // Class cmGeneratorFileSet
 //
-cmGeneratorFileSet::cmGeneratorFileSet(cmFileSet const* fileSet)
-  : FileSet(fileSet)
+cmGeneratorFileSet::cmGeneratorFileSet(cmGeneratorTarget const* target,
+                                       cmFileSet const* fileSet)
+  : Target(target)
+  , FileSet(fileSet)
 {
+  auto& cmake = *target->GetLocalGenerator()->GetCMakeInstance();
+
+  CreatePropertyGeneratorExpressions(cmake, fileSet->GetIncludeDirectories(),
+                                     this->IncludeDirectories);
+  CreatePropertyGeneratorExpressions(cmake,
+                                     fileSet->GetInterfaceIncludeDirectories(),
+                                     this->InterfaceIncludeDirectories);
+
+  CreatePropertyGeneratorExpressions(cmake, fileSet->GetCompileOptions(),
+                                     this->CompileOptions);
+  CreatePropertyGeneratorExpressions(cmake,
+                                     fileSet->GetInterfaceCompileOptions(),
+                                     this->InterfaceCompileOptions);
+
+  CreatePropertyGeneratorExpressions(cmake, fileSet->GetCompileDefinitions(),
+                                     this->CompileDefinitions);
+  CreatePropertyGeneratorExpressions(cmake,
+                                     fileSet->GetInterfaceCompileDefinitions(),
+                                     this->InterfaceCompileDefinitions);
 }
 
 std::string const& cmGeneratorFileSet::GetName() const
@@ -129,6 +229,161 @@ bool cmGeneratorFileSet::CanBeIncluded() const
 cmValue cmGeneratorFileSet::GetProperty(std::string const& prop) const
 {
   return this->FileSet->GetProperty(prop);
+}
+
+std::vector<BT<std::string>> cmGeneratorFileSet::GetIncludeDirectories(
+  std::string const& config, std::string const& lang) const
+{
+  ConfigAndLanguage cacheKey(config, lang);
+  {
+    auto it = this->IncludeDirectoriesCache.find(cacheKey);
+    if (it != this->IncludeDirectoriesCache.end()) {
+      return it->second;
+    }
+  }
+
+  cm::GenEx::Context context(this->Target->GetLocalGenerator(), config, lang);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this->Target, "INCLUDE_DIRECTORIES", nullptr, nullptr, context,
+  };
+
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
+                                      this->IncludeDirectories);
+  auto includes = ProcessIncludes(this->Target, this->GetName(),
+                                  "INCLUDE_DIRECTORIES"_s, entries);
+  this->IncludeDirectoriesCache.emplace(cacheKey, includes);
+
+  return includes;
+}
+std::vector<BT<std::string>>
+cmGeneratorFileSet::GetInterfaceIncludeDirectories(
+  std::string const& config, std::string const& lang) const
+{
+  ConfigAndLanguage cacheKey(config, lang);
+  {
+    auto it = this->InterfaceIncludeDirectoriesCache.find(cacheKey);
+    if (it != this->InterfaceIncludeDirectoriesCache.end()) {
+      return it->second;
+    }
+  }
+
+  cm::GenEx::Context context(this->Target->GetLocalGenerator(), config, lang);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this->Target, "INCLUDE_DIRECTORIES", nullptr, nullptr, context,
+  };
+
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
+                                      this->InterfaceIncludeDirectories);
+  auto includes = ProcessIncludes(this->Target, this->GetName(),
+                                  "INTERFACE_INCLUDE_DIRECTORIES"_s, entries);
+  this->InterfaceIncludeDirectoriesCache.emplace(cacheKey, includes);
+
+  return includes;
+}
+
+std::vector<BT<std::string>> cmGeneratorFileSet::GetCompileOptions(
+  std::string const& config, std::string const& language) const
+{
+  ConfigAndLanguage cacheKey(config, language);
+  {
+    auto it = this->CompileOptionsCache.find(cacheKey);
+    if (it != this->CompileOptionsCache.end()) {
+      return it->second;
+    }
+  }
+
+  cm::GenEx::Context context(this->Target->GetLocalGenerator(), config,
+                             language);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this->Target, "COMPILE_OPTIONS", nullptr, nullptr, context,
+  };
+
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
+                                      this->CompileOptions);
+  auto options = ProcessOptions(entries, OptionsParse::Shell);
+  this->CompileOptionsCache.emplace(cacheKey, options);
+
+  return options;
+}
+std::vector<BT<std::string>> cmGeneratorFileSet::GetInterfaceCompileOptions(
+  std::string const& config, std::string const& language) const
+{
+  ConfigAndLanguage cacheKey(config, language);
+  {
+    auto it = this->InterfaceCompileOptionsCache.find(cacheKey);
+    if (it != this->InterfaceCompileOptionsCache.end()) {
+      return it->second;
+    }
+  }
+
+  cm::GenEx::Context context(this->Target->GetLocalGenerator(), config,
+                             language);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this->Target, "COMPILE_OPTIONS", nullptr, nullptr, context,
+  };
+
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
+                                      this->InterfaceCompileOptions);
+  auto options = ProcessOptions(entries, OptionsParse::Shell);
+  this->InterfaceCompileOptionsCache.emplace(cacheKey, options);
+
+  return options;
+}
+
+std::vector<BT<std::string>> cmGeneratorFileSet::GetCompileDefinitions(
+  std::string const& config, std::string const& language) const
+{
+  ConfigAndLanguage cacheKey(config, language);
+  {
+    auto it = this->CompileDefinitionsCache.find(cacheKey);
+    if (it != this->CompileDefinitionsCache.end()) {
+      return it->second;
+    }
+  }
+
+  cm::GenEx::Context context(this->Target->GetLocalGenerator(), config,
+                             language);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this->Target, "COMPILE_DEFINITIONS", nullptr, nullptr, context,
+  };
+
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
+                                      this->CompileDefinitions);
+  auto defines = ProcessOptions(entries);
+  this->CompileDefinitionsCache.emplace(cacheKey, defines);
+
+  return defines;
+}
+std::vector<BT<std::string>>
+cmGeneratorFileSet::GetInterfaceCompileDefinitions(
+  std::string const& config, std::string const& language) const
+{
+  ConfigAndLanguage cacheKey(config, language);
+  {
+    auto it = this->InterfaceCompileDefinitionsCache.find(cacheKey);
+    if (it != this->InterfaceCompileDefinitionsCache.end()) {
+      return it->second;
+    }
+  }
+
+  cm::GenEx::Context context(this->Target->GetLocalGenerator(), config,
+                             language);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this->Target, "COMPILE_DEFINITIONS", nullptr, nullptr, context,
+  };
+
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
+                                      this->InterfaceCompileDefinitions);
+  auto defines = ProcessOptions(entries);
+  this->InterfaceCompileDefinitionsCache.emplace(cacheKey, defines);
+
+  return defines;
 }
 
 std::vector<BT<std::string>> const& cmGeneratorFileSet::GetDirectoryEntries()

@@ -27,6 +27,8 @@
 #include "cmFastbuildTargetGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalFastbuildGenerator.h"
@@ -117,7 +119,20 @@ std::string cmFastbuildNormalTargetGenerator::DetectCompilerFlags(
   cmGeneratorExpressionInterpreter genexInterpreter(
     this->GetLocalGenerator(), Config, this->GeneratorTarget, language);
 
+  auto const* fileSet =
+    this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
+      this->Config, &srcFile);
+
   std::vector<std::string> sourceIncludesVec;
+  if (fileSet) {
+    auto fsIncludes = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetIncludeDirectories(this->Config, language)
+      : fileSet->GetInterfaceIncludeDirectories(this->Config, language);
+    if (!fsIncludes.empty()) {
+      this->LocalGenerator->AppendIncludeDirectories(
+        sourceIncludesVec, cm::remove_BT(fsIncludes), srcFile);
+    }
+  }
   if (cmValue cincludes = srcFile.GetProperty(INCLUDE_DIRECTORIES)) {
     this->LocalGenerator->AppendIncludeDirectories(
       sourceIncludesVec,
@@ -140,6 +155,17 @@ std::string cmFastbuildNormalTargetGenerator::DetectCompilerFlags(
     this->LocalGenerator->AppendCompileOptions(
       compileFlags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
   }
+  // Add flags from file set properties.
+  if (fileSet) {
+    auto options = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetCompileOptions(this->Config, language)
+      : fileSet->GetInterfaceCompileOptions(this->Config, language);
+    if (!options.empty()) {
+      this->LocalGenerator->AppendCompileOptions(compileFlags,
+                                                 cm::remove_BT(options));
+    }
+  }
+
   // Source includes take precedence over target includes.
   this->LocalGenerator->AppendFlags(compileFlags, sourceIncludesStr);
   this->LocalGenerator->AppendFlags(compileFlags,
@@ -409,6 +435,17 @@ std::string cmFastbuildNormalTargetGenerator::ComputeDefines(
     this->GetLocalGenerator()->AppendDefines(
       defines,
       genexInterpreter.Evaluate(*config_compile_defs, COMPILE_DEFINITIONS));
+  }
+
+  if (auto const* fileSet =
+        this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
+          this->Config, &srcFile)) {
+    auto fsDefines = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetCompileDefinitions(this->Config, language)
+      : fileSet->GetInterfaceCompileDefinitions(this->Config, language);
+    if (!fsDefines.empty()) {
+      this->LocalGenerator->AppendDefines(defines, fsDefines);
+    }
   }
 
   std::string definesString = this->GetDefines(language, Config);

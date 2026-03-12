@@ -13,7 +13,6 @@
 
 #include <cm/optional>
 #include <cm/string_view>
-#include <cmext/type_traits>
 
 #include "cmList.h"
 #include "cmStack.h"
@@ -220,6 +219,7 @@ template <typename T>
 std::vector<T> remove_BT(std::vector<BT<T>> const& container)
 {
   std::vector<T> result;
+  result.reserve(container.size());
   for (auto const& entry : container) {
     result.emplace_back(entry.Value);
   }

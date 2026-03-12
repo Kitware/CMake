@@ -1,0 +1,4 @@
+CMake Error at FileNoExist\.cmake:[0-9]+ \(target_sources\):
+  Cannot find source file:
+
+    .+/Tests/RunCMake/FileSet-SOURCES/noexist\.c

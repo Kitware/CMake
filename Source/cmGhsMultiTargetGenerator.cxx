@@ -10,15 +10,19 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGhsMultiGenerator.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
@@ -503,6 +507,34 @@ void cmGhsMultiTargetGenerator::WriteSourceProperty(
   }
 }
 
+void cmGhsMultiTargetGenerator::WriteFileSetProperty(
+  std::ostream& fout, cmGeneratorFileSet const* fileSet,
+  std::string const& lang, cm::string_view propName, cm::string_view propFlag)
+{
+  if (!fileSet) {
+    return;
+  }
+
+  std::vector<BT<std::string>> entries;
+  if (propName == "COMPILE_OPTIONS"_s) {
+    entries = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetCompileOptions(this->ConfigName, lang)
+      : fileSet->GetInterfaceCompileOptions(this->ConfigName, lang);
+  } else if (propName == "COMPILE_DEFINITIONS"_s) {
+    entries = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetCompileDefinitions(this->ConfigName, lang)
+      : fileSet->GetInterfaceCompileDefinitions(this->ConfigName, lang);
+  } else if (propName == "INCLUDE_DIRECTORIES"_s) {
+    entries = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetIncludeDirectories(this->ConfigName, lang)
+      : fileSet->GetInterfaceIncludeDirectories(this->ConfigName, lang);
+  }
+
+  for (auto const& entry : entries) {
+    fout << "    " << propFlag << entry.Value << '\n';
+  }
+}
+
 void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 {
   /* vector of all sources for this target */
@@ -642,9 +674,20 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
         *fout << comment << fname << WriteObjectLangOverride(si) << '\n';
         if (compile) {
+          // lookup for the associated file set, if any.
+          auto const* fileSet =
+            this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
+              this->ConfigName, si);
+
+          this->WriteFileSetProperty(*fout, fileSet, si->GetLanguage(),
+                                     "INCLUDE_DIRECTORIES"_s, "");
           this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
           this->WriteSourceProperty(*fout, si, "COMPILE_DEFINITIONS", "-D");
+          this->WriteFileSetProperty(*fout, fileSet, si->GetLanguage(),
+                                     "COMPILE_DEFINITIONS"_s, "");
           this->WriteSourceProperty(*fout, si, "COMPILE_OPTIONS", "");
+          this->WriteFileSetProperty(*fout, fileSet, si->GetLanguage(),
+                                     "COMPILE_OPTIONS"_s, "");
 
           /* to avoid clutter in the GUI only print out the objectName if it
            * has been renamed */

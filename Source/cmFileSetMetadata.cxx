@@ -2,7 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFileSetMetadata.h"
 
+#include <map>
 #include <string>
+#include <utility>
 
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -74,12 +76,34 @@ bool VisibilityIsForInterface(Visibility vis)
 }
 
 cm::string_view const HEADERS = "HEADERS"_s;
+cm::string_view const SOURCES = "SOURCES"_s;
 cm::string_view const CXX_MODULES = "CXX_MODULES"_s;
 
 namespace {
-std::vector<cm::string_view> KnownTypes{ HEADERS, CXX_MODULES };
+std::map<cm::string_view, FileSetDescriptor> const FileSetDescriptors{
+  { cm::FileSetMetadata::HEADERS,
+    { cm::FileSetMetadata::HEADERS,
+      cm::FileSetMetadata::FileSetLookup::Target } },
+  { cm::FileSetMetadata::SOURCES,
+    { cm::FileSetMetadata::SOURCES,
+      cm::FileSetMetadata::FileSetLookup::Dependencies } },
+  { cm::FileSetMetadata::CXX_MODULES,
+    { cm::FileSetMetadata::CXX_MODULES,
+      cm::FileSetMetadata::FileSetLookup::Target } },
+};
+
+std::vector<cm::string_view> KnownTypes{ HEADERS, SOURCES, CXX_MODULES };
 
 cmsys::RegularExpression const ValidNameRegex("^[a-z0-9][a-zA-Z0-9_]*$");
+}
+
+cm::optional<FileSetDescriptor> GetFileSetDescriptor(cm::string_view type)
+{
+  auto it = FileSetDescriptors.find(type);
+  if (it != FileSetDescriptors.end()) {
+    return it->second;
+  }
+  return cm::nullopt;
 }
 
 std::vector<cm::string_view> const& GetKnownTypes()
@@ -97,6 +121,5 @@ bool IsValidName(cm::string_view name)
   cmsys::RegularExpressionMatch match;
   return ValidNameRegex.find(name.data(), match);
 }
-
 }
 }

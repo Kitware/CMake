@@ -29,11 +29,13 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
@@ -55,7 +57,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmTarget.h"
 #include "cmValue.h"
 #include "cmake.h"
 
@@ -346,18 +347,6 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     }
   }
 
-  std::map<std::string, std::string> file_set_map;
-
-  auto const* tgt = this->GeneratorTarget->Target;
-  for (auto const* file_set : this->GeneratorTarget->GetAllFileSets()) {
-    auto files = file_set->GetFiles(context, this->GeneratorTarget).first;
-    for (auto const& it : files) {
-      for (auto const& filename : it.second) {
-        file_set_map[filename] = file_set->GetType();
-      }
-    }
-  }
-
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources,
                                           this->GetConfigName());
@@ -372,20 +361,17 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   }
 
   for (cmSourceFile const* sf : objectSources) {
-    auto const& path = sf->GetFullPath();
-    auto const it = file_set_map.find(path);
-    if (it != file_set_map.end()) {
-      auto const& file_set_type = it->second;
-      if (file_set_type == cm::FileSetMetadata::CXX_MODULES) {
-        if (sf->GetLanguage() != "CXX"_s) {
-          this->Makefile->IssueMessage(
-            MessageType::FATAL_ERROR,
-            cmStrCat(
-              "Target \"", tgt->GetName(), "\" contains the source\n  ", path,
-              "\nin a file set of type \"", file_set_type,
-              R"(" but the source is not classified as a "CXX" source.)"));
-        }
-      }
+    cmGeneratorFileSet const* fileSet =
+      this->GeneratorTarget->GetFileSetForSource(this->GetConfigName(), sf);
+    if (fileSet && fileSet->GetType() == cm::FileSetMetadata::CXX_MODULES &&
+        sf->GetLanguage() != "CXX"_s) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+                 "\" contains the source\n  ", sf->GetFullPath(),
+                 "\nin a file set of type \"",
+                 cm::FileSetMetadata::CXX_MODULES,
+                 R"(" but the source is not classified as a "CXX" source.)"));
     }
   }
 }
@@ -765,6 +751,11 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       ispcHeaderRelative, cmOutputConverter::SHELL);
   }
 
+  // lookup for the associated file set, if any.
+  auto const* fileSet =
+    this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
+      config, &source);
+
   // Add flags from source file properties.
   std::string const COMPILE_FLAGS("COMPILE_FLAGS");
   if (cmValue cflags = source.GetProperty(COMPILE_FLAGS)) {
@@ -784,6 +775,22 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     *this->FlagFileStream << "# Custom options: " << relativeObj
                           << "_OPTIONS = " << evaluatedOptions << "\n"
                           << "\n";
+  }
+
+  // Add flags from file set properties.
+  if (fileSet) {
+    auto options = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetCompileOptions(config, lang)
+      : fileSet->GetInterfaceCompileOptions(config, lang);
+    if (!options.empty()) {
+      this->LocalGenerator->AppendCompileOptions(flags,
+                                                 cm::remove_BT(options));
+      *this->FlagFileStream << "# Custom options (File Set '"
+                            << fileSet->GetName() << "'): " << relativeObj
+                            << "_OPTIONS = " << cmList::to_string(options)
+                            << "\n"
+                            << "\n";
+    }
   }
 
   // Add precompile headers compile options.
@@ -807,9 +814,25 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
                           << "\n";
   }
 
-  // Add include directories from source file properties.
+  // Add include directories from file set properties.
   std::vector<std::string> includes;
 
+  if (fileSet) {
+    auto fsIncludes = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetIncludeDirectories(config, lang)
+      : fileSet->GetInterfaceIncludeDirectories(config, lang);
+    if (!fsIncludes.empty()) {
+      this->LocalGenerator->AppendIncludeDirectories(
+        includes, cm::remove_BT(fsIncludes), source);
+      *this->FlagFileStream
+        << "# Custom include directories (File Set '" << fileSet->GetName()
+        << "'): " << relativeObj
+        << "_INCLUDE_DIRECTORIES = " << cmList::to_string(fsIncludes) << "\n"
+        << "\n";
+    }
+  }
+
+  // Add include directories from source file properties.
   std::string const INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
   if (cmValue cincludes = source.GetProperty(INCLUDE_DIRECTORIES)) {
     std::string const& evaluatedIncludes =
@@ -844,6 +867,21 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     *this->FlagFileStream << "# Custom defines: " << relativeObj << "_DEFINES_"
                           << configUpper << " = " << evaluatedDefs << "\n"
                           << "\n";
+  }
+
+  // Add file set preprocessor definitions
+  if (fileSet) {
+    auto fsDefines = fileSet->BelongsTo(this->GeneratorTarget)
+      ? fileSet->GetCompileDefinitions(config, lang)
+      : fileSet->GetInterfaceCompileDefinitions(config, lang);
+    if (!fsDefines.empty()) {
+      this->LocalGenerator->AppendDefines(defines, fsDefines);
+      *this->FlagFileStream << "# Custom defines (File Set '"
+                            << fileSet->GetName() << "'): " << relativeObj
+                            << "_DEFINES = " << cmList::to_string(fsDefines)
+                            << "\n"
+                            << "\n";
+    }
   }
 
   // Get the output paths for source and object files.

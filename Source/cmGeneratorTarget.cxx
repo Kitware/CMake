@@ -92,12 +92,11 @@ static void CreatePropertyGeneratorExpressions(
 
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   : Target(t)
+  , Makefile(t->GetMakefile())
+  , LocalGenerator(lg)
+  , GlobalGenerator(lg->GetGlobalGenerator())
   , FileSets(cm::make_unique<cmGeneratorFileSets>(this, lg))
 {
-  this->Makefile = this->Target->GetMakefile();
-  this->LocalGenerator = lg;
-  this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
-
   this->GlobalGenerator->ComputeTargetObjectDirectory(this);
 
   CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
@@ -5884,12 +5883,8 @@ bool cmGeneratorTarget::HaveFortranSources() const
 
 bool cmGeneratorTarget::HaveCxx20ModuleSources() const
 {
-  auto const& fileSets = this->GetAllFileSets();
-  return std::any_of(fileSets.begin(), fileSets.end(),
-                     [](cmGeneratorFileSet const* file_set) -> bool {
-                       auto const& fs_type = file_set->GetType();
-                       return fs_type == cm::FileSetMetadata::CXX_MODULES;
-                     });
+  return !this->GetFileSets(cm::FileSetMetadata::CXX_MODULES).empty() ||
+    !this->GetInterfaceFileSets(cm::FileSetMetadata::CXX_MODULES).empty();
 }
 
 cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
