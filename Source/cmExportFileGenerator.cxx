@@ -16,6 +16,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
@@ -139,6 +140,20 @@ bool cmExportFileGenerator::PopulateInterfaceProperties(
   return true;
 }
 
+bool cmExportFileGenerator::PopulateFileSetInterfaceProperties(
+  cmGeneratorTarget const* target, cmGeneratorFileSet const* fileSet,
+  cmGeneratorExpression::PreprocessContext preprocessRule,
+  ImportPropertyMap& properties)
+{
+  this->PopulateFileSetInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
+                                         target, fileSet, preprocessRule,
+                                         properties);
+  this->PopulateFileSetInterfaceProperty("INTERFACE_COMPILE_OPTIONS", target,
+                                         fileSet, preprocessRule, properties);
+
+  return true;
+}
+
 void cmExportFileGenerator::PopulateInterfaceProperty(
   std::string const& propName, cmGeneratorTarget const* target,
   ImportPropertyMap& properties) const
@@ -179,6 +194,29 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
 {
   this->PopulateInterfaceProperty(propName, propName, target, preprocessRule,
                                   properties);
+}
+
+void cmExportFileGenerator::PopulateFileSetInterfaceProperty(
+  std::string const& propName, cmGeneratorTarget const* target,
+  cmGeneratorFileSet const* fileSet,
+  cmGeneratorExpression::PreprocessContext preprocessRule,
+  ImportPropertyMap& properties)
+{
+  cmValue input = fileSet->GetProperty(propName);
+  if (input) {
+    if (input->empty()) {
+      // Set to empty
+      properties[propName].clear();
+      return;
+    }
+
+    std::string prepro =
+      cmGeneratorExpression::Preprocess(*input, preprocessRule);
+    if (!prepro.empty()) {
+      this->ResolveTargetsInGeneratorExpressions(prepro, target);
+      properties[propName] = prepro;
+    }
+  }
 }
 
 bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(

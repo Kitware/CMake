@@ -83,6 +83,11 @@ bool cmExportInstallCMakeConfigGenerator::GenerateMainFile(std::ostream& os)
       return false;
     }
 
+    ImportFileSetPropertyMap fsProperties;
+    if (!this->PopulateFileSetInterfaceProperties(te, fsProperties)) {
+      return false;
+    }
+
     if (this->PopulateInterfaceLinkLibrariesProperty(
           gt, cmGeneratorExpression::InstallInterface, properties) &&
         !this->ExportOld) {
@@ -99,7 +104,7 @@ bool cmExportInstallCMakeConfigGenerator::GenerateMainFile(std::ostream& os)
 
     this->GenerateInterfaceProperties(gt, os, properties);
 
-    this->GenerateTargetFileSets(gt, os, te);
+    this->GenerateTargetFileSets(gt, os, fsProperties, te);
   }
 
   this->LoadConfigFiles(os);

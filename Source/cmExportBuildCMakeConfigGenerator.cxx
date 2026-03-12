@@ -71,12 +71,17 @@ bool cmExportBuildCMakeConfigGenerator::GenerateMainFile(std::ostream& os)
       return false;
     }
 
+    ImportFileSetPropertyMap fsProperties;
+    if (!this->PopulateFileSetInterfaceProperties(gte, fsProperties)) {
+      return false;
+    }
+
     this->PopulateInterfaceLinkLibrariesProperty(
       gte, cmGeneratorExpression::BuildInterface, properties);
 
     this->GenerateInterfaceProperties(gte, os, properties);
 
-    this->GenerateTargetFileSets(gte, os);
+    this->GenerateTargetFileSets(gte, os, fsProperties);
   }
 
   std::string cxx_modules_name;

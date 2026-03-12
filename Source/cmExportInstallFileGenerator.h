@@ -19,6 +19,7 @@
 #include "cmStateTypes.h"
 
 class cmGeneratorTarget;
+class cmGeneratorFileSet;
 class cmInstallTargetGenerator;
 class cmTargetExport;
 
@@ -138,6 +139,10 @@ protected:
                                 ImportPropertyMap& properties,
                                 std::set<std::string>& importedLocations);
 
+  using cmExportFileGenerator::PopulateFileSetInterfaceProperties;
+  bool PopulateFileSetInterfaceProperties(
+    cmTargetExport const* targetExport, ImportFileSetPropertyMap& properties);
+
   virtual bool CheckInterfaceDirs(std::string const& prepro,
                                   cmGeneratorTarget const* target,
                                   std::string const& prop) const;
@@ -177,6 +182,11 @@ private:
     ImportPropertyMap& properties);
   void PopulateLinkDependsInterface(
     cmGeneratorTarget const* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties);
+
+  void PopulateFileSetIncludeDirectoriesInterface(
+    cmGeneratorTarget const* target, cmGeneratorFileSet const* fileSet,
     cmGeneratorExpression::PreprocessContext preprocessRule,
     ImportPropertyMap& properties);
 };

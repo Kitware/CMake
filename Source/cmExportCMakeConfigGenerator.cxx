@@ -612,6 +612,8 @@ cm::optional<FileSetInformation> GetFileSetInformation(cm::string_view type)
     fileSetsInformation{
       { cm::FileSetMetadata::HEADERS,
         { cm::FileSetMetadata::HEADERS, "3.23.0"_s } },
+      { cm::FileSetMetadata::SOURCES,
+        { cm::FileSetMetadata::SOURCES, "4.4.0"_s } },
       { cm::FileSetMetadata::CXX_MODULES,
         { cm::FileSetMetadata::CXX_MODULES, "3.28.0"_s } },
     };
@@ -625,7 +627,8 @@ cm::optional<FileSetInformation> GetFileSetInformation(cm::string_view type)
 }
 
 void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
-  cmGeneratorTarget* gte, std::ostream& os, cmTargetExport const* te)
+  cmGeneratorTarget* gte, std::ostream& os,
+  ImportFileSetPropertyMap const& properties, cmTargetExport const* te)
 {
   cmGeneratorFileSets const* gfs = gte->GetGeneratorFileSets();
   auto const& types = gfs->GetInterfaceFileSetTypes();
@@ -648,9 +651,20 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
            << this->GetFileSetDirectories(gte, fileSet, te) << "\n      FILES "
            << this->GetFileSetFiles(gte, fileSet, te) << '\n';
       }
+      os << "  )\n";
+      for (auto const* fileSet : gfs->GetInterfaceFileSets(type)) {
+        auto fsProperties = properties.find(fileSet->GetName());
+        if (fsProperties != properties.end()) {
+          for (auto const& property : fsProperties->second) {
+            os << "\n  set_property(FILE_SET "
+               << cmScriptGenerator::Quote(fileSet->GetName()) << " TARGET "
+               << targetName << "\n    PROPERTY " << property.first << ' '
+               << cmExportFileGeneratorEscape(property.second) << "\n  )";
+          }
+        }
+      }
 
       if (fsInfo) {
-        os << "  )";
         if (type == cm::FileSetMetadata::HEADERS) {
           os << "\nelse()\n  set_property(TARGET " << targetName
              << "\n    APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES";
@@ -658,6 +672,10 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
             os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
           }
           os << "\n  )";
+        } else if (type == cm::FileSetMetadata::SOURCES) {
+          os << "\nelse()\n  message(FATAL_ERROR \"The target '" << targetName
+             << "' cannot be imported because it relies on 'FILE_SET' of type "
+                "'SOURCES' which is not supported by this CMake version.\")";
         } else if (type == cm::FileSetMetadata::CXX_MODULES) {
           os << "\nelse()\n  message(AUTHOR_WARNING \"The target '"
              << targetName
