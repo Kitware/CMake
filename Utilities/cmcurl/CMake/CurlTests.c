@@ -27,7 +27,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
-/* */
+
 #if defined(sun) || defined(__sun__) || \
   defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 #  if defined(__SVR4) || defined(__srv4__)
@@ -39,7 +39,7 @@
 #if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX41)
 #  define PLATFORM_AIX_V3
 #endif
-/* */
+
 #if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
 #error "O_NONBLOCK does not work on this platform"
 #endif
@@ -128,7 +128,7 @@ int main(void)
 #ifdef HAVE_FILE_OFFSET_BITS
 #include <sys/types.h>
 /* Check that off_t can represent 2**63 - 1 correctly.
-   We cannot simply define LARGE_OFF_T to be 9223372036854775807,
+   We cannot define LARGE_OFF_T to be 9223372036854775807,
    since some C++ compilers masquerading as C compilers
    incorrectly reject 9223372036854775807. */
 #define LARGE_OFF_T (((off_t)1 << 62) - 1 + ((off_t)1 << 62))

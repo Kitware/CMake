@@ -23,19 +23,22 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
-
-#include "../cfilters.h"
-#include "../select.h"
-#include "../urldata.h"
-#include "vtls.h"
+#include "curl_setup.h"
 
 #ifdef USE_SSL
 
+#include "cfilters.h"
+#include "select.h"
+#include "urldata.h"
+#include "vtls/vtls.h"
+
 struct Curl_ssl;
 struct ssl_connect_data;
+struct Curl_ssl_session;
 
 /* see https://www.iana.org/assignments/tls-extensiontype-values/ */
+#define ALPN_HTTP_1_0_LENGTH 8
+#define ALPN_HTTP_1_0 "http/1.0"
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"
 #define ALPN_H2_LENGTH 2
@@ -99,12 +102,12 @@ typedef enum {
   ssl_earlydata_rejected
 } ssl_earlydata_state;
 
-#define CURL_SSL_IO_NEED_NONE   (0)
+#define CURL_SSL_IO_NEED_NONE   0
 #define CURL_SSL_IO_NEED_RECV   (1 << 0)
 #define CURL_SSL_IO_NEED_SEND   (1 << 1)
 
 /* Max earlydata payload we want to send */
-#define CURL_SSL_EARLY_MAX       (64 * 1024)
+#define CURL_SSL_EARLY_MAX      (64 * 1024)
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
@@ -198,6 +201,11 @@ CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
  */
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
 
+CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct alpn_spec *alpns,
+                               struct Curl_ssl_session *scs,
+                               bool *do_early_data, bool early_data_allowed);
 #endif /* USE_SSL */
 
 #endif /* HEADER_CURL_VTLS_INT_H */

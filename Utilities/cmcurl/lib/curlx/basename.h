@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_STRDUP_H
-#define HEADER_CURL_STRDUP_H
+#ifndef HEADER_CURLX_BASENAME_H
+#define HEADER_CURLX_BASENAME_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,13 +25,15 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifndef HAVE_STRDUP
-char *Curl_strdup(const char *str);
+#ifndef HAVE_BASENAME
+char *curlx_basename(char *path);
+#else
+
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
 #endif
-#ifdef _WIN32
-wchar_t *Curl_wcsdup(const wchar_t *src);
-#endif
-void *Curl_memdup(const void *src, size_t buffer_length);
-void *Curl_saferealloc(void *ptr, size_t size);
-void *Curl_memdup0(const char *src, size_t length);
-#endif /* HEADER_CURL_STRDUP_H */
+
+#define curlx_basename(x) basename(x)
+#endif /* !HAVE_BASENAME */
+
+#endif /* HEADER_CURLX_BASENAME_H */

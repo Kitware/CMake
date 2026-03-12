@@ -32,15 +32,13 @@ struct ip_quadruple;
 struct Curl_str;
 
 enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len);
-enum alpnid Curl_str2alpnid(const struct Curl_str *str);
+enum alpnid Curl_str2alpnid(const struct Curl_str *cstr);
 
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */
-timediff_t Curl_timeleft_ms(struct Curl_easy *data,
-                            bool duringconnect);
+timediff_t Curl_timeleft_ms(struct Curl_easy *data);
 timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
-                                const struct curltime *pnow,
-                                bool duringconnect);
+                                const struct curltime *pnow);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 
@@ -78,7 +76,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, uint16_t *port);
 
 /*
- * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'
+ * Curl_conncontrol() marks the end of a connection/stream. The 'ctrl'
  * argument specifies if it is the end of a connection or a stream.
  *
  * For stream-based protocols (such as HTTP/2), a stream close will not cause
@@ -94,17 +92,17 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #define CONNCTRL_STREAM 2
 
 void Curl_conncontrol(struct connectdata *conn,
-                      int closeit
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+                      int ctrl
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
                       , const char *reason
 #endif
   );
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 #define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
 #define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
 #define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
-#else /* if !DEBUGBUILD || CURL_DISABLE_VERBOSE_STRINGS */
+#else /* !DEBUGBUILD || !CURLVERBOSE */
 #define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM)
 #define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
 #define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP)

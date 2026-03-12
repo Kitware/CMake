@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 void curlx_str_init(struct Curl_str *out)
 {
@@ -140,7 +140,7 @@ int curlx_str_singlespace(const char **linep)
 
 /* given an ASCII character and max ascii, return TRUE if valid */
 #define valid_digit(x, m) \
-  (((x) >= '0') && ((x) <= m) && curlx_hexasciitable[(x) - '0'])
+  (((x) >= '0') && ((x) <= (m)) && curlx_hexasciitable[(x) - '0'])
 
 /* We use 16 for the zero index (and the necessary bitwise AND in the loop)
    to be able to have a non-zero value there to make valid_digit() able to
@@ -172,7 +172,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
     /* special-case low max scenario because check needs to be different */
     do {
       int n = curlx_hexval(*p++);
-      num = num * base + n;
+      num = (num * base) + n;
       if(num > max)
         return STRE_OVERFLOW;
     } while(valid_digit(*p, m));
@@ -182,7 +182,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
       int n = curlx_hexval(*p++);
       if(num > ((max - n) / base))
         return STRE_OVERFLOW;
-      num = num * base + n;
+      num = (num * base) + n;
     } while(valid_digit(*p, m));
   }
   *nump = num;

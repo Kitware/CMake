@@ -194,6 +194,36 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
+void Curl_reset_fail(struct Curl_easy *data)
+{
+  if(data->set.errorbuffer)
+    data->set.errorbuffer[0] = 0;
+  data->state.errorbuf = FALSE;
+}
+
+#ifdef CURLVERBOSE
+struct curl_trc_feat Curl_trc_feat_multi = {
+  "MULTI",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_read = {
+  "READ",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_write = {
+  "WRITE",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_dns = {
+  "DNS",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_timer = {
+  "TIMER",
+  CURL_LOG_LVL_NONE,
+};
+#endif
+
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 
 static void trc_infof(struct Curl_easy *data,
@@ -247,27 +277,6 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
     va_end(ap);
   }
 }
-
-struct curl_trc_feat Curl_trc_feat_multi = {
-  "MULTI",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_read = {
-  "READ",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_write = {
-  "WRITE",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_dns = {
-  "DNS",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_timer = {
-  "TIMER",
-  CURL_LOG_LVL_NONE,
-};
 
 static const char * const Curl_trc_timer_names[] = {
   "100_TIMEOUT",
@@ -485,7 +494,7 @@ void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
 
-#define TRC_CT_NONE        (0)
+#define TRC_CT_NONE        0
 #define TRC_CT_PROTOCOL    (1 << 0)
 #define TRC_CT_NETWORK     (1 << 1)
 #define TRC_CT_PROXY       (1 << 2)
@@ -578,7 +587,7 @@ static void trc_apply_level_by_name(struct Curl_str *token, int lvl)
   }
 }
 
-static void trc_apply_level_by_category(int category, int lvl)
+static void trc_apply_level_by_category(unsigned int category, int lvl)
 {
   size_t i;
 

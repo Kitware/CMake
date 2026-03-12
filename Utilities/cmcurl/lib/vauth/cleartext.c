@@ -24,13 +24,13 @@
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_POP3) ||                                  \
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include "vauth.h"
+#include "vauth/vauth.h"
 
 /*
  * Curl_auth_create_plain_message()
@@ -81,14 +81,14 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
  *
  * Parameters:
  *
- * valuep  [in]     - The username or user's password.
+ * value   [in]     - The username or user's password.
  * out     [out]    - The result storage.
  *
  * Returns void.
  */
-void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
+void Curl_auth_create_login_message(const char *value, struct bufref *out)
 {
-  Curl_bufref_set(out, valuep, strlen(valuep), NULL);
+  Curl_bufref_set(out, value, strlen(value), NULL);
 }
 
 /*

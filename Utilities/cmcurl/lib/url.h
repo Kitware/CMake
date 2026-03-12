@@ -35,15 +35,17 @@ void Curl_init_userdefined(struct Curl_easy *data);
 
 void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
-CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
-CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
+CURLcode Curl_close(struct Curl_easy **datap); /* opposite of Curl_open() */
+CURLcode Curl_connect(struct Curl_easy *data,
+                      bool *asyncp,
+                      bool *protocol_done);
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          struct Curl_dns_entry *dns,
                          bool *protocol_done);
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
-                                  char **userptr, char **passwdptr,
-                                  char **optionsptr);
+                                  char **userp, char **passwdp,
+                                  char **optionsp);
 
 /* Attach/Clear/Get meta data for an easy handle. Needs to provide
  * a destructor, will be automatically called when the easy handle
@@ -71,9 +73,8 @@ void *Curl_conn_meta_get(struct connectdata *conn, const char *key);
  * @param scheme URI scheme, case-insensitive
  * @return NULL of handler not found
  */
-const struct Curl_handler *Curl_get_scheme_handler(const char *scheme);
-const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
-                                                    size_t len);
+const struct Curl_scheme *Curl_get_scheme(const char *scheme);
+const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
@@ -81,7 +82,6 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 
 /**
  * Return TRUE iff the given connection is considered dead.
- * @param nowp      NULL or pointer to time being checked against.
  */
 bool Curl_conn_seems_dead(struct connectdata *conn,
                           struct Curl_easy *data);

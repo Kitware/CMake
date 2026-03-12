@@ -33,7 +33,7 @@
 #include "connect.h"
 #include "curlx/nonblock.h"
 #include "socks.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic push
@@ -135,7 +135,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   /* prepare service name */
   if(strchr(serviceptr, '/')) {
     service.length = serviceptr_length;
-    service.value = Curl_memdup(serviceptr, service.length);
+    service.value = curlx_memdup(serviceptr, service.length);
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
 
@@ -168,8 +168,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   (void)curlx_nonblock(sock, FALSE);
 
-  /* As long as we need to keep sending some context info, and there is no  */
-  /* errors, keep sending it...                                            */
+  /* As long as we need to keep sending some context info, and there is no
+   * errors, keep sending it... */
   for(;;) {
     gss_major_status = Curl_gss_init_sec_context(data,
                                                  &gss_minor_status,
@@ -188,7 +188,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
     if(check_gss_err(data, gss_major_status,
                      gss_minor_status, "gss_init_sec_context") ||
-       /* the size needs to fit in a 16 bit field */
+       /* the size needs to fit in a 16-bit field */
        (gss_send_token.length > 0xffff)) {
       gss_release_name(&gss_status, &server);
       gss_release_buffer(&gss_status, &gss_send_token);
@@ -317,7 +317,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
 
   infof(data, "SOCKS5 server authenticated user %.*s with GSS-API.",
-        (int)gss_send_token.length, (char *)gss_send_token.value);
+        (int)gss_send_token.length, (const char *)gss_send_token.value);
 
   gss_release_name(&gss_status, &gss_client_name);
   gss_release_buffer(&gss_status, &gss_send_token);
@@ -374,7 +374,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
   else {
     gss_send_token.length = 1;
-    gss_send_token.value = Curl_memdup(&gss_enc, gss_send_token.length);
+    gss_send_token.value = curlx_memdup(&gss_enc, gss_send_token.length);
     if(!gss_send_token.value) {
       Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
       return CURLE_OUT_OF_MEMORY;
@@ -515,7 +515,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted.",
-        (socksreq[0] == 0) ? "out GSS-API data":
+        (socksreq[0] == 0) ? "out GSS-API data" :
         ((socksreq[0] == 1) ? " GSS-API integrity" :
          " GSS-API confidentiality"));
 

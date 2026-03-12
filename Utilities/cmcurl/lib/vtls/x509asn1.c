@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
   defined(USE_MBEDTLS) || defined(USE_RUSTLS)
@@ -36,12 +36,12 @@
 #define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
 #endif
 
-#include "../urldata.h"
-#include "vtls.h"
-#include "../curl_trc.h"
-#include "../curlx/base64.h"
-#include "x509asn1.h"
-#include "../curlx/dynbuf.h"
+#include "urldata.h"
+#include "vtls/vtls.h"
+#include "curl_trc.h"
+#include "curlx/base64.h"
+#include "vtls/x509asn1.h"
+#include "curlx/dynbuf.h"
 
 /*
  * Constants.
@@ -50,6 +50,7 @@
 /* Largest supported ASN.1 structure. */
 #define CURL_ASN1_MAX                   ((size_t)0x40000)      /* 256K */
 
+#ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 classes. */
 /* #define CURL_ASN1_UNIVERSAL             0 */
 /* #define CURL_ASN1_APPLICATION           1 */
@@ -86,7 +87,6 @@
 /* #define CURL_ASN1_CHARACTER_STRING      29 */
 #define CURL_ASN1_BMP_STRING            30
 
-#ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
 struct Curl_OID {
   const char *numoid;  /* Dotted-numeric OID. */
@@ -146,7 +146,7 @@ static const struct Curl_OID OIDtable[] = {
   { "2.16.840.1.101.3.4.2.2",   "sha384" },
   { "2.16.840.1.101.3.4.2.3",   "sha512" },
   { "1.2.840.113549.1.9.2",     "unstructuredName" },
-  { (const char *)NULL,         (const char *)NULL }
+  { NULL,                       NULL }
 };
 
 #endif /* WANT_EXTRACT_CERTINFO */
@@ -369,7 +369,7 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(type == CURL_ASN1_UTF8_STRING) {
-    /* Just copy. */
+    /* copy. */
     if(inlength)
       result = curlx_dyn_addn(to, from, inlength);
   }
@@ -443,6 +443,8 @@ static CURLcode encodeOID(struct dynbuf *store,
     do {
       if(x & 0xFF000000)
         return CURLE_OK;
+      else if(beg == end)
+        return CURLE_BAD_FUNCTION_ARGUMENT;
       y = *(const unsigned char *)beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);
@@ -473,8 +475,8 @@ static CURLcode OID2str(struct dynbuf *store,
           result = curlx_dyn_add(store, op->textoid);
         else
           result = curlx_dyn_add(store, curlx_dyn_ptr(&buf));
-        curlx_dyn_free(&buf);
       }
+      curlx_dyn_free(&buf);
     }
     else
       result = encodeOID(store, beg, end);
@@ -556,7 +558,7 @@ static CURLcode GTime2str(struct dynbuf *store,
                         "%.4s-%.2s-%.2s %.2s:%.2s:%c%c%s%.*s%s%.*s",
                         beg, beg + 4, beg + 6,
                         beg + 8, beg + 10, sec1, sec2,
-                        fracl ? ".": "", (int)fracl, fracp,
+                        fracl ? "." : "", (int)fracl, fracp,
                         sep, (int)tzl, tzp);
 }
 
@@ -932,7 +934,7 @@ static CURLcode ssl_push_certinfo_dyn(struct Curl_easy *data,
                                       struct dynbuf *ptr)
 {
   size_t valuelen = curlx_dyn_len(ptr);
-  char *value = curlx_dyn_ptr(ptr);
+  const char *value = curlx_dyn_ptr(ptr);
 
   CURLcode result = Curl_ssl_push_certinfo_len(data, certnum, label,
                                                value, valuelen);
@@ -979,11 +981,16 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
      * ECC public key is all the data, a value of type BIT STRING mapped to
      * OCTET STRING and should not be parsed as an ASN.1 value.
      */
-    const size_t len = ((pubkey->end - pubkey->beg - 2) * 4);
+    const size_t dlen = pubkey->end - pubkey->beg;
+    size_t len;
+    if(dlen < 2)
+      /* too small */
+      return 1;
+    len = (dlen - 2) * 4;
     if(!certnum)
       infof(data, "   ECC Public Key (%zu bits)", len);
     if(data->set.ssl.certinfo) {
-      char q[sizeof(len) * 8 / 3 + 1];
+      char q[(sizeof(len) * 8 / 3) + 1];
       (void)curl_msnprintf(q, sizeof(q), "%zu", len);
       if(ssl_push_certinfo(data, certnum, "ECC Public Key", q))
         return 1;
@@ -1018,7 +1025,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
     if(!certnum)
       infof(data, "   RSA Public Key (%zu bits)", len);
     if(data->set.ssl.certinfo) {
-      char r[sizeof(len) * 8 / 3 + 1];
+      char r[(sizeof(len) * 8 / 3) + 1];
       curl_msnprintf(r, sizeof(r), "%zu", len);
       if(ssl_push_certinfo(data, certnum, "RSA Public Key", r))
         return 1;

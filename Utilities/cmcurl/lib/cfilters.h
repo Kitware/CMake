@@ -117,7 +117,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
  */
 /*      data event                            arg1       arg2     return */
 #define CF_CTRL_DATA_SETUP              4  /* 0          NULL     first fail */
-/* unused now                           5  */
+/* unused now                           5 */
 #define CF_CTRL_DATA_PAUSE              6  /* on/off     NULL     first fail */
 #define CF_CTRL_DATA_DONE               7  /* premature  NULL     ignored */
 #define CF_CTRL_DATA_DONE_SEND          8  /* 0          NULL     ignored */
@@ -170,7 +170,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
-#define CF_QUERY_HTTP_VERSION       9  /* number (10/11/20/30)   -  */
+#define CF_QUERY_HTTP_VERSION       9  /* number (10/11/20/30)   - */
 /* pass in a `const struct Curl_sockaddr_ex **` as `pres2`. Gets set
  * to NULL when not connected. */
 #define CF_QUERY_REMOTE_ADDR       10  /* -          `Curl_sockaddr_ex *` */
@@ -312,8 +312,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
  * Remove and destroy all filters at chain `sockindex` on connection `conn`.
  */
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              int sockindex);
+                              struct connectdata *conn, int sockindex);
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -349,7 +348,7 @@ unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
 const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
                                              struct Curl_easy *data);
 
-#define CURL_CF_SSL_DEFAULT  -1
+#define CURL_CF_SSL_DEFAULT  (-1)
 #define CURL_CF_SSL_DISABLE  0
 #define CURL_CF_SSL_ENABLE   1
 
@@ -608,15 +607,14 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
  * Will return CURLE_AGAIN iff blocked on receiving.
  */
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
-                        char *buf, size_t buffersize,
-                        size_t *pnread);
+                        char *buf, size_t len, size_t *pnread);
 
 /*
  * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
  * Will return CURLE_AGAIN iff blocked on sending.
  */
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
-                        const void *buf, size_t blen, bool eos,
+                        const void *buf, size_t len, bool eos,
                         size_t *pnwritten);
 
 /**

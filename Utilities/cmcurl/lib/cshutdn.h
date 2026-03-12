@@ -30,6 +30,7 @@ struct curl_pollfds;
 struct Curl_waitfds;
 struct Curl_multi;
 struct Curl_share;
+struct Curl_sigpipe_ctx;
 
 /* Run the shutdown of the connection once.
  * Will shortly attach/detach `data` to `conn` while doing so.
@@ -40,12 +41,12 @@ void Curl_cshutdn_run_once(struct Curl_easy *data,
                            bool *done);
 
 /* Terminates the connection, e.g. closes and destroys it.
- * If `run_shutdown` is TRUE, the shutdown will be run once before
+ * If `do_shutdown` is TRUE, the shutdown will be run once before
  * terminating it.
  * Takes ownership of `conn`. */
 void Curl_cshutdn_terminate(struct Curl_easy *data,
                             struct connectdata *conn,
-                            bool run_shutdown);
+                            bool do_shutdown);
 
 /* A `cshutdown` is always owned by a multi handle to maintain
  * the connections to be shut down. It registers timers and
@@ -97,10 +98,9 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
                          fd_set *read_fd_set, fd_set *write_fd_set,
                          int *maxfd);
 
-/* Run shut down connections using socket. If socket is CURL_SOCKET_TIMEOUT,
- * run maintenance on all connections. */
+/* Run maintenance on all connections. */
 void Curl_cshutdn_perform(struct cshutdn *cshutdn,
                           struct Curl_easy *data,
-                          curl_socket_t s);
+                          struct Curl_sigpipe_ctx *sigpipe_ctx);
 
 #endif /* HEADER_CURL_CSHUTDN_H */

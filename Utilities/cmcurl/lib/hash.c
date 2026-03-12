@@ -155,7 +155,7 @@ static void hash_elem_link(struct Curl_hash *h,
   ++h->size;
 }
 
-#define CURL_HASH_SLOT(x, y, z)      x->table[x->hash_func(y, z, x->slots)]
+#define CURL_HASH_SLOT(x, y, z)      x->table[(x)->hash_func(y, z, (x)->slots)]
 #define CURL_HASH_SLOT_ADDR(x, y, z) &CURL_HASH_SLOT(x, y, z)
 
 void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
@@ -177,7 +177,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
       /* existing key entry, overwrite by clearing old pointer */
       hash_elem_clear_ptr(h, he);
-      he->ptr = (void *)p;
+      he->ptr = p;
       he->dtor = dtor;
       return p;
     }

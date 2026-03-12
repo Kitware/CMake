@@ -91,97 +91,7 @@ extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url,
                         LDAP **ld);
 #endif
 
-static CURLcode oldap_setup_connection(struct Curl_easy *data,
-                                       struct connectdata *conn);
-static CURLcode oldap_do(struct Curl_easy *data, bool *done);
-static CURLcode oldap_done(struct Curl_easy *data, CURLcode, bool);
-static CURLcode oldap_connect(struct Curl_easy *data, bool *done);
-static CURLcode oldap_connecting(struct Curl_easy *data, bool *done);
-static CURLcode oldap_disconnect(struct Curl_easy *data,
-                                 struct connectdata *conn, bool dead);
-
-static CURLcode oldap_perform_auth(struct Curl_easy *data, const char *mech,
-                                   const struct bufref *initresp);
-static CURLcode oldap_continue_auth(struct Curl_easy *data, const char *mech,
-                                    const struct bufref *resp);
-static CURLcode oldap_cancel_auth(struct Curl_easy *data, const char *mech);
-static CURLcode oldap_get_message(struct Curl_easy *data, struct bufref *out);
-
 static Curl_recv oldap_recv;
-
-/*
- * LDAP protocol handler.
- */
-const struct Curl_handler Curl_handler_ldap = {
-  "ldap",                               /* scheme */
-  oldap_setup_connection,               /* setup_connection */
-  oldap_do,                             /* do_it */
-  oldap_done,                           /* done */
-  ZERO_NULL,                            /* do_more */
-  oldap_connect,                        /* connect_it */
-  oldap_connecting,                     /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  oldap_disconnect,                     /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_LDAP,                            /* defport */
-  CURLPROTO_LDAP,                       /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL_REUSE |                   /* flags */
-    PROTOPT_CONN_REUSE
-};
-
-#ifdef USE_SSL
-/*
- * LDAPS protocol handler.
- */
-const struct Curl_handler Curl_handler_ldaps = {
-  "ldaps",                              /* scheme */
-  oldap_setup_connection,               /* setup_connection */
-  oldap_do,                             /* do_it */
-  oldap_done,                           /* done */
-  ZERO_NULL,                            /* do_more */
-  oldap_connect,                        /* connect_it */
-  oldap_connecting,                     /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  oldap_disconnect,                     /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_LDAPS,                           /* defport */
-  CURLPROTO_LDAPS,                      /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL |                         /* flags */
-    PROTOPT_CONN_REUSE
-};
-#endif
-
-/* SASL parameters for the ldap protocol */
-static const struct SASLproto saslldap = {
-  "ldap",                     /* The service name */
-  oldap_perform_auth,         /* Send authentication command */
-  oldap_continue_auth,        /* Send authentication continuation */
-  oldap_cancel_auth,          /* Send authentication cancellation */
-  oldap_get_message,          /* Get SASL response message */
-  0,                          /* Maximum initial response length (no max) */
-  LDAP_SASL_BIND_IN_PROGRESS, /* Code received when continuation is expected */
-  LDAP_SUCCESS,               /* Code to receive upon authentication success */
-  SASL_AUTH_NONE,             /* Default mechanisms */
-  0                           /* Configuration flags */
-};
 
 struct ldapconninfo {
   struct SASL sasl;          /* SASL-related parameters */
@@ -204,7 +114,6 @@ struct ldapreqinfo {
 /* meta key for storing ldapconninfo at connection */
 #define CURL_META_LDAP_CONN   "meta:proto:ldap:conn"
 
-
 /*
  * oldap_state()
  *
@@ -213,7 +122,7 @@ struct ldapreqinfo {
 static void oldap_state(struct Curl_easy *data, struct ldapconninfo *li,
                         ldapstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -230,8 +139,9 @@ static void oldap_state(struct Curl_easy *data, struct ldapconninfo *li,
   if(li->state != newstate)
     infof(data, "LDAP %p state change from %s to %s",
           (void *)li, names[li->state], names[newstate]);
-#endif
+#else
   (void)data;
+#endif
   li->state = newstate;
 }
 
@@ -426,7 +336,7 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-  char *binddn = NULL;
+  const char *binddn = NULL;
   struct berval passwd;
   int rc;
 
@@ -496,14 +406,86 @@ static CURLcode oldap_perform_sasl(struct Curl_easy *data)
 }
 
 #ifdef USE_SSL
-static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg);
-static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod);
-static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg);
+static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg)
+{
+  sbiod->sbiod_pvt = arg;
+  return 0;
+}
+
+static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod)
+{
+  sbiod->sbiod_pvt = NULL;
+  return 0;
+}
+
+/* We do not need to do anything because libcurl does it already */
+static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod)
+{
+  (void)sbiod;
+  return 0;
+}
+
+static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
+{
+  (void)arg;
+  if(opt == LBER_SB_OPT_DATA_READY) {
+    struct Curl_easy *data = sbiod->sbiod_pvt;
+    return Curl_conn_data_pending(data, FIRSTSOCKET);
+  }
+  return 0;
+}
+
 static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
-                                  ber_len_t len);
+                                  ber_len_t len)
+{
+  struct Curl_easy *data = sbiod->sbiod_pvt;
+  ber_slen_t ret = 0;
+  if(data) {
+    struct connectdata *conn = data->conn;
+    if(conn) {
+      struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
+      CURLcode err = CURLE_RECV_ERROR;
+      size_t nread;
+
+      if(!li) {
+        SET_SOCKERRNO(SOCKEINVAL);
+        return -1;
+      }
+      err = (li->recv)(data, FIRSTSOCKET, buf, len, &nread);
+      if(err == CURLE_AGAIN) {
+        SET_SOCKERRNO(SOCKEWOULDBLOCK);
+      }
+      ret = err ? -1 : (ber_slen_t)nread;
+    }
+  }
+  return ret;
+}
+
 static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
-                                   ber_len_t len);
-static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod);
+                                   ber_len_t len)
+{
+  struct Curl_easy *data = sbiod->sbiod_pvt;
+  ber_slen_t ret = 0;
+  if(data) {
+    struct connectdata *conn = data->conn;
+    if(conn) {
+      struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
+      CURLcode err = CURLE_SEND_ERROR;
+      size_t nwritten;
+
+      if(!li) {
+        SET_SOCKERRNO(SOCKEINVAL);
+        return -1;
+      }
+      err = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &nwritten);
+      if(err == CURLE_AGAIN) {
+        SET_SOCKERRNO(SOCKEWOULDBLOCK);
+      }
+      ret = err ? -1 : (ber_slen_t)nwritten;
+    }
+  }
+  return ret;
+}
 
 static Sockbuf_IO ldapsb_tls = {
   ldapsb_tls_setup,
@@ -585,6 +567,20 @@ static void oldap_conn_dtor(void *key, size_t klen, void *entry)
   curlx_free(li);
 }
 
+/* SASL parameters for the ldap protocol */
+static const struct SASLproto saslldap = {
+  "ldap",                     /* The service name */
+  oldap_perform_auth,         /* Send authentication command */
+  oldap_continue_auth,        /* Send authentication continuation */
+  oldap_cancel_auth,          /* Send authentication cancellation */
+  oldap_get_message,          /* Get SASL response message */
+  0,                          /* Maximum initial response length (no max) */
+  LDAP_SASL_BIND_IN_PROGRESS, /* Code received when continuation is expected */
+  LDAP_SUCCESS,               /* Code to receive upon authentication success */
+  SASL_AUTH_NONE,             /* Default mechanisms */
+  0                           /* Configuration flags */
+};
+
 static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
@@ -619,7 +615,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
     goto out;
 
   hosturl = curl_maprintf("%s://%s%s%s:%d",
-                          conn->handler->scheme,
+                          conn->scheme->name,
                           conn->bits.ipv6_ip ? "[" : "",
                           conn->host.name,
                           conn->bits.ipv6_ip ? "]" : "",
@@ -727,8 +723,9 @@ static CURLcode oldap_state_mechs_resp(struct Curl_easy *data,
       if(bvals) {
         for(i = 0; bvals[i].bv_val; i++) {
           size_t llen;
-          unsigned short mech = Curl_sasl_decode_mech((char *)bvals[i].bv_val,
-                                                      bvals[i].bv_len, &llen);
+          unsigned short mech =
+            Curl_sasl_decode_mech((const char *)bvals[i].bv_val,
+                                  bvals[i].bv_len, &llen);
           if(bvals[i].bv_len == llen)
             li->sasl.authmechs |= mech;
         }
@@ -963,8 +960,7 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
 #ifdef USE_SSL
     if(ssl_installed(conn)) {
       Sockbuf *sb;
-      if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
-         ||
+      if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS ||
          ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
         return CURLE_FAILED_INIT;
     }
@@ -1242,88 +1238,6 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   return result;
 }
 
-#ifdef USE_SSL
-static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg)
-{
-  sbiod->sbiod_pvt = arg;
-  return 0;
-}
-
-static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod)
-{
-  sbiod->sbiod_pvt = NULL;
-  return 0;
-}
-
-/* We do not need to do anything because libcurl does it already */
-static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod)
-{
-  (void)sbiod;
-  return 0;
-}
-
-static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
-{
-  (void)arg;
-  if(opt == LBER_SB_OPT_DATA_READY) {
-    struct Curl_easy *data = sbiod->sbiod_pvt;
-    return Curl_conn_data_pending(data, FIRSTSOCKET);
-  }
-  return 0;
-}
-
-static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
-                                  ber_len_t len)
-{
-  struct Curl_easy *data = sbiod->sbiod_pvt;
-  ber_slen_t ret = 0;
-  if(data) {
-    struct connectdata *conn = data->conn;
-    if(conn) {
-      struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-      CURLcode err = CURLE_RECV_ERROR;
-      size_t nread;
-
-      if(!li) {
-        SET_SOCKERRNO(SOCKEINVAL);
-        return -1;
-      }
-      err = (li->recv)(data, FIRSTSOCKET, buf, len, &nread);
-      if(err == CURLE_AGAIN) {
-        SET_SOCKERRNO(SOCKEWOULDBLOCK);
-      }
-      ret = err ? -1 : (ber_slen_t)nread;
-    }
-  }
-  return ret;
-}
-static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
-                                   ber_len_t len)
-{
-  struct Curl_easy *data = sbiod->sbiod_pvt;
-  ber_slen_t ret = 0;
-  if(data) {
-    struct connectdata *conn = data->conn;
-    if(conn) {
-      struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-      CURLcode err = CURLE_SEND_ERROR;
-      size_t nwritten;
-
-      if(!li) {
-        SET_SOCKERRNO(SOCKEINVAL);
-        return -1;
-      }
-      err = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &nwritten);
-      if(err == CURLE_AGAIN) {
-        SET_SOCKERRNO(SOCKEWOULDBLOCK);
-      }
-      ret = err ? -1 : (ber_slen_t)nwritten;
-    }
-  }
-  return ret;
-}
-#endif /* USE_SSL */
-
 void Curl_ldap_version(char *buf, size_t bufsz)
 {
   LDAPAPIInfo api;
@@ -1333,7 +1247,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
     unsigned int patch = (unsigned int)(api.ldapai_vendor_version % 100);
     unsigned int major = (unsigned int)(api.ldapai_vendor_version / 10000);
     unsigned int minor =
-      (((unsigned int)api.ldapai_vendor_version - major * 10000)
+      (((unsigned int)api.ldapai_vendor_version - (major * 10000))
        - patch) / 100;
     curl_msnprintf(buf, bufsz, "%s/%u.%u.%u",
                    api.ldapai_vendor_name, major, minor, patch);
@@ -1344,4 +1258,29 @@ void Curl_ldap_version(char *buf, size_t bufsz)
     curl_msnprintf(buf, bufsz, "OpenLDAP");
 }
 
+/*
+ * LDAP protocol handler.
+ */
+const struct Curl_protocol Curl_protocol_ldap = {
+  oldap_setup_connection,               /* setup_connection */
+  oldap_do,                             /* do_it */
+  oldap_done,                           /* done */
+  ZERO_NULL,                            /* do_more */
+  oldap_connect,                        /* connect_it */
+  oldap_connecting,                     /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  oldap_disconnect,                     /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+};
+
 #endif /* !CURL_DISABLE_LDAP && USE_OPENLDAP */
+
+/* The LDAP scheme structs are in ldap.c */

@@ -384,6 +384,7 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
   return gss_delete_sec_context(min, context, output_token);
 }
 
+#ifdef CURLVERBOSE
 #define GSS_LOG_BUFFER_LEN 1024
 static size_t display_gss_error(OM_uint32 status, int type,
                                 char *buf, size_t len)
@@ -437,11 +438,8 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
   display_gss_error(minor, GSS_C_MECH_CODE, buf, len);
 
   infof(data, "%s%s", prefix, buf);
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-  (void)prefix;
-#endif
 }
+#endif /* CURLVERBOSE */
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic pop

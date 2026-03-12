@@ -24,17 +24,17 @@
  * RFC2831 DIGEST-MD5 authentication
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_DIGEST_AUTH)
 
-#include "vauth.h"
-#include "digest.h"
-#include "../curlx/multibyte.h"
-#include "../curl_trc.h"
-#include "../strdup.h"
-#include "../strcase.h"
-#include "../strerror.h"
+#include "vauth/vauth.h"
+#include "vauth/digest.h"
+#include "curlx/multibyte.h"
+#include "curl_trc.h"
+#include "curlx/strdup.h"
+#include "strcase.h"
+#include "strerror.h"
 
 /*
  * Curl_auth_is_digest_supported()
@@ -193,9 +193,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
      status == SEC_I_COMPLETE_AND_CONTINUE)
     Curl_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char buffer[STRERROR_LEN];
-#endif
+    VERBOSE(char buffer[STRERROR_LEN]);
 
     Curl_pSecFn->FreeCredentialsHandle(&credentials);
     Curl_sspi_free_identity(p_identity);
@@ -205,10 +203,8 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     if(status == SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
     infof(data, "schannel: InitializeSecurityContext failed: %s",
           Curl_sspi_strerror(status, buffer, sizeof(buffer)));
-#endif
 
     return CURLE_AUTH_ERROR;
   }
@@ -355,7 +351,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   }
 
   /* Store the challenge for use later */
-  digest->input_token = (BYTE *)Curl_memdup(chlg, chlglen + 1);
+  digest->input_token = (BYTE *)curlx_memdup(chlg, chlglen + 1);
   if(!digest->input_token)
     return CURLE_OUT_OF_MEMORY;
 
@@ -400,8 +396,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   SecBuffer chlg_buf[5];
   SecBufferDesc chlg_desc;
   SECURITY_STATUS status;
-
-  (void)data;
 
   /* Query the security package for DigestSSP */
   status =
@@ -594,9 +588,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
        status == SEC_I_COMPLETE_AND_CONTINUE)
       Curl_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
     else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      char buffer[STRERROR_LEN];
-#endif
+      VERBOSE(char buffer[STRERROR_LEN]);
 
       Curl_pSecFn->FreeCredentialsHandle(&credentials);
 
@@ -608,10 +600,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       if(status == SEC_E_INSUFFICIENT_MEMORY)
         return CURLE_OUT_OF_MEMORY;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "schannel: InitializeSecurityContext failed: %s",
             Curl_sspi_strerror(status, buffer, sizeof(buffer)));
-#endif
 
       return CURLE_AUTH_ERROR;
     }
@@ -622,7 +612,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     Curl_sspi_free_identity(p_identity);
   }
 
-  resp = Curl_memdup0((const char *)output_token, output_token_len);
+  resp = curlx_memdup0((const char *)output_token, output_token_len);
   curlx_free(output_token);
   if(!resp) {
     return CURLE_OUT_OF_MEMORY;
