@@ -217,3 +217,18 @@ CPack generators which are essentially archives at their core. These include:
   It is selected automatically by the archive library backend and
   not directly set by CMake itself. The default compression level
   may vary between archive formats, platforms, etc.
+
+.. variable:: CPACK_ARCHIVE_ENCODING
+
+  .. versionadded:: 4.4
+
+  Specify the pathname character encoding used in package archives.
+
+  :Default: ``UTF-8``
+
+  See the :option:`cmake -E tar <cmake-E tar>` tool's
+  :option:`--cmake-tar-encoding <cmake-E_tar --cmake-tar-encoding>` flag
+  for supported encoding names.
+
+  In CMake 4.3 and below, the ``OEM`` encoding (current locale)
+  was always used.

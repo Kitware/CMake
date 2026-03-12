@@ -562,18 +562,20 @@ public:
   };
 
   static bool ListTar(std::string const& arFileName,
-                      std::vector<std::string> const& files, bool verbose);
+                      std::vector<std::string> const& files,
+                      std::string const& encoding, bool verbose);
   static bool CreateTar(std::string const& arFileName,
                         std::vector<std::string> const& files,
                         std::string const& workingDirectory,
-                        cmTarCompression compressType, bool verbose,
+                        cmTarCompression compressType,
+                        std::string const& encoding, bool verbose,
                         std::string const& mtime = std::string(),
                         std::string const& format = std::string(),
                         int compressionLevel = 0, int numThreads = 1);
   static bool ExtractTar(std::string const& arFileName,
                          std::vector<std::string> const& files,
                          cmTarExtractTimestamps extractTimestamps,
-                         bool verbose);
+                         std::string const& encoding, bool verbose);
 
   /** Random number generation.  */
   static unsigned int RandomSeed();

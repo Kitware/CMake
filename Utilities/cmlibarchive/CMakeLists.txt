@@ -44,9 +44,11 @@ ENDIF(NOT "${CMAKE_BUILD_TYPE_UPPER}"
        MATCHES "^(DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL|NONE)\$")
 ENDIF()
 
+if(0) # XXX(cmake): not needed for build within cmake
 # On MacOS, prefer MacPorts libraries to system libraries.
 # I haven't come up with a compelling argument for this to be conditional.
 list(APPEND CMAKE_PREFIX_PATH /opt/local)
+endif() # XXX(cmake): end
 # Enable @rpath in the install name.
 # detail in "cmake  --help-policy CMP0042"
 SET(CMAKE_MACOSX_RPATH ON)
@@ -1198,6 +1200,13 @@ IF(ENABLE_ICONV)
       ENDIF(HAVE_ICONV)
     ENDIF(NOT HAVE_ICONV AND LIBICONV_PATH)
   ENDIF(ICONV_INCLUDE_DIR)
+
+  # XXX(cmake): iconv is required on non-Windows platforms
+  if(NOT HAVE_ICONV AND NOT WIN32)
+    message(FATAL_ERROR "iconv is required, but was not found.")
+  endif()
+  # XXX(cmake): end
+
   #
   # Find locale_charset() for libiconv.
   #

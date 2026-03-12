@@ -1105,6 +1105,9 @@ add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SY
 if(CMake_TEST_LibArchive_VERSION)
   list(APPEND CommandLineTar_ARGS -DCMake_TEST_LibArchive_VERSION=${CMake_TEST_LibArchive_VERSION})
 endif()
+if(DEFINED CMake_TEST_LOCALE_CHARSET)
+  list(APPEND CommandLineTar_ARGS -DCMake_TEST_LOCALE_CHARSET=${CMake_TEST_LOCALE_CHARSET})
+endif()
 list(APPEND CommandLineTar_ARGS -DPython_EXECUTABLE=${Python_EXECUTABLE})
 add_RunCMake_test(CommandLineTar)
 

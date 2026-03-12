@@ -575,12 +575,7 @@ archive_wstring_append_from_mbs_in_codepage(struct archive_wstring *dest,
 		} else
 			mbflag = MB_PRECOMPOSED;
 
-		/* FIXME(CMake#26903): Offer control over encoding conversion.
-		   For now, we instead tolerate invalid characters as
-		   libarchive 3.7.2 / CMake 3.30 and below did.  */
-		#if 0
 		mbflag |= MB_ERR_INVALID_CHARS;
-		#endif
 
 		buffsize = dest->length + length + 1;
 		do {
@@ -777,7 +772,7 @@ archive_string_append_from_wcs_in_codepage(struct archive_string *as,
 			int r;
 
 			defchar_used = 0;
-			if (to_cp == CP_UTF8 || sc == NULL)
+			if (to_cp == CP_UTF8)
 				dp = NULL;
 			else
 				dp = &defchar_used;
@@ -1878,6 +1873,9 @@ archive_string_conversion_free(struct archive *a)
 const char *
 archive_string_conversion_charset_name(struct archive_string_conv *sc)
 {
+	if (sc == NULL) {
+		return "current locale";
+	}
 	if (sc->flag & SCONV_TO_CHARSET)
 		return (sc->to_charset);
 	else
@@ -4128,7 +4126,12 @@ archive_mstring_get_mbs_l(struct archive *a, struct archive_mstring *aes,
 	 * character-set. */
 	if ((aes->aes_set & AES_SET_MBS) == 0) {
 		const char *pm; /* unused */
-		archive_mstring_get_mbs(a, aes, &pm); /* ignore errors, we'll handle it later */
+		if (archive_mstring_get_mbs(a, aes, &pm) != 0) {
+			/* We have another form, but failed to convert it to
+			 * the native locale.  Transitively, we've failed to
+			 * convert it to the specified character set. */
+			ret = -1;
+		}
 	}
 	/* If we already have an MBS form, use it to be translated to
 	 * specified character-set. */
@@ -4146,6 +4149,8 @@ archive_mstring_get_mbs_l(struct archive *a, struct archive_mstring *aes,
 		if (length != NULL)
 			*length = aes->aes_mbs_in_locale.length;
 	} else {
+		/* Either we have no string in any form,
+		 * or conversion failed and set 'ret != 0'.  */
 		*p = NULL;
 		if (length != NULL)
 			*length = 0;

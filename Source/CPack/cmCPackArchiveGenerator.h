@@ -106,6 +106,7 @@ private:
 
   int GetThreadCount() const;
   int GetCompressionLevel() const;
+  std::string GetEncoding() const;
 
 private:
   cmArchiveWrite::Compress Compress;

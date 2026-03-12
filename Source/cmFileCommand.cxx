@@ -3824,8 +3824,8 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
 
   if (!cmSystemTools::CreateTar(
         parsedArgs.Output, parsedArgs.Paths, parsedArgs.WorkingDirectory,
-        compress, parsedArgs.Verbose, parsedArgs.MTime, parsedArgs.Format,
-        compressionLevel, threads)) {
+        compress, "OEM", parsedArgs.Verbose, parsedArgs.MTime,
+        parsedArgs.Format, compressionLevel, threads)) {
     status.SetError(cmStrCat("failed to compress: ", parsedArgs.Output));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
@@ -3873,7 +3873,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
   std::string inFile = parsedArgs.Input;
 
   if (parsedArgs.ListOnly) {
-    if (!cmSystemTools::ListTar(inFile, parsedArgs.Patterns,
+    if (!cmSystemTools::ListTar(inFile, parsedArgs.Patterns, "OEM",
                                 parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to list: ", inFile));
       cmSystemTools::SetFatalErrorOccurred();
@@ -3911,7 +3911,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
           inFile, parsedArgs.Patterns,
           parsedArgs.Touch ? cmSystemTools::cmTarExtractTimestamps::No
                            : cmSystemTools::cmTarExtractTimestamps::Yes,
-          parsedArgs.Verbose)) {
+          "OEM", parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to extract:\n  ", inFile));
       cmSystemTools::SetFatalErrorOccurred();
       return false;

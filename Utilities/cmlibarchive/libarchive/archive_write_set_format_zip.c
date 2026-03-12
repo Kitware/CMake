@@ -802,6 +802,17 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 	int version_needed = 10;
 #define MIN_VERSION_NEEDED(x) do { if (version_needed < x) { version_needed = x; } } while (0)
 
+	/* Sanity check. */
+	if (archive_entry_pathname(entry) == NULL
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	    && archive_entry_pathname_w(entry) == NULL
+#endif
+	    ) {
+		archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC,
+		    "Can't record entry in zip file without pathname");
+		return ARCHIVE_FAILED;
+	}
+
 	/* Ignore types of entries that we don't support. */
 	type = archive_entry_filetype(entry);
 	if (type != AE_IFREG && type != AE_IFDIR && type != AE_IFLNK) {
@@ -882,22 +893,33 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 		return (ARCHIVE_FATAL);
 	}
 
-	if (sconv != NULL) {
+	{
 		const char *p;
 		size_t len;
 
 		if (archive_entry_pathname_l(zip->entry, &p, &len, sconv) != 0) {
+			const char* p_mbs;
 			if (errno == ENOMEM) {
 				archive_set_error(&a->archive, ENOMEM,
 				    "Can't allocate memory for Pathname");
 				return (ARCHIVE_FATAL);
 			}
-			archive_set_error(&a->archive,
-			    ARCHIVE_ERRNO_FILE_FORMAT,
-			    "Can't translate Pathname '%s' to %s",
-			    archive_entry_pathname(zip->entry),
-			    archive_string_conversion_charset_name(sconv));
-			ret2 = ARCHIVE_WARN;
+			p_mbs = archive_entry_pathname(zip->entry);
+			if (p_mbs) {
+				/* We have a wrongly-encoded MBS pathname.  Warn and use it.  */
+				archive_set_error(&a->archive,
+				    ARCHIVE_ERRNO_FILE_FORMAT,
+				    "Can't translate pathname '%s' to %s", p_mbs,
+				    archive_string_conversion_charset_name(sconv));
+				ret2 = ARCHIVE_WARN;
+			} else {
+				/* We have no MBS pathname.  Fail.  */
+				archive_set_error(&a->archive,
+				    ARCHIVE_ERRNO_FILE_FORMAT,
+				    "Can't translate pathname to %s",
+				    archive_string_conversion_charset_name(sconv));
+				return ARCHIVE_FAILED;
+			}
 		}
 		if (len > 0)
 			archive_entry_set_pathname(zip->entry, p);
