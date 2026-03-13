@@ -3,85 +3,85 @@ Contributors
 
 The following individuals and institutions are among the contributors:
 
-* `Aaron C. Meadows <mailto:cmake@shadowguarddev.com>`_
-* `Adriaan de Groot <mailto:groot@kde.org>`_
-* `Aleksey Avdeev <mailto:solo@altlinux.ru>`_
-* `Alexander Neundorf <mailto:neundorf@kde.org>`_
-* `Alexander Smorkalov <mailto:alexander.smorkalov@itseez.com>`_
-* `Alexey Sokolov <mailto:sokolov@google.com>`_
-* `Alex Merry <mailto:alex.merry@kde.org>`_
-* `Alex Turbov <mailto:i.zaufi@gmail.com>`_
-* `Andreas Pakulat <mailto:apaku@gmx.de>`_
-* `Andreas Schneider <mailto:asn@cryptomilk.org>`_
-* `André Rigland Brodtkorb <mailto:Andre.Brodtkorb@ifi.uio.no>`_
+* `Aaron C. Meadows <mailto:cmake@shadowguarddev.com>`__
+* `Adriaan de Groot <mailto:groot@kde.org>`__
+* `Aleksey Avdeev <mailto:solo@altlinux.ru>`__
+* `Alexander Neundorf <mailto:neundorf@kde.org>`__
+* `Alexander Smorkalov <mailto:alexander.smorkalov@itseez.com>`__
+* `Alexey Sokolov <mailto:sokolov@google.com>`__
+* `Alex Merry <mailto:alex.merry@kde.org>`__
+* `Alex Turbov <mailto:i.zaufi@gmail.com>`__
+* `Andreas Pakulat <mailto:apaku@gmx.de>`__
+* `Andreas Schneider <mailto:asn@cryptomilk.org>`__
+* `André Rigland Brodtkorb <mailto:Andre.Brodtkorb@ifi.uio.no>`__
 * Axel Huebl, Helmholtz-Zentrum Dresden - Rossendorf
 * Benjamin Eikel
-* `Bjoern Ricks <mailto:bjoern.ricks@gmail.com>`_
-* `Brad Hards <mailto:bradh@kde.org>`_
+* `Bjoern Ricks <mailto:bjoern.ricks@gmail.com>`__
+* `Brad Hards <mailto:bradh@kde.org>`__
 * Christopher Harvey
-* `Christoph Grüninger <mailto:foss@grueninger.de>`_
-* `Clement Creusot <mailto:creusot@cs.york.ac.uk>`_
-* `Daniel Blezek <mailto:blezek@gmail.com>`_
-* `Daniel Pfeifer <mailto:daniel@pfeifer-mail.de>`_
-* `Dawid Wróbel <mailto:me@dawidwrobel.com>`_
-* `Enrico Scholz <mailto:enrico.scholz@informatik.tu-chemnitz.de>`_
-* `Eran Ifrah <mailto:eran.ifrah@gmail.com>`_
+* `Christoph Grüninger <mailto:foss@grueninger.de>`__
+* `Clement Creusot <mailto:creusot@cs.york.ac.uk>`__
+* `Daniel Blezek <mailto:blezek@gmail.com>`__
+* `Daniel Pfeifer <mailto:daniel@pfeifer-mail.de>`__
+* `Dawid Wróbel <mailto:me@dawidwrobel.com>`__
+* `Enrico Scholz <mailto:enrico.scholz@informatik.tu-chemnitz.de>`__
+* `Eran Ifrah <mailto:eran.ifrah@gmail.com>`__
 * Esben Mose Hansen, Ange Optimization ApS
-* `Geoffrey Viola <mailto:geoffrey.viola@asirobots.com>`_
-* `Georg Brandl <mailto:georg@python.org>`_
-* `Google Inc <https://www.google.com/>`_
+* `Geoffrey Viola <mailto:geoffrey.viola@asirobots.com>`__
+* `Georg Brandl <mailto:georg@python.org>`__
+* `Google Inc <https://www.google.com/>`__
 * Gregor Jasny
-* `Helio Chissini de Castro <mailto:helio@kde.org>`_
-* `Ilya Lavrenov <mailto:ilya.lavrenov@itseez.com>`_
-* `Insight Software Consortium <https://insightsoftwareconsortium.org/>`_
-* `Intel Corporation <https://www.intel.com/>`_
+* `Helio Chissini de Castro <mailto:helio@kde.org>`__
+* `Ilya Lavrenov <mailto:ilya.lavrenov@itseez.com>`__
+* `Insight Software Consortium <https://insightsoftwareconsortium.org/>`__
+* `Intel Corporation <https://www.intel.com/>`__
 * Jan Woetzel
-* `Jordan Williams <mailto:jordan@jwillikers.com>`_
+* `Jordan Williams <mailto:jordan@jwillikers.com>`__
 * Julien Schueller
-* `Kelly Thompson <mailto:kgt@lanl.gov>`_
-* `Konstantin Podsvirov <mailto:konstantin@podsvirov.su>`_
-* `Laurent Montel <mailto:montel@kde.org>`_
-* `Mario Bensi <mailto:mbensi@ipsquad.net>`_
-* `Martin Gräßlin <mailto:mgraesslin@kde.org>`_
-* `Mathieu Malaterre <mailto:mathieu.malaterre@gmail.com>`_
+* `Kelly Thompson <mailto:kgt@lanl.gov>`__
+* `Konstantin Podsvirov <mailto:konstantin@podsvirov.su>`__
+* `Laurent Montel <mailto:montel@kde.org>`__
+* `Mario Bensi <mailto:mbensi@ipsquad.net>`__
+* `Martin Gräßlin <mailto:mgraesslin@kde.org>`__
+* `Mathieu Malaterre <mailto:mathieu.malaterre@gmail.com>`__
 * Matthaeus G. Chajdas
-* `Matthias Kretz <mailto:kretz@kde.org>`_
-* `Matthias Maennich <mailto:matthias@maennich.net>`_
-* `Michael Hirsch, Ph.D. <https://www.scivision.dev/>`_
+* `Matthias Kretz <mailto:kretz@kde.org>`__
+* `Matthias Maennich <mailto:matthias@maennich.net>`__
+* `Michael Hirsch, Ph.D. <https://www.scivision.dev/>`__
 * Michael Stürmer
 * Miguel A. Figueroa-Villanueva
-* `Mike Durso <mailto:rbprogrammer@gmail.com>`_
+* `Mike Durso <mailto:rbprogrammer@gmail.com>`__
 * Mike Jackson
-* `Mike McQuaid <mailto:mike@mikemcquaid.com>`_
-* `Nicolas Bock <mailto:nicolasbock@gmail.com>`_
-* `Nicolas Despres <mailto:nicolas.despres@gmail.com>`_
-* `Nikita Krupen'ko <mailto:krnekit@gmail.com>`_
-* `NVIDIA Corporation <https://www.nvidia.com/>`_
-* `OpenGamma Ltd. <https://opengamma.com/>`_
-* `Patrick Stotko <mailto:stotko@cs.uni-bonn.de>`_
-* `Per Øyvind Karlsen <mailto:peroyvind@mandriva.org>`_
-* `Peter Collingbourne <mailto:peter@pcc.me.uk>`_
-* `Petr Gotthard <mailto:gotthard@honeywell.com>`_
-* `Philip Lowman <mailto:philip@yhbt.com>`_
-* `Philippe Proulx <mailto:pproulx@efficios.com>`_
+* `Mike McQuaid <mailto:mike@mikemcquaid.com>`__
+* `Nicolas Bock <mailto:nicolasbock@gmail.com>`__
+* `Nicolas Despres <mailto:nicolas.despres@gmail.com>`__
+* `Nikita Krupen'ko <mailto:krnekit@gmail.com>`__
+* `NVIDIA Corporation <https://www.nvidia.com/>`__
+* `OpenGamma Ltd. <https://opengamma.com/>`__
+* `Patrick Stotko <mailto:stotko@cs.uni-bonn.de>`__
+* `Per Øyvind Karlsen <mailto:peroyvind@mandriva.org>`__
+* `Peter Collingbourne <mailto:peter@pcc.me.uk>`__
+* `Petr Gotthard <mailto:gotthard@honeywell.com>`__
+* `Philip Lowman <mailto:philip@yhbt.com>`__
+* `Philippe Proulx <mailto:pproulx@efficios.com>`__
 * Raffi Enficiaud, Max Planck Society
 * Raumfeld
-* `Roger Leigh <mailto:rleigh@codelibre.net>`_
-* `Rolf Eike Beer <mailto:eike@sf-mail.de>`_
-* `Roman Donchenko <mailto:roman.donchenko@itseez.com>`_
-* `Roman Kharitonov <mailto:roman.kharitonov@itseez.com>`_
+* `Roger Leigh <mailto:rleigh@codelibre.net>`__
+* `Rolf Eike Beer <mailto:eike@sf-mail.de>`__
+* `Roman Donchenko <mailto:roman.donchenko@itseez.com>`__
+* `Roman Kharitonov <mailto:roman.kharitonov@itseez.com>`__
 * Ruslan Baratov
-* `Sebastian Holtermann <mailto:sebholt@xwmw.org>`_
-* `Stephen Kelly <mailto:steveire@gmail.com>`_
-* `Sylvain Joubert <mailto:joubert.sy@gmail.com>`_
-* `The Qt Company Ltd. <https://www.qt.io/>`_
-* `Thomas Sondergaard <mailto:ts@medical-insight.com>`_
-* `Tobias Hunger <mailto:tobias.hunger@qt.io>`_
-* `Todd Gamblin <mailto:tgamblin@llnl.gov>`_
+* `Sebastian Holtermann <mailto:sebholt@xwmw.org>`__
+* `Stephen Kelly <mailto:steveire@gmail.com>`__
+* `Sylvain Joubert <mailto:joubert.sy@gmail.com>`__
+* `The Qt Company Ltd. <https://www.qt.io/>`__
+* `Thomas Sondergaard <mailto:ts@medical-insight.com>`__
+* `Tobias Hunger <mailto:tobias.hunger@qt.io>`__
+* `Todd Gamblin <mailto:tgamblin@llnl.gov>`__
 * Tristan Carel
-* `University of Dundee <https://www.dundee.ac.uk/>`_
+* `University of Dundee <https://www.dundee.ac.uk/>`__
 * Vadim Zhukov
-* `Will Dicharry <mailto:wdicharry@stellarscience.com>`_
+* `Will Dicharry <mailto:wdicharry@stellarscience.com>`__
 
 See version control history for details of individual contributions.
 
