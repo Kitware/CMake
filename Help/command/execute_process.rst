@@ -22,6 +22,8 @@ Execute one or more child processes.
                   [OUTPUT_STRIP_TRAILING_WHITESPACE]
                   [ERROR_STRIP_TRAILING_WHITESPACE]
                   [ENCODING <name>]
+                  [ENVIRONMENT <variable=value>...]
+                  [ENVIRONMENT_MODIFICATION <env-mod-op>...]
                   [ECHO_OUTPUT_VARIABLE]
                   [ECHO_ERROR_VARIABLE]
                   [COMMAND_ERROR_IS_FATAL <ANY|LAST|NONE>])
@@ -186,6 +188,27 @@ Options:
    of ``UTF-8`` to match the
    `UTF-8 RFC <https://datatracker.ietf.org/doc/html/rfc3629>`_
    naming convention.
+
+``ENVIRONMENT <variable=value>...``
+  .. versionadded:: 4.4
+
+  Add environment variable definitions to the environment of the child
+  processes.  Each entry must be of the form ``NAME=value`` and is interpreted
+  as setting ``NAME`` to ``value`` for the duration of the
+  ``execute_process()`` call.
+
+  These entries are processed in order.  If the same variable name is given
+  multiple times, the last value wins.
+
+``ENVIRONMENT_MODIFICATION <env-mod-op>...``
+  .. versionadded:: 4.4
+
+  Apply one or more :prop_test:`ENVIRONMENT_MODIFICATION` operations to the
+  environment of the child processes.  Each operation is applied in the given
+  order, and failures to parse an operation are treated as errors.
+
+  Environment modifications are applied after ``ENVIRONMENT`` entries, if both
+  options are specified.
 
 ``COMMAND_ERROR_IS_FATAL <ANY|LAST|NONE>``
   .. versionadded:: 3.19

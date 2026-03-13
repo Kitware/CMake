@@ -19,6 +19,10 @@ if(TEST_ENCODING_EXE)
   run_cmake_script(EncodingUTF8 -DTEST_ENCODING_EXE=${TEST_ENCODING_EXE})
 endif()
 
+run_cmake(Environment)
+run_cmake(EnvironmentModification)
+run_cmake(EnvironmentModificationError)
+
 if(EXIT_CODE_EXE)
   run_cmake_command(ExitValues ${CMAKE_COMMAND} -DEXIT_CODE_EXE=${EXIT_CODE_EXE} -P ${RunCMake_SOURCE_DIR}/ExitValues.cmake)
 endif()
