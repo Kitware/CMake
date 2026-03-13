@@ -175,8 +175,9 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
     this->StateSnapshot.GetState()->CreatePolicyScopeSnapshot(
       this->StateSnapshot);
 
-  // Enter a policy level for this directory.
+  // Enter a policy and diagnostic level for this directory.
   this->PushPolicy();
+  this->PushDiagnostic();
 
   // push empty loop block
   this->PushLoopBlockBarrier();
@@ -620,7 +621,8 @@ class cmMakefile::IncludeScope : public FileScopeBase
 {
 public:
   IncludeScope(cmMakefile* mf, std::string const& filenametoread,
-               cm::PolicyScope policyScope);
+               cm::PolicyScope policyScope,
+               cm::DiagnosticScope diagnosticScope);
   ~IncludeScope();
   void Quiet() { this->ReportError = false; }
 
@@ -629,14 +631,17 @@ public:
 
 private:
   cm::PolicyScope PolicyScope;
+  cm::DiagnosticScope DiagnosticScope;
   bool ReportError = true;
 };
 
 cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
                                        std::string const& filenametoread,
-                                       cm::PolicyScope policyScope)
+                                       cm::PolicyScope policyScope,
+                                       cm::DiagnosticScope diagnosticScope)
   : FileScopeBase(mf)
   , PolicyScope(policyScope)
+  , DiagnosticScope(diagnosticScope)
 {
   this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
     cmListFileContext::FromListFilePath(filenametoread));
@@ -649,12 +654,19 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   if (this->PolicyScope == cm::PolicyScope::Local) {
     this->Makefile->PushPolicy();
   }
+  if (this->DiagnosticScope == cm::DiagnosticScope::Local) {
+    this->Makefile->PushDiagnostic();
+  }
   this->PushListFileVars(filenametoread);
 }
 
 cmMakefile::IncludeScope::~IncludeScope()
 {
   this->PopListFileVars();
+  if (this->DiagnosticScope == cm::DiagnosticScope::Local) {
+    // Pop the scope we pushed for the script.
+    this->Makefile->PopDiagnostic();
+  }
   if (this->PolicyScope == cm::PolicyScope::Local) {
     // Pop the scope we pushed for the script.
     this->Makefile->PopPolicy();
@@ -667,12 +679,13 @@ cmMakefile::IncludeScope::~IncludeScope()
 }
 
 bool cmMakefile::ReadDependentFile(std::string const& filename,
-                                   cm::PolicyScope policyScope)
+                                   cm::PolicyScope policyScope,
+                                   cm::DiagnosticScope diagnosticScope)
 {
   std::string filenametoread = cmSystemTools::CollapseFullPath(
     filename, this->GetCurrentSourceDirectory());
 
-  IncludeScope incScope(this, filenametoread, policyScope);
+  IncludeScope incScope(this, filenametoread, policyScope, diagnosticScope);
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (this->GetCMakeInstance()->GetDebugAdapter()) {
@@ -1442,7 +1455,8 @@ void cmMakefile::SetExplicitlyGeneratesSbom(bool status)
 }
 
 void cmMakefile::PushFunctionScope(std::string const& fileName,
-                                   cmPolicies::PolicyMap const& pm)
+                                   cmPolicies::PolicyMap const& pm,
+                                   cmDiagnostics::DiagnosticMap dm)
 {
   this->StateSnapshot = this->GetState()->CreateFunctionCallSnapshot(
     this->StateSnapshot, fileName);
@@ -1457,10 +1471,12 @@ void cmMakefile::PushFunctionScope(std::string const& fileName,
   this->PushFunctionBlockerBarrier();
 
   this->PushPolicy(true, pm);
+  this->PushDiagnostic(true, dm);
 }
 
 void cmMakefile::PopFunctionScope(bool reportError)
 {
+  this->PopDiagnostic();
   this->PopPolicy();
 
   this->PopSnapshot(reportError);
@@ -1475,7 +1491,8 @@ void cmMakefile::PopFunctionScope(bool reportError)
 }
 
 void cmMakefile::PushMacroScope(std::string const& fileName,
-                                cmPolicies::PolicyMap const& pm)
+                                cmPolicies::PolicyMap const& pm,
+                                cmDiagnostics::DiagnosticMap dm)
 {
   this->StateSnapshot =
     this->GetState()->CreateMacroCallSnapshot(this->StateSnapshot, fileName);
@@ -1484,10 +1501,12 @@ void cmMakefile::PushMacroScope(std::string const& fileName,
   this->PushFunctionBlockerBarrier();
 
   this->PushPolicy(true, pm);
+  this->PushDiagnostic(true, dm);
 }
 
 void cmMakefile::PopMacroScope(bool reportError)
 {
+  this->PopDiagnostic();
   this->PopPolicy();
   this->PopSnapshot(reportError);
 
@@ -4146,18 +4165,83 @@ void cmMakefile::PopPolicy()
   }
 }
 
+cmDiagnostics::DiagnosticAction cmMakefile::GetDiagnosticAction(
+  cmDiagnostics::DiagnosticCategory category) const
+{
+  return this->StateSnapshot.GetDiagnostic(category);
+}
+
+bool cmMakefile::SetDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                               cmDiagnostics::DiagnosticAction action,
+                               bool recursive)
+{
+  this->StateSnapshot.SetDiagnostic(category, action, recursive);
+  return true;
+}
+
+bool cmMakefile::PromoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                                   cmDiagnostics::DiagnosticAction action,
+                                   bool recursive)
+{
+  this->StateSnapshot.PromoteDiagnostic(category, action, recursive);
+  return true;
+}
+
+bool cmMakefile::DemoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                                  cmDiagnostics::DiagnosticAction action,
+                                  bool recursive)
+{
+  this->StateSnapshot.DemoteDiagnostic(category, action, recursive);
+  return true;
+}
+
+cmMakefile::DiagnosticPushPop::DiagnosticPushPop(cmMakefile* m)
+  : Makefile(m)
+{
+  this->Makefile->PushDiagnostic();
+}
+
+cmMakefile::DiagnosticPushPop::~DiagnosticPushPop()
+{
+  this->Makefile->PopDiagnostic();
+}
+
+void cmMakefile::PushDiagnostic(bool weak, cmDiagnostics::DiagnosticMap dm)
+{
+  this->StateSnapshot.PushDiagnostic(dm, weak);
+}
+
+void cmMakefile::PopDiagnostic()
+{
+  if (!this->StateSnapshot.PopDiagnostic()) {
+    this->IssueMessage(MessageType::FATAL_ERROR,
+                       "cmake_diagnostic POP without matching PUSH");
+  }
+}
+
 void cmMakefile::PopSnapshot(bool reportError)
 {
-  // cmStateSnapshot manages nested policy scopes within it.
+  // cmStateSnapshot manages nested policy/diagnostic scopes within it.
   // Since the scope corresponding to the snapshot is closing,
-  // reject any still-open nested policy scopes with an error.
-  while (this->StateSnapshot.CanPopPolicyScope()) {
-    if (reportError) {
-      this->IssueMessage(MessageType::FATAL_ERROR,
-                         "cmake_policy PUSH without matching POP");
-      reportError = false;
+  // reject any still-open nested policy/diagnostic scopes with an error.
+  for (;;) {
+    if (this->StateSnapshot.CanPopPolicyScope()) {
+      if (reportError) {
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           "cmake_policy PUSH without matching POP");
+        reportError = false;
+      }
+      this->PopPolicy();
+    } else if (this->StateSnapshot.CanPopDiagnosticScope()) {
+      if (reportError) {
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           "cmake_diagnostic PUSH without matching POP");
+        reportError = false;
+      }
+      this->PopDiagnostic();
+    } else {
+      break;
     }
-    this->PopPolicy();
   }
 
   this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
@@ -4209,12 +4293,23 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
   }
 }
 
+void cmMakefile::RecordDiagnostics(cmDiagnostics::DiagnosticMap& dm) const
+{
+  /* Record the setting of every diagnostic category.  */
+  using DiagnosticCategory = cmDiagnostics::DiagnosticCategory;
+  for (size_t n = 0; n < cmDiagnostics::CategoryCount; ++n) {
+    DiagnosticCategory dc = static_cast<DiagnosticCategory>(n);
+    dm[dc] = this->GetDiagnosticAction(dc);
+  }
+}
+
 cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
                                              std::string const& fileName,
-                                             cmPolicies::PolicyMap const& pm)
+                                             cmPolicies::PolicyMap const& pm,
+                                             cmDiagnostics::DiagnosticMap dm)
   : Makefile(mf)
 {
-  this->Makefile->PushFunctionScope(fileName, pm);
+  this->Makefile->PushFunctionScope(fileName, pm, dm);
 }
 
 cmMakefile::FunctionPushPop::~FunctionPushPop()
@@ -4224,10 +4319,11 @@ cmMakefile::FunctionPushPop::~FunctionPushPop()
 
 cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
                                        std::string const& fileName,
-                                       cmPolicies::PolicyMap const& pm)
+                                       cmPolicies::PolicyMap const& pm,
+                                       cmDiagnostics::DiagnosticMap dm)
   : Makefile(mf)
 {
-  this->Makefile->PushMacroScope(fileName, pm);
+  this->Makefile->PushMacroScope(fileName, pm, dm);
 }
 
 cmMakefile::MacroPushPop::~MacroPushPop()

@@ -49,6 +49,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
 
   bool optional = false;
   cm::PolicyScope policyScope = cm::PolicyScope::Local;
+  cm::DiagnosticScope diagnosticScope = cm::DiagnosticScope::Local;
   std::string fname = args[0];
   std::string resultVarName;
 
@@ -73,6 +74,8 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
       }
     } else if (args[i] == "NO_POLICY_SCOPE") {
       policyScope = cm::PolicyScope::None;
+    } else if (args[i] == "NO_DIAGNOSTIC_SCOPE") {
+      diagnosticScope = cm::DiagnosticScope::None;
     } else if (i > 1) // compat.: in previous cmake versions the second
                       // parameter was ignored if it wasn't "OPTIONAL"
     {
@@ -161,7 +164,8 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
     }
   }
 
-  bool readit = status.GetMakefile().ReadDependentFile(listFile, policyScope);
+  bool const readit = status.GetMakefile().ReadDependentFile(
+    listFile, policyScope, diagnosticScope);
 
   // add the location of the included file if a result variable was given
   if (!resultVarName.empty()) {

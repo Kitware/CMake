@@ -6,7 +6,7 @@ Load and run CMake code from a file or module.
 .. code-block:: cmake
 
   include(<file|module> [OPTIONAL] [RESULT_VARIABLE <var>]
-                        [NO_POLICY_SCOPE])
+                        [NO_POLICY_SCOPE] [NO_DIAGNOSTIC_SCOPE])
 
 Loads and runs CMake code from the file given.  Variable reads and
 writes access the scope of the caller (dynamic scoping).  If ``OPTIONAL``
@@ -23,3 +23,6 @@ module directory, then first the CMake builtin module directory is searched and
 
 See the :command:`cmake_policy` command documentation for discussion of the
 ``NO_POLICY_SCOPE`` option.
+
+See the :command:`cmake_diagnostic` command documentation for discussion of the
+``NO_DIAGNOSTIC_SCOPE`` option.

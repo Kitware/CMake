@@ -2086,7 +2086,8 @@ bool cmFindPackageCommand::ReadListFile(std::string const& f,
   // This allows child snapshots to inherit the CAN_UNWIND state from us, we'll
   // reset it immediately after the dependent file is done
   this->Makefile->GetStateSnapshot().SetUnwindType(cmStateEnums::CAN_UNWIND);
-  bool result = this->Makefile->ReadDependentFile(f, ps);
+  bool const result =
+    this->Makefile->ReadDependentFile(f, ps, cm::DiagnosticScope::Local);
 
   this->Makefile->GetStateSnapshot().SetUnwindType(oldUnwind);
   this->Makefile->GetStateSnapshot().SetUnwindState(

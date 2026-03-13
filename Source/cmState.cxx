@@ -301,6 +301,13 @@ cmStateSnapshot cmState::Reset()
   assert(pos->Policies.IsValid());
   assert(pos->PolicyRoot.IsValid());
 
+  this->DiagnosticStack.Clear();
+  pos->Diagnostics = this->DiagnosticStack.Root();
+  pos->DiagnosticRoot = this->DiagnosticStack.Root();
+  pos->DiagnosticScope = this->DiagnosticStack.Root();
+  assert(pos->Diagnostics.IsValid());
+  assert(pos->DiagnosticRoot.IsValid());
+
   {
     std::string srcDir =
       *cmDefinitions::Get("CMAKE_SOURCE_DIR", pos->Vars, pos->Root);
@@ -886,6 +893,11 @@ cmStateSnapshot cmState::CreateBaseSnapshot()
   pos->PolicyScope = this->PolicyStack.Root();
   assert(pos->Policies.IsValid());
   assert(pos->PolicyRoot.IsValid());
+  pos->Diagnostics = this->DiagnosticStack.Root();
+  pos->DiagnosticRoot = this->DiagnosticStack.Root();
+  pos->DiagnosticScope = this->DiagnosticStack.Root();
+  assert(pos->Diagnostics.IsValid());
+  assert(pos->DiagnosticRoot.IsValid());
   pos->Vars = this->VarTree.Push(this->VarTree.Root());
   assert(pos->Vars.IsValid());
   pos->Parent = this->VarTree.Root();
@@ -913,6 +925,11 @@ cmStateSnapshot cmState::CreateBuildsystemDirectorySnapshot(
   pos->PolicyScope = originSnapshot.Position->Policies;
   assert(pos->Policies.IsValid());
   assert(pos->PolicyRoot.IsValid());
+  pos->Diagnostics = originSnapshot.Position->Diagnostics;
+  pos->DiagnosticRoot = originSnapshot.Position->Diagnostics;
+  pos->DiagnosticScope = originSnapshot.Position->Diagnostics;
+  assert(pos->Diagnostics.IsValid());
+  assert(pos->DiagnosticRoot.IsValid());
 
   cmLinkedTree<cmDefinitions>::iterator origin = originSnapshot.Position->Vars;
   pos->Parent = origin;
@@ -939,6 +956,7 @@ cmStateSnapshot cmState::CreateDeferCallSnapshot(
   assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  pos->DiagnosticScope = originSnapshot.Position->Diagnostics;
   return { this, pos };
 }
 
@@ -954,6 +972,7 @@ cmStateSnapshot cmState::CreateFunctionCallSnapshot(
     originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  pos->DiagnosticScope = originSnapshot.Position->Diagnostics;
   assert(originSnapshot.Position->Vars.IsValid());
   cmLinkedTree<cmDefinitions>::iterator origin = originSnapshot.Position->Vars;
   pos->Parent = origin;
@@ -973,6 +992,7 @@ cmStateSnapshot cmState::CreateMacroCallSnapshot(
   assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  pos->DiagnosticScope = originSnapshot.Position->Diagnostics;
   return { this, pos };
 }
 
@@ -988,6 +1008,7 @@ cmStateSnapshot cmState::CreateIncludeFileSnapshot(
   assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  pos->DiagnosticScope = originSnapshot.Position->Diagnostics;
   return { this, pos };
 }
 
@@ -1001,6 +1022,7 @@ cmStateSnapshot cmState::CreateVariableScopeSnapshot(
   pos->Keep = false;
   pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  pos->DiagnosticScope = originSnapshot.Position->Diagnostics;
   assert(originSnapshot.Position->Vars.IsValid());
 
   cmLinkedTree<cmDefinitions>::iterator origin = originSnapshot.Position->Vars;
@@ -1021,6 +1043,7 @@ cmStateSnapshot cmState::CreateInlineListFileSnapshot(
     originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  pos->DiagnosticScope = originSnapshot.Position->Diagnostics;
   return { this, pos };
 }
 
@@ -1033,6 +1056,7 @@ cmStateSnapshot cmState::CreatePolicyScopeSnapshot(
   pos->Keep = false;
   pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  pos->DiagnosticScope = originSnapshot.Position->Diagnostics;
   return { this, pos };
 }
 

@@ -185,6 +185,8 @@ add_library(
   cmDependsJavaParserHelper.h
   cmDependsCompiler.cxx
   cmDependsCompiler.h
+  cmDiagnostics.h
+  cmDiagnostics.cxx
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
   cmDyndepCollation.cxx

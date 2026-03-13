@@ -25,7 +25,8 @@ namespace {
 enum class ScopeType : std::uint8_t
 {
   VARIABLES,
-  POLICIES
+  POLICIES,
+  DIAGNOSTICS,
 };
 using ScopeSet = cm::enum_set<ScopeType>;
 
@@ -41,6 +42,7 @@ public:
 private:
   std::unique_ptr<cmMakefile::PolicyPushPop> PolicyScope;
   std::unique_ptr<cmMakefile::VariablePushPop> VariableScope;
+  std::unique_ptr<cmMakefile::DiagnosticPushPop> DiagnosticScope;
 };
 
 BlockScopePushPop::BlockScopePushPop(cmMakefile* mf, ScopeSet const& scopes)
@@ -50,6 +52,9 @@ BlockScopePushPop::BlockScopePushPop(cmMakefile* mf, ScopeSet const& scopes)
   }
   if (scopes.contains(ScopeType::VARIABLES)) {
     this->VariableScope = cm::make_unique<cmMakefile::VariablePushPop>(mf);
+  }
+  if (scopes.contains(ScopeType::DIAGNOSTICS)) {
+    this->DiagnosticScope = cm::make_unique<cmMakefile::DiagnosticPushPop>(mf);
   }
 }
 
@@ -177,12 +182,17 @@ bool cmBlockCommand(std::vector<std::string> const& args,
         scopes.insert(ScopeType::POLICIES);
         continue;
       }
+      if (scope == "DIAGNOSTICS"_s) {
+        scopes.insert(ScopeType::DIAGNOSTICS);
+        continue;
+      }
       status.SetError(cmStrCat("SCOPE_FOR unsupported scope \"", scope, '"'));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   } else {
-    scopes = { ScopeType::VARIABLES, ScopeType::POLICIES };
+    scopes = { ScopeType::VARIABLES, ScopeType::POLICIES,
+               ScopeType::DIAGNOSTICS };
   }
   if (!scopes.contains(ScopeType::VARIABLES) &&
       !parsedArgs.Propagate.empty()) {

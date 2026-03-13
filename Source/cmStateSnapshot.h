@@ -10,6 +10,7 @@
 
 #include <cm/string_view>
 
+#include "cmDiagnostics.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmValue.h"
@@ -57,6 +58,27 @@ public:
   bool PopPolicy();
   bool CanPopPolicyScope();
 
+  void SetDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                     cmDiagnostics::DiagnosticAction action, bool recursive);
+  void PromoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                         cmDiagnostics::DiagnosticAction action,
+                         bool recursive);
+  void DemoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                        cmDiagnostics::DiagnosticAction action,
+                        bool recursive);
+  cmDiagnostics::DiagnosticAction GetDiagnostic(
+    cmDiagnostics::DiagnosticCategory category,
+    cmDiagnostics::DiagnosticAction defaultAction) const;
+  cmDiagnostics::DiagnosticAction GetDiagnostic(
+    cmDiagnostics::DiagnosticCategory category) const
+  {
+    return this->GetDiagnostic(
+      category, cmDiagnostics::CategoryInfo[category].DefaultAction);
+  }
+  void PushDiagnostic(cmDiagnostics::DiagnosticMap entry, bool weak);
+  bool PopDiagnostic();
+  bool CanPopDiagnosticScope();
+
   cmState* GetState() const;
 
   cmStateDirectory GetDirectory() const;
@@ -88,6 +110,13 @@ private:
   friend struct StrictWeakOrder;
 
   void InitializeFromParent();
+
+  using AlterDiagnosticFunction =
+    bool (*)(cmDiagnostics::DiagnosticAction current,
+             cmDiagnostics::DiagnosticAction desired);
+  void AlterDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                       cmDiagnostics::DiagnosticAction action,
+                       AlterDiagnosticFunction function, bool recursive);
 
   cmState* State;
   cmStateDetail::PositionType Position;

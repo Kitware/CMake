@@ -25,6 +25,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
+#include "cmDiagnostics.h"
 #include "cmFindPackageStack.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
@@ -66,6 +67,12 @@ class cmake;
 
 namespace cm {
 enum class PolicyScope : bool
+{
+  None,
+  Local,
+};
+
+enum class DiagnosticScope : bool
 {
   None,
   Local,
@@ -116,8 +123,10 @@ public:
   bool ReadListFileAsString(std::string const& content,
                             std::string const& virtualFileName);
 
-  bool ReadDependentFile(std::string const& filename,
-                         cm::PolicyScope policyScope = cm::PolicyScope::None);
+  bool ReadDependentFile(
+    std::string const& filename,
+    cm::PolicyScope policyScope = cm::PolicyScope::None,
+    cm::DiagnosticScope DiagnosticScope = cm::DiagnosticScope::None);
 
   /**
    * Add a function blocker to this makefile
@@ -399,6 +408,24 @@ public:
   void RecordPolicies(cmPolicies::PolicyMap& pm) const;
   //@}
 
+  //@{
+  /**
+   * Set, Push, Pop diagnostics for CMake.
+   */
+  bool SetDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                     cmDiagnostics::DiagnosticAction action,
+                     bool recursive = false);
+  bool PromoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                         cmDiagnostics::DiagnosticAction action,
+                         bool recursive = false);
+  bool DemoteDiagnostic(cmDiagnostics::DiagnosticCategory category,
+                        cmDiagnostics::DiagnosticAction action,
+                        bool recursive = false);
+  cmDiagnostics::DiagnosticAction GetDiagnosticAction(
+    cmDiagnostics::DiagnosticCategory category) const;
+  void RecordDiagnostics(cmDiagnostics::DiagnosticMap& dm) const;
+  //@}
+
   /** Update CMAKE_PARENT_LIST_FILE based on CMP0198 policy status.  */
   void UpdateParentListFileVariable();
 
@@ -416,6 +443,21 @@ public:
     cmMakefile* Makefile;
   };
   friend class PolicyPushPop;
+
+  /** Helper class to push and pop diagnostics automatically.  */
+  class DiagnosticPushPop
+  {
+  public:
+    DiagnosticPushPop(cmMakefile* m);
+    ~DiagnosticPushPop();
+
+    DiagnosticPushPop(DiagnosticPushPop const&) = delete;
+    DiagnosticPushPop& operator=(DiagnosticPushPop const&) = delete;
+
+  private:
+    cmMakefile* Makefile;
+  };
+  friend class DiagnosticPushPop;
 
   /** Helper class to push and pop variables scopes automatically. */
   class VariablePushPop
@@ -889,7 +931,8 @@ public:
   {
   public:
     FunctionPushPop(cmMakefile* mf, std::string const& fileName,
-                    cmPolicies::PolicyMap const& pm);
+                    cmPolicies::PolicyMap const& pm,
+                    cmDiagnostics::DiagnosticMap dm);
     ~FunctionPushPop();
 
     FunctionPushPop(FunctionPushPop const&) = delete;
@@ -906,7 +949,8 @@ public:
   {
   public:
     MacroPushPop(cmMakefile* mf, std::string const& fileName,
-                 cmPolicies::PolicyMap const& pm);
+                 cmPolicies::PolicyMap const& pm,
+                 cmDiagnostics::DiagnosticMap dm);
     ~MacroPushPop();
 
     MacroPushPop(MacroPushPop const&) = delete;
@@ -920,10 +964,12 @@ public:
   };
 
   void PushFunctionScope(std::string const& fileName,
-                         cmPolicies::PolicyMap const& pm);
+                         cmPolicies::PolicyMap const& pm,
+                         cmDiagnostics::DiagnosticMap dm);
   void PopFunctionScope(bool reportError);
   void PushMacroScope(std::string const& fileName,
-                      cmPolicies::PolicyMap const& pm);
+                      cmPolicies::PolicyMap const& pm,
+                      cmDiagnostics::DiagnosticMap dm);
   void PopMacroScope(bool reportError);
   void PushScope();
   void PopScope();
@@ -1213,12 +1259,19 @@ private:
   TargetMap ImportedTargets;
 
   // Internal policy stack management.
-  void PushPolicy(bool weak = false,
-                  cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
+  void PushPolicy(bool weak = false, cmPolicies::PolicyMap const& pm = {});
   void PopPolicy();
-  void PopSnapshot(bool reportError = true);
   friend bool cmCMakePolicyCommand(std::vector<std::string> const& args,
                                    cmExecutionStatus& status);
+
+  // Internal diagnostic stack management.
+  void PushDiagnostic(bool weak = false, cmDiagnostics::DiagnosticMap dm = {});
+  void PopDiagnostic();
+  friend bool cmCMakeDiagnosticCommand(std::vector<std::string> const& args,
+                                       cmExecutionStatus& status);
+
+  void PopSnapshot(bool reportError = true);
+
   class IncludeScope;
   friend class IncludeScope;
 
