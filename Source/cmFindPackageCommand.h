@@ -32,6 +32,10 @@ namespace std {
 /* clang-format on */
 #endif
 
+namespace cm {
+enum class PolicyScope : bool;
+}
+
 class cmExecutionStatus;
 class cmPackageState;
 class cmSearchPath;
@@ -139,12 +143,7 @@ private:
   bool FindFrameworkConfig();
   bool FindAppBundleConfig();
   bool FindEnvironmentConfig();
-  enum PolicyScopeRule
-  {
-    NoPolicyScope,
-    DoPolicyScope
-  };
-  bool ReadListFile(std::string const& f, PolicyScopeRule psr);
+  bool ReadListFile(std::string const& f, cm::PolicyScope ps);
   bool ReadPackage();
 
   struct Appendix

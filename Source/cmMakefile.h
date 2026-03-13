@@ -64,6 +64,14 @@ class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
 
+namespace cm {
+enum class PolicyScope : bool
+{
+  None,
+  Local,
+};
+}
+
 /** A type-safe wrapper for a string representing a directory id.  */
 class cmDirectoryId
 {
@@ -109,7 +117,7 @@ public:
                             std::string const& virtualFileName);
 
   bool ReadDependentFile(std::string const& filename,
-                         bool noPolicyScope = true);
+                         cm::PolicyScope policyScope = cm::PolicyScope::None);
 
   /**
    * Add a function blocker to this makefile

@@ -48,7 +48,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   }
 
   bool optional = false;
-  bool noPolicyScope = false;
+  cm::PolicyScope policyScope = cm::PolicyScope::Local;
   std::string fname = args[0];
   std::string resultVarName;
 
@@ -72,7 +72,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
         return false;
       }
     } else if (args[i] == "NO_POLICY_SCOPE") {
-      noPolicyScope = true;
+      policyScope = cm::PolicyScope::None;
     } else if (i > 1) // compat.: in previous cmake versions the second
                       // parameter was ignored if it wasn't "OPTIONAL"
     {
@@ -161,8 +161,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
     }
   }
 
-  bool readit =
-    status.GetMakefile().ReadDependentFile(listFile, noPolicyScope);
+  bool readit = status.GetMakefile().ReadDependentFile(listFile, policyScope);
 
   // add the location of the included file if a result variable was given
   if (!resultVarName.empty()) {

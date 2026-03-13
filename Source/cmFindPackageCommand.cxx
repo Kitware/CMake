@@ -1581,7 +1581,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
     found = true;
     std::string const var = cmStrCat(this->Name, "_FIND_MODULE");
     this->Makefile->AddDefinition(var, "1");
-    bool result = this->ReadListFile(mfile, DoPolicyScope);
+    bool result = this->ReadListFile(mfile, cm::PolicyScope::Local);
     this->Makefile->RemoveDefinition(var);
 
     std::string const foundVar = cmStrCat(this->Name, "_FOUND");
@@ -1705,7 +1705,7 @@ bool cmFindPackageCommand::HandlePackageMode(
       // The package has been found.
       found = true;
       result = this->ReadPackage();
-    } else if (this->ReadListFile(this->FileFound, DoPolicyScope)) {
+    } else if (this->ReadListFile(this->FileFound, cm::PolicyScope::Local)) {
       // The package has been found.
       found = true;
 
@@ -2071,9 +2071,11 @@ cmFindPackageCommand::AppendixMap cmFindPackageCommand::FindAppendices(
 }
 
 bool cmFindPackageCommand::ReadListFile(std::string const& f,
-                                        PolicyScopeRule const psr)
+                                        cm::PolicyScope ps)
 {
-  bool const noPolicyScope = !this->PolicyScope || psr == NoPolicyScope;
+  if (!this->PolicyScope) {
+    ps = cm::PolicyScope::None;
+  }
 
   using ITScope = cmMakefile::ImportedTargetScope;
   ITScope scope = this->GlobalScope ? ITScope::Global : ITScope::Local;
@@ -2084,7 +2086,7 @@ bool cmFindPackageCommand::ReadListFile(std::string const& f,
   // This allows child snapshots to inherit the CAN_UNWIND state from us, we'll
   // reset it immediately after the dependent file is done
   this->Makefile->GetStateSnapshot().SetUnwindType(cmStateEnums::CAN_UNWIND);
-  bool result = this->Makefile->ReadDependentFile(f, noPolicyScope);
+  bool result = this->Makefile->ReadDependentFile(f, ps);
 
   this->Makefile->GetStateSnapshot().SetUnwindType(oldUnwind);
   this->Makefile->GetStateSnapshot().SetUnwindState(
@@ -3205,7 +3207,7 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
   // Load the version check file.
   // Pass NoPolicyScope because we do our own policy push/pop.
   bool suitable = false;
-  if (this->ReadListFile(version_file, NoPolicyScope)) {
+  if (this->ReadListFile(version_file, cm::PolicyScope::None)) {
     // Check the output variables.
     bool okay = this->Makefile->IsOn("PACKAGE_VERSION_EXACT");
     bool const unsuitable = this->Makefile->IsOn("PACKAGE_VERSION_UNSUITABLE");

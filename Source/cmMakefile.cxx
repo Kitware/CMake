@@ -620,7 +620,7 @@ class cmMakefile::IncludeScope : public FileScopeBase
 {
 public:
   IncludeScope(cmMakefile* mf, std::string const& filenametoread,
-               bool noPolicyScope);
+               cm::PolicyScope policyScope);
   ~IncludeScope();
   void Quiet() { this->ReportError = false; }
 
@@ -628,15 +628,15 @@ public:
   IncludeScope& operator=(IncludeScope const&) = delete;
 
 private:
-  bool NoPolicyScope;
+  cm::PolicyScope PolicyScope;
   bool ReportError = true;
 };
 
 cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
                                        std::string const& filenametoread,
-                                       bool noPolicyScope)
+                                       cm::PolicyScope policyScope)
   : FileScopeBase(mf)
-  , NoPolicyScope(noPolicyScope)
+  , PolicyScope(policyScope)
 {
   this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
     cmListFileContext::FromListFilePath(filenametoread));
@@ -646,7 +646,7 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   this->Makefile->StateSnapshot =
     this->Makefile->GetState()->CreateIncludeFileSnapshot(
       this->Makefile->StateSnapshot, filenametoread);
-  if (!this->NoPolicyScope) {
+  if (this->PolicyScope == cm::PolicyScope::Local) {
     this->Makefile->PushPolicy();
   }
   this->PushListFileVars(filenametoread);
@@ -655,7 +655,7 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
 cmMakefile::IncludeScope::~IncludeScope()
 {
   this->PopListFileVars();
-  if (!this->NoPolicyScope) {
+  if (this->PolicyScope == cm::PolicyScope::Local) {
     // Pop the scope we pushed for the script.
     this->Makefile->PopPolicy();
   }
@@ -667,12 +667,12 @@ cmMakefile::IncludeScope::~IncludeScope()
 }
 
 bool cmMakefile::ReadDependentFile(std::string const& filename,
-                                   bool noPolicyScope)
+                                   cm::PolicyScope policyScope)
 {
   std::string filenametoread = cmSystemTools::CollapseFullPath(
     filename, this->GetCurrentSourceDirectory());
 
-  IncludeScope incScope(this, filenametoread, noPolicyScope);
+  IncludeScope incScope(this, filenametoread, policyScope);
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (this->GetCMakeInstance()->GetDebugAdapter()) {
