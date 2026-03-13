@@ -1,0 +1,8 @@
+^CMake Error at NotEnabled.cmake:[0-9]+ \(target_compile_definitions\):
+  Error evaluating generator expression:
+
+    \$<COMPILE_FEATURES:c_std_99>
+
+  cannot use features from non-enabled language C
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

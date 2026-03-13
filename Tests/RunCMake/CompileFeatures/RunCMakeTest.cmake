@@ -7,6 +7,7 @@ run_cmake(NotAFeature_OriginDebug)
 run_cmake(NotAFeature_OriginDebugGenex)
 run_cmake(NotAFeature_OriginDebugTransitive)
 run_cmake(NotAFeature_OriginDebugCommand)
+run_cmake(NotEnabled)
 
 run_cmake(compiler_introspection)
 include("${RunCMake_BINARY_DIR}/compiler_introspection-build/info.cmake")
