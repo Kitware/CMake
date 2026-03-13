@@ -19,6 +19,7 @@
 #include <cmext/string_view>
 
 #include "cmBuildArgs.h"
+#include "cmDiagnostics.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
@@ -654,6 +655,16 @@ public:
   void IssueMessage(
     MessageType t, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
+  void IssueDiagnostic(
+    cmDiagnosticCategory category, std::string const& text,
+    cmStateSnapshot const& state,
+    cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
+  void IssueDiagnostic(
+    cmDiagnosticCategory category, std::string const& text,
+    cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const
+  {
+    this->IssueDiagnostic(category, text, this->CurrentSnapshot, backtrace);
+  }
 
   //! run the --build option
   int Build(cmBuildArgs buildArgs, std::vector<std::string> targets,

@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "cmDiagnostics.h"
 #include "cmExportCMakeConfigGenerator.h"
 
 class cmGeneratorTarget;
@@ -32,6 +33,8 @@ protected:
     std::string const& /*targetName*/) const override {};
   void IssueMessage(MessageType type,
                     std::string const& message) const override;
+  void IssueDiagnostic(cmDiagnosticCategory category,
+                       std::string const& message) const override;
 
   bool GenerateMainFile(std::ostream& os) override;
 

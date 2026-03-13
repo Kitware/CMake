@@ -10,6 +10,7 @@
 #include <cmext/string_view>
 
 #include "cmConfigureLog.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -57,7 +58,7 @@ void ReportCheckResult(cm::string_view what, std::string result,
     mf.DisplayStatus(IndentText(std::move(text), mf), -1);
   } else {
     mf.GetMessenger()->DisplayMessage(
-      MessageType::AUTHOR_WARNING,
+      MessageType::AUTHOR_WARNING, cmDiagnostics::CMD_NONE,
       cmStrCat("Ignored "_s, what, " without CHECK_START"_s),
       mf.GetBacktrace());
   }
@@ -194,7 +195,8 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     case Message::LogLevel::LOG_ERROR:
     case Message::LogLevel::LOG_WARNING:
       // we've overridden the message type, above, so display it directly
-      mf.GetMessenger()->DisplayMessage(type, message, mf.GetBacktrace());
+      mf.GetMessenger()->DisplayMessage(type, cmDiagnostics::CMD_NONE, message,
+                                        mf.GetBacktrace());
       break;
 
     case Message::LogLevel::LOG_NOTICE:

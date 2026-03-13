@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmGenExContext.h"
@@ -52,6 +53,15 @@ void cmExportTryCompileFileGenerator::IssueMessage(
     default:
       cmSystemTools::Message(message);
   }
+}
+
+void cmExportTryCompileFileGenerator::IssueDiagnostic(
+  cmDiagnosticCategory category, std::string const& message) const
+{
+  cm::string_view const cname =
+    cmDiagnostics::GetCategoryString(category).substr(4);
+  cmSystemTools::Message(
+    cmStrCat("CMake Diagnostic ("_s, cname, "): "_s, message), "Diagnostic");
 }
 
 bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)

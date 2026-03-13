@@ -214,7 +214,8 @@ cmDirectoryId cmMakefile::GetDirectoryId() const
   return std::string(buf);
 }
 
-void cmMakefile::IssueMessage(MessageType t, std::string const& text) const
+void cmMakefile::IssueMessage(MessageType t, std::string const& text,
+                              cmListFileBacktrace const& bt) const
 {
   if (!this->ExecutionStatusStack.empty()) {
     if ((t == MessageType::FATAL_ERROR) ||
@@ -222,7 +223,21 @@ void cmMakefile::IssueMessage(MessageType t, std::string const& text) const
       this->ExecutionStatusStack.back()->SetNestedError();
     }
   }
-  this->GetCMakeInstance()->IssueMessage(t, text, this->Backtrace);
+  this->GetCMakeInstance()->IssueMessage(t, text, bt);
+}
+
+void cmMakefile::IssueDiagnostic(cmDiagnosticCategory category,
+                                 std::string const& text,
+                                 cmListFileBacktrace const& bt) const
+{
+  if (!this->ExecutionStatusStack.empty()) {
+    cmDiagnosticAction const action = this->GetDiagnosticAction(category);
+    if (action >= cmDiagnosticAction::SendError) {
+      this->ExecutionStatusStack.back()->SetNestedError();
+    }
+  }
+  this->GetCMakeInstance()->IssueDiagnostic(category, text,
+                                            this->GetStateSnapshot(), bt);
 }
 
 Message::LogLevel cmMakefile::GetCurrentLogLevel() const

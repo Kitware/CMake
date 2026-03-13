@@ -12,6 +12,7 @@
 
 #include <cm/string_view>
 
+#include "cmDiagnostics.h"
 #include "cmGeneratorExpression.h"
 #include "cmMessageType.h"
 
@@ -123,6 +124,8 @@ protected:
 
   virtual void IssueMessage(MessageType type,
                             std::string const& message) const = 0;
+  virtual void IssueDiagnostic(cmDiagnosticCategory category,
+                               std::string const& message) const = 0;
 
   void ReportError(std::string const& errorMessage) const
   {

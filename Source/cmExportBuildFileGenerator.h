@@ -11,6 +11,7 @@
 
 #include <cmext/algorithm>
 
+#include "cmDiagnostics.h"
 #include "cmExportFileGenerator.h"
 #include "cmStateTypes.h"
 
@@ -88,6 +89,8 @@ protected:
 
   void IssueMessage(MessageType type,
                     std::string const& message) const override;
+  void IssueDiagnostic(cmDiagnosticCategory category,
+                       std::string const& message) const override;
 
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(std::string const& config,

@@ -17,6 +17,7 @@
 #include <cm/optional>
 
 #include "cmCustomCommandTypes.h"
+#include "cmDiagnostics.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
@@ -569,7 +570,19 @@ public:
   bool IsNinjaMulti() const;
   bool IsWindowsVSIDE() const;
 
-  void IssueMessage(MessageType t, std::string const& text) const;
+  void IssueMessage(MessageType type, std::string const& text) const
+  {
+    this->IssueMessage(type, text, this->DirectoryBacktrace);
+  }
+  void IssueMessage(MessageType type, std::string const& text,
+                    cmListFileBacktrace const& bt) const;
+  void IssueDiagnostic(cmDiagnosticCategory category,
+                       std::string const& text) const
+  {
+    this->IssueDiagnostic(category, text, this->DirectoryBacktrace);
+  }
+  void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
+                       cmListFileBacktrace const& bt) const;
 
   void CreateEvaluationFileOutputs();
   void CreateEvaluationFileOutputs(std::string const& config);

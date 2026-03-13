@@ -1037,7 +1037,20 @@ public:
     cmMakefile* Makefile;
   };
 
-  void IssueMessage(MessageType t, std::string const& text) const;
+  void IssueMessage(MessageType t, std::string const& text) const
+  {
+    this->IssueMessage(t, text, this->Backtrace);
+  }
+  void IssueMessage(MessageType t, std::string const& text,
+                    cmListFileBacktrace const& bt) const;
+
+  void IssueDiagnostic(cmDiagnosticCategory category,
+                       std::string const& text) const
+  {
+    this->IssueDiagnostic(category, text, this->Backtrace);
+  }
+  void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
+                       cmListFileBacktrace const& bt) const;
   Message::LogLevel GetCurrentLogLevel() const;
 
   /** Set whether or not to report a CMP0000 violation.  */

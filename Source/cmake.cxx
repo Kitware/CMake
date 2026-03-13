@@ -3836,6 +3836,14 @@ void cmake::IssueMessage(MessageType t, std::string const& text,
   this->Messenger->IssueMessage(t, text, backtrace);
 }
 
+void cmake::IssueDiagnostic(cmDiagnosticCategory category,
+                            std::string const& text,
+                            cmStateSnapshot const& state,
+                            cmListFileBacktrace const& backtrace) const
+{
+  this->Messenger->IssueDiagnostic(category, text, state, backtrace);
+}
+
 std::vector<std::string> cmake::GetDebugConfigs()
 {
   cmList configs;
