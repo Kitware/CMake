@@ -263,8 +263,13 @@ public:
 bool cmCTestDiscoverTestsCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus& status)
 {
-  using Arguments = cmTestDiscoveryArgs;
-  static auto const parser = cmTestDiscoveryParser<Arguments>();
+  struct Arguments : cmTestDiscoveryArgs
+  {
+    std::string TestList;
+  };
+  static auto const parser =
+    cmArgumentParser<Arguments>{ cmTestDiscoveryParser<Arguments>() } //
+      .Bind("TEST_LIST"_s, &Arguments::TestList);
 
   auto unparsed = std::vector<std::string>{};
   Arguments const arguments = parser.Parse(args, &unparsed);
@@ -277,7 +282,20 @@ bool cmCTestDiscoverTestsCommand::InitialPass(
     return false;
   }
 
-  return cmCTestDiscoverTests(arguments, this->TestHandler, status);
+  std::vector<std::string> testList;
+  if (!cmCTestDiscoverTests(arguments, this->TestHandler, testList, status)) {
+    return false;
+  }
+
+  if (!arguments.TestList.empty()) {
+    for (std::string& testName : testList) {
+      cmSystemTools::ReplaceString(testName, ";", "\\;");
+    }
+    status.GetMakefile().AddDefinition(arguments.TestList,
+                                       cmList::to_string(testList));
+  }
+
+  return true;
 }
 
 class cmCTestSetTestsPropertiesCommand : public cmCTestCommand

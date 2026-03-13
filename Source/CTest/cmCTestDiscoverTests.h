@@ -4,10 +4,14 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+#include <vector>
+
 struct cmTestDiscoveryArgs;
 class cmCTestTestHandler;
 class cmExecutionStatus;
 
 bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
                           cmCTestTestHandler* handler,
+                          std::vector<std::string>& testList,
                           cmExecutionStatus& status);

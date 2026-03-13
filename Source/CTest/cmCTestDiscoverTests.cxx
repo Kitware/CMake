@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <iterator>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cmsys/RegularExpression.hxx>
@@ -87,6 +88,7 @@ private:
 
 bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
                           cmCTestTestHandler* handler,
+                          std::vector<std::string>& testList,
                           cmExecutionStatus& status)
 {
   cmsys::RegularExpression re;
@@ -136,7 +138,7 @@ bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
       continue;
     }
 
-    auto const testName = replace(args.TestName);
+    auto testName = replace(args.TestName);
     auto testArgs = std::vector<std::string>{ testName };
     testArgs.reserve(1 + args.Command.size() + args.TestArgs.size());
     std::copy(args.Command.begin(), args.Command.end(),
@@ -157,6 +159,8 @@ bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
     if (!handler->SetTestsProperties(testProperties)) {
       return false;
     }
+
+    testList.push_back(std::move(testName));
   }
 
   return true;
