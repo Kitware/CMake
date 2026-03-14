@@ -247,6 +247,14 @@ These are:
   * ``cm::contains``:
     Checks if element or key is contained in container.
 
+  * ``cm::keys``
+    Extract keys from associative container or sequence container with tuple as
+    element
+
+  * ``cm::values``
+    Extract values from associative container or sequence container with tuple as
+    element
+
 * ``<cmext/enum_set>``
 
   * ``cm::enum_set``:
