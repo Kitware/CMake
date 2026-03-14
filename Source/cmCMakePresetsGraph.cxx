@@ -503,6 +503,16 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
   status = CycleStatus::Verified;
   return ExpandMacroResult::Ok;
 }
+
+void printPrecedingNewline(cmCMakePresetsGraph::PrintPrecedingNewline* newline)
+{
+  if (newline) {
+    if (*newline == cmCMakePresetsGraph::PrintPrecedingNewline::True) {
+      std::cout << '\n';
+    }
+    *newline = cmCMakePresetsGraph::PrintPrecedingNewline::True;
+  }
+}
 }
 
 template <typename T>
@@ -1338,16 +1348,6 @@ void cmCMakePresetsGraph::ClearPresets()
   this->WorkflowPresetOrder.clear();
 
   this->Files.clear();
-}
-
-void cmCMakePresetsGraph::printPrecedingNewline(PrintPrecedingNewline* newline)
-{
-  if (newline) {
-    if (*newline == PrintPrecedingNewline::True) {
-      std::cout << std::endl;
-    }
-    *newline = PrintPrecedingNewline::True;
-  }
 }
 
 void cmCMakePresetsGraph::PrintPresets(

@@ -424,7 +424,6 @@ public:
     False,
     True,
   };
-  static void printPrecedingNewline(PrintPrecedingNewline* p);
 
   static void PrintPresets(
     std::vector<cmCMakePresetsGraph::Preset const*> const& presets);
