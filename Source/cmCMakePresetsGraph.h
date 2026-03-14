@@ -419,26 +419,15 @@ public:
 
   std::string GetGeneratorForPreset(std::string const& presetName) const;
 
-  enum class PrintPrecedingNewline
-  {
-    False,
-    True,
-  };
-
-  static void PrintPresets(
-    std::vector<cmCMakePresetsGraph::Preset const*> const& presets);
+  void PrintConfigurePresetList() const;
   void PrintConfigurePresetList(
-    PrintPrecedingNewline* newline = nullptr) const;
-  void PrintConfigurePresetList(
-    std::function<bool(ConfigurePreset const&)> const& filter,
-    PrintPrecedingNewline* newline = nullptr) const;
-  void PrintBuildPresetList(PrintPrecedingNewline* newline = nullptr) const;
-  void PrintTestPresetList(PrintPrecedingNewline* newline = nullptr) const;
-  void PrintPackagePresetList(PrintPrecedingNewline* newline = nullptr) const;
+    std::function<bool(ConfigurePreset const&)> const& filter) const;
+  void PrintBuildPresetList() const;
+  void PrintTestPresetList() const;
+  void PrintPackagePresetList() const;
   void PrintPackagePresetList(
-    std::function<bool(PackagePreset const&)> const& filter,
-    PrintPrecedingNewline* newline = nullptr) const;
-  void PrintWorkflowPresetList(PrintPrecedingNewline* newline = nullptr) const;
+    std::function<bool(PackagePreset const&)> const& filter) const;
+  void PrintWorkflowPresetList() const;
   void PrintAllPresets() const;
 
 private:

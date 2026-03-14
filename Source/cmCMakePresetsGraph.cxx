@@ -504,14 +504,13 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
   return ExpandMacroResult::Ok;
 }
 
-void printPrecedingNewline(cmCMakePresetsGraph::PrintPrecedingNewline* newline)
+void printPrecedingNewline()
 {
-  if (newline) {
-    if (*newline == cmCMakePresetsGraph::PrintPrecedingNewline::True) {
-      std::cout << '\n';
-    }
-    *newline = cmCMakePresetsGraph::PrintPrecedingNewline::True;
+  static bool skipNewLine = true;
+  if (!skipNewLine) {
+    std::cout << '\n';
   }
+  skipNewLine = false;
 }
 }
 
@@ -1378,16 +1377,13 @@ void cmCMakePresetsGraph::PrintPresets(
   }
 }
 
-void cmCMakePresetsGraph::PrintConfigurePresetList(
-  PrintPrecedingNewline* newline) const
+void cmCMakePresetsGraph::PrintConfigurePresetList() const
 {
-  PrintConfigurePresetList([](ConfigurePreset const&) { return true; },
-                           newline);
+  PrintConfigurePresetList([](ConfigurePreset const&) { return true; });
 }
 
 void cmCMakePresetsGraph::PrintConfigurePresetList(
-  std::function<bool(ConfigurePreset const&)> const& filter,
-  PrintPrecedingNewline* newline) const
+  std::function<bool(ConfigurePreset const&)> const& filter) const
 {
   std::vector<cmCMakePresetsGraph::Preset const*> presets;
   for (auto const& p : this->ConfigurePresetOrder) {
@@ -1400,14 +1396,13 @@ void cmCMakePresetsGraph::PrintConfigurePresetList(
   }
 
   if (!presets.empty()) {
-    printPrecedingNewline(newline);
+    printPrecedingNewline();
     std::cout << "Available configure presets:\n\n";
     cmCMakePresetsGraph::PrintPresets(presets);
   }
 }
 
-void cmCMakePresetsGraph::PrintBuildPresetList(
-  PrintPrecedingNewline* newline) const
+void cmCMakePresetsGraph::PrintBuildPresetList() const
 {
   std::vector<cmCMakePresetsGraph::Preset const*> presets;
   for (auto const& p : this->BuildPresetOrder) {
@@ -1420,14 +1415,13 @@ void cmCMakePresetsGraph::PrintBuildPresetList(
   }
 
   if (!presets.empty()) {
-    printPrecedingNewline(newline);
+    printPrecedingNewline();
     std::cout << "Available build presets:\n\n";
     cmCMakePresetsGraph::PrintPresets(presets);
   }
 }
 
-void cmCMakePresetsGraph::PrintTestPresetList(
-  PrintPrecedingNewline* newline) const
+void cmCMakePresetsGraph::PrintTestPresetList() const
 {
   std::vector<cmCMakePresetsGraph::Preset const*> presets;
   for (auto const& p : this->TestPresetOrder) {
@@ -1440,22 +1434,19 @@ void cmCMakePresetsGraph::PrintTestPresetList(
   }
 
   if (!presets.empty()) {
-    printPrecedingNewline(newline);
+    printPrecedingNewline();
     std::cout << "Available test presets:\n\n";
     cmCMakePresetsGraph::PrintPresets(presets);
   }
 }
 
-void cmCMakePresetsGraph::PrintPackagePresetList(
-  PrintPrecedingNewline* newline) const
+void cmCMakePresetsGraph::PrintPackagePresetList() const
 {
-  this->PrintPackagePresetList([](PackagePreset const&) { return true; },
-                               newline);
+  this->PrintPackagePresetList([](PackagePreset const&) { return true; });
 }
 
 void cmCMakePresetsGraph::PrintPackagePresetList(
-  std::function<bool(PackagePreset const&)> const& filter,
-  PrintPrecedingNewline* newline) const
+  std::function<bool(PackagePreset const&)> const& filter) const
 {
   std::vector<cmCMakePresetsGraph::Preset const*> presets;
   for (auto const& p : this->PackagePresetOrder) {
@@ -1468,14 +1459,13 @@ void cmCMakePresetsGraph::PrintPackagePresetList(
   }
 
   if (!presets.empty()) {
-    printPrecedingNewline(newline);
+    printPrecedingNewline();
     std::cout << "Available package presets:\n\n";
     cmCMakePresetsGraph::PrintPresets(presets);
   }
 }
 
-void cmCMakePresetsGraph::PrintWorkflowPresetList(
-  PrintPrecedingNewline* newline) const
+void cmCMakePresetsGraph::PrintWorkflowPresetList() const
 {
   std::vector<cmCMakePresetsGraph::Preset const*> presets;
   for (auto const& p : this->WorkflowPresetOrder) {
@@ -1488,7 +1478,7 @@ void cmCMakePresetsGraph::PrintWorkflowPresetList(
   }
 
   if (!presets.empty()) {
-    printPrecedingNewline(newline);
+    printPrecedingNewline();
     std::cout << "Available workflow presets:\n\n";
     cmCMakePresetsGraph::PrintPresets(presets);
   }
@@ -1496,10 +1486,9 @@ void cmCMakePresetsGraph::PrintWorkflowPresetList(
 
 void cmCMakePresetsGraph::PrintAllPresets() const
 {
-  PrintPrecedingNewline newline = PrintPrecedingNewline::False;
-  this->PrintConfigurePresetList(&newline);
-  this->PrintBuildPresetList(&newline);
-  this->PrintTestPresetList(&newline);
-  this->PrintPackagePresetList(&newline);
-  this->PrintWorkflowPresetList(&newline);
+  this->PrintConfigurePresetList();
+  this->PrintBuildPresetList();
+  this->PrintTestPresetList();
+  this->PrintPackagePresetList();
+  this->PrintWorkflowPresetList();
 }
