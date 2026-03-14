@@ -100,7 +100,7 @@ void InheritMap(std::map<std::string, T>& child,
  * that each preset has the required fields, either directly or through
  * inheritance.
  */
-template <class T>
+template <typename T>
 bool VisitPreset(
   T& preset,
   std::map<std::string, cmCMakePresetsGraph::PresetPair<T>>& presets,
@@ -178,7 +178,7 @@ bool VisitPreset(
   return true;
 }
 
-template <class T>
+template <typename T>
 bool ComputePresetInheritance(
   std::map<std::string, cmCMakePresetsGraph::PresetPair<T>>& presets,
   cmCMakePresetsGraph& graph)
@@ -222,7 +222,7 @@ bool IsValidMacroNamespace(std::string const& str)
 ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
                            MacroExpanderVector const& macroExpanders,
                            int version);
-template <class T>
+template <typename T>
 class EnvironmentMacroExpander : public MacroExpander
 {
   std::map<std::string, CycleStatus>& EnvCycles;
@@ -428,7 +428,7 @@ bool CheckExpandMacros(WorkflowPreset const& /*preset*/,
   return true;
 }
 
-template <class T>
+template <typename T>
 bool ExpandMacros(cmCMakePresetsGraph* graph, T const& preset,
                   cm::optional<T>& out)
 {
