@@ -40,22 +40,19 @@ public:
     Expand,
   };
 
-  class CacheVariable
+  struct CacheVariable
   {
-  public:
     std::string Type;
     std::string Value;
   };
 
   class Condition;
 
-  class File
+  struct File
   {
-  public:
+    std::unordered_set<File*> ReachableFiles;
     std::string Filename;
     int Version;
-
-    std::unordered_set<File*> ReachableFiles;
   };
 
   class Preset
@@ -369,9 +366,8 @@ public:
     WorkflowPreset& operator=(WorkflowPreset&& /*other*/) = delete;
 #endif
 
-    class WorkflowStep
+    struct WorkflowStep
     {
-    public:
       enum class Type
       {
         Configure,
@@ -390,10 +386,9 @@ public:
                                  cmJSONState* /* state */) override;
   };
 
-  template <class T>
-  class PresetPair
+  template <typename T>
+  struct PresetPair
   {
-  public:
     T Unexpanded;
     cm::optional<T> Expanded;
   };
