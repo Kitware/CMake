@@ -33,4 +33,5 @@ public:
 private:
   std::string ConvertToIncludeReference(
     std::string const& path, cmOutputConverter::OutputFormat format) override;
+  std::string MaybeRelativeToWorkDir(std::string const& path) const override;
 };

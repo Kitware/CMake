@@ -277,8 +277,7 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
   vars.CMTargetType = cmState::GetTargetTypeName(targetType).c_str();
   vars.Config = Config.c_str();
   vars.Language = linkLanguage.c_str();
-  std::string const manifests =
-    cmJoin(this->GetManifestsAsFastbuildPath(), " ");
+  std::string const manifests = this->GetManifests(Config);
   vars.Manifests = manifests.c_str();
 
   std::string const stdLibString = this->Makefile->GetSafeDefinition(
@@ -1006,27 +1005,15 @@ void cmFastbuildNormalTargetGenerator::ProcessManifests(
   if (this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile()) {
     return;
   }
-  auto manifests = this->GetManifestsAsFastbuildPath();
-  if (manifests.empty()) {
-    return;
-  }
+  std::vector<std::string> const manifests =
+    this->GetManifestsAsFastbuildPath();
   // Manifests should always be in .Libraries2, so we re-link when needed.
   // Tested in RunCMake.BuildDepends
+  linkerNode.Libraries2.reserve(linkerNode.Libraries2.size() +
+                                manifests.size());
   for (auto const& manifest : manifests) {
     linkerNode.Libraries2.emplace_back(manifest);
   }
-
-  if (this->Makefile->GetSafeDefinition("CMAKE_C_COMPILER_ID") != "MSVC") {
-    return;
-  }
-
-  for (auto const& manifest : manifests) {
-    linkerNode.LinkerOptions =
-      cmStrCat("/MANIFESTINPUT:", manifest, ' ', linkerNode.LinkerOptions);
-  }
-  // /MANIFESTINPUT only works with /MANIFEST:EMBED
-  linkerNode.LinkerOptions =
-    cmStrCat("/MANIFEST:EMBED ", linkerNode.LinkerOptions);
 }
 
 void cmFastbuildNormalTargetGenerator::AddStampExeIfApplicable(
