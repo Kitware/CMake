@@ -17,6 +17,9 @@
 
 #  include "cm_fileno.hxx"
 #else
+#  include <cm/string_view>
+#  include <cmext/string_view>
+
 #  include <unistd.h>
 #endif
 
@@ -118,6 +121,17 @@ Globals::Globals()
 #else
   // On non-Windows platforms, we select the user's locale.
   std::setlocale(LC_CTYPE, "");
+
+  // In the "C" locale try switching to a UTF-8 character set.
+  if (char const* locale = std::setlocale(LC_CTYPE, nullptr)) {
+    if (locale == "C"_s || locale == "POSIX"_s) {
+      std::setlocale(LC_CTYPE, "C.UTF-8")
+#  ifdef __APPLE__
+        || std::setlocale(LC_CTYPE, "UTF-8")
+#  endif
+        || std::setlocale(LC_CTYPE, "en_US.UTF-8");
+    }
+  }
 #endif
 }
 
