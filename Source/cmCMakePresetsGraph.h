@@ -142,6 +142,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetBeforeInherit() override;
     bool VisitPresetAfterInherit(int version, cmJSONState* state) override;
+
+    static char const* kind() { return "configure"; }
   };
 
   class BuildPreset : public Preset
@@ -174,6 +176,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
+
+    static char const* kind() { return "build"; }
   };
 
   class TestPreset : public Preset
@@ -309,6 +313,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
+
+    static char const* kind() { return "test"; }
   };
 
   class PackagePreset : public Preset
@@ -346,6 +352,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
+
+    static char const* kind() { return "package"; }
   };
 
   class WorkflowPreset : public Preset
@@ -383,6 +391,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /* state */) override;
+
+    static char const* kind() { return "workflow"; }
   };
 
   template <typename T>

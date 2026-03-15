@@ -61,6 +61,8 @@ using ImmediateMacroExpander =
   cmCMakePresetsGraphInternal::ImmediateMacroExpander<T>;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
+bool gSkipNewLine = true;
+
 void InheritString(std::string& child, std::string const& parent)
 {
   if (child.empty()) {
@@ -504,15 +506,6 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
   return ExpandMacroResult::Ok;
 }
 
-void printPrecedingNewline()
-{
-  static bool skipNewLine = true;
-  if (!skipNewLine) {
-    std::cout << '\n';
-  }
-  skipNewLine = false;
-}
-
 void PrintPresets(
   std::vector<cmCMakePresetsGraph::Preset const*> const& presets)
 {
@@ -529,16 +522,50 @@ void PrintPresets(
   auto longestLength = (*longestPresetName)->Name.length();
 
   for (auto const* preset : presets) {
-    auto name = cmStrCat("  \"", preset->Name, '"');
-    auto const& description = preset->DisplayName;
-    if (!description.empty()) {
+    std::string name = cmStrCat("  \"", preset->Name, '"');
+    if (!preset->DisplayName.empty()) {
       int const width = static_cast<int>(longestLength + name.length() -
                                          preset->Name.length());
       std::cout << std::left << std::setw(width) << name << " - "
-                << description << '\n';
+                << preset->DisplayName << '\n';
     } else {
       std::cout << name << '\n';
     }
+  }
+}
+
+struct AlwaysTrue
+{
+  template <typename T>
+  constexpr bool operator()(T const&) const noexcept
+  {
+    return true;
+  }
+};
+
+template <typename PresetType, typename Filter = AlwaysTrue>
+void PrintPresetList(
+  cmCMakePresetsGraph const* const graph,
+  std::map<std::string, cmCMakePresetsGraph::PresetPair<PresetType>>
+    cmCMakePresetsGraph::*data,
+  std::vector<std::string> cmCMakePresetsGraph::*index, Filter filter = {})
+{
+  std::vector<cmCMakePresetsGraph::Preset const*> presets;
+  presets.reserve((graph->*index).size());
+  for (auto const& p : graph->*index) {
+    auto const& preset = (graph->*data).at(p);
+    if (!preset.Unexpanded.Hidden && preset.Expanded &&
+        preset.Expanded->ConditionResult && filter(preset.Unexpanded)) {
+      presets.push_back(
+        static_cast<cmCMakePresetsGraph::Preset const*>(&preset.Unexpanded));
+    }
+  }
+
+  if (!presets.empty()) {
+    std::cout << (gSkipNewLine ? "" : "\n") << "Available "
+              << PresetType::kind() << " presets:\n\n";
+    gSkipNewLine = false;
+    PrintPresets(presets);
   }
 }
 }
@@ -945,11 +972,7 @@ bool cmCMakePresetsGraph::BuildPreset::VisitPresetInherit(
 bool cmCMakePresetsGraph::BuildPreset::VisitPresetAfterInherit(
   int /* version */, cmJSONState* /*stat*/)
 {
-  auto& preset = *this;
-  if (!preset.Hidden && preset.ConfigurePreset.empty()) {
-    return false;
-  }
-  return true;
+  return this->Hidden || !this->ConfigurePreset.empty();
 }
 
 bool cmCMakePresetsGraph::TestPreset::VisitPresetInherit(
@@ -1059,11 +1082,7 @@ bool cmCMakePresetsGraph::TestPreset::VisitPresetInherit(
 bool cmCMakePresetsGraph::TestPreset::VisitPresetAfterInherit(
   int /* version */, cmJSONState* /*state*/)
 {
-  auto& preset = *this;
-  if (!preset.Hidden && preset.ConfigurePreset.empty()) {
-    return false;
-  }
-  return true;
+  return this->Hidden || !this->ConfigurePreset.empty();
 }
 
 bool cmCMakePresetsGraph::PackagePreset::VisitPresetInherit(
@@ -1092,11 +1111,7 @@ bool cmCMakePresetsGraph::PackagePreset::VisitPresetInherit(
 bool cmCMakePresetsGraph::PackagePreset::VisitPresetAfterInherit(
   int /* version */, cmJSONState* /*state*/)
 {
-  auto& preset = *this;
-  if (!preset.Hidden && preset.ConfigurePreset.empty()) {
-    return false;
-  }
-  return true;
+  return this->Hidden || !this->ConfigurePreset.empty();
 }
 
 bool cmCMakePresetsGraph::WorkflowPreset::VisitPresetInherit(
@@ -1380,109 +1395,49 @@ void cmCMakePresetsGraph::ClearPresets()
 
 void cmCMakePresetsGraph::PrintConfigurePresetList() const
 {
-  PrintConfigurePresetList([](ConfigurePreset const&) { return true; });
+  PrintPresetList<ConfigurePreset>(this,
+                                   &cmCMakePresetsGraph::ConfigurePresets,
+                                   &cmCMakePresetsGraph::ConfigurePresetOrder);
 }
 
 void cmCMakePresetsGraph::PrintConfigurePresetList(
   std::function<bool(ConfigurePreset const&)> const& filter) const
 {
-  std::vector<cmCMakePresetsGraph::Preset const*> presets;
-  for (auto const& p : this->ConfigurePresetOrder) {
-    auto const& preset = this->ConfigurePresets.at(p);
-    if (!preset.Unexpanded.Hidden && preset.Expanded &&
-        preset.Expanded->ConditionResult && filter(preset.Unexpanded)) {
-      presets.push_back(
-        static_cast<cmCMakePresetsGraph::Preset const*>(&preset.Unexpanded));
-    }
-  }
-
-  if (!presets.empty()) {
-    printPrecedingNewline();
-    std::cout << "Available configure presets:\n\n";
-    PrintPresets(presets);
-  }
+  PrintPresetList<ConfigurePreset>(
+    this, &cmCMakePresetsGraph::ConfigurePresets,
+    &cmCMakePresetsGraph::ConfigurePresetOrder, filter);
 }
 
 void cmCMakePresetsGraph::PrintBuildPresetList() const
 {
-  std::vector<cmCMakePresetsGraph::Preset const*> presets;
-  for (auto const& p : this->BuildPresetOrder) {
-    auto const& preset = this->BuildPresets.at(p);
-    if (!preset.Unexpanded.Hidden && preset.Expanded &&
-        preset.Expanded->ConditionResult) {
-      presets.push_back(
-        static_cast<cmCMakePresetsGraph::Preset const*>(&preset.Unexpanded));
-    }
-  }
-
-  if (!presets.empty()) {
-    printPrecedingNewline();
-    std::cout << "Available build presets:\n\n";
-    PrintPresets(presets);
-  }
+  PrintPresetList<BuildPreset>(this, &cmCMakePresetsGraph::BuildPresets,
+                               &cmCMakePresetsGraph::BuildPresetOrder);
 }
 
 void cmCMakePresetsGraph::PrintTestPresetList() const
 {
-  std::vector<cmCMakePresetsGraph::Preset const*> presets;
-  for (auto const& p : this->TestPresetOrder) {
-    auto const& preset = this->TestPresets.at(p);
-    if (!preset.Unexpanded.Hidden && preset.Expanded &&
-        preset.Expanded->ConditionResult) {
-      presets.push_back(
-        static_cast<cmCMakePresetsGraph::Preset const*>(&preset.Unexpanded));
-    }
-  }
-
-  if (!presets.empty()) {
-    printPrecedingNewline();
-    std::cout << "Available test presets:\n\n";
-    PrintPresets(presets);
-  }
+  PrintPresetList<TestPreset>(this, &cmCMakePresetsGraph::TestPresets,
+                              &cmCMakePresetsGraph::TestPresetOrder);
 }
 
 void cmCMakePresetsGraph::PrintPackagePresetList() const
 {
-  this->PrintPackagePresetList([](PackagePreset const&) { return true; });
+  PrintPresetList<PackagePreset>(this, &cmCMakePresetsGraph::PackagePresets,
+                                 &cmCMakePresetsGraph::PackagePresetOrder);
 }
 
 void cmCMakePresetsGraph::PrintPackagePresetList(
   std::function<bool(PackagePreset const&)> const& filter) const
 {
-  std::vector<cmCMakePresetsGraph::Preset const*> presets;
-  for (auto const& p : this->PackagePresetOrder) {
-    auto const& preset = this->PackagePresets.at(p);
-    if (!preset.Unexpanded.Hidden && preset.Expanded &&
-        preset.Expanded->ConditionResult && filter(preset.Unexpanded)) {
-      presets.push_back(
-        static_cast<cmCMakePresetsGraph::Preset const*>(&preset.Unexpanded));
-    }
-  }
-
-  if (!presets.empty()) {
-    printPrecedingNewline();
-    std::cout << "Available package presets:\n\n";
-    PrintPresets(presets);
-  }
+  PrintPresetList<PackagePreset>(this, &cmCMakePresetsGraph::PackagePresets,
+                                 &cmCMakePresetsGraph::PackagePresetOrder,
+                                 filter);
 }
 
 void cmCMakePresetsGraph::PrintWorkflowPresetList() const
 {
-  std::vector<cmCMakePresetsGraph::Preset const*> presets;
-  for (auto const& p : this->WorkflowPresetOrder) {
-    auto const& preset = this->WorkflowPresets.at(p);
-    if (!preset.Unexpanded.Hidden && preset.Expanded &&
-        preset.Expanded->ConditionResult) {
-      presets.push_back(
-        static_cast<cmCMakePresetsGraph::Preset const*>(&preset.Unexpanded));
-    }
-  }
-
-  if (!presets.empty()) {
-    printPrecedingNewline();
-    std::cout << "Available workflow presets:\n\n";
-    PrintPresets(presets);
-  }
+  PrintPresetList<WorkflowPreset>(this, &cmCMakePresetsGraph::WorkflowPresets,
+                                  &cmCMakePresetsGraph::WorkflowPresetOrder);
 }
 
 void cmCMakePresetsGraph::PrintAllPresets() const
