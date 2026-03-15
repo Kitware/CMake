@@ -28,15 +28,13 @@ namespace @KWSYS_NAMESPACE@ {
 template <typename CharType, typename Traits>
 class basic_filebuf : public std::basic_filebuf<CharType, Traits>
 {
-#    if _MSC_VER >= 1400
 public:
   typedef std::basic_filebuf<CharType, Traits> my_base_type;
-  basic_filebuf* open(char const* s, std::ios_base::openmode mode)
+  basic_filebuf* open(std::string const& s, std::ios_base::openmode mode)
   {
     std::wstring const wstr = Encoding::ToWindowsExtendedPath(s);
-    return static_cast<basic_filebuf*>(my_base_type::open(wstr.c_str(), mode));
+    return static_cast<basic_filebuf*>(my_base_type::open(wstr, mode));
   }
-#    endif
 };
 
 #  else
@@ -85,7 +83,7 @@ public:
     buf_ = 0;
   }
 
-  bool _open(char const* file_name, std::ios_base::openmode mode)
+  bool _open(std::string const& file_name, std::ios_base::openmode mode)
   {
     if (_is_open() || file_) {
       return false;
@@ -182,7 +180,7 @@ public:
     this->buf_ =
       static_cast<internal_buffer_type*>(internal_stream_type::rdbuf());
   }
-  explicit basic_fstream(char const* file_name,
+  explicit basic_fstream(std::string const& file_name,
                          std::ios_base::openmode mode = std::ios_base::in |
                            std::ios_base::out)
     : internal_stream_type(new internal_buffer_type())
@@ -192,7 +190,7 @@ public:
     open(file_name, mode);
   }
 
-  void open(char const* file_name,
+  void open(std::string const& file_name,
             std::ios_base::openmode mode = std::ios_base::in |
               std::ios_base::out)
   {
@@ -226,7 +224,7 @@ public:
     this->buf_ =
       static_cast<internal_buffer_type*>(internal_stream_type::rdbuf());
   }
-  explicit basic_ifstream(char const* file_name,
+  explicit basic_ifstream(std::string const& file_name,
                           std::ios_base::openmode mode = std::ios_base::in)
     : internal_stream_type(new internal_buffer_type())
   {
@@ -235,7 +233,7 @@ public:
     open(file_name, mode);
   }
 
-  void open(char const* file_name,
+  void open(std::string const& file_name,
             std::ios_base::openmode mode = std::ios_base::in)
   {
     mode = mode | std::ios_base::in;
@@ -271,7 +269,7 @@ public:
     this->buf_ =
       static_cast<internal_buffer_type*>(internal_stream_type::rdbuf());
   }
-  explicit basic_ofstream(char const* file_name,
+  explicit basic_ofstream(std::string const& file_name,
                           std::ios_base::openmode mode = std::ios_base::out)
     : internal_stream_type(new internal_buffer_type())
   {
@@ -279,7 +277,7 @@ public:
       static_cast<internal_buffer_type*>(internal_stream_type::rdbuf());
     open(file_name, mode);
   }
-  void open(char const* file_name,
+  void open(std::string const& file_name,
             std::ios_base::openmode mode = std::ios_base::out)
   {
     mode = mode | std::ios_base::out;
