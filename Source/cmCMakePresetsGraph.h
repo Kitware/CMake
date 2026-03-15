@@ -412,8 +412,6 @@ public:
     return preset.OriginFile->Version;
   }
 
-  static std::string GetFilename(std::string const& sourceDir);
-  static std::string GetUserFilename(std::string const& sourceDir);
   bool ReadProjectPresets(std::string const& sourceDir,
                           bool allowNoFiles = false);
 
@@ -448,4 +446,10 @@ private:
                     ReadReason readReason, std::vector<File*>& inProgressFiles,
                     File*& file, std::string& errMsg);
   void ClearPresets();
+
+  static std::string GetFilename(std::string const& sourceDir);
+  static std::string GetUserFilename(std::string const& sourceDir);
+
+  static void PrintPresets(
+    std::vector<cmCMakePresetsGraph::Preset const*> const& presets);
 };
