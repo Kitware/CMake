@@ -10,6 +10,7 @@
 #include <memory>
 #include <utility>
 
+#include <cm/ranges>
 #include <cm/type_traits>
 #include <cmext/iterator>
 #include <cmext/type_traits>
@@ -250,5 +251,86 @@ bool contains(Range const& range, Key const& key)
   return contains(range, key, detail::overload_selector<1>{});
 }
 #endif
+
+template <
+  typename Range,
+  cm::enable_if_t<cm::is_associative_container<Range>::value ||
+                    cm::is_unordered_associative_container<Range>::value,
+                  int> = 0>
+std::vector<typename Range::key_type> keys(Range const& range)
+{
+#if defined(CMake_HAVE_CXX_RANGES)
+#  if __cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)
+  return std::vector<std::string_view>{ std::from_range,
+                                        std::views::keys(range) };
+#  else
+  auto view = std::views::keys(range);
+  return std::vector<std::string_view>{ view.begin(), view.end() };
+#  endif
+#else
+  return cm::views::keys(range);
+#endif
+}
+
+template <
+  typename Range,
+  cm::enable_if_t<cm::is_associative_container<Range>::value ||
+                    cm::is_unordered_associative_container<Range>::value,
+                  int> = 0>
+std::vector<typename Range::mapped_type> values(Range const& range)
+{
+#if defined(CMake_HAVE_CXX_RANGES)
+#  if __cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)
+  return std::vector<std::string_view>{ std::from_range,
+                                        std::views::values(range) };
+#  else
+  auto view = std::views::values(range);
+  return std::vector<std::string_view>{ view.begin(), view.end() };
+#  endif
+#else
+  return cm::views::values(range);
+#endif
+}
+
+// sequence containers with std::pair<> or std::tuple<> as elements
+template <typename Range,
+          cm::enable_if_t<cm::is_sequence_container<Range>::value &&
+                            cm::is_tuple<1, typename Range::value_type>::value,
+                          int> = 0>
+std::vector<typename std::tuple_element<0, typename Range::value_type>::type>
+keys(Range const& range)
+{
+#if defined(CMake_HAVE_CXX_RANGES)
+#  if __cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)
+  return std::vector<std::string_view>{ std::from_range,
+                                        std::views::keys(range) };
+#  else
+  auto view = std::views::keys(range);
+  return std::vector<std::string_view>{ view.begin(), view.end() };
+#  endif
+#else
+  return cm::views::keys(range);
+#endif
+}
+
+template <typename Range,
+          cm::enable_if_t<cm::is_sequence_container<Range>::value &&
+                            cm::is_tuple<2, typename Range::value_type>::value,
+                          int> = 0>
+std::vector<typename std::tuple_element<1, typename Range::value_type>::type>
+keys(Range const& range)
+{
+#if defined(CMake_HAVE_CXX_RANGES)
+#  if __cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)
+  return std::vector<std::string_view>{ std::from_range,
+                                        std::views::values(range) };
+#  else
+  auto view = std::views::values(range);
+  return std::vector<std::string_view>{ view.begin(), view.end() };
+#  endif
+#else
+  return cm::views::values(range);
+#endif
+}
 
 } // namespace cm
