@@ -4,8 +4,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <utility>
@@ -1365,15 +1365,16 @@ void cmCMakePresetsGraph::PrintPresets(
   auto longestLength = (*longestPresetName)->Name.length();
 
   for (auto const* preset : presets) {
-    std::cout << "  \"" << preset->Name << '"';
+    auto name = cmStrCat("  \"", preset->Name, '"');
     auto const& description = preset->DisplayName;
     if (!description.empty()) {
-      for (std::size_t i = 0; i < longestLength - preset->Name.length(); ++i) {
-        std::cout << ' ';
-      }
-      std::cout << " - " << description;
+      int const width = static_cast<int>(longestLength + name.length() -
+                                         preset->Name.length());
+      std::cout << std::left << std::setw(width) << name << " - "
+                << description << '\n';
+    } else {
+      std::cout << name << '\n';
     }
-    std::cout << '\n';
   }
 }
 
