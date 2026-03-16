@@ -1403,6 +1403,19 @@ t:windows-borland5.8:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:windows-clang21.1-cl-fastbuild:
+    extends:
+        - .windows_clang_fastbuild
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.44
+        - .cmake_junit_artifacts
+        - .rules
+    needs:
+        - t:windows-vs2026-x64-ninja
+    variables:
+        CMAKE_CI_BUILD_NAME: windows_clang21.1_cl_fastbuild
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:windows-clang21.1-cl-ninja:
     extends:
         - .windows_clang_ninja

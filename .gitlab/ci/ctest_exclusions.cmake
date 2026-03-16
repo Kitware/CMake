@@ -49,6 +49,17 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "^macos_x86_64_")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows_clang_fastbuild")
+  list(APPEND test_exclusions
+    # FIXME(#27697): These fail with clang-cl and FASTBuild.
+    "^BuildDepends$"
+    "^ExportImport$"
+    "^Module.CheckIPOSupported-C$"
+    "^RunCMake.PrecompileHeaders$"
+    "^RunCMake.PrecompileHeaders-Reuse$"
+    )
+endif()
+
 string(REPLACE ";" "|" test_exclusions "${test_exclusions}")
 if (test_exclusions)
   set(test_exclusions "(${test_exclusions})")
