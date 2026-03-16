@@ -36,7 +36,7 @@ This module provides the following command:
     variable will be created as an internal cache variable.
 
   ``<flags>``
-    (Optional) A :ref:`semicolon-separated list <CMake Language Lists>` of
+    (Optional) A space-separated string of
     additional compilation flags to be added to the check.  Alternatively,
     flags can be also specified with the ``CMAKE_REQUIRED_FLAGS`` variable
     below.
