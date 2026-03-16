@@ -24,7 +24,7 @@
  * cmake list files.
  */
 
-class cmMessenger;
+class cmMakefile;
 
 struct cmListFileArgument
 {
@@ -239,11 +239,11 @@ std::vector<BT<std::string>> cmExpandListWithBacktrace(
 
 struct cmListFile
 {
-  bool ParseFile(std::string const& path, cmMessenger* messenger,
+  bool ParseFile(std::string const& path, cmMakefile const* mf,
                  cmListFileBacktrace const& lfbt);
 
   bool ParseString(cm::string_view str, std::string const& virtual_filename,
-                   cmMessenger* messenger, cmListFileBacktrace const& lfbt);
+                   cmMakefile const* mf, cmListFileBacktrace const& lfbt);
 
   std::vector<cmListFileFunction> Functions;
 };

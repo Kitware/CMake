@@ -20,7 +20,6 @@
 #include <unistd.h>
 
 #include "cmListFileCache.h"
-#include "cmMessenger.h"
 #include "cmSystemTools.h"
 
 static constexpr size_t kMaxInputSize = 256 * 1024;
@@ -59,13 +58,10 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size)
     fclose(fp);
   }
 
-  // Create a messenger for error handling
-  cmMessenger messenger;
-
   // Parse the file
   cmListFile listFile;
   cmListFileBacktrace backtrace;
-  if (listFile.ParseFile(testFile.c_str(), &messenger, backtrace)) {
+  if (listFile.ParseFile(testFile.c_str(), nullptr, backtrace)) {
     // Successfully parsed - examine results
     for (auto const& func : listFile.Functions) {
       (void)func.LowerCaseName();

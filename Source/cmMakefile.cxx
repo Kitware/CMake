@@ -710,8 +710,7 @@ bool cmMakefile::ReadDependentFile(std::string const& filename,
 #endif
 
   cmListFile listFile;
-  if (!listFile.ParseFile(filenametoread, this->GetMessenger(),
-                          this->Backtrace)) {
+  if (!listFile.ParseFile(filenametoread, this, this->Backtrace)) {
 #ifdef CMake_ENABLE_DEBUGGER
     if (this->GetCMakeInstance()->GetDebugAdapter()) {
       this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
@@ -833,8 +832,7 @@ bool cmMakefile::ReadListFile(std::string const& filename)
 #endif
 
   cmListFile listFile;
-  if (!listFile.ParseFile(filenametoread, this->GetMessenger(),
-                          this->Backtrace)) {
+  if (!listFile.ParseFile(filenametoread, this, this->Backtrace)) {
 #ifdef CMake_ENABLE_DEBUGGER
     if (this->GetCMakeInstance()->GetDebugAdapter()) {
       this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
@@ -868,8 +866,7 @@ bool cmMakefile::ReadListFileAsString(std::string const& content,
   ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
-  if (!listFile.ParseString(content, virtualFileName, this->GetMessenger(),
-                            this->Backtrace)) {
+  if (!listFile.ParseString(content, virtualFileName, this, this->Backtrace)) {
     return false;
   }
 
@@ -1628,8 +1625,7 @@ void cmMakefile::Configure()
 #endif
 
   cmListFile listFile;
-  if (!listFile.ParseFile(currentStart, this->GetMessenger(),
-                          this->Backtrace)) {
+  if (!listFile.ParseFile(currentStart, this, this->Backtrace)) {
 #ifdef CMake_ENABLE_DEBUGGER
     if (this->GetCMakeInstance()->GetDebugAdapter()) {
       this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
