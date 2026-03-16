@@ -8,6 +8,8 @@ set(CMAKE_TLS_CAINFO CCCC)
 set(CMAKE_NETRC DDDD)
 set(CMAKE_NETRC_FILE EEEE)
 set(CMAKE_TLS_VERSION FFFF)
+set(CMAKE_EP_GIT_CLONE_RETRY_COUNT GGGG)
+set(CMAKE_EP_GIT_CLONE_RETRY_DELAY HHHH)
 
 FetchContent_Declare(PassThrough
   DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "Download command executed"
@@ -42,4 +44,12 @@ endif()
 
 if(NOT contents MATCHES "CMAKE_NETRC_FILE \\[==\\[EEEE\\]==\\]")
   message(FATAL_ERROR "Missing CMAKE_NETRC_FILE")
+endif()
+
+if(NOT contents MATCHES "CMAKE_EP_GIT_CLONE_RETRY_COUNT \\[==\\[GGGG\\]==\\]")
+  message(FATAL_ERROR "Missing CMAKE_EP_GIT_CLONE_RETRY_COUNT")
+endif()
+
+if(NOT contents MATCHES "CMAKE_EP_GIT_CLONE_RETRY_DELAY \\[==\\[HHHH\\]==\\]")
+  message(FATAL_ERROR "Missing CMAKE_EP_GIT_CLONE_RETRY_DELAY")
 endif()
