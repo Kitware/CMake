@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <sstream>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -17,9 +18,9 @@
 #include "cmFindPackageStack.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
-#include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmScriptGenerator.h"
@@ -598,53 +599,76 @@ void cmExportCMakeConfigGenerator::GenerateImportedFileChecksCode(
   os << ")\n\n";
 }
 
+namespace {
+struct FileSetInformation
+{
+  cm::string_view Type;
+  cm::string_view CMakeVersion;
+};
+
+cm::optional<FileSetInformation> GetFileSetInformation(cm::string_view type)
+{
+  static std::unordered_map<cm::string_view, FileSetInformation>
+    fileSetsInformation{
+      { cm::FileSetMetadata::HEADERS,
+        { cm::FileSetMetadata::HEADERS, "3.23.0"_s } },
+      { cm::FileSetMetadata::CXX_MODULES,
+        { cm::FileSetMetadata::CXX_MODULES, "3.28.0"_s } },
+    };
+
+  auto fsInfo = fileSetsInformation.find(type);
+  if (fsInfo != fileSetsInformation.end()) {
+    return fsInfo->second;
+  }
+  return {};
+}
+}
+
 void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
   cmGeneratorTarget* gte, std::ostream& os, cmTargetExport const* te)
 {
-  auto interfaceFileSets = gte->Target->GetAllInterfaceFileSets();
-  if (!interfaceFileSets.empty()) {
+  cmGeneratorFileSets const* gfs = gte->GetGeneratorFileSets();
+  auto const& types = gfs->GetInterfaceFileSetTypes();
+
+  if (!types.empty()) {
     std::string targetName = cmStrCat(this->Namespace, gte->GetExportName());
-    os << "if(NOT CMAKE_VERSION VERSION_LESS \"3.23.0\")\n"
-          "  target_sources("
-       << targetName << '\n';
+    for (auto const& type : types) {
+      auto fsInfo = GetFileSetInformation(type);
+      if (fsInfo) {
+        os << "if(NOT CMAKE_VERSION VERSION_LESS \"" << fsInfo->CMakeVersion
+           << "\")\n  ";
+      }
+      os << "target_sources(" << targetName << '\n';
 
-    for (auto const& name : interfaceFileSets) {
-      auto const* fileSet = gte->GetFileSet(name);
-      if (!fileSet) {
-        gte->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat("File set \"", name,
-                   "\" is listed in interface file sets of ", gte->GetName(),
-                   " but has not been created"));
-        return;
+      for (auto const* fileSet : gfs->GetInterfaceFileSets(type)) {
+        os << "    INTERFACE"
+           << "\n      FILE_SET "
+           << cmScriptGenerator::Quote(fileSet->GetName()) << "\n      TYPE "
+           << cmScriptGenerator::Quote(type) << "\n      BASE_DIRS "
+           << this->GetFileSetDirectories(gte, fileSet, te) << "\n      FILES "
+           << this->GetFileSetFiles(gte, fileSet, te) << '\n';
       }
 
-      os << "    INTERFACE"
-         << "\n      FILE_SET " << cmScriptGenerator::Quote(name)
-         << "\n      TYPE " << cmScriptGenerator::Quote(fileSet->GetType())
-         << "\n      BASE_DIRS "
-         << this->GetFileSetDirectories(gte, fileSet, te) << "\n      FILES "
-         << this->GetFileSetFiles(gte, fileSet, te) << '\n';
-    }
-
-    os << "  )\nelse()\n  set_property(TARGET " << targetName
-       << "\n    APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES";
-    for (auto const& name : interfaceFileSets) {
-      auto const* fileSet = gte->GetFileSet(name);
-      if (!fileSet) {
-        gte->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat("File set \"", name,
-                   "\" is listed in interface file sets of ", gte->GetName(),
-                   " but has not been created"));
-        return;
-      }
-
-      if (fileSet->GetType() == cm::FileSetMetadata::HEADERS) {
-        os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
+      if (fsInfo) {
+        os << "  )";
+        if (type == cm::FileSetMetadata::HEADERS) {
+          os << "\nelse()\n  set_property(TARGET " << targetName
+             << "\n    APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES";
+          for (auto const* fileSet : gfs->GetInterfaceFileSets(type)) {
+            os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
+          }
+          os << "\n  )";
+        } else if (type == cm::FileSetMetadata::CXX_MODULES) {
+          os << "\nelse()\n  message(AUTHOR_WARNING \"The target '"
+             << targetName
+             << "' cannot be imported properly because it relies on C++ "
+                "modules which are not supported by this CMake version.\")";
+        }
+        os << "\nendif()\n\n";
+      } else {
+        os << ")\n\n";
       }
     }
-    os << "\n  )\nendif()\n\n";
   }
 }
 

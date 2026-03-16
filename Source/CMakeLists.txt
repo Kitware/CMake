@@ -339,6 +339,8 @@ add_library(
   cmInstallAndroidMKExportGenerator.h
   cmInstallCMakeConfigExportGenerator.cxx
   cmInstallCMakeConfigExportGenerator.h
+  cmInstallDirs.cxx
+  cmInstallDirs.h
   cmInstallGenerator.h
   cmInstallGenerator.cxx
   cmInstallGetRuntimeDependenciesGenerator.h

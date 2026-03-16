@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmGenExContext.h"
 #include "cmGeneratorFileSet.h"
@@ -22,22 +23,42 @@ cmGeneratorFileSets::cmGeneratorFileSets(cmGeneratorTarget* target,
   : Target(target)
   , LocalGenerator(lg)
 {
-  for (auto const& name : target->Target->GetAllFileSetNames()) {
+  for (auto const& name : target->Target->GetAllPrivateFileSets()) {
     auto entry = this->FileSets.emplace(
       name,
       cm::make_unique<cmGeneratorFileSet>(target->Target->GetFileSet(name)));
 
     auto const* fileSet = entry.first->second.get();
     this->AllFileSets.push_back(fileSet);
-    if (fileSet->IsForSelf()) {
-      this->SelfFileSets[fileSet->GetType()].push_back(fileSet);
+    this->SelfFileSets[fileSet->GetType()].push_back(fileSet);
+  }
+  for (auto const& name : target->Target->GetAllInterfaceFileSets()) {
+    auto it = this->FileSets.find(name);
+    cmGeneratorFileSet const* fileSet = nullptr;
+    if (it == this->FileSets.end()) {
+      auto entry = this->FileSets.emplace(
+        name,
+        cm::make_unique<cmGeneratorFileSet>(target->Target->GetFileSet(name)));
+      fileSet = entry.first->second.get();
+      this->AllFileSets.push_back(fileSet);
+    } else {
+      fileSet = it->second.get();
     }
-    if (fileSet->IsForInterface()) {
-      this->InterfaceFileSets[fileSet->GetType()].push_back(fileSet);
-    }
+    this->InterfaceFileSets[fileSet->GetType()].push_back(fileSet);
   }
 }
 cmGeneratorFileSets::~cmGeneratorFileSets() = default;
+
+std::vector<cm::string_view> cmGeneratorFileSets::GetFileSetTypes() const
+{
+  return cm::keys(this->SelfFileSets);
+}
+
+std::vector<cm::string_view> cmGeneratorFileSets::GetInterfaceFileSetTypes()
+  const
+{
+  return cm::keys(this->InterfaceFileSets);
+}
 
 std::vector<cmGeneratorFileSet const*> const&
 cmGeneratorFileSets::GetAllFileSets() const

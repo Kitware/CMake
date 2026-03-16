@@ -1519,6 +1519,10 @@ public:
   // File sets support queries
 
   bool HasFileSets() const;
+  cmGeneratorFileSets const* GetGeneratorFileSets() const
+  {
+    return this->FileSets.get();
+  }
   std::vector<cmGeneratorFileSet const*> const& GetAllFileSets() const;
   std::vector<cmGeneratorFileSet const*> const& GetFileSets(
     cm::string_view type) const;
