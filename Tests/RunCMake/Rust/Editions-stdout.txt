@@ -1,4 +1,3 @@
-Not searching for unused variables given on the command line.
 -- Configuring done \([.0-9]+s\)
 -- Generating done \([.0-9]+s\)
 -- Build files have been written to: .*[\\/]Editions-build

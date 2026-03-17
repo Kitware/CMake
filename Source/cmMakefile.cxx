@@ -1965,7 +1965,9 @@ void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
   // check to see if we need to print a warning
   // if strict mode is on and the variable has
   // not been "cleared"/initialized with a set(foo ) call
-  if (this->GetCMakeInstance()->GetWarnUninitialized() &&
+  cmDiagnosticAction const action =
+    this->GetDiagnosticAction(cmDiagnostics::CMD_UNINITIALIZED);
+  if (action != cmDiagnostics::Ignore &&
       !this->VariableInitialized(variable)) {
     if (this->CheckSystemVars ||
         (sourceFilename && this->IsProjectFile(sourceFilename))) {
@@ -3317,7 +3319,7 @@ int cmMakefile::TryCompile(std::string const& srcdir,
   if (cmakeArgs) {
     // FIXME: Workaround to ignore unused CLI variables in try-compile.
     //
-    // Ideally we should use SetArgs for options like --no-warn-unused-cli.
+    // Ideally we should use SetArgs for options like -Wno-unused-cli.
     // However, there is a subtle problem when certain arguments are passed to
     // a macro wrapping around try_compile or try_run that does not escape
     // semicolons in its parameters but just passes ${ARGV} or ${ARGN}.  In
@@ -3336,8 +3338,9 @@ int cmMakefile::TryCompile(std::string const& srcdir,
     // the value VAR=a is sufficient for the try_compile or try_run to get the
     // correct result.  Calling SetArgs here would break such projects that
     // previously built.  Instead we work around the issue by never reporting
-    // unused arguments and ignoring options such as --no-warn-unused-cli.
-    cm.SetWarnUnusedCli(false);
+    // unused arguments and ignoring options such as -Wno-unused-cli.
+    cm.GetCurrentSnapshot().SetDiagnostic(cmDiagnostics::CMD_UNUSED_CLI,
+                                          cmDiagnostics::Ignore, true);
     // cm.SetArgs(*cmakeArgs, true);
 
     cm.SetCacheArgs(*cmakeArgs);

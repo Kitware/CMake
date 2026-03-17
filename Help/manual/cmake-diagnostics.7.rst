@@ -35,7 +35,7 @@ Diagnostic Actions
 
 The action taken when a particular diagnostic is triggered depends on the
 diagnostic category.  Most categories will warn by default.  The
-:command:`cmake_diagnostic` command and ``-W`` options can be
+:command:`cmake_diagnostic` command and :option:`-W <cmake -W>` options can be
 used to control what action occurs when a diagnostic of a particular category
 is triggered.  The possible actions are described in the documentation of the
 same.

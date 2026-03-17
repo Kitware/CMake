@@ -114,16 +114,20 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     level = Message::LogLevel::LOG_WARNING;
     ++i;
   } else if (*i == "AUTHOR_WARNING") {
-    if (mf.IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
-        !mf.IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS")) {
-      fatal = true;
-      type = MessageType::AUTHOR_ERROR;
-      level = Message::LogLevel::LOG_ERROR;
-    } else if (!mf.IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
-      type = MessageType::AUTHOR_WARNING;
-      level = Message::LogLevel::LOG_WARNING;
-    } else {
-      return true;
+    switch (mf.GetDiagnosticAction(cmDiagnostics::CMD_AUTHOR)) {
+      case cmDiagnostics::Ignore:
+        return true;
+      case cmDiagnostics::FatalError:
+        fatal = true;
+        CM_FALLTHROUGH;
+      case cmDiagnostics::SendError:
+        type = MessageType::AUTHOR_ERROR;
+        level = Message::LogLevel::LOG_ERROR;
+        break;
+      default:
+        type = MessageType::AUTHOR_WARNING;
+        level = Message::LogLevel::LOG_WARNING;
+        break;
     }
     ++i;
   } else if (*i == "CHECK_START") {
@@ -159,16 +163,20 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     level = Message::LogLevel::LOG_TRACE;
     ++i;
   } else if (*i == "DEPRECATION") {
-    if (mf.IsOn("CMAKE_ERROR_DEPRECATED")) {
-      fatal = true;
-      type = MessageType::DEPRECATION_ERROR;
-      level = Message::LogLevel::LOG_ERROR;
-    } else if (!mf.IsSet("CMAKE_WARN_DEPRECATED") ||
-               mf.IsOn("CMAKE_WARN_DEPRECATED")) {
-      type = MessageType::DEPRECATION_WARNING;
-      level = Message::LogLevel::LOG_WARNING;
-    } else {
-      return true;
+    switch (mf.GetDiagnosticAction(cmDiagnostics::CMD_DEPRECATED)) {
+      case cmDiagnostics::Ignore:
+        return true;
+      case cmDiagnostics::FatalError:
+        fatal = true;
+        CM_FALLTHROUGH;
+      case cmDiagnostics::SendError:
+        type = MessageType::DEPRECATION_ERROR;
+        level = Message::LogLevel::LOG_ERROR;
+        break;
+      default:
+        type = MessageType::DEPRECATION_WARNING;
+        level = Message::LogLevel::LOG_WARNING;
+        break;
     }
     ++i;
   } else if (*i == "NOTICE") {

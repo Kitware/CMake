@@ -6,7 +6,7 @@ run_cmake(ExperimentalWarning)
 
 # Enable experimental feature and suppress warnings
 set(RunCMake_TEST_OPTIONS
-  -Wno-dev
+  -Wno-author
   "-DCMAKE_EXPERIMENTAL_MAPPED_PACKAGE_INFO:STRING=ababa1b5-7099-495f-a9cd-e22d38f274f2"
   )
 

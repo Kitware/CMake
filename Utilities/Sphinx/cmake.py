@@ -36,6 +36,21 @@ else:
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+# BEGIN sphinx tweaks
+
+# Adjust the 'std' domain regex used to parse options so that it recognizes
+# e.g. `-W<name>` as the option `-W` with a value `<name>`, rather than
+# treating the entire string as the option name.
+#
+# See also https://github.com/sphinx-doc/sphinx/issues/14323.
+
+sphinx.domains.std.option_desc_re = (
+    re.compile(r'((?:/|--|-|\+)?[^\s=<]+)(=?\s*.*)'))
+
+# END sphinx tweaks
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 # BEGIN pygments tweaks
 
 # Override much of pygments' CMakeLexer.

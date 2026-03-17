@@ -1,7 +1,7 @@
 include(RunCMake)
 
 set(common_test_options
-  -Wno-dev
+  -Wno-author
   "-DCMAKE_EXPERIMENTAL_GENERATE_SBOM:STRING=ca494ed3-b261-4205-a01f-603c95e4cae0"
   "-DCMAKE_INSTALL_SBOM_FORMATS:STRING=JSON"
   "-DCMAKE_INSTALL_LIBDIR=lib"

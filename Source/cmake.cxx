@@ -178,6 +178,19 @@ void cmWarnUnusedCliWarning(std::string const& variable, int /*unused*/,
 }
 #endif
 
+void warnDeprecated(cm::string_view oldOption, cm::string_view newOption)
+{
+  std::cerr << "The "_s << oldOption << " option is deprecated.  Use "_s
+            << newOption << " instead.\n"_s;
+}
+
+std::string normalizeCliWarningName(cm::string_view cliName)
+{
+  std::string out = cmStrCat("CMD_"_s, cmSystemTools::UpperCase(cliName));
+  std::replace(out.begin(), out.end(), '-', '_');
+  return out;
+}
+
 bool cmakeCheckStampFile(std::string const& stampName)
 {
   // The stamp file does not exist.  Use the stamp dependencies to
@@ -270,9 +283,16 @@ bool cmakeCheckStampList(std::string const& stampList)
   return true;
 }
 
+bool isDiagnosticSet(cmStateSnapshot const& state,
+                     cmDiagnosticCategory category)
+{
+  constexpr cmDiagnosticAction unset = cmDiagnostics::Undefined;
+  return (state.GetDiagnostic(category, unset) == unset);
+}
+
 } // namespace
 
-cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[19] = {
+cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[15] = {
   { "-S <path-to-source>", "Explicitly specify a source directory." },
   { "-B <path-to-build>", "Explicitly specify a build directory." },
   { "-C <initial-cache>", "Pre-load a script to populate the cache." },
@@ -286,18 +306,11 @@ cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[19] = {
     "Specify install directory [CMAKE_INSTALL_PREFIX]." },
   { "--project-file <project-file-name>",
     "Specify an alternate project file name." },
-  { "-Wdev", "Enable developer warnings." },
-  { "-Wno-dev", "Suppress developer warnings." },
-  { "-Werror=dev", "Make developer warnings errors." },
-  { "-Wno-error=dev", "Make developer warnings not errors." },
-  { "-Wdeprecated", "Enable deprecation warnings." },
-  { "-Wno-deprecated", "Suppress deprecation warnings." },
-  { "-Werror=deprecated",
-    "Make deprecated macro and function warnings "
-    "errors." },
-  { "-Wno-error=deprecated",
-    "Make deprecated macro and function warnings "
-    "not errors." }
+  { "-W<category>", "Enable the specified category of warnings." },
+  { "-Wno-<category>", "Suppress the specified category of warnings." },
+  { "-Werror=<category>", "Make the specified category of warnings errors." },
+  { "-Wno-error=<category>",
+    "Make the specified category of warnings not errors." },
 };
 
 cmake::cmake(cmState::Role role, cmState::TryCompile isTryCompile)
@@ -472,7 +485,7 @@ cmake::CommandFailureAction cmake::GetCommandFailureAction() const
 
 void cmake::CleanupCommandsAndMacros()
 {
-  this->CurrentSnapshot = this->State->Reset();
+  this->CurrentSnapshot = this->State->Reset(this->CurrentSnapshot);
   this->State->RemoveUserDefinedCommands();
   this->CurrentSnapshot.SetDefaultDefinitions();
   // FIXME: InstalledFiles probably belongs in the global generator.
@@ -480,38 +493,28 @@ void cmake::CleanupCommandsAndMacros()
 }
 
 #ifndef CMAKE_BOOTSTRAP
-using DiagnosticMap = std::map<cmDiagnosticCategory, bool>;
-
-void cmake::SetWarningFromPreset(std::string const& name,
-                                 DiagnosticMap const& warnings,
-                                 DiagnosticMap const& errors,
-                                 cmDiagnosticCategory key)
+void cmake::SetDiagnosticsFromPreset(
+  std::map<cmDiagnosticCategory, bool> const& warnings,
+  std::map<cmDiagnosticCategory, bool> const& errors)
 {
-  auto const wi = warnings.find(key);
-  if (wi != warnings.end()) {
-    if (wi->second) {
-      this->DiagLevels[name] = std::max(this->DiagLevels[name], DIAG_WARN);
+  for (auto const& wi : warnings) {
+    if (wi.second) {
+      this->CurrentSnapshot.PromoteDiagnostic( // clang-format: break
+        wi.first, cmDiagnostics::Warn, true);
     } else {
-      this->DiagLevels[name] = DIAG_IGNORE;
+      this->CurrentSnapshot.DemoteDiagnostic( // clang-format: break
+        wi.first, cmDiagnostics::Ignore, true);
     }
   }
-  auto const ei = errors.find(key);
-  if (ei != errors.end()) {
-    if (ei->second) {
-      this->DiagLevels[name] = DIAG_ERROR;
-    } else {
-      this->DiagLevels[name] = std::min(this->DiagLevels[name], DIAG_WARN);
-    }
-  }
-}
 
-void cmake::SetWarningFromPreset(void (cmake::*func)(bool),
-                                 DiagnosticMap const& warnings,
-                                 bool allowedValue, cmDiagnosticCategory key)
-{
-  auto const wi = warnings.find(key);
-  if (wi != warnings.end() && wi->second == allowedValue) {
-    (this->*func)(wi->second);
+  for (auto const& ei : errors) {
+    if (ei.second) {
+      this->CurrentSnapshot.PromoteDiagnostic( // clang-format: break
+        ei.first, cmDiagnostics::SendError, true);
+    } else {
+      this->CurrentSnapshot.DemoteDiagnostic( // clang-format: break
+        ei.first, cmDiagnostics::Warn, true);
+    }
   }
 }
 
@@ -620,43 +623,50 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
     return true;
   };
 
-  auto WarningLambda = [](cm::string_view entry, cmake* state) -> bool {
+  auto WarningLambda = [](cm::string_view option, cmake* state) -> bool {
     bool foundNo = false;
     bool foundError = false;
 
-    if (cmHasLiteralPrefix(entry, "no-")) {
+    cm::string_view cname = option;
+    if (cmHasLiteralPrefix(cname, "no-")) {
       foundNo = true;
-      entry.remove_prefix(3);
+      cname.remove_prefix(3);
     }
 
-    if (cmHasLiteralPrefix(entry, "error=")) {
+    if (cmHasLiteralPrefix(cname, "error=")) {
       foundError = true;
-      entry.remove_prefix(6);
+      cname.remove_prefix(6);
     }
 
-    if (entry.empty()) {
+    if (cname.empty()) {
       cmSystemTools::Error("No warning name provided.");
       return false;
     }
 
-    std::string const name = std::string(entry);
-    if (!foundNo && !foundError) {
-      // -W<name>
-      state->DiagLevels[name] = std::max(state->DiagLevels[name], DIAG_WARN);
-    } else if (foundNo && !foundError) {
-      // -Wno<name>
-      state->DiagLevels[name] = DIAG_IGNORE;
-    } else if (!foundNo && foundError) {
-      // -Werror=<name>
-      state->DiagLevels[name] = DIAG_ERROR;
+    cm::optional<cmDiagnosticCategory> category;
+    if (cname == "dev"_s) {
+      warnDeprecated(
+        option,
+        cmStrCat("-W"_s, option.substr(0, option.size() - 3), "author"_s));
+      category = cmDiagnostics::CMD_AUTHOR;
     } else {
-      // -Wno-error=<name>
-      // This can downgrade an error to a warning, but should not enable
-      // or disable a warning in the first place.
-      auto dli = state->DiagLevels.find(name);
-      if (dli != state->DiagLevels.end()) {
-        dli->second = std::min(dli->second, DIAG_WARN);
+      category =
+        cmDiagnostics::GetDiagnosticCategory(normalizeCliWarningName(cname));
+      if (!category) {
+        cmSystemTools::Error(
+          cmStrCat("The warning category \""_s, cname, "\" is not known."));
+        return false;
       }
+    }
+
+    if (foundNo) {
+      state->CurrentSnapshot.DemoteDiagnostic(
+        *category, foundError ? cmDiagnostics::Warn : cmDiagnostics::Ignore,
+        true);
+    } else {
+      state->CurrentSnapshot.PromoteDiagnostic(
+        *category, foundError ? cmDiagnostics::SendError : cmDiagnostics::Warn,
+        true);
     }
     return true;
   };
@@ -801,12 +811,15 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
 void cmake::ProcessCacheArg(std::string const& var, std::string const& value,
                             cmStateEnums::CacheEntryType type)
 {
+  cmDiagnosticAction const warnUnusedCli =
+    this->CurrentSnapshot.GetDiagnostic(cmDiagnostics::CMD_UNUSED_CLI);
+
   // The value is transformed if it is a filepath for example, so
   // we can't compare whether the value is already in the cache until
   // after we call AddCacheEntry.
   bool haveValue = false;
   std::string cachedValue;
-  if (this->WarnUnusedCli) {
+  if (warnUnusedCli != cmDiagnostics::Ignore) {
     if (cmValue v = this->State->GetInitializedCacheValue(var)) {
       haveValue = true;
       cachedValue = *v;
@@ -816,7 +829,7 @@ void cmake::ProcessCacheArg(std::string const& var, std::string const& value,
   this->AddCacheEntry(
     var, value, "No help, variable specified on the command line.", type);
 
-  if (this->WarnUnusedCli) {
+  if (warnUnusedCli != cmDiagnostics::Ignore) {
     if (!haveValue ||
         cachedValue != *this->State->GetInitializedCacheValue(var)) {
       this->WatchUnusedCli(var);
@@ -839,7 +852,7 @@ void cmake::ReadListFile(std::vector<std::string> const& args,
 
   // read in the list file to fill the cache
   if (!path.empty()) {
-    this->CurrentSnapshot = this->State->Reset();
+    this->CurrentSnapshot = this->State->Reset(this->CurrentSnapshot);
     cmStateSnapshot snapshot = this->GetCurrentSnapshot();
     snapshot.GetDirectory().SetCurrentBinary(this->GetHomeOutputDirectory());
     snapshot.GetDirectory().SetCurrentSource(this->GetHomeDirectory());
@@ -1287,22 +1300,24 @@ void cmake::SetArgs(std::vector<std::string> const& args)
                        state->SetTrace(true);
                        return true;
                      } },
-    CommandArgument{ "--warn-uninitialized", CommandArgument::Values::Zero,
-                     [](std::string const&, cmake* state) -> bool {
-                       std::cout << "Warn about uninitialized values.\n";
-                       state->SetWarnUninitialized(true);
-                       return true;
-                     } },
+    CommandArgument{
+      "--warn-uninitialized", CommandArgument::Values::Zero,
+      [](std::string const&, cmake* state) -> bool {
+        warnDeprecated("--warn-uninitialized"_s, "-Wuninitialized"_s);
+        state->CurrentSnapshot.PromoteDiagnostic(
+          cmDiagnostics::CMD_UNINITIALIZED, cmDiagnostics::Warn, true);
+        return true;
+      } },
     CommandArgument{ "--warn-unused-vars", CommandArgument::Values::Zero,
                      IgnoreAndTrueLambda }, // Option was removed.
-    CommandArgument{ "--no-warn-unused-cli", CommandArgument::Values::Zero,
-                     [](std::string const&, cmake* state) -> bool {
-                       std::cout
-                         << "Not searching for unused variables given on the "
-                            "command line.\n";
-                       state->SetWarnUnusedCli(false);
-                       return true;
-                     } },
+    CommandArgument{
+      "--no-warn-unused-cli", CommandArgument::Values::Zero,
+      [](std::string const&, cmake* state) -> bool {
+        warnDeprecated("--no-warn-unused-cli"_s, "-Wno-unused-cli"_s);
+        state->CurrentSnapshot.DemoteDiagnostic(cmDiagnostics::CMD_UNUSED_CLI,
+                                                cmDiagnostics::Ignore, true);
+        return true;
+      } },
     CommandArgument{
       "--check-system-vars", CommandArgument::Values::Zero,
       [](std::string const&, cmake* state) -> bool {
@@ -2096,18 +2111,8 @@ bool cmake::SetArgsFromPreset(std::string const& presetName,
     }
   }
 
-  this->SetWarningFromPreset("dev", expandedPreset->Warnings,
-                             expandedPreset->Errors,
-                             cmDiagnostics::CMD_AUTHOR);
-  this->SetWarningFromPreset("deprecated", expandedPreset->Warnings,
-                             expandedPreset->Errors,
-                             cmDiagnostics::CMD_DEPRECATED);
-  this->SetWarningFromPreset(&cmake::SetWarnUninitialized,
-                             expandedPreset->Warnings, true,
-                             cmDiagnostics::CMD_UNINITIALIZED);
-  this->SetWarningFromPreset(&cmake::SetWarnUnusedCli,
-                             expandedPreset->Warnings, false,
-                             cmDiagnostics::CMD_UNUSED_CLI);
+  this->SetDiagnosticsFromPreset(expandedPreset->Warnings,
+                                 expandedPreset->Errors);
   if (expandedPreset->WarnSystemVars == true) {
     this->SetCheckSystemVars(true);
   }
@@ -2388,78 +2393,133 @@ int cmake::Configure()
   auto profilingRAII = this->CreateProfilingEntry("project", "configure");
 #endif
 
-  DiagLevel diagLevel;
+  // We now need to harmonize the previous initial diagnostic state with any
+  // changes requested via command line options. This is a bit tricky, because
+  // we need to underlay what is specified by the cache beneath whatever state
+  // has been built from command line processing.
 
-  if (this->DiagLevels.count("deprecated") == 1) {
+  cmDiagnosticAction deprecated = this->CurrentSnapshot.GetDiagnostic(
+    cmDiagnostics::CMD_DEPRECATED, cmDiagnostics::Undefined);
+  bool const deprecatedAlreadySet = (deprecated != cmDiagnostics::Undefined);
 
-    diagLevel = this->DiagLevels["deprecated"];
-    if (diagLevel == DIAG_IGNORE) {
-      this->SetSuppressDeprecatedWarnings(true);
-      this->SetDeprecatedWarningsAsErrors(false);
-    } else if (diagLevel == DIAG_WARN) {
-      this->SetSuppressDeprecatedWarnings(false);
-      this->SetDeprecatedWarningsAsErrors(false);
-    } else if (diagLevel == DIAG_ERROR) {
-      this->SetSuppressDeprecatedWarnings(false);
-      this->SetDeprecatedWarningsAsErrors(true);
-    }
-  }
+  if (cmValue cachedDiagnostics =
+        this->State->GetCacheEntryValue("CMAKE_DIAGNOSTIC_INIT")) {
+    for (std::string const& item : cmList{ cachedDiagnostics }) {
+      std::string::size_type n = item.find('=');
+      if (n != std::string::npos) {
+        cm::string_view v = item;
+        cm::optional<cmDiagnosticCategory> const& category =
+          cmDiagnostics::GetDiagnosticCategory(v.substr(0, n));
+        cm::optional<cmDiagnosticAction> const& action =
+          cmDiagnostics::GetDiagnosticAction(v.substr(n + 1));
 
-  if (this->DiagLevels.count("dev") == 1) {
-    bool setDeprecatedVariables = false;
-
-    cmValue cachedWarnDeprecated =
-      this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
-    cmValue cachedErrorDeprecated =
-      this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
-
-    // don't overwrite deprecated warning setting from a previous invocation
-    if (!cachedWarnDeprecated && !cachedErrorDeprecated) {
-      setDeprecatedVariables = true;
-    }
-
-    diagLevel = this->DiagLevels["dev"];
-    if (diagLevel == DIAG_IGNORE) {
-      this->SetSuppressDevWarnings(true);
-      this->SetDevWarningsAsErrors(false);
-
-      if (setDeprecatedVariables) {
-        this->SetSuppressDeprecatedWarnings(true);
-        this->SetDeprecatedWarningsAsErrors(false);
-      }
-    } else if (diagLevel == DIAG_WARN) {
-      this->SetSuppressDevWarnings(false);
-      this->SetDevWarningsAsErrors(false);
-
-      if (setDeprecatedVariables) {
-        this->SetSuppressDeprecatedWarnings(false);
-        this->SetDeprecatedWarningsAsErrors(false);
-      }
-    } else if (diagLevel == DIAG_ERROR) {
-      this->SetSuppressDevWarnings(false);
-      this->SetDevWarningsAsErrors(true);
-
-      if (setDeprecatedVariables) {
-        this->SetSuppressDeprecatedWarnings(false);
-        this->SetDeprecatedWarningsAsErrors(true);
+        if (category && action) {
+          // Only use the cache if command-line options have not modified the
+          // diagnostic.
+          if (isDiagnosticSet(this->CurrentSnapshot, *category)) {
+            this->CurrentSnapshot.SetDiagnostic(*category, *action, false);
+          }
+        }
       }
     }
   }
 
-  // Cache variables may have already been set by a previous invocation,
-  // so we cannot rely on command line options alone. Always ensure our
-  // messenger is in sync with the cache.
-  cmValue value = this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
-  this->Messenger->SetSuppressDeprecatedWarnings(value && value.IsOff());
+  cmValue cachedWarnDeprecated =
+    this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
+  if (cachedWarnDeprecated) {
+    std::cerr << "The CMAKE_WARN_DEPRECATED variable is deprecated.  "
+                 "Use CMAKE_DIAGNOSTIC_INIT instead.\n"_s;
+    if (cachedWarnDeprecated.IsOn()) {
+      deprecated = cmDiagnostics::Warn;
+    } else {
+      deprecated = cmDiagnostics::Ignore;
+    }
+  }
 
-  value = this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
-  this->Messenger->SetDeprecatedWarningsAsErrors(value.IsOn());
+  cmValue cachedErrorDeprecated =
+    this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
+  if (cachedErrorDeprecated) {
+    std::cerr << "The CMAKE_ERROR_DEPRECATED variable is deprecated.  "
+                 "Use CMAKE_DIAGNOSTIC_INIT instead.\n"_s;
+    if (cachedErrorDeprecated.IsOn()) {
+      deprecated = cmDiagnostics::SendError;
+    }
+  }
 
-  value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-  this->Messenger->SetSuppressDevWarnings(value.IsOn());
+  if (!deprecatedAlreadySet && deprecated != cmDiagnostics::Undefined) {
+    // CMD_DEPRECATED was not set by command-line options, but was altered by
+    // one or both of CMAKE_{WARN,ERROR}_DEPRECATED.
+    this->CurrentSnapshot.SetDiagnostic(cmDiagnostics::CMD_DEPRECATED,
+                                        deprecated, false);
+  }
 
-  value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS");
-  this->Messenger->SetDevWarningsAsErrors(value && value.IsOff());
+  // Copy diagnostic state to cmMessenger.
+  switch (this->CurrentSnapshot.GetDiagnostic(cmDiagnostics::CMD_AUTHOR)) {
+    case cmDiagnostics::Ignore:
+      this->Messenger->SetSuppressDevWarnings(true);
+      this->Messenger->SetDevWarningsAsErrors(false);
+      break;
+    case cmDiagnostics::SendError:
+    case cmDiagnostics::FatalError:
+      this->Messenger->SetSuppressDevWarnings(false);
+      this->Messenger->SetDevWarningsAsErrors(true);
+      break;
+    default:
+      this->Messenger->SetSuppressDevWarnings(false);
+      this->Messenger->SetDevWarningsAsErrors(false);
+      break;
+  }
+  switch (this->CurrentSnapshot.GetDiagnostic(cmDiagnostics::CMD_DEPRECATED)) {
+    case cmDiagnostics::Ignore:
+      this->Messenger->SetSuppressDeprecatedWarnings(true);
+      this->Messenger->SetDeprecatedWarningsAsErrors(false);
+      break;
+    case cmDiagnostics::SendError:
+    case cmDiagnostics::FatalError:
+      this->Messenger->SetSuppressDeprecatedWarnings(false);
+      this->Messenger->SetDeprecatedWarningsAsErrors(true);
+      break;
+    default:
+      this->Messenger->SetSuppressDeprecatedWarnings(false);
+      this->Messenger->SetDeprecatedWarningsAsErrors(false);
+      break;
+  }
+
+  // Now write the diagnostic state back to the cache.
+  cmList diagnostics;
+  for (unsigned i = 1; i < cmDiagnostics::CategoryCount; ++i) {
+    auto const category = static_cast<cmDiagnosticCategory>(i);
+    auto const action = this->CurrentSnapshot.GetDiagnostic(category);
+
+    diagnostics.emplace_back(
+      cmStrCat(cmDiagnostics::GetCategoryString(category), '=',
+               cmDiagnostics::GetActionString(action)));
+
+    if (category == cmDiagnostics::CMD_DEPRECATED) {
+      // Set deprecated CMAKE_{WARN,ERROR}_DEPRECATED, but only in the cache,
+      // and only if they were already set in the cache.
+      if (cachedWarnDeprecated) {
+        std::string const value =
+          (action >= cmDiagnostics::Warn ? "ON" : "OFF");
+        this->AddCacheEntry("CMAKE_WARN_DEPRECATED", value,
+                            "Deprecated.  Use CMAKE_DIAGNOSTIC_INIT instead.",
+                            cmStateEnums::INTERNAL);
+      }
+      if (cachedErrorDeprecated) {
+        std::string const value =
+          (action >= cmDiagnostics::SendError ? "ON" : "OFF");
+        this->AddCacheEntry("CMAKE_ERROR_DEPRECATED", value,
+                            "Deprecated.  Use CMAKE_DIAGNOSTIC_INIT instead.",
+                            cmStateEnums::INTERNAL);
+      }
+    }
+  }
+
+  this->AddCacheEntry("CMAKE_DIAGNOSTIC_INIT", cmJoin(diagnostics, ";"_s),
+                      "Set initial state for CMake diagnostics; "
+                      "used to persist state set by command-line options "
+                      "across invocations.",
+                      cmStateEnums::INTERNAL);
 
   int ret = this->ActualConfigure();
   cmValue delCacheVars =
@@ -3214,9 +3274,7 @@ int cmake::Generate()
     std::cout << "Generate graphviz: " << this->GraphVizFile << '\n';
     this->GenerateGraphViz(this->GraphVizFile);
   }
-  if (this->WarnUnusedCli) {
-    this->RunCheckForUnusedVariables();
-  }
+  this->RunCheckForUnusedVariables();
   if (cmSystemTools::GetErrorOccurredFlag()) {
 #if !defined(CMAKE_BOOTSTRAP)
     this->FileAPI->WriteReplies(cmFileAPI::IndexFor::FailedGenerate);
@@ -3244,16 +3302,6 @@ void cmake::AddCacheEntry(std::string const& key, cmValue value,
   this->State->AddCacheEntry(key, value, helpString,
                              static_cast<cmStateEnums::CacheEntryType>(type));
   this->UnwatchUnusedCli(key);
-
-  if (key == "CMAKE_WARN_DEPRECATED"_s) {
-    this->Messenger->SetSuppressDeprecatedWarnings(value && value.IsOff());
-  } else if (key == "CMAKE_ERROR_DEPRECATED"_s) {
-    this->Messenger->SetDeprecatedWarningsAsErrors(value.IsOn());
-  } else if (key == "CMAKE_SUPPRESS_DEVELOPER_WARNINGS"_s) {
-    this->Messenger->SetSuppressDevWarnings(value.IsOn());
-  } else if (key == "CMAKE_SUPPRESS_DEVELOPER_ERRORS"_s) {
-    this->Messenger->SetDevWarningsAsErrors(value && value.IsOff());
-  }
 }
 
 bool cmake::DoWriteGlobVerifyTarget() const
@@ -4450,115 +4498,26 @@ void cmake::UnwatchUnusedCli(std::string const& var)
 void cmake::RunCheckForUnusedVariables()
 {
 #ifndef CMAKE_BOOTSTRAP
-  bool haveUnused = false;
-  std::ostringstream msg;
-  msg << "Manually-specified variables were not used by the project:";
-  for (auto const& it : this->UsedCliVariables) {
-    if (!it.second) {
-      haveUnused = true;
-      msg << "\n  " << it.first;
+  cmDiagnosticAction const action =
+    this->CurrentSnapshot.GetDiagnostic(cmDiagnostics::CMD_UNUSED_CLI);
+  if (action != cmDiagnostics::Ignore) {
+    bool haveUnused = false;
+    std::ostringstream msg;
+    msg << "Manually-specified variables were not used by the project:";
+    for (auto const& it : this->UsedCliVariables) {
+      if (!it.second) {
+        haveUnused = true;
+        msg << "\n  " << it.first;
+      }
+    }
+    if (haveUnused) {
+      this->IssueMessage(action > cmDiagnostics::Warn
+                           ? MessageType::FATAL_ERROR
+                           : MessageType::WARNING,
+                         msg.str());
     }
   }
-  if (haveUnused) {
-    this->IssueMessage(MessageType::WARNING, msg.str());
-  }
 #endif
-}
-
-bool cmake::GetSuppressDevWarnings() const
-{
-  return this->Messenger->GetSuppressDevWarnings();
-}
-
-void cmake::SetSuppressDevWarnings(bool b)
-{
-  std::string value;
-
-  // equivalent to -Wno-dev
-  if (b) {
-    value = "TRUE";
-  }
-  // equivalent to -Wdev
-  else {
-    value = "FALSE";
-  }
-
-  this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", value,
-                      "Suppress Warnings that are meant for"
-                      " the author of the CMakeLists.txt files.",
-                      cmStateEnums::INTERNAL);
-}
-
-bool cmake::GetSuppressDeprecatedWarnings() const
-{
-  return this->Messenger->GetSuppressDeprecatedWarnings();
-}
-
-void cmake::SetSuppressDeprecatedWarnings(bool b)
-{
-  std::string value;
-
-  // equivalent to -Wno-deprecated
-  if (b) {
-    value = "FALSE";
-  }
-  // equivalent to -Wdeprecated
-  else {
-    value = "TRUE";
-  }
-
-  this->AddCacheEntry("CMAKE_WARN_DEPRECATED", value,
-                      "Whether to issue warnings for deprecated "
-                      "functionality.",
-                      cmStateEnums::INTERNAL);
-}
-
-bool cmake::GetDevWarningsAsErrors() const
-{
-  return this->Messenger->GetDevWarningsAsErrors();
-}
-
-void cmake::SetDevWarningsAsErrors(bool b)
-{
-  std::string value;
-
-  // equivalent to -Werror=dev
-  if (b) {
-    value = "FALSE";
-  }
-  // equivalent to -Wno-error=dev
-  else {
-    value = "TRUE";
-  }
-
-  this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", value,
-                      "Suppress errors that are meant for"
-                      " the author of the CMakeLists.txt files.",
-                      cmStateEnums::INTERNAL);
-}
-
-bool cmake::GetDeprecatedWarningsAsErrors() const
-{
-  return this->Messenger->GetDeprecatedWarningsAsErrors();
-}
-
-void cmake::SetDeprecatedWarningsAsErrors(bool b)
-{
-  std::string value;
-
-  // equivalent to -Werror=deprecated
-  if (b) {
-    value = "TRUE";
-  }
-  // equivalent to -Wno-error=deprecated
-  else {
-    value = "FALSE";
-  }
-
-  this->AddCacheEntry("CMAKE_ERROR_DEPRECATED", value,
-                      "Whether to issue deprecation errors for macros"
-                      " and functions.",
-                      cmStateEnums::INTERNAL);
 }
 
 void cmake::SetDebugFindOutputPkgs(std::string const& args)

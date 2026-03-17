@@ -14,6 +14,7 @@
 
 #include "cmCacheManager.h"
 #include "cmDefinitions.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobCacheEntry.h" // IWYU pragma: keep
 #include "cmGlobVerificationManager.h"
@@ -274,8 +275,12 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
   this->CacheManager->RemoveCacheEntryProperty(key, propertyName);
 }
 
-cmStateSnapshot cmState::Reset()
+cmStateSnapshot cmState::Reset(cmStateSnapshot const& diagnosticState)
 {
+  assert(diagnosticState.CanPopDiagnosticScope());
+  cmDiagnostics::DiagnosticMap diagnostics =
+    *diagnosticState.Position->Diagnostics;
+
   this->GlobalProperties.Clear();
   this->PropertyDefinitions = {};
   this->GlobVerificationManager->Reset();
@@ -302,11 +307,13 @@ cmStateSnapshot cmState::Reset()
   assert(pos->PolicyRoot.IsValid());
 
   this->DiagnosticStack.Clear();
-  pos->Diagnostics = this->DiagnosticStack.Root();
+  pos->Diagnostics = this->DiagnosticStack.Push(this->DiagnosticStack.Root(),
+                                                { diagnostics, false });
   pos->DiagnosticRoot = this->DiagnosticStack.Root();
   pos->DiagnosticScope = this->DiagnosticStack.Root();
   assert(pos->Diagnostics.IsValid());
   assert(pos->DiagnosticRoot.IsValid());
+  assert(pos->Diagnostics != pos->DiagnosticRoot);
 
   {
     std::string srcDir =
@@ -893,11 +900,13 @@ cmStateSnapshot cmState::CreateBaseSnapshot()
   pos->PolicyScope = this->PolicyStack.Root();
   assert(pos->Policies.IsValid());
   assert(pos->PolicyRoot.IsValid());
-  pos->Diagnostics = this->DiagnosticStack.Root();
+  pos->Diagnostics =
+    this->DiagnosticStack.Push(this->DiagnosticStack.Root(), { {}, false });
   pos->DiagnosticRoot = this->DiagnosticStack.Root();
   pos->DiagnosticScope = this->DiagnosticStack.Root();
   assert(pos->Diagnostics.IsValid());
   assert(pos->DiagnosticRoot.IsValid());
+  assert(pos->Diagnostics != pos->DiagnosticRoot);
   pos->Vars = this->VarTree.Push(this->VarTree.Root());
   assert(pos->Vars.IsValid());
   pos->Parent = this->VarTree.Root();

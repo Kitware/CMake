@@ -1,11 +1,10 @@
-^The dev option is deprecated\.  Use -Wauthor instead\.
-CMake Warning \(dev\) at Wdev\.cmake:1 \(message\):
+^CMake Warning \(dev\) at Wno-error_author\.cmake:2 \(message\):
   Some author warning
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 
-CMake Warning \(dev\) at Wdev\.cmake:6 \(include\):
+CMake Warning \(dev\) at Wno-error_author\.cmake:7 \(include\):
   include\(\) given empty file name \(ignored\)\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

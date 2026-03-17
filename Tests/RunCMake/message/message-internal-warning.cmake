@@ -1,5 +1,5 @@
 
-set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON)
+cmake_diagnostic(SET CMD_AUTHOR WARN)
 
 macro(mymacro)
 endmacro(notmymacro)

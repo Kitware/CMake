@@ -1,5 +1,5 @@
 
-set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE BOOL "")
+cmake_diagnostic(SET CMD_AUTHOR IGNORE)
 
 macro(mymacro)
 endmacro(notmymacro)
