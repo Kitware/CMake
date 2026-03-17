@@ -214,34 +214,71 @@ std::string Encoding::ToNarrow(wchar_t const* wcstr)
 }
 
 #if defined(_WIN32)
-// Convert local paths to UNC style paths
+// Convert local paths to UNC style paths:
+// * https://web.archive.org/web/20250329050419/
+//   https://cpp.arsenmk.com/2015/12/handling-long-paths-on-windows.html
+
+namespace {
+// UNC prefix for local paths.
+std::wstring const unc_local_prefix = L"\\\\?\\";
+
+// UNC prefix for remote paths.
+std::wstring const unc_remote_prefix = L"\\\\?\\UNC\\";
+
+// The longest UNC prefix replaces two leading backslashes.
+size_t const unc_max_space = unc_remote_prefix.length() - 2;
+}
+
 std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
 {
   return ToWindowsExtendedPath(ToWide(source));
 }
 
-// Convert local paths to UNC style paths
 std::wstring Encoding::ToWindowsExtendedPath(char const* source)
 {
   return ToWindowsExtendedPath(ToWide(source));
 }
 
-// Convert local paths to UNC style paths
 std::wstring Encoding::ToWindowsExtendedPath(std::wstring const& wsource)
 {
   // Resolve any relative paths
+  std::wstring wfull;
   DWORD wfull_len;
 
-  /* The +3 is a workaround for a bug in some versions of GetFullPathNameW that
-   * won't return a large enough buffer size if the input is too small */
-  wfull_len = GetFullPathNameW(wsource.c_str(), 0, nullptr, nullptr) + 3;
-  std::wstring wfull(wfull_len, L'\0');
-  wfull_len = GetFullPathNameW(wsource.c_str(), wfull_len, &wfull[0], nullptr);
-  wfull.resize(wfull_len);
+  // Try with a stack-allocated buffer first.
+  wchar_t local_buf[512];
+  size_t const local_buf_len = sizeof(local_buf) / sizeof(local_buf[0]);
+  wfull_len =
+    GetFullPathNameW(wsource.c_str(), local_buf_len, local_buf, nullptr);
+  if (wfull_len <= local_buf_len) {
+    // The stack-allocated buffer was large enough.  It holds the result.
+
+    // Reserve room for the prefix added below.
+    wfull.reserve(wfull_len + unc_max_space);
+
+    // Store the absolute path to be returned.
+    wfull.assign(local_buf, wfull_len);
+  } else {
+    // The stack-allocated buffer was too small, but now we know how
+    // much to allocate on the heap.
+
+    // Some versions of GetFullPathNameW return a slightly too-small size.
+    wfull_len += 3;
+
+    // Reserve room for the prefix added below.
+    wfull.reserve(wfull_len + unc_max_space);
+
+    // Try again with a heap-allocated buffer.
+    wfull.resize(wfull_len, L'\0');
+    wfull_len =
+      GetFullPathNameW(wsource.c_str(), wfull_len, &wfull[0], nullptr);
+    wfull.resize(wfull_len);
+  }
 
   if (wfull_len >= 2 && kwsysString_isalpha(wfull[0]) &&
       wfull[1] == L':') { /* C:\Foo\bar\FooBar.txt */
-    return L"\\\\?\\" + wfull;
+    wfull.insert(0, unc_local_prefix);
+    return wfull;
   } else if (wfull_len >= 2 && wfull[0] == L'\\' &&
              wfull[1] == L'\\') { /* Starts with \\ */
     if (wfull_len >= 4 && wfull[2] == L'?' &&
@@ -254,19 +291,22 @@ std::wstring Encoding::ToWindowsExtendedPath(std::wstring const& wsource)
                  wfull[5] == L':') { /* \\?\C:\Foo\bar\FooBar.txt */
         return wfull;
       } else if (wfull_len >= 5) { /* \\?\Foo\bar\FooBar.txt */
-        return L"\\\\?\\UNC\\" + wfull.substr(4);
+        wfull.replace(0, 4, unc_remote_prefix);
+        return wfull;
       }
     } else if (wfull_len >= 4 && wfull[2] == L'.' &&
                wfull[3] == L'\\') { /* Starts with \\.\ a device name */
       if (wfull_len >= 6 && kwsysString_isalpha(wfull[4]) &&
           wfull[5] == L':') { /* \\.\C:\Foo\bar\FooBar.txt */
-        return L"\\\\?\\" + wfull.substr(4);
+        wfull.replace(0, 4, unc_local_prefix);
+        return wfull;
       } else if (wfull_len >=
                  5) { /* \\.\Foo\bar\ Device name is left unchanged */
         return wfull;
       }
     } else if (wfull_len >= 3) { /* \\Foo\bar\FooBar.txt */
-      return L"\\\\?\\UNC\\" + wfull.substr(2);
+      wfull.replace(0, 2, unc_remote_prefix);
+      return wfull;
     }
   }
 
