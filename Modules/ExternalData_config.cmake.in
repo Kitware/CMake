@@ -4,4 +4,5 @@ set(ExternalData_TIMEOUT_INACTIVITY "@ExternalData_TIMEOUT_INACTIVITY@")
 set(ExternalData_TIMEOUT_ABSOLUTE "@ExternalData_TIMEOUT_ABSOLUTE@")
 set(ExternalData_NO_SYMLINKS "@ExternalData_NO_SYMLINKS@")
 set(ExternalData_STATE_ROOT "@ExternalData_STATE_ROOT@")
+set(ExternalData_LINK_MODE "@ExternalData_LINK_MODE@")
 @_ExternalData_CONFIG_CODE@
