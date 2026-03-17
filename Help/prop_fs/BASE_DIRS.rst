@@ -1,6 +1,8 @@
 BASE_DIRS
 ---------
 
+.. versionadded:: 4.4
+
 List of base directories of the file set. The :command:`target_sources` command
 sets or adds to the ``BASE_DIRS`` file set property and is the usual way to
 manipulate it.

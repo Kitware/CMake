@@ -1,6 +1,8 @@
 INTERFACE_SOURCES
 -----------------
 
+.. versionadded:: 4.4
+
 List of interface sources to compile into consuming targets.
 The :command:`target_sources` command sets or adds to the ``INTERFACE_SOURCES``
 file set property for the file sets defined with the ``PUBLIC`` or

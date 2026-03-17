@@ -1,6 +1,8 @@
 SOURCES
 -------
 
+.. versionadded:: 4.4
+
 This specifies the list of paths to sources for the file set.
 The :command:`target_sources` command sets or adds to the ``SOURCES`` file set
 property for the file sets defined with the ``PRIVATE`` or ``PUBLIC`` keyword
