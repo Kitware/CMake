@@ -1,0 +1,1 @@
+^CMake Error: The -- option cannot be used with --build-and-test\. Use --build-options or --test-command to forward arguments\.$

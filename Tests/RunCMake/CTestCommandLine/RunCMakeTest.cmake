@@ -734,3 +734,38 @@ endforeach()
   run_cmake_command(ScheduleRandomSeed1 ${CMAKE_CTEST_COMMAND} --schedule-random --schedule-random-seed 42)
   run_cmake_command(ScheduleRandomSeed2 ${CMAKE_CTEST_COMMAND} --schedule-random --schedule-random-seed 42)
 endblock()
+
+function(run_PassthroughTest case)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Passthrough-${case})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(echo_test \"${CMAKE_COMMAND}\" -E echo \"base_output\")
+add_test(echo_test2 \"${CMAKE_COMMAND}\" -E echo \"second_test\")
+")
+  run_cmake_command(Passthrough-${case} ${CMAKE_CTEST_COMMAND} ${ARGN})
+endfunction()
+
+# Basic passthrough
+run_PassthroughTest(basic -V -- --extra-flag)
+# Multiple passthrough args
+run_PassthroughTest(multiple -V -- --flag1 --flag2 value)
+# Passthrough with -R filter (only echo_test2 should run)
+run_PassthroughTest(with-filter -V -R echo_test2 -- --extra)
+# Empty passthrough (bare --)
+run_PassthroughTest(empty -V --)
+# Passthrough args that look like ctest flags
+run_PassthroughTest(ctest-flags -V -- -R --verbose)
+# -- rejected with --build-and-test
+run_cmake_command(Passthrough-build-and-test-error ${CMAKE_CTEST_COMMAND}
+  --build-and-test
+    ${RunCMake_BINARY_DIR}/Passthrough-build-and-test-error/does-not-exist
+    ${RunCMake_BINARY_DIR}/Passthrough-build-and-test-error/does-not-exist
+  --build-generator "None" -- --extra-flag)
+# bare -- rejected with --build-and-test
+run_cmake_command(Passthrough-build-and-test-empty-error ${CMAKE_CTEST_COMMAND}
+  --build-and-test
+    ${RunCMake_BINARY_DIR}/Passthrough-build-and-test-empty-error/does-not-exist
+    ${RunCMake_BINARY_DIR}/Passthrough-build-and-test-empty-error/does-not-exist
+  --build-generator "None" --)

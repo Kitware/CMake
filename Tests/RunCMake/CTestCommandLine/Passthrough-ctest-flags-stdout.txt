@@ -1,0 +1,6 @@
+1: Test command: [^
+]* "-E" "echo" "base_output" "-R" "--verbose"
+.*
+2: Test command: [^
+]* "-E" "echo" "second_test" "-R" "--verbose"
+.*
