@@ -127,3 +127,9 @@ std::string cmLocalFastbuildGenerator::ConvertToIncludeReference(
   }
   return converted;
 }
+
+std::string cmLocalFastbuildGenerator::MaybeRelativeToWorkDir(
+  std::string const& path) const
+{
+  return this->MaybeRelativeToTopBinDir(path);
+}
