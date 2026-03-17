@@ -5,14 +5,36 @@ include(${CMAKE_CURRENT_LIST_DIR}/verify-snippet.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/verify-trace.cmake)
 
 # Test CALLBACK script. Prints output information and verifies index file
-# Called as: cmake -P hook.cmake [CheckForStaticQuery?] [CheckForTrace?] [index.json]
-set(index ${CMAKE_ARGV5})
-if (NOT ${CMAKE_ARGV3})
-  set(hasStaticInfo "UNEXPECTED")
+# Called as: cmake -P -DSTATIC_QUERY=<ON|OFF> -DTRACE_QUERY=<ON|OFF> \
+#            hook.cmake index-*.json
+
+# Get the index file as the last argument.
+math(EXPR last_arg_idx "${CMAKE_ARGC} - 1")
+set(index "${CMAKE_ARGV${last_arg_idx}}")
+if(NOT index MATCHES "index-.*\.json")
+  message(FATAL_ERROR "Received unexpected index argument: ${index}")
 endif()
-if (NOT ${CMAKE_ARGV4})
-  set(hasTrace "UNEXPECTED")
-endif()
+
+# Verify that we received the expected arguments.
+function(check_args vars)
+  foreach(var IN LISTS vars)
+    if (NOT DEFINED ${var})
+      message(FATAL_ERROR "Expected argument ${var}, but none given.")
+    endif()
+  endforeach()
+endfunction()
+check_args("STATIC_QUERY;TRACE_QUERY")
+
+function(init_query_var input_var output_var)
+  set(${output_var})
+  if (NOT ${input_var})
+    set(${output_var} "UNEXPECTED")
+  endif()
+  return(PROPAGATE ${output_var})
+endfunction()
+init_query_var(STATIC_QUERY hasStaticInfo)
+init_query_var(TRACE_QUERY hasTrace)
+
 read_json("${index}" contents)
 string(JSON hook GET "${contents}" hook)
 
