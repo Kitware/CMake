@@ -19,6 +19,46 @@ set(CMAKE_Rust_FLAGS_RELEASE_INIT "-O")
 set(CMAKE_Rust_FLAGS_RELWITHDEBINFO_INIT "-O -g")
 set(CMAKE_Rust_FLAGS_MINSIZEREL_INIT "-C opt-level=z")
 
+block(
+    PROPAGATE
+    CMAKE_Rust_LINK_PIE_SUPPORTED
+    CMAKE_Rust_LINK_NO_PIE_SUPPORTED
+    CMAKE_Rust_COMPILE_OPTIONS_PIE
+    CMAKE_Rust_COMPILE_OPTIONS_PIC
+    CMAKE_Rust_LINK_OPTIONS_PIE
+    CMAKE_Rust_LINK_OPTIONS_NO_PIE
+  )
+  execute_process(
+    COMMAND "${CMAKE_Rust_COMPILER}" --print relocation-models
+    OUTPUT_VARIABLE RUSTC_OUTPUT
+    ERROR_VARIABLE RUSTC_ERROR
+    RESULT_VARIABLE RUSTC_EXITCODE
+  )
+  if(RUSTC_EXITCODE EQUAL "0")
+    string(REPLACE "\n" ";" RUSTC_OUTPUT_LINES "${RUSTC_OUTPUT}")
+    list(TRANSFORM RUSTC_OUTPUT_LINES STRIP)
+    if("pic" IN_LIST RUSTC_OUTPUT_LINES)
+      set(CMAKE_Rust_COMPILE_OPTIONS_PIC -C relocation-model=pic)
+    endif()
+    if("pie" IN_LIST RUSTC_OUTPUT_LINES)
+      set(CMAKE_Rust_LINK_PIE_SUPPORTED TRUE)
+      set(CMAKE_Rust_COMPILE_OPTIONS_PIE -C relocation-model=pie)
+      set(CMAKE_Rust_LINK_OPTIONS_PIE -C relocation-model=pie)
+    else()
+      set(CMAKE_Rust_LINK_PIE_SUPPORTED FALSE)
+    endif()
+    if("static" IN_LIST RUSTC_OUTPUT_LINES)
+      set(CMAKE_Rust_LINK_NO_PIE_SUPPORTED TRUE)
+      set(CMAKE_Rust_LINK_OPTIONS_NO_PIE -C relocation-model=static)
+    else()
+      set(CMAKE_Rust_LINK_NO_PIE_SUPPORTED FALSE)
+    endif()
+  else()
+    string(REPLACE "\n" "\n  " RUSTC_ERROR "  ${RUSTC_ERROR}")
+    message(FATAL_ERROR "Failed to check PIC/PIE support in rustc:\n${RUSTC_ERROR}")
+  endif()
+endblock()
+
 cmake_initialize_per_config_variable(CMAKE_Rust_FLAGS "Flags used by the Rust compiler")
 
 if(NOT CMAKE_Rust_CREATE_STATIC_LIBRARY)

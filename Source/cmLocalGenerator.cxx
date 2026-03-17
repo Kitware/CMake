@@ -3596,8 +3596,12 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   }
 
   char const* PICValue = target->GetLinkPIEProperty(config);
-  if (!PICValue) {
-    // POSITION_INDEPENDENT_CODE is not set
+  if (!PICValue && lang != "Rust") {
+    // POSITION_INDEPENDENT_CODE is not set, note that for Rust we do not
+    // return as the compiler tends to enable PIE all the time, which is the
+    // opposite of what C & C++ compilers do. So instead of letting the rust
+    // compiler decide on its own whether PIE should be enabled, we explicit
+    // set it.
     return;
   }
 
