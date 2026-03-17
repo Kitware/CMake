@@ -260,12 +260,13 @@ template <
 std::vector<typename Range::key_type> keys(Range const& range)
 {
 #if defined(CMake_HAVE_CXX_RANGES)
+  using key_type = typename Range::key_type;
+
 #  if __cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)
-  return std::vector<std::string_view>{ std::from_range,
-                                        std::views::keys(range) };
+  return std::vector<key_type>{ std::from_range, std::views::keys(range) };
 #  else
   auto view = std::views::keys(range);
-  return std::vector<std::string_view>{ view.begin(), view.end() };
+  return std::vector<key_type>{ view.begin(), view.end() };
 #  endif
 #else
   return cm::views::keys(range);
@@ -280,12 +281,13 @@ template <
 std::vector<typename Range::mapped_type> values(Range const& range)
 {
 #if defined(CMake_HAVE_CXX_RANGES)
+  using value_type = typename Range::mapped_type;
+
 #  if __cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)
-  return std::vector<std::string_view>{ std::from_range,
-                                        std::views::values(range) };
+  return std::vector<value_type>{ std::from_range, std::views::values(range) };
 #  else
   auto view = std::views::values(range);
-  return std::vector<std::string_view>{ view.begin(), view.end() };
+  return std::vector<value_type>{ view.begin(), view.end() };
 #  endif
 #else
   return cm::views::values(range);
@@ -301,12 +303,14 @@ std::vector<typename std::tuple_element<0, typename Range::value_type>::type>
 keys(Range const& range)
 {
 #if defined(CMake_HAVE_CXX_RANGES)
+  using key_type =
+    typename std::tuple_element<0, typename Range::value_type>::type;
+
 #  if __cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)
-  return std::vector<std::string_view>{ std::from_range,
-                                        std::views::keys(range) };
+  return std::vector<key_type>{ std::from_range, std::views::keys(range) };
 #  else
   auto view = std::views::keys(range);
-  return std::vector<std::string_view>{ view.begin(), view.end() };
+  return std::vector<key_type>{ view.begin(), view.end() };
 #  endif
 #else
   return cm::views::keys(range);
@@ -318,15 +322,17 @@ template <typename Range,
                             cm::is_tuple<2, typename Range::value_type>::value,
                           int> = 0>
 std::vector<typename std::tuple_element<1, typename Range::value_type>::type>
-keys(Range const& range)
+values(Range const& range)
 {
 #if defined(CMake_HAVE_CXX_RANGES)
+  using value_type =
+    typename std::tuple_element<1, typename Range::value_type>::type;
+
 #  if __cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)
-  return std::vector<std::string_view>{ std::from_range,
-                                        std::views::values(range) };
+  return std::vector<value_type>{ std::from_range, std::views::values(range) };
 #  else
   auto view = std::views::values(range);
-  return std::vector<std::string_view>{ view.begin(), view.end() };
+  return std::vector<value_type>{ view.begin(), view.end() };
 #  endif
 #else
   return cm::views::values(range);
