@@ -114,6 +114,31 @@ _cmake()
             _filedir -d
             return
             ;;
+
+        --target)
+            local quoted
+            printf -v quoted %q "$cur"
+            # Options allowed right after `--target`
+            local target_options='--verbose --clean-first --config --'
+            local build_dir="build"
+            for ((i=0; i < ${#COMP_WORDS[@]}; i++)); do
+                if [[ "${COMP_WORDS[i]}" == "--build" ]]; then
+                    build_dir="${COMP_WORDS[i+1]}"
+                    break
+                fi
+            done
+            if [[ "$cur" == -* ]]; then
+                COMPREPLY=( $( compgen -W "$target_options" -- "$quoted" ) )
+            else
+                local targets=$( cmake --build "$build_dir" --target help 2>/dev/null \
+                    | sed -n -e 's/^... \([^ ]*\).*$/\1/p' \
+                       -e '/^\[/d' -e 's/^\([^ :]*\):.*$/\1/p' | \
+                grep -v '^/' | sort -u )
+                COMPREPLY=( $( compgen -W "$targets $target_options" -- "$quoted" ) )
+            fi
+            return
+            ;;
+
         --install|--open)
             _filedir -d
             return
