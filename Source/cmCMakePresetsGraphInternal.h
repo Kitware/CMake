@@ -25,6 +25,7 @@ enum class ExpandMacroResult
 {
   Ok,
   Ignore,
+  Defer,
   Error,
 };
 
@@ -124,6 +125,49 @@ public:
     return ExpandMacroResult::Ignore;
   }
 };
+
+template <class T>
+class ImmediateMacroExpander : public MacroExpander
+{
+  T const& Preset;
+
+public:
+  ImmediateMacroExpander(T const& preset)
+    : Preset(preset)
+  {
+  }
+  ExpandMacroResult operator()(std::string const& macroNamespace,
+                               std::string const& macroName,
+                               std::string& macroOut,
+                               int version) const override
+  {
+    if (macroNamespace.empty()) {
+      if (macroName == "fileDir") {
+        if (version < 12) {
+          return ExpandMacroResult::Defer;
+        }
+        macroOut +=
+          cmSystemTools::GetParentDirectory(Preset.OriginFile->Filename);
+        return ExpandMacroResult::Ok;
+      }
+    }
+    return ExpandMacroResult::Defer;
+  }
+};
+
+template <typename T>
+bool ExpandImmediateMacros(T& preset);
+
+extern template bool ExpandImmediateMacros<
+  cmCMakePresetsGraph::ConfigurePreset>(cmCMakePresetsGraph::ConfigurePreset&);
+extern template bool ExpandImmediateMacros<cmCMakePresetsGraph::BuildPreset>(
+  cmCMakePresetsGraph::BuildPreset&);
+extern template bool ExpandImmediateMacros<cmCMakePresetsGraph::TestPreset>(
+  cmCMakePresetsGraph::TestPreset&);
+extern template bool ExpandImmediateMacros<cmCMakePresetsGraph::PackagePreset>(
+  cmCMakePresetsGraph::PackagePreset&);
+extern template bool ExpandImmediateMacros<
+  cmCMakePresetsGraph::WorkflowPreset>(cmCMakePresetsGraph::WorkflowPreset&);
 
 class NullCondition : public cmCMakePresetsGraph::Condition
 {

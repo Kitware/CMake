@@ -1,0 +1,17 @@
+{
+  "version": 12,
+  "include": [
+    "${fileDir}/FileDirInclude.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "FileDir",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${fileDir}/build",
+      "cacheVariables": {
+        "TEST_FILE_DIR": "${fileDir}",
+        "PRESET": "FileDir"
+      }
+    }
+  ]
+}

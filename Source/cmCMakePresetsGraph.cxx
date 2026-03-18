@@ -27,6 +27,8 @@
       case ExpandMacroResult::Ignore:                                         \
         out.reset();                                                          \
         return true;                                                          \
+      case ExpandMacroResult::Defer:                                          \
+        CM_FALLTHROUGH;                                                       \
       case ExpandMacroResult::Ok:                                             \
         break;                                                                \
     }                                                                         \
@@ -54,6 +56,9 @@ using BaseMacroExpander = cmCMakePresetsGraphInternal::BaseMacroExpander;
 template <typename T>
 using PresetMacroExpander =
   cmCMakePresetsGraphInternal::PresetMacroExpander<T>;
+template <typename T>
+using ImmediateMacroExpander =
+  cmCMakePresetsGraphInternal::ImmediateMacroExpander<T>;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 void InheritString(std::string& child, std::string const& parent)
@@ -77,6 +82,15 @@ void InheritVector(std::vector<T>& child, std::vector<T> const& parent)
 {
   if (child.empty()) {
     child = parent;
+  }
+}
+
+template <typename T>
+void InheritMap(std::map<std::string, T>& child,
+                std::map<std::string, T> const& parent)
+{
+  for (auto const& v : parent) {
+    child.insert(v);
   }
 }
 
@@ -142,9 +156,7 @@ bool VisitPreset(
       return false;
     }
 
-    for (auto const& v : parentPreset.Environment) {
-      preset.Environment.insert(v);
-    }
+    InheritMap(preset.Environment, parentPreset.Environment);
 
     if (!preset.ConditionEvaluator) {
       preset.ConditionEvaluator = parentPreset.ConditionEvaluator;
@@ -259,156 +271,165 @@ public:
   }
 };
 
-bool ExpandMacros(cmCMakePresetsGraph const& graph,
-                  ConfigurePreset const& preset,
-                  cm::optional<ConfigurePreset>& out,
-                  MacroExpanderVector const& macroExpanders)
+bool CheckExpandMacros(ConfigurePreset const& preset,
+                       cm::optional<ConfigurePreset>& out,
+                       MacroExpanderVector const& macroExpanders,
+                       cmCMakePresetsGraph const* graph = nullptr)
 {
+  int version = graph ? graph->GetVersion(preset) : preset.OriginFile->Version;
+
   std::string binaryDir = preset.BinaryDir;
-  CHECK_EXPAND(out, binaryDir, macroExpanders, graph.GetVersion(preset));
+  CHECK_EXPAND(out, binaryDir, macroExpanders, version);
 
   if (!binaryDir.empty()) {
-    if (!cmSystemTools::FileIsFullPath(binaryDir)) {
-      binaryDir = cmStrCat(graph.SourceDir, '/', binaryDir);
+    if (graph) {
+      if (!cmSystemTools::FileIsFullPath(binaryDir)) {
+        binaryDir = cmStrCat(graph->SourceDir, '/', binaryDir);
+      }
+      out->BinaryDir = cmSystemTools::CollapseFullPath(binaryDir);
+      cmSystemTools::ConvertToUnixSlashes(out->BinaryDir);
+    } else {
+      // Defer path normalization until the graph is merged, but store the
+      // intermediate result.
+      out->BinaryDir = binaryDir;
     }
-    out->BinaryDir = cmSystemTools::CollapseFullPath(binaryDir);
-    cmSystemTools::ConvertToUnixSlashes(out->BinaryDir);
   }
 
   if (!preset.InstallDir.empty()) {
     std::string installDir = preset.InstallDir;
-    CHECK_EXPAND(out, installDir, macroExpanders, graph.GetVersion(preset));
+    CHECK_EXPAND(out, installDir, macroExpanders, version);
 
-    if (!cmSystemTools::FileIsFullPath(installDir)) {
-      installDir = cmStrCat(graph.SourceDir, '/', installDir);
+    if (graph) {
+      if (!cmSystemTools::FileIsFullPath(installDir)) {
+        installDir = cmStrCat(graph->SourceDir, '/', installDir);
+      }
+      out->InstallDir = cmSystemTools::CollapseFullPath(installDir);
+      cmSystemTools::ConvertToUnixSlashes(out->InstallDir);
+    } else {
+      // Defer path normalization until the graph is merged, but store the
+      // intermediate result.
+      out->InstallDir = installDir;
     }
-    out->InstallDir = cmSystemTools::CollapseFullPath(installDir);
-    cmSystemTools::ConvertToUnixSlashes(out->InstallDir);
   }
 
   if (!preset.ToolchainFile.empty()) {
     std::string toolchain = preset.ToolchainFile;
-    CHECK_EXPAND(out, toolchain, macroExpanders, graph.GetVersion(preset));
+    CHECK_EXPAND(out, toolchain, macroExpanders, version);
     out->ToolchainFile = toolchain;
   }
 
   if (!preset.GraphVizFile.empty()) {
     std::string graphVizFile = preset.GraphVizFile;
-    CHECK_EXPAND(out, graphVizFile, macroExpanders, graph.GetVersion(preset));
+    CHECK_EXPAND(out, graphVizFile, macroExpanders, version);
     out->GraphVizFile = graphVizFile;
   }
 
   for (auto& variable : out->CacheVariables) {
     if (variable.second) {
-      CHECK_EXPAND(out, variable.second->Value, macroExpanders,
-                   graph.GetVersion(preset));
+      CHECK_EXPAND(out, variable.second->Value, macroExpanders, version);
     }
   }
 
   return true;
 }
 
-bool ExpandMacros(cmCMakePresetsGraph const& graph, BuildPreset const& preset,
-                  cm::optional<BuildPreset>& out,
-                  MacroExpanderVector const& macroExpanders)
+bool CheckExpandMacros(BuildPreset const& preset,
+                       cm::optional<BuildPreset>& out,
+                       MacroExpanderVector const& macroExpanders,
+                       cmCMakePresetsGraph const* graph = nullptr)
 {
+  int version = graph ? graph->GetVersion(preset) : preset.OriginFile->Version;
+
   for (auto& target : out->Targets) {
-    CHECK_EXPAND(out, target, macroExpanders, graph.GetVersion(preset));
+    CHECK_EXPAND(out, target, macroExpanders, version);
   }
 
   for (auto& nativeToolOption : out->NativeToolOptions) {
-    CHECK_EXPAND(out, nativeToolOption, macroExpanders,
-                 graph.GetVersion(preset));
+    CHECK_EXPAND(out, nativeToolOption, macroExpanders, version);
   }
 
   return true;
 }
 
-bool ExpandMacros(cmCMakePresetsGraph const& graph, TestPreset const& preset,
-                  cm::optional<TestPreset>& out,
-                  MacroExpanderVector const& macroExpanders)
+bool CheckExpandMacros(TestPreset const& preset, cm::optional<TestPreset>& out,
+                       MacroExpanderVector const& macroExpanders,
+                       cmCMakePresetsGraph const* graph = nullptr)
 {
+  int version = graph ? graph->GetVersion(preset) : preset.OriginFile->Version;
+
   for (auto& overwrite : out->OverwriteConfigurationFile) {
-    CHECK_EXPAND(out, overwrite, macroExpanders, graph.GetVersion(preset));
+    CHECK_EXPAND(out, overwrite, macroExpanders, version);
   }
 
   if (out->Output) {
-    CHECK_EXPAND(out, out->Output->OutputLogFile, macroExpanders,
-                 graph.GetVersion(preset));
-    CHECK_EXPAND(out, out->Output->OutputJUnitFile, macroExpanders,
-                 graph.GetVersion(preset));
+    CHECK_EXPAND(out, out->Output->OutputLogFile, macroExpanders, version);
+    CHECK_EXPAND(out, out->Output->OutputJUnitFile, macroExpanders, version);
   }
 
   if (out->Filter) {
     if (out->Filter->Include) {
-      CHECK_EXPAND(out, out->Filter->Include->Name, macroExpanders,
-                   graph.GetVersion(preset));
-      CHECK_EXPAND(out, out->Filter->Include->Label, macroExpanders,
-                   graph.GetVersion(preset));
+      CHECK_EXPAND(out, out->Filter->Include->Name, macroExpanders, version);
+      CHECK_EXPAND(out, out->Filter->Include->Label, macroExpanders, version);
 
       if (out->Filter->Include->Index) {
         CHECK_EXPAND(out, out->Filter->Include->Index->IndexFile,
-                     macroExpanders, graph.GetVersion(preset));
+                     macroExpanders, version);
       }
     }
 
     if (out->Filter->Exclude) {
-      CHECK_EXPAND(out, out->Filter->Exclude->Name, macroExpanders,
-                   graph.GetVersion(preset));
-      CHECK_EXPAND(out, out->Filter->Exclude->Label, macroExpanders,
-                   graph.GetVersion(preset));
+      CHECK_EXPAND(out, out->Filter->Exclude->Name, macroExpanders, version);
+      CHECK_EXPAND(out, out->Filter->Exclude->Label, macroExpanders, version);
 
       if (out->Filter->Exclude->Fixtures) {
         CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Any, macroExpanders,
-                     graph.GetVersion(preset));
+                     version);
         CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Setup,
-                     macroExpanders, graph.GetVersion(preset));
+                     macroExpanders, version);
         CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Cleanup,
-                     macroExpanders, graph.GetVersion(preset));
+                     macroExpanders, version);
       }
     }
   }
 
   if (out->Execution) {
     CHECK_EXPAND(out, out->Execution->ResourceSpecFile, macroExpanders,
-                 graph.GetVersion(preset));
+                 version);
   }
 
   return true;
 }
 
-bool ExpandMacros(cmCMakePresetsGraph const& graph,
-                  PackagePreset const& preset,
-                  cm::optional<PackagePreset>& out,
-                  MacroExpanderVector const& macroExpanders)
+bool CheckExpandMacros(PackagePreset const& preset,
+                       cm::optional<PackagePreset>& out,
+                       MacroExpanderVector const& macroExpanders,
+                       cmCMakePresetsGraph const* graph = nullptr)
 {
+  int version = graph ? graph->GetVersion(preset) : preset.OriginFile->Version;
+
   for (auto& variable : out->Variables) {
-    CHECK_EXPAND(out, variable.second, macroExpanders,
-                 graph.GetVersion(preset));
+    CHECK_EXPAND(out, variable.second, macroExpanders, version);
   }
 
-  CHECK_EXPAND(out, out->ConfigFile, macroExpanders, graph.GetVersion(preset));
-  CHECK_EXPAND(out, out->PackageName, macroExpanders,
-               graph.GetVersion(preset));
-  CHECK_EXPAND(out, out->PackageVersion, macroExpanders,
-               graph.GetVersion(preset));
-  CHECK_EXPAND(out, out->PackageDirectory, macroExpanders,
-               graph.GetVersion(preset));
-  CHECK_EXPAND(out, out->VendorName, macroExpanders, graph.GetVersion(preset));
+  CHECK_EXPAND(out, out->ConfigFile, macroExpanders, version);
+  CHECK_EXPAND(out, out->PackageName, macroExpanders, version);
+  CHECK_EXPAND(out, out->PackageVersion, macroExpanders, version);
+  CHECK_EXPAND(out, out->PackageDirectory, macroExpanders, version);
+  CHECK_EXPAND(out, out->VendorName, macroExpanders, version);
 
   return true;
 }
 
-bool ExpandMacros(cmCMakePresetsGraph const& /*graph*/,
-                  WorkflowPreset const& /*preset*/,
-                  cm::optional<WorkflowPreset>& /*out*/,
-                  MacroExpanderVector const& /*macroExpanders*/)
+bool CheckExpandMacros(WorkflowPreset const& /*preset*/,
+                       cm::optional<WorkflowPreset>& /*out*/,
+                       MacroExpanderVector const& /*macroExpanders*/,
+                       cmCMakePresetsGraph const* /*graph*/ = nullptr)
 {
   return true;
 }
 
 template <class T>
-bool ExpandMacros(cmCMakePresetsGraph& graph, T const& preset,
+bool ExpandMacros(cmCMakePresetsGraph* graph, T const& preset,
                   cm::optional<T>& out)
 {
   out.emplace(preset);
@@ -420,23 +441,25 @@ bool ExpandMacros(cmCMakePresetsGraph& graph, T const& preset,
 
   MacroExpanderVector macroExpanders{};
 
-  macroExpanders.push_back(cm::make_unique<BaseMacroExpander>(graph));
+  macroExpanders.push_back(cm::make_unique<BaseMacroExpander>(*graph));
   macroExpanders.push_back(
-    cm::make_unique<PresetMacroExpander<T>>(graph, preset));
+    cm::make_unique<PresetMacroExpander<T>>(*graph, preset));
   macroExpanders.push_back(cm::make_unique<EnvironmentMacroExpander<T>>(
     macroExpanders, out, envCycles));
 
   for (auto& v : out->Environment) {
     if (v.second) {
       switch (VisitEnv(*v.second, envCycles[v.first], macroExpanders,
-                       graph.GetVersion(preset))) {
+                       graph->GetVersion(preset))) {
         case ExpandMacroResult::Error:
           cmCMakePresetsErrors::INVALID_PRESET_NAMED(preset.Name,
-                                                     &graph.parseState);
+                                                     &graph->parseState);
           return false;
         case ExpandMacroResult::Ignore:
           out.reset();
           return true;
+        case ExpandMacroResult::Defer:
+          CM_FALLTHROUGH;
         case ExpandMacroResult::Ok:
           break;
       }
@@ -446,9 +469,9 @@ bool ExpandMacros(cmCMakePresetsGraph& graph, T const& preset,
   if (preset.ConditionEvaluator) {
     cm::optional<bool> result;
     if (!preset.ConditionEvaluator->Evaluate(
-          macroExpanders, graph.GetVersion(preset), result)) {
+          macroExpanders, graph->GetVersion(preset), result)) {
       cmCMakePresetsErrors::INVALID_PRESET_NAMED(preset.Name,
-                                                 &graph.parseState);
+                                                 &graph->parseState);
       return false;
     }
     if (!result) {
@@ -458,7 +481,7 @@ bool ExpandMacros(cmCMakePresetsGraph& graph, T const& preset,
     out->ConditionResult = *result;
   }
 
-  return ExpandMacros(graph, preset, out, macroExpanders);
+  return CheckExpandMacros(preset, out, macroExpanders, graph);
 }
 
 ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
@@ -481,6 +504,30 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
   return ExpandMacroResult::Ok;
 }
 }
+
+template <typename T>
+bool cmCMakePresetsGraphInternal::ExpandImmediateMacros(T& preset)
+{
+  MacroExpanderVector macroExpanders{};
+  macroExpanders.push_back(cm::make_unique<ImmediateMacroExpander<T>>(preset));
+  cm::optional<T> out = preset;
+  bool result = CheckExpandMacros(preset, out, macroExpanders);
+  if (out.has_value()) {
+    preset = out.value();
+  };
+  return result;
+}
+
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<
+  ConfigurePreset>(ConfigurePreset&);
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<BuildPreset>(
+  BuildPreset&);
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<TestPreset>(
+  TestPreset&);
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<
+  PackagePreset>(PackagePreset&);
+template bool cmCMakePresetsGraphInternal::ExpandImmediateMacros<
+  WorkflowPreset>(WorkflowPreset&);
 
 ExpandMacroResult cmCMakePresetsGraphInternal::ExpandMacros(
   std::string& out, MacroExpanderVector const& macroExpanders, int version)
@@ -788,10 +835,7 @@ bool cmCMakePresetsGraph::ConfigurePreset::VisitPresetInherit(
   InheritOptionalValue(preset.WarnUninitialized, parent.WarnUninitialized);
   InheritOptionalValue(preset.WarnUnusedCli, parent.WarnUnusedCli);
   InheritOptionalValue(preset.WarnSystemVars, parent.WarnSystemVars);
-
-  for (auto const& v : parent.CacheVariables) {
-    preset.CacheVariables.insert(v);
-  }
+  InheritMap(preset.CacheVariables, parent.CacheVariables);
 
   return true;
 }
@@ -994,11 +1038,7 @@ bool cmCMakePresetsGraph::PackagePreset::VisitPresetInherit(
                        parent.InheritConfigureEnvironment);
   InheritVector(preset.Generators, parent.Generators);
   InheritVector(preset.Configurations, parent.Configurations);
-
-  for (auto const& v : parent.Variables) {
-    preset.Variables.insert(v);
-  }
-
+  InheritMap(preset.Variables, parent.Variables);
   InheritOptionalValue(preset.DebugOutput, parent.DebugOutput);
   InheritOptionalValue(preset.VerboseOutput, parent.VerboseOutput);
   InheritString(preset.PackageName, parent.PackageName);
@@ -1098,7 +1138,7 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
   }
 
   for (auto& it : this->ConfigurePresets) {
-    if (!ExpandMacros(*this, it.second.Unexpanded, it.second.Expanded)) {
+    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
       cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
                                                     &this->parseState);
       return false;
@@ -1128,7 +1168,7 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
       }
     }
 
-    if (!ExpandMacros(*this, it.second.Unexpanded, it.second.Expanded)) {
+    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
       cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
                                                     &this->parseState);
       return false;
@@ -1158,7 +1198,7 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
       }
     }
 
-    if (!ExpandMacros(*this, it.second.Unexpanded, it.second.Expanded)) {
+    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
       cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
                                                     &this->parseState);
       return false;
@@ -1188,7 +1228,7 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
       }
     }
 
-    if (!ExpandMacros(*this, it.second.Unexpanded, it.second.Expanded)) {
+    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
       cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
                                                     &this->parseState);
       return false;
@@ -1243,7 +1283,7 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
       return false;
     }
 
-    if (!ExpandMacros(*this, it.second.Unexpanded, it.second.Expanded)) {
+    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
       cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
                                                     &this->parseState);
       return false;

@@ -1257,12 +1257,14 @@ Macro Expansion
 ^^^^^^^^^^^^^^^
 
 As mentioned above, some fields support macro expansion. Macros are
-recognized in the form ``$<macro-namespace>{<macro-name>}``. All macros are
-evaluated in the context of the preset being used, even if the macro is in a
-field that was inherited from another preset. For example, if the ``Base``
-preset sets variable ``PRESET_NAME`` to ``${presetName}``, and the
-``Derived`` preset inherits from ``Base``, ``PRESET_NAME`` will be set to
-``Derived``.
+recognized in the form ``$<macro-namespace>{<macro-name>}``.
+
+In general, macros are evaluated in the context of the preset being used, even
+if the macro is in a field that was inherited from another preset. For example,
+if the ``Base`` preset sets variable ``PRESET_NAME`` to ``${presetName}``, and
+the ``Derived`` preset inherits from ``Base``, ``PRESET_NAME`` will be set to
+``Derived``. The ``${fileDir}`` macro as of preset version ``12`` is an
+exception to this rule.
 
 It is an error to not put a closing brace at the end of a macro name. For
 example, ``${sourceDir`` is invalid. A dollar sign (``$``) followed by
@@ -1304,8 +1306,37 @@ Recognized macros include:
 .. _`CMakePresets fileDir`:
 
 ``${fileDir}``
-  Path to the directory containing the preset file which contains the macro.
+  Path to the directory containing the preset file which defines the preset
+  being used.
+
   This is allowed in preset files specifying version ``4`` or above.
+
+  In preset files specifying version ``12`` or above, this *always* expands to
+  the directory of the current preset file containing the macro, regardless
+  of the preset being used.
+
+  For example, consider the following scenario.
+
+  * ``/path/to/CMakePresets.json`` includes
+    ``/path/to/subdir/CMakePresets.json``.
+  * ``/path/to/subdir/CMakePresets.json`` defines preset ``Base``, which
+    sets variable ``MY_DIR`` to ``${fileDir}``.
+  * ``/path/to/CMakePresets.json`` defines preset ``Derived``, and
+    ``Derived`` inherits from ``Base``.
+
+  Under preset versions 4-11, ``MY_DIR`` will be set to ``/path/to/`` when
+  using the ``Base`` preset, and ``/path/to/subdir/`` when using the
+  ``Derived`` preset.
+  When ``/path/to/subdir/CMakePresets.json`` specifies version ``12`` or
+  above, ``MY_DIR`` will always be set to ``/path/to/subdir/``, regardless of
+  the preset being used.
+
+  .. note::
+
+    Since the ``${fileDir}`` macro in version 12 is expanded in the context of
+    the current preset file, it is the version of the current file, rather than
+    the version of the root file containing the preset being used, which
+    enables this alternative behavior.
 
 ``${dollar}``
   A literal dollar sign (``$``).
@@ -1471,6 +1502,16 @@ they were added and a summary of the new features and changes is given below.
       * The `jobs <CMakePresets test jobs_>`_ field now accepts an empty string
         representing :option:`--parallel <ctest --parallel>` with ``<jobs>``
         omitted.
+
+  ``12``
+    .. versionadded:: 4.4
+
+    * Changes to `Macro Expansion`_
+
+      * The `${fileDir} <CMakePresets fileDir_>`_ macro now always expands to
+        the directory of preset file containing the ``${fileDir}`` macro,
+        regardless of whether it is inherited by another preset in a different
+        directory.
 
 Schema
 ======
