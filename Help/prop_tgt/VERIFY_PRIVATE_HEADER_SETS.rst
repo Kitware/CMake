@@ -10,13 +10,19 @@ VERIFY_PRIVATE_HEADER_SETS
 Used to verify that all headers in a target's ``PUBLIC`` and ``PRIVATE``
 header sets can be included on their own.
 
+.. versionchanged:: 4.4
+  Previously, the verification target was only created when the target had
+  at least one matching header. Now it is always created when the property
+  is enabled.
+
 When this property is set to true, and the target is an object library, static
-library, shared library, module library, interface library, or executable, and
-the target has one or more ``PUBLIC`` or ``PRIVATE`` header sets, an object
-library target named ``<target_name>_verify_private_header_sets`` is created.
-This verification target has one source file per header in the ``PUBLIC`` and
-``PRIVATE`` header sets. Each source file only includes its associated header
-file.
+library, shared library, module library, interface library, or executable, an
+object library target named ``<target_name>_verify_private_header_sets`` is
+created. This verification target has one source file per header in the
+target's ``PUBLIC`` and ``PRIVATE`` header sets. Each source file only
+includes its associated header file. If the target has no matching header
+sets, a utility target is created instead so that the target name always
+exists for build system dependencies.
 
 Properties affecting compilation are copied from the original target to the
 verification target so that the headers will be interpreted the same way by

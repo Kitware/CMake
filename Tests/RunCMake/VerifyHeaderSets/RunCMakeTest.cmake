@@ -125,3 +125,21 @@ run_cmake_build(AllVerifyPrivateHeaderSets private all)
 set(RunCMake_TEST_OPTIONS -DCMAKE_VERIFY_PRIVATE_HEADER_SETS=ON)
 run_cmake(VerifyPrivateHeaderSetsNonexistent)
 unset(RunCMake_TEST_OPTIONS)
+
+# Test that verify targets are always created even with no headers
+if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+endif()
+run_cmake(VerifyEmptyHeaderSets)
+unset(RunCMake_TEST_OPTIONS)
+
+run_cmake_build(VerifyEmptyHeaderSets interface empty_iface)
+run_cmake_build(VerifyEmptyHeaderSets private empty_priv)
+run_cmake_build(VerifyEmptyHeaderSets interface all)
+run_cmake_build(VerifyEmptyHeaderSets private all)
+
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/VerifyEmptyHeaderSets-build)
+set(RunCMake_TEST_NO_CLEAN 1)
+run_cmake_command(VerifyEmptyHeaderSets-all_verify_header_sets-Debug-build
+  ${CMAKE_COMMAND} --build . --config Debug --target all_verify_header_sets
+)

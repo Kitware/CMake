@@ -5925,7 +5925,15 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
       }
     }
 
-    if (!stubSources.empty()) {
+    if (stubSources.empty()) {
+      // No headers to verify. Create a utility target so the target
+      // name always exists (e.g. for build system dependencies) without
+      // needing a placeholder source. This avoids warnings from tools
+      // like Xcode's libtool about empty static libraries.
+      verifyTarget =
+        this->Makefile->AddNewUtilityTarget(verifyTargetName, true);
+    } else {
+      // Create an OBJECT library to compile the verification stubs.
       {
         cmMakefile::PolicyPushPop polScope(this->Makefile);
         this->Makefile->SetPolicy(cmPolicies::CMP0119, cmPolicies::NEW);
