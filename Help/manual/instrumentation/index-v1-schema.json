@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema#",
+  "type": "object",
+  "required": [
+    "version",
+    "buildDir",
+    "dataDir",
+    "hook",
+    "snippets"
+  ],
+  "definitions": {
+    "nonEmptyStringOrNull": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "positiveIntegerOrNull": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "The data version of the index file.",
+      "enum": [
+        1
+      ]
+    },
+    "buildDir": {
+      "type": "string",
+      "description": "The build directory of the CMake project.",
+      "minLength": 1
+    },
+    "dataDir": {
+      "type": "string",
+      "description": "The full path to the <build>/.cmake/instrumentation/v1/data/ directory.",
+      "minLength": 1
+    },
+    "hook": {
+      "type": "string",
+      "description": "The name of the hook responsible for generating the index file. In addition to the hooks that can be specified by one of the v1 Query Files, this value may be set to manual if indexing is performed by invoking ctest --collect-instrumentation.",
+      "enum": [
+        "postGenerate",
+        "preBuild",
+        "postBuild",
+        "preCMakeBuild",
+        "postCMakeBuild",
+        "postCMakeInstall",
+        "postCMakeWorkflow",
+        "postCTest",
+        "manual"
+      ]
+    },
+    "snippets": {
+      "type": "array",
+      "description": "Contains a list of v1 Snippet Files. This includes all snippet files generated since the previous index file was created. The file paths are relative to dataDir.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "trace": {
+      "type": "string",
+      "description": "Contains the path to the Google Trace File. This includes data from all corresponding snippets in the index file. The file path is relative to dataDir. Only included when enabled by the v1 Query Files.",
+      "minLength": 1
+    },
+    "staticSystemInformation": {
+      "type": "object",
+      "description": "Specifies the static information collected about the host machine CMake is being run from. Only included when enabled by the v1 Query Files.",
+      "properties": {
+        "OSName": {
+          "description": "The host operating system name.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "OSPlatform": {
+          "description": "The name of the CPU CMake is running on.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "OSRelease": {
+          "description": "The OS sub-type (e.g., 'Professional' on Windows).",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "OSVersion": {
+          "description": "The OS build ID.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "familyId": {
+          "description": "The processor family name.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "hostname": {
+          "description": "Hostname.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "is64Bits": {
+          "type": "boolean",
+          "description": "True if processor is 64 bit."
+        },
+        "modelId": {
+          "description": "The processor model ID",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "numberOfLogicalCPU": {
+          "description": "Number of logical cores.",
+          "$ref": "#/definitions/positiveIntegerOrNull"
+        },
+        "numberOfPhysicalCPU": {
+          "description": "Number of physical cores.",
+          "$ref": "#/definitions/positiveIntegerOrNull"
+        },
+        "processorAPICID": {
+          "description": "The processor APIC ID.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "processorCacheSize": {
+          "description": "The processor L1 cache size.",
+          "$ref": "#/definitions/positiveIntegerOrNull"
+        },
+        "processorClockFrequency": {
+          "description": "The processor clock frequency.",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "processorName": {
+          "description": "Human readable processor name.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "totalPhysicalMemory": {
+          "description": "Total physical memory in MiB",
+          "$ref": "#/definitions/positiveIntegerOrNull"
+        },
+        "totalVirtualMemory": {
+          "description": "Total virtual memory in MiB",
+          "$ref": "#/definitions/positiveIntegerOrNull"
+        },
+        "vendorID": {
+          "description": "The processor vendor ID.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        },
+        "vendorString": {
+          "description": "The processor vendor string.",
+          "$ref": "#/definitions/nonEmptyStringOrNull"
+        }
+      }
+    }
+  }
+}

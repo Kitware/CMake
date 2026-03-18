@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.30)
 
 include(${CMAKE_CURRENT_LIST_DIR}/json.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/validate_schema.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/verify-snippet.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/verify-trace.cmake)
 
 # Test CALLBACK script. Prints output information and verifies index file
 # Called as: cmake -P -DSTATIC_QUERY=<ON|OFF> -DTRACE_QUERY=<ON|OFF> \
+#            -DCMake_TEST_JSON_SCHEMA=<ON|OFF> -DPython_EXECUTABLE=<path> \
 #            hook.cmake index-*.json
 
 # Get the index file as the last argument.
@@ -23,7 +25,7 @@ function(check_args vars)
     endif()
   endforeach()
 endfunction()
-check_args("STATIC_QUERY;TRACE_QUERY")
+check_args("STATIC_QUERY;TRACE_QUERY;Python_EXECUTABLE;CMake_TEST_JSON_SCHEMA")
 
 function(init_query_var input_var output_var)
   set(${output_var})
@@ -46,6 +48,17 @@ function(add_error error)
   string(APPEND ERROR_MESSAGE "${error}\n")
   return(PROPAGATE ERROR_MESSAGE)
 endfunction()
+
+validate_schema(
+  "${index}"
+  "${CMAKE_CURRENT_LIST_DIR}/../../../Help/manual/instrumentation/index-v1-schema.json"
+  # We expect to always generate valid index files.
+  0
+)
+if (RunCMake_TEST_FAILED)
+  add_error("${RunCMake_TEST_FAILED}")
+  unset(RunCMake_TEST_FAILED)
+endif()
 
 json_has_key("${index}" "${contents}" version)
 json_has_key("${index}" "${contents}" buildDir)

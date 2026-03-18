@@ -58,6 +58,8 @@ function(instrument test)
     "\\\"${CMAKE_COMMAND}\\\""
     "-DSTATIC_QUERY=${static_query_hook_arg}"
     "-DTRACE_QUERY=${trace_query_hook_arg}"
+    "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
+    "-DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}"
     "-P \\\"${RunCMake_SOURCE_DIR}/hook.cmake\\\""
   )
   list(JOIN GET_HOOK " " GET_HOOK)

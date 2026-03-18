@@ -563,6 +563,10 @@ Example:
     "trace": "trace/trace-<timestamp>.json"
   }
 
+.. versionadded:: 4.4
+  The JSON format is described in machine-readable form by
+  :download:`this JSON schema </manual/instrumentation/index-v1-schema.json>`.
+
 .. _`cmake-instrumentation v1 CMake Content File`:
 
 v1 CMake Content File
