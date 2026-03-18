@@ -5863,6 +5863,10 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
     }
 
     cm::optional<cm::optional<std::string>> defaultLanguage;
+
+    // First, collect all verification stubs before creating the target,
+    // so we know whether to create an OBJECT library or not.
+    std::vector<std::string> stubSources;
     for (auto const* fileSet : fileSets) {
       auto const& dirCges = fileSet->CompileDirectoryEntries();
       auto const& fileCges = fileSet->CompileFileEntries();
@@ -5907,93 +5911,10 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             }
             std::string filename = *filenameOpt;
 
-            if (!verifyTarget) {
-              {
-                cmMakefile::PolicyPushPop polScope(this->Makefile);
-                this->Makefile->SetPolicy(cmPolicies::CMP0119,
-                                          cmPolicies::NEW);
-                verifyTarget = this->Makefile->AddLibrary(
-                  verifyTargetName, cmStateEnums::OBJECT_LIBRARY, {}, true);
-              }
-
-              if (isInterface) {
-                // Link to the original target so that we pick up its
-                // interface compile options just like a consumer would.
-                // This also ensures any generated headers in the original
-                // target will be created.
-                verifyTarget->AddLinkLibrary(
-                  *this->Makefile, this->GetName(),
-                  cmTargetLinkLibraryType::GENERAL_LibraryType);
-              } else {
-                // For private file sets, we need to simulate compiling the
-                // same way as the original target. That includes linking to
-                // the same things so we pick up the same transitive
-                // properties. For the <LANG>_... properties, we don't care if
-                // we set them for languages this target won't eventually use.
-                // Copy language-standard properties for all supported
-                // languages. We don't care if we set properties for languages
-                // this target won't eventually use.
-                static std::array<std::string, 19> const propertiesToCopy{ {
-                  "COMPILE_DEFINITIONS",    "COMPILE_FEATURES",
-                  "COMPILE_FLAGS",          "COMPILE_OPTIONS",
-                  "DEFINE_SYMBOL",          "INCLUDE_DIRECTORIES",
-                  "LINK_LIBRARIES",         "C_STANDARD",
-                  "C_STANDARD_REQUIRED",    "C_EXTENSIONS",
-                  "CXX_STANDARD",           "CXX_STANDARD_REQUIRED",
-                  "CXX_EXTENSIONS",         "OBJC_STANDARD",
-                  "OBJC_STANDARD_REQUIRED", "OBJC_EXTENSIONS",
-                  "OBJCXX_STANDARD",        "OBJCXX_STANDARD_REQUIRED",
-                  "OBJCXX_EXTENSIONS",
-                } };
-                for (std::string const& prop : propertiesToCopy) {
-                  cmValue propValue = this->Target->GetProperty(prop);
-                  if (propValue.IsSet()) {
-                    verifyTarget->SetProperty(prop, propValue);
-                  }
-                }
-                // The original target might have generated headers. Since
-                // we only link to the original target for compilation,
-                // there's nothing to force such generation to happen yet.
-                // Our verify target must depend on the original target to
-                // ensure such generated files will be created.
-                verifyTarget->AddUtility(this->GetName(), false,
-                                         this->Makefile);
-                verifyTarget->AddCodegenDependency(this->GetName());
-              }
-
-              verifyTarget->SetProperty("AUTOMOC", "OFF");
-              verifyTarget->SetProperty("AUTORCC", "OFF");
-              verifyTarget->SetProperty("AUTOUIC", "OFF");
-              verifyTarget->SetProperty("DISABLE_PRECOMPILE_HEADERS", "ON");
-              verifyTarget->SetProperty("UNITY_BUILD", "OFF");
-              verifyTarget->SetProperty("CXX_SCAN_FOR_MODULES", "OFF");
-
-              if (isInterface) {
-                verifyTarget->FinalizeTargetConfiguration(
-                  this->Makefile->GetCompileDefinitionsEntries());
-              } else {
-                // Private verification only needs to add the directory scope
-                // definitions here
-                for (auto const& def :
-                     this->Makefile->GetCompileDefinitionsEntries()) {
-                  verifyTarget->InsertCompileDefinition(def);
-                }
-              }
-
-              if (!allVerifyTarget) {
-                allVerifyTarget =
-                  this->GlobalGenerator->GetMakefiles()
-                    .front()
-                    ->AddNewUtilityTarget(allVerifyTargetName, true);
-              }
-
-              allVerifyTarget->AddUtility(verifyTargetName, false);
-            }
-
             if (fileCgesContextSensitive) {
               filename = cmStrCat("$<$<CONFIG:", config, ">:", filename, '>');
             }
-            verifyTarget->AddSource(filename);
+            stubSources.emplace_back(std::move(filename));
           }
         }
 
@@ -6004,13 +5925,91 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
       }
     }
 
-    if (verifyTarget) {
-      this->LocalGenerator->AddGeneratorTarget(
-        cm::make_unique<cmGeneratorTarget>(verifyTarget,
-                                           this->LocalGenerator));
-    }
-  }
+    if (!stubSources.empty()) {
+      {
+        cmMakefile::PolicyPushPop polScope(this->Makefile);
+        this->Makefile->SetPolicy(cmPolicies::CMP0119, cmPolicies::NEW);
+        verifyTarget = this->Makefile->AddLibrary(
+          verifyTargetName, cmStateEnums::OBJECT_LIBRARY, {}, true);
+      }
 
+      if (isInterface) {
+        // Link to the original target so that we pick up its
+        // interface compile options just like a consumer would.
+        // This also ensures any generated headers in the original
+        // target will be created.
+        verifyTarget->AddLinkLibrary(
+          *this->Makefile, this->GetName(),
+          cmTargetLinkLibraryType::GENERAL_LibraryType);
+      } else {
+        // For private file sets, we need to simulate compiling the
+        // same way as the original target. That includes linking to
+        // the same things so we pick up the same transitive
+        // properties. For the <LANG>_... properties, we don't care if
+        // we set them for languages this target won't eventually use.
+        // Copy language-standard properties for all supported
+        // languages. We don't care if we set properties for languages
+        // this target won't eventually use.
+        static std::array<std::string, 19> const propertiesToCopy{ {
+          "COMPILE_DEFINITIONS",    "COMPILE_FEATURES",
+          "COMPILE_FLAGS",          "COMPILE_OPTIONS",
+          "DEFINE_SYMBOL",          "INCLUDE_DIRECTORIES",
+          "LINK_LIBRARIES",         "C_STANDARD",
+          "C_STANDARD_REQUIRED",    "C_EXTENSIONS",
+          "CXX_STANDARD",           "CXX_STANDARD_REQUIRED",
+          "CXX_EXTENSIONS",         "OBJC_STANDARD",
+          "OBJC_STANDARD_REQUIRED", "OBJC_EXTENSIONS",
+          "OBJCXX_STANDARD",        "OBJCXX_STANDARD_REQUIRED",
+          "OBJCXX_EXTENSIONS",
+        } };
+        for (std::string const& prop : propertiesToCopy) {
+          cmValue propValue = this->Target->GetProperty(prop);
+          if (propValue.IsSet()) {
+            verifyTarget->SetProperty(prop, propValue);
+          }
+        }
+        // The original target might have generated headers. Since
+        // we only link to the original target for compilation,
+        // there's nothing to force such generation to happen yet.
+        // Our verify target must depend on the original target to
+        // ensure such generated files will be created.
+        verifyTarget->AddUtility(this->GetName(), false, this->Makefile);
+        verifyTarget->AddCodegenDependency(this->GetName());
+      }
+
+      verifyTarget->SetProperty("AUTOMOC", "OFF");
+      verifyTarget->SetProperty("AUTORCC", "OFF");
+      verifyTarget->SetProperty("AUTOUIC", "OFF");
+      verifyTarget->SetProperty("DISABLE_PRECOMPILE_HEADERS", "ON");
+      verifyTarget->SetProperty("UNITY_BUILD", "OFF");
+      verifyTarget->SetProperty("CXX_SCAN_FOR_MODULES", "OFF");
+
+      if (isInterface) {
+        verifyTarget->FinalizeTargetConfiguration(
+          this->Makefile->GetCompileDefinitionsEntries());
+      } else {
+        // Private verification only needs to add the directory scope
+        // definitions here
+        for (auto const& def :
+             this->Makefile->GetCompileDefinitionsEntries()) {
+          verifyTarget->InsertCompileDefinition(def);
+        }
+      }
+
+      for (auto const& source : stubSources) {
+        verifyTarget->AddSource(source);
+      }
+    }
+    if (!allVerifyTarget) {
+      allVerifyTarget =
+        this->GlobalGenerator->GetMakefiles().front()->AddNewUtilityTarget(
+          allVerifyTargetName, true);
+    }
+    allVerifyTarget->AddUtility(verifyTargetName, false);
+
+    this->LocalGenerator->AddGeneratorTarget(
+      cm::make_unique<cmGeneratorTarget>(verifyTarget, this->LocalGenerator));
+  }
   return true;
 }
 
