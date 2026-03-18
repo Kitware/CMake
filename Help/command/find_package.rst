@@ -77,17 +77,17 @@ The command has a few modes by which it searches for packages:
 **Config mode**
   In this mode, CMake searches for a file matching any of:
 
-  * ``<lowercasePackageName>-config.cmake``
-  * ``<PackageName>Config.cmake``
   * ``<PackageName>.cps``
   * ``<lowercasePackageName>.cps``
+  * ``<lowercasePackageName>-config.cmake``
+  * ``<PackageName>Config.cmake``
 
-  If one of the first two is found, CMake will also look respectively, for
+  If one of the latter two is found, CMake will also look respectively, for
   ``<lowercasePackageName>-config-version.cmake`` or
   ``<PackageName>ConfigVersion.cmake`` if version details were specified
   (see :ref:`version selection` for an explanation of how these separate
-  version files are used).  The first two options are CMake-script package
-  descriptions.  The latter two are |CPS|_ (CPS) package descriptions, which
+  version files are used).  The latter two options are CMake-script package
+  descriptions.  The first two are |CPS|_ (CPS) package descriptions, which
   are more portable and include version information in the 'base' file.  Aside
   from any explicitly noted exceptions, any references to "config files",
   "config mode", "package configuration files", and so forth refer equally to
