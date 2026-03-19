@@ -75,6 +75,8 @@ run_cmake_build_presets(InvalidConfigurePreset "default" "badConfigurePreset" ""
 run_cmake_build_presets(Condition "default" "enabled;disabled" "")
 
 set(CMakePresetsBuild_BUILD_ONLY 1)
+run_cmake_command(PresetsNoArg-build ${CMAKE_COMMAND} "--build" "--preset")
+run_cmake_command(PresetsNoArgEq-build ${CMAKE_COMMAND} "--build" "--preset=")
 run_cmake_build_presets(ListPresets "x" "x" "--list-presets" "")
 run_cmake_build_presets(NoConfigurePreset "x" "noConfigurePreset" "")
 run_cmake_build_presets(Invalid "x" "hidden;vendorMacro" "")
