@@ -1,6 +1,8 @@
 TYPE
 ----
 
+.. versionadded:: 4.4
+
 The type of the file set.
 
 This read-only property can be used to retrieve the
