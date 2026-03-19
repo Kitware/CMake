@@ -391,6 +391,7 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorFileSets \
   cmGeneratorTarget \
   cmGeneratorTarget_CompatibleInterface \
+  cmGeneratorTarget_HeaderSetVerification \
   cmGeneratorTarget_IncludeDirectories \
   cmGeneratorTarget_Link \
   cmGeneratorTarget_LinkDirectories \
