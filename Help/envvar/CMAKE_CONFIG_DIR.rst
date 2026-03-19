@@ -6,7 +6,7 @@ CMAKE_CONFIG_DIR
 .. include:: include/ENV_VAR.rst
 
 Specify a CMake user-wide configuration directory for
-:manual:`cmake-file-api(7)` queries.
+:manual:`cmake-file-api(7)` and :manual:`cmake-instrumentation(7)` queries.
 
 If this environment variable is not set, the default user-wide
 configuration directory is platform-specific:
