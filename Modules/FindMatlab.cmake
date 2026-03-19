@@ -1326,6 +1326,33 @@ function(matlab_add_mex)
     set(${prefix}_OUTPUT_NAME ${${prefix}_NAME})
   endif()
 
+  if(NOT ${prefix}_SRC)
+    message(FATAL_ERROR "[MATLAB] The MEX source files cannot be empty")
+  endif()
+
+  set(languages "")
+  foreach(src_file IN LISTS ${prefix}_SRC)
+    get_filename_component(ext ${src_file} EXT)
+    if(ext STREQUAL ".c")
+      list(APPEND languages "C")
+    elseif(ext STREQUAL ".cpp" OR ext STREQUAL ".cxx" OR ext STREQUAL ".c++" OR ext STREQUAL ".cc")
+      list(APPEND languages "CXX")
+    elseif(ext MATCHES "\\.[fF](90|95|03|08)?$" OR ext STREQUAL ".for")
+      list(APPEND languages "Fortran")
+    endif()
+  endforeach()
+
+  if("CXX" IN_LIST languages)
+    set(language "CXX")
+  elseif("C" IN_LIST languages)
+    set(language "C")
+  elseif("Fortran" IN_LIST languages)
+    set(language "Fortran")
+  else()
+    set(language "CXX")
+    message(STATUS "No standard C, CXX or Fortran source files, the target language is set to CXX")
+  endif()
+
   if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, add version source file
     # Compilers officially supported by Matlab 9.1 (R2016b):
     #   MinGW 4.9, MSVC 2012, Intel C++ 2013, Xcode 6, GCC 4.9
@@ -1333,25 +1360,26 @@ function(matlab_add_mex)
     # Other compilers (Clang) may support the -w flag and can be added here.
     set(_Matlab_silenceable_compilers AppleClang Clang GNU Intel IntelLLVM MSVC)
 
-    # Add the correct version file depending on which languages are enabled in the project
-    if(CMAKE_C_COMPILER_LOADED)
-      # If C is enabled, use the .c file as it will work fine also with C++
+    # Add the correct version file depending on the languages of the source files
+    if(language STREQUAL "C")
+      # For C source files, use the .c file
       set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/c_mexapi_version.c")
       # Silence warnings for version source file
       if("${CMAKE_C_COMPILER_ID}" IN_LIST _Matlab_silenceable_compilers)
         set_source_files_properties("${MEX_VERSION_FILE}" PROPERTIES COMPILE_OPTIONS -w)
       endif()
-    elseif(CMAKE_CXX_COMPILER_LOADED)
-      # If C is not enabled, check if CXX is enabled and use the .cpp file
-      # to avoid that the .c file is silently ignored
+    elseif(language STREQUAL "CXX")
+      # For CXX source files, use the .cpp file
       set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/cpp_mexapi_version.cpp")
       if("${CMAKE_CXX_COMPILER_ID}" IN_LIST _Matlab_silenceable_compilers)
         set_source_files_properties("${MEX_VERSION_FILE}" PROPERTIES COMPILE_OPTIONS -w)
       endif()
+    elseif(language STREQUAL "Fortran")
+      # For Fortran source files, use the .F file
+      set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/fortran_mexapi_version.F")
     else()
-      # If neither C or CXX is enabled, warn because we cannot add the source.
-      # TODO: add support for fortran mex files
-      message(WARNING "[MATLAB] matlab_add_mex requires that at least C or CXX are enabled languages")
+      # If neither C, CXX or Fortran source files are provided, warn because we cannot add the source.
+      message(WARNING "[MATLAB] matlab_add_mex requires that the input source files are written in C, CXX or Fortran")
     endif()
   endif()
 
@@ -1433,9 +1461,16 @@ function(matlab_add_mex)
 
     if (MSVC)
 
-      string(APPEND _link_flags " /EXPORT:mexFunction")
-      if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
-        string(APPEND _link_flags " /EXPORT:mexfilerequiredapiversion")
+      if(language STREQUAL "C" OR language STREQUAL "CXX")
+        string(APPEND _link_flags " /EXPORT:mexFunction")
+        if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
+          string(APPEND _link_flags " /EXPORT:mexfilerequiredapiversion")
+        endif()
+      elseif(language STREQUAL "Fortran")
+        string(APPEND _link_flags " /EXPORT:MEXFUNCTION")
+        if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
+          string(APPEND _link_flags " /EXPORT:MEXFILEREQUIREDAPIVERSION")
+        endif()
       endif()
 
       set_property(TARGET ${${prefix}_NAME} APPEND PROPERTY LINK_FLAGS ${_link_flags})
@@ -1448,9 +1483,17 @@ function(matlab_add_mex)
   else()
 
     if(Matlab_VERSION_STRING VERSION_LESS "9.1") # For versions prior to 9.1 (R2016b)
-      set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/mexFunction.map)
+      if(language STREQUAL "C" OR language STREQUAL "CXX")
+        set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/mexFunction.map)
+      elseif(language STREQUAL "Fortran")
+        set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/fexport.map)
+      endif()
     else()                                          # For 9.1 (R2016b) and newer
-      set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/c_exportsmexfileversion.map)
+      if(language STREQUAL "C" OR language STREQUAL "CXX")
+        set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/c_exportsmexfileversion.map)
+      elseif(language STREQUAL "Fortran")
+        set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/fortran_exportsmexfileversion.map)
+      endif()
     endif()
 
     if(NOT Matlab_VERSION_STRING VERSION_LESS "9.5") # For 9.5 (R2018b) (and newer?)
