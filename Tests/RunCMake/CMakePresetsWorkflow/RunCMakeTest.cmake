@@ -81,6 +81,8 @@ unset(CMakeUserPresets_FILE)
 unset(CMakePresets_ASSETS)
 
 run_cmake_workflow_presets(ListPresets --list-presets)
+run_cmake_command(PresetsNoArg-workflow ${CMAKE_COMMAND} "--workflow" "--preset")
+run_cmake_command(PresetsNoArgEq-workflow ${CMAKE_COMMAND} "--workflow" "--preset=")
 run_cmake_workflow_presets(InvalidOption -DINVALID_OPTION)
 
 set(RunCMake_TEST_NO_CLEAN TRUE)
