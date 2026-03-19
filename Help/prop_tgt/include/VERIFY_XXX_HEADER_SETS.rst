@@ -26,11 +26,10 @@ conditions.  The compiler flags used for private and interface contexts can be
 different, leading to the compiler interpreting the contents of the header
 differently.
 
-If any |xxx| file set verification targets are created, a top-level target
-called |THIS_ALL_TARGET| is created which depends on all |xxx| verification
-targets.  Another target called ``all_verify_header_sets`` is also created
-which depends on |THIS_ALL_TARGET|, and on |COMPLEMENTARY_ALL_TARGET| if it
-exists (see |COMPLEMENTARY_PROPERTY|).
+A top-level target called |THIS_ALL_TARGET| is created which depends on all
+|xxx| verification targets.  Another target called ``all_verify_header_sets``
+is also created which depends on |THIS_ALL_TARGET|, and on
+|COMPLEMENTARY_ALL_TARGET| if it exists (see |COMPLEMENTARY_PROPERTY|).
 
 This property is initialized by the value of the |INIT_VARIABLE| variable if
 it is set when a target is created.

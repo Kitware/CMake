@@ -10,13 +10,20 @@ VERIFY_INTERFACE_HEADER_SETS
 Used to verify that all headers in a target's ``PUBLIC`` and ``INTERFACE``
 header sets can be included on their own.
 
+.. versionchanged:: 4.4
+  Previously, the verification target was only created when the target had
+  at least one matching header. Now it is always created when the property
+  is enabled.
+
 When this property is set to true, and the target is an object library, static
 library, shared library, interface library, or executable (subject to policy
-:policy:`CMP0209`) and the target has one or more ``PUBLIC`` or ``INTERFACE``
-header sets, an object library target named
+:policy:`CMP0209`), an object library target named
 ``<target_name>_verify_interface_header_sets`` is created. This verification
-target has one source file per header in the ``PUBLIC`` and ``INTERFACE``
-header sets. Each source file only includes its associated header file.
+target has one source file per header in the target's ``PUBLIC`` and
+``INTERFACE`` header sets. Each source file only includes its associated
+header file. If the target has no matching header sets, a utility target is
+created instead so that the target name always exists for build system
+dependencies.
 The verification target links against the original target to get all of its
 usage requirements.
 
