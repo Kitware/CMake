@@ -1053,7 +1053,7 @@ run_cmake(Werror_dev)
 unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS -Wno-error=dev)
-run_cmake(Wno-error_deprecated)
+run_cmake(Wno-error_dev)
 unset(RunCMake_TEST_OPTIONS)
 
 # -Wdev should not override deprecated options if specified
