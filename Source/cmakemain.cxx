@@ -840,7 +840,8 @@ int do_install(int ac, char const* const* av)
     CommandArgument{
       "--default-directory-permissions", CommandArgument::Values::One,
       CommandArgument::setToValue(defaultDirectoryPermissions) },
-    CommandArgument{ "-j", CommandArgument::Values::One, jLambda },
+    CommandArgument{ "-j", CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, jLambda },
     CommandArgument{ "--parallel", CommandArgument::Values::One,
                      parallelLambda },
     CommandArgument{ "--prefix", CommandArgument::Values::One,

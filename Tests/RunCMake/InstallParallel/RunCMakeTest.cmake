@@ -48,6 +48,7 @@ function(install_test test)
 endfunction()
 
 install_test(parallel PARALLEL ARGS "-j 4")
+install_test(parallel-no-space PARALLEL ARGS "-j4")
 install_test(no-parallel ARGS "-j 4")
 install_test(out-of-date-json TOUCH_CACHE PARALLEL ARGS "-j 4")
 install_test(component PARALLEL ARGS "-j 4" COMPONENT "ALPHANUMERIC123")
