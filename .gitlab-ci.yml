@@ -385,6 +385,16 @@ t:fedora43-ninja-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:fedora43-ninja-gcc-std-reloc:
+    extends:
+        - .fedora43_ninja_gcc_std_reloc
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .rules
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:fedora43-ninja-multi-clang:
     extends:
         - .fedora43_ninja_multi_clang
@@ -628,16 +638,6 @@ t:hip6.3-radeon:
         - .hip6.3_radeon
         - .cmake_test_linux_release
         - .linux_x86_64_tags_rocm6.3
-        - .rules
-        - .needs_centos7_x86_64
-    variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
-
-t:linux-gcc-cxx-modules-reloc-ninja:
-    extends:
-        - .gcc_cxx_modules_reloc_ninja
-        - .cmake_test_linux_release
-        - .linux_x86_64_tags
         - .rules
         - .needs_centos7_x86_64
     variables:
