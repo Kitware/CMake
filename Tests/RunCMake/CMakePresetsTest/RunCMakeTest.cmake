@@ -95,6 +95,9 @@ set(CMakePresetsTest_NO_CONFIGURE 1)
 set(CMakePresetsTest_FILE "${RunCMake_SOURCE_DIR}/Good.json.in")
 run_cmake_test_presets(ListPresets "" "" "x" "--list-presets")
 
+run_cmake_command(PresetsNoArg-test ${CMAKE_CTEST_COMMAND} "--preset")
+run_cmake_command(PresetsNoArgEq-test ${CMAKE_CTEST_COMMAND} "--preset=")
+
 set(CMakePresetsTest_FILE "${RunCMake_SOURCE_DIR}/Condition.json.in")
 run_cmake_test_presets(ConditionListPresets "" "" "x" "--list-presets")
 unset(CMakePresetsTest_NO_CONFIGURE)
