@@ -64,6 +64,7 @@ The following individuals and institutions are among the contributors:
 * `Petr Gotthard <mailto:gotthard@honeywell.com>`__
 * `Philip Lowman <mailto:philip@yhbt.com>`__
 * `Philippe Proulx <mailto:pproulx@efficios.com>`__
+* `Qualcomm Technologies, Inc. <https://www.qualcomm.com>`__
 * Raffi Enficiaud, Max Planck Society
 * Raumfeld
 * `Roger Leigh <mailto:rleigh@codelibre.net>`__

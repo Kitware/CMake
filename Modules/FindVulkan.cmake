@@ -278,6 +278,51 @@ The following cache variables may also be set:
 
   The path to the DirectX shader compiler CLI tool.
 
+``Vulkan_Layer_API_DUMP_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `api_dump` Vulkan Layer library.
+
+``Vulkan_Layer_CRASH_DIAGNOSTIC_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `crash_diagnostic` Vulkan Layer library.
+
+``Vulkan_Layer_GFXRECONSTRUCT_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `gfxreconstruct` Vulkan Layer library.
+
+``Vulkan_Layer_KHRONOS_PROFILES_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `khronos_profiles` Vulkan Layer library.
+
+``Vulkan_Layer_KHRONOS_SHADER_OBJECT_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `khronos_shader_object` Vulkan Layer library.
+
+``Vulkan_Layer_KHRONOS_SYNCHRONIZATION2_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `khronos_synchronization2` Vulkan Layer library.
+
+``Vulkan_Layer_KHRONOS_VALIDATION_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `khronos_validation` Vulkan Layer library.
+
+``Vulkan_Layer_MONITOR_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `monitor` Vulkan Layer library.
+
+``Vulkan_Layer_SCREENSHOT_LIBRARY``
+  .. versionadded:: 4.4
+
+  Path to the `screenshot` Vulkan Layer library.
+
 Hints
 ^^^^^
 
@@ -420,6 +465,31 @@ find_library(Vulkan_LIBRARY
   )
 mark_as_advanced(Vulkan_LIBRARY)
 
+# On iOS search for Validation Layers, which must be explicitly linked.
+if (IOS)
+  foreach(layer IN ITEMS
+      api_dump
+      crash_diagnostic
+      gfxreconstruct
+      khronos_profiles
+      khronos_shader_object
+      khronos_synchronization2
+      khronos_validation
+      monitor
+      screenshot
+    )
+    string(TOUPPER "${layer}" LAYER)
+    find_library(Vulkan_Layer_${LAYER}_LIBRARY
+      NAMES VkLayer_${layer}
+      HINTS
+      ${_Vulkan_hint_library_search_paths}
+      OPTIONAL
+    )
+    mark_as_advanced(Vulkan_Layer_${LAYER}_LIBRARY)
+  endforeach()
+endif()
+
+# Search for requested components.
 if(glslc IN_LIST Vulkan_FIND_COMPONENTS)
   find_program(Vulkan_GLSLC_EXECUTABLE
     NAMES glslc
