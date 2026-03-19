@@ -100,3 +100,6 @@ endfunction()
 run_cmake_package_presets(UnsupportedVersion "x" "" "")
 run_cmake_package_presets(Good "default" "build-default-debug" "no-environment;with-environment;generators;configurations;variables;config-file;debug;verbose;package-name;package-version;package-directory;vendor-name")
 run_cmake_package_presets(ListPresets "default" "" "x" "--list-presets")
+
+run_cmake_command(PresetsNoArg-package ${CMAKE_CPACK_COMMAND} "--preset")
+run_cmake_command(PresetsNoArgEq-package ${CMAKE_CPACK_COMMAND} "--preset=")
