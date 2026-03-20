@@ -1372,7 +1372,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     auto const& gen = this->GlobalGen->GetName();
     return this->QtVersion >= IntegerVersion(5, 15) &&
       (gen.find("Ninja") != std::string::npos ||
-       gen.find("Make") != std::string::npos);
+       gen.find("Make") != std::string::npos ||
+       gen.find("Visual Studio") != std::string::npos || gen == "Xcode");
   }();
 
   // Files provided by the autogen target
@@ -1451,6 +1452,10 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     }
     // Cannot use PRE_BUILD when a global autogen target is in place
     if (this->AutogenTarget.GlobalTarget) {
+      usePRE_BUILD = false;
+    }
+    // Cannot use PRE_BUILD with depfiles
+    if (useDepfile) {
       usePRE_BUILD = false;
     }
   }
