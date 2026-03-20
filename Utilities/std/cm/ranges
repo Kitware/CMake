@@ -102,7 +102,7 @@ template <typename Range,
                             cm::is_tuple<2, typename Range::value_type>::value,
                           int> = 0>
 std::vector<typename std::tuple_element<1, typename Range::value_type>::type>
-keys(Range const& range)
+values(Range const& range)
 {
   using value_type =
     typename std::tuple_element<1, typename Range::value_type>::type;

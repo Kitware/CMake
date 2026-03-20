@@ -1,5 +1,8 @@
 #include <iostream>
+#include <map>
 #include <memory>
+#include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -107,11 +110,79 @@ void testAppend()
     }
   }
 }
+
+void testKeys()
+{
+  {
+    std::map<std::string, int> m{ { "one", 1 }, { "two", 2 } };
+    std::vector<std::string> ref{ "one", "two" };
+
+    auto res = cm::keys(m);
+    if (res != ref) {
+      ++failed;
+    }
+  }
+  {
+    std::map<int, int> m{ { 1, 1 }, { 2, 2 } };
+    std::vector<int> ref{ 1, 2 };
+
+    auto res = cm::keys(m);
+    if (res != ref) {
+      ++failed;
+    }
+  }
+  {
+    std::vector<std::tuple<std::string, int, int>> m;
+    m.emplace_back("one", 1, 10);
+    m.emplace_back("two", 2, 20);
+    std::vector<std::string> ref{ "one", "two" };
+
+    auto res = cm::keys(m);
+    if (res != ref) {
+      ++failed;
+    }
+  }
+}
+
+void testValues()
+{
+  {
+    std::map<std::string, int> m{ { "one", 1 }, { "two", 2 } };
+    std::vector<int> ref{ 1, 2 };
+
+    auto res = cm::values(m);
+    if (res != ref) {
+      ++failed;
+    }
+  }
+  {
+    std::map<int, std::string> m{ { 1, "one" }, { 2, "two" } };
+    std::vector<std::string> ref{ "one", "two" };
+
+    auto res = cm::values(m);
+    if (res != ref) {
+      ++failed;
+    }
+  }
+  {
+    std::vector<std::tuple<std::string, int, int>> m;
+    m.emplace_back("one", 1, 10);
+    m.emplace_back("two", 2, 20);
+    std::vector<int> ref{ 1, 2 };
+
+    auto res = cm::values(m);
+    if (res != ref) {
+      ++failed;
+    }
+  }
+}
 }
 
 int testCMExtAlgorithm(int /*unused*/, char* /*unused*/[])
 {
   testAppend();
+  testKeys();
+  testValues();
 
   return failed;
 }
