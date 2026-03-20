@@ -1,0 +1,47 @@
+{
+    "version": 12,
+    "configurePresets": [
+        {
+            "name": "default",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "basic",
+            "configurePreset": "default",
+            "output": {
+                "verbosity": "verbose"
+            },
+            "execution": {
+                "testPassthroughArguments": ["--extra-flag"]
+            }
+        },
+        {
+            "name": "parent",
+            "hidden": true,
+            "execution": {
+                "testPassthroughArguments": ["--parent-arg"]
+            }
+        },
+        {
+            "name": "inherit",
+            "inherits": "parent",
+            "configurePreset": "default",
+            "output": {
+                "verbosity": "verbose"
+            }
+        },
+        {
+            "name": "execOnly",
+            "configurePreset": "default",
+            "output": {
+                "verbosity": "verbose"
+            },
+            "execution": {
+                "testPassthroughArguments": ["--only-arg"]
+            }
+        }
+    ]
+}

@@ -1008,6 +1008,8 @@ bool cmCMakePresetsGraph::TestPreset::VisitPresetInherit(
       InheritOptionalValue(execution.Timeout, parentExecution.Timeout);
       InheritOptionalValue(execution.NoTestsAction,
                            parentExecution.NoTestsAction);
+      InheritVector(execution.TestPassthroughArguments,
+                    parentExecution.TestPassthroughArguments);
     } else {
       preset.Execution = parent.Execution;
     }

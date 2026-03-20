@@ -1,0 +1,22 @@
+{
+    "version": 12,
+    "configurePresets": [
+        {
+            "name": "default",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "combined",
+            "configurePreset": "default",
+            "output": {
+                "verbosity": "verbose"
+            },
+            "execution": {
+                "testPassthroughArguments": ["--preset-arg"]
+            }
+        }
+    ]
+}

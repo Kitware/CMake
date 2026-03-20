@@ -193,7 +193,7 @@
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV10" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV11" },
-        "testPresets": { "$ref": "#/definitions/testPresetsV11" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV12" },
         "packagePresets": { "$ref": "#/definitions/packagePresetsV10" },
         "workflowPresets": { "$ref": "#/definitions/workflowPresetsV10" },
         "include": { "$ref": "#/definitions/include" }
@@ -1211,6 +1211,28 @@
         }
       }
     },
+    "testPresetsExecutionV12": {
+      "type": "object",
+      "description": "An optional object specifying options for test execution.",
+      "allOf": [
+        { "$ref": "#/definitions/testPresetsExecutionObject" },
+        { "$ref": "#/definitions/commentAsProperty" },
+        {
+          "properties": {
+            "repeat": { "$ref": "#/definitions/testPresetsExecutionRepeatV10" },
+            "jobs": { "$ref": "#/definitions/testPresetsExecutionJobsV11" },
+            "testPassthroughArguments": {
+              "type": "array",
+              "description": "An optional array of strings. Each element is forwarded as an argument to every test executable. Equivalent to passing arguments after -- on the ctest command line.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
     "testPresetsExecutionV11": {
       "type": "object",
       "description": "An optional object specifying options for test execution.",
@@ -1413,6 +1435,22 @@
         }
       }
     },
+    "testPresetsAdditionalPropertiesV12": {
+      "properties": {
+        "execution": { "$ref": "#/definitions/testPresetsExecutionV12" },
+        "filter": {
+          "type": "object",
+          "description": "An optional object specifying how to filter the tests to run.",
+          "properties": {
+            "include": { "$ref": "#/definitions/testPresetsFilterIncludeV10" },
+            "exclude": { "$ref": "#/definitions/testPresetsFilterExcludeV10" },
+            "$comment": { "$ref": "#/definitions/$comment" }
+          }
+        },
+        "output": { "$ref": "#/definitions/testPresetsOutputV6" },
+        "condition": { "$ref": "#/definitions/topConditionV10" }
+      }
+    },
     "testPresetsAdditionalPropertiesV11": {
       "properties": {
         "execution": { "$ref": "#/definitions/testPresetsExecutionV11" },
@@ -1554,6 +1592,20 @@
       "required": [
         "name"
       ]
+    },
+    "testPresetsV12": {
+      "type": "array",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 12 and higher.",
+      "items": {
+        "type": "object",
+        "description": "A test preset object",
+        "allOf": [
+          { "$ref": "#/definitions/testPresetsItemsV2" },
+          { "$ref": "#/definitions/testPresetsAdditionalPropertiesV12" },
+          { "$ref": "#/definitions/commentAsProperty" }
+        ],
+        "unevaluatedProperties": false
+      }
     },
     "testPresetsV11": {
       "type": "array",
