@@ -313,6 +313,7 @@ add_library(
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
   cmGeneratorTarget_CompatibleInterface.cxx
+  cmGeneratorTarget_HeaderSetVerification.cxx
   cmGeneratorTarget_IncludeDirectories.cxx
   cmGeneratorTarget_Link.cxx
   cmGeneratorTarget_LinkDirectories.cxx
