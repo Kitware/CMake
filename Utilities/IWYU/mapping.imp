@@ -54,6 +54,10 @@
   { symbol: [ "S_IWUSR", private, "\"cm_sys_stat.h\"", public ] },
   { symbol: [ "S_IWGRP", private, "\"cm_sys_stat.h\"", public ] },
 
+  { symbol: [ "std::filesystem::path", private, "<cm/filesystem>", public ] },
+  { symbol: [ "std::optional", private, "<cm/optional>", public ] },
+  { symbol: [ "std::string_view", private, "<cm/string_view>", public ] },
+
   { include: [ "<filesystem>", public, "<cm/filesystem>", public ] },
   { include: [ "<optional>", public, "<cm/optional>", public ] },
   { include: [ "<shared_mutex>", public, "<cm/shared_mutex>", public ] },
