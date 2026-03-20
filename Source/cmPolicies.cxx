@@ -259,10 +259,10 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
          minPatch > maxPatch) ||
         (minMajor == maxMajor && minMinor == maxMinor &&
          minPatch == maxPatch && minTweak > maxTweak)) {
-      mf->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Policy VERSION range \"", version_min, "...", version_max,
-                 "\" specifies a larger minimum than maximum."));
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Policy VERSION range \"", version_min, "...",
+                                version_max,
+                                "\" specifies a later minimum than maximum."));
       return false;
     }
 

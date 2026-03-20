@@ -60,6 +60,7 @@ Reference Manuals
    /manual/cmake-configure-log.7
    /manual/cmake-cxxmodules.7
    /manual/cmake-developer.7
+   /manual/cmake-diagnostics.7
    /manual/cmake-env-variables.7
    /manual/cmake-file-api.7
    /manual/cmake-generator-expressions.7

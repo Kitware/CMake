@@ -288,6 +288,7 @@ private:
 
   cmLinkedTree<std::string> ExecutionListFiles;
 
+  cmLinkedTree<cmStateDetail::DiagnosticStackEntry> DiagnosticStack;
   cmLinkedTree<cmStateDetail::PolicyStackEntry> PolicyStack;
   cmLinkedTree<cmStateDetail::SnapshotDataType> SnapshotData;
   cmLinkedTree<cmDefinitions> VarTree;

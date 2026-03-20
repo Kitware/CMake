@@ -7,7 +7,8 @@ Evaluate a group of commands with a dedicated variable and/or policy scope.
 
 .. code-block:: cmake
 
-  block([SCOPE_FOR [POLICIES] [VARIABLES]] [PROPAGATE <var-name>...])
+  block([SCOPE_FOR [DIAGNOSTICS] [POLICIES] [VARIABLES]]
+        [PROPAGATE <var-name>...])
     <commands>
   endblock()
 
@@ -18,6 +19,13 @@ scopes created by the ``block()`` command are removed.
 
 ``SCOPE_FOR``
   Specify which scopes must be created.
+
+  ``DIAGNOSTICS``
+    .. versionadded:: 4.4
+
+    Create a new diagnostic scope. This is equivalent to
+    :command:`cmake_diagnostic(PUSH)` with an automatic
+    :command:`cmake_diagnostic(POP)` when leaving the block scope.
 
   ``POLICIES``
     Create a new policy scope. This is equivalent to
@@ -31,7 +39,7 @@ scopes created by the ``block()`` command are removed.
 
   .. code-block:: cmake
 
-    block(SCOPE_FOR VARIABLES POLICIES)
+    block(SCOPE_FOR VARIABLES POLICIES DIAGNOSTICS)
 
 ``PROPAGATE``
   When a variable scope is created by the :command:`block` command, this

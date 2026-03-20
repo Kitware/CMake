@@ -10,6 +10,7 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmFunctionBlocker.h"
 #include "cmList.h"
@@ -37,6 +38,7 @@ public:
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
+  cmDiagnostics::DiagnosticMap Diagnostics;
   std::string FilePath;
 };
 
@@ -61,7 +63,7 @@ bool cmMacroHelperCommand::operator()(
   }
 
   cmMakefile::MacroPushPop macroScope(&makefile, this->FilePath,
-                                      this->Policies);
+                                      this->Policies, this->Diagnostics);
 
   // set the value of argc
   std::string argcDef = std::to_string(expandedArgs.size());
@@ -175,6 +177,7 @@ bool cmMacroFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
   f.Functions = std::move(functions);
   f.FilePath = this->GetStartingContext().FilePath;
   mf.RecordPolicies(f.Policies);
+  mf.RecordDiagnostics(f.Diagnostics);
   return mf.GetState()->AddScriptedCommand(
     this->Args[0],
     BT<cmState::Command>(std::move(f),

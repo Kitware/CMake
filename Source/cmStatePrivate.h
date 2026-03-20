@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "cmDefinitions.h"
+#include "cmDiagnostics.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
 #include "cmPackageState.h"
@@ -22,6 +23,7 @@
 namespace cmStateDetail {
 struct BuildsystemDirectoryStateType;
 struct PolicyStackEntry;
+struct DiagnosticStackEntry;
 extern std::string const PropertySentinel;
 } // namespace cmStateDetail
 
@@ -32,6 +34,9 @@ struct cmStateDetail::SnapshotDataType
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator Policies;
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyRoot;
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyScope;
+  cmLinkedTree<cmStateDetail::DiagnosticStackEntry>::iterator Diagnostics;
+  cmLinkedTree<cmStateDetail::DiagnosticStackEntry>::iterator DiagnosticRoot;
+  cmLinkedTree<cmStateDetail::DiagnosticStackEntry>::iterator DiagnosticScope;
   cmStateEnums::SnapshotType SnapshotType;
   cmStateEnums::SnapshotUnwindType UnwindType = cmStateEnums::NO_UNWIND;
   cmStateEnums::SnapshotUnwindState UnwindState = cmStateEnums::NOT_UNWINDING;
@@ -57,6 +62,22 @@ struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
   {
   }
   PolicyStackEntry(derived const& d, bool w)
+    : derived(d)
+    , Weak(w)
+  {
+  }
+  bool Weak;
+};
+
+struct cmStateDetail::DiagnosticStackEntry
+  : public cmDiagnostics::DiagnosticMap
+{
+  using derived = cmDiagnostics::DiagnosticMap;
+  DiagnosticStackEntry(bool w = false)
+    : Weak(w)
+  {
+  }
+  DiagnosticStackEntry(derived d, bool w)
     : derived(d)
     , Weak(w)
   {

@@ -4,6 +4,7 @@
 #include "cmStateSnapshot.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <set>
 #include <string>
@@ -168,7 +169,7 @@ bool cmStateSnapshot::PopPolicy()
   return true;
 }
 
-bool cmStateSnapshot::CanPopPolicyScope()
+bool cmStateSnapshot::CanPopPolicyScope() const
 {
   return this->Position->Policies != this->Position->PolicyScope;
 }
@@ -222,6 +223,129 @@ cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(cmPolicies::PolicyID id,
     dir = p->BuildSystemDirectory;
   }
   return status;
+}
+
+void cmStateSnapshot::PushDiagnostic(cmDiagnostics::DiagnosticMap entry,
+                                     bool weak)
+{
+  cmStateDetail::PositionType pos = this->Position;
+  pos->Diagnostics = this->State->DiagnosticStack.Push(
+    pos->Diagnostics, cmStateDetail::DiagnosticStackEntry(entry, weak));
+}
+
+bool cmStateSnapshot::PopDiagnostic()
+{
+  cmStateDetail::PositionType pos = this->Position;
+  if (pos->Diagnostics == pos->DiagnosticScope) {
+    return false;
+  }
+  pos->Diagnostics = this->State->DiagnosticStack.Pop(pos->Diagnostics);
+  return true;
+}
+
+bool cmStateSnapshot::CanPopDiagnosticScope() const
+{
+  return this->Position->Diagnostics != this->Position->DiagnosticScope;
+}
+
+void cmStateSnapshot::SetDiagnostic(cmDiagnosticCategory category,
+                                    cmDiagnosticAction action, bool recursive)
+{
+  assert(action != cmDiagnostics::Undefined);
+
+  auto function = [](cmDiagnosticAction, cmDiagnosticAction) -> bool {
+    return true;
+  };
+
+  this->AlterDiagnostic(category, action, function, recursive);
+}
+
+void cmStateSnapshot::PromoteDiagnostic(cmDiagnosticCategory category,
+                                        cmDiagnosticAction action,
+                                        bool recursive)
+{
+  assert(action != cmDiagnostics::Undefined);
+
+  auto function = [](cmDiagnosticAction current,
+                     cmDiagnosticAction desired) -> bool {
+    return (current < desired);
+  };
+
+  this->AlterDiagnostic(category, action, function, recursive);
+}
+
+void cmStateSnapshot::DemoteDiagnostic(cmDiagnosticCategory category,
+                                       cmDiagnosticAction action,
+                                       bool recursive)
+{
+  assert(action != cmDiagnostics::Undefined);
+
+  auto function = [](cmDiagnosticAction current,
+                     cmDiagnosticAction desired) -> bool {
+    return (current > desired);
+  };
+
+  this->AlterDiagnostic(category, action, function, recursive);
+}
+
+void cmStateSnapshot::AlterDiagnostic(cmDiagnosticCategory category,
+                                      cmDiagnosticAction action,
+                                      AlterDiagnosticFunction function,
+                                      bool recursive)
+{
+  if (recursive) {
+    unsigned i = category;
+    for (;;) {
+      this->AlterDiagnostic(static_cast<cmDiagnosticCategory>(i), action,
+                            function, false);
+      if (++i >= cmDiagnostics::CategoryCount) {
+        break;
+      }
+      if (cmDiagnostics::CategoryInfo[i].Parent < category) {
+        break;
+      }
+    }
+  } else {
+    cmDiagnosticAction const oldAction = this->GetDiagnostic(category);
+    if (function(oldAction, action)) {
+      // Update the policy stack from the top to the top-most strong entry.
+      bool previous_was_weak = true;
+      for (cmLinkedTree<cmStateDetail::DiagnosticStackEntry>::iterator dsi =
+             this->Position->Diagnostics;
+           previous_was_weak && dsi != this->Position->DiagnosticRoot; ++dsi) {
+        (*dsi)[category] = action;
+        previous_was_weak = dsi->Weak;
+      }
+    }
+  }
+}
+
+cmDiagnosticAction cmStateSnapshot::GetDiagnostic(
+  cmDiagnosticCategory category, cmDiagnosticAction defaultAction) const
+{
+  cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator dir =
+    this->Position->BuildSystemDirectory;
+
+  while (true) {
+    assert(dir.IsValid());
+    cmLinkedTree<cmStateDetail::DiagnosticStackEntry>::iterator leaf =
+      dir->CurrentScope->Diagnostics;
+    cmLinkedTree<cmStateDetail::DiagnosticStackEntry>::iterator root =
+      dir->CurrentScope->DiagnosticRoot;
+    for (; leaf != root; ++leaf) {
+      cmDiagnosticAction const action = (*leaf)[category];
+      if (action != cmDiagnostics::Undefined) {
+        return action;
+      }
+    }
+    cmStateDetail::PositionType e = dir->CurrentScope;
+    cmStateDetail::PositionType p = e->DirectoryParent;
+    if (p == this->State->SnapshotData.Root()) {
+      break;
+    }
+    dir = p->BuildSystemDirectory;
+  }
+  return defaultAction;
 }
 
 cmValue cmStateSnapshot::GetDefinition(std::string const& name) const
