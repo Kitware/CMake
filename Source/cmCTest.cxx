@@ -1840,7 +1840,12 @@ int cmCTest::Run(std::vector<std::string> const& args)
     } else {
       if (cmHasLiteralPrefix(*it, "--preset=")) {
         auto const& presetName = it->substr(9);
-        success = this->SetArgsFromPreset(presetName, listPresets);
+        if (presetName.empty()) {
+          cmSystemTools::Error("'--preset' requires an argument");
+          success = false;
+        } else {
+          success = this->SetArgsFromPreset(presetName, listPresets);
+        }
       } else if (++it != args.end()) {
         auto const& presetName = *it;
         success = this->SetArgsFromPreset(presetName, listPresets);
