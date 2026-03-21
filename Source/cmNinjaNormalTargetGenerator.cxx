@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include <cm/filesystem>
 #include <cm/memory>
 #include <cm/optional>
 #include <cm/vector>
@@ -479,8 +480,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     }
 
     if (this->TargetLinkLanguage(config) == "Rust") {
-      vars.RustSources = "$RUST_SOURCES";
-      vars.RustObjectDeps = "$RUST_OBJECT_DEPS";
+      vars.RustMainCrateRoot = "$RUST_MAIN_CRATE_ROOT";
+      vars.RustLinkCrates = "$RUST_LINK_CRATES";
+      vars.RustNativeObjects = "$RUST_NATIVE_OBJECTS";
     }
 
     std::string responseFlag;
@@ -1284,37 +1286,49 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   } else if (this->TargetLinkLanguage(config) == "Rust") {
     // Use one-step build/link for Rust.
     // Compute specific libraries to link with.
-    std::vector<cmSourceFile const*> sources;
-    gt->GetObjectSources(sources, config);
     cmLocalGenerator const* lg = this->GetLocalGenerator();
-    std::string entry_obj;
-
-    for (auto const& source : sources) {
-      if (source->GetLanguage() == "Rust") {
-        if (vars.count("RUST_SOURCES") == 0) {
-          std::string const sourcePath =
-            this->GetCompiledSourceNinjaPath(source);
-          vars["RUST_SOURCES"] =
-            lg->ConvertToOutputFormat(sourcePath, cmOutputConverter::SHELL);
-          entry_obj = this->GetObjectFilePath(source, config);
-        } else {
-          assert(false && "Rust crate can only have 1 entry");
-        }
-      }
-    }
 
     linkBuild.ExplicitDeps = this->GetObjects(config);
-    std::stringstream obj_deps;
 
-    // Do not try linking to object file created from the crate entry.
+    // First we handle Rust rlib and normal native objects.
+    std::stringstream rlibs;
+    std::stringstream objects;
     for (auto const& obj : linkBuild.ExplicitDeps) {
-      if (obj != entry_obj) {
-        obj_deps << " "
-                 << lg->ConvertToOutputFormat(obj, cmOutputConverter::SHELL);
+      cm::filesystem::path const objPath(obj);
+      if (objPath.extension() == ".rlib") {
+        // Drop the "lib..." prefix and the ".rs" suffix. The prefix is
+        // required by Rust on the crate rlib file, but is hidden from the user
+        // when using the crate from Rust source code, so we drop it to be
+        // consistent with common usage in Rust.
+        std::string objStem = objPath.stem().string();
+        objStem = objStem.substr(3, objStem.length() - 6);
+        rlibs << " --extern=" << objStem << "="
+              << lg->ConvertToOutputFormat(obj, cmOutputConverter::SHELL);
+      } else {
+        objects << " -Clink-arg="
+                << lg->ConvertToOutputFormat(obj, cmOutputConverter::SHELL);
       }
     }
+    vars["RUST_LINK_CRATES"] = rlibs.str();
+    vars["RUST_NATIVE_OBJECTS"] = objects.str();
 
-    vars["RUST_OBJECT_DEPS"] = obj_deps.str();
+    // Then, we handle the main crate root that is build as part of the link
+    // step.
+    std::vector<cmSourceFile const*> mainCrateRoot;
+    gt->GetRustMainCrateRoot(mainCrateRoot, config);
+    if (mainCrateRoot.size() != 1) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "Target " + gt->GetName() +
+          " has none or more than one main crate root.");
+      return;
+    }
+    std::string mainCrateRootPath =
+      this->GetCompiledSourceNinjaPath(mainCrateRoot[0]);
+    linkBuild.ExplicitDeps.emplace_back(mainCrateRootPath);
+    mainCrateRootPath =
+      lg->ConvertToOutputFormat(mainCrateRootPath, cmOutputConverter::SHELL);
+    vars["RUST_MAIN_CRATE_ROOT"] = mainCrateRootPath;
   } else {
     linkBuild.ExplicitDeps = this->GetObjects(config);
   }

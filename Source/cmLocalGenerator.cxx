@@ -3596,8 +3596,12 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   }
 
   char const* PICValue = target->GetLinkPIEProperty(config);
-  if (!PICValue) {
-    // POSITION_INDEPENDENT_CODE is not set
+  if (!PICValue && lang != "Rust") {
+    // POSITION_INDEPENDENT_CODE is not set, note that for Rust we do not
+    // return as the compiler tends to enable PIE all the time, which is the
+    // opposite of what C & C++ compilers do. So instead of letting the rust
+    // compiler decide on its own whether PIE should be enabled, we explicit
+    // set it.
     return;
   }
 
@@ -4672,6 +4676,20 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   }
   if (hasSourceExtension) {
     *hasSourceExtension = keptSourceExtension;
+  }
+
+  if (source.GetLanguage() == "Rust") {
+    cmValue const rustEmit = source.GetRustEmitProperty();
+    // Rust requires any rlib to start with lib prefix on all platforms to
+    // allow linking to them as crate. So we enforce having lib prefix for rust
+    // "object" files.
+    if (rustEmit == "link") {
+      cmCMakePath objectPath(objectName);
+      std::string const objectFileName =
+        "lib" + objectPath.GetFileName().String();
+      objectPath.ReplaceFileName(objectFileName);
+      objectName = objectPath.String();
+    }
   }
 
   // Convert to a safe name.

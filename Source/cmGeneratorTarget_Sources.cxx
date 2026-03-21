@@ -347,6 +347,12 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
   cmsys::RegularExpression header_regex(CM_HEADER_REGEX);
   std::vector<cmSourceFile*> badObjLib;
 
+  cmValue const rustMainCrateRootProp =
+    this->GetProperty("Rust_MAIN_CRATE_ROOT");
+  cmSourceFile const* rustMainCrateRootSf = rustMainCrateRootProp
+    ? this->Makefile->GetOrCreateSource(rustMainCrateRootProp)
+    : nullptr;
+
   std::set<cmSourceFile*> emitted;
   for (BT<std::string> const& s : srcs) {
     // Create each source at most once.
@@ -379,7 +385,28 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
       kind = SourceKindExternalObject;
     } else if (!sf->GetOrDetermineLanguage().empty()) {
-      kind = SourceKindObjectSource;
+      if (sf->GetOrDetermineLanguage() == "Rust") {
+        // NOLINTNEXTLINE(bugprone-branch-clone)
+        if (this->Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+          // There is no main crate root for object libraries.
+          kind = SourceKindObjectSource;
+        } else if (!rustMainCrateRootSf) {
+          // We do not have a main crate root source file, we use the first
+          // Rust source file for it.
+          rustMainCrateRootSf = sf;
+          kind = SourceKindRustMainCrateRoot;
+        } else if (rustMainCrateRootSf == sf) {
+          // Current source file is the main crate root defined in the target
+          // Rust_MAIN_CRATE_ROOT property.
+          kind = SourceKindRustMainCrateRoot;
+        } else {
+          // Any other Rust source file is treated as a normal object, but will
+          // be built into a .rlib. Maybe in the future this could be changed?
+          kind = SourceKindObjectSource;
+        }
+      } else {
+        kind = SourceKindObjectSource;
+      }
     } else if (ext == "def") {
       kind = SourceKindModuleDefinition;
       if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {

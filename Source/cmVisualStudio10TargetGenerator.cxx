@@ -2629,6 +2629,9 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         case cmGeneratorTarget::SourceKindResx:
           this->ResxObjs.push_back(si.Source);
           break;
+        case cmGeneratorTarget::SourceKindRustMainCrateRoot:
+          tool = "None";
+          break;
         case cmGeneratorTarget::SourceKindXaml:
           this->XamlObjs.push_back(si.Source);
           break;

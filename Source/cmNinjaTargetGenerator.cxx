@@ -674,6 +674,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
   vars.CudaCompileMode = "$CUDA_COMPILE_MODE";
   vars.ISPCHeader = "$ISPC_HEADER_FILE";
   vars.Config = "$CONFIG";
+  vars.RustEmit = "$RUST_EMIT";
 
   cmMakefile* mf = this->GetMakefile();
 
@@ -1736,6 +1737,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       objBuild.OrderOnlyDeps.insert(objBuild.OrderOnlyDeps.end(),
                                     headers.begin(), headers.end());
     }
+  }
+
+  if (language == "Rust") {
+    cmValue const rustEmit = source->GetRustEmitProperty();
+    vars["RUST_EMIT"] = rustEmit;
   }
 
   if (language == "Swift") {

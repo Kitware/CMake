@@ -1008,6 +1008,12 @@ void cmGeneratorTarget::GetManifests(std::vector<cmSourceFile const*>& data,
   IMPLEMENT_VISIT(SourceKindManifest);
 }
 
+void cmGeneratorTarget::GetRustMainCrateRoot(
+  std::vector<cmSourceFile const*>& data, std::string const& config) const
+{
+  IMPLEMENT_VISIT(SourceKindRustMainCrateRoot);
+}
+
 std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
 {
   if (!this->UtilityItemsDone) {

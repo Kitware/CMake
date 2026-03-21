@@ -608,6 +608,7 @@ Properties on Source Files
    /prop_sf/OBJECT_DEPENDS
    /prop_sf/OBJECT_NAME
    /prop_sf/OBJECT_OUTPUTS
+   /prop_sf/Rust_EMIT
    /prop_sf/SKIP_AUTOGEN
    /prop_sf/SKIP_AUTOMOC
    /prop_sf/SKIP_AUTORCC

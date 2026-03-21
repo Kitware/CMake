@@ -503,3 +503,13 @@ void cmSourceFile::SetCustomCommand(std::unique_ptr<cmCustomCommand> cc)
 {
   this->CustomCommand = std::move(cc);
 }
+
+cmValue cmSourceFile::GetRustEmitProperty() const
+{
+  static std::string const s_default = "link";
+  cmValue const value = this->GetProperty("Rust_EMIT");
+  if (!value || value->empty()) {
+    return cmValue(s_default);
+  }
+  return value;
+}
