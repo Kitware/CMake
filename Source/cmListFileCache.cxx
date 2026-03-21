@@ -15,10 +15,11 @@
 
 #include "cmList.h"
 #include "cmListFileLexer.h"
+#include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmMessenger.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 namespace {
 
@@ -48,7 +49,7 @@ class cmListFileParser
 {
 public:
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
-                   cmMessenger* messenger, std::string const& filename);
+                   cmMakefile const* mf, std::string const& filename);
   cmListFileParser(cmListFileParser const&) = delete;
   cmListFileParser& operator=(cmListFileParser const&) = delete;
 
@@ -74,7 +75,7 @@ private:
 
   cmListFile* ListFile;
   cmListFileBacktrace Backtrace;
-  cmMessenger* Messenger;
+  cmMakefile const* Makefile;
   std::string const& FileName;
   std::unique_ptr<cmListFileLexer, void (*)(cmListFileLexer*)> Lexer;
   std::string FunctionName;
@@ -84,11 +85,11 @@ private:
 };
 
 cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
-                                   cmMessenger* messenger,
+                                   cmMakefile const* mf,
                                    std::string const& filename)
   : ListFile(lf)
   , Backtrace(std::move(lfbt))
-  , Messenger(messenger)
+  , Makefile(mf)
   , FileName(filename)
   , Lexer(cmListFileLexer_New(), cmListFileLexer_Delete)
 {
@@ -96,18 +97,23 @@ cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
 
 void cmListFileParser::IssueFileOpenError(std::string const& text) const
 {
-  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text,
-                                this->Backtrace);
+  if (this->Makefile) {
+    this->Makefile->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                     text, this->Backtrace);
+  }
 }
 
 void cmListFileParser::IssueError(std::string const& text) const
 {
-  cmListFileContext lfc;
-  lfc.FilePath = this->FileName;
-  lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer.get());
-  cmListFileBacktrace lfbt = this->Backtrace;
-  lfbt = lfbt.Push(lfc);
-  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text, lfbt);
+  if (this->Makefile) {
+    cmListFileContext lfc;
+    lfc.FilePath = this->FileName;
+    lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer.get());
+    cmListFileBacktrace lfbt = this->Backtrace;
+    lfbt = lfbt.Push(lfc);
+    this->Makefile->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                     text, lfbt);
+  }
   cmSystemTools::SetFatalErrorOccurred();
 }
 
@@ -194,10 +200,12 @@ bool cmListFileParser::Parse()
 
   // Check if all functions are nested properly.
   if (auto badNesting = this->CheckNesting()) {
-    this->Messenger->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "Flow control statements are not properly nested.",
-      this->Backtrace.Push(*badNesting));
+    if (this->Makefile) {
+      this->Makefile->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "Flow control statements are not properly nested.",
+        this->Backtrace.Push(*badNesting));
+    }
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -286,16 +294,18 @@ bool cmListFileParser::ParseFunction(cm::string_view name, long line)
     }
   }
 
-  cmListFileContext lfc;
-  lfc.FilePath = this->FileName;
-  lfc.Line = line;
-  cmListFileBacktrace lfbt = this->Backtrace;
-  lfbt = lfbt.Push(lfc);
-  this->Messenger->IssueMessage(
-    MessageType::FATAL_ERROR,
-    "Parse error.  Function missing ending \")\".  "
-    "End of file reached.",
-    lfbt);
+  if (this->Makefile) {
+    cmListFileContext lfc;
+    lfc.FilePath = this->FileName;
+    lfc.Line = line;
+    cmListFileBacktrace lfbt = this->Backtrace;
+    lfbt = lfbt.Push(lfc);
+    this->Makefile->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Parse error.  Function missing ending \")\".  "
+      "End of file reached.",
+      lfbt);
+  }
   return false;
 }
 
@@ -320,10 +330,15 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
              "\n"
              "Argument not separated from preceding token by whitespace.");
   if (isError) {
-    this->Messenger->IssueMessage(MessageType::FATAL_ERROR, msg, lfbt);
+    if (this->Makefile) {
+      this->Makefile->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR, msg, lfbt);
+    }
     return false;
   }
-  this->Messenger->IssueMessage(MessageType::AUTHOR_WARNING, msg, lfbt);
+  if (this->Makefile) {
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg, lfbt);
+  }
   return true;
 }
 
@@ -422,7 +437,7 @@ cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
 
 } // anonymous namespace
 
-bool cmListFile::ParseFile(std::string const& filename, cmMessenger* messenger,
+bool cmListFile::ParseFile(std::string const& filename, cmMakefile const* mf,
                            cmListFileBacktrace const& lfbt)
 {
   if (!cmSystemTools::FileExists(filename) ||
@@ -430,16 +445,16 @@ bool cmListFile::ParseFile(std::string const& filename, cmMessenger* messenger,
     return false;
   }
 
-  cmListFileParser parser(this, lfbt, messenger, filename);
+  cmListFileParser parser(this, lfbt, mf, filename);
   return parser.ParseFile();
 }
 
 bool cmListFile::ParseString(cm::string_view str,
                              std::string const& virtual_filename,
-                             cmMessenger* messenger,
+                             cmMakefile const* mf,
                              cmListFileBacktrace const& lfbt)
 {
-  cmListFileParser parser(this, lfbt, messenger, virtual_filename);
+  cmListFileParser parser(this, lfbt, mf, virtual_filename);
   return parser.ParseString(str);
 }
 

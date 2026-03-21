@@ -240,10 +240,17 @@ cmLocalGenerator::CreateRulePlaceholderExpander(cmBuildStep buildStep) const
 
 cmLocalGenerator::~cmLocalGenerator() = default;
 
-void cmLocalGenerator::IssueMessage(MessageType t,
-                                    std::string const& text) const
+void cmLocalGenerator::IssueMessage(MessageType type, std::string const& text,
+                                    cmListFileBacktrace const& bt) const
 {
-  this->GetCMakeInstance()->IssueMessage(t, text, this->DirectoryBacktrace);
+  this->GetMakefile()->IssueMessage(type, text, bt);
+}
+
+void cmLocalGenerator::IssueDiagnostic(cmDiagnosticCategory category,
+                                       std::string const& text,
+                                       cmListFileBacktrace const& bt) const
+{
+  this->GetMakefile()->IssueDiagnostic(category, text, bt);
 }
 
 void cmLocalGenerator::ComputeObjectMaxPath()

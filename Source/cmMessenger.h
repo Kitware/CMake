@@ -10,12 +10,15 @@
 
 #include <cm/optional>
 
+#include "cmDiagnostics.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h" // IWYU pragma: keep
 
 #ifndef CMAKE_BOOTSTRAP
 #  include "cmSarifLog.h"
 #endif
+
+class cmStateSnapshot;
 
 #ifdef CMake_ENABLE_DEBUGGER
 namespace cmDebugger {
@@ -27,10 +30,16 @@ class cmMessenger
 {
 public:
   void IssueMessage(
-    MessageType t, std::string const& text,
+    MessageType type, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
-  void DisplayMessage(MessageType t, std::string const& text,
+  void IssueDiagnostic(
+    cmDiagnosticCategory category, std::string const& text,
+    cmStateSnapshot const& context,
+    cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
+
+  void DisplayMessage(MessageType type, cmDiagnosticCategory category,
+                      std::string const& text,
                       cmListFileBacktrace const& backtrace) const;
 
   void SetTopSource(cm::optional<std::string> topSource);

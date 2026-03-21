@@ -21,7 +21,6 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
-#include "cmake.h"
 
 class cmSourceFile;
 
@@ -244,8 +243,13 @@ void cmExportBuildFileGenerator::ComplainAboutDuplicateTarget(
 void cmExportBuildFileGenerator::IssueMessage(MessageType type,
                                               std::string const& message) const
 {
-  this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
-    type, message, this->LG->GetMakefile()->GetBacktrace());
+  this->LG->GetMakefile()->IssueMessage(type, message);
+}
+
+void cmExportBuildFileGenerator::IssueDiagnostic(
+  cmDiagnosticCategory category, std::string const& message) const
+{
+  this->LG->GetMakefile()->IssueDiagnostic(category, message);
 }
 
 std::string cmExportBuildFileGenerator::InstallNameDir(

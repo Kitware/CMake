@@ -12,6 +12,7 @@
 
 #include <cm/string_view>
 
+#include "cmDiagnostics.h"
 #include "cmExportFileGenerator.h"
 #include "cmGeneratorExpression.h"
 #include "cmInstallExportGenerator.h"
@@ -96,6 +97,8 @@ protected:
 
   void IssueMessage(MessageType type,
                     std::string const& message) const override;
+  void IssueDiagnostic(cmDiagnosticCategory category,
+                       std::string const& message) const override;
 
   /** Generate a per-configuration file for the targets.  */
   virtual bool GenerateImportFileConfig(std::string const& config);
