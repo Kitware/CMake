@@ -30,6 +30,41 @@ run_cmake(threads-gz)
 run_cmake(threads-xz)
 run_cmake(threads-zstd)
 
+# Encoding tests.  These rely on UTF-8 encoding of our test sources.
+if(NOT DEFINED CMake_TEST_LOCALE_CHARSET)
+  cmake_host_system_information(RESULT CMake_TEST_LOCALE_CHARSET QUERY LOCALE_CHARSET)
+  message(STATUS "Detected LOCALE_CHARSET '${CMake_TEST_LOCALE_CHARSET}'")
+endif()
+
+if(CMake_TEST_LOCALE_CHARSET STREQUAL "UTF-8")
+  if(CMAKE_HOST_WIN32)
+    # The OEM encoding cannot represent our UTF-8 test paths.
+    run_cmake(encoding-oem-gnutar-fails)
+    run_cmake(encoding-oem-zip-fails)
+    run_cmake(CMP0213-OLD-fails)
+    run_cmake(CMP0213-WARN-fails)
+  else()
+    run_cmake(encoding-oem-gnutar)
+    run_cmake(encoding-oem-zip)
+    run_cmake(CMP0213-OLD)
+    run_cmake(CMP0213-WARN)
+  endif()
+
+  run_cmake(CMP0213-NEW)
+
+  run_cmake(encoding-oem-7zip)
+  run_cmake(encoding-oem-pax)
+  run_cmake(encoding-oem-paxr)
+
+  run_cmake(encoding-utf-8-7zip)
+  run_cmake(encoding-utf-8-gnutar)
+  run_cmake(encoding-utf-8-pax)
+  run_cmake(encoding-utf-8-paxr)
+  run_cmake(encoding-utf-8-zip)
+else()
+  message(STATUS "encoding-* - SKIPPED due to non-UTF-8 locale")
+endif()
+
 # Extracting only selected files or directories
 run_cmake(zip-filtered)
 
