@@ -331,6 +331,13 @@
     variables:
         CMAKE_CONFIGURATION: fedora43_ninja_clang
 
+.fedora43_ninja_gcc_std_reloc:
+    extends: .fedora43
+
+    variables:
+        CMAKE_CONFIGURATION: fedora43_ninja_gcc_std_reloc
+        CTEST_LABELS: "CXXModules"
+
 .fedora43_ninja_multi_clang:
     extends: .fedora43
 
@@ -598,37 +605,6 @@
         CMAKE_CONFIGURATION: hip6.3_nvidia
         CTEST_LABELS: "HIP"
         CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP: 1
-
-### C++ modules
-
-.gcc_cxx_modules_x86_64:
-    image: "kitware/cmake:ci-gcc_cxx_modules-x86_64-2024-12-23"
-
-    variables:
-        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        CMAKE_ARCH: x86_64
-        CC: "/opt/gcc-importstd/bin/gcc"
-        CXX: "/opt/gcc-importstd/bin/g++"
-
-.gcc_cxx_modules_ninja:
-    extends: .gcc_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja
-
-.gcc_cxx_modules_reloc_ninja:
-    extends: .gcc_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_reloc_ninja
-        CTEST_LABELS: "CXXModules"
-
-.gcc_cxx_modules_ninja_multi:
-    extends: .gcc_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja_multi
-        CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ### Debian 10 legacy packages
 
