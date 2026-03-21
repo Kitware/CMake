@@ -1833,6 +1833,9 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
     // Just add path to binary artifact to command line (except for OBJECT
     // libraries which we will link directly).
     if (UsingCommandLine && depType != cmStateEnums::OBJECT_LIBRARY) {
+      // Take transitively linked objects into account,
+      // so we don't link them again.
+      AppendTransitivelyLinkedObjects(*item.Target, linkedObjects);
       AppendCommandLineDep(linkerNode, item);
       return;
     }
