@@ -45,6 +45,9 @@ To contribute patches:
 
 The merge request will enter the `CMake Review Process`_ for consideration.
 
+Please note `CMake's AI policy`_ if using AI tools or services as part of
+preparing or submitting a change.
+
 .. _`Kitware's GitLab Instance`: https://gitlab.kitware.com
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 .. _`Utilities/SetupForDevelopment.sh`: Utilities/SetupForDevelopment.sh
@@ -53,6 +56,7 @@ The merge request will enter the `CMake Review Process`_ for consideration.
 .. _`CMake Testing Guide`: Help/dev/testing.rst
 .. _`commit messages`: Help/dev/review.rst#commit-messages
 .. _`CMake Review Process`: Help/dev/review.rst
+.. _`CMake's AI policy`: Help/dev/ai-policy.rst
 
 CMake Dashboard Client
 ======================
