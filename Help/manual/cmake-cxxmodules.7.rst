@@ -471,45 +471,6 @@ Additionally, toolchains should set the following variables:
 If a toolchain does not provide the ``CMAKE_CXX_MODULE_BMI_ONLY_FLAG``, it
 will not be able to consume modules provided by ``IMPORTED`` targets.
 
-Toolchain (``import std``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If the toolchain supports ``import std``, it must also provide a toolchain
-identification module named ``${CMAKE_CXX_COMPILER_ID}-CXX-CXXImportStd``.
-
-.. note::
-
-   Currently only CMake may provide these files due to the way they are
-   included.  Once ``import std`` is no longer experimental, external
-   toolchains may provide support independently as well.
-
-This module must provide the ``_cmake_cxx_import_std`` command.  It will be
-passed two arguments: the version of the C++ standard (e.g., ``23``) and the
-name of a variable in which to place the result of its ``import std`` support.
-The variable should be filled in with CMake source code which declares the
-``__CMAKE::CXX${std}`` target, where ``${std}`` is the version passed in.  If
-the target cannot be made, the source code should instead set the
-``CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE`` variable to the
-reason that ``import std`` is not supported in the current configuration.
-Note that CMake will guard the returned code with conditional checks to ensure
-that the target is only defined once.
-
-Ideally, the ``__CMAKE::CXX${std}`` target will be an ``IMPORTED``
-``INTERFACE`` target with the ``std`` module sources attached to it.  However,
-it may be necessary to compile objects for some implementations.  Object files
-are required when there are symbols expected to be provided by the consumer of
-the module by compiling it.  There is a concern that, if this happens, more
-than once within a program, this will result in duplication of these symbols
-which may violate the :term:`ODR` for them.
-
-As an example, if consumers of a module are expected to provide symbols for
-that module, the use of the module is then a global property of the program
-and cannot be abstracted away.  Imagine that a library exposes a C API but
-uses a C++ module internally.  If it is supposed to provide the module
-symbols, anything using the C API needs to cooperate with its internal module
-usage if it wants to use the same module for its own purposes.  If both end up
-providing symbols for the imported module, there may be conflicts.
-
 Configure
 ^^^^^^^^^
 
