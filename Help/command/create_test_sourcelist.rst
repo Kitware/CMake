@@ -60,3 +60,20 @@ Additionally, some CMake variables affect test driver generation:
 .. variable:: CMAKE_TESTDRIVER_AFTER_TESTMAIN
 
   Code to be placed directly after the call to each test's function.
+
+The generated test driver supports the following command-line arguments:
+
+``<name>``
+  Run the test with the exact name ``<name>`` (case-insensitive).
+
+``-R <substr>``
+  Run the first test whose name contains ``<substr>`` (case-insensitive).
+
+``-A [<skip_test>...]``
+  .. versionadded:: 3.21
+
+    Run all tests and print results in `TAP <https://testanything.org/>`_
+    format.
+
+    Any additional arguments after ``-A`` are interpreted as exact test names
+    to skip.
