@@ -1083,7 +1083,7 @@ Signatures
 
     An informational canonical home URL for the project.
 
-  By default, if the specified ``<sbom-name>`` matches the current CMake
+  By default, if the specified ``<package-name>`` matches the current CMake
   :variable:`PROJECT_NAME`, package metadata will be inherited from the
   project.  The ``PROJECT <project-name>`` option may be used to specify a
   different project from which to inherit metadata.  If ``NO_PROJECT_METADATA``
@@ -1266,7 +1266,7 @@ Signatures
     An informational description of the project.  It is recommended that this
     description is a relatively short string, usually no more than a few words.
 
-  By default, if the specified ``<package-name>`` matches the current CMake
+  By default, if the specified ``<sbom-name>`` matches the current CMake
   :variable:`PROJECT_NAME`, sbom metadata will be inherited from the
   project.  The ``PROJECT <project-name>`` option may be used to specify a
   different project from which to inherit metadata.  If ``NO_PROJECT_METADATA``
