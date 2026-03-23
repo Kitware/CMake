@@ -429,6 +429,13 @@ within the target.
 Implementation Details
 ----------------------
 
+.. warning::
+
+  The implementation details are not a stable interface.  Each version
+  of CMake may revise them without any attempt at providing compatibility.
+  External toolchain maintainers are responsible for updating their
+  implementations for each version of CMake they support.
+
 This section describes how CMake actually structures the build graph, the data
 passed between various parts, and the files which contain that data.  It is
 intended to be used both as functional documentation and as a guide to help
