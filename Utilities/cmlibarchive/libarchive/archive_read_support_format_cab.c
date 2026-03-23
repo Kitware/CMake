@@ -383,8 +383,10 @@ archive_read_support_format_cab(struct archive *_a)
 	    NULL,
 	    NULL);
 
-	if (r != ARCHIVE_OK)
+	if (r != ARCHIVE_OK) {
+		archive_wstring_free(&cab->ws);
 		free(cab);
+	}
 	return (ARCHIVE_OK);
 }
 
