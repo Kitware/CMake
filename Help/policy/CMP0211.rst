@@ -1,0 +1,22 @@
+CMP0211
+-------
+
+.. versionadded:: 4.4
+
+A file may belong to at most one :ref:`file set <file sets>` in a target.
+
+In CMake 4.3 and below, it was possible to specify the same file
+in multiple file sets in a target.  In CMake 4.4 and above, a file
+may belong to at most one file set in a target.  This policy provides
+compatibility for projects that have not been updated accordingly.
+
+The ``OLD`` behavior for this policy is to accept the same file in
+multiple file sets in a target.  The ``NEW`` behavior for this policy
+is to accept a given file in at most one file set in a target.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.4
+.. |WARNS_OR_DOES_NOT_WARN| replace::
+    warns when a file is part of multiple file sets in a target
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

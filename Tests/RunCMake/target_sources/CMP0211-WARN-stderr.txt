@@ -1,0 +1,23 @@
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Policy CMP0211 is not set: A file may belong to at most one file set in a
+  target\.  Run "cmake --help-policy CMP0211" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
+
+  In target "foo1" the file
+
+    .+/Tests/RunCMake/target_sources/h1\.h
+
+  already belongs to file set "h2"\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Policy CMP0211 is not set: A file may belong to at most one file set in a
+  target\.  Run "cmake --help-policy CMP0211" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
+
+  In target "foo2" the file
+
+    .+/Tests/RunCMake/target_sources/h1\.h
+
+  already belongs to file set "h1"\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

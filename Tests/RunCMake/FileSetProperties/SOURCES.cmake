@@ -40,11 +40,11 @@ if(NOT srcs MATCHES "[^;]*bar.h;[^;]*foo.h$")
 endif()
 
 
-target_sources(foo PRIVATE FILE_SET foo TYPE HEADERS FILES foo.h)
+target_sources(foo PRIVATE FILE_SET foo TYPE HEADERS FILES h1.h)
 
 get_property(srcs FILE_SET foo TARGET foo PROPERTY SOURCES)
-if(NOT srcs MATCHES ".*/foo.h$")
-  message(SEND_ERROR "wrong sources: '${srcs}' instead of 'foo.h'")
+if(NOT srcs MATCHES ".*/h1.h$")
+  message(SEND_ERROR "wrong sources: '${srcs}' instead of 'h1.h'")
 endif()
 get_property(srcs FILE_SET foo TARGET foo PROPERTY INTERFACE_SOURCES)
 if(srcs)
@@ -52,11 +52,11 @@ if(srcs)
 endif()
 
 
-set_property(FILE_SET foo TARGET foo PROPERTY SOURCES bar.h)
+set_property(FILE_SET foo TARGET foo PROPERTY SOURCES h2.h)
 
 get_property(srcs FILE_SET foo TARGET foo PROPERTY SOURCES)
-if(NOT srcs MATCHES "[^;]*bar.h$")
-  message(SEND_ERROR "wrong sources: '${srcs}' instead of 'bar.h'")
+if(NOT srcs MATCHES "[^;]*h2.h$")
+  message(SEND_ERROR "wrong sources: '${srcs}' instead of 'h2.h'")
 endif()
 get_property(srcs FILE_SET foo TARGET foo PROPERTY INTERFACE_SOURCES)
 if(srcs)
@@ -64,11 +64,11 @@ if(srcs)
 endif()
 
 
-set_property(FILE_SET foo TARGET foo PROPERTY INTERFACE_SOURCES foo.h)
+set_property(FILE_SET foo TARGET foo PROPERTY INTERFACE_SOURCES h2.h)
 
 get_property(srcs FILE_SET foo TARGET foo PROPERTY SOURCES)
-if(NOT srcs MATCHES "[^;]*bar.h$")
-  message(SEND_ERROR "wrong sources: '${srcs}' instead of 'bar.h'")
+if(NOT srcs MATCHES "[^;]*h2.h$")
+  message(SEND_ERROR "wrong sources: '${srcs}' instead of 'h2.h'")
 endif()
 get_property(srcs FILE_SET foo TARGET foo PROPERTY INTERFACE_SOURCES)
 if(srcs)
