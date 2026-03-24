@@ -131,7 +131,9 @@ if(BUILD_TESTING)
     set(CMake_TEST_RESOURCES TRUE)
   endif()
   # For some Windows toolchains there is no resource support.
-  if(WATCOM OR BORLAND OR CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
+  if(WATCOM OR BORLAND
+      OR (CMAKE_C_COMPILER_ID STREQUAL "OrangeC" AND
+          CMAKE_C_COMPILER_VERSION VERSION_LESS "7.0"))
     set(CMake_TEST_RESOURCES FALSE)
   endif()
 
