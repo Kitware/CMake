@@ -1003,7 +1003,8 @@ Archiving
 
     .. versionadded:: 4.3
       The ``<compression-level>`` can be specified for the ``7zip`` and ``zip``
-      formats too. The ``Zstd`` algorithm compression level can be set between 0-19, except for ``zip`` format.
+      formats too. The ``Zstd`` algorithm compression level can be set
+      between 0-19, except for ``zip`` format.
 
   ``MTIME <mtime>``
     Specify the modification time recorded in tarball entries.
