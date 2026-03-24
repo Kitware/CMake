@@ -28,7 +28,7 @@ macro(__compiler_orangec lang)
   set(CMAKE_${lang}_CREATE_SHARED_MODULE "${CMAKE_${lang}_CREATE_SHARED_LIBRARY}")
 
   set(CMAKE_LIBRARY_PATH_FLAG "-L")
-  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-! -shared")
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
 
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "@")
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "@")
