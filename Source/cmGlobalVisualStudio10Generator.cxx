@@ -19,8 +19,6 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCryptoHash.h"
-#include "cmDocumentationEntry.h"
-#include "cmExperimental.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio7Generator.h"
