@@ -188,6 +188,12 @@ Generating Files
        cause the custom command to re-run whenever the target is
        recompiled.
 
+       .. versionchanged:: 4.4
+
+         Previously an executable target could be specified using the name
+         of the target with ``.exe`` appended.  This is no longer allowed.
+         See policy :policy:`CMP0212`.
+
     2. If the argument is an absolute path, a file-level dependency
        is created on that path.
 

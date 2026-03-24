@@ -957,7 +957,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomDepend(
   for (std::string const& d : ccg.GetDepends()) {
     // Lookup the real name of the dependency in case it is a CMake target.
     std::string dep;
-    if (this->GetRealDependency(d, this->GetConfigName(), dep)) {
+    if (this->GetRealDependency(d, this->GetConfigName(), dep,
+                                ccg.GetCC().GetCMP0212Status())) {
       depends.push_back(std::move(dep));
     }
   }

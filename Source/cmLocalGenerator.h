@@ -310,7 +310,7 @@ public:
    *   used for dependencies of custom commands.
    */
   bool GetRealDependency(std::string const& name, std::string const& config,
-                         std::string& dep);
+                         std::string& dep, cmPolicies::PolicyStatus cmp0212);
 
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */, bool /* verbose */) {}

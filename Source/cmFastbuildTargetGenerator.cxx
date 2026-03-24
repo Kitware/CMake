@@ -356,7 +356,8 @@ void cmFastbuildTargetGenerator::GetDepends(
   for (auto dep : ccg.GetDepends()) {
     LogMessage("Dep: " + dep);
     auto orig = dep;
-    if (this->LocalCommonGenerator->GetRealDependency(dep, Config, dep)) {
+    if (this->LocalCommonGenerator->GetRealDependency(
+          dep, Config, dep, ccg.GetCC().GetCMP0212Status())) {
       LogMessage("Real dep: " + dep);
       if (!dep.empty()) {
         LogMessage("Custom command real dep: " + dep);

@@ -1840,7 +1840,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
 
       for (std::string const& d : ccg.GetDepends()) {
         std::string dep;
-        if (lg->GetRealDependency(d, c, dep)) {
+        if (lg->GetRealDependency(d, c, dep, command.GetCMP0212Status())) {
           if (!unique_inputs.insert(dep).second) {
             // already listed
             continue;
