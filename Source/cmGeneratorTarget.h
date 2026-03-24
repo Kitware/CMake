@@ -1118,13 +1118,8 @@ public:
   std::string GetImportedXcFrameworkPath(std::string const& config) const;
 
   bool ApplyCXXStdTargets();
-  bool DiscoverSyntheticTargets(
-    cmSyntheticTargetCache& cache, std::string const& config,
-    cmGeneratorTarget const* bmiConsumer = nullptr);
-
-  using SyntheticDepsMap =
-    std::map<cmGeneratorTarget const*, std::vector<cmGeneratorTarget const*>>;
-  SyntheticDepsMap const& GetSyntheticDeps(std::string const& config) const;
+  bool DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
+                                std::string const& config);
 
   class CustomTransitiveProperty : public TransitiveProperty
   {
