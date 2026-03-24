@@ -1362,9 +1362,12 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 		 * zlib's 0 to 9 scale and its negative scale is way bigger than
 		 * its positive one. So setting 1 as the lowest allowed compression
 		 * level and rescaling to 2 to 9 to libzstd's positive scale. */
+		int zstd_maxCLevel = ZSTD_maxCLevel() <= 19
+			? ZSTD_maxCLevel()
+			: 19;
 		int zstd_compression_level = zip->compression_level == 1
 			? ZSTD_minCLevel() // ZSTD_minCLevel is negative !
-			: (zip->compression_level - 1) * ZSTD_maxCLevel() / 8;
+			: (zip->compression_level - 1) * zstd_maxCLevel / 8;
 #ifdef _AIX
 		if (zstd_compression_level > 6) {
 			zstd_compression_level = 6;
