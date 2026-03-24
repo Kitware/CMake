@@ -17,6 +17,13 @@ set(CMAKE_C11_STANDARD__HAS_FULL_SUPPORT ON)
 
 set(CMAKE_C_STANDARD_LATEST 11)
 
+if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "6.0.71")
+  set(CMAKE_C23_STANDARD_COMPILE_OPTION -2)
+  set(CMAKE_C23_EXTENSION_COMPILE_OPTION -2)
+
+  set(CMAKE_C_STANDARD_LATEST 23)
+endif()
+
 __compiler_orangec(C)
 #- 6.38 is the earliest version which version info is available in the preprocessor
 __compiler_check_default_language_standard(C 6.38 11)
