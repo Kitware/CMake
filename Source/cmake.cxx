@@ -2684,6 +2684,19 @@ int cmake::ActualConfigure()
     }
   }
 
+  if (!this->State->GetInitializedCacheValue(
+        "CMAKE_DISABLE_PRECOMPILE_HEADERS")) {
+    cm::optional<std::string> disablePrecompileHeaders =
+      cmSystemTools::GetEnvVar("CMAKE_DISABLE_PRECOMPILE_HEADERS");
+    if (disablePrecompileHeaders && !disablePrecompileHeaders->empty()) {
+      std::string message =
+        "Default value for DISABLE_PRECOMPILE_HEADERS of targets.";
+      this->AddCacheEntry("CMAKE_DISABLE_PRECOMPILE_HEADERS",
+                          *disablePrecompileHeaders, message,
+                          cmStateEnums::BOOL);
+    }
+  }
+
   // reset any system configuration information, except for when we are
   // InTryCompile. With TryCompile the system info is taken from the parent's
   // info to save time
