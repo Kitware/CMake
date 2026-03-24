@@ -1721,52 +1721,37 @@ void cmTarget::CopyPolicyStatuses(cmTarget const* tgt)
   assert(!this->IsNormal());
   // Imported targets cannot be the target of a copy.
   assert(!this->IsImported());
-
-  // Only imported or normal targets can be the source of a copy.
-  assert(tgt->IsImported() || tgt->IsNormal());
+  // Only imported targets can be the source of a copy.
+  assert(tgt->IsImported());
 
   this->impl->PolicyMap = tgt->impl->PolicyMap;
   this->impl->TemplateTarget = tgt;
 }
 
-void cmTarget::CopyCxxModulesEntries(cmTarget const* tgt)
+void cmTarget::CopyImportedCxxModulesEntries(cmTarget const* tgt)
 {
   // Normal targets cannot be the target of a copy.
   assert(!this->IsNormal());
   // Imported targets cannot be the target of a copy.
   assert(!this->IsImported());
-  // Only imported or normal targets can be the source of a copy.
-  assert(tgt->IsImported() || tgt->IsNormal());
+  // Only imported targets can be the source of a copy.
+  assert(tgt->IsImported());
 
   this->impl->IncludeDirectories.Entries.clear();
+  this->impl->IncludeDirectories.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesIncludeDirectories.Entries));
   this->impl->CompileDefinitions.Entries.clear();
+  this->impl->CompileDefinitions.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesCompileDefinitions.Entries));
   this->impl->CompileFeatures.Entries.clear();
+  this->impl->CompileFeatures.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesCompileFeatures.Entries));
   this->impl->CompileOptions.Entries.clear();
+  this->impl->CompileOptions.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesCompileOptions.Entries));
   this->impl->LinkLibraries.Entries.clear();
-
-  if (tgt->IsImported()) {
-    this->impl->IncludeDirectories.CopyFromEntries(
-      cmMakeRange(tgt->impl->ImportedCxxModulesIncludeDirectories.Entries));
-    this->impl->CompileDefinitions.CopyFromEntries(
-      cmMakeRange(tgt->impl->ImportedCxxModulesCompileDefinitions.Entries));
-    this->impl->CompileFeatures.CopyFromEntries(
-      cmMakeRange(tgt->impl->ImportedCxxModulesCompileFeatures.Entries));
-    this->impl->CompileOptions.CopyFromEntries(
-      cmMakeRange(tgt->impl->ImportedCxxModulesCompileOptions.Entries));
-    this->impl->LinkLibraries.CopyFromEntries(
-      cmMakeRange(tgt->impl->ImportedCxxModulesLinkLibraries.Entries));
-  } else {
-    this->impl->IncludeDirectories.CopyFromEntries(
-      cmMakeRange(tgt->impl->IncludeDirectories.Entries));
-    this->impl->CompileDefinitions.CopyFromEntries(
-      cmMakeRange(tgt->impl->CompileDefinitions.Entries));
-    this->impl->CompileFeatures.CopyFromEntries(
-      cmMakeRange(tgt->impl->CompileFeatures.Entries));
-    this->impl->CompileOptions.CopyFromEntries(
-      cmMakeRange(tgt->impl->CompileOptions.Entries));
-    this->impl->LinkLibraries.CopyFromEntries(
-      cmMakeRange(tgt->impl->LinkLibraries.Entries));
-  }
+  this->impl->LinkLibraries.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesLinkLibraries.Entries));
 
   // Copy the C++ module fileset entries from `tgt`'s `INTERFACE` to this
   // target's `PRIVATE`.
@@ -1775,14 +1760,14 @@ void cmTarget::CopyCxxModulesEntries(cmTarget const* tgt)
     tgt->impl->CxxModulesFileSets.InterfaceEntries.Entries;
 }
 
-void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
+void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
 {
   // Normal targets cannot be the target of a copy.
   assert(!this->IsNormal());
   // Imported targets cannot be the target of a copy.
   assert(!this->IsImported());
-  // Only imported or normal targets can be the source of a copy.
-  assert(tgt->IsImported() || tgt->IsNormal());
+  // Only imported targets can be the source of a copy.
+  assert(tgt->IsImported());
 
   // The list of properties that are relevant here include:
   // - compilation-specific properties for any language or platform
