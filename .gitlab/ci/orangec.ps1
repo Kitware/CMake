@@ -1,9 +1,9 @@
 $erroractionpreference = "stop"
 
-if ("$env:CMAKE_CONFIGURATION".Contains("orangec6.73.1")) {
-    # OrangeC 6.73.1
+if ("$env:CMAKE_CONFIGURATION".Contains("orangec6.73.8")) {
+    # OrangeC 6.73.8
     $archive = "ZippedBinaries6738.zip"
-    $release = "Orange-C-v6.73.1"
+    $release = "Orange-C-v6.73.1" # release numbering seems mismatched
     $sha256sum = "29BC506AB105B2BF1002129C37826B2153DF1C8D0F22B9A2C38ACA3FB72A5B89"
 } else {
     throw ('unknown CMAKE_CONFIGURATION: ' + "$env:CMAKE_CONFIGURATION")
