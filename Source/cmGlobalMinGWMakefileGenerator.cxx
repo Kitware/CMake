@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGlobalMinGWMakefileGenerator.h"
 
-#include "cmMakefile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"

@@ -12,7 +12,6 @@
 #include "cmCMakeToWixPath.h"
 #include "cmInstalledFile.h"
 #include "cmSystemTools.h"
-#include "cmUuid.h"
 #include "cmWIXAccessControlList.h"
 
 #ifdef _WIN32

@@ -14,7 +14,6 @@
 #include <windows.h>
 
 #include "cmGeneratedFileStream.h"
-#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
@@ -22,7 +21,6 @@
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
