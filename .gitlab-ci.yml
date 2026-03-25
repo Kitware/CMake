@@ -1534,6 +1534,18 @@ t:windows-orangec6.73.8:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:windows-orangec7.0.7:
+    extends:
+        - .windows_orangec7.0.7
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent
+        - .cmake_junit_artifacts
+        - .rules
+    needs:
+        - t:windows-vs2026-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 # Windows arm64 jobs
 
 b:windows-arm64-vs2026-ninja:
