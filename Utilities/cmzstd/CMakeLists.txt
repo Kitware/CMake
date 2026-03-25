@@ -53,4 +53,11 @@ target_compile_definitions(cmzstd PRIVATE
   ZSTD_DISABLE_ASM=1
   )
 
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "AIX")
+  target_compile_definitions(cmzstd PRIVATE
+    # Enable threaded compression.
+    ZSTD_MULTITHREAD
+    )
+endif()
+
 install(FILES LICENSE DESTINATION ${CMake_INSTALL_DOC_DIR}/cmzstd)
