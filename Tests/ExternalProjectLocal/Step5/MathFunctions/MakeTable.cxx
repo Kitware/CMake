@@ -22,11 +22,12 @@ int main(int argc, char* argv[])
   fprintf(fout, "double sqrtTable[] = {\n");
   for (i = 0; i < 10; ++i) {
     result = sqrt(static_cast<double>(i));
-    fprintf(fout, "%g,\n", result);
+    // FIXME(OrangeC#1138): OrangeC 7 no longer accepts plain '0' as a double
+    fprintf(fout, "%.5f,\n", result);
   }
 
   // close the table with a zero
-  fprintf(fout, "0};\n");
+  fprintf(fout, "0.0};\n");
   fclose(fout);
   return 0;
 }
