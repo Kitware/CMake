@@ -3,7 +3,6 @@
 #include "cmLocalVisualStudio7Generator.h"
 
 #include <algorithm>
-#include <cassert>
 #include <cstring>
 #include <functional>
 #include <sstream>
@@ -1681,17 +1680,19 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
 
   // Loop through each source in the source group.
   for (cmSourceFile const* sf : sourceFiles) {
+    // We only need source group members that are part of this target.
+    auto si = sources.Index.find(sf);
+    if (si == sources.Index.end()) {
+      continue;
+    }
+
     std::string source = sf->GetFullPath();
 
     if (source != libName || target->GetType() == cmStateEnums::UTILITY ||
         target->GetType() == cmStateEnums::GLOBAL_TARGET ||
         target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-      // Look up the source kind and configs.
-      auto map_it = sources.Index.find(sf);
-      // The map entry must exist because we populated it earlier.
-      assert(map_it != sources.Index.end());
       cmGeneratorTarget::AllConfigSource const& acs =
-        sources.Sources[map_it->second];
+        sources.Sources[si->second];
 
       FCInfo fcinfo(this, target, acs, configs);
 
