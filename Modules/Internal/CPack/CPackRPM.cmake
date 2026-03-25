@@ -1284,6 +1284,10 @@ function(cpack_rpm_generate_package)
   # CPACK_RPM_SPEC_MORE_DEFINE
   # This is a generated spec rpm file spaceholder
   if(CPACK_RPM_SPEC_MORE_DEFINE)
+    list(LENGTH CPACK_RPM_SPEC_MORE_DEFINE _defines_size)
+    if(_defines_size GREATER 1)
+      list(JOIN CPACK_RPM_SPEC_MORE_DEFINE "\n" CPACK_RPM_SPEC_MORE_DEFINE)
+    endif()
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: User defined more define spec line specified:\n ${CPACK_RPM_SPEC_MORE_DEFINE}")
     endif()
