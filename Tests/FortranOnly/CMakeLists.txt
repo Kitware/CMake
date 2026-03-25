@@ -200,7 +200,9 @@ if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF AND
 endif()
 
 # Test that we are safe from infinite include recursion in dependency scanner
-# (SunPro Fortran compiler does not support recursive inclusion)
-if (NOT CMAKE_Fortran_COMPILER_ID STREQUAL "SunPro")
+if (# The SunPro Fortran compiler does not support recursive inclusion
+    NOT CMAKE_Fortran_COMPILER_ID STREQUAL "SunPro"
+    # The Intel Fortran VS integration overflows its stack.
+    AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   add_executable(test_include_loop test_include_loop.F)
 endif()
