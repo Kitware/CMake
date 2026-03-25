@@ -1101,6 +1101,13 @@ lha_read_file_header_3(struct archive_read *a, struct lha *lha)
 	header_crc = lha_crc16(0, p, H3_FIXED_SIZE);
 	__archive_read_consume(a, H3_FIXED_SIZE);
 
+	/* Reject rediculously large header */
+	if (lha->header_size > 65536) {
+		archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
+		    "LHa header size too large");
+		return (ARCHIVE_FATAL);
+	}
+
 	/* Read extended headers */
 	err = lha_read_file_extended_header(a, lha, &header_crc, 4,
 		  lha->header_size - H3_FIXED_SIZE, &extdsize);
