@@ -43,6 +43,12 @@ The above would expand to ``OLD_COMPILER`` if the
 :variable:`CMAKE_CXX_COMPILER_VERSION <CMAKE_<LANG>_COMPILER_VERSION>` is less
 than 4.2.0.
 
+.. note::
+
+  Generator expressions are supported in the values of many properties,
+  but not all.  Check a property's documentation for explicit mention
+  of generator expressions before using them.
+
 Whitespace And Quoting
 ======================
 
