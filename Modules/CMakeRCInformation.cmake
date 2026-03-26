@@ -39,7 +39,9 @@ set(CMAKE_RC_FLAG_REGEX "^[-/](D|I)")
 
 # now define the following rule variables
 # CMAKE_RC_COMPILE_OBJECT
-set(CMAKE_INCLUDE_FLAG_RC "-I ")
+if(NOT CMAKE_INCLUDE_FLAG_RC)
+  set(CMAKE_INCLUDE_FLAG_RC "-I ")
+endif()
 # compile a Resource file into an object file
 if(NOT CMAKE_RC_COMPILE_OBJECT)
   set(CMAKE_RC_COMPILE_OBJECT

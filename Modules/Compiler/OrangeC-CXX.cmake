@@ -22,6 +22,14 @@ set(CMAKE_CXX14_STANDARD__HAS_FULL_SUPPORT ON)
 
 set(CMAKE_CXX_STANDARD_LATEST 14)
 
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
+  set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++17")
+  set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=c++17")
+  set(CMAKE_CXX17_STANDARD__HAS_FULL_SUPPORT ON)
+
+  set(CMAKE_CXX_STANDARD_LATEST 17)
+endif()
+
 __compiler_orangec(CXX)
 #- 6.38 is the earliest version which version info is available in the preprocessor
 __compiler_check_default_language_standard(CXX 6.38 14)
