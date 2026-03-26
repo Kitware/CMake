@@ -2357,7 +2357,8 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
         if (!mf->GetDefinition("CMAKE_CXX_COMPILE_BMI").IsEmpty()) {
           useBmiTemplate = true;
         } else {
-          auto flag = mf->GetSafeDefinition("CMAKE_CXX_MODULE_BMI_ONLY_FLAG");
+          std::string flag =
+            mf->GetSafeDefinition("CMAKE_CXX_MODULE_BMI_ONLY_FLAG");
           cmRulePlaceholderExpander::RuleVariables compileObjectVars;
           compileObjectVars.Object = sfVars.ObjectFileDir.c_str();
           auto rulePlaceholderExpander = lg->CreateRulePlaceholderExpander();
