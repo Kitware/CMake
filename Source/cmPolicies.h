@@ -635,7 +635,11 @@ class cmMakefile;
          WARN)                                                                \
   SELECT(POLICY, CMP0212,                                                     \
          "add_custom_command DEPENDS does not strip .exe suffixes.", 4, 4, 0, \
-         WARN)
+         WARN)                                                                \
+  SELECT(POLICY, CMP0213,                                                     \
+         "file(ARCHIVE_{CREATE,EXTRACT}) encode archive paths as UTF-8 by "   \
+         "default.",                                                          \
+         4, 4, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

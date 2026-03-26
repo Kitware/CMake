@@ -3678,6 +3678,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     std::string Format;
     std::string Compression;
     std::string CompressionLevel;
+    std::string Encoding;
     // "MTIME" should require one value, but it has long been accidentally
     // accepted without one and treated as if an empty value were given.
     // Fixing this would require a policy.
@@ -3695,6 +3696,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       .Bind("FORMAT"_s, &Arguments::Format)
       .Bind("COMPRESSION"_s, &Arguments::Compression)
       .Bind("COMPRESSION_LEVEL"_s, &Arguments::CompressionLevel)
+      .Bind("ENCODING"_s, &Arguments::Encoding)
       .Bind("MTIME"_s, &Arguments::MTime)
       .Bind("THREADS"_s, &Arguments::Threads)
       .Bind("WORKING_DIRECTORY"_s, &Arguments::WorkingDirectory)
@@ -3822,9 +3824,18 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  if (parsedArgs.Encoding.empty()) {
+    if (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0213) ==
+        cmPolicies::NEW) {
+      parsedArgs.Encoding = "UTF-8";
+    } else {
+      parsedArgs.Encoding = "OEM";
+    }
+  }
+
   if (!cmSystemTools::CreateTar(
         parsedArgs.Output, parsedArgs.Paths, parsedArgs.WorkingDirectory,
-        compress, "OEM", parsedArgs.Verbose, parsedArgs.MTime,
+        compress, parsedArgs.Encoding, parsedArgs.Verbose, parsedArgs.MTime,
         parsedArgs.Format, compressionLevel, threads)) {
     status.SetError(cmStrCat("failed to compress: ", parsedArgs.Output));
     cmSystemTools::SetFatalErrorOccurred();
@@ -3840,6 +3851,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
   struct Arguments : public ArgumentParser::ParseResult
   {
     std::string Input;
+    std::string Encoding;
     bool Verbose = false;
     bool ListOnly = false;
     std::string Destination;
@@ -3849,6 +3861,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
 
   static auto const parser = cmArgumentParser<Arguments>{}
                                .Bind("INPUT"_s, &Arguments::Input)
+                               .Bind("ENCODING"_s, &Arguments::Encoding)
                                .Bind("VERBOSE"_s, &Arguments::Verbose)
                                .Bind("LIST_ONLY"_s, &Arguments::ListOnly)
                                .Bind("DESTINATION"_s, &Arguments::Destination)
@@ -3872,9 +3885,18 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
 
   std::string inFile = parsedArgs.Input;
 
+  if (parsedArgs.Encoding.empty()) {
+    if (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0213) ==
+        cmPolicies::NEW) {
+      parsedArgs.Encoding = "UTF-8";
+    } else {
+      parsedArgs.Encoding = "OEM";
+    }
+  }
+
   if (parsedArgs.ListOnly) {
-    if (!cmSystemTools::ListTar(inFile, parsedArgs.Patterns, "OEM",
-                                parsedArgs.Verbose)) {
+    if (!cmSystemTools::ListTar(inFile, parsedArgs.Patterns,
+                                parsedArgs.Encoding, parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to list: ", inFile));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
@@ -3911,7 +3933,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
           inFile, parsedArgs.Patterns,
           parsedArgs.Touch ? cmSystemTools::cmTarExtractTimestamps::No
                            : cmSystemTools::cmTarExtractTimestamps::Yes,
-          "OEM", parsedArgs.Verbose)) {
+          parsedArgs.Encoding, parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to extract:\n  ", inFile));
       cmSystemTools::SetFatalErrorOccurred();
       return false;

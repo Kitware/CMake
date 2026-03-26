@@ -915,6 +915,7 @@ Archiving
     [FORMAT <format>]
     [COMPRESSION <compression>
     [COMPRESSION_LEVEL <compression-level>]]
+    [ENCODING <encoding>]
     [MTIME <mtime>]
     [THREADS <number>]
     [WORKING_DIRECTORY <dir>]
@@ -1006,6 +1007,39 @@ Archiving
       formats too. The ``Zstd`` algorithm compression level can be set
       between 0-19, except for ``zip`` format.
 
+  ``ENCODING <encoding>``
+    .. versionadded:: 4.4
+
+    Specify the pathname character encoding used in the archive.
+
+    The ``<encoding>`` may be one of:
+
+    ``UTF-8``
+      Archive pathnames are encoded as UTF-8.
+
+      In CMake 4.4 and below, this is the default.
+      See policy :policy:`CMP0213` for CMake 4.3 and below compatibility
+      details.
+
+    ``OEM``
+      On Windows platforms, pathnames are encoded as using the original
+      equipment manufacturer (OEM) code page.  On non-Windows platforms,
+      pathnames are encoded according to the current locale.
+
+      In CMake 4.3 and below, the ``OEM`` encoding (current locale)
+      was always used.
+
+    ``UTF-16LE``, ``UTF-16BE``
+      Archive pathnames are encoded as UTF-16 little-endian or big-endian.
+
+    ``...``
+      Any encoding name supported by ``iconv`` on the current platform.
+      On Windows, code page names may be specified.
+
+    .. note::
+      ``7zip`` archives always encode paths as ``UTF-16LE``,
+      so this option is silently ignored for that format.
+
   ``MTIME <mtime>``
     Specify the modification time recorded in tarball entries.
 
@@ -1032,6 +1066,7 @@ Archiving
   file(ARCHIVE_EXTRACT
     INPUT <archive>
     [DESTINATION <dir>]
+    [ENCODING <encoding>]
     [PATTERNS <pattern>...]
     [LIST_ONLY]
     [VERBOSE]
@@ -1049,6 +1084,41 @@ Archiving
     extracted.  If the directory does not exist, it will be created.
     If ``DESTINATION`` is not given, the current binary directory will
     be used.
+
+  ``ENCODING <encoding>``
+    .. versionadded:: 4.4
+
+    Specify the pathname character encoding used in the archive.
+
+    The ``<encoding>`` may be one of:
+
+    ``UTF-8``
+      Archive pathnames are encoded as UTF-8.
+
+      In CMake 4.3 and below, this is the default
+      if the :policy:`CMP0213` is ``NEW``.
+
+    ``OEM``
+      On Windows platforms, pathnames are encoded as using the original
+      equipment manufacturer (OEM) code page.  On non-Windows platforms,
+      pathnames are encoded according to the current locale.
+
+      In CMake 4.3 and below, the ``OEM`` encoding (current locale)
+      was always used.
+
+      In CMake 4.4 and above, the ``OEM`` encoding (current locale)
+      is only used if the :policy:`CMP0213` is not ``NEW``.
+
+    ``UTF-16LE``, ``UTF-16BE``
+      Archive pathnames are encoded as UTF-16 little-endian or big-endian.
+
+    ``...``
+      Any encoding name supported by ``iconv`` on the current platform.
+      On Windows, code page names may be specified.
+
+    .. note::
+      ``7zip`` archives always encode paths as ``UTF-16LE``,
+      so this option is silently ignored for that format.
 
   ``PATTERNS <pattern>...``
     Extract/list only files and directories that match one of the given

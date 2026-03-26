@@ -1,0 +1,4 @@
+^CMake Error: archive_write_header: Can't translate [Pp]athname( '[^']*\.txt')? to [^
+]*
+CMake Error at roundtrip\.cmake:[0-9]+ \(file\):
+  file failed to compress:
