@@ -36,6 +36,10 @@ if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
 else ()
   set(output_flag "-o")
 endif ()
+if (CMAKE_CXX_COMPILE_BMI) # Only `clang` does this today.
+  set(CMAKE_CXX_COMPILE_BMI
+    "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --precompile ${output_flag}<OBJECT> -v <SOURCE>")
+endif ()
 set(CMAKE_CXX_COMPILE_OBJECT
   "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> ${output_flag}<OBJECT> -c <SOURCE>")
 
