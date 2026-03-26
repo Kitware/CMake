@@ -162,6 +162,7 @@ Helpful Resources
 Files to Edit
 -------------
 
+* ``CMakeLists.txt``
 * ``Tutorial/CMakeLists.txt``
 * ``MathFunctions/CMakeLists.txt``
 * ``MathFunctions/MathFunctions.cxx``
