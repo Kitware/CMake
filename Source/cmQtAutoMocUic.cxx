@@ -2116,8 +2116,11 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
     this->Log().Info(GenT::MOC, result.StdOut);
   }
 
-  // Extract dependencies from the dep file moc generated for us
-  if (this->MocConst().CanOutputDependencies) {
+  // Extract dependencies from the dep file moc generated for us.
+  // When a build-system depfile is used, JobDepFilesMergeT handles reading
+  // and merging all moc dependencies, so skip per-compilation dep reading.
+  if (this->MocConst().CanOutputDependencies &&
+      this->BaseConst().DepFile.empty()) {
     std::string const depfile = outputFile + ".d";
     if (this->Log().Verbose()) {
       this->Log().Info(
