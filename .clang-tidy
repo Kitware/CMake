@@ -33,6 +33,7 @@ modernize-*,\
 -modernize-macro-to-enum,\
 -modernize-return-braced-init-list,\
 -modernize-type-traits,\
+-modernize-unary-static-assert, \
 -modernize-use-emplace,\
 -modernize-use-nodiscard,\
 -modernize-use-noexcept,\
