@@ -69,7 +69,13 @@ The list of compilers for which CMake supports scanning sources for C++
 modules includes:
 
 * MSVC toolset 14.34 and newer (provided with Visual Studio 17.4 and newer)
+
 * LLVM/Clang 16.0 and newer
+
+  .. versionadded:: 4.4
+
+    ``clang-cl`` version 19.1 and newer
+
 * GCC 14 and newer
 
 ``import std`` Support

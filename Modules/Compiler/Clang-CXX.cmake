@@ -20,7 +20,8 @@ if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_DRIVER_MODE "cl")
 endif()
 
-if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0 AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
+if((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0 AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU") OR
+   (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1 AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
   if (CMAKE_CXX_COMPILER_CLANG_RESOURCE_DIR)
     set(_clang_scan_deps_resource_dir
       " -resource-dir \"${CMAKE_CXX_COMPILER_CLANG_RESOURCE_DIR}\"")
@@ -34,15 +35,20 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0 AND CMAKE_CXX_COMPILER_
   else ()
     set(_clang_scan_deps_mv "mv")
   endif ()
+  if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    set(_clang "-clang:")
+  else()
+    set(_clang "")
+  endif()
   string(CONCAT CMAKE_CXX_SCANDEP_SOURCE
     "\"${CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS}\""
     " -format=p1689"
     " --"
     " <CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS>"
-    " -x c++ <SOURCE> -c -o <OBJECT>"
+    " -x c++ <SOURCE> -c ${_clang}-o ${_clang}<OBJECT>"
     "${_clang_scan_deps_resource_dir}"
-    " -MT <DYNDEP_FILE>"
-    " -MD -MF <DEP_FILE>"
+    " ${_clang}-MT ${_clang}<DYNDEP_FILE>"
+    " ${_clang}-MD ${_clang}-MF ${_clang}<DEP_FILE>"
     # Write to a temporary file. If the scan fails, we do not want to update
     # the actual output file as `ninja` (at least) assumes that failed
     # commands either delete or leave output files alone. See Issue#25419.
@@ -56,5 +62,6 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0 AND CMAKE_CXX_COMPILER_
   set(CMAKE_CXX_MODULE_MAP_FORMAT "clang")
   set(CMAKE_CXX_MODULE_MAP_FLAG "@<MODULE_MAP_FILE>")
   set(CMAKE_CXX_COMPILE_BMI
-    "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> --precompile <SOURCE>")
+    "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> ${_clang}-o ${_clang}<OBJECT> --precompile <SOURCE>")
+  unset(_clang)
 endif()
