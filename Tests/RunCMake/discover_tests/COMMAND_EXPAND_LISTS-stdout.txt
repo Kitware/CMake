@@ -1,0 +1,7 @@
+  Test #[0-9]*: ExpandLists.OFF.case_one;two
+  Test #[0-9]*: ExpandLists.OFF.case_three
+  Test #[0-9]*: ExpandLists.ON.case_one
+  Test #[0-9]*: ExpandLists.ON.case_two
+  Test #[0-9]*: ExpandLists.ON.case_three
+
+Total Tests: 5

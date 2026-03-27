@@ -70,7 +70,7 @@ cmTestGenerator::cmTestGenerator(
   : cmScriptGenerator("CTEST_CONFIGURATION_TYPE", configurations)
   , Test(test)
 {
-  this->ActionsPerConfig = !test->GetOldStyle();
+  this->ActionsPerConfig = test == nullptr || !test->GetOldStyle();
   this->TestGenerated = false;
   this->LG = nullptr;
 }
@@ -84,7 +84,7 @@ void cmTestGenerator::Compute(cmLocalGenerator* lg)
 
 bool cmTestGenerator::TestsForConfig(std::string const& config)
 {
-  return this->GeneratesForConfig(config);
+  return this->Test != nullptr && this->GeneratesForConfig(config);
 }
 
 cmTest* cmTestGenerator::GetTest() const
@@ -106,28 +106,19 @@ void cmTestGenerator::GenerateScriptActions(std::ostream& os, Indent indent)
   }
 }
 
-void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
-                                              std::string const& config,
-                                              Indent indent)
+void cmTestGenerator::GenerateCommand(std::ostream& os,
+                                      std::vector<std::string> const& command,
+                                      std::string const& config, bool expand,
+                                      cmGeneratorExpression& ge,
+                                      cmPolicies::PolicyStatus cmp0158,
+                                      cmPolicies::PolicyStatus cmp0178)
 {
-  this->TestGenerated = true;
-
-  // Set up generator expression evaluation context.
-  cmGeneratorExpression ge(*this->Test->GetMakefile()->GetCMakeInstance(),
-                           this->Test->GetBacktrace());
-
-  auto const test_name = TestName(this->Test);
-
-  // Start the test command.
-  os << indent << "add_test(" << test_name << ' ';
-
   // Evaluate command line arguments
   cmList argv{
-    this->EvaluateCommandLineArguments(this->Test->GetCommand(), ge, config),
+    this->EvaluateCommandLineArguments(command, ge, config),
     // Expand arguments if COMMAND_EXPAND_LISTS is set
-    this->Test->GetCommandExpandLists() ? cmList::ExpandElements::Yes
-                                        : cmList::ExpandElements::No,
-    cmList::EmptyElements::Yes
+    expand ? cmList::ExpandElements::Yes : cmList::ExpandElements::No,
+    cmList::EmptyElements::Yes,
   };
   // Expanding lists on an empty command may have left it empty
   if (argv.empty()) {
@@ -142,23 +133,22 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     // Use the target file on disk.
     exe = target->GetFullPath(config);
 
-    auto addLauncher = [this, &config, &ge, &os,
-                        target](std::string const& propertyName) {
+    auto addLauncher = [&](std::string const& propertyName) {
       cmValue launcher = target->GetProperty(propertyName);
       if (!cmNonempty(launcher)) {
         return;
       }
       auto const propVal = ge.Parse(*launcher)->Evaluate(this->LG, config);
       cmList launcherWithArgs(propVal, cmList::ExpandElements::Yes,
-                              this->Test->GetCMP0178() == cmPolicies::NEW
+                              cmp0178 == cmPolicies::NEW
                                 ? cmList::EmptyElements::Yes
                                 : cmList::EmptyElements::No);
       if (!launcherWithArgs.empty() && !launcherWithArgs[0].empty()) {
-        if (this->Test->GetCMP0178() == cmPolicies::WARN) {
+        if (cmp0178 == cmPolicies::WARN) {
           cmList argsWithEmptyValuesPreserved(
             propVal, cmList::ExpandElements::Yes, cmList::EmptyElements::Yes);
           if (launcherWithArgs != argsWithEmptyValuesPreserved) {
-            this->Test->GetMakefile()->IssueMessage(
+            this->LG->GetMakefile()->IssueMessage(
               MessageType::AUTHOR_WARNING,
               cmStrCat("The ", propertyName, " property of target '",
                        target->GetName(),
@@ -182,7 +172,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     addLauncher("TEST_LAUNCHER");
 
     // Prepend with the emulator when cross compiling if required.
-    if (!this->GetTest()->GetCMP0158IsNew() ||
+    if (cmp0158 != cmPolicies::NEW ||
         this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")) {
       addLauncher("CROSSCOMPILING_EMULATOR");
     }
@@ -197,8 +187,23 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   for (auto const& arg : cmMakeRange(argv).advance(1)) {
     os << " " << cmScriptGenerator::Quote(arg);
   }
+}
 
-  // Finish the test command.
+void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
+                                              std::string const& config,
+                                              Indent indent)
+{
+  this->TestGenerated = true;
+
+  // Set up generator expression evaluation context.
+  cmGeneratorExpression ge(*this->Test->GetMakefile()->GetCMakeInstance(),
+                           this->Test->GetBacktrace());
+
+  auto const test_name = TestName(this->Test);
+  os << indent << "add_test(" << test_name << ' ';
+  this->GenerateCommand(
+    os, this->Test->GetCommand(), config, this->Test->GetCommandExpandLists(),
+    ge, this->GetTest()->GetCMP0158(), this->Test->GetCMP0178());
   os << ")\n";
 
   // Output properties for the test.
@@ -208,7 +213,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
        << cmScriptGenerator::Quote(
             ge.Parse(i.second)->Evaluate(this->LG, config));
   }
-  this->GenerateInternalProperties(os);
+  os << ' ';
+  this->GenerateBacktrace(os, this->Test->GetBacktrace());
   os << ")\n";
 }
 
@@ -260,20 +266,19 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
   for (auto const& i : this->Test->GetProperties().GetList()) {
     fout << " " << i.first << " " << cmScriptGenerator::Quote(i.second);
   }
-  this->GenerateInternalProperties(fout);
+  fout << ' ';
+  this->GenerateBacktrace(fout, this->Test->GetBacktrace());
   fout << ")\n";
 }
 
-void cmTestGenerator::GenerateInternalProperties(std::ostream& os)
+void cmTestGenerator::GenerateBacktrace(std::ostream& os,
+                                        cmListFileBacktrace bt)
 {
-  cmListFileBacktrace bt = this->Test->GetBacktrace();
   if (bt.Empty()) {
     return;
   }
 
-  os << " "
-     << "_BACKTRACE_TRIPLES"
-     << " \"";
+  os << "_BACKTRACE_TRIPLES \"";
 
   bool prependTripleSeparator = false;
   while (!bt.Empty()) {

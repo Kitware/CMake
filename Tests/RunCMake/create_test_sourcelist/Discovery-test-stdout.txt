@@ -1,0 +1,9 @@
+Test project [^
+]*/Tests/RunCMake/create_test_sourcelist/Discovery-build
+    Start 1: case_one
+.*
+    Start 2: case_two
+.*
+    Start 3: case_three
+.*
+100% tests passed, 0 tests failed out of 3
