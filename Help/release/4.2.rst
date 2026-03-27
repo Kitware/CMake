@@ -246,9 +246,9 @@ Changes made since CMake 4.2.0 include the following.
   matching the configuration of the consuming target, and so has been
   partially reverted to match either as CMake 4.1 and below did.
 
-4.2.3
------
+4.2.3, 4.2.4
+------------
 
-* This version made no changes to documented features or interfaces.
+* These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
