@@ -168,6 +168,7 @@ protected:
 
   void WriteLanguageRules(std::string const& language,
                           std::string const& config);
+  std::string GetCompileTemplateVar(std::string const& lang) const;
   void WriteCompileRule(std::string const& language,
                         std::string const& config);
   void WriteCompileRule(std::string const& language, std::string const& config,

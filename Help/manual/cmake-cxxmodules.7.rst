@@ -470,13 +470,18 @@ Additionally, toolchains should set the following variables:
 * ``CMAKE_CXX_MODULE_MAP_FLAG``: The arguments used to inform the compiler of
   the :term:`module map` file.  It should use the ``<MODULE_MAP_FILE>``
   placeholder.
+* ``CMAKE_CXX_COMPILE_BMI``: The command template to compile a :term:`BMI`
+  file from a :term:`module interface unit`.  Used when
+  ``CMAKE_CXX_MODULE_BMI_ONLY_FLAG`` is not completely additive to an
+  object compilation template.
 * ``CMAKE_CXX_MODULE_BMI_ONLY_FLAG``: The arguments used to compile only a
   :term:`BMI` file from a :term:`module interface unit`.  This is used when
   consuming modules from external projects to compile :term:`BMI` files for
   use within the current build.
 
-If a toolchain does not provide the ``CMAKE_CXX_MODULE_BMI_ONLY_FLAG``, it
-will not be able to consume modules provided by ``IMPORTED`` targets.
+If a toolchain does not provide the ``CMAKE_CXX_COMPILE_BMI`` or
+``CMAKE_CXX_MODULE_BMI_ONLY_FLAG`` variables, it will not be able to consume
+modules provided by ``IMPORTED`` targets.
 
 Configure
 ^^^^^^^^^
