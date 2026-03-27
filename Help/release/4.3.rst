@@ -280,3 +280,15 @@ Other Changes
 
 * The precompiled Windows binaries provided on
   `cmake.org <https://cmake.org/download/>`_ now require Windows 10 or higher.
+
+Updates
+=======
+
+Changes made since CMake 4.3.0 include the following.
+
+4.3.1
+-----
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
