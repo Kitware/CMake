@@ -2335,6 +2335,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
   }
 
   // C++ module flags.
+  bool useBmiTemplate = false;
   if (lang == "CXX"_s) {
     FlagClassification cls = FlagClassification::LocationFlag;
     FlagKind kind = FlagKind::BuildSystem;
@@ -2353,13 +2354,18 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
       }
 
       if (!this->Target->IsNormal()) {
-        auto flag = mf->GetSafeDefinition("CMAKE_CXX_MODULE_BMI_ONLY_FLAG");
-        cmRulePlaceholderExpander::RuleVariables compileObjectVars;
-        compileObjectVars.Object = sfVars.ObjectFileDir.c_str();
-        auto rulePlaceholderExpander = lg->CreateRulePlaceholderExpander();
-        rulePlaceholderExpander->ExpandRuleVariables(lg, flag,
-                                                     compileObjectVars);
-        lg->AppendCompileOptions(bmiFlags, flag);
+        if (!mf->GetDefinition("CMAKE_CXX_COMPILE_BMI").IsEmpty()) {
+          useBmiTemplate = true;
+        } else {
+          std::string flag =
+            mf->GetSafeDefinition("CMAKE_CXX_MODULE_BMI_ONLY_FLAG");
+          cmRulePlaceholderExpander::RuleVariables compileObjectVars;
+          compileObjectVars.Object = sfVars.ObjectFileDir.c_str();
+          auto rulePlaceholderExpander = lg->CreateRulePlaceholderExpander();
+          rulePlaceholderExpander->ExpandRuleVariables(lg, flag,
+                                                       compileObjectVars);
+          lg->AppendCompileOptions(bmiFlags, flag);
+        }
       }
     }
 
@@ -2382,7 +2388,8 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     FlagClassification cls = FlagClassification::ExecutionFlag;
     FlagKind kind = FlagKind::NotAFlag;
 
-    std::string const cmdVar = cmStrCat("CMAKE_", lang, "_COMPILE_OBJECT");
+    std::string const cmdVar =
+      cmStrCat("CMAKE_", lang, "_COMPILE_", useBmiTemplate ? "BMI" : "OBJECT");
     std::string const& compileCmd = mf->GetRequiredDefinition(cmdVar);
     cmList compileCmds(compileCmd); // FIXME: which command to use?
     std::string& cmd = compileCmds[0];

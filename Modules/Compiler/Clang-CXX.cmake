@@ -56,6 +56,7 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
     unset(_clang_scan_deps_mv)
     set(CMAKE_CXX_MODULE_MAP_FORMAT "clang")
     set(CMAKE_CXX_MODULE_MAP_FLAG "@<MODULE_MAP_FILE>")
-    set(CMAKE_CXX_MODULE_BMI_ONLY_FLAG "--precompile")
+    set(CMAKE_CXX_COMPILE_BMI
+      "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> --precompile <SOURCE>")
   endif()
 endif()

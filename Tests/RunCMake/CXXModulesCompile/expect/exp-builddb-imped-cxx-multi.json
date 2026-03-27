@@ -143,7 +143,7 @@
             "REGEX:PATH:-Ddepflag=\"CMakeFiles/CXXModules__export_build_database@synth_<HEX>.dir<CONFIG_DIR>/.d\"",
             "REGEX:<BMI_ONLY_FLAG>",
             "REGEX:PATH:<OUTPUT_FLAG>CMakeFiles/CXXModules__export_build_database@synth_<HEX>.dir<CONFIG_DIR>/",
-            "-c",
+            "REGEX:-[cv]",
             "PATH:<SOURCE_DIR>/exp-builddb/importable.cxx"
           ],
           "baseline-arguments": [
@@ -229,7 +229,7 @@
             "REGEX:PATH:-Ddepflag=\"CMakeFiles/CXXModules__export_build_database@synth_<HEX>.dir<CONFIG_OTHER_DIR>/.d\"",
             "REGEX:<BMI_ONLY_FLAG>",
             "REGEX:PATH:<OUTPUT_FLAG>CMakeFiles/CXXModules__export_build_database@synth_<HEX>.dir<CONFIG_OTHER_DIR>/",
-            "-c",
+            "REGEX:-[cv]",
             "PATH:<SOURCE_DIR>/exp-builddb/importable.cxx"
           ],
           "baseline-arguments": [
