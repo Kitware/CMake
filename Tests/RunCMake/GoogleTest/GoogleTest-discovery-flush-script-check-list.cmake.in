@@ -15,9 +15,9 @@ endif()
 # uncovered by checking the name buffer flushing above.
 
 # PRE_TEST can have a config-specific tests file, POST_BUILD never does
-set(tests_file "@CMAKE_CURRENT_BINARY_DIR@/flush_script_test[1]_tests-Debug.cmake")
+set(tests_file "@CMAKE_CURRENT_BINARY_DIR@/flush_script_test_e3b0c442_tests-Debug.cmake")
 if(NOT EXISTS "${tests_file}")
-  set(tests_file "@CMAKE_CURRENT_BINARY_DIR@/flush_script_test[1]_tests.cmake")
+  set(tests_file "@CMAKE_CURRENT_BINARY_DIR@/flush_script_test_e3b0c442_tests.cmake")
 endif()
 if(NOT EXISTS "${tests_file}")
   message(FATAL_ERROR "Tests file is missing")

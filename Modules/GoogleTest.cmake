@@ -599,30 +599,12 @@ function(gtest_discover_tests target)
     set(arg_DISCOVERY_MODE ${CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE})
   endif()
 
-  get_property(
-    has_counter
-    TARGET ${target}
-    PROPERTY CTEST_DISCOVERED_TEST_COUNTER
-    SET
-  )
-  if(has_counter)
-    get_property(
-      counter
-      TARGET ${target}
-      PROPERTY CTEST_DISCOVERED_TEST_COUNTER
-    )
-    math(EXPR counter "${counter} + 1")
-  else()
-    set(counter 1)
-  endif()
-  set_property(
-    TARGET ${target}
-    PROPERTY CTEST_DISCOVERED_TEST_COUNTER
-    ${counter}
-  )
+  string(SHA256 argn_hash "${ARGN}")
+  string(SUBSTRING "${argn_hash}" 0 8 argn_hash)
+  string(MAKE_C_IDENTIFIER "${target}_${argn_hash}" ctest_file_base)
 
   # Define rule to generate test list for aforementioned test executable
-  set(ctest_file_base "${CMAKE_CURRENT_BINARY_DIR}/${target}[${counter}]")
+  set(ctest_file_base "${CMAKE_CURRENT_BINARY_DIR}/${ctest_file_base}")
   set(ctest_include_file "${ctest_file_base}_include.cmake")
   set(ctest_tests_file "${ctest_file_base}_tests.cmake")
   get_property(test_launcher
