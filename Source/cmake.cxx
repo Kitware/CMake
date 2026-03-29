@@ -967,19 +967,6 @@ void cmake::LoadEnvironmentPresets()
     cmSystemTools::GetEnvVar("CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY");
 }
 
-namespace {
-enum class ListPresets
-{
-  None,
-  Configure,
-  Build,
-  Test,
-  Package,
-  Workflow,
-  All,
-};
-}
-
 // Parse the args
 void cmake::SetArgs(std::vector<std::string> const& args)
 {
@@ -1571,156 +1558,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
 
 #if !defined(CMAKE_BOOTSTRAP)
   if (listPresets != ListPresets::None || !presetName.empty()) {
-    cmCMakePresetsGraph presetsGraph;
-    auto result = presetsGraph.ReadProjectPresets(this->GetHomeDirectory());
-    if (result != true) {
-      std::string errorMsg =
-        cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
-                 ":\n", presetsGraph.parseState.GetErrorMessage());
-      cmSystemTools::Error(errorMsg);
-      return;
-    }
-
-    if (listPresets != ListPresets::None) {
-      if (listPresets == ListPresets::Configure) {
-        this->PrintPresetList(presetsGraph);
-      } else if (listPresets == ListPresets::Build) {
-        presetsGraph.PrintBuildPresetList();
-      } else if (listPresets == ListPresets::Test) {
-        presetsGraph.PrintTestPresetList();
-      } else if (listPresets == ListPresets::Package) {
-        presetsGraph.PrintPackagePresetList();
-      } else if (listPresets == ListPresets::Workflow) {
-        presetsGraph.PrintWorkflowPresetList();
-      } else if (listPresets == ListPresets::All) {
-        presetsGraph.PrintAllPresets();
-      }
-
-      this->State->SetRoleToHelpForListPresets();
-      return;
-    }
-
-    auto preset = presetsGraph.ConfigurePresets.find(presetName);
-    if (preset == presetsGraph.ConfigurePresets.end()) {
-      cmSystemTools::Error(cmStrCat("No such preset in ",
-                                    this->GetHomeDirectory(), ": \"",
-                                    presetName, '"'));
-      this->PrintPresetList(presetsGraph);
-      return;
-    }
-    if (preset->second.Unexpanded.Hidden) {
-      cmSystemTools::Error(cmStrCat("Cannot use hidden preset in ",
-                                    this->GetHomeDirectory(), ": \"",
-                                    presetName, '"'));
-      this->PrintPresetList(presetsGraph);
-      return;
-    }
-    auto const& expandedPreset = preset->second.Expanded;
-    if (!expandedPreset) {
-      cmSystemTools::Error(cmStrCat("Could not evaluate preset \"",
-                                    preset->second.Unexpanded.Name,
-                                    "\": Invalid macro expansion"));
-      return;
-    }
-    if (!expandedPreset->ConditionResult) {
-      cmSystemTools::Error(cmStrCat("Could not use disabled preset \"",
-                                    preset->second.Unexpanded.Name, '"'));
-      return;
-    }
-
-    if (!this->State->IsCacheLoaded() && !haveBArg &&
-        !expandedPreset->BinaryDir.empty()) {
-      this->SetHomeOutputDirectory(expandedPreset->BinaryDir);
-    }
-    if (!this->GlobalGenerator && !expandedPreset->Generator.empty()) {
-      if (!this->CreateAndSetGlobalGenerator(expandedPreset->Generator)) {
-        return;
-      }
-    }
-    this->UnprocessedPresetVariables = expandedPreset->CacheVariables;
-    this->UnprocessedPresetEnvironment = expandedPreset->Environment;
-
-    if (!expandedPreset->InstallDir.empty() &&
-        !this->State->GetInitializedCacheValue("CMAKE_INSTALL_PREFIX")) {
-      this->UnprocessedPresetVariables["CMAKE_INSTALL_PREFIX"] = {
-        "PATH", expandedPreset->InstallDir
-      };
-    }
-    if (!expandedPreset->ToolchainFile.empty() &&
-        !this->State->GetInitializedCacheValue("CMAKE_TOOLCHAIN_FILE")) {
-      this->UnprocessedPresetVariables["CMAKE_TOOLCHAIN_FILE"] = {
-        "FILEPATH", expandedPreset->ToolchainFile
-      };
-    }
-
-    if (!expandedPreset->ArchitectureStrategy ||
-        expandedPreset->ArchitectureStrategy ==
-          cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
-      if (!this->GeneratorPlatformSet &&
-          !expandedPreset->Architecture.empty()) {
-        this->SetGeneratorPlatform(expandedPreset->Architecture);
-      }
-    }
-    if (!expandedPreset->ToolsetStrategy ||
-        expandedPreset->ToolsetStrategy ==
-          cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
-      if (!this->GeneratorToolsetSet && !expandedPreset->Toolset.empty()) {
-        this->SetGeneratorToolset(expandedPreset->Toolset);
-      }
-    }
-
-    if (!expandedPreset->GraphVizFile.empty()) {
-      if (this->GraphVizFile.empty()) {
-        this->SetGraphVizFile(
-          cmSystemTools::CollapseFullPath(expandedPreset->GraphVizFile));
-      }
-    }
-
-    this->SetWarningFromPreset("dev", expandedPreset->WarnDev,
-                               expandedPreset->ErrorDev);
-    this->SetWarningFromPreset("deprecated", expandedPreset->WarnDeprecated,
-                               expandedPreset->ErrorDeprecated);
-    if (expandedPreset->WarnUninitialized == true) {
-      this->SetWarnUninitialized(true);
-    }
-    if (expandedPreset->WarnUnusedCli == false) {
-      this->SetWarnUnusedCli(false);
-    }
-    if (expandedPreset->WarnSystemVars == true) {
-      this->SetCheckSystemVars(true);
-    }
-    if (expandedPreset->DebugOutput == true) {
-      this->SetDebugOutputOn(true);
-    }
-    if (expandedPreset->DebugTryCompile == true) {
-      this->DebugTryCompileOn();
-    }
-    if (expandedPreset->DebugFind == true) {
-      this->SetDebugFindOutput(true);
-    }
-    if (expandedPreset->TraceMode &&
-        expandedPreset->TraceMode !=
-          cmCMakePresetsGraph::TraceEnableMode::Disable) {
-      this->SetTrace(true);
-      if (expandedPreset->TraceMode ==
-          cmCMakePresetsGraph::TraceEnableMode::Expand) {
-        this->SetTraceExpand(true);
-      }
-    }
-    if (expandedPreset->TraceFormat) {
-      this->SetTrace(true);
-      this->SetTraceFormat(*expandedPreset->TraceFormat);
-    }
-    if (!expandedPreset->TraceSource.empty()) {
-      this->SetTrace(true);
-      for (std::string const& filePaths : expandedPreset->TraceSource) {
-        this->AddTraceSource(filePaths);
-      }
-    }
-    if (!expandedPreset->TraceRedirect.empty()) {
-      this->SetTrace(true);
-      this->SetTraceFile(expandedPreset->TraceRedirect);
-    }
+    this->SetArgsFromPreset(presetName, listPresets, haveBArg);
   }
 #endif
 }
@@ -2135,6 +1973,162 @@ bool cmake::CreateAndSetGlobalGenerator(std::string const& name)
 }
 
 #ifndef CMAKE_BOOTSTRAP
+bool cmake::SetArgsFromPreset(std::string const& presetName,
+                              ListPresets listPresets, bool haveBinaryDirArg)
+{
+  cmCMakePresetsGraph presetsGraph;
+  auto result = presetsGraph.ReadProjectPresets(this->GetHomeDirectory());
+  if (result != true) {
+    std::string errorMsg =
+      cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ":\n",
+               presetsGraph.parseState.GetErrorMessage());
+    cmSystemTools::Error(errorMsg);
+    return false;
+  }
+
+  if (listPresets != ListPresets::None) {
+    if (listPresets == ListPresets::Configure) {
+      this->PrintPresetList(presetsGraph);
+    } else if (listPresets == ListPresets::Build) {
+      presetsGraph.PrintBuildPresetList();
+    } else if (listPresets == ListPresets::Test) {
+      presetsGraph.PrintTestPresetList();
+    } else if (listPresets == ListPresets::Package) {
+      presetsGraph.PrintPackagePresetList();
+    } else if (listPresets == ListPresets::Workflow) {
+      presetsGraph.PrintWorkflowPresetList();
+    } else if (listPresets == ListPresets::All) {
+      presetsGraph.PrintAllPresets();
+    }
+
+    this->State->SetRoleToHelpForListPresets();
+    return false;
+  }
+
+  auto preset = presetsGraph.ConfigurePresets.find(presetName);
+  if (preset == presetsGraph.ConfigurePresets.end()) {
+    cmSystemTools::Error(cmStrCat("No such preset in ",
+                                  this->GetHomeDirectory(), ": \"", presetName,
+                                  '"'));
+    this->PrintPresetList(presetsGraph);
+    return false;
+  }
+  if (preset->second.Unexpanded.Hidden) {
+    cmSystemTools::Error(cmStrCat("Cannot use hidden preset in ",
+                                  this->GetHomeDirectory(), ": \"", presetName,
+                                  '"'));
+    this->PrintPresetList(presetsGraph);
+    return false;
+  }
+  auto const& expandedPreset = preset->second.Expanded;
+  if (!expandedPreset) {
+    cmSystemTools::Error(cmStrCat("Could not evaluate preset \"",
+                                  preset->second.Unexpanded.Name,
+                                  "\": Invalid macro expansion"));
+    return false;
+  }
+  if (!expandedPreset->ConditionResult) {
+    cmSystemTools::Error(cmStrCat("Could not use disabled preset \"",
+                                  preset->second.Unexpanded.Name, '"'));
+    return false;
+  }
+
+  if (!this->State->IsCacheLoaded() && !haveBinaryDirArg &&
+      !expandedPreset->BinaryDir.empty()) {
+    this->SetHomeOutputDirectory(expandedPreset->BinaryDir);
+  }
+  if (!this->GlobalGenerator && !expandedPreset->Generator.empty()) {
+    if (!this->CreateAndSetGlobalGenerator(expandedPreset->Generator)) {
+      return false;
+    }
+  }
+  this->UnprocessedPresetVariables = expandedPreset->CacheVariables;
+  this->UnprocessedPresetEnvironment = expandedPreset->Environment;
+
+  if (!expandedPreset->InstallDir.empty() &&
+      !this->State->GetInitializedCacheValue("CMAKE_INSTALL_PREFIX")) {
+    this->UnprocessedPresetVariables["CMAKE_INSTALL_PREFIX"] = {
+      "PATH", expandedPreset->InstallDir
+    };
+  }
+  if (!expandedPreset->ToolchainFile.empty() &&
+      !this->State->GetInitializedCacheValue("CMAKE_TOOLCHAIN_FILE")) {
+    this->UnprocessedPresetVariables["CMAKE_TOOLCHAIN_FILE"] = {
+      "FILEPATH", expandedPreset->ToolchainFile
+    };
+  }
+
+  if (!expandedPreset->ArchitectureStrategy ||
+      expandedPreset->ArchitectureStrategy ==
+        cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
+    if (!this->GeneratorPlatformSet && !expandedPreset->Architecture.empty()) {
+      this->SetGeneratorPlatform(expandedPreset->Architecture);
+    }
+  }
+  if (!expandedPreset->ToolsetStrategy ||
+      expandedPreset->ToolsetStrategy ==
+        cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
+    if (!this->GeneratorToolsetSet && !expandedPreset->Toolset.empty()) {
+      this->SetGeneratorToolset(expandedPreset->Toolset);
+    }
+  }
+
+  if (!expandedPreset->GraphVizFile.empty()) {
+    if (this->GraphVizFile.empty()) {
+      this->SetGraphVizFile(
+        cmSystemTools::CollapseFullPath(expandedPreset->GraphVizFile));
+    }
+  }
+
+  this->SetWarningFromPreset("dev", expandedPreset->WarnDev,
+                             expandedPreset->ErrorDev);
+  this->SetWarningFromPreset("deprecated", expandedPreset->WarnDeprecated,
+                             expandedPreset->ErrorDeprecated);
+  if (expandedPreset->WarnUninitialized == true) {
+    this->SetWarnUninitialized(true);
+  }
+  if (expandedPreset->WarnUnusedCli == false) {
+    this->SetWarnUnusedCli(false);
+  }
+  if (expandedPreset->WarnSystemVars == true) {
+    this->SetCheckSystemVars(true);
+  }
+  if (expandedPreset->DebugOutput == true) {
+    this->SetDebugOutputOn(true);
+  }
+  if (expandedPreset->DebugTryCompile == true) {
+    this->DebugTryCompileOn();
+  }
+  if (expandedPreset->DebugFind == true) {
+    this->SetDebugFindOutput(true);
+  }
+  if (expandedPreset->TraceMode &&
+      expandedPreset->TraceMode !=
+        cmCMakePresetsGraph::TraceEnableMode::Disable) {
+    this->SetTrace(true);
+    if (expandedPreset->TraceMode ==
+        cmCMakePresetsGraph::TraceEnableMode::Expand) {
+      this->SetTraceExpand(true);
+    }
+  }
+  if (expandedPreset->TraceFormat) {
+    this->SetTrace(true);
+    this->SetTraceFormat(*expandedPreset->TraceFormat);
+  }
+  if (!expandedPreset->TraceSource.empty()) {
+    this->SetTrace(true);
+    for (std::string const& filePaths : expandedPreset->TraceSource) {
+      this->AddTraceSource(filePaths);
+    }
+  }
+  if (!expandedPreset->TraceRedirect.empty()) {
+    this->SetTrace(true);
+    this->SetTraceFile(expandedPreset->TraceRedirect);
+  }
+
+  return true;
+}
+
 void cmake::PrintPresetList(cmCMakePresetsGraph const& graph) const
 {
   std::vector<GeneratorInfo> generators;

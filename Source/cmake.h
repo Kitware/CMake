@@ -261,7 +261,20 @@ public:
   bool CreateAndSetGlobalGenerator(std::string const& name);
 
 #ifndef CMAKE_BOOTSTRAP
-  //! Print list of configure presets
+  enum class ListPresets
+  {
+    None,
+    Configure,
+    Build,
+    Test,
+    Package,
+    Workflow,
+    All,
+  };
+
+  bool SetArgsFromPreset(std::string const& presetName,
+                         ListPresets listPresets, bool haveBinaryDirArg);
+
   void PrintPresetList(cmCMakePresetsGraph const& graph) const;
 #endif
 
