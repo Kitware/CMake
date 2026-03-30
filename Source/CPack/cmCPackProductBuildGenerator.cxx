@@ -85,18 +85,9 @@ int cmCPackProductBuildGenerator::PackageFiles()
 
   std::string version = this->GetOption("CPACK_PACKAGE_VERSION");
   std::string productbuild = this->GetOption("CPACK_COMMAND_PRODUCTBUILD");
-  std::string identityName;
-  if (cmValue n = this->GetOption("CPACK_PRODUCTBUILD_IDENTITY_NAME")) {
-    identityName = n;
-  }
-  std::string keychainPath;
-  if (cmValue p = this->GetOption("CPACK_PRODUCTBUILD_KEYCHAIN_PATH")) {
-    keychainPath = p;
-  }
-  std::string identifier;
-  if (cmValue i = this->GetOption("CPACK_PRODUCTBUILD_IDENTIFIER")) {
-    identifier = i;
-  }
+  cmValue identityName = this->GetOption("CPACK_PRODUCTBUILD_IDENTITY_NAME");
+  cmValue keychainPath = this->GetOption("CPACK_PRODUCTBUILD_KEYCHAIN_PATH");
+  cmValue identifier = this->GetOption("CPACK_PRODUCTBUILD_IDENTIFIER");
 
   pkgCmd << productbuild << " --distribution \"" << packageDirFileName
          << "/Contents/distribution.dist\""
@@ -108,16 +99,17 @@ int cmCPackProductBuildGenerator::PackageFiles()
          << resDir
          << "\""
             " --version \""
-         << version << "\""
-         << (identifier.empty()
-               ? std::string{}
-               : cmStrCat(" --identifier \"", identifier, '"'))
-         << (identityName.empty() ? std::string{}
-                                  : cmStrCat(" --sign \"", identityName, '"'))
-         << (keychainPath.empty()
-               ? std::string{}
-               : cmStrCat(" --keychain \"", keychainPath, '"'))
-         << " \"" << packageFileNames[0] << '"';
+         << version << '"';
+  if (identifier) {
+    pkgCmd << " --identifier \"" << identifier << '"';
+  }
+  if (identityName) {
+    pkgCmd << " --sign \"" << identityName << '"';
+  }
+  if (keychainPath) {
+    pkgCmd << " --keychain \"" << keychainPath << '"';
+  }
+  pkgCmd << " \"" << packageFileNames[0] << '"';
 
   // Run ProductBuild
   return RunProductBuild(pkgCmd.str());
@@ -205,10 +197,10 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   // then copy them into the script directory and make
   // them executable
   if (preflight) {
-    this->CopyInstallScript(scriptDir, preflight, "preinstall");
+    this->CopyInstallScript(scriptDir, *preflight, "preinstall");
   }
   if (postflight) {
-    this->CopyInstallScript(scriptDir, postflight, "postinstall");
+    this->CopyInstallScript(scriptDir, *postflight, "postinstall");
   }
 
   // The command that will be used to run ProductBuild
@@ -216,7 +208,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
 
   std::string pkgId;
   if (cmValue n = this->GetOption("CPACK_PRODUCTBUILD_IDENTIFIER")) {
-    pkgId = n;
+    pkgId = *n;
   } else {
     pkgId = cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
                      this->GetOption("CPACK_PACKAGE_NAME"));
@@ -228,14 +220,8 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
 
   std::string version = this->GetOption("CPACK_PACKAGE_VERSION");
   std::string pkgbuild = this->GetOption("CPACK_COMMAND_PKGBUILD");
-  std::string identityName;
-  if (cmValue n = this->GetOption("CPACK_PKGBUILD_IDENTITY_NAME")) {
-    identityName = n;
-  }
-  std::string keychainPath;
-  if (cmValue p = this->GetOption("CPACK_PKGBUILD_KEYCHAIN_PATH")) {
-    keychainPath = p;
-  }
+  cmValue identityName = this->GetOption("CPACK_PKGBUILD_IDENTITY_NAME");
+  cmValue keychainPath = this->GetOption("CPACK_PKGBUILD_KEYCHAIN_PATH");
 
   pkgCmd << pkgbuild << " --root \"" << packageDir
          << "\""
@@ -248,16 +234,17 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
             " --version \""
          << version
          << "\""
-            " --install-location \"/\""
-         << (identityName.empty() ? std::string{}
-                                  : cmStrCat(" --sign \"", identityName, '"'))
-         << (keychainPath.empty()
-               ? std::string{}
-               : cmStrCat(" --keychain \"", keychainPath, '"'))
-         << " \"" << packageFile << '"';
+            " --install-location \"/\"";
+  if (identityName) {
+    pkgCmd << " --sign \"" << identityName << '"';
+  }
+  if (keychainPath) {
+    pkgCmd << " --keychain \"" << keychainPath << '"';
+  }
+  pkgCmd << " \"" << packageFile << '"';
 
   if (component && !component->Plist.empty()) {
-    pkgCmd << " --component-plist \"" << component->Plist << "\"";
+    pkgCmd << " --component-plist \"" << component->Plist << '"';
   }
 
   // Run ProductBuild
