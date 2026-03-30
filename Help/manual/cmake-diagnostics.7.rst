@@ -12,6 +12,8 @@ cmake-diagnostics(7)
 Introduction
 ============
 
+.. versionadded:: 4.4
+
 CMake Diagnostics are the mechanism by which CMake categorizes and presents
 certain advisory information about a project's configuration and the generation
 of its build system.  These diagnostics can be seen as the build system
