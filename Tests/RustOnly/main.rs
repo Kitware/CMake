@@ -17,5 +17,6 @@ fn main() {
     unsafe { liba_greet() };
     unsafe { libb_greet() };
     libc_greet();
+    libd_greet();
     unsafe { libe_greet() };
 }
