@@ -51,6 +51,11 @@ Run Tests
  must contain CMake preset files.
  See :manual:`preset <cmake-presets(7)>` for more details.
 
+ .. versionadded:: 3.30
+   The ``--test-dir`` option may optionally be specified with a different
+   binary directory than the one specified by the ``configurePreset`` key
+   of the test preset.
+
 .. option:: --list-presets
 
  Lists the available test presets. The current working directory must contain
