@@ -29,7 +29,7 @@ underlying build system tool.
 
 .. versionadded:: 3.21
   The ``PARALLEL_LEVEL`` argument can be used to set the
-  :option:`--parallel <cmake--build --parallel>` flag.
+  :cmake-build-option:`--parallel` flag.
 
 .. code-block:: cmake
 
@@ -39,7 +39,7 @@ This second signature is deprecated, but still available for backwards
 compatibility.  Use the first signature instead.
 
 It sets the given ``<cachevariable>`` to a command-line string as
-above but without the :option:`--target <cmake--build --target>` option.
+above but without the :cmake-build-option:`--target` option.
 The ``<makecommand>`` is ignored but should be the full path to
 devenv, nmake, make or one of the end user build tools
 for legacy invocations.

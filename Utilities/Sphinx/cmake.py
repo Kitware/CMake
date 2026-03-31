@@ -21,6 +21,7 @@ if sphinx.version_info >= (2,):
     from sphinx import addnodes
     from sphinx.directives import ObjectDescription, nl_escape_re
     from sphinx.domains import Domain, ObjType
+    from sphinx.domains.std import OptionXRefRole
     from sphinx.roles import XRefRole
     from sphinx.util import logging, ws_re
     from sphinx.util.docutils import ReferenceRole
@@ -585,6 +586,16 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
     #     pass
 
 
+class CMakeOptionXRefRole(OptionXRefRole):
+    def __init__(self, command: str) -> None:
+        self.command = command
+        super().__init__()
+
+    def __call__(self, typ, rawtext, text, *args, **kwargs):
+        content = f'{text} <{self.command} {text.split('=')[0]}>'
+        return super().__call__('std:option', text, content, *args, **kwargs)
+
+
 class CMakeXRefTransform(Transform):
 
     # Run this transform early since we insert nodes we want
@@ -670,6 +681,7 @@ class CMakeDomain(Domain):
         # Other `object_types` cannot be created except by the `CMakeTransform`
     }
     roles = {
+        # General CMake reference roles.
         'cref':       CMakeCRefRole(),
         'command':    CMakeXRefRole(fix_parens=True, lowercase=True),
         'cpack_gen':  CMakeXRefRole(),
@@ -689,6 +701,13 @@ class CMakeDomain(Domain):
         'prop_test':  CMakeXRefRole(),
         'prop_tgt':   CMakeXRefRole(),
         'manual':     CMakeXRefRole(),
+        # Roles for program-specific command-line options without the program
+        # name (which add the name to form the ref).
+        'cmake-option':         CMakeOptionXRefRole('cmake'),
+        'cmake-build-option':   CMakeOptionXRefRole('cmake--build'),
+        'cmake-install-option': CMakeOptionXRefRole('cmake--install'),
+        'cpack-option':         CMakeOptionXRefRole('cpack'),
+        'ctest-option':         CMakeOptionXRefRole('ctest'),
     }
     initial_data = {
         'objects': {},  # fullname -> ObjectEntry
