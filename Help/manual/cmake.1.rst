@@ -707,6 +707,11 @@ Options
  if the preset sets a variable called ``MYVAR`` to ``1``, but the user sets
  it to ``2`` with a ``-D`` argument, the value ``2`` is preferred.
 
+ .. versionadded:: 3.21
+   The ``-B`` option may optionally be specified with a different binary
+   directory than the one specified by the ``binaryDir`` key of the
+   configure preset.
+
 .. option:: --list-presets[=<type>]
 
  Lists the available presets of the specified ``<type>``.  Valid values for
