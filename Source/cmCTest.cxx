@@ -1818,51 +1818,11 @@ int cmCTest::Run(std::vector<std::string> const& args)
   bool processSteps = false;
   bool SRArgumentSpecified = false;
   std::vector<std::pair<std::string, bool>> runScripts;
+  bool listPresets = false;
+  std::string presetName;
 
   // copy the command line
   cm::append(this->Impl->InitialCommandLineArguments, args);
-
-  // check if a test preset was specified
-
-  bool listPresets =
-    find(args.begin(), args.end(), "--list-presets") != args.end();
-  auto it =
-    std::find_if(args.begin(), args.end(), [](std::string const& arg) -> bool {
-      return arg == "--preset" || cmHasLiteralPrefix(arg, "--preset=");
-    });
-  if (listPresets || it != args.end()) {
-    std::string errormsg;
-    bool success;
-
-    if (listPresets) {
-      // If listing presets we don't need a presetName
-      success = this->SetArgsFromPreset("", listPresets);
-    } else {
-      if (cmHasLiteralPrefix(*it, "--preset=")) {
-        auto const& presetName = it->substr(9);
-        if (presetName.empty()) {
-          cmSystemTools::Error("'--preset' requires an argument");
-          success = false;
-        } else {
-          success = this->SetArgsFromPreset(presetName, listPresets);
-        }
-      } else if (++it != args.end()) {
-        auto const& presetName = *it;
-        success = this->SetArgsFromPreset(presetName, listPresets);
-      } else {
-        cmSystemTools::Error("'--preset' requires an argument");
-        success = false;
-      }
-    }
-
-    if (listPresets) {
-      return success ? 0 : 1;
-    }
-
-    if (!success) {
-      return 1;
-    }
-  }
 
   auto const dashD = [this, &processSteps](std::string const& targ) -> bool {
     // AddTestsForDashboard parses the dashboard type and converts it
@@ -2044,6 +2004,23 @@ int cmCTest::Run(std::vector<std::string> const& args)
 
   using CommandArgument =
     cmCommandLineArgument<bool(std::string const& value)>;
+
+  auto const presetArguments = std::vector<CommandArgument>{
+    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
+                     [&listPresets](std::string const&) -> bool {
+                       listPresets = true;
+                       return true;
+                     } },
+    CommandArgument{ "--preset", "'--preset' requires an argument",
+                     CommandArgument::Values::One,
+                     [&presetName](std::string const& presetArg) -> bool {
+                       presetName = presetArg;
+                       return true;
+                     } }
+  };
+  auto const isPresetArgument = [&](std::string const& arg) -> bool {
+    return cmHasLiteralPrefix(arg, "--preset") || arg == "--list-presets";
+  };
 
   auto const arguments = std::vector<CommandArgument>{
     CommandArgument{ "--dashboard", CommandArgument::Values::One, dashD },
@@ -2516,7 +2493,31 @@ int cmCTest::Run(std::vector<std::string> const& args)
                      } },
   };
 
-  // process the command line arguments
+  // Process command line arguments for presets first, since other arguments
+  // can override those settings.
+  for (size_t i = 1; i < args.size(); ++i) {
+    std::string const& arg = args[i];
+    for (auto const& m : presetArguments) {
+      if (m.matches(arg)) {
+        if (!m.parse(arg, i, args)) {
+          return 1;
+        }
+        break;
+      }
+    }
+  }
+
+  if (listPresets || !presetName.empty()) {
+    bool success = this->SetArgsFromPreset(presetName, listPresets);
+    if (listPresets) {
+      return static_cast<int>(!success);
+    }
+    if (!success) {
+      return 1;
+    }
+  }
+
+  // Process the remaining command line arguments.
   bool hadPassthroughDelimiter = false;
   for (size_t i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
@@ -2558,8 +2559,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
         this->Impl->BuildAndTest.TestCommandArgs.emplace_back(args[i]);
       }
     }
-    if (!matched && cmHasPrefix(arg, '-') &&
-        !cmHasLiteralPrefix(arg, "--preset")) {
+    if (!matched && cmHasPrefix(arg, '-') && !isPresetArgument(arg)) {
       cmSystemTools::Error(cmStrCat("Unknown argument: ", arg));
       cmSystemTools::Error("Run 'ctest --help' for all supported options.");
       return 1;
