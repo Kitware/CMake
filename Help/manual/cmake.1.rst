@@ -794,8 +794,8 @@ following options:
   after ``--build``. The current working directory must contain CMake preset
   files. See :manual:`preset <cmake-presets(7)>` for more details.
 
-.. versionchanged:: 4.3
-  ``cmake --build`` now supports specifying a build directory and
+  .. versionadded:: 4.3
+    ``cmake --build`` now supports specifying a build directory and
     preset together.
 
 .. option:: --list-presets
