@@ -6,10 +6,11 @@ enable_testing()
 include(xcode_sign_adhoc.cmake)
 
 add_executable(fake_gtest fake_gtest.cpp)
+add_executable(fake::gtest ALIAS fake_gtest)
 xcode_sign_adhoc(fake_gtest)
 
 gtest_discover_tests(
-  fake_gtest
+  fake::gtest
   TEST_PREFIX TEST:
   TEST_SUFFIX !1
   EXTRA_ARGS how now "\"brown\" cow"
