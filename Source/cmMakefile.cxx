@@ -4275,14 +4275,24 @@ cmFindPackageStackRAII::~cmFindPackageStackRAII()
   this->Makefile->FindPackageStack = this->Makefile->FindPackageStack.Pop();
 
   if (!this->Makefile->FindPackageStack.Empty()) {
-    auto top = this->Makefile->FindPackageStack.Top();
+    // We have just finished an inner package found as a dependency of an
+    // outer package.  Targets created in the outer package after this
+    // point may depend on the inner package, so if they are exported,
+    // their find_dependency call for the outer package should be
+    // ordered after the find_dependency call for the inner package.
+    //
+    // Any targets created by the outer package before the inner package
+    // was loaded will have already saved a copy of the outer package
+    // stack with its original index.  Replace the top entry with a new
+    // one representing the same outer package with a new index.
+    cmFindPackageCall outer = this->Makefile->FindPackageStack.Top();
     this->Makefile->FindPackageStack = this->Makefile->FindPackageStack.Pop();
 
-    top.Index = this->Makefile->FindPackageStackNextIndex;
+    outer.Index = this->Makefile->FindPackageStackNextIndex;
     this->Makefile->FindPackageStackNextIndex++;
 
     this->Makefile->FindPackageStack =
-      this->Makefile->FindPackageStack.Push(top);
+      this->Makefile->FindPackageStack.Push(outer);
   }
 }
 
