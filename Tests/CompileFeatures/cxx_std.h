@@ -28,7 +28,9 @@
 #    define CXX_STD __cplusplus
 #  endif
 #elif defined(__NVCOMPILER)
-#  if __cplusplus == CXX_STD_17 && defined(__cpp_aggregate_paren_init)
+#  if __cplusplus > CXX_STD_20 && defined(__cpp_pp_embed)
+#    define CXX_STD /*CXX_STD_26*/ (CXX_STD_23 + 1)
+#  elif __cplusplus == CXX_STD_17 && defined(__cpp_aggregate_paren_init)
 #    define CXX_STD CXX_STD_20
 #  else
 #    define CXX_STD __cplusplus
