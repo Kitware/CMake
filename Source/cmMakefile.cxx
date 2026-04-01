@@ -4233,7 +4233,7 @@ cmMakefile::MacroPushPop::~MacroPushPop()
   this->Makefile->PopMacroScope(this->ReportError);
 }
 
-cmFindPackageStackRAII::cmFindPackageStackRAII(
+cmMakefile::FindPackageStackRAII::FindPackageStackRAII(
   cmMakefile* mf, std::string const& name,
   std::shared_ptr<cmPackageInformation const> pkgInfo)
   : Makefile(mf)
@@ -4247,7 +4247,7 @@ cmFindPackageStackRAII::cmFindPackageStackRAII(
   this->Makefile->FindPackageStackNextIndex++;
 }
 
-cmFindPackageStackRAII::~cmFindPackageStackRAII()
+cmMakefile::FindPackageStackRAII::~FindPackageStackRAII()
 {
   this->Makefile->FindPackageStackNextIndex =
     this->Makefile->FindPackageStack.Top().Index + 1;

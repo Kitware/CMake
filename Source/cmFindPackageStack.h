@@ -10,9 +10,7 @@
 
 #include <cm/optional>
 
-#include "cmStack.h"
-
-class cmMakefile;
+#include "cmConstStack.h"
 
 /**
  * This data represents the actual contents of find_package
@@ -44,42 +42,14 @@ public:
 };
 
 /**
- * RAII type to manage the find_package call stack.
- */
-// Note: implemented in cmMakefile.cxx
-class cmFindPackageStackRAII
-{
-  cmMakefile* Makefile;
-
-public:
-  cmFindPackageStackRAII(cmMakefile* mf, std::string const& pkg,
-                         std::shared_ptr<cmPackageInformation const> pkgInfo);
-  ~cmFindPackageStackRAII();
-
-  cmFindPackageStackRAII(cmFindPackageStackRAII const&) = delete;
-  cmFindPackageStackRAII& operator=(cmFindPackageStackRAII const&) = delete;
-};
-
-/**
  * Represents a stack of find_package calls with efficient value semantics.
  */
 class cmFindPackageStack
-  : protected cmStack<cmFindPackageCall, cmFindPackageStack>
+  : public cmConstStack<cmFindPackageCall, cmFindPackageStack>
 {
-  using cmStack::cmStack;
-  friend cmFindPackageStack::Base;
-  friend class cmFindPackageStackRAII;
-
-public:
-  using cmStack::Push;
-  using cmStack::Pop;
-  using cmStack::Empty;
-
-  cmFindPackageCall const& Top() const;
+  using cmConstStack::cmConstStack;
+  friend class cmConstStack<cmFindPackageCall, cmFindPackageStack>;
 };
 #ifndef cmFindPackageStack_cxx
-extern template class cmStack<cmFindPackageCall, cmFindPackageStack>;
-
-extern template cmFindPackageCall&
-cmStack<cmFindPackageCall, cmFindPackageStack>::Top<true>();
+extern template class cmConstStack<cmFindPackageCall, cmFindPackageStack>;
 #endif
