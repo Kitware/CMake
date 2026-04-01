@@ -51,7 +51,6 @@
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceGroup.h"
-#include "cmStack.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
@@ -4234,34 +4233,22 @@ cmMakefile::MacroPushPop::~MacroPushPop()
   this->Makefile->PopMacroScope(this->ReportError);
 }
 
-cmFindPackageStackRAII::cmFindPackageStackRAII(cmMakefile* mf,
-                                               std::string const& name)
+cmFindPackageStackRAII::cmFindPackageStackRAII(
+  cmMakefile* mf, std::string const& name,
+  std::shared_ptr<cmPackageInformation const> pkgInfo)
   : Makefile(mf)
 {
   this->Makefile->FindPackageStack =
     this->Makefile->FindPackageStack.Push(cmFindPackageCall{
       name,
-      cmPackageInformation(),
+      std::move(pkgInfo),
       this->Makefile->FindPackageStackNextIndex,
     });
   this->Makefile->FindPackageStackNextIndex++;
 }
 
-void cmFindPackageStackRAII::BindTop(cmPackageInformation*& value)
-{
-  if (this->Value) {
-    *this->Value = nullptr;
-  }
-  this->Value = &value;
-  value = &this->Makefile->FindPackageStack.cmStack::Top().PackageInfo;
-}
-
 cmFindPackageStackRAII::~cmFindPackageStackRAII()
 {
-  if (this->Value) {
-    *this->Value = nullptr;
-  }
-
   this->Makefile->FindPackageStackNextIndex =
     this->Makefile->FindPackageStack.Top().Index + 1;
   this->Makefile->FindPackageStack = this->Makefile->FindPackageStack.Pop();

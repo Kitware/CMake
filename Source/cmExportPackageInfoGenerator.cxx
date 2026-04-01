@@ -311,7 +311,8 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     auto pkgInfo = [](cmTarget* t) -> Package {
       cmFindPackageStack pkgStack = t->GetFindPackageStack();
       if (!pkgStack.Empty()) {
-        return std::make_pair(pkgStack.Top().Name, pkgStack.Top().PackageInfo);
+        return std::make_pair(pkgStack.Top().Name,
+                              *pkgStack.Top().PackageInfo);
       }
 
       cmPackageInformation package;
