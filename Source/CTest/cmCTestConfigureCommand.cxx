@@ -27,6 +27,85 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
+namespace {
+
+bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
+                               std::string const sourceDirectory,
+                               std::string const buildDirectory,
+                               std::string const options,
+                               std::string& configureCommand)
+{
+  cmValue cmakeGenerator = mf.GetDefinition("CTEST_CMAKE_GENERATOR");
+  if (!cmNonempty(cmakeGenerator)) {
+    status.SetError(
+      "called with no configure command specified.  "
+      "If this is a  \"built with CMake\" project, set "
+      "CTEST_CMAKE_GENERATOR. If not, set CTEST_CONFIGURE_COMMAND.");
+    return false;
+  }
+
+  bool const multiConfig = [&]() -> bool {
+    cmake* cm = mf.GetCMakeInstance();
+    auto gg = cm->CreateGlobalGenerator(cmakeGenerator);
+    return gg && gg->IsMultiConfig();
+  }();
+
+  bool const buildTypeInOptions =
+    options.find("CMAKE_BUILD_TYPE=") != std::string::npos ||
+    options.find("CMAKE_BUILD_TYPE:STRING=") != std::string::npos;
+
+  configureCommand = cmStrCat('"', cmSystemTools::GetCMakeCommand(), '"');
+
+  auto const optionsList = cmList(options);
+  for (std::string const& option : optionsList) {
+    configureCommand += " \"";
+    configureCommand += option;
+    configureCommand += "\"";
+  }
+
+  cmValue cmakeBuildType = mf.GetDefinition("CTEST_CONFIGURATION_TYPE");
+  if (!multiConfig && !buildTypeInOptions && cmNonempty(cmakeBuildType)) {
+    configureCommand += " \"-DCMAKE_BUILD_TYPE:STRING=";
+    configureCommand += cmakeBuildType;
+    configureCommand += "\"";
+  }
+
+  if (mf.IsOn("CTEST_USE_LAUNCHERS")) {
+    configureCommand += " \"-DCTEST_USE_LAUNCHERS:BOOL=TRUE\"";
+  }
+
+  configureCommand += " \"-G";
+  configureCommand += cmakeGenerator;
+  configureCommand += "\"";
+
+  cmValue cmakeGeneratorPlatform =
+    mf.GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
+  if (cmNonempty(cmakeGeneratorPlatform)) {
+    configureCommand += " \"-A";
+    configureCommand += *cmakeGeneratorPlatform;
+    configureCommand += "\"";
+  }
+
+  cmValue cmakeGeneratorToolset =
+    mf.GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
+  if (cmNonempty(cmakeGeneratorToolset)) {
+    configureCommand += " \"-T";
+    configureCommand += *cmakeGeneratorToolset;
+    configureCommand += "\"";
+  }
+
+  configureCommand += " \"-S";
+  configureCommand += cmSystemTools::CollapseFullPath(sourceDirectory);
+  configureCommand += "\"";
+
+  configureCommand += " \"-B";
+  configureCommand += cmSystemTools::CollapseFullPath(buildDirectory);
+  configureCommand += "\"";
+  return true;
+}
+
+} // namespace
+
 bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
                                                cmExecutionStatus& status) const
 {
@@ -42,85 +121,22 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     return false;
   }
 
+  std::string const sourceDirectory = !args.Source.empty()
+    ? args.Source
+    : mf.GetDefinition("CTEST_SOURCE_DIRECTORY");
+  if (sourceDirectory.empty() ||
+      !cmSystemTools::FileExists(sourceDirectory + "/CMakeLists.txt")) {
+    status.SetError("called with invalid source directory.  "
+                    "CTEST_SOURCE_DIRECTORY must be set to a directory "
+                    "that contains CMakeLists.txt.");
+    return false;
+  }
+
   std::string configureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
-  if (configureCommand.empty()) {
-    cmValue cmakeGenerator = mf.GetDefinition("CTEST_CMAKE_GENERATOR");
-    if (!cmNonempty(cmakeGenerator)) {
-      status.SetError(
-        "called with no configure command specified.  "
-        "If this is a  \"built with CMake\" project, set "
-        "CTEST_CMAKE_GENERATOR. If not, set CTEST_CONFIGURE_COMMAND.");
-      return false;
-    }
-
-    std::string const sourceDirectory = !args.Source.empty()
-      ? args.Source
-      : mf.GetDefinition("CTEST_SOURCE_DIRECTORY");
-    if (sourceDirectory.empty() ||
-        !cmSystemTools::FileExists(sourceDirectory + "/CMakeLists.txt")) {
-      status.SetError("called with invalid source directory.  "
-                      "CTEST_SOURCE_DIRECTORY must be set to a directory "
-                      "that contains CMakeLists.txt.");
-      return false;
-    }
-
-    bool const multiConfig = [&]() -> bool {
-      cmake* cm = mf.GetCMakeInstance();
-      auto gg = cm->CreateGlobalGenerator(cmakeGenerator);
-      return gg && gg->IsMultiConfig();
-    }();
-
-    bool const buildTypeInOptions =
-      args.Options.find("CMAKE_BUILD_TYPE=") != std::string::npos ||
-      args.Options.find("CMAKE_BUILD_TYPE:STRING=") != std::string::npos;
-
-    configureCommand = cmStrCat('"', cmSystemTools::GetCMakeCommand(), '"');
-
-    auto const options = cmList(args.Options);
-    for (std::string const& option : options) {
-      configureCommand += " \"";
-      configureCommand += option;
-      configureCommand += "\"";
-    }
-
-    cmValue cmakeBuildType = mf.GetDefinition("CTEST_CONFIGURATION_TYPE");
-    if (!multiConfig && !buildTypeInOptions && cmNonempty(cmakeBuildType)) {
-      configureCommand += " \"-DCMAKE_BUILD_TYPE:STRING=";
-      configureCommand += cmakeBuildType;
-      configureCommand += "\"";
-    }
-
-    if (mf.IsOn("CTEST_USE_LAUNCHERS")) {
-      configureCommand += " \"-DCTEST_USE_LAUNCHERS:BOOL=TRUE\"";
-    }
-
-    configureCommand += " \"-G";
-    configureCommand += cmakeGenerator;
-    configureCommand += "\"";
-
-    cmValue cmakeGeneratorPlatform =
-      mf.GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
-    if (cmNonempty(cmakeGeneratorPlatform)) {
-      configureCommand += " \"-A";
-      configureCommand += *cmakeGeneratorPlatform;
-      configureCommand += "\"";
-    }
-
-    cmValue cmakeGeneratorToolset =
-      mf.GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
-    if (cmNonempty(cmakeGeneratorToolset)) {
-      configureCommand += " \"-T";
-      configureCommand += *cmakeGeneratorToolset;
-      configureCommand += "\"";
-    }
-
-    configureCommand += " \"-S";
-    configureCommand += cmSystemTools::CollapseFullPath(sourceDirectory);
-    configureCommand += "\"";
-
-    configureCommand += " \"-B";
-    configureCommand += cmSystemTools::CollapseFullPath(buildDirectory);
-    configureCommand += "\"";
+  if (configureCommand.empty() &&
+      !ConstructConfigureCommand(status, mf, sourceDirectory, buildDirectory,
+                                 args.Options, configureCommand)) {
+    return false;
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Configure project\n",
