@@ -39,7 +39,7 @@ class cmFindPackageCall
 {
 public:
   std::string const Name;
-  cmPackageInformation PackageInfo;
+  std::shared_ptr<cmPackageInformation const> PackageInfo;
   unsigned int Index;
 };
 
@@ -50,19 +50,14 @@ public:
 class cmFindPackageStackRAII
 {
   cmMakefile* Makefile;
-  cmPackageInformation** Value = nullptr;
 
 public:
-  cmFindPackageStackRAII(cmMakefile* mf, std::string const& pkg);
+  cmFindPackageStackRAII(cmMakefile* mf, std::string const& pkg,
+                         std::shared_ptr<cmPackageInformation const> pkgInfo);
   ~cmFindPackageStackRAII();
 
   cmFindPackageStackRAII(cmFindPackageStackRAII const&) = delete;
   cmFindPackageStackRAII& operator=(cmFindPackageStackRAII const&) = delete;
-
-  /** Get a mutable pointer to the top of the stack.
-      The pointer is invalidated if BindTop is called again or when the
-      cmFindPackageStackRAII goes out of scope.  */
-  void BindTop(cmPackageInformation*& value);
 };
 
 /**
