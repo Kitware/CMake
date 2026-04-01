@@ -1225,8 +1225,8 @@ bool cmFindPackageCommand::FindPackage(
   FlushDebugBufferOnExit flushDebugBufferOnExit(*this);
   PushPopRootPathStack pushPopRootPathStack(*this);
   SetRestoreFindDefinitions setRestoreFindDefinitions(*this);
-  cmFindPackageStackRAII findPackageStackRAII(this->Makefile, this->Name,
-                                              this->PackageInfo);
+  cmMakefile::FindPackageStackRAII findPackageStackRAII(
+    this->Makefile, this->Name, this->PackageInfo);
 
   // See if we have been told to delegate to FetchContent or some other
   // redirected config package first. We have to check all names that
