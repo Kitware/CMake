@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 class cmMakefile;
@@ -25,7 +26,30 @@ bool VisibilityIsForInterface(Visibility vis);
 
 // Pre-defined FileSet types
 extern cm::string_view const HEADERS;
+extern cm::string_view const SOURCES;
 extern cm::string_view const CXX_MODULES;
+
+enum class FileSetLookup
+{
+  // Search for file sets attached to the target
+  Target,
+  // Search also file sets inherited from link libraries
+  Dependencies
+};
+
+struct FileSetDescriptor
+{
+  FileSetDescriptor(cm::string_view type, FileSetLookup lookup)
+    : Type(type)
+    , Lookup(lookup)
+  {
+  }
+
+  cm::string_view const Type;
+  FileSetLookup const Lookup;
+};
+
+cm::optional<FileSetDescriptor> GetFileSetDescriptor(cm::string_view type);
 
 std::vector<cm::string_view> const& GetKnownTypes();
 bool IsKnownType(cm::string_view type);

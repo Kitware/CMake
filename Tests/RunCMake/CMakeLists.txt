@@ -623,6 +623,8 @@ add_RunCMake_test(TargetArtifacts -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetProperties)
 add_RunCMake_test(FileSetProperties)
+add_RunCMake_test(FileSet-SOURCES -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                  -DMSVC_VERSION=${MSVC_VERSION})
 add_RunCMake_test(ToolchainFile)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)

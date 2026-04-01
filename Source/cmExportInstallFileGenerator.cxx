@@ -12,6 +12,8 @@
 
 #include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallTargetGenerator.h"
@@ -410,6 +412,27 @@ bool cmExportInstallFileGenerator::PopulateInterfaceProperties(
     properties);
 }
 
+bool cmExportInstallFileGenerator::PopulateFileSetInterfaceProperties(
+  cmTargetExport const* targetExport, ImportFileSetPropertyMap& properties)
+{
+  cmGeneratorTarget const* const gt = targetExport->Target;
+  cmGeneratorFileSets const* const gfs = gt->GetGeneratorFileSets();
+
+  bool result = true;
+
+  for (auto const& type : gfs->GetInterfaceFileSetTypes()) {
+    for (auto const* fileSet : gfs->GetInterfaceFileSets(type)) {
+      ImportPropertyMap& fsProperties = properties[fileSet->GetName()];
+      this->PopulateFileSetIncludeDirectoriesInterface(
+        gt, fileSet, cmGeneratorExpression::InstallInterface, fsProperties);
+      result = result &&
+        this->PopulateFileSetInterfaceProperties(
+          gt, fileSet, cmGeneratorExpression::InstallInterface, fsProperties);
+    }
+  }
+  return result;
+}
+
 namespace {
 bool isSubDirectory(std::string const& a, std::string const& b)
 {
@@ -610,6 +633,37 @@ void cmExportInstallFileGenerator::PopulateIncludeDirectoriesInterface(
   includes += sep + exportDirs;
   std::string prepro = cmGeneratorExpression::Preprocess(
     includes, preprocessRule, this->GetImportPrefixWithSlash());
+  if (!prepro.empty()) {
+    this->ResolveTargetsInGeneratorExpressions(prepro, target);
+
+    if (!this->CheckInterfaceDirs(prepro, target, propName)) {
+      return;
+    }
+    properties[propName] = prepro;
+  }
+}
+
+void cmExportInstallFileGenerator::PopulateFileSetIncludeDirectoriesInterface(
+  cmGeneratorTarget const* target, cmGeneratorFileSet const* fileSet,
+  cmGeneratorExpression::PreprocessContext preprocessRule,
+  ImportPropertyMap& properties)
+{
+  assert(preprocessRule == cmGeneratorExpression::InstallInterface);
+
+  char const* const propName = "INTERFACE_INCLUDE_DIRECTORIES";
+  cmValue includes = fileSet->GetProperty(propName);
+
+  if (!includes) {
+    return;
+  }
+  if (includes && includes->empty()) {
+    // Set to empty
+    properties[propName].clear();
+    return;
+  }
+
+  std::string prepro = cmGeneratorExpression::Preprocess(
+    *includes, preprocessRule, this->GetImportPrefixWithSlash());
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, target);
 

@@ -114,6 +114,10 @@ protected:
   bool PopulateInterfaceProperties(cmGeneratorTarget const* target,
                                    ImportPropertyMap& properties);
 
+  using cmExportFileGenerator::PopulateFileSetInterfaceProperties;
+  bool PopulateFileSetInterfaceProperties(
+    cmGeneratorTarget const* target, ImportFileSetPropertyMap& properties);
+
   struct TargetExportPrivate
   {
     TargetExportPrivate(cmGeneratorTarget* target,

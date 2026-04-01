@@ -53,7 +53,7 @@ using UseTo = cmGeneratorTarget::UseTo;
 void AddObjectEntries(cmGeneratorTarget const* headTarget,
                       cm::GenEx::Context const& context,
                       cmGeneratorExpressionDAGChecker* dagChecker,
-                      EvaluatedTargetPropertyEntries& entries)
+                      cm::EvaluatedTargetPropertyEntries& entries)
 {
   if (cmLinkImplementationLibraries const* impl =
         headTarget->GetLinkImplementationLibraries(context.Config,
@@ -73,7 +73,7 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
           ge.Parse(std::move(genex));
         cge->SetEvaluateForBuildsystem(true);
 
-        EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
+        cm::EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
         cmExpandList(cge->Evaluate(context, dagChecker, headTarget),
                      ee.Values);
         if (cge->GetHadContextSensitiveCondition()) {
@@ -89,7 +89,7 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
                        cmGeneratorFileSets const* fileSets,
                        cm::GenEx::Context const& context,
                        cmGeneratorExpressionDAGChecker* dagChecker,
-                       EvaluatedTargetPropertyEntries& entries)
+                       cm::EvaluatedTargetPropertyEntries& entries)
 {
   auto sources = fileSets->GetSources(context, headTarget, dagChecker);
   entries =
@@ -97,7 +97,7 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
 }
 
 bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
-                    EvaluatedTargetPropertyEntries& entries,
+                    cm::EvaluatedTargetPropertyEntries& entries,
                     std::vector<BT<std::string>>& srcs,
                     std::unordered_set<std::string>& uniqueSrcs,
                     bool debugSources,
@@ -107,7 +107,7 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
 
   bool contextDependent = entries.HadContextSensitiveCondition;
 
-  for (EvaluatedTargetPropertyEntry& entry : entries.Entries) {
+  for (cm::EvaluatedTargetPropertyEntry& entry : entries.Entries) {
     if (entry.ContextDependent) {
       contextDependent = true;
     }
@@ -213,18 +213,19 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     this, "SOURCES", nullptr, nullptr, context,
   };
 
-  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context, &dagChecker, this->SourceEntries);
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this, context, &dagChecker,
+                                      this->SourceEntries);
 
   std::unordered_set<std::string> uniqueSrcs;
   bool contextDependentDirectSources =
     processSources(this, config, entries, files, uniqueSrcs, debugSources);
 
   // Collect INTERFACE_SOURCES of all direct link-dependencies.
-  EvaluatedTargetPropertyEntries linkInterfaceSourcesEntries;
-  AddInterfaceEntries(this, "INTERFACE_SOURCES", context, &dagChecker,
-                      linkInterfaceSourcesEntries, IncludeRuntimeInterface::No,
-                      UseTo::Compile);
+  cm::EvaluatedTargetPropertyEntries linkInterfaceSourcesEntries;
+  cm::AddInterfaceEntries(this, "INTERFACE_SOURCES", context, &dagChecker,
+                          linkInterfaceSourcesEntries,
+                          cm::IncludeRuntimeInterface::No, UseTo::Compile);
   bool contextDependentInterfaceSources =
     processSources(this, config, linkInterfaceSourcesEntries, files,
                    uniqueSrcs, debugSources);
@@ -232,7 +233,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   // Collect TARGET_OBJECTS of direct object link-dependencies.
   bool contextDependentObjects = false;
   if (this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
-    EvaluatedTargetPropertyEntries linkObjectsEntries;
+    cm::EvaluatedTargetPropertyEntries linkObjectsEntries;
     AddObjectEntries(this, context, &dagChecker, linkObjectsEntries);
     contextDependentObjects = processSources(this, config, linkObjectsEntries,
                                              files, uniqueSrcs, debugSources);
@@ -243,8 +244,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   }
 
   // Collect this target's file sets.
-  EvaluatedTargetPropertyEntries fileSetEntries;
-  AddFileSetEntries(this, this->FileSets.get(), context, &dagChecker,
+  cmGeneratorExpressionDAGChecker fsDagChecker{
+    this, "SOURCES", nullptr, nullptr, context,
+  };
+
+  cm::EvaluatedTargetPropertyEntries fileSetEntries;
+  AddFileSetEntries(this, this->FileSets.get(), context, &fsDagChecker,
                     fileSetEntries);
   auto processFileSetEntry = [this, &config](cmSourceFile* sf) {
     auto const* fileSet = this->GetFileSetForSource(config, sf);
@@ -272,9 +277,19 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     processSources(this, config, fileSetEntries, files, uniqueSrcs,
                    debugSources, processFileSetEntry);
 
+  // Collect file sets INTERFACE_SOURCES of all direct link-dependencies.
+  cm::EvaluatedTargetPropertyEntries linkInterfaceFileSetsEntries;
+  cm::AddInterfaceFileSetsEntries(this, cm::FileSetMetadata::SOURCES,
+                                  "INTERFACE_SOURCES", context, &fsDagChecker,
+                                  linkInterfaceFileSetsEntries);
+  bool contextDependentInterfaceFileSets =
+    processSources(this, config, linkInterfaceFileSetsEntries, files,
+                   uniqueSrcs, debugSources);
+
   // Determine if sources are context-dependent or not.
   if (!contextDependentDirectSources && !contextDependentInterfaceSources &&
-      !contextDependentObjects && !contextDependentFileSets) {
+      !contextDependentObjects && !contextDependentFileSets &&
+      !contextDependentInterfaceFileSets) {
     this->SourcesAreContextDependent = Tribool::False;
   } else {
     this->SourcesAreContextDependent = Tribool::True;

@@ -49,14 +49,14 @@ auto const DL_BEGIN = "<DEVICE_LINK>"_s;
 auto const DL_END = "</DEVICE_LINK>"_s;
 
 void processOptions(cmGeneratorTarget const* tgt,
-                    EvaluatedTargetPropertyEntries const& entries,
+                    cm::EvaluatedTargetPropertyEntries const& entries,
                     std::vector<BT<std::string>>& options,
                     std::unordered_set<std::string>& uniqueOptions,
                     bool debugOptions, char const* logName, OptionsParse parse,
                     bool processDeviceOptions = false)
 {
   bool splitOption = !processDeviceOptions;
-  for (EvaluatedTargetPropertyEntry const& entry : entries.Entries) {
+  for (cm::EvaluatedTargetPropertyEntry const& entry : entries.Entries) {
     std::string usedOptions;
     for (std::string const& opt : entry.Values) {
       if (processDeviceOptions && (opt == DL_BEGIN || opt == DL_END)) {
@@ -222,7 +222,7 @@ constexpr char SBCS_DEFINITION_PREFIX[] = "_SBCS=";
 
 MsvcCharSetInfo GetMsvcCharSetInfo(
   cmGeneratorTarget const& tgt, std::string const& lang,
-  EvaluatedTargetPropertyEntries const& entries)
+  cm::EvaluatedTargetPropertyEntries const& entries)
 {
   using MsvcCharSet = cmGeneratorTarget::MsvcCharSet;
 
@@ -235,7 +235,7 @@ MsvcCharSetInfo GetMsvcCharSetInfo(
     return { MsvcCharSet::None, false };
   }
 
-  for (EvaluatedTargetPropertyEntry const& entry : entries.Entries) {
+  for (cm::EvaluatedTargetPropertyEntry const& entry : entries.Entries) {
     for (std::string const& value : entry.Values) {
       MsvcCharSet charSet = cmGeneratorTarget::GetMsvcCharSet(value);
       if (charSet != MsvcCharSet::None) {
@@ -289,11 +289,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
 
   this->DebugCompileOptionsDone = true;
 
-  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context, &dagChecker, this->CompileOptionsEntries);
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this, context, &dagChecker,
+                                      this->CompileOptionsEntries);
 
   AddInterfaceEntries(this, "INTERFACE_COMPILE_OPTIONS", context, &dagChecker,
-                      entries, IncludeRuntimeInterface::Yes);
+                      entries, cm::IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, result, uniqueOptions, debugOptions,
                  "compile options", OptionsParse::Shell);
@@ -332,11 +333,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
 
   this->DebugCompileFeaturesDone = true;
 
-  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context, &dagChecker, this->CompileFeaturesEntries);
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this, context, &dagChecker,
+                                      this->CompileFeaturesEntries);
 
   AddInterfaceEntries(this, "INTERFACE_COMPILE_FEATURES", context, &dagChecker,
-                      entries, IncludeRuntimeInterface::Yes);
+                      entries, cm::IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, result, uniqueFeatures, debugFeatures,
                  "compile features", OptionsParse::None);
@@ -382,11 +384,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
 
   this->DebugCompileDefinitionsDone = true;
 
-  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context, &dagChecker, this->CompileDefinitionsEntries);
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this, context, &dagChecker,
+                                      this->CompileDefinitionsEntries);
 
   AddInterfaceEntries(this, "INTERFACE_COMPILE_DEFINITIONS", context,
-                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
+                      &dagChecker, entries, cm::IncludeRuntimeInterface::Yes);
 
   // Add the character set definition
   MsvcCharSetInfo charSetInfo = GetMsvcCharSetInfo(*this, language, entries);
@@ -449,11 +452,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
 
   this->DebugPrecompileHeadersDone = true;
 
-  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context, &dagChecker, this->PrecompileHeadersEntries);
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this, context, &dagChecker,
+                                      this->PrecompileHeadersEntries);
 
   AddInterfaceEntries(this, "INTERFACE_PRECOMPILE_HEADERS", context,
-                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
+                      &dagChecker, entries, cm::IncludeRuntimeInterface::Yes);
 
   std::vector<BT<std::string>> list;
   processOptions(this, entries, list, uniqueOptions, debugDefines,
@@ -507,11 +511,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
 
   this->DebugLinkOptionsDone = true;
 
-  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context, &dagChecker, this->LinkOptionsEntries);
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this, context, &dagChecker,
+                                      this->LinkOptionsEntries);
 
   AddInterfaceEntries(this, "INTERFACE_LINK_OPTIONS", context, &dagChecker,
-                      entries, IncludeRuntimeInterface::Yes,
+                      entries, cm::IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() == cmPolicies::NEW
                         ? UseTo::Link
                         : UseTo::Compile);
@@ -684,12 +689,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
     this, "STATIC_LIBRARY_OPTIONS", nullptr, nullptr, context,
   };
 
-  EvaluatedTargetPropertyEntries entries;
+  cm::EvaluatedTargetPropertyEntries entries;
   if (cmValue linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
     std::unique_ptr<TargetPropertyEntry> entry = TargetPropertyEntry::Create(
       *this->LocalGenerator->GetCMakeInstance(), *linkOptions);
     entries.Entries.emplace_back(
-      EvaluateTargetPropertyEntry(this, context, &dagChecker, *entry));
+      cm::EvaluateTargetPropertyEntry(this, context, &dagChecker, *entry));
   }
   processOptions(this, entries, result, uniqueOptions, false,
                  "static library link options", OptionsParse::Shell);
@@ -729,7 +734,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
     this, "LINK_DEPENDS", nullptr, nullptr, context,
   };
 
-  EvaluatedTargetPropertyEntries entries;
+  cm::EvaluatedTargetPropertyEntries entries;
   if (cmValue linkDepends = this->GetProperty("LINK_DEPENDS")) {
     cmList depends{ *linkDepends };
     for (auto const& depend : depends) {
@@ -740,7 +745,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
     }
   }
   AddInterfaceEntries(this, "INTERFACE_LINK_DEPENDS", context, &dagChecker,
-                      entries, IncludeRuntimeInterface::Yes,
+                      entries, cm::IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() == cmPolicies::NEW
                         ? UseTo::Link
                         : UseTo::Compile);

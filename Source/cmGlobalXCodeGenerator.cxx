@@ -28,6 +28,8 @@
 #include "cmCustomCommandTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGeneratorFactory.h"
@@ -1091,6 +1093,12 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
       break;
   }
 
+  // lookup for the associated file set, if any.
+  //// sources are independent of the config but needed here
+  auto const& config = this->CurrentConfigurationTypes[0];
+  auto const* fileSet =
+    gtgt->GetGeneratorFileSets()->GetFileSetForSource(config, sf);
+
   // Explicitly add the explicit language flag before any other flag
   // so user flags can override it.
   gtgt->AddExplicitLanguageFlags(flags, *sf);
@@ -1104,6 +1112,15 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     lg->AppendCompileOptions(
       flags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
   }
+  // Add flags from file set properties.
+  if (fileSet) {
+    auto options = fileSet->BelongsTo(gtgt)
+      ? fileSet->GetCompileOptions(config, lang)
+      : fileSet->GetInterfaceCompileOptions(config, lang);
+    if (!options.empty()) {
+      lg->AppendCompileOptions(flags, cm::remove_BT(options));
+    }
+  }
 
   // Add per-source definitions.
   BuildObjectListOrString flagsBuild(this, false);
@@ -1113,6 +1130,15 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
       flagsBuild,
       genexInterpreter.Evaluate(*compile_defs, COMPILE_DEFINITIONS).c_str(),
       true);
+  }
+  // Add file set preprocessor definitions
+  if (fileSet) {
+    auto fsDefines = fileSet->BelongsTo(gtgt)
+      ? fileSet->GetCompileDefinitions(config, lang)
+      : fileSet->GetInterfaceCompileDefinitions(config, lang);
+    if (!fsDefines.empty()) {
+      this->AppendDefines(flagsBuild, cm::remove_BT(fsDefines), true);
+    }
   }
 
   if (sf->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
@@ -1126,8 +1152,17 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     flags += flagsBuild.GetString();
   }
 
-  // Add per-source include directories.
   std::vector<std::string> includes;
+  // Add include directories from file set properties.
+  if (fileSet) {
+    auto fsIncludes = fileSet->BelongsTo(gtgt)
+      ? fileSet->GetIncludeDirectories(config, lang)
+      : fileSet->GetInterfaceIncludeDirectories(config, lang);
+    if (!fsIncludes.empty()) {
+      lg->AppendIncludeDirectories(includes, cm::remove_BT(fsIncludes), *sf);
+    }
+  }
+  // Add per-source include directories.
   std::string const INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
   if (cmValue cincludes = sf->GetProperty(INCLUDE_DIRECTORIES)) {
     lg->AppendIncludeDirectories(

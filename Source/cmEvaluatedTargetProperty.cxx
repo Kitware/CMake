@@ -7,6 +7,7 @@
 
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
@@ -14,6 +15,7 @@
 
 struct cmGeneratorExpressionDAGChecker;
 
+namespace cm {
 EvaluatedTargetPropertyEntry::EvaluatedTargetPropertyEntry(
   cmLinkItem const& item, cmListFileBacktrace bt)
   : LinkItem(item)
@@ -72,6 +74,31 @@ void addInterfaceEntry(cmGeneratorTarget const* headTarget,
     }
   }
 }
+
+void addInterfaceFileSetsEntry(cmGeneratorTarget const* headTarget,
+                               cm::string_view type, std::string const& prop,
+                               cm::GenEx::Context const& context,
+                               cmGeneratorExpressionDAGChecker* dagChecker,
+                               EvaluatedTargetPropertyEntries& entries,
+                               std::vector<cmLinkItem> const& libraries)
+{
+  for (cmLinkItem const& lib : libraries) {
+    if (lib.Target) {
+      EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
+      // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
+      // caller's property and hand-evaluate it as if it were compiled.
+      // Create a context as cmCompiledGeneratorExpression::Evaluate does.
+      cm::GenEx::Evaluation eval(context, false, headTarget, headTarget, true,
+                                 lib.Backtrace);
+      cmExpandList(
+        lib.Target->GetGeneratorFileSets()->EvaluateInterfaceProperty(
+          type, prop, &eval, dagChecker),
+        ee.Values);
+      ee.ContextDependent = eval.HadContextSensitiveCondition;
+      entries.Entries.emplace_back(std::move(ee));
+    }
+  }
+}
 }
 
 void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
@@ -106,4 +133,20 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
                         impl->Libraries);
     }
   }
+}
+
+void AddInterfaceFileSetsEntries(cmGeneratorTarget const* headTarget,
+                                 cm::string_view type, std::string const& prop,
+                                 cm::GenEx::Context const& context,
+                                 cmGeneratorExpressionDAGChecker* dagChecker,
+                                 EvaluatedTargetPropertyEntries& entries)
+{
+  if (cmLinkImplementationLibraries const* impl =
+        headTarget->GetLinkImplementationLibraries(
+          context.Config, cmGeneratorTarget::UseTo::Compile)) {
+    entries.HadContextSensitiveCondition = impl->HadContextSensitiveCondition;
+    addInterfaceFileSetsEntry(headTarget, type, prop, context, dagChecker,
+                              entries, impl->Libraries);
+  }
+}
 }

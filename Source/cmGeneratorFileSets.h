@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -17,6 +18,7 @@
 namespace cm {
 namespace GenEx {
 struct Context;
+struct Evaluation;
 }
 }
 
@@ -64,7 +66,24 @@ public:
     cmGeneratorTarget const* target,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
 
+  std::vector<std::unique_ptr<TargetPropertyEntry>> GetInterfaceSources(
+    cm::GenEx::Context const& context, cmGeneratorTarget const* target,
+    cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
+  std::vector<std::unique_ptr<TargetPropertyEntry>> GetInterfaceSources(
+    std::string type, cm::GenEx::Context const& context,
+    cmGeneratorTarget const* target,
+    cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
+
+  std::string EvaluateInterfaceProperty(
+    cm::string_view type, std::string const& prop, cm::GenEx::Evaluation* eval,
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const;
+
 private:
+  std::vector<std::unique_ptr<cm::TargetPropertyEntry>> GetSources(
+    std::function<bool(cmGeneratorFileSet const*)> include,
+    cm::GenEx::Context const& context, cmGeneratorTarget const* target,
+    cmGeneratorExpressionDAGChecker* dagChecker) const;
+
   // file sets indexed by name
   std::map<std::string, std::unique_ptr<cmGeneratorFileSet>> FileSets;
   std::vector<cmGeneratorFileSet const*> AllFileSets;
@@ -75,10 +94,16 @@ private:
   std::unordered_map<cm::string_view, std::vector<cmGeneratorFileSet const*>>
     InterfaceFileSets;
 
+  mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
+  bool MaybeHaveInterfaceProperty(cm::string_view type,
+                                  std::string const& prop,
+                                  cm::GenEx::Evaluation* eval) const;
+
   struct InfoByConfig
   {
     bool BuiltCache = false;
     std::map<std::string, cmGeneratorFileSet const*> FileSetCache;
+    std::map<std::string, cmGeneratorFileSet const*> InterfaceFileSetCache;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
 

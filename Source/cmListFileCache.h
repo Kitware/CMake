@@ -6,6 +6,7 @@
 
 #include <iosfwd>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -205,6 +206,37 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& os, BT<std::string> const& s);
+
+namespace cm {
+// Helpers for basic type retrieval
+template <typename T>
+T remove_BT(BT<T> const& bt)
+{
+  return bt.Value;
+}
+
+template <typename T>
+std::vector<T> remove_BT(std::vector<BT<T>> const& container)
+{
+  std::vector<T> result;
+  result.reserve(container.size());
+  for (auto const& entry : container) {
+    result.emplace_back(entry.Value);
+  }
+
+  return result;
+}
+template <typename T>
+std::set<T> remove_BT(std::set<BT<T>> const& container)
+{
+  std::set<T> result;
+  for (auto const& entry : container) {
+    result.emplace(entry.Value);
+  }
+
+  return result;
+}
+}
 
 // Wrap type T as a value with potentially multiple backtraces.  For purposes
 // of ordering and equality comparison, only the original value is used.  The

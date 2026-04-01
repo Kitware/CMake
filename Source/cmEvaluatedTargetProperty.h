@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
 
@@ -20,6 +22,7 @@ struct Context;
 class cmLinkItem;
 struct cmGeneratorExpressionDAGChecker;
 
+namespace cm {
 // Represent a target property entry after evaluating generator expressions
 // and splitting up lists.
 struct EvaluatedTargetPropertyEntry
@@ -82,3 +85,10 @@ void AddInterfaceEntries(
   EvaluatedTargetPropertyEntries& entries,
   IncludeRuntimeInterface searchRuntime,
   cmGeneratorTarget::UseTo usage = cmGeneratorTarget::UseTo::Compile);
+
+void AddInterfaceFileSetsEntries(cmGeneratorTarget const* headTarget,
+                                 cm::string_view type, std::string const& prop,
+                                 cm::GenEx::Context const& context,
+                                 cmGeneratorExpressionDAGChecker* dagChecker,
+                                 EvaluatedTargetPropertyEntries& entries);
+}

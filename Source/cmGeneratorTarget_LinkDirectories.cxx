@@ -30,12 +30,12 @@
 
 namespace {
 void processLinkDirectories(cmGeneratorTarget const* tgt,
-                            EvaluatedTargetPropertyEntries& entries,
+                            cm::EvaluatedTargetPropertyEntries& entries,
                             std::vector<BT<std::string>>& directories,
                             std::unordered_set<std::string>& uniqueDirectories,
                             bool debugDirectories)
 {
-  for (EvaluatedTargetPropertyEntry& entry : entries.Entries) {
+  for (cm::EvaluatedTargetPropertyEntry& entry : entries.Entries) {
     cmLinkItem const& item = entry.LinkItem;
     std::string const& targetName = item.AsStr();
 
@@ -135,11 +135,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
 
   this->DebugLinkDirectoriesDone = true;
 
-  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context, &dagChecker, this->LinkDirectoriesEntries);
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this, context, &dagChecker,
+                                      this->LinkDirectoriesEntries);
 
   AddInterfaceEntries(this, "INTERFACE_LINK_DIRECTORIES", context, &dagChecker,
-                      entries, IncludeRuntimeInterface::Yes,
+                      entries, cm::IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() == cmPolicies::NEW
                         ? UseTo::Link
                         : UseTo::Compile);

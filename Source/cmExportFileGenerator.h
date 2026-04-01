@@ -18,6 +18,7 @@
 
 class cmExportSet;
 class cmGeneratorTarget;
+class cmGeneratorFileSet;
 class cmLocalGenerator;
 
 /** \class cmExportFileGenerator
@@ -48,6 +49,7 @@ public:
 
 protected:
   using ImportPropertyMap = std::map<std::string, std::string>;
+  using ImportFileSetPropertyMap = std::map<std::string, ImportPropertyMap>;
 
   // Collect properties with detailed information about targets beyond
   // their location on disk.
@@ -112,6 +114,10 @@ protected:
                                  cmGeneratorTarget const* target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap& properties);
+  void PopulateFileSetInterfaceProperty(
+    std::string const& propName, cmGeneratorTarget const* target,
+    cmGeneratorFileSet const* fileSet,
+    cmGeneratorExpression::PreprocessContext, ImportPropertyMap& properties);
   bool PopulateInterfaceLinkLibrariesProperty(
     cmGeneratorTarget const* target, cmGeneratorExpression::PreprocessContext,
     ImportPropertyMap& properties);
@@ -119,6 +125,11 @@ protected:
   bool PopulateInterfaceProperties(
     cmGeneratorTarget const* target,
     std::string const& includesDestinationDirs,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties);
+
+  bool PopulateFileSetInterfaceProperties(
+    cmGeneratorTarget const* target, cmGeneratorFileSet const* fileSet,
     cmGeneratorExpression::PreprocessContext preprocessRule,
     ImportPropertyMap& properties);
 

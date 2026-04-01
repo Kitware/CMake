@@ -11,6 +11,8 @@
 
 #include "cmExportSet.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
@@ -283,4 +285,25 @@ bool cmExportBuildFileGenerator::PopulateInterfaceProperties(
 
   return this->PopulateInterfaceProperties(
     target, {}, cmGeneratorExpression::BuildInterface, properties);
+}
+
+bool cmExportBuildFileGenerator::PopulateFileSetInterfaceProperties(
+  cmGeneratorTarget const* target, ImportFileSetPropertyMap& properties)
+{
+  cmGeneratorFileSets const* const gfs = target->GetGeneratorFileSets();
+  bool result = true;
+
+  for (auto const& type : gfs->GetInterfaceFileSetTypes()) {
+    for (auto const* fileSet : gfs->GetInterfaceFileSets(type)) {
+      ImportPropertyMap& fsProperties = properties[fileSet->GetName()];
+      this->PopulateFileSetInterfaceProperty(
+        "INTERFACE_INCLUDE_DIRECTORIES", target, fileSet,
+        cmGeneratorExpression::BuildInterface, fsProperties);
+      result = result &&
+        this->PopulateFileSetInterfaceProperties(
+          target, fileSet, cmGeneratorExpression::InstallInterface,
+          fsProperties);
+    }
+  }
+  return result;
 }

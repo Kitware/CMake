@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmGhsMultiGpj.h"
 
 class cmCustomCommand;
@@ -17,6 +19,7 @@ class cmGlobalGhsMultiGenerator;
 class cmLocalGhsMultiGenerator;
 class cmMakefile;
 class cmSourceFile;
+class cmGeneratorFileSet;
 
 class cmGhsMultiTargetGenerator
 {
@@ -65,6 +68,10 @@ private:
   void WriteSourceProperty(std::ostream& fout, cmSourceFile const* sf,
                            std::string const& propName,
                            std::string const& propFlag);
+  void WriteFileSetProperty(std::ostream& fout,
+                            cmGeneratorFileSet const* fileSet,
+                            std::string const& lang, cm::string_view propName,
+                            cm::string_view propFlag);
   static std::string WriteObjectLangOverride(cmSourceFile const* sourceFile);
 
   bool DetermineIfIntegrityApp();

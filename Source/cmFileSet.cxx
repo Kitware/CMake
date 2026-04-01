@@ -16,6 +16,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
@@ -55,6 +56,33 @@ void cmFileSet::ClearFileEntries()
 void cmFileSet::AddFileEntry(BT<std::string> files)
 {
   this->FileEntries.push_back(std::move(files));
+}
+
+cmBTStringRange cmFileSet::GetIncludeDirectories() const
+{
+  return cmMakeRange(this->IncludeDirectories);
+}
+cmBTStringRange cmFileSet::GetInterfaceIncludeDirectories() const
+{
+  return cmMakeRange(this->InterfaceIncludeDirectories);
+}
+
+cmBTStringRange cmFileSet::GetCompileOptions() const
+{
+  return cmMakeRange(this->CompileOptions);
+}
+cmBTStringRange cmFileSet::GetInterfaceCompileOptions() const
+{
+  return cmMakeRange(this->InterfaceCompileOptions);
+}
+
+cmBTStringRange cmFileSet::GetCompileDefinitions() const
+{
+  return cmMakeRange(this->CompileDefinitions);
+}
+cmBTStringRange cmFileSet::GetInterfaceCompileDefinitions() const
+{
+  return cmMakeRange(this->InterfaceCompileDefinitions);
 }
 
 namespace {
@@ -142,9 +170,15 @@ bool IsSettableProperty(cmMakefile* context, cmTarget* target,
 cm::string_view const BASE_DIRS = "BASE_DIRS"_s;
 cm::string_view const SOURCES = "SOURCES"_s;
 cm::string_view const INTERFACE_SOURCES = "INTERFACE_SOURCES"_s;
-cm::string_view const COMPILE_DEFINITIONS = "COMPILE_DEFINITIONS"_s;
-cm::string_view const COMPILE_OPTIONS = "COMPILE_OPTIONS"_s;
 cm::string_view const INCLUDE_DIRECTORIES = "INCLUDE_DIRECTORIES"_s;
+cm::string_view const INTERFACE_INCLUDE_DIRECTORIES =
+  "INTERFACE_INCLUDE_DIRECTORIES"_s;
+cm::string_view const COMPILE_DEFINITIONS = "COMPILE_DEFINITIONS"_s;
+cm::string_view const INTERFACE_COMPILE_DEFINITIONS =
+  "INTERFACE_COMPILE_DEFINITIONS"_s;
+cm::string_view const COMPILE_OPTIONS = "COMPILE_OPTIONS"_s;
+cm::string_view const INTERFACE_COMPILE_OPTIONS =
+  "INTERFACE_COMPILE_OPTIONS"_s;
 }
 
 void cmFileSet::SetProperty(std::string const& prop, cmValue value)
@@ -178,22 +212,58 @@ void cmFileSet::SetProperty(std::string const& prop, cmValue value)
       this->AddFileEntry(BT<std::string>{ value, lfbt });
     }
   } else if (prop == INCLUDE_DIRECTORIES) {
+    if (!this->IsForSelf()) {
+      return;
+    }
     this->IncludeDirectories.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->IncludeDirectories.emplace_back(value, lfbt);
     }
+  } else if (prop == INTERFACE_INCLUDE_DIRECTORIES) {
+    if (!this->IsForInterface()) {
+      return;
+    }
+    this->InterfaceIncludeDirectories.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->InterfaceIncludeDirectories.emplace_back(value, lfbt);
+    }
   } else if (prop == COMPILE_OPTIONS) {
+    if (!this->IsForSelf()) {
+      return;
+    }
     this->CompileOptions.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->CompileOptions.emplace_back(value, lfbt);
     }
+  } else if (prop == INTERFACE_COMPILE_OPTIONS) {
+    if (!this->IsForInterface()) {
+      return;
+    }
+    this->InterfaceCompileOptions.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->InterfaceCompileOptions.emplace_back(value, lfbt);
+    }
   } else if (prop == COMPILE_DEFINITIONS) {
+    if (!this->IsForSelf()) {
+      return;
+    }
     this->CompileDefinitions.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->CompileDefinitions.emplace_back(value, lfbt);
+    }
+  } else if (prop == INTERFACE_COMPILE_DEFINITIONS) {
+    if (!this->IsForInterface()) {
+      return;
+    }
+    this->InterfaceCompileDefinitions.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->InterfaceCompileDefinitions.emplace_back(value, lfbt);
     }
   } else {
     this->Properties.SetProperty(prop, value);
@@ -229,19 +299,52 @@ void cmFileSet::AppendProperty(std::string const& prop,
       this->AddFileEntry(BT<std::string>{ value, lfbt });
     }
   } else if (prop == INCLUDE_DIRECTORIES) {
+    if (!this->IsForSelf()) {
+      return;
+    }
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->IncludeDirectories.emplace_back(value, lfbt);
     }
+  } else if (prop == INTERFACE_INCLUDE_DIRECTORIES) {
+    if (!this->IsForInterface()) {
+      return;
+    }
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->InterfaceIncludeDirectories.emplace_back(value, lfbt);
+    }
   } else if (prop == COMPILE_OPTIONS) {
+    if (!this->IsForSelf()) {
+      return;
+    }
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->CompileOptions.emplace_back(value, lfbt);
     }
+  } else if (prop == INTERFACE_COMPILE_OPTIONS) {
+    if (!this->IsForInterface()) {
+      return;
+    }
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->InterfaceCompileOptions.emplace_back(value, lfbt);
+    }
   } else if (prop == COMPILE_DEFINITIONS) {
+    if (!this->IsForSelf()) {
+      return;
+    }
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
       this->CompileDefinitions.emplace_back(value, lfbt);
+    }
+  } else if (prop == INTERFACE_COMPILE_DEFINITIONS) {
+    if (!this->IsForInterface()) {
+      return;
+    }
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->InterfaceCompileDefinitions.emplace_back(value, lfbt);
     }
   } else {
     this->Properties.AppendProperty(prop, value, asString);
@@ -286,6 +389,16 @@ cmValue cmFileSet::GetProperty(std::string const& prop) const
     return cmValue(output);
   }
 
+  if (prop == INTERFACE_INCLUDE_DIRECTORIES) {
+    if (this->InterfaceIncludeDirectories.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmList::to_string(this->InterfaceIncludeDirectories);
+    return cmValue(output);
+  }
+
   if (prop == COMPILE_OPTIONS) {
     if (this->CompileOptions.empty()) {
       return nullptr;
@@ -296,6 +409,16 @@ cmValue cmFileSet::GetProperty(std::string const& prop) const
     return cmValue(output);
   }
 
+  if (prop == INTERFACE_COMPILE_OPTIONS) {
+    if (this->InterfaceCompileOptions.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmList::to_string(this->InterfaceCompileOptions);
+    return cmValue(output);
+  }
+
   if (prop == COMPILE_DEFINITIONS) {
     if (this->CompileDefinitions.empty()) {
       return nullptr;
@@ -303,6 +426,16 @@ cmValue cmFileSet::GetProperty(std::string const& prop) const
 
     static std::string output;
     output = cmList::to_string(this->CompileDefinitions);
+    return cmValue(output);
+  }
+
+  if (prop == INTERFACE_COMPILE_DEFINITIONS) {
+    if (this->InterfaceCompileDefinitions.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmList::to_string(this->InterfaceCompileDefinitions);
     return cmValue(output);
   }
 

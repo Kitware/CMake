@@ -97,7 +97,7 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
 void AddLangSpecificImplicitIncludeDirectories(
   cmGeneratorTarget const* target, std::string const& lang,
   std::string const& config, std::string const& propertyName,
-  IncludeDirectoryFallBack mode, EvaluatedTargetPropertyEntries& entries)
+  IncludeDirectoryFallBack mode, cm::EvaluatedTargetPropertyEntries& entries)
 {
   if (auto const* libraries =
         target->GetLinkImplementationLibraries(config, UseTo::Compile)) {
@@ -113,7 +113,7 @@ void AddLangSpecificImplicitIncludeDirectories(
         }
         if (cm::contains(dependency->GetAllConfigCompileLanguages(), lang)) {
           auto* lg = dependency->GetLocalGenerator();
-          EvaluatedTargetPropertyEntry entry{ library, library.Backtrace };
+          cm::EvaluatedTargetPropertyEntry entry{ library, library.Backtrace };
 
           if (lang == "Swift") {
             entry.Values.emplace_back(
@@ -141,12 +141,12 @@ void AddLangSpecificImplicitIncludeDirectories(
 }
 
 void processIncludeDirectories(cmGeneratorTarget const* tgt,
-                               EvaluatedTargetPropertyEntries& entries,
+                               cm::EvaluatedTargetPropertyEntries& entries,
                                std::vector<BT<std::string>>& includes,
                                std::unordered_set<std::string>& uniqueIncludes,
                                bool debugIncludes)
 {
-  for (EvaluatedTargetPropertyEntry& entry : entries.Entries) {
+  for (cm::EvaluatedTargetPropertyEntry& entry : entries.Entries) {
     cmLinkItem const& item = entry.LinkItem;
     std::string const& targetName = item.AsStr();
     bool const fromImported = item.Target && item.Target->IsImported();
@@ -237,8 +237,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
 
   this->DebugIncludesDone = true;
 
-  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context, &dagChecker, this->IncludeDirectoriesEntries);
+  cm::EvaluatedTargetPropertyEntries entries =
+    cm::EvaluateTargetPropertyEntries(this, context, &dagChecker,
+                                      this->IncludeDirectoriesEntries);
 
   if (lang == "Swift") {
     AddLangSpecificImplicitIncludeDirectories(
@@ -266,7 +267,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   }
 
   AddInterfaceEntries(this, "INTERFACE_INCLUDE_DIRECTORIES", context,
-                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
+                      &dagChecker, entries, cm::IncludeRuntimeInterface::Yes);
 
   processIncludeDirectories(this, entries, includes, uniqueIncludes,
                             debugIncludes);
