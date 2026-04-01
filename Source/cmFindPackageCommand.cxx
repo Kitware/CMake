@@ -1668,12 +1668,6 @@ bool cmFindPackageCommand::HandlePackageMode(
         "fileFound is true but FileFound is empty!");
       fileFound = false;
     }
-
-    if (fileFound) {
-      this->CurrentPackageInfo->Directory =
-        cmSystemTools::GetFilenamePath(this->FileFound);
-      this->CurrentPackageInfo->Version = this->VersionFound;
-    }
   }
 
   std::string const foundVar = cmStrCat(this->Name, "_FOUND");
@@ -1734,6 +1728,12 @@ bool cmFindPackageCommand::HandlePackageMode(
     } else {
       // The configuration file is invalid.
       result = false;
+    }
+
+    if (this->UseConfigFiles && found) {
+      this->CurrentPackageInfo->Directory =
+        cmSystemTools::GetFilenamePath(this->FileFound);
+      this->CurrentPackageInfo->Version = this->VersionFound;
     }
   }
 
