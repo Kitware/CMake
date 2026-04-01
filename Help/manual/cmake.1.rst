@@ -707,6 +707,11 @@ Options
  if the preset sets a variable called ``MYVAR`` to ``1``, but the user sets
  it to ``2`` with a ``-D`` argument, the value ``2`` is preferred.
 
+ .. versionadded:: 3.21
+   The ``-B`` option may optionally be specified with a different binary
+   directory than the one specified by the ``binaryDir`` key of the
+   configure preset.
+
 .. option:: --list-presets[=<type>]
 
  Lists the available presets of the specified ``<type>``.  Valid values for
@@ -794,8 +799,8 @@ following options:
   after ``--build``. The current working directory must contain CMake preset
   files. See :manual:`preset <cmake-presets(7)>` for more details.
 
-.. versionchanged:: 4.3
-  ``cmake --build`` now supports specifying a build directory and
+  .. versionadded:: 4.3
+    ``cmake --build`` now supports specifying a build directory and
     preset together.
 
 .. option:: --list-presets
