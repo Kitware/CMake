@@ -1732,6 +1732,12 @@ bool cmFindPackageCommand::HandlePackageMode(
       // The configuration file is invalid.
       result = false;
     }
+
+    if (this->UseConfigFiles && found) {
+      this->CurrentPackageInfo->Directory =
+        cmSystemTools::GetFilenamePath(this->FileFound);
+      this->CurrentPackageInfo->Version = this->VersionFound;
+    }
   }
 
   if (this->UseFindModules && !found &&
@@ -1975,8 +1981,6 @@ bool cmFindPackageCommand::FindConfig()
   std::string init;
   if (found) {
     init = cmSystemTools::GetFilenamePath(this->FileFound);
-    this->CurrentPackageInfo->Directory = init;
-    this->CurrentPackageInfo->Version = this->VersionFound;
   } else {
     init = this->Variable + "-NOTFOUND";
   }
