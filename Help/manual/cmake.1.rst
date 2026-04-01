@@ -99,9 +99,8 @@ Generator
   This chooses the kind of buildsystem to generate.  See the
   :manual:`cmake-generators(7)` manual for documentation of all generators.
   Run :option:`cmake --help` to see a list of generators available locally.
-  Optionally use the :option:`-G <cmake -G>` option below to specify a
-  generator, or simply accept the default CMake chooses for the current
-  platform.
+  Optionally use the :cmake-option:`-G` option below to specify a generator,
+  or simply accept the default CMake chooses for the current platform.
 
   When using one of the :ref:`Command-Line Build Tool Generators`
   CMake expects that the environment needed by the compiler toolchain
@@ -158,11 +157,11 @@ source and build trees and generate a buildsystem:
 In all cases the ``<options>`` may be zero or more of the `Options`_ below.
 
 The above styles for specifying the source and build trees may be mixed.
-Paths specified with :option:`-S <cmake -S>` or :option:`-B <cmake -B>`
-are always classified as source or build trees, respectively.  Paths
-specified with plain arguments are classified based on their content
-and the types of paths given earlier.  If only one type of path is given,
-the current working directory (cwd) is used for the other.  For example:
+Paths specified with :cmake-option:`-S` or :cmake-option:`-B` are always
+classified as source or build trees, respectively.  Paths specified with plain
+arguments are classified based on their content and the types of paths given
+earlier.  If only one type of path is given, the current working directory
+(cwd) is used for the other.  For example:
 
 ============================== ============ ===========
  Command Line                   Source Dir   Build Dir
@@ -225,12 +224,12 @@ Options
  List non-advanced cached variables.
 
  List ``CACHE`` variables will run CMake and list all the variables from
- the CMake ``CACHE`` that are not marked as ``INTERNAL`` or :prop_cache:`ADVANCED`.
- This will effectively display current CMake settings, which can then be
- changed with :option:`-D <cmake -D>` option.  Changing some of the variables
- may result in more variables being created.  If ``A`` is specified, then it
- will display also advanced variables.  If ``H`` is specified, it will also
- display help for each variable.
+ the CMake ``CACHE`` that are not marked as ``INTERNAL`` or
+ :prop_cache:`ADVANCED`.  This will effectively display current CMake
+ settings, which can then be changed with :cmake-option:`-D` option.
+ Changing some of the variables may result in more variables being created.
+ If ``A`` is specified, then it will display also advanced variables.
+ If ``H`` is specified, it will also display help for each variable.
 
 .. option:: -LR[A][H] <regex>
 
@@ -499,7 +498,7 @@ Options
  is an entry in the given comma-separated list of case-sensitive package
  names.
 
- Like :option:`--debug-find <cmake --debug-find>`, but limiting scope
+ Like :cmake-option:`--debug-find`, but limiting scope
  to the specified packages.
 
 .. option:: --debug-find-var=<var>[,...]
@@ -510,7 +509,7 @@ Options
  as the result variable, where ``<var>`` is an entry in the given
  comma-separated list.
 
- Like :option:`--debug-find <cmake --debug-find>`, but limiting scope
+ Like :cmake-option:`--debug-find`, but limiting scope
  to the specified variable names.
 
 .. option:: --trace
@@ -523,7 +522,7 @@ Options
 
  Put cmake in trace mode.
 
- Like :option:`--trace <cmake --trace>`, but with variables expanded.
+ Like :cmake-option:`--trace`, but with variables expanded.
 
 .. option:: --trace-format=<format>
 
@@ -669,9 +668,8 @@ Options
 
  .. versionadded:: 3.18
 
- Used in conjunction with
- :option:`--profiling-format <cmake --profiling-format>` to output to a
- given path.
+ Used in conjunction with :cmake-option:`--profiling-format`
+ to output to a given path.
 
 .. option:: --profiling-format=<file>
 
@@ -698,9 +696,9 @@ Options
  on these files, see :manual:`cmake-presets(7)`.
 
  The presets are read before all other command line options, although the
- :option:`-S <cmake -S>` option can be used to specify the source directory
+ :cmake-option:`-S` option can be used to specify the source directory
  containing the ``CMakePresets.json`` and ``CMakeUserPresets.json`` files.
- If :option:`-S <cmake -S>` is not given, the current directory is assumed to
+ If :cmake-option:`-S` is not given, the current directory is assumed to
  be the top level source directory and must contain the presets files. The
  options specified by the chosen preset (variables, generator, etc.) can all
  be overridden by manually specifying them on the command line. For example,
@@ -717,18 +715,18 @@ Options
  Lists the available presets of the specified ``<type>``.  Valid values for
  ``<type>`` are ``configure``, ``build``, ``test``, ``package``, or ``all``.
  If ``<type>`` is omitted, ``configure`` is assumed.  The current working
- directory must contain CMake preset files unless the :option:`-S <cmake -S>`
+ directory must contain CMake preset files unless the :cmake-option:`-S`
  option is used to specify a different top level source directory.
 
 .. option:: --debugger
 
-  Enables interactive debugging of the CMake language. CMake exposes a debugging
-  interface on the pipe named by :option:`--debugger-pipe <cmake --debugger-pipe>`
-  that conforms to the `Debug Adapter Protocol`_ specification with the following
-  modifications.
+  Enables interactive debugging of the CMake language. CMake exposes a
+  debugging interface on the pipe named by :cmake-option:`--debugger-pipe`
+  that conforms to the `Debug Adapter Protocol`_ specification with the
+  following modifications.
 
-  The ``initialize`` response includes an additional field named ``cmakeVersion``
-  which specifies the version of CMake being debugged.
+  The ``initialize`` response includes an additional field named
+  ``cmakeVersion`` which specifies the version of CMake being debugged.
 
   .. code-block:: json
     :caption: Debugger initialize response
@@ -1122,7 +1120,7 @@ Available commands are:
     A JSON object with version information. Keys are:
 
     ``string``
-      The full version string as displayed by cmake :option:`--version <cmake --version>`.
+      The full version string as displayed by cmake :cmake-option:`--version`.
     ``major``
       The major version number in integer form.
     ``minor``
@@ -1183,8 +1181,8 @@ Available commands are:
   ``debugger``
     .. versionadded:: 3.27
 
-    ``true`` if the :option:`--debugger <cmake --debugger>` mode
-    is supported and ``false`` otherwise.
+    ``true`` if the :cmake-option:`--debugger` mode is supported
+    and ``false`` otherwise.
 
 .. option:: cat [--] <files>...
 

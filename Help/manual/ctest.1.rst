@@ -57,9 +57,9 @@ in the following cases:
 * .. versionadded:: 4.4
     No arguments are given and no ``CTestTestfile.cmake`` exists.
 
-* The :option:`--no-tests=error <ctest --no-tests>` argument is given and no
-  tests are executed, e.g., when ``CTestTestfile.cmake`` defines no tests,
-  or when the given arguments exclude all tests.
+* The :ctest-option:`--no-tests=error` argument is given and no tests are
+  executed, e.g., when ``CTestTestfile.cmake`` defines no tests, or when the
+  given arguments exclude all tests.
 
 * At least one test fails.
 
@@ -180,9 +180,8 @@ The options for running tests are:
 
 .. option:: --test-load <level>
 
- While running tests in parallel (e.g. with :option:`-j <ctest -j>`), try
- not to start tests when they may cause the CPU load to pass above a given
- threshold.
+ While running tests in parallel (e.g. with :ctest-option:`-j`), try not to
+ start tests when they may cause the CPU load to pass above a given threshold.
 
  When :program:`ctest` is run as a `Dashboard Client`_ this sets the
  ``TestLoad`` option of the `CTest Test Step`_.
@@ -192,10 +191,10 @@ The options for running tests are:
  Make CTest quiet.
 
  This option will suppress all the output.  The output log file will
- still be generated if the :option:`--output-log <ctest --output-log>` is
- specified.  Options such as :option:`--verbose <ctest --verbose>`,
- :option:`--extra-verbose <ctest --extra-verbose>`, and
- :option:`--debug <ctest --debug>` are ignored
+ still be generated if the :ctest-option:`--output-log` is specified.
+ Options such as :ctest-option:`--verbose`,
+ :ctest-option:`--extra-verbose`, and
+ :ctest-option:`--debug` are ignored
  if ``--quiet`` is specified.
 
 .. option:: -O <file>, --output-log <file>
@@ -212,16 +211,16 @@ The options for running tests are:
 
  This option tells CTest to write test results to ``<file>`` in JUnit XML
  format. If ``<file>`` already exists, it will be overwritten. If using the
- :option:`-S <ctest -S>` option to run a dashboard script, use the
- ``OUTPUT_JUNIT`` keyword with the :command:`ctest_test` command instead.
+ :ctest-option:`-S` option to run a dashboard script, use the ``OUTPUT_JUNIT``
+ keyword with the :command:`ctest_test` command instead.
 
 .. option:: -N, --show-only[=<format>]
 
  Disable actual execution of tests.
 
  This option tells CTest to list the tests that would be run but not
- actually run them.  Useful in conjunction with the :option:`-R <ctest -R>`
- and :option:`-E <ctest -E>` options.
+ actually run them.  Useful in conjunction with the :ctest-option:`-R`
+ and :ctest-option:`-E` options.
 
  .. versionadded:: 3.14
 
@@ -310,13 +309,11 @@ The options for running tests are:
 
 .. option:: -FS <regex>, --fixture-exclude-setup <regex>
 
- Same as :option:`-FA <ctest -FA>` except only matching setup tests are
- excluded.
+ Same as :ctest-option:`-FA` except only matching setup tests are excluded.
 
 .. option:: -FC <regex>, --fixture-exclude-cleanup <regex>
 
- Same as :option:`-FA <ctest -FA>` except only matching cleanup tests are
- excluded.
+ Same as :ctest-option:`-FA` except only matching cleanup tests are excluded.
 
 .. option:: -I [Start,End,Stride,test#,test#|Test file], --tests-information
 
@@ -330,11 +327,11 @@ The options for running tests are:
 
 .. option:: -U, --union
 
- Take the Union of :option:`-I <ctest -I>` and :option:`-R <ctest -R>`.
+ Take the Union of :ctest-option:`-I` and :ctest-option:`-R`.
 
- When both :option:`-R <ctest -R>` and :option:`-I <ctest -I>` are specified
- by default the intersection of tests are run.  By specifying ``-U`` the union
- of tests is run instead.
+ When both :ctest-option:`-R` and :ctest-option:`-I` are specified by default
+ the intersection of tests are run.  By specifying ``-U`` the union of tests
+ is run instead.
 
 .. option:: --rerun-failed
 
@@ -343,8 +340,8 @@ The options for running tests are:
  This option tells CTest to perform only the tests that failed during
  its previous run.  When this option is specified, CTest ignores all
  other options intended to modify the list of tests to run (
- :option:`-L <ctest -L>`, :option:`-R <ctest -R>`, :option:`-E <ctest -E>`,
- :option:`-LE <ctest -LE>`, :option:`-I <ctest -I>`, etc).  In the event that
+ :ctest-option:`-L`, :ctest-option:`-R`, :ctest-option:`-E`,
+ :ctest-option:`-LE`, :ctest-option:`-I`, etc).  In the event that
  CTest runs and no tests fail, subsequent calls to CTest with the
  ``--rerun-failed`` option will run the set of tests that most recently
  failed (if any).
@@ -557,7 +554,7 @@ The options for running tests are:
    ctest --verbose -- --success
 
  All selected tests receive the same extra arguments.
- Use :option:`-R <ctest -R>` or :option:`-L <ctest -L>` to limit
+ Use :ctest-option:`-R` or :ctest-option:`-L` to limit
  which tests are executed.
 
  A bare ``--`` with no following arguments is silently ignored.
@@ -580,17 +577,16 @@ or excluded from a test run by filtering on the labels.
 Each individual filter is a regular expression applied to
 the labels attached to a test.
 
-When :option:`-L <ctest -L>` is used, in order for a test to be included in a
-test run, each regular expression must match at least one
-label.  Using more than one :option:`-L <ctest -L>` option means "match **all**
-of these".
+When :ctest-option:`-L` is used, in order for a test to be included in a test
+run, each regular expression must match at least one label.  Using more than
+one :ctest-option:`-L` option means "match **all** of these".
 
-The :option:`-LE <ctest -LE>` option works just like :option:`-L <ctest -L>`,
+The :ctest-option:`-LE` option works just like :ctest-option:`-L`,
 but excludes tests rather than including them. A test is excluded if each
 regular expression matches at least one label.
 
-If a test has no labels attached to it, then :option:`-L <ctest -L>` will never
-include that test, and :option:`-LE <ctest -LE>` will never exclude that test.
+If a test has no labels attached to it, then :ctest-option:`-L` will never
+include that test, and :ctest-option:`-LE` will never exclude that test.
 As an example of tests with labels, consider five tests,
 with the following labels:
 
@@ -750,7 +746,7 @@ this mode include:
 .. option:: --test-command
 
  The command to run as the test step with the
- :option:`--build-and-test <ctest --build-and-test>` option.
+ :ctest-option:`--build-and-test` option.
  All arguments following this keyword will be assumed to be part of the
  test command line, so it must be the last option given.
 
@@ -797,8 +793,7 @@ Options for Dashboard Client include:
 
  This option tells CTest to act as a CDash client where the ``<model>``
  can be ``Experimental``, ``Nightly``, and ``Continuous``.
- Combining ``-M`` and :option:`-T <ctest -T>` is similar to
- :option:`-D <ctest -D>`.
+ Combining ``-M`` and :ctest-option:`-T` is similar to :ctest-option:`-D`.
 
 .. option:: -T <action>, --test-action <action>
 
@@ -807,8 +802,7 @@ Options for Dashboard Client include:
  This option tells CTest to act as a CDash client and perform some
  action such as ``start``, ``build``, ``test`` etc. See
  `Dashboard Client Steps`_ for the full list of actions.
- Combining :option:`-M <ctest -M>` and ``-T`` is similar to
- :option:`-D <ctest -D>`.
+ Combining :ctest-option:`-M` and ``-T`` is similar to :ctest-option:`-D`.
 
 .. option:: -S <script>, --script <script>
 
@@ -824,10 +818,10 @@ Options for Dashboard Client include:
 
  Execute a dashboard for a configuration.
 
- This option does the same operations as :option:`-S <ctest -S>` but it
- will do them in a separate process.  This is primarily useful in cases
- where the script may modify the environment and you do not want the modified
- environment to impact other :option:`-S <ctest -S>` scripts.
+ This option does the same operations as :ctest-option:`-S` but it will do
+ them in a separate process.  This is primarily useful in cases where the
+ script may modify the environment and you do not want the modified
+ environment to impact other :ctest-option:`-S` scripts.
 
 .. _`Dashboard Options`:
 
@@ -838,7 +832,7 @@ The available ``<dashboard-options>`` are the following:
  Define a variable for script mode.
 
  Pass in variable values on the command line.  Use in conjunction
- with :option:`-S <ctest -S>` to pass variable values to a dashboard script.
+ with :ctest-option:`-S` to pass variable values to a dashboard script.
  Parsing ``-D`` arguments as variable values is only attempted if the value
  following ``-D`` does not match any of the known dashboard types.
 
@@ -1279,9 +1273,9 @@ Configuration settings include:
 ``DefaultCTestConfigurationType``
   When the build system to be launched allows build-time selection
   of the configuration (e.g. ``Debug``, ``Release``), this specifies
-  the default configuration to be built when no :option:`-C <ctest -C>`
-  option is given to the :program:`ctest` command.  The value will be substituted
-  into the value of ``MakeCommand`` to replace the literal string
+  the default configuration to be built when no :ctest-option:`-C`
+  option is given to the :program:`ctest` command.  The value will be
+  substituted into the value of ``MakeCommand`` to replace the literal string
   ``${CTEST_CONFIGURATION_TYPE}`` if it appears.
 
   * `CTest Script`_ variable: :variable:`CTEST_CONFIGURATION_TYPE`
@@ -1353,7 +1347,7 @@ Configuration settings include:
   See `Label and Subproject Summary`_.
 
 ``TestLoad``
-  While running tests in parallel (e.g. with :option:`-j <ctest -j>`),
+  While running tests in parallel (e.g. with :ctest-option:`-j`),
   try not to start tests when they may cause the CPU load to pass above
   a given threshold.
 
@@ -1363,7 +1357,7 @@ Configuration settings include:
 ``TimeOut``
   The default timeout for each test if not specified by the
   :prop_test:`TIMEOUT` test property or the
-  :option:`--timeout <ctest --timeout>` flag.
+  :ctest-option:`--timeout` flag.
 
   * `CTest Script`_ variable: :variable:`CTEST_TEST_TIMEOUT`
   * :module:`CTest` module variable: ``DART_TESTING_TIMEOUT``
@@ -1729,7 +1723,7 @@ model is defined as follows:
     Test name. This cannot be empty.
   ``config``
     Optional field specifying the configuration for which the test will run.
-    This will always match the :option:`-C <ctest -C>` option specified on the
+    This will always match the :ctest-option:`-C` option specified on the
     ``ctest`` command line.  If no such option was given, this field will not
     be present.
   ``command``
@@ -1847,11 +1841,10 @@ generated dynamically as part of test execution (see
 
 If a dashboard script is used and ``RESOURCE_SPEC_FILE`` is not specified, the
 value of :variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script is used
-instead.  If :option:`--resource-spec-file <ctest --resource-spec-file>`,
-``RESOURCE_SPEC_FILE``, and :variable:`CTEST_RESOURCE_SPEC_FILE` in the
-dashboard script are not specified, the value of
-:variable:`CTEST_RESOURCE_SPEC_FILE` in the CMake build is used instead.
-If none of these are specified, no resource spec file is used.
+instead.  If :ctest-option:`--resource-spec-file`, ``RESOURCE_SPEC_FILE``, and
+:variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script are not specified,
+the value of :variable:`CTEST_RESOURCE_SPEC_FILE` in the CMake build is used
+instead.  If none of these are specified, no resource spec file is used.
 
 The resource specification file must be a JSON object. All examples in this
 document assume the following resource specification file:
@@ -2048,9 +2041,9 @@ Job Server Integration
 
 On POSIX systems, when running under the context of a `Job Server`_,
 CTest shares its job slots.  This is independent of the :prop_test:`PROCESSORS`
-test property, which still counts against CTest's :option:`-j <ctest -j>`
-parallel level.  CTest acquires exactly one token from the job server before
-running each test, and returns it when the test finishes.
+test property, which still counts against CTest's :ctest-option:`-j` parallel
+level.  CTest acquires exactly one token from the job server before running
+each test, and returns it when the test finishes.
 
 For example, consider the ``Makefile``:
 
