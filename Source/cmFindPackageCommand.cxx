@@ -1218,13 +1218,15 @@ bool cmFindPackageCommand::FindPackage(
     }
   }
 
+  // Record package information discovered while it is loaded.
+  this->PackageInfo = std::make_shared<cmPackageInformation>();
+
   // RAII objects to ensure we leave this function with consistent state.
   FlushDebugBufferOnExit flushDebugBufferOnExit(*this);
   PushPopRootPathStack pushPopRootPathStack(*this);
   SetRestoreFindDefinitions setRestoreFindDefinitions(*this);
-  cmFindPackageStackRAII findPackageStackRAII(this->Makefile, this->Name);
-
-  findPackageStackRAII.BindTop(this->CurrentPackageInfo);
+  cmMakefile::FindPackageStackRAII findPackageStackRAII(
+    this->Makefile, this->Name, this->PackageInfo);
 
   // See if we have been told to delegate to FetchContent or some other
   // redirected config package first. We have to check all names that
@@ -1272,8 +1274,8 @@ bool cmFindPackageCommand::FindPackage(
       this->Names.clear();
       this->Names.emplace_back(overrideName); // Force finding this one
       this->Variable = cmStrCat(this->Name, "_DIR");
-      this->CurrentPackageInfo->Directory = redirectsDir;
-      this->CurrentPackageInfo->Version = this->VersionFound;
+      this->PackageInfo->Directory = redirectsDir;
+      this->PackageInfo->Version = this->VersionFound;
       this->SetConfigDirCacheVariable(redirectsDir);
       break;
     }
@@ -1732,6 +1734,12 @@ bool cmFindPackageCommand::HandlePackageMode(
       // The configuration file is invalid.
       result = false;
     }
+
+    if (this->UseConfigFiles && found) {
+      this->PackageInfo->Directory =
+        cmSystemTools::GetFilenamePath(this->FileFound);
+      this->PackageInfo->Version = this->VersionFound;
+    }
   }
 
   if (this->UseFindModules && !found &&
@@ -1975,8 +1983,6 @@ bool cmFindPackageCommand::FindConfig()
   std::string init;
   if (found) {
     init = cmSystemTools::GetFilenamePath(this->FileFound);
-    this->CurrentPackageInfo->Directory = init;
-    this->CurrentPackageInfo->Version = this->VersionFound;
   } else {
     init = this->Variable + "-NOTFOUND";
   }
