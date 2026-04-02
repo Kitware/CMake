@@ -639,7 +639,7 @@ Google Trace File
 CMake can generate a file in the `Google Trace Event Format`_ to help visualize
 collected instrumentation data. Enabling the ``trace`` option in the
 `v1 Query Files`_ causes such a file to be generated under
-``<build>/.cmake/v1/instrumentation/data/trace`` whenever `Indexing`_ occurs.
+``<build>/.cmake/instrumentation/v1/data/trace`` whenever `Indexing`_ occurs.
 
 Generated trace files include data from all
 `v1 Snippet Files <v1 Snippet File_>`_ listed in the current index file.
