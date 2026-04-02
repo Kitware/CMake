@@ -5433,7 +5433,8 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(
 
       // Copy file sets.
       {
-        for (auto const* gfs : gt->GetAllFileSets()) {
+        for (auto const* gfs :
+             gt->GetInterfaceFileSets(cm::FileSetMetadata::CXX_MODULES)) {
           auto* newFs =
             tgt
               ->GetOrCreateFileSet(gfs->GetName(), gfs->GetType(),
