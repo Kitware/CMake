@@ -458,9 +458,8 @@ bool cmListFile::ParseString(cm::string_view str,
   return parser.ParseString(str);
 }
 
-#include "cmStack.tcc"
-template class cmStack<cmListFileContext const, cmListFileBacktrace,
-                       cmStackType::Const>;
+#include "cmConstStack.tcc"
+template class cmConstStack<cmListFileContext, cmListFileBacktrace>;
 
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
 {

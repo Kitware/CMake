@@ -4,6 +4,7 @@
 
 #include <array>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -320,7 +321,8 @@ bool cmExportSbomGenerator::NoteLinkedTarget(
     auto pkgInfo = [](cmTarget* t) -> Package {
       cmFindPackageStack pkgStack = t->GetFindPackageStack();
       if (!pkgStack.Empty()) {
-        return std::make_pair(pkgStack.Top().Name, pkgStack.Top().PackageInfo);
+        return std::make_pair(pkgStack.Top().Name,
+                              *pkgStack.Top().PackageInfo);
       }
       std::string const pkgName =
         t->GetSafeProperty("EXPORT_FIND_PACKAGE_NAME");

@@ -284,7 +284,7 @@ private:
   std::set<std::string> OptionalComponents;
   std::set<std::string> RequiredTargets;
   std::string DebugBuffer;
-  cmPackageInformation* CurrentPackageInfo;
+  std::shared_ptr<cmPackageInformation> PackageInfo;
 
   enum class SearchResult
   {
