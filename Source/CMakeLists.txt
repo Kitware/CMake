@@ -151,6 +151,8 @@ add_library(
   cmComputeTargetDepends.cxx
   cmConfigureLog.h
   cmConfigureLog.cxx
+  cmConstStack.h
+  cmConstStack.tcc
   cmCPackPropertiesGenerator.h
   cmCPackPropertiesGenerator.cxx
   cmCryptoHash.cxx
@@ -474,8 +476,6 @@ add_library(
   cmSourceFileLocationKind.h
   cmSourceGroup.cxx
   cmSourceGroup.h
-  cmStack.h
-  cmStack.tcc
   cmStandardLevel.h
   cmStandardLevelResolver.cxx
   cmStandardLevelResolver.h

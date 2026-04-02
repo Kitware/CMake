@@ -1037,7 +1037,21 @@ public:
   // searches
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
 
-  friend class cmFindPackageStackRAII;
+  /**
+   * RAII type to manage the find_package call stack.
+   */
+  class FindPackageStackRAII
+  {
+    cmMakefile* Makefile;
+
+  public:
+    FindPackageStackRAII(cmMakefile* mf, std::string const& pkg,
+                         std::shared_ptr<cmPackageInformation const> pkgInfo);
+    ~FindPackageStackRAII();
+
+    FindPackageStackRAII(FindPackageStackRAII const&) = delete;
+    FindPackageStackRAII& operator=(FindPackageStackRAII const&) = delete;
+  };
 
   class DebugFindPkgRAII
   {
