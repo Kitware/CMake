@@ -1,0 +1,13 @@
+{
+  "version": 11,
+  "configurePresets": [
+    {
+      "name": "ErrorUnusedCliNotSupported",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "errors": {
+        "unusedCli": true
+      }
+    }
+  ]
+}

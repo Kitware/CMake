@@ -1,0 +1,13 @@
+{
+  "version": 12,
+  "configurePresets": [
+    {
+      "name": "ErrorDevNotSupported",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "errors": {
+        "dev": true
+      }
+    }
+  ]
+}

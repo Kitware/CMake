@@ -172,27 +172,18 @@ void QCMake::setPreset(QString const& name, bool setBinary)
             QString::fromStdString(expandedPreset->BinaryDir);
           this->setBinaryDirectory(binaryDir);
         }
-        if (expandedPreset->WarnDev) {
-          this->CMakeInstance->SetSuppressDevWarnings(
-            !*expandedPreset->WarnDev);
-        }
-        if (expandedPreset->ErrorDev) {
-          this->CMakeInstance->SetDevWarningsAsErrors(
-            *expandedPreset->ErrorDev);
-        }
-        if (expandedPreset->WarnDeprecated) {
-          this->CMakeInstance->SetSuppressDeprecatedWarnings(
-            !*expandedPreset->WarnDeprecated);
-        }
-        if (expandedPreset->ErrorDeprecated) {
-          this->CMakeInstance->SetDeprecatedWarningsAsErrors(
-            *expandedPreset->ErrorDeprecated);
-        }
-        if (expandedPreset->WarnUninitialized) {
-          this->WarnUninitializedMode = *expandedPreset->WarnUninitialized;
-          emit this->warnUninitializedModeChanged(
-            *expandedPreset->WarnUninitialized);
-        }
+        this->CMakeInstance->SetWarningFromPreset(
+          "dev", expandedPreset->Warnings, expandedPreset->Errors,
+          cmDiagnostics::CMD_AUTHOR);
+        this->CMakeInstance->SetWarningFromPreset(
+          "deprecated", expandedPreset->Warnings, expandedPreset->Errors,
+          cmDiagnostics::CMD_DEPRECATED);
+        this->CMakeInstance->SetWarningFromPreset(
+          &cmake::SetWarnUninitialized, expandedPreset->Warnings, true,
+          cmDiagnostics::CMD_UNINITIALIZED);
+        this->CMakeInstance->SetWarningFromPreset(
+          &cmake::SetWarnUnusedCli, expandedPreset->Warnings, false,
+          cmDiagnostics::CMD_UNUSED_CLI);
         this->Environment = this->StartEnvironment;
         for (auto const& v : expandedPreset->Environment) {
           if (v.second) {

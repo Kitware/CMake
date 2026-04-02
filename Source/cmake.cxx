@@ -48,6 +48,7 @@
 #    include "cmDebuggerPosixPipeConnection.h"
 #  endif //_WIN32
 #endif
+#include "cmDiagnostics.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmDuration.h"
@@ -479,23 +480,38 @@ void cmake::CleanupCommandsAndMacros()
 }
 
 #ifndef CMAKE_BOOTSTRAP
+using DiagnosticMap = std::map<cmDiagnosticCategory, bool>;
+
 void cmake::SetWarningFromPreset(std::string const& name,
-                                 cm::optional<bool> warning,
-                                 cm::optional<bool> error)
+                                 DiagnosticMap const& warnings,
+                                 DiagnosticMap const& errors,
+                                 cmDiagnosticCategory key)
 {
-  if (warning) {
-    if (*warning) {
+  auto const wi = warnings.find(key);
+  if (wi != warnings.end()) {
+    if (wi->second) {
       this->DiagLevels[name] = std::max(this->DiagLevels[name], DIAG_WARN);
     } else {
       this->DiagLevels[name] = DIAG_IGNORE;
     }
   }
-  if (error) {
-    if (*error) {
+  auto const ei = errors.find(key);
+  if (ei != errors.end()) {
+    if (ei->second) {
       this->DiagLevels[name] = DIAG_ERROR;
     } else {
       this->DiagLevels[name] = std::min(this->DiagLevels[name], DIAG_WARN);
     }
+  }
+}
+
+void cmake::SetWarningFromPreset(void (cmake::*func)(bool),
+                                 DiagnosticMap const& warnings,
+                                 bool allowedValue, cmDiagnosticCategory key)
+{
+  auto const wi = warnings.find(key);
+  if (wi != warnings.end() && wi->second == allowedValue) {
+    (this->*func)(wi->second);
   }
 }
 
@@ -2080,16 +2096,18 @@ bool cmake::SetArgsFromPreset(std::string const& presetName,
     }
   }
 
-  this->SetWarningFromPreset("dev", expandedPreset->WarnDev,
-                             expandedPreset->ErrorDev);
-  this->SetWarningFromPreset("deprecated", expandedPreset->WarnDeprecated,
-                             expandedPreset->ErrorDeprecated);
-  if (expandedPreset->WarnUninitialized == true) {
-    this->SetWarnUninitialized(true);
-  }
-  if (expandedPreset->WarnUnusedCli == false) {
-    this->SetWarnUnusedCli(false);
-  }
+  this->SetWarningFromPreset("dev", expandedPreset->Warnings,
+                             expandedPreset->Errors,
+                             cmDiagnostics::CMD_AUTHOR);
+  this->SetWarningFromPreset("deprecated", expandedPreset->Warnings,
+                             expandedPreset->Errors,
+                             cmDiagnostics::CMD_DEPRECATED);
+  this->SetWarningFromPreset(&cmake::SetWarnUninitialized,
+                             expandedPreset->Warnings, true,
+                             cmDiagnostics::CMD_UNINITIALIZED);
+  this->SetWarningFromPreset(&cmake::SetWarnUnusedCli,
+                             expandedPreset->Warnings, false,
+                             cmDiagnostics::CMD_UNUSED_CLI);
   if (expandedPreset->WarnSystemVars == true) {
     this->SetCheckSystemVars(true);
   }

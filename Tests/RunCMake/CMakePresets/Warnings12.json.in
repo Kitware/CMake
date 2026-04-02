@@ -1,0 +1,70 @@
+{
+  "version": 12,
+  "configurePresets": [
+    {
+      "name": "NoWarningFlags",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "UNUSED_VARIABLE": "Unused"
+      }
+    },
+    {
+      "name": "WarningFlags",
+      "inherits": "NoWarningFlags",
+      "warnings": {
+        "author": true,
+        "deprecated": true,
+        "uninitialized": true,
+        "unusedCli": false,
+        "systemVars": true
+      }
+    },
+    {
+      "name": "DisableWarningFlags",
+      "inherits": "NoWarningFlags",
+      "warnings": {
+        "author": false,
+        "deprecated": false,
+        "unusedCli": false
+      }
+    },
+    {
+      "name": "ErrorDev",
+      "inherits": "NoWarningFlags",
+      "errors": {
+        "author": true
+      }
+    },
+    {
+      "name": "ErrorDeprecated",
+      "inherits": "NoWarningFlags",
+      "warnings": {
+        "author": false
+      },
+      "errors": {
+        "deprecated": true
+      }
+    },
+    {
+      "name": "ErrorUninitialized",
+      "inherits": "NoWarningFlags",
+      "warnings": {
+        "author": false
+      },
+      "errors": {
+        "uninitialized": true
+      }
+    },
+    {
+      "name": "ErrorUnusedCli",
+      "inherits": "NoWarningFlags",
+      "warnings": {
+        "author": false
+      },
+      "errors": {
+        "unusedCli": true
+      }
+    }
+  ]
+}

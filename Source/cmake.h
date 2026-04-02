@@ -396,9 +396,15 @@ public:
   bool GetIsInTryCompile() const;
 
 #ifndef CMAKE_BOOTSTRAP
-  void SetWarningFromPreset(std::string const& name,
-                            cm::optional<bool> warning,
-                            cm::optional<bool> error);
+  void SetWarningFromPreset(
+    std::string const& name,
+    std::map<cmDiagnosticCategory, bool> const& warnings,
+    std::map<cmDiagnosticCategory, bool> const& errors,
+    cmDiagnosticCategory key);
+  void SetWarningFromPreset(
+    void (cmake::*func)(bool),
+    std::map<cmDiagnosticCategory, bool> const& warnings, bool allowedValue,
+    cmDiagnosticCategory key);
   void ProcessPresetVariables();
   void PrintPresetVariables();
   void ProcessPresetEnvironment();

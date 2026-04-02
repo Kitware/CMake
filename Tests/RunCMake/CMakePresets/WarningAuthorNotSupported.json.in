@@ -1,0 +1,13 @@
+{
+  "version": 11,
+  "configurePresets": [
+    {
+      "name": "WarningAuthorNotSupported",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "warnings": {
+        "author": true
+      }
+    }
+  ]
+}

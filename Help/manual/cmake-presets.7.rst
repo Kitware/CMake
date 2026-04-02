@@ -465,6 +465,15 @@ they were added and a summary of the new features and changes is given below.
   ``12``
     .. versionadded:: 4.4
 
+    * Changes to `Configure Presets <Configure Preset_>`_:
+
+      * The ``dev`` field is renamed to ``author`` in
+        :preset:`configurePresets.warnings` and
+        :preset:`configurePresets.errors`.
+
+      * The ``uninitialized`` and ``unusedCli`` fields were added to
+        :preset:`configurePresets.errors`.
+
     * Changes to `Macro Expansion`_
 
       * The `${fileDir} <CMakePresets fileDir_>`_ macro now always expands to

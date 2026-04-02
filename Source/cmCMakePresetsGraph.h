@@ -14,6 +14,7 @@
 
 #include <cm/optional>
 
+#include "cmDiagnostics.h"
 #include "cmJSONState.h"
 #include "cmStateTypes.h" // IWYU pragma: keep
 
@@ -126,13 +127,11 @@ public:
 
     std::map<std::string, cm::optional<CacheVariable>> CacheVariables;
 
-    cm::optional<bool> WarnDev;
-    cm::optional<bool> ErrorDev;
-    cm::optional<bool> WarnDeprecated;
-    cm::optional<bool> ErrorDeprecated;
-    cm::optional<bool> WarnUninitialized;
-    cm::optional<bool> WarnUnusedCli;
+    std::map<cmDiagnosticCategory, bool> Warnings;
+    std::map<cmDiagnosticCategory, bool> Errors;
     cm::optional<bool> WarnSystemVars;
+    cm::optional<bool> WarnDev;  // Deprecated synonym for Warnings.CMD_AUTHOR
+    cm::optional<bool> ErrorDev; // Deprecated synonym for Errors.CMD_AUTHOR
 
     cm::optional<bool> DebugOutput;
     cm::optional<bool> DebugTryCompile;

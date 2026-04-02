@@ -1,0 +1,13 @@
+{
+  "version": 11,
+  "configurePresets": [
+    {
+      "name": "ErrorAuthorNotSupported",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "errors": {
+        "author": true
+      }
+    }
+  ]
+}

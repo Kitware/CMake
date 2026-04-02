@@ -69,3 +69,20 @@ to the project's developer(s).
 
 Warn about use of a deprecated function or package.  This is the category
 triggered by :command:`message(DEPRECATION)`.
+
+``CMD_UNINITIALIZED`` (``-Wuninitialized``)
+-------------------------------------------
+
+:Default: Ignore
+
+Warn if an uninitialized variable is dereferenced.
+
+``CMD_UNUSED_CLI`` (``-Wunused-cli``)
+-------------------------------------
+
+:Default: Warn
+
+Warn about variables that are declared on the command line, but not used.
+
+Although the action of this warning category can be queried as usual, changes
+made using the :command:`cmake_diagnostic` command have no effect.

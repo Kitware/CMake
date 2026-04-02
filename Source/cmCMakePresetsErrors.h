@@ -6,6 +6,8 @@
 
 #include <string>
 
+#include <cm/string_view>
+
 #include <cm3p/json/value.h>
 
 #include "cmJSONHelpers.h"
@@ -123,4 +125,10 @@ void PRESET_MISSING_FIELD(std::string const& presetName,
                           std::string const& missingField, cmJSONState* state);
 
 void SCHEMA_UNSUPPORTED(cmJSONState* state);
+
+void DIAGNOSTIC_UNSUPPORTED(cm::string_view name, cm::string_view context,
+                            int version, cmJSONState* state);
+
+void DIAGNOSTIC_REMOVED(cm::string_view name, cm::string_view context,
+                        int version, cmJSONState* state);
 }
