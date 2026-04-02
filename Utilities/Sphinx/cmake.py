@@ -592,7 +592,7 @@ class CMakeOptionXRefRole(OptionXRefRole):
         super().__init__()
 
     def __call__(self, typ, rawtext, text, *args, **kwargs):
-        content = f'{text} <{self.command} {text.split('=')[0]}>'
+        content = f'{text} <{self.command} {re.split(r'[ =]', text)[0]}>'
         return super().__call__('std:option', text, content, *args, **kwargs)
 
 
