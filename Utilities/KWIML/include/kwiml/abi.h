@@ -155,7 +155,7 @@ suppression macro KWIML_ABI_NO_VERIFY was defined.
 #if !defined(KWIML_ABI_CHAR_IS_UNSIGNED) && !defined(KWIML_ABI_CHAR_IS_SIGNED)
 # if defined(__CHAR_UNSIGNED__) /* GNU, some IBM XL, others?  */
 #  define KWIML_ABI_CHAR_IS_UNSIGNED 1
-# elif defined(_CHAR_UNSIGNED) /* Intel, IBM XL, MSVC, Borland, others?  */
+# elif defined(_CHAR_UNSIGNED) /* Intel, IBM XL, MSVC, Borland, Pelles C, others?  */
 #  define KWIML_ABI_CHAR_IS_UNSIGNED 1
 # elif defined(_CHAR_SIGNED) /* IBM XL, others? */
 #  define KWIML_ABI_CHAR_IS_SIGNED 1
@@ -176,6 +176,8 @@ suppression macro KWIML_ABI_NO_VERIFY was defined.
 # elif defined(_SGI_COMPILER_VERSION) /* SGI MIPSpro default */
 #  define KWIML_ABI_CHAR_IS_UNSIGNED 1
 # elif defined(__PGIC__) /* PGI default */
+#  define KWIML_ABI_CHAR_IS_SIGNED 1
+# elif defined(__POCC__) /* PellesC default */
 #  define KWIML_ABI_CHAR_IS_SIGNED 1
 # elif defined(_MSC_VER) /* MSVC default */
 #  define KWIML_ABI_CHAR_IS_SIGNED 1
