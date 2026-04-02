@@ -9,11 +9,15 @@
         # use so that different versions can be tested in a single pipeline.
         DEVELOPER_DIR: "/Applications/Xcode-26.3.app/Contents/Developer"
 
+.macos_arm64:
+    extends: .macos
+
+.macos_x86_64:
+    extends: .macos
+
 ### Build and test
 
 .macos_build:
-    extends: .macos
-
     variables:
         # Note that shell runners only support runners with a single
         # concurrency level. We can't use `$CI_CONCURRENCY_ID` because this may
@@ -22,8 +26,18 @@
         # could run at the same time, so we drop it.
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
+.macos_arm64_build:
+    extends:
+        - .macos_arm64
+        - .macos_build
+
+.macos_x86_64_build:
+    extends:
+        - .macos_x86_64
+        - .macos_build
+
 .macos_x86_64_ninja:
-    extends: .macos_build
+    extends: .macos_x86_64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_ninja
@@ -31,7 +45,7 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .macos_arm64_ninja:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_ninja
@@ -39,7 +53,7 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .macos_arm64_ninja_symlinked:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_ninja_symlinked
@@ -54,7 +68,7 @@
         CMAKE_CONFIGURATION: macos_arm64_pch
 
 .macos_x86_64_makefiles:
-    extends: .macos_build
+    extends: .macos_x86_64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_makefiles
@@ -62,7 +76,7 @@
         CMAKE_GENERATOR: "Unix Makefiles"
 
 .macos_package:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_package
@@ -70,7 +84,7 @@
         CMAKE_CI_NO_INSTALL: 1
 
 .macos10.10_package:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos10.10_package
@@ -80,7 +94,7 @@
 ### External testing
 
 .macos_x86_64_xcode:
-    extends: .macos
+    extends: .macos_x86_64
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_xcode
@@ -88,7 +102,7 @@
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_xcode:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode
@@ -96,7 +110,7 @@
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_xcode_symlinked:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode_symlinked
@@ -106,7 +120,7 @@
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
 .macos_arm64_xcode_ub:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode_ub
@@ -114,7 +128,7 @@
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_ninja_multi:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_ninja_multi
@@ -122,14 +136,14 @@
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_x86_64_ninja_ub:
-    extends: .macos
+    extends: .macos_x86_64
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_ninja_ub
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_fastbuild:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_fastbuild
