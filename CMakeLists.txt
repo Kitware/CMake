@@ -2,12 +2,32 @@
 # file LICENSE.rst or https://cmake.org/licensing for details.
 
 cmake_minimum_required(VERSION 3.13...4.2 FATAL_ERROR)
+
+if(CMake_TEST_HOST_CMAKE)
+  get_filename_component(CMake_TEST_EXTERNAL_CMAKE "${CMAKE_COMMAND}" DIRECTORY)
+endif()
+
+set(CMake_LANGUAGES "")
+if(CMake_TEST_EXTERNAL_CMAKE)
+  foreach(lang C CXX)
+    if(NOT DEFINED CMake_TEST_${lang})
+      set(CMake_TEST_${lang} 1)
+    endif()
+    if(CMake_TEST_${lang})
+      list(APPEND CMake_LANGUAGES ${lang})
+    endif()
+  endforeach()
+else()
+  set(CMake_TEST_C 1)
+  set(CMake_TEST_CXX 1)
+  list(APPEND CMake_LANGUAGES C CXX)
+endif()
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
-
-project(CMake)
+project(CMake LANGUAGES ${CMake_LANGUAGES})
 unset(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
 unset(CMAKE_USER_MAKE_RULES_OVERRIDE_C)
+unset(CMake_LANGUAGES)
 
 # FIXME: This block should go away after a transition period.
 if(MSVC AND NOT CMAKE_VERSION VERSION_LESS 3.15)
@@ -28,10 +48,6 @@ if(CMAKE_BOOTSTRAP)
   # Running from bootstrap script.  Set local variable and remove from cache.
   set(CMAKE_BOOTSTRAP 1)
   unset(CMAKE_BOOTSTRAP CACHE)
-endif()
-
-if(CMake_TEST_HOST_CMAKE)
-  get_filename_component(CMake_TEST_EXTERNAL_CMAKE "${CMAKE_COMMAND}" DIRECTORY)
 endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
