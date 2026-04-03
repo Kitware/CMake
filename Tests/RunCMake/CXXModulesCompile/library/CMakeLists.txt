@@ -23,6 +23,13 @@ target_sources(library
     importable.cxx)
 target_compile_features(library PUBLIC cxx_std_20)
 
+if(WITH_FILE_SET_SOURCES)
+  target_sources(library
+    PUBLIC
+      FILE_SET SOURCES
+      FILES src.cpp)
+endif()
+
 add_executable(exe)
 target_link_libraries(exe PRIVATE library)
 target_sources(exe

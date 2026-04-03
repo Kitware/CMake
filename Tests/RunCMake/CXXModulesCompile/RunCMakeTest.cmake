@@ -164,6 +164,8 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(file-sets-with-dot)
   run_cxx_module_test(vs-without-flags)
   run_cxx_module_test(library library-static -DBUILD_SHARED_LIBS=OFF)
+  run_cxx_module_test(library library-static-file-set-SOURCES -DBUILD_SHARED_LIBS=OFF
+                                                              -DWITH_FILE_SET_SOURCES=ON)
   run_cxx_module_test(unity-build)
   run_cxx_module_test(object-library)
   run_cxx_module_test(generated)
