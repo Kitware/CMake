@@ -5,15 +5,16 @@
 .macos:
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
-        # TODO: Factor this out so that each job selects the Xcode version to
-        # use so that different versions can be tested in a single pipeline.
-        DEVELOPER_DIR: "/Applications/Xcode-26.3.app/Contents/Developer"
 
 .macos_arm64:
     extends: .macos
+    variables:
+        DEVELOPER_DIR: "/Applications/Xcode-26.4.app/Contents/Developer"
 
 .macos_x86_64:
     extends: .macos
+    variables:
+        DEVELOPER_DIR: "/Applications/Xcode-26.3.app/Contents/Developer"
 
 ### Build and test
 
@@ -173,7 +174,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.3
+        - xcode-26.4
         - nonconcurrent
 
 .macos_arm64_tags_ext:
@@ -181,7 +182,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.3
+        - xcode-26.4
         - concurrent
 
 .macos_arm64_tags_package:
@@ -189,7 +190,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.3
+        - xcode-26.4
         - nonconcurrent
         - finder
 
