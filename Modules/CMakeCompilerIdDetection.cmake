@@ -74,6 +74,7 @@ function(compiler_id_detection outvar lang)
       list(APPEND ordered_compilers
         TinyCC
         Bruce
+        PellesC
       )
     endif()
     list(APPEND ordered_compilers

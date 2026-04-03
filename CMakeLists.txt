@@ -482,6 +482,7 @@ endif()
 
 if(CMake_TEST_EXTERNAL_CMAKE)
   set(KWIML_TEST_ENABLE 1)
+  set(KWIML_TEST_LABELS "PellesC")
   add_subdirectory(Utilities/KWIML)
 endif()
 

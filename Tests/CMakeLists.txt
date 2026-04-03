@@ -530,6 +530,7 @@ if(BUILD_TESTING)
   endif()
 
   ADD_TEST_MACRO(COnly COnly)
+  set_property(TEST COnly APPEND PROPERTY LABELS "PellesC")
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(CxxSubdirC CxxSubdirC)
   ADD_TEST_MACRO(OutDir runtime/OutDir)
