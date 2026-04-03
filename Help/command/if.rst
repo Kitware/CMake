@@ -41,19 +41,21 @@ Compound conditions are evaluated in the following order of precedence:
 
 1. `Parentheses`_.
 
-2. Unary tests such as `COMMAND`_, `POLICY`_, `TARGET`_, `TEST`_,
-   `EXISTS`_, `IS_READABLE`_, `IS_WRITABLE`_, `IS_EXECUTABLE`_,
-   `IS_DIRECTORY`_, `IS_SYMLINK`_, `IS_ABSOLUTE`_, and `DEFINED`_.
+2. Unary tests such as:
 
-3. Binary tests such as `EQUAL`_, `LESS`_, `LESS_EQUAL`_, `GREATER`_,
-   `GREATER_EQUAL`_, `STREQUAL`_, `STRLESS`_, `STRLESS_EQUAL`_,
-   `STRGREATER`_, `STRGREATER_EQUAL`_, `VERSION_EQUAL`_, `VERSION_LESS`_,
-   `VERSION_LESS_EQUAL`_, `VERSION_GREATER`_, `VERSION_GREATER_EQUAL`_,
-   `PATH_EQUAL`_, `IN_LIST`_, `IS_NEWER_THAN`_, and `MATCHES`_.
+  * The `Existence Checks`_ :cref:`COMMAND`, :cref:`POLICY`, :cref:`TARGET`,
+    :cref:`TEST`, :cref:`EXISTS`, and :cref:`DEFINED`.
+  * The `File Operations`_ :cref:`IS_READABLE`, :cref:`IS_WRITABLE`,
+    :cref:`IS_EXECUTABLE`, :cref:`IS_DIRECTORY`, :cref:`IS_SYMLINK`, and
+    :cref:`IS_ABSOLUTE`.
 
-4. Unary logical operator `NOT`_.
+3. Binary tests such as those described in `Comparisons`_,
+   `Version Comparisons`_, and `Path Comparisons`_, as well as :cref:`IN_LIST`
+   and :cref:`IS_NEWER_THAN`.
 
-5. Binary logical operators `AND`_ and `OR`_, from left to right,
+4. Unary logical operator :cref:`NOT`.
+
+5. Binary logical operators :cref:`AND` and :cref:`OR`, from left to right,
    without any short-circuit.
 
 Basic Expressions
@@ -181,7 +183,7 @@ File Operations
   False if the given path is an empty string.
 
   .. note::
-    Prefer ``if(IS_READABLE)`` to check file readability.  ``if(EXISTS)``
+    Prefer :command:`if(IS_READABLE)` to check file readability. ``if(EXISTS)``
     may be changed in the future to only check file existence.
 
 .. signature:: if(IS_READABLE <path-to-file-or-directory>)
@@ -228,7 +230,7 @@ File Operations
   time stamps are exactly the same, an ``IS_NEWER_THAN`` comparison returns
   true, so that any dependent build operations will occur in the event
   of a tie.  This includes the case of passing the same file name for
-  both file1 and file2.
+  both ``file1`` and ``file2``.
 
 .. signature:: if(IS_DIRECTORY <path>)
 
@@ -262,10 +264,8 @@ Comparisons
   :target: MATCHES
 
   True if the given string or variable's value matches the given regular
-  expression.  See :ref:`Regex Specification` for regex format.
-
-  .. versionadded:: 2.6
-   ``()`` groups are captured in :variable:`CMAKE_MATCH_<n>` variables.
+  expression.  See :ref:`Regex Specification` for regex format.  ``()`` groups
+  are captured in :variable:`CMAKE_MATCH_<n>` variables.
 
 .. signature:: if(<variable|string> LESS <variable|string>)
   :target: LESS
@@ -415,7 +415,7 @@ Path Comparisons
        ...
     endif()
 
-  See :ref:`cmake_path(COMPARE) <Path Comparison>` for more details.
+  See :command:`cmake_path(COMPARE)` for more details.
 
 Variable Expansion
 ^^^^^^^^^^^^^^^^^^
@@ -452,40 +452,40 @@ constant.
 Automatic evaluation applies in the other cases whenever the
 above-documented condition syntax accepts ``<variable|string>``:
 
-* The left hand argument to `MATCHES`_ is first checked to see if it is
+* The left hand argument to :cref:`MATCHES` is first checked to see if it is
   a defined variable.  If so, the variable's value is used, otherwise the
   original value is used.
 
-* If the left hand argument to `MATCHES`_ is missing it returns false
+* If the left hand argument to :cref:`MATCHES` is missing it returns false
   without error
 
-* Both left and right hand arguments to `LESS`_, `GREATER`_, `EQUAL`_,
-  `LESS_EQUAL`_, and `GREATER_EQUAL`_, are independently tested to see if
-  they are defined variables.  If so, their defined values are used otherwise
-  the original value is used.
+* Both left and right hand arguments to :cref:`LESS`, :cref:`GREATER`,
+  :cref:`EQUAL`, :cref:`LESS_EQUAL`, and :cref:`GREATER_EQUAL` are
+  independently tested to see if they are defined variables.  If so, their
+  defined values are used; otherwise the original value is used.
 
-* Both left and right hand arguments to `STRLESS`_, `STRGREATER`_,
-  `STREQUAL`_, `STRLESS_EQUAL`_, and `STRGREATER_EQUAL`_ are independently
-  tested to see if they are defined variables.  If so, their defined values are
-  used otherwise the original value is used.
+* Both left and right hand arguments to :cref:`STRLESS`, :cref:`STRGREATER`,
+  :cref:`STREQUAL`, :cref:`STRLESS_EQUAL`, and :cref:`STRGREATER_EQUAL` are
+  independently tested to see if they are defined variables.  If so, their
+  defined values are used; otherwise the original value is used.
 
-* Both left and right hand arguments to `VERSION_LESS`_,
-  `VERSION_GREATER`_, `VERSION_EQUAL`_, `VERSION_LESS_EQUAL`_, and
-  `VERSION_GREATER_EQUAL`_ are independently tested to see if they are defined
-  variables.  If so, their defined values are used otherwise the original value
-  is used.
+* Both left and right hand arguments to :cref:`VERSION_LESS`,
+  :cref:`VERSION_GREATER`, :cref:`VERSION_EQUAL`, :cref:`VERSION_LESS_EQUAL`,
+  and :cref:`VERSION_GREATER_EQUAL` are independently tested to see if they are
+  defined variables.  If so, their defined values are used; otherwise the
+  original value is used.
 
-* The left hand argument to `IN_LIST`_ is tested to see if it is a defined
-  variable.  If so, the variable's value is used, otherwise the original
+* The left hand argument to :cref:`IN_LIST` is tested to see if it is a defined
+  variable.  If so, the variable's value is used; otherwise the original
   value is used.
 
-* The right hand argument to `NOT`_ is tested to see if it is a boolean
-  constant.  If so, the value is used, otherwise it is assumed to be a
+* The right hand argument to :cref:`NOT` is tested to see if it is a boolean
+  constant.  If so, the value is used; otherwise it is assumed to be a
   variable and it is dereferenced.
 
-* The left and right hand arguments to `AND`_ and `OR`_ are independently
-  tested to see if they are boolean constants.  If so, they are used as
-  such, otherwise they are assumed to be variables and are dereferenced.
+* The left and right hand arguments to :cref:`AND` and :cref:`OR` are
+  independently tested to see if they are boolean constants.  If so, they are
+  used as such, otherwise they are assumed to be variables and are dereferenced.
 
 .. versionchanged:: 3.1
   To prevent ambiguity, potential variable or keyword names can be
