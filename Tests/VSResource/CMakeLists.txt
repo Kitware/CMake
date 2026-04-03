@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(VSResource)
+project(VSResource LANGUAGES C)
 
 string(REPLACE "/INCREMENTAL:YES" ""
   CMAKE_EXE_LINKER_FLAGS_DEBUG
@@ -45,9 +45,9 @@ else()
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-add_library(ResourceLib STATIC lib.cpp lib.rc)
+add_library(ResourceLib STATIC lib.c lib.rc)
 
-add_executable(VSResource main.cpp test.rc)
+add_executable(VSResource main.c test.rc)
 target_link_libraries(VSResource ResourceLib)
 
 if(MSVC AND NOT MSVC_VERSION VERSION_LESS 1600)
