@@ -4,6 +4,8 @@ enable_language(C)
 set(obj "${CMAKE_C_OUTPUT_EXTENSION}")
 if(BORLAND)
   set(pre -)
+elseif(XCODE)
+  set(pre --badflag=)
 endif()
 
 # CMAKE_STATIC_LINKER_FLAGS_<CONFIG> variant
