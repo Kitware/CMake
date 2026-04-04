@@ -543,6 +543,7 @@ Properties on File Sets
    /prop_fs/BASE_DIRS
    /prop_fs/COMPILE_DEFINITIONS
    /prop_fs/COMPILE_OPTIONS
+   /prop_fs/CXX_SCAN_FOR_MODULES
    /prop_fs/INCLUDE_DIRECTORIES
    /prop_fs/INTERFACE_COMPILE_DEFINITIONS
    /prop_fs/INTERFACE_COMPILE_OPTIONS

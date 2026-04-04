@@ -6051,6 +6051,12 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
   if (targetDyndep == CxxModuleSupport::Unavailable) {
     return false;
   }
+  if (fs) {
+    auto const fsProp = fs->GetProperty("CXX_SCAN_FOR_MODULES");
+    if (fsProp.IsSet()) {
+      return fsProp.IsOn();
+    }
+  }
   auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
   if (sfProp.IsSet()) {
     return sfProp.IsOn();
