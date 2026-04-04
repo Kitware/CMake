@@ -5238,9 +5238,15 @@ std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)
       // transform targets into the suffixes
       auto pos = ispcTarget.find('-');
       auto target_suffix = ispcTarget.substr(0, pos);
+      // ISPC uses underscores in output file suffixes where the target name
+      // has dots (e.g. "avx10.2dmr" produces files with "_avx10_2dmr" suffix)
+      std::replace(target_suffix.begin(), target_suffix.end(), '.', '_');
       if (target_suffix ==
           "avx1") { // when targeting avx1 ISPC uses the 'avx' output string
         target_suffix = "avx";
+      } else if (target_suffix == "sse4_1" || target_suffix == "sse4_2") {
+        // when targeting sse4.1 or sse4.2 ISPC uses the 'sse4' output string
+        target_suffix = "sse4";
       }
       ispcTarget = target_suffix;
     }
