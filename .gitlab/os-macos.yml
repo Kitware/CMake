@@ -5,15 +5,20 @@
 .macos:
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
-        # TODO: Factor this out so that each job selects the Xcode version to
-        # use so that different versions can be tested in a single pipeline.
+
+.macos_arm64:
+    extends: .macos
+    variables:
+        DEVELOPER_DIR: "/Applications/Xcode-26.4.app/Contents/Developer"
+
+.macos_x86_64:
+    extends: .macos
+    variables:
         DEVELOPER_DIR: "/Applications/Xcode-26.3.app/Contents/Developer"
 
 ### Build and test
 
 .macos_build:
-    extends: .macos
-
     variables:
         # Note that shell runners only support runners with a single
         # concurrency level. We can't use `$CI_CONCURRENCY_ID` because this may
@@ -22,22 +27,32 @@
         # could run at the same time, so we drop it.
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
+.macos_arm64_build:
+    extends:
+        - .macos_arm64
+        - .macos_build
+
+.macos_x86_64_build:
+    extends:
+        - .macos_x86_64
+        - .macos_build
+
 .macos_x86_64_ninja:
-    extends: .macos_build
+    extends: .macos_x86_64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .macos_arm64_ninja:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .macos_arm64_ninja_symlinked:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_ninja_symlinked
@@ -46,7 +61,7 @@
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
 .macos_arm64_curl:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_curl
@@ -59,7 +74,7 @@
         CMAKE_CONFIGURATION: macos_arm64_pch
 
 .macos_x86_64_makefiles:
-    extends: .macos_build
+    extends: .macos_x86_64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_makefiles
@@ -67,7 +82,7 @@
         CMAKE_GENERATOR: "Unix Makefiles"
 
 .macos_package:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos_package
@@ -75,7 +90,7 @@
         CMAKE_CI_NO_INSTALL: 1
 
 .macos10.10_package:
-    extends: .macos_build
+    extends: .macos_arm64_build
 
     variables:
         CMAKE_CONFIGURATION: macos10.10_package
@@ -85,7 +100,7 @@
 ### External testing
 
 .macos_x86_64_xcode:
-    extends: .macos
+    extends: .macos_x86_64
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_xcode
@@ -93,7 +108,7 @@
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_xcode:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode
@@ -101,7 +116,7 @@
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_xcode_symlinked:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode_symlinked
@@ -111,7 +126,7 @@
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
 .macos_arm64_xcode_ub:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode_ub
@@ -119,7 +134,7 @@
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_ninja_multi:
-    extends: .macos
+    extends: .macos_arm64
 
     variables:
         CMAKE_CONFIGURATION: macos_arm64_ninja_multi
@@ -127,7 +142,7 @@
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_x86_64_ninja_ub:
-    extends: .macos
+    extends: .macos_x86_64
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_ninja_ub
@@ -156,7 +171,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.3
+        - xcode-26.4
         - nonconcurrent
 
 .macos_arm64_tags_ext:
@@ -164,7 +179,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.3
+        - xcode-26.4
         - concurrent
 
 .macos_arm64_tags_package:
@@ -172,7 +187,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.3
+        - xcode-26.4
         - nonconcurrent
         - finder
 
