@@ -512,6 +512,35 @@ void printPrecedingNewline()
   }
   skipNewLine = false;
 }
+
+void PrintPresets(
+  std::vector<cmCMakePresetsGraph::Preset const*> const& presets)
+{
+  if (presets.empty()) {
+    return;
+  }
+
+  auto longestPresetName =
+    std::max_element(presets.begin(), presets.end(),
+                     [](cmCMakePresetsGraph::Preset const* a,
+                        cmCMakePresetsGraph::Preset const* b) {
+                       return a->Name.length() < b->Name.length();
+                     });
+  auto longestLength = (*longestPresetName)->Name.length();
+
+  for (auto const* preset : presets) {
+    auto name = cmStrCat("  \"", preset->Name, '"');
+    auto const& description = preset->DisplayName;
+    if (!description.empty()) {
+      int const width = static_cast<int>(longestLength + name.length() -
+                                         preset->Name.length());
+      std::cout << std::left << std::setw(width) << name << " - "
+                << description << '\n';
+    } else {
+      std::cout << name << '\n';
+    }
+  }
+}
 }
 
 template <typename T>
@@ -1349,35 +1378,6 @@ void cmCMakePresetsGraph::ClearPresets()
   this->Files.clear();
 }
 
-void cmCMakePresetsGraph::PrintPresets(
-  std::vector<cmCMakePresetsGraph::Preset const*> const& presets)
-{
-  if (presets.empty()) {
-    return;
-  }
-
-  auto longestPresetName =
-    std::max_element(presets.begin(), presets.end(),
-                     [](cmCMakePresetsGraph::Preset const* a,
-                        cmCMakePresetsGraph::Preset const* b) {
-                       return a->Name.length() < b->Name.length();
-                     });
-  auto longestLength = (*longestPresetName)->Name.length();
-
-  for (auto const* preset : presets) {
-    auto name = cmStrCat("  \"", preset->Name, '"');
-    auto const& description = preset->DisplayName;
-    if (!description.empty()) {
-      int const width = static_cast<int>(longestLength + name.length() -
-                                         preset->Name.length());
-      std::cout << std::left << std::setw(width) << name << " - "
-                << description << '\n';
-    } else {
-      std::cout << name << '\n';
-    }
-  }
-}
-
 void cmCMakePresetsGraph::PrintConfigurePresetList() const
 {
   PrintConfigurePresetList([](ConfigurePreset const&) { return true; });
@@ -1399,7 +1399,7 @@ void cmCMakePresetsGraph::PrintConfigurePresetList(
   if (!presets.empty()) {
     printPrecedingNewline();
     std::cout << "Available configure presets:\n\n";
-    cmCMakePresetsGraph::PrintPresets(presets);
+    PrintPresets(presets);
   }
 }
 
@@ -1418,7 +1418,7 @@ void cmCMakePresetsGraph::PrintBuildPresetList() const
   if (!presets.empty()) {
     printPrecedingNewline();
     std::cout << "Available build presets:\n\n";
-    cmCMakePresetsGraph::PrintPresets(presets);
+    PrintPresets(presets);
   }
 }
 
@@ -1437,7 +1437,7 @@ void cmCMakePresetsGraph::PrintTestPresetList() const
   if (!presets.empty()) {
     printPrecedingNewline();
     std::cout << "Available test presets:\n\n";
-    cmCMakePresetsGraph::PrintPresets(presets);
+    PrintPresets(presets);
   }
 }
 
@@ -1462,7 +1462,7 @@ void cmCMakePresetsGraph::PrintPackagePresetList(
   if (!presets.empty()) {
     printPrecedingNewline();
     std::cout << "Available package presets:\n\n";
-    cmCMakePresetsGraph::PrintPresets(presets);
+    PrintPresets(presets);
   }
 }
 
@@ -1481,7 +1481,7 @@ void cmCMakePresetsGraph::PrintWorkflowPresetList() const
   if (!presets.empty()) {
     printPrecedingNewline();
     std::cout << "Available workflow presets:\n\n";
-    cmCMakePresetsGraph::PrintPresets(presets);
+    PrintPresets(presets);
   }
 }
 

@@ -449,7 +449,4 @@ private:
 
   static std::string GetFilename(std::string const& sourceDir);
   static std::string GetUserFilename(std::string const& sourceDir);
-
-  static void PrintPresets(
-    std::vector<cmCMakePresetsGraph::Preset const*> const& presets);
 };
