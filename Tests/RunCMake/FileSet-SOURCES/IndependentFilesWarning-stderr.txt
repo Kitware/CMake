@@ -1,0 +1,5 @@
+CMake Warning \(dev\) in CMakeLists\.txt:
+  the "INDEPENDENT_FILES" property of the file set "HEADERS" of the target
+  "lib1" will be ignored because it is incompatible with the file set type
+  "HEADERS"\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

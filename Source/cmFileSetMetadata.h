@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <set>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -37,19 +39,49 @@ enum class FileSetLookup
   Dependencies
 };
 
+// Define the various modes regarding graph dependency for
+// the generated files (Ninja specific)
+// items must be kept in this order: "Lower" modes are "stronger" in that they
+// have more restrictions (and therefore allow for more build graph
+// optimization).
+// std::set rely on it.
+enum class DependencyMode
+{
+  IndependentFiles, // files in the file set are independent from each other
+  Includables,      // files can be used by another source during compilation
+};
+using DependencySet = std::set<DependencyMode>;
+
 struct FileSetDescriptor
 {
-  FileSetDescriptor(cm::string_view type, FileSetLookup lookup)
+  FileSetDescriptor(cm::string_view type, FileSetLookup lookup,
+                    DependencySet dependencies,
+                    DependencyMode defaultDependency)
     : Type(type)
     , Lookup(lookup)
+    , SupportedDependencies(std::move(dependencies))
+    , DefaultDependency(defaultDependency)
+  {
+  }
+
+  FileSetDescriptor(FileSetLookup lookup)
+    : Type()
+    , Lookup(lookup)
+    , SupportedDependencies({ DependencyMode::Includables })
+    , DefaultDependency(DependencyMode::Includables)
   {
   }
 
   cm::string_view const Type;
   FileSetLookup const Lookup;
+  DependencySet const SupportedDependencies;
+  DependencyMode const DefaultDependency;
 };
 
 cm::optional<FileSetDescriptor> GetFileSetDescriptor(cm::string_view type);
+DependencyMode GetDependencyMode(cm::string_view type);
+DependencyMode GetDependencyMode(cm::string_view type,
+                                 DependencyMode requestedMode);
 
 std::vector<cm::string_view> const& GetKnownTypes();
 bool IsKnownType(cm::string_view type);

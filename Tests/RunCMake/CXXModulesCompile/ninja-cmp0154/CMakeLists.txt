@@ -27,5 +27,7 @@ target_compile_features(ninja_cmp0154 PUBLIC cxx_std_20)
 set_property(SOURCE unrelated.cxx
   PROPERTY
     CXX_SCAN_FOR_MODULES 0)
+# ensure property INDEPENDENT_FILES=OFF is ignored
+set_property(FILE_SET CXX_MODULES TARGET ninja_cmp0154 PROPERTY INDEPENDENT_FILES OFF)
 
 add_test(NAME ninja_cmp0154 COMMAND ninja_cmp0154)

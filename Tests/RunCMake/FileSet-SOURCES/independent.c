@@ -1,0 +1,4 @@
+
+void independent(void)
+{
+}
