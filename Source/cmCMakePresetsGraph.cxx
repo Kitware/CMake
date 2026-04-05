@@ -513,13 +513,13 @@ void PrintPresets(
     return;
   }
 
-  auto longestPresetName =
+  auto presetWithLongestName =
     std::max_element(presets.begin(), presets.end(),
                      [](cmCMakePresetsGraph::Preset const* a,
                         cmCMakePresetsGraph::Preset const* b) {
                        return a->Name.length() < b->Name.length();
                      });
-  auto longestLength = (*longestPresetName)->Name.length();
+  auto longestLength = (*presetWithLongestName)->Name.length();
 
   for (auto const* preset : presets) {
     std::string name = cmStrCat("  \"", preset->Name, '"');
