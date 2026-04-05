@@ -5392,7 +5392,7 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(
 
   for (auto const& entry : impl.Libraries) {
     auto const* gt = entry.Target;
-    if (!gt || !gt->HaveCxx20ModuleSources()) {
+    if (!gt || !gt->HaveInterfaceCxx20ModuleSources()) {
       continue;
     }
 
@@ -5882,6 +5882,10 @@ bool cmGeneratorTarget::HaveFortranSources() const
   return have_direct || have_via_target_objects;
 }
 
+bool cmGeneratorTarget::HaveInterfaceCxx20ModuleSources() const
+{
+  return !this->GetInterfaceFileSets(cm::FileSetMetadata::CXX_MODULES).empty();
+}
 bool cmGeneratorTarget::HaveCxx20ModuleSources() const
 {
   return !this->GetFileSets(cm::FileSetMetadata::CXX_MODULES).empty() ||
