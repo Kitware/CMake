@@ -44,16 +44,15 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 #define C_STD_17 201710L
 #define C_STD_23 202311L
 
-#ifdef __STDC_VERSION__
-#  define C_STD __STDC_VERSION__
+#if defined(__STDC_VERSION__)
+# define C_STD __STDC_VERSION__
+#elif defined(__STDC__) || defined(__clang__) || defined(_MSC_VER) ||         \
+  defined(__ibmxl__) || defined(__IBMC__) || defined(__RENESAS__)
+# define C_STD 1
 #endif
 
-#if !defined(__STDC__) && !defined(__clang__) && !defined(__RENESAS__)
-# if defined(_MSC_VER) || defined(__ibmxl__) || defined(__IBMC__)
-#  define C_VERSION "90"
-# else
-#  define C_VERSION
-# endif
+#if !defined(C_STD)
+# define C_VERSION
 #elif C_STD > C_STD_17
 # define C_VERSION "23"
 #elif C_STD > C_STD_11
