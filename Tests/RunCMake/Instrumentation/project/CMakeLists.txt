@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 4.3)
-project(instrumentation)
+project(instrumentation C)
 enable_testing()
 if (EXISTS ${INSTRUMENT_COMMAND_FILE})
   include(${INSTRUMENT_COMMAND_FILE})
 endif()
 
-add_executable(main main.cxx)
-add_library(lib lib.cxx)
+add_executable(main main.c)
+add_library(lib lib.c)
 target_link_libraries(main lib)
 add_custom_command(TARGET main POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E true
@@ -46,10 +46,10 @@ set_target_properties(main PROPERTIES LABELS "label1;label2")
 set_target_properties(lib PROPERTIES LABELS "label3")
 
 if (FAIL)
-  file(WRITE "${CMAKE_BINARY_DIR}/dummy.cxx"
+  file(WRITE "${CMAKE_BINARY_DIR}/dummy.c"
     "#error \"something which will not compile\"\n"
   )
-  add_executable(dummy "${CMAKE_BINARY_DIR}/dummy.cxx")
+  add_executable(dummy "${CMAKE_BINARY_DIR}/dummy.c")
   add_test(NAME dummy COMMAND ${CMAKE_COMMAND} -E false)
   install(CODE "message(FATAL_ERROR \"Failed install.\")")
 endif()

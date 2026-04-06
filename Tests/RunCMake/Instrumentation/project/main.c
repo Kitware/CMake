@@ -1,5 +1,5 @@
 #include "lib.h"
-int main()
+int main(void)
 {
   return lib();
 }
