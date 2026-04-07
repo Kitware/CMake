@@ -13,26 +13,13 @@ string(JOIN " " coverage_flags
   # `#line` directives. CI coverage then cannot find the source files reliably.
   # See related issue #20001.
   "-fprofile-exclude-files=cmExprParser[.].*\\;cmFortranParser[.].*"
-  "-fdiagnostics-show-option"
-  "-Wall"
-  "-Wextra"
-  "-Wshadow"
-  "-Wpointer-arith"
-  "-Winvalid-pch"
-  "-Wcast-align"
-  "-Wdisabled-optimization"
-  "-Wwrite-strings"
-  "-fstack-protector-all"
-  "-Wconversion"
-  "-Wno-error=sign-conversion"
-  "-Wno-error=conversion"
 )
 string(JOIN " " link_flags
   "--coverage"
 )
 
 set(CMAKE_C_FLAGS "${coverage_flags}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS "${coverage_flags} -Woverloaded-virtual -Wstrict-null-sentinel" CACHE STRING "")
+set(CMAKE_CXX_FLAGS "${coverage_flags}" CACHE STRING "")
 # Apply `LDFLAGS`.
 set(CMAKE_EXE_LINKER_FLAGS_INIT "${link_flags}" CACHE STRING "")
 set(CMAKE_SHARED_LINKER_FLAGS_INIT "${link_flags}" CACHE STRING "")
