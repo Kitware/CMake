@@ -35,6 +35,12 @@ public:
   void SetCommand(std::vector<std::string> const& command);
   std::vector<std::string> const& GetCommand() const { return this->Command; }
 
+  void SetBuildDependencies(std::vector<std::string> deps);
+  std::vector<std::string> const& GetDependencies() const
+  {
+    return this->BuildDependencies;
+  }
+
   //! Set/Get a property of this source file
   void SetProperty(std::string const& prop, cmValue value);
   void SetProperty(std::string const& prop, std::nullptr_t)
@@ -85,6 +91,7 @@ private:
   cmPropertyMap Properties;
   std::string Name;
   std::vector<std::string> Command;
+  std::vector<std::string> BuildDependencies;
   bool CommandExpandLists = false;
 
   bool OldStyle;

@@ -13,6 +13,7 @@
 
 class cmListFileBacktrace;
 class cmGeneratorExpression;
+class cmGeneratorTarget;
 class cmLocalGenerator;
 class cmTest;
 
@@ -23,6 +24,12 @@ class cmTest;
 class cmTestGenerator : public cmScriptGenerator
 {
 public:
+  struct BuildDependencies
+  {
+    std::vector<cmGeneratorTarget*> Targets;
+    std::vector<std::string> Files;
+  };
+
   cmTestGenerator(cmTest* test,
                   std::vector<std::string> const& configurations =
                     std::vector<std::string>());
@@ -32,6 +39,7 @@ public:
   cmTestGenerator& operator=(cmTestGenerator const&) = delete;
 
   void Compute(cmLocalGenerator* lg);
+  bool GetBuildDependencies(cmLocalGenerator* lg, BuildDependencies& deps);
 
   /** Test if this generator installs the test for a given configuration.  */
   bool TestsForConfig(std::string const& config);
