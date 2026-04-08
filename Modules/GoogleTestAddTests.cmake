@@ -3,19 +3,6 @@
 
 cmake_minimum_required(VERSION 4.2)
 
-function(add_command name test_name)
-  set(args "")
-  foreach(arg ${ARGN})
-    if(arg MATCHES "[^-./:a-zA-Z0-9_]")
-      string(APPEND args " [==[${arg}]==]")
-    else()
-      string(APPEND args " ${arg}")
-    endif()
-  endforeach()
-  string(APPEND script "${name}(${test_name} ${args})\n")
-  set(script "${script}" PARENT_SCOPE)
-endfunction()
-
 function(generate_testname_guards output open_guard_var close_guard_var)
   set(open_guard "[=[")
   set(close_guard "]=]")
@@ -95,13 +82,6 @@ macro(write_test_to_file)
     string(REPLACE "${close_sb}" "]" testname "${testname}")
   endif()
   set(guarded_testname "${open_guard}${testname}${close_guard}")
-  # Add to script. Do not use add_command() here because it messes up the
-  # handling of empty values when forwarding arguments, and we need to
-  # preserve those carefully for arg_TEST_EXECUTOR and arg_EXTRA_ARGS.
-  # Test properties with values that are lists are also not handled
-  # correctly because the properties need to be expressed as a list
-  # of key-value pairs, but that list is flattened, so any values
-  # that are lists can't be differentiated from the next key.
   string(APPEND script "add_test(${guarded_testname} ${launcherArgs}")
   foreach(arg IN ITEMS
     "${arg_TEST_EXECUTABLE}"
@@ -438,7 +418,8 @@ function(gtest_discover_tests_impl)
 
   # Create a list of all discovered tests, which users may use to e.g. set
   # properties on the tests
-  add_command(set "" ${arg_TEST_LIST} "${tests}")
+  list(JOIN tests "]==] [==[" tests)
+  string(APPEND script "set(${arg_TEST_LIST} [==[${tests}]==])\n")
 
   # Write remaining content to the CTest script
   file(APPEND "${arg_CTEST_FILE}" "${script}")
