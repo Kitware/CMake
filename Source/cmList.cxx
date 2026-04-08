@@ -18,12 +18,16 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
+#include "cmMakefile.h"
 #include "cmRange.h"
+#include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cm::string_view cmList::element_separator{ ";" };
 
@@ -565,6 +569,85 @@ private:
   std::unique_ptr<cmStringReplaceHelper> ReplaceHelper;
 };
 
+class TransformActionApply : public TransformAction
+{
+public:
+  using TransformAction::Initialize;
+
+  void Initialize(TransformSelector* selector, std::string const& functionName,
+                  cmMakefile& makefile)
+  {
+    TransformAction::Initialize(selector);
+    this->FunctionName = functionName;
+    this->Makefile = &makefile;
+
+    // Validate: command must exist
+    if (!makefile.GetState()->GetCommand(this->FunctionName)) {
+      throw transform_error(
+        cmStrCat("sub-command TRANSFORM, action APPLY: unknown function \"",
+                 this->FunctionName, "\"."));
+    }
+  }
+
+  void Initialize(TransformSelector* /*selector*/,
+                  std::vector<std::string> const& /*args*/) override
+  {
+    // This overload must not be used for APPLY — it lacks cmMakefile context.
+    throw transform_error(
+      "sub-command TRANSFORM, action APPLY requires cmMakefile context.");
+  }
+
+  std::string operator()(std::string const& s) override
+  {
+    if (!this->Selector->InSelection(s)) {
+      return s;
+    }
+
+    // Use a unique output variable name to avoid collisions
+    std::string const outputVar = "_list_transform_apply_out_";
+
+    // Unset the output variable before calling
+    this->Makefile->RemoveDefinition(outputVar);
+
+    // Build the function call: functionName(s, outputVar)
+    cmListFileContext context = this->Makefile->GetBacktrace().Top();
+    std::vector<cmListFileArgument> funcArgs;
+    funcArgs.emplace_back(s, cmListFileArgument::Quoted, context.Line);
+    funcArgs.emplace_back(outputVar, cmListFileArgument::Quoted, context.Line);
+    cmListFileFunction func{ this->FunctionName, context.Line, context.Line,
+                             std::move(funcArgs) };
+
+    cmExecutionStatus status(*this->Makefile);
+    if (!this->Makefile->ExecuteCommand(func, status) ||
+        status.GetNestedError()) {
+      throw transform_error(
+        cmStrCat("sub-command TRANSFORM, action APPLY: function \"",
+                 this->FunctionName, "\" failed during execution."));
+    }
+
+    // Read back the output variable
+    cmValue result = this->Makefile->GetDefinition(outputVar);
+    if (!result) {
+      throw transform_error(
+        cmStrCat("sub-command TRANSFORM, action APPLY: function \"",
+                 this->FunctionName, "\" did not set the output variable."));
+    }
+
+    // Copy the result before cleaning up (RemoveDefinition invalidates the
+    // cmValue pointer).
+    std::string output = *result;
+
+    // Clean up
+    this->Makefile->RemoveDefinition(outputVar);
+
+    return output;
+  }
+
+private:
+  std::string FunctionName;
+  cmMakefile* Makefile = nullptr;
+};
+
 // Descriptor of action
 // Arity: number of arguments required for the action
 // Transform: Object implementing the action
@@ -621,6 +704,8 @@ ActionDescriptorSet::iterator TransformConfigure(
                         cm::make_unique<TransformActionGenexStrip>());
     Descriptors.emplace(cmList::TransformAction::REPLACE, "REPLACE", 2,
                         cm::make_unique<TransformActionReplace>());
+    Descriptors.emplace(cmList::TransformAction::APPLY, "APPLY", 1,
+                        cm::make_unique<TransformActionApply>());
   }
 
   auto descriptor = Descriptors.find(action);
@@ -799,6 +884,25 @@ cmList& cmList::transform(TransformAction action,
 
   descriptor->Transform->Initialize(
     static_cast<::TransformSelector*>(selector.get()), args);
+
+  static_cast<::TransformSelector&>(*selector).Transform(
+    this->Values, [&descriptor](std::string const& s) -> std::string {
+      return (*descriptor->Transform)(s);
+    });
+
+  return *this;
+}
+
+cmList& cmList::transform(TransformAction action, std::string const& arg,
+                          cmMakefile& makefile,
+                          std::unique_ptr<TransformSelector> selector)
+{
+  auto descriptor = TransformConfigure(action, selector, 1);
+
+  auto* applyAction =
+    static_cast<TransformActionApply*>(descriptor->Transform.get());
+  applyAction->Initialize(static_cast<::TransformSelector*>(selector.get()),
+                          arg, makefile);
 
   static_cast<::TransformSelector&>(*selector).Transform(
     this->Values, [&descriptor](std::string const& s) -> std::string {
