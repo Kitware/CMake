@@ -70,6 +70,7 @@ public:
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
   int SpawnBuildDaemon();
   bool LockBuildDaemon();
+  bool LockIndexing();
   int CollectTimingAfterBuild(int ppid);
   void AddHook(cmInstrumentationQuery::Hook hook);
   void AddOption(cmInstrumentationQuery::Option option);
@@ -87,6 +88,8 @@ public:
 
 private:
   Json::Value ReadJsonSnippet(std::string const& file_name);
+  bool AcquireLock(std::string const& lock_file, cmFileLock& lock,
+                   unsigned long timeout);
   void WriteInstrumentationJson(Json::Value& index,
                                 std::string const& directory,
                                 std::string const& file_name);
@@ -134,5 +137,6 @@ private:
   cmsys::SystemInformation& GetSystemInformation();
 #endif
   int writtenJsonQueries = 0;
-  cmFileLock lock;
+  cmFileLock buildLock; // non-blocking
+  cmFileLock indexLock; // never held alongside buildLock
 };
