@@ -297,16 +297,14 @@ function(gtest_discover_tests_impl)
     CTEST_FILE
     TEST_DISCOVERY_TIMEOUT
     TEST_XML_OUTPUT_DIR
-    # The following are all multi-value arguments in gtest_discover_tests(),
-    # but they are each given to us as a single argument. We parse them that
-    # way to avoid problems with preserving empty list values and escaping.
     TEST_FILTER
+  )
+  set(multiValueArgs
     TEST_EXTRA_ARGS
     TEST_DISCOVERY_EXTRA_ARGS
     TEST_PROPERTIES
     TEST_EXECUTOR
   )
-  set(multiValueArgs "")
   cmake_parse_arguments(PARSE_ARGV 0 arg
     "${options}" "${oneValueArgs}" "${multiValueArgs}"
   )
@@ -424,25 +422,3 @@ function(gtest_discover_tests_impl)
   # Write remaining content to the CTest script
   file(APPEND "${arg_CTEST_FILE}" "${script}")
 endfunction()
-
-if(CMAKE_SCRIPT_MODE_FILE)
-  gtest_discover_tests_impl(
-    NO_PRETTY_TYPES ${NO_PRETTY_TYPES}
-    NO_PRETTY_VALUES ${NO_PRETTY_VALUES}
-    TEST_TARGET ${TEST_TARGET}
-    TEST_EXECUTABLE ${TEST_EXECUTABLE}
-    TEST_EXECUTOR "${TEST_EXECUTOR}"
-    TEST_WORKING_DIR ${TEST_WORKING_DIR}
-    TEST_PREFIX ${TEST_PREFIX}
-    TEST_SUFFIX ${TEST_SUFFIX}
-    TEST_FILTER ${TEST_FILTER}
-    TEST_LIST ${TEST_LIST}
-    CTEST_FILE ${CTEST_FILE}
-    TEST_DISCOVERY_TIMEOUT ${TEST_DISCOVERY_TIMEOUT}
-    TEST_XML_OUTPUT_DIR ${TEST_XML_OUTPUT_DIR}
-    TEST_EXTRA_ARGS "${TEST_EXTRA_ARGS}"
-    TEST_DISCOVERY_EXTRA_ARGS "${TEST_DISCOVERY_EXTRA_ARGS}"
-    TEST_PROPERTIES "${TEST_PROPERTIES}"
-    LIST_SEPARATOR "${LIST_SEPARATOR}"
-  )
-endif()
