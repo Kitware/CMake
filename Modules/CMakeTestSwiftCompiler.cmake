@@ -30,10 +30,8 @@ if(NOT CMAKE_Swift_COMPILER_WORKS)
   "}")
   try_compile(CMAKE_Swift_COMPILER_WORKS
     SOURCE_FROM_VAR main.swift __CMAKE_Swift_TEST_SOURCE
+    NO_CACHE
     OUTPUT_VARIABLE __CMAKE_Swift_COMPILER_OUTPUT)
-  # Move result from cache to normal variable.
-  set(CMAKE_Swift_COMPILER_WORKS ${CMAKE_Swift_COMPILER_WORKS})
-  unset(CMAKE_Swift_COMPILER_WORKS CACHE)
   set(Swift_TEST_WAS_RUN 1)
 endif()
 

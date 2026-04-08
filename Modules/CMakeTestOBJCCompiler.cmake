@@ -52,11 +52,9 @@ if(NOT CMAKE_OBJC_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_OBJC_COMPILER_WORKS
     SOURCE_FROM_VAR testObjCCompiler.m __TestCompiler_testObjCCompilerSource
+    NO_CACHE
     OUTPUT_VARIABLE __CMAKE_OBJC_COMPILER_OUTPUT)
   unset(__TestCompiler_testObjCCompilerSource)
-  # Move result from cache to normal variable.
-  set(CMAKE_OBJC_COMPILER_WORKS ${CMAKE_OBJC_COMPILER_WORKS})
-  unset(CMAKE_OBJC_COMPILER_WORKS CACHE)
   __TestCompiler_restoreTryCompileTargetType()
   if(NOT CMAKE_OBJC_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")
