@@ -108,6 +108,12 @@ macro(write_test_to_file)
     set(maybe_LOCATION "DEF_SOURCE_LINE [==[${current_test_file}:${current_test_line}]==]")
   endif()
 
+  set(maybe_properties)
+  if(arg_TEST_PROPERTIES)
+    list(JOIN arg_TEST_PROPERTIES "]] [[" maybe_properties)
+    set(maybe_properties "[[${maybe_properties}]]")
+  endif()
+
   string(APPEND script
     "set_tests_properties(${guarded_testname}\n"
     "  PROPERTIES\n"
@@ -115,30 +121,9 @@ macro(write_test_to_file)
     "    ${maybe_LOCATION}\n"
     "    WORKING_DIRECTORY [==[${arg_TEST_WORKING_DIR}]==]\n"
     "    SKIP_REGULAR_EXPRESSION [==[\\[  SKIPPED \\]]==]\n"
+    "    ${maybe_properties}\n"
+    ")\n"
   )
-  if(arg_TEST_PROPERTIES)
-    # Making local copy of arg_TEST_PROPERTIES, as write_test_to_file is
-    # called in a loop and we don't want to destroy the parsed arg value
-    # by POP_FRONT-ing from it.
-    set(test_properties "${arg_TEST_PROPERTIES}")
-    list(LENGTH test_properties test_properties_length)
-    math(EXPR test_properties_length_mod2 "${test_properties_length} % 2")
-    if(NOT test_properties_length_mod2 EQUAL 0)
-      message(FATAL_ERROR
-        "gtest_discover_tests() received a key-value list of properties with an uneven number of elements.\n"
-        "Check the supplied TEST_PROPERTIES argument and LIST_SEPARATOR if used."
-      )
-    endif()
-    while(NOT test_properties_length EQUAL 0)
-      list(POP_FRONT test_properties property_name property_value)
-      list(LENGTH test_properties test_properties_length)
-      if(NOT "${arg_LIST_SEPARATOR}" STREQUAL "")
-        string(REPLACE "${arg_LIST_SEPARATOR}" ";" property_value "${property_value}")
-      endif()
-      string(APPEND script "    ${property_name} [==[${property_value}]==]\n")
-    endwhile()
-  endif()
-  string(APPEND script ")\n")
 
   # possibly unbalanced square brackets render lists invalid so skip such
   # tests in ${arg_TEST_LIST}
@@ -287,7 +272,6 @@ function(gtest_discover_tests_impl)
   set(oneValueArgs
     NO_PRETTY_TYPES   # These two take a value, unlike gtest_discover_tests()
     NO_PRETTY_VALUES  #
-    LIST_SEPARATOR
     TEST_TARGET
     TEST_EXECUTABLE
     TEST_WORKING_DIR

@@ -115,14 +115,11 @@ if(NOT TEST GoogleTest.NoKeywords)
   message(FATAL_ERROR "Test case GoogleTest.NoKeywords not defined")
 endif()
 
-# Check if LIST_SEPARATOR allows passing both ENVIRONMENT values to test
+# Check if PROPERTIES values are allowed to be lists
 add_executable(test_gtest5 main5.cxx)
 target_link_libraries(test_gtest5 GTest::Main)
 set(environment VALX=1 VALY=2)
-set(list_separator ",")
-list(JOIN environment ${list_separator} environment)
 gtest_discover_tests(test_gtest5
-  LIST_SEPARATOR ${list_separator}
   PROPERTIES
     ENVIRONMENT "${environment}"
 )
