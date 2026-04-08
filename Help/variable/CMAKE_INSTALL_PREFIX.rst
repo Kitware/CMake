@@ -60,6 +60,6 @@ See Also
 
 * The :option:`--install-prefix <cmake --install-prefix>` option.
 * The :genex:`$<INSTALL_PREFIX>` generator expression.
-* The :ref:`installDir <CMakePresets installDir>` field in CMake configure
-  presets.
+* The :ref:`installDir <CMakePresets.configurePresets.installDir>` field in
+  CMake configure presets.
 * The :variable:`CPACK_PACKAGING_INSTALL_PREFIX` variable.

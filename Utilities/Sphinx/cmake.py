@@ -21,6 +21,8 @@ if sphinx.version_info >= (2,):
     from sphinx import addnodes
     from sphinx.directives import ObjectDescription, nl_escape_re
     from sphinx.domains import Domain, ObjType
+    from sphinx.domains.changeset import VersionChange
+    from sphinx.domains.changeset import versionlabels, versionlabel_classes
     from sphinx.domains.std import OptionXRefRole
     from sphinx.roles import XRefRole
     from sphinx.util import logging, ws_re
@@ -776,4 +778,21 @@ def setup(app):
     app.add_transform(CMakeTransform)
     app.add_transform(CMakeXRefTransform)
     app.add_domain(CMakeDomain)
+
+    versionlabels.update({
+        'presets-versionadded':   'Added in presets version %s',
+        'presets-versionchanged': 'Changed in presets version %s',
+        'presets-versionremoved': 'Removed in presets version %s',
+    })
+
+    versionlabel_classes.update({
+        'presets-versionadded':     'added',
+        'presets-versionchanged':   'changed',
+        'presets-versionremoved':   'removed',
+    })
+
+    app.add_directive('presets-versionadded', VersionChange)
+    app.add_directive('presets-versionchanged', VersionChange)
+    app.add_directive('presets-versionremoved', VersionChange)
+
     return {"parallel_read_safe": True}

@@ -26,7 +26,8 @@ exclude_patterns = [
     'dev',
     # NOTE Ignore shared RST files used in `.. include::` directives
     'include/*.rst',
-    '**/include/*.rst'
+    '**/include/*.rst',
+    'manual/presets/*.rst',
     ]
 
 extensions = ['cmake']
