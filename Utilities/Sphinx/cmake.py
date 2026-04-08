@@ -574,6 +574,8 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
             m = CMakeXRefRole._re_guide.match(text)
             if m:
                 text = f'{m.group(2)} <{text}>'
+        elif typ == 'cmake:preset':
+            text = f'CMakePresets.{text}'
         return super().__call__(typ, rawtext, text, *args, **kwargs)
 
     # We cannot insert index nodes using the result_nodes method
@@ -703,6 +705,7 @@ class CMakeDomain(Domain):
         'prop_test':  CMakeXRefRole(),
         'prop_tgt':   CMakeXRefRole(),
         'manual':     CMakeXRefRole(),
+        'preset':     CMakeXRefRole(lowercase=True, warn_dangling=True),
         # Roles for program-specific command-line options without the program
         # name (which add the name to form the ref).
         'cmake-option':         CMakeOptionXRefRole('cmake'),
@@ -742,13 +745,29 @@ class CMakeDomain(Domain):
         targetid = f'{typ}:{target}'
         obj = self.data['objects'].get(targetid)
 
-        if obj is None and typ == 'command':
-            # If 'command(args)' wasn't found, try just 'command'.
-            # TODO: remove this fallback? warn?
-            # logger.warning(f'no match for {targetid}')
-            command = target.split('(')[0]
-            targetid = f'{typ}:{command}'
-            obj = self.data['objects'].get(targetid)
+        if obj is None:
+            if typ == 'command':
+                # If 'command(args)' wasn't found, try just 'command'.
+                # TODO: remove this fallback? warn?
+                # logger.warning(f'no match for {targetid}')
+                command = target.split('(')[0]
+                targetid = f'{typ}:{command}'
+                obj = self.data['objects'].get(targetid)
+            elif typ == 'preset':
+                # Preset references are really just references to plain old
+                # explicit targets.
+                labels = env.get_domain('std').labels
+                docname, labelid, sectname = labels.get(target, ('', '', ''))
+
+                if not docname:
+                    return None
+
+                return make_refnode(builder, fromdocname, docname, labelid,
+                                    nodes.literal('', sectname), target)
+
+                import sys
+                print(typ, target, node, file=sys.stderr)
+                print(docname, labelid, sectname, file=sys.stderr)
 
         if obj is None:
             # TODO: warn somehow?

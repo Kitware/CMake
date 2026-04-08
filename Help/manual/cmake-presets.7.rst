@@ -377,14 +377,10 @@ they were added and a summary of the new features and changes is given below.
       `Build <Build Preset_>`_, and `Test Presets <Test Preset_>`_.
     * Changes to `Configure Presets <Configure Preset_>`_
 
-      * The `installDir <CMakePresets.configurePresets.installDir_>`_ field was
-        added.
-      * The `toolchainFile <CMakePresets.configurePresets.toolchainFile_>`_
-        field was added.
-      * The `binaryDir <CMakePresets.configurePresets.binaryDir_>`_ field is
-        now optional.
-      * The `generator <CMakePresets.configurePresets.generator_>`_ field is
-        now optional.
+      * The :preset:`configurePresets.installDir` field was added.
+      * The :preset:`configurePresets.toolchainFile` field was added.
+      * The :preset:`configurePresets.binaryDir` field is now optional.
+      * The :preset:`configurePresets.generator` field is now optional.
 
     * Changes to `Macro Expansion`_
 
@@ -398,9 +394,7 @@ they were added and a summary of the new features and changes is given below.
       ``CMakePresets.json`` and ``CMakeUserPresets.json``.
     * Changes to `Build Presets <Build Preset_>`_
 
-      * The
-        `resolvePackageReferences <CMakePresets.buildPresets.resolvePackageReferences_>`_
-        field was added.
+      * The :preset:`buildPresets.resolvePackageReferences` field was added.
 
     * Changes to `Macro Expansion`_
 
@@ -411,9 +405,8 @@ they were added and a summary of the new features and changes is given below.
 
     * Changes to `Test Presets <Test Preset_>`_
 
-      * The `testOutputTruncation <CMakePresets.testPresets.output.testOutputTruncation_>`_
-        field was added to the `output <CMakePresets.testPresets.output_>`_
-        object.
+      * The :preset:`testPresets.output.testOutputTruncation` field was added
+        to the :preset:`testPresets.output` object.
 
     * Changes to `Macro Expansion`_
 
@@ -426,16 +419,15 @@ they were added and a summary of the new features and changes is given below.
     * `Workflow Presets <Workflow Preset_>`_ were added.
     * Changes to `Test Presets <Test Preset_>`_
 
-      * The `outputJUnitFile <CMakePresets.testPresets.output.outputJUnitFile_>`_
-        field was added to the `output <CMakePresets.testPresets.output_>`_
-        object.
+      * The :preset:`testPresets.output.outputJUnitFile` field was added to the
+        :preset:`testPresets.output` object.
 
   ``7``
     .. versionadded:: 3.27
 
     * Changes to `Configure Presets <Configure Preset_>`_
 
-      * The `trace <CMakePresets.configurePresets.trace_>`_ field was added.
+      * The :preset:`configurePresets.trace` field was added.
 
     * Changes to `Includes`_
 
@@ -444,8 +436,7 @@ they were added and a summary of the new features and changes is given below.
   ``8``
     .. versionadded:: 3.28
 
-    * The `$schema <CMakePresets.$schema_>`_ field was added to the root
-      object.
+    * The :preset:`$schema` field was added to the root object.
 
   ``9``
     .. versionadded:: 3.30
@@ -461,17 +452,15 @@ they were added and a summary of the new features and changes is given below.
       throughout ``CMakePresets.json`` and ``CMakeUserPresets.json``.
     * Changes to `Configure Presets <Configure Preset_>`_:
 
-      * The `graphviz <CMakePresets.configurePresets.graphviz_>`_ field was
-        added.
+      * The :preset:`configurePresets.graphviz` field was added.
 
   ``11``
     .. versionadded:: 4.3
 
     * Changes to `Test Presets <Test Preset_>`_
 
-      * The `jobs <CMakePresets.testPresets.execution.jobs_>`_ field now
-        accepts an empty string representing
-        :ctest-option:`--parallel` with ``<jobs>`` omitted.
+      * The :preset:`testPresets.execution.jobs` field now accepts an empty
+        string representing :ctest-option:`--parallel` with ``<jobs>`` omitted.
 
   ``12``
     .. versionadded:: 4.4
@@ -485,8 +474,8 @@ they were added and a summary of the new features and changes is given below.
 
     * Changes to `Test Presets <Test Preset_>`_
 
-      * The `testPassthroughArguments <CMakePresets.testPresets.execution.testPassthroughArguments_>`_
-        field was added to forward arguments to test executables.
+      * The :preset:`testPresets.execution.testPassthroughArguments` field was
+        added to forward arguments to test executables.
 
 Schema
 ======
