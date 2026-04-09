@@ -186,12 +186,23 @@ bool testProtocolWithPipesAbruptDisconnect()
   std::future<void> adapterFinishedFuture =
     adapterFinishedPromise.get_future();
 
-  std::promise<void> pipeClosedPromise;
-  std::future<void> pipeClosedFuture = pipeClosedPromise.get_future();
-
   std::promise<bool> initializedEventReceivedPromise;
   std::future<bool> initializedEventReceivedFuture =
     initializedEventReceivedPromise.get_future();
+
+  std::promise<bool> exitedEventReceivedPromise;
+  std::future<bool> exitedEventReceivedFuture =
+    exitedEventReceivedPromise.get_future();
+
+  std::promise<bool> terminatedEventReceivedPromise;
+  std::future<bool> terminatedEventReceivedFuture =
+    terminatedEventReceivedPromise.get_future();
+
+  std::promise<bool> threadStartedPromise;
+  std::future<bool> threadStartedFuture = threadStartedPromise.get_future();
+
+  std::promise<bool> threadExitedPromise;
+  std::future<bool> threadExitedFuture = threadExitedPromise.get_future();
 
   auto futureTimeout = std::chrono::seconds(60);
   auto disconnectTimeout = std::chrono::seconds(10);
@@ -208,17 +219,26 @@ bool testProtocolWithPipesAbruptDisconnect()
   client->registerHandler([&](dap::InitializedEvent /*unused*/) {
     initializedEventReceivedPromise.set_value(true);
   });
+  client->registerHandler([&](dap::ExitedEvent /*unused*/) {
+    exitedEventReceivedPromise.set_value(true);
+  });
+  client->registerHandler([&](dap::TerminatedEvent const& /*unused*/) {
+    terminatedEventReceivedPromise.set_value(true);
+  });
+  client->registerHandler([&](dap::ThreadEvent const& e) {
+    if (e.reason == "started") {
+      threadStartedPromise.set_value(true);
+    } else if (e.reason == "exited") {
+      threadExitedPromise.set_value(true);
+    }
+  });
 
   // Raw thread (not ScopedThread): we need to be able to detach on
-  // failure so the test process can exit even if the bug is present.
-  //
-  // Note: we deliberately do NOT call ReportExitCode() here. With the
-  // bug present, an attempted write to a closed pipe would trigger the
-  // dap::Session error handler, which masks the busy-loop condition we
-  // are trying to test for. Instead we let the adapter destructor join
-  // the SessionThread directly: if SessionThread is spinning on EOF the
-  // join will hang, the adapterFinishedFuture wait below will time out,
-  // and the test will fail.
+  // failure so the test process can exit even if the regression
+  // returns. With the fix in place, ReportExitCode()'s wait on
+  // DisconnectEvent unblocks when the SessionThread detects EOF on the
+  // pipe; without the fix, it blocks forever and the adapter
+  // destructor hangs in SessionThread.join().
   std::thread debuggerThread([&]() {
     try {
       auto connection =
@@ -228,9 +248,12 @@ bool testProtocolWithPipesAbruptDisconnect()
       std::shared_ptr<cmDebugger::cmDebuggerAdapter> debuggerAdapter =
         std::make_shared<cmDebugger::cmDebuggerAdapter>(
           connection, dap::file(stdout, false));
-      // Hold the adapter until the test signals that it has closed the
-      // client side of the pipe.
-      pipeClosedFuture.wait();
+      // Sends thread-exited / exited / terminated events and then
+      // blocks on DisconnectEvent. The test closes the client side of
+      // the pipe instead of sending a DisconnectRequest, so the only
+      // thing that will unblock this wait is the SessionThread's EOF
+      // handling in cmDebuggerAdapter.
+      debuggerAdapter->ReportExitCode(0);
       // Adapter destructed here; joins SessionThread.
     } catch (std::runtime_error const&) {
       // Swallowed: connection failures shouldn't hang the test.
@@ -249,7 +272,7 @@ bool testProtocolWithPipesAbruptDisconnect()
   client->bind(client2Debugger, client2Debugger);
 
   // Drive the full handshake so that the debugger SessionThread is up
-  // and blocked reading the pipe.
+  // and ReportExitCode is blocked on DisconnectEvent.
   dap::CMakeInitializeRequest initializeRequest;
   auto initializeResponse = client->send(initializeRequest).get();
   ASSERT_TRUE(!initializeResponse.error);
@@ -265,20 +288,33 @@ bool testProtocolWithPipesAbruptDisconnect()
 
   ASSERT_TRUE(initializedEventReceivedFuture.wait_for(futureTimeout) ==
               std::future_status::ready);
+  ASSERT_TRUE(terminatedEventReceivedFuture.wait_for(futureTimeout) ==
+              std::future_status::ready);
+  ASSERT_TRUE(threadStartedFuture.wait_for(futureTimeout) ==
+              std::future_status::ready);
+  ASSERT_TRUE(threadExitedFuture.wait_for(futureTimeout) ==
+              std::future_status::ready);
+  ASSERT_TRUE(exitedEventReceivedFuture.wait_for(futureTimeout) ==
+              std::future_status::ready);
 
   // Abruptly close the client side without sending DisconnectRequest.
   // Regression check for the busy-loop bug: the debugger adapter must
   // detect EOF on the pipe and shut down on its own.
-  client2Debugger->close();
-  pipeClosedPromise.set_value();
+  //
+  // Use ShutdownForTesting() rather than close(). The client dap::Session
+  // has its own recvThread still blocked in read() on this same socket;
+  // on Linux, ::close() on an fd does not wake a sibling thread's
+  // in-flight ::read(), which would deadlock the test. ShutdownForTesting
+  // calls shutdown(SHUT_RDWR) to signal EOF on the socket endpoint
+  // without freeing the fd, so both reads wake up naturally.
+  client2Debugger->ShutdownForTesting();
 
   bool finishedInTime = adapterFinishedFuture.wait_for(disconnectTimeout) ==
     std::future_status::ready;
   if (!finishedInTime) {
-    // Bug reproduced: the SessionThread is spinning on EOF and the
-    // adapter destructor is blocked in SessionThread.join(). Detach so
-    // the test process can exit instead of hanging in std::thread's
-    // destructor.
+    // Bug reproduced: the SessionThread is spinning on EOF and
+    // ReportExitCode is blocked on DisconnectEvent. Detach so the test
+    // process can exit instead of hanging in std::thread's destructor.
     debuggerThread.detach();
     ASSERT_TRUE(finishedInTime);
   }
