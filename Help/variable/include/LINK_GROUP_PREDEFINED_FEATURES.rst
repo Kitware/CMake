@@ -20,3 +20,7 @@
   This feature is available when using toolchains that target Linux, BSD, and
   SunOS.  It can also be used when targeting Windows platforms if the GNU
   toolchain is used.
+
+  .. versionadded:: 4.4
+    ``RESCAN`` is additionally available when using toolchains targeting
+    Haiku.
