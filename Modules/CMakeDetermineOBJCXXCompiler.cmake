@@ -78,11 +78,10 @@ else()
     # if the C compiler already had a path, reuse it for searching the CXX compiler
     get_filename_component(_CMAKE_USER_OBJCXX_COMPILER_PATH "${CMAKE_OBJCXX_COMPILER}" PATH)
     if(NOT _CMAKE_USER_OBJCXX_COMPILER_PATH)
-      find_program(CMAKE_OBJCXX_COMPILER_WITH_PATH NAMES ${CMAKE_OBJCXX_COMPILER})
+      find_program(CMAKE_OBJCXX_COMPILER_WITH_PATH NO_CACHE NAMES ${CMAKE_OBJCXX_COMPILER})
       if(CMAKE_OBJCXX_COMPILER_WITH_PATH)
         set(CMAKE_OBJCXX_COMPILER ${CMAKE_OBJCXX_COMPILER_WITH_PATH} CACHE STRING "Objective-C++ compiler" FORCE)
       endif()
-      unset(CMAKE_OBJCXX_COMPILER_WITH_PATH CACHE)
     endif()
 
   endif()

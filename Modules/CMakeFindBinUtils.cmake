@@ -34,7 +34,7 @@ function(__resolve_tool_path CMAKE_TOOL SEARCH_PATH DOCSTRING)
     if(NOT _CMAKE_USER_TOOL_PATH)
 
       # Find CMAKE_TOOL in the SEARCH_PATH directory by user-defined name.
-      find_program(_CMAKE_TOOL_WITH_PATH NAMES ${${CMAKE_TOOL}} HINTS ${SEARCH_PATH} NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
+      find_program(_CMAKE_TOOL_WITH_PATH NO_CACHE NAMES ${${CMAKE_TOOL}} HINTS ${SEARCH_PATH} NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
       if(_CMAKE_TOOL_WITH_PATH)
 
         # Overwrite CMAKE_TOOL with full path found in SEARCH_PATH.
@@ -47,7 +47,6 @@ function(__resolve_tool_path CMAKE_TOOL SEARCH_PATH DOCSTRING)
         endif()
 
       endif()
-      unset(_CMAKE_TOOL_WITH_PATH CACHE)
 
     endif()
 

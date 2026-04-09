@@ -45,6 +45,7 @@ try_compile(FortranCInterface_COMPILED
   TARGET FortranCInterface
   SOURCE_DIR ${FortranCInterface_SOURCE_DIR}
   BINARY_DIR ${FortranCInterface_BINARY_DIR}
+  NO_CACHE
   LOG_DESCRIPTION "Fortran/C interface test project"
   CMAKE_FLAGS
     "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}"
@@ -54,8 +55,6 @@ try_compile(FortranCInterface_COMPILED
     ${_FortranCInterface_OSX_ARCH}
     ${_FortranCInterface_EXE_LINKER_FLAGS}
   )
-set(FortranCInterface_COMPILED ${FortranCInterface_COMPILED})
-unset(FortranCInterface_COMPILED CACHE)
 unset(_FortranCInterface_EXE_LINKER_FLAGS)
 unset(_FortranCInterface_OSX_ARCH)
 
