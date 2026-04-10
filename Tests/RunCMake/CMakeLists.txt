@@ -628,6 +628,11 @@ add_RunCMake_test(FileSet-SOURCES -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                                   -DCMAKE_C_OUTPUT_EXTENSION=${CMAKE_C_OUTPUT_EXTENSION}
                                   -DMSVC_VERSION=${MSVC_VERSION})
 add_RunCMake_test(ToolchainFile)
+add_RunCMake_test(ToolchainSkipsChecks
+  -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+  -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}
+  -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   set(Tutorial_ARGS TEST_DIR Tutorial -DTutorial_SOURCE_DIR=${CMake_SOURCE_DIR}/Help/guide/tutorial)
