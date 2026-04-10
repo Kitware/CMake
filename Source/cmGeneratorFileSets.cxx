@@ -13,6 +13,7 @@
 #include <cm/optional>
 #include <cmext/algorithm>
 
+#include "cmFileSet.h"
 #include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
@@ -24,6 +25,8 @@
 #include "cmLinkItem.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -35,30 +38,47 @@ cmGeneratorFileSets::cmGeneratorFileSets(cmGeneratorTarget* target,
   : Target(target)
   , LocalGenerator(lg)
 {
-  for (auto const& name : target->Target->GetAllPrivateFileSets()) {
-    auto entry =
-      this->FileSets.emplace(name,
-                             cm::make_unique<cmGeneratorFileSet>(
-                               target, target->Target->GetFileSet(name)));
+  bool isFramework = target->IsFrameworkOnApple();
+  auto issueMessage = [&target](cmFileSet const* fileSet) {
+    target->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(R"(The file set ")", fileSet->GetName(), R"(",  of type ")",
+               fileSet->GetType(),
+               R"(", is incompatible with the "FRAMEWORK" target ")",
+               target->GetName(), R"(".)"));
+  };
 
-    auto const* fileSet = entry.first->second.get();
-    this->AllFileSets.push_back(fileSet);
-    this->SelfFileSets[fileSet->GetType()].push_back(fileSet);
+  for (auto const& name : target->Target->GetAllPrivateFileSets()) {
+    cmFileSet const* fileSet = target->Target->GetFileSet(name);
+    if (isFramework &&
+        !cm::FileSetMetadata::IsFrameworkSupported(fileSet->GetType())) {
+      issueMessage(fileSet);
+      continue;
+    }
+    auto entry = this->FileSets.emplace(
+      name, cm::make_unique<cmGeneratorFileSet>(target, fileSet));
+    auto const* genFileSet = entry.first->second.get();
+    this->AllFileSets.push_back(genFileSet);
+    this->SelfFileSets[genFileSet->GetType()].push_back(genFileSet);
   }
   for (auto const& name : target->Target->GetAllInterfaceFileSets()) {
     auto it = this->FileSets.find(name);
-    cmGeneratorFileSet const* fileSet = nullptr;
+    cmGeneratorFileSet const* genFileSet = nullptr;
     if (it == this->FileSets.end()) {
-      auto entry =
-        this->FileSets.emplace(name,
-                               cm::make_unique<cmGeneratorFileSet>(
-                                 target, target->Target->GetFileSet(name)));
-      fileSet = entry.first->second.get();
-      this->AllFileSets.push_back(fileSet);
+      cmFileSet const* fileSet = target->Target->GetFileSet(name);
+      if (isFramework &&
+          !cm::FileSetMetadata::IsFrameworkSupported(fileSet->GetType())) {
+        issueMessage(fileSet);
+        continue;
+      }
+      auto entry = this->FileSets.emplace(
+        name, cm::make_unique<cmGeneratorFileSet>(target, fileSet));
+      genFileSet = entry.first->second.get();
+      this->AllFileSets.push_back(genFileSet);
     } else {
-      fileSet = it->second.get();
+      genFileSet = it->second.get();
     }
-    this->InterfaceFileSets[fileSet->GetType()].push_back(fileSet);
+    this->InterfaceFileSets[genFileSet->GetType()].push_back(genFileSet);
   }
 }
 cmGeneratorFileSets::~cmGeneratorFileSets() = default;
