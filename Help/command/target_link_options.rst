@@ -67,5 +67,10 @@ See Also
   add language-wide flags passed to all invocations of the compiler.
   This includes invocations that drive compiling and those that drive linking.
 
+* .. versionadded:: 4.3
+    :variable:`CMAKE_<LANG>_LINK_FLAGS` and
+    :variable:`CMAKE_<LANG>_LINK_FLAGS_<CONFIG>` add language-wide flags passed
+    to all invocations of the compiler which drive linking.
+
 * The :module:`CheckLinkerFlag` module to check whether a linker flag is
   supported by the compiler.
