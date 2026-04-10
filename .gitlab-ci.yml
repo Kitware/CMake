@@ -601,6 +601,7 @@ t:cuda13.0-aarch64-nvidia:
         - .needs_centos8_aarch64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 t:cuda13.0-nvidia-fastbuild:
     extends:
