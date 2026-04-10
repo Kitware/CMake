@@ -21,6 +21,8 @@ if sphinx.version_info >= (2,):
     from sphinx import addnodes
     from sphinx.directives import ObjectDescription, nl_escape_re
     from sphinx.domains import Domain, ObjType
+    from sphinx.domains.changeset import VersionChange
+    from sphinx.domains.changeset import versionlabels, versionlabel_classes
     from sphinx.domains.std import OptionXRefRole
     from sphinx.roles import XRefRole
     from sphinx.util import logging, ws_re
@@ -572,6 +574,8 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
             m = CMakeXRefRole._re_guide.match(text)
             if m:
                 text = f'{m.group(2)} <{text}>'
+        elif typ == 'cmake:preset':
+            text = f'CMakePresets.{text}'
         return super().__call__(typ, rawtext, text, *args, **kwargs)
 
     # We cannot insert index nodes using the result_nodes method
@@ -592,7 +596,7 @@ class CMakeOptionXRefRole(OptionXRefRole):
         super().__init__()
 
     def __call__(self, typ, rawtext, text, *args, **kwargs):
-        content = f'{text} <{self.command} {text.split('=')[0]}>'
+        content = f'{text} <{self.command} {re.split(r'[ =]', text)[0]}>'
         return super().__call__('std:option', text, content, *args, **kwargs)
 
 
@@ -701,6 +705,7 @@ class CMakeDomain(Domain):
         'prop_test':  CMakeXRefRole(),
         'prop_tgt':   CMakeXRefRole(),
         'manual':     CMakeXRefRole(),
+        'preset':     CMakeXRefRole(lowercase=True, warn_dangling=True),
         # Roles for program-specific command-line options without the program
         # name (which add the name to form the ref).
         'cmake-option':         CMakeOptionXRefRole('cmake'),
@@ -740,13 +745,29 @@ class CMakeDomain(Domain):
         targetid = f'{typ}:{target}'
         obj = self.data['objects'].get(targetid)
 
-        if obj is None and typ == 'command':
-            # If 'command(args)' wasn't found, try just 'command'.
-            # TODO: remove this fallback? warn?
-            # logger.warning(f'no match for {targetid}')
-            command = target.split('(')[0]
-            targetid = f'{typ}:{command}'
-            obj = self.data['objects'].get(targetid)
+        if obj is None:
+            if typ == 'command':
+                # If 'command(args)' wasn't found, try just 'command'.
+                # TODO: remove this fallback? warn?
+                # logger.warning(f'no match for {targetid}')
+                command = target.split('(')[0]
+                targetid = f'{typ}:{command}'
+                obj = self.data['objects'].get(targetid)
+            elif typ == 'preset':
+                # Preset references are really just references to plain old
+                # explicit targets.
+                labels = env.get_domain('std').labels
+                docname, labelid, sectname = labels.get(target, ('', '', ''))
+
+                if not docname:
+                    return None
+
+                return make_refnode(builder, fromdocname, docname, labelid,
+                                    nodes.literal('', sectname), target)
+
+                import sys
+                print(typ, target, node, file=sys.stderr)
+                print(docname, labelid, sectname, file=sys.stderr)
 
         if obj is None:
             # TODO: warn somehow?
@@ -776,4 +797,21 @@ def setup(app):
     app.add_transform(CMakeTransform)
     app.add_transform(CMakeXRefTransform)
     app.add_domain(CMakeDomain)
+
+    versionlabels.update({
+        'presets-versionadded':   'Added in presets version %s',
+        'presets-versionchanged': 'Changed in presets version %s',
+        'presets-versionremoved': 'Removed in presets version %s',
+    })
+
+    versionlabel_classes.update({
+        'presets-versionadded':     'added',
+        'presets-versionchanged':   'changed',
+        'presets-versionremoved':   'removed',
+    })
+
+    app.add_directive('presets-versionadded', VersionChange)
+    app.add_directive('presets-versionchanged', VersionChange)
+    app.add_directive('presets-versionremoved', VersionChange)
+
     return {"parallel_read_safe": True}
