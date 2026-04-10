@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include <sys/socket.h>
+#include <sys/types.h>
 
 namespace cmDebugger {
 
@@ -110,10 +111,13 @@ size_t cmDebuggerPipeConnection_POSIX::read(void* buffer, size_t n)
 {
   size_t result = 0;
   if (rw_pipe >= 0) {
-    result = ::read(rw_pipe, buffer, n);
-    if (result == 0) {
+    ssize_t count = ::read(rw_pipe, buffer, n);
+    if (count <= 0) {
+      // EOF or error (including EBADF from a concurrent close).
       close();
+      return 0;
     }
+    result = static_cast<size_t>(count);
   }
 
   return result;
@@ -174,17 +178,26 @@ void cmDebuggerPipeClient_POSIX::close()
   }
 }
 
+void cmDebuggerPipeClient_POSIX::ShutdownForTesting()
+{
+  if (isOpen()) {
+    ::shutdown(rw_pipe, SHUT_RDWR);
+  }
+}
+
 size_t cmDebuggerPipeClient_POSIX::read(void* buffer, size_t n)
 {
-  int count = 0;
+  ssize_t count = 0;
   if (isOpen()) {
-    count = static_cast<int>(::read(rw_pipe, buffer, n));
-    if (count == 0) {
+    count = ::read(rw_pipe, buffer, n);
+    if (count <= 0) {
+      // EOF or error (including EBADF from a concurrent close).
       close();
+      return 0;
     }
   }
 
-  return count;
+  return static_cast<size_t>(count);
 }
 
 bool cmDebuggerPipeClient_POSIX::write(void const* buffer, size_t n)

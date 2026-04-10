@@ -312,6 +312,14 @@ cmDebuggerAdapter::cmDebuggerAdapter(
     while (SessionActive.load()) {
       if (auto payload = Session->getPayload()) {
         payload();
+      } else {
+        // Connection closed or unrecoverable error.
+        BreakpointManager->ClearAll();
+        ExceptionManager->ClearAll();
+        ClearStepRequests();
+        ContinueSem->Notify();
+        DisconnectEvent->Fire();
+        SessionActive.store(false);
       }
     }
   });

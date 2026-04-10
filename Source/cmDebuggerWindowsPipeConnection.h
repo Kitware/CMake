@@ -89,6 +89,11 @@ public:
   size_t read(void* buffer, size_t n) override;
   bool write(void const* buffer, size_t n) override;
 
+  // Unit-test helper: on Windows CloseHandle already cancels any
+  // pending overlapped I/O, so this just delegates to close().
+  // Production code does not use cmDebuggerPipeClient.
+  void ShutdownForTesting() { this->close(); }
+
 private:
   std::string GetErrorMessage(DWORD errorCode);
 

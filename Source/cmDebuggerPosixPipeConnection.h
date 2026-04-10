@@ -69,6 +69,11 @@ public:
   size_t read(void* buffer, size_t n) override;
   bool write(void const* buffer, size_t n) override;
 
+  // Unit-test helper: signal EOF on both halves of the socket without
+  // freeing the fd, so a sibling thread blocked in read() wakes up
+  // cleanly. Production code does not use cmDebuggerPipeClient.
+  void ShutdownForTesting();
+
 private:
   std::string const PipeName;
   int rw_pipe = -1;
