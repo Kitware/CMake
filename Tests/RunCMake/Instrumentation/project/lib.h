@@ -1,1 +1,1 @@
-int lib();
+int lib(void);

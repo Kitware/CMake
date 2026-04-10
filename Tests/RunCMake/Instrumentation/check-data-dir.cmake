@@ -39,18 +39,18 @@ foreach(snippet IN LISTS snippets)
     string(JSON source GET "${contents}" source)
     string(JSON language GET "${contents}" language)
     string(JSON result GET "${contents}" result)
-    if (NOT language MATCHES "C\\+\\+")
-      json_error("${snippet}" "Expected C++ compile language")
+    if (NOT language STREQUAL "C")
+      json_error("${snippet}" "Expected C compile language")
     endif()
-    if (NOT source MATCHES "${target}.cxx$")
+    if (NOT source MATCHES "${target}.c$")
       json_error("${snippet}" "Unexpected source file")
     endif()
     if (ARGS_FAIL)
-      if (source MATCHES "dummy.cxx" AND result EQUAL 0)
+      if (source MATCHES "dummy.c" AND result EQUAL 0)
         json_error("${snippet}"
           "Expected nonzero exit code for compile command, got: ${result}"
         )
-      elseif (NOT source MATCHES "dummy.cxx" AND NOT result EQUAL 0)
+      elseif (NOT source MATCHES "dummy.c" AND NOT result EQUAL 0)
         json_error("${snippet}"
           "Expected zero exit code for compile command, got: ${result}"
         )
