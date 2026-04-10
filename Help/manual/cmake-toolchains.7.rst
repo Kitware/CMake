@@ -70,9 +70,16 @@ enabled:
 :variable:`CMAKE_<LANG>_COMPILER_VERSION`
   The version of the compiler.
 :variable:`CMAKE_<LANG>_FLAGS`
-  The variables and the configuration-specific equivalents contain flags that
-  will be added to the compile command when compiling a file of a particular
-  language.
+  These variables and the configuration-specific equivalents contain flags that
+  will be added to all invocations of the compiler for a particular language,
+  including those driving compiling and linking.
+
+:variable:`CMAKE_<LANG>_LINK_FLAGS`
+  .. versionadded:: 4.3
+
+  These variables and the configuration-specific equivalents contain flags that
+  will be added to all invocations of the compiler for a particular language
+  when driving linking only.
 
 CMake needs a way to determine which compiler to use to invoke the linker.
 This is determined by the :prop_sf:`LANGUAGE` property of source files of the
