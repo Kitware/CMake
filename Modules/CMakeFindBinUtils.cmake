@@ -108,6 +108,11 @@ elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^x(Open)?W
   set(_CMAKE_AR_NAMES "wlib")
   list(APPEND _CMAKE_TOOL_VARS LINKER AR)
 
+elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL "xPellesC")
+  set(_CMAKE_LINKER_NAMES "polink")
+  set(_CMAKE_AR_NAMES "polib")
+  list(APPEND _CMAKE_TOOL_VARS LINKER AR)
+
 elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   # Detect the `<lang>` compiler name
   get_filename_component(__iar_selected_compiler "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" NAME)

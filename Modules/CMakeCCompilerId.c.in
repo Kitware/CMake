@@ -46,6 +46,8 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 
 #if defined(__STDC_VERSION__)
 # define C_STD __STDC_VERSION__
+#elif defined(__POCC_STDC_VERSION__)
+# define C_STD __POCC_STDC_VERSION__
 #elif defined(__STDC__) || defined(__clang__) || defined(_MSC_VER) ||         \
   defined(__ibmxl__) || defined(__IBMC__) || defined(__RENESAS__)
 # define C_STD 1

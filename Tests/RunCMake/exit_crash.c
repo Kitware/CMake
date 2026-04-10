@@ -1,3 +1,7 @@
+#ifdef __POCC__
+#  pragma warn(disable : 2801) /* Store to a non-writable location. */
+#endif
+
 int main(int argc, char const* argv[])
 {
 #ifndef __clang_analyzer__ /* Suppress clang-analyzer warnings */

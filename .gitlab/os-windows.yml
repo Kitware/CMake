@@ -325,6 +325,21 @@
     variables:
         CMAKE_CONFIGURATION: windows_orangec7.0.7
 
+.windows_pellesc:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "Ninja"
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
+        CTEST_LABELS: "PellesC"
+
+.windows_pellesc13.01:
+    extends: .windows_pellesc
+
+    variables:
+        CMAKE_CONFIGURATION: windows_pellesc13.01
+
 .windows_arm64_vs2026:
     extends: .windows
 
