@@ -375,8 +375,10 @@ int cmCPackNSISGenerator::PackageFiles()
     }
 
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLATION_TYPES", installTypesCode);
-    this->SetOptionIfNotSet("CPACK_NSIS_PAGE_COMPONENTS",
-                            "!insertmacro MUI_PAGE_COMPONENTS");
+    if (!this->IsSet("CPACK_NSIS_IGNORE_COMPONENTS_PAGE")) {
+      this->SetOptionIfNotSet("CPACK_NSIS_PAGE_COMPONENTS",
+                              "!insertmacro MUI_PAGE_COMPONENTS");
+    }
     this->SetOptionIfNotSet("CPACK_NSIS_FULL_INSTALL", "");
     this->SetOptionIfNotSet("CPACK_NSIS_COMPONENT_SECTIONS", componentCode);
     this->SetOptionIfNotSet("CPACK_NSIS_COMPONENT_SECTION_LIST", sectionList);

@@ -249,3 +249,9 @@ on Windows Nullsoft Scriptable Install System.
  allowing an install.
  Allowed values for this variable are ``on``, ``off``, and ``force``.
  If not specified, the default behavior is ``on``.
+
+.. variable:: CPACK_NSIS_IGNORE_COMPONENTS_PAGE
+
+ .. versionadded:: 4.4
+
+ If set, do not display the page containing the license during installation.
