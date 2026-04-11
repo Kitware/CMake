@@ -42,6 +42,7 @@ run_cmake(UuidMissingNameValue)
 run_cmake(UuidMissingTypeValue)
 run_cmake(UuidBadType)
 
+run_cmake(RegexMatch)
 run_cmake(RegexClear)
 run_cmake(RegexMultiMatchClear)
 run_cmake(RegexEmptyMatch)
