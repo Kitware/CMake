@@ -302,7 +302,7 @@ std::string DebGenerator::generateMD5File() const
   cmGeneratedFileStream out;
   out.Open(md5filename, false, true);
 
-  std::string topLevelWithTrailingSlash = cmStrCat(this->TemporaryDir, '/');
+  std::string topLevelWithTrailingSlash = cmStrCat(this->WorkDir, '/');
   for (std::string const& file : this->PackageFiles) {
     // hash only regular files
     if (cmSystemTools::FileIsDirectory(file) ||
