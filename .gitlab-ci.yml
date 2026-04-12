@@ -220,6 +220,7 @@ b:fedora43-bullseye-coverage:
         - .rules
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
         CMAKE_CI_JOB_RUN_MANUALLY: "true"
 
 t:fedora43-bullseye-coverage:
@@ -235,6 +236,7 @@ t:fedora43-bullseye-coverage:
         - b:fedora43-bullseye-coverage
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 a:fedora43-bullseye-coverage:
     extends:
@@ -247,6 +249,7 @@ a:fedora43-bullseye-coverage:
         - t:fedora43-bullseye-coverage
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 # Linux builds
 
@@ -611,6 +614,7 @@ t:cuda13.0-aarch64-nvidia:
         - .needs_centos8_aarch64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 t:cuda13.0-nvidia-fastbuild:
     extends:
