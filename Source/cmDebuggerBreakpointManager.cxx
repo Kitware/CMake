@@ -17,6 +17,16 @@
 
 namespace cmDebugger {
 
+// Resolve a source path to its canonical form so that breakpoint map
+// keys match regardless of the case used by the DAP client or by
+// CollapseFullPath.  On case-insensitive filesystems (macOS, Windows)
+// ToNormalizedPathOnDisk loads the on-disk capitalization while
+// preserving symbolic links in logical paths.
+static std::string NormalizePath(std::string const& sourcePath)
+{
+  return cmSystemTools::ToNormalizedPathOnDisk(sourcePath);
+}
+
 cmDebuggerBreakpointManager::cmDebuggerBreakpointManager(
   dap::Session* dapSession)
   : DapSession(dapSession)
@@ -73,8 +83,7 @@ cmDebuggerBreakpointManager::HandleSetBreakpointsRequest(
 
   dap::SetBreakpointsResponse response;
 
-  auto sourcePath =
-    cmSystemTools::GetActualCaseForPath(request.source.path.value());
+  auto sourcePath = NormalizePath(request.source.path.value());
   dap::array<dap::SourceBreakpoint> const defaultValue{};
   auto const& breakpoints = request.breakpoints.value(defaultValue);
 
@@ -126,42 +135,45 @@ void cmDebuggerBreakpointManager::SourceFileLoaded(
   std::string const& sourcePath,
   std::vector<cmListFileFunction> const& functions)
 {
+  auto normalizedPath = NormalizePath(sourcePath);
+
   std::unique_lock<std::mutex> lock(Mutex);
-  if (ListFileFunctionLines.find(sourcePath) != ListFileFunctionLines.end()) {
+  if (ListFileFunctionLines.find(normalizedPath) !=
+      ListFileFunctionLines.end()) {
     // this is not expected.
     return;
   }
 
   for (cmListFileFunction const& func : functions) {
-    ListFileFunctionLines[sourcePath].emplace_back(
+    ListFileFunctionLines[normalizedPath].emplace_back(
       cmDebuggerFunctionLocation{ func.Line(), func.LineEnd() });
   }
 
-  if (ListFilePendingValidations.find(sourcePath) ==
+  if (ListFilePendingValidations.find(normalizedPath) ==
       ListFilePendingValidations.end()) {
     return;
   }
 
-  ListFilePendingValidations.erase(sourcePath);
+  ListFilePendingValidations.erase(normalizedPath);
 
-  for (size_t i = 0; i < Breakpoints[sourcePath].size(); i++) {
+  for (size_t i = 0; i < Breakpoints[normalizedPath].size(); i++) {
     dap::BreakpointEvent breakpointEvent;
-    breakpointEvent.breakpoint.id = Breakpoints[sourcePath][i].GetId();
-    breakpointEvent.breakpoint.line = Breakpoints[sourcePath][i].GetLine();
+    breakpointEvent.breakpoint.id = Breakpoints[normalizedPath][i].GetId();
+    breakpointEvent.breakpoint.line = Breakpoints[normalizedPath][i].GetLine();
     auto source = dap::Source();
-    source.path = sourcePath;
+    source.path = normalizedPath;
     breakpointEvent.breakpoint.source = source;
     int64_t correctedLine = CalibrateBreakpointLine(
-      sourcePath, Breakpoints[sourcePath][i].GetLine());
-    if (correctedLine != Breakpoints[sourcePath][i].GetLine()) {
-      Breakpoints[sourcePath][i].ChangeLine(correctedLine);
+      normalizedPath, Breakpoints[normalizedPath][i].GetLine());
+    if (correctedLine != Breakpoints[normalizedPath][i].GetLine()) {
+      Breakpoints[normalizedPath][i].ChangeLine(correctedLine);
     }
     breakpointEvent.reason = "changed";
     breakpointEvent.breakpoint.verified = (correctedLine > 0);
     if (breakpointEvent.breakpoint.verified) {
       breakpointEvent.breakpoint.line = correctedLine;
     } else {
-      Breakpoints[sourcePath][i].Invalid();
+      Breakpoints[normalizedPath][i].Invalid();
     }
 
     DapSession->send(breakpointEvent);
@@ -171,8 +183,10 @@ void cmDebuggerBreakpointManager::SourceFileLoaded(
 std::vector<int64_t> cmDebuggerBreakpointManager::GetBreakpoints(
   std::string const& sourcePath, int64_t line)
 {
+  auto normalizedPath = NormalizePath(sourcePath);
+
   std::unique_lock<std::mutex> lock(Mutex);
-  auto const& all = Breakpoints[sourcePath];
+  auto const& all = Breakpoints[normalizedPath];
   std::vector<int64_t> breakpoints;
   if (all.empty()) {
     return breakpoints;
