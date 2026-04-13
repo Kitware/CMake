@@ -12,7 +12,6 @@
 #include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
-#include <cmext/string_view>
 
 #include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
@@ -132,8 +131,7 @@ cmGeneratorFileSet const* cmGeneratorFileSets::GetFileSetForSource(
   auto const it2 = info.InterfaceFileSetCache.find(path);
   if (it2 != info.InterfaceFileSetCache.end() &&
       cm::FileSetMetadata::GetFileSetDescriptor(it2->second->GetType())
-          .value_or(
-            cm::FileSetMetadata::FileSetDescriptor{ ""_s, Lookup::Target })
+          .value_or(cm::FileSetMetadata::FileSetDescriptor{ Lookup::Target })
           .Lookup == Lookup::Dependencies) {
     return it2->second;
   }

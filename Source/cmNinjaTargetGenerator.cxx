@@ -1089,17 +1089,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     // Gather order-only dependencies on custom command outputs.
     std::vector<std::string> ccouts;
     std::vector<std::string> ccouts_private;
-    bool usePrivateGeneratedSources = false;
-    if (this->GeneratorTarget->HasFileSets()) {
-      switch (this->GetGeneratorTarget()->GetPolicyStatusCMP0154()) {
-        case cmPolicies::WARN:
-        case cmPolicies::OLD:
-          break;
-        case cmPolicies::NEW:
-          usePrivateGeneratedSources = true;
-          break;
-      }
-    }
+    bool usePrivateGeneratedSources = this->GeneratorTarget->HasFileSets() &&
+      this->GetGeneratorTarget()->GetPolicyStatusCMP0154() == cmPolicies::NEW;
+
     for (cmCustomCommand const* cc : customCommands) {
       cmCustomCommandGenerator ccg(*cc, config, this->GetLocalGenerator());
       std::vector<std::string> const& ccoutputs = ccg.GetOutputs();
@@ -1115,15 +1107,51 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
           cmGeneratorFileSet const* fileset =
             this->GeneratorTarget->GetFileSetForSource(
               config, this->Makefile->GetOrCreateGeneratedSource(*it));
-          bool isVisible = fileset && fileset->IsForInterface();
-          bool isIncludeable = !fileset || fileset->CanBeIncluded();
-          if (fileset && isVisible && isIncludeable) {
-            ++it;
+
+          if (!fileset) {
+            // use private order dependency
+            ccouts_private.push_back(*it);
+            it = ccouts.erase(it);
             continue;
           }
-          if (!fileset || isIncludeable) {
-            ccouts_private.push_back(*it);
+
+          using DependencyMode = cm::FileSetMetadata::DependencyMode;
+
+          cmValue independentFiles = fileset->GetProperty("INDEPENDENT_FILES");
+          // retrieve default mode
+          DependencyMode dependencyMode =
+            cm::FileSetMetadata::GetDependencyMode(fileset->GetType());
+          // if property is defined, try to enforce mode requested
+          if (independentFiles) {
+            dependencyMode = cm::FileSetMetadata::GetDependencyMode(
+              fileset->GetType(),
+              independentFiles.IsOn() ? DependencyMode::IndependentFiles
+                                      : DependencyMode::Includables);
           }
+          if (independentFiles.IsOn() &&
+              dependencyMode != DependencyMode::IndependentFiles) {
+            // requested dependency mode not supported
+            this->GetMakefile()->IssueMessage(
+              MessageType::AUTHOR_WARNING,
+              cmStrCat(R"(the "INDEPENDENT_FILES" property of the file set ")",
+                       fileset->GetName(), R"(" of the target ")",
+                       this->GeneratorTarget->GetName(),
+                       R"(" will be ignored because it is incompatible with )"
+                       R"(the file set type ")",
+                       fileset->GetType(), R"(".)"));
+          }
+          if (dependencyMode == DependencyMode::Includables) {
+            if (fileset->IsForInterface()) {
+              // use public order dependency
+              ++it;
+            } else {
+              // use private order dependency
+              ccouts_private.push_back(*it);
+              it = ccouts.erase(it);
+            }
+            continue;
+          }
+          // no order dependency is required
           it = ccouts.erase(it);
         }
       }

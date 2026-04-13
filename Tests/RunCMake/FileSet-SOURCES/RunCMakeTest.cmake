@@ -34,6 +34,16 @@ run_and_build(CustomCommandInput)
 run_and_build(IncludeDirectoriesOrder)
 run_and_build(FileSetTransitivity)
 run_and_check(CompileOptionsOrder)
+if (RunCMake_GENERATOR MATCHES "Ninja")
+  run_cmake(IndependentFilesWarning)
+  if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(IndependentFiles_target "CMakeFiles/lib1.dir/Debug/independent.c${CMAKE_C_OUTPUT_EXTENSION}")
+  else ()
+    set(IndependentFiles_target "CMakeFiles/lib1.dir/independent.c${CMAKE_C_OUTPUT_EXTENSION}")
+  endif ()
+  set(RunCMake-check-file IndependentFiles-check.cmake)
+  run_and_build(IndependentFiles ${IndependentFiles_target})
+endif()
 
 # Some environments are excluded because they are not able to honor verbose mode
 if ((RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode"

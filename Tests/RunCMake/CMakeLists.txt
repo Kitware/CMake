@@ -624,6 +624,7 @@ add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetProperties)
 add_RunCMake_test(FileSetProperties)
 add_RunCMake_test(FileSet-SOURCES -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                  -DCMAKE_C_OUTPUT_EXTENSION=${CMAKE_C_OUTPUT_EXTENSION}
                                   -DMSVC_VERSION=${MSVC_VERSION})
 add_RunCMake_test(ToolchainFile)
 
