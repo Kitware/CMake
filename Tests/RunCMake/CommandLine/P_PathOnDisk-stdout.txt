@@ -1,0 +1,2 @@
+^-- CMAKE_SCRIPT_MODE_FILE='[^']*/Tests/RunCMake/CommandLine/P_PathOnDisk.cmake'
+-- CMAKE_CURRENT_LIST_FILE='[^']*/Tests/RunCMake/CommandLine/P_PathOnDisk.cmake'$
