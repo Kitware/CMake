@@ -348,6 +348,8 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
     return 0;
   }
 
+  this->LockIndexing();
+
   // Touch index file immediately to claim snippets
   std::string suffix_time = ComputeSuffixTime();
   std::string const& index_name = cmStrCat("index-", suffix_time, ".json");
@@ -427,6 +429,8 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   // Delete old content and trace files
   this->RemoveOldFiles("content");
   this->RemoveOldFiles("trace");
+
+  this->indexLock.Release();
 
   return 0;
 }
@@ -837,7 +841,7 @@ int cmInstrumentation::SpawnBuildDaemon()
   // preBuild Hook
   if (this->LockBuildDaemon()) {
     // Release lock before spawning the build daemon, to prevent blocking it.
-    this->lock.Release();
+    this->buildLock.Release();
     this->CollectTimingData(cmInstrumentationQuery::Hook::PreBuild);
   }
 
@@ -859,11 +863,26 @@ int cmInstrumentation::SpawnBuildDaemon()
 // Prevent multiple build daemons from running simultaneously
 bool cmInstrumentation::LockBuildDaemon()
 {
-  std::string const lockFile = cmStrCat(this->timingDirv1, "/.build.lock");
-  if (!cmSystemTools::FileExists(lockFile)) {
-    cmSystemTools::Touch(lockFile, true);
+  // 0 = non-blocking, 0s timeout
+  return this->AcquireLock(".build.lock", this->buildLock, 0);
+}
+
+// Prevent multiple index processes from claiming snippets simultaneously
+bool cmInstrumentation::LockIndexing()
+{
+  return this->AcquireLock(".index.lock", this->indexLock,
+                           // -1 = no timeout
+                           static_cast<unsigned long>(-1));
+}
+
+bool cmInstrumentation::AcquireLock(std::string const& lock_file,
+                                    cmFileLock& lock, unsigned long timeout)
+{
+  std::string const lock_path = cmStrCat(this->timingDirv1, '/', lock_file);
+  if (!cmSystemTools::FileExists(lock_path)) {
+    cmSystemTools::Touch(lock_path, true);
   }
-  return this->lock.Lock(lockFile, 0).IsOk();
+  return lock.Lock(lock_path, timeout).IsOk();
 }
 
 /*
@@ -890,6 +909,7 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
   int ret = this->InstrumentCommand(
     "build", {}, [waitForBuild]() { return waitForBuild(); }, cm::nullopt,
     cm::nullopt, LoadQueriesAfter::Yes);
+  this->buildLock.Release();
   this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
   return ret;
 }
