@@ -6,9 +6,6 @@ set(CMAKE_LIBRARY_PATH_FLAG "-libpath:")
 set(CMAKE_LINK_LIBRARY_FLAG "")
 
 macro(__windows_compiler_pellesc lang)
-  set(CMAKE_${lang}_COMPILE_OBJECT
-    "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -Fo<OBJECT> -c <SOURCE>")
-
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "<CMAKE_AR> <LINK_FLAGS> -out:<TARGET> <OBJECTS>")
 
   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
