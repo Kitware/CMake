@@ -1,0 +1,5 @@
+^CMake Error at SORT-COMPARATOR-DuplicateOption\.cmake:10 \(list\):
+  list sub-command SORT option "COMPARATOR" has been specified multiple
+  times\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$

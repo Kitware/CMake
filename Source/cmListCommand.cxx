@@ -726,6 +726,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
 
   using SortConfig = cmList::SortConfiguration;
   SortConfig sortConfig;
+  bool hasComparator = false;
 
   size_t argumentIndex = 2;
   std::string const messageHint = "sub-command SORT ";
@@ -733,6 +734,12 @@ bool HandleSortCommand(std::vector<std::string> const& args,
   while (argumentIndex < args.size()) {
     std::string const& option = args[argumentIndex++];
     if (option == "COMPARE") {
+      if (hasComparator) {
+        status.SetError(cmStrCat(messageHint,
+                                 "option \"COMPARE\" is incompatible "
+                                 "with \"COMPARATOR\"."));
+        return false;
+      }
       if (sortConfig.Compare != SortConfig::CompareMethod::DEFAULT) {
         std::string error = cmStrCat(messageHint, "option \"", option,
                                      "\" has been specified multiple times.");
@@ -806,6 +813,27 @@ bool HandleSortCommand(std::vector<std::string> const& args,
                                  option, "\"."));
         return false;
       }
+    } else if (option == "COMPARATOR") {
+      if (hasComparator) {
+        status.SetError(cmStrCat(messageHint, "option \"", option,
+                                 "\" has been specified multiple times."));
+        return false;
+      }
+      if (sortConfig.Compare != SortConfig::CompareMethod::DEFAULT) {
+        status.SetError(cmStrCat(messageHint,
+                                 "option \"COMPARATOR\" is incompatible "
+                                 "with \"COMPARE\"."));
+        return false;
+      }
+      if (argumentIndex < args.size()) {
+        sortConfig.ComparatorFunction = args[argumentIndex++];
+        sortConfig.Compare = SortConfig::CompareMethod::COMPARATOR;
+        hasComparator = true;
+      } else {
+        status.SetError(cmStrCat(messageHint, "missing argument for option \"",
+                                 option, "\"."));
+        return false;
+      }
     } else {
       status.SetError(
         cmStrCat(messageHint, "option \"", option, "\" is unknown."));
@@ -819,6 +847,17 @@ bool HandleSortCommand(std::vector<std::string> const& args,
 
   if (!list) {
     return true;
+  }
+
+  if (hasComparator) {
+    try {
+      status.GetMakefile().AddDefinition(
+        listName, list->sort(sortConfig, status.GetMakefile()).to_string());
+      return true;
+    } catch (std::invalid_argument& e) {
+      status.SetError(e.what());
+      return false;
+    }
   }
 
   status.GetMakefile().AddDefinition(listName,

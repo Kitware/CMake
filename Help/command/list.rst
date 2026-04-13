@@ -399,6 +399,7 @@ Ordering
 
 .. signature::
   list(SORT <list> [COMPARE <compare>] [CASE <case>] [ORDER <order>])
+  list(SORT <list> COMPARATOR <function> [CASE <case>] [ORDER <order>])
 
   Sorts the list in-place alphabetically.
 
@@ -447,3 +448,47 @@ Ordering
 
     ``DESCENDING``
       Sorts the list in descending order.
+
+  Instead of the built-in ``COMPARE`` methods, a user-defined comparison
+  function may be used with the ``COMPARATOR`` keyword.
+
+  .. versionadded:: 4.4
+
+  ``COMPARATOR`` is mutually exclusive with ``COMPARE``.  The ``CASE``
+  and ``ORDER`` options may still be used alongside ``COMPARATOR``:
+  the ``CASE`` filter is applied to both values before they are passed to
+  the callable, and ``ORDER DESCENDING`` reverses the comparison by
+  swapping the two arguments.
+
+  The callable must accept exactly three parameters: two input values and
+  the name of an output variable.  It must set the output variable to a
+  boolean value (``TRUE`` if the first value should come before the second,
+  ``FALSE`` otherwise) in the calling scope.
+  If the callable does not set the output variable, it is an error.
+
+  The comparator must define a
+  `strict weak ordering <https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings>`_.
+  In particular:
+
+  * It must return ``FALSE`` when comparing an element to itself
+    (irreflexivity).
+  * If it returns ``TRUE`` for ``(a, b)``, it must return ``FALSE``
+    for ``(b, a)`` (asymmetry).
+
+  An error is raised if the comparator violates these requirements.
+
+  Example:
+
+  .. code-block:: cmake
+
+    function(version_less a b result)
+      if("${a}" VERSION_LESS "${b}")
+        set(${result} TRUE PARENT_SCOPE)
+      else()
+        set(${result} FALSE PARENT_SCOPE)
+      endif()
+    endfunction()
+
+    set(versions 3.1 1.2 2.0 1.10)
+    list(SORT versions COMPARATOR version_less)
+    # versions is now: 1.2;1.10;2.0;3.1

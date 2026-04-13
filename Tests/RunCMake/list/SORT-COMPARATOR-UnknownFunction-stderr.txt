@@ -1,0 +1,4 @@
+^CMake Error at SORT-COMPARATOR-UnknownFunction\.cmake:2 \(list\):
+  list sub-command SORT, COMPARATOR: unknown function "no_such_function"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$
