@@ -3255,8 +3255,9 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
   // Check if the new file already exists and remove it.
   if (cmSystemTools::PathExists(newFileName)) {
     cmsys::Status rmStatus;
-    if (cmp0205 == cmPolicies::NEW &&
-        cmSystemTools::FileIsDirectory(newFileName)) {
+    if (cmp0205 == cmPolicies::NEW && arguments.CopyOnError &&
+        cmSystemTools::FileIsDirectory(newFileName) &&
+        !cmSystemTools::FileIsSymlink(newFileName)) {
       rmStatus = cmSystemTools::RepeatedRemoveDirectory(newFileName);
     } else {
       rmStatus = cmSystemTools::RemoveFile(newFileName);
