@@ -108,6 +108,7 @@ macro(cmake_nvcc_parse_implicit_info lang lang_var_)
       else()
         string(APPEND _nvcc_log "  extracted link launcher name: [${_nvcc_host_link_launcher}]\n")
         find_program(_nvcc_find_host_link_launcher
+          NO_CACHE
           NAMES ${_nvcc_host_link_launcher}
           PATHS ${_nvcc_path} NO_DEFAULT_PATH)
         find_program(_nvcc_find_host_link_launcher
@@ -119,7 +120,7 @@ macro(cmake_nvcc_parse_implicit_info lang lang_var_)
           string(APPEND _nvcc_log "  could not find link launcher absolute path\n")
           set(CMAKE_${lang}_HOST_LINK_LAUNCHER "${_nvcc_host_link_launcher}")
         endif()
-        unset(_nvcc_find_host_link_launcher CACHE)
+        unset(_nvcc_find_host_link_launcher)
       endif()
     endif()
 

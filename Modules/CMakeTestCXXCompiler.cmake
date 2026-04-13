@@ -55,6 +55,7 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_CXX_COMPILER_WORKS
     SOURCE_FROM_VAR testCXXCompiler.cxx __TestCompiler_testCXXCompilerSource
+    NO_CACHE
     OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
   if(DEFINED __CMAKE_SAVED_CXX_SCAN_FOR_MODULES)
     set(CMAKE_CXX_SCAN_FOR_MODULES "${__CMAKE_SAVED_CXX_SCAN_FOR_MODULES}")
@@ -63,9 +64,6 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
     unset(CMAKE_CXX_SCAN_FOR_MODULES)
   endif()
   unset(__TestCompiler_testCXXCompilerSource)
-  # Move result from cache to normal variable.
-  set(CMAKE_CXX_COMPILER_WORKS ${CMAKE_CXX_COMPILER_WORKS})
-  unset(CMAKE_CXX_COMPILER_WORKS CACHE)
   __TestCompiler_restoreTryCompileTargetType()
   if(NOT CMAKE_CXX_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")

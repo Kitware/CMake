@@ -219,13 +219,14 @@ if(NOT ODBC_LIBRARY)
 
   foreach(_lib IN LISTS _odbc_required_libs_names)
     find_library(_lib_path
+      NO_CACHE
       NAMES ${_lib}
       PATHS ${_odbc_lib_paths} # system paths or collected from ODBC_CONFIG
       PATH_SUFFIXES odbc)
     if(_lib_path)
       list(APPEND _odbc_required_libs_paths ${_lib_path})
     endif()
-    unset(_lib_path CACHE)
+    unset(_lib_path)
   endforeach()
 endif()
 

@@ -420,6 +420,7 @@ function(FortranCInterface_VERIFY)
       TARGET VerifyFortranC
       SOURCE_DIR ${FortranCInterface_SOURCE_DIR}/Verify
       BINARY_DIR ${FortranCInterface_BINARY_DIR}/Verify${lang}
+      NO_CACHE
       CMAKE_FLAGS -DVERIFY_CXX=${verify_cxx}
                   -DCMAKE_VERBOSE_MAKEFILE=ON
                  "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}"
@@ -443,7 +444,6 @@ function(FortranCInterface_VERIFY)
       message(CHECK_FAIL "Failed")
       set(FortranCInterface_VERIFIED_${lang} 0 CACHE INTERNAL "Fortran/${lang} compatibility")
     endif()
-    unset(FortranCInterface_VERIFY_${lang}_COMPILED CACHE)
   endif()
 
   # Error if compilers are incompatible.

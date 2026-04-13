@@ -33,12 +33,10 @@ if(NOT CMAKE_CSharp_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_CSharp_COMPILER_WORKS
     SOURCE_FROM_VAR testCSharpCompiler.cs __TestCompiler_testCSharpCompilerSource
+    NO_CACHE
     OUTPUT_VARIABLE __CMAKE_CSharp_COMPILER_OUTPUT
     )
   unset(__TestCompiler_testCSharpCompilerSource)
-  # Move result from cache to normal variable.
-  set(CMAKE_CSharp_COMPILER_WORKS ${CMAKE_CSharp_COMPILER_WORKS})
-  unset(CMAKE_CSharp_COMPILER_WORKS CACHE)
   set(CSharp_TEST_WAS_RUN 1)
 endif()
 

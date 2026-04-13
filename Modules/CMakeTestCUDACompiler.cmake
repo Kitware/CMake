@@ -47,12 +47,10 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_CUDA_COMPILER_WORKS
     SOURCE_FROM_VAR main.cu __TestCompiler_testCudaCompilerSource
+    NO_CACHE
     OUTPUT_VARIABLE __CMAKE_CUDA_COMPILER_OUTPUT)
   unset(__TestCompiler_testCudaCompilerSource)
 
-  # Move result from cache to normal variable.
-  set(CMAKE_CUDA_COMPILER_WORKS ${CMAKE_CUDA_COMPILER_WORKS})
-  unset(CMAKE_CUDA_COMPILER_WORKS CACHE)
   if(NOT CMAKE_CUDA_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")
     string(REPLACE "\n" "\n  " _output "${__CMAKE_CUDA_COMPILER_OUTPUT}")

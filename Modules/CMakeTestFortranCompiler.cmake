@@ -48,11 +48,9 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_Fortran_COMPILER_WORKS
     SOURCE_FROM_VAR testFortranCompiler.f __TestCompiler_testFortranCompilerSource
+    NO_CACHE
     OUTPUT_VARIABLE OUTPUT)
   unset(__TestCompiler_testFortranCompilerSource)
-  # Move result from cache to normal variable.
-  set(CMAKE_Fortran_COMPILER_WORKS ${CMAKE_Fortran_COMPILER_WORKS})
-  unset(CMAKE_Fortran_COMPILER_WORKS CACHE)
   if(NOT CMAKE_Fortran_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")
     string(REPLACE "\n" "\n  " _output "${OUTPUT}")

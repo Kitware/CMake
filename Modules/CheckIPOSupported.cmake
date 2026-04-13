@@ -199,14 +199,13 @@ macro(_ipo_run_language_check language)
       PROJECT "${TRY_COMPILE_PROJECT_NAME}"
       SOURCE_DIR "${srcdir}"
       BINARY_DIR "${bindir}"
+      NO_CACHE
       CMAKE_FLAGS
       "-DCMAKE_VERBOSE_MAKEFILE=ON"
       "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON"
       ${_CMAKE_LANG_FLAGS}
       OUTPUT_VARIABLE output
   )
-  set(_IPO_LANGUAGE_CHECK_RESULT "${_IPO_LANGUAGE_CHECK_RESULT}")
-  unset(_IPO_LANGUAGE_CHECK_RESULT CACHE)
 
   if(NOT _IPO_LANGUAGE_CHECK_RESULT)
     _ipo_not_supported("check failed to compile")

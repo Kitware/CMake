@@ -37,6 +37,7 @@ macro(_record_compiler_features lang compile_flags feature_list)
     LINK_LIBRARIES "${compile_flags_for_link}"
     COPY_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin"
     COPY_FILE_ERROR _copy_error
+    NO_CACHE
     __CMAKE_INTERNAL FEATURE_TESTING
     )
   if(NOT CMAKE_${lang}_FEATURE_TEST)
@@ -47,7 +48,7 @@ macro(_record_compiler_features lang compile_flags feature_list)
   else()
     set(_result 0)
   endif()
-  unset(CMAKE_${lang}_FEATURE_TEST CACHE)
+  unset(CMAKE_${lang}_FEATURE_TEST)
   unset(compile_flags_for_link)
 
   if (_result EQUAL 0)

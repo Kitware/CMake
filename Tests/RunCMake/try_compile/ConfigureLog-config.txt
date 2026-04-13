@@ -63,7 +63,7 @@ events:(
 ]*)+
     buildResult:
       variable: "CMAKE_C_FEATURE_TEST"
-      cached: true
+      cached: false
       stdout: \|.*
       exitCode: 0)*
   -

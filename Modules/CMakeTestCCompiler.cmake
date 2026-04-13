@@ -55,11 +55,9 @@ if(NOT CMAKE_C_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_C_COMPILER_WORKS
     SOURCE_FROM_VAR testCCompiler.c __TestCompiler_testCCompilerSource
+    NO_CACHE
     OUTPUT_VARIABLE __CMAKE_C_COMPILER_OUTPUT)
   unset(__TestCompiler_testCCompilerSource)
-  # Move result from cache to normal variable.
-  set(CMAKE_C_COMPILER_WORKS ${CMAKE_C_COMPILER_WORKS})
-  unset(CMAKE_C_COMPILER_WORKS CACHE)
   __TestCompiler_restoreTryCompileTargetType()
   if(NOT CMAKE_C_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")
