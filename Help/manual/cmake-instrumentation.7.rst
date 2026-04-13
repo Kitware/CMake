@@ -66,13 +66,19 @@ Indexing
 
 Indexing is the process of collating generated instrumentation data. The
 available hooks to trigger indexing include options such as after every build,
-or every :manual:`ctest <ctest(1)>` invocation, and are configured as part of the `v1 Query Files`_.
-Whenever a hook is triggered, an index file is generated containing a list of
-snippet files newer than the previous indexing. This index file is passed to
-user-defined `Callbacks`_ commands to process the data.
+or every :manual:`ctest <ctest(1)>` invocation, and are configured as part of
+the `v1 Query Files`_. Whenever a hook is triggered, an index file is generated
+containing a list of snippet files newer than the previous indexing. This index
+file is passed to user-defined `Callbacks`_ commands to process the data.
 
 Indexing and can also be performed by manually invoking
 :option:`ctest --collect-instrumentation`.
+
+Indexing, and the subsequent callbacks, will not occur concurrently in a
+single build tree. When multiple hooks trigger indexing at the same time,
+a file-based lock is used to ensure one indexing completes, executes all of its
+callbacks, and deletes the instrumentation data before the next indexing can
+begin.
 
 .. _`cmake-instrumentation Callbacks`:
 
