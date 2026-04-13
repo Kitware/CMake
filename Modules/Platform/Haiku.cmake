@@ -8,6 +8,12 @@ set(CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG "-Wl,-rpath-link,")
 set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
 set(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
 
+# Features for LINK_GROUP generator expression
+## RESCAN: request the linker to rescan static libraries until there is
+## no pending undefined symbols
+set(CMAKE_LINK_GROUP_USING_RESCAN "LINKER:--start-group" "LINKER:--end-group")
+set(CMAKE_LINK_GROUP_USING_RESCAN_SUPPORTED TRUE)
+
 # Determine, if the C or C++ compiler is configured for a secondary
 # architecture. If so, that will change the search paths we set below. We check
 # whether the compiler's library search paths contain a
