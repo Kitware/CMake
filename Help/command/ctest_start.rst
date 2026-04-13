@@ -1,7 +1,7 @@
 ctest_start
 -----------
 
-Starts the testing for a given model
+Perform the :ref:`CTest Start Step` as a :ref:`Dashboard Client`.
 
 .. code-block:: cmake
 

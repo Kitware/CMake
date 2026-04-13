@@ -1,16 +1,15 @@
 ctest_sleep
 -----------
 
-sleeps for some amount of time
+Sleep for some amount of time.
 
-.. code-block:: cmake
-
+.. signature::
   ctest_sleep(<seconds>)
 
-Sleep for given number of seconds.
+  Sleep for ``<seconds>`` seconds.
 
-.. code-block:: cmake
-
+.. signature::
   ctest_sleep(<time1> <duration> <time2>)
 
-Sleep for t=(time1 + duration - time2) seconds if t > 0.
+  Sleep for ``<time1> + <duration> - <time2>`` seconds, if this sum is greater
+  than zero.

@@ -83,8 +83,9 @@ The options are:
 ``CAPTURE_CMAKE_ERROR <result-var>``
   .. versionadded:: 3.13
 
-  Store in the ``<result-var>`` variable -1 if there are any errors running
-  the command and prevent ctest from returning non-zero if an error occurs.
+  Store in the ``<result-var>`` variable ``-1`` if there are any errors running
+  the command and prevent :manual:`ctest(1)` from returning non-zero if an
+  error occurs.
 
 ``QUIET``
   .. versionadded:: 3.3
