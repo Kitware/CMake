@@ -687,7 +687,7 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
     // set to $PWD for -P mode.
     state->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
     state->SetHomeOutputDirectory(cmSystemTools::GetLogicalWorkingDirectory());
-    state->ReadListFile(args, path);
+    state->ReadListFile(args, cmSystemTools::ToNormalizedPathOnDisk(path));
     return true;
   };
 
@@ -830,7 +830,7 @@ void cmake::ReadListFile(std::vector<std::string> const& args,
     snapshot.SetDefaultDefinitions();
     cmMakefile mf(gg, snapshot);
     if (this->State->GetRole() == cmState::Role::Script) {
-      mf.SetScriptModeFile(cmSystemTools::ToNormalizedPathOnDisk(path));
+      mf.SetScriptModeFile(path);
       mf.SetArgcArgv(args);
     }
     if (!cmSystemTools::FileExists(path, true)) {
