@@ -407,7 +407,7 @@
 ### NVHPC Compiler
 
 .nvhpc:
-    image: "kitware/cmake:ci-nvhpc24.9-x86_64-2024-09-27"
+    image: "kitware/cmake:ci-nvhpc26.3-x86_64-2026-03-31"
     variables:
         CMAKE_ARCH: x86_64
         CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP: 1
@@ -666,10 +666,10 @@
         - docker
         - linux-x86_64
 
-.linux_x86_64_v3_tags_cuda_arch_52:
+.linux_x86_64_v3_tags_cuda_arch_75:
     tags:
         - cmake
-        - cuda-arch-52
+        - cuda-arch-75
         - docker
         - linux-x86_64-v3
 
