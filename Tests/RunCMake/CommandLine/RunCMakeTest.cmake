@@ -70,6 +70,12 @@ run_cmake_command(P_P_in_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_D
 run_cmake_command(P_P_in_arbitrary_args_2 ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -P -o)
 run_cmake_command(P_fresh ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_fresh.cmake" --fresh)
 
+if(CMAKE_HOST_WIN32)
+  run_cmake_command(P_PathOnDisk ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/../CommandLine/P_pathondisk.cmake")
+else()
+  run_cmake_command(P_PathOnDisk ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/../CommandLine/P_PathOnDisk.cmake")
+endif()
+
 run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
 run_cmake_command(build-no-dir2
