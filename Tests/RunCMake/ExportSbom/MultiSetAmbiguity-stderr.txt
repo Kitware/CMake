@@ -1,0 +1,8 @@
+CMake Error in CMakeLists\.txt:
+  Target "libb" references target "liba" that is in multiple export sets:
+  .*/setA1\.cmake,
+  .*/setA2\.cmake\.
+
+  An SBOM cannot attribute a dependency exported in more than one export set
+  or with more than one namespace\.  Consider consolidating the exports of the
+  "liba" target to a single export\.

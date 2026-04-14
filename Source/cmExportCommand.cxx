@@ -15,6 +15,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmBuildSbomGenerator.h"
 #include "cmCryptoHash.h"
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
@@ -23,7 +24,6 @@
 #include "cmExportBuildCMakeConfigGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportBuildPackageInfoGenerator.h"
-#include "cmExportBuildSbomGenerator.h"
 #include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -86,6 +86,29 @@ static void AddExportGenerator(
     globalGenerator->AddBuildExportExportSet(exportGenerator.get());
   }
   makefile.AddExportBuildFileGenerator(std::move(exportGenerator));
+}
+
+static bool ValidateExportableTarget(std::string const& name, cmMakefile& mf,
+                                     cmGlobalGenerator* gg,
+                                     cmExecutionStatus& status)
+{
+  if (mf.IsAlias(name)) {
+    status.SetError(cmStrCat("given ALIAS target \"", name,
+                             "\" which may not be exported."));
+    return false;
+  }
+  cmTarget const* target = gg->FindTarget(name);
+  if (!target) {
+    status.SetError(cmStrCat("given target \"", name,
+                             "\" which is not built by this project."));
+    return false;
+  }
+  if (target->GetType() == cmStateEnums::UTILITY) {
+    status.SetError(cmStrCat("given custom target \"", name,
+                             "\" which may not be exported."));
+    return false;
+  }
+  return true;
 }
 
 static bool HandleTargetsMode(std::vector<std::string> const& args,
@@ -163,25 +186,7 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
   cmGlobalGenerator* gg = mf.GetGlobalGenerator();
 
   for (std::string const& currentTarget : *arguments.Targets) {
-    if (mf.IsAlias(currentTarget)) {
-      std::ostringstream e;
-      e << "given ALIAS target \"" << currentTarget
-        << "\" which may not be exported.";
-      status.SetError(e.str());
-      return false;
-    }
-
-    if (cmTarget* target = gg->FindTarget(currentTarget)) {
-      if (target->GetType() == cmStateEnums::UTILITY) {
-        status.SetError("given custom target \"" + currentTarget +
-                        "\" which may not be exported.");
-        return false;
-      }
-    } else {
-      std::ostringstream e;
-      e << "given target \"" << currentTarget
-        << "\" which is not built by this project.";
-      status.SetError(e.str());
+    if (!ValidateExportableTarget(currentTarget, mf, gg, status)) {
       return false;
     }
     targets.emplace_back(currentTarget, std::string{});
@@ -413,10 +418,66 @@ static bool HandleSbomMode(std::vector<std::string> const& args,
     return false;
   }
 
-  using arg_t = cmSbomArguments;
-  using gen_t = cmExportBuildSbomGenerator;
-  status.GetMakefile().SetExplicitlyGeneratesSbom(true);
-  return HandleSpecialExportMode<arg_t, gen_t>(args, status);
+  struct SbomExportArguments
+    : public cmSbomArguments
+    , public ArgumentParser::ParseResult
+  {
+    ArgumentParser::NonEmpty<std::vector<std::string>> ExportSetNames;
+
+    using cmSbomArguments::Check;
+    using ArgumentParser::ParseResult::Check;
+  };
+
+  auto parser = cmArgumentParser<SbomExportArguments>{};
+  cmSbomArguments::Bind(parser);
+  parser.Bind("EXPORTS"_s, &SbomExportArguments::ExportSetNames);
+
+  std::vector<std::string> unknownArgs;
+  SbomExportArguments arguments = parser.Parse(args, &unknownArgs);
+
+  if (!arguments.Check(args[0], &unknownArgs, status)) {
+    return false;
+  }
+
+  if (arguments.ExportSetNames.empty()) {
+    status.SetError(cmStrCat(args[0], " missing EXPORTS."));
+    return false;
+  }
+
+  if (!arguments.Check(status) || !arguments.SetMetadataFromProject(status)) {
+    return false;
+  }
+
+  cmMakefile& mf = status.GetMakefile();
+  cmGlobalGenerator* gg = mf.GetGlobalGenerator();
+
+  std::string const dir =
+    arguments.GetDefaultDestination(mf.GetCurrentBinaryDirectory());
+  std::string const fpath = cmStrCat(dir, '/', arguments.GetPackageFileName());
+
+  if (gg->IsBuildSbomFile(fpath)) {
+    status.SetError(cmStrCat("SBOM command already specified for the file "_s,
+                             cmSystemTools::GetFilenameNameView(fpath), '.'));
+    return false;
+  }
+
+  std::vector<cmExportSet*> sets;
+  sets.reserve(arguments.ExportSetNames.size());
+  for (std::string const& name : arguments.ExportSetNames) {
+    cm::optional<cmExportSet*> const exportSet =
+      GetExportSet(name, gg, status);
+    if (!exportSet) {
+      return false;
+    }
+    sets.push_back(*exportSet);
+  }
+
+  auto builder = cm::make_unique<cmBuildSbomGenerator>(arguments, sets, fpath);
+
+  cmBuildSbomGenerator* rawPtr = builder.get();
+  mf.AddBuildSbomGenerator(std::move(builder));
+  gg->AddBuildSbomGenerator(rawPtr);
+  return true;
 }
 
 static bool HandleSetupMode(std::vector<std::string> const& args,

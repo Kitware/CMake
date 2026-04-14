@@ -174,7 +174,7 @@ Exporting Software Bill of Materials (SBOM) Documents
 
 .. code-block:: cmake
 
-  export(SBOM <sbom-name> EXPORT <export-name>
+  export(SBOM <sbom-name> EXPORTS <export-names>...
          [FORMAT <string>]
          [PROJECT <project-name>|NO_PROJECT_METADATA]
          [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
@@ -189,9 +189,10 @@ Exporting Software Bill of Materials (SBOM) Documents
   Experimental. Gated by ``CMAKE_EXPERIMENTAL_GENERATE_SBOM``.
 
 Generates a software bill of materials (SBOM) document describing the targets
-in the export ``<export-name>`` and their dependencies in the build tree.
-Files are written to the ``sbom/<sbom-name>`` subdirectory of the current
-build directory.
+in the listed ``<export-names>`` export sets and their dependencies in the
+build tree.  Targets from all listed exports are aggregated into one document.
+The generated SBOM will be written to the ``sbom/<sbom-name>`` subdirectory of
+the current build directory.
 
 See :command:`install(SBOM)` for details about the supported SBOM formats and a
 description of the other options.

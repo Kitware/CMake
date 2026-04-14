@@ -1,0 +1,4 @@
+CMake Warning \(author\) in CMakeLists\.txt:
+  Target "libb" references target "liba", whose export does not use the
+  standard namespace separator\.  The dependency will be recorded by its bare
+  target name without provenance\.

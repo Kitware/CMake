@@ -34,6 +34,13 @@ public:
   cmExportFileGenerator();
   virtual ~cmExportFileGenerator() = default;
 
+  struct ExportInfo
+  {
+    std::vector<std::string> Files;
+    std::set<std::string> Sets;
+    std::set<std::string> Namespaces;
+  };
+
   /** Set the full path to the export file to generate.  */
   void SetExportFile(char const* mainFile);
   std::string const& GetMainExportFileName() const;
@@ -144,13 +151,6 @@ protected:
   {
     this->IssueMessage(MessageType::FATAL_ERROR, errorMessage);
   }
-
-  struct ExportInfo
-  {
-    std::vector<std::string> Files;
-    std::set<std::string> Sets;
-    std::set<std::string> Namespaces;
-  };
 
   /** Find the set of export files and the unique namespace (if any) for a
    *  target. */

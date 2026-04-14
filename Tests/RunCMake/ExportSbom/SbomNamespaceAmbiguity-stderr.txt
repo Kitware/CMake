@@ -1,0 +1,4 @@
+CMake Warning \(author\) in CMakeLists\.txt:
+  Target "libc" references target "libb" which has no
+  install\(EXPORT\)/export\(EXPORT\) namespace and is covered by multiple SBOMs:
+  foo_sbom, foo_sbom2\.  Attributing to "foo_sbom" \(first alphabetically\)\.

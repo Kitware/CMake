@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include "cmDiagnostics.h"
@@ -55,6 +56,18 @@ public:
     cm::append(this->Targets, targets);
   }
   void SetExportSet(cmExportSet*);
+
+  struct ExportRecord
+  {
+    std::string Name;      // export set name; empty for anonymous exports
+    std::string Namespace; // export namespace
+  };
+
+  /** If this export contains `target`, return a record identifying it
+   *  (export set name + namespace).  Used by cmGlobalGenerator to assemble
+   *  a project-wide view of where targets are exported.  */
+  cm::optional<ExportRecord> FindRecordForTarget(
+    cmGeneratorTarget const* target) const;
 
   /** Set the name of the C++ module directory.  */
   void SetCxxModuleDirectory(std::string cxx_module_dir)

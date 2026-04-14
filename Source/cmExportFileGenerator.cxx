@@ -482,7 +482,7 @@ cm::optional<std::string> cmResolveTargetsInGeneratorExpression(
     lastPos = nameStartPos + targetName.size() + 1;
   }
 
-  std::string errorString;
+  cm::optional<std::string> errorString;
   pos = 0;
   lastPos = pos;
   while ((pos = input.find("$<TARGET_NAME:", lastPos)) != std::string::npos) {
@@ -509,7 +509,7 @@ cm::optional<std::string> cmResolveTargetsInGeneratorExpression(
 
   pos = 0;
   lastPos = pos;
-  while (errorString.empty() &&
+  while (!errorString &&
          (pos = input.find("$<LINK_ONLY:", lastPos)) != std::string::npos) {
     std::string::size_type nameStartPos = pos + cmStrLen("$<LINK_ONLY:");
     std::string::size_type endPos = input.find('>', nameStartPos);
@@ -525,7 +525,7 @@ cm::optional<std::string> cmResolveTargetsInGeneratorExpression(
     lastPos = nameStartPos + libName.size() + 1;
   }
 
-  while (errorString.empty() &&
+  while (!errorString &&
          (pos = input.find("$<COMPILE_ONLY:", lastPos)) != std::string::npos) {
     std::string::size_type nameStartPos = pos + cmStrLen("$<COMPILE_ONLY:");
     std::string::size_type endPos = input.find('>', nameStartPos);
@@ -541,10 +541,7 @@ cm::optional<std::string> cmResolveTargetsInGeneratorExpression(
     lastPos = nameStartPos + libName.size() + 1;
   }
 
-  if (!errorString.empty()) {
-    return errorString;
-  }
-  return cm::nullopt;
+  return errorString;
 }
 
 void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(

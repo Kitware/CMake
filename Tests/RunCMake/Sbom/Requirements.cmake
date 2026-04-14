@@ -19,7 +19,8 @@ add_library(bar ALIAS libc)
 target_link_libraries(libd INTERFACE test::liba foo bar)
 
 install(TARGETS libb EXPORT foo DESTINATION .)
-install(SBOM foo EXPORT foo DESTINATION .)
+install(EXPORT foo NAMESPACE foo:: DESTINATION lib/cmake/foo)
+install(SBOM foo_sbom EXPORTS foo DESTINATION .)
 
 install(TARGETS libc libd EXPORT bar DESTINATION .)
-install(SBOM bar EXPORT bar DESTINATION .)
+install(SBOM bar_sbom EXPORTS bar DESTINATION .)
