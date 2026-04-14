@@ -579,13 +579,21 @@ void cmCTestTestHandler::LogTestSummary(std::vector<std::string> const& passed,
   } else {
     failedColorCode = this->CTest->GetColorCode(cmCTest::Color::RED);
   }
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             std::endl
-               << passColorCode << std::lround(percent) << "% tests passed"
-               << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
-               << ", " << failedColorCode << failed.size() << " tests failed"
-               << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
-               << " out of " << total << std::endl);
+  if (failed.empty()) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::endl
+                 << passColorCode << std::lround(percent) << "% tests passed"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << " out of " << total << std::endl);
+  } else {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::endl
+                 << passColorCode << std::lround(percent) << "% tests passed"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << ", " << failedColorCode << failed.size() << " tests failed"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << " out of " << total << std::endl);
+  }
   if ((!this->CTest->GetLabelsForSubprojects().empty() &&
        this->CTest->GetSubprojectSummary())) {
     this->PrintLabelOrSubprojectSummary(true);

@@ -18,4 +18,4 @@ test 2
 ]*)*
 2/2 Test #[1-2]: TestLoad[1-2] \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
 +
-100% tests passed, 0 tests failed out of 2
+100% tests passed out of 2

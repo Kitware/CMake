@@ -4,7 +4,7 @@ Custom Pre-Test
     Start 1: Echo
 1/1 Test #1: Echo \.+   Passed +[0-9\.]+ sec
 
-100% tests passed, 0 tests failed out of 1
+100% tests passed out of 1
 
 Total Test time \(real\) = +[0-9\.]+ sec
 Custom Post-Test$

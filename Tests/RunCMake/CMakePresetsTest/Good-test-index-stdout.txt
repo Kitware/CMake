@@ -4,4 +4,4 @@ Test project [^
 .*
     Start 3: testc
 .*
-100% tests passed, 0 tests failed out of 2
+100% tests passed out of 2

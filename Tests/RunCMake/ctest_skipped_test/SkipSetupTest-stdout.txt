@@ -5,7 +5,7 @@
     Start 3: SuccessfulCleanupTest
 3/3 Test #3: SuccessfulCleanupTest \.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
 +
-100% tests passed, 0 tests failed out of 3
+100% tests passed out of 3
 +
 Total Test time \(real\) = +[0-9\.]+ sec
 +
