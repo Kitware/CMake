@@ -23,6 +23,8 @@ macro(__compiler_iar_common lang)
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Oh -r -DNDEBUG")
 
     set(CMAKE_${lang}_LINK_MODE LINKER)
+
+    set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "--warnings_are_errors")
   endif()
 
   set(CMAKE_${lang}_OUTPUT_EXTENSION_REPLACE 1)
