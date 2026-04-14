@@ -2292,8 +2292,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     }
   }
 
-  // Add runtime paths required by the languages to always be
-  // present.  This is done even when skipping rpath support.
+  // Add runtime paths required by the toolchains' runtime libraries.
+  // This is done even when skipping RPATH entries modeled by CMake.
   {
     cmGeneratorTarget::LinkClosure const* lc =
       this->Target->GetLinkClosure(this->Config);
@@ -2310,8 +2310,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     }
   }
 
-  // Add runtime paths required by the platform to always be
-  // present.  This is done even when skipping rpath support.
+  // Add runtime paths required by the platform to always be present.
+  // This is done even when skipping RPATH entries modeled by CMake.
   cmCLI_ExpandListUnique(this->RuntimeAlways, runtimeDirs, emitted);
 }
 
