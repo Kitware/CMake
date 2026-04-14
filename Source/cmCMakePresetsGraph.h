@@ -9,7 +9,6 @@
 #include <memory>
 #include <string>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -40,22 +39,19 @@ public:
     Expand,
   };
 
-  class CacheVariable
+  struct CacheVariable
   {
-  public:
     std::string Type;
     std::string Value;
   };
 
   class Condition;
 
-  class File
+  struct File
   {
-  public:
+    std::unordered_set<File*> ReachableFiles;
     std::string Filename;
     int Version;
-
-    std::unordered_set<File*> ReachableFiles;
   };
 
   class Preset
@@ -146,6 +142,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetBeforeInherit() override;
     bool VisitPresetAfterInherit(int version, cmJSONState* state) override;
+
+    static char const* kind() { return "configure"; }
   };
 
   class BuildPreset : public Preset
@@ -178,6 +176,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
+
+    static char const* kind() { return "build"; }
   };
 
   class TestPreset : public Preset
@@ -313,6 +313,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
+
+    static char const* kind() { return "test"; }
   };
 
   class PackagePreset : public Preset
@@ -350,6 +352,8 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
+
+    static char const* kind() { return "package"; }
   };
 
   class WorkflowPreset : public Preset
@@ -369,9 +373,8 @@ public:
     WorkflowPreset& operator=(WorkflowPreset&& /*other*/) = delete;
 #endif
 
-    class WorkflowStep
+    struct WorkflowStep
     {
-    public:
       enum class Type
       {
         Configure,
@@ -388,12 +391,13 @@ public:
     bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /* state */) override;
+
+    static char const* kind() { return "workflow"; }
   };
 
-  template <class T>
-  class PresetPair
+  template <typename T>
+  struct PresetPair
   {
-  public:
     T Unexpanded;
     cm::optional<T> Expanded;
   };
@@ -418,59 +422,20 @@ public:
     return preset.OriginFile->Version;
   }
 
-  static std::string GetFilename(std::string const& sourceDir);
-  static std::string GetUserFilename(std::string const& sourceDir);
   bool ReadProjectPresets(std::string const& sourceDir,
                           bool allowNoFiles = false);
 
-  std::string GetGeneratorForPreset(std::string const& presetName) const
-  {
-    auto configurePresetName = presetName;
+  std::string GetGeneratorForPreset(std::string const& presetName) const;
 
-    auto buildPresetIterator = this->BuildPresets.find(presetName);
-    if (buildPresetIterator != this->BuildPresets.end()) {
-      configurePresetName =
-        buildPresetIterator->second.Unexpanded.ConfigurePreset;
-    } else {
-      auto testPresetIterator = this->TestPresets.find(presetName);
-      if (testPresetIterator != this->TestPresets.end()) {
-        configurePresetName =
-          testPresetIterator->second.Unexpanded.ConfigurePreset;
-      }
-    }
-
-    auto configurePresetIterator =
-      this->ConfigurePresets.find(configurePresetName);
-    if (configurePresetIterator != this->ConfigurePresets.end()) {
-      return configurePresetIterator->second.Unexpanded.Generator;
-    }
-
-    // This should only happen if the preset is hidden
-    // or (for build or test presets) if ConfigurePreset is invalid.
-    return "";
-  }
-
-  enum class PrintPrecedingNewline
-  {
-    False,
-    True,
-  };
-  static void printPrecedingNewline(PrintPrecedingNewline* p);
-
-  static void PrintPresets(
-    std::vector<cmCMakePresetsGraph::Preset const*> const& presets);
+  void PrintConfigurePresetList() const;
   void PrintConfigurePresetList(
-    PrintPrecedingNewline* newline = nullptr) const;
-  void PrintConfigurePresetList(
-    std::function<bool(ConfigurePreset const&)> const& filter,
-    PrintPrecedingNewline* newline = nullptr) const;
-  void PrintBuildPresetList(PrintPrecedingNewline* newline = nullptr) const;
-  void PrintTestPresetList(PrintPrecedingNewline* newline = nullptr) const;
-  void PrintPackagePresetList(PrintPrecedingNewline* newline = nullptr) const;
+    std::function<bool(ConfigurePreset const&)> const& filter) const;
+  void PrintBuildPresetList() const;
+  void PrintTestPresetList() const;
+  void PrintPackagePresetList() const;
   void PrintPackagePresetList(
-    std::function<bool(PackagePreset const&)> const& filter,
-    PrintPrecedingNewline* newline = nullptr) const;
-  void PrintWorkflowPresetList(PrintPrecedingNewline* newline = nullptr) const;
+    std::function<bool(PackagePreset const&)> const& filter) const;
+  void PrintWorkflowPresetList() const;
   void PrintAllPresets() const;
 
 private:
@@ -491,4 +456,7 @@ private:
                     ReadReason readReason, std::vector<File*>& inProgressFiles,
                     File*& file, std::string& errMsg);
   void ClearPresets();
+
+  static std::string GetFilename(std::string const& sourceDir);
+  static std::string GetUserFilename(std::string const& sourceDir);
 };
