@@ -553,6 +553,10 @@ List of CPack RPM generator specific variables:
 
    set(CPACK_RPM_SPEC_MORE_DEFINE "%define __spec_install_post /bin/true")
 
+ .. versionadded:: 4.4
+   If the variable is a list, its string elements will be concatenated using
+   ``\n`` before being substituted into the spec template.
+
 .. variable:: CPACK_RPM_PACKAGE_DEBUG
 
  Toggle CPack RPM generator debug output.
