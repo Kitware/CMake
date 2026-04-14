@@ -96,7 +96,7 @@ cmList CMakeString::Match(std::string const& matchExpression,
       if (makefile) {
         makefile->StoreMatches(re);
       }
-      output = re.match();
+      output.push_back(re.match());
     }
   } else {
     unsigned optAnchor = 0;
