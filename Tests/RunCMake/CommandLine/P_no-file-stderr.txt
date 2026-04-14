@@ -1,2 +1,4 @@
-^CMake Error: Not a file: nosuchscriptfile\.cmake
-CMake Error: Error processing file: nosuchscriptfile\.cmake$
+^CMake Error: Not a file: [^
+]*/Tests/RunCMake/CommandLine/P_no-file-build/nosuchscriptfile\.cmake
+CMake Error: Error processing file: [^
+]*/Tests/RunCMake/CommandLine/P_no-file-build/nosuchscriptfile\.cmake$
