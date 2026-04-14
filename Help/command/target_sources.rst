@@ -109,7 +109,8 @@ files within those directories.
   ``INTERFACE`` scope except on ``IMPORTED`` targets.
 
 The optional default file sets are named after their type. The target may not
-be a custom target or :prop_tgt:`FRAMEWORK` target.
+be a custom target or, for ``HEADERS`` and ``CXX_MODULES`` types, a
+:prop_tgt:`FRAMEWORK` target.
 
 Files in a ``PRIVATE`` or ``PUBLIC`` file set are marked as source files for
 the purposes of IDE integration. Additionally, files in ``HEADERS`` file sets

@@ -1,0 +1,5 @@
+CMake Error at FileSetFramework1\.cmake:[0-9]+ \(target_sources\):
+  target_sources FILE_SETs, of type "HEADERS", may not be added to FRAMEWORK
+  targets
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

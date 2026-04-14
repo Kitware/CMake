@@ -52,15 +52,23 @@ enum class DependencyMode
 };
 using DependencySet = std::set<DependencyMode>;
 
+enum class FrameworkCompatible
+{
+  No,
+  Yes
+};
+
 struct FileSetDescriptor
 {
   FileSetDescriptor(cm::string_view type, FileSetLookup lookup,
                     DependencySet dependencies,
-                    DependencyMode defaultDependency)
+                    DependencyMode defaultDependency,
+                    FrameworkCompatible frameworkSupported)
     : Type(type)
     , Lookup(lookup)
     , SupportedDependencies(std::move(dependencies))
     , DefaultDependency(defaultDependency)
+    , FrameworkSupported(frameworkSupported)
   {
   }
 
@@ -69,6 +77,7 @@ struct FileSetDescriptor
     , Lookup(lookup)
     , SupportedDependencies({ DependencyMode::Includables })
     , DefaultDependency(DependencyMode::Includables)
+    , FrameworkSupported(FrameworkCompatible::No)
   {
   }
 
@@ -76,12 +85,14 @@ struct FileSetDescriptor
   FileSetLookup const Lookup;
   DependencySet const SupportedDependencies;
   DependencyMode const DefaultDependency;
+  FrameworkCompatible const FrameworkSupported;
 };
 
 cm::optional<FileSetDescriptor> GetFileSetDescriptor(cm::string_view type);
 DependencyMode GetDependencyMode(cm::string_view type);
 DependencyMode GetDependencyMode(cm::string_view type,
                                  DependencyMode requestedMode);
+bool IsFrameworkSupported(cm::string_view type);
 
 std::vector<cm::string_view> const& GetKnownTypes();
 bool IsKnownType(cm::string_view type);

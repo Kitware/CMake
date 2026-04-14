@@ -85,17 +85,20 @@ std::map<cm::string_view, FileSetDescriptor> const FileSetDescriptors{
     { cm::FileSetMetadata::HEADERS,
       cm::FileSetMetadata::FileSetLookup::Target,
       { DependencyMode ::Includables },
-      DependencyMode ::Includables } },
+      DependencyMode ::Includables,
+      FrameworkCompatible::No } },
   { cm::FileSetMetadata::SOURCES,
     { cm::FileSetMetadata::SOURCES,
       cm::FileSetMetadata::FileSetLookup::Dependencies,
       { DependencyMode ::IndependentFiles, DependencyMode ::Includables },
-      DependencyMode ::Includables } },
+      DependencyMode ::Includables,
+      FrameworkCompatible::Yes } },
   { cm::FileSetMetadata::CXX_MODULES,
     { cm::FileSetMetadata::CXX_MODULES,
       cm::FileSetMetadata::FileSetLookup::Target,
       { DependencyMode ::IndependentFiles },
-      DependencyMode ::IndependentFiles } },
+      DependencyMode ::IndependentFiles,
+      FrameworkCompatible::No } },
 };
 
 std::vector<cm::string_view> KnownTypes{ HEADERS, SOURCES, CXX_MODULES };
@@ -133,6 +136,15 @@ DependencyMode GetDependencyMode(cm::string_view type,
       : *mode;
   }
   return DependencyMode::Includables;
+}
+
+bool IsFrameworkSupported(cm::string_view type)
+{
+  auto descriptor = GetFileSetDescriptor(type);
+  if (descriptor) {
+    return descriptor->FrameworkSupported == FrameworkCompatible::Yes;
+  }
+  return false;
 }
 
 std::vector<cm::string_view> const& GetKnownTypes()
