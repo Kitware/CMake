@@ -1,1 +1,2 @@
-^-- target: 'READ_SYMLINK-target.txt'$
+^-- result: '0'
+-- target: 'READ_SYMLINK-target.txt'$

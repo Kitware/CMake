@@ -43,7 +43,7 @@ Synopsis
     file(`COPY_FILE`_ <oldname> <newname> [...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
     file(`SIZE`_ <filename> <out-var>)
-    file(`READ_SYMLINK`_ <linkname> <out-var>)
+    file(`READ_SYMLINK`_ <linkname> <out-var> [...])
     file(`CREATE_LINK`_ <original> <linkname> [...])
     file(`CHMOD`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
     file(`CHMOD_RECURSE`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
@@ -577,13 +577,21 @@ Filesystem
   pointing to a file and is readable.
 
 .. signature::
-  file(READ_SYMLINK <linkname> <variable>)
+  file(READ_SYMLINK <linkname> <variable> [RESULT <result>])
 
   .. versionadded:: 3.14
 
   Query the symlink ``<linkname>`` and stores the path it points to
-  in the result ``<variable>``.  If ``<linkname>`` does not exist
-  or is not a symlink, CMake issues a fatal error.
+  in the result ``<variable>``.
+
+  The options are:
+
+  ``RESULT <result>``
+    .. versionadded:: 4.4
+
+    Capture the status of the operation in a ``<result>`` variable.  The
+    variable is set to ``0`` on success or an error message otherwise.
+    If not specified, and the operation fails, a fatal error is emitted.
 
   Note that this command returns the raw symlink path and does not resolve
   a relative path.  The following is an example of how to ensure that an
