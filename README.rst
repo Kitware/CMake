@@ -89,6 +89,12 @@ a separate build tree::
   $ mkdir build && cd build
   $ ../bootstrap && make
 
+By default the ``bootstrap`` script configures CMake to build with vendored
+dependencies.  However, CMake does not vendor OpenSSL.  To bootstrap in a
+minimal environment, disable use of OpenSSL::
+
+  $ ./bootstrap -- -DCMAKE_USE_OPENSSL=OFF
+
 Windows
 ^^^^^^^
 
