@@ -1,4 +1,4 @@
-^CMake Error at threads\.cmake:39 \(file\):
+^CMake Error at threads\.cmake:[0-9]+ \(file\):
   file number of threads -1 should be at least 0
 Call Stack \(most recent call first\):
   argument-validation-threads\.cmake:8 \(check_threads\)
