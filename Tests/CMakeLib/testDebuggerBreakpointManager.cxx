@@ -175,7 +175,9 @@ static bool testSourceFileLoadedAfterHandleBreakpointRequest()
 
 int testDebuggerBreakpointManager(int, char*[])
 {
-  return runTests({ testHandleBreakpointRequestBeforeFileIsLoaded,
-                    testHandleBreakpointRequestAfterFileIsLoaded,
-                    testSourceFileLoadedAfterHandleBreakpointRequest });
+  return runTests({
+    testHandleBreakpointRequestBeforeFileIsLoaded,
+    testHandleBreakpointRequestAfterFileIsLoaded,
+    testSourceFileLoadedAfterHandleBreakpointRequest,
+  });
 }
