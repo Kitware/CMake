@@ -657,21 +657,9 @@ properties:
 
             .. include:: presets/warnings-properties.rst
           properties:
-            # These should be in lexicographical order, except for systemVars.
-            author:
-              since: 12
-              type: boolean
-              description:
-                An optional boolean. Equivalent to passing -Wauthor or
-                -Wno-author on the command line. This may not be set
-                to false if errors.author is set to true.
-              sphinxDescription: |
-                An optional boolean. Equivalent to passing
-                :option:`-Wauthor <cmake -W>` or
-                :option:`-Wno-author <cmake -Wno->`
-                on the command line.
-                This may not be set to ``false``
-                if ``errors.author`` is set to ``true``.
+            # This should ONLY have diagnostics whose definitions require
+            # special handling (i.e. anything from preset version < 12). Others
+            # will be generated from cmDiagnostics.h.
             deprecated:
               type: boolean
               description:
@@ -725,8 +713,8 @@ properties:
                 on the command line.
                 This may not be set to ``false``
                 if ``errors.unusedCli`` is set to ``true``.
-            # systemVars should be last.
             systemVars:
+              sort: false
               type: boolean
               description:
                 An optional boolean. Setting this to true is equivalent to
@@ -746,22 +734,9 @@ properties:
 
             .. include:: presets/errors-properties.rst
           properties:
-            # These should be in lexicographical order.
-            author:
-              since: 12
-              type: boolean
-              description:
-                An optional boolean. Equivalent to passing
-                -Werror=author or -Wno-error=author
-                on the command line. This may not be set
-                to true if warnings.author is set to false.
-              sphinxDescription: |
-                An optional boolean. Equivalent to passing
-                :cmake-option:`-Werror=author` or
-                :cmake-option:`-Wno-error=author`
-                on the command line.
-                This may not be set to ``true``
-                if ``warnings.author`` is set to ``false``.
+            # This should ONLY have diagnostics whose definitions require
+            # special handling (i.e. anything from preset version < 12). Others
+            # will be generated from cmDiagnostics.h.
             deprecated:
               type: boolean
               description:

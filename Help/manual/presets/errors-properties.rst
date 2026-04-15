@@ -6,12 +6,9 @@
 ``author``
   .. presets-versionadded:: 12
 
-  An optional boolean. Equivalent to passing
-  :cmake-option:`-Werror=author` or
-  :cmake-option:`-Wno-error=author`
-  on the command line.
-  This may not be set to ``true``
-  if ``warnings.author`` is set to ``false``.
+  An optional boolean. Equivalent to passing :cmake-option:`-Werror=author` or
+  :cmake-option:`-Wno-error=author` on the command line.
+  This may not be set to ``true`` if ``warnings.author`` is set to ``false``.
 
 .. _`CMakePresets.configurePresets.errors.deprecated`:
 
