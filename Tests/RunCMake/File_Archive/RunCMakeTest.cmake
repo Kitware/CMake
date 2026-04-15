@@ -93,3 +93,5 @@ if(Python_EXECUTABLE)
   run_cmake_script(path-absolute -DPython_EXECUTABLE=${Python_EXECUTABLE})
   run_cmake_script(path-traversal -DPython_EXECUTABLE=${Python_EXECUTABLE})
 endif()
+
+run_cmake(extract-through-symlink)
