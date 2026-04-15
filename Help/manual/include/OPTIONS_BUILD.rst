@@ -138,59 +138,34 @@
   transition and not for publication of a final product. CMake will always emit
   a warning when the project file is anything other than ``CMakeLists.txt``.
 
-.. option:: -Wno-dev
+.. option:: -W<category>
 
- Suppress developer warnings.
+ Promote the specified diagnostic category (and any children) to at least
+ ``WARN`` severity.  Note that this has no effect on diagnostics already set to
+ a higher severity.
 
- Suppress warnings that are meant for the author of the
- ``CMakeLists.txt`` files. By default this will also turn off
- deprecation warnings.
+ See the :manual:`cmake-diagnostics(7)` manual for a list of accepted values
+ for ``<category>``.
 
-.. option:: -Wdev
+.. option:: -Wno-<category>
 
- Enable developer warnings.
+ Disable (ignore) all diagnostics of the specified category, including any
+ child categories.
 
- Enable warnings that are meant for the author of the ``CMakeLists.txt``
- files. By default this will also turn on deprecation warnings.
+.. option:: -Werror=<category>
 
-.. option:: -Wdeprecated
+ Promote the specified diagnostic category (and any children) to at least
+ ``SEND_ERROR`` severity.  Note that this has no effect on diagnostics already
+ set to a higher severity.
 
- Enable deprecated functionality warnings.
+.. option:: -Wno-error=<category>
 
- Enable warnings for usage of deprecated functionality, that are meant
- for the author of the ``CMakeLists.txt`` files.
+ Demote the specified diagnostic category (and any children) to at most
+ ``WARN`` severity.  Note that this has no effect on diagnostics already
+ set to a lower severity.
 
-.. option:: -Wno-deprecated
+.. option:: -Wdev, -Wno-dev
 
- Suppress deprecated functionality warnings.
+ .. deprecated:: 4.4
 
- Suppress warnings for usage of deprecated functionality, that are meant
- for the author of the ``CMakeLists.txt`` files.
-
-.. option:: -Werror=<what>
-
- Treat CMake warnings as errors. ``<what>`` must be one of the following:
-
- ``dev``
-   Make developer warnings errors.
-
-   Make warnings that are meant for the author of the ``CMakeLists.txt`` files
-   errors. By default this will also turn on deprecated warnings as errors.
-
- ``deprecated``
-  Make deprecated macro and function warnings errors.
-
-  Make warnings for usage of deprecated macros and functions, that are meant
-  for the author of the ``CMakeLists.txt`` files, errors.
-
-.. option:: -Wno-error=<what>
-
- Do not treat CMake warnings as errors. ``<what>`` must be one of the following:
-
- ``dev``
-  Make warnings that are meant for the author of the ``CMakeLists.txt`` files not
-  errors. By default this will also turn off deprecated warnings as errors.
-
- ``deprecated``
-  Make warnings for usage of deprecated macros and functions, that are meant
-  for the author of the ``CMakeLists.txt`` files, not errors.
+ Compatibility synonyms for ``-Wauthor`` / ``-Wno-author``.

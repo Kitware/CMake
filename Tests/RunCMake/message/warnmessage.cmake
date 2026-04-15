@@ -1,8 +1,8 @@
 
-set(CMAKE_WARN_DEPRECATED ON)
+cmake_diagnostic(SET CMD_DEPRECATED WARN)
 
 message(DEPRECATION "This is a deprecation warning")
 
-set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS OFF)
+cmake_diagnostic(SET CMD_AUTHOR WARN)
 
 message(AUTHOR_WARNING "This is a author warning")

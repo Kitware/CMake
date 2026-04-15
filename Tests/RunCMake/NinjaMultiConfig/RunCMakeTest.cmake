@@ -446,7 +446,7 @@ run_cmake_build(ExternalProject debug-in-release-graph "Release" all:Debug)
 #run_cmake_configure(AutoMocExecutable)
 #run_cmake_build(AutoMocExecutable debug-in-release-graph Release exe)
 
-# Need to test this manually because run_cmake() adds --no-warn-unused-cli
+# Need to test this manually because run_cmake() adds -Wno-unused-cli
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/NoUnusedVariables-build)
 run_cmake_command(NoUnusedVariables ${CMAKE_COMMAND} ${CMAKE_CURRENT_LIST_DIR}
   -G "Ninja Multi-Config"

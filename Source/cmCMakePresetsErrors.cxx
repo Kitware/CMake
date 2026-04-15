@@ -335,4 +335,18 @@ void SCHEMA_UNSUPPORTED(cmJSONState* state)
 {
   state->AddError("File version must be 8 or higher for $schema support");
 }
+
+void DIAGNOSTIC_UNSUPPORTED(cm::string_view name, cm::string_view context,
+                            int version, cmJSONState* state)
+{
+  state->AddError(cmStrCat("File version must be ", std::to_string(version),
+                           " or higher for ", context, '.', name, " support"));
+}
+
+void DIAGNOSTIC_REMOVED(cm::string_view name, cm::string_view context,
+                        int version, cmJSONState* state)
+{
+  state->AddError(cmStrCat("File version must be ", std::to_string(version),
+                           " or lower for ", context, '.', name, " support"));
+}
 }

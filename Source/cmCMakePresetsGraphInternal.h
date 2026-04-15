@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
 #include <cm3p/json/value.h>
 
 #include "cmCMakePresetsGraph.h"
@@ -257,6 +259,22 @@ bool PresetBoolHelper(bool& out, Json::Value const* value, cmJSONState* state);
 bool PresetOptionalBoolHelper(cm::optional<bool>& out,
                               Json::Value const* value, cmJSONState* state);
 
+template <typename K>
+bool PresetMapToBoolHelper(std::map<K, bool>& out, Json::Value const* value,
+                           K key, cmJSONState* state)
+{
+  cm::optional<bool> temp;
+  if (!PresetOptionalBoolHelper(temp, value, state)) {
+    return false;
+  }
+
+  if (temp) {
+    out[key] = *temp;
+  }
+
+  return true;
+}
+
 bool PresetIntHelper(int& out, Json::Value const* value, cmJSONState* state);
 
 bool PresetOptionalIntHelper(cm::optional<int>& out, Json::Value const* value,
@@ -303,4 +321,7 @@ bool EnvironmentMapHelper(
   Json::Value const* value, cmJSONState* state);
 
 cmJSONHelper<std::nullptr_t> SchemaHelper();
+
+bool CheckDiagnostics(cmJSONState* state, int version,
+                      cmCMakePresetsGraph::ConfigurePreset& preset);
 }

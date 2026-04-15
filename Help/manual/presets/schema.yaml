@@ -658,6 +658,20 @@ properties:
             .. include:: presets/warnings-properties.rst
           properties:
             # These should be in lexicographical order, except for systemVars.
+            author:
+              since: 12
+              type: boolean
+              description:
+                An optional boolean. Equivalent to passing -Wauthor or
+                -Wno-author on the command line. This may not be set
+                to false if errors.author is set to true.
+              sphinxDescription: |
+                An optional boolean. Equivalent to passing
+                :option:`-Wauthor <cmake -W>` or
+                :option:`-Wno-author <cmake -Wno->`
+                on the command line.
+                This may not be set to ``false``
+                if ``errors.author`` is set to ``true``.
             deprecated:
               type: boolean
               description:
@@ -666,12 +680,13 @@ properties:
                 to false if errors.deprecated is set to true.
               sphinxDescription: |
                 An optional boolean. Equivalent to passing
-                :cmake-option:`-Wdeprecated` or
-                :cmake-option:`-Wno-deprecated`
+                :option:`-Wdeprecated <cmake -W>` or
+                :option:`-Wno-deprecated <cmake -Wno->`
                 on the command line.
                 This may not be set to ``false``
                 if ``errors.deprecated`` is set to ``true``.
             dev:
+              until: 12
               type: boolean
               description:
                 An optional boolean. Equivalent to passing -Wdev or
@@ -679,29 +694,37 @@ properties:
                 to false if errors.dev is set to true.
               sphinxDescription: |
                 An optional boolean. Equivalent to passing
-                :cmake-option:`-Wdev` or
-                :cmake-option:`-Wno-dev`
+                :option:`-Wdev <cmake -W>` or
+                :option:`-Wno-dev <cmake -Wno->`
                 on the command line.
                 This may not be set to ``false``
                 if ``errors.dev`` is set to ``true``.
             uninitialized:
               type: boolean
               description:
-                An optional boolean. Setting this to true is equivalent to
-                passing --warn-uninitialized on the command line.
+                An optional boolean. Equivalent to passing -Wuninitialized or
+                -Wno-uninitialized on the command line. This may not be set
+                to false if errors.uninitialized is set to true.
               sphinxDescription: |
-                An optional boolean. Setting this to ``true`` is equivalent to
-                passing :cmake-option:`--warn-uninitialized` on the command
-                line.
+                An optional boolean. Equivalent to passing
+                :option:`-Wuninitialized <cmake -W>` or
+                :option:`-Wno-uninitialized <cmake -Wno->`
+                on the command line.
+                This may not be set to ``false``
+                if ``errors.uninitialized`` is set to ``true``.
             unusedCli:
               type: boolean
               description:
-                An optional boolean. Setting this to false is equivalent to
-                passing --no-warn-unused-cli on the command line.
+                An optional boolean. Equivalent to passing -Wunused-cli or
+                -Wno-unused-cli on the command line. This may not be set
+                to false if errors.unusedCli is set to true.
               sphinxDescription: |
-                An optional boolean. Setting this to ``false`` is equivalent to
-                passing :cmake-option:`--no-warn-unused-cli` on the command
-                line.
+                An optional boolean. Equivalent to passing
+                :option:`-Wunused-cli <cmake -W>` or
+                :option:`-Wno-unused-cli <cmake -Wno->`
+                on the command line.
+                This may not be set to ``false``
+                if ``errors.unusedCli`` is set to ``true``.
             # systemVars should be last.
             systemVars:
               type: boolean
@@ -724,6 +747,21 @@ properties:
             .. include:: presets/errors-properties.rst
           properties:
             # These should be in lexicographical order.
+            author:
+              since: 12
+              type: boolean
+              description:
+                An optional boolean. Equivalent to passing
+                -Werror=author or -Wno-error=author
+                on the command line. This may not be set
+                to true if warnings.author is set to false.
+              sphinxDescription: |
+                An optional boolean. Equivalent to passing
+                :cmake-option:`-Werror=author` or
+                :cmake-option:`-Wno-error=author`
+                on the command line.
+                This may not be set to ``true``
+                if ``warnings.author`` is set to ``false``.
             deprecated:
               type: boolean
               description:
@@ -739,6 +777,7 @@ properties:
                 This may not be set to ``true``
                 if ``warnings.deprecated`` is set to ``false``.
             dev:
+              until: 12
               type: boolean
               description:
                 An optional boolean. Equivalent to passing
@@ -752,6 +791,36 @@ properties:
                 on the command line.
                 This may not be set to ``true``
                 if ``warnings.dev`` is set to ``false``.
+            uninitialized:
+              since: 12
+              type: boolean
+              description:
+                An optional boolean. Equivalent to passing
+                -Werror=uninitialized or -Wno-error=uninitialized
+                on the command line. This may not be set
+                to true if warnings.uninitialized is set to false.
+              sphinxDescription: |
+                An optional boolean. Equivalent to passing
+                :cmake-option:`-Werror=uninitialized` or
+                :cmake-option:`-Wno-error=uninitialized`
+                on the command line.
+                This may not be set to ``true``
+                if ``warnings.uninitialized`` is set to ``false``.
+            unusedCli:
+              since: 12
+              type: boolean
+              description:
+                An optional boolean. Equivalent to passing
+                -Werror=unused-cli or -Wno-error=unused-cli
+                on the command line. This may not be set
+                to true if warnings.unusedCli is set to false.
+              sphinxDescription: |
+                An optional boolean. Equivalent to passing
+                :cmake-option:`-Werror=unused-cli` or
+                :cmake-option:`-Wno-error=unused-cli`
+                on the command line.
+                This may not be set to ``true``
+                if ``warnings.unusedCli`` is set to ``false``.
           unevaluatedProperties: false
         debug:
           type: object

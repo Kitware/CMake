@@ -1,0 +1,13 @@
+{
+  "version": 11,
+  "configurePresets": [
+    {
+      "name": "ErrorUninitializedNotSupported",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "errors": {
+        "uninitialized": true
+      }
+    }
+  ]
+}

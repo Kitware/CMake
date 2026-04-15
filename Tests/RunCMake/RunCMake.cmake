@@ -134,7 +134,7 @@ function(run_cmake test)
     endif()
     list(APPEND RunCMake_TEST_COMMAND
       -DRunCMake_TEST=${test}
-      --no-warn-unused-cli
+      -Wno-unused-cli
       )
   else()
     set(RunCMake_TEST_OPTIONS "")

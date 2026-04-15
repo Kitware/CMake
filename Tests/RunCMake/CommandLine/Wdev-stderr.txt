@@ -1,4 +1,5 @@
-^CMake Warning \(dev\) at Wdev\.cmake:1 \(message\):
+^The dev option is deprecated\.  Use -Wauthor instead\.
+CMake Warning \(dev\) at Wdev\.cmake:1 \(message\):
   Some author warning
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

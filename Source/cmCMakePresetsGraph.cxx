@@ -87,12 +87,11 @@ void InheritVector(std::vector<T>& child, std::vector<T> const& parent)
   }
 }
 
-template <typename T>
-void InheritMap(std::map<std::string, T>& child,
-                std::map<std::string, T> const& parent)
+template <typename K, typename V>
+void InheritMap(std::map<K, V>& child, std::map<K, V> const& parent)
 {
-  for (auto const& v : parent) {
-    child.insert(v);
+  for (auto const& item : parent) {
+    child.insert(item);
   }
 }
 
@@ -893,12 +892,8 @@ bool cmCMakePresetsGraph::ConfigurePreset::VisitPresetInherit(
   InheritString(preset.InstallDir, parent.InstallDir);
   InheritString(preset.ToolchainFile, parent.ToolchainFile);
   InheritString(preset.GraphVizFile, parent.GraphVizFile);
-  InheritOptionalValue(preset.WarnDev, parent.WarnDev);
-  InheritOptionalValue(preset.ErrorDev, parent.ErrorDev);
-  InheritOptionalValue(preset.WarnDeprecated, parent.WarnDeprecated);
-  InheritOptionalValue(preset.ErrorDeprecated, parent.ErrorDeprecated);
-  InheritOptionalValue(preset.WarnUninitialized, parent.WarnUninitialized);
-  InheritOptionalValue(preset.WarnUnusedCli, parent.WarnUnusedCli);
+  InheritMap(preset.Warnings, parent.Warnings);
+  InheritMap(preset.Errors, parent.Errors);
   InheritOptionalValue(preset.WarnSystemVars, parent.WarnSystemVars);
   InheritMap(preset.CacheVariables, parent.CacheVariables);
 
@@ -933,12 +928,15 @@ bool cmCMakePresetsGraph::ConfigurePreset::VisitPresetAfterInherit(
       }
     }
 
-    if (preset.WarnDev == false && preset.ErrorDev == true) {
-      return false;
+    for (auto const& w : preset.Warnings) {
+      auto const ei = preset.Errors.find(w.first);
+      if (ei != preset.Errors.end()) {
+        if (w.second == false && ei->second == true) {
+          return false;
+        }
+      }
     }
-    if (preset.WarnDeprecated == false && preset.ErrorDeprecated == true) {
-      return false;
-    }
+
     if (preset.CacheVariables.count("") != 0) {
       return false;
     }

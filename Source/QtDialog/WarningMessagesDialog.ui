@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
+    <width>450</width>
     <height>300</height>
    </rect>
   </property>
@@ -18,103 +18,54 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QTreeWidget" name="treeWidget">
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
      </property>
-     <property name="title">
-      <string>Suppress Warnings</string>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QCheckBox" name="suppressDeveloperWarnings">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Suppress developer (author) warnings.</string>
-        </property>
-        <property name="text">
-         <string>Developer Warnings</string>
-        </property>
-        <property name="tristate">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="suppressDeprecatedWarnings">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Suppress deprecated warnings.</string>
-        </property>
-        <property name="text">
-         <string>Deprecated Warnings</string>
-        </property>
-        <property name="tristate">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+     <property name="rootIsDecorated">
+      <bool>false</bool>
      </property>
-     <property name="title">
-      <string>Warnings as Errors</string>
+     <property name="uniformRowHeights">
+      <bool>true</bool>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QCheckBox" name="developerWarningsAsErrors">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Treat developer (author) warnings as errors.</string>
-        </property>
-        <property name="text">
-         <string>Developer Warnings as Errors</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="deprecatedWarningsAsErrors">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Treat deprecated warnings as errors.</string>
-        </property>
-        <property name="text">
-         <string>Deprecated Warnings as Errors</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="itemsExpandable">
+      <bool>false</bool>
+     </property>
+     <property name="allColumnsShowFocus">
+      <bool>true</bool>
+     </property>
+     <property name="expandsOnDoubleClick">
+      <bool>false</bool>
+     </property>
+     <attribute name="headerVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="headerStretchLastSection">
+      <bool>false</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string notr="true">Category</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string notr="true">Ignore</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string notr="true">Warn</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string notr="true">Error</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>

@@ -3,9 +3,9 @@
   Executing try_compile \(CMAKE_C_ABI_COMPILED\) in:
 
     [^
-]*/Tests/RunCMake/try_compile/WarnDeprecated-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+
+]*/Tests/RunCMake/try_compile/CudaArchitectures-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+
 Call Stack \(most recent call first\):
   [^
 ]*/Modules/CMakeTestCCompiler\.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)
-  WarnDeprecated\.cmake:[0-9]+ \(enable_language\)
+  CudaArchitectures\.cmake:[0-9]+ \(enable_language\)
   CMakeLists\.txt:[0-9]+ \(include\)

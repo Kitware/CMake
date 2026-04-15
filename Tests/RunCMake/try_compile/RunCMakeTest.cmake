@@ -52,7 +52,7 @@ run_cmake(ProjectVars)
 
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(PlatformVariables)
-run_cmake(WarnDeprecated)
+run_cmake(CudaArchitectures)
 unset(RunCMake_TEST_OPTIONS)
 
 if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND

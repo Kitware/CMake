@@ -598,14 +598,6 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
       return false;
     }
 
-    PresetPair<ConfigurePreset> presetPair;
-    presetPair.Unexpanded = preset;
-    presetPair.Expanded = cm::nullopt;
-    if (!this->ConfigurePresets.emplace(preset.Name, presetPair).second) {
-      cmCMakePresetsErrors::DUPLICATE_PRESETS(preset.Name, &this->parseState);
-      return false;
-    }
-
     // Support for installDir presets added in version 3.
     if (v < 3 && !preset.InstallDir.empty()) {
       cmCMakePresetsErrors::INSTALL_PREFIX_UNSUPPORTED(&root["installDir"],
@@ -636,6 +628,20 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
     // Support for graphviz argument added in version 10.
     if (v < 10 && !preset.GraphVizFile.empty()) {
       cmCMakePresetsErrors::GRAPHVIZ_FILE_UNSUPPORTED(&this->parseState);
+      return false;
+    }
+
+    // Support for diagnostics.
+    if (!cmCMakePresetsGraphInternal::CheckDiagnostics(&this->parseState, v,
+                                                       preset)) {
+      return false;
+    }
+
+    PresetPair<ConfigurePreset> presetPair;
+    presetPair.Unexpanded = preset;
+    presetPair.Expanded = cm::nullopt;
+    if (!this->ConfigurePresets.emplace(preset.Name, presetPair).second) {
+      cmCMakePresetsErrors::DUPLICATE_PRESETS(preset.Name, &this->parseState);
       return false;
     }
 

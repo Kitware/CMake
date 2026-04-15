@@ -1,20 +1,27 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
+#include <cassert>
 #include <cstddef>
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
+#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include <cm3p/json/value.h>
 
+#include "cmsys/String.h"
+
 #include "cmCMakePresetsErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
+#include "cmDiagnostics.h"
 #include "cmJSONHelpers.h"
 #include "cmStateTypes.h"
 
@@ -204,27 +211,68 @@ auto const VariablesHelper =
   JSONHelperBuilder::Map<cm::optional<CacheVariable>>(
     cmCMakePresetsErrors::INVALID_PRESET, VariableHelper);
 
+template <cmDiagnosticCategory C>
+cm::string_view GetJSONName()
+{
+  static std::string storage = [] {
+    cm::string_view const in = cmDiagnostics::GetCategoryString(C).substr(4);
+    std::string out;
+    bool sep = false;
+    for (char const c : in) {
+      if (sep) {
+        out += c;
+        sep = false;
+      } else if (c == '_') {
+        sep = true;
+      } else {
+        out += static_cast<char>(cmsysString_tolower(c));
+      }
+    }
+    return out;
+  }();
+  return storage;
+}
+
+cm::string_view GetJSONName(cmDiagnosticCategory category)
+{
+  static cm::string_view const names[] = {
+    "none"_s, // CMD_NONE
+#define DIAGNOSTIC_JSON_NAME(C) GetJSONName<cmDiagnostics::C>(),
+    CM_FOR_EACH_DIAGNOSTIC_CATEGORY(DIAGNOSTIC_JSON_NAME)
+#undef DIAGNOSTIC_JSON_NAME
+  };
+  assert(category > 0 && category < cmDiagnostics::CategoryCount);
+  return names[category];
+}
+
+auto const PresetDiagnosticMapHelper =
+  cmCMakePresetsGraphInternal::PresetMapToBoolHelper<cmDiagnosticCategory>;
+
+#define BIND_DIAGNOSTIC(C)                                                    \
+  .Bind(GetJSONName<cmDiagnostics::C>(), &DIAGNOSTIC_MEMBER,                  \
+        PresetDiagnosticMapHelper, cmDiagnostics::C, false)
+
+#define DIAGNOSTIC_MEMBER ConfigurePreset::Warnings
 auto const PresetWarningsHelper =
   JSONHelperBuilder::Object<ConfigurePreset>(
     JsonErrors::INVALID_NAMED_OBJECT_KEY, false)
     .Bind("dev"_s, &ConfigurePreset::WarnDev,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
-    .Bind("deprecated"_s, &ConfigurePreset::WarnDeprecated,
-          cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
-    .Bind("uninitialized"_s, &ConfigurePreset::WarnUninitialized,
-          cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
-    .Bind("unusedCli"_s, &ConfigurePreset::WarnUnusedCli,
-          cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
+      CM_FOR_EACH_DIAGNOSTIC_CATEGORY(BIND_DIAGNOSTIC)
     .Bind("systemVars"_s, &ConfigurePreset::WarnSystemVars,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
+#undef DIAGNOSTIC_MEMBER
 
+#define DIAGNOSTIC_MEMBER ConfigurePreset::Errors
 auto const PresetErrorsHelper =
   JSONHelperBuilder::Object<ConfigurePreset>(
     JsonErrors::INVALID_NAMED_OBJECT_KEY, false)
     .Bind("dev"_s, &ConfigurePreset::ErrorDev,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
-    .Bind("deprecated"_s, &ConfigurePreset::ErrorDeprecated,
-          cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
+      CM_FOR_EACH_DIAGNOSTIC_CATEGORY(BIND_DIAGNOSTIC);
+#undef DIAGNOSTIC_MEMBER
+
+#undef BIND_DIAGNOSTIC
 
 auto const PresetDebugHelper =
   JSONHelperBuilder::Object<ConfigurePreset>(
@@ -300,5 +348,72 @@ bool ConfigurePresetsHelper(std::vector<ConfigurePreset>& out,
     cmCMakePresetsErrors::INVALID_PRESETS, ConfigurePresetHelper);
 
   return helper(out, value, state);
+}
+
+bool CheckDiagnostics(cmJSONState* state, int version,
+                      std::map<cmDiagnosticCategory, bool> values,
+                      cm::string_view group)
+{
+  // NOLINTNEXTLINE(readability-use-anyofallof)
+  for (auto const& i : values) {
+    assert(i.first > 0 && i.first < cmDiagnostics::CategoryCount);
+    int const minVersion = cmDiagnostics::CategoryInfo[i.first].PresetVersion;
+    if (version < minVersion) {
+      cm::string_view dn = GetJSONName(i.first);
+      cmCMakePresetsErrors::DIAGNOSTIC_UNSUPPORTED(dn, group, minVersion,
+                                                   state);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool CheckDiagnostics(cmJSONState* state, int version,
+                      cmCMakePresetsGraph::ConfigurePreset& preset)
+{
+  // Check for diagnostics added in later schemes.
+  if (!CheckDiagnostics(state, version, preset.Warnings, "warnings"_s) ||
+      !CheckDiagnostics(state, version, preset.Errors, "errors"_s)) {
+    return false;
+  }
+
+  if (version < 12) {
+    // Handle 'dev'.
+    if (preset.WarnDev) {
+      preset.Warnings.emplace(cmDiagnostics::CMD_AUTHOR, *preset.WarnDev);
+    }
+    if (preset.ErrorDev) {
+      preset.Errors.emplace(cmDiagnostics::CMD_AUTHOR, *preset.ErrorDev);
+    }
+
+    // Check for diagnostics only present as warnings before v12.
+    constexpr cmDiagnosticCategory unsupportedErrors[] = {
+      cmDiagnostics::CMD_UNINITIALIZED,
+      cmDiagnostics::CMD_UNUSED_CLI,
+    };
+
+    for (cmDiagnosticCategory c : unsupportedErrors) {
+      if (cm::contains(preset.Errors, c)) {
+        cm::string_view dn = GetJSONName(c);
+        cmCMakePresetsErrors::DIAGNOSTIC_UNSUPPORTED(dn, "errors"_s, 12,
+                                                     state);
+        return false;
+      }
+    }
+  } else {
+    // Check for diagnostics removed in v12.
+    if (preset.WarnDev) {
+      cmCMakePresetsErrors::DIAGNOSTIC_REMOVED("dev"_s, "warnings"_s, 11,
+                                               state);
+      return false;
+    }
+    if (preset.ErrorDev) {
+      cmCMakePresetsErrors::DIAGNOSTIC_REMOVED("dev"_s, "errors"_s, 11, state);
+      return false;
+    }
+  }
+
+  return true;
 }
 }

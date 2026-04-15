@@ -1,6 +1,8 @@
 CMAKE_ERROR_DEPRECATED
 ----------------------
 
+.. deprecated:: 4.4
+
 Whether to issue errors for deprecated functionality.
 
 If ``TRUE``, use of deprecated functionality will issue fatal errors.

@@ -623,11 +623,13 @@ Options
 
 .. option:: --warn-uninitialized
 
- Warn about uninitialized values.
+ .. deprecated:: 4.4
 
- Print a warning when an uninitialized variable is used.
+ Compatibility synonym for ``-Wuninitialized``.
 
 .. option:: --warn-unused-vars
+
+ .. deprecated:: 3.19
 
  Does nothing.  In CMake versions 3.2 and below this enabled warnings about
  unused variables.  In CMake versions 3.3 through 3.18 the option was broken.
@@ -635,10 +637,9 @@ Options
 
 .. option:: --no-warn-unused-cli
 
- Don't warn about command line options.
+ .. deprecated:: 4.4
 
- Don't find variables that are declared on the command line, but not
- used.
+ Compatibility synonym for ``-Wno-unused-cli``.
 
 .. option:: --check-system-vars
 

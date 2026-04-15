@@ -105,6 +105,18 @@ struct cmJSONHelperBuilder
           -> bool { return func(out.*member, value, state); },
         required);
     }
+    template <typename U, typename M, typename F, typename C>
+    Object& Bind(cm::string_view name, M U::*member, F func, C constant,
+                 bool required = true)
+    {
+      return this->BindPrivate(
+        name,
+        [func, member, constant](T& out, Json::Value const* value,
+                                 cmJSONState* state) -> bool {
+          return func(out.*member, value, constant, state);
+        },
+        required);
+    }
     template <typename M, typename F>
     Object& Bind(cm::string_view name, std::nullptr_t, F func,
                  bool required = true)

@@ -1,0 +1,7 @@
+CMake Error:
+  Manually-specified variables were not used by the project:
+
+    RunCMake_GENERATOR
+    UNUSED_VARIABLE
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

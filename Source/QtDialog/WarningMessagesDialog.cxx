@@ -2,6 +2,20 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "WarningMessagesDialog.h"
 
+#include "cm/string_view"
+
+#include <QButtonGroup>
+#include <QHeaderView>
+#include <QRadioButton>
+#include <QToolButton>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+
+#include "cmDiagnostics.h"
+
+#include "QCMake.h"
+#include "QCMakeSizeType.h"
+
 WarningMessagesDialog::WarningMessagesDialog(QWidget* prnt, QCMake* instance)
   : QDialog(prnt)
   , cmakeInstance(instance)
@@ -13,84 +27,83 @@ WarningMessagesDialog::WarningMessagesDialog(QWidget* prnt, QCMake* instance)
 
 void WarningMessagesDialog::setInitialValues()
 {
-  this->suppressDeveloperWarnings->setChecked(
-    this->cmakeInstance->getSuppressDevWarnings());
-  this->suppressDeprecatedWarnings->setChecked(
-    this->cmakeInstance->getSuppressDeprecatedWarnings());
+  QHeaderView* const header = this->treeWidget->header();
+  header->setSectionResizeMode(0, QHeaderView::Stretch);
+  header->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+  header->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+  header->setSectionResizeMode(3, QHeaderView::ResizeToContents);
 
-  this->developerWarningsAsErrors->setChecked(
-    this->cmakeInstance->getDevWarningsAsErrors());
-  this->deprecatedWarningsAsErrors->setChecked(
-    this->cmakeInstance->getDeprecatedWarningsAsErrors());
+  std::map<unsigned, QTreeWidgetItem*> items = {
+    { 0, this->treeWidget->invisibleRootItem() },
+  };
+
+  for (unsigned i = 1; i < cmDiagnostics::CategoryCount; ++i) {
+    auto const category = static_cast<cmDiagnosticCategory>(i);
+    cm::string_view const cname =
+      cmDiagnostics::GetCategoryString(category).substr(4);
+    QTreeWidgetItem* const parent =
+      items[cmDiagnostics::CategoryInfo[category].Parent];
+
+    QTreeWidgetItem* const item = new QTreeWidgetItem(parent);
+    item->setText(0,
+                  QString::fromUtf8(cname.data(),
+                                    static_cast<cm_qsizetype>(cname.size())));
+
+    auto makeButton = [](QString const& text) {
+      QToolButton* const button = new QToolButton;
+      button->setCheckable(true);
+      button->setText(text);
+      return button;
+    };
+    QAbstractButton* const ignore = makeButton(tr("Ignore"));
+    QAbstractButton* const warn = makeButton(tr("Warn"));
+    QAbstractButton* const error = makeButton(tr("Error"));
+
+    QButtonGroup* const buttonGroup = new QButtonGroup(treeWidget);
+    buttonGroup->addButton(ignore, cmDiagnosticAction::Ignore);
+    buttonGroup->addButton(warn, cmDiagnosticAction::Warn);
+    buttonGroup->addButton(error, cmDiagnosticAction::SendError);
+    buttonGroup->setExclusive(true);
+    this->buttons.emplace(i, buttonGroup);
+
+    treeWidget->setItemWidget(item, 1, ignore);
+    treeWidget->setItemWidget(item, 2, warn);
+    treeWidget->setItemWidget(item, 3, error);
+
+    cmDiagnosticAction const action =
+      this->cmakeInstance->getDiagnosticAction(category);
+    switch (action) {
+      case cmDiagnostics::SendError:
+      case cmDiagnostics::FatalError:
+        error->setChecked(true);
+        break;
+      case cmDiagnostics::Warn:
+        warn->setChecked(true);
+        break;
+      default:
+        ignore->setChecked(true);
+        break;
+    }
+
+    items.emplace(i, item);
+  }
+
+  for (auto const& ii : items) {
+    ii.second->setExpanded(true);
+  }
 }
 
 void WarningMessagesDialog::setupSignals()
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
-  static auto const checkStateChanged = &QCheckBox::checkStateChanged;
-#else
-  static auto const checkStateChanged = &QCheckBox::stateChanged;
-#endif
   QObject::connect(this->buttonBox, &QDialogButtonBox::accepted, this,
                    &WarningMessagesDialog::doAccept);
-  QObject::connect(this->suppressDeveloperWarnings, checkStateChanged, this,
-                   &WarningMessagesDialog::doSuppressDeveloperWarningsChanged);
-  QObject::connect(
-    this->suppressDeprecatedWarnings, checkStateChanged, this,
-    &WarningMessagesDialog::doSuppressDeprecatedWarningsChanged);
-
-  QObject::connect(this->developerWarningsAsErrors, checkStateChanged, this,
-                   &WarningMessagesDialog::doDeveloperWarningsAsErrorsChanged);
-  QObject::connect(
-    this->deprecatedWarningsAsErrors, checkStateChanged, this,
-    &WarningMessagesDialog::doDeprecatedWarningsAsErrorsChanged);
 }
 
 void WarningMessagesDialog::doAccept()
 {
-  this->cmakeInstance->setSuppressDevWarnings(
-    this->suppressDeveloperWarnings->isChecked());
-  this->cmakeInstance->setSuppressDeprecatedWarnings(
-    this->suppressDeprecatedWarnings->isChecked());
-
-  this->cmakeInstance->setDevWarningsAsErrors(
-    this->developerWarningsAsErrors->isChecked());
-  this->cmakeInstance->setDeprecatedWarningsAsErrors(
-    this->deprecatedWarningsAsErrors->isChecked());
-}
-
-void WarningMessagesDialog::doSuppressDeveloperWarningsChanged(
-  CheckState state)
-{
-  // no warnings implies no errors either
-  if (state) {
-    this->developerWarningsAsErrors->setChecked(false);
-  }
-}
-
-void WarningMessagesDialog::doSuppressDeprecatedWarningsChanged(
-  CheckState state)
-{
-  // no warnings implies no errors either
-  if (state) {
-    this->deprecatedWarningsAsErrors->setChecked(false);
-  }
-}
-
-void WarningMessagesDialog::doDeveloperWarningsAsErrorsChanged(
-  CheckState state)
-{
-  // warnings as errors implies warnings are not suppressed
-  if (state) {
-    this->suppressDeveloperWarnings->setChecked(false);
-  }
-}
-
-void WarningMessagesDialog::doDeprecatedWarningsAsErrorsChanged(
-  CheckState state)
-{
-  // warnings as errors implies warnings are not suppressed
-  if (state) {
-    this->suppressDeprecatedWarnings->setChecked(false);
+  for (auto const& ii : this->buttons) {
+    this->cmakeInstance->setDiagnosticAction(
+      static_cast<cmDiagnosticCategory>(ii.first),
+      static_cast<cmDiagnosticAction>(ii.second->checkedId()));
   }
 }

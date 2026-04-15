@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCMakePresetsGraph.h"
+#include "cmDiagnostics.h"
 #include "cmake.h"
 
 #ifdef _MSC_VER
@@ -105,24 +106,9 @@ public slots:
   void reloadCache();
   /// set whether to do debug output
   void setDebugOutput(bool);
-  /// get whether to do suppress dev warnings
-  bool getSuppressDevWarnings();
-  /// set whether to do suppress dev warnings
-  void setSuppressDevWarnings(bool value);
-  /// get whether to do suppress deprecated warnings
-  bool getSuppressDeprecatedWarnings();
-  /// set whether to do suppress deprecated warnings
-  void setSuppressDeprecatedWarnings(bool value);
-  /// get whether to treat developer (author) warnings as errors
-  bool getDevWarningsAsErrors();
-  /// set whether to treat developer (author) warnings as errors
-  void setDevWarningsAsErrors(bool value);
-  /// get whether to treat deprecated warnings as errors
-  bool getDeprecatedWarningsAsErrors();
-  /// set whether to treat deprecated warnings as errors
-  void setDeprecatedWarningsAsErrors(bool value);
-  /// set whether to run cmake with warnings about uninitialized variables
-  void setWarnUninitializedMode(bool value);
+  /// set diagnostic action
+  void setDiagnosticAction(cmDiagnostics::DiagnosticCategory,
+                           cmDiagnostics::DiagnosticAction);
   /// check if project IDE open is possible and emit openPossible signal
   void checkOpenPossible();
   /// Reload the preset files and tree
@@ -145,6 +131,8 @@ public:
   std::vector<cmake::GeneratorInfo> const& availableGenerators() const;
   /// get whether to do debug output
   bool getDebugOutput() const;
+  /// get diagnostic action
+  cmDiagnosticAction getDiagnosticAction(cmDiagnosticCategory) const;
 
 signals:
   /// signal when properties change (during read from disk or configure
@@ -163,8 +151,6 @@ signals:
   void presetChanged(QString const& name);
   /// signal when there's an error reading the presets files
   void presetLoadError(QString const& dir, QString const& error);
-  /// signal when uninitialized warning changes
-  void warnUninitializedModeChanged(bool value);
   /// signal for progress events
   void progressChanged(QString const& msg, float percent);
   /// signal when configure is done
@@ -196,7 +182,6 @@ protected:
   void stderrCallback(std::string const& msg);
   void setUpEnvironment() const;
 
-  bool WarnUninitializedMode;
   QString SourceDirectory;
   QString BinaryDirectory;
   QString MaybeRelativeBinaryDirectory;

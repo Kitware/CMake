@@ -73,7 +73,7 @@ cmDocumentationEntry const cmDocumentationUsageNote = {
   "Run 'cmake --help' for more information."
 };
 
-cmDocumentationEntry const cmDocumentationOptions[35] = {
+cmDocumentationEntry const cmDocumentationOptions[] = {
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
   { "--list-presets[=<type>]", "List available presets." },
   { "--workflow [<options>]", "Run a workflow preset." },
@@ -118,8 +118,6 @@ cmDocumentationEntry const cmDocumentationOptions[35] = {
     "Trace only this CMake file/module. Multiple options allowed." },
   { "--trace-redirect=<file>",
     "Redirect trace output to a file instead of stderr." },
-  { "--warn-uninitialized", "Warn about uninitialized values." },
-  { "--no-warn-unused-cli", "Don't warn about command line options." },
   { "--check-system-vars",
     "Find problems with variable usage in system files." },
   { "--compile-no-warning-as-error",

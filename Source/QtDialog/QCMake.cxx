@@ -11,6 +11,7 @@
 #include <QString>
 #include <QVector>
 
+#include "cmDiagnostics.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmMessageMetadata.h"
@@ -29,7 +30,6 @@ QCMake::QCMake(QObject* p)
   , StartEnvironment(QProcessEnvironment::systemEnvironment())
   , Environment(QProcessEnvironment::systemEnvironment())
 {
-  this->WarnUninitializedMode = false;
   qRegisterMetaType<QCMakeProperty>();
   qRegisterMetaType<QCMakePropertyList>();
   qRegisterMetaType<QProcessEnvironment>();
@@ -172,27 +172,8 @@ void QCMake::setPreset(QString const& name, bool setBinary)
             QString::fromStdString(expandedPreset->BinaryDir);
           this->setBinaryDirectory(binaryDir);
         }
-        if (expandedPreset->WarnDev) {
-          this->CMakeInstance->SetSuppressDevWarnings(
-            !*expandedPreset->WarnDev);
-        }
-        if (expandedPreset->ErrorDev) {
-          this->CMakeInstance->SetDevWarningsAsErrors(
-            *expandedPreset->ErrorDev);
-        }
-        if (expandedPreset->WarnDeprecated) {
-          this->CMakeInstance->SetSuppressDeprecatedWarnings(
-            !*expandedPreset->WarnDeprecated);
-        }
-        if (expandedPreset->ErrorDeprecated) {
-          this->CMakeInstance->SetDeprecatedWarningsAsErrors(
-            *expandedPreset->ErrorDeprecated);
-        }
-        if (expandedPreset->WarnUninitialized) {
-          this->WarnUninitializedMode = *expandedPreset->WarnUninitialized;
-          emit this->warnUninitializedModeChanged(
-            *expandedPreset->WarnUninitialized);
-        }
+        this->CMakeInstance->SetDiagnosticsFromPreset(expandedPreset->Warnings,
+                                                      expandedPreset->Errors);
         this->Environment = this->StartEnvironment;
         for (auto const& v : expandedPreset->Environment) {
           if (v.second) {
@@ -259,7 +240,6 @@ void QCMake::configure()
     this->CMakeInstance->SetGeneratorPlatform(this->Platform.toStdString());
     this->CMakeInstance->SetGeneratorToolset(this->Toolset.toStdString());
     this->CMakeInstance->LoadCache();
-    this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
     this->CMakeInstance->PreLoadCMakeFiles();
 
     InterruptFlag = 0;
@@ -668,49 +648,17 @@ bool QCMake::getDebugOutput() const
   return this->CMakeInstance->GetDebugOutput();
 }
 
-bool QCMake::getSuppressDevWarnings()
+void QCMake::setDiagnosticAction(cmDiagnostics::DiagnosticCategory category,
+                                 cmDiagnostics::DiagnosticAction action)
 {
-  return this->CMakeInstance->GetSuppressDevWarnings();
+  this->CMakeInstance->GetCurrentSnapshot().SetDiagnostic(category, action,
+                                                          false);
 }
 
-void QCMake::setSuppressDevWarnings(bool value)
+cmDiagnosticAction QCMake::getDiagnosticAction(
+  cmDiagnosticCategory category) const
 {
-  this->CMakeInstance->SetSuppressDevWarnings(value);
-}
-
-bool QCMake::getSuppressDeprecatedWarnings()
-{
-  return this->CMakeInstance->GetSuppressDeprecatedWarnings();
-}
-
-void QCMake::setSuppressDeprecatedWarnings(bool value)
-{
-  this->CMakeInstance->SetSuppressDeprecatedWarnings(value);
-}
-
-bool QCMake::getDevWarningsAsErrors()
-{
-  return this->CMakeInstance->GetDevWarningsAsErrors();
-}
-
-void QCMake::setDevWarningsAsErrors(bool value)
-{
-  this->CMakeInstance->SetDevWarningsAsErrors(value);
-}
-
-bool QCMake::getDeprecatedWarningsAsErrors()
-{
-  return this->CMakeInstance->GetDeprecatedWarningsAsErrors();
-}
-
-void QCMake::setDeprecatedWarningsAsErrors(bool value)
-{
-  this->CMakeInstance->SetDeprecatedWarningsAsErrors(value);
-}
-
-void QCMake::setWarnUninitializedMode(bool value)
-{
-  this->WarnUninitializedMode = value;
+  return this->CMakeInstance->GetCurrentSnapshot().GetDiagnostic(category);
 }
 
 void QCMake::checkOpenPossible()

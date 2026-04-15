@@ -1,0 +1,13 @@
+{
+  "version": 12,
+  "configurePresets": [
+    {
+      "name": "WarningDevNotSupported",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "warnings": {
+        "dev": true
+      }
+    }
+  ]
+}

@@ -71,7 +71,7 @@ The CMake tooling may report warnings which are intended
 for the provider of the software, not intended for the
 consumer of the software.  Such warnings end with "This
 warning is for project developers".  Users may disable
-such warnings by passing the :option:`-Wno-dev <cmake -Wno-dev>`
+such warnings by passing the :option:`-Wno-author <cmake -Wno->`
 flag to :manual:`cmake(1)`.
 
 cmake-gui tool

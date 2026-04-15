@@ -1,14 +1,14 @@
 function(run_test ACTION INIT TARGET EXPECTED)
-  cmake_diagnostic(SET CMD_AUTHOR ${INIT})
+  cmake_diagnostic(SET CMD_DEPRECATED ${INIT})
 
-  cmake_diagnostic(GET CMD_AUTHOR action)
+  cmake_diagnostic(GET CMD_DEPRECATED action)
   if(NOT "${action}" STREQUAL "${INIT}")
     message(SEND_ERROR "failed to set diagnostic state")
   endif()
 
-  cmake_diagnostic(${ACTION} CMD_AUTHOR ${TARGET})
+  cmake_diagnostic(${ACTION} CMD_AUTHOR ${TARGET} RECURSE)
 
-  cmake_diagnostic(GET CMD_AUTHOR action)
+  cmake_diagnostic(GET CMD_DEPRECATED action)
   if(NOT "${action}" STREQUAL "${EXPECTED}")
     message(SEND_ERROR
       "failed to change diagnostic state"
@@ -17,6 +17,7 @@ function(run_test ACTION INIT TARGET EXPECTED)
   endif()
 endfunction()
 
+# Run tests for altering a diagnostic from a known state
 run_test(SET IGNORE WARN WARN)
 run_test(SET IGNORE SEND_ERROR SEND_ERROR)
 run_test(SET IGNORE FATAL_ERROR FATAL_ERROR)
@@ -60,3 +61,14 @@ run_test(DEMOTE FATAL_ERROR IGNORE IGNORE)
 run_test(DEMOTE FATAL_ERROR WARN WARN)
 run_test(DEMOTE FATAL_ERROR SEND_ERROR SEND_ERROR)
 run_test(DEMOTE FATAL_ERROR FATAL_ERROR FATAL_ERROR)
+
+# Ensure that altering a diagnostic that is still in the default state
+# uses the default state as the basis for alteration
+cmake_diagnostic(DEMOTE CMD_UNINITIALIZED WARN)
+
+cmake_diagnostic(GET CMD_UNINITIALIZED action)
+if(NOT "${action}" STREQUAL "IGNORE")
+  message(SEND_ERROR
+    "CMD_UNINITIALIZED has unexpected state '${action}' (expected 'IGNORE')"
+  )
+endif()

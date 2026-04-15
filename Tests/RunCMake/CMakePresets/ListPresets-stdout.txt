@@ -1,5 +1,4 @@
-^Not searching for unused variables given on the command line\.
-Available configure presets:
+^Available configure presets:
 
   "zzzzzz"       - Sleepy
   "aaaaaaaa"     - Screaming
