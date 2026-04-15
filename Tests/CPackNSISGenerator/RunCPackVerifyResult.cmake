@@ -70,6 +70,15 @@ else()
   message(FATAL_ERROR "License found in the project")
 endif()
 
+# components page should not be present
+file(STRINGS "${project_file}" line REGEX "!insertmacro MUI_PAGE_COMPONENTS")
+string(FIND "${line}" "MUI_PAGE_COMPONENTS" output_index)
+if("${output_index}" EQUAL "-1")
+  message(STATUS "Components page not found in the project")
+else()
+  message(FATAL_ERROR "Components page found in the project")
+endif()
+
 file(STRINGS "${project_file}" line REGEX [[\\_CON\\]])
 string(FIND "${line}" [[\_CON\]] output_index)
 message(STATUS "Found CON component reserved directory name as _CON")
