@@ -3022,7 +3022,7 @@ if(BUILD_TESTING)
     )
   #make sure all 3 subdirs were added
   set_tests_properties(CTestTestSubdir PROPERTIES
-    PASS_REGULAR_EXPRESSION "0 tests failed out of 3")
+    PASS_REGULAR_EXPRESSION "100% tests passed out of 3")
 
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestDepends/test.cmake.in"

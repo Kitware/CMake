@@ -5,6 +5,6 @@ Test project [^
     Start 1: testRepeat
     Test #1: testRepeat \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
 +
-100% tests passed, 0 tests failed out of 1
+100% tests passed out of 1
 +
 Total Test time \(real\) = +[0-9\.]+ sec$

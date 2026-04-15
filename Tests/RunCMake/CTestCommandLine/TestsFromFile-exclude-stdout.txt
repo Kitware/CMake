@@ -5,5 +5,5 @@ Test project [^
  +Start 3: Test11
 2/2 Test #3: Test11 \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
 +
-100% tests passed, 0 tests failed out of 2
+100% tests passed out of 2
 +

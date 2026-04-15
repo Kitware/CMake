@@ -5,4 +5,4 @@ Test project [^
 .*
 5: TEST_ENV_REF=xx
 .*
-100% tests passed, 0 tests failed out of 1
+100% tests passed out of 1

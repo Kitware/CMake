@@ -5,4 +5,4 @@ Test project [^
     Start 2: skip
 2/2 Test #2: skip \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\*\*\*Skipped +[0-9\.]+ sec
 +
-100% tests passed, 0 tests failed out of 2
+100% tests passed out of 2

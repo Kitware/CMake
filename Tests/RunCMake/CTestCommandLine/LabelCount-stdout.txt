@@ -1,4 +1,4 @@
-100% tests passed, 0 tests failed out of 4
+100% tests passed out of 4
 +
 +Label Time Summary:
 +'bar'    = +[0-9\.]+ sec\*proc \(3 tests\)

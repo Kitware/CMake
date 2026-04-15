@@ -12,6 +12,6 @@ Test project .*
     Start 6: zoo\.emu
 6/6 Test #6: zoo\.emu .+ +Passed +[0-9\.]+ sec
 
-100% tests passed, 0 tests failed out of 6
+100% tests passed out of 6
 
 Total Test time \(real\) = +[0-9\.]+ sec

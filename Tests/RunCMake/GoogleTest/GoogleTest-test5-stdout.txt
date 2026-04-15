@@ -82,6 +82,6 @@ Test project .*
  *Start +[0-9]+: TEST:prefix/both\.case/test<TYPE>!5
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both\.case/test<TYPE>!5 .+ +Passed +[0-9\.]+ sec
 
-100% tests passed, 0 tests failed out of [0-9]+
+100% tests passed out of [0-9]+
 
 Total Test time \(real\) = +[0-9\.]+ sec

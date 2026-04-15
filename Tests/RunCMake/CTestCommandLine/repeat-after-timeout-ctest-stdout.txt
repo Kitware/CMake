@@ -10,6 +10,6 @@
     Start 4: goodbye
 4/4 Test #4: goodbye \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
 
-100% tests passed, 0 tests failed out of 4
+100% tests passed out of 4
 
 Total Test time \(real\) = +[0-9\.]+ sec$
