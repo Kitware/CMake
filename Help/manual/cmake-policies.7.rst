@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.4
 .. toctree::
    :maxdepth: 1
 
+   CMP0214: Honor CMAKE_EXE_LINKER_FLAGS for Swift executable targets. </policy/CMP0214>
    CMP0213: file(ARCHIVE_{CREATE,EXTRACT}) encode archive paths as UTF-8 by default. </policy/CMP0213>
    CMP0212: add_custom_command DEPENDS does not strip .exe suffixes. </policy/CMP0212>
    CMP0211: A file may belong to at most one file set in a target. </policy/CMP0211>

@@ -1562,7 +1562,9 @@ void cmLocalGenerator::GetTargetFlags(
       }
     } break;
     case cmStateEnums::EXECUTABLE: {
-      if (linkLanguage != "Swift") {
+      if (linkLanguage != "Swift" ||
+          (this->IsSplitSwiftBuild() &&
+           target->GetPolicyStatusCMP0214() == cmPolicies::NEW)) {
         std::string exeFlags;
         this->AddTargetTypeLinkerFlags(exeFlags, target, linkLanguage, config);
         if (!exeFlags.empty()) {
