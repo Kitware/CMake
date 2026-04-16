@@ -5,7 +5,7 @@
     [^
 ]*[\\|/]file-CREATE_LINK[\\|/]CMP0205
 
-  is directory.  Hardlinks creation is not supported for directories.
+  is a directory.  Hard link creation is not supported for directories.
 
   Policy CMP0205 is not set: file\(CREATE_LINK\) with COPY_ON_ERROR copies
   directory content\.  Run "cmake --help-policy CMP0205" for policy details\.
@@ -24,8 +24,7 @@ CMake Warning \(dev\) at [^
     [^
 ]*[\\|/]file-CREATE_LINK[\\|/]CMP0205
 
-  is directory.  It will be copied recursively when NEW policy behavior
-  applies for CMP0205\.
+  is a directory.  It will be copied recursively when CMP0205 is set to NEW\.
 
   Policy CMP0205 is not set: file\(CREATE_LINK\) with COPY_ON_ERROR copies
   directory content\.  Run "cmake --help-policy CMP0205" for policy details\.
