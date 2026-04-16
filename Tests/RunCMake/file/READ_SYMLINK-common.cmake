@@ -1,0 +1,5 @@
+file(READ_SYMLINK "${link}" target)
+if(CMAKE_HOST_WIN32)
+  string(REPLACE [[\]] [[/]] target "${target}")
+endif()
+message(STATUS "target: '${target}'")
