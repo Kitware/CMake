@@ -606,7 +606,7 @@ Filesystem
 
   Create a link ``<linkname>`` that points to ``<original>``.
   It will be a hard link by default, but providing the ``SYMBOLIC`` option
-  results in a symbolic link instead.  Hard links require that ``original``
+  results in a symbolic link instead.  Hard links require that ``<original>``
   exists and is a file, not a directory.  If ``<linkname>`` already exists,
   it will be overwritten.
 
@@ -619,9 +619,13 @@ Filesystem
   creating the link fails.  It can be useful for handling situations such as
   ``<original>`` and ``<linkname>`` being on different drives or mount points,
   which would make them unable to support a hard link.
-  If the source is a directory, the destination directory will be created if
-  it does not exist.  Contents of the source directory will be copied to the
-  destination directory unless policy :policy:`CMP0205` is not set to ``NEW``.
+
+  .. versionchanged:: 4.3
+
+    If the source is a directory, CMake versions prior to 4.3 will create the
+    destination directory if it does not exist, but not copy any files.
+    With CMake 4.3 and above, the contents of the source directory will be
+    copied recursively to the destination.  See policy :policy:`CMP0205`.
 
 .. signature::
   file(CHMOD <files>... <directories>...

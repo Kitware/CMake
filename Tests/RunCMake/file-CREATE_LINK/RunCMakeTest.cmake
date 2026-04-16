@@ -12,23 +12,13 @@ if(NOT WIN32
   run_cmake(CREATE_LINK-SYMBOLIC-noexist)
 endif()
 
+run_cmake_script(CMP0205-SymLink-WARN)
+run_cmake_script(CMP0205-SymLink-OLD)
+run_cmake_script(CMP0205-SymLink-NEW)
+
+# Some older versions of macOS with HFS+ filesystems support directory hard
+# links. Inspect whether this test case is applicable on the current system.
 file(MAKE_DIRECTORY ${RunCMake_BINARY_DIR}/CMP0205-Inspect/Dest)
-
-file(REMOVE_RECURSE ${RunCMake_BINARY_DIR}/CMP0205-Inspect-SymLink)
-file(CREATE_LINK
-  ${RunCMake_BINARY_DIR}/CMP0205-Inspect/Dest ${RunCMake_BINARY_DIR}/CMP0205-Inspect-SymLink
-  SYMBOLIC
-  RESULT SymLink_RESULT
-)
-if(SymLink_RESULT STREQUAL "0")
-  message(STATUS "CMP0205-SymLink-* skipped: directory symbolic link creation works")
-  file(REMOVE ${RunCMake_BINARY_DIR}/CMP0205-Inspect-SymLink)
-else()
-  run_cmake_script(CMP0205-SymLink-WARN)
-  run_cmake_script(CMP0205-SymLink-OLD)
-  run_cmake_script(CMP0205-SymLink-NEW)
-endif()
-
 file(REMOVE_RECURSE ${RunCMake_BINARY_DIR}/CMP0205-Inspect-HardLink)
 file(CREATE_LINK
   ${RunCMake_BINARY_DIR}/CMP0205-Inspect/Dest ${RunCMake_BINARY_DIR}/CMP0205-Inspect-HardLink
