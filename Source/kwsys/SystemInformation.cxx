@@ -3919,8 +3919,8 @@ double SystemInformationImplementation::GetLoadAverage()
   // Old windows.h headers do not provide GetSystemTimes.
   using GetSystemTimesType = BOOL(WINAPI*)(LPFILETIME, LPFILETIME, LPFILETIME);
   static GetSystemTimesType pGetSystemTimes =
-    (GetSystemTimesType)GetProcAddress(GetModuleHandleW(L"kernel32"),
-                                       "GetSystemTimes");
+    (GetSystemTimesType)(void*)GetProcAddress(GetModuleHandleW(L"kernel32"),
+                                              "GetSystemTimes");
   FILETIME idleTime, kernelTime, userTime;
   if (pGetSystemTimes && pGetSystemTimes(&idleTime, &kernelTime, &userTime)) {
     unsigned __int64 const idleTicks = fileTimeToUInt64(idleTime);
@@ -4469,7 +4469,7 @@ void SystemInformationImplementation::CPUCountWindows()
   using GetLogicalProcessorInformationType =
     BOOL(WINAPI*)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
   static GetLogicalProcessorInformationType pGetLogicalProcessorInformation =
-    reinterpret_cast<GetLogicalProcessorInformationType>(GetProcAddress(
+    reinterpret_cast<GetLogicalProcessorInformationType>((void*)GetProcAddress(
       GetModuleHandleW(L"kernel32"), "GetLogicalProcessorInformation"));
 
   if (!pGetLogicalProcessorInformation) {
@@ -5330,7 +5330,8 @@ bool SystemInformationImplementation::QueryOSInformation()
 
   this->OSName = "Windows";
 
-  OSVERSIONINFOEXW osvi = { sizeof(osvi) };
+  OSVERSIONINFOEXW osvi = {};
+  osvi.dwOSVersionInfoSize = sizeof(osvi);
 #  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #    pragma warning(push)
 #    ifdef __INTEL_COMPILER

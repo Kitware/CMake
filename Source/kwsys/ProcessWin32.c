@@ -1706,16 +1706,17 @@ DWORD kwsysProcessCreate(kwsysProcess* cp, int index,
   }
 
   /* Create inherited copies of the handles.  */
-  (error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdInput,
-                                         si->hStdInput, 1)) ||
-    (error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdOutput,
-                                           si->hStdOutput, 0)) ||
-    (error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdError,
-                                           si->hStdError, 0)) ||
-    /* Create the process.  */
-    (!CreateProcessW(0, cp->Commands[index], 0, 0, TRUE, creationFlags, 0, 0,
-                     &si->StartupInfo, &cp->ProcessInformation[index]) &&
-     (error = GetLastError()));
+  (void)((error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdInput,
+                                                si->hStdInput, 1)) ||
+         (error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdOutput,
+                                                si->hStdOutput, 0)) ||
+         (error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdError,
+                                                si->hStdError, 0)) ||
+         /* Create the process.  */
+         (!CreateProcessW(0, cp->Commands[index], 0, 0, TRUE, creationFlags, 0,
+                          0, &si->StartupInfo,
+                          &cp->ProcessInformation[index]) &&
+          (error = GetLastError())));
 
   /* Close the inherited copies of the handles. */
   if (si->StartupInfo.hStdInput != si->hStdInput) {
@@ -2354,7 +2355,7 @@ static int kwsysProcess_List__New_NT4(kwsysProcess_List* self)
   if (hNT) {
     /* Get pointers to the needed API functions.  */
     self->P_ZwQuerySystemInformation =
-      ((ZwQuerySystemInformationType)GetProcAddress(
+      ((ZwQuerySystemInformationType)(void*)GetProcAddress(
         hNT, "ZwQuerySystemInformation"));
   }
   if (!self->P_ZwQuerySystemInformation) {
@@ -2418,12 +2419,13 @@ static int kwsysProcess_List__Next_NT4(kwsysProcess_List* self)
 
 static int kwsysProcess_List__GetProcessId_NT4(kwsysProcess_List* self)
 {
-  return self->CurrentInfo ? self->CurrentInfo->ProcessId : -1;
+  return self->CurrentInfo ? (int)self->CurrentInfo->ProcessId : -1;
 }
 
 static int kwsysProcess_List__GetParentId_NT4(kwsysProcess_List* self)
 {
-  return self->CurrentInfo ? self->CurrentInfo->InheritedFromProcessId : -1;
+  return self->CurrentInfo ? (int)self->CurrentInfo->InheritedFromProcessId
+                           : -1;
 }
 
 static int kwsysProcess_List__New_Snapshot(kwsysProcess_List* self)
@@ -2435,12 +2437,12 @@ static int kwsysProcess_List__New_Snapshot(kwsysProcess_List* self)
   HMODULE hKernel = GetModuleHandleW(L"kernel32.dll");
   if (hKernel) {
     self->P_CreateToolhelp32Snapshot =
-      ((CreateToolhelp32SnapshotType)GetProcAddress(
+      ((CreateToolhelp32SnapshotType)(void*)GetProcAddress(
         hKernel, "CreateToolhelp32Snapshot"));
     self->P_Process32First =
-      ((Process32FirstType)GetProcAddress(hKernel, "Process32First"));
+      ((Process32FirstType)(void*)GetProcAddress(hKernel, "Process32First"));
     self->P_Process32Next =
-      ((Process32NextType)GetProcAddress(hKernel, "Process32Next"));
+      ((Process32NextType)(void*)GetProcAddress(hKernel, "Process32Next"));
   }
   return (self->P_CreateToolhelp32Snapshot && self->P_Process32First &&
           self->P_Process32Next)
@@ -2488,12 +2490,12 @@ static int kwsysProcess_List__Next_Snapshot(kwsysProcess_List* self)
 
 static int kwsysProcess_List__GetProcessId_Snapshot(kwsysProcess_List* self)
 {
-  return self->Snapshot ? self->CurrentEntry.th32ProcessID : -1;
+  return self->Snapshot ? (int)self->CurrentEntry.th32ProcessID : -1;
 }
 
 static int kwsysProcess_List__GetParentId_Snapshot(kwsysProcess_List* self)
 {
-  return self->Snapshot ? self->CurrentEntry.th32ParentProcessID : -1;
+  return self->Snapshot ? (int)self->CurrentEntry.th32ParentProcessID : -1;
 }
 
 static void kwsysProcessKill(DWORD pid)

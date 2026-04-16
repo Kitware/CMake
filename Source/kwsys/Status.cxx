@@ -46,7 +46,7 @@ std::string Status::GetString() const
 #ifdef _WIN32
     case Kind::Windows: {
       LPWSTR message = NULL;
-      DWORD size = FormatMessageW(
+      FormatMessageW(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
           FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL, this->Windows_, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
