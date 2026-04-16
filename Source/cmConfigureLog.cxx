@@ -120,7 +120,7 @@ cmsys::ofstream& cmConfigureLog::BeginLine()
 
 void cmConfigureLog::EndLine()
 {
-  this->Stream << std::endl;
+  this->Stream << '\n';
 }
 
 void cmConfigureLog::BeginArray()
