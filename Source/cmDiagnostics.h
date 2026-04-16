@@ -16,11 +16,14 @@
 // IWYU pragma: no_forward_declare cmDiagnostics::DiagnosticCategory
 
 // The list of diagnostic categories along with their associated data.
-// Each entry is of the form `SELECT(ACTION, <default>, <parent>, <name>)`.
+// Each entry is of the form:
+//    `SELECT(ACTION, <default>, <parent>, <name>, <preset-version>)`
 // Entries MUST appear in the order that a depth-first enumeration would
 // produce.
 //
-// When this changes, Help/manual/presets/schema.json must also be updated.
+// When changing this table, Utilities/Scripts/regenerate-presets.py must be
+// run to update the JSON schema for CMake presets. If the _TABLE macro name
+// changes, said script will also need to be updated with the new name.
 
 #define CM_FOR_EACH_DIAGNOSTIC_TABLE(ACTION, SELECT)                          \
   SELECT(ACTION, Warn, CMD_NONE, CMD_AUTHOR, 12)                              \
