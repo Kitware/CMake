@@ -786,13 +786,6 @@ public:
                                                   double percent_bin = 0.05);
 
   /**
-   * Create a symbolic link if the platform supports it.  Returns whether
-   * creation succeeded.
-   */
-  static Status CreateSymlink(std::string const& origName,
-                              std::string const& newName);
-
-  /**
    * Read the contents of a symbolic link.  Returns whether reading
    * succeeded.
    */
