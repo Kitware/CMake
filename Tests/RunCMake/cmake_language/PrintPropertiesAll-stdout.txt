@@ -1,0 +1,14 @@
+-- Printing properties\.\.\.
+ +All properties for TARGET mylib:
+.* +mylib.HEADER_DIRS = \"[^\"]*/Tests/RunCMake/cmake_language\"
+.* +mylib.HEADER_DIRS_HEADERS = \"[^\"]*/Tests/RunCMake/cmake_language\"
+.* +mylib.HEADER_SET = \"[^\"]*/Tests/RunCMake/cmake_language/nothing.h\"
+.* +mylib.HEADER_SETS = \"HEADERS\"
+.* +mylib.HEADER_SET_HEADERS = \"[^\"]*/Tests/RunCMake/cmake_language/nothing.h\"
+.* +mylib.IMPORTED = \"FALSE\"
+.* +mylib.INCLUDE_DIRECTORIES = \"\$\<BUILD_INTERFACE:[^\"]*/Tests/RunCMake/cmake_language\>\"
+.* +mylib.INTERFACE_HEADER_SETS = \"HEADERS\"
+.* +mylib.INTERFACE_INCLUDE_DIRECTORIES = \"\$\<BUILD_INTERFACE:[^\"]*/Tests/RunCMake/cmake_language\>\"
+.* +mylib.NAME = \"mylib\"
+.* +mylib.SOURCES = \"nothing.c\"
+.* +mylib.TYPE = \"STATIC_LIBRARY\"

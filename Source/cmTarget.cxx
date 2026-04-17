@@ -163,6 +163,11 @@ struct FileSetType
 
   void AddFileSet(std::string const& name, cm::FileSetMetadata::Visibility vis,
                   cmListFileBacktrace bt);
+
+  // We recompute this every time since some of the property
+  // names depend on names of the file sets
+  cmPropertyMap GetProperties(cmTarget const* tgt,
+                              cmTargetInternals const* impl) const;
 };
 
 struct UsageRequirementProperty
@@ -872,6 +877,43 @@ void FileSetType::AddFileSet(std::string const& name,
   if (cm::FileSetMetadata::VisibilityIsForInterface(vis)) {
     this->InterfaceEntries.Entries.emplace_back(name, std::move(bt));
   }
+}
+
+cmPropertyMap FileSetType::GetProperties(cmTarget const* tgt,
+                                         cmTargetInternals const* impl) const
+{
+  std::set<std::string> propNames{ std::string(this->DefaultDirectoryProperty),
+                                   std::string(this->DefaultPathProperty),
+                                   std::string(this->SelfEntries.PropertyName),
+                                   std::string(
+                                     this->InterfaceEntries.PropertyName) };
+
+  for (auto const& entry : this->SelfEntries.Entries) {
+    std::string directoryPropertyName =
+      cmStrCat(this->DirectoryPrefix, entry.Value);
+    std::string pathPropertyName = cmStrCat(this->PathPrefix, entry.Value);
+    propNames.emplace(directoryPropertyName);
+    propNames.emplace(pathPropertyName);
+  }
+
+  for (auto const& entry : this->InterfaceEntries.Entries) {
+    std::string directoryPropertyName =
+      cmStrCat(this->DirectoryPrefix, entry.Value);
+    std::string pathPropertyName = cmStrCat(this->PathPrefix, entry.Value);
+    propNames.emplace(directoryPropertyName);
+    propNames.emplace(pathPropertyName);
+  }
+
+  cmPropertyMap propertyMap;
+
+  for (std::string const& prop : propNames) {
+    auto value = this->ReadProperties(tgt, impl, prop);
+    if (value.first) {
+      propertyMap.SetProperty(prop, value.second);
+    }
+  }
+
+  return propertyMap;
 }
 
 template <typename ValueType>
@@ -2669,13 +2711,7 @@ void cmTarget::CheckProperty(std::string const& prop,
   }
 }
 
-cmValue cmTarget::GetComputedProperty(std::string const& prop,
-                                      cmMakefile& mf) const
-{
-  return cmTargetPropertyComputer::GetProperty(this, prop, mf);
-}
-
-cmValue cmTarget::GetProperty(std::string const& prop) const
+std::unordered_set<std::string> const& cmTarget::GetSpecialPropertyNames()
 {
   static std::unordered_set<std::string> const specialProps{
     propC_STANDARD,
@@ -2710,6 +2746,18 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
     propIMPORTED_CXX_MODULES_COMPILE_OPTIONS,
     propIMPORTED_CXX_MODULES_LINK_LIBRARIES,
   };
+  return specialProps;
+}
+
+cmValue cmTarget::GetComputedProperty(std::string const& prop,
+                                      cmMakefile& mf) const
+{
+  return cmTargetPropertyComputer::GetProperty(this, prop, mf);
+}
+
+cmValue cmTarget::GetProperty(std::string const& prop) const
+{
+  auto const& specialProps = cmTarget::GetSpecialPropertyNames();
   if (specialProps.count(prop)) {
     if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
         prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
@@ -2865,6 +2913,33 @@ bool cmTarget::GetPropertyAsBool(std::string const& prop) const
 cmPropertyMap const& cmTarget::GetDirectProperties() const
 {
   return this->impl->Properties;
+}
+
+cmPropertyMap cmTarget::GetExtendedProperties() const
+{
+  // Get properties in the base property map
+  cmPropertyMap pm = this->impl->Properties;
+
+  // Get special properties
+  auto const& specialProps = cmTarget::GetSpecialPropertyNames();
+  for (auto const& propName : specialProps) {
+    cmValue propValue = this->GetProperty(propName);
+    if (propValue) {
+      pm.SetProperty(propName, propValue);
+    }
+  }
+
+  // Get fileset properties
+  for (auto const& fileSetType : this->impl->FileSetTypes) {
+    cmPropertyMap fileSetProperties =
+      fileSetType.second.GetProperties(this, this->impl.get());
+    auto fileSetPropertiesList = fileSetProperties.GetList();
+    for (auto const& propPair : fileSetPropertiesList) {
+      pm.SetProperty(propPair.first, propPair.second);
+    }
+  }
+
+  return pm;
 }
 
 bool cmTarget::IsDLLPlatform() const

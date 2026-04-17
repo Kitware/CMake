@@ -4,9 +4,8 @@
 
 #include <string>
 
-#include "cmValue.h"
-
 class cmExecutionStatus;
+class cmValue;
 
 enum class cmGetTestPropertyResult
 {

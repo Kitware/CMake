@@ -1,0 +1,3 @@
+-- Printing properties\.\.\.
+ +All properties for TARGET mylib matching name '\^MY_MARKER\$':
+ +mylib\.MY_MARKER = "marker_value"

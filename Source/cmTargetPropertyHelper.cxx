@@ -2,8 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetPropertyHelper.h"
 
-#include <utility>
-
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"

@@ -1,0 +1,11 @@
+set(MY_CACHE_A "a_val" CACHE STRING "help A")
+set(MY_CACHE_B "b_val" CACHE PATH "help B")
+
+cmake_language(
+  PRINT_PROPERTIES
+  CACHE_ENTRIES MY_CACHE_A MY_CACHE_B
+  NAMED
+    TYPE
+    HELPSTRING
+    NOT_SET
+)

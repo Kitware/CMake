@@ -1,0 +1,7 @@
+-- Configuring done .*
+-- Printing properties\.\.\.
+ +All properties for TARGET mylib \(and all reachable\) matching name '\^MY_' and value 'alpha':
+ +mylib\.MY_PROP = "alpha-mylib"
+ +leaflib\.MY_PROP = "alpha-leaf"
+
+-- Generating done .*

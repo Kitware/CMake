@@ -9,6 +9,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -232,9 +233,15 @@ public:
   std::string const& GetSafeProperty(std::string const& prop) const;
   bool GetPropertyAsBool(std::string const& prop) const;
   void CheckProperty(std::string const& prop, cmMakefile* context) const;
+  static std::unordered_set<std::string> const& GetSpecialPropertyNames();
   cmValue GetComputedProperty(std::string const& prop, cmMakefile& mf) const;
   //! Get properties set directly on this target (no special/computed/chained)
   cmPropertyMap const& GetDirectProperties() const;
+  /**
+   * Get the properties in the property map plus
+   * special properties, fileset properties, etc.
+   */
+  cmPropertyMap GetExtendedProperties() const;
 
   //! Return whether or not the target is for a DLL platform.
   bool IsDLLPlatform() const;

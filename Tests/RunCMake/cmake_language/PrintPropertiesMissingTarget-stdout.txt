@@ -1,0 +1,12 @@
+-- Printing properties\.\.\.
+
+ +No such TARGET "does_not_exist" !
+
+
+-- Configuring done .*
+-- Printing properties\.\.\.
+
+ +No such TARGET "does_not_exist" !
+
+
+-- Generating done .*

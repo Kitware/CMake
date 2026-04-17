@@ -4,8 +4,6 @@
 
 #include <string>
 
-#include "cmValue.h"
-
 class cmMakefile;
 class cmTarget;
 class cmValue;

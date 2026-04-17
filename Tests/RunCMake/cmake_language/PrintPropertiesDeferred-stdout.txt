@@ -1,0 +1,6 @@
+-- Configuring done .*
+-- Printing properties\.\.\.
+ +Properties for TARGET mylib:
+ +mylib\.MY_PROP = "mylib_value"
+
+-- Generating done .*

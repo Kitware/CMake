@@ -5,9 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "cmValue.h"
-
 class cmExecutionStatus;
+class cmValue;
 
 enum class cmGetSourceFilePropertyResult
 {

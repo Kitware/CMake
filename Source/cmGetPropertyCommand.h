@@ -7,9 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "cmValue.h"
-
 class cmExecutionStatus;
+class cmValue;
 
 namespace GetPropertyCommand {
 
@@ -33,10 +32,18 @@ bool LookupSourceProperty(
   std::vector<std::string>& sourceFileDirectories,
   std::vector<std::string>& sourceFileTargetDirectories, cmValue& out);
 
+// Convenience overload: no DIRECTORY / TARGET_DIRECTORY scoping.
+bool LookupSourceProperty(cmExecutionStatus& status, std::string const& name,
+                          std::string const& propertyName, cmValue& out);
+
 bool LookupTestProperty(cmExecutionStatus& status, std::string const& name,
                         std::string const& propertyName,
                         bool testDirectoryOptionEnabled,
                         std::string& testDirectory, cmValue& out);
+
+// Convenience overload: no DIRECTORY scoping.
+bool LookupTestProperty(cmExecutionStatus& status, std::string const& name,
+                        std::string const& propertyName, cmValue& out);
 
 bool LookupCacheProperty(cmExecutionStatus& status, std::string const& name,
                          std::string const& propertyName, cmValue& out);

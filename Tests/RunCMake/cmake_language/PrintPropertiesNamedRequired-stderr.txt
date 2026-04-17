@@ -1,0 +1,3 @@
+^CMake Error at PrintPropertiesNamedRequired\.cmake:[0-9]+ \(cmake_language\):
+  cmake_language NAMED keyword missing in cmake_language\(PRINT_PROPERTIES\)
+  call with SOURCES scope\.

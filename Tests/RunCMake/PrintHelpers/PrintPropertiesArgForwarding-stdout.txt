@@ -1,0 +1,20 @@
+.*--.*
+ +Properties for TARGET mylib:
+ +mylib\.TYPE = "STATIC_LIBRARY"
+ +mylib\.NAME = "mylib"
+
+--.*
+ +Printing all properties for TARGET mylib matching name '\^MY_PROP_' and value '\^alpha\$':
+ +mylib\.MY_PROP_X = "alpha"
+
+-- Configuring done .*
+--.*
+ +Printing all properties for TARGET mylib \(and all reachable\) matching name '\^MY_PROP_' and value '\^alpha\$':
+ +mylib\.MY_PROP_X = "alpha"
+ +mydep\.MY_PROP_X = "alpha"
+
+--.*
+ +Properties for TARGET mylib:
+ +mylib\.TYPE = "STATIC_LIBRARY"
+
+-- Generating done .*

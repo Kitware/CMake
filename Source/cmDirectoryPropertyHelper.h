@@ -4,9 +4,8 @@
 
 #include <string>
 
-#include "cmValue.h"
-
 class cmMakefile;
+class cmValue;
 
 enum class cmGetDirectoryPropertyResult
 {

@@ -2,11 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGetPropertyCommand.h"
 
-#include <cstddef>
-
-#include <cm/string_view>
-#include <cmext/string_view>
-
 #include "cmDirectoryPropertyHelper.h"
 #include "cmExecutionStatus.h"
 #include "cmFileSet.h"
@@ -510,6 +505,17 @@ bool LookupSourceProperty(
   return false;
 }
 
+bool LookupSourceProperty(cmExecutionStatus& status, std::string const& name,
+                          std::string const& propertyName, cmValue& out)
+{
+  std::vector<std::string> noDirectories;
+  std::vector<std::string> noTargetDirectories;
+  return LookupSourceProperty(status, name, propertyName,
+                              /*sourceFileDirectoryOptionEnabled=*/false,
+                              /*sourceFileTargetOptionEnabled=*/false,
+                              noDirectories, noTargetDirectories, out);
+}
+
 bool LookupTestProperty(cmExecutionStatus& status, std::string const& name,
                         std::string const& propertyName,
                         bool testDirectoryOptionEnabled,
@@ -530,6 +536,15 @@ bool LookupTestProperty(cmExecutionStatus& status, std::string const& name,
     status.SetError(cmStrCat("given TEST name that does not exist: ", name));
   }
   return false;
+}
+
+bool LookupTestProperty(cmExecutionStatus& status, std::string const& name,
+                        std::string const& propertyName, cmValue& out)
+{
+  std::string noDirectory;
+  return LookupTestProperty(status, name, propertyName,
+                            /*testDirectoryOptionEnabled=*/false, noDirectory,
+                            out);
 }
 
 bool LookupCacheProperty(cmExecutionStatus& status, std::string const& name,
