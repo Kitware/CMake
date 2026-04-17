@@ -21,6 +21,10 @@ This module provides the following commands:
 
 .. command:: cmake_print_properties
 
+  .. deprecated:: 4.5
+
+    Use :command:`cmake_language(PRINT_PROPERTIES)` instead.
+
   Prints the values of properties for the specified targets, source files,
   directories, tests, or cache entries:
 
@@ -111,6 +115,23 @@ endfunction()
 
 
 function(cmake_print_properties)
+  message(DEPRECATION
+    "cmake_print_properties() is deprecated. Use cmake_language(PRINT_PROPERTIES) instead.")
+
+  set(_cppmode_reserved_keywords
+    ALL NAMED PROPERTY_NAME_REGEX PROPERTY_VALUE_REGEX
+    DEFERRED FOLLOW_DEPENDENCIES __CMAKE_PRINT_PROPERTIES)
+  foreach(_arg IN LISTS ARGV)
+    if(_arg IN_LIST _cppmode_reserved_keywords)
+      message(FATAL_ERROR
+        "cmake_print_properties() got \"${_arg}\", which is a reserved "
+        "keyword in cmake_language(PRINT_PROPERTIES).  If you wish to use "
+        "it as a keyword to the command, use cmake_language(PRINT_PROPERTIES) "
+        "directly.")
+      return()
+    endif()
+  endforeach()
+
   set(options )
   set(oneValueArgs )
   set(cpp_multiValueArgs PROPERTIES )
@@ -146,39 +167,30 @@ function(cmake_print_properties)
 
   set(mode)
   set(items)
-  set(keyword)
 
   if(CPPMODE_TARGETS)
     set(items ${CPPMODE_TARGETS})
     set(mode ${mode} TARGETS)
-    set(keyword TARGET)
   endif()
 
   if(CPPMODE_SOURCES)
     set(items ${CPPMODE_SOURCES})
     set(mode ${mode} SOURCES)
-    set(keyword SOURCE)
   endif()
 
   if(CPPMODE_TESTS)
     set(items ${CPPMODE_TESTS})
     set(mode ${mode} TESTS)
-    set(keyword TEST)
   endif()
 
   if(CPPMODE_DIRECTORIES)
     set(items ${CPPMODE_DIRECTORIES})
     set(mode ${mode} DIRECTORIES)
-    set(keyword DIRECTORY)
   endif()
 
   if(CPPMODE_CACHE_ENTRIES)
     set(items ${CPPMODE_CACHE_ENTRIES})
     set(mode ${mode} CACHE_ENTRIES)
-    # This is a workaround for the fact that passing `CACHE` as an argument to
-    # set() causes a cache variable to be set.
-    set(keyword "")
-    string(APPEND keyword CACHE)
   endif()
 
   if(NOT mode)
@@ -193,33 +205,6 @@ function(cmake_print_properties)
     return()
   endif()
 
-  set(msg "\n")
-  foreach(item ${items})
-
-    set(itemExists TRUE)
-    if(keyword STREQUAL "TARGET")
-      if(NOT TARGET ${item})
-        set(itemExists FALSE)
-        string(APPEND msg "\n No such TARGET \"${item}\" !\n\n")
-      endif()
-    endif()
-
-    if (itemExists)
-      string(APPEND msg " Properties for ${keyword} ${item}:\n")
-      foreach(prop ${CPP_PROPERTIES})
-
-        get_property(propertySet ${keyword} ${item} PROPERTY "${prop}" SET)
-
-        if(propertySet)
-          get_property(property ${keyword} ${item} PROPERTY "${prop}")
-          string(APPEND msg "   ${item}.${prop} = \"${property}\"\n")
-        else()
-          string(APPEND msg "   ${item}.${prop} = <NOTFOUND>\n")
-        endif()
-      endforeach()
-    endif()
-
-  endforeach()
-  message(STATUS "${msg}")
-
+  cmake_language(PRINT_PROPERTIES ${mode} ${items} NAMED ${CPP_PROPERTIES}
+                 __CMAKE_PRINT_PROPERTIES)
 endfunction()
