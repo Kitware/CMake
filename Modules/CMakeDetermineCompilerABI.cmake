@@ -86,6 +86,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
                   # Ignore unused flags when we are just determining the ABI.
                   "--no-warn-unused-cli"
       COMPILE_DEFINITIONS ${COMPILE_DEFINITIONS}
+      NO_CACHE
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
       COPY_FILE_ERROR _copy_error
@@ -97,9 +98,6 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     set(ENV{LC_MESSAGES} ${_orig_lc_messages})
     set(ENV{LANG}        ${_orig_lang})
 
-    # Move result from cache to normal variable.
-    set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED})
-    unset(CMAKE_${lang}_ABI_COMPILED CACHE)
     if(CMAKE_${lang}_ABI_COMPILED AND _copy_error)
       set(CMAKE_${lang}_ABI_COMPILED 0)
     endif()
