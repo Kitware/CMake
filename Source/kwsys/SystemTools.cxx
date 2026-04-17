@@ -3166,44 +3166,6 @@ bool SystemTools::FileIsFIFO(std::string const& name)
 #endif
 }
 
-Status SystemTools::CreateSymlink(std::string const& origName,
-                                  std::string const& newName)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  DWORD flags;
-  if (FileIsDirectory(origName)) {
-    flags = SYMBOLIC_LINK_FLAG_DIRECTORY;
-  } else {
-    flags = 0;
-  }
-
-  std::wstring origPath = Encoding::ToWindowsExtendedPath(origName);
-  std::wstring newPath = Encoding::ToWindowsExtendedPath(newName);
-
-  Status status;
-  if (!CreateSymbolicLinkW(newPath.c_str(), origPath.c_str(),
-                           flags |
-                             SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE)) {
-    status = Status::Windows_GetLastError();
-  }
-  // Older Windows versions do not understand
-  // SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE
-  if (status.GetWindows() == ERROR_INVALID_PARAMETER) {
-    status = Status::Success();
-    if (!CreateSymbolicLinkW(newPath.c_str(), origPath.c_str(), flags)) {
-      status = Status::Windows_GetLastError();
-    }
-  }
-
-  return status;
-#else
-  if (symlink(origName.c_str(), newName.c_str()) < 0) {
-    return Status::POSIX_errno();
-  }
-  return Status::Success();
-#endif
-}
-
 Status SystemTools::ReadSymlink(std::string const& newName,
                                 std::string& origName)
 {

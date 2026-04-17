@@ -445,29 +445,6 @@ static bool CheckFileOperations()
     res = false;
   }
 
-  std::string const testBadSymlink(testNewDir + "/badSymlink.txt");
-  std::string const testBadSymlinkTgt(testNewDir + "/missing/symlinkTgt.txt");
-  kwsys::Status const symlinkStatus =
-    kwsys::SystemTools::CreateSymlink(testBadSymlinkTgt, testBadSymlink);
-#if defined(_WIN32)
-  // Under Windows, the user may not have enough privileges to create symlinks
-  if (symlinkStatus.GetWindows() != ERROR_PRIVILEGE_NOT_HELD)
-#endif
-  {
-    if (!symlinkStatus.IsSuccess()) {
-      std::cerr << "CreateSymlink for: " << testBadSymlink << " -> "
-                << testBadSymlinkTgt
-                << " failed: " << symlinkStatus.GetString() << std::endl;
-      res = false;
-    }
-
-    if (!kwsys::SystemTools::Touch(testBadSymlink, false)) {
-      std::cerr << "Problem with Touch (no create) for: " << testBadSymlink
-                << std::endl;
-      res = false;
-    }
-  }
-
   if (!kwsys::SystemTools::Touch(testNewDir, false)) {
     std::cerr << "Problem with Touch (no create) for: " << testNewDir
               << std::endl;
