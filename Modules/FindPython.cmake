@@ -182,6 +182,13 @@ This module defines the following variables
     * Canopy
     * IronPython
     * PyPy
+
+``Python3_FREE_THREADED``
+  .. versionadded:: 4.4
+
+  Boolean value, which is ``true`` if the python is free threaded (i.e.
+  config var ``Py_GIL_DISABLED`` has value ``1``), ``false`` otherwise.
+
 ``Python_STDLIB``
   Standard platform independent installation directory.
 
@@ -215,8 +222,8 @@ This module defines the following variables
 
   Information computed from ``importlib.machinery.EXTENSION_SUFFIXES`` if the
   COMPONENT ``Interpreter`` was specified. Otherwise, the extension is ``abi3``
-  except for ``Windows``, ``MSYS`` and ``CYGWIN`` for which this is an empty
-  string.
+  or ``abi3t`` except for ``Windows``, ``MSYS`` and ``CYGWIN`` for which this
+  is an empty string.
 
 ``Python_Compiler_FOUND``
   Boolean indicating whether system has the Python compiler.
@@ -650,6 +657,12 @@ If the library type is not specified, ``MODULE`` is assumed.
   version should be, at least, ``3.2`` which is the version where the
   `Stable Application Binary Interface <https://docs.python.org/3/c-api/stable.html>`_
   was introduced. Specifying only major version ``3`` is equivalent to ``3.2``.
+
+.. versionchanged:: 4.4
+  When ``USE_SABI`` is specified, if ``Python3_FREE_THREADED`` is ``true`` and
+  Python version is ``3.15`` or upper, ``Py_TARGET_ABI3T`` preprocessor
+  definition will be defined rather than ``Py_LIMITED_API`` (see :pep:`803` for
+  more details).
 
   When option ``WITH_SOABI`` is also specified,  the module suffix will include
   the ``Python_SOSABI`` value, if any.

@@ -238,20 +238,30 @@ function (_PYTHON_GET_REGISTRIES _PYTHON_PGR_REGISTRY_PATHS)
 
   foreach (implementation IN LISTS _PGR_IMPLEMENTATIONS)
     if (implementation STREQUAL "CPython")
+      set (abi "${_${_PYTHON_PREFIX}_ABIFLAGS}")
+      list (TRANSFORM abi REPLACE "^<none>$" "")
       foreach (version IN LISTS _PGR_VERSION)
         string (REPLACE "." "" version_no_dots ${version})
-        list (TRANSFORM _${_PYTHON_PREFIX}_ARCH REPLACE "^(.+)$" "[HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}-\\1/InstallPath]" OUTPUT_VARIABLE reg_paths)
-        list (APPEND registries ${reg_paths})
-        if (version VERSION_GREATER_EQUAL "3.5")
-          # cmake_host_system_information is not usable in bootstrap
-          get_filename_component (arch "[HKEY_CURRENT_USER\\Software\\Python\\PythonCore\\${version};SysArchitecture]" NAME)
-          string (REPLACE "bit" "" arch "${arch}")
-          if (arch IN_LIST _${_PYTHON_PREFIX}_ARCH)
-            list (APPEND registries [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}/InstallPath])
-          endif()
+        if (abi)
+          set (abiversions "${abi}")
+          list (TRANSFORM abiversions PREPEND "${version}")
         else()
-          list (APPEND registries [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}/InstallPath])
+          set (abiversions "${version}")
         endif()
+        foreach (abiversion IN LISTS abiversions)
+          list (TRANSFORM _${_PYTHON_PREFIX}_ARCH REPLACE "^(.+)$" "[HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${abiversion}-\\1/InstallPath]" OUTPUT_VARIABLE reg_paths)
+          list (APPEND registries ${reg_paths})
+          if (version VERSION_GREATER_EQUAL "3.5")
+            # cmake_host_system_information is not usable in bootstrap
+            get_filename_component (arch "[HKEY_CURRENT_USER\\Software\\Python\\PythonCore\\${abiversion};SysArchitecture]" NAME)
+            string (REPLACE "bit" "" arch "${arch}")
+            if (arch IN_LIST _${_PYTHON_PREFIX}_ARCH)
+              list (APPEND registries [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${abiversion}/InstallPath])
+            endif()
+          else()
+            list (APPEND registries [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${abiversion}/InstallPath])
+          endif()
+        endforeach()
         list (TRANSFORM _${_PYTHON_PREFIX}_ARCH REPLACE "^(.+)$" "[HKEY_CURRENT_USER/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-\\1/InstallPath]" OUTPUT_VARIABLE reg_paths)
         list (APPEND registries ${reg_paths})
         list (TRANSFORM _${_PYTHON_PREFIX}_ARCH REPLACE "^(.+)$" "[HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}-\\1/InstallPath]" OUTPUT_VARIABLE reg_paths)
@@ -549,7 +559,11 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME MATCHES "MSYS|CYGWIN")
       set (_values "")
     else()
-      set (_values "abi${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}")
+      if (${_PYTHON_PREFIX}_FREE_THREADED)
+        set (_values "abi${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}t")
+      else()
+        set (_values "abi${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}")
+      endif()
     endif()
   elseif (_${_PYTHON_PREFIX}_CONFIG)
     if (NAME STREQUAL "SOABI")
@@ -579,9 +593,6 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
           string (REGEX REPLACE "^([.-]|_d\\.)(.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\2" _values "${_values}")
         endif()
       endif()
-    endif()
-    if (NAME STREQUAL "ABIFLAGS" AND NOT _values)
-      set (_values "<none>")
     endif()
   endif()
 
@@ -773,10 +784,11 @@ except Exception:
       if (_result)
         unset (_values)
       endif()
-      if (NAME STREQUAL "ABIFLAGS" AND NOT _values)
-        set (_values "<none>")
-      endif()
     endif()
+  endif()
+
+  if (NAME STREQUAL "ABIFLAGS" AND NOT _values)
+    set (_values "<none>")
   endif()
 
   if (NAME STREQUAL "ABIFLAGS" OR NAME STREQUAL "SOABI" OR NAME STREQUAL "SOSABI" OR NAME STREQUAL "POSTFIX")
@@ -1667,17 +1679,20 @@ else()
       message (AUTHOR_WARNING "Find${_PYTHON_PREFIX}: ${${_PYTHON_PREFIX}_FIND_ABI}: invalid value for '${_PYTHON_PREFIX}_FIND_ABI'. Ignore it")
       unset (_${_PYTHON_PREFIX}_FIND_ABI)
     endif()
-    _python_get_abiflags ("${${_PYTHON_PREFIX}_FIND_ABI}" _${_PYTHON_PREFIX}_ABIFLAGS)
-  else()
+  endif()
+  if (NOT DEFINED _${_PYTHON_PREFIX}_FIND_ABI)
+    # set defaults
     if (WIN32)
-      _python_get_abiflags ("OFF;OFF;OFF;OFF" _${_PYTHON_PREFIX}_ABIFLAGS)
+      set (_${_PYTHON_PREFIX}_FIND_ABI "OFF;OFF;OFF;OFF")
     else()
-      _python_get_abiflags ("ANY;ANY;ANY;OFF" _${_PYTHON_PREFIX}_ABIFLAGS)
+      set (_${_PYTHON_PREFIX}_FIND_ABI "ANY;ANY;ANY;OFF")
     endif()
   endif()
+  _python_get_abiflags ("${_${_PYTHON_PREFIX}_FIND_ABI}" _${_PYTHON_PREFIX}_ABIFLAGS)
 endif()
 unset (${_PYTHON_PREFIX}_SOABI)
 unset (${_PYTHON_PREFIX}_SOSABI)
+unset (${_PYTHON_PREFIX}_FREE_THREADED)
 
 # Windows CPython implementation may be requiring a postfix in debug mode
 unset (${_PYTHON_PREFIX}_DEBUG_POSTFIX)
@@ -2536,6 +2551,13 @@ else:
           unset (${_PYTHON_PREFIX}_SITEARCH)
         endif()
 
+        # Identify if the python interpreter is free threaded or not
+        if (_${_PYTHON_PREFIX}_ABIFLAGS MATCHES "t")
+          set (${_PYTHON_PREFIX}_FREE_THREADED ON)
+        else()
+          set (${_PYTHON_PREFIX}_FREE_THREADED OFF)
+        endif()
+
         _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
         _python_get_config_var (${_PYTHON_PREFIX}_SOSABI SOSABI)
 
@@ -3134,7 +3156,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
                            OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
                            ERROR_QUIET
                            OUTPUT_STRIP_TRAILING_WHITESPACE)
-          if (_${_PYTHON_PREFIX}_RESULT OR NOT __${_PYTHON_PREFIX}_ABIFLAGS )
+          if (_${_PYTHON_PREFIX}_RESULT OR NOT __${_PYTHON_PREFIX}_ABIFLAGS)
             # assume ABI is not supported or not used
             set (__${_PYTHON_PREFIX}_ABIFLAGS "<none>")
           endif()
@@ -3261,7 +3283,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
                            OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
                            ERROR_QUIET
                            OUTPUT_STRIP_TRAILING_WHITESPACE)
-          if (_${_PYTHON_PREFIX}_RESULT)
+          if (_${_PYTHON_PREFIX}_RESULT OR NOT __${_PYTHON_PREFIX}_ABIFLAGS)
             # assume ABI is not supported
             set (__${_PYTHON_PREFIX}_ABIFLAGS "<none>")
           endif()
@@ -3497,6 +3519,14 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
         set (_${_PYTHON_PREFIX}_VERSION_MAJOR ${${_PYTHON_PREFIX}_VERSION_MAJOR})
         set (_${_PYTHON_PREFIX}_VERSION_MINOR ${${_PYTHON_PREFIX}_VERSION_MINOR})
         set (_${_PYTHON_PREFIX}_VERSION_PATCH ${${_PYTHON_PREFIX}_VERSION_PATCH})
+      endif()
+    endif()
+
+    if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND NOT DEFINED ${_PYTHON_PREFIX}_FREE_THREADED)
+      if (_${_PYTHON_PREFIX}_ABI MATCHES "t")
+        set (${_PYTHON_PREFIX}_FREE_THREADED ON)
+      else()
+        set (${_PYTHON_PREFIX}_FREE_THREADED OFF)
       endif()
     endif()
 
@@ -3763,6 +3793,14 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
       _python_get_version (SABI_LIBRARY PREFIX _${_PYTHON_PREFIX}_)
     endif()
 
+    if (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE AND NOT DEFINED ${_PYTHON_PREFIX}_FREE_THREADED)
+      if (_${_PYTHON_PREFIX}_ABI MATCHES "t")
+        set (${_PYTHON_PREFIX}_FREE_THREADED ON)
+      else()
+        set (${_PYTHON_PREFIX}_FREE_THREADED OFF)
+      endif()
+    endif()
+
     set (${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}")
 
     if (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE AND NOT EXISTS "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}")
@@ -3979,6 +4017,14 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
         set (_${_PYTHON_PREFIX}_VERSION_MINOR ${_${_PYTHON_PREFIX}_INC_VERSION_MINOR})
         set (_${_PYTHON_PREFIX}_VERSION_PATCH ${_${_PYTHON_PREFIX}_INC_VERSION_PATCH})
       endif()
+
+      if (NOT DEFINED ${_PYTHON_PREFIX}_FREE_THREADED)
+        if (_${_PYTHON_PREFIX}_INC_ABI MATCHES "t")
+          set (${_PYTHON_PREFIX}_FREE_THREADED ON)
+        else()
+          set (${_PYTHON_PREFIX}_FREE_THREADED OFF)
+        endif()
+      endif()
     endif()
   endif()
 
@@ -4018,14 +4064,6 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
                                 _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
                                 _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
     endif()
-
-    if (WIN32 AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "t${CMAKE_IMPORT_LIBRARY_SUFFIX}$")
-      # On windows, header file is shared between the different implementations
-      # So Py_GIL_DISABLED should be set explicitly
-      set (${_PYTHON_PREFIX}_DEFINITIONS Py_GIL_DISABLED=1)
-    else()
-      unset (${_PYTHON_PREFIX}_DEFINITIONS)
-    endif()
   endif()
 
   if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
@@ -4055,14 +4093,14 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
                                 _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE
                                 _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG)
     endif()
+  endif()
 
-    if (WIN32 AND _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE MATCHES "t${CMAKE_IMPORT_LIBRARY_SUFFIX}$")
-      # On windows, header file is shared between the different implementations
-      # So Py_GIL_DISABLED should be set explicitly
-      set (${_PYTHON_PREFIX}_DEFINITIONS Py_GIL_DISABLED=1)
-    else()
-      unset (${_PYTHON_PREFIX}_DEFINITIONS)
-    endif()
+  if (WIN32 AND ${_PYTHON_PREFIX}_FREE_THREADED)
+    # On windows, header file is shared between the different implementations
+    # So Py_GIL_DISABLED should be set explicitly
+    set (${_PYTHON_PREFIX}_DEFINITIONS Py_GIL_DISABLED=1)
+  else()
+    unset (${_PYTHON_PREFIX}_DEFINITIONS)
   endif()
 
   if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE OR _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE OR _${_PYTHON_PREFIX}_INCLUDE_DIR)
@@ -4081,13 +4119,20 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
       _python_set_development_module_found (Embed)
     endif()
     if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI)
-      if ((_${_PYTHON_PREFIX}_LIBRARY_RELEASE OR _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+      if (((("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS
+              OR "LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_EMBED_ARTIFACTS)
+            AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+          OR ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS
+            AND _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE))
           AND NOT _${_PYTHON_PREFIX}_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
         set (${_PYTHON_PREFIX}_Development.Module_FOUND FALSE)
         set (${_PYTHON_PREFIX}_Development.SABIModule_FOUND FALSE)
         set (${_PYTHON_PREFIX}_Development.Embed_FOUND FALSE)
       endif()
-      if (_${_PYTHON_PREFIX}_INCLUDE_DIR AND
+      if ((("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS
+              OR "INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS
+              OR "INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_EMBED_ARTIFACTS)
+            AND _${_PYTHON_PREFIX}_INCLUDE_DIR) AND
           NOT WIN32 AND NOT _${_PYTHON_PREFIX}_INC_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
         set (${_PYTHON_PREFIX}_Development.Module_FOUND FALSE)
         set (${_PYTHON_PREFIX}_Development.SABIModule_FOUND FALSE)
@@ -4586,7 +4631,12 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
 
       if (type STREQUAL "MODULE_LIBRARY")
         if (PYTHON_ADD_LIBRARY_USE_SABI)
-          target_compile_definitions (${name} PRIVATE Py_LIMITED_API=${Py_LIMITED_API})
+          if (${prefix}_FREE_THREADED AND
+              "${major_version}.${minor_version}" VERSION_GREATER_EQUAL "3.15")
+            target_compile_definitions (${name} PRIVATE Py_TARGET_ABI3T=${Py_LIMITED_API})
+          else()
+            target_compile_definitions (${name} PRIVATE Py_LIMITED_API=${Py_LIMITED_API})
+          endif()
           target_link_libraries (${name} PRIVATE ${prefix}::SABIModule)
         else()
           target_link_libraries (${name} PRIVATE ${prefix}::Module)
