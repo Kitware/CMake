@@ -40,14 +40,6 @@
 #include "cmCMakePresetsGraph.h"
 #include "cmCommandLineArgument.h"
 #include "cmCommands.h"
-#ifdef CMake_ENABLE_DEBUGGER
-#  include "cmDebuggerAdapter.h"
-#  ifdef _WIN32
-#    include "cmDebuggerWindowsPipeConnection.h"
-#  else //!_WIN32
-#    include "cmDebuggerPosixPipeConnection.h"
-#  endif //_WIN32
-#endif
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmDuration.h"
@@ -57,18 +49,12 @@
 #include "cmGlobCacheEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
+#include "cmJSONState.h"
 #include "cmLinkLineComputer.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#if !defined(CMAKE_BOOTSTRAP)
-#  include "cmMakefileProfilingData.h"
-#endif
-#include "cmJSONState.h"
-#include "cmList.h"
 #include "cmMessenger.h"
-#ifndef CMAKE_BOOTSTRAP
-#  include "cmSarifLog.h"
-#endif
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
@@ -79,6 +65,15 @@
 #include "cmUtils.hxx"
 #include "cmVersionConfig.h"
 #include "cmWorkingDirectory.h"
+
+#ifdef CMake_ENABLE_DEBUGGER
+#  include "cmDebuggerAdapter.h"
+#  ifdef _WIN32
+#    include "cmDebuggerWindowsPipeConnection.h"
+#  else //!_WIN32
+#    include "cmDebuggerPosixPipeConnection.h"
+#  endif //_WIN32
+#endif
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <unordered_map>
@@ -92,6 +87,8 @@
 #  include "cmGraphVizWriter.h"
 #  include "cmInstrumentation.h"
 #  include "cmInstrumentationQuery.h"
+#  include "cmMakefileProfilingData.h"
+#  include "cmSarifLog.h"
 #  include "cmVariableWatch.h"
 #endif
 
