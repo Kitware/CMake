@@ -100,11 +100,7 @@ std::string const& cmInstallCommandArguments::GetComponent() const
   if (this->GenericArguments) {
     return this->GenericArguments->GetComponent();
   }
-  if (!this->DefaultComponentName.empty()) {
-    return this->DefaultComponentName;
-  }
-  static std::string unspecifiedComponent = "Unspecified";
-  return unspecifiedComponent;
+  return this->DefaultComponentName;
 }
 
 std::string const& cmInstallCommandArguments::GetNamelinkComponent() const
