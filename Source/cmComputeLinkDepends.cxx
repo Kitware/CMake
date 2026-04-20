@@ -18,6 +18,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmComputeComponentGraph.h"
+#include "cmDiagnostics.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -362,8 +363,8 @@ public:
         if (!makefile->GetCMakeInstance()->GetIsInTryCompile() &&
             makefile->PolicyOptionalWarningEnabled(
               "CMAKE_POLICY_WARNING_CMP0156")) {
-          makefile->GetCMakeInstance()->IssueMessage(
-            MessageType::AUTHOR_WARNING,
+          makefile->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
             cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0156),
                      "\nSince the policy is not set, legacy libraries "
                      "de-duplication strategy will be applied."),
@@ -379,8 +380,8 @@ public:
             !makefile->GetCMakeInstance()->GetIsInTryCompile() &&
             makefile->PolicyOptionalWarningEnabled(
               "CMAKE_POLICY_WARNING_CMP0179")) {
-          makefile->GetCMakeInstance()->IssueMessage(
-            MessageType::AUTHOR_WARNING,
+          makefile->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
             cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0179),
                      "\nSince the policy is not set, static libraries "
                      "de-duplication will keep the last occurrence of the "
@@ -1037,8 +1038,8 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
       if (depender.Target && depender.Target->IsImported() &&
           !IsFeatureSupported(this->Makefile, this->LinkLanguage,
                               item.Feature)) {
-        this->CMakeInstance->IssueMessage(
-          MessageType::AUTHOR_ERROR,
+        this->CMakeInstance->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
                    "' uses the generator-expression '$<LINK_LIBRARY>' with "
                    "the feature '",
@@ -1088,8 +1089,8 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
       if (depender.Target && depender.Target->IsImported() &&
           !IsGroupFeatureSupported(this->Makefile, this->LinkLanguage,
                                    groupFeature)) {
-        this->CMakeInstance->IssueMessage(
-          MessageType::AUTHOR_ERROR,
+        this->CMakeInstance->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
                    "' uses the generator-expression '$<LINK_GROUP>' with "
                    "the feature '",
@@ -1117,8 +1118,8 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
            cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
       supportedItem = false;
       auto const& groupFeature = this->EntryList[group->first].Feature;
-      this->CMakeInstance->IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      this->CMakeInstance->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmStrCat(
           "The feature '", groupFeature,
           "', specified as part of a generator-expression "
@@ -1137,8 +1138,8 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
       if (featureAttributes.LibraryTypes.find(entry.Target->GetType()) ==
           featureAttributes.LibraryTypes.end()) {
         supportedItem = false;
-        this->CMakeInstance->IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        this->CMakeInstance->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat("The feature '", itemFeature,
                    "', specified as part of a generator-expression "
                    "'$<LINK_LIBRARY:",

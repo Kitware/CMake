@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMarkAsAdvancedCommand.h"
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -68,7 +68,7 @@ bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
         "is no longer created when policy CMP0102 is set to NEW. Run \"cmake "
         "--help-policy CMP0102\" for policy details. Use the cmake_policy "
         "command to set the policy and suppress this warning.");
-      mf.IssueMessage(MessageType::AUTHOR_WARNING, err);
+      mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err);
     }
 
     // If it's not in the cache and we're using the new behavior, nothing to

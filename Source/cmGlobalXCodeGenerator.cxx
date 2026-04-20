@@ -26,6 +26,7 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
+#include "cmDiagnostics.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
@@ -2715,8 +2716,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         case cmSwiftCompileMode::Singlefile:
           break;
         case cmSwiftCompileMode::Unknown:
-          this->CurrentLocalGenerator->IssueMessage(
-            MessageType::AUTHOR_WARNING,
+          this->CurrentLocalGenerator->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
             cmStrCat("Unknown Swift_COMPILATION_MODE on target '",
                      gtgt->GetName(), '\''));
           break;

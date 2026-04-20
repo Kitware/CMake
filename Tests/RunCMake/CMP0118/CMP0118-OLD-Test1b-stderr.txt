@@ -1,4 +1,4 @@
-^CMake Deprecation Warning at CMP0118-OLD-Test1b\.cmake:[0-9]+ \(cmake_policy\):
+^CMake Warning \(deprecated\) at CMP0118-OLD-Test1b\.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0118 will be removed from a future version
   of CMake\.
 

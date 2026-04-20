@@ -26,6 +26,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmDiagnostics.h"
 #include "cmDyndepCollation.h"
 #include "cmFileSetMetadata.h"
 #include "cmGeneratedFileStream.h"
@@ -1131,8 +1132,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
           if (independentFiles.IsOn() &&
               dependencyMode != DependencyMode::IndependentFiles) {
             // requested dependency mode not supported
-            this->GetMakefile()->IssueMessage(
-              MessageType::AUTHOR_WARNING,
+            this->GetMakefile()->IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
               cmStrCat(R"(the "INDEPENDENT_FILES" property of the file set ")",
                        fileset->GetName(), R"(" of the target ")",
                        this->GeneratorTarget->GetName(),

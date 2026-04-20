@@ -8,6 +8,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmDiagnostics.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -251,7 +252,7 @@ std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
         "undefined behavior will be used."
         ;
       /* clang-format on */
-      lg->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+      lg->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
     }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:

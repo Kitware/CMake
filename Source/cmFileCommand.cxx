@@ -33,6 +33,7 @@
 #include "cmArgumentParserTypes.h"
 #include "cmCMakePath.h"
 #include "cmCryptoHash.h"
+#include "cmDiagnostics.h"
 #include "cmELF.h"
 #include "cmExecutionStatus.h"
 #include "cmFSPermissions.h"
@@ -415,8 +416,8 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
         case cmPolicies::WARN:
           if (status.GetMakefile().PolicyOptionalWarningEnabled(
                 "CMAKE_POLICY_WARNING_CMP0159")) {
-            status.GetMakefile().IssueMessage(
-              MessageType::AUTHOR_WARNING,
+            status.GetMakefile().IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
               cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0159),
                        "\n"
                        "For compatibility, CMake is leaving CMAKE_MATCH_<n> "
@@ -732,8 +733,8 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
     } else if (*i == "CONFIGURE_DEPENDS") {
       // Generated build system depends on glob results
       if (!configureDepends && warnConfigureLate) {
-        status.GetMakefile().IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        status.GetMakefile().IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           "CONFIGURE_DEPENDS flag was given after a glob expression was "
           "already evaluated.");
       }
@@ -769,8 +770,8 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
         bool shouldExit = false;
         for (cmsys::Glob::Message const& globMessage : globMessages) {
           if (globMessage.type == cmsys::Glob::cyclicRecursion) {
-            status.GetMakefile().IssueMessage(
-              MessageType::AUTHOR_WARNING,
+            status.GetMakefile().IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
               cmStrCat("Cyclic recursion detected while globbing for '", *i,
                        "':\n", globMessage.content));
           } else if (globMessage.type == cmsys::Glob::error) {
@@ -1375,8 +1376,8 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     if (warnAbout152) {
       computeNewPath(input, realPath);
       if (oldPolicyPath != realPath) {
-        status.GetMakefile().IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        status.GetMakefile().IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0152),
                    "\n"
                    "From input path:\n  ",
@@ -1392,8 +1393,8 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
   }
 
   if (!cmSystemTools::FileExists(realPath)) {
-    status.GetMakefile().IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    status.GetMakefile().IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       cmStrCat("Given path:\n  ", input,
                "\ndoes not refer to an existing path on disk."));
   }
@@ -1609,8 +1610,8 @@ bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
     std::string fileName = arg;
     if (fileName.empty()) {
       std::string r = recurse ? "REMOVE_RECURSE" : "REMOVE";
-      status.GetMakefile().IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      status.GetMakefile().IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmStrCat("Ignoring empty file name in ", std::move(r), '.'));
       continue;
     }
@@ -2060,8 +2061,8 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       file = *i;
     } else {
       // Do not return error for compatibility reason.
-      std::string err = cmStrCat("Unexpected argument: ", *i);
-      status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, err);
+      status.GetMakefile().IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR, cmStrCat("Unexpected argument: ", *i));
     }
     ++i;
   }
@@ -2499,8 +2500,8 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
       curl_headers.push_back(*i);
     } else {
       // Do not return error for compatibility reason.
-      std::string err = cmStrCat("Unexpected argument: ", *i);
-      status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, err);
+      status.GetMakefile().IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR, cmStrCat("Unexpected argument: ", *i));
     }
 
     ++i;
@@ -3297,8 +3298,8 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
       if (cmp0205 == cmPolicies::NEW) {
         needToTry = false;
       } else if (cmp0205 == cmPolicies::WARN && arguments.CopyOnError) {
-        status.GetMakefile().IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        status.GetMakefile().IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat("Path\n  ", fileName,
                    "\nis a directory. Hard link creation is not supported "
                    "for directories.\n",
@@ -3323,8 +3324,8 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
 
   if (cmp0205 == cmPolicies::WARN && arguments.CopyOnError &&
       sourceIsDirectory) {
-    status.GetMakefile().IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    status.GetMakefile().IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       cmStrCat("Path\n  ", fileName,
                "\nis a directory. It will be copied "
                "recursively when CMP0205 is set to NEW.\n",
@@ -3378,8 +3379,8 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   }
 
   if (status.GetMakefile().GetState()->GetRole() == cmState::Role::Project) {
-    status.GetMakefile().IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    status.GetMakefile().IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       "You have used file(GET_RUNTIME_DEPENDENCIES)"
       " in project mode. This is probably not what "
       "you intended to do. Instead, please consider"

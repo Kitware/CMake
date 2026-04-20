@@ -7,9 +7,9 @@
 #include <cstddef>
 #include <string>
 
+#include "cmDiagnostics.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmValue.h"
 
@@ -111,10 +111,10 @@ bool cmExperimental::HasSupportEnabled(cmMakefile const& mf, Feature f)
 
     if (mf.GetGlobalGenerator()->ShouldWarnExperimental(data.Name, *value)) {
       if (enabled) {
-        mf.IssueMessage(MessageType::AUTHOR_WARNING, data.Description);
+        mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, data.Description);
       } else {
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(
             data.Variable, " is set to incorrect value\n  ", value,
             "\n"

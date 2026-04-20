@@ -6,10 +6,10 @@
 
 #include <cm3p/kwiml/int.h>
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExprParserHelper.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 
 namespace {
 bool HandleExprCommand(std::vector<std::string> const& args,
@@ -111,7 +111,7 @@ bool HandleExprCommand(std::vector<std::string> const& args,
 
   std::string const& w = helper.GetWarning();
   if (!w.empty()) {
-    status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, w);
+    status.GetMakefile().IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w);
   }
 
   status.GetMakefile().AddDefinition(outputVariable, buffer);

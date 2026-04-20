@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at CMP0199-WARN\.cmake:[0-9]+ \(target_link_libraries\):
+CMake Warning \(author\) at CMP0199-WARN\.cmake:[0-9]+ \(target_link_libraries\):
   Policy CMP0199 is not set: \$<CONFIG:cfgs> does not match mapped
   configurations that are not selected\.  Run "cmake --help-policy CMP0199"
   for policy details\.  Use the cmake_policy command to set the policy and
@@ -9,4 +9,4 @@ CMake Warning \(dev\) at CMP0199-WARN\.cmake:[0-9]+ \(target_link_libraries\):
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.

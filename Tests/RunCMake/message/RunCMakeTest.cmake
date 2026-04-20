@@ -7,17 +7,8 @@ run_cmake(ConfigureLog)
 run_cmake(defaultmessage)
 run_cmake(nomessage)
 run_cmake(message-internal-warning)
-# run_cmake(nomessage-internal-warning)
-run_cmake(warnmessage)
-
-# TODO: We currently do not have a way to change diagnostic state in a way that
-# is visible to internally issued diagnostic. This will be remedied when we
-# switch to the new methods for issuing diagnostics, but for a brief window,
-# this test will only pass if author warnings are disabled by command-line
-# option.
-set(RunCMake_TEST_OPTIONS -Wno-author)
 run_cmake(nomessage-internal-warning)
-unset(RunCMake_TEST_OPTIONS)
+run_cmake(warnmessage)
 
 # Have to explicitly give the command for the working dir to be honored
 set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY /)

@@ -3,7 +3,7 @@
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 +
-CMake Warning \(dev\) at CMP0084-NEW\.cmake:[0-9]+ \(find_package\):
+CMake Warning \(author\) at CMP0084-NEW\.cmake:[0-9]+ \(find_package\):
   FindQt\.cmake must either be part of this project itself, in this case
   adjust CMAKE_MODULE_PATH so that it points to the correct location inside
   its source tree\.
@@ -17,4 +17,4 @@ CMake Warning \(dev\) at CMP0084-NEW\.cmake:[0-9]+ \(find_package\):
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.$
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

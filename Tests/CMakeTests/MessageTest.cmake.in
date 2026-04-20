@@ -25,6 +25,6 @@ if(NOT "${err}" MATCHES "CMake Warning at[^\n]*:\r?\n  message-warning")
   message(FATAL_ERROR "message(WARNING) did not appear properly")
 endif()
 
-if(NOT "${err}" MATCHES "CMake Warning \\(dev\\) at[^\n]*:\r?\n  message-author")
+if(NOT "${err}" MATCHES "CMake Warning \\(author\\) at[^\n]*:\r?\n  message-author")
   message(FATAL_ERROR "message(AUTHOR_WARNING) did not appear properly")
 endif()

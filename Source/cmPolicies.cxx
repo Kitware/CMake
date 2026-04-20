@@ -10,6 +10,7 @@
 
 #include "cmsys/String.h"
 
+#include "cmDiagnostics.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -339,8 +340,8 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
     }
   } else if (majorVer == 3 && minorVer < 10 && warnCompat == WarnCompat::On) {
     // Warn about policy versions for which support will be removed.
-    mf->IssueMessage(
-      MessageType::DEPRECATION_WARNING,
+    mf->IssueDiagnostic(
+      cmDiagnostics::CMD_DEPRECATED,
       "Compatibility with CMake < 3.10 will be removed from "
       "a future version of CMake.\n" ADVICE_UPDATE_VERSION_ARGUMENT);
   }

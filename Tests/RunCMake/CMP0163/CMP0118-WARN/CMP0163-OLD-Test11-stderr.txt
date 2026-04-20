@@ -1,4 +1,4 @@
-^((CMake Warning \(dev\) at subdir-Common-Test11/CMakeLists\.txt:[0-9]+ \(set_property\):
+^((CMake Warning \(author\) at subdir-Common-Test11/CMakeLists\.txt:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -6,9 +6,9 @@
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
 
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +)+
-(CMake Warning \(dev\) at CMP0163-Common-Test11\.cmake:[0-9]+ \(add_subdirectory\):
+(CMake Warning \(author\) at CMP0163-Common-Test11\.cmake:[0-9]+ \(add_subdirectory\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -19,7 +19,7 @@ This warning is for project developers\.  Use -Wno-dev to suppress it\.
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-OLD-Test11\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +)+)+
 Generated_source0\.txt: # 1a # GENERATED = `1`
 Generated_source0\.txt: # 1b # GENERATED = `1`

@@ -7,7 +7,7 @@ CMake Error at MissingNormalForceRequired\.cmake:2 \(find_package\):
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 +
-CMake Warning \(dev\) at MissingNormalForceRequired\.cmake:2 \(find_package\):
+CMake Warning \(author\) at MissingNormalForceRequired\.cmake:2 \(find_package\):
   FindNotHere\.cmake must either be part of this project itself, in this case
   adjust CMAKE_MODULE_PATH so that it points to the correct location inside
   its source tree\.
@@ -21,4 +21,4 @@ CMake Warning \(dev\) at MissingNormalForceRequired\.cmake:2 \(find_package\):
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.

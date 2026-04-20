@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmOptionCommand.h"
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -78,8 +78,8 @@ bool cmOptionCommand(std::vector<std::string> const& args,
     auto const& existsAfterSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     if (!existsAfterSet) {
-      status.GetMakefile().IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      status.GetMakefile().IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0077),
                  "\n"
                  "For compatibility with older versions of CMake, option "

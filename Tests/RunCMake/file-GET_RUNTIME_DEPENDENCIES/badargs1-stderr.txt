@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at badargs1\.cmake:[0-9]+ \(file\):
+^CMake Warning \(author\) at badargs1\.cmake:[0-9]+ \(file\):
   You have used file\(GET_RUNTIME_DEPENDENCIES\) in project mode\.  This is
   probably not what you intended to do\.  Instead, please consider using it in
   an install\(CODE\) or install\(SCRIPT\) command\.  For example:
@@ -10,7 +10,7 @@
       ]]\)
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
 CMake Error at badargs1\.cmake:[0-9]+ \(file\):
   file Unrecognized argument: "invalid"

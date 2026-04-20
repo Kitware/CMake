@@ -13,6 +13,7 @@
 
 #include <cm/string_view>
 
+#include "cmDiagnostics.h"
 #include "cmList.h"
 #include "cmListFileLexer.h"
 #include "cmMakefile.h"
@@ -337,7 +338,7 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     return false;
   }
   if (this->Makefile) {
-    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg, lfbt);
+    this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, msg, lfbt);
   }
   return true;
 }

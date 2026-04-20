@@ -16,6 +16,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -81,8 +82,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   cmMakefile& mf = status.GetMakefile();
   std::string const& projectName = args[0];
   if (parser.HasKeyword(projectName)) {
-    mf.IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    mf.IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       cmStrCat(
         "project() called with '", projectName,
         "' as first argument. The first parameter should be the project name, "
@@ -94,8 +95,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   if (mf.IsRootMakefile() &&
       !mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
-    mf.IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    mf.IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       "cmake_minimum_required() should be called prior to this top-level "
       "project() call. Please see the cmake-commands(7) manual for usage "
       "documentation of both commands.");

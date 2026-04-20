@@ -10,15 +10,14 @@
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmListFileBacktrace;
 class cmTarget;
@@ -36,8 +35,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& name,
       ".  The problem was found while processing the source directory: ",
       makefile.GetCurrentSourceDirectory(),
       ".  This FLTK_WRAP_UI call will be ignored.");
-    makefile.GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_ERROR, msg,
-                                              lfbt);
+    makefile.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, msg, lfbt);
   }
 }
 

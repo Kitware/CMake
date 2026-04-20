@@ -31,6 +31,7 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmDiagnostics.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
@@ -533,8 +534,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         this->AutogenTarget.Parallel = static_cast<ParallelType>(propInt);
       } else {
         // Warn the project author that AUTOGEN_PARALLEL is not valid.
-        this->Makefile->IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        this->Makefile->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat("AUTOGEN_PARALLEL=\"", prop, "\" for target \"",
                    this->GenTarget->GetName(),
                    "\" is not valid. Using AUTOGEN_PARALLEL=1"));
@@ -556,8 +557,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
             static_cast<maxCommandLineLengthType>(propInt);
         } else {
           // Warn the project author that AUTOGEN_PARALLEL is not valid.
-          this->Makefile->IssueMessage(
-            MessageType::AUTHOR_WARNING,
+          this->Makefile->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
             cmStrCat("AUTOGEN_COMMAND_LINE_LENGTH_MAX=\"", *value,
                      "\" for target \"", this->GenTarget->GetName(),
                      "\" is not valid. Using no limit for "
@@ -620,8 +621,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       // CMAKE_AUTOMOC_RELAXED_MODE
       if (this->Makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE")) {
         this->Moc.RelaxedMode = true;
-        this->Makefile->IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        this->Makefile->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat("AUTOMOC: CMAKE_AUTOMOC_RELAXED_MODE is "
                    "deprecated an will be removed in the future.  Consider "
                    "disabling it and converting the target ",
@@ -1220,8 +1221,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       for (MUFile const* muf : this->AutogenTarget.FilesGenerated) {
         files += cmStrCat("  ", Quoted(muf->FullPath), '\n');
       }
-      this->Makefile->IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      this->Makefile->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmStrCat(
           cmPolicies::GetPolicyWarning(cmPolicies::CMP0071),
           "\n"
@@ -1252,8 +1253,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     for (cmSourceFile const* sf : this->AutogenTarget.CMP0100HeadersWarn) {
       files += cmStrCat("  ", Quoted(sf->GetFullPath()), '\n');
     }
-    this->Makefile->IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    this->Makefile->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       cmStrCat(
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0100),
         "\n"

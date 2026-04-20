@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at CMP0156-Common\.cmake:[0-9]+ \(add_library\):
+CMake Warning \(author\) at CMP0156-Common\.cmake:[0-9]+ \(add_library\):
   Policy CMP0156 is not set: De-duplicate libraries on link lines based on
   linker capabilities\.  Run "cmake --help-policy CMP0156" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -8,9 +8,9 @@ CMake Warning \(dev\) at CMP0156-Common\.cmake:[0-9]+ \(add_library\):
 Call Stack \(most recent call first\):
   CMP0156-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
-CMake Warning \(dev\) at CMP0156-Common\.cmake:[0-9]+ \(add_library\):
+CMake Warning \(author\) at CMP0156-Common\.cmake:[0-9]+ \(add_library\):
   Policy CMP0156 is not set: De-duplicate libraries on link lines based on
   linker capabilities\.  Run "cmake --help-policy CMP0156" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -20,9 +20,9 @@ CMake Warning \(dev\) at CMP0156-Common\.cmake:[0-9]+ \(add_library\):
 Call Stack \(most recent call first\):
   CMP0156-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 
-CMake Warning \(dev\) at CMP0156-Common\.cmake:[0-9]+ \(add_executable\):
+CMake Warning \(author\) at CMP0156-Common\.cmake:[0-9]+ \(add_executable\):
   Policy CMP0156 is not set: De-duplicate libraries on link lines based on
   linker capabilities\.  Run "cmake --help-policy CMP0156" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -32,4 +32,4 @@ CMake Warning \(dev\) at CMP0156-Common\.cmake:[0-9]+ \(add_executable\):
 Call Stack \(most recent call first\):
   CMP0156-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.

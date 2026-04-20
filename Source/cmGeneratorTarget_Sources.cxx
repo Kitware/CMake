@@ -22,6 +22,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmDiagnostics.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
@@ -120,13 +121,13 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
       std::string e;
       std::string w;
       std::string fullPath = sf->ResolveFullPath(&e, &w);
-      cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
+      cmLocalGenerator const* const lg = tgt->GetLocalGenerator();
       if (!w.empty()) {
-        cm->IssueMessage(MessageType::AUTHOR_WARNING, w, entry.Backtrace);
+        lg->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w, entry.Backtrace);
       }
       if (fullPath.empty()) {
         if (!e.empty()) {
-          cm->IssueMessage(MessageType::FATAL_ERROR, e, entry.Backtrace);
+          lg->IssueMessage(MessageType::FATAL_ERROR, e, entry.Backtrace);
         }
         return contextDependent;
       }
@@ -163,8 +164,8 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
               tgt->GetGeneratorFileSets()->GetFileSetForSource(config, src)) {
           switch (tgt->GetPolicyStatusCMP0211()) {
             case cmPolicies::WARN:
-              tgt->GetLocalGenerator()->IssueMessage(
-                MessageType::AUTHOR_WARNING,
+              tgt->GetLocalGenerator()->IssueDiagnostic(
+                cmDiagnostics::CMD_AUTHOR,
                 cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0211),
                          "\nIn target \"", tgt->GetName(), "\" the file\n  ",
                          src, "\nalready belongs to file set \"",

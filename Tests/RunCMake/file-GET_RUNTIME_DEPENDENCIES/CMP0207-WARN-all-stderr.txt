@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at cmake_install\.cmake:[0-9]+ \(file\):
+^CMake Warning \(author\) at cmake_install\.cmake:[0-9]+ \(file\):
   Policy CMP0207 is not set: file\(GET_RUNTIME_DEPENDENCIES\) normalizes paths
   before matching\.  Run "cmake --help-policy CMP0207" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -11,9 +11,9 @@
 
     "[^"]*test\.dll"
 
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
-CMake Warning \(dev\) at cmake_install\.cmake:[0-9]+ \(file\):
+CMake Warning \(author\) at cmake_install\.cmake:[0-9]+ \(file\):
   Policy CMP0207 is not set: file\(GET_RUNTIME_DEPENDENCIES\) normalizes paths
   before matching\.  Run "cmake --help-policy CMP0207" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -26,9 +26,9 @@ CMake Warning \(dev\) at cmake_install\.cmake:[0-9]+ \(file\):
 
     "[^"]*test\.dll"
 
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
-CMake Warning \(dev\) at cmake_install\.cmake:[0-9]+ \(file\):
+CMake Warning \(author\) at cmake_install\.cmake:[0-9]+ \(file\):
   Policy CMP0207 is not set: file\(GET_RUNTIME_DEPENDENCIES\) normalizes paths
   before matching\.  Run "cmake --help-policy CMP0207" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -41,4 +41,4 @@ CMake Warning \(dev\) at cmake_install\.cmake:[0-9]+ \(file\):
 
     "[^"]*test\.dll"
 
-This warning is for project developers\.  Use -Wno-dev to suppress it\.$
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

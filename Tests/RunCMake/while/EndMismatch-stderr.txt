@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) in EndMismatch\.cmake:
+^CMake Warning \(author\) in EndMismatch\.cmake:
   A logical block opening on the line
 
     .*/Tests/RunCMake/while/EndMismatch\.cmake:1 \(while\)
@@ -10,4 +10,4 @@
   with mis-matching arguments\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.$
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

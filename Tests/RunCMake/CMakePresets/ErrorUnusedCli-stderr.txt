@@ -1,4 +1,4 @@
-CMake Error:
+CMake Error \(unused-cli\):
   Manually-specified variables were not used by the project:
 
     RunCMake_GENERATOR

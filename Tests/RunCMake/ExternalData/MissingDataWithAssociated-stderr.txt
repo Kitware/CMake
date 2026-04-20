@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
+CMake Warning \(author\) at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   Data file referenced by argument
 
     DATA{MissingData\.txt,Data\.txt}
@@ -12,4 +12,4 @@ Call Stack \(most recent call first\):
   .*
   MissingDataWithAssociated\.cmake:[0-9]+ \(ExternalData_Expand_Arguments\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.

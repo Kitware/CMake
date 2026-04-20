@@ -16,6 +16,7 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmCryptoHash.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
@@ -198,8 +199,8 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
   if (gg->GetExportedTargetsFile(fname)) {
     switch (mf.GetPolicyStatus(cmPolicies::CMP0103)) {
       case cmPolicies::WARN:
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103),
                    "\n"
                    "export() command already specified for the file\n  ",
@@ -283,10 +284,10 @@ static bool HandleExportMode(std::vector<std::string> const& args,
       return false;
     }
     if (p == cmPolicies::WARN) {
-      status.GetMakefile().IssueMessage(
-        MessageType::AUTHOR_WARNING, cmStrCat("export "_s, status.GetError()));
-      status.GetMakefile().IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      status.GetMakefile().IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR, cmStrCat("export "_s, status.GetError()));
+      status.GetMakefile().IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0208));
     }
   }

@@ -10,6 +10,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -95,8 +96,8 @@ static void PassParsedArguments(
       // The OLD policy behavior doesn't define a variable for an empty or
       // missing value, and we can't differentiate between those two cases.
       if (parseFromArgV && (cmp0174 == cmPolicies::WARN)) {
-        makefile.IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        makefile.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat("The ", iter.first,
                    " keyword was followed by an empty string or no value at "
                    "all. Policy CMP0174 is not set, so "

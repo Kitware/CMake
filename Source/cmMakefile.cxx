@@ -288,7 +288,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
                     *rootEnv, '\n');
     }
     e += "For compatibility, CMake is ignoring the variable.";
-    this->IssueMessage(MessageType::AUTHOR_WARNING, e);
+    this->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e);
   }
 }
 
@@ -308,7 +308,7 @@ void cmMakefile::MaybeWarnCMP0144(std::string const& rootVar, cmValue rootDef,
     }
     e += "For compatibility, find_package is ignoring the variable, but "
          "code in a .cmake module might still use it.";
-    this->IssueMessage(MessageType::AUTHOR_WARNING, e);
+    this->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e);
   }
 }
 
@@ -1700,16 +1700,15 @@ void cmMakefile::Configure()
     }
     // if no project command is found, add one
     if (!hasProject) {
-      this->GetCMakeInstance()->IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      this->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         "No project() command is present.  The top-level CMakeLists.txt "
         "file must contain a literal, direct call to the project() command.  "
         "Add a line of code such as\n"
         "  project(ProjectName)\n"
         "near the top of the file, but after cmake_minimum_required().\n"
         "CMake is pretending there is a \"project(Project)\" command on "
-        "the first line.",
-        this->Backtrace);
+        "the first line.");
       cmListFileFunction project{
         "project", 0, 0, { { "Project", cmListFileArgument::Unquoted, 0 } }
       };
@@ -1932,8 +1931,8 @@ void cmMakefile::AddCacheDefinition(std::string const& name, cmValue value,
     case cmPolicies::WARN:
       if (this->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0126") &&
           this->IsNormalDefinitionSet(name)) {
-        this->IssueMessage(
-          MessageType::AUTHOR_WARNING,
+        this->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0126),
                    "\nFor compatibility with older versions of CMake, normal "
                    "variable \"",
@@ -1971,8 +1970,9 @@ void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
       !this->VariableInitialized(variable)) {
     if (this->CheckSystemVars ||
         (sourceFilename && this->IsProjectFile(sourceFilename))) {
-      this->IssueMessage(MessageType::AUTHOR_WARNING,
-                         cmStrCat("uninitialized variable '", variable, '\''));
+      this->IssueDiagnostic(
+        cmDiagnostics::CMD_UNINITIALIZED,
+        cmStrCat("uninitialized variable '", variable, '\''));
     }
   }
 }
@@ -3209,8 +3209,8 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& languages,
     }
     if (!duplicate_languages.empty()) {
       auto quantity = duplicate_languages.size() == 1 ? " has"_s : "s have"_s;
-      this->IssueMessage(
-        MessageType::AUTHOR_WARNING,
+      this->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
         cmStrCat("Languages to be enabled may not be specified more "
                  "than once at the same time. The following language",
                  quantity, " been specified multiple times: ",
@@ -3838,8 +3838,8 @@ void cmMakefile::RaiseScope(std::string const& var, char const* varDef)
   }
 
   if (!this->StateSnapshot.RaiseScope(var, varDef)) {
-    this->IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    this->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       cmStrCat("Cannot set \"", var, "\": current scope has no parent."));
     return;
   }
@@ -4135,11 +4135,9 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
           id == cmPolicies::CMP0104 || id == cmPolicies::CMP0123 ||
           id == cmPolicies::CMP0126 || id == cmPolicies::CMP0128 ||
           id == cmPolicies::CMP0136 || id == cmPolicies::CMP0141 ||
-          id == cmPolicies::CMP0155)) &&
-      (!this->IsSet("CMAKE_WARN_DEPRECATED") ||
-       this->IsOn("CMAKE_WARN_DEPRECATED"))) {
-    this->IssueMessage(MessageType::DEPRECATION_WARNING,
-                       cmPolicies::GetPolicyDeprecatedWarning(id));
+          id == cmPolicies::CMP0155))) {
+    this->IssueDiagnostic(cmDiagnostics::CMD_DEPRECATED,
+                          cmPolicies::GetPolicyDeprecatedWarning(id));
   }
 
   this->StateSnapshot.SetPolicy(id, status);

@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <sstream>
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -113,8 +114,8 @@ bool cmCMakeMinimumRequired(std::vector<std::string> const& args,
   }
 
   if (required_major < 2 || (required_major == 2 && required_minor < 4)) {
-    status.GetMakefile().IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    status.GetMakefile().IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       "Compatibility with CMake < 2.4 is not supported by CMake >= 3.0.");
     status.GetMakefile().SetPolicyVersion("2.4", version_max);
   } else {

@@ -27,6 +27,7 @@
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmDiagnostics.h"
 #include "cmFileSetMetadata.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
@@ -397,7 +398,7 @@ void cmVisualStudio10TargetGenerator::Generate()
       cmStrCat("The C# target \"", this->GeneratorTarget->GetName(),
                "\" is of type STATIC_LIBRARY. This is discouraged (and may be "
                "disabled in future). Make it a SHARED library instead.");
-    this->Makefile->IssueMessage(MessageType::DEPRECATION_WARNING, message);
+    this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_DEPRECATED, message);
   }
 
   if (this->Android &&

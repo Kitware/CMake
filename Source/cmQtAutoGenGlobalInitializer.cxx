@@ -8,11 +8,11 @@
 #include <cm/memory>
 
 #include "cmCustomCommand.h"
+#include "cmDiagnostics.h"
 #include "cmDuration.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmProcessOutput.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenInitializer.h"
@@ -145,7 +145,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
             cmQtAutoGen::Tools(mocDisabled, uicDisabled, rccDisabled),
             " disabled.  Consider adding:\n  find_package(Qt", version,
             " COMPONENTS ", component, ")\nto your CMakeLists.txt file.");
-          target->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
+          target->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, msg);
         }
         if (mocIsValid || uicIsValid || rccIsValid) {
           // Create autogen target initializer

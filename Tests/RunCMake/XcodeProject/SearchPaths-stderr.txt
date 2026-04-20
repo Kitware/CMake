@@ -1,4 +1,4 @@
-^CMake Deprecation Warning at SearchPaths\.cmake:[0-9]+ \(cmake_policy\):
+^CMake Warning \(deprecated\) at SearchPaths\.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0142 will be removed from a future version
   of CMake\.
 

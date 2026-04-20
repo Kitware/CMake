@@ -473,7 +473,7 @@ void cmState::AddDisallowedCommand(std::string const& name,
           if (additionalWarning) {
             warning = cmStrCat(warning, '\n', additionalWarning);
           }
-          mf.IssueMessage(MessageType::AUTHOR_WARNING, warning);
+          mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, warning);
         }
           CM_FALLTHROUGH;
         case cmPolicies::OLD:

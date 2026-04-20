@@ -4,13 +4,13 @@ Generated_with_full_path1\.txt: # 2a # GENERATED = `1`
 Generated_with_full_path1\.txt: # 2b # GENERATED = `1`
 Generated_with_full_path1\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path1\.txt: # 3b # GENERATED = `0`
-CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(author\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Unsetting the 'GENERATED' property is not allowed under CMP0118!
 
 Call Stack \(most recent call first\):
   CMP0118-NEW/CMP0163-WARN-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
 Generated_with_full_path2\.txt: # 1a # GENERATED = `0`
 Generated_with_full_path2\.txt: # 1b # GENERATED = `0`
@@ -18,7 +18,7 @@ Generated_with_full_path2\.txt: # 2a # GENERATED = `0`
 Generated_with_full_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_full_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path2\.txt: # 3b # GENERATED = `0`
-CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(author\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is set to NEW and the following non-boolean value given for
   property 'GENERATED' is therefore not allowed:
 
@@ -29,7 +29,7 @@ CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
 Call Stack \(most recent call first\):
   CMP0118-NEW/CMP0163-WARN-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
 Generated_with_full_path3\.txt: # 1a # GENERATED = `0`
 Generated_with_full_path3\.txt: # 1b # GENERATED = `0`
@@ -43,13 +43,13 @@ Generated_with_relative_path1\.txt: # 2a # GENERATED = `1`
 Generated_with_relative_path1\.txt: # 2b # GENERATED = `1`
 Generated_with_relative_path1\.txt: # 3a # GENERATED = `0`
 Generated_with_relative_path1\.txt: # 3b # GENERATED = `0`
-CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(author\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Unsetting the 'GENERATED' property is not allowed under CMP0118!
 
 Call Stack \(most recent call first\):
   CMP0118-NEW/CMP0163-WARN-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
 Generated_with_relative_path2\.txt: # 1a # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 1b # GENERATED = `0`
@@ -57,7 +57,7 @@ Generated_with_relative_path2\.txt: # 2a # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 3b # GENERATED = `0`
-CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(author\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is set to NEW and the following non-boolean value given for
   property 'GENERATED' is therefore not allowed:
 
@@ -68,7 +68,7 @@ CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
 Call Stack \(most recent call first\):
   CMP0118-NEW/CMP0163-WARN-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
 Generated_with_relative_path3\.txt: # 1a # GENERATED = `0`
 Generated_with_relative_path3\.txt: # 1b # GENERATED = `0`
@@ -82,13 +82,13 @@ Generated_with_full_source_path1\.txt: # 2a # GENERATED = `1`
 Generated_with_full_source_path1\.txt: # 2b # GENERATED = `1`
 Generated_with_full_source_path1\.txt: # 3a # GENERATED = `1`
 Generated_with_full_source_path1\.txt: # 3b # GENERATED = `1`
-CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(author\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Unsetting the 'GENERATED' property is not allowed under CMP0118!
 
 Call Stack \(most recent call first\):
   CMP0118-NEW/CMP0163-WARN-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
 Generated_with_full_source_path2\.txt: # 1a # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 1b # GENERATED = `0`
@@ -96,7 +96,7 @@ Generated_with_full_source_path2\.txt: # 2a # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 3b # GENERATED = `0`
-CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(author\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is set to NEW and the following non-boolean value given for
   property 'GENERATED' is therefore not allowed:
 
@@ -107,7 +107,7 @@ CMake Warning \(dev\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
 Call Stack \(most recent call first\):
   CMP0118-NEW/CMP0163-WARN-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
 Generated_with_full_source_path3\.txt: # 1a # GENERATED = `0`
 Generated_with_full_source_path3\.txt: # 1b # GENERATED = `0`

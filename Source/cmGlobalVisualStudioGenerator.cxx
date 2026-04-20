@@ -23,6 +23,7 @@
 #include "cmCallVisualStudioMacro.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmDiagnostics.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
@@ -300,8 +301,8 @@ std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
     if (this->FindTarget(startup)) {
       return startup;
     }
-    root->GetMakefile()->IssueMessage(
-      MessageType::AUTHOR_WARNING,
+    root->GetMakefile()->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
       cmStrCat("Directory property VS_STARTUP_PROJECT specifies target "
                "'",
                startup, "' that does not exist.  Ignoring."));

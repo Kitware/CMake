@@ -58,7 +58,7 @@ void ReportCheckResult(cm::string_view what, std::string result,
     mf.DisplayStatus(IndentText(std::move(text), mf), -1);
   } else {
     mf.GetMessenger()->DisplayMessage(
-      MessageType::AUTHOR_WARNING, cmDiagnostics::CMD_NONE,
+      MessageType::WARNING, cmDiagnostics::CMD_AUTHOR,
       cmStrCat("Ignored "_s, what, " without CHECK_START"_s),
       mf.GetBacktrace());
   }
@@ -96,6 +96,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
 
   auto i = args.cbegin();
 
+  auto category = cmDiagnostics::CMD_NONE;
   auto type = MessageType::MESSAGE;
   auto fatal = false;
   auto level = Message::LogLevel::LOG_UNDEFINED;
@@ -114,6 +115,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     level = Message::LogLevel::LOG_WARNING;
     ++i;
   } else if (*i == "AUTHOR_WARNING") {
+    category = cmDiagnostics::CMD_AUTHOR;
     switch (mf.GetDiagnosticAction(cmDiagnostics::CMD_AUTHOR)) {
       case cmDiagnostics::Ignore:
         return true;
@@ -121,11 +123,11 @@ bool cmMessageCommand(std::vector<std::string> const& args,
         fatal = true;
         CM_FALLTHROUGH;
       case cmDiagnostics::SendError:
-        type = MessageType::AUTHOR_ERROR;
+        type = MessageType::FATAL_ERROR;
         level = Message::LogLevel::LOG_ERROR;
         break;
       default:
-        type = MessageType::AUTHOR_WARNING;
+        type = MessageType::WARNING;
         level = Message::LogLevel::LOG_WARNING;
         break;
     }
@@ -163,6 +165,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     level = Message::LogLevel::LOG_TRACE;
     ++i;
   } else if (*i == "DEPRECATION") {
+    category = cmDiagnostics::CMD_DEPRECATED;
     switch (mf.GetDiagnosticAction(cmDiagnostics::CMD_DEPRECATED)) {
       case cmDiagnostics::Ignore:
         return true;
@@ -170,11 +173,11 @@ bool cmMessageCommand(std::vector<std::string> const& args,
         fatal = true;
         CM_FALLTHROUGH;
       case cmDiagnostics::SendError:
-        type = MessageType::DEPRECATION_ERROR;
+        type = MessageType::FATAL_ERROR;
         level = Message::LogLevel::LOG_ERROR;
         break;
       default:
-        type = MessageType::DEPRECATION_WARNING;
+        type = MessageType::WARNING;
         level = Message::LogLevel::LOG_WARNING;
         break;
     }
@@ -203,7 +206,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     case Message::LogLevel::LOG_ERROR:
     case Message::LogLevel::LOG_WARNING:
       // we've overridden the message type, above, so display it directly
-      mf.GetMessenger()->DisplayMessage(type, cmDiagnostics::CMD_NONE, message,
+      mf.GetMessenger()->DisplayMessage(type, category, message,
                                         mf.GetBacktrace());
       break;
 

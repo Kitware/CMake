@@ -8,7 +8,6 @@
 #include <iterator>
 #include <map>
 #include <set>
-#include <sstream>
 #include <utility>
 
 #include <cm/memory>
@@ -21,6 +20,7 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmCMakePath.h"
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportSet.h"
@@ -1082,10 +1082,11 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             helper.Makefile, absFiles, privateHeaderArgs, false,
             helper.GetIncludeDestination(&privateHeaderArgs));
         } else {
-          std::ostringstream e;
-          e << "Target " << target.GetName() << " has "
-            << "PRIVATE_HEADER files but no PRIVATE_HEADER DESTINATION.";
-          helper.Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+          helper.Makefile->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
+            cmStrCat("Target ", target.GetName(),
+                     " has PRIVATE_HEADER files"
+                     " but no PRIVATE_HEADER DESTINATION."));
         }
       }
 
@@ -1104,10 +1105,11 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             helper.Makefile, absFiles, publicHeaderArgs, false,
             helper.GetIncludeDestination(&publicHeaderArgs));
         } else {
-          std::ostringstream e;
-          e << "Target " << target.GetName() << " has "
-            << "PUBLIC_HEADER files but no PUBLIC_HEADER DESTINATION.";
-          helper.Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+          helper.Makefile->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
+            cmStrCat("Target ", target.GetName(),
+                     " has PUBLIC_HEADER files"
+                     " but no PUBLIC_HEADER DESTINATION."));
         }
       }
 
@@ -1124,8 +1126,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           resourceGenerator = CreateInstallFilesGenerator(
             helper.Makefile, absFiles, resourceArgs, false);
         } else if (!target.IsAppBundleOnApple()) {
-          helper.Makefile->IssueMessage(
-            MessageType::AUTHOR_WARNING,
+          helper.Makefile->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
             cmStrCat("Target ", target.GetName(),
                      " has RESOURCE files but no RESOURCE DESTINATION."));
         }
@@ -1807,8 +1809,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
           // generator expressions
           if (cmGeneratorExpression::Find(args[i]) == cm::string_view::npos &&
               args[i] != cmCMakePath(args[i]).Normal().String()) {
-            status.GetMakefile().IssueMessage(
-              MessageType::AUTHOR_WARNING,
+            status.GetMakefile().IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
               cmPolicies::GetPolicyWarning(cmPolicies::CMP0177));
           }
           CM_FALLTHROUGH;

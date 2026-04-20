@@ -24,6 +24,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
+#include "cmDiagnostics.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -1298,8 +1299,8 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(
       ", is marked as being deprecated by the owner.  The message provided by "
       "the developer is: \n" << resolved.Target->GetDeprecation() << "\n";
     /* clang-format on */
-    this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-      MessageType::AUTHOR_WARNING, w.str(), bt);
+    this->LocalGenerator->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str(),
+                                          bt);
   }
 
   // Skip targets that will not really be linked.  This is probably a

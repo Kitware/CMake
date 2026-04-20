@@ -1,4 +1,4 @@
-^CMake Warning \(dev\):
+^CMake Warning \(author\):
   The detected version of Ninja:
 
     .*
@@ -10,4 +10,4 @@
 
   Any pre-check scripts, such as those generated for file\(GLOB
   CONFIGURE_DEPENDS\), will not be run by Ninja\.
-This warning is for project developers\.  Use -Wno-dev to suppress it\.$
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

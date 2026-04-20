@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at CMP0102-Common\.cmake:2 \(mark_as_advanced\):
+CMake Warning \(author\) at CMP0102-Common\.cmake:2 \(mark_as_advanced\):
   Policy CMP0102 is not set: The variable named "CMP0102_TEST_VARIABLE" is
   not in the cache\.  This results in an empty cache entry which is no longer
   created when policy CMP0102 is set to NEW\.  Run "cmake --help-policy
@@ -7,4 +7,4 @@ CMake Warning \(dev\) at CMP0102-Common\.cmake:2 \(mark_as_advanced\):
 Call Stack \(most recent call first\):
   CMP0102-WARN\.cmake:4 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-author to suppress it\.
