@@ -313,7 +313,7 @@ Helpful Resources
 * :variable:`CMAKE_<LANG>_STANDARD`
 * :variable:`CMAKE_CXX_STANDARD`
 * :prop_tgt:`CXX_STANDARD`
-* `cppreference \<format\> <https://en.cppreference.com/w/cpp/utility/format/format.html>`_
+* `cppreference \<format\> <https://en.cppreference.com/cpp/utility/format/format>`_
 
 Files to Edit
 -------------
