@@ -161,4 +161,8 @@ if(RunCMake_GENERATOR MATCHES "Ninja")
     set(RunCMake_TEST_NO_CLEAN 1)
     run_cmake_command(SwiftLibraryModuleCommand-check ${CMAKE_COMMAND} --build . -- -n -v)
   endblock()
+
+  run_cmake(CMP0214-NEW)
+  run_cmake(CMP0214-OLD)
+  run_cmake(CMP0214-NEW-CMP0157-OLD)
 endif()

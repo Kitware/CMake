@@ -1,0 +1,33 @@
+CMP0214
+-------
+
+.. versionadded:: 4.4
+
+Honor ``CMAKE_EXE_LINKER_FLAGS`` for Swift executable targets.
+
+CMake 3.29 introduced :policy:`CMP0157`, which provides an abstraction
+for selecting the Swift compilation mode.  In CMake 3.30,
+:variable:`CMAKE_SHARED_LINKER_FLAGS` was accidentally honored for
+Swift shared library targets when :policy:`CMP0157` is ``NEW``, but
+the change went unnoticed and was not documented.  The corresponding
+change was not made for Swift executable targets, leaving linker flag
+handling inconsistent between Swift executables and Swift shared
+libraries in CMake 3.30 through 4.3.
+
+CMake 4.4 and above prefer to honor :variable:`CMAKE_EXE_LINKER_FLAGS`
+for Swift executable targets when :policy:`CMP0157` is set to ``NEW``,
+restoring consistency with Swift shared library targets.  This policy
+provides compatibility for projects that have not been updated to
+expect ``CMAKE_EXE_LINKER_FLAGS`` to be honored for Swift executables.
+
+The ``OLD`` behavior for this policy is to not honor
+:variable:`CMAKE_EXE_LINKER_FLAGS` for Swift executable targets.
+The ``NEW`` behavior for this policy is to honor
+:variable:`CMAKE_EXE_LINKER_FLAGS` for Swift executable targets
+when :policy:`CMP0157` is set to ``NEW``.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.4
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst
