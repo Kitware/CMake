@@ -21,4 +21,9 @@ macro(__windows_compiler_pellesc lang)
 
   set(CMAKE_${lang}_CREATE_WIN32_EXE "-subsystem:windows")
   set(CMAKE_${lang}_CREATE_CONSOLE_EXE "-subsystem:console")
+
+  if(NOT CMAKE_RC_COMPILER_INIT)
+    set(CMAKE_RC_COMPILER_INIT porc)
+  endif()
+  enable_language(RC)
 endmacro()
