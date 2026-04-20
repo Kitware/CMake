@@ -3166,7 +3166,7 @@ bool HandleSizeCommand(std::vector<std::string> const& args,
 bool HandleReadSymlinkCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
-  if (args.size() != 3) {
+  if (args.size() < 3) {
     status.SetError(
       cmStrCat(args[0], " requires a file name and output variable"));
     return false;
@@ -3175,14 +3175,39 @@ bool HandleReadSymlinkCommand(std::vector<std::string> const& args,
   std::string const& filename = args[1];
   std::string const& outputVariable = args[2];
 
+  struct Arguments
+  {
+    std::string Result;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}.Bind("RESULT"_s, &Arguments::Result);
+
+  std::vector<std::string> unconsumedArgs;
+  Arguments const arguments =
+    parser.Parse(cmMakeRange(args).advance(3), &unconsumedArgs);
+  if (!unconsumedArgs.empty()) {
+    status.SetError(
+      cmStrCat("READ_SYMLINK unknown argument:\n  ", unconsumedArgs.front()));
+    return false;
+  }
+
   std::string result;
   if (!cmSystemTools::ReadSymlink(filename, result)) {
-    status.SetError(cmStrCat(
-      "READ_SYMLINK requested of path that is not a symlink:\n  ", filename));
+    std::string const error = cmStrCat(
+      "READ_SYMLINK requested of path that is not a symlink:\n  ", filename);
+    if (!arguments.Result.empty()) {
+      status.GetMakefile().AddDefinition(arguments.Result, error);
+      return true;
+    }
+    status.SetError(error);
     return false;
   }
 
   status.GetMakefile().AddDefinition(outputVariable, result);
+  if (!arguments.Result.empty()) {
+    status.GetMakefile().AddDefinition(arguments.Result, "0");
+  }
 
   return true;
 }

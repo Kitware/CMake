@@ -1,0 +1,5 @@
+file(READ_SYMLINK "${CMAKE_CURRENT_BINARY_DIR}/rel.sym" target RESULT result)
+message(STATUS "result: '${result}'")
+if(DEFINED target)
+  message(FATAL_ERROR "Target variable should not be defined on failure, got:\n '${target}'")
+endif()

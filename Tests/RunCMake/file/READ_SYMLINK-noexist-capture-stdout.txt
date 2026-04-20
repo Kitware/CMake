@@ -1,0 +1,2 @@
+-- result: 'READ_SYMLINK requested of path that is not a symlink:
+  [^']*/Tests/RunCMake/file/READ_SYMLINK-noexist-capture-build/rel\.sym'

@@ -86,15 +86,44 @@ if(NOT WIN32
     )
   run_cmake(GLOB_RECURSE-cyclic-recursion)
   run_cmake(INSTALL-SYMLINK)
-  run_cmake(READ_SYMLINK)
-  run_cmake(READ_SYMLINK-noexist)
-  run_cmake(READ_SYMLINK-notsymlink)
   if(NOT CYGWIN)
     run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
   endif()
   # Test that file(LOCK) doesn't truncate symlink targets (CVE regression test)
   run_cmake(LOCK-symlink-no-truncate)
 endif()
+
+# Try creating symbolic links to read below.
+# If this fails on the current filesystem, we'll skip those tests.
+block(PROPAGATE READ_SYMLINK-link-rel READ_SYMLINK-link-abs)
+  set(READ_SYMLINK-dest-rel "READ_SYMLINK-target.txt")
+  set(READ_SYMLINK-dest-abs "${RunCMake_BINARY_DIR}/${READ_SYMLINK-dest-rel}")
+  file(WRITE "${READ_SYMLINK-dest-abs}" "")
+  foreach(link IN ITEMS rel abs)
+    set(READ_SYMLINK-link-${link} "${RunCMake_BINARY_DIR}/READ_SYMLINK-link-${link}.sym")
+    file(REMOVE "${READ_SYMLINK-link-${link}}")
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E create_symlink "${READ_SYMLINK-dest-${link}}" "${READ_SYMLINK-link-${link}}"
+      OUTPUT_VARIABLE create_symlink_stdout
+      ERROR_VARIABLE create_symlink_stderr
+      RESULT_VARIABLE create_symlink_result
+    )
+    if(NOT create_symlink_result EQUAL 0 OR NOT EXISTS "${READ_SYMLINK-link-${link}}")
+      set(READ_SYMLINK-link-${link} "")
+    endif()
+  endforeach()
+endblock()
+
+if(READ_SYMLINK-link-rel)
+  run_cmake_script(READ_SYMLINK-rel "-Dlink=${READ_SYMLINK-link-rel}")
+endif()
+if(READ_SYMLINK-link-abs)
+  run_cmake_script(READ_SYMLINK-abs "-Dlink=${READ_SYMLINK-link-abs}")
+endif()
+run_cmake_script(READ_SYMLINK-noexist)
+run_cmake_script(READ_SYMLINK-noexist-capture)
+run_cmake_script(READ_SYMLINK-notsymlink)
+run_cmake_script(READ_SYMLINK-notsymlink-capture)
 
 run_cmake(REAL_PATH-non-existing)
 run_cmake(REAL_PATH-existing)

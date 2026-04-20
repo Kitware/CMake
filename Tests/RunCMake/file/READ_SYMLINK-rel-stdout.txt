@@ -1,0 +1,2 @@
+^-- result: '0'
+-- target: 'READ_SYMLINK-target.txt'$
