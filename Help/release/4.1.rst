@@ -263,8 +263,8 @@ Changes made since CMake 4.1.0 include the following.
   processes when its ``TIMEOUT`` is reached.  This was accidentally
   regressed by CMake 3.29.
 
-4.1.4, 4.1.5
-------------
+4.1.4, 4.1.5, 4.1.6
+-------------------
 
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
