@@ -39,14 +39,10 @@ void cmExportTryCompileFileGenerator::IssueMessage(
 {
   switch (type) {
     case MessageType::FATAL_ERROR:
-    case MessageType::AUTHOR_ERROR:
     case MessageType::INTERNAL_ERROR:
-    case MessageType::DEPRECATION_ERROR:
       cmSystemTools::Error(message);
       break;
     case MessageType::WARNING:
-    case MessageType::AUTHOR_WARNING:
-    case MessageType::DEPRECATION_WARNING:
       cmSystemTools::Message(cmStrCat("CMake Warning: "_s, message),
                              "Warning");
       break;

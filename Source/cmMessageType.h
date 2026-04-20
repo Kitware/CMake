@@ -7,15 +7,11 @@
 enum class MessageType
 {
   UNDEFINED,
-  AUTHOR_WARNING,
-  AUTHOR_ERROR,
   FATAL_ERROR,
   INTERNAL_ERROR,
   MESSAGE,
   WARNING,
   LOG,
-  DEPRECATION_ERROR,
-  DEPRECATION_WARNING
 };
 
 namespace Message {

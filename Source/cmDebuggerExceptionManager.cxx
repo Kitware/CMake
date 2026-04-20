@@ -29,10 +29,6 @@ cmDebuggerExceptionManager::cmDebuggerExceptionManager(
     return HandleExceptionInfoRequest();
   });
 
-  ExceptionMap[MessageType::AUTHOR_WARNING] =
-    cmDebuggerExceptionFilter{ "AUTHOR_WARNING", "Warning (dev)" };
-  ExceptionMap[MessageType::AUTHOR_ERROR] =
-    cmDebuggerExceptionFilter{ "AUTHOR_ERROR", "Error (dev)" };
   ExceptionMap[MessageType::FATAL_ERROR] =
     cmDebuggerExceptionFilter{ "FATAL_ERROR", "Fatal error" };
   ExceptionMap[MessageType::INTERNAL_ERROR] =
@@ -43,14 +39,8 @@ cmDebuggerExceptionManager::cmDebuggerExceptionManager(
     cmDebuggerExceptionFilter{ "WARNING", "Warning" };
   ExceptionMap[MessageType::LOG] =
     cmDebuggerExceptionFilter{ "LOG", "Debug log" };
-  ExceptionMap[MessageType::DEPRECATION_ERROR] =
-    cmDebuggerExceptionFilter{ "DEPRECATION_ERROR", "Deprecation error" };
-  ExceptionMap[MessageType::DEPRECATION_WARNING] =
-    cmDebuggerExceptionFilter{ "DEPRECATION_WARNING", "Deprecation warning" };
-  RaiseExceptions["AUTHOR_ERROR"] = true;
   RaiseExceptions["FATAL_ERROR"] = true;
   RaiseExceptions["INTERNAL_ERROR"] = true;
-  RaiseExceptions["DEPRECATION_ERROR"] = true;
 }
 
 dap::SetExceptionBreakpointsResponse
