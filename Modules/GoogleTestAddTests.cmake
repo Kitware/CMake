@@ -3,19 +3,6 @@
 
 cmake_minimum_required(VERSION 4.2)
 
-function(add_command name test_name)
-  set(args "")
-  foreach(arg ${ARGN})
-    if(arg MATCHES "[^-./:a-zA-Z0-9_]")
-      string(APPEND args " [==[${arg}]==]")
-    else()
-      string(APPEND args " ${arg}")
-    endif()
-  endforeach()
-  string(APPEND script "${name}(${test_name} ${args})\n")
-  set(script "${script}" PARENT_SCOPE)
-endfunction()
-
 function(generate_testname_guards output open_guard_var close_guard_var)
   set(open_guard "[=[")
   set(close_guard "]=]")
@@ -95,13 +82,6 @@ macro(write_test_to_file)
     string(REPLACE "${close_sb}" "]" testname "${testname}")
   endif()
   set(guarded_testname "${open_guard}${testname}${close_guard}")
-  # Add to script. Do not use add_command() here because it messes up the
-  # handling of empty values when forwarding arguments, and we need to
-  # preserve those carefully for arg_TEST_EXECUTOR and arg_EXTRA_ARGS.
-  # Test properties with values that are lists are also not handled
-  # correctly because the properties need to be expressed as a list
-  # of key-value pairs, but that list is flattened, so any values
-  # that are lists can't be differentiated from the next key.
   string(APPEND script "add_test(${guarded_testname} ${launcherArgs}")
   foreach(arg IN ITEMS
     "${arg_TEST_EXECUTABLE}"
@@ -128,6 +108,12 @@ macro(write_test_to_file)
     set(maybe_LOCATION "DEF_SOURCE_LINE [==[${current_test_file}:${current_test_line}]==]")
   endif()
 
+  set(maybe_properties)
+  if(arg_TEST_PROPERTIES)
+    list(JOIN arg_TEST_PROPERTIES "]] [[" maybe_properties)
+    set(maybe_properties "[[${maybe_properties}]]")
+  endif()
+
   string(APPEND script
     "set_tests_properties(${guarded_testname}\n"
     "  PROPERTIES\n"
@@ -135,30 +121,9 @@ macro(write_test_to_file)
     "    ${maybe_LOCATION}\n"
     "    WORKING_DIRECTORY [==[${arg_TEST_WORKING_DIR}]==]\n"
     "    SKIP_REGULAR_EXPRESSION [==[\\[  SKIPPED \\]]==]\n"
+    "    ${maybe_properties}\n"
+    ")\n"
   )
-  if(arg_TEST_PROPERTIES)
-    # Making local copy of arg_TEST_PROPERTIES, as write_test_to_file is
-    # called in a loop and we don't want to destroy the parsed arg value
-    # by POP_FRONT-ing from it.
-    set(test_properties "${arg_TEST_PROPERTIES}")
-    list(LENGTH test_properties test_properties_length)
-    math(EXPR test_properties_length_mod2 "${test_properties_length} % 2")
-    if(NOT test_properties_length_mod2 EQUAL 0)
-      message(FATAL_ERROR
-        "gtest_discover_tests() received a key-value list of properties with an uneven number of elements.\n"
-        "Check the supplied TEST_PROPERTIES argument and LIST_SEPARATOR if used."
-      )
-    endif()
-    while(NOT test_properties_length EQUAL 0)
-      list(POP_FRONT test_properties property_name property_value)
-      list(LENGTH test_properties test_properties_length)
-      if(NOT "${arg_LIST_SEPARATOR}" STREQUAL "")
-        string(REPLACE "${arg_LIST_SEPARATOR}" ";" property_value "${property_value}")
-      endif()
-      string(APPEND script "    ${property_name} [==[${property_value}]==]\n")
-    endwhile()
-  endif()
-  string(APPEND script ")\n")
 
   # possibly unbalanced square brackets render lists invalid so skip such
   # tests in ${arg_TEST_LIST}
@@ -307,7 +272,6 @@ function(gtest_discover_tests_impl)
   set(oneValueArgs
     NO_PRETTY_TYPES   # These two take a value, unlike gtest_discover_tests()
     NO_PRETTY_VALUES  #
-    LIST_SEPARATOR
     TEST_TARGET
     TEST_EXECUTABLE
     TEST_WORKING_DIR
@@ -317,16 +281,14 @@ function(gtest_discover_tests_impl)
     CTEST_FILE
     TEST_DISCOVERY_TIMEOUT
     TEST_XML_OUTPUT_DIR
-    # The following are all multi-value arguments in gtest_discover_tests(),
-    # but they are each given to us as a single argument. We parse them that
-    # way to avoid problems with preserving empty list values and escaping.
     TEST_FILTER
+  )
+  set(multiValueArgs
     TEST_EXTRA_ARGS
     TEST_DISCOVERY_EXTRA_ARGS
     TEST_PROPERTIES
     TEST_EXECUTOR
   )
-  set(multiValueArgs "")
   cmake_parse_arguments(PARSE_ARGV 0 arg
     "${options}" "${oneValueArgs}" "${multiValueArgs}"
   )
@@ -438,30 +400,9 @@ function(gtest_discover_tests_impl)
 
   # Create a list of all discovered tests, which users may use to e.g. set
   # properties on the tests
-  add_command(set "" ${arg_TEST_LIST} "${tests}")
+  list(JOIN tests "]==] [==[" tests)
+  string(APPEND script "set(${arg_TEST_LIST} [==[${tests}]==])\n")
 
   # Write remaining content to the CTest script
   file(APPEND "${arg_CTEST_FILE}" "${script}")
 endfunction()
-
-if(CMAKE_SCRIPT_MODE_FILE)
-  gtest_discover_tests_impl(
-    NO_PRETTY_TYPES ${NO_PRETTY_TYPES}
-    NO_PRETTY_VALUES ${NO_PRETTY_VALUES}
-    TEST_TARGET ${TEST_TARGET}
-    TEST_EXECUTABLE ${TEST_EXECUTABLE}
-    TEST_EXECUTOR "${TEST_EXECUTOR}"
-    TEST_WORKING_DIR ${TEST_WORKING_DIR}
-    TEST_PREFIX ${TEST_PREFIX}
-    TEST_SUFFIX ${TEST_SUFFIX}
-    TEST_FILTER ${TEST_FILTER}
-    TEST_LIST ${TEST_LIST}
-    CTEST_FILE ${CTEST_FILE}
-    TEST_DISCOVERY_TIMEOUT ${TEST_DISCOVERY_TIMEOUT}
-    TEST_XML_OUTPUT_DIR ${TEST_XML_OUTPUT_DIR}
-    TEST_EXTRA_ARGS "${TEST_EXTRA_ARGS}"
-    TEST_DISCOVERY_EXTRA_ARGS "${TEST_DISCOVERY_EXTRA_ARGS}"
-    TEST_PROPERTIES "${TEST_PROPERTIES}"
-    LIST_SEPARATOR "${LIST_SEPARATOR}"
-  )
-endif()
