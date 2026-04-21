@@ -34,14 +34,6 @@ char const* getMessageTypeStr(MessageType t)
       return "Internal Error (please report a bug)";
     case MessageType::LOG:
       return "Debug Log";
-    case MessageType::DEPRECATION_ERROR:
-      return "Deprecation Error";
-    case MessageType::DEPRECATION_WARNING:
-      return "Deprecation Warning";
-    case MessageType::AUTHOR_WARNING:
-      return "Warning (dev)";
-    case MessageType::AUTHOR_ERROR:
-      return "Error (dev)";
     default:
       break;
   }
@@ -61,9 +53,7 @@ cm::StdIo::TermAttr getMessageColor(MessageType t)
   switch (t) {
     case MessageType::INTERNAL_ERROR:
     case MessageType::FATAL_ERROR:
-    case MessageType::AUTHOR_ERROR:
       return cm::StdIo::TermAttr::ForegroundRed;
-    case MessageType::AUTHOR_WARNING:
     case MessageType::WARNING:
       return cm::StdIo::TermAttr::ForegroundYellow;
     default:
@@ -82,14 +72,6 @@ void printMessageText(std::ostream& msg, std::string const& text)
 void displayMessage(MessageType type, cmDiagnosticCategory category,
                     std::ostringstream& msg)
 {
-  // Add a note about warning suppression.
-  if (type == MessageType::AUTHOR_WARNING) {
-    msg << "This warning is for project developers.  Use -Wno-dev to suppress "
-           "it.";
-  } else if (type == MessageType::AUTHOR_ERROR) {
-    msg << "This error is for project developers. Use -Wno-error=dev to "
-           "suppress it.";
-  }
   if (category == cmDiagnostics::CMD_AUTHOR) {
     // Add a note about warning suppression.
     if (type == MessageType::WARNING) {
@@ -121,9 +103,7 @@ void displayMessage(MessageType type, cmDiagnosticCategory category,
   cmMessageMetadata md;
   md.attrs = getMessageColor(type);
   if (type == MessageType::FATAL_ERROR ||
-      type == MessageType::INTERNAL_ERROR ||
-      type == MessageType::DEPRECATION_ERROR ||
-      type == MessageType::AUTHOR_ERROR) {
+      type == MessageType::INTERNAL_ERROR) {
     cmSystemTools::SetErrorOccurred();
     md.title = "Error";
   } else {
@@ -172,56 +152,10 @@ void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
 
 } // anonymous namespace
 
-MessageType cmMessenger::ConvertMessageType(MessageType t) const
-{
-  if (t == MessageType::AUTHOR_WARNING || t == MessageType::AUTHOR_ERROR) {
-    if (this->GetDevWarningsAsErrors()) {
-      return MessageType::AUTHOR_ERROR;
-    }
-    return MessageType::AUTHOR_WARNING;
-  }
-  if (t == MessageType::DEPRECATION_WARNING ||
-      t == MessageType::DEPRECATION_ERROR) {
-    if (this->GetDeprecatedWarningsAsErrors()) {
-      return MessageType::DEPRECATION_ERROR;
-    }
-    return MessageType::DEPRECATION_WARNING;
-  }
-  return t;
-}
-
-bool cmMessenger::IsMessageTypeVisible(MessageType t) const
-{
-  if (t == MessageType::DEPRECATION_ERROR) {
-    return this->GetDeprecatedWarningsAsErrors();
-  }
-  if (t == MessageType::DEPRECATION_WARNING) {
-    return !this->GetSuppressDeprecatedWarnings();
-  }
-  if (t == MessageType::AUTHOR_ERROR) {
-    return this->GetDevWarningsAsErrors();
-  }
-  if (t == MessageType::AUTHOR_WARNING) {
-    return !this->GetSuppressDevWarnings();
-  }
-
-  return true;
-}
-
 void cmMessenger::IssueMessage(MessageType t, std::string const& text,
                                cmListFileBacktrace const& backtrace) const
 {
-  bool force = false;
-  // override the message type, if needed, for warnings and errors
-  MessageType override = this->ConvertMessageType(t);
-  if (override != t) {
-    t = override;
-    force = true;
-  }
-
-  if (force || this->IsMessageTypeVisible(t)) {
-    this->DisplayMessage(t, cmDiagnostics::CMD_NONE, text, backtrace);
-  }
+  this->DisplayMessage(t, cmDiagnostics::CMD_NONE, text, backtrace);
 }
 
 void cmMessenger::IssueDiagnostic(cmDiagnosticCategory category,

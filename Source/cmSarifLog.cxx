@@ -124,14 +124,10 @@ std::size_t cmSarif::ResultsLog::UseRule(std::string const& id) const
 cmSarif::ResultSeverityLevel cmSarif::MessageSeverityLevel(MessageType t)
 {
   switch (t) {
-    case MessageType::AUTHOR_WARNING:
     case MessageType::WARNING:
-    case MessageType::DEPRECATION_WARNING:
       return ResultSeverityLevel::SARIF_WARNING;
-    case MessageType::AUTHOR_ERROR:
     case MessageType::FATAL_ERROR:
     case MessageType::INTERNAL_ERROR:
-    case MessageType::DEPRECATION_ERROR:
       return ResultSeverityLevel::SARIF_ERROR;
     case MessageType::MESSAGE:
     case MessageType::LOG:
@@ -144,20 +140,12 @@ cmSarif::ResultSeverityLevel cmSarif::MessageSeverityLevel(MessageType t)
 cm::optional<std::string> cmSarif::MessageRuleId(MessageType t)
 {
   switch (t) {
-    case MessageType::AUTHOR_WARNING:
-      return "CMake.AuthorWarning";
     case MessageType::WARNING:
       return "CMake.Warning";
-    case MessageType::DEPRECATION_WARNING:
-      return "CMake.DeprecationWarning";
-    case MessageType::AUTHOR_ERROR:
-      return "CMake.AuthorError";
     case MessageType::FATAL_ERROR:
       return "CMake.FatalError";
     case MessageType::INTERNAL_ERROR:
       return "CMake.InternalError";
-    case MessageType::DEPRECATION_ERROR:
-      return "CMake.DeprecationError";
     case MessageType::MESSAGE:
       return "CMake.Message";
     case MessageType::LOG:
