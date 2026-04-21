@@ -46,30 +46,35 @@ CONFIGURE_PRESET_PROPERTIES_PATH = (
 WARNING_DESCRIPTION = (
     'An optional boolean. '
     'Equivalent to passing -W{c} or -Wno-{c} on the command line. '
-    'This may not be set to false if errors.{c} is set to true.'
+    'This may not be set to false if errors.{p} is set to true.'
 )
 WARNING_SPHINX_DESCRIPTION = """
 An optional boolean. Equivalent to passing :option:`-W{c} <cmake -W>` or
 :option:`-Wno-{c} <cmake -Wno->` on the command line.
-This may not be set to ``false`` if ``errors.{c}`` is set to ``true``.
+This may not be set to ``false`` if ``errors.{p}`` is set to ``true``.
 """.strip()
 ERROR_DESCRIPTION = (
     'An optional boolean. '
     'Equivalent to passing -Werror={c} or -Wno-error={c} on the command line. '
-    'This may not be set to true if warnings.{c} is set to false.'
+    'This may not be set to true if warnings.{p} is set to false.'
 )
 ERROR_SPHINX_DESCRIPTION = """
 An optional boolean. Equivalent to passing :cmake-option:`-Werror={c}` or
 :cmake-option:`-Wno-error={c}` on the command line.
-This may not be set to ``true`` if ``warnings.{c}`` is set to ``false``.
+This may not be set to ``true`` if ``warnings.{p}`` is set to ``false``.
 """.strip()
 
 
 # =============================================================================
 @dataclass
 class Diagnostic:
-    name: str
+    presetName: str
+    cliName: str
     since: int
+
+    # -------------------------------------------------------------------------
+    def format(self, template: str) -> str:
+        return template.format(c=self.cliName, p=self.presetName)
 
 
 # =============================================================================
@@ -662,11 +667,11 @@ def buildDiagnosticsSchema(
     out = {}
 
     for d in diagnostics:
-        out[d.name] = {
+        out[d.presetName] = {
             'since': d.since,
             'type': 'boolean',
-            'description': descriptionTemplate.format(c=d.name),
-            'sphinxDescription': sphinxDescriptionTemplate.format(c=d.name),
+            'description': d.format(descriptionTemplate),
+            'sphinxDescription': d.format(sphinxDescriptionTemplate),
         }
 
     return out
@@ -720,10 +725,11 @@ def readDiagnostics(path: Path | str) -> list[Diagnostic]:
             break
 
         args = [a.strip() for a in m.group(1).split(',')]
-        n = diagnosticPresetName(args[3])
+        p = diagnosticPresetName(args[3])
+        c = args[3][4:].lower().replace('_', '-')
         v = int(args[4])
         if v > 1:
-            out.append(Diagnostic(n, v))
+            out.append(Diagnostic(p, c, v))
 
         content = content[m.span()[1]:]
 
