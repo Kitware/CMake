@@ -4,10 +4,8 @@
 
 #include <chrono>
 #include <cstdlib>
-#include <map>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <cm/memory>
@@ -35,48 +33,6 @@
 using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 
 namespace {
-
-cm::optional<ConfigurePreset> LoadPreset(cmExecutionStatus& status,
-                                         std::string sourceDirectory,
-                                         std::string presetName)
-{
-  // Load a configure preset after verifying its existence and validity.
-  cmCMakePresetsGraph presetsGraph;
-  if (!presetsGraph.ReadProjectPresets(sourceDirectory)) {
-    status.SetError(
-      cmStrCat("Could not read presets from \"", sourceDirectory,
-               "\": ", presetsGraph.parseState.GetErrorMessage()));
-    return cm::nullopt;
-  }
-
-  auto preset = presetsGraph.ConfigurePresets.find(presetName);
-  if (preset == presetsGraph.ConfigurePresets.end()) {
-    status.SetError(cmStrCat("No such preset in ", sourceDirectory, ": \"",
-                             presetName, '"'));
-    return cm::nullopt;
-  }
-
-  if (preset->second.Unexpanded.Hidden) {
-    status.SetError(cmStrCat("Cannot use hidden preset in ", sourceDirectory,
-                             ": \"", presetName, '"'));
-    return cm::nullopt;
-  }
-
-  auto const& expandedPreset = preset->second.Expanded;
-  if (!expandedPreset) {
-    status.SetError(cmStrCat("Could not evaluate preset \"", presetName,
-                             "\": Invalid macro expansion."));
-    return cm::nullopt;
-  }
-
-  if (!expandedPreset->ConditionResult) {
-    status.SetError(
-      cmStrCat("Cannot use disabled preset \"", presetName, "\"."));
-    return cm::nullopt;
-  }
-
-  return expandedPreset;
-}
 
 bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
                                std::string const sourceDirectory,
@@ -107,10 +63,26 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
   bool presetProvidesGenerator = false;
 
   if (!presetName.empty()) {
-    auto expandedPreset = LoadPreset(status, sourceDirectory, presetName);
-    if (!expandedPreset) {
+    cmCMakePresetsGraph presetsGraph;
+    if (!presetsGraph.ReadProjectPresets(sourceDirectory)) {
+      status.SetError(
+        cmStrCat("Could not read presets from \"", sourceDirectory,
+                 "\": ", presetsGraph.parseState.GetErrorMessage()));
       return false;
     }
+
+    auto resolveResult =
+      presetsGraph.ResolvePreset(presetName, presetsGraph.ConfigurePresets);
+    auto resolveError =
+      cmCMakePresetsGraph::FormatPresetError<ConfigurePreset>(
+        resolveResult.StatusCode, resolveResult.ErrorPresetName,
+        sourceDirectory);
+    if (resolveError) {
+      status.SetError(*resolveError);
+      return false;
+    }
+
+    auto const* expandedPreset = resolveResult.Preset;
 
     configureCommand += " \"--preset\"";
     configureCommand += " \"";

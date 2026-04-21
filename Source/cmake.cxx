@@ -2035,33 +2035,22 @@ bool cmake::SetArgsFromPreset(std::string const& presetName,
     return false;
   }
 
-  auto preset = presetsGraph.ConfigurePresets.find(presetName);
-  if (preset == presetsGraph.ConfigurePresets.end()) {
-    cmSystemTools::Error(cmStrCat("No such preset in ",
-                                  this->GetHomeDirectory(), ": \"", presetName,
-                                  '"'));
-    this->PrintPresetList(presetsGraph);
+  auto resolveResult =
+    presetsGraph.ResolvePreset(presetName, presetsGraph.ConfigurePresets);
+  using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
+  using S = cmCMakePresetsGraph::PresetResolveStatus;
+  auto resolveError = cmCMakePresetsGraph::FormatPresetError<ConfigurePreset>(
+    resolveResult.StatusCode, resolveResult.ErrorPresetName,
+    this->GetHomeDirectory());
+  if (resolveError) {
+    cmSystemTools::Error(*resolveError);
+    if (resolveResult.StatusCode == S::NotFound ||
+        resolveResult.StatusCode == S::Hidden) {
+      this->PrintPresetList(presetsGraph);
+    }
     return false;
   }
-  if (preset->second.Unexpanded.Hidden) {
-    cmSystemTools::Error(cmStrCat("Cannot use hidden preset in ",
-                                  this->GetHomeDirectory(), ": \"", presetName,
-                                  '"'));
-    this->PrintPresetList(presetsGraph);
-    return false;
-  }
-  auto const& expandedPreset = preset->second.Expanded;
-  if (!expandedPreset) {
-    cmSystemTools::Error(cmStrCat("Could not evaluate preset \"",
-                                  preset->second.Unexpanded.Name,
-                                  "\": Invalid macro expansion"));
-    return false;
-  }
-  if (!expandedPreset->ConditionResult) {
-    cmSystemTools::Error(cmStrCat("Could not use disabled preset \"",
-                                  preset->second.Unexpanded.Name, '"'));
-    return false;
-  }
+  auto const* expandedPreset = resolveResult.Preset;
 
   if (!this->State->IsCacheLoaded() && !haveBinaryDirArg &&
       !expandedPreset->BinaryDir.empty()) {
@@ -3926,39 +3915,18 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
       return 0;
     }
 
-    auto presetPair = settingsFile.BuildPresets.find(presetName);
-    if (presetPair == settingsFile.BuildPresets.end()) {
-      cmSystemTools::Error(cmStrCat("No such build preset in ",
-                                    this->GetHomeDirectory(), ": \"",
-                                    presetName, '"'));
+    auto resolveResult =
+      settingsFile.ResolvePreset(presetName, settingsFile.BuildPresets);
+    auto resolveError =
+      cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::BuildPreset>(
+        resolveResult.StatusCode, resolveResult.ErrorPresetName,
+        this->GetHomeDirectory());
+    if (resolveError) {
+      cmSystemTools::Error(*resolveError);
       settingsFile.PrintBuildPresetList();
       return 1;
     }
-
-    if (presetPair->second.Unexpanded.Hidden) {
-      cmSystemTools::Error(cmStrCat("Cannot use hidden build preset in ",
-                                    this->GetHomeDirectory(), ": \"",
-                                    presetName, '"'));
-      settingsFile.PrintBuildPresetList();
-      return 1;
-    }
-
-    auto const& expandedPreset = presetPair->second.Expanded;
-    if (!expandedPreset) {
-      cmSystemTools::Error(cmStrCat("Could not evaluate build preset \"",
-                                    presetName,
-                                    "\": Invalid macro expansion"));
-      settingsFile.PrintBuildPresetList();
-      return 1;
-    }
-
-    if (!expandedPreset->ConditionResult) {
-      cmSystemTools::Error(cmStrCat("Cannot use disabled build preset in ",
-                                    this->GetHomeDirectory(), ": \"",
-                                    presetName, '"'));
-      settingsFile.PrintBuildPresetList();
-      return 1;
-    }
+    auto const* expandedPreset = resolveResult.Preset;
 
     auto configurePresetPair =
       settingsFile.ConfigurePresets.find(expandedPreset->ConfigurePreset);

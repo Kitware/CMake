@@ -1,1 +1,2 @@
-^CMake Error: Could not use disabled preset "SimpleFalse"$
+^CMake Error: Cannot use disabled configure preset in [^
+]*/Tests/RunCMake/CMakePresets/SimpleFalse: "SimpleFalse"$
