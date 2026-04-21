@@ -286,9 +286,9 @@ Updates
 
 Changes made since CMake 4.3.0 include the following.
 
-4.3.1
------
+4.3.1, 4.3.2
+------------
 
-* This version made no changes to documented features or interfaces.
+* These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
