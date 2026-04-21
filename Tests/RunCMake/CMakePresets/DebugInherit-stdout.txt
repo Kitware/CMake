@@ -1,0 +1,4 @@
+-- Generating [^
+]*/Tests/RunCMake/CMakePresets/DebugInherit/build
+   Called from: \[1\][^
+]*/Tests/RunCMake/CMakePresets/DebugInherit/CMakeLists\.txt
