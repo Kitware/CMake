@@ -19,6 +19,7 @@ protected:
   struct ConfigureArguments : HandlerArguments
   {
     std::string Options;
+    std::string Preset;
   };
 
 private:
