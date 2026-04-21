@@ -668,7 +668,7 @@ Generation
   For reference, the algorithm used to compute the relative path is the same
   as that used by C++
   `std::filesystem::path::lexically_relative
-  <https://en.cppreference.com/w/cpp/filesystem/path/lexically_normal>`_.
+  <https://en.cppreference.com/cpp/filesystem/path/lexically_normal>`_.
 
   See :ref:`Creating a Path Variable` for details on the output variable.
 
