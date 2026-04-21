@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 
+#ifdef HAVE_RESOURCE_LIB
 extern int lib(void);
+#endif
 
 struct x
 {
@@ -76,5 +78,9 @@ int main(int argc, char** argv)
     }
   }
 
-  return ret + lib();
+  return ret
+#ifdef HAVE_RESOURCE_LIB
+    + lib()
+#endif
+    ;
 }

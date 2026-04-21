@@ -444,6 +444,7 @@ if(BUILD_TESTING)
 
   if(CMake_TEST_RESOURCES)
     ADD_TEST_MACRO(VSResource VSResource)
+    set_property(TEST VSResource APPEND PROPERTY LABELS "PellesC")
     if(CMAKE_GENERATOR MATCHES "Ninja")
       add_test_macro(VSResourceNinjaForceRSP VSResourceNinjaForceRSP)
     endif()
