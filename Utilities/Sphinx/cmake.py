@@ -570,6 +570,7 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
     _re_sub = re.compile(r'^([^()\s]+)\s*\(([^()]*)\)$', re.DOTALL)
     _re_genex = re.compile(r'^\$<([^<>:]+)(:[^<>]+)?>$', re.DOTALL)
     _re_guide = re.compile(r'^([^<>/]+)/([^<>]*)$', re.DOTALL)
+    _re_explicit = re.compile(r'^([^<>]+)\s+<([^<>]+)>$', re.DOTALL)
 
     def __call__(self, typ, rawtext, text, *args, **kwargs):
         if typ == 'cmake:command':
@@ -590,7 +591,12 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
             if m:
                 text = f'{m.group(2)} <{text}>'
         elif typ == 'cmake:preset':
-            text = f'CMakePresets.{text}'
+            m = CMakeXRefRole._re_explicit.match(text)
+            if m:
+                rawtext = f'{m.group(1)} <CMakePresets.{m.group(2)}>'
+                text = f'{m.group(1)} <CMakePresets.{m.group(2)}>'
+            else:
+                text = f'CMakePresets.{text}'
         return super().__call__(typ, rawtext, text, *args, **kwargs)
 
     # We cannot insert index nodes using the result_nodes method
@@ -777,12 +783,11 @@ class CMakeDomain(Domain):
                 if not docname:
                     return None
 
+                if node['refexplicit']:
+                    sectname = node.astext()
+
                 return make_refnode(builder, fromdocname, docname, labelid,
                                     nodes.literal('', sectname), target)
-
-                import sys
-                print(typ, target, node, file=sys.stderr)
-                print(docname, labelid, sectname, file=sys.stderr)
 
         if obj is None:
             # TODO: warn somehow?
