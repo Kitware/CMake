@@ -7,9 +7,15 @@ Add default compilation flags to be used when compiling a specific dialect
 of an assembly language.  ``ASM<DIALECT>FLAGS`` can be one of:
 
 * ``ASMFLAGS``
+
 * ``ASM_NASMFLAGS``
+
 * ``ASM_MASMFLAGS``
+
 * ``ASM_MARMASMFLAGS``
+
+.. FIXME(#21536): * ``ASM_POASMFLAGS``
+
 * ``ASM-ATTFLAGS``
 
 .. |CMAKE_LANG_FLAGS| replace:: :variable:`CMAKE_ASM<DIALECT>_FLAGS <CMAKE_<LANG>_FLAGS>`

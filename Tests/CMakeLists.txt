@@ -2142,6 +2142,11 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(VSMASM VSMASM)
   endif()
 
+  if(CMAKE_C_COMPILER_ID STREQUAL "PellesC")
+    ADD_TEST_MACRO(PellesASM PellesASM)
+    set_property(TEST PellesASM APPEND PROPERTY LABELS "PellesC")
+  endif()
+
   if(CMAKE_GENERATOR MATCHES "Visual Studio")
     if(NOT MSVC60)
       ADD_TEST_MACRO(SBCS SBCS)

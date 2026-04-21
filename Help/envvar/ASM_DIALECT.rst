@@ -7,9 +7,15 @@ Preferred executable for compiling a specific dialect of assembly language
 files. ``ASM<DIALECT>`` can be one of:
 
 * ``ASM``
+
 * ``ASM_NASM`` (Netwide Assembler)
+
 * ``ASM_MASM`` (Microsoft Assembler)
+
 * ``ASM_MARMASM`` (Microsoft ARM Assembler)
+
+.. FIXME(#21536): * ``ASM_POASM`` (Pelles Macro Assembler)
+
 * ``ASM-ATT`` (Assembler AT&T)
 
 Will only be used by CMake on the first configuration to determine
