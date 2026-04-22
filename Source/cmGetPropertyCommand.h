@@ -7,7 +7,41 @@
 #include <string>
 #include <vector>
 
+#include "cmValue.h"
+
 class cmExecutionStatus;
+
+namespace GetPropertyCommand {
+
+// Per-entity property lookups used by the get_property command. Each preserves
+// the script command's error semantics for its scope (status.SetError on
+// missing entity / empty name where applicable). On success, returns true and
+// fills `out`; `out` is null iff the property is unset. On hard error returns
+// false with status.SetError already set.
+
+bool LookupTargetProperty(cmExecutionStatus& status, std::string const& name,
+                          std::string const& propertyName, cmValue& out);
+
+bool LookupDirectoryProperty(cmExecutionStatus& status,
+                             std::string const& name,
+                             std::string const& propertyName, cmValue& out);
+
+bool LookupSourceProperty(
+  cmExecutionStatus& status, std::string const& name,
+  std::string const& propertyName, bool sourceFileDirectoryOptionEnabled,
+  bool sourceFileTargetOptionEnabled,
+  std::vector<std::string>& sourceFileDirectories,
+  std::vector<std::string>& sourceFileTargetDirectories, cmValue& out);
+
+bool LookupTestProperty(cmExecutionStatus& status, std::string const& name,
+                        std::string const& propertyName,
+                        bool testDirectoryOptionEnabled,
+                        std::string& testDirectory, cmValue& out);
+
+bool LookupCacheProperty(cmExecutionStatus& status, std::string const& name,
+                         std::string const& propertyName, cmValue& out);
+
+}
 
 bool cmGetPropertyCommand(std::vector<std::string> const& args,
                           cmExecutionStatus& status);

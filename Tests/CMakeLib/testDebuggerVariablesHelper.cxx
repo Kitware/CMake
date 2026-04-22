@@ -213,7 +213,7 @@ static bool testCreateFromTarget()
   ASSERT_VARIABLE(variables[12], "PolicyMap", "", "collection");
   ASSERT_VARIABLE(variables[13], "Properties",
                   std::to_string(dummies.Makefile->GetOrderedTargets()[0]
-                                   ->GetProperties()
+                                   ->GetDirectProperties()
                                    .GetList()
                                    .size()),
                   "collection");

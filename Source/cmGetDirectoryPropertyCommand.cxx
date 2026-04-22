@@ -2,16 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGetDirectoryPropertyCommand.h"
 
+#include "cmDirectoryPropertyHelper.h"
 #include "cmExecutionStatus.h"
-#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmSystemTools.h"
 #include "cmValue.h"
-
-namespace {
-void StoreResult(cmMakefile& makefile, std::string const& variable,
-                 cmValue prop);
-}
 
 // cmGetDirectoryPropertyCommand
 bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
@@ -26,8 +20,8 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
   std::string const& variable = *i;
   ++i;
 
-  // get the directory argument if there is one
-  cmMakefile* dir = &status.GetMakefile();
+  // Get the directory argument if there is one.
+  cmMakefile* mf = &status.GetMakefile();
   if (*i == "DIRECTORY") {
     ++i;
     if (i == args.end()) {
@@ -35,12 +29,8 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
         "DIRECTORY argument provided without subsequent arguments");
       return false;
     }
-    std::string sd = cmSystemTools::CollapseFullPath(
-      *i, status.GetMakefile().GetCurrentSourceDirectory());
-
-    // lookup the makefile from the directory name
-    dir = status.GetMakefile().GetGlobalGenerator()->FindMakefile(sd);
-    if (!dir) {
+    mf = cmResolveDirectoryMakefile(status.GetMakefile(), *i);
+    if (!mf) {
       status.SetError(
         "DIRECTORY argument provided but requested directory not found. "
         "This could be because the directory argument was invalid or, "
@@ -54,9 +44,6 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
     }
   }
 
-  // OK, now we have the directory to process, we just get the requested
-  // information out of it
-
   if (*i == "DEFINITION") {
     ++i;
     if (i == args.end()) {
@@ -64,8 +51,7 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
                       "providing the name of the variable to get.");
       return false;
     }
-    std::string const& output = dir->GetSafeDefinition(*i);
-    status.GetMakefile().AddDefinition(variable, output);
+    status.GetMakefile().AddDefinition(variable, mf->GetSafeDefinition(*i));
     return true;
   }
 
@@ -74,14 +60,12 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  StoreResult(status.GetMakefile(), variable, dir->GetProperty(*i));
-  return true;
-}
-
-namespace {
-void StoreResult(cmMakefile& makefile, std::string const& variable,
-                 cmValue prop)
-{
-  makefile.AddDefinition(variable, prop);
-}
+  cmValue prop;
+  auto result = cmGetDirectoryProperty(*mf, *i, prop);
+  if (result == cmGetDirectoryPropertyResult::Success) {
+    status.GetMakefile().AddDefinition(variable, prop);
+    return true;
+  }
+  status.SetError("unknown error retrieving directory property");
+  return false;
 }

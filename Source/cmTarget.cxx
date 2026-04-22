@@ -2862,7 +2862,7 @@ bool cmTarget::GetPropertyAsBool(std::string const& prop) const
   return this->GetProperty(prop).IsOn();
 }
 
-cmPropertyMap const& cmTarget::GetProperties() const
+cmPropertyMap const& cmTarget::GetDirectProperties() const
 {
   return this->impl->Properties;
 }

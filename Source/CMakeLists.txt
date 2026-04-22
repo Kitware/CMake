@@ -195,6 +195,8 @@ add_library(
   cmDiagnosticContext.cxx
   cmDiagnostics.h
   cmDiagnostics.cxx
+  cmDirectoryPropertyHelper.cxx
+  cmDirectoryPropertyHelper.h
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
   cmDyndepCollation.cxx
@@ -496,6 +498,8 @@ add_library(
   cmSourceFileLocation.cxx
   cmSourceFileLocation.h
   cmSourceFileLocationKind.h
+  cmSourceFilePropertyHelper.cxx
+  cmSourceFilePropertyHelper.h
   cmSourceGroup.cxx
   cmSourceGroup.h
   cmStandardLevel.h
@@ -527,6 +531,8 @@ add_library(
   cmTargetPropertyComputer.h
   cmTargetPropertyEntry.cxx
   cmTargetPropertyEntry.h
+  cmTargetPropertyHelper.cxx
+  cmTargetPropertyHelper.h
   cmTargetTraceDependencies.cxx
   cmTargetTraceDependencies.h
   cmTargetTypes.h
@@ -534,6 +540,8 @@ add_library(
   cmTest.h
   cmTestGenerator.cxx
   cmTestGenerator.h
+  cmTestPropertyHelper.cxx
+  cmTestPropertyHelper.h
   cmTransformDepfile.cxx
   cmTransformDepfile.h
   cmUuid.cxx

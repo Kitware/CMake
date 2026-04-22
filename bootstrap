@@ -317,6 +317,7 @@ CMAKE_CXX_SOURCES="\
   cmDefinitions \
   cmDiagnostics \
   cmDiagnosticContext \
+  cmDirectoryPropertyHelper \
   cmDiscoverTestsCommand \
   cmDocumentationFormatter \
   cmELF \
@@ -471,6 +472,7 @@ CMAKE_CXX_SOURCES="\
   cmSiteNameCommand \
   cmSourceFile \
   cmSourceFileLocation \
+  cmSourceFilePropertyHelper \
   cmStandardLevelResolver \
   cmState \
   cmStateDirectory \
@@ -496,10 +498,12 @@ CMAKE_CXX_SOURCES="\
   cmTargetPropCommandBase \
   cmTargetPropertyComputer \
   cmTargetPropertyEntry \
+  cmTargetPropertyHelper \
   cmTargetSourcesCommand \
   cmTargetTraceDependencies \
   cmTest \
   cmTestGenerator \
+  cmTestPropertyHelper \
   cmTimestamp \
   cmTransformDepfile \
   cmTryCompileCommand \

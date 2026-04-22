@@ -233,8 +233,8 @@ public:
   bool GetPropertyAsBool(std::string const& prop) const;
   void CheckProperty(std::string const& prop, cmMakefile* context) const;
   cmValue GetComputedProperty(std::string const& prop, cmMakefile& mf) const;
-  //! Get all properties
-  cmPropertyMap const& GetProperties() const;
+  //! Get properties set directly on this target (no special/computed/chained)
+  cmPropertyMap const& GetDirectProperties() const;
 
   //! Return whether or not the target is for a DLL platform.
   bool IsDLLPlatform() const;
