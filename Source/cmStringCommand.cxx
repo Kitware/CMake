@@ -5,6 +5,7 @@
 
 #include "cmStringCommand.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
@@ -928,6 +929,56 @@ std::string WriteJson(Json::Value const& value)
   return Json::writeString(writer, value);
 }
 
+bool JsonPartialMatch(Json::Value const& pattern, Json::Value const& actual)
+{
+  if (pattern.type() != actual.type()) {
+    return false;
+  }
+  switch (pattern.type()) {
+    case Json::nullValue:
+    case Json::intValue:
+    case Json::uintValue:
+    case Json::realValue:
+    case Json::stringValue:
+    case Json::booleanValue:
+      return pattern == actual;
+
+    case Json::objectValue: {
+      std::vector<std::string> const keys = pattern.getMemberNames();
+      return std::all_of(keys.begin(), keys.end(),
+                         [&](std::string const& key) {
+                           return actual.isMember(key) &&
+                             JsonPartialMatch(pattern[key], actual[key]);
+                         });
+    }
+
+    case Json::arrayValue: {
+      if (actual.size() < pattern.size()) {
+        return false;
+      }
+      std::vector<bool> matched(actual.size(), false);
+      for (Json::Value const& p : pattern) {
+        bool found = false;
+        for (Json::ArrayIndex j = 0; j < actual.size(); ++j) {
+          if (matched[j]) {
+            continue;
+          }
+          if (JsonPartialMatch(p, actual[j])) {
+            matched[j] = true;
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
 #endif
 
 bool HandleJSONCommand(std::vector<std::string> const& arguments,
@@ -954,11 +1005,12 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
     auto const& mode = args.PopFront("missing mode argument"_s);
     if (mode != "GET"_s && mode != "GET_RAW"_s && mode != "TYPE"_s &&
         mode != "MEMBER"_s && mode != "LENGTH"_s && mode != "REMOVE"_s &&
-        mode != "SET"_s && mode != "EQUAL"_s && mode != "STRING_ENCODE"_s) {
+        mode != "SET"_s && mode != "EQUAL"_s && mode != "STRING_ENCODE"_s &&
+        mode != "PARTIAL_EQUAL"_s) {
       throw json_error(cmStrCat(
         "got an invalid mode '"_s, mode,
         "', expected one of GET, GET_RAW, TYPE, MEMBER, LENGTH, REMOVE, SET, "
-        " EQUAL, STRING_ENCODE"_s));
+        " EQUAL, PARTIAL_EQUAL, STRING_ENCODE"_s));
     }
 
     auto const& jsonstr = args.PopFront("missing json string argument"_s);
@@ -1067,6 +1119,12 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
           args.PopFront("missing second json string argument"_s);
         Json::Value json2 = ReadJson(jsonstr2);
         makefile.AddDefinitionBool(*outputVariable, json == json2);
+      } else if (mode == "PARTIAL_EQUAL"_s) {
+        auto const& jsonstr2 =
+          args.PopFront("missing second json string argument"_s);
+        Json::Value json2 = ReadJson(jsonstr2);
+        makefile.AddDefinitionBool(*outputVariable,
+                                   JsonPartialMatch(json, json2));
       }
     }
 
