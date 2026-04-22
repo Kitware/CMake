@@ -3909,9 +3909,17 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
 
 #if !defined(CMAKE_BOOTSTRAP)
   if (!presetName.empty() || listPresets) {
-    this->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
-    this->SetHomeOutputDirectory(cmSystemTools::GetLogicalWorkingDirectory());
-
+    // If the binary directory was specified, use it to find
+    // the source directory so we can locate the presets file.
+    if (!buildArgs.binaryDir.empty() &&
+        this->SetDirectoriesFromFile(buildArgs.binaryDir)) {
+      // HomeDirectory is now the source directory (found in CMakeCache.txt)
+    } else {
+      // Otherwise we assume this command was called from the source directory.
+      this->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
+      this->SetHomeOutputDirectory(
+        cmSystemTools::GetLogicalWorkingDirectory());
+    }
     cmCMakePresetsGraph settingsFile;
     auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
     if (result != true) {

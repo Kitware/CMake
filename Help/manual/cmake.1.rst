@@ -778,8 +778,8 @@ project binary tree:
 
 .. code-block:: shell
 
-  cmake --build <dir>             [<options>] [-- <build-tool-options>]
-  cmake --build --preset <preset> [<options>] [-- <build-tool-options>]
+  cmake --build <dir>                     [<options>] [-- <build-tool-options>]
+  cmake --build [<dir>] --preset <preset> [<options>] [-- <build-tool-options>]
 
 This abstracts a native build tool's command-line interface with the
 following options:
@@ -795,17 +795,23 @@ following options:
 
   Use a build preset to specify build options. The project binary directory
   is inferred from the ``configurePreset`` key unless a directory is specified
-  after ``--build``. The current working directory must contain CMake preset
-  files. See :manual:`preset <cmake-presets(7)>` for more details.
+  after ``--build``.  See :manual:`preset <cmake-presets(7)>` for more details.
 
   .. versionadded:: 4.3
     ``cmake --build`` now supports specifying a build directory and
     preset together.
 
+  .. versionchanged:: 4.4
+    ``cmake --build <dir> --preset`` no longer needs to be called from the
+    directory containing the CMake presets files.
+
 .. option:: --list-presets
 
-  Lists the available build presets. The current working directory must
-  contain CMake preset files.
+  Lists the available build presets.
+
+  .. versionchanged:: 4.4
+    ``cmake --build <dir> --list-presets`` no longer needs to be called from
+    the directory containing the CMake presets files.
 
 .. option:: -j [<jobs>], --parallel [<jobs>]
 
