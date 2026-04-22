@@ -1,25 +1,54 @@
+The supported languages are:
 
-Supported languages are ``C``, ``CXX`` (i.e.  C++), ``CSharp`` (i.e.  C#), ``CUDA``,
-``OBJC`` (i.e. Objective-C), ``OBJCXX`` (i.e. Objective-C++), ``Fortran``, ``HIP``,
-``ISPC``, ``Swift``, ``ASM``, ``ASM_NASM``, ``ASM_MARMASM``, ``ASM_MASM``, and ``ASM-ATT``.
+``C``
 
+``CXX``
+  C++
+
+``CSharp``
   .. versionadded:: 3.8
-    Added ``CSharp`` and ``CUDA`` support.
 
-  .. versionadded:: 3.15
-    Added ``Swift`` support.
+  C#
 
+``CUDA``
+  .. versionadded:: 3.8
+
+``OBJC``
   .. versionadded:: 3.16
-    Added ``OBJC`` and ``OBJCXX`` support.
 
-  .. versionadded:: 3.18
-    Added ``ISPC`` support.
+  Objective-C
 
+``OBJCXX``
+  .. versionadded:: 3.16
+
+  Objective-C++
+
+``Fortran``
+
+``HIP``
   .. versionadded:: 3.21
-    Added ``HIP`` support.
 
+``ISPC``
+  .. versionadded:: 3.18
+
+``Swift``
+  .. versionadded:: 3.15
+
+``ASM``
+  Assembly language supported by the C compiler.
+
+  If enabling ``ASM``, list it last so that CMake can check
+  whether the ``C`` or ``CXX`` compiler supports assembly.
+
+``ASM_NASM``
+  Netwide Assembler
+
+``ASM_MARMASM``
   .. versionadded:: 3.26
-    Added ``ASM_MARMASM`` support.
 
-If enabling ``ASM``, list it last so that CMake can check whether
-compilers for other languages like ``C`` work for assembly too.
+  Microsoft Assembler (ARM, ARM64)
+
+``ASM_MASM``
+  Microsoft Assembler (x86, x64)
+
+``ASM-ATT``
