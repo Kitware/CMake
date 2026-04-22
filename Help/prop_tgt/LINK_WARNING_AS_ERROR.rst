@@ -35,6 +35,7 @@ are:
 * ``MOLD``
 * ``MSVC``
 * ``Solaris``
+* ``WILD``
 
 This property is initialized by the value of the variable
 :variable:`CMAKE_LINK_WARNING_AS_ERROR` if it is set when a target is

@@ -45,8 +45,8 @@ built-in types. The pre-defined linker types are:
   ``NVIDIA``, and ``Swift`` compilers.
 
 ``MOLD``
-  Use the `mold linker <https://github.com/rui314/mold>`_. This type is
-  supported on the following platform-compiler combinations:
+  Use the `mold linker`_. This type is supported on the following
+  platform-compiler combinations:
 
   * Linux: ``GNU``, ``Clang``, ``LLVMFlang``, and ``NVIDIA`` compilers.
   * Apple platforms: ``Clang`` and ``AppleClang`` compilers (acts as an
@@ -55,6 +55,12 @@ built-in types. The pre-defined linker types are:
 ``SOLD``
   Use the `sold linker`_. This type is only supported on Apple platforms
   with ``Clang`` and ``AppleClang`` compilers.
+
+``WILD``
+  .. versionadded:: 4.4
+
+  Use the `wild linker`_. This type is only supported on Linux platforms
+  with ``Clang`` and ``GNU`` compilers.
 
 ``APPLE_CLASSIC``
   Use the Apple linker in the classic behavior (i.e. before ``Xcode 15.0``).
@@ -66,4 +72,6 @@ built-in types. The pre-defined linker types are:
   platform with ``MSVC``, ``Clang`` with MSVC-like front-end, and ``Swift``
   compilers.
 
+.. _mold linker: https://github.com/rui314/mold
 .. _sold linker: https://github.com/bluewhalesystems/sold
+.. _wild linker: https://github.com/wild-linker/wild
