@@ -3,6 +3,7 @@
 include_guard()
 
 set(CMAKE_LIBRARY_PATH_FLAG "-libpath:")
+set(CMAKE_LINK_DEF_FILE_FLAG "-def:")
 set(CMAKE_LINK_LIBRARY_FLAG "")
 
 macro(__windows_compiler_pellesc lang)
@@ -15,6 +16,8 @@ macro(__windows_compiler_pellesc lang)
 
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_LINKER> <OBJECTS> -out:<TARGET> -implib:<TARGET_IMPLIB> -version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <LINK_FLAGS> <LINK_LIBRARIES>")
+
+  set(CMAKE_${lang}_LINK_DEF_FILE_FLAG "${CMAKE_LINK_DEF_FILE_FLAG}")
 
   set(CMAKE_${lang}_CREATE_WIN32_EXE "-subsystem:windows")
   set(CMAKE_${lang}_CREATE_CONSOLE_EXE "-subsystem:console")

@@ -2093,9 +2093,10 @@ if(BUILD_TESTING)
       set_property(TEST MSVCRuntimeLibrary.Fortran APPEND PROPERTY LABELS "Fortran")
     endif()
   endif()
-  if(MSVC OR
+  if(MSVC OR CMAKE_C_COMPILER_ID MATCHES "PellesC" OR
       "${CMAKE_GENERATOR}" MATCHES "(MSYS|MinGW) Makefiles")
     ADD_TEST_MACRO(ModuleDefinition example_exe)
+    set_property(TEST ModuleDefinition APPEND PROPERTY LABELS "PellesC")
   endif()
 
   if(CMAKE_C_COMPILER_ID MATCHES "Watcom" AND WIN32)
