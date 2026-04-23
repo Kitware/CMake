@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "CMakeGUITest.h"
 
-#include "QCMake.h"
 #include <QApplication>
 #include <QEventLoop>
 #include <QFile>
@@ -21,6 +20,7 @@
 
 #include "CatchShow.h"
 #include "FirstConfigure.h"
+#include "QCMake.h"
 
 using WindowSetupHelper = std::function<void(CMakeSetupDialog*)>;
 Q_DECLARE_METATYPE(WindowSetupHelper)
@@ -284,6 +284,14 @@ QCMakePropertyList makePresetProperties(QString const& name)
       /*Strings=*/{},
       /*Help=*/"",
       /*Type=*/QCMakeProperty::PATH,
+      /*Advanced=*/false,
+    },
+    QCMakeProperty{
+      /*Key=*/"SOURCE_DIR_NAME_VARIABLE",
+      /*Value=*/"src",
+      /*Strings=*/{},
+      /*Help=*/"",
+      /*Type=*/QCMakeProperty::STRING,
       /*Advanced=*/false,
     },
     QCMakeProperty{

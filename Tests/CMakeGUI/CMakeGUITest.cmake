@@ -151,7 +151,7 @@ run_cmake_gui_test(environment)
 
 run_cmake_gui_test(presetArg:preset
   ARGS
-    -S "${CMakeGUITest_BINARY_DIR}/presetArg-preset/src"
+    -S "${CMakeGUITest_BINARY_DIR}/presetArg-preset/src/"
     "--preset=ninja"
   )
 run_cmake_gui_test(presetArg:presetBinary

@@ -18,6 +18,10 @@
           "type": "FILEPATH",
           "value": "${sourceDir}/CMakeLists.txt"
         },
+        "SOURCE_DIR_NAME_VARIABLE": {
+          "type": "STRING",
+          "value": "${sourceDirName}"
+        },
         "ON_VARIABLE": {
           "type": "BOOL",
           "value": "ON"
