@@ -25,20 +25,19 @@ struct cmVariableWatchCallbackData
   std::string Command;
 };
 
-void cmVariableWatchCommandVariableAccessed(std::string const& variable,
-                                            int access_type, void* client_data,
-                                            char const* newValue,
-                                            cmMakefile const* mf)
+void cmVariableWatchCommandVariableAccessed(
+  std::string const& variable, cmVariableWatch::AccessType accessType,
+  void* clientData, char const* newValue, cmMakefile const* mf)
 {
   cmVariableWatchCallbackData* data =
-    static_cast<cmVariableWatchCallbackData*>(client_data);
+    static_cast<cmVariableWatchCallbackData*>(clientData);
 
   if (data->InCallback) {
     return;
   }
   data->InCallback = true;
 
-  auto accessString = cmVariableWatch::GetAccessAsString(access_type);
+  auto accessString = cmVariableWatch::GetAccessAsString(accessType);
 
   /// Ultra bad!!
   cmMakefile* makefile = const_cast<cmMakefile*>(mf);

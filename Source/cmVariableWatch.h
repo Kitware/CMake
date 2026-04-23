@@ -19,8 +19,21 @@ class cmMakefile;
 class cmVariableWatch
 {
 public:
-  using WatchMethod = void (*)(std::string const&, int, void*, char const*,
-                               cmMakefile const*);
+  /**
+   * Different access types.
+   */
+  enum AccessType : unsigned
+  {
+    VARIABLE_READ_ACCESS,
+    UNKNOWN_VARIABLE_READ_ACCESS,
+    UNKNOWN_VARIABLE_DEFINED_ACCESS,
+    VARIABLE_MODIFIED_ACCESS,
+    VARIABLE_REMOVED_ACCESS,
+    NO_ACCESS
+  };
+
+  using WatchMethod = void (*)(std::string const&, AccessType, void*,
+                               char const*, cmMakefile const*);
   using DeleteData = void (*)(void*);
 
   cmVariableWatch();
@@ -37,26 +50,13 @@ public:
   /**
    * This method is called when variable is accessed
    */
-  bool VariableAccessed(std::string const& variable, int access_type,
+  bool VariableAccessed(std::string const& variable, AccessType accessType,
                         char const* newValue, cmMakefile const* mf) const;
-
-  /**
-   * Different access types.
-   */
-  enum
-  {
-    VARIABLE_READ_ACCESS,
-    UNKNOWN_VARIABLE_READ_ACCESS,
-    UNKNOWN_VARIABLE_DEFINED_ACCESS,
-    VARIABLE_MODIFIED_ACCESS,
-    VARIABLE_REMOVED_ACCESS,
-    NO_ACCESS
-  };
 
   /**
    * Return the access as string
    */
-  static std::string const& GetAccessAsString(int access_type);
+  static std::string const& GetAccessAsString(AccessType accessType);
 
 protected:
   struct Pair

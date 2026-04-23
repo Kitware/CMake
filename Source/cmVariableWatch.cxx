@@ -7,16 +7,16 @@
 #include <utility>
 #include <vector>
 
-std::string const& cmVariableWatch::GetAccessAsString(int access_type)
+std::string const& cmVariableWatch::GetAccessAsString(AccessType accessType)
 {
   static std::array<std::string, 6> const cmVariableWatchAccessStrings = {
     { "READ_ACCESS", "UNKNOWN_READ_ACCESS", "UNKNOWN_DEFINED_ACCESS",
       "MODIFIED_ACCESS", "REMOVED_ACCESS", "NO_ACCESS" }
   };
-  if (access_type < 0 || access_type >= cmVariableWatch::NO_ACCESS) {
-    access_type = cmVariableWatch::NO_ACCESS;
+  if (accessType >= cmVariableWatch::NO_ACCESS) {
+    accessType = cmVariableWatch::NO_ACCESS;
   }
-  return cmVariableWatchAccessStrings[access_type];
+  return cmVariableWatchAccessStrings[accessType];
 }
 
 cmVariableWatch::cmVariableWatch() = default;
@@ -63,7 +63,8 @@ void cmVariableWatch::RemoveWatch(std::string const& variable,
 }
 
 bool cmVariableWatch::VariableAccessed(std::string const& variable,
-                                       int access_type, char const* newValue,
+                                       AccessType accessType,
+                                       char const* newValue,
                                        cmMakefile const* mf) const
 {
   auto mit = this->WatchMap.find(variable);
@@ -77,7 +78,7 @@ bool cmVariableWatch::VariableAccessed(std::string const& variable,
       // lockable, and so this ensures we don't attempt to call into freed
       // memory
       if (auto it = weak_it.lock()) {
-        it->Method(variable, access_type, it->ClientData, newValue, mf);
+        it->Method(variable, accessType, it->ClientData, newValue, mf);
       }
     }
     return true;

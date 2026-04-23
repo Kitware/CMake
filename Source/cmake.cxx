@@ -166,8 +166,9 @@ using CommandArgument =
   cmCommandLineArgument<bool(std::string const& value, cmake* state)>;
 
 #ifndef CMAKE_BOOTSTRAP
-void cmWarnUnusedCliWarning(std::string const& variable, int /*unused*/,
-                            void* ctx, char const* /*unused*/,
+void cmWarnUnusedCliWarning(std::string const& variable,
+                            cmVariableWatch::AccessType /*unused*/, void* ctx,
+                            char const* /*unused*/,
                             cmMakefile const* /*unused*/)
 {
   cmake* cm = reinterpret_cast<cmake*>(ctx);
