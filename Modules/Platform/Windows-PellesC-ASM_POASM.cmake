@@ -2,7 +2,7 @@
 # file LICENSE.rst or https://cmake.org/licensing for details.
 
 include (Platform/Windows-PellesC)
-__windows_compiler_pellesc(C)
+__windows_compiler_pellesc(ASM_POASM)
 
-set(CMAKE_C_COMPILE_OBJECT
-  "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -Fo<OBJECT> -c <SOURCE>")
+set(CMAKE_ASM_POASM_COMPILE_OBJECT
+  "<CMAKE_ASM_POASM_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -Fo<OBJECT> <SOURCE>")
