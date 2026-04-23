@@ -1520,35 +1520,18 @@ bool cmCTest::SetArgsFromPreset(std::string const& presetName,
     return true;
   }
 
-  auto presetPair = settingsFile.TestPresets.find(presetName);
-  if (presetPair == settingsFile.TestPresets.end()) {
-    cmSystemTools::Error(cmStrCat("No such test preset in ", workingDirectory,
-                                  ": \"", presetName, '"'));
+  auto resolveResult =
+    settingsFile.ResolvePreset(presetName, settingsFile.TestPresets);
+  auto resolveError =
+    cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::TestPreset>(
+      resolveResult.StatusCode, resolveResult.ErrorPresetName,
+      workingDirectory);
+  if (resolveError) {
+    cmSystemTools::Error(*resolveError);
     settingsFile.PrintTestPresetList();
     return false;
   }
-
-  if (presetPair->second.Unexpanded.Hidden) {
-    cmSystemTools::Error(cmStrCat("Cannot use hidden test preset in ",
-                                  workingDirectory, ": \"", presetName, '"'));
-    settingsFile.PrintTestPresetList();
-    return false;
-  }
-
-  auto const& expandedPreset = presetPair->second.Expanded;
-  if (!expandedPreset) {
-    cmSystemTools::Error(cmStrCat("Could not evaluate test preset \"",
-                                  presetName, "\": Invalid macro expansion"));
-    settingsFile.PrintTestPresetList();
-    return false;
-  }
-
-  if (!expandedPreset->ConditionResult) {
-    cmSystemTools::Error(cmStrCat("Cannot use disabled test preset in ",
-                                  workingDirectory, ": \"", presetName, '"'));
-    settingsFile.PrintTestPresetList();
-    return false;
-  }
+  auto const* expandedPreset = resolveResult.Preset;
 
   auto configurePresetPair =
     settingsFile.ConfigurePresets.find(expandedPreset->ConfigurePreset);

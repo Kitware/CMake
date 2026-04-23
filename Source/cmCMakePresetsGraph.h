@@ -401,6 +401,38 @@ public:
     cm::optional<T> Expanded;
   };
 
+  enum class PresetResolveStatus
+  {
+    Success,
+    NotFound,
+    Hidden,
+    InvalidMacroExpansion,
+    Disabled,
+  };
+
+  // Result type for preset resolution
+  template <class T>
+  struct PresetResolveResult
+  {
+    using Status = PresetResolveStatus;
+
+    Status StatusCode = Status::Success;
+    std::string ErrorPresetName;
+    T const* Preset = nullptr;
+  };
+
+  template <class T>
+  PresetResolveResult<T> ResolvePreset(
+    std::string const& presetName,
+    std::map<std::string, PresetPair<T>> const& presets) const;
+
+  // Returns an error message for a preset resolve status,
+  // or cm::nullopt on Success.
+  template <class T>
+  static cm::optional<std::string> FormatPresetError(
+    PresetResolveStatus status, std::string const& errorPresetName,
+    std::string const& directory);
+
   std::map<std::string, PresetPair<ConfigurePreset>> ConfigurePresets;
   std::map<std::string, PresetPair<BuildPreset>> BuildPresets;
   std::map<std::string, PresetPair<TestPreset>> TestPresets;
@@ -459,3 +491,57 @@ private:
   static std::string GetFilename(std::string const& sourceDir);
   static std::string GetUserFilename(std::string const& sourceDir);
 };
+
+extern template cmCMakePresetsGraph::PresetResolveResult<
+  cmCMakePresetsGraph::ConfigurePreset>
+cmCMakePresetsGraph::ResolvePreset(
+  std::string const&,
+  std::map<std::string,
+           cmCMakePresetsGraph::PresetPair<
+             cmCMakePresetsGraph::ConfigurePreset>> const&) const;
+
+extern template cmCMakePresetsGraph::PresetResolveResult<
+  cmCMakePresetsGraph::BuildPreset>
+cmCMakePresetsGraph::ResolvePreset(
+  std::string const&,
+  std::map<
+    std::string,
+    cmCMakePresetsGraph::PresetPair<cmCMakePresetsGraph::BuildPreset>> const&)
+  const;
+
+extern template cmCMakePresetsGraph::PresetResolveResult<
+  cmCMakePresetsGraph::TestPreset>
+cmCMakePresetsGraph::ResolvePreset(
+  std::string const&,
+  std::map<
+    std::string,
+    cmCMakePresetsGraph::PresetPair<cmCMakePresetsGraph::TestPreset>> const&)
+  const;
+
+extern template cmCMakePresetsGraph::PresetResolveResult<
+  cmCMakePresetsGraph::PackagePreset>
+cmCMakePresetsGraph::ResolvePreset(
+  std::string const&,
+  std::map<std::string,
+           cmCMakePresetsGraph::PresetPair<
+             cmCMakePresetsGraph::PackagePreset>> const&) const;
+
+extern template cm::optional<std::string>
+cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::ConfigurePreset>(
+  cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
+  std::string const&);
+
+extern template cm::optional<std::string>
+cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::BuildPreset>(
+  cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
+  std::string const&);
+
+extern template cm::optional<std::string>
+cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::TestPreset>(
+  cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
+  std::string const&);
+
+extern template cm::optional<std::string>
+cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::PackagePreset>(
+  cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
+  std::string const&);

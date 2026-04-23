@@ -1,2 +1,2 @@
-^CMake Error: Cannot use hidden preset in [^
+^CMake Error: Cannot use hidden configure preset in [^
 ]*/Tests/RunCMake/CMakePresets/UseHiddenPreset: "UseHiddenPreset"$

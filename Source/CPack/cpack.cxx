@@ -276,41 +276,20 @@ int main(int argc, char const* const* argv)
       return 0;
     }
 
-    auto presetPair = presetsGraph.PackagePresets.find(preset);
-    if (presetPair == presetsGraph.PackagePresets.end()) {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-                  "No such package preset in " << workingDirectory << ": \""
-                                               << preset << "\"\n");
+    auto resolveResult =
+      presetsGraph.ResolvePreset(preset, presetsGraph.PackagePresets);
+    auto resolveError = cmCMakePresetsGraph::FormatPresetError<
+      cmCMakePresetsGraph::PackagePreset>(resolveResult.StatusCode,
+                                          resolveResult.ErrorPresetName,
+                                          workingDirectory);
+    if (resolveError) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR, *resolveError << "\n");
       presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
       return 1;
     }
+    auto const* expandedPreset = resolveResult.Preset;
 
-    if (presetPair->second.Unexpanded.Hidden) {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-                  "Cannot use hidden package preset in "
-                    << workingDirectory << ": \"" << preset << "\"\n");
-      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
-      return 1;
-    }
-
-    auto const& expandedPreset = presetPair->second.Expanded;
-    if (!expandedPreset) {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-                  "Could not evaluate package preset \""
-                    << preset << "\": Invalid macro expansion\n");
-      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
-      return 1;
-    }
-
-    if (!expandedPreset->ConditionResult) {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-                  "Cannot use disabled package preset in "
-                    << workingDirectory << ": \"" << preset << "\"\n");
-      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
-      return 1;
-    }
-
-    if (!presetGeneratorsPresent(presetPair->second.Unexpanded)) {
+    if (!presetGeneratorsPresent(*expandedPreset)) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Cannot use preset");
       presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
       return 1;

@@ -1,1 +1,1 @@
-^CMake Error: Could not evaluate preset "VendorMacro": Invalid macro expansion$
+^CMake Error: Could not evaluate configure preset "VendorMacro": Invalid macro expansion$
