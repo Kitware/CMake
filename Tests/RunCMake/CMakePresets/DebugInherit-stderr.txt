@@ -1,0 +1,2 @@
+  find_package considered the following locations for
+  ThisPackageHopefullyDoesNotExist's Config module:

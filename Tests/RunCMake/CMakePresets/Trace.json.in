@@ -64,6 +64,29 @@
         "source": "TraceSourceFile.txt",
         "redirect": "TraceRedirectFile.json"
       }
+    },
+    {
+      "name": "TraceInherit",
+      "inherits": "Trace"
+    },
+    {
+      "name": "TraceInheritOverride",
+      "inherits": "Trace",
+      "trace": {
+        "mode": "off"
+      }
+    },
+    {
+      "name": "TraceFormatInherit",
+      "inherits": "TraceFormatJSON"
+    },
+    {
+      "name": "TraceSourceInherit",
+      "inherits": "TraceSource"
+    },
+    {
+      "name": "TraceRedirectInherit",
+      "inherits": "TraceRedirect"
     }
   ]
 }

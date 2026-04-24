@@ -373,6 +373,8 @@ unset(CMakePresets_WARN_UNUSED_CLI)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Debug.json.in")
 run_cmake_presets(NoDebug)
 run_cmake_presets(Debug)
+run_cmake_presets(DebugInherit)
+run_cmake_presets(DebugInheritOverride)
 
 # Test trace
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Trace.json.in")
@@ -385,6 +387,11 @@ run_cmake_presets(TraceFormatHuman)
 run_cmake_presets(TraceSource)
 run_cmake_presets(TraceRedirect)
 run_cmake_presets(TraceAll)
+run_cmake_presets(TraceInherit)
+run_cmake_presets(TraceInheritOverride)
+run_cmake_presets(TraceFormatInherit)
+run_cmake_presets(TraceSourceInherit)
+run_cmake_presets(TraceRedirectInherit)
 
 # Test ${hostSystemName} macro
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemName.json.in")
