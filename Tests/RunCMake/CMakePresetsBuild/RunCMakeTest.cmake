@@ -90,3 +90,34 @@ set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
 
 run_cmake_build_presets(ConfigurePresetUnreachable "x" "x" "")
 set(CMakePresetsBuild_BUILD_ONLY 0)
+
+# Verify that `cmake --build <dir> --preset <pre>` works when
+# the current working directory is not the source directory.
+block()
+  set(name "BuildPresetFromBinaryDir")
+  set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/${name}")
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_TEST_SOURCE_DIR}/build/default")
+  set(RunCMake_TEST_NO_CLEAN TRUE)
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  set(CASE_NAME "${name}")
+  set(CASE_SOURCE_DIR "${RunCMake_SOURCE_DIR}")
+  configure_file("${RunCMake_SOURCE_DIR}/CMakeLists.txt.in"
+                 "${RunCMake_TEST_SOURCE_DIR}/CMakeLists.txt" @ONLY)
+  configure_file("${RunCMake_SOURCE_DIR}/ListPresets.json.in"
+                 "${RunCMake_TEST_SOURCE_DIR}/CMakePresets.json" @ONLY)
+
+  # Configure using the "default" preset.
+  set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}")
+  run_cmake_command("${name}-configure"
+    "${CMAKE_COMMAND}" "--preset" "default")
+
+  # Verify calling `cmake --build <dir> --preset <pre>` from the
+  # binary directory.
+  set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake_command("${name}-build"
+    "${CMAKE_COMMAND}" "--build" "${RunCMake_TEST_BINARY_DIR}"
+    "--preset" "build-default")
+endblock()
