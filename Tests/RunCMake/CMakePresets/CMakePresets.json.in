@@ -126,6 +126,22 @@
       "binaryDir": "build"
     },
     {
+      "name": "GoodSourceSlash",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "build",
+      "cacheVariables": {
+        "TEST_SOURCE_DIR": {
+          "type": "PATH",
+          "value": "${sourceDir}"
+        },
+        "TEST_SOURCE_PARENT_DIR": {
+          "type": "PATH",
+          "value": "${sourceParentDir}"
+        },
+        "TEST_SOURCE_DIR_NAME": "${sourceDirName}"
+      }
+    },
+    {
       "name": "Good Spaces",
       "generator": "@RunCMake_GENERATOR@",
       "binaryDir": "${sourceDir}/build",

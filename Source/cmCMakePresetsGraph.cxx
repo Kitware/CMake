@@ -1137,7 +1137,7 @@ std::string cmCMakePresetsGraph::GetUserFilename(std::string const& sourceDir)
 bool cmCMakePresetsGraph::ReadProjectPresets(std::string const& sourceDir,
                                              bool allowNoFiles)
 {
-  this->SourceDir = sourceDir;
+  this->SourceDir = cmSystemTools::CollapseFullPath(sourceDir);
   this->ClearPresets();
 
   if (!this->ReadProjectPresetsInternal(allowNoFiles)) {
