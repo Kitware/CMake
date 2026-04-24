@@ -203,8 +203,7 @@ For more information on regular expressions look under
     the other ones will remain the same as before the transformation.
 
   ``<ACTION>`` specifies the action to apply to the elements of the list.
-  The actions have exactly the same semantics as sub-commands of the
-  :command:`string` command.  ``<ACTION>`` must be one of the following:
+  ``<ACTION>`` must be one of the following:
 
     :command:`APPEND <string(APPEND)>`, :command:`PREPEND <string(PREPEND)>`
       Append, prepend specified value to each element of the list.
@@ -250,6 +249,45 @@ For more information on regular expressions look under
         The ``^`` anchor now matches only at the beginning of the input
         element instead of the beginning of each repeated search.
         See policy :policy:`CMP0186`.
+
+    ``APPLY``
+      Invoke a user-defined callable for each element of the list.
+      The callable must accept exactly two parameters: the input value and the
+      name of an output variable.  The callable must set the output variable
+      in the calling scope.
+
+      .. signature::
+        list(TRANSFORM <list> APPLY <function> ...)
+        :target: TRANSFORM_APPLY
+
+      .. versionadded:: 4.4
+
+      ``<function>`` is a :command:`function` with exactly two formal parameters.
+      Set the output variable via
+      :command:`set(\<variable\> \<value\> PARENT_SCOPE) <set>`:
+
+      .. code-block:: cmake
+
+        function(<function> <input> <output>)
+          # Transform <input>, store result in ${<output>}
+          set(${<output>} "<result>" PARENT_SCOPE)
+        endfunction()
+
+      Before each invocation, the output variable is unset in the calling scope
+      to prevent stale values.
+
+      Example:
+
+      .. code-block:: cmake
+
+        function(make_absolute in out)
+          cmake_path(ABSOLUTE_PATH in BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+          set(${out} "${in}" PARENT_SCOPE)
+        endfunction()
+
+        set(mylist main.c utils.c io.c)
+        list(TRANSFORM mylist APPLY make_absolute)
+        # mylist is now absolute paths relative to CMAKE_CURRENT_SOURCE_DIR
 
   ``<SELECTOR>`` determines which elements of the list will be transformed.
   Only one type of selector can be specified at a time.

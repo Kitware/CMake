@@ -1,0 +1,5 @@
+^CMake Error at TRANSFORM-APPLY-NoOutput\.cmake:6 \(list\):
+  list sub-command TRANSFORM, action APPLY: function "my_bad_transform" did
+  not set the output variable\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$

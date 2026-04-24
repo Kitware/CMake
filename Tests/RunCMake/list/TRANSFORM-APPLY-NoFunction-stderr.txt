@@ -1,0 +1,4 @@
+^CMake Error at TRANSFORM-APPLY-NoFunction\.cmake:2 \(list\):
+  list sub-command TRANSFORM, action APPLY expects 1 argument\(s\)\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$

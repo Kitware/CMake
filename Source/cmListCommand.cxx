@@ -481,7 +481,8 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
                    { "TOLOWER", cmList::TransformAction::TOLOWER, 0 },
                    { "STRIP", cmList::TransformAction::STRIP, 0 },
                    { "GENEX_STRIP", cmList::TransformAction::GENEX_STRIP, 0 },
-                   { "REPLACE", cmList::TransformAction::REPLACE, 2 } },
+                   { "REPLACE", cmList::TransformAction::REPLACE, 2 },
+                   { "APPLY", cmList::TransformAction::APPLY, 1 } },
                  [](std::string const& x, std::string const& y) {
                    return x < y;
                  } };
@@ -683,7 +684,12 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
     }
     selector->Makefile = &status.GetMakefile();
 
-    list->transform(descriptor->Action, arguments, std::move(selector));
+    if (descriptor->Action == cmList::TransformAction::APPLY) {
+      list->transform(descriptor->Action, arguments.front(),
+                      status.GetMakefile(), std::move(selector));
+    } else {
+      list->transform(descriptor->Action, arguments, std::move(selector));
+    }
     status.GetMakefile().AddDefinition(outputName, list->to_string());
     return true;
   } catch (cmList::transform_error& e) {
