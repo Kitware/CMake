@@ -648,6 +648,14 @@
       "minimum": 0,
       "description": "Index into the fileSets array. Only present if the file is part of a file set."
     },
+    "sourcesFileSetIndexesV2_11": {
+      "type": "array",
+      "description": "Indexes into the fileSets array. Only present if the file is part of a file set.",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
     "sourcesV2_0": {
       "type": "array",
       "items": {
@@ -705,6 +713,39 @@
         "additionalProperties": false
       }
     },
+    "sourcesV2_11": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "#/definitions/sourcesPath"
+          },
+          "compileGroupIndex": {
+            "$ref": "#/definitions/sourcesCompileGroupIndex"
+          },
+          "sourceGroupIndex": {
+            "$ref": "#/definitions/sourcesSourceGroupIndex"
+          },
+          "isGenerated": {
+            "$ref": "#/definitions/sourcesIsGenerated"
+          },
+          "backtrace": {
+            "$ref": "#/definitions/backtrace"
+          },
+          "fileSetIndex": {
+            "$ref": "#/definitions/sourcesFileSetIndexV2_5"
+          },
+          "fileSetIndexes": {
+            "$ref": "#/definitions/sourcesFileSetIndexesV2_11"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "interfaceSourcesV2_10": {
       "type": "array",
       "items": {
@@ -724,6 +765,33 @@
           },
           "fileSetIndex": {
             "$ref": "#/definitions/sourcesFileSetIndexV2_5"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "interfaceSourcesV2_11": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "#/definitions/sourcesPath"
+          },
+          "sourceGroupIndex": {
+            "$ref": "#/definitions/sourcesSourceGroupIndex"
+          },
+          "isGenerated": {
+            "$ref": "#/definitions/sourcesIsGenerated"
+          },
+          "fileSetIndex": {
+            "$ref": "#/definitions/sourcesFileSetIndexV2_5"
+          },
+          "fileSetIndexes": {
+            "$ref": "#/definitions/sourcesFileSetIndexesV2_11"
           }
         },
         "additionalProperties": false
@@ -1922,10 +1990,10 @@
           "$ref": "#/definitions/fileSetsV2_11"
         },
         "sources": {
-          "$ref": "#/definitions/sourcesV2_5"
+          "$ref": "#/definitions/sourcesV2_11"
         },
         "interfaceSources": {
-          "$ref": "#/definitions/interfaceSourcesV2_10"
+          "$ref": "#/definitions/interfaceSourcesV2_11"
         },
         "symbolic": {
           "$ref": "#/definitions/symbolicV2_9"

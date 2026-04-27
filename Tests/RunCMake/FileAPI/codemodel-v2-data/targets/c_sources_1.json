@@ -31,7 +31,8 @@
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
-      "fileSetName": "public_srcs",
+      "fileSetNames": ["public_srcs"],
+      "fileSetIndexes": [0],
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
       "backtrace": [
@@ -52,7 +53,8 @@
     {
       "path": "^fileset/other\\.c$",
       "isGenerated": null,
-      "fileSetName": "SOURCES",
+      "fileSetNames": ["SOURCES"],
+      "fileSetIndexes": [0],
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -75,7 +77,7 @@
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
-      "fileSetName": "SOURCES",
+      "fileSetNames": ["SOURCES"],
       "sourceGroupName": "Source Files"
     }
   ],

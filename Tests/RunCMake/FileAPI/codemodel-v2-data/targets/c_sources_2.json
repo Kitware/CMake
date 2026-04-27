@@ -14,7 +14,8 @@
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
+      "fileSetIndexes": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
       "backtrace": [

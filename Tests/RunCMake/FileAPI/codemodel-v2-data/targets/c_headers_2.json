@@ -23,7 +23,7 @@
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
       "backtrace": [
@@ -46,7 +46,7 @@
     {
       "path": "^fileset/h1\\.h$",
       "isGenerated": null,
-      "fileSetName": "HEADERS",
+      "fileSetNames": ["HEADERS"],
       "sourceGroupName": "Header Files"
     }
   ],

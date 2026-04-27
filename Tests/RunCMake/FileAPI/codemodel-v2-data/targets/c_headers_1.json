@@ -47,7 +47,7 @@
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
       "backtrace": [
@@ -68,7 +68,8 @@
     {
       "path": "^fileset/error\\.c$",
       "isGenerated": null,
-      "fileSetName": "HEADERS",
+      "fileSetNames": ["HEADERS"],
+      "fileSetIndexes": [0],
       "sourceGroupName": "Header Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -89,7 +90,8 @@
     {
       "path": "^fileset/other\\.c$",
       "isGenerated": null,
-      "fileSetName": "HEADERS",
+      "fileSetNames": ["HEADERS"],
+      "fileSetIndexes": [0],
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -110,7 +112,8 @@
     {
       "path": "^fileset/h1\\.h$",
       "isGenerated": null,
-      "fileSetName": "a",
+      "fileSetNames": ["a"],
+      "fileSetIndexes": [1],
       "sourceGroupName": "Header Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -131,7 +134,30 @@
     {
       "path": "^fileset/dir/h4\\.h$",
       "isGenerated": null,
-      "fileSetName": "a",
+      "fileSetNames": ["a"],
+      "fileSetIndexes": [1],
+      "sourceGroupName": "Header Files",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 3,
+          "command": "target_sources",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": "^fileset/h5\\.h$",
+      "isGenerated": null,
+      "fileSetNames": ["a", "c"],
+      "fileSetIndexes": [1, 3],
       "sourceGroupName": "Header Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -152,7 +178,8 @@
     {
       "path": "^fileset/dir/h2\\.h$",
       "isGenerated": null,
-      "fileSetName": "b",
+      "fileSetNames": ["b"],
+      "fileSetIndexes": [2],
       "sourceGroupName": "Header Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -175,25 +202,36 @@
     {
       "path": "^fileset/error\\.c$",
       "isGenerated": null,
-      "fileSetName": "HEADERS",
+      "fileSetNames": ["HEADERS"],
+      "fileSetIndexes": [0],
       "sourceGroupName": "Header Files"
     },
     {
       "path": "^fileset/other\\.c$",
       "isGenerated": null,
-      "fileSetName": "HEADERS",
+      "fileSetNames": ["HEADERS"],
+      "fileSetIndexes": [0],
       "sourceGroupName": "Source Files"
     },
     {
       "path": "^fileset/h3\\.h$",
       "isGenerated": null,
-      "fileSetName": "c",
+      "fileSetNames": ["c"],
+      "fileSetIndexes": [3],
+      "sourceGroupName": "Header Files"
+    },
+    {
+      "path": "^fileset/h5\\.h$",
+      "isGenerated": null,
+      "fileSetNames": ["c"],
+      "fileSetIndexes": [1, 3],
       "sourceGroupName": "Header Files"
     },
     {
       "path": "^fileset/dir/h2\\.h$",
       "isGenerated": null,
-      "fileSetName": "b",
+      "fileSetNames": ["b"],
+      "fileSetIndexes": [2],
       "sourceGroupName": "Header Files"
     }
   ],
@@ -213,13 +251,15 @@
       "sourcePaths": [
         "^fileset/error\\.c$",
         "^fileset/h1\\.h$",
+        "^fileset/h5\\.h$",
         "^fileset/dir/h2\\.h$",
         "^fileset/dir/h4\\.h$"
       ],
       "interfaceSourcePaths": [
         "^fileset/error\\.c$",
-        "^fileset/dir/h2\\.h$",
-        "^fileset/h3\\.h$"
+        "^fileset/h3\\.h$",
+        "^fileset/h5\\.h$",
+        "^fileset/dir/h2\\.h$"
       ]
     }
   ],

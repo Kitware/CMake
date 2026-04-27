@@ -14,7 +14,7 @@
         {
             "path": "^empty\\.c$",
             "isGenerated": null,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "C",
             "backtrace": [
@@ -35,7 +35,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(direct|build/inject_direct_lib_impl\\.build)/.*/other(\\.c)?\\.o(bj)?$",
             "isGenerated": true,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Object Libraries",
             "compileGroupLanguage": null,
             "backtrace": [

@@ -14,7 +14,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPIExternalSource/empty\\.c$",
             "isGenerated": null,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "C",
             "backtrace": [
@@ -35,7 +35,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/generated\\.cxx$",
             "isGenerated": true,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Generated Source Files",
             "compileGroupLanguage": "CXX",
             "backtrace": [

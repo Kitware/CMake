@@ -14,7 +14,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/cxx/CMakeFiles/ALL_BUILD$",
             "isGenerated": true,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "",
             "compileGroupLanguage": null,
             "backtrace": [
@@ -29,7 +29,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/cxx/CMakeFiles/ALL_BUILD\\.rule$",
             "isGenerated": true,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "CMake Rules",
             "compileGroupLanguage": null,
             "backtrace": [

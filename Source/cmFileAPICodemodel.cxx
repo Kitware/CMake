@@ -462,7 +462,7 @@ class Target
   std::unordered_map<CompileData, Json::ArrayIndex> CompileGroupMap;
   std::vector<CompileGroup> CompileGroups;
 
-  using FileSetDatabase = std::map<std::string, Json::ArrayIndex>;
+  using FileSetDatabase = std::map<std::string, std::vector<Json::ArrayIndex>>;
 
   std::vector<cm::FileSetMetadata::Visibility> FileSetVisibilities;
 
@@ -1802,7 +1802,7 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
           } else {
             sf_path = cmStrCat(dir, '/', file);
           }
-          fsdb[sf_path] = static_cast<Json::ArrayIndex>(fsIndex);
+          fsdb[sf_path].emplace_back(static_cast<Json::ArrayIndex>(fsIndex));
         }
       }
 
@@ -1859,7 +1859,11 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
 
   auto fsit = fsdb.find(path);
   if (fsit != fsdb.end()) {
-    source["fileSetIndex"] = fsit->second;
+    source["fileSetIndex"] = fsit->second.back();
+    source["fileSetIndexes"] = Json::arrayValue;
+    for (Json::ArrayIndex const& fsIndex : fsit->second) {
+      source["fileSetIndexes"].append(fsIndex);
+    }
   }
 
   if (cmSourceGroup const* sg =
@@ -1920,7 +1924,7 @@ Json::Value Target::DumpInterfaceSources(FileSetDatabase const& fsdb)
   }
 
   for (auto const& fsIter : fsdb) {
-    Json::ArrayIndex const index = fsIter.second;
+    Json::ArrayIndex const index = fsIter.second.back();
     // FileSetVisibilities was populated by DumpFileSets() and will always
     // have the same size as the file sets array that index is indexing into
     if (this->FileSetVisibilities[index] !=
@@ -1946,7 +1950,11 @@ Json::Value Target::DumpInterfaceSource(std::string path, Json::ArrayIndex si,
 
   auto fsit = fsdb.find(path);
   if (fsit != fsdb.end()) {
-    source["fileSetIndex"] = fsit->second;
+    source["fileSetIndex"] = fsit->second.back();
+    source["fileSetIndexes"] = Json::arrayValue;
+    for (Json::ArrayIndex const& fsIndex : fsit->second) {
+      source["fileSetIndexes"].append(fsIndex);
+    }
   }
 
   if (cmSourceGroup const* sg =
