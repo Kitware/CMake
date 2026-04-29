@@ -22,6 +22,7 @@ Value                           Name
                                 `sold`_ linker
 ``Solaris``                     SunOS system linker
 ``WILD``                        `wild`_ linker
+``OpenWatcom``                  `OpenWatcom wlink`_ linker
 =============================== ===============================================
 
 This variable is not guaranteed to be defined for all linkers or languages.
@@ -33,3 +34,4 @@ This variable is not guaranteed to be defined for all linkers or languages.
 .. _mold\: A Modern Linker: https://github.com/rui314/mold
 .. _sold: https://github.com/bluewhalesystems/sold
 .. _wild: https://github.com/wild-linker/wild
+.. _OpenWatcom wlink: https://www.openwatcom.com/
