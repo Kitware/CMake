@@ -1,0 +1,5 @@
+^CMake Error at FILTER-PREDICATE-Macro\.cmake:11 \(list\):
+  list sub-command FILTER, mode PREDICATE: macro "is_short" may not be used
+  here; define it as a function\(\) instead\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$

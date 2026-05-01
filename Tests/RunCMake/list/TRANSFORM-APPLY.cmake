@@ -8,11 +8,6 @@ function(add_prefix in out)
   set(${out} "prefix_${in}" PARENT_SCOPE)
 endfunction()
 
-# Define a transform macro: wrap in angle brackets
-macro(wrap_angles in out)
-  set(${out} "<${in}>")
-endmacro()
-
 set(mylist alpha bravo charlie delta)
 
 # Basic APPLY - all elements
@@ -72,19 +67,6 @@ unset(output)
 list(TRANSFORM mylist APPLY add_prefix OUTPUT_VARIABLE output)
 if(NOT output STREQUAL "prefix_alpha;prefix_bravo;prefix_charlie;prefix_delta")
   message(FATAL_ERROR "TRANSFORM(APPLY add_prefix) is \"${output}\", expected is \"prefix_alpha;prefix_bravo;prefix_charlie;prefix_delta\"")
-endif()
-
-# APPLY with a macro
-set(mylist alpha bravo charlie)
-list(TRANSFORM mylist APPLY wrap_angles OUTPUT_VARIABLE output)
-if(NOT output STREQUAL "<alpha>;<bravo>;<charlie>")
-  message(FATAL_ERROR "TRANSFORM(APPLY macro) is \"${output}\", expected is \"<alpha>;<bravo>;<charlie>\"")
-endif()
-
-# APPLY with macro and selector
-list(TRANSFORM mylist APPLY wrap_angles AT 0 2 OUTPUT_VARIABLE output)
-if(NOT output STREQUAL "<alpha>;bravo;<charlie>")
-  message(FATAL_ERROR "TRANSFORM(APPLY macro AT) is \"${output}\", expected is \"<alpha>;bravo;<charlie>\"")
 endif()
 
 # APPLY on empty list

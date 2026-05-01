@@ -1,0 +1,5 @@
+^CMake Error at TRANSFORM-Selector-PREDICATE-Macro\.cmake:11 \(list\):
+  list sub-command TRANSFORM, selector PREDICATE: macro "is_short" may not be
+  used here; define it as a function\(\) instead\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$

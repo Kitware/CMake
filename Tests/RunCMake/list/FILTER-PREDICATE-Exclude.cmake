@@ -12,22 +12,6 @@ message("mylist was: ${mylist}")
 list(FILTER mylist EXCLUDE PREDICATE starts_with_filter)
 message("mylist is: ${mylist}")
 
-# EXCLUDE with macro predicate
-macro(is_short input result)
-  string(LENGTH "${input}" _len)
-  if(_len LESS 6)
-    set(${result} TRUE)
-  else()
-    set(${result} FALSE)
-  endif()
-endmacro()
-
-set(mylist ab cdefgh ij klmnop qr)
-list(FILTER mylist EXCLUDE PREDICATE is_short)
-if(NOT mylist STREQUAL "cdefgh;klmnop")
-  message(FATAL_ERROR "FILTER(EXCLUDE PREDICATE macro) is \"${mylist}\", expected \"cdefgh;klmnop\"")
-endif()
-
 # EXCLUDE on empty list
 set(empty_list "")
 list(FILTER empty_list EXCLUDE PREDICATE starts_with_filter)

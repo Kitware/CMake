@@ -14,6 +14,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -24,6 +25,7 @@
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
@@ -96,9 +98,17 @@ void RequireFunction(cmMakefile const& makefile,
                      std::string const& functionName,
                      std::string const& errorPrefix)
 {
-  if (!makefile.GetState()->GetCommand(functionName)) {
+  cm::optional<cmStateEnums::CommandType> type =
+    makefile.GetState()->GetCommandType(functionName);
+  if (!type) {
     throw cmList::transform_error(
       cmStrCat(errorPrefix, ": unknown function \"", functionName, "\"."));
+  }
+  if (*type == cmStateEnums::CommandType::Macro) {
+    throw cmList::transform_error(
+      cmStrCat(errorPrefix, ": macro \"", functionName,
+               "\" may not be used here;"
+               " define it as a function() instead."));
   }
 }
 

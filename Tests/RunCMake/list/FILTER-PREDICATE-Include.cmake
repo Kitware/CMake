@@ -7,27 +7,10 @@ function(starts_with_filter input result)
   endif()
 endfunction()
 
-# Predicate as macro
-macro(is_short input result)
-  string(LENGTH "${input}" _len)
-  if(_len LESS 6)
-    set(${result} TRUE)
-  else()
-    set(${result} FALSE)
-  endif()
-endmacro()
-
 set(mylist FILTER_THIS_BIT DO_NOT_FILTER_THIS thisisanitem FILTER_THIS_THING)
 message("mylist was: ${mylist}")
 list(FILTER mylist INCLUDE PREDICATE starts_with_filter)
 message("mylist is: ${mylist}")
-
-# INCLUDE with macro predicate
-set(mylist ab cdefgh ij klmnop qr)
-list(FILTER mylist INCLUDE PREDICATE is_short)
-if(NOT mylist STREQUAL "ab;ij;qr")
-  message(FATAL_ERROR "FILTER(INCLUDE PREDICATE macro) is \"${mylist}\", expected \"ab;ij;qr\"")
-endif()
 
 # INCLUDE on empty list
 set(empty_list "")

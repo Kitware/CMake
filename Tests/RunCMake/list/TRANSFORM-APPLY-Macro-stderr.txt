@@ -1,0 +1,5 @@
+^CMake Error at TRANSFORM-APPLY-Macro\.cmake:6 \(list\):
+  list sub-command TRANSFORM, action APPLY: macro "wrap_angles" may not be
+  used here; define it as a function\(\) instead\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$
