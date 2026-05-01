@@ -9,9 +9,22 @@ if(_PellesC_ARCH)
 else()
   set(_PellesC_C_OBJ_FLAGS "")
 endif()
+if(_PellesC_ARCH STREQUAL "x64")
+  set(_PellesC_C_ASM_FLAGS " -Tx64-asm")
+elseif(_PellesC_ARCH STREQUAL "x86")
+  set(_PellesC_C_ASM_FLAGS " -Tx86-asm")
+else()
+  set(_PellesC_C_ASM_FLAGS "")
+endif()
 
 set(CMAKE_C_COMPILE_OBJECT
   "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES>${_PellesC_C_OBJ_FLAGS} <FLAGS> -Fo<OBJECT> -c <SOURCE>")
+
+set(CMAKE_C_CREATE_PREPROCESSED_SOURCE
+  "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES>${_PellesC_C_OBJ_FLAGS} <FLAGS> -E <SOURCE> ><PREPROCESSED_SOURCE>")
+
+set(CMAKE_C_CREATE_ASSEMBLY_SOURCE
+  "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES>${_PellesC_C_ASM_FLAGS} <FLAGS> -Fo<ASSEMBLY_SOURCE> <SOURCE>")
 
 # Enable Pelles C's Microsoft extensions to use Windows APIs.
 # The flag also disables standard definitions, so add them.
@@ -23,4 +36,5 @@ string(APPEND CMAKE_C_FLAGS_RELWITHDEBINFO_INIT " -Zi -Ot -Ob1 -DNDEBUG=1")
 string(APPEND CMAKE_C_FLAGS_MINSIZEREL_INIT " -Os -Ob1 -DNDEBUG=1")
 
 unset(_PellesC_C_OBJ_FLAGS)
+unset(_PellesC_C_ASM_FLAGS)
 unset(_PellesC_ARCH)
