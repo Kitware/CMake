@@ -92,6 +92,16 @@ std::string OutputVarFor(cm::string_view prefix, cmMakefile& makefile)
   return cmStrCat(prefix, hash, "_");
 }
 
+void RequireFunction(cmMakefile const& makefile,
+                     std::string const& functionName,
+                     std::string const& errorPrefix)
+{
+  if (!makefile.GetState()->GetCommand(functionName)) {
+    throw cmList::transform_error(
+      cmStrCat(errorPrefix, ": unknown function \"", functionName, "\"."));
+  }
+}
+
 class PredicateEvaluator
 {
 public:
@@ -103,11 +113,7 @@ public:
     , ErrorPrefix(std::move(errorPrefix))
     , OutputVar(OutputVarFor("_cmake_predicate_out_", makefile))
   {
-    if (!makefile.GetState()->GetCommand(this->FunctionName)) {
-      throw cmList::transform_error(cmStrCat(this->ErrorPrefix,
-                                             ": unknown function \"",
-                                             this->FunctionName, "\"."));
-    }
+    RequireFunction(makefile, this->FunctionName, this->ErrorPrefix);
   }
 
   bool operator()(std::string const& value)
@@ -176,11 +182,8 @@ public:
     , Makefile(&makefile)
     , OutputVar(OutputVarFor("_cmake_comparator_out_", makefile))
   {
-    if (!makefile.GetState()->GetCommand(this->FunctionName)) {
-      throw cmList::transform_error(
-        cmStrCat("sub-command SORT, COMPARATOR: unknown function \"",
-                 this->FunctionName, "\"."));
-    }
+    RequireFunction(makefile, this->FunctionName,
+                    "sub-command SORT, COMPARATOR");
   }
 
   bool operator()(std::string const& a, std::string const& b)
@@ -798,12 +801,8 @@ public:
     this->Makefile = &makefile;
     this->OutputVar = OutputVarFor("_cmake_transform_apply_out_", makefile);
 
-    // Validate: command must exist
-    if (!makefile.GetState()->GetCommand(this->FunctionName)) {
-      throw transform_error(
-        cmStrCat("sub-command TRANSFORM, action APPLY: unknown function \"",
-                 this->FunctionName, "\"."));
-    }
+    RequireFunction(makefile, this->FunctionName,
+                    "sub-command TRANSFORM, action APPLY");
   }
 
   void Initialize(TransformSelector* /*selector*/,
