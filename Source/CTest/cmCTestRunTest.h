@@ -114,7 +114,8 @@ private:
   void WriteLogOutputTop(size_t completed, size_t total);
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
-
+  std::string GenerateLLVMPath(std::string fileString);
+  void CollectLLVMCoverage();
   void SetupResourcesEnvironment(cmEnvironment& env);
 
   // Returns "completed/total Test #Index: "
@@ -141,6 +142,7 @@ private:
   int NumberOfRunsLeft = 1;  // default to 1 run of the test
   int NumberOfRunsTotal = 1; // default to 1 run of the test
   bool RunAgain = false;     // default to not having to run again
+  bool UseLLVMCov = false;
   size_t TotalNumberOfTests;
 };
 

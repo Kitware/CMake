@@ -1,0 +1,2 @@
+Using environment variable LLVM_PROFILE_FILE=[^
+]*/Tests/RunCMake/CTestCoverage/ClangCoverage-build/ClangCoverage_%p\.profraw
