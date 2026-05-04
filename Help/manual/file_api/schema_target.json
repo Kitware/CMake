@@ -34,6 +34,9 @@
     },
     {
       "$ref": "#/definitions/codemodelV2_10"
+    },
+    {
+      "$ref": "#/definitions/codemodelV2_11"
     }
   ],
   "definitions": {
@@ -68,7 +71,25 @@
         },
         "minor": {
           "type": "integer",
-          "minimum": 10
+          "const": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "codemodelVersionV2_11": {
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "type": "integer",
+          "const": 2
+        },
+        "minor": {
+          "type": "integer",
+          "minimum": 11
         }
       },
       "additionalProperties": false
@@ -81,7 +102,22 @@
       "type": "string",
       "description": "Unique identifier for the target. The format is unspecified and should not be interpreted by clients."
     },
-    "typeV2_0": {
+    "fileset-typeV2_5": {
+      "type": "string",
+      "enum": [
+        "HEADERS",
+        "CXX_MODULES"
+      ]
+    },
+    "fileset-typeV2_11": {
+      "type": "string",
+      "enum": [
+        "HEADERS",
+        "CXX_MODULES",
+        "SOURCES"
+      ]
+    },
+    "target-typeV2_0": {
       "type": "string",
       "enum": [
         "EXECUTABLE",
@@ -93,7 +129,7 @@
         "UTILITY"
       ]
     },
-    "typeV2_9": {
+    "target-typeV2_9": {
       "type": "string",
       "enum": [
         "EXECUTABLE",
@@ -530,11 +566,44 @@
             "type": "string"
           },
           "type": {
+            "$ref": "#/definitions/fileset-typeV2_5"
+          },
+          "visibility": {
             "type": "string",
             "enum": [
-              "HEADERS",
-              "CXX_MODULES"
+              "PUBLIC",
+              "PRIVATE",
+              "INTERFACE"
             ]
+          },
+          "baseDirectories": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "Base directories containing the file set's files. If a directory is inside the top level source directory, its path is specified relative to that directory. Otherwise, its path is absolute."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "fileSetsV2_11": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "visibility",
+          "baseDirectories"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/definitions/fileset-typeV2_11"
           },
           "visibility": {
             "type": "string",
@@ -1094,7 +1163,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_0"
+          "$ref": "#/definitions/target-typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1158,7 +1227,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_0"
+          "$ref": "#/definitions/target-typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1222,7 +1291,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_0"
+          "$ref": "#/definitions/target-typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1286,7 +1355,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_0"
+          "$ref": "#/definitions/target-typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1353,7 +1422,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_0"
+          "$ref": "#/definitions/target-typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1420,7 +1489,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_0"
+          "$ref": "#/definitions/target-typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1490,7 +1559,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_0"
+          "$ref": "#/definitions/target-typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1567,7 +1636,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_9"
+          "$ref": "#/definitions/target-typeV2_9"
         },
         "imported": {
           "$ref": "#/definitions/importedV2_9"
@@ -1674,7 +1743,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/typeV2_9"
+          "$ref": "#/definitions/target-typeV2_9"
         },
         "imported": {
           "$ref": "#/definitions/importedV2_9"
@@ -1741,6 +1810,116 @@
         },
         "fileSets": {
           "$ref": "#/definitions/fileSetsV2_5"
+        },
+        "sources": {
+          "$ref": "#/definitions/sourcesV2_5"
+        },
+        "interfaceSources": {
+          "$ref": "#/definitions/interfaceSourcesV2_10"
+        },
+        "symbolic": {
+          "$ref": "#/definitions/symbolicV2_9"
+        },
+        "sourceGroups": {
+          "$ref": "#/definitions/sourceGroupsV2_10"
+        },
+        "compileGroups": {
+          "$ref": "#/definitions/compileGroupsV2_6"
+        },
+        "backtraceGraph": {
+          "$ref": "#/definitions/backtraceGraph"
+        }
+      },
+      "additionalProperties": false
+    },
+    "codemodelV2_11": {
+      "required": [
+        "codemodelVersion",
+        "name",
+        "id",
+        "type",
+        "paths",
+        "sources",
+        "backtraceGraph"
+      ],
+      "properties": {
+        "codemodelVersion": {
+          "$ref": "#/definitions/codemodelVersionV2_11"
+        },
+        "name": {
+          "$ref": "#/definitions/name"
+        },
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/target-typeV2_9"
+        },
+        "imported": {
+          "$ref": "#/definitions/importedV2_9"
+        },
+        "local": {
+          "$ref": "#/definitions/localV2_9"
+        },
+        "abstract": {
+          "$ref": "#/definitions/abstractV2_9"
+        },
+        "backtrace": {
+          "$ref": "#/definitions/backtrace"
+        },
+        "folder": {
+          "$ref": "#/definitions/folder"
+        },
+        "paths": {
+          "$ref": "#/definitions/paths"
+        },
+        "nameOnDisk": {
+          "$ref": "#/definitions/nameOnDisk"
+        },
+        "artifacts": {
+          "$ref": "#/definitions/artifacts"
+        },
+        "isGeneratorProvided": {
+          "$ref": "#/definitions/isGeneratorProvided"
+        },
+        "install": {
+          "$ref": "#/definitions/install"
+        },
+        "launchers": {
+          "$ref": "#/definitions/launchersV2_7"
+        },
+        "link": {
+          "$ref": "#/definitions/link"
+        },
+        "archive": {
+          "$ref": "#/definitions/archive"
+        },
+        "debugger": {
+          "$ref": "#/definitions/debuggerV2_8"
+        },
+        "dependencies": {
+          "$ref": "#/definitions/dependencies"
+        },
+        "linkLibraries": {
+          "$ref": "#/definitions/linkLibrariesV2_9"
+        },
+        "interfaceLinkLibraries": {
+          "$ref": "#/definitions/interfaceLinkLibrariesV2_9"
+        },
+        "compileDependencies": {
+          "$ref": "#/definitions/compileDependenciesV2_9"
+        },
+        "interfaceCompileDependencies": {
+          "$ref": "#/definitions/interfaceCompileDependenciesV2_9"
+        },
+        "objectDependencies": {
+          "$ref": "#/definitions/onlyTargetDependenciesArrayV2_9"
+        },
+        "orderDependencies": {
+          "$ref": "#/definitions/onlyTargetDependenciesArrayV2_9"
+        },
+        "fileSets": {
+          "$ref": "#/definitions/fileSetsV2_11"
         },
         "sources": {
           "$ref": "#/definitions/sourcesV2_5"

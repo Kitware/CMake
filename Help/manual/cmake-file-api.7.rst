@@ -1017,6 +1017,9 @@ with members:
 
     This field was added in codemodel version 2.4.
 
+    Since codemodel version 2.11, this field additionally accounts for
+    ``SOURCES`` file sets.
+
   ``fileSetDirectories``
     Optional member that is present when ``type`` is ``fileSet``. The value
     is a list of strings with the file set's base directories (determined by

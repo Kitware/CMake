@@ -1,0 +1,188 @@
+{
+  "name": "c_sources_1",
+  "id": "^c_sources_1::@6b8db101d64c125f29fe$",
+  "directorySource": "^fileset$",
+  "projectName": "codemodel-v2",
+  "type": "STATIC_LIBRARY",
+  "imported": null,
+  "local": null,
+  "abstract": null,
+  "symbolic": null,
+  "isGeneratorProvided": null,
+  "fileSets": [
+    {
+      "name": "SOURCES",
+      "type": "SOURCES",
+      "visibility": "PRIVATE",
+      "baseDirectories": [
+        "^fileset$"
+      ]
+    },
+    {
+      "name": "public_srcs",
+      "type": "SOURCES",
+      "visibility": "PUBLIC",
+      "baseDirectories": [
+        "^fileset$"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "^fileset/empty\\.c$",
+      "isGenerated": null,
+      "fileSetName": "public_srcs",
+      "sourceGroupName": "Source Files",
+      "compileGroupLanguage": "C",
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 40,
+          "command": "target_sources",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": "^fileset/other\\.c$",
+      "isGenerated": null,
+      "fileSetName": "SOURCES",
+      "sourceGroupName": "Source Files",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 35,
+          "command": "target_sources",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    }
+  ],
+  "interfaceSources": [
+    {
+      "path": "^fileset/empty\\.c$",
+      "isGenerated": null,
+      "fileSetName": "SOURCES",
+      "sourceGroupName": "Source Files"
+    }
+  ],
+  "sourceGroups": [
+    {
+      "name": "Source Files",
+      "sourcePaths": [
+        "^fileset/empty\\.c$",
+        "^fileset/other\\.c$"
+      ],
+      "interfaceSourcePaths": [
+        "^fileset/empty\\.c$"
+      ]
+    }
+  ],
+  "compileGroups": [
+    {
+      "language": "C",
+      "sourcePaths": [
+        "^fileset/empty\\.c$"
+      ],
+      "includes": [
+        {
+          "path": "^.*/Tests/RunCMake/FileAPI/fileset/dir$",
+          "isSystem": null,
+          "backtrace": [
+            {
+              "file": "^fileset/CMakeLists\\.txt$",
+              "line": 46,
+              "command": "set_property",
+              "hasParent": true
+            },
+            {
+              "file": "^fileset/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        }
+      ],
+      "frameworks": null,
+      "defines": [
+        {
+          "define": "DEF2",
+          "backtrace": [
+            {
+              "file": "^fileset/CMakeLists\\.txt$",
+              "line": 43,
+              "command": "set_property",
+              "hasParent": true
+            },
+            {
+              "file": "^fileset/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        },
+        {
+          "define": "_MBCS",
+          "backtrace": null
+        }
+      ],
+      "compileCommandFragments": null
+    }
+  ],
+  "backtrace": [
+    {
+      "file": "^fileset/CMakeLists\\.txt$",
+      "line": 33,
+      "command": "add_library",
+      "hasParent": true
+    },
+    {
+      "file": "^fileset/CMakeLists\\.txt$",
+      "line": null,
+      "command": null,
+      "hasParent": false
+    }
+  ],
+  "folder": null,
+  "nameOnDisk": "^(lib)?c_sources_1\\.(a|lib|l)$",
+  "artifacts": [
+    {
+      "path": "^fileset/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_sources_1\\.(a|lib|l)$",
+      "_dllExtra": false
+    }
+  ],
+  "build": "^fileset$",
+  "source": "^fileset$",
+  "install": null,
+  "link": null,
+  "archive": {
+    "lto": null
+  },
+  "dependencies": [
+    {
+      "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+      "backtrace": null
+    }
+  ],
+  "linkLibraries": null,
+  "interfaceLinkLibraries": null,
+  "compileDependencies": null,
+  "interfaceCompileDependencies": null,
+  "objectDependencies": null,
+  "orderDependencies": null
+}
