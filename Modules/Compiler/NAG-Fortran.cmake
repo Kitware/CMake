@@ -6,10 +6,11 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS AND NOT CMAKE_Fortran_COMPILER_FORCED)
     COMMAND ${CMAKE_Fortran_COMPILER} dummy.o -dryrun
     OUTPUT_VARIABLE _dryrun
     ERROR_VARIABLE _dryrun
+    RESULT_VARIABLE _dryrun_result
     )
   # Match an object file.
   string(REGEX MATCH "/[^ ]*/[^ /][^ /]*\\.o" _nag_obj "${_dryrun}")
-  if(_nag_obj)
+  if(_nag_obj AND _dryrun_result EQUAL 0)
     # Parse object directory and convert to a regex.
     string(REGEX REPLACE "/[^/]*$" "" _nag_dir "${_nag_obj}")
     string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" _nag_regex "${_nag_dir}")

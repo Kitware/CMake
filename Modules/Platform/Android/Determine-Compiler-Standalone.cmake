@@ -30,8 +30,9 @@ execute_process(
   OUTPUT_VARIABLE _gcc_version
   ERROR_VARIABLE _gcc_error
   OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE _gcc_result
   )
-if(_gcc_version MATCHES "^([0-9]+\\.[0-9]+)")
+if(_gcc_result EQUAL 0 AND _gcc_version MATCHES "^([0-9]+\\.[0-9]+)")
   set(_ANDROID_TOOL_C_TOOLCHAIN_VERSION "${CMAKE_MATCH_1}")
 else()
   message(FATAL_ERROR

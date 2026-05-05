@@ -31,8 +31,9 @@ macro(cmake_gnu_set_sysroot_flag lang)
       COMMAND ${CMAKE_${lang}_COMPILER} "-v" "--help"
       OUTPUT_VARIABLE _gcc_help
       ERROR_VARIABLE _gcc_help
+      RESULT_VARIABLE _gcc_result
       )
-    if("${_gcc_help}" MATCHES "isysroot")
+    if(_gcc_result EQUAL 0 AND "${_gcc_help}" MATCHES "isysroot")
       message(CHECK_PASS "yes")
       set(CMAKE_${lang}_SYSROOT_FLAG "-isysroot")
     else()
@@ -51,8 +52,9 @@ macro(cmake_gnu_set_osx_deployment_target_flag lang)
       COMMAND ${CMAKE_${lang}_COMPILER} "-v" "--help"
       OUTPUT_VARIABLE _gcc_help
       ERROR_VARIABLE _gcc_help
+      RESULT_VARIABLE _gcc_result
       )
-    if("${_gcc_help}" MATCHES "macosx-version-min")
+    if(_gcc_result EQUAL 0 AND "${_gcc_help}" MATCHES "macosx-version-min")
       message(CHECK_PASS "yes")
       set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "-mmacosx-version-min=")
     else()

@@ -24,11 +24,13 @@ function(__linker_gnu lang)
       # Ninja 1.10 or upper is required
       execute_process(COMMAND "${CMAKE_MAKE_PROGRAM}" --version
         OUTPUT_VARIABLE _ninja_version
-        ERROR_VARIABLE _ninja_version)
+        ERROR_VARIABLE _ninja_version
+        RESULT_VARIABLE _res
+        )
       if (_ninja_version MATCHES "[0-9]+(\\.[0-9]+)*")
         set (_ninja_version "${CMAKE_MATCH_0}")
       endif()
-      if (_ninja_version VERSION_LESS "1.10")
+      if (NOT _res EQUAL 0 OR _ninja_version VERSION_LESS "1.10")
         set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED FALSE)
       endif()
     endif()
@@ -38,8 +40,9 @@ function(__linker_gnu lang)
       if (CMAKE_${lang}_COMPILER_LINKER AND CMAKE_${lang}_COMPILER_LINKER_ID MATCHES "GNU|LLD|MOLD")
         execute_process(COMMAND "${CMAKE_${lang}_COMPILER_LINKER}" --help
                         OUTPUT_VARIABLE _linker_capabilities
-                        ERROR_VARIABLE _linker_capabilities)
-        if(_linker_capabilities MATCHES "--dependency-file")
+                        ERROR_VARIABLE _linker_capabilities
+                        RESULT_VARIABLE _res)
+        if(_res EQUAL 0 AND _linker_capabilities MATCHES "--dependency-file")
           set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED TRUE)
         else()
           set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED FALSE)
