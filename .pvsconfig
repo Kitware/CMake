@@ -14,7 +14,7 @@
 //-V::539
 # Expression is always true/false.
 //-V::547
-# Possible array overrun.
+# Array underrun/overrun is possible.
 //-V::557
 # Part of conditional expression is always true/false.
 //-V::560
