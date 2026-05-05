@@ -174,6 +174,7 @@ protected:
 
   enum ResponseFlagFor
   {
+    Archive,
     Link,
     DeviceLink,
   };

@@ -2420,10 +2420,17 @@ std::string cmMakefileTargetGenerator::GetResponseFlag(
     responseFlagVar = cmStrCat("CMAKE_", lang, "_RESPONSE_FILE_LINK_FLAG");
   } else if (mode == cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink) {
     responseFlagVar = "CMAKE_CUDA_RESPONSE_FILE_DEVICE_LINK_FLAG";
+  } else if (mode == cmMakefileTargetGenerator::ResponseFlagFor::Archive) {
+    responseFlagVar = cmStrCat("CMAKE_", lang, "_RESPONSE_FILE_ARCHIVE_FLAG");
   }
 
   if (cmValue const p = this->Makefile->GetDefinition(responseFlagVar)) {
     responseFlag = *p;
+  } else if (mode == cmMakefileTargetGenerator::ResponseFlagFor::Archive) {
+    responseFlagVar = cmStrCat("CMAKE_", lang, "_RESPONSE_FILE_LINK_FLAG");
+    if (cmValue const q = this->Makefile->GetDefinition(responseFlagVar)) {
+      responseFlag = *q;
+    }
   }
   return responseFlag;
 }

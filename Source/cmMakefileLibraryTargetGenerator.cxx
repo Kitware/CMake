@@ -755,9 +755,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     // Construct object file lists that may be needed to expand the
     // rule.
     std::string buildObjs;
+    cmMakefileTargetGenerator::ResponseFlagFor responseMode =
+      this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY
+      ? cmMakefileTargetGenerator::ResponseFlagFor::Archive
+      : cmMakefileTargetGenerator::ResponseFlagFor::Link;
     this->CreateObjectLists(useLinkScript, useArchiveRules,
                             useResponseFileForObjects, buildObjs, depends,
-                            useWatcomQuote, linkLanguage);
+                            useWatcomQuote, linkLanguage, responseMode);
     if (!this->DeviceLinkObject.empty()) {
       buildObjs += " " +
         this->LocalGenerator->ConvertToOutputFormat(
