@@ -2256,9 +2256,9 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
 
     // Create this response file.
     std::string const responseFileName =
-      (responseMode == Link) ? "linkLibs.rsp" : "deviceLinkLibs.rsp";
+      (responseMode == DeviceLink) ? "deviceLinkLibs.rsp" : "linkLibs.rsp";
     std::string const responseLang =
-      (responseMode == Link) ? linkLanguage : "CUDA";
+      (responseMode == DeviceLink) ? "CUDA" : linkLanguage;
     std::string link_rsp = this->CreateResponseFile(
       responseFileName, linkLibs, makefile_depends, responseLang);
 
@@ -2295,8 +2295,9 @@ void cmMakefileTargetGenerator::CreateObjectLists(
     char const* sep = "";
     for (unsigned int i = 0; i < object_strings.size(); ++i) {
       // Number the response files.
-      std::string responseFileName = cmStrCat(
-        (responseMode == Link) ? "objects" : "deviceObjects", i + 1, ".rsp");
+      std::string responseFileName =
+        cmStrCat((responseMode == DeviceLink) ? "deviceObjects" : "objects",
+                 i + 1, ".rsp");
 
       // Create this response file.
       std::string objects_rsp = this->CreateResponseFile(
