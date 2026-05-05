@@ -14,8 +14,6 @@
 //-V::539
 # Expression is always true/false.
 //-V::547
-# Expression of the 'A - B > 0' kind will work as 'A != B'.
-//-V::555
 # Possible array overrun.
 //-V::557
 # Part of conditional expression is always true/false.
