@@ -1231,8 +1231,9 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   if(UNIX AND NOT CYGWIN)
     execute_process(COMMAND ldd --help
       OUTPUT_VARIABLE LDD_HELP
-      ERROR_VARIABLE LDD_ERR)
-    if("${LDD_HELP}" MATCHES
+      ERROR_VARIABLE LDD_ERR
+      RESULT_VARIABLE LDD_RESULT)
+    if(LDD_RESULT EQUAL 0 AND "${LDD_HELP}" MATCHES
         "(-r, --function-relocs.*process data and function relocations.*-u, --unused.*print unused direct dependencies)")
       add_RunCMake_test(LinkWhatYouUse)
     endif()
