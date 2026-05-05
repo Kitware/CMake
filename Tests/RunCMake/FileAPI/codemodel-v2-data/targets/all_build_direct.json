@@ -17,13 +17,15 @@
             "fileSetNames": null,
             "sourceGroupName": "",
             "compileGroupLanguage": null,
-            "backtrace": [
-                {
-                    "file": "^direct/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^direct/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         },
         {
@@ -32,13 +34,15 @@
             "fileSetNames": null,
             "sourceGroupName": "CMake Rules",
             "compileGroupLanguage": null,
-            "backtrace": [
-                {
-                    "file": "^direct/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^direct/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],

@@ -18,19 +18,21 @@
       "fileSetIndexes": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
-      "backtrace": [
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": 50,
-          "command": "target_link_libraries",
-          "hasParent": true
-        },
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 50,
+            "command": "target_link_libraries",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     }
   ],

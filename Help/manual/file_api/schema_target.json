@@ -163,6 +163,14 @@
       "minimum": 0,
       "description": "Index into backtraceGraph nodes array"
     },
+    "backtraces": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "description": "Indices into the backtraceGraph nodes array"
+    },
     "folder": {
       "type": "object",
       "description": "This will only be present if the FOLDER target property is set",
@@ -736,6 +744,9 @@
           "backtrace": {
             "$ref": "#/definitions/backtrace"
           },
+          "backtraces": {
+            "$ref": "#/definitions/backtraces"
+          },
           "fileSetIndex": {
             "$ref": "#/definitions/sourcesFileSetIndexV2_5"
           },
@@ -875,12 +886,7 @@
       ],
       "properties": {
         "backtraces": {
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "description": "Indices into the backtraceGraph nodes array"
+          "$ref": "#/definitions/backtraces"
         },
         "standard": {
           "type": "string",

@@ -26,19 +26,21 @@
       "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
-      "backtrace": [
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": 15,
-          "command": "add_library",
-          "hasParent": true
-        },
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 15,
+            "command": "add_library",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     }
   ],

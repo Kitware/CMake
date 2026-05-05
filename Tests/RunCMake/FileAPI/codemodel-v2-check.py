@@ -382,9 +382,12 @@ def check_target(c, major, minor):
                 expected_keys.append("isGenerated")
                 assert is_bool(actual["isGenerated"], expected["isGenerated"])
 
-            if expected["backtrace"] is not None:
+            if expected["backtraces"] is not None:
                 expected_keys.append("backtrace")
-                check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+                expected_keys.append("backtraces")
+                assert is_list(actual["backtraces"])
+                check_backtrace(obj, actual["backtrace"], expected["backtraces"][0])
+                check_backtraces(obj, actual["backtraces"], expected["backtraces"])
 
             assert sorted(actual.keys()) == sorted(expected_keys)
 
@@ -1178,13 +1181,15 @@ def gen_check_build_system_targets(c, g, inSource):
                             "fileSetNames": None,
                             "sourceGroupName": "CMake Rules",
                             "compileGroupLanguage": None,
-                            "backtrace": [
-                                {
-                                    "file": "^CMakeLists\\.txt$",
-                                    "line": None,
-                                    "command": None,
-                                    "hasParent": False,
-                                },
+                            "backtraces": [
+                                [
+                                    {
+                                        "file": "^CMakeLists\\.txt$",
+                                        "line": None,
+                                        "command": None,
+                                        "hasParent": False,
+                                    },
+                                ]
                             ],
                         },
                     ]

@@ -164,13 +164,15 @@
       "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "CXX",
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
@@ -179,13 +181,15 @@
       "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "CXX",
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
@@ -194,19 +198,21 @@
       "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "CXX",
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": 5,
-          "command": "add_executable",
-          "hasParent": true
-        },
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": 5,
+            "command": "add_executable",
+            "hasParent": true
+          },
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
@@ -215,13 +221,15 @@
       "fileSetNames": null,
       "sourceGroupName": "Precompile Header File",
       "compileGroupLanguage": null,
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
@@ -230,13 +238,15 @@
       "fileSetNames": null,
       "sourceGroupName": "Precompile Header File",
       "compileGroupLanguage": null,
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     }
   ],

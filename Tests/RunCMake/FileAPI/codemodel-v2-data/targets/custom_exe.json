@@ -17,19 +17,21 @@
             "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "C",
-            "backtrace": [
-                {
-                    "file": "^custom/CMakeLists\\.txt$",
-                    "line": 4,
-                    "command": "add_executable",
-                    "hasParent": true
-                },
-                {
-                    "file": "^custom/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^custom/CMakeLists\\.txt$",
+                        "line": 4,
+                        "command": "add_executable",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^custom/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],

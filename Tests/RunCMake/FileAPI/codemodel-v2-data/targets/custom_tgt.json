@@ -17,19 +17,21 @@
             "fileSetNames": null,
             "sourceGroupName": "",
             "compileGroupLanguage": null,
-            "backtrace": [
-                {
-                    "file": "^custom/CMakeLists\\.txt$",
-                    "line": 3,
-                    "command": "add_custom_target",
-                    "hasParent": true
-                },
-                {
-                    "file": "^custom/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^custom/CMakeLists\\.txt$",
+                        "line": 3,
+                        "command": "add_custom_target",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^custom/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         },
         {
@@ -38,13 +40,15 @@
             "fileSetNames": null,
             "sourceGroupName": "CMake Rules",
             "compileGroupLanguage": null,
-            "backtrace": [
-                {
-                    "file": "^custom/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^custom/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],

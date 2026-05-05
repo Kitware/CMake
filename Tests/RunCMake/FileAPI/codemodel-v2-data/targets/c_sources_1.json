@@ -35,19 +35,21 @@
       "fileSetIndexes": [0],
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
-      "backtrace": [
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": 40,
-          "command": "target_sources",
-          "hasParent": true
-        },
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 40,
+            "command": "target_sources",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
@@ -57,19 +59,21 @@
       "fileSetIndexes": [0],
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": null,
-      "backtrace": [
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": 35,
-          "command": "target_sources",
-          "hasParent": true
-        },
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 35,
+            "command": "target_sources",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     }
   ],

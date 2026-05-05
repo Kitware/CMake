@@ -17,19 +17,21 @@
             "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "CXX",
-            "backtrace": [
-                {
-                    "file": "^cxx/CMakeLists\\.txt$",
-                    "line": 12,
-                    "command": "add_executable",
-                    "hasParent": true
-                },
-                {
-                    "file": "^cxx/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^cxx/CMakeLists\\.txt$",
+                        "line": 12,
+                        "command": "add_executable",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^cxx/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],
@@ -140,7 +142,7 @@
         }
     ],
     "interfaceLinkLibraries": null,
-    "compileDependencies":  [
+    "compileDependencies": [
         {
             "id": "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
             "backtrace": [

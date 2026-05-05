@@ -464,7 +464,11 @@ class Target
 
   using FileSetDatabase = std::map<std::string, std::vector<Json::ArrayIndex>>;
 
+  using FileSetBacktraceDatabase =
+    std::unordered_map<std::string, std::vector<cmListFileBacktrace>>;
+
   std::vector<cm::FileSetMetadata::Visibility> FileSetVisibilities;
+  FileSetBacktraceDatabase FileSetBacktraces;
 
   template <typename T>
   JBT<T> ToJBT(BT<T> const& bt)
@@ -1776,6 +1780,7 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
   // interface sources, which needs to map files to file set visibility
   // with only an index available. Those indexes match this vector.
   this->FileSetVisibilities.clear();
+  this->FileSetBacktraces.clear();
 
   // Build the fileset database.
   auto const& fileSets = this->GT->GetAllFileSets();
@@ -1803,6 +1808,34 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
             sf_path = cmStrCat(dir, '/', file);
           }
           fsdb[sf_path].emplace_back(static_cast<Json::ArrayIndex>(fsIndex));
+        }
+      }
+
+      // Collect backtraces from each original file set FILES entry so that
+      // source backtraces preserve line metadata and can include repeated
+      // additions from multiple file sets.
+      auto const& fileEntries = fs->GetFileEntries();
+      for (BT<std::string> const& fileEntry : fileEntries) {
+        cmGeneratorExpression ge(
+          *this->GT->GetLocalGenerator()->GetCMakeInstance(),
+          fileEntry.Backtrace);
+        for (std::string const& ex : cmList{ fileEntry.Value }) {
+          std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(ex);
+          std::map<std::string, std::vector<std::string>> filesForEntry;
+          fs->EvaluateFileEntry(directories.first, filesForEntry, cge, context,
+                                this->GT);
+          for (auto const& filesPerDir : filesForEntry) {
+            std::string const& dir = filesPerDir.first;
+            for (std::string const& file : filesPerDir.second) {
+              std::string sf_path;
+              if (dir.empty() || cmSystemTools::FileIsFullPath(file)) {
+                sf_path = file;
+              } else {
+                sf_path = cmStrCat(dir, '/', file);
+              }
+              this->FileSetBacktraces[sf_path].push_back(fileEntry.Backtrace);
+            }
+          }
         }
       }
 
@@ -1855,7 +1888,32 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
   if (sk.Source.Value->GetIsGenerated()) {
     source["isGenerated"] = true;
   }
-  this->AddBacktrace(source, sk.Source.Backtrace);
+
+  JBTIndex sourceBacktrace = this->Backtraces.Add(sk.Source.Backtrace);
+  JBTIndex primaryBacktrace = sourceBacktrace;
+  Json::Value backtraces = Json::arrayValue;
+  auto const fileSetBacktraces = this->FileSetBacktraces.find(path);
+  if (fileSetBacktraces != this->FileSetBacktraces.end() &&
+      !fileSetBacktraces->second.empty()) {
+    for (cmListFileBacktrace const& fsbt : fileSetBacktraces->second) {
+      if (JBTIndex bt = this->Backtraces.Add(fsbt)) {
+        if (!primaryBacktrace) {
+          primaryBacktrace = bt;
+        }
+        backtraces.append(bt.Index);
+      }
+    }
+  } else {
+    if (sourceBacktrace) {
+      backtraces.append(sourceBacktrace.Index);
+    }
+  }
+
+  this->AddBacktrace(source, primaryBacktrace);
+
+  if (!backtraces.empty()) {
+    source["backtraces"] = std::move(backtraces);
+  }
 
   auto fsit = fsdb.find(path);
   if (fsit != fsdb.end()) {
