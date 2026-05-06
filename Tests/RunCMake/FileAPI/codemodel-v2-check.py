@@ -13,7 +13,7 @@ def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
     major = 2
-    minor = 10
+    minor = 11
     check_index_object(o[0], "codemodel", major, minor, check_object_codemodel(g, major, minor))
 
 def check_backtrace(t, b, backtrace):
@@ -1077,6 +1077,8 @@ def gen_check_build_system_targets(c, g, inSource):
 
         read_codemodel_json_data("targets/c_headers_1.json"),
         read_codemodel_json_data("targets/c_headers_2.json"),
+        read_codemodel_json_data("targets/c_sources_1.json"),
+        read_codemodel_json_data("targets/c_sources_2.json"),
     ]
 
     if sys.platform == "darwin":

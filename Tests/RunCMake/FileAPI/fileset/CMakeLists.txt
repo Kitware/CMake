@@ -26,3 +26,25 @@ install(TARGETS c_headers_1
   FILE_SET d
   )
 install(TARGETS c_headers_2)
+
+#
+# SOURCES file set type
+#
+add_library(c_sources_1 STATIC)
+
+target_sources(c_sources_1
+  PRIVATE FILE_SET SOURCES BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" FILES other.c
+  )
+set_property(FILE_SET SOURCES TARGET c_sources_1 PROPERTY COMPILE_DEFINITIONS DEF1)
+
+target_sources(c_sources_1
+  PUBLIC FILE_SET public_srcs TYPE SOURCES BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" FILES empty.c
+  )
+set_property(FILE_SET public_srcs TARGET c_sources_1 PROPERTY COMPILE_DEFINITIONS DEF2)
+set_property(FILE_SET public_srcs TARGET c_sources_1 PROPERTY INTERFACE_COMPILE_DEFINITIONS DEF3)
+
+set_property(FILE_SET public_srcs TARGET c_sources_1 PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/dir")
+set_property(FILE_SET public_srcs TARGET c_sources_1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/dir")
+
+add_library(c_sources_2 STATIC)
+target_link_libraries(c_sources_2 PRIVATE c_sources_1)
