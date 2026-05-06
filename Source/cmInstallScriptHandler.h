@@ -40,18 +40,18 @@ public:
     void printResult(std::size_t n, std::size_t total);
 
   private:
-    std::vector<std::string> command;
-    std::vector<std::string> output;
-    std::string name;
-    std::unique_ptr<cmUVProcessChain> chain;
-    std::unique_ptr<cmUVStreamReadHandle> streamHandler;
+    std::vector<std::string> Command;
+    std::vector<std::string> Output;
+    std::string Name;
+    std::unique_ptr<cmUVProcessChain> Chain;
+    std::unique_ptr<cmUVStreamReadHandle> StreamHandler;
   };
 
 private:
-  std::vector<InstallScript> scripts;
-  std::vector<std::string> configs;
-  std::vector<std::string> directories;
-  std::vector<std::string> components;
-  std::string binaryDir;
-  bool parallel;
+  std::vector<InstallScript> Scripts;
+  std::vector<std::string> Configs;
+  std::vector<std::string> Directories;
+  std::vector<std::string> Components;
+  std::string BinaryDir;
+  bool Parallel;
 };

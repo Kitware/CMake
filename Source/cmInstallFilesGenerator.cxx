@@ -11,14 +11,14 @@
 
 cmInstallFilesGenerator::cmInstallFilesGenerator(
   std::vector<std::string> const& files, std::string const& dest,
-  bool programs, std::string file_permissions,
+  bool programs, std::string filePermissions,
   std::vector<std::string> const& configurations, std::string const& component,
-  MessageLevel message, bool exclude_from_all, std::string rename,
-  bool optional, cmListFileBacktrace backtrace)
+  MessageLevel message, bool excludeFromAll, std::string rename, bool optional,
+  cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(backtrace))
   , Files(files)
-  , FilePermissions(std::move(file_permissions))
+  , FilePermissions(std::move(filePermissions))
   , Rename(std::move(rename))
   , Programs(programs)
   , Optional(optional)
@@ -86,11 +86,11 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
   std::vector<std::string> const& files)
 {
   // Write code to install the files.
-  char const* no_dir_permissions = nullptr;
+  char const* noDirPermissions = nullptr;
   this->AddInstallRule(
     os, this->GetDestination(config),
     (this->Programs ? cmInstallType_PROGRAMS : cmInstallType_FILES), files,
-    this->Optional, this->FilePermissions.c_str(), no_dir_permissions,
+    this->Optional, this->FilePermissions.c_str(), noDirPermissions,
     this->GetRename(config).c_str(), nullptr, indent);
 }
 

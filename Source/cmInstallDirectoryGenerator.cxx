@@ -16,16 +16,16 @@
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, std::string const& dest,
-  std::string file_permissions, std::string dir_permissions,
+  std::string filePermissions, std::string dirPermissions,
   std::vector<std::string> const& configurations, std::string const& component,
-  MessageLevel message, bool exclude_from_all, std::string literal_args,
+  MessageLevel message, bool excludeFromAll, std::string literalArgs,
   bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(backtrace))
   , Directories(dirs)
-  , FilePermissions(std::move(file_permissions))
-  , DirPermissions(std::move(dir_permissions))
-  , LiteralArguments(std::move(literal_args))
+  , FilePermissions(std::move(filePermissions))
+  , DirPermissions(std::move(dirPermissions))
+  , LiteralArguments(std::move(literalArgs))
   , Optional(optional)
 {
   // We need per-config actions if destination have generator expressions.
@@ -107,11 +107,11 @@ void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
   std::vector<std::string> const& dirs)
 {
   // Write code to install the directories.
-  char const* no_rename = nullptr;
+  char const* noRename = nullptr;
   this->AddInstallRule(os, this->GetDestination(config),
                        cmInstallType_DIRECTORY, dirs, this->Optional,
                        this->FilePermissions.c_str(),
-                       this->DirPermissions.c_str(), no_rename,
+                       this->DirPermissions.c_str(), noRename,
                        this->LiteralArguments.c_str(), indent);
 }
 

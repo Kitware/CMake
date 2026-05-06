@@ -21,10 +21,10 @@ class cmInstallDirectoryGenerator : public cmInstallGenerator
 public:
   cmInstallDirectoryGenerator(
     std::vector<std::string> const& dirs, std::string const& dest,
-    std::string file_permissions, std::string dir_permissions,
+    std::string filePermissions, std::string dirPermissions,
     std::vector<std::string> const& configurations,
-    std::string const& component, MessageLevel message, bool exclude_from_all,
-    std::string literal_args, bool optional, cmListFileBacktrace backtrace);
+    std::string const& component, MessageLevel message, bool excludeFromAll,
+    std::string literalArgs, bool optional, cmListFileBacktrace backtrace);
   ~cmInstallDirectoryGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;

@@ -14,14 +14,14 @@
 #include "cmStringAlgorithms.h"
 
 cmInstallCxxModuleBmiGenerator::cmInstallCxxModuleBmiGenerator(
-  std::string target, std::string const& dest, std::string file_permissions,
+  std::string target, std::string const& dest, std::string filePermissions,
   std::vector<std::string> const& configurations, std::string const& component,
-  MessageLevel message, bool exclude_from_all, bool optional,
+  MessageLevel message, bool excludeFromAll, bool optional,
   cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(backtrace))
   , TargetName(std::move(target))
-  , FilePermissions(std::move(file_permissions))
+  , FilePermissions(std::move(filePermissions))
   , Optional(optional)
 {
   this->ActionsPerConfig = true;
@@ -46,12 +46,12 @@ bool cmInstallCxxModuleBmiGenerator::Compute(cmLocalGenerator* lg)
 std::string cmInstallCxxModuleBmiGenerator::GetScriptLocation(
   std::string const& config) const
 {
-  char const* config_name = config.c_str();
+  char const* configName = config.c_str();
   if (config.empty()) {
-    config_name = "noconfig";
+    configName = "noconfig";
   }
   return cmStrCat(this->Target->GetCMFSupportDirectory(),
-                  "/install-cxx-module-bmi-", config_name, ".cmake");
+                  "/install-cxx-module-bmi-", configName, ".cmake");
 }
 
 std::string cmInstallCxxModuleBmiGenerator::GetDestination(

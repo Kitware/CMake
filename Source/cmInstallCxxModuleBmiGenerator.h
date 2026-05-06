@@ -21,9 +21,9 @@ class cmInstallCxxModuleBmiGenerator : public cmInstallGenerator
 {
 public:
   cmInstallCxxModuleBmiGenerator(
-    std::string target, std::string const& dest, std::string file_permissions,
+    std::string target, std::string const& dest, std::string filePermissions,
     std::vector<std::string> const& configurations,
-    std::string const& component, MessageLevel message, bool exclude_from_all,
+    std::string const& component, MessageLevel message, bool excludeFromAll,
     bool optional, cmListFileBacktrace backtrace);
   ~cmInstallCxxModuleBmiGenerator() override;
 

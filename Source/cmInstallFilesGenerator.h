@@ -21,10 +21,10 @@ class cmInstallFilesGenerator : public cmInstallGenerator
 public:
   cmInstallFilesGenerator(std::vector<std::string> const& files,
                           std::string const& dest, bool programs,
-                          std::string file_permissions,
+                          std::string filePermissions,
                           std::vector<std::string> const& configurations,
                           std::string const& component, MessageLevel message,
-                          bool exclude_from_all, std::string rename,
+                          bool excludeFromAll, std::string rename,
                           bool optional, cmListFileBacktrace backtrace);
   ~cmInstallFilesGenerator() override;
 

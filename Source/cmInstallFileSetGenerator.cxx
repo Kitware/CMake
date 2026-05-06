@@ -29,14 +29,14 @@
 
 cmInstallFileSetGenerator::cmInstallFileSetGenerator(
   std::string targetName, std::string fileSetName, std::string destination,
-  std::string file_permissions, std::vector<std::string> const& configurations,
-  std::string const& component, MessageLevel message, bool exclude_from_all,
+  std::string filePermissions, std::vector<std::string> const& configurations,
+  std::string const& component, MessageLevel message, bool excludeFromAll,
   bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(std::move(destination), configurations, component,
-                       message, exclude_from_all, false, std::move(backtrace))
+                       message, excludeFromAll, false, std::move(backtrace))
   , TargetName(std::move(targetName))
   , FileSetName(std::move(fileSetName))
-  , FilePermissions(std::move(file_permissions))
+  , FilePermissions(std::move(filePermissions))
   , Optional(optional)
 {
   this->ActionsPerConfig = true;

@@ -27,7 +27,7 @@ public:
     std::vector<std::string> postExcludeFiles, std::string libraryComponent,
     std::string frameworkComponent, bool noInstallRPath, char const* depsVar,
     char const* rpathPrefix, std::vector<std::string> const& configurations,
-    MessageLevel message, bool exclude_from_all, cmListFileBacktrace backtrace,
+    MessageLevel message, bool excludeFromAll, cmListFileBacktrace backtrace,
     cmPolicies::PolicyStatus policyStatusCMP0207);
 
   bool Compute(cmLocalGenerator* lg) override;

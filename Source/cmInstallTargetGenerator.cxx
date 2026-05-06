@@ -128,13 +128,13 @@ void computeFilesToInstall(
 
 cmInstallTargetGenerator::cmInstallTargetGenerator(
   std::string targetName, std::string const& dest, bool implib,
-  std::string file_permissions, std::vector<std::string> const& configurations,
-  std::string const& component, MessageLevel message, bool exclude_from_all,
+  std::string filePermissions, std::vector<std::string> const& configurations,
+  std::string const& component, MessageLevel message, bool excludeFromAll,
   bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(backtrace))
   , TargetName(std::move(targetName))
-  , FilePermissions(std::move(file_permissions))
+  , FilePermissions(std::move(filePermissions))
   , ImportLibrary(implib)
   , Optional(optional)
 {
@@ -177,9 +177,9 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   // Write code to install the target file.
   char const* no_dir_permissions = nullptr;
   bool optional = this->Optional || this->ImportLibrary;
-  std::string literal_args;
+  std::string literalArgs;
   if (files.UseSourcePermissions) {
-    literal_args += " USE_SOURCE_PERMISSIONS";
+    literalArgs += " USE_SOURCE_PERMISSIONS";
   }
   if (files.Rename) {
     if (files.From.size() != files.To.size()) {
@@ -199,16 +199,16 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       }
       this->AddInstallRule(os, dest, files.Type, FileNames, optional,
                            this->FilePermissions.c_str(), no_dir_permissions,
-                           files.To[i].c_str(), literal_args.c_str(), indent);
+                           files.To[i].c_str(), literalArgs.c_str(), indent);
     }
   } else {
     char const* no_rename = nullptr;
     if (!files.FromDir.empty()) {
-      literal_args += " FILES_FROM_DIR \"" + files.FromDir + "\"";
+      literalArgs += " FILES_FROM_DIR \"" + files.FromDir + "\"";
     }
     this->AddInstallRule(os, dest, files.Type, files.From, optional,
                          this->FilePermissions.c_str(), no_dir_permissions,
-                         no_rename, literal_args.c_str(), indent);
+                         no_rename, literalArgs.c_str(), indent);
   }
 
   // Add post-installation tweaks.

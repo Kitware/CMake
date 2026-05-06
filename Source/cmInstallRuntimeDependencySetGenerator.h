@@ -27,7 +27,7 @@ public:
     std::string installNameDir, bool noInstallName, char const* depsVar,
     char const* rpathPrefix, char const* tmpVarPrefix, std::string destination,
     std::vector<std::string> const& configurations, std::string component,
-    std::string permissions, MessageLevel message, bool exclude_from_all,
+    std::string permissions, MessageLevel message, bool excludeFromAll,
     cmListFileBacktrace backtrace);
 
   bool Compute(cmLocalGenerator* lg) override;

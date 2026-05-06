@@ -22,9 +22,9 @@ class cmInstallTargetGenerator : public cmInstallGenerator
 public:
   cmInstallTargetGenerator(
     std::string targetName, std::string const& dest, bool implib,
-    std::string file_permissions,
+    std::string filePermissions,
     std::vector<std::string> const& configurations,
-    std::string const& component, MessageLevel message, bool exclude_from_all,
+    std::string const& component, MessageLevel message, bool excludeFromAll,
     bool optional, cmListFileBacktrace backtrace = cmListFileBacktrace());
   ~cmInstallTargetGenerator() override;
 

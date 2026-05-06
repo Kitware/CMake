@@ -24,10 +24,10 @@ cmInstallRuntimeDependencySetGenerator::cmInstallRuntimeDependencySetGenerator(
   std::string installNameDir, bool noInstallName, char const* depsVar,
   char const* rpathPrefix, char const* tmpVarPrefix, std::string destination,
   std::vector<std::string> const& configurations, std::string component,
-  std::string permissions, MessageLevel message, bool exclude_from_all,
+  std::string permissions, MessageLevel message, bool excludeFromAll,
   cmListFileBacktrace backtrace)
   : cmInstallGenerator(std::move(destination), configurations,
-                       std::move(component), message, exclude_from_all, false,
+                       std::move(component), message, excludeFromAll, false,
                        std::move(backtrace))
   , Type(type)
   , DependencySet(dependencySet)
