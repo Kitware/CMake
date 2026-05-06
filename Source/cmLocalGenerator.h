@@ -17,6 +17,7 @@
 #include <cm/optional>
 
 #include "cmCustomCommandTypes.h"
+#include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
@@ -581,10 +582,16 @@ public:
   void IssueDiagnostic(cmDiagnosticCategory category,
                        std::string const& text) const
   {
-    this->IssueDiagnostic(category, text, this->DirectoryBacktrace);
+    this->IssueDiagnostic(category, text,
+                          cmDiagnosticContext{ this->DirectoryBacktrace });
   }
   void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
-                       cmListFileBacktrace const& bt) const;
+                       cmListFileBacktrace const& bt) const
+  {
+    this->IssueDiagnostic(category, text, cmDiagnosticContext{ bt });
+  }
+  void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
+                       cmDiagnosticContext const& context) const;
 
   void CreateEvaluationFileOutputs();
   void CreateEvaluationFileOutputs(std::string const& config);

@@ -10,6 +10,7 @@
 
 #include <cm/optional>
 
+#include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h" // IWYU pragma: keep
@@ -33,10 +34,9 @@ public:
     MessageType type, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
-  void IssueDiagnostic(
-    cmDiagnosticCategory category, std::string const& text,
-    cmStateSnapshot const& context,
-    cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
+  void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
+                       cmStateSnapshot const& fallbackContext,
+                       cmDiagnosticContext const& context = {}) const;
 
   void DisplayMessage(MessageType type, cmDiagnosticCategory category,
                       std::string const& text,

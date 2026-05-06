@@ -25,6 +25,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
+#include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmFindPackageStack.h"
 #include "cmFunctionBlocker.h"
@@ -1047,10 +1048,17 @@ public:
   void IssueDiagnostic(cmDiagnosticCategory category,
                        std::string const& text) const
   {
-    this->IssueDiagnostic(category, text, this->Backtrace);
+    this->IssueDiagnostic(category, text,
+                          cmDiagnosticContext{ this->Backtrace });
   }
   void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
-                       cmListFileBacktrace const& bt) const;
+                       cmListFileBacktrace backtrace) const
+  {
+    this->IssueDiagnostic(category, text,
+                          cmDiagnosticContext{ std::move(backtrace) });
+  }
+  void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
+                       cmDiagnosticContext const& context) const;
   Message::LogLevel GetCurrentLogLevel() const;
 
   /** Set whether or not to report a CMP0000 violation.  */
