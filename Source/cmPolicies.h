@@ -650,7 +650,11 @@ class cmMakefile;
          0, WARN)                                                             \
   SELECT(POLICY, CMP0217,                                                     \
          "The MACROS directory property does not exist anymore.", 4, 4, 0,    \
-         WARN)
+         WARN)                                                                \
+  SELECT(POLICY, CMP0218,                                                     \
+         "The CMAKE_WARN_DEPRECATED and CMAKE_ERROR_DEPRECATED variables "    \
+         "are ignored.",                                                      \
+         4, 4, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

@@ -44,12 +44,10 @@ influences the way the message is handled:
   CMake Warning, continue processing.
 
 ``AUTHOR_WARNING``
-  CMake Warning (dev), continue processing.
+  CMake :diagnostic:`CMD_AUTHOR` diagnostic.
 
 ``DEPRECATION``
-  CMake Deprecation Error or Warning if variable
-  :variable:`CMAKE_ERROR_DEPRECATED` or :variable:`CMAKE_WARN_DEPRECATED`
-  is enabled, respectively, else no message.
+  CMake :diagnostic:`CMD_DEPRECATED` diagnostic.
 
 (none) or ``NOTICE``
   Important message printed to stderr to attract user's attention.

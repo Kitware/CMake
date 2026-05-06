@@ -224,7 +224,6 @@ Variables that Change Behavior
    /variable/CMAKE_ECLIPSE_MAKE_ARGUMENTS
    /variable/CMAKE_ECLIPSE_RESOURCE_ENCODING
    /variable/CMAKE_ECLIPSE_VERSION
-   /variable/CMAKE_ERROR_DEPRECATED
    /variable/CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION
    /variable/CMAKE_EXECUTE_PROCESS_COMMAND_ECHO
    /variable/CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL
@@ -318,7 +317,6 @@ Variables that Change Behavior
    /variable/CMAKE_TLS_VERIFY
    /variable/CMAKE_TLS_VERSION
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE
-   /variable/CMAKE_WARN_DEPRECATED
    /variable/CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION
    /variable/CMAKE_XCODE_GENERATE_SCHEME
    /variable/CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY
@@ -878,8 +876,10 @@ Deprecated Variables that Change Behavior
 
    /variable/CMAKE_AUTOMOC_RELAXED_MODE
    /variable/CMAKE_BACKWARDS_COMPATIBILITY
+   /variable/CMAKE_ERROR_DEPRECATED
    /variable/CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
    /variable/CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
+   /variable/CMAKE_WARN_DEPRECATED
 
 Deprecated Variables that Describe the System
 =============================================

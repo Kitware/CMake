@@ -55,6 +55,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessenger.h"
+#include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
@@ -173,6 +174,17 @@ void cmWarnUnusedCliWarning(std::string const& variable,
 {
   cmake* cm = reinterpret_cast<cmake*>(ctx);
   cm->MarkCliAsUsed(variable);
+}
+
+void cmDeprecatedWatch(std::string const& /*unused*/,
+                       cmVariableWatch::AccessType /*unused*/,
+                       void* /*unused*/, char const* /*unused*/,
+                       cmMakefile const* mf)
+{
+  if (mf->GetPolicyStatus(cmPolicies::CMP0218) == cmPolicies::WARN) {
+    mf->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
+                        cmPolicies::GetPolicyWarning(cmPolicies::CMP0218));
+  }
 }
 #endif
 
@@ -828,6 +840,15 @@ void cmake::ProcessCacheArg(std::string const& var, std::string const& value,
       haveValue = true;
       cachedValue = *v;
     }
+  }
+
+  // See also CMP0218.
+  if (var == "CMAKE_WARN_DEPRECATED") {
+    std::cerr << "The CMAKE_WARN_DEPRECATED variable is deprecated.  "
+                 "Use -W[no-]deprecated instead.\n"_s;
+  } else if (var == "CMAKE_ERROR_DEPRECATED") {
+    std::cerr << "The CMAKE_ERROR_DEPRECATED variable is deprecated.  "
+                 "Use -W[no-]error=deprecated instead.\n"_s;
   }
 
   this->AddCacheEntry(
@@ -2439,8 +2460,6 @@ int cmake::Configure()
   cmValue cachedWarnDeprecated =
     this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
   if (cachedWarnDeprecated) {
-    std::cerr << "The CMAKE_WARN_DEPRECATED variable is deprecated.  "
-                 "Use CMAKE_DIAGNOSTIC_INIT instead.\n"_s;
     if (cachedWarnDeprecated.IsOn()) {
       deprecated = cmDiagnostics::Warn;
     } else {
@@ -2451,8 +2470,6 @@ int cmake::Configure()
   cmValue cachedErrorDeprecated =
     this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
   if (cachedErrorDeprecated) {
-    std::cerr << "The CMAKE_ERROR_DEPRECATED variable is deprecated.  "
-                 "Use CMAKE_DIAGNOSTIC_INIT instead.\n"_s;
     if (cachedErrorDeprecated.IsOn()) {
       deprecated = cmDiagnostics::SendError;
     }
@@ -2476,22 +2493,16 @@ int cmake::Configure()
                cmDiagnostics::GetActionString(action)));
 
     if (category == cmDiagnostics::CMD_DEPRECATED) {
-      // Set deprecated CMAKE_{WARN,ERROR}_DEPRECATED, but only in the cache,
-      // and only if they were already set in the cache.
-      if (cachedWarnDeprecated) {
-        std::string const value =
-          (action >= cmDiagnostics::Warn ? "ON" : "OFF");
-        this->AddCacheEntry("CMAKE_WARN_DEPRECATED", value,
-                            "Deprecated.  Use CMAKE_DIAGNOSTIC_INIT instead.",
-                            cmStateEnums::INTERNAL);
-      }
-      if (cachedErrorDeprecated) {
-        std::string const value =
-          (action >= cmDiagnostics::SendError ? "ON" : "OFF");
-        this->AddCacheEntry("CMAKE_ERROR_DEPRECATED", value,
-                            "Deprecated.  Use CMAKE_DIAGNOSTIC_INIT instead.",
-                            cmStateEnums::INTERNAL);
-      }
+      std::string const warnValue =
+        (action >= cmDiagnostics::Warn ? "ON" : "OFF");
+      this->AddCacheEntry("CMAKE_WARN_DEPRECATED", warnValue,
+                          "Deprecated.  Use -W[no-]deprecated instead.",
+                          cmStateEnums::INTERNAL);
+      std::string const errorValue =
+        (action >= cmDiagnostics::SendError ? "ON" : "OFF");
+      this->AddCacheEntry("CMAKE_ERROR_DEPRECATED", errorValue,
+                          "Deprecated.  Use -W[no-]error=deprecated instead.",
+                          cmStateEnums::INTERNAL);
     }
   }
 
@@ -3057,6 +3068,9 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
   if (!sarifLogFileWriter.ConfigureForCMakeRun(*this)) {
     return -1;
   }
+
+  this->VariableWatch->AddWatch("CMAKE_WARN_DEPRECATED", cmDeprecatedWatch);
+  this->VariableWatch->AddWatch("CMAKE_ERROR_DEPRECATED", cmDeprecatedWatch);
 #endif
 
   // Log the trace format version to the desired output
