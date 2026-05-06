@@ -3,6 +3,7 @@
 #include "cmMessenger.h"
 
 #include <algorithm>
+#include <array>
 #include <sstream>
 #include <utility>
 
