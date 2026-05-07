@@ -9,9 +9,10 @@ if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile" AND
   execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} -v
                   OUTPUT_VARIABLE makeVersionOutput
                   ERROR_QUIET
-                  TIMEOUT 10)
+                  TIMEOUT 10
+                  RESULT_VARIABLE _make_result)
   string(TOUPPER "${makeVersionOutput}" MAKE_VERSION_OUTPUT)
-  if("${MAKE_VERSION_OUTPUT}" MATCHES "GNU MAKE")
+  if(_make_result EQUAL 0 AND "${MAKE_VERSION_OUTPUT}" MATCHES "GNU MAKE")
 
     # build a library which we can search during the test
     add_library(foo STATIC foo.cpp)

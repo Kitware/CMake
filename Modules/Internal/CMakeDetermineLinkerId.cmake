@@ -31,7 +31,10 @@ function(cmake_determine_linker_id lang linker)
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_STRIP_TRAILING_WHITESPACE
                     COMMAND_ERROR_IS_FATAL NONE
+                    RESULT_VARIABLE _res
     )
+    # We capture "_res" but don't check it because it's expected that
+    # linkers will exit with non-zero on flags they do not have.
 
     string(JOIN "\" \"" flags_string ${flags})
     string(REGEX REPLACE "\n\n.*" "" linker_desc_head "${linker_desc}")

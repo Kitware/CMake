@@ -23,8 +23,8 @@ function(__cmake_set_whole_archive_feature __linker)
                     OUTPUT_VARIABLE __linker_log
                     ERROR_VARIABLE __linker_log
                     COMMAND_ERROR_IS_FATAL NONE
-    )
-    if(__linker_log MATCHES "--push-state" OR __linker_log MATCHES "--pop-state")
+                    RESULT_VARIABLE __linker_result)
+    if(__linker_result EQUAL 0 AND (__linker_log MATCHES "--push-state" OR __linker_log MATCHES "--pop-state"))
       set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED FALSE)
     else()
       set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED TRUE)

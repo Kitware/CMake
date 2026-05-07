@@ -162,8 +162,9 @@ if(GIT_EXECUTABLE)
     execute_process(COMMAND ${GIT_EXECUTABLE} --version
                     OUTPUT_VARIABLE git_version
                     ERROR_QUIET
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (git_version MATCHES "^git version [0-9]")
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    RESULT_VARIABLE _git_res)
+    if (_git_res EQUAL 0 AND git_version MATCHES "^git version [0-9]")
       string(REPLACE "git version " "" Git_VERSION "${git_version}")
       set(GIT_VERSION_STRING "${Git_VERSION}")
       set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION

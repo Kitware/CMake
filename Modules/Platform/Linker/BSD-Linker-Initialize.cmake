@@ -7,7 +7,7 @@ if(NOT _CMAKE_SYSTEM_LINKER_TYPE)
                     RESULT_VARIABLE result
                     OUTPUT_VARIABLE output
                     ERROR_VARIABLE output)
-    if(result OR NOT output MATCHES "LLD")
+    if(NOT result EQUAL 0 OR NOT output MATCHES "LLD")
       # assume GNU as default linker
       set(_CMAKE_SYSTEM_LINKER_TYPE GNU CACHE INTERNAL "System linker type")
     else()

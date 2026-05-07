@@ -58,8 +58,8 @@ set(CMAKE_GNULD_IMAGE_VERSION
 
 # Check if GNU ld is too old to support @FILE syntax.
 set(__WINDOWS_GNU_LD_RESPONSE 1)
-execute_process(COMMAND ld -v OUTPUT_VARIABLE _help ERROR_VARIABLE _help)
-if("${_help}" MATCHES "GNU ld .* 2\\.1[1-6]")
+execute_process(COMMAND ld -v OUTPUT_VARIABLE _help ERROR_VARIABLE _help RESULT_VARIABLE _res)
+if(_res EQUAL 0 AND "${_help}" MATCHES "GNU ld .* 2\\.1[1-6]")
   set(__WINDOWS_GNU_LD_RESPONSE 0)
 endif()
 
@@ -107,8 +107,8 @@ macro(__windows_compiler_gnu lang)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 1)
 
   # We prefer "@" for response files but it is not supported by gcc 3.
-  execute_process(COMMAND ${CMAKE_${lang}_COMPILER} --version OUTPUT_VARIABLE _ver ERROR_VARIABLE _ver)
-  if("${_ver}" MATCHES "\\(GCC\\) 3\\.")
+  execute_process(COMMAND ${CMAKE_${lang}_COMPILER} --version OUTPUT_VARIABLE _ver ERROR_VARIABLE _ver RESULT_VARIABLE _res)
+  if(_res EQUAL 0 AND "${_ver}" MATCHES "\\(GCC\\) 3\\.")
     if("${lang}" STREQUAL "Fortran")
       # The GNU Fortran compiler reports an error:
       #   no input files; unwilling to write output files
