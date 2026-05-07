@@ -121,6 +121,7 @@ function(_DetermineVSServicePack_FastCheckVersionWithCompiler _SUCCESS_VAR  _VER
           COMMAND ${CMAKE_CXX_COMPILER} -?
           ERROR_VARIABLE _output
           OUTPUT_QUIET
+          RESULT_VARIABLE _result_cl_help
         )
 
       if(_output MATCHES "Compiler Version (([0-9]+)\\.([0-9]+)\\.([0-9]+)(\\.([0-9]+))?)")

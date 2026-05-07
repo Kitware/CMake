@@ -87,7 +87,8 @@ if (GNUPLOT_EXECUTABLE)
     execute_process(COMMAND "${GNUPLOT_EXECUTABLE}" --version
                   OUTPUT_VARIABLE GNUPLOT_OUTPUT_VARIABLE
                   ERROR_QUIET
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  RESULT_VARIABLE _gnuplot_version_result)
 
     string(REGEX REPLACE "^gnuplot ([0-9\\.]+)( patchlevel )?" "\\1." Gnuplot_VERSION "${GNUPLOT_OUTPUT_VARIABLE}")
     string(REGEX REPLACE "\\.$" "" Gnuplot_VERSION "${Gnuplot_VERSION}")

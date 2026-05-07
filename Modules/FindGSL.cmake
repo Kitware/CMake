@@ -171,7 +171,8 @@ if( NOT GSL_VERSION )
     execute_process(
       COMMAND "${GSL_CONFIG_EXECUTABLE}" --version
       OUTPUT_VARIABLE GSL_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE )
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _gsl_config_version_result)
   endif()
 
   # 2. If gsl-config is not available, try looking in gsl/gsl_version.h

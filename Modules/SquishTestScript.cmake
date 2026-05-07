@@ -45,7 +45,7 @@ endif ()
 
 if(squish_pre_command)
   message(STATUS "Executing pre command: ${squish_pre_command}")
-  execute_process(COMMAND "${squish_pre_command}")
+  execute_process(COMMAND "${squish_pre_command}" RESULT_VARIABLE _result_pre_command)
 endif()
 
 # run the test
@@ -71,7 +71,7 @@ endif()
 
 if(squish_post_command)
   message(STATUS "Executing post command: ${squish_post_command}")
-  execute_process(COMMAND "${squish_post_command}")
+  execute_process(COMMAND "${squish_post_command}" RESULT_VARIABLE _result_post_command)
 endif()
 
 # check for an error with running the test

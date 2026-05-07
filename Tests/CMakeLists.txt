@@ -1218,7 +1218,8 @@ if(BUILD_TESTING)
         execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
           OUTPUT_VARIABLE _TMP_VERSION
           ERROR_QUIET
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          RESULT_VARIABLE _result_dpkg_version)
         if(_TMP_VERSION MATCHES "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)")
           set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
         else()
@@ -1963,6 +1964,7 @@ if(BUILD_TESTING)
         COMMAND sw_vers -productVersion
         OUTPUT_VARIABLE OSX_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE _sw_vers_result
         )
       if(OSX_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
         set(CMake_TEST_XCTest_DEPLOYMENT_TARGET "${CMAKE_MATCH_1}")

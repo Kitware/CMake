@@ -1083,6 +1083,7 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
     OUTPUT_VARIABLE _matlab_mex_extension
     ERROR_VARIABLE _matlab_mex_extension_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _matlab_mex_extension_result
     ${devnull})
 
   if(_matlab_mex_extension_error)

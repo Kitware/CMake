@@ -110,7 +110,8 @@ macro(cmake_cuda_find_toolkit lang lang_var_)
   # each of which has a different layout, we need to extract the CUDA toolkit root from the compiler
   # itself, allowing us to support numerous different scattered toolkit layouts
   execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "-v" "__cmake_determine_cuda"
-    OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
+    OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT
+    RESULT_VARIABLE _result_nvcc_out)
   if(_CUDA_NVCC_OUT MATCHES "\\#\\$ TOP=([^\r\n]*)")
     get_filename_component(${lang_var_}TOOLKIT_ROOT "${CMAKE_MATCH_1}" ABSOLUTE)
   else()
@@ -161,7 +162,9 @@ macro(cmake_cuda_find_toolkit lang lang_var_)
   # For regular nvcc we the toolkit version is the same as the compiler version and we can parse it from the vendor test output.
   # For Clang we need to invoke nvcc to get version output.
   if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
-    execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "--version" OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT)
+    execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "--version"
+      OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+      RESULT_VARIABLE _result_nvcc_version)
   endif()
 
   if(CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES [=[V([0-9]+\.[0-9]+\.[0-9]+)]=])

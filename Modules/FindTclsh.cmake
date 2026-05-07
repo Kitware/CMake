@@ -139,7 +139,8 @@ if(TCL_TCLSH)
                   COMMAND "${TCL_TCLSH}"
                   OUTPUT_VARIABLE Tclsh_VERSION
                   ERROR_QUIET
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  RESULT_VARIABLE _tclsh_version_result)
   set(TCLSH_VERSION_STRING "${Tclsh_VERSION}")
 endif()
 

@@ -99,7 +99,8 @@ elseif(NOT DEFINED CMAKE_Swift_COMPILER_USE_OLD_DRIVER)
   # Execute in dry-run mode so no compilation will be actually performed.
   execute_process(COMMAND ${_CMAKE_Swift_COMPILER_CHECK_COMMAND}
     WORKING_DIRECTORY "${CMAKE_Swift_COMPILER_DRIVER_TEST_DIR}"
-    OUTPUT_VARIABLE _CMAKE_Swift_COMPILER_CHECK_OUTPUT)
+    OUTPUT_VARIABLE _CMAKE_Swift_COMPILER_CHECK_OUTPUT
+    RESULT_VARIABLE _result_CMAKE_Swift_COMPILER)
 
   # Check the first frontend execution.  It is on the first line of output.
   # The old driver treats all inputs as Swift sources while the new driver
@@ -133,7 +134,8 @@ if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 5.2)
   endif()
   execute_process(
     COMMAND ${target_info_command}
-    OUTPUT_VARIABLE swift_target_info)
+    OUTPUT_VARIABLE swift_target_info
+    RESULT_VARIABLE _result_swift_target_info)
   message(CONFIGURE_LOG "Swift target info:\n" "${swift_target_info}")
   string(JSON module_triple GET "${swift_target_info}" "target" "moduleTriple")
   set(CMAKE_Swift_MODULE_TRIPLE ${module_triple})

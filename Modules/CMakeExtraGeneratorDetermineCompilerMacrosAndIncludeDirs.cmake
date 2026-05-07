@@ -31,7 +31,8 @@ macro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
   execute_process(COMMAND ${_compilerExecutable} ${_arg1} ${_stdver} ${_stdlib} -v -E -x ${_lang} -dD dummy
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles
                   ERROR_VARIABLE _gccOutput
-                  OUTPUT_VARIABLE _gccStdout )
+                  OUTPUT_VARIABLE _gccStdout
+                  RESULT_VARIABLE _result_gcc)
   file(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy")
 
   # First find the system include dirs:

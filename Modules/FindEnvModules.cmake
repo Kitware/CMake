@@ -229,6 +229,7 @@ function(env_module)
   execute_process(
     COMMAND mktemp -t module.cmake.XXXXXXXXXXXX
     OUTPUT_VARIABLE tempfile_name
+    RESULT_VARIABLE _tempfile_result
   )
   string(STRIP "${tempfile_name}" tempfile_name)
 

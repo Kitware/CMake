@@ -13,6 +13,7 @@ function(_ep_get_git_remote_url output_variable working_directory)
     OUTPUT_VARIABLE git_symbolic_ref
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET
+    RESULT_VARIABLE _result_git_symbolic_ref
   )
 
   if(NOT git_symbolic_ref STREQUAL "")
@@ -24,6 +25,7 @@ function(_ep_get_git_remote_url output_variable working_directory)
       OUTPUT_VARIABLE git_remote_name
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_QUIET
+      RESULT_VARIABLE _result_git_branch_remote
     )
   endif()
 
@@ -36,6 +38,7 @@ function(_ep_get_git_remote_url output_variable working_directory)
       OUTPUT_VARIABLE git_remote_list
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_QUIET
+      RESULT_VARIABLE _result_git_remote_list
     )
     string(REPLACE "\n" ";" git_remote_list "${git_remote_list}")
     list(LENGTH git_remote_list git_remote_list_length)
@@ -70,6 +73,7 @@ function(_ep_get_git_remote_url output_variable working_directory)
     OUTPUT_STRIP_TRAILING_WHITESPACE
     COMMAND_ERROR_IS_FATAL LAST
     ENCODING UTF-8   # Needed to handle non-ascii characters in local paths
+    RESULT_VARIABLE _result_git_remote_url
   )
 
   set("${output_variable}" "${git_remote_url}" PARENT_SCOPE)

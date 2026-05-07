@@ -257,16 +257,19 @@ if(CURL_FIND_COMPONENTS)
       execute_process(COMMAND ${CURL_CONFIG_EXECUTABLE} --version
                       OUTPUT_VARIABLE CURL_CONFIG_VERSION_STRING
                       ERROR_QUIET
-                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+                      OUTPUT_STRIP_TRAILING_WHITESPACE
+                      RESULT_VARIABLE _curl_config_version_result)
       execute_process(COMMAND ${CURL_CONFIG_EXECUTABLE} --feature
                       OUTPUT_VARIABLE CURL_CONFIG_FEATURES_STRING
                       ERROR_QUIET
-                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+                      OUTPUT_STRIP_TRAILING_WHITESPACE
+                      RESULT_VARIABLE _curl_config_features_result)
       string(REPLACE "\n" ";" CURL_SUPPORTED_FEATURES "${CURL_CONFIG_FEATURES_STRING}")
       execute_process(COMMAND ${CURL_CONFIG_EXECUTABLE} --protocols
                       OUTPUT_VARIABLE CURL_CONFIG_PROTOCOLS_STRING
                       ERROR_QUIET
-                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+                      OUTPUT_STRIP_TRAILING_WHITESPACE
+                      RESULT_VARIABLE _curl_config_protocols_result)
       string(REPLACE "\n" ";" CURL_SUPPORTED_PROTOCOLS "${CURL_CONFIG_PROTOCOLS_STRING}")
     endif()
   endif()

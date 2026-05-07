@@ -708,7 +708,8 @@ else()
       # rpath:
       execute_process(COMMAND ${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}
         ${WX_CONFIG_ARGS_LIBS}
-        OUTPUT_VARIABLE WX_CONFIG_LIBS )
+        OUTPUT_VARIABLE WX_CONFIG_LIBS
+        RESULT_VARIABLE _wx_config_libs_result)
 
       ## extract linkdirs (-L) for rpath
       ## use regular expression to match wildcard equivalent "-L*<endchar>"
