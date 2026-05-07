@@ -114,9 +114,18 @@ run_cmake(SORT-DuplicateOrderOption)
 run_cmake(SORT-DuplicateCompareOption)
 run_cmake(SORT-DuplicateCaseOption)
 run_cmake(SORT-NoCaseOption)
+run_cmake(SORT-COMPARATOR-UnknownFunction)
+run_cmake(SORT-COMPARATOR-NoOutput)
+run_cmake(SORT-COMPARATOR-CompareConflict)
+run_cmake(SORT-COMPARATOR-CompareConflictReverse)
+run_cmake(SORT-COMPARATOR-NoFunction)
+run_cmake(SORT-COMPARATOR-DuplicateOption)
+run_cmake(SORT-COMPARATOR-NotStrictWeak)
+run_cmake(SORT-COMPARATOR-NotStrictWeakLate)
 
 # Successful tests
 run_cmake(SORT)
+run_cmake(SORT-COMPARATOR)
 
 # argument tests
 run_cmake(PREPEND-NoArgs)

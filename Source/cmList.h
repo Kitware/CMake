@@ -848,6 +848,7 @@ public:
       STRING,
       FILE_BASENAME,
       NATURAL,
+      COMPARATOR,
     } Compare = CompareMethod::DEFAULT;
 
     enum class CaseSensitivity
@@ -856,6 +857,8 @@ public:
       SENSITIVE,
       INSENSITIVE,
     } Case = CaseSensitivity::DEFAULT;
+
+    std::string ComparatorFunction;
 
     // declare the default constructor to work-around clang bug
     SortConfiguration();
@@ -869,6 +872,7 @@ public:
     }
   };
   cmList& sort(SortConfiguration config = SortConfiguration{});
+  cmList& sort(SortConfiguration config, cmMakefile& makefile);
 
   // exception raised on error during transform operations
   class transform_error : public std::runtime_error

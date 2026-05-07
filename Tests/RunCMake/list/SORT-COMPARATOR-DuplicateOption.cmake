@@ -1,0 +1,10 @@
+function(my_cmp a b out)
+  if("${a}" STRLESS "${b}")
+    set(${out} TRUE PARENT_SCOPE)
+  else()
+    set(${out} FALSE PARENT_SCOPE)
+  endif()
+endfunction()
+
+set(mylist c a b)
+list(SORT mylist COMPARATOR my_cmp COMPARATOR my_cmp)

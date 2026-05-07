@@ -167,6 +167,60 @@ private:
   PredicateEvaluator& Evaluator;
   bool IncludeMatches;
 };
+
+class ComparatorEvaluator
+{
+public:
+  ComparatorEvaluator(std::string functionName, cmMakefile& makefile)
+    : FunctionName(std::move(functionName))
+    , Makefile(&makefile)
+    , OutputVar(OutputVarFor("_cmake_comparator_out_", makefile))
+  {
+    if (!makefile.GetState()->GetCommand(this->FunctionName)) {
+      throw cmList::transform_error(
+        cmStrCat("sub-command SORT, COMPARATOR: unknown function \"",
+                 this->FunctionName, "\"."));
+    }
+  }
+
+  bool operator()(std::string const& a, std::string const& b)
+  {
+    this->Makefile->RemoveDefinition(this->OutputVar);
+
+    cmListFileContext context = this->Makefile->GetBacktrace().Top();
+    std::vector<cmListFileArgument> funcArgs;
+    funcArgs.emplace_back(a, cmListFileArgument::Quoted, context.Line);
+    funcArgs.emplace_back(b, cmListFileArgument::Quoted, context.Line);
+    funcArgs.emplace_back(this->OutputVar, cmListFileArgument::Quoted,
+                          context.Line);
+    cmListFileFunction func{ this->FunctionName, context.Line, context.Line,
+                             std::move(funcArgs) };
+
+    cmExecutionStatus status(*this->Makefile);
+    if (!this->Makefile->ExecuteCommand(func, status) ||
+        status.GetNestedError()) {
+      throw cmList::transform_error(
+        cmStrCat("sub-command SORT, COMPARATOR: function \"",
+                 this->FunctionName, "\" failed during execution."));
+    }
+
+    cmValue result = this->Makefile->GetDefinition(this->OutputVar);
+    if (!result) {
+      throw cmList::transform_error(
+        cmStrCat("sub-command SORT, COMPARATOR: function \"",
+                 this->FunctionName, "\" did not set the output variable."));
+    }
+
+    bool boolResult = cmIsOn(*result);
+    this->Makefile->RemoveDefinition(this->OutputVar);
+    return boolResult;
+  }
+
+private:
+  std::string FunctionName;
+  cmMakefile* Makefile = nullptr;
+  std::string OutputVar;
+};
 }
 
 cmList& cmList::filter(cm::string_view pattern, FilterMode mode)
@@ -249,6 +303,13 @@ public:
   {
   }
 
+  StringSorter(cmList::SortConfiguration config, ComparisonFunction comparator)
+    : Filters{ nullptr, this->GetCaseFilter(config.Case) }
+    , SortMethod(std::move(comparator))
+    , Descending(config.Order == OrderMode::DESCENDING)
+  {
+  }
+
   std::string ApplyFilter(std::string const& argument)
   {
     std::string result = argument;
@@ -303,6 +364,38 @@ cmList& cmList::sort(SortConfiguration cfg)
   } else {
     StringSorter sorter(config);
     std::sort(this->Values.begin(), this->Values.end(), sorter);
+  }
+
+  return *this;
+}
+
+cmList& cmList::sort(SortConfiguration cfg, cmMakefile& makefile)
+{
+  SortConfiguration config{ cfg };
+
+  if (config.Order == SortConfiguration::OrderMode::DEFAULT) {
+    config.Order = SortConfiguration::OrderMode::ASCENDING;
+  }
+  if (config.Case == SortConfiguration::CaseSensitivity::DEFAULT) {
+    config.Case = SortConfiguration::CaseSensitivity::SENSITIVE;
+  }
+
+  try {
+    ComparatorEvaluator evaluator(config.ComparatorFunction, makefile);
+    StringSorter sorter(
+      config, [&evaluator](std::string const& a, std::string const& b) {
+        bool result = evaluator(a, b);
+        if (result && evaluator(b, a)) {
+          throw cmList::transform_error(
+            "sub-command SORT, COMPARATOR: function does not induce a strict "
+            "weak ordering. The comparator returned TRUE for both (a, b) and "
+            "(b, a).");
+        }
+        return result;
+      });
+    std::sort(this->Values.begin(), this->Values.end(), sorter);
+  } catch (transform_error& e) {
+    throw std::invalid_argument(e.what());
   }
 
   return *this;
