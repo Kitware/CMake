@@ -48,18 +48,18 @@ bool cmInstallProgramsCommand(std::vector<std::string> const& args,
 static void FinalAction(cmMakefile& makefile, std::string const& dest,
                         std::vector<std::string> const& args)
 {
-  bool files_mode = false;
+  bool filesMode = false;
   if (!args.empty() && args[0] == "FILES") {
-    files_mode = true;
+    filesMode = true;
   }
 
   std::vector<std::string> files;
 
   // two different options
-  if (args.size() > 1 || files_mode) {
+  if (args.size() > 1 || filesMode) {
     // for each argument, get the programs
     auto s = args.begin();
-    if (files_mode) {
+    if (filesMode) {
       // Skip the FILES argument in files mode.
       ++s;
     }

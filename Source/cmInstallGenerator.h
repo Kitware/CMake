@@ -34,7 +34,7 @@ public:
   cmInstallGenerator(std::string destination,
                      std::vector<std::string> const& configurations,
                      std::string component, MessageLevel message,
-                     bool exclude_from_all, bool all_components,
+                     bool excludeFromAll, bool allComponents,
                      cmListFileBacktrace backtrace);
   ~cmInstallGenerator() override;
 
@@ -48,10 +48,10 @@ public:
   void AddInstallRule(
     std::ostream& os, std::string const& dest, cmInstallType type,
     std::vector<std::string> const& files, bool optional = false,
-    char const* permissions_file = nullptr,
-    char const* permissions_dir = nullptr, char const* rename = nullptr,
-    char const* literal_args = nullptr, Indent indent = Indent(),
-    char const* files_var = nullptr);
+    char const* permissionsFile = nullptr,
+    char const* permissionsDir = nullptr, char const* rename = nullptr,
+    char const* literalArgs = nullptr, Indent indent = Indent(),
+    char const* filesVar = nullptr);
 
   /** Get the install destination as it should appear in the
       installation script.  */
@@ -81,8 +81,8 @@ protected:
   void GenerateScript(std::ostream& os) override;
 
   std::string CreateComponentTest(std::string const& component,
-                                  bool exclude_from_all,
-                                  bool all_components = false);
+                                  bool excludeFromAll,
+                                  bool allComponents = false);
 
   using TweakMethod =
     std::function<void(std::ostream& os, Indent indent,

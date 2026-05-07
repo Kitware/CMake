@@ -16,14 +16,14 @@
 
 cmInstallGenerator::cmInstallGenerator(
   std::string destination, std::vector<std::string> const& configurations,
-  std::string component, MessageLevel message, bool exclude_from_all,
-  bool all_components, cmListFileBacktrace backtrace)
+  std::string component, MessageLevel message, bool excludeFromAll,
+  bool allComponents, cmListFileBacktrace backtrace)
   : cmScriptGenerator("CMAKE_INSTALL_CONFIG_NAME", configurations)
   , Destination(std::move(destination))
   , Component(std::move(component))
   , Message(message)
-  , ExcludeFromAll(exclude_from_all)
-  , AllComponents(all_components)
+  , ExcludeFromAll(excludeFromAll)
+  , AllComponents(allComponents)
   , Backtrace(std::move(backtrace))
 {
 }
@@ -46,10 +46,10 @@ void cmInstallGenerator::CheckCMP0082(bool& haveSubdirectoryInstall,
 void cmInstallGenerator::AddInstallRule(
   std::ostream& os, std::string const& dest, cmInstallType type,
   std::vector<std::string> const& files, bool optional /* = false */,
-  char const* permissions_file /* = nullptr */,
-  char const* permissions_dir /* = nullptr */,
-  char const* rename /* = nullptr */, char const* literal_args /* = nullptr */,
-  Indent indent, char const* files_var /* = nullptr */)
+  char const* permissionsFile /* = nullptr */,
+  char const* permissionsDir /* = nullptr */,
+  char const* rename /* = nullptr */, char const* literalArgs /* = nullptr */,
+  Indent indent, char const* filesVar /* = nullptr */)
 {
   // Use the FILE command to install the file.
   std::string stype;
@@ -95,9 +95,8 @@ void cmInstallGenerator::AddInstallRule(
       }
       os << "\")\n";
     }
-    if (files_var) {
-      os << indent << "foreach(_cmake_abs_file IN LISTS " << files_var
-         << ")\n";
+    if (filesVar) {
+      os << indent << "foreach(_cmake_abs_file IN LISTS " << filesVar << ")\n";
       os << indent.Next()
          << "get_filename_component(_cmake_abs_file_name "
             "\"${_cmake_abs_file}\" NAME)\n";
@@ -139,11 +138,11 @@ void cmInstallGenerator::AddInstallRule(
       os << " MESSAGE_NEVER";
       break;
   }
-  if (permissions_file && *permissions_file) {
-    os << " PERMISSIONS" << permissions_file;
+  if (permissionsFile && *permissionsFile) {
+    os << " PERMISSIONS" << permissionsFile;
   }
-  if (permissions_dir && *permissions_dir) {
-    os << " DIR_PERMISSIONS" << permissions_dir;
+  if (permissionsDir && *permissionsDir) {
+    os << " DIR_PERMISSIONS" << permissionsDir;
   }
   if (rename && *rename) {
     os << " RENAME \"" << rename << "\"";
@@ -155,25 +154,25 @@ void cmInstallGenerator::AddInstallRule(
     for (std::string const& f : files) {
       os << "\n" << indent << "  \"" << f << "\"";
     }
-    if (files_var) {
-      os << " ${" << files_var << "}";
+    if (filesVar) {
+      os << " ${" << filesVar << "}";
     }
     os << "\n" << indent << " ";
-    if (!(literal_args && *literal_args)) {
+    if (!(literalArgs && *literalArgs)) {
       os << " ";
     }
   }
-  if (literal_args && *literal_args) {
-    os << literal_args;
+  if (literalArgs && *literalArgs) {
+    os << literalArgs;
   }
   os << ")\n";
 }
 
 std::string cmInstallGenerator::CreateComponentTest(
-  std::string const& component, bool exclude_from_all, bool all_components)
+  std::string const& component, bool excludeFromAll, bool allComponents)
 {
-  if (all_components) {
-    if (exclude_from_all) {
+  if (allComponents) {
+    if (excludeFromAll) {
       return "CMAKE_INSTALL_COMPONENT";
     }
     return {};
@@ -182,7 +181,7 @@ std::string cmInstallGenerator::CreateComponentTest(
   std::string result = "CMAKE_INSTALL_COMPONENT STREQUAL \"";
   result += component;
   result += "\"";
-  if (!exclude_from_all) {
+  if (!excludeFromAll) {
     result += " OR NOT CMAKE_INSTALL_COMPONENT";
   }
 
@@ -194,12 +193,12 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
   // Track indentation.
   Indent indent;
 
-  std::string component_test = this->CreateComponentTest(
+  std::string componentTest = this->CreateComponentTest(
     this->Component, this->ExcludeFromAll, this->AllComponents);
 
   // Begin this block of installation.
-  if (!component_test.empty()) {
-    os << indent << "if(" << component_test << ")\n";
+  if (!componentTest.empty()) {
+    os << indent << "if(" << componentTest << ")\n";
   }
 
   // Generate the script possibly with per-configuration code.
@@ -207,7 +206,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
                               this->AllComponents ? indent : indent.Next());
 
   // End this block of installation.
-  if (!component_test.empty()) {
+  if (!componentTest.empty()) {
     os << indent << "endif()\n\n";
   }
 }

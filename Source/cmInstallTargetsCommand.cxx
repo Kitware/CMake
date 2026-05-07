@@ -26,7 +26,7 @@ bool cmInstallTargetsCommand(std::vector<std::string> const& args,
   cmMakefile::cmTargetMap& tgts = mf.GetTargets();
   auto s = args.begin();
   ++s;
-  std::string runtime_dir = "/bin";
+  std::string runtimeDir = "/bin";
   for (; s != args.end(); ++s) {
     if (*s == "RUNTIME_DIRECTORY") {
       ++s;
@@ -36,12 +36,12 @@ bool cmInstallTargetsCommand(std::vector<std::string> const& args,
         return false;
       }
 
-      runtime_dir = *s;
+      runtimeDir = *s;
     } else {
       auto ti = tgts.find(*s);
       if (ti != tgts.end()) {
         ti->second.SetInstallPath(args[0]);
-        ti->second.SetRuntimeInstallPath(runtime_dir);
+        ti->second.SetRuntimeInstallPath(runtimeDir);
         ti->second.SetHaveInstallRule(true);
       } else {
         std::string str = "Cannot find target: \"" + *s + "\" to install.";

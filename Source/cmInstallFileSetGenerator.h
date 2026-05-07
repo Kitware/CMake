@@ -20,10 +20,10 @@ class cmInstallFileSetGenerator : public cmInstallGenerator
 public:
   cmInstallFileSetGenerator(std::string targetName, std::string fileSetName,
                             std::string destination,
-                            std::string file_permissions,
+                            std::string filePermissions,
                             std::vector<std::string> const& configurations,
                             std::string const& component, MessageLevel message,
-                            bool exclude_from_all, bool optional,
+                            bool excludeFromAll, bool optional,
                             cmListFileBacktrace backtrace);
   ~cmInstallFileSetGenerator() override;
 

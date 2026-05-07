@@ -32,14 +32,14 @@ cmsys::RegularExpression const CFBundleRegularExpression(
 cmInstallImportedRuntimeArtifactsGenerator::
   cmInstallImportedRuntimeArtifactsGenerator(
     std::string targetName, std::string const& dest,
-    std::string file_permissions,
+    std::string filePermissions,
     std::vector<std::string> const& configurations,
-    std::string const& component, MessageLevel message, bool exclude_from_all,
+    std::string const& component, MessageLevel message, bool excludeFromAll,
     bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(backtrace))
   , TargetName(std::move(targetName))
-  , FilePermissions(std::move(file_permissions))
+  , FilePermissions(std::move(filePermissions))
   , Optional(optional)
 {
   this->ActionsPerConfig = true;

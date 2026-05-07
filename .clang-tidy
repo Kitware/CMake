@@ -90,4 +90,18 @@ CheckOptions:
     value: '0'
   - key:   modernize-use-auto.MinTypeNameLength
     value: '80'
+  - key:   readability-identifier-naming.ClassCase
+    value: 'CamelCase'
+  - key:   readability-identifier-naming.ClassIgnoredRegexp
+    value: 'cm[A-Z][A-Za-z]+|(const_)?iterator'
+  - key:   readability-identifier-naming.ClassMemberCase
+    value: 'CamelCase'
+  - key:   readability-identifier-naming.ClassMemberIgnoredRegexp
+    value: 'prop[A-Z_]+'
+  - key:   readability-identifier-naming.PrivateMemberCase
+    value: 'CamelCase'
+  - key:   readability-identifier-naming.ParameterCase
+    value: 'camelBack'
+  - key:   readability-identifier-naming.LocalVariableCase
+    value: 'camelBack'
 ...

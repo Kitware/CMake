@@ -14,9 +14,9 @@
 
 cmInstallScriptGenerator::cmInstallScriptGenerator(
   std::string script, bool code, std::string const& component,
-  bool exclude_from_all, bool all_components, cmListFileBacktrace backtrace)
+  bool excludeFromAll, bool allComponents, cmListFileBacktrace backtrace)
   : cmInstallGenerator("", std::vector<std::string>(), component,
-                       MessageDefault, exclude_from_all, all_components,
+                       MessageDefault, excludeFromAll, allComponents,
                        std::move(backtrace))
   , Script(std::move(script))
   , Code(code)
