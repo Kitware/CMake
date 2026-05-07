@@ -498,8 +498,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     }
 
     // build response file name
-    std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-    cmValue flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
+    cmValue flag;
+    if (targetType == cmStateEnums::STATIC_LIBRARY) {
+      std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_ARCHIVE_FLAG";
+      flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
+    }
+    if (!flag) {
+      std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
+      flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
+    }
 
     if (flag) {
       responseFlag = *flag;
@@ -1590,9 +1597,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     cmStrCat("CMAKE_", this->TargetLinkLanguage(config));
 
   // build response file name
-  std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-
-  cmValue flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
+  cmValue flag;
+  if (targetType == cmStateEnums::STATIC_LIBRARY) {
+    std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_ARCHIVE_FLAG";
+    flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
+  }
+  if (!flag) {
+    std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
+    flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
+  }
 
   bool const lang_supports_response =
     !(this->TargetLinkLanguage(config) == "RC" ||

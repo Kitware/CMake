@@ -174,8 +174,9 @@ protected:
 
   enum ResponseFlagFor
   {
+    Archive,
     Link,
-    DeviceLink
+    DeviceLink,
   };
 
   /** Create list of flags for link libraries. */
