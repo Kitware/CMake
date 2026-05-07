@@ -1083,15 +1083,35 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
   }
 }
 
+namespace {
+std::string const gcc_s = "gcc_s";
+std::string const gcc_s_asneeded = "gcc_s_asneeded";
+}
+
 void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 {
+  auto const impliedByLinkerLanguage = [this](std::string const& lib) -> bool {
+    if (cm::contains(this->ImplicitLinkLibs, lib)) {
+      return true;
+    }
+    // As of GCC 16, `gcc` implies `gcc_s_asneeded` but `g++` implies `gcc_s`.
+    // Accept them interchangeably when linking mixed C and C++ binaries.
+    if ((lib == gcc_s_asneeded &&
+         cm::contains(this->ImplicitLinkLibs, gcc_s)) ||
+        (lib == gcc_s &&
+         cm::contains(this->ImplicitLinkLibs, gcc_s_asneeded))) {
+      return true;
+    }
+    return false;
+  };
+
   // Add libraries for this language that are not implied by the
   // linker language.
   std::string libVar = cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_LIBRARIES");
   if (cmValue libs = this->Makefile->GetDefinition(libVar)) {
     cmList libsList{ *libs };
-    for (auto const& i : libsList) {
-      if (!cm::contains(this->ImplicitLinkLibs, i)) {
+    for (std::string const& i : libsList) {
+      if (!impliedByLinkerLanguage(i)) {
         this->AddItem({ i });
       }
     }
