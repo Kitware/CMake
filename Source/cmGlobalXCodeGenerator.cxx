@@ -3907,6 +3907,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
             if (!IsLinkPhaseLibraryExtension(libExt)) {
               canUseLinkPhase = false;
             }
+            // We can't add non-absolute PBXFileReferences to the link phase
+            if (!cmSystemTools::FileIsFullPath(libItem.Value.Value)) {
+              canUseLinkPhase = false;
+            }
           }
         }
         if (canUseLinkPhase) {
