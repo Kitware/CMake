@@ -8,8 +8,8 @@
 
 #include "cmInstallExportGenerator.h"
 
+class cmDiagnosticContext;
 class cmExportSet;
-class cmListFileBacktrace;
 
 /** \class cmInstallCMakeConfigExportGenerator
  * \brief Generate rules for creating CMake export files.
@@ -24,7 +24,7 @@ public:
     MessageLevel message, bool excludeFromAll, std::string filename,
     std::string targetNamespace, std::string cxxModulesDirectory,
     bool exportOld, bool exportPackageDependencies,
-    cmListFileBacktrace backtrace);
+    cmDiagnosticContext context);
   cmInstallCMakeConfigExportGenerator(
     cmInstallCMakeConfigExportGenerator const&) = delete;
   ~cmInstallCMakeConfigExportGenerator() override;

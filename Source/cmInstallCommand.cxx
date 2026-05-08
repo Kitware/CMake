@@ -20,6 +20,7 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmCMakePath.h"
+#include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
@@ -58,8 +59,6 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
-
-class cmListFileBacktrace;
 
 namespace {
 
@@ -108,6 +107,11 @@ public:
     }
   }
 
+  cmDiagnosticContext CaptureContext() const
+  {
+    return cmInstallGenerator::CaptureContext(this->Makefile);
+  }
+
   void SetError(std::string const& err) { this->Status.SetError(err); }
 
   bool MakeFilesFullPath(char const* modeName,
@@ -137,7 +141,7 @@ public:
 
 std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
   cmTarget& target, cmInstallCommandArguments const& args, bool impLib,
-  cmListFileBacktrace const& backtrace, std::string const& destination,
+  cmDiagnosticContext context, std::string const& destination,
   bool forceOpt = false, bool namelink = false)
 {
   cmInstallGenerator::MessageLevel message =
@@ -148,17 +152,16 @@ std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
   auto g = cm::make_unique<cmInstallTargetGenerator>(
     target.GetName(), destination, impLib, args.GetPermissions(),
     args.GetConfigurations(), component, message, args.GetExcludeFromAll(),
-    args.GetOptional() || forceOpt, backtrace);
+    args.GetOptional() || forceOpt, std::move(context));
   target.AddInstallGenerator(g.get());
   return g;
 }
 
 std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
   cmTarget& target, cmInstallCommandArguments const& args, bool impLib,
-  cmListFileBacktrace const& backtrace, bool forceOpt = false,
-  bool namelink = false)
+  cmDiagnosticContext context, bool forceOpt = false, bool namelink = false)
 {
-  return CreateInstallTargetGenerator(target, args, impLib, backtrace,
+  return CreateInstallTargetGenerator(target, args, impLib, std::move(context),
                                       args.GetDestination(), forceOpt,
                                       namelink);
 }
@@ -174,7 +177,7 @@ std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
     absFiles, destination, programs, args.GetPermissions(),
     args.GetConfigurations(), args.GetComponent(), message,
     args.GetExcludeFromAll(), args.GetRename(), args.GetOptional(),
-    mf->GetBacktrace());
+    cmInstallGenerator::CaptureContext(mf));
 }
 
 std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
@@ -195,7 +198,7 @@ std::unique_ptr<cmInstallFileSetGenerator> CreateInstallFileSetGenerator(
     target.GetName(), args.GetFileSet(), args.GetDestination(),
     args.GetPermissions(), args.GetConfigurations(), args.GetComponent(),
     message, args.GetExcludeFromAll(), args.GetOptional(),
-    helper.Makefile->GetBacktrace());
+    helper.CaptureContext());
 }
 
 void AddInstallRuntimeDependenciesGenerator(
@@ -253,8 +256,7 @@ void AddInstallRuntimeDependenciesGenerator(
       runtimeDependenciesArgsRef.GetComponent(),
       runtimeDependenciesArgsRef.GetPermissions(),
       cmInstallGenerator::SelectMessageLevel(helper.Makefile),
-      runtimeDependenciesArgsRef.GetExcludeFromAll(),
-      helper.Makefile->GetBacktrace());
+      runtimeDependenciesArgsRef.GetExcludeFromAll(), helper.CaptureContext());
   helper.Makefile->AddInstallGenerator(
     std::move(libraryRuntimeDependenciesGenerator));
   if (dllPlatform) {
@@ -273,7 +275,7 @@ void AddInstallRuntimeDependenciesGenerator(
         frameworkArgs.GetDestination(), frameworkArgs.GetConfigurations(),
         frameworkArgs.GetComponent(), frameworkArgs.GetPermissions(),
         cmInstallGenerator::SelectMessageLevel(helper.Makefile),
-        frameworkArgs.GetExcludeFromAll(), helper.Makefile->GetBacktrace());
+        frameworkArgs.GetExcludeFromAll(), helper.CaptureContext());
     helper.Makefile->AddInstallGenerator(
       std::move(frameworkRuntimeDependenciesGenerator));
     installsFramework = true;
@@ -830,21 +832,21 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           if (!archiveArgs.GetDestination().empty()) {
             // The import library uses the ARCHIVE properties.
             archiveGenerator = CreateInstallTargetGenerator(
-              target, archiveArgs, true, helper.Makefile->GetBacktrace());
+              target, archiveArgs, true, helper.CaptureContext());
             artifactsSpecified = true;
           }
           if (!runtimeArgs.GetDestination().empty()) {
             // The DLL uses the RUNTIME properties.
             runtimeGenerator = CreateInstallTargetGenerator(
-              target, runtimeArgs, false, helper.Makefile->GetBacktrace());
+              target, runtimeArgs, false, helper.CaptureContext());
             artifactsSpecified = true;
           }
           if (!archiveGenerator && !runtimeGenerator) {
             archiveGenerator = CreateInstallTargetGenerator(
-              target, archiveArgs, true, helper.Makefile->GetBacktrace(),
+              target, archiveArgs, true, helper.CaptureContext(),
               helper.GetArchiveDestination(nullptr));
             runtimeGenerator = CreateInstallTargetGenerator(
-              target, runtimeArgs, false, helper.Makefile->GetBacktrace(),
+              target, runtimeArgs, false, helper.CaptureContext(),
               helper.GetRuntimeDestination(nullptr));
           }
           if (runtimeDependencySet && runtimeGenerator) {
@@ -867,7 +869,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             // Use the FRAMEWORK properties.
             if (!frameworkArgs.GetDestination().empty()) {
               frameworkGenerator = CreateInstallTargetGenerator(
-                target, frameworkArgs, false, helper.Makefile->GetBacktrace());
+                target, frameworkArgs, false, helper.CaptureContext());
             } else {
               status.SetError(
                 cmStrCat("TARGETS given no FRAMEWORK DESTINATION for shared "
@@ -882,14 +884,14 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             }
             if (namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
               libraryGenerator = CreateInstallTargetGenerator(
-                target, libraryArgs, false, helper.Makefile->GetBacktrace(),
+                target, libraryArgs, false, helper.CaptureContext(),
                 helper.GetLibraryDestination(&libraryArgs));
               libraryGenerator->SetNamelinkMode(
                 cmInstallTargetGenerator::NamelinkModeSkip);
             }
             if (namelinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
               namelinkGenerator = CreateInstallTargetGenerator(
-                target, libraryArgs, false, helper.Makefile->GetBacktrace(),
+                target, libraryArgs, false, helper.CaptureContext(),
                 helper.GetLibraryDestination(&libraryArgs), false, true);
               namelinkGenerator->SetNamelinkMode(
                 cmInstallTargetGenerator::NamelinkModeOnly);
@@ -906,7 +908,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
               if (importlinkMode !=
                   cmInstallTargetGenerator::NamelinkModeOnly) {
                 archiveGenerator = CreateInstallTargetGenerator(
-                  target, archiveArgs, true, helper.Makefile->GetBacktrace(),
+                  target, archiveArgs, true, helper.CaptureContext(),
                   helper.GetLibraryDestination(&archiveArgs));
                 archiveGenerator->SetImportlinkMode(
                   cmInstallTargetGenerator::NamelinkModeSkip);
@@ -914,7 +916,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
               if (importlinkMode !=
                   cmInstallTargetGenerator::NamelinkModeSkip) {
                 importlinkGenerator = CreateInstallTargetGenerator(
-                  target, archiveArgs, true, helper.Makefile->GetBacktrace(),
+                  target, archiveArgs, true, helper.CaptureContext(),
                   helper.GetLibraryDestination(&archiveArgs), false, true);
                 importlinkGenerator->SetImportlinkMode(
                   cmInstallTargetGenerator::NamelinkModeOnly);
@@ -944,7 +946,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           // Use the FRAMEWORK properties.
           if (!frameworkArgs.GetDestination().empty()) {
             frameworkGenerator = CreateInstallTargetGenerator(
-              target, frameworkArgs, false, helper.Makefile->GetBacktrace());
+              target, frameworkArgs, false, helper.CaptureContext());
           } else {
             status.SetError(
               cmStrCat("TARGETS given no FRAMEWORK DESTINATION for static "
@@ -958,7 +960,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             artifactsSpecified = true;
           }
           archiveGenerator = CreateInstallTargetGenerator(
-            target, archiveArgs, false, helper.Makefile->GetBacktrace(),
+            target, archiveArgs, false, helper.CaptureContext(),
             helper.GetArchiveDestination(&archiveArgs));
         }
       } break;
@@ -966,7 +968,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         // Modules use LIBRARY properties.
         if (!libraryArgs.GetDestination().empty()) {
           libraryGenerator = CreateInstallTargetGenerator(
-            target, libraryArgs, false, helper.Makefile->GetBacktrace());
+            target, libraryArgs, false, helper.CaptureContext());
           libraryGenerator->SetNamelinkMode(namelinkMode);
           namelinkOnly =
             (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
@@ -994,7 +996,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           }
 
           objectGenerator = CreateInstallTargetGenerator(
-            target, objectArgs, false, helper.Makefile->GetBacktrace());
+            target, objectArgs, false, helper.CaptureContext());
         } else {
           // Installing an OBJECT library without a destination transforms
           // it to an INTERFACE library.  It installs no files but can be
@@ -1006,7 +1008,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           // Application bundles use the BUNDLE properties.
           if (!bundleArgs.GetDestination().empty()) {
             bundleGenerator = CreateInstallTargetGenerator(
-              target, bundleArgs, false, helper.Makefile->GetBacktrace());
+              target, bundleArgs, false, helper.CaptureContext());
           }
           if (!bundleGenerator) {
             status.SetError(cmStrCat("TARGETS given no BUNDLE DESTINATION for "
@@ -1026,7 +1028,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             artifactsSpecified = true;
           }
           runtimeGenerator = CreateInstallTargetGenerator(
-            target, runtimeArgs, false, helper.Makefile->GetBacktrace(),
+            target, runtimeArgs, false, helper.CaptureContext(),
             helper.GetRuntimeDestination(&runtimeArgs));
           if (runtimeDependencySet) {
             runtimeDependencySet->AddExecutable(runtimeGenerator.get());
@@ -1042,7 +1044,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           // The import library uses the ARCHIVE properties.
           artifactsSpecified = true;
           archiveGenerator = CreateInstallTargetGenerator(
-            target, archiveArgs, true, helper.Makefile->GetBacktrace(), true);
+            target, archiveArgs, true, helper.CaptureContext(), true);
         }
       } break;
       case cmStateEnums::INTERFACE_LIBRARY:
@@ -1150,7 +1152,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         cxxModuleBmiArgs.GetConfigurations(), cxxModuleBmiArgs.GetComponent(),
         cmInstallGenerator::SelectMessageLevel(target.GetMakefile()),
         cxxModuleBmiArgs.GetExcludeFromAll(), cxxModuleBmiArgs.GetOptional(),
-        helper.Makefile->GetBacktrace());
+        helper.CaptureContext());
       target.SetHaveInstallRule(true);
     }
 
@@ -1407,7 +1409,7 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
       typeArgs.GetConfigurations(), typeArgs.GetComponent(),
       cmInstallGenerator::SelectMessageLevel(helper.Makefile),
       typeArgs.GetExcludeFromAll(), typeArgs.GetOptional(),
-      helper.Makefile->GetBacktrace());
+      helper.CaptureContext());
   };
 
   // Generate install script code to install the given targets.
@@ -1925,7 +1927,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
     cm::make_unique<cmInstallDirectoryGenerator>(
       dirs, *destination, permissionsFile, permissionsDir, configurations,
       component, message, excludeFromAll, literalArgs, optional,
-      helper.Makefile->GetBacktrace()));
+      helper.CaptureContext()));
 
   // Tell the global generator about any installation component names
   // specified.
@@ -2022,7 +2024,7 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
       ica.GetExcludeFromAll(), std::move(fname), std::move(exportNamespace),
-      helper.Makefile->GetBacktrace()));
+      helper.CaptureContext()));
 
   return true;
 #else
@@ -2172,7 +2174,7 @@ bool HandleMappedPackageInfo(
       installCommandArgs.GetConfigurations(),
       installCommandArgs.GetComponent(), message,
       installCommandArgs.GetExcludeFromAll(), std::move(arguments),
-      cxxModulesDirectory, helper.Makefile->GetBacktrace()));
+      cxxModulesDirectory, helper.CaptureContext()));
 
   return true;
 }
@@ -2303,7 +2305,7 @@ bool HandleExportMode(std::vector<std::string> const& args,
       ica.GetConfigurations(), ica.GetComponent(), message,
       ica.GetExcludeFromAll(), std::move(fname), std::move(exportNamespace),
       std::move(cxxModulesDirectory), exportOld, exportPackageDependencies,
-      helper.Makefile->GetBacktrace()));
+      helper.CaptureContext()));
 
   return true;
 }
@@ -2373,7 +2375,7 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
       &exportSet, dest, ica.GetPermissions(), ica.GetConfigurations(),
       ica.GetComponent(), message, ica.GetExcludeFromAll(),
       std::move(arguments), std::move(cxxModulesDirectory),
-      helper.Makefile->GetBacktrace()));
+      helper.CaptureContext()));
 
   return true;
 #else
@@ -2576,7 +2578,7 @@ bool HandleSbomMode(std::vector<std::string> const& args,
       &exportSet, dest, ica.GetPermissions(), ica.GetConfigurations(),
       ica.GetComponent(), message, ica.GetExcludeFromAll(),
       std::move(arguments), std::move(cxxModulesDirectory),
-      helper.Makefile->GetBacktrace()));
+      helper.CaptureContext()));
 
   return true;
 #else

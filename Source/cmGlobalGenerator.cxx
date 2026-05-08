@@ -1649,7 +1649,7 @@ bool cmGlobalGenerator::Compute()
           &exportSet.second, dest, "", std::vector<std::string>(), "",
           cmInstallGenerator::SelectMessageLevel(this->Makefiles[0].get()),
           false, std::move(sbomDefaultArgs), "",
-          this->Makefiles[0]->GetBacktrace()));
+          cmInstallGenerator::CaptureContext(this->Makefiles[0].get())));
     }
   }
 #endif

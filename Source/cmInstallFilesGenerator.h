@@ -10,7 +10,7 @@
 
 #include "cmInstallGenerator.h"
 
-class cmListFileBacktrace;
+class cmDiagnosticContext;
 class cmLocalGenerator;
 
 /** \class cmInstallFilesGenerator
@@ -25,7 +25,7 @@ public:
                           std::vector<std::string> const& configurations,
                           std::string const& component, MessageLevel message,
                           bool excludeFromAll, std::string rename,
-                          bool optional, cmListFileBacktrace backtrace);
+                          bool optional, cmDiagnosticContext context);
   ~cmInstallFilesGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;

@@ -15,11 +15,13 @@
 #include <cm/optional>
 
 #include "cmComputeLinkInformation.h"
+#include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallType.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -130,9 +132,9 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   std::string targetName, std::string const& dest, bool implib,
   std::string filePermissions, std::vector<std::string> const& configurations,
   std::string const& component, MessageLevel message, bool excludeFromAll,
-  bool optional, cmListFileBacktrace backtrace)
+  bool optional, cmDiagnosticContext context)
   : cmInstallGenerator(dest, configurations, component, message,
-                       excludeFromAll, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(context))
   , TargetName(std::move(targetName))
   , FilePermissions(std::move(filePermissions))
   , ImportLibrary(implib)
@@ -482,7 +484,7 @@ std::string cmInstallTargetGenerator::GetDestination(
   cmLocalGenerator* lg = this->Target->GetLocalGenerator();
   std::string dest =
     cmGeneratorExpression::Evaluate(this->Destination, lg, config);
-  cmInstallGenerator::CheckAbsoluteDestination(dest, lg, this->Backtrace);
+  this->CheckAbsoluteDestination(dest, lg);
   return dest;
 }
 

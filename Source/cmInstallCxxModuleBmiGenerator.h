@@ -10,8 +10,8 @@
 
 #include "cmInstallGenerator.h"
 
+class cmDiagnosticContext;
 class cmGeneratorTarget;
-class cmListFileBacktrace;
 class cmLocalGenerator;
 
 /** \class cmInstallCxxModuleBmiGenerator
@@ -24,7 +24,7 @@ public:
     std::string target, std::string const& dest, std::string filePermissions,
     std::vector<std::string> const& configurations,
     std::string const& component, MessageLevel message, bool excludeFromAll,
-    bool optional, cmListFileBacktrace backtrace);
+    bool optional, cmDiagnosticContext context);
   ~cmInstallCxxModuleBmiGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;

@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmDiagnosticContext.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -18,7 +19,8 @@ cmInstallSubdirectoryGenerator::cmInstallSubdirectoryGenerator(
   cmMakefile* makefile, std::string binaryDirectory,
   cmListFileBacktrace backtrace)
   : cmInstallGenerator("", std::vector<std::string>(), "", MessageDefault,
-                       false, false, std::move(backtrace))
+                       false, false,
+                       cmDiagnosticContext{ std::move(backtrace) })
   , Makefile(makefile)
   , BinaryDirectory(std::move(binaryDirectory))
 {

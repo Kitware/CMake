@@ -6,9 +6,9 @@
 
 #include <cm/memory>
 
+#include "cmDiagnosticContext.h"
 #include "cmExportInstallCMakeConfigGenerator.h"
 #include "cmExportInstallFileGenerator.h"
-#include "cmListFileCache.h"
 
 class cmExportSet;
 
@@ -17,12 +17,12 @@ cmInstallCMakeConfigExportGenerator::cmInstallCMakeConfigExportGenerator(
   std::vector<std::string> const& configurations, std::string component,
   MessageLevel message, bool excludeFromAll, std::string filename,
   std::string targetNamespace, std::string cxxModulesDirectory, bool exportOld,
-  bool exportPackageDependencies, cmListFileBacktrace backtrace)
+  bool exportPackageDependencies, cmDiagnosticContext context)
   : cmInstallExportGenerator(
       exportSet, std::move(destination), std::move(filePermissions),
       configurations, std::move(component), message, excludeFromAll,
       std::move(filename), std::move(targetNamespace),
-      std::move(cxxModulesDirectory), std::move(backtrace))
+      std::move(cxxModulesDirectory), std::move(context))
   , ExportOld(exportOld)
   , ExportPackageDependencies(exportPackageDependencies)
 {

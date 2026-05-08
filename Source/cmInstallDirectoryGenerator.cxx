@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <utility>
 
+#include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
 #include "cmList.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -19,9 +19,9 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::string filePermissions, std::string dirPermissions,
   std::vector<std::string> const& configurations, std::string const& component,
   MessageLevel message, bool excludeFromAll, std::string literalArgs,
-  bool optional, cmListFileBacktrace backtrace)
+  bool optional, cmDiagnosticContext context)
   : cmInstallGenerator(dest, configurations, component, message,
-                       excludeFromAll, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(context))
   , Directories(dirs)
   , FilePermissions(std::move(filePermissions))
   , DirPermissions(std::move(dirPermissions))
@@ -120,7 +120,6 @@ std::string cmInstallDirectoryGenerator::GetDestination(
 {
   std::string dest = cmGeneratorExpression::Evaluate(
     this->Destination, this->LocalGenerator, config);
-  cmInstallGenerator::CheckAbsoluteDestination(dest, this->LocalGenerator,
-                                               this->Backtrace);
+  this->CheckAbsoluteDestination(dest, this->LocalGenerator);
   return dest;
 }

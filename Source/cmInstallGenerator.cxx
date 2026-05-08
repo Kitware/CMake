@@ -8,7 +8,6 @@
 #include <cm/string_view>
 
 #include "cmDiagnostics.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -17,14 +16,14 @@
 cmInstallGenerator::cmInstallGenerator(
   std::string destination, std::vector<std::string> const& configurations,
   std::string component, MessageLevel message, bool excludeFromAll,
-  bool allComponents, cmListFileBacktrace backtrace)
+  bool allComponents, cmDiagnosticContext context)
   : cmScriptGenerator("CMAKE_INSTALL_CONFIG_NAME", configurations)
   , Destination(std::move(destination))
   , Component(std::move(component))
   , Message(message)
   , ExcludeFromAll(excludeFromAll)
   , AllComponents(allComponents)
-  , Backtrace(std::move(backtrace))
+  , Context{ std::move(context) }
 {
 }
 
@@ -231,8 +230,8 @@ std::string cmInstallGenerator::ConvertToAbsoluteDestination(
   return result;
 }
 
-void cmInstallGenerator::CheckAbsoluteDestination(
-  std::string const& dest, cmLocalGenerator* lg, cmListFileBacktrace const& bt)
+void cmInstallGenerator::CheckAbsoluteDestination(std::string const& dest,
+                                                  cmLocalGenerator* lg) const
 {
   if (!cmSystemTools::FileIsFullPath(dest)) {
     return;
@@ -241,7 +240,7 @@ void cmInstallGenerator::CheckAbsoluteDestination(
     cmDiagnostics::CMD_INSTALL_ABSOLUTE_DESTINATION,
     cmStrCat("INSTALL command given absolute DESTINATION path (", dest,
              ").\n"),
-    bt);
+    this->Context);
 }
 
 cmInstallGenerator::MessageLevel cmInstallGenerator::SelectMessageLevel(
@@ -261,6 +260,14 @@ cmInstallGenerator::MessageLevel cmInstallGenerator::SelectMessageLevel(
     return MessageNever;
   }
   return MessageDefault;
+}
+
+cmDiagnosticContext cmInstallGenerator::CaptureContext(cmMakefile const& mf)
+{
+  cmDiagnosticContext context{ mf.GetBacktrace() };
+  context.RecordDiagnostic(cmDiagnostics::CMD_INSTALL_ABSOLUTE_DESTINATION,
+                           mf.GetStateSnapshot());
+  return context;
 }
 
 std::string cmInstallGenerator::GetDestDirPath(std::string const& file)
