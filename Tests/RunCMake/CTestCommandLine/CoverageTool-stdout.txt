@@ -1,0 +1,2 @@
+Using environment variable LLVM_PROFILE_FILE=[^
+]*/Tests/RunCMake/CTestCommandLine/CoverageTool/test1_%p\.profraw

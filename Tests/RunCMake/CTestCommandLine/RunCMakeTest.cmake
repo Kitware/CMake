@@ -769,3 +769,19 @@ run_cmake_command(Passthrough-build-and-test-empty-error ${CMAKE_CTEST_COMMAND}
     ${RunCMake_BINARY_DIR}/Passthrough-build-and-test-empty-error/does-not-exist
     ${RunCMake_BINARY_DIR}/Passthrough-build-and-test-empty-error/does-not-exist
   --build-generator "None" --)
+
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CoverageTool)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/DartConfiguration.tcl" "
+BuildDirectory: ${RunCMake_TEST_BINARY_DIR}
+CTestTestCoverageTool: LLVM-COV
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E true)
+")
+  run_cmake_command(CoverageTool ${CMAKE_CTEST_COMMAND} -V)
+  run_cmake_command(CoverageTool-T-Test ${CMAKE_CTEST_COMMAND} -V -T Test)
+endblock()
