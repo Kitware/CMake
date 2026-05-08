@@ -198,3 +198,19 @@ run_mc_test(DummyCudaSanitizer "${PSEUDO_CUDA_SANITIZER}")
 unset(CTEST_MEMCHECK_ARGS)
 unset(CTEST_SUFFIX_CODE)
 unset(CTEST_EXTRA_CODE)
+
+#-----------------------------------------------------------------------------
+block()
+  set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/TestPresetInclude")
+  set(CMAKELISTS_EXTRA_CODE [[
+foreach(i RANGE 1 3)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+endforeach()
+]])
+  configure_file(
+    "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+    "${RunCMake_TEST_SOURCE_DIR}/CMakePresets.json"
+    @ONLY)
+  set(CTEST_MEMCHECK_ARGS "PRESET my-include-preset")
+  run_mc_test(TestPresetInclude "${PSEUDO_VALGRIND}")
+endblock()

@@ -28,6 +28,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [CAPTURE_CMAKE_ERROR <result-var>]
              [REPEAT <mode>:<n>]
              [OUTPUT_JUNIT <file>]
+             [PRESET <preset>]
              [QUIET]
              )
 
@@ -189,6 +190,15 @@ The options are:
   Specify the ``<tool>`` used for collecting coverage during the running
   of the tests.  See the CTest :ref:`CoverageTool <ctest-CoverageTool>`
   setting for details.
+
+``PRESET <preset>``
+  .. versionadded:: 4.4
+
+  Specify a :manual:`preset <cmake-presets(7)>` to use when running tests.
+  Any value set in the CTest script will take priority over a corresponding
+  setting from the preset.  For example, the ``INCLUDE`` argument will override
+  the :preset:`filter.include.name <testPresets.filter.include.name>` setting
+  from the chosen preset.
 
 ``QUIET``
   .. versionadded:: 3.3

@@ -1,0 +1,4 @@
+Cannot instantiate test handler ctest_test
+CMake Error at [^
+]*/test\.cmake:[0-9]+ \(ctest_test\):
+  ctest_test No such test preset
