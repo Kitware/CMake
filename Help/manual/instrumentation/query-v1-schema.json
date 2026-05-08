@@ -64,7 +64,8 @@
           "dynamicSystemInformation",
           "cdashSubmit",
           "cdashVerbose",
-          "trace"
+          "trace",
+          "captureOutput"
         ],
         "type": "string"
       }

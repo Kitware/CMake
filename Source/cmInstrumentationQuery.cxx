@@ -15,8 +15,12 @@
 #include "cmStringAlgorithms.h"
 
 std::vector<std::string> const cmInstrumentationQuery::OptionString{
-  "staticSystemInformation", "dynamicSystemInformation", "cdashSubmit",
-  "cdashVerbose", "trace"
+  "staticSystemInformation",
+  "dynamicSystemInformation",
+  "captureOutput",
+  "cdashSubmit",
+  "cdashVerbose",
+  "trace"
 };
 std::vector<std::string> const cmInstrumentationQuery::HookString{
   "postGenerate",    "preBuild",  "postBuild",        "preCMakeBuild",

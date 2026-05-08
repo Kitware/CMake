@@ -5,6 +5,7 @@
   },
   "options": [
     "staticSystemInformation",
-    "dynamicSystemInformation"
+    "dynamicSystemInformation",
+    "captureOutput"
   ]
 }

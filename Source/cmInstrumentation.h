@@ -42,9 +42,15 @@ public:
                     LoadQueriesAfter loadQueries = LoadQueriesAfter::Yes);
   void LoadQueries();
   void CheckCDashVariable();
+  struct CommandResult
+  {
+    int ExitCode;
+    cm::optional<std::string> StdOut;
+    cm::optional<std::string> StdErr;
+  };
   int InstrumentCommand(
     std::string command_type, std::vector<std::string> const& command,
-    std::function<int()> const& callback,
+    std::function<CommandResult()> const& callback,
     cm::optional<std::map<std::string, std::string>> options = cm::nullopt,
     cm::optional<std::map<std::string, std::string>> arrayOptions =
       cm::nullopt,
@@ -55,7 +61,8 @@ public:
                              int64_t result,
                              std::chrono::steady_clock::time_point steadyStart,
                              std::chrono::system_clock::time_point systemStart,
-                             std::string config);
+                             std::string config,
+                             cm::optional<std::string> output = cm::nullopt);
   void GetPreTestStats();
   bool HasQuery() const;
   bool HasOption(cmInstrumentationQuery::Option option) const;

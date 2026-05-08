@@ -21,6 +21,7 @@
 #include "cmCTestLaunchReporter.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
@@ -206,6 +207,9 @@ void cmCTestLaunch::RunChild()
     return;
   }
 
+  this->CapturedStdOut.clear();
+  this->CapturedStdErr.clear();
+
   // Prepare to run the real command.
   cmUVProcessChainBuilder builder;
   builder.AddCommand(this->RealArgV);
@@ -213,18 +217,19 @@ void cmCTestLaunch::RunChild()
   // We always share the input pipe.
   builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, stdin);
 
+  builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
   cmsys::ofstream fout;
   cmsys::ofstream ferr;
-  if (this->Reporter.Passthru) {
-    // In passthru mode we just share the output pipes.
-    builder.SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, stdout)
-      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, stderr);
-  } else {
+  cmsys::ofstream* foutPtr = nullptr;
+  cmsys::ofstream* ferrPtr = nullptr;
+
+  if (!this->Reporter.Passthru) {
     // In full mode we record the child output pipes to log files.
-    builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
-      .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
     fout.open(this->Reporter.LogOut.c_str(), std::ios::out | std::ios::binary);
     ferr.open(this->Reporter.LogErr.c_str(), std::ios::out | std::ios::binary);
+    foutPtr = &fout;
+    ferrPtr = &ferr;
   }
 
 #ifdef _WIN32
@@ -243,36 +248,43 @@ void cmCTestLaunch::RunChild()
   cmProcessOutput processOutput;
   std::unique_ptr<cmUVStreamReadHandle> outputHandle;
   std::unique_ptr<cmUVStreamReadHandle> errorHandle;
-  if (!this->Reporter.Passthru) {
-    auto beginRead =
-      [&processOutput](uv_stream_t* stream, std::ostream& out,
-                       cmsys::ofstream& file, bool& haveData, bool& finished,
-                       int id) -> std::unique_ptr<cmUVStreamReadHandle> {
-      finished = false;
-      return cmUVStreamRead(
-        stream,
-        [&processOutput, &out, &file, id, &haveData](std::vector<char> data) {
-          std::string strdata;
-          processOutput.DecodeText(data.data(), data.size(), strdata, id);
-          file.write(strdata.c_str(), strdata.size());
-          out.write(strdata.c_str(), strdata.size());
-          haveData = true;
-        },
-        [&processOutput, &out, &file, &finished, id]() {
-          std::string strdata;
-          processOutput.DecodeText(std::string(), strdata, id);
-          if (!strdata.empty()) {
-            file.write(strdata.c_str(), strdata.size());
-            out.write(strdata.c_str(), strdata.size());
+  auto beginRead =
+    [&processOutput](
+      uv_stream_t* stream, std::ostream& out, cmsys::ofstream* file,
+      bool& haveData, bool& finished, int id,
+      std::string& capture) -> std::unique_ptr<cmUVStreamReadHandle> {
+    finished = false;
+    return cmUVStreamRead(
+      stream,
+      [&processOutput, &out, file, id, &haveData,
+       &capture](std::vector<char> data) {
+        std::string strdata;
+        processOutput.DecodeText(data.data(), data.size(), strdata, id);
+        if (file && file->is_open()) {
+          file->write(strdata.c_str(), strdata.size());
+        }
+        out.write(strdata.c_str(), strdata.size());
+        capture.append(strdata);
+        haveData = true;
+      },
+      [&processOutput, &out, file, &finished, id, &capture]() {
+        std::string strdata;
+        processOutput.DecodeText(std::string(), strdata, id);
+        if (!strdata.empty()) {
+          if (file && file->is_open()) {
+            file->write(strdata.c_str(), strdata.size());
           }
-          finished = true;
-        });
-    };
-    outputHandle = beginRead(chain.OutputStream(), std::cout, fout,
-                             this->HaveOut, outFinished, 1);
-    errorHandle = beginRead(chain.ErrorStream(), std::cerr, ferr,
-                            this->HaveErr, errFinished, 2);
-  }
+          out.write(strdata.c_str(), strdata.size());
+          capture.append(strdata);
+        }
+        finished = true;
+      });
+  };
+  outputHandle =
+    beginRead(chain.OutputStream(), std::cout, foutPtr, this->HaveOut,
+              outFinished, 1, this->CapturedStdOut);
+  errorHandle = beginRead(chain.ErrorStream(), std::cerr, ferrPtr,
+                          this->HaveErr, errFinished, 2, this->CapturedStdErr);
 
   // Wait for the real command to finish.
   while (!(chain.Finished() && outFinished && errFinished)) {
@@ -291,6 +303,8 @@ void cmCTestLaunch::RunChild()
 int cmCTestLaunch::Run()
 {
   auto instrumentation = cmInstrumentation(this->Reporter.OptionBuildDir);
+  bool const captureOutput =
+    instrumentation.HasOption(cmInstrumentationQuery::Option::CaptureOutput);
   std::map<std::string, std::string> options;
   if (this->Reporter.OptionTargetName != "TARGET_NAME") {
     options["target"] = this->Reporter.OptionTargetName;
@@ -305,9 +319,15 @@ int cmCTestLaunch::Run()
   arrayOptions["targetLabels"] = this->Reporter.OptionTargetLabels;
   instrumentation.InstrumentCommand(
     this->Reporter.OptionCommandType, this->RealArgV,
-    [this]() -> int {
+    [this, captureOutput]() -> cmInstrumentation::CommandResult {
       this->RunChild();
-      return this->Reporter.ExitCode;
+      cmInstrumentation::CommandResult result;
+      result.ExitCode = this->Reporter.ExitCode;
+      if (captureOutput) {
+        result.StdOut = this->CapturedStdOut;
+        result.StdErr = this->CapturedStdErr;
+      }
+      return result;
     },
     options, arrayOptions);
 

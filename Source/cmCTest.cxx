@@ -2713,8 +2713,12 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
   };
   std::map<std::string, std::string> data;
   data["showOnly"] = this->GetShowOnly() ? "1" : "0";
-  int ret =
-    instrumentation.InstrumentCommand("ctest", args, processHandler, data);
+  int ret = instrumentation.InstrumentCommand(
+    "ctest", args,
+    [processHandler]() -> cmInstrumentation::CommandResult {
+      return { processHandler(), cm::nullopt, cm::nullopt };
+    },
+    data);
   instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostCTest);
   if (ret == cmCTest::TEST_ERRORS) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
