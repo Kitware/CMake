@@ -177,6 +177,13 @@ typedef struct {
 #else
 #include <windows.h>
 #include <wincrypt.h>
+/* Undefine indirect <wincrypt.h> symbols conflicting with BoringSSL/AWS-LC. */
+#undef X509_NAME
+#undef X509_EXTENSIONS
+#undef PKCS7_ISSUER_AND_SERIAL
+#undef PKCS7_SIGNER_INFO
+#undef OCSP_REQUEST
+#undef OCSP_RESPONSE
 #define	ARCHIVE_CRYPTO_WINCRYPT 1
 typedef struct {
   int   valid;
