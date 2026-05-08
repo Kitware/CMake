@@ -329,6 +329,15 @@ It is allowed to pass raw pointers between objects to enable objects sharing.
 A raw pointer **must** not be deleted. Only the object(s) owning the smart
 pointer are allowed to delete dynamically allocated memory.
 
+CMake Module/Script Style
+=========================
+
+``execute_process`` should capture ``RESULT_VARIABLE`` to avoid
+unexpected termination of CMake in case the user or project has set
+``CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL`` to a value other than
+``NONE``.  Output should be captured for both stdout and stderr by using
+``OUTPUT_VARIABLE``/``OUTPUT_QUIET`` and ``ERROR_VARIABLE``/``ERROR_QUIET``.
+
 Third Parties
 =============
 
