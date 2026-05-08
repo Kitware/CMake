@@ -190,6 +190,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   add_RunCMake_test(CMP0194 -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 endif()
 
+add_RunCMake_test(CMP0218)
+
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
 # generators ignore.  The policy will have no effect on those generators.

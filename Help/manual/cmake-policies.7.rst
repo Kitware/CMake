@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.4
 .. toctree::
    :maxdepth: 1
 
+   CMP0218: The CMAKE_WARN_DEPRECATED and CMAKE_ERROR_DEPRECATED variables are ignored. </policy/CMP0218>
    CMP0217: The MACROS directory property does not exist anymore. </policy/CMP0217>
    CMP0216: Swift targets have a default project name. </policy/CMP0216>
    CMP0215: Ninja generators emit Swift modules separately from compilation. </policy/CMP0215>

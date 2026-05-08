@@ -1,0 +1,35 @@
+CMP0218
+-------
+
+.. versionadded:: 4.4
+
+The :variable:`CMAKE_WARN_DEPRECATED` and :variable:`CMAKE_ERROR_DEPRECATED`
+variables are ignored.
+
+In CMake 4.3 and below, these variables controlled whether deprecation messages
+resulted in warnings, errors, or were suppressed.
+
+CMake 4.4 introduced a new, unified system for managing
+:manual:`diagnostics <cmake-diagnostics(7)>` that prefers the
+:command:`cmake_diagnostic` command for manipulating diagnostic actions.
+
+This policy provides compatibility with projects that relied on these variables
+and have not been updated to be aware of the change.
+
+The ``OLD`` behavior for this policy is to use the variables to control
+deprecation messages which existed prior to CMake 4.4.
+
+The ``NEW`` behavior does not ascribe any special meaning to these variables
+and uses the :diagnostic:`CMD_DEPRECATED` diagnostic state to control all
+deprecation messages.
+
+Any deprecation messages introduced in CMake 4.4 or later are controlled by the
+:diagnostic:`CMD_DEPRECATED` diagnostic regardless of the setting of this
+policy.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.4
+.. |WARNS_OR_DOES_NOT_WARN| replace::
+    warns when either variable is accessed or modified
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

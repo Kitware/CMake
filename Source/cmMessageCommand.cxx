@@ -3,9 +3,9 @@
 #include "cmMessageCommand.h"
 
 #include <cassert>
-#include <memory>
 #include <utility>
 
+#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -16,9 +16,11 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 #ifdef CMake_ENABLE_DEBUGGER
@@ -96,6 +98,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
 
   auto i = args.cbegin();
 
+  std::unique_ptr<cmMakefile::DiagnosticPushPop> ds;
   auto category = cmDiagnostics::CMD_NONE;
   auto type = MessageType::MESSAGE;
   auto fatal = false;
@@ -116,7 +119,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     ++i;
   } else if (*i == "AUTHOR_WARNING") {
     category = cmDiagnostics::CMD_AUTHOR;
-    switch (mf.GetDiagnosticAction(cmDiagnostics::CMD_AUTHOR)) {
+    switch (mf.GetDiagnosticAction(category)) {
       case cmDiagnostics::Ignore:
         return true;
       case cmDiagnostics::FatalError:
@@ -166,7 +169,34 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     ++i;
   } else if (*i == "DEPRECATION") {
     category = cmDiagnostics::CMD_DEPRECATED;
-    switch (mf.GetDiagnosticAction(cmDiagnostics::CMD_DEPRECATED)) {
+
+    cmPolicies::PolicyStatus const cmp0218 =
+      mf.GetPolicyStatus(cmPolicies::CMP0218);
+    if (cmp0218 != cmPolicies::NEW) {
+      std::unique_ptr<cmMakefile::PolicyPushPop> ps;
+
+      if (cmp0218 != cmPolicies::OLD) {
+        // Suppress warnings about using old variables.
+        ps = cm::make_unique<cmMakefile::PolicyPushPop>(&mf);
+        mf.SetPolicy(cmPolicies::CMP0218, cmPolicies::OLD);
+      }
+
+      ds = cm::make_unique<cmMakefile::DiagnosticPushPop>(&mf);
+
+      // Use old variables to determine diagnostic action.
+      if (mf.IsOn("CMAKE_ERROR_DEPRECATED")) {
+        mf.SetDiagnostic(category, cmDiagnostics::FatalError);
+      } else {
+        cmValue const warn = mf.GetDefinition("CMAKE_WARN_DEPRECATED");
+        if (warn.IsSet() && !warn.IsOn()) {
+          mf.SetDiagnostic(category, cmDiagnostics::Ignore);
+        } else {
+          mf.SetDiagnostic(category, cmDiagnostics::Warn);
+        }
+      }
+    }
+
+    switch (mf.GetDiagnosticAction(category)) {
       case cmDiagnostics::Ignore:
         return true;
       case cmDiagnostics::FatalError:

@@ -4136,6 +4136,34 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
           id == cmPolicies::CMP0126 || id == cmPolicies::CMP0128 ||
           id == cmPolicies::CMP0136 || id == cmPolicies::CMP0141 ||
           id == cmPolicies::CMP0155))) {
+    std::unique_ptr<PolicyPushPop> ps;
+    std::unique_ptr<DiagnosticPushPop> ds;
+
+    cmPolicies::PolicyStatus const cmp0218 =
+      this->GetPolicyStatus(cmPolicies::CMP0218);
+    if (cmp0218 != cmPolicies::NEW) {
+      if (cmp0218 != cmPolicies::OLD) {
+        // Suppress warnings about using old variables.
+        ps = cm::make_unique<PolicyPushPop>(this);
+        this->SetPolicy(cmPolicies::CMP0218, cmPolicies::OLD);
+      }
+
+      ds = cm::make_unique<DiagnosticPushPop>(this);
+
+      // Use old variables to determine diagnostic action.
+      cmValue const warn = this->GetDefinition("CMAKE_WARN_DEPRECATED");
+      if (warn.IsSet() && !warn.IsOn()) {
+        this->SetDiagnostic(cmDiagnostics::CMD_DEPRECATED,
+                            cmDiagnostics::Ignore);
+      } else if (this->IsOn("CMAKE_ERROR_DEPRECATED")) {
+        this->SetDiagnostic(cmDiagnostics::CMD_DEPRECATED,
+                            cmDiagnostics::SendError);
+      } else {
+        this->SetDiagnostic(cmDiagnostics::CMD_DEPRECATED,
+                            cmDiagnostics::Warn);
+      }
+    }
+
     this->IssueDiagnostic(cmDiagnostics::CMD_DEPRECATED,
                           cmPolicies::GetPolicyDeprecatedWarning(id));
   }
