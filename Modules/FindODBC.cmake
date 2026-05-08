@@ -163,9 +163,11 @@ endif()
 if (UNIX AND ODBC_CONFIG)
   # unixODBC and iODBC accept unified command line options
   execute_process(COMMAND ${ODBC_CONFIG} --cflags
-    OUTPUT_VARIABLE _cflags OUTPUT_STRIP_TRAILING_WHITESPACE)
+    OUTPUT_VARIABLE _cflags OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _odbc_config_cflags_result)
   execute_process(COMMAND ${ODBC_CONFIG} --libs
-    OUTPUT_VARIABLE _libs OUTPUT_STRIP_TRAILING_WHITESPACE)
+    OUTPUT_VARIABLE _libs OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _odbc_config_libs_result)
 
   # Collect paths of include directories from CFLAGS
   separate_arguments(_cflags NATIVE_COMMAND "${_cflags}")

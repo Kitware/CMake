@@ -67,6 +67,7 @@ function(get_file_permissions FILE RETURN_VAR)
       OUTPUT_VARIABLE permissions_str
       ERROR_QUIET
       OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _result_stat_permissions
     )
 
   string(REGEX REPLACE "(.)" "\\1;" permissions "${permissions_str}")
@@ -581,7 +582,9 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
                   BASE_DIRECTORY "${SYMLINK_LOCATION_}"
                   OUTPUT_VARIABLE FINAL_PATH_
                 )
-              execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${FINAL_PATH_}" "${WDIR}/${F}")
+              execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink
+                "${FINAL_PATH_}" "${WDIR}/${F}"
+                RESULT_VARIABLE _result_symlink_creation)
             else()
               # relocation subpaths
               cpack_rpm_symlink_add_for_relocation_script("${PACKAGE_PREFIXES}" "${F}" "${SYMLINK_RELOCATIONS}"
@@ -598,7 +601,9 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
               "${SYMLINK_POINT_WD_}" "${POINT_RELOCATIONS}")
         else()
           # is not relocatable or points to non relocatable path - permanent symlink
-          execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${SYMLINK_POINT_WD_}" "${WDIR}/${F}")
+          execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink
+            "${SYMLINK_POINT_WD_}" "${WDIR}/${F}"
+            RESULT_VARIABLE _result_symlink_creation)
         endif()
       endif()
     elseif(IS_DIRECTORY "${WDIR}/${F}")
@@ -840,7 +845,8 @@ function(cpack_rpm_generate_package)
   execute_process(COMMAND ${RPMBUILD_EXECUTABLE} --version
                   OUTPUT_VARIABLE _TMP_VERSION
                   ERROR_QUIET
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  RESULT_VARIABLE _TMP_VERSION_RESULT)
   string(REGEX REPLACE "^.* " ""
          RPMBUILD_EXECUTABLE_VERSION
          ${_TMP_VERSION})
@@ -857,7 +863,8 @@ function(cpack_rpm_generate_package)
       execute_process(COMMAND ${LSB_RELEASE_EXECUTABLE} -a
                       OUTPUT_VARIABLE _TMP_LSB_RELEASE_OUTPUT
                       ERROR_QUIET
-                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+                      OUTPUT_STRIP_TRAILING_WHITESPACE
+                      RESULT_VARIABLE _TMP_LSB_RELEASE_RESULT)
       string(REGEX REPLACE "\n" ", "
              LSB_RELEASE_OUTPUT
              ${_TMP_LSB_RELEASE_OUTPUT})
@@ -953,7 +960,8 @@ function(cpack_rpm_generate_package)
   if(NOT CPACK_RPM_PACKAGE_ARCHITECTURE)
     execute_process(COMMAND uname "-m"
                     OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    RESULT_VARIABLE _TMP_UNAME_RESULT)
   else()
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: using user-specified build arch = ${CPACK_RPM_PACKAGE_ARCHITECTURE}")
@@ -1113,7 +1121,8 @@ function(cpack_rpm_generate_package)
     execute_process(
       COMMAND "${RPM_EXECUTABLE}" --querytags
       OUTPUT_VARIABLE RPMBUILD_TAG_LIST
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _result_rpm)
   endif()
   string(REPLACE "\n" ";" RPMBUILD_TAG_LIST "${RPMBUILD_TAG_LIST}")
 
@@ -1668,6 +1677,7 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E tar "cfvz" "${CPACK_RPM_DIRECTORY}/SOURCES/${archive_name_}.tar.gz" "${CPACK_PACKAGE_FILE_NAME}"
         WORKING_DIRECTORY ${CPACK_RPM_DIRECTORY}
+        RESULT_VARIABLE _result_tar
       )
     set(TMP_RPM_SOURCE "Source: ${archive_name_}.tar.gz")
 

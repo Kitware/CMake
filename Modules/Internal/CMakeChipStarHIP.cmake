@@ -42,7 +42,8 @@ function(_cmake_chipstar_set_compiler_id_flags)
   set(_hip_path "$ENV{HIP_PATH}")
   if(NOT IS_DIRECTORY "${_hip_path}")
     execute_process(COMMAND hipconfig --rocmpath
-      OUTPUT_VARIABLE _hip_path OUTPUT_STRIP_TRAILING_WHITESPACE)
+      OUTPUT_VARIABLE _hip_path OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _result_hipconfig)
   endif()
   if(IS_DIRECTORY "${_hip_path}")
     file(TO_CMAKE_PATH "${_hip_path}" _hip_path)

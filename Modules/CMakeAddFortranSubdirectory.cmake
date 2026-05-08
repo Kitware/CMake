@@ -154,7 +154,8 @@ function(_setup_mingw_config_and_build source_dir build_dir)
     set(_mingw_target "Target:.*mingw32")
   endif()
   execute_process(COMMAND "${MINGW_GFORTRAN}" -v
-    ERROR_VARIABLE out ERROR_STRIP_TRAILING_WHITESPACE)
+    ERROR_VARIABLE out ERROR_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _result_mingw_gfortran_v)
   if(NOT "${out}" MATCHES "${_mingw_target}")
     string(REPLACE "\n" "\n  " out "  ${out}")
     message(FATAL_ERROR

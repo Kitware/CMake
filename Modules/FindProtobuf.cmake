@@ -992,7 +992,8 @@ if(Protobuf_INCLUDE_DIR)
   if(Protobuf_PROTOC_EXECUTABLE)
     # Check Protobuf compiler version to be aligned with libraries version
     execute_process(COMMAND ${Protobuf_PROTOC_EXECUTABLE} --version
-                    OUTPUT_VARIABLE _PROTOBUF_PROTOC_EXECUTABLE_VERSION)
+                    OUTPUT_VARIABLE _PROTOBUF_PROTOC_EXECUTABLE_VERSION
+                    RESULT_VARIABLE _PROTOBUF_PROTOC_EXECUTABLE_VERSION_RESULT)
 
     if("${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" MATCHES "libprotoc ([0-9.]+)")
       set(_PROTOBUF_PROTOC_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")

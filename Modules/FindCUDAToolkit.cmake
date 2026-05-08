@@ -1022,7 +1022,9 @@ else()
     endif()
   elseif(CUDAToolkit_NVCC_EXECUTABLE)
     # Compute the version by invoking nvcc
-    execute_process(COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "--version" OUTPUT_VARIABLE NVCC_OUT)
+    execute_process(COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "--version"
+      OUTPUT_VARIABLE NVCC_OUT
+      RESULT_VARIABLE _nvcc_version_result)
     if(NVCC_OUT MATCHES [=[ V([0-9]+)\.([0-9]+)\.([0-9]+)]=])
       set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
       set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")

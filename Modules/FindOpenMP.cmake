@@ -365,7 +365,8 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
             COMMAND ${CMAKE_${LANG}_COMPILER} -print-search-dirs
             OUTPUT_VARIABLE output_lines
             COMMAND_ERROR_IS_FATAL ANY
-            ERROR_QUIET)
+            ERROR_QUIET
+            RESULT_VARIABLE _result_lcc_output)
           if("${output_lines}" MATCHES ".*\nlibraries:[ \t]+(.*:)\n.*")
             string(REPLACE ":" ";" implicit_dirs_addon "${CMAKE_MATCH_1}")
             list(PREPEND OpenMP_${LANG}_IMPLICIT_LINK_DIRS ${implicit_dirs_addon})

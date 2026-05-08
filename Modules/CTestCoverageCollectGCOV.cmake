@@ -419,7 +419,9 @@ ${uncovered_files_for_tar}
     "--mtime=1970-01-01 0:0:0 UTC"
     "--format=gnutar"
     --files-from=${coverage_dir}/coverage_file_list.txt
-    WORKING_DIRECTORY ${binary_dir})
+    WORKING_DIRECTORY ${binary_dir}
+    RESULT_VARIABLE _result_tar
+    )
 
   if (GCOV_DELETE)
     foreach(gcov_file ${unfiltered_gcov_files})

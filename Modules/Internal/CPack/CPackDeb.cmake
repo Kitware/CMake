@@ -382,6 +382,7 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_VARIABLE _TMP_VERSION
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE _result_shlibdeps_version
       )
       if(_TMP_VERSION MATCHES "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)")
         set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
@@ -413,6 +414,7 @@ function(cpack_deb_prepare_package_vars)
           OUTPUT_VARIABLE _TMP_HELP
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE
+          RESULT_VARIABLE _result_shlibdeps_help
         )
         if(_TMP_HELP MATCHES "--ignore-missing-info")
           set(IGNORE_MISSING_INFO_FLAG "--ignore-missing-info")
@@ -621,6 +623,7 @@ function(cpack_deb_prepare_package_vars)
       COMMAND "${DPKG_EXECUTABLE}" --print-architecture
       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
       OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _result_dpkg_arch
     )
   endif()
 
@@ -878,6 +881,7 @@ function(cpack_deb_prepare_package_vars)
         COMMAND "${DPKG_EXECUTABLE}" --version
         OUTPUT_VARIABLE DPKG_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE _result_dpkg_version
       )
       set(_dpkg_version_re "Debian 'dpkg' package management program version ([0-9]+\.[0-9]+\.[0-9]+).*")
       if(DPKG_VERSION MATCHES "${_dpkg_version_re}")

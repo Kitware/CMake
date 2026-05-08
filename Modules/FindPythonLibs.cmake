@@ -483,7 +483,10 @@ extern \"C\" {
   file(APPEND ${_filenameTmp} "#ifndef EXCLUDE_LOAD_ALL_FUNCTION\nvoid CMakeLoadAllPythonModules(void)\n{\n  ${_name}_LoadAllPythonModules();\n}\n#endif\n\n#endif\n")
 
 # with configure_file() cmake complains that you may not use a file created using file(WRITE) as input file for configure_file()
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_filenameTmp}" "${_filename}" OUTPUT_QUIET ERROR_QUIET)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${_filenameTmp}" "${_filename}"
+    OUTPUT_QUIET ERROR_QUIET
+    RESULT_VARIABLE _result_copy)
 
 endfunction()
 

@@ -413,7 +413,8 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
   execute_process(COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --version
                   OUTPUT_VARIABLE gettext_version
                   ERROR_QUIET
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  RESULT_VARIABLE _gettext_msgmerge_version_result)
   get_filename_component(msgmerge_name ${GETTEXT_MSGMERGE_EXECUTABLE} NAME)
   get_filename_component(msgmerge_namewe ${GETTEXT_MSGMERGE_EXECUTABLE} NAME_WE)
   if(gettext_version MATCHES "^(${msgmerge_name}|${msgmerge_namewe}) \\([^\\)]*\\) ([0-9\\.]+[^ \n]*)")

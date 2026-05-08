@@ -22,6 +22,7 @@ else()
         OUTPUT_VARIABLE _CMD_JAVA_HOME
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET
+        RESULT_VARIABLE _result_java_home
       )
     endif()
     if(_CMD_JAVA_HOME AND IS_DIRECTORY "${_CMD_JAVA_HOME}")

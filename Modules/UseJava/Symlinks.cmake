@@ -13,6 +13,7 @@ if (UNIX AND _JAVA_TARGET_OUTPUT_LINK)
         execute_process(
             COMMAND ${LN_EXECUTABLE} -sf "${_JAVA_TARGET_OUTPUT_NAME}" "${_JAVA_TARGET_OUTPUT_LINK}"
             WORKING_DIRECTORY ${_JAVA_TARGET_DIR}
+            RESULT_VARIABLE _result_symlink_creation
         )
     else ()
         message(SEND_ERROR "FATAL: Can't find _JAVA_TARGET_OUTPUT_NAME")

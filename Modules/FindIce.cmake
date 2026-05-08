@@ -662,7 +662,8 @@ function(_Ice_FIND)
 
     execute_process(COMMAND ${Ice_SLICE2CPP_EXECUTABLE} --version
       ERROR_VARIABLE Ice_VERSION_SLICE2CPP_FULL
-      ERROR_STRIP_TRAILING_WHITESPACE)
+      ERROR_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _slice2cpp_version_result)
 
     # restore the previous LC_ALL
     set(ENV{LC_ALL} ${_Ice_SAVED_LC_ALL})

@@ -71,7 +71,9 @@ if(UNIX)
       find_program(FILE_EXECUTABLE file)
       if(FILE_EXECUTABLE)
         get_filename_component(FILE_ABSPATH "${FILE_EXECUTABLE}" ABSOLUTE)
-        execute_process(COMMAND "${FILE_ABSPATH}" "${FILE_ABSPATH}" OUTPUT_VARIABLE fileOutput ERROR_QUIET)
+        execute_process(COMMAND "${FILE_ABSPATH}" "${FILE_ABSPATH}"
+          OUTPUT_VARIABLE fileOutput ERROR_QUIET
+          RESULT_VARIABLE _result_file)
         if("${fileOutput}" MATCHES "64-bit")
           set(CMAKE_SIZEOF_VOID_P 8)
         endif()

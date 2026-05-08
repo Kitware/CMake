@@ -285,6 +285,7 @@ function(_ImageMagick_GetVersion)
       OUTPUT_VARIABLE version
       ERROR_QUIET
       OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _version_result
     )
 
     if(version MATCHES "^Version: ImageMagick ([-0-9.]+)")

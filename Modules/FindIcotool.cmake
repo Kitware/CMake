@@ -81,6 +81,7 @@ if(ICOTOOL_EXECUTABLE)
     OUTPUT_VARIABLE Icotool_VERSION
     ERROR_QUIET
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _icotool_version_result
   )
   if("${Icotool_VERSION}" MATCHES "^icotool \\([^\\)]*\\) ([0-9\\.]+[^ \n]*)")
     set(Icotool_VERSION "${CMAKE_MATCH_1}")

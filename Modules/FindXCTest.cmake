@@ -150,7 +150,8 @@ unset(_PRESERVED_CMAKE_FIND_ROOT_PATH)
 execute_process(
   COMMAND xcrun --find xctest
   OUTPUT_VARIABLE _xcrun_out OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_VARIABLE _xcrun_err)
+  ERROR_VARIABLE _xcrun_err
+  RESULT_VARIABLE _xcrun_result)
 if(_xcrun_out)
   set(XCTest_EXECUTABLE "${_xcrun_out}" CACHE FILEPATH "XCTest executable")
   mark_as_advanced(XCTest_EXECUTABLE)

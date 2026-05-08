@@ -289,7 +289,9 @@ else()
     find_program(FLTK_CONFIG_SCRIPT fltk-config PATHS ${FLTK_BIN_DIR})
     if(FLTK_CONFIG_SCRIPT)
       if(NOT FLTK_INCLUDE_DIR)
-        execute_process(COMMAND ${FLTK_CONFIG_SCRIPT} --cxxflags OUTPUT_VARIABLE FLTK_CXXFLAGS)
+        execute_process(COMMAND ${FLTK_CONFIG_SCRIPT} --cxxflags
+          OUTPUT_VARIABLE FLTK_CXXFLAGS
+          RESULT_VARIABLE _fltk_cxxflags_result)
         if(FLTK_CXXFLAGS)
           string(REGEX MATCHALL "-I[^ ]*" _fltk_temp_dirs ${FLTK_CXXFLAGS})
           string(REPLACE "-I" "" _fltk_temp_dirs "${_fltk_temp_dirs}")
@@ -313,7 +315,9 @@ else()
   # Try to find FLTK library
   if(UNIX)
     if(FLTK_CONFIG_SCRIPT)
-      execute_process(COMMAND ${FLTK_CONFIG_SCRIPT} --libs OUTPUT_VARIABLE _FLTK_POSSIBLE_LIBS)
+      execute_process(COMMAND ${FLTK_CONFIG_SCRIPT} --libs
+        OUTPUT_VARIABLE _FLTK_POSSIBLE_LIBS
+        RESULT_VARIABLE _fltk_config_libs_result)
       if(_FLTK_POSSIBLE_LIBS)
         get_filename_component(_FLTK_POSSIBLE_LIBRARY_DIR ${_FLTK_POSSIBLE_LIBS} PATH)
       endif()
@@ -350,7 +354,8 @@ else()
   if(UNIX)
     if(FLTK_CONFIG_SCRIPT)
       execute_process(COMMAND ${FLTK_CONFIG_SCRIPT} --use-images --ldflags
-        OUTPUT_VARIABLE FLTK_IMAGES_LDFLAGS)
+        OUTPUT_VARIABLE FLTK_IMAGES_LDFLAGS
+        RESULT_VARIABLE _fltk_images_ldflags_result)
       set(FLTK_LIBS_EXTRACT_REGEX ".*-lfltk_images (.*) -lfltk.*")
       if("${FLTK_IMAGES_LDFLAGS}" MATCHES "${FLTK_LIBS_EXTRACT_REGEX}")
         string(REGEX REPLACE " +" ";" FLTK_IMAGES_LIBS "${CMAKE_MATCH_1}")

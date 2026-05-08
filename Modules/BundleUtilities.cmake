@@ -695,6 +695,7 @@ function(get_bundle_all_executables bundle exes_var)
       -type f \( -perm -0100 -o -perm -0010 -o -perm -0001 \)
       OUTPUT_VARIABLE file_list
       OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _result_find
       )
     string(REPLACE "\n" ";" file_list "${file_list}")
   else()
@@ -991,7 +992,9 @@ function(link_resolved_item_into_bundle resolved_item resolved_embedded_item)
     if (NOT EXISTS "${target_dir}")
       file(MAKE_DIRECTORY "${target_dir}")
     endif()
-    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${symlink_target}" "${resolved_embedded_item}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${symlink_target}"
+      "${resolved_embedded_item}"
+      RESULT_VARIABLE _result_symlink)
   endif()
 endfunction()
 
@@ -1009,7 +1012,9 @@ function(copy_resolved_item_into_bundle resolved_item resolved_embedded_item)
     message(STATUS "warning: resolved_item == resolved_embedded_item - not copying...")
   else()
     #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}"
+      "${resolved_embedded_item}"
+      RESULT_VARIABLE _result_copy)
     if(UNIX AND NOT APPLE)
       file(RPATH_REMOVE FILE "${resolved_embedded_item}")
     endif()
@@ -1042,14 +1047,18 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
     else()
       # Framework lib itself:
       #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
-      execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
+      execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}"
+        "${resolved_embedded_item}"
+        RESULT_VARIABLE _result_copy)
 
       # Plus Resources, if they exist:
       string(REGEX REPLACE "^(.*)/[^/]+$" "\\1/Resources" resolved_resources "${resolved_item}")
       string(REGEX REPLACE "^(.*)/[^/]+$" "\\1/Resources" resolved_embedded_resources "${resolved_embedded_item}")
       if(EXISTS "${resolved_resources}")
         #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy_directory '${resolved_resources}' '${resolved_embedded_resources}'")
-        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${resolved_resources}" "${resolved_embedded_resources}")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory
+          "${resolved_resources}" "${resolved_embedded_resources}"
+          RESULT_VARIABLE _result_copy_resources)
       endif()
 
       # Some frameworks e.g. Qt put Info.plist in wrong place, so when it is
@@ -1060,7 +1069,9 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
         string(REGEX REPLACE "^(.*)/[^/]+$" "\\1/Resources/Info.plist" resolved_embedded_info_plist "${resolved_embedded_item}")
         if(EXISTS "${resolved_info_plist}")
           #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy_directory '${resolved_info_plist}' '${resolved_embedded_info_plist}'")
-          execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_info_plist}" "${resolved_embedded_info_plist}")
+          execute_process(COMMAND ${CMAKE_COMMAND} -E copy
+            "${resolved_info_plist}" "${resolved_embedded_info_plist}"
+            RESULT_VARIABLE _result_copy_info_plist)
         endif()
       endif()
 
@@ -1071,17 +1082,25 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
       if(resolved_embedded_versions_basename STREQUAL "Versions")
         # Ensure Current symlink points to the framework version
         if(NOT EXISTS "${resolved_embedded_versions}/Current")
-          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${resolved_embedded_version}" "${resolved_embedded_versions}/Current")
+          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+            "${resolved_embedded_version}"
+            "${resolved_embedded_versions}/Current"
+            RESULT_VARIABLE _result_symlink_current)
         endif()
         # Restore symlinks in framework root pointing to current framework
         # binary and resources:
         string(REGEX REPLACE "^(.*)/[^/]+/[^/]+/[^/]+$" "\\1" resolved_embedded_root "${resolved_embedded_item}")
         string(REGEX REPLACE "^.*/([^/]+)$" "\\1" resolved_embedded_item_basename "${resolved_embedded_item}")
         if(NOT EXISTS "${resolved_embedded_root}/${resolved_embedded_item_basename}")
-          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "Versions/Current/${resolved_embedded_item_basename}" "${resolved_embedded_root}/${resolved_embedded_item_basename}")
+          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+            "Versions/Current/${resolved_embedded_item_basename}"
+            "${resolved_embedded_root}/${resolved_embedded_item_basename}"
+            RESULT_VARIABLE _result_symlink_item)
         endif()
         if(NOT EXISTS "${resolved_embedded_root}/Resources")
-          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "Versions/Current/Resources" "${resolved_embedded_root}/Resources")
+          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+            "Versions/Current/Resources" "${resolved_embedded_root}/Resources"
+            RESULT_VARIABLE _result_symlink_resources)
         endif()
       endif()
     endif()
@@ -1156,6 +1175,7 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
   execute_process(COMMAND ${CMAKE_INSTALL_NAME_TOOL}
     OUTPUT_VARIABLE install_name_tool_usage
     ERROR_VARIABLE  install_name_tool_usage
+    RESULT_VARIABLE _result_install_name_tool_usage
     )
   if(install_name_tool_usage MATCHES ".*-delete_rpath.*")
     foreach(rpath ${${ikey}_RPATHS})
@@ -1177,7 +1197,8 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
        NOT file_contents MATCHES "^#!")
       set(cmd ${CMAKE_INSTALL_NAME_TOOL} ${changes} "${resolved_embedded_item}")
       if(BU_CHMOD_BUNDLE_ITEMS)
-        execute_process(COMMAND chmod u+w "${resolved_embedded_item}")
+        execute_process(COMMAND chmod u+w "${resolved_embedded_item}"
+          RESULT_VARIABLE _result_chmod)
       endif()
       execute_process(COMMAND ${cmd} RESULT_VARIABLE install_name_tool_result)
       if(NOT install_name_tool_result EQUAL 0)
@@ -1278,7 +1299,8 @@ endfunction()
 
 
 function(copy_and_fixup_bundle src dst libs dirs)
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${src}" "${dst}")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${src}" "${dst}"
+    RESULT_VARIABLE _result_copy_directory)
   fixup_bundle("${dst}" "${libs}" "${dirs}")
 endfunction()
 

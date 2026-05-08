@@ -299,7 +299,8 @@ if(SQUISH_CLIENT_EXECUTABLE)
   set(SQUISH_CLIENT_EXECUTABLE_FOUND 1)
   execute_process(COMMAND "${SQUISH_CLIENT_EXECUTABLE}" --version
                   OUTPUT_VARIABLE _squishVersionOutput
-                  ERROR_QUIET )
+                  ERROR_QUIET
+                  RESULT_VARIABLE _squishVersionResult)
   if("${_squishVersionOutput}" MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+)")
     set(SQUISH_VERSION_MAJOR "${CMAKE_MATCH_1}")
     set(SQUISH_VERSION_MINOR "${CMAKE_MATCH_2}")

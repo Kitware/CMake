@@ -41,7 +41,8 @@ function(android_push_test_files_to_device)
     set(${file_exists} "")
     execute_process(
       COMMAND ${adb_executable} shell ls ${device_file}
-      OUTPUT_VARIABLE out_var ERROR_VARIABLE out_var)
+      OUTPUT_VARIABLE out_var ERROR_VARIABLE out_var
+      RESULT_VARIABLE _result_check_file)
     if(NOT out_var) # when a directory exists but is empty the output is empty
       set(${file_exists} "YES")
     else()

@@ -1357,7 +1357,9 @@ endif()
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "e2k" AND NOT DEFINED CMake_TEST_E2K_BROKEN_LIBC)
   # Exclude tests that fail due to a broken libc version on Elbrus.
   find_program(DPKG_QUERY "dpkg-query" )
-  execute_process(COMMAND "${DPKG_QUERY}" "-f" "\${Version}" "-W" "glibc" OUTPUT_VARIABLE LIBC_VERSION)
+  execute_process(COMMAND "${DPKG_QUERY}" "-f" "\${Version}" "-W" "glibc"
+    OUTPUT_VARIABLE LIBC_VERSION
+    RESULT_VARIABLE _result_libc)
   if(LIBC_VERSION MATCHES "2.29-25.*")
     list(REMOVE_ITEM cpack_tests
       DEB.DEFAULT_PERMISSIONS
