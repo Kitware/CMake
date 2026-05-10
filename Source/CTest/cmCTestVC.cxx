@@ -138,25 +138,23 @@ void cmCTestVC::CleanupImpl()
 bool cmCTestVC::Update()
 {
   bool result = true;
-
-  // Use the explicitly specified version.
-  std::string versionOverride =
-    this->Makefile->GetSafeDefinition("CTEST_UPDATE_VERSION_OVERRIDE");
-  if (!versionOverride.empty()) {
-    this->SetNewRevision(versionOverride);
-    return true;
-  }
-
-  // if update version only is on then do not actually update,
-  // just note the current version and finish
-  if (!this->Makefile->IsOn("CTEST_UPDATE_VERSION_ONLY")) {
-    result = this->NoteOldRevision() && result;
-    this->Log << "--- Begin Update ---\n";
-    result = this->UpdateImpl() && result;
-    this->Log << "--- End Update ---\n";
-  }
+  result = this->NoteOldRevision() && result;
+  this->Log << "--- Begin Update ---\n";
+  result = this->UpdateImpl() && result;
+  this->Log << "--- End Update ---\n";
   result = this->NoteNewRevision() && result;
   return result;
+}
+
+bool cmCTestVC::UpdateVersionOverride(std::string const& version)
+{
+  this->SetNewRevision(version);
+  return true;
+}
+
+bool cmCTestVC::UpdateVersionOnly()
+{
+  return this->NoteNewRevision();
 }
 
 bool cmCTestVC::NoteOldRevision()

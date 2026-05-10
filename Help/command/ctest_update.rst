@@ -7,6 +7,8 @@ Perform the :ref:`CTest Update Step` as a :ref:`Dashboard Client`.
 
   ctest_update([SOURCE <source-dir>]
                [RETURN_VALUE <result-var>]
+               [VERSION_ONLY]
+               [VERSION_OVERRIDE <version>]
                [CAPTURE_CMAKE_ERROR <result-var>]
                [QUIET])
 
@@ -23,6 +25,21 @@ The options are:
   Store in the ``<result-var>`` variable the number of files
   updated or ``-1`` on error.
 
+``VERSION_ONLY``
+  .. versionadded:: 4.4
+
+  Record the currently checked out revision without updating the source tree to
+  a different version.  This is equivalent to setting the
+  :variable:`CTEST_UPDATE_VERSION_ONLY` variable.
+
+``VERSION_OVERRIDE <version>``
+  .. versionadded:: 4.4
+
+  Report ``<version>`` as the current revision without querying or updating the
+  source tree.  This is equivalent to setting the
+  :variable:`CTEST_UPDATE_VERSION_OVERRIDE` variable, and supersedes
+  ``VERSION_ONLY``.
+
 ``CAPTURE_CMAKE_ERROR <result-var>``
   .. versionadded:: 3.13
 
@@ -38,7 +55,9 @@ The options are:
   the new revision of the repository and any conflicting files
   that were found.
 
-The update always follows the version control branch currently checked
-out in the source directory.  See the :ref:`CTest Update Step`
-documentation for information about variables that change the behavior
-of ``ctest_update()``.
+By default, the update follows the version control branch currently checked
+out in the source directory.  The ``VERSION_ONLY`` and
+``VERSION_OVERRIDE`` options instead record revision information without
+changing the source tree.  See the :ref:`CTest Update Step` documentation
+for information about further variables that change the behavior of
+``ctest_update()``.

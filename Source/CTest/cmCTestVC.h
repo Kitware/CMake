@@ -45,6 +45,12 @@ public:
   /** Update the working tree to the new revision.  */
   bool Update();
 
+  /** Use the explicitly specified version. */
+  bool UpdateVersionOverride(std::string const& version);
+
+  /** Do not actually update, just note the current version and finish.  */
+  bool UpdateVersionOnly();
+
   /** Get the command line used by the Update method.  */
   std::string const& GetUpdateCommandLine() const
   {

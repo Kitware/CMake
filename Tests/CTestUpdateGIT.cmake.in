@@ -347,6 +347,44 @@ unset(NO_UPDATE)
 rewind_source(dash-source)
 
 #-----------------------------------------------------------------------------
+# Test no update with a VERSION_ONLY option.
+message("Running CTest Dashboard Script (No update argument)...")
+
+set(ctest_update_args VERSION_ONLY)
+create_dashboard_script(dash-binary-no-update-arg
+  "# git command configuration
+set(CTEST_GIT_COMMAND \"${GIT}\")
+")
+unset(ctest_update_args)
+
+# Run the dashboard script with CTest.
+set(NO_UPDATE 1)
+run_dashboard_script(dash-binary-no-update-arg)
+unset(NO_UPDATE)
+
+rewind_source(dash-source)
+
+#-----------------------------------------------------------------------------
+# Test reporting a specific revision with VERSION_OVERRIDE.
+message("Running CTest Dashboard Script (Version override)...")
+
+set(ctest_update_args VERSION_OVERRIDE qwertyuiop)
+create_dashboard_script(dash-binary-version-override
+  "# git command configuration
+set(CTEST_GIT_COMMAND \"${GIT}\")
+")
+unset(ctest_update_args)
+
+# Run the dashboard script with CTest.
+set(NO_UPDATE 1)
+set(NO_UPDATE_REVISION qwertyuiop)
+run_dashboard_script(dash-binary-version-override)
+unset(NO_UPDATE_REVISION)
+unset(NO_UPDATE)
+
+rewind_source(dash-source)
+
+#-----------------------------------------------------------------------------
 # Test ctest_update(QUIET)
 message("Running CTest Dashboard Script (update quietly)...")
 

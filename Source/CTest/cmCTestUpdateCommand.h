@@ -20,6 +20,8 @@ protected:
   {
     std::string Source;
     std::string ReturnValue;
+    std::string VersionOverride;
+    bool VersionOnly = false;
     bool Quiet = false;
   };
 
