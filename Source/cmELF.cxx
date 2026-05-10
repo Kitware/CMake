@@ -22,6 +22,11 @@
 #include "cmelf/elf64.h"
 #include "cmelf/elf_common.h"
 
+// Maximum reasonable values to prevent DoS/OOM from malformed files.
+static constexpr std::size_t kMaxSections = 65536;
+static constexpr std::size_t kMaxSectionSize = 1024 * 1024 * 256;
+static constexpr std::size_t kMaxDynamicEntries = 1024 * 1024;
+
 // Low-level byte swapping implementation.
 template <size_t s>
 struct cmELFByteSwapSize
@@ -216,8 +221,15 @@ public:
   // Return the number of sections as specified by the ELF header.
   std::size_t GetNumberOfSections() const override
   {
-    return static_cast<unsigned int>(this->ELFHeader.e_shnum +
-                                     this->SectionHeaders[0].sh_size);
+    std::size_t count = this->ELFHeader.e_shnum;
+    if (!this->SectionHeaders.empty()) {
+      count += static_cast<std::size_t>(this->SectionHeaders[0].sh_size);
+    }
+    // Prevent OOM from malformed files.
+    if (count > kMaxSections) {
+      return kMaxSections;
+    }
+    return count;
   }
 
   // Get the file position of a dynamic section entry.
@@ -452,6 +464,11 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
   // Load the section headers.
   std::size_t const minSections = 1;
   std::size_t numSections = this->ELFHeader.e_shnum;
+  // Prevent OOM from malformed files.
+  if (numSections > kMaxSections) {
+    this->SetErrorMessage("ELF file has too many sections.");
+    return;
+  }
   this->SectionHeaders.resize(std::max(numSections, minSections));
   if (!this->LoadSectionHeader(0)) {
     return;
@@ -484,12 +501,23 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
     return false;
   }
 
+  // Prevent OOM from malformed files.
+  if (sec.sh_size > kMaxSectionSize) {
+    this->SetErrorMessage("DYNAMIC section is too large.");
+    return false;
+  }
+
   // Allocate the dynamic section entries.
-  int n = static_cast<int>(sec.sh_size / sec.sh_entsize);
+  std::size_t n = static_cast<int>(sec.sh_size / sec.sh_entsize);
+  // Prevent OOM from malformed files.
+  if (n > kMaxDynamicEntries) {
+    this->SetErrorMessage("DYNAMIC section has too many entries.");
+    return false;
+  }
   this->DynamicSectionEntries.resize(n);
 
   // Read each entry.
-  for (int j = 0; j < n; ++j) {
+  for (std::size_t j = 0; j < n; ++j) {
     // Seek to the beginning of the section entry.
     this->Stream->seekg(sec.sh_offset + sec.sh_entsize * j);
     ELF_Dyn& dyn = this->DynamicSectionEntries[j];
