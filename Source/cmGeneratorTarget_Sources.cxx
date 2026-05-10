@@ -6,6 +6,7 @@
 
 #include "cmConfigure.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <map>
@@ -160,8 +161,22 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
           usedSources += cmStrCat(" * ", src, '\n');
         }
       } else {
-        if (auto const* fileSet =
-              tgt->GetGeneratorFileSets()->GetFileSetForSource(config, src)) {
+        auto const& fileSets =
+          tgt->GetGeneratorFileSets()->GetAllFileSetsForSource(config, src);
+        if (fileSets.empty()) {
+          continue;
+        }
+        auto fileMustBeUnique = [&fileSets]() -> bool {
+          return std::none_of(
+            fileSets.begin(), fileSets.end(),
+            [](cmGeneratorFileSet const* fileSet) {
+              return cm::FileSetMetadata::GetAttributes(fileSet->GetType())
+                .contains(cm::FileSetMetadata::FileSetAttributes::
+                            FilesInMultipleFileSets);
+            });
+        };
+        if (fileMustBeUnique()) {
+          auto const* fileSet = *fileSets.begin();
           switch (tgt->GetPolicyStatusCMP0211()) {
             case cmPolicies::WARN:
               tgt->GetLocalGenerator()->IssueDiagnostic(

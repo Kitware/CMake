@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <cm/string_view>
@@ -53,6 +54,12 @@ public:
 
   cmGeneratorFileSet const* GetFileSet(std::string const& name) const;
 
+  std::unordered_set<cmGeneratorFileSet const*> const& GetAllFileSetsForSource(
+    std::string const& config, std::string const& file) const;
+  std::unordered_set<cmGeneratorFileSet const*> const& GetAllFileSetsForSource(
+    std::string const& config, cmSourceFile const* sf) const;
+
+  // returns the first FileSet of the set
   cmGeneratorFileSet const* GetFileSetForSource(std::string const& config,
                                                 std::string const& file) const;
   cmGeneratorFileSet const* GetFileSetForSource(std::string const& config,
@@ -102,8 +109,10 @@ private:
   struct InfoByConfig
   {
     bool BuiltCache = false;
-    std::map<std::string, cmGeneratorFileSet const*> FileSetCache;
-    std::map<std::string, cmGeneratorFileSet const*> InterfaceFileSetCache;
+    std::map<std::string, std::unordered_set<cmGeneratorFileSet const*>>
+      FileSetCache;
+    std::map<std::string, std::unordered_set<cmGeneratorFileSet const*>>
+      InterfaceFileSetCache;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
 

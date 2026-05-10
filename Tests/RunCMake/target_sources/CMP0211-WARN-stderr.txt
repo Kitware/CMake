@@ -5,9 +5,9 @@ CMake Warning \(author\) in CMakeLists\.txt:
 
   In target "foo1" the file
 
-    .+/Tests/RunCMake/target_sources/h1\.h
+    .+/Tests/RunCMake/target_sources/lib2\.c
 
-  already belongs to file set "h2"\.
+  already belongs to file set "s[12]"\.
 This warning is for project developers\.  Use -Wno-author to suppress it\.
 
 CMake Warning \(author\) in CMakeLists\.txt:
@@ -17,7 +17,7 @@ CMake Warning \(author\) in CMakeLists\.txt:
 
   In target "foo2" the file
 
-    .+/Tests/RunCMake/target_sources/h1\.h
+    .+/Tests/RunCMake/target_sources/lib2\.c
 
-  already belongs to file set "h1"\.
+  already belongs to file set "s1"\.
 This warning is for project developers\.  Use -Wno-author to suppress it\.

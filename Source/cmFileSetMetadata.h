@@ -2,12 +2,14 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cstdint>
 #include <set>
 #include <utility>
 #include <vector>
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/enum_set>
 
 class cmMakefile;
 
@@ -48,27 +50,28 @@ enum class FileSetLookup
 enum class DependencyMode
 {
   IndependentFiles, // files in the file set are independent from each other
-  Includables,      // files can be used by another source during compilation
+  Includables       // files can be used by another source during compilation
 };
 using DependencySet = std::set<DependencyMode>;
 
-enum class FrameworkCompatible
+enum class FileSetAttributes : std::uint16_t
 {
-  No,
-  Yes
+  FrameworkCompatible,    // Can be part of an Apple framework
+  FilesInMultipleFileSets // Files of this file set type can be part of other
+                          // file sets
 };
+using AttributeSet = cm::enum_set<FileSetAttributes, 2>;
 
 struct FileSetDescriptor
 {
   FileSetDescriptor(cm::string_view type, FileSetLookup lookup,
                     DependencySet dependencies,
-                    DependencyMode defaultDependency,
-                    FrameworkCompatible frameworkSupported)
+                    DependencyMode defaultDependency, AttributeSet attributes)
     : Type(type)
     , Lookup(lookup)
     , SupportedDependencies(std::move(dependencies))
     , DefaultDependency(defaultDependency)
-    , FrameworkSupported(frameworkSupported)
+    , Attributes(attributes)
   {
   }
 
@@ -77,7 +80,6 @@ struct FileSetDescriptor
     , Lookup(lookup)
     , SupportedDependencies({ DependencyMode::Includables })
     , DefaultDependency(DependencyMode::Includables)
-    , FrameworkSupported(FrameworkCompatible::No)
   {
   }
 
@@ -85,13 +87,15 @@ struct FileSetDescriptor
   FileSetLookup const Lookup;
   DependencySet const SupportedDependencies;
   DependencyMode const DefaultDependency;
-  FrameworkCompatible const FrameworkSupported;
+  AttributeSet const Attributes;
 };
 
 cm::optional<FileSetDescriptor> GetFileSetDescriptor(cm::string_view type);
 DependencyMode GetDependencyMode(cm::string_view type);
 DependencyMode GetDependencyMode(cm::string_view type,
                                  DependencyMode requestedMode);
+
+AttributeSet GetAttributes(cm::string_view type);
 bool IsFrameworkSupported(cm::string_view type);
 
 std::vector<cm::string_view> const& GetKnownTypes();
@@ -101,3 +105,5 @@ bool IsKnownType(cm::string_view type);
 bool IsValidName(cm::string_view type);
 }
 }
+
+CM_ENUM_SET_TRAITS(cm::FileSetMetadata::AttributeSet)
