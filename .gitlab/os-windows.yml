@@ -340,6 +340,12 @@
     variables:
         CMAKE_CONFIGURATION: windows_pellesc13.01_x64
 
+.windows_pellesc13.01_x86:
+    extends: .windows_pellesc
+
+    variables:
+        CMAKE_CONFIGURATION: windows_pellesc13.01_x86
+
 .windows_arm64_vs2026:
     extends: .windows
 
