@@ -4326,7 +4326,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           }
           if ((!libName.Target || libName.Target->IsImported()) &&
               (isFramework || isXcFramework ||
-               IsLinkPhaseLibraryExtension(cleanPath))) {
+               IsLinkPhaseLibraryExtension(cleanPath)) &&
+              cmSystemTools::FileIsFullPath(cleanPath)) {
             // Create file reference for embedding
             auto it = this->ExternalLibRefs.find(cleanPath);
             if (it == this->ExternalLibRefs.end()) {
