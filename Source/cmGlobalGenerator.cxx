@@ -3101,7 +3101,7 @@ void cmGlobalGenerator::ReserveGlobalTargetCodegen()
 
   switch (policyStatus) {
     case cmPolicies::WARN:
-      this->GetCMakeInstance()->IssueDiagnostic(
+      tgt->GetMakefile()->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0171), '\n',
                  "The target name \"codegen\" is reserved."),
