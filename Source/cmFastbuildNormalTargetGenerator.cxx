@@ -25,6 +25,7 @@
 #include "cmCommonTargetGenerator.h"
 #include "cmCryptoHash.h"
 #include "cmFastbuildTargetGenerator.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
@@ -76,8 +77,24 @@ char const kPATH_SLASH = '\\';
 char const kPATH_SLASH = '/';
 #endif
 
-bool IsExcludedFromUnity(cmSourceFile const& srcFile)
+bool IsExcludedFromUnity(cmGeneratorTarget const* target,
+                         cmGeneratorFileSet const* fileSet,
+                         cmSourceFile const& srcFile)
 {
+  if (fileSet &&
+      (fileSet->GetType() == cm::FileSetMetadata::HEADERS ||
+       fileSet->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn() ||
+       fileSet->GetProperty(fileSet->BelongsTo(target)
+                              ? "COMPILE_OPTIONS"
+                              : "INTERFACE_COMPILE_OPTIONS") ||
+       fileSet->GetProperty(fileSet->BelongsTo(target)
+                              ? "COMPILE_DEFINITIONS"
+                              : "INTERFACE_COMPILE_DEFINITIONS") ||
+       fileSet->GetProperty(fileSet->BelongsTo(target)
+                              ? "INCLUDE_DIRECTORIES"
+                              : "INTERFACE_INCLUDE_DIRECTORIES"))) {
+    return true;
+  }
   return srcFile.GetPropertyAsBool(SKIP_UNITY_BUILD_INCLUSION) ||
     srcFile.GetProperty(COMPILE_OPTIONS) ||
     srcFile.GetProperty(COMPILE_DEFINITIONS) ||
@@ -1440,8 +1457,10 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
     std::string const pathToFile = srcFile.GetFullPath();
     bool fileUsesUnity = useUnity;
     if (useUnity) {
+      cmGeneratorFileSet const* fileSet =
+        GeneratorTarget->GetFileSetForSource(Config, source);
       // Check if the source should be added to "UnityInputExcludedFiles".
-      if (IsExcludedFromUnity(srcFile)) {
+      if (IsExcludedFromUnity(GeneratorTarget, fileSet, srcFile)) {
         fileUsesUnity = false;
         excludedFromUnity.emplace(pathToFile);
       }

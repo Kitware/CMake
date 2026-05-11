@@ -1637,7 +1637,9 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       !cm::contains(acs.Configs, ci) ||
       (gt->GetPropertyAsBool("UNITY_BUILD") &&
        sf.GetProperty("UNITY_SOURCE_FILE") &&
-       !sf.GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"));
+       !((fileSet &&
+          fileSet->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn()) ||
+         sf.GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")));
     if (fc.ExcludedFromBuild) {
       needfc = true;
     }
