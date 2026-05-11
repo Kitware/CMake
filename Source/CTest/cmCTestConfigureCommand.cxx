@@ -39,6 +39,7 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
                                std::string const buildDirectory,
                                std::string const options,
                                std::string const presetName,
+                               std::string const presetsFile,
                                std::string& configureCommand)
 {
   configureCommand = cmStrCat('"', cmSystemTools::GetCMakeCommand(), '"');
@@ -64,10 +65,10 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
 
   if (!presetName.empty()) {
     cmCMakePresetsGraph presetsGraph;
-    if (!presetsGraph.ReadProjectPresets(sourceDirectory, "")) {
-      status.SetError(
-        cmStrCat("Could not read presets from \"", sourceDirectory,
-                 "\": ", presetsGraph.parseState.GetErrorMessage()));
+    if (!presetsGraph.ReadProjectPresets(sourceDirectory, presetsFile)) {
+      status.SetError(cmStrCat("\n Could not read presets from \"",
+                               sourceDirectory, "\":\n ",
+                               presetsGraph.parseState.GetErrorMessage()));
       return false;
     }
 
@@ -88,6 +89,13 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
     configureCommand += " \"";
     configureCommand += presetName;
     configureCommand += "\"";
+
+    if (!presetsFile.empty()) {
+      configureCommand += " \"--presets-file\"";
+      configureCommand += " \"";
+      configureCommand += presetsFile;
+      configureCommand += "\"";
+    }
 
     if (!expandedPreset->BinaryDir.empty()) {
       presetProvidesBuildDir = true;
@@ -183,10 +191,14 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     return false;
   }
 
+  std::string const presetsFile = args.PresetsFile.empty()
+    ? ""
+    : cmSystemTools::CollapseFullPath(args.PresetsFile, sourceDirectory);
+
   std::string configureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
   if (configureCommand.empty() &&
       !ConstructConfigureCommand(status, mf, sourceDirectory, buildDirectory,
-                                 args.Options, args.Preset,
+                                 args.Options, args.Preset, presetsFile,
                                  configureCommand)) {
     return false;
   }
@@ -291,7 +303,8 @@ bool cmCTestConfigureCommand::InitialPass(std::vector<std::string> const& args,
   static auto const parser =
     cmArgumentParser<Args>{ MakeHandlerParser<Args>() } //
       .Bind("OPTIONS"_s, &ConfigureArguments::Options)
-      .Bind("PRESET"_s, &ConfigureArguments::Preset);
+      .Bind("PRESET"_s, &ConfigureArguments::Preset)
+      .Bind("PRESETS_FILE"_s, &ConfigureArguments::PresetsFile);
 
   return this->Invoke(parser, args, status, [&](ConfigureArguments& a) {
     return this->ExecuteConfigure(a, status);

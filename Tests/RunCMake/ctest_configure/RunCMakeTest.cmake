@@ -15,3 +15,12 @@ configure_file(
   "${RunCMake_TEST_SOURCE_DIR}/CMakePresets.json"
   @ONLY)
 run_ctest_configure(ConfigurePreset PRESET my-preset)
+
+set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/ConfigurePresetFromFile")
+set(custom_presets_file "${RunCMake_BINARY_DIR}/ConfigurePresetFromFile/custom-presets.json")
+configure_file(
+  "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+  "${custom_presets_file}"
+  @ONLY)
+run_ctest_configure(ConfigurePresetFromFile PRESET my-preset PRESETS_FILE "${custom_presets_file}")
+unset(custom_presets_file)

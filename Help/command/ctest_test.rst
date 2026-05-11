@@ -29,6 +29,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [REPEAT <mode>:<n>]
              [OUTPUT_JUNIT <file>]
              [PRESET <preset>]
+             [PRESETS_FILE <file>]
              [QUIET]
              )
 
@@ -199,6 +200,14 @@ The options are:
   setting from the preset.  For example, the ``INCLUDE`` argument will override
   the :preset:`filter.include.name <testPresets.filter.include.name>` setting
   from the chosen preset.
+
+``PRESETS_FILE <file>``
+  .. versionadded:: 4.4
+
+  Specify a :manual:`presets <cmake-presets(7)>` file to use instead of the
+  default ``CMakePresets.json`` in the source directory.
+  A relative path is interpreted relative to the source directory.
+  Has no effect unless ``PRESET`` is also specified.
 
 ``QUIET``
   .. versionadded:: 3.3

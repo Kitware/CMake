@@ -23,6 +23,7 @@
 #include "cmJSONState.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmValue.h"
 
 using TestPreset = cmCMakePresetsGraph::TestPreset;
@@ -39,11 +40,15 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
     std::string const sourceDirectory =
       mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
 
+    std::string const presetsFile = args.PresetsFile.empty()
+      ? ""
+      : cmSystemTools::CollapseFullPath(args.PresetsFile, sourceDirectory);
+
     presetsGraph = cm::make_unique<cmCMakePresetsGraph>();
-    if (!presetsGraph->ReadProjectPresets(sourceDirectory, "")) {
-      status.SetError(
-        cmStrCat("Could not read presets from \"", sourceDirectory,
-                 "\": ", presetsGraph->parseState.GetErrorMessage()));
+    if (!presetsGraph->ReadProjectPresets(sourceDirectory, presetsFile)) {
+      status.SetError(cmStrCat("\n Could not read presets from \"",
+                               sourceDirectory, "\":\n ",
+                               presetsGraph->parseState.GetErrorMessage()));
       return nullptr;
     }
 

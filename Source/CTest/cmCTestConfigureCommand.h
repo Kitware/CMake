@@ -20,6 +20,7 @@ protected:
   {
     std::string Options;
     std::string Preset;
+    std::string PresetsFile;
   };
 
 private:
