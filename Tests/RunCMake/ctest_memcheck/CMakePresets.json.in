@@ -1,0 +1,26 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "my-configure-preset",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "my-include-preset",
+      "configurePreset": "my-configure-preset",
+      "filter": {
+        "include": {
+          "name": "^test1$"
+        }
+      }
+    }
+  ]
+}

@@ -35,6 +35,7 @@
 #include "cm_utf8.h"
 
 #include "cmArgumentParser.h"
+#include "cmCMakePresetsGraph.h"
 #include "cmCTest.h"
 #include "cmCTestDiscoverTests.h"
 #include "cmCTestMultiProcessHandler.h"
@@ -58,6 +59,69 @@
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
+
+void cmCTestApplyTestPresetToOptions(
+  cmCTestTestOptions& opts, cmCMakePresetsGraph::TestPreset const& preset)
+{
+  if (preset.Filter) {
+    if (preset.Filter->Include) {
+      auto const& inc = *preset.Filter->Include;
+      opts.IncludeRegularExpression = inc.Name;
+      if (!inc.Label.empty()) {
+        opts.LabelRegularExpression.push_back(inc.Label);
+      }
+      opts.UseUnion = inc.UseUnion.value_or(false);
+      if (inc.Index) {
+        auto const& idx = *inc.Index;
+        if (!idx.IndexFile.empty()) {
+          opts.TestsToRunInformation = idx.IndexFile;
+        } else {
+          opts.TestsToRunInformation = cmStrCat(
+            (idx.Start ? std::to_string(*idx.Start) : std::string{}), ',',
+            (idx.End ? std::to_string(*idx.End) : std::string{}), ',',
+            (idx.Stride ? std::to_string(*idx.Stride) : std::string{}), ',',
+            cmJoin(idx.SpecificTests, ","));
+        }
+      }
+    }
+    if (preset.Filter->Exclude) {
+      auto const& exc = *preset.Filter->Exclude;
+      opts.ExcludeRegularExpression = exc.Name;
+      if (!exc.Label.empty()) {
+        opts.ExcludeLabelRegularExpression.push_back(exc.Label);
+      }
+      if (exc.Fixtures) {
+        opts.ExcludeFixtureRegularExpression = exc.Fixtures->Any;
+        opts.ExcludeFixtureSetupRegularExpression = exc.Fixtures->Setup;
+        opts.ExcludeFixtureCleanupRegularExpression = exc.Fixtures->Cleanup;
+      }
+    }
+  }
+
+  if (preset.Execution) {
+    auto const& exec = *preset.Execution;
+    opts.StopOnFailure = exec.StopOnFailure.value_or(false);
+    opts.ResourceSpecFile = exec.ResourceSpecFile;
+    opts.ScheduleRandom = exec.ScheduleRandom.value_or(false);
+    opts.TestPassthroughArguments = exec.TestPassthroughArguments;
+  }
+
+  if (preset.Output) {
+    auto const& output = *preset.Output;
+    if (!output.OutputJUnitFile.empty()) {
+      opts.JUnitXMLFileName = output.OutputJUnitFile;
+    }
+    if (output.MaxPassedTestOutputSize) {
+      opts.OutputSizePassed = *output.MaxPassedTestOutputSize;
+    }
+    if (output.MaxFailedTestOutputSize) {
+      opts.OutputSizeFailed = *output.MaxFailedTestOutputSize;
+    }
+    if (output.TestOutputTruncation) {
+      opts.OutputTruncation = *output.TestOutputTruncation;
+    }
+  }
+}
 
 namespace {
 

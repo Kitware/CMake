@@ -13,6 +13,29 @@ endfunction()
 
 run_ctest_test(TestQuiet QUIET)
 
+block()
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+foreach(i RANGE 1 3)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+endforeach()
+]])
+  foreach(case IN ITEMS
+    TestPresetBadName
+    TestPresetExclude
+    TestPresetInclude
+    TestPresetOverride
+  )
+    configure_file(
+      "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+      "${RunCMake_BINARY_DIR}/${case}/CMakePresets.json"
+      @ONLY)
+  endforeach()
+  run_ctest_test(TestPresetBadName PRESET nonexistent-preset)
+  run_ctest_test(TestPresetExclude PRESET my-exclude-preset)
+  run_ctest_test(TestPresetInclude PRESET my-include-preset)
+  run_ctest_test(TestPresetOverride PRESET my-include-preset INCLUDE test2)
+endblock()
+
 set(CASE_CMAKELISTS_SUFFIX_CODE [[
 foreach(i RANGE 1 4)
   add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
