@@ -219,6 +219,7 @@ void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
       emitted.insert(cmLinkItem(depender, false, cmListFileBacktrace()));
       emitted.insert(cmLinkItem(depender, true, cmListFileBacktrace()));
 
+      // Build link dependencies before the current target.
       if (cmLinkImplementation const* impl = depender->GetLinkImplementation(
             it, cmGeneratorTarget::UseTo::Link)) {
         for (cmLinkItem const& lib : impl->Libraries) {
@@ -232,6 +233,18 @@ void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
           if (cmSourceFile const* o = depender->Makefile->GetSource(
                 obj.AsStr(), cmSourceFileLocationKind::Known)) {
             this->AddObjectDepends(depender_index, o, emitted);
+          }
+        }
+      }
+
+      // Build compile dependencies before the current target.
+      if (cmLinkImplementation const* impl = depender->GetLinkImplementation(
+            it, cmGeneratorTarget::UseTo::Compile)) {
+        for (cmLinkItem const& lib : impl->Libraries) {
+          // Don't emit the same library twice for this target.
+          if (emitted.insert(lib).second) {
+            this->AddTargetDepend(depender_index, lib, true, false, emitted);
+            this->AddInterfaceDepends(depender_index, lib, it, emitted);
           }
         }
       }
