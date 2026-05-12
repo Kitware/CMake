@@ -3411,9 +3411,9 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
         }
 
         std::cout << msg;
-#ifndef _WIN32
-        printf("\x1B[K"); // move caret to end
-#endif
+        // ProgressOutputSupportedByConsole() already verified VT100 support.
+        // Erase the rest of the line before printing the message.
+        printf("\x1B[K");
         std::cout.flush();
         return;
       }
