@@ -1338,8 +1338,8 @@ void cmGlobalGenerator::Configure()
     this->CMakeInstance->GetHomeOutputDirectory());
 
   if (this->ExtraGenerator && !this->CMakeInstance->GetIsInTryCompile()) {
-    this->CMakeInstance->IssueDiagnostic(
-      cmDiagnostics::CMD_DEPRECATED,
+    this->CMakeInstance->IssueMessage(
+      MessageType::WARNING,
       cmStrCat("Support for \"Extra Generators\" like\n  ",
                this->ExtraGenerator->GetName(),
                "\nis deprecated and will be removed from a future version "
