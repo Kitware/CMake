@@ -5,6 +5,7 @@
 #include "cmMakefile.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -227,7 +228,7 @@ void cmMakefile::IssueMessage(MessageType t, std::string const& text,
 
 void cmMakefile::IssueDiagnostic(cmDiagnosticCategory category,
                                  std::string const& text,
-                                 cmListFileBacktrace const& bt) const
+                                 cmDiagnosticContext const& context) const
 {
   if (!this->ExecutionStatusStack.empty()) {
     cmDiagnosticAction const action = this->GetDiagnosticAction(category);
@@ -236,7 +237,7 @@ void cmMakefile::IssueDiagnostic(cmDiagnosticCategory category,
     }
   }
   this->GetCMakeInstance()->IssueDiagnostic(category, text,
-                                            this->GetStateSnapshot(), bt);
+                                            this->GetStateSnapshot(), context);
 }
 
 Message::LogLevel cmMakefile::GetCurrentLogLevel() const

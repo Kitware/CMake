@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
@@ -17,7 +18,7 @@ cmInstallScriptGenerator::cmInstallScriptGenerator(
   bool excludeFromAll, bool allComponents, cmListFileBacktrace backtrace)
   : cmInstallGenerator("", std::vector<std::string>(), component,
                        MessageDefault, excludeFromAll, allComponents,
-                       std::move(backtrace))
+                       cmDiagnosticContext{ std::move(backtrace) })
   , Script(std::move(script))
   , Code(code)
 {

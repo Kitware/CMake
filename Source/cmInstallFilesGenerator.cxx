@@ -4,19 +4,19 @@
 
 #include <utility>
 
+#include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
 #include "cmList.h"
-#include "cmListFileCache.h"
 
 cmInstallFilesGenerator::cmInstallFilesGenerator(
   std::vector<std::string> const& files, std::string const& dest,
   bool programs, std::string filePermissions,
   std::vector<std::string> const& configurations, std::string const& component,
   MessageLevel message, bool excludeFromAll, std::string rename, bool optional,
-  cmListFileBacktrace backtrace)
+  cmDiagnosticContext context)
   : cmInstallGenerator(dest, configurations, component, message,
-                       excludeFromAll, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(context))
   , Files(files)
   , FilePermissions(std::move(filePermissions))
   , Rename(std::move(rename))
@@ -56,8 +56,7 @@ std::string cmInstallFilesGenerator::GetDestination(
 {
   std::string dest = cmGeneratorExpression::Evaluate(
     this->Destination, this->LocalGenerator, config);
-  cmInstallGenerator::CheckAbsoluteDestination(dest, this->LocalGenerator,
-                                               this->Backtrace);
+  this->CheckAbsoluteDestination(dest, this->LocalGenerator);
   return dest;
 }
 

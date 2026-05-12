@@ -13,7 +13,6 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallType.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -35,9 +34,9 @@ cmInstallImportedRuntimeArtifactsGenerator::
     std::string filePermissions,
     std::vector<std::string> const& configurations,
     std::string const& component, MessageLevel message, bool excludeFromAll,
-    bool optional, cmListFileBacktrace backtrace)
+    bool optional, cmDiagnosticContext context)
   : cmInstallGenerator(dest, configurations, component, message,
-                       excludeFromAll, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(context))
   , TargetName(std::move(targetName))
   , FilePermissions(std::move(filePermissions))
   , Optional(optional)

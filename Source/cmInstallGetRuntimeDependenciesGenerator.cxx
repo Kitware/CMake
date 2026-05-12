@@ -13,6 +13,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmInstallRuntimeDependencySet.h"
 #include "cmListFileCache.h"
@@ -87,7 +88,7 @@ cmInstallGetRuntimeDependenciesGenerator::
     MessageLevel message, bool excludeFromAll, cmListFileBacktrace backtrace,
     cmPolicies::PolicyStatus policyStatusCMP0207)
   : cmInstallGenerator("", configurations, "", message, excludeFromAll, false,
-                       std::move(backtrace))
+                       cmDiagnosticContext{ std::move(backtrace) })
   , RuntimeDependencySet(runtimeDependencySet)
   , Directories(std::move(directories))
   , PreIncludeRegexes(std::move(preIncludeRegexes))

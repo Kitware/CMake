@@ -8,8 +8,8 @@
 
 #include "cmInstallGenerator.h"
 
+class cmDiagnosticContext;
 class cmInstallRuntimeDependencySet;
-class cmListFileBacktrace;
 class cmLocalGenerator;
 
 class cmInstallRuntimeDependencySetGenerator : public cmInstallGenerator
@@ -28,7 +28,7 @@ public:
     char const* rpathPrefix, char const* tmpVarPrefix, std::string destination,
     std::vector<std::string> const& configurations, std::string component,
     std::string permissions, MessageLevel message, bool excludeFromAll,
-    cmListFileBacktrace backtrace);
+    cmDiagnosticContext context);
 
   bool Compute(cmLocalGenerator* lg) override;
 

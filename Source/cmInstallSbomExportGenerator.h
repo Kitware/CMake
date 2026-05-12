@@ -7,8 +7,8 @@
 
 #include "cmInstallExportGenerator.h"
 
+class cmDiagnosticContext;
 class cmExportSet;
-class cmListFileBacktrace;
 class cmSbomArguments;
 
 class cmInstallSbomExportGenerator final : public cmInstallExportGenerator
@@ -20,7 +20,7 @@ public:
                                std::string component, MessageLevel message,
                                bool excludeFromAll, cmSbomArguments arguments,
                                std::string cxxModulesDirectory,
-                               cmListFileBacktrace backtrace);
+                               cmDiagnosticContext context);
   cmInstallSbomExportGenerator(cmInstallSbomExportGenerator const&) = delete;
   ~cmInstallSbomExportGenerator() override;
 

@@ -101,7 +101,11 @@ public:
     cm::string_view name);
 
   /** Represent a set of diagnostic category actions.  */
-  using DiagnosticMap = std::array<DiagnosticAction, CategoryCount>;
+  struct DiagnosticMap : public std::array<DiagnosticAction, CategoryCount>
+  {
+    DiagnosticMap()
+      : array{} {};
+  };
 };
 
 using cmDiagnosticCategory = cmDiagnostics::DiagnosticCategory;

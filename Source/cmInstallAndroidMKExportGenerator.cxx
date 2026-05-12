@@ -6,9 +6,9 @@
 
 #include <cm/memory>
 
+#include "cmDiagnosticContext.h"
 #include "cmExportInstallAndroidMKGenerator.h"
 #include "cmExportInstallFileGenerator.h"
-#include "cmListFileCache.h"
 
 class cmExportSet;
 
@@ -16,12 +16,12 @@ cmInstallAndroidMKExportGenerator::cmInstallAndroidMKExportGenerator(
   cmExportSet* exportSet, std::string destination, std::string filePermissions,
   std::vector<std::string> const& configurations, std::string component,
   MessageLevel message, bool excludeFromAll, std::string filename,
-  std::string targetNamespace, cmListFileBacktrace backtrace)
+  std::string targetNamespace, cmDiagnosticContext context)
   : cmInstallExportGenerator(exportSet, std::move(destination),
                              std::move(filePermissions), configurations,
                              std::move(component), message, excludeFromAll,
                              std::move(filename), std::move(targetNamespace),
-                             std::string{}, std::move(backtrace))
+                             std::string{}, std::move(context))
 {
   this->EFGen = cm::make_unique<cmExportInstallAndroidMKGenerator>(this);
 }

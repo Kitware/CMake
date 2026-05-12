@@ -7,8 +7,8 @@
 
 #include "cmInstallExportGenerator.h"
 
+class cmDiagnosticContext;
 class cmExportSet;
-class cmListFileBacktrace;
 
 /** \class cmInstallAndroidMKExportGenerator
  * \brief Generate rules for creating Android .mk export files.
@@ -21,7 +21,7 @@ public:
     std::string filePermissions,
     std::vector<std::string> const& configurations, std::string component,
     MessageLevel message, bool excludeFromAll, std::string filename,
-    std::string targetNamespace, cmListFileBacktrace backtrace);
+    std::string targetNamespace, cmDiagnosticContext context);
   cmInstallAndroidMKExportGenerator(cmInstallAndroidMKExportGenerator const&) =
     delete;
   ~cmInstallAndroidMKExportGenerator() override;

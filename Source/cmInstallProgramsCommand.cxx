@@ -99,7 +99,8 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
     cmInstallGenerator::SelectMessageLevel(&makefile);
   makefile.AddInstallGenerator(cm::make_unique<cmInstallFilesGenerator>(
     files, destination, true, no_permissions, no_configurations, no_component,
-    message, no_exclude_from_all, no_rename, false, makefile.GetBacktrace()));
+    message, no_exclude_from_all, no_rename, false,
+    cmInstallGenerator::CaptureContext(makefile)));
 }
 
 /**

@@ -7,10 +7,10 @@
 #include <utility>
 
 #include "cmCryptoHash.h"
+#include "cmDiagnosticContext.h"
 #include "cmExportInstallFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmInstallType.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
@@ -21,10 +21,10 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   std::vector<std::string> const& configurations, std::string component,
   MessageLevel message, bool excludeFromAll, std::string filename,
   std::string targetNamespace, std::string cxxModulesDirectory,
-  cmListFileBacktrace backtrace)
+  cmDiagnosticContext context)
   : cmInstallGenerator(std::move(destination), configurations,
                        std::move(component), message, excludeFromAll, false,
-                       std::move(backtrace))
+                       std::move(context))
   , ExportSet(exportSet)
   , FilePermissions(std::move(filePermissions))
   , FileName(std::move(filename))

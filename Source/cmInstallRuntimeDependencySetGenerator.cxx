@@ -7,10 +7,10 @@
 #include <utility>
 #include <vector>
 
+#include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmInstallGenerator.h"
 #include "cmInstallType.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -25,10 +25,10 @@ cmInstallRuntimeDependencySetGenerator::cmInstallRuntimeDependencySetGenerator(
   char const* rpathPrefix, char const* tmpVarPrefix, std::string destination,
   std::vector<std::string> const& configurations, std::string component,
   std::string permissions, MessageLevel message, bool excludeFromAll,
-  cmListFileBacktrace backtrace)
+  cmDiagnosticContext context)
   : cmInstallGenerator(std::move(destination), configurations,
                        std::move(component), message, excludeFromAll, false,
-                       std::move(backtrace))
+                       std::move(context))
   , Type(type)
   , DependencySet(dependencySet)
   , InstallRPaths(std::move(installRPaths))
@@ -68,7 +68,7 @@ void cmInstallRuntimeDependencySetGenerator::GenerateScriptForConfig(
           MessageType::FATAL_ERROR,
           "INSTALL_NAME_DIR argument must not evaluate to an "
           "empty string",
-          this->Backtrace);
+          this->Context.GetBacktrace());
         return;
       }
       if (installNameDir.back() != '/') {

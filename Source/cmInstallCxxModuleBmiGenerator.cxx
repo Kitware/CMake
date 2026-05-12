@@ -5,10 +5,10 @@
 #include <ostream>
 #include <utility>
 
+#include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
@@ -17,9 +17,9 @@ cmInstallCxxModuleBmiGenerator::cmInstallCxxModuleBmiGenerator(
   std::string target, std::string const& dest, std::string filePermissions,
   std::vector<std::string> const& configurations, std::string const& component,
   MessageLevel message, bool excludeFromAll, bool optional,
-  cmListFileBacktrace backtrace)
+  cmDiagnosticContext context)
   : cmInstallGenerator(dest, configurations, component, message,
-                       excludeFromAll, false, std::move(backtrace))
+                       excludeFromAll, false, std::move(context))
   , TargetName(std::move(target))
   , FilePermissions(std::move(filePermissions))
   , Optional(optional)

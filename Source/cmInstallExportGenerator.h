@@ -11,9 +11,9 @@
 
 #include "cmInstallGenerator.h"
 
+class cmDiagnosticContext;
 class cmExportInstallFileGenerator;
 class cmExportSet;
-class cmListFileBacktrace;
 class cmLocalGenerator;
 
 /** \class cmInstallExportGenerator
@@ -29,7 +29,7 @@ public:
                            bool excludeFromAll, std::string filename,
                            std::string targetNamespace,
                            std::string cxxModulesDirectory,
-                           cmListFileBacktrace backtrace);
+                           cmDiagnosticContext context);
   cmInstallExportGenerator(cmInstallExportGenerator const&) = delete;
   ~cmInstallExportGenerator() override;
 

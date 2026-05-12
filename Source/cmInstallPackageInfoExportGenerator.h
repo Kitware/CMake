@@ -7,8 +7,8 @@
 
 #include "cmInstallExportGenerator.h"
 
+class cmDiagnosticContext;
 class cmExportSet;
-class cmListFileBacktrace;
 class cmPackageInfoArguments;
 
 /** \class cmInstallPackageInfoGenerator
@@ -23,7 +23,7 @@ public:
     std::vector<std::string> const& configurations, std::string component,
     MessageLevel message, bool excludeFromAll,
     cmPackageInfoArguments arguments, std::string cxxModulesDirectory,
-    cmListFileBacktrace backtrace);
+    cmDiagnosticContext context);
   cmInstallPackageInfoExportGenerator(
     cmInstallPackageInfoExportGenerator const&) = delete;
   ~cmInstallPackageInfoExportGenerator() override;

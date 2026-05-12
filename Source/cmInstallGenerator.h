@@ -9,12 +9,13 @@
 #include <string>
 #include <vector>
 
+#include "cmDiagnosticContext.h"
 #include "cmInstallType.h"
-#include "cmListFileCache.h"
 #include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
 class cmMakefile;
+class cmListFileBacktrace;
 
 /** \class cmInstallGenerator
  * \brief Support class for generating install scripts.
@@ -35,7 +36,7 @@ public:
                      std::vector<std::string> const& configurations,
                      std::string component, MessageLevel message,
                      bool excludeFromAll, bool allComponents,
-                     cmListFileBacktrace backtrace);
+                     cmDiagnosticContext context);
   ~cmInstallGenerator() override;
 
   cmInstallGenerator(cmInstallGenerator const&) = delete;
@@ -56,15 +57,21 @@ public:
   /** Get the install destination as it should appear in the
       installation script.  */
   static std::string ConvertToAbsoluteDestination(std::string const& dest);
-  static void CheckAbsoluteDestination(std::string const& dest,
-                                       cmLocalGenerator* lg,
-                                       cmListFileBacktrace const& bt);
+  void CheckAbsoluteDestination(std::string const& dest,
+                                cmLocalGenerator* lg) const;
 
   /** Test if this generator installs something for a given configuration.  */
   bool InstallsForConfig(std::string const& config);
 
   /** Select message level from CMAKE_INSTALL_MESSAGE or 'never'.  */
   static MessageLevel SelectMessageLevel(cmMakefile* mf, bool never = false);
+
+  /** Capture context for generator.  */
+  static cmDiagnosticContext CaptureContext(cmMakefile const& mf);
+  static cmDiagnosticContext CaptureContext(cmMakefile const* mf)
+  {
+    return cmInstallGenerator::CaptureContext(*mf);
+  }
 
   virtual bool Compute(cmLocalGenerator*) { return true; }
 
@@ -73,7 +80,10 @@ public:
   bool GetExcludeFromAll() const { return this->ExcludeFromAll; }
   bool GetAllComponentsFlag() const { return this->AllComponents; }
 
-  cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
+  cmListFileBacktrace const& GetBacktrace() const
+  {
+    return this->Context.GetBacktrace();
+  }
 
   static std::string GetDestDirPath(std::string const& file);
 
@@ -101,5 +111,5 @@ protected:
   MessageLevel const Message;
   bool const ExcludeFromAll;
   bool const AllComponents;
-  cmListFileBacktrace const Backtrace;
+  cmDiagnosticContext const Context;
 };

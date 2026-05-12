@@ -314,6 +314,7 @@ CMAKE_CXX_SOURCES="\
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDiagnostics \
+  cmDiagnosticContext \
   cmDiscoverTestsCommand \
   cmDocumentationFormatter \
   cmELF \

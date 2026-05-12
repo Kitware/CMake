@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
+#include "cmDiagnosticContext.h"
 #include "cmInstallGenerator.h"
 #include "cmInstallType.h"
-#include "cmListFileCache.h"
 
 class cmGeneratorTarget;
 
@@ -20,12 +20,12 @@ class cmGeneratorTarget;
 class cmInstallTargetGenerator : public cmInstallGenerator
 {
 public:
-  cmInstallTargetGenerator(
-    std::string targetName, std::string const& dest, bool implib,
-    std::string filePermissions,
-    std::vector<std::string> const& configurations,
-    std::string const& component, MessageLevel message, bool excludeFromAll,
-    bool optional, cmListFileBacktrace backtrace = cmListFileBacktrace());
+  cmInstallTargetGenerator(std::string targetName, std::string const& dest,
+                           bool implib, std::string filePermissions,
+                           std::vector<std::string> const& configurations,
+                           std::string const& component, MessageLevel message,
+                           bool excludeFromAll, bool optional,
+                           cmDiagnosticContext context = {});
   ~cmInstallTargetGenerator() override;
 
   /** Select the policy for installing shared library linkable name

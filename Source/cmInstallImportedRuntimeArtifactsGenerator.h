@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "cmDiagnosticContext.h"
 #include "cmInstallGenerator.h"
-#include "cmListFileCache.h"
 
 class cmGeneratorTarget;
 
@@ -19,7 +19,7 @@ public:
     std::string filePermissions,
     std::vector<std::string> const& configurations,
     std::string const& component, MessageLevel message, bool excludeFromAll,
-    bool optional, cmListFileBacktrace backtrace = cmListFileBacktrace());
+    bool optional, cmDiagnosticContext context = {});
   ~cmInstallImportedRuntimeArtifactsGenerator() override = default;
 
   bool Compute(cmLocalGenerator* lg) override;

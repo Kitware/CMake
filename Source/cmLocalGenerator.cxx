@@ -246,11 +246,11 @@ void cmLocalGenerator::IssueMessage(MessageType type, std::string const& text,
   this->GetMakefile()->IssueMessage(type, text, bt);
 }
 
-void cmLocalGenerator::IssueDiagnostic(cmDiagnosticCategory category,
-                                       std::string const& text,
-                                       cmListFileBacktrace const& bt) const
+void cmLocalGenerator::IssueDiagnostic(
+  cmDiagnosticCategory category, std::string const& text,
+  cmDiagnosticContext const& context) const
 {
-  this->GetMakefile()->IssueDiagnostic(category, text, bt);
+  this->GetMakefile()->IssueDiagnostic(category, text, context);
 }
 
 void cmLocalGenerator::ComputeObjectMaxPath()
