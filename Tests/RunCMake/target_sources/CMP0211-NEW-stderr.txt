@@ -1,14 +1,14 @@
 CMake Error in CMakeLists\.txt:
   In target "foo1" the file
 
-    .+/Tests/RunCMake/target_sources/h1\.h
+    .+/Tests/RunCMake/target_sources/lib2\.c
 
-  already belongs to file set "h2"\.
+  already belongs to file set "s[12]"\.
 
 
 CMake Error in CMakeLists\.txt:
   In target "foo2" the file
 
-    .+/Tests/RunCMake/target_sources/h1\.h
+    .+/Tests/RunCMake/target_sources/lib2\.c
 
-  already belongs to file set "h1"\.
+  already belongs to file set "s1"\.

@@ -133,11 +133,10 @@ cmGeneratorFileSet const* cmGeneratorFileSets::GetFileSet(
   return nullptr;
 }
 
-cmGeneratorFileSet const* cmGeneratorFileSets::GetFileSetForSource(
-  std::string const& config, std::string const& path) const
+std::unordered_set<cmGeneratorFileSet const*> const&
+cmGeneratorFileSets::GetAllFileSetsForSource(std::string const& config,
+                                             std::string const& path) const
 {
-  using Lookup = cm::FileSetMetadata::FileSetLookup;
-
   this->BuildInfoCache(config);
 
   auto const& info = this->Configs[config];
@@ -149,14 +148,28 @@ cmGeneratorFileSet const* cmGeneratorFileSets::GetFileSetForSource(
 
   // search in all the dependents
   auto const it2 = info.InterfaceFileSetCache.find(path);
-  if (it2 != info.InterfaceFileSetCache.end() &&
-      cm::FileSetMetadata::GetFileSetDescriptor(it2->second->GetType())
-          .value_or(cm::FileSetMetadata::FileSetDescriptor{ Lookup::Target })
-          .Lookup == Lookup::Dependencies) {
+  if (it2 != info.InterfaceFileSetCache.end()) {
     return it2->second;
   }
 
-  return nullptr;
+  static std::unordered_set<cmGeneratorFileSet const*> emptySet;
+  return emptySet;
+}
+std::unordered_set<cmGeneratorFileSet const*> const&
+cmGeneratorFileSets::GetAllFileSetsForSource(std::string const& config,
+                                             cmSourceFile const* sf) const
+{
+  return this->GetAllFileSetsForSource(config, sf->GetFullPath());
+}
+
+cmGeneratorFileSet const* cmGeneratorFileSets::GetFileSetForSource(
+  std::string const& config, std::string const& file) const
+{
+  auto const& fileSets = this->GetAllFileSetsForSource(config, file);
+  if (fileSets.empty()) {
+    return nullptr;
+  }
+  return *fileSets.begin();
 }
 cmGeneratorFileSet const* cmGeneratorFileSets::GetFileSetForSource(
   std::string const& config, cmSourceFile const* sf) const
@@ -358,10 +371,10 @@ std::string cmGeneratorFileSets::EvaluateInterfaceProperty(
 }
 
 namespace {
-void GetInterfaceFiles(cmGeneratorTarget const* target,
-                       cm::GenEx::Context const& context,
-                       std::unordered_set<cmGeneratorTarget const*>& targets,
-                       std::map<std::string, cmGeneratorFileSet const*>& cache)
+void GetInterfaceFiles(
+  cmGeneratorTarget const* target, cm::GenEx::Context const& context,
+  std::unordered_set<cmGeneratorTarget const*>& targets,
+  std::map<std::string, std::unordered_set<cmGeneratorFileSet const*>>& cache)
 {
   namespace Metadata = cm::FileSetMetadata;
 
@@ -375,7 +388,7 @@ void GetInterfaceFiles(cmGeneratorTarget const* target,
         for (auto const& it : files.first) {
           for (auto const& filename : it.second) {
             auto collapsedFile = cmSystemTools::CollapseFullPath(filename);
-            cache[collapsedFile] = fileSet;
+            cache[collapsedFile].insert(fileSet);
           }
         }
       }
@@ -413,7 +426,7 @@ void cmGeneratorFileSets::BuildInfoCache(std::string const& config) const
     for (auto const& it : files.first) {
       for (auto const& filename : it.second) {
         auto collapsedFile = cmSystemTools::CollapseFullPath(filename);
-        info.FileSetCache[collapsedFile] = fileSet;
+        info.FileSetCache[collapsedFile].insert(fileSet);
       }
     }
   }

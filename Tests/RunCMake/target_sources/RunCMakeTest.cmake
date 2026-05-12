@@ -52,6 +52,7 @@ endif()
 run_cmake(CMP0211-OLD)
 run_cmake(CMP0211-NEW)
 run_cmake(CMP0211-WARN)
+run_cmake(CMP0211-NEW-HEADERS)
 
 set(RunCMake_TEST_NO_CLEAN 1)
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/FileSetGeneratedDependency-build")
