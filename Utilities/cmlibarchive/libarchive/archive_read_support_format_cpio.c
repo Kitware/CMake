@@ -1102,6 +1102,16 @@ record_hardlink(struct archive_read *a,
 		    ENOMEM, "Out of memory adding file to list");
 		return (ARCHIVE_FATAL);
 	}
+
+	const char *pathname = archive_entry_pathname(entry);
+	if (pathname == NULL) {
+		archive_set_error(&a->archive,
+			ARCHIVE_ERRNO_FILE_FORMAT,
+           "Invalid hardlink entry with no pathname");
+		free(le);
+		return (ARCHIVE_FATAL);
+	}
+
 	if (cpio->links_head != NULL)
 		cpio->links_head->previous = le;
 	le->next = cpio->links_head;
@@ -1110,10 +1120,11 @@ record_hardlink(struct archive_read *a,
 	le->dev = dev;
 	le->ino = ino;
 	le->links = archive_entry_nlink(entry) - 1;
-	le->name = strdup(archive_entry_pathname(entry));
+	le->name = strdup(pathname);
 	if (le->name == NULL) {
 		archive_set_error(&a->archive,
 		    ENOMEM, "Out of memory adding file to list");
+		free(le);
 		return (ARCHIVE_FATAL);
 	}
 
