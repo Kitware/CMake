@@ -334,11 +334,17 @@
         CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
         CTEST_LABELS: "PellesC"
 
-.windows_pellesc13.01:
+.windows_pellesc13.01_x64:
     extends: .windows_pellesc
 
     variables:
-        CMAKE_CONFIGURATION: windows_pellesc13.01
+        CMAKE_CONFIGURATION: windows_pellesc13.01_x64
+
+.windows_pellesc13.01_x86:
+    extends: .windows_pellesc
+
+    variables:
+        CMAKE_CONFIGURATION: windows_pellesc13.01_x86
 
 .windows_arm64_vs2026:
     extends: .windows
