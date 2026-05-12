@@ -76,6 +76,15 @@ char const kPATH_SLASH = '\\';
 char const kPATH_SLASH = '/';
 #endif
 
+bool IsExcludedFromUnity(cmSourceFile const& srcFile)
+{
+  return srcFile.GetPropertyAsBool(SKIP_UNITY_BUILD_INCLUSION) ||
+    srcFile.GetProperty(COMPILE_OPTIONS) ||
+    srcFile.GetProperty(COMPILE_DEFINITIONS) ||
+    srcFile.GetProperty(COMPILE_FLAGS) ||
+    srcFile.GetProperty(INCLUDE_DIRECTORIES);
+}
+
 } // anonymous namespace
 
 cmFastbuildNormalTargetGenerator::cmFastbuildNormalTargetGenerator(
@@ -1432,7 +1441,7 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
     bool fileUsesUnity = useUnity;
     if (useUnity) {
       // Check if the source should be added to "UnityInputExcludedFiles".
-      if (srcFile.GetPropertyAsBool(SKIP_UNITY_BUILD_INCLUSION)) {
+      if (IsExcludedFromUnity(srcFile)) {
         fileUsesUnity = false;
         excludedFromUnity.emplace(pathToFile);
       }
