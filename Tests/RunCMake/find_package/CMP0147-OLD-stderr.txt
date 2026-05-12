@@ -8,6 +8,8 @@
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 CMake Warning \(deprecated\) at CMP0147-common\.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0146 will be removed from a future version
@@ -19,4 +21,6 @@ CMake Warning \(deprecated\) at CMP0147-common\.cmake:[0-9]+ \(cmake_policy\):
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMP0147-OLD\.cmake:2 \(include\)
-  CMakeLists\.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.$

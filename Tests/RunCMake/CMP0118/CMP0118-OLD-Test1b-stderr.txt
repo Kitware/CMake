@@ -8,6 +8,8 @@
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 prop: `NOTFOUND`
 CMake Error at CMP0118-Common-Test1b\.cmake:[0-9]+ \(target_sources\):

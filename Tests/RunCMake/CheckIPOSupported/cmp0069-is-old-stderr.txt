@@ -8,6 +8,8 @@
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 CMake Error at .*/Modules/CheckIPOSupported\.cmake:[0-9]+ \(message\):
   Policy CMP0069 set to OLD

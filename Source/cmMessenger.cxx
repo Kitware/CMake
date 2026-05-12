@@ -64,6 +64,17 @@ cm::StdIo::TermAttr getMessageColor(MessageType t)
   }
 }
 
+bool isAuthorDiagnostic(cmDiagnosticCategory category)
+{
+  while (category != cmDiagnostics::CMD_NONE) {
+    if (category == cmDiagnostics::CMD_AUTHOR) {
+      return true;
+    }
+    category = cmDiagnostics::CategoryInfo[category].Parent;
+  }
+  return false;
+}
+
 void printMessageText(std::ostream& msg, std::string const& text)
 {
   msg << ":\n";
@@ -75,19 +86,30 @@ void printMessageText(std::ostream& msg, std::string const& text)
 void displayMessage(MessageType type, cmDiagnosticCategory category,
                     std::ostringstream& msg)
 {
-  if (category == cmDiagnostics::CMD_AUTHOR) {
+  if (isAuthorDiagnostic(category)) {
     // Add a note about warning suppression.
+    std::ostringstream text;
     if (type == MessageType::WARNING) {
-      msg << "This warning is for project developers.  "
-             "Use -Wno-author to suppress it.";
+      text << "This warning is for project developers.  "
+              "Use -Wno-author";
+      if (category != cmDiagnostics::CMD_AUTHOR) {
+        text << " or -Wno-" << getDiagnosticCategoryStr(category);
+      }
     } else if (type == MessageType::FATAL_ERROR) {
-      msg << "This error is for project developers.  "
-             "Use -Wno-error=author to suppress it.";
+      text << "This error is for project developers.  "
+              "Use -Wno-error=author";
+      if (category != cmDiagnostics::CMD_AUTHOR) {
+        text << " or -Wno-error=" << getDiagnosticCategoryStr(category);
+      }
     }
-  }
+    text << " to suppress it.";
 
-  // Add a terminating blank line.
-  msg << '\n';
+    cmDocumentationFormatter formatter;
+    formatter.PrintFormatted(msg, text.str());
+  } else {
+    // Add a terminating blank line.
+    msg << '\n';
+  }
 
 #if !defined(CMAKE_BOOTSTRAP)
   // Add a C++ stack trace to internal errors.

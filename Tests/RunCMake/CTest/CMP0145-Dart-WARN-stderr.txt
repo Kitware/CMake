@@ -28,4 +28,6 @@ CMake Warning \(deprecated\) at [^
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMP0145-Dart-WARN\.cmake:[0-9]+ \(include\)
-  CMakeLists\.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.$

@@ -8,6 +8,8 @@
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 CMake Warning \(author\) at CMP0116-Mixed\.cmake:1 \(add_custom_command\):
   Policy CMP0116 is not set: Ninja generators transform DEPFILEs from

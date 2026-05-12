@@ -6,7 +6,7 @@ Call Stack \(most recent call first\):
 ]*/Tests/RunCMake/CMakePresets/NoWarningFlags\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-author to suppress it\.
-
++
 CMake Warning \(deprecated\) at [^
 ]*/Tests/RunCMake/CMakePresets/WarningsBase\.cmake:[0-9]+ \(message\):
   Deprecation warning
@@ -14,8 +14,9 @@ Call Stack \(most recent call first\):
   [^
 ]*/Tests/RunCMake/CMakePresets/NoWarningFlags\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-
-
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
++
 CMake Warning \(unused-cli\):
   Manually-specified variables were not used by the project:
 

@@ -5,6 +5,8 @@
   Update the VERSION argument <min> value\.  Or, use the <min>\.\.\.<max> syntax
   to tell CMake that the project requires at least <min> but has been updated
   to work with policies introduced by <max> or earlier\.
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 before try_compile with CMP0066 WARN-default
 after try_compile with CMP0066 WARN-default
@@ -31,4 +33,6 @@ CMake Warning \(deprecated\) at CMP0066\.cmake:[0-9]+ \(cmake_policy\):
   specific short-term circumstances\.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.$
