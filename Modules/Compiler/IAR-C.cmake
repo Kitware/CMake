@@ -1,12 +1,5 @@
-# This file is processed when the IAR C Compiler is used
-#
-# C Language Specification support
-#  - Newer versions of the IAR C Compiler require the --c89 flag to build a file under the C90 standard.
-#  - Earlier versions of the compiler had C90 by default, not requiring the backward-compatibility flag.
-#
-# The IAR Language Extensions
-#  - The IAR Language Extensions can be enabled by -e flag
-#
+# This file is processed when the IAR C Compiler is used.
+
 include(Compiler/IAR)
 include(Compiler/CMakeCommonCompilerMacros)
 
@@ -17,16 +10,35 @@ endif()
 # Unused after CMP0128
 set(CMAKE_C_EXTENSION_COMPILE_OPTION -e)
 
-if(CMAKE_C_COMPILER_VERSION_INTERNAL VERSION_GREATER 7)
+# Stubs for standard/extended compile options
+if((NOT CMAKE_C_STANDARD_COMPUTED_DEFAULT EQUAL 99) AND
+   (NOT CMAKE_C_STANDARD_COMPUTED_DEFAULT EQUAL 90))
+  if(CMAKE_C_STANDARD_COMPUTED_DEFAULT GREATER_EQUAL 17)
+    set(CMAKE_C17_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_C17_EXTENSION_COMPILE_OPTION -e)
+  endif()
+  if(CMAKE_C_STANDARD_COMPUTED_DEFAULT GREATER_EQUAL 11)
+    set(CMAKE_C11_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_C11_EXTENSION_COMPILE_OPTION -e)
+  endif()
+  set(CMAKE_C99_STANDARD_COMPILE_OPTION "")
+  set(CMAKE_C99_EXTENSION_COMPILE_OPTION -e)
+elseif(CMAKE_C_STANDARD_COMPUTED_DEFAULT EQUAL 99)
+  set(CMAKE_C99_STANDARD_COMPILE_OPTION "")
+  set(CMAKE_C99_EXTENSION_COMPILE_OPTION -e)
+endif()
+
+# C90 Mode
+#  - IAR Compilers with *internal* version >= v8.0.0 require the --c89 flag.
+#  - IAR Compilers with *internal* version < v8.0.0 has C90 mode by default.
+if(CMAKE_C_COMPILER_VERSION_INTERNAL GREATER_EQUAL 0x00080000)
   set(CMAKE_C90_STANDARD_COMPILE_OPTION --c89)
   set(CMAKE_C90_EXTENSION_COMPILE_OPTION --c89 -e)
-else()
+elseif(CMAKE_C_COMPILER_VERSION_INTERNAL LESS 0x00080000)
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "")
   set(CMAKE_C90_EXTENSION_COMPILE_OPTION -e)
 endif()
 
-set(CMAKE_C${CMAKE_C_STANDARD_COMPUTED_DEFAULT}_STANDARD_COMPILE_OPTION "")
-set(CMAKE_C${CMAKE_C_STANDARD_COMPUTED_DEFAULT}_EXTENSION_COMPILE_OPTION -e)
 
 # Architecture specific
 if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
