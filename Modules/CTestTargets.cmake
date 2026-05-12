@@ -35,6 +35,14 @@ block()
       set(CTEST_TLS_VERIFY "$ENV{CMAKE_TLS_VERIFY}")
     endif()
   endif()
+
+  if(CTEST_TEST_COVERAGE_TOOL STREQUAL "LLVM-COV")
+    find_program(CTEST_TEST_COVERAGE_MERGE_EXECUTABLE llvm-profdata)
+    if(NOT CTEST_TEST_COVERAGE_MERGE_EXECUTABLE)
+      set(CTEST_TEST_COVERAGE_MERGE_EXECUTABLE "llvm-profdata")
+    endif()
+  endif()
+
   if(CTEST_NEW_FORMAT)
     configure_file(
       ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
