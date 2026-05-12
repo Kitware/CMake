@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake("CMP0171-WARN")
+run_cmake("CMP0171-WARN-QUIET")
 
 run_cmake_with_options(CMP0171-OLD "-DCMAKE_POLICY_DEFAULT_CMP0171=OLD")
 
