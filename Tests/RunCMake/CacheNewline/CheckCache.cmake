@@ -1,5 +1,9 @@
-set(CACHE_EXPECTED_FILE "${RunCMake_TEST_SOURCE_DIR}/cache-regex.txt")
-set(CACHE_ACTUAL_FILE "${RunCMake_BINARY_DIR}/CacheNewline-build/CMakeCache.txt")
+set(CACHE_EXPECTED_FILE "${RunCMake_TEST_SOURCE_DIR}/${case}-CMakeCacheRegex.txt")
+set(CACHE_ACTUAL_FILE "${RunCMake_TEST_BINARY_DIR}/CMakeCache.txt")
+
+if(NOT EXISTS ${CACHE_EXPECTED_FILE})
+  message(FATAL_ERROR "Could not find ${RunCMake_TEST_SOURCE_DIR}/${case}-CMakeCacheRegex.txt")
+endif()
 
 file(READ ${CACHE_EXPECTED_FILE} CACHE_EXPECTED)
 string(REGEX REPLACE "\r\n" "\n" CACHE_EXPECTED "${CACHE_EXPECTED}")

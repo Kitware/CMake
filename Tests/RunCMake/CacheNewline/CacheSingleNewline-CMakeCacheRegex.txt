@@ -1,0 +1,5 @@
+//Offending entry
+NEWLINE_VARIABLE:STRING=
+# WARNING: Value of NEWLINE_VARIABLE contained a newline and was
+#  truncated\. Original value:
+# \\n
