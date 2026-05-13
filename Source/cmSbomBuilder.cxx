@@ -70,7 +70,8 @@ cmSbomBuilder::cmSbomBuilder(cmSbomArguments args,
   , PackageDescription(std::move(args.Description))
   , PackageWebsite(std::move(args.Website))
   , PackageUrl(std::move(args.PackageUrl))
-  , PackageLicense(std::move(args.License))
+  , DataLicense(std::move(args.DataLicense))
+  , DefaultLicense(std::move(args.DefaultLicense))
   , PackageFormat(args.GetFormat())
 {
 }
@@ -222,8 +223,12 @@ cmSpdxDocument cmSbomBuilder::GenerateSbom(cmSpdxCreationInfo const* ci) const
     proj.Description = this->PackageDescription;
   }
 
-  if (!this->PackageLicense.empty()) {
-    proj.DataLicense = this->PackageLicense;
+  if (!this->DataLicense.empty()) {
+    cmSpdxLicenseExpression license;
+    license.SpdxId = cmStrCat("urn:", PackageName, "#LicenseExpression");
+    license.CreationInfo = ci;
+    license.LicenseExpression = this->DataLicense;
+    proj.DataLicense = license;
   }
 
   return proj;
@@ -319,7 +324,31 @@ bool cmSbomBuilder::GenerateLinkProperties(
           this->AddPackageInformation(pkg, pkgIt->first, pkgIt->second);
         }
       }
-      return { true, insert_back(project->Elements, std::move(pkg)) };
+
+      cmSpdxPackage const* pkgPtr =
+        insert_back(project->Elements, std::move(pkg));
+      if (!linkInfo.License.empty() &&
+          !cm::contains(this->GeneratedLinkLicenses, name)) {
+        this->GeneratedLinkLicenses.emplace(name);
+
+        cmSpdxLicenseExpression license;
+        license.SpdxId = cmStrCat("urn:", name, "#LicenseExpression");
+        license.CreationInfo = ci;
+        license.LicenseExpression = linkInfo.License;
+
+        cmSpdxRelationship relHasLicense;
+        relHasLicense.SpdxId =
+          cmStrCat("urn:", name, "#DeclaredLicenseRelationship");
+        relHasLicense.CreationInfo = ci;
+        relHasLicense.RelationshipType =
+          cmSpdxRelationship::HAS_DECLARED_LICENSE;
+        relHasLicense.From = pkgPtr;
+        relHasLicense.To.emplace_back(std::move(license));
+
+        insert_back(doc.Graph, std::move(relHasLicense));
+      }
+
+      return { true, pkgPtr };
     }
 
     cmSpdxPackage pkg;
@@ -368,8 +397,38 @@ bool cmSbomBuilder::GenerateProperties(
                                          current, allTargets, config);
   status &= this->GenerateLinkProperties(
     doc, proj, ci, "INTERFACE_LINK_LIBRARIES", current, allTargets, config);
-
+  status &= this->GenerateMetaProperties(doc, proj, ci, current);
   return status;
+}
+
+bool cmSbomBuilder::GenerateMetaProperties(
+  cmSbomDocument& doc, cmSpdxDocument* /*project*/,
+  cmSpdxCreationInfo const* ci, TargetProperties const& current) const
+{
+  std::string licenseExpr = this->DefaultLicense;
+  cmValue licenseExprProp = current.Target->GetProperty("SPDX_LICENSE");
+  if (licenseExprProp) {
+    licenseExpr = licenseExprProp;
+  }
+  if (!licenseExpr.empty()) {
+    auto const& tgtName = current.Target->GetName();
+
+    cmSpdxLicenseExpression license;
+    license.SpdxId = cmStrCat("urn:", tgtName, "#LicenseExpression");
+    license.CreationInfo = ci;
+    license.LicenseExpression = std::move(licenseExpr);
+
+    cmSpdxRelationship relHasLicense;
+    relHasLicense.SpdxId =
+      cmStrCat("urn:", tgtName, "#DeclaredLicenseRelationship");
+    relHasLicense.CreationInfo = ci;
+    relHasLicense.RelationshipType = cmSpdxRelationship::HAS_DECLARED_LICENSE;
+    relHasLicense.From = current.Package;
+    relHasLicense.To.emplace_back(std::move(license));
+
+    insert_back(doc.Graph, std::move(relHasLicense));
+  }
+  return true;
 }
 
 bool cmSbomBuilder::PopulateLinkLibrariesProperty(
@@ -428,9 +487,12 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
                                      std::string const& linkedName,
                                      cmGeneratorTarget const* linkedTarget)
 {
+  auto linkedLicense = linkedTarget->GetSafeProperty("SPDX_LICENSE");
+
   if (cm::contains(this->SbomTargets, linkedTarget)) {
-    this->LinkTargets.emplace(linkedName,
-                              LinkInfo{ "", linkedTarget->GetExportName() });
+    this->LinkTargets.emplace(
+      linkedName,
+      LinkInfo{ "", linkedTarget->GetExportName(), linkedLicense });
     return true;
   }
 
@@ -468,7 +530,8 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
     } else {
       component = linkedName.substr(prefix.length());
     }
-    this->LinkTargets.emplace(linkedName, LinkInfo{ pkgName, component });
+    this->LinkTargets.emplace(linkedName,
+                              LinkInfo{ pkgName, component, linkedLicense });
     cmPackageInformation& req =
       this->Requirements.insert(std::move(*pkgInfo)).first->second;
     req.Components.emplace(std::move(component));
@@ -494,9 +557,11 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
     std::string pkgName{ linkNamespace.data(), linkNamespace.size() - 2 };
     std::string component = linkedTarget->GetExportName();
     if (pkgName == this->GetPackageName()) {
-      this->LinkTargets.emplace(linkedName, LinkInfo{ "", component });
+      this->LinkTargets.emplace(linkedName,
+                                LinkInfo{ "", component, linkedLicense });
     } else {
-      this->LinkTargets.emplace(linkedName, LinkInfo{ pkgName, component });
+      this->LinkTargets.emplace(linkedName,
+                                LinkInfo{ pkgName, component, linkedLicense });
       this->Requirements[pkgName].Components.emplace(std::move(component));
     }
     return true;
@@ -535,7 +600,8 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
           "\" (first alphabetically)."));
     }
     std::string component = linkedTarget->GetExportName();
-    this->LinkTargets.emplace(linkedName, LinkInfo{ pkgName, component });
+    this->LinkTargets.emplace(linkedName,
+                              LinkInfo{ pkgName, component, linkedLicense });
     this->Requirements[pkgName].Components.emplace(std::move(component));
     return true;
   }

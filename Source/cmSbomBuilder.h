@@ -129,6 +129,9 @@ protected:
                               TargetProperties const& current,
                               std::vector<TargetProperties> const& allTargets,
                               std::string const& config) const;
+  bool GenerateMetaProperties(cmSbomDocument& doc, cmSpdxDocument* project,
+                              cmSpdxCreationInfo const* ci,
+                              TargetProperties const& current) const;
 
   bool NoteLinkedTarget(cmGeneratorTarget const* target,
                         std::string const& linkedName,
@@ -163,6 +166,7 @@ private:
   {
     std::string Package;
     std::string Component;
+    std::string License;
   };
 
   // Metadata
@@ -172,7 +176,8 @@ private:
   std::string const PackageDescription;
   std::string const PackageWebsite;
   std::string const PackageUrl;
-  std::string const PackageLicense;
+  std::string const DataLicense;
+  std::string const DefaultLicense;
   cmSbomArguments::SbomFormat const PackageFormat;
 
   // Derived from inputs at generate time
@@ -182,4 +187,7 @@ private:
   std::map<std::string, LinkInfo> LinkTargets;
   std::map<std::string, cmPackageInformation> Requirements;
   std::vector<std::string> Configurations;
+
+  // Targets for which license data has been generated
+  mutable std::set<std::string> GeneratedLinkLicenses;
 };

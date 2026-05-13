@@ -128,6 +128,8 @@ std::string to_string(cmSpdxRelationship::RelationshipTypeId id)
       return "contains";
     case cmSpdxRelationship::RelationshipTypeId::DEPENDS_ON:
       return "dependsOn";
+    case cmSpdxRelationship::RelationshipTypeId::HAS_DECLARED_LICENSE:
+      return "hasDeclaredLicense";
     case cmSpdxRelationship::RelationshipTypeId::OTHER:
       return "other";
   }
@@ -497,6 +499,20 @@ void cmSpdxSnippet::Serialize(cmSbomSerializer& serializer) const
   }
 }
 
+void cmSpdxAnyLicenseInfo::Serialize(cmSbomSerializer& serializer) const
+{
+  cmSpdxElement::Serialize(serializer);
+  serializer.AddString("type", "simplelicensing_AnyLicenseInfo");
+}
+
+void cmSpdxLicenseExpression::Serialize(cmSbomSerializer& serializer) const
+{
+  cmSpdxAnyLicenseInfo::Serialize(serializer);
+  serializer.AddString("type", "simplelicensing_LicenseExpression");
+  SerializeIfPresent(serializer, "simplelicensing_licenseExpression",
+                     LicenseExpression);
+}
+
 void cmSpdxDocument::Serialize(cmSbomSerializer& serializer) const
 {
   cmSpdxElementCollection::Serialize(serializer);
@@ -508,7 +524,9 @@ void cmSpdxDocument::Serialize(cmSbomSerializer& serializer) const
   if (NamespaceMap) {
     serializer.AddVisitable("namespaceMap", *NamespaceMap);
   }
-  SerializeIfPresent(serializer, "dataLicense", DataLicense);
+  if (DataLicense) {
+    serializer.AddVisitable("dataLicense", *DataLicense);
+  }
 }
 
 void cmSbomDocument::Serialize(cmSbomSerializer& serializer) const

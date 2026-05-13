@@ -65,6 +65,14 @@ bool cmSbomArguments::Check(cmExecutionStatus& status) const
       return false;
     }
   }
+
+  if (!this->License.empty()) {
+    // Do not allow the license argument to be provided as SBOM only accepts a
+    // DEFAULT_LICENSE
+    status.SetError("SBOM given unknown argument: \"LICENSE\".");
+    return false;
+  }
+
   return true;
 }
 

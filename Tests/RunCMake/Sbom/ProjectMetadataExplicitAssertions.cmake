@@ -3,7 +3,13 @@ include(${CMAKE_CURRENT_LIST_DIR}/Assertions.cmake)
 set(DOCUMENT_METADATA_EXPECTED [=[
 {
   "description" : "An eloquent description",
-  "dataLicense" : "BSD-3"
+  "dataLicense" :
+  {
+    "creationInfo" : "_:Build#CreationInfo",
+    "simplelicensing_licenseExpression" : "BSD-3",
+    "spdxId" : "urn:test_targets#LicenseExpression",
+    "type" : "simplelicensing_LicenseExpression"
+  }
 }
 ]=])
 

@@ -159,6 +159,7 @@ struct cmSpdxRelationship : cmSpdxElement
     DESCRIBES,
     CONTAINS,
     DEPENDS_ON,
+    HAS_DECLARED_LICENSE,
     OTHER
   };
 
@@ -343,11 +344,23 @@ struct cmSpdxPackage final : cmSpdxSoftwareArtifact
   void Serialize(cmSbomSerializer&) const override;
 };
 
+struct cmSpdxAnyLicenseInfo : cmSpdxElement
+{
+  void Serialize(cmSbomSerializer&) const override;
+};
+
+struct cmSpdxLicenseExpression final : cmSpdxAnyLicenseInfo
+{
+  cm::optional<std::string> LicenseExpression;
+
+  void Serialize(cmSbomSerializer&) const override;
+};
+
 struct cmSpdxDocument final : cmSpdxElementCollection
 {
   cm::optional<cmSbomObject> ExternalMap;
   cm::optional<cmSbomObject> NamespaceMap;
-  std::string DataLicense;
+  cm::optional<cmSbomObject> DataLicense;
 
   void Serialize(cmSbomSerializer& serializer) const override;
 };
