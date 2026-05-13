@@ -1,14 +1,14 @@
 function (_cmake_cxx_find_modules_json)
-  if (CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
-    set(_clang_modules_json_impl "libc++")
-  elseif (CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libstdc++")
-    set(_clang_modules_json_impl "libstdc++")
-  else ()
-    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Only `libc++` and `libstdc++` are supported" PARENT_SCOPE)
-    return ()
-  endif ()
-
   if (NOT CMAKE_CXX_STDLIB_MODULES_JSON)
+    if (CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
+      set(_clang_modules_json_impl "libc++")
+    elseif (CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libstdc++")
+      set(_clang_modules_json_impl "libstdc++")
+    else ()
+      set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Only `libc++` and `libstdc++` are supported" PARENT_SCOPE)
+      return ()
+    endif ()
+
     execute_process(
       COMMAND
         "${CMAKE_CXX_COMPILER}"
@@ -32,7 +32,7 @@ function (_cmake_cxx_find_modules_json)
     # The original PR had a key spelling mismatch internally. Do not support it
     # and instead require a release known to have the fix.
     # https://github.com/llvm/llvm-project/pull/83036
-    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "LLVM 18.1.2 is required for `${_clang_modules_json_impl}.modules.json` format fix" PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "LLVM 18.1.2 is required for 'import std' json format fix" PARENT_SCOPE)
     return ()
   endif ()
 endfunction ()
