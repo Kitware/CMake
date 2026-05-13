@@ -20,6 +20,7 @@ function(instrument test)
     "MANUAL_HOOK"
     "PRESERVE_DATA"
     "NO_CONFIGURE"
+    "DISABLE_TEST"
     "FAIL"
     "BAD_QUERY"
   )
@@ -93,6 +94,9 @@ function(instrument test)
   set(RunCMake_TEST_NO_CLEAN 1)
   if (ARGS_FAIL)
     list(APPEND ARGS_CONFIGURE_ARG "-DFAIL=ON")
+  endif()
+  if (ARGS_DISABLE_TEST)
+    list(APPEND ARGS_CONFIGURE_ARG "-DDISABLE_TEST=ON")
   endif()
   set(RunCMake_TEST_SOURCE_DIR ${RunCMake_SOURCE_DIR}/project)
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -206,6 +210,10 @@ instrument(hooks-no-callbacks MANUAL_HOOK
 # Check data file contents for optional query data
 instrument(no-query
   BUILD INSTALL TEST
+  CHECK_SCRIPT check-data-dir.cmake
+)
+instrument(disabled-test
+  BUILD TEST DISABLE_TEST
   CHECK_SCRIPT check-data-dir.cmake
 )
 instrument(dynamic-query

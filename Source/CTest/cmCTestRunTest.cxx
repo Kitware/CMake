@@ -1025,7 +1025,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 
 void cmCTestRunTest::FinalizeTest(bool started)
 {
-  if (this->CTest->GetInstrumentation().HasQuery()) {
+  if (started && this->CTest->GetInstrumentation().HasQuery()) {
     std::string data_file = this->CTest->GetInstrumentation().InstrumentTest(
       this->TestProperties->Name, this->ActualCommand, this->Arguments,
       this->TestProcess->GetExitValue(), this->TestProcess->GetStartTime(),
