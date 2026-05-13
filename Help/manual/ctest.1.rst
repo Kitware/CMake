@@ -1224,6 +1224,7 @@ Configuration settings to specify the version control tool include:
   to a different version.
 
   * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_ONLY`
+  * :command:`ctest_update` option: ``VERSION_ONLY``
 
 .. _`UpdateVersionOverride`:
 
@@ -1237,6 +1238,7 @@ Configuration settings to specify the version control tool include:
   CTest not to update the source tree to a different version.
 
   * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_OVERRIDE`
+  * :command:`ctest_update` option: ``VERSION_OVERRIDE <version>``
 
 Additional configuration settings include:
 

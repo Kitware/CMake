@@ -172,6 +172,13 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
     updateType = DetermineType(mf.GetSafeDefinition("CTEST_UPDATE_TYPE"));
   }
 
+  std::string const& versionOverride = !args.VersionOverride.empty()
+    ? args.VersionOverride
+    : mf.GetSafeDefinition("CTEST_UPDATE_VERSION_OVERRIDE");
+
+  bool const versionOnly =
+    args.VersionOnly || mf.IsOn("CTEST_UPDATE_VERSION_ONLY");
+
   // If no update command was specified, lookup one for this VCS tool.
   if (updateCommand.empty()) {
     char const* key = TypeToCommandKey(updateType);
@@ -231,7 +238,16 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
   auto start_time_time = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
 
-  bool updated = vc->Update();
+  bool const updated = [&]() -> bool {
+    if (!versionOverride.empty()) {
+      return vc->UpdateVersionOverride(versionOverride);
+    }
+    if (versionOnly) {
+      return vc->UpdateVersionOnly();
+    }
+    return vc->Update();
+  }();
+
   std::string buildname =
     cmCTest::SafeBuildIdField(mf.GetSafeDefinition("CTEST_BUILD_NAME"));
 
@@ -321,6 +337,8 @@ bool cmCTestUpdateCommand::InitialPass(std::vector<std::string> const& args,
     cmArgumentParser<UpdateArguments>{ MakeBasicParser<UpdateArguments>() }
       .Bind("SOURCE"_s, &UpdateArguments::Source)
       .Bind("RETURN_VALUE"_s, &UpdateArguments::ReturnValue)
+      .Bind("VERSION_ONLY"_s, &UpdateArguments::VersionOnly)
+      .Bind("VERSION_OVERRIDE"_s, &UpdateArguments::VersionOverride)
       .Bind("QUIET"_s, &UpdateArguments::Quiet);
 
   return this->Invoke(parser, args, status, [&](UpdateArguments& a) {
