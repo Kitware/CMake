@@ -41,6 +41,9 @@ add_custom_target(customTarget ALL
   DEPENDS output1 shell_redirect.out
 )
 add_test(NAME test COMMAND $<TARGET_FILE:main>)
+if(DISABLE_TEST)
+  set_tests_properties(test PROPERTIES DISABLED TRUE)
+endif()
 install(TARGETS main)
 set_target_properties(main PROPERTIES LABELS "label1;label2")
 set_target_properties(lib PROPERTIES LABELS "label3")

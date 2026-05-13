@@ -1117,7 +1117,7 @@ void cmCTestRunTest::FinalizeTest(bool started)
     this->CollectLLVMCoverage();
   }
 
-  if (this->CTest->GetInstrumentation().HasQuery()) {
+  if (started && this->CTest->GetInstrumentation().HasQuery()) {
     std::string data_file = this->CTest->GetInstrumentation().InstrumentTest(
       this->TestProperties->Name, this->ActualCommand, this->Arguments,
       this->TestProcess->GetExitValue(), this->TestProcess->GetStartTime(),
