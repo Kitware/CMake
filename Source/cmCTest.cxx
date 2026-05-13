@@ -79,6 +79,10 @@
 #  include <be/kernel/OS.h> /* disable_debugger() API. */
 #endif
 
+namespace {
+cm::string_view const kVT100_EraseLine = "\x1B[K"_s;
+}
+
 struct tm;
 
 struct cmCTest::Private
@@ -121,7 +125,7 @@ struct cmCTest::Private
   bool Failover = false;
   cmJSONState parseState;
 
-  bool FlushTestProgressLine = false;
+  bool TestProgressNewlinePending = false;
 
   // these are helper classes
   cmCTestBuildAndTest BuildAndTest;
@@ -3399,22 +3403,19 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
   if (!this->Impl->Quiet) {
     if (logType == HANDLER_TEST_PROGRESS_OUTPUT) {
       if (this->Impl->TestProgressOutput) {
-        if (this->Impl->FlushTestProgressLine) {
-          printf("\r");
-          this->Impl->FlushTestProgressLine = false;
-          std::cout.flush();
+        if (this->Impl->TestProgressNewlinePending) {
+          this->Impl->TestProgressNewlinePending = false;
+          std::cout << '\r';
         }
 
         if (msg.find('\n') != std::string::npos) {
-          this->Impl->FlushTestProgressLine = true;
+          this->Impl->TestProgressNewlinePending = true;
           msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
         }
 
-        std::cout << msg;
         // ProgressOutputSupportedByConsole() already verified VT100 support.
         // Erase the rest of the line before printing the message.
-        printf("\x1B[K");
-        std::cout.flush();
+        std::cout << kVT100_EraseLine << msg << std::flush;
         return;
       }
       logType = HANDLER_OUTPUT;
