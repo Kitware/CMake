@@ -1,4 +1,4 @@
-^CMake Warning \(deprecated\):
+^CMake Warning:
   Support for "Extra Generators" like
 
     [^
