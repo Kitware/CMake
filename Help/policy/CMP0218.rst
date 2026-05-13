@@ -7,7 +7,8 @@ The :variable:`CMAKE_WARN_DEPRECATED` and :variable:`CMAKE_ERROR_DEPRECATED`
 variables are ignored.
 
 In CMake 4.3 and below, these variables controlled whether deprecation messages
-resulted in warnings, errors, or were suppressed.
+resulted in warnings, errors, or were suppressed.  However, not all deprecation
+messages considered the non-cache values.
 
 CMake 4.4 introduced a new, unified system for managing
 :manual:`diagnostics <cmake-diagnostics(7)>` that prefers the
@@ -17,11 +18,21 @@ This policy provides compatibility with projects that relied on these variables
 and have not been updated to be aware of the change.
 
 The ``OLD`` behavior for this policy is to use the variables to control
-deprecation messages which existed prior to CMake 4.4.
+deprecation messages which respected the non-cache values of these variables
+in CMake 4.3 and earlier.
 
-The ``NEW`` behavior does not ascribe any special meaning to these variables
-and uses the :diagnostic:`CMD_DEPRECATED` diagnostic state to control all
-deprecation messages.
+The ``NEW`` behavior does not ascribe any special meaning to the non-cache
+values of these variables and uses the :diagnostic:`CMD_DEPRECATED` diagnostic
+state to control all deprecation messages.
+
+.. note::
+
+  The :variable:`CMAKE_WARN_DEPRECATED` and :variable:`CMAKE_ERROR_DEPRECATED`
+  *cache* variables are synchronized with the initial state of the
+  :diagnostic:`CMD_DEPRECATED` diagnostic, regardless of this policy's setting.
+  (The synchronization happens at a point prior to when it is possible to
+  manipulate policies.)  However, this behavior is deprecated and will be
+  removed in a future version of CMake.
 
 Any deprecation messages introduced in CMake 4.4 or later are controlled by the
 :diagnostic:`CMD_DEPRECATED` diagnostic regardless of the setting of this
