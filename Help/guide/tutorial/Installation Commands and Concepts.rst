@@ -66,6 +66,27 @@ to unless instructed to do otherwise. For example, ``RUNTIME`` will be installed
 to the location named by :module:`CMAKE_INSTALL_BINDIR <GNUInstallDirs>`, if
 the variable is available, otherwise they default to ``bin``.
 
+Just like we use :option:`cmake -B` to control what build directory will be
+used by CMake, we have a variety of options for telling CMake where to install
+things. This location is generally referred to as the install prefix. To
+set this at configure time, so that every :option:`cmake --install` performed
+using that build tree defaults to a given prefix, we can use any of:
+
+* the :option:`cmake --install-prefix` option;
+* the :ref:`installDir <CMakePresets installDir>` field in CMake presets; or
+* the :variable:`CMAKE_INSTALL_PREFIX` variable.
+
+.. note::
+  We have discouraged setting ``CMAKE_`` variables inside the project. Setting
+  :variable:`CMAKE_INSTALL_PREFIX` is *particularly* bad practice without very
+  good reasoning for doing so, since it prevents users from ever overriding it.
+  When providing a default, projects should check
+  :variable:`CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT`.
+
+Alternatively, we can use the
+:option:`cmake --install --prefix <cmake--install --prefix>` option to set the
+install prefix for a single install invocation.
+
 The full list of artifact kind default destinations is described in the
 following table.
 
@@ -140,6 +161,8 @@ Helpful Resources
 -----------------
 
 * :command:`install`
+* :option:`cmake --install-prefix`
+* :option:`cmake --install --prefix <cmake--install --prefix>`
 
 Files to Edit
 -------------
