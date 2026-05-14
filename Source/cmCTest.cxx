@@ -731,8 +731,10 @@ int cmCTest::ProcessSteps()
   script.CreateCMake();
   cmMakefile& mf = *script.GetMakefile();
   this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
-  this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
   this->SetCMakeVariables(mf);
+  // CTEST_TIME_LIMIT may come from CTestCustom.cmake (already in the makefile)
+  // or from the config map (just populated by SetCMakeVariables above).
+  this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
   std::vector<cmListFileArgument> args{
     cmListFileArgument("RETURN_VALUE"_s, cmListFileArgument::Unquoted, 0),
     cmListFileArgument("return_value"_s, cmListFileArgument::Unquoted, 0),
@@ -3162,6 +3164,8 @@ CTestVarConfigEntry const kCTestVarConfigMap[] = {
   { "CTEST_NIGHTLY_START_TIME",            "NightlyStartTime"            },
   { "CTEST_SOURCE_DIRECTORY",              "SourceDirectory"             },
   { "CTEST_BINARY_DIRECTORY",              "BuildDirectory"              },
+  // Start step
+  { "CTEST_CHECKOUT_COMMAND",              "CheckoutCommand"             },
   // Update step
   { "CTEST_UPDATE_COMMAND",                "UpdateCommand"               },
   { "CTEST_UPDATE_OPTIONS",                "UpdateOptions"               },
@@ -3189,15 +3193,23 @@ CTestVarConfigEntry const kCTestVarConfigMap[] = {
   // Configure step
   { "CTEST_CONFIGURE_COMMAND",             "ConfigureCommand"            },
   { "CTEST_LABELS_FOR_SUBPROJECTS",        "LabelsForSubprojects"        },
+  { "CTEST_CMAKE_GENERATOR",               "CMakeGenerator"              },
+  { "CTEST_CMAKE_GENERATOR_PLATFORM",      "CMakeGeneratorPlatform"      },
+  { "CTEST_CMAKE_GENERATOR_TOOLSET",       "CMakeGeneratorToolset"       },
   // Build step
   { "CTEST_BUILD_COMMAND",                 "MakeCommand"                 },
   { "CTEST_USE_LAUNCHERS",                 "UseLaunchers"                },
+  { "CTEST_BUILD_FLAGS",                   "BuildFlags"                  },
+  { "CTEST_BUILD_TARGET",                  "BuildTarget"                 },
   // Test step
   { "CTEST_TEST_TIMEOUT",                  "TimeOut"                     },
   { "CTEST_TEST_COVERAGE_TOOL",            "CTestTestCoverageTool"       },
+  { "CTEST_RESOURCE_SPEC_FILE",            "ResourceSpecFile"            },
+  { "CTEST_TEST_LOAD",                     "TestLoad"                    },
   // Coverage step
   { "CTEST_COVERAGE_COMMAND",              "CoverageCommand"             },
   { "CTEST_COVERAGE_EXTRA_FLAGS",          "CoverageExtraFlags"          },
+  { "CTEST_EXTRA_COVERAGE_GLOB",           "ExtraCoverageGlob"           },
   // MemCheck step
   { "CTEST_MEMORYCHECK_TYPE",              "MemoryCheckType"             },
   { "CTEST_MEMORYCHECK_SANITIZER_OPTIONS", "MemoryCheckSanitizerOptions" },
@@ -3205,6 +3217,8 @@ CTestVarConfigEntry const kCTestVarConfigMap[] = {
   { "CTEST_MEMORYCHECK_COMMAND_OPTIONS",   "MemoryCheckCommandOptions"   },
   { "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE", "MemoryCheckSuppressionFile"  },
   // Submit step
+  { "CTEST_NOTES_FILES",                   "NotesFiles"                  },
+  { "CTEST_EXTRA_SUBMIT_FILES",            "ExtraSubmitFiles"            },
   { "CTEST_SUBMIT_URL",                    "SubmitURL"                   },
   { "CTEST_DROP_METHOD",                   "DropMethod"                  },
   { "CTEST_DROP_SITE_USER",                "DropSiteUser"                },
@@ -3215,6 +3229,7 @@ CTestVarConfigEntry const kCTestVarConfigMap[] = {
   { "CTEST_TLS_VERSION",                   "TLSVersion"                  },
   { "CTEST_CURL_OPTIONS",                  "CurlOptions"                 },
   { "CTEST_SUBMIT_INACTIVITY_TIMEOUT",     "SubmitInactivityTimeout"     },
+  { "CTEST_TIME_LIMIT",                    "TimeLimit"                   },
 };
 // clang-format on
 } // namespace

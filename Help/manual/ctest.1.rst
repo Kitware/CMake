@@ -1064,6 +1064,13 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_SOURCE_DIRECTORY`
   * :module:`CTest` module variable: :variable:`PROJECT_SOURCE_DIR`
 
+``CheckoutCommand``
+  Command-line to run before the start step to initialize the source
+  directory, e.g. to perform an initial checkout from version control.
+
+  * `CTest Script`_ variable: :variable:`CTEST_CHECKOUT_COMMAND`
+  * :module:`CTest` module variable: none
+
 .. _`CTest Update Step`:
 
 CTest Update Step
@@ -1283,6 +1290,27 @@ Configuration settings include:
 
   See `Label and Subproject Summary`_.
 
+``CMakeGenerator``
+  The CMake generator to use for the configure step when
+  ``ConfigureCommand`` is not set.
+
+  * `CTest Script`_ variable: ``CTEST_CMAKE_GENERATOR``
+  * :module:`CTest` module variable: none
+
+``CMakeGeneratorPlatform``
+  The CMake generator platform to use for the configure step when
+  ``ConfigureCommand`` is not set.
+
+  * `CTest Script`_ variable: ``CTEST_CMAKE_GENERATOR_PLATFORM``
+  * :module:`CTest` module variable: none
+
+``CMakeGeneratorToolset``
+  The CMake generator toolset to use for the configure step when
+  ``ConfigureCommand`` is not set.
+
+  * `CTest Script`_ variable: ``CTEST_CMAKE_GENERATOR_TOOLSET``
+  * :module:`CTest` module variable: none
+
 .. _`CTest Build Step`:
 
 CTest Build Step
@@ -1339,6 +1367,20 @@ Configuration settings include:
 
   * `CTest Script`_ variable: :variable:`CTEST_USE_LAUNCHERS`
   * :module:`CTest` module variable: ``CTEST_USE_LAUNCHERS``
+
+``BuildFlags``
+  Additional flags to pass to the build tool when building the project.
+  Only used when ``MakeCommand`` is not set explicitly.
+
+  * `CTest Script`_ variable: ``CTEST_BUILD_FLAGS``
+  * :module:`CTest` module variable: none
+
+``BuildTarget``
+  Specify a specific target to build instead of the default target.
+  Only used when ``MakeCommand`` is not set explicitly.
+
+  * `CTest Script`_ variable: ``CTEST_BUILD_TARGET``
+  * :module:`CTest` module variable: none
 
 .. _`CTest Test Step`:
 
@@ -1445,6 +1487,13 @@ Configuration settings include:
   * :module:`CTest` module variable: ``COVERAGE_EXTRA_FLAGS``
 
   These options are the first arguments passed to ``CoverageCommand``.
+
+``ExtraCoverageGlob``
+  A semicolon-separated list of glob patterns for additional source files
+  to include in the coverage analysis.
+
+  * `CTest Script`_ variable: :variable:`CTEST_EXTRA_COVERAGE_GLOB`
+  * :module:`CTest` module variable: none
 
 .. _`CTest MemCheck Step`:
 
@@ -1684,6 +1733,27 @@ Configuration settings include:
 
   * `CTest Script`_ variable: :variable:`CTEST_SUBMIT_INACTIVITY_TIMEOUT`
   * :module:`CTest` module variable: ``CTEST_SUBMIT_INACTIVITY_TIMEOUT``
+
+``NotesFiles``
+  A semicolon-separated list of notes files to upload with the submission.
+
+  * `CTest Script`_ variable: :variable:`CTEST_NOTES_FILES`
+  * :module:`CTest` module variable: none
+
+``ExtraSubmitFiles``
+  A semicolon-separated list of extra ``.xml`` files to upload with the
+  submission.
+
+  * `CTest Script`_ variable: :variable:`CTEST_EXTRA_SUBMIT_FILES`
+  * :module:`CTest` module variable: none
+
+``TimeLimit``
+  Maximum total time (in seconds) allowed for the entire dashboard run.
+  CTest will not start additional steps once the remaining time drops
+  below two minutes.
+
+  * `CTest Script`_ variable: ``CTEST_TIME_LIMIT``
+  * :module:`CTest` module variable: none
 
 ``TLSVersion``
   .. versionadded:: 3.30
