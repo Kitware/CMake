@@ -38,7 +38,8 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
       .Bind("FLAGS"_s, &BuildArguments::Flags)
       .Bind("PROJECT_NAME"_s, &BuildArguments::ProjectName)
       .Bind("PARALLEL_LEVEL"_s, &BuildArguments::ParallelLevel)
-      .Bind("PRESET"_s, &BuildArguments::Preset);
+      .Bind("PRESET"_s, &BuildArguments::Preset)
+      .Bind("PRESETS_FILE"_s, &BuildArguments::PresetsFile);
 
   return this->Invoke(parser, args, status, [&](BuildArguments& a) {
     return this->ExecuteHandlerCommand(a, status);
@@ -80,11 +81,15 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     std::string const sourceDirectory =
       mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
 
+    std::string const presetsFile = args.PresetsFile.empty()
+      ? ""
+      : cmSystemTools::CollapseFullPath(args.PresetsFile, sourceDirectory);
+
     cmCMakePresetsGraph presetsGraph;
-    if (!presetsGraph.ReadProjectPresets(sourceDirectory, "")) {
-      status.SetError(
-        cmStrCat("Could not read presets from \"", sourceDirectory,
-                 "\": ", presetsGraph.parseState.GetErrorMessage()));
+    if (!presetsGraph.ReadProjectPresets(sourceDirectory, presetsFile)) {
+      status.SetError(cmStrCat("\n Could not read presets from \"",
+                               sourceDirectory, "\":\n ",
+                               presetsGraph.parseState.GetErrorMessage()));
       return nullptr;
     }
 
@@ -103,6 +108,12 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     buildCommand += " --build . --preset \"";
     buildCommand += args.Preset;
     buildCommand += "\"";
+
+    if (!presetsFile.empty()) {
+      buildCommand += " --presets-file \"";
+      buildCommand += presetsFile;
+      buildCommand += "\"";
+    }
 
     if (!cmakeBuildConfiguration.empty()) {
       buildCommand += " --config \"";

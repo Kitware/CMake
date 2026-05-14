@@ -1,0 +1,8 @@
+1/1 MemCheck #[0-9]+: test1 .+   Passed +[0-9]+\.[0-9]+ sec
+
+100% tests passed out of 1
+.*
+-- Processing memory checking output:
+MemCheck log files can be found here:.*corresponds to test number.
+.*MemoryChecker.*log
+Memory checking results:

@@ -214,3 +214,27 @@ endforeach()
   set(CTEST_MEMCHECK_ARGS "PRESET my-include-preset")
   run_mc_test(TestPresetInclude "${PSEUDO_VALGRIND}")
 endblock()
+
+block()
+  set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/TestPresetFromFile")
+  set(custom_presets_file
+    "${RunCMake_BINARY_DIR}/TestPresetFromFile/custom-presets.json")
+  set(CMAKELISTS_EXTRA_CODE [[
+foreach(i RANGE 1 3)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+endforeach()
+]])
+  configure_file(
+    "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+    "${custom_presets_file}"
+    @ONLY)
+  set(CTEST_MEMCHECK_ARGS
+    "PRESET my-include-preset PRESETS_FILE \"${custom_presets_file}\"")
+  run_mc_test(TestPresetFromFile "${PSEUDO_VALGRIND}")
+endblock()
+
+block()
+  set(CTEST_MEMCHECK_ARGS
+    "PRESET my-include-preset PRESETS_FILE /nonexistent/path/presets.json")
+  run_mc_test(TestPresetBadFile "${PSEUDO_VALGRIND}")
+endblock()

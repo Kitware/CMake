@@ -9,6 +9,7 @@ Perform the :ref:`CTest Configure Step` as a :ref:`Dashboard Client`.
                   [OPTIONS <options>] [RETURN_VALUE <result-var>] [QUIET]
                   [CAPTURE_CMAKE_ERROR <result-var>]
                   [PRESET <preset>]
+                  [PRESETS_FILE <file>]
                   )
 
 Configure the project build tree and record results in ``Configure.xml``
@@ -47,6 +48,14 @@ The options are:
 
   This option is ignored when :variable:`CTEST_CONFIGURE_COMMAND`
   is used.
+
+``PRESETS_FILE <file>``
+  .. versionadded:: 4.4
+
+  Specify a :manual:`presets <cmake-presets(7)>` file to use instead of the
+  default ``CMakePresets.json`` in the source directory.
+  A relative path is interpreted relative to the source directory.
+  Has no effect unless ``PRESET`` is also specified.
 
 ``RETURN_VALUE <result-var>``
   Store in the ``<result-var>`` variable the return value of the native

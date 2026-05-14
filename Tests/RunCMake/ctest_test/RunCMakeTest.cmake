@@ -34,6 +34,23 @@ endforeach()
   run_ctest_test(TestPresetExclude PRESET my-exclude-preset)
   run_ctest_test(TestPresetInclude PRESET my-include-preset)
   run_ctest_test(TestPresetOverride PRESET my-include-preset INCLUDE test2)
+
+  set(custom_presets_file
+    "${RunCMake_BINARY_DIR}/TestPresetFileInclude/custom-presets.json")
+  configure_file(
+    "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+    "${custom_presets_file}"
+    @ONLY)
+  set(CASE_CTEST_TEST_RAW_ARGS
+    "PRESET my-include-preset PRESETS_FILE \"${custom_presets_file}\"")
+  run_ctest(TestPresetFileInclude)
+  unset(CASE_CTEST_TEST_RAW_ARGS)
+  unset(custom_presets_file)
+
+  set(CASE_CTEST_TEST_RAW_ARGS
+    "PRESET my-include-preset PRESETS_FILE /nonexistent/path/presets.json")
+  run_ctest(TestPresetBadFile)
+  unset(CASE_CTEST_TEST_RAW_ARGS)
 endblock()
 
 set(CASE_CMAKELISTS_SUFFIX_CODE [[

@@ -49,6 +49,7 @@ protected:
     std::string CoverageTool;
     bool StopOnFailure = false;
     std::string Preset;
+    std::string PresetsFile;
   };
 
   template <typename Args>
@@ -78,7 +79,8 @@ protected:
       .Bind("STOP_ON_FAILURE"_s, &TestArguments::StopOnFailure)
       .Bind("COVERAGE_TOOL"_s, &TestArguments::CoverageTool)
       .Bind("OUTPUT_JUNIT"_s, &TestArguments::OutputJUnit)
-      .Bind("PRESET"_s, &TestArguments::Preset);
+      .Bind("PRESET"_s, &TestArguments::Preset)
+      .Bind("PRESETS_FILE"_s, &TestArguments::PresetsFile);
   }
 
 private:

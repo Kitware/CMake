@@ -16,6 +16,7 @@ Perform the :ref:`CTest Build Step` as a :ref:`Dashboard Client`.
               [RETURN_VALUE <result-var>]
               [CAPTURE_CMAKE_ERROR <result-var>]
               [PRESET <preset>]
+              [PRESETS_FILE <file>]
               )
 
 Build the project and store results in ``Build.xml``
@@ -84,6 +85,14 @@ The options are:
   corresponding setting from the preset.  For example, the ``TARGET``
   argument will override the :preset:`buildPresets.targets` setting from
   the chosen preset.
+
+``PRESETS_FILE <file>``
+  .. versionadded:: 4.4
+
+  Specify a :manual:`presets <cmake-presets(7)>` file to use instead of the
+  default ``CMakePresets.json`` in the source directory.
+  A relative path is interpreted relative to the source directory.
+  Has no effect unless ``PRESET`` is also specified.
 
 ``RETURN_VALUE <result-var>``
   Store the return value of the native build tool in the given variable.

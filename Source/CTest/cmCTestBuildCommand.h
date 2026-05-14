@@ -24,6 +24,7 @@ protected:
     std::string ProjectName;
     std::string ParallelLevel;
     std::string Preset;
+    std::string PresetsFile;
   };
 
 private:

@@ -1,0 +1,14 @@
+file(GLOB build_xml_file "${RunCMake_TEST_BINARY_DIR}/Testing/*/Build.xml")
+if(build_xml_file)
+  file(READ "${build_xml_file}" build_xml)
+  if(NOT build_xml MATCHES "--preset.*my-build-preset")
+    set(RunCMake_TEST_FAILED
+        "Build.xml does not contain the expected --preset argument")
+  endif()
+  if(NOT build_xml MATCHES "--presets-file")
+    set(RunCMake_TEST_FAILED
+        "Build.xml does not contain the expected --presets-file argument")
+  endif()
+else()
+  set(RunCMake_TEST_FAILED "Build.xml not found")
+endif()
