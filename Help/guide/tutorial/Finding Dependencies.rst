@@ -142,7 +142,7 @@ Build and Run
 -------------
 
 First we must install the ``SimpleTest`` framework. Navigate to the
-``Help/guide/Step10/SimpleTest`` directory and run the following commands
+``Help/guide/Step10/SimpleTest`` directory and run the following commands.
 
 .. code-block:: console
 
@@ -191,7 +191,7 @@ We do this with ``REQUIRED`` because the tests cannot build without
 
   </details>
 
-Next we add the ``SimpleTest::SimpleTest`` target to ``TestMathFunctions``
+Next we add the ``SimpleTest::SimpleTest`` target to ``TestMathFunctions``.
 
 .. raw:: html
 

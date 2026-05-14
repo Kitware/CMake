@@ -471,7 +471,7 @@ When importing CMake targets from a target export file, there is no way to
 incompatible version for the one we requested, we'll be stuck with any
 side-effects incurred while we learned that version information.
 
-The answer CMake provides for this problem is a light-weight version file which
+The answer CMake provides for this problem is a lightweight version file which
 only describes this version compatibility information, which can be checked
 before CMake commits to fully importing the file.
 
