@@ -1221,20 +1221,18 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       for (MUFile const* muf : this->AutogenTarget.FilesGenerated) {
         files += cmStrCat("  ", Quoted(muf->FullPath), '\n');
       }
-      this->Makefile->IssueDiagnostic(
-        cmDiagnostics::CMD_POLICY,
+      this->Makefile->IssuePolicyWarning(
+        cmPolicies::CMP0071, {},
         cmStrCat(
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0071),
-          "\n"
           "For compatibility, CMake is excluding the GENERATED source "
-          "file(s):\n",
-          files, "from processing by ",
+          "file(s):\n"_s,
+          files, "from processing by "_s,
           cmQtAutoGen::Tools(this->Moc.Enabled, this->Uic.Enabled, false),
           ".  If any of the files should be processed, set CMP0071 to NEW.  "
           "If any of the files should not be processed, "
-          "explicitly exclude them by setting the source file property ",
-          property, ":\n  set_property(SOURCE file.h PROPERTY ", property,
-          " ON)\n"));
+          "explicitly exclude them by setting the source file property "_s,
+          property, ":\n  set_property(SOURCE file.h PROPERTY "_s, property,
+          " ON)"_s));
     }
   }
 
@@ -1253,19 +1251,17 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     for (cmSourceFile const* sf : this->AutogenTarget.CMP0100HeadersWarn) {
       files += cmStrCat("  ", Quoted(sf->GetFullPath()), '\n');
     }
-    this->Makefile->IssueDiagnostic(
-      cmDiagnostics::CMD_POLICY,
+    this->Makefile->IssuePolicyWarning(
+      cmPolicies::CMP0100, {},
       cmStrCat(
-        cmPolicies::GetPolicyWarning(cmPolicies::CMP0100),
-        "\n"
-        "For compatibility, CMake is excluding the header file(s):\n",
-        files, "from processing by ",
+        "For compatibility, CMake is excluding the header file(s):\n"_s, files,
+        "from processing by "_s,
         cmQtAutoGen::Tools(this->Moc.Enabled, this->Uic.Enabled, false),
         ".  If any of the files should be processed, set CMP0100 to NEW.  "
         "If any of the files should not be processed, "
-        "explicitly exclude them by setting the source file property ",
-        property, ":\n  set_property(SOURCE file.hh PROPERTY ", property,
-        " ON)\n"));
+        "explicitly exclude them by setting the source file property "_s,
+        property, ":\n  set_property(SOURCE file.hh PROPERTY "_s, property,
+        " ON)"_s));
   }
 
   // Process qrc files

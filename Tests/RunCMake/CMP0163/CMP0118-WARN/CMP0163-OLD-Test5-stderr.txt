@@ -11,7 +11,6 @@ CMake Warning \(policy\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-OLD-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -39,7 +38,6 @@ CMake Warning \(policy\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   instead\.
 
   This will be an error under policy CMP0118\.
-
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-OLD-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -65,7 +63,6 @@ CMake Warning \(policy\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-OLD-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -93,7 +90,6 @@ CMake Warning \(policy\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   instead\.
 
   This will be an error under policy CMP0118\.
-
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-OLD-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -119,7 +115,6 @@ CMake Warning \(policy\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-OLD-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -147,7 +142,6 @@ CMake Warning \(policy\) at CMP0163-Common-Test5\.cmake:[0-9]+ \(set_property\):
   instead\.
 
   This will be an error under policy CMP0118\.
-
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-OLD-Test5\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)

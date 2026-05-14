@@ -7,7 +7,6 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
-#include "cmDiagnostics.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -201,14 +200,12 @@ bool cmSourceFile::FindFullPath(std::string* error,
           if (this->IsGenerated || cmSystemTools::FileExists(extPath)) {
             this->FullPath = extPath;
             if (cmp0115 == cmPolicies::WARN) {
-              std::string warning =
-                cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0115),
-                         "\nFile:\n  ", extPath);
+              std::string warning = cmStrCat("File:\n  "_s, extPath);
               if (cmp0115Warning) {
                 *cmp0115Warning = std::move(warning);
               } else {
-                makefile->IssueDiagnostic(cmDiagnostics::CMD_POLICY, warning,
-                                          cmListFileBacktrace{});
+                makefile->IssuePolicyWarning(cmPolicies::CMP0115, {}, warning,
+                                             cmListFileBacktrace{});
               }
             }
             return true;

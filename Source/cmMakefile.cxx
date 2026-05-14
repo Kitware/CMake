@@ -240,6 +240,23 @@ void cmMakefile::IssueDiagnostic(cmDiagnosticCategory category,
                                             this->GetStateSnapshot(), context);
 }
 
+void cmMakefile::IssuePolicyWarning(cmPolicies::PolicyID policy,
+                                    cm::string_view preface,
+                                    cm::string_view postface,
+                                    cmListFileBacktrace const& bt) const
+{
+  std::string msg = cmPolicies::GetPolicyWarning(policy);
+  if (!preface.empty() && !postface.empty()) {
+    msg = cmStrCat(preface, '\n', msg, '\n', postface);
+  } else if (!preface.empty()) {
+    msg = cmStrCat(preface, '\n', msg);
+  } else if (!postface.empty()) {
+    msg = cmStrCat(msg, '\n', postface);
+  }
+  this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, msg,
+                        cmDiagnosticContext{ bt });
+}
+
 Message::LogLevel cmMakefile::GetCurrentLogLevel() const
 {
   cmake const* cmakeInstance = this->GetCMakeInstance();
@@ -279,7 +296,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
 {
   // Warn if a <PackageName>_ROOT variable we may use is set.
   if ((rootDef || rootEnv) && this->WarnedCMP0074.insert(rootVar).second) {
-    auto e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0074), '\n');
+    std::string e;
     if (rootDef) {
       e += cmStrCat("CMake variable ", rootVar, " is set to:\n  ", *rootDef,
                     '\n');
@@ -289,7 +306,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
                     *rootEnv, '\n');
     }
     e += "For compatibility, CMake is ignoring the variable.";
-    this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, e);
+    this->IssuePolicyWarning(cmPolicies::CMP0074, {}, e);
   }
 }
 
@@ -298,7 +315,7 @@ void cmMakefile::MaybeWarnCMP0144(std::string const& rootVar, cmValue rootDef,
 {
   // Warn if a <PACKAGENAME>_ROOT variable we may use is set.
   if ((rootDef || rootEnv) && this->WarnedCMP0144.insert(rootVar).second) {
-    auto e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0144), '\n');
+    std::string e;
     if (rootDef) {
       e += cmStrCat("CMake variable ", rootVar, " is set to:\n  ", *rootDef,
                     '\n');
@@ -309,7 +326,7 @@ void cmMakefile::MaybeWarnCMP0144(std::string const& rootVar, cmValue rootDef,
     }
     e += "For compatibility, find_package is ignoring the variable, but "
          "code in a .cmake module might still use it.";
-    this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, e);
+    this->IssuePolicyWarning(cmPolicies::CMP0144, {}, e);
   }
 }
 
@@ -1932,12 +1949,11 @@ void cmMakefile::AddCacheDefinition(std::string const& name, cmValue value,
     case cmPolicies::WARN:
       if (this->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0126") &&
           this->IsNormalDefinitionSet(name)) {
-        this->IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0126),
-                   "\nFor compatibility with older versions of CMake, normal "
-                   "variable \"",
-                   name, "\" will be removed from the current scope."));
+        this->IssuePolicyWarning(
+          cmPolicies::CMP0126, {},
+          cmStrCat("For compatibility with older versions of CMake, "
+                   "normal variable \""_s,
+                   name, "\" will be removed from the current scope."_s));
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:

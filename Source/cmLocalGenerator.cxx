@@ -255,6 +255,14 @@ void cmLocalGenerator::IssueDiagnostic(
   this->GetMakefile()->IssueDiagnostic(category, text, context);
 }
 
+void cmLocalGenerator::IssuePolicyWarning(cmPolicies::PolicyID policy,
+                                          cm::string_view preface,
+                                          cm::string_view postface,
+                                          cmListFileBacktrace const& bt) const
+{
+  this->GetMakefile()->IssuePolicyWarning(policy, preface, postface, bt);
+}
+
 void cmLocalGenerator::ComputeObjectMaxPath()
 {
 // Choose a maximum object file name length.
@@ -719,9 +727,7 @@ void cmLocalGenerator::GenerateInstallRules()
       if (haveInstallAfterSubdirectory &&
           this->Makefile->PolicyOptionalWarningEnabled(
             "CMAKE_POLICY_WARNING_CMP0082")) {
-        std::ostringstream e;
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0082) << "\n";
-        this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, e.str());
+        this->IssuePolicyWarning(cmPolicies::CMP0082);
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD: {
@@ -2633,13 +2639,10 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
       if (!this->Makefile->GetCMakeInstance()->GetIsInTryCompile() &&
           this->Makefile->PolicyOptionalWarningEnabled(
             "CMAKE_POLICY_WARNING_CMP0181")) {
-        this->Makefile->IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0181),
-                   "\nSince the policy is not set, the contents of variable '",
-                   name,
-                   "' will "
-                   "be used as is."),
+        this->Makefile->IssuePolicyWarning(
+          cmPolicies::CMP0181, {},
+          cmStrCat("Since the policy is not set, the contents of variable '"_s,
+                   name, "' will be used as is."_s),
           target->GetBacktrace());
       }
       CM_FALLTHROUGH;
@@ -3435,12 +3438,12 @@ void cmLocalGenerator::AddPerLanguageLinkFlags(std::string& flags,
             this->Makefile->GetSafeDefinition(
               cmStrCat("CMAKE_EXECUTABLE_CREATE_", lang, "_FLAGS")) &&
           this->GlobalGenerator->ShouldWarnCMP0210(lang)) {
-        this->IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0210), "\n",
-                   "For compatibility with older versions of CMake, ",
-                   "CMAKE_", lang, "_LINK_FLAGS will be ignored for all ",
-                   "non-EXECUTABLE targets which use these flags."));
+        this->IssuePolicyWarning(
+          cmPolicies::CMP0210, {},
+          cmStrCat("For compatibility with older versions of CMake, CMAKE_"_s,
+                   lang,
+                   "_LINK_FLAGS will be ignored for all non-EXECUTABLE "
+                   "targets which use these flags."_s));
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:

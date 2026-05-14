@@ -1059,6 +1059,15 @@ public:
   }
   void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
                        cmDiagnosticContext const& context) const;
+  void IssuePolicyWarning(cmPolicies::PolicyID policy, cm::string_view preface,
+                          cm::string_view postface,
+                          cmListFileBacktrace const& bt) const;
+  void IssuePolicyWarning(cmPolicies::PolicyID policy,
+                          cm::string_view preface = {},
+                          cm::string_view postface = {}) const
+  {
+    this->IssuePolicyWarning(policy, preface, postface, this->Backtrace);
+  }
   Message::LogLevel GetCurrentLogLevel() const;
 
   /** Set whether or not to report a CMP0000 violation.  */

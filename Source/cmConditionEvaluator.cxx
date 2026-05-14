@@ -17,7 +17,6 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCMakePath.h"
-#include "cmDiagnostics.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -660,14 +659,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       }
 
       else if (this->Policy139Status == cmPolicies::WARN) {
-        std::ostringstream e;
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0139)
-          << "\n"
-             "PATH_EQUAL will be interpreted as an operator "
-             "when the policy is set to NEW.  "
-             "Since the policy is not set the OLD behavior will be used.";
-
-        this->Makefile.IssueDiagnostic(cmDiagnostics::CMD_POLICY, e.str());
+        this->Makefile.IssuePolicyWarning(
+          cmPolicies::CMP0139, {},
+          "PATH_EQUAL will be interpreted as an operator "
+          "when the policy is set to NEW.  "
+          "Since the policy is not set the OLD behavior will be used."_s);
       }
     }
   }

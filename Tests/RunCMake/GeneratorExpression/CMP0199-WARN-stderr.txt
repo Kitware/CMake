@@ -6,7 +6,6 @@ CMake Warning \(policy\) at CMP0199-WARN\.cmake:[0-9]+ \(target_link_libraries\)
 
   Evaluation of \$<CONFIG> for imported target "lib_test", used by "exe_test",
   may match multiple configurations\.
-
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-author or -Wno-policy to

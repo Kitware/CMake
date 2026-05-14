@@ -1811,9 +1811,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
           // generator expressions
           if (cmGeneratorExpression::Find(args[i]) == cm::string_view::npos &&
               args[i] != cmCMakePath(args[i]).Normal().String()) {
-            status.GetMakefile().IssueDiagnostic(
-              cmDiagnostics::CMD_POLICY,
-              cmPolicies::GetPolicyWarning(cmPolicies::CMP0177));
+            status.GetMakefile().IssuePolicyWarning(cmPolicies::CMP0177);
           }
           CM_FALLTHROUGH;
         case cmPolicies::OLD:

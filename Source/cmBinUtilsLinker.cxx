@@ -6,7 +6,6 @@
 #include <utility>
 
 #include "cmCMakePath.h"
-#include "cmDiagnostics.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmRuntimeDependencyArchive.h"
@@ -34,14 +33,9 @@ void cmBinUtilsLinker::NormalizePath(std::string& path) const
   cmPolicies::PolicyStatus policy =
     this->Archive->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0207);
   if (policy == cmPolicies::WARN) {
-    this->Archive->GetMakefile()->IssueDiagnostic(
-      cmDiagnostics::CMD_POLICY,
-      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0207),
-               "\n"
-               "Path\n  \"",
-               path,
-               "\"\n"
-               "would be converted to\n  \"",
+    this->Archive->GetMakefile()->IssuePolicyWarning(
+      cmPolicies::CMP0207, {},
+      cmStrCat("Path\n  \"", path, "\"\nwould be converted to\n  \"",
                normalizedPath, "\"\n"));
   } else if (policy == cmPolicies::NEW) {
     path = std::move(normalizedPath);

@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "cmDiagnosticContext.h"
-#include "cmDiagnostics.h"
 #include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
 #include "cmPolicies.h"
@@ -37,9 +36,7 @@ bool cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
   if (this->ActionsPerConfig) {
     switch (this->LocalGenerator->GetPolicyStatus(cmPolicies::CMP0087)) {
       case cmPolicies::WARN:
-        this->LocalGenerator->IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0087));
+        this->LocalGenerator->IssuePolicyWarning(cmPolicies::CMP0087);
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;

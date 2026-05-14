@@ -6,8 +6,8 @@
 #include <string>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
-#include "cmDiagnostics.h"
 #include "cmFindCommon.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
@@ -143,27 +143,17 @@ struct cmFindProgramHelper
       return isExeNew;
     }
     if (isExeNew) {
-      this->Makefile->IssueDiagnostic(
-        cmDiagnostics::CMD_POLICY,
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0109),
-                 "\n"
-                 "The file\n"
-                 "  ",
-                 file,
-                 "\n"
-                 "is executable but not readable.  "
-                 "CMake is ignoring it for compatibility."));
+      this->Makefile->IssuePolicyWarning(
+        cmPolicies::CMP0109, {},
+        cmStrCat("The file\n  "_s, file,
+                 "\nis executable but not readable.  "
+                 "CMake is ignoring it for compatibility."_s));
     } else {
-      this->Makefile->IssueDiagnostic(
-        cmDiagnostics::CMD_POLICY,
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0109),
-                 "\n"
-                 "The file\n"
-                 "  ",
-                 file,
-                 "\n"
-                 "is readable but not executable.  "
-                 "CMake is using it for compatibility."));
+      this->Makefile->IssuePolicyWarning(
+        cmPolicies::CMP0109, {},
+        cmStrCat("The file\n  "_s, file,
+                 "\nis readable but not executable.  "
+                 "CMake is using it for compatibility."_s));
     }
     return isExeOld;
   }

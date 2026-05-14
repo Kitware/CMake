@@ -199,11 +199,9 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
   if (gg->GetExportedTargetsFile(fname)) {
     switch (mf.GetPolicyStatus(cmPolicies::CMP0103)) {
       case cmPolicies::WARN:
-        mf.IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103),
-                   "\n"
-                   "export() command already specified for the file\n  ",
+        mf.IssuePolicyWarning(
+          cmPolicies::CMP0103, {},
+          cmStrCat("export() command already specified for the file\n  ",
                    arguments.Filename, "\nDid you miss 'APPEND' keyword?"));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -286,9 +284,7 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     if (p == cmPolicies::WARN) {
       status.GetMakefile().IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR, cmStrCat("export "_s, status.GetError()));
-      status.GetMakefile().IssueDiagnostic(
-        cmDiagnostics::CMD_POLICY,
-        cmPolicies::GetPolicyWarning(cmPolicies::CMP0208));
+      status.GetMakefile().IssuePolicyWarning(cmPolicies::CMP0208);
     }
   }
 

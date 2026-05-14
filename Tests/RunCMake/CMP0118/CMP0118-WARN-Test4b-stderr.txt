@@ -5,7 +5,6 @@
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -25,7 +24,6 @@ CMake Warning \(policy\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\)
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -45,7 +43,6 @@ CMake Warning \(policy\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\)
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -65,7 +62,6 @@ CMake Warning \(policy\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\)
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -85,7 +81,6 @@ CMake Warning \(policy\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\)
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -105,7 +100,6 @@ CMake Warning \(policy\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\)
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -125,7 +119,6 @@ CMake Warning \(policy\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\)
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -145,7 +138,6 @@ CMake Warning \(policy\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\)
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -165,7 +157,6 @@ CMake Warning \(policy\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\)
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)

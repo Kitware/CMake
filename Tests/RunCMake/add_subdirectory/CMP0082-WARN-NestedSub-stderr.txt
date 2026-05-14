@@ -3,6 +3,5 @@ CMake Warning \(policy\) in CMP0082-NestedSub/CMakeLists\.txt:
   interleaved with those in caller\.  Run "cmake --help-policy CMP0082" for
   policy details\.  Use the cmake_policy command to set the policy and
   suppress this warning\.
-
 This warning is for project developers\.  Use -Wno-author or -Wno-policy to
 suppress it\.

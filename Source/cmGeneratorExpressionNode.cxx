@@ -29,7 +29,6 @@
 #include "cmCMakePath.h"
 #include "cmCMakeString.hxx"
 #include "cmComputeLinkInformation.h"
-#include "cmDiagnostics.h"
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpression.h"
@@ -426,11 +425,11 @@ static const struct InListNode : public cmGeneratorExpressionNode
       case cmPolicies::OLD:
         values.assign(parameters[1]);
         if (check && values != checkValues) {
-          std::string const err =
-            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0085),
-                     "\nSearch Item:\n  \""_s, parameters.front(),
-                     "\"\nList:\n  \""_s, parameters[1], "\"\n"_s);
-          lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err, eval->Backtrace);
+          lg->IssuePolicyWarning(
+            cmPolicies::CMP0085, {},
+            cmStrCat("Search Item:\n  \""_s, parameters.front(),
+                     "\"\nList:\n  \""_s, parameters[1], "\"\n"_s),
+            eval->Backtrace);
           return "0";
         }
         if (values.empty()) {
@@ -2894,14 +2893,13 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
             case cmPolicies::WARN:
               if (lg->GetMakefile()->PolicyOptionalWarningEnabled(
                     "CMAKE_POLICY_WARNING_CMP0199")) {
-                std::string const err =
-                  cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0199),
-                           "\nEvaluation of $<CONFIG> for imported target  \"",
-                           eval->CurrentTarget->GetName(), "\", used by \"",
+                lg->IssuePolicyWarning(
+                  cmPolicies::CMP0199, {},
+                  cmStrCat("Evaluation of $<CONFIG> for imported target  \""_s,
+                           eval->CurrentTarget->GetName(), "\", used by \""_s,
                            eval->HeadTarget->GetName(),
-                           "\", may match multiple configurations.\n");
-                lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err,
-                                    eval->Backtrace);
+                           "\", may match multiple configurations."_s),
+                  eval->Backtrace);
               }
               CM_FALLTHROUGH;
             case cmPolicies::OLD:
@@ -4663,9 +4661,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
         cmLocalGenerator* lg = eval->HeadTarget->GetLocalGenerator();
         switch (statusForTarget(eval->HeadTarget, policy)) {
           case cmPolicies::WARN:
-            lg->IssueDiagnostic(
-              cmDiagnostics::CMD_POLICY,
-              cmPolicies::GetPolicyWarning(policyForString(policy)));
+            lg->IssuePolicyWarning(policyForString(policy));
             CM_FALLTHROUGH;
           case cmPolicies::OLD:
             return "0";
@@ -4749,11 +4745,11 @@ struct TargetFilesystemArtifactDependencyCMP0112
       case cmPolicies::WARN:
         if (lg->GetMakefile()->PolicyOptionalWarningEnabled(
               "CMAKE_POLICY_WARNING_CMP0112")) {
-          std::string const err =
-            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0112),
-                     "\nDependency being added to target:\n  \"",
-                     target->GetName(), "\"\n");
-          lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err, eval->Backtrace);
+          lg->IssuePolicyWarning(
+            cmPolicies::CMP0112, {},
+            cmStrCat("Dependency being added to target:\n  \""_s,
+                     target->GetName(), "\"\n"_s),
+            eval->Backtrace);
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -5442,13 +5438,10 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
 
     if (target->GetPolicyStatusCMP0202() == cmPolicies::WARN &&
         postfix != Postfix::Unspecified) {
-      lg->IssueDiagnostic(
-        cmDiagnostics::CMD_POLICY,
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0202),
-                 "\n"
-                 "\"POSTFIX\" option is recognized only when the policy is "
-                 "set to NEW. Since the policy is not set, the OLD behavior "
-                 "will be used."),
+      lg->IssuePolicyWarning(
+        cmPolicies::CMP0202, {},
+        "\"POSTFIX\" option is recognized only when the policy is set to NEW."
+        "  Since the policy is not set, the OLD behavior will be used."_s,
         eval->Backtrace);
     }
 
