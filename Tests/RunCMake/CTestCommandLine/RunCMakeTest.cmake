@@ -785,3 +785,32 @@ add_test(test1 \"${CMAKE_COMMAND}\" -E true)
   run_cmake_command(CoverageTool ${CMAKE_CTEST_COMMAND} -V)
   run_cmake_command(CoverageTool-T-Test ${CMAKE_CTEST_COMMAND} -V -T Test)
 endblock()
+
+# Verify that CTEST_* variables defined via the command-line are visible
+# from the CTest script.
+run_cmake_command(DashD-ScriptVars
+  ${CMAKE_CTEST_COMMAND}
+  "-S" "${RunCMake_SOURCE_DIR}/DashD-ScriptVars.cmake"
+  "-D" "CTEST_BUILD_NAME=cli-build-name"
+  "-D" "CTEST_SITE=cli-site"
+  "-D" "CTEST_BUILD_FLAGS=-O2 -Wall"
+  "-D" "CTEST_BUILD_TARGET=my-target"
+  "-D" "CTEST_CMAKE_GENERATOR=Ninja"
+  "-D" "CTEST_EXTRA_COVERAGE_GLOB=**/*.gcov"
+  "-D" "CTEST_TIME_LIMIT=3600"
+  )
+
+# Verify that CTEST_* variables defined via the command-line override
+# settings from the dashboard configuration file.
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DashD-DashboardVar-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/DartConfiguration.tcl"
+    "BuildName: original-build-name\nSite: original-site\nSourceDirectory: ${RunCMake_TEST_BINARY_DIR}\n")
+  run_cmake_command(DashD-DashboardVar
+    ${CMAKE_CTEST_COMMAND} -M Experimental -T Start
+    -D CTEST_BUILD_NAME=cli-build-name
+    )
+endblock()

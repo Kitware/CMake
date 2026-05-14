@@ -4,7 +4,8 @@ CTEST_RESOURCE_SPEC_FILE
 .. versionadded:: 3.18
 
 Specify the CTest ``ResourceSpecFile`` setting in a :manual:`ctest(1)`
-:ref:`Dashboard Client` script.
+:ref:`Dashboard Client` script,
+or on the :program:`ctest` command line via the :ref:`-D <ctest-option-D-var>` option.
 
 This can also be used to specify the resource spec file from a CMake build. If
 no ``RESOURCE_SPEC_FILE`` is passed to :command:`ctest_test`, and

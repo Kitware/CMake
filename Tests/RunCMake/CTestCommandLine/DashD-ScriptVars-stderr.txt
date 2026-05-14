@@ -1,0 +1,7 @@
+.*CTEST_BUILD_NAME=cli-build-name.*
+.*CTEST_SITE=cli-site.*
+.*CTEST_BUILD_FLAGS=-O2 -Wall.*
+.*CTEST_BUILD_TARGET=my-target.*
+.*CTEST_CMAKE_GENERATOR=Ninja.*
+.*CTEST_EXTRA_COVERAGE_GLOB=\*\*/\*.gcov.*
+.*CTEST_TIME_LIMIT=3600.*

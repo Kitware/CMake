@@ -848,14 +848,30 @@ Options for Dashboard Client include:
 
 The available ``<dashboard-options>`` are the following:
 
-.. option:: -D <var>:<type>=<value>
+.. _`ctest-option-D-var`:
 
- Define a variable for script mode.
+.. option:: -D <var>:<type>=<value>, -D <var>=<value>
 
- Pass in variable values on the command line.  Use in conjunction
- with :ctest-option:`-S` to pass variable values to a dashboard script.
+ Define a variable for dashboard client mode.
+
+ Pass in variable values on the command line.  Use in conjunction with
+ :ctest-option:`-S` to pass variable values to a dashboard script, or with
+ :ctest-option:`-T` to override `Dashboard Client Configuration`_ settings.
  Parsing ``-D`` arguments as variable values is only attempted if the value
  following ``-D`` does not match any of the known dashboard types.
+
+ The ``<var>:<type>=<value>`` form accepts any variable name.  The simpler
+ ``<var>=<value>`` form (without a type) is accepted only for variables whose
+ names begin with ``CTEST_``.  In both cases the value overrides the
+ corresponding setting from the `Dashboard Client Configuration`_ file
+ (e.g., ``DartConfiguration.tcl``) when using :ctest-option:`-T`.
+
+ .. note::
+   These definitions set CTest script variables
+   (e.g., :variable:`CTEST_BUILD_NAME`), not CMake cache variables.
+   To pass CMake cache variables to the configure step, consider using a
+   `CTest Script`_, a :manual:`configure preset <cmake-presets(7)>`, or
+   setting :variable:`CTEST_CONFIGURE_COMMAND`.
 
 .. option:: --group <group>
 

@@ -452,6 +452,9 @@ private:
   /** add a variable definition from a command line -D value */
   bool AddVariableDefinition(std::string const& arg);
 
+  /** apply CTEST_* variable definitions to the CTest configuration map */
+  void ApplyDefinitionsToCTestConfig();
+
   /** set command line arguments read from a test preset */
   bool SetArgsFromPreset(cmCMakePresetsArgs const& args);
 

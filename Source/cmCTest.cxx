@@ -539,6 +539,7 @@ bool cmCTest::UpdateCTestConfiguration()
     // No need to exit if we are not producing XML
     if (this->Impl->ProduceXML) {
       cmCTestLog(this, WARNING, "Cannot find file: " << fileName << std::endl);
+      this->ApplyDefinitionsToCTestConfig();
       return false;
     }
   } else {
@@ -602,6 +603,8 @@ bool cmCTest::UpdateCTestConfiguration()
     this->Impl->CompressXMLFiles =
       cmIsOn(this->GetCTestConfiguration("CompressSubmission"));
   }
+  // Command-line definitions override values loaded from the config file.
+  this->ApplyDefinitionsToCTestConfig();
   return true;
 }
 
@@ -1466,7 +1469,9 @@ void cmCTest::ErrorMessageUnknownDashDValue(std::string const& val)
              "  ctest -D Nightly\n"
              "  ctest -D Nightly(Start|Update|Configure|Build)\n"
              "  ctest -D Nightly(Test|Coverage|MemCheck|Submit)\n"
-             "  ctest -D NightlyMemoryCheck\n");
+             "  ctest -D NightlyMemoryCheck\n"
+             "  ctest -D CTEST_<VAR>=<value>\n"
+             "  ctest -D <var>:<type>=<value>\n");
 }
 
 bool cmCTest::CheckArgument(std::string const& arg, cm::string_view varg1,
@@ -1503,6 +1508,16 @@ bool cmCTest::AddVariableDefinition(std::string const& arg)
   if (cmake::ParseCacheEntry(arg, name, value, type)) {
     this->Impl->Definitions[name] = value;
     return true;
+  }
+
+  // Also accept CTEST_VAR=VALUE (without :TYPE=).
+  auto const eq = arg.find('=');
+  if (eq != std::string::npos && eq > 0) {
+    name = arg.substr(0, eq);
+    if (cmHasLiteralPrefix(name, "CTEST_")) {
+      this->Impl->Definitions[name] = arg.substr(eq + 1);
+      return true;
+    }
   }
 
   return false;
@@ -3232,6 +3247,20 @@ CTestVarConfigEntry const kCTestVarConfigMap[] = {
   { "CTEST_TIME_LIMIT",                    "TimeLimit"                   },
 };
 // clang-format on
+
+// Entries accepted by ApplyDefinitionsToCTestConfig() (i.e. settable via
+// "ctest -D") but not emitted by SetCMakeVariables(), because their forward
+// direction is handled outside of that function.
+//
+//   CTEST_CVS_CHECKOUT - Deprecated alias for CTEST_CHECKOUT_COMMAND.
+//                        The canonical name is already in kCTestVarConfigMap.
+//   CTEST_CHANGE_ID    - Handler commands push this *into* the config map
+//                        themselves rather than reading it out;
+//                        SetCMakeVariables intentionally has no entry for it.
+CTestVarConfigEntry const kCTestVarConfigMapReverseOnly[] = {
+  { "CTEST_CVS_CHECKOUT", "CheckoutCommand" },
+  { "CTEST_CHANGE_ID", "ChangeId" },
+};
 } // namespace
 
 void cmCTest::SetCMakeVariables(cmMakefile& mf)
@@ -3243,6 +3272,28 @@ void cmCTest::SetCMakeVariables(cmMakefile& mf)
         this, HANDLER_VERBOSE_OUTPUT,
         "SetCMakeVariable:" << entry.Var << ":" << val << std::endl, false);
       mf.AddDefinition(entry.Var, val);
+    }
+  }
+}
+
+void cmCTest::ApplyDefinitionsToCTestConfig()
+{
+  // Build a reverse-lookup map from both tables the first time this is called.
+  static std::map<std::string, std::string> const reverseMap = []() {
+    std::map<std::string, std::string> m;
+    for (auto const& e : kCTestVarConfigMap) {
+      m.emplace(e.Var, e.Config);
+    }
+    for (auto const& e : kCTestVarConfigMapReverseOnly) {
+      m.emplace(e.Var, e.Config);
+    }
+    return m;
+  }();
+
+  for (auto const& def : this->Impl->Definitions) {
+    auto const it = reverseMap.find(def.first);
+    if (it != reverseMap.end()) {
+      this->SetCTestConfiguration(it->second.c_str(), def.second);
     }
   }
 }
