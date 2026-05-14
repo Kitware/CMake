@@ -14,31 +14,35 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/ZERO_CHECK$",
             "isGenerated": true,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "",
             "compileGroupLanguage": null,
-            "backtrace": [
-                {
-                    "file": "^custom/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^custom/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         },
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/ZERO_CHECK\\.rule$",
             "isGenerated": true,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "CMake Rules",
             "compileGroupLanguage": null,
-            "backtrace": [
-                {
-                    "file": "^custom/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^custom/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],

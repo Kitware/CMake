@@ -14,43 +14,47 @@
         {
             "path": "^empty\\.c$",
             "isGenerated": null,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "C",
-            "backtrace": [
-                {
-                    "file": "^direct/CMakeLists\\.txt$",
-                    "line": 3,
-                    "command": "add_executable",
-                    "hasParent": true
-                },
-                {
-                    "file": "^direct/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^direct/CMakeLists\\.txt$",
+                        "line": 3,
+                        "command": "add_executable",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^direct/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         },
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(direct|build/inject_direct_lib_impl\\.build)/.*/other(\\.c)?\\.o(bj)?$",
             "isGenerated": true,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Object Libraries",
             "compileGroupLanguage": null,
-            "backtrace": [
-                {
-                    "file": "^direct/CMakeLists\\.txt$",
-                    "line": 13,
-                    "command": "set_property",
-                    "hasParent": true
-                },
-                {
-                    "file": "^direct/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^direct/CMakeLists\\.txt$",
+                        "line": 13,
+                        "command": "set_property",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^direct/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],

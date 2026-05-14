@@ -23,22 +23,24 @@
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
-      "backtrace": [
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": 15,
-          "command": "add_library",
-          "hasParent": true
-        },
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 15,
+            "command": "add_library",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     }
   ],
@@ -46,7 +48,7 @@
     {
       "path": "^fileset/h1\\.h$",
       "isGenerated": null,
-      "fileSetName": "HEADERS",
+      "fileSetNames": ["HEADERS"],
       "sourceGroupName": "Header Files"
     }
   ],

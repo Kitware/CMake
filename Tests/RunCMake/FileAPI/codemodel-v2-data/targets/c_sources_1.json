@@ -31,43 +31,49 @@
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
-      "fileSetName": "public_srcs",
+      "fileSetNames": ["public_srcs"],
+      "fileSetIndexes": [0],
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
-      "backtrace": [
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": 40,
-          "command": "target_sources",
-          "hasParent": true
-        },
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 40,
+            "command": "target_sources",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
       "path": "^fileset/other\\.c$",
       "isGenerated": null,
-      "fileSetName": "SOURCES",
+      "fileSetNames": ["SOURCES"],
+      "fileSetIndexes": [0],
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": null,
-      "backtrace": [
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": 35,
-          "command": "target_sources",
-          "hasParent": true
-        },
-        {
-          "file": "^fileset/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 35,
+            "command": "target_sources",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     }
   ],
@@ -75,7 +81,7 @@
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
-      "fileSetName": "SOURCES",
+      "fileSetNames": ["SOURCES"],
       "sourceGroupName": "Source Files"
     }
   ],

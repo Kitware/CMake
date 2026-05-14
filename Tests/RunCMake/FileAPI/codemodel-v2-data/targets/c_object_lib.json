@@ -14,22 +14,24 @@
         {
             "path": "^empty\\.c$",
             "isGenerated": null,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "C",
-            "backtrace": [
-                {
-                    "file": "^object/CMakeLists\\.txt$",
-                    "line": 8,
-                    "command": "add_library",
-                    "hasParent": true
-                },
-                {
-                    "file": "^object/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^object/CMakeLists\\.txt$",
+                        "line": 8,
+                        "command": "add_library",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^object/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],

@@ -1626,19 +1626,50 @@ with members:
     the source is :prop_sf:`GENERATED`.
 
   ``fileSetIndex``
+    .. deprecated:: 4.4
+      Use the ``fileSetIndexes`` field instead, which is an array, and
+      accounts for sources assigned to multiple file sets.
+
     Optional member that is present when the source is part of a file set.
     The value is an unsigned integer 0-based index into the ``fileSets``
-    array.
+    array representing the file set to which the source was most recently added.
 
     This field was added in codemodel version 2.5.
 
+  ``fileSetIndexes``
+    Optional member that is present when the source is part of at least one
+    file set; see also policy :policy:`CMP0211`. The value is
+    an array of unsigned integer 0-based indexes inte the ``fileSets`` array.
+
+    This field was added in codemodel version 2.11.
+
   ``backtrace``
+    .. deprecated:: 4.4
+      Use the ``backtraces`` field instead, which is an array, and
+      accounts for sources added to multiple file sets over multiple command
+      invocations.
+
     Optional member that is present when a CMake language backtrace to
     the :command:`target_sources`, :command:`add_executable`,
     :command:`add_library`, :command:`add_custom_target`, or other
     command invocation that added this source to the target is
     available.  The value is an unsigned integer 0-based index into
     the ``backtraceGraph`` member's ``nodes`` array.
+
+  ``backtraces``
+
+    Optional member that is present when CMake language backtraces to
+    the :command:`target_sources`, :command:`add_executable`,
+    :command:`add_library`, :command:`add_custom_target`, or other
+    command invocation that added this source to the target is
+    available.  It's possible for a single source file to be included in
+    multiple :command:`target_sources` invocations each naming it in a
+    different file set (see also policy :policy:`CMP0211`), so there could be
+    multiple backtraces.  The value is a JSON array with each entry being an
+    unsigned integer 0-based index into the ``backtraceGraph`` member's
+    ``nodes`` array.
+
+    This field was added in codemodel version 2.11.
 
 ``interfaceSources``
   An optional member that is present when a target defines one or more
@@ -1663,9 +1694,20 @@ with members:
     the source is :prop_sf:`GENERATED`.
 
   ``fileSetIndex``
+    .. deprecated:: 4.4
+      Use the ``fileSetIndexes`` field instead, which is an array, and
+      accounts for sources assigned to multiple file sets.
+
     Optional member that is present when the source is part of a file set.
     The value is an unsigned integer 0-based index into the ``fileSets``
-    array.
+    array representing the file set to which the source was most recently added.
+
+  ``fileSetIndexes``
+    Optional member that is present when the source is part of at least one
+    file set; see also policy :policy:`CMP0211`. The value is
+    an array of unsigned integer 0-based indexes inte the ``fileSets`` array.
+
+    This field was added in codemodel version 2.11.
 
   This field was added in codemodel version 2.10.
 

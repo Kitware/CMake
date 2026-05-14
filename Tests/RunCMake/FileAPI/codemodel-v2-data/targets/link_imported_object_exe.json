@@ -14,22 +14,24 @@
         {
             "path": "^empty\\.c$",
             "isGenerated": null,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "C",
-            "backtrace": [
-                {
-                    "file": "^imported/CMakeLists\\.txt$",
-                    "line": 27,
-                    "command": "add_executable",
-                    "hasParent": true
-                },
-                {
-                    "file": "^imported/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^imported/CMakeLists\\.txt$",
+                        "line": 27,
+                        "command": "add_executable",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^imported/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],

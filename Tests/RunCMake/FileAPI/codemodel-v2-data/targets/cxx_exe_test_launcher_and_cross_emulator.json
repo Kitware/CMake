@@ -14,22 +14,24 @@
         {
             "path": "^empty\\.cxx$",
             "isGenerated": null,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "CXX",
-            "backtrace": [
-                {
-                    "file": "^cxx/cross/CMakeLists\\.txt$",
-                    "line": 9,
-                    "command": "add_executable",
-                    "hasParent": true
-                },
-                {
-                    "file": "^cxx/cross/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^cxx/cross/CMakeLists\\.txt$",
+                        "line": 9,
+                        "command": "add_executable",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^cxx/cross/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],

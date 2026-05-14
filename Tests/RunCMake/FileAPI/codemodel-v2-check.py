@@ -355,9 +355,20 @@ def check_target(c, major, minor):
             assert is_dict(actual)
             expected_keys = ["path"]
 
-            if expected["fileSetName"] is not None:
+            if expected["fileSetNames"] is not None:
                 expected_keys.append("fileSetIndex")
-                assert is_string(obj["fileSets"][actual["fileSetIndex"]]["name"], expected["fileSetName"])
+                expected_keys.append("fileSetIndexes")
+
+                assert is_list(expected["fileSetIndexes"])
+                assert is_list(expected["fileSetNames"])
+
+                assert is_list(actual["fileSetIndexes"])
+                assert is_int(actual["fileSetIndex"], actual["fileSetIndexes"][-1])
+                assert is_string(obj["fileSets"][actual["fileSetIndex"]]["name"], expected["fileSetNames"][-1])
+
+                assert is_int(len(actual["fileSetIndexes"]), len(expected["fileSetNames"]))
+                for (actual_idx, expected_name) in zip(actual["fileSetIndexes"], expected["fileSetNames"]):
+                    assert is_string(obj["fileSets"][actual_idx]["name"], expected_name)
 
             if expected["compileGroupLanguage"] is not None:
                 expected_keys.append("compileGroupIndex")
@@ -371,9 +382,12 @@ def check_target(c, major, minor):
                 expected_keys.append("isGenerated")
                 assert is_bool(actual["isGenerated"], expected["isGenerated"])
 
-            if expected["backtrace"] is not None:
+            if expected["backtraces"] is not None:
                 expected_keys.append("backtrace")
-                check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+                expected_keys.append("backtraces")
+                assert is_list(actual["backtraces"])
+                check_backtrace(obj, actual["backtrace"], expected["backtraces"][0])
+                check_backtraces(obj, actual["backtraces"], expected["backtraces"])
 
             assert sorted(actual.keys()) == sorted(expected_keys)
 
@@ -1164,16 +1178,18 @@ def gen_check_build_system_targets(c, g, inSource):
                         {
                             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/CMakeFiles/([0-9a-f]+/)?generate\\.stamp\\.rule$",
                             "isGenerated": True,
-                            "fileSetName": None,
+                            "fileSetNames": None,
                             "sourceGroupName": "CMake Rules",
                             "compileGroupLanguage": None,
-                            "backtrace": [
-                                {
-                                    "file": "^CMakeLists\\.txt$",
-                                    "line": None,
-                                    "command": None,
-                                    "hasParent": False,
-                                },
+                            "backtraces": [
+                                [
+                                    {
+                                        "file": "^CMakeLists\\.txt$",
+                                        "line": None,
+                                        "command": None,
+                                        "hasParent": False,
+                                    },
+                                ]
                             ],
                         },
                     ]

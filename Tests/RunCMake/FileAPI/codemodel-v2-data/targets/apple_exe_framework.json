@@ -1,6 +1,5 @@
 {
-    "compileGroups":
-    [
+    "compileGroups": [
         {
             "language": "CXX",
             "sourcePaths": [
@@ -8,8 +7,7 @@
             ],
             "includes": null,
             "defines": null,
-            "frameworks":
-            [
+            "frameworks": [
                 {
                     "isSystem": null,
                     "path": "^.*/framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?static_framework.framework",

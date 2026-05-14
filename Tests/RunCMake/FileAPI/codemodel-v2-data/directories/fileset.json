@@ -134,7 +134,8 @@
       "type": "fileSet",
       "destination": "include",
       "paths": [
-        "^fileset/h3\\.h$"
+        "^fileset/h3\\.h$",
+        "^fileset/h5\\.h$"
       ],
       "isExcludeFromAll": null,
       "isForAllComponents": null,

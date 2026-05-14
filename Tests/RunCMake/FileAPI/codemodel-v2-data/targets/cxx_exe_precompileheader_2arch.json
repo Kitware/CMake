@@ -161,82 +161,92 @@
     {
       "path": ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "CXX",
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
       "path": ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "CXX",
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
       "path": "^empty\\.cxx$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "CXX",
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": 5,
-          "command": "add_executable",
-          "hasParent": true
-        },
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": 5,
+            "command": "add_executable",
+            "hasParent": true
+          },
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
       "path": ".*/cmake_pch(_[^.]+)?\\.hxx$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
       "sourceGroupName": "Precompile Header File",
       "compileGroupLanguage": null,
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     },
     {
       "path": ".*/cmake_pch(_[^.]+)?\\.hxx$",
       "isGenerated": null,
-      "fileSetName": null,
+      "fileSetNames": null,
       "sourceGroupName": "Precompile Header File",
       "compileGroupLanguage": null,
-      "backtrace": [
-        {
-          "file": "^cxx/CMakeLists\\.txt$",
-          "line": null,
-          "command": null,
-          "hasParent": false
-        }
+      "backtraces": [
+        [
+          {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
       ]
     }
   ],

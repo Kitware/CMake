@@ -14,22 +14,24 @@
         {
             "path": "^empty\\.cxx$",
             "isGenerated": null,
-            "fileSetName": null,
+            "fileSetNames": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "CXX",
-            "backtrace": [
-                {
-                    "file": "^framework/CMakeLists\\.txt$",
-                    "line": 7,
-                    "command": "add_library",
-                    "hasParent": true
-                },
-                {
-                    "file": "^framework/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
+            "backtraces": [
+                [
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": 7,
+                        "command": "add_library",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
             ]
         }
     ],
