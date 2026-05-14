@@ -1567,7 +1567,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
         switch (status) {
           case cmPolicies::WARN: {
             this->Makefile->IssueDiagnostic(
-              cmDiagnostics::CMD_AUTHOR,
+              cmDiagnostics::CMD_POLICY,
               cmStrCat(cmPolicies::GetPolicyWarning(it->second), '\n'));
             CM_FALLTHROUGH;
           }

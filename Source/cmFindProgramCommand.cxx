@@ -144,7 +144,7 @@ struct cmFindProgramHelper
     }
     if (isExeNew) {
       this->Makefile->IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0109),
                  "\n"
                  "The file\n"
@@ -155,7 +155,7 @@ struct cmFindProgramHelper
                  "CMake is ignoring it for compatibility."));
     } else {
       this->Makefile->IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0109),
                  "\n"
                  "The file\n"

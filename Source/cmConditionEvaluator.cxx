@@ -667,7 +667,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
              "when the policy is set to NEW.  "
              "Since the policy is not set the OLD behavior will be used.";
 
-        this->Makefile.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e.str());
+        this->Makefile.IssueDiagnostic(cmDiagnostics::CMD_POLICY, e.str());
       }
     }
   }

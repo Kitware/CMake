@@ -828,7 +828,7 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0069) << "\n";
       w << "INTERPROCEDURAL_OPTIMIZATION property will be ignored for target "
         << "'" << this->GetName() << "'.";
-      this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str(),
+      this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str(),
                                       this->GetBacktrace());
 
       this->PolicyReportedCMP0069 = true;
@@ -2582,7 +2582,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
       case cmPolicies::WARN:
         if (!this->LocalGenerator->GetCMakeInstance()->GetIsInTryCompile()) {
           this->Makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
+            cmDiagnostics::CMD_POLICY,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0104) +
               "\nCUDA_ARCHITECTURES is empty for target \"" + this->GetName() +
               "\".");

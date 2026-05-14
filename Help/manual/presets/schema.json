@@ -1286,8 +1286,14 @@
         "deprecated": {
           "$ref": "#/definitions/configurePresets.warnings.deprecated@v1.."
         },
+        "experimental": {
+          "$ref": "#/definitions/configurePresets.warnings.experimental@v12"
+        },
         "installAbsoluteDestination": {
           "$ref": "#/definitions/configurePresets.warnings.installAbsoluteDestination@v12"
+        },
+        "policy": {
+          "$ref": "#/definitions/configurePresets.warnings.policy@v12"
         },
         "uninitialized": {
           "$ref": "#/definitions/configurePresets.warnings.uninitialized@v1.."
@@ -1315,9 +1321,17 @@
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Wdev or -Wno-dev on the command line. This may not be set to false if errors.dev is set to true."
     },
+    "configurePresets.warnings.experimental@v12": {
+      "type": "boolean",
+      "description": "An optional boolean. Equivalent to passing -Wexperimental or -Wno-experimental on the command line. This may not be set to false if errors.experimental is set to true."
+    },
     "configurePresets.warnings.installAbsoluteDestination@v12": {
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Winstall-absolute-destination or -Wno-install-absolute-destination on the command line. This may not be set to false if errors.installAbsoluteDestination is set to true."
+    },
+    "configurePresets.warnings.policy@v12": {
+      "type": "boolean",
+      "description": "An optional boolean. Equivalent to passing -Wpolicy or -Wno-policy on the command line. This may not be set to false if errors.policy is set to true."
     },
     "configurePresets.warnings.uninitialized@v1..": {
       "type": "boolean",
@@ -1371,8 +1385,14 @@
         "deprecated": {
           "$ref": "#/definitions/configurePresets.errors.deprecated@v1.."
         },
+        "experimental": {
+          "$ref": "#/definitions/configurePresets.errors.experimental@v12"
+        },
         "installAbsoluteDestination": {
           "$ref": "#/definitions/configurePresets.errors.installAbsoluteDestination@v12"
+        },
+        "policy": {
+          "$ref": "#/definitions/configurePresets.errors.policy@v12"
         },
         "uninitialized": {
           "$ref": "#/definitions/configurePresets.errors.uninitialized@v12"
@@ -1397,9 +1417,17 @@
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Werror=dev or -Wno-error=dev on the command line. This may not be set to true if warnings.dev is set to false."
     },
+    "configurePresets.errors.experimental@v12": {
+      "type": "boolean",
+      "description": "An optional boolean. Equivalent to passing -Werror=experimental or -Wno-error=experimental on the command line. This may not be set to true if warnings.experimental is set to false."
+    },
     "configurePresets.errors.installAbsoluteDestination@v12": {
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Werror=install-absolute-destination or -Wno-error=install-absolute-destination on the command line. This may not be set to true if warnings.installAbsoluteDestination is set to false."
+    },
+    "configurePresets.errors.policy@v12": {
+      "type": "boolean",
+      "description": "An optional boolean. Equivalent to passing -Werror=policy or -Wno-error=policy on the command line. This may not be set to true if warnings.policy is set to false."
     },
     "configurePresets.errors.uninitialized@v12": {
       "type": "boolean",

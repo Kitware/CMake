@@ -1026,7 +1026,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
             R"( compiler id "XLClang" to "XL" for compatibility.)"
             ;
           /* clang-format on */
-          mf->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
+          mf->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1051,7 +1051,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
             R"( compiler id "LCC" to "GNU" for compatibility.)"
             ;
           /* clang-format on */
-          mf->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
+          mf->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1784,7 +1784,7 @@ void cmGlobalGenerator::Generate()
     for (std::string const& t : this->CMP0068WarnTargets) {
       w << ' ' << t << '\n';
     }
-    this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
+    this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_POLICY,
                                               w.str());
   }
 }
@@ -3102,7 +3102,7 @@ void cmGlobalGenerator::ReserveGlobalTargetCodegen()
   switch (policyStatus) {
     case cmPolicies::WARN:
       tgt->GetMakefile()->IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0171), '\n',
                  "The target name \"codegen\" is reserved."),
         tgt->GetBacktrace());

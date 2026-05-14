@@ -417,7 +417,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
           if (status.GetMakefile().PolicyOptionalWarningEnabled(
                 "CMAKE_POLICY_WARNING_CMP0159")) {
             status.GetMakefile().IssueDiagnostic(
-              cmDiagnostics::CMD_AUTHOR,
+              cmDiagnostics::CMD_POLICY,
               cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0159),
                        "\n"
                        "For compatibility, CMake is leaving CMAKE_MATCH_<n> "
@@ -1377,7 +1377,7 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
       computeNewPath(input, realPath);
       if (oldPolicyPath != realPath) {
         status.GetMakefile().IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0152),
                    "\n"
                    "From input path:\n  ",
@@ -3324,7 +3324,7 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
         needToTry = false;
       } else if (cmp0205 == cmPolicies::WARN && arguments.CopyOnError) {
         status.GetMakefile().IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat("Path\n  ", fileName,
                    "\nis a directory. Hard link creation is not supported "
                    "for directories.\n",
@@ -3350,7 +3350,7 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
   if (cmp0205 == cmPolicies::WARN && arguments.CopyOnError &&
       sourceIsDirectory) {
     status.GetMakefile().IssueDiagnostic(
-      cmDiagnostics::CMD_AUTHOR,
+      cmDiagnostics::CMD_POLICY,
       cmStrCat("Path\n  ", fileName,
                "\nis a directory. It will be copied "
                "recursively when CMP0205 is set to NEW.\n",

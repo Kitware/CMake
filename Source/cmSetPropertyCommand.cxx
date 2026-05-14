@@ -397,7 +397,7 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
   if (cmp0118PolicyWARN) {
     if (!cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
       mf.IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0118),
                  "\nAttempt to set property 'GENERATED' with the following "
                  "non-boolean value (which will be interpreted as \"0\"):\n",
@@ -408,14 +408,14 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
     }
     if (cmIsOff(propertyValue)) {
       mf.IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0118),
                  "\nUnsetting property 'GENERATED' will not be allowed under "
                  "policy CMP0118!\n"));
     }
     if (op == PropertyOp::Append || op == PropertyOp::AppendAsString) {
       mf.IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0118),
                  "\nAppending to property 'GENERATED' will not be allowed "
                  "under policy CMP0118!\n"));

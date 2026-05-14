@@ -54,7 +54,7 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
         switch (tgt->GetPolicyStatusCMP0081()) {
           case cmPolicies::WARN:
             tgt->GetLocalGenerator()->IssueDiagnostic(
-              cmDiagnostics::CMD_AUTHOR,
+              cmDiagnostics::CMD_POLICY,
               cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0081),
                        "\nFound relative path while evaluating"
                        " link directories of \"",

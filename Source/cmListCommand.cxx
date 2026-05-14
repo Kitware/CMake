@@ -39,7 +39,7 @@ bool GetIndexArg(std::string const& arg, int* idx, cmMakefile& mf)
         std::string warn =
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0121),
                    " Invalid list index \"", arg, "\".");
-        mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, warn);
+        mf.IssueDiagnostic(cmDiagnostics::CMD_POLICY, warn);
         CM_FALLTHROUGH;
       }
       case cmPolicies::OLD:

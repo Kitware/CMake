@@ -107,7 +107,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
         switch (PolicyStatus) {
           case cmPolicies::WARN: {
             status.GetMakefile().IssueDiagnostic(
-              cmDiagnostics::CMD_AUTHOR,
+              cmDiagnostics::CMD_POLICY,
               cmStrCat(cmPolicies::GetPolicyWarning(ModulePolicy->second),
                        '\n'));
             CM_FALLTHROUGH;

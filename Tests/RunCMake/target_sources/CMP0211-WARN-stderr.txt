@@ -1,4 +1,4 @@
-CMake Warning \(author\) in CMakeLists\.txt:
+CMake Warning \(policy\) in CMakeLists\.txt:
   Policy CMP0211 is not set: A file may belong to at most one file set in a
   target\.  Run "cmake --help-policy CMP0211" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -8,9 +8,10 @@ CMake Warning \(author\) in CMakeLists\.txt:
     .+/Tests/RunCMake/target_sources/lib2\.c
 
   already belongs to file set "s[12]"\.
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) in CMakeLists\.txt:
+CMake Warning \(policy\) in CMakeLists\.txt:
   Policy CMP0211 is not set: A file may belong to at most one file set in a
   target\.  Run "cmake --help-policy CMP0211" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -20,4 +21,5 @@ CMake Warning \(author\) in CMakeLists\.txt:
     .+/Tests/RunCMake/target_sources/lib2\.c
 
   already belongs to file set "s1"\.
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

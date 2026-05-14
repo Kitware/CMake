@@ -182,7 +182,7 @@ void cmDeprecatedWatch(std::string const& /*unused*/,
                        cmMakefile const* mf)
 {
   if (mf->GetPolicyStatus(cmPolicies::CMP0218) == cmPolicies::WARN) {
-    mf->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
+    mf->IssueDiagnostic(cmDiagnostics::CMD_POLICY,
                         cmPolicies::GetPolicyWarning(cmPolicies::CMP0218));
   }
 }

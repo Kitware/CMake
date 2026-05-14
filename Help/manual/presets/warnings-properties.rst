@@ -32,6 +32,15 @@
   This may not be set to ``false``
   if ``errors.dev`` is set to ``true``.
 
+.. _`CMakePresets.configurePresets.warnings.experimental`:
+
+``experimental``
+  .. presets-versionadded:: 12
+
+  An optional boolean. Equivalent to passing :option:`-Wexperimental <cmake -W>` or
+  :option:`-Wno-experimental <cmake -Wno->` on the command line.
+  This may not be set to ``false`` if ``errors.experimental`` is set to ``true``.
+
 .. _`CMakePresets.configurePresets.warnings.installAbsoluteDestination`:
 
 ``installAbsoluteDestination``
@@ -40,6 +49,15 @@
   An optional boolean. Equivalent to passing :option:`-Winstall-absolute-destination <cmake -W>` or
   :option:`-Wno-install-absolute-destination <cmake -Wno->` on the command line.
   This may not be set to ``false`` if ``errors.installAbsoluteDestination`` is set to ``true``.
+
+.. _`CMakePresets.configurePresets.warnings.policy`:
+
+``policy``
+  .. presets-versionadded:: 12
+
+  An optional boolean. Equivalent to passing :option:`-Wpolicy <cmake -W>` or
+  :option:`-Wno-policy <cmake -Wno->` on the command line.
+  This may not be set to ``false`` if ``errors.policy`` is set to ``true``.
 
 .. _`CMakePresets.configurePresets.warnings.uninitialized`:
 

@@ -79,7 +79,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     if (!existsAfterSet) {
       status.GetMakefile().IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0077),
                  "\n"
                  "For compatibility with older versions of CMake, option "

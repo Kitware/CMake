@@ -38,7 +38,7 @@ bool cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
     switch (this->LocalGenerator->GetPolicyStatus(cmPolicies::CMP0087)) {
       case cmPolicies::WARN:
         this->LocalGenerator->IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmPolicies::GetPolicyWarning(cmPolicies::CMP0087));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:

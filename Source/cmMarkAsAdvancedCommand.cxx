@@ -68,7 +68,7 @@ bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
         "is no longer created when policy CMP0102 is set to NEW. Run \"cmake "
         "--help-policy CMP0102\" for policy details. Use the cmake_policy "
         "command to set the policy and suppress this warning.");
-      mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err);
+      mf.IssueDiagnostic(cmDiagnostics::CMD_POLICY, err);
     }
 
     // If it's not in the cache and we're using the new behavior, nothing to

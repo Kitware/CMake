@@ -11,11 +11,12 @@ Call Stack \(most recent call first\):
 This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
 to suppress it\.
 +
-CMake Warning \(author\) in CMakeLists\.txt:
+CMake Warning \(policy\) in CMakeLists\.txt:
   Policy CMP0128 is not set: Selection of language standard and extension
   flags improved\.  Run "cmake --help-policy CMP0128" for policy details\.  Use
   the cmake_policy command to set the policy and suppress this warning\.
 
   For compatibility with older versions of CMake, unnecessary flags for
   language standard or compiler extensions may be added\.
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

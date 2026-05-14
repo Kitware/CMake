@@ -988,7 +988,7 @@ void cmInstallTargetGenerator::IssueCMP0095Warning(
     w << "RPATH entries for target '" << this->Target->GetName() << "' "
       << "will not be escaped in the intermediary "
       << "cmake_install.cmake script.";
-    cm->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str(),
+    cm->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str(),
                         this->GetBacktrace());
   }
 }

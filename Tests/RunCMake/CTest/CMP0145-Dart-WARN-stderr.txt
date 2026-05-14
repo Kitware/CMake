@@ -1,11 +1,12 @@
-^CMake Warning \(author\) at CMP0145-Dart-WARN\.cmake:[0-9]+ \(include\):
+^CMake Warning \(policy\) at CMP0145-Dart-WARN\.cmake:[0-9]+ \(include\):
   Policy CMP0145 is not set: The Dart and FindDart modules are removed\.  Run
   "cmake --help-policy CMP0145" for policy details\.  Use the cmake_policy
   command to set the policy and suppress this warning\.
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 CMake Warning \(author\) at [^
 ]*/Modules/Dart\.cmake:[0-9]+ \(message\):
@@ -18,7 +19,7 @@ Call Stack \(most recent call first\):
 This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
 CMake Warning \(deprecated\) at [^
-]*/Modules/Dart\.cmake:[0-9]+6 \(cmake_policy\):
+]*/Modules/Dart\.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0145 will be removed from a future version
   of CMake\.
 

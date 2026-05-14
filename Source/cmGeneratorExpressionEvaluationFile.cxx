@@ -252,7 +252,7 @@ std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
         "undefined behavior will be used."
         ;
       /* clang-format on */
-      lg->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
+      lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
     }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
