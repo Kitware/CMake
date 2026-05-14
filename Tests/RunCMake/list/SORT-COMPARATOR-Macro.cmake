@@ -1,0 +1,10 @@
+macro(string_less_macro a b result)
+  if(${a} STRLESS ${b})
+    set(${result} TRUE)
+  else()
+    set(${result} FALSE)
+  endif()
+endmacro()
+
+set(mylist c a b)
+list(SORT mylist COMPARATOR string_less_macro)

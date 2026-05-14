@@ -1,0 +1,11 @@
+macro(is_short input result)
+  string(LENGTH "${input}" _len)
+  if(_len LESS 4)
+    set(${result} TRUE)
+  else()
+    set(${result} FALSE)
+  endif()
+endmacro()
+
+set(mylist alpha bravo charlie)
+list(FILTER mylist INCLUDE PREDICATE is_short)

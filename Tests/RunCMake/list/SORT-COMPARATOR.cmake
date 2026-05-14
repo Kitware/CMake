@@ -7,15 +7,6 @@ function(string_less a b result)
   endif()
 endfunction()
 
-# Comparator as macro
-macro(string_less_macro a b result)
-  if(${a} STRLESS ${b})
-    set(${result} TRUE)
-  else()
-    set(${result} FALSE)
-  endif()
-endmacro()
-
 # Comparator: string length comparison
 function(shorter_first a b result)
   string(LENGTH "${a}" len_a)
@@ -32,13 +23,6 @@ set(mylist c a b)
 list(SORT mylist COMPARATOR string_less)
 if(NOT mylist STREQUAL "a;b;c")
   message(FATAL_ERROR "SORT(COMPARATOR function) is \"${mylist}\", expected \"a;b;c\"")
-endif()
-
-## COMPARATOR with macro
-set(mylist c a b)
-list(SORT mylist COMPARATOR string_less_macro)
-if(NOT mylist STREQUAL "a;b;c")
-  message(FATAL_ERROR "SORT(COMPARATOR macro) is \"${mylist}\", expected \"a;b;c\"")
 endif()
 
 ## COMPARATOR with ORDER DESCENDING

@@ -1,0 +1,5 @@
+^CMake Error at SORT-COMPARATOR-Macro\.cmake:10 \(list\):
+  list sub-command SORT, COMPARATOR: macro "string_less_macro" may not be
+  used here; define it as a function\(\) instead\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$

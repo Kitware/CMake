@@ -139,7 +139,7 @@ Modification
       :ref:`string(REGEX) <Regex Specification>`.
 
     ``PREDICATE``
-      Specify a user-defined callable as a predicate.
+      Specify a user-defined :command:`function` as a predicate.
 
       .. code-block:: cmake
 
@@ -148,11 +148,11 @@ Modification
       .. versionadded:: 4.4
 
       ``<function>`` is a user-defined :command:`function` that acts as a
-      unary predicate.  The callable must accept exactly two parameters: the
-      input value and the name of an output variable.  The callable must set the
+      unary predicate.  The function must accept exactly two parameters: the
+      input value and the name of an output variable.  The function must set the
       output variable to a boolean value in the calling scope.
       The output variable is interpreted using standard CMake boolean evaluation.
-      If the callable does not set the output variable, it is an error.
+      If the function does not set the output variable, it is an error.
 
       Example:
 
@@ -290,9 +290,9 @@ Modification
         See policy :policy:`CMP0186`.
 
     ``APPLY``
-      Invoke a user-defined callable for each element of the list.
-      The callable must accept exactly two parameters: the input value and the
-      name of an output variable.  The callable must set the output variable
+      Invoke a user-defined :command:`function` for each element of the list.
+      The function must accept exactly two parameters: the input value and the
+      name of an output variable.  The function must set the output variable
       in the calling scope.
 
       .. signature::
@@ -356,8 +356,8 @@ Modification
         list(TRANSFORM <list> <ACTION> REGEX <regular_expression> ...)
 
     ``PREDICATE``
-      Specify a user-defined callable as a predicate.
-      Only elements for which the callable returns a true value will be
+      Specify a user-defined :command:`function` as a predicate.
+      Only elements for which the function returns a true value will be
       transformed.
 
       .. code-block:: cmake
@@ -368,9 +368,9 @@ Modification
 
       ``<function>`` is a user-defined :command:`function` with exactly
       two formal parameters: the input value and the name of an output
-      variable.  The callable must set the output variable to a boolean
+      variable.  The function must set the output variable to a boolean
       value.  Standard CMake boolean evaluation is used.
-      If the callable does not set the output variable, it is an error.
+      If the function does not set the output variable, it is an error.
 
       Example:
 
@@ -450,21 +450,21 @@ Ordering
       Sorts the list in descending order.
 
   Instead of the built-in ``COMPARE`` methods, a user-defined comparison
-  function may be used with the ``COMPARATOR`` keyword.
+  :command:`function` may be used with the ``COMPARATOR`` keyword.
 
   .. versionadded:: 4.4
 
   ``COMPARATOR`` is mutually exclusive with ``COMPARE``.  The ``CASE``
   and ``ORDER`` options may still be used alongside ``COMPARATOR``:
   the ``CASE`` filter is applied to both values before they are passed to
-  the callable, and ``ORDER DESCENDING`` reverses the comparison by
+  the function, and ``ORDER DESCENDING`` reverses the comparison by
   swapping the two arguments.
 
-  The callable must accept exactly three parameters: two input values and
+  The function must accept exactly three parameters: two input values and
   the name of an output variable.  It must set the output variable to a
   boolean value (``TRUE`` if the first value should come before the second,
   ``FALSE`` otherwise) in the calling scope.
-  If the callable does not set the output variable, it is an error.
+  If the function does not set the output variable, it is an error.
 
   The comparator must define a
   `strict weak ordering <https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings>`_.

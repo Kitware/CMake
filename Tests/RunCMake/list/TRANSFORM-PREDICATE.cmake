@@ -7,16 +7,6 @@ function(starts_with_b input result)
   endif()
 endfunction()
 
-# Predicate as macro
-macro(is_short input result)
-  string(LENGTH "${input}" _len)
-  if(_len LESS 4)
-    set(${result} TRUE)
-  else()
-    set(${result} FALSE)
-  endif()
-endmacro()
-
 set(mylist alpha bravo charlie bravo_two delta)
 
 # Basic PREDICATE with TOUPPER - only items starting with "b" are uppercased
@@ -34,13 +24,6 @@ endif()
 list(TRANSFORM mylist TOUPPER PREDICATE starts_with_b)
 if(NOT mylist STREQUAL "alpha;BRAVO;charlie;BRAVO_TWO;delta")
   message(FATAL_ERROR "TRANSFORM(TOUPPER PREDICATE in-place) is \"${mylist}\", expected \"alpha;BRAVO;charlie;BRAVO_TWO;delta\"")
-endif()
-
-# PREDICATE with macro
-set(mylist ab cde fg hijklm no)
-list(TRANSFORM mylist TOUPPER PREDICATE is_short OUTPUT_VARIABLE output)
-if(NOT output STREQUAL "AB;CDE;FG;hijklm;NO")
-  message(FATAL_ERROR "TRANSFORM(TOUPPER PREDICATE macro) is \"${output}\", expected \"AB;CDE;FG;hijklm;NO\"")
 endif()
 
 # PREDICATE combined with APPLY
