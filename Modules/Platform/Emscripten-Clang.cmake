@@ -11,7 +11,6 @@ macro(__emscripten_clang lang)
   # We also do not add -sMAIN_MODULE to CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS
   # to preserve legacy behavior in which projects added it as needed.
   # In the future we may add both flags with suitable controls.
-  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "")
 
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
