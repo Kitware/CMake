@@ -187,6 +187,14 @@ No special configuration is needed, configure and build as usual.
 
 We can verify the installation is correct with :option:`cmake --install`.
 
+.. note::
+
+  As with CTest, when using a multi-config generator such as Visual Studio, it
+  will be necessary to specify a configuration like ``Debug`` or ``Release``
+  using :option:`cmake --install --config <cmake--install --config>`.
+  This is true whenever using a multi-config generator, and won't be called out
+  specifically in future commands.
+
 .. code-block:: console
 
   cmake --install build --prefix install
@@ -351,15 +359,6 @@ The build command is sufficient to reconfigure the project.
   cmake --build build
 
 We can verify the installation is correct with :option:`cmake --install`.
-
-.. note::
-
-  As with CTest, when using multi-config generator, eg Visual Studio, it will be
-  necessary to specify a configuration with
-  ``cmake --install --config <config> <remaining flags>``, where
-  ``<config>`` is a value like ``Debug`` or ``Release``. This is true whenever
-  using a multi-config generator, and won't be called out specifically in
-  future commands.
 
 .. code-block:: console
 
