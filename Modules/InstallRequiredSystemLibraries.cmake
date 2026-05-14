@@ -141,6 +141,10 @@ if(MSVC)
       set(CMAKE_MSVC_ARCH amd64)
     endif()
   endif()
+  if(CMAKE_MSVC_ARCH STREQUAL "arm64ec")
+    set(CMAKE_MSVC_ARCH "arm64")
+  endif()
+
 
   get_filename_component(devenv_dir "${CMAKE_MAKE_PROGRAM}" PATH)
   get_filename_component(base_dir "${devenv_dir}/../.." ABSOLUTE)
