@@ -410,9 +410,6 @@ void cmCacheManager::OutputHelpString(std::ostream& fout,
                                       std::string const& helpString)
 {
   std::string::size_type end = helpString.size();
-  if (end == 0) {
-    return;
-  }
   std::string oneLine;
   std::string::size_type pos = 0;
   for (std::string::size_type i = 1; i <= end; i++) {
@@ -437,7 +434,7 @@ void cmCacheManager::OutputWarningComment(std::ostream& fout,
   std::string::size_type end = message.size();
   std::string oneLine;
   std::string::size_type pos = 0;
-  for (std::string::size_type i = 0; i <= end; i++) {
+  for (std::string::size_type i = 1; i <= end; i++) {
     if ((i == end) || (message[i] == '\n') ||
         ((i - pos >= 60) && (message[i] == ' ') && wrapSpaces)) {
       fout << "# ";

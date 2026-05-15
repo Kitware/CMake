@@ -73,12 +73,6 @@ if(NOT RunCMake_GENERATOR MATCHES "^Ninja Multi-Config$")
   run_cmake(NoCMAKE_DEFAULT_CONFIGS)
 endif()
 
-block()
-  run_cmake(CacheVarHelpString)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  run_cmake(CacheVarHelpString)
-endblock()
-
 if(NOT CMAKE_HOST_WIN32)
   block()
     # Test a non-writable build directory.
