@@ -11,8 +11,8 @@ build.
 
 CMake provides different algorithms for selecting which sources are grouped
 together into a *bucket*. Algorithm selection is decided by the
-:prop_tgt:`UNITY_BUILD_MODE` target property, which has the following acceptable
-values:
+:prop_tgt:`UNITY_BUILD_MODE` target property, which has the following
+acceptable values:
 
 * ``BATCH``
   When in this mode CMake determines which files are grouped together.
@@ -79,6 +79,11 @@ a number of measures to help address such problems:
   :prop_sf:`INCLUDE_DIRECTORIES` source property will not be combined
   into a unity source.
 
+* .. versionadded:: 4.4
+    Any file set that has a non-empty :prop_fs:`COMPILE_OPTIONS`,
+    :prop_fs:`COMPILE_DEFINITIONS`, or :prop_fs:`INCLUDE_DIRECTORIES`
+    file set property will not be combined into a unity source.
+
 * Any source file which is scanned for C++ module sources via
   :prop_tgt:`CXX_SCAN_FOR_MODULES`, :prop_sf:`CXX_SCAN_FOR_MODULES`, or
   membership of a ``CXX_MODULES`` file set will not be combined into a unity
@@ -89,6 +94,13 @@ a number of measures to help address such problems:
   source property to true.  This can be a more effective way to prevent
   problems with specific files than disabling unity builds for an entire
   target.
+
+* .. versionadded:: 4.4
+    Projects can prevent all the source files of a file set from being combined
+    into a unity source by setting its :prop_fs:`SKIP_UNITY_BUILD_INCLUSION`
+    file set property to true.  This can be a more effective way to prevent
+    problems with specific files than disabling unity builds for an entire
+    target.
 
 * Projects can set :prop_tgt:`UNITY_BUILD_UNIQUE_ID` to cause a valid
   C-identifier to be generated which is unique per file in a unity

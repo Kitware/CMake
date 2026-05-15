@@ -2694,7 +2694,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         if (useNativeUnityBuild) {
           e2.Attribute(
             "IncludeInUnityFile",
-            si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")
+            ((fs && fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn()) ||
+             si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"))
               ? "false"
               : "true");
           e2.Attribute("CustomUnityFile", "true");
@@ -2705,14 +2706,16 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         } else {
           // Visual Studio versions prior to 2017 15.8 do not know about unity
           // builds, thus we exclude the files already part of unity sources.
-          if (!si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")) {
+          if (!((fs && fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn()) ||
+                si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"))) {
             exclude_configs = all_configs;
           }
         }
       }
       if (haveUnityBuild && strcmp(tool, "CudaCompile") == 0 &&
           si.Source->GetProperty("UNITY_SOURCE_FILE")) {
-        if (!si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")) {
+        if (!((fs && fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn()) ||
+              si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"))) {
           exclude_configs = all_configs;
         }
       }

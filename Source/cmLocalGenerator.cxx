@@ -32,9 +32,11 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
@@ -3327,18 +3329,39 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
 
   for (std::string lang : { "C", "CXX", "OBJC", "OBJCXX", "CUDA" }) {
     std::vector<UnityBatchedSource> filtered_sources;
-    std::copy_if(unitySources.begin(), unitySources.end(),
-                 std::back_inserter(filtered_sources),
-                 [&](UnityBatchedSource const& ubs) -> bool {
-                   cmSourceFile* sf = ubs.Source;
-                   return sf->GetLanguage() == lang &&
-                     !sf->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION") &&
-                     !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-                     !sf->GetProperty("COMPILE_OPTIONS") &&
-                     !sf->GetProperty("COMPILE_DEFINITIONS") &&
-                     !sf->GetProperty("COMPILE_FLAGS") &&
-                     !sf->GetProperty("INCLUDE_DIRECTORIES");
-                 });
+    std::copy_if(
+      unitySources.begin(), unitySources.end(),
+      std::back_inserter(filtered_sources),
+      [&](UnityBatchedSource const& ubs) -> bool {
+        cmSourceFile* sf = ubs.Source;
+        if (sf->GetLanguage() != lang) {
+          return false;
+        }
+        for (auto idx : ubs.Configs) {
+          cmGeneratorFileSet const* fileSet =
+            target->GetFileSetForSource(configs[idx], sf);
+          if (fileSet &&
+              (fileSet->GetType() == cm::FileSetMetadata::HEADERS ||
+               fileSet->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn() ||
+               fileSet->GetProperty(fileSet->BelongsTo(target)
+                                      ? "COMPILE_OPTIONS"
+                                      : "INTERFACE_COMPILE_OPTIONS") ||
+               fileSet->GetProperty(fileSet->BelongsTo(target)
+                                      ? "COMPILE_DEFINITIONS"
+                                      : "INTERFACE_COMPILE_DEFINITIONS") ||
+               fileSet->GetProperty(fileSet->BelongsTo(target)
+                                      ? "INCLUDE_DIRECTORIES"
+                                      : "INTERFACE_INCLUDE_DIRECTORIES"))) {
+            return false;
+          }
+        }
+        return !sf->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION") &&
+          !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+          !sf->GetProperty("COMPILE_OPTIONS") &&
+          !sf->GetProperty("COMPILE_DEFINITIONS") &&
+          !sf->GetProperty("COMPILE_FLAGS") &&
+          !sf->GetProperty("INCLUDE_DIRECTORIES");
+      });
 
     std::vector<UnitySource> unity_files;
     if (!unityMode || *unityMode == "BATCH") {

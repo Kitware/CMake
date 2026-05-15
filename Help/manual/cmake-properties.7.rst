@@ -554,6 +554,7 @@ Properties on File Sets
    /prop_fs/INTERFACE_SOURCES
    /prop_fs/SCOPE
    /prop_fs/SKIP_LINTING
+   /prop_fs/SKIP_UNITY_BUILD_INCLUSION
    /prop_fs/SOURCES
    /prop_fs/TYPE
 
