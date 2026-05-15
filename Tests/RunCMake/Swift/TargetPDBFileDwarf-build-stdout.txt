@@ -1,0 +1,10 @@
+.*swiftc(\.exe)?"?[^
+]* -g[^
+]* -debug-info-format=dwarf[^
+]*
+.*swiftc(\.exe)?"?[^
+]* -Xlinker -debug:dwarf[^
+]* -use-ld=lld[^
+]* -Xlinker -pdb:[^
+]*SwiftPDBDwarf\.pdb[^
+]*

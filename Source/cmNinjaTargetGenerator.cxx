@@ -580,9 +580,16 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(
   cmNinjaVars& vars, std::string const& config) const
 {
   cmMakefile* mf = this->GetMakefile();
-  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
-      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID") ||
-      mf->GetDefinition("MSVC_CUDA_ARCHITECTURE_ID")) {
+  bool supportsPDB = mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+    mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID") ||
+    mf->GetDefinition("MSVC_CUDA_ARCHITECTURE_ID");
+  if (!supportsPDB) {
+    std::string const linkLanguage =
+      this->GeneratorTarget->GetLinkerLanguage(config);
+    supportsPDB =
+      mf->IsOn(cmStrCat("CMAKE_", linkLanguage, "_LINKER_SUPPORTS_PDB"));
+  }
+  if (supportsPDB) {
     std::string pdbPath;
     std::string compilePdbPath = this->ComputeTargetCompilePDB(config);
     if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE ||
