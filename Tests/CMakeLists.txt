@@ -3192,7 +3192,8 @@ if(BUILD_TESTING)
         AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran"
         )
       if(DEFINED CMake_TEST_Fortran_SUBMODULES)
-        list(PREPEND CMake_TEST_FortranModules_BUILD_OPTIONS -DCMake_TEST_Fortran_SUBMODULES:BOOL=${CMake_TEST_Fortran_SUBMODULES})
+        list(INSERT CMake_TEST_FortranModules_BUILD_OPTIONS 0
+          -DCMake_TEST_Fortran_SUBMODULES:BOOL=${CMake_TEST_Fortran_SUBMODULES})
       endif()
       add_test(FortranModules ${CMAKE_CTEST_COMMAND}
         --build-and-test
