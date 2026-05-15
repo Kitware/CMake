@@ -117,11 +117,10 @@ Verify all the tests pass with CTest.
 
 .. note::
 
-  If using a multi-config generator, eg Visual Studio, it will be necessary to
-  specify a configuration with ``ctest -C <config> <remaining flags>``, where
-  ``<config>`` is a value like ``Debug`` or ``Release``. This is true whenever
-  using a multi-config generator, and won't be called out specifically in
-  future commands.
+  When using a multi-config generator such as Visual Studio, it
+  will be necessary to specify a configuration like ``Debug`` or ``Release``
+  using :option:`ctest -C`. This is true whenever using a multi-config
+  generator, and won't be called out specifically in future commands.
 
 .. code-block:: console
 
