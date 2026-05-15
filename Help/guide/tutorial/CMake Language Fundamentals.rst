@@ -418,7 +418,7 @@ recommended way is to allow the command to do the variable expansion for us
 via ``IN LISTS`` to access the ``ARGN`` list items.
 
 The :command:`if` comparison we need is ``MATCHES`` which will check if
-``"FOO"`` exists in the item. All that remains is to append the item to the
+``"Foo"`` exists in the item. All that remains is to append the item to the
 ``OutVar`` list.  The trickiest part is remembering that ``OutVar`` *names* a
 list, it is not the list itself, so we need to access it via ``${OutVar}``.
 
