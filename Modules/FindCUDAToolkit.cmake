@@ -1401,7 +1401,12 @@ if(CUDAToolkit_FOUND)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
-  _CUDAToolkit_find_and_add_import_lib(nvml_static ONLY_SEARCH_FOR libnvidia-ml.a libnvml.a)
+  if(NOT TARGET CUDA::nvml_static)
+    _CUDAToolkit_find_and_add_import_lib(nvml_static ONLY_SEARCH_FOR libnvidia-ml.a libnvml.a)
+    if(TARGET CUDA::nvml_static)
+      target_link_libraries(CUDA::nvml_static INTERFACE ${CMAKE_DL_LIBS})
+    endif()
+  endif()
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
     # Header-only variant. Uses dlopen().
