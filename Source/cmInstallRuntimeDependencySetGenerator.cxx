@@ -269,6 +269,8 @@ void cmInstallRuntimeDependencySetGenerator::GenerateStripFixup(
 std::string cmInstallRuntimeDependencySetGenerator::GetDestination(
   std::string const& config) const
 {
-  return cmGeneratorExpression::Evaluate(this->Destination,
-                                         this->LocalGenerator, config);
+  std::string dest = cmGeneratorExpression::Evaluate(
+    this->Destination, this->LocalGenerator, config);
+  this->CheckAbsoluteDestination(dest, this->LocalGenerator);
+  return dest;
 }

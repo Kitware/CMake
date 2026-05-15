@@ -1,0 +1,10 @@
+CMake Error \(install-absolute-destination\) at InstallBMIAbsDir\.cmake:[0-9]+ \(install\):
+  INSTALL command given absolute DESTINATION path:
+
+    /lib/bmi
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This error is for project developers\.  Use -Wno-error=author or
+-Wno-error=install-absolute-destination to suppress it\.
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$
