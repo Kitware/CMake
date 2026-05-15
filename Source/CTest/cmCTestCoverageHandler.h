@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <array>
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -25,8 +26,12 @@ public:
   std::string SourceDir;
   std::string BinaryDir;
   using SingleFileCoverageVector = std::vector<int>;
+  using SingleFileBranchCoverageVector = std::vector<std::array<int, 2>>;
   using TotalCoverageMap = std::map<std::string, SingleFileCoverageVector>;
+  using TotalBranchCoverageMap =
+    std::map<std::string, SingleFileBranchCoverageVector>;
   TotalCoverageMap TotalCoverage;
+  TotalBranchCoverageMap TotalBranchCoverage;
   std::ostream* OFS;
   bool Quiet;
 };
@@ -75,6 +80,11 @@ private:
   //! Handle coverage using xdebug php coverage
   int HandlePHPCoverage(cmCTestCoverageHandlerContainer* cont);
 
+  //! Handle coverage for Clang with llvm function
+  int HandleClangSourceCodeCoverage(cmCTestCoverageHandlerContainer* cont);
+
+  void HandleClangSourceCodeCoverageFile(cmCTestCoverageHandlerContainer* cont,
+                                         std::string output);
   //! Handle coverage for Python with coverage.py
   int HandleCoberturaCoverage(cmCTestCoverageHandlerContainer* cont);
 

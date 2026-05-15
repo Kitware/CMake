@@ -41,6 +41,11 @@ block()
     if(NOT CTEST_TEST_COVERAGE_MERGE_EXECUTABLE)
       set(CTEST_TEST_COVERAGE_MERGE_EXECUTABLE "llvm-profdata")
     endif()
+
+        find_program(CTEST_TEST_COVERAGE_MERGE_EXECUTABLE llvm-cov)
+    if(NOT CTEST_TEST_COVERAGE_DATA_EXEUCUTABLE)
+      set(CTEST_TEST_COVERAGE_DATA_EXECUTABLE "llvm-cov")
+    endif()
   endif()
 
   if(CTEST_NEW_FORMAT)
