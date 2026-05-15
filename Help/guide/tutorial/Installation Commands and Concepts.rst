@@ -73,7 +73,8 @@ set this at configure time, so that every :option:`cmake --install` performed
 using that build tree defaults to a given prefix, we can use any of:
 
 * the :option:`cmake --install-prefix` option;
-* the :ref:`installDir <CMakePresets installDir>` field in CMake presets; or
+* the :ref:`installDir <CMakePresets.configurePresets.installDir>`
+  field in CMake presets; or
 * the :variable:`CMAKE_INSTALL_PREFIX` variable.
 
 .. note::
