@@ -5,6 +5,11 @@ elseif("x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   include(Platform/Windows-MSVC)
   __windows_compiler_msvc(Fortran)
 
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_PossibleDataLoss      "")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_StackFrameErrorCheck  "")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_UninitializedVariable "")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_RTCsu                 "")
+
   if(CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 18.0)
     set(_LLVMFlang_LINK_RUNTIME "")
     set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "-fms-runtime-lib=static")

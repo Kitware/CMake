@@ -1,6 +1,7 @@
 /* Some compilers ignore the -RTC flags even if specified.  */
 #if (defined(_MSC_VER) && _MSC_VER <= 1310) || defined(__clang__) ||          \
-  defined(__INTEL_LLVM_COMPILER) || defined(__INTEL_COMPILER)
+  defined(__flang__) || defined(__INTEL_LLVM_COMPILER) ||                     \
+  defined(__INTEL_COMPILER)
 #  define NO__MSVC_RUNTIME_CHECKS
 #endif
 
