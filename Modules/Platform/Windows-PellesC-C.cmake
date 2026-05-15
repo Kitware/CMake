@@ -35,6 +35,8 @@ string(APPEND CMAKE_C_FLAGS_RELEASE_INIT " -Ot -Ob2 -DNDEBUG=1")
 string(APPEND CMAKE_C_FLAGS_RELWITHDEBINFO_INIT " -Zi -Ot -Ob1 -DNDEBUG=1")
 string(APPEND CMAKE_C_FLAGS_MINSIZEREL_INIT " -Os -Ob1 -DNDEBUG=1")
 
+set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib")
+
 unset(_PellesC_C_OBJ_FLAGS)
 unset(_PellesC_C_ASM_FLAGS)
 unset(_PellesC_ARCH)
