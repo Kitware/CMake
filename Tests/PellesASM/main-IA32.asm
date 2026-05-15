@@ -1,4 +1,4 @@
-﻿extern $printf:proc
+extern $printf:proc
 
 .rdata
 fmt db "hello assembler world, %d arguments  given", 0ah, 0
