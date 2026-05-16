@@ -1,0 +1,67 @@
+# This is a basic version file for the Config-mode of find_package().
+# It is used by write_basic_package_version_file() as input file for configure_file()
+# to create a version-file which can be installed along a config.cmake file.
+#
+# The created file sets PACKAGE_VERSION_EXACT if the current version string and
+# the requested version string are exactly the same and it sets
+# PACKAGE_VERSION_COMPATIBLE if the current version and requested version are
+# equal after normalizing leading zeroes in each specified version component.
+# The variable CVF_VERSION must be set before calling configure_file().
+
+
+if (PACKAGE_FIND_VERSION_RANGE)
+  message(AUTHOR_WARNING
+    "`find_package()` specify a version range but the version strategy "
+    "(SameFullVersion) of the module `${PACKAGE_FIND_NAME}` is incompatible "
+    "with this request. Only the lower endpoint of the range will be used.")
+endif()
+
+set(PACKAGE_VERSION "@CVF_VERSION@")
+
+if("@CVF_VERSION@" MATCHES "^[0-9]+(\\.[0-9]+){0,3}$")
+  string(REPLACE "." ";" CVF_VERSION_COMPONENTS "@CVF_VERSION@")
+  unset(CVF_VERSION_NORMALIZED)
+  foreach(CVF_VERSION_COMPONENT IN LISTS CVF_VERSION_COMPONENTS)
+    set(CVF_VERSION_COMPONENT_VALUE "${CVF_VERSION_COMPONENT}")
+    if(NOT CVF_VERSION_COMPONENT_VALUE VERSION_EQUAL 0)
+      string(REGEX REPLACE "^0+" "" CVF_VERSION_COMPONENT_VALUE "${CVF_VERSION_COMPONENT_VALUE}")
+    endif()
+    if(DEFINED CVF_VERSION_NORMALIZED)
+      string(APPEND CVF_VERSION_NORMALIZED ".${CVF_VERSION_COMPONENT_VALUE}")
+    else()
+      set(CVF_VERSION_NORMALIZED "${CVF_VERSION_COMPONENT_VALUE}")
+    endif()
+  endforeach()
+else()
+  set(CVF_VERSION_NORMALIZED "@CVF_VERSION@")
+endif()
+
+if("${PACKAGE_FIND_VERSION}" MATCHES "^[0-9]+(\\.[0-9]+){0,3}$")
+  string(REPLACE "." ";" REQUESTED_VERSION_COMPONENTS "${PACKAGE_FIND_VERSION}")
+  unset(REQUESTED_VERSION_NORMALIZED)
+  foreach(REQUESTED_VERSION_COMPONENT IN LISTS REQUESTED_VERSION_COMPONENTS)
+    set(REQUESTED_VERSION_COMPONENT_VALUE "${REQUESTED_VERSION_COMPONENT}")
+    if(NOT REQUESTED_VERSION_COMPONENT_VALUE VERSION_EQUAL 0)
+      string(REGEX REPLACE "^0+" "" REQUESTED_VERSION_COMPONENT_VALUE "${REQUESTED_VERSION_COMPONENT_VALUE}")
+    endif()
+    if(DEFINED REQUESTED_VERSION_NORMALIZED)
+      string(APPEND REQUESTED_VERSION_NORMALIZED ".${REQUESTED_VERSION_COMPONENT_VALUE}")
+    else()
+      set(REQUESTED_VERSION_NORMALIZED "${REQUESTED_VERSION_COMPONENT_VALUE}")
+    endif()
+  endforeach()
+else()
+  set(REQUESTED_VERSION_NORMALIZED "${PACKAGE_FIND_VERSION}")
+endif()
+
+if(REQUESTED_VERSION_NORMALIZED STREQUAL CVF_VERSION_NORMALIZED)
+  set(PACKAGE_VERSION_COMPATIBLE TRUE)
+else()
+  set(PACKAGE_VERSION_COMPATIBLE FALSE)
+endif()
+
+if(PACKAGE_FIND_VERSION STREQUAL PACKAGE_VERSION)
+  set(PACKAGE_VERSION_EXACT TRUE)
+endif()
+
+@CVF_ARCH_INDEPENDENT_CHECK@

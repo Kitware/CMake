@@ -7,8 +7,10 @@ set(_dummy_version 1.0.0)
 
 set(_compatibilities AnyNewerVersion
                      SameMajorVersion
+                     SemanticVersion
                      SameMinorVersion
-                     ExactVersion)
+                     SamePatchVersion
+                     SameFullVersion)
 
 function(test_write_basic_config_version_file_arch_prepare filename_out compat arch_independent arch)
   if(arch_independent)

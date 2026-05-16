@@ -4,15 +4,15 @@
 #
 # The created file sets PACKAGE_VERSION_EXACT if the current version string and
 # the requested version string are exactly the same and it sets
-# PACKAGE_VERSION_COMPATIBLE if the current version is equal to the requested version.
-# The tweak version component is ignored.
+# PACKAGE_VERSION_COMPATIBLE if the current version and requested version are
+# equal through the patch version. The tweak version component is ignored.
 # The variable CVF_VERSION must be set before calling configure_file().
 
 
 if (PACKAGE_FIND_VERSION_RANGE)
   message(AUTHOR_WARNING
     "`find_package()` specify a version range but the version strategy "
-    "(ExactVersion) of the module `${PACKAGE_FIND_NAME}` is incompatible "
+    "(SamePatchVersion) of the module `${PACKAGE_FIND_NAME}` is incompatible "
     "with this request. Only the lower endpoint of the range will be used.")
 endif()
 
