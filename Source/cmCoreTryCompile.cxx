@@ -758,7 +758,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
             "(e.g. CMAKE_C_FLAGS_DEBUG) in the test project."
             ;
           /* clang-format on */
-          this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
+          this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1048,7 +1048,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       for (std::string const& vi : warnCMP0067Variables) {
         w << "  " << vi << "\n";
       }
-      this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
+      this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
     }
 
     for (auto const& p : arguments.LangProps) {

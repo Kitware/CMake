@@ -104,7 +104,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
           !this->GetPropertyAsBool("ENABLE_EXPORTS")) {
         if (cmp0209 == cmPolicies::WARN && !fileSets.empty()) {
           this->Makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
+            cmDiagnostics::CMD_POLICY,
             cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0209),
                      "\n"
                      "Executable target \"",

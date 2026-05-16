@@ -210,7 +210,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         }
         if (cmp0175 == cmPolicies::WARN) {
           mf.IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
+            cmDiagnostics::CMD_POLICY,
             cmStrCat(msg, '\n',
                      cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
         }
@@ -383,7 +383,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
             }
             if (cmp0175 == cmPolicies::WARN) {
               mf.IssueDiagnostic(
-                cmDiagnostics::CMD_AUTHOR,
+                cmDiagnostics::CMD_POLICY,
                 cmStrCat(msg, '\n',
                          cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
             }
@@ -467,7 +467,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
       }
       if (cmp0175 == cmPolicies::WARN) {
         mf.IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(msg, ".\n",
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }
@@ -505,7 +505,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
       }
       if (cmp0175 == cmPolicies::WARN) {
         mf.IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(msg, '\n',
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }
@@ -527,7 +527,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
       }
       if (cmp0175 == cmPolicies::WARN) {
         mf.IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(msg, ".\n",
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }
@@ -554,7 +554,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
             msg += "POST_BUILD";
         }
         mf.IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(msg, " to preserve backward compatibility.\n",
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }
@@ -578,7 +578,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
       }
       if (cmp0175 == cmPolicies::WARN) {
         mf.IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(msg, ".\n",
                    cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
       }

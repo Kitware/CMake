@@ -35,7 +35,7 @@ void cmBinUtilsLinker::NormalizePath(std::string& path) const
     this->Archive->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0207);
   if (policy == cmPolicies::WARN) {
     this->Archive->GetMakefile()->IssueDiagnostic(
-      cmDiagnostics::CMD_AUTHOR,
+      cmDiagnostics::CMD_POLICY,
       cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0207),
                "\n"
                "Path\n  \"",

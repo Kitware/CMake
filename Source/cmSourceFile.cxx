@@ -207,7 +207,7 @@ bool cmSourceFile::FindFullPath(std::string* error,
               if (cmp0115Warning) {
                 *cmp0115Warning = std::move(warning);
               } else {
-                makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, warning,
+                makefile->IssueDiagnostic(cmDiagnostics::CMD_POLICY, warning,
                                           cmListFileBacktrace{});
               }
             }

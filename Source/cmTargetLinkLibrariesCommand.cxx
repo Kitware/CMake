@@ -445,7 +445,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
 
   if (this->WarnRemoteInterface) {
     this->Makefile.IssueDiagnostic(
-      cmDiagnostics::CMD_AUTHOR,
+      cmDiagnostics::CMD_POLICY,
       cmStrCat(
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0079), "\nTarget\n  ",
         this->Target->GetName(),

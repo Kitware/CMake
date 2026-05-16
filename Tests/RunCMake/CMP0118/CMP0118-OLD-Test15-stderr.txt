@@ -8,6 +8,8 @@
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 Generated_source0\.txt: # 1a # GENERATED = `1`
 Generated_source0\.txt: # 1b # GENERATED = `1`

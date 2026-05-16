@@ -289,7 +289,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
                     *rootEnv, '\n');
     }
     e += "For compatibility, CMake is ignoring the variable.";
-    this->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e);
+    this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, e);
   }
 }
 
@@ -309,7 +309,7 @@ void cmMakefile::MaybeWarnCMP0144(std::string const& rootVar, cmValue rootDef,
     }
     e += "For compatibility, find_package is ignoring the variable, but "
          "code in a .cmake module might still use it.";
-    this->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e);
+    this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, e);
   }
 }
 
@@ -1933,7 +1933,7 @@ void cmMakefile::AddCacheDefinition(std::string const& name, cmValue value,
       if (this->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0126") &&
           this->IsNormalDefinitionSet(name)) {
         this->IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0126),
                    "\nFor compatibility with older versions of CMake, normal "
                    "variable \"",

@@ -49,7 +49,7 @@ cmInstallCommandArguments::cmInstallCommandArguments(
         if (cmGeneratorExpression::Find(arg) == cm::string_view::npos &&
             arg != cmCMakePath(arg).Normal().String()) {
           makefile.IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
+            cmDiagnostics::CMD_POLICY,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0177));
         }
         return ArgumentParser::Continue::No;

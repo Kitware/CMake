@@ -1222,7 +1222,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         files += cmStrCat("  ", Quoted(muf->FullPath), '\n');
       }
       this->Makefile->IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(
           cmPolicies::GetPolicyWarning(cmPolicies::CMP0071),
           "\n"
@@ -1254,7 +1254,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       files += cmStrCat("  ", Quoted(sf->GetFullPath()), '\n');
     }
     this->Makefile->IssueDiagnostic(
-      cmDiagnostics::CMD_AUTHOR,
+      cmDiagnostics::CMD_POLICY,
       cmStrCat(
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0100),
         "\n"

@@ -1,4 +1,4 @@
-^CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+^CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -9,7 +9,8 @@
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_full_path1\.txt: # 1a # GENERATED = `0`
 Generated_with_full_path1\.txt: # 1b # GENERATED = `0`
@@ -17,7 +18,7 @@ Generated_with_full_path1\.txt: # 2a # GENERATED = `0`
 Generated_with_full_path1\.txt: # 2b # GENERATED = `0`
 Generated_with_full_path1\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path1\.txt: # 3b # GENERATED = `0`
-CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -28,7 +29,8 @@ CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\)
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_full_path2\.txt: # 1a # GENERATED = `0`
 Generated_with_full_path2\.txt: # 1b # GENERATED = `0`
@@ -36,7 +38,7 @@ Generated_with_full_path2\.txt: # 2a # GENERATED = `0`
 Generated_with_full_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_full_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path2\.txt: # 3b # GENERATED = `0`
-CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -47,7 +49,8 @@ CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\)
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_full_path3\.txt: # 1a # GENERATED = `0`
 Generated_with_full_path3\.txt: # 1b # GENERATED = `0`
@@ -55,7 +58,7 @@ Generated_with_full_path3\.txt: # 2a # GENERATED = `0`
 Generated_with_full_path3\.txt: # 2b # GENERATED = `0`
 Generated_with_full_path3\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path3\.txt: # 3b # GENERATED = `0`
-CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -66,7 +69,8 @@ CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\)
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_relative_path1\.txt: # 1a # GENERATED = `0`
 Generated_with_relative_path1\.txt: # 1b # GENERATED = `0`
@@ -74,7 +78,7 @@ Generated_with_relative_path1\.txt: # 2a # GENERATED = `0`
 Generated_with_relative_path1\.txt: # 2b # GENERATED = `0`
 Generated_with_relative_path1\.txt: # 3a # GENERATED = `0`
 Generated_with_relative_path1\.txt: # 3b # GENERATED = `0`
-CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -85,7 +89,8 @@ CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\)
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_relative_path2\.txt: # 1a # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 1b # GENERATED = `0`
@@ -93,7 +98,7 @@ Generated_with_relative_path2\.txt: # 2a # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 3b # GENERATED = `0`
-CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -104,7 +109,8 @@ CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\)
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_relative_path3\.txt: # 1a # GENERATED = `0`
 Generated_with_relative_path3\.txt: # 1b # GENERATED = `0`
@@ -112,7 +118,7 @@ Generated_with_relative_path3\.txt: # 2a # GENERATED = `0`
 Generated_with_relative_path3\.txt: # 2b # GENERATED = `0`
 Generated_with_relative_path3\.txt: # 3a # GENERATED = `0`
 Generated_with_relative_path3\.txt: # 3b # GENERATED = `0`
-CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -123,7 +129,8 @@ CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\)
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_full_source_path1\.txt: # 1a # GENERATED = `0`
 Generated_with_full_source_path1\.txt: # 1b # GENERATED = `0`
@@ -131,7 +138,7 @@ Generated_with_full_source_path1\.txt: # 2a # GENERATED = `0`
 Generated_with_full_source_path1\.txt: # 2b # GENERATED = `0`
 Generated_with_full_source_path1\.txt: # 3a # GENERATED = `0`
 Generated_with_full_source_path1\.txt: # 3b # GENERATED = `0`
-CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -142,7 +149,8 @@ CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\)
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_full_source_path2\.txt: # 1a # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 1b # GENERATED = `0`
@@ -150,7 +158,7 @@ Generated_with_full_source_path2\.txt: # 2a # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 3b # GENERATED = `0`
-CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
+CMake Warning \(policy\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: GENERATED sources may be used across directories
   without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -161,7 +169,8 @@ CMake Warning \(author\) at CMP0163-Common-Test4b\.cmake:[0-9]+ \(set_property\)
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test4b\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 Generated_with_full_source_path3\.txt: # 1a # GENERATED = `0`
 Generated_with_full_source_path3\.txt: # 1b # GENERATED = `0`

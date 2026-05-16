@@ -714,7 +714,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
                 this->Makefile->PolicyOptionalWarningEnabled(
                   "CMAKE_POLICY_WARNING_CMP0116")) {
               this->GetCMakeInstance()->IssueDiagnostic(
-                cmDiagnostics::CMD_AUTHOR,
+                cmDiagnostics::CMD_POLICY,
                 cmPolicies::GetPolicyWarning(cmPolicies::CMP0116),
                 cc->GetBacktrace());
             }

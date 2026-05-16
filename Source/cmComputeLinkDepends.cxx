@@ -364,7 +364,7 @@ public:
             makefile->PolicyOptionalWarningEnabled(
               "CMAKE_POLICY_WARNING_CMP0156")) {
           makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
+            cmDiagnostics::CMD_POLICY,
             cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0156),
                      "\nSince the policy is not set, legacy libraries "
                      "de-duplication strategy will be applied."),
@@ -381,7 +381,7 @@ public:
             makefile->PolicyOptionalWarningEnabled(
               "CMAKE_POLICY_WARNING_CMP0179")) {
           makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
+            cmDiagnostics::CMD_POLICY,
             cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0179),
                      "\nSince the policy is not set, static libraries "
                      "de-duplication will keep the last occurrence of the "

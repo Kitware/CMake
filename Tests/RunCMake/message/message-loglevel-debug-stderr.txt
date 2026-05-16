@@ -1,5 +1,7 @@
 ^CMake Warning \(deprecated\) at.*/Tests/RunCMake/message/message-all-loglevels\.cmake:2 \(message\):
   Deprecation warning
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 CMake Warning \(author\) at.*/Tests/RunCMake/message/message-all-loglevels\.cmake:3 \(message\):
   Author warning message

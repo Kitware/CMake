@@ -111,10 +111,10 @@ bool cmExperimental::HasSupportEnabled(cmMakefile const& mf, Feature f)
 
     if (mf.GetGlobalGenerator()->ShouldWarnExperimental(data.Name, *value)) {
       if (enabled) {
-        mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, data.Description);
+        mf.IssueDiagnostic(cmDiagnostics::CMD_EXPERIMENTAL, data.Description);
       } else {
         mf.IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_EXPERIMENTAL,
           cmStrCat(
             data.Variable, " is set to incorrect value\n  ", value,
             "\n"

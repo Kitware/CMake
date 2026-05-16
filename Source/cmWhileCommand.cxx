@@ -133,7 +133,7 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     if (mf.GetPolicyStatus(cmPolicies::CMP0130) == cmPolicies::WARN) {
       err =
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0130), '\n', err);
-      mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err, whileBT);
+      mf.IssueDiagnostic(cmDiagnostics::CMD_POLICY, err, whileBT);
     } else {
       mf.IssueMessage(messageType, err, whileBT);
       if (messageType == MessageType::FATAL_ERROR) {

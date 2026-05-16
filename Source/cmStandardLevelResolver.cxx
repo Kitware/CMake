@@ -129,7 +129,7 @@ struct StandardLevelComputer
           }
           if (state) {
             makefile->IssueDiagnostic(
-              cmDiagnostics::CMD_AUTHOR,
+              cmDiagnostics::CMD_POLICY,
               cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0128),
                        "\nFor compatibility with older versions of CMake, "
                        "compiler extensions won't be ",
@@ -179,7 +179,7 @@ struct StandardLevelComputer
           makefile->PolicyOptionalWarningEnabled(
             "CMAKE_POLICY_WARNING_CMP0128")) {
         makefile->IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0128),
                    "\nFor compatibility with older versions of CMake, "
                    "unnecessary flags for language standard or compiler "

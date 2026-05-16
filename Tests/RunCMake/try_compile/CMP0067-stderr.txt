@@ -3,7 +3,7 @@ after try_compile with CMP0067 WARN-enabled but no variables
 before try_compile with CMP0067 WARN-default
 after try_compile with CMP0067 WARN-default
 before try_compile with CMP0067 WARN-enabled
-CMake Warning \(author\) at CMP0067\.cmake:[0-9]+ \(try_compile\):
+CMake Warning \(policy\) at CMP0067\.cmake:[0-9]+ \(try_compile\):
   Policy CMP0067 is not set: Honor language standard in try_compile\(\)
   source-file signature\.  Run "cmake --help-policy CMP0067" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -16,8 +16,9 @@ CMake Warning \(author\) at CMP0067\.cmake:[0-9]+ \(try_compile\):
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
-
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
++
 after try_compile with CMP0067 WARN-enabled
 CMake Warning \(deprecated\) at CMP0067\.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0067 will be removed from a future version
@@ -29,6 +30,8 @@ CMake Warning \(deprecated\) at CMP0067\.cmake:[0-9]+ \(cmake_policy\):
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 before try_compile with CMP0067 OLD
 after try_compile with CMP0067 OLD

@@ -7,4 +7,6 @@
   specific short-term circumstances\.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
-  CMakeLists\.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.$

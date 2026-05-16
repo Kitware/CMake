@@ -430,7 +430,7 @@ static const struct InListNode : public cmGeneratorExpressionNode
             cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0085),
                      "\nSearch Item:\n  \""_s, parameters.front(),
                      "\"\nList:\n  \""_s, parameters[1], "\"\n"_s);
-          lg->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err, eval->Backtrace);
+          lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err, eval->Backtrace);
           return "0";
         }
         if (values.empty()) {
@@ -2900,7 +2900,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
                            eval->CurrentTarget->GetName(), "\", used by \"",
                            eval->HeadTarget->GetName(),
                            "\", may match multiple configurations.\n");
-                lg->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err,
+                lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err,
                                     eval->Backtrace);
               }
               CM_FALLTHROUGH;
@@ -4664,7 +4664,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
         switch (statusForTarget(eval->HeadTarget, policy)) {
           case cmPolicies::WARN:
             lg->IssueDiagnostic(
-              cmDiagnostics::CMD_AUTHOR,
+              cmDiagnostics::CMD_POLICY,
               cmPolicies::GetPolicyWarning(policyForString(policy)));
             CM_FALLTHROUGH;
           case cmPolicies::OLD:
@@ -4753,7 +4753,7 @@ struct TargetFilesystemArtifactDependencyCMP0112
             cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0112),
                      "\nDependency being added to target:\n  \"",
                      target->GetName(), "\"\n");
-          lg->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, err, eval->Backtrace);
+          lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err, eval->Backtrace);
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -5443,7 +5443,7 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
     if (target->GetPolicyStatusCMP0202() == cmPolicies::WARN &&
         postfix != Postfix::Unspecified) {
       lg->IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0202),
                  "\n"
                  "\"POSTFIX\" option is recognized only when the policy is "

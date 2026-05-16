@@ -38,7 +38,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -48,9 +48,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -60,9 +61,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -72,9 +74,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -84,9 +87,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -96,9 +100,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -108,9 +113,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -120,9 +126,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -132,7 +139,8 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
 CMake Error at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   IMPORTED_GLOBAL property can't be set on non-imported
@@ -184,7 +192,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -194,9 +202,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -206,9 +215,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -218,9 +228,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -230,9 +241,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -243,9 +255,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -255,9 +268,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -267,9 +281,10 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
+CMake Warning \(policy\) at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   Policy CMP0160 is not set: More read-only target properties now error when
   trying to set them\.  Run "cmake --help-policy CMP0160" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.
@@ -279,7 +294,8 @@ CMake Warning \(author\) at READONLY_PROPERTIES\.cmake:44 \(set_target_propertie
 Call Stack \(most recent call first\):
   CMP0160-WARN\.cmake:3 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
 CMake Error at READONLY_PROPERTIES\.cmake:44 \(set_target_properties\):
   EXPORT_NAME property can't be set on imported targets\("ReadOnlyImport"\)

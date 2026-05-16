@@ -1,4 +1,4 @@
-CMake Warning \(author\) in CMakeLists\.txt:
+CMake Warning \(policy\) in CMakeLists\.txt:
   Policy CMP0200 is not set: Location and configuration selection for
   imported targets is more consistent\.  Run "cmake --help-policy CMP0200" for
   policy details\.  Use the cmake_policy command to set the policy and
@@ -8,9 +8,10 @@ CMake Warning \(author\) in CMakeLists\.txt:
   configuration "CAT", but would select configuration "DOG" under the NEW
   policy\.
 
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) in CMakeLists\.txt:
+CMake Warning \(policy\) in CMakeLists\.txt:
   Policy CMP0200 is not set: Location and configuration selection for
   imported targets is more consistent\.  Run "cmake --help-policy CMP0200" for
   policy details\.  Use the cmake_policy command to set the policy and
@@ -20,4 +21,5 @@ CMake Warning \(author\) in CMakeLists\.txt:
   configuration "\(none\)", but would select configuration "[^"]*" under the
   NEW policy\.
 
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

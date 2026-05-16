@@ -7,6 +7,8 @@
   to work with policies introduced by <max> or earlier\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 CMake Warning \(deprecated\) at BeforeVersionDeprecated\.cmake:5 \(cmake_policy\):
   Compatibility with CMake < 3\.10 will be removed from a future version of
@@ -16,4 +18,6 @@ CMake Warning \(deprecated\) at BeforeVersionDeprecated\.cmake:5 \(cmake_policy\
   to tell CMake that the project requires at least <min> but has been updated
   to work with policies introduced by <max> or earlier\.
 Call Stack \(most recent call first\):
-  CMakeLists\.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.$

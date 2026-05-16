@@ -4,4 +4,6 @@
 Call Stack \(most recent call first\):
   [^
 ]*/Tests/RunCMake/CMakePresets/ErrorDeprecated\.cmake:[0-9]+ \(include\)
-  CMakeLists\.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)
+This error is for project developers\.  Use -Wno-error=author or
+-Wno-error=deprecated to suppress it\.$

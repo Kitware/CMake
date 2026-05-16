@@ -8,6 +8,8 @@
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:5 \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.
 +
 CMake Warning \(deprecated\) at [^
 ]*/Modules/Dart\.cmake:[0-9]+ \(cmake_policy\):
@@ -20,4 +22,6 @@ CMake Warning \(deprecated\) at [^
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
   CMP0145-Dart-OLD\.cmake:3 \(include\)
-  CMakeLists\.txt:5 \(include\)$
+  CMakeLists\.txt:5 \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
+to suppress it\.$

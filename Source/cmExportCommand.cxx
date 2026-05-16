@@ -200,7 +200,7 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
     switch (mf.GetPolicyStatus(cmPolicies::CMP0103)) {
       case cmPolicies::WARN:
         mf.IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103),
                    "\n"
                    "export() command already specified for the file\n  ",
@@ -287,7 +287,7 @@ static bool HandleExportMode(std::vector<std::string> const& args,
       status.GetMakefile().IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR, cmStrCat("export "_s, status.GetError()));
       status.GetMakefile().IssueDiagnostic(
-        cmDiagnostics::CMD_AUTHOR,
+        cmDiagnostics::CMD_POLICY,
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0208));
     }
   }

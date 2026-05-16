@@ -1,31 +1,35 @@
-CMake Warning \(author\) at [^
+CMake Warning \(policy\) at [^
 ]+/Tests/RunCMake/CMP0218/CMP0218-WARN\.cmake:[0-9]+ \(set\):
   Policy CMP0218 is not set: The CMAKE_WARN_DEPRECATED and
   CMAKE_ERROR_DEPRECATED variables are ignored\.  Run "cmake --help-policy
   CMP0218" for policy details\.  Use the cmake_policy command to set the
   policy and suppress this warning\.
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at [^
+CMake Warning \(policy\) at [^
 ]+/Tests/RunCMake/CMP0218/CMP0218-WARN\.cmake:[0-9]+ \(set\):
   Policy CMP0218 is not set: The CMAKE_WARN_DEPRECATED and
   CMAKE_ERROR_DEPRECATED variables are ignored\.  Run "cmake --help-policy
   CMP0218" for policy details\.  Use the cmake_policy command to set the
   policy and suppress this warning\.
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at [^
+CMake Warning \(policy\) at [^
 ]+/Tests/RunCMake/CMP0218/CMP0218-WARN\.cmake:[0-9]+ \(set\):
   Policy CMP0218 is not set: The CMAKE_WARN_DEPRECATED and
   CMAKE_ERROR_DEPRECATED variables are ignored\.  Run "cmake --help-policy
   CMP0218" for policy details\.  Use the cmake_policy command to set the
   policy and suppress this warning\.
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at [^
+CMake Warning \(policy\) at [^
 ]+/Tests/RunCMake/CMP0218/CMP0218-WARN\.cmake:[0-9]+ \(set\):
   Policy CMP0218 is not set: The CMAKE_WARN_DEPRECATED and
   CMAKE_ERROR_DEPRECATED variables are ignored\.  Run "cmake --help-policy
   CMP0218" for policy details\.  Use the cmake_policy command to set the
   policy and suppress this warning\.
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

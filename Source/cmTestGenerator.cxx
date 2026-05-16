@@ -37,7 +37,7 @@ bool needToQuoteTestName(cmMakefile const& mf, std::string const& name)
       // Only warn if a forbidden character is used in the name.
       if (name.find_first_of("$[] #;\t\n\"\\") != std::string::npos) {
         mf.IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0110),
                    "\nThe following name given to add_test() is invalid if "
                    "CMP0110 is not set or set to OLD:\n  `",
@@ -149,7 +149,7 @@ void cmTestGenerator::GenerateCommand(std::ostream& os,
             propVal, cmList::ExpandElements::Yes, cmList::EmptyElements::Yes);
           if (launcherWithArgs != argsWithEmptyValuesPreserved) {
             this->LG->GetMakefile()->IssueDiagnostic(
-              cmDiagnostics::CMD_AUTHOR,
+              cmDiagnostics::CMD_POLICY,
               cmStrCat("The ", propertyName, " property of target '",
                        target->GetName(),
                        "' contains empty list items. Those empty items are "

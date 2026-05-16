@@ -88,6 +88,8 @@ The following categories are defined:
 
    /diagnostic/CMD_AUTHOR
    /diagnostic/CMD_DEPRECATED
+   /diagnostic/CMD_EXPERIMENTAL
    /diagnostic/CMD_INSTALL_ABSOLUTE_DESTINATION
+   /diagnostic/CMD_POLICY
    /diagnostic/CMD_UNINITIALIZED
    /diagnostic/CMD_UNUSED_CLI

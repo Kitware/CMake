@@ -20,7 +20,7 @@ bool cmReturnCommand(std::vector<std::string> const& args,
     switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0140)) {
       case cmPolicies::WARN:
         status.GetMakefile().IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0140),
             "\n"

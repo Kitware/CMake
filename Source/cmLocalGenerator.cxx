@@ -721,7 +721,7 @@ void cmLocalGenerator::GenerateInstallRules()
             "CMAKE_POLICY_WARNING_CMP0082")) {
         std::ostringstream e;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0082) << "\n";
-        this->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, e.str());
+        this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, e.str());
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD: {
@@ -2634,7 +2634,7 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
           this->Makefile->PolicyOptionalWarningEnabled(
             "CMAKE_POLICY_WARNING_CMP0181")) {
         this->Makefile->IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0181),
                    "\nSince the policy is not set, the contents of variable '",
                    name,
@@ -3436,7 +3436,7 @@ void cmLocalGenerator::AddPerLanguageLinkFlags(std::string& flags,
               cmStrCat("CMAKE_EXECUTABLE_CREATE_", lang, "_FLAGS")) &&
           this->GlobalGenerator->ShouldWarnCMP0210(lang)) {
         this->IssueDiagnostic(
-          cmDiagnostics::CMD_AUTHOR,
+          cmDiagnostics::CMD_POLICY,
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0210), "\n",
                    "For compatibility with older versions of CMake, ",
                    "CMAKE_", lang, "_LINK_FLAGS will be ignored for all ",
