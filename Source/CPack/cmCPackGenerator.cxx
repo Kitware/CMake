@@ -1158,6 +1158,9 @@ int cmCPackGenerator::DoPackage()
       return 0;
     }
     this->files = gl.GetFiles();
+
+    // Add files in a reproducible order
+    std::stable_sort(this->files.begin(), this->files.end());
   }
 
   // Determine and store internally the directory that shall be packaged.
