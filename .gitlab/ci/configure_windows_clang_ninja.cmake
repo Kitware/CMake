@@ -1,2 +1,7 @@
 set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database" CACHE STRING "")
+if("$ENV{CMAKE_CI_BUILD_NAME}" MATCHES "(^|_)cl(_|$)")
+  set(CMAKE_Fortran_COMPILER "flang" CACHE STRING "")
+  set(CMAKE_Fortran_COMPILER_ID "LLVMFlang" CACHE STRING "")
+  set(CMAKE_Fortran_COMPILER_SUPPORTS_F90 "1" CACHE BOOL "")
+endif()
 include("${CMAKE_CURRENT_LIST_DIR}/configure_windows_clang_common.cmake")

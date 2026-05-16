@@ -11,5 +11,7 @@ if ("$env:CMAKE_CI_BUILD_NAME" -match "(^|_)gnu(_|$)") {
 } else {
   $env:CC  = "clang-cl"
   $env:CXX = "clang-cl"
+  $env:FC = "flang"
   clang-cl --version
+  flang --version
 }

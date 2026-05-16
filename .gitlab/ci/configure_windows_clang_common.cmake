@@ -7,6 +7,8 @@ else()
   set(CMake_TEST_CXX_STANDARDS "98;11;14;17;20;23" CACHE STRING "")
 endif()
 
+set(CMAKE_Fortran_COMPILER "" CACHE STRING "")
+
 set(CMake_TEST_FindOpenMP "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_C "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_CXX "ON" CACHE BOOL "")
