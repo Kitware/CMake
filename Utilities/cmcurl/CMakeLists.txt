@@ -205,7 +205,7 @@ if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
 endif()
 endif() # XXX(cmake): end
 
-list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
+list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(Utilities)
 include(Macros)
 include(CMakeDependentOption)
@@ -872,7 +872,7 @@ elseif(AMIGA)
 elseif(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
-    list(PREPEND CURL_NETWORK_AND_TIME_LIBS "socket")
+    list(INSERT CURL_NETWORK_AND_TIME_LIBS 0 "socket")
   endif()
 endif()
 
@@ -1422,7 +1422,7 @@ if(NOT CURL_DISABLE_LDAP)
     find_package(LDAP MODULE)
     if(LDAP_FOUND)
       set(HAVE_LBER_H 1)
-      list(PREPEND CURL_LIBS CURL::ldap)
+      list(INSERT CURL_LIBS 0 CURL::ldap)
 
       # LDAP feature checks
 
@@ -1489,7 +1489,7 @@ set(HAVE_LIBIDN2 OFF)
 if(USE_LIBIDN2 AND NOT USE_APPLE_IDN AND NOT USE_WIN32_IDN)
   find_package(Libidn2 MODULE QUIET)
   if(LIBIDN2_FOUND)
-    list(PREPEND CURL_LIBS CURL::libidn2)
+    list(INSERT CURL_LIBS 0 CURL::libidn2)
     set(HAVE_IDN2_H 1)
     set(HAVE_LIBIDN2 1)
   endif()
@@ -1512,7 +1512,7 @@ set(USE_LIBSSH2 OFF)
 if(CURL_USE_LIBSSH2)
   find_package(Libssh2 MODULE)
   if(LIBSSH2_FOUND)
-    list(PREPEND CURL_LIBS CURL::libssh2)  # keep it before TLS-crypto, compression
+    list(INSERT CURL_LIBS 0 CURL::libssh2)  # keep it before TLS-crypto, compression
     set(USE_LIBSSH2 ON)
   endif()
 endif()
@@ -1522,7 +1522,7 @@ option(CURL_USE_LIBSSH "Use libssh" OFF)
 mark_as_advanced(CURL_USE_LIBSSH)
 if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(Libssh MODULE REQUIRED)
-  list(PREPEND CURL_LIBS CURL::libssh)  # keep it before TLS-crypto, compression
+  list(INSERT CURL_LIBS 0 CURL::libssh)  # keep it before TLS-crypto, compression
   set(USE_LIBSSH ON)
 endif()
 
