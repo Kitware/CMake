@@ -25,7 +25,13 @@ else()
 
   set(CMAKE_Fortran_LINK_MODE DRIVER)
 
+  set(CMAKE_Fortran_COMPILE_OPTIONS_PIC "-fPIC")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_PIE "-fPIE")
+
   string(APPEND CMAKE_Fortran_FLAGS_DEBUG_INIT " -O0 -g")
   string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO_INIT " -O2 -g")
   string(APPEND CMAKE_Fortran_FLAGS_RELEASE_INIT " -O3")
 endif()
+
+set(CMAKE_SHARED_LIBRARY_Fortran_FLAGS -fPIC)
+set(CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS "-shared")
