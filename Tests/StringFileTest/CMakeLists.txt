@@ -55,6 +55,10 @@ else()
     "file(STRINGS) incorrectly read from srec file [${infile_strings}]")
 endif()
 
+# this file is crafted to contain the maximum line length and trigger a buffer
+# overflow
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/s1-max-length.srec" infile_strings)
+
 #this file has utf-8 content
 file(STRINGS test.utf8 infile_strings ENCODING UTF-8)
 list(LENGTH infile_strings content_len)

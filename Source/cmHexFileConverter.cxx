@@ -45,6 +45,10 @@ static bool OutputBin(FILE* file, char const* buf, unsigned int startIndex,
       success = false;
       break;
     }
+    if (outBufCount >= sizeof(outBuf)) {
+      success = false;
+      break;
+    }
     outBuf[outBufCount] = static_cast<char>(convertedByte & 0xff);
     outBufCount++;
   }
