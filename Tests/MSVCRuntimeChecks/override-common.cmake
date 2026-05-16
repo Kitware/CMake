@@ -4,6 +4,12 @@ if("${CMAKE_${lang}_COMPILER_ID};${CMAKE_${lang}_SIMULATE_ID};${CMAKE_${lang}_CO
   set(empty_StackFrameErrorCheck 1)
   set(empty_UninitializedVariable 1)
   set(empty_RTCsu 1)
+elseif("${CMAKE_${lang}_COMPILER_ID};${CMAKE_${lang}_SIMULATE_ID};${lang}" STREQUAL "LLVMFlang;MSVC;Fortran")
+  # LLVMFlang does not actually support these, so Windows-LLVMFlang-Fortran passes no flags.
+  set(empty_PossibleDataLoss 1)
+  set(empty_StackFrameErrorCheck 1)
+  set(empty_UninitializedVariable 1)
+  set(empty_RTCsu 1)
 elseif("${CMAKE_${lang}_COMPILER_ID};${CMAKE_${lang}_SIMULATE_ID};${lang}" MATCHES "^Intel(LLVM)?;MSVC;Fortran$")
   # IntelLLVM Fortran does not actually support these, so Windows-IntelLLVM-Fortran passes no flags.
   set(empty_PossibleDataLoss 1)
