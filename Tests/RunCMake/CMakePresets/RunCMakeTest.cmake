@@ -349,6 +349,7 @@ run_cmake_presets(NoPresetArgument --preset)
 run_cmake_presets(NoPresetArgumentEq --preset= -DA=B)
 run_cmake_presets(UseHiddenPreset)
 run_cmake_presets(NoPresetFileArgument --preset GoodNoArgs --presets-file)
+run_cmake_presets(PresetScriptMode -P PresetScriptMode.cmake --preset GoodNoArgs)
 
 # Test CMakeUserPresets.json
 unset(CMakePresets_FILE)
