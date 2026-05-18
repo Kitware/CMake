@@ -88,8 +88,6 @@
 //-V::1071
 # Conditional initialization inside the constructor may leave some members uninitialized.
 //-V::1077
-# Call of the 'Foo' function will lead to buffer underflow.
-//-V::1086
 # Waiting on condition variable without predicate. A thread can wait indefinitely or experience a spurious wake-up.
 //-V::1089
 # The 'emplace' / 'insert' function call contains potentially dangerous move operation. Moved object can be destroyed even if there is no insertion.
