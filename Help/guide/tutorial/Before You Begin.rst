@@ -227,7 +227,7 @@ a non-Windows platform, we can simply do:
 
 If we're using a multi-configuration generator, we will want to specify the
 build configuration. The default configurations are ``Debug``, ``Release``,
-``RelWithDebInfo``, and ``MinRelSize``. The result of the build will be stored
+``RelWithDebInfo``, and ``MinSizeRel``. The result of the build will be stored
 in a configuration-specific subdirectory of the build folder. So for example we
 could run:
 
