@@ -3889,7 +3889,8 @@ static cm::optional<bool> RemoveRPathELF(std::string const& file,
       // There is no RPATH or RUNPATH anyway.
       return true;
     }
-    if (se_count == 2 && se[1]->IndexInSection < se[0]->IndexInSection) {
+    if (se_count == 2 && se[0] && se[1] &&
+        se[1]->IndexInSection < se[0]->IndexInSection) {
       std::swap(se[0], se[1]);
     }
 

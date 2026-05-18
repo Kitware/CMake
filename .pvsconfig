@@ -6,8 +6,6 @@
 //-V::508
 # The 'x' variable is assigned values twice successively. Perhaps this is a mistake.
 //-V::519
-# Possible null pointer dereference.
-//-V::522
 # Constant value is represented by an octal form.
 //-V::536
 # Iterators are passed as arguments to 'Foo' function. Consider inspecting the expression.
