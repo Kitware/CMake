@@ -390,11 +390,6 @@ std::vector<std::string> cmState::GetEnabledLanguages() const
   return this->EnabledLanguages;
 }
 
-void cmState::SetEnabledLanguages(std::vector<std::string> const& langs)
-{
-  this->EnabledLanguages = langs;
-}
-
 void cmState::ClearEnabledLanguages()
 {
   this->EnabledLanguages.clear();
