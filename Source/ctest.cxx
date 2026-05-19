@@ -168,7 +168,11 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
   { "--no-tests=<[error|ignore]>",
-    "Regard no tests found either as 'error' or 'ignore' it." }
+    "Regard no tests found either as 'error' or 'ignore' it." },
+  { "--collect-instrumentation <build>",
+    "Manually collect instrumentation data from the specified build "
+    "directory." },
+  { "--", "Forward extra arguments to test executables." },
 };
 } // anonymous namespace
 
