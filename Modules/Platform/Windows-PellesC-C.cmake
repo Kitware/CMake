@@ -39,4 +39,3 @@ set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.
 
 unset(_PellesC_C_OBJ_FLAGS)
 unset(_PellesC_C_ASM_FLAGS)
-unset(_PellesC_ARCH)
