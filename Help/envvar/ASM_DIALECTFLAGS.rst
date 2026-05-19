@@ -14,7 +14,7 @@ of an assembly language.  ``ASM<DIALECT>FLAGS`` can be one of:
 
 * ``ASM_MARMASMFLAGS``
 
-.. FIXME(#21536): * ``ASM_POASMFLAGS``
+* ``ASM_POASMFLAGS``
 
 * ``ASM-ATTFLAGS``
 

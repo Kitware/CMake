@@ -51,7 +51,7 @@ The supported languages are:
 ``ASM_MASM``
   Microsoft Assembler (x86, x64)
 
-.. FIXME(#21536): ``ASM_POASM``
+``ASM_POASM``
   .. versionadded:: 4.4
 
   Pelles C toolchain assembler.

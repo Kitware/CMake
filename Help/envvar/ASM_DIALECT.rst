@@ -14,7 +14,7 @@ files. ``ASM<DIALECT>`` can be one of:
 
 * ``ASM_MARMASM`` (Microsoft ARM Assembler)
 
-.. FIXME(#21536): * ``ASM_POASM`` (Pelles Macro Assembler)
+* ``ASM_POASM`` (Pelles Macro Assembler)
 
 * ``ASM-ATT`` (Assembler AT&T)
 
