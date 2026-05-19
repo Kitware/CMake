@@ -2,7 +2,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/Assertions.cmake)
 
 set(out_dir "${RunCMake_BINARY_DIR}/DependencyVersionCps-build/")
 
-file(READ "${out_dir}/foo.cps" content)
+file(READ "${out_dir}/cps/foo/foo.cps" content)
 expect_value("${content}" "foo" "name")
 expect_array("${content}" 1 "requires" "baz" "components")
 expect_value("${content}" "baz" "requires" "baz" "components" 0)

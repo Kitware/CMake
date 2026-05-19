@@ -87,6 +87,15 @@ std::string cmSbomArguments::GetPackageDirName() const
   return this->PackageName;
 }
 
+std::string cmSbomArguments::GetDefaultDestination(
+  std::string const& root) const
+{
+  if (root.empty()) {
+    return cmStrCat("sbom/"_s, this->GetPackageDirName());
+  }
+  return cmStrCat(root, '/', "sbom/"_s, this->GetPackageDirName());
+}
+
 cmSbomArguments::SbomFormat cmSbomArguments::GetFormat() const
 {
   if (this->Format.empty()) {

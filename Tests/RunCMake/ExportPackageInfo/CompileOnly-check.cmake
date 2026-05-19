@@ -2,7 +2,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/Assertions.cmake)
 
 set(out_dir "${RunCMake_BINARY_DIR}/CompileOnly-build")
 
-file(READ "${out_dir}/bar.cps" content)
+file(READ "${out_dir}/cps/bar/bar.cps" content)
 string(JSON component GET "${content}" "components" "bar")
 expect_array("${component}" 2 "compile_requires")
 expect_value("${component}" "foo:linkOnlyOne" "compile_requires" 0)
