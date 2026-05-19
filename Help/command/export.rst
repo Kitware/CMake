@@ -161,7 +161,8 @@ tree.  The imported targets are implicitly in the namespace ``<package-name>``.
 
 The default file name is ``<package-name>[-<appendix-name>].cps``. If the
 ``LOWER_CASE_FILE`` option is given, the file name will use the package name
-converted to lower case.
+converted to lower case.  Files are written to the ``cps/<package-name>``
+subdirectory of the current build directory.
 
 See :command:`install(PACKAGE_INFO)` for a description of the other options.
 
@@ -188,7 +189,9 @@ Exporting Software Bill of Materials (SBOM) Documents
   Experimental. Gated by ``CMAKE_EXPERIMENTAL_GENERATE_SBOM``.
 
 Generates a software bill of materials (SBOM) document describing the targets
-in the export ``<export-name>`` and their dependencies in the build tree
+in the export ``<export-name>`` and their dependencies in the build tree.
+Files are written to the ``sbom/<sbom-name>`` subdirectory of the current
+build directory.
 
 See :command:`install(SBOM)` for details about the supported SBOM formats and a
 description of the other options.

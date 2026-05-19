@@ -2137,10 +2137,10 @@ bool HandleMappedPackageInfo(
   std::string dest = std::string{ directive };
   if (dest.empty()) {
     if (helper.Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Windows") {
-      dest = std::string{ "cps"_s };
+      dest = arguments.GetDefaultDestination();
     } else {
-      dest = cmStrCat(helper.GetLibraryDestination(nullptr), "/cps/",
-                      arguments.GetPackageDirName());
+      dest =
+        arguments.GetDefaultDestination(helper.GetLibraryDestination(nullptr));
     }
   }
 
@@ -2351,10 +2351,10 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
   std::string dest = ica.GetDestination();
   if (dest.empty()) {
     if (helper.Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Windows") {
-      dest = std::string{ "cps"_s };
+      dest = arguments.GetDefaultDestination();
     } else {
-      dest = cmStrCat(helper.GetLibraryDestination(nullptr), "/cps/",
-                      arguments.GetPackageDirName());
+      dest =
+        arguments.GetDefaultDestination(helper.GetLibraryDestination(nullptr));
     }
   }
 
@@ -2553,10 +2553,10 @@ bool HandleSbomMode(std::vector<std::string> const& args,
   std::string dest = ica.GetDestination();
   if (dest.empty()) {
     if (helper.Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Windows") {
-      dest = std::string{ "/sbom/"_s };
+      dest = arguments.GetDefaultDestination();
     } else {
-      dest = cmStrCat(helper.GetLibraryDestination(nullptr), "/sbom/",
-                      arguments.GetPackageDirName());
+      dest =
+        arguments.GetDefaultDestination(helper.GetLibraryDestination(nullptr));
     }
   }
 

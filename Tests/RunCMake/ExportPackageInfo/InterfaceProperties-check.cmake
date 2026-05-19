@@ -2,7 +2,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/Assertions.cmake)
 
 set(out_dir "${RunCMake_BINARY_DIR}/InterfaceProperties-build")
 
-file(READ "${out_dir}/foo.cps" content)
+file(READ "${out_dir}/cps/foo/foo.cps" content)
 expect_value("${content}" "foo" "name")
 
 string(JSON component GET "${content}" "components" "foo")

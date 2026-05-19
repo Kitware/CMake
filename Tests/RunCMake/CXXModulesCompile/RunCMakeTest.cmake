@@ -303,7 +303,7 @@ if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(exp-command-sepdir-build)
   run_cxx_module_test(exp-trans-targets-build)
   run_cxx_module_test(exp-trans-mods1-build)
-  run_cxx_module_test(exp-trans-mods-build exp-trans-mods-build "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/exp-trans-mods1-build-build" "-Dexport_transitive_modules1_cps_DIR=${RunCMake_BINARY_DIR}/exp-trans-mods1-build-build")
+  run_cxx_module_test(exp-trans-mods-build exp-trans-mods-build "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/exp-trans-mods1-build-build")
   run_cxx_module_test(exp-with-headers-build)
 
   if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION AND
