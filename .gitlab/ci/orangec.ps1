@@ -1,6 +1,11 @@
 $erroractionpreference = "stop"
 
-if ("$env:CMAKE_CONFIGURATION" -eq "windows_orangec7.0") {
+if ("$env:CMAKE_CONFIGURATION" -eq "windows_orangec7.10") {
+    # OrangeC 7.10
+    $archive = "ZippedBinaries71059.zip"
+    $release = "Orange-C-v7.10.1"
+    $sha256sum = "123F450D68CB26E19ED3A6646C8212C625A9158C93BCB031FE8E24CF315033E2"
+} elseif ("$env:CMAKE_CONFIGURATION" -eq "windows_orangec7.0") {
     # OrangeC 7.0.7
     $archive = "ZippedBinaries707.zip"
     $release = "v7.0.7"

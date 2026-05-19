@@ -325,6 +325,12 @@
     variables:
         CMAKE_CONFIGURATION: windows_orangec7.0
 
+.windows_orangec7.10:
+    extends: .windows_orangec
+
+    variables:
+        CMAKE_CONFIGURATION: windows_orangec7.10
+
 .windows_pellesc:
     extends: .windows
 
