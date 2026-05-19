@@ -472,7 +472,7 @@ The options for running tests are:
  Truncate ``tail`` (default), ``middle`` or ``head`` of test output once
  maximum output size is reached.
 
-.. option:: --overwrite
+.. option:: --overwrite <option-name>
 
  Overwrite CTest configuration option.
 
@@ -491,7 +491,7 @@ The options for running tests are:
  This option will run the tests in a random order.  It is commonly
  used to detect implicit dependencies in a test suite.
 
-.. option:: --schedule-random-seed
+.. option:: --schedule-random-seed <seed>
 
  .. versionadded:: 4.1
 
@@ -500,7 +500,7 @@ The options for running tests are:
  This option is used to allow recreating failures owing to
  random order of execution by ``--schedule-random``.
 
-.. option:: --submit-index
+.. option:: --submit-index <index>
 
  Legacy option for old Dart2 dashboard server feature.
  Do not use.
@@ -694,11 +694,11 @@ be provided to use ``--build-and-test``.  If ``--test-command`` is specified
 then that will be run after the build is complete.  Other options that affect
 this mode include:
 
-.. option:: --build-and-test
+.. option:: --build-and-test <path-to-source> <path-to-build>
 
  Switch into the build and test mode.
 
-.. option:: --build-target
+.. option:: --build-target <tgt>
 
  Specify a specific target to build.  The option can be given multiple times
  with different targets, in which case each target is built in turn.
@@ -713,7 +713,7 @@ this mode include:
 
  Skip the cmake step.
 
-.. option:: --build-run-dir
+.. option:: --build-run-dir <dir>
 
  Specify directory to run programs from.
 
@@ -723,27 +723,27 @@ this mode include:
 
  Run CMake twice.
 
-.. option:: --build-exe-dir
+.. option:: --build-exe-dir <dir>
 
  Specify the directory for the executable.
 
-.. option:: --build-generator
+.. option:: --build-generator <generator-name>
 
  Specify the generator to use. See the :manual:`cmake-generators(7)` manual.
 
-.. option:: --build-generator-platform
+.. option:: --build-generator-platform <platform-name>
 
  Specify the generator-specific platform.
 
-.. option:: --build-generator-toolset
+.. option:: --build-generator-toolset <toolset-name>
 
  Specify the generator-specific toolset.
 
-.. option:: --build-project
+.. option:: --build-project <project-name>
 
  Specify the name of the project to build.
 
-.. option:: --build-makeprogram
+.. option:: --build-makeprogram <program-name>
 
  Specify the explicit make program to be used by CMake when configuring and
  building the project. Only applicable for Make and Ninja based generators.
@@ -752,26 +752,26 @@ this mode include:
 
  Skip the make clean step.
 
-.. option:: --build-config-sample
+.. option:: --build-config-sample <exe-name>
 
  A sample executable to use to determine the configuration that
  should be used.  e.g.  ``Debug``, ``Release`` etc.
 
-.. option:: --build-options
+.. option:: --build-options [<options>...]
 
  Additional options for configuring the build (i.e. for CMake, not for
  the build tool).  Note that if this is specified, the ``--build-options``
  keyword and its arguments must be the last option given on the command
  line, with the possible exception of ``--test-command``.
 
-.. option:: --test-command
+.. option:: --test-command <command>
 
  The command to run as the test step with the
  :ctest-option:`--build-and-test` option.
  All arguments following this keyword will be assumed to be part of the
  test command line, so it must be the last option given.
 
-.. option:: --test-timeout
+.. option:: --test-timeout <timeout>
 
  The time limit in seconds
 
