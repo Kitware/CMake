@@ -136,6 +136,10 @@ bool cmMacroHelperCommand::operator()(
       inStatus.SetBreakInvoked();
       return true;
     }
+    if (status.GetContinueInvoked()) {
+      inStatus.SetContinueInvoked();
+      return true;
+    }
     if (status.HasExitCode()) {
       inStatus.SetExitCode(status.GetExitCode());
       return true;
