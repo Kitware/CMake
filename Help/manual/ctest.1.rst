@@ -153,7 +153,7 @@ The options for running tests are:
 
  Output anything outputted by the test program if the test should fail.
  This option can also be enabled by setting the
- :envvar:`CTEST_OUTPUT_ON_FAILURE` environment variable
+ :envvar:`CTEST_OUTPUT_ON_FAILURE` environment variable.
 
 .. option:: --stop-on-failure
 
@@ -302,7 +302,8 @@ The options for running tests are:
  The file must contain one exact test name per line.
  Lines that do not exactly match any test names are ignored.
  This option can be combined with the other options like
- ``-R``, ``-E``, ``-L`` or ``-LE``.
+ :ctest-option:`-R`, :ctest-option:`-E`, :ctest-option:`-L`, or
+ :ctest-option:`-LE`.
 
 .. option:: --exclude-from-file <filename>
 
@@ -314,7 +315,8 @@ The options for running tests are:
  The file must contain one exact test name per line.
  Lines that do not exactly match any test names are ignored.
  This option can be combined with the other options like
- ``-R``, ``-E``, ``-L`` or ``-LE``.
+ :ctest-option:`-R`, :ctest-option:`-E`, :ctest-option:`-L`, or
+ :ctest-option:`-LE`.
 
 .. option:: -FA <regex>, --fixture-exclude-any <regex>
 
@@ -482,7 +484,7 @@ The options for running tests are:
 .. option:: --force-new-ctest-process
 
  Ignored.  This option once disabled a now-removed optimization
- for tests running ``ctest`` itself.
+ for tests running :program:`ctest` itself.
 
 .. option:: --schedule-random
 
@@ -495,10 +497,10 @@ The options for running tests are:
 
  .. versionadded:: 4.1
 
- Override the random order seed
+ Override the random order seed.
 
  This option is used to allow recreating failures owing to
- random order of execution by ``--schedule-random``.
+ random order of execution by :ctest-option:`--schedule-random`.
 
 .. option:: --submit-index <index>
 
@@ -709,9 +711,9 @@ this mode include:
 
 .. option:: --build-nocmake
 
- Run the build without running cmake first.
+ Run the build without running :program:`cmake` first.
 
- Skip the cmake step.
+ Skip the :program:`cmake` step.
 
 .. option:: --build-run-dir <dir>
 
@@ -746,7 +748,8 @@ this mode include:
 .. option:: --build-makeprogram <program-name>
 
  Specify the explicit make program to be used by CMake when configuring and
- building the project. Only applicable for Make and Ninja based generators.
+ building the project. Only applicable for :ref:`Makefile Generators` and
+ :ref:`Ninja Generators`.
 
 .. option:: --build-noclean
 
@@ -755,14 +758,15 @@ this mode include:
 .. option:: --build-config-sample <exe-name>
 
  A sample executable to use to determine the configuration that
- should be used.  e.g.  ``Debug``, ``Release`` etc.
+ should be used (e.g.  ``Debug``, ``Release``, etc.).
 
 .. option:: --build-options [<options>...]
 
- Additional options for configuring the build (i.e. for CMake, not for
- the build tool).  Note that if this is specified, the ``--build-options``
- keyword and its arguments must be the last option given on the command
- line, with the possible exception of ``--test-command``.
+ Additional options for configuring the build (i.e. for :manual:`cmake(1)`,
+ not for the build tool).  Note that if this is specified, the
+ ``--build-options`` keyword and its arguments must be the last option given
+ on the command line, with the possible exception of
+ :ctest-option:`--test-command`.
 
 .. option:: --test-command <command>
 
@@ -773,7 +777,7 @@ this mode include:
 
 .. option:: --test-timeout <timeout>
 
- The time limit in seconds
+ The time limit in seconds.
 
 .. _`Dashboard Client`:
 
@@ -859,9 +863,9 @@ The available ``<dashboard-options>`` are the following:
 
 .. option:: --group <group>
 
- Specify what group you'd like to submit results to
+ Specify the group to which to submit results.
 
- Submit dashboard to specified group instead of default one.  By
+ Submit dashboard to specified group instead of the default.  By
  default, the dashboard is submitted to Nightly, Experimental, or
  Continuous group, but by specifying this option, the group can be
  arbitrary.
@@ -1780,8 +1784,8 @@ model is defined as follows:
   ``config``
     Optional field specifying the configuration for which the test will run.
     This will always match the :ctest-option:`-C` option specified on the
-    ``ctest`` command line.  If no such option was given, this field will not
-    be present.
+    :program:`ctest` command line.  If no such option was given, this field
+    will not be present.
   ``command``
     Optional array where the first element is the test command and the
     remaining elements are the command arguments.  Normally, this field should
@@ -1818,11 +1822,11 @@ prevents them from trying to claim resources that are not available.
 When the resource allocation feature is used, CTest will not oversubscribe
 resources. For example, if a resource has 8 slots, CTest will not run tests
 that collectively use more than 8 slots at a time. This has the effect of
-limiting how many tests can run at any given time, even if a high ``-j``
-argument is used, if those tests all use some slots from the same resource.
-In addition, it means that a single test that uses more of a resource than is
-available on a machine will not run at all (and will be reported as
-``Not Run``).
+limiting how many tests can run at any given time, even if a high
+:ctest-option:`-j` argument is used, if those tests all use some slots from the
+same resource. In addition, it means that a single test that uses more of a
+resource than is available on a machine will not run at all (and will be
+reported as ``Not Run``).
 
 A common use case for this feature is for tests that require the use of a GPU.
 Multiple tests can simultaneously allocate memory from a GPU, but if too many
@@ -1860,27 +1864,27 @@ form of a set of
 described below. Using this information to decide which resource to connect to
 is left to the test writer.
 
-The ``RESOURCE_GROUPS`` property tells CTest what resources a test expects
-to use grouped in a way meaningful to the test.  The test itself must read
-the :ref:`environment variables <ctest-resource-environment-variables>` to
+The :prop_test:`RESOURCE_GROUPS` property tells CTest what resources a test
+expects to use grouped in a way meaningful to the test.  The test itself must
+read the :ref:`environment variables <ctest-resource-environment-variables>` to
 determine which resources have been allocated to each group.  For example,
 each group may correspond to a process the test will spawn when executed.
 
-Note that even if a test specifies a ``RESOURCE_GROUPS`` property, it is still
-possible for that to test to run without any resource allocation (and without
-the corresponding
+Note that even if a test specifies a :prop_test:`RESOURCE_GROUPS` property, it
+is still possible for that to test to run without any resource allocation
+(and without the corresponding
 :ref:`environment variables <ctest-resource-environment-variables>`)
 if the user does not pass a resource specification file. Passing this file,
-either through the ``--resource-spec-file`` command-line argument or the
-``RESOURCE_SPEC_FILE`` argument to :command:`ctest_test`, is what activates the
-resource allocation feature. Tests should check the
+either through the :ctest-option:`--resource-spec-file` command-line argument
+or the ``RESOURCE_SPEC_FILE`` argument to :command:`ctest_test`, is what
+activates the resource allocation feature. Tests should check the
 ``CTEST_RESOURCE_GROUP_COUNT`` environment variable to find out whether or not
 resource allocation is activated. This variable will always (and only) be
 defined if resource allocation is activated. If resource allocation is not
 activated, then the ``CTEST_RESOURCE_GROUP_COUNT`` variable will not exist,
-even if it exists for the parent :program:`ctest` process. If a test absolutely must
-have resource allocation, then it can return a failing exit code or use the
-:prop_test:`SKIP_RETURN_CODE` or :prop_test:`SKIP_REGULAR_EXPRESSION`
+even if it exists for the parent :program:`ctest` process. If a test absolutely
+must have resource allocation, then it can return a failing exit code or use
+the :prop_test:`SKIP_RETURN_CODE` or :prop_test:`SKIP_REGULAR_EXPRESSION`
 properties to indicate a skipped test.
 
 .. _`ctest-resource-specification-file`:
@@ -1890,7 +1894,7 @@ Resource Specification File
 
 The resource specification file is a JSON file which is passed to CTest in one
 of a number of ways. It can be specified on the command line with the
-:option:`ctest --resource-spec-file` option, it can be given using the
+:ctest-option:`--resource-spec-file` option, it can be given using the
 ``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`, or it can be
 generated dynamically as part of test execution (see
 :ref:`ctest-resource-dynamically-generated-spec-file`).
@@ -2020,9 +2024,9 @@ The following variables are passed to the test process:
   * ``CTEST_RESOURCE_GROUP_COUNT=3``
 
   This variable will only be defined if :manual:`ctest(1)` has been given a
-  ``--resource-spec-file``, or if :command:`ctest_test` has been given a
-  ``RESOURCE_SPEC_FILE``. If no resource specification file has been given,
-  this variable will not be defined.
+  :ctest-option:`--resource-spec-file`, or if :command:`ctest_test` has been
+  given a ``RESOURCE_SPEC_FILE``. If no resource specification file has been
+  given, this variable will not be defined.
 
 .. envvar:: CTEST_RESOURCE_GROUP_<num>
 
@@ -2106,8 +2110,8 @@ For example, consider the ``Makefile``:
 .. literalinclude:: CTEST_EXAMPLE_MAKEFILE_JOB_SERVER.make
   :language: make
 
-When invoked via ``make -j 2 test``, ``ctest`` connects to the job server,
-acquires a token for each test, and runs at most 2 tests concurrently.
+When invoked via ``make -j 2 test``, CTest connects to the job server, acquires
+a token for each test, and runs at most 2 tests concurrently.
 
 On Windows systems, job server integration is not yet implemented.
 
