@@ -29,6 +29,8 @@ cmDocumentationEntry const cmDocumentationUsage = { {}, "  ctest [options]" };
 cmDocumentationEntry const cmDocumentationOptions[] = {
   { "--preset <preset>, --preset=<preset>",
     "Read arguments from a test preset." },
+  { "--presets-file <file>, --presets-file=<file>",
+    "Load test presets from the given file." },
   { "--list-presets", "List available test presets." },
   { "-C <cfg>, --build-config <cfg>", "Choose configuration to test." },
   { "--progress", "Enable short progress output from tests." },
