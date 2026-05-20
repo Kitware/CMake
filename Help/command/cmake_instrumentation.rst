@@ -20,9 +20,9 @@ This allows for configuring instrumentation at the project-level.
   )
 
 The ``API_VERSION`` and ``DATA_VERSION`` must always be given.  Currently, the
-only supported value for both fields is 1.  See :ref:`cmake-instrumentation API v1`
-for details of the ``API_VERSION`` and :ref:`cmake-instrumentation Data v1` for details
-of the ``DATA_VERSION``.
+only supported value for both fields is 1.  See
+:ref:`cmake-instrumentation API v1` for details of the ``API_VERSION`` and
+:ref:`cmake-instrumentation Data Version` for details of the ``DATA_VERSION``.
 
 Each of the optional keywords ``HOOKS``, ``OPTIONS``, and ``CALLBACK``
 correspond to one of the parameters to the :ref:`cmake-instrumentation v1 Query Files`.
