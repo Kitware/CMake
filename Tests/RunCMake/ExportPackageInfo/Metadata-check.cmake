@@ -2,7 +2,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/Assertions.cmake)
 
 set(out_dir "${RunCMake_BINARY_DIR}/Metadata-build")
 
-file(READ "${out_dir}/foo.cps" content)
+file(READ "${out_dir}/cps/foo/foo.cps" content)
 expect_value("${content}" "foo" "name")
 expect_value("${content}" "1.2.3" "version")
 expect_value("${content}" "1.2.0" "compat_version")

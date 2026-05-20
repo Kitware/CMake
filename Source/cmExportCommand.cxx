@@ -375,7 +375,8 @@ static bool HandleSpecialExportMode(std::vector<std::string> const& args,
   cmMakefile& mf = status.GetMakefile();
   cmGlobalGenerator* gg = mf.GetGlobalGenerator();
 
-  std::string const& dir = mf.GetCurrentBinaryDirectory();
+  std::string const& dir =
+    arguments.GetDefaultDestination(mf.GetCurrentBinaryDirectory());
   std::string const fname = cmStrCat(dir, '/', arguments.GetPackageFileName());
 
   if (gg->GetExportedTargetsFile(fname)) {

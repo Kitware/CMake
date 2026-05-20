@@ -43,6 +43,7 @@ public:
   std::string GetNamespace() const;
   std::string GetPackageDirName() const;
   std::string GetPackageFileName() const;
+  std::string GetDefaultDestination(std::string const& root = {}) const;
 
   bool Check(cmExecutionStatus& status) const override;
 

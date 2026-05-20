@@ -2,7 +2,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/Assertions.cmake)
 
 set(out_dir "${RunCMake_BINARY_DIR}/LinkDependentLibraries-build")
 
-file(READ "${out_dir}/dyld.cps" content)
+file(READ "${out_dir}/cps/dyld/dyld.cps" content)
 expect_value("${content}" "dyld" "name")
 expect_value("${content}" "dylib" "components" "private" "type")
 expect_value("${content}" "dylib" "components" "public" "type")

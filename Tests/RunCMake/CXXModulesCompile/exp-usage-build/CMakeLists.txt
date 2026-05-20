@@ -104,7 +104,7 @@ add_test(NAME export_usage_build
     "${CMAKE_COMMAND}"
     "-Dexpected_dir=${CMAKE_CURRENT_SOURCE_DIR}"
     "-Dexport_interfaces_flag=${variable_flag}"
-    "-Dexport_usage_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+    "-DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")
