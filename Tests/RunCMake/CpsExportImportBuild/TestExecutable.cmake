@@ -1,7 +1,7 @@
 project(TestLibrary C)
 
-set(liba_DIR "${CMAKE_BINARY_DIR}/../TestLibrary-build")
-set(libb_DIR "${CMAKE_BINARY_DIR}/../TestLibrary-build")
+set(liba_DIR "${CMAKE_BINARY_DIR}/../TestLibrary-build/cps/liba")
+set(libb_DIR "${CMAKE_BINARY_DIR}/../TestLibrary-build/cps/libb")
 
 find_package(libb REQUIRED COMPONENTS libb)
 

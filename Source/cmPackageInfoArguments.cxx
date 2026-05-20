@@ -89,3 +89,12 @@ std::string cmPackageInfoArguments::GetPackageFileName() const
   }
   return cmStrCat(pkgNameOnDisk, ".cps"_s);
 }
+
+std::string cmPackageInfoArguments::GetDefaultDestination(
+  std::string const& root) const
+{
+  if (root.empty()) {
+    return cmStrCat("cps/"_s, this->GetPackageDirName());
+  }
+  return cmStrCat(root, '/', "cps/"_s, this->GetPackageDirName());
+}

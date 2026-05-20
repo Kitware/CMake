@@ -34,8 +34,7 @@ add_test(NAME export_sepdir_build
   COMMAND
     "${CMAKE_COMMAND}"
     "-Dexpected_dir=${CMAKE_CURRENT_SOURCE_DIR}"
-    "-Dexport_sepdir_DIR=${CMAKE_CURRENT_BINARY_DIR}"
-    "-Dexport_sepdir_cps_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+    "-DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

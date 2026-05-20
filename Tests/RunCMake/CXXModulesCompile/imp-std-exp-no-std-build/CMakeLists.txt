@@ -53,7 +53,7 @@ add_test(NAME import_std_export_no_std_build
   COMMAND
     "${CMAKE_COMMAND}"
     "-Dexpected_dir=${CMAKE_CURRENT_SOURCE_DIR}"
-    "-Dimport_std_export_no_std_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+    "-DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")
