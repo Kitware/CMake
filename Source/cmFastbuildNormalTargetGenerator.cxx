@@ -82,7 +82,8 @@ bool IsExcludedFromUnity(cmGeneratorTarget const* target,
                          cmSourceFile const& srcFile)
 {
   if (fileSet &&
-      (fileSet->GetType() == cm::FileSetMetadata::HEADERS ||
+      (!cm::FileSetMetadata::GetAttributes(fileSet->GetType())
+          .contains(cm::FileSetMetadata::FileSetAttributes::UnityBuild) ||
        fileSet->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn() ||
        fileSet->GetProperty(fileSet->BelongsTo(target)
                               ? "COMPILE_OPTIONS"

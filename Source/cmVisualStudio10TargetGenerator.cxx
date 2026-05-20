@@ -2694,7 +2694,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         if (useNativeUnityBuild) {
           e2.Attribute(
             "IncludeInUnityFile",
-            ((fs && fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn()) ||
+            ((fs &&
+              (!cm::FileSetMetadata::GetAttributes(fs->GetType())
+                  .contains(
+                    cm::FileSetMetadata::FileSetAttributes::UnityBuild) ||
+               fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn())) ||
              si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"))
               ? "false"
               : "true");
@@ -2706,7 +2710,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         } else {
           // Visual Studio versions prior to 2017 15.8 do not know about unity
           // builds, thus we exclude the files already part of unity sources.
-          if (!((fs && fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn()) ||
+          if (!((fs &&
+                 (!cm::FileSetMetadata::GetAttributes(fs->GetType())
+                     .contains(
+                       cm::FileSetMetadata::FileSetAttributes::UnityBuild) ||
+                  fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn())) ||
                 si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"))) {
             exclude_configs = all_configs;
           }
@@ -2714,7 +2722,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       }
       if (haveUnityBuild && strcmp(tool, "CudaCompile") == 0 &&
           si.Source->GetProperty("UNITY_SOURCE_FILE")) {
-        if (!((fs && fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn()) ||
+        if (!((fs &&
+               (!cm::FileSetMetadata::GetAttributes(fs->GetType())
+                   .contains(
+                     cm::FileSetMetadata::FileSetAttributes::UnityBuild) ||
+                fs->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn())) ||
               si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"))) {
           exclude_configs = all_configs;
         }
