@@ -237,6 +237,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_CrayClang "-fopenmp")
     set(OMP_FLAG_Fujitsu "-Kopenmp" "-KOMP")
     set(OMP_FLAG_FujitsuClang "-fopenmp" "-Kopenmp")
+    set(OMP_FLAG_OrangeC "")
 
     if(CMAKE_${LANG}_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_${LANG}_HOST_COMPILER_ID)
       set(compiler_id "${CMAKE_${LANG}_HOST_COMPILER_ID}")
