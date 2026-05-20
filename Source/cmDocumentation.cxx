@@ -747,6 +747,11 @@ bool cmDocumentation::PrintHelpOneVariable(std::ostream& os)
   if (this->PrintFiles(os, cmStrCat("variable/", vname))) {
     return true;
   }
+  std::string const generalized = GeneralizeKeyword(vname);
+  if (generalized != vname &&
+      this->PrintFiles(os, cmStrCat("variable/", generalized))) {
+    return true;
+  }
   // Argument was not a variable.  Complain.
   os << "Argument \"" << this->CurrentArgument
      << "\" to --help-variable is not a defined variable.  "

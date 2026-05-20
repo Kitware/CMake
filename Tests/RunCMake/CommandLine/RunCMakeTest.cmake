@@ -1266,6 +1266,7 @@ run_cmake(ProfilingTest)
 unset(RunCMake_TEST_OPTIONS)
 
 run_cmake_with_options(help-arbitrary "--help" "CMAKE_CXX_IGNORE_EXTENSIONS")
+run_cmake_with_options(help-variable-lang "--help-variable" "CMAKE_CXX_PVS_STUDIO")
 
 if (WIN32 OR DEFINED ENV{HOME})
   set(config_dir_test print-config-dir)
