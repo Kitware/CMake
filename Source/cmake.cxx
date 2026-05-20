@@ -1619,6 +1619,11 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     this->SetHomeOutputDirectory(cmSystemTools::GetLogicalWorkingDirectory());
   }
 
+  if (this->State->GetRole() == cmState::Role::Script && havePreset) {
+    this->IssueMessage(MessageType::FATAL_ERROR,
+                       "Presets are not supported in CMake script mode.");
+  }
+
 #if !defined(CMAKE_BOOTSTRAP)
   if (presetsArgs.HasPresetsArg()) {
     this->SetArgsFromPreset(presetsArgs, haveBArg);
