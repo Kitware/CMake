@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.4
 .. toctree::
    :maxdepth: 1
 
+   CMP0219: Macro invocations preserve backslashes in arguments. </policy/CMP0219>
    CMP0218: The CMAKE_WARN_DEPRECATED and CMAKE_ERROR_DEPRECATED variables are ignored. </policy/CMP0218>
    CMP0217: The MACROS directory property does not exist anymore. </policy/CMP0217>
    CMP0216: Swift targets have a default project name. </policy/CMP0216>

@@ -1186,6 +1186,20 @@ public:
   cm::optional<std::string> DeferGetCallIds() const;
   cm::optional<std::string> DeferGetCall(std::string const& id) const;
 
+  //! Check CMP0219 policy status for the given callee and arguments.
+  //! Returns the effective policy status: OLD, NEW, or WARN (only on
+  //! first occurrence of calleeName with backslashes present).  The
+  //! caller is responsible for issuing any warning when WARN is returned.
+  cmPolicies::PolicyStatus CheckCMP0219(std::string const& calleeName,
+                                        std::vector<std::string> const& args);
+  cmPolicies::PolicyStatus CheckCMP0219(
+    std::string const& calleeName,
+    std::vector<cmListFileArgument> const& args);
+  void IssueCMP0219Warning(std::string const& calleeName,
+                           std::vector<std::string> const& args) const;
+  void IssueCMP0219Warning(std::string const& calleeName,
+                           std::vector<cmListFileArgument> const& args) const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(cmTarget& target);
@@ -1350,6 +1364,7 @@ private:
   bool CheckCMP0000;
   std::set<std::string> WarnedCMP0074;
   std::set<std::string> WarnedCMP0144;
+  std::set<std::string> WarnedCMP0219;
   bool IsSourceFileTryCompile;
   ImportedTargetScope CurrentImportedTargetScope = ImportedTargetScope::Local;
 };

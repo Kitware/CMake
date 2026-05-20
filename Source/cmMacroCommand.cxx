@@ -63,9 +63,6 @@ bool cmMacroHelperCommand::operator()(
     return false;
   }
 
-  cmMakefile::MacroPushPop macroScope(&makefile, this->FilePath,
-                                      this->Policies, this->Diagnostics);
-
   // set the value of argc
   std::string argcDef = std::to_string(expandedArgs.size());
 
@@ -73,6 +70,21 @@ bool cmMacroHelperCommand::operator()(
   std::string expandedArgn =
     cmList::to_string(cmMakeRange(expIt, expandedArgs.end()));
   std::string expandedArgv = cmList::to_string(expandedArgs);
+  {
+    cmPolicies::PolicyStatus cmp0219 =
+      makefile.CheckCMP0219(this->Args[0], expandedArgs);
+    if (cmp0219 == cmPolicies::NEW) {
+      // Escape macro argument backslashes so that callees receive the same
+      // values the caller had.
+      for (std::string& expandedArg : expandedArgs) {
+        cmSystemTools::ReplaceString(expandedArg, "\\", "\\\\");
+      }
+      cmSystemTools::ReplaceString(expandedArgn, "\\", "\\\\");
+      cmSystemTools::ReplaceString(expandedArgv, "\\", "\\\\");
+    } else if (cmp0219 == cmPolicies::WARN) {
+      makefile.IssueCMP0219Warning(this->Args[0], expandedArgs);
+    }
+  }
   std::vector<std::string> variables;
   variables.reserve(this->Args.size() - 1);
   for (unsigned int j = 1; j < this->Args.size(); ++j) {
@@ -83,6 +95,10 @@ bool cmMacroHelperCommand::operator()(
   for (unsigned int j = 0; j < expandedArgs.size(); ++j) {
     argVs.emplace_back(cmStrCat("${ARGV", j, '}'));
   }
+
+  cmMakefile::MacroPushPop macroScope(&makefile, this->FilePath,
+                                      this->Policies, this->Diagnostics);
+
   // Invoke all the functions that were collected in the block.
   // for each function
   for (cmListFileFunction const& func : this->Functions) {
