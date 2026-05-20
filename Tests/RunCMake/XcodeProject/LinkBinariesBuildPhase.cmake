@@ -14,6 +14,8 @@ int func7();
 ]])
 set(prototypes_objc [[
 #import <CoreFoundation/CoreFoundation.h>
+#import <CoreGraphics/CoreGraphics.h>
+#import <CoreAudio/CoreAudio.h>
 ]])
 set(impl [[
 {
@@ -25,6 +27,7 @@ set(impl_objc [[
 {
   CFStringRef cfStr = CFSTR("This is a string");
   printf("%p %p %ld\n", compress, res_close, (long)CFStringGetLength(cfStr));
+  printf("%p %llu\n", (void *)CGColorSpaceCreateDeviceRGB, (unsigned long long)AudioGetCurrentHostTime());
   return func1() + func2() + func3() + func4() + func5() + func6() + func7();
 }
 ]])
@@ -137,6 +140,8 @@ set(linkToThings
     imported2
     ${libresolv}
     ${CoreFoundation}
+    "$<LINK_LIBRARY:FRAMEWORK,CoreGraphics>"
+    "$<LINK_LIBRARY:FRAMEWORK,CoreAudio.framework>"
     "${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/sharedFrameworkExt.framework"
     "${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/staticFrameworkExt.framework"
 )
@@ -157,6 +162,8 @@ set(linkToThings
     imported2
     ${libresolv}
     ${CoreFoundation}
+    "$<LINK_LIBRARY:FRAMEWORK,CoreGraphics>"
+    "$<LINK_LIBRARY:FRAMEWORK,CoreAudio.framework>"
     "$<LINK_LIBRARY:WEAK_FRAMEWORK,${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/sharedFrameworkExt.framework>"
     "${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/staticFrameworkExt.framework"
 )
@@ -177,6 +184,8 @@ set(linkToThings
     imported2
     ${libresolv}
     ${CoreFoundation}
+    "$<LINK_LIBRARY:FRAMEWORK,CoreGraphics>"
+    "$<LINK_LIBRARY:FRAMEWORK,CoreAudio.framework>"
     "$<LINK_LIBRARY:REEXPORT_FRAMEWORK,${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/sharedFrameworkExt.framework>"
     "${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/staticFrameworkExt.framework"
 )

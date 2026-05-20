@@ -3907,6 +3907,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
             if (!IsLinkPhaseLibraryExtension(libExt)) {
               canUseLinkPhase = false;
             }
+            // We can't add non-absolute PBXFileReferences to the link phase
+            if (!cmSystemTools::FileIsFullPath(libItem.Value.Value)) {
+              canUseLinkPhase = false;
+            }
           }
         }
         if (canUseLinkPhase) {
@@ -4322,7 +4326,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           }
           if ((!libName.Target || libName.Target->IsImported()) &&
               (isFramework || isXcFramework ||
-               IsLinkPhaseLibraryExtension(cleanPath))) {
+               IsLinkPhaseLibraryExtension(cleanPath)) &&
+              cmSystemTools::FileIsFullPath(cleanPath)) {
             // Create file reference for embedding
             auto it = this->ExternalLibRefs.find(cleanPath);
             if (it == this->ExternalLibRefs.end()) {
