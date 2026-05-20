@@ -1,0 +1,11 @@
+macro(wrapped_continue)
+  continue()
+endmacro()
+
+message(STATUS "start")
+foreach(iter RANGE 1 5)
+  message(STATUS "${iter} before continue")
+  wrapped_continue()
+  message(STATUS "${iter} after continue")
+endforeach()
+message(STATUS "end")
