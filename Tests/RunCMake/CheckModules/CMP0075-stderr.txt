@@ -1,5 +1,5 @@
-^CMake Warning \(author\) at [^
-]*/Modules/CheckIncludeFile\.cmake:[0-9]+ \(message\):
+^CMake Warning \(policy\) at [^
+]*/Modules/CheckIncludeFile\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0075 is not set: Include file check macros honor
   CMAKE_REQUIRED_LIBRARIES\.  Run "cmake --help-policy CMP0075" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -13,10 +13,11 @@
 Call Stack \(most recent call first\):
   CMP0075\.cmake:11 \(check_include_file\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
-CMake Warning \(author\) at [^
-]*/Modules/CheckIncludeFileCXX\.cmake:[0-9]+ \(message\):
+CMake Warning \(policy\) at [^
+]*/Modules/CheckIncludeFileCXX\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0075 is not set: Include file check macros honor
   CMAKE_REQUIRED_LIBRARIES\.  Run "cmake --help-policy CMP0075" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -30,10 +31,11 @@ CMake Warning \(author\) at [^
 Call Stack \(most recent call first\):
   CMP0075\.cmake:26 \(check_include_file_cxx\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
-CMake Warning \(author\) at [^
-]*/Modules/CheckIncludeFiles\.cmake:[0-9]+ \(message\):
+CMake Warning \(policy\) at [^
+]*/Modules/CheckIncludeFiles\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0075 is not set: Include file check macros honor
   CMAKE_REQUIRED_LIBRARIES\.  Run "cmake --help-policy CMP0075" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -47,7 +49,8 @@ CMake Warning \(author\) at [^
 Call Stack \(most recent call first\):
   CMP0075\.cmake:41 \(check_include_files\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 CMake Warning \(deprecated\) at CMP0075\.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0075 will be removed from a future version

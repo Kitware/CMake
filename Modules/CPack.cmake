@@ -899,10 +899,9 @@ if(NOT DEFINED CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE
   cmake_policy(GET CMP0133 _CPack_CMP0133)
   if(NOT "x${_CPack_CMP0133}x" STREQUAL "xNEWx")
     if(NOT "x${_CPack_CMP0133}x" STREQUAL "xOLDx" AND CMAKE_POLICY_WARNING_CMP0133)
-      cmake_policy(GET_WARNING CMP0133 _CMP0133_warning)
-      message(AUTHOR_WARNING
-        "${_CMP0133_warning}\n"
-        "For compatibility, CMake will enable the SLA in the CPack DragNDrop Generator."
+      cmake_policy(ISSUE_WARNING CMP0133 POST
+        "For compatibility, CMake will enable the SLA "
+        "in the CPack DragNDrop Generator."
         )
       unset(_CMP0133_warning)
     endif()
@@ -925,10 +924,9 @@ if(NOT DEFINED CPACK_WIX_INSTALL_SCOPE)
   if("x${_CPack_CMP0172}x" STREQUAL "xNEWx")
     _cpack_set_default(CPACK_WIX_INSTALL_SCOPE perMachine)
   elseif(NOT "x${_CPack_CMP0172}x" STREQUAL "xOLDx" AND CMAKE_POLICY_WARNING_CMP0172)
-    cmake_policy(GET_WARNING CMP0172 _CMP0172_warning)
-    message(AUTHOR_WARNING
-      "${_CMP0172_warning}\n"
-      "For compatibility, CMake will not enable per-machine installation by default in the CPack WIX Generator."
+    cmake_policy(ISSUE_WARNING CMP0172 POST
+      "For compatibility, CMake will not enable per-machine installation "
+      "by default in the CPack WIX Generator."
       )
     unset(_CMP0172_warning)
   endif()
@@ -942,13 +940,11 @@ if("x${_CPack_CMP0161}x" STREQUAL "xNEWx")
 elseif(APPLE AND CPACK_BINARY_PRODUCTBUILD AND
        NOT DEFINED CPACK_PRODUCTBUILD_DOMAINS AND
        NOT "x${_CPack_CMP0161}x" STREQUAL "xOLDx")
-  cmake_policy(GET_WARNING CMP0161 _CMP0161_warning)
-  message(AUTHOR_WARNING
-    "${_CMP0161_warning}\n"
+  cmake_policy(ISSUE_WARNING CMP0161 POST
     "For compatibility, CPACK_PRODUCTBUILD_DOMAINS will remain unset. "
     "Explicitly setting CPACK_PRODUCTBUILD_DOMAINS or setting policy CMP0161 "
     "to NEW will prevent this warning."
-  )
+    )
   unset(_CMP0161_warning)
 endif()
 unset(_CPack_CMP0161)
@@ -958,9 +954,7 @@ if(NOT DEFINED CPACK_ARCHIVE_UID AND NOT DEFINED CPACK_ARCHIVE_GID)
   cmake_policy(GET CMP0206 _CPack_CMP0206)
   if(NOT "x${_CPack_CMP0206}x" STREQUAL "xNEWx")
     if(NOT "x${_CPack_CMP0206}x" STREQUAL "xOLDx" AND CMAKE_POLICY_WARNING_CMP0206)
-      cmake_policy(GET_WARNING CMP0206 _CMP0206_warning)
-      message(AUTHOR_WARNING
-        "${_CMP0206_warning}\n"
+      cmake_policy(ISSUE_WARNING CMP0206 POST
         "For compatibility, CMake will set archive UID/GID to -1/-1."
         )
       unset(_CMP0206_warning)

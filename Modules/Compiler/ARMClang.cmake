@@ -99,9 +99,7 @@ macro(__compiler_armclang lang)
   cmake_policy(GET CMP0123 policy_CMP0123)
   if(NOT "x${CMAKE_ARMClang_CMP0123}x" STREQUAL "xNEWx")
     if(NOT "x${CMAKE_ARMClang_CMP0123}x" STREQUAL "xOLDx")
-      cmake_policy(GET_WARNING CMP0123 _cmp0123_warning)
-      message(AUTHOR_WARNING
-        "${_cmp0123_warning}\n"
+      cmake_policy(ISSUE_WARNING CMP0123 POST
         "For compatibility, CMake will automatically add cpu/arch flags based "
         "on the CMAKE_SYSTEM_PROCESSOR and/or CMAKE_SYSTEM_ARCH variables."
         )

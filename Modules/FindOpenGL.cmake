@@ -536,9 +536,7 @@ else()
   endif()
 
   if(_OpenGL_GL_POLICY_WARN AND OPENGL_gl_LIBRARY AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
-    cmake_policy(GET_WARNING CMP0072 _cmp0072_warning)
-    message(AUTHOR_WARNING
-      "${_cmp0072_warning}\n"
+    cmake_policy(ISSUE_WARNING CMP0072 POST
       "FindOpenGL found both a legacy GL library:\n"
       "  OPENGL_gl_LIBRARY: ${OPENGL_gl_LIBRARY}\n"
       "and GLVND libraries for OpenGL and GLX:\n"

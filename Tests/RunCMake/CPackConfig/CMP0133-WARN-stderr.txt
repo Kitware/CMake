@@ -1,5 +1,5 @@
-^CMake Warning \(author\) at [^
-]*/Modules/CPack\.cmake:[0-9]+ \(message\):
+^CMake Warning \(policy\) at [^
+]*/Modules/CPack\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0133 is not set: The CPack module disables SLA by default in the
   CPack DragNDrop Generator\.  Run "cmake --help-policy CMP0133" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
@@ -9,4 +9,5 @@
   Generator\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.$
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.$

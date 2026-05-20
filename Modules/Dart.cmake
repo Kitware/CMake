@@ -43,8 +43,7 @@ whether testing support should be enabled.  The default is ON.
 # which will not warn.  Warn again just in case.
 cmake_policy(GET CMP0145 cmp0145)
 if(cmp0145 STREQUAL "")
-  cmake_policy(GET_WARNING CMP0145 _cmp0145_warning)
-  message(AUTHOR_WARNING "${_cmp0145_warning}")
+  cmake_policy(ISSUE_WARNING CMP0145)
 endif()
 
 option(BUILD_TESTING "Build the testing tree." ON)

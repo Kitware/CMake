@@ -234,8 +234,7 @@ else()
 endif()
 
 if("ASM${ASM_DIALECT}" STREQUAL "ASM" AND CMAKE_ASM_COMPILER_ID STREQUAL "MSVC" AND _CMAKE_ASM_CMP0194 STREQUAL "")
-  cmake_policy(GET_WARNING CMP0194 _CMAKE_ASM_CMP0194_WARNING)
-  message(AUTHOR_WARNING "${_CMAKE_ASM_CMP0194_WARNING}")
+  cmake_policy(ISSUE_WARNING CMP0194)
 endif()
 
 # If we have a gas/as cross compiler, they have usually some prefix, like
