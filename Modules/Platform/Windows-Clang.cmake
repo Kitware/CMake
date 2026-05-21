@@ -62,9 +62,9 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_SHARED_LIBRARY_COMPILE_DEFINITIONS "_WINDLL")
 
   # linker selection
-  set(CMAKE_${lang}_USING_LINKER_DEFAULT "-fuse-ld=lld-link")
+  set(CMAKE_${lang}_USING_LINKER_DEFAULT "-fuse-ld=lld")
   set(CMAKE_${lang}_USING_LINKER_SYSTEM "-fuse-ld=link")
-  set(CMAKE_${lang}_USING_LINKER_LLD "-fuse-ld=lld-link")
+  set(CMAKE_${lang}_USING_LINKER_LLD "-fuse-ld=lld")
   set(CMAKE_${lang}_USING_LINKER_MSVC "-fuse-ld=link")
 
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
