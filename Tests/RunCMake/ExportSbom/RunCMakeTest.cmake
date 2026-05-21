@@ -28,3 +28,4 @@ run_cmake_install(Requirements)
 
 run_cmake_install(MissingPackageNamespace)
 run_cmake_install(ReferencesNonExportedTarget)
+run_cmake_install(ProjectMetadata)

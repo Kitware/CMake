@@ -56,6 +56,7 @@ cmExportSbomGenerator::cmExportSbomGenerator(cmSbomArguments args)
   , PackageDescription(std::move(args.Description))
   , PackageWebsite(std::move(args.Website))
   , PackageLicense(std::move(args.License))
+  , PackageUrl(std::move(args.PackageUrl))
   , PackageFormat(args.GetFormat())
 {
 }
