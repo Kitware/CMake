@@ -9,6 +9,6 @@ create_test_sourcelist(testSrcs
                        test1.cxx
                        test2.cxx
                        subdir/test3.cxx
-                       EXTRA_INCLUDE testArgs.h FUNCTION testProccessArgs)
+                       EXTRA_INCLUDE testArgs.h FUNCTION testProcessArgs)
 
 add_executable(TestDriverTest ${testSrcs} ${Extra_SRCS})
