@@ -293,8 +293,9 @@ Changes made since CMake 4.3.0 include the following.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
 
-.. 4.3.3
+4.3.3
+-----
 
-   * The :command:`export(PACKAGE_INFO)` command now writes to the
-     ``cps/<package-name>`` subdirectory of the current build directory, rather
-     than directly to the current build directory.
+* The :command:`export(PACKAGE_INFO)` command now writes to the
+  ``cps/<package-name>`` subdirectory of the current build directory,
+  rather than directly to the current build directory.
