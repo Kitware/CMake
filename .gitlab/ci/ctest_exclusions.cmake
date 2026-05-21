@@ -49,9 +49,9 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "^macos_x86_64_")
     )
 endif()
 
-if ("$ENV{CMAKE_CONFIGURATION}" MATCHES [[windows_orangec7\.0\.7]])
+if ("$ENV{CMAKE_CONFIGURATION}" STREQUAL "windows_orangec7.0")
   list(APPEND test_exclusions
-    # FIXME(OrangeC#1136): OrangeC 7 no longer fails when linking a missing library
+    # FIXME(OrangeC#1136): OrangeC 7.0 no longer fails when linking a missing library
     "^RunCMake.CheckModules$"
     )
 endif()

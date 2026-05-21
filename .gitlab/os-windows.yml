@@ -313,17 +313,17 @@
         CMAKE_CI_BUILD_TYPE: Release
         CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
-.windows_orangec6.73.8:
+.windows_orangec6.73:
     extends: .windows_orangec
 
     variables:
-        CMAKE_CONFIGURATION: windows_orangec6.73.8
+        CMAKE_CONFIGURATION: windows_orangec6.73
 
-.windows_orangec7.0.7:
+.windows_orangec7.0:
     extends: .windows_orangec
 
     variables:
-        CMAKE_CONFIGURATION: windows_orangec7.0.7
+        CMAKE_CONFIGURATION: windows_orangec7.0
 
 .windows_pellesc:
     extends: .windows
