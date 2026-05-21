@@ -84,17 +84,18 @@ change a variable which has already been created.
 
 .. code-block:: console
 
-  $ cmake -P StickyCacheVariable.cmake
+  $ cmake -B build
+  ...
   StickyCacheVariable: I will not change
 
-Because :option:`-D <cmake -D>` flags are processed before any other commands,
+Because :option:`-D <cmake -D>` flags are processed before any project commands,
 they take precedence for setting the value of a cache variable.
 
 .. code-block:: console
 
-  $ cmake \
-    -DStickyCacheVariable="Commandline always wins" \
-    -P StickyCacheVariable.cmake
+  $ cmake -B build \
+    -DStickyCacheVariable="Commandline always wins"
+  ...
   StickyCacheVariable: Commandline always wins
 
 While cache variables cannot ordinarily be changed, they can be *shadowed* by
@@ -113,9 +114,15 @@ the normal variable.
 
 .. code-block:: console
 
-  $ cmake -P ShadowVariable.cmake
+  $ cmake -B build
+  ...
   ShadowVariable: Hiding the cache variable
   ShadowVariable: In the shadows
+
+.. note::
+  :ref:`Script mode <Script Processing Mode>` operates slightly differently,
+  only :option:`-D <cmake -D>` flags provided before the :option:`-P <cmake -P>`
+  flag in the command are evaluated and available in the running script.
 
 Exercise 1 - Using Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
