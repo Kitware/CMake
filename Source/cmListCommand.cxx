@@ -16,7 +16,6 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -36,10 +35,9 @@ bool GetIndexArg(std::string const& arg, int* idx, cmMakefile& mf)
       case cmPolicies::WARN: {
         // Default is to warn and use old behavior OLD behavior is to allow
         // compatibility, so issue a warning and use the previous behavior.
-        std::string warn =
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0121),
-                   " Invalid list index \"", arg, "\".");
-        mf.IssueDiagnostic(cmDiagnostics::CMD_POLICY, warn);
+        mf.IssuePolicyWarning(
+          cmPolicies::CMP0121, {},
+          cmStrCat("Invalid list index \""_s, arg, "\"."_s));
         CM_FALLTHROUGH;
       }
       case cmPolicies::OLD:

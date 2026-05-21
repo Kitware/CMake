@@ -471,13 +471,8 @@ void cmState::AddDisallowedCommand(std::string const& name,
                         cmExecutionStatus& status) -> bool {
       cmMakefile& mf = status.GetMakefile();
       switch (mf.GetPolicyStatus(policy)) {
-        case cmPolicies::WARN: {
-          std::string warning = cmPolicies::GetPolicyWarning(policy);
-          if (additionalWarning) {
-            warning = cmStrCat(warning, '\n', additionalWarning);
-          }
-          mf.IssueDiagnostic(cmDiagnostics::CMD_POLICY, warning);
-        }
+        case cmPolicies::WARN:
+          mf.IssuePolicyWarning(policy, {}, additionalWarning);
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;

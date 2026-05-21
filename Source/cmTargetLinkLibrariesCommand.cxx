@@ -11,6 +11,7 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
@@ -444,17 +445,14 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
   }
 
   if (this->WarnRemoteInterface) {
-    this->Makefile.IssueDiagnostic(
-      cmDiagnostics::CMD_POLICY,
-      cmStrCat(
-        cmPolicies::GetPolicyWarning(cmPolicies::CMP0079), "\nTarget\n  ",
-        this->Target->GetName(),
-        "\nis not created in this "
-        "directory.  For compatibility with older versions of CMake, link "
-        "library\n  ",
-        lib,
-        "\nwill be looked up in the directory in which "
-        "the target was created rather than in this calling directory."));
+    this->Makefile.IssuePolicyWarning(
+      cmPolicies::CMP0079, {},
+      cmStrCat("Target\n  "_s, this->Target->GetName(),
+               "\nis not created in this directory.  For compatibility "
+               "with older versions of CMake, link library\n  "_s,
+               lib,
+               "\nwill be looked up in the directory in which the target "
+               "was created rather than in this calling directory."_s));
   }
 
   // Handle (additional) case where the command was called with PRIVATE /

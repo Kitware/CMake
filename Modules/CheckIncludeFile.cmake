@@ -151,11 +151,7 @@ macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
       elseif("x${_CIF_CMP0075}x" STREQUAL "xOLDx")
       elseif(NOT _CIF_CMP0075_WARNED)
         set(_CIF_CMP0075_WARNED 1)
-        message(AUTHOR_WARNING
-          "Policy CMP0075 is not set: Include file check macros honor CMAKE_REQUIRED_LIBRARIES.  "
-          "Run \"cmake --help-policy CMP0075\" for policy details.  "
-          "Use the cmake_policy command to set the policy and suppress this warning."
-          "\n"
+        cmake_policy(ISSUE_WARNING CMP0075 POST
           "CMAKE_REQUIRED_LIBRARIES is set to:\n"
           "  ${CMAKE_REQUIRED_LIBRARIES}\n"
           "For compatibility with CMake 3.11 and below this check is ignoring it."

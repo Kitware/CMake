@@ -2,7 +2,6 @@ CMake Warning \(policy\) at CMP0173-common\.cmake:1 \(include\):
   Policy CMP0173 is not set: The CMakeFindFrameworks module is removed\.  Run
   "cmake --help-policy CMP0173" for policy details\.  Use the cmake_policy
   command to set the policy and suppress this warning\.
-
 Call Stack \(most recent call first\):
   CMP0173-WARN\.cmake:2 \(include\)
   CMakeLists\.txt:3 \(include\)

@@ -10,7 +10,6 @@
 #include <cmext/string_view>
 
 #include "cmCMakePath.h"
-#include "cmDiagnostics.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
@@ -48,9 +47,7 @@ cmInstallCommandArguments::cmInstallCommandArguments(
         // generator expressions
         if (cmGeneratorExpression::Find(arg) == cm::string_view::npos &&
             arg != cmCMakePath(arg).Normal().String()) {
-          makefile.IssueDiagnostic(
-            cmDiagnostics::CMD_POLICY,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0177));
+          makefile.IssuePolicyWarning(cmPolicies::CMP0177);
         }
         return ArgumentParser::Continue::No;
       };

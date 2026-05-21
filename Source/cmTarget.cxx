@@ -21,7 +21,6 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
-#include "cmDiagnostics.h"
 #include "cmFileSet.h"
 #include "cmFileSetMetadata.h"
 #include "cmFindPackageStack.h"
@@ -2061,10 +2060,8 @@ struct ReadOnlyProperty
     } else {
       switch (target->GetPolicyStatus(*this->Policy)) {
         case cmPolicies::WARN:
-          context->IssueDiagnostic(
-            cmDiagnostics::CMD_POLICY,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0160) + "\n" +
-              this->message(prop, target));
+          context->IssuePolicyWarning(cmPolicies::CMP0160, {},
+                                      this->message(prop, target));
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
           readOnly = false;
@@ -3137,10 +3134,8 @@ std::string cmTarget::ImportedGetFullPath(
 
       switch (this->GetPolicyStatus(cmPolicies::CMP0111)) {
         case cmPolicies::WARN:
-          this->impl->Makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_POLICY,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0111) + "\n" +
-              message());
+          this->impl->Makefile->IssuePolicyWarning(cmPolicies::CMP0111, {},
+                                                   message());
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;
@@ -3323,12 +3318,12 @@ bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
     if (newResult) {
       // NEW policy found a configuration, OLD did not.
       cm::string_view newConfig = configFromSuffix(newSuffix);
-      std::string const err = cmStrCat(
-        cmPolicies::GetPolicyWarning(cmPolicies::CMP0200),
-        "\nConfiguration selection for imported target \"", this->GetName(),
-        "\" failed, but would select configuration \"", newConfig,
-        "\" under the NEW policy.\n");
-      this->GetMakefile()->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err);
+      this->GetMakefile()->IssuePolicyWarning(
+        cmPolicies::CMP0200, {},
+        cmStrCat("Configuration selection for imported target \""_s,
+                 this->GetName(),
+                 "\" failed, but would select configuration \""_s, newConfig,
+                 "\" under the NEW policy."_s));
     }
 
     return false;
@@ -3337,22 +3332,20 @@ bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
   cm::string_view oldConfig = configFromSuffix(suffix);
   if (!newResult) {
     // NEW policy did not find a configuration, OLD did.
-    std::string const err =
-      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0200),
-               "\nConfiguration selection for imported target \"",
-               this->GetName(), "\" selected configuration \"", oldConfig,
-               "\", but would fail under the NEW policy.\n");
-    this->GetMakefile()->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err);
+    this->GetMakefile()->IssuePolicyWarning(
+      cmPolicies::CMP0200, {},
+      cmStrCat("Configuration selection for imported target \""_s,
+               this->GetName(), "\" selected configuration \""_s, oldConfig,
+               "\", but would fail under the NEW policy."_s));
   } else if (suffix != newSuffix) {
     // OLD and NEW policies found different configurations.
     cm::string_view newConfig = configFromSuffix(newSuffix);
-    std::string const err =
-      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0200),
-               "\nConfiguration selection for imported target \"",
-               this->GetName(), "\" selected configuration \"", oldConfig,
-               "\", but would select configuration \"", newConfig,
-               "\" under the NEW policy.\n");
-    this->GetMakefile()->IssueDiagnostic(cmDiagnostics::CMD_POLICY, err);
+    this->GetMakefile()->IssuePolicyWarning(
+      cmPolicies::CMP0200, {},
+      cmStrCat("Configuration selection for imported target \""_s,
+               this->GetName(), "\" selected configuration \""_s, oldConfig,
+               "\", but would select configuration \""_s, newConfig,
+               "\" under the NEW policy."_s));
   }
 
   return true;

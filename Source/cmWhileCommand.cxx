@@ -10,7 +10,6 @@
 #include <cmext/string_view>
 
 #include "cmConditionEvaluator.h"
-#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmFunctionBlocker.h"
@@ -19,7 +18,6 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmWhileFunctionBlocker : public cmFunctionBlocker
@@ -131,9 +129,7 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     err += "\n";
     err += errorString;
     if (mf.GetPolicyStatus(cmPolicies::CMP0130) == cmPolicies::WARN) {
-      err =
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0130), '\n', err);
-      mf.IssueDiagnostic(cmDiagnostics::CMD_POLICY, err, whileBT);
+      mf.IssuePolicyWarning(cmPolicies::CMP0130, {}, err, whileBT);
     } else {
       mf.IssueMessage(messageType, err, whileBT);
       if (messageType == MessageType::FATAL_ERROR) {

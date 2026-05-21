@@ -26,9 +26,7 @@ if (_Documentation_policy STREQUAL "")
   # Ignore the warning if the project is detected as VTK itself.
   if (NOT CMAKE_PROJECT_NAME STREQUAL "VTK" AND
       NOT PROJECT_NAME STREQUAL "VTK")
-    cmake_policy(GET_WARNING CMP0106 _Documentation_policy_warning)
-    message(AUTHOR_WARNING
-      "${_Documentation_policy_warning}\n"
+    cmake_policy(ISSUE_WARNING CMP0106 POST
       "Documentation.cmake is VTK-specific code and should not be used in "
       "non-VTK projects. This logic in this module is best shipped with the "
       "project using it rather than with CMake.")

@@ -26,7 +26,6 @@
 #include "cmCryptoHash.h"
 #include "cmCxxModuleMetadata.h"
 #include "cmCxxModuleUsageEffects.h"
-#include "cmDiagnostics.h"
 #include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmFileSetMetadata.h"
@@ -824,12 +823,12 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
     bool const in_try_compile =
       this->LocalGenerator->GetCMakeInstance()->GetIsInTryCompile();
     if (cmp0069 == cmPolicies::WARN && !in_try_compile) {
-      std::ostringstream w;
-      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0069) << "\n";
-      w << "INTERPROCEDURAL_OPTIMIZATION property will be ignored for target "
-        << "'" << this->GetName() << "'.";
-      this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str(),
-                                      this->GetBacktrace());
+      this->Makefile->IssuePolicyWarning(
+        cmPolicies::CMP0069, {},
+        cmStrCat("INTERPROCEDURAL_OPTIMIZATION property "
+                 "will be ignored for target '"_s,
+                 this->GetName(), "'."_s),
+        this->GetBacktrace());
 
       this->PolicyReportedCMP0069 = true;
     }
@@ -2581,11 +2580,10 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
     switch (this->GetPolicyStatusCMP0104()) {
       case cmPolicies::WARN:
         if (!this->LocalGenerator->GetCMakeInstance()->GetIsInTryCompile()) {
-          this->Makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_POLICY,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0104) +
-              "\nCUDA_ARCHITECTURES is empty for target \"" + this->GetName() +
-              "\".");
+          this->Makefile->IssuePolicyWarning(
+            cmPolicies::CMP0104, {},
+            cmStrCat("CUDA_ARCHITECTURES is empty for target \""_s,
+                     this->GetName(), "\"."_s));
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:

@@ -416,12 +416,10 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
         case cmPolicies::WARN:
           if (status.GetMakefile().PolicyOptionalWarningEnabled(
                 "CMAKE_POLICY_WARNING_CMP0159")) {
-            status.GetMakefile().IssueDiagnostic(
-              cmDiagnostics::CMD_POLICY,
-              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0159),
-                       "\n"
-                       "For compatibility, CMake is leaving CMAKE_MATCH_<n> "
-                       "unchanged."));
+            status.GetMakefile().IssuePolicyWarning(
+              cmPolicies::CMP0159, {},
+              "For compatibility, CMake is leaving CMAKE_MATCH_<n> "
+              "unchanged."_s);
           }
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
@@ -1376,17 +1374,14 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     if (warnAbout152) {
       computeNewPath(input, realPath);
       if (oldPolicyPath != realPath) {
-        status.GetMakefile().IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0152),
-                   "\n"
-                   "From input path:\n  ",
-                   input, "\nthe policy OLD behavior produces path:\n  ",
-                   oldPolicyPath,
-                   "\nbut the policy NEW behavior produces path:\n  ",
-                   realPath,
-                   "\nSince the policy is not set, CMake is using the OLD "
-                   "behavior for compatibility."));
+        status.GetMakefile().IssuePolicyWarning(
+          cmPolicies::CMP0152, {},
+          cmStrCat(
+            "From input path:\n  ", input,
+            "\nthe policy OLD behavior produces path:\n  ", oldPolicyPath,
+            "\nbut the policy NEW behavior produces path:\n  ", realPath,
+            "\nSince the policy is not set, CMake is using the OLD "
+            "behavior for compatibility."));
       }
     }
     realPath = oldPolicyPath;
@@ -3323,12 +3318,11 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
       if (cmp0205 == cmPolicies::NEW) {
         needToTry = false;
       } else if (cmp0205 == cmPolicies::WARN && arguments.CopyOnError) {
-        status.GetMakefile().IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
+        status.GetMakefile().IssuePolicyWarning(
+          cmPolicies::CMP0205,
           cmStrCat("Path\n  ", fileName,
                    "\nis a directory. Hard link creation is not supported "
-                   "for directories.\n",
-                   cmPolicies::GetPolicyWarning(cmPolicies::CMP0205)));
+                   "for directories."));
       }
     }
 
@@ -3349,12 +3343,11 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
 
   if (cmp0205 == cmPolicies::WARN && arguments.CopyOnError &&
       sourceIsDirectory) {
-    status.GetMakefile().IssueDiagnostic(
-      cmDiagnostics::CMD_POLICY,
+    status.GetMakefile().IssuePolicyWarning(
+      cmPolicies::CMP0205,
       cmStrCat("Path\n  ", fileName,
                "\nis a directory. It will be copied "
-               "recursively when CMP0205 is set to NEW.\n",
-               cmPolicies::GetPolicyWarning(cmPolicies::CMP0205)));
+               "recursively when CMP0205 is set to NEW."));
   }
 
   // Check if copy-on-error is enabled in the arguments.

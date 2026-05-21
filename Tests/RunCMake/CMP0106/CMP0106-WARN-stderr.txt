@@ -2,14 +2,13 @@ CMake Warning \(policy\) at CMP0106-Common\.cmake:1 \(include\):
   Policy CMP0106 is not set: The Documentation module is removed\.  Run "cmake
   --help-policy CMP0106" for policy details\.  Use the cmake_policy command to
   set the policy and suppress this warning\.
-
 Call Stack \(most recent call first\):
   CMP0106-WARN\.cmake:2 \(include\)
   CMakeLists\.txt:7 \(include\)
 This warning is for project developers\.  Use -Wno-author or -Wno-policy to
 suppress it\.
 
-CMake Warning \(author\) at .*/Modules/Documentation\.cmake:[0-9]+ \(message\):
+CMake Warning \(policy\) at .*/Modules/Documentation\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0106 is not set: The Documentation module is removed\.  Run "cmake
   --help-policy CMP0106" for policy details\.  Use the cmake_policy command to
   set the policy and suppress this warning\.
@@ -21,9 +20,10 @@ Call Stack \(most recent call first\):
   CMP0106-Common\.cmake:1 \(include\)
   CMP0106-WARN\.cmake:2 \(include\)
   CMakeLists\.txt:7 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at .*/Modules/Documentation\.cmake:[0-9]+ \(message\):
+CMake Warning \(policy\) at .*/Modules/Documentation\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0106 is not set: The Documentation module is removed\.  Run "cmake
   --help-policy CMP0106" for policy details\.  Use the cmake_policy command to
   set the policy and suppress this warning\.
@@ -35,4 +35,5 @@ Call Stack \(most recent call first\):
   CMP0106-Common\.cmake:10 \(include\)
   CMP0106-WARN\.cmake:2 \(include\)
   CMakeLists\.txt:7 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

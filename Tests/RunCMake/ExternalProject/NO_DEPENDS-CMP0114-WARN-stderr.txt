@@ -1,5 +1,5 @@
-^CMake Warning \(author\) at [^
-]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
+^CMake Warning \(policy\) at [^
+]*/Modules/ExternalProject\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0114 is not set: ExternalProject step targets fully adopt their
   steps\.  Run "cmake --help-policy CMP0114" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -17,7 +17,8 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 CMake Warning \(author\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
@@ -53,8 +54,8 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
-CMake Warning \(author\) at [^
-]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
+CMake Warning \(policy\) at [^
+]*/Modules/ExternalProject\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0114 is not set: ExternalProject step targets fully adopt their
   steps\.  Run "cmake --help-policy CMP0114" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -72,7 +73,8 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 CMake Warning \(author\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
@@ -91,8 +93,8 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-author to suppress it\.
 +
-CMake Warning \(author\) at [^
-]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
+CMake Warning \(policy\) at [^
+]*/Modules/ExternalProject\.cmake:[0-9]+ \(cmake_policy\):
   Policy CMP0114 is not set: ExternalProject step targets fully adopt their
   steps\.  Run "cmake --help-policy CMP0114" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
@@ -105,7 +107,8 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add_StepTargets\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 +
 CMake Warning \(author\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):

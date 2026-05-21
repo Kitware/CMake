@@ -23,7 +23,6 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmDiagnostics.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
@@ -124,7 +123,7 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
       std::string fullPath = sf->ResolveFullPath(&e, &w);
       cmLocalGenerator const* const lg = tgt->GetLocalGenerator();
       if (!w.empty()) {
-        lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w, entry.Backtrace);
+        lg->IssuePolicyWarning(cmPolicies::CMP0115, {}, w, entry.Backtrace);
       }
       if (fullPath.empty()) {
         if (!e.empty()) {
@@ -179,10 +178,9 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
           auto const* fileSet = *fileSets.begin();
           switch (tgt->GetPolicyStatusCMP0211()) {
             case cmPolicies::WARN:
-              tgt->GetLocalGenerator()->IssueDiagnostic(
-                cmDiagnostics::CMD_POLICY,
-                cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0211),
-                         "\nIn target \"", tgt->GetName(), "\" the file\n  ",
+              tgt->GetLocalGenerator()->IssuePolicyWarning(
+                cmPolicies::CMP0211, {},
+                cmStrCat("In target \"", tgt->GetName(), "\" the file\n  ",
                          src, "\nalready belongs to file set \"",
                          fileSet->GetName(), "\"."));
               CM_FALLTHROUGH;

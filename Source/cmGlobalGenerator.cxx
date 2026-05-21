@@ -1019,14 +1019,11 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
       case cmPolicies::WARN:
         if (!this->CMakeInstance->GetIsInTryCompile() &&
             mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0089")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0089) << "\n"
-            "Converting " << lang <<
-            R"( compiler id "XLClang" to "XL" for compatibility.)"
-            ;
-          /* clang-format on */
-          mf->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
+          mf->IssuePolicyWarning(
+            cmPolicies::CMP0089, {},
+            cmStrCat(
+              "Converting "_s, lang,
+              R"( compiler id "XLClang" to "XL" for compatibility.)"_s));
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1044,14 +1041,10 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
       case cmPolicies::WARN:
         if (!this->CMakeInstance->GetIsInTryCompile() &&
             mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0129")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0129) << "\n"
-            "Converting " << lang <<
-            R"( compiler id "LCC" to "GNU" for compatibility.)"
-            ;
-          /* clang-format on */
-          mf->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
+          mf->IssuePolicyWarning(
+            cmPolicies::CMP0129, {},
+            cmStrCat("Converting "_s, lang,
+                     R"( compiler id "LCC" to "GNU" for compatibility.)"_s));
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -3101,10 +3094,8 @@ void cmGlobalGenerator::ReserveGlobalTargetCodegen()
 
   switch (policyStatus) {
     case cmPolicies::WARN:
-      tgt->GetMakefile()->IssueDiagnostic(
-        cmDiagnostics::CMD_POLICY,
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0171), '\n',
-                 "The target name \"codegen\" is reserved."),
+      tgt->GetMakefile()->IssuePolicyWarning(
+        cmPolicies::CMP0171, {}, "The target name \"codegen\" is reserved.",
         tgt->GetBacktrace());
       break;
     case cmPolicies::OLD:

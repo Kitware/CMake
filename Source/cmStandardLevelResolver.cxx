@@ -18,7 +18,6 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include "cmDiagnostics.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -128,11 +127,10 @@ struct StandardLevelComputer
             state = "disabled";
           }
           if (state) {
-            makefile->IssueDiagnostic(
-              cmDiagnostics::CMD_POLICY,
-              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0128),
-                       "\nFor compatibility with older versions of CMake, "
-                       "compiler extensions won't be ",
+            makefile->IssuePolicyWarning(
+              cmPolicies::CMP0128, {},
+              cmStrCat("For compatibility with older versions of CMake, "
+                       "compiler extensions won't be "_s,
                        state, '.'));
           }
         }
@@ -178,12 +176,10 @@ struct StandardLevelComputer
       if (cmp0128 == cmPolicies::WARN &&
           makefile->PolicyOptionalWarningEnabled(
             "CMAKE_POLICY_WARNING_CMP0128")) {
-        makefile->IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0128),
-                   "\nFor compatibility with older versions of CMake, "
-                   "unnecessary flags for language standard or compiler "
-                   "extensions may be added."));
+        makefile->IssuePolicyWarning(
+          cmPolicies::CMP0128, {},
+          "For compatibility with older versions of CMake, unnecessary flags "
+          "for language standard or compiler extensions may be added."_s);
       }
     }
 

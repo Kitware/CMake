@@ -7,7 +7,6 @@ CMake Warning \(policy\) in CMakeLists\.txt:
   Configuration selection for imported target "lib_test1" selected
   configuration "CAT", but would select configuration "DOG" under the NEW
   policy\.
-
 This warning is for project developers\.  Use -Wno-author or -Wno-policy to
 suppress it\.
 
@@ -20,6 +19,5 @@ CMake Warning \(policy\) in CMakeLists\.txt:
   Configuration selection for imported target "lib_test2" selected
   configuration "\(none\)", but would select configuration "[^"]*" under the
   NEW policy\.
-
 This warning is for project developers\.  Use -Wno-author or -Wno-policy to
 suppress it\.

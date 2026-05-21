@@ -175,9 +175,7 @@ function(_ep_resolve_git_remote
     set("${output_variable}" "${_resolved_git_remote_url}" PARENT_SCOPE)
     return()
   elseif(cmp0150 STREQUAL "")
-    cmake_policy(GET_WARNING CMP0150 _cmp0150_warning)
-    message(AUTHOR_WARNING
-      "${_cmp0150_warning}\n"
+    cmake_policy(ISSUE_WARNING CMP0150 POST
       "A relative GIT_REPOSITORY path was detected. "
       "This will be interpreted as a local path to where the project is being cloned. "
       "Set GIT_REPOSITORY to an absolute path or set policy CMP0150 to NEW to avoid "

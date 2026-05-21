@@ -17,8 +17,8 @@
 #include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/string_view>
 
-#include "cmDiagnostics.h"
 #include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
@@ -103,15 +103,12 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
           this->GetType() == cmStateEnums::EXECUTABLE &&
           !this->GetPropertyAsBool("ENABLE_EXPORTS")) {
         if (cmp0209 == cmPolicies::WARN && !fileSets.empty()) {
-          this->Makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_POLICY,
-            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0209),
-                     "\n"
-                     "Executable target \"",
-                     this->GetName(),
+          this->Makefile->IssuePolicyWarning(
+            cmPolicies::CMP0209, {},
+            cmStrCat("Executable target \""_s, this->GetName(),
                      "\" has interface header file sets, but it does not "
                      "enable exports. Those headers would be verified under "
-                     "CMP0209 NEW behavior.\n"));
+                     "CMP0209 NEW behavior.\n"_s));
         }
         continue;
       }

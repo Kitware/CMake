@@ -381,12 +381,10 @@ function(gtest_add_tests)
           # the latter.
           set(__newArgs ${arg_new_EXTRA_ARGS})
           if(NOT "${arg_EXTRA_ARGS}" STREQUAL "${__newArgs}")
-            cmake_policy(GET_WARNING CMP0178 cmp0178_warning)
-            message(AUTHOR_WARNING
+            cmake_policy(ISSUE_WARNING CMP0178 PRE
               "The EXTRA_ARGS contain one or more empty values. Those empty "
               "values are being silently discarded to preserve backward "
-              "compatibility.\n"
-              "${cmp0178_warning}"
+              "compatibility."
             )
           endif()
         endblock()
@@ -634,24 +632,20 @@ function(gtest_discover_tests target)
     set(test_executor ${test_executor})
     if(NOT cmp0178 STREQUAL "OLD")
       if(NOT "${test_executor}" STREQUAL "${test_executor_orig}")
-        cmake_policy(GET_WARNING CMP0178 cmp0178_warning)
-        message(AUTHOR_WARNING
+        cmake_policy(ISSUE_WARNING CMP0178 PRE
           "The '${target}' target's TEST_LAUNCHER or CROSSCOMPILING_EMULATOR "
           "test properties contain one or more empty values. Those empty "
           "values are being silently discarded to preserve backward "
-          "compatibility.\n"
-          "${cmp0178_warning}"
+          "compatibility."
         )
       endif()
       # Unescape semicolons from the PARSE_ARGV form's value before comparing
       string(REPLACE [[\;]] ";" new_arg_EXTRA_ARGS "${new_arg_EXTRA_ARGS}")
       if(NOT "${old_arg_EXTRA_ARGS}" STREQUAL "${new_arg_EXTRA_ARGS}")
-        cmake_policy(GET_WARNING CMP0178 cmp0178_warning)
-        message(AUTHOR_WARNING
+        cmake_policy(ISSUE_WARNING CMP0178 PRE
           "The EXTRA_ARGS value contains one or more empty values. "
           "Those empty values are being silently discarded to preserve "
-          "backward compatibility.\n"
-          "${cmp0178_warning}"
+          "backward compatibility."
         )
       endif()
     endif()

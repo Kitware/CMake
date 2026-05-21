@@ -5,7 +5,6 @@
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 This warning is for project developers\.  Use -Wno-author or -Wno-policy to
 suppress it\.
 +)+
@@ -16,7 +15,6 @@ suppress it\.
   warning\.
 
   Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
-
 Call Stack \(most recent call first\):
   CMP0118-WARN/CMP0163-WARN-Test9\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)

@@ -750,15 +750,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       case cmPolicies::WARN:
         if (this->Makefile->PolicyOptionalWarningEnabled(
               "CMAKE_POLICY_WARNING_CMP0066")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0066) << "\n"
+          this->Makefile->IssuePolicyWarning(
+            cmPolicies::CMP0066, {},
             "For compatibility with older versions of CMake, try_compile "
             "is not honoring caller config-specific compiler flags "
-            "(e.g. CMAKE_C_FLAGS_DEBUG) in the test project."
-            ;
-          /* clang-format on */
-          this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
+            "(e.g. CMAKE_C_FLAGS_DEBUG) in the test project."_s);
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1039,16 +1035,12 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     if (!warnCMP0067Variables.empty()) {
       std::ostringstream w;
-      /* clang-format off */
-      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0067) << "\n"
-        "For compatibility with older versions of CMake, try_compile "
-        "is not honoring language standard variables in the test project:\n"
-        ;
-      /* clang-format on */
+      w << "For compatibility with older versions of CMake, try_compile is "
+           "not honoring language standard variables in the test project:\n"_s;
       for (std::string const& vi : warnCMP0067Variables) {
         w << "  " << vi << "\n";
       }
-      this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
+      this->Makefile->IssuePolicyWarning(cmPolicies::CMP0067, {}, w.str());
     }
 
     for (auto const& p : arguments.LangProps) {

@@ -2,9 +2,14 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCMakePolicyCommand.h"
 
+#include <cmext/string_view>
+
+#include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmStringAlgorithms.h"
 
 namespace {
@@ -16,6 +21,8 @@ bool HandleVersionMode(std::vector<std::string> const& args,
                        cmExecutionStatus& status);
 bool HandleGetWarningMode(std::vector<std::string> const& args,
                           cmExecutionStatus& status);
+bool HandleIssueWarningMode(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
 }
 
 // cmCMakePolicyCommand
@@ -54,6 +61,9 @@ bool cmCMakePolicyCommand(std::vector<std::string> const& args,
   }
   if (args[0] == "GET_WARNING") {
     return HandleGetWarningMode(args, status);
+  }
+  if (args[0] == "ISSUE_WARNING") {
+    return HandleIssueWarningMode(args, status);
   }
 
   status.SetError(cmStrCat("given unknown first argument \"", args[0], '"'));
@@ -188,6 +198,47 @@ bool HandleGetWarningMode(std::vector<std::string> const& args,
 
   // Lookup the policy warning.
   status.GetMakefile().AddDefinition(var, cmPolicies::GetPolicyWarning(pid));
+
+  return true;
+}
+
+bool HandleIssueWarningMode(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
+{
+  if (args.size() < 2) {
+    status.SetError(
+      "ISSUE_WARNING must be given at least one additional argument.");
+    return false;
+  }
+
+  // Get arguments.
+  std::string const& id = args[1];
+
+  struct Arguments
+  {
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PreArgs;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PostArgs;
+  };
+
+  static auto const parser = cmArgumentParser<Arguments>{}
+                               .Bind("PRE"_s, &Arguments::PreArgs)
+                               .Bind("POST"_s, &Arguments::PostArgs);
+
+  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(2),
+                                           /*unparsedArguments=*/nullptr);
+
+  // Lookup the policy number.
+  cmPolicies::PolicyID pid;
+  if (!cmPolicies::GetPolicyID(id.c_str(), pid)) {
+    status.SetError(
+      cmStrCat("ISSUE_WARNING given policy \"", id,
+               "\" which is not known to this version of CMake."));
+    return false;
+  }
+
+  // Issue the policy warning.
+  status.GetMakefile().IssuePolicyWarning(pid, cmJoin(arguments.PreArgs, {}),
+                                          cmJoin(arguments.PostArgs, {}));
 
   return true;
 }

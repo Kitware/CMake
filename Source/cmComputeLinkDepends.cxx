@@ -363,11 +363,10 @@ public:
         if (!makefile->GetCMakeInstance()->GetIsInTryCompile() &&
             makefile->PolicyOptionalWarningEnabled(
               "CMAKE_POLICY_WARNING_CMP0156")) {
-          makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_POLICY,
-            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0156),
-                     "\nSince the policy is not set, legacy libraries "
-                     "de-duplication strategy will be applied."),
+          makefile->IssuePolicyWarning(
+            cmPolicies::CMP0156, {},
+            "Since the policy is not set, legacy libraries "
+            "de-duplication strategy will be applied."_s,
             target->GetBacktrace());
         }
         CM_FALLTHROUGH;
@@ -380,12 +379,10 @@ public:
             !makefile->GetCMakeInstance()->GetIsInTryCompile() &&
             makefile->PolicyOptionalWarningEnabled(
               "CMAKE_POLICY_WARNING_CMP0179")) {
-          makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_POLICY,
-            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0179),
-                     "\nSince the policy is not set, static libraries "
-                     "de-duplication will keep the last occurrence of the "
-                     "static libraries."),
+          makefile->IssuePolicyWarning(
+            cmPolicies::CMP0179, {},
+            "Since the policy is not set, static libraries de-duplication "
+            "will keep the last occurrence of the static libraries."_s,
             target->GetBacktrace());
         }
 

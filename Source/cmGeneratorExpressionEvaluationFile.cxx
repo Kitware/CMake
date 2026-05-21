@@ -6,9 +6,10 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
-#include "cmDiagnostics.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -17,6 +18,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
@@ -231,29 +233,16 @@ std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
 {
   std::string resultPath;
   switch (this->PolicyStatusCMP0070) {
-    case cmPolicies::WARN: {
-      std::string arg;
-      switch (role) {
-        case PathForInput:
-          arg = "INPUT";
-          break;
-        case PathForOutput:
-          arg = "OUTPUT";
-          break;
-      }
-      std::ostringstream w;
-      /* clang-format off */
-      w <<
-        cmPolicies::GetPolicyWarning(cmPolicies::CMP0070) << "\n"
-        "file(GENERATE) given relative " << arg << " path:\n"
-        "  " << relativePath << "\n"
-        "This is not defined behavior unless CMP0070 is set to NEW.  "
-        "For compatibility with older versions of CMake, the previous "
-        "undefined behavior will be used."
-        ;
-      /* clang-format on */
-      lg->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str());
-    }
+    case cmPolicies::WARN:
+      lg->IssuePolicyWarning(
+        cmPolicies::CMP0070, {},
+        cmStrCat(
+          "file(GENERATE) given relative "_s,
+          (role == PathForInput ? "INPUT"_s : "OUTPUT"_s), " path:\n  "_s,
+          relativePath,
+          "\nThis is not defined behavior unless CMP0070 is set to NEW.  "
+          "For compatibility with older versions of CMake, the previous "
+          "undefined behavior will be used."_s));
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
       // OLD behavior is to use the relative path unchanged,

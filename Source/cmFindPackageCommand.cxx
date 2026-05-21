@@ -1566,9 +1566,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
           this->Makefile->GetPolicyStatus(it->second);
         switch (status) {
           case cmPolicies::WARN: {
-            this->Makefile->IssueDiagnostic(
-              cmDiagnostics::CMD_POLICY,
-              cmStrCat(cmPolicies::GetPolicyWarning(it->second), '\n'));
+            this->Makefile->IssuePolicyWarning(it->second);
             CM_FALLTHROUGH;
           }
           case cmPolicies::OLD:

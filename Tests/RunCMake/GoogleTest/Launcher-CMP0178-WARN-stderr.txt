@@ -1,5 +1,5 @@
-CMake Warning \(author\) at [^
-]*/Modules/GoogleTest\.cmake:[0-9]+ \(message\):
+CMake Warning \(policy\) at [^
+]*/Modules/GoogleTest\.cmake:[0-9]+ \(cmake_policy\):
   The 'launcher_test' target's TEST_LAUNCHER or CROSSCOMPILING_EMULATOR test
   properties contain one or more empty values\.  Those empty values are being
   silently discarded to preserve backward compatibility\.
@@ -11,10 +11,11 @@ Call Stack \(most recent call first\):
   Launcher\.cmake:[0-9]+ \(gtest_discover_tests\)
   Launcher-CMP0178-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
-CMake Warning \(author\) at [^
-]*/Modules/GoogleTest\.cmake:[0-9]+ \(message\):
+CMake Warning \(policy\) at [^
+]*/Modules/GoogleTest\.cmake:[0-9]+ \(cmake_policy\):
   The EXTRA_ARGS value contains one or more empty values\.  Those empty values
   are being silently discarded to preserve backward compatibility\.
 
@@ -25,7 +26,8 @@ Call Stack \(most recent call first\):
   Launcher\.cmake:[0-9]+ \(gtest_discover_tests\)
   Launcher-CMP0178-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers\.  Use -Wno-author to suppress it\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
 
 CMake Warning \(policy\) in CMakeLists\.txt:
   The TEST_LAUNCHER property of target 'launcher_test' contains empty list

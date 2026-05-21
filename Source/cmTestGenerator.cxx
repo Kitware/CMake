@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "cmDiagnostics.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmList.h"
@@ -36,10 +35,9 @@ bool needToQuoteTestName(cmMakefile const& mf, std::string const& name)
     case cmPolicies::WARN:
       // Only warn if a forbidden character is used in the name.
       if (name.find_first_of("$[] #;\t\n\"\\") != std::string::npos) {
-        mf.IssueDiagnostic(
-          cmDiagnostics::CMD_POLICY,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0110),
-                   "\nThe following name given to add_test() is invalid if "
+        mf.IssuePolicyWarning(
+          cmPolicies::CMP0110, {},
+          cmStrCat("The following name given to add_test() is invalid if "
                    "CMP0110 is not set or set to OLD:\n  `",
                    name, "´\n"));
       }
@@ -148,14 +146,13 @@ void cmTestGenerator::GenerateCommand(std::ostream& os,
           cmList argsWithEmptyValuesPreserved(
             propVal, cmList::ExpandElements::Yes, cmList::EmptyElements::Yes);
           if (launcherWithArgs != argsWithEmptyValuesPreserved) {
-            this->LG->GetMakefile()->IssueDiagnostic(
-              cmDiagnostics::CMD_POLICY,
+            this->LG->GetMakefile()->IssuePolicyWarning(
+              cmPolicies::CMP0178,
               cmStrCat("The ", propertyName, " property of target '",
                        target->GetName(),
                        "' contains empty list items. Those empty items are "
                        "being silently discarded to preserve backward "
-                       "compatibility.\n",
-                       cmPolicies::GetPolicyWarning(cmPolicies::CMP0178)));
+                       "compatibility."));
           }
         }
         std::string launcherExe(launcherWithArgs[0]);

@@ -12,7 +12,6 @@
 
 #include <cmext/algorithm>
 
-#include "cmDiagnostics.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -53,10 +52,9 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
         }
         switch (tgt->GetPolicyStatusCMP0081()) {
           case cmPolicies::WARN:
-            tgt->GetLocalGenerator()->IssueDiagnostic(
-              cmDiagnostics::CMD_POLICY,
-              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0081),
-                       "\nFound relative path while evaluating"
+            tgt->GetLocalGenerator()->IssuePolicyWarning(
+              cmPolicies::CMP0081, {},
+              cmStrCat("Found relative path while evaluating"
                        " link directories of \"",
                        tgt->GetName(), "\":\n  \"", entryDirectory, "\"\n"));
             break;
