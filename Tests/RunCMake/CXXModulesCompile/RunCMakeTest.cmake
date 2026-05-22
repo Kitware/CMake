@@ -246,6 +246,10 @@ if ("build_database" IN_LIST CMake_TEST_MODULE_COMPILATION)
   set(RunCMake_CXXModules_NO_TEST 1)
 
   run_cxx_module_test(exp-builddb)
+  # Skip for multi-config generators.
+  if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    run_cxx_module_test(exp-builddb-emptyconfig)
+  endif ()
 
   unset(RunCMake_CXXModules_NO_TEST)
   unset(RunCMake_CXXModules_TARGETS)
