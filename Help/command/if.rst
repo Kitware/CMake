@@ -93,6 +93,11 @@ Basic Expressions
     to ``NEW`` and the string's value happens to be a variable name that
     is affected by :policy:`CMP0054`'s behavior.
 
+.. signature:: if()
+  :target: empty
+
+  False if no argument is provided.
+
 Logic Operators
 """""""""""""""
 
