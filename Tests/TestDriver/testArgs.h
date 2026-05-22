@@ -1,4 +1,4 @@
-void testProccessArgs(int* ac, char*** av)
+void testProcessArgs(int* ac, char*** av)
 {
   char** argv = *av;
   if (*ac < 2) {
