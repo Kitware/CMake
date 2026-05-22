@@ -856,13 +856,22 @@ set_property(TEST RunCMake.DependencyGraph APPEND PROPERTY LABELS "Fortran")
 add_RunCMake_test(CXXModules
   -DCMake_TEST_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON}
 )
-add_RunCMake_test(CXXModulesCompile
-  -DCMake_TEST_MODULE_COMPILATION=${CMake_TEST_MODULE_COMPILATION}
-  -DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}
-  -DCMake_TEST_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON}
-)
-set_property(TEST RunCMake.CXXModules RunCMake.CXXModulesCompile APPEND
+set_property(TEST RunCMake.CXXModules APPEND
   PROPERTY LABELS "CXXModules")
+function (add_RunCMake_CXXModulesCompile_test variant)
+  add_RunCMake_test(CXXModulesCompile${variant}
+    TEST_DIR CXXModulesCompile
+    -DCMake_TEST_MODULE_VARIANT=${variant}
+    -DCMake_TEST_MODULE_COMPILATION=${CMake_TEST_MODULE_COMPILATION}
+    -DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}
+    -DCMake_TEST_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON}
+  )
+  set_property(TEST RunCMake.CXXModulesCompile${variant} APPEND
+    PROPERTY LABELS "CXXModules")
+endfunction ()
+add_RunCMake_CXXModulesCompile_test(BuildBehavior)
+add_RunCMake_CXXModulesCompile_test(BuildImportExport)
+add_RunCMake_CXXModulesCompile_test(Install)
 
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built
 # if CMake_TEST_EXTERNAL_CMAKE is activated (the compiler might be different.)
