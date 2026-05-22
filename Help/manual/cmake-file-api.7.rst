@@ -636,13 +636,13 @@ The members specific to ``codemodel`` objects are:
       ``targets`` array.
 
     ``abstractTargetIndexes``
+      .. codemodel-versionadded:: 2.9
+
       Optional member that is present when the directory itself has abstract
       targets, excluding those belonging to subdirectories.
       The value is a JSON array of entries corresponding to the abstract
       targets.  Each entry is an unsigned integer 0-based index into the main
       ``abstractTargets`` array.
-
-      This field was added in codemodel version 2.9.
 
     ``minimumCMakeVersion``
       Optional member present when a minimum required version of CMake is
@@ -666,11 +666,11 @@ The members specific to ``codemodel`` objects are:
       or equivalent rule is available.
 
     ``jsonFile``
+      .. codemodel-versionadded:: 2.3
+
       A JSON string specifying a path relative to the codemodel file
       to another JSON file containing a
       `"codemodel" version 2 "directory" object`_.
-
-      This field was added in codemodel version 2.3.
 
   ``projects``
     A JSON array of entries corresponding to the top-level project
@@ -711,13 +711,13 @@ The members specific to ``codemodel`` objects are:
       ``targets`` array.
 
     ``abstractTargetIndexes``
+      .. codemodel-versionadded:: 2.9
+
       Optional member that is present when the project itself has
       abstract targets, excluding those belonging to sub-projects.
       The value is a JSON array of entries corresponding to the abstract
       targets.  Each entry is an unsigned integer 0-based index into the main
       ``abstractTargets`` array.
-
-      This field was added in codemodel version 2.9.
 
   ``targets``
     A JSON array of entries corresponding to the build system targets.
@@ -747,6 +747,8 @@ The members specific to ``codemodel`` objects are:
       `"codemodel" version 2 "target" object`_.
 
   ``abstractTargets``
+    .. codemodel-versionadded:: 2.9
+
     A JSON array of entries corresponding to targets that are not present
     in the build system.  These are imported targets or interface libraries
     created by calls to :command:`add_executable` or :command:`add_library`.
@@ -777,8 +779,6 @@ The members specific to ``codemodel`` objects are:
       to another JSON file containing a
       `"codemodel" version 2 "target" object`_.
 
-    This field was added in codemodel version 2.9.
-
 "codemodel" version 2 "directory" object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -791,6 +791,8 @@ object's ``directories`` array.  Each "directory" object is a JSON object
 with members:
 
 ``codemodelVersion``
+  .. codemodel-versionadded:: 2.9
+
   This specifies the codemodel version this file is part of.  It will match
   the ``version`` field of the codemodel object kind that references this file.
   It is a JSON object with the following members:
@@ -800,8 +802,6 @@ with members:
 
   ``minor``
     The codemodel minor version.
-
-  This field was added in codemodel version 2.9.
 
 ``paths``
   A JSON object containing members:
@@ -913,20 +913,20 @@ with members:
       ``runtimeDependencySetName`` and ``runtimeDependencySetType``.
 
     ``fileSet``
+      .. codemodel-versionadded:: 2.4
+
       An :command:`install(TARGETS)` call with ``FILE_SET``.
       The ``destination`` and ``paths`` members are populated.
       The ``isOptional`` member may exist.
       This type has additional members ``fileSetName``, ``fileSetType``,
       ``fileSetDirectories``, and ``fileSetTarget``.
 
-      This type was added in codemodel version 2.4.
-
     ``cxxModuleBmi``
+      .. codemodel-versionadded:: 2.5
+
       An :command:`install(TARGETS)` call with ``CXX_MODULES_BMI``.
       The ``destination`` member is populated and the ``isOptional`` member
       may exist.  This type has an additional ``cxxModuleBmiTarget`` member.
-
-      This type was added in codemodel version 2.5.
 
   ``isExcludeFromAll``
     Optional member that is present with boolean value ``true`` when
@@ -1006,29 +1006,32 @@ with members:
       frameworks.
 
   ``fileSetName``
+    .. codemodel-versionadded:: 2.4
+
     Optional member that is present when ``type`` is ``fileSet``. The value is
     a string with the name of the file set.
 
-    This field was added in codemodel version 2.4.
-
   ``fileSetType``
+    .. codemodel-versionadded:: 2.4
+
     Optional member that is present when ``type`` is ``fileSet``. The value is
     a string with the type of the file set.
 
-    This field was added in codemodel version 2.4.
+    .. codemodel-versionchanged:: 2.11
 
-    Since codemodel version 2.11, this field additionally accounts for
-    ``SOURCES`` file sets.
+      This field additionally accounts for ``SOURCES`` file sets.
 
   ``fileSetDirectories``
+    .. codemodel-versionadded:: 2.4
+
     Optional member that is present when ``type`` is ``fileSet``. The value
     is a list of strings with the file set's base directories (determined by
     genex-evaluation of :prop_tgt:`HEADER_DIRS` or
     :prop_tgt:`HEADER_DIRS_<NAME>`).
 
-    This field was added in codemodel version 2.4.
-
   ``fileSetTarget``
+    .. codemodel-versionadded:: 2.4
+
     Optional member that is present when ``type`` is ``fileSet``. The value
     is a JSON object with members:
 
@@ -1041,9 +1044,9 @@ with members:
       An unsigned integer 0-based index into the main "codemodel"
       object's ``targets`` array for the target.
 
-    This field was added in codemodel version 2.4.
-
   ``cxxModuleBmiTarget``
+    .. codemodel-versionadded:: 2.5
+
     Optional member that is present when ``type`` is ``cxxModuleBmi``.
     The value is a JSON object with members:
 
@@ -1055,8 +1058,6 @@ with members:
     ``index``
       An unsigned integer 0-based index into the main "codemodel"
       object's ``targets`` array for the target.
-
-    This field was added in codemodel version 2.5.
 
   ``scriptFile``
     Optional member that is present when ``type`` is ``script``.
@@ -1087,6 +1088,8 @@ object's ``targets`` array.  Each "target" object is a JSON object
 with members:
 
 ``codemodelVersion``
+  .. codemodel-versionadded:: 2.9
+
   This specifies the codemodel version this file is part of.  It will match
   the ``version`` field of the codemodel object kind that references this file.
   It is a JSON object with the following members:
@@ -1096,8 +1099,6 @@ with members:
 
   ``minor``
     The codemodel minor version.
-
-  This field was added in codemodel version 2.9.
 
 ``name``
   A string specifying the logical name of the target.
@@ -1113,19 +1114,21 @@ with members:
   or ``UTILITY``.
 
 ``imported``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that is present with boolean value ``true`` if the
   target is an imported target.
 
-  This field was added in codemodel version 2.9.
-
 ``local``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that is present with boolean value ``true`` if the
   target is only defined with local scope rather than being a global target.
   Currently, only imported targets will potentially have this field.
 
-  This field was added in codemodel version 2.9.
-
 ``abstract``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that is present with boolean value ``true`` if the
   target is an abstract target.  Abstract targets are not part of the build
   system, they only exist to describe dependencies or to provide usage
@@ -1134,17 +1137,17 @@ with members:
   cannot be built, so they should not be presented to the user as a buildable
   target.
 
-  This field was added in codemodel version 2.9.  Abstract targets were not
-  included in codemodel version 2.8 and earlier.
+  Abstract targets were not included in codemodel version 2.8 and earlier.
 
 ``symbolic``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that is present with boolean value ``true`` if the target
   is :prop_tgt:`SYMBOLIC`.  Symbolic targets are created by calls to
   :command:`add_library(INTERFACE SYMBOLIC) <add_library(INTERFACE-SYMBOLIC)>`,
   and are also abstract targets that are not part of the build system.
 
-  This field was added in codemodel version 2.9.  Symbolic targets were not
-  included in codemodel version 2.8 and earlier.
+  Symbolic targets were not included in codemodel version 2.8 and earlier.
 
 ``backtrace``
   Optional member that is present when a CMake language backtrace to
@@ -1223,6 +1226,8 @@ with members:
       index into the ``backtraceGraph`` member's ``nodes`` array.
 
 ``launchers``
+  .. codemodel-versionadded:: 2.7
+
   Optional member that is present on executable targets that have
   at least one launcher specified by the project.  The value is a
   JSON array of entries corresponding to the specified launchers.
@@ -1249,8 +1254,6 @@ with members:
     ``test``
       A start program for the execution of tests.
       See the :prop_tgt:`TEST_LAUNCHER` target property.
-
-  This field was added in codemodel version 2.7.
 
 ``link``
   Optional member that is present for non-imported executables and shared
@@ -1323,20 +1326,18 @@ with members:
     or link-time code generation) is enabled.
 
 ``debugger``
+  .. codemodel-versionadded:: 2.8
+
   Optional member that is present when the target has one of the
   following fields set.
   The value is a JSON object of entries corresponding to
   debugger specific values set.
-
-  This field was added in codemodel version 2.8.
 
   ``workingDirectory``
     Optional member that is present when the
     :prop_tgt:`DEBUGGER_WORKING_DIRECTORY` target property is set.
     The member will also be present in :ref:`Visual Studio Generators`
     when :prop_tgt:`VS_DEBUGGER_WORKING_DIRECTORY` is set.
-
-    This field was added in codemodel version 2.8.
 
 ``dependencies``
   Optional member that is present when the target depends on other targets.
@@ -1367,6 +1368,8 @@ with members:
     the ``backtraceGraph`` member's ``nodes`` array.
 
 ``linkLibraries``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that may be present when the target links directly to one or
   more other targets or libraries.  It contains items that are used when
   linking this target.  These come from the target's
@@ -1416,9 +1419,9 @@ with members:
       :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` property created the
       relationship.  The value matches the main ``id`` member of that target.
 
-  This field was added in codemodel version 2.9.
-
 ``interfaceLinkLibraries``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that may be present when the target has one or more interface
   link libraries.  It contains items that are used when linking consumers of
   this target.  These come from the target's
@@ -1456,9 +1459,9 @@ with members:
     The value is an unsigned integer 0-based index into the
     ``backtraceGraph`` member's ``nodes`` array.
 
-  This field was added in codemodel version 2.9.
-
 ``compileDependencies``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that may be present when the target links directly to one or
   more other targets that may provide usage requirements to this one.  They
   affect how this target's sources are compiled.  These relationships are
@@ -1498,9 +1501,9 @@ with members:
       :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` property created the
       relationship.  The value matches the main ``id`` member of that target.
 
-  This field was added in codemodel version 2.9.
-
 ``interfaceCompileDependencies``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that may be present when the target has one or more interface
   linking relationships to other targets.  It contains items that affect how
   consumers' sources are compiled.  These relationships are defined by the
@@ -1528,9 +1531,9 @@ with members:
     The value is an unsigned integer 0-based index into the
     ``backtraceGraph`` member's ``nodes`` array.
 
-  This field was added in codemodel version 2.9.
-
 ``objectDependencies``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that is present when the target has one or more entries in
   its :prop_tgt:`SOURCES` property where the entry is specified using
   :genex:`$<TARGET_OBJECTS:...>`, and where no other generator expression is
@@ -1550,9 +1553,9 @@ with members:
     The value is an unsigned integer 0-based index into the
     ``backtraceGraph`` member's ``nodes`` array.
 
-  This field was added in codemodel version 2.9.
-
 ``orderDependencies``
+  .. codemodel-versionadded:: 2.9
+
   Optional member that is present when the target has one or more direct order
   dependencies on other targets.  Such dependencies may arise from calls to
   :command:`add_dependencies` or from internal CMake processing.
@@ -1574,9 +1577,9 @@ with members:
     The value is an unsigned integer 0-based index into the
     ``backtraceGraph`` member's ``nodes`` array.
 
-  This field was added in codemodel version 2.9.
-
 ``fileSets``
+  .. codemodel-versionadded:: 2.5
+
   An optional member that is present when a target defines one or more
   file sets.  The value is a JSON array of entries corresponding to the
   target's file sets.  Each entry is a JSON object with members:
@@ -1597,8 +1600,6 @@ with members:
     sources in the file set.  If the directory is inside the top-level source
     directory then the path is specified relative to that directory.
     Otherwise the path is absolute.
-
-  This field was added in codemodel version 2.5.
 
 ``sources``
   A JSON array of entries corresponding to the target's source files.
@@ -1626,6 +1627,8 @@ with members:
     the source is :prop_sf:`GENERATED`.
 
   ``fileSetIndex``
+    .. codemodel-versionadded:: 2.5
+
     .. deprecated:: 4.4
       Use the ``fileSetIndexes`` field instead, which is an array, and
       accounts for sources assigned to multiple file sets.
@@ -1634,14 +1637,12 @@ with members:
     The value is an unsigned integer 0-based index into the ``fileSets``
     array representing the file set to which the source was most recently added.
 
-    This field was added in codemodel version 2.5.
-
   ``fileSetIndexes``
+    .. codemodel-versionadded:: 2.11
+
     Optional member that is present when the source is part of at least one
     file set; see also policy :policy:`CMP0211`. The value is
     an array of unsigned integer 0-based indexes inte the ``fileSets`` array.
-
-    This field was added in codemodel version 2.11.
 
   ``backtrace``
     .. deprecated:: 4.4
@@ -1657,6 +1658,7 @@ with members:
     the ``backtraceGraph`` member's ``nodes`` array.
 
   ``backtraces``
+    .. codemodel-versionadded:: 2.11
 
     Optional member that is present when CMake language backtraces to
     the :command:`target_sources`, :command:`add_executable`,
@@ -1669,9 +1671,9 @@ with members:
     unsigned integer 0-based index into the ``backtraceGraph`` member's
     ``nodes`` array.
 
-    This field was added in codemodel version 2.11.
-
 ``interfaceSources``
+  .. codemodel-versionadded:: 2.10
+
   An optional member that is present when a target defines one or more
   interface sources.  The value is a JSON array of entries corresponding
   to the target's interface source files.  Each entry is a JSON object
@@ -1703,13 +1705,11 @@ with members:
     array representing the file set to which the source was most recently added.
 
   ``fileSetIndexes``
+    .. codemodel-versionadded:: 2.11
+
     Optional member that is present when the source is part of at least one
     file set; see also policy :policy:`CMP0211`. The value is
     an array of unsigned integer 0-based indexes inte the ``fileSets`` array.
-
-    This field was added in codemodel version 2.11.
-
-  This field was added in codemodel version 2.10.
 
 ``sourceGroups``
   Optional member that is present when sources are grouped together by
@@ -1726,13 +1726,13 @@ with members:
     main ``sources`` array for the target.
 
   ``interfaceSourceIndexes``
+    .. codemodel-versionadded:: 2.10
+
     Optional member that is present when at least one interface source file
     is part of the source group.  The value is a JSON array listing the
     interface sources belonging to the group.  Each entry is an unsigned
     integer 0-based index into the main ``interfaceSources`` array for the
     target.
-
-    This field was added in codemodel version 2.10.
 
 ``compileGroups``
   Optional member that is present when the target has sources that compile.
@@ -1750,6 +1750,8 @@ with members:
     of the toolchain is used to compile the source file.
 
   ``languageStandard``
+    .. codemodel-versionadded:: 2.2
+
     Optional member that is present when the language standard is set
     explicitly (e.g. via :prop_tgt:`CXX_STANDARD`) or implicitly by
     compile features.  Each entry is a JSON object with two members:
@@ -1766,8 +1768,6 @@ with members:
 
     ``standard``
       String representing the language standard.
-
-    This field was added in codemodel version 2.2.
 
   ``compileCommandFragments``
     Optional member that is present when fragments of the compiler command
@@ -1806,6 +1806,8 @@ with members:
       member's ``nodes`` array.
 
   ``frameworks``
+    .. codemodel-versionadded:: 2.6
+
     Optional member that is present when, on Apple platforms, there are
     frameworks. The value is a JSON array with an entry for each directory.
     Each entry is a JSON object with members:
@@ -1825,9 +1827,9 @@ with members:
       an unsigned integer 0-based index into the ``backtraceGraph``
       member's ``nodes`` array.
 
-    This field was added in codemodel version 2.6.
-
   ``precompileHeaders``
+    .. codemodel-versionadded:: 2.1
+
     Optional member that is present when :command:`target_precompile_headers`
     or other command invocations set :prop_tgt:`PRECOMPILE_HEADERS` on the
     target.  The value is a JSON array with an entry for each header.  Each
@@ -1842,8 +1844,6 @@ with members:
       that added this precompiled header is available.  The value is an
       unsigned integer 0-based index into the ``backtraceGraph`` member's
       ``nodes`` array.
-
-    This field was added in codemodel version 2.1.
 
   ``defines``
     Optional member that is present when there are preprocessor definitions.
@@ -2134,14 +2134,14 @@ The members specific to ``cmakeFiles`` objects are:
     if the path specifies a file in the CMake installation.
 
 ``globsDependent``
+  .. cmakefiles-versionadded:: 1.1
+
   Optional member that is present when the project calls :command:`file(GLOB)`
   or :command:`file(GLOB_RECURSE)` with the ``CONFIGURE_DEPENDS`` option.
   The value is a JSON array of JSON objects, each specifying a globbing
   expression and the list of paths it matched.  If the globbing expression
   no longer matches the same list of paths, CMake considers the build system
   to be out of date.
-
-  This field was added in ``cmakeFiles`` version 1.1.
 
   The members of each entry are:
 
@@ -2278,14 +2278,14 @@ The members specific to ``toolchains`` objects are:
       language. Its value is a JSON string holding the path to the compiler.
 
     ``commandFragment``
+      .. toolchains-versionadded:: 1.1
+
       Optional member that is present when the
       :variable:`CMAKE_<LANG>_COMPILER` variable is a list containing multiple
       elements or the :envvar:`CC` or similar environment variable contains
       command line arguments after the compiler executable.
       Its value is a JSON string holding the second and further elements
       (mandatory arguments to the compiler) as a command line fragment.
-
-      This field was added in toolchains version 1.1.
 
     ``id``
       Optional member that is present when the

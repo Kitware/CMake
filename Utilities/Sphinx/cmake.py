@@ -896,20 +896,25 @@ def setup(app):
     app.add_transform(CMakeXRefTransform)
     app.add_domain(CMakeDomain)
 
-    versionlabels.update({
-        'presets-versionadded':   'Added in presets version %s',
-        'presets-versionchanged': 'Changed in presets version %s',
-        'presets-versionremoved': 'Removed in presets version %s',
-    })
-
-    versionlabel_classes.update({
-        'presets-versionadded':     'added',
-        'presets-versionchanged':   'changed',
-        'presets-versionremoved':   'removed',
-    })
-
-    app.add_directive('presets-versionadded', VersionChange)
-    app.add_directive('presets-versionchanged', VersionChange)
-    app.add_directive('presets-versionremoved', VersionChange)
+    version_directives = {
+        'cmakefiles': 'cmakeFiles',
+        'codemodel': 'codemodel',
+        'presets': 'presets',
+        'toolchains': 'toolchains',
+    }
+    for directive, name in version_directives.items():
+        versionlabels.update({
+            f'{directive}-versionadded':   f'Added in {name} version %s',
+            f'{directive}-versionchanged': f'Changed in {name} version %s',
+            f'{directive}-versionremoved': f'Removed in {name} version %s',
+        })
+        versionlabel_classes.update({
+            f'{directive}-versionadded':   'added',
+            f'{directive}-versionchanged': 'changed',
+            f'{directive}-versionremoved': 'removed',
+        })
+        app.add_directive(f'{directive}-versionadded', VersionChange)
+        app.add_directive(f'{directive}-versionchanged', VersionChange)
+        app.add_directive(f'{directive}-versionremoved', VersionChange)
 
     return {"parallel_read_safe": True}
