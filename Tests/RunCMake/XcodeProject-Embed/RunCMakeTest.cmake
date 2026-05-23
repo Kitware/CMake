@@ -57,6 +57,19 @@ block()
   )
 endblock()
 
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/EmbedFrameworksMultiTargets-build)
+  run_cmake(EmbedFrameworksMultiTargets)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(EmbedFrameworksMultiTargets-build
+    ${CMAKE_COMMAND} --build .
+                     --config Debug
+                     --target MTestLib
+                     --target mapp1
+                     --target mapp2
+  )
+endblock()
+
 function(TestAppExtension platform)
   set(testName EmbedAppExtensions-${platform})
   if(NOT platform STREQUAL "macOS")
