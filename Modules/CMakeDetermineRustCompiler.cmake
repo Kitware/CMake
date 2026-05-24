@@ -3,7 +3,7 @@
 
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 
-if(NOT "${CMAKE_GENERATOR}" MATCHES "^Ninja")
+if(NOT "${CMAKE_GENERATOR}" MATCHES "^(Ninja)|(Unix Makefiles)")
   message(FATAL_ERROR "Rust language not supported by \"${CMAKE_GENERATOR}\" generator")
 endif()
 

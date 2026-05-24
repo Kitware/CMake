@@ -598,6 +598,16 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       vars.Launcher = linkerLauncher.c_str();
     }
 
+    std::string rustMainCrateRootPath;
+    std::string rustLinkCrates;
+    std::string rustNativeObjects;
+    if (CreateRustLinkArguments(linkLanguage, rustMainCrateRootPath,
+                                rustLinkCrates, rustNativeObjects)) {
+      vars.RustMainCrateRoot = rustMainCrateRootPath.c_str();
+      vars.RustLinkCrates = rustLinkCrates.c_str();
+      vars.RustNativeObjects = rustNativeObjects.c_str();
+    }
+
     if (this->UseLWYU) {
       cmValue lwyuCheck =
         this->Makefile->GetDefinition("CMAKE_LINK_WHAT_YOU_USE_CHECK");

@@ -1,0 +1,10 @@
+\[ 20%\] Building Rust object CMakeFiles[\\/]Edition.20[0-9][0-9]\.dir[\\/]libedition_20[0-9][0-9]\.rs\.rlib
+\[ 20%\] Built target Edition\.20[0-9][0-9]
+\[ 40%\] Building Rust object CMakeFiles[\\/]Edition.20[0-9][0-9]\.dir[\\/]libedition_20[0-9][0-9]\.rs\.rlib
+\[ 40%\] Built target Edition\.20[0-9][0-9]
+\[ 60%\] Building Rust object CMakeFiles[\\/]Edition.20[0-9][0-9]\.dir[\\/]libedition_20[0-9][0-9]\.rs\.rlib
+\[ 60%\] Built target Edition\.20[0-9][0-9]
+\[ 80%\] Building Rust object CMakeFiles[\\/]Edition.20[0-9][0-9]\.dir[\\/]libedition_20[0-9][0-9]\.rs\.rlib
+\[ 80%\] Built target Edition\.20[0-9][0-9]
+\[100%\] Linking Rust executable Editions
+\[100%\] Built target Editions
