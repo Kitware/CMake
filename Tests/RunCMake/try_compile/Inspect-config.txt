@@ -29,7 +29,7 @@ events:(
 ]*)+
     buildResult:
       variable: "CMAKE_C_ABI_COMPILED"
-      cached: true
+      cached: false
       stdout: \|.*
       exitCode: 0(
 +  -
@@ -60,7 +60,7 @@ events:(
 ]*)+
     buildResult:
       variable: "CMAKE_CXX_ABI_COMPILED"
-      cached: true
+      cached: false
       stdout: \|.*
       exitCode: 0(
 +  -

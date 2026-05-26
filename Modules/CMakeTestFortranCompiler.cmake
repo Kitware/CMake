@@ -21,7 +21,9 @@ CMAKE_DETERMINE_COMPILER_ABI(Fortran ${CMAKE_ROOT}/Modules/CMakeFortranCompilerA
 if(CMAKE_Fortran_ABI_COMPILED)
   # The compiler worked so skip dedicated test below.
   set(CMAKE_Fortran_COMPILER_WORKS TRUE)
-  set(CMAKE_Fortran_COMPILER_SUPPORTS_F90 1)
+  if (NOT DEFINED CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+    set(CMAKE_Fortran_COMPILER_SUPPORTS_F90 1)
+  endif ()
   message(STATUS "Check for working Fortran compiler: ${CMAKE_Fortran_COMPILER} - skipped")
 else()
   cmake_determine_compiler_abi(Fortran ${CMAKE_ROOT}/Modules/CMakeFortranCompilerABI.F)

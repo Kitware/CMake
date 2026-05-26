@@ -13,6 +13,42 @@ include(${CMAKE_ROOT}/Modules/CMakeParseLibraryArchitecture.cmake)
 include(CMakeTestCompilerCommon)
 
 function(CMAKE_DETERMINE_COMPILER_ABI lang src)
+  set(abi_variables
+    CMAKE_${lang}_COMPILER_WORKS
+    CMAKE_${lang}_COMPILER_ARCHITECTURE_ID
+    CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES
+    CMAKE_${lang}_COMPILER_LINKER
+    CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES
+    CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES
+    CMAKE_${lang}_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+    CMAKE_${lang}_LIBRARY_ARCHITECTURE)
+  if (CMAKE_${lang}_COMPILER_LINKER)
+    list(APPEND abi_variables
+      CMAKE_${lang}_COMPILER_LINKER_ID
+      CMAKE_${lang}_COMPILER_LINKER_VERSION
+      CMAKE_${lang}_COMPILER_LINKER_FRONTEND_VARIANT)
+  endif ()
+  if (lang STREQUAL "Fortran")
+    list(APPEND abi_variables
+      CMAKE_${lang}_COMPILER_SUPPORTS_F90)
+  endif ()
+  if (lang MATCHES "^(CUDA|HIP)$")
+    list(APPEND abi_variables
+      CMAKE_${lang}_ARCHITECTURES
+      CMAKE_${lang}_HOST_COMPILER_ID
+      CMAKE_${lang}_HOST_COMPILER_VERSION
+      CMAKE_${lang}_RUNTIME_LIBRARY)
+  endif ()
+  set(all_abi_variables_defined 1)
+  foreach (abi_variable IN LISTS abi_variables)
+    if (NOT DEFINED "${abi_variable}")
+      set(all_abi_variables_defined 0)
+      break ()
+    endif ()
+  endforeach ()
+  if (all_abi_variables_defined AND CMAKE_${lang}_COMPILER_WORKS)
+    set(CMAKE_${lang}_ABI_COMPILED 1)
+  endif ()
   if(NOT DEFINED CMAKE_${lang}_ABI_COMPILED)
     message(CHECK_START "Detecting ${lang} compiler ABI info")
 
@@ -86,6 +122,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
                   # Ignore unused flags when we are just determining the ABI.
                   "--no-warn-unused-cli"
       COMPILE_DEFINITIONS ${COMPILE_DEFINITIONS}
+      NO_CACHE
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
       COPY_FILE_ERROR _copy_error
@@ -97,9 +134,6 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     set(ENV{LC_MESSAGES} ${_orig_lc_messages})
     set(ENV{LANG}        ${_orig_lang})
 
-    # Move result from cache to normal variable.
-    set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED})
-    unset(CMAKE_${lang}_ABI_COMPILED CACHE)
     if(CMAKE_${lang}_ABI_COMPILED AND _copy_error)
       set(CMAKE_${lang}_ABI_COMPILED 0)
     endif()

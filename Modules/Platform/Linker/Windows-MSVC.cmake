@@ -18,7 +18,7 @@ macro(__windows_linker_msvc lang)
   set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=FORWARD DEDUPLICATION=ALL)
 
   # Features for LINK_LIBRARY generator expression
-  if(DEFINED CMAKE_${lang}_COMPILER_LINKER_VERSION)
+  if(NOT CMAKE_${lang}_COMPILER_LINKER_VERSION STREQUAL "")
     if (CMAKE_${lang}_COMPILER_LINKER_VERSION GREATER_EQUAL "14.10")
       ## WHOLE_ARCHIVE: Force loading all members of an archive
       set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE "LINKER:/WHOLEARCHIVE:<LIBRARY>")
