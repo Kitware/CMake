@@ -4,4 +4,5 @@ CTEST_CHECKOUT_COMMAND
 .. versionadded:: 3.1
 
 Tell the :command:`ctest_start` command how to checkout or initialize
-the source directory in a :manual:`ctest(1)` :ref:`Dashboard Client` script.
+the source directory in a :manual:`ctest(1)` :ref:`Dashboard Client` script,
+or on the :program:`ctest` command line via the :ref:`-D <ctest-option-D-var>` option.

@@ -539,6 +539,7 @@ bool cmCTest::UpdateCTestConfiguration()
     // No need to exit if we are not producing XML
     if (this->Impl->ProduceXML) {
       cmCTestLog(this, WARNING, "Cannot find file: " << fileName << std::endl);
+      this->ApplyDefinitionsToCTestConfig();
       return false;
     }
   } else {
@@ -602,6 +603,8 @@ bool cmCTest::UpdateCTestConfiguration()
     this->Impl->CompressXMLFiles =
       cmIsOn(this->GetCTestConfiguration("CompressSubmission"));
   }
+  // Command-line definitions override values loaded from the config file.
+  this->ApplyDefinitionsToCTestConfig();
   return true;
 }
 
@@ -731,8 +734,10 @@ int cmCTest::ProcessSteps()
   script.CreateCMake();
   cmMakefile& mf = *script.GetMakefile();
   this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
-  this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
   this->SetCMakeVariables(mf);
+  // CTEST_TIME_LIMIT may come from CTestCustom.cmake (already in the makefile)
+  // or from the config map (just populated by SetCMakeVariables above).
+  this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
   std::vector<cmListFileArgument> args{
     cmListFileArgument("RETURN_VALUE"_s, cmListFileArgument::Unquoted, 0),
     cmListFileArgument("return_value"_s, cmListFileArgument::Unquoted, 0),
@@ -1464,7 +1469,9 @@ void cmCTest::ErrorMessageUnknownDashDValue(std::string const& val)
              "  ctest -D Nightly\n"
              "  ctest -D Nightly(Start|Update|Configure|Build)\n"
              "  ctest -D Nightly(Test|Coverage|MemCheck|Submit)\n"
-             "  ctest -D NightlyMemoryCheck\n");
+             "  ctest -D NightlyMemoryCheck\n"
+             "  ctest -D CTEST_<VAR>=<value>\n"
+             "  ctest -D <var>:<type>=<value>\n");
 }
 
 bool cmCTest::CheckArgument(std::string const& arg, cm::string_view varg1,
@@ -1501,6 +1508,16 @@ bool cmCTest::AddVariableDefinition(std::string const& arg)
   if (cmake::ParseCacheEntry(arg, name, value, type)) {
     this->Impl->Definitions[name] = value;
     return true;
+  }
+
+  // Also accept CTEST_VAR=VALUE (without :TYPE=).
+  auto const eq = arg.find('=');
+  if (eq != std::string::npos && eq > 0) {
+    name = arg.substr(0, eq);
+    if (cmHasLiteralPrefix(name, "CTEST_")) {
+      this->Impl->Definitions[name] = arg.substr(eq + 1);
+      return true;
+    }
   }
 
   return false;
@@ -3146,83 +3163,139 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
   return true;
 }
 
+namespace {
+// Mapping of CTEST_* variable names to CTest configuration keys.
+struct CTestVarConfigEntry
+{
+  char const* Var;    // CTEST_* variable name
+  char const* Config; // CTest configuration key
+};
+
+// clang-format off
+CTestVarConfigEntry const kCTestVarConfigMap[] = {
+  // General
+  { "CTEST_SITE",                          "Site"                        },
+  { "CTEST_BUILD_NAME",                    "BuildName"                   },
+  { "CTEST_NIGHTLY_START_TIME",            "NightlyStartTime"            },
+  { "CTEST_SOURCE_DIRECTORY",              "SourceDirectory"             },
+  { "CTEST_BINARY_DIRECTORY",              "BuildDirectory"              },
+  // Start step
+  { "CTEST_CHECKOUT_COMMAND",              "CheckoutCommand"             },
+  // Update step
+  { "CTEST_UPDATE_COMMAND",                "UpdateCommand"               },
+  { "CTEST_UPDATE_OPTIONS",                "UpdateOptions"               },
+  { "CTEST_UPDATE_TYPE",                   "UpdateType"                  },
+  { "CTEST_CVS_COMMAND",                   "CVSCommand"                  },
+  { "CTEST_CVS_UPDATE_OPTIONS",            "CVSUpdateOptions"            },
+  { "CTEST_SVN_COMMAND",                   "SVNCommand"                  },
+  { "CTEST_SVN_UPDATE_OPTIONS",            "SVNUpdateOptions"            },
+  { "CTEST_SVN_OPTIONS",                   "SVNOptions"                  },
+  { "CTEST_BZR_COMMAND",                   "BZRCommand"                  },
+  { "CTEST_BZR_UPDATE_OPTIONS",            "BZRUpdateOptions"            },
+  { "CTEST_GIT_COMMAND",                   "GITCommand"                  },
+  { "CTEST_GIT_UPDATE_OPTIONS",            "GITUpdateOptions"            },
+  { "CTEST_GIT_INIT_SUBMODULES",           "GITInitSubmodules"           },
+  { "CTEST_GIT_UPDATE_CUSTOM",             "GITUpdateCustom"             },
+  { "CTEST_UPDATE_VERSION_ONLY",           "UpdateVersionOnly"           },
+  { "CTEST_UPDATE_VERSION_OVERRIDE",       "UpdateVersionOverride"       },
+  { "CTEST_HG_COMMAND",                    "HGCommand"                   },
+  { "CTEST_HG_UPDATE_OPTIONS",             "HGUpdateOptions"             },
+  { "CTEST_P4_COMMAND",                    "P4Command"                   },
+  { "CTEST_P4_UPDATE_CUSTOM",              "P4UpdateCustom"              },
+  { "CTEST_P4_UPDATE_OPTIONS",             "P4UpdateOptions"             },
+  { "CTEST_P4_CLIENT",                     "P4Client"                    },
+  { "CTEST_P4_OPTIONS",                    "P4Options"                   },
+  // Configure step
+  { "CTEST_CONFIGURE_COMMAND",             "ConfigureCommand"            },
+  { "CTEST_LABELS_FOR_SUBPROJECTS",        "LabelsForSubprojects"        },
+  { "CTEST_CMAKE_GENERATOR",               "CMakeGenerator"              },
+  { "CTEST_CMAKE_GENERATOR_PLATFORM",      "CMakeGeneratorPlatform"      },
+  { "CTEST_CMAKE_GENERATOR_TOOLSET",       "CMakeGeneratorToolset"       },
+  // Build step
+  { "CTEST_BUILD_COMMAND",                 "MakeCommand"                 },
+  { "CTEST_USE_LAUNCHERS",                 "UseLaunchers"                },
+  { "CTEST_BUILD_FLAGS",                   "BuildFlags"                  },
+  { "CTEST_BUILD_TARGET",                  "BuildTarget"                 },
+  // Test step
+  { "CTEST_TEST_TIMEOUT",                  "TimeOut"                     },
+  { "CTEST_TEST_COVERAGE_TOOL",            "CTestTestCoverageTool"       },
+  { "CTEST_RESOURCE_SPEC_FILE",            "ResourceSpecFile"            },
+  { "CTEST_TEST_LOAD",                     "TestLoad"                    },
+  // Coverage step
+  { "CTEST_COVERAGE_COMMAND",              "CoverageCommand"             },
+  { "CTEST_COVERAGE_EXTRA_FLAGS",          "CoverageExtraFlags"          },
+  { "CTEST_EXTRA_COVERAGE_GLOB",           "ExtraCoverageGlob"           },
+  // MemCheck step
+  { "CTEST_MEMORYCHECK_TYPE",              "MemoryCheckType"             },
+  { "CTEST_MEMORYCHECK_SANITIZER_OPTIONS", "MemoryCheckSanitizerOptions" },
+  { "CTEST_MEMORYCHECK_COMMAND",           "MemoryCheckCommand"          },
+  { "CTEST_MEMORYCHECK_COMMAND_OPTIONS",   "MemoryCheckCommandOptions"   },
+  { "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE", "MemoryCheckSuppressionFile"  },
+  // Submit step
+  { "CTEST_NOTES_FILES",                   "NotesFiles"                  },
+  { "CTEST_EXTRA_SUBMIT_FILES",            "ExtraSubmitFiles"            },
+  { "CTEST_SUBMIT_URL",                    "SubmitURL"                   },
+  { "CTEST_DROP_METHOD",                   "DropMethod"                  },
+  { "CTEST_DROP_SITE_USER",                "DropSiteUser"                },
+  { "CTEST_DROP_SITE_PASSWORD",            "DropSitePassword"            },
+  { "CTEST_DROP_SITE",                     "DropSite"                    },
+  { "CTEST_DROP_LOCATION",                 "DropLocation"                },
+  { "CTEST_TLS_VERIFY",                    "TLSVerify"                   },
+  { "CTEST_TLS_VERSION",                   "TLSVersion"                  },
+  { "CTEST_CURL_OPTIONS",                  "CurlOptions"                 },
+  { "CTEST_SUBMIT_INACTIVITY_TIMEOUT",     "SubmitInactivityTimeout"     },
+  { "CTEST_TIME_LIMIT",                    "TimeLimit"                   },
+};
+// clang-format on
+
+// Entries accepted by ApplyDefinitionsToCTestConfig() (i.e. settable via
+// "ctest -D") but not emitted by SetCMakeVariables(), because their forward
+// direction is handled outside of that function.
+//
+//   CTEST_CVS_CHECKOUT - Deprecated alias for CTEST_CHECKOUT_COMMAND.
+//                        The canonical name is already in kCTestVarConfigMap.
+//   CTEST_CHANGE_ID    - Handler commands push this *into* the config map
+//                        themselves rather than reading it out;
+//                        SetCMakeVariables intentionally has no entry for it.
+CTestVarConfigEntry const kCTestVarConfigMapReverseOnly[] = {
+  { "CTEST_CVS_CHECKOUT", "CheckoutCommand" },
+  { "CTEST_CHANGE_ID", "ChangeId" },
+};
+} // namespace
+
 void cmCTest::SetCMakeVariables(cmMakefile& mf)
 {
-  auto set = [&](char const* cmake_var, char const* ctest_opt) {
-    std::string val = this->GetCTestConfiguration(ctest_opt);
+  for (auto const& entry : kCTestVarConfigMap) {
+    std::string val = this->GetCTestConfiguration(entry.Config);
     if (!val.empty()) {
       cmCTestOptionalLog(
         this, HANDLER_VERBOSE_OUTPUT,
-        "SetCMakeVariable:" << cmake_var << ":" << val << std::endl, false);
-      mf.AddDefinition(cmake_var, val);
+        "SetCMakeVariable:" << entry.Var << ":" << val << std::endl, false);
+      mf.AddDefinition(entry.Var, val);
     }
-  };
+  }
+}
 
-  set("CTEST_SITE", "Site");
-  set("CTEST_BUILD_NAME", "BuildName");
-  set("CTEST_NIGHTLY_START_TIME", "NightlyStartTime");
-  set("CTEST_SOURCE_DIRECTORY", "SourceDirectory");
-  set("CTEST_BINARY_DIRECTORY", "BuildDirectory");
+void cmCTest::ApplyDefinitionsToCTestConfig()
+{
+  // Build a reverse-lookup map from both tables the first time this is called.
+  static std::map<std::string, std::string> const reverseMap = []() {
+    std::map<std::string, std::string> m;
+    for (auto const& e : kCTestVarConfigMap) {
+      m.emplace(e.Var, e.Config);
+    }
+    for (auto const& e : kCTestVarConfigMapReverseOnly) {
+      m.emplace(e.Var, e.Config);
+    }
+    return m;
+  }();
 
-  // CTest Update Step
-  set("CTEST_UPDATE_COMMAND", "UpdateCommand");
-  set("CTEST_UPDATE_OPTIONS", "UpdateOptions");
-  set("CTEST_UPDATE_TYPE", "UpdateType");
-  set("CTEST_CVS_COMMAND", "CVSCommand");
-  set("CTEST_CVS_UPDATE_OPTIONS", "CVSUpdateOptions");
-  set("CTEST_SVN_COMMAND", "SVNCommand");
-  set("CTEST_SVN_UPDATE_OPTIONS", "SVNUpdateOptions");
-  set("CTEST_SVN_OPTIONS", "SVNOptions");
-  set("CTEST_BZR_COMMAND", "BZRCommand");
-  set("CTEST_BZR_UPDATE_OPTIONS", "BZRUpdateOptions");
-  set("CTEST_GIT_COMMAND", "GITCommand");
-  set("CTEST_GIT_UPDATE_OPTIONS", "GITUpdateOptions");
-  set("CTEST_GIT_INIT_SUBMODULES", "GITInitSubmodules");
-  set("CTEST_GIT_UPDATE_CUSTOM", "GITUpdateCustom");
-  set("CTEST_UPDATE_VERSION_ONLY", "UpdateVersionOnly");
-  set("CTEST_UPDATE_VERSION_OVERRIDE", "UpdateVersionOverride");
-  set("CTEST_HG_COMMAND", "HGCommand");
-  set("CTEST_HG_UPDATE_OPTIONS", "HGUpdateOptions");
-  set("CTEST_P4_COMMAND", "P4Command");
-  set("CTEST_P4_UPDATE_CUSTOM", "P4UpdateCustom");
-  set("CTEST_P4_UPDATE_OPTIONS", "P4UpdateOptions");
-  set("CTEST_P4_CLIENT", "P4Client");
-  set("CTEST_P4_OPTIONS", "P4Options");
-
-  // CTest Configure Step
-  set("CTEST_CONFIGURE_COMMAND", "ConfigureCommand");
-  set("CTEST_LABELS_FOR_SUBPROJECTS", "LabelsForSubprojects");
-
-  // CTest Build Step
-  set("CTEST_BUILD_COMMAND", "MakeCommand");
-  set("CTEST_USE_LAUNCHERS", "UseLaunchers");
-
-  // CTest Test Step
-  set("CTEST_TEST_TIMEOUT", "TimeOut");
-  set("CTEST_TEST_COVERAGE_TOOL", "CTestTestCoverageTool");
-
-  // CTest Coverage Step
-  set("CTEST_COVERAGE_COMMAND", "CoverageCommand");
-  set("CTEST_COVERAGE_EXTRA_FLAGS", "CoverageExtraFlags");
-
-  // CTest MemCheck Step
-  set("CTEST_MEMORYCHECK_TYPE", "MemoryCheckType");
-  set("CTEST_MEMORYCHECK_SANITIZER_OPTIONS", "MemoryCheckSanitizerOptions");
-  set("CTEST_MEMORYCHECK_COMMAND", "MemoryCheckCommand");
-  set("CTEST_MEMORYCHECK_COMMAND_OPTIONS", "MemoryCheckCommandOptions");
-  set("CTEST_MEMORYCHECK_SUPPRESSIONS_FILE", "MemoryCheckSuppressionFile");
-
-  // CTest Submit Step
-  set("CTEST_SUBMIT_URL", "SubmitURL");
-  set("CTEST_DROP_METHOD", "DropMethod");
-  set("CTEST_DROP_SITE_USER", "DropSiteUser");
-  set("CTEST_DROP_SITE_PASSWORD", "DropSitePassword");
-  set("CTEST_DROP_SITE", "DropSite");
-  set("CTEST_DROP_LOCATION", "DropLocation");
-  set("CTEST_TLS_VERIFY", "TLSVerify");
-  set("CTEST_TLS_VERSION", "TLSVersion");
-  set("CTEST_CURL_OPTIONS", "CurlOptions");
-  set("CTEST_SUBMIT_INACTIVITY_TIMEOUT", "SubmitInactivityTimeout");
+  for (auto const& def : this->Impl->Definitions) {
+    auto const it = reverseMap.find(def.first);
+    if (it != reverseMap.end()) {
+      this->SetCTestConfiguration(it->second.c_str(), def.second);
+    }
+  }
 }
 
 bool cmCTest::RunCommand(std::vector<std::string> const& args,

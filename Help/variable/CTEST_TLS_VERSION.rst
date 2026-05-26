@@ -5,7 +5,8 @@ CTEST_TLS_VERSION
 
 Specify the CTest ``TLSVersion`` setting in a :manual:`ctest(1)`
 :ref:`Dashboard Client` script or in project ``CMakeLists.txt`` code
-before including the :module:`CTest` module.  The value is a minimum
+before including the :module:`CTest` module, or on the :program:`ctest`
+command line via the :ref:`-D <ctest-option-D-var>` option.  The value is a minimum
 TLS version allowed when submitting to a dashboard via ``https://`` URLs.
 
 The value may be one of:

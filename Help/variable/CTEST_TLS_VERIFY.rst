@@ -5,7 +5,8 @@ CTEST_TLS_VERIFY
 
 Specify the CTest ``TLSVerify`` setting in a :manual:`ctest(1)`
 :ref:`Dashboard Client` script or in project ``CMakeLists.txt`` code
-before including the :module:`CTest` module.  The value is a boolean
+before including the :module:`CTest` module, or on the :program:`ctest`
+command line via the :ref:`-D <ctest-option-D-var>` option.  The value is a boolean
 indicating whether to  verify the server certificate when submitting
 to a dashboard via ``https://`` URLs.
 
