@@ -258,7 +258,7 @@ Commands
   :command:`FetchContent_Declare` for each dependency, and the first such call
   will control how that dependency will be made available, as described below.
 
-  If ``<lowercaseName>_SOURCE_DIR`` is not set:
+  If ``FETCHCONTENT_SOURCE_DIR_<uppercaseName>`` is not set:
 
   * .. versionadded:: 3.24
 
