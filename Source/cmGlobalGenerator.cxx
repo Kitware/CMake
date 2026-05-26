@@ -3438,6 +3438,31 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
 
   std::string module_languages[] = { "CXX" };
 
+  // Handle config-less builds.
+  if (configs.empty()) {
+    std::vector<std::string> all_lang_paths;
+    for (auto const& lang : module_languages) {
+      auto comment = cmStrCat("Combining module command databases for ", lang);
+      auto output = cmStrCat(mf->GetHomeOutputDirectory(), "/build_database_",
+                             lang, ".json");
+      mf->GetOrCreateGeneratedSource(output);
+      AddMergeTarget(
+        cmStrCat(TargetPrefix, '-', lang), comment.c_str(), output,
+        [this, lang]() { return this->PerLanguageModuleDbs[lang]; });
+      all_lang_paths.emplace_back(std::move(output));
+    }
+
+    // Add the overall target.
+    auto const* comment = "Combining module command databases";
+    auto output =
+      cmStrCat(mf->GetHomeOutputDirectory(), "/build_database.json");
+    mf->GetOrCreateGeneratedSource(output);
+    AddMergeTarget(std::string{ TargetPrefix }, comment, output,
+                   [all_lang_paths]() { return all_lang_paths; });
+
+    return true;
+  }
+
   // Add per-configuration targets.
   for (auto const& config : configs) {
     // Add per-language targets.

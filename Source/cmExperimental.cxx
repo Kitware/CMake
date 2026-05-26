@@ -48,7 +48,7 @@ cmExperimental::FeatureData const LookupTable[] = {
     cmExperimental::TryCompileCondition::Always },
   // ExportBuildDatabase
   { "ExportBuildDatabase",
-    "73194a1d-c0b5-41b9-9190-a4512925e192",
+    "70ef007e-b743-492d-9407-e35eeac03a40",
     "CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE",
     "CMake's support for exporting build databases is experimental. It is "
     "meant only for experimentation and feedback to CMake developers.",

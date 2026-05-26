@@ -87,7 +87,7 @@ Build database support
 In order to activate support for exporting build databases, set
 
 * variable ``CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE`` to
-* value ``73194a1d-c0b5-41b9-9190-a4512925e192``.
+* value ``70ef007e-b743-492d-9407-e35eeac03a40``.
 
 This UUID may change in future versions of CMake.  Be sure to use the value
 documented here by the source tree of the version of CMake with which you are
