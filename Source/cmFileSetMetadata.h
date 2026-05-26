@@ -56,11 +56,12 @@ using DependencySet = std::set<DependencyMode>;
 
 enum class FileSetAttributes : std::uint16_t
 {
-  FrameworkCompatible,    // Can be part of an Apple framework
-  FilesInMultipleFileSets // Files of this file set type can be part of other
-                          // file sets
+  FrameworkCompatible,     // Can be part of an Apple framework
+  FilesInMultipleFileSets, // Files of this file set type can be part of other
+                           // file sets
+  UnityBuild               // Can be part of a unity build
 };
-using AttributeSet = cm::enum_set<FileSetAttributes, 2>;
+using AttributeSet = cm::enum_set<FileSetAttributes, 3>;
 
 struct FileSetDescriptor
 {

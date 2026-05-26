@@ -3294,6 +3294,13 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
     std::vector<cmSourceFile*> sources;
     target->GetSourceFiles(sources, configs[ci]);
     for (cmSourceFile* sf : sources) {
+      cmGeneratorFileSet const* fileSet =
+        target->GetFileSetForSource(configs[ci], sf);
+      if (fileSet &&
+          !cm::FileSetMetadata::GetAttributes(fileSet->GetType())
+             .contains(cm::FileSetMetadata::FileSetAttributes::UnityBuild)) {
+        continue;
+      }
       // Files which need C++ scanning cannot participate in unity builds as
       // there is a single place in TUs that may perform module-dependency bits
       // and a unity source cannot `#include` them in-order and represent a
@@ -3344,8 +3351,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
           cmGeneratorFileSet const* fileSet =
             target->GetFileSetForSource(configs[idx], sf);
           if (fileSet &&
-              (fileSet->GetType() == cm::FileSetMetadata::HEADERS ||
-               fileSet->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn() ||
+              (fileSet->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn() ||
                fileSet->GetProperty(fileSet->BelongsTo(target)
                                       ? "COMPILE_OPTIONS"
                                       : "INTERFACE_COMPILE_OPTIONS") ||
