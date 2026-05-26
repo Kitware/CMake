@@ -76,6 +76,35 @@ function (run_cxx_module_test directory)
     list(POP_FRONT ARGN test_name)
   endif ()
 
+  # Split the test cases into two suites: those for builds and those for
+  # installs.
+  set(is_for_install 0)
+  if (RunCMake_CXXModules_INSTALL OR
+      RunCMake_CXXModules_NEEDS_INSTALL OR
+      test_name MATCHES "install")
+    set(is_for_install 1)
+  endif ()
+  # Build variants
+  if (CMake_TEST_MODULE_VARIANT MATCHES "Build")
+    if (is_for_install)
+      return ()
+    endif ()
+    # Further split the test cases into those for import/export and "behavior".
+    set(is_import_export 0)
+    if (test_name MATCHES "^(imp|exp)-")
+      set(is_import_export 1)
+    endif ()
+    if (CMake_TEST_MODULE_VARIANT STREQUAL "BuildBehavior" AND is_import_export)
+      return ()
+    endif ()
+    if (CMake_TEST_MODULE_VARIANT STREQUAL "BuildImportExport" AND NOT is_import_export)
+      return ()
+    endif ()
+  endif ()
+  if (CMake_TEST_MODULE_VARIANT STREQUAL "Install" AND NOT is_for_install)
+    return ()
+  endif ()
+
   set(RunCMake_TEST_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/${directory}")
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${test_name}-build")
 
@@ -170,8 +199,8 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(object-library)
   run_cxx_module_test(generated)
   run_cxx_module_test(deep-chain)
-  run_cxx_module_test(non-trivial-collation-order)
-  run_cxx_module_test(non-trivial-collation-order-randomized)
+  run_cxx_module_test(non-triv-coll)
+  run_cxx_module_test(non-triv-coll-rando)
   run_cxx_module_test(duplicate)
   set(RunCMake_CXXModules_NO_TEST 1)
   if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
@@ -387,4 +416,6 @@ set(RunCMake_CXXModules_INSTALL 0)
 
 set(test_set mods-from-ninja)
 run_cxx_module_test_ninja("exp-${test_set}")
+set(RunCMake_CXXModules_NEEDS_INSTALL 1)
 run_cxx_module_test(imp-mods "imp-${test_set}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/exp-${test_set}-ninja-install" -DFROM_NINJA=1)
+unset(RunCMake_CXXModules_NEEDS_INSTALL)
