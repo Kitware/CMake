@@ -74,8 +74,7 @@ include:
 ``volk``
   .. versionadded:: 3.25
 
-  Finds the Vulkan meta-loader ``volk`` library, a vector-optimized library of
-  kernels.
+  Finds the Vulkan meta-loader ``volk`` library.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
