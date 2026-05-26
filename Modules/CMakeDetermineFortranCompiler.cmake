@@ -134,6 +134,9 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   list(APPEND CMAKE_Fortran_COMPILER_ID_VENDORS NAG) # Numerical Algorithms Group
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_NAG "-V")
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_REGEX_NAG "NAG Fortran Compiler")
+  list(APPEND CMAKE_Fortran_COMPILER_ID_VENDORS IBMLLVMFlang)
+  set(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_IBMLLVMFlang "--version")
+  set(CMAKE_Fortran_COMPILER_ID_VENDOR_REGEX_IBMLLVMFlang "IBM Open XL Fortran")
 
   # Match the link line from xcodebuild output of the form
   #  Ld ...

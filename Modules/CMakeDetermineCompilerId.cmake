@@ -72,6 +72,17 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endforeach()
   endif()
 
+  # Check if there is any vendor specific LLVMFlang
+  if(lang STREQUAL "Fortran" AND CMAKE_${lang}_COMPILER_ID STREQUAL "LLVMFlang")
+    set(_orig_compiler_id "${CMAKE_${lang}_COMPILER_ID}")
+    foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
+      CMAKE_DETERMINE_COMPILER_ID_VENDOR(${lang} "${userflags}")
+      if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL _orig_compiler_id)
+        break()
+      endif()
+    endforeach()
+  endif()
+
   # Check if compiler id detection gave us the compiler tool.
   if(CMAKE_${lang}_COMPILER_ID_TOOL)
     set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}")
@@ -233,6 +244,22 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
         if (output MATCHES [[Fujitsu [^ ]* Compiler ([0-9]+\.[0-9]+\.[0-9]+)]])
           set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_MATCH_1}")
         endif()
+      endif()
+    endif()
+  endif()
+
+  # The IBM LLVM Flang compiler version is extracted from --version output
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "IBMLLVMFlang")
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}" --version
+      OUTPUT_VARIABLE output
+      ERROR_VARIABLE output
+      RESULT_VARIABLE result
+      TIMEOUT 10
+    )
+    if(result EQUAL 0)
+      if(output MATCHES [[version ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)]])
+        set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_MATCH_1}")
       endif()
     endif()
   endif()
