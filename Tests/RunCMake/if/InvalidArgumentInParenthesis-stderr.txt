@@ -1,0 +1,8 @@
+^CMake Error at InvalidArgumentInParenthesis\.cmake:1 \(if\):
+  if given arguments:
+
+    "\(" "A" "B" "\)" "OR" "\(" "" "\)"
+
+  Unknown arguments specified
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$

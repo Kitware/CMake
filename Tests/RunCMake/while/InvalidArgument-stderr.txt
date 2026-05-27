@@ -1,0 +1,8 @@
+^CMake Error at InvalidArgument\.cmake:2 \(while\):
+  while\(\) given incorrect arguments:
+
+    "\(" "A" "B" "\)" "OR" "\(" "" "\)"
+
+  Unknown arguments specified
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$
