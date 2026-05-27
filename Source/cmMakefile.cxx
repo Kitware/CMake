@@ -3366,8 +3366,7 @@ int cmMakefile::TryCompile(std::string const& srcdir,
     cm.SetCacheArgs(*cmakeArgs);
   }
   // to save time we pass the EnableLanguage info directly
-  cm.GetGlobalGenerator()->EnableLanguagesFromGenerator(
-    this->GetGlobalGenerator(), this);
+  cm.GetGlobalGenerator()->SetupTryCompile(this->GetGlobalGenerator(), this);
   for (unsigned dc = 1; dc < cmDiagnostics::CategoryCount; ++dc) {
     auto const category = static_cast<cmDiagnosticCategory>(dc);
     if (this->GetDiagnosticAction(category) == cmDiagnostics::Ignore) {

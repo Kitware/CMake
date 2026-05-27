@@ -159,7 +159,6 @@ public:
   void SetLanguageEnabled(std::string const& l);
   bool GetLanguageEnabled(std::string const& l) const;
   std::vector<std::string> GetEnabledLanguages() const;
-  void SetEnabledLanguages(std::vector<std::string> const& langs);
   void ClearEnabledLanguages();
 
   bool GetIsGeneratorMultiConfig() const;

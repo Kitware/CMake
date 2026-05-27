@@ -240,11 +240,7 @@ public:
   void ResolveLanguageCompiler(std::string const& lang, cmMakefile* mf,
                                bool optional) const;
 
-  /**
-   * Try to determine system information, get it from another generator
-   */
-  void EnableLanguagesFromGenerator(cmGlobalGenerator* gen, cmMakefile* mf);
-
+  void SetupTryCompile(cmGlobalGenerator* gen, cmMakefile* mf);
   /**
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
@@ -870,10 +866,8 @@ private:
   std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
 
   cmMakefile* TryCompileOuterMakefile;
-  // If you add a new map here, make sure it is copied
-  // in EnableLanguagesFromGenerator
   std::map<std::string, bool> IgnoreExtensions;
-  std::set<std::string> LanguagesReady; // Ready for try_compile
+  std::set<std::string> LanguagesReadyForTryCompile;
   std::set<std::string> LanguagesInProgress;
   std::map<std::string, std::string> OutputExtensions;
   std::map<std::string, std::string> LanguageToOutputExtension;
