@@ -306,8 +306,10 @@ public:
   cmBTStringRange GetIncludeDirectoriesEntries() const;
 
   cmBTStringRange GetCompileOptionsEntries() const;
+  cmBTStringRange GetImportedCxxModulesCompileOptionsEntries() const;
 
   cmBTStringRange GetCompileFeaturesEntries() const;
+  cmBTStringRange GetImportedCxxModulesCompileFeaturesEntries() const;
 
   cmBTStringRange GetCompileDefinitionsEntries() const;
 
@@ -325,6 +327,7 @@ public:
   cmBTStringRange GetLinkInterfaceDirectEntries() const;
   cmBTStringRange GetLinkInterfaceDirectExcludeEntries() const;
 
+  void CopyUsageEffects(cmTarget const* tgt);
   void CopyPolicyStatuses(cmTarget const* tgt);
   void CopyCxxModulesEntries(cmTarget const* tgt);
   void CopyCxxModulesProperties(cmTarget const* tgt);

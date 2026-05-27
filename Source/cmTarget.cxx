@@ -1679,9 +1679,19 @@ cmBTStringRange cmTarget::GetCompileOptionsEntries() const
   return cmMakeRange(this->impl->CompileOptions.Entries);
 }
 
+cmBTStringRange cmTarget::GetImportedCxxModulesCompileOptionsEntries() const
+{
+  return cmMakeRange(this->impl->ImportedCxxModulesCompileOptions.Entries);
+}
+
 cmBTStringRange cmTarget::GetCompileFeaturesEntries() const
 {
   return cmMakeRange(this->impl->CompileFeatures.Entries);
+}
+
+cmBTStringRange cmTarget::GetImportedCxxModulesCompileFeaturesEntries() const
+{
+  return cmMakeRange(this->impl->ImportedCxxModulesCompileFeatures.Entries);
 }
 
 cmBTStringRange cmTarget::GetCompileDefinitionsEntries() const
@@ -1729,6 +1739,31 @@ cmBTStringRange cmTarget::GetLinkInterfaceDirectExcludeEntries() const
   return cmMakeRange(this->impl->InterfaceLinkLibrariesDirectExclude.Entries);
 }
 
+void cmTarget::CopyUsageEffects(cmTarget const* tgt)
+{
+  // Normal targets cannot be the target of a copy.
+  assert(!this->IsNormal());
+  // Imported targets cannot be the target of a copy.
+  assert(!this->IsImported());
+  // Only imported or normal targets can be the source of a copy.
+  assert(tgt->IsImported() || tgt->IsNormal());
+
+  this->impl->CompileFeatures.Entries.clear();
+  this->impl->CompileOptions.Entries.clear();
+
+  if (tgt->IsImported()) {
+    this->impl->CompileFeatures.CopyFromEntries(
+      cmMakeRange(tgt->impl->ImportedCxxModulesCompileFeatures.Entries));
+    this->impl->CompileOptions.CopyFromEntries(
+      cmMakeRange(tgt->impl->ImportedCxxModulesCompileOptions.Entries));
+  } else {
+    this->impl->CompileFeatures.CopyFromEntries(
+      cmMakeRange(tgt->impl->CompileFeatures.Entries));
+    this->impl->CompileOptions.CopyFromEntries(
+      cmMakeRange(tgt->impl->CompileOptions.Entries));
+  }
+}
+
 void cmTarget::CopyPolicyStatuses(cmTarget const* tgt)
 {
   // Normal targets cannot be the target of a copy.
@@ -1754,8 +1789,6 @@ void cmTarget::CopyCxxModulesEntries(cmTarget const* tgt)
 
   this->impl->IncludeDirectories.Entries.clear();
   this->impl->CompileDefinitions.Entries.clear();
-  this->impl->CompileFeatures.Entries.clear();
-  this->impl->CompileOptions.Entries.clear();
   this->impl->LinkLibraries.Entries.clear();
 
   if (tgt->IsImported()) {
@@ -1763,10 +1796,6 @@ void cmTarget::CopyCxxModulesEntries(cmTarget const* tgt)
       cmMakeRange(tgt->impl->ImportedCxxModulesIncludeDirectories.Entries));
     this->impl->CompileDefinitions.CopyFromEntries(
       cmMakeRange(tgt->impl->ImportedCxxModulesCompileDefinitions.Entries));
-    this->impl->CompileFeatures.CopyFromEntries(
-      cmMakeRange(tgt->impl->ImportedCxxModulesCompileFeatures.Entries));
-    this->impl->CompileOptions.CopyFromEntries(
-      cmMakeRange(tgt->impl->ImportedCxxModulesCompileOptions.Entries));
     this->impl->LinkLibraries.CopyFromEntries(
       cmMakeRange(tgt->impl->ImportedCxxModulesLinkLibraries.Entries));
   } else {
@@ -1774,10 +1803,6 @@ void cmTarget::CopyCxxModulesEntries(cmTarget const* tgt)
       cmMakeRange(tgt->impl->IncludeDirectories.Entries));
     this->impl->CompileDefinitions.CopyFromEntries(
       cmMakeRange(tgt->impl->CompileDefinitions.Entries));
-    this->impl->CompileFeatures.CopyFromEntries(
-      cmMakeRange(tgt->impl->CompileFeatures.Entries));
-    this->impl->CompileOptions.CopyFromEntries(
-      cmMakeRange(tgt->impl->CompileOptions.Entries));
     this->impl->LinkLibraries.CopyFromEntries(
       cmMakeRange(tgt->impl->LinkLibraries.Entries));
   }

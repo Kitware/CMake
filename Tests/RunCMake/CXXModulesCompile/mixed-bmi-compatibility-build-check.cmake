@@ -1,4 +1,5 @@
-# Verify the build system generated a synthetic target/BMI for each unique importer
+# Verify the build system reused the owning target BMI when compatible and
+# generated a synthetic target BMI only for the incompatible importer.
 set(expected_consumers consumer20 consumer23)
 set(linked_dir_keys "")
 set(linked_dir_names "")
@@ -31,9 +32,23 @@ foreach (consumer IN LISTS expected_consumers)
   string(JSON linked_dirs_len LENGTH "${depend_info_json}" "linked-target-dirs")
   string(JSON linked_dirs GET "${depend_info_json}" "linked-target-dirs")
 
+  if (consumer STREQUAL "consumer20")
+    set(expected_linked_tgt_regex "^importable\.dir$")
+    set(expected_linked_tgt_desc "owning target dir for 'importable'")
+    set(expected_linked_tgt_has_bmi 0)
+  elseif (consumer STREQUAL "consumer23")
+    set(expected_linked_tgt_regex "^importable@synth_[A-Za-z0-9_]+\.dir$")
+    set(expected_linked_tgt_desc "synthetic target dir for 'importable'")
+    set(expected_linked_tgt_has_bmi 1)
+  else ()
+    list(APPEND RunCMake_TEST_FAILED
+      "No linked target expectation defined for consumer '${consumer}'")
+    continue()
+  endif ()
+
   if (NOT linked_dirs_len GREATER 0)
     list(APPEND RunCMake_TEST_FAILED
-      "Consumer '${consumer}' has no linked-target-dirs but expected synthetic target for 'importable'")
+      "Consumer '${consumer}' has no linked-target-dirs but expected ${expected_linked_tgt_desc}")
     continue()
   endif ()
 
@@ -54,10 +69,9 @@ foreach (consumer IN LISTS expected_consumers)
 
   cmake_path(GET linked_tgt_root FILENAME linked_tgt_name)
 
-  # Verify it is a synthetic target for the 'importable' library
-  if (NOT linked_tgt_name MATCHES "^importable@synth_[A-Za-z0-9_]+\.dir$")
+  if (NOT linked_tgt_name MATCHES "${expected_linked_tgt_regex}")
     list(APPEND RunCMake_TEST_FAILED
-      "Consumer '${consumer}' should link to synthetic target dir for 'importable' but found ${linked_dir}")
+      "Consumer '${consumer}' should link to ${expected_linked_tgt_desc} but found ${linked_dir}")
     continue()
   endif ()
 
@@ -67,33 +81,37 @@ foreach (consumer IN LISTS expected_consumers)
     set(linked_output_dir "${linked_dir}")
   endif ()
 
-  # Verify the synthetic target dir exists and contains a BMI
+  # Verify the linked target dir exists and contains a BMI
   if (NOT EXISTS "${linked_dir}")
     list(APPEND RunCMake_TEST_FAILED
-      "Consumer '${consumer}' links to synthetic target directory that does not exist: ${linked_dir}")
+      "Consumer '${consumer}' links to target directory that does not exist: ${linked_dir}")
     continue()
   endif ()
 
-  file(GLOB_RECURSE bmi_files "${linked_dir}/*.bmi")
-  if (NOT bmi_files)
-    list(APPEND RunCMake_TEST_FAILED
-      "No BMI files found in synthetic target directory: ${linked_dir}")
-    continue()
+  if (expected_linked_tgt_has_bmi)
+    file(GLOB_RECURSE bmi_files "${linked_dir}/*.bmi")
+    if (NOT bmi_files)
+      list(APPEND RunCMake_TEST_FAILED
+        "No BMI files found in target directory: ${linked_dir}")
+      continue()
+    endif ()
   endif ()
 
-  # Record the consumers of each linked dir to verify uniqueness
-  string(REGEX REPLACE "[^A-Za-z0-9_]" "_" linked_dir_key "${linked_tgt_name}")
-  set(linked_dir_consumers_var "linked_dir_consumers_${linked_dir_key}")
-  if (NOT DEFINED ${linked_dir_consumers_var})
-    list(APPEND linked_dir_keys "${linked_dir_key}")
-    list(APPEND linked_dir_names "${linked_tgt_name}")
-  endif ()
+  if (linked_tgt_name MATCHES "^importable@synth_[A-Za-z0-9_]+\.dir$")
+    # Record the consumers of each synthetic dir to verify uniqueness.
+    string(REGEX REPLACE "[^A-Za-z0-9_]" "_" linked_dir_key "${linked_tgt_name}")
+    set(linked_dir_consumers_var "linked_dir_consumers_${linked_dir_key}")
+    if (NOT DEFINED ${linked_dir_consumers_var})
+      list(APPEND linked_dir_keys "${linked_dir_key}")
+      list(APPEND linked_dir_names "${linked_tgt_name}")
+    endif ()
 
-  list(APPEND ${linked_dir_consumers_var} ${consumer})
+    list(APPEND ${linked_dir_consumers_var} ${consumer})
+  endif ()
 
 endforeach ()
 
-# Verify each synthetic target is consumed exactly once
+# Verify each synthetic target is consumed exactly once.
 foreach (linked_dir_key IN LISTS linked_dir_keys)
   set(consumers "${linked_dir_consumers_${linked_dir_key}}")
   list(LENGTH consumers linked_dir_consumer_count)
@@ -104,7 +122,7 @@ foreach (linked_dir_key IN LISTS linked_dir_keys)
 
     string(JOIN ", " linked_dir_consumers_joined ${consumers})
     list(APPEND RunCMake_TEST_FAILED
-      "Expected per-importer BMI generation, but '${linked_tgt_name}' is linked to by multiple targets: ${linked_dir_consumers_joined}")
+      "Expected per-compatibility synthetic BMI generation, but '${linked_tgt_name}' is linked to by multiple targets: ${linked_dir_consumers_joined}")
   endif ()
 endforeach ()
 
