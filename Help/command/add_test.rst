@@ -8,7 +8,8 @@ Add a test to the project to be run by :manual:`ctest(1)`.
   add_test(NAME <name> COMMAND <command> [<arg>...]
            [CONFIGURATIONS <config>...]
            [WORKING_DIRECTORY <dir>]
-           [COMMAND_EXPAND_LISTS])
+           [COMMAND_EXPAND_LISTS]
+           [BUILD_DEPENDS <dependencies>...])
 
 Adds a test called ``<name>``.  The test name may contain arbitrary
 characters, expressed as a :ref:`Quoted Argument` or :ref:`Bracket Argument`
@@ -59,6 +60,25 @@ directory the test is created in.
 
         <launcher> <emulator> <command>
 
+  * .. versionadded:: 4.4
+
+      When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled,
+      the :ref:`Ninja Generators` generate a convenience build target named
+      ``test_prep/<name>`` that depends on the test executable target. Building
+      this target ensures the executable is up-to-date before the test runs.
+
+      Additionally, targets referenced by the test command via generator
+      expressions are added as dependencies of the ``test_prep/<name>`` target.
+
+      If multiple tests in different directories share the same name, their
+      dependencies are merged into a single ``test_prep/<name>`` target.
+
+      Tests with names that are not valid target names are excluded from this
+      behavior.
+
+      The ``BUILD_DEPENDS`` keyword can be used to add explicit build
+      dependencies.
+
   The command may be specified using
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
@@ -70,6 +90,15 @@ directory the test is created in.
   test. If not specified, the test will be run in
   :variable:`CMAKE_CURRENT_BINARY_DIR`. The working directory may be specified
   using :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+``BUILD_DEPENDS``
+  .. versionadded:: 4.4
+
+  Specify a list of targets or files that must be built before the test can
+  run. Each dependency is added to the ``test_prep/<name>`` build target
+  described above when :variable:`CMAKE_TEST_BUILD_DEPENDS` is enabled
+  with the :ref:`Ninja Generators`. The test name must be a valid target name
+  in order to list build dependencies with this keyword.
 
 ``COMMAND_EXPAND_LISTS``
   .. versionadded:: 3.16

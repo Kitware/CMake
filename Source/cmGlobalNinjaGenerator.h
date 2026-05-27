@@ -524,6 +524,7 @@ private:
   void WriteDisclaimer(std::ostream& os) const;
 
   void WriteAssumedSourceDependencies();
+  void WriteTestPrepTargets();
 
   void WriteTargetAliases(std::ostream& os);
   void WriteFolderTargets(std::ostream& os);

@@ -54,6 +54,8 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmTest.h"
+#include "cmTestGenerator.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -641,6 +643,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->cmGlobalGenerator::Generate();
 
   this->WriteAssumedSourceDependencies();
+  this->WriteTestPrepTargets();
   this->WriteTargetAliases(*this->GetCommonFileStream());
   this->WriteFolderTargets(*this->GetCommonFileStream());
   this->WriteBuiltinTargets(*this->GetCommonFileStream());
@@ -1290,6 +1293,80 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
       /*uses_terminal*/ false,
       /*restat*/ true, std::string(), outputs, cmNinjaDeps(),
       std::move(orderOnlyDeps));
+  }
+}
+
+void cmGlobalNinjaGenerator::WriteTestPrepTargets()
+{
+  auto writeConfig = [this](std::string const& config, std::ostream& os) {
+    struct TestPrepTarget
+    {
+      std::string Comment;
+      cmNinjaDeps ExplicitDeps;
+    };
+
+    std::map<std::string, TestPrepTarget> testPrepTargets;
+    for (auto const& localGen : this->LocalGenerators) {
+      auto* lg = static_cast<cmLocalNinjaGenerator*>(localGen.get());
+      auto const& testGenerators = lg->GetMakefile()->GetTestGenerators();
+      for (auto const& tester : testGenerators) {
+        cmTestGenerator::BuildDependencies testDeps;
+        if (!tester->GetBuildDependencies(lg, testDeps)) {
+          continue;
+        }
+        std::string const depName = this->ConvertToNinjaPath(
+          cmStrCat("test_prep/", tester->GetTest()->GetName()));
+        // Merge with existing target if multiple tests have the same name
+        auto& testPrepTarget = testPrepTargets[depName];
+        testPrepTarget.Comment = cmStrCat("Build dependencies for test ",
+                                          tester->GetTest()->GetName());
+
+        for (cmGeneratorTarget* depTarget : testDeps.Targets) {
+          this->AppendTargetOutputs(depTarget, testPrepTarget.ExplicitDeps,
+                                    config, DependOnTargetArtifact);
+        }
+        std::transform(testDeps.Files.begin(), testDeps.Files.end(),
+                       std::back_inserter(testPrepTarget.ExplicitDeps),
+                       this->MapToNinjaPath());
+      }
+    }
+
+    std::vector<std::string> allDeps;
+    for (auto& prepTarget : testPrepTargets) {
+      cmNinjaBuild build("phony");
+      build.Comment = prepTarget.second.Comment;
+      build.Outputs.push_back(prepTarget.first);
+
+      // Avoid duplicate dependencies when merging test_prep/ targets
+      auto& explicitDeps = prepTarget.second.ExplicitDeps;
+      std::sort(explicitDeps.begin(), explicitDeps.end());
+      explicitDeps.erase(std::unique(explicitDeps.begin(), explicitDeps.end()),
+                         explicitDeps.end());
+      build.ExplicitDeps = std::move(explicitDeps);
+
+      allDeps.push_back(prepTarget.first);
+      this->WriteBuild(os, build);
+    }
+
+    cmNinjaBuild build("phony");
+    build.Comment = "Build dependencies for all tests";
+    build.Outputs.push_back(this->ConvertToNinjaPath("test_prep/all"));
+    build.ExplicitDeps = std::move(allDeps);
+    this->WriteBuild(os, build);
+    return true;
+  };
+
+  if (!this->Makefiles.front()->IsOn("CMAKE_TEST_BUILD_DEPENDS")) {
+    return;
+  }
+  if (this->IsMultiConfig()) {
+    for (std::string const& config : this->GetConfigNames()) {
+      if (!writeConfig(config, *this->GetConfigFileStream(config))) {
+        return;
+      }
+    }
+  } else {
+    writeConfig(std::string(), *this->GetCommonFileStream());
   }
 }
 

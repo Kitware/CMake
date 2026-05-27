@@ -31,6 +31,26 @@ Builtin Targets
     Created only if the :prop_gbl:`INSTALL_PARALLEL` global property is ``ON``.
     Runs the install step for each subdirectory independently and in parallel.
 
+``test_prep/<test-name>``
+
+  .. versionadded:: 4.4
+
+    Created only if the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is
+    enabled. Builds all known build dependencies for the named test, including
+    the executable target invoked by the test, targets referenced by generator
+    expressions in the test command, and explicit ``BUILD_DEPENDS`` entries.
+
+    Tests with names that are not valid target names are excluded. If multiple
+    tests in different directories share the same name, their dependencies are
+    merged into one ``test_prep/<test-name>`` target.
+
+``test_prep/all``
+
+  .. versionadded:: 4.4
+
+    Created only if the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is
+    enabled. Depends on every generated ``test_prep/<test-name>`` target.
+
 For each subdirectory ``sub/dir`` of the project, additional targets
 are generated:
 

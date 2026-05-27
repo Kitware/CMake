@@ -58,3 +58,50 @@ block()
   run_cmake_command(TestLauncher-test ${CMAKE_CTEST_COMMAND} -C Debug -V)
 endblock()
 unset(RunCMake_TEST_OPTIONS)
+
+function(run_testdependency_case CASE_NAME EXPECT_PRESENT)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestDependency-${CASE_NAME}-build)
+  run_cmake(TestDependency-${CASE_NAME})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(TestDependency-${CASE_NAME}-check
+    ${CMAKE_COMMAND}
+    -DRunCMake_TEST_BINARY_DIR=${RunCMake_TEST_BINARY_DIR}
+    -Dexpect_present=${EXPECT_PRESENT}
+    -P ${RunCMake_SOURCE_DIR}/TestDependency-check-targets.cmake)
+  unset(RunCMake_TEST_NO_CLEAN)
+endfunction()
+
+if(RunCMake_GENERATOR MATCHES Ninja)
+  block()
+    run_testdependency_case(DEFAULT FALSE)
+    run_testdependency_case(OFF FALSE)
+    run_cmake(TestDependency-ON-invalid-test-name)
+
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestDependency-ON-build)
+    run_testdependency_case(ON TRUE)
+
+    if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+      set(TestDependency_CONFIG Debug)
+    else()
+      set(TestDependency_CONFIG "")
+    endif()
+    set(TestDependency_BUILD_CONFIG_ARG)
+    if(TestDependency_CONFIG)
+      set(TestDependency_BUILD_CONFIG_ARG --config ${TestDependency_CONFIG})
+    endif()
+    set(RunCMake_TEST_OUTPUT_MERGE 1)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(TestDependency-ON-all
+      ${CMAKE_COMMAND} --build . ${TestDependency_BUILD_CONFIG_ARG}
+      --target test_prep/all)
+    run_cmake_command(TestDependency-ON-build
+      ${CMAKE_COMMAND} --build . ${TestDependency_BUILD_CONFIG_ARG}
+      --target test_prep/TargetBuildTest)
+    run_cmake_command(TestDependency-ON-build-check
+      ${CMAKE_COMMAND}
+      -DRunCMake_TEST_BINARY_DIR=${RunCMake_TEST_BINARY_DIR}
+      -P ${RunCMake_SOURCE_DIR}/TestDependency-build-check.cmake)
+    unset(RunCMake_TEST_OUTPUT_MERGE)
+    unset(RunCMake_TEST_NO_CLEAN)
+  endblock()
+endif()

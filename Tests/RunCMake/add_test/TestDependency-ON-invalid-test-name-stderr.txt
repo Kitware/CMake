@@ -1,0 +1,5 @@
+CMake Error at TestDependency-ON-invalid-test-name.cmake:[0-9]+ \(add_test\):
+  add_test Cannot set build dependencies for a test with NAME "Target Build
+  Test Invalid Name" which is not a valid target name.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

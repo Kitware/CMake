@@ -7,6 +7,7 @@
 #include <cm/memory>
 
 #include "cmExecutionStatus.h"
+#include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
@@ -90,6 +91,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
   std::vector<std::string> configurations;
   std::string working_directory;
   std::vector<std::string> command;
+  std::vector<std::string> buildDepends;
   bool command_expand_lists = false;
   cmPolicies::PolicyStatus cmp0178 = mf.GetPolicyStatus(cmPolicies::CMP0178);
 
@@ -100,6 +102,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
     DoingCommand,
     DoingConfigs,
     DoingWorkingDirectory,
+    DoingBuildDepends,
     DoingCmp0178,
     DoingNone
   };
@@ -117,6 +120,8 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
         return false;
       }
       doing = DoingConfigs;
+    } else if (args[i] == "BUILD_DEPENDS") {
+      doing = DoingBuildDepends;
     } else if (args[i] == "WORKING_DIRECTORY") {
       if (!working_directory.empty()) {
         status.SetError(" may be given at most one WORKING_DIRECTORY.");
@@ -139,6 +144,8 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
       command.push_back(args[i]);
     } else if (doing == DoingConfigs) {
       configurations.push_back(args[i]);
+    } else if (doing == DoingBuildDepends) {
+      buildDepends.push_back(args[i]);
     } else if (doing == DoingWorkingDirectory) {
       working_directory = args[i];
       doing = DoingNone;
@@ -185,6 +192,15 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
     test->SetProperty("WORKING_DIRECTORY", working_directory);
   }
   test->SetCommandExpandLists(command_expand_lists);
+  if (!buildDepends.empty()) {
+    if (!cmGeneratorExpression::IsValidTargetName(name)) {
+      status.SetError(cmStrCat("Cannot set build dependencies for a test with"
+                               " NAME \"",
+                               name, "\" which is not a valid target name."));
+      return false;
+    }
+    test->SetBuildDependencies(buildDepends);
+  }
   mf.AddTestGenerator(cm::make_unique<cmTestGenerator>(test, configurations));
 
   return true;

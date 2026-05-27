@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTest.h"
 
+#include <utility>
+
 #include "cmMakefile.h"
 #include "cmProperty.h"
 #include "cmState.h"
@@ -31,6 +33,11 @@ void cmTest::SetName(std::string const& name)
 void cmTest::SetCommand(std::vector<std::string> const& command)
 {
   this->Command = command;
+}
+
+void cmTest::SetBuildDependencies(std::vector<std::string> deps)
+{
+  this->BuildDependencies = std::move(deps);
 }
 
 cmValue cmTest::GetProperty(std::string const& prop) const
