@@ -837,6 +837,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     vars.Manifests = manifests.c_str();
     vars.Config = this->GetConfigName().c_str();
 
+    std::string rustMainCrateRootPath;
+    std::string rustLinkCrates;
+    std::string rustNativeObjects;
+    if (CreateRustLinkArguments(linkLanguage, rustMainCrateRootPath,
+                                rustLinkCrates, rustNativeObjects)) {
+      vars.RustMainCrateRoot = rustMainCrateRootPath.c_str();
+      vars.RustLinkCrates = rustLinkCrates.c_str();
+      vars.RustNativeObjects = rustNativeObjects.c_str();
+    }
+
     // Compute the directory portion of the install_name setting.
     std::string install_name_dir;
     if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY) {

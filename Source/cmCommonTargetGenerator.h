@@ -90,6 +90,10 @@ protected:
   bool HaveRequiredLanguages(std::vector<cmSourceFile const*> const& sources,
                              std::set<std::string>& languagesNeeded) const;
 
+  void ComputeRustFlagsForObjects(std::string& linkCrates,
+                                  std::string& nativeObjects,
+                                  std::vector<std::string> const& objects);
+
 private:
   using ByLanguageMap = std::map<std::string, std::string>;
   struct ByConfig

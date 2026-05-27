@@ -228,6 +228,8 @@ public:
   void GetRustMainCrateRoot(std::vector<cmSourceFile const*>&,
                             std::string const& config) const;
 
+  cmSourceFile const* GetRustMainCrateRoot(std::string const& config) const;
+
   std::set<cmLinkItem> const& GetUtilityItems() const;
 
   void ComputeObjectMapping();

@@ -1013,6 +1013,18 @@ void cmGeneratorTarget::GetRustMainCrateRoot(
   IMPLEMENT_VISIT(SourceKindRustMainCrateRoot);
 }
 
+cmSourceFile const* cmGeneratorTarget::GetRustMainCrateRoot(
+  std::string const& config) const
+{
+  std::vector<cmSourceFile const*> files;
+  GetRustMainCrateRoot(files, config);
+  if (files.empty()) {
+    return nullptr;
+  }
+  assert(files.size() == 1);
+  return files[0];
+}
+
 std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
 {
   if (!this->UtilityItemsDone) {

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/filesystem>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -652,4 +653,35 @@ bool cmCommonTargetGenerator::HaveRequiredLanguages(
     return valid;
   };
   return std::all_of(languagesNeeded.cbegin(), languagesNeeded.cend(), unary);
+}
+
+void cmCommonTargetGenerator::ComputeRustFlagsForObjects(
+  std::string& linkCrates, std::string& nativeObjects,
+  std::vector<std::string> const& objects)
+{
+  std::stringstream rlibsArgs;
+  std::stringstream objectsArgs;
+  auto const processObject = [&](std::string const& obj) {
+    cm::filesystem::path const objPath(obj);
+    if (objPath.extension() == ".rlib") {
+      // Drop the "lib..." prefix and the ".rs" suffix. The prefix is required
+      // by Rust on the crate rlib file, but is hidden from the user when using
+      // the crate from Rust source code, so we drop it to be consistent with
+      // common usage in Rust.
+      std::string objStem = objPath.stem().string();
+      objStem = objStem.substr(3, objStem.length() - 6);
+      rlibsArgs << " --extern=" << objStem << "="
+                << this->LocalCommonGenerator->ConvertToOutputFormat(
+                     obj, cmOutputConverter::SHELL);
+    } else {
+      objectsArgs << " -Clink-arg="
+                  << this->LocalCommonGenerator->ConvertToOutputFormat(
+                       obj, cmOutputConverter::SHELL);
+    }
+  };
+  for (auto const& obj : objects) {
+    processObject(obj);
+  }
+  linkCrates += rlibsArgs.str();
+  nativeObjects += objectsArgs.str();
 }

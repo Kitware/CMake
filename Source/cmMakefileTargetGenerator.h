@@ -193,6 +193,11 @@ protected:
                          bool useWatcomQuote, std::string const& linkLanguage,
                          ResponseFlagFor responseMode = ResponseFlagFor::Link);
 
+  bool CreateRustLinkArguments(std::string const& linkLanguage,
+                               std::string& rustMainCrateRootPath,
+                               std::string& rustLinkCrates,
+                               std::string& rustNativeObjects);
+
   /** Add commands for generate def files */
   void GenDefFile(std::vector<std::string>& real_link_commands);
 

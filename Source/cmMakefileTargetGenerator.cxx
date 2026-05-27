@@ -976,6 +976,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   vars.Flags = flags.c_str();
   vars.ISPCHeader = ispcHeaderForShell.c_str();
   vars.Config = this->GetConfigName().c_str();
+  vars.RustEmit = source.GetRustEmitProperty()->c_str();
 
   std::string definesString = cmStrCat("$(", lang, "_DEFINES)");
 
@@ -2053,6 +2054,12 @@ void cmMakefileTargetGenerator::AppendObjectDepends(
   // Add dependencies on the external object files.
   cm::append(depends, this->ExternalObjects);
 
+  // Add dependency on the Rust main crate root file.
+  if (cmSourceFile const* mainCrateRoot =
+        this->GeneratorTarget->GetRustMainCrateRoot(this->GetConfigName())) {
+    depends.push_back(mainCrateRoot->GetFullPath());
+  }
+
   // Add a dependency on the rule file itself.
   this->LocalGenerator->AppendRuleDepend(depends,
                                          this->BuildFileNameFull.c_str());
@@ -2324,6 +2331,33 @@ void cmMakefileTargetGenerator::CreateObjectLists(
     buildObjs =
       cmStrCat("$(", variableName, ") $(", variableNameExternal, ')');
   }
+}
+
+bool cmMakefileTargetGenerator::CreateRustLinkArguments(
+  std::string const& linkLanguage, std::string& rustMainCrateRootPath,
+  std::string& rustLinkCrates, std::string& rustNativeObjects)
+{
+  if (linkLanguage == "Rust") {
+    this->ComputeRustFlagsForObjects(rustLinkCrates, rustNativeObjects,
+                                     this->Objects);
+    this->ComputeRustFlagsForObjects(rustLinkCrates, rustNativeObjects,
+                                     this->ExternalObjects);
+
+    cmSourceFile const* mainCrateRoot =
+      this->GeneratorTarget->GetRustMainCrateRoot(this->GetConfigName());
+    if (!mainCrateRoot) {
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                   "Target " +
+                                     this->GeneratorTarget->GetName() +
+                                     " has no main crate root.");
+      return false;
+    }
+    rustMainCrateRootPath = mainCrateRoot->GetFullPath();
+    rustMainCrateRootPath = this->LocalGenerator->ConvertToOutputFormat(
+      rustMainCrateRootPath, cmOutputConverter::SHELL);
+    return true;
+  }
+  return false;
 }
 
 void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
