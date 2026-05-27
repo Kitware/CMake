@@ -551,7 +551,7 @@ void cmGlobalGenerator::EnableLanguage(
       if (lang == "NONE") {
         this->SetLanguageEnabled("NONE", mf);
       } else {
-        if (!cm::contains(this->LanguagesReady, lang)) {
+        if (!cm::contains(this->LanguagesReadyForTryCompile, lang)) {
           std::ostringstream e;
           e << "The test project needs language " << lang
             << " which is not enabled.";
@@ -905,12 +905,12 @@ void cmGlobalGenerator::EnableLanguage(
     if (needSetLanguageEnabledMaps[lang]) {
       this->SetLanguageEnabledMaps(lang, mf);
     }
-    this->LanguagesReady.insert(lang);
+
+    // At this point we have enough info for a try compile.
+    this->LanguagesReadyForTryCompile.insert(lang);
 
     // Test the compiler for the language just setup
     // (but only if a compiler has been actually found)
-    // At this point we should have enough info for a try compile
-    // which is used in the backward stuff
     // If the language is untested then test it now with a try compile.
     if (needTestLanguage[lang]) {
       if (!this->CMakeInstance->GetIsInTryCompile()) {
@@ -2585,7 +2585,7 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator* gen,
   // copy the enabled languages
   this->GetCMakeInstance()->GetState()->SetEnabledLanguages(
     gen->GetCMakeInstance()->GetState()->GetEnabledLanguages());
-  this->LanguagesReady = gen->LanguagesReady;
+  this->LanguagesReadyForTryCompile = gen->LanguagesReadyForTryCompile;
   this->ExtensionToLanguage = gen->ExtensionToLanguage;
   this->IgnoreExtensions = gen->IgnoreExtensions;
   this->LanguageToOutputExtension = gen->LanguageToOutputExtension;

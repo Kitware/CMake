@@ -873,7 +873,7 @@ private:
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator
   std::map<std::string, bool> IgnoreExtensions;
-  std::set<std::string> LanguagesReady; // Ready for try_compile
+  std::set<std::string> LanguagesReadyForTryCompile;
   std::set<std::string> LanguagesInProgress;
   std::map<std::string, std::string> OutputExtensions;
   std::map<std::string, std::string> LanguageToOutputExtension;
