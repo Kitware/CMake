@@ -1,0 +1,25 @@
+if(IS_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}/build")
+ set(RunCMake_TEST_FAILED
+     "CTEST_BINARY_DIRECTORY did not override buildDir from preset")
+endif()
+
+file(GLOB configure_xml_file "${RunCMake_TEST_BINARY_DIR}/Testing/*/Configure.xml")
+if(configure_xml_file)
+  file(READ "${configure_xml_file}" configure_xml)
+  if(NOT configure_xml MATCHES "\"--preset\" \"my-preset\"")
+     set(RunCMake_TEST_FAILED
+         "Configure.xml does not contain the expected --preset argument")
+  endif()
+else()
+  set(RunCMake_TEST_FAILED "Configure.xml not found")
+endif()
+
+set(cmakecache_file "${RunCMake_TEST_BINARY_DIR}/CMakeCache.txt")
+if(EXISTS "${cmakecache_file}")
+  file(READ "${cmakecache_file}" cmakecache_txt)
+  if(NOT cmakecache_txt MATCHES "MY_CUSTOM_VAR:STRING=this-gets-set")
+     set(RunCMake_TEST_FAILED "CMakeCache.txt does not contain MY_CUSTOM_VAR")
+  endif()
+else()
+  set(RunCMake_TEST_FAILED "CMakeCache.txt not found")
+endif()

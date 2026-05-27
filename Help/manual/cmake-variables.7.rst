@@ -738,12 +738,14 @@ Variables for CTest
    /variable/CTEST_BINARY_DIRECTORY
    /variable/CTEST_BUILD_COMMAND
    /variable/CTEST_BUILD_NAME
+   /variable/CTEST_BUILD_PRESET
    /variable/CTEST_BZR_COMMAND
    /variable/CTEST_BZR_UPDATE_OPTIONS
    /variable/CTEST_CHANGE_ID
    /variable/CTEST_CHECKOUT_COMMAND
    /variable/CTEST_CONFIGURATION_TYPE
    /variable/CTEST_CONFIGURE_COMMAND
+   /variable/CTEST_CONFIGURE_PRESET
    /variable/CTEST_COVERAGE_COMMAND
    /variable/CTEST_COVERAGE_EXTRA_FLAGS
    /variable/CTEST_CUSTOM_COVERAGE_EXCLUDE
@@ -792,6 +794,8 @@ Variables for CTest
    /variable/CTEST_P4_COMMAND
    /variable/CTEST_P4_OPTIONS
    /variable/CTEST_P4_UPDATE_OPTIONS
+   /variable/CTEST_PRESET
+   /variable/CTEST_PRESETS_FILE
    /variable/CTEST_RESOURCE_SPEC_FILE
    /variable/CTEST_RUN_CURRENT_SCRIPT
    /variable/CTEST_SCRIPT_DIRECTORY
@@ -803,6 +807,7 @@ Variables for CTest
    /variable/CTEST_SVN_OPTIONS
    /variable/CTEST_SVN_UPDATE_OPTIONS
    /variable/CTEST_TEST_LOAD
+   /variable/CTEST_TEST_PRESET
    /variable/CTEST_TEST_TIMEOUT
    /variable/CTEST_TEST_COVERAGE_TOOL
    /variable/CTEST_TLS_VERIFY

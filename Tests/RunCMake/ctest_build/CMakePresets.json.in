@@ -10,6 +10,10 @@
       "name": "my-configure-preset",
       "generator": "@RunCMake_GENERATOR@",
       "binaryDir": "${sourceDir}/../BuildPreset-build"
+    },
+    {
+      "name": "my-build-preset",
+      "inherits": "my-configure-preset"
     }
   ],
   "buildPresets": [
