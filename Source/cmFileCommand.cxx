@@ -2173,7 +2173,16 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   if (tlsVersionOpt.has_value()) {
     if (cm::optional<int> v = cmCurlParseTLSVersion(*tlsVersionOpt)) {
       res = ::curl_easy_setopt(curl, CURLOPT_SSLVERSION, *v);
-      if (tlsVersionDefaulted && res == CURLE_NOT_BUILT_IN) {
+      // If the caller did not explicitly ask for TLS, and libcurl was
+      // built without any TLS backend, ignore failure to set our default.
+      // Note that libcurl reports the absence of any TLS backend with
+      // one of two distinct errors depending on how it was built:
+      // - CURLE_NOT_BUILT_IN from the Curl_setopt_SSLVERSION
+      //   stub macro in setopt.h, or
+      // - CURLE_UNKNOWN_OPTION from the function-level #else
+      //   arm of setopt_long_ssl() in setopt.c.
+      if (tlsVersionDefaulted &&
+          (res == CURLE_NOT_BUILT_IN || res == CURLE_UNKNOWN_OPTION)) {
         res = CURLE_OK;
       }
       check_curl_result(res,
@@ -2575,7 +2584,10 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   if (tlsVersionOpt.has_value()) {
     if (cm::optional<int> v = cmCurlParseTLSVersion(*tlsVersionOpt)) {
       res = ::curl_easy_setopt(curl, CURLOPT_SSLVERSION, *v);
-      if (tlsVersionDefaulted && res == CURLE_NOT_BUILT_IN) {
+      // See HandleDownloadCommand for the rationale behind accepting both
+      // CURLE_NOT_BUILT_IN and CURLE_UNKNOWN_OPTION here.
+      if (tlsVersionDefaulted &&
+          (res == CURLE_NOT_BUILT_IN || res == CURLE_UNKNOWN_OPTION)) {
         res = CURLE_OK;
       }
       check_curl_result(
