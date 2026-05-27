@@ -20,6 +20,10 @@ install(TARGETS exe DESTINATION bin)
 
 install(CODE [[
   file(MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib/$<TARGET_FILE_NAME:test>")
+
+  # workaround for rdar://FB22863998, an otool bug:
+  file(TOUCH "${CMAKE_INSTALL_PREFIX}/lib/$<TARGET_FILE_NAME:test>/dummy.txt")
+
   file(GET_RUNTIME_DEPENDENCIES
     EXECUTABLES
       "${CMAKE_INSTALL_PREFIX}/bin/$<TARGET_FILE_NAME:exe>"
