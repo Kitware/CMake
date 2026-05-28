@@ -8,9 +8,11 @@
 
 #include <cm/string_view>
 
+#include "cmCMakePresetsGraph.h"
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmExecutionStatus.h"
+#include "cmJSONState.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -215,4 +217,56 @@ void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*,
                                                     HandlerArguments const&,
                                                     cmExecutionStatus&) const
 {
+}
+
+namespace {
+enum class PresetType
+{
+  Build,
+  Test,
+};
+
+cmCTestHandlerCommand::PresetCheckResult PresetExistsInGraph(
+  cmCMakePresetsGraph& graph, std::string const& name,
+  std::string const& sourceDir, std::string const& presetsFile,
+  PresetType presetType, std::string& errorMessage)
+{
+  using Result = cmCTestHandlerCommand::PresetCheckResult;
+  if (!graph.ReadProjectPresets(sourceDir, presetsFile)) {
+    errorMessage = cmStrCat("Could not read presets from \"", sourceDir,
+                            "\":\n  ", graph.parseState.GetErrorMessage());
+    return Result::ReadError;
+  }
+  using Status = cmCMakePresetsGraph::PresetResolveStatus;
+  if (presetType == PresetType::Build) {
+    auto result = graph.ResolvePreset(name, graph.BuildPresets);
+    return result.StatusCode == Status::Success ? Result::Found
+                                                : Result::NotFound;
+  }
+  auto result = graph.ResolvePreset(name, graph.TestPresets);
+  return result.StatusCode == Status::Success ? Result::Found
+                                              : Result::NotFound;
+}
+}
+
+cmCTestHandlerCommand::PresetCheckResult
+cmCTestHandlerCommand::BuildPresetExists(std::string const& name,
+                                         std::string const& sourceDir,
+                                         std::string const& presetsFile,
+                                         std::string& errorMessage)
+{
+  cmCMakePresetsGraph graph;
+  return PresetExistsInGraph(graph, name, sourceDir, presetsFile,
+                             PresetType::Build, errorMessage);
+}
+
+cmCTestHandlerCommand::PresetCheckResult
+cmCTestHandlerCommand::TestPresetExists(std::string const& name,
+                                        std::string const& sourceDir,
+                                        std::string const& presetsFile,
+                                        std::string& errorMessage)
+{
+  cmCMakePresetsGraph graph;
+  return PresetExistsInGraph(graph, name, sourceDir, presetsFile,
+                             PresetType::Test, errorMessage);
 }

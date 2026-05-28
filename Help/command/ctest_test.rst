@@ -201,13 +201,22 @@ The options are:
   the :preset:`filter.include.name <testPresets.filter.include.name>` setting
   from the chosen preset.
 
+  This option also applies to the :command:`ctest_memcheck` command.
+  See also the :variable:`CTEST_TEST_PRESET` and
+  :variable:`CTEST_PRESET` variables.
+
 ``PRESETS_FILE <file>``
   .. versionadded:: 4.4
 
   Specify a :manual:`presets <cmake-presets(7)>` file to use instead of the
   default ``CMakePresets.json`` in the source directory.
   A relative path is interpreted relative to the source directory.
-  Has no effect unless ``PRESET`` is also specified.
+  Has no effect unless a preset is selected via the ``PRESET`` argument
+  or the :variable:`CTEST_TEST_PRESET` or :variable:`CTEST_PRESET`
+  variables.
+
+  This option also applies to the :command:`ctest_memcheck` command.
+  See also the :variable:`CTEST_PRESETS_FILE` variable.
 
 ``QUIET``
   .. versionadded:: 3.3

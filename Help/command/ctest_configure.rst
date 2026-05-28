@@ -49,13 +49,20 @@ The options are:
   This option is ignored when :variable:`CTEST_CONFIGURE_COMMAND`
   is used.
 
+  See also the :variable:`CTEST_CONFIGURE_PRESET` and
+  :variable:`CTEST_PRESET` variables.
+
 ``PRESETS_FILE <file>``
   .. versionadded:: 4.4
 
   Specify a :manual:`presets <cmake-presets(7)>` file to use instead of the
   default ``CMakePresets.json`` in the source directory.
   A relative path is interpreted relative to the source directory.
-  Has no effect unless ``PRESET`` is also specified.
+  Has no effect unless a preset is selected via the ``PRESET`` argument
+  or the :variable:`CTEST_CONFIGURE_PRESET` or :variable:`CTEST_PRESET`
+  variables.
+
+  See also the :variable:`CTEST_PRESETS_FILE` variable.
 
 ``RETURN_VALUE <result-var>``
   Store in the ``<result-var>`` variable the return value of the native

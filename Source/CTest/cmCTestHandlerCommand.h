@@ -24,6 +24,13 @@ class cmCTestHandlerCommand : public cmCTestCommand
 public:
   using cmCTestCommand::cmCTestCommand;
 
+  enum class PresetCheckResult
+  {
+    Found,
+    NotFound,
+    ReadError,
+  };
+
 protected:
   struct BasicArguments : ArgumentParser::ParseResult
   {
@@ -77,6 +84,15 @@ protected:
 
   bool ExecuteHandlerCommand(HandlerArguments& args,
                              cmExecutionStatus& status) const;
+
+  static PresetCheckResult BuildPresetExists(std::string const& name,
+                                             std::string const& sourceDir,
+                                             std::string const& presetsFile,
+                                             std::string& errorMessage);
+  static PresetCheckResult TestPresetExists(std::string const& name,
+                                            std::string const& sourceDir,
+                                            std::string const& presetsFile,
+                                            std::string& errorMessage);
 
 private:
   bool InvokeImpl(BasicArguments& args,

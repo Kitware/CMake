@@ -80,6 +80,26 @@ configure_file(
 run_ctest_build(BuildPreset PRESET my-build-preset)
 unset(RunCMake_TEST_SOURCE_DIR)
 
+set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/BuildPresetVar")
+configure_file(
+  "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+  "${RunCMake_TEST_SOURCE_DIR}/CMakePresets.json"
+  @ONLY)
+set(CASE_TEST_PREFIX_CODE [[set(CTEST_BUILD_PRESET "my-build-preset")]])
+run_ctest(BuildPresetVar)
+unset(CASE_TEST_PREFIX_CODE)
+unset(RunCMake_TEST_SOURCE_DIR)
+
+set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/BuildPresetGenericVar")
+configure_file(
+  "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+  "${RunCMake_TEST_SOURCE_DIR}/CMakePresets.json"
+  @ONLY)
+set(CASE_TEST_PREFIX_CODE [[set(CTEST_PRESET "my-build-preset")]])
+run_ctest(BuildPresetGenericVar)
+unset(CASE_TEST_PREFIX_CODE)
+unset(RunCMake_TEST_SOURCE_DIR)
+
 set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/BuildPresetFromFile")
 set(custom_presets_file
   "${RunCMake_BINARY_DIR}/BuildPresetFromFile/custom-presets.json")
@@ -90,6 +110,21 @@ configure_file(
 run_ctest_build(BuildPresetFromFile
   PRESET my-build-preset
   PRESETS_FILE "${custom_presets_file}")
+unset(RunCMake_TEST_SOURCE_DIR)
+unset(custom_presets_file)
+
+set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/BuildPresetFromFileVar")
+set(custom_presets_file
+  "${RunCMake_BINARY_DIR}/BuildPresetFromFileVar/custom-presets.json")
+configure_file(
+  "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+  "${custom_presets_file}"
+  @ONLY)
+set(CASE_TEST_PREFIX_CODE
+"set(CTEST_BUILD_PRESET \"my-build-preset\")
+set(CTEST_PRESETS_FILE \"${custom_presets_file}\")")
+run_ctest(BuildPresetFromFileVar)
+unset(CASE_TEST_PREFIX_CODE)
 unset(RunCMake_TEST_SOURCE_DIR)
 unset(custom_presets_file)
 

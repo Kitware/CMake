@@ -73,18 +73,54 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     ? args.Target
     : mf.GetSafeDefinition("CTEST_BUILD_TARGET");
 
+  // Preset name is set according to the following priority order:
+  // 1) The PRESET option to ctest_build()
+  // 2) CTEST_BUILD_PRESET script variable
+  // 3) CTEST_PRESET script variable (a warning is emitted if no build preset
+  //    exists with this name)
+  std::string const sourceDirectory =
+    mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
+
+  // Presets file is set according to the following priority order:
+  // 1) The PRESETS_FILE option to ctest_build()
+  // 2) CTEST_PRESETS_FILE script variable
+  std::string const rawPresetsFile = !args.PresetsFile.empty()
+    ? args.PresetsFile
+    : mf.GetSafeDefinition("CTEST_PRESETS_FILE");
+
+  std::string const presetsFile = rawPresetsFile.empty()
+    ? ""
+    : cmSystemTools::CollapseFullPath(rawPresetsFile, sourceDirectory);
+
+  std::string effectivePreset = !args.Preset.empty() ? args.Preset
+    : cmNonempty(mf.GetDefinition("CTEST_BUILD_PRESET"))
+    ? *mf.GetDefinition("CTEST_BUILD_PRESET")
+    : "";
+  if (effectivePreset.empty()) {
+    cmValue v = mf.GetDefinition("CTEST_PRESET");
+    if (cmNonempty(v)) {
+      std::string presetError;
+      auto presetCheck =
+        BuildPresetExists(*v, sourceDirectory, presetsFile, presetError);
+      if (presetCheck == PresetCheckResult::ReadError) {
+        status.SetError(cmStrCat('\n', presetError));
+        return nullptr;
+      }
+      if (presetCheck == PresetCheckResult::Found) {
+        effectivePreset = *v;
+      } else {
+        cmCTestLog(this->CTest, WARNING,
+                   "No build preset named \""
+                     << *v << "\" found, ignoring CTEST_PRESET." << std::endl);
+      }
+    }
+  }
+
   cmValue ctestBuildCommand = mf.GetDefinition("CTEST_BUILD_COMMAND");
   if (cmNonempty(ctestBuildCommand)) {
     this->CTest->SetCTestConfiguration("MakeCommand", *ctestBuildCommand,
                                        args.Quiet);
-  } else if (!args.Preset.empty()) {
-    std::string const sourceDirectory =
-      mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
-
-    std::string const presetsFile = args.PresetsFile.empty()
-      ? ""
-      : cmSystemTools::CollapseFullPath(args.PresetsFile, sourceDirectory);
-
+  } else if (!effectivePreset.empty()) {
     cmCMakePresetsGraph presetsGraph;
     if (!presetsGraph.ReadProjectPresets(sourceDirectory, presetsFile)) {
       status.SetError(cmStrCat("\n Could not read presets from \"",
@@ -94,7 +130,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     }
 
     auto resolveResult =
-      presetsGraph.ResolvePreset(args.Preset, presetsGraph.BuildPresets);
+      presetsGraph.ResolvePreset(effectivePreset, presetsGraph.BuildPresets);
     auto resolveError = cmCMakePresetsGraph::FormatPresetError<BuildPreset>(
       resolveResult.StatusCode, resolveResult.ErrorPresetName,
       sourceDirectory);
@@ -106,7 +142,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     std::string buildCommand =
       cmStrCat('"', cmSystemTools::GetCMakeCommand(), '"');
     buildCommand += " --build . --preset \"";
-    buildCommand += args.Preset;
+    buildCommand += effectivePreset;
     buildCommand += "\"";
 
     if (!presetsFile.empty()) {

@@ -24,6 +24,8 @@ endforeach()
     TestPresetExclude
     TestPresetInclude
     TestPresetOverride
+    TestPresetVar
+    TestPresetGenericVar
   )
     configure_file(
       "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
@@ -35,6 +37,14 @@ endforeach()
   run_ctest_test(TestPresetInclude PRESET my-include-preset)
   run_ctest_test(TestPresetOverride PRESET my-include-preset INCLUDE test2)
 
+  set(CASE_TEST_PREFIX_CODE [[set(CTEST_TEST_PRESET "my-include-preset")]])
+  run_ctest(TestPresetVar)
+  unset(CASE_TEST_PREFIX_CODE)
+
+  set(CASE_TEST_PREFIX_CODE [[set(CTEST_PRESET "my-include-preset")]])
+  run_ctest(TestPresetGenericVar)
+  unset(CASE_TEST_PREFIX_CODE)
+
   set(custom_presets_file
     "${RunCMake_BINARY_DIR}/TestPresetFileInclude/custom-presets.json")
   configure_file(
@@ -45,6 +55,19 @@ endforeach()
     "PRESET my-include-preset PRESETS_FILE \"${custom_presets_file}\"")
   run_ctest(TestPresetFileInclude)
   unset(CASE_CTEST_TEST_RAW_ARGS)
+  unset(custom_presets_file)
+
+  set(custom_presets_file
+    "${RunCMake_BINARY_DIR}/TestPresetFromFileVar/custom-presets.json")
+  configure_file(
+    "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+    "${custom_presets_file}"
+    @ONLY)
+  set(CASE_TEST_PREFIX_CODE
+"set(CTEST_TEST_PRESET \"my-include-preset\")
+set(CTEST_PRESETS_FILE \"${custom_presets_file}\")")
+  run_ctest(TestPresetFromFileVar)
+  unset(CASE_TEST_PREFIX_CODE)
   unset(custom_presets_file)
 
   set(CASE_CTEST_TEST_RAW_ARGS

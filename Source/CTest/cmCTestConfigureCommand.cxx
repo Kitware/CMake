@@ -191,14 +191,30 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     return false;
   }
 
-  std::string const presetsFile = args.PresetsFile.empty()
+  // Preset name is set according to the following priority order:
+  // 1) The PRESET option to ctest_configure()
+  // 2) CTEST_CONFIGURE_PRESET script variable
+  // 3) CTEST_PRESET script variable (error if no such configure preset exists)
+  std::string const presetName = !args.Preset.empty() ? args.Preset
+    : cmNonempty(mf.GetDefinition("CTEST_CONFIGURE_PRESET"))
+    ? *mf.GetDefinition("CTEST_CONFIGURE_PRESET")
+    : mf.GetSafeDefinition("CTEST_PRESET");
+
+  // Presets file is set according to the following priority order:
+  // 1) The PRESETS_FILE option to ctest_configure()
+  // 2) CTEST_PRESETS_FILE script variable
+  std::string const rawPresetsFile = !args.PresetsFile.empty()
+    ? args.PresetsFile
+    : mf.GetSafeDefinition("CTEST_PRESETS_FILE");
+
+  std::string const presetsFile = rawPresetsFile.empty()
     ? ""
-    : cmSystemTools::CollapseFullPath(args.PresetsFile, sourceDirectory);
+    : cmSystemTools::CollapseFullPath(rawPresetsFile, sourceDirectory);
 
   std::string configureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
   if (configureCommand.empty() &&
       !ConstructConfigureCommand(status, mf, sourceDirectory, buildDirectory,
-                                 args.Options, args.Preset, presetsFile,
+                                 args.Options, presetName, presetsFile,
                                  configureCommand)) {
     return false;
   }

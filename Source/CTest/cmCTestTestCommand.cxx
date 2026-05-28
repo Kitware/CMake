@@ -34,16 +34,52 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
   cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<TestArguments&>(arguments);
 
+  std::string const sourceDirectory =
+    mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
+
+  // Presets file is set according to the following priority order:
+  // 1) The PRESETS_FILE option to ctest_test()
+  // 2) CTEST_PRESETS_FILE script variable
+  std::string const rawPresetsFile = !args.PresetsFile.empty()
+    ? args.PresetsFile
+    : mf.GetSafeDefinition("CTEST_PRESETS_FILE");
+
+  std::string const presetsFile = rawPresetsFile.empty()
+    ? ""
+    : cmSystemTools::CollapseFullPath(rawPresetsFile, sourceDirectory);
+
+  // Preset name is set according to the following priority order:
+  // 1) The PRESET option to ctest_test()
+  // 2) CTEST_TEST_PRESET script variable
+  // 3) CTEST_PRESET script variable (a warning is emitted if no test preset
+  //    exists with this name)
+  std::string effectivePreset = !args.Preset.empty() ? args.Preset
+    : cmNonempty(mf.GetDefinition("CTEST_TEST_PRESET"))
+    ? *mf.GetDefinition("CTEST_TEST_PRESET")
+    : "";
+  if (effectivePreset.empty()) {
+    cmValue v = mf.GetDefinition("CTEST_PRESET");
+    if (cmNonempty(v)) {
+      std::string presetError;
+      auto presetCheck =
+        TestPresetExists(*v, sourceDirectory, presetsFile, presetError);
+      if (presetCheck == PresetCheckResult::ReadError) {
+        status.SetError(cmStrCat('\n', presetError));
+        return nullptr;
+      }
+      if (presetCheck == PresetCheckResult::Found) {
+        effectivePreset = *v;
+      } else {
+        cmCTestLog(this->CTest, WARNING,
+                   "No test preset named \""
+                     << *v << "\" found, ignoring CTEST_PRESET." << std::endl);
+      }
+    }
+  }
+
   std::unique_ptr<cmCMakePresetsGraph> presetsGraph;
   TestPreset const* expandedPreset = nullptr;
-  if (!args.Preset.empty()) {
-    std::string const sourceDirectory =
-      mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
-
-    std::string const presetsFile = args.PresetsFile.empty()
-      ? ""
-      : cmSystemTools::CollapseFullPath(args.PresetsFile, sourceDirectory);
-
+  if (!effectivePreset.empty()) {
     presetsGraph = cm::make_unique<cmCMakePresetsGraph>();
     if (!presetsGraph->ReadProjectPresets(sourceDirectory, presetsFile)) {
       status.SetError(cmStrCat("\n Could not read presets from \"",
@@ -53,7 +89,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
     }
 
     auto resolveResult =
-      presetsGraph->ResolvePreset(args.Preset, presetsGraph->TestPresets);
+      presetsGraph->ResolvePreset(effectivePreset, presetsGraph->TestPresets);
     auto resolveError = cmCMakePresetsGraph::FormatPresetError<TestPreset>(
       resolveResult.StatusCode, resolveResult.ErrorPresetName,
       sourceDirectory);
