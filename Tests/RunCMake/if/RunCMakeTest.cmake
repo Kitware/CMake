@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(InvalidArgument1)
+run_cmake(InvalidArgumentInParenthesis)
 run_cmake(exists)
 if(NOT MSYS)
   # permissions and symbolic links are broken on MSYS

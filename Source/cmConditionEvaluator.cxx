@@ -409,6 +409,9 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
       // now recursively invoke IsTrue to handle the values inside the
       // parenthetical expression
       auto const value = this->IsTrue(subExpr, errorString, status);
+      if (!errorString.empty()) {
+        return false;
+      }
       *arg = cmExpandedCommandArgument(bool2string(value), true);
       argOpen = std::next(arg);
       // remove the now evaluated parenthetical expression

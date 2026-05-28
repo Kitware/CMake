@@ -1,0 +1,6 @@
+cmake_policy(SET CMP0130 NEW)
+while((A B) OR ("$ENV{NOT_AN_ENV_VARIABLE}"))
+  message(STATUS "Invalid evaluated to TRUE")
+  return()
+endwhile()
+message(STATUS "Invalid evaluated to FALSE")
