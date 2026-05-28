@@ -735,6 +735,17 @@ int cmCTest::ProcessSteps()
   cmMakefile& mf = *script.GetMakefile();
   this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
   this->SetCMakeVariables(mf);
+
+  // Inject variables passed via -D so that ctest_* commands can read them
+  // using mf.GetDefinition(). This matches what cmCTestScriptHandler does
+  // before running a -S script. SetCMakeVariables() (above) only defines
+  // variables that correspond to a CTest Configuration key. Other variables
+  // such as CTEST_PRESET are read directly from the makefile and would
+  // otherwise be invisible here.
+  for (auto const& def : this->GetDefinitions()) {
+    mf.AddDefinition(def.first, def.second);
+  }
+
   // CTEST_TIME_LIMIT may come from CTestCustom.cmake (already in the makefile)
   // or from the config map (just populated by SetCMakeVariables above).
   this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
