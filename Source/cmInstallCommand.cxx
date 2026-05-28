@@ -1916,8 +1916,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       cmSystemTools::FileIsFullPath(*destination)) {
     helper.Makefile->IssueDiagnostic(
       cmDiagnostics::CMD_INSTALL_ABSOLUTE_DESTINATION,
-      cmStrCat("INSTALL command given absolute DESTINATION path (",
-               *destination, ").\n"));
+      cmStrCat("INSTALL command given absolute DESTINATION path:\n  ",
+               *destination));
   }
 
   // Create the directory install generator.
