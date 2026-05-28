@@ -2428,6 +2428,9 @@ void ArchiveError(char const* m1, struct archive* a)
   cmSystemTools::Error(message);
 }
 
+// Return 'true' if the return value 'r' from a libarchive function indicates
+// success or a warning that can be ignored.  Return 'false' if it indicates an
+// error
 bool la_diagnostic(struct archive* ar, __LA_SSIZE_T r)
 {
   // See archive.h definition of ARCHIVE_OK for return values.
@@ -2437,6 +2440,12 @@ bool la_diagnostic(struct archive* ar, __LA_SSIZE_T r)
   }
 
   if (r >= ARCHIVE_WARN) {
+    if (archive_errno(ar) == ENOSPC) {
+      // If we fall through to the generic error handling, the error message
+      // will be "Write failed". Explicit handling for better diagnostics
+      std::cerr << "cmake -E tar: error: No space left on device\n";
+      return false;
+    }
     char const* warn = archive_error_string(ar);
     if (!warn) {
       warn = "unknown warning";
@@ -2477,7 +2486,7 @@ bool copy_data(struct archive* ar, struct archive* aw)
     }
     // See archive.h definition of ARCHIVE_OK for return values.
     __LA_SSIZE_T const w = archive_write_data_block(aw, buff, size, offset);
-    if (!la_diagnostic(ar, w)) {
+    if (!la_diagnostic(aw, w)) {
       return false;
     }
   }
@@ -2572,6 +2581,7 @@ bool extract_tar(std::string const& arFileName,
       r = archive_write_header(ext, entry);
       if (r == ARCHIVE_OK) {
         if (!copy_data(a, ext)) {
+          r = ARCHIVE_FAILED;
           break;
         }
         r = archive_write_finish_entry(ext);
