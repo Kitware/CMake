@@ -930,7 +930,6 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
   this->FileRefs.clear();
   this->ExternalLibRefs.clear();
   this->FileRefToBuildFileMap.clear();
-  this->FileRefToEmbedBuildFileMap.clear();
   this->CommandsVisited.clear();
 }
 
@@ -4428,14 +4427,9 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
                                       " is missing product reference"));
         continue;
       }
-      auto it = this->FileRefToEmbedBuildFileMap.find(fileRefObject);
-      if (it == this->FileRefToEmbedBuildFileMap.end()) {
-        buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
-        buildFile->AddAttribute("fileRef", fileRefObject);
-        this->FileRefToEmbedBuildFileMap[fileRefObject] = buildFile;
-      } else {
-        buildFile = it->second;
-      }
+      buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
+      buildFile->SetComment(xcTarget->GetComment());
+      buildFile->AddAttribute("fileRef", fileRefObject);
     } else if (cmSystemTools::IsPathToFramework(relFile) ||
                cmSystemTools::IsPathToMacOSSharedLibrary(relFile) ||
                cmSystemTools::FileIsDirectory(filePath)) {

@@ -381,7 +381,6 @@ private:
   std::map<std::string, cmXCodeObject*> ExternalLibRefs;
   std::map<cmGeneratorTarget const*, cmXCodeObject*> XCodeObjectMap;
   std::map<cmXCodeObject*, cmXCodeObject*> FileRefToBuildFileMap;
-  std::map<cmXCodeObject*, cmXCodeObject*> FileRefToEmbedBuildFileMap;
   std::vector<std::string> Architectures;
   std::string ObjectDirArchDefault;
   std::string ObjectDirArch;
