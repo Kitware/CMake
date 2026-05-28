@@ -611,6 +611,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
                   GROUP_READ GROUP_EXECUTE
                   WORLD_READ WORLD_EXECUTE
     REGEX "Help/(dev|guide)($|/)" EXCLUDE
+    PATTERN ".git*" EXCLUDE
     )
 
   # Install auxiliary files integrating with other tools.
