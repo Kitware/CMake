@@ -2889,6 +2889,8 @@ std::string InitLogicalWorkingDirectory()
   return cwd;
 }
 
+bool cmSystemToolsCMakeInBuildTree = false;
+
 std::string cmSystemToolsLogicalWorkingDirectory =
   InitLogicalWorkingDirectory();
 
@@ -3013,6 +3015,7 @@ void FindCMakeResourcesInBuildTree(std::string const& exe_dir)
   if (fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
       cmSystemTools::FileIsDirectory(src_dir)) {
     cmSystemToolsCMakeRoot = src_dir;
+    cmSystemToolsCMakeInBuildTree = true;
   } else {
     dir = cmSystemTools::GetFilenamePath(dir);
     src_dir_txt = cmStrCat(dir, "/CMakeFiles/CMakeSourceDir.txt");
@@ -3020,6 +3023,7 @@ void FindCMakeResourcesInBuildTree(std::string const& exe_dir)
     if (fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
         cmSystemTools::FileIsDirectory(src_dir)) {
       cmSystemToolsCMakeRoot = src_dir;
+      cmSystemToolsCMakeInBuildTree = true;
     }
   }
   if (!cmSystemToolsCMakeRoot.empty() && cmSystemToolsHTMLDoc.empty() &&
@@ -3037,6 +3041,7 @@ void cmSystemTools::FindCMakeResources(char const* argv0)
 #ifdef CMAKE_BOOTSTRAP
   // The bootstrap cmake knows its resource locations.
   cmSystemToolsCMakeRoot = CMAKE_BOOTSTRAP_SOURCE_DIR;
+  cmSystemToolsCMakeInBuildTree = true;
   cmSystemToolsCMakeCommand = exe;
   // The bootstrap cmake does not provide the other tools,
   // so use the directory where they are about to be built.
@@ -3118,6 +3123,11 @@ std::string const& cmSystemTools::GetCMClDepsCommand()
 std::string const& cmSystemTools::GetCMakeRoot()
 {
   return cmSystemToolsCMakeRoot;
+}
+
+bool cmSystemTools::GetCMakeInBuildTree()
+{
+  return cmSystemToolsCMakeInBuildTree;
 }
 
 std::string const& cmSystemTools::GetHTMLDoc()

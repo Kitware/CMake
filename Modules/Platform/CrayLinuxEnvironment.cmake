@@ -40,9 +40,16 @@ endif()
 # The rest of this file is based on UnixPaths.cmake, adjusted for Cray
 
 # add the install directory of the running cmake to the search directories
-# CMAKE_ROOT is CMAKE_INSTALL_PREFIX/share/cmake, so we need to go two levels up
+# CMAKE_ROOT is CMAKE_INSTALL_PREFIX/share/cmake, so we need to go two levels up.
+# When CMake runs from its build tree, CMAKE_ROOT is the source tree instead.
 get_filename_component(__cmake_install_dir "${CMAKE_ROOT}" PATH)
 get_filename_component(__cmake_install_dir "${__cmake_install_dir}" PATH)
+get_property(__cmake_running_in_build_tree GLOBAL PROPERTY
+  _CMAKE_RUNNING_IN_BUILD_TREE)
+if(__cmake_running_in_build_tree)
+  set(__cmake_install_dir "")
+endif()
+unset(__cmake_running_in_build_tree)
 
 # Note: Some Cray's have the SYSROOT_DIR variable defined, pointing to a copy
 # of the NIDs userland.  If so, then we'll use it.  Otherwise, just assume
@@ -53,10 +60,13 @@ get_filename_component(__cmake_install_dir "${__cmake_install_dir}" PATH)
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH
   # Standard
   $ENV{SYSROOT_DIR}/usr/local $ENV{SYSROOT_DIR}/usr $ENV{SYSROOT_DIR}/
-
-  # CMake install location
-  "${__cmake_install_dir}"
   )
+if(__cmake_install_dir)
+  list(APPEND CMAKE_SYSTEM_PREFIX_PATH
+    # CMake install location
+    "${__cmake_install_dir}"
+    )
+endif()
 if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
   list(APPEND CMAKE_SYSTEM_PREFIX_PATH
     # Project install destination.

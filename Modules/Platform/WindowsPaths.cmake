@@ -50,9 +50,19 @@ endif()
 unset(_programfiles)
 
 # Add the CMake install location.
+# CMAKE_ROOT is CMAKE_INSTALL_PREFIX/share/cmake, so we need to go two levels up.
+# When CMake runs from its build tree, CMAKE_ROOT is the source tree instead.
 get_filename_component(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
 get_filename_component(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
-list(APPEND CMAKE_SYSTEM_PREFIX_PATH "${_CMAKE_INSTALL_DIR}")
+get_property(_cmake_running_in_build_tree GLOBAL PROPERTY
+  _CMAKE_RUNNING_IN_BUILD_TREE)
+if(_cmake_running_in_build_tree)
+  set(_CMAKE_INSTALL_DIR "")
+endif()
+unset(_cmake_running_in_build_tree)
+if(_CMAKE_INSTALL_DIR)
+  list(APPEND CMAKE_SYSTEM_PREFIX_PATH "${_CMAKE_INSTALL_DIR}")
+endif()
 
 if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
   # Add other locations.
@@ -88,8 +98,12 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
     )
   endif()
 endif()
+if(_CMAKE_INSTALL_DIR)
+  list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+    "${_CMAKE_INSTALL_DIR}/bin"
+    )
+endif()
 list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
-  "${_CMAKE_INSTALL_DIR}/bin"
   /bin
   )
 

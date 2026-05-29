@@ -560,6 +560,7 @@ public:
   static std::string const& GetCMakeCursesCommand();
   static std::string const& GetCMClDepsCommand();
   static std::string const& GetCMakeRoot();
+  static bool GetCMakeInBuildTree();
   static std::string const& GetHTMLDoc();
 
   /** Get the CMake config directory **/
