@@ -74,6 +74,11 @@ block()
   endif()
 endblock()
 
+if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 6.2
+    OR XCODE_VERSION VERSION_GREATER_EQUAL 26)
+  run_cmake(SwiftPtrSize)
+endif()
+
 if(RunCMake_GENERATOR MATCHES "Ninja")
   block()
     if (CMAKE_SYSTEM_NAME MATCHES "Windows")

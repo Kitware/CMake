@@ -1,0 +1,2 @@
+-- CMAKE_Swift_SIZEOF_DATA_PTR='[1-9][0-9]*'
+-- CMAKE_SIZEOF_VOID_P='[1-9][0-9]*'
