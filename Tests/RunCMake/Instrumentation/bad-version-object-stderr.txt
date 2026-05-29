@@ -1,0 +1,5 @@
+^CMake Error: Could not load instrumentation queries from [^
+]+:
+bad-version-object\.json:4: Invalid extra field "patch" in version object
+    "patch": 0
+             \^

@@ -37,11 +37,15 @@ endfunction()
 init_query_var(STATIC_QUERY hasStaticInfo)
 init_query_var(TRACE_QUERY hasTrace)
 
+cmake_path(GET index PARENT_PATH indexDir)
+cmake_path(GET indexDir PARENT_PATH dataDir)
+cmake_path(GET dataDir PARENT_PATH v1)
 read_json("${index}" contents)
 string(JSON hook GET "${contents}" hook)
 
 # Output is verified by *-stdout.txt files that the HOOK is run
 message(STATUS ${hook})
+
 # Not a check-*.cmake script, this is called as an instrumentation CALLBACK
 set(ERROR_MESSAGE "")
 function(add_error error)
@@ -61,13 +65,16 @@ if (RunCMake_TEST_FAILED)
 endif()
 
 json_has_key("${index}" "${contents}" version)
+
+string(JSON version_major GET "${contents}" version major)
+string(JSON version_minor GET "${contents}" version minor)
+if (NOT version_major EQUAL 1 OR NOT version_minor EQUAL 0)
+  add_error("Version must be 1.0, got: ${version_major}.${version_minor}")
+endif()
+
 json_has_key("${index}" "${contents}" buildDir)
 json_has_key("${index}" "${contents}" dataDir)
 json_has_key("${index}" "${contents}" snippets)
-
-if (NOT version EQUAL 1)
-  add_error("Version must be 1, got: ${version}")
-endif()
 
 string(JSON n_snippets LENGTH "${snippets}")
 
@@ -194,7 +201,6 @@ if (NOT hasStaticInfo STREQUAL UNEXPECTED)
   endforeach()
 endif()
 
-get_filename_component(v1 ${dataDir} DIRECTORY)
 if (EXISTS ${v1}/${hook}.hook)
   add_error("Received multiple triggers of the same hook: ${hook}")
 endif()

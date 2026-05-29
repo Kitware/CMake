@@ -37,18 +37,32 @@ public:
   };
   static std::vector<std::string> const HookString;
 
+  struct Version
+  {
+    int Major = 0;
+    int Minor = 0;
+  };
+
+  struct Callback
+  {
+    std::string Command;
+    Version DataVersion;
+  };
+
   struct QueryJSONRoot
   {
     std::vector<cmInstrumentationQuery::Option> options;
     std::vector<cmInstrumentationQuery::Hook> hooks;
     std::vector<std::string> callbacks;
-    int version;
+    Version version;
   };
 
   cmInstrumentationQuery() = default;
   bool ReadJSON(std::string const& file, std::string& errorMessage,
                 std::set<Option>& options, std::set<Hook>& hooks,
-                std::vector<std::string>& callbacks);
+                std::vector<Callback>& callbacks);
   QueryJSONRoot queryRoot;
   cmJSONState parseState;
+  static Version LatestDataVersion();
+  static bool ValidDataVersion(Version version);
 };

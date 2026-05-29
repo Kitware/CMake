@@ -15,6 +15,11 @@ set(firstFile "")
 foreach(content_file IN LISTS content_files)
   read_json("${content_file}" contents)
 
+  # Check version
+  string(JSON version GET "${contents}" version)
+  json_assert_key("${content_file}" "${version}" major "1")
+  json_assert_key("${content_file}" "${version}" minor "0")
+
   # Check project name
   json_assert_key("${content_file}" "${contents}" project "instrumentation")
 
