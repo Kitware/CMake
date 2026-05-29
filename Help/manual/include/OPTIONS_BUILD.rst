@@ -45,6 +45,16 @@
  This option may also be given as a single argument:
  ``-D<var>:<type>=<value>`` or ``-D<var>=<value>``.
 
+ The cache :prop_cache:`HELPSTRING` is populated as follows:
+
+ * If the cache entry is known to CMake, its help string is
+   set to a one-line description of the variable.
+
+   .. versionadded:: 4.4
+
+ * Otherwise, its help string is set to the generic default
+   ``No help, variable specified on the command line.``
+
  It's important to note that the order of ``-C`` and ``-D`` arguments is
  significant. They will be carried out in the order they are listed, with the
  last argument taking precedence over the previous ones. For example, if you

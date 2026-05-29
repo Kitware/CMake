@@ -38,6 +38,7 @@
 #include "cmBuildOptions.h"
 #include "cmCMakePath.h"
 #include "cmCMakePresetsGraph.h"
+#include "cmCacheDocumentationTable.h"
 #include "cmCommandLineArgument.h"
 #include "cmCommands.h"
 #include "cmDocumentation.h"
@@ -850,8 +851,12 @@ void cmake::ProcessCacheArg(std::string const& var, std::string const& value,
                  "Use -W[no-]error=deprecated instead.\n"_s;
   }
 
-  this->AddCacheEntry(
-    var, value, "No help, variable specified on the command line.", type);
+  auto const builtIn = cmCacheDocumentationTable::Get(var);
+  std::string const helpString = builtIn.Summary.empty()
+    ? std::string("No help, variable specified on the command line.")
+    : std::string(builtIn.Summary);
+
+  this->AddCacheEntry(var, value, helpString, type);
 
   if (warnUnusedCli != cmDiagnostics::Ignore) {
     if (!haveValue ||

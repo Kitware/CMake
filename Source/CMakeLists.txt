@@ -879,6 +879,22 @@ target_link_libraries(
     llpkgc::llpkgc
   )
 
+# Built-in cache variable documentation table.  This is a committed,
+# hand-edited translation unit consumed by cmCacheManager to provide
+# fallback HELPSTRING values for cache entries that ship without one.
+# See the header comment in cmCacheDocumentationTable.cxx for the scope
+# and maintenance discipline.  The cmCachePatternTable sibling provides
+# the same service for placeholder-shaped variable names (CMAKE_<LANG>_*,
+# CMAKE_POLICY_DEFAULT_CMP<NNNN>, etc.) and is consulted as a fallback
+# inside cmCacheDocumentationTable::Get.  No code generation occurs at
+# build time.
+target_sources(CMakeLib PRIVATE
+  cmCacheDocumentationTable.h
+  cmCacheDocumentationTable.cxx
+  cmCachePatternTable.h
+  cmCachePatternTable.cxx
+)
+
 if(CMake_ENABLE_DEBUGGER)
   target_sources(
     CMakeLib

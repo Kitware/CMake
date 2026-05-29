@@ -1200,6 +1200,9 @@ endif()
 add_executable(print_stdin print_stdin.c)
 add_RunCMake_test(CTestCommandLine -DTEST_PRINT_STDIN=$<TARGET_FILE:print_stdin>)
 add_RunCMake_test(CacheNewline)
+add_RunCMake_test(CacheVarHelpFallback)
+add_RunCMake_test(CacheVarHelpCoverage
+  -DCMake_SOURCE_DIR=${CMake_SOURCE_DIR})
 # Only run this test on unix platforms that support
 # symbolic links
 if(UNIX)

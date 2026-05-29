@@ -4,6 +4,7 @@ configure_file(testConfig.h.in testConfig.h @ONLY)
 set(CMakeLib_TESTS
   testAssert.cxx
   testArgumentParser.cxx
+  testCacheDocumentationTable.cxx
   testCTestBinPacker.cxx
   testCTestResourceAllocator.cxx
   testCTestResourceSpec.cxx
