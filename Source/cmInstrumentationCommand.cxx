@@ -29,6 +29,8 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 namespace {
 
+using Version = cmInstrumentationQuery::Version;
+
 bool validateVersion(std::string const& key, std::string const& versionString,
                      int& version, cmExecutionStatus& status)
 {
@@ -44,6 +46,45 @@ bool validateVersion(std::string const& key, std::string const& versionString,
                "\" (the only currently supported version is 1)."));
     return false;
   }
+  return true;
+}
+
+bool validateDataVersion(std::string const& versionString, Version& version,
+                         cmExecutionStatus& status)
+{
+  char const* vStart = versionString.c_str();
+  if (!std::all_of(versionString.begin(), versionString.end(), [](char c) {
+        return cmsysString_isdigit(c) || c == '.';
+      })) {
+    status.SetError(
+      cmStrCat("given a malformed DATA_VERSION \"", versionString,
+               "\". A numeric major or major.minor version is required."));
+
+    return false;
+  }
+
+  version.Major = std::atoi(vStart);
+  version.Minor = 0;
+  std::string::size_type pos = versionString.find('.');
+  if (pos != std::string::npos) {
+    vStart += pos + 1;
+    version.Minor = std::atoi(vStart);
+  }
+
+  if (version.Major < 1 || version.Minor < 0) {
+    status.SetError(
+      cmStrCat("given a malformed DATA_VERSION \"", versionString,
+               "\". A numeric major or major.minor version is required."));
+    return false;
+  }
+
+  if (!cmInstrumentationQuery::ValidDataVersion(version)) {
+    status.SetError(
+      cmStrCat("given an unsupported DATA_VERSION \"", versionString,
+               "\" (the only currently supported version is 1.0)."));
+    return false;
+  }
+
   return true;
 }
 
@@ -110,11 +151,10 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     return false;
   }
   int apiVersion;
-  int dataVersion;
+  Version dataVersion;
   if (!validateVersion("API_VERSION", arguments.ApiVersion, apiVersion,
                        status) ||
-      !validateVersion("DATA_VERSION", arguments.DataVersion, dataVersion,
-                       status)) {
+      !validateDataVersion(arguments.DataVersion, dataVersion, status)) {
     return false;
   }
 
@@ -182,7 +222,8 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
   }
 
   // Write query file
-  instrumentation->WriteJSONQuery(options, hooks, arguments.Callbacks);
+  instrumentation->WriteJSONQuery(dataVersion, options, hooks,
+                                  arguments.Callbacks);
 
   return true;
 }

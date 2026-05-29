@@ -44,6 +44,11 @@
 
 using LoadQueriesAfter = cmInstrumentation::LoadQueriesAfter;
 
+namespace {
+cmInstrumentationQuery::Version latestDataVersion =
+  cmInstrumentationQuery::LatestDataVersion();
+}
+
 std::map<std::string, std::string> cmInstrumentation::cdashSnippetsMap = {
   {
     "configure",
@@ -145,7 +150,7 @@ void cmInstrumentation::CheckCDashVariable()
       options_.insert(cmInstrumentationQuery::Option::CDashVerbose);
     }
     std::set<cmInstrumentationQuery::Hook> hooks_;
-    this->WriteJSONQuery(options_, hooks_, {});
+    this->WriteJSONQuery(latestDataVersion, options_, hooks_, {});
   }
 }
 
@@ -198,12 +203,12 @@ bool cmInstrumentation::HasErrors() const
 }
 
 void cmInstrumentation::WriteJSONQuery(
+  cmInstrumentationQuery::Version dataVersion,
   std::set<cmInstrumentationQuery::Option> const& options_,
   std::set<cmInstrumentationQuery::Hook> const& hooks_,
   std::vector<std::vector<std::string>> const& callbacks_)
 {
   Json::Value root;
-  root["version"] = 1;
   root["options"] = Json::arrayValue;
   for (auto const& option : options_) {
     root["options"].append(cmInstrumentationQuery::OptionString[option]);
@@ -217,7 +222,7 @@ void cmInstrumentation::WriteJSONQuery(
     root["callbacks"].append(cmInstrumentation::GetCommandStr(callback));
   }
   this->WriteInstrumentationJson(
-    root, "query/generated",
+    dataVersion, root, "query/generated",
     cmStrCat("query-", this->writtenJsonQueries++, ".json"));
 }
 
@@ -236,7 +241,7 @@ void cmInstrumentation::WriteCMakeContent(
   root["project"] =
     gg->GetCMakeInstance()->GetCacheDefinition("CMAKE_PROJECT_NAME").GetCStr();
   this->WriteInstrumentationJson(
-    root, "data/content",
+    latestDataVersion, root, "data/content",
     cmStrCat("cmake-", this->ComputeSuffixTime(), ".json"));
 }
 
@@ -362,6 +367,8 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   cmsys::Directory d;
   std::string last_index_name =
     this->GetFileByTimestamp(LatestOrOldest::Latest, "index", index_name);
+  std::string last_index_path =
+    cmStrCat(this->dataDir, "/index/", last_index_name);
   if (d.Load(this->dataDir)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
@@ -379,18 +386,16 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   index["hook"] = cmInstrumentationQuery::HookString[hook];
   index["dataDir"] = this->dataDir;
   index["buildDir"] = this->binaryDir;
-  index["version"] = 1;
   if (this->HasOption(
         cmInstrumentationQuery::Option::StaticSystemInformation)) {
     this->InsertStaticSystemInformation(index);
   }
+
   for (auto const& file : files) {
     if (last_index_name.empty()) {
       index["snippets"].append(file.first);
     } else {
       int compare;
-      std::string last_index_path =
-        cmStrCat(this->dataDir, "/index/", last_index_name);
       cmSystemTools::FileTimeCompare(file.second, last_index_path, &compare);
       if (compare == 1) {
         index["snippets"].append(file.first);
@@ -406,13 +411,14 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   }
 
   // Write index file
-  this->WriteInstrumentationJson(index, "data/index", index_name);
+  this->WriteInstrumentationJson(latestDataVersion, index, "data/index",
+                                 index_name);
 
   // Execute callbacks
-  for (auto& cb : this->callbacks) {
-    cmSystemTools::RunSingleCommand(cmStrCat(cb, " \"", index_path, '"'),
-                                    nullptr, nullptr, nullptr, nullptr,
-                                    cmSystemTools::OUTPUT_PASSTHROUGH);
+  for (auto const& cb : this->callbacks) {
+    cmSystemTools::RunSingleCommand(
+      cmStrCat(cb.Command, " \"", index_path, '"'), nullptr, nullptr, nullptr,
+      nullptr, cmSystemTools::OUTPUT_PASSTHROUGH);
   }
 
   // Special case for CDash collation
@@ -545,10 +551,14 @@ Json::Value cmInstrumentation::ReadJsonSnippet(std::string const& file_name)
   return snippetData;
 }
 
-void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
-                                                 std::string const& subdir,
-                                                 std::string const& file_name)
+void cmInstrumentation::WriteInstrumentationJson(
+  cmInstrumentationQuery::Version version, Json::Value& root,
+  std::string const& subdir, std::string const& file_name)
 {
+  root["version"] = Json::objectValue;
+  root["version"]["major"] = version.Major;
+  root["version"]["minor"] = version.Minor;
+
   Json::StreamWriterBuilder wbuilder;
   wbuilder["indentation"] = "\t";
   std::unique_ptr<Json::StreamWriter> JsonWriter =
@@ -581,7 +591,6 @@ std::string cmInstrumentation::InstrumentTest(
   // Store command info
   Json::Value root(this->preTestStats);
   std::string command_str = cmStrCat(command, ' ', GetCommandStr(args));
-  root["version"] = 1;
   root["command"] = command_str;
   root["role"] = "test";
   root["testName"] = name;
@@ -603,7 +612,7 @@ std::string cmInstrumentation::InstrumentTest(
     "test-",
     this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())), '-',
     this->ComputeSuffixTime(endTime), ".json");
-  this->WriteInstrumentationJson(root, "data", file_name);
+  this->WriteInstrumentationJson(latestDataVersion, root, "data", file_name);
   return file_name;
 }
 
@@ -637,7 +646,6 @@ int cmInstrumentation::InstrumentCommand(
   if (!command_str.empty()) {
     root["command"] = command_str;
   }
-  root["version"] = 1;
 
   // Pre-Command
   auto steady_start = std::chrono::steady_clock::now();
@@ -759,11 +767,12 @@ int cmInstrumentation::InstrumentCommand(
         } else {
           addCMakeContent(it->second);
         }
-        this->WriteInstrumentationJson(it->second, "data", it->first);
+        this->WriteInstrumentationJson(latestDataVersion, it->second, "data",
+                                       it->first);
       }
       this->configureSnippetData.clear();
     }
-    this->WriteInstrumentationJson(root, "data", file_name);
+    this->WriteInstrumentationJson(latestDataVersion, root, "data", file_name);
   }
   return ret;
 }

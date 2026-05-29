@@ -229,9 +229,11 @@ request a specific Data Version, and `v1 Data Files`_ of the corresponding
 version will be generated and sent to the user `Callbacks`_ defined in that
 query.
 
-Currently, the only supported version is ``1``. A new version number will be
-created whenever previously included data is removed or reformatted such that
-scripts written to parse this data may become incompatible with the new format.
+Currently, the only supported version is ``1.0``. A new major version number
+will be created whenever previously included data is removed or reformatted such
+that scripts written to parse this data may become incompatible with the new
+format. A new minor version number will be created whenever new data becomes
+available.
 
 .. _`cmake-instrumentation v1 Query Files`:
 
@@ -245,8 +247,17 @@ These files must contain a JSON object with the following keys. The ``version``
 key is required, but all other fields are optional.
 
 ``version``
-  The `Data Version`_ of snippet file to generate, an integer. Currently the only
-  supported version is ``1``.
+  The `Data Version`_ of snippet files to generate.
+
+  In query files, this may be specified either as an integer major version or
+  as an object with ``major`` and ``minor`` members. For example, ``1`` and
+  ``{ "major": 1, "minor": 0 }`` both request version ``1.0``. Specifying a
+  minor version is optional. CMake will always generate instrumentation data
+  for the most recent minor version, even if an earlier minor version is
+  requested.
+
+  Currently, the only supported version is ``1.0``. Query files with an unknown
+  data version will be ignored.
 
 ``callbacks``
   A list of command-line strings for `Callbacks`_ to handle collected
@@ -402,8 +413,8 @@ Snippet files have a filename with the syntax
 ``<role>-<hash>-<timestamp>.json`` and contain the following data:
 
   ``version``
-    The `Data Version`_ of the snippet file, an integer. Currently the version is
-    always ``1``.
+    The `Data Version`_ of the snippet file. Currently the version is
+    always ``{ "major": 1, "minor": 0 }``.
 
   ``command``
     The full command executed. Excluded when ``role`` is ``build``.
@@ -507,7 +518,10 @@ Example:
 .. code-block:: json
 
   {
-    "version": 1,
+    "version": {
+      "major": 1,
+      "minor": 0
+    },
     "command" : "\"/usr/bin/c++\" \"-MD\" \"-MT\" \"CMakeFiles/main.dir/main.cxx.o\" \"-MF\" \"CMakeFiles/main.dir/main.cxx.o.d\" \"-o\" \"CMakeFiles/main.dir/main.cxx.o\" \"-c\" \"<src>/main.cxx\"",
     "role" : "compile",
     "result" : 1,
@@ -538,8 +552,8 @@ generated whenever `Indexing`_ occurs and deleted after any user-specified
 `Callbacks`_ are executed.
 
 ``version``
-  The `Data Version`_ of the index file, an integer. Currently the version is
-  always ``1``.
+  The `Data Version`_ of the index file. Currently this is always written as:
+  ``{ "major": 1, "minor": 0 }``.
 
 ``buildDir``
   The build directory of the CMake project.
@@ -604,7 +618,10 @@ Example:
 .. code-block:: json
 
   {
-    "version": 1,
+    "version": {
+      "major": 1,
+      "minor": 0
+    },
     "hook": "manual",
     "buildDir": "<build>",
     "dataDir": "<build>/.cmake/instrumentation/v1/data",
@@ -632,6 +649,10 @@ steps. Each `v1 Snippet File`_ provides the path to one of these files
 corresponding to the CMake invocation responsible for generating its command.
 
 Each CMake content file contains the following:
+
+  ``version``
+    The `Data Version`_ of the content file. Currently the version is
+    always ``{ "major": 1, "minor": 0 }``.
 
   ``project``
     The value of :variable:`CMAKE_PROJECT_NAME`.
