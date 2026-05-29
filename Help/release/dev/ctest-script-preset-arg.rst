@@ -11,7 +11,7 @@ ctest-script-preset-arg
   :variable:`CTEST_PRESETS_FILE` variables may be used to specify preset
   arguments to the above commands in a :ref:`Dashboard Client` script or
   on the :program:`ctest` command line via the
-  :ref:`-D <ctest-option-D-var>` option.
+  :ctest-dashboard-option:`-D` option.
 
 * When a preset is selected for :command:`ctest_configure` or
   :command:`ctest_build`, the :variable:`CTEST_CONFIGURE_COMMAND` and

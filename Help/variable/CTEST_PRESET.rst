@@ -5,7 +5,7 @@ CTEST_PRESET
 
 Specify a preset name to use for all relevant :manual:`ctest(1)`
 :ref:`Dashboard Client` steps in a dashboard script,
-or on the :program:`ctest` command line via the :ref:`-D <ctest-option-D-var>` option.
+or on the :program:`ctest` command line via the :ctest-dashboard-option:`-D` option.
 
 This variable sets the ``PRESET`` option for :command:`ctest_configure`,
 :command:`ctest_build`, :command:`ctest_test`, and :command:`ctest_memcheck`

@@ -5,7 +5,7 @@ CTEST_CHANGE_ID
 
 Specify the CTest ``ChangeId`` setting
 in a :manual:`ctest(1)` :ref:`Dashboard Client` script,
-or on the :program:`ctest` command line via the :ref:`-D <ctest-option-D-var>` option.
+or on the :program:`ctest` command line via the :ctest-dashboard-option:`-D` option.
 
 This setting allows CTest to pass arbitrary information about this
 build up to CDash.  One use of this feature is to allow CDash to

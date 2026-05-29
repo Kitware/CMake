@@ -133,7 +133,7 @@ Modules
 CTest
 -----
 
-* :manual:`ctest(1)` gained a :option:`--http-header <ctest --http-header>`
+* :manual:`ctest(1)` gained a :ctest-dashboard-option:`--http-header`
   option to add custom headers on submission to CDash.
 
 * :manual:`ctest(1)` gained the :option:`--tests-from-file <ctest

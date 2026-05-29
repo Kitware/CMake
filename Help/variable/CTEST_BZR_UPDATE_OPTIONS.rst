@@ -5,4 +5,4 @@ CTEST_BZR_UPDATE_OPTIONS
 
 Specify the CTest ``BZRUpdateOptions`` setting
 in a :manual:`ctest(1)` :ref:`Dashboard Client` script,
-or on the :program:`ctest` command line via the :ref:`-D <ctest-option-D-var>` option.
+or on the :program:`ctest` command line via the :ctest-dashboard-option:`-D` option.

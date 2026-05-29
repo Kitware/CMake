@@ -806,12 +806,13 @@ class CMakeDomain(Domain):
         'preset':     CMakeXRefRole(lowercase=True, warn_dangling=True),
         # Roles for program-specific command-line options without the program
         # name (which add the name to form the ref).
-        'cmake-option':          CMakeOptionXRefRole('cmake'),
-        'cmake-build-option':    CMakeOptionXRefRole('cmake--build'),
-        'cmake-install-option':  CMakeOptionXRefRole('cmake--install'),
-        'cmake-workflow-option': CMakeOptionXRefRole('cmake--workflow'),
-        'cpack-option':          CMakeOptionXRefRole('cpack'),
-        'ctest-option':          CMakeOptionXRefRole('ctest'),
+        'cmake-option':           CMakeOptionXRefRole('cmake'),
+        'cmake-build-option':     CMakeOptionXRefRole('cmake--build'),
+        'cmake-install-option':   CMakeOptionXRefRole('cmake--install'),
+        'cmake-workflow-option':  CMakeOptionXRefRole('cmake--workflow'),
+        'cpack-option':           CMakeOptionXRefRole('cpack'),
+        'ctest-dashboard-option': CMakeOptionXRefRole('ctest-dashboard'),
+        'ctest-option':           CMakeOptionXRefRole('ctest'),
     }
     initial_data = {
         'objects': {},  # fullname -> ObjectEntry
