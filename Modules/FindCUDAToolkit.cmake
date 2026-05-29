@@ -138,6 +138,7 @@ of the following libraries that are part of the CUDAToolkit:
 - `nvtx3`_
 - `OpenCL`_
 - `cuLIBOS`_
+- `cufilt`_
 
 CUDA Runtime Library
 """"""""""""""""""""
@@ -552,6 +553,20 @@ Target Created:
 - ``CUDA::sanitizer``
 
 .. _`NVIDIA Compute Sanitizer`: https://docs.nvidia.com/compute-sanitizer
+
+cufilt
+""""""
+
+.. versionadded:: 4.4
+
+The `cu++filt`_ binary utility also provides a static library for demangling
+CUDA C++ symbols.
+
+Targets Created:
+
+- ``CUDA::cufilt`` starting in CUDA 11.4
+
+.. _`cu++filt`: https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html#cu-filt
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -1562,6 +1577,10 @@ if(CUDAToolkit_FOUND)
       target_include_directories(CUDA::sanitizer INTERFACE "${sanitizer_dir}/include")
     endif()
   endif()
+endif()
+
+if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.4)
+  _CUDAToolkit_find_and_add_import_lib(cufilt)
 endif()
 
 if(_CUDAToolkit_Pop_ROOT_PATH)
