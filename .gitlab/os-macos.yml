@@ -9,7 +9,7 @@
 .macos_arm64:
     extends: .macos
     variables:
-        DEVELOPER_DIR: "/Applications/Xcode-26.4.app/Contents/Developer"
+        DEVELOPER_DIR: "/Applications/Xcode-26.5.app/Contents/Developer"
 
 .macos_x86_64:
     extends: .macos
@@ -179,7 +179,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.4
+        - xcode-26.5
         - nonconcurrent
 
 .macos_arm64_tags_ext:
@@ -187,7 +187,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.4
+        - xcode-26.5
         - concurrent
 
 .macos_arm64_tags_package:
@@ -195,7 +195,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.4
+        - xcode-26.5
         - nonconcurrent
         - finder
 
