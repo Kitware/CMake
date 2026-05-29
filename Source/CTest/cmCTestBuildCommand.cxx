@@ -116,11 +116,20 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     }
   }
 
+  // Skip checking CTEST_BUILD_COMMAND when a preset is specified.
+  // We do this to avoid using a stale MakeCommand from DartConfiguration.tcl
+  // that would cause us to silently ignore the requested preset.
   cmValue ctestBuildCommand = mf.GetDefinition("CTEST_BUILD_COMMAND");
-  if (cmNonempty(ctestBuildCommand)) {
+  if (cmNonempty(ctestBuildCommand) && effectivePreset.empty()) {
     this->CTest->SetCTestConfiguration("MakeCommand", *ctestBuildCommand,
                                        args.Quiet);
   } else if (!effectivePreset.empty()) {
+    if (cmNonempty(ctestBuildCommand)) {
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                         "Ignoring CTEST_BUILD_COMMAND because preset \""
+                           << effectivePreset << "\" is in use.\n",
+                         args.Quiet);
+    }
     cmCMakePresetsGraph presetsGraph;
     if (!presetsGraph.ReadProjectPresets(sourceDirectory, presetsFile)) {
       status.SetError(cmStrCat("\n Could not read presets from \"",

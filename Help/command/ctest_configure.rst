@@ -46,8 +46,8 @@ The options are:
   :variable:`CTEST_BINARY_DIRECTORY` variable will override the
   :preset:`configurePresets.binaryDir` setting from the chosen preset.
 
-  This option is ignored when :variable:`CTEST_CONFIGURE_COMMAND`
-  is used.
+  When a preset is specified, the :variable:`CTEST_CONFIGURE_COMMAND`
+  variable is ignored so that the preset is always honored.
 
   See also the :variable:`CTEST_CONFIGURE_PRESET` and
   :variable:`CTEST_PRESET` variables.

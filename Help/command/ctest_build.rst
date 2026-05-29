@@ -23,8 +23,8 @@ Build the project and store results in ``Build.xml``
 for submission with the :command:`ctest_submit` command.
 
 The :variable:`CTEST_BUILD_COMMAND` variable may be set to explicitly
-specify the build command line.  Otherwise the build command line is
-computed automatically based on the options given.
+specify the build command line when no preset is selected.  Otherwise
+the build command line is computed automatically based on the options given.
 
 The options are:
 
@@ -85,6 +85,9 @@ The options are:
   corresponding setting from the preset.  For example, the ``TARGET``
   argument will override the :preset:`buildPresets.targets` setting from
   the chosen preset.
+
+  When a preset is specified, the :variable:`CTEST_BUILD_COMMAND`
+  variable is ignored so that the preset is always honored.
 
   See also the :variable:`CTEST_BUILD_PRESET` and
   :variable:`CTEST_PRESET` variables.

@@ -12,3 +12,9 @@ ctest-script-preset-arg
   arguments to the above commands in a :ref:`Dashboard Client` script or
   on the :program:`ctest` command line via the
   :ref:`-D <ctest-option-D-var>` option.
+
+* When a preset is selected for :command:`ctest_configure` or
+  :command:`ctest_build`, the :variable:`CTEST_CONFIGURE_COMMAND` and
+  :variable:`CTEST_BUILD_COMMAND` variables (which may be populated from a
+  pre-existing ``DartConfiguration.tcl`` file) are ignored so that the
+  requested preset is always honored.
