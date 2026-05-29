@@ -1,0 +1,18 @@
+^CMake Warning \(author\) at CaseMismatch\.cmake:[0-9]+ \(include\):
+  The module name
+
+    casemodule\.cmake
+
+  does not match the case of the module file name on disk
+
+    [^
+]*/CaseMismatch/CaseModule\.cmake
+
+  This may fail on case-sensitive file systems\.  Use the module name
+
+    CaseModule\.cmake
+
+  instead\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

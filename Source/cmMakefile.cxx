@@ -3511,6 +3511,27 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
     result = moduleInCMakeRoot;
   }
 
+#if defined(_WIN32) || defined(__APPLE__)
+  if (!result.empty()) {
+    std::string const requestedName =
+      cmSystemTools::GetFilenameName(std::string{ filename });
+    std::string actualName;
+    cmsys::Status const status =
+      cmSystemTools::ReadNameOnDisk(result, actualName);
+    if (status && actualName != requestedName) {
+      this->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
+        cmStrCat("The module name\n  ", requestedName, '\n',
+                 "does not match the case of the module file name on disk\n"
+                 "  ",
+                 cmSystemTools::GetFilenamePath(result), '/', actualName, '\n',
+                 "This may fail on case-sensitive file systems.  "
+                 "Use the module name\n  ",
+                 actualName, "\ninstead."));
+    }
+  }
+#endif
+
   return result;
 }
 

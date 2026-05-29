@@ -264,6 +264,22 @@ if(BUILD_TESTING)
     unset(_sysctl_stdout)
   endif()
 
+  if(NOT DEFINED CMake_TEST_FILESYSTEM_CASE)
+    if(CMAKE_HOST_WIN32)
+      set(CMake_TEST_FILESYSTEM_CASE 1)
+    elseif(CMAKE_HOST_APPLE)
+      execute_process(
+        COMMAND sw_vers -productVersion
+        OUTPUT_VARIABLE sw_vers_productVersion
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE _sw_vers_result
+      )
+      if(sw_vers_productVersion VERSION_GREATER_EQUAL 10.11)
+        set(CMake_TEST_FILESYSTEM_CASE 1)
+      endif()
+    endif()
+  endif()
+
   if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA MATCHES "^(NVIDIA|Clang)$")
     message(FATAL_ERROR "CMake_TEST_CUDA should be \"NVIDIA\" or \"Clang\", got \"${CMake_TEST_CUDA}\"")
   endif()

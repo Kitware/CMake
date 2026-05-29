@@ -367,6 +367,14 @@ RealSystem RealOS;
 
 } // namespace
 
+#if defined(_WIN32) || defined(__APPLE__)
+cmsys::Status cmSystemTools::ReadNameOnDisk(std::string const& path,
+                                            std::string& name)
+{
+  return ::ReadNameOnDisk(path, name);
+}
+#endif
+
 #if !defined(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
 // For GetEnvironmentVariables
 #  if defined(_WIN32)
