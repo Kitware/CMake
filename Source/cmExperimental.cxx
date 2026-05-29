@@ -55,7 +55,7 @@ cmExperimental::FeatureData const LookupTable[] = {
     {},
     cmExperimental::TryCompileCondition::Never },
   { "GenerateSbom",
-    "ca494ed3-b261-4205-a01f-603c95e4cae0",
+    "2d856d6d-53e8-488b-a17f-d486d2cac317",
     "CMAKE_EXPERIMENTAL_GENERATE_SBOM",
     "CMake's support for generating software bill of materials (Sbom) "
     "information in SPDX format is experimental. It is meant only for "
