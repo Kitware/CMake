@@ -1531,7 +1531,9 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     }
     // Add precompile headers compile options.
     std::string const pchSource = gt->GetPchSource(config, lang);
-    if (!pchSource.empty() && !sf.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    if (!pchSource.empty() &&
+        !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+          sf.GetProperty("SKIP_PRECOMPILE_HEADERS"))) {
       std::string pchOptions;
       if (sf.GetFullPath() == pchSource) {
         pchOptions = gt->GetPchCreateCompileOptions(config, lang);

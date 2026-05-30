@@ -1141,7 +1141,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     }
   }
 
-  if (sf->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
+  if ((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+      sf->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
     this->AppendDefines(flagsBuild, "CMAKE_SKIP_PRECOMPILE_HEADERS", true);
   }
 

@@ -490,6 +490,13 @@ void cmFastbuildNormalTargetGenerator::ComputePCH(
   if (srcFile.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     return;
   }
+
+  cmGeneratorFileSet const* const fileSet =
+    this->GeneratorTarget->GetFileSetForSource(Config, &srcFile);
+  if (fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    return;
+  }
+
   // We have already computed PCH for this node.
   if (!node.PCHOptions.empty() || !node.PCHInputFile.empty() ||
       !node.PCHOutputFile.empty()) {
@@ -1456,10 +1463,10 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
 
     cmSourceFile const& srcFile = *source;
     std::string const pathToFile = srcFile.GetFullPath();
+    cmGeneratorFileSet const* const fileSet =
+      GeneratorTarget->GetFileSetForSource(Config, source);
     bool fileUsesUnity = useUnity;
     if (useUnity) {
-      cmGeneratorFileSet const* fileSet =
-        GeneratorTarget->GetFileSetForSource(Config, source);
       // Check if the source should be added to "UnityInputExcludedFiles".
       if (IsExcludedFromUnity(GeneratorTarget, fileSet, srcFile)) {
         fileUsesUnity = false;
@@ -1518,7 +1525,8 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
       std::string const objectListHash = hash.HashString(cmStrCat(
         compileOptions, staticCheckOptions, objOutDirWithPossibleSubdir,
         // If file does not need PCH - it must be in another ObjectList.
-        srcFile.GetProperty("SKIP_PRECOMPILE_HEADERS"),
+        (fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+          srcFile.GetProperty("SKIP_PRECOMPILE_HEADERS"),
         srcFile.GetLanguage()));
 
       LogMessage("ObjectList Hash: " + objectListHash);

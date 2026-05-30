@@ -1545,7 +1545,9 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
     }
   }
 
-  if (!pchSources.empty() && !sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  if (!pchSources.empty() &&
+      !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+        sf->GetProperty("SKIP_PRECOMPILE_HEADERS"))) {
     std::string pchOptions;
     auto pchIt = pchSources.find(sf->ResolveFullPath());
     if (pchIt != pchSources.end()) {

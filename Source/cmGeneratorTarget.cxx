@@ -2395,7 +2395,8 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     std::string pchFlags;
 
     // Add precompile headers compile options.
-    if (!sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    if (!((fileSet && sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+          sf->GetProperty("SKIP_PRECOMPILE_HEADERS"))) {
       if (!pchSources.empty()) {
         std::string pchOptions;
         auto pchIt = pchSources.find(sf->GetFullPath());
