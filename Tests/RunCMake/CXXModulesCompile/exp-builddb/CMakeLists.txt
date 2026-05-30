@@ -51,6 +51,8 @@ set_property(SOURCE importable.cxx APPEND
   PROPERTY COMPILE_OPTIONS "-Dfrom_source_option")
 set_property(SOURCE importable.cxx APPEND
   PROPERTY COMPILE_DEFINITIONS "from_source_define")
+set_property(SOURCE importable.cxx APPEND
+  PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/from_source_include")
 
 set_property(TARGET export_build_database APPEND
   PROPERTY COMPILE_FLAGS "-Dfrom_compile_flags")
