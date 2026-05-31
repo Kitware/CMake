@@ -7,10 +7,10 @@ include_guard()
 
 # WHOLE_ARCHIVE Feature for LINK_LIBRARY generator expression
 ## check linker capabilities
-function(__cmake_set_whole_archive_feature __linker)
+function(__cmake_set_whole_archive_feature __linker __linker_options)
   unset(__lang)
-  if(ARGC EQUAL "2")
-    set(__lang "${ARGV1}_")
+  if(ARGC EQUAL "3")
+    set(__lang "${ARGV2}_")
   endif()
 
   if(NOT __linker)
@@ -19,12 +19,11 @@ function(__cmake_set_whole_archive_feature __linker)
 
   if(NOT DEFINED CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED)
     # launch linker to check if push_state/pop_state options are supported
-    execute_process(COMMAND "${__linker}" --push-state --pop-state
+    execute_process(COMMAND "${__linker}"  ${__linker_options} --push-state --pop-state
                     OUTPUT_VARIABLE __linker_log
                     ERROR_VARIABLE __linker_log
-                    COMMAND_ERROR_IS_FATAL NONE
-                    RESULT_VARIABLE __linker_result)
-    if(__linker_result EQUAL 0 AND (__linker_log MATCHES "--push-state" OR __linker_log MATCHES "--pop-state"))
+                    COMMAND_ERROR_IS_FATAL NONE)
+    if(__linker_log MATCHES "--push-state" OR __linker_log MATCHES "--pop-state")
       set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED FALSE)
     else()
       set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED TRUE)
@@ -47,4 +46,4 @@ endfunction()
 
 
 ## Configure system linker
-__cmake_set_whole_archive_feature("${CMAKE_LINKER}")
+__cmake_set_whole_archive_feature("${CMAKE_LINKER}" "")
