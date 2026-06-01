@@ -2178,6 +2178,8 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
 
   auto* const lg = this->GetLocalGenerator();
   auto const* const mf = this->Makefile;
+  cmGeneratorFileSet const* const fileSet =
+    this->GetFileSetForSource(config, sf);
 
   // Compute the compiler launcher flags.
   if (CanUseCompilerLauncher(lang)) {
@@ -2230,6 +2232,28 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
       }
       if (!pchSource.empty()) {
         pchSources.insert(std::make_pair(pchSource, arch));
+      }
+    }
+  }
+
+  // File set specific flags
+  if (fileSet) {
+    // include flags
+    {
+      auto fsIncludes = fileSet->BelongsTo(this)
+        ? fileSet->GetIncludeDirectories(config, lang)
+        : fileSet->GetInterfaceIncludeDirectories(config, lang);
+      if (!fsIncludes.empty()) {
+        std::vector<std::string> includes;
+        lg->AppendIncludeDirectories(includes, cm::remove_BT(fsIncludes), *sf);
+
+        auto includeFlags =
+          lg->GetIncludeFlags(includes, this, lang, config, false);
+
+        for (auto&& flag : SplitFlags(includeFlags)) {
+          include_flags.emplace_back(FlagClassification::PrivateFlag,
+                                     FlagKind::Include, std::move(flag));
+        }
       }
     }
   }
@@ -2320,6 +2344,44 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
         for (auto&& flag : SplitFlags(depfileFlags)) {
           compile_flags.emplace_back(FlagClassification::LocationFlag,
                                      FlagKind::BuildSystem, std::move(flag));
+        }
+      }
+    }
+  }
+
+  // File set specific flags
+  if (fileSet) {
+    // Define flags
+    {
+      auto fsDefines = fileSet->BelongsTo(this)
+        ? fileSet->GetCompileDefinitions(config, lang)
+        : fileSet->GetInterfaceCompileDefinitions(config, lang);
+      if (!fsDefines.empty()) {
+        std::set<std::string> defines;
+        lg->AppendDefines(defines, fsDefines);
+
+        std::string defineFlags;
+        lg->JoinDefines(defines, defineFlags, lang);
+
+        for (auto&& flag : SplitFlags(defineFlags)) {
+          define_flags.emplace_back(FlagClassification::PrivateFlag,
+                                    FlagKind::Definition, std::move(flag));
+        }
+      }
+    }
+
+    // Compile flags.
+    {
+      auto options = fileSet->BelongsTo(this)
+        ? fileSet->GetCompileOptions(config, lang)
+        : fileSet->GetInterfaceCompileOptions(config, lang);
+      if (!options.empty()) {
+        std::string compileFlags;
+        lg->AppendCompileOptions(compileFlags, cm::remove_BT(options));
+
+        for (auto&& flag : SplitFlags(compileFlags)) {
+          compile_flags.emplace_back(FlagClassification::PrivateFlag,
+                                     FlagKind::Compile, std::move(flag));
         }
       }
     }

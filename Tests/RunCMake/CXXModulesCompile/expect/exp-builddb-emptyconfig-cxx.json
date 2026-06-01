@@ -81,6 +81,8 @@
             "-Dfrom_compile_definitions",
             "-Dtarget_private_define",
             "-Dtarget_public_define",
+            "-Dfileset_private_define",
+            "PATH:-I<SOURCE_DIR>/exp-builddb-emptyconfig/fileset_private_include",
             "PATH:-I<SOURCE_DIR>/exp-builddb-emptyconfig/from_include_directories",
             "PATH:-I<SOURCE_DIR>/exp-builddb-emptyconfig/target_private_include",
             "PATH:-I<SOURCE_DIR>/exp-builddb-emptyconfig/target_public_include",
@@ -95,6 +97,7 @@
             "-Dfrom_source_flag",
             "-Dfrom_source_option",
             "PATH:-Ddepflag=\"CMakeFiles/export_build_database.dir/importable.cxx<OBJEXT>.d\"",
+            "-Dfileset_private_option",
             "PATH:<OUTPUT_FLAG>CMakeFiles/export_build_database.dir/importable.cxx<OBJEXT>",
             "-c",
             "PATH:<SOURCE_DIR>/exp-builddb-emptyconfig/importable.cxx"
@@ -123,6 +126,8 @@
             "-Dfrom_compile_definitions",
             "-Dtarget_private_define",
             "-Dtarget_public_define",
+            "-Dfileset_private_define",
+            "PATH:-I<SOURCE_DIR>/exp-builddb-emptyconfig/fileset_private_include",
             "PATH:-I<SOURCE_DIR>/exp-builddb-emptyconfig/from_include_directories",
             "PATH:-I<SOURCE_DIR>/exp-builddb-emptyconfig/target_private_include",
             "PATH:-I<SOURCE_DIR>/exp-builddb-emptyconfig/target_public_include",
@@ -135,7 +140,8 @@
             "-Dtarget_public_option",
             "-Ddep_interface_option",
             "-Dfrom_source_flag",
-            "-Dfrom_source_option"
+            "-Dfrom_source_option",
+            "-Dfileset_private_option"
           ],
           "object": "PATH:CMakeFiles/export_build_database.dir/importable.cxx<OBJEXT>",
           "private": false,
