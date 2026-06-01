@@ -1,0 +1,5 @@
+^CMake Error at BadArgN2\.cmake:[0-9]+ \(cmake_parse_arguments\):
+  PARSE_ARGN called with _FUNCTION_ARGNC='' that is not an unsigned integer
+Call Stack \(most recent call first\):
+  BadArgN2\.cmake:[0-9]+ \(test2\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

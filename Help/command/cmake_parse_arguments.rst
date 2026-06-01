@@ -11,6 +11,9 @@ Parse function or macro arguments.
   cmake_parse_arguments(PARSE_ARGV <N> <prefix> <options>
                         <one_value_keywords> <multi_value_keywords>)
 
+  cmake_parse_arguments(PARSE_ARGN <prefix> <options>
+                        <one_value_keywords> <multi_value_keywords>)
+
 .. versionadded:: 3.5
   This command is implemented natively.  Previously, it has been defined in the
   module :module:`CMakeParseArguments`.
@@ -29,6 +32,12 @@ This may be used in either a :command:`macro` or a :command:`function`.
   ``ARGV#`` variables of the calling function.  The parsing starts with
   the ``<N>``-th argument, where ``<N>`` is an unsigned integer.
   This allows for the values to have special characters like ``;`` in them.
+
+.. versionadded:: 4.4
+  The ``PARSE_ARGN`` signature is only for use in a :command:`function`
+  body. This starts parsing after the last named argument of the calling
+  function and works exactly like ``PARSE_ARGV`` with ``<N>`` being the number
+  of parameters in the function definition.
 
 The ``<options>`` argument contains all options for the respective function
 or macro. These are keywords that have no value following them, like the
