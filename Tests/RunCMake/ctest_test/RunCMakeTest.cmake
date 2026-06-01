@@ -45,6 +45,32 @@ endforeach()
   run_ctest(TestPresetGenericVar)
   unset(CASE_TEST_PREFIX_CODE)
 
+  # Verify that CTEST_TEST_PRESET passed via -D on the command line reaches
+  # ctest_test() when ctest is run with -M/-T.
+  set(case_source_dir "${RunCMake_BINARY_DIR}/TestPresetCLIVar")
+  set(case_binary_dir "${RunCMake_BINARY_DIR}/TestPresetCLIVar-build")
+  configure_file(
+    "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+    "${case_source_dir}/CMakePresets.json"
+    @ONLY)
+  file(REMOVE_RECURSE "${case_binary_dir}")
+  file(MAKE_DIRECTORY "${case_binary_dir}")
+  file(WRITE "${case_binary_dir}/DartConfiguration.tcl"
+    "BuildDirectory: ${case_binary_dir}\nSourceDirectory: ${case_source_dir}\n")
+  file(WRITE "${case_binary_dir}/CTestTestfile.cmake"
+    "add_test(test1 \"${CMAKE_COMMAND}\" -E true)\n"
+    "add_test(test2 \"${CMAKE_COMMAND}\" -E true)\n"
+    "add_test(test3 \"${CMAKE_COMMAND}\" -E true)\n")
+  set(RunCMake_TEST_BINARY_DIR "${case_binary_dir}")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(TestPresetCLIVar
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -M Experimental
+    -D "CTEST_TEST_PRESET=my-include-preset"
+    -T Test
+    -V)
+
   set(custom_presets_file
     "${RunCMake_BINARY_DIR}/TestPresetFileInclude/custom-presets.json")
   configure_file(

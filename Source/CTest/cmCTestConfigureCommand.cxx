@@ -211,7 +211,18 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     ? ""
     : cmSystemTools::CollapseFullPath(rawPresetsFile, sourceDirectory);
 
-  std::string configureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
+  // Skip checking CTEST_CONFIGURE_COMMAND when a preset is specified.
+  // We do this to avoid using a stale ConfigureCommand from a previous cmake
+  // run that would cause us to silently ignore the requested preset.
+  std::string configureCommand;
+  if (presetName.empty()) {
+    configureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
+  } else if (cmNonempty(mf.GetDefinition("CTEST_CONFIGURE_COMMAND"))) {
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                       "Ignoring CTEST_CONFIGURE_COMMAND because preset \""
+                         << presetName << "\" is in use.\n",
+                       args.Quiet);
+  }
   if (configureCommand.empty() &&
       !ConstructConfigureCommand(status, mf, sourceDirectory, buildDirectory,
                                  args.Options, presetName, presetsFile,
