@@ -139,6 +139,10 @@ if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 5.2)
   message(CONFIGURE_LOG "Swift target info:\n" "${swift_target_info}")
   string(JSON module_triple GET "${swift_target_info}" "target" "moduleTriple")
   set(CMAKE_Swift_MODULE_TRIPLE ${module_triple})
+
+  if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 6.2)
+    string(JSON CMAKE_Swift_SIZEOF_DATA_PTR GET "${swift_target_info}" "target" "pointerWidthInBytes")
+  endif()
 endif()
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)

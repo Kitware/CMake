@@ -622,6 +622,7 @@ add_RunCMake_test(ScriptMode)
 add_RunCMake_test(StandardLinkDirectories)
 add_RunCMake_test(Swift -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
                         -DCMake_TEST_Swift=${CMake_TEST_Swift}
+                        -DCMAKE_Swift_COMPILER_VERSION=${CMAKE_Swift_COMPILER_VERSION}
                         -DXCODE_VERSION=${XCODE_VERSION})
 add_RunCMake_test(TargetArtifacts -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(TargetObjects)
