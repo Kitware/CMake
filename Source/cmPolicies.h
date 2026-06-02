@@ -631,8 +631,9 @@ class cmMakefile;
          "CMAKE_<LANG>_LINK_FLAGS adds link flags to all target types.", 4,   \
          3, 0, WARN)                                                          \
   SELECT(POLICY, CMP0211,                                                     \
-         "A file may belong to at most one file set in a target.", 4, 4, 0,   \
-         WARN)                                                                \
+         "A file may belong to at most one non-HEADERS file set in a "        \
+         "target.",                                                           \
+         4, 4, 0, WARN)                                                       \
   SELECT(POLICY, CMP0212,                                                     \
          "add_custom_command DEPENDS does not strip .exe suffixes.", 4, 4, 0, \
          WARN)                                                                \

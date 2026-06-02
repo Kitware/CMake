@@ -3,8 +3,8 @@ CMP0211
 
 .. versionadded:: 4.4
 
-A file may belong to at most one :ref:`file set <file sets>` in a target except
-for the ``HEADERS`` file set type.
+A file may belong to at most one non-``HEADERS`` :ref:`file set <file sets>`
+in a target.
 
 In CMake 4.3 and below, it was possible to specify the same file
 in multiple file sets in a target.  In CMake 4.4 and above, a file

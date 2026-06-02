@@ -80,8 +80,8 @@ have zero or more named file sets. Each file set has a name, a type, a scope of
 files within those directories.
 
 .. versionchanged:: 4.4
-  A file may only belong to at most one file set in a target. See policy
-  :policy:`CMP0211`.
+  A file may belong to at most one non-``HEADERS`` file set in a target.
+  See policy :policy:`CMP0211`.
 
  The acceptable types include:
 
