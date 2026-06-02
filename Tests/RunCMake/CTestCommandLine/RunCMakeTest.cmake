@@ -656,6 +656,64 @@ endfunction()
 run_testDir(testDir 0)
 run_testDir(testDir-preset 1)
 
+# Test --source-dir and --build-dir
+run_cmake_command(source-dir-invalid-arg ${CMAKE_CTEST_COMMAND} --source-dir)
+run_cmake_command(build-dir-invalid-arg ${CMAKE_CTEST_COMMAND} --build-dir)
+
+# Build the -D arguments needed to pass the generator to ctest -T Configure.
+macro(ctest_source_dir_generator_args var)
+  set(${var} -D "CTEST_CMAKE_GENERATOR=${RunCMake_GENERATOR}")
+  if(RunCMake_GENERATOR_PLATFORM)
+    list(APPEND ${var}
+      -D "CTEST_CMAKE_GENERATOR_PLATFORM=${RunCMake_GENERATOR_PLATFORM}")
+  endif()
+endmacro()
+
+# Verify that ctest -T Configure works with an empty binary directory
+# when --source-dir is provided.
+function(run_configure_empty_bindir)
+  set(src "${RunCMake_BINARY_DIR}/configure-empty-bindir-src")
+  set(bin "${RunCMake_BINARY_DIR}/configure-empty-bindir-bin")
+  file(REMOVE_RECURSE "${src}" "${bin}")
+  file(MAKE_DIRECTORY "${src}")
+  file(WRITE "${src}/CMakeLists.txt"
+    "cmake_minimum_required(VERSION 3.10)\nproject(Minimal LANGUAGES NONE)\n")
+  # Note that run_cmake_command always pre-creates RunCMake_TEST_BINARY_DIR
+  # before invoking the command, so this test exercises configure from an already-
+  # created but otherwise empty binary directory.  The MakeDirectory call in CTest
+  # itself is what would handle the truly-absent case in production use.
+  set(RunCMake_TEST_BINARY_DIR "${bin}")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  ctest_source_dir_generator_args(generator_args)
+  run_cmake_command(configure-empty-bindir
+    ${CMAKE_CTEST_COMMAND}
+    --source-dir "${src}"
+    --build-dir  "${bin}"
+    ${generator_args}
+    -T Configure)
+endfunction()
+run_configure_empty_bindir()
+
+# Verify expected error condition when --source-dir does not contain
+# a CMakeLists.txt file.
+function(run_configure_no_cmakelists)
+  set(src "${RunCMake_BINARY_DIR}/configure-no-cmakelists-src")
+  set(bin "${RunCMake_BINARY_DIR}/configure-no-cmakelists-bin")
+  file(REMOVE_RECURSE "${src}" "${bin}")
+  # Source dir exists but contains no CMakeLists.txt
+  file(MAKE_DIRECTORY "${src}")
+  set(RunCMake_TEST_BINARY_DIR "${bin}")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  ctest_source_dir_generator_args(generator_args)
+  run_cmake_command(configure-no-cmakelists
+    ${CMAKE_CTEST_COMMAND}
+    --source-dir "${src}"
+    --build-dir  "${bin}"
+    ${generator_args}
+    -T Configure)
+endfunction()
+run_configure_no_cmakelists()
+
 # Test --output-junit
 function(run_output_junit)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/output-junit)

@@ -20,10 +20,13 @@ Synopsis
        [--test-command <command> [<args>...]]
 
  `Dashboard Client`_
-  ctest -D <dashboard>         [-- <dashboard-options>...]
-  ctest -M <model> -T <action> [-- <dashboard-options>...]
-  ctest -S <script>            [-- <dashboard-options>...]
-  ctest -SP <script>           [-- <dashboard-options>...]
+  ctest -D <dashboard>            [-- <dashboard-options>...]
+  ctest -M <model> -T <action>    [-- <dashboard-options>...]
+  ctest [-M <model>] -T Configure --source-dir <path-to-source>
+                                  [--build-dir <path-to-build>]
+                                  [-- <dashboard-options>...]
+  ctest -S <script>               [-- <dashboard-options>...]
+  ctest -SP <script>              [-- <dashboard-options>...]
 
  `View Help`_
   ctest --help[-<topic>]
@@ -448,12 +451,13 @@ The options for running tests are:
 
  See `Label and Subproject Summary`_.
 
-.. option:: --test-dir <dir>
+.. option:: --test-dir <path-to-build>
 
  .. versionadded:: 3.20
 
  Specify the directory in which to look for tests, typically a CMake project
  build directory. If not specified, the current directory is used.
+ See also :ctest-option:`--build-dir`.
 
 .. option:: --test-output-size-passed <size>
 
@@ -877,6 +881,34 @@ The available ``<dashboard-options>`` are the following:
    `CTest Script`_, a :manual:`configure preset <cmake-presets(7)>`, or
    setting :variable:`CTEST_CONFIGURE_COMMAND`.
 
+.. option:: --source-dir <path-to-source>
+
+ .. versionadded:: 4.4
+
+ Specify the project source directory. When combined with
+ :option:`-T Configure <ctest -T>`, this allows CTest to perform an initial
+ configure step for an empty binary directory.  The binary directory defaults
+ to the current working directory; use :ctest-option:`--build-dir` to specify
+ a different location. The binary directory is created automatically if it
+ does not yet exist.
+
+ A CMake generator must also be specified. Use
+ :cref:`-D CTEST_CMAKE_GENERATOR=\<gen\> <ctest-option-D-var>` to supply one, or
+ set :variable:`CTEST_CONFIGURE_PRESET` to specify a
+ :manual:`configure preset <cmake-presets(7)>` that includes a
+ :preset:`generator <configurePresets.generator>`.
+
+ See the `CTest Configure Step`_ settings for more details.
+
+.. option:: --build-dir <path-to-build>
+
+ .. versionadded:: 4.4
+
+ Specify the project binary (build) directory. This is an alias for
+ :ctest-option:`--test-dir` intended for use with
+ :ctest-option:`--source-dir` when bootstrapping a build with
+ :option:`-T Configure <ctest -T>`.
+
 .. option:: --group <group>
 
  Specify the group to which to submit results.
@@ -1010,6 +1042,15 @@ to the build tree and use one of these signatures::
 
   ctest -D <mode>[<step>]
   ctest -M <mode> [-T <step>]...
+
+The :ctest-option:`--source-dir` option additionally allows the
+``Configure`` step to be performed on a build tree that does not yet
+exist, in which case the :ctest-option:`--build-dir` option specifies
+where to create it::
+
+  ctest [-M <mode>] -T Configure
+      --source-dir <path-to-source> [--build-dir <path-to-build>]
+  ctest --build-and-test <path-to-source> <path-to-build>
 
 The ``<mode>`` must be one of the above `Dashboard Client Modes`_,
 and each ``<step>`` must be one of the above `Dashboard Client Steps`_.
