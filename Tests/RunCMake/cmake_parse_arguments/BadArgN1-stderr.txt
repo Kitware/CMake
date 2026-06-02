@@ -1,0 +1,5 @@
+^CMake Error at BadArgN1\.cmake:[0-9]+ \(cmake_parse_arguments\):
+  PARSE_ARGN must be called with exactly 5 arguments\.
+Call Stack \(most recent call first\):
+  BadArgN1\.cmake:[0-9]+ \(test1\)
+  CMakeLists\.txt:[0-9]+ \(include\)$
