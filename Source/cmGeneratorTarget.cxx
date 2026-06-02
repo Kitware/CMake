@@ -2258,6 +2258,23 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     }
   }
 
+  // source specific flags
+  {
+    // include flags
+    if (cmValue srcIncludes = sf->GetProperty("INCLUDE_DIRECTORIES")) {
+      std::vector<std::string> includes;
+      lg->AppendIncludeDirectories(includes, srcIncludes, *sf);
+
+      auto includeFlags =
+        lg->GetIncludeFlags(includes, this, lang, config, false);
+
+      for (auto&& flag : SplitFlags(includeFlags)) {
+        include_flags.emplace_back(FlagClassification::PrivateFlag,
+                                   FlagKind::Include, std::move(flag));
+      }
+    }
+  }
+
   // Compute target-wide flags.
   {
     FlagClassification cls = FlagClassification::BaselineFlag;
@@ -2304,47 +2321,48 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     }
   }
 
-  std::string const COMPILE_FLAGS("COMPILE_FLAGS");
   std::string const COMPILE_OPTIONS("COMPILE_OPTIONS");
-
   cmGeneratorExpressionInterpreter genexInterpreter(lg, config, this, lang);
 
   // Source-specific flags.
   {
-    FlagClassification cls = FlagClassification::PrivateFlag;
-    FlagKind kind = FlagKind::Compile;
-
-    std::string sourceFlags;
-
-    if (cmValue cflags = sf->GetProperty(COMPILE_FLAGS)) {
-      lg->AppendFlags(sourceFlags,
-                      genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
-    }
-
-    if (cmValue coptions = sf->GetProperty(COMPILE_OPTIONS)) {
-      lg->AppendCompileOptions(
-        sourceFlags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
-    }
-
-    for (auto&& flag : SplitFlags(sourceFlags)) {
-      compile_flags.emplace_back(cls, kind, std::move(flag));
-    }
-
-    // Dependency tracking flags.
+    // Define flags
     {
-      if (!sfVars.DependencyFlags.empty()) {
-        cmRulePlaceholderExpander::RuleVariables vars;
-        auto rulePlaceholderExpander = lg->CreateRulePlaceholderExpander();
+      if (cmValue srcDefines = sf->GetProperty("COMPILE_DEFINITIONS")) {
+        std::set<std::string> defines;
+        lg->AppendDefines(defines, srcDefines);
 
-        vars.DependencyFile = sfVars.DependencyFile.c_str();
-        vars.DependencyTarget = sfVars.DependencyTarget.c_str();
+        std::string defineFlags;
+        lg->JoinDefines(defines, defineFlags, lang);
 
-        std::string depfileFlags = sfVars.DependencyFlags;
-        rulePlaceholderExpander->ExpandRuleVariables(lg, depfileFlags, vars);
-        for (auto&& flag : SplitFlags(depfileFlags)) {
-          compile_flags.emplace_back(FlagClassification::LocationFlag,
-                                     FlagKind::BuildSystem, std::move(flag));
+        for (auto&& flag : SplitFlags(defineFlags)) {
+          define_flags.emplace_back(FlagClassification::PrivateFlag,
+                                    FlagKind::Definition, std::move(flag));
         }
+      }
+    }
+
+    // Compile flags.
+    {
+      std::string const COMPILE_FLAGS("COMPILE_FLAGS");
+
+      FlagClassification cls = FlagClassification::PrivateFlag;
+      FlagKind kind = FlagKind::Compile;
+
+      std::string sourceFlags;
+
+      if (cmValue cflags = sf->GetProperty(COMPILE_FLAGS)) {
+        lg->AppendFlags(sourceFlags,
+                        genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
+      }
+
+      if (cmValue coptions = sf->GetProperty(COMPILE_OPTIONS)) {
+        lg->AppendCompileOptions(
+          sourceFlags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
+      }
+
+      for (auto&& flag : SplitFlags(sourceFlags)) {
+        compile_flags.emplace_back(cls, kind, std::move(flag));
       }
     }
   }
@@ -2383,6 +2401,24 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
           compile_flags.emplace_back(FlagClassification::PrivateFlag,
                                      FlagKind::Compile, std::move(flag));
         }
+      }
+    }
+  }
+
+  // Dependency tracking flags.
+  {
+    if (!sfVars.DependencyFlags.empty()) {
+      cmRulePlaceholderExpander::RuleVariables vars;
+      auto rulePlaceholderExpander = lg->CreateRulePlaceholderExpander();
+
+      vars.DependencyFile = sfVars.DependencyFile.c_str();
+      vars.DependencyTarget = sfVars.DependencyTarget.c_str();
+
+      std::string depfileFlags = sfVars.DependencyFlags;
+      rulePlaceholderExpander->ExpandRuleVariables(lg, depfileFlags, vars);
+      for (auto&& flag : SplitFlags(depfileFlags)) {
+        compile_flags.emplace_back(FlagClassification::LocationFlag,
+                                   FlagKind::BuildSystem, std::move(flag));
       }
     }
   }
