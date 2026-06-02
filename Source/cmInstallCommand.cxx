@@ -41,7 +41,7 @@
 #include "cmInstallPackageInfoExportGenerator.h"
 #include "cmInstallRuntimeDependencySet.h"
 #include "cmInstallRuntimeDependencySetGenerator.h"
-#include "cmInstallSbomExportGenerator.h"
+#include "cmInstallSbomGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmList.h"
@@ -2513,16 +2513,13 @@ bool HandleSbomMode(std::vector<std::string> const& args,
   cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
 
   cmSbomArguments arguments;
-  ArgumentParser::NonEmpty<std::string> exportName;
-  ArgumentParser::NonEmpty<std::string> cxxModulesDirectory;
+  ArgumentParser::NonEmpty<std::vector<std::string>> exportNames;
 
   arguments.Bind(ica);
-  ica.Bind("EXPORT"_s, exportName);
+  ica.Bind("EXPORTS"_s, exportNames);
   // ica.Bind("CXX_MODULES_DIRECTORY"_s, cxxModulesDirectory); TODO?
 
   std::vector<std::string> unknownArgs;
-  ica.Parse(args, &unknownArgs);
-
   ArgumentParser::ParseResult result = ica.Parse(args, &unknownArgs);
   if (!result.Check(args[0], &unknownArgs, status)) {
     return false;
@@ -2538,8 +2535,8 @@ bool HandleSbomMode(std::vector<std::string> const& args,
     return false;
   }
 
-  if (exportName.empty()) {
-    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+  if (exportNames.empty()) {
+    status.SetError(cmStrCat(args[0], " missing EXPORTS."));
     return false;
   }
 
@@ -2558,25 +2555,39 @@ bool HandleSbomMode(std::vector<std::string> const& args,
     }
   }
 
-  cmExportSet& exportSet =
-    helper.Makefile->GetGlobalGenerator()->GetExportSets()[exportName];
+  cmGlobalGenerator* gg = helper.Makefile->GetGlobalGenerator();
+
+  std::string const fpath =
+    cmStrCat(dest, '/', arguments.GetPackageFileName());
+  if (gg->IsInstallSbomFile(fpath)) {
+    status.SetError(cmStrCat("SBOM command already specified for the file "_s,
+                             cmSystemTools::GetFilenameNameView(fpath), '.'));
+    return false;
+  }
+
+  cmExportSetMap& allExportSets = gg->GetExportSets();
+  std::vector<cmExportSet*> sets;
+  sets.reserve(exportNames.size());
+  for (std::string const& name : exportNames) {
+    sets.push_back(&allExportSets[name]);
+  }
 
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);
 
   // Tell the global generator about any installation component names
-  // specified
+  // specified.
   helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
     ica.GetComponent());
-  helper.Makefile->SetExplicitlyGeneratesSbom(true);
 
-  // Create the export install generator.
-  helper.Makefile->AddInstallGenerator(
-    cm::make_unique<cmInstallSbomExportGenerator>(
-      &exportSet, dest, ica.GetPermissions(), ica.GetConfigurations(),
-      ica.GetComponent(), message, ica.GetExcludeFromAll(),
-      std::move(arguments), std::move(cxxModulesDirectory),
-      helper.CaptureContext()));
+  // Create the SBOM install generator.
+  auto sbomGen = cm::make_unique<cmInstallSbomGenerator>(
+    std::move(sets), dest, ica.GetPermissions(), ica.GetConfigurations(),
+    ica.GetComponent(), message, ica.GetExcludeFromAll(), std::move(arguments),
+    helper.CaptureContext());
+  cmInstallSbomGenerator const* rawPtr = sbomGen.get();
+  helper.Makefile->AddInstallGenerator(std::move(sbomGen));
+  helper.Makefile->GetGlobalGenerator()->AddInstallSbomGenerator(rawPtr);
 
   return true;
 #else

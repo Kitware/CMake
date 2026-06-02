@@ -4,12 +4,14 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmDiagnostics.h"
@@ -31,6 +33,13 @@ class cmExportFileGenerator
 public:
   cmExportFileGenerator();
   virtual ~cmExportFileGenerator() = default;
+
+  struct ExportInfo
+  {
+    std::vector<std::string> Files;
+    std::set<std::string> Sets;
+    std::set<std::string> Namespaces;
+  };
 
   /** Set the full path to the export file to generate.  */
   void SetExportFile(char const* mainFile);
@@ -143,13 +152,6 @@ protected:
     this->IssueMessage(MessageType::FATAL_ERROR, errorMessage);
   }
 
-  struct ExportInfo
-  {
-    std::vector<std::string> Files;
-    std::set<std::string> Sets;
-    std::set<std::string> Namespaces;
-  };
-
   /** Find the set of export files and the unique namespace (if any) for a
    *  target. */
   virtual ExportInfo FindExportInfo(cmGeneratorTarget const* target) const = 0;
@@ -238,3 +240,16 @@ extern template void cmExportFileGenerator::SetImportLinkProperty<cmLinkItem>(
   std::string const&, cmGeneratorTarget const*, std::string const&,
   std::vector<cmLinkItem> const&, ImportPropertyMap& properties,
   ImportLinkPropertyTargetNames);
+
+/** Walk a generator expression and rewrite the target-name slot of each
+    `$<TARGET_PROPERTY:>`, `$<TARGET_NAME:>`, `$<LINK_ONLY:>`, and
+    `$<COMPILE_ONLY:>` construct via the provided callback.  The callback
+    receives the bare target name; if it mutates the name and returns true,
+    the helper splices the new name back into the genex. Returns the
+    parse-level error message, if an error was encountered. Callers handle
+    install-prefix substitution and error reporting themselves. This is used
+    by the cmExportFileGenerator hierarchy, as well as the cmSbomBuilder
+    hierarchy.  */
+cm::optional<std::string> cmResolveTargetsInGeneratorExpression(
+  std::string& input,
+  std::function<bool(std::string& name)> const& addTargetNamespace);

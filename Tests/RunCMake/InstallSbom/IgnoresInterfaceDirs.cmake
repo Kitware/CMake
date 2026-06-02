@@ -14,6 +14,6 @@ install(
 )
 
 install(SBOM interface_targets
-  EXPORT interface_targets
+  EXPORTS interface_targets
   DESTINATION .
 )

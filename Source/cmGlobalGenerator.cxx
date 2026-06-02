@@ -27,6 +27,7 @@
 #include "cmAlgorithms.h"
 #include "cmArgumentParserTypes.h"
 #include "cmBuildArgs.h"
+#include "cmBuildSbomGenerator.h"
 #include "cmCMakePath.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmComputeTargetDepends.h"
@@ -42,9 +43,10 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmInstallExportGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmInstallRuntimeDependencySet.h"
-#include "cmInstallSbomExportGenerator.h"
+#include "cmInstallSbomGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -63,6 +65,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSyntheticTargetCache.h"
 #include "cmSystemTools.h"
+#include "cmTargetExport.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
@@ -312,11 +315,93 @@ void cmGlobalGenerator::AddBuildExportSet(cmExportBuildFileGenerator* gen)
   this->BuildExportSets[gen->GetMainExportFileName()] = gen;
 }
 
+cmExportFileGenerator::ExportInfo cmGlobalGenerator::FindBuildExportInfo(
+  cmGeneratorTarget const* target) const
+{
+  cmExportFileGenerator::ExportInfo info;
+  for (auto const& exp : this->BuildExportSets) {
+    if (auto rec = exp.second->FindRecordForTarget(target)) {
+      info.Files.push_back(exp.first);
+      info.Sets.insert(rec->Name.empty() ? exp.first : rec->Name);
+      info.Namespaces.insert(rec->Namespace);
+    }
+  }
+  return info;
+}
+
+cmExportFileGenerator::ExportInfo cmGlobalGenerator::FindInstallExportInfo(
+  cmGeneratorTarget const* target) const
+{
+  cmExportFileGenerator::ExportInfo info;
+  auto const& name = target->GetName();
+  for (auto const& exp : this->ExportSets) {
+    auto const& exportSet = exp.second;
+    auto const& targets = exportSet.GetTargetExports();
+    bool const contains =
+      std::any_of(targets.begin(), targets.end(),
+                  [&name](std::unique_ptr<cmTargetExport> const& te) {
+                    return te->TargetName == name;
+                  });
+    if (!contains) {
+      continue;
+    }
+    auto const* installs = exportSet.GetInstallations();
+    if (!installs || installs->empty()) {
+      continue;
+    }
+    info.Sets.insert(exp.first);
+    for (auto const* install : *installs) {
+      info.Files.push_back(install->GetDestinationFile());
+      info.Namespaces.insert(install->GetNamespace());
+    }
+  }
+  return info;
+}
+
+#ifndef CMAKE_BOOTSTRAP
+cmSbomBuilder::SbomInfo cmGlobalGenerator::FindBuildSbomInfo(
+  cmGeneratorTarget const* target) const
+{
+  cmSbomBuilder::SbomInfo info;
+  for (cmBuildSbomGenerator const* g : this->BuildSbomGenerators) {
+    if (g->CoversTarget(target)) {
+      info.Packages.push_back(g->GetPackageName());
+    }
+  }
+  std::sort(info.Packages.begin(), info.Packages.end());
+  return info;
+}
+
+cmSbomBuilder::SbomInfo cmGlobalGenerator::FindInstallSbomInfo(
+  cmGeneratorTarget const* target) const
+{
+  cmSbomBuilder::SbomInfo info;
+  for (cmInstallSbomGenerator const* g : this->InstallSbomGenerators) {
+    if (g->CoversTarget(target)) {
+      info.Packages.push_back(g->GetPackageName());
+    }
+  }
+  std::sort(info.Packages.begin(), info.Packages.end());
+  return info;
+}
+#endif
+
 void cmGlobalGenerator::AddBuildExportExportSet(
   cmExportBuildFileGenerator* gen)
 {
   this->BuildExportExportSets[gen->GetMainExportFileName()] = gen;
   this->AddBuildExportSet(gen);
+}
+
+void cmGlobalGenerator::AddBuildSbomGenerator(cmBuildSbomGenerator* gen)
+{
+  this->BuildSbomGenerators.push_back(gen);
+}
+
+void cmGlobalGenerator::AddInstallSbomGenerator(
+  cmInstallSbomGenerator const* gen)
+{
+  this->InstallSbomGenerators.push_back(gen);
 }
 
 void cmGlobalGenerator::ForceLinkerLanguages()
@@ -411,6 +496,24 @@ bool cmGlobalGenerator::IsExportedTargetsFile(
     return false;
   }
   return !cm::contains(this->BuildExportExportSets, filename);
+}
+
+bool cmGlobalGenerator::IsBuildSbomFile(std::string const& filepath) const
+{
+  return std::any_of(this->BuildSbomGenerators.begin(),
+                     this->BuildSbomGenerators.end(),
+                     [&filepath](cmBuildSbomGenerator const* g) {
+                       return g->GetOutputFile() == filepath;
+                     });
+}
+
+bool cmGlobalGenerator::IsInstallSbomFile(std::string const& filepath) const
+{
+  return std::any_of(this->InstallSbomGenerators.begin(),
+                     this->InstallSbomGenerators.end(),
+                     [&filepath](cmInstallSbomGenerator const* g) {
+                       return g->GetInstallFile() == filepath;
+                     });
 }
 
 // Find the make program for the generator, required for try compiles
@@ -1440,11 +1543,15 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
 void cmGlobalGenerator::ComputeBuildFileGenerators()
 {
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-    std::vector<std::unique_ptr<cmExportBuildFileGenerator>> const& gens =
-      this->Makefiles[i]->GetExportBuildFileGenerators();
-    for (std::unique_ptr<cmExportBuildFileGenerator> const& g : gens) {
-      g->Compute(this->LocalGenerators[i].get());
+    cmLocalGenerator* lg = this->LocalGenerators[i].get();
+    for (auto const& g : this->Makefiles[i]->GetExportBuildFileGenerators()) {
+      g->Compute(lg);
     }
+#ifndef CMAKE_BOOTSTRAP
+    for (auto const& g : this->Makefiles[i]->GetBuildSbomGenerators()) {
+      g->Compute(lg);
+    }
+#endif
   }
 }
 
@@ -1621,10 +1728,10 @@ bool cmGlobalGenerator::Compute()
   bool sbomEnabled = cmExperimental::HasSupportEnabled(
     *this->Makefiles[0], cmExperimental::Feature::GenerateSbom);
 
-  // Automatically generate SBOM files if enabled.
+  // Automatically generate one SBOM per export set not already tied to an
+  // explicit install(SBOM) call.
   cmValue sbomFormat = this->GetGlobalSetting("CMAKE_INSTALL_SBOM_FORMATS");
-  if (sbomFormat.IsSet() && !this->Makefiles[0]->ExplicitlyGeneratesSbom() &&
-      sbomEnabled && !isTryCompile) {
+  if (sbomFormat.IsSet() && sbomEnabled && !isTryCompile) {
     std::string location =
       this->Makefiles[0]->GetSafeDefinition("CMAKE_INSTALL_LIBDIR");
     if (location.empty()) {
@@ -1632,16 +1739,26 @@ bool cmGlobalGenerator::Compute()
     }
 
     std::string projectName = this->LocalGenerators[0]->GetProjectName();
-    cmSbomArguments sbomDefaultArgs;
-    sbomDefaultArgs.ProjectName = projectName;
     for (auto& exportSet : this->ExportSets) {
+      bool isCovered =
+        std::any_of(this->InstallSbomGenerators.cbegin(),
+                    this->InstallSbomGenerators.cend(),
+                    [&exportSet](cmInstallSbomGenerator const* g) {
+                      return g->CoversExportSet(&exportSet.second);
+                    });
+      if (isCovered) {
+        continue;
+      }
+      cmSbomArguments sbomDefaultArgs;
+      sbomDefaultArgs.ProjectName = projectName;
       sbomDefaultArgs.PackageName = exportSet.first;
       std::string dest = cmStrCat(location, "/sbom/", projectName);
       this->Makefiles[0]->AddInstallGenerator(
-        cm::make_unique<cmInstallSbomExportGenerator>(
-          &exportSet.second, dest, "", std::vector<std::string>(), "",
+        cm::make_unique<cmInstallSbomGenerator>(
+          std::vector<cmExportSet*>{ &exportSet.second }, dest, "",
+          std::vector<std::string>(), "",
           cmInstallGenerator::SelectMessageLevel(this->Makefiles[0].get()),
-          false, std::move(sbomDefaultArgs), "",
+          false, std::move(sbomDefaultArgs),
           cmInstallGenerator::CaptureContext(this->Makefiles[0].get())));
     }
   }
@@ -1752,6 +1869,17 @@ void cmGlobalGenerator::Generate()
       return;
     }
   }
+#ifndef CMAKE_BOOTSTRAP
+  for (auto& sbomGen : this->BuildSbomGenerators) {
+    if (!sbomGen->GenerateForBuild()) {
+      if (!cmSystemTools::GetErrorOccurredFlag()) {
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                               "Could not write SBOM file.");
+      }
+      return;
+    }
+  }
+#endif
   // Update rule hashes.
   this->CheckRuleHashes();
 

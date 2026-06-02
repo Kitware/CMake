@@ -214,8 +214,10 @@ add_library(
   cmExportBuildFileGenerator.cxx
   cmExportBuildPackageInfoGenerator.h
   cmExportBuildPackageInfoGenerator.cxx
-  cmExportBuildSbomGenerator.h
-  cmExportBuildSbomGenerator.cxx
+  cmBuildSbomGenerator.h
+  cmBuildSbomGenerator.cxx
+  cmBuildSbomBuilder.h
+  cmBuildSbomBuilder.cxx
   cmExportCMakeConfigGenerator.h
   cmExportCMakeConfigGenerator.cxx
   cmExportFileGenerator.h
@@ -228,14 +230,12 @@ add_library(
   cmExportInstallFileGenerator.cxx
   cmExportInstallPackageInfoGenerator.h
   cmExportInstallPackageInfoGenerator.cxx
-  cmExportInstallSbomGenerator.h
-  cmExportInstallSbomGenerator.cxx
   cmExportPackageInfoGenerator.h
   cmExportPackageInfoGenerator.cxx
   cmExportTryCompileFileGenerator.h
   cmExportTryCompileFileGenerator.cxx
-  cmExportSbomGenerator.h
-  cmExportSbomGenerator.cxx
+  cmSbomBuilder.h
+  cmSbomBuilder.cxx
   cmExportSet.h
   cmExportSet.cxx
   cmExternalMakefileProjectGenerator.cxx
@@ -369,8 +369,10 @@ add_library(
   cmInstallRuntimeDependencySet.cxx
   cmInstallRuntimeDependencySetGenerator.h
   cmInstallRuntimeDependencySetGenerator.cxx
-  cmInstallSbomExportGenerator.h
-  cmInstallSbomExportGenerator.cxx
+  cmInstallSbomGenerator.h
+  cmInstallSbomGenerator.cxx
+  cmInstallSbomBuilder.h
+  cmInstallSbomBuilder.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
   cmInstallSubdirectoryGenerator.h

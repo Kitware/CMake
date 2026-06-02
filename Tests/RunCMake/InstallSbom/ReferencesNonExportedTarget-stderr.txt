@@ -1,0 +1,6 @@
+CMake Error in CMakeLists\.txt:
+  Target "canine" references target "mammal" which has no
+  install\(EXPORT\)/export\(EXPORT\) namespace and is not covered by any SBOM\.
+  An SBOM cannot attribute this dependency\.  Give "mammal" an
+  install\(EXPORT\)/export\(EXPORT\) with a NAMESPACE, or include it in an
+  install\(SBOM\)/export\(SBOM\)\.

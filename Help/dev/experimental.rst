@@ -109,7 +109,7 @@ In order to activate support for the :command:`install(SBOM)` command,
 set
 
 * variable ``CMAKE_EXPERIMENTAL_GENERATE_SBOM`` to
-* value ``ca494ed3-b261-4205-a01f-603c95e4cae0``.
+* value ``2d856d6d-53e8-488b-a17f-d486d2cac317``.
 
 This UUID may change in future versions of CMake.  Be sure to use the value
 documented here by the source tree of the version of CMake with which you are

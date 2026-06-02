@@ -30,6 +30,9 @@
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmBuildSbomGenerator.h"
+#endif
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
@@ -1018,6 +1021,20 @@ void cmMakefile::AddExportBuildFileGenerator(
   this->ExportBuildFileGenerators.emplace_back(std::move(gen));
 }
 
+#ifndef CMAKE_BOOTSTRAP
+std::vector<std::unique_ptr<cmBuildSbomGenerator>> const&
+cmMakefile::GetBuildSbomGenerators() const
+{
+  return this->BuildSbomGenerators;
+}
+
+void cmMakefile::AddBuildSbomGenerator(
+  std::unique_ptr<cmBuildSbomGenerator> gen)
+{
+  this->BuildSbomGenerators.emplace_back(std::move(gen));
+}
+#endif
+
 namespace {
 struct file_not_persistent
 {
@@ -1480,16 +1497,6 @@ void cmMakefile::AddTestGenerator(std::unique_ptr<cmTestGenerator> g)
   if (g) {
     this->TestGenerators.push_back(std::move(g));
   }
-}
-
-bool cmMakefile::ExplicitlyGeneratesSbom() const
-{
-  return this->ExplicitSbomGenerator;
-}
-
-void cmMakefile::SetExplicitlyGeneratesSbom(bool status)
-{
-  this->ExplicitSbomGenerator = status;
 }
 
 void cmMakefile::PushFunctionScope(std::string const& fileName,

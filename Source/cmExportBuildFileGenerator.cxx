@@ -3,7 +3,6 @@
 #include "cmExportBuildFileGenerator.h"
 
 #include <algorithm>
-#include <map>
 #include <memory>
 #include <set>
 #include <sstream>
@@ -177,33 +176,29 @@ void cmExportBuildFileGenerator::GetTargets(
 cmExportFileGenerator::ExportInfo cmExportBuildFileGenerator::FindExportInfo(
   cmGeneratorTarget const* target) const
 {
-  std::vector<std::string> exportFiles;
-  std::set<std::string> exportSets;
-  std::set<std::string> namespaces;
+  return target->GetLocalGenerator()
+    ->GetGlobalGenerator()
+    ->FindBuildExportInfo(target);
+}
 
+cm::optional<cmExportBuildFileGenerator::ExportRecord>
+cmExportBuildFileGenerator::FindRecordForTarget(
+  cmGeneratorTarget const* target) const
+{
   auto const& name = target->GetName();
-  auto& allExportSets =
-    target->GetLocalGenerator()->GetGlobalGenerator()->GetBuildExportSets();
-
-  for (auto const& exp : allExportSets) {
-    cmExportBuildFileGenerator const* const bfg = exp.second;
-    cmExportSet const* const exportSet = bfg->GetExportSet();
-    std::vector<TargetExport> targets;
-    bfg->GetTargets(targets);
-    if (std::any_of(
-          targets.begin(), targets.end(),
-          [&name](TargetExport const& te) { return te.Name == name; })) {
-      if (exportSet) {
-        exportSets.insert(exportSet->GetName());
-      } else {
-        exportSets.insert(exp.first);
-      }
-      exportFiles.push_back(exp.first);
-      namespaces.insert(bfg->GetNamespace());
-    }
+  std::vector<TargetExport> targets;
+  this->GetTargets(targets);
+  bool const contains =
+    std::any_of(targets.begin(), targets.end(),
+                [&name](TargetExport const& te) { return te.Name == name; });
+  cm::optional<ExportRecord> result;
+  if (contains) {
+    ExportRecord rec;
+    rec.Name = this->ExportSet ? this->ExportSet->GetName() : std::string{};
+    rec.Namespace = this->GetNamespace();
+    result = rec;
   }
-
-  return { exportFiles, exportSets, namespaces };
+  return result;
 }
 
 void cmExportBuildFileGenerator::ComplainAboutMissingTarget(

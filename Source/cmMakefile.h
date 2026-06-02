@@ -53,6 +53,7 @@ class cmCompiledGeneratorExpression;
 class cmCustomCommandLines;
 class cmExecutionStatus;
 class cmExpandedCommandArgument;
+class cmBuildSbomGenerator;
 class cmExportBuildFileGenerator;
 class cmGeneratorExpressionEvaluationFile;
 class cmGlobalGenerator;
@@ -901,9 +902,6 @@ public:
   //! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);
 
-  bool ExplicitlyGeneratesSbom() const;
-  void SetExplicitlyGeneratesSbom(bool status = true);
-
   void AddInstallGenerator(std::unique_ptr<cmInstallGenerator> g);
 
   std::vector<std::unique_ptr<cmInstallGenerator>>& GetInstallGenerators()
@@ -1113,6 +1111,12 @@ public:
   void AddExportBuildFileGenerator(
     std::unique_ptr<cmExportBuildFileGenerator> gen);
 
+#ifndef CMAKE_BOOTSTRAP
+  std::vector<std::unique_ptr<cmBuildSbomGenerator>> const&
+  GetBuildSbomGenerators() const;
+  void AddBuildSbomGenerator(std::unique_ptr<cmBuildSbomGenerator> gen);
+#endif
+
   // Maintain a stack of package roots to allow nested PACKAGE_ROOT_PATH
   // searches
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
@@ -1299,6 +1303,10 @@ private:
   std::vector<std::unique_ptr<cmExportBuildFileGenerator>>
     ExportBuildFileGenerators;
 
+#ifndef CMAKE_BOOTSTRAP
+  std::vector<std::unique_ptr<cmBuildSbomGenerator>> BuildSbomGenerators;
+#endif
+
   std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>
     EvaluationFiles;
 
@@ -1357,7 +1365,6 @@ private:
   cmFindPackageStack FindPackageStack;
   unsigned int FindPackageStackNextIndex = 0;
 
-  bool ExplicitSbomGenerator = false;
   bool DebugFindPkg = false;
 
   bool CheckSystemVars;
