@@ -1,0 +1,103 @@
+CMP0219
+-------
+
+.. versionadded:: 4.4
+
+:command:`macro` invocations preserve backslashes in arguments.
+
+In CMake 4.3 and below, macro argument references (``${ARGN}``, ``${ARGV}``,
+``${ARGV<n>}``, and named macro arguments) are substituted textually and then
+evaluated by the called command. Backslashes in substituted values are
+re-evaluated as escape prefixes, and invalid escape sequences (such as
+``\b`` in Windows paths) can cause errors. The same re-evaluation can also
+occur for arguments passed to a :command:`variable_watch` callback command.
+
+CMake 4.4 and above prefer to preserve literal backslashes in those macro
+argument references.
+
+The ``OLD`` behavior for this policy is to interpret escape sequences in macro
+argument references and in arguments passed to ``variable_watch()`` callback
+commands. The ``NEW`` behavior is to preserve backslashes in those values
+before command invocation.
+
+This policy applies to macro argument references and to arguments passed to
+``variable_watch()`` callback commands. Other variable references keep their
+existing behavior.
+
+Mixed Policy Chains
+^^^^^^^^^^^^^^^^^^^
+
+Whether pre-escaping occurs is determined by the policy setting at each
+call site. When a project and its dependencies use different ``CMP0219``
+settings, each macro call in the chain follows the policy where that call
+appears.
+
+Consider a project (``CMP0219`` is ``OLD``) that calls a macro from
+dependency A (upgraded to
+:command:`cmake_minimum_required(VERSION 4.4) <cmake_minimum_required>`,
+so ``CMP0219`` is ``NEW``), which in turn forwards arguments to a macro
+from dependency B (not yet upgraded, so ``CMP0219`` is ``OLD``):
+
+.. code-block:: cmake
+
+  # Dependency B: cmake_minimum_required(VERSION 3.24)
+  # CMP0219 is OLD inside dependency B.
+  macro(depB_store var_name)
+    set(${var_name} "${ARGN}")
+  endmacro()
+
+  # Dependency A: cmake_minimum_required(VERSION 4.4)
+  # CMP0219 is NEW inside dependency A.
+  macro(depA_forward var_name)
+    depB_store(${var_name} ${ARGN})  # call site is NEW -> pre-escapes
+  endmacro()
+
+  # Project: cmake_minimum_required(VERSION 3.24)
+  # CMP0219 is OLD in the project.
+  macro(my_wrapper var_name)
+    depA_forward(${var_name} ${ARGN})  # call site is OLD -> no pre-escaping
+  endmacro()
+
+In a fully ``OLD`` chain, each macro boundary re-evaluates backslash
+escapes, so callers must add extra escaping layers to compensate.
+To pass the Windows path ``C:\build\new\temp`` through three ``OLD``
+boundaries, the caller needs eight backslashes per separator:
+
+.. code-block:: cmake
+
+  my_wrapper(result "C:\\\\\\\\build\\\\\\\\new\\\\\\\\temp")
+  message("${result}")  # -> C:\build\new\temp
+
+When dependency A upgrades and the middle boundary becomes ``NEW``,
+that boundary preserves backslashes instead of consuming a level.
+The same input now retains an extra layer:
+
+.. code-block:: cmake
+
+  # Same 8x-escaped input through OLD -> NEW -> OLD:
+  my_wrapper(result "C:\\\\\\\\build\\\\\\\\new\\\\\\\\temp")
+  message("${result}")  # -> C:\\build\\new\\temp  (one extra layer)
+
+The caller must then use half the escaping to reach the native path:
+
+.. code-block:: cmake
+
+  # Only 4x-escaped input needed for OLD -> NEW -> OLD:
+  my_wrapper(result "C:\\\\build\\\\new\\\\temp")
+  message("${result}")  # -> C:\build\new\temp
+
+When a dependency updates its :command:`cmake_minimum_required` version
+to 4.4 or above, call sites inside that dependency begin pre-escaping.
+Callers that previously added extra backslash layers to compensate for
+multiple levels of ``OLD`` re-evaluation may then need fewer escape
+layers.
+
+Where possible, converting paths to forward slashes with
+:command:`cmake_path(CONVERT ... TO_CMAKE_PATH_LIST)` avoids the issue entirely, because
+forward slashes require no escaping regardless of the policy setting.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.4
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns when backslashes are present
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

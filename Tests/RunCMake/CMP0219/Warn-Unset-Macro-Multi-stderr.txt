@@ -1,0 +1,22 @@
+CMake Warning \(policy\) at .*/Warn-Unset-Macro-Multi\.cmake:[0-9]+ \(cmp0219_warn_macro\):
+  Policy CMP0219 is not set: Macro invocations preserve backslashes in
+  arguments\.  Run "cmake --help-policy CMP0219" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
+
+  Command "cmp0219_warn_macro" called with arguments containing backslashes\.
+
+  Since the policy is not set, backslashes in the arguments:
+
+   "prefix\\tsuffix"
+   "left\\;right"
+
+  will be interpreted as escape sequences for compatibility\.
+
+  Set the policy to NEW to instead pass
+
+   "prefix\\\\tsuffix"
+   "left\\\\;right"
+
+  so that argument parsing will preserve the original values\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

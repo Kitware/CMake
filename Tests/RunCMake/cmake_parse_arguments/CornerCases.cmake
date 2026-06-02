@@ -1,4 +1,5 @@
 include(${CMAKE_CURRENT_LIST_DIR}/test_utils.cmake)
+cmake_policy(SET CMP0219 OLD)
 
 # example from the documentation
 # OPTIONAL is a keyword and therefore terminates the definition of

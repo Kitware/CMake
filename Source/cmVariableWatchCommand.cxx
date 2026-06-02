@@ -10,6 +10,7 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -56,6 +57,17 @@ void cmVariableWatchCommandVariableAccessed(
       { *currentListFile, cmListFileArgument::Quoted, fakeLineNo },
       { stack, cmListFileArgument::Quoted, fakeLineNo }
     };
+    {
+      cmPolicies::PolicyStatus cmp0219 =
+        makefile->CheckCMP0219(data->Command, newLFFArgs);
+      if (cmp0219 == cmPolicies::NEW) {
+        for (cmListFileArgument& arg : newLFFArgs) {
+          cmSystemTools::ReplaceString(arg.Value, "\\", "\\\\");
+        }
+      } else if (cmp0219 == cmPolicies::WARN) {
+        makefile->IssueCMP0219Warning(data->Command, newLFFArgs);
+      }
+    }
 
     cmListFileFunction newLFF{ data->Command, fakeLineNo, fakeLineNo,
                                std::move(newLFFArgs) };
