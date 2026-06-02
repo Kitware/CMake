@@ -1,9 +1,9 @@
 SKIP_PRECOMPILE_HEADERS
 -----------------------
 
-.. versionadded:: 3.16
+.. versionadded:: 4.4
 
-Is this source file skipped by :prop_tgt:`PRECOMPILE_HEADERS` feature.
+The file set sources will be skipped by :prop_tgt:`PRECOMPILE_HEADERS` feature.
 
 This property helps with build problems that one would run into
 when using the :prop_tgt:`PRECOMPILE_HEADERS` feature.
@@ -17,4 +17,4 @@ compatible between languages.
 See Also
 ^^^^^^^^
 
-* :prop_fs:`SKIP_PRECOMPILE_HEADERS` file set property
+* :prop_sf:`SKIP_PRECOMPILE_HEADERS` source file property

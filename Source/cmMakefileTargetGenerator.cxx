@@ -29,7 +29,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
-#include "cmGeneratorFileSets.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -665,6 +664,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   std::string const config = this->GetConfigName();
   std::string const configUpper = cmSystemTools::UpperCase(config);
 
+  // lookup for the associated file set, if any.
+  auto const* fileSet =
+    this->GeneratorTarget->GetFileSetForSource(config, &source);
+
   // Add precompile headers dependencies
   std::vector<std::string> pchArchs =
     this->GeneratorTarget->GetPchArchs(config, lang);
@@ -682,7 +685,9 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     }
   }
 
-  if (!pchSources.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  if (!pchSources.empty() &&
+      !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+        source.GetProperty("SKIP_PRECOMPILE_HEADERS"))) {
     for (std::string const& arch : pchArchs) {
       std::string const& pchHeader =
         this->GeneratorTarget->GetPchHeader(config, lang, arch);
@@ -751,11 +756,6 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       ispcHeaderRelative, cmOutputConverter::SHELL);
   }
 
-  // lookup for the associated file set, if any.
-  auto const* fileSet =
-    this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
-      config, &source);
-
   // Add flags from source file properties.
   std::string const COMPILE_FLAGS("COMPILE_FLAGS");
   if (cmValue cflags = source.GetProperty(COMPILE_FLAGS)) {
@@ -794,7 +794,9 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   }
 
   // Add precompile headers compile options.
-  if (!pchSources.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  if (!pchSources.empty() &&
+      !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+        source.GetProperty("SKIP_PRECOMPILE_HEADERS"))) {
     std::string pchOptions;
     auto const pchIt = pchSources.find(source.GetFullPath());
     if (pchIt != pchSources.end()) {

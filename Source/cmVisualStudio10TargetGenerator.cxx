@@ -2743,7 +2743,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
                    "\nin a \"FILE_SET TYPE ", cm::FileSetMetadata::CXX_MODULES,
                    "\" but it is not scheduled for compilation."));
       }
-      if (si.Source->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
+      if ((fs && fs->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+          si.Source->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
         e2.Element("PrecompiledHeader", "NotUsing");
       }
       if (!isCSharp && !exclude_configs.empty()) {
@@ -2965,8 +2966,9 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       this->GeneratorTarget->GetLinkerLanguage(config);
     std::string const& pchSource =
       this->GeneratorTarget->GetPchSource(config, lang);
-    bool const skipPCH =
-      pchSource.empty() || sf.GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS");
+    bool const skipPCH = pchSource.empty() ||
+      (fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+      sf.GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS");
     bool const makePCH = (sf.GetFullPath() == pchSource);
     bool const useSharedPCH = !skipPCH && (lang == linkLanguage);
     bool const useDifferentLangPCH = !skipPCH && (lang != linkLanguage);

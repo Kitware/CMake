@@ -2746,9 +2746,12 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
     for (std::string const& lang : langs) {
       auto langSources = std::count_if(
-        sources.begin(), sources.end(), [lang](cmSourceFile* sf) {
+        sources.begin(), sources.end(),
+        [&target, &config, &lang](cmSourceFile* sf) {
+          auto const* const fileSet = target->GetFileSetForSource(config, sf);
           return lang == sf->GetLanguage() &&
-            !sf->GetProperty("SKIP_PRECOMPILE_HEADERS");
+            !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+              sf->GetProperty("SKIP_PRECOMPILE_HEADERS"));
         });
       if (langSources == 0) {
         continue;

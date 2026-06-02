@@ -249,9 +249,11 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
       flags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
   }
 
-  if (auto const* fileSet =
-        this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(
-          config, source)) {
+  auto const* const fileSet =
+    this->GeneratorTarget->GetGeneratorFileSets()->GetFileSetForSource(config,
+                                                                       source);
+
+  if (fileSet) {
     auto options = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileOptions(config, language)
       : fileSet->GetInterfaceCompileOptions(config, language);
@@ -262,7 +264,9 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   }
 
   // Add precompile headers compile options.
-  if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  if (!pchSources.empty() &&
+      !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+        source->GetProperty("SKIP_PRECOMPILE_HEADERS"))) {
     std::string pchOptions;
     auto pchIt = pchSources.find(source->GetFullPath());
     if (pchIt != pchSources.end()) {
@@ -277,14 +281,13 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
       flags, genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
   }
 
-  auto const* fs = this->GeneratorTarget->GetFileSetForSource(config, source);
-  if (fs && fs->GetType() == cm::FileSetMetadata::CXX_MODULES) {
+  if (fileSet && fileSet->GetType() == cm::FileSetMetadata::CXX_MODULES) {
     if (source->GetLanguage() != "CXX"_s) {
       this->GetMakefile()->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("Target \"", this->GeneratorTarget->Target->GetName(),
                  "\" contains the source\n  ", source->GetFullPath(),
-                 "\nin a file set of type \"", fs->GetType(),
+                 "\nin a file set of type \"", fileSet->GetType(),
                  R"(" but the source is not classified as a "CXX" source.)"));
     }
 
@@ -1678,7 +1681,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
   }
 
-  if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  if (!pchSources.empty() &&
+      !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+        source->GetProperty("SKIP_PRECOMPILE_HEADERS"))) {
     for (std::string const& arch : pchArchs) {
       depList.push_back(
         this->GeneratorTarget->GetPchHeader(config, language, arch));
@@ -1832,7 +1837,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", config,
                              this->GetGeneratorTarget(), source, vars);
 
-  if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  if (!pchSources.empty() &&
+      !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+        source->GetProperty("SKIP_PRECOMPILE_HEADERS"))) {
     auto pchIt = pchSources.find(source->GetFullPath());
     if (pchIt != pchSources.end()) {
       this->addPoolNinjaVariable("JOB_POOL_PRECOMPILE_HEADER", config,
