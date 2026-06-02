@@ -108,6 +108,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
     string(APPEND linker_tool_exclude_regex "|^clang |^gcc ")
   endif()
   set(linker_tool "NOTFOUND")
+  set(linker_tool_arch)
   set(linker_tool_fallback "")
   set(link_line_parsed 0)
   string(APPEND log "  link line regex: [${linker_regex}]\n")
@@ -120,18 +121,31 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
         NOT linker_tool AND NOT "${line}" MATCHES "${linker_tool_exclude_regex}")
       if("${line}" MATCHES "exec: ([^()]*/(${linker}))") # IBM XL as nvcc host compiler
         set(linker_tool "${CMAKE_MATCH_1}")
+        string(APPEND log "  link line: [${line}] ==> linker [${linker_tool}]\n")
       elseif("${line}" MATCHES "^export XL_LINKER=(.*/${linker})[ \t]*$") # IBM XL
         set(linker_tool "${CMAKE_MATCH_1}")
+        string(APPEND log "  link line: [${line}] ==> linker [${linker_tool}]\n")
       elseif("${line}" MATCHES "--with-ld=") # GNU
         # The GNU compiler reports how it was configured.
         # This does not account for -fuse-ld= so use it only as a fallback.
         if("${line}" MATCHES " --with-ld=([^ ]+/${linker})( |$)")
           set(linker_tool_fallback "${CMAKE_MATCH_1}")
+        string(APPEND log "  link line: [${line}] ==> linker (fallback) [${linker_tool_fallback}]\n")
         endif()
       elseif("${line}" MATCHES "vs_link.*-- +\"?([^\"]*[/\\](${linker}))\"? ") # cmake -E vs_link_exe
         set(linker_tool "${CMAKE_MATCH_1}")
+        string(APPEND log "  link line: [${line}] ==> linker [${linker_tool}]\n")
       elseif("${line}" MATCHES "${linker_tool_regex}")
         set(linker_tool "${CMAKE_MATCH_2}")
+        string(APPEND log "  link line: [${line}] ==> linker [${linker_tool}]\n")
+      endif()
+    endif()
+    if(linker_tool)
+      # pick-up useful flags influencing linker behavior
+      # these flags are meaningful only for LLVM and GNU linkers. Check will be done later
+      if("${line}" MATCHES "-m ([a-zA-Z0-9]+)")
+        list(APPEND linker_tool_arch -m "${CMAKE_MATCH_1}")
+        string(APPEND log "  link line: [${line}] ==> linker architecture flags [${linker_tool_arch}]\n")
       endif()
     endif()
     if(NOT (EXTRA_PARSE_COMPUTE_IMPLICIT_LIBS OR EXTRA_PARSE_COMPUTE_IMPLICIT_DIRS
@@ -305,7 +319,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
       cmake_path(NORMAL_PATH linker_tool)
     endif()
-    string(APPEND log "  linker tool for '${EXTRA_PARSE_LANGUAGE}': ${linker_tool}\n")
+    string(APPEND log "  linker tool for '${EXTRA_PARSE_LANGUAGE}': ${linker_tool} ${linker_tool_arch}\n")
   endif()
 
   # Look for library search paths reported by linker.
@@ -401,6 +415,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   # Return results.
   if(EXTRA_PARSE_COMPUTE_LINKER)
     set(${EXTRA_PARSE_COMPUTE_LINKER} "${linker_tool}" PARENT_SCOPE)
+    set(${EXTRA_PARSE_COMPUTE_LINKER}_ARCH_FLAGS "${linker_tool_arch}" PARENT_SCOPE)
   endif()
 
   set(${log_var} "${log}" PARENT_SCOPE)

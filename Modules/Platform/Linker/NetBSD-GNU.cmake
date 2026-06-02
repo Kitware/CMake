@@ -10,6 +10,8 @@ include(Platform/Linker/GNU)
 macro(__netbsd_linker_gnu lang)
   set(CMAKE_${lang}_PLATFORM_LINKER_ID GNU)
   if(CMAKE_${lang}_COMPILER_LINKER)
-    __cmake_set_whole_archive_feature("${CMAKE_${lang}_COMPILER_LINKER}" "${lang}")
+    __cmake_set_whole_archive_feature("${CMAKE_${lang}_COMPILER_LINKER}"
+                                      "${CMAKE_${lang}_COMPILER_LINKER_ARCHITECTURE_FLAGS}"
+                                      "${lang}")
   endif()
 endmacro()
