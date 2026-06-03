@@ -803,6 +803,7 @@ Variables for CTest
    /variable/CTEST_SITE
    /variable/CTEST_SOURCE_DIRECTORY
    /variable/CTEST_SUBMIT_INACTIVITY_TIMEOUT
+   /variable/CTEST_SUBMIT_PARTS
    /variable/CTEST_SUBMIT_URL
    /variable/CTEST_SVN_COMMAND
    /variable/CTEST_SVN_OPTIONS

@@ -1808,6 +1808,14 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_EXTRA_SUBMIT_FILES`
   * :module:`CTest` module variable: none
 
+``SubmitParts``
+  A semicolon-separated list of part names to submit.  When set, only the
+  named parts are submitted rather than all available parts.  Valid names
+  are the same as the ``PARTS`` option of :command:`ctest_submit`.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SUBMIT_PARTS`
+  * :module:`CTest` module variable: none
+
 ``TimeLimit``
   Maximum total time (in seconds) allowed for the entire dashboard run.
   CTest will not start additional steps once the remaining time drops

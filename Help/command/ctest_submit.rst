@@ -22,7 +22,9 @@ By default all available parts are submitted.
 The options are:
 
 ``PARTS <part>...``
-  Specify a subset of parts to submit.  Valid part names are:
+  Specify a subset of parts to submit.  Takes precedence over the
+  :variable:`CTEST_SUBMIT_PARTS` variable if both are set.
+  Valid part names are:
 
   * ``Start`` - nothing.
   * ``Update`` - :command:`ctest_update` results, in ``Update.xml``.

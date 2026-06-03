@@ -204,6 +204,21 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments,
 {
   cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<SubmitArguments&>(arguments);
+
+  // Honor CTEST_SUBMIT_PARTS when PARTS is not given explicitly.
+  // Skip for FILES-only calls (where PARTS is intentionally absent so that
+  // only the named files are submitted) and for CDASH_UPLOAD calls (where
+  // the PARTS concept does not apply at all).
+  if (!args.Parts && !args.Files && !args.CDashUpload) {
+    cmValue submitPartsVar = mf.GetDefinition("CTEST_SUBMIT_PARTS");
+    if (submitPartsVar && !submitPartsVar->empty()) {
+      cmList submitPartsList{ *submitPartsVar };
+      if (!submitPartsList.empty()) {
+        args.Parts.emplace(submitPartsList.begin(), submitPartsList.end());
+      }
+    }
+  }
+
   if (args.Parts) {
     cm::erase_if(*(args.Parts), [this, &mf](std::string const& arg) -> bool {
       cmCTest::Part p = this->CTest->GetPartFromName(arg);
