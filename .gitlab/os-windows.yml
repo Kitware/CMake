@@ -45,25 +45,25 @@
     variables:
         VCVARSALL: "${VS180COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.50.35717"
+        VCVARSVERSION: "14.51.36231"
 
 .windows_vcvarsall_vs2026_x86:
     variables:
         VCVARSALL: "${VS180COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x86"
-        VCVARSVERSION: "14.50.35717"
+        VCVARSVERSION: "14.51.36231"
 
 .windows_vcvarsall_vs2026_x64_arm64:
     variables:
         VCVARSALL: "${VS180COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64_arm64"
-        VCVARSVERSION: "14.50.35717"
+        VCVARSVERSION: "14.51.36231"
 
 .windows_arm64_vcvarsall_vs2026:
     variables:
         VCVARSALL: "${VS180COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "arm64"
-        VCVARSVERSION: "14.50.35717"
+        VCVARSVERSION: "14.51.36231"
 
 .windows_vs2026_x64_pch:
     extends:
@@ -129,7 +129,7 @@
         CMAKE_CONFIGURATION: windows_vs2026_x64
         CMAKE_GENERATOR: "Visual Studio 18 2026"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v145,version=14.50.35717"
+        CMAKE_GENERATOR_TOOLSET: "v145,version=14.51.36231"
         CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_vs2022_x64:
@@ -359,7 +359,7 @@
         CMAKE_CONFIGURATION: windows_arm64_vs2026
         CMAKE_GENERATOR: "Visual Studio 18 2026"
         CMAKE_GENERATOR_PLATFORM: "ARM64"
-        CMAKE_GENERATOR_TOOLSET: "v145,version=14.50.35717"
+        CMAKE_GENERATOR_TOOLSET: "v145,version=14.51.36231"
         CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_arm64_vs2022:
@@ -411,7 +411,7 @@
         - windows-x86_64
         - shell
         - vs2026
-        - msvc-14.50
+        - msvc-14.51
         - nonconcurrent
 
 .windows_x86_64_tags_nonconcurrent_vs2026_arm64:
@@ -420,7 +420,7 @@
         - windows-x86_64
         - shell
         - vs2026
-        - msvc-14.50-arm64
+        - msvc-14.51-arm64
         - nonconcurrent
 
 .windows_x86_64_tags_concurrent_vs2026:
@@ -429,7 +429,7 @@
         - windows-x86_64
         - shell
         - vs2026
-        - msvc-14.50
+        - msvc-14.51
         - concurrent
 
 .windows_x86_64_tags_concurrent_vs2026_android:
@@ -439,7 +439,7 @@
         - shell
         - vs2026
         - vs18-android
-        - msvc-14.50
+        - msvc-14.51
         - concurrent
 
 .windows_x86_64_tags_concurrent_vs2022_msvc14.44:
@@ -493,7 +493,7 @@
         - windows-arm64
         - shell
         - vs2026
-        - msvc-14.50
+        - msvc-14.51
         - nonconcurrent
 
 .windows_arm64_tags_concurrent_vs2026:
@@ -502,7 +502,7 @@
         - windows-arm64
         - shell
         - vs2026
-        - msvc-14.50
+        - msvc-14.51
         - concurrent
 
 .windows_arm64_tags_concurrent_vs2022:
