@@ -31,6 +31,8 @@ class cmGlobalGenerator;
 class cmInstrumentation
 {
 public:
+  using Callback = cmInstrumentationQuery::Callback;
+
   enum class LoadQueriesAfter
   {
     Yes,
@@ -60,7 +62,8 @@ public:
   bool HasHook(cmInstrumentationQuery::Hook hook) const;
   bool ReadJSONQueries(std::string const& directory);
   void ReadJSONQuery(std::string const& file);
-  void WriteJSONQuery(std::set<cmInstrumentationQuery::Option> const& options,
+  void WriteJSONQuery(cmInstrumentationQuery::Version dataVersion,
+                      std::set<cmInstrumentationQuery::Option> const& options,
                       std::set<cmInstrumentationQuery::Hook> const& hooks,
                       std::vector<std::vector<std::string>> const& callback);
   void AddCustomContent(std::string const& name, Json::Value const& contents);
@@ -90,7 +93,8 @@ private:
   Json::Value ReadJsonSnippet(std::string const& file_name);
   bool AcquireLock(std::string const& lock_file, cmFileLock& lock,
                    unsigned long timeout);
-  void WriteInstrumentationJson(Json::Value& index,
+  void WriteInstrumentationJson(cmInstrumentationQuery::Version version,
+                                Json::Value& index,
                                 std::string const& directory,
                                 std::string const& file_name);
   void InsertStaticSystemInformation(Json::Value& index);
@@ -122,7 +126,7 @@ private:
   std::string dataDir;
   std::set<cmInstrumentationQuery::Option> options;
   std::set<cmInstrumentationQuery::Hook> hooks;
-  std::vector<std::string> callbacks;
+  std::vector<Callback> callbacks;
   std::vector<std::string> queryFiles;
   static std::map<std::string, std::string> cdashSnippetsMap;
   Json::Value preTestStats;

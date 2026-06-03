@@ -4,10 +4,29 @@
   "required": ["version"],
   "properties": {
     "version": {
-      "type": "integer",
       "description": "The data version of snippet file to generate.",
-      "enum": [
-        1
+      "oneOf": [
+        {
+          "type": "integer",
+          "const": 1
+        },
+        {
+          "type": "object",
+          "required": [
+            "major"
+          ],
+          "properties": {
+            "major": {
+              "type": "integer",
+              "const": 1
+            },
+            "minor": {
+              "type": "integer",
+              "const": 0
+            }
+          },
+          "additionalProperties": false
+        }
       ]
     },
     "callbacks": {
