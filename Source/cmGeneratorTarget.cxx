@@ -52,7 +52,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmSyntheticTargetCache.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
@@ -5511,12 +5510,114 @@ bool cmGeneratorTarget::ApplyCXXStdTargets()
   return true;
 }
 
-bool cmGeneratorTarget::DiscoverSyntheticTargets(
-  cmSyntheticTargetCache& cache, std::string const& config,
-  cmGeneratorTarget const* bmiConsumer)
+cmCxxModuleUsageEffects const& cmGeneratorTarget::GetCxxModuleUsageEffects()
+  const
 {
+  if (!this->CxxModuleUsageEffects) {
+    this->CxxModuleUsageEffects.emplace(this);
+  }
+
+  return *this->CxxModuleUsageEffects;
+}
+
+cmGeneratorTarget const* cmGeneratorTarget::GetTargetForCxxModules(
+  std::string const& config, cmGeneratorTarget const& bmiConsumer) const
+{
+  auto const& consumingUsage = bmiConsumer.GetCxxModuleUsageEffects();
+  auto const& owningUsage = this->GetCxxModuleUsageEffects();
+  if (consumingUsage.GetHash() == owningUsage.GetHash()) {
+    if (this->IsImported()) {
+      return this->GetCxxSyntheticTarget(config, *this);
+    }
+    return this;
+  }
+
+  return this->GetCxxSyntheticTarget(config, bmiConsumer);
+}
+
+cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
+  std::string const& config, cmGeneratorTarget const& bmiConsumer) const
+{
+  auto const& usageHash = bmiConsumer.GetCxxModuleUsageEffects().GetHash();
+  auto cached = this->SynthCxxTargets.find(usageHash);
+  if (cached != this->SynthCxxTargets.end()) {
+    return cached->second;
+  }
+
+  auto targetNameBase = this->GetName();
+  if (this->IsImported()) {
+    cmSystemTools::ReplaceString(targetNameBase, "::", "__");
+  }
+  auto const targetName =
+    cmStrCat(targetNameBase, "@synth_", this->SynthCxxTargets.size());
+
   std::vector<std::string> allConfigs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  auto const* model = this->Target;
+  auto* mf = this->Makefile;
+  auto* lg = this->GetLocalGenerator();
+  auto* tgt =
+    mf->AddSynthesizedTarget(cmStateEnums::INTERFACE_LIBRARY, targetName);
+
+  // Copy relevant information from the existing target.
+
+  // Copy policies to the target.
+  tgt->CopyPolicyStatuses(model);
+
+  // Copy file sets.
+  {
+    for (auto const* gfs :
+         this->GetInterfaceFileSets(cm::FileSetMetadata::CXX_MODULES)) {
+      auto* newFs =
+        tgt
+          ->GetOrCreateFileSet(gfs->GetName(), gfs->GetType(),
+                               cm::FileSetMetadata::Visibility::Public)
+          .first;
+      newFs->CopyEntries(gfs->GetFileSet());
+    }
+  }
+
+  // Copy properties which effect consumer compatibility
+  tgt->CopyUsageEffects(bmiConsumer.Target);
+
+  // Copy properties which don't effect consumer compatibility
+  tgt->CopyCxxModulesEntries(model);
+
+  // Copy other properties which may affect the C++ module BMI generation.
+  tgt->CopyCxxModulesProperties(model);
+
+  tgt->AddLinkLibrary(*mf, cmStrCat("$<COMPILE_ONLY:", model->GetName(), '>'),
+                      GENERAL_LibraryType);
+
+  // Create the generator target and attach it to the local generator.
+  auto gtp = cm::make_unique<cmGeneratorTarget>(tgt, lg);
+  auto* syntheticTarget = gtp.get();
+
+  // See `localGen->ComputeTargetCompileFeatures()` call in
+  // `cmGlobalGenerator::Compute` for where non-synthetic targets resolve
+  // this.
+  for (auto const& innerConfig : allConfigs) {
+    gtp->ComputeCompileFeatures(innerConfig);
+  }
+  // See `cmGlobalGenerator::ApplyCXXStdTargets` in
+  // `cmGlobalGenerator::Compute` for non-synthetic target resolutions.
+  if (!gtp->ApplyCXXStdTargets()) {
+    return nullptr;
+  }
+
+  lg->AddGeneratorTarget(std::move(gtp));
+  this->SynthCxxTargets[usageHash] = syntheticTarget;
+  if (!syntheticTarget->DiscoverSyntheticTargets(config, &bmiConsumer)) {
+    return nullptr;
+  }
+
+  return syntheticTarget;
+}
+
+bool cmGeneratorTarget::DiscoverSyntheticTargets(
+  std::string const& config, cmGeneratorTarget const* bmiConsumer)
+{
+  auto& configInfo = this->Configs[config];
   cmOptionalLinkImplementation impl;
   this->ComputeLinkImplementationLibraries(config, impl, UseTo::Link);
 
@@ -5524,9 +5625,7 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(
     bmiConsumer = this;
   }
 
-  cmCxxModuleUsageEffects usage(bmiConsumer);
-
-  auto& SyntheticDeps = this->Configs[config].SyntheticDeps;
+  auto& SyntheticDeps = configInfo.SyntheticDeps;
 
   for (auto const& entry : impl.Libraries) {
     auto const* gt = entry.Target;
@@ -5542,86 +5641,13 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(
       continue;
     }
 
-    cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
-    constexpr size_t HASH_TRUNCATION = 12;
-    auto dirhash =
-      hasher.HashString(gt->GetLocalGenerator()->GetCurrentBinaryDirectory());
-    std::string safeName = gt->GetName();
-    cmSystemTools::ReplaceString(safeName, ":", "_");
-    auto targetIdent =
-      hasher.HashString(cmStrCat("@d_", dirhash, "@u_", usage.GetHash()));
-    std::string targetName =
-      cmStrCat(safeName, "@synth_", targetIdent.substr(0, HASH_TRUNCATION));
-
-    // Check the cache to see if this instance of the target has
-    // already been created.
-    auto cached = cache.CxxModuleTargets.find(targetName);
-    cmGeneratorTarget const* synthDep = nullptr;
-    if (cached == cache.CxxModuleTargets.end()) {
-      auto const* model = gt->Target;
-      auto* mf = gt->Makefile;
-      auto* lg = gt->GetLocalGenerator();
-      auto* tgt =
-        mf->AddSynthesizedTarget(cmStateEnums::INTERFACE_LIBRARY, targetName);
-
-      // Copy relevant information from the existing target.
-
-      // Copy policies to the target.
-      tgt->CopyPolicyStatuses(model);
-
-      // Copy file sets.
-      {
-        for (auto const* gfs :
-             gt->GetInterfaceFileSets(cm::FileSetMetadata::CXX_MODULES)) {
-          auto* newFs =
-            tgt
-              ->GetOrCreateFileSet(gfs->GetName(), gfs->GetType(),
-                                   cm::FileSetMetadata::Visibility::Public)
-              .first;
-          newFs->CopyEntries(gfs->GetFileSet());
-        }
-      }
-
-      // Copy C++ module properties.
-      tgt->CopyCxxModulesEntries(model);
-
-      // Copy other properties which may affect the C++ module BMI
-      // generation.
-      tgt->CopyCxxModulesProperties(model);
-
-      tgt->AddLinkLibrary(*mf,
-                          cmStrCat("$<COMPILE_ONLY:", model->GetName(), '>'),
-                          GENERAL_LibraryType);
-
-      // Apply usage requirements to the target.
-      usage.ApplyToTarget(tgt);
-
-      // Create the generator target and attach it to the local generator.
-      auto gtp = cm::make_unique<cmGeneratorTarget>(tgt, lg);
-
-      synthDep = gtp.get();
-      cache.CxxModuleTargets[targetName] = synthDep;
-
-      // See `localGen->ComputeTargetCompileFeatures()` call in
-      // `cmGlobalGenerator::Compute` for where non-synthetic targets resolve
-      // this.
-      for (auto const& innerConfig : allConfigs) {
-        gtp->ComputeCompileFeatures(innerConfig);
-      }
-      // See `cmGlobalGenerator::ApplyCXXStdTargets` in
-      // `cmGlobalGenerator::Compute` for non-synthetic target resolutions.
-      if (!gtp->ApplyCXXStdTargets()) {
-        return false;
-      }
-
-      gtp->DiscoverSyntheticTargets(cache, config, bmiConsumer);
-
-      lg->AddGeneratorTarget(std::move(gtp));
-    } else {
-      synthDep = cached->second;
+    auto const* dep = gt->GetTargetForCxxModules(config, *bmiConsumer);
+    if (!dep) {
+      return false;
     }
-
-    SyntheticDeps[gt].push_back(synthDep);
+    if (dep->IsSynthetic()) {
+      SyntheticDeps[gt].push_back(dep);
+    }
   }
 
   return true;

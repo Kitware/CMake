@@ -63,7 +63,6 @@
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmSyntheticTargetCache.h"
 #include "cmSystemTools.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
@@ -2023,8 +2022,6 @@ bool cmGlobalGenerator::ApplyCXXStdTargets()
 
 bool cmGlobalGenerator::DiscoverSyntheticTargets()
 {
-  cmSyntheticTargetCache cache;
-
   for (auto const& gen : this->LocalGenerators) {
     // Because DiscoverSyntheticTargets() adds generator targets, we need to
     // cache the existing list of generator targets before starting.
@@ -2039,7 +2036,7 @@ bool cmGlobalGenerator::DiscoverSyntheticTargets()
         tgt->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
       for (auto const& config : configs) {
-        if (!tgt->DiscoverSyntheticTargets(cache, config)) {
+        if (!tgt->DiscoverSyntheticTargets(config)) {
           return false;
         }
       }

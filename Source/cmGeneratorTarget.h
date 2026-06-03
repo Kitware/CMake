@@ -19,6 +19,7 @@
 #include <cm/string_view>
 
 #include "cmAlgorithms.h"
+#include "cmCxxModuleUsageEffects.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -45,7 +46,6 @@ class cmGeneratorFileSet;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
-struct cmSyntheticTargetCache;
 class cmTarget;
 
 struct cmGeneratorExpressionDAGChecker;
@@ -1147,9 +1147,11 @@ public:
   std::string GetImportedXcFrameworkPath(std::string const& config) const;
 
   bool ApplyCXXStdTargets();
+  cmCxxModuleUsageEffects const& GetCxxModuleUsageEffects() const;
+  cmGeneratorTarget const* GetTargetForCxxModules(
+    std::string const& config, cmGeneratorTarget const& bmiConsumer) const;
   bool DiscoverSyntheticTargets(
-    cmSyntheticTargetCache& cache, std::string const& config,
-    cmGeneratorTarget const* bmiConsumer = nullptr);
+    std::string const& config, cmGeneratorTarget const* bmiConsumer = nullptr);
 
   using SyntheticDepsMap =
     std::map<cmGeneratorTarget const*, std::vector<cmGeneratorTarget const*>>;
@@ -1181,6 +1183,9 @@ public:
 
 private:
   void AddSourceCommon(std::string const& src, bool before = false);
+
+  cmGeneratorTarget const* GetCxxSyntheticTarget(
+    std::string const& config, cmGeneratorTarget const& bmiConsumer) const;
 
   std::string CreateFortranModuleDirectory(
     std::string const& working_dir) const;
@@ -1611,6 +1616,8 @@ private:
       SyntheticDeps;
     std::map<cmSourceFile const*, ClassifiedFlags> SourceFlags;
   };
+  mutable std::map<std::string, cmGeneratorTarget*> SynthCxxTargets;
+  mutable cm::optional<cmCxxModuleUsageEffects> CxxModuleUsageEffects;
   mutable std::map<std::string, InfoByConfig> Configs;
   std::unique_ptr<cmGeneratorFileSets> FileSets;
   bool PchReused = false;
