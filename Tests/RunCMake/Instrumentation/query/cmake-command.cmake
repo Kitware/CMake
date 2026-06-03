@@ -14,7 +14,7 @@
   # Query 2
   cmake_instrumentation(
     API_VERSION 1
-    DATA_VERSION 1
+    DATA_VERSION 1.0
     HOOKS postCMakeBuild
     OPTIONS staticSystemInformation dynamicSystemInformation trace
     CALLBACK ${CMAKE_COMMAND} -E echo callback2

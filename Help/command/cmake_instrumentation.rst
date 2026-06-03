@@ -19,10 +19,14 @@ This allows for configuring instrumentation at the project-level.
     [CUSTOM_CONTENT <name> <type> <content>]
   )
 
-The ``API_VERSION`` and ``DATA_VERSION`` must always be given.  Currently, the
-only supported value for both fields is 1.  See
-:ref:`cmake-instrumentation API v1` for details of the ``API_VERSION`` and
-:ref:`cmake-instrumentation Data Version` for details of the ``DATA_VERSION``.
+The ``API_VERSION`` and ``DATA_VERSION`` must always be given.
+
+``API_VERSION`` is an integer. Currently, the only supported value is ``1``.
+See :ref:`cmake-instrumentation API v1` for details.
+
+``DATA_VERSION`` is a version value of the form ``major`` or ``major.minor``.
+Currently, the only supported version is ``1.0``. See
+:ref:`cmake-instrumentation Data Version` for details.
 
 Each of the optional keywords ``HOOKS``, ``OPTIONS``, and ``CALLBACK``
 correspond to one of the parameters to the :ref:`cmake-instrumentation v1 Query Files`.
@@ -70,7 +74,7 @@ equivalent JSON query file.
 
   cmake_instrumentation(
     API_VERSION 1
-    DATA_VERSION 1
+    DATA_VERSION 1.0
     HOOKS postGenerate preCMakeBuild postCMakeBuild
     OPTIONS staticSystemInformation dynamicSystemInformation trace
     CALLBACK ${CMAKE_COMMAND} -P /path/to/handle_data.cmake
@@ -91,7 +95,7 @@ equivalent JSON query file.
       "staticSystemInformation", "dynamicSystemInformation", "trace"
     ],
     "callbacks": [
-      "/path/to/cmake -P /path/to/handle_data.cmake"
+      "/path/to/cmake -P /path/to/handle_data.cmake",
       "/path/to/cmake -P /path/to/handle_data_2.cmake"
     ]
   }

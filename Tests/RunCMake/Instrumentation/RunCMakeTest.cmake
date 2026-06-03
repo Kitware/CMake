@@ -208,6 +208,18 @@ instrument(empty BAD_QUERY
 instrument(bad-version BAD_QUERY
   CHECK_SCRIPT check-query-dir.cmake
 )
+instrument(bad-version-major BAD_QUERY
+  CHECK_SCRIPT check-query-dir.cmake
+)
+instrument(bad-version-minor BAD_QUERY
+  CHECK_SCRIPT check-query-dir.cmake
+)
+instrument(bad-version-object BAD_QUERY
+  CHECK_SCRIPT check-query-dir.cmake
+)
+instrument(hooks-invalid-version-ignored BUILD
+  CHECK_SCRIPT check-hooks-invalid-version-ignored.cmake
+)
 
 # Verify Hooks Run and Index File
 instrument(hooks-1 BUILD INSTALL TEST STATIC_QUERY
@@ -249,6 +261,7 @@ instrument(cmake-command-data
 )
 instrument(cmake-command-bad-api-version)
 instrument(cmake-command-bad-data-version)
+instrument(cmake-command-unsupported-data-version)
 instrument(cmake-command-missing-version)
 instrument(cmake-command-bad-arg)
 instrument(cmake-command-parallel-install

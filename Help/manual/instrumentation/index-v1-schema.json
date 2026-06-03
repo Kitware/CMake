@@ -34,11 +34,23 @@
   },
   "properties": {
     "version": {
-      "type": "integer",
       "description": "The data version of the index file.",
-      "enum": [
-        1
-      ]
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "type": "integer",
+          "const": 1
+        },
+        "minor": {
+          "type": "integer",
+          "const": 0
+        }
+      },
+      "additionalProperties": false
     },
     "buildDir": {
       "type": "string",

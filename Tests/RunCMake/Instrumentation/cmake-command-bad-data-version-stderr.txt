@@ -1,5 +1,6 @@
 CMake Error at [^
 ]*\(cmake_instrumentation\):
-  cmake_instrumentation given a non-integer DATA_VERSION\.
+  cmake_instrumentation given a malformed DATA_VERSION "NOT_AN_INT"\.  A
+  numeric major or major\.minor version is required\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:5 \(include\)

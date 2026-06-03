@@ -14,5 +14,9 @@
     "dynamicSystemInformation",
     "trace"
   ],
-  "version": 1
+  "version" :
+  {
+    "major" : 1,
+    "minor" : 0
+  }
 }
