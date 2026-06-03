@@ -26,6 +26,12 @@ void WriteFilenameGcc(cmsys::ofstream& fout, std::string const& filename)
 {
   for (auto c : filename) {
     switch (c) {
+      case '$':
+        fout << "$$";
+        break;
+      case '#':
+        fout << "\\#";
+        break;
       case ' ':
         fout << "\\ ";
         break;
