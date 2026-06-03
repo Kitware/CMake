@@ -3841,7 +3841,7 @@ static const struct SourcePropertyNode : public cmGeneratorExpressionNode
   std::string Evaluate(
     std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
     GeneratorExpressionContent const* content,
-    cmGeneratorExpressionDAGChecker* /*dagCheckerParent*/) const override
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
   {
     static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
 
@@ -3891,7 +3891,47 @@ static const struct SourcePropertyNode : public cmGeneratorExpressionNode
       return std::string{};
     }
 
-    return sourceFile->GetPropertyForUser(propertyName);
+    if (propertyName == "OBJECT_NAME"_s) {
+      return eval->Context.LG->GetCustomObjectFileName(*sourceFile);
+    }
+
+    std::string result = sourceFile->GetPropertyForUser(propertyName);
+
+    if (propertyName == "INCLUDE_DIRECTORIES"_s ||
+        propertyName == "COMPILE_DEFINITIONS"_s ||
+        propertyName == "COMPILE_OPTIONS"_s ||
+        propertyName == "COMPILE_FLAGS"_s ||
+        propertyName == "OBJECT_OUTPUTS"_s ||
+        propertyName == "VS_DEPLOYMENT_CONTENT"_s ||
+        propertyName == "VS_SETTINGS"_s) {
+      if (eval->HeadTarget) {
+        cmGeneratorExpressionDAGChecker dagChecker{
+          eval->HeadTarget, propertyName,  content,
+          dagCheckerParent, eval->Context, eval->Backtrace,
+        };
+        switch (dagChecker.Check()) {
+          case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+          case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
+            dagChecker.ReportError(eval, content->GetOriginalExpression());
+            return std::string{};
+          }
+          case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+          case cmGeneratorExpressionDAGChecker::DAG:
+            break;
+        }
+
+        return cmGeneratorExpression::StripEmptyListElements(
+          this->EvaluateDependentExpression(result, eval, eval->HeadTarget,
+                                            &dagChecker, eval->CurrentTarget));
+      }
+
+      return cmGeneratorExpression::StripEmptyListElements(
+        this->EvaluateDependentExpression(result, eval, eval->HeadTarget,
+                                          dagCheckerParent,
+                                          eval->CurrentTarget));
+    }
+
+    return result;
   }
 } sourcePropertyNode;
 
