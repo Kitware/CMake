@@ -457,7 +457,7 @@ The options for running tests are:
 
  Specify the directory in which to look for tests, typically a CMake project
  build directory. If not specified, the current directory is used.
- See also :ctest-option:`--build-dir`.
+ See also :ctest-dashboard-option:`--build-dir`.
 
 .. option:: --test-output-size-passed <size>
 
@@ -856,7 +856,7 @@ Options for Dashboard Client include:
 
 The available ``<dashboard-options>`` are the following:
 
-.. _`ctest-option-D-var`:
+.. program:: ctest-dashboard
 
 .. option:: -D <var>:<type>=<value>, -D <var>=<value>
 
@@ -888,13 +888,13 @@ The available ``<dashboard-options>`` are the following:
  Specify the project source directory. When combined with
  :option:`-T Configure <ctest -T>`, this allows CTest to perform an initial
  configure step for an empty binary directory.  The binary directory defaults
- to the current working directory; use :ctest-option:`--build-dir` to specify
- a different location. The binary directory is created automatically if it
- does not yet exist.
+ to the current working directory; use :ctest-dashboard-option:`--build-dir` to
+ specify a different location. The binary directory is created automatically
+ if it does not yet exist.
 
  A CMake generator must also be specified. Use
- :cref:`-D CTEST_CMAKE_GENERATOR=\<gen\> <ctest-option-D-var>` to supply one, or
- set :variable:`CTEST_CONFIGURE_PRESET` to specify a
+ :option:`-D CTEST_CMAKE_GENERATOR=\<gen\> <ctest-dashboard -D>` to supply one,
+ or set :variable:`CTEST_CONFIGURE_PRESET` to specify a
  :manual:`configure preset <cmake-presets(7)>` that includes a
  :preset:`generator <configurePresets.generator>`.
 
@@ -906,7 +906,7 @@ The available ``<dashboard-options>`` are the following:
 
  Specify the project binary (build) directory. This is an alias for
  :ctest-option:`--test-dir` intended for use with
- :ctest-option:`--source-dir` when bootstrapping a build with
+ :ctest-dashboard-option:`--source-dir` when bootstrapping a build with
  :option:`-T Configure <ctest -T>`.
 
 .. option:: --group <group>
@@ -1043,9 +1043,9 @@ to the build tree and use one of these signatures::
   ctest -D <mode>[<step>]
   ctest -M <mode> [-T <step>]...
 
-The :ctest-option:`--source-dir` option additionally allows the
+The :ctest-dashboard-option:`--source-dir` option additionally allows the
 ``Configure`` step to be performed on a build tree that does not yet
-exist, in which case the :ctest-option:`--build-dir` option specifies
+exist, in which case the :ctest-dashboard-option:`--build-dir` option specifies
 where to create it::
 
   ctest [-M <mode>] -T Configure
