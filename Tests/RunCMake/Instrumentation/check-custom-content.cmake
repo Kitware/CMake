@@ -18,7 +18,7 @@ foreach(content_file IN LISTS content_files)
   # Check version
   string(JSON version GET "${contents}" version)
   json_assert_key("${content_file}" "${version}" major "1")
-  json_assert_key("${content_file}" "${version}" minor "0")
+  json_assert_key("${content_file}" "${version}" minor "1")
 
   # Check project name
   json_assert_key("${content_file}" "${contents}" project "instrumentation")

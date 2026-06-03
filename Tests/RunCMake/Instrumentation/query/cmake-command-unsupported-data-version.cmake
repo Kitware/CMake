@@ -1,4 +1,4 @@
 cmake_instrumentation(
   API_VERSION 1
-  DATA_VERSION 1.1
+  DATA_VERSION 2.1
 )

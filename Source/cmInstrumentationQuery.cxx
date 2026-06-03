@@ -165,13 +165,13 @@ bool cmInstrumentationQuery::ReadJSON(std::string const& filename,
 bool cmInstrumentationQuery::ValidDataVersion(Version version)
 {
   auto const latest = LatestDataVersion();
-  return version.Major == latest.Major && version.Minor == latest.Minor;
+  return version.Major == latest.Major && version.Minor <= latest.Minor;
 }
 
 Version cmInstrumentationQuery::LatestDataVersion()
 {
   Version latest;
   latest.Major = 1;
-  latest.Minor = 0;
+  latest.Minor = 1;
   return latest;
 }

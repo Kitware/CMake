@@ -22,7 +22,10 @@
             },
             "minor": {
               "type": "integer",
-              "const": 0
+              "enum": [
+                0,
+                1
+              ]
             }
           },
           "additionalProperties": false

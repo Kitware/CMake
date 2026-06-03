@@ -17,8 +17,7 @@ information and system diagnostic information during the configure, generate,
 build, test and install steps for a CMake project.
 
 All interactions with the CMake instrumentation API must specify both an API
-version and a Data version. At this time, there is only one version for each of
-these: see the `API v1`_ and `Data Version`_.
+version and a `Data Version`_. There is only one API version, see the `API v1`_.
 
 .. note::
 
@@ -229,11 +228,11 @@ request a specific Data Version, and `v1 Data Files`_ of the corresponding
 version will be generated and sent to the user `Callbacks`_ defined in that
 query.
 
-Currently, the only supported version is ``1.0``. A new major version number
-will be created whenever previously included data is removed or reformatted such
-that scripts written to parse this data may become incompatible with the new
-format. A new minor version number will be created whenever new data becomes
-available.
+Currently, the only supported major version is ``1``, and the maximum supported
+minor version is also ``1``. A new major version number will be created whenever
+previously included data is removed or reformatted such that scripts written to
+parse this data may become incompatible with the new format. A new minor version
+number will be created whenever new data becomes available.
 
 .. _`cmake-instrumentation v1 Query Files`:
 
@@ -306,6 +305,8 @@ key is required, but all other fields are optional.
       Enables collection of command output in generated `v1 Snippet Files`_.
       When enabled, snippets for ``compile``, ``link``, ``custom``, ``test``, and
       ``install`` commands include ``stdout`` and ``stderr`` fields.
+
+      Only available as of data version ``1.1``.
 
     ``cdashSubmit``
       Enables including instrumentation data in CDash. This is
@@ -546,7 +547,7 @@ Example:
   {
     "version": {
       "major": 1,
-      "minor": 0
+      "minor": 1
     },
     "command" : "\"/usr/bin/c++\" \"-MD\" \"-MT\" \"CMakeFiles/main.dir/main.cxx.o\" \"-MF\" \"CMakeFiles/main.dir/main.cxx.o.d\" \"-o\" \"CMakeFiles/main.dir/main.cxx.o\" \"-c\" \"<src>/main.cxx\"",
     "role" : "compile",
