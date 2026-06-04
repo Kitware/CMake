@@ -32,6 +32,11 @@ Command-Line
   final product.  CMake will always emit a warning when the project file is
   anything other than ``CMakeLists.txt``.
 
+* The :option:`cmake --sarif-output` option was added to enable generation of a
+  `Static Analysis Results Interchange Format (SARIF)
+  <https://sarifweb.azurewebsites.net/>`_ log file recording diagnostic
+  messages from the run.
+
 Commands
 --------
 
@@ -58,6 +63,10 @@ Variables
 * The :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL` variable
   was added to specify the :command:`execute_process` command's
   default ``COMMAND_ERROR_IS_FATAL`` behavior.
+
+* The :variable:`CMAKE_EXPORT_SARIF` variable was added to enable generation of
+  a SARIF log file listing diagnostics recorded during configuration and
+  generation of a CMake project.
 
 * The :variable:`CMAKE_<LANG>_LINK_MODE` and
   :variable:`CMAKE_<LANG>_DEVICE_LINK_MODE` variables were added to provide
