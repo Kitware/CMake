@@ -1,0 +1,407 @@
+CMake 4.4 Release Notes
+***********************
+
+.. only:: html
+
+  .. contents::
+
+Changes made since CMake 4.3 include the following.
+
+New Features
+============
+
+Diagnostics
+-----------
+
+* CMake diagnostic actions are now tracked in a new state type managed by the
+  :command:`cmake_diagnostic` command.  This replaces the old system which
+  sometimes used variables to manage reporting actions and sometimes did not
+  allow management beyond command-line options and presets.  The new system
+  also introduces several new diagnostic categories and significantly reduces
+  the cost of adding additional categories in the future.  See the
+  :manual:`cmake-diagnostics(7)` manual for a list of available categories.
+
+* The :diagnostic:`CMD_INSTALL_ABSOLUTE_DESTINATION` diagnostic category
+  was added to diagnose :command:`install` commands that specify an
+  absolute ``DESTINATION``.  This diagnostic may be controlled with the
+  :option:`-Winstall-absolute-destination <cmake -W>` command-line option,
+  the ``installAbsoluteDestination`` field in a
+  :manual:`CMake Presets <cmake-presets(7)>`
+  :preset:`configurePresets.warnings` object,
+  or the :command:`cmake_diagnostic` command.
+
+Presets
+-------
+
+* :manual:`cmake-presets(7)` files now support schema version 12.
+
+* :manual:`cmake(1)`, :manual:`ctest(1)`, and :manual:`cpack(1)` gained
+  ``--presets-file`` arguments to support loading
+  :manual:`presets <cmake-presets(7)>` from the specified file instead of
+  ``CMakePresets.json`` and/or ``CMakeUserPresets.json``. See
+  :option:`cmake --presets-file`,
+  :option:`cmake --build --presets-file <cmake--build --presets-file>`,
+  :option:`cmake --workflow --presets-file <cmake--workflow --presets-file>`,
+  :option:`ctest --presets-file`, and :option:`cpack --presets-file` for details.
+
+* :manual:`cmake-presets(7)`, in schema version 12 and above, now expand the
+  :ref:`${fileDir} <CMakePresets fileDir>` macro to the directory of the
+  presets file containing the ``${fileDir}`` macro, regardless of whether
+  it is inherited by another preset in a different directory.
+
+* :manual:`cmake-presets(7)` gained support for a
+  ``testPassthroughArguments`` field in the
+  test preset ``execution`` object for
+  forwarding arguments to test executables via presets.
+
+File-Based API
+--------------
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 object has been
+  updated to 2.11.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" "sources" and
+  "interfaceSources" objects gained new ``fileSetIndexes`` fields to support
+  sources belonging to multiple file sets. The ``fileSetIndex`` fields are
+  maintained for backwards compatibility only, and users are advised to port
+  to the new fields.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" "sources"
+  object gained a new ``backtraces`` field to represent multiple command
+  invocations which associate a single source for a given target with multiple
+  file sets. The ``backtrace`` field is maintained for backwards compatibility
+  only, and users are advised to port to the new field.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "installers" object's
+  optional ``fileSetType`` field gained a new ``SOURCES`` value to incorporate
+  the new :ref:`file set <file sets>` ``SOURCES`` type in codemodel replies.
+
+Generators
+----------
+
+* The :ref:`Ninja Generators` now support generating a build target named
+  ``test_prep/<test-name>`` for each test added by :command:`add_test`, which
+  builds all dependencies for that test. Build dependencies are registered for
+  an executable target invoked by the test, targets referenced in generator
+  expressions in the test command, and explicit dependencies added using the
+  new ``BUILD_DEPENDS`` option. This behavior is enabled by the new
+  :variable:`CMAKE_TEST_BUILD_DEPENDS` variable. A ``test_prep/all``
+  target is also generated to depend on every ``test_prep/<test-name>``
+  target. Tests with names that are not valid target names are excluded from
+  this behavior. If multiple tests in different directories share the same
+  name, their dependencies are merged into one ``test_prep/<test-name>``
+  target.
+
+Compilers
+---------
+
+* C++ 20 named modules are now supported with ``clang-cl``.
+  See :manual:`cmake-cxxmodules(7)`.
+
+* The ``ibm-flang`` compiler is now supported with
+  :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``IBMLLVMFlang``.
+
+* The `Pelles C`_ toolchain is now supported with compiler id ``PellesC``.
+
+  The ``ASM_POASM`` language was added to support the Pelles Macro Assembler.
+
+* The Open Watcom ``wlink`` linker is now identified with
+  :variable:`CMAKE_<LANG>_COMPILER_LINKER_ID` ``OpenWatcom``.
+
+* The `wild linker <https://github.com/wild-linker/wild>`_ is now
+  supported with :variable:`CMAKE_<LANG>_COMPILER_LINKER_ID` ``WILD``.
+
+.. _`Pelles C`: https://pellesc.se
+
+Command-Line
+------------
+
+* :manual:`cmake(1)` now supports ``--build <dir> --preset <pre>``
+  regardless of the current working directory.
+
+* The :option:`cmake -D` command-line option now populates a
+  default :prop_cache:`HELPSTRING` for variables known to CMake.
+
+* :option:`cmake --install` now supports installing multiple components.
+
+* :option:`cmake --install` now accepts ``-j<N>`` in addition to ``-j <N>``
+  for specifying the number of parallel jobs.
+
+* The :option:`cmake -E` commands
+  :option:`copy_if_different <cmake-E copy_if_different>`,
+  :option:`copy_if_newer <cmake-E copy_if_newer>`,
+  :option:`copy_directory <cmake-E copy_directory>`,
+  :option:`copy_directory_if_different <cmake-E copy_directory_if_different>`,
+  and :option:`copy_directory_if_newer <cmake-E copy_directory_if_newer>`
+  gained support for the ``-t`` argument.
+
+* The :option:`cmake -E tar <cmake-E tar>` command-line tool gained the
+  :option:`--cmake-tar-encoding <cmake-E_tar --cmake-tar-encoding>` flag
+  to specify the pathname encoding used in archives.
+
+Commands
+--------
+
+* The :command:`block` command can now create a ``DIAGNOSTICS`` scope.
+
+* The :command:`cmake_diagnostic` command was added to manipulate CMake's
+  diagnostic state.
+
+* The :command:`cmake_parse_arguments` command gained a new ``PARSE_ARGN``
+  signature that starts parsing after the last named argument of the calling
+  function and works exactly like ``PARSE_ARGV`` with ``<N>`` being the number
+  of parameters in the function definition.
+
+* The :command:`discover_tests` command was added to support registering tests
+  discovered at test time by :manual:`ctest(1)`. It runs a user-provided
+  discovery command, parses its output, and generates test names, arguments,
+  and properties from regular-expression captures.
+
+* The :command:`execute_process` command learned the
+  ``ENVIRONMENT`` and ``ENVIRONMENT_MODIFICATION`` options to run child
+  processes with a modified environment.
+
+* The :command:`file(ARCHIVE_CREATE)` and :command:`file(ARCHIVE_EXTRACT)`
+  commands gained an ``ENCODING`` option to specify the encoding of the
+  archive pathnames.  The default is now ``UTF-8``.
+  See policy :policy:`CMP0213`.
+
+* The :command:`file(READ_SYMLINK)` command gained a ``RESULT``
+  option to capture errors without failing.
+
+* The :command:`include` command now has a ``NO_DIAGNOSTIC_SCOPE`` option.
+
+* The :command:`list(FILTER)` command gained a new ``PREDICATE`` mode
+  that invokes a user-defined :command:`function` to decide which elements are
+  included or excluded, complementing the existing ``REGEX`` mode.
+
+* The :command:`list(SORT)` command gained a new ``COMPARATOR`` keyword
+  that invokes a user-defined :command:`function` to compare elements, complementing
+  the built-in ``COMPARE`` methods.
+
+* The :command:`list(TRANSFORM)` command gained a new ``APPLY`` action that
+  invokes a user-defined :command:`function` for each element of the list,
+  enabling arbitrary per-element transformations.
+
+* The :command:`list(TRANSFORM)` command gained a new ``PREDICATE`` selector
+  that invokes a user-defined :command:`function` to decide which elements are
+  transformed.
+
+* The :command:`string(JSON ... PARTIAL_EQUAL) <string(JSON-PARTIAL_EQUAL)>`
+  command was added to compare two JSON values using *partial* equality.
+
+File Sets
+---------
+
+* A ``SOURCES`` :ref:`file set <file sets>` type was added to specify
+  a target's source files via file sets.
+
+* The :prop_fs:`CXX_SCAN_FOR_MODULES` file set property was added to
+  control whether a file set's sources are scanned for C++ modules.
+
+* The :prop_fs:`INDEPENDENT_FILES` file set property was added to
+  specify that a file set's sources do not depend on any generated files.
+
+* The :prop_fs:`JOB_POOL_COMPILE` file set property was added to
+  assign a file set's sources to a specific Ninja job pool.
+
+* The :prop_fs:`SCOPE`, :prop_fs:`TYPE`, :prop_fs:`BASE_DIRS`,
+  :prop_fs:`SOURCES`, and :prop_fs:`INTERFACE_SOURCES` file set
+  properties were added to provide the declared details of a file set.
+
+* The :prop_fs:`SKIP_LINTING` file set property was added to exclude
+  a file set's sources from target-wide code checks.
+
+* The :prop_fs:`SKIP_PRECOMPILE_HEADERS` file set property was added
+  to avoid using precompiled headers for a file set's sources.
+
+* The :prop_fs:`SKIP_UNITY_BUILD_INCLUSION` file set property was added
+  to exclude a file set's sources from inclusion in unity builds.
+
+Variables
+---------
+
+* The :variable:`CMAKE_INSTALL_DEFAULT_COMPONENT_NAME` variable gained
+  support for a special ``<PROJECT_NAME>`` placeholder value.
+  It tells each :command:`install` invocation to take a default component
+  name from the current :variable:`PROJECT_NAME` variable value.
+
+Environment Variables
+---------------------
+
+* The :envvar:`CMAKE_DISABLE_PRECOMPILE_HEADERS` environment variable
+  was added to disable precompiled headers by default.
+
+Properties
+----------
+
+* The :prop_tgt:`VERIFY_INTERFACE_HEADER_SETS` and
+  :prop_tgt:`VERIFY_PRIVATE_HEADER_SETS` target properties now always
+  create the per-target verification target and the aggregate
+  ``all_verify_interface_header_sets``, ``all_verify_private_header_sets``,
+  and ``all_verify_header_sets`` targets when the property is enabled,
+  even if the target has no matching header sets.
+
+* The :prop_tgt:`VERIFY_INTERFACE_HEADER_SETS` and
+  :prop_tgt:`VERIFY_PRIVATE_HEADER_SETS` target properties now support
+  ``OBJC`` and ``OBJCXX`` languages in addition to ``C`` and ``CXX``.
+
+* The :prop_tgt:`VS_SOLUTION_DEPLOY` target property is now implemented
+  for targets created by :command:`add_custom_target`.
+
+Modules
+-------
+
+* The :module:`CMakePackageConfigHelpers` module's
+  :command:`write_basic_package_version_file` command now supports
+  ``SamePatchVersion``, ``SameFullVersion``, and ``SemanticVersion``
+  compatibility modes. The older ``ExactVersion`` mode is now documented as
+  deprecated in favor of the more explicit ``SamePatchVersion`` and
+  ``SameFullVersion`` modes. The ``SemanticVersion`` mode treats ``0.y.z``
+  versions more strictly than ``1.y.z`` and later versions.
+
+* The :module:`ExternalData` module gained an
+  :variable:`ExternalData_LINK_MODE` variable to select an ordered list
+  of file materialization modes for hard links, symbolic links, and
+  copies.
+
+* The :module:`ExternalData` module gained an
+  :variable:`ExternalData_STATE_ROOT` variable to store hash records outside
+  :variable:`ExternalData_BINARY_ROOT`.
+
+* The :module:`ExternalProject` and :module:`FetchContent` modules gained
+  :variable:`CMAKE_EP_GIT_CLONE_RETRY_COUNT` and
+  :variable:`CMAKE_EP_GIT_CLONE_RETRY_DELAY` variables to control
+  ``git clone`` retries.
+
+* The :module:`FindCUDAToolkit` module now creates a ``CUDA::sanitizer``
+  target for the :ref:`compute-sanitizer <FindCUDAToolkit_sanitizer>`
+  library.
+
+* The :module:`FindCUDAToolkit` module now provides an imported target
+  for ``cufilt`` in CUDA 11.4 and above.
+
+* :module:`FindPython` and :module:`FindPython3` modules gained the support of
+  the Stable ABI for Free Threaded Python (``SABIT``) as specified by
+  :pep:`803`.
+
+Generator Expressions
+---------------------
+
+* The :genex:`TARGET_OBJECTS` generator expression now has an optional
+  ``SOURCE_FILES:...`` argument, which can take one or more source files as
+  arguments, and will filter its output to only include objects built from
+  those source files.
+
+Swift
+-----
+
+* The :ref:`Ninja Generators` gained the
+  :prop_tgt:`Swift_SEPARATE_MODULE_EMISSION` target property, initialized by
+  the :variable:`CMAKE_Swift_SEPARATE_MODULE_EMISSION` variable, to control
+  whether importable Swift targets emit ``.swiftmodule`` from a dedicated
+  build edge.  Policy :policy:`CMP0215` enables this by default.
+
+* The default :prop_tgt:`Swift_MODULE_NAME` now replaces hyphens with
+  underscores, since hyphens are not valid in Swift module identifiers.
+
+* Swift targets now have a package name by default.
+  See policy :policy:`CMP0216`.
+
+* The :prop_tgt:`Swift_PACKAGE_NAME` target property was added to
+  specify a Swift package name.
+
+* Swift targets on Windows now support the ``$<TARGET_PDB_FILE:...>``
+  family of generator expressions.
+
+CTest
+-----
+
+* :manual:`ctest(1)` gained support for forwarding extra arguments to test
+  executables using a :option:`-- <ctest -->` separator.
+
+* :manual:`ctest(1)` gained a :ref:`CoverageTool <ctest-CoverageTool>`
+  option in :ref:`Dashboard Client` mode to configure tests for
+  coverage collection by ``llvm-cov``.
+
+* The :command:`ctest_configure`, :command:`ctest_build`,
+  :command:`ctest_test`, and :command:`ctest_memcheck` commands gained
+  ``PRESET`` and ``PRESETS_FILE`` arguments to support using
+  :manual:`presets <cmake-presets(7)>` for their :ref:`Dashboard Client` steps.
+
+  The :variable:`CTEST_CONFIGURE_PRESET`, :variable:`CTEST_BUILD_PRESET`,
+  :variable:`CTEST_TEST_PRESET`, :variable:`CTEST_PRESET`, and
+  :variable:`CTEST_PRESETS_FILE` variables may be used to specify preset
+  arguments to the above commands in a :ref:`Dashboard Client` script or
+  on the :program:`ctest` command line via the
+  :ctest-dashboard-option:`-D` option.
+
+* :manual:`ctest(1)` gained support for a :variable:`CTEST_SUBMIT_PARTS`
+  variable that restricts which parts are uploaded when operating in
+  :ref:`Dashboard Client` mode.
+
+* The :command:`ctest_update` command gained ``VERSION_ONLY`` and
+  ``VERSION_OVERRIDE`` options to select or report a source revision
+  without requiring the corresponding
+  :variable:`CTEST_UPDATE_VERSION_ONLY` or
+  :variable:`CTEST_UPDATE_VERSION_OVERRIDE` dashboard script variables.
+
+CPack
+-----
+
+* The :cpack_gen:`CPack Archive Generator` gained the
+  :variable:`CPACK_ARCHIVE_ENCODING` variable to specify the pathname
+  encoding used in package archives.
+
+* The :cpack_gen:`CPack NSIS Generator` gained a new variable
+  :variable:`CPACK_NSIS_IGNORE_COMPONENTS_PAGE` to ignore the
+  component selection page in the installer.
+
+* The :variable:`CPACK_RPM_SPEC_MORE_DEFINE` variable now supports
+  a list of definitions.
+
+Deprecated and Removed Features
+===============================
+
+* The ``-W[no-][error=]dev`` command-line options are deprecated.  The new
+  spelling is :option:`-W[no-][error=]author <cmake -W>`.
+
+* The ``--warn-uninitialized`` command-line option is deprecated.  The new
+  spelling is :option:`-Wuninitialized <cmake -W>`.
+
+* The ``--no-warn-unused-cli`` command-line option is deprecated.  The new
+  spelling is :option:`-Wno-unused-cli <cmake -Wno->`.
+
+* The :variable:`CMAKE_WARN_DEPRECATED` and :variable:`CMAKE_ERROR_DEPRECATED`
+  variables are deprecated.  The new :command:`cmake_diagnostic` command should
+  be used instead.
+
+* The :prop_dir:`MACROS` directory property does not exist anymore.
+  See policy :policy:`CMP0217`.
+
+Other Changes
+=============
+
+* A file may belong to at most one non-``HEADERS`` :ref:`file set <file sets>`
+  in a target.  See policy :policy:`CMP0211`.
+
+* :command:`macro` invocations now preserve backslashes in arguments.
+  See policy :policy:`CMP0219`.
+
+* :command:`variable_watch` callback command arguments preserve backslashes.
+  See policy :policy:`CMP0219`.
+
+* :manual:`ctest(1)` now exits with non-zero if invoked with no
+  arguments and no test input file exists.
+
+* Test drivers generated by the :command:`create_test_sourcelist` command now
+  support the `-N` option to list all tests, one per line.  This is useful in
+  combination with the new :command:`discover_tests` command.
+
+* Names of executables given to the ``DEPENDS`` argument of
+  :command:`add_custom_command` no longer have ``.exe`` suffixes stripped to
+  establish target-level dependencies. See policy :policy:`CMP0212`.
+
+* Targets which provide C++ modules may now be consumed by targets with
+  different :prop_tgt:`compile features <COMPILE_FEATURES>` and
+  :prop_tgt:`options <COMPILE_OPTIONS>` than the provider.
