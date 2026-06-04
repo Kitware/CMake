@@ -27,7 +27,7 @@ at the start of the input string:
 
 .. code-block:: cmake
 
-  string(REGEX REPLACE "^a" "b" result "aaaa") # result="abbb"
+  string(REGEX REPLACE "^a" "b" result "aaaa") # result="baaa"
   string(REGEX MATCHALL "^a" result "aaaa")    # result="a"
 
 This policy provides compatibility for projects that have not been updated.
