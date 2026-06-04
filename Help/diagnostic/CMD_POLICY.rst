@@ -1,6 +1,8 @@
 CMD_POLICY
 ----------
 
+.. versionadded:: 4.4
+
 .. diagnostic::
   :default: warn
   :parent: CMD_AUTHOR

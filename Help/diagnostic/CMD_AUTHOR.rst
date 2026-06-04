@@ -1,6 +1,8 @@
 CMD_AUTHOR
 ----------
 
+.. versionadded:: 4.4
+
 .. diagnostic::
   :default: warn
 

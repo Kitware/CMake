@@ -1,6 +1,8 @@
 CMD_INSTALL_ABSOLUTE_DESTINATION
 --------------------------------
 
+.. versionadded:: 4.4
+
 .. diagnostic::
   :default: ignore
   :parent: CMD_AUTHOR
