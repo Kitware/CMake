@@ -1,6 +1,8 @@
 CMD_DEPRECATED
 --------------
 
+.. versionadded:: 4.4
+
 .. diagnostic::
   :default: warn
   :parent: CMD_AUTHOR

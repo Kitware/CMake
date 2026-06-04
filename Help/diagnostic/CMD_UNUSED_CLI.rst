@@ -1,6 +1,8 @@
 CMD_UNUSED_CLI
 --------------
 
+.. versionadded:: 4.4
+
 .. diagnostic::
   :default: ignore
 

@@ -1,6 +1,8 @@
 discover_tests
 --------------
 
+.. versionadded:: 4.4
+
 Register tests with names and properties discovered at test time by
 :manual:`ctest(1)`.
 
