@@ -872,3 +872,43 @@ block()
     -D CTEST_BUILD_NAME=cli-build-name
     )
 endblock()
+
+# Test CTEST_SUBMIT_PARTS: a valid part name reaches the network submission step.
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SubmitParts-valid-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/DartConfiguration.tcl"
+    "SourceDirectory: ${RunCMake_TEST_BINARY_DIR}\n"
+    "BuildDirectory: ${RunCMake_TEST_BINARY_DIR}\n"
+    "DropMethod: https\n"
+    "DropSite: badhostname.invalid\n"
+    "DropLocation: /submit.php?project=Test\n"
+    "CTestSubmitRetryCount: 0\n"
+  )
+  run_cmake_command(SubmitParts-valid-ctest
+    ${CMAKE_CTEST_COMMAND} -M Experimental -T Start -T Submit -VV
+    -D CTEST_SUBMIT_PARTS=Done
+  )
+endblock()
+
+# Test CTEST_SUBMIT_PARTS: an invalid part name produces a validation error.
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SubmitParts-badpart-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/DartConfiguration.tcl"
+    "SourceDirectory: ${RunCMake_TEST_BINARY_DIR}\n"
+    "BuildDirectory: ${RunCMake_TEST_BINARY_DIR}\n"
+    "DropMethod: https\n"
+    "DropSite: badhostname.invalid\n"
+    "DropLocation: /submit.php?project=Test\n"
+    "CTestSubmitRetryCount: 0\n"
+  )
+  run_cmake_command(SubmitParts-badpart-ctest
+    ${CMAKE_CTEST_COMMAND} -M Experimental -T Start -T Submit
+    -D CTEST_SUBMIT_PARTS=BadPart
+  )
+endblock()

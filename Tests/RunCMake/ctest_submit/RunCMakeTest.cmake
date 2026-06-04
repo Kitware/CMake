@@ -29,6 +29,19 @@ run_ctest_submit(RepeatRETURN_VALUE RETURN_VALUE res RETURN_VALUE res)
 run_ctest_submit(PARTSCDashUpload PARTS Configure CDASH_UPLOAD)
 run_ctest_submit(PARTSCDashUploadType PARTS Configure CDASH_UPLOAD_TYPE)
 run_ctest_submit(PARTSDone PARTS Done)
+
+# Test CTEST_SUBMIT_PARTS with a valid value.
+block()
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_SUBMIT_PARTS Done)")
+  run_ctest_submit(PARTSDone-variable)
+endblock()
+
+# Test CTEST_SUBMIT_PARTS with an invalid value.
+block()
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_SUBMIT_PARTS bad-part)")
+  run_ctest_submit(BadPARTS-variable)
+endblock()
+
 run_ctest_submit(CDashUploadPARTS CDASH_UPLOAD bad-upload PARTS)
 run_ctest_submit(CDashUploadFILES CDASH_UPLOAD bad-upload FILES)
 run_ctest_submit(CDashUploadNone CDASH_UPLOAD)
