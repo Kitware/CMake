@@ -495,8 +495,6 @@ Getting current message log level
 
 .. versionadded:: 3.25
 
-.. _query_message_log_level:
-
 .. signature::
   cmake_language(GET_MESSAGE_LOG_LEVEL <output_variable>)
 
@@ -506,9 +504,8 @@ Getting current message log level
   See :command:`message` for the possible logging levels.
 
   The current message logging level can be set either using the
-  :option:`--log-level <cmake --log-level>`
-  command line option of the :manual:`cmake(1)` program or using
-  the :variable:`CMAKE_MESSAGE_LOG_LEVEL` variable.
+  :cmake-option:`--log-level` command line option of the :manual:`cmake(1)`
+  program or using the :variable:`CMAKE_MESSAGE_LOG_LEVEL` variable.
 
   If both the command line option and the variable are set, the command line
   option takes precedence. If neither are set, the default logging level

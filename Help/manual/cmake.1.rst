@@ -426,8 +426,8 @@ Options
  synonym for this option.
 
  .. versionadded:: 3.25
-   See the :command:`cmake_language` command for a way to
-   :ref:`query the current message logging level <query_message_log_level>`.
+   See the :command:`cmake_language(GET_MESSAGE_LOG_LEVEL)` command for a way
+   to query the current message logging level.
 
 .. option:: --log-context
 
