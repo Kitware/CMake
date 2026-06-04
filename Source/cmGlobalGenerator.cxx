@@ -43,6 +43,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmInstallDirs.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmInstallRuntimeDependencySet.h"
@@ -1731,12 +1732,6 @@ bool cmGlobalGenerator::Compute()
   // explicit install(SBOM) call.
   cmValue sbomFormat = this->GetGlobalSetting("CMAKE_INSTALL_SBOM_FORMATS");
   if (sbomFormat.IsSet() && sbomEnabled && !isTryCompile) {
-    std::string location =
-      this->Makefiles[0]->GetSafeDefinition("CMAKE_INSTALL_LIBDIR");
-    if (location.empty()) {
-      location = "lib";
-    }
-
     std::string projectName = this->LocalGenerators[0]->GetProjectName();
     for (auto& exportSet : this->ExportSets) {
       bool isCovered =
@@ -1748,17 +1743,23 @@ bool cmGlobalGenerator::Compute()
       if (isCovered) {
         continue;
       }
-      cmSbomArguments sbomDefaultArgs;
-      sbomDefaultArgs.ProjectName = projectName;
-      sbomDefaultArgs.PackageName = exportSet.first;
-      std::string dest = cmStrCat(location, "/sbom/", projectName);
-      this->Makefiles[0]->AddInstallGenerator(
-        cm::make_unique<cmInstallSbomGenerator>(
-          std::vector<cmExportSet*>{ &exportSet.second }, dest, "",
-          std::vector<std::string>(), "",
-          cmInstallGenerator::SelectMessageLevel(this->Makefiles[0].get()),
-          false, std::move(sbomDefaultArgs),
-          cmInstallGenerator::CaptureContext(this->Makefiles[0].get())));
+
+      cmSbomArguments args;
+      args.ProjectName = projectName;
+      args.PackageName = exportSet.first;
+      std::string dest = args.GetDefaultDestination(
+        cm::InstallDirs::GetLibraryDirectory(this->Makefiles[0].get()));
+
+      auto installGen = cm::make_unique<cmInstallSbomGenerator>(
+        std::vector<cmExportSet*>{ &exportSet.second }, dest, "",
+        std::vector<std::string>(), "",
+        cmInstallGenerator::SelectMessageLevel(this->Makefiles[0].get()),
+        false, std::move(args),
+        cmInstallGenerator::CaptureContext(this->Makefiles[0].get()));
+
+      cmInstallSbomGenerator const* rawPtr = installGen.get();
+      this->Makefiles[0]->AddInstallGenerator(std::move(installGen));
+      this->AddInstallSbomGenerator(rawPtr);
     }
   }
 #endif
@@ -1869,13 +1870,17 @@ void cmGlobalGenerator::Generate()
     }
   }
 #ifndef CMAKE_BOOTSTRAP
+
   for (auto& sbomGen : this->BuildSbomGenerators) {
-    if (!sbomGen->GenerateForBuild()) {
-      if (!cmSystemTools::GetErrorOccurredFlag()) {
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                               "Could not write SBOM file.");
+    for (std::string const& c : this->Makefiles[0]->GetGeneratorConfigs(
+           cmMakefile::IncludeEmptyConfig)) {
+      if (!sbomGen->GenerateForBuild(c)) {
+        if (!cmSystemTools::GetErrorOccurredFlag()) {
+          this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                 "Could not write SBOM file.");
+        }
+        return;
       }
-      return;
     }
   }
 #endif

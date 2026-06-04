@@ -2,11 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSbomArguments.h"
 
-#include <algorithm>
-
 #include <cm/string_view>
-
-#include "cmsys/String.h"
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -82,7 +78,7 @@ std::string cmSbomArguments::GetNamespace() const
   return cmStrCat(this->PackageName, "::"_s);
 }
 
-std::string cmSbomArguments::GetPackageDirName() const
+std::string cmSbomArguments::GetPackageName() const
 {
   return this->PackageName;
 }
@@ -91,9 +87,9 @@ std::string cmSbomArguments::GetDefaultDestination(
   std::string const& root) const
 {
   if (root.empty()) {
-    return cmStrCat("sbom/"_s, this->GetPackageDirName());
+    return cmStrCat("sbom/"_s, this->GetPackageName());
   }
-  return cmStrCat(root, '/', "sbom/"_s, this->GetPackageDirName());
+  return cmStrCat(root, '/', "sbom/"_s, this->GetPackageName());
 }
 
 cmSbomArguments::SbomFormat cmSbomArguments::GetFormat() const
@@ -102,13 +98,4 @@ cmSbomArguments::SbomFormat cmSbomArguments::GetFormat() const
     return SbomFormat::SPDX_3_0_JSON;
   }
   return ParseSbomFormat(this->Format);
-}
-
-std::string cmSbomArguments::GetPackageFileName() const
-{
-  std::string const pkgNameOnDisk = this->GetPackageDirName();
-  std::string format = GetSbomFileExtension(this->GetFormat());
-  std::transform(format.begin(), format.end(), format.begin(),
-                 cmsysString_tolower);
-  return cmStrCat(pkgNameOnDisk, format);
 }

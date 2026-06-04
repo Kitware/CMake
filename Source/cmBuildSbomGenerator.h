@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <iosfwd>
 #include <string>
 #include <utility>
 #include <vector>
@@ -10,7 +11,6 @@
 
 #include "cmBuildSbomBuilder.h"
 #include "cmSbomArguments.h"
-
 class cmExportSet;
 class cmGeneratorTarget;
 class cmLocalGenerator;
@@ -45,13 +45,19 @@ public:
   {
     return this->Builder->CoversTarget(target);
   }
+
+  bool GenerateForBuild(std::ostream& os, std::string const& config)
+  {
+    return this->Builder->Generate(os, config);
+  }
+
   std::string const& GetPackageName() const
   {
     return this->Builder->GetPackageName();
   }
 
   /** Open the output file and write the SBOM document to it. */
-  bool GenerateForBuild();
+  bool GenerateForBuild(std::string const& config);
 
 private:
   std::string OutputFile;

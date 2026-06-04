@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallSbomGenerator.h"
 
+#include <ostream>
 #include <utility>
 #include <vector>
 
@@ -13,7 +14,9 @@
 #include "cmInstallSbomBuilder.h"
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 #include "cmSbomArguments.h"
+#include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -26,8 +29,9 @@ cmInstallSbomGenerator::cmInstallSbomGenerator(
                        std::move(component), message, excludeFromAll, false,
                        std::move(context))
   , FilePermissions(std::move(filePermissions))
-  , SbomFileName(args.GetPackageFileName())
+  , SbomFileName(args.GetPackageName())
   , SbomFilePath(cmStrCat(this->Destination, '/', this->SbomFileName))
+  , SbomFormat(args.GetFormat())
   , Builder(cm::make_unique<cmInstallSbomBuilder>(std::move(args),
                                                   std::move(exportSets)))
 {
@@ -64,15 +68,20 @@ void cmInstallSbomGenerator::GenerateScript(std::ostream& os)
   cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
   std::string const tempDir =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(),
-             "/CMakeFiles/Sbom/", hasher.HashString(this->Destination));
-
+             "/CMakeFiles/sbom/", hasher.HashString(this->Destination));
   cmSystemTools::MakeDirectory(tempDir);
 
-  this->TempSbomFilePath = cmStrCat(tempDir, '/', this->SbomFileName);
-
-  // Generate the SBOM file now, at cmake generate time.
-  cmGeneratedFileStream sbomStream(this->TempSbomFilePath);
-  this->Builder->Generate(sbomStream);
+  for (std::string const& c :
+       this->LocalGenerator->GetMakefile()->GetGeneratorConfigs(
+         cmMakefile::IncludeEmptyConfig)) {
+    std::string configName =
+      cmStrCat(tempDir, '/', this->SbomFileName, "-", c, ".spdx.json");
+    cmGeneratedFileStream sbomStream(configName);
+    this->TempSbomFiles.emplace(c, configName);
+    if (!this->Builder->Generate(sbomStream, c)) {
+      break;
+    }
+  }
 
   // Emit the cmake_install.cmake script to copy the file at install time.
   this->cmInstallGenerator::GenerateScript(os);
@@ -81,8 +90,12 @@ void cmInstallSbomGenerator::GenerateScript(std::ostream& os)
 void cmInstallSbomGenerator::GenerateScriptActions(std::ostream& os,
                                                    Indent indent)
 {
-  std::vector<std::string> files{ this->TempSbomFilePath };
-  this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
-                       false, this->FilePermissions.c_str(), nullptr, nullptr,
-                       nullptr, indent);
+  for (auto const& i : this->TempSbomFiles) {
+    std::string configTest = this->CreateConfigTest(i.first);
+    os << indent << "if(" << configTest << ")\n";
+    this->AddInstallRule(os, this->Destination, cmInstallType_FILES,
+                         { i.second }, false, this->FilePermissions.c_str(),
+                         nullptr, nullptr, nullptr, indent.Next());
+    os << indent << "endif()\n";
+  }
 }

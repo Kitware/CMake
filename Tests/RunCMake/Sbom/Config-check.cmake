@@ -1,0 +1,15 @@
+include(${CMAKE_CURRENT_LIST_DIR}/Assertions.cmake)
+
+function(check_config VAR_NAME1)
+  if(NOT "${${VAR_NAME1}}" STREQUAL "")
+    set(RunCMake_TEST_FAILED "${ERROR_MSG}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
+  check_config(DebugSbom)
+  check_config(ReleaseSbom)
+else()
+  check_config(DebugSbom)
+endif()

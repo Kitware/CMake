@@ -35,8 +35,7 @@ public:
 
   bool Check(cmExecutionStatus& status) const override;
   std::string GetNamespace() const;
-  std::string GetPackageDirName() const;
-  std::string GetPackageFileName() const;
+  std::string GetPackageName() const;
   std::string GetDefaultDestination(std::string const& root = {}) const;
   SbomFormat GetFormat() const;
 

@@ -17,12 +17,13 @@ cmBuildSbomBuilder::cmBuildSbomBuilder(cmSbomArguments args,
 {
 }
 
-bool cmBuildSbomBuilder::Generate(std::ostream& os)
+bool cmBuildSbomBuilder::Generate(std::ostream& os, std::string const& config)
 {
   if (!this->LocalGenerator) {
     return false;
   }
-  return this->GenerateForTargets(os, cmGeneratorExpression::BuildInterface);
+  return this->GenerateForTargets(os, config,
+                                  cmGeneratorExpression::BuildInterface);
 }
 
 cmExportFileGenerator::ExportInfo cmBuildSbomBuilder::FindExportInfoFor(

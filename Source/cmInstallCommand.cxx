@@ -2565,12 +2565,8 @@ bool HandleSbomMode(std::vector<std::string> const& args,
   // Get or construct the destination path.
   std::string dest = ica.GetDestination();
   if (dest.empty()) {
-    if (helper.Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Windows") {
-      dest = arguments.GetDefaultDestination();
-    } else {
-      dest =
-        arguments.GetDefaultDestination(helper.GetLibraryDestination(nullptr));
-    }
+    dest =
+      arguments.GetDefaultDestination(helper.GetLibraryDestination(nullptr));
   }
 
   // Check for CMD_INSTALL_ABSOLUTE_DESTINATION diagnostics.
@@ -2578,8 +2574,7 @@ bool HandleSbomMode(std::vector<std::string> const& args,
 
   cmGlobalGenerator* gg = helper.Makefile->GetGlobalGenerator();
 
-  std::string const fpath =
-    cmStrCat(dest, '/', arguments.GetPackageFileName());
+  std::string const fpath = cmStrCat(dest, '/', arguments.GetPackageName());
   if (gg->IsInstallSbomFile(fpath)) {
     status.SetError(cmStrCat("SBOM command already specified for the file "_s,
                              cmSystemTools::GetFilenameNameView(fpath), '.'));

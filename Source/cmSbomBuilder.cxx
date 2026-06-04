@@ -115,10 +115,11 @@ bool cmSbomBuilder::CoversExportSet(cmExportSet const* set) const
 }
 
 bool cmSbomBuilder::GenerateForTargets(
-  std::ostream& os, cmGeneratorExpression::PreprocessContext preprocessContext)
+  std::ostream& os, std::string const& config,
+  cmGeneratorExpression::PreprocessContext preprocessContext)
 {
   cmSbomDocument doc;
-  doc.Graph.reserve(256);
+  doc.Graph.reserve(512);
 
   cmSpdxCreationInfo const* ci =
     insert_back(doc.Graph, this->GenerateCreationInfo());
@@ -131,19 +132,23 @@ bool cmSbomBuilder::GenerateForTargets(
     this->PopulateLinkLibrariesProperty(target, preprocessContext, properties);
     this->PopulateInterfaceLinkLibrariesProperty(target, preprocessContext,
                                                  properties);
-
-    targetProps.push_back(
-      TargetProperties{ insert_back(project->RootElements,
-                                    this->GenerateImportTarget(ci, target)),
-                        target, std::move(properties) });
+    targetProps.push_back(TargetProperties{
+      insert_back(project->RootElements,
+                  this->GenerateImportTarget(ci, target)),
+      target,
+      std::move(properties),
+    });
   }
 
+  bool status = true;
   for (TargetProperties const& target : targetProps) {
-    this->GenerateProperties(doc, project, ci, target, targetProps);
+    status &=
+      this->GenerateProperties(doc, project, ci, target, targetProps, config);
   }
-
-  this->WriteSbom(doc, os);
-  return true;
+  if (status) {
+    this->WriteSbom(doc, os);
+  }
+  return status;
 }
 
 void cmSbomBuilder::WriteSbom(cmSbomDocument& doc, std::ostream& os) const
@@ -248,23 +253,31 @@ cmSpdxPackage cmSbomBuilder::GenerateImportTarget(
   return package;
 }
 
-void cmSbomBuilder::GenerateLinkProperties(
+bool cmSbomBuilder::GenerateLinkProperties(
   cmSbomDocument& doc, cmSpdxDocument* project, cmSpdxCreationInfo const* ci,
   std::string const& libraries, TargetProperties const& current,
-  std::vector<TargetProperties> const& allTargets) const
+  std::vector<TargetProperties> const& allTargets,
+  std::string const& config) const
 {
   auto itProp = current.Properties.find(libraries);
   if (itProp == current.Properties.end()) {
-    return;
+    return true;
   }
 
-  std::map<std::string, std::vector<std::string>> allowList = { { "LINK_ONLY",
-                                                                  {} } };
-  std::string interfaceLinkLibraries;
-  if (!cmGeneratorExpression::ForbidGeneratorExpressions(
-        current.Target, itProp->first, itProp->second, interfaceLinkLibraries,
-        allowList)) {
-    return;
+  cmGeneratorExpression ge(*current.Target->Makefile->GetCMakeInstance());
+  std::unique_ptr<cmCompiledGeneratorExpression> cge =
+    ge.Parse(itProp->second);
+  std::string evaluatedLibraries =
+    cge->Evaluate(current.Target->GetLocalGenerator(), config, current.Target);
+
+  if (cge->GetHadHeadSensitiveCondition()) {
+    current.Target->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Property \"", libraries, "\" of target \"",
+               current.Target->GetName(),
+               "\" contains a generator expression that is not allowed for "
+               "SBOM generation."));
+    return false;
   }
 
   auto makeRel = [&](char const* id, char const* desc) {
@@ -316,26 +329,21 @@ void cmSbomBuilder::GenerateLinkProperties(
     return { false, insert_back(project->Elements, std::move(pkg)) };
   };
 
-  auto handleDependencies = [&](std::vector<std::string> const& names,
-                                cmSpdxRelationship& internalDeps,
-                                cmSpdxRelationship& externalDeps) {
-    for (auto const& n : names) {
-      auto res = addArtifact(n);
-      if (!res.second) {
-        continue;
-      }
-
-      if (res.first) {
-        internalDeps.To.push_back(res.second);
-      } else {
-        externalDeps.To.push_back(res.second);
-      }
+  cmList names{ evaluatedLibraries };
+  names.sort();
+  names.remove_duplicates();
+  for (std::string const& n : names) {
+    auto res = addArtifact(n);
+    if (!res.second) {
+      continue;
     }
-  };
 
-  handleDependencies(allowList["LINK_ONLY"], linkLibraries, linkRequires);
-  handleDependencies(cmList{ interfaceLinkLibraries }, linkLibraries,
-                     buildRequires);
+    if (res.first) {
+      linkLibraries.To.push_back(res.second);
+    } else {
+      buildRequires.To.push_back(res.second);
+    }
+  }
 
   if (!linkLibraries.To.empty()) {
     insert_back(doc.Graph, std::move(linkLibraries));
@@ -346,18 +354,22 @@ void cmSbomBuilder::GenerateLinkProperties(
   if (!buildRequires.To.empty()) {
     insert_back(doc.Graph, std::move(buildRequires));
   }
+  return true;
 }
 
 bool cmSbomBuilder::GenerateProperties(
   cmSbomDocument& doc, cmSpdxDocument* proj, cmSpdxCreationInfo const* ci,
   TargetProperties const& current,
-  std::vector<TargetProperties> const& allTargets) const
+  std::vector<TargetProperties> const& allTargets,
+  std::string const& config) const
 {
-  this->GenerateLinkProperties(doc, proj, ci, "LINK_LIBRARIES", current,
-                               allTargets);
-  this->GenerateLinkProperties(doc, proj, ci, "INTERFACE_LINK_LIBRARIES",
-                               current, allTargets);
-  return true;
+  bool status = true;
+  status &= this->GenerateLinkProperties(doc, proj, ci, "LINK_LIBRARIES",
+                                         current, allTargets, config);
+  status &= this->GenerateLinkProperties(
+    doc, proj, ci, "INTERFACE_LINK_LIBRARIES", current, allTargets, config);
+
+  return status;
 }
 
 bool cmSbomBuilder::PopulateLinkLibrariesProperty(
@@ -365,10 +377,11 @@ bool cmSbomBuilder::PopulateLinkLibrariesProperty(
   cmGeneratorExpression::PreprocessContext preprocessRule,
   ImportPropertyMap& properties)
 {
-  static std::array<std::string, 3> const linkIfaceProps = {
-    { "LINK_LIBRARIES", "LINK_LIBRARIES_DIRECT",
-      "LINK_LIBRARIES_DIRECT_EXCLUDE" }
-  };
+  static std::array<std::string, 3> const linkIfaceProps = { {
+    "LINK_LIBRARIES",
+    "LINK_LIBRARIES_DIRECT",
+    "LINK_LIBRARIES_DIRECT_EXCLUDE",
+  } };
   bool hadLINK_LIBRARIES = false;
   for (std::string const& linkIfaceProp : linkIfaceProps) {
     if (cmValue input = target->GetProperty(linkIfaceProp)) {

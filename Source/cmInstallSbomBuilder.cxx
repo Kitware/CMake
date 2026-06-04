@@ -17,12 +17,14 @@ cmInstallSbomBuilder::cmInstallSbomBuilder(
 {
 }
 
-bool cmInstallSbomBuilder::Generate(std::ostream& os)
+bool cmInstallSbomBuilder::Generate(std::ostream& os,
+                                    std::string const& config)
 {
   if (!this->LocalGenerator) {
     return false;
   }
-  return this->GenerateForTargets(os, cmGeneratorExpression::InstallInterface);
+  return this->GenerateForTargets(os, config,
+                                  cmGeneratorExpression::InstallInterface);
 }
 
 cmExportFileGenerator::ExportInfo cmInstallSbomBuilder::FindExportInfoFor(

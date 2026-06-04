@@ -48,10 +48,9 @@ public:
    *  query CoversTarget() before any Generate() runs. */
   void Compute(cmLocalGenerator* lg);
 
-  /** Produce the SBOM document on `os`.  Implementations pick the
-   *  generator-expression preprocess context (BuildInterface vs
-   *  InstallInterface) and delegate to GenerateForTargets. */
-  virtual bool Generate(std::ostream& os) = 0;
+  /** Produce the SBOM document on `os`.  Implementations select their own
+   *  target set (via CollectTargets) and preprocess context. */
+  virtual bool Generate(std::ostream& os, std::string const& config) = 0;
 
   /** Identifier this SBOM publishes itself as (the SPDX document name and
    *  the namespace under which other SBOMs refer to its contents). */
@@ -59,9 +58,12 @@ public:
 
   /** True if `target` is one of the targets this SBOM directly describes. */
   bool CoversTarget(cmGeneratorTarget const* target) const;
-
-  /** True if `set` is one of the export sets this SBOM was built from. */
   bool CoversExportSet(cmExportSet const* set) const;
+
+  void AddConfiguration(std::string const& config)
+  {
+    this->Configurations.push_back(config);
+  }
 
   /** Names of peer SBOMs (same build/install mode) that cover a target.
    *  Used by NoteLinkedTarget to attribute a cross-reference when no
@@ -93,7 +95,7 @@ protected:
   /** Generate an sbom for the targets in this->SbomTargets. Each leaf class
    * calls this internally */
   bool GenerateForTargets(
-    std::ostream& os,
+    std::ostream& os, std::string const& config,
     cmGeneratorExpression::PreprocessContext preprocessContext);
 
   using ImportPropertyMap = std::map<std::string, std::string>;
@@ -115,15 +117,18 @@ protected:
   bool AddPackageInformation(cmSpdxPackage& artifact, std::string const& name,
                              cmPackageInformation const& package) const;
 
-  bool GenerateProperties(
-    cmSbomDocument& doc, cmSpdxDocument* project, cmSpdxCreationInfo const* ci,
-    TargetProperties const& current,
-    std::vector<TargetProperties> const& allTargets) const;
+  bool GenerateProperties(cmSbomDocument& doc, cmSpdxDocument* project,
+                          cmSpdxCreationInfo const* ci,
+                          TargetProperties const& current,
+                          std::vector<TargetProperties> const& allTargets,
+                          std::string const& config) const;
 
-  void GenerateLinkProperties(
-    cmSbomDocument& doc, cmSpdxDocument* project, cmSpdxCreationInfo const* ci,
-    std::string const& libraries, TargetProperties const& current,
-    std::vector<TargetProperties> const& allTargets) const;
+  bool GenerateLinkProperties(cmSbomDocument& doc, cmSpdxDocument* project,
+                              cmSpdxCreationInfo const* ci,
+                              std::string const& libraries,
+                              TargetProperties const& current,
+                              std::vector<TargetProperties> const& allTargets,
+                              std::string const& config) const;
 
   bool NoteLinkedTarget(cmGeneratorTarget const* target,
                         std::string const& linkedName,
@@ -176,4 +181,5 @@ private:
   // Accumulated during generation
   std::map<std::string, LinkInfo> LinkTargets;
   std::map<std::string, cmPackageInformation> Requirements;
+  std::vector<std::string> Configurations;
 };

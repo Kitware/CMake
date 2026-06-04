@@ -521,7 +521,6 @@ std::string const& cmGeneratorExpressionInterpreter::Evaluate(
     nullptr,
     context,
   };
-
   return this->CompiledGeneratorExpression->Evaluate(context, &dagChecker,
                                                      this->HeadTarget);
 }

@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <string>
 #include <vector>
 
 #include "cmExportFileGenerator.h"
@@ -23,7 +24,7 @@ public:
                        std::vector<cmExportSet*> exportSets,
                        cmLocalGenerator* lg = nullptr);
 
-  bool Generate(std::ostream& os) override;
+  bool Generate(std::ostream& os, std::string const& config) override;
 
 protected:
   cmExportFileGenerator::ExportInfo FindExportInfoFor(
