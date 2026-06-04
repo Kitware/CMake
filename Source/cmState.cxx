@@ -673,6 +673,9 @@ cmValue cmState::GetGlobalProperty(std::string const& prop)
     this->SetGlobalProperty("ENABLED_LANGUAGES", langs);
   } else if (prop == "CMAKE_ROLE") {
     this->SetGlobalProperty("CMAKE_ROLE", this->GetRoleString());
+  } else if (prop == "_CMAKE_RUNNING_IN_BUILD_TREE") {
+    this->SetGlobalProperty("_CMAKE_RUNNING_IN_BUILD_TREE",
+                            cmSystemTools::GetCMakeInBuildTree() ? "1" : "0");
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
