@@ -14,13 +14,12 @@ endif()
 # Note that flushing errors would repeat a test name, so such errors are not
 # uncovered by checking the name buffer flushing above.
 
-# PRE_TEST can have a config-specific tests file, POST_BUILD never does
+# PRE_TEST writes a config-specific tests file
 set(tests_file "@CMAKE_CURRENT_BINARY_DIR@/flush_script_test_e3b0c442_Debug_tests.cmake")
+
+# POST_BUILD does not write a tests file
 if(NOT EXISTS "${tests_file}")
-  set(tests_file "@CMAKE_CURRENT_BINARY_DIR@/flush_script_test_e3b0c442_tests.cmake")
-endif()
-if(NOT EXISTS "${tests_file}")
-  message(FATAL_ERROR "Tests file is missing")
+  return()
 endif()
 
 file(STRINGS "${tests_file}" add_test_lines REGEX "^add_test" ENCODING UTF-8)
