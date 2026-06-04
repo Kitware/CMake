@@ -589,39 +589,23 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
 
   set (swig_source_file_flags ${CMAKE_SWIG_FLAGS})
   # handle various swig compile flags properties
-  get_source_file_property (include_directories "${infile}" INCLUDE_DIRECTORIES)
-  if (include_directories)
-    list (APPEND swig_source_file_flags "$<$<BOOL:${include_directories}>:-I$<JOIN:${include_directories},$<SEMICOLON>-I>>")
-  endif()
-  set (property "$<TARGET_PROPERTY:${target_name},SWIG_INCLUDE_DIRECTORIES>")
-  list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-I$<JOIN:$<TARGET_GENEX_EVAL:${target_name},${property}>,$<SEMICOLON>-I>>")
-  set (property "$<REMOVE_DUPLICATES:$<TARGET_PROPERTY:${target_name},INCLUDE_DIRECTORIES>>")
-  get_source_file_property(use_target_include_dirs "${infile}" USE_TARGET_INCLUDE_DIRECTORIES)
-  if (use_target_include_dirs)
-    list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-I$<JOIN:${property},$<SEMICOLON>-I>>")
-  elseif(use_target_include_dirs STREQUAL "NOTFOUND")
-    # not defined at source level, rely on target level
-    list (APPEND swig_source_file_flags "$<$<AND:$<BOOL:$<TARGET_PROPERTY:${target_name},SWIG_USE_TARGET_INCLUDE_DIRECTORIES>>,$<BOOL:${property}>>:-I$<JOIN:${property},$<SEMICOLON>-I>>")
-  endif()
+  ### include directories
+  list (APPEND swig_source_file_flags "$<LIST:TRANSFORM,$<LIST:REMOVE_DUPLICATES,$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},INCLUDE_DIRECTORIES>>,PREPEND,-I>")
+  list (APPEND swig_source_file_flags "$<LIST:TRANSFORM,$<LIST:REMOVE_DUPLICATES,$<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_INCLUDE_DIRECTORIES>>>,PREPEND,-I>")
+  # use target INCLUDE_DIRECTORIES if source property USE_TARGET_INCLUDE_DIRECTORIES is "ON" or,
+  # if undefined, if target property SWIG_USE_TARGET_INCLUDE_DIRECTORIES is "ON"
+  list (APPEND swig_source_file_flags "$<LIST:TRANSFORM,$<LIST:REMOVE_DUPLICATES,$<IF:$<BOOL:$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},USE_TARGET_INCLUDE_DIRECTORIES>>,$<TARGET_PROPERTY:${target_name},INCLUDE_DIRECTORIES>,$<$<AND:$<EQUAL:$<STRING:LENGTH,$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},USE_TARGET_INCLUDE_DIRECTORIES>>,0>,$<BOOL:$<TARGET_PROPERTY:${target_name},SWIG_USE_TARGET_INCLUDE_DIRECTORIES>>>:$<TARGET_PROPERTY:${target_name},INCLUDE_DIRECTORIES>>>>,PREPEND,-I>")
 
-  set (property "$<TARGET_PROPERTY:${target_name},SWIG_COMPILE_DEFINITIONS>")
-  list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-D$<JOIN:$<TARGET_GENEX_EVAL:${target_name},${property}>,$<SEMICOLON>-D>>")
-  get_source_file_property (compile_definitions "${infile}" COMPILE_DEFINITIONS)
-  if (compile_definitions)
-    list (APPEND swig_source_file_flags "$<$<BOOL:${compile_definitions}>:-D$<JOIN:${compile_definitions},$<SEMICOLON>-D>>")
-  endif()
+  ### compile definitions
+  list (APPEND swig_source_file_flags "$<LIST:TRANSFORM,$<LIST:REMOVE_DUPLICATES,$<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_COMPILE_DEFINITIONS>>>,PREPEND,-D>")
+  list (APPEND swig_source_file_flags "$<LIST:TRANSFORM,$<LIST:REMOVE_DUPLICATES,$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},COMPILE_DEFINITIONS>>,PREPEND,-D>")
 
+  ### compile options
   list (APPEND swig_source_file_flags "$<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_COMPILE_OPTIONS>>")
-  get_source_file_property (compile_options "${infile}" COMPILE_OPTIONS)
-  if (compile_options)
-    list (APPEND swig_source_file_flags ${compile_options})
-  endif()
+  list (APPEND swig_source_file_flags "$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},COMPILE_OPTIONS>")
 
   # legacy support
-  get_source_file_property (swig_flags "${infile}" SWIG_FLAGS)
-  if (swig_flags)
-    list (APPEND swig_source_file_flags ${swig_flags})
-  endif()
+  list (APPEND swig_source_file_flags "$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},SWIG_FLAGS>")
 
   get_filename_component(swig_source_file_fullname "${infile}" ABSOLUTE)
 
@@ -651,21 +635,16 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   list (REMOVE_DUPLICATES cmake_include_directories)
   set (swig_include_dirs)
   if (cmake_include_directories)
-    set (swig_include_dirs "$<$<BOOL:${cmake_include_directories}>:-I$<JOIN:${cmake_include_directories},$<SEMICOLON>-I>>")
+    set (swig_include_dirs "$<LIST:TRANSFORM,${cmake_include_directories},PREPEND,-I>")
   endif()
 
   set(swig_special_flags)
   # default is c, so add c++ flag if it is c++
-  if(swig_source_file_cplusplus)
-    list (APPEND swig_special_flags "-c++")
-  endif()
+  list (APPEND swig_special_flags "$<$<BOOL:$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},CPLUSPLUS>>:-c++>")
 
   cmake_policy(GET CMP0086 module_name_policy)
   if (module_name_policy STREQUAL "NEW")
-    get_source_file_property(module_name "${infile}" SWIG_MODULE_NAME)
-    if (module_name)
-      list (APPEND swig_special_flags "-module" "${module_name}")
-    endif()
+    list (APPEND swig_special_flags "$<$<BOOL:$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},SWIG_MODULE_NAME>>:-module$<SEMICOLON>$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},SWIG_MODULE_NAME>>")
   else()
     if (NOT module_name_policy)
       cmake_policy(ISSUE_WARNING CMP0086)
@@ -692,10 +671,7 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
 
   # dependencies
   set (swig_dependencies DEPENDS ${SWIG_MODULE_${name}_EXTRA_DEPS} $<TARGET_PROPERTY:${target_name},SWIG_DEPENDS>)
-  get_source_file_property(file_depends "${infile}" DEPENDS)
-  if (file_depends)
-    list (APPEND swig_dependencies ${file_depends})
-  endif()
+  list (APPEND swig_dependencies "$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},DEPENDS>")
 
   if (UseSWIG_MODULE_VERSION VERSION_GREATER 1)
     # as part of custom command, start by removing old generated files
@@ -761,14 +737,17 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     PROPERTIES GENERATED 1)
 
   ## add all properties for generated file to various properties
-  get_property (include_directories SOURCE "${infile}" PROPERTY GENERATED_INCLUDE_DIRECTORIES)
-  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY INCLUDE_DIRECTORIES ${include_directories} $<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_GENERATED_INCLUDE_DIRECTORIES>>)
+  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY INCLUDE_DIRECTORIES
+        "$<TARGET_GENEX_EVAL:${target_name},$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},GENERATED_INCLUDE_DIRECTORIES>>"
+        "$<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_GENERATED_INCLUDE_DIRECTORIES>>")
 
-  get_property (compile_definitions SOURCE "${infile}" PROPERTY GENERATED_COMPILE_DEFINITIONS)
-  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_DEFINITIONS $<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_GENERATED_COMPILE_DEFINITIONS>> ${compile_definitions})
+  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_DEFINITIONS
+        "$<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_GENERATED_COMPILE_DEFINITIONS>>"
+        "$<TARGET_GENEX_EVAL:${target_name},$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},GENERATED_COMPILE_DEFINITIONS>>")
 
-  get_property (compile_options SOURCE "${infile}" PROPERTY GENERATED_COMPILE_OPTIONS)
-  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_OPTIONS $<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_GENERATED_COMPILE_OPTIONS>> ${compile_options})
+  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_OPTIONS
+        "$<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_GENERATED_COMPILE_OPTIONS>>"
+        "$<TARGET_GENEX_EVAL:${target_name},$<SOURCE_PROPERTY:${infile},TARGET_DIRECTORY:${target_name},GENERATED_COMPILE_OPTIONS>>")
 
   if (SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG MATCHES "php")
     set_property (SOURCE "${swig_generated_file_fullname}" APPEND PROPERTY INCLUDE_DIRECTORIES "${outdir}")
