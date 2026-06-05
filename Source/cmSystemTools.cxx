@@ -1824,7 +1824,7 @@ bool cmSystemTools::SimpleGlob(std::string const& glob,
   }
   std::string path = cmSystemTools::GetFilenamePath(glob);
   std::string ppath = cmSystemTools::GetFilenameName(glob);
-  ppath = ppath.substr(0, ppath.size() - 1);
+  ppath.pop_back();
   if (path.empty()) {
     path = "/";
   }
@@ -2148,7 +2148,7 @@ cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
   for (std::string var : currentEnv) {
     std::string::size_type pos = var.find('=');
     if (pos != std::string::npos) {
-      var = var.substr(0, pos);
+      var.resize(pos);
     }
 
     cmSystemTools::UnsetEnv(var.c_str());
