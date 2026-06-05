@@ -1122,7 +1122,7 @@ void cmCTestRunTest::FinalizeTest(bool started)
       this->TestProperties->Name, this->ActualCommand, this->Arguments,
       this->TestProcess->GetExitValue(), this->TestProcess->GetStartTime(),
       this->TestProcess->GetSystemStartTime(),
-      this->GetCTest()->GetConfigType());
+      this->GetCTest()->GetConfigType(), this->ProcessOutput);
     this->TestResult.InstrumentationFile = data_file;
   }
   this->MultiTestHandler.FinishTestProcess(this->TestProcess->GetRunner(),

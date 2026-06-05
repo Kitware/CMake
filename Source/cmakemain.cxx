@@ -977,7 +977,9 @@ int do_install(int ac, char const* const* av)
   std::vector<std::string> cmd;
   cm::append(cmd, av, av + ac);
   ret = instrumentation.InstrumentCommand(
-    "cmakeInstall", cmd, [doInstall]() { return doInstall(); });
+    "cmakeInstall", cmd, [doInstall]() -> cmInstrumentation::CommandResult {
+      return { doInstall(), cm::nullopt, cm::nullopt };
+    });
   instrumentation.CollectTimingData(
     cmInstrumentationQuery::Hook::PostCMakeInstall);
   return ret;

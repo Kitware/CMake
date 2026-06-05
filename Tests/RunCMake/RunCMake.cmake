@@ -105,6 +105,9 @@ function(run_cmake test)
   else()
     set(maybe_input_file "")
   endif()
+  if (RunCMake_QUIET_ERROR)
+    set(maybe_quiet_error "ERROR_QUIET")
+  endif()
   if(NOT RunCMake_TEST_COMMAND)
     if(NOT DEFINED RunCMake_TEST_OPTIONS)
       set(RunCMake_TEST_OPTIONS "")
@@ -157,6 +160,7 @@ function(run_cmake test)
       ENCODING UTF8
       ${maybe_timeout}
       ${maybe_input_file}
+      ${maybe_quiet_error}
       )]])
   else()
     set(expect_result "")

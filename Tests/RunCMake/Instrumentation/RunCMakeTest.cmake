@@ -16,6 +16,7 @@ function(instrument test)
     "COPY_QUERIES_GENERATED"
     "STATIC_QUERY"
     "DYNAMIC_QUERY"
+    "CAPTURE_OUTPUT_QUERY"
     "TRACE_QUERY"
     "MANUAL_HOOK"
     "PRESERVE_DATA"
@@ -82,7 +83,7 @@ function(instrument test)
         )
         set(cmake_file "${RunCMake_TEST_BINARY_DIR}/${cmake_filename}")
       else ()
-        set(cmake_file ${query_dir}/default.cmake)
+        set(cmake_file "${query_dir}/default.cmake")
       endif()
     endif()
     list(APPEND ARGS_CONFIGURE_ARG "-DINSTRUMENT_COMMAND_FILE=${cmake_file}")
@@ -133,9 +134,11 @@ function(instrument test)
         COPYONLY
       )
     endforeach()
+    set(RunCMake_QUIET_ERROR 1)
     set(v1 ${RunCMake_TEST_BINARY_DIR}/build/.cmake/instrumentation/v1)
     run_cmake_command(${test}-workflow ${CMAKE_COMMAND} --workflow default)
     set(ARGS_NO_CONFIGURE TRUE)
+    unset(RunCMake_QUIET_ERROR)
   endif()
   if (NOT ARGS_NO_CONFIGURE)
     run_cmake_with_options(${test} ${ARGS_CONFIGURE_ARG} ${maybe_CMAKE_BUILD_TYPE})
@@ -160,19 +163,23 @@ function(instrument test)
       # errors to different places.
       set(RunCMake_TEST_OUTPUT_MERGE 1)
     endif()
+    set(RunCMake_QUIET_ERROR 1)
     run_cmake_command(${test}-build
       ${CMAKE_COMMAND} --build . ${cmake_build_args} -- ${additional_build_args}
     )
+    unset(RunCMake_QUIET_ERROR)
     if (ARGS_FAIL)
       unset(RunCMake_TEST_OUTPUT_MERGE)
     endif()
   endif()
   if (ARGS_BUILD_MAKE_PROGRAM)
     set(RunCMake_TEST_OUTPUT_MERGE 1)
+    set(RunCMake_QUIET_ERROR 1)
     # Force reconfigure to test for double preBuild & postBuild hooks
     file(TOUCH ${RunCMake_TEST_BINARY_DIR}/CMakeCache.txt)
     run_cmake_command(${test}-make-program ${RunCMake_MAKE_PROGRAM})
     unset(RunCMake_TEST_OUTPUT_MERGE)
+    unset(RunCMake_QUIET_ERROR)
   endif()
   if (ARGS_INSTALL)
     run_cmake_command(${test}-install ${CMAKE_COMMAND} --install . --prefix install --config Debug)
@@ -246,7 +253,7 @@ instrument(dynamic-query
   CHECK_SCRIPT check-data-dir.cmake
 )
 instrument(both-query
-  BUILD INSTALL TEST DYNAMIC_QUERY
+  BUILD INSTALL TEST STATIC_QUERY DYNAMIC_QUERY CAPTURE_OUTPUT_QUERY
   CHECK_SCRIPT check-data-dir.cmake
 )
 
@@ -337,6 +344,12 @@ instrument(cmake-command-trace
 instrument(cmake-command-trace
   BUILD PRESERVE_DATA
   CHECK_SCRIPT check-trace-removed.cmake
+)
+
+# Test capture output
+instrument(cmake-command-capture-output
+  BUILD CAPTURE_OUTPUT_QUERY
+  CHECK_SCRIPT check-data-dir.cmake
 )
 
 # Test make/ninja hooks

@@ -25,7 +25,7 @@ The ``API_VERSION`` and ``DATA_VERSION`` must always be given.
 See :ref:`cmake-instrumentation API v1` for details.
 
 ``DATA_VERSION`` is a version value of the form ``major`` or ``major.minor``.
-Currently, the only supported version is ``1.0``. See
+Currently, the maximum supported version is ``1.1``. See
 :ref:`cmake-instrumentation Data Version` for details.
 
 Each of the optional keywords ``HOOKS``, ``OPTIONS``, and ``CALLBACK``

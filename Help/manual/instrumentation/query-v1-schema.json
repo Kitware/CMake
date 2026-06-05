@@ -22,7 +22,10 @@
             },
             "minor": {
               "type": "integer",
-              "const": 0
+              "enum": [
+                0,
+                1
+              ]
             }
           },
           "additionalProperties": false
@@ -64,7 +67,8 @@
           "dynamicSystemInformation",
           "cdashSubmit",
           "cdashVerbose",
-          "trace"
+          "trace",
+          "captureOutput"
         ],
         "type": "string"
       }

@@ -59,6 +59,8 @@ private:
   // Whether or not any data have been written to stdout or stderr.
   bool HaveOut;
   bool HaveErr;
+  std::string CapturedStdOut;
+  std::string CapturedStdErr;
 
   // Load custom rules to match warnings and their exceptions.
   bool ScrapeRulesLoaded;

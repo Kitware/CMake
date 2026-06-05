@@ -586,7 +586,8 @@ std::string cmInstrumentation::InstrumentTest(
   std::string const& name, std::string const& command,
   std::vector<std::string> const& args, int64_t result,
   std::chrono::steady_clock::time_point steadyStart,
-  std::chrono::system_clock::time_point systemStart, std::string config)
+  std::chrono::system_clock::time_point systemStart, std::string config,
+  cm::optional<std::string> output)
 {
   // Store command info
   Json::Value root(this->preTestStats);
@@ -597,6 +598,10 @@ std::string cmInstrumentation::InstrumentTest(
   root["result"] = static_cast<Json::Value::Int64>(result);
   root["config"] = config;
   root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
+  if (this->HasOption(cmInstrumentationQuery::Option::CaptureOutput)) {
+    root["stdout"] = output ? *output : "";
+    root["stderr"] = "";
+  }
 
   // Post-Command
   this->InsertTimingData(root, steadyStart, systemStart);
@@ -626,7 +631,7 @@ void cmInstrumentation::GetPreTestStats()
 
 int cmInstrumentation::InstrumentCommand(
   std::string command_type, std::vector<std::string> const& command,
-  std::function<int()> const& callback,
+  std::function<cmInstrumentation::CommandResult()> const& callback,
   cm::optional<std::map<std::string, std::string>> data,
   cm::optional<std::map<std::string, std::string>> arrayData,
   LoadQueriesAfter reloadQueriesAfterCommand)
@@ -635,7 +640,7 @@ int cmInstrumentation::InstrumentCommand(
   // Always begin gathering data for configure in case cmake_instrumentation
   // command creates a query
   if (!this->hasQuery && reloadQueriesAfterCommand == LoadQueriesAfter::No) {
-    return callback();
+    return callback().ExitCode;
   }
 
   // Store command info
@@ -660,7 +665,16 @@ int cmInstrumentation::InstrumentCommand(
   }
 
   // Execute Command
-  int ret = callback();
+  cmInstrumentation::CommandResult callbackResult = callback();
+  int ret = callbackResult.ExitCode;
+  if (this->HasOption(cmInstrumentationQuery::Option::CaptureOutput)) {
+    if (callbackResult.StdOut) {
+      root["stdout"] = *callbackResult.StdOut;
+    }
+    if (callbackResult.StdErr) {
+      root["stderr"] = *callbackResult.StdErr;
+    }
+  }
 
   // Exit early if configure didn't generate a query
   if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
@@ -916,8 +930,11 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
     return 0;
   };
   int ret = this->InstrumentCommand(
-    "build", {}, [waitForBuild]() { return waitForBuild(); }, cm::nullopt,
-    cm::nullopt, LoadQueriesAfter::Yes);
+    "build", {},
+    [waitForBuild]() -> cmInstrumentation::CommandResult {
+      return { waitForBuild(), cm::nullopt, cm::nullopt };
+    },
+    cm::nullopt, cm::nullopt, LoadQueriesAfter::Yes);
   this->buildLock.Release();
   this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
   return ret;
