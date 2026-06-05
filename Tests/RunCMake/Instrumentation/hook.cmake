@@ -68,8 +68,8 @@ json_has_key("${index}" "${contents}" version)
 
 string(JSON version_major GET "${contents}" version major)
 string(JSON version_minor GET "${contents}" version minor)
-if (NOT version_major EQUAL 1 OR NOT version_minor EQUAL 0)
-  add_error("Version must be 1.0, got: ${version_major}.${version_minor}")
+if (NOT version_major EQUAL 1 OR NOT version_minor LESS_EQUAL 1)
+  add_error("Version must be <= 1.1, got: ${version_major}.${version_minor}")
 endif()
 
 json_has_key("${index}" "${contents}" buildDir)

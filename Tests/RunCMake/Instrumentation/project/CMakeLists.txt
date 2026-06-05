@@ -15,6 +15,11 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E true
   OUTPUT output1 output2
 )
+add_custom_command(
+  COMMAND $<TARGET_FILE:main>
+  OUTPUT output3
+  DEPENDS main
+)
 
 file(COPY_FILE shell_redirect.txt ${CMAKE_CURRENT_BINARY_DIR}/shell_redirect.in)
 if(CMAKE_GENERATOR STREQUAL "Watcom WMake")
@@ -35,10 +40,10 @@ else()
   )
 endif()
 
-set_property(SOURCE output1 output2 PROPERTY SYMBOLIC 1)
+set_property(SOURCE output1 output2 output3 PROPERTY SYMBOLIC 1)
 add_custom_target(customTarget ALL
   COMMAND ${CMAKE_COMMAND} -E true
-  DEPENDS output1 shell_redirect.out
+  DEPENDS output1 output3 shell_redirect.out
 )
 add_test(NAME test COMMAND $<TARGET_FILE:main>)
 if(DISABLE_TEST)

@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 9
   },
   "hooks": ["postCMakeBuild"],
   "callbacks": ["@GET_HOOK@"]

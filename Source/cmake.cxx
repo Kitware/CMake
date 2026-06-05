@@ -2802,7 +2802,10 @@ int cmake::ActualConfigure()
     return 0;
   };
   int ret = this->Instrumentation->InstrumentCommand(
-    "configure", this->cmdArgs, [doConfigure]() { return doConfigure(); },
+    "configure", this->cmdArgs,
+    [doConfigure]() -> cmInstrumentation::CommandResult {
+      return { doConfigure(), cm::nullopt, cm::nullopt };
+    },
     cm::nullopt, cm::nullopt,
     this->GetIsInTryCompile() ? cmInstrumentation::LoadQueriesAfter::No
                               : cmInstrumentation::LoadQueriesAfter::Yes);
@@ -3254,7 +3257,10 @@ int cmake::Generate()
   };
 
   int ret = this->Instrumentation->InstrumentCommand(
-    "generate", this->cmdArgs, [doGenerate]() { return doGenerate(); });
+    "generate", this->cmdArgs,
+    [doGenerate]() -> cmInstrumentation::CommandResult {
+      return { doGenerate(), cm::nullopt, cm::nullopt };
+    });
   if (ret != 0) {
     return ret;
   }
@@ -4191,8 +4197,10 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
   // Block the instrumentation build daemon from spawning during this build.
   // This lock will be released when the process exits at the end of the build.
   instrumentation.LockBuildDaemon();
-  int buildresult =
-    instrumentation.InstrumentCommand("cmakeBuild", args, doBuild);
+  int buildresult = instrumentation.InstrumentCommand(
+    "cmakeBuild", args, [doBuild]() -> cmInstrumentation::CommandResult {
+      return { doBuild(), cm::nullopt, cm::nullopt };
+    });
   instrumentation.CollectTimingData(
     cmInstrumentationQuery::Hook::PostCMakeBuild);
 #else
