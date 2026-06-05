@@ -18,6 +18,7 @@ std::vector<std::string> const cmInstrumentationQuery::OptionString{
   "staticSystemInformation",
   "dynamicSystemInformation",
   "captureOutput",
+  "compileTrace",
   "cdashSubmit",
   "cdashVerbose",
   "trace"

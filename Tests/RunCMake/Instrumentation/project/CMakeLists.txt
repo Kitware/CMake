@@ -8,6 +8,15 @@ endif()
 add_executable(main main.c)
 add_library(lib lib.c)
 target_link_libraries(main lib)
+
+if (INSTRUMENT_COMPILE_TRACE STREQUAL "DEFAULT")
+  target_compile_options(main PRIVATE "-ftime-trace")
+  target_compile_options(lib PRIVATE "-ftime-trace")
+elseif (INSTRUMENT_COMPILE_TRACE STREQUAL "EXPLICIT")
+  target_compile_options(main PRIVATE "-ftime-trace=main.json")
+  target_compile_options(lib PRIVATE "-ftime-trace=lib.json")
+endif()
+
 add_custom_command(TARGET main POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E true
 )
