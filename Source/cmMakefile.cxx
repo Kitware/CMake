@@ -4251,7 +4251,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   // Deprecate old policies.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0155 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0161 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
@@ -4259,7 +4259,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
           id == cmPolicies::CMP0104 || id == cmPolicies::CMP0123 ||
           id == cmPolicies::CMP0126 || id == cmPolicies::CMP0128 ||
           id == cmPolicies::CMP0136 || id == cmPolicies::CMP0141 ||
-          id == cmPolicies::CMP0155))) {
+          id == cmPolicies::CMP0155 || id == cmPolicies::CMP0157))) {
     std::unique_ptr<PolicyPushPop> ps;
     std::unique_ptr<DiagnosticPushPop> ds;
 
