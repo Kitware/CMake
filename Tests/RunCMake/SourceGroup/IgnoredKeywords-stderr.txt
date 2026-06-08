@@ -1,0 +1,11 @@
+CMake Warning \(author\) at IgnoredKeywords\.cmake:[0-9]+ \(source_group\):
+  keyword "PREFIX" will be ignored in this context\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
+
+CMake Warning \(author\) at IgnoredKeywords\.cmake:[0-9]+ \(source_group\):
+  keyword "REGULAR_EXPRESSION" will be ignored in this context\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.

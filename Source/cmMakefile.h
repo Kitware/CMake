@@ -682,14 +682,14 @@ public:
   /**
    * Add a root source group for consideration when adding a new source.
    */
-  void AddSourceGroup(std::string const& name, char const* regex = nullptr);
+  void AddSourceGroup(std::string const& name, cm::string_view regex = {});
 
   /**
    * Add a source group for consideration when adding a new source.
    * name is tokenized.
    */
   void AddSourceGroup(std::vector<std::string> const& name,
-                      char const* regex = nullptr);
+                      cm::string_view regex = {});
 
   /**
    * Get and existing or create a new source group.

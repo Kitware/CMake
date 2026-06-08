@@ -15,27 +15,27 @@ public:
   SourceGroupVector GroupChildren;
 };
 
-cmSourceGroup::cmSourceGroup(std::string name, char const* regex,
-                             char const* parentName)
+cmSourceGroup::cmSourceGroup(std::string name, cm::string_view regex,
+                             cm::string_view parentName)
   : Name(std::move(name))
 {
   this->Internal = cm::make_unique<cmSourceGroupInternals>();
   this->SetGroupRegex(regex);
-  if (parentName) {
-    this->FullName = cmStrCat(parentName, '\\');
+  if (parentName.empty()) {
+    this->FullName = this->Name;
+  } else {
+    this->FullName = cmStrCat(parentName, '\\', this->Name);
   }
-  this->FullName += this->Name;
 }
 
 cmSourceGroup::~cmSourceGroup() = default;
 
-void cmSourceGroup::SetGroupRegex(char const* regex)
+bool cmSourceGroup::SetGroupRegex(cm::string_view regex)
 {
-  if (regex) {
-    this->GroupRegex.compile(regex);
-  } else {
-    this->GroupRegex.compile("^$");
+  if (regex.data()) {
+    return this->GroupRegex.compile(static_cast<std::string>(regex));
   }
+  return this->GroupRegex.compile("^$");
 }
 
 void cmSourceGroup::ResolveGenex(cmLocalGenerator* lg,

@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 class cmLocalGenerator;
@@ -32,16 +34,17 @@ using SourceGroupVector = std::vector<std::unique_ptr<cmSourceGroup>>;
 class cmSourceGroup
 {
 public:
-  cmSourceGroup(std::string name, char const* regex,
-                char const* parentName = nullptr);
+  cmSourceGroup(std::string name, cm::string_view regex,
+                cm::string_view parentName = {});
   cmSourceGroup(cmSourceGroup const& r) = delete;
   ~cmSourceGroup();
   cmSourceGroup& operator=(cmSourceGroup const&) = delete;
 
   /**
    * Set the regular expression for this group.
+   * Returns false if the regular expression cannot be compiled.
    */
-  void SetGroupRegex(char const* regex);
+  bool SetGroupRegex(cm::string_view regex);
 
   /**
    * Resolve genex.
