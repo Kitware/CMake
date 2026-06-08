@@ -1,4 +1,4 @@
-CMake Warning \(install-absolute-destination\) at FILES-AbsoluteDest-warn\.cmake:[0-9]+ \(install\):
+CMake Warning \(install-absolute-destination\) at SBOM-AbsoluteDest-warn\.cmake:[0-9]+ \(install\):
   INSTALL command given absolute DESTINATION path:
 
     /absolute/path

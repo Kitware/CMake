@@ -238,8 +238,7 @@ void cmInstallGenerator::CheckAbsoluteDestination(std::string const& dest,
   }
   lg->IssueDiagnostic(
     cmDiagnostics::CMD_INSTALL_ABSOLUTE_DESTINATION,
-    cmStrCat("INSTALL command given absolute DESTINATION path (", dest,
-             ").\n"),
+    cmStrCat("INSTALL command given absolute DESTINATION path:\n  ", dest),
     this->Context);
 }
 

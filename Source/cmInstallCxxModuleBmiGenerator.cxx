@@ -50,6 +50,7 @@ std::string cmInstallCxxModuleBmiGenerator::GetScriptLocation(
   if (config.empty()) {
     configName = "noconfig";
   }
+
   return cmStrCat(this->Target->GetCMFSupportDirectory(),
                   "/install-cxx-module-bmi-", configName, ".cmake");
 }
@@ -57,8 +58,10 @@ std::string cmInstallCxxModuleBmiGenerator::GetScriptLocation(
 std::string cmInstallCxxModuleBmiGenerator::GetDestination(
   std::string const& config) const
 {
-  return cmGeneratorExpression::Evaluate(this->Destination,
-                                         this->LocalGenerator, config);
+  std::string dest = cmGeneratorExpression::Evaluate(
+    this->Destination, this->LocalGenerator, config);
+  this->CheckAbsoluteDestination(dest, this->LocalGenerator);
+  return dest;
 }
 
 void cmInstallCxxModuleBmiGenerator::GenerateScriptForConfig(

@@ -1,2 +1,8 @@
 CMake Warning \(install-absolute-destination\) at TARGETS-AbsoluteDest-warn\.cmake:[0-9]+ \(install\):
-  INSTALL command given absolute DESTINATION path \(/absolute/path\)\.
+  INSTALL command given absolute DESTINATION path:
+
+    /absolute/path
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or
+-Wno-install-absolute-destination to suppress it\.

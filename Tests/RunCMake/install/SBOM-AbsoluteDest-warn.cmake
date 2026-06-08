@@ -1,0 +1,5 @@
+enable_language(C)
+project(SBOM-AbsoluteDest-warn LANGUAGES C VERSION 1.0)
+add_library(mylib STATIC empty.c)
+install(TARGETS mylib EXPORT myexp DESTINATION lib)
+install(SBOM mysbom EXPORTS myexp FORMAT "spdx-3.0+json" DESTINATION /absolute/path)

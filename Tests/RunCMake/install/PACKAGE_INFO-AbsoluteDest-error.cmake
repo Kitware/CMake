@@ -1,0 +1,5 @@
+enable_language(C)
+project(PACKAGE_INFO-AbsoluteDest-error LANGUAGES C VERSION 1.0)
+add_library(mylib STATIC empty.c)
+install(TARGETS mylib EXPORT myexp DESTINATION lib)
+install(PACKAGE_INFO mypkg EXPORT myexp DESTINATION /absolute/path)
