@@ -298,8 +298,8 @@ Recognized macros include:
       ``Derived`` inherits from ``Base``.
 
     Under preset versions ``4``-``11``, ``MY_DIR`` will be set to ``/path/to/``
-    when using the ``Base`` preset, and ``/path/to/subdir/`` when using the
-    ``Derived`` preset.
+    when using the ``Derived`` preset, and ``/path/to/subdir/`` when using the
+    ``Base`` preset.
 
     When ``/path/to/subdir/CMakePresets.json`` specifies version ``12`` or
     above, ``MY_DIR`` will always be set to ``/path/to/subdir/``, regardless of
@@ -310,7 +310,7 @@ Recognized macros include:
       Since the ``${fileDir}`` macro in version 12 is expanded in the context
       of the current presets file, it is the version of the current file, rather
       than the version of the root file containing the preset being used, which
-      enables this alternative behavior.
+      dictates this behavior.
 
 ``${dollar}``
   A literal dollar sign (``$``).

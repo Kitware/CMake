@@ -586,6 +586,10 @@ The options for running tests are:
 
  A bare ``--`` with no following arguments is silently ignored.
 
+ When both ``<test-args>`` and
+ :preset:`testPresets.execution.testPassthroughArguments` are provided,
+ the test preset arguments will appear first, followed by the ``<test-args>``.
+
 View Help
 =========
 

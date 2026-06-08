@@ -21,6 +21,7 @@ those custom commands only produce sources independent from other sources in
 the same target.
 
 If this property is not defined, the following default will be applied:
+
 * ``ON`` for ``CXX_MODULES`` file set type.
 * ``OFF`` for all other file set types.
 
@@ -28,6 +29,6 @@ In the case of the ``CXX_MODULES`` file set type, the only supported mode is
 ``ON``. So if the property is set to ``OFF``, it will be ignored.
 
 In the case of the ``HEADERS`` file set type, if the property is ``ON``, an
-author warning will be emit because this mode is not supported.
+author warning will be emitted because this mode is not supported.
 
 This property is effective only when the policy :policy:`CMP0154` is ``NEW``.
