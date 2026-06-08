@@ -10,11 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include <cm/string_view>
-
 #include "cmExportFileGenerator.h"
 #include "cmExportSet.h"
-#include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
@@ -24,7 +21,6 @@
 #include "cmInstallFileSetGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -295,21 +291,6 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetDirectories(
       dest = cmStrCat("${_IMPORT_PREFIX}/", dest);
     }
 
-    auto const& type = fileSet->GetType();
-    // C++ modules do not support interface file sets which are dependent upon
-    // the configuration.
-    if (result.HadContextSensitiveCondition &&
-        type == cm::FileSetMetadata::CXX_MODULES) {
-      auto* mf = this->IEGen->GetLocalGenerator()->GetMakefile();
-      std::ostringstream e;
-      e << "The \"" << gte->GetName() << "\" target's interface file set \""
-        << fileSet->GetName() << "\" of type \"" << type
-        << "\" contains context-sensitive base file entries which is not "
-           "supported.";
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      return std::string{};
-    }
-
     if (result.HadContextSensitiveCondition && configs.size() != 1) {
       resultVector.push_back(
         cmStrCat("\"$<$<CONFIG:", config, ">:", dest, ">\""));
@@ -350,20 +331,6 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetFiles(
 
     bool const contextSensitive =
       destCge->GetHadContextSensitiveCondition() || files.second;
-    auto const& type = fileSet->GetType();
-    // C++ modules do not support interface file sets which are dependent upon
-    // the configuration.
-    if (contextSensitive && type == cm::FileSetMetadata::CXX_MODULES) {
-      auto* mf = this->IEGen->GetLocalGenerator()->GetMakefile();
-      mf->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("The \"", gte->GetName(),
-                                "\" target's interface file set \"",
-                                fileSet->GetName(), "\" of type \"", type,
-                                "\" contains context-sensitive base file "
-                                "entries which is not supported."));
-      return std::string{};
-    }
-
     for (auto const& it : files.first) {
       auto prefix = it.first.empty() ? "" : cmStrCat(it.first, '/');
       for (auto const& filename : it.second) {
