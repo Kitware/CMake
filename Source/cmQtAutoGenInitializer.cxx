@@ -2588,10 +2588,8 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
     if (this->MultiConfig && this->UseBetterGraph) {
       for (auto const& config : this->ConfigsList) {
         if (!genVars.ExecutableFeatures.Config[config]) {
-          if (!genVars.ExecutableFeatures.Config[config]) {
-            print_err(err);
-            return false;
-          }
+          print_err(err);
+          return false;
         }
       }
     } else {
