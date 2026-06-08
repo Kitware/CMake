@@ -916,6 +916,13 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               ? "NEW"
               : "OLD");
 
+    // Honor CMAKE_EXE_LINKER_FLAGS in Swift if the outer project does.
+    fprintf(fout, "cmake_policy(SET CMP0214 %s)\n",
+            this->Makefile->GetPolicyStatus(cmPolicies::CMP0214) ==
+                cmPolicies::NEW
+              ? "NEW"
+              : "OLD");
+
     // Workaround for -Wl,-headerpad_max_install_names issue until we can
     // avoid adding that flag in the platform and compiler language files
     fprintf(fout,
