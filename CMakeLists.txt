@@ -1,7 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file LICENSE.rst or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 3.13...4.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13...4.3 FATAL_ERROR)
 
 if(CMake_TEST_HOST_CMAKE)
   get_filename_component(CMake_TEST_EXTERNAL_CMAKE "${CMAKE_COMMAND}" DIRECTORY)
