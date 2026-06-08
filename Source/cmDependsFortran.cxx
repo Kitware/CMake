@@ -87,7 +87,7 @@ cmDependsFortran::cmDependsFortran(cmLocalUnixMakefileGenerator3* lg)
   for (std::string def : definitions) {
     std::string::size_type assignment = def.find('=');
     if (assignment != std::string::npos) {
-      def = def.substr(0, assignment);
+      def.resize(assignment);
     }
     this->PPDefinitions.insert(def);
   }

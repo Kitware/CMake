@@ -252,7 +252,7 @@ static bool RccListParseOutput(std::string const& rccStdOut,
   auto StripCR = [](std::string& line) {
     std::string::size_type cr = line.find('\r');
     if (cr != std::string::npos) {
-      line = line.substr(0, cr);
+      line.resize(cr);
     }
   };
 

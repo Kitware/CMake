@@ -5193,7 +5193,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
   }
   pos = lib.find_last_not_of(" \t\r\n");
   if (pos != std::string::npos) {
-    lib = lib.substr(0, pos + 1);
+    lib.resize(pos + 1);
   }
   if (lib != item) {
     cmake* cm = this->LocalGenerator->GetCMakeInstance();

@@ -176,9 +176,7 @@ bool cmDependsC::WriteDependencies(std::set<std::string> const& sources,
           fileIt->second.Used = true;
           dependencies.insert(fullName);
           for (UnscannedEntry const& inc : fileIt->second.UnscannedEntries) {
-            if (this->Encountered.find(inc.FileName) ==
-                this->Encountered.end()) {
-              this->Encountered.insert(inc.FileName);
+            if (this->Encountered.insert(inc.FileName).second) {
               this->Unscanned.push(inc);
             }
           }
@@ -382,9 +380,7 @@ void cmDependsC::Scan(std::istream& is, std::string const& directory,
       // preprocessor-like implementation of this scanner is created.
       if (this->IncludeRegexScan.find(entry.FileName)) {
         newCacheEntry.UnscannedEntries.push_back(entry);
-        if (this->Encountered.find(entry.FileName) ==
-            this->Encountered.end()) {
-          this->Encountered.insert(entry.FileName);
+        if (this->Encountered.insert(entry.FileName).second) {
           this->Unscanned.push(entry);
         }
       }

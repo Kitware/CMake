@@ -134,8 +134,6 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
   auto const& utilityItems = target.GetUtilityItems();
   for (auto const& item : utilityItems) {
     auto const& name = item.AsStr();
-    if (dependencies.find(name) == dependencies.cend()) {
-      dependencies[name] = Dependency(DependencyType::Utility, item);
-    }
+    dependencies.emplace(name, Dependency(DependencyType::Utility, item));
   }
 }

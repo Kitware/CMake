@@ -1360,10 +1360,10 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
     // we must shorten the combined string by 4 characters
     // keep no more than 24 characters from the second string
     if (static_cast<int>(str2.size()) > keep) {
-      str2 = str2.substr(0, keep);
+      str2.resize(keep);
     }
     if (static_cast<int>(str1.size()) + static_cast<int>(str2.size()) > size) {
-      str1 = str1.substr(0, size - str2.size());
+      str1.resize(size - str2.size());
     }
     char buffer[12];
     int ni = 0;

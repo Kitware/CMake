@@ -591,8 +591,7 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
         dir = frameworkRx.match(1);
       }
 
-      if (emittedDirs.find(dir) == emittedDirs.end()) {
-        emittedDirs.insert(dir);
+      if (emittedDirs.insert(dir).second) {
         xml.StartElement("pathentry");
         xml.Attribute("include",
                       cmExtraEclipseCDT4Generator::GetEclipsePath(dir));
@@ -783,8 +782,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         }
 
         // insert the definition if not already added.
-        if (emitted.find(def) == emitted.end()) {
-          emitted.insert(def);
+        if (emitted.insert(def).second) {
           xml.StartElement("pathentry");
           xml.Attribute("kind", "mac");
           xml.Attribute("name", def);
@@ -815,8 +813,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         }
 
         // insert the definition if not already added.
-        if (emitted.find(def) == emitted.end()) {
-          emitted.insert(def);
+        if (emitted.insert(def).second) {
           xml.StartElement("pathentry");
           xml.Attribute("kind", "mac");
           xml.Attribute("name", def);
@@ -847,8 +844,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         }
 
         // insert the definition if not already added.
-        if (emitted.find(def) == emitted.end()) {
-          emitted.insert(def);
+        if (emitted.insert(def).second) {
           xml.StartElement("pathentry");
           xml.Attribute("kind", "mac");
           xml.Attribute("name", def);
