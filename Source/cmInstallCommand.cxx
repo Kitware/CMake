@@ -301,6 +301,18 @@ bool AddBundleExecutable(Helper& helper,
   return true;
 }
 
+void CheckAbsoluteDestination(Helper& helper, std::string const& destination)
+{
+  // Check for an absolute destination.
+  if (cmGeneratorExpression::Find(destination) == std::string::npos &&
+      cmSystemTools::FileIsFullPath(destination)) {
+    helper.Makefile->IssueDiagnostic(
+      cmDiagnostics::CMD_INSTALL_ABSOLUTE_DESTINATION,
+      cmStrCat("INSTALL command given absolute DESTINATION path:\n  ",
+               destination));
+  }
+}
+
 bool HandleScriptMode(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
 {
@@ -1911,14 +1923,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile, messageNever);
 
-  // Check for an absolute destination.
-  if (cmGeneratorExpression::Find(*destination) == std::string::npos &&
-      cmSystemTools::FileIsFullPath(*destination)) {
-    helper.Makefile->IssueDiagnostic(
-      cmDiagnostics::CMD_INSTALL_ABSOLUTE_DESTINATION,
-      cmStrCat("INSTALL command given absolute DESTINATION path (",
-               *destination, ").\n"));
-  }
+  // Check for CMD_INSTALL_ABSOLUTE_DESTINATION diagnostics.
+  CheckAbsoluteDestination(helper, *destination);
 
   // Create the directory install generator.
   helper.Makefile->AddInstallGenerator(
@@ -1973,6 +1979,9 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
     status.SetError(cmStrCat(args[0], " given no DESTINATION!"));
     return false;
   }
+
+  // Check for CMD_INSTALL_ABSOLUTE_DESTINATION diagnostics.
+  CheckAbsoluteDestination(helper, ica.GetDestination());
 
   // Check the file name.
   std::string fname = filename;
@@ -2142,6 +2151,9 @@ bool HandleMappedPackageInfo(
     }
   }
 
+  // Check for CMD_INSTALL_ABSOLUTE_DESTINATION diagnostics.
+  CheckAbsoluteDestination(helper, dest);
+
   if (arguments.Appendix.empty()) {
     // Get additional export information from variables.
     GetExportArgumentFromVariable( // BR
@@ -2296,6 +2308,9 @@ bool HandleExportMode(std::vector<std::string> const& args,
   }
 #endif
 
+  // Check for CMD_INSTALL_ABSOLUTE_DESTINATION diagnostics.
+  CheckAbsoluteDestination(helper, ica.GetDestination());
+
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallCMakeConfigExportGenerator>(
@@ -2355,6 +2370,9 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
         arguments.GetDefaultDestination(helper.GetLibraryDestination(nullptr));
     }
   }
+
+  // Check for CMD_INSTALL_ABSOLUTE_DESTINATION diagnostics.
+  CheckAbsoluteDestination(helper, dest);
 
   cmExportSet& exportSet =
     helper.Makefile->GetGlobalGenerator()->GetExportSets()[exportName];
@@ -2554,6 +2572,9 @@ bool HandleSbomMode(std::vector<std::string> const& args,
         arguments.GetDefaultDestination(helper.GetLibraryDestination(nullptr));
     }
   }
+
+  // Check for CMD_INSTALL_ABSOLUTE_DESTINATION diagnostics.
+  CheckAbsoluteDestination(helper, dest);
 
   cmGlobalGenerator* gg = helper.Makefile->GetGlobalGenerator();
 

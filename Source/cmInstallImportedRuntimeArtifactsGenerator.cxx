@@ -60,8 +60,10 @@ bool cmInstallImportedRuntimeArtifactsGenerator::Compute(cmLocalGenerator* lg)
 std::string cmInstallImportedRuntimeArtifactsGenerator::GetDestination(
   std::string const& config) const
 {
-  return cmGeneratorExpression::Evaluate(
+  std::string dest = cmGeneratorExpression::Evaluate(
     this->Destination, this->Target->GetLocalGenerator(), config);
+  this->CheckAbsoluteDestination(dest, this->Target->GetLocalGenerator());
+  return dest;
 }
 
 void cmInstallImportedRuntimeArtifactsGenerator::GenerateScriptForConfig(

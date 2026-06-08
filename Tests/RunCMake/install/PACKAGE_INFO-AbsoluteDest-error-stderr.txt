@@ -1,4 +1,4 @@
-CMake Error \(install-absolute-destination\) at FILES-AbsoluteDest-error\.cmake:[0-9]+ \(install\):
+CMake Error \(install-absolute-destination\) at PACKAGE_INFO-AbsoluteDest-error\.cmake:[0-9]+ \(install\):
   INSTALL command given absolute DESTINATION path:
 
     /absolute/path
