@@ -249,7 +249,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   endif()
 
   # The IBM LLVM Flang compiler version is extracted from --version output
-  if(CMAKE_${lang}_COMPILER_ID STREQUAL "IBMLLVMFlang")
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "IBMFlang")
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}" --version
       OUTPUT_VARIABLE output

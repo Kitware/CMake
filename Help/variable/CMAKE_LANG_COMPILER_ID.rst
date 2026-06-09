@@ -54,7 +54,7 @@ Value                           Name
 ``XL``, ``VisualAge``, ``zOS``  IBM XL
 ``XLClang``                     IBM Clang-based XL
 ``IBMClang``                    IBM LLVM-based Compiler
-``IBMLLVMFlang``                IBM LLVM/Flang-based Fortran Compiler
+``IBMFlang``                    IBM LLVM/Flang-based Fortran Compiler
 =============================== ===============================================
 
 This variable is not guaranteed to be defined for all compilers or
