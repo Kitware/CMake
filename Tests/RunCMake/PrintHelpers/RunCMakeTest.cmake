@@ -1,5 +1,10 @@
 include(RunCMake)
 
-run_cmake(Variables)
+block()
+  set(RunCMake_TEST_OPTIONS -Wno-deprecated)
+  run_cmake(VariablesArgForwarding)
+  run_cmake(VariablesReservedKeyword)
+endblock()
+run_cmake(VariablesDeprecation)
 run_cmake(Properties)
 run_cmake(PropertiesSources)
