@@ -1155,7 +1155,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
 
     if (WIN32)
       # In this case, check if the interpreter is compatible with the target processor architecture
-      if (_$_PYTHON_PREFIX}_ARCHITECTURE_ID MATCHES "ARM")
+      if (_${_PYTHON_PREFIX}_ARCHITECTURE_ID MATCHES "ARM")
         set(target_arm TRUE)
       else()
         set(target_arm FALSE)
