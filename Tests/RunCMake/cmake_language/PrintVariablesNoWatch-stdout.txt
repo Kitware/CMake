@@ -1,0 +1,3 @@
+-- Printing variables\.\.\.
+ Variables in scope at '.*PrintVariablesNoWatch\.cmake' matching name '\^watched\$' \(case sensitive\):
+   watched = "value"

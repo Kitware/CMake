@@ -29,6 +29,8 @@
 #include "cmMessageType.h" // IWYU pragma: keep
 #include "cmRange.h"
 #include "cmState.h"
+#include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -522,6 +524,267 @@ bool cmCMakeLanguageCommandPRINT_TARGETS(
   }
   return true;
 }
+
+struct PrintVariablesArgs : public ArgumentParser::ParseResult
+{
+  bool All = false;
+  ArgumentParser::NonEmpty<std::vector<std::string>> Named;
+  cm::optional<std::string> NameRegex;
+  cm::optional<std::string> ValueRegex;
+  bool IgnoreCase = false;
+  // Internal: set by the deprecated cmake_print_variables() module wrapper to
+  // request the historical flush single-line output (no banner, undefined
+  // names printed as name="").  Not part of the public interface.
+  bool CmakePrintVariables = false;
+};
+
+// Banner opening a cmake_language(PRINT_VARIABLES) status message.  Suppressed
+// in the deprecated cmake_print_variables() (legacy) path.
+cm::static_string_view const PrintVariablesBanner =
+  "Printing variables...\n"_s;
+
+// NAMED mode.  By default (matching cmake_language(PRINT_PROPERTIES)) this
+// emits a " Named variables:" header followed by one `name = "value"` entry
+// per line; a name that is not defined prints as `name = <NOTFOUND>` in the
+// order given.  When `legacy` is set (the deprecated cmake_print_variables()
+// wrapper) it instead emits the historical flush single line
+// "name=\"value\" ; ..." with no header and undefined names as name="".
+// Values go through GetDefinition so users see the same
+// in-scope/cache-fallback value they'd get from ${var}.
+void PrintVariablesNamed(cmMakefile& makefile,
+                         std::vector<std::string> const& names, bool legacy)
+{
+  if (legacy) {
+    std::string msg;
+    bool first = true;
+    for (std::string const& name : names) {
+      if (!first) {
+        msg += " ; ";
+      }
+      first = false;
+      cmValue v = makefile.GetDefinition(name);
+      msg += cmStrCat(name, "=\"", v ? *v : std::string(), "\"");
+    }
+    makefile.DisplayStatus(msg, -1);
+    return;
+  }
+
+  std::string out = cmStrCat(PrintVariablesBanner, " Named variables:\n");
+  for (std::string const& name : names) {
+    cmValue v = makefile.GetDefinition(name);
+    if (v) {
+      out += cmStrCat("   ", name, " = \"", *v, "\"\n");
+    } else {
+      out += cmStrCat("   ", name, " = <NOTFOUND>\n");
+    }
+  }
+  makefile.DisplayStatus(out, -1);
+}
+
+// ALL mode: enumerate every regular variable in scope and
+// every cache entry.  A name with both a regular variable and a cache
+// entry is printed on two distinct lines so the user sees the full
+// picture, including the value the cache holds even when a regular
+// variable shadows it.  Values are read via the snapshot and cache APIs
+// directly to avoid firing variable-watch callbacks (which would
+// otherwise trip CMP0218 when CMAKE_WARN_DEPRECATED or
+// CMAKE_ERROR_DEPRECATED are in scope).
+bool PrintVariablesAll(cmMakefile& makefile, PrintVariablesArgs const& parsed,
+                       cmExecutionStatus& status)
+{
+  cm::optional<cmsys::RegularExpression> nameRegex;
+  cm::optional<cmsys::RegularExpression> valueRegex;
+  if (parsed.NameRegex) {
+    cmsys::RegularExpression re;
+    std::string const pat = parsed.IgnoreCase
+      ? cmSystemTools::LowerCase(*parsed.NameRegex)
+      : *parsed.NameRegex;
+    if (!re.compile(pat)) {
+      return FatalError(status,
+                        cmStrCat("NAME_REGEX regular expression \"",
+                                 *parsed.NameRegex, "\" cannot compile."));
+    }
+    nameRegex = std::move(re);
+  }
+  if (parsed.ValueRegex) {
+    cmsys::RegularExpression re;
+    std::string const pat = parsed.IgnoreCase
+      ? cmSystemTools::LowerCase(*parsed.ValueRegex)
+      : *parsed.ValueRegex;
+    if (!re.compile(pat)) {
+      return FatalError(status,
+                        cmStrCat("VALUE_REGEX regular expression \"",
+                                 *parsed.ValueRegex, "\" cannot compile."));
+    }
+    valueRegex = std::move(re);
+  }
+
+  auto matches = [&](std::string const& name, std::string const& value) {
+    if (nameRegex) {
+      std::string const subj =
+        parsed.IgnoreCase ? cmSystemTools::LowerCase(name) : name;
+      if (!nameRegex->find(subj)) {
+        return false;
+      }
+    }
+    if (valueRegex) {
+      std::string const subj =
+        parsed.IgnoreCase ? cmSystemTools::LowerCase(value) : value;
+      if (!valueRegex->find(subj)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  cmStateSnapshot const snapshot = makefile.GetStateSnapshot();
+  cmState* state = makefile.GetState();
+
+  // GetDefinitions() already unions ClosureKeys() with the cache keys and
+  // sorts the result; just dedupe so a name that lives in both lists isn't
+  // visited twice.
+  auto names = makefile.GetDefinitions();
+  names.erase(std::unique(names.begin(), names.end()), names.end());
+
+  // Build the body first so nothing is printed when a regex filters
+  // everything out; the warning below covers that case.
+  std::string body;
+  bool anyMatched = false;
+  for (std::string const& name : names) {
+    cmValue regular = snapshot.GetDefinition(name);
+    if (regular && matches(name, *regular)) {
+      body += cmStrCat("   ", name, " = \"", *regular, "\"\n");
+      anyMatched = true;
+    }
+    cmValue cached = state->GetInitializedCacheValue(name);
+    if (cached && matches(name, *cached)) {
+      auto const type = state->GetCacheEntryType(name);
+      body += cmStrCat("   CACHE{", name, "}");
+      if (type != cmStateEnums::UNINITIALIZED) {
+        body += cmStrCat(":", cmState::CacheEntryTypeToString(type));
+      }
+      body += cmStrCat(" = \"", *cached, "\"\n");
+      anyMatched = true;
+    }
+  }
+
+  if (anyMatched) {
+    cmValue listFile = snapshot.GetDefinition("CMAKE_CURRENT_LIST_FILE");
+    std::string out =
+      cmStrCat(PrintVariablesBanner, " Variables in scope at '",
+               listFile ? *listFile : std::string("<unknown>"), "'");
+    if (parsed.NameRegex || parsed.ValueRegex) {
+      out += " matching";
+      if (parsed.NameRegex) {
+        out += cmStrCat(" name '", *parsed.NameRegex, "'");
+      }
+      if (parsed.NameRegex && parsed.ValueRegex) {
+        out += " and";
+      }
+      if (parsed.ValueRegex) {
+        out += cmStrCat(" value '", *parsed.ValueRegex, "'");
+      }
+      out += parsed.IgnoreCase ? " (case insensitive)" : " (case sensitive)";
+    }
+    out += cmStrCat(":\n", body);
+    makefile.DisplayStatus(out, -1);
+  }
+
+  if (!anyMatched && (parsed.NameRegex || parsed.ValueRegex)) {
+    std::string msg = "No variables in scope matching";
+    if (parsed.NameRegex) {
+      msg += cmStrCat(" name '", *parsed.NameRegex, "'");
+    }
+    if (parsed.NameRegex && parsed.ValueRegex) {
+      msg += " and";
+    }
+    if (parsed.ValueRegex) {
+      msg += cmStrCat(" value '", *parsed.ValueRegex, "'");
+    }
+    msg += parsed.IgnoreCase ? " (case insensitive)" : " (case sensitive)";
+    msg += " in cmake_language(PRINT_VARIABLES ...).";
+    makefile.IssueMessage(MessageType::WARNING, msg);
+  }
+  return true;
+}
+
+bool cmCMakeLanguageCommandPRINT_VARIABLES(
+  std::vector<cmListFileArgument> const& args, cmExecutionStatus& status)
+{
+  cmMakefile& makefile = status.GetMakefile();
+  std::vector<std::string> expandedArgs;
+  makefile.ExpandArguments(args, expandedArgs);
+
+  // Drop the leading "PRINT_VARIABLES" subcommand keyword.
+  std::vector<std::string> body(expandedArgs.begin() + 1, expandedArgs.end());
+
+  auto const ArgsParser =
+    cmArgumentParser<PrintVariablesArgs>()
+      .Bind("ALL"_s, &PrintVariablesArgs::All)
+      .Bind("NAMED"_s, &PrintVariablesArgs::Named)
+      .Bind("NAME_REGEX"_s, &PrintVariablesArgs::NameRegex)
+      .Bind("VALUE_REGEX"_s, &PrintVariablesArgs::ValueRegex)
+      .Bind("IGNORE_CASE"_s, &PrintVariablesArgs::IgnoreCase)
+      .Bind("__CMAKE_PRINT_VARIABLES"_s,
+            &PrintVariablesArgs::CmakePrintVariables);
+
+  std::vector<std::string> unparsed;
+  auto parsedArgs = ArgsParser.Parse(body, &unparsed);
+
+  // No bareword form: every token must belong to ALL, NAMED, or a filter.
+  if (!unparsed.empty()) {
+    return FatalError(
+      status,
+      cmStrCat("Unknown argument(s) given to cmake_language(PRINT_VARIABLES)"
+               ": \"",
+               cmJoin(unparsed, "\" \""), "\"."));
+  }
+
+  if (parsedArgs.MaybeReportError(makefile)) {
+    cmSystemTools::SetFatalErrorOccurred();
+    return true;
+  }
+
+  bool const hasNamed = !parsedArgs.Named.empty();
+  bool const hasFilters =
+    parsedArgs.NameRegex || parsedArgs.ValueRegex || parsedArgs.IgnoreCase;
+
+  // ALL and NAMED are mutually exclusive modes.
+  if (parsedArgs.All && hasNamed) {
+    return FatalError(status,
+                      "ALL and NAMED keywords in "
+                      "cmake_language(PRINT_VARIABLES) call "
+                      "are mutually exclusive.");
+  }
+
+  // The filter keywords narrow an enumeration, so they only make sense with
+  // ALL (explicit or implicit), never with NAMED.
+  if (hasNamed && hasFilters) {
+    return FatalError(status,
+                      "NAME_REGEX, VALUE_REGEX, and IGNORE_CASE in "
+                      "cmake_language(PRINT_VARIABLES) call "
+                      "are only valid with ALL, not NAMED.");
+  }
+
+  // __CMAKE_PRINT_VARIABLES selects the legacy single-line NAMED output; it is
+  // meaningless when enumerating variables (ALL, explicit or implicit).
+  if (!hasNamed && parsedArgs.CmakePrintVariables) {
+    return FatalError(status,
+                      "__CMAKE_PRINT_VARIABLES in "
+                      "cmake_language(PRINT_VARIABLES) call is only valid "
+                      "with NAMED.");
+  }
+
+  // Default to ALL when neither mode keyword is given.
+  bool const all = parsedArgs.All || !hasNamed;
+  if (all) {
+    return PrintVariablesAll(makefile, parsedArgs, status);
+  }
+
+  PrintVariablesNamed(makefile, parsedArgs.Named,
+                      parsedArgs.CmakePrintVariables);
+  return true;
+}
 }
 
 bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
@@ -703,6 +966,10 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
 
   if (expArgs[expArg] == "PRINT_TARGETS") {
     return cmCMakeLanguageCommandPRINT_TARGETS(args, status);
+  }
+
+  if (expArgs[expArg] == "PRINT_VARIABLES") {
+    return cmCMakeLanguageCommandPRINT_VARIABLES(args, status);
   }
 
   if (expArgs[expArg] == "TRACE") {

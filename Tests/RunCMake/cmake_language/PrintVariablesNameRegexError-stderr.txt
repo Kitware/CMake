@@ -1,0 +1,2 @@
+CMake Error at PrintVariablesNameRegexError\.cmake:[0-9]+ \(cmake_language\):
+  cmake_language NAME_REGEX regular expression "\[" cannot compile\.

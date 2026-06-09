@@ -18,6 +18,8 @@ Synopsis
   cmake_language(`EXIT`_ <exit-code>)
   cmake_language(`TRACE`_ <boolean> ...)
   cmake_language(`PRINT_TARGETS`_ <filter>...)
+  cmake_language(`PRINT_VARIABLES`_
+                 [{ ALL [<filter>...] | NAMED <vars>... }])
 
 Introduction
 ^^^^^^^^^^^^
@@ -610,3 +612,74 @@ Gives::
    Non-imported targets matching REGEX '^(app|util)$' (case sensitive):
      app (EXECUTABLE)
      util (STATIC_LIBRARY)
+
+Printing Variables
+^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.5
+
+.. signature::
+  cmake_language(PRINT_VARIABLES
+    [{ ALL [<filter>...] | NAMED <vars>... }])
+
+  Prints the values of variables in the current scope.  The set of
+  variables to print may be specified by one of:
+
+  ``ALL [<filter>...]`` (default)
+    Enumerates every regular variable in the current scope and every
+    cache entry, printing one entry per line.  Cache entries are annotated
+    as ``CACHE{<name>}:<TYPE>`` (e.g.
+    ``CACHE{CMAKE_INSTALL_PREFIX}:PATH = "/usr/local"``).  If a name
+    corresponds to both a cache entry and a regular variable, both are printed.
+
+    Each ``<filter>`` may be one of:
+
+    ``NAME_REGEX <name-regex>``
+      Print only variables whose name matches the given
+      :ref:`regular expression <Regex Specification>`.
+    ``VALUE_REGEX <value-regex>``
+      Print only variables whose value matches the given
+      :ref:`regular expression <Regex Specification>`.
+    ``IGNORE_CASE``
+      Lower-case both the pattern and the candidate string before matching,
+      so ``NAME_REGEX`` and ``VALUE_REGEX`` match case-insensitively.
+
+  ``NAMED <vars>...``
+    Prints one ``<var> = "<value>"`` entry per line, in the order given.  Note
+    that a regular variable shadows a cache entry of the same name.  A
+    ``<var>`` that is not defined prints as ``<var> = <NOTFOUND>``; a variable
+    set to the empty string is *defined* and prints as ``<var> = ""``.
+
+Printing Variables Examples
+"""""""""""""""""""""""""""
+
+Printing a few specific variables:
+
+.. code-block:: cmake
+
+  cmake_language(
+    PRINT_VARIABLES NAMED CMAKE_C_COMPILER CMAKE_MAJOR_VERSION NOT_SET
+  )
+
+Gives::
+
+  -- Printing variables...
+   Named variables:
+     CMAKE_C_COMPILER = "/usr/bin/cc"
+     CMAKE_MAJOR_VERSION = "4"
+     NOT_SET = <NOTFOUND>
+
+Enumerating user variables and cache entries:
+
+.. code-block:: cmake
+
+  set(MY_FLAG "on")
+  set(MY_PATH "/some/path" CACHE FILEPATH "")
+  cmake_language(PRINT_VARIABLES ALL NAME_REGEX "^MY_")
+
+Gives::
+
+  -- Printing variables...
+   Variables in scope at '/path/to/CMakeLists.txt' matching name '^MY_' (case sensitive):
+     MY_FLAG = "on"
+     CACHE{MY_PATH}:FILEPATH = "/some/path"

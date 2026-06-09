@@ -1,0 +1,3 @@
+-- Printing variables\.\.\.
+ +Variables in scope at '.*PrintVariablesImplicitAll\.cmake':
+.* +zz_implicit_marker = "present"

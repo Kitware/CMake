@@ -1,0 +1,1 @@
+cmake_language(PRINT_VARIABLES ALL NAME_REGEX "[")

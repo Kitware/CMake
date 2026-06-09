@@ -1,0 +1,5 @@
+-- Printing variables\.\.\.
+ Named variables:
+   source_dir = "src"
+   binary_dir = "build"
+   cache_var = "cached"
