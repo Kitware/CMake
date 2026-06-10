@@ -2505,6 +2505,7 @@ bool copy_data(struct archive* ar, struct archive* aw)
 
 bool extract_tar(std::string const& arFileName,
                  std::vector<std::string> const& files,
+                 std::vector<std::string> const& excludeFiles,
                  std::string const& encoding, bool verbose,
                  cmSystemTools::cmTarExtractTimestamps extractTimestamps,
                  bool extract)
@@ -2547,6 +2548,14 @@ bool extract_tar(std::string const& arFileName,
     if (archive_match_include_pattern(matching, filename.c_str()) !=
         ARCHIVE_OK) {
       cmSystemTools::Error("Failed to add to inclusion list: " + filename);
+      return false;
+    }
+  }
+
+  for (auto const& filename : excludeFiles) {
+    if (archive_match_exclude_pattern(matching, filename.c_str()) !=
+        ARCHIVE_OK) {
+      cmSystemTools::Error("Failed to add to exclusion list: " + filename);
       return false;
     }
   }
@@ -2644,15 +2653,17 @@ bool extract_tar(std::string const& arFileName,
 
 bool cmSystemTools::ExtractTar(std::string const& arFileName,
                                std::vector<std::string> const& files,
+                               std::vector<std::string> const& excludeFiles,
                                cmTarExtractTimestamps extractTimestamps,
                                std::string const& encoding, bool verbose)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  return extract_tar(arFileName, files, encoding, verbose, extractTimestamps,
-                     true);
+  return extract_tar(arFileName, files, excludeFiles, encoding, verbose,
+                     extractTimestamps, true);
 #else
   (void)arFileName;
   (void)files;
+  (void)excludeFiles;
   (void)extractTimestamps;
   (void)encoding;
   (void)verbose;
@@ -2662,14 +2673,16 @@ bool cmSystemTools::ExtractTar(std::string const& arFileName,
 
 bool cmSystemTools::ListTar(std::string const& arFileName,
                             std::vector<std::string> const& files,
+                            std::vector<std::string> const& excludeFiles,
                             std::string const& encoding, bool verbose)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  return extract_tar(arFileName, files, encoding, verbose,
+  return extract_tar(arFileName, files, excludeFiles, encoding, verbose,
                      cmTarExtractTimestamps::Yes, false);
 #else
   (void)arFileName;
   (void)files;
+  (void)excludeFiles;
   (void)encoding;
   (void)verbose;
   return false;

@@ -86,9 +86,10 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size)
     std::vector<std::string> files;
 
     // Extract without verbose, with timestamps
+    std::vector<std::string> excludeFiles;
     bool result1 = cmSystemTools::ExtractTar(
-      archiveFile, files, cmSystemTools::cmTarExtractTimestamps::Yes, "UTF-8",
-      false);
+      archiveFile, files, excludeFiles,
+      cmSystemTools::cmTarExtractTimestamps::Yes, "UTF-8", false);
     (void)result1;
 
     // Restore directory BEFORE removing (can't remove cwd)
@@ -103,8 +104,8 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size)
       // Extract with verbose, without timestamps
       files.clear();
       bool result2 = cmSystemTools::ExtractTar(
-        archiveFile, files, cmSystemTools::cmTarExtractTimestamps::No, "UTF-8",
-        true);
+        archiveFile, files, excludeFiles,
+        cmSystemTools::cmTarExtractTimestamps::No, "UTF-8", true);
       (void)result2;
 
       // Restore directory
