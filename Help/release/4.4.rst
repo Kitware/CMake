@@ -99,7 +99,7 @@ Compilers
   See :manual:`cmake-cxxmodules(7)`.
 
 * The ``ibm-flang`` compiler is now supported with
-  :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``IBMLLVMFlang``.
+  :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``IBMFlang``.
 
 * The `Pelles C`_ toolchain is now supported with
   :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``PellesC``.
