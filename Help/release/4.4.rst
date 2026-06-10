@@ -92,6 +92,12 @@ Generators
   name, their dependencies are merged into one ``test_prep/<test-name>``
   target.
 
+Languages
+---------
+
+* CUDA language level 23 (corresponding to C++ 23) is now supported with
+  NVCC 13.3 and above.
+
 Compilers
 ---------
 
