@@ -84,6 +84,7 @@
 #  include <cm3p/json/writer.h>
 
 #  include "cmCMakePresetsArgs.h"
+#  include "cmCMakeSarifLogger.h"
 #  include "cmConfigureLog.h"
 #  include "cmFileAPI.h"
 #  include "cmGraphVizWriter.h"
@@ -91,7 +92,6 @@
 #  include "cmInstrumentationInterrupt.h"
 #  include "cmInstrumentationQuery.h"
 #  include "cmMakefileProfilingData.h"
-#  include "cmSarifLog.h"
 #  include "cmVariableWatch.h"
 #endif
 
@@ -3076,11 +3076,7 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
 
 #ifndef CMAKE_BOOTSTRAP
   // Configure the SARIF log for the current run
-  cmSarif::LogFileWriter sarifLogFileWriter(
-    this->GetMessenger()->GetSarifResultsLog());
-  if (!sarifLogFileWriter.ConfigureForCMakeRun(*this)) {
-    return -1;
-  }
+  cmCMakeSarifLogger sarifLogger(*this);
 
   this->VariableWatch->AddWatch("CMAKE_WARN_DEPRECATED", cmDeprecatedWatch);
   this->VariableWatch->AddWatch("CMAKE_ERROR_DEPRECATED", cmDeprecatedWatch);
@@ -3112,16 +3108,6 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
       cmSystemTools::Error("Error executing cmake::LoadCache(). Aborting.\n");
       return -1;
     }
-#ifndef CMAKE_BOOTSTRAP
-    // If no SARIF file has been explicitly specified, use the default path
-    if (!this->SarifFileOutput) {
-      // If no output file is specified, use the default path
-      // Enable parent directory creation for the default path
-      sarifLogFileWriter.SetPath(cmStrCat(this->GetHomeOutputDirectory(), '/',
-                                          cmSarif::PROJECT_DEFAULT_SARIF_FILE),
-                                 true);
-    }
-#endif
   } else {
     if (this->FreshCache) {
       cmSystemTools::Error("--fresh allowed only when configuring a project");
@@ -3155,11 +3141,6 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
     }
     return this->HasScriptModeExitCode() ? this->GetScriptModeExitCode() : 0;
   }
-
-#ifndef CMAKE_BOOTSTRAP
-  // CMake only responds to the SARIF variable in normal mode
-  this->MarkCliAsUsed(cmSarif::PROJECT_SARIF_FILE_VARIABLE);
-#endif
 
   // If MAKEFLAGS are given in the environment, remove the environment
   // variable.  This will prevent try-compile from succeeding when it

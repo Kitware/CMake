@@ -7,6 +7,7 @@
 #include <iosfwd>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <cm/optional>
 
@@ -14,10 +15,6 @@
 #include "cmDiagnostics.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h" // IWYU pragma: keep
-
-#ifndef CMAKE_BOOTSTRAP
-#  include "cmSarifLog.h"
-#endif
 
 class cmStateSnapshot;
 
@@ -32,21 +29,17 @@ class cmMessenger
 public:
   void IssueMessage(
     MessageType type, std::string const& text,
-    cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
+    cmListFileBacktrace const& backtrace = cmListFileBacktrace());
 
   void IssueDiagnostic(cmDiagnosticCategory category, std::string const& text,
                        cmStateSnapshot const& fallbackContext,
-                       cmDiagnosticContext const& context = {}) const;
+                       cmDiagnosticContext const& context = {});
 
   void DisplayMessage(MessageType type, cmDiagnosticCategory category,
                       std::string const& text,
-                      cmListFileBacktrace const& backtrace) const;
+                      cmListFileBacktrace const& backtrace);
 
   void SetTopSource(cm::optional<std::string> topSource);
-
-#ifndef CMAKE_BOOTSTRAP
-  cmSarif::ResultsLog const& GetSarifResultsLog() const { return SarifLog; }
-#endif
 
   // Print the top of a backtrace.
   void PrintBacktraceTitle(std::ostream& out,
@@ -59,12 +52,23 @@ public:
   }
 #endif
 
+  struct Message
+  {
+    MessageType Type;
+    cmDiagnosticCategory Category;
+    cmListFileBacktrace Backtrace;
+    std::string Text;
+  };
+
+  std::vector<Message> const& GetDisplayedMessages() const
+  {
+    return this->DisplayedMessages;
+  }
+
 private:
   cm::optional<std::string> TopSource;
 
-#ifndef CMAKE_BOOTSTRAP
-  cmSarif::ResultsLog SarifLog;
-#endif
+  std::vector<Message> DisplayedMessages;
 
 #ifdef CMake_ENABLE_DEBUGGER
   std::shared_ptr<cmDebugger::cmDebuggerAdapter> DebuggerAdapter;

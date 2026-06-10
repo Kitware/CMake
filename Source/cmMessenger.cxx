@@ -19,8 +19,6 @@
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/SystemInformation.hxx"
-
-#  include "cmSarifLog.h"
 #endif
 
 #ifdef CMake_ENABLE_DEBUGGER
@@ -178,7 +176,7 @@ void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
 } // anonymous namespace
 
 void cmMessenger::IssueMessage(MessageType t, std::string const& text,
-                               cmListFileBacktrace const& backtrace) const
+                               cmListFileBacktrace const& backtrace)
 {
   this->DisplayMessage(t, cmDiagnostics::CMD_NONE, text, backtrace);
 }
@@ -186,7 +184,7 @@ void cmMessenger::IssueMessage(MessageType t, std::string const& text,
 void cmMessenger::IssueDiagnostic(cmDiagnosticCategory category,
                                   std::string const& text,
                                   cmStateSnapshot const& fallbackContext,
-                                  cmDiagnosticContext const& context) const
+                                  cmDiagnosticContext const& context)
 {
   cmDiagnosticAction const action = [&] {
     if (context.HasState) {
@@ -229,7 +227,7 @@ void cmMessenger::IssueDiagnostic(cmDiagnosticCategory category,
 void cmMessenger::DisplayMessage(MessageType type,
                                  cmDiagnosticCategory category,
                                  std::string const& text,
-                                 cmListFileBacktrace const& backtrace) const
+                                 cmListFileBacktrace const& backtrace)
 {
   std::ostringstream msg;
 
@@ -249,10 +247,9 @@ void cmMessenger::DisplayMessage(MessageType type,
 
   displayMessage(type, category, msg);
 
-#ifndef CMAKE_BOOTSTRAP
-  // Add message to SARIF logs
-  this->SarifLog.LogMessage(type, text, backtrace);
-#endif
+  // Add message to logs
+  this->DisplayedMessages.emplace_back(
+    Message{ type, category, backtrace, text });
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (DebuggerAdapter) {

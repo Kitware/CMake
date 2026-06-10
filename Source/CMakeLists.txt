@@ -138,6 +138,8 @@ add_library(
   cmCMakePresetsGraphReadJSONTestPresets.cxx
   cmCMakePresetsGraphReadJSONWorkflowPresets.cxx
   cmCMakePresetsGraphResolve.cxx
+  cmCMakeSarifLogger.h
+  cmCMakeSarifLogger.cxx
   cmCMakeString.hxx
   cmCMakeString.cxx
   cmCommandLineArgument.h
@@ -485,8 +487,8 @@ add_library(
   cmRST.h
   cmRuntimeDependencyArchive.cxx
   cmRuntimeDependencyArchive.h
-  cmSarifLog.cxx
-  cmSarifLog.h
+  cmSarif.cxx
+  cmSarif.h
   cmScriptGenerator.h
   cmScriptGenerator.cxx
   cmSourceFile.cxx
