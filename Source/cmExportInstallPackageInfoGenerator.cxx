@@ -6,7 +6,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -233,20 +232,6 @@ cmExportInstallPackageInfoGenerator::GetFileSetDirectory(
   }
   if (!config && result.HadContextSensitiveCondition) {
     this->RequiresConfigFiles = true;
-    return {};
-  }
-
-  std::string const& type = fileSet->GetType();
-  if (config && (type == cm::FileSetMetadata::CXX_MODULES)) {
-    // C++ modules do not support interface file sets which are dependent
-    // upon the configuration.
-    cmMakefile* mf = gte->LocalGenerator->GetMakefile();
-    std::ostringstream e;
-    e << "The \"" << gte->GetName() << "\" target's interface file set \""
-      << fileSet->GetName() << "\" of type \"" << type
-      << "\" contains context-sensitive base file entries which is not "
-         "supported.";
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return {};
   }
 

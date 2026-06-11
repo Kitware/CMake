@@ -10,11 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include <cm/string_view>
-
 #include "cmCryptoHash.h"
 #include "cmExportSet.h"
-#include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
@@ -22,7 +19,6 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -177,20 +173,6 @@ std::string cmExportBuildCMakeConfigGenerator::GetFileSetDirectories(
     auto directories = fileSet->GetDirectories(context, gte);
     bool const contextSensitive = directories.second;
 
-    auto const& type = fileSet->GetType();
-    // C++ modules do not support interface file sets which are dependent upon
-    // the configuration.
-    if (contextSensitive && type == cm::FileSetMetadata::CXX_MODULES) {
-      auto* mf = this->LG->GetMakefile();
-      mf->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("The \"", gte->GetName(),
-                                "\" target's interface file set \"",
-                                fileSet->GetName(), "\" of type \"", type,
-                                "\" contains context-sensitive base directory "
-                                "entries which is not supported."));
-      return std::string{};
-    }
-
     for (auto const& directory : directories.first) {
       auto dest = cmOutputConverter::EscapeForCMake(
         directory, cmOutputConverter::WrapQuotes::NoWrap);
@@ -221,20 +203,6 @@ std::string cmExportBuildCMakeConfigGenerator::GetFileSetFiles(
 
     auto files = fileSet->GetFiles(context, gte);
     bool const contextSensitive = files.second;
-
-    auto const& type = fileSet->GetType();
-    // C++ modules do not support interface file sets which are dependent upon
-    // the configuration.
-    if (contextSensitive && type == cm::FileSetMetadata::CXX_MODULES) {
-      auto* mf = this->LG->GetMakefile();
-      mf->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("The \"", gte->GetName(),
-                                "\" target's interface file set \"",
-                                fileSet->GetName(), "\" of type \"", type,
-                                "\" contains context-sensitive file entries "
-                                "which is not supported."));
-      return std::string{};
-    }
 
     for (auto const& it : files.first) {
       for (auto const& filename : it.second) {
