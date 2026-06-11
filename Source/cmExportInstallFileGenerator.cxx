@@ -321,7 +321,8 @@ void cmExportInstallFileGenerator::IssueDiagnostic(
   cmDiagnosticCategory category, std::string const& message) const
 {
   cmLocalGenerator const* const lg = this->IEGen->GetLocalGenerator();
-  lg->GetMakefile()->IssueDiagnostic(category, message);
+  lg->GetMakefile()->IssueDiagnostic(category, message,
+                                     this->IEGen->GetDiagnosticContext());
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(

@@ -4,8 +4,10 @@
 
 #include <functional>
 #include <sstream>
+#include <utility>
 #include <vector>
 
+#include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmStateTypes.h"
@@ -13,7 +15,11 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-cmExportBuildAndroidMKGenerator::cmExportBuildAndroidMKGenerator() = default;
+cmExportBuildAndroidMKGenerator::cmExportBuildAndroidMKGenerator(
+  cmDiagnosticContext context)
+  : cmExportBuildFileGenerator(std::move(context))
+{
+}
 
 bool cmExportBuildAndroidMKGenerator::GenerateMainFile(std::ostream& os)
 {

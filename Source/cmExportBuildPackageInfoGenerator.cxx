@@ -13,6 +13,7 @@
 #include <cm3p/json/value.h>
 
 #include "cmAlgorithms.h"
+#include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
 #include "cmPackageInfoArguments.h"
@@ -20,8 +21,9 @@
 #include "cmStringAlgorithms.h"
 
 cmExportBuildPackageInfoGenerator::cmExportBuildPackageInfoGenerator(
-  cmPackageInfoArguments arguments)
-  : cmExportPackageInfoGenerator(std::move(arguments))
+  cmPackageInfoArguments arguments, cmDiagnosticContext context)
+  : cmExportBuildFileGenerator(std::move(context))
+  , cmExportPackageInfoGenerator(std::move(arguments))
 {
   this->SetNamespace(cmStrCat(this->GetPackageName(), "::"_s));
 }
