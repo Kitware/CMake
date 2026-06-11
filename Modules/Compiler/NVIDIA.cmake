@@ -40,7 +40,7 @@ macro(__compiler_nvidia_cxx_standards lang)
     endif()
 
     if (NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 12.0)
-      if(CMAKE_${lang}_SIMULATE_VERSION VERSION_GREATER_EQUAL 19.11.25505)
+      if(CMAKE_${lang}_SIMULATE_VERSION VERSION_GREATER_EQUAL 19.12.25835)
         set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "-std=c++20")
         set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "-std=c++20")
         set(CMAKE_${lang}_STANDARD_LATEST 20)
