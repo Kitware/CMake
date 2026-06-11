@@ -12,6 +12,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cm/string_view>
 #include <cmext/algorithm>
 
 #include <cm3p/json/reader.h>
@@ -434,6 +435,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 
   // Delete old content and trace files
   this->RemoveOldFiles("content");
+  this->RemoveOldFiles("compile-trace");
   this->RemoveOldFiles("trace");
 
   this->indexLock.Release();
@@ -651,6 +653,49 @@ int cmInstrumentation::InstrumentCommand(
   if (!command_str.empty()) {
     root["command"] = command_str;
   }
+  root["role"] = command_type;
+  root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
+
+  if (data.has_value()) {
+    for (auto const& item : data.value()) {
+      if (item.first == "role" && !item.second.empty()) {
+        command_type = item.second;
+        root["role"] = command_type;
+      } else if (item.first == "showOnly") {
+        root[item.first] = item.second == "1" ? true : false;
+      } else if (!item.second.empty()) {
+        root[item.first] = item.second;
+      }
+    }
+  }
+  if (arrayData.has_value()) {
+    for (auto const& item : arrayData.value()) {
+      root[item.first] = Json::arrayValue;
+      std::stringstream ss(item.second);
+      std::string element;
+      while (getline(ss, element, ',')) {
+        root[item.first].append(element);
+      }
+    }
+  }
+  // Create empty config entry if config not found
+  if (!root.isMember("config") &&
+      (command_type == "compile" || command_type == "link" ||
+       command_type == "custom" || command_type == "install")) {
+    root["config"] = "";
+  }
+
+  // Check existing compile trace json to check for modifications
+  std::string compileTraceFile;
+  if (this->HasOption(cmInstrumentationQuery::Option::CompileTrace) &&
+      command_type == "compile") {
+    compileTraceFile = this->GetCompileTraceFile(
+      command, root["outputs"], root["workingDir"].asString());
+  }
+  long int oldCompileTraceTimestamp = !compileTraceFile.empty() &&
+      cmSystemTools::FileExists(compileTraceFile, true)
+    ? cmSystemTools::ModifiedTime(compileTraceFile)
+    : -1;
 
   // Pre-Command
   auto steady_start = std::chrono::steady_clock::now();
@@ -699,52 +744,18 @@ int cmInstrumentation::InstrumentCommand(
     this->InsertDynamicSystemInformation(root, "after");
   }
 
-  // Gather additional data
-  if (data.has_value()) {
-    for (auto const& item : data.value()) {
-      if (item.first == "role" && !item.second.empty()) {
-        command_type = item.second;
-      } else if (item.first == "showOnly") {
-        root[item.first] = item.second == "1" ? true : false;
-      } else if (!item.second.empty()) {
-        root[item.first] = item.second;
-      }
-    }
-  }
-
   // See SpawnBuildDaemon(); this data is currently meaningless for build.
   root["result"] = command_type == "build" ? Json::nullValue : ret;
 
-  // Create empty config entry if config not found
-  if (!root.isMember("config") &&
-      (command_type == "compile" || command_type == "link" ||
-       command_type == "custom" || command_type == "install")) {
-    root["config"] = "";
-  }
-
-  if (arrayData.has_value()) {
-    for (auto const& item : arrayData.value()) {
-      if (item.first == "targetLabels" && command_type != "link") {
-        continue;
-      }
-      root[item.first] = Json::arrayValue;
-      std::stringstream ss(item.second);
-      std::string element;
-      while (getline(ss, element, ',')) {
-        root[item.first].append(element);
-      }
-      if (item.first == "outputs") {
-        root["outputSizes"] = Json::arrayValue;
-        for (auto const& output : root["outputs"]) {
-          root["outputSizes"].append(
-            static_cast<Json::Value::UInt64>(cmSystemTools::FileLength(
-              cmStrCat(this->binaryDir, '/', output.asCString()))));
-        }
-      }
+  // Output Sizes
+  if (root.isMember("outputs")) {
+    root["outputSizes"] = Json::arrayValue;
+    for (auto const& output : root["outputs"]) {
+      root["outputSizes"].append(
+        static_cast<Json::Value::UInt64>(cmSystemTools::FileLength(
+          cmStrCat(this->binaryDir, '/', output.asCString()))));
     }
   }
-  root["role"] = command_type;
-  root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
 
   auto addCMakeContent = [this](Json::Value& root_) -> void {
     std::string contentFile =
@@ -758,14 +769,25 @@ int cmInstrumentation::InstrumentCommand(
     addCMakeContent(root);
   }
 
-  // Write Json
-  cmsys::SystemInformation& info = this->GetSystemInformation();
+  // Compute file name properties
   std::chrono::system_clock::time_point endTime =
     system_start + std::chrono::milliseconds(root["duration"].asUInt64());
-  std::string const& file_name = cmStrCat(
-    command_type, '-',
-    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())), '-',
-    this->ComputeSuffixTime(endTime), ".json");
+  cmsys::SystemInformation& info = this->GetSystemInformation();
+  std::string const commandHash =
+    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId()));
+  std::string const suffixTime = this->ComputeSuffixTime(endTime);
+
+  // Compile Trace
+  if (this->HasOption(cmInstrumentationQuery::Option::CompileTrace) &&
+      command_type == "compile") {
+    this->CollectCompileTraceFile(root, compileTraceFile,
+                                  oldCompileTraceTimestamp, commandHash,
+                                  suffixTime);
+  }
+
+  // Write JSON
+  std::string const& file_name =
+    cmStrCat(command_type, '-', commandHash, '-', suffixTime, ".json");
 
   // Don't write configure snippet until generate time
   if (command_type == "configure") {
@@ -1048,12 +1070,70 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
     }
 
     std::string dst = cmStrCat(dst_dir, '/', snippet_str);
-    cmsys::Status copied = cmSystemTools::CopyFileAlways(snippet_path, dst);
-    if (!copied) {
+    if (!cmSystemTools::CopyFileAlways(snippet_path, dst)) {
       error_msg = cmStrCat("Failed to copy ", snippet_path, " to ", dst);
       cmSystemTools::Error(error_msg);
     }
   }
+}
+
+std::string cmInstrumentation::GetCompileTraceFile(
+  std::vector<std::string> const& command, Json::Value const& outputs,
+  std::string const& workingDir)
+{
+  cm::string_view const prefix = "-ftime-trace=";
+  std::string traceFile;
+  for (auto it = command.rbegin(); it != command.rend(); ++it) {
+    std::string const& arg = *it;
+    if (cmHasPrefix(arg, prefix)) {
+      traceFile = arg.substr(prefix.size());
+    }
+  }
+  if (traceFile.empty() && !outputs.empty()) {
+    std::string outputPath = outputs[0].asString();
+    cm::string_view ext =
+      cmSystemTools::GetFilenameLastExtensionView(outputPath);
+    if (!outputPath.empty() && !ext.empty()) {
+      traceFile = cmStrCat(
+        outputPath.substr(0, outputPath.size() - ext.size()), ".json");
+    }
+  }
+  if (!cmSystemTools::FileIsFullPath(traceFile)) {
+    traceFile = cmStrCat(workingDir, '/', traceFile);
+  }
+
+  return traceFile;
+}
+
+void cmInstrumentation::CollectCompileTraceFile(Json::Value& root,
+                                                std::string traceFile,
+                                                long int oldTimestamp,
+                                                std::string const& commandHash,
+                                                std::string const& suffixTime)
+{
+  if (traceFile.empty()) {
+    root["traceFile"] = Json::nullValue;
+    return;
+  }
+  if (!cmSystemTools::FileExists(traceFile, true) ||
+      cmSystemTools::ModifiedTime(traceFile) == oldTimestamp) {
+    root["traceFile"] = Json::nullValue;
+    return;
+  }
+  cm::string_view ext = cmSystemTools::GetFilenameLastExtensionView(traceFile);
+  std::string candidateName = cmSystemTools::GetFilenameName(traceFile);
+  std::string copiedName =
+    cmStrCat(candidateName.substr(0, candidateName.size() - ext.size()), '-',
+             commandHash, '-', suffixTime, ext);
+  std::string const copiedFile = cmStrCat("compile-trace/", copiedName);
+  std::string const destination = cmStrCat(this->dataDir, '/', copiedFile);
+  cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(destination));
+  if (!cmSystemTools::CopyFileAlways(traceFile, destination)) {
+    cmSystemTools::Error(cmStrCat("Failed to copy compile trace file ",
+                                  traceFile, " to ", destination));
+    return;
+  }
+  root["traceFile"] = copiedFile;
 }
 
 void cmInstrumentation::WriteTraceFile(Json::Value const& index,
