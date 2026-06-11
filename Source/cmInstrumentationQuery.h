@@ -17,6 +17,7 @@ public:
     StaticSystemInformation,
     DynamicSystemInformation,
     CaptureOutput,
+    CompileTrace,
     CDashSubmit,
     CDashVerbose,
     Trace

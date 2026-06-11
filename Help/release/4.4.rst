@@ -76,6 +76,16 @@ File-Based API
   optional ``fileSetType`` field gained a new ``SOURCES`` value to incorporate
   the new ``SOURCES`` :ref:`file set <file sets>` type in codemodel replies.
 
+Instrumentation
+---------------
+
+* The :manual:`cmake-instrumentation(7)` data version has been updated to 1.1.
+* :manual:`cmake-instrumentation(7)` gained a ``captureOutput`` option which
+  collects the ``stdout`` and ``stderr`` of instrumented commands.
+* :manual:`cmake-instrumentation(7)` gained a ``compileTrace`` option which
+  records compiler-generated trace files (e.g., from Clang's ``-ftime-trace``
+  flag).
+
 Generators
 ----------
 

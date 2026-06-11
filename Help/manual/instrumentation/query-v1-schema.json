@@ -65,6 +65,7 @@
         "enum": [
           "staticSystemInformation",
           "dynamicSystemInformation",
+          "compileTrace",
           "cdashSubmit",
           "cdashVerbose",
           "trace",
