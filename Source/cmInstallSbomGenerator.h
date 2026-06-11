@@ -5,18 +5,19 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "cmInstallGenerator.h"
+#include "cmSbomArguments.h"
 
 class cmDiagnosticContext;
 class cmExportSet;
 class cmGeneratorTarget;
 class cmInstallSbomBuilder;
 class cmLocalGenerator;
-class cmSbomArguments;
 
 /** \class cmInstallSbomGenerator
  * \brief Generate installation rules for SBOM files.
@@ -59,10 +60,11 @@ protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
 
 private:
-  std::string TempSbomFilePath;
+  std::map<std::string, std::string> TempSbomFiles;
   std::string const FilePermissions;
   std::string const SbomFileName;
   std::string const SbomFilePath;
+  cmSbomArguments::SbomFormat SbomFormat;
   cmLocalGenerator* LocalGenerator = nullptr;
   std::unique_ptr<cmInstallSbomBuilder> Builder;
 };
