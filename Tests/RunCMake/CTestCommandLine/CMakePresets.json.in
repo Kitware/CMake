@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 18,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "my-preset",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "MY_CUSTOM_VAR": {
+          "type": "STRING",
+          "value": "this-gets-set"
+        }
+      }
+    }
+  ]
+}

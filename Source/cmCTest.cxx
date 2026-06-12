@@ -750,6 +750,57 @@ int cmCTest::ProcessSteps()
     mf.AddDefinition(def.first, def.second);
   }
 
+  if (!this->Impl->SourceDir.empty() && this->Impl->TestDir.empty() &&
+      this->Impl->CTestConfigurationOverwrites.find("BuildDirectory") ==
+        this->Impl->CTestConfigurationOverwrites.end()) {
+    std::string const configurePresetName =
+      cmNonempty(mf.GetDefinition("CTEST_CONFIGURE_PRESET"))
+      ? *mf.GetDefinition("CTEST_CONFIGURE_PRESET")
+      : mf.GetSafeDefinition("CTEST_PRESET");
+    if (!configurePresetName.empty()) {
+      // Check if we should use the binary directory from the specified
+      // configure preset.
+      std::string const sourceDir =
+        this->GetCTestConfiguration("SourceDirectory");
+      std::string const rawPresetsFile =
+        mf.GetSafeDefinition("CTEST_PRESETS_FILE");
+      std::string const presetsFile = rawPresetsFile.empty()
+        ? std::string{}
+        : cmSystemTools::CollapseFullPath(rawPresetsFile, sourceDir);
+      cmCMakePresetsGraph presetsGraph;
+      if (!sourceDir.empty()) {
+        if (!presetsGraph.ReadProjectPresets(sourceDir, presetsFile)) {
+          cmCTestLog(this, ERROR_MESSAGE,
+                     "Could not read presets from \""
+                       << sourceDir << "\":\n "
+                       << presetsGraph.parseState.GetErrorMessage()
+                       << std::endl);
+          return 12;
+        }
+        cmCMakePresetsGraph::PresetResolveResult<
+          cmCMakePresetsGraph::ConfigurePreset>
+          resolveResult = presetsGraph.ResolvePreset(
+            configurePresetName, presetsGraph.ConfigurePresets);
+        cm::optional<std::string> resolveError =
+          cmCMakePresetsGraph::FormatPresetError<
+            cmCMakePresetsGraph::ConfigurePreset>(
+            resolveResult.StatusCode, resolveResult.ErrorPresetName,
+            sourceDir);
+        if (resolveError) {
+          cmCTestLog(this, ERROR_MESSAGE, *resolveError << std::endl);
+          return 12;
+        }
+        if (resolveResult.Preset && !resolveResult.Preset->BinaryDir.empty()) {
+          std::string const binaryDir = resolveResult.Preset->BinaryDir;
+          this->SetCTestConfiguration("BuildDirectory", binaryDir);
+          this->Impl->BinaryDir = binaryDir;
+          cmSystemTools::SetLogicalWorkingDirectory(binaryDir);
+          mf.AddDefinition("CTEST_BINARY_DIRECTORY", binaryDir);
+        }
+      }
+    }
+  }
+
   // CTEST_TIME_LIMIT may come from CTestCustom.cmake (already in the makefile)
   // or from the config map (just populated by SetCMakeVariables above).
   this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
