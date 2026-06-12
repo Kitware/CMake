@@ -230,8 +230,8 @@ std::string cmInstallGenerator::ConvertToAbsoluteDestination(
   return result;
 }
 
-void cmInstallGenerator::CheckAbsoluteDestination(std::string const& dest,
-                                                  cmLocalGenerator* lg) const
+void cmInstallGenerator::CheckAbsoluteDestination(
+  std::string const& dest, cmLocalGenerator const* lg) const
 {
   if (!cmSystemTools::FileIsFullPath(dest)) {
     return;

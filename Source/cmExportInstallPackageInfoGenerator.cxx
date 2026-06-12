@@ -220,21 +220,19 @@ std::string cmExportInstallPackageInfoGenerator::GetCxxModulesDirectory() const
 
 cm::optional<std::string>
 cmExportInstallPackageInfoGenerator::GetFileSetDirectory(
-  cmGeneratorTarget* gte, cmTargetExport const* te,
+  cmGeneratorTarget const* target, cmTargetExport const* targetExport,
   cmGeneratorFileSet const* fileSet, cm::optional<std::string> const& config)
 {
-  cmInstallFileSetGenerator::DestinationContext result =
-    te->FileSetGenerators.at(fileSet->GetName())
-      ->GetDestination(gte, config.value_or(""));
+  cmInstallFileSetGenerator const* const fsg =
+    targetExport->FileSetGenerators.at(fileSet->GetName());
+  cmInstallFileSetGenerator::DestinationContext const result =
+    fsg->GetDestination(target, config.value_or(""));
 
-  if (config && !result.HadContextSensitiveCondition) {
-    return {};
-  }
-  if (!config && result.HadContextSensitiveCondition) {
-    this->RequiresConfigFiles = true;
+  if (!config == result.HadContextSensitiveCondition) {
     return {};
   }
 
+  // Use cm::optional here to enable NRVO.
   cm::optional<std::string> dest = cmOutputConverter::EscapeForCMake(
     result.UnescapedDestination, cmOutputConverter::WrapQuotes::NoWrap);
 
@@ -267,8 +265,11 @@ bool cmExportInstallPackageInfoGenerator::GenerateFileSetProperties(
       this->GetFileSetDirectory(gte, te, fileSet, config);
 
     if (fileSet->GetType() == cm::FileSetMetadata::HEADERS) {
-      if (fileSetDirectory &&
-          !cm::contains(seenIncludeDirectories, *fileSetDirectory)) {
+      if (!fileSetDirectory) {
+        if (!config) {
+          this->RequiresConfigFiles = true;
+        }
+      } else if (!cm::contains(seenIncludeDirectories, *fileSetDirectory)) {
         component["includes"].append(*fileSetDirectory);
         seenIncludeDirectories.insert(*fileSetDirectory);
       }

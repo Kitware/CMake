@@ -106,7 +106,7 @@ std::string cmInstallFileSetGenerator::GetDestination(
 }
 
 cmInstallFileSetGenerator::DestinationContext
-cmInstallFileSetGenerator::GetDestination(cmGeneratorTarget* gte,
+cmInstallFileSetGenerator::GetDestination(cmGeneratorTarget const* gte,
                                           std::string const& config) const
 {
   cmGeneratorExpression ge(*gte->Makefile->GetCMakeInstance());
