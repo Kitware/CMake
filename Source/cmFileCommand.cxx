@@ -3888,17 +3888,20 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     bool ListOnly = false;
     std::string Destination;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> Patterns;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PatternsExclude;
     bool Touch = false;
   };
 
-  static auto const parser = cmArgumentParser<Arguments>{}
-                               .Bind("INPUT"_s, &Arguments::Input)
-                               .Bind("ENCODING"_s, &Arguments::Encoding)
-                               .Bind("VERBOSE"_s, &Arguments::Verbose)
-                               .Bind("LIST_ONLY"_s, &Arguments::ListOnly)
-                               .Bind("DESTINATION"_s, &Arguments::Destination)
-                               .Bind("PATTERNS"_s, &Arguments::Patterns)
-                               .Bind("TOUCH"_s, &Arguments::Touch);
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("INPUT"_s, &Arguments::Input)
+      .Bind("ENCODING"_s, &Arguments::Encoding)
+      .Bind("VERBOSE"_s, &Arguments::Verbose)
+      .Bind("LIST_ONLY"_s, &Arguments::ListOnly)
+      .Bind("DESTINATION"_s, &Arguments::Destination)
+      .Bind("PATTERNS"_s, &Arguments::Patterns)
+      .Bind("PATTERNS_EXCLUDE"_s, &Arguments::PatternsExclude)
+      .Bind("TOUCH"_s, &Arguments::Touch);
 
   std::vector<std::string> unrecognizedArguments;
   auto parsedArgs =
@@ -3928,6 +3931,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
 
   if (parsedArgs.ListOnly) {
     if (!cmSystemTools::ListTar(inFile, parsedArgs.Patterns,
+                                parsedArgs.PatternsExclude,
                                 parsedArgs.Encoding, parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to list: ", inFile));
       cmSystemTools::SetFatalErrorOccurred();
@@ -3962,7 +3966,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     }
 
     if (!cmSystemTools::ExtractTar(
-          inFile, parsedArgs.Patterns,
+          inFile, parsedArgs.Patterns, parsedArgs.PatternsExclude,
           parsedArgs.Touch ? cmSystemTools::cmTarExtractTimestamps::No
                            : cmSystemTools::cmTarExtractTimestamps::Yes,
           parsedArgs.Encoding, parsedArgs.Verbose)) {

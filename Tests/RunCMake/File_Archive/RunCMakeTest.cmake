@@ -68,6 +68,10 @@ endif()
 # Extracting only selected files or directories
 run_cmake(zip-filtered)
 
+# Excluding selected files or directories from extraction
+run_cmake(zip-filtered-exclude)
+run_cmake(zip-filtered-exclude-precedence)
+
 run_cmake(create-missing-args)
 run_cmake(extract-missing-args)
 

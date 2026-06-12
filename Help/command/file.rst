@@ -1080,6 +1080,7 @@ Archiving
     [DESTINATION <dir>]
     [ENCODING <encoding>]
     [PATTERNS <pattern>...]
+    [PATTERNS_EXCLUDE <pattern>...]
     [LIST_ONLY]
     [VERBOSE]
     [TOUCH])
@@ -1136,6 +1137,18 @@ Archiving
     Extract/list only files and directories that match one of the given
     patterns.  Wildcards are supported.  If the ``PATTERNS`` option is
     not given, the entire archive will be listed or extracted.
+
+  ``PATTERNS_EXCLUDE <pattern>...``
+    .. versionadded:: 4.5
+
+    Do not extract or list files and directories that match one of the given
+    patterns.  Wildcards are supported.  This option may be combined with
+    ``PATTERNS``; an entry that matches both an inclusion pattern and an
+    exclusion pattern is excluded.
+
+    Unlike ``PATTERNS``, exclusion patterns are not anchored to the start of
+    an entry's path: a pattern matches if it matches any portion of the path.
+    This is consistent with the ``--exclude`` option of command-line ``tar``.
 
   ``LIST_ONLY``
     List the files in the archive rather than extract them.
