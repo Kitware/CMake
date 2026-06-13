@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <iosfwd>
 #include <string>
+#include <vector>
 
 #if defined(CMAKE_BOOTSTRAP)
 #  error "cmArchiveWrite not allowed during bootstrap build!"
@@ -143,6 +144,11 @@ public:
     this->Gname = "";
   }
 
+  //! Sets exclusion patterns.  Any path whose archive entry name matches one
+  //! of the patterns is skipped, and excluded directories are not descended
+  //! into.  Returns false and sets the error if a pattern cannot be added.
+  bool SetExcludePatterns(std::vector<std::string> const& patterns);
+
 private:
   bool Okay() const { return this->Error.empty(); }
   bool AddPath(std::string const& path, size_t skip, char const* prefix,
@@ -158,6 +164,7 @@ private:
   std::ostream& Stream;
   struct archive* Archive;
   struct archive* Disk;
+  struct archive* MatchObject = nullptr;
   bool Verbose = false;
   std::string Format;
   std::string Error;

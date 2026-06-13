@@ -527,6 +527,7 @@ public:
                       std::string const& encoding, bool verbose);
   static bool CreateTar(std::string const& arFileName,
                         std::vector<std::string> const& files,
+                        std::vector<std::string> const& excludeFiles,
                         std::string const& workingDirectory,
                         cmTarCompression compressType,
                         std::string const& encoding, bool verbose,
