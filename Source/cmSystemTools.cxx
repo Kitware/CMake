@@ -2503,14 +2503,33 @@ bool copy_data(struct archive* ar, struct archive* aw)
 #  endif
 }
 
+struct ArchiveReadDeleter
+{
+  void operator()(struct archive* a) const { archive_read_free(a); }
+};
+
+struct ArchiveWriteDeleter
+{
+  void operator()(struct archive* a) const { archive_write_free(a); }
+};
+
+struct ArchiveMatchDeleter
+{
+  void operator()(struct archive* a) const { archive_match_free(a); }
+};
+
 bool extract_tar(std::string const& arFileName,
                  std::vector<std::string> const& files,
                  std::string const& encoding, bool verbose,
                  cmSystemTools::cmTarExtractTimestamps extractTimestamps,
                  bool extract)
 {
-  struct archive* a = archive_read_new();
-  struct archive* ext = archive_write_disk_new();
+  std::unique_ptr<struct archive, ArchiveReadDeleter> a_owner(
+    archive_read_new());
+  std::unique_ptr<struct archive, ArchiveWriteDeleter> ext_owner(
+    archive_write_disk_new());
+  struct archive* a = a_owner.get();
+  struct archive* ext = ext_owner.get();
   if (extract) {
     int flags =
       ARCHIVE_EXTRACT_SECURE_NODOTDOT | ARCHIVE_EXTRACT_SECURE_NOABSOLUTEPATHS;
@@ -2519,8 +2538,6 @@ bool extract_tar(std::string const& arFileName,
     }
     if (archive_write_disk_set_options(ext, flags) != ARCHIVE_OK) {
       ArchiveError("Problem with archive_write_disk_set_options(): ", ext);
-      archive_write_free(ext);
-      archive_read_free(a);
       return false;
     }
   }
@@ -2537,7 +2554,9 @@ bool extract_tar(std::string const& arFileName,
   }
   struct archive_entry* entry;
 
-  struct archive* matching = archive_match_new();
+  std::unique_ptr<struct archive, ArchiveMatchDeleter> matching_owner(
+    archive_match_new());
+  struct archive* matching = matching_owner.get();
   if (!matching) {
     cmSystemTools::Error("Out of memory");
     return false;
@@ -2554,10 +2573,6 @@ bool extract_tar(std::string const& arFileName,
   int r = cm_archive_read_open_filename(a, arFileName.c_str(), 10240);
   if (r) {
     ArchiveError("Problem with archive_read_open_filename(): ", a);
-    archive_write_free(ext);
-    archive_read_close(a);
-    archive_read_free(a);
-    archive_match_free(matching);
     return false;
   }
   for (;;) {
@@ -2633,10 +2648,6 @@ bool extract_tar(std::string const& arFileName,
       return false;
     }
   }
-  archive_match_free(matching);
-  archive_write_free(ext);
-  archive_read_close(a);
-  archive_read_free(a);
   return r == ARCHIVE_EOF || r == ARCHIVE_OK;
 }
 }
