@@ -1926,8 +1926,8 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
     }
   }
 
-  if (cmSourceGroup const* sg =
-        this->GT->LocalGenerator->FindSourceGroup(path)) {
+  if (cmSourceGroup const* sg = this->GT->LocalGenerator->FindSourceGroup(
+        this->GT, sf, this->Config)) {
     Json::ArrayIndex const groupIndex = this->AddSourceGroup(sg);
     source["sourceGroupIndex"] = groupIndex;
     this->SourceGroups[groupIndex].SourceIndexes.append(si);
@@ -2017,8 +2017,8 @@ Json::Value Target::DumpInterfaceSource(std::string path, Json::ArrayIndex si,
     }
   }
 
-  if (cmSourceGroup const* sg =
-        this->GT->LocalGenerator->FindSourceGroup(path)) {
+  if (cmSourceGroup const* sg = this->GT->LocalGenerator->FindSourceGroup(
+        this->GT, sf, this->Config)) {
     Json::ArrayIndex const groupIndex = this->AddSourceGroup(sg);
     source["sourceGroupIndex"] = groupIndex;
     this->SourceGroups[groupIndex].InterfaceSourceIndexes.append(si);

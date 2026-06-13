@@ -7,6 +7,7 @@
 #include <cm/memory>
 
 #include "cmGeneratorExpression.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 
 class cmSourceGroupInternals
@@ -43,10 +44,20 @@ void cmSourceGroup::ResolveGenex(cmLocalGenerator* lg,
 {
   std::set<std::string> files;
 
-  for (std::string const& file : this->GroupFiles) {
-    files.emplace(cmGeneratorExpression::Evaluate(file, lg, config));
+  for (auto& pair : this->GroupFileSets) {
+    files.clear();
+    for (std::string const& fileSet : pair.second) {
+      cmList list{ cmGeneratorExpression::Evaluate(fileSet, lg, config) };
+      files.insert(list.begin(), list.end());
+    }
+    pair.second = std::move(files);
   }
 
+  files.clear();
+  for (std::string const& file : this->GroupFiles) {
+    cmList list{ cmGeneratorExpression::Evaluate(file, lg, config) };
+    files.insert(list.begin(), list.end());
+  }
   this->GroupFiles = std::move(files);
 
   if (!this->Internal) {
@@ -61,6 +72,13 @@ void cmSourceGroup::ResolveGenex(cmLocalGenerator* lg,
 void cmSourceGroup::AddGroupFile(std::string const& name)
 {
   this->GroupFiles.insert(name);
+}
+
+void cmSourceGroup::AddGroupFileSets(std::string const& target,
+                                     std::set<std::string> const& fileSets)
+{
+  auto& fs = this->GroupFileSets[target];
+  fs.insert(fileSets.begin(), fileSets.end());
 }
 
 std::string const& cmSourceGroup::GetName() const
@@ -87,6 +105,11 @@ bool cmSourceGroup::MatchesFiles(std::string const& name) const
 std::set<std::string> const& cmSourceGroup::GetGroupFiles() const
 {
   return this->GroupFiles;
+}
+std::map<std::string, std::set<std::string>> const&
+cmSourceGroup::GetGroupFileSets() const
+{
+  return this->GroupFileSets;
 }
 
 void cmSourceGroup::AddChild(std::unique_ptr<cmSourceGroup> child)
@@ -151,6 +174,23 @@ cmSourceGroup* cmSourceGroup::MatchChildrenRegex(std::string const& name) const
   return nullptr;
 }
 
+cmSourceGroup* cmSourceGroup::MatchChildrenFileSets(std::string const& target,
+                                                    std::string const& fileSet)
+{
+  auto item = this->GroupFileSets.find(target);
+  if (item != this->GroupFileSets.end() &&
+      item->second.find(fileSet) != item->second.end()) {
+    return this;
+  }
+  for (auto const& group : this->Internal->GroupChildren) {
+    if (cmSourceGroup* result =
+          group->MatchChildrenFileSets(target, fileSet)) {
+      return result;
+    }
+  }
+  return nullptr;
+}
+
 SourceGroupVector const& cmSourceGroup::GetGroupChildren() const
 {
   return this->Internal->GroupChildren;
@@ -160,7 +200,7 @@ SourceGroupVector const& cmSourceGroup::GetGroupChildren() const
  * Find a source group whose regular expression matches the filename
  * part of the given source name.  Search backward through the list of
  * source groups, and take the first matching group found.  This way
- * non-inherited SOURCE_GROUP commands will have precedence over
+ * non-inherited source_group() commands will have precedence over
  * inherited ones.
  */
 cmSourceGroup* cmSourceGroup::FindSourceGroup(std::string const& source,
@@ -184,6 +224,27 @@ cmSourceGroup* cmSourceGroup::FindSourceGroup(std::string const& source,
 
   // Shouldn't get here, but just in case, return the default group.
   return groups.data()->get();
+}
+
+/**
+ * Find a source group whose matches the target and file set.
+ * Search backward through the list of source groups, and take the first
+ * matching group found.  This way non-inherited source_group() commands will
+ * have precedence over inherited ones.
+ */
+cmSourceGroup* cmSourceGroup::FindSourceGroup(std::string const& target,
+                                              std::string const& fileSet,
+                                              SourceGroupVector const& groups)
+{
+  // First search for a group that lists the file set explicitly.
+  for (auto sg = groups.rbegin(); sg != groups.rend(); ++sg) {
+    if (cmSourceGroup* result =
+          (*sg)->MatchChildrenFileSets(target, fileSet)) {
+      return result;
+    }
+  }
+
+  return nullptr;
 }
 
 void cmSourceGroupFiles::Add(cmSourceGroup const* sg, cmSourceFile const* sf)

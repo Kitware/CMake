@@ -525,12 +525,12 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
           // get the files from the source lists then add them to the groups
           cmSourceGroupFiles sourceGroupFiles;
           std::vector<cmSourceFile*> files;
-          target->GetSourceFiles(
-            files, makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+          cmValue config = makefile->GetDefinition("CMAKE_BUILD_TYPE");
+          target->GetSourceFiles(files, *config);
           for (cmSourceFile* sf : files) {
             // Add the file to the list of sources.
-            sourceGroupFiles.Add(lg->FindSourceGroup(sf->ResolveFullPath()),
-                                 sf);
+            sourceGroupFiles.Add(
+              lg->FindSourceGroup(target.get(), sf, *config), sf);
           }
 
           this->WriteGroups(makefile->GetSourceGroups(), sourceGroupFiles,

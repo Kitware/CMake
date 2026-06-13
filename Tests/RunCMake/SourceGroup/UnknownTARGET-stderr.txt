@@ -1,0 +1,5 @@
+CMake Warning \(author\) at UnknownTARGET\.cmake:[0-9]+ \(source_group\):
+  TARGET "bar" is not defined in this directory\.  It will be ignored.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.

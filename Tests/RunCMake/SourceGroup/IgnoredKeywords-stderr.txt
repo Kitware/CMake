@@ -9,3 +9,15 @@ CMake Warning \(author\) at IgnoredKeywords\.cmake:[0-9]+ \(source_group\):
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-author to suppress it\.
+
+CMake Warning \(author\) at IgnoredKeywords\.cmake:[0-9]+ \(source_group\):
+  keyword "FILE_SETS" will be ignored in this context\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
+
+CMake Warning \(author\) at IgnoredKeywords\.cmake:[0-9]+ \(source_group\):
+  keyword "TARGET" will be ignored in this context\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.

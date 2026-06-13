@@ -2,12 +2,15 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
-#include <cstddef>
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
+#include <unordered_map>
 #include <utility>
 
+#include <cm/optional>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -22,6 +25,7 @@
 #include "cmSourceGroup.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 
 namespace {
 template <typename Args>
@@ -127,8 +131,12 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
     cm::optional<std::string> GroupName;
     cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Files;
     cm::optional<std::string> Regex;
+    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>>
+      FileSets;
     cm::optional<ArgumentParser::NonEmpty<std::string>> Tree;
     cm::optional<ArgumentParser::MaybeEmpty<std::string>> Prefix;
+
+    std::map<std::string, std::set<std::string>> FileSetsPerTarget;
   };
 
   auto unsupportedKeyword =
@@ -147,6 +155,21 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
     }
     return ArgumentParser::Continue::No;
   };
+  auto handleTarget = [](Arguments& result,
+                         cm::string_view value) -> ArgumentParser::Continue {
+    if (!result.FileSets) {
+      result.AddKeywordError(
+        "TARGET", cmStrCat("FILE_SETS is required for TARGET ", value, '.'));
+      return ArgumentParser::Continue::No;
+    }
+    if (!result.FileSets->empty()) {
+      result.FileSetsPerTarget[std::string{ value }].insert(
+        result.FileSets->begin(), result.FileSets->end());
+    }
+    result.FileSets.reset();
+
+    return ArgumentParser::Continue::Yes;
+  };
 
   std::vector<std::string> unexpectedArgs;
   auto parser =
@@ -156,11 +179,15 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
     // this is the TREE syntax
     parser.Bind("TREE"_s, &Arguments::Tree)
       .Bind("PREFIX"_s, &Arguments::Prefix)
-      .Bind("REGULAR_EXPRESSION"_s, unsupportedKeyword);
+      .Bind("REGULAR_EXPRESSION"_s, unsupportedKeyword)
+      .Bind("FILE_SETS"_s, unsupportedKeyword)
+      .Bind("TARGET"_s, unsupportedKeyword);
   } else {
     // assume that first argument is the group name
     parser.Bind(0, &Arguments::GroupName)
       .Bind("REGULAR_EXPRESSION"_s, handleRegex, 0)
+      .Bind("FILE_SETS"_s, &Arguments::FileSets)
+      .Bind("TARGET"_s, handleTarget)
       .Bind("TREE"_s, unsupportedKeyword)
       .Bind("PREFIX"_s, unsupportedKeyword);
   }
@@ -177,6 +204,11 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
+  if (!parsedArgs.Tree && parsedArgs.FileSets) {
+    status.SetError(cmStrCat("TARGET is required for FILE_SETS ",
+                             cmJoin(*parsedArgs.FileSets, ", "), '.'));
+    return false;
+  }
 
   if (parsedArgs.Tree) {
     if (!ProcessTree(parsedArgs, status)) {
@@ -184,7 +216,8 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
       return false;
     }
   } else {
-    if (!parsedArgs.Files && !parsedArgs.Regex) {
+    if (!parsedArgs.Files && !parsedArgs.Regex &&
+        parsedArgs.FileSetsPerTarget.empty()) {
       // group is not created
       return true;
     }
@@ -208,6 +241,34 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
       for (auto const& file : *parsedArgs.Files) {
         sg->AddGroupFile(
           cmSystemTools::CollapseFullPath(file, currentSourceDir));
+      }
+    }
+    for (auto& item : parsedArgs.FileSetsPerTarget) {
+      // check validity of arguments
+      auto it = mf.GetTargets().find(item.first);
+      if (it == mf.GetTargets().end()) {
+        mf.IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
+          cmStrCat(
+            "TARGET \"", item.first,
+            "\" is not defined in this directory. It will be ignored."));
+        continue;
+      }
+
+      cmTarget const& target = it->second;
+      for (auto it2 = item.second.begin(); it2 != item.second.end();) {
+        if (!target.GetFileSet(*it2)) {
+          mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
+                             cmStrCat("FILE_SET \"", *it2,
+                                      "\" is not known for TARGET \"",
+                                      item.first, "\". It will ignored."));
+          it2 = item.second.erase(it2);
+        } else {
+          ++it2;
+        }
+      }
+      if (!item.second.empty()) {
+        sg->AddGroupFileSets(item.first, item.second);
       }
     }
   }
