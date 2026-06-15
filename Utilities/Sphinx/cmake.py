@@ -13,6 +13,7 @@ import sphinx
 # The following imports may fail if we don't have Sphinx 2.x or later.
 if sphinx.version_info >= (2,):
     from docutils import io, nodes
+    from docutils.statemachine import ViewList
     from docutils.nodes import Element, Node, TextElement, system_message
     from docutils.parsers.rst import Directive, directives
     from docutils.transforms import Transform
@@ -143,6 +144,12 @@ logger = logging.getLogger(__name__)
 
 # RE to split multiple command signatures.
 sig_end_re = re.compile(r'(?<=[)])\n')
+
+
+def _parse_rst(state, text: str) -> list[Node]:
+    node = nodes.Element()
+    state.nested_parse(ViewList([text], source=''), 0, node)
+    return node.children
 
 
 @dataclass
@@ -559,7 +566,7 @@ class CMakeDiagnosticObject(CMakeObject):
 
     def _build_field(self, name: str, content: str | list[Node]) -> Node:
         if type(content) is not list:
-            content = self.parse_text_to_nodes(content)
+            content = _parse_rst(self.state,content)
 
         name_node = nodes.field_name(text=name)
         body_node = nodes.field_body('', *content)
@@ -568,13 +575,13 @@ class CMakeDiagnosticObject(CMakeObject):
     def _build_cli(self) -> list[Node]:
         cname = self.targetname[4:].lower().replace('_', '-')
         ctext = f'-W[no-][error=]{cname}'
-        return self.parse_text_to_nodes(f':option:`{ctext} <cmake -W>`')
+        return _parse_rst(self.state,f':option:`{ctext} <cmake -W>`')
 
     def _build_preset_refs(self) -> list[Node]:
         p = self._preset_name()
         w = f':preset:`warnings.{p} <configurePresets.warnings.{p}>`'
         e = f':preset:`errors.{p} <configurePresets.errors.{p}>`'
-        return self.parse_text_to_nodes(f'{w}, {e}')
+        return _parse_rst(self.state,f'{w}, {e}')
 
     def run(self) -> list[Node]:
         self.domain, self.objtype = self.name.split(':', 1)
@@ -590,11 +597,12 @@ class CMakeDiagnosticObject(CMakeObject):
         headers += self._build_field('Default', default)
 
         if parent:
-            parentRef = self.parse_text_to_nodes(f':diagnostic:`{parent}`')
+            parentRef = _parse_rst(self.state,f':diagnostic:`{parent}`')
             headers += self._build_field('Parent', parentRef)
 
-        content = self.parse_content_to_nodes()
-        return [headers] + content
+        node = nodes.Element()
+        self.state.nested_parse(self.content, self.content_offset, node)
+        return [headers] + node.children
 
 
 class CMakeReferenceRole:
