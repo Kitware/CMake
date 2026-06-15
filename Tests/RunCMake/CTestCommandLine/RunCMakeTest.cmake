@@ -714,6 +714,76 @@ function(run_configure_no_cmakelists)
 endfunction()
 run_configure_no_cmakelists()
 
+# Helper for tests that invoke ctest -M/-T Configure with -D CTEST_PRESET.
+# Options:
+#   SOURCE_DIR  -- pass --source-dir to ctest
+#   BUILD_DIR   -- create a separate <CASE_NAME>-build dir with
+#                  DartConfiguration.tcl and pass --build-dir to ctest
+function(run_ctest_configure_cli_preset CASE_NAME)
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "SOURCE_DIR;BUILD_DIR;BAD_PRESETS" "PRESET_NAME" "")
+  set(src "${RunCMake_BINARY_DIR}/${CASE_NAME}")
+  set(bin "${src}")
+  if(ARG_BUILD_DIR)
+    set(bin "${RunCMake_BINARY_DIR}/${CASE_NAME}-build")
+  endif()
+  set(preset_name "my-preset")
+  if(ARG_PRESET_NAME)
+    set(preset_name "${ARG_PRESET_NAME}")
+  endif()
+  configure_file("${RunCMake_SOURCE_DIR}/CMakeLists.txt.in"
+                 "${src}/CMakeLists.txt" @ONLY)
+  if(ARG_BAD_PRESETS)
+    configure_file("${RunCMake_SOURCE_DIR}/BadCMakePresets.json.in"
+                   "${src}/CMakePresets.json" @ONLY)
+  else()
+    configure_file("${RunCMake_SOURCE_DIR}/CMakePresets.json.in"
+                   "${src}/CMakePresets.json" @ONLY)
+  endif()
+  file(REMOVE_RECURSE "${src}/build")
+  if(ARG_BUILD_DIR)
+    file(REMOVE_RECURSE "${bin}")
+    file(MAKE_DIRECTORY "${bin}")
+    file(WRITE "${bin}/DartConfiguration.tcl"
+      "BuildDirectory: ${bin}\n"
+      "SourceDirectory: ${src}\n"
+      "ConfigureCommand: \"${CMAKE_COMMAND}\" -S\"${src}\" -B\"${bin}\"\n")
+  endif()
+  set(extra_args "")
+  if(ARG_SOURCE_DIR)
+    list(APPEND extra_args --source-dir "${src}")
+  endif()
+  if(ARG_BUILD_DIR)
+    list(APPEND extra_args --build-dir "${bin}")
+  endif()
+  set(RunCMake_TEST_SOURCE_DIR "${src}")
+  set(RunCMake_TEST_BINARY_DIR "${bin}")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${CASE_NAME}
+    ${CMAKE_CTEST_COMMAND}
+    ${extra_args}
+    -M Experimental
+    -D "CTEST_PRESET=${preset_name}"
+    -T Configure
+    -V)
+endfunction()
+
+# CTEST_PRESET via -D reaches ctest_configure() when run with -M/-T.
+run_ctest_configure_cli_preset(ConfigurePresetCLIVar BUILD_DIR)
+
+# --source-dir + -D CTEST_PRESET picks up the preset's binaryDir when no
+# DartConfiguration.tcl / explicit --build-dir is provided.
+run_ctest_configure_cli_preset(ConfigurePresetCLIVarSourceDir SOURCE_DIR)
+
+# An explicit --build-dir takes precedence over the preset's binaryDir.
+run_ctest_configure_cli_preset(ConfigurePresetCLIVarBuildDirOverride SOURCE_DIR BUILD_DIR)
+
+# A malformed presets file is an error.
+run_ctest_configure_cli_preset(ConfigurePresetCLIVarBadPresets SOURCE_DIR BAD_PRESETS)
+
+# Referencing a preset that does not exist is an error.
+run_ctest_configure_cli_preset(ConfigurePresetCLIVarUnknownPreset SOURCE_DIR
+  PRESET_NAME nonexistent-preset)
+
 # Test --output-junit
 function(run_output_junit)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/output-junit)
