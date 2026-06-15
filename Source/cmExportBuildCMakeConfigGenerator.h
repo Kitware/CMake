@@ -10,6 +10,8 @@
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportCMakeConfigGenerator.h"
 
+class cmDiagnosticContext;
+
 /** \class cmExportBuildCMakeConfigGenerator
  * \brief Generate a file exporting targets from a build tree.
  *
@@ -25,7 +27,7 @@ class cmExportBuildCMakeConfigGenerator
   , public cmExportBuildFileGenerator
 {
 public:
-  cmExportBuildCMakeConfigGenerator();
+  cmExportBuildCMakeConfigGenerator(cmDiagnosticContext context);
 
   /** Set whether to append generated code to the output file.  */
   void SetAppendMode(bool append) { this->AppendMode = append; }

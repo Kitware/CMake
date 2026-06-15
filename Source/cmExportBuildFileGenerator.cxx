@@ -25,10 +25,20 @@
 
 class cmSourceFile;
 
-cmExportBuildFileGenerator::cmExportBuildFileGenerator()
+cmExportBuildFileGenerator::cmExportBuildFileGenerator(
+  cmDiagnosticContext context)
+  : Context(std::move(context))
 {
   this->LG = nullptr;
   this->ExportSet = nullptr;
+}
+
+cmDiagnosticContext cmExportBuildFileGenerator::CaptureContext(
+  cmMakefile const& mf)
+{
+  cmDiagnosticContext context{ mf.GetBacktrace() };
+  context.RecordDiagnostic(cmDiagnostics::CMD_AUTHOR, mf.GetStateSnapshot());
+  return context;
 }
 
 void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
@@ -246,7 +256,7 @@ void cmExportBuildFileGenerator::IssueMessage(MessageType type,
 void cmExportBuildFileGenerator::IssueDiagnostic(
   cmDiagnosticCategory category, std::string const& message) const
 {
-  this->LG->GetMakefile()->IssueDiagnostic(category, message);
+  this->LG->GetMakefile()->IssueDiagnostic(category, message, this->Context);
 }
 
 std::string cmExportBuildFileGenerator::InstallNameDir(

@@ -85,6 +85,11 @@ public:
     return this->Context.GetBacktrace();
   }
 
+  cmDiagnosticContext const& GetDiagnosticContext() const
+  {
+    return this->Context;
+  }
+
   static std::string GetDestDirPath(std::string const& file);
 
 protected:

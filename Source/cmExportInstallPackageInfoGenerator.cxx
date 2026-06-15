@@ -255,11 +255,11 @@ bool cmExportInstallPackageInfoGenerator::GenerateFileSetProperties(
     cmGeneratorFileSet const* fileSet = gte->GetFileSet(name);
 
     if (!fileSet) {
-      gte->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("File set \"", name,
-                 "\" is listed in interface file sets of ", gte->GetName(),
-                 " but has not been created"));
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmStrCat("File set \"", name,
+                                  "\" is listed in interface file sets of ",
+                                  gte->GetName(),
+                                  " but has not been created"));
       return false;
     }
 

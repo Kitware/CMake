@@ -11,6 +11,8 @@
 #include "cmExportBuildFileGenerator.h"
 #include "cmStateTypes.h"
 
+class cmDiagnosticContext;
+
 /** \class cmExportBuildAndroidMKGenerator
  * \brief Generate a file exporting targets from a build tree.
  *
@@ -25,7 +27,7 @@ class cmExportBuildAndroidMKGenerator
   , public cmExportAndroidMKGenerator
 {
 public:
-  cmExportBuildAndroidMKGenerator();
+  cmExportBuildAndroidMKGenerator(cmDiagnosticContext context);
 
   /** Set whether to append generated code to the output file.  */
   void SetAppendMode(bool append) { this->AppendMode = append; }

@@ -12,6 +12,7 @@
 #include <cm/optional>
 #include <cmext/algorithm>
 
+#include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmExportFileGenerator.h"
 #include "cmStateTypes.h"
@@ -19,6 +20,7 @@
 class cmExportSet;
 class cmGeneratorTarget;
 class cmLocalGenerator;
+class cmMakefile;
 
 /** \class cmExportBuildCMakeConfigGenerator
  * \brief Generate a file exporting targets from a build tree.
@@ -43,7 +45,7 @@ public:
     std::string XcFrameworkLocation;
   };
 
-  cmExportBuildFileGenerator();
+  cmExportBuildFileGenerator(cmDiagnosticContext context);
 
   /** Set the list of targets to export.  */
   void SetTargets(std::vector<TargetExport> const& targets)
@@ -80,6 +82,9 @@ public:
   }
 
   void Compute(cmLocalGenerator* lg);
+
+  /** Capture context for generator.  */
+  static cmDiagnosticContext CaptureContext(cmMakefile const& mf);
 
 protected:
   cmStateEnums::TargetType GetExportTargetType(
@@ -144,6 +149,7 @@ protected:
     std::string XcFrameworkLocation;
   };
 
+  cmDiagnosticContext Context;
   std::vector<TargetExport> Targets;
   cmExportSet* ExportSet;
   std::vector<TargetExportPrivate> Exports;
