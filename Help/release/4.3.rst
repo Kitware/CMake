@@ -299,3 +299,12 @@ Changes made since CMake 4.3.0 include the following.
 * The :command:`export(PACKAGE_INFO)` command now writes to the
   ``cps/<package-name>`` subdirectory of the current build directory,
   rather than directly to the current build directory.
+
+.. 4.3.4
+
+  * :manual:`cmake-instrumentation(7)`, introduced in 4.3.0, has been *changed*
+    to generate :ref:`index files <cmake-instrumentation v1 Index File>` and
+    :ref:`snippet files <cmake-instrumentation v1 Snippet File>` with a new
+    ``version`` field format.  It is now an object with major and minor version
+    components, ``{ "major": 1, "minor": 0 }``.  Previously it was an integer
+    with only the major version, ``1``.

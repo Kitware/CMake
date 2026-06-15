@@ -598,6 +598,8 @@ Example:
     "cmakeContent" : "content/cmake-2025-07-11T12-46-32-0572.json"
   }
 
+.. _`cmake-instrumentation v1 Index File`:
+
 v1 Index File
 -------------
 
