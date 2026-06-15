@@ -182,12 +182,11 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     }
     parseFromArg = true;
     argIter++; // move past PARSE_ARGN
-    std::string argncStr =
-      status.GetMakefile().GetSafeDefinition("_FUNCTION_ARGNC");
+    std::string argncStr = status.GetMakefile().GetSafeDefinition("ARGNC");
     if (!cmStrToULong(argncStr, &argnc)) {
       status.GetMakefile().IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("PARSE_ARGN called with _FUNCTION_ARGNC='", argncStr,
+        cmStrCat("PARSE_ARGN called with ARGNC='", argncStr,
                  "' that is not an unsigned integer"));
       cmSystemTools::SetFatalErrorOccurred();
       return true;

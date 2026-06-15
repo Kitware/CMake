@@ -78,6 +78,11 @@ variables are set in the scope of the function:
 ``ARGN``
   The list of arguments past the last expected argument.
 
+``ARGNC``
+  .. versionadded:: 4.5
+
+  The number of arguments past the last expected argument.
+
 See Also
 ^^^^^^^^
 

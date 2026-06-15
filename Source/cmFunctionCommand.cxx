@@ -25,7 +25,7 @@
 
 namespace {
 std::string const ARGC = "ARGC";
-std::string const kFUNCTION_ARGNC = "_FUNCTION_ARGNC";
+std::string const ARGNC = "ARGNC";
 std::string const ARGN = "ARGN";
 std::string const ARGV = "ARGV";
 std::string const CMAKE_CURRENT_FUNCTION = "CMAKE_CURRENT_FUNCTION";
@@ -94,7 +94,7 @@ bool cmFunctionHelperCommand::operator()(
     makefile.AddDefinition(this->Args[j], expandedArgs[j - 1]);
   }
 
-  // define ARGV, ARGN, and _FUNCTION_ARGNC
+  // define ARGV, ARGN, and ARGNC
   auto const argvDef = cmList::to_string(expandedArgs);
   auto const expIt = expandedArgs.begin() + (this->Args.size() - 1);
   auto const argnDef =
@@ -105,8 +105,8 @@ bool cmFunctionHelperCommand::operator()(
   makefile.MarkVariableAsUsed(ARGV);
   makefile.AddDefinition(ARGN, argnDef);
   makefile.MarkVariableAsUsed(ARGN);
-  makefile.AddDefinition(kFUNCTION_ARGNC, functionArgncDef);
-  makefile.MarkVariableAsUsed(kFUNCTION_ARGNC);
+  makefile.AddDefinition(ARGNC, functionArgncDef);
+  makefile.MarkVariableAsUsed(ARGNC);
 
   makefile.AddDefinition(CMAKE_CURRENT_FUNCTION, this->Args.front());
   makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION);
