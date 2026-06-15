@@ -48,6 +48,7 @@ public:
     cm::optional<std::string> StdOut;
     cm::optional<std::string> StdErr;
   };
+
   int InstrumentCommand(
     std::string command_type, std::vector<std::string> const& command,
     std::function<CommandResult()> const& callback,
@@ -100,10 +101,16 @@ private:
   Json::Value ReadJsonSnippet(std::string const& file_name);
   bool AcquireLock(std::string const& lock_file, cmFileLock& lock,
                    unsigned long timeout);
+  enum class Atomic
+  {
+    No,
+    Yes,
+  };
   void WriteInstrumentationJson(cmInstrumentationQuery::Version version,
                                 Json::Value& index,
                                 std::string const& directory,
-                                std::string const& file_name);
+                                std::string const& file_name,
+                                Atomic atomic = Atomic::No);
   void InsertStaticSystemInformation(Json::Value& index);
   void GetDynamicSystemInformation(double& memory, double& load);
   void InsertDynamicSystemInformation(Json::Value& index,

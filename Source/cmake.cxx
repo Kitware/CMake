@@ -88,6 +88,7 @@
 #  include "cmFileAPI.h"
 #  include "cmGraphVizWriter.h"
 #  include "cmInstrumentation.h"
+#  include "cmInstrumentationInterrupt.h"
 #  include "cmInstrumentationQuery.h"
 #  include "cmMakefileProfilingData.h"
 #  include "cmSarifLog.h"
@@ -4197,10 +4198,30 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
   // Block the instrumentation build daemon from spawning during this build.
   // This lock will be released when the process exits at the end of the build.
   instrumentation.LockBuildDaemon();
-  int buildresult = instrumentation.InstrumentCommand(
-    "cmakeBuild", args, [doBuild]() -> cmInstrumentation::CommandResult {
-      return { doBuild(), cm::nullopt, cm::nullopt };
-    });
+  // Run the build under an interrupt handler so that a user interrupt (e.g.
+  // Ctrl+C) still writes the overall `cmakeBuild` snippet before we exit.
+  cmInstrumentationInterrupt::InterruptOutcome buildOutcome =
+    cmInstrumentationInterrupt::HandleInterrupt(
+      instrumentation.HasQuery(),
+      [&instrumentation, &args, &doBuild]() -> int {
+        return instrumentation.InstrumentCommand(
+          "cmakeBuild", args,
+          [&doBuild]() -> cmInstrumentation::CommandResult {
+            return { doBuild(), cm::nullopt, cm::nullopt };
+          });
+      });
+  int buildresult = buildOutcome.ExitCode;
+  if (buildOutcome.Interrupted) {
+    // The build was interrupted and its snippet has been written.  Skip the
+    // post-build indexing hook (which would run callbacks and delete data).
+    // For a real OS interrupt, re-raise so the exit status reflects it; for a
+    // test-injected interrupt, exit cleanly.  The next indexing run will
+    // reclaim the snippet written above.
+    if (buildOutcome.ShouldRaise) {
+      cmInstrumentationInterrupt::RaiseInterrupt(buildOutcome.Signal);
+    }
+    return buildresult;
+  }
   instrumentation.CollectTimingData(
     cmInstrumentationQuery::Hook::PostCMakeBuild);
 #else

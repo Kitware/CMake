@@ -385,6 +385,8 @@ add_library(
   cmInstallScriptHandler.cxx
   cmInstrumentation.h
   cmInstrumentation.cxx
+  cmInstrumentationInterrupt.h
+  cmInstrumentationInterrupt.cxx
   cmInstrumentationCommand.h
   cmInstrumentationCommand.cxx
   cmInstrumentationQuery.h

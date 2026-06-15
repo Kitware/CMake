@@ -450,6 +450,17 @@ Snippet files have a filename with the syntax
     The exit code of the command, an integer. This will be ``null`` when
     ``role`` is ``build``.
 
+  ``interruptSignal``
+    .. versionadded:: 4.5
+
+    The integer signal number that interrupted the build before it completed
+    (for example ``2`` for ``SIGINT`` from Ctrl+C). Only included when ``role``
+    is ``cmakeBuild`` and the build was interrupted. Consumers can use the
+    presence of this field to distinguish an interrupted build from one that
+    ran to completion.
+
+    Only available as of data version ``1.2``.
+
   ``stdout``
     .. versionadded:: 4.4
 

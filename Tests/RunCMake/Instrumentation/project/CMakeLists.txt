@@ -70,3 +70,12 @@ if (FAIL)
   add_test(NAME dummy COMMAND ${CMAKE_COMMAND} -E false)
   install(CODE "message(FATAL_ERROR \"Failed install.\")")
 endif()
+
+if (INTERRUPT_BUILD_SRC)
+  add_executable(InterruptBuild "${INTERRUPT_BUILD_SRC}")
+  add_custom_target(interruptSlow ALL
+    COMMAND ${CMAKE_COMMAND} -E echo "interruptSlow: begin"
+    COMMAND ${CMAKE_COMMAND} -E sleep 30
+    COMMAND ${CMAKE_COMMAND} -E echo "interruptSlow: end"
+  )
+endif()

@@ -9,6 +9,8 @@ function(snippet_has_fields snippet contents)
   json_has_key("${snippet}" "${contents}" role)
   json_has_key("${snippet}" "${contents}" workingDir)
   json_has_key("${snippet}" "${contents}" result)
+  # Only an interrupted build records this; completed commands must omit it.
+  json_missing_key("${snippet}" "${contents}" interruptSignal)
   if (NOT filename MATCHES "^build-*")
     json_has_key("${snippet}" "${contents}" command)
   else()

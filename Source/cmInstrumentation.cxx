@@ -29,8 +29,10 @@
 #include "cmCryptoHash.h"
 #include "cmFileLock.h"
 #include "cmFileLockResult.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstrumentationInterrupt.h"
 #include "cmInstrumentationQuery.h"
 #include "cmJSONState.h"
 #include "cmList.h"
@@ -555,7 +557,7 @@ Json::Value cmInstrumentation::ReadJsonSnippet(std::string const& file_name)
 
 void cmInstrumentation::WriteInstrumentationJson(
   cmInstrumentationQuery::Version version, Json::Value& root,
-  std::string const& subdir, std::string const& file_name)
+  std::string const& subdir, std::string const& file_name, Atomic atomic)
 {
   root["version"] = Json::objectValue;
   root["version"]["major"] = version.Major;
@@ -567,8 +569,28 @@ void cmInstrumentation::WriteInstrumentationJson(
     std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
   std::string const& directory = cmStrCat(this->timingDirv1, '/', subdir);
   cmSystemTools::MakeDirectory(directory);
+  std::string const file_path = cmStrCat(directory, '/', file_name);
 
-  cmsys::ofstream ftmp(cmStrCat(directory, '/', file_name).c_str());
+  if (atomic == Atomic::Yes) {
+    // Write to a temporary file and atomically rename it into place, so that
+    // an interrupt during the write cannot leave a truncated snippet.
+    cmGeneratedFileStream ftmp(file_path);
+    if (!ftmp) {
+      throw std::runtime_error(std::string("Unable to open: ") + file_name);
+    }
+    try {
+      JsonWriter->write(root, &ftmp);
+      ftmp << "\n";
+      // The atomic rename happens when the stream is closed/destroyed.
+    } catch (std::ios_base::failure& fail) {
+      cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
+    } catch (...) {
+      cmSystemTools::Error("Error writing JSON output for instrumentation.");
+    }
+    return;
+  }
+
+  cmsys::ofstream ftmp(file_path.c_str());
   if (!ftmp.good()) {
     throw std::runtime_error(std::string("Unable to open: ") + file_name);
   }
@@ -747,6 +769,15 @@ int cmInstrumentation::InstrumentCommand(
   // See SpawnBuildDaemon(); this data is currently meaningless for build.
   root["result"] = command_type == "build" ? Json::nullValue : ret;
 
+  // If the build was interrupted (e.g. by Ctrl+C), record the signal number
+  // that stopped it, so consumers can distinguish an interrupted build from
+  // one that ran to completion.  Omitted when no interrupt occurred; only a
+  // command wrapped by HandleInterrupt can observe a pending signal here.
+  int sig = cmInstrumentationInterrupt::PendingInterruptSignal();
+  if (sig != 0) {
+    root["interruptSignal"] = sig;
+  }
+
   // Output Sizes
   if (root.isMember("outputs")) {
     root["outputSizes"] = Json::arrayValue;
@@ -808,7 +839,14 @@ int cmInstrumentation::InstrumentCommand(
       }
       this->configureSnippetData.clear();
     }
-    this->WriteInstrumentationJson(latestDataVersion, root, "data", file_name);
+    // Write the cmakeBuild envelope atomically (temp file + rename).  This is
+    // the snippet flushed while unwinding from a user interrupt, where a
+    // second Ctrl+C could otherwise truncate it mid-write; the atomic write
+    // guarantees it is either absent or complete.  Per-step snippets are never
+    // flushed under interrupt and are left non-atomic.
+    this->WriteInstrumentationJson(latestDataVersion, root, "data", file_name,
+                                   command_type == "cmakeBuild" ? Atomic::Yes
+                                                                : Atomic::No);
   }
   return ret;
 }
