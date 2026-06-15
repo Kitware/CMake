@@ -896,6 +896,13 @@ The available ``<dashboard-options>`` are the following:
  specify a different location. The binary directory is created automatically
  if it does not yet exist.
 
+ When a :manual:`configure preset <cmake-presets(7)>` is specified that
+ defines a :preset:`binaryDir <configurePresets.binaryDir>`, CTest uses that
+ path as the binary directory automatically (without requiring
+ :ctest-dashboard-option:`--build-dir`).  An explicit
+ :ctest-dashboard-option:`--build-dir` takes precedence over the preset's
+ :preset:`binaryDir <configurePresets.binaryDir>`.
+
  A CMake generator must also be specified. Use
  :option:`-D CTEST_CMAKE_GENERATOR=\<gen\> <ctest-dashboard -D>` to supply one,
  or set :variable:`CTEST_CONFIGURE_PRESET` to specify a

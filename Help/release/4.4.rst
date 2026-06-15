@@ -353,6 +353,11 @@ CTest
   on the :program:`ctest` command line via the
   :ctest-dashboard-option:`-D` option.
 
+* :manual:`ctest(1)` gained a :ctest-dashboard-option:`--source-dir` option
+  to specify the source directory.  When combined with
+  :ctest-option:`-T` Configure, this allows CTest to perform an
+  initial configure step for an empty binary directory.
+
 * :manual:`ctest(1)` gained support for a :variable:`CTEST_SUBMIT_PARTS`
   variable that restricts which parts are uploaded when operating in
   :ref:`Dashboard Client` mode.
