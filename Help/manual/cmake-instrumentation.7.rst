@@ -234,7 +234,7 @@ version will be generated and sent to the user `Callbacks`_ defined in that
 query.
 
 Currently, the only supported major version is ``1``, and the maximum supported
-minor version is also ``1``. A new major version number will be created whenever
+minor version is ``2``. A new major version number will be created whenever
 previously included data is removed or reformatted such that scripts written to
 parse this data may become incompatible with the new format. A new minor version
 number will be created whenever new data becomes available.

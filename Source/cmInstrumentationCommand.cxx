@@ -81,7 +81,7 @@ bool validateDataVersion(std::string const& versionString, Version& version,
   if (!cmInstrumentationQuery::ValidDataVersion(version)) {
     status.SetError(
       cmStrCat("given an unsupported DATA_VERSION \"", versionString,
-               "\" (the maximum currently supported version is 1.1)."));
+               "\" (the maximum currently supported version is 1.2)."));
     return false;
   }
 

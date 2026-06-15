@@ -173,6 +173,6 @@ Version cmInstrumentationQuery::LatestDataVersion()
 {
   Version latest;
   latest.Major = 1;
-  latest.Minor = 1;
+  latest.Minor = 2;
   return latest;
 }
