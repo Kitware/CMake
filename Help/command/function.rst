@@ -59,20 +59,24 @@ Arguments
 
 When the function is invoked, the recorded ``<commands>`` are first
 modified by replacing formal parameters (``${arg1}``, ...) with the
-arguments passed, and then invoked as normal commands.
+arguments passed, and then invoked as normal commands. The following
+variables are set in the scope of the function:
 
-In addition to referencing the formal parameters you can reference the
-``ARGC`` variable which will be set to the number of arguments passed
-into the function as well as ``ARGV0``, ``ARGV1``, ``ARGV2``, ...  which
-will have the actual values of the arguments passed in.  This facilitates
-creating functions with optional arguments.
+``ARGC``
+  The number of arguments passed into the function.
 
-Furthermore, ``ARGV`` holds the list of all arguments given to the
-function and ``ARGN`` holds the list of arguments past the last expected
-argument.  Referencing to ``ARGV#`` arguments beyond ``ARGC`` have
-undefined behavior.  Checking that ``ARGC`` is greater than ``#`` is
-the only way to ensure that ``ARGV#`` was passed to the function as an
-extra argument.
+``ARGV``
+  The list of all arguments given to the function.
+
+``ARGV#``
+  The variables ``ARGV0``, ``ARGV1``, ``ARGV2``, ...  which will have the
+  actual values of the arguments passed in. References to ``ARGV#``
+  arguments beyond ``ARGC`` have undefined behavior.  Checking that
+  ``ARGC`` is greater than ``#`` is the only way to ensure that ``ARGV#``
+  was passed to the function as an extra argument.
+
+``ARGN``
+  The list of arguments past the last expected argument.
 
 See Also
 ^^^^^^^^
