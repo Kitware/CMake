@@ -17,6 +17,7 @@
 #include "cmArgumentParserTypes.h"
 #include "cmBuildSbomGenerator.h"
 #include "cmCryptoHash.h"
+#include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
@@ -219,14 +220,17 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
     }
   }
 
+  cmDiagnosticContext context = cmExportBuildFileGenerator::CaptureContext(mf);
   std::unique_ptr<cmExportBuildFileGenerator> ebfg = nullptr;
   if (android) {
-    auto ebag = cm::make_unique<cmExportBuildAndroidMKGenerator>();
+    auto ebag =
+      cm::make_unique<cmExportBuildAndroidMKGenerator>(std::move(context));
     ebag->SetNamespace(arguments.Namespace);
     ebag->SetAppendMode(arguments.Append);
     ebfg = std::move(ebag);
   } else {
-    auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();
+    auto ebcg =
+      cm::make_unique<cmExportBuildCMakeConfigGenerator>(std::move(context));
     ebcg->SetNamespace(arguments.Namespace);
     ebcg->SetAppendMode(arguments.Append);
     ebcg->SetExportOld(arguments.ExportOld);
@@ -328,7 +332,8 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   }
 
   // Set up export file generation.
-  auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();
+  auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>(
+    cmExportBuildFileGenerator::CaptureContext(mf));
   ebcg->SetNamespace(arguments.Namespace);
   ebcg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
 
@@ -395,7 +400,8 @@ static bool HandleSpecialExportMode(std::vector<std::string> const& args,
   }
 
   // Create the export build generator
-  auto ebpg = cm::make_unique<GeneratorType>(arguments);
+  auto ebpg = cm::make_unique<GeneratorType>(
+    arguments, cmExportBuildFileGenerator::CaptureContext(mf));
   AddExportGenerator(mf, gg, std::move(ebpg), fname, *exportSet,
                      arguments.CxxModulesDirectory);
   return true;

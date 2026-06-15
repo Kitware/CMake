@@ -1,3 +1,5 @@
-CMake Warning \(author\) in CMakeLists\.txt:
+CMake Warning \(author\) at VersionCheckWarning\.cmake:[0-9]+ \(install\):
   Package "foo" uses unrecognized version schema "unrecognized"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers\.  Use -Wno-author to suppress it\.

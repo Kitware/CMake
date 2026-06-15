@@ -264,6 +264,7 @@ cmInstallGenerator::MessageLevel cmInstallGenerator::SelectMessageLevel(
 cmDiagnosticContext cmInstallGenerator::CaptureContext(cmMakefile const& mf)
 {
   cmDiagnosticContext context{ mf.GetBacktrace() };
+  context.RecordDiagnostic(cmDiagnostics::CMD_AUTHOR, mf.GetStateSnapshot());
   context.RecordDiagnostic(cmDiagnostics::CMD_INSTALL_ABSOLUTE_DESTINATION,
                            mf.GetStateSnapshot());
   return context;

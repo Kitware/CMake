@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "cmCryptoHash.h"
+#include "cmDiagnosticContext.h"
 #include "cmExportSet.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
@@ -25,7 +26,9 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-cmExportBuildCMakeConfigGenerator::cmExportBuildCMakeConfigGenerator()
+cmExportBuildCMakeConfigGenerator::cmExportBuildCMakeConfigGenerator(
+  cmDiagnosticContext context)
+  : cmExportBuildFileGenerator(std::move(context))
 {
   this->LG = nullptr;
   this->ExportSet = nullptr;

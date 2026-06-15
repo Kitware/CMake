@@ -14,6 +14,7 @@ namespace Json {
 class Value;
 }
 
+class cmDiagnosticContext;
 class cmGeneratorTarget;
 class cmPackageInfoArguments;
 
@@ -31,7 +32,8 @@ class cmExportBuildPackageInfoGenerator
   , public cmExportPackageInfoGenerator
 {
 public:
-  cmExportBuildPackageInfoGenerator(cmPackageInfoArguments arguments);
+  cmExportBuildPackageInfoGenerator(cmPackageInfoArguments arguments,
+                                    cmDiagnosticContext context);
 
 protected:
   // Implement virtual methods from the superclass.
