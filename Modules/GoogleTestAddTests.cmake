@@ -143,6 +143,7 @@ function(gtest_discover_tests_impl)
     CTEST_FILE
     TEST_DISCOVERY_TIMEOUT
     TEST_XML_OUTPUT_DIR
+    TEST_JSON_OUTPUT_DIR
     TEST_FILTER
   )
   set(multiValueArgs
@@ -202,7 +203,7 @@ function(gtest_discover_tests_impl)
   string(SHA256 target_hash "${arg_TEST_TARGET}")
   string(SUBSTRING "${target_hash}" 0 10 target_hash)
   set(json_file
-    "${arg_TEST_WORKING_DIR}/cmake_test_discovery_${target_hash}.json"
+    "${arg_TEST_JSON_OUTPUT_DIR}/cmake_test_discovery_${target_hash}.json"
   )
 
   # Remove json file to make sure we don't pick up an outdated one

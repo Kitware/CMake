@@ -700,6 +700,7 @@ function(gtest_discover_tests target)
       "  TEST_DISCOVERY_TIMEOUT" " [==[${arg_DISCOVERY_TIMEOUT}]==]"        "\n"
       "  TEST_DISCOVERY_EXTRA_ARGS [==[${arg_DISCOVERY_EXTRA_ARGS}]==]"     "\n"
       "  TEST_XML_OUTPUT_DIR"    " [==[${arg_XML_OUTPUT_DIR}]==]"           "\n"
+      "  TEST_JSON_OUTPUT_DIR"   " [==[${CMAKE_CURRENT_BINARY_DIR}]==]"     "\n"
       ")"                                                                   "\n"
     )
     file(GENERATE OUTPUT "${discovery_file}" CONTENT "${discovery_content}")
