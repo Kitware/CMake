@@ -1,0 +1,527 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema#",
+  "oneOf": [
+    {
+      "$ref": "#/definitions/snippetV1_0"
+    },
+    {
+      "$ref": "#/definitions/snippetV1_1"
+    }
+  ],
+  "definitions": {
+    "snippetConditionals": {
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "enum": [
+                  "configure",
+                  "generate",
+                  "compile",
+                  "link",
+                  "custom",
+                  "cmakeBuild",
+                  "cmakeInstall",
+                  "install",
+                  "ctest",
+                  "test"
+                ]
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "command"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "enum": [
+                  "compile",
+                  "link"
+                ]
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "language",
+              "target",
+              "outputs",
+              "outputSizes"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "compile"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "source"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "custom"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "outputs",
+              "outputSizes"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "enum": [
+                  "compile",
+                  "link",
+                  "custom",
+                  "install",
+                  "test"
+                ]
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "config"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "ctest"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "showOnly"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "test"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "testName"
+            ]
+          }
+        }
+      ]
+    },
+    "versionV1_0": {
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "type": "integer",
+          "const": 1
+        },
+        "minor": {
+          "type": "integer",
+          "const": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "versionV1_1": {
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "type": "integer",
+          "const": 1
+        },
+        "minor": {
+          "type": "integer",
+          "const": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "fields": {
+      "command": {
+        "type": "string",
+        "description": "The full command executed. Excluded when role is build.",
+        "minLength": 1
+      },
+      "workingDir": {
+        "type": "string",
+        "description": "The working directory in which the command was executed.",
+        "minLength": 1
+      },
+      "result": {
+        "description": "The exit code of the command, or null when unavailable.",
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "role": {
+        "type": "string",
+        "description": "The type of command executed.",
+        "enum": [
+          "configure",
+          "generate",
+          "compile",
+          "link",
+          "custom",
+          "build",
+          "cmakeBuild",
+          "cmakeInstall",
+          "install",
+          "ctest",
+          "test"
+        ]
+      },
+      "target": {
+        "type": "string",
+        "description": "The CMake target associated with the command.",
+        "minLength": 1
+      },
+      "targetLabels": {
+        "type": "array",
+        "description": "Optional labels associated with the target.",
+        "items": {
+          "type": "string"
+        }
+      },
+      "timeStart": {
+        "type": "integer",
+        "description": "Command start time in milliseconds since epoch.",
+        "minimum": 0
+      },
+      "duration": {
+        "type": "integer",
+        "description": "Command duration in milliseconds.",
+        "minimum": 0
+      },
+      "outputs": {
+        "type": "array",
+        "description": "The command output file paths.",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "outputSizes": {
+        "type": "array",
+        "description": "Sizes in bytes for each output file.",
+        "items": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "source": {
+        "type": "string",
+        "description": "The source file being compiled.",
+        "minLength": 1
+      },
+      "language": {
+        "type": "string",
+        "description": "The language used by the compile or link command.",
+        "minLength": 1
+      },
+      "testName": {
+        "type": "string",
+        "description": "The name of the test being executed.",
+        "minLength": 1
+      },
+      "config": {
+        "type": "string",
+        "description": "The build configuration, such as Release or Debug. May be empty for some test runs."
+      },
+      "dynamicSystemInformation": {
+        "type": "object",
+        "description": "Dynamic host information collected before and after command execution.",
+        "required": [
+          "beforeHostMemoryUsed",
+          "afterHostMemoryUsed",
+          "beforeCPULoadAverage",
+          "afterCPULoadAverage"
+        ],
+        "properties": {
+          "beforeHostMemoryUsed": {
+            "type": "number",
+            "description": "Host memory used in KiB at command start.",
+            "minimum": 0
+          },
+          "afterHostMemoryUsed": {
+            "type": "number",
+            "description": "Host memory used in KiB at command end.",
+            "minimum": 0
+          },
+          "beforeCPULoadAverage": {
+            "description": "Average CPU load at command start.",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "afterCPULoadAverage": {
+            "description": "Average CPU load at command end.",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "cmakeContent": {
+        "description": "Relative path to the corresponding v1 CMake content file.",
+        "anyOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "showOnly": {
+        "type": "boolean",
+        "description": "True when ctest was invoked with --show-only."
+      },
+      "stdout": {
+        "type": "string",
+        "description": "The standard output produced by the command."
+      },
+      "stderr": {
+        "type": "string",
+        "description": "The standard error output produced by the command."
+      },
+      "traceFile": {
+        "description": "A path, relative to the data directory, referencing a copied JSON file generated by Clang's -ftime-trace option.",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "snippetV1_0": {
+      "type": "object",
+      "required": [
+        "version",
+        "role",
+        "result",
+        "timeStart",
+        "duration",
+        "workingDir"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/definitions/versionV1_0"
+        },
+        "command": {
+          "$ref": "#/definitions/fields/command"
+        },
+        "workingDir": {
+          "$ref": "#/definitions/fields/workingDir"
+        },
+        "result": {
+          "$ref": "#/definitions/fields/result"
+        },
+        "role": {
+          "$ref": "#/definitions/fields/role"
+        },
+        "target": {
+          "$ref": "#/definitions/fields/target"
+        },
+        "targetLabels": {
+          "$ref": "#/definitions/fields/targetLabels"
+        },
+        "timeStart": {
+          "$ref": "#/definitions/fields/timeStart"
+        },
+        "duration": {
+          "$ref": "#/definitions/fields/duration"
+        },
+        "outputs": {
+          "$ref": "#/definitions/fields/outputs"
+        },
+        "outputSizes": {
+          "$ref": "#/definitions/fields/outputSizes"
+        },
+        "source": {
+          "$ref": "#/definitions/fields/source"
+        },
+        "language": {
+          "$ref": "#/definitions/fields/language"
+        },
+        "testName": {
+          "$ref": "#/definitions/fields/testName"
+        },
+        "config": {
+          "$ref": "#/definitions/fields/config"
+        },
+        "dynamicSystemInformation": {
+          "$ref": "#/definitions/fields/dynamicSystemInformation"
+        },
+        "cmakeContent": {
+          "$ref": "#/definitions/fields/cmakeContent"
+        },
+        "showOnly": {
+          "$ref": "#/definitions/fields/showOnly"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/definitions/snippetConditionals"
+        }
+      ]
+    },
+    "snippetV1_1": {
+      "type": "object",
+      "required": [
+        "version",
+        "role",
+        "result",
+        "timeStart",
+        "duration",
+        "workingDir"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/definitions/versionV1_1"
+        },
+        "command": {
+          "$ref": "#/definitions/fields/command"
+        },
+        "workingDir": {
+          "$ref": "#/definitions/fields/workingDir"
+        },
+        "result": {
+          "$ref": "#/definitions/fields/result"
+        },
+        "role": {
+          "$ref": "#/definitions/fields/role"
+        },
+        "target": {
+          "$ref": "#/definitions/fields/target"
+        },
+        "targetLabels": {
+          "$ref": "#/definitions/fields/targetLabels"
+        },
+        "timeStart": {
+          "$ref": "#/definitions/fields/timeStart"
+        },
+        "duration": {
+          "$ref": "#/definitions/fields/duration"
+        },
+        "outputs": {
+          "$ref": "#/definitions/fields/outputs"
+        },
+        "outputSizes": {
+          "$ref": "#/definitions/fields/outputSizes"
+        },
+        "source": {
+          "$ref": "#/definitions/fields/source"
+        },
+        "language": {
+          "$ref": "#/definitions/fields/language"
+        },
+        "testName": {
+          "$ref": "#/definitions/fields/testName"
+        },
+        "config": {
+          "$ref": "#/definitions/fields/config"
+        },
+        "dynamicSystemInformation": {
+          "$ref": "#/definitions/fields/dynamicSystemInformation"
+        },
+        "cmakeContent": {
+          "$ref": "#/definitions/fields/cmakeContent"
+        },
+        "showOnly": {
+          "$ref": "#/definitions/fields/showOnly"
+        },
+        "stderr": {
+          "$ref": "#/definitions/fields/stderr"
+        },
+        "stdout": {
+          "$ref": "#/definitions/fields/stdout"
+        },
+        "traceFile": {
+          "$ref": "#/definitions/fields/traceFile"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/definitions/snippetConditionals"
+        }
+      ]
+    }
+  }
+}

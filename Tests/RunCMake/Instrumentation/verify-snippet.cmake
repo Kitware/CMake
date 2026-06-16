@@ -2,6 +2,7 @@
 include_guard()
 
 include(${CMAKE_CURRENT_LIST_DIR}/json.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/validate_schema.cmake)
 
 function(snippet_has_fields snippet contents)
   get_filename_component(filename "${snippet}" NAME)
@@ -106,6 +107,16 @@ function(verify_snippet_file snippet contents)
   get_filename_component(filename "${snippet}" NAME)
   if (NOT filename MATCHES "^${role}-")
     json_error("${snippet}" "Role \"${role}\" doesn't match snippet filename")
+  endif()
+
+  validate_schema(
+    "${snippet}"
+    "${CMAKE_CURRENT_LIST_DIR}/../../../Help/manual/instrumentation/snippet-v1-schema.json"
+    # We expect to always generate valid snippet files.
+    0
+  )
+  if (RunCMake_TEST_FAILED)
+    add_error("${RunCMake_TEST_FAILED}")
   endif()
 
   return(PROPAGATE ERROR_MESSAGE RunCMake_TEST_FAILED role)
