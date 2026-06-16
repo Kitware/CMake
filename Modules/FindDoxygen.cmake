@@ -743,6 +743,7 @@ function(_Doxygen_get_version doxy_version result_var doxy_path)
             OUTPUT_VARIABLE full_doxygen_version
             OUTPUT_STRIP_TRAILING_WHITESPACE
             RESULT_VARIABLE version_result
+            ERROR_QUIET
         )
 
         # Ignore any commit hashes, etc.
@@ -1029,6 +1030,7 @@ if(TARGET Doxygen::doxygen)
         COMMAND "${DOXYGEN_EXECUTABLE}" -s -g "${_Doxygen_tpl}"
         OUTPUT_QUIET
         RESULT_VARIABLE _Doxygen_tpl_result
+        ERROR_QUIET
     )
     if(_Doxygen_tpl_result)
         message(FATAL_ERROR
