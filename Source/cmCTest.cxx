@@ -796,6 +796,9 @@ int cmCTest::ProcessSteps()
           this->Impl->BinaryDir = binaryDir;
           cmSystemTools::SetLogicalWorkingDirectory(binaryDir);
           mf.AddDefinition("CTEST_BINARY_DIRECTORY", binaryDir);
+          // Re-parse DartConfiguration.tcl since we changed BinaryDir.
+          this->UpdateCTestConfiguration();
+          this->SetCMakeVariables(mf);
         }
       }
     }

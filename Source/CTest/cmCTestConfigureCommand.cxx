@@ -125,6 +125,22 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
     configureCommand += " \"-DCTEST_USE_LAUNCHERS:BOOL=TRUE\"";
   }
 
+  // Propagate CTEST_SITE / CTEST_BUILD_NAME into the SITE / BUILDNAME
+  // cache variables so DartConfiguration.tcl gets generated with
+  // correct values.
+  cmValue site = mf.GetDefinition("CTEST_SITE");
+  if (cmNonempty(site)) {
+    configureCommand += " \"-DSITE:STRING=";
+    configureCommand += *site;
+    configureCommand += "\"";
+  }
+  cmValue buildName = mf.GetDefinition("CTEST_BUILD_NAME");
+  if (cmNonempty(buildName)) {
+    configureCommand += " \"-DBUILDNAME:STRING=";
+    configureCommand += *buildName;
+    configureCommand += "\"";
+  }
+
   cmValue cmakeGeneratorPlatform =
     mf.GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
   if (cmNonempty(cmakeGeneratorPlatform)) {
