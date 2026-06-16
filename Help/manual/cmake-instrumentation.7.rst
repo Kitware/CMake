@@ -598,6 +598,10 @@ Example:
     "cmakeContent" : "content/cmake-2025-07-11T12-46-32-0572.json"
   }
 
+.. versionadded:: 4.4
+  The JSON format is described in machine-readable form by
+  :download:`this JSON schema </manual/instrumentation/snippet-v1-schema.json>`.
+
 .. _`cmake-instrumentation v1 Index File`:
 
 v1 Index File
