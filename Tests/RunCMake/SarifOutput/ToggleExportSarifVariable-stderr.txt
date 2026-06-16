@@ -8,4 +8,18 @@ CMake Warning at GenerateSarifResults\.cmake:5 \(message\):
   A second example warning message
 Call Stack \(most recent call first\):
   ToggleExportSarifVariable\.cmake:[0-9]+ \(include\)
-  CMakeLists\.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Warning \(author\) at GenerateSarifResults\.cmake:11 \(message\):
+  Example author warning message
+Call Stack \(most recent call first\):
+  ToggleExportSarifVariable\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
++
+CMake Error \(author\) at GenerateSarifResults\.cmake:16 \(message\):
+  Another example author warning message
+Call Stack \(most recent call first\):
+  ToggleExportSarifVariable\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This error is for project developers\.  Use -Wno-error=author to suppress it\.$

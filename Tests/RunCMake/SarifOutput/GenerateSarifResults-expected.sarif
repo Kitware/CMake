@@ -44,6 +44,48 @@
           },
           "ruleId": "CMake.Warning",
           "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "GenerateSarifResults.cmake",
+                  "uriBaseId": "PATH:<SOURCE_DIR>"
+                },
+                "region": {
+                  "startLine": 11
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Example author warning message"
+          },
+          "ruleId": "CMake.Author",
+          "ruleIndex": 1
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "GenerateSarifResults.cmake",
+                  "uriBaseId": "PATH:<SOURCE_DIR>"
+                },
+                "region": {
+                  "startLine": 16
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Another example author warning message"
+          },
+          "ruleId": "CMake.Author",
+          "ruleIndex": 1
         }
       ],
       "tool": {
@@ -53,6 +95,10 @@
             {
               "id": "CMake.Warning",
               "name": "CMake Warning"
+            },
+            {
+              "id": "CMake.Author",
+              "name": "CMD_AUTHOR"
             }
           ],
           "version": "<IGNORE>"
