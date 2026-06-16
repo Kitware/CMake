@@ -472,7 +472,6 @@ function(ExternalData_add_target target)
 
   # Store http headers.
   if(ExternalData_HTTPHEADERS)
-    message(STATUS "${CMAKE_CURRENT_BINARY_DIR}/${target}_config.cmake")
     string(CONCAT _ExternalData_CONFIG_CODE "${_ExternalData_CONFIG_CODE}\n"
       "set(ExternalData_HTTPHEADERS)")
     foreach(h IN LISTS ExternalData_HTTPHEADERS)
