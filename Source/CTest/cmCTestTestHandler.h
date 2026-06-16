@@ -31,6 +31,7 @@ class cmXMLWriter;
 struct cmCTestTestOptions
 {
   bool RerunFailed = false;
+  bool OutOfDateOnly = false;
   bool ScheduleRandom = false;
   bool StopOnFailure = false;
   bool UseUnion = false;
@@ -144,6 +145,7 @@ public:
   struct cmCTestTestProperties
   {
     void AppendError(cm::string_view err);
+    std::string GetStampFile();
     cm::optional<std::string> Error;
     std::string Name;
     // working directory for test, overridden by WORKING_DIRECTORY property
@@ -192,6 +194,7 @@ public:
     std::set<std::string> RequireSuccessDepends;
     std::vector<std::vector<cmCTestTestResourceRequirement>> ResourceGroups;
     std::string GeneratedResourceSpecFile;
+    std::string BuildDepends;
     // Private test generator properties used to track backtraces
     cmListFileBacktrace Backtrace;
   };
@@ -342,6 +345,7 @@ private:
   // compute the lists of tests that will actually run
   // based on LastTestFailed.log
   bool ComputeTestListForRerunFailed();
+  void ComputeOutOfDateTests();
 
   // add required setup/cleanup tests not already in the
   // list of tests to be run and update dependencies between

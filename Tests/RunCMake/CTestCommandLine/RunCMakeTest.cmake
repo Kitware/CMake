@@ -117,6 +117,52 @@ add_test(fails \"${CMAKE_COMMAND}\" -E false)
   run_cmake_command(rerun-failed ${CMAKE_CTEST_COMMAND} --rerun-failed)
 endblock()
 
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/out-of-date)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  set(out_of_date_build_dir "${RunCMake_TEST_BINARY_DIR}/build")
+  set(out_of_date_config "Debug")
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(out_of_date_config "")
+  endif()
+  set(out_of_date_build_config_args)
+  set(out_of_date_ctest_config_args)
+  if(out_of_date_config)
+    set(out_of_date_build_config_args --config ${out_of_date_config})
+    set(out_of_date_ctest_config_args -C ${out_of_date_config})
+  endif()
+  file(COPY "${RunCMake_SOURCE_DIR}/out-of-date-src"
+       DESTINATION "${RunCMake_TEST_BINARY_DIR}")
+  set(RunCMake_TEST_SOURCE_DIR "${RunCMake_TEST_BINARY_DIR}/out-of-date-src")
+  set(RunCMake_TEST_BINARY_DIR "${out_of_date_build_dir}")
+  run_cmake(out-of-date-configure)
+  run_cmake_command(out-of-date-build "${CMAKE_COMMAND}" --build "${out_of_date_build_dir}" ${out_of_date_build_config_args})
+  run_cmake_command(out-of-date-initial-test
+    "${CMAKE_CTEST_COMMAND}" ${out_of_date_ctest_config_args} -V --test-dir "${out_of_date_build_dir}")
+
+  # Sleep for timestamp compare
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1.125)
+
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" -P
+    "${RunCMake_TEST_SOURCE_DIR}/update-deps.cmake"
+    COMMAND_ERROR_IS_FATAL ANY)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E touch
+    "${RunCMake_TEST_BINARY_DIR}/file_gen"
+    COMMAND_ERROR_IS_FATAL ANY)
+  run_cmake_command(out-of-date-rebuild
+    "${CMAKE_COMMAND}" --build "${out_of_date_build_dir}" ${out_of_date_build_config_args})
+  set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${out_of_date_build_dir}")
+
+  # Sleep for timestamp compare
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1.125)
+
+  run_cmake_command(out-of-date ${CMAKE_CTEST_COMMAND} ${out_of_date_ctest_config_args} -V --out-of-date)
+  run_cmake_command(up-to-date ${CMAKE_CTEST_COMMAND} ${out_of_date_ctest_config_args} -V --out-of-date)
+  unset(RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+endblock()
+
 function(run_BadCTestTestfile)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BadCTestTestfile)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -767,6 +813,7 @@ function(run_ctest_configure_cli_preset CASE_NAME)
       -D "CTEST_BUILD_NAME=cli-build-name"
       -D "CTEST_SITE=cli-site")
   endif()
+  set(RunCMake_TEST_SOURCE_DIR "${src}")
   set(RunCMake_TEST_SOURCE_DIR "${src}")
   set(RunCMake_TEST_BINARY_DIR "${bin}")
   set(RunCMake_TEST_NO_CLEAN 1)

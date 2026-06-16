@@ -1,0 +1,7 @@
+Test project .*
+.*Start 1: exec-test.*
+.*Start 2: static-test.*
+.*Start 3: shared-test.*
+.*Start 4: module-test.*
+.*Start 5: object-test.*
+.*Start 6: file-test.*

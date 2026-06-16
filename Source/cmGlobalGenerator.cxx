@@ -3010,6 +3010,34 @@ bool cmGlobalGenerator::NameResolvesToFramework(
   return false;
 }
 
+std::vector<std::string> cmGlobalGenerator::GetTestBuildDependencyPaths(
+  std::string const& config,
+  cmTestGenerator::BuildDependencies const& deps) const
+{
+  std::set<std::string> uniqueDeps;
+  for (auto const& file : deps.Files) {
+    uniqueDeps.insert(file.Path);
+  }
+  for (cmGeneratorTarget* target : deps.Targets) {
+    if (target->GetType() == cmStateEnums::TargetType::UTILITY ||
+        target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
+        target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY) {
+      continue;
+    }
+    if (target->GetType() == cmStateEnums::TargetType::OBJECT_LIBRARY) {
+      std::vector<std::string> objects;
+      target->GetTargetObjectNames(config, objects);
+      for (auto const& object : objects) {
+        uniqueDeps.insert(
+          cmStrCat(target->GetObjectDirectory(config), object));
+      }
+      continue;
+    }
+    uniqueDeps.insert(target->GetFullPath(config));
+  }
+  return { uniqueDeps.begin(), uniqueDeps.end() };
+}
+
 // If the file has no extension it's either a raw executable or might
 // be a direct reference to a binary within a framework (bad practice!).
 // This is where we change the path to point to the framework directory.

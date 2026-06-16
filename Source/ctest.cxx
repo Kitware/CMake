@@ -117,6 +117,8 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
     "Run a specific number of tests by number." },
   { "-U, --union", "Take the Union of -I and -R" },
   { "--rerun-failed", "Run only the tests that failed previously" },
+  { "--out-of-date",
+    "Run only tests whose build dependencies changed since they last ran" },
   { "--tests-from-file <file>", "Run the tests listed in the given file" },
   { "--exclude-from-file <file>",
     "Run tests except those listed in the given file" },
