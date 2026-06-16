@@ -52,6 +52,12 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_CLANG_SCAN_DEPS NAMES
     "${_CMAKE_TOOLCHAIN_PREFIX}clang-scan-deps-${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}clang-scan-deps${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}clang-scan-deps"
+    # Gentoo, at least, installs associated tools without the prefix. Upstream
+    # builds also seem to not add toolchain prefixes to `clang-scan-deps`.
+    "clang-scan-deps-${__version_x_y}"
+    "clang-scan-deps-${__version_x}"
+    "clang-scan-deps${__version_x}"
+    "clang-scan-deps"
     HINTS ${__clang_hints}
     NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH
     DOC "`clang-scan-deps` dependency scanner"
