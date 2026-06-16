@@ -74,6 +74,7 @@ run_cmake(zip-filtered-exclude-precedence)
 
 run_cmake(create-missing-args)
 run_cmake(extract-missing-args)
+run_cmake(extract-missing-pattern)
 
 run_cmake(unsupported-format)
 run_cmake(zip-with-bad-compression)
