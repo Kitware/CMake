@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(Actions)
+run_cmake(ExistenceCheck)
 
 run_cmake_with_options(
   CacheInit
