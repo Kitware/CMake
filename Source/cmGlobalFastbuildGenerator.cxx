@@ -32,6 +32,8 @@
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTest.h"
+#include "cmTestGenerator.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -1583,6 +1585,62 @@ void cmGlobalFastbuildGenerator::AddTargetAll()
   this->AddTarget(std::move(allAliasNode));
 }
 
+void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
+{
+  if (!this->Makefiles.front()->IsOn("CMAKE_TEST_BUILD_DEPENDS")) {
+    return;
+  }
+
+  struct TestPrepTarget
+  {
+    std::string Comment;
+    std::set<FastbuildTargetDep> Dependencies;
+  };
+
+  std::map<std::string, TestPrepTarget> testPrepTargets;
+  for (auto const& localGen : this->LocalGenerators) {
+    auto const& testGenerators = localGen->GetMakefile()->GetTestGenerators();
+    for (auto const& tester : testGenerators) {
+      cmTestGenerator::BuildDependencies testDeps;
+      if (!tester->GetBuildDependencies(localGen.get(), testDeps)) {
+        continue;
+      }
+      std::string const depName =
+        cmStrCat("test_prep/", tester->GetTest()->GetName());
+      auto& testPrepTarget = testPrepTargets[depName];
+      testPrepTarget.Comment =
+        cmStrCat("Build dependencies for test ", tester->GetTest()->GetName());
+
+      for (cmGeneratorTarget* depTarget : testDeps.Targets) {
+        testPrepTarget.Dependencies.emplace(depTarget->GetName());
+      }
+      for (std::string const& depFile : testDeps.Files) {
+        testPrepTarget.Dependencies.emplace(depFile);
+      }
+    }
+  }
+
+  FastbuildAliasNode allAliasNode;
+  allAliasNode.Name = "test_prep/all";
+  allAliasNode.Hidden = false;
+  for (auto& prepEntry : testPrepTargets) {
+    FastbuildAliasNode alias;
+    alias.Name = prepEntry.first;
+    alias.Hidden = false;
+    alias.PreBuildDependencies = std::move(prepEntry.second.Dependencies);
+    if (alias.PreBuildDependencies.empty()) {
+      alias.PreBuildDependencies.emplace(FASTBUILD_NOOP_FILE_NAME);
+    }
+    this->WriteComment(prepEntry.second.Comment);
+    this->WriteAlias(alias);
+    allAliasNode.PreBuildDependencies.emplace(prepEntry.first);
+  }
+  if (!allAliasNode.PreBuildDependencies.empty()) {
+    this->WriteComment("Build dependencies for all tests");
+    this->WriteAlias(allAliasNode);
+  }
+}
+
 void cmGlobalFastbuildGenerator::AddGlobCheckExec()
 {
   // Tested in "RunCMake.file" test.
@@ -1874,6 +1932,8 @@ void cmGlobalFastbuildGenerator::WriteTargets()
     // Target end.
     *BuildFileStream << "}\n";
   }
+
+  WriteTestPrepTargets();
 
   if (!this->GetCMakeInstance()->GetIsInTryCompile()) {
     if (!IDEProjects.empty()) {

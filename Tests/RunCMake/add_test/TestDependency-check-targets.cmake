@@ -8,7 +8,8 @@ endif()
 
 file(GLOB ninja_files LIST_DIRECTORIES false
   "${RunCMake_TEST_BINARY_DIR}/*.ninja"
-  "${RunCMake_TEST_BINARY_DIR}/*.ninja.in")
+  "${RunCMake_TEST_BINARY_DIR}/*.ninja.in"
+  "${RunCMake_TEST_BINARY_DIR}/fbuild.bff")
 
 set(found FALSE)
 foreach(ninja_file IN LISTS ninja_files)

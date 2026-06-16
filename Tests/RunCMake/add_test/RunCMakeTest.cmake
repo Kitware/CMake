@@ -71,7 +71,7 @@ function(run_testdependency_case CASE_NAME EXPECT_PRESENT)
   unset(RunCMake_TEST_NO_CLEAN)
 endfunction()
 
-if(RunCMake_GENERATOR MATCHES Ninja)
+if(RunCMake_GENERATOR MATCHES "Ninja|FASTBuild")
   block()
     run_testdependency_case(DEFAULT FALSE)
     run_testdependency_case(OFF FALSE)

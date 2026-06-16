@@ -63,7 +63,8 @@ directory the test is created in.
   * .. versionadded:: 4.4
 
       When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled,
-      the :ref:`Ninja Generators` generate a convenience build target named
+      the :ref:`Ninja Generators` and :generator:`FASTBuild` generate a
+      convenience build target named
       ``test_prep/<name>`` that depends on the test executable target. Building
       this target ensures the executable is up-to-date before the test runs.
 
@@ -78,6 +79,10 @@ directory the test is created in.
 
       The ``BUILD_DEPENDS`` keyword can be used to add explicit build
       dependencies.
+
+    .. versionchanged:: 4.5
+
+      :generator:`FASTBuild` gained support for ``test_prep/<name>`` targets.
 
   The command may be specified using
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
@@ -96,9 +101,9 @@ directory the test is created in.
 
   Specify a list of targets or files that must be built before the test can
   run. Each dependency is added to the ``test_prep/<name>`` build target
-  described above when :variable:`CMAKE_TEST_BUILD_DEPENDS` is enabled
-  with the :ref:`Ninja Generators`. The test name must be a valid target name
-  in order to list build dependencies with this keyword.
+  described above when :variable:`CMAKE_TEST_BUILD_DEPENDS` is enabled with
+  the :ref:`Ninja Generators` or :generator:`FASTBuild`. The test name must be
+  a valid target name in order to list build dependencies with this keyword.
 
 ``COMMAND_EXPAND_LISTS``
   .. versionadded:: 3.16
