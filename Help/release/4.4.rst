@@ -186,6 +186,9 @@ Commands
 * The :command:`file(READ_SYMLINK)` command gained a ``RESULT``
   option to capture errors without failing.
 
+* The :command:`if` command gained a new ``DIAGNOSTIC`` operator that evaluates
+  to true if a given diagnostic category name is known to CMake.
+
 * The :command:`include` command now has a ``NO_DIAGNOSTIC_SCOPE`` option.
 
 * The :command:`list(FILTER)` command gained a new ``PREDICATE`` mode

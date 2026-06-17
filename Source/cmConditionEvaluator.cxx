@@ -11,12 +11,14 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCMakePath.h"
+#include "cmDiagnostics.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -30,6 +32,7 @@ namespace {
 auto const keyAND = "AND"_s;
 auto const keyCOMMAND = "COMMAND"_s;
 auto const keyDEFINED = "DEFINED"_s;
+auto const keyDIAGNOSTIC = "DIAGNOSTIC"_s;
 auto const keyEQUAL = "EQUAL"_s;
 auto const keyEXISTS = "EXISTS"_s;
 auto const keyIS_READABLE = "IS_READABLE"_s;
@@ -477,6 +480,13 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       newArgs.ReduceOneArg(
         static_cast<bool>(
           this->Makefile.GetState()->GetCommand(args.next->GetValue())),
+        args);
+    }
+    // does a diagnostic exist
+    else if (this->IsKeyword(keyDIAGNOSTIC, *args.current)) {
+      newArgs.ReduceOneArg(
+        cmDiagnostics::GetDiagnosticCategory(args.next->GetValue())
+          .has_value(),
         args);
     }
     // does a policy exist
