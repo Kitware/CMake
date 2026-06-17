@@ -21,23 +21,23 @@ ExternalProject_Add(CustomCommand
   COMMAND
   COMMAND "${CMAKE_COMMAND}" -DVARNAME=ListVar -P ${ScriptPath}
   CONFIGURE_ENVIRONMENT_MODIFICATION
-    Stage=set:config
+    "Stage=set:config step"
     ListVar=set:4,5,6
     ListSeparator=set:,
   BUILD_COMMAND "${CMAKE_COMMAND}" -P ${ScriptPath}
   BUILD_ENVIRONMENT_MODIFICATION
-    Stage=set:build
+    "Stage=set:build step"
     ListVar=set:4,5,6
     ListSeparator=set:,
   INSTALL_COMMAND "${CMAKE_COMMAND}" -P ${ScriptPath}
   INSTALL_ENVIRONMENT_MODIFICATION
     InstallVar=set:install
-    Stage=set:install
+    "Stage=set:install step"
     ListVar=set:4,5,6
     ListSeparator=set:,
   TEST_COMMAND "${CMAKE_COMMAND}" -P ${ScriptPath}
   TEST_ENVIRONMENT_MODIFICATION
-    Stage=set:test
+    "Stage=set:test step"
     ListVar=set:4,5,6
     ListSeparator=set:,)
 
@@ -48,7 +48,7 @@ ExternalProject_Add_Step(CustomCommand custom
   COMMAND "${CMAKE_COMMAND}" -P ${ScriptPath}
   ENVIRONMENT_MODIFICATION
     CustomVar=set:custom
-    CustomVar2=set:custom2
+    "CustomVar2=set:custom two"
     Stage=set:custom
     ListVar=set:1,2,3
     ListSeparator=set:,)
