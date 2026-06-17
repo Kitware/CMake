@@ -43,8 +43,9 @@ Compound conditions are evaluated in the following order of precedence:
 
 2. Unary tests such as:
 
-  * The `Existence Checks`_ :cref:`COMMAND`, :cref:`POLICY`, :cref:`TARGET`,
-    :cref:`TEST`, :cref:`EXISTS`, and :cref:`DEFINED`.
+  * The `Existence Checks`_ :cref:`COMMAND`, :cref:`DEFINED`,
+    :cref:`DIAGNOSTIC`, :cref:`EXISTS`, :cref:`POLICY`, :cref:`TARGET`, and
+    :cref:`TEST`.
   * The `File Operations`_ :cref:`IS_READABLE`, :cref:`IS_WRITABLE`,
     :cref:`IS_EXECUTABLE`, :cref:`IS_DIRECTORY`, :cref:`IS_SYMLINK`, and
     :cref:`IS_ABSOLUTE`.
@@ -130,6 +131,12 @@ Existence Checks
 
   True if the given name is a command, macro or function that can be
   invoked.
+
+.. signature:: if(DIAGNOSTIC <category>)
+
+  .. versionadded:: 4.4
+
+  True if the given name is an existing diagnostic category.
 
 .. signature:: if(POLICY <policy-id>)
 
