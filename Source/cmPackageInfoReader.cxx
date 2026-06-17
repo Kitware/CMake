@@ -591,6 +591,9 @@ std::vector<cmPackageRequirement> cmPackageInfoReader::GetRequirements() const
   std::vector<cmPackageRequirement> requirements;
 
   auto const& requirementObjects = this->Data["requires"];
+  if (!requirementObjects.isObject()) {
+    return {};
+  }
 
   for (auto ri = requirementObjects.begin(), re = requirementObjects.end();
        ri != re; ++ri) {
