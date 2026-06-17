@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <functional>
 #include <iterator>
+#include <set>
 #include <sstream>
 #include <utility>
 
@@ -2565,6 +2566,7 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   std::vector<std::string> includes;
   std::string dir_top_bld;
   std::string module_dir;
+  bool building_intrinsics = false;
 
   if (!arg_src_orig.empty()) {
     // Prepend the original source file's directory as an include directory
@@ -2615,6 +2617,10 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
 
     Json::Value const& tdi_submodule_ext = tdi["submodule-ext"];
     fc.SModExt = tdi_submodule_ext.asString();
+
+    Json::Value const& tdi_building_intrinsics =
+      tdi["building-intrinsic-modules"];
+    building_intrinsics = tdi_building_intrinsics.asBool();
   }
 
   cmFortranSourceInfo finfo;
@@ -2643,7 +2649,11 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
     }
     info->ScanDep.Provides.emplace_back(src_info);
   }
-  for (std::string const& require : finfo.Requires) {
+  std::set<std::string> requiredModules = finfo.Requires;
+  if (building_intrinsics) {
+    requiredModules.insert(finfo.Intrinsics.begin(), finfo.Intrinsics.end());
+  }
+  for (std::string const& require : requiredModules) {
     // Require modules not provided in the same source.
     if (finfo.Provides.count(require)) {
       continue;

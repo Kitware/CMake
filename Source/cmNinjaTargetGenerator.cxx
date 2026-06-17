@@ -2376,6 +2376,8 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_SEP");
     tdi["submodule-ext"] =
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_EXT");
+    tdi["building-intrinsic-modules"] =
+      this->GeneratorTarget->IsFortranBuildingIntrinsicModules();
   } else if (lang == "CXX") {
     // No extra information necessary.
   }
