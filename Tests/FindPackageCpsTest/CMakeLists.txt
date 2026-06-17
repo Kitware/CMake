@@ -284,6 +284,19 @@ elseif(NOT TARGET Bar::Target2)
 endif()
 
 ###############################################################################
+# Find some packages with malformatted dependencies.
+
+find_package(Bad1)
+if(NOT Bad1_FOUND)
+  message(SEND_ERROR "Bad1 not found !")
+endif()
+
+find_package(Bad2)
+if(NOT Bad2_FOUND)
+  message(SEND_ERROR "Bad2 not found !")
+endif()
+
+###############################################################################
 # Test requesting components from a package.
 
 find_package(ComponentTest
