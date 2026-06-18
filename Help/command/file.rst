@@ -937,6 +937,7 @@ Archiving
     [MTIME <mtime>]
     [THREADS <number>]
     [WORKING_DIRECTORY <dir>]
+    [PATTERNS_EXCLUDE <pattern>...]
     [VERBOSE])
   :target: ARCHIVE_CREATE
   :break: verbatim
@@ -1076,6 +1077,17 @@ Archiving
     be executed.  Paths in the ``<paths>`` argument can be relative to
     this directory.  If this option is not provided, the current working
     directory will be used by default.
+
+  ``PATTERNS_EXCLUDE <pattern>...``
+    .. versionadded:: 4.5
+
+    Do not add files or directories that match one of the given patterns.
+    Wildcards are supported.  When a directory matches a pattern, it is
+    excluded together with everything beneath it.
+
+    Exclusion patterns are not anchored to the start of an entry's path: a
+    pattern matches if it matches any portion of the path.  This is consistent
+    with the ``--exclude`` option of command-line ``tar``.
 
   ``VERBOSE``
     Enable verbose output from the archive operation.

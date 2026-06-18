@@ -2129,9 +2129,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         if (files.empty()) {
           std::cerr << "tar: No files or directories specified\n";
         }
-        if (!cmSystemTools::CreateTar(outFile, files, {}, compress, encoding,
-                                      verbose, mtime, format, compressionLevel,
-                                      numThreads)) {
+        if (!cmSystemTools::CreateTar(outFile, files, {}, {}, compress,
+                                      encoding, verbose, mtime, format,
+                                      compressionLevel, numThreads)) {
           cmSystemTools::Error(cmStrCat("Problem creating tar:\n  ", outFile));
           return 1;
         }

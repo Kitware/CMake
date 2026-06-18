@@ -406,8 +406,44 @@ bool cmArchiveWrite::Open()
   return true;
 }
 
+bool cmArchiveWrite::SetExcludePatterns(
+  std::vector<std::string> const& patterns)
+{
+  if (patterns.empty()) {
+    return true;
+  }
+  if (!this->MatchObject) {
+    this->MatchObject = archive_match_new();
+    if (!this->MatchObject) {
+      this->Error = "archive_match_new: out of memory";
+      return false;
+    }
+  }
+  // NOLINTNEXTLINE(readability-use-anyofallof)
+  for (std::string const& pattern : patterns) {
+    // Reject empty patterns ourselves.  libarchive would reject them too, but
+    // only after allocating an error message on the match object that
+    // archive_match_free() does not release.
+    if (pattern.empty()) {
+      this->Error = "exclusion pattern must not be empty";
+      return false;
+    }
+    if (archive_match_exclude_pattern(this->MatchObject, pattern.c_str()) !=
+        ARCHIVE_OK) {
+      this->Error =
+        cmStrCat("Failed to add to exclusion list: ", pattern, " (",
+                 cm_archive_error_string(this->MatchObject), ')');
+      return false;
+    }
+  }
+  return true;
+}
+
 cmArchiveWrite::~cmArchiveWrite()
 {
+  if (this->MatchObject) {
+    archive_match_free(this->MatchObject);
+  }
   archive_read_free(this->Disk);
   archive_write_free(this->Archive);
 }
@@ -425,6 +461,23 @@ bool cmArchiveWrite::Add(std::string path, size_t skip, char const* prefix,
 bool cmArchiveWrite::AddPath(std::string const& path, size_t skip,
                              char const* prefix, bool recursive)
 {
+  // Skip paths whose archive entry name matches an exclusion pattern.  For a
+  // directory this also prevents descending into it, pruning the subtree.
+  if (this->MatchObject && skip < path.length()) {
+    cm::string_view out = cm::string_view(path).substr(skip);
+    std::string dest = cmStrCat(prefix ? prefix : "", out);
+    Entry e;
+    cm_archive_entry_copy_pathname(e, dest.c_str());
+    int matched = archive_match_path_excluded(this->MatchObject, e);
+    if (matched < 0) {
+      this->Error = cmStrCat("archive_match_path_excluded: ",
+                             cm_archive_error_string(this->MatchObject));
+      return false;
+    }
+    if (matched > 0) {
+      return true;
+    }
+  }
   if (path != "." || (this->Format != "zip" && this->Format != "7zip")) {
     if (!this->AddFile(path, skip, prefix)) {
       return false;

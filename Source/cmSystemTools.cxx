@@ -2238,6 +2238,7 @@ bool cmSystemTools::IsPathToMacOSSharedLibrary(std::string const& path)
 
 bool cmSystemTools::CreateTar(
   std::string const& arFileName, std::vector<std::string> const& files,
+  std::vector<std::string> const& excludeFiles,
   std::string const& workingDirectory, cmTarCompression compressType,
   std::string const& encoding, bool verbose, std::string const& mtime,
   std::string const& format, int compressionLevel, int numThreads)
@@ -2300,6 +2301,10 @@ bool cmSystemTools::CreateTar(
   }
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
+  if (!a.SetExcludePatterns(excludeFiles)) {
+    cmSystemTools::Error(a.GetError());
+    return false;
+  }
   bool tarCreatedSuccessfully = true;
   for (auto path : files) {
     if (cmSystemTools::FileIsFullPath(path)) {
@@ -2315,6 +2320,7 @@ bool cmSystemTools::CreateTar(
 #else
   (void)arFileName;
   (void)files;
+  (void)excludeFiles;
   (void)encoding;
   (void)verbose;
   return false;

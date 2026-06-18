@@ -3720,6 +3720,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     bool Verbose = false;
     // "PATHS" requires at least one value, but use a custom check below.
     ArgumentParser::MaybeEmpty<std::vector<std::string>> Paths;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PatternsExclude;
   };
 
   static auto const parser =
@@ -3733,7 +3734,8 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       .Bind("THREADS"_s, &Arguments::Threads)
       .Bind("WORKING_DIRECTORY"_s, &Arguments::WorkingDirectory)
       .Bind("VERBOSE"_s, &Arguments::Verbose)
-      .Bind("PATHS"_s, &Arguments::Paths);
+      .Bind("PATHS"_s, &Arguments::Paths)
+      .Bind("PATTERNS_EXCLUDE"_s, &Arguments::PatternsExclude);
 
   std::vector<std::string> unrecognizedArguments;
   auto parsedArgs =
@@ -3866,9 +3868,10 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   }
 
   if (!cmSystemTools::CreateTar(
-        parsedArgs.Output, parsedArgs.Paths, parsedArgs.WorkingDirectory,
-        compress, parsedArgs.Encoding, parsedArgs.Verbose, parsedArgs.MTime,
-        parsedArgs.Format, compressionLevel, threads)) {
+        parsedArgs.Output, parsedArgs.Paths, parsedArgs.PatternsExclude,
+        parsedArgs.WorkingDirectory, compress, parsedArgs.Encoding,
+        parsedArgs.Verbose, parsedArgs.MTime, parsedArgs.Format,
+        compressionLevel, threads)) {
     status.SetError(cmStrCat("failed to compress: ", parsedArgs.Output));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
