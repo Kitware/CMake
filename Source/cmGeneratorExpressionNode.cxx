@@ -107,6 +107,48 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   return result;
 }
 
+// Re-evaluate the unevaluated <body> subtree of a binding operation with
+// `$<_0>` bound to the given operand.  A fresh Evaluation is built from a
+// copied, mutated Context so that nested binding operations can shadow `$<_0>`
+// and restore it on exit.
+static std::string EvaluateBodyWithBoundOperand(
+  cmGeneratorExpressionEvaluatorVector const& bodyExpr,
+  std::string const& operand, cm::GenEx::Evaluation* eval,
+  cmGeneratorExpressionDAGChecker* dagChecker)
+{
+  cm::GenEx::Context elemContext = eval->Context; // copy
+  elemContext.SetBoundOperand(operand);
+  cm::GenEx::Evaluation elemEval(
+    elemContext, eval->Quiet, eval->HeadTarget, eval->CurrentTarget,
+    eval->EvaluateForBuildsystem, eval->Backtrace);
+
+  std::string result;
+  for (auto const& pExprEval : bodyExpr) {
+    result += pExprEval->Evaluate(&elemEval, dagChecker);
+    if (elemEval.HadError) {
+      eval->HadError = true;
+      return std::string{};
+    }
+  }
+  eval->HadContextSensitiveCondition |= elemEval.HadContextSensitiveCondition;
+  eval->HadHeadSensitiveCondition |= elemEval.HadHeadSensitiveCondition;
+  eval->HadLinkLanguageSensitiveCondition |=
+    elemEval.HadLinkLanguageSensitiveCondition;
+  eval->DependTargets.insert(elemEval.DependTargets.begin(),
+                             elemEval.DependTargets.end());
+  eval->AllTargets.insert(elemEval.AllTargets.begin(),
+                          elemEval.AllTargets.end());
+  eval->SeenTargetProperties.insert(elemEval.SeenTargetProperties.begin(),
+                                    elemEval.SeenTargetProperties.end());
+  eval->SourceSensitiveTargets.insert(elemEval.SourceSensitiveTargets.begin(),
+                                      elemEval.SourceSensitiveTargets.end());
+  for (auto const& entry : elemEval.MaxLanguageStandard) {
+    eval->MaxLanguageStandard[entry.first].insert(entry.second.begin(),
+                                                  entry.second.end());
+  }
+  return result;
+}
+
 static const struct ZeroNode : public cmGeneratorExpressionNode
 {
   ZeroNode() {} // NOLINT(modernize-use-equals-default)
@@ -2005,11 +2047,74 @@ static const struct ListNode : public cmGeneratorExpressionNode
 
   bool AcceptsArbitraryContentParameter() const override { return true; }
 
+  bool ShouldEvaluateNextParameter(std::vector<std::string> const& parameters,
+                                   std::string&) const override
+  {
+    // Skip the APPLY <body> (4th parameter) so $<_0> is not evaluated unbound;
+    // selector args (5th+) evaluate normally.
+    return !(parameters.size() == 3 && parameters[0] == "TRANSFORM" &&
+             parameters[2] == "APPLY");
+  }
+
   std::string Evaluate(
     std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
     GeneratorExpressionContent const* content,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
+    if (parameters.size() >= 3 && parameters[0] == "TRANSFORM" &&
+        parameters[2] == "APPLY") {
+      if (parameters.size() < 4) {
+        reportError(
+          eval, content->GetOriginalExpression(),
+          "sub-command TRANSFORM, action APPLY expects a <body> argument.");
+        return std::string();
+      }
+      cmList list = GetList(parameters[1]);
+      if (list.empty()) {
+        return std::string{};
+      }
+      cmGeneratorExpressionEvaluatorVector const& bodyExpr =
+        content->GetParamChildren()[3];
+      std::vector<std::string> const selectorTokens(parameters.begin() + 4,
+                                                    parameters.end());
+      std::unique_ptr<cmList::TransformSelector> selector =
+        ParseTransformSelector(selectorTokens, eval, content);
+      if (!selector) {
+        return std::string();
+      }
+      // selector->Makefile is left unset: the REGEX/AT/FOR selectors never
+      // consult it, and the only one that does (list()'s PREDICATE) cannot
+      // reach here.
+      std::vector<bool> selected;
+      try {
+        selected = list.GetTransformSelection(*selector);
+      } catch (cmList::transform_error& e) {
+        reportError(eval, content->GetOriginalExpression(), e.what());
+        return std::string();
+      }
+
+      std::vector<std::string> out;
+      out.reserve(list.size());
+      std::size_t i = 0;
+      for (auto const& element : list) {
+        if (i < selected.size() && selected[i]) {
+          out.push_back(
+            EvaluateBodyWithBoundOperand(bodyExpr, element, eval, dagChecker));
+          if (eval->HadError) {
+            return std::string();
+          }
+        } else {
+          out.push_back(element);
+        }
+        ++i;
+      }
+      // Join per-element results with ';'; keep empty elements so a body that
+      // yields "" is not dropped.
+      return cmList{ out.begin(), out.end(), cmList::ExpandElements::No,
+                     cmList::EmptyElements::Yes }
+        .to_string();
+    }
+
     static std::unordered_map<
       cm::string_view,
       std::function<std::string(cm::GenEx::Evaluation*,
