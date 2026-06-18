@@ -40,7 +40,7 @@ ${call_list}
 add_executable(exe "${CMAKE_BINARY_DIR}/main.c")
 target_link_libraries(exe PRIVATE ${dep_list})
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
   set_property(TARGET exe PROPERTY INSTALL_RPATH "\${ORIGIN}/../lib")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set_property(TARGET exe PROPERTY INSTALL_RPATH "@loader_path/../lib")

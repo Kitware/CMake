@@ -60,7 +60,7 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   run_cmake(project)
   run_cmake(badargs1)
   run_cmake(badargs2)
-elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_HOST_SYSTEM_NAME STREQUAL "FreeBSD")
   if(DEFINED ENV{LDFLAGS})
     # Some setups prebake disable-new-dtags into LDFLAGS
     string(REPLACE "-Wl,--disable-new-dtags" "" new_ldflags "$ENV{LDFLAGS}")

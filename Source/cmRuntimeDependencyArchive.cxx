@@ -153,9 +153,11 @@ bool cmRuntimeDependencyArchive::Prepare()
       platform = "macos+macho";
     } else if (systemName == "Linux") {
       platform = "linux+elf";
+    } else if (systemName == "FreeBSD") {
+      platform = "freebsd+elf";
     }
   }
-  if (platform == "linux+elf") {
+  if (platform == "linux+elf" || platform == "freebsd+elf") {
     this->Linker = cm::make_unique<cmBinUtilsLinuxELFLinker>(this);
   } else if (platform == "windows+pe") {
     this->Linker = cm::make_unique<cmBinUtilsWindowsPELinker>(this);
@@ -403,7 +405,11 @@ cmRuntimeDependencyArchive::GetRPaths() const
 bool cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
   std::string const& platform)
 {
-  static std::set<std::string> const supportedPlatforms = { "Windows", "Linux",
-                                                            "Darwin" };
+  static std::set<std::string> const supportedPlatforms = {
+    "Windows",
+    "Linux",
+    "Darwin",
+    "FreeBSD",
+  };
   return supportedPlatforms.count(platform);
 }

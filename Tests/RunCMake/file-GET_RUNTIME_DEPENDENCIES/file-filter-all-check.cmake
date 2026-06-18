@@ -1,4 +1,4 @@
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_HOST_SYSTEM_NAME STREQUAL "FreeBSD")
   set(_check
     [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/file-filter-build/root-all/bin/\.\./lib/libdep1\.so]]
     [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/file-filter-build/root-all/bin/\.\./lib/libdep2\.so]]

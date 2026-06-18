@@ -1487,7 +1487,13 @@ Handling Runtime Binaries
     for. This could be one of several values:
 
     * ``linux+elf``
+
+    * ``freebsd+elf``
+
+      .. versionadded:: 4.5
+
     * ``windows+pe``
+
     * ``macos+macho``
 
     If this variable is not specified, it is determined automatically by system
@@ -1502,7 +1508,7 @@ Handling Runtime Binaries
     ================================================= =============================================
        ``CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM``       ``CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL``
     ================================================= =============================================
-    ``linux+elf``                                     ``objdump``
+    ``linux+elf``, ``freebsd+elf``                    ``objdump``
     ``windows+pe``                                    ``objdump`` or ``dumpbin``
     ``macos+macho``                                   ``otool``
     ================================================= =============================================
