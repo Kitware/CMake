@@ -14,6 +14,7 @@ set(CMakeLib_TESTS
   testDocumentationFormatter.cxx
   testGccDepfileReader.cxx
   testGeneratedFileStream.cxx
+  testGenExBoundOperand.cxx
   testJSONHelpers.cxx
   testRST.cxx
   testRange.cxx

@@ -57,6 +57,7 @@ run_cmake(FILTER-InvalidOperator)
 run_cmake(FILTER-Exclude)
 run_cmake(FILTER-Include)
 run_cmake(LIST-edgecases)
+run_cmake(BoundOperandOutsideBinding)
 
 function(run_cmake_build test)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)

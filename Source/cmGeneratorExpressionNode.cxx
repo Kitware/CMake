@@ -141,6 +141,27 @@ static const struct OneNode : public cmGeneratorExpressionNode
   }
 } oneNode;
 
+static const struct BoundOperandNode : public cmGeneratorExpressionNode
+{
+  BoundOperandNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 0; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& /*parameters*/,
+    cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    if (!eval->Context.HasBoundOperand()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<_0> may only be used inside the body of a binding "
+                  "operation.");
+      return std::string();
+    }
+    return eval->Context.GetBoundOperand();
+  }
+} boundOperandNode;
+
 static const struct OneNode buildInterfaceNode;
 
 static const struct ZeroNode installInterfaceNode;
@@ -5932,6 +5953,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "PATH_EQUAL", &pathEqualNode },
     { "MAKE_C_IDENTIFIER", &makeCIdentifierNode },
     { "BOOL", &boolNode },
+    { "_0", &boundOperandNode },
     { "IF", &ifNode },
     { "ANGLE-R", &angle_rNode },
     { "COMMA", &commaNode },

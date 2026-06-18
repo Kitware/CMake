@@ -1048,6 +1048,22 @@ List Ordering
 
     $<LIST:SORT,list,CASE:SENSITIVE,COMPARE:STRING,ORDER:DESCENDING>
 
+.. _GenEx Bound Operands:
+
+Bound Operands
+^^^^^^^^^^^^^^
+
+.. genex:: $<_0>
+
+  .. versionadded:: 4.5
+
+  ``$<_0>`` is the *bound operand* of the enclosing *binding operation*: a
+  generator expression that evaluates a ``<body>`` once for each value it
+  supplies, with ``$<_0>`` expanding to that value.
+
+  ``$<_0>`` is only valid inside the body of a binding operation.  Using it
+  anywhere else is an error.
+
 Path Expressions
 ----------------
 
