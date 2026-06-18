@@ -6,17 +6,13 @@
 //-V::508
 # The 'x' variable is assigned values twice successively. Perhaps this is a mistake.
 //-V::519
-# Possible null pointer dereference.
-//-V::522
 # Constant value is represented by an octal form.
 //-V::536
 # Iterators are passed as arguments to 'Foo' function. Consider inspecting the expression.
 //-V::539
 # Expression is always true/false.
 //-V::547
-# Expression of the 'A - B > 0' kind will work as 'A != B'.
-//-V::555
-# Possible array overrun.
+# Array underrun/overrun is possible.
 //-V::557
 # Part of conditional expression is always true/false.
 //-V::560
@@ -90,8 +86,6 @@
 //-V::1071
 # Conditional initialization inside the constructor may leave some members uninitialized.
 //-V::1077
-# Call of the 'Foo' function will lead to buffer underflow.
-//-V::1086
 # Waiting on condition variable without predicate. A thread can wait indefinitely or experience a spurious wake-up.
 //-V::1089
 # The 'emplace' / 'insert' function call contains potentially dangerous move operation. Moved object can be destroyed even if there is no insertion.

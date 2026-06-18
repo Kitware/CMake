@@ -81,14 +81,16 @@ bool cmTargetPropCommandBase::HandleArguments(
   }
 
   bool prepend = false;
-  if ((flags & PROCESS_BEFORE) && args[argIndex] == "BEFORE") {
+  if ((flags & PROCESS_BEFORE) && argIndex < args.size() &&
+      args[argIndex] == "BEFORE") {
     if (args.size() < 3) {
       this->SetError("called with incorrect number of arguments");
       return false;
     }
     prepend = true;
     ++argIndex;
-  } else if ((flags & PROCESS_AFTER) && args[argIndex] == "AFTER") {
+  } else if ((flags & PROCESS_AFTER) && argIndex < args.size() &&
+             args[argIndex] == "AFTER") {
     if (args.size() < 3) {
       this->SetError("called with incorrect number of arguments");
       return false;
@@ -97,7 +99,8 @@ bool cmTargetPropCommandBase::HandleArguments(
     ++argIndex;
   }
 
-  if ((flags & PROCESS_REUSE_FROM) && args[argIndex] == "REUSE_FROM") {
+  if ((flags & PROCESS_REUSE_FROM) && argIndex < args.size() &&
+      args[argIndex] == "REUSE_FROM") {
     if (args.size() != 3) {
       this->SetError("called with incorrect number of arguments");
       return false;

@@ -246,7 +246,8 @@ static bool testUVStreambufRead(
               << std::endl;
     goto end;
   }
-  if (std::memcmp(inputData.data(), outputData, 64)) {
+  if (std::memcmp(inputData.data(), outputData, //-V1086 Ignore underflow
+                  64)) {
     std::cout << "Read data does not match write data" << std::endl;
     goto end;
   }

@@ -93,7 +93,7 @@ void cmStringReplaceHelper::ParseReplaceExpression()
       this->Replacements.emplace_back(
         this->ReplaceExpression.substr(l, r - l));
     } else {
-      if (r - l > 0) {
+      if (r > l) {
         this->Replacements.emplace_back(
           this->ReplaceExpression.substr(l, r - l));
       }

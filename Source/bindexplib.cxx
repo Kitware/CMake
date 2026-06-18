@@ -391,7 +391,7 @@ static bool DumpFileWithLlvmNm(std::string const& nmPath, char const* filename,
               line.c_str());
       return false;
     }
-    if (line.size() < sym_end + 1) {
+    if (line.size() < sym_end) {
       fprintf(stderr, "Couldn't parse llvm-nm output line: %s\n",
               line.c_str());
       return false;
