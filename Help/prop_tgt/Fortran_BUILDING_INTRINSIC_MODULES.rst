@@ -14,3 +14,7 @@ Turning this property on will correctly add dependencies for building
 Fortran intrinsic modules whereas turning the property off will ignore
 Fortran intrinsic modules in the dependency graph as they are supplied
 by the compiler itself.
+
+.. versionadded:: 4.5
+  This property is now honored by the :ref:`Ninja Generators`.
+  Previously it was only honored by the :ref:`Makefile Generators`.
