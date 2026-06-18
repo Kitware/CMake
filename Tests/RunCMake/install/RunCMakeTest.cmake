@@ -68,183 +68,191 @@ function(run_cmake_EDIT_RPATH_only case)
   endif()
 endfunction()
 
-run_cmake(TARGETS-FILE_RPATH_CHANGE-old_rpath)
-run_cmake_EDIT_RPATH_only(TARGETS-FILE_RPATH_CHANGE-new_rpath)
-run_cmake(DIRECTORY-MESSAGE_NEVER)
-run_cmake(DIRECTORY-PATTERN-MESSAGE_NEVER)
-run_cmake(DIRECTORY-message)
-run_cmake(DIRECTORY-message-lazy)
-run_cmake(SkipInstallRulesWarning)
-run_cmake(SkipInstallRulesNoWarning1)
-run_cmake(SkipInstallRulesNoWarning2)
-run_cmake(DIRECTORY-DIRECTORY-bad)
-run_cmake(DIRECTORY-DESTINATION-bad)
-run_cmake(FILES-DESTINATION-bad)
-run_cmake(FILES-RENAME-bad)
-run_cmake(TARGETS-DESTINATION-bad)
-run_cmake_with_options(DIRECTORY-AbsoluteDest-error -Werror=install-absolute-destination)
-run_cmake_with_options(FILES-AbsoluteDest-error -Werror=install-absolute-destination)
-run_cmake_with_options(FILES-AbsoluteDest-warn -Winstall-absolute-destination)
-run_cmake_with_options(TARGETS-AbsoluteDest-error -Werror=install-absolute-destination)
-run_cmake_with_options(TARGETS-AbsoluteDest-warn -Winstall-absolute-destination)
-run_cmake(TARGETS-AbsoluteDest-archive-error)
-run_cmake(TARGETS-AbsoluteDest-library-error)
-run_cmake(TARGETS-AbsoluteDest-runtime-error)
-run_cmake_with_options(EXPORT-AbsoluteDest-warn -Winstall-absolute-destination)
-run_cmake_with_options(EXPORT_ANDROID_MK-AbsoluteDest-warn -Winstall-absolute-destination)
-run_cmake_with_options(PACKAGE_INFO-AbsoluteDest-error -Werror=install-absolute-destination)
-run_cmake_with_options(SBOM-AbsoluteDest-warn
-  -Winstall-absolute-destination
-  -DCMAKE_EXPERIMENTAL_GENERATE_SBOM=248471c2-d905-4c9e-81b5-b89cd27965e1)
-run_cmake_with_options(IMPORTED_RUNTIME_ARTIFACTS-AbsoluteDest-warn -Winstall-absolute-destination)
-if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$")
-  run_cmake_with_options(RUNTIME_DEPENDENCY_SET-AbsoluteDest-warn -Winstall-absolute-destination)
-endif()
-run_cmake(EXPORT-Component)
-run_cmake(EXPORT-FindDependencyExportGate)
-run_cmake(EXPORT-OldIFace)
-run_cmake(EXPORT-UnknownExport)
-run_cmake(EXPORT-NamelinkOnly)
-run_cmake(EXPORT-SeparateNamelink)
-run_cmake(EXPORT-SystemInclude)
-run_cmake(EXPORT-TargetTwice)
-run_cmake(EXPORT-InterfaceLinkNoexist)
-run_cmake(CMP0062-NEW)
-run_cmake(CMP0087-OLD)
-run_cmake(CMP0087-NEW)
-run_cmake(CMP0087-WARN)
-foreach(policy IN ITEMS NEW OLD WARN)
-  run_install_test(CMP0177-${policy})
-  run_cmake_with_options(CMP0177-${policy}-verify
-    -DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/CMP0177-${policy}-build/root-all
-    )
-endforeach()
-run_cmake(TARGETS-ImportedGlobal)
-run_cmake(TARGETS-NAMELINK_COMPONENT-bad-all)
-run_cmake(TARGETS-NAMELINK_COMPONENT-bad-exc)
-run_cmake(FILES-DESTINATION-TYPE)
-run_cmake(DIRECTORY-DESTINATION-TYPE)
-run_cmake(FILES-directory)
-if(NOT WIN32)
-  run_cmake(FILES-symlink-to-directory)
-endif()
+if (CMake_TEST_install_VARIANT STREQUAL "Files")
+  run_cmake(DIRECTORY-MESSAGE_NEVER)
+  run_cmake(DIRECTORY-PATTERN-MESSAGE_NEVER)
+  run_cmake(DIRECTORY-message)
+  run_cmake(DIRECTORY-message-lazy)
+  run_cmake(SkipInstallRulesWarning)
+  run_cmake(SkipInstallRulesNoWarning1)
+  run_cmake(SkipInstallRulesNoWarning2)
+  run_cmake(DIRECTORY-DIRECTORY-bad)
+  run_cmake(DIRECTORY-DESTINATION-bad)
+  run_cmake(FILES-DESTINATION-bad)
+  run_cmake(FILES-RENAME-bad)
+  run_cmake_with_options(DIRECTORY-AbsoluteDest-error -Werror=install-absolute-destination)
+  run_cmake_with_options(FILES-AbsoluteDest-error -Werror=install-absolute-destination)
+  run_cmake_with_options(FILES-AbsoluteDest-warn -Winstall-absolute-destination)
+  run_cmake(CMP0087-OLD)
+  run_cmake(CMP0087-NEW)
+  run_cmake(CMP0087-WARN)
+  foreach(policy IN ITEMS NEW OLD WARN)
+    run_install_test(CMP0177-${policy})
+    run_cmake_with_options(CMP0177-${policy}-verify
+      -DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/CMP0177-${policy}-build/root-all
+      )
+  endforeach()
+  run_cmake(FILES-DESTINATION-TYPE)
+  run_cmake(DIRECTORY-DESTINATION-TYPE)
+  run_cmake(FILES-directory)
+  if(NOT WIN32)
+    run_cmake(FILES-symlink-to-directory)
+  endif()
 
-set(RunCMake_TEST_OPTIONS "-DCMAKE_BUILD_TYPE:STRING=Debug")
-run_install_test(FILES-RENAME)
-unset(RunCMake_TEST_OPTIONS)
-
-if(APPLE)
-  run_cmake(TARGETS-Apple-Defaults)
-endif()
-
-if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]")
-  run_install_test(FILES-TARGET_OBJECTS)
-endif()
-
-if(CMake_TEST_ISPC)
-  run_install_test(FILES-EXTRA_ISPC_TARGET_OBJECTS)
-endif()
-
-run_install_test(FILES-DESTINATION-dot)
-
-run_install_test(TARGETS-InstallFromSubDir)
-run_install_test(TARGETS-OPTIONAL)
-run_install_test(FILES-OPTIONAL)
-run_install_test(DIRECTORY-OPTIONAL)
-run_install_test(TARGETS-Defaults)
-run_install_test(TARGETS-SymbolicComponent)
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  run_install_test(TARGETS-NAMELINK-No-Tweak)
-endif()
-
-set(RunCMake_TEST_OPTIONS
-  "-DCMAKE_INSTALL_BINDIR:PATH=mybin"
-  "-DCMAKE_INSTALL_LIBDIR:PATH=mylib"
-  "-DCMAKE_INSTALL_INCLUDEDIR:PATH=myinclude"
-  )
-run_install_test(TARGETS-Defaults-Cache)
-unset(RunCMake_TEST_OPTIONS)
-
-run_install_test(FILES-TYPE)
-run_install_test(DIRECTORY-TYPE)
-
-set(RunCMake_TEST_OPTIONS
-  "-DCMAKE_INSTALL_BINDIR:PATH=mybin"
-  "-DCMAKE_INSTALL_SBINDIR:PATH=mysbin"
-  "-DCMAKE_INSTALL_LIBEXECDIR:PATH=mylibexec"
-  "-DCMAKE_INSTALL_LIBDIR:PATH=mylib"
-  "-DCMAKE_INSTALL_INCLUDEDIR:PATH=myinclude"
-  "-DCMAKE_INSTALL_SYSCONFDIR:PATH=myetc"
-  "-DCMAKE_INSTALL_SHAREDSTATEDIR:PATH=mycom"
-  "-DCMAKE_INSTALL_LOCALSTATEDIR:PATH=myvar"
-  "-DCMAKE_INSTALL_RUNSTATEDIR:PATH=myrun"
-  "-DCMAKE_INSTALL_DATADIR:PATH=myshare"
-  "-DCMAKE_INSTALL_INFODIR:PATH=myinfo"
-  "-DCMAKE_INSTALL_LOCALEDIR:PATH=mylocale"
-  "-DCMAKE_INSTALL_MANDIR:PATH=myman"
-  "-DCMAKE_INSTALL_DOCDIR:PATH=mydoc"
-  )
-run_install_test(FILES-TYPE-Cache)
-run_install_test(DIRECTORY-TYPE-Cache)
-unset(RunCMake_TEST_OPTIONS)
-
-set(RunCMake_TEST_OPTIONS
-  "-DCMAKE_INSTALL_LOCALSTATEDIR:PATH=myvar"
-  "-DCMAKE_INSTALL_DATAROOTDIR:PATH=myshare"
-  )
-run_install_test(FILES-TYPE-CacheDependent)
-run_install_test(DIRECTORY-TYPE-CacheDependent)
-unset(RunCMake_TEST_OPTIONS)
-
-set(RunCMake_TEST_OPTIONS "-DCMAKE_BUILD_TYPE:STRING=Debug")
-run_install_test(TARGETS-OUTPUT_NAME)
-unset(RunCMake_TEST_OPTIONS)
-
-run_install_test(Deprecated)
-run_install_test(PRE_POST_INSTALL_SCRIPT)
-run_install_test(TARGETS-CONFIGURATIONS)
-run_install_test(DIRECTORY-PATTERN)
-run_install_test(TARGETS-Parts)
-run_install_test(FILES-PERMISSIONS)
-run_install_test(TARGETS-RPATH)
-run_install_test(InstallRequiredSystemLibraries)
-run_install_test(EXPORT-FindDependencyExport)
-run_install_test(EXPORT-Unwind)
-
-set(RunCMake_TEST_OPTIONS "-DCMAKE_POLICY_DEFAULT_CMP0087:STRING=NEW")
-run_install_test(SCRIPT)
-unset(RunCMake_TEST_OPTIONS)
-
-if(UNIX)
-  run_install_test(DIRECTORY-symlink-clobber)
-endif()
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  run_cmake(TARGETS-RUNTIME_DEPENDENCIES-macos-two-bundle)
-  run_cmake(TARGETS-RUNTIME_DEPENDENCIES-macos-no-framework)
-endif()
-
-if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$")
-  run_install_test(TARGETS-RUNTIME_DEPENDENCIES-nodep)
-  run_install_test(TARGETS-RUNTIME_DEPENDENCIES-empty)
-  set(RunCMake_TEST_OPTIONS "-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}")
-  run_cmake(TARGETS-RUNTIME_DEPENDENCIES-cross)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_BUILD_TYPE:STRING=Debug")
+  run_install_test(FILES-RENAME)
   unset(RunCMake_TEST_OPTIONS)
-  run_cmake(TARGETS-RUNTIME_DEPENDENCY_SET-RUNTIME_DEPENDENCIES-conflict)
-  run_cmake(RuntimeDependencies-COMPONENTS)
-  run_cmake(RuntimeDependencies-Default-COMPONENT-Name)
-  run_cmake(RuntimeDependencies-ProjectName-Placeholder-COMPONENT-Name)
-else()
-  run_cmake(TARGETS-RUNTIME_DEPENDENCIES-unsupported)
-  run_cmake(TARGETS-RUNTIME_DEPENDENCY_SET-unsupported)
-  run_cmake(IMPORTED_RUNTIME_ARTIFACTS-RUNTIME_DEPENDENCY_SET-unsupported)
-  run_cmake(RUNTIME_DEPENDENCY_SET-unsupported)
-endif()
 
-set(run_install_test_components 1)
-run_install_test(FILES-EXCLUDE_FROM_ALL)
-run_install_test(TARGETS-EXCLUDE_FROM_ALL)
-run_install_test(TARGETS-NAMELINK_COMPONENT)
-run_install_test(SCRIPT-COMPONENT)
-run_install_test(SCRIPT-ALL_COMPONENTS)
+  if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]")
+    run_install_test(FILES-TARGET_OBJECTS)
+  endif()
+
+  if(CMake_TEST_ISPC)
+    run_install_test(FILES-EXTRA_ISPC_TARGET_OBJECTS)
+  endif()
+
+  run_install_test(FILES-DESTINATION-dot)
+
+  run_install_test(FILES-OPTIONAL)
+  run_install_test(DIRECTORY-OPTIONAL)
+
+  run_install_test(FILES-TYPE)
+  run_install_test(DIRECTORY-TYPE)
+
+  set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_INSTALL_BINDIR:PATH=mybin"
+    "-DCMAKE_INSTALL_SBINDIR:PATH=mysbin"
+    "-DCMAKE_INSTALL_LIBEXECDIR:PATH=mylibexec"
+    "-DCMAKE_INSTALL_LIBDIR:PATH=mylib"
+    "-DCMAKE_INSTALL_INCLUDEDIR:PATH=myinclude"
+    "-DCMAKE_INSTALL_SYSCONFDIR:PATH=myetc"
+    "-DCMAKE_INSTALL_SHAREDSTATEDIR:PATH=mycom"
+    "-DCMAKE_INSTALL_LOCALSTATEDIR:PATH=myvar"
+    "-DCMAKE_INSTALL_RUNSTATEDIR:PATH=myrun"
+    "-DCMAKE_INSTALL_DATADIR:PATH=myshare"
+    "-DCMAKE_INSTALL_INFODIR:PATH=myinfo"
+    "-DCMAKE_INSTALL_LOCALEDIR:PATH=mylocale"
+    "-DCMAKE_INSTALL_MANDIR:PATH=myman"
+    "-DCMAKE_INSTALL_DOCDIR:PATH=mydoc"
+    )
+  run_install_test(FILES-TYPE-Cache)
+  run_install_test(DIRECTORY-TYPE-Cache)
+  unset(RunCMake_TEST_OPTIONS)
+
+  set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_INSTALL_LOCALSTATEDIR:PATH=myvar"
+    "-DCMAKE_INSTALL_DATAROOTDIR:PATH=myshare"
+    )
+  run_install_test(FILES-TYPE-CacheDependent)
+  run_install_test(DIRECTORY-TYPE-CacheDependent)
+  unset(RunCMake_TEST_OPTIONS)
+
+  run_install_test(Deprecated)
+  run_install_test(PRE_POST_INSTALL_SCRIPT)
+  run_install_test(DIRECTORY-PATTERN)
+  run_install_test(FILES-PERMISSIONS)
+
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_POLICY_DEFAULT_CMP0087:STRING=NEW")
+  run_install_test(SCRIPT)
+  unset(RunCMake_TEST_OPTIONS)
+
+  if(UNIX)
+    run_install_test(DIRECTORY-symlink-clobber)
+  endif()
+
+  set(run_install_test_components 1)
+  run_install_test(FILES-EXCLUDE_FROM_ALL)
+  run_install_test(SCRIPT-COMPONENT)
+  run_install_test(SCRIPT-ALL_COMPONENTS)
+elseif (CMake_TEST_install_VARIANT STREQUAL "Targets")
+  run_cmake(TARGETS-FILE_RPATH_CHANGE-old_rpath)
+  run_cmake_EDIT_RPATH_only(TARGETS-FILE_RPATH_CHANGE-new_rpath)
+  run_cmake(TARGETS-DESTINATION-bad)
+  run_cmake_with_options(TARGETS-AbsoluteDest-error -Werror=install-absolute-destination)
+  run_cmake_with_options(TARGETS-AbsoluteDest-warn -Winstall-absolute-destination)
+  run_cmake(TARGETS-AbsoluteDest-archive-error)
+  run_cmake(TARGETS-AbsoluteDest-library-error)
+  run_cmake(TARGETS-AbsoluteDest-runtime-error)
+  run_cmake_with_options(IMPORTED_RUNTIME_ARTIFACTS-AbsoluteDest-warn -Winstall-absolute-destination)
+  if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$")
+    run_cmake_with_options(RUNTIME_DEPENDENCY_SET-AbsoluteDest-warn -Winstall-absolute-destination)
+  endif()
+  run_cmake(TARGETS-ImportedGlobal)
+  run_cmake(TARGETS-NAMELINK_COMPONENT-bad-all)
+  run_cmake(TARGETS-NAMELINK_COMPONENT-bad-exc)
+
+  if(APPLE)
+    run_cmake(TARGETS-Apple-Defaults)
+  endif()
+
+  run_install_test(TARGETS-InstallFromSubDir)
+  run_install_test(TARGETS-OPTIONAL)
+  run_install_test(TARGETS-Defaults)
+  run_install_test(TARGETS-SymbolicComponent)
+
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    run_install_test(TARGETS-NAMELINK-No-Tweak)
+  endif()
+
+  set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_INSTALL_BINDIR:PATH=mybin"
+    "-DCMAKE_INSTALL_LIBDIR:PATH=mylib"
+    "-DCMAKE_INSTALL_INCLUDEDIR:PATH=myinclude"
+    )
+  run_install_test(TARGETS-Defaults-Cache)
+  unset(RunCMake_TEST_OPTIONS)
+
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_BUILD_TYPE:STRING=Debug")
+  run_install_test(TARGETS-OUTPUT_NAME)
+  unset(RunCMake_TEST_OPTIONS)
+
+  run_install_test(TARGETS-CONFIGURATIONS)
+  run_install_test(TARGETS-Parts)
+  run_install_test(TARGETS-RPATH)
+  run_install_test(InstallRequiredSystemLibraries)
+
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    run_cmake(TARGETS-RUNTIME_DEPENDENCIES-macos-two-bundle)
+    run_cmake(TARGETS-RUNTIME_DEPENDENCIES-macos-no-framework)
+  endif()
+
+  if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$")
+    run_install_test(TARGETS-RUNTIME_DEPENDENCIES-nodep)
+    run_install_test(TARGETS-RUNTIME_DEPENDENCIES-empty)
+    set(RunCMake_TEST_OPTIONS "-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}")
+    run_cmake(TARGETS-RUNTIME_DEPENDENCIES-cross)
+    unset(RunCMake_TEST_OPTIONS)
+    run_cmake(TARGETS-RDS-RUNTIME_DEPENDENCIES-conflict)
+    run_cmake(RuntimeDeps-COMPONENTS)
+    run_cmake(RuntimeDeps-Default-COMPONENT-Name)
+    run_cmake(RuntimeDeps-ProjectName-Placeholder-COMPONENT-Name)
+  else()
+    run_cmake(TARGETS-RUNTIME_DEPENDENCIES-unsupported)
+    run_cmake(TARGETS-RUNTIME_DEPENDENCY_SET-unsupported)
+    run_cmake(IMPORTED_RUNTIME_ARTIFACTS-RUNTIME_DEPENDENCY_SET-unsupported)
+    run_cmake(RUNTIME_DEPENDENCY_SET-unsupported)
+  endif()
+
+  set(run_install_test_components 1)
+  run_install_test(TARGETS-EXCLUDE_FROM_ALL)
+  run_install_test(TARGETS-NAMELINK_COMPONENT)
+elseif (CMake_TEST_install_VARIANT STREQUAL "Exports")
+  run_cmake_with_options(EXPORT-AbsoluteDest-warn -Winstall-absolute-destination)
+  run_cmake_with_options(EXPORT_ANDROID_MK-AbsoluteDest-warn -Winstall-absolute-destination)
+  run_cmake_with_options(PACKAGE_INFO-AbsoluteDest-error -Werror=install-absolute-destination)
+  run_cmake_with_options(SBOM-AbsoluteDest-warn
+    -Winstall-absolute-destination
+    -DCMAKE_EXPERIMENTAL_GENERATE_SBOM=248471c2-d905-4c9e-81b5-b89cd27965e1)
+  run_cmake(CMP0062-NEW)
+  run_cmake(EXPORT-Component)
+  run_cmake(EXPORT-FindDependencyExportGate)
+  run_cmake(EXPORT-OldIFace)
+  run_cmake(EXPORT-UnknownExport)
+  run_cmake(EXPORT-NamelinkOnly)
+  run_cmake(EXPORT-SeparateNamelink)
+  run_cmake(EXPORT-SystemInclude)
+  run_cmake(EXPORT-TargetTwice)
+  run_cmake(EXPORT-InterfaceLinkNoexist)
+  run_install_test(EXPORT-FindDependencyExport)
+  run_install_test(EXPORT-Unwind)
+endif ()
