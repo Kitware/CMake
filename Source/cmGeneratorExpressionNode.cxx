@@ -1858,6 +1858,122 @@ inline cmList GetList(std::string const& list)
 {
   return list.empty() ? cmList{} : cmList{ list, cmList::EmptyElements::Yes };
 }
+
+// Parse the optional trailing selector of a $<LIST:TRANSFORM,...> action
+// (AT <i>... / FOR <start> <stop> [<step>] / REGEX <re>) into a
+// cmList::TransformSelector.  Returns nullptr (after reporting via `eval`) on
+// a malformed selector; empty `tokens` yields a select-all selector.
+std::unique_ptr<cmList::TransformSelector> ParseTransformSelector(
+  std::vector<std::string> const& tokens, cm::GenEx::Evaluation* eval,
+  GeneratorExpressionContent const* content)
+{
+  static std::string const REGEX{ "REGEX" };
+  static std::string const AT{ "AT" };
+  static std::string const FOR{ "FOR" };
+
+  std::unique_ptr<cmList::TransformSelector> selector;
+
+  std::size_t i = 0;
+  while (i < tokens.size()) {
+    std::string const& tok = tokens[i];
+
+    if ((tok == REGEX || tok == AT || tok == FOR) && selector) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("sub-command TRANSFORM, selector already specified (",
+                 selector->GetTag(), ")."));
+      return nullptr;
+    }
+
+    if (tok == REGEX) {
+      if (i + 1 >= tokens.size()) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "sub-command TRANSFORM, selector REGEX expects "
+                    "'regular expression' argument.");
+        return nullptr;
+      }
+      selector =
+        cmList::TransformSelector::New<cmList::TransformSelector::REGEX>(
+          tokens[i + 1]);
+      i += 2;
+      continue;
+    }
+
+    if (tok == AT) {
+      ++i;
+      std::vector<cmList::index_type> indexes;
+      for (; i < tokens.size(); ++i) {
+        cmList indexList{ tokens[i] };
+        for (auto const& index : indexList) {
+          cmList::index_type value;
+          if (!GetNumericArgument(index, value)) {
+            reportError(eval, content->GetOriginalExpression(),
+                        cmStrCat("sub-command TRANSFORM, selector AT: '",
+                                 index, "': unexpected argument."));
+            return nullptr;
+          }
+          indexes.push_back(value);
+        }
+      }
+      if (indexes.empty()) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "sub-command TRANSFORM, selector AT expects at least one "
+                    "numeric value.");
+        return nullptr;
+      }
+      selector = cmList::TransformSelector::New<cmList::TransformSelector::AT>(
+        std::move(indexes));
+      continue;
+    }
+
+    if (tok == FOR) {
+      if (i + 2 >= tokens.size()) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "sub-command TRANSFORM, selector FOR expects, at least, "
+                    "two arguments.");
+        return nullptr;
+      }
+      cmList::index_type start = 0;
+      cmList::index_type stop = 0;
+      cmList::index_type step = 1;
+      if (!GetNumericArgument(tokens[i + 1], start) ||
+          !GetNumericArgument(tokens[i + 2], stop)) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "sub-command TRANSFORM, selector FOR expects, at least, "
+                    "two numeric values.");
+        return nullptr;
+      }
+      i += 3;
+      if (i < tokens.size()) {
+        if (!GetNumericArgument(tokens[i], step)) {
+          step = -1;
+        }
+        ++i;
+      }
+      if (step <= 0) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "sub-command TRANSFORM, selector FOR expects positive "
+                    "numeric value for <step>.");
+        return nullptr;
+      }
+      selector =
+        cmList::TransformSelector::New<cmList::TransformSelector::FOR>(
+          { start, stop, step });
+      continue;
+    }
+
+    std::vector<std::string> const rest(tokens.begin() + i, tokens.end());
+    reportError(eval, content->GetOriginalExpression(),
+                cmStrCat("sub-command TRANSFORM, '", cmJoin(rest, ", "),
+                         "': unexpected argument(s)."));
+    return nullptr;
+  }
+
+  if (!selector) {
+    selector = cmList::TransformSelector::New();
+  }
+  return selector;
+}
 }
 
 static const struct ListNode : public cmGeneratorExpressionNode
@@ -2177,137 +2293,14 @@ static const struct ListNode : public cmGeneratorExpressionNode
                   args.advance(descriptor->Arity);
                 }
 
-                std::string const REGEX{ "REGEX" };
-                std::string const AT{ "AT" };
-                std::string const FOR{ "FOR" };
                 std::unique_ptr<cmList::TransformSelector> selector;
 
                 try {
-                  // handle optional arguments
-                  while (!args.empty()) {
-                    if ((args.front() == REGEX || args.front() == AT ||
-                         args.front() == FOR) &&
-                        selector) {
-                      reportError(ev, cnt->GetOriginalExpression(),
-                                  cmStrCat("sub-command TRANSFORM, selector "
-                                           "already specified (",
-                                           selector->GetTag(), ")."));
-
-                      return std::string{};
-                    }
-
-                    // REGEX selector
-                    if (args.front() == REGEX) {
-                      if (args.advance(1).empty()) {
-                        reportError(
-                          ev, cnt->GetOriginalExpression(),
-                          "sub-command TRANSFORM, selector REGEX expects "
-                          "'regular expression' argument.");
-                        return std::string{};
-                      }
-
-                      selector = cmList::TransformSelector::New<
-                        cmList::TransformSelector::REGEX>(args.front());
-
-                      args.advance(1);
-                      continue;
-                    }
-
-                    // AT selector
-                    if (args.front() == AT) {
-                      args.advance(1);
-                      // get all specified indexes
-                      std::vector<cmList::index_type> indexes;
-                      while (!args.empty()) {
-                        cmList indexList{ args.front() };
-                        for (auto const& index : indexList) {
-                          cmList::index_type value;
-
-                          if (!GetNumericArgument(index, value)) {
-                            // this is not a number, stop processing
-                            reportError(
-                              ev, cnt->GetOriginalExpression(),
-                              cmStrCat("sub-command TRANSFORM, selector AT: '",
-                                       index, "': unexpected argument."));
-                            return std::string{};
-                          }
-                          indexes.push_back(value);
-                        }
-                        args.advance(1);
-                      }
-
-                      if (indexes.empty()) {
-                        reportError(ev, cnt->GetOriginalExpression(),
-                                    "sub-command TRANSFORM, selector AT "
-                                    "expects at least one "
-                                    "numeric value.");
-                        return std::string{};
-                      }
-
-                      selector = cmList::TransformSelector::New<
-                        cmList::TransformSelector::AT>(std::move(indexes));
-
-                      continue;
-                    }
-
-                    // FOR selector
-                    if (args.front() == FOR) {
-                      if (args.advance(1).size() < 2) {
-                        reportError(ev, cnt->GetOriginalExpression(),
-                                    "sub-command TRANSFORM, selector FOR "
-                                    "expects, at least,"
-                                    " two arguments.");
-                        return std::string{};
-                      }
-
-                      cmList::index_type start = 0;
-                      cmList::index_type stop = 0;
-                      cmList::index_type step = 1;
-                      bool valid = false;
-
-                      if (GetNumericArgument(args.front(), start) &&
-                          GetNumericArgument(args.advance(1).front(), stop)) {
-                        valid = true;
-                      }
-
-                      if (!valid) {
-                        reportError(
-                          ev, cnt->GetOriginalExpression(),
-                          "sub-command TRANSFORM, selector FOR expects, "
-                          "at least, two numeric values.");
-                        return std::string{};
-                      }
-                      // try to read a third numeric value for step
-                      if (!args.advance(1).empty()) {
-                        if (!GetNumericArgument(args.front(), step)) {
-                          // this is not a number
-                          step = -1;
-                        }
-                        args.advance(1);
-                      }
-
-                      if (step <= 0) {
-                        reportError(
-                          ev, cnt->GetOriginalExpression(),
-                          "sub-command TRANSFORM, selector FOR expects "
-                          "positive numeric value for <step>.");
-                        return std::string{};
-                      }
-
-                      selector = cmList::TransformSelector::New<
-                        cmList::TransformSelector::FOR>({ start, stop, step });
-                      continue;
-                    }
-
-                    reportError(ev, cnt->GetOriginalExpression(),
-                                cmStrCat("sub-command TRANSFORM, '",
-                                         cmJoin(args, ", "),
-                                         "': unexpected argument(s)."));
-                    return std::string{};
-                  }
-
+                  std::vector<std::string> const tokens(args.begin(),
+                                                        args.end());
+                  selector = ParseTransformSelector(tokens, ev, cnt);
                   if (!selector) {
-                    selector = cmList::TransformSelector::New();
+                    return std::string{};
                   }
                   selector->Makefile = ev->Context.LG->GetMakefile();
 

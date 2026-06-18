@@ -975,6 +975,11 @@ public:
                     cmMakefile& makefile,
                     std::unique_ptr<TransformSelector> = {});
 
+  // Return, for each element of this list, whether `selector` selects it.
+  // Throws transform_error on a malformed selector (e.g. an out-of-range
+  // index), like transform().
+  std::vector<bool> GetTransformSelection(TransformSelector& selector) const;
+
   std::string join(cm::string_view glue) const
   {
     return cmList::Join(this->Values, glue);
