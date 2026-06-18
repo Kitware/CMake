@@ -407,7 +407,7 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
   _RUBY_CONFIG_VAR("sitelibdir" Ruby_SITELIB_DIR)
 
   # vendor_ruby - TODO - Not relevant and should be removed.
-  execute_process(COMMAND "${Ruby_EXECUTABLE}" -r vendor-specific -e "print 'true'"
+  execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print 'true' unless RbConfig::CONFIG['vendorarchdir'].nil?"
                   OUTPUT_VARIABLE Ruby_HAS_VENDOR_RUBY ERROR_QUIET)
 
   if (Ruby_HAS_VENDOR_RUBY)
