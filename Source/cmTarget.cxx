@@ -25,6 +25,7 @@
 #include "cmFileSetMetadata.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -595,6 +596,16 @@ TargetProperty const StaticTargetProperties[] = {
 #undef COMMON_LANGUAGE_PROPERTIES
 #undef IC
 #undef R
+
+cmValue copyProperty(cmTarget const* src, cmTarget* dst,
+                     std::string const& prop)
+{
+  cmValue value = src->GetProperty(prop);
+  // Always set the property; it may have been explicitly unset.
+  dst->SetProperty(prop, value);
+  return value;
+};
+
 }
 
 class cmTargetInternals
@@ -1739,12 +1750,16 @@ cmBTStringRange cmTarget::GetLinkInterfaceDirectExcludeEntries() const
   return cmMakeRange(this->impl->InterfaceLinkLibrariesDirectExclude.Entries);
 }
 
-void cmTarget::CopyUsageEffects(cmTarget const* tgt)
+void cmTarget::CopyUsageEffects(cmGeneratorTarget const* gt,
+                                std::string const& config)
 {
   // Normal targets cannot be the target of a copy.
   assert(!this->IsNormal());
   // Imported targets cannot be the target of a copy.
   assert(!this->IsImported());
+
+  auto const* tgt = gt->Target;
+
   // Only imported or normal targets can be the source of a copy.
   assert(tgt->IsImported() || tgt->IsNormal());
 
@@ -1758,10 +1773,17 @@ void cmTarget::CopyUsageEffects(cmTarget const* tgt)
       cmMakeRange(tgt->impl->ImportedCxxModulesCompileOptions.Entries));
   } else {
     this->impl->CompileFeatures.CopyFromEntries(
-      cmMakeRange(tgt->impl->CompileFeatures.Entries));
+      cmMakeRange(gt->GetCompileFeatures(config)));
     this->impl->CompileOptions.CopyFromEntries(
-      cmMakeRange(tgt->impl->CompileOptions.Entries));
+      cmMakeRange(gt->GetCompileOptions(config, "CXX")));
   }
+
+  cmValue langStd = gt->GetLanguageStandard("CXX", config);
+  if (langStd) {
+    this->SetProperty("CXX_STANDARD", *langStd);
+  }
+  copyProperty(tgt, this, "CXX_EXTENSIONS");
+  copyProperty(tgt, this, "CXX_STANDARD_REQUIRED");
 }
 
 void cmTarget::CopyPolicyStatuses(cmTarget const* tgt)
@@ -1857,9 +1879,6 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
     // -- Language
     // ---- C++
     "CXX_COMPILER_LAUNCHER",
-    "CXX_STANDARD",
-    "CXX_STANDARD_REQUIRED",
-    "CXX_EXTENSIONS",
     "CXX_VISIBILITY_PRESET",
     "CXX_MODULE_STD",
 
@@ -1896,15 +1915,8 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
     "SYSTEM",
   };
 
-  auto copyProperty = [this, tgt](std::string const& prop) -> cmValue {
-    cmValue value = tgt->GetProperty(prop);
-    // Always set the property; it may have been explicitly unset.
-    this->SetProperty(prop, value);
-    return value;
-  };
-
   for (auto const& prop : propertiesToCopy) {
-    copyProperty(prop);
+    copyProperty(tgt, this, prop);
   }
 
   static cm::static_string_view const perConfigPropertiesToCopy[] = {
@@ -1919,12 +1931,13 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
   for (std::string const& configName : configNames) {
     std::string configUpper = cmSystemTools::UpperCase(configName);
     for (auto const& perConfigProp : perConfigPropertiesToCopy) {
-      copyProperty(cmStrCat(perConfigProp, configUpper));
+      copyProperty(tgt, this, cmStrCat(perConfigProp, configUpper));
     }
   }
 
   if (this->GetGlobalGenerator()->IsXcode()) {
-    cmValue xcodeGenerateScheme = copyProperty("XCODE_GENERATE_SCHEME");
+    cmValue xcodeGenerateScheme =
+      copyProperty(tgt, this, "XCODE_GENERATE_SCHEME");
 
     // TODO: Make sure these show up on the imported target in the first place
     // XCODE_ATTRIBUTE_???
@@ -1954,7 +1967,7 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
       };
 
       for (auto const& xcodeProperty : xcodeSchemePropertiesToCopy) {
-        copyProperty(xcodeProperty);
+        copyProperty(tgt, this, xcodeProperty);
       }
 #endif
     }

@@ -5485,21 +5485,26 @@ bool cmGeneratorTarget::ApplyCXXStdTarget()
   return true;
 }
 
-cmCxxModuleUsageEffects const& cmGeneratorTarget::GetCxxModuleUsageEffects()
-  const
+cmCxxModuleUsageEffects const& cmGeneratorTarget::GetCxxModuleUsageEffects(
+  std::string const& config) const
 {
-  if (!this->CxxModuleUsageEffects) {
-    this->CxxModuleUsageEffects.emplace(this);
+
+  auto iter = this->CxxModuleUsageEffects.find(config);
+  if (iter == this->CxxModuleUsageEffects.end()) {
+    auto result = this->CxxModuleUsageEffects.emplace(
+      std::pair<std::string, cmCxxModuleUsageEffects>{
+        config, cmCxxModuleUsageEffects(this, config) });
+    return result.first->second;
   }
 
-  return *this->CxxModuleUsageEffects;
+  return iter->second;
 }
 
 cmGeneratorTarget const* cmGeneratorTarget::GetTargetForCxxModules(
   std::string const& config, cmGeneratorTarget const& bmiConsumer) const
 {
-  auto const& consumingUsage = bmiConsumer.GetCxxModuleUsageEffects();
-  auto const& owningUsage = this->GetCxxModuleUsageEffects();
+  auto const& consumingUsage = bmiConsumer.GetCxxModuleUsageEffects(config);
+  auto const& owningUsage = this->GetCxxModuleUsageEffects(config);
   if (consumingUsage.GetHash() == owningUsage.GetHash()) {
     if (this->IsImported()) {
       return this->GetCxxSyntheticTarget(config, *this);
@@ -5513,7 +5518,8 @@ cmGeneratorTarget const* cmGeneratorTarget::GetTargetForCxxModules(
 cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
   std::string const& config, cmGeneratorTarget const& bmiConsumer) const
 {
-  auto const& usageHash = bmiConsumer.GetCxxModuleUsageEffects().GetHash();
+  auto const& usageHash =
+    bmiConsumer.GetCxxModuleUsageEffects(config).GetHash();
   auto cached = this->SynthCxxTargets.find(usageHash);
   if (cached != this->SynthCxxTargets.end()) {
     return cached->second;
