@@ -1922,6 +1922,32 @@ inline cmList GetList(std::string const& list)
   return list.empty() ? cmList{} : cmList{ list, cmList::EmptyElements::Yes };
 }
 
+struct TransformActionDescriptor
+{
+  cmList::TransformAction Action;
+  int Arity;
+};
+
+// Look up a canned TRANSFORM action by name (APPLY is handled separately).
+cm::optional<TransformActionDescriptor> FindTransformActionDescriptor(
+  std::string const& name)
+{
+  static std::unordered_map<cm::string_view, TransformActionDescriptor> const
+    descriptors{
+      { "APPEND"_s, { cmList::TransformAction::APPEND, 1 } },
+      { "PREPEND"_s, { cmList::TransformAction::PREPEND, 1 } },
+      { "TOUPPER"_s, { cmList::TransformAction::TOUPPER, 0 } },
+      { "TOLOWER"_s, { cmList::TransformAction::TOLOWER, 0 } },
+      { "STRIP"_s, { cmList::TransformAction::STRIP, 0 } },
+      { "REPLACE"_s, { cmList::TransformAction::REPLACE, 2 } },
+    };
+  auto it = descriptors.find(name);
+  if (it == descriptors.end()) {
+    return cm::nullopt;
+  }
+  return it->second;
+}
+
 // Parse the optional trailing selector of a $<LIST:TRANSFORM,...> action
 // (AT <i>... / FOR <start> <stop> [<step>] / REGEX <re>) into a
 // cmList::TransformSelector.  Returns nullptr (after reporting via `eval`) on
@@ -2359,47 +2385,12 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                       false)) {
               auto list = GetList(args.front());
               if (!list.empty()) {
-                struct ActionDescriptor
-                {
-                  ActionDescriptor(std::string name)
-                    : Name(std::move(name))
-                  {
-                  }
-                  ActionDescriptor(std::string name,
-                                   cmList::TransformAction action, int arity)
-                    : Name(std::move(name))
-                    , Action(action)
-                    , Arity(arity)
-                  {
-                  }
-
-                  operator std::string const&() const { return this->Name; }
-
-                  std::string Name;
-                  cmList::TransformAction Action;
-                  int Arity = 0;
-                };
-
-                static std::set<
-                  ActionDescriptor,
-                  std::function<bool(std::string const&, std::string const&)>>
-                  descriptors{
-                    { { "APPEND", cmList::TransformAction::APPEND, 1 },
-                      { "PREPEND", cmList::TransformAction::PREPEND, 1 },
-                      { "TOUPPER", cmList::TransformAction::TOUPPER, 0 },
-                      { "TOLOWER", cmList::TransformAction::TOLOWER, 0 },
-                      { "STRIP", cmList::TransformAction::STRIP, 0 },
-                      { "REPLACE", cmList::TransformAction::REPLACE, 2 } },
-                    [](std::string const& x, std::string const& y) {
-                      return x < y;
-                    }
-                  };
-
-                auto descriptor = descriptors.find(args.advance(1).front());
-                if (descriptor == descriptors.end()) {
+                std::string const actionName = args.advance(1).front();
+                auto descriptor = FindTransformActionDescriptor(actionName);
+                if (!descriptor) {
                   reportError(ev, cnt->GetOriginalExpression(),
-                              cmStrCat(" sub-command TRANSFORM, ",
-                                       args.front(), " invalid action."));
+                              cmStrCat(" sub-command TRANSFORM, ", actionName,
+                                       " invalid action."));
                   return std::string{};
                 }
 
@@ -2408,7 +2399,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 if (args.size() < descriptor->Arity) {
                   reportError(ev, cnt->GetOriginalExpression(),
                               cmStrCat("sub-command TRANSFORM, action ",
-                                       descriptor->Name, " expects ",
+                                       actionName, " expects ",
                                        descriptor->Arity, " argument(s)."));
                   return std::string{};
                 }
