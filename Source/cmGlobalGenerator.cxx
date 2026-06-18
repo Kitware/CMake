@@ -1676,13 +1676,12 @@ bool cmGlobalGenerator::Compute()
     }
   }
 
-  // We now have all targets set up and std levels constructed. Add
-  // `__CMAKE::CXX*` targets as link dependencies to all targets which need
-  // them.
+  // We now have all targets set up. Add the `@cmake_cxx_std` target as a link
+  // dependency to all targets which need it.
   //
   // Synthetic targets performed this inside of
   // `cmLocalGenerator::DiscoverSyntheticTargets`
-  if (!this->ApplyCXXStdTargets()) {
+  if (!this->ApplyCXXStdTarget()) {
     return false;
   }
 
@@ -1997,12 +1996,12 @@ void cmGlobalGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
   entry->second = index++;
 }
 
-bool cmGlobalGenerator::ApplyCXXStdTargets()
+bool cmGlobalGenerator::ApplyCXXStdTarget()
 {
   for (auto const& gen : this->LocalGenerators) {
 
-    // tgt->ApplyCXXStd can create targets itself, so we need iterators which
-    // won't be invalidated by that target creation
+    // tgt->ApplyCXXStdTarget can create a target itself, so we need iterators
+    // which won't be invalidated by that target creation
     auto const& genTgts = gen->GetGeneratorTargets();
     std::vector<cmGeneratorTarget*> existingTgts;
     existingTgts.reserve(genTgts.size());
@@ -2011,7 +2010,7 @@ bool cmGlobalGenerator::ApplyCXXStdTargets()
     }
 
     for (auto const& tgt : existingTgts) {
-      if (!tgt->ApplyCXXStdTargets()) {
+      if (!tgt->ApplyCXXStdTarget()) {
         return false;
       }
     }

@@ -158,7 +158,7 @@ function(cmake_determine_compiler_support lang)
     foreach(_cmake_import_std_version IN ITEMS 23 26)
       if(CMAKE_CXX${_cmake_import_std_version}_COMPILE_FEATURES)
         # Modules JSON covers all versions, otherwise rely on toolchain targets
-        if(CMAKE_CXX_STDLIB_MODULES_JSON OR (TARGET "__CMAKE:CXX${_cmake_import_std_version}"))
+        if(CMAKE_CXX_STDLIB_MODULES_JSON)
           list(APPEND CMAKE_CXX_COMPILER_IMPORT_STD ${_cmake_import_std_version})
         endif()
       endif()

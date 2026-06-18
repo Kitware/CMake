@@ -1,5 +1,5 @@
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
-  "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
+  "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
 set(CMAKE_CXX_STDLIB_MODULES_JSON
   "${CMAKE_CURRENT_LIST_DIR}/../dummy-std/manifest/dummy-std.modules.json"
 )

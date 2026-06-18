@@ -1146,7 +1146,7 @@ public:
 
   std::string GetImportedXcFrameworkPath(std::string const& config) const;
 
-  bool ApplyCXXStdTargets();
+  bool ApplyCXXStdTarget();
   cmCxxModuleUsageEffects const& GetCxxModuleUsageEffects() const;
   cmGeneratorTarget const* GetTargetForCxxModules(
     std::string const& config, cmGeneratorTarget const& bmiConsumer) const;

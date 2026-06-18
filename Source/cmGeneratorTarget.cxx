@@ -5330,8 +5330,6 @@ bool cmGeneratorTarget::IsNullImpliedByLinkLibraries(
 namespace {
 bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
                            std::string const& targetName,
-                           std::string const& cxxTargetName,
-                           std::string const& stdLevel,
                            std::vector<std::string> const& configs)
 {
 #ifndef CMAKE_BOOTSTRAP
@@ -5377,20 +5375,17 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
     metadata = std::move(*parseResult.Meta);
   }
 
-  auto const localTargetName = cmStrCat("__cmake_cxx_std_", stdLevel);
-  cmStandardLevelResolver standardResolver(makefile);
   auto* stdlibTgt = makefile->AddLibrary(
-    localTargetName, cmStateEnums::STATIC_LIBRARY, {}, true);
+    "@cmake_cxx_std", cmStateEnums::STATIC_LIBRARY, {}, true);
   cmCxxModuleMetadata::PopulateTarget(*stdlibTgt, *metadata, configs);
-  standardResolver.AddRequiredTargetFeature(stdlibTgt,
-                                            cmStrCat("cxx_std_", stdLevel));
+  cmStandardLevelResolver standardResolver(makefile);
+  standardResolver.AddRequiredTargetFeature(stdlibTgt, "cxx_std_20");
   auto gt = cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
   for (auto const& config : configs) {
     gt->ComputeCompileFeatures(config);
   }
 
   lg->AddGeneratorTarget(std::move(gt));
-  makefile->AddAlias(cxxTargetName, localTargetName);
 
 #endif // CMAKE_BOOTSTRAP
 
@@ -5398,11 +5393,8 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
 }
 } // namespace
 
-bool cmGeneratorTarget::ApplyCXXStdTargets()
+bool cmGeneratorTarget::ApplyCXXStdTarget()
 {
-  cmStandardLevelResolver standardResolver(this->Makefile);
-  cmStandardLevel const cxxStd23 =
-    *standardResolver.LanguageStandardLevel("CXX", "23");
   std::vector<std::string> const& configs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   auto std_prop = this->GetProperty("CXX_MODULE_STD");
@@ -5466,34 +5458,17 @@ bool cmGeneratorTarget::ApplyCXXStdTargets()
     return true;
   }
 
-  for (auto const& config : configs) {
-    if (this->HaveCxxModuleSupport(config) != Cxx20SupportLevel::Supported) {
-      continue;
-    }
-
-    cm::optional<cmStandardLevel> explicitLevel =
-      this->GetExplicitStandardLevel("CXX", config);
-    if (!explicitLevel || *explicitLevel < cxxStd23) {
-      continue;
-    }
-
-    auto const stdLevel =
-      standardResolver.GetLevelString("CXX", *explicitLevel);
-    auto const cxxTargetName = cmStrCat("__CMAKE::CXX", stdLevel);
-
-    // Create the __CMAKE::CXX## target if it doesn't already exist
-    if (!this->Makefile->FindTargetToUse(cxxTargetName) &&
-        !CreateCxxStdlibTarget(this->Makefile, this->LocalGenerator,
-                               this->GetName(), cxxTargetName, stdLevel,
-                               configs)) {
-      return false;
-    }
-
-    this->Target->AppendProperty(
-      "LINK_LIBRARIES",
-      cmStrCat("$<BUILD_LOCAL_INTERFACE:$<$<CONFIG:", config,
-               ">:", cxxTargetName, ">>"));
+  // Create the single, unreferenceable import std target if it doesn't
+  // already exist. BMI compatibility handles per-consumer standard level
+  // differences by creating synthetic targets as needed.
+  if (!this->Makefile->FindTargetToUse("@cmake_cxx_std") &&
+      !CreateCxxStdlibTarget(this->Makefile, this->LocalGenerator,
+                             this->GetName(), configs)) {
+    return false;
   }
+
+  this->Target->AppendProperty("LINK_LIBRARIES",
+                               "$<BUILD_LOCAL_INTERFACE:@cmake_cxx_std>");
 
   // Check the experimental feature here. A toolchain may have
   // skipped the check in the toolchain preparation logic.
@@ -5577,8 +5552,10 @@ cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
     }
   }
 
-  // Copy properties which effect consumer compatibility
-  tgt->CopyUsageEffects(bmiConsumer.Target);
+  // Copy properties which effect consumer compatibility.
+  // CopyUsageEffects now uses the consumer's full (own + transitive)
+  // compile features and options.
+  tgt->CopyUsageEffects(&bmiConsumer, config);
 
   // Copy properties which don't effect consumer compatibility
   tgt->CopyCxxModulesEntries(model);
@@ -5599,9 +5576,9 @@ cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
   for (auto const& innerConfig : allConfigs) {
     gtp->ComputeCompileFeatures(innerConfig);
   }
-  // See `cmGlobalGenerator::ApplyCXXStdTargets` in
+  // See `cmGlobalGenerator::ApplyCXXStdTarget` in
   // `cmGlobalGenerator::Compute` for non-synthetic target resolutions.
-  if (!gtp->ApplyCXXStdTargets()) {
+  if (!gtp->ApplyCXXStdTarget()) {
     return nullptr;
   }
 
