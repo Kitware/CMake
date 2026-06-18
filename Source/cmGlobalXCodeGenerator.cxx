@@ -3583,7 +3583,10 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeTarget(
   target->AddAttribute("name", this->CreateString(gtgt->GetName()));
   target->AddAttribute("productName", this->CreateString(gtgt->GetName()));
 
-  cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
+  cmXCodeObject* fileRef =
+    this->CreateObject(cmXCodeObject::PBXFileReference,
+                       cmStrCat("PBXFileReference:product:", gtgt->GetName(),
+                                ':', targetBinaryPath));
   if (char const* fileType = this->GetTargetFileType(gtgt)) {
     fileRef->AddAttribute("explicitFileType", this->CreateString(fileType));
   }
