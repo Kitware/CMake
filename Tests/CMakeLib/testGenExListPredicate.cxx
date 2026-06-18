@@ -49,6 +49,43 @@ bool expectEq(char const* name, std::string const& got,
 }
 }
 
+static bool testFilterPredicateInclude()
+{
+  GenExFixture fx;
+  // Keep only elements equal to "a".
+  return expectEq(
+    "testFilterPredicateInclude",
+    fx.Eval("$<LIST:FILTER,a;b;a;c,INCLUDE,PREDICATE,$<STREQUAL:$<_0>,a>>"),
+    "a;a");
+}
+
+static bool testFilterPredicateExclude()
+{
+  GenExFixture fx;
+  // Drop elements equal to "a".
+  return expectEq(
+    "testFilterPredicateExclude",
+    fx.Eval("$<LIST:FILTER,a;b;a;c,EXCLUDE,PREDICATE,$<STREQUAL:$<_0>,a>>"),
+    "b;c");
+}
+
+static bool testFilterRegexKeyword()
+{
+  GenExFixture fx;
+  // Explicit REGEX keyword behaves like the bare form.
+  return expectEq("testFilterRegexKeyword",
+                  fx.Eval("$<LIST:FILTER,foo;bar;baz,INCLUDE,REGEX,^ba>"),
+                  "bar;baz");
+}
+
+static bool testFilterBareRegexUnchanged()
+{
+  GenExFixture fx;
+  // The legacy bare form still works.
+  return expectEq("testFilterBareRegexUnchanged",
+                  fx.Eval("$<LIST:FILTER,foo;bar;baz,EXCLUDE,^ba>"), "foo");
+}
+
 static bool testCannedTransformStillWorks()
 {
   GenExFixture fx;
@@ -99,6 +136,13 @@ static bool testTransformPredicateApplyShadowing()
                   "aa;bb");
 }
 
+static bool testFilterPredicateEmptyList()
+{
+  GenExFixture fx;
+  return expectEq("testFilterPredicateEmptyList",
+                  fx.Eval("$<LIST:FILTER,,INCLUDE,PREDICATE,1>"), "");
+}
+
 static bool testTransformPredicateEmptyList()
 {
   GenExFixture fx;
@@ -108,6 +152,18 @@ static bool testTransformPredicateEmptyList()
 
 int testGenExListPredicate(int /*argc*/, char* /*argv*/[])
 {
+  if (!testFilterPredicateInclude()) {
+    return 1;
+  }
+  if (!testFilterPredicateExclude()) {
+    return 1;
+  }
+  if (!testFilterRegexKeyword()) {
+    return 1;
+  }
+  if (!testFilterBareRegexUnchanged()) {
+    return 1;
+  }
   if (!testCannedTransformStillWorks()) {
     return 1;
   }
@@ -121,6 +177,9 @@ int testGenExListPredicate(int /*argc*/, char* /*argv*/[])
     return 1;
   }
   if (!testTransformPredicateApplyShadowing()) {
+    return 1;
+  }
+  if (!testFilterPredicateEmptyList()) {
     return 1;
   }
   if (!testTransformPredicateEmptyList()) {

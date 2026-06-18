@@ -2228,6 +2228,12 @@ static const struct ListNode : public cmGeneratorExpressionNode
   bool ShouldEvaluateNextParameter(std::vector<std::string> const& parameters,
                                    std::string&) const override
   {
+    // Leave the FILTER PREDICATE <body> (slot 4) unevaluated so $<_0> is never
+    // evaluated unbound.
+    if (parameters.size() == 4 && parameters[0] == "FILTER" &&
+        parameters[3] == "PREDICATE") {
+      return false;
+    }
     // Leave a TRANSFORM PREDICATE selector's <body> unevaluated.  PREDICATE is
     // the selector keyword only when it sits exactly at the selector position
     // (not when it is a literal action argument such as APPEND PREDICATE).
@@ -2309,6 +2315,48 @@ static const struct ListNode : public cmGeneratorExpressionNode
       }
       // Join per-element results with ';'; keep empty elements so a body that
       // yields "" is not dropped.
+      return cmList{ out.begin(), out.end(), cmList::ExpandElements::No,
+                     cmList::EmptyElements::Yes }
+        .to_string();
+    }
+
+    // FILTER ... PREDICATE <body>: genex-native predicate filter.
+    if (parameters.size() >= 4 && parameters[0] == "FILTER" &&
+        parameters[3] == "PREDICATE") {
+      if (parameters.size() != 5) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "sub-command FILTER, PREDICATE expects a single <body> "
+                    "argument.");
+        return std::string();
+      }
+      std::string const& op = parameters[2];
+      if (op != "INCLUDE" && op != "EXCLUDE") {
+        reportError(
+          eval, content->GetOriginalExpression(),
+          cmStrCat("sub-command FILTER does not recognize operator \"", op,
+                   "\". It must be either INCLUDE or EXCLUDE."));
+        return std::string();
+      }
+      cmList list = GetList(parameters[1]);
+      if (list.empty()) {
+        return std::string();
+      }
+      cmGeneratorExpressionEvaluatorVector const& predicateBody =
+        content->GetParamChildren()[4];
+      auto mask = EvaluatePredicateMask(predicateBody, list, "FILTER"_s, eval,
+                                        content, dagChecker);
+      if (!mask) {
+        return std::string();
+      }
+      bool const keepWhenTrue = (op == "INCLUDE");
+      std::vector<std::string> out;
+      std::size_t i = 0;
+      for (auto const& element : list) {
+        if ((*mask)[i] == keepWhenTrue) {
+          out.push_back(element);
+        }
+        ++i;
+      }
       return cmList{ out.begin(), out.end(), cmList::ExpandElements::No,
                      cmList::EmptyElements::Yes }
         .to_string();
@@ -2526,7 +2574,13 @@ static const struct ListNode : public cmGeneratorExpressionNode
         { "FILTER"_s,
           [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
              Arguments& args) -> std::string {
-            if (CheckListParameters(ev, cnt, "FILTER"_s, args, 3)) {
+            // args = [list, INCLUDE|EXCLUDE, <regex> | REGEX <regex>].
+            // (PREDICATE is handled up-front in Evaluate and never reaches
+            // here.)
+            bool const explicitRegex =
+              args.size() >= 3 && args[2] == "REGEX"_s;
+            int const required = explicitRegex ? 4 : 3;
+            if (CheckListParameters(ev, cnt, "FILTER"_s, args, required)) {
               auto const& op = args[1];
               if (op != "INCLUDE"_s && op != "EXCLUDE"_s) {
                 reportError(
@@ -2535,9 +2589,10 @@ static const struct ListNode : public cmGeneratorExpressionNode
                            op, "\". It must be either INCLUDE or EXCLUDE."));
                 return std::string{};
               }
+              auto const& regex = explicitRegex ? args[3] : args[2];
               try {
                 return GetList(args.front())
-                  .filter(args[2],
+                  .filter(regex,
                           op == "INCLUDE"_s ? cmList::FilterMode::INCLUDE
                                             : cmList::FilterMode::EXCLUDE)
                   .to_string();
@@ -2545,7 +2600,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 reportError(
                   ev, cnt->GetOriginalExpression(),
                   cmStrCat("sub-command FILTER, failed to compile regex \"",
-                           args[2], "\"."));
+                           regex, "\"."));
                 return std::string{};
               }
             }
