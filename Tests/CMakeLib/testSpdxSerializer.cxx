@@ -28,7 +28,6 @@ bool testSerializeSpdxJson()
 
   cmSpdxDocument spdxValue;
   spdxValue.SpdxId = "_:SPDXRef-Document";
-  spdxValue.DataLicense = "CC0-1.0";
   auto spdx = insert_back(doc.Graph, std::move(spdxValue));
 
   {

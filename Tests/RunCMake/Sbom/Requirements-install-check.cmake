@@ -119,6 +119,24 @@ set(BAR_DEPENDENCY_FOO [=[
 }
 ]=])
 
+set(TEST_LIBA_LINKED_LICENSE_EXPECTED [=[
+{
+  "creationInfo" : "_:Build#CreationInfo",
+  "from" : "urn:test:liba#Package",
+  "relationshipType" : "hasDeclaredLicense",
+  "spdxId" : "urn:test::liba#DeclaredLicenseRelationship",
+  "to" :
+  [
+    {
+      "creationInfo" : "_:Build#CreationInfo",
+      "simplelicensing_licenseExpression" : "license-for-test-liba",
+      "spdxId" : "urn:test::liba#LicenseExpression",
+      "type" : "simplelicensing_LicenseExpression"
+    }
+  ],
+  "type" : "Relationship"
+}
+]=])
 
 set(CREATION_INFO_EXPECTED [=[
 {
@@ -147,3 +165,7 @@ expect_object("${BAR_SPDX_DOCUMENT}" BAR_LIBC "rootElement")
 expect_object("${BAR_SPDX_DOCUMENT}" BAR_LIBD "rootElement")
 expect_object("${BAR_SPDX_DOCUMENT}" BAR_DEPENDENCY_TEST "element")
 expect_object("${BAR_SPDX_DOCUMENT}" BAR_DEPENDENCY_FOO "element")
+
+# Check that the license target property imported from cmake config is reported
+string(JSON LICENSE_RELATIONSHIP GET "${BAR_CONTENT}" "@graph" "2")
+expect_object("${LICENSE_RELATIONSHIP}" TEST_LIBA_LINKED_LICENSE_EXPECTED)

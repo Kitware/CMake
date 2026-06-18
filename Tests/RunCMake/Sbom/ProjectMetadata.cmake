@@ -10,6 +10,7 @@ project(test LANGUAGES C
   VERSION 1.2.0)
 
 add_library(test INTERFACE)
+set_target_properties(test PROPERTIES SPDX_LICENSE license-for-test-target)
 
 install(
   TARGETS test

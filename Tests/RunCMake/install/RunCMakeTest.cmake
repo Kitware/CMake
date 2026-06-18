@@ -95,7 +95,7 @@ run_cmake_with_options(EXPORT_ANDROID_MK-AbsoluteDest-warn -Winstall-absolute-de
 run_cmake_with_options(PACKAGE_INFO-AbsoluteDest-error -Werror=install-absolute-destination)
 run_cmake_with_options(SBOM-AbsoluteDest-warn
   -Winstall-absolute-destination
-  -DCMAKE_EXPERIMENTAL_GENERATE_SBOM=2d856d6d-53e8-488b-a17f-d486d2cac317)
+  -DCMAKE_EXPERIMENTAL_GENERATE_SBOM=248471c2-d905-4c9e-81b5-b89cd27965e1)
 run_cmake_with_options(IMPORTED_RUNTIME_ARTIFACTS-AbsoluteDest-warn -Winstall-absolute-destination)
 if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$")
   run_cmake_with_options(RUNTIME_DEPENDENCY_SET-AbsoluteDest-warn -Winstall-absolute-destination)

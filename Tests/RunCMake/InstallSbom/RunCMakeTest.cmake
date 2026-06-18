@@ -2,7 +2,7 @@ include(RunCMake)
 
 set(common_test_options
   -Wno-author
-  "-DCMAKE_EXPERIMENTAL_GENERATE_SBOM:STRING=2d856d6d-53e8-488b-a17f-d486d2cac317"
+  "-DCMAKE_EXPERIMENTAL_GENERATE_SBOM:STRING=248471c2-d905-4c9e-81b5-b89cd27965e1"
 )
 
 function(run_cmake_error test)

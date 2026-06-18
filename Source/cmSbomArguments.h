@@ -41,6 +41,8 @@ public:
 
   ArgumentParser::NonEmpty<std::string> Format;
   ArgumentParser::NonEmpty<std::string> PackageUrl;
+  ArgumentParser::NonEmpty<std::string> DefaultLicense;
+  ArgumentParser::NonEmpty<std::string> DataLicense;
 
 protected:
   cm::string_view CommandName() const override;
@@ -55,6 +57,8 @@ private:
     Bind(base, parser, "SBOM"_s, &cmProjectInfoArguments::PackageName);
     Bind(self, parser, "FORMAT"_s, &cmSbomArguments::Format);
     Bind(self, parser, "PACKAGE_URL"_s, &cmSbomArguments::PackageUrl);
+    Bind(self, parser, "DEFAULT_LICENSE"_s, &cmSbomArguments::DefaultLicense);
+    Bind(self, parser, "DATA_LICENSE"_s, &cmSbomArguments::DataLicense);
     cmProjectInfoArguments::Bind(parser, self);
   }
 };
