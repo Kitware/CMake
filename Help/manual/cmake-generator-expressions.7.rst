@@ -977,6 +977,22 @@ List Transformations
 
         $<LIST:TRANSFORM,list,ACTION,REGEX,regular_expression>
 
+    ``PREDICATE``
+      Specify a generator expression ``body`` evaluated once per item with the
+      bound operand :genex:`$<_0>` expanding to the current item.  Only items
+      whose body evaluates to ``1`` are transformed; the body must evaluate to
+      exactly ``0`` or ``1``.  ``PREDICATE`` may be combined with any action,
+      including ``APPLY`` (in which case both bodies bind :genex:`$<_0>`
+      independently).
+      Like all selectors, only one selector may be given; ``PREDICATE`` cannot
+      be combined with ``AT``, ``FOR``, or ``REGEX``.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,ACTION,PREDICATE,body>
+
+      .. versionadded:: 4.5
+
 .. genex:: $<JOIN:list,glue>
 
   Joins the ``list`` with the content of the ``glue`` string inserted between
