@@ -604,21 +604,21 @@ public:
   cmTarget::Origin Origin = cmTarget::Origin::Unknown;
   cmMakefile* Makefile;
   cmPolicies::PolicyMap PolicyMap;
-  cmTarget const* TemplateTarget;
+  cmTarget const* TemplateTarget = nullptr;
   std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
   cmPropertyMap Properties;
-  bool IsGeneratorProvided;
-  bool HaveInstallRule;
-  bool IsDLLPlatform;
-  bool IsAIX;
-  bool IsApple;
-  bool IsAndroid;
-  bool BuildInterfaceIncludesAppended;
-  bool PerConfig;
-  bool IsSymbolic;
-  bool IsForTryCompile{ false };
+  bool IsGeneratorProvided = false;
+  bool HaveInstallRule = false;
+  bool IsDLLPlatform = false;
+  bool IsAIX = false;
+  bool IsApple = false;
+  bool IsAndroid = false;
+  bool BuildInterfaceIncludesAppended = false;
+  bool PerConfig = false;
+  bool IsSymbolic = false;
+  bool IsForTryCompile = false;
   cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::set<std::string> CodegenDependencies;
@@ -657,7 +657,9 @@ public:
 
   std::unordered_map<cm::string_view, FileSetType> FileSetTypes;
 
-  cmTargetInternals();
+  cmTargetInternals(std::string name, cmStateEnums::TargetType type,
+                    cmTarget::Visibility visibility, cmMakefile* mf,
+                    cmTarget::PerConfig perConfig);
 
   bool IsImported() const;
 
@@ -687,8 +689,17 @@ public:
   }
 };
 
-cmTargetInternals::cmTargetInternals()
-  : IncludeDirectories("INCLUDE_DIRECTORIES"_s)
+cmTargetInternals::cmTargetInternals(std::string name,
+                                     cmStateEnums::TargetType type,
+                                     cmTarget::Visibility visibility,
+                                     cmMakefile* mf,
+                                     cmTarget::PerConfig perConfig)
+  : TargetType(type)
+  , Makefile(mf)
+  , Name(std::move(name))
+  , PerConfig(perConfig == cmTarget::PerConfig::Yes)
+  , TargetVisibility(visibility)
+  , IncludeDirectories("INCLUDE_DIRECTORIES"_s)
   , CompileOptions("COMPILE_OPTIONS"_s)
   , CompileFeatures("COMPILE_FEATURES"_s)
   , CompileDefinitions("COMPILE_DEFINITIONS"_s)
@@ -729,6 +740,29 @@ cmTargetInternals::cmTargetInternals()
                       FileSetEntries{ "CXX_MODULE_SETS"_s },
                       FileSetEntries{ "INTERFACE_CXX_MODULE_SETS"_s } } } }
 {
+  assert(mf);
+
+  // Check whether this is a DLL platform.
+  this->IsDLLPlatform =
+    !mf->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
+
+  // Check whether we are targeting AIX.
+  {
+    std::string const& systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+    this->IsAIX = (systemName == "AIX" || systemName == "OS400");
+  }
+
+  // Check whether we are targeting Apple.
+  this->IsApple = mf->IsOn("APPLE");
+
+  // Check whether we are targeting an Android platform.
+  this->IsAndroid = (mf->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android");
+
+  // Save the backtrace of target construction.
+  this->Backtrace = mf->GetBacktrace();
+  if (this->IsImported()) {
+    this->FindPackageStack = mf->GetFindPackageStack();
+  }
 }
 
 template <typename ValueType>
@@ -889,51 +923,11 @@ std::pair<bool, cmValue> UsageRequirementProperty::Read(
   return { did_read, value };
 }
 
-cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
+cmTarget::cmTarget(std::string name, cmStateEnums::TargetType type,
                    Visibility vis, cmMakefile* mf, PerConfig perConfig)
-  : impl(cm::make_unique<cmTargetInternals>())
+  : impl(cm::make_unique<cmTargetInternals>(std::move(name), type, vis, mf,
+                                            perConfig))
 {
-  assert(mf);
-  this->impl->TargetType = type;
-  this->impl->Makefile = mf;
-  this->impl->Name = name;
-  this->impl->TemplateTarget = nullptr;
-  this->impl->IsGeneratorProvided = false;
-  this->impl->HaveInstallRule = false;
-  this->impl->IsDLLPlatform = false;
-  this->impl->IsAIX = false;
-  this->impl->IsApple = false;
-  this->impl->IsAndroid = false;
-  this->impl->IsSymbolic = false;
-  this->impl->TargetVisibility = vis;
-  this->impl->BuildInterfaceIncludesAppended = false;
-  this->impl->PerConfig = (perConfig == PerConfig::Yes);
-
-  // Check whether this is a DLL platform.
-  this->impl->IsDLLPlatform =
-    !this->impl->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")
-       .empty();
-
-  // Check whether we are targeting AIX.
-  {
-    std::string const& systemName =
-      this->impl->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-    this->impl->IsAIX = (systemName == "AIX" || systemName == "OS400");
-  }
-
-  // Check whether we are targeting Apple.
-  this->impl->IsApple = this->impl->Makefile->IsOn("APPLE");
-
-  // Check whether we are targeting an Android platform.
-  this->impl->IsAndroid = (this->impl->Makefile->GetSafeDefinition(
-                             "CMAKE_SYSTEM_NAME") == "Android");
-
-  // Save the backtrace of target construction.
-  this->impl->Backtrace = this->impl->Makefile->GetBacktrace();
-  if (this->impl->IsImported()) {
-    this->impl->FindPackageStack = this->impl->Makefile->GetFindPackageStack();
-  }
-
   if (this->IsNormal()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:

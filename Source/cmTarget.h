@@ -69,8 +69,8 @@ public:
     No
   };
 
-  cmTarget(std::string const& name, cmStateEnums::TargetType type,
-           Visibility vis, cmMakefile* mf, PerConfig perConfig);
+  cmTarget(std::string name, cmStateEnums::TargetType type, Visibility vis,
+           cmMakefile* mf, PerConfig perConfig);
 
   cmTarget(cmTarget const&) = delete;
   cmTarget(cmTarget&&) noexcept;
