@@ -1,0 +1,1 @@
+option "COMPARE" is incompatible with "COMPARATOR"

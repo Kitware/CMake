@@ -1098,6 +1098,24 @@ List Ordering
 
     $<LIST:SORT,list,CASE:SENSITIVE,COMPARE:STRING,ORDER:DESCENDING>
 
+  .. versionadded:: 4.5
+
+  A ``COMPARATOR`` option sorts using a generator-expression ``body`` instead
+  of a built-in ordering:
+
+  .. code-block:: cmake
+
+    $<LIST:SORT,list,COMPARATOR,body[,ORDER:ASCENDING|DESCENDING][,CASE:SENSITIVE|INSENSITIVE]>
+
+  ``body`` is evaluated once per comparison with the two items being compared
+  bound to :genex:`$<_0>` and :genex:`$<_1>`.  It must evaluate to exactly
+  ``0`` or ``1``; ``1`` means :genex:`$<_0>` sorts before :genex:`$<_1>`.
+  ``COMPARATOR`` is incompatible with ``COMPARE:``.  ``ORDER:DESCENDING``
+  reverses the comparator and ``CASE:INSENSITIVE`` case-folds the values the
+  body sees, both as in the configure-time :command:`list(SORT)`.  The body
+  must induce a `strict weak ordering
+  <https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings>`_.
+
 .. _GenEx Bound Operands:
 
 Bound Operands
@@ -1116,6 +1134,20 @@ Bound Operands
 
   ``$<_0>`` is only valid inside the body of a binding operation.  Using it
   anywhere else is an error.
+
+.. genex:: $<_1>
+
+  .. versionadded:: 4.5
+
+  The second *bound operand* of a *binding operation* that binds at least two
+  operands, expanding to the second supplied value.
+
+  For example, :genex:`$<LIST:SORT,...,COMPARATOR,body>` evaluates ``body``
+  once per comparison with :genex:`$<_0>` and ``$<_1>`` bound to the two items
+  being compared.
+
+  ``$<_1>`` is only valid inside the body of a binding operation that binds at
+  least two operands.  Using it anywhere else is an error.
 
 Path Expressions
 ----------------

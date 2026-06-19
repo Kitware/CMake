@@ -2220,6 +2220,88 @@ SortOptionResult ParseSortOption(std::string const& arg,
   return SortOptionResult::NotRecognized;
 }
 
+// $<LIST:SORT,...,COMPARATOR,body>: sort with a per-comparison genex body, the
+// two elements bound to $<_0> and $<_1>; body must yield "0" or "1".
+std::string EvaluateSortComparator(std::vector<std::string> const& parameters,
+                                   std::size_t comparatorIndex,
+                                   cm::GenEx::Evaluation* eval,
+                                   GeneratorExpressionContent const* content,
+                                   cmGeneratorExpressionDAGChecker* dagChecker)
+{
+  if (comparatorIndex + 1 >= parameters.size()) {
+    reportError(eval, content->GetOriginalExpression(),
+                "sub-command SORT, COMPARATOR expects a <body> argument.");
+    return std::string();
+  }
+  cmGeneratorExpressionEvaluatorVector const& bodyExpr =
+    content->GetParamChildren()[comparatorIndex + 1];
+
+  using SortConfig = cmList::SortConfiguration;
+  SortConfig sortConfig;
+  sortConfig.Compare = SortConfig::CompareMethod::COMPARATOR;
+  for (std::size_t i = 2; i < parameters.size(); ++i) {
+    if (i == comparatorIndex || i == comparatorIndex + 1) {
+      continue; // COMPARATOR keyword + its (empty) body slot
+    }
+    std::string const& arg = parameters[i];
+    // COMPARATOR defines the ordering, so reject COMPARE:; CASE:/ORDER: are
+    // accepted as in list(SORT ... COMPARATOR) (CASE: folds the body
+    // operands).
+    if (cmHasPrefix(arg, "COMPARE:"_s)) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "sub-command SORT, option \"COMPARE\" is incompatible with "
+                  "\"COMPARATOR\".");
+      return std::string();
+    }
+    switch (ParseSortOption(arg, sortConfig, eval, content)) {
+      case SortOptionResult::Parsed:
+        break;
+      case SortOptionResult::Error:
+        return std::string();
+      case SortOptionResult::NotRecognized:
+        reportError(
+          eval, content->GetOriginalExpression(),
+          cmStrCat("sub-command SORT, option \"", arg, "\" is invalid."));
+        return std::string();
+    }
+  }
+
+  cmList list = GetList(parameters[1]);
+  if (list.size() < 2) {
+    return list.to_string();
+  }
+
+  // The strict-weak-ordering guard in cmList::sort may call this twice per
+  // pair, so the body can be evaluated up to twice per comparison.
+  auto comparator = [&](std::string const& a, std::string const& b) -> bool {
+    std::string r =
+      EvaluateBodyWithBoundOperands(bodyExpr, { a, b }, eval, dagChecker);
+    if (eval->HadError) {
+      throw cmList::transform_error(std::string{}); // body already reported
+    }
+    if (r == "1") {
+      return true;
+    }
+    if (r == "0") {
+      return false;
+    }
+    throw cmList::transform_error(
+      cmStrCat("sub-command SORT, COMPARATOR body must evaluate to \"0\" or "
+               "\"1\", but evaluated to \"",
+               r, "\"."));
+  };
+
+  try {
+    list.sort(sortConfig, comparator);
+  } catch (std::invalid_argument& e) {
+    if (!eval->HadError) {
+      reportError(eval, content->GetOriginalExpression(), e.what());
+    }
+    return std::string();
+  }
+  return list.to_string();
+}
+
 // Parse the optional trailing selector of a $<LIST:TRANSFORM,...> action
 // (AT <i>... / FOR <start> <stop> [<step>] / REGEX <re>) into a
 // cmList::TransformSelector.  Returns nullptr (after reporting via `eval`) on
@@ -2363,6 +2445,12 @@ static const struct ListNode : public cmGeneratorExpressionNode
         return false;
       }
     }
+    // Leave the SORT COMPARATOR <body> unevaluated; a bare COMPARATOR token is
+    // unambiguous since SORT's other options are colon-style.
+    if (parameters.size() >= 3 && parameters[0] == "SORT" &&
+        parameters.back() == "COMPARATOR") {
+      return false;
+    }
     // Skip the APPLY <body> (4th parameter) so $<_0> is not evaluated unbound;
     // selector args (5th+) evaluate normally.
     return !(parameters.size() == 3 && parameters[0] == "TRANSFORM" &&
@@ -2480,6 +2568,17 @@ static const struct ListNode : public cmGeneratorExpressionNode
       return cmList{ out.begin(), out.end(), cmList::ExpandElements::No,
                      cmList::EmptyElements::Yes }
         .to_string();
+    }
+
+    // SORT COMPARATOR is handled here, not the listCommands SORT lambda,
+    // because the body needs the DAG checker.
+    if (parameters.size() >= 3 && parameters[0] == "SORT") {
+      for (std::size_t i = 2; i < parameters.size(); ++i) {
+        if (parameters[i] == "COMPARATOR") {
+          return EvaluateSortComparator(parameters, i, eval, content,
+                                        dagChecker);
+        }
+      }
     }
 
     static std::unordered_map<

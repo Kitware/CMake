@@ -17,6 +17,7 @@ set(CMakeLib_TESTS
   testGenExBoundOperand.cxx
   testGenExTransformApply.cxx
   testGenExListPredicate.cxx
+  testGenExListSortComparator.cxx
   testJSONHelpers.cxx
   testRST.cxx
   testRange.cxx
