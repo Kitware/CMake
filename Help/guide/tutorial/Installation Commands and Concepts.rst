@@ -1,18 +1,18 @@
 Step 9: Installation Commands and Concepts
 ==========================================
 
-Projects need to do more than build and test their code, they need to make it
+Projects need to do more than build and test their code. They need to make it
 available to consumers. The layout of files in the build tree is unsuitable
-for consumption by other projects, binaries are in unexpected places, header
+for consumption by other projects. Binaries are in unexpected places, header
 files are located far away in the source tree, and there's no clear way
 to discover what targets are provided or how to use them.
 
-This translation, moving artifacts from the source and build trees into a final
-layout suitable for consumption, is known as installation. CMake supports a
-complete installation workflow as part of the project description, controlling
-both the layout of artifacts in the install tree, and reconstructing targets
-for other CMake projects which want to consume the libraries provided by the
-install tree.
+Moving artifacts from the source and build trees into a final layout suitable
+for consumption is known as installation. CMake supports a complete
+installation workflow as part of the project description, controlling both the
+layout of artifacts in the install tree and reconstructing targets for other
+CMake projects which want to consume the libraries provided by the install
+tree.
 
 Background
 ^^^^^^^^^^
