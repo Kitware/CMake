@@ -107,17 +107,17 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   return result;
 }
 
-// Re-evaluate the unevaluated <body> subtree of a binding operation with
-// `$<_0>` bound to the given operand.  A fresh Evaluation is built from a
-// copied, mutated Context so that nested binding operations can shadow `$<_0>`
-// and restore it on exit.
-static std::string EvaluateBodyWithBoundOperand(
+// Re-evaluate the unevaluated <body> subtree of a binding operation with the
+// given operands bound (accessible as $<_0>, $<_1>, ...).  A fresh Evaluation
+// is built from a copied, mutated Context so that nested binding operations
+// can shadow the operands and restore them on exit.
+static std::string EvaluateBodyWithBoundOperands(
   cmGeneratorExpressionEvaluatorVector const& bodyExpr,
-  std::string const& operand, cm::GenEx::Evaluation* eval,
+  std::vector<std::string> operands, cm::GenEx::Evaluation* eval,
   cmGeneratorExpressionDAGChecker* dagChecker)
 {
   cm::GenEx::Context elemContext = eval->Context; // copy
-  elemContext.SetBoundOperand(operand);
+  elemContext.SetBoundOperands(std::move(operands));
   cm::GenEx::Evaluation elemEval(
     elemContext, eval->Quiet, eval->HeadTarget, eval->CurrentTarget,
     eval->EvaluateForBuildsystem, eval->Backtrace);
@@ -147,6 +147,15 @@ static std::string EvaluateBodyWithBoundOperand(
                                                   entry.second.end());
   }
   return result;
+}
+
+static std::string EvaluateBodyWithBoundOperand(
+  cmGeneratorExpressionEvaluatorVector const& bodyExpr,
+  std::string const& operand, cm::GenEx::Evaluation* eval,
+  cmGeneratorExpressionDAGChecker* dagChecker)
+{
+  return EvaluateBodyWithBoundOperands(bodyExpr, { operand }, eval,
+                                       dagChecker);
 }
 
 // Evaluate `predicateBody` once per element of `list`, binding `$<_0>` to the
@@ -220,9 +229,12 @@ static const struct OneNode : public cmGeneratorExpressionNode
   }
 } oneNode;
 
-static const struct BoundOperandNode : public cmGeneratorExpressionNode
+struct BoundOperandNode : public cmGeneratorExpressionNode
 {
-  BoundOperandNode() {} // NOLINT(modernize-use-equals-default)
+  explicit BoundOperandNode(std::size_t index)
+    : Index(index)
+  {
+  }
 
   int NumExpectedParameters() const override { return 0; }
 
@@ -231,15 +243,31 @@ static const struct BoundOperandNode : public cmGeneratorExpressionNode
     cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    if (!eval->Context.HasBoundOperand()) {
-      reportError(eval, content->GetOriginalExpression(),
-                  "$<_0> may only be used inside the body of a binding "
-                  "operation.");
+    if (!eval->Context.HasBoundOperand(this->Index)) {
+      std::size_t const count = eval->Context.BoundOperandCount();
+      if (count == 0) {
+        reportError(eval, content->GetOriginalExpression(),
+                    cmStrCat("$<_", this->Index,
+                             "> may only be used inside the body of a binding "
+                             "operation."));
+      } else {
+        reportError(
+          eval, content->GetOriginalExpression(),
+          cmStrCat(
+            "$<_", this->Index,
+            "> is out of range for the current binding operation, which "
+            "binds only ",
+            count, " operand(s) (maximum $<_", count - 1, ">)."));
+      }
       return std::string();
     }
-    return eval->Context.GetBoundOperand();
+    return eval->Context.GetBoundOperand(this->Index);
   }
-} boundOperandNode;
+
+  std::size_t Index;
+};
+static BoundOperandNode const boundOperandNode0{ 0 };
+static BoundOperandNode const boundOperandNode1{ 1 };
 
 static const struct OneNode buildInterfaceNode;
 
@@ -6279,7 +6307,8 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "PATH_EQUAL", &pathEqualNode },
     { "MAKE_C_IDENTIFIER", &makeCIdentifierNode },
     { "BOOL", &boolNode },
-    { "_0", &boundOperandNode },
+    { "_0", &boundOperandNode0 },
+    { "_1", &boundOperandNode1 },
     { "IF", &ifNode },
     { "ANGLE-R", &angle_rNode },
     { "COMMA", &commaNode },

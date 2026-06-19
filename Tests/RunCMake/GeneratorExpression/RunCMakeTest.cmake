@@ -72,6 +72,7 @@ run_cmake(ListTransformPredicateLinkLibraries)
 run_cmake(ListFilterPredicateMissingBody)
 run_cmake(ListFilterPredicateNonBool)
 run_cmake(BoundOperandOutsideBinding)
+run_cmake(BoundOperand1OutsideBinding)
 
 function(run_cmake_build test)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
