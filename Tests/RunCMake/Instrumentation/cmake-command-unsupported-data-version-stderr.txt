@@ -1,6 +1,6 @@
 CMake Error at [^
 ]*\(cmake_instrumentation\):
   cmake_instrumentation given an unsupported DATA_VERSION "2\.1" \(the maximum
-  currently supported version is 1\.1\)\.
+  currently supported version is 1\.2\)\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:5 \(include\)

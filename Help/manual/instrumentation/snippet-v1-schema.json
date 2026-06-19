@@ -6,6 +6,9 @@
     },
     {
       "$ref": "#/definitions/snippetV1_1"
+    },
+    {
+      "$ref": "#/definitions/snippetV1_2"
     }
   ],
   "definitions": {
@@ -192,6 +195,24 @@
       },
       "additionalProperties": false
     },
+    "versionV1_2": {
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "type": "integer",
+          "const": 1
+        },
+        "minor": {
+          "type": "integer",
+          "const": 2
+        }
+      },
+      "additionalProperties": false
+    },
     "fields": {
       "command": {
         "type": "string",
@@ -213,6 +234,11 @@
             "type": "null"
           }
         ]
+      },
+      "interruptSignal": {
+        "type": "integer",
+        "description": "The signal number that interrupted the build before it completed. Only included when role is cmakeBuild and the build was interrupted.",
+        "minimum": 1
       },
       "role": {
         "type": "string",
@@ -514,6 +540,91 @@
         },
         "traceFile": {
           "$ref": "#/definitions/fields/traceFile"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/definitions/snippetConditionals"
+        }
+      ]
+    },
+    "snippetV1_2": {
+      "type": "object",
+      "required": [
+        "version",
+        "role",
+        "result",
+        "timeStart",
+        "duration",
+        "workingDir"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/definitions/versionV1_2"
+        },
+        "command": {
+          "$ref": "#/definitions/fields/command"
+        },
+        "workingDir": {
+          "$ref": "#/definitions/fields/workingDir"
+        },
+        "result": {
+          "$ref": "#/definitions/fields/result"
+        },
+        "role": {
+          "$ref": "#/definitions/fields/role"
+        },
+        "target": {
+          "$ref": "#/definitions/fields/target"
+        },
+        "targetLabels": {
+          "$ref": "#/definitions/fields/targetLabels"
+        },
+        "timeStart": {
+          "$ref": "#/definitions/fields/timeStart"
+        },
+        "duration": {
+          "$ref": "#/definitions/fields/duration"
+        },
+        "outputs": {
+          "$ref": "#/definitions/fields/outputs"
+        },
+        "outputSizes": {
+          "$ref": "#/definitions/fields/outputSizes"
+        },
+        "source": {
+          "$ref": "#/definitions/fields/source"
+        },
+        "language": {
+          "$ref": "#/definitions/fields/language"
+        },
+        "testName": {
+          "$ref": "#/definitions/fields/testName"
+        },
+        "config": {
+          "$ref": "#/definitions/fields/config"
+        },
+        "dynamicSystemInformation": {
+          "$ref": "#/definitions/fields/dynamicSystemInformation"
+        },
+        "cmakeContent": {
+          "$ref": "#/definitions/fields/cmakeContent"
+        },
+        "showOnly": {
+          "$ref": "#/definitions/fields/showOnly"
+        },
+        "stderr": {
+          "$ref": "#/definitions/fields/stderr"
+        },
+        "stdout": {
+          "$ref": "#/definitions/fields/stdout"
+        },
+        "traceFile": {
+          "$ref": "#/definitions/fields/traceFile"
+        },
+        "interruptSignal": {
+          "$ref": "#/definitions/fields/interruptSignal"
         }
       },
       "additionalProperties": false,

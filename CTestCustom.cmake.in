@@ -134,4 +134,5 @@ list(APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
 
 list(APPEND CTEST_CUSTOM_MEMCHECK_IGNORE
   kwsys.testProcess-10 # See Source/kwsys/CTestCustom.cmake.in
+  RunCMake.InstrumentationInterrupt # interrupts cmake with a real signal
   )

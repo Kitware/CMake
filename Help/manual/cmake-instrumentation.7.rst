@@ -234,7 +234,7 @@ version will be generated and sent to the user `Callbacks`_ defined in that
 query.
 
 Currently, the only supported major version is ``1``, and the maximum supported
-minor version is also ``1``. A new major version number will be created whenever
+minor version is ``2``. A new major version number will be created whenever
 previously included data is removed or reformatted such that scripts written to
 parse this data may become incompatible with the new format. A new minor version
 number will be created whenever new data becomes available.
@@ -450,6 +450,17 @@ Snippet files have a filename with the syntax
   ``result``
     The exit code of the command, an integer. This will be ``null`` when
     ``role`` is ``build``.
+
+  ``interruptSignal``
+    .. versionadded:: 4.5
+
+    The integer signal number that interrupted the build before it completed
+    (for example ``2`` for ``SIGINT`` from Ctrl+C). Only included when ``role``
+    is ``cmakeBuild`` and the build was interrupted. Consumers can use the
+    presence of this field to distinguish an interrupted build from one that
+    ran to completion.
+
+    Only available as of data version ``1.2``.
 
   ``stdout``
     .. versionadded:: 4.4

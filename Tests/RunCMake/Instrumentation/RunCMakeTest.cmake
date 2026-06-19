@@ -8,6 +8,8 @@ function(instrument test)
   set(OPTIONS
     "BUILD"
     "BUILD_MAKE_PROGRAM"
+    "INTERRUPT"
+    "INTERRUPT_SEAM"
     "INSTALL"
     "INSTALL_PARALLEL"
     "TEST"
@@ -121,6 +123,10 @@ function(instrument test)
   if (ARGS_DISABLE_TEST)
     list(APPEND ARGS_CONFIGURE_ARGS "-DDISABLE_TEST=ON")
   endif()
+  if (ARGS_INTERRUPT)
+    list(APPEND ARGS_CONFIGURE_ARGS
+      "-DINTERRUPT_BUILD_SRC=${RunCMake_SOURCE_DIR}/InterruptBuild.c")
+  endif()
   set(RunCMake_TEST_SOURCE_DIR ${RunCMake_SOURCE_DIR}/project)
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(maybe_CMAKE_BUILD_TYPE -DCMAKE_BUILD_TYPE=Debug)
@@ -176,6 +182,51 @@ function(instrument test)
       unset(RunCMake_TEST_OUTPUT_MERGE)
     endif()
   endif()
+  if (ARGS_INTERRUPT)
+    # Build just the interrupt helper so it exists for the interrupted build.
+    # This uninterrupted build runs the postCMakeBuild hook, so remove the
+    # postCMakeBuild.hook file it produces; its absence after the interrupted
+    # build below then proves that build's hook was skipped.
+    run_cmake_command(${test}-helper
+      ${CMAKE_COMMAND} --build . --config Debug --target InterruptBuild)
+    file(REMOVE ${v1}/postCMakeBuild.hook)
+
+    # Run an instrumented build and interrupt it after a few seconds, while the
+    # slow target is still running.  Multi-config generators place the helper
+    # under a per-config subdirectory; the build below uses --config Debug.
+    set(helper_dir ${RunCMake_TEST_BINARY_DIR})
+    if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
+      set(helper_dir ${helper_dir}/Debug)
+    endif()
+    set(helper ${helper_dir}/InterruptBuild${CMAKE_EXECUTABLE_SUFFIX})
+    set(RunCMake_QUIET_ERROR 1)
+    run_cmake_command(${test}-build
+      ${helper} 3
+      ${CMAKE_COMMAND} --build . --config Debug)
+    unset(RunCMake_QUIET_ERROR)
+  endif()
+  if (ARGS_INTERRUPT_SEAM)
+    # Drive the cmakeBuild interrupt path deterministically via the test-only
+    # injection seam, with no OS signal, so it runs on every generator.  First
+    # build normally so the postCMakeBuild hook runs and creates its marker
+    # file; remove it so its absence after the injected build proves that
+    # build's hook was skipped.
+    set(RunCMake_QUIET_ERROR 1)
+    run_cmake_command(${test}-warmup
+      ${CMAKE_COMMAND} --build . --config Debug)
+    file(REMOVE ${v1}/postCMakeBuild.hook)
+
+    # Inject an interrupt (SIGINT == 2) via the undocumented test seam and build
+    # again; cmake exits cleanly but writes the interrupted cmakeBuild snippet
+    # and skips the hook.
+    set(ENV{__CMAKE_INSTRUMENTATION_TEST_INTERRUPT} 2)
+    set(RunCMake_TEST_EXPECT_RESULT 0)
+    run_cmake_command(${test}-build
+      ${CMAKE_COMMAND} --build . --config Debug)
+    unset(RunCMake_TEST_EXPECT_RESULT)
+    unset(ENV{__CMAKE_INSTRUMENTATION_TEST_INTERRUPT})
+    unset(RunCMake_QUIET_ERROR)
+  endif()
   if (ARGS_BUILD_MAKE_PROGRAM)
     set(RunCMake_TEST_OUTPUT_MERGE 1)
     set(RunCMake_QUIET_ERROR 1)
@@ -205,6 +256,22 @@ function(instrument test)
     unset(RunCMake_CHECK_ONLY)
   endif()
 endfunction()
+
+if (INSTRUMENTATION_INTERRUPT_REAL)
+  # RunCMake.InstrumentationInterrupt runs ONLY the real-signal/
+  # console-event interrupt case, as it must be excluded from MemCheck.
+  #
+  # POSIX delivers a real SIGINT to a contained process group.  On Windows, only
+  # the Ninja generator is exercised: its native tool reliably stops on the
+  # console event and does not re-broadcast it to the runner; the other Windows
+  # make-family generators are covered by the injection seam instead.
+  if (NOT WIN32 OR RunCMake_GENERATOR MATCHES "Ninja")
+    instrument(interrupt INTERRUPT
+      CHECK_SCRIPT check-interrupted.cmake
+    )
+  endif()
+  return()
+endif()
 
 # Bad Queries
 instrument(bad-option BAD_QUERY
@@ -402,6 +469,14 @@ if (NOT Skip_COMPILE_TRACE_QUERY_Case)
     )
   endif()
 endif()
+
+# Test that interrupting `cmake --build` still writes the cmakeBuild snippet,
+# recording the interrupting signal.  This case uses the deterministic test
+# seam (no OS event).  The real OS-event counterpart runs in the separate
+# RunCMake.InstrumentationInterrupt suite.
+instrument(interrupt INTERRUPT_SEAM
+  CHECK_SCRIPT check-interrupted.cmake
+)
 
 # Test make/ninja hooks
 if(RunCMake_GENERATOR STREQUAL "FASTBuild")
