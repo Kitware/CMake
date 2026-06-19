@@ -260,8 +260,9 @@ key is required, but all other fields are optional.
   for the most recent minor version, even if an earlier minor version is
   requested.
 
-  Currently, the only supported version is ``1.0``. Query files with an unknown
-  data version will be ignored.
+  Currently, the only supported major version is ``1``.  Query files
+  requesting a minor version up to the maximum described in `Data Version`_
+  are accepted; those with an unknown data version will be ignored.
 
 ``callbacks``
   A list of command-line strings for `Callbacks`_ to handle collected
@@ -437,8 +438,8 @@ Snippet files have a filename with the syntax
 ``<role>-<hash>-<timestamp>.json`` and contain the following data:
 
   ``version``
-    The `Data Version`_ of the snippet file. Currently the version is
-    always ``{ "major": 1, "minor": 0 }``.
+    The `Data Version`_ of the snippet file, written as
+    ``{ "major": 1, "minor": N }`` where ``N`` is the most recent minor version.
 
   ``command``
     The full command executed. Excluded when ``role`` is ``build``.
@@ -613,8 +614,8 @@ generated whenever `Indexing`_ occurs and deleted after any user-specified
 `Callbacks`_ are executed.
 
 ``version``
-  The `Data Version`_ of the index file. Currently this is always written as:
-  ``{ "major": 1, "minor": 0 }``.
+  The `Data Version`_ of the index file, written as
+  ``{ "major": 1, "minor": N }`` where ``N`` is the most recent minor version.
 
 ``buildDir``
   The build directory of the CMake project.
@@ -716,8 +717,8 @@ corresponding to the CMake invocation responsible for generating its command.
 Each CMake content file contains the following:
 
   ``version``
-    The `Data Version`_ of the content file. Currently the version is
-    always ``{ "major": 1, "minor": 0 }``.
+    The `Data Version`_ of the content file, written as
+    ``{ "major": 1, "minor": N }`` where ``N`` is the most recent minor version.
 
   ``project``
     The value of :variable:`CMAKE_PROJECT_NAME`.
