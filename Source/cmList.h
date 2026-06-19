@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <initializer_list>
 #include <iterator>
 #include <memory>
@@ -873,6 +874,9 @@ public:
   };
   cmList& sort(SortConfiguration config = SortConfiguration{});
   cmList& sort(SortConfiguration config, cmMakefile& makefile);
+  cmList& sort(
+    SortConfiguration config,
+    std::function<bool(std::string const&, std::string const&)> comparator);
 
   // exception raised on error during transform operations
   class transform_error : public std::runtime_error

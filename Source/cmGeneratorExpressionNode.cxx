@@ -2130,6 +2130,96 @@ std::string EvaluateTransformPredicate(
   }
 }
 
+enum class SortOptionResult
+{
+  NotRecognized, // `arg` is not a SORT option keyword
+  Parsed,        // recognized and applied to `sortConfig`
+  Error,         // recognized but malformed or duplicate (already reported)
+};
+
+// Parse one $<LIST:SORT> colon-option (COMPARE:/CASE:/ORDER:) into sortConfig.
+SortOptionResult ParseSortOption(std::string const& arg,
+                                 cmList::SortConfiguration& sortConfig,
+                                 cm::GenEx::Evaluation* eval,
+                                 GeneratorExpressionContent const* content)
+{
+  using SortConfig = cmList::SortConfiguration;
+  auto const COMPARE = "COMPARE:"_s;
+  auto const CASE = "CASE:"_s;
+  auto const ORDER = "ORDER:"_s;
+
+  if (cmHasPrefix(arg, COMPARE)) {
+    if (sortConfig.Compare != SortConfig::CompareMethod::DEFAULT) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "sub-command SORT, COMPARE option has been specified "
+                  "multiple times.");
+      return SortOptionResult::Error;
+    }
+    auto option = cm::string_view{ arg.c_str() + COMPARE.length() };
+    if (option == "STRING"_s) {
+      sortConfig.Compare = SortConfig::CompareMethod::STRING;
+    } else if (option == "FILE_BASENAME"_s) {
+      sortConfig.Compare = SortConfig::CompareMethod::FILE_BASENAME;
+    } else if (option == "NATURAL"_s) {
+      sortConfig.Compare = SortConfig::CompareMethod::NATURAL;
+    } else {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("sub-command SORT, an invalid COMPARE option has "
+                           "been specified: \"",
+                           option, "\"."));
+      return SortOptionResult::Error;
+    }
+    return SortOptionResult::Parsed;
+  }
+
+  if (cmHasPrefix(arg, CASE)) {
+    if (sortConfig.Case != SortConfig::CaseSensitivity::DEFAULT) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "sub-command SORT, CASE option has been specified multiple "
+                  "times.");
+      return SortOptionResult::Error;
+    }
+    auto option = cm::string_view{ arg.c_str() + CASE.length() };
+    if (option == "SENSITIVE"_s) {
+      sortConfig.Case = SortConfig::CaseSensitivity::SENSITIVE;
+    } else if (option == "INSENSITIVE"_s) {
+      sortConfig.Case = SortConfig::CaseSensitivity::INSENSITIVE;
+    } else {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("sub-command SORT, an invalid CASE option has been "
+                           "specified: \"",
+                           option, "\"."));
+      return SortOptionResult::Error;
+    }
+    return SortOptionResult::Parsed;
+  }
+
+  if (cmHasPrefix(arg, ORDER)) {
+    if (sortConfig.Order != SortConfig::OrderMode::DEFAULT) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "sub-command SORT, ORDER option has been specified multiple "
+                  "times.");
+      return SortOptionResult::Error;
+    }
+    auto option = cm::string_view{ arg.c_str() + ORDER.length() };
+    if (option == "ASCENDING"_s) {
+      sortConfig.Order = SortConfig::OrderMode::ASCENDING;
+    } else if (option == "DESCENDING"_s) {
+      sortConfig.Order = SortConfig::OrderMode::DESCENDING;
+    } else {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("sub-command SORT, an invalid ORDER option has been "
+                 "specified: \"",
+                 option, "\"."));
+      return SortOptionResult::Error;
+    }
+    return SortOptionResult::Parsed;
+  }
+
+  return SortOptionResult::NotRecognized;
+}
+
 // Parse the optional trailing selector of a $<LIST:TRANSFORM,...> action
 // (AT <i>... / FOR <start> <stop> [<step>] / REGEX <re>) into a
 // cmList::TransformSelector.  Returns nullptr (after reporting via `eval`) on
@@ -2706,97 +2796,19 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                       false)) {
               auto list = GetList(args.front());
               args.advance(1);
-              auto const COMPARE = "COMPARE:"_s;
-              auto const CASE = "CASE:"_s;
-              auto const ORDER = "ORDER:"_s;
-              using SortConfig = cmList::SortConfiguration;
-              SortConfig sortConfig;
+              cmList::SortConfiguration sortConfig;
               for (auto const& arg : args) {
-                if (cmHasPrefix(arg, COMPARE)) {
-                  if (sortConfig.Compare !=
-                      SortConfig::CompareMethod::DEFAULT) {
-                    reportError(ev, cnt->GetOriginalExpression(),
-                                "sub-command SORT, COMPARE option has been "
-                                "specified multiple times.");
+                switch (ParseSortOption(arg, sortConfig, ev, cnt)) {
+                  case SortOptionResult::Parsed:
+                    break;
+                  case SortOptionResult::Error:
                     return std::string{};
-                  }
-                  auto option =
-                    cm::string_view{ arg.c_str() + COMPARE.length() };
-                  if (option == "STRING"_s) {
-                    sortConfig.Compare = SortConfig::CompareMethod::STRING;
-                    continue;
-                  }
-                  if (option == "FILE_BASENAME"_s) {
-                    sortConfig.Compare =
-                      SortConfig::CompareMethod::FILE_BASENAME;
-                    continue;
-                  }
-                  if (option == "NATURAL"_s) {
-                    sortConfig.Compare = SortConfig::CompareMethod::NATURAL;
-                    continue;
-                  }
-                  reportError(
-                    ev, cnt->GetOriginalExpression(),
-                    cmStrCat(
-                      "sub-command SORT, an invalid COMPARE option has been "
-                      "specified: \"",
-                      option, "\"."));
-                  return std::string{};
-                }
-                if (cmHasPrefix(arg, CASE)) {
-                  if (sortConfig.Case !=
-                      SortConfig::CaseSensitivity::DEFAULT) {
+                  case SortOptionResult::NotRecognized:
                     reportError(ev, cnt->GetOriginalExpression(),
-                                "sub-command SORT, CASE option has been "
-                                "specified multiple times.");
+                                cmStrCat("sub-command SORT, option \"", arg,
+                                         "\" is invalid."));
                     return std::string{};
-                  }
-                  auto option = cm::string_view{ arg.c_str() + CASE.length() };
-                  if (option == "SENSITIVE"_s) {
-                    sortConfig.Case = SortConfig::CaseSensitivity::SENSITIVE;
-                    continue;
-                  }
-                  if (option == "INSENSITIVE"_s) {
-                    sortConfig.Case = SortConfig::CaseSensitivity::INSENSITIVE;
-                    continue;
-                  }
-                  reportError(
-                    ev, cnt->GetOriginalExpression(),
-                    cmStrCat(
-                      "sub-command SORT, an invalid CASE option has been "
-                      "specified: \"",
-                      option, "\"."));
-                  return std::string{};
                 }
-                if (cmHasPrefix(arg, ORDER)) {
-                  if (sortConfig.Order != SortConfig::OrderMode::DEFAULT) {
-                    reportError(ev, cnt->GetOriginalExpression(),
-                                "sub-command SORT, ORDER option has been "
-                                "specified multiple times.");
-                    return std::string{};
-                  }
-                  auto option =
-                    cm::string_view{ arg.c_str() + ORDER.length() };
-                  if (option == "ASCENDING"_s) {
-                    sortConfig.Order = SortConfig::OrderMode::ASCENDING;
-                    continue;
-                  }
-                  if (option == "DESCENDING"_s) {
-                    sortConfig.Order = SortConfig::OrderMode::DESCENDING;
-                    continue;
-                  }
-                  reportError(
-                    ev, cnt->GetOriginalExpression(),
-                    cmStrCat(
-                      "sub-command SORT, an invalid ORDER option has been "
-                      "specified: \"",
-                      option, "\"."));
-                  return std::string{};
-                }
-                reportError(ev, cnt->GetOriginalExpression(),
-                            cmStrCat("sub-command SORT, option \"", arg,
-                                     "\" is invalid."));
-                return std::string{};
               }
 
               return list.sort(sortConfig).to_string();
