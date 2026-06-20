@@ -23,16 +23,25 @@ This is intended to set up file tabs in Visual Studio.
 The group is scoped in the directory where the command is called, and applies
 to sources in targets created in that directory.
 
-If the file is part of a file set, search for a group which explicitly lists
-this file set. If no group has been found or the file is not part of a file
-set, search for a group which explicitly lists the file.
-
 If the file set or the source file matches multiple groups, the *last* group
 that explicitly lists the file set with ``FILE_SETS`` or the file with
 ``FILES`` will be favored, if any.
 
-If no group explicitly lists the file set or the file, the *last* group whose
-regular expression matches the file will be favored.
+To determine the group of a source file, the algorithm used is as follows:
+
+1. The file is part of a file set:
+
+  a. Use the :prop_fs:`SOURCE_GROUP` file set property if any.
+  b. Search for the *last* group which explicitly lists this file set.
+
+2. The file is not part of a file set or no group was defined for this file
+   set:
+
+  a. Use the :prop_sf:`SOURCE_GROUP` source property if any.
+  b. Search for the *last* group which explicitly lists this source file.
+
+3. If no group explicitly lists the file set or the file, the *last* group
+   whose regular expression matches the file will be favored.
 
 The ``<group>`` and ``<prefix>`` arguments may contain forward
 slashes or backslashes to specify subgroups.  Backslashes need to be escaped

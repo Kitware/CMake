@@ -557,6 +557,7 @@ Properties on File Sets
    /prop_fs/SKIP_PRECOMPILE_HEADERS
    /prop_fs/SKIP_UNITY_BUILD_INCLUSION
    /prop_fs/SOURCES
+   /prop_fs/SOURCE_GROUP
    /prop_fs/TYPE
 
 .. _`Test Properties`:
@@ -636,6 +637,7 @@ Properties on Source Files
    /prop_sf/SKIP_LINTING
    /prop_sf/SKIP_PRECOMPILE_HEADERS
    /prop_sf/SKIP_UNITY_BUILD_INCLUSION
+   /prop_sf/SOURCE_GROUP
    /prop_sf/Swift_DEPENDENCIES_FILE
    /prop_sf/Swift_DIAGNOSTICS_FILE
    /prop_sf/SYMBOLIC
