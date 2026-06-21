@@ -990,6 +990,150 @@ function(_pkgconfig_extract_isystem _prefix)
   set(${_prefix}_INCLUDE_DIRS "${incdirs}" PARENT_SCOPE)
 endfunction()
 
+#=============================================================================
+# Parse pkg-config --cflags or --libs output into the component variables
+# exposed by pkg_check_modules()
+#
+# _prefix     - prefix for result variables (e.g. "FOO")
+# _flags_output - raw stdout from pkg-config --cflags or --libs
+# _is_libs    - TRUE if parsing --libs output, FALSE for --cflags
+# _static     - TRUE to use STATIC_ prefix for variable names
+#
+function(_pkgconfig_parse_flags _prefix _flags_output _is_libs _static)
+  string(REGEX REPLACE "[\r\n]" " " _pkgconfig_pf_output "${_flags_output}")
+
+  # Unquote if needed (same logic as _pkgconfig_invoke)
+  if((PkgConfig_VERSION VERSION_LESS 0.29.1) OR
+      (PkgConfig_VERSION VERSION_GREATER_EQUAL 1.0 AND PkgConfig_VERSION VERSION_LESS 1.5.1))
+    if(_pkgconfig_pf_output MATCHES "^\"(.*)\"$")
+      set(_pkgconfig_pf_output "${CMAKE_MATCH_1}")
+    elseif(_pkgconfig_pf_output MATCHES "^'(.*)'$")
+      set(_pkgconfig_pf_output "${CMAKE_MATCH_1}")
+    endif()
+  endif()
+
+  separate_arguments(_pkgconfig_pf_list UNIX_COMMAND "${_pkgconfig_pf_output}")
+
+  if(${_static})
+    set(_pkgconfig_pf_var_prefix "STATIC_")
+  else()
+    set(_pkgconfig_pf_var_prefix "")
+  endif()
+
+  set(_pkgconfig_pf_libs "")
+  set(_pkgconfig_pf_lib_dirs "")
+  set(_pkgconfig_pf_include_dirs "")
+  set(_pkgconfig_pf_other "")
+  set(_pkgconfig_pf_next_fw FALSE)
+  set(_pkgconfig_pf_next_isystem FALSE)
+
+  foreach(_pkgconfig_pf_flag IN LISTS _pkgconfig_pf_list)
+    if(${_is_libs})
+      # Linker flags: -L, -l, -framework, and other
+      if(_pkgconfig_pf_next_fw)
+        list(APPEND _pkgconfig_pf_libs "-framework ${_pkgconfig_pf_flag}")
+        set(_pkgconfig_pf_next_fw FALSE)
+      elseif(_pkgconfig_pf_flag STREQUAL "-framework")
+        set(_pkgconfig_pf_next_fw TRUE)
+      elseif(_pkgconfig_pf_flag MATCHES "^-L(.+)$")
+        list(APPEND _pkgconfig_pf_lib_dirs "${CMAKE_MATCH_1}")
+      elseif(_pkgconfig_pf_flag MATCHES "^-l(.+)$")
+        list(APPEND _pkgconfig_pf_libs "${CMAKE_MATCH_1}")
+      else()
+        list(APPEND _pkgconfig_pf_other "${_pkgconfig_pf_flag}")
+      endif()
+    else()
+      # Compiler flags: -I, -isystem, and other
+      if(_pkgconfig_pf_next_isystem)
+        list(APPEND _pkgconfig_pf_include_dirs "${_pkgconfig_pf_flag}")
+        set(_pkgconfig_pf_next_isystem FALSE)
+      elseif(_pkgconfig_pf_flag STREQUAL "-isystem")
+        set(_pkgconfig_pf_next_isystem TRUE)
+      elseif(_pkgconfig_pf_flag MATCHES "^-isystem(.+)$")
+        string(SUBSTRING "${_pkgconfig_pf_flag}" 8 -1 _pkgconfig_pf_path)
+        list(APPEND _pkgconfig_pf_include_dirs "${_pkgconfig_pf_path}")
+      elseif(_pkgconfig_pf_flag MATCHES "^-I(.+)$")
+        list(APPEND _pkgconfig_pf_include_dirs "${CMAKE_MATCH_1}")
+      else()
+        list(APPEND _pkgconfig_pf_other "${_pkgconfig_pf_flag}")
+      endif()
+    endif()
+  endforeach()
+
+  if(${_is_libs})
+    _pkgconfig_set(${_prefix}_${_pkgconfig_pf_var_prefix}LIBRARIES "${_pkgconfig_pf_libs}")
+    _pkgconfig_set(${_prefix}_${_pkgconfig_pf_var_prefix}LIBRARY_DIRS "${_pkgconfig_pf_lib_dirs}")
+    _pkgconfig_set(${_prefix}_${_pkgconfig_pf_var_prefix}LDFLAGS "${_pkgconfig_pf_list}")
+    _pkgconfig_set(${_prefix}_${_pkgconfig_pf_var_prefix}LDFLAGS_OTHER "${_pkgconfig_pf_other}")
+  else()
+    _pkgconfig_set(${_prefix}_${_pkgconfig_pf_var_prefix}INCLUDE_DIRS "${_pkgconfig_pf_include_dirs}")
+    _pkgconfig_set(${_prefix}_${_pkgconfig_pf_var_prefix}CFLAGS "${_pkgconfig_pf_list}")
+    _pkgconfig_set(${_prefix}_${_pkgconfig_pf_var_prefix}CFLAGS_OTHER "${_pkgconfig_pf_other}")
+  endif()
+endfunction()
+
+#=============================================================================
+# Retrieve dynamic and static compiler/linker flags for the given packages
+macro(_pkgconfig_get_combined_flags _prefix _pkgs)
+  # --cflags (non-static)
+  execute_process(
+    COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} --cflags ${_pkgs}
+    OUTPUT_VARIABLE _pkgconfig_gcf_cflags
+    RESULT_VARIABLE _pkgconfig_gcf_cflags_res
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT _pkgconfig_gcf_cflags_res)
+    _pkgconfig_parse_flags(${_prefix} "${_pkgconfig_gcf_cflags}" FALSE FALSE)
+  else()
+    _pkgconfig_unset(${_prefix}_INCLUDE_DIRS)
+    _pkgconfig_unset(${_prefix}_CFLAGS)
+    _pkgconfig_unset(${_prefix}_CFLAGS_OTHER)
+  endif()
+
+  # --libs (non-static)
+  execute_process(
+    COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} --libs ${_pkgs}
+    OUTPUT_VARIABLE _pkgconfig_gcf_libs
+    RESULT_VARIABLE _pkgconfig_gcf_libs_res
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT _pkgconfig_gcf_libs_res)
+    _pkgconfig_parse_flags(${_prefix} "${_pkgconfig_gcf_libs}" TRUE FALSE)
+  else()
+    _pkgconfig_unset(${_prefix}_LIBRARIES)
+    _pkgconfig_unset(${_prefix}_LIBRARY_DIRS)
+    _pkgconfig_unset(${_prefix}_LDFLAGS)
+    _pkgconfig_unset(${_prefix}_LDFLAGS_OTHER)
+  endif()
+
+  # --static --cflags
+  execute_process(
+    COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} --static --cflags ${_pkgs}
+    OUTPUT_VARIABLE _pkgconfig_gcf_static_cflags
+    RESULT_VARIABLE _pkgconfig_gcf_static_cflags_res
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT _pkgconfig_gcf_static_cflags_res)
+    _pkgconfig_parse_flags(${_prefix} "${_pkgconfig_gcf_static_cflags}" FALSE TRUE)
+  else()
+    _pkgconfig_unset(${_prefix}_STATIC_INCLUDE_DIRS)
+    _pkgconfig_unset(${_prefix}_STATIC_CFLAGS)
+    _pkgconfig_unset(${_prefix}_STATIC_CFLAGS_OTHER)
+  endif()
+
+  # --static --libs
+  execute_process(
+    COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} --static --libs ${_pkgs}
+    OUTPUT_VARIABLE _pkgconfig_gcf_static_libs
+    RESULT_VARIABLE _pkgconfig_gcf_static_libs_res
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT _pkgconfig_gcf_static_libs_res)
+    _pkgconfig_parse_flags(${_prefix} "${_pkgconfig_gcf_static_libs}" TRUE TRUE)
+  else()
+    _pkgconfig_unset(${_prefix}_STATIC_LIBRARIES)
+    _pkgconfig_unset(${_prefix}_STATIC_LIBRARY_DIRS)
+    _pkgconfig_unset(${_prefix}_STATIC_LDFLAGS)
+    _pkgconfig_unset(${_prefix}_STATIC_LDFLAGS_OTHER)
+  endif()
+endmacro()
+
 ###
 macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _prefix)
   _pkgconfig_unset(${_prefix}_FOUND)
@@ -1053,28 +1197,22 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_INCLUDEDIR)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_LIBDIR)
 
-      list(APPEND _pkg_check_modules_packages    "${_pkg_check_modules_pkg_name}")
-
-      # create the final query which is of the format:
-      # * <pkg-name> > <version>
-      # * <pkg-name> >= <version>
-      # * <pkg-name> = <version>
-      # * <pkg-name> <= <version>
-      # * <pkg-name> < <version>
-      # * --exists <pkg-name>
-      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors)
+      # --modversion validates any version constraint and prints the module
+      # version.  --variable=prefix prints the prefix on the following line
+      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors --modversion --variable=prefix)
       if (_pkg_check_modules_pkg_op)
         list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name} ${_pkg_check_modules_pkg_op} ${_pkg_check_modules_pkg_ver}")
       else()
-        list(APPEND _pkg_check_modules_exist_query --exists)
         list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name}")
       endif()
 
       # execute the query
       execute_process(
         COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} ${_pkg_check_modules_exist_query}
+        OUTPUT_VARIABLE _pkgconfig_module_version
         RESULT_VARIABLE _pkgconfig_retval
         ERROR_VARIABLE _pkgconfig_error
+        OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_STRIP_TRAILING_WHITESPACE)
 
       # evaluate result and tell failures
@@ -1084,6 +1222,20 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         endif()
 
         string(APPEND _pkg_check_modules_failed " - ${_pkg_check_modules_pkg}\n")
+      else()
+        # Expected output is version on the first line and prefix on the second
+        string(REGEX REPLACE "\n" ";" _pkgconfig_combined_list "${_pkgconfig_module_version}")
+        list(GET _pkgconfig_combined_list 0 _pkgconfig_module_version)
+        list(LENGTH _pkgconfig_combined_list _pkgconfig_combined_len)
+        if(_pkgconfig_combined_len GREATER 1)
+          list(GET _pkgconfig_combined_list 1 _pkgconfig_module_prefix)
+          separate_arguments(_pkgconfig_module_prefix UNIX_COMMAND "${_pkgconfig_module_prefix}")
+        else()
+          set(_pkgconfig_module_prefix "")
+        endif()
+        list(APPEND _pkg_check_modules_packages "${_pkg_check_modules_pkg_name}")
+        set(_pkgconfig_${_pkg_check_modules_pkg_name}_VERSION "${_pkgconfig_module_version}")
+        set(_pkgconfig_${_pkg_check_modules_pkg_name}_PREFIX "${_pkgconfig_module_prefix}")
       endif()
     endforeach()
 
@@ -1108,43 +1260,22 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
           set(_pkg_check_prefix "${_prefix}_${_pkg_check_modules_pkg}")
         endif()
 
-        _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" VERSION    ""   --modversion )
-        pkg_get_variable("${_pkg_check_prefix}_PREFIX" ${_pkg_check_modules_pkg} "prefix")
+        _pkgconfig_set(${_pkg_check_prefix}_VERSION "${_pkgconfig_${_pkg_check_modules_pkg}_VERSION}")
+        _pkgconfig_set(${_pkg_check_prefix}_PREFIX "${_pkgconfig_${_pkg_check_modules_pkg}_PREFIX}")
         pkg_get_variable("${_pkg_check_prefix}_INCLUDEDIR" ${_pkg_check_modules_pkg} "includedir")
         pkg_get_variable("${_pkg_check_prefix}_LIBDIR" ${_pkg_check_modules_pkg} "libdir")
         foreach (variable IN ITEMS PREFIX INCLUDEDIR LIBDIR)
           _pkgconfig_set("${_pkg_check_prefix}_${variable}" "${${_pkg_check_prefix}_${variable}}")
         endforeach ()
-          _pkgconfig_set("${_pkg_check_prefix}_MODULE_NAME" "${_pkg_check_modules_pkg}")
+        _pkgconfig_set("${_pkg_check_prefix}_MODULE_NAME" "${_pkg_check_modules_pkg}")
 
         if (NOT ${_is_silent})
-          message(STATUS "  Found ${_pkg_check_modules_pkg}, version ${_pkgconfig_VERSION}")
+          message(STATUS "  Found ${_pkg_check_modules_pkg}, version ${_pkgconfig_${_pkg_check_modules_pkg}_VERSION}")
         endif ()
       endforeach()
 
-      # set variables which are combined for multiple modules
-      _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LIBRARIES     "(^| )-l"             --libs-only-l )
-      _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LIBRARY_DIRS  "(^| )-L"             --libs-only-L )
-      _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LDFLAGS       ""                    --libs )
-      _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LDFLAGS_OTHER ""                    --libs-only-other )
-
-      if (APPLE AND "-framework" IN_LIST ${_prefix}_LDFLAGS_OTHER)
-        _pkgconfig_extract_frameworks("${_prefix}")
-        # Using _pkgconfig_set in this scope so that a future policy can switch to normal variables
-        _pkgconfig_set("${_pkg_check_prefix}_LIBRARIES" "${${_pkg_check_prefix}_LIBRARIES}")
-        _pkgconfig_set("${_pkg_check_prefix}_LDFLAGS_OTHER" "${${_pkg_check_prefix}_LDFLAGS_OTHER}")
-      endif()
-
-      _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" INCLUDE_DIRS  "(^| )(-I|-isystem ?)" --cflags-only-I )
-      _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS        ""                    --cflags )
-      _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS_OTHER  ""                    --cflags-only-other )
-
-      if (${_prefix}_CFLAGS_OTHER MATCHES "-isystem")
-        _pkgconfig_extract_isystem("${_prefix}")
-        # Using _pkgconfig_set in this scope so that a future policy can switch to normal variables
-        _pkgconfig_set("${_pkg_check_prefix}_CFLAGS_OTHER" "${${_pkg_check_prefix}_CFLAGS_OTHER}")
-        _pkgconfig_set("${_pkg_check_prefix}_INCLUDE_DIRS" "${${_pkg_check_prefix}_INCLUDE_DIRS}")
-      endif ()
+      # Set variables which are combined for multiple modules
+      _pkgconfig_get_combined_flags("${_prefix}" "${_pkg_check_modules_packages}")
 
       _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global})
     endif()
