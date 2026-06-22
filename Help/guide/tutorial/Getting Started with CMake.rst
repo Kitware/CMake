@@ -596,7 +596,7 @@ Continue to edit files from ``Step1``. Start on ``TODO 7`` and complete through
 ``TODO 9``. In this exercise, we need to add the ``MathFunctions`` target to
 the ``Tutorial`` target's linked libraries using :command:`target_link_libraries`.
 
-After modifying the CML, update ``tutorial.cxx`` to use the
+After modifying the CML, update ``Tutorial.cxx`` to use the
 ``mathfunctions::sqrt()`` function instead of ``std::sqrt``.
 
 Build and Run

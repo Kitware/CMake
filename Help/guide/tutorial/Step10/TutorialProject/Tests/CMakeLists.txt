@@ -8,7 +8,7 @@ target_sources(TestMathFunctions
 # TODO1: Find the SimpleTest package. This should be a required dependency when
 #        building tests.
 
-# TODO2: Add the SimpleTest::SimpleTest target to Test MathFunctions
+# TODO2: Add the SimpleTest::SimpleTest target to TestMathFunctions
 
 target_link_libraries(TestMathFunctions
   PRIVATE
