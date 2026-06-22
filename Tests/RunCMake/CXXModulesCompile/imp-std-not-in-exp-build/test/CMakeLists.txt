@@ -39,7 +39,7 @@ list(FILTER usage_dependent_targets EXCLUDE REGEX "CXXModules::")
 # Strip quotes.
 string(REPLACE "\"" "" usage_dependent_targets "${usage_dependent_targets}")
 
-if ("__CMAKE::CXX23" IN_LIST usage_dependent_targets)
+if ("@cmake_cxx_std" IN_LIST usage_dependent_targets)
   message(SEND_ERROR
-    "The main export requires the '__CMAKE::CXX23' target")
+    "The main export requires the '@cmake_cxx_std' target")
 endif ()

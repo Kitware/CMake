@@ -1146,8 +1146,9 @@ public:
 
   std::string GetImportedXcFrameworkPath(std::string const& config) const;
 
-  bool ApplyCXXStdTargets();
-  cmCxxModuleUsageEffects const& GetCxxModuleUsageEffects() const;
+  bool ApplyCXXStdTarget();
+  cmCxxModuleUsageEffects const& GetCxxModuleUsageEffects(
+    std::string const& config) const;
   cmGeneratorTarget const* GetTargetForCxxModules(
     std::string const& config, cmGeneratorTarget const& bmiConsumer) const;
   bool DiscoverSyntheticTargets(
@@ -1617,7 +1618,7 @@ private:
     std::map<cmSourceFile const*, ClassifiedFlags> SourceFlags;
   };
   mutable std::map<std::string, cmGeneratorTarget*> SynthCxxTargets;
-  mutable cm::optional<cmCxxModuleUsageEffects> CxxModuleUsageEffects;
+  mutable std::map<std::string, cmCxxModuleUsageEffects> CxxModuleUsageEffects;
   mutable std::map<std::string, InfoByConfig> Configs;
   std::unique_ptr<cmGeneratorFileSets> FileSets;
   bool PchReused = false;

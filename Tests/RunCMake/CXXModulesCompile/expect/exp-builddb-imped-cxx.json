@@ -149,9 +149,9 @@
             "-Dfrom_cmake_cxx_flags",
             "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
             "<CXX20_OPTION>",
-            "-Ddep_interface_option",
             "-Dtarget_interface_option",
             "-Dtarget_public_option",
+            "-Ddep_interface_option",
             "PATH:-Ddepflag=\"CMakeFiles/CXXModules__export_build_database@synth_0.dir<CONFIG_DIR>/.d\"",
             "REGEX:<BMI_ONLY_FLAG>",
             "PATH:<OUTPUT_FLAG>CMakeFiles/CXXModules__export_build_database@synth_0.dir<CONFIG_DIR>/",
@@ -173,9 +173,9 @@
             "-Dfrom_cmake_cxx_flags",
             "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
             "<CXX20_OPTION>",
-            "-Ddep_interface_option",
             "-Dtarget_interface_option",
-            "-Dtarget_public_option"
+            "-Dtarget_public_option",
+            "-Ddep_interface_option"
           ],
           "local-arguments": [
             "-D_MBCS",
@@ -192,9 +192,9 @@
             "-Dfrom_cmake_cxx_flags",
             "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
             "<CXX20_OPTION>",
-            "-Ddep_interface_option",
             "-Dtarget_interface_option",
-            "-Dtarget_public_option"
+            "-Dtarget_public_option",
+            "-Ddep_interface_option"
           ],
           "private": false,
           "provides": {
@@ -231,8 +231,8 @@
             "-Dfrom_compile_options",
             "-Dtarget_private_option",
             "-Dtarget_public_option",
-            "-Ddep_interface_option",
             "-Dtarget_interface_option",
+            "-Ddep_interface_option",
             "PATH:-Ddepflag=\"CMakeFiles/CXXModules__export_build_database@synth_1.dir<CONFIG_DIR>/.d\"",
             "REGEX:<BMI_ONLY_FLAG>",
             "PATH:<OUTPUT_FLAG>CMakeFiles/CXXModules__export_build_database@synth_1.dir<CONFIG_DIR>/",
@@ -257,8 +257,8 @@
             "-Dfrom_compile_options",
             "-Dtarget_private_option",
             "-Dtarget_public_option",
-            "-Ddep_interface_option",
-            "-Dtarget_interface_option"
+            "-Dtarget_interface_option",
+            "-Ddep_interface_option"
           ],
           "local-arguments": [
             "-D_MBCS",
@@ -278,8 +278,8 @@
             "-Dfrom_compile_options",
             "-Dtarget_private_option",
             "-Dtarget_public_option",
-            "-Ddep_interface_option",
-            "-Dtarget_interface_option"
+            "-Dtarget_interface_option",
+            "-Ddep_interface_option"
           ],
           "private": false,
           "provides": {
