@@ -1114,9 +1114,15 @@ endif()
 
 # Determine windows search path suffix for libraries
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-  if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64")
+  if(_CUDA_TARGET_PROCESSOR STREQUAL "AMD64" OR
+      _CUDA_TARGET_PROCESSOR STREQUAL "x64" OR
+      _CUDA_TARGET_PROCESSOR STREQUAL "ARM64EC" # Can link x64, but not arm64.
+    )
     set(_CUDAToolkit_win_search_dirs lib/x64)
     set(_CUDAToolkit_win_stub_search_dirs lib/x64/stubs)
+  elseif(_CUDA_TARGET_PROCESSOR STREQUAL "ARM64")
+    set(_CUDAToolkit_win_search_dirs lib/arm64)
+    set(_CUDAToolkit_win_stub_search_dirs lib/arm64/stubs)
   endif()
 endif()
 
@@ -1538,7 +1544,7 @@ if(CUDAToolkit_FOUND)
         NAMES nvToolsExt64_1 nvToolsExt64 nvToolsExt
         PATHS ENV NVTOOLSEXT_PATH
               ENV CUDA_PATH
-        PATH_SUFFIXES lib/x64 lib
+        PATH_SUFFIXES ${_CUDAToolkit_win_search_dirs} lib
       )
     endif()
     _CUDAToolkit_find_and_add_import_lib(nvToolsExt ALT nvToolsExt64)
