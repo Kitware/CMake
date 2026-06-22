@@ -1053,19 +1053,24 @@ else()
   endif()
 endif()
 
-# Figure out the target directory when either crosscompiling
+# Figure out the target processor which is required to determine
+# our target dir ( linux ) or our lib dir ( windows )
+#
+# When a language is enabled we can use its compiler's target architecture.
+if(CMAKE_CUDA_COMPILER_LOADED AND CMAKE_CUDA_COMPILER_ARCHITECTURE_ID)
+  set(_CUDA_TARGET_PROCESSOR "${CMAKE_CUDA_COMPILER_ARCHITECTURE_ID}")
+elseif(CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID)
+  set(_CUDA_TARGET_PROCESSOR "${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
+elseif(CMAKE_C_COMPILER_LOADED AND CMAKE_C_COMPILER_ARCHITECTURE_ID)
+  set(_CUDA_TARGET_PROCESSOR "${CMAKE_C_COMPILER_ARCHITECTURE_ID}")
+elseif(CMAKE_SYSTEM_PROCESSOR)
+  set(_CUDA_TARGET_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+
+# Figure out our crosscompiling targets dir
 # or if we don't have `nvcc` and need to deduce the target arch
 if(CMAKE_CROSSCOMPILING OR NOT CUDAToolkit_NVCC_EXECUTABLE)
-  # When a language is enabled we can use its compiler's target architecture.
-  if(CMAKE_CUDA_COMPILER_LOADED AND CMAKE_CUDA_COMPILER_ARCHITECTURE_ID)
-    set(_CUDA_TARGET_PROCESSOR "${CMAKE_CUDA_COMPILER_ARCHITECTURE_ID}")
-  elseif(CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID)
-    set(_CUDA_TARGET_PROCESSOR "${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-  elseif(CMAKE_C_COMPILER_LOADED AND CMAKE_C_COMPILER_ARCHITECTURE_ID)
-    set(_CUDA_TARGET_PROCESSOR "${CMAKE_C_COMPILER_ARCHITECTURE_ID}")
-  elseif(CMAKE_SYSTEM_PROCESSOR)
-    set(_CUDA_TARGET_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
-  elseif(CMAKE_CROSSCOMPILING)
+  if(CMAKE_CROSSCOMPILING AND NOT _CUDA_TARGET_PROCESSOR)
     message(FATAL_ERROR "Cross-compiling with the CUDA toolkit requires CMAKE_SYSTEM_PROCESSOR to be set.")
   endif()
   # Keep in sync with equivalent table in CMakeDetermineCUDACompiler and FindCUDA!
@@ -1085,7 +1090,6 @@ if(CMAKE_CROSSCOMPILING OR NOT CUDAToolkit_NVCC_EXECUTABLE)
   elseif(_CUDA_TARGET_PROCESSOR STREQUAL "x86_64")
     set(CUDAToolkit_TARGET_NAMES "x86_64-linux")
   endif()
-  unset(_CUDA_TARGET_PROCESSOR)
 
   foreach(CUDAToolkit_TARGET_NAME IN LISTS CUDAToolkit_TARGET_NAMES)
     if(EXISTS "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
@@ -1115,6 +1119,8 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     set(_CUDAToolkit_win_stub_search_dirs lib/x64/stubs)
   endif()
 endif()
+
+unset(_CUDA_TARGET_PROCESSOR)
 
 # We don't need to verify the cuda_runtime header when we are using `nvcc` include paths
 # as the compiler being enabled means the header was found
