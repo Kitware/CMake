@@ -31,7 +31,7 @@ cmExperimental::FeatureData const LookupTable[] = {
     cmExperimental::TryCompileCondition::Always },
   // CxxImportStd
   { "CxxImportStd",
-    "451f2fe2-a8a2-47c3-bc32-94786d8fc91b",
+    "f35a9ac6-8463-4d38-8eec-5d6008153e7d",
     "CMAKE_EXPERIMENTAL_CXX_IMPORT_STD",
     "CMake's support for `import std;` in C++23 and newer is experimental. It "
     "is meant only for experimentation and feedback to CMake developers.",

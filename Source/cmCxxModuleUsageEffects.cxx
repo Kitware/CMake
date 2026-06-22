@@ -12,6 +12,8 @@
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmValue.h"
 
@@ -96,10 +98,17 @@ FlagFilter GetFlagFilter(cmGeneratorTarget const* gt)
   return filter;
 }
 
+void AppendUsage(std::string& usageHashInput, std::string const& entry)
+{
+  usageHashInput += entry;
+  usageHashInput.push_back('\0');
+}
+
 template <typename Range>
 void AppendUsageEntries(std::string& usageHashInput, Range const& entries)
 {
   std::vector<std::string> entryValues;
+  entryValues.reserve(entries.size());
   for (auto const& entry : entries) {
     entryValues.push_back(entry.Value);
   }
@@ -114,7 +123,8 @@ void AppendUsageEntries(std::string& usageHashInput, Range const& entries)
 }
 }
 
-cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(cmGeneratorTarget const* gt)
+cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(cmGeneratorTarget const* gt,
+                                                 std::string const& config)
 {
   auto const* tgt = gt->Target;
   auto const filter = GetFlagFilter(gt);
@@ -128,11 +138,25 @@ cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(cmGeneratorTarget const* gt)
       tgt->GetImportedCxxModulesCompileOptionsEntries().filter(
         [&](const BT<std::string>& flag) { return !filter(flag.Value); }));
   } else {
-    AppendUsageEntries(usageHashInput, tgt->GetCompileFeaturesEntries());
-    AppendUsageEntries(
+    AppendUsageEntries(usageHashInput,
+                       cmMakeRange(gt->GetCompileOptions(config, "CXX"))
+                         .filter([&](const BT<std::string>& flag) {
+                           return !filter(flag.Value);
+                         }));
+
+    cmValue langStd = gt->GetLanguageStandard("CXX", config);
+    if (!langStd) {
+      langStd = gt->Makefile->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+    }
+    AppendUsage(usageHashInput,
+                cmStrCat("CXX_STANDARD:", langStd ? *langStd : "20"));
+    AppendUsage(
       usageHashInput,
-      tgt->GetCompileOptionsEntries().filter(
-        [&](const BT<std::string>& flag) { return !filter(flag.Value); }));
+      cmStrCat("CXX_EXTENSIONS:", *gt->GetLanguageExtensions("CXX")));
+    AppendUsage(
+      usageHashInput,
+      cmStrCat("CXX_STANDARD_REQUIRED:",
+               gt->GetLanguageStandardRequired("CXX") ? "TRUE" : "FALSE"));
   }
 
   cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);

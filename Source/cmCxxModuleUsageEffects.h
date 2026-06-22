@@ -11,7 +11,8 @@ class cmGeneratorTarget;
 class cmCxxModuleUsageEffects
 {
 public:
-  cmCxxModuleUsageEffects(cmGeneratorTarget const* gt);
+  cmCxxModuleUsageEffects(cmGeneratorTarget const* gt,
+                          std::string const& config);
   std::string const& GetHash() const;
 
 private:

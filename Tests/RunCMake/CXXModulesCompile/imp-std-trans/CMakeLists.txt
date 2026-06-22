@@ -1,13 +1,7 @@
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
-  "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
+  "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
 
 cmake_minimum_required(VERSION 3.29)
-
-if (EXPORT_NO_STD)
-  # Block making C++ `import std` targets.
-  add_library(__CMAKE::CXX23 IMPORTED INTERFACE)
-  add_library(__CMAKE::CXX26 IMPORTED INTERFACE)
-endif ()
 
 project(cxx_modules_import_std_transitive CXX)
 

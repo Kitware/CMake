@@ -1,6 +1,3 @@
-# Block making C++ `import std` targets.
-add_library(__CMAKE::CXX23 IMPORTED INTERFACE)
-
 enable_language(CXX)
 
 add_library(nocxx20)
