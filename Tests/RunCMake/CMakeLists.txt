@@ -1152,11 +1152,20 @@ add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SY
                   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
                   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
                   -DPRINT_STDIN_EXE=$<TARGET_FILE:print_stdin>)
+
+if(NOT DEFINED CMake_TEST_LibLZMA_ARM64_BCJ)
+  if(NOT CMake_TEST_EXTERNAL_CMAKE AND NOT CMAKE_USE_SYSTEM_LIBARCHIVE AND NOT CMAKE_USE_SYSTEM_LIBLZMA)
+    set(CMake_TEST_LibLZMA_ARM64_BCJ 1)
+  endif()
+endif()
 if(CMake_TEST_LibArchive_VERSION)
   list(APPEND CommandLineTar_ARGS -DCMake_TEST_LibArchive_VERSION=${CMake_TEST_LibArchive_VERSION})
 endif()
 if(DEFINED CMake_TEST_LOCALE_CHARSET)
   list(APPEND CommandLineTar_ARGS -DCMake_TEST_LOCALE_CHARSET=${CMake_TEST_LOCALE_CHARSET})
+endif()
+if(DEFINED CMake_TEST_LibLZMA_ARM64_BCJ)
+  list(APPEND CommandLineTar_ARGS -DCMake_TEST_LibLZMA_ARM64_BCJ=${CMake_TEST_LibLZMA_ARM64_BCJ})
 endif()
 list(APPEND CommandLineTar_ARGS -DPython_EXECUTABLE=${Python_EXECUTABLE})
 add_RunCMake_test(CommandLineTar)
