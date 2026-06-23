@@ -57,6 +57,14 @@ run_cmake(FILTER-InvalidOperator)
 run_cmake(FILTER-Exclude)
 run_cmake(FILTER-Include)
 run_cmake(LIST-edgecases)
+run_cmake(ListTransformApply)
+run_cmake(ListTransformApplyTargetProperty)
+run_cmake(ListTransformApplyLinkLibraries)
+run_cmake(ListTransformApplyNested)
+run_cmake(ListTransformApplyBadSelector)
+run_cmake(ListTransformApplyBodyError)
+run_cmake(ListTransformApplyMissingBody)
+run_cmake(BoundOperandOutsideBinding)
 
 function(run_cmake_build test)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
@@ -149,6 +157,8 @@ run_cmake(CONFIG-empty-entries)
 unset(RunCMake_TEST_OPTIONS)
 
 run_cmake_build_target(COMPILE_ONLY-custom-target-deps consumer)
+
+run_cmake_build_target(ListTransformApplyDependTarget consumer)
 
 run_cmake(CMP0199-WARN)
 run_cmake_build(CMP0199-OLD)

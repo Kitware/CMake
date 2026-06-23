@@ -933,6 +933,23 @@ List Transformations
         element instead of the beginning of each repeated search.
         See policy :policy:`CMP0186`.
 
+    ``APPLY``
+      Transform each selected element by evaluating an arbitrary generator
+      expression ``<body>`` once per element.  Within ``<body>``, the bound
+      operand ``$<_0>`` expands to the current element.  Unlike the
+      configure-time ``list(TRANSFORM ... APPLY <function>)`` command, the
+      genex form returns the body's value directly and has no side effects.  A
+      list-valued body result expands into multiple elements, like any other
+      list-valued generator expression.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,APPLY,body[,SELECTOR]>
+
+      See ``$<_0>`` below for the bound operand.
+
+      .. versionadded:: 4.5
+
   ``SELECTOR`` determines which items of the list will be transformed.
   Only one type of selector can be specified at a time. When given,
   ``SELECTOR`` must be one of the following:
@@ -1047,6 +1064,25 @@ List Ordering
   .. code-block:: cmake
 
     $<LIST:SORT,list,CASE:SENSITIVE,COMPARE:STRING,ORDER:DESCENDING>
+
+.. _GenEx Bound Operands:
+
+Bound Operands
+^^^^^^^^^^^^^^
+
+.. genex:: $<_0>
+
+  .. versionadded:: 4.5
+
+  ``$<_0>`` is the *bound operand* of the enclosing *binding operation*: a
+  generator expression that evaluates a ``<body>`` once for each value it
+  supplies, with ``$<_0>`` expanding to that value.
+
+  For example, ``$<LIST:TRANSFORM,...,APPLY,body>`` evaluates ``body`` once per
+  list element with ``$<_0>`` bound to the current element.
+
+  ``$<_0>`` is only valid inside the body of a binding operation.  Using it
+  anywhere else is an error.
 
 Path Expressions
 ----------------

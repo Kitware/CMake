@@ -1,0 +1,5 @@
+file(READ "${RunCMake_TEST_BINARY_DIR}/out.txt" actual)
+string(STRIP "${actual}" actual)
+if(NOT actual STREQUAL "NET;AUDIO;VIDEO")
+  set(RunCMake_TEST_FAILED "unexpected APPLY output: [${actual}]")
+endif()

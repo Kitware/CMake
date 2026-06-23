@@ -1,0 +1,1 @@
+\$<_0> may only be used inside the body of a binding operation

@@ -437,6 +437,17 @@ public:
     std::transform(list.begin(), list.end(), list.begin(), transform);
   }
 
+  // Return, for each element, whether the selector selects it via InSelection.
+  virtual std::vector<bool> Selection(cmList::container_type const& list)
+  {
+    std::vector<bool> selected;
+    selected.reserve(list.size());
+    for (auto const& value : list) {
+      selected.push_back(this->InSelection(value));
+    }
+    return selected;
+  }
+
 protected:
   TransformSelector(std::string&& tag)
     : Tag(std::move(tag))
@@ -514,6 +525,19 @@ public:
     for (auto index : this->Indexes) {
       list[index] = transform(list[index]);
     }
+  }
+
+  // Select the computed Indexes; Validate throws transform_error on an
+  // out-of-range index.
+  std::vector<bool> Selection(cmList::container_type const& list) override
+  {
+    this->Validate(list.size());
+
+    std::vector<bool> selected(list.size(), false);
+    for (auto index : this->Indexes) {
+      selected[index] = true;
+    }
+    return selected;
   }
 
 protected:
@@ -1146,6 +1170,12 @@ cmList& cmList::transform(TransformAction action, std::string const& arg,
     });
 
   return *this;
+}
+
+std::vector<bool> cmList::GetTransformSelection(
+  cmList::TransformSelector& selector) const
+{
+  return static_cast<::TransformSelector&>(selector).Selection(this->Values);
 }
 
 std::string& cmList::append(std::string& list, std::string&& value)

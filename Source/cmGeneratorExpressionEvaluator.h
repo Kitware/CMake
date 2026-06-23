@@ -97,6 +97,12 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 
   std::string GetOriginalExpression() const;
 
+  std::vector<cmGeneratorExpressionEvaluatorVector> const& GetParamChildren()
+    const
+  {
+    return this->ParamChildren;
+  }
+
   ~GeneratorExpressionContent() override;
 
 private:
