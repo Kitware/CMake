@@ -198,9 +198,16 @@ public:
                                               char separator = '/',
                                               bool isPath = false);
   /**
-   * Perform a case-independent string comparison
+   * Perform a case-independent string comparison.
+   * Similar to POSIX's strcasecmp.
    */
   static int Strucmp(char const* s1, char const* s2);
+
+  /**
+   * Perform a case-independent string comparison, but compares at most n
+   * characters. Similar to POSIX's strncasecmp.
+   */
+  static int Strnucmp(char const* s1, char const* s2, size_t n);
 
   /**
    * Split a string on its newlines into multiple lines
