@@ -1317,6 +1317,43 @@ static bool CheckSplitString()
   return ret;
 }
 
+static bool CheckStringComparisons()
+{
+  if (!(kwsys::SystemTools::Strucmp("", "") == 0))
+    return false;
+  if (!(kwsys::SystemTools::Strucmp("bob", "bob") == 0))
+    return false;
+  if (!(kwsys::SystemTools::Strucmp("bob", "BOB") == 0))
+    return false;
+  if (!(kwsys::SystemTools::Strucmp("bob1", "BoB2") < 0))
+    return false;
+  if (!(kwsys::SystemTools::Strucmp("bOb4", "Bob3") > 0))
+    return false;
+  if (!(kwsys::SystemTools::Strucmp("aaa", "aaaaaaaaa") < 0))
+    return false;
+  if (!(kwsys::SystemTools::Strucmp("aaaaaaaaa", "aaa") > 1))
+    return false;
+
+  if (!(kwsys::SystemTools::Strnucmp("", "", 0) == 0))
+    return false;
+  if (!(kwsys::SystemTools::Strnucmp("", "", 3000) == 0))
+    return false;
+  if (!(kwsys::SystemTools::Strnucmp("bob", "Bobby", 3) == 0))
+    return false;
+  if (!(kwsys::SystemTools::Strnucmp("Bob", "boBBy", 3) == 0))
+    return false;
+  if (!(kwsys::SystemTools::Strnucmp("bob", "Bobby", 3000) < 0))
+    return false;
+  if (!(kwsys::SystemTools::Strnucmp("bobbY", "BOB", 3000) > 0))
+    return false;
+  if (!(kwsys::SystemTools::Strnucmp("bobb", "Bobby", 5) < 0))
+    return false;
+  if (!(kwsys::SystemTools::Strnucmp("bobbY", "BOBb", 5) > 0))
+    return false;
+
+  return true;
+}
+
 int testSystemTools(int, char*[])
 {
   bool res = true;
@@ -1369,6 +1406,8 @@ int testSystemTools(int, char*[])
   res &= CheckURLParsing();
 
   res &= CheckSplitString();
+
+  res &= CheckStringComparisons();
 
   return res ? 0 : 1;
 }

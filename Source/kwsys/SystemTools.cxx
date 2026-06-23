@@ -2728,6 +2728,22 @@ int SystemTools::Strucmp(char const* l, char const* r)
   return lc - rc;
 }
 
+int SystemTools::Strnucmp(char const* l, char const* r, size_t n)
+{
+  int lc;
+  int rc;
+  size_t count = 0;
+  do {
+    lc = kwsysString_tolower(*l++);
+    rc = kwsysString_tolower(*r++);
+    count++;
+    if (count >= n) {
+      return lc - rc;
+    }
+  } while (lc == rc && lc);
+  return lc - rc;
+}
+
 // return file's modified time
 long int SystemTools::ModifiedTime(std::string const& filename)
 {
