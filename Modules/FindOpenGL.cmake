@@ -529,12 +529,6 @@ else()
     list(APPEND _OpenGL_CACHE_VARS OPENGL_gl_LIBRARY)
   endif()
 
-  # When preferring legacy, linking OpenGL and GLX should behave the same as linking legacy GL.
-  if(OpenGL_GL_PREFERENCE STREQUAL "LEGACY")
-    set(OpenGL_glx_LIBRARY "${OPENGL_gl_LIBRARY}")
-    set(OpenGL_opengl_LIBRARY "${OPENGL_gl_LIBRARY}")
-  endif()
-
   if(_OpenGL_GL_POLICY_WARN AND OPENGL_gl_LIBRARY AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
     cmake_policy(ISSUE_WARNING CMP0072 POST
       "FindOpenGL found both a legacy GL library:\n"
@@ -547,6 +541,12 @@ else()
       )
   endif()
   unset(_OpenGL_GL_POLICY_WARN)
+
+  # When preferring legacy, linking OpenGL and GLX should behave the same as linking legacy GL.
+  if(OpenGL_GL_PREFERENCE STREQUAL "LEGACY")
+    set(OPENGL_glx_LIBRARY "${OPENGL_gl_LIBRARY}")
+    set(OPENGL_opengl_LIBRARY "${OPENGL_gl_LIBRARY}")
+  endif()
 
   # FPHSA cannot handle "this OR that is required", so we conditionally set what
   # it must look for.  First clear any previous config we might have done:
