@@ -66,6 +66,9 @@ Json::Value Toolchains::DumpToolchains()
 
   for (std::string const& lang :
        this->FileAPI.GetCMakeInstance()->GetState()->GetEnabledLanguages()) {
+    if (lang == "NONE") {
+      continue;
+    }
     toolchains.append(this->DumpToolchain(lang));
   }
 
