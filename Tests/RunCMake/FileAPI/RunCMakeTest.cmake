@@ -164,3 +164,77 @@ run_object(cmakeFiles-v1)
 run_object(toolchains-v1)
 run_object(toolchains-v1 -DTOOLCHAINSV1_COMPILERARGS=1)
 run_object(toolchains-v1 -DTOOLCHAINSV1_COMPILERARGS=2)
+
+function(run_import_std_codemodel_test)
+  if(NOT CMake_TEST_MODULE_COMPILATION)
+    return()
+  endif()
+
+  set(stdlib_custom_json)
+  if(CMake_TEST_CXX_STDLIB_MODULES_JSON)
+    list(APPEND stdlib_custom_json
+      -DCMAKE_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON})
+  endif()
+
+  run_cmake(codemodel-v2-import-std-Inspect ${stdlib_custom_json})
+  include("${RunCMake_BINARY_DIR}/codemodel-v2-import-std-Inspect-build/info.cmake")
+
+  if(RunCMake_GENERATOR MATCHES "Ninja")
+    execute_process(
+      COMMAND "${CMAKE_MAKE_PROGRAM}" --version
+      RESULT_VARIABLE res
+      OUTPUT_VARIABLE ninja_version
+      ERROR_VARIABLE err
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_STRIP_TRAILING_WHITESPACE)
+
+    if(res)
+      message(WARNING
+        "Failed to determine `ninja` version: ${err}")
+      set(ninja_version "0")
+    endif()
+  endif()
+
+  set(generator_supports_cxx_modules 0)
+  if(RunCMake_GENERATOR MATCHES "Ninja" AND
+      ninja_version VERSION_GREATER_EQUAL "1.11" AND
+      "cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+    set(generator_supports_cxx_modules 1)
+  endif()
+
+  if(RunCMake_GENERATOR MATCHES "Visual Studio" AND
+      CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.34")
+    set(generator_supports_cxx_modules 1)
+  endif()
+
+  if(NOT generator_supports_cxx_modules)
+    return()
+  endif()
+
+  string(REPLACE "," ";" cxx_module_features "${CMake_TEST_MODULE_COMPILATION}")
+  if(RunCMake_GENERATOR MATCHES "Ninja")
+    list(APPEND cxx_module_features
+      "ninja")
+  endif()
+
+  if(NOT "import_std23" IN_LIST cxx_module_features OR
+      NOT "cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+    return()
+  endif()
+
+  set(RunCMake_TEST_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/codemodel-v2-import-std")
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/codemodel-v2-import-std-build")
+
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_CONFIGURATION_TYPES=Debug)
+  else()
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+
+  list(APPEND RunCMake_TEST_OPTIONS
+    ${stdlib_custom_json}
+    "-DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}")
+  run_cmake(codemodel-v2-import-std)
+endfunction()
+
+run_import_std_codemodel_test()
