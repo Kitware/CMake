@@ -709,6 +709,21 @@ void cmGlobalGenerator::EnableLanguage(
     fpath += "/CMakeSystem.cmake";
     if (cmSystemTools::FileExists(fpath)) {
       mf->ReadListFile(fpath);
+      // Fail early if CMAKE_TOOLCHAIN_FILE is different than what is stored in
+      // CMakeSystem.cmake to erase the cache because introspection results may
+      // become invalid
+      cmValue toolchainFile = mf->GetDefinition("CMAKE_TOOLCHAIN_FILE");
+      cmValue storedToolchainFile =
+        mf->GetDefinition("_CMAKE_SYSTEM_TOOLCHAIN_FILE");
+      if (toolchainFile && toolchainFile != storedToolchainFile) {
+        mf->GetState()->AppendGlobalProperty(
+          "__CMAKE_DELETE_CACHE_CHANGE_VARS_",
+          "CMAKE_TOOLCHAIN_FILE;" + *toolchainFile);
+        for (std::string const& lang : cur_languages) {
+          this->LanguagesInProgress.erase(lang);
+        }
+        return;
+      }
     }
   }
 

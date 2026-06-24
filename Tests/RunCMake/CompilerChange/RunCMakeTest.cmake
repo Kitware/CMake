@@ -45,3 +45,29 @@ block()
   set(RunCMake_TEST_VARIANT_DESCRIPTION "-step2")
   run_cmake_with_options(CompilerPath "-DCMAKE_C_COMPILER=${cc1_dot}")
 endblock()
+
+# Set up "toolchain" files
+file(WRITE "${RunCMake_BINARY_DIR}/foo.cmake" "set(toolchain_var foo)\n")
+file(WRITE "${RunCMake_BINARY_DIR}/bar.cmake" "set(toolchain_var bar)\n")
+
+# New toolchain path comes from file
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ToolchainFromFile-build)
+  run_cmake(ToolchainFromFile-step1)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(ENV{RunCMake_TEST} "ToolchainFromFile-step2")
+  run_cmake(ToolchainFromFile-step2)
+endblock()
+
+# New toolchain path comes from command line
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ToolchainFromCmdline-build)
+  run_cmake_with_options(ToolchainFromCmdline-step1
+    "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_BINARY_DIR}/foo.cmake"
+  )
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(ENV{RunCMake_TEST} "ToolchainFromCmdline-step2")
+  run_cmake_with_options(ToolchainFromCmdline-step2
+    "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_BINARY_DIR}/bar.cmake"
+  )
+endblock()
