@@ -159,13 +159,14 @@ static cm::optional<std::vector<bool>> EvaluatePredicateMask(
   GeneratorExpressionContent const* content,
   cmGeneratorExpressionDAGChecker* dagChecker)
 {
+  cm::optional<std::vector<bool>> result;
   std::vector<bool> mask;
   mask.reserve(list.size());
   for (auto const& element : list) {
     std::string r =
       EvaluateBodyWithBoundOperand(predicateBody, element, eval, dagChecker);
     if (eval->HadError) {
-      return cm::nullopt;
+      return result;
     }
     if (r == "1") {
       mask.push_back(true);
@@ -178,10 +179,11 @@ static cm::optional<std::vector<bool>> EvaluatePredicateMask(
                  ", PREDICATE body must evaluate to \"0\" or \"1\", but "
                  "evaluated to \"",
                  r, "\"."));
-      return cm::nullopt;
+      return result;
     }
   }
-  return mask;
+  result = std::move(mask);
+  return result;
 }
 
 static const struct ZeroNode : public cmGeneratorExpressionNode

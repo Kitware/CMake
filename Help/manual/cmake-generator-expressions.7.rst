@@ -952,20 +952,18 @@ List Transformations
         element instead of the beginning of each repeated search.
         See policy :policy:`CMP0186`.
 
-    ``APPLY``
+    :command:`APPLY <list(TRANSFORM_APPLY)>`
       Transform each selected element by evaluating an arbitrary generator
       expression ``<body>`` once per element.  Within ``<body>``, the bound
-      operand ``$<_0>`` expands to the current element.  Unlike the
-      configure-time ``list(TRANSFORM ... APPLY <function>)`` command, the
-      genex form returns the body's value directly and has no side effects.  A
-      list-valued body result expands into multiple elements, like any other
-      list-valued generator expression.
+      operand :genex:`$<_0>` expands to the current element.  Unlike the
+      configure-time :command:`list(TRANSFORM APPLY) <list(TRANSFORM_APPLY)>`
+      command, the genex form returns the body's value directly and has no side
+      effects.  A list-valued body result expands into multiple elements, like
+      any other list-valued generator expression.
 
       .. code-block:: cmake
 
         $<LIST:TRANSFORM,list,APPLY,body[,SELECTOR]>
-
-      See ``$<_0>`` below for the bound operand.
 
       .. versionadded:: 4.5
 
@@ -1113,8 +1111,8 @@ Bound Operands
   generator expression that evaluates a ``<body>`` once for each value it
   supplies, with ``$<_0>`` expanding to that value.
 
-  For example, ``$<LIST:TRANSFORM,...,APPLY,body>`` evaluates ``body`` once per
-  list element with ``$<_0>`` bound to the current element.
+  For example, :genex:`$<LIST:TRANSFORM,...,APPLY,body>` evaluates ``body``
+  once per list element with ``$<_0>`` bound to the current element.
 
   ``$<_0>`` is only valid inside the body of a binding operation.  Using it
   anywhere else is an error.
