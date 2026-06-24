@@ -228,7 +228,8 @@ public:
   void Bind(Maybe<std::string>& val);
   void Bind(MaybeEmpty<std::vector<std::string>>& val);
   void Bind(NonEmpty<std::vector<std::string>>& val);
-  void Bind(std::vector<std::vector<std::string>>& val);
+  void Bind(MaybeEmpty<std::vector<std::vector<std::string>>>& val);
+  void Bind(NonEmpty<std::vector<std::vector<std::string>>>& val);
 
   template <typename U>
   void Bind(NonEmpty<std::vector<std::pair<std::string, U>>>& val,

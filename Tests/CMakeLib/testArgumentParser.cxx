@@ -45,10 +45,14 @@ struct Result : ArgumentParser::ParseResult
   cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> List5;
   cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> List6;
 
-  std::vector<std::vector<std::string>> Multi1;
-  std::vector<std::vector<std::string>> Multi2;
-  cm::optional<std::vector<std::vector<std::string>>> Multi3;
-  cm::optional<std::vector<std::vector<std::string>>> Multi4;
+  ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>> Multi1;
+  ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>> Multi2;
+  cm::optional<
+    ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>>>
+    Multi3;
+  cm::optional<
+    ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>>>
+    Multi4;
 
   cm::optional<std::string> Pos0;
   cm::optional<std::string> Pos1;

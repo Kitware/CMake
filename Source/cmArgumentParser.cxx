@@ -127,7 +127,8 @@ void Instance::Bind(NonEmpty<std::vector<std::string>>& val)
     ExpectAtLeast{ 1 });
 }
 
-void Instance::Bind(std::vector<std::vector<std::string>>& multiVal)
+void Instance::Bind(
+  MaybeEmpty<std::vector<std::vector<std::string>>>& multiVal)
 {
   multiVal.emplace_back();
   std::vector<std::string>& val = multiVal.back();
@@ -137,6 +138,18 @@ void Instance::Bind(std::vector<std::vector<std::string>>& multiVal)
       return Continue::Yes;
     },
     ExpectAtLeast{ 0 });
+}
+
+void Instance::Bind(NonEmpty<std::vector<std::vector<std::string>>>& multiVal)
+{
+  multiVal.emplace_back();
+  std::vector<std::string>& val = multiVal.back();
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 1 });
 }
 
 void Instance::Consume(cm::string_view arg)

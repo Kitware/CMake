@@ -487,8 +487,10 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
   {
     ArgumentParser::NonEmpty<std::string> ExportSetName;
     ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
-    std::vector<std::vector<std::string>> PackageDependencyArgs;
-    std::vector<std::vector<std::string>> TargetArgs;
+    ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>>
+      PackageDependencyArgs;
+    ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>>
+      TargetArgs;
   };
 
   auto parser = cmArgumentParser<SetupArguments>{};

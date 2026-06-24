@@ -79,7 +79,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
 
   struct Arguments : public ArgumentParser::ParseResult
   {
-    std::vector<std::vector<std::string>> Commands;
+    ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>> Commands;
     std::string OutputVariable;
     std::string ErrorVariable;
     std::string ResultVariable;

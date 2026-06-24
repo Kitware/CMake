@@ -1016,7 +1016,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     ArgumentParser::MaybeEmpty<std::vector<std::string>> PublicHeader;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> Resource;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> CxxModulesBmi;
-    std::vector<std::vector<std::string>> FileSets;
+    ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>> FileSets;
   };
 
   static auto const argHelper =
