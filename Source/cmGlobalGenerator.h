@@ -313,6 +313,11 @@ public:
   std::vector<cmGeneratorTarget*> GetLocalGeneratorTargetsInOrder(
     cmLocalGenerator* lg) const;
 
+  // Find the single build-system target that produces the given path as a
+  // primary custom-command output, or nullptr if there is none or more than
+  // one.  Used to resolve file-level test build dependencies.
+  cmGeneratorTarget* FindOutputOwningTarget(std::string const& output);
+
   cmMakefile* GetCurrentMakefile() const
   {
     return this->CurrentConfigureMakefile;
@@ -977,6 +982,13 @@ private:
   // Store computed inter-target dependencies.
   using TargetDependMap = std::map<cmGeneratorTarget const*, TargetDependSet>;
   TargetDependMap TargetDependencies;
+
+  // Map from a custom-command primary output (collapsed full path) to the
+  // build-system target(s) that produce it.  Built lazily on first use and
+  // cleared with the other generator members.
+  std::map<std::string, std::vector<cmGeneratorTarget*>> OutputOwnerIndex;
+  bool OutputOwnerIndexComputed = false;
+  void ComputeOutputOwnerIndex();
 
   friend class cmake;
   void CreateGeneratorTargets(

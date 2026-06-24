@@ -1326,9 +1326,11 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
           this->AppendTargetOutputs(depTarget, testPrepTarget.ExplicitDeps,
                                     config, DependOnTargetArtifact);
         }
-        std::transform(testDeps.Files.begin(), testDeps.Files.end(),
-                       std::back_inserter(testPrepTarget.ExplicitDeps),
-                       this->MapToNinjaPath());
+        for (cmTestGenerator::BuildDependencies::FileDependency const& file :
+             testDeps.Files) {
+          testPrepTarget.ExplicitDeps.push_back(
+            this->ConvertToNinjaPath(file.Path));
+        }
       }
     }
 

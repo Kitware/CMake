@@ -71,24 +71,57 @@ function(run_testdependency_case CASE_NAME EXPECT_PRESENT)
   unset(RunCMake_TEST_NO_CLEAN)
 endfunction()
 
-if(RunCMake_GENERATOR MATCHES "Ninja|FASTBuild")
+if(RunCMake_GENERATOR MATCHES "Ninja|FASTBuild|Makefiles")
   block()
+    if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+      set(TestDependency_BUILD_CONFIG_ARG --config Debug)
+    else()
+      set(TestDependency_BUILD_CONFIG_ARG)
+    endif()
+
     run_testdependency_case(DEFAULT FALSE)
     run_testdependency_case(OFF FALSE)
     run_cmake(TestDependency-ON-invalid-test-name)
 
+    block()
+      # A header-only INTERFACE library dependency is filtered out by the
+      # generator-independent dependency resolution, so building the
+      # test_prep target must not fail on a missing rule.
+      set(RunCMake_TEST_BINARY_DIR
+        ${RunCMake_BINARY_DIR}/TestDependency-ON-interface-build)
+      run_cmake(TestDependency-ON-interface)
+      set(RunCMake_TEST_NO_CLEAN 1)
+      set(RunCMake_TEST_OUTPUT_MERGE 1)
+      run_cmake_command(TestDependency-ON-interface-build
+        ${CMAKE_COMMAND} --build . ${TestDependency_BUILD_CONFIG_ARG}
+        --target test_prep/InterfaceTest)
+    endblock()
+
+    if(RunCMake_GENERATOR MATCHES Makefiles)
+      # Diagnostics specific to the Makefile generators.
+      block()
+        # A ':' in a test name cannot be expressed as a Makefile target.
+        set(RunCMake_TEST_BINARY_DIR
+          ${RunCMake_BINARY_DIR}/TestDependency-ON-colon-name-build)
+        run_cmake(TestDependency-ON-colon-name)
+      endblock()
+      block()
+        # A byproduct file cannot be built through a single owning target.
+        set(RunCMake_TEST_BINARY_DIR
+          ${RunCMake_BINARY_DIR}/TestDependency-ON-byproduct-build)
+        run_cmake(TestDependency-ON-byproduct)
+      endblock()
+      block()
+        # A custom-command output owned by no target cannot be built.
+        set(RunCMake_TEST_BINARY_DIR
+          ${RunCMake_BINARY_DIR}/TestDependency-ON-orphan-build)
+        run_cmake(TestDependency-ON-orphan)
+      endblock()
+    endif()
+
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestDependency-ON-build)
     run_testdependency_case(ON TRUE)
 
-    if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
-      set(TestDependency_CONFIG Debug)
-    else()
-      set(TestDependency_CONFIG "")
-    endif()
-    set(TestDependency_BUILD_CONFIG_ARG)
-    if(TestDependency_CONFIG)
-      set(TestDependency_BUILD_CONFIG_ARG --config ${TestDependency_CONFIG})
-    endif()
     set(RunCMake_TEST_OUTPUT_MERGE 1)
     set(RunCMake_TEST_NO_CLEAN 1)
     run_cmake_command(TestDependency-ON-all

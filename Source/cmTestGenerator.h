@@ -26,8 +26,21 @@ class cmTestGenerator : public cmScriptGenerator
 public:
   struct BuildDependencies
   {
+    // A file dependency together with how the build produces it.
+    struct FileDependency
+    {
+      std::string Path;
+      // The single build-system target that produces Path as a primary
+      // custom-command output, or nullptr if there is no such unique target.
+      cmGeneratorTarget* Owner = nullptr;
+      // Whether Path is produced by the build at all (output or byproduct).
+      bool Generated = false;
+    };
+    // Build-system targets the test depends on (filtered to targets that are
+    // part of the build system).
     std::vector<cmGeneratorTarget*> Targets;
-    std::vector<std::string> Files;
+    // BUILD_DEPENDS entries that did not name a target.
+    std::vector<FileDependency> Files;
   };
 
   cmTestGenerator(cmTest* test,

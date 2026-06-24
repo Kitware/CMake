@@ -1,0 +1,5 @@
+CMake Warning at TestDependency-ON-colon-name.cmake:[0-9]+ \(add_test\):
+  Test "Foo::Bar" has a name containing ':', which cannot be used as a
+  Makefile build target.  No "test_prep/" target will be generated for it.
+  Use the Ninja generator or rename the test to build its dependencies with a
+  "test_prep/" target.

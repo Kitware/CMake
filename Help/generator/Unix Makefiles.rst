@@ -29,3 +29,23 @@ be created, containing the following targets:
 
 ``package``
   Runs the package step in the subdirectory, if any.
+
+.. versionadded:: 4.5
+
+  When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled, the
+  top-level makefile additionally provides the following targets:
+
+  ``test_prep/<test-name>``
+    Builds all known build dependencies for the test named ``<test-name>``
+    added by :command:`add_test`, including the executable target invoked by
+    the test, targets referenced by generator expressions in the test command,
+    and explicit ``BUILD_DEPENDS`` entries.  A ``BUILD_DEPENDS`` file is built
+    by building the target whose build produces it.
+
+    Tests whose names are not valid target names, and tests whose names
+    contain a ``:`` character, are excluded.  If multiple tests in different
+    directories share the same name, their dependencies are merged into one
+    ``test_prep/<test-name>`` target.
+
+  ``test_prep/all``
+    Depends on every generated ``test_prep/<test-name>`` target.
