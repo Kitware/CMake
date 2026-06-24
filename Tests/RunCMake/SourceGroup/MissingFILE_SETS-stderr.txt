@@ -1,0 +1,6 @@
+CMake Error at MissingFILE_SETS\.cmake:[0-9]+ \(source_group\):
+  source_group given invalid argument:
+
+    TARGET: FILE_SETS is required for TARGET bar\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

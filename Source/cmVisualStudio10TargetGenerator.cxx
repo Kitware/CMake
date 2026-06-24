@@ -2006,17 +2006,18 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 
   std::set<cmSourceGroup const*> groupsUsed;
   for (cmGeneratorTarget::AllConfigSource const& si : sources) {
-    std::string const& source = si.Source->GetFullPath();
-    cmSourceGroup const* sourceGroup =
-      this->LocalGenerator->FindSourceGroup(source);
+    cmSourceGroup const* sourceGroup = this->LocalGenerator->FindSourceGroup(
+      this->GeneratorTarget, si.Source,
+      this->Configurations.empty() ? ""
+                                   : this->Configurations[si.Configs.front()]);
     groupsUsed.insert(sourceGroup);
   }
 
   if (cmSourceFile const* srcCMakeLists =
         this->LocalGenerator->CreateVCProjBuildRule()) {
-    std::string const& source = srcCMakeLists->GetFullPath();
-    cmSourceGroup const* sourceGroup =
-      this->LocalGenerator->FindSourceGroup(source);
+    cmSourceGroup const* sourceGroup = this->LocalGenerator->FindSourceGroup(
+      this->GeneratorTarget, srcCMakeLists,
+      this->Configurations.empty() ? "" : this->Configurations.front());
     groupsUsed.insert(sourceGroup);
   }
 
@@ -2175,8 +2176,9 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
   for (ToolSource const& s : sources) {
     cmSourceFile const* sf = s.SourceFile;
     std::string const& source = sf->GetFullPath();
-    cmSourceGroup const* sourceGroup =
-      this->LocalGenerator->FindSourceGroup(source);
+    cmSourceGroup const* sourceGroup = this->LocalGenerator->FindSourceGroup(
+      this->GeneratorTarget, sf,
+      this->Configurations.empty() ? "" : this->Configurations.front());
     std::string const& filter = sourceGroup->GetFullName();
     std::string path = this->ConvertPath(source, s.RelativePath);
     ConvertToWindowsSlash(path);
@@ -6095,8 +6097,9 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
   std::string const& fullFileName = source->GetFullPath();
   std::string const& srcDir = this->Makefile->GetCurrentSourceDirectory();
   std::string const& binDir = this->Makefile->GetCurrentBinaryDirectory();
-  cmSourceGroup const* sourceGroup =
-    this->LocalGenerator->FindSourceGroup(fullFileName);
+  cmSourceGroup const* sourceGroup = this->LocalGenerator->FindSourceGroup(
+    this->GeneratorTarget, source,
+    this->Configurations.empty() ? "" : this->Configurations.front());
   if (sourceGroup && !sourceGroup->GetFullName().empty()) {
     sourceGroupedFile =
       cmStrCat(sourceGroup->GetFullName(), '/',

@@ -4565,22 +4565,24 @@ bool cmGlobalXCodeGenerator::CreateGroups(
       }
 
       auto addSourceToGroup = [this, &gtgt,
-                               &generator](std::string const& source) {
-        cmSourceGroup const* sourceGroup = generator->FindSourceGroup(source);
+                               &generator](cmSourceFile const* source) {
+        cmSourceGroup const* sourceGroup = generator->FindSourceGroup(
+          gtgt.get(), source, this->CurrentConfigurationTypes.front());
         cmXCodeObject* pbxgroup =
           this->CreateOrGetPBXGroup(gtgt.get(), sourceGroup);
-        std::string key = GetGroupMapKeyFromPath(gtgt.get(), source);
+        std::string key =
+          GetGroupMapKeyFromPath(gtgt.get(), source->GetFullPath());
         this->GroupMap[key] = pbxgroup;
       };
 
       // Put cmSourceFile instances in proper groups:
-      for (auto const& si : gtgt->GetAllConfigSources()) {
-        cmSourceFile const* sf = si.Source;
+      for (auto& si : gtgt->GetAllConfigSources()) {
+        cmSourceFile* sf = si.Source;
         if (!sf->GetObjectLibrary().empty()) {
           // Object library files go on the link line instead.
           continue;
         }
-        addSourceToGroup(sf->GetFullPath());
+        addSourceToGroup(sf);
       }
 
       // Add CMakeLists.txt file for user convenience.
@@ -4589,8 +4591,9 @@ bool cmGlobalXCodeGenerator::CreateGroups(
           gtgt->GetLocalGenerator()->GetCurrentSourceDirectory());
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
           listfile, false, cmSourceFileLocationKind::Known);
+        sf->ResolveFullPath();
         sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::CMakeLists);
-        addSourceToGroup(sf->ResolveFullPath());
+        addSourceToGroup(sf);
       }
 
       // Add the Info.plist we are about to generate for an App Bundle.
@@ -4598,9 +4601,10 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         std::string plist = this->ComputeInfoPListLocation(gtgt.get());
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
           plist, true, cmSourceFileLocationKind::Known);
+        sf->ResolveFullPath();
         sf->SetSpecialSourceType(
           cmSourceFile::SpecialSourceType::BundleInfoPlist);
-        addSourceToGroup(sf->ResolveFullPath());
+        addSourceToGroup(sf);
       }
     }
   }

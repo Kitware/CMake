@@ -1,0 +1,4 @@
+CMake Error at MissingTARGET\.cmake:[0-9]+ \(source_group\):
+  source_group TARGET is required for FILE_SETS bar\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

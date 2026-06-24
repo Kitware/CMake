@@ -1427,7 +1427,11 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       }
     }
     // Add the file to the list of sources.
-    sourceGroupFiles.Add(this->FindSourceGroup(sf->GetFullPath()), sf);
+    sourceGroupFiles.Add(
+      this->FindSourceGroup(
+        target, sf,
+        configs.empty() ? "" : configs[sources.Sources[si].Configs.front()]),
+      sf);
   }
 
   // open the project

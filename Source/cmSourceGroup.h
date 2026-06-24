@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 class cmLocalGenerator;
@@ -32,16 +34,17 @@ using SourceGroupVector = std::vector<std::unique_ptr<cmSourceGroup>>;
 class cmSourceGroup
 {
 public:
-  cmSourceGroup(std::string name, char const* regex,
-                char const* parentName = nullptr);
+  cmSourceGroup(std::string name, cm::string_view regex,
+                cm::string_view parentName = {});
   cmSourceGroup(cmSourceGroup const& r) = delete;
   ~cmSourceGroup();
   cmSourceGroup& operator=(cmSourceGroup const&) = delete;
 
   /**
    * Set the regular expression for this group.
+   * Returns false if the regular expression cannot be compiled.
    */
-  void SetGroupRegex(char const* regex);
+  bool SetGroupRegex(cm::string_view regex);
 
   /**
    * Resolve genex.
@@ -52,6 +55,12 @@ public:
    * Add a file name to the explicit list of files for this group.
    */
   void AddGroupFile(std::string const& name);
+
+  /**
+   * Add file sets to the explicit list of file sets for this group.
+   */
+  void AddGroupFileSets(std::string const& target,
+                        std::set<std::string> const& fileSets);
 
   /**
    * Add child to this sourcegroup
@@ -101,9 +110,20 @@ public:
   cmSourceGroup* MatchChildrenRegex(std::string const& name) const;
 
   /**
+   * Check if the given name matches this group's explicit file list
+   * in children.
+   */
+  cmSourceGroup* MatchChildrenFileSets(std::string const& target,
+                                       std::string const& fileSet);
+
+  /**
    * Get the set of file names explicitly added to this source group.
    */
   std::set<std::string> const& GetGroupFiles() const;
+  /**
+   * Get the set of file sets names explicitly added to this source group.
+   */
+  std::map<std::string, std::set<std::string>> const& GetGroupFileSets() const;
 
   SourceGroupVector const& GetGroupChildren() const;
 
@@ -111,6 +131,13 @@ public:
    * Given a source group collection, find the source group for a given source.
    */
   static cmSourceGroup* FindSourceGroup(std::string const& source,
+                                        SourceGroupVector const& groups);
+  /**
+   * Given a source group collection, find the source group for a given
+   * target/file set.
+   */
+  static cmSourceGroup* FindSourceGroup(std::string const& target,
+                                        std::string const& fileSet,
                                         SourceGroupVector const& groups);
 
 private:
@@ -130,6 +157,11 @@ private:
    * Set of file names explicitly added to this group.
    */
   std::set<std::string> GroupFiles;
+
+  /**
+   * Set of file Sets indexed by target explicitly added to this group.
+   */
+  std::map<std::string, std::set<std::string>> GroupFileSets;
 
   std::unique_ptr<cmSourceGroupInternals> Internal;
 };

@@ -1,0 +1,5 @@
+CMake Warning \(author\) at UnknownFILE_SET\.cmake:[0-9]+ \(source_group\):
+  FILE_SET "bar" is not known for TARGET "bar"\.  It will ignored\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.

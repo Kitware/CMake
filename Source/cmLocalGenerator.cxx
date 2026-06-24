@@ -9,7 +9,6 @@
 #include <cstdlib>
 #include <initializer_list>
 #include <iterator>
-#include <queue>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
@@ -4255,28 +4254,49 @@ std::string cmLocalGenerator::CreateSafeObjectFileName(
   return ssin;
 }
 
-void cmLocalGenerator::ComputeSourceGroupSearchIndex()
+// search a the source group defined for the file set or the source itself
+// in case of match, result is stored in a cache to speed-up future searches
+cmSourceGroup* cmLocalGenerator::FindSourceGroup(
+  cmGeneratorTarget const* target, cmSourceFile const* source,
+  std::string const& config)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  SourceGroupVector const& sourceGroups = this->Makefile->GetSourceGroups();
+  std::string const& targetName = target->GetName();
+  cmGeneratorFileSet const* fileSet =
+    target->GetFileSetForSource(config, source);
 
-  // Build lookup index from sources to source groups
-  std::queue<cmSourceGroup*> sgToVisit;
-  for (auto const& group : sourceGroups) {
-    cmSourceGroup* cmSourceGroup = group.get();
-    sgToVisit.emplace(cmSourceGroup);
+  if (fileSet) {
+    std::string fsName = fileSet->GetName();
+    std::string const fsKey = cmStrCat(targetName, "::", fsName);
+    auto const indexIt = this->SourceGroupSearchIndex.find(fsKey);
+    if (indexIt != this->SourceGroupSearchIndex.cend()) {
+      return indexIt->second;
+    }
+
+    cmSourceGroup* sourceGroup = cmSourceGroup::FindSourceGroup(
+      targetName, fsName, this->Makefile->GetSourceGroups());
+    if (sourceGroup) {
+      this->SourceGroupSearchIndex.emplace(fsKey, sourceGroup);
+      return sourceGroup;
+    }
   }
 
-  while (!sgToVisit.empty()) {
-    cmSourceGroup* sourceGroup = sgToVisit.front();
-    sgToVisit.pop();
-    for (auto const& sgChild : sourceGroup->GetGroupChildren()) {
-      sgToVisit.emplace(sgChild.get());
-    }
-    for (std::string const& source : sourceGroup->GetGroupFiles()) {
-      this->SourceGroupSearchIndex.emplace(source, sourceGroup);
-    }
+  // no source group defined for the file set or the source is not part of a
+  // file set.
+  // search for source group defined at source level
+  auto const indexIt =
+    this->SourceGroupSearchIndex.find(source->GetFullPath());
+  if (indexIt != this->SourceGroupSearchIndex.cend()) {
+    return indexIt->second;
   }
+
+  // look-up in source groups definitions
+  return this->FindSourceGroup(source->GetFullPath());
+#else
+  static_cast<void>(target);
+  static_cast<void>(source);
+  static_cast<void>(config);
+  return nullptr;
 #endif
 }
 

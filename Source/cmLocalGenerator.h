@@ -623,13 +623,11 @@ public:
   std::string CreateSafeObjectFileName(std::string const& sin) const;
 
   /**
-   * Build the search index from source files to source groups
-   */
-  void ComputeSourceGroupSearchIndex();
-
-  /**
    * find what source group this source is in
    */
+  cmSourceGroup* FindSourceGroup(cmGeneratorTarget const* target,
+                                 cmSourceFile const* source,
+                                 std::string const& config);
   cmSourceGroup* FindSourceGroup(std::string const& source);
 
 protected:
