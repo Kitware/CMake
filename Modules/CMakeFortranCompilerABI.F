@@ -12,6 +12,8 @@
         PRINT *, 'INFO:sizeof_dptr[8]'
 #elif defined(__x86_64__)
         PRINT *, 'INFO:sizeof_dptr[8]'
+#elif defined(__ppc64__) || defined(__powerpc64__) || defined(__PPC64__)
+        PRINT *, 'INFO:sizeof_dptr[8]'
 #elif defined(__sparcv9) || defined(__sparcv9__) || defined(__sparc64__)
         PRINT *, 'INFO:sizeof_dptr[8]'
 
@@ -20,6 +22,8 @@
 #elif defined(_M_IX86)
         PRINT *, 'INFO:sizeof_dptr[4]'
 #elif defined(__i386__)
+        PRINT *, 'INFO:sizeof_dptr[4]'
+#elif defined(__ppc__) || defined(__powerpc__) || defined(__PPC__)
         PRINT *, 'INFO:sizeof_dptr[4]'
 #elif defined(__sparc) || defined(__sparc__)
         PRINT *, 'INFO:sizeof_dptr[4]'
