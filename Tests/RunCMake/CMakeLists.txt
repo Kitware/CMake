@@ -437,7 +437,10 @@ endif()
 add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}
                           -DCMAKE_CXX_SIMULATE_ID=${CMAKE_CXX_SIMULATE_ID}
-                          -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
+                          -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
+                          -DCMake_TEST_MODULE_COMPILATION=${CMake_TEST_MODULE_COMPILATION}
+                          -DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}
+                          -DCMake_TEST_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON})
 if(CMAKE_GENERATOR MATCHES "Make|Ninja|FASTBuild")
   add_RunCMake_test(Instrumentation -DPython_EXECUTABLE=${Python_EXECUTABLE}
                                     -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
