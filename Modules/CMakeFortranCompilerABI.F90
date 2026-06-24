@@ -18,7 +18,8 @@ PRINT *, 'INFO:sizeof_dptr[8]'
 PRINT *, 'INFO:sizeof_dptr[8]'
 #elif defined(_M_AMD64)
 PRINT *, 'INFO:sizeof_dptr[8]'
-#elif defined(__x86_64__)
+#elif defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||         \
+  defined(__amd64__)
 PRINT *, 'INFO:sizeof_dptr[8]'
 #elif defined(__ppc64__) || defined(__powerpc64__) || defined(__PPC64__)
 PRINT *, 'INFO:sizeof_dptr[8]'
@@ -29,7 +30,7 @@ PRINT *, 'INFO:sizeof_dptr[8]'
 PRINT *, 'INFO:sizeof_dptr[4]'
 #elif defined(_M_IX86)
 PRINT *, 'INFO:sizeof_dptr[4]'
-#elif defined(__i386__)
+#elif defined(__i386) || defined(__i386__)
 PRINT *, 'INFO:sizeof_dptr[4]'
 #elif defined(__ppc__) || defined(__powerpc__) || defined(__PPC__)
 PRINT *, 'INFO:sizeof_dptr[4]'
