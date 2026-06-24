@@ -555,7 +555,8 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   bool ssldone = FALSE;
 
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-    result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
+    result = Curl_ssl_cfilter_add(
+      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
     if(result)
       goto out;
     /* Change the connection handler */
@@ -565,7 +566,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   DEBUGASSERT(!imapc->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   DEBUGF(infof(data, "imap_perform_upgrade_tls, connect -> %d, %d",
-               result, ssldone));
+               (int)result, ssldone));
   if(!result && ssldone) {
     imapc->ssldone = ssldone;
     /* perform CAPA now, changes imapc->state out of IMAP_UPGRADETLS */
@@ -597,15 +598,15 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we do not */
-  if(!data->state.aptr.user) {
+  if(!conn->creds) {
     imap_state(data, imapc, IMAP_STOP);
 
     return result;
   }
 
   /* Make sure the username and password are in the correct atom format */
-  user = imap_atom(conn->user, FALSE);
-  passwd = imap_atom(conn->passwd, FALSE);
+  user = imap_atom(Curl_creds_user(conn->creds), FALSE);
+  passwd = imap_atom(Curl_creds_passwd(conn->creds), FALSE);
 
   /* Send the LOGIN command */
   result = imap_sendf(data, imapc, "LOGIN %s %s", user ? user : "",
@@ -712,7 +713,6 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
   /* Calculate the SASL login details */
   result = Curl_sasl_start(&imapc->sasl, data, (bool)imapc->ir_supported,
                            &progress);
-
   if(!result) {
     if(progress == SASL_INPROGRESS)
       imap_state(data, imapc, IMAP_AUTHENTICATE);
@@ -911,12 +911,12 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
   if(data->set.upload_flags) {
     int i;
     struct ulbits ulflag[] = {
-      {CURLULFLAG_ANSWERED, "Answered"},
-      {CURLULFLAG_DELETED, "Deleted"},
-      {CURLULFLAG_DRAFT, "Draft"},
-      {CURLULFLAG_FLAGGED, "Flagged"},
-      {CURLULFLAG_SEEN, "Seen"},
-      {0, NULL}
+      { CURLULFLAG_ANSWERED, "Answered" },
+      { CURLULFLAG_DELETED, "Deleted" },
+      { CURLULFLAG_DRAFT, "Draft" },
+      { CURLULFLAG_FLAGGED, "Flagged" },
+      { CURLULFLAG_SEEN, "Seen" },
+      { 0, NULL }
     };
 
     result = CURLE_OUT_OF_MEMORY;
@@ -1044,7 +1044,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
 
       /* Extract the word */
       for(wordlen = 0; line[wordlen] && !ISBLANK(line[wordlen]) &&
-            !ISNEWLINE(line[wordlen]);)
+                       !ISNEWLINE(line[wordlen]);)
         wordlen++;
 
       /* Does the server support the STARTTLS capability? */
@@ -1076,7 +1076,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
       line += wordlen;
     }
   }
-  else if(data->set.use_ssl && !Curl_xfer_is_secure(data)) {
+  else if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
     /* PREAUTH is not compatible with STARTTLS. */
     if(imapcode == IMAP_RESP_OK && imapc->tls_supported && !imapc->preauth) {
       /* Switch to TLS connection now */
@@ -1189,9 +1189,9 @@ static bool is_custom_fetch_listing_match(const char *params)
       return FALSE;
   }
   if(*params == ':')
-    return true;
+    return TRUE;
   if(*params == ',')
-    return true;
+    return TRUE;
   return FALSE;
 }
 
@@ -1796,7 +1796,7 @@ static CURLcode imap_parse_url_options(struct connectdata *conn,
 static CURLcode imap_parse_url_path(struct Curl_easy *data,
                                     struct IMAP *imap)
 {
-  /* The imap struct is already initialised in imap_connect() */
+  /* The imap struct is already initialized in imap_connect() */
   CURLcode result = CURLE_OK;
   const char *begin = &data->state.up.path[1]; /* skip leading slash */
   const char *ptr = begin;

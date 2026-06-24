@@ -23,7 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
+struct Curl_str;
+struct hostname;
+
 bool Curl_is_ASCII_name(const char *hostname);
+bool Curl_is_ASCII_str(struct Curl_str *s);
+
 CURLcode Curl_idnconvert_hostname(struct hostname *host);
 
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)

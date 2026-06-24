@@ -158,6 +158,7 @@ static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 
 #elif defined(USE_GNUTLS)
 #include <nettle/md4.h>
+#include <nettle/version.h>
 
 typedef struct md4_ctx my_md4_ctx;
 
@@ -175,7 +176,11 @@ static void my_md4_update(my_md4_ctx *ctx,
 
 static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
+#if NETTLE_VERSION_MAJOR >= 4
+  md4_digest(ctx, digest);
+#else
   md4_digest(ctx, MD4_DIGEST_SIZE, digest);
+#endif
 }
 
 #else

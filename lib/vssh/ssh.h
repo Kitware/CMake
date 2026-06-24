@@ -195,7 +195,7 @@ struct ssh_conn {
   const char *readdir_filename; /* points within readdir_attrs */
   const char *readdir_longentry;
   char *readdir_tmp;
-  BIT(initialised);
+  BIT(initialized);
 #elif defined(USE_LIBSSH2)
   LIBSSH2_SESSION *ssh_session; /* Secure Shell session */
   LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
@@ -229,9 +229,9 @@ struct ssh_conn {
 /* Feature detection based on version numbers to better work with
    non-configure platforms */
 
-#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x010208)
-#error "SCP/SFTP protocols require libssh2 1.2.8 or later"
-/* 1.2.8 was released on April 5 2011 */
+#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x010900)
+#error "SCP/SFTP protocols require libssh2 1.9.0 or greater"
+/* 1.9.0 was released on June 20 2019 */
 #endif
 
 #endif /* USE_LIBSSH2 */

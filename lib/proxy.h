@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_CURL_QUICHE_H
-#define HEADER_CURL_VQUIC_CURL_QUICHE_H
+#ifndef HEADER_CURL_PROXY_H
+#define HEADER_CURL_PROXY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,21 +25,35 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_QUICHE)
+#ifndef CURL_DISABLE_PROXY
 
-#include <quiche.h>
-#include <openssl/ssl.h>
-
-struct Curl_cfilter;
 struct Curl_easy;
+struct Curl_peer;
+struct Curl_creds;
+struct connectdata;
 
-void Curl_quiche_ver(char *p, size_t len);
+struct proxy_info {
+  struct Curl_peer *peer; /* proxy to this peer */
+  struct Curl_creds *creds; /* use these credentials, maybe NULL */
+  uint8_t proxytype; /* what kind of proxy that is in use */
+};
 
-CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
-                               struct Curl_easy *data,
-                               struct connectdata *conn,
-                               struct Curl_sockaddr_ex *addr);
+#define CURL_PROXY_IS_HTTPS(t)  \
+  (((t) == CURLPROXY_HTTPS) ||  \
+   ((t) == CURLPROXY_HTTPS2) || \
+   ((t) == CURLPROXY_HTTPS3))
 
-#endif
+#define CURL_PROXY_IS_HTTP(t)   \
+  (((t) == CURLPROXY_HTTP) ||   \
+   ((t) == CURLPROXY_HTTP_1_0))
 
-#endif /* HEADER_CURL_VQUIC_CURL_QUICHE_H */
+#define CURL_PROXY_IS_ANY_HTTP(t) \
+  (CURL_PROXY_IS_HTTP(t) ||       \
+   CURL_PROXY_IS_HTTPS(t))
+
+CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
+                              struct connectdata *conn);
+
+#endif /* !CURL_DISABLE_PROXY */
+
+#endif /* HEADER_CURL_PROXY_H */

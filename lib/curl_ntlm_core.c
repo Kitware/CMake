@@ -49,6 +49,13 @@
      in NTLM type-3 messages.
  */
 
+#ifdef USE_GNUTLS
+#include <nettle/version.h>
+#if NETTLE_VERSION_MAJOR < 4
+#define USE_GNUTLS_DES
+#endif
+#endif
+
 #if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
 
 #  include <openssl/des.h>
@@ -63,7 +70,7 @@
 #  include <wolfssl/wolfcrypt/des3.h>
 #  define USE_WOLFSSL_DES
 
-#elif defined(USE_GNUTLS)
+#elif defined(USE_GNUTLS_DES)
 #  include <nettle/des.h>
 #  define USE_CURL_DES_SET_ODD_PARITY
 #elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
@@ -175,7 +182,7 @@ static void setup_des_key(const unsigned char *key_56, Des *des)
   wc_Des_SetKey(des, key, NULL, 0);
 }
 
-#elif defined(USE_GNUTLS)
+#elif defined(USE_GNUTLS_DES)
 static void setup_des_key(const unsigned char *key_56, struct des_ctx *des)
 {
   char key[8];
@@ -244,6 +251,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
     char key[8];
   } blob;
   DWORD len = 8;
+  BOOL res;
 
   /* Acquire the crypto provider */
   if(!CryptAcquireContext(&hprov, NULL, NULL, PROV_RSA_FULL,
@@ -273,19 +281,19 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   memcpy(out, in, 8);
 
   /* Perform the encryption */
-  CryptEncrypt(hkey, 0, FALSE, 0, out, &len, len);
+  res = CryptEncrypt(hkey, 0, FALSE, 0, out, &len, len);
 
   CryptDestroyKey(hkey);
   CryptReleaseContext(hprov, 0);
 
-  return TRUE;
+  return res;
 }
 
 #endif /* crypto backends */
 
 /*
- * takes a 21 byte array and treats it as 3 56-bit DES keys. The
- * 8 byte plaintext is encrypted with each key and the resulting 24
+ * takes a 21-byte array and treats it as 3 56-bit DES keys. The
+ * 8-byte plaintext is encrypted with each key and the resulting 24
  * bytes are stored in the results array.
  */
 void Curl_ntlm_core_lm_resp(const unsigned char *keys,
@@ -314,7 +322,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   wc_Des_EcbEncrypt(&des, results + 8, plaintext, DES_KEY_SIZE);
   setup_des_key(keys + 14, &des);
   wc_Des_EcbEncrypt(&des, results + 16, plaintext, DES_KEY_SIZE);
-#elif defined(USE_GNUTLS)
+#elif defined(USE_GNUTLS_DES)
   struct des_ctx des;
   setup_des_key(keys, &des);
   des_encrypt(&des, 8, results, plaintext);
@@ -367,7 +375,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     wc_Des_EcbEncrypt(&des, lmbuffer, magic, DES_KEY_SIZE);
     setup_des_key(pw + 7, &des);
     wc_Des_EcbEncrypt(&des, lmbuffer + 8, magic, DES_KEY_SIZE);
-#elif defined(USE_GNUTLS)
+#elif defined(USE_GNUTLS_DES)
     struct des_ctx des;
     setup_des_key(pw, &des);
     des_encrypt(&des, 8, lmbuffer, magic);
@@ -625,7 +633,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(const unsigned char *ntlmv2hash,
  *
  * ntlmv2hash        [in] - The NTLMv2 hash (16 bytes)
  * challenge_client  [in] - The client nonce (8 bytes)
- * challenge_client  [in] - The server challenge (8 bytes)
+ * challenge_server  [in] - The server challenge (8 bytes)
  * lmresp           [out] - The LMv2 response (24 bytes)
  *
  * Returns CURLE_OK on success.

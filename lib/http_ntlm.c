@@ -93,6 +93,8 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
       else if(*state == NTLMSTATE_TYPE3) {
         infof(data, "NTLM handshake rejected");
         Curl_auth_ntlm_remove(conn, proxy);
+        Curl_peer_unlink(&conn->creds_origin);
+        Curl_creds_unlink(&conn->creds);
         *state = NTLMSTATE_NONE;
         return CURLE_REMOTE_ACCESS_DENIED;
       }
@@ -122,10 +124,8 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
      server, which is for a plain host or for an HTTP proxy */
   char **allocuserpwd;
 
-  /* point to the username, password, service and host */
-  const char *userp;
-  const char *passwdp;
-  const char *service = NULL;
+  /* point to credentials and host */
+  struct Curl_creds *creds = NULL;
   const char *hostname = NULL;
 
   /* point to the correct struct with this */
@@ -139,12 +139,9 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-    allocuserpwd = &data->req.proxyuserpwd;
-    userp = data->state.aptr.proxyuser;
-    passwdp = data->state.aptr.proxypasswd;
-    service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
-    hostname = conn->http_proxy.host.name;
+    allocuserpwd = &data->req.hd_proxy_auth;
+    creds = conn->http_proxy.creds;
+    hostname = conn->http_proxy.peer->hostname;
     state = &conn->proxy_ntlm_state;
     authp = &data->state.authproxy;
 #else
@@ -152,26 +149,17 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 #endif
   }
   else {
-    allocuserpwd = &data->req.userpwd;
-    userp = data->state.aptr.user;
-    passwdp = data->state.aptr.passwd;
-    service = data->set.str[STRING_SERVICE_NAME] ?
-              data->set.str[STRING_SERVICE_NAME] : "HTTP";
-    hostname = conn->host.name;
+    allocuserpwd = &data->req.hd_auth;
+    creds = data->state.creds;
+    hostname = data->state.origin->hostname;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
   }
+
   ntlm = Curl_auth_ntlm_get(conn, proxy);
   if(!ntlm)
     return CURLE_OUT_OF_MEMORY;
   authp->done = FALSE;
-
-  /* not set means empty */
-  if(!userp)
-    userp = "";
-
-  if(!passwdp)
-    passwdp = "";
 
 #ifdef USE_WINDOWS_SSPI
   if(!Curl_pSecFn) {
@@ -194,9 +182,23 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   switch(*state) {
   case NTLMSTATE_TYPE1:
-  default: /* for the weird cases we (re)start here */
-    /* Create a type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(data, userp, passwdp, service,
+  default:  /* for the weird cases we (re)start here */
+    if(!proxy) {
+      /* Start it up. From this time onwards, the connection is tied
+       * tp the credentials used. */
+      if(conn->creds_origin &&
+         !Curl_peer_equal(conn->creds_origin, data->state.origin)) {
+        DEBUGASSERT(0); /* should not happen. */
+        return CURLE_FAILED_INIT;
+      }
+      if(conn->creds && !Curl_creds_same(creds, conn->creds)) {
+        DEBUGASSERT(0); /* should not happen. */
+        return CURLE_FAILED_INIT;
+      }
+      Curl_peer_link(&conn->creds_origin, data->state.origin);
+      Curl_creds_link(&conn->creds, creds);
+    }
+    result = Curl_auth_create_ntlm_type1_message(data, creds, "HTTP",
                                                  hostname, ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
@@ -215,8 +217,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
-    result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
-                                                 ntlm, &ntlmmsg);
+    result = Curl_auth_create_ntlm_type3_message(data, creds, ntlm, &ntlmmsg);
     if(!result && Curl_bufref_len(&ntlmmsg)) {
       result = curlx_base64_encode(Curl_bufref_uptr(&ntlmmsg),
                                    Curl_bufref_len(&ntlmmsg), &base64, &len);

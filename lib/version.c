@@ -388,7 +388,7 @@ static int idn_present(curl_version_info_data *info)
   (void)info;
   return TRUE;
 #else
-  return info->libidn != NULL;
+  return !!info->libidn;
 #endif
 }
 #endif
@@ -490,6 +490,9 @@ static const struct feat features_table[] = {
 #endif
 #ifdef USE_NTLM
   FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
+#endif
+#ifdef USE_PROXY_HTTP3
+  FEATURE("proxy-HTTP3", NULL,                0),
 #endif
 #ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),

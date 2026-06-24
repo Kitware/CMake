@@ -219,7 +219,7 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
-/* Give calloc a chance to be dragging in early, so we do not redefine */
+/* Give calloc a chance to be included early, so we do not redefine */
 #ifdef HAVE_THREADS_POSIX
 #  include <pthread.h>
 #endif
@@ -461,7 +461,7 @@
 #    undef HAVE_FCNTL
 #    undef HAVE_FCNTL_O_NONBLOCK
 #  else
-     /* use libc networking and hence close() and fnctl() */
+     /* use libc networking and hence close() and fcntl() */
 #    undef HAVE_CLOSESOCKET_CAMEL
 #    undef HAVE_IOCTLSOCKET_CAMEL
 #  endif
@@ -587,7 +587,7 @@
 #  endif
 #endif
 
-#if (SIZEOF_CURL_OFF_T < 8)
+#if SIZEOF_CURL_OFF_T < 8
 #error "too small curl_off_t"
 #else
    /* assume SIZEOF_CURL_OFF_T == 8 */
@@ -598,7 +598,7 @@
 #define FMT_OFF_T  CURL_FORMAT_CURL_OFF_T
 #define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
-#if (SIZEOF_TIME_T == 4)
+#if SIZEOF_TIME_T == 4
 #  ifdef HAVE_TIME_T_UNSIGNED
 #  define TIME_T_MAX UINT_MAX
 #  define TIME_T_MIN 0
@@ -1137,6 +1137,15 @@ typedef unsigned int curl_bit;
 #define SOCKEWOULDBLOCK   EWOULDBLOCK
 #endif
 
+/* The socket error may be EWOULDBLOCK or on some systems EAGAIN when
+   it returned due to its inability to send/read data without blocking.
+   We treat both error codes the same here. */
+#if !defined(USE_WINSOCK) && EAGAIN != SOCKEWOULDBLOCK
+#define SOCK_EAGAIN(e) ((e) == SOCKEWOULDBLOCK || (e) == EAGAIN)
+#else
+#define SOCK_EAGAIN(e) ((e) == SOCKEWOULDBLOCK)
+#endif
+
 /*
  * Macro argv_item_t hides platform details to code using it.
  */
@@ -1327,6 +1336,20 @@ extern curl_calloc_callback Curl_ccalloc;
   do {                      \
     curlx_free(ptr);        \
     (ptr) = NULL;           \
+  } while(0)
+
+/* Same as curlx_safefree() but zeroes memory before freeing */
+#define curlx_safefreezero(ptr, size) \
+  do {                                \
+    curlx_freezero(ptr, size);        \
+    (ptr) = NULL;                     \
+  } while(0)
+
+/* Same as curlx_safefreezero() but determines length with strlen() */
+#define curlx_safefreezeroz(ptr) \
+  do {                           \
+    curlx_freezeroz(ptr);        \
+    (ptr) = NULL;                \
   } while(0)
 
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
@@ -1542,7 +1565,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(_WIN32)
-/* Offered by mingw-w64 v10+. MS SDK 10.17763/~VS2017+. */
+/* Offered by mingw-w64 v10+, MS SDK 10.0.16299.0/VS2017 15.4+ */
 #if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR >= 10)
 #  include <afunix.h>
 #elif !defined(UNIX_PATH_MAX) /* Replicate logic present in afunix.h */
@@ -1578,7 +1601,7 @@ typedef struct sockaddr_un {
 /* The code is compiled with C++ compiler.
    C++ always supports 'inline'. */
 #  define CURL_INLINE inline /* 'inline' keyword supported */
-#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 /* C99 (and later) supports 'inline' keyword */
 #  define CURL_INLINE inline /* 'inline' keyword supported */
 #elif defined(__GNUC__) && __GNUC__ >= 3
@@ -1607,5 +1630,44 @@ typedef struct sockaddr_un {
 #define VERBOSE(x) Curl_nop_stmt
 #define NOVERBOSE(x) x
 #endif
+
+/* For FreeBSD it is included from curl/curl.h */
+#if defined(__DragonFly__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#include <sys/param.h>  /* for __DragonFly_version, OpenBSD,
+                           __NetBSD_Version__ */
+#endif
+
+#ifndef _CURL_LOCAL_MEMZERO /* to be removed after a couple of releases */
+#ifdef _WIN32
+#if defined(_MSC_VER) && defined(NTDDI_VERSION) && \
+  (NTDDI_VERSION >= 0x0A000010) /* MS SDK 10.0.26100.0+ */
+#pragma comment(lib, "volatileaccessu.lib")
+#define curlx_memzero(buf, size)  SecureZeroMemory2(buf, size)
+#else
+#define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
+#endif
+#elif defined(HAVE_MEMSET_S)
+#define curlx_memzero(buf, size)  (void)memset_s(buf, size, 0, size)
+#elif defined(HAVE_MEMSET_EXPLICIT)
+#define curlx_memzero(buf, size)  (void)memset_explicit(buf, 0, size)
+#elif defined(__CYGWIN__) || \
+  (defined(__NEWLIB__) && !defined(__CLIB2__)) || \
+  (defined(__GLIBC__) && \
+    (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
+  (defined(__DragonFly__) && __DragonFly_version >= 500600 /* v5.6+ */) || \
+  (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11.0+ */) || \
+  (defined(__OpenBSD__) && OpenBSD >= 201405 /* v5.5+ */)
+#define curlx_memzero(buf, size)  explicit_bzero(buf, size)
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* v7.2+ */
+#define curlx_memzero(buf, size)  (void)explicit_memset(buf, 0, size)
+#endif
+#endif /* !_CURL_LOCAL_MEMZERO */
+
+#ifndef curlx_memzero
+#define USE_CURLX_MEMZERO
+void curlx_memzero(void *buf, size_t size);
+#endif
+void curlx_freezero(void *buf, size_t size);
+void curlx_freezeroz(void *buf);
 
 #endif /* HEADER_CURL_SETUP_H */

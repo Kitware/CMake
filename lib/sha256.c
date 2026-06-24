@@ -43,8 +43,8 @@
  * 2. USE_WOLFSSL
  * 3. USE_GNUTLS
  * 4. USE_MBEDTLS
- * 5. USE_COMMON_CRYPTO
- * 6. USE_WIN32_CRYPTO
+ * 5. USE_WIN32_CRYPTO
+ * 6. USE_COMMON_CRYPTO
  *
  * This ensures that the same SSL branch gets activated throughout this source
  * file even if multiple backends are enabled at the same time.
@@ -113,7 +113,8 @@ static void my_sha256_final(unsigned char *digest, void *in)
 }
 
 #elif defined(USE_GNUTLS)
-#include <nettle/sha.h>
+#include <nettle/sha2.h>
+#include <nettle/version.h>
 
 typedef struct sha256_ctx my_sha256_ctx;
 
@@ -132,11 +133,15 @@ static void my_sha256_update(void *ctx,
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
+#if NETTLE_VERSION_MAJOR >= 4
+  sha256_digest(ctx, digest);
+#else
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
+#endif
 }
 
 #elif defined(USE_MBEDTLS) && \
-  defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
+  defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
 #include <psa/crypto.h>
 
 typedef psa_hash_operation_t my_sha256_ctx;

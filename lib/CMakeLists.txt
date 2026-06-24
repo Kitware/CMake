@@ -110,8 +110,7 @@ if(SHARE_LIB_OBJECT)
     set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
   target_link_libraries(${LIB_OBJECT} PRIVATE ${CURL_LIBS})
-  set_target_properties(${LIB_OBJECT} PROPERTIES
-    POSITION_INDEPENDENT_CODE ON)
+  set_target_properties(${LIB_OBJECT} PROPERTIES POSITION_INDEPENDENT_CODE ON)
   set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_OPTIONS "${CURL_CFLAGS}")
   if(CURL_HIDES_PRIVATE_SYMBOLS)
     set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_OPTIONS "${CURL_CFLAG_SYMBOLS_HIDE}")
@@ -253,7 +252,7 @@ if(BUILD_SHARED_LIBS)
     CMAKE_SYSTEM_NAME STREQUAL "Haiku" OR
     CMAKE_SYSTEM_NAME STREQUAL "OHOS" OR  # OpenHarmony
     CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
-    # FreeBSD comes with the a.out and ELF flavours but a.out was supported
+    # FreeBSD comes with the a.out and ELF flavors but a.out was supported
     # up to v3.x and ELF from v3.x. I cannot imagine someone running CMake
     # on those ancient systems.
     CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
