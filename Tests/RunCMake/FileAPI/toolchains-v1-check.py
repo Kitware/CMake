@@ -48,14 +48,18 @@ def check_object_toolchains(o):
 
     # Other platform-specific toolchains may exist (like RC on Windows).
     has_cxx_toolchain = False
+    has_none_toolchain = False
     for toolchain in toolchains:
         assert is_dict(toolchain)
         assert "language" in toolchain
         if toolchain["language"] == "CXX":
             check_object_toolchain(toolchain, EXPECTED_TOOLCHAIN)
             has_cxx_toolchain = True
+        if toolchain["language"] == "NONE":
+            has_none_toolchain = True
 
     assert has_cxx_toolchain
+    assert not has_none_toolchain
 
 def check_object_toolchain(o, expected):
     expected_keys = [
