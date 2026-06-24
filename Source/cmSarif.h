@@ -167,9 +167,23 @@ struct Tool
 
 Json::Value GetJson(Tool const& tool);
 
+struct Invocation
+{
+  std::vector<std::string> Arguments;
+  ArtifactLocation ExecutableLocation;
+  std::string StartTimeUtc;
+  std::string EndTimeUtc;
+  cm::optional<int> ExitCode;
+  cm::optional<int> ExitSignalNumber;
+  bool ExecutionSuccessful;
+};
+
+Json::Value GetJson(Invocation const& invocation);
+
 struct Run
 {
   cmSarif::Tool Tool;
+  std::vector<Invocation> Invocations;
   std::vector<Result> Results;
   std::unordered_map<std::string, ArtifactLocation> OriginalUriBaseIds;
 };

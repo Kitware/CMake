@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <climits>
 #include <cstring>
 #include <functional>
@@ -33,6 +34,7 @@
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageMetadata.h"
+#include "cmMessenger.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStdIoConsole.h"
@@ -46,6 +48,7 @@
 
 #ifndef CMAKE_BOOTSTRAP
 #  include "cmCMakePresetsArgs.h"
+#  include "cmCMakeSarifLogger.h"
 #  include "cmDocumentation.h"
 #endif
 
@@ -137,6 +140,8 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
     "Select an output path for the profiling data enabled through "
     "--profiling-format." }
 };
+
+cmCMakeSarifLogger cmSarifLogger;
 
 #endif
 
@@ -264,6 +269,9 @@ int do_cmake(int ac, char const* const* av)
   // (Regex) Filter on the cached variable(s) to print.
   std::string filter_var_name;
   bool view_only = false;
+#ifndef CMAKE_BOOTSTRAP
+  cm::optional<std::string> sarif_output_path;
+#endif
   cmState::Role role = cmState::Role::Project;
   std::vector<std::string> parsedArgs;
 
@@ -329,6 +337,15 @@ int do_cmake(int ac, char const* const* av)
                        return true;
                      } },
   };
+
+#ifndef CMAKE_BOOTSTRAP
+  arguments.emplace_back(
+    "--sarif-output", "No file specified for --sarif-output",
+    CommandArgument::Values::One, [&](std::string const& value) -> bool {
+      sarif_output_path = cmSystemTools::ToNormalizedPathOnDisk(value);
+      return true;
+    });
+#endif
 
   std::vector<std::string> inputArgs;
   inputArgs.reserve(ac);
@@ -409,6 +426,31 @@ int do_cmake(int ac, char const* const* av)
       }
     }
   }
+
+#ifndef CMAKE_BOOTSTRAP
+  // If SARIF wasn't enabled on the CLI, see if it is enabled for the project.
+  if (!sarif_output_path && (sarif_output_path = cm.GetProjectSarifFile())) {
+    // Create parent directories when writing to the default location
+    cmSystemTools::MakeDirectory(
+      cmSystemTools::GetFilenamePath(*sarif_output_path));
+  }
+
+  if (sarif_output_path) {
+    cmSarifLogger.SetOutputPath(*sarif_output_path);
+
+    std::string const& binDir = cm.GetHomeOutputDirectory();
+    if (!binDir.empty()) {
+      cmSarifLogger.AddBaseDirectory("CMAKE_BINARY_DIR", binDir);
+    }
+
+    std::string const& homeDir = cm.GetHomeDirectory();
+    if (!homeDir.empty()) {
+      cmSarifLogger.AddBaseDirectory("CMAKE_SOURCE_DIR", homeDir);
+    }
+
+    cmSarifLogger.RecordDiagnostics(cm.GetMessenger()->GetDisplayedMessages());
+  }
+#endif
 
   // Always return a non-negative value (except exit code from SCRIPT_MODE).
   // Windows tools do not always interpret negative return values as errors.
@@ -1175,6 +1217,11 @@ int do_open(int ac, char const* const* av)
 
 int main(int ac, char const* const* av)
 {
+#ifndef CMAKE_BOOTSTRAP
+  std::chrono::system_clock::time_point wall_start_time =
+    std::chrono::system_clock::now();
+#endif
+
   cm::optional<cm::StdIo::Console> console = cm::StdIo::Console();
 
   cmsys::Encoding::CommandLineArguments args =
@@ -1212,5 +1259,9 @@ int main(int ac, char const* const* av)
   if (uv_loop_t* loop = uv_default_loop()) {
     uv_loop_close(loop);
   }
+#ifndef CMAKE_BOOTSTRAP
+  cmSarifLogger.RecordInvocation(ac, av, ret, wall_start_time,
+                                 std::chrono::system_clock::now());
+#endif
   return ret;
 }

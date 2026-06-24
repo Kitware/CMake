@@ -178,6 +178,27 @@ Json::Value GetJson(Tool const& tool)
   return toolJson;
 }
 
+Json::Value GetJson(Invocation const& invocation)
+{
+  Json::Value obj(Json::objectValue);
+  Json::Value arguments(Json::arrayValue);
+  for (auto const& argument : invocation.Arguments) {
+    arguments.append(argument);
+  }
+  obj["arguments"] = arguments;
+  obj["executableLocation"] = cmSarif::GetJson(invocation.ExecutableLocation);
+  obj["startTimeUtc"] = invocation.StartTimeUtc;
+  obj["endTimeUtc"] = invocation.EndTimeUtc;
+  if (invocation.ExitCode) {
+    obj["exitCode"] = *invocation.ExitCode;
+  }
+  if (invocation.ExitSignalNumber) {
+    obj["exitSignalNumber"] = *invocation.ExitSignalNumber;
+  }
+  obj["executionSuccessful"] = invocation.ExecutionSuccessful;
+  return obj;
+}
+
 Json::Value GetJson(Run const& run)
 {
   Json::Value runJson(Json::objectValue);
@@ -189,6 +210,14 @@ Json::Value GetJson(Run const& run)
       uriBaseIds[base.first] = cmSarif::GetJson(base.second);
     }
     runJson["originalUriBaseIds"] = uriBaseIds;
+  }
+
+  if (!run.Invocations.empty()) {
+    Json::Value invocations(Json::arrayValue);
+    for (auto const& invocation : run.Invocations) {
+      invocations.append(cmSarif::GetJson(invocation));
+    }
+    runJson["invocations"] = invocations;
   }
 
   Json::Value results(Json::arrayValue);
