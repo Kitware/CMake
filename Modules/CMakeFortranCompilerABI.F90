@@ -105,8 +105,6 @@ PRINT *, 'INFO:arch[loongarch64]'
 PRINT *, 'INFO:arch[loongarch32]'
 #elif defined(__m68k__)
 PRINT *, 'INFO:arch[m68k]'
-#elif defined(__sw_64)
-PRINT *, 'INFO:arch[sw_64]'
 #elif defined(__mips64) || defined(__mips64__)
 #  if defined(_MIPSEL)
 PRINT *, 'INFO:arch[mips64el]'
@@ -131,6 +129,8 @@ PRINT *, 'INFO:arch[s390]'
 PRINT *, 'INFO:arch[sparcv9]'
 #elif defined(__sparc) || defined(__sparc__)
 PRINT *, 'INFO:arch[sparc]'
+#elif defined(__sw_64) || defined(__sw_64__)
+PRINT *, 'INFO:arch[sw_64]'
 #elif defined(__hppa) || defined(__hppa__)
 #  if defined(__LP64__)
 PRINT *, 'INFO:arch[parisc64]'
