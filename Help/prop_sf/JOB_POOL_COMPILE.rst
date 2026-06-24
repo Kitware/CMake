@@ -23,5 +23,6 @@ This property is undefined by default.
 See Also
 ^^^^^^^^
 
+* :prop_rule:`JOB_POOL_COMPILE` rule property
 * :prop_fs:`JOB_POOL_COMPILE` file set property
 * :prop_tgt:`JOB_POOL_COMPILE` target property

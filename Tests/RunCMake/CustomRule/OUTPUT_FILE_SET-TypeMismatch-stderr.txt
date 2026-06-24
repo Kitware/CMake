@@ -1,0 +1,3 @@
+CMake Error in CMakeLists\.txt:
+  The output file set "foo_bar_fs", for the target "bar", has the type
+  "HEADERS" instead of "SOURCES", as specified by the rule "foo"\.

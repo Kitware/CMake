@@ -1,0 +1,5 @@
+CMake Error at InvalidDuplicateOption-DEPFILE\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule only one occurrence of "DEPFILE" or "CONFIGURATOR" options
+  is allowed\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -1,0 +1,4 @@
+CMake Error at FROM_RULE-InvalidOption-OUTPUT\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule given unknown argument: "OUTPUT".
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

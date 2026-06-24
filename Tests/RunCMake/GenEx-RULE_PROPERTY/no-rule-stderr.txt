@@ -1,0 +1,8 @@
+CMake Error at no-rule.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<RULE_PROPERTY:,FOO>
+
+  \$<RULE_PROPERTY:rule,prop> expression requires a non-empty rule name\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

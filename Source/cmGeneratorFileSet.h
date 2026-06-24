@@ -33,7 +33,8 @@ class cmGeneratorFileSet
 public:
   using TargetPropertyEntry = cm::TargetPropertyEntry;
 
-  cmGeneratorFileSet(cmGeneratorTarget const*, cmFileSet const*);
+  cmGeneratorFileSet(cmGeneratorTarget const*, cmFileSet const*,
+                     cm::FileSetMetadata::FileSetDomain);
   ~cmGeneratorFileSet() = default;
 
   cmGeneratorFileSet(cmGeneratorFileSet&&) = default;
@@ -55,6 +56,8 @@ public:
   }
 
   cmFileSet const* GetFileSet() const { return this->FileSet; }
+
+  cm::FileSetMetadata::FileSetDomain GetDomain() const { return this->Domain; }
 
   cmValue GetProperty(std::string const& prop) const;
 
@@ -130,6 +133,7 @@ public:
 private:
   cmGeneratorTarget const* Target;
   cmFileSet const* FileSet;
+  cm::FileSetMetadata::FileSetDomain Domain;
   mutable std::vector<std::unique_ptr<cmCompiledGeneratorExpression>>
     CompiledDirectoryEntries;
   mutable std::vector<std::unique_ptr<cmCompiledGeneratorExpression>>

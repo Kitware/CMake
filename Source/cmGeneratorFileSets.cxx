@@ -12,9 +12,9 @@
 #include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
+#include <cmext/enum_set>
 
 #include "cmFileSet.h"
-#include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpression.h"
@@ -48,23 +48,8 @@ cmGeneratorFileSets::cmGeneratorFileSets(cmGeneratorTarget* target,
                target->GetName(), R"(".)"));
   };
 
-  for (auto const& name : target->Target->GetAllPrivateFileSets()) {
-    cmFileSet const* fileSet = target->Target->GetFileSet(name);
-    if (isFramework &&
-        !cm::FileSetMetadata::IsFrameworkSupported(fileSet->GetType())) {
-      issueMessage(fileSet);
-      continue;
-    }
-    auto entry = this->FileSets.emplace(
-      name, cm::make_unique<cmGeneratorFileSet>(target, fileSet));
-    auto const* genFileSet = entry.first->second.get();
-    this->AllFileSets.push_back(genFileSet);
-    this->SelfFileSets[genFileSet->GetType()].push_back(genFileSet);
-  }
-  for (auto const& name : target->Target->GetAllInterfaceFileSets()) {
-    auto it = this->FileSets.find(name);
-    cmGeneratorFileSet const* genFileSet = nullptr;
-    if (it == this->FileSets.end()) {
+  for (auto domain : cm::FileSetMetadata::AllFileSetDomains) {
+    for (auto const& name : target->Target->GetAllPrivateFileSets(domain)) {
       cmFileSet const* fileSet = target->Target->GetFileSet(name);
       if (isFramework &&
           !cm::FileSetMetadata::IsFrameworkSupported(fileSet->GetType())) {
@@ -72,13 +57,30 @@ cmGeneratorFileSets::cmGeneratorFileSets(cmGeneratorTarget* target,
         continue;
       }
       auto entry = this->FileSets.emplace(
-        name, cm::make_unique<cmGeneratorFileSet>(target, fileSet));
-      genFileSet = entry.first->second.get();
+        name, cm::make_unique<cmGeneratorFileSet>(target, fileSet, domain));
+      auto const* genFileSet = entry.first->second.get();
       this->AllFileSets.push_back(genFileSet);
-    } else {
-      genFileSet = it->second.get();
+      this->SelfFileSets[genFileSet->GetType()].push_back(genFileSet);
     }
-    this->InterfaceFileSets[genFileSet->GetType()].push_back(genFileSet);
+    for (auto const& name : target->Target->GetAllInterfaceFileSets(domain)) {
+      auto it = this->FileSets.find(name);
+      cmGeneratorFileSet const* genFileSet = nullptr;
+      if (it == this->FileSets.end()) {
+        cmFileSet const* fileSet = target->Target->GetFileSet(name);
+        if (isFramework &&
+            !cm::FileSetMetadata::IsFrameworkSupported(fileSet->GetType())) {
+          issueMessage(fileSet);
+          continue;
+        }
+        auto entry = this->FileSets.emplace(
+          name, cm::make_unique<cmGeneratorFileSet>(target, fileSet, domain));
+        genFileSet = entry.first->second.get();
+        this->AllFileSets.push_back(genFileSet);
+      } else {
+        genFileSet = it->second.get();
+      }
+      this->InterfaceFileSets[genFileSet->GetType()].push_back(genFileSet);
+    }
   }
 }
 cmGeneratorFileSets::~cmGeneratorFileSets() = default;
@@ -199,11 +201,12 @@ cmGeneratorFileSets::GetSources(
 std::vector<std::unique_ptr<cm::TargetPropertyEntry>>
 cmGeneratorFileSets::GetSources(
   cm::GenEx::Context const& context, cmGeneratorTarget const* target,
+  cm::FileSetMetadata::FileSetDomainSet domains,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
   return this->GetSources(
-    [](cmGeneratorFileSet const* fileSet) -> bool {
-      return fileSet->IsForSelf();
+    [&domains](cmGeneratorFileSet const* fileSet) -> bool {
+      return fileSet->IsForSelf() && domains.contains(fileSet->GetDomain());
     },
     context, target, dagChecker);
 }
@@ -223,11 +226,13 @@ cmGeneratorFileSets::GetSources(
 std::vector<std::unique_ptr<cm::TargetPropertyEntry>>
 cmGeneratorFileSets::GetInterfaceSources(
   cm::GenEx::Context const& context, cmGeneratorTarget const* target,
+  cm::FileSetMetadata::FileSetDomainSet domains,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
   return this->GetSources(
-    [](cmGeneratorFileSet const* fileSet) -> bool {
-      return fileSet->IsForInterface();
+    [&domains](cmGeneratorFileSet const* fileSet) -> bool {
+      return fileSet->IsForInterface() &&
+        domains.contains(fileSet->GetDomain());
     },
     context, target, dagChecker);
 }

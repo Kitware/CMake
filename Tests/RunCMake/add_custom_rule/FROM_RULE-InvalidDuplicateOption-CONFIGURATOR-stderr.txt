@@ -1,0 +1,5 @@
+CMake Error at FROM_RULE-InvalidDuplicateOption-CONFIGURATOR\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule only one occurrence of "FROM_RULE" or "CONFIGURATOR"
+  options is allowed.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

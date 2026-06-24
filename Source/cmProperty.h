@@ -18,6 +18,7 @@ public:
     VARIABLE,
     CACHED_VARIABLE,
     INSTALL,
-    FILE_SET
+    FILE_SET,
+    RULE
   };
 };

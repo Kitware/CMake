@@ -8,6 +8,7 @@ Get a property.
   get_property(<variable>
                <GLOBAL                                                  |
                 DIRECTORY [<dir>]                                       |
+                RULE      <rule>                                        |
                 TARGET    <target>                                      |
                 FILE_SET  <file_set> TARGET <target>                    |
                 SOURCE    <source>
@@ -38,6 +39,12 @@ It must be one of the following:
 
   .. versionadded:: 3.19
     ``<dir>`` may reference a binary directory.
+
+``RULE``
+  .. versionadded:: 4.5
+
+  Scope must name one existing rule in the current directory, created
+  by the :command:`add_custom_rule` command.
 
 ``TARGET``
   Scope must name one existing target.

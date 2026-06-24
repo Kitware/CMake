@@ -52,6 +52,7 @@ enum class cmObjectLibraryCommands;
 
 class cmCompiledGeneratorExpression;
 class cmCustomCommandLines;
+class cmRule;
 class cmExecutionStatus;
 class cmExpandedCommandArgument;
 class cmBuildSbomGenerator;
@@ -259,6 +260,25 @@ public:
     std::string const& output, std::vector<std::string> const& depends,
     cmImplicitDependsList const& implicit_depends,
     cmCustomCommandLines const& commandLines);
+
+  /**
+   * Add a custom rule to the build.
+   */
+  cmRule* AddRule(std::unique_ptr<cmRule> rule);
+
+  // -- List of custom rules
+  std::vector<std::unique_ptr<cmRule>> const& GetOwnedRules() const
+  {
+    return this->RulesOwned;
+  }
+  using cmRuleMap = std::unordered_map<std::string, cmRule*>;
+  /** Get the rules map */
+  cmRuleMap const& GetRules() const { return this->Rules; }
+
+  /**
+   * Lookup for a rule
+   */
+  cmRule* FindRuleToUse(std::string const& name) const;
 
   /**
    * Add a define flag to the build.
@@ -1370,4 +1390,7 @@ private:
   bool IsSourceFileTryCompile;
   cm::ImportedTargetScope CurrentImportedTargetScope =
     cm::ImportedTargetScope::Local;
+  // -- List of custom rules
+  std::vector<std::unique_ptr<cmRule>> RulesOwned;
+  cmRuleMap Rules;
 };

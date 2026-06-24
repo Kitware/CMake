@@ -134,7 +134,7 @@ public:
   std::string const& GetTarget() const;
   void SetTarget(std::string const& target);
 
-  /** Set/Get the custom command rolee */
+  /** Set/Get the custom command role */
   std::string const& GetRole() const;
   void SetRole(std::string const& role);
 

@@ -723,3 +723,4 @@ See Also
 ^^^^^^^^
 
 * :command:`add_custom_target`
+* :command:`add_custom_rule`

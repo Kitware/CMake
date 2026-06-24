@@ -1,0 +1,4 @@
+CMake Error at NoArguments\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule called with incorrect number of arguments
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

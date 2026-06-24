@@ -1,0 +1,4 @@
+CMake Error at FROM_RULE-InvalidOption-COMMAND\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule given unknown argument: "COMMAND".
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -7,6 +7,7 @@
 
 #include "cmAddCompileDefinitionsCommand.h"
 #include "cmAddCustomCommandCommand.h"
+#include "cmAddCustomRuleCommand.h"
 #include "cmAddCustomTargetCommand.h"
 #include "cmAddDefinitionsCommand.h"
 #include "cmAddDependenciesCommand.h"
@@ -231,6 +232,7 @@ void GetProjectCommands(cmState* state)
                            cmAddCompileDefinitionsCommand);
   state->AddBuiltinCommand("add_custom_command", cmAddCustomCommandCommand);
   state->AddBuiltinCommand("add_custom_target", cmAddCustomTargetCommand);
+  state->AddBuiltinCommand("add_custom_rule", cmAddCustomRuleCommand);
   state->AddBuiltinCommand("add_definitions", cmAddDefinitionsCommand);
   state->AddBuiltinCommand("add_dependencies", cmAddDependenciesCommand);
   state->AddBuiltinCommand("add_executable", cmAddExecutableCommand);

@@ -262,6 +262,7 @@ CMAKE_UNUSED_SOURCES="\
 CMAKE_CXX_SOURCES="\
   cmAddCompileDefinitionsCommand \
   cmAddCustomCommandCommand \
+  cmAddCustomRuleCommand \
   cmAddCustomTargetCommand \
   cmAddDefinitionsCommand \
   cmAddDependenciesCommand \
@@ -312,6 +313,7 @@ CMAKE_CXX_SOURCES="\
   cmCustomCommand \
   cmCustomCommandGenerator \
   cmCustomCommandLines \
+  cmCustomRule \
   cmCxxModuleMapper \
   cmCxxModuleUsageEffects \
   cmDefinePropertyCommand \
@@ -373,6 +375,7 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpressionParser \
   cmGeneratorFileSet \
   cmGeneratorFileSets \
+  cmGeneratorRule \
   cmGeneratorTarget \
   cmGeneratorTarget_CompatibleInterface \
   cmGeneratorTarget_HeaderSetVerification \
@@ -459,6 +462,7 @@ CMAKE_CXX_SOURCES="\
   cmPackageInfoReader \
   cmPlaceholderExpander \
   cmPlistParser \
+  cmRule \
   cmRulePlaceholderExpander \
   cmRuntimeDependencyArchive \
   cmScriptGenerator \
@@ -474,6 +478,7 @@ CMAKE_CXX_SOURCES="\
   cmSourceFile \
   cmSourceFileLocation \
   cmSourceFilePropertyHelper \
+  cmSpecializedRule \
   cmStandardLevelResolver \
   cmState \
   cmStateDirectory \

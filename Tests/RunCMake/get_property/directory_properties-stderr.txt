@@ -22,6 +22,10 @@ get_directory_property: -->Imported1Top;Imported2Top<--
 get_property: -->Imported1Top;Imported2Top<--
 get_directory_property: -->Imported1Sub;Imported2Sub<--
 get_property: -->Imported1Sub;Imported2Sub<--
+get_directory_property: -->Rule1Top;Rule2Top<--
+get_property: -->Rule1Top;Rule2Top<--
+get_directory_property: -->Rule1Sub;Rule2Sub<--
+get_property: -->Rule1Sub;Rule2Sub<--
 get_directory_property: -->[^<;]*/Tests/RunCMake/get_property/directory_properties-build<--
 get_property: -->[^<;]*/Tests/RunCMake/get_property/directory_properties-build<--
 get_directory_property: -->[^<;]*/RunCMake/get_property<--

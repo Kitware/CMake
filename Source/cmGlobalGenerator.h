@@ -57,6 +57,8 @@ class cmExternalMakefileProjectGenerator;
 class cmBuildSbomGenerator;
 class cmInstallSbomGenerator;
 class cmGeneratorTarget;
+class cmRule;
+class cmGeneratorRule;
 class cmInstallRuntimeDependencySet;
 class cmLinkLineComputer;
 class cmMakefile;
@@ -177,6 +179,9 @@ public:
   virtual void Configure();
 
   virtual bool InspectConfigTypeVariables() { return true; }
+
+  // Produce custom commands for file sets attached to a custom rule
+  void CreateCustomCommandsFromRules();
 
   enum class CxxModuleSupportQuery
   {
@@ -412,6 +417,10 @@ public:
   void AddAlias(std::string const& name, std::string const& tgtName);
   bool IsAlias(std::string const& name) const;
 
+  //! Find a rule by name.
+  cmRule* FindRule(std::string const& name) const;
+  cmGeneratorRule* FindGeneratorRule(std::string const& name) const;
+
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
   bool NameResolvesToFramework(std::string const& libname) const;
@@ -531,6 +540,9 @@ public:
   virtual char const* GetEditCacheTargetName() const { return nullptr; }
   virtual char const* GetRebuildCacheTargetName() const { return nullptr; }
   virtual char const* GetCleanTargetName() const { return nullptr; }
+
+  void IndexRule(cmRule* rule);
+  void IndexGeneratorRule(cmGeneratorRule* gt);
 
   // Lookup edit_cache target command preferred by this generator.
   virtual std::string GetEditCacheCommand() const { return ""; }
@@ -896,6 +908,8 @@ private:
   using TargetMap = std::unordered_map<std::string, cmTarget*>;
   using GeneratorTargetMap =
     std::unordered_map<std::string, cmGeneratorTarget*>;
+  using RuleMap = std::unordered_map<std::string, cmRule*>;
+  using GeneratorRuleMap = std::unordered_map<std::string, cmGeneratorRule*>;
   using MakefileMap = std::unordered_map<std::string, cmMakefile*>;
   using LocalGeneratorMap = std::unordered_map<std::string, cmLocalGenerator*>;
   using TargetDirectoryRegistrationMap =
@@ -912,6 +926,12 @@ private:
   mutable TargetDirectoryRegistrationMap TargetDirectoryRegistrations;
   // Map from target directories to targets using it.
   mutable TargetDirectoryMap TargetDirectories;
+
+  // Map efficiently from rule name to cmRule instance.
+  // Do not use this structure for looping over all rules.
+  // It may not contain all of them.
+  RuleMap RuleSearchIndex;
+  GeneratorRuleMap GeneratorRuleSearchIndex;
 
   // Map efficiently from source directory path to cmMakefile instance.
   // Do not use this structure for looping over all directories.

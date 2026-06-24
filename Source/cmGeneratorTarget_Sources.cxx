@@ -92,7 +92,11 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
                        cmGeneratorExpressionDAGChecker* dagChecker,
                        cm::EvaluatedTargetPropertyEntries& entries)
 {
-  auto sources = fileSets->GetSources(context, headTarget, dagChecker);
+  auto sources =
+    fileSets->GetSources(context, headTarget,
+                         cm::FileSetMetadata::FileSetDomainSet{
+                           cm::FileSetMetadata::FileSetDomain::NATIVE },
+                         dagChecker);
   entries =
     EvaluateTargetPropertyEntries(headTarget, context, dagChecker, sources);
 }

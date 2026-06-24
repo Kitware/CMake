@@ -426,8 +426,18 @@ Acceptable file set types are:
   using the ``export`` keyword). This file set type may not have an
   ``INTERFACE`` scope except on ``IMPORTED`` targets.
 
-The optional default file sets are named after their type. The target may not
-be a custom target or, for ``HEADERS`` and ``CXX_MODULES`` types, a
+``<rule>``
+  .. versionadded:: 4.5
+
+  Specifies sources which will be processed by the custom rule defined by the
+  :command:`add_custom_rule` command.
+
+For ``HEADERS``, ``SOURCES``, and ``CXX_MODULES`` types, the optional default
+file sets are named after their type.
+
+For ``<rule>`` types, the target may be a custom target.
+
+For ``HEADERS`` and ``CXX_MODULES`` types, the target may not be a
 :prop_tgt:`FRAMEWORK` target.
 
 Files in a ``PRIVATE`` or ``PUBLIC`` file set are marked as source files for

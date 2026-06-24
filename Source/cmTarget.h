@@ -17,6 +17,7 @@
 #include <cm/string_view>
 
 #include "cmAlgorithms.h"
+#include "cmFileSetMetadata.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
@@ -24,12 +25,6 @@
 #include "cmTargetLinkLibraryType.h"
 #include "cmTargetTypes.h"
 #include "cmValue.h"
-
-namespace cm {
-namespace FileSetMetadata {
-enum class Visibility;
-}
-}
 
 class cmCustomCommand;
 class cmFileSet;
@@ -385,11 +380,23 @@ public:
   cmFileSet* GetFileSet(std::string const& name);
   std::pair<cmFileSet*, bool> GetOrCreateFileSet(
     std::string const& name, std::string const& type,
-    cm::FileSetMetadata::Visibility vis);
+    cm::FileSetMetadata::Visibility vis)
+  {
+    return this->GetOrCreateFileSet(name, type, vis, this->GetMakefile());
+  }
+  std::pair<cmFileSet*, bool> GetOrCreateFileSet(
+    std::string const& name, std::string const& type,
+    cm::FileSetMetadata::Visibility vis, cmMakefile* mf);
 
-  std::vector<std::string> GetAllFileSetNames() const;
-  std::vector<std::string> GetAllPrivateFileSets() const;
-  std::vector<std::string> GetAllInterfaceFileSets() const;
+  std::vector<std::string> GetAllFileSetNames(
+    cm::FileSetMetadata::FileSetDomainSet domains = {
+      cm::FileSetMetadata::FileSetDomain::NATIVE }) const;
+  std::vector<std::string> GetAllPrivateFileSets(
+    cm::FileSetMetadata::FileSetDomainSet domains = {
+      cm::FileSetMetadata::FileSetDomain::NATIVE }) const;
+  std::vector<std::string> GetAllInterfaceFileSets(
+    cm::FileSetMetadata::FileSetDomainSet domains = {
+      cm::FileSetMetadata::FileSetDomain::NATIVE }) const;
 
   std::string GetFileSetsPropertyName(std::string const& type) const;
   std::string GetInterfaceFileSetsPropertyName(std::string const& type) const;

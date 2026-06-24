@@ -105,6 +105,8 @@ struct cmStateDetail::BuildsystemDirectoryStateType
   std::vector<std::string> NormalTargetNames;
   std::vector<std::string> ImportedTargetNames;
 
+  std::vector<std::string> RuleNames;
+
   std::set<std::string> Projects;
 
   std::string ProjectName;

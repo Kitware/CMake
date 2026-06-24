@@ -1,0 +1,10 @@
+CMake Error at InvalidRuleName.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule names in all uppercase are reserved for CMake\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at InvalidRuleName.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule invalid name for RULE: @\?\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

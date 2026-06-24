@@ -204,24 +204,22 @@ bool TargetSourcesImpl::HandleOneFileSet(
 
   if (!unparsed.empty()) {
     this->SetError(
-      cmStrCat("Unrecognized keyword: \"", unparsed.front(), '"'));
+      cmStrCat("Unrecognized keyword: \"", unparsed.front(), "\"."));
     return false;
   }
 
   if (args.FileSet.empty()) {
-    this->SetError("FILE_SET must not be empty");
+    this->SetError("FILE_SET must not be empty.");
     return false;
   }
 
-  if (this->Target->GetType() == cm::TargetType::UTILITY) {
-    this->SetError("FILE_SETs may not be added to custom targets");
-    return false;
-  }
-
-  if (!args.Type.empty() && !cm::FileSetMetadata::IsKnownType(args.Type)) {
+  if (!args.Type.empty() && !cm::FileSetMetadata::IsKnownType(args.Type) &&
+      // rule must be known from the target directory
+      !this->Makefile->FindRuleToUse(args.Type)) {
     this->SetError(
-      cmStrCat("File set TYPE may only be \"",
-               cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""), '"'));
+      cmStrCat("File set TYPE may only be one of the built-in types \"",
+               cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""),
+               "\" or a RULE visible from the current directory."));
     return false;
   }
   if (args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
@@ -229,14 +227,14 @@ bool TargetSourcesImpl::HandleOneFileSet(
     this->SetError(
       cmStrCat("FILE_SET names starting with a capital letter are reserved "
                "for built-in file sets and may only be \"",
-               cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""), '"'));
+               cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""), "\"."));
     return false;
   }
   if (!args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
       args.Type != args.FileSet) {
     this->SetError(cmStrCat("FILE_SET name starting with a capital letter "
                             "must match the TYPE name \"",
-                            args.Type, '"'));
+                            args.Type, "\"."));
     return false;
   }
 
@@ -246,26 +244,36 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (!isDefault && !cm::FileSetMetadata::IsValidName(args.FileSet)) {
     this->SetError("Non-default file set name must contain only letters, "
                    "numbers, and underscores, and must not start with a "
-                   "capital letter or underscore");
+                   "capital letter or underscore.");
     return false;
   }
 
   std::string type = isDefault ? args.FileSet : args.Type;
+
+  if (cm::FileSetMetadata::IsKnownType(type) &&
+      this->Target->GetType() == cm::TargetType::UTILITY) {
+    this->SetError(
+      cmStrCat("FILE_SETs of type \"",
+               cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""),
+               "\" may not be added to custom targets."));
+    return false;
+  }
+
   cm::FileSetMetadata::Visibility visibility =
     cm::FileSetMetadata::VisibilityFromName(scope, this->Makefile);
 
   if (this->Target->IsFrameworkOnApple() &&
       !cm::FileSetMetadata::IsFrameworkSupported(type)) {
     this->SetError(cmStrCat(R"(FILE_SETs, of type ")", type,
-                            R"(", may not be added to FRAMEWORK targets)"));
+                            R"(", may not be added to FRAMEWORK targets.)"));
     return false;
   }
 
-  auto fileSet =
-    this->Target->GetOrCreateFileSet(args.FileSet, type, visibility);
+  auto fileSet = this->Target->GetOrCreateFileSet(args.FileSet, type,
+                                                  visibility, this->Makefile);
   if (fileSet.second) {
     if (type.empty()) {
-      this->SetError("Must specify a TYPE when creating file set");
+      this->SetError("Must specify a TYPE when creating file set.");
       return false;
     }
 
@@ -289,7 +297,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
       if (type == cm::FileSetMetadata::CXX_MODULES) {
         this->SetError(cmStrCat(R"(File set TYPE ")",
                                 cm::FileSetMetadata::CXX_MODULES,
-                                R"(" may not have "INTERFACE" scope)"));
+                                R"(" may not have "INTERFACE" scope.)"));
         return false;
       }
     }
@@ -312,16 +320,16 @@ bool TargetSourcesImpl::HandleOneFileSet(
     if (!args.Type.empty() && args.Type != type) {
       this->SetError(cmStrCat(
         "Type \"", args.Type, "\" for file set \"", fileSet.first->GetName(),
-        "\" does not match original type \"", type, '"'));
+        "\" does not match original type \"", type, "\"."));
       return false;
     }
 
     if (visibility != fileSet.first->GetVisibility()) {
-      this->SetError(cmStrCat("Scope ", scope, " for file set \"",
-                              args.FileSet,
-                              "\" does not match original scope ",
-                              cm::FileSetMetadata::VisibilityToName(
-                                fileSet.first->GetVisibility())));
+      this->SetError(cmStrCat(
+        "Scope ", scope, " for file set \"", args.FileSet,
+        "\" does not match original scope ",
+        cm::FileSetMetadata::VisibilityToName(fileSet.first->GetVisibility()),
+        '.'));
       return false;
     }
   }

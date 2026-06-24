@@ -9,6 +9,7 @@
 #include "cmMakefile.h"
 #include "cmProperty.h"
 #include "cmPropertyDefinition.h"
+#include "cmRule.h"
 #include "cmSetPropertyCommand.h"
 #include "cmSourceFilePropertyHelper.h"
 #include "cmState.h"
@@ -36,6 +37,9 @@ bool HandleGlobalMode(cmExecutionStatus& status, std::string const& name,
 bool HandleDirectoryMode(cmExecutionStatus& status, std::string const& name,
                          OutType infoType, std::string const& variable,
                          std::string const& propertyName);
+bool HandleRuleMode(cmExecutionStatus& status, std::string const& name,
+                    OutType infoType, std::string const& variable,
+                    std::string const& propertyName);
 bool HandleTargetMode(cmExecutionStatus& status, std::string const& name,
                       OutType infoType, std::string const& variable,
                       std::string const& propertyName);
@@ -97,6 +101,8 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
     scope = cmProperty::GLOBAL;
   } else if (args[1] == "DIRECTORY") {
     scope = cmProperty::DIRECTORY;
+  } else if (args[1] == "RULE") {
+    scope = cmProperty::RULE;
   } else if (args[1] == "TARGET") {
     scope = cmProperty::TARGET;
   } else if (args[1] == "FILE_SET") {
@@ -112,11 +118,10 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
   } else if (args[1] == "INSTALL") {
     scope = cmProperty::INSTALL;
   } else {
-    status.SetError(cmStrCat("given invalid scope ", args[1],
-                             ".  "
-                             "Valid scopes are "
-                             "GLOBAL, DIRECTORY, TARGET, FILE_SET, SOURCE, "
-                             "TEST, VARIABLE, CACHE, INSTALL."));
+    status.SetError(
+      cmStrCat("given invalid scope ", args[1],
+               ".  Valid scopes are GLOBAL, DIRECTORY, RULE, TARGET, "
+               "FILE_SET, SOURCE, TEST, VARIABLE, CACHE, INSTALL."));
     return false;
   }
 
@@ -236,6 +241,8 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
       case cmProperty::DIRECTORY:
         return HandleDirectoryMode(status, name, infoType, variable,
                                    propertyName);
+      case cmProperty::RULE:
+        return HandleRuleMode(status, name, infoType, variable, propertyName);
       case cmProperty::TARGET:
         return HandleTargetMode(status, name, infoType, variable,
                                 propertyName);
@@ -320,6 +327,24 @@ bool HandleDirectoryMode(cmExecutionStatus& status, std::string const& name,
     return false;
   }
   return StoreResult(infoType, status.GetMakefile(), variable, prop);
+}
+
+bool HandleRuleMode(cmExecutionStatus& status, std::string const& name,
+                    OutType infoType, std::string const& variable,
+                    std::string const& propertyName)
+{
+  if (name.empty()) {
+    status.SetError("not given name for RULE scope.");
+    return false;
+  }
+
+  if (cmRule* rule = status.GetMakefile().FindRuleToUse(name)) {
+    cmValue prop = rule->GetProperty(propertyName);
+    return StoreResult(infoType, status.GetMakefile(), variable, prop);
+  }
+  status.SetError(cmStrCat("could not find RULE ", name,
+                           ".  Perhaps it has not yet been created."));
+  return false;
 }
 
 bool HandleTargetMode(cmExecutionStatus& status, std::string const& name,

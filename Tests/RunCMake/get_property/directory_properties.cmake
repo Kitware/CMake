@@ -21,6 +21,9 @@ add_library(my::InterfaceTop ALIAS InterfaceTop)
 add_library(Imported1Top INTERFACE IMPORTED)
 add_library(Imported2Top INTERFACE IMPORTED)
 
+add_custom_rule(Rule1Top OUTPUT out COMMAND cmd)
+add_custom_rule(Rule2Top FROM_RULE Rule1Top)
+
 add_subdirectory(directory_properties)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" SUBDIRECTORIES)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" SUBDIRECTORIES)
@@ -28,6 +31,8 @@ check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" BUILDSYSTEM_TARGETS)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" BUILDSYSTEM_TARGETS)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" IMPORTED_TARGETS)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" IMPORTED_TARGETS)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" RULES)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" RULES)
 
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" BINARY_DIR)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" SOURCE_DIR)

@@ -40,8 +40,11 @@
 #include "cmExperimental.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorRule.h"
 #include "cmGeneratorTarget.h"
 #include "cmInstallDirs.h"
 #include "cmInstallExportGenerator.h"
@@ -58,6 +61,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmRule.h"
 #include "cmSbomArguments.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -65,6 +69,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmUnreachable.h"
 #include "cmValue.h"
@@ -1524,6 +1529,9 @@ void cmGlobalGenerator::Configure()
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
   this->CreateLocalGenerators();
+
+  this->CreateCustomCommandsFromRules();
+
   // Commit side effects only if we are actually generating
   if (targetTypes == TargetTypes::AllTargets) {
     this->CheckTargetProperties();
@@ -2272,6 +2280,58 @@ cmGlobalGenerator::CreateMSVC60LinkLineComputer(
     cm::make_unique<cmMSVC60LinkLineComputer>(outputConverter, stateDir));
 }
 
+void cmGlobalGenerator::CreateCustomCommandsFromRules()
+{
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
+    cmMakefile* mf = this->Makefiles[i].get();
+    cmLocalGenerator* lg = this->LocalGenerators[i].get();
+    for (auto& item : mf->GetTargets()) {
+      cmTarget& target = item.second;
+      for (auto const& fsName : target.GetAllFileSetNames(
+             cm::FileSetMetadata::FileSetDomain::RULE)) {
+        cmFileSet const* fileSet = target.GetFileSet(fsName);
+        cmRule const* rule =
+          fileSet->GetMakefile()->FindRuleToUse(fileSet->GetType());
+        if (!rule) {
+          continue;
+        }
+
+        // generated files by the custom command are stored in a file set
+        cmFileSet* outFileSet = rule->GetOutputFileSet(&target, fileSet);
+        if (!outFileSet) {
+          continue;
+        }
+
+        cmRule::PatternSet fileSetPatterns;
+        if (!rule->Instantiate(&target, fileSet, outFileSet,
+                               fileSetPatterns)) {
+          continue;
+        }
+
+        for (auto const& files : fileSet->GetFileEntries()) {
+          for (auto const& file :
+               cmList{ cm::remove_BT(files), cmList::EmptyElements::No }) {
+            cmSourceFile* source = mf->GetOrCreateSource(file);
+            source->ResolveFullPath();
+
+            cmRule::PatternSet sourcePatterns{ fileSetPatterns };
+            if (!rule->Instantiate(&target, fileSet, outFileSet, source,
+                                   sourcePatterns)) {
+              continue;
+            }
+
+            auto genRule = cm::make_unique<cmGeneratorRule>(
+              rule, &target, fileSet, outFileSet, source, sourcePatterns);
+            auto cc = genRule->Generate(outFileSet);
+            lg->AddGeneratorRule(std::move(genRule));
+            mf->AddCustomCommandToOutput(std::move(cc));
+          }
+        }
+      }
+    }
+  }
+}
+
 void cmGlobalGenerator::FinalizeTargetConfiguration()
 {
   std::vector<std::string> const langs =
@@ -2392,6 +2452,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->TargetDependencies.clear();
   this->TargetSearchIndex.clear();
   this->GeneratorTargetSearchIndex.clear();
+  this->RuleSearchIndex.clear();
   this->MakefileSearchIndex.clear();
   this->LocalGeneratorSearchIndex.clear();
   this->TargetOrderIndex.clear();
@@ -3027,6 +3088,20 @@ std::string cmGlobalGenerator::IndexGeneratorTargetUniquely(
   return id;
 }
 
+void cmGlobalGenerator::IndexRule(cmRule* rule)
+{
+  if (rule->IsGloballyVisible()) {
+    this->RuleSearchIndex[rule->GetName()] = rule;
+  }
+}
+
+void cmGlobalGenerator::IndexGeneratorRule(cmGeneratorRule* gr)
+{
+  if (gr->IsGloballyVisible()) {
+    this->GeneratorRuleSearchIndex[gr->GetName()] = gr;
+  }
+}
+
 void cmGlobalGenerator::IndexMakefile(cmMakefile* mf)
 {
   // We index by both source and binary directory.  add_subdirectory
@@ -3089,6 +3164,25 @@ cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTarget(
     return this->FindGeneratorTargetImpl(ai->second);
   }
   return this->FindGeneratorTargetImpl(name);
+}
+
+cmRule* cmGlobalGenerator::FindRule(std::string const& name) const
+{
+  auto const it = this->RuleSearchIndex.find(name);
+  if (it != this->RuleSearchIndex.end()) {
+    return it->second;
+  }
+  return nullptr;
+}
+
+cmGeneratorRule* cmGlobalGenerator::FindGeneratorRule(
+  std::string const& name) const
+{
+  auto const it = this->GeneratorRuleSearchIndex.find(name);
+  if (it != this->GeneratorRuleSearchIndex.end()) {
+    return it->second;
+  }
+  return nullptr;
 }
 
 bool cmGlobalGenerator::NameResolvesToFramework(

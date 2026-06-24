@@ -1,0 +1,5 @@
+CMake Error at FROM_RULE-InvalidValue-FROM_RULE\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule cannot create RULE "rule" because the RULE "base" does not
+  exist or is not accessible\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
