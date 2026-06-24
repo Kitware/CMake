@@ -3,8 +3,13 @@ CMAKE_TEST_BUILD_DEPENDS
 
 .. versionadded:: 4.4
 
+.. versionchanged:: 4.5
+
+  :generator:`FASTBuild` gained support for ``test_prep/<name>`` targets.
+
 Enable ``test_prep/<name>`` build targets for tests added by
-:command:`add_test` when using the :ref:`Ninja Generators`.
+:command:`add_test` when using the :ref:`Ninja Generators` or
+:generator:`FASTBuild`.
 
 When this variable is set to a true value, CMake generates a
 ``test_prep/<name>`` target for each eligible test and a ``test_prep/all``
