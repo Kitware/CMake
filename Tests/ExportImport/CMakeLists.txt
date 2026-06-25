@@ -80,7 +80,7 @@ set_property(
 # Run the install tests.
 set(install_deps)
 set(rdep_tests)
-if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Windows|Darwin)$" AND NOT CMake_INSTALL_NAME_TOOL_BUG)
+if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Windows|Darwin|FreeBSD)$" AND NOT CMake_INSTALL_NAME_TOOL_BUG)
   set(rdep_tests RUNTIME_DEPENDENCIES RUNTIME_DEPENDENCY_SET)
 endif()
 foreach(name IMPORTED_RUNTIME_ARTIFACTS ${rdep_tests})

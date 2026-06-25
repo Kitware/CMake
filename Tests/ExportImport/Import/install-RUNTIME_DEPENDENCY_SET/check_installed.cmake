@@ -1,6 +1,6 @@
 include("${CMAKE_CURRENT_LIST_DIR}/../check_installed.cmake")
 
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_HOST_SYSTEM_NAME STREQUAL "FreeBSD")
   check_installed([[^bin;bin/exe;lib;lib/libdep1\.so;lib/libdep3\.so;lib/libdeplib\.so;yyy;yyy/lib;yyy/lib/libdep1\.so;yyy/lib/libdep3\.so;yyy/lib/libdep4\.so;zzz;zzz/libdep1\.so;zzz/libdep3\.so;zzz/libdep4\.so$]])
 elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   set(_msvc_check [[bin;bin/dep1\.dll;bin/dep3\.dll;bin/deplib\.dll;bin/exe\.exe;yyy;yyy/bin;yyy/bin/dep1\.dll;yyy/bin/dep3\.dll;yyy/bin/dep4\.dll;zzz;zzz/dep1\.dll;zzz/dep3\.dll;zzz/dep4\.dll]])

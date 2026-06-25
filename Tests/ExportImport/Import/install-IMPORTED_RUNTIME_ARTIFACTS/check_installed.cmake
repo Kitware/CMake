@@ -1,6 +1,6 @@
 include("${CMAKE_CURRENT_LIST_DIR}/../check_installed.cmake")
 
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_HOST_SYSTEM_NAME STREQUAL "FreeBSD")
   set(_dirs [[aaa;aaa/executables;aaa/executables/testExe1-4;aaa/executables/testExe3;aaa/libraries;aaa/libraries/libtestExe2lib\.so;aaa/libraries/libtestLib3lib(-d|-r)?\.so\.1\.2;aaa/libraries/libtestLib3lib(-d|-r)?\.so\.3;aaa/libraries/libtestLib4\.so;aaa/libraries/libtestMod1\.so;aaa/libraries/libtestMod2\.so]])
   set(_alldest [[bbb;bbb/libtestExe2lib\.so;bbb/libtestLib3lib(-d|-r)?\.so\.1\.2;bbb/libtestLib3lib(-d|-r)?\.so\.3;bbb/libtestLib4\.so;bbb/libtestMod1\.so;bbb/libtestMod2\.so;bbb/testExe1-4;bbb/testExe3]])
   set(_default [[bin;bin/testExe1-4;bin/testExe3;lib;lib/libtestExe2lib\.so;lib/libtestLib3lib(-d|-r)?\.so\.1\.2;lib/libtestLib3lib(-d|-r)?\.so\.3;lib/libtestLib4\.so;lib/libtestMod1\.so;lib/libtestMod2\.so]])

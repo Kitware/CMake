@@ -36,9 +36,13 @@ bool cmLDConfigLDConfigTool::GetLDConfigPaths(std::vector<std::string>& paths)
   }
 
   cmList ldConfigCommand{ ldConfigPath };
+#ifdef __FreeBSD__
+  ldConfigCommand.emplace_back("-r"); // List directories
+#else
   ldConfigCommand.emplace_back("-v");
   ldConfigCommand.emplace_back("-N"); // Don't rebuild the cache.
   ldConfigCommand.emplace_back("-X"); // Don't update links.
+#endif
 
   cmUVProcessChainBuilder builder;
   builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
@@ -50,14 +54,35 @@ bool cmLDConfigLDConfigTool::GetLDConfigPaths(std::vector<std::string>& paths)
   }
 
   std::string line;
-  static cmsys::RegularExpression const regex("^([^\t:]*):");
   cmUVIStream output(process.OutputStream());
+#ifdef __FreeBSD__
+  // FreeBSD ldconfig output:
+  // /var/run/ld-elf.so.hints:
+  //    search directories: /lib:/usr/lib:...
+  // Extract everything after "search directories: " and split by ':'
+  static cmsys::RegularExpression regex("search directories: (.*)$");
+  while (std::getline(output, line)) {
+    cmsys::RegularExpressionMatch match;
+    if (!regex.find(line.c_str(), match))
+      continue;
+    auto allPaths = std::stringstream(match.match(1));
+    std::string path;
+    while (std::getline(allPaths, path, ':'))
+      if (!path.empty())
+        paths.push_back(path);
+  }
+#else
+  // Linux ldconfig output:
+  // /lib64: (from <builtin>:0)
+  // Extract the "/lib64" part
+  static cmsys::RegularExpression const regex("^([^\t:]*):");
   while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (regex.find(line.c_str(), match)) {
       paths.push_back(match.match(1));
     }
   }
+#endif
 
   if (!process.Wait()) {
     this->Archive->SetError("Failed to wait on ldconfig process");
