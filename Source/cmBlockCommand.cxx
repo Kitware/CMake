@@ -40,18 +40,18 @@ public:
   BlockScopePushPop& operator=(BlockScopePushPop const&) = delete;
 
 private:
-  std::unique_ptr<cmMakefile::PolicyPushPop> PolicyScope;
   std::unique_ptr<cmMakefile::VariablePushPop> VariableScope;
+  std::unique_ptr<cmMakefile::PolicyPushPop> PolicyScope;
   std::unique_ptr<cmMakefile::DiagnosticPushPop> DiagnosticScope;
 };
 
 BlockScopePushPop::BlockScopePushPop(cmMakefile* mf, ScopeSet const& scopes)
 {
-  if (scopes.contains(ScopeType::POLICIES)) {
-    this->PolicyScope = cm::make_unique<cmMakefile::PolicyPushPop>(mf);
-  }
   if (scopes.contains(ScopeType::VARIABLES)) {
     this->VariableScope = cm::make_unique<cmMakefile::VariablePushPop>(mf);
+  }
+  if (scopes.contains(ScopeType::POLICIES)) {
+    this->PolicyScope = cm::make_unique<cmMakefile::PolicyPushPop>(mf);
   }
   if (scopes.contains(ScopeType::DIAGNOSTICS)) {
     this->DiagnosticScope = cm::make_unique<cmMakefile::DiagnosticPushPop>(mf);
