@@ -114,8 +114,6 @@ static unsigned short const info_byte_order_little_endian[] = {
 #  define ARCHITECTURE_ID "riscv64"
 #elif defined(__riscv) && __riscv_xlen == 32
 #  define ARCHITECTURE_ID "riscv32"
-#elif defined(__sw_64)
-#  define ARCHITECTURE_ID "sw_64"
 #elif defined(__s390x__)
 #  define ARCHITECTURE_ID "s390x"
 #elif defined(__s390__)
@@ -124,6 +122,8 @@ static unsigned short const info_byte_order_little_endian[] = {
 #  define ARCHITECTURE_ID "sparcv9"
 #elif defined(__sparc) || defined(__sparc__)
 #  define ARCHITECTURE_ID "sparc"
+#elif defined(__sw_64) || defined(__sw_64__)
+#  define ARCHITECTURE_ID "sw_64"
 #elif defined(__hppa) || defined(__hppa__)
 #  if defined(__LP64__)
 #    define ARCHITECTURE_ID "parisc64"
