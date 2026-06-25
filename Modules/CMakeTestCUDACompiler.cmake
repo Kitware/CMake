@@ -10,6 +10,12 @@ endif()
 
 include(CMakeTestCompilerCommon)
 
+# work around enforced code signing and / or missing executable target type
+set(__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE ${CMAKE_TRY_COMPILE_TARGET_TYPE})
+if(_CMAKE_FEATURE_DETECTION_TARGET_TYPE)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_CMAKE_FEATURE_DETECTION_TARGET_TYPE})
+endif()
+
 # Remove any cached result from an older CMake version.
 # We now store this in CMakeCUDACompiler.cmake.
 unset(CMAKE_CUDA_COMPILER_WORKS CACHE)
@@ -102,4 +108,6 @@ configure_file(
   )
 include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCUDACompiler.cmake)
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE ${__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE})
+unset(__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE)
 unset(__CMAKE_CUDA_COMPILER_OUTPUT)
