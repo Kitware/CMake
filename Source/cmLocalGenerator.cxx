@@ -4261,6 +4261,7 @@ cmSourceGroup* cmLocalGenerator::FindSourceGroup(
   std::string const& config)
 {
 #if !defined(CMAKE_BOOTSTRAP)
+  std::string const SOURCE_GROUP{ "SOURCE_GROUP" };
   std::string const& targetName = target->GetName();
   cmGeneratorFileSet const* fileSet =
     target->GetFileSetForSource(config, source);
@@ -4271,6 +4272,13 @@ cmSourceGroup* cmLocalGenerator::FindSourceGroup(
     auto const indexIt = this->SourceGroupSearchIndex.find(fsKey);
     if (indexIt != this->SourceGroupSearchIndex.cend()) {
       return indexIt->second;
+    }
+
+    cmValue fsSG = fileSet->GetProperty(SOURCE_GROUP);
+    if (!fsSG.IsEmpty()) {
+      cmSourceGroup* sg = this->GetMakefile()->GetOrCreateSourceGroup(*fsSG);
+      this->SourceGroupSearchIndex.emplace(fsKey, sg);
+      return sg;
     }
 
     cmSourceGroup* sourceGroup = cmSourceGroup::FindSourceGroup(
@@ -4288,6 +4296,13 @@ cmSourceGroup* cmLocalGenerator::FindSourceGroup(
     this->SourceGroupSearchIndex.find(source->GetFullPath());
   if (indexIt != this->SourceGroupSearchIndex.cend()) {
     return indexIt->second;
+  }
+
+  cmValue srcSG = source->GetProperty(SOURCE_GROUP);
+  if (!srcSG.IsEmpty()) {
+    cmSourceGroup* sg = this->GetMakefile()->GetOrCreateSourceGroup(*srcSG);
+    this->SourceGroupSearchIndex.emplace(source->GetFullPath(), sg);
+    return sg;
   }
 
   // look-up in source groups definitions
