@@ -1,0 +1,7 @@
+CMake Warning at [^
+]*/Tests/RunCMake/CheckSourceCompiles/Extra\.cmake:[0-9]+ \(message\):
+  Hello from Extra\.cmake
+Call Stack \(most recent call first\):
+  [^
+]*/Tests/RunCMake/CheckSourceCompiles/RequiredFlags-build/CMakeFiles/CMakeScratch/TryCompile-[^
+]*/CMakeLists\.txt:[0-9]+ \(project\)

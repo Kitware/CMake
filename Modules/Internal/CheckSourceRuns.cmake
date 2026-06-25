@@ -88,6 +88,40 @@ function(CMAKE_CHECK_SOURCE_RUNS _lang _source _var)
       set(CHECK_${_lang}_SOURCE_COMPILES_ADD_INCLUDES)
     endif()
 
+    set(_CSR_EXTRA_CMAKE_ARGUMENTS)
+    string(REPLACE "\\;" "\\\\;" CMAKE_REQUIRED_FLAGS
+      "${CMAKE_REQUIRED_FLAGS}")
+    #[[
+    cmake_polify(GET CMP0999 _CSR_CMP0999)
+    if(_CSR_CMP0999 STREQUAL "NEW")
+      # Join multiple list arguments into the space-separated string that we
+      # want. This ensures that the entirety of the value gets passed as
+      # compile arguments, which is what the user almost surely intended.
+      #
+      # FIXME(#27901): This needs a policy to be implemented. This will be
+      # available in a future version of CMake.
+      list(JOIN CMAKE_REQUIRED_FLAGS " " CMAKE_REQUIRED_FLAGS)
+    else()
+    #]]
+      # If CMAKE_REQUIRED_FLAGS contains an unescaped semicolon, anything after
+      # gets passed as flags to 'cmake' itself. This is probably not intended,
+      # but we preserve it for compatibility.
+      set(_CSR_EXTRA_CMAKE_ARGUMENTS "${CMAKE_REQUIRED_FLAGS}")
+      list(POP_FRONT _CSR_EXTRA_CMAKE_ARGUMENTS CMAKE_REQUIRED_FLAGS)
+      #[[
+      if(NOT CMAKE_REQUIRED_FLAGS STREQUAL "")
+        cmake_policy(ISSUE_WARNING CMP0999) TODO
+      endif()
+      #]]
+      # There is at least one known instance of users accidentally passing
+      # '-W' arguments intended for the compiler as arguments to CMake. Since
+      # CMake complains about unknown '-W' arguments starting with CMake 4.4,
+      # we need to strip these for compatibility.
+      string(REPLACE "\\;" "\\\\;" _CSR_EXTRA_CMAKE_ARGUMENTS
+        "${_CSR_EXTRA_CMAKE_ARGUMENTS}")
+      list(FILTER _CSR_EXTRA_CMAKE_ARGUMENTS EXCLUDE REGEX "^-W")
+    #endif()
+
     if(NOT CMAKE_REQUIRED_QUIET)
       message(CHECK_START "Performing Test ${_var}")
     endif()
@@ -97,7 +131,9 @@ function(CMAKE_CHECK_SOURCE_RUNS _lang _source _var)
       COMPILE_DEFINITIONS -D${_var} ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_${_lang}_SOURCE_COMPILES_ADD_LINK_OPTIONS}
       ${CHECK_${_lang}_SOURCE_COMPILES_ADD_LIBRARIES}
-      CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CMAKE_REQUIRED_FLAGS}
+      CMAKE_FLAGS
+        -DCOMPILE_DEFINITIONS:STRING=${CMAKE_REQUIRED_FLAGS}
+        ${_CSR_EXTRA_CMAKE_ARGUMENTS}
       -DCMAKE_SKIP_RPATH:BOOL=${CMAKE_SKIP_RPATH}
       "${CHECK_${_lang}_SOURCE_COMPILES_ADD_INCLUDES}"
       "${_CSR_LINK_DIRECTORIES}"
