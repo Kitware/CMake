@@ -94,6 +94,14 @@ Supported Policies
 
 The following policies are supported.
 
+Policies Introduced by CMake 4.5
+--------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0220: Languages enabled in subdirectories propagate to the top-level directory. </policy/CMP0220>
+
 Policies Introduced by CMake 4.4
 --------------------------------
 

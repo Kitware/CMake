@@ -225,6 +225,43 @@ cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(cmPolicies::PolicyID id,
   return status;
 }
 
+cmPolicies::PolicyStatus cmStateSnapshot::GetScopePolicy(
+  cmPolicies::PolicyID id) const
+{
+  if (cmPolicies::IsRemoved(id)) {
+    return cmPolicies::NEW;
+  }
+
+  cmPolicies::PolicyStatus status = cmPolicies::WARN;
+
+  cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator dir =
+    this->Position->BuildSystemDirectory;
+
+  // Logic mirrors GetPolicy(), except that the search starts at this
+  // snapshot's exact scope rather than the directory's current top scope.
+  cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator leaf =
+    this->Position->Policies;
+  cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator root =
+    this->Position->PolicyRoot;
+  while (true) {
+    assert(dir.IsValid());
+    for (; leaf != root; ++leaf) {
+      if (leaf->IsDefined(id)) {
+        return leaf->Get(id);
+      }
+    }
+    cmStateDetail::PositionType e = dir->CurrentScope;
+    cmStateDetail::PositionType p = e->DirectoryParent;
+    if (p == this->State->SnapshotData.Root()) {
+      break;
+    }
+    dir = p->BuildSystemDirectory;
+    leaf = dir->CurrentScope->Policies;
+    root = dir->CurrentScope->PolicyRoot;
+  }
+  return status;
+}
+
 void cmStateSnapshot::PushDiagnostic(cmDiagnostics::DiagnosticMap entry,
                                      bool weak)
 {
@@ -377,6 +414,27 @@ std::vector<std::string> cmStateSnapshot::ClosureKeys() const
                                     this->Position->Root);
 }
 
+std::vector<std::string> cmStateSnapshot::LocalKeys() const
+{
+  std::vector<std::string> keys = cmDefinitions::ClosureKeys(
+    this->Position->Vars, this->Position->ScopeParent->Vars);
+
+  // Remove keys that are the same in the parent scope to avoid propagating
+  // logic meant to restore variables back to their original value.
+  keys.erase(std::remove_if(
+               keys.begin(), keys.end(),
+               [this](std::string const& key) {
+                 return cmDefinitions::Get(key, this->Position->Vars,
+                                           this->Position->Root) ==
+                   cmDefinitions::Get(key, this->Position->ScopeParent->Vars,
+                                      this->Position->ScopeParent->Root);
+               }),
+             keys.end());
+  std::sort(keys.begin(), keys.end());
+
+  return keys;
+}
+
 bool cmStateSnapshot::RaiseScope(std::string const& var, char const* varDef)
 {
   if (this->Position->ScopeParent == this->Position->DirectoryParent) {
@@ -404,6 +462,40 @@ bool cmStateSnapshot::RaiseScope(std::string const& var, char const* varDef)
     this->Position->Parent->Unset(var);
   }
   return true;
+}
+
+cmStateSnapshot::WarnCMP0220 cmStateSnapshot::RaiseToRoot(
+  std::string const& var, char const* varDef, CheckCMP0220 checkCMP0220)
+{
+  // If we are at the top of a directory, propagate to the parent directory (if
+  // any).
+  cmStateSnapshot parentScope =
+    this->Position->ScopeParent == this->Position->DirectoryParent
+    ? this->GetBuildsystemDirectoryParent()
+    : cmStateSnapshot(this->State, this->Position->ScopeParent);
+
+  if (!parentScope.IsValid()) {
+    return WarnCMP0220::No;
+  }
+
+  // First raise always occurs to propagate out of capturing variable scope.
+  if (checkCMP0220 == CheckCMP0220::Yes) {
+    switch (parentScope.GetScopePolicy(cmPolicies::CMP0220)) {
+      case cmPolicies::NEW:
+        break;
+      case cmPolicies::OLD:
+        return WarnCMP0220::No;
+      case cmPolicies::WARN:
+        return WarnCMP0220::Yes;
+    }
+  }
+
+  if (varDef) {
+    parentScope.SetDefinition(var, varDef);
+  } else {
+    parentScope.RemoveDefinition(var);
+  }
+  return parentScope.RaiseToRoot(var, varDef, CheckCMP0220::Yes);
 }
 
 template <typename T, typename U>

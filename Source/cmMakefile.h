@@ -972,6 +972,8 @@ public:
     this->RaiseScope(var, value.GetCStr());
   }
   void RaiseScope(std::vector<std::string> const& variables);
+  cmStateSnapshot::WarnCMP0220 RaiseToRoot(std::string const& var,
+                                           char const* varDef);
 
   // push and pop loop scopes
   void PushLoopBlockBarrier();

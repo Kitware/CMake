@@ -1,0 +1,64 @@
+CMP0220
+-------
+
+.. versionadded:: 4.5
+
+Languages enabled in subdirectories propagate to the top-level directory.
+
+In CMake 4.4 and below, enabling a language with the :command:`project`
+command or :command:`enable_language` command had some restrictions:
+
+* It had to be called in file scope, not in a :command:`function` call
+  nor inside a :command:`block`.
+* It had be called in the highest directory common to all targets
+  using the named language directly for compiling sources or
+  indirectly through link dependencies.
+
+While these restrictions could be met by enabling all needed languages
+in the top-level directory of a project, this was not always easy.
+
+CMake 4.5 and above prefer to relax these restrictions so that languages
+enabled by calls to the :command:`project` and :command:`enable_language`
+commands in subdirectories are available to targets created in ancestor
+and sibling directories created afterward.  This policy provides
+compatibility with projects that have not been updated for the new behavior.
+
+One may think of an :command:`add_subdirectory` call as an effective call
+site to :command:`enable_language` for languages enabled inside the
+subdirectory's tree.  Similarly, for languages enabled in :command:`function`
+and :command:`block` scopes, the function or :command:`endblock` calls are
+effectively call sites to :command:`enable_language`.
+
+This policy is evaluated independently at each "effective call site",
+proceeding up the stack of variable scopes to determine if the language
+should be enabled at that level.  This propagation stops at the first
+ancestor scope whose ``CMP0220`` is not ``NEW``.  For example:
+
+.. code-block:: cmake
+
+  cmake_policy(SET CMP0220 NEW)
+
+  block()
+    cmake_policy(SET CMP0220 OLD)
+    block()
+      cmake_policy(SET CMP0220 NEW)
+      block()
+        cmake_policy(SET CMP0220 OLD)
+        enable_language(CXX)
+        # CXX is enabled in this scope
+      endblock()
+      # CXX is enabled in this scope
+    endblock()
+    # CXX is not enabled in this scope
+  endblock()
+  # CXX is not enabled in this scope
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.5
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: include/STANDARD_ADVICE.rst
+
+See documentation of the
+:variable:`CMAKE_POLICY_WARNING_CMP0220 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
+variable to control the warning.
+
+.. include:: include/DEPRECATED.rst
