@@ -46,6 +46,7 @@ typedef KWIML_INT_uintptr_t uintptr_t;
 #define HAVE_CHECK_SHA256 1
 
 #define HAVE_DECODER_ARM 1
+#define HAVE_DECODER_ARM64 1
 #define HAVE_DECODER_ARMTHUMB 1
 #define HAVE_DECODER_DELTA 1
 #define HAVE_DECODER_IA64 1
@@ -56,6 +57,7 @@ typedef KWIML_INT_uintptr_t uintptr_t;
 #define HAVE_DECODER_X86 1
 
 #define HAVE_ENCODER_ARM 1
+#define HAVE_ENCODER_ARM64 1
 #define HAVE_ENCODER_ARMTHUMB 1
 #define HAVE_ENCODER_DELTA 1
 #define HAVE_ENCODER_IA64 1

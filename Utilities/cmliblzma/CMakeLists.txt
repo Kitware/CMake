@@ -40,6 +40,7 @@ set(HAVE_CHECK_CRC64 1)
 set(HAVE_CHECK_SHA256 1)
 
 set(HAVE_DECODER_ARM 1)
+set(HAVE_DECODER_ARM64 1)
 set(HAVE_DECODER_ARMTHUMB 1)
 set(HAVE_DECODER_DELTA 1)
 set(HAVE_DECODER_IA64 1)
@@ -50,6 +51,7 @@ set(HAVE_DECODER_SPARC 1)
 set(HAVE_DECODER_X86 1)
 
 set(HAVE_ENCODER_ARM 1)
+set(HAVE_ENCODER_ARM64 1)
 set(HAVE_ENCODER_ARMTHUMB 1)
 set(HAVE_ENCODER_DELTA 1)
 set(HAVE_ENCODER_IA64 1)
@@ -133,6 +135,7 @@ SET(LZMA_SRCS
   liblzma/lzma/lzma_encoder_presets.c
   liblzma/rangecoder/price_table.c
   liblzma/simple/arm.c
+  liblzma/simple/arm64.c
   liblzma/simple/armthumb.c
   liblzma/simple/ia64.c
   liblzma/simple/powerpc.c
