@@ -8,7 +8,15 @@ all file sets with the type ``SOURCES``). Files listed in these source sets
 can be installed with :command:`install(TARGETS)` and exported with
 :command:`install(EXPORT)` and :command:`export`.
 
-Source sets may be defined using the :command:`target_sources` command
-``FILE_SET`` option with type ``SOURCES``.
+See Also
+^^^^^^^^
 
-See also :prop_tgt:`SOURCE_SETS`.
+Related properties:
+
+* :prop_tgt:`INTERFACE_FILE_SETS_<TYPE>`
+* :prop_tgt:`FILE_SETS_<TYPE>`
+* :prop_tgt:`SOURCE_SETS`
+
+Related commands:
+
+* :command:`target_sources` to define file sets of type ``SOURCES``

@@ -8,8 +8,17 @@ all file sets with the type ``HEADERS``). Files listed in these file sets are
 treated as source files for the purpose of IDE integration. The files also
 have their :prop_sf:`HEADER_FILE_ONLY` property set to ``TRUE``.
 
-Header sets may be defined using the :command:`target_sources` command
-``FILE_SET`` option with type ``HEADERS``.
+See Also
+^^^^^^^^
 
-See also :prop_tgt:`HEADER_SET_<NAME>`, :prop_tgt:`HEADER_SET` and
-:prop_tgt:`INTERFACE_HEADER_SETS`.
+Related properties:
+
+* :prop_tgt:`FILE_SETS_<TYPE>`
+* :prop_tgt:`INTERFACE_FILE_SETS_<TYPE>`
+* :prop_tgt:`INTERFACE_HEADER_SETS`
+* :prop_tgt:`HEADER_SET_<NAME>`
+* :prop_tgt:`HEADER_SET`
+
+Related commands:
+
+* :command:`target_sources` to define file sets of type ``HEADERS``

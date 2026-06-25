@@ -8,7 +8,15 @@ with the type ``CXX_MODULES``). Files listed in these C++ module sets can be
 installed with :command:`install(TARGETS)` and exported with
 :command:`install(EXPORT)` and :command:`export`.
 
-C++ module sets may be defined using the :command:`target_sources` command
-``FILE_SET`` option with type ``CXX_MODULES``.
+See Also
+^^^^^^^^
 
-See also :prop_tgt:`CXX_MODULE_SETS`.
+Related properties:
+
+* :prop_tgt:`INTERFACE_FILE_SETS_<TYPE>`
+* :prop_tgt:`FILE_SETS_<TYPE>`
+* :prop_tgt:`CXX_MODULE_SETS`
+
+Related commands:
+
+* :command:`target_sources` to define file sets of type ``CXX_MODULES``
