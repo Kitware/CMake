@@ -1009,7 +1009,7 @@ if(_use_core_foundation_and_core_services)
 endif()
 
 if(CURL_USE_OPENSSL)
-  find_package(OpenSSL)
+  find_package(OpenSSL 3.0.0)
   if(NOT OpenSSL_FOUND)
     message(FATAL_ERROR
       "Could not find OpenSSL. Install an OpenSSL development package or "
