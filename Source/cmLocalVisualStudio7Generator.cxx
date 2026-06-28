@@ -272,7 +272,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cc->SetMainDependency(makefileIn);
   cc->SetDepends(listFiles);
   cc->SetCommandLines(commandLines);
-  cc->SetComment(comment.c_str());
+  cc->SetComment(comment);
   cc->SetEscapeOldStyle(false);
   cc->SetStdPipesUTF8(true);
   cc->SetUsesTerminal(true);

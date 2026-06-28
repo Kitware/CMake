@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -50,8 +51,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   bool verbatim = false;
   bool uses_terminal = false;
   bool command_expand_lists = false;
-  std::string comment_buffer;
-  char const* comment = nullptr;
+  cm::optional<std::string> comment;
   std::vector<std::string> sources;
   std::string job_pool;
   std::string job_server_aware;
@@ -143,8 +143,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
           depends.push_back(std::move(dep));
         } break;
         case doing_comment:
-          comment_buffer = copy;
-          comment = comment_buffer.c_str();
+          comment = copy;
           break;
         case doing_source:
           sources.push_back(copy);
@@ -209,7 +208,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
 
   // Add the utility target to the makefile.
   auto cc = cm::make_unique<cmCustomCommand>();
-  cc->SetWorkingDirectory(working_directory.c_str());
+  cc->SetWorkingDirectory(working_directory);
   cc->SetByproducts(byproducts);
   cc->SetDepends(depends);
   cc->SetCommandLines(commandLines);

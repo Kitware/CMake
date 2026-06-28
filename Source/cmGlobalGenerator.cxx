@@ -3614,7 +3614,7 @@ void ModuleCompilationDatabaseCommandAction::operator()(
 
   cc->SetBacktrace(lfbt);
   cc->SetCommandLines(command_lines);
-  cc->SetWorkingDirectory(lg.GetBinaryDirectory().c_str());
+  cc->SetWorkingDirectory(lg.GetBinaryDirectory());
   cc->SetDependsExplicitOnly(true);
   cc->SetOutputs(this->Output);
   if (!inputs.empty()) {
@@ -3646,7 +3646,7 @@ void ModuleCompilationDatabaseTargetAction::operator()(
   std::unique_ptr<cmCustomCommand> cc)
 {
   cc->SetBacktrace(lfbt);
-  cc->SetWorkingDirectory(lg.GetBinaryDirectory().c_str());
+  cc->SetWorkingDirectory(lg.GetBinaryDirectory());
   std::vector<std::string> target_inputs;
   target_inputs.emplace_back(this->Output);
   cc->SetDepends(target_inputs);
@@ -3698,7 +3698,7 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
 
   static cm::static_string_view TargetPrefix = "cmake_build_database"_s;
   auto AddMergeTarget =
-    [&mf](std::string const& name, char const* comment,
+    [&mf](std::string const& name, std::string const& comment,
           std::string const& output,
           std::function<std::vector<std::string>()> inputs) {
       // Add the custom command.
@@ -3732,13 +3732,13 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
                              lang, ".json");
       mf->GetOrCreateGeneratedSource(output);
       AddMergeTarget(
-        cmStrCat(TargetPrefix, '-', lang), comment.c_str(), output,
+        cmStrCat(TargetPrefix, '-', lang), comment, output,
         [this, lang]() { return this->PerLanguageModuleDbs[lang]; });
       all_lang_paths.emplace_back(std::move(output));
     }
 
     // Add the overall target.
-    auto const* comment = "Combining module command databases";
+    std::string comment{ "Combining module command databases" };
     auto output =
       cmStrCat(mf->GetHomeOutputDirectory(), "/build_database.json");
     mf->GetOrCreateGeneratedSource(output);
@@ -3758,8 +3758,8 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
       auto output = cmStrCat(mf->GetHomeOutputDirectory(), "/build_database_",
                              lang, '_', config, ".json");
       mf->GetOrCreateGeneratedSource(output);
-      AddMergeTarget(cmStrCat(TargetPrefix, '-', lang, '-', config),
-                     comment.c_str(), output, [this, config, lang]() {
+      AddMergeTarget(cmStrCat(TargetPrefix, '-', lang, '-', config), comment,
+                     output, [this, config, lang]() {
                        return this->PerConfigModuleDbs[config][lang];
                      });
       all_config_paths.emplace_back(std::move(output));
@@ -3770,8 +3770,8 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
     auto output = cmStrCat(mf->GetHomeOutputDirectory(), "/build_database_",
                            config, ".json");
     mf->GetOrCreateGeneratedSource(output);
-    AddMergeTarget(cmStrCat(TargetPrefix, '-', config), comment.c_str(),
-                   output, [all_config_paths]() { return all_config_paths; });
+    AddMergeTarget(cmStrCat(TargetPrefix, '-', config), comment, output,
+                   [all_config_paths]() { return all_config_paths; });
   }
 
   // NMC considerations
@@ -3783,13 +3783,13 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
                            lang, ".json");
     mf->GetOrCreateGeneratedSource(output);
     AddMergeTarget(
-      cmStrCat(TargetPrefix, '-', lang), comment.c_str(), output,
+      cmStrCat(TargetPrefix, '-', lang), comment, output,
       [this, lang]() { return this->PerLanguageModuleDbs[lang]; });
     all_config_paths.emplace_back(std::move(output));
   }
 
   // Add the overall target.
-  auto const* comment = "Combining all module command databases";
+  std::string comment{ "Combining all module command databases" };
   auto output = cmStrCat(mf->GetHomeOutputDirectory(), "/build_database.json");
   mf->GetOrCreateGeneratedSource(output);
   AddMergeTarget(std::string(TargetPrefix), comment, output,
@@ -3844,7 +3844,7 @@ void cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   // Store the custom command in the target.
   cmCustomCommand cc;
   cc.SetCommandLines(gti.CommandLines);
-  cc.SetWorkingDirectory(gti.WorkingDir.c_str());
+  cc.SetWorkingDirectory(gti.WorkingDir);
   cc.SetStdPipesUTF8(gti.StdPipesUTF8);
   cc.SetUsesTerminal(gti.UsesTerminal);
   cc.SetRole(gti.Role);

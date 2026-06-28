@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 
 #include "cmCustomCommand.h"
 #include "cmDiagnostics.h"
@@ -171,9 +172,9 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
 
     // Create utility target
     auto cc = cm::make_unique<cmCustomCommand>();
-    cc->SetWorkingDirectory(makefile->GetHomeOutputDirectory().c_str());
+    cc->SetWorkingDirectory(makefile->GetHomeOutputDirectory());
     cc->SetEscapeOldStyle(false);
-    cc->SetComment(comment.c_str());
+    cc->SetComment(comment);
     cmTarget* target = localGen->AddUtilityCommand(name, true, std::move(cc));
     localGen->AddGeneratorTarget(
       cm::make_unique<cmGeneratorTarget>(target, localGen));

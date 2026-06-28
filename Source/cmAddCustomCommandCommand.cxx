@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/string_view>
 
 #include "cmCustomCommand.h"
@@ -44,8 +45,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   std::string depfile;
   std::string job_pool;
   std::string job_server_aware;
-  std::string comment_buffer;
-  char const* comment = nullptr;
+  cm::optional<std::string> comment;
   std::vector<std::string> depends;
   std::vector<std::string> outputs;
   std::vector<std::string> output;
@@ -369,7 +369,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
           byproducts.push_back(filename);
           break;
         case doing_comment:
-          if (!comment_buffer.empty()) {
+          if (comment && !comment->empty()) {
             std::string const msg =
               "COMMENT requires exactly one argument, but multiple values "
               "or COMMENT keywords have been given.";
@@ -381,8 +381,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
               mf.IssuePolicyWarning(cmPolicies::CMP0175, msg);
             }
           }
-          comment_buffer = copy;
-          comment = comment_buffer.c_str();
+          comment = copy;
           break;
         default:
           status.SetError("Wrong syntax. Unknown type of argument.");
@@ -477,7 +476,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   cc->SetByproducts(byproducts);
   cc->SetCommandLines(commandLines);
   cc->SetComment(comment);
-  cc->SetWorkingDirectory(working.c_str());
+  cc->SetWorkingDirectory(working);
   cc->SetEscapeOldStyle(!verbatim);
   cc->SetUsesTerminal(uses_terminal);
   cc->SetDepfile(depfile);

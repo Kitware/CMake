@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -96,7 +98,7 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
           if (!commandDesc.empty()) {
             commandDesc += "; ";
           }
-          auto cge = ge.Parse(ci.GetComment());
+          auto cge = ge.Parse(ci.GetComment().value());
           commandDesc += cge->Evaluate(this->GetLocalGenerator(), config);
         }
         util_outputs.Add(ccg.GetByproducts());
