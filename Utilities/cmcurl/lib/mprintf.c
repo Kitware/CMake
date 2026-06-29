@@ -244,7 +244,7 @@ static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
         fmt += 2;
       }
       else {
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if SIZEOF_CURL_OFF_T > SIZEOF_LONG
         flags |= FLAGS_LONGLONG;
 #else
         flags |= FLAGS_LONG;
@@ -267,14 +267,14 @@ static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
     case 'z':
       /* the code below generates a warning if -Wunreachable-code is
          used */
-#if (SIZEOF_SIZE_T > SIZEOF_LONG)
+#if SIZEOF_SIZE_T > SIZEOF_LONG
       flags |= FLAGS_LONGLONG;
 #else
       flags |= FLAGS_LONG;
 #endif
       break;
     case 'O':
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if SIZEOF_CURL_OFF_T > SIZEOF_LONG
       flags |= FLAGS_LONGLONG;
 #else
       flags |= FLAGS_LONG;
@@ -422,7 +422,6 @@ static bool parse_conversion(const char f, unsigned int *flagp,
   *typep = type;
   return FALSE;
 }
-
 
 static int parsefmt(const char *format,
                     struct outsegment *out,
@@ -968,7 +967,6 @@ static bool out_pointer(void *userp,
  *
  * All output is sent to the 'stream()' callback, one byte at a time.
  */
-
 static int formatf(void *userp, /* untouched by format(), sent to the
                                    stream() function in the second argument */
                    /* function pointer called for each output character */
@@ -1075,9 +1073,8 @@ static int formatf(void *userp, /* untouched by format(), sent to the
       /* Answer the count of characters written. */
       if(p.flags & FLAGS_LONGLONG)
         *(int64_t *)iptr->val.ptr = (int64_t)done;
-      else
-        if(p.flags & FLAGS_LONG)
-          *(long *)iptr->val.ptr = (long)done;
+      else if(p.flags & FLAGS_LONG)
+        *(long *)iptr->val.ptr = (long)done;
       else if(!(p.flags & FLAGS_SHORT))
         *(int *)iptr->val.ptr = done;
       else

@@ -29,6 +29,10 @@
 #include "progress.h"
 #include "curl_share.h"
 
+#if !defined(PSL_VERSION_NUMBER) || PSL_VERSION_NUMBER < 0x001000
+#error "libpsl 0.16.0 or greater required"
+#endif
+
 void Curl_psl_destroy(struct PslCache *pslcache)
 {
   if(pslcache->psl) {
@@ -65,17 +69,14 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
       bool dynamic = FALSE;
       time_t expires = TIME_T_MAX;
 
-#if defined(PSL_VERSION_NUMBER) && PSL_VERSION_NUMBER >= 0x001000
       psl = psl_latest(NULL);
-      dynamic = psl != NULL;
+      dynamic = !!psl;
       /* Take care of possible time computation overflow. */
       expires = (now_sec < TIME_T_MAX - PSL_TTL) ?
                 (now_sec + PSL_TTL) : TIME_T_MAX;
 
       /* Only get the built-in PSL if we do not already have the "latest". */
       if(!psl && !pslcache->dynamic)
-#endif
-
         psl = psl_builtin();
 
       if(psl) {

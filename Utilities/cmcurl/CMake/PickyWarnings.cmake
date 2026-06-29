@@ -250,7 +250,7 @@ if(PICKY_COMPILER)
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 17.0))
         list(APPEND _picky_enable
-          -Wno-format-signedness           # clang 19.1  gcc  5.1  appleclang 17.0  # In clang-cl enums are signed ints by default
+          -Wformat-signedness              # clang 19.1  gcc  5.1  appleclang 17.0  # In clang-cl enums are signed ints by default
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.1) OR
@@ -300,13 +300,14 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.1
           -Wformat=2                       # clang  2.7  gcc  4.8
+          -Wlogical-op                     #             gcc  4.4
           -Wtrampolines                    #             gcc  4.6
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0)
         list(APPEND _picky_enable
           -Warray-bounds=2                 # clang  2.9  gcc  5.0 (clang default: -Warray-bounds)
-          -Wno-format-signedness           # clang 19.1  gcc  5.1  appleclang 17.0
+          -Wformat-signedness              # clang 19.1  gcc  5.1  appleclang 17.0
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)
@@ -391,7 +392,7 @@ if(PICKY_COMPILER)
         list(APPEND _picky "-Wno-conversion")  # Avoid false positives
       endif()
     endif()
-  elseif(MSVC AND MSVC_VERSION LESS_EQUAL 1950)  # Skip for untested/unreleased newer versions
+  elseif(MSVC AND MSVC_VERSION LESS_EQUAL 1951)  # Enable for tested versions only
     list(APPEND _picky "-Wall")
     list(APPEND _picky "-wd4061")  # enumerator 'A' in switch of enum 'B' is not explicitly handled by a case label
     list(APPEND _picky "-wd4191")  # 'type cast': unsafe conversion from 'FARPROC' to 'void (__cdecl *)(void)'
@@ -407,7 +408,7 @@ if(PICKY_COMPILER)
     list(APPEND _picky "-wd4746")
     list(APPEND _picky "-wd4820")  # 'A': 'N' bytes padding added after data member 'B'
     if(MSVC_VERSION GREATER_EQUAL 1900)
-      list(APPEND _picky "-wd5045")  # Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
+      list(APPEND _picky "-wd5045")  # Compiler inserts Spectre mitigation for memory load if /Qspectre switch specified
     endif()
   endif()
 endif()
@@ -437,7 +438,7 @@ if(CMAKE_C_STANDARD STREQUAL 90)
   endif()
   if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9) OR
      (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1))
-    list(APPEND _picky "-Wno-comma")  # Just silly
+    list(APPEND _picky "-Wno-comma")  # Silly
   endif()
 endif()
 

@@ -78,9 +78,8 @@ bool Curl_auth_is_spnego_supported(void)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
-                                         const char *user,
-                                         const char *password,
-                                         const char *service,
+                                         struct Curl_creds *creds,
+                                         const char *default_service,
                                          const char *host,
                                          const char *chlg64,
                                          struct negotiatedata *nego)
@@ -105,6 +104,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(!nego->spn) {
     /* Generate our SPN */
+    const char *service = Curl_creds_has_sasl_service(creds) ?
+      Curl_creds_sasl_service(creds) : default_service;
     nego->spn = Curl_auth_build_spn(service, host, NULL);
     if(!nego->spn)
       return CURLE_OUT_OF_MEMORY;
@@ -133,9 +134,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(!nego->credentials) {
     /* Do we have credentials to use or are we using single sign-on? */
-    if(user && *user) {
+    if(Curl_creds_has_user(creds)) {
       /* Populate our identity structure */
-      result = Curl_create_sspi_identity(user, password, &nego->identity);
+      result = Curl_create_sspi_identity(creds->user, creds->passwd,
+                                         &nego->identity);
       if(result)
         return result;
 
@@ -157,8 +159,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                 SECPKG_CRED_OUTBOUND, NULL,
                                 nego->p_identity, NULL, NULL,
                                 nego->credentials, NULL);
-    if(nego->status != SEC_E_OK)
+    if(nego->status != SEC_E_OK) {
+      curlx_safefree(nego->credentials);
       return CURLE_AUTH_ERROR;
+    }
 
     /* Allocate our new context handle */
     nego->context = curlx_calloc(1, sizeof(CtxtHandle));
@@ -189,7 +193,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     chlg_buf[0].cbBuffer   = curlx_uztoul(chlglen);
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-    /* ssl context comes from Schannel.
+    /* SSL context comes from Schannel.
      * When extended protection is used in IIS server,
      * we have to pass a second SecBuffer to the SecBufferDesc
      * otherwise IIS does not pass the authentication (401 response).
@@ -223,15 +227,20 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   resp_buf.cbBuffer   = curlx_uztoul(nego->token_max);
 
   /* Generate our challenge-response message */
-  nego->status =
-    Curl_pSecFn->InitializeSecurityContext(nego->credentials,
-                                           chlg ? nego->context : NULL,
-                                           nego->spn,
-                                           ISC_REQ_CONFIDENTIALITY,
-                                           0, SECURITY_NATIVE_DREP,
-                                           chlg ? &chlg_desc : NULL,
-                                           0, nego->context,
-                                           &resp_desc, &attrs, NULL);
+  {
+    DWORD sspi_flags = ISC_REQ_CONFIDENTIALITY;
+    if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
+      sspi_flags |= ISC_REQ_DELEGATE | ISC_REQ_MUTUAL_AUTH;
+    nego->status =
+      Curl_pSecFn->InitializeSecurityContext(nego->credentials,
+                                             chlg ? nego->context : NULL,
+                                             nego->spn,
+                                             sspi_flags,
+                                             0, SECURITY_NATIVE_DREP,
+                                             chlg ? &chlg_desc : NULL,
+                                             0, nego->context,
+                                             &resp_desc, &attrs, NULL);
+  }
 
   /* Free the decoded challenge as it is not required anymore */
   curlx_free(chlg);
@@ -313,15 +322,13 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   /* Free our security context */
   if(nego->context) {
     Curl_pSecFn->DeleteSecurityContext(nego->context);
-    curlx_free(nego->context);
-    nego->context = NULL;
+    curlx_safefree(nego->context);
   }
 
   /* Free our credentials handle */
   if(nego->credentials) {
     Curl_pSecFn->FreeCredentialsHandle(nego->credentials);
-    curlx_free(nego->credentials);
-    nego->credentials = NULL;
+    curlx_safefree(nego->credentials);
   }
 
   /* Free our identity */

@@ -120,13 +120,13 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow)
 {
-  DEBUGASSERT(!pp->initialised);
+  DEBUGASSERT(!pp->initialized);
   pp->nread_resp = 0;
   pp->response = *pnow; /* start response time-out */
   pp->pending_resp = TRUE;
   curlx_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
   curlx_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
-  pp->initialised = TRUE;
+  pp->initialized = TRUE;
 }
 
 /***********************************************************************
@@ -152,7 +152,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 
   DEBUGASSERT(pp->sendleft == 0);
   DEBUGASSERT(pp->sendsize == 0);
-  DEBUGASSERT(pp->sendthis == NULL);
+  DEBUGASSERT(!pp->sendthis);
 
   if(!conn)
     /* cannot send without a connection! */
@@ -292,6 +292,13 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
            the line is not really terminated until the LF comes */
         size_t length = nl - line + 1;
 
+        if(memchr(line, 0, length)) {
+          /* The response line is passed on as a "header" below, so reject an
+             embedded nul the same way verify_header() does for HTTP. */
+          failf(data, "Nul byte in server response line");
+          return CURLE_WEIRD_SERVER_REPLY;
+        }
+
         /* output debug output if that is requested */
         Curl_debug(data, CURLINFO_HEADER_IN, line, length);
 
@@ -389,7 +396,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
 
 CURLcode Curl_pp_disconnect(struct pingpong *pp)
 {
-  if(pp->initialised) {
+  if(pp->initialized) {
     curlx_dyn_free(&pp->sendbuf);
     curlx_dyn_free(&pp->recvbuf);
     memset(pp, 0, sizeof(*pp));

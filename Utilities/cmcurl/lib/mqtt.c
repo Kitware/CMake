@@ -280,11 +280,9 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   char *packet = NULL;
 
   /* extracting username from request */
-  const char *username = data->state.aptr.user ? data->state.aptr.user : "";
-  const size_t ulen = strlen(username);
-  /* extracting password from request */
-  const char *passwd = data->state.aptr.passwd ? data->state.aptr.passwd : "";
-  const size_t plen = strlen(passwd);
+  struct Curl_creds *creds = data->state.creds;
+  const size_t ulen = creds ? strlen(creds->user) : 0;
+  const size_t plen = creds ? strlen(creds->passwd) : 0;
   const size_t payloadlen = ulen + plen + MQTT_CLIENTID_LEN + 2 +
   /* The plus 2s below are for the MSB and LSB describing the length of the
      string to be added on the payload. Refer to spec 1.5.2 and 1.5.4 */
@@ -326,7 +324,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   if(ulen) {
     start_pwd += 2;
 
-    rc = add_user(username, ulen,
+    rc = add_user(creds->user, ulen,
                   (unsigned char *)packet, start_user, remain_pos);
     if(rc) {
       failf(data, "Username too long: [%zu]", ulen);
@@ -337,7 +335,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
   /* if passwd was provided, add it to the packet */
   if(plen) {
-    rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
+    rc = add_passwd(creds->passwd, plen, packet, start_pwd, remain_pos);
     if(rc) {
       failf(data, "Password too long: [%zu]", plen);
       result = CURLE_WEIRD_SERVER_REPLY;
@@ -351,8 +349,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 end:
   if(packet)
     curlx_free(packet);
-  curlx_safefree(data->state.aptr.user);
-  curlx_safefree(data->state.aptr.passwd);
+  Curl_creds_unlink(&data->state.creds);
   return result;
 }
 
@@ -427,7 +424,7 @@ static CURLcode mqtt_verify_connack(struct Curl_easy *data)
 
   if(ptr[0] != 0x00 || ptr[1] != 0x00) {
     failf(data, "Expected %02x%02x but got %02x%02x",
-          0x00, 0x00, ptr[0], ptr[1]);
+          0x00U, 0x00U, (unsigned char)ptr[0], (unsigned char)ptr[1]);
     curlx_dyn_reset(&mq->recvbuf);
     return CURLE_WEIRD_SERVER_REPLY;
   }
@@ -605,9 +602,9 @@ fail:
   return result;
 }
 
-/* return 0 on success, non-zero on error */
-static int mqtt_decode_len(size_t *lenp, const unsigned char *buf,
-                           size_t buflen)
+/* return FALSE on success, TRUE on error */
+static bool mqtt_decode_len(size_t *lenp, const unsigned char *buf,
+                            size_t buflen)
 {
   size_t len = 0;
   size_t mult = 1;
@@ -616,14 +613,17 @@ static int mqtt_decode_len(size_t *lenp, const unsigned char *buf,
 
   for(i = 0; (i < buflen) && (encoded & 128); i++) {
     if(i == 4)
-      return 1; /* bad size */
+      return TRUE; /* bad size */
     encoded = buf[i];
     len += (encoded & 127) * mult;
     mult *= 128;
   }
+  if(encoded & 128)
+    /* truncated size */
+    return TRUE;
 
   *lenp = len;
-  return 0;
+  return FALSE;
 }
 
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
@@ -774,7 +774,7 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
 
   result = mqtt_connect(data);
   if(result) {
-    failf(data, "Error %d sending MQTT CONNECT request", result);
+    failf(data, "Error %d sending MQTT CONNECT request", (int)result);
     return result;
   }
   mqstate(data, MQTT_FIRST, MQTT_CONNACK);
@@ -892,6 +892,24 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       break;
     }
     mq->npacket = 0;
+    /* PINGRESP and DISCONNECT must have remaining_length == 0 and
+     * reserved bits (low nibble) must be zero per MQTT 3.1.1
+     * sections 2.2.2, 3.13.1 and 3.14.1. Reject before state
+     * dispatch to prevent nextstate confusion. */
+    {
+      const unsigned char type = mq->firstbyte & 0xF0;
+      const unsigned char reserved = mq->firstbyte & 0x0F;
+      if((type == MQTT_MSG_DISCONNECT || type == MQTT_MSG_PINGRESP) &&
+         (mq->remaining_length || reserved)) {
+        failf(data,
+              "Broker sent malformed %s "
+              "(remaining_length=%zu, header byte=0x%02x)",
+              type == MQTT_MSG_DISCONNECT ? "DISCONNECT" : "PINGRESP",
+              mq->remaining_length, mq->firstbyte);
+        result = CURLE_WEIRD_SERVER_REPLY;
+        break;
+      }
+    }
     if(mq->remaining_length) {
       mqstate(data, mqtt->nextstate, MQTT_NOSTATE);
       break;

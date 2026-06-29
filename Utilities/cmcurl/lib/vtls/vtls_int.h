@@ -38,20 +38,20 @@ struct Curl_ssl_session;
 
 /* see https://www.iana.org/assignments/tls-extensiontype-values/ */
 #define ALPN_HTTP_1_0_LENGTH 8
-#define ALPN_HTTP_1_0 "http/1.0"
+#define ALPN_HTTP_1_0        "http/1.0"
 #define ALPN_HTTP_1_1_LENGTH 8
-#define ALPN_HTTP_1_1 "http/1.1"
-#define ALPN_H2_LENGTH 2
-#define ALPN_H2 "h2"
-#define ALPN_H3_LENGTH 2
-#define ALPN_H3 "h3"
+#define ALPN_HTTP_1_1        "http/1.1"
+#define ALPN_H2_LENGTH       2
+#define ALPN_H2              "h2"
+#define ALPN_H3_LENGTH       2
+#define ALPN_H3              "h3"
 
 /* conservative sizes on the ALPN entries and count we are handling,
  * we can increase these if we ever feel the need or have to accommodate
  * ALPN strings from the "outside". */
-#define ALPN_NAME_MAX     10
-#define ALPN_ENTRIES_MAX  3
-#define ALPN_PROTO_BUF_MAX   (ALPN_ENTRIES_MAX * (ALPN_NAME_MAX + 1))
+#define ALPN_NAME_MAX      10
+#define ALPN_ENTRIES_MAX   3
+#define ALPN_PROTO_BUF_MAX (ALPN_ENTRIES_MAX * (ALPN_NAME_MAX + 1))
 
 struct alpn_spec {
   char entries[ALPN_ENTRIES_MAX][ALPN_NAME_MAX];
@@ -133,9 +133,6 @@ struct ssl_connect_data {
   BIT(input_pending);               /* data for SSL_read() may be available */
 };
 
-#undef CF_CTX_CALL_DATA
-#define CF_CTX_CALL_DATA(cf) ((struct ssl_connect_data *)(cf)->ctx)->call_data
-
 /* Definitions for SSL Implementations */
 
 struct Curl_ssl {
@@ -209,3 +206,9 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
 #endif /* USE_SSL */
 
 #endif /* HEADER_CURL_VTLS_INT_H */
+
+#ifdef USE_SSL
+/* Restore the default SSL filter call_data accessor for unity builds. */
+#undef CF_CTX_CALL_DATA
+#define CF_CTX_CALL_DATA(cf) ((struct ssl_connect_data *)(cf)->ctx)->call_data
+#endif

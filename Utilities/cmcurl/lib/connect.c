@@ -23,51 +23,20 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h> /* <netinet/tcp.h> may need it */
-#endif
-#ifdef HAVE_SYS_UN_H
-#include <sys/un.h> /* for sockaddr_un */
-#endif
-#ifdef HAVE_LINUX_TCP_H
-#include <linux/tcp.h>
-#elif defined(HAVE_NETINET_TCP_H)
-#include <netinet/tcp.h>
-#endif
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-
-#ifdef __VMS
-#include <in.h>
-#include <inet.h>
-#endif
-
 #include "urldata.h"
 #include "curl_trc.h"
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "cf-dns.h"
-#include "cf-haproxy.h"
 #include "cf-https-connect.h"
-#include "cf-ip-happy.h"
-#include "cf-socket.h"
+#include "cf-setup.h"
 #include "multiif.h"
-#include "curlx/inet_ntop.h"
-#include "curlx/strparse.h"
-#include "vtls/vtls.h" /* for vtls cfilters */
 #include "progress.h"
 #include "conncache.h"
 #include "multihandle.h"
-#include "http_proxy.h"
-#include "socks.h"
+#include "select.h"
+#include "curlx/strparse.h"
 
 #if !defined(CURL_DISABLE_ALTSVC) || defined(USE_HTTPSRR)
 
@@ -210,59 +179,6 @@ bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-/* retrieves ip address and port from a sockaddr structure. note it calls
-   curlx_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, uint16_t *port)
-{
-  struct sockaddr_in *si = NULL;
-#ifdef USE_IPV6
-  struct sockaddr_in6 *si6 = NULL;
-#endif
-#ifdef USE_UNIX_SOCKETS
-  struct sockaddr_un *su = NULL;
-#else
-  (void)salen;
-#endif
-
-  switch(sa->sa_family) {
-  case AF_INET:
-    si = (struct sockaddr_in *)(void *)sa;
-    if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
-      *port = ntohs(si->sin_port);
-      return TRUE;
-    }
-    break;
-#ifdef USE_IPV6
-  case AF_INET6:
-    si6 = (struct sockaddr_in6 *)(void *)sa;
-    if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr, MAX_IPADR_LEN)) {
-      *port = ntohs(si6->sin6_port);
-      return TRUE;
-    }
-    break;
-#endif
-#ifdef USE_UNIX_SOCKETS
-  case AF_UNIX:
-    if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
-      su = (struct sockaddr_un *)sa;
-      curl_msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
-    }
-    else
-      addr[0] = 0; /* socket with no name */
-    *port = 0;
-    return TRUE;
-#endif
-  default:
-    break;
-  }
-
-  addr[0] = '\0';
-  *port = 0;
-  errno = SOCKEAFNOSUPPORT;
-  return FALSE;
-}
-
 /*
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given Curl_easy.
@@ -325,266 +241,21 @@ void Curl_conncontrol(struct connectdata *conn,
   }
 }
 
-typedef enum {
-  CF_SETUP_INIT,
-  CF_SETUP_CNNCT_EYEBALLS,
-  CF_SETUP_CNNCT_SOCKS,
-  CF_SETUP_CNNCT_HTTP_PROXY,
-  CF_SETUP_CNNCT_HAPROXY,
-  CF_SETUP_CNNCT_SSL,
-  CF_SETUP_DONE
-} cf_setup_state;
-
-struct cf_setup_ctx {
-  cf_setup_state state;
-  int ssl_mode;
-  uint8_t transport;
-};
-
-static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 bool *done)
-{
-  struct cf_setup_ctx *ctx = cf->ctx;
-  CURLcode result = CURLE_OK;
-
-  if(cf->connected) {
-    *done = TRUE;
-    return CURLE_OK;
-  }
-
-  /* connect current sub-chain */
-connect_sub_chain:
-
-  if(cf->next && !cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, done);
-    if(result || !*done)
-      return result;
-  }
-
-  if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-    result = cf_ip_happy_insert_after(cf, data, ctx->transport);
-    if(result)
-      return result;
-    ctx->state = CF_SETUP_CNNCT_EYEBALLS;
-    if(!cf->next || !cf->next->connected)
-      goto connect_sub_chain;
-  }
-
-  /* sub-chain connected, do we need to add more? */
-#ifndef CURL_DISABLE_PROXY
-  if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
-    /* for the secondary socket (FTP), use the "connect to host"
-     * but ignore the "connect to port" (use the secondary port)
-     */
-    const char *hostname =
-      cf->conn->bits.httpproxy ?
-      cf->conn->http_proxy.host.name :
-      cf->conn->bits.conn_to_host ?
-      cf->conn->conn_to_host.name :
-      cf->sockindex == SECONDARYSOCKET ?
-      cf->conn->secondaryhostname : cf->conn->host.name;
-    uint16_t port =
-      cf->conn->bits.httpproxy ? cf->conn->http_proxy.port :
-      cf->sockindex == SECONDARYSOCKET ? cf->conn->secondary_port :
-      cf->conn->bits.conn_to_port ? cf->conn->conn_to_port :
-      cf->conn->remote_port;
-    const char *user = cf->conn->socks_proxy.user;
-    const char *passwd = cf->conn->socks_proxy.passwd;
-
-    result = Curl_cf_socks_proxy_insert_after(
-      cf, data, hostname, port, cf->conn->ip_version,
-      cf->conn->socks_proxy.proxytype, user, passwd);
-    if(result)
-      return result;
-    ctx->state = CF_SETUP_CNNCT_SOCKS;
-    if(!cf->next || !cf->next->connected)
-      goto connect_sub_chain;
-  }
-
-  if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy) {
-#ifdef USE_SSL
-    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
-       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-      result = Curl_cf_ssl_proxy_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-#endif /* USE_SSL */
-
-#ifndef CURL_DISABLE_HTTP
-    if(cf->conn->bits.tunnel_proxy) {
-      result = Curl_cf_http_proxy_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-#endif /* !CURL_DISABLE_HTTP */
-    ctx->state = CF_SETUP_CNNCT_HTTP_PROXY;
-    if(!cf->next || !cf->next->connected)
-      goto connect_sub_chain;
-  }
-#endif /* !CURL_DISABLE_PROXY */
-
-  if(ctx->state < CF_SETUP_CNNCT_HAPROXY) {
-#ifndef CURL_DISABLE_PROXY
-    if(data->set.haproxyprotocol) {
-      if(Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-        failf(data, "haproxy protocol not supported with SSL "
-              "encryption in place (QUIC?)");
-        return CURLE_UNSUPPORTED_PROTOCOL;
-      }
-      result = Curl_cf_haproxy_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-#endif /* !CURL_DISABLE_PROXY */
-    ctx->state = CF_SETUP_CNNCT_HAPROXY;
-    if(!cf->next || !cf->next->connected)
-      goto connect_sub_chain;
-  }
-
-  if(ctx->state < CF_SETUP_CNNCT_SSL) {
-#ifdef USE_SSL
-    if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
-        (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
-         cf->conn->scheme->flags & PROTOPT_SSL)) &&  /* we want SSL */
-       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
-      result = Curl_cf_ssl_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-#endif /* USE_SSL */
-    ctx->state = CF_SETUP_CNNCT_SSL;
-    if(!cf->next || !cf->next->connected)
-      goto connect_sub_chain;
-  }
-
-  ctx->state = CF_SETUP_DONE;
-  cf->connected = TRUE;
-  *done = TRUE;
-  return CURLE_OK;
-}
-
-static void cf_setup_close(struct Curl_cfilter *cf,
-                           struct Curl_easy *data)
-{
-  struct cf_setup_ctx *ctx = cf->ctx;
-
-  CURL_TRC_CF(data, cf, "close");
-  cf->connected = FALSE;
-  ctx->state = CF_SETUP_INIT;
-
-  if(cf->next) {
-    cf->next->cft->do_close(cf->next, data);
-    Curl_conn_cf_discard_chain(&cf->next, data);
-  }
-}
-
-static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_setup_ctx *ctx = cf->ctx;
-
-  CURL_TRC_CF(data, cf, "destroy");
-  curlx_safefree(ctx);
-}
-
-struct Curl_cftype Curl_cft_setup = {
-  "SETUP",
-  CF_TYPE_SETUP,
-  CURL_LOG_LVL_NONE,
-  cf_setup_destroy,
-  cf_setup_connect,
-  cf_setup_close,
-  Curl_cf_def_shutdown,
-  Curl_cf_def_adjust_pollset,
-  Curl_cf_def_data_pending,
-  Curl_cf_def_send,
-  Curl_cf_def_recv,
-  Curl_cf_def_cntrl,
-  Curl_cf_def_conn_is_alive,
-  Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
-};
-
-static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
-                                struct Curl_easy *data,
-                                uint8_t transport,
-                                int ssl_mode)
-{
-  struct Curl_cfilter *cf = NULL;
-  struct cf_setup_ctx *ctx;
-  CURLcode result = CURLE_OK;
-
-  (void)data;
-  ctx = curlx_calloc(1, sizeof(*ctx));
-  if(!ctx) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
-  ctx->state = CF_SETUP_INIT;
-  ctx->ssl_mode = ssl_mode;
-  ctx->transport = transport;
-
-  result = Curl_cf_create(&cf, &Curl_cft_setup, ctx);
-  if(result)
-    goto out;
-  ctx = NULL;
-
-out:
-  *pcf = result ? NULL : cf;
-  if(ctx) {
-    curlx_free(ctx);
-  }
-  return result;
-}
-
-static CURLcode cf_setup_add(struct Curl_easy *data,
-                             struct connectdata *conn,
-                             int sockindex,
-                             uint8_t transport,
-                             int ssl_mode)
-{
-  struct Curl_cfilter *cf;
-  CURLcode result = CURLE_OK;
-
-  DEBUGASSERT(data);
-  result = cf_setup_create(&cf, data, transport, ssl_mode);
-  if(result)
-    goto out;
-  Curl_conn_cf_add(data, conn, sockindex, cf);
-out:
-  return result;
-}
-
-CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
-                                    struct Curl_easy *data,
-                                    uint8_t transport,
-                                    int ssl_mode)
-{
-  struct Curl_cfilter *cf;
-  CURLcode result;
-
-  DEBUGASSERT(data);
-  result = cf_setup_create(&cf, data, transport, ssl_mode);
-  if(result)
-    goto out;
-  Curl_conn_cf_insert_after(cf_at, cf);
-out:
-  return result;
-}
-
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
-                         struct Curl_dns_entry *dns,
                          int ssl_mode)
 {
   CURLcode result = CURLE_OK;
+  struct Curl_peer *peer = Curl_conn_get_first_peer(conn, sockindex);
   uint8_t dns_queries;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn->scheme);
   DEBUGASSERT(!conn->cfilter[sockindex]);
+
+  if(!peer)
+    return CURLE_FAILED_INIT;
 
 #ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
@@ -598,8 +269,8 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
   /* Still no cfilter set, apply default. */
   if(!conn->cfilter[sockindex]) {
-    result = cf_setup_add(data, conn, sockindex,
-                          conn->transport_wanted, ssl_mode);
+    result = Curl_cf_setup_add(data, conn, sockindex,
+                               conn->transport_wanted, ssl_mode);
     if(result)
       goto out;
   }
@@ -609,28 +280,179 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   if(sockindex == FIRSTSOCKET)
     dns_queries |= CURL_DNSQ_HTTPS;
 #endif
-  result = Curl_cf_dns_add(data, conn, sockindex, dns_queries,
-                           conn->transport_wanted, dns);
+  result = Curl_cf_dns_add(data, conn, sockindex, peer, dns_queries,
+                           conn->transport_wanted);
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
   return result;
 }
 
-#ifdef USE_UNIX_SOCKETS
-const char *Curl_conn_get_unix_path(struct connectdata *conn)
+#ifdef CURLVERBOSE
+static CURLcode conn_connect_trace(struct Curl_easy *data,
+                                   struct Curl_cfilter *cf)
 {
-  const char *unix_path = conn->unix_domain_socket;
+  if(Curl_trc_is_verbose(data)) {
+    struct ip_quadruple ipquad;
+    bool is_ipv6;
+    CURLcode result;
 
-#ifndef CURL_DISABLE_PROXY
-  if(!unix_path && conn->bits.proxy && conn->socks_proxy.host.name &&
-     !strncmp(UNIX_SOCKET_PREFIX "/",
-              conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
-    unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
+    result = Curl_conn_cf_get_ip_info(cf, data, &is_ipv6, &ipquad);
+    if(result)
+      return result;
+
+    infof(data, "Established %sconnection to %s (%s port %u) from %s port %u ",
+          (cf->sockindex == SECONDARYSOCKET) ? "2nd " : "",
+          CURL_CONN_HOST_DISPNAME(data->conn),
+          ipquad.remote_ip, ipquad.remote_port,
+          ipquad.local_ip, ipquad.local_port);
+  }
+  return CURLE_OK;
+}
 #endif
 
-  return unix_path;
+/**
+ * Update connection statistics
+ */
+static void conn_report_connect_stats(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data)
+{
+  if(cf) {
+    struct curltime connected;
+    struct curltime appconnected;
+
+    memset(&connected, 0, sizeof(connected));
+    cf->cft->query(cf, data, CF_QUERY_TIMER_CONNECT, NULL, &connected);
+    if(connected.tv_sec || connected.tv_usec)
+      Curl_pgrsTimeWas(data, TIMER_CONNECT, connected);
+
+    memset(&appconnected, 0, sizeof(appconnected));
+    cf->cft->query(cf, data, CF_QUERY_TIMER_APPCONNECT, NULL, &appconnected);
+    if(appconnected.tv_sec || appconnected.tv_usec)
+      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, appconnected);
+  }
 }
-#endif /* USE_UNIX_SOCKETS */
+
+CURLcode Curl_conn_connect(struct Curl_easy *data,
+                           int sockindex,
+                           bool blocking,
+                           bool *done)
+{
+#define CF_CONN_NUM_POLLS_ON_STACK 5
+  struct pollfd a_few_on_stack[CF_CONN_NUM_POLLS_ON_STACK];
+  struct easy_pollset ps;
+  struct curl_pollfds cpfds;
+  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  if(!CONN_SOCK_IDX_VALID(sockindex))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  cf = data->conn->cfilter[sockindex];
+  if(!cf) {
+    *done = FALSE;
+    return CURLE_FAILED_INIT;
+  }
+
+  *done = (bool)cf->connected;
+  if(*done)
+    return CURLE_OK;
+
+  Curl_pollset_init(&ps);
+  Curl_pollfds_init(&cpfds, a_few_on_stack, CF_CONN_NUM_POLLS_ON_STACK);
+  while(!*done) {
+    if(Curl_conn_needs_flush(data, sockindex)) {
+      DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
+      result = Curl_conn_flush(data, sockindex);
+      if(result && (result != CURLE_AGAIN))
+        goto out;
+    }
+
+    result = cf->cft->do_connect(cf, data, done);
+    CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %d, done=%d",
+                blocking, (int)result, *done);
+    if(!result && *done) {
+      /* A final sanity check on connection security */
+      if((data->state.origin->scheme->flags & PROTOPT_SSL) &&
+         (sockindex == FIRSTSOCKET) &&
+         !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
+        DEBUGASSERT(0);
+        failf(data, "transfer requires SSL, but not connected via SSL");
+        result = CURLE_FAILED_INIT;
+        goto out;
+      }
+      /* Now that the complete filter chain is connected, let all filters
+       * persist information at the connection. E.g. cf-socket sets the
+       * socket and ip related information. */
+      Curl_conn_cntrl_update_info(data, data->conn);
+      conn_report_connect_stats(cf, data);
+      data->conn->keepalive = *Curl_pgrs_now(data);
+      VERBOSE(result = conn_connect_trace(data, cf));
+      VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
+      Curl_conn_remove_setup_filters(data, sockindex);
+      VERBOSE(Curl_conn_trc_filters(data, sockindex, "reduced to"));
+      goto out;
+    }
+    else if(result) {
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
+                  (int)result);
+      VERBOSE(Curl_conn_trc_filters(data, sockindex, "failed to connect"));
+      conn_report_connect_stats(cf, data);
+      goto out;
+    }
+
+    if(!blocking)
+      goto out;
+    else {
+      /* check allowed time left */
+      const timediff_t timeout_ms = Curl_timeleft_ms(data);
+      curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+      int rc;
+
+      if(timeout_ms < 0) {
+        /* no need to continue if time already is up */
+        failf(data, "connect timeout");
+        result = CURLE_OPERATION_TIMEDOUT;
+        goto out;
+      }
+
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), do poll");
+      Curl_pollset_reset(&ps);
+      Curl_pollfds_reset(&cpfds);
+      /* In general, we want to send after connect, wait on that. */
+      if(sockfd != CURL_SOCKET_BAD)
+        result = Curl_pollset_set_out_only(data, &ps, sockfd);
+      if(!result)
+        result = Curl_conn_adjust_pollset(data, data->conn, &ps);
+      if(result)
+        goto out;
+      result = Curl_pollfds_add_ps(&cpfds, &ps);
+      if(result)
+        goto out;
+
+      rc = Curl_poll(cpfds.pfds, cpfds.n,
+                     CURLMIN(timeout_ms, (cpfds.n ? 1000 : 10)));
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), Curl_poll() -> %d",
+                  rc);
+      if(rc < 0) {
+        result = CURLE_COULDNT_CONNECT;
+        goto out;
+      }
+      /* continue iterating */
+    }
+  }
+
+out:
+  Curl_pollset_cleanup(&ps);
+  Curl_pollfds_cleanup(&cpfds);
+  return result;
+}
 
 void Curl_conn_set_multiplex(struct connectdata *conn)
 {
@@ -640,4 +462,33 @@ void Curl_conn_set_multiplex(struct connectdata *conn)
       Curl_multi_connchanged(conn->attached_multi);
     }
   }
+}
+
+struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
+                                       int sockindex)
+{
+  return (sockindex == SECONDARYSOCKET) ?
+    conn->origin2 : conn->origin;
+}
+
+struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
+                                            int sockindex)
+{
+  return (sockindex == SECONDARYSOCKET) ?
+    (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
+    (conn->via_peer ? conn->via_peer : conn->origin);
+}
+
+struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,
+                                           int sockindex)
+{
+#ifndef CURL_DISABLE_PROXY
+  if(conn->socks_proxy.peer)
+    return conn->socks_proxy.peer;
+  if(conn->http_proxy.peer)
+    return conn->http_proxy.peer;
+#endif
+  return (sockindex == SECONDARYSOCKET) ?
+    (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
+    (conn->via_peer ? conn->via_peer : conn->origin);
 }

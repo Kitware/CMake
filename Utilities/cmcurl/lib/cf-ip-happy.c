@@ -56,12 +56,14 @@
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
+#include "sockaddr.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 
 
 struct transport_provider {
-  uint8_t transport;
   cf_ip_connect_create *cf_create;
+  uint8_t transport;
+  bool tunnel;
 };
 
 static
@@ -69,23 +71,30 @@ static
 const
 #endif
 struct transport_provider transport_providers[] = {
-  { TRNSPRT_TCP, Curl_cf_tcp_create },
+  { Curl_cf_tcp_create, TRNSPRT_TCP, FALSE },
+  { Curl_cf_tcp_create, TRNSPRT_TCP, TRUE },
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
-  { TRNSPRT_QUIC, Curl_cf_quic_create },
+  { Curl_cf_quic_create, TRNSPRT_QUIC, FALSE },
+#endif
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_PROXY_HTTP3)
+  { Curl_cf_h3_proxy_create, TRNSPRT_QUIC, TRUE },
 #endif
 #ifndef CURL_DISABLE_TFTP
-  { TRNSPRT_UDP, Curl_cf_udp_create },
+  { Curl_cf_udp_create, TRNSPRT_UDP, FALSE },
 #endif
 #ifdef USE_UNIX_SOCKETS
-  { TRNSPRT_UNIX, Curl_cf_unix_create },
+  { Curl_cf_unix_create, TRNSPRT_UNIX, FALSE },
+  { Curl_cf_unix_create, TRNSPRT_UNIX, TRUE },
 #endif
 };
 
-static cf_ip_connect_create *get_cf_create(uint8_t transport)
+static cf_ip_connect_create *get_cf_create(uint8_t transport,
+                                           bool tunnel)
 {
   size_t i;
   for(i = 0; i < CURL_ARRAYSIZE(transport_providers); ++i) {
-    if(transport == transport_providers[i].transport)
+    if((transport == transport_providers[i].transport) &&
+       (tunnel == transport_providers[i].tunnel))
       return transport_providers[i].cf_create;
   }
   return NULL;
@@ -102,7 +111,6 @@ UNITTEST void debug_set_transport_provider(
   for(i = 0; i < CURL_ARRAYSIZE(transport_providers); ++i) {
     if(transport == transport_providers[i].transport) {
       transport_providers[i].cf_create = cf_create;
-      return;
     }
   }
 }
@@ -110,15 +118,18 @@ UNITTEST void debug_set_transport_provider(
 
 struct cf_ai_iter {
   struct Curl_cfilter *cf;
+  struct Curl_peer *peer;
   int ai_family;
   unsigned int n;
 };
 
 static void cf_ai_iter_init(struct cf_ai_iter *iter,
                             struct Curl_cfilter *cf,
+                            struct Curl_peer *peer,
                             int ai_family)
 {
   iter->cf = cf;
+  iter->peer = peer; /* not linked, ctx->ballers owns and has same lifetime */
   iter->ai_family = ai_family;
   iter->n = 0;
 }
@@ -131,7 +142,7 @@ static const struct Curl_addrinfo *cf_ai_iter_next(struct cf_ai_iter *iter,
   if(!iter->cf)
     return NULL;
 
-  addr = Curl_conn_dns_get_ai(data, iter->cf->sockindex,
+  addr = Curl_conn_dns_get_ai(data, iter->peer, iter->cf->sockindex,
                               iter->ai_family, iter->n);
   if(addr)
     iter->n++;
@@ -142,19 +153,23 @@ static bool cf_ai_iter_has_more(struct cf_ai_iter *iter,
                                 struct Curl_easy *data)
 {
   return (iter->cf &&
-          !!Curl_conn_dns_get_ai(data, iter->cf->sockindex,
+          !!Curl_conn_dns_get_ai(data, iter->peer, iter->cf->sockindex,
                                  iter->ai_family, iter->n));
 }
 
 struct cf_ip_attempt {
   struct cf_ip_attempt *next;
+  struct Curl_peer *origin;
+  struct Curl_peer *peer;
+  struct Curl_peer *tunnel_peer;
   struct Curl_sockaddr_ex addr;
   struct Curl_cfilter *cf;           /* current sub-cfilter connecting */
   cf_ip_connect_create *cf_create;
   struct curltime started;           /* start of current attempt */
   CURLcode result;
   int ai_family;
-  uint8_t transport;
+  uint8_t transport_peer;
+  uint8_t tunnel_transport;
   int error;
   BIT(connected);                    /* cf has connected */
   BIT(shutdown);                     /* cf has shutdown */
@@ -168,16 +183,23 @@ static void cf_ip_attempt_free(struct cf_ip_attempt *a,
   if(a) {
     if(a->cf)
       Curl_conn_cf_discard_chain(&a->cf, data);
+    Curl_peer_unlink(&a->origin);
+    Curl_peer_unlink(&a->peer);
+    Curl_peer_unlink(&a->tunnel_peer);
     curlx_free(a);
   }
 }
 
 static CURLcode cf_ip_attempt_new(struct cf_ip_attempt **pa,
-                                  struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
+                                  struct Curl_cfilter *cf,
+                                  struct Curl_peer *origin,
+                                  struct Curl_peer *peer,
+                                  uint8_t transport_peer,
                                   struct Curl_sockaddr_ex *addr,
                                   int ai_family,
-                                  uint8_t transport,
+                                  struct Curl_peer *tunnel_peer,
+                                  uint8_t tunnel_transport,
                                   cf_ip_connect_create *cf_create)
 {
   struct Curl_cfilter *wcf;
@@ -189,14 +211,20 @@ static CURLcode cf_ip_attempt_new(struct cf_ip_attempt **pa,
   if(!a)
     return CURLE_OUT_OF_MEMORY;
 
+  Curl_peer_link(&a->origin, origin);
+  Curl_peer_link(&a->peer, peer);
+  a->transport_peer = transport_peer;
+  Curl_peer_link(&a->tunnel_peer, tunnel_peer);
+  a->tunnel_transport = tunnel_transport;
   a->addr = *addr;
   a->ai_family = ai_family;
-  a->transport = transport;
   a->result = CURLE_OK;
   a->cf_create = cf_create;
   *pa = a;
 
-  result = a->cf_create(&a->cf, data, cf->conn, &a->addr, a->transport);
+  result = a->cf_create(&a->cf, data, a->origin, a->peer, a->transport_peer,
+                        cf->conn, &a->addr, a->tunnel_peer,
+                        a->tunnel_transport);
   if(result)
     goto out;
 
@@ -245,13 +273,17 @@ struct cf_ip_ballers {
 #ifdef USE_IPV6
   struct cf_ai_iter ipv6_iter;
 #endif
+  struct Curl_peer *origin;
+  struct Curl_peer *peer;
+  struct Curl_peer *tunnel_peer;
   cf_ip_connect_create *cf_create;   /* for creating cf */
   struct curltime started;
   struct curltime last_attempt_started;
   timediff_t attempt_delay_ms;
   int last_attempt_ai_family;
   uint32_t max_concurrent;
-  uint8_t transport;
+  uint8_t transport_peer;
+  uint8_t tunnel_transport;
 };
 
 static CURLcode cf_ip_attempt_restart(struct cf_ip_attempt *a,
@@ -269,7 +301,9 @@ static CURLcode cf_ip_attempt_restart(struct cf_ip_attempt *a,
   a->inconclusive = FALSE;
   a->cf = NULL;
 
-  result = a->cf_create(&a->cf, data, cf->conn, &a->addr, a->transport);
+  result = a->cf_create(&a->cf, data, a->origin, a->peer, a->transport_peer,
+                        cf->conn, &a->addr,
+                        a->tunnel_peer, a->tunnel_transport);
   if(!result) {
     bool dummy;
     /* the new filter might have sub-filters */
@@ -282,11 +316,9 @@ static CURLcode cf_ip_attempt_restart(struct cf_ip_attempt *a,
   return result;
 }
 
-static void cf_ip_ballers_clear(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+static void cf_ip_ballers_clear(struct Curl_easy *data,
                                 struct cf_ip_ballers *bs)
 {
-  (void)cf;
   while(bs->running) {
     struct cf_ip_attempt *a = bs->running;
     bs->running = a->next;
@@ -294,35 +326,36 @@ static void cf_ip_ballers_clear(struct Curl_cfilter *cf,
   }
   cf_ip_attempt_free(bs->winner, data);
   bs->winner = NULL;
+  Curl_peer_unlink(&bs->origin);
+  Curl_peer_unlink(&bs->peer);
+  Curl_peer_unlink(&bs->tunnel_peer);
 }
 
 static CURLcode cf_ip_ballers_init(struct cf_ip_ballers *bs,
-                                   struct Curl_cfilter *cf,
-                                   cf_ip_connect_create *cf_create,
-                                   uint8_t transport,
+                                   struct Curl_easy *data,
+                                   struct Curl_peer *origin,
+                                   struct Curl_peer *peer,
+                                   uint8_t transport_peer,
+                                   struct Curl_peer *tunnel_peer,
+                                   uint8_t tunnel_transport,
                                    timediff_t attempt_delay_ms,
                                    uint32_t max_concurrent)
 {
   memset(bs, 0, sizeof(*bs));
-  bs->cf_create = cf_create;
-  bs->transport = transport;
+  bs->cf_create = get_cf_create(transport_peer, !!tunnel_peer);
+  if(!bs->cf_create) {
+    failf(data, "unsupported transport type %u%s",
+          transport_peer, tunnel_peer ? " to proxy" : "");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+  }
+  Curl_peer_link(&bs->origin, origin);
+  Curl_peer_link(&bs->peer, peer);
+  bs->transport_peer = transport_peer;
+  Curl_peer_link(&bs->tunnel_peer, tunnel_peer);
+  bs->tunnel_transport = tunnel_transport;
   bs->attempt_delay_ms = attempt_delay_ms;
   bs->max_concurrent = max_concurrent;
   bs->last_attempt_ai_family = AF_INET; /* so AF_INET6 is next */
-
-  if(transport == TRNSPRT_UNIX) {
-#ifdef USE_UNIX_SOCKETS
-    cf_ai_iter_init(&bs->addr_iter, cf, AF_UNIX);
-#else
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-  else { /* TCP/UDP/QUIC */
-#ifdef USE_IPV6
-    cf_ai_iter_init(&bs->ipv6_iter, cf, AF_INET6);
-#endif
-    cf_ai_iter_init(&bs->addr_iter, cf, AF_INET);
-  }
   return CURLE_OK;
 }
 
@@ -458,15 +491,17 @@ evaluate:
       if(bs->max_concurrent)
         cf_ip_ballers_prune(bs, cf, data, bs->max_concurrent - 1);
 
-      result = Curl_socket_addr_from_ai(&addr, ai, bs->transport);
+      result = Curl_socket_addr_from_ai(&addr, ai, bs->transport_peer);
       if(result)
         goto out;
 
-      result = cf_ip_attempt_new(&a, cf, data, &addr, ai_family,
-                                 bs->transport, bs->cf_create);
+      result = cf_ip_attempt_new(&a, data, cf, bs->origin, bs->peer,
+                                 bs->transport_peer, &addr, ai_family,
+                                 bs->tunnel_peer, bs->tunnel_transport,
+                                 bs->cf_create);
       CURL_TRC_CF(data, cf, "starting %s attempt for ipv%s -> %d",
                   bs->running ? "next" : "first",
-                  (ai_family == AF_INET) ? "4" : "6", result);
+                  (ai_family == AF_INET) ? "4" : "6", (int)result);
       if(result)
         goto out;
       DEBUGASSERT(a);
@@ -495,7 +530,7 @@ evaluate:
           if(!a->inconclusive)
             continue;
           result = cf_ip_attempt_restart(a, cf, data);
-          CURL_TRC_CF(data, cf, "restarted baller %d -> %d", i, result);
+          CURL_TRC_CF(data, cf, "restarted baller %d -> %d", i, (int)result);
           if(result) /* serious failure */
             goto out;
           bs->last_attempt_started = *Curl_pgrs_now(data);
@@ -518,7 +553,7 @@ evaluate:
       result = CURLE_COULDNT_CONNECT;
       VERBOSE(i = 0);
       for(a = bs->running; a; a = a->next) {
-        CURL_TRC_CF(data, cf, "baller %d: result=%d", i, a->result);
+        CURL_TRC_CF(data, cf, "baller %d: result=%d", i, (int)a->result);
         if(a->result)
           result = a->result;
       }
@@ -652,7 +687,6 @@ typedef enum {
 } cf_connect_state;
 
 struct cf_ip_happy_ctx {
-  uint8_t transport;
   cf_ip_connect_create *cf_create;
   cf_connect_state state;
   struct cf_ip_ballers ballers;
@@ -674,40 +708,39 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   if(!result)
     return CURLE_OK;
   else {
-    const char *hostname, *proxy_name = NULL;
+    struct Curl_peer *peer = NULL, *proxy_peer = NULL;
     char viamsg[160];
-#ifndef CURL_DISABLE_PROXY
-    if(conn->bits.socksproxy)
-      proxy_name = conn->socks_proxy.host.name;
-    else if(conn->bits.httpproxy)
-      proxy_name = conn->http_proxy.host.name;
-#endif
-    hostname = conn->bits.conn_to_host ? conn->conn_to_host.name :
-      conn->host.name;
 
-#ifdef USE_UNIX_SOCKETS
-    if(conn->unix_domain_socket)
-      curl_msnprintf(viamsg, sizeof(viamsg), "over %s",
-                     conn->unix_domain_socket);
-    else
+    peer = Curl_conn_get_first_peer(conn, cf->sockindex);
+    if(!conn->origin || !peer)
+      return CURLE_FAILED_INIT;
+
+#ifndef CURL_DISABLE_PROXY
+    if(conn->socks_proxy.peer)
+      proxy_peer = conn->socks_proxy.peer;
+    else if(conn->http_proxy.peer)
+      proxy_peer = conn->http_proxy.peer;
 #endif
-    {
-      uint16_t port;
-      if(cf->sockindex == SECONDARYSOCKET)
-        port = conn->secondary_port;
-      else if(cf->conn->bits.conn_to_port)
-        port = conn->conn_to_port;
+
+    viamsg[0] = 0;
+    if(!Curl_peer_equal(peer, conn->origin) &&
+       !Curl_peer_equal(peer, proxy_peer)) {
+#ifdef USE_UNIX_SOCKETS
+      if(peer->unix_socket)
+        curl_msnprintf(viamsg, sizeof(viamsg), " over unix://%s",
+                       peer->hostname);
       else
-        port = conn->remote_port;
-      curl_msnprintf(viamsg, sizeof(viamsg), "port %d", port);
+#endif
+      curl_msnprintf(viamsg, sizeof(viamsg), " via %s:%u",
+                     peer->hostname, peer->port);
     }
 
-    failf(data, "Failed to connect to %s %s %s%s%safter "
+    failf(data, "Failed to connect to %s:%u%s %s%s%safter "
           "%" FMT_TIMEDIFF_T " ms: %s",
-          hostname, viamsg,
-          proxy_name ? "via " : "",
-          proxy_name ? proxy_name : "",
-          proxy_name ? " " : "",
+          conn->origin->hostname, conn->origin->port, viamsg,
+          proxy_peer ? "over proxy " : "",
+          proxy_peer ? proxy_peer->hostname : "",
+          proxy_peer ? " " : "",
           curlx_ptimediff_ms(Curl_pgrs_now(data),
                              &data->progress.t_startsingle),
           curl_easy_strerror(result));
@@ -734,28 +767,41 @@ static CURLcode cf_ip_happy_init(struct Curl_cfilter *cf,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  CURL_TRC_CF(data, cf, "init ip ballers for transport %u", ctx->transport);
+  if(ctx->ballers.transport_peer == TRNSPRT_UNIX) {
+#ifdef USE_UNIX_SOCKETS
+    cf_ai_iter_init(&ctx->ballers.addr_iter, cf, ctx->ballers.peer, AF_UNIX);
+#else
+    return CURLE_UNSUPPORTED_PROTOCOL;
+#endif
+  }
+  else { /* TCP/UDP/QUIC */
+#ifdef USE_IPV6
+    cf_ai_iter_init(&ctx->ballers.ipv6_iter, cf, ctx->ballers.peer, AF_INET6);
+#endif
+    cf_ai_iter_init(&ctx->ballers.addr_iter, cf, ctx->ballers.peer, AF_INET);
+  }
+
+  CURL_TRC_CF(data, cf, "init ip ballers for transport %u",
+              ctx->ballers.transport_peer);
   ctx->started = *Curl_pgrs_now(data);
-  return cf_ip_ballers_init(&ctx->ballers, cf,
-                            ctx->cf_create, ctx->transport,
-                            data->set.happy_eyeballs_timeout,
-                            IP_HE_MAX_CONCURRENT_ATTEMPTS);
+  return CURLE_OK;
 }
 
-static void cf_ip_happy_ctx_clear(struct Curl_cfilter *cf,
+static void cf_ip_happy_ctx_clear(struct cf_ip_happy_ctx *ctx,
                                   struct Curl_easy *data)
 {
-  struct cf_ip_happy_ctx *ctx = cf->ctx;
-
   DEBUGASSERT(ctx);
-  DEBUGASSERT(data);
-  cf_ip_ballers_clear(cf, data, &ctx->ballers);
+  if(ctx)
+    cf_ip_ballers_clear(data, &ctx->ballers);
 }
 
-static void cf_ip_happy_ctx_destroy(struct cf_ip_happy_ctx *ctx)
+static void cf_ip_happy_ctx_destroy(struct cf_ip_happy_ctx *ctx,
+                                    struct Curl_easy *data)
 {
-  if(ctx)
+  if(ctx) {
+    cf_ip_happy_ctx_clear(ctx, data);
     curlx_free(ctx);
+  }
 }
 
 static CURLcode cf_ip_happy_shutdown(struct Curl_cfilter *cf,
@@ -772,7 +818,7 @@ static CURLcode cf_ip_happy_shutdown(struct Curl_cfilter *cf,
   }
 
   result = cf_ip_ballers_shutdown(&ctx->ballers, data, done);
-  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", result, *done);
+  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", (int)result, *done);
   return result;
 }
 
@@ -785,7 +831,8 @@ static CURLcode cf_ip_happy_adjust_pollset(struct Curl_cfilter *cf,
 
   if(!cf->connected) {
     result = cf_ip_ballers_pollset(&ctx->ballers, data, ps);
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %u socks", result, ps->n);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %u socks", (int)result,
+                ps->n);
   }
   return result;
 }
@@ -810,7 +857,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(!ctx->dns_resolved) {
-    result = Curl_conn_dns_result(cf->conn, cf->sockindex);
+    result = Curl_conn_dns_result(cf->conn, cf->sockindex, ctx->ballers.peer);
     if(!result)
       ctx->dns_resolved = TRUE;
     else if(result == CURLE_AGAIN) {
@@ -841,9 +888,9 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
       cf->connected = TRUE;
       cf->next = ctx->ballers.winner->cf;
       ctx->ballers.winner->cf = NULL;
-      cf_ip_happy_ctx_clear(cf, data);
+      cf_ip_happy_ctx_clear(ctx, data);
       Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
-      /* whatever errors where reported by ballers, clear our errorbuf */
+      /* whatever errors were reported by ballers, clear our errorbuf */
       Curl_reset_fail(data);
 
       if(cf->conn->scheme->protocol & PROTO_FAMILY_SSH)
@@ -869,22 +916,6 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   }
 out:
   return result;
-}
-
-static void cf_ip_happy_close(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
-{
-  struct cf_ip_happy_ctx *ctx = cf->ctx;
-
-  CURL_TRC_CF(data, cf, "close");
-  cf_ip_happy_ctx_clear(cf, data);
-  cf->connected = FALSE;
-  ctx->state = SCFST_INIT;
-
-  if(cf->next) {
-    cf->next->cft->do_close(cf->next, data);
-    Curl_conn_cf_discard_chain(&cf->next, data);
-  }
 }
 
 static bool cf_ip_happy_data_pending(struct Curl_cfilter *cf,
@@ -940,8 +971,8 @@ static void cf_ip_happy_destroy(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "destroy");
   if(ctx) {
-    cf_ip_happy_ctx_clear(cf, data);
-    cf_ip_happy_ctx_destroy(ctx);
+    cf_ip_happy_ctx_clear(ctx, data);
+    cf_ip_happy_ctx_destroy(ctx, data);
   }
 }
 
@@ -951,7 +982,6 @@ struct Curl_cftype Curl_cft_ip_happy = {
   CURL_LOG_LVL_NONE,
   cf_ip_happy_destroy,
   cf_ip_happy_connect,
-  cf_ip_happy_close,
   cf_ip_happy_shutdown,
   cf_ip_happy_adjust_pollset,
   cf_ip_happy_data_pending,
@@ -963,21 +993,14 @@ struct Curl_cftype Curl_cft_ip_happy = {
   cf_ip_happy_query,
 };
 
-/**
- * Create an IP happy eyeball connection filter that uses the, once resolved,
- * address information to connect on ip families based on connection
- * configuration.
- * @param pcf        output, the created cfilter
- * @param data       easy handle used in creation
- * @param conn       connection the filter is created for
- * @param cf_create  method to create the sub-filters performing the
- *                   actual connects.
- */
 static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
                                    struct Curl_easy *data,
+                                   struct Curl_peer *origin,
+                                   struct Curl_peer *peer,
+                                   uint8_t transport_peer,
                                    struct connectdata *conn,
-                                   cf_ip_connect_create *cf_create,
-                                   uint8_t transport)
+                                   struct Curl_peer *tunnel_peer,
+                                   uint8_t tunnel_transport)
 {
   struct cf_ip_happy_ctx *ctx = NULL;
   CURLcode result;
@@ -990,35 +1013,39 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  ctx->transport = transport;
-  ctx->cf_create = cf_create;
+  result = cf_ip_ballers_init(&ctx->ballers, data,
+                              origin, peer, transport_peer,
+                              tunnel_peer, tunnel_transport,
+                              data->set.happy_eyeballs_timeout,
+                              IP_HE_MAX_CONCURRENT_ATTEMPTS);
+  if(result)
+    goto out;
 
   result = Curl_cf_create(pcf, &Curl_cft_ip_happy, ctx);
 
 out:
   if(result) {
     curlx_safefree(*pcf);
-    cf_ip_happy_ctx_destroy(ctx);
+    cf_ip_happy_ctx_destroy(ctx, data);
   }
   return result;
 }
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  uint8_t transport)
+                                  struct Curl_peer *origin,
+                                  struct Curl_peer *peer,
+                                  uint8_t transport_peer,
+                                  struct Curl_peer *tunnel_peer,
+                                  uint8_t tunnel_transport)
 {
-  cf_ip_connect_create *cf_create;
   struct Curl_cfilter *cf;
   CURLcode result;
 
   /* Need to be first */
   DEBUGASSERT(cf_at);
-  cf_create = get_cf_create(transport);
-  if(!cf_create) {
-    CURL_TRC_CF(data, cf_at, "unsupported transport type %u", transport);
-    return CURLE_UNSUPPORTED_PROTOCOL;
-  }
-  result = cf_ip_happy_create(&cf, data, cf_at->conn, cf_create, transport);
+  result = cf_ip_happy_create(&cf, data, origin, peer, transport_peer,
+                              cf_at->conn, tunnel_peer, tunnel_transport);
   if(result)
     return result;
 

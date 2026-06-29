@@ -66,7 +66,7 @@ void Curl_tls_keylog_close(void)
 
 bool Curl_tls_keylog_enabled(void)
 {
-  return keylog_file_fp != NULL;
+  return !!keylog_file_fp;
 }
 
 const char *Curl_tls_keylog_file_name(void)
@@ -102,9 +102,10 @@ bool Curl_tls_keylog_write_line(const char *line)
   return TRUE;
 }
 
-bool Curl_tls_keylog_write(const char *label,
-                         const unsigned char client_random[CLIENT_RANDOM_SIZE],
-                         const unsigned char *secret, size_t secretlen)
+bool Curl_tls_keylog_write(
+  const char *label,
+  const unsigned char client_random[CLIENT_RANDOM_SIZE],
+  const unsigned char *secret, size_t secretlen)
 {
   size_t pos, i;
   unsigned char line[KEYLOG_LABEL_MAXLEN + 1 +

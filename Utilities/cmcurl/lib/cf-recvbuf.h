@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_CURL_NGTCP2_H
-#define HEADER_CURL_VQUIC_CURL_NGTCP2_H
+#ifndef HEADER_CURL_CF_RECVBUF_H
+#define HEADER_CURL_CF_RECVBUF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,35 +25,16 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+#ifndef CURL_DISABLE_WEBSOCKETS
+/* only used for this protocol, so far */
 
-#ifdef HAVE_NETINET_UDP_H
-#include <netinet/udp.h>
-#endif
+CURLcode Curl_cf_recvbuf_add(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             int sockindex,
+                             const uint8_t *buf, size_t blen);
 
-#include <ngtcp2/ngtcp2_crypto.h>
-#ifdef OPENSSL_QUIC_API2
-#include <ngtcp2/ngtcp2_crypto_ossl.h>
-#endif
-#include <nghttp3/nghttp3.h>
-#ifdef USE_OPENSSL
-#include <openssl/ssl.h>
-#elif defined(USE_WOLFSSL)
-#include <wolfssl/options.h>
-#include <wolfssl/ssl.h>
-#include <wolfssl/quic.h>
-#endif
+extern struct Curl_cftype Curl_cft_recvbuf;
 
-struct Curl_cfilter;
+#endif /* !CURL_DISABLE_WEBSOCKETS */
 
-#include "urldata.h"
-
-void Curl_ngtcp2_ver(char *p, size_t len);
-
-CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
-                               struct Curl_easy *data,
-                               struct connectdata *conn,
-                               struct Curl_sockaddr_ex *addr);
-#endif
-
-#endif /* HEADER_CURL_VQUIC_CURL_NGTCP2_H */
+#endif /* HEADER_CURL_CF_RECVBUF_H */

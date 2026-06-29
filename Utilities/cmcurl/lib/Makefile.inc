@@ -96,6 +96,7 @@ LIB_VTLS_CFILES =           \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
   vtls/vtls.c               \
+  vtls/vtls_config.c        \
   vtls/vtls_scache.c        \
   vtls/vtls_spack.c         \
   vtls/wolfssl.c            \
@@ -113,23 +114,32 @@ LIB_VTLS_HFILES =           \
   vtls/schannel.h           \
   vtls/schannel_int.h       \
   vtls/vtls.h               \
+  vtls/vtls_config.h        \
   vtls/vtls_int.h           \
   vtls/vtls_scache.h        \
   vtls/vtls_spack.h         \
   vtls/wolfssl.h            \
   vtls/x509asn1.h
 
-LIB_VQUIC_CFILES =      \
-  vquic/curl_ngtcp2.c   \
-  vquic/curl_quiche.c   \
-  vquic/vquic.c         \
+LIB_VQUIC_CFILES =          \
+  vquic/capsule.c           \
+  vquic/cf-capsule.c        \
+  vquic/cf-ngtcp2.c         \
+  vquic/cf-ngtcp2-cmn.c     \
+  vquic/cf-ngtcp2-proxy.c   \
+  vquic/cf-quiche.c         \
+  vquic/vquic.c             \
   vquic/vquic-tls.c
 
-LIB_VQUIC_HFILES =      \
-  vquic/curl_ngtcp2.h   \
-  vquic/curl_quiche.h   \
-  vquic/vquic.h         \
-  vquic/vquic_int.h     \
+LIB_VQUIC_HFILES =          \
+  vquic/capsule.h           \
+  vquic/cf-capsule.h        \
+  vquic/cf-ngtcp2.h         \
+  vquic/cf-ngtcp2-cmn.h     \
+  vquic/cf-ngtcp2-proxy.h   \
+  vquic/cf-quiche.h         \
+  vquic/vquic.h             \
+  vquic/vquic_int.h         \
   vquic/vquic-tls.h
 
 LIB_VSSH_CFILES =    \
@@ -155,12 +165,15 @@ LIB_CFILES =         \
   cf-haproxy.c       \
   cf-https-connect.c \
   cf-ip-happy.c      \
+  cf-recvbuf.c       \
+  cf-setup.c         \
   cf-socket.c        \
   cfilters.c         \
   conncache.c        \
   connect.c          \
   content_encoding.c \
   cookie.c           \
+  creds.c            \
   cshutdn.c          \
   curl_addrinfo.c    \
   curl_endian.c      \
@@ -230,13 +243,14 @@ LIB_CFILES =         \
   multi_ev.c         \
   multi_ntfy.c       \
   netrc.c            \
-  noproxy.c          \
   openldap.c         \
   parsedate.c        \
+  peer.c             \
   pingpong.c         \
   pop3.c             \
   progress.c         \
   protocol.c         \
+  proxy.c            \
   psl.c              \
   rand.c             \
   ratelimit.c        \
@@ -285,6 +299,8 @@ LIB_HFILES =         \
   cf-haproxy.h       \
   cf-https-connect.h \
   cf-ip-happy.h      \
+  cf-recvbuf.h       \
+  cf-setup.h         \
   cf-socket.h        \
   cfilters.h         \
   conncache.h        \
@@ -292,6 +308,7 @@ LIB_HFILES =         \
   connect.h          \
   content_encoding.h \
   cookie.h           \
+  creds.h            \
   curl_addrinfo.h    \
   curl_ctype.h       \
   curl_endian.h      \
@@ -362,12 +379,13 @@ LIB_HFILES =         \
   multi_ntfy.h       \
   multiif.h          \
   netrc.h            \
-  noproxy.h          \
   parsedate.h        \
+  peer.h             \
   pingpong.h         \
   pop3.h             \
   progress.h         \
   protocol.h         \
+  proxy.h            \
   psl.h              \
   rand.h             \
   ratelimit.h        \

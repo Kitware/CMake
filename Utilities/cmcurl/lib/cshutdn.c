@@ -150,8 +150,8 @@ void Curl_cshutdn_terminate(struct Curl_easy *data,
   CURL_TRC_M(admin, "[SHUTDOWN] %sclosing connection #%" FMT_OFF_T,
              conn->bits.shutdown_filters ? "" : "force ",
              conn->connection_id);
-  Curl_conn_close(admin, SECONDARYSOCKET);
-  Curl_conn_close(admin, FIRSTSOCKET);
+  Curl_conn_cf_discard_all(admin, conn, SECONDARYSOCKET);
+  Curl_conn_cf_discard_all(admin, conn, FIRSTSOCKET);
   Curl_detach_connection(admin);
 
   if(data->multi)
@@ -322,14 +322,14 @@ int Curl_cshutdn_init(struct cshutdn *cshutdn,
   DEBUGASSERT(multi);
   cshutdn->multi = multi;
   Curl_llist_init(&cshutdn->list, NULL);
-  cshutdn->initialised = TRUE;
+  cshutdn->initialized = TRUE;
   return 0; /* good */
 }
 
 void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
                           struct Curl_easy *data)
 {
-  if(cshutdn->initialised && data) {
+  if(cshutdn->initialized && data) {
     int timeout_ms = 0;
     /* for testing, run graceful shutdown */
 #ifdef DEBUGBUILD

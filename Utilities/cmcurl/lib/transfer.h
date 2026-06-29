@@ -31,8 +31,6 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 
 void Curl_init_CONNECT(struct Curl_easy *data);
 
-CURLcode Curl_reset_userpwd(struct Curl_easy *data);
-CURLcode Curl_reset_proxypwd(struct Curl_easy *data);
 CURLcode Curl_pretransfer(struct Curl_easy *data);
 
 CURLcode Curl_sendrecv(struct Curl_easy *data);
@@ -145,8 +143,8 @@ bool Curl_xfer_recv_is_paused(struct Curl_easy *data);
 CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable);
 CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable);
 
-/* TRUE if the transfer is secure (e.g. TLS) from libcurl to the
- * URL's host. */
+/* TRUE if the transfer is secure, e.g. uses TLS and does not
+ * use a forward proxy. */
 bool Curl_xfer_is_secure(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_TRANSFER_H */

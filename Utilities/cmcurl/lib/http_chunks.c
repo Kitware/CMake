@@ -27,6 +27,7 @@
 
 #include "urldata.h" /* it includes http_chunks.h */
 #include "curl_trc.h"
+#include "http.h"    /* for Curl_verify_header */
 #include "sendf.h"   /* for the client write stuff */
 #include "curlx/dynbuf.h"
 #include "multiif.h"
@@ -153,7 +154,8 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         if(ch->hexindex == 0) {
           /* This is illegal data, we received junk where we expected
              a hexadecimal digit. */
-          failf(data, "chunk hex-length char not a hex digit: 0x%x", *buf);
+          failf(data, "chunk hex-length char not a hex digit: 0x%x",
+                (unsigned int)*buf);
           ch->state = CHUNK_FAILED;
           ch->last_code = CHUNKE_ILLEGAL_HEX;
           return CURLE_RECV_ERROR;
@@ -247,6 +249,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
            there was no trailer and we move on */
 
         if(tr) {
+          size_t trlen;
           result = curlx_dyn_addn(&ch->trailer, STRCONST("\x0d\x0a"));
           if(result) {
             ch->state = CHUNK_FAILED;
@@ -254,8 +257,18 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
             return result;
           }
           tr = curlx_dyn_ptr(&ch->trailer);
+          trlen = curlx_dyn_len(&ch->trailer);
+
+          /* a trailer is delivered to the client as a header, so it must pass
+             the same checks as a regular response header */
+          result = Curl_verify_header(data, tr, trlen);
+          if(result) {
+            ch->state = CHUNK_FAILED;
+            ch->last_code = CHUNKE_BAD_CHUNK;
+            return result;
+          }
+
           if(!data->set.http_te_skip) {
-            size_t trlen = curlx_dyn_len(&ch->trailer);
             if(cw_next)
               result = Curl_cwriter_write(data, cw_next,
                                           CLIENTWRITE_HEADER |
@@ -535,7 +548,7 @@ static CURLcode add_last_chunk(struct Curl_easy *data,
 out:
   curl_slist_free_all(trailers);
   CURL_TRC_READ(data, "http_chunk, added last chunk with trailers "
-                "from client -> %d", result);
+                "from client -> %d", (int)result);
   return result;
 }
 
@@ -583,7 +596,7 @@ static CURLcode add_chunk(struct Curl_easy *data,
     if(!result)
       result = Curl_bufq_cwrite(&ctx->chunkbuf, "\r\n", 2, &n);
     CURL_TRC_READ(data, "http_chunk, made chunk of %zu bytes -> %d",
-                  nread, result);
+                  nread, (int)result);
     if(result)
       return result;
   }

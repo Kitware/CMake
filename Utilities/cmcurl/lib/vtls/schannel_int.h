@@ -42,7 +42,7 @@
 #define CERT_STORE_PROV_SYSTEM_W  ((LPCSTR)(size_t)10)
 #endif
 
-/* Offered by mingw-w64 v8+, MS SDK ~10+/~VS2022+ */
+/* Offered by mingw-w64 v8+, MS SDK 10.0.17763.0/VS2017 15.8+ */
 #ifndef SCH_CREDENTIALS_VERSION
 #define SCH_CREDENTIALS_VERSION  0x00000005
 
@@ -56,42 +56,42 @@ typedef enum _eTlsAlgorithmUsage {
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _CRYPTO_SETTINGS {
-  eTlsAlgorithmUsage  eAlgorithmUsage;
-  UNICODE_STRING      strCngAlgId;
-  DWORD               cChainingModes;
-  PUNICODE_STRING     rgstrChainingModes; /* spellchecker:disable-line */
-  DWORD               dwMinBitLength;
-  DWORD               dwMaxBitLength;
-} CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
+  eTlsAlgorithmUsage eAlgorithmUsage;
+  UNICODE_STRING strCngAlgId;
+  DWORD cChainingModes;
+  PUNICODE_STRING rgstrChainingModes; /* spellchecker:disable-line */
+  DWORD dwMinBitLength;
+  DWORD dwMaxBitLength;
+} CRYPTO_SETTINGS, *PCRYPTO_SETTINGS;
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _TLS_PARAMETERS {
-  DWORD               cAlpnIds;
-  PUNICODE_STRING     rgstrAlpnIds; /* spellchecker:disable-line */
-  DWORD               grbitDisabledProtocols;
-  DWORD               cDisabledCrypto;
-  PCRYPTO_SETTINGS    pDisabledCrypto;
-  DWORD               dwFlags;
-} TLS_PARAMETERS, * PTLS_PARAMETERS;
+  DWORD cAlpnIds;
+  PUNICODE_STRING rgstrAlpnIds; /* spellchecker:disable-line */
+  DWORD grbitDisabledProtocols;
+  DWORD cDisabledCrypto;
+  PCRYPTO_SETTINGS pDisabledCrypto;
+  DWORD dwFlags;
+} TLS_PARAMETERS, *PTLS_PARAMETERS;
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _SCH_CREDENTIALS {
-  DWORD               dwVersion;
-  DWORD               dwCredFormat;
-  DWORD               cCreds;
-  PCCERT_CONTEXT* paCred;
-  HCERTSTORE          hRootStore;
+  DWORD dwVersion;
+  DWORD dwCredFormat;
+  DWORD cCreds;
+  PCCERT_CONTEXT *paCred;
+  HCERTSTORE hRootStore;
 
-  DWORD               cMappers;
+  DWORD cMappers;
   struct _HMAPPER **aphMappers;
 
-  DWORD               dwSessionLifespan;
-  DWORD               dwFlags;
-  DWORD               cTlsParameters;
-  PTLS_PARAMETERS     pTlsParameters;
-} SCH_CREDENTIALS, * PSCH_CREDENTIALS;
+  DWORD dwSessionLifespan;
+  DWORD dwFlags;
+  DWORD cTlsParameters;
+  PTLS_PARAMETERS pTlsParameters;
+} SCH_CREDENTIALS, *PSCH_CREDENTIALS;
 
-#endif /* SCH_CREDENTIALS_VERSION */
+#endif /* !SCH_CREDENTIALS_VERSION */
 
 struct Curl_schannel_cred {
   CredHandle cred_handle;

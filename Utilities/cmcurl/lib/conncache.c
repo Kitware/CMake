@@ -122,7 +122,7 @@ void Curl_cpool_init(struct cpool *cpool,
 
   cpool->idata = idata;
   cpool->share = share;
-  cpool->initialised = TRUE;
+  cpool->initialized = TRUE;
 }
 
 /* Return the "first" connection in the pool or NULL. */
@@ -230,7 +230,7 @@ static void cpool_discard_conn(struct cpool *cpool,
 
 void Curl_cpool_destroy(struct cpool *cpool)
 {
-  if(cpool && cpool->initialised && cpool->idata) {
+  if(cpool && cpool->initialized && cpool->idata) {
     struct connectdata *conn;
     struct Curl_sigpipe_ctx pipe_ctx;
 
@@ -305,9 +305,9 @@ static struct cpool_bundle *cpool_add_bundle(struct cpool *cpool,
   return bundle;
 }
 
-static struct connectdata *
-cpool_bundle_get_oldest_idle(struct cpool_bundle *bundle,
-                             const struct curltime *pnow)
+static struct connectdata *cpool_bundle_get_oldest_idle(
+  struct cpool_bundle *bundle,
+  const struct curltime *pnow)
 {
   struct Curl_llist_node *curr;
   timediff_t highscore = -1;

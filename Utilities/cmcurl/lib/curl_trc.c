@@ -29,8 +29,9 @@
 #include "multiif.h"
 
 #include "cf-dns.h"
+#include "cf-recvbuf.h"
 #include "cf-socket.h"
-#include "connect.h"
+#include "cf-setup.h"
 #include "http2.h"
 #include "http_proxy.h"
 #include "cf-h1-proxy.h"
@@ -563,6 +564,9 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_unix,           TRC_CT_NETWORK },
   { &Curl_cft_tcp_accept,     TRC_CT_NETWORK },
   { &Curl_cft_ip_happy,       TRC_CT_NETWORK },
+#ifndef CURL_DISABLE_WEBSOCKETS
+  { &Curl_cft_recvbuf,        TRC_CT_PROTOCOL },
+#endif
   { &Curl_cft_setup,          TRC_CT_PROTOCOL },
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   { &Curl_cft_nghttp2,        TRC_CT_PROTOCOL },
@@ -578,6 +582,9 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_h1_proxy,       TRC_CT_PROXY },
 #ifdef USE_NGHTTP2
   { &Curl_cft_h2_proxy,       TRC_CT_PROXY },
+#endif
+#if defined(USE_PROXY_HTTP3) && defined(USE_NGHTTP3)
+  { &Curl_cft_h3_proxy,       TRC_CT_PROXY },
 #endif
   { &Curl_cft_http_proxy,     TRC_CT_PROXY },
 #endif /* !CURL_DISABLE_HTTP */
