@@ -2232,9 +2232,50 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
   }
 }
 
+void cmGlobalGenerator::ComputeOutputOwnerIndex()
+{
+  this->OutputOwnerIndexComputed = true;
+  for (auto const& lg : this->LocalGenerators) {
+    for (auto const& gt : lg->GetGeneratorTargets()) {
+      if (!gt->IsInBuildSystem()) {
+        continue;
+      }
+      for (cmGeneratorTarget::AllConfigSource const& acs :
+           gt->GetAllConfigSources(
+             cmGeneratorTarget::SourceKindCustomCommand)) {
+        cmCustomCommand const* cc = acs.Source->GetCustomCommand();
+        if (!cc) {
+          continue;
+        }
+        for (std::string const& out : cc->GetOutputs()) {
+          this->OutputOwnerIndex[cmSystemTools::CollapseFullPath(out)]
+            .push_back(gt.get());
+        }
+      }
+    }
+  }
+}
+
+cmGeneratorTarget* cmGlobalGenerator::FindOutputOwningTarget(
+  std::string const& output)
+{
+  if (!this->OutputOwnerIndexComputed) {
+    this->ComputeOutputOwnerIndex();
+  }
+  auto it =
+    this->OutputOwnerIndex.find(cmSystemTools::CollapseFullPath(output));
+  if (it != this->OutputOwnerIndex.end() && it->second.size() == 1) {
+    return it->second.front();
+  }
+  return nullptr;
+}
+
 void cmGlobalGenerator::ClearGeneratorMembers()
 {
   this->BuildExportSets.clear();
+
+  this->OutputOwnerIndex.clear();
+  this->OutputOwnerIndexComputed = false;
 
   this->Makefiles.clear();
 

@@ -64,6 +64,27 @@ std::string TestName(cmTest* test)
   return name;
 }
 
+// Whether a path is produced by the build (a custom-command output or
+// byproduct) rather than a pre-existing file.  The output-to-source map
+// records every generated path regardless of which target, if any, builds it.
+bool fileIsGenerated(cmGlobalGenerator* gg, std::string const& file)
+{
+  std::string const collapsed = cmSystemTools::CollapseFullPath(file);
+  for (auto const& lg : gg->GetLocalGenerators()) {
+    cmSourcesWithOutput so = lg->GetSourcesWithOutput(collapsed);
+    if (so.Source || so.Target) {
+      return true;
+    }
+    if (file != collapsed) {
+      so = lg->GetSourcesWithOutput(file);
+      if (so.Source || so.Target) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 } // End: anonymous namespace
 
 cmTestGenerator::cmTestGenerator(
@@ -135,7 +156,12 @@ bool cmTestGenerator::GetBuildDependencies(cmLocalGenerator* lg,
     }
     cmGeneratorTarget* depTarget = lg->FindGeneratorTargetToUse(depName);
     if (!depTarget) {
-      info.Files.push_back(depName);
+      cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+      BuildDependencies::FileDependency file;
+      file.Path = depName;
+      file.Owner = gg->FindOutputOwningTarget(depName);
+      file.Generated = fileIsGenerated(gg, depName);
+      info.Files.push_back(std::move(file));
       continue;
     }
     if (depTarget->IsImported()) {
@@ -149,8 +175,11 @@ bool cmTestGenerator::GetBuildDependencies(cmLocalGenerator* lg,
     dependencies.insert(depTarget);
   }
 
-  info.Targets.insert(info.Targets.end(), dependencies.begin(),
-                      dependencies.end());
+  for (cmGeneratorTarget* gt : dependencies) {
+    if (gt->IsInBuildSystem()) {
+      info.Targets.push_back(gt);
+    }
+  }
   return true;
 }
 

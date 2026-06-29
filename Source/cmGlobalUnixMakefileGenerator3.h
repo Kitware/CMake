@@ -226,6 +226,21 @@ protected:
   void AppendCodegenTargetDepends(std::vector<std::string>& depends,
                                   cmGeneratorTarget* target);
 
+  // Compute the "test_prep/<name>" build targets requested via the
+  // CMAKE_TEST_BUILD_DEPENDS variable.  Each test's dependencies are
+  // resolved to the build-system targets that produce them so that the
+  // recursive Makefile graph can build them.
+  void ComputeTestPrepTargets();
+
+  // Write the internal "test_prep/<name>" and "test_prep/all" rules into
+  // CMakeFiles/Makefile2.
+  void WriteTestPrepRules(std::ostream& makefileStream,
+                          cmLocalUnixMakefileGenerator3& rootLG);
+
+  // Write the top-level "test_prep/<name>" convenience rules that forward
+  // into CMakeFiles/Makefile2.
+  void WriteTestPrepConvenienceRules(std::ostream& ruleFileStream);
+
   // Target name hooks for superclass.
   char const* GetAllTargetName() const override { return "all"; }
   char const* GetInstallTargetName() const override { return "install"; }
@@ -298,4 +313,10 @@ private:
            cmStateSnapshot::StrictWeakOrder>
     DirectoryTargetsMap;
   void InitializeProgressMarks() override;
+
+  // Ordered map of "test_prep/<name>" -> the "<target>.dir/all" recursive
+  // rules that must be built to prepare the named test.  Populated by
+  // ComputeTestPrepTargets when CMAKE_TEST_BUILD_DEPENDS is enabled.
+  std::map<std::string, std::vector<std::string>> TestPrepTargets;
+  bool TestPrepEnabled = false;
 };

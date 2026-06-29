@@ -1,0 +1,9 @@
+CMake Warning at TestDependency-ON-byproduct.cmake:[0-9]+ \(add_test\):
+  Test "ByproductTest" BUILD_DEPENDS file
+
+    .*/TestDependencyByproduct-built.txt
+
+  is generated but is not the unique output of a build target, so the
+  "test_prep/ByproductTest" target cannot build it with this generator.
+  Depend on the target that produces it \(for example one created with
+  add_custom_target\) instead.

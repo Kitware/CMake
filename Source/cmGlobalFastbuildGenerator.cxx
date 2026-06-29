@@ -1614,8 +1614,9 @@ void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
       for (cmGeneratorTarget* depTarget : testDeps.Targets) {
         testPrepTarget.Dependencies.emplace(depTarget->GetName());
       }
-      for (std::string const& depFile : testDeps.Files) {
-        testPrepTarget.Dependencies.emplace(depFile);
+      for (cmTestGenerator::BuildDependencies::FileDependency const& depFile :
+           testDeps.Files) {
+        testPrepTarget.Dependencies.emplace(depFile.Path);
       }
     }
   }

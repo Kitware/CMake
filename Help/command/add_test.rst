@@ -82,7 +82,12 @@ directory the test is created in.
 
     .. versionchanged:: 4.5
 
-      :generator:`FASTBuild` gained support for ``test_prep/<name>`` targets.
+      :generator:`FASTBuild` and the :ref:`Makefile Generators` gained support
+      for ``test_prep/<name>`` targets.  With the Makefile generators a
+      ``BUILD_DEPENDS`` file is built by building the target whose build
+      produces it; a file that is not the unique output of a single target is
+      reported with a warning, and a test whose name contains a ``:`` character
+      is excluded.
 
   The command may be specified using
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
@@ -101,9 +106,10 @@ directory the test is created in.
 
   Specify a list of targets or files that must be built before the test can
   run. Each dependency is added to the ``test_prep/<name>`` build target
-  described above when :variable:`CMAKE_TEST_BUILD_DEPENDS` is enabled with
-  the :ref:`Ninja Generators` or :generator:`FASTBuild`. The test name must be
-  a valid target name in order to list build dependencies with this keyword.
+  described above when :variable:`CMAKE_TEST_BUILD_DEPENDS` is enabled with the
+  :ref:`Ninja Generators`, :generator:`FASTBuild`, or :ref:`Makefile
+  Generators`. The test name must be a valid target name in order to list
+  build dependencies with this keyword.
 
 ``COMMAND_EXPAND_LISTS``
   .. versionadded:: 3.16
