@@ -58,3 +58,45 @@ if(RunCMake_GENERATOR MATCHES "Ninja")
   install_test(ninja-parallel ARGS "-t install/parallel" NINJA PARALLEL)
   install_test(ninja-no-parallel ARGS "-t install" NINJA)
 endif()
+
+# Exit-code fidelity: a failing install must report a non-zero exit code.
+function(install_fail_test test fixture)
+  cmake_parse_arguments(ARG "PARALLEL" "FAIL_MODE" "INSTALL_ARGS" ${ARGN})
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
+  set(RunCMake_TEST_OPTIONS
+    -DINSTALL_PARALLEL=${ARG_PARALLEL}
+    -DCMAKE_INSTALL_PREFIX=install)
+  if (ARG_FAIL_MODE)
+    list(APPEND RunCMake_TEST_OPTIONS -DFAIL_MODE=${ARG_FAIL_MODE})
+  endif()
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  run_cmake(${fixture})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  if (ARG_PARALLEL)
+    # The install runs in parallel only when CMakeFiles/InstallScripts.json is
+    # at least as new as CMakeFiles/cmake.check_cache; otherwise the handler
+    # falls back to running the top-level cmake_install.cmake serially.  Both
+    # files are written during the same configuration, and their relative
+    # modification times are not reliable on every filesystem, so make the JSON
+    # newest explicitly to keep this test from intermittently exercising the
+    # serial fallback (which omits the per-script parallel diagnostics).
+    file(TOUCH_NOCREATE
+      ${RunCMake_TEST_BINARY_DIR}/CMakeFiles/InstallScripts.json)
+  endif()
+  run_cmake_command(${test}
+    ${CMAKE_COMMAND} -E env --unset=NINJA_STATUS
+    ${CMAKE_COMMAND} --install . ${ARG_INSTALL_ARGS})
+endfunction()
+
+# Parallel: any failing child must make the install exit non-zero.
+install_fail_test(parallel-fatal install-fail PARALLEL FAIL_MODE fatal INSTALL_ARGS -j 4)
+install_fail_test(parallel-exit install-fail PARALLEL FAIL_MODE exit INSTALL_ARGS -j 4)
+# Serial: fail-fast is preserved on a fatal error (regression guard) ...
+install_fail_test(serial-fatal install-fail FAIL_MODE fatal)
+# ... and a status-only failure of an earlier component is no longer masked
+# by a later success (and the later component is not installed).
+install_fail_test(serial-mask install-component-mask
+  INSTALL_ARGS --component comp_fail --component comp_ok)

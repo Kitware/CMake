@@ -969,6 +969,11 @@ int do_install(int ac, char const* const* av)
         });
         cm.SetDebugOutputOn(verbose);
         ret_ = int(bool(cm.Run(cmd)));
+        if (ret_ != 0) {
+          // Serial install is fail-fast: stop at the first failed script
+          // instead of attempting the remaining components or configs.
+          break;
+        }
       }
     }
     return int(ret_ > 0);
