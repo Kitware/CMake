@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -79,6 +80,8 @@ public:
     cm::GenEx::Context const& context, cmGeneratorTarget const* target,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
 
+  using FileMap = std::map<std::string, std::vector<std::string>>;
+
   // returned value:
   // first: list of directories
   // second: is context sensitive
@@ -88,7 +91,7 @@ public:
   // returned value:
   // first: list of files per directory
   // second: is context sensitive
-  std::pair<std::map<std::string, std::vector<std::string>>, bool> GetFiles(
+  std::pair<FileMap, bool> GetFiles(
     cm::GenEx::Context const& context, cmGeneratorTarget const* target,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
 
@@ -103,9 +106,23 @@ public:
     cm::GenEx::Context const& context, cmGeneratorTarget const* target,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
 
+  using EvaluateFileEntryFunction =
+    std::function<void(std::string&&, std::string&&, std::string&&)>;
+
+  // returned value: is context sensitive
+  bool EvaluateFiles(
+    cm::GenEx::Context const& context, cmGeneratorTarget const* target,
+    EvaluateFileEntryFunction callback,
+    cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
+
   void EvaluateFileEntry(
-    std::vector<std::string> const& dirs,
-    std::map<std::string, std::vector<std::string>>& filesPerDir,
+    std::vector<std::string> const& dirs, EvaluateFileEntryFunction handler,
+    std::unique_ptr<cmCompiledGeneratorExpression> const& cge,
+    cm::GenEx::Context const& context, cmGeneratorTarget const* target,
+    cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
+
+  void EvaluateFileEntry(
+    std::vector<std::string> const& dirs, FileMap& filesPerDir,
     std::unique_ptr<cmCompiledGeneratorExpression> const& cge,
     cm::GenEx::Context const& context, cmGeneratorTarget const* target,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
