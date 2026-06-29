@@ -80,4 +80,11 @@ protected:
                                  cmTargetExport const* te,
                                  std::string const& packagePath,
                                  cm::optional<std::string> config = {});
+
+  using cmExportPackageInfoGenerator::GenerateTargetFileSets;
+  void GenerateTargetFileSets(Json::Value& fileSets,
+                              cmGeneratorTarget const* target,
+                              cmGeneratorFileSet const* fileSet,
+                              cmTargetExport const* targetExport,
+                              std::string const& type) const override;
 };

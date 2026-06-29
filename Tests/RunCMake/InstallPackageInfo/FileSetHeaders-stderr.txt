@@ -1,0 +1,15 @@
+CMake Warning \(author\) at FileSetHeaders\.cmake:[0-9]+ \(install\):
+  The "foo" target's interface file set "genex" of type "HEADERS" has a
+  context-sensitive destination, which is not supported\.  The file set will
+  not be exported\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
+
+CMake Warning \(author\) at FileSetHeaders\.cmake:[0-9]+ \(install\):
+  The "foo" target's interface file set "genex_dup" of type "HEADERS" has a
+  context-sensitive destination, which is not supported\.  The file set will
+  not be exported\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
