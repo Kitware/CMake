@@ -149,6 +149,43 @@ static std::string EvaluateBodyWithBoundOperand(
   return result;
 }
 
+// Evaluate `predicateBody` once per element of `list`, binding `$<_0>` to the
+// element (reusing EvaluateBodyWithBoundOperand).  Each result must be exactly
+// "0" or "1".  Returns the per-element boolean mask, or cm::nullopt after
+// reporting an error (non-boolean result, or a failure inside the body).
+static cm::optional<std::vector<bool>> EvaluatePredicateMask(
+  cmGeneratorExpressionEvaluatorVector const& predicateBody,
+  cmList const& list, cm::string_view subCommand, cm::GenEx::Evaluation* eval,
+  GeneratorExpressionContent const* content,
+  cmGeneratorExpressionDAGChecker* dagChecker)
+{
+  cm::optional<std::vector<bool>> result;
+  std::vector<bool> mask;
+  mask.reserve(list.size());
+  for (auto const& element : list) {
+    std::string r =
+      EvaluateBodyWithBoundOperand(predicateBody, element, eval, dagChecker);
+    if (eval->HadError) {
+      return result;
+    }
+    if (r == "1") {
+      mask.push_back(true);
+    } else if (r == "0") {
+      mask.push_back(false);
+    } else {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("sub-command ", subCommand,
+                 ", PREDICATE body must evaluate to \"0\" or \"1\", but "
+                 "evaluated to \"",
+                 r, "\"."));
+      return result;
+    }
+  }
+  result = std::move(mask);
+  return result;
+}
+
 static const struct ZeroNode : public cmGeneratorExpressionNode
 {
   ZeroNode() {} // NOLINT(modernize-use-equals-default)
@@ -1922,6 +1959,149 @@ inline cmList GetList(std::string const& list)
   return list.empty() ? cmList{} : cmList{ list, cmList::EmptyElements::Yes };
 }
 
+struct TransformActionDescriptor
+{
+  cmList::TransformAction Action;
+  int Arity;
+};
+
+// Look up a canned TRANSFORM action by name (APPLY is handled separately).
+cm::optional<TransformActionDescriptor> FindTransformActionDescriptor(
+  std::string const& name)
+{
+  static std::unordered_map<cm::string_view, TransformActionDescriptor> const
+    descriptors{
+      { "APPEND"_s, { cmList::TransformAction::APPEND, 1 } },
+      { "PREPEND"_s, { cmList::TransformAction::PREPEND, 1 } },
+      { "TOUPPER"_s, { cmList::TransformAction::TOUPPER, 0 } },
+      { "TOLOWER"_s, { cmList::TransformAction::TOLOWER, 0 } },
+      { "STRIP"_s, { cmList::TransformAction::STRIP, 0 } },
+      { "REPLACE"_s, { cmList::TransformAction::REPLACE, 2 } },
+    };
+  auto it = descriptors.find(name);
+  if (it == descriptors.end()) {
+    return cm::nullopt;
+  }
+  return it->second;
+}
+
+// Index in `parameters` at which a TRANSFORM action's selector region begins,
+// or nullopt if this is not a TRANSFORM or the action is unknown.  For the
+// APPLY action the <body> occupies slot 3, so the selector starts at slot 4.
+cm::optional<std::size_t> TransformSelectorStart(
+  std::vector<std::string> const& parameters)
+{
+  if (parameters.size() < 3 || parameters[0] != "TRANSFORM") {
+    return cm::nullopt;
+  }
+  std::string const& action = parameters[2];
+  if (action == "APPLY") {
+    return std::size_t{ 4 };
+  }
+  if (auto d = FindTransformActionDescriptor(action)) {
+    return std::size_t{ 3 } + static_cast<std::size_t>(d->Arity);
+  }
+  return cm::nullopt;
+}
+
+// Handle $<LIST:TRANSFORM,...,PREDICATE,<body>>.  `predIndex` is the index of
+// the PREDICATE token in `parameters`; the <body> follows it.  PREDICATE is
+// the sole selector: only elements whose predicate is "1" are transformed.
+std::string EvaluateTransformPredicate(
+  std::vector<std::string> const& parameters, std::size_t predIndex,
+  cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* content,
+  cmGeneratorExpressionDAGChecker* dagChecker)
+{
+  // PREDICATE must take exactly one <body> and not be combined with another
+  // selector (AT/FOR/REGEX) or trailing tokens.
+  if (parameters.size() < predIndex + 2) {
+    reportError(eval, content->GetOriginalExpression(),
+                "sub-command TRANSFORM, selector PREDICATE expects a <body> "
+                "argument.");
+    return std::string();
+  }
+  if (parameters.size() > predIndex + 2) {
+    reportError(eval, content->GetOriginalExpression(),
+                "sub-command TRANSFORM, selector PREDICATE expects a single "
+                "<body> argument and cannot be combined with another "
+                "selector.");
+    return std::string();
+  }
+
+  cmList list = GetList(parameters[1]);
+  if (list.empty()) {
+    return std::string();
+  }
+
+  cmGeneratorExpressionEvaluatorVector const& predicateBody =
+    content->GetParamChildren()[predIndex + 1];
+  auto mask = EvaluatePredicateMask(predicateBody, list, "TRANSFORM"_s, eval,
+                                    content, dagChecker);
+  if (!mask) {
+    return std::string();
+  }
+
+  if (parameters[2] == "APPLY") {
+    cmGeneratorExpressionEvaluatorVector const& applyBody =
+      content->GetParamChildren()[3];
+    std::vector<std::string> out;
+    out.reserve(list.size());
+    std::size_t i = 0;
+    for (auto const& element : list) {
+      if ((*mask)[i]) {
+        out.push_back(
+          EvaluateBodyWithBoundOperand(applyBody, element, eval, dagChecker));
+        if (eval->HadError) {
+          return std::string();
+        }
+      } else {
+        out.push_back(element);
+      }
+      ++i;
+    }
+    return cmList{ out.begin(), out.end(), cmList::ExpandElements::No,
+                   cmList::EmptyElements::Yes }
+      .to_string();
+  }
+
+  std::string const& action = parameters[2];
+  auto descriptor = FindTransformActionDescriptor(action);
+  if (!descriptor) {
+    reportError(
+      eval, content->GetOriginalExpression(),
+      cmStrCat(" sub-command TRANSFORM, ", action, " invalid action."));
+    return std::string();
+  }
+
+  // Action arguments occupy parameters[3 .. predIndex); TransformSelectorStart
+  // guarantees there are exactly descriptor->Arity of them.
+  std::vector<std::string> arguments(parameters.begin() + 3,
+                                     parameters.begin() + predIndex);
+
+  std::vector<cmList::index_type> indices;
+  for (std::size_t i = 0; i < mask->size(); ++i) {
+    if ((*mask)[i]) {
+      indices.push_back(static_cast<cmList::index_type>(i));
+    }
+  }
+  if (indices.empty()) {
+    // No element selected: TRANSFORM is a no-op.
+    return list.to_string();
+  }
+
+  auto selector =
+    cmList::TransformSelector::New<cmList::TransformSelector::AT>(
+      std::move(indices));
+  selector->Makefile = eval->Context.LG->GetMakefile();
+  try {
+    return list.transform(descriptor->Action, arguments, std::move(selector))
+      .to_string();
+  } catch (cmList::transform_error& e) {
+    reportError(eval, content->GetOriginalExpression(), e.what());
+    return std::string();
+  }
+}
+
 // Parse the optional trailing selector of a $<LIST:TRANSFORM,...> action
 // (AT <i>... / FOR <start> <stop> [<step>] / REGEX <re>) into a
 // cmList::TransformSelector.  Returns nullptr (after reporting via `eval`) on
@@ -2050,6 +2230,21 @@ static const struct ListNode : public cmGeneratorExpressionNode
   bool ShouldEvaluateNextParameter(std::vector<std::string> const& parameters,
                                    std::string&) const override
   {
+    // Leave the FILTER PREDICATE <body> (slot 4) unevaluated so $<_0> is never
+    // evaluated unbound.
+    if (parameters.size() == 4 && parameters[0] == "FILTER" &&
+        parameters[3] == "PREDICATE") {
+      return false;
+    }
+    // Leave a TRANSFORM PREDICATE selector's <body> unevaluated.  PREDICATE is
+    // the selector keyword only when it sits exactly at the selector position
+    // (not when it is a literal action argument such as APPEND PREDICATE).
+    if (auto start = TransformSelectorStart(parameters)) {
+      if (parameters.size() == *start + 1 &&
+          parameters.back() == "PREDICATE") {
+        return false;
+      }
+    }
     // Skip the APPLY <body> (4th parameter) so $<_0> is not evaluated unbound;
     // selector args (5th+) evaluate normally.
     return !(parameters.size() == 3 && parameters[0] == "TRANSFORM" &&
@@ -2061,6 +2256,18 @@ static const struct ListNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
+    // TRANSFORM ... PREDICATE <body>: genex-native predicate selector, usable
+    // with any action (canned or APPLY).  Handled here (not in the
+    // listCommands lambda) because the predicate <body> needs the DAG checker.
+    if (parameters.size() >= 3 && parameters[0] == "TRANSFORM") {
+      if (auto start = TransformSelectorStart(parameters)) {
+        if (*start < parameters.size() && parameters[*start] == "PREDICATE") {
+          return EvaluateTransformPredicate(parameters, *start, eval, content,
+                                            dagChecker);
+        }
+      }
+    }
+
     if (parameters.size() >= 3 && parameters[0] == "TRANSFORM" &&
         parameters[2] == "APPLY") {
       if (parameters.size() < 4) {
@@ -2110,6 +2317,48 @@ static const struct ListNode : public cmGeneratorExpressionNode
       }
       // Join per-element results with ';'; keep empty elements so a body that
       // yields "" is not dropped.
+      return cmList{ out.begin(), out.end(), cmList::ExpandElements::No,
+                     cmList::EmptyElements::Yes }
+        .to_string();
+    }
+
+    // FILTER ... PREDICATE <body>: genex-native predicate filter.
+    if (parameters.size() >= 4 && parameters[0] == "FILTER" &&
+        parameters[3] == "PREDICATE") {
+      if (parameters.size() != 5) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "sub-command FILTER, PREDICATE expects a single <body> "
+                    "argument.");
+        return std::string();
+      }
+      std::string const& op = parameters[2];
+      if (op != "INCLUDE" && op != "EXCLUDE") {
+        reportError(
+          eval, content->GetOriginalExpression(),
+          cmStrCat("sub-command FILTER does not recognize operator \"", op,
+                   "\". It must be either INCLUDE or EXCLUDE."));
+        return std::string();
+      }
+      cmList list = GetList(parameters[1]);
+      if (list.empty()) {
+        return std::string();
+      }
+      cmGeneratorExpressionEvaluatorVector const& predicateBody =
+        content->GetParamChildren()[4];
+      auto mask = EvaluatePredicateMask(predicateBody, list, "FILTER"_s, eval,
+                                        content, dagChecker);
+      if (!mask) {
+        return std::string();
+      }
+      bool const keepWhenTrue = (op == "INCLUDE");
+      std::vector<std::string> out;
+      std::size_t i = 0;
+      for (auto const& element : list) {
+        if ((*mask)[i] == keepWhenTrue) {
+          out.push_back(element);
+        }
+        ++i;
+      }
       return cmList{ out.begin(), out.end(), cmList::ExpandElements::No,
                      cmList::EmptyElements::Yes }
         .to_string();
@@ -2327,7 +2576,13 @@ static const struct ListNode : public cmGeneratorExpressionNode
         { "FILTER"_s,
           [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
              Arguments& args) -> std::string {
-            if (CheckListParameters(ev, cnt, "FILTER"_s, args, 3)) {
+            // args = [list, INCLUDE|EXCLUDE, <regex> | REGEX <regex>].
+            // (PREDICATE is handled up-front in Evaluate and never reaches
+            // here.)
+            bool const explicitRegex =
+              args.size() >= 3 && args[2] == "REGEX"_s;
+            int const required = explicitRegex ? 4 : 3;
+            if (CheckListParameters(ev, cnt, "FILTER"_s, args, required)) {
               auto const& op = args[1];
               if (op != "INCLUDE"_s && op != "EXCLUDE"_s) {
                 reportError(
@@ -2336,9 +2591,10 @@ static const struct ListNode : public cmGeneratorExpressionNode
                            op, "\". It must be either INCLUDE or EXCLUDE."));
                 return std::string{};
               }
+              auto const& regex = explicitRegex ? args[3] : args[2];
               try {
                 return GetList(args.front())
-                  .filter(args[2],
+                  .filter(regex,
                           op == "INCLUDE"_s ? cmList::FilterMode::INCLUDE
                                             : cmList::FilterMode::EXCLUDE)
                   .to_string();
@@ -2346,7 +2602,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 reportError(
                   ev, cnt->GetOriginalExpression(),
                   cmStrCat("sub-command FILTER, failed to compile regex \"",
-                           args[2], "\"."));
+                           regex, "\"."));
                 return std::string{};
               }
             }
@@ -2359,47 +2615,12 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                       false)) {
               auto list = GetList(args.front());
               if (!list.empty()) {
-                struct ActionDescriptor
-                {
-                  ActionDescriptor(std::string name)
-                    : Name(std::move(name))
-                  {
-                  }
-                  ActionDescriptor(std::string name,
-                                   cmList::TransformAction action, int arity)
-                    : Name(std::move(name))
-                    , Action(action)
-                    , Arity(arity)
-                  {
-                  }
-
-                  operator std::string const&() const { return this->Name; }
-
-                  std::string Name;
-                  cmList::TransformAction Action;
-                  int Arity = 0;
-                };
-
-                static std::set<
-                  ActionDescriptor,
-                  std::function<bool(std::string const&, std::string const&)>>
-                  descriptors{
-                    { { "APPEND", cmList::TransformAction::APPEND, 1 },
-                      { "PREPEND", cmList::TransformAction::PREPEND, 1 },
-                      { "TOUPPER", cmList::TransformAction::TOUPPER, 0 },
-                      { "TOLOWER", cmList::TransformAction::TOLOWER, 0 },
-                      { "STRIP", cmList::TransformAction::STRIP, 0 },
-                      { "REPLACE", cmList::TransformAction::REPLACE, 2 } },
-                    [](std::string const& x, std::string const& y) {
-                      return x < y;
-                    }
-                  };
-
-                auto descriptor = descriptors.find(args.advance(1).front());
-                if (descriptor == descriptors.end()) {
+                std::string const actionName = args.advance(1).front();
+                auto descriptor = FindTransformActionDescriptor(actionName);
+                if (!descriptor) {
                   reportError(ev, cnt->GetOriginalExpression(),
-                              cmStrCat(" sub-command TRANSFORM, ",
-                                       args.front(), " invalid action."));
+                              cmStrCat(" sub-command TRANSFORM, ", actionName,
+                                       " invalid action."));
                   return std::string{};
                 }
 
@@ -2408,7 +2629,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 if (args.size() < descriptor->Arity) {
                   reportError(ev, cnt->GetOriginalExpression(),
                               cmStrCat("sub-command TRANSFORM, action ",
-                                       descriptor->Name, " expects ",
+                                       actionName, " expects ",
                                        descriptor->Arity, " argument(s)."));
                   return std::string{};
                 }

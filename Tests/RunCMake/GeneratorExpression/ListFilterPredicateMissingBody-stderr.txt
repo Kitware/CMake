@@ -1,0 +1,1 @@
+sub-command FILTER, PREDICATE expects a single <body> argument

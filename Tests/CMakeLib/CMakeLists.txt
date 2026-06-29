@@ -16,6 +16,7 @@ set(CMakeLib_TESTS
   testGeneratedFileStream.cxx
   testGenExBoundOperand.cxx
   testGenExTransformApply.cxx
+  testGenExListPredicate.cxx
   testJSONHelpers.cxx
   testRST.cxx
   testRange.cxx
