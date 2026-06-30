@@ -7,9 +7,13 @@ endif()
 if(NOT nproc EQUAL 0)
   set(parallel_arg --parallel=${nproc})
 endif()
-message(STATUS "running bootstrap: ${bootstrap} ${ninja_arg} ${parallel_arg}")
+if(args)
+  string(JOIN "\" \"" args_string ${args})
+  set(args_string " \"${args_string}\"")
+endif()
+message(STATUS "running bootstrap: ${bootstrap} ${ninja_arg} ${parallel_arg}${args_string}")
 execute_process(
-  COMMAND ${bootstrap} ${ninja_arg} ${parallel_arg}
+  COMMAND ${bootstrap} ${ninja_arg} ${parallel_arg} ${args}
   WORKING_DIRECTORY "${bin_dir}"
   RESULT_VARIABLE result
   )
