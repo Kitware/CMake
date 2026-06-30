@@ -1,0 +1,3 @@
+-- Toolchain file: [^
+]*/Tests/RunCMake/CompilerChange/foo\.cmake
+-- Using toolchain: foo
