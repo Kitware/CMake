@@ -31,6 +31,8 @@ if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
   run_RuntimePath(Genex)
   run_cmake_command(GenexCheck
     ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/Genex-build -P ${RunCMake_SOURCE_DIR}/GenexCheck.cmake)
+
+  run_RuntimePath(SysrootSlash)
 endif()
 
 block()

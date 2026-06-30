@@ -2266,7 +2266,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       // support or if using the link path as an rpath.
       if (use_build_rpath) {
         std::string d = ri;
-        if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
+        if (!rootPath.empty() && rootPath != "/" && cmHasPrefix(d, rootPath)) {
           d.erase(0, rootPath.size());
         } else if (cmNonempty(stagePath) && cmHasPrefix(d, *stagePath)) {
           d.erase(0, (*stagePath).size());
@@ -2297,7 +2297,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
             !cmSystemTools::IsSubDirectory(ri, topSourceDir) &&
             !cmSystemTools::IsSubDirectory(ri, topBinaryDir)) {
           std::string d = ri;
-          if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
+          if (!rootPath.empty() && rootPath != "/" &&
+              cmHasPrefix(d, rootPath)) {
             d.erase(0, rootPath.size());
           } else if (cmNonempty(stagePath) && cmHasPrefix(d, *stagePath)) {
             d.erase(0, (*stagePath).size());
