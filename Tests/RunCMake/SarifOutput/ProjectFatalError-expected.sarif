@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json",
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
   "runs": [
     {
       "results": [
@@ -9,7 +9,8 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "PATH:<SOURCE_DIR>/ProjectFatalError.cmake"
+                  "uri": "ProjectFatalError.cmake",
+                  "uriBaseId": "PATH:<SOURCE_DIR>"
                 },
                 "region": {
                   "startLine": 1
@@ -30,11 +31,6 @@
           "rules": [
             {
               "id": "CMake.FatalError",
-              "messageStrings": {
-                "default": {
-                  "text": "CMake Error: {0}"
-                }
-              },
               "name": "CMake Error"
             }
           ],
