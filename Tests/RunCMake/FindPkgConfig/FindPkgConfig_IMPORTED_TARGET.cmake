@@ -130,6 +130,9 @@ if(NOT WIN32)
 
   get_target_property(inc_dirs ${tgt} INTERFACE_INCLUDE_DIRECTORIES)
   set(expected_inc_dirs "/special" "/other" "/more")
+  # pkg-config does not guarantee preserving the order from the .pc file
+  list(SORT inc_dirs)
+  list(SORT expected_inc_dirs)
 
   if (NOT inc_dirs STREQUAL expected_inc_dirs)
     message(FATAL_ERROR
