@@ -3706,7 +3706,13 @@ static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
     auto result = fileSet->GetProperty(propertyName);
 
     if (propertyName == "BASE_DIRS"_s || propertyName == "SOURCES"_s ||
-        propertyName == "INTERFACE_SOURCES"_s) {
+        propertyName == "INTERFACE_SOURCES"_s ||
+        propertyName == "INCLUDE_DIRECTORIES"_s ||
+        propertyName == "INTERFACE_INCLUDE_DIRECTORIES"_s ||
+        propertyName == "COMPILE_OPTIONS"_s ||
+        propertyName == "INTERFACE_COMPILE_OPTIONS"_s ||
+        propertyName == "COMPILE_DEFINITIONS"_s ||
+        propertyName == "INTERFACE_COMPILE_DEFINITIONS"_s) {
       cmGeneratorExpressionDAGChecker dagChecker{
         target,           propertyName,  content,
         dagCheckerParent, eval->Context, eval->Backtrace,
