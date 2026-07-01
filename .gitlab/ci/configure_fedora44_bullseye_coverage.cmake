@@ -6,7 +6,7 @@ set(CMAKE_CXX_COMPILER "/opt/bullseye/bin/c++" CACHE PATH "")
 set(configure_no_sccache 1)
 
 # Do not bootstrap for the coverage test suite.
-set(CMAKE_SKIP_BOOTSTRAP_TEST TRUE CACHE BOOL "")
+set(CMake_TEST_BOOTSTRAP FALSE CACHE BOOL "")
 
 # Shrink stress tests when running with Bullseye.
 set(ENV{KWSYS_TEST_PROCESS_1_COUNT} 11)

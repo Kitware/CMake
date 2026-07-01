@@ -3198,6 +3198,7 @@ if(BUILD_TESTING)
         -D "bootstrap=${bootstrap}"
         -D "bin_dir=${CMake_BINARY_DIR}/Tests/BootstrapTest"
         -D "generator=${CMAKE_GENERATOR}"
+        -D "args=${CMake_TEST_BOOTSTRAP_ARGS}"
         -P ${CMAKE_CURRENT_SOURCE_DIR}/BootstrapTest.cmake
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")

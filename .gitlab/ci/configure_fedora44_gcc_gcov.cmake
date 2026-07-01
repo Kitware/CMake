@@ -26,6 +26,6 @@ set(CMAKE_SHARED_LINKER_FLAGS_INIT "${link_flags}" CACHE STRING "")
 set(CMAKE_MODULE_LINKER_FLAGS_INIT "${link_flags}" CACHE STRING "")
 
 # Do not bootstrap for the coverage test suite.
-set(CMAKE_SKIP_BOOTSTRAP_TEST TRUE CACHE BOOL "")
+set(CMake_TEST_BOOTSTRAP FALSE CACHE BOOL "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora44_common.cmake")
