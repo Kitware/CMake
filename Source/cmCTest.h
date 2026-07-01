@@ -253,6 +253,9 @@ public:
   /** Get the path to the build tree */
   std::string GetBinaryDir();
 
+  /** Get the path to the test stamp file tree */
+  std::string GetStampDir();
+
   /**
    * Get the short path to the file.
    *

@@ -303,6 +303,17 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
        << cmScriptGenerator::Quote(
             ge.Parse(i.second)->Evaluate(this->LG, config));
   }
+  BuildDependencies deps;
+  if (this->GetBuildDependencies(this->LG, deps)) {
+    cmList depList;
+    for (std::string const& dep :
+         this->LG->GetGlobalGenerator()->GetTestBuildDependencyPaths(config,
+                                                                     deps)) {
+      depList.append(dep);
+    }
+    os << " _CMAKE_TEST_BUILD_DEPENDS "
+       << cmScriptGenerator::Quote(depList.to_string());
+  }
   os << ' ';
   this->GenerateBacktrace(os, this->Test->GetBacktrace());
   os << ")\n";

@@ -41,6 +41,7 @@
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCTestResourceGroupsLexerHelper.h"
 #include "cmCTestTestMeasurementXMLParser.h"
+#include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
@@ -967,6 +968,9 @@ bool cmCTestTestHandler::ComputeTestList()
   if (this->TestOptions.RerunFailed) {
     return this->ComputeTestListForRerunFailed();
   }
+  if (this->TestOptions.OutOfDateOnly) {
+    this->ComputeOutOfDateTests();
+  }
 
   cmCTestTestHandler::ListOfTests::size_type tmsize = this->TestList.size();
   // how many tests are in based on RegExp?
@@ -1067,6 +1071,49 @@ bool cmCTestTestHandler::ComputeTestListForRerunFailed()
   this->UpdateMaxTestNameWidth();
 
   return true;
+}
+
+void cmCTestTestHandler::ComputeOutOfDateTests()
+{
+  ListOfTests finalList;
+  std::string const stampDir = this->CTest->GetStampDir();
+  cmSystemTools::MakeDirectory(stampDir);
+
+  for (cmCTestTestProperties& tp : this->TestList) {
+    if (tp.BuildDepends.empty()) {
+      continue;
+    }
+
+    std::string const stampFile = stampDir + "/" + tp.GetStampFile();
+
+    if (!cmSystemTools::FileExists(stampFile)) {
+      finalList.push_back(tp);
+      continue;
+    }
+
+    cmList deps{ tp.BuildDepends };
+    bool outOfDate = false;
+    for (std::string const& dep : deps) {
+      if (dep.empty()) {
+        continue;
+      }
+      if (!cmSystemTools::FileExists(dep)) {
+        // If any dependencies don't exist, skip the test
+        outOfDate = false;
+        break;
+      }
+      int result = 0;
+      cmSystemTools::FileTimeCompare(dep, stampFile, &result);
+      if (result >= 0) {
+        // At least one newer dependency, add to list
+        outOfDate = true;
+      }
+    }
+    if (outOfDate) {
+      finalList.push_back(tp);
+    }
+  }
+  this->TestList = finalList;
 }
 
 void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
@@ -2298,6 +2345,11 @@ void cmCTestTestHandler::cmCTestTestProperties::AppendError(
   }
 }
 
+std::string cmCTestTestHandler::cmCTestTestProperties::GetStampFile()
+{
+  return cmCryptoHash(cmCryptoHash::AlgoMD5).HashString(this->Name) + ".stamp";
+}
+
 bool cmCTestTestHandler::SetTestsProperties(
   std::vector<std::string> const& args)
 {
@@ -2498,6 +2550,8 @@ bool cmCTestTestHandler::SetTestsProperties(
                 rt.TimeoutRegularExpressions.emplace_back(cr, cr);
               }
             }
+          } else if (key == "_CMAKE_TEST_BUILD_DEPENDS"_s) {
+            rt.BuildDepends = val;
           } else {
             rt.CustomProperties[key] = val;
           }

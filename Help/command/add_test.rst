@@ -111,6 +111,12 @@ directory the test is created in.
   Generators`. The test name must be a valid target name in order to list
   build dependencies with this keyword.
 
+  * .. versionchanged:: 4.5
+
+    Build dependencies added by this argument, or referenced in the test
+    ``COMMAND`` also enable the :option:`--out-of-date <ctest --out-of-date>`
+    behavior of :manual:`ctest(1)`.
+
 ``COMMAND_EXPAND_LISTS``
   .. versionadded:: 3.16
 

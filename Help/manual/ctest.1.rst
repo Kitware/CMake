@@ -590,6 +590,25 @@ The options for running tests are:
  :preset:`testPresets.execution.testPassthroughArguments` are provided,
  the test preset arguments will appear first, followed by the ``<test-args>``.
 
+.. option:: --out-of-date
+
+ .. versionadded:: 4.5
+
+ Run only tests whose build dependencies are newer than the last time the
+ test ran.
+
+ This option tells CTest to skip tests that are already up to date with
+ respect to their recorded build dependencies. Build dependencies include
+ executables and targets in generator expressions as part of the test
+ ``COMMAND``, as well as the outputs of targets or files added as explicit
+ dependencies with the ``BUILD_DEPENDS`` argument of :command:`add_test`.
+
+ A test is selected to run when any of its recorded build dependencies are
+ newer than the test's last-run timestamp, or when the test has not been
+ run before. Tests without any known build dependencies, including any tests
+ not added by the :command:`add_test` command, are excluded when this argument
+ is provided.
+
 View Help
 =========
 

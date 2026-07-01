@@ -375,6 +375,12 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
     this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
     this->MemCheckPostProcess();
     this->ComputeWeightedCost();
+
+    std::string const stampDir = this->CTest->GetStampDir();
+    cmSystemTools::MakeDirectory(stampDir);
+    std::string const stampFile =
+      stampDir + "/" + this->TestProperties->GetStampFile();
+    cmSystemTools::Touch(stampFile, true);
   }
   // If the test does not need to rerun push the current TestResult onto the
   // TestHandler vector

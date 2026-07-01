@@ -34,6 +34,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmTestGenerator.h"
 #include "cmValue.h"
 #include "cmXcFramework.h"
 
@@ -129,6 +130,10 @@ public:
 
   //! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
+
+  virtual std::vector<std::string> GetTestBuildDependencyPaths(
+    std::string const& config,
+    cmTestGenerator::BuildDependencies const& deps) const;
 
   /** Check whether the given name matches the current generator.  */
   virtual bool MatchesGeneratorName(std::string const& name) const
