@@ -107,17 +107,17 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   return result;
 }
 
-// Re-evaluate the unevaluated <body> subtree of a binding operation with
-// `$<_0>` bound to the given operand.  A fresh Evaluation is built from a
-// copied, mutated Context so that nested binding operations can shadow `$<_0>`
-// and restore it on exit.
-static std::string EvaluateBodyWithBoundOperand(
+// Re-evaluate the unevaluated <body> subtree of a binding operation with the
+// given operands bound (accessible as $<_0>, $<_1>, ...).  A fresh Evaluation
+// is built from a copied, mutated Context so that nested binding operations
+// can shadow the operands and restore them on exit.
+static std::string EvaluateBodyWithBoundOperands(
   cmGeneratorExpressionEvaluatorVector const& bodyExpr,
-  std::string const& operand, cm::GenEx::Evaluation* eval,
+  std::vector<std::string> operands, cm::GenEx::Evaluation* eval,
   cmGeneratorExpressionDAGChecker* dagChecker)
 {
   cm::GenEx::Context elemContext = eval->Context; // copy
-  elemContext.SetBoundOperand(operand);
+  elemContext.SetBoundOperands(std::move(operands));
   cm::GenEx::Evaluation elemEval(
     elemContext, eval->Quiet, eval->HeadTarget, eval->CurrentTarget,
     eval->EvaluateForBuildsystem, eval->Backtrace);
@@ -147,6 +147,15 @@ static std::string EvaluateBodyWithBoundOperand(
                                                   entry.second.end());
   }
   return result;
+}
+
+static std::string EvaluateBodyWithBoundOperand(
+  cmGeneratorExpressionEvaluatorVector const& bodyExpr,
+  std::string const& operand, cm::GenEx::Evaluation* eval,
+  cmGeneratorExpressionDAGChecker* dagChecker)
+{
+  return EvaluateBodyWithBoundOperands(bodyExpr, { operand }, eval,
+                                       dagChecker);
 }
 
 // Evaluate `predicateBody` once per element of `list`, binding `$<_0>` to the
@@ -220,9 +229,12 @@ static const struct OneNode : public cmGeneratorExpressionNode
   }
 } oneNode;
 
-static const struct BoundOperandNode : public cmGeneratorExpressionNode
+struct BoundOperandNode : public cmGeneratorExpressionNode
 {
-  BoundOperandNode() {} // NOLINT(modernize-use-equals-default)
+  explicit BoundOperandNode(std::size_t index)
+    : Index(index)
+  {
+  }
 
   int NumExpectedParameters() const override { return 0; }
 
@@ -231,15 +243,31 @@ static const struct BoundOperandNode : public cmGeneratorExpressionNode
     cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    if (!eval->Context.HasBoundOperand()) {
-      reportError(eval, content->GetOriginalExpression(),
-                  "$<_0> may only be used inside the body of a binding "
-                  "operation.");
+    if (!eval->Context.HasBoundOperand(this->Index)) {
+      std::size_t const count = eval->Context.BoundOperandCount();
+      if (count == 0) {
+        reportError(eval, content->GetOriginalExpression(),
+                    cmStrCat("$<_", this->Index,
+                             "> may only be used inside the body of a binding "
+                             "operation."));
+      } else {
+        reportError(
+          eval, content->GetOriginalExpression(),
+          cmStrCat(
+            "$<_", this->Index,
+            "> is out of range for the current binding operation, which "
+            "binds only ",
+            count, " operand(s) (maximum $<_", count - 1, ">)."));
+      }
       return std::string();
     }
-    return eval->Context.GetBoundOperand();
+    return eval->Context.GetBoundOperand(this->Index);
   }
-} boundOperandNode;
+
+  std::size_t Index;
+};
+static BoundOperandNode const boundOperandNode0{ 0 };
+static BoundOperandNode const boundOperandNode1{ 1 };
 
 static const struct OneNode buildInterfaceNode;
 
@@ -2102,6 +2130,178 @@ std::string EvaluateTransformPredicate(
   }
 }
 
+enum class SortOptionResult
+{
+  NotRecognized, // `arg` is not a SORT option keyword
+  Parsed,        // recognized and applied to `sortConfig`
+  Error,         // recognized but malformed or duplicate (already reported)
+};
+
+// Parse one $<LIST:SORT> colon-option (COMPARE:/CASE:/ORDER:) into sortConfig.
+SortOptionResult ParseSortOption(std::string const& arg,
+                                 cmList::SortConfiguration& sortConfig,
+                                 cm::GenEx::Evaluation* eval,
+                                 GeneratorExpressionContent const* content)
+{
+  using SortConfig = cmList::SortConfiguration;
+  auto const COMPARE = "COMPARE:"_s;
+  auto const CASE = "CASE:"_s;
+  auto const ORDER = "ORDER:"_s;
+
+  if (cmHasPrefix(arg, COMPARE)) {
+    if (sortConfig.Compare != SortConfig::CompareMethod::DEFAULT) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "sub-command SORT, COMPARE option has been specified "
+                  "multiple times.");
+      return SortOptionResult::Error;
+    }
+    auto option = cm::string_view{ arg.c_str() + COMPARE.length() };
+    if (option == "STRING"_s) {
+      sortConfig.Compare = SortConfig::CompareMethod::STRING;
+    } else if (option == "FILE_BASENAME"_s) {
+      sortConfig.Compare = SortConfig::CompareMethod::FILE_BASENAME;
+    } else if (option == "NATURAL"_s) {
+      sortConfig.Compare = SortConfig::CompareMethod::NATURAL;
+    } else {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("sub-command SORT, an invalid COMPARE option has "
+                           "been specified: \"",
+                           option, "\"."));
+      return SortOptionResult::Error;
+    }
+    return SortOptionResult::Parsed;
+  }
+
+  if (cmHasPrefix(arg, CASE)) {
+    if (sortConfig.Case != SortConfig::CaseSensitivity::DEFAULT) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "sub-command SORT, CASE option has been specified multiple "
+                  "times.");
+      return SortOptionResult::Error;
+    }
+    auto option = cm::string_view{ arg.c_str() + CASE.length() };
+    if (option == "SENSITIVE"_s) {
+      sortConfig.Case = SortConfig::CaseSensitivity::SENSITIVE;
+    } else if (option == "INSENSITIVE"_s) {
+      sortConfig.Case = SortConfig::CaseSensitivity::INSENSITIVE;
+    } else {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("sub-command SORT, an invalid CASE option has been "
+                           "specified: \"",
+                           option, "\"."));
+      return SortOptionResult::Error;
+    }
+    return SortOptionResult::Parsed;
+  }
+
+  if (cmHasPrefix(arg, ORDER)) {
+    if (sortConfig.Order != SortConfig::OrderMode::DEFAULT) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "sub-command SORT, ORDER option has been specified multiple "
+                  "times.");
+      return SortOptionResult::Error;
+    }
+    auto option = cm::string_view{ arg.c_str() + ORDER.length() };
+    if (option == "ASCENDING"_s) {
+      sortConfig.Order = SortConfig::OrderMode::ASCENDING;
+    } else if (option == "DESCENDING"_s) {
+      sortConfig.Order = SortConfig::OrderMode::DESCENDING;
+    } else {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("sub-command SORT, an invalid ORDER option has been "
+                 "specified: \"",
+                 option, "\"."));
+      return SortOptionResult::Error;
+    }
+    return SortOptionResult::Parsed;
+  }
+
+  return SortOptionResult::NotRecognized;
+}
+
+// $<LIST:SORT,...,COMPARATOR,body>: sort with a per-comparison genex body, the
+// two elements bound to $<_0> and $<_1>; body must yield "0" or "1".
+std::string EvaluateSortComparator(std::vector<std::string> const& parameters,
+                                   std::size_t comparatorIndex,
+                                   cm::GenEx::Evaluation* eval,
+                                   GeneratorExpressionContent const* content,
+                                   cmGeneratorExpressionDAGChecker* dagChecker)
+{
+  if (comparatorIndex + 1 >= parameters.size()) {
+    reportError(eval, content->GetOriginalExpression(),
+                "sub-command SORT, COMPARATOR expects a <body> argument.");
+    return std::string();
+  }
+  cmGeneratorExpressionEvaluatorVector const& bodyExpr =
+    content->GetParamChildren()[comparatorIndex + 1];
+
+  using SortConfig = cmList::SortConfiguration;
+  SortConfig sortConfig;
+  sortConfig.Compare = SortConfig::CompareMethod::COMPARATOR;
+  for (std::size_t i = 2; i < parameters.size(); ++i) {
+    if (i == comparatorIndex || i == comparatorIndex + 1) {
+      continue; // COMPARATOR keyword + its (empty) body slot
+    }
+    std::string const& arg = parameters[i];
+    // COMPARATOR defines the ordering, so reject COMPARE:; CASE:/ORDER: are
+    // accepted as in list(SORT ... COMPARATOR) (CASE: folds the body
+    // operands).
+    if (cmHasPrefix(arg, "COMPARE:"_s)) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "sub-command SORT, option \"COMPARE\" is incompatible with "
+                  "\"COMPARATOR\".");
+      return std::string();
+    }
+    switch (ParseSortOption(arg, sortConfig, eval, content)) {
+      case SortOptionResult::Parsed:
+        break;
+      case SortOptionResult::Error:
+        return std::string();
+      case SortOptionResult::NotRecognized:
+        reportError(
+          eval, content->GetOriginalExpression(),
+          cmStrCat("sub-command SORT, option \"", arg, "\" is invalid."));
+        return std::string();
+    }
+  }
+
+  cmList list = GetList(parameters[1]);
+  if (list.size() < 2) {
+    return list.to_string();
+  }
+
+  // The strict-weak-ordering guard in cmList::sort may call this twice per
+  // pair, so the body can be evaluated up to twice per comparison.
+  auto comparator = [&](std::string const& a, std::string const& b) -> bool {
+    std::string r =
+      EvaluateBodyWithBoundOperands(bodyExpr, { a, b }, eval, dagChecker);
+    if (eval->HadError) {
+      throw cmList::transform_error(std::string{}); // body already reported
+    }
+    if (r == "1") {
+      return true;
+    }
+    if (r == "0") {
+      return false;
+    }
+    throw cmList::transform_error(
+      cmStrCat("sub-command SORT, COMPARATOR body must evaluate to \"0\" or "
+               "\"1\", but evaluated to \"",
+               r, "\"."));
+  };
+
+  try {
+    list.sort(sortConfig, comparator);
+  } catch (std::invalid_argument& e) {
+    if (!eval->HadError) {
+      reportError(eval, content->GetOriginalExpression(), e.what());
+    }
+    return std::string();
+  }
+  return list.to_string();
+}
+
 // Parse the optional trailing selector of a $<LIST:TRANSFORM,...> action
 // (AT <i>... / FOR <start> <stop> [<step>] / REGEX <re>) into a
 // cmList::TransformSelector.  Returns nullptr (after reporting via `eval`) on
@@ -2245,6 +2445,12 @@ static const struct ListNode : public cmGeneratorExpressionNode
         return false;
       }
     }
+    // Leave the SORT COMPARATOR <body> unevaluated; a bare COMPARATOR token is
+    // unambiguous since SORT's other options are colon-style.
+    if (parameters.size() >= 3 && parameters[0] == "SORT" &&
+        parameters.back() == "COMPARATOR") {
+      return false;
+    }
     // Skip the APPLY <body> (4th parameter) so $<_0> is not evaluated unbound;
     // selector args (5th+) evaluate normally.
     return !(parameters.size() == 3 && parameters[0] == "TRANSFORM" &&
@@ -2362,6 +2568,17 @@ static const struct ListNode : public cmGeneratorExpressionNode
       return cmList{ out.begin(), out.end(), cmList::ExpandElements::No,
                      cmList::EmptyElements::Yes }
         .to_string();
+    }
+
+    // SORT COMPARATOR is handled here, not the listCommands SORT lambda,
+    // because the body needs the DAG checker.
+    if (parameters.size() >= 3 && parameters[0] == "SORT") {
+      for (std::size_t i = 2; i < parameters.size(); ++i) {
+        if (parameters[i] == "COMPARATOR") {
+          return EvaluateSortComparator(parameters, i, eval, content,
+                                        dagChecker);
+        }
+      }
     }
 
     static std::unordered_map<
@@ -2678,97 +2895,19 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                       false)) {
               auto list = GetList(args.front());
               args.advance(1);
-              auto const COMPARE = "COMPARE:"_s;
-              auto const CASE = "CASE:"_s;
-              auto const ORDER = "ORDER:"_s;
-              using SortConfig = cmList::SortConfiguration;
-              SortConfig sortConfig;
+              cmList::SortConfiguration sortConfig;
               for (auto const& arg : args) {
-                if (cmHasPrefix(arg, COMPARE)) {
-                  if (sortConfig.Compare !=
-                      SortConfig::CompareMethod::DEFAULT) {
-                    reportError(ev, cnt->GetOriginalExpression(),
-                                "sub-command SORT, COMPARE option has been "
-                                "specified multiple times.");
+                switch (ParseSortOption(arg, sortConfig, ev, cnt)) {
+                  case SortOptionResult::Parsed:
+                    break;
+                  case SortOptionResult::Error:
                     return std::string{};
-                  }
-                  auto option =
-                    cm::string_view{ arg.c_str() + COMPARE.length() };
-                  if (option == "STRING"_s) {
-                    sortConfig.Compare = SortConfig::CompareMethod::STRING;
-                    continue;
-                  }
-                  if (option == "FILE_BASENAME"_s) {
-                    sortConfig.Compare =
-                      SortConfig::CompareMethod::FILE_BASENAME;
-                    continue;
-                  }
-                  if (option == "NATURAL"_s) {
-                    sortConfig.Compare = SortConfig::CompareMethod::NATURAL;
-                    continue;
-                  }
-                  reportError(
-                    ev, cnt->GetOriginalExpression(),
-                    cmStrCat(
-                      "sub-command SORT, an invalid COMPARE option has been "
-                      "specified: \"",
-                      option, "\"."));
-                  return std::string{};
-                }
-                if (cmHasPrefix(arg, CASE)) {
-                  if (sortConfig.Case !=
-                      SortConfig::CaseSensitivity::DEFAULT) {
+                  case SortOptionResult::NotRecognized:
                     reportError(ev, cnt->GetOriginalExpression(),
-                                "sub-command SORT, CASE option has been "
-                                "specified multiple times.");
+                                cmStrCat("sub-command SORT, option \"", arg,
+                                         "\" is invalid."));
                     return std::string{};
-                  }
-                  auto option = cm::string_view{ arg.c_str() + CASE.length() };
-                  if (option == "SENSITIVE"_s) {
-                    sortConfig.Case = SortConfig::CaseSensitivity::SENSITIVE;
-                    continue;
-                  }
-                  if (option == "INSENSITIVE"_s) {
-                    sortConfig.Case = SortConfig::CaseSensitivity::INSENSITIVE;
-                    continue;
-                  }
-                  reportError(
-                    ev, cnt->GetOriginalExpression(),
-                    cmStrCat(
-                      "sub-command SORT, an invalid CASE option has been "
-                      "specified: \"",
-                      option, "\"."));
-                  return std::string{};
                 }
-                if (cmHasPrefix(arg, ORDER)) {
-                  if (sortConfig.Order != SortConfig::OrderMode::DEFAULT) {
-                    reportError(ev, cnt->GetOriginalExpression(),
-                                "sub-command SORT, ORDER option has been "
-                                "specified multiple times.");
-                    return std::string{};
-                  }
-                  auto option =
-                    cm::string_view{ arg.c_str() + ORDER.length() };
-                  if (option == "ASCENDING"_s) {
-                    sortConfig.Order = SortConfig::OrderMode::ASCENDING;
-                    continue;
-                  }
-                  if (option == "DESCENDING"_s) {
-                    sortConfig.Order = SortConfig::OrderMode::DESCENDING;
-                    continue;
-                  }
-                  reportError(
-                    ev, cnt->GetOriginalExpression(),
-                    cmStrCat(
-                      "sub-command SORT, an invalid ORDER option has been "
-                      "specified: \"",
-                      option, "\"."));
-                  return std::string{};
-                }
-                reportError(ev, cnt->GetOriginalExpression(),
-                            cmStrCat("sub-command SORT, option \"", arg,
-                                     "\" is invalid."));
-                return std::string{};
               }
 
               return list.sort(sortConfig).to_string();
@@ -6285,7 +6424,8 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "PATH_EQUAL", &pathEqualNode },
     { "MAKE_C_IDENTIFIER", &makeCIdentifierNode },
     { "BOOL", &boolNode },
-    { "_0", &boundOperandNode },
+    { "_0", &boundOperandNode0 },
+    { "_1", &boundOperandNode1 },
     { "IF", &ifNode },
     { "ANGLE-R", &angle_rNode },
     { "COMMA", &commaNode },

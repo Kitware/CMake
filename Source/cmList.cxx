@@ -382,7 +382,9 @@ cmList& cmList::sort(SortConfiguration cfg)
   return *this;
 }
 
-cmList& cmList::sort(SortConfiguration cfg, cmMakefile& makefile)
+cmList& cmList::sort(
+  SortConfiguration cfg,
+  std::function<bool(std::string const&, std::string const&)> comparator)
 {
   SortConfiguration config{ cfg };
 
@@ -394,11 +396,10 @@ cmList& cmList::sort(SortConfiguration cfg, cmMakefile& makefile)
   }
 
   try {
-    ComparatorEvaluator evaluator(config.ComparatorFunction, makefile);
     StringSorter sorter(
-      config, [&evaluator](std::string const& a, std::string const& b) {
-        bool result = evaluator(a, b);
-        if (result && evaluator(b, a)) {
+      config, [&comparator](std::string const& a, std::string const& b) {
+        bool result = comparator(a, b);
+        if (result && comparator(b, a)) {
           throw cmList::transform_error(
             "sub-command SORT, COMPARATOR: function does not induce a strict "
             "weak ordering. The comparator returned TRUE for both (a, b) and "
@@ -412,6 +413,19 @@ cmList& cmList::sort(SortConfiguration cfg, cmMakefile& makefile)
   }
 
   return *this;
+}
+
+cmList& cmList::sort(SortConfiguration cfg, cmMakefile& makefile)
+{
+  try {
+    ComparatorEvaluator evaluator(cfg.ComparatorFunction, makefile);
+    return this->sort(
+      cfg, [&evaluator](std::string const& a, std::string const& b) {
+        return evaluator(a, b);
+      });
+  } catch (transform_error& e) {
+    throw std::invalid_argument(e.what());
+  }
 }
 
 namespace {

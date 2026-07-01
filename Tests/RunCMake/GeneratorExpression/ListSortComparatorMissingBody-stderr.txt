@@ -1,0 +1,1 @@
+sub-command SORT, COMPARATOR expects a <body> argument
