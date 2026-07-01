@@ -9,7 +9,7 @@
 
 # find out on which system cmake runs
 if(CMAKE_HOST_UNIX)
-  find_program(CMAKE_UNAME NAMES uname PATHS /bin /usr/bin /usr/local/bin)
+  find_program(CMAKE_UNAME NAMES uname PATHS /bin /usr/bin /usr/local/bin NO_CMAKE_FIND_ROOT_PATH)
   if(CMAKE_UNAME)
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL "AIX")
       execute_process(COMMAND ${CMAKE_UNAME} -v
