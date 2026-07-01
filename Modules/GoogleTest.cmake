@@ -704,6 +704,7 @@ function(gtest_discover_tests target)
               -D "TEST_DISCOVERY_TIMEOUT=${arg_DISCOVERY_TIMEOUT}"
               -D "TEST_DISCOVERY_EXTRA_ARGS=${arg_DISCOVERY_EXTRA_ARGS}"
               -D "TEST_XML_OUTPUT_DIR=${arg_XML_OUTPUT_DIR}"
+              -D "TEST_JSON_OUTPUT_DIR=${CMAKE_CURRENT_BINARY_DIR}"
               -P "${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake"
       VERBATIM
     )
@@ -747,6 +748,7 @@ function(gtest_discover_tests target)
       "      TEST_DISCOVERY_TIMEOUT" " [==[${arg_DISCOVERY_TIMEOUT}]==]"           "\n"
       "      TEST_DISCOVERY_EXTRA_ARGS [==[${arg_DISCOVERY_EXTRA_ARGS}]==]"        "\n"
       "      TEST_XML_OUTPUT_DIR"    " [==[${arg_XML_OUTPUT_DIR}]==]"              "\n"
+      "      TEST_JSON_OUTPUT_DIR"   " [==[${CMAKE_CURRENT_BINARY_DIR}]==]"        "\n"
       "    )"                                                                      "\n"
       "  endif()"                                                                  "\n"
       "  include(\"${ctest_tests_file}\")"                                         "\n"

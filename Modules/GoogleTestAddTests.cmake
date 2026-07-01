@@ -293,6 +293,7 @@ function(gtest_discover_tests_impl)
     CTEST_FILE
     TEST_DISCOVERY_TIMEOUT
     TEST_XML_OUTPUT_DIR
+    TEST_JSON_OUTPUT_DIR
     # The following are all multi-value arguments in gtest_discover_tests(),
     # but they are each given to us as a single argument. We parse them that
     # way to avoid problems with preserving empty list values and escaping.
@@ -354,7 +355,7 @@ function(gtest_discover_tests_impl)
   string(SHA256 target_hash "${arg_TEST_TARGET}")
   string(SUBSTRING "${target_hash}" 0 10 target_hash)
   set(json_file
-    "${arg_TEST_WORKING_DIR}/cmake_test_discovery_${target_hash}.json"
+    "${arg_TEST_JSON_OUTPUT_DIR}/cmake_test_discovery_${target_hash}.json"
   )
 
   # Remove json file to make sure we don't pick up an outdated one
@@ -435,6 +436,7 @@ if(CMAKE_SCRIPT_MODE_FILE)
     CTEST_FILE ${CTEST_FILE}
     TEST_DISCOVERY_TIMEOUT ${TEST_DISCOVERY_TIMEOUT}
     TEST_XML_OUTPUT_DIR ${TEST_XML_OUTPUT_DIR}
+    TEST_JSON_OUTPUT_DIR ${TEST_JSON_OUTPUT_DIR}
     TEST_EXTRA_ARGS "${TEST_EXTRA_ARGS}"
     TEST_DISCOVERY_EXTRA_ARGS "${TEST_DISCOVERY_EXTRA_ARGS}"
     TEST_PROPERTIES "${TEST_PROPERTIES}"
