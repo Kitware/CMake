@@ -78,8 +78,8 @@
 #include "easy_lock.h"
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
-static unsigned int  initialized;
-static long          easy_init_flags;
+static unsigned int initialized;
+static long easy_init_flags;
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
@@ -942,7 +942,7 @@ static void dupeasy_meta_freeentry(void *p)
   /* Always FALSE. Cannot use a 0 assert here since compilers
    * are not in agreement if they then want a NORETURN attribute or
    * not. *sigh* */
-  DEBUGASSERT(p == NULL);
+  DEBUGASSERT(!p);
 }
 
 /*
@@ -1052,6 +1052,11 @@ CURL *curl_easy_duphandle(CURL *curl)
       (void)Curl_hsts_loadfile(outcurl,
                                outcurl->hsts, outcurl->set.str[STRING_HSTS]);
     (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
+
+    /* Copy entries learned at runtime. (E.g. Strict-Transport-Security
+       headers.) */
+    if(Curl_hsts_copy(outcurl->hsts, data->hsts))
+      goto fail;
   }
 #endif
 

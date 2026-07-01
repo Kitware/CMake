@@ -231,7 +231,7 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
  */
 static CURLcode pop3_parse_url_path(struct Curl_easy *data)
 {
-  /* The POP3 struct is already initialised in pop3_connect() */
+  /* The POP3 struct is already initialized in pop3_connect() */
   struct POP3 *pop3 = Curl_meta_get(data, CURL_META_POP3_EASY);
   const char *path = &data->state.up.path[1]; /* skip leading path */
 
@@ -485,7 +485,8 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-    result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
+    result = Curl_ssl_cfilter_add(
+      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
     if(result)
       goto out;
     /* Change the connection handler */
@@ -495,7 +496,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   DEBUGASSERT(!pop3c->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   DEBUGF(infof(data, "pop3_perform_upgrade_tls, connect -> %d, %d",
-               result, ssldone));
+               (int)result, ssldone));
   if(!result && ssldone) {
     pop3c->ssldone = ssldone;
     /* perform CAPA now, changes pop3c->state out of POP3_UPGRADETLS */
@@ -527,7 +528,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we do not */
-  if(!data->state.aptr.user) {
+  if(!conn->creds) {
     pop3_state(data, POP3_STOP);
 
     return result;
@@ -535,7 +536,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
 
   /* Send the USER command */
   result = Curl_pp_sendf(data, &pop3c->pp, "USER %s",
-                         conn->user ? conn->user : "");
+                         Curl_creds_user(conn->creds));
   if(!result)
     pop3_state(data, POP3_USER);
 
@@ -564,7 +565,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we do not */
-  if(!data->state.aptr.user) {
+  if(!data->state.creds) {
     pop3_state(data, POP3_STOP);
 
     return result;
@@ -578,17 +579,18 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   Curl_MD5_update(ctxt, (const unsigned char *)pop3c->apoptimestamp,
                   curlx_uztoui(strlen(pop3c->apoptimestamp)));
 
-  Curl_MD5_update(ctxt, (const unsigned char *)conn->passwd,
-                  curlx_uztoui(strlen(conn->passwd)));
+  Curl_MD5_update(ctxt, (const unsigned char *)Curl_creds_passwd(conn->creds),
+                  curlx_uztoui(strlen(Curl_creds_passwd(conn->creds))));
 
   /* Finalise the digest */
   Curl_MD5_final(ctxt, digest);
 
-  /* Convert the calculated 16 octet digest into a 32 byte hex string */
+  /* Convert the calculated 16 octet digest into a 32-byte hex string */
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     curl_msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
-  result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s", conn->user, secret);
+  result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s",
+                         Curl_creds_user(conn->creds), secret);
 
   if(!result)
     pop3_state(data, POP3_APOP);
@@ -1038,7 +1040,8 @@ static CURLcode pop3_state_user_resp(struct Curl_easy *data, int pop3code,
   }
   else
     /* Send the PASS command */
-    result = Curl_pp_sendf(data, &pop3c->pp, "PASS %s", conn->passwd);
+    result = Curl_pp_sendf(data, &pop3c->pp, "PASS %s",
+                           Curl_creds_passwd(conn->creds));
   if(!result)
     pop3_state(data, POP3_PASS);
 
@@ -1437,7 +1440,7 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
   pop3c->preftype = POP3_TYPE_ANY;
   Curl_sasl_init(&pop3c->sasl, data, &saslpop3);
 
-  /* Initialise the pingpong layer */
+  /* Initialize the pingpong layer */
   Curl_pp_init(pp, Curl_pgrs_now(data));
 
   /* Parse the URL options */

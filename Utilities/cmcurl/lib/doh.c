@@ -259,7 +259,6 @@ static void doh_probe_done(struct Curl_easy *data,
     result = curlx_dyn_addn(&dohp->probe_resp[i].body,
                             curlx_dyn_ptr(&doh_req->resp_body),
                             curlx_dyn_len(&doh_req->resp_body));
-    curlx_dyn_free(&doh_req->resp_body);
   }
   Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
 
@@ -319,7 +318,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
                      sizeof(doh_req->req_body),
                      &doh_req->req_body_len);
   if(d) {
-    failf(data, "Failed to encode DoH packet [%d]", d);
+    failf(data, "Failed to encode DoH packet [%d]", (int)d);
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
@@ -418,7 +417,8 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   }
 
   (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS,
-                         (long)data->set.ssl.primary.ssl_options);
+                         ((long)data->set.ssl.primary.ssl_options &
+                          ~CURLSSLOPT_AUTO_CLIENT_CERT));
 
   doh->state.internal = TRUE;
   doh->master_mid = data->mid; /* master transfer of this one */
@@ -724,7 +724,9 @@ UNITTEST void de_init(struct dohentry *de)
     curlx_dyn_init(&de->cname[i], DYN_DOH_CNAME);
 }
 
-/* @unittest 1655 */
+/* TTL value cap */
+#define MAX_DNS_TTL 86400U /* 24 hours */
+/* @unittest 1650 */
 UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
                                  size_t dohlen,
                                  DNStype dnstype,
@@ -794,6 +796,8 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
       return DOH_DNS_OUT_OF_RANGE;
 
     ttl = doh_get32bit(doh, index);
+    if(ttl > MAX_DNS_TTL)
+      ttl = MAX_DNS_TTL;
     if(ttl < d->ttl)
       d->ttl = ttl;
     index += 4;
@@ -1087,10 +1091,14 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
   DEBUGASSERT(buf && remaining && dnsname);
   if(!buf || !remaining || !dnsname || !*remaining)
     return CURLE_OUT_OF_MEMORY;
-  curlx_dyn_init(&thename, CURL_MAXLEN_host_name);
+  curlx_dyn_init(&thename, CURL_MAXLEN_HOST_NAME);
   rem = *remaining;
   cp = *buf;
   clen = *cp++;
+  /* RFC 9460 says it must be uncompressed */
+  if(clen > 63)
+    return CURLE_WEIRD_SERVER_REPLY;
+
   if(clen == 0) {
     /* special case - return "." as name */
     if(curlx_dyn_addn(&thename, ".", 1))
@@ -1112,6 +1120,11 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
       return CURLE_OUT_OF_MEMORY;
     }
     clen = *cp++;
+    if(clen > 63) {
+      /* invalid format */
+      curlx_dyn_free(&thename);
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
   }
   *buf = cp;
   *remaining = rem - 1;

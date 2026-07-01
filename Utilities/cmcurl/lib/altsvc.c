@@ -113,11 +113,11 @@ static struct altsvc *altsvc_createid(const char *srchost,
     return NULL;
   as->src.host = (char *)as + sizeof(struct altsvc);
   memcpy(as->src.host, srchost, hlen);
-  /* the null terminator is already there */
+  /* the null-terminator is already there */
 
   as->dst.host = (char *)as + sizeof(struct altsvc) + hlen + 1;
   memcpy(as->dst.host, dsthost, dlen);
-  /* the null terminator is already there */
+  /* the null-terminator is already there */
 
   as->src.alpnid = srcalpnid;
   as->dst.alpnid = dstalpnid;
@@ -149,7 +149,7 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
 static void altsvc_append(struct altsvcinfo *asi, struct altsvc *as)
 {
   while(Curl_llist_count(&asi->list) >= MAX_ALTSVC_ENTRIES) {
-    /* It's full. Remove the first entry in the list */
+    /* It is full. Remove the first entry in the list */
     struct Curl_llist_node *e = Curl_llist_head(&asi->list);
     struct altsvc *oldas = Curl_node_elem(e);
     Curl_node_remove(e);

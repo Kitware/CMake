@@ -45,6 +45,7 @@ struct easy_pollset;
 struct Curl_https_rrinfo;
 struct Curl_multi;
 struct Curl_dns_entry;
+struct Curl_peer;
 
 /* DNS query types */
 #define CURL_DNSQ_A           (1U << 0)
@@ -96,9 +97,8 @@ void Curl_printable_address(const struct Curl_addrinfo *ai,
  * - other: the operation failed, `*pdns` is NULL, `*presolv_id` is 0.
  */
 CURLcode Curl_resolv(struct Curl_easy *data,
+                     struct Curl_peer *peer,
                      uint8_t dns_queries,
-                     const char *hostname,
-                     uint16_t port,
                      uint8_t transport,
                      bool for_proxy,
                      timediff_t timeout_ms,
@@ -182,13 +182,6 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
                                             const char *hostname,
                                             uint16_t port,
                                             uint8_t transport);
-#endif
-
-#ifdef USE_UNIX_SOCKETS
-CURLcode Curl_resolv_unix(struct Curl_easy *data,
-                          const char *unix_path,
-                          bool abstract_path,
-                          struct Curl_dns_entry **pdns);
 #endif
 
 #endif /* HEADER_CURL_HOSTIP_H */

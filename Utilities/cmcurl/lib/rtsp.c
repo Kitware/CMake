@@ -288,8 +288,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   const char *p_stream_uri = NULL;
   const char *p_transport = NULL;
   const char *p_uagent = NULL;
-  const char *p_proxyuserpwd = NULL;
-  const char *p_userpwd = NULL;
+  const char *p_hd_proxy_auth = NULL;
+  const char *p_hd_auth = NULL;
 
   *done = TRUE;
   if(!rtsp)
@@ -300,18 +300,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   rtsp->CSeq_sent = data->state.rtsp_next_client_CSeq;
   rtsp->CSeq_recv = 0;
-
-  /* Setup the first_* fields to allow auth details get sent
-     to this origin */
-
-  if(!data->state.first_host) {
-    data->state.first_host = curlx_strdup(conn->host.name);
-    if(!data->state.first_host)
-      return CURLE_OUT_OF_MEMORY;
-
-    data->state.first_remote_port = conn->remote_port;
-    data->state.first_remote_protocol = conn->scheme->protocol;
-  }
 
   /* Setup the 'p_request' pointer to the proper p_request string
    * Since all RTSP requests are included here, there is no need to
@@ -448,14 +436,14 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   /* setup the authentication headers */
   result = Curl_http_output_auth(data, conn, p_request, HTTPREQ_GET,
-                                 p_stream_uri, FALSE);
+                                 p_stream_uri, NULL, FALSE);
   if(result)
     goto out;
 
 #ifndef CURL_DISABLE_PROXY
-  p_proxyuserpwd = data->req.proxyuserpwd;
+  p_hd_proxy_auth = data->req.hd_proxy_auth;
 #endif
-  p_userpwd = data->req.userpwd;
+  p_hd_auth = data->req.hd_auth;
 
   /* Referrer */
   curlx_safefree(data->state.aptr.ref);
@@ -526,8 +514,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           "%s" /* range */
                           "%s" /* referrer */
                           "%s" /* user-agent */
-                          "%s" /* proxyuserpwd */
-                          "%s" /* userpwd */
+                          "%s" /* hd_proxy_auth */
+                          "%s" /* hd_auth */
                           ,
                           p_transport ? p_transport : "",
                           p_accept ? p_accept : "",
@@ -535,8 +523,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           p_range ? p_range : "",
                           p_referrer ? p_referrer : "",
                           p_uagent ? p_uagent : "",
-                          p_proxyuserpwd ? p_proxyuserpwd : "",
-                          p_userpwd ? p_userpwd : "");
+                          p_hd_proxy_auth ? p_hd_proxy_auth : "",
+                          p_hd_auth ? p_hd_auth : "");
 
   if(result)
     goto out;
@@ -670,7 +658,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
       while(blen && buf[0] != '$') {
         if(!in_body && buf[0] == 'R' &&
            data->set.rtspreq != RTSPREQ_RECEIVE) {
-          if(strncmp(buf, "RTSP/", (blen < 5) ? blen : 5) == 0) {
+          if(!strncmp(buf, "RTSP/", (blen < 5) ? blen : 5)) {
             /* This could be the next response, no consume and return */
             if(*pconsumed) {
               DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "
@@ -893,6 +881,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
       result = rtsp_filter_rtp(data, rtspc, buf, blen, &consumed);
       if(result)
         goto out;
+      buf += consumed;
       blen -= consumed;
     }
   }
@@ -904,7 +893,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
    * writer deal with it (it will report EXCESS and fail the transfer). */
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d, "
                "rtspc->state=%d, req.size=%" FMT_OFF_T ")",
-               blen, rtspc->in_header, data->req.done, rtspc->state,
+               blen, rtspc->in_header, data->req.done, (int)rtspc->state,
                data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY |

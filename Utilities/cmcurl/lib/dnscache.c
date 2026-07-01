@@ -351,7 +351,7 @@ UNITTEST CURLcode dns_shuffle_addr(struct Curl_easy *data,
 
   if(num_addrs > 1) {
     struct Curl_addrinfo **nodes;
-    CURL_TRC_DNS(data, "Shuffling %i addresses", num_addrs);
+    CURL_TRC_DNS(data, "Shuffling %d addresses", num_addrs);
 
     nodes = curlx_malloc(num_addrs * sizeof(*nodes));
     if(nodes) {
@@ -616,20 +616,6 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
   return CURLE_OUT_OF_MEMORY;
 }
 
-struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,
-                                           struct Curl_dns_entry *dns)
-{
-  if(!dns)
-    return NULL;
-  else {
-    struct Curl_dnscache *dnscache = dnscache_get(data);
-    dnscache_lock(data, dnscache);
-    dns->refcount++;
-    dnscache_unlock(data, dnscache);
-    return dns;
-  }
-}
-
 /*
  * Curl_dns_entry_unlink() releases a reference to the given cached DNS entry.
  * When the reference count reaches 0, the entry is destroyed. It is important
@@ -789,7 +775,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
         result = Curl_str2addr(address, port, &ai);
         if(result) {
-          infof(data, "Resolve address '%s' found illegal", address);
+          infof(data, "Resolve IP address '%s' found is illegal", address);
           goto err;
         }
 
@@ -842,7 +828,7 @@ err:
         Curl_hash_delete(&dnscache->entries, entry_id, entry_len + 1);
       }
 
-      /* put this new host in the cache, an overridy for ALL dns queries */
+      /* put this new host in the cache, an override for ALL dns queries */
       dns = dnscache_add_addr(data, dnscache, CURL_DNSQ_ALL,
                               &head, curlx_str(&source),
                               curlx_strlen(&source), port, permanent);

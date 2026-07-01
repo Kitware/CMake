@@ -65,9 +65,9 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->httpversion = 0;
   req->sendbuf_hds_len = 0;
 
-  curlx_safefree(req->userpwd);
+  curlx_safefree(req->hd_auth);
 #ifndef CURL_DISABLE_PROXY
-  curlx_safefree(req->proxyuserpwd);
+  curlx_safefree(req->hd_proxy_auth);
 #endif
 
   result = Curl_client_start(data);
@@ -115,9 +115,9 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   struct curltime t0 = { 0, 0 };
 
   curlx_safefree(req->newurl);
-  curlx_safefree(req->userpwd);
+  curlx_safefree(req->hd_auth);
 #ifndef CURL_DISABLE_PROXY
-  curlx_safefree(req->proxyuserpwd);
+  curlx_safefree(req->hd_proxy_auth);
 #endif
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(req->cookiehost);
@@ -175,9 +175,9 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
 {
   curlx_safefree(req->newurl);
-  curlx_safefree(req->userpwd);
+  curlx_safefree(req->hd_auth);
 #ifndef CURL_DISABLE_PROXY
-  curlx_safefree(req->proxyuserpwd);
+  curlx_safefree(req->hd_proxy_auth);
 #endif
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
@@ -271,7 +271,8 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
   data->req.upload_done = TRUE;
   CURL_REQ_CLEAR_SEND(data);
 
-  Curl_pgrsTime(data, TIMER_POSTRANSFER);
+  if(data->mstate >= MSTATE_DID)
+    Curl_pgrsTime(data, TIMER_POSTRANSFER);
   Curl_creader_done(data, data->req.upload_aborted);
 
   if(data->req.upload_aborted) {
@@ -333,7 +334,7 @@ static CURLcode req_flush(struct Curl_easy *data)
       result = Curl_xfer_send_shutdown(data, &done);
       if(result && data->req.shutdown_err_ignore) {
         infof(data, "Shutdown send direction error: %d. Broken server? "
-              "Proceeding as if everything is ok.", result);
+              "Proceeding as if everything is ok.", (int)result);
         result = CURLE_OK;
         done = TRUE;
       }
@@ -392,7 +393,7 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
   blen = curlx_dyn_len(req);
   /* if the sendbuf is empty and the request without body and
    * the length to send fits info a sendbuf chunk, we send it directly.
-   * If `blen` is larger then `chunk_size`, we can not. Because we
+   * If `blen` is larger than `chunk_size`, we can not. Because we
    * might have to retry a blocked send later from sendbuf and that
    * would result in retry sends with a shrunken length. That is trouble. */
   if(Curl_bufq_is_empty(&data->req.sendbuf) &&

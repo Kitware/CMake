@@ -102,7 +102,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 
   if(conn_config->verifyhost) {
     host_str = CFStringCreateWithCString(NULL,
-      peer->sni ? peer->sni : peer->hostname, kCFStringEncodingUTF8);
+      peer->sni ? peer->sni : peer->origin->hostname, kCFStringEncodingUTF8);
     if(!host_str) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -208,7 +208,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
       status = SecTrustSetOCSPResponse(trust, ocspdata);
       CFRelease(ocspdata);
       if(status != noErr) {
-        failf(data, "Apple SecTrust: failed to set OCSP response: %i",
+        failf(data, "Apple SecTrust: failed to set OCSP response: %d",
               (int)status);
         result = CURLE_PEER_FAILED_VERIFICATION;
         goto out;
@@ -238,10 +238,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
         err_desc = curlx_malloc(size + 1);
         if(err_desc) {
           if(!CFStringGetCString(error_ref, err_desc, size,
-                                 kCFStringEncodingUTF8)) {
-            curlx_free(err_desc);
-            err_desc = NULL;
-          }
+                                 kCFStringEncodingUTF8))
+            curlx_safefree(err_desc);
         }
       }
       infof(data, "Apple SecTrust failure %ld%s%s", code,
@@ -256,7 +254,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     status = SecTrustEvaluate(trust, &sec_result);
 
     if(status != noErr) {
-      failf(data, "Apple SecTrust verification failed: error %i", (int)status);
+      failf(data, "Apple SecTrust verification failed: error %d", (int)status);
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else if((sec_result == kSecTrustResultUnspecified) ||

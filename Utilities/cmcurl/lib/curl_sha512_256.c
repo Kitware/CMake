@@ -44,7 +44,7 @@
 #    define USE_OPENSSL_SHA512_256          1
 #    define HAS_SHA512_256_IMPLEMENTATION   1
 #    ifdef __NetBSD__
-/* Some NetBSD versions has a bug in SHA-512/256.
+/* Some NetBSD versions have a bug in SHA-512/256.
  * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
  * The problematic versions:
  * - NetBSD before 9.4
@@ -54,7 +54,6 @@
  * NetBSD 10.99.11 development.
  * It is safe to apply the workaround even if the bug is not present, as
  * the workaround reduces performance slightly. */
-#      include <sys/param.h>
 #      if  __NetBSD_Version__ <   904000000 ||  \
           (__NetBSD_Version__ >=  999000000 &&  \
            __NetBSD_Version__ <  1000000000) || \
@@ -75,7 +74,8 @@
 #endif
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
-#  include <nettle/sha.h>
+#  include <nettle/sha2.h>
+#  include <nettle/version.h>
 #  ifdef SHA512_256_DIGEST_SIZE
 #    define USE_GNUTLS_SHA512_256           1
 #  endif
@@ -102,7 +102,7 @@
 typedef EVP_MD_CTX *Curl_sha512_256_ctx;
 
 /**
- * Initialise structure for SHA-512/256 calculation.
+ * Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
  * @return CURLE_OK if succeed,
@@ -145,7 +145,7 @@ static CURLcode Curl_sha512_256_update(void *context,
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
   if(!EVP_DigestUpdate(*ctx, data, length))
-    return CURLE_SSL_CIPHER;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   return CURLE_OK;
 }
@@ -168,14 +168,14 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   /* Use a larger buffer to work around a bug in NetBSD:
      https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
   unsigned char tmp_digest[CURL_SHA512_256_DIGEST_SIZE * 2];
-  result = EVP_DigestFinal_ex(*ctx,
-                           tmp_digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
+  result = EVP_DigestFinal_ex(*ctx, tmp_digest, NULL) ?
+    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   if(result == CURLE_OK)
     memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
-  explicit_memset(tmp_digest, 0, sizeof(tmp_digest));
+  curlx_memzero(tmp_digest, sizeof(tmp_digest));
 #else /* !NEED_NETBSD_SHA512_256_WORKAROUND */
   result = EVP_DigestFinal_ex(*ctx, digest, NULL) ?
-    CURLE_OK : CURLE_SSL_CIPHER;
+    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 #endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
 
   EVP_MD_CTX_destroy(*ctx);
@@ -206,7 +206,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
   do {
     word32 ilen = (word32)CURLMIN(length, UINT_MAX);
     if(wc_Sha512_256Update(ctx, data, ilen))
-      return CURLE_SSL_CIPHER;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     length -= ilen;
     data += ilen;
   } while(length);
@@ -216,7 +216,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 {
   if(wc_Sha512_256Final(ctx, digest))
-    return CURLE_SSL_CIPHER;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 }
 
@@ -231,7 +231,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 typedef struct sha512_256_ctx Curl_sha512_256_ctx;
 
 /**
- * Initialise structure for SHA-512/256 calculation.
+ * Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
  * @return always CURLE_OK
@@ -262,7 +262,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
-  DEBUGASSERT((data != NULL) || (length == 0));
+  DEBUGASSERT(data || (length == 0));
 
   sha512_256_update(ctx, length, (const uint8_t *)data);
 
@@ -281,8 +281,12 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
+#if NETTLE_VERSION_MAJOR >= 4
+  sha512_256_digest(ctx, (uint8_t *)digest);
+#else
   sha512_256_digest(ctx,
                     (size_t)CURL_SHA512_256_DIGEST_SIZE, (uint8_t *)digest);
+#endif
 
   return CURLE_OK;
 }
@@ -296,7 +300,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 
 #ifdef __GNUC__
 #  if defined(__has_attribute) && defined(__STDC_VERSION__)
-#    if __has_attribute(always_inline) && __STDC_VERSION__ >= 199901
+#    if __has_attribute(always_inline) && __STDC_VERSION__ >= 199901L
 #      define CURL_FORCEINLINE CURL_INLINE __attribute__((always_inline))
 #    endif
 #  endif
@@ -430,7 +434,7 @@ struct Curl_sha512_256ctx {
 typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
 
 /**
- * Initialise structure for SHA-512/256 calculation.
+ * Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
  * @return always CURLE_OK
@@ -456,7 +460,7 @@ static CURLcode Curl_sha512_256_init(void *context)
   ctx->H[6] = UINT64_C(0x2B0199FC2C85B8AA);
   ctx->H[7] = UINT64_C(0x0EB72DDC81C52CA2);
 
-  /* Initialise number of bytes and high part of number of bits. */
+  /* Initialize number of bytes and high part of number of bits. */
   ctx->count = UINT64_C(0);
   ctx->count_bits_hi = UINT64_C(0);
 
@@ -494,14 +498,10 @@ static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
 
   /* Four 'Sigma' macro functions.
      See FIPS PUB 180-4 formulae 4.10, 4.11, 4.12, 4.13. */
-#define SIG0(x)                                                  \
-  (Curl_rotr64(x, 28) ^ Curl_rotr64(x, 34) ^ Curl_rotr64(x, 39))
-#define SIG1(x)                                                  \
-  (Curl_rotr64(x, 14) ^ Curl_rotr64(x, 18) ^ Curl_rotr64(x, 41))
-#define sig0(x)                                                  \
-  (Curl_rotr64(x,  1) ^ Curl_rotr64(x,  8) ^ ((x) >> 7))
-#define sig1(x)                                                  \
-  (Curl_rotr64(x, 19) ^ Curl_rotr64(x, 61) ^ ((x) >> 6))
+#define SIG0(x) (Curl_rotr64(x, 28) ^ Curl_rotr64(x, 34) ^ Curl_rotr64(x, 39))
+#define SIG1(x) (Curl_rotr64(x, 14) ^ Curl_rotr64(x, 18) ^ Curl_rotr64(x, 41))
+#define sig0(x) (Curl_rotr64(x,  1) ^ Curl_rotr64(x,  8) ^ ((x) >> 7))
+#define sig1(x) (Curl_rotr64(x, 19) ^ Curl_rotr64(x, 61) ^ ((x) >> 6))
 
   if(1) {
     unsigned int t;
@@ -645,7 +645,7 @@ static CURLcode Curl_sha512_256_update(void *context,
   /* the void pointer here is required to mute Intel compiler warning */
   void * const ctx_buf = ctx->buffer;
 
-  DEBUGASSERT((data != NULL) || (length == 0));
+  DEBUGASSERT(data || (length == 0));
 
   if(length == 0)
     return CURLE_OK; /* Shortcut, do nothing */
@@ -711,7 +711,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
-  uint64_t num_bits;   /* Number of processed bits */
+  uint64_t num_bits; /* Number of processed bits */
   unsigned int bytes_have; /* Number of bytes in the context buffer */
   /* the void pointer here is required to mute Intel compiler warning */
   void * const ctx_buf = ctx->buffer;

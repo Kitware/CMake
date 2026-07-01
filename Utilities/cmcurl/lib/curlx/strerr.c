@@ -190,7 +190,7 @@ static const char *get_winsock_error(int err, char *buf, size_t len)
     p = "Winsock library is not ready";
     break;
   case WSANOTINITIALISED:
-    p = "Winsock library not initialised";
+    p = "Winsock library not initialized";
     break;
   case WSAVERNOTSUPPORTED:
     p = "Winsock version not supported";
@@ -268,7 +268,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
      !get_winsock_error(err, buf, buflen) &&
 #endif
      !curlx_get_winapi_error((DWORD)err, buf, buflen))
-    SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, err);
+    SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, (unsigned int)err);
 #else /* !_WIN32 */
 
 #if defined(HAVE_STRERROR_R) && defined(HAVE_POSIX_STRERROR_R)

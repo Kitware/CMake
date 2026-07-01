@@ -49,15 +49,13 @@ struct dynbuf;
 #define SSLSUPP_ISSUERCERT_BLOB (1 << 14) /* CURLOPT_ISSUERCERT_BLOB */
 
 #ifdef USE_ECH
-/* CURLECH_ bits for the tls_ech option */
-#define CURLECH_DISABLE    (1 << 0)
-#define CURLECH_GREASE     (1 << 1)
-#define CURLECH_ENABLE     (1 << 2)
-#define CURLECH_HARD       (1 << 3)
-#define CURLECH_CLA_CFG    (1 << 4)
+/* CURLECH_ values for the tls_ech option */
+#define CURLECH_DISABLE    0
+#define CURLECH_GREASE     1
+#define CURLECH_ENABLE     2
+#define CURLECH_HARD       3
 
-#define CURLECH_ENABLED(data) \
-  ((data)->set.tls_ech && !((data)->set.tls_ech & CURLECH_DISABLE))
+#define CURLECH_ENABLED(data) ((data)->set.tls_ech)
 #endif /* USE_ECH */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
@@ -91,12 +89,11 @@ typedef enum {
 } ssl_peer_type;
 
 struct ssl_peer {
-  char *hostname;        /* hostname for verification */
-  char *dispname;        /* display version of hostname */
+  struct Curl_peer *origin; /* the authority we talk to */
+  struct Curl_peer *peer;   /* the machine we are connected to */
   char *sni;             /* SNI version of hostname or NULL if not usable */
   char *scache_key;      /* for lookups in session cache */
   ssl_peer_type type;    /* type of the peer information */
-  uint16_t port;         /* port we are talking to */
   uint8_t transport;     /* one of TRNSPRT_* defines */
 };
 
@@ -108,47 +105,12 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 curl_sslbackend Curl_ssl_backend(void);
 
 /**
- * Init ssl config for a new easy handle.
- */
-void Curl_ssl_easy_config_init(struct Curl_easy *data);
-
-/**
- * Init the `data->set.ssl` and `data->set.proxy_ssl` for
- * connection matching use.
- */
-CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data);
-
-/**
- * Init SSL configs (main + proxy) for a new connection from the easy handle.
- */
-CURLcode Curl_ssl_conn_config_init(struct Curl_easy *data,
-                                   struct connectdata *conn);
-
-/**
- * Free allocated resources in SSL configs (main + proxy) for
- * the given connection.
- */
-void Curl_ssl_conn_config_cleanup(struct connectdata *conn);
-
-/**
- * Return TRUE iff SSL configuration from `data` is functionally the
- * same as the one on `candidate`.
- * @param proxy   match the proxy SSL config or the main one
- */
-bool Curl_ssl_conn_config_match(struct Curl_easy *data,
-                                struct connectdata *candidate,
-                                bool proxy);
-
-/* Update certain connection SSL config flags after they have
- * been changed on the easy handle. Works for `verifypeer`,
- * `verifyhost` and `verifystatus`. */
-void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
-
-/**
  * Init SSL peer information for filter. Can be called repeatedly.
  */
-CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
-                            struct Curl_cfilter *cf,
+CURLcode Curl_ssl_peer_init(struct ssl_peer *ssl_peer,
+                            struct Curl_peer *origin,
+                            struct Curl_peer *peer,
+                            struct ssl_primary_config *sslc,
                             const char *tls_id,
                             uint8_t transport);
 /**
@@ -194,7 +156,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 bool Curl_ssl_cert_status_request(void);
 
 /* The maximum size of the SSL channel binding is 85 bytes, as defined in
- * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes long,
+ * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes,
  * and SHA-512 is the longest supported hash algorithm, with a digest length of
  * 64 bytes.
  * The maximum size of the channel binding is therefore 21 + 64 = 85 bytes.
@@ -215,18 +177,22 @@ CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
+                              struct Curl_peer *origin,
                               struct connectdata *conn,
                               int sockindex);
 
 CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
-                                  struct Curl_easy *data);
+                                  struct Curl_easy *data,
+                                  struct Curl_peer *origin,
+                                  struct Curl_peer *peer);
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
                                  int sockindex, bool send_shutdown);
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                        struct Curl_easy *data);
+                                        struct Curl_easy *data,
+                                        struct Curl_peer *peer);
 #endif /* !CURL_DISABLE_PROXY */
 
 /**
@@ -245,8 +211,8 @@ struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
 /**
  * Get the primary config relevant for the filter from its connection.
  */
-struct ssl_primary_config *
-  Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
+struct ssl_primary_config *Curl_ssl_cf_get_primary_config(
+  struct Curl_cfilter *cf);
 
 extern struct Curl_cftype Curl_cft_ssl;
 #ifndef CURL_DISABLE_PROXY
@@ -266,7 +232,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_random(x, y, z) ((void)(x), CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_supports(a, b) FALSE
-#define Curl_ssl_cfilter_add(a, b, c) CURLE_NOT_BUILT_IN
+#define Curl_ssl_cfilter_add(a, b, c, d) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a, b, c) CURLE_OK
 #define Curl_ssl_cf_get_config(a, b) NULL
 #define Curl_ssl_cf_get_primary_config(a) NULL

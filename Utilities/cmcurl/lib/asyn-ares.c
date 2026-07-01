@@ -281,8 +281,8 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   if(ares->ares_status == ARES_SUCCESS && !result) {
     struct Curl_dns_entry *dns =
       Curl_dnscache_mk_entry2(data, async->dns_queries,
-                             &ares->res_AAAA, &ares->res_A,
-                             async->hostname, async->port);
+                              &ares->res_AAAA, &ares->res_A,
+                              async->hostname, async->port);
     if(!dns) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -314,7 +314,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   }
 
   CURL_TRC_DNS(data, "ares: is_resolved() result=%d, dns=%sfound",
-               result, *pdns ? "" : "not ");
+               (int)result, *pdns ? "" : "not ");
   async_ares_cleanup(async);
 
 out:
@@ -489,7 +489,7 @@ static struct Curl_addrinfo *async_ares_node2addr(
   struct Curl_addrinfo *calast = NULL;
   int error = 0;
 
-  for(ai = node; ai != NULL; ai = ai->ai_next) {
+  for(ai = node; ai; ai = ai->ai_next) {
     size_t ss_size;
     struct Curl_addrinfo *ca;
     /* ignore elements with unsupported address family,

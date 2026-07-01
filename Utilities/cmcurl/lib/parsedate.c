@@ -98,8 +98,12 @@ const char * const Curl_month[] = {
 
 #ifndef CURL_DISABLE_PARSEDATE
 
+#if SIZEOF_TIME_T < 5
 #define PARSEDATE_LATER  1
+#endif
+#if SIZEOF_TIME_T < 5 || defined(HAVE_TIME_T_UNSIGNED)
 #define PARSEDATE_SOONER 2
+#endif
 
 static const char * const weekday[] = {
   "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"

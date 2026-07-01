@@ -111,7 +111,7 @@ struct async_thrdd_item {
 #ifdef CURLVERBOSE
   char description[CURL_ASYN_ITEM_DESC_LEN];
 #endif
-  int sock_error;
+  int sockerr;
   uint32_t mid;
   uint32_t resolv_id;
   uint16_t port;
@@ -372,9 +372,9 @@ static void async_thrdd_item_process(void *arg)
 
   rc = Curl_getaddrinfo_ex(item->hostname, service, &hints, &item->res);
   if(rc) {
-    item->sock_error = SOCKERRNO ? SOCKERRNO : rc;
-    if(item->sock_error == 0)
-      item->sock_error = RESOLVER_ENOMEM;
+    item->sockerr = SOCKERRNO ? SOCKERRNO : rc;
+    if(item->sockerr == 0)
+      item->sockerr = RESOLVER_ENOMEM;
   }
   else {
     Curl_addrinfo_set_port(item->res, item->port);
@@ -399,9 +399,9 @@ static void async_thrdd_item_process(void *arg)
 #endif
   item->res = Curl_ipv4_resolve_r(item->hostname, item->port);
   if(!item->res) {
-    item->sock_error = SOCKERRNO;
-    if(item->sock_error == 0)
-      item->sock_error = RESOLVER_ENOMEM;
+    item->sockerr = SOCKERRNO;
+    if(item->sockerr == 0)
+      item->sockerr = RESOLVER_ENOMEM;
   }
 }
 
@@ -481,8 +481,13 @@ static void async_thrdd_report_item(struct Curl_easy *data,
   struct dynbuf tmp;
   const char *sep = "";
   const struct Curl_addrinfo *ai = item->res;
-  int ai_family = (item->dns_queries & CURL_DNSQ_AAAA) ? AF_INET6 : AF_INET;
   CURLcode result;
+  int ai_family;
+#ifdef USE_IPV6
+  ai_family = (item->dns_queries & CURL_DNSQ_AAAA) ? AF_INET6 : AF_INET;
+#else
+  ai_family = AF_INET;
+#endif
 
   if(!CURL_TRC_DNS_is_verbose(data))
     return;
@@ -635,7 +640,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 out:
   if(result)
     CURL_TRC_DNS(data, "error queueing query %s:%d -> %d",
-                 async->hostname, async->port, result);
+                 async->hostname, async->port, (int)result);
   return result;
 }
 
@@ -701,6 +706,9 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   if(thrdd->rr.channel)
     (void)Curl_ares_perform(thrdd->rr.channel, 0);
 #endif
+#ifndef ENABLE_WAKEUP
+  Curl_async_thrdd_multi_process(data->multi);
+#endif
 
   if(!async->done)
     return CURLE_AGAIN;
@@ -756,7 +764,7 @@ out:
      (result != CURLE_COULDNT_RESOLVE_HOST) &&
      (result != CURLE_COULDNT_RESOLVE_PROXY)) {
     CURL_TRC_DNS(data, "Error %d resolving %s:%d",
-                 result, async->hostname, async->port);
+                 (int)result, async->hostname, async->port);
   }
   return result;
 }
@@ -789,10 +797,12 @@ const struct Curl_addrinfo *Curl_async_get_ai(struct Curl_easy *data,
     if(thrdd->res_A)
       return async_thrdd_get_ai(thrdd->res_A->res, ai_family, index);
     break;
+#ifdef USE_IPV6
   case AF_INET6:
     if(thrdd->res_AAAA)
       return async_thrdd_get_ai(thrdd->res_AAAA->res, ai_family, index);
     break;
+#endif
   default:
     break;
   }

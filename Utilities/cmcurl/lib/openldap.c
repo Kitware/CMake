@@ -345,9 +345,9 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
   passwd.bv_val = NULL;
   passwd.bv_len = 0;
 
-  if(data->state.aptr.user) {
-    binddn = conn->user;
-    passwd.bv_val = conn->passwd;
+  if(conn->creds) {
+    binddn = Curl_creds_user(conn->creds);
+    passwd.bv_val = CURL_UNCONST(Curl_creds_passwd(conn->creds));
     passwd.bv_len = strlen(passwd.bv_val);
   }
 
@@ -355,7 +355,7 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
                       NULL, NULL, &li->msgid);
   if(rc != LDAP_SUCCESS)
     return oldap_map_error(rc,
-                           data->state.aptr.user ?
+                           data->state.creds ?
                            CURLE_LOGIN_DENIED : CURLE_LDAP_CANNOT_BIND);
   oldap_state(data, li, newstate);
   return CURLE_OK;
@@ -499,7 +499,7 @@ static Sockbuf_IO ldapsb_tls = {
 static bool ssl_installed(struct connectdata *conn)
 {
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-  return li && li->recv != NULL;
+  return li && li->recv;
 }
 
 static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
@@ -617,8 +617,8 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   hosturl = curl_maprintf("%s://%s:%d",
                           conn->scheme->name,
                           (data->state.up.hostname[0] == '[') ?
-                          data->state.up.hostname : conn->host.name,
-                          conn->remote_port);
+                          data->state.up.hostname : conn->origin->hostname,
+                          conn->origin->port);
   if(!hosturl) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -900,7 +900,8 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
         result = oldap_perform_bind(data, OLDAP_BIND);
       break;
     }
-    result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
+    result = Curl_ssl_cfilter_add(
+      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
     if(result)
       break;
     FALLTHROUGH();
@@ -911,7 +912,7 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
     else if(ssl_installed(conn)) {
       if(li->sasl.prefmech != SASL_AUTH_NONE)
         result = oldap_perform_mechs(data);
-      else if(data->state.aptr.user)
+      else if(data->state.creds)
         result = oldap_perform_bind(data, OLDAP_BIND);
       else {
         /* Version 3 supported: no bind required */
@@ -1177,7 +1178,7 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       binary = bv.bv_len > 7 &&
         curl_strnequal(bv.bv_val + bv.bv_len - 7, ";binary", 7);
 
-      for(i = 0; bvals[i].bv_val != NULL; i++) {
+      for(i = 0; bvals[i].bv_val; i++) {
         bool binval = FALSE;
 
         result = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,

@@ -196,13 +196,11 @@ void Curl_wildcard_dtor(struct WildcardData **wcp)
     wc->dtor = ZERO_NULL;
     wc->ftpwc = NULL;
   }
-  DEBUGASSERT(wc->ftpwc == NULL);
+  DEBUGASSERT(!wc->ftpwc);
 
   Curl_llist_destroy(&wc->filelist, NULL);
-  curlx_free(wc->path);
-  wc->path = NULL;
-  curlx_free(wc->pattern);
-  wc->pattern = NULL;
+  curlx_safefree(wc->path);
+  curlx_safefree(wc->pattern);
   wc->state = CURLWC_INIT;
   curlx_free(wc);
   *wcp = NULL;
@@ -312,8 +310,9 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                           str + parser->offsets.group : NULL;
   finfo->strings.perm   = parser->offsets.perm ?
                           str + parser->offsets.perm : NULL;
-  finfo->strings.target = parser->offsets.symlink_target ?
-                          str + parser->offsets.symlink_target : NULL;
+  finfo->strings.target = parser->offsets.symlink_target &&
+    (finfo->filetype == CURLFILETYPE_SYMLINK) ?
+    str + parser->offsets.symlink_target : NULL;
   finfo->strings.time   = str + parser->offsets.time;
   finfo->strings.user   = parser->offsets.user ?
                           str + parser->offsets.user : NULL;
@@ -940,7 +939,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
       parser->item_length++;
       if(c == ' ') {
         mem[parser->item_offset + parser->item_length - 1] = 0;
-        if(strcmp("<DIR>", mem + parser->item_offset) == 0) {
+        if(!strcmp("<DIR>", mem + parser->item_offset)) {
           finfo->filetype = CURLFILETYPE_DIRECTORY;
           finfo->size = 0;
         }
