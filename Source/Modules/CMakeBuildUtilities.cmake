@@ -153,7 +153,7 @@ else()
     set(CURL_CA_BUNDLE "" CACHE FILEPATH "Path to SSL CA Certificate Bundle")
     set(CURL_CA_PATH "" CACHE PATH "Path to SSL CA Certificate Directory")
     mark_as_advanced(CURL_CA_BUNDLE CURL_CA_PATH)
-    find_package(OpenSSL)
+    find_package(OpenSSL 3.0.0)
   endif()
   if(NOT CMAKE_USE_SYSTEM_NGHTTP2)
     # Tell curl's FindNGHTTP2 module to use our library.
