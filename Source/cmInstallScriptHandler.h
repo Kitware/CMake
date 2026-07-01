@@ -36,8 +36,10 @@ public:
   {
   public:
     InstallScriptRunner(InstallScript const&);
-    void start(cm::uv_loop_ptr&, std::function<void()>);
+    bool start(cm::uv_loop_ptr&, std::function<void()>);
     void printResult(std::size_t n, std::size_t total);
+    bool Failed() const;
+    void printFailure();
 
   private:
     std::vector<std::string> Command;

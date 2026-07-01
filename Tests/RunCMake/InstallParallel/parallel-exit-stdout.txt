@@ -1,0 +1,1 @@
+install script '[^']*' exited with code 7

@@ -155,49 +155,67 @@ int cmInstallScriptHandler::Install(unsigned int j,
     for (auto queue = std::min(j - working, runners.size() - i); queue > 0;
          --queue) {
       ++working;
-      runners[i].start(loop,
-                       [&runners, &working, &installed, i, &queueScripts]() {
-                         runners[i].printResult(++installed, runners.size());
-                         --working;
-                         queueScripts();
-                       });
+      bool started = runners[i].start(
+        loop, [&runners, &working, &installed, i, &queueScripts]() {
+          runners[i].printResult(++installed, runners.size());
+          --working;
+          queueScripts();
+        });
+      if (!started) {
+        // The child could not be spawned.  Release its scheduling slot so the
+        // remaining scripts still run; it is counted as a failure after the
+        // event loop completes.
+        --working;
+      }
       ++i;
     }
   };
   queueScripts();
   uv_run(loop, UV_RUN_DEFAULT);
 
-  // Write install manifest
-  std::string installManifest;
-  for (auto const& component : this->Components) {
-    if (component.empty()) {
-      installManifest = "install_manifest.txt";
-    } else {
-      cmsys::RegularExpression regEntry;
-      if (regEntry.compile("^[a-zA-Z0-9_.+-]+$") && regEntry.find(component)) {
-        installManifest = cmStrCat("install_manifest_", component, ".txt");
-      } else {
-        cmCryptoHash md5(cmCryptoHash::AlgoMD5);
-        md5.Initialize();
-        installManifest =
-          cmStrCat("install_manifest_", md5.HashString(component), ".txt");
-      }
+  int result = 0;
+  for (auto& runner : runners) {
+    if (runner.Failed()) {
+      runner.printFailure();
+      result = 1;
     }
-    cmGeneratedFileStream fout(
-      cmStrCat(this->BinaryDir, '/', installManifest));
-    fout.SetCopyIfDifferent(true);
-    for (auto const& dir : this->Directories) {
-      auto localManifest = cmStrCat(dir, "/install_local_manifest.txt");
-      if (cmSystemTools::FileExists(localManifest)) {
-        cmsys::ifstream fin(localManifest.c_str());
-        std::string line;
-        while (std::getline(fin, line)) {
-          fout << line << "\n";
+  }
+
+  // Write the install manifest only when every script succeeded.  A failed
+  // install must not leave behind a manifest that looks complete.
+  if (result == 0) {
+    std::string installManifest;
+    for (auto const& component : this->Components) {
+      if (component.empty()) {
+        installManifest = "install_manifest.txt";
+      } else {
+        cmsys::RegularExpression regEntry;
+        if (regEntry.compile("^[a-zA-Z0-9_.+-]+$") &&
+            regEntry.find(component)) {
+          installManifest = cmStrCat("install_manifest_", component, ".txt");
+        } else {
+          cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+          md5.Initialize();
+          installManifest =
+            cmStrCat("install_manifest_", md5.HashString(component), ".txt");
+        }
+      }
+      cmGeneratedFileStream fout(
+        cmStrCat(this->BinaryDir, '/', installManifest));
+      fout.SetCopyIfDifferent(true);
+      for (auto const& dir : this->Directories) {
+        auto localManifest = cmStrCat(dir, "/install_local_manifest.txt");
+        if (cmSystemTools::FileExists(localManifest)) {
+          cmsys::ifstream fin(localManifest.c_str());
+          std::string line;
+          while (std::getline(fin, line)) {
+            fout << line << "\n";
+          }
         }
       }
     }
   }
-  return 0;
+  return result;
 }
 
 InstallScriptRunner::InstallScriptRunner(InstallScript const& script)
@@ -207,7 +225,7 @@ InstallScriptRunner::InstallScriptRunner(InstallScript const& script)
   this->Command = script.command;
 }
 
-void InstallScriptRunner::start(cm::uv_loop_ptr& loop,
+bool InstallScriptRunner::start(cm::uv_loop_ptr& loop,
                                 std::function<void()> callback)
 {
   cmUVProcessChainBuilder builder;
@@ -215,6 +233,9 @@ void InstallScriptRunner::start(cm::uv_loop_ptr& loop,
     .SetExternalLoop(*loop)
     .SetMergedBuiltinStreams();
   this->Chain = cm::make_unique<cmUVProcessChain>(builder.Start());
+  if (!this->Chain->Valid()) {
+    return false;
+  }
   this->StreamHandler = cmUVStreamRead(
     this->Chain->OutputStream(),
     [this](std::vector<char> data) {
@@ -224,6 +245,7 @@ void InstallScriptRunner::start(cm::uv_loop_ptr& loop,
       this->Output.push_back(strdata);
     },
     std::move(callback));
+  return true;
 }
 
 void InstallScriptRunner::printResult(std::size_t n, std::size_t total)
@@ -232,4 +254,40 @@ void InstallScriptRunner::printResult(std::size_t n, std::size_t total)
   for (auto const& line : this->Output) {
     cmSystemTools::Stdout(line);
   }
+}
+
+bool InstallScriptRunner::Failed() const
+{
+  if (!this->Chain || !this->Chain->Valid()) {
+    return true;
+  }
+  auto const& status = this->Chain->GetStatus(0);
+  return status.SpawnResult != 0 || status.TermSignal != 0 ||
+    status.ExitStatus != 0;
+}
+
+void InstallScriptRunner::printFailure()
+{
+  std::string detail;
+  if (!this->Chain || !this->Chain->Valid()) {
+    // The chain never spawned a process (e.g. pipe/loop setup failed).
+    detail = "failed to start";
+  } else {
+    auto const& status = this->Chain->GetStatus(0);
+    auto exception = status.GetException();
+    switch (exception.first) {
+      case cmUVProcessChain::ExceptionCode::None:
+        detail = cmStrCat("exited with code ", status.ExitStatus);
+        break;
+      case cmUVProcessChain::ExceptionCode::Spawn:
+        // Prepared, but the process could not be executed.
+        detail = cmStrCat("failed to start: ", exception.second);
+        break;
+      default:
+        detail = exception.second;
+        break;
+    }
+  }
+  cmSystemTools::Stderr(
+    cmStrCat("CMake Error: install script '", this->Name, "' ", detail, '\n'));
 }

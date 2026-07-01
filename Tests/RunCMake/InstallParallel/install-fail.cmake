@@ -1,0 +1,6 @@
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt TYPE DATA RENAME root.txt)
+if (INSTALL_PARALLEL)
+  set_property(GLOBAL PROPERTY INSTALL_PARALLEL ON)
+endif()
+add_subdirectory(fail-subdir)
+add_subdirectory(ok-subdir)
