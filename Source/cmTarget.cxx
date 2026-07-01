@@ -41,6 +41,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetPropertyComputer.h"
 #include "cmValue.h"
@@ -2114,6 +2115,7 @@ bool IsSettableProperty(cmMakefile* context, cmTarget* target,
   using ROC = ReadOnlyCondition;
   static std::unordered_map<std::string, ReadOnlyProperty> const readOnlyProps{
     { "EXPORT_NAME", { ROC::Imported } },
+    { "FILE_SET_TYPES", { ROC::All } },
     { "HEADER_SETS", { ROC::All } },
     { "IMPORTED_GLOBAL", { ROC::NonImported } },
     { "INTERFACE_HEADER_SETS", { ROC::All } },
@@ -2181,6 +2183,11 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
     }
   }
 
+  if (cmHasPrefix(prop, "FILE_SETS_"_s) ||
+      cmHasPrefix(prop, "INTERFACE_FILE_SETS_"_s)) {
+    // these properties are always read-only
+    return;
+  }
   for (auto& fileSetType : this->impl->FileSetTypes) {
     if (fileSetType.second.WriteProperties(this, this->impl.get(), prop, value,
                                            FileSetType::Action::Set)) {
@@ -2773,6 +2780,32 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
   }
 
   // Check fileset properties.
+  if (prop == "FILE_SET_TYPES"_s) {
+    static std::string fsTypes;
+    cmList types;
+    for (auto const& fileSetType : this->impl->FileSetTypes) {
+      if (!fileSetType.second.SelfEntries.Entries.empty() ||
+          !fileSetType.second.InterfaceEntries.Entries.empty()) {
+        types.push_back(fileSetType.first);
+      }
+    }
+    std::sort(types.begin(), types.end());
+    fsTypes = types.to_string();
+    return cmValue{ fsTypes };
+  }
+  if (cmHasPrefix(prop, "FILE_SETS_"_s)) {
+    static std::string fileSets;
+    std::string type = prop.substr(10);
+    fileSets = cmList::to_string(this->GetFileSetsEntries(type));
+    return cmValue{ fileSets };
+  }
+  if (cmHasPrefix(prop, "INTERFACE_FILE_SETS_"_s)) {
+    static std::string fileSets;
+    std::string type = prop.substr(20);
+    fileSets = cmList::to_string(this->GetInterfaceFileSetsEntries(type));
+    return cmValue{ fileSets };
+  }
+
   {
     for (auto const& fileSetType : this->impl->FileSetTypes) {
       auto value =

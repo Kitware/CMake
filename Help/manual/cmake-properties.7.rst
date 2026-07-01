@@ -227,6 +227,8 @@ Properties on Targets
    /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FASTBUILD_CACHING
    /prop_tgt/FASTBUILD_DISTRIBUTION
+   /prop_tgt/FILE_SET_TYPES
+   /prop_tgt/FILE_SETS_TYPE
    /prop_tgt/FOLDER
    /prop_tgt/Fortran_BUILDING_INTRINSIC_MODULES
    /prop_tgt/Fortran_FORMAT
@@ -295,6 +297,7 @@ Properties on Targets
    /prop_tgt/INTERFACE_COMPILE_FEATURES
    /prop_tgt/INTERFACE_COMPILE_OPTIONS
    /prop_tgt/INTERFACE_CXX_MODULE_SETS
+   /prop_tgt/INTERFACE_FILE_SETS_TYPE
    /prop_tgt/INTERFACE_HEADER_SETS
    /prop_tgt/INTERFACE_HEADER_SETS_TO_VERIFY
    /prop_tgt/INTERFACE_INCLUDE_DIRECTORIES

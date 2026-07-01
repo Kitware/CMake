@@ -8,7 +8,15 @@ all file sets with the type ``HEADERS``). Files listed in these header sets
 can be installed with :command:`install(TARGETS)` and exported with
 :command:`install(EXPORT)` and :command:`export`.
 
-Header sets may be defined using the :command:`target_sources` command
-``FILE_SET`` option with type ``HEADERS``.
+See Also
+^^^^^^^^
 
-See also :prop_tgt:`HEADER_SETS`.
+Related properties:
+
+* :prop_tgt:`INTERFACE_FILE_SETS_<TYPE>`
+* :prop_tgt:`FILE_SETS_<TYPE>`
+* :prop_tgt:`HEADER_SETS`
+
+Related commands:
+
+* :command:`target_sources` to define file sets of type ``HEADERS``
