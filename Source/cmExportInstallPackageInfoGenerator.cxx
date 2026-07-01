@@ -17,8 +17,10 @@
 #include <cm3p/json/value.h>
 
 #include "cmAlgorithms.h"
+#include "cmDiagnostics.h"
 #include "cmExportSet.h"
 #include "cmFileSetMetadata.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
@@ -115,6 +117,7 @@ bool cmExportInstallPackageInfoGenerator::GenerateMainFile(std::ostream& os)
     if (!this->GenerateFileSetProperties(*component, gt, te, packagePath)) {
       return false;
     }
+    this->GenerateTargetFileSets(*component, gt, te);
   }
 
   this->GeneratePackageRequires(root);
@@ -220,21 +223,19 @@ std::string cmExportInstallPackageInfoGenerator::GetCxxModulesDirectory() const
 
 cm::optional<std::string>
 cmExportInstallPackageInfoGenerator::GetFileSetDirectory(
-  cmGeneratorTarget* gte, cmTargetExport const* te,
+  cmGeneratorTarget const* target, cmTargetExport const* targetExport,
   cmGeneratorFileSet const* fileSet, cm::optional<std::string> const& config)
 {
-  cmInstallFileSetGenerator::DestinationContext result =
-    te->FileSetGenerators.at(fileSet->GetName())
-      ->GetDestination(gte, config.value_or(""));
+  cmInstallFileSetGenerator const* const fsg =
+    targetExport->FileSetGenerators.at(fileSet->GetName());
+  cmInstallFileSetGenerator::DestinationContext const result =
+    fsg->GetDestination(target, config.value_or(""));
 
-  if (config && !result.HadContextSensitiveCondition) {
-    return {};
-  }
-  if (!config && result.HadContextSensitiveCondition) {
-    this->RequiresConfigFiles = true;
+  if (!config == result.HadContextSensitiveCondition) {
     return {};
   }
 
+  // Use cm::optional here to enable NRVO.
   cm::optional<std::string> dest = cmOutputConverter::EscapeForCMake(
     result.UnescapedDestination, cmOutputConverter::WrapQuotes::NoWrap);
 
@@ -267,8 +268,11 @@ bool cmExportInstallPackageInfoGenerator::GenerateFileSetProperties(
       this->GetFileSetDirectory(gte, te, fileSet, config);
 
     if (fileSet->GetType() == cm::FileSetMetadata::HEADERS) {
-      if (fileSetDirectory &&
-          !cm::contains(seenIncludeDirectories, *fileSetDirectory)) {
+      if (!fileSetDirectory) {
+        if (!config) {
+          this->RequiresConfigFiles = true;
+        }
+      } else if (!cm::contains(seenIncludeDirectories, *fileSetDirectory)) {
         component["includes"].append(*fileSetDirectory);
         seenIncludeDirectories.insert(*fileSetDirectory);
       }
@@ -287,4 +291,44 @@ bool cmExportInstallPackageInfoGenerator::GenerateFileSetProperties(
     }
   }
   return true;
+}
+
+void cmExportInstallPackageInfoGenerator::GenerateTargetFileSets(
+  Json::Value& fileSets, cmGeneratorTarget const* target,
+  cmGeneratorFileSet const* fileSet, cmTargetExport const* targetExport,
+  std::string const& type) const
+{
+  cm::optional<std::string> dest =
+    this->GetFileSetDirectory(target, targetExport, fileSet);
+  if (!dest) {
+    this->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
+      cmStrCat("The \""_s, target->GetName(),
+               "\" target's interface file set \""_s, fileSet->GetName(),
+               "\" of type \""_s, fileSet->GetType(),
+               "\" has a context-sensitive destination, which is not "
+               "supported.  The file set will not be exported."_s));
+    return;
+  }
+
+  cm::GenEx::Context context{ target->LocalGenerator, {} };
+
+  std::vector<std::string> files;
+  auto eval = [&files](std::string&& /*baseDir*/, std::string&& relPath,
+                       std::string&& /*file*/) {
+    files.emplace_back(std::move(relPath));
+  };
+
+  if (fileSet->EvaluateFiles(context, target, eval)) {
+    this->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
+      cmStrCat("The \""_s, target->GetName(),
+               "\" target's interface file set \""_s, fileSet->GetName(),
+               "\" of type \""_s, fileSet->GetType(),
+               "\" contains context-sensitive information, which is not "
+               "supported.  The file set will not be exported."_s));
+    return;
+  }
+
+  this->GenerateTargetFileSet(fileSets, fileSet, type, *dest, files);
 }

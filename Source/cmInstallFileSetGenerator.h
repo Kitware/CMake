@@ -35,7 +35,7 @@ public:
     bool HadContextSensitiveCondition;
   };
   std::string GetDestination(std::string const& config) const;
-  DestinationContext GetDestination(cmGeneratorTarget* gt,
+  DestinationContext GetDestination(cmGeneratorTarget const* gt,
                                     std::string const& config) const;
   bool GetOptional() const { return this->Optional; }
   std::string GetFileSetName() const { return this->FileSetName; }

@@ -4,10 +4,18 @@ target_sources(foo
   INTERFACE
     FILE_SET no_genex
     TYPE HEADERS
+    BASE_DIRS foo
+    FILES
+    foo/header1.h
+    foo/header2.h
 
   INTERFACE
     FILE_SET no_genex_dup
     TYPE HEADERS
+    BASE_DIRS foo
+    FILES
+    foo/header1.h
+    foo/header2.h
 
   INTERFACE
     FILE_SET genex

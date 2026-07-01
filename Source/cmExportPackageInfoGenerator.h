@@ -19,8 +19,10 @@ namespace Json {
 class Value;
 }
 
+class cmGeneratorFileSet;
 class cmGeneratorTarget;
 class cmPackageInfoArguments;
+class cmTargetExport;
 
 /** \class cmExportPackageInfoGenerator
  * \brief Generate Common Package Specification package information files
@@ -65,6 +67,20 @@ protected:
                                    ImportPropertyMap const& properties) const;
   Json::Value GenerateInterfaceConfigProperties(
     std::string const& suffix, ImportPropertyMap const& properties) const;
+
+  void GenerateTargetFileSets(
+    Json::Value& component, cmGeneratorTarget const* target,
+    cmTargetExport const* targetExport = nullptr) const;
+  virtual void GenerateTargetFileSets(Json::Value& fileSets,
+                                      cmGeneratorTarget const* target,
+                                      cmGeneratorFileSet const* fileSet,
+                                      cmTargetExport const* targetExport,
+                                      std::string const& type) const = 0;
+  static void GenerateTargetFileSet(Json::Value& fileSets,
+                                    cmGeneratorFileSet const* fileSet,
+                                    std::string const& type,
+                                    std::string const& root,
+                                    std::vector<std::string> const& files);
 
   cm::string_view GetImportPrefixWithSlash() const override;
 

@@ -8,11 +8,16 @@ target_sources(foo
     FILE_SET no_genex
     TYPE HEADERS
     BASE_DIRS ${CMAKE_CURRENT_LIST_DIR}/foo
+    FILES
+    ${CMAKE_CURRENT_LIST_DIR}/foo/header1.h
+    ${CMAKE_CURRENT_LIST_DIR}/foo/header2.h
 
   INTERFACE
     FILE_SET genex
     TYPE HEADERS
     BASE_DIRS ${CMAKE_CURRENT_LIST_DIR}/foo
+    FILES
+    ${CMAKE_CURRENT_LIST_DIR}/foo/header3.h
 )
 
 install(

@@ -70,8 +70,8 @@ protected:
 
   std::string GetCxxModulesDirectory() const override;
 
-  cm::optional<std::string> GetFileSetDirectory(
-    cmGeneratorTarget* gte, cmTargetExport const* te,
+  static cm::optional<std::string> GetFileSetDirectory(
+    cmGeneratorTarget const* target, cmTargetExport const* targetExport,
     cmGeneratorFileSet const* fileSet,
     cm::optional<std::string> const& config = {});
 
@@ -80,4 +80,11 @@ protected:
                                  cmTargetExport const* te,
                                  std::string const& packagePath,
                                  cm::optional<std::string> config = {});
+
+  using cmExportPackageInfoGenerator::GenerateTargetFileSets;
+  void GenerateTargetFileSets(Json::Value& fileSets,
+                              cmGeneratorTarget const* target,
+                              cmGeneratorFileSet const* fileSet,
+                              cmTargetExport const* targetExport,
+                              std::string const& type) const override;
 };

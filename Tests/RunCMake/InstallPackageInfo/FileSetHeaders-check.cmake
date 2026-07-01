@@ -9,6 +9,24 @@ string(JSON component GET "${content}" "components" "foo")
 expect_array("${component}" 1 "includes")
 expect_value("${component}" "@prefix@/no_genex" "includes" 0)
 
+expect_array("${component}" 2 "file_sets")
+
+expect_value("${component}" "includes" "file_sets" 0 "type")
+expect_value("${component}" "@prefix@/no_genex" "file_sets" 0 "root")
+expect_array("${component}" 2 "file_sets" 0 "files")
+expect_value("${component}" "header1.h" "file_sets" 0 "files" 0)
+expect_value("${component}" "header2.h" "file_sets" 0 "files" 1)
+expect_value("${component}" "no_genex"
+             "file_sets" 0 "extensions" "cmake" "name@v1")
+
+expect_value("${component}" "includes" "file_sets" 1 "type")
+expect_value("${component}" "@prefix@/no_genex" "file_sets" 1 "root")
+expect_array("${component}" 2 "file_sets" 1 "files")
+expect_value("${component}" "header1.h" "file_sets" 1 "files" 0)
+expect_value("${component}" "header2.h" "file_sets" 1 "files" 1)
+expect_value("${component}" "no_genex_dup"
+             "file_sets" 1 "extensions" "cmake" "name@v1")
+
 file(GLOB configs "${out_dir}/foo@*.cps")
 list(LENGTH configs configs_len)
 

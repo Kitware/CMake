@@ -48,4 +48,11 @@ protected:
                                          std::string const& config);
 
   std::string GetCxxModulesDirectory() const override;
+
+  using cmExportPackageInfoGenerator::GenerateTargetFileSets;
+  void GenerateTargetFileSets(Json::Value& fileSets,
+                              cmGeneratorTarget const* target,
+                              cmGeneratorFileSet const* fileSet,
+                              cmTargetExport const* targetExport,
+                              std::string const& type) const override;
 };

@@ -14,7 +14,11 @@
 
 #include "cmAlgorithms.h"
 #include "cmDiagnosticContext.h"
+#include "cmDiagnostics.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorTarget.h"
 #include "cmList.h"
 #include "cmPackageInfoArguments.h"
 #include "cmStateTypes.h"
@@ -84,6 +88,7 @@ bool cmExportBuildPackageInfoGenerator::GenerateMainFile(std::ostream& os)
 
     // Set configuration-agnostic properties for component.
     this->GenerateInterfaceProperties(*component, target, properties);
+    this->GenerateTargetFileSets(*component, target);
   }
 
   this->GeneratePackageRequires(root);
@@ -122,6 +127,35 @@ void cmExportBuildPackageInfoGenerator::GenerateInterfacePropertiesConfig(
   if (!component.empty()) {
     configurations[config.empty() ? std::string{ "noconfig" } : config] =
       std::move(component);
+  }
+}
+
+void cmExportBuildPackageInfoGenerator::GenerateTargetFileSets(
+  Json::Value& fileSets, cmGeneratorTarget const* target,
+  cmGeneratorFileSet const* fileSet, cmTargetExport const* /*targetExport*/,
+  std::string const& type) const
+{
+  cm::GenEx::Context context{ target->LocalGenerator, {} };
+
+  std::map<std::string, std::vector<std::string>> files;
+  auto eval = [&files](std::string&& baseDir, std::string&& relPath,
+                       std::string&& /*file*/) {
+    files[std::move(baseDir)].emplace_back(std::move(relPath));
+  };
+
+  if (fileSet->EvaluateFiles(context, target, eval)) {
+    this->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
+      cmStrCat("The \""_s, target->GetName(),
+               "\" target's interface file set \""_s, fileSet->GetName(),
+               "\" of type \""_s, fileSet->GetType(),
+               "\" contains context-sensitive information, which is not "
+               "supported.  The file set will not be exported."_s));
+    return;
+  }
+
+  for (auto const& i : files) {
+    this->GenerateTargetFileSet(fileSets, fileSet, type, i.first, i.second);
   }
 }
 

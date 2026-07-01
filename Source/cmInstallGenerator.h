@@ -58,7 +58,7 @@ public:
       installation script.  */
   static std::string ConvertToAbsoluteDestination(std::string const& dest);
   void CheckAbsoluteDestination(std::string const& dest,
-                                cmLocalGenerator* lg) const;
+                                cmLocalGenerator const* lg) const;
 
   /** Test if this generator installs something for a given configuration.  */
   bool InstallsForConfig(std::string const& config);

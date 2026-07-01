@@ -22,6 +22,8 @@
 #include "cmExportSet.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
+#include "cmGeneratorFileSets.h"
 #include "cmGeneratorTarget.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -294,6 +296,54 @@ bool cmExportPackageInfoGenerator::GenerateInterfaceProperties(
   // TODO: description
 
   return result;
+}
+
+void cmExportPackageInfoGenerator::GenerateTargetFileSets(
+  Json::Value& component, cmGeneratorTarget const* target,
+  cmTargetExport const* targetExport) const
+{
+  cmGeneratorFileSets const* gfs = target->GetGeneratorFileSets();
+
+  for (auto const& type : gfs->GetInterfaceFileSetTypes()) {
+    // Do we support this file set type?
+    std::string fsType;
+    if (type == "HEADERS") {
+      fsType = "includes";
+    } else {
+      continue;
+    }
+
+    // Generate CPS file set(s) for each CMake file set
+    Json::Value fileSets;
+    for (cmGeneratorFileSet const* fileSet : gfs->GetInterfaceFileSets(type)) {
+      this->GenerateTargetFileSets(fileSets, target, fileSet, targetExport,
+                                   fsType);
+    }
+
+    if (!fileSets.empty()) {
+      component["file_sets"] = fileSets;
+    }
+  }
+}
+
+void cmExportPackageInfoGenerator::GenerateTargetFileSet(
+  Json::Value& fileSets, cmGeneratorFileSet const* fileSet,
+  std::string const& type, std::string const& root,
+  std::vector<std::string> const& files)
+{
+  Json::Value fileSetOut;
+  fileSetOut["type"] = type;
+  fileSetOut["root"] = root;
+
+  Json::Value filesOut;
+  for (auto const& f : files) {
+    filesOut.append(f);
+  }
+  fileSetOut["files"] = filesOut;
+
+  fileSetOut["extensions"]["cmake"]["name@v1"] = fileSet->GetName();
+
+  fileSets.append(fileSetOut);
 }
 
 bool cmExportPackageInfoGenerator::NoteLinkedTarget(
