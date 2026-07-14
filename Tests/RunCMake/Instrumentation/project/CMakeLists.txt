@@ -62,6 +62,26 @@ install(TARGETS main)
 set_target_properties(main PROPERTIES LABELS "label1;label2")
 set_target_properties(lib PROPERTIES LABELS "label3")
 
+if(LONG_CUSTOM_COMMAND_OUTPUT)
+  file(GLOB_RECURSE LONG_CUSTOM_FILES
+    RELATIVE "${CMAKE_ROOT}"
+    "${CMAKE_ROOT}/Modules/*")
+  set(long_dst "${CMAKE_CURRENT_BINARY_DIR}/Destination-Modules")
+  set(long_outs)
+  foreach(f IN LISTS LONG_CUSTOM_FILES)
+    # Generate outputs without spaces to correct expansion
+    list(APPEND long_outs "Destination-${f}")
+  endforeach()
+  add_custom_command(
+    OUTPUT ${long_outs}
+    COMMAND "${CMAKE_COMMAND}" -E copy_directory
+            "${CMAKE_ROOT}/Modules" "${long_dst}"
+    COMMAND "${CMAKE_COMMAND}" -E touch "${long_dst}/check-done.txt"
+    COMMENT "Copying Modules to Destination-Modules"
+  )
+  add_custom_target(longCustomCommand ALL DEPENDS ${long_outs})
+endif()
+
 if (FAIL)
   file(WRITE "${CMAKE_BINARY_DIR}/dummy.c"
     "#error \"something which will not compile\"\n"

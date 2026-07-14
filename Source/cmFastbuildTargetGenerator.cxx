@@ -716,6 +716,10 @@ std::string cmFastbuildTargetGenerator::MakeCustomLauncher(
     }
   }
   vars.Output = output.c_str();
+
+  std::string filePathWithOutput = ccg.StoreContentToFile(output);
+  vars.FilePathWithOutput = filePathWithOutput.c_str();
+
   vars.Role = ccg.GetCC().GetRole().c_str();
   vars.CMTargetName = ccg.GetCC().GetTarget().c_str();
   vars.Config = ccg.GetOutputConfig().c_str();

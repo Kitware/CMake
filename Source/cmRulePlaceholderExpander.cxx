@@ -304,6 +304,11 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       return this->ReplaceValues->Output;
     }
   }
+  if (this->ReplaceValues->FilePathWithOutput) {
+    if (variable == "OUTPUT_STORE_TO_FILE") {
+      return this->ReplaceValues->FilePathWithOutput;
+    }
+  }
   if (variable == "CMAKE_COMMAND") {
     return this->OutputConverter->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);

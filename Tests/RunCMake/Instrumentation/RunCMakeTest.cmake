@@ -617,6 +617,16 @@ instrument(cmake-command-trace
   CHECK_SCRIPT check-trace-removed.cmake
 )
 
+# FIXME(#27984): FASTBuild long output test failure
+# FIXME(#279846): Watcom WMake unsupported file names
+if(NOT RunCMake_GENERATOR MATCHES "FASTBuild|Watcom WMake")
+  instrument(cmake-command-long-output
+    BUILD
+    CONFIGURE_ARGS "-DLONG_CUSTOM_COMMAND_OUTPUT=ON"
+    CHECK_SCRIPT check-long-output.cmake
+  )
+endif()
+
 # Test capture output
 instrument(cmake-command-capture-output
   BUILD CAPTURE_OUTPUT_QUERY

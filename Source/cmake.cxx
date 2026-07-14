@@ -2882,8 +2882,9 @@ int cmake::ActualConfigure()
         "--output <TARGET> --config <CONFIG> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_CUSTOM",
-      cmStrCat(launcher, "--command-type custom", common_args,
-               "--output \"<OUTPUT>\" --role <ROLE> -- "));
+      cmStrCat(
+        launcher, "--command-type custom", common_args,
+        "--output-as-file-name \"<OUTPUT_STORE_TO_FILE>\" --role <ROLE> -- "));
   }
 #endif
 

@@ -56,6 +56,7 @@ public:
     char const* PreprocessedSource = nullptr;
     char const* DynDepFile = nullptr;
     char const* Output = nullptr;
+    char const* FilePathWithOutput = nullptr;
     char const* Object = nullptr;
     char const* TargetSupportDir = nullptr;
     char const* ObjectDir = nullptr;
