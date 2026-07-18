@@ -618,6 +618,18 @@ are not rebuilt if out of date.  The :ref:`Ninja Generators`
 are sufficiently fast at dependency checking that
 such targets are not provided for that generator.
 
+.. note::
+
+  Shell tab-completion of ``make`` target names is provided
+  by the external ``bash-completion`` package, not by CMake.
+  Some versions of it hide the plain ``<target>`` name when a
+  ``<target>/fast`` variant also exists, treating the ``/`` as
+  a directory separator.  The targets themselves remain
+  available to build.  To complete project target names
+  reliably, use :option:`--target <cmake--build --target>`
+  completion instead, e.g. tab-completion after
+  ``cmake --build <dir> --target``.
+
 :ref:`Makefile Generators` also provide build-targets to
 preprocess, assemble and compile individual files in a
 particular directory.
