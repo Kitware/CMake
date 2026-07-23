@@ -512,18 +512,9 @@ function(show_only_json_check_python v)
   file(WRITE "${json_file}" "${actual_stdout}")
   set(actual_stdout "" PARENT_SCOPE)
 
-  if(CMake_TEST_JSON_SCHEMA)
-    execute_process(
-      COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/show-only_json_validate_schema.py" "${json_file}"
-      RESULT_VARIABLE result
-      OUTPUT_VARIABLE output
-      ERROR_VARIABLE output
-    )
-    if(NOT result STREQUAL 0)
-      string(REPLACE "\n" "\n  " output "${output}")
-      string(APPEND RunCMake_TEST_FAILED "Failed to validate version ${v} JSON schema for file: ${file}\nOutput:\n${output}\n")
-    endif()
-  endif()
+  include("${RunCMake_SOURCE_DIR}/../validate_json_schema.cmake")
+  set(schema_file "${RunCMake_SOURCE_DIR}/../../../Help/manual/ctest/show-only-schema.json")
+  validate_json_schema("${schema_file}" "${json_file}")
 
   execute_process(
     COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/show-only_json-v${v}_check.py" "${json_file}"
