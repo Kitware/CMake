@@ -77,29 +77,26 @@ def check_labels_property(p):
     assert is_dict(p)
     assert sorted(p.keys()) == ["name", "value"]
     assert is_string(p["name"])
-    assert is_list(p["value"])
+    assert is_string(p["value"])
     assert p["name"] == "LABELS"
-    assert len(p["value"]) == 2
-    assert p["value"][0] == "DirectoryLabel"
-    assert p["value"][1] == "TestLabel"
+    assert p["value"] == "TestLabel;DirectoryLabel"
 
 def check_reqfiles_property(p):
     assert is_dict(p)
     assert sorted(p.keys()) == ["name", "value"]
     assert is_string(p["name"])
-    assert is_list(p["value"])
+    assert is_string(p["value"])
     assert p["name"] == "REQUIRED_FILES"
-    assert len(p["value"]) == 2
-    assert p["value"][0] == "RequiredFileDoesNotExist"
-    assert p["value"][1] == "AnotherRequiredFileDoesNotExist"
+    assert p["value"] == \
+        "RequiredFileDoesNotExist;AnotherRequiredFileDoesNotExist"
 
 def check_timeout_property(p):
     assert is_dict(p)
     assert sorted(p.keys()) == ["name", "value"]
     assert is_string(p["name"])
-    assert is_float(p["value"])
+    assert is_string(p["value"])
     assert p["name"] == "TIMEOUT"
-    assert p["value"] == 1234.5
+    assert p["value"] == "1234.5"
 
 def check_timeout_signal_name_property(p):
     assert is_dict(p)
@@ -113,73 +110,25 @@ def check_timeout_signal_grace_property(p):
     assert is_dict(p)
     assert sorted(p.keys()) == ["name", "value"]
     assert is_string(p["name"])
-    assert is_float(p["value"])
+    assert is_string(p["value"])
     assert p["name"] == "TIMEOUT_SIGNAL_GRACE_PERIOD"
-    assert p["value"] == 2.1
+    assert p["value"] == "2.1"
 
 def check_willfail_property(p):
     assert is_dict(p)
     assert sorted(p.keys()) == ["name", "value"]
     assert is_string(p["name"])
-    assert is_bool(p["value"])
+    assert is_string(p["value"])
     assert p["name"] == "WILL_FAIL"
-    assert p["value"] == True
+    assert p["value"] == "true"
 
 def check_resource_groups_property(p):
     assert is_dict(p)
     assert sorted(p.keys()) == ["name", "value"]
     assert is_string(p["name"])
-    assert is_list(p["value"])
+    assert is_string(p["value"])
     assert p["name"] == "RESOURCE_GROUPS"
-    assert len(p["value"]) == 3
-
-    assert is_dict(p["value"][0])
-    assert sorted(p["value"][0].keys()) == ["requirements"]
-    assert is_list(p["value"][0]["requirements"])
-    assert len(p["value"][0]["requirements"]) == 2
-    assert is_dict(p["value"][0]["requirements"][0])
-    assert sorted(p["value"][0]["requirements"][0].keys()) == \
-        [".type", "slots"]
-    assert is_string(p["value"][0]["requirements"][0][".type"])
-    assert p["value"][0]["requirements"][0][".type"] == "threads"
-    assert is_int(p["value"][0]["requirements"][0]["slots"])
-    assert p["value"][0]["requirements"][0]["slots"] == 2
-    assert is_string(p["value"][0]["requirements"][1][".type"])
-    assert p["value"][0]["requirements"][1][".type"] == "gpus"
-    assert is_int(p["value"][0]["requirements"][1]["slots"])
-    assert p["value"][0]["requirements"][1]["slots"] == 4
-
-    assert is_dict(p["value"][1])
-    assert sorted(p["value"][1].keys()) == ["requirements"]
-    assert is_list(p["value"][1]["requirements"])
-    assert len(p["value"][1]["requirements"]) == 2
-    assert is_dict(p["value"][1]["requirements"][0])
-    assert sorted(p["value"][1]["requirements"][0].keys()) == \
-        [".type", "slots"]
-    assert is_string(p["value"][1]["requirements"][0][".type"])
-    assert p["value"][1]["requirements"][0][".type"] == "threads"
-    assert is_int(p["value"][1]["requirements"][0]["slots"])
-    assert p["value"][1]["requirements"][0]["slots"] == 2
-    assert is_string(p["value"][1]["requirements"][1][".type"])
-    assert p["value"][1]["requirements"][1][".type"] == "gpus"
-    assert is_int(p["value"][1]["requirements"][1]["slots"])
-    assert p["value"][1]["requirements"][1]["slots"] == 4
-
-    assert is_dict(p["value"][2])
-    assert sorted(p["value"][2].keys()) == ["requirements"]
-    assert is_list(p["value"][2]["requirements"])
-    assert len(p["value"][2]["requirements"]) == 2
-    assert is_dict(p["value"][2]["requirements"][0])
-    assert sorted(p["value"][2]["requirements"][0].keys()) == \
-        [".type", "slots"]
-    assert is_string(p["value"][2]["requirements"][0][".type"])
-    assert p["value"][2]["requirements"][0][".type"] == "gpus"
-    assert is_int(p["value"][2]["requirements"][0]["slots"])
-    assert p["value"][2]["requirements"][0]["slots"] == 2
-    assert is_string(p["value"][2]["requirements"][1][".type"])
-    assert p["value"][2]["requirements"][1][".type"] == "threads"
-    assert is_int(p["value"][2]["requirements"][1]["slots"])
-    assert p["value"][2]["requirements"][1]["slots"] == 4
+    assert p["value"] == "2,threads:2,gpus:4;gpus:2,threads:4"
 
 def check_workingdir_property(p):
     assert is_dict(p)

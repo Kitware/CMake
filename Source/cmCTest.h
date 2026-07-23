@@ -183,6 +183,8 @@ public:
 
   int GetOutputAsJsonVersion();
 
+  bool GetOutputAsJsonRaw() const;
+
   bool ShouldUseHTTP10() const;
 
   bool ShouldPrintLabels() const;

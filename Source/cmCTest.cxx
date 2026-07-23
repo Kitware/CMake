@@ -134,6 +134,7 @@ struct cmCTest::Private
   bool ShowOnly = false;
   bool OutputAsJson = false;
   int OutputAsJsonVersion = 1;
+  bool OutputAsJsonRaw = false;
 
   // TODO: The ctest configuration should be a hierarchy of
   // configuration option sources: command-line, script, ini file.
@@ -2355,6 +2356,13 @@ int cmCTest::Run(std::vector<std::string> const& args)
                          this->Impl->Quiet = true;
                          this->Impl->OutputAsJson = true;
                          this->Impl->OutputAsJsonVersion = 1;
+                       } else if (format == "json-v1-raw") {
+                         // Force quiet mode so the only output
+                         // is the json object model.
+                         this->Impl->Quiet = true;
+                         this->Impl->OutputAsJson = true;
+                         this->Impl->OutputAsJsonVersion = 1;
+                         this->Impl->OutputAsJsonRaw = true;
                        } else if (format == "human") {
                        } else if (!format.empty()) {
                          cmSystemTools::Error(
@@ -3102,6 +3110,11 @@ bool cmCTest::GetOutputAsJson()
 int cmCTest::GetOutputAsJsonVersion()
 {
   return this->Impl->OutputAsJsonVersion;
+}
+
+bool cmCTest::GetOutputAsJsonRaw() const
+{
+  return this->Impl->OutputAsJsonRaw;
 }
 
 bool cmCTest::ShouldUseHTTP10() const

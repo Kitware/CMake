@@ -554,6 +554,7 @@ function(run_ShowOnly)
     add_test(ShowOnly \"${CMAKE_COMMAND}\" -E echo)
     set_tests_properties(ShowOnly PROPERTIES
       GENERATED_RESOURCE_SPEC_FILE \"/Path/Does/Not/Exist\"
+      LABELS TestLabel
       RESOURCE_GROUPS \"2,threads:2,gpus:4;gpus:2,threads:4\"
       REQUIRED_FILES RequiredFileDoesNotExist
       _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\"
@@ -564,11 +565,19 @@ function(run_ShowOnly)
       USER_DEFINED_A \"User defined property A value\"
       USER_DEFINED_B \"User defined property B value\"
       )
+    set_tests_properties(ShowOnly PROPERTIES
+      REQUIRED_FILES AnotherRequiredFileDoesNotExist
+      )
+    set_directory_properties(PROPERTIES
+      LABELS DirectoryLabel
+      )
     add_test(ShowOnlyNotAvailable NOT_AVAILABLE)
 ")
   run_cmake_command(show-only_human ${CMAKE_CTEST_COMMAND} --show-only=human)
   run_cmake_command(show-only_bad ${CMAKE_CTEST_COMMAND} --show-only=bad)
   run_cmake_command(show-only_json-v1 ${CMAKE_CTEST_COMMAND} --show-only=json-v1)
+  run_cmake_command(show-only_json-v1-raw
+    ${CMAKE_CTEST_COMMAND} --show-only=json-v1-raw)
 endfunction()
 run_ShowOnly()
 

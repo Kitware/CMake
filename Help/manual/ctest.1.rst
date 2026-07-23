@@ -260,6 +260,13 @@ The options for running tests are:
      Dump the test information in JSON format.
      See `Show as JSON Object Model`_.
 
+   ``json-v1-raw``
+
+     .. versionadded:: 4.5
+
+     Dump the test information in JSON format, but leaves test property
+     values as raw strings. See `Show as JSON Object Model`_.
+
 .. option:: -L <regex>, --label-regex <regex>
 
  Run tests with labels matching regular expression as described under
@@ -1895,9 +1902,9 @@ Show as JSON Object Model
 
 .. versionadded:: 3.14
 
-When the ``--show-only=json-v1`` command line option is given, the test
-information is output in JSON format.  Version 1.0 of the JSON object
-model is defined as follows:
+When the ``--show-only=json-v1`` or ``--show-only=json-v1-raw`` command
+line option is given, the test information is output in JSON format.
+Version 1.0 of the JSON object model is defined as follows:
 
 ``kind``
   The string "ctestInfo".
