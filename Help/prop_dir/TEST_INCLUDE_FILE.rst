@@ -12,3 +12,9 @@ included and processed when ``ctest`` is run on the directory.
 If both the ``TEST_INCLUDE_FILE`` and :prop_dir:`TEST_INCLUDE_FILES` directory
 properties are set, the script specified in ``TEST_INCLUDE_FILE`` is included
 first, followed by the scripts listed in ``TEST_INCLUDE_FILES``.
+
+.. versionadded:: 4.5
+
+  The include path may use :manual:`generator expressions
+  <cmake-generator-expressions(7)>`, with the same per-configuration semantics
+  as :prop_dir:`TEST_INCLUDE_FILES`.
