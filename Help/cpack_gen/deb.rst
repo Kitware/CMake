@@ -290,13 +290,13 @@ List of CPack DEB generator specific variables:
  Possible values are:
 
   ``lzma``
-    Lempel–Ziv–Markov chain algorithm
+    Lempel-Ziv-Markov chain algorithm
 
   ``xz``
-    XZ Utils LZMA2 (Lempel–Ziv–Markov chain algorithm, version 2) compression
+    XZ Utils LZMA2 (Lempel-Ziv-Markov chain algorithm, version 2) compression
 
   ``bzip2``
-    bzip2 Burrows–Wheeler algorithm
+    bzip2 Burrows-Wheeler algorithm
 
   ``gzip``
     GNU Gzip Deflate compression
@@ -323,11 +323,11 @@ List of CPack DEB generator specific variables:
 
  The valid range and interpretation depend on the selected compression type:
 
-  - ``gzip``  – level 1–9
-  - ``bzip2`` – level 1–9
-  - ``xz``    – level 1–9
-  - ``lzma``  – level 1–9
-  - ``zstd``  – level 1–19
+  - ``gzip``  - level 1-9
+  - ``bzip2`` - level 1-9
+  - ``xz``    - level 1-9
+  - ``lzma``  - level 1-9
+  - ``zstd``  - level 1-19
 
  Example usage:
 

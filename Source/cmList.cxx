@@ -818,7 +818,7 @@ public:
   void Initialize(TransformSelector* /*selector*/,
                   std::vector<std::string> const& /*args*/) override
   {
-    // This overload must not be used for APPLY — it lacks cmMakefile context.
+    // This overload must not be used for APPLY - it lacks cmMakefile context.
     throw transform_error(
       "sub-command TRANSFORM, action APPLY requires cmMakefile context.");
   }

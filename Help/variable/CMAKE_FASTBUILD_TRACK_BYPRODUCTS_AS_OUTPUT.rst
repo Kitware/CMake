@@ -11,7 +11,7 @@ inputs have changed or the byproduct file is missing.
 .. note::
 
    When this variable is ``OFF`` (the default), ``BYPRODUCTS`` are treated
-   similarly to how Ninja handles them — as opaque side effects — and the
+   similarly to how Ninja handles them - as opaque side effects - and the
    generator emits ``ExecAlways`` nodes to ensure they always run.
 
 Defaults to ``OFF``.

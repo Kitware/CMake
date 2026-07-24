@@ -4,7 +4,7 @@ AUTOMOC_INCLUDE_DIRECTORIES
 .. versionadded:: 4.1
 
 Specifies zero or more include directories for AUTOMOC to pass explicitly to
-the Qt Meta‑Object Compiler (``moc``) instead of automatically discovering a
+the Qt Meta-Object Compiler (``moc``) instead of automatically discovering a
 target's include directories.
 
 When this property is set on a target, only the directories listed here will be
