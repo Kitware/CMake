@@ -17,7 +17,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root)
+cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root,
+                         StrictMode strictMode)
   : Filename(std::move(jsonFile))
 {
   cmsys::ifstream fin(this->Filename.c_str(), std::ios::in | std::ios::binary);
@@ -28,12 +29,13 @@ cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root)
   // If there's a BOM, toss it.
   cmsys::FStream::ReadBOM(fin);
 
-  this->ReadJSONStream(fin, root);
+  this->ReadJSONStream(fin, root, strictMode);
 }
 
-cmJSONState::cmJSONState(std::istream& jsonIStream, Json::Value* root)
+cmJSONState::cmJSONState(std::istream& jsonIStream, Json::Value* root,
+                         StrictMode strictMode)
 {
-  this->ReadJSONStream(jsonIStream, root);
+  this->ReadJSONStream(jsonIStream, root, strictMode);
 }
 
 void cmJSONState::AddError(std::string const& errMsg)
@@ -120,7 +122,8 @@ void cmJSONState::pop_stack()
   this->parseStack.pop_back();
 }
 
-void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root)
+void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root,
+                                 StrictMode strictMode)
 {
   // Save the entire document.
   std::streampos inBegin = jsonIStream.tellg();
@@ -133,7 +136,9 @@ void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root)
   jsonIStream.seekg(inBegin);
 
   Json::CharReaderBuilder builder;
-  Json::CharReaderBuilder::strictMode(&builder.settings_);
+  if (strictMode == StrictMode::Strict) {
+    Json::CharReaderBuilder::strictMode(&builder.settings_);
+  }
   std::string errMsg;
 
 #if JSONCPP_VERSION_HEXA >= 0x01090600
