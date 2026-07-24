@@ -1,0 +1,6 @@
+    Start [0-9]+: test1
+[0-9]+/2 Test #[0-9]+: test1 \.+ +Passed +[0-9\.]+ sec
+    Start [0-9]+: test3
+[0-9]+/2 Test #[0-9]+: test3 \.+ +Passed +[0-9\.]+ sec
++
+100% tests passed out of 2

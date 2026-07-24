@@ -176,13 +176,10 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
     handler->TestOptions.IncludeRegularExpression = args.Include;
   }
   if (!args.ExcludeLabel.empty()) {
-    handler->TestOptions.ExcludeLabelRegularExpression.clear();
-    handler->TestOptions.ExcludeLabelRegularExpression.push_back(
-      args.ExcludeLabel);
+    handler->TestOptions.ExcludeLabelRegularExpression = args.ExcludeLabel;
   }
   if (!args.IncludeLabel.empty()) {
-    handler->TestOptions.LabelRegularExpression.clear();
-    handler->TestOptions.LabelRegularExpression.push_back(args.IncludeLabel);
+    handler->TestOptions.LabelRegularExpression = args.IncludeLabel;
   }
 
   if (!args.ExcludeTestsFromFile.empty()) {

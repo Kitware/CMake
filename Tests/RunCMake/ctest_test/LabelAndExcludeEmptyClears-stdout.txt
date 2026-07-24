@@ -1,0 +1,10 @@
+    Start [0-9]+: RunCMakeVersion
+[0-9]+/4 Test #[0-9]+: RunCMakeVersion \.+ +Passed +[0-9\.]+ sec
+    Start [0-9]+: test1
+[0-9]+/4 Test #[0-9]+: test1 \.+ +Passed +[0-9\.]+ sec
+    Start [0-9]+: test2
+[0-9]+/4 Test #[0-9]+: test2 \.+ +Passed +[0-9\.]+ sec
+    Start [0-9]+: test3
+[0-9]+/4 Test #[0-9]+: test3 \.+ +Passed +[0-9\.]+ sec
++
+100% tests passed out of 4

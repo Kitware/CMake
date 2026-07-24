@@ -11,8 +11,8 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [STRIDE <stride-number>]
              [EXCLUDE <exclude-regex>]
              [INCLUDE <include-regex>]
-             [EXCLUDE_LABEL <label-exclude-regex>]
-             [INCLUDE_LABEL <label-include-regex>]
+             [EXCLUDE_LABEL <label-exclude-regex>...]
+             [INCLUDE_LABEL <label-include-regex>...]
              [EXCLUDE_FROM_FILE <filename>]
              [INCLUDE_FROM_FILE <filename>]
              [EXCLUDE_FIXTURE <regex>]
@@ -69,12 +69,30 @@ The options are:
   Specify a regular expression matching test names to include.
   Tests not matching this expression are excluded.
 
-``EXCLUDE_LABEL <label-exclude-regex>``
+``EXCLUDE_LABEL <label-exclude-regex>...``
   Specify a regular expression matching test labels to exclude.
 
-``INCLUDE_LABEL <label-include-regex>``
+  .. versionchanged:: 4.5
+
+    More than one ``<label-exclude-regex>`` may be given, in which case a
+    test is excluded only if each regular expression matches at least one
+    of the test's labels (i.e. the expressions form an ``AND`` relationship).
+    See the :ref:`Label Matching` section of the :manual:`ctest(1)` manual.
+    This mirrors the behavior of repeating the
+    :option:`ctest --label-exclude` command-line option.
+
+``INCLUDE_LABEL <label-include-regex>...``
   Specify a regular expression matching test labels to include.
   Tests not matching this expression are excluded.
+
+  .. versionchanged:: 4.5
+
+    More than one ``<label-include-regex>`` may be given, in which case a
+    test is included only if each regular expression matches at least one
+    of the test's labels (i.e. the expressions form an ``AND`` relationship).
+    See the :ref:`Label Matching` section of the :manual:`ctest(1)` manual.
+    This mirrors the behavior of repeating the
+    :option:`ctest --label-regex` command-line option.
 
 ``EXCLUDE_FROM_FILE <filename>``
   .. versionadded:: 3.29
