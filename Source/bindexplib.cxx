@@ -371,10 +371,11 @@ static bool DumpFileWithLlvmNm(std::string const& nmPath, char const* filename,
 
   // run the command
   int exit_code = 0;
-  cmSystemTools::RunSingleCommand(command, &output, &output, &exit_code,
-                                  nullptr, cmSystemTools::OUTPUT_NONE);
+  bool const commandResult =
+    cmSystemTools::RunSingleCommand(command, &output, &output, &exit_code,
+                                    nullptr, cmSystemTools::OUTPUT_NONE);
 
-  if (exit_code != 0) {
+  if (!commandResult || exit_code != 0) {
     fprintf(stderr, "llvm-nm returned an error: %s\n", output.c_str());
     return false;
   }
