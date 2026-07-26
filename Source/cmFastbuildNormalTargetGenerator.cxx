@@ -639,7 +639,7 @@ void cmFastbuildNormalTargetGenerator::GenerateModuleDefinitionInfo(
     std::string const obj_list_file = mdi->DefFile + ".objs";
 
     auto const nm_executable = GetMakefile()->GetDefinition("CMAKE_NM");
-    if (!nm_executable.IsEmpty()) {
+    if (!cmIsOff(nm_executable)) {
       execNode.ExecArguments += " --nm=";
       execNode.ExecArguments += ConvertToFastbuildPath(*nm_executable);
     }

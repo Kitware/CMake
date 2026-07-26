@@ -2424,7 +2424,7 @@ void cmMakefileTargetGenerator::GenDefFile(
     this->LocalGenerator->MaybeRelativeToCurBinDir(objlist_file),
     cmOutputConverter::SHELL);
   cmValue const nm_executable = this->Makefile->GetDefinition("CMAKE_NM");
-  if (cmNonempty(nm_executable)) {
+  if (!cmIsOff(nm_executable)) {
     cmd += " --nm=";
     cmd += this->LocalCommonGenerator->ConvertToOutputFormat(
       *nm_executable, cmOutputConverter::SHELL);

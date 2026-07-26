@@ -1534,7 +1534,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       obj_list_file, cmOutputConverter::SHELL);
 
     cmValue nm_executable = this->GetMakefile()->GetDefinition("CMAKE_NM");
-    if (cmNonempty(nm_executable)) {
+    if (!cmIsOff(nm_executable)) {
       cmd += " --nm=";
       cmd += this->LocalCommonGenerator->ConvertToOutputFormat(
         *nm_executable, cmOutputConverter::SHELL);
