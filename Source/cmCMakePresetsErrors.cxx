@@ -15,6 +15,16 @@
 #include "cmStringAlgorithms.h"
 
 namespace cmCMakePresetsErrors {
+namespace {
+std::string CapitalizePresetKind(std::string kind)
+{
+  if (!kind.empty() && kind.front() >= 'a' && kind.front() <= 'z') {
+    kind.front() = static_cast<char>(kind.front() - 'a' + 'A');
+  }
+  return kind;
+}
+}
+
 Json::Value const* getPreset(cmJSONState* state)
 {
   if (state->parseStack.size() < 2) {
@@ -218,6 +228,17 @@ void INVALID_WORKFLOW_STEPS(std::string const& workflowStep,
                             cmJSONState* state)
 {
   state->AddError(cmStrCat("Invalid workflow step \"", workflowStep, '"'));
+}
+
+void WORKFLOW_STEP_CONFIGURE_PRESET_MISMATCH(
+  std::string const& kind, std::string const& workflowStep,
+  std::string const& stepConfigurePreset,
+  std::string const& workflowConfigurePreset, cmJSONState* state)
+{
+  state->AddError(cmStrCat(
+    CapitalizePresetKind(kind), " workflow step \"", workflowStep,
+    "\" uses configure preset \"", stepConfigurePreset,
+    "\", but workflow configure preset is \"", workflowConfigurePreset, '"'));
 }
 
 void NO_WORKFLOW_STEPS(std::string const& presetName, cmJSONState* state)

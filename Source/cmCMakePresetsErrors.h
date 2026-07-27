@@ -88,6 +88,11 @@ void TEST_OUTPUT_TRUNCATION_UNSUPPORTED(cmJSONState* state);
 void INVALID_WORKFLOW_STEPS(std::string const& workflowStep,
                             cmJSONState* state);
 
+void WORKFLOW_STEP_CONFIGURE_PRESET_MISMATCH(
+  std::string const& kind, std::string const& workflowStep,
+  std::string const& stepConfigurePreset,
+  std::string const& workflowConfigurePreset, cmJSONState* state);
+
 void NO_WORKFLOW_STEPS(std::string const& presetName, cmJSONState* state);
 
 void FIRST_WORKFLOW_STEP_NOT_CONFIGURE(std::string const& stepName,

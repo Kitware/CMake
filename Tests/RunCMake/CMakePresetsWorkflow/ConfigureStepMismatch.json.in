@@ -2,29 +2,29 @@
   "version": 6,
   "configurePresets": [
     {
-      "name": "default"
+      "name": "default_c"
     },
     {
-      "name": "mismatch"
+      "name": "mismatch_c"
     }
   ],
   "buildPresets": [
     {
-      "name": "mismatch",
-      "configurePreset": "mismatch"
+      "name": "mismatch_b",
+      "configurePreset": "mismatch_c"
     }
   ],
   "workflowPresets": [
     {
-      "name": "default",
+      "name": "default_w",
       "steps": [
         {
           "type": "configure",
-          "name": "default"
+          "name": "default_c"
         },
         {
           "type": "build",
-          "name": "mismatch"
+          "name": "mismatch_b"
         }
       ]
     }

@@ -703,7 +703,9 @@ bool SetupWorkflowConfigurePreset(T const& preset,
                                   cmJSONState* state)
 {
   if (preset.ConfigurePreset != configurePreset->Name) {
-    cmCMakePresetsErrors::INVALID_WORKFLOW_STEPS(configurePreset->Name, state);
+    cmCMakePresetsErrors::WORKFLOW_STEP_CONFIGURE_PRESET_MISMATCH(
+      preset.kind(), preset.Name, preset.ConfigurePreset,
+      configurePreset->Name, state);
     return false;
   }
   return true;
