@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include <cm3p/json/value.h>
 
@@ -305,6 +306,8 @@ bool PackagePresetsHelper(std::vector<cmCMakePresetsGraph::PackagePreset>& out,
 bool WorkflowPresetsHelper(
   std::vector<cmCMakePresetsGraph::WorkflowPreset>& out,
   Json::Value const* value, cmJSONState* state);
+
+cm::string_view GetDiagnosticJSONName(cmDiagnosticCategory category);
 
 cmJSONHelper<std::nullptr_t> VendorHelper(ErrorGenerator const& error);
 

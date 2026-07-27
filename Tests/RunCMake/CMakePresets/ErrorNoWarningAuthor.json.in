@@ -1,0 +1,14 @@
+{
+  "version": 12,
+  "configurePresets": [
+    {
+      "name": "ErrorNoWarningAuthor",
+      "warnings": {
+        "author": false
+      },
+      "errors": {
+        "author": true
+      }
+    }
+  ]
+}

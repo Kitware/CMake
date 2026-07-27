@@ -233,18 +233,6 @@ cm::string_view GetJSONName()
   return storage;
 }
 
-cm::string_view GetJSONName(cmDiagnosticCategory category)
-{
-  static cm::string_view const names[] = {
-    "none"_s, // CMD_NONE
-#define DIAGNOSTIC_JSON_NAME(C) GetJSONName<cmDiagnostics::C>(),
-    CM_FOR_EACH_DIAGNOSTIC_CATEGORY(DIAGNOSTIC_JSON_NAME)
-#undef DIAGNOSTIC_JSON_NAME
-  };
-  assert(category > 0 && category < cmDiagnostics::CategoryCount);
-  return names[category];
-}
-
 auto const PresetDiagnosticMapHelper =
   cmCMakePresetsGraphInternal::PresetMapToBoolHelper<cmDiagnosticCategory>;
 
@@ -341,6 +329,18 @@ auto const ConfigurePresetHelper =
 }
 
 namespace cmCMakePresetsGraphInternal {
+cm::string_view GetDiagnosticJSONName(cmDiagnosticCategory category)
+{
+  static cm::string_view const names[] = {
+    "none"_s, // CMD_NONE
+#define DIAGNOSTIC_JSON_NAME(C) GetJSONName<cmDiagnostics::C>(),
+    CM_FOR_EACH_DIAGNOSTIC_CATEGORY(DIAGNOSTIC_JSON_NAME)
+#undef DIAGNOSTIC_JSON_NAME
+  };
+  assert(category > 0 && category < cmDiagnostics::CategoryCount);
+  return names[category];
+}
+
 bool ConfigurePresetsHelper(std::vector<ConfigurePreset>& out,
                             Json::Value const* value, cmJSONState* state)
 {
@@ -359,7 +359,7 @@ bool CheckDiagnostics(cmJSONState* state, int version,
     assert(i.first > 0 && i.first < cmDiagnostics::CategoryCount);
     int const minVersion = cmDiagnostics::CategoryInfo[i.first].PresetVersion;
     if (version < minVersion) {
-      cm::string_view dn = GetJSONName(i.first);
+      cm::string_view dn = GetDiagnosticJSONName(i.first);
       cmCMakePresetsErrors::DIAGNOSTIC_UNSUPPORTED(dn, group, minVersion,
                                                    state);
       return false;
@@ -395,7 +395,7 @@ bool CheckDiagnostics(cmJSONState* state, int version,
 
     for (cmDiagnosticCategory c : unsupportedErrors) {
       if (cm::contains(preset.Errors, c)) {
-        cm::string_view dn = GetJSONName(c);
+        cm::string_view dn = GetDiagnosticJSONName(c);
         cmCMakePresetsErrors::DIAGNOSTIC_UNSUPPORTED(dn, "errors"_s, 12,
                                                      state);
         return false;

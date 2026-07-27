@@ -11,6 +11,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -949,6 +950,13 @@ bool cmCMakePresetsGraph::ConfigurePreset::VisitPresetAfterInherit(
       auto const ei = preset.Errors.find(w.first);
       if (ei != preset.Errors.end()) {
         if (w.second == false && ei->second == true) {
+          cm::string_view const diagnostic =
+            version < 12 && w.first == cmDiagnostics::CMD_AUTHOR
+            ? cm::string_view{ "dev" }
+            : cmCMakePresetsGraphInternal::GetDiagnosticJSONName(w.first);
+          this->ErrorDetail = cmStrCat("\"errors.", diagnostic,
+                                       "\" is enabled while \"warnings.",
+                                       diagnostic, "\" is disabled");
           return false;
         }
       }
