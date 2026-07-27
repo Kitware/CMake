@@ -119,3 +119,4 @@ run_cmake_command(PresetsFileNoArg-package ${CMAKE_CPACK_COMMAND} "--presets-fil
 set(CMakePresetsPackage_NO_CONFIGURE 1)
 set(CMakePresetsPackage_NO_BUILD 1)
 run_cmake_package_presets(InvalidConfigurePreset "" "" "package-release")
+run_cmake_package_presets(ConfigurePresetUnreachable "" "" "package-child")

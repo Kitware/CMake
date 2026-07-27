@@ -2,7 +2,7 @@
   "version": 4,
   "configurePresets": [
     {
-      "name": "x"
+      "name": "cfg-parent"
     }
   ]
 }

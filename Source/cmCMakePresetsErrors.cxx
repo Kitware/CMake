@@ -131,10 +131,14 @@ void INHERITED_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
 }
 
 void CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
+                                            std::string const& kind,
+                                            std::string const& configurePreset,
                                             cmJSONState* state)
 {
-  state->AddError(cmStrCat("Configure preset \"", presetName,
-                           "\" is unreachable from preset's file"));
+  state->AddError(cmStrCat(CapitalizePresetKind(kind), " preset \"",
+                           presetName, "\" references configure preset \"",
+                           configurePreset, "\", but \"", configurePreset,
+                           "\" is not reachable from the preset's file"));
 }
 
 void INVALID_MACRO_EXPANSION(std::string const& presetName, cmJSONState* state)

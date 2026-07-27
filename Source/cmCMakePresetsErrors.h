@@ -51,6 +51,8 @@ void INHERITED_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
                                             cmJSONState* state);
 
 void CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
+                                            std::string const& kind,
+                                            std::string const& configurePreset,
                                             cmJSONState* state);
 
 void INVALID_MACRO_EXPANSION(std::string const& presetName,

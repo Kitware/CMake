@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 6,
   "configurePresets": [
     {
       "name": "cfg-parent"

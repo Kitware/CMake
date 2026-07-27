@@ -1286,7 +1286,8 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
             configurePreset->second.Unexpanded.OriginFile)) {
         cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, &this->parseState);
+          it.first, BuildPreset::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
         return false;
       }
 
@@ -1317,7 +1318,8 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
             configurePreset->second.Unexpanded.OriginFile)) {
         cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, &this->parseState);
+          it.first, TestPreset::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
         return false;
       }
 
@@ -1348,7 +1350,8 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
             configurePreset->second.Unexpanded.OriginFile)) {
         cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, &this->parseState);
+          it.first, PackagePreset::kind(),
+          it.second.Unexpanded.ConfigurePreset, &this->parseState);
         return false;
       }
 
