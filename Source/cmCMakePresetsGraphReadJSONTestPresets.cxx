@@ -162,6 +162,7 @@ bool TestPresetOptionalFilterIncludeIndexHelper(
     return TestPresetOptionalFilterIncludeIndexObjectHelper(out, value, state);
   }
 
+  cmCMakePresetsErrors::INVALID_TEST_FILTER_INCLUDE_INDEX(value, state);
   return false;
 }
 

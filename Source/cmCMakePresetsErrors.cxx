@@ -252,6 +252,14 @@ void WORKFLOW_STEP_CONFIGURE_PRESET_MISMATCH(
     "\", but workflow configure preset is \"", workflowConfigurePreset, '"'));
 }
 
+void INVALID_TEST_FILTER_INCLUDE_INDEX(Json::Value const* value,
+                                       cmJSONState* state)
+{
+  state->AddErrorAtValue(
+    "Invalid \"filter.include.index\" field: expected a string or object",
+    value);
+}
+
 void NO_WORKFLOW_STEPS(std::string const& presetName, cmJSONState* state)
 {
   state->AddError(

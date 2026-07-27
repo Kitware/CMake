@@ -98,6 +98,9 @@ void WORKFLOW_STEP_CONFIGURE_PRESET_MISMATCH(
   std::string const& stepConfigurePreset,
   std::string const& workflowConfigurePreset, cmJSONState* state);
 
+void INVALID_TEST_FILTER_INCLUDE_INDEX(Json::Value const* value,
+                                       cmJSONState* state);
+
 void NO_WORKFLOW_STEPS(std::string const& presetName, cmJSONState* state);
 
 void FIRST_WORKFLOW_STEP_NOT_CONFIGURE(std::string const& stepName,

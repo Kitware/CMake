@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "default",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "invalidIndex",
+      "configurePreset": "default",
+      "filter": {
+        "include": {
+          "index": 42
+        }
+      }
+    }
+  ]
+}
