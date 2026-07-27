@@ -105,7 +105,7 @@ def check_query_json_bad_root(q):
     check_error_re(q, "A valid JSON document must be either an array or an object value")
 
 def check_query_json_empty(q):
-    check_error_re(q, "value, object or array expected")
+    check_error_re(q, "A JSON document cannot be empty")
 
 def check_query_json_extra(q):
     if bool(os.environ.get("CMake_JSONCPP_PRE_1_7_5", "")) and is_dict(q) and sorted(q.keys()) == ["responses"]:

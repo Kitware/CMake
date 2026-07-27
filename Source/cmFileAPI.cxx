@@ -24,6 +24,7 @@
 #include "cmFileAPIConfigureLog.h"
 #include "cmFileAPIToolchains.h"
 #include "cmGlobalGenerator.h"
+#include "cmJSONState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -53,14 +54,6 @@ cmFileAPI::cmFileAPI(cmake* cm)
         cmSystemTools::GetCMakeConfigDirectory()) {
     this->UserAPIv1 = cmStrCat(std::move(*cmakeConfigDir), "/api/v1"_s);
   }
-
-  Json::CharReaderBuilder rbuilder;
-  rbuilder["collectComments"] = false;
-  rbuilder["failIfExtra"] = true;
-  rbuilder["rejectDupKeys"] = false;
-  rbuilder["strictRoot"] = true;
-  this->JsonReader =
-    std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
 
   Json::StreamWriterBuilder wbuilder;
   wbuilder["indentation"] = "\t";
@@ -174,37 +167,19 @@ void cmFileAPI::RemoveOldReplyFiles()
 bool cmFileAPI::ReadJsonFile(std::string const& file, Json::Value& value,
                              std::string& error)
 {
-  std::vector<char> content;
-
-  cmsys::ifstream fin;
-  if (!cmSystemTools::FileIsDirectory(file)) {
-    fin.open(file.c_str(), std::ios::binary);
-  }
-  auto finEnd = fin.rdbuf()->pubseekoff(0, std::ios::end);
-  if (finEnd > 0) {
-    size_t finSize = finEnd;
-    try {
-      // Allocate a buffer to read the whole file.
-      content.resize(finSize);
-
-      // Now read the file from the beginning.
-      fin.seekg(0, std::ios::beg);
-      fin.read(content.data(), finSize);
-    } catch (...) {
-      fin.setstate(std::ios::failbit);
-    }
-  }
-  fin.close();
-  if (!fin) {
+  // Verify the file exists.
+  if (!cmSystemTools::FileExists(file) ||
+      cmSystemTools::FileIsDirectory(file)) {
     value = Json::Value();
     error = "failed to read from file";
     return false;
   }
 
   // Parse our buffer as json.
-  if (!this->JsonReader->parse(content.data(), content.data() + content.size(),
-                               &value, &error)) {
+  cmJSONState parseState(file, &value);
+  if (!parseState.errors.empty()) {
     value = Json::Value();
+    error = parseState.GetErrorMessage();
     return false;
   }
 
