@@ -16,7 +16,7 @@ is set, it takes precedence over this target-wide property.
 This is a convenience alternative to setting the :prop_sf:`SKIP_LINTING`
 source file property individually on each source.  If either the target's
 :prop_tgt:`SKIP_LINTING` or file set's :prop_fs:`SKIP_LINTING` including this
-source or a source’s :prop_sf:`SKIP_LINTING` is enabled, that source will be
+source or a source's :prop_sf:`SKIP_LINTING` is enabled, that source will be
 excluded from linting.
 
 The property has no effect on targets that do not have sources.

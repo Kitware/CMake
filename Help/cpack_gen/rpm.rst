@@ -252,13 +252,13 @@ List of CPack RPM generator specific variables:
  Possible values are:
 
   ``lzma``
-    Lempel–Ziv–Markov chain algorithm
+    Lempel-Ziv-Markov chain algorithm
 
   ``xz``
-    XZ Utils LZMA2 (Lempel–Ziv–Markov chain algorithm, version 2) compression
+    XZ Utils LZMA2 (Lempel-Ziv-Markov chain algorithm, version 2) compression
 
   ``bzip2``
-    bzip2 Burrows–Wheeler algorithm
+    bzip2 Burrows-Wheeler algorithm
 
   ``gzip``
     GNU Gzip Deflate compression

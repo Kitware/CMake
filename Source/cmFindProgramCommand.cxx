@@ -312,7 +312,7 @@ std::string cmFindProgramCommand::GetBundleExecutable(
     kCFAllocatorDefault, bundlePath.c_str(), kCFStringEncodingUTF8);
 
   // Make a CFURLRef from the CFString representation of the
-  // bundle’s path.
+  // bundle's path.
   CFURLRef bundleURL = CFURLCreateWithFileSystemPath(
     kCFAllocatorDefault, bundlePathCFS, kCFURLPOSIXPathStyle, true);
 
