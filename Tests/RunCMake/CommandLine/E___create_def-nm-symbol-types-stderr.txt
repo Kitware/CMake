@@ -1,0 +1,1 @@
+^Ignoring symbol 'unknown' with unrecognized type '\?' in object 'symbol-types.obj'\.$

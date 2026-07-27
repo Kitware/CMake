@@ -3,10 +3,11 @@ ELSE
 .MODEL FLAT,C
 ENDIF
 
-SOME SEGMENT EXECUTE READ
+.CODE
 
 public justnop
-justnop:
+justnop PROC
   ret
+justnop ENDP
 
 END

@@ -5,6 +5,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREA
 endif()
 
 run_cmake(CustomCommandGenex)
+run_cmake(AutoExportNm)
 if(NOT RunCMake_GENERATOR MATCHES "^Visual Studio 1[1-5] ")
   run_cmake(CustomCommandParallel)
   run_cmake(CustomCommandParallelDisable)
