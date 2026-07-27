@@ -167,8 +167,10 @@ Generating Files
     dependencies.
 
   ``COMMENT``
-    Display the given message before the commands are executed at
-    build time.  This will be ignored if ``APPEND`` is given, although a future
+    Display the given message associated with running the commands at build
+    time.  The message is passed to the native build tool, which controls when
+    and how it is shown, so its exact timing relative to the commands is not
+    guaranteed.  This will be ignored if ``APPEND`` is given, although a future
     version may use it.
 
     .. versionadded:: 3.26
