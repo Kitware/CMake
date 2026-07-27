@@ -228,8 +228,8 @@ Compiler pre definitions for ``moc`` are written to the ``moc_predefs.h`` file.
 The generation of this file can be enabled or disabled in this target property.
 
 :prop_tgt:`AUTOMOC_INCLUDE_DIRECTORIES`:
-Specifies one or more include directories for ``AUTOMOC`` to pass explicitly to ``moc``
-instead of automatically discovering a target’s include directories.
+Specifies one or more include directories for ``AUTOMOC`` to pass explicitly
+to ``moc`` instead of automatically discovering a target's include directories.
 
 :prop_sf:`SKIP_AUTOMOC`:
 Sources and headers can be excluded from ``AUTOMOC`` processing by

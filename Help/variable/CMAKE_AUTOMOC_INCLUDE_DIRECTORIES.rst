@@ -4,7 +4,7 @@ CMAKE_AUTOMOC_INCLUDE_DIRECTORIES
 .. versionadded:: 4.1
 
 Specifies zero or more include directories for AUTOMOC to pass explicitly to
-the Qt Meta‑Object Compiler (``moc``) instead of automatically discovering
+the Qt Meta-Object Compiler (``moc``) instead of automatically discovering
 each target's include directories.
 
 The directories listed here will replace any include paths discovered from

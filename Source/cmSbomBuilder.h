@@ -88,7 +88,7 @@ protected:
    *  install leaves consult cmGlobalGenerator::FindInstallSbomInfo. */
   virtual SbomInfo FindSbomInfoFor(cmGeneratorTarget const* target) const = 0;
 
-  /** The set of targets the SBOM directly describes — derived from the
+  /** The set of targets the SBOM directly describes - derived from the
    *  associated export sets. */
   std::set<cmGeneratorTarget const*> CollectTargets() const;
 

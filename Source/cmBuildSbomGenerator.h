@@ -20,7 +20,7 @@ class cmLocalGenerator;
  *
  * Stored on cmMakefile at configure time.  At generate time,
  * ComputeBuildFileGenerators() calls Compute(lg) to resolve export set
- * targets and supply the local generator — mirroring
+ * targets and supply the local generator - mirroring
  * cmExportBuildFileGenerator.
  */
 class cmBuildSbomGenerator
