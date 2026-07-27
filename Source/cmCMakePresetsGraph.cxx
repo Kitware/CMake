@@ -146,7 +146,7 @@ bool VisitPreset(
     auto& parentPreset = parent->second.Unexpanded;
     if (!preset.OriginFile->ReachableFiles.count(parentPreset.OriginFile)) {
       cmCMakePresetsErrors::INHERITED_PRESET_UNREACHABLE_FROM_FILE(
-        preset.Name, preset.kind(), &graph.parseState);
+        preset.Name, i, preset.kind(), &graph.parseState);
       return false;
     }
 

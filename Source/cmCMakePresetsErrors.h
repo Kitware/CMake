@@ -47,6 +47,7 @@ void CYCLIC_PRESET_INHERITANCE(std::string const& presetName,
                                std::string const& kind, cmJSONState* state);
 
 void INHERITED_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
+                                            std::string const& inheritedPreset,
                                             std::string const& kind,
                                             cmJSONState* state);
 

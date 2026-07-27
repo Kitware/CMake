@@ -123,11 +123,14 @@ void CYCLIC_PRESET_INHERITANCE(std::string const& presetName,
 }
 
 void INHERITED_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
+                                            std::string const& inheritedPreset,
                                             std::string const& kind,
                                             cmJSONState* state)
 {
-  state->AddError(cmStrCat("Inherited ", kind, " preset \"", presetName,
-                           "\" is unreachable from preset's file"));
+  state->AddError(cmStrCat(CapitalizePresetKind(kind), " preset \"",
+                           presetName, "\" inherits preset \"",
+                           inheritedPreset, "\", but \"", inheritedPreset,
+                           "\" is not reachable from the preset's file"));
 }
 
 void CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
