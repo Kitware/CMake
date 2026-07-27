@@ -1,0 +1,17 @@
+# ctest -C Release (multi-config only): the Release per-config include runs;
+# the Debug per-config include and the Debug-only conditional include do not.
+if(NOT actual_stdout MATCHES "plain_test")
+  string(APPEND RunCMake_TEST_FAILED "plain_test missing with -C Release\n")
+endif()
+if(NOT actual_stdout MATCHES "indep_test")
+  string(APPEND RunCMake_TEST_FAILED "indep_test missing with -C Release\n")
+endif()
+if(NOT actual_stdout MATCHES "config_Release")
+  string(APPEND RunCMake_TEST_FAILED "config_Release missing with -C Release\n")
+endif()
+if(actual_stdout MATCHES "config_Debug")
+  string(APPEND RunCMake_TEST_FAILED "config_Debug ran under -C Release\n")
+endif()
+if(actual_stdout MATCHES "dbgonly_test")
+  string(APPEND RunCMake_TEST_FAILED "dbgonly_test ran under -C Release\n")
+endif()

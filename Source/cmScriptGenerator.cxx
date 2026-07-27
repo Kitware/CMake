@@ -100,9 +100,10 @@ static void cmScriptGeneratorEncodeConfig(std::string const& config,
   }
 }
 
-std::string cmScriptGenerator::CreateConfigTest(std::string const& config)
+std::string cmScriptGenerator::CreateConfigTest(std::string const& configVar,
+                                                std::string const& config)
 {
-  std::string result = cmStrCat(this->RuntimeConfigVariable, " MATCHES \"^(");
+  std::string result = cmStrCat(configVar, " MATCHES \"^(");
   if (!config.empty()) {
     cmScriptGeneratorEncodeConfig(config, result);
   }
@@ -111,9 +112,9 @@ std::string cmScriptGenerator::CreateConfigTest(std::string const& config)
 }
 
 std::string cmScriptGenerator::CreateConfigTest(
-  std::vector<std::string> const& configs)
+  std::string const& configVar, std::vector<std::string> const& configs)
 {
-  std::string result = cmStrCat(this->RuntimeConfigVariable, " MATCHES \"^(");
+  std::string result = cmStrCat(configVar, " MATCHES \"^(");
   char const* sep = "";
   for (std::string const& config : configs) {
     result += sep;
@@ -122,6 +123,19 @@ std::string cmScriptGenerator::CreateConfigTest(
   }
   result += ")$\"";
   return result;
+}
+
+std::string cmScriptGenerator::CreateConfigTest(std::string const& config)
+{
+  return cmScriptGenerator::CreateConfigTest(this->RuntimeConfigVariable,
+                                             config);
+}
+
+std::string cmScriptGenerator::CreateConfigTest(
+  std::vector<std::string> const& configs)
+{
+  return cmScriptGenerator::CreateConfigTest(this->RuntimeConfigVariable,
+                                             configs);
 }
 
 void cmScriptGenerator::GenerateScript(std::ostream& os)

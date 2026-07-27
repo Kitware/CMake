@@ -78,6 +78,11 @@ public:
 
   static cmScriptGeneratorQuoted Quote(cm::string_view value);
 
+  static std::string CreateConfigTest(std::string const& configVar,
+                                      std::string const& config);
+  static std::string CreateConfigTest(std::string const& configVar,
+                                      std::vector<std::string> const& configs);
+
 protected:
   using Indent = cmScriptGeneratorIndent;
   virtual void GenerateScript(std::ostream& os);

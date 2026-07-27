@@ -386,16 +386,91 @@ void cmLocalGenerator::GenerateTestFiles()
     fout << "set(CTEST_RESOURCE_SPEC_FILE \"" << resourceSpecFile << "\")\n";
   }
 
+  auto writeTestIncludeFile = [this, &fout, &configurationTypes,
+                               &config](std::string const& entry) {
+    // Entries without a generator expression are emitted verbatim,
+    // preserving CTest-time ${VAR} expansion of the path.
+    if (cmGeneratorExpression::Find(entry) == std::string::npos) {
+      fout << "include(\"" << entry << "\")\n";
+      return;
+    }
+
+    // Emit one include() per path in an evaluated result.  As for list-valued
+    // properties, the result is split on ';', and each path is quoted so that
+    // any '"', '$', or '\' cannot break the include() argument or trigger a
+    // second-stage CTest ${...} expansion.  An empty result adds no include.
+    auto writeIncludes = [&fout](std::vector<std::string> const& paths,
+                                 char const* indent) {
+      for (std::string const& path : paths) {
+        fout << indent << "include(" << cmScriptGenerator::Quote(path)
+             << ")\n";
+      }
+    };
+
+    if (!this->GlobalGenerator->IsMultiConfig() ||
+        configurationTypes.empty()) {
+      // Single-config generator, or a multi-config generator with no
+      // configuration types: evaluate once with the default configuration
+      // and emit unconditional includes.
+      std::vector<std::string> paths;
+      cmExpandList(cmGeneratorExpression::Evaluate(entry, this, config),
+                   paths);
+      writeIncludes(paths, "");
+      return;
+    }
+
+    // Multi-config generator: evaluate the entry for every configuration.
+    std::vector<std::string> results;
+    results.reserve(configurationTypes.size());
+    bool allSame = true;
+    for (std::string const& ct : configurationTypes) {
+      results.emplace_back(cmGeneratorExpression::Evaluate(entry, this, ct));
+      if (results.back() != results.front()) {
+        allSame = false;
+      }
+    }
+
+    // A config-independent result collapses to unconditional includes, so it
+    // still runs when ctest is invoked without -C.
+    if (allSame) {
+      std::vector<std::string> paths;
+      cmExpandList(results.front(), paths);
+      writeIncludes(paths, "");
+      return;
+    }
+
+    // Otherwise guard each per-config result to match the config guards used
+    // for add_test().  A configuration whose result yields no include is
+    // skipped so no empty guard is emitted.
+    bool first = true;
+    for (size_t i = 0; i < configurationTypes.size(); ++i) {
+      std::vector<std::string> paths;
+      cmExpandList(results[i], paths);
+      if (paths.empty()) {
+        continue;
+      }
+      fout << (first ? "if(" : "elseif(")
+           << cmScriptGenerator::CreateConfigTest("CTEST_CONFIGURATION_TYPE",
+                                                  configurationTypes[i])
+           << ")\n";
+      writeIncludes(paths, "  ");
+      first = false;
+    }
+    if (!first) {
+      fout << "endif()\n";
+    }
+  };
+
   cmValue testIncludeFile = this->Makefile->GetProperty("TEST_INCLUDE_FILE");
   if (testIncludeFile) {
-    fout << "include(\"" << *testIncludeFile << "\")\n";
+    writeTestIncludeFile(*testIncludeFile);
   }
 
   cmValue testIncludeFiles = this->Makefile->GetProperty("TEST_INCLUDE_FILES");
   if (testIncludeFiles) {
     cmList includesList{ *testIncludeFiles };
     for (std::string const& i : includesList) {
-      fout << "include(\"" << i << "\")\n";
+      writeTestIncludeFile(i);
     }
   }
 
