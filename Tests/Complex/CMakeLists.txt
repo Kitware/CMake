@@ -297,11 +297,31 @@ if (WIN32)
       ${Complex_SOURCE_DIR}/Library/dummy
       "${dir}/${file}"
       COPYONLY)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E write_regv "${hkey}" "${dir}")
+
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E write_regv "${hkey}" "${dir}"
+      RESULT_VARIABLE write_regv_result)
+    if(NOT write_regv_result EQUAL 0)
+      message(SEND_ERROR "write_regv failed with result ${write_regv_result}")
+    endif()
     find_path(REGISTRY_TEST_PATH
       ${file}
-      "[${hkey}]" DOC "Registry_Test_Path")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E delete_regv "${hkey}")
+      "[${hkey}]"
+      NO_DEFAULT_PATH
+      DOC "Registry_Test_Path")
+    if(NOT REGISTRY_TEST_PATH)
+      message(SEND_ERROR "Registry value was not found after write_regv")
+    elseif(NOT EXISTS "${REGISTRY_TEST_PATH}/${file}")
+      message(SEND_ERROR "Registry-resolved path does not contain ${file}: ${REGISTRY_TEST_PATH}")
+    endif()
+
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E delete_regv "${hkey}"
+      RESULT_VARIABLE delete_regv_result)
+    if(NOT delete_regv_result EQUAL 0)
+      message(SEND_ERROR "delete_regv failed with result ${delete_regv_result}")
+    endif()
+
     execute_process(COMMAND ${CMAKE_COMMAND} -E rm -f "${dir}/${file}")
   endif ()
 endif ()
