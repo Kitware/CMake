@@ -335,6 +335,7 @@ endfunction ()
 
 # Tests which install BMIs
 if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(exp-nested-dirs-build)
   run_cxx_module_test(exp-iface-no-props-build)
   run_cxx_module_test(exp-iface-build)
   run_cxx_module_test(exp-incdirs-build)
