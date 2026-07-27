@@ -2,31 +2,7 @@ include(RunCMake)
 
 cmake_policy(SET CMP0140 NEW)
 
-# Arguments after the first are the files to validate against the schema
-function(validate_fileapi_schema schema)
-  if(NOT ARGN)
-    # No files to validate against the schema
-    return()
-  endif()
-  list(JOIN ARGN "\n" file_list)
-  set(file_list_file ${RunCMake_TEST_BINARY_DIR}/check_file_list.txt)
-  file(WRITE "${file_list_file}" "${file_list}")
-  execute_process(
-    COMMAND ${Python_EXECUTABLE}
-      "${RunCMake_SOURCE_DIR}/fileapi_validate_schema.py"
-        "${file_list_file}"
-        "${schema}"
-    RESULT_VARIABLE result
-    OUTPUT_VARIABLE output
-    ERROR_VARIABLE output
-  )
-  if(NOT result STREQUAL 0)
-    string(REPLACE "\n" "\n  " output "${output}")
-    string(APPEND RunCMake_TEST_FAILED
-      "Failed to validate files against JSON schema: ${schema}\nOutput:\n${output}\n")
-  endif()
-  return(PROPAGATE RunCMake_TEST_FAILED)
-endfunction()
+include("${RunCMake_SOURCE_DIR}/../validate_json_schema.cmake")
 
 # Function called in *-check.cmake scripts to check api files.
 function(check_api expect)
@@ -73,9 +49,13 @@ in directory:
       endif()
     endforeach()
     foreach(schema_type IN LISTS schema_types)
-      validate_fileapi_schema(
-        ${schema_dir}/schema_${schema_type}.json
-        ${schema_type_${schema_type}}
+      if("${schema_type_${schema_type}}" STREQUAL "")
+        # No files to validate against the schema
+        continue()
+      endif()
+      validate_json_schema(
+        "${schema_dir}/schema_${schema_type}.json"
+        "${schema_type_${schema_type}}"
       )
     endforeach()
   endif()
@@ -95,9 +75,9 @@ function(check_stateful_queries)
     REPLACE "^(.+)$" "${prefix}-\\1/query.json"
     OUTPUT_VARIABLE query_json_files
   )
-  validate_fileapi_schema(
-    ${schema_dir}/schema_stateful_query.json
-    ${query_json_files}
+  validate_json_schema(
+    "${schema_dir}/schema_stateful_query.json"
+    "${query_json_files}"
   )
   return(PROPAGATE RunCMake_TEST_FAILED)
 endfunction()

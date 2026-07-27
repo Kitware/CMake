@@ -14,16 +14,10 @@ function(version_json_check_python v is_json_ready)
     set(actual_stdout "" PARENT_SCOPE)
   endif()
 
-  execute_process(
-    COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/version_json_validate_schema.py" "${json_file}"
-    RESULT_VARIABLE result
-    OUTPUT_VARIABLE output
-    ERROR_VARIABLE output
-  )
-  if(NOT result STREQUAL 0)
-    string(REPLACE "\n" "\n  " output "${output}")
-    string(APPEND RunCMake_TEST_FAILED "Failed to validate version ${v} JSON schema for file: ${json_file}\nOutput:\n${output}\n")
-  endif()
+  include("${RunCMake_SOURCE_DIR}/../validate_json_schema.cmake")
+  set(schema_file "${RunCMake_SOURCE_DIR}/../../../Help/manual/cmake/version-schema.json")
+  validate_json_schema("${schema_file}" "${json_file}")
+
   return(PROPAGATE RunCMake_TEST_FAILED)
 endfunction()
 
