@@ -1,0 +1,3 @@
+^CPack Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsPackage/InvalidConfigurePreset:
+Package preset "package-release" references unknown configure preset "does-not-exist"$

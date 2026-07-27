@@ -1278,8 +1278,9 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       auto const configurePreset =
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
       if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::INVALID_CONFIGURE_PRESET(it.first,
-                                                       &this->parseState);
+        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
+          it.first, BuildPreset::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
         return false;
       }
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
@@ -1308,8 +1309,9 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       auto const configurePreset =
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
       if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::INVALID_CONFIGURE_PRESET(it.first,
-                                                       &this->parseState);
+        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
+          it.first, TestPreset::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
         return false;
       }
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
@@ -1338,8 +1340,9 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       auto const configurePreset =
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
       if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::INVALID_CONFIGURE_PRESET(it.first,
-                                                       &this->parseState);
+        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
+          it.first, PackagePreset::kind(),
+          it.second.Unexpanded.ConfigurePreset, &this->parseState);
         return false;
       }
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(

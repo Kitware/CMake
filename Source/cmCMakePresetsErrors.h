@@ -66,8 +66,10 @@ void INCLUDE_UNSUPPORTED(Json::Value const*, cmJSONState* state);
 
 void INVALID_INCLUDE(Json::Value const* value, cmJSONState* state);
 
-void INVALID_CONFIGURE_PRESET(std::string const& presetName,
-                              cmJSONState* state);
+void CONFIGURE_PRESET_NOT_FOUND(std::string const& presetName,
+                                std::string const& kind,
+                                std::string const& configurePreset,
+                                cmJSONState* state);
 
 void INSTALL_PREFIX_UNSUPPORTED(Json::Value const* value, cmJSONState* state);
 

@@ -170,11 +170,14 @@ void INVALID_INCLUDE(Json::Value const* value, cmJSONState* state)
   state->AddErrorAtValue("Invalid \"include\" field", value);
 }
 
-void INVALID_CONFIGURE_PRESET(std::string const& presetName,
-                              cmJSONState* state)
+void CONFIGURE_PRESET_NOT_FOUND(std::string const& presetName,
+                                std::string const& kind,
+                                std::string const& configurePreset,
+                                cmJSONState* state)
 {
-  state->AddError(
-    cmStrCat(R"(Invalid "configurePreset": ")", presetName, '"'));
+  state->AddError(cmStrCat(
+    CapitalizePresetKind(kind), " preset \"", presetName,
+    "\" references unknown configure preset \"", configurePreset, '"'));
 }
 
 void INSTALL_PREFIX_UNSUPPORTED(Json::Value const* value, cmJSONState* state)
