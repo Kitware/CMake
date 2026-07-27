@@ -1,0 +1,5 @@
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsWorkflow/WorkflowStepInvalidType:
+CMakePresets\.json:8: "type" expected a string, got: 42
+          "type": 42,
+                  \^$

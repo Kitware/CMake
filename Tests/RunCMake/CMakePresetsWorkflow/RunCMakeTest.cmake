@@ -65,6 +65,7 @@ endfunction()
 
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_workflow_presets(UnsupportedVersion)
+run_cmake_workflow_presets(WorkflowStepInvalidType)
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
 run_cmake_workflow_presets(NoWorkflowSteps)
 run_cmake_workflow_presets(FirstStepNotConfigure)
