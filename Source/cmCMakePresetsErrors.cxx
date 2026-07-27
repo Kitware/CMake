@@ -82,7 +82,8 @@ void UNRECOGNIZED_VERSION(Json::Value const* value, cmJSONState* state)
 
 void INVALID_PRESETS(Json::Value const* value, cmJSONState* state)
 {
-  state->AddErrorAtValue("Invalid \"configurePresets\" field", value);
+  state->AddErrorAtValue(cmStrCat("Invalid \"", state->key(), "\" field"),
+                         value);
 }
 
 void INVALID_PRESET(Json::Value const* value, cmJSONState* state)
