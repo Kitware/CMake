@@ -72,4 +72,6 @@ public:
 
   std::string const& GetOutputConfig() const { return this->OutputConfig; }
   std::string const& GetCommandConfig() const { return this->CommandConfig; }
+
+  std::string StoreContentToFile(std::string const& content) const;
 };

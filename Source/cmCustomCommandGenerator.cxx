@@ -11,6 +11,8 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include "cmsys/FStream.hxx"
+
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -519,4 +521,25 @@ std::set<BT<std::pair<std::string, bool>>> const&
 cmCustomCommandGenerator::GetUtilities() const
 {
   return this->Utilities;
+}
+
+std::string cmCustomCommandGenerator::StoreContentToFile(
+  std::string const& content) const
+{
+  cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
+
+  std::string fileDir =
+    cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/c");
+  if (!cmSystemTools::MakeDirectory(fileDir)) {
+    return "";
+  }
+
+  std::string fileName = cmStrCat(fileDir, "/", hash.HashString(content));
+
+  cmsys::ofstream file(fileName.c_str(), std::ios::out);
+  if (!file) {
+    return "";
+  }
+  file.write(content.data(), content.size());
+  return fileName;
 }

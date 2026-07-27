@@ -6,6 +6,7 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <memory>
 
@@ -63,6 +64,7 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
   {
     DoingNone,
     DoingOutput,
+    DoingOutputAsFileName,
     DoingSource,
     DoingLanguage,
     DoingTargetLabels,
@@ -87,6 +89,8 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       doing = DoingCommandType;
     } else if (strcmp(arg, "--output") == 0) {
       doing = DoingOutput;
+    } else if (strcmp(arg, "--output-as-file-name") == 0) {
+      doing = DoingOutputAsFileName;
     } else if (strcmp(arg, "--source") == 0) {
       doing = DoingSource;
     } else if (strcmp(arg, "--language") == 0) {
@@ -111,6 +115,19 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       doing = DoingObjectDir;
     } else if (doing == DoingOutput) {
       this->Reporter.OptionOutput = arg;
+      doing = DoingNone;
+    } else if (doing == DoingOutputAsFileName) {
+      // Read all data from the file name
+      cmsys::ifstream file(arg, std::ios::in);
+      if (!file) {
+        std::cerr << "failed to open file '" << arg << "' for reading ("
+                  << cmSystemTools::GetLastSystemError() << "):\n";
+        return false;
+      }
+
+      this->Reporter.OptionOutput =
+        std::string(std::istreambuf_iterator<char>(file),
+                    std::istreambuf_iterator<char>());
       doing = DoingNone;
     } else if (doing == DoingSource) {
       this->Reporter.OptionSource = arg;
