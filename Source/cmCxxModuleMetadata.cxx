@@ -464,13 +464,19 @@ MetaDataProperties CollectMetaProperties(cmCxxModuleMetadata const& meta)
 
   props.MetadataDir = cmSystemTools::GetFilenamePath(meta.MetadataFilePath);
 
+#ifndef _WIN32
+  props.BaseDirs.insert("/");
+#endif
+
   for (auto const& module : meta.Modules) {
     std::string sourcePath = props.NormalizePath(module.SourcePath);
     props.Sources.insert(sourcePath);
 
-    // Module metadata files can reference files in different roots,
-    // just use the immediate parent directory as a base directory
-    props.BaseDirs.insert(cmSystemTools::GetFilenamePath(sourcePath));
+#ifdef _WIN32
+    std::string root;
+    cmSystemTools::SplitPathRootComponent(sourcePath, &root);
+    props.BaseDirs.insert(root);
+#endif
 
     if (module.LocalArguments) {
       for (auto const& incDir : module.LocalArguments->IncludeDirectories) {
