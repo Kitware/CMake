@@ -117,14 +117,9 @@ bool cmExportInstallPackageInfoGenerator::GenerateMainFile(std::ostream& os)
     }
   }
 
-  this->GeneratePackageRequires(root);
-
-  // Write the primary packing information file.
-  this->WritePackageInfo(root, os);
-
+  // Generate per-configuration files before the main file so that
+  // processing link-dependent targets populates package requirements.
   bool result = true;
-
-  // Generate an import file for each configuration.
   if (this->RequiresConfigFiles) {
     for (std::string const& c : this->Configurations) {
       if (!this->GenerateImportFileConfig(c)) {
@@ -132,6 +127,11 @@ bool cmExportInstallPackageInfoGenerator::GenerateMainFile(std::ostream& os)
       }
     }
   }
+
+  this->GeneratePackageRequires(root);
+
+  // Write the primary packing information file.
+  this->WritePackageInfo(root, os);
 
   return result;
 }
