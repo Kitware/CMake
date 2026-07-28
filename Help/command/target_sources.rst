@@ -63,8 +63,6 @@ expressions to ensure the sources are correctly assigned to the target.
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 
-.. _`File Sets`:
-
 File Sets
 ^^^^^^^^^
 
@@ -78,49 +76,11 @@ File Sets
     ]...)
 
 Adds a file set to a target, or adds files to an existing file set. Targets
-have zero or more named file sets. Each file set has a name, a type, a scope of
-``INTERFACE``, ``PUBLIC``, or ``PRIVATE``, one or more base directories, and
-files within those directories.
+have zero or more named file sets.
 
-.. versionchanged:: 4.4
-  A file may belong to at most one non-``HEADERS`` file set in a target.
-  See policy :policy:`CMP0211`.
-
- The acceptable types include:
-
-``HEADERS``
-
-  Sources intended to be used via a language's ``#include`` mechanism.
-
-``SOURCES``
-  .. versionadded:: 4.4
-
-  Specifies sources to use when building a target and/or its dependents.
-  With the scope ``PRIVATE`` and ``PUBLIC``, ``<files>`` will populate the
-  :prop_fs:`SOURCES` property of ``<set>``, which are used when building the
-  target itself. With the scope ``PUBLIC`` and ``INTERFACE``, ``<files>`` will
-  populate the :prop_fs:`INTERFACE_SOURCES` property of ``<set>``, which are
-  used when building dependents. The sources specified by the
-  :prop_fs:`INTERFACE_SOURCES` property are propagated, transitively, to all
-  the dependents.
-
-``CXX_MODULES``
-  .. versionadded:: 3.28
-
-  Sources which contain C++ interface module or partition units (i.e., those
-  using the ``export`` keyword). This file set type may not have an
-  ``INTERFACE`` scope except on ``IMPORTED`` targets.
-
-The optional default file sets are named after their type. The target may not
-be a custom target or, for ``HEADERS`` and ``CXX_MODULES`` types, a
-:prop_tgt:`FRAMEWORK` target.
-
-Files in a ``PRIVATE`` or ``PUBLIC`` file set are marked as source files for
-the purposes of IDE integration. Additionally, files in ``HEADERS`` file sets
-have their :prop_sf:`HEADER_FILE_ONLY` property set to ``TRUE``. Files in an
-``INTERFACE`` or ``PUBLIC`` file set can be installed with the
-:command:`install(TARGETS)` command, and exported with the
-:command:`install(EXPORT)` and :command:`export` commands.
+See the :manual:`cmake-buildsystem(7)` manual for more on :ref:`File Sets`,
+including their types and scope semantics, properties, and installation/export
+behavior.
 
 Each ``target_sources(FILE_SET)`` entry starts with ``INTERFACE``, ``PUBLIC``,
 or ``PRIVATE`` and accepts the following arguments:
@@ -137,10 +97,10 @@ or ``PRIVATE`` and accepts the following arguments:
 ``TYPE <type>``
 
   Every file set is associated with a particular type of file. Only types
-  specified above may be used and it is an error to specify anything else. As
-  a special case, if the name of the file set is one of the types, the type
-  does not need to be specified and the ``TYPE <type>`` arguments can be
-  omitted. For all other file set names, ``TYPE`` is required.
+  listed under :ref:`File Sets` may be used and it is an error to specify
+  anything else. As a special case, if the name of the file set is one of these
+  types, the type does not need to be specified and the ``TYPE <type>``
+  arguments can be omitted. For all other file set names, ``TYPE`` is required.
 
 ``BASE_DIRS <dirs>...``
 
@@ -167,51 +127,6 @@ or ``PRIVATE`` and accepts the following arguments:
   called. An exception to this is a path starting with ``$<``. Such paths
   are treated as relative to the target's source directory after evaluation
   of generator expressions.
-
-The following target properties are set by ``target_sources(FILE_SET)``,
-but they should not generally be manipulated directly:
-
-For file sets of type ``HEADERS``:
-
-* :prop_tgt:`HEADER_SETS`
-* :prop_tgt:`INTERFACE_HEADER_SETS`
-* :prop_tgt:`HEADER_SET`
-* :prop_tgt:`HEADER_SET_<NAME>`
-* :prop_tgt:`HEADER_DIRS`
-* :prop_tgt:`HEADER_DIRS_<NAME>`
-
-For file sets of type ``SOURCES``:
-
-* :prop_tgt:`SOURCE_SETS`
-* :prop_tgt:`INTERFACE_SOURCE_SETS`
-* :prop_tgt:`SOURCE_SET`
-* :prop_tgt:`SOURCE_SET_<NAME>`
-* :prop_tgt:`SOURCE_DIRS`
-* :prop_tgt:`SOURCE_DIRS_<NAME>`
-
-For file sets of type ``CXX_MODULES``:
-
-* :prop_tgt:`CXX_MODULE_SETS`
-* :prop_tgt:`INTERFACE_CXX_MODULE_SETS`
-* :prop_tgt:`CXX_MODULE_SET`
-* :prop_tgt:`CXX_MODULE_SET_<NAME>`
-* :prop_tgt:`CXX_MODULE_DIRS`
-* :prop_tgt:`CXX_MODULE_DIRS_<NAME>`
-
-Target properties related to include directories are also modified by
-``target_sources(FILE_SET)`` as follows:
-
-:prop_tgt:`INCLUDE_DIRECTORIES`
-
-  If the ``TYPE`` is ``HEADERS``, and the scope of the file set is ``PRIVATE``
-  or ``PUBLIC``, all of the ``BASE_DIRS`` of the file set are wrapped in
-  :genex:`$<BUILD_INTERFACE>` and appended to this property.
-
-:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
-
-  If the ``TYPE`` is ``HEADERS``, and the scope of the file set is
-  ``INTERFACE`` or ``PUBLIC``, all of the ``BASE_DIRS`` of the file set are
-  wrapped in :genex:`$<BUILD_INTERFACE>` and appended to this property.
 
 See Also
 ^^^^^^^^

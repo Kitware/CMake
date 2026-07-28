@@ -1581,15 +1581,16 @@ with members:
   .. codemodel-versionadded:: 2.5
 
   An optional member that is present when a target defines one or more
-  file sets.  The value is a JSON array of entries corresponding to the
+  :ref:`File Sets`.  The value is a JSON array of entries corresponding to the
   target's file sets.  Each entry is a JSON object with members:
 
   ``name``
     A string specifying the name of the file set.
 
   ``type``
-    A string specifying the type of the file set.  See
-    :command:`target_sources` supported file set types.
+    A string specifying the type of the file set.  See the
+    :manual:`cmake-buildsystem(7)` manual for the list of supported file set
+    types.
 
   ``visibility``
     A string specifying the visibility of the file set; one of ``PUBLIC``,
@@ -1642,7 +1643,7 @@ with members:
 
     Optional member that is present when the source is part of at least one
     file set; see also policy :policy:`CMP0211`. The value is
-    an array of unsigned integer 0-based indexes inte the ``fileSets`` array.
+    an array of unsigned integer 0-based indexes into the ``fileSets`` array.
 
   ``backtrace``
     .. deprecated:: 4.4
@@ -1709,7 +1710,7 @@ with members:
 
     Optional member that is present when the source is part of at least one
     file set; see also policy :policy:`CMP0211`. The value is
-    an array of unsigned integer 0-based indexes inte the ``fileSets`` array.
+    an array of unsigned integer 0-based indexes into the ``fileSets`` array.
 
 ``sourceGroups``
   Optional member that is present when sources are grouped together by

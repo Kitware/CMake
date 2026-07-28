@@ -88,6 +88,8 @@ Commands
     List of file sets. Files of these file sets will be placed in group
     ``<group>``. Arguments to ``FILE_SETS`` may use
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
+    See the :manual:`cmake-buildsystem(7)` manual for more details on
+    :ref:`File Sets`.
 
   ``TARGET <target>``
     .. versionadded:: 4.5

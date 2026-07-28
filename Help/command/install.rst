@@ -247,9 +247,9 @@ Signatures
   ``FILE_SET <set-name>``
     .. versionadded:: 3.23
 
-    File sets are defined by the :command:`target_sources(FILE_SET)` command.
-    If the file set ``<set-name>`` exists and is ``PUBLIC`` or ``INTERFACE``,
-    any files in the set of type ``HEADERS`` are installed under
+    :ref:`File sets` are defined by the :command:`target_sources(FILE_SET)`
+    command. If the file set ``<set-name>`` exists and is ``PUBLIC`` or
+    ``INTERFACE``, any files in the set of type ``HEADERS`` are installed under
     the destination (see below). Other types do not have any default
     destination, so ``DESTINATION`` option must be specified for each
     ``FILE_SET``.
@@ -534,9 +534,10 @@ Signatures
 
   .. note::
 
-    If installing header files, consider using file sets defined by
+    If installing header files, consider using :ref:`file sets` defined by
     :command:`target_sources(FILE_SET)` instead. File sets associate
-    headers with a target and they install as part of the target.
+    headers with a target and they install as part of the target. See the
+    :manual:`cmake-buildsystem(7)` manual for more details.
 
   Install files or programs:
 
@@ -643,10 +644,11 @@ Signatures
 
   .. note::
 
-    To install a directory sub-tree of headers, consider using file sets
+    To install a directory sub-tree of headers, consider using :ref:`file sets`
     defined by :command:`target_sources(FILE_SET)` instead. File sets not only
     preserve directory structure, they also associate headers with a target
-    and install as part of the target.
+    and install as part of the target. See the :manual:`cmake-buildsystem(7)`
+    manual for more details.
 
   Install the contents of one or more directories:
 
