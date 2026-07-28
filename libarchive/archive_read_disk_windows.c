@@ -37,10 +37,11 @@
 #include <winioctl.h>
 
 #include "archive.h"
-#include "archive_string.h"
 #include "archive_entry.h"
+#include "archive_integer.h"
 #include "archive_private.h"
 #include "archive_read_disk_private.h"
+#include "archive_string.h"
 #include "archive_time_private.h"
 
 #ifndef O_BINARY
@@ -151,6 +152,8 @@ struct tree {
 	size_t			 dirname_length;
 
 	int	 depth;
+	/* Whether this tree began as a wildcard search */
+	int	 rootwild;
 
 	BY_HANDLE_FILE_INFORMATION	lst;
 	BY_HANDLE_FILE_INFORMATION	st;
@@ -358,6 +361,8 @@ la_linkname_from_handle(HANDLE h, wchar_t **linkname, int *linktype)
 	}
 
 	indata = malloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
+	if (indata == NULL)
+		return (-1);
 	ret = DeviceIoControl(h, FSCTL_GET_REPARSE_POINT, NULL, 0, indata,
 	    1024, &inbytes, NULL);
 	if (ret == 0) {
@@ -553,6 +558,10 @@ archive_read_disk_new(void)
 	a->archive.state = ARCHIVE_STATE_NEW;
 	a->archive.vtable = &archive_read_disk_vtable;
 	a->entry = archive_entry_new2(&a->archive);
+	if (a->entry == NULL) {
+		free(a);
+		return (NULL);
+	}
 	a->lookup_uname = trivial_lookup_uname;
 	a->lookup_gname = trivial_lookup_gname;
 	a->flags = ARCHIVE_READDISK_MAC_COPYFILE;
@@ -924,7 +933,27 @@ next_entry(struct archive_read_disk *a, struct tree *t,
 		case 0:
 			return (ARCHIVE_EOF);
 		case TREE_POSTDESCENT:
+			if (t->depth == 1 && t->rootwild && t->symlink_mode == 'H') {
+				/*
+				 * We have descended from a directory at depth 0 specified by a
+				 * wildcard search in 'H'ybrid link mode. All items under this
+				 * directory should be 'P'hysical.
+				 */
+				t->symlink_mode = 'P';
+				a->follow_symlinks = 0;
+			}
+			break;
 		case TREE_POSTASCENT:
+			if (t->depth == 0 && t->rootwild && t->initial_symlink_mode == 'H') {
+				/*
+				 * We have returned to the root of a wildcard search, in 'H'ybrid
+				 * mode, so restore the symlink mode we overwrote in
+				 * TREE_POSTDESCENT.
+				 */
+				t->symlink_mode = t->initial_symlink_mode;
+				/* Mimics setup done in setup_symlink_mode */
+				a->follow_symlinks = 1;
+			}
 			break;
 		case TREE_REGULAR:
 			lst = tree_current_lstat(t);
@@ -946,8 +975,8 @@ next_entry(struct archive_read_disk *a, struct tree *t,
 	if (a->matching) {
 		r = archive_match_path_excluded(a->matching, entry);
 		if (r < 0) {
-			archive_set_error(&(a->archive), errno,
-			    "Failed : %s", archive_error_string(a->matching));
+			archive_set_error(&(a->archive), archive_errno(a->matching),
+			    "%s", archive_error_string(a->matching));
 			return (r);
 		}
 		if (r) {
@@ -964,7 +993,14 @@ next_entry(struct archive_read_disk *a, struct tree *t,
 	switch(t->symlink_mode) {
 	case 'H':
 		/* 'H': After the first item, rest like 'P'. */
-		t->symlink_mode = 'P';
+		if (!t->rootwild) {
+			/*
+			 * 'H': When we started with a wildcard, entries at the starting
+			 * depth should be kept in `H` mode; switching into 'P' mode
+			 * is handled in TREE_POSTDESCENT when we enter depth = 1.
+			 */
+			t->symlink_mode = 'P';
+		}
 		/* 'H': First item (from command line) like 'L'. */
 		/* FALLTHROUGH */
 	case 'L':
@@ -1018,8 +1054,8 @@ next_entry(struct archive_read_disk *a, struct tree *t,
 	if (a->matching) {
 		r = archive_match_time_excluded(a->matching, entry);
 		if (r < 0) {
-			archive_set_error(&(a->archive), errno,
-			    "Failed : %s", archive_error_string(a->matching));
+			archive_set_error(&(a->archive), archive_errno(a->matching),
+			    "%s", archive_error_string(a->matching));
 			return (r);
 		}
 		if (r) {
@@ -1044,8 +1080,8 @@ next_entry(struct archive_read_disk *a, struct tree *t,
 	if (a->matching) {
 		r = archive_match_owner_excluded(a->matching, entry);
 		if (r < 0) {
-			archive_set_error(&(a->archive), errno,
-			    "Failed : %s", archive_error_string(a->matching));
+			archive_set_error(&(a->archive), archive_errno(a->matching),
+			    "%s", archive_error_string(a->matching));
 			return (r);
 		}
 		if (r) {
@@ -1450,18 +1486,18 @@ update_current_filesystem(struct archive_read_disk *a, int64_t dev)
 	/*
 	 * There is a new filesystem, we generate a new ID for.
 	 */
-	fid = t->max_filesystem_id++;
-	if (fid > MAX_FILESYSTEM_ID) {
+	fid = t->max_filesystem_id;
+	if (fid >= MAX_FILESYSTEM_ID) {
 		archive_set_error(&a->archive, ENOMEM, "Too many filesystems");
 		return (ARCHIVE_FATAL);
 	}
-	if (t->max_filesystem_id > t->allocated_filesystem) {
+	if (fid + 1 > t->allocated_filesystem) {
 		int s;
 		void *p;
 
-		s = t->max_filesystem_id * 2;
+		s = (fid + 1) * 2;
 		p = realloc(t->filesystem_table,
-			s * sizeof(*t->filesystem_table));
+		    s * sizeof(*t->filesystem_table));
 		if (p == NULL) {
 			archive_set_error(&a->archive, ENOMEM,
 			    "Can't allocate tar data");
@@ -1470,6 +1506,7 @@ update_current_filesystem(struct archive_read_disk *a, int64_t dev)
 		t->filesystem_table = (struct filesystem *)p;
 		t->allocated_filesystem = s;
 	}
+	t->max_filesystem_id = fid + 1;
 	t->current_filesystem_id = fid;
 	t->current_filesystem = &(t->filesystem_table[fid]);
 	t->current_filesystem->dev = dev;
@@ -1632,6 +1669,8 @@ tree_push(struct tree *t, const wchar_t *path, const wchar_t *full_path,
 	struct tree_entry *te;
 
 	te = calloc(1, sizeof(*te));
+	if (te == NULL)
+		return;
 	te->next = t->stack;
 	te->parent = t->current;
 	if (te->parent)
@@ -1704,6 +1743,8 @@ tree_open(const wchar_t *path, int symlink_mode, int restore_time)
 	struct tree *t;
 
 	t = calloc(1, sizeof(*t));
+	if (t == NULL)
+		return (NULL);
 	archive_string_init(&(t->full_path));
 	archive_string_init(&t->path);
 	if (archive_wstring_ensure(&t->path, 15) == NULL) {
@@ -1726,6 +1767,7 @@ tree_reopen(struct tree *t, const wchar_t *path, int restore_time)
 	t->full_path_dir_length = 0;
 	t->dirname_length = 0;
 	t->depth = 0;
+	t->rootwild = 0;
 	t->descend = 0;
 	t->current = NULL;
 	t->d = INVALID_HANDLE_VALUE;
@@ -1779,6 +1821,7 @@ tree_reopen(struct tree *t, const wchar_t *path, int restore_time)
 			t->full_path.length = wcslen(t->full_path.s);
 			t->full_path_dir_length = archive_strlen(&t->full_path);
 		}
+		t->rootwild = 1;
 	}
 	tree_push(t, base, t->full_path.s, 0, 0, 0, NULL);
 	archive_wstring_free(&ws);
@@ -2498,7 +2541,12 @@ setup_sparse_from_disk(struct archive_read_disk *a,
 			    (DWORD)outranges_size, &retbytes, NULL);
 			if (ret == 0 && GetLastError() == ERROR_MORE_DATA) {
 				free(outranges);
-				outranges_size *= 2;
+				if (archive_ckd_mul_size(&outranges_size, outranges_size, 2)) {
+					archive_set_error(&a->archive, ENOMEM,
+					    "Couldn't allocate memory");
+					exit_sts = ARCHIVE_FATAL;
+					goto exit_setup_sparse;
+				}
 				outranges = (FILE_ALLOCATED_RANGE_BUFFER *)
 				    malloc(outranges_size);
 				if (outranges == NULL) {
