@@ -314,6 +314,10 @@ public:
   cmStringRange GetInstallIncludeDirectoriesEntries(
     cmTargetExport const& te) const;
 
+  //! Control if the target generates object files for module interfaces
+  bool CxxModuleNeedsInterfaceObjects() const;
+  void SetCxxModuleNeedsInterfaceObjects(bool);
+
   BTs<std::string> const* GetLanguageStandardProperty(
     std::string const& propertyName) const;
 

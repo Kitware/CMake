@@ -434,8 +434,8 @@ public:
     std::vector<std::string> const& linked_target_dirs,
     std::vector<std::string> const& forward_modules_from_target_dirs,
     std::string const& native_target_dir, std::string const& arg_lang,
-    std::string const& arg_modmapfmt,
-    cmCxxModuleExportInfo const& export_info);
+    std::string const& arg_modmapfmt, cmCxxModuleExportInfo const& export_info,
+    Json::Value const* cxx_interface_objects = nullptr);
 
   virtual std::string BuildAlias(std::string const& alias,
                                  std::string const& /*config*/) const

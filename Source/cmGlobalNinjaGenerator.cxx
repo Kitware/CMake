@@ -2680,7 +2680,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::vector<std::string> const& linked_target_dirs,
   std::vector<std::string> const& forward_modules_from_target_dirs,
   std::string const& native_target_dir, std::string const& arg_lang,
-  std::string const& arg_modmapfmt, cmCxxModuleExportInfo const& export_info)
+  std::string const& arg_modmapfmt, cmCxxModuleExportInfo const& export_info,
+  Json::Value const* cxx_interface_objects)
 {
   // Setup path conversions.
   {
@@ -3066,8 +3067,40 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     return {};
   };
 
-  return cmDyndepCollation::WriteDyndepMetadata(arg_lang, objects, export_info,
-                                                cb);
+  if (!cmDyndepCollation::WriteDyndepMetadata(arg_lang, objects, export_info,
+                                              cb)) {
+    return false;
+  }
+
+  // Write the interface objects response file if configured.
+  if (cxx_interface_objects && cxx_interface_objects->isObject()) {
+    Json::Value const& rspFile = (*cxx_interface_objects)["rsp-file"];
+    Json::Value const& moduleObjects =
+      (*cxx_interface_objects)["module-objects"];
+    if (rspFile.isString() && moduleObjects.isObject()) {
+      std::set<std::string> usedModules;
+      for (cmScanDepInfo const& object : objects) {
+        for (auto const& r : object.Requires) {
+          usedModules.insert(r.LogicalName);
+        }
+      }
+
+      cmGeneratedFileStream rsp(rspFile.asString());
+      rsp.SetCopyIfDifferent(true);
+      auto* lg = this->LocalGenerators.back().get();
+      for (auto i = moduleObjects.begin(); i != moduleObjects.end(); ++i) {
+        std::string moduleName = i.key().asString();
+        if (usedModules.count(moduleName)) {
+          rsp << lg->ConvertToOutputFormat(
+                   lg->MaybeRelativeToTopBinDir((*i).asString()),
+                   cmOutputConverter::RESPONSE)
+              << "\n";
+        }
+      }
+    }
+  }
+
+  return true;
 }
 
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
@@ -3182,6 +3215,11 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
 
   auto export_info = cmDyndepCollation::ParseExportInfo(tdi);
 
+  Json::Value const* cxx_interface_objects = nullptr;
+  if (tdi.isMember("cxx-interface-objects")) {
+    cxx_interface_objects = &tdi["cxx-interface-objects"];
+  }
+
   cmake cm(cmState::Role::Internal);
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
@@ -3200,7 +3238,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
                             arg_dd, arg_ddis, module_dir, linked_target_dirs,
                             forward_modules_from_target_dirs,
                             native_target_dir, arg_lang, arg_modmapfmt,
-                            *export_info)
+                            *export_info, cxx_interface_objects)
     ? 0
     : 1;
 }

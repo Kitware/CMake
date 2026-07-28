@@ -708,7 +708,7 @@ void cmGeneratorTarget::GetObjectSources(
   this->VisitedConfigsForObjects.insert(config);
 }
 
-void cmGeneratorTarget::ComputeObjectMapping()
+void cmGeneratorTarget::ComputeObjectMapping() const
 {
   auto const& configs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
@@ -863,7 +863,8 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
   return false;
 }
 
-std::string const& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
+std::string const& cmGeneratorTarget::GetObjectName(
+  cmSourceFile const* file) const
 {
   this->ComputeObjectMapping();
   auto const useShortPaths = this->GetUseShortObjectNames()
@@ -906,7 +907,7 @@ void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile const* sf)
 
 bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 {
-  const_cast<cmGeneratorTarget*>(this)->ComputeObjectMapping();
+  this->ComputeObjectMapping();
   auto it = this->ExplicitObjectName.find(file);
   return it != this->ExplicitObjectName.end();
 }
@@ -5377,8 +5378,9 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
     metadata = std::move(*parseResult.Meta);
   }
 
-  auto* stdlibTgt = makefile->AddLibrary(
-    "@cmake_cxx_std", cm::TargetType::STATIC_LIBRARY, {}, true);
+  auto* stdlibTgt = makefile->AddImportedTarget(
+    "@cmake_cxx_std", cm::TargetType::INTERFACE_LIBRARY,
+    cm::ImportedTargetScope::Local);
   cmCxxModuleMetadata::PopulateTarget(*stdlibTgt, *metadata, configs);
   cmStandardLevelResolver standardResolver(makefile);
   standardResolver.AddRequiredTargetFeature(stdlibTgt, "cxx_std_20");
@@ -5387,7 +5389,13 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
     gt->ComputeCompileFeatures(config);
   }
 
-  lg->AddGeneratorTarget(std::move(gt));
+  auto compilerId = makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
+  if (compilerId == "MSVC") {
+    stdlibTgt->SetCxxModuleNeedsInterfaceObjects(true);
+  }
+
+  lg->AddImportedGeneratorTarget(gt.get());
+  lg->AddOwnedImportedGeneratorTarget(std::move(gt));
 
 #endif // CMAKE_BOOTSTRAP
 
@@ -5541,6 +5549,9 @@ cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
   auto* lg = this->GetLocalGenerator();
   auto* tgt =
     mf->AddSynthesizedTarget(cm::TargetType::INTERFACE_LIBRARY, targetName);
+  if (model->CxxModuleNeedsInterfaceObjects()) {
+    tgt->SetCxxModuleNeedsInterfaceObjects(true);
+  }
 
   // Copy relevant information from the existing target.
 

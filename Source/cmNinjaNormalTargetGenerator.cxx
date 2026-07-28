@@ -42,6 +42,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetTypes.h"
 #include "cmValue.h"
 
@@ -1385,6 +1386,30 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   vars["LINK_PATH"] = frameworkPath + linkPath;
   vars["CONFIG"] = config;
+
+  // Add interface objects response file to link flags if configured.
+  {
+    bool multiConfig = this->GetGlobalGenerator()->IsMultiConfig();
+    std::string configDir = multiConfig ? cmStrCat('/', config) : "";
+    bool hasInterfaceObjects = false;
+    for (auto const& pair :
+         this->GetGeneratorTarget()->GetSyntheticDeps(config)) {
+      if (pair.first->Target->CxxModuleNeedsInterfaceObjects()) {
+        hasInterfaceObjects = true;
+        break;
+      }
+    }
+    if (hasInterfaceObjects) {
+      std::string rspPath =
+        cmStrCat(this->GeneratorTarget->GetSupportDirectory(), configDir,
+                 "/CXXInterfaceObjects.rsp");
+      vars["LINK_FLAGS"] += cmStrCat(
+        " @",
+        this->GetLocalGenerator()->ConvertToOutputFormat(
+          this->ConvertToNinjaPath(rspPath), cmOutputConverter::SHELL));
+      linkBuild.ImplicitDeps.emplace_back(this->ConvertToNinjaPath(rspPath));
+    }
+  }
 
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating

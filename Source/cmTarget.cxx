@@ -632,6 +632,7 @@ public:
   bool IsSymbolic = false;
   bool IsForTryCompile = false;
   bool IsExportPassthrough = false;
+  bool CxxModuleNeedsInterfaceObjects = false;
   cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::set<std::string> CodegenDependencies;
@@ -1188,6 +1189,16 @@ cmPolicies::PolicyStatus cmTarget::GetPolicyStatus(
 cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
 {
   return this->impl->Makefile->GetGlobalGenerator();
+}
+
+bool cmTarget::CxxModuleNeedsInterfaceObjects() const
+{
+  return this->impl->CxxModuleNeedsInterfaceObjects;
+}
+
+void cmTarget::SetCxxModuleNeedsInterfaceObjects(bool v)
+{
+  this->impl->CxxModuleNeedsInterfaceObjects = v;
 }
 
 BTs<std::string> const* cmTarget::GetLanguageStandardProperty(
