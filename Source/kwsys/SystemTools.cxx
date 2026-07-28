@@ -1252,7 +1252,8 @@ bool SystemTools::DeleteRegistryValue(std::string const& key, KeyWOW64 view)
                     &hKey) != ERROR_SUCCESS) {
     return false;
   } else {
-    if (RegDeleteValue(hKey, (LPTSTR)valuename.c_str()) == ERROR_SUCCESS) {
+    if (RegDeleteValueW(hKey, Encoding::ToWide(valuename).c_str()) ==
+        ERROR_SUCCESS) {
       RegCloseKey(hKey);
       return true;
     }
@@ -2724,22 +2725,6 @@ int SystemTools::Strucmp(char const* l, char const* r)
   do {
     lc = kwsysString_tolower(*l++);
     rc = kwsysString_tolower(*r++);
-  } while (lc == rc && lc);
-  return lc - rc;
-}
-
-int SystemTools::Strnucmp(char const* l, char const* r, size_t n)
-{
-  int lc;
-  int rc;
-  size_t count = 0;
-  do {
-    lc = kwsysString_tolower(*l++);
-    rc = kwsysString_tolower(*r++);
-    count++;
-    if (count >= n) {
-      return lc - rc;
-    }
   } while (lc == rc && lc);
   return lc - rc;
 }
