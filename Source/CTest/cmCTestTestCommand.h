@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #include <cm/optional>
 #include <cmext/string_view>
@@ -31,8 +32,8 @@ protected:
     std::string Stride;
     std::string Exclude;
     std::string Include;
-    std::string ExcludeLabel;
-    std::string IncludeLabel;
+    ArgumentParser::NonEmpty<std::vector<std::string>> ExcludeLabel;
+    ArgumentParser::NonEmpty<std::vector<std::string>> IncludeLabel;
     std::string IncludeTestsFromFile;
     std::string ExcludeTestsFromFile;
     std::string ExcludeFixture;

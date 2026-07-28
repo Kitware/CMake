@@ -1,0 +1,3 @@
+CMake Error at [^
+]*/test\.cmake:[0-9]+ \(ctest_test\):
+  Error after keyword "INCLUDE_LABEL":

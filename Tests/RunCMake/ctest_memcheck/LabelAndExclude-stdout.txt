@@ -1,0 +1,10 @@
+Memory check project [^
+]*/LabelAndExclude-build
+    Start [0-9]+: RunCMake
+[0-9]+/3 MemCheck #[0-9]+: RunCMake \.+ +Passed +[0-9\.]+ sec
+    Start [0-9]+: test1
+[0-9]+/3 MemCheck #[0-9]+: test1 \.+ +Passed +[0-9\.]+ sec
+    Start [0-9]+: test2
+[0-9]+/3 MemCheck #[0-9]+: test2 \.+ +Passed +[0-9\.]+ sec
++
+100% tests passed out of 3

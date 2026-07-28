@@ -418,6 +418,34 @@ set_property(TEST b PROPERTY LABELS b)
 endfunction()
 run_changing_labels()
 
+# Verify that INCLUDE_LABEL / EXCLUDE_LABEL accept more than one value that
+# form an AND relationship, matching the `ctest -L` / `ctest -LE` behavior.
+function(run_label_and)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME test1 COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST test1 PROPERTY LABELS foo)
+add_test(NAME test2 COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST test2 PROPERTY LABELS bar)
+add_test(NAME test3 COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST test3 PROPERTY LABELS foo bar)
+  ]])
+  run_ctest_test(LabelAndInclude INCLUDE_LABEL foo bar)
+  run_ctest_test(LabelAndExclude EXCLUDE_LABEL foo bar)
+  run_ctest_test(LabelAndIncludeSingle INCLUDE_LABEL foo)
+  run_ctest_test(LabelAndMissingValue INCLUDE_LABEL)
+  run_ctest_test(LabelAndDuplicate INCLUDE_LABEL foo INCLUDE_LABEL bar)
+
+  # An explicit empty-string label argument clears a filter pre-seeded on the
+  # `ctest` command line, and thus runs every test.
+  set(CASE_CTEST_TEST_RAW_ARGS "INCLUDE_LABEL \"\"")
+  run_ctest(LabelAndIncludeEmptyClears -L "^foo$")
+  unset(CASE_CTEST_TEST_RAW_ARGS)
+  set(CASE_CTEST_TEST_RAW_ARGS "EXCLUDE_LABEL \"\"")
+  run_ctest(LabelAndExcludeEmptyClears -LE "^foo$")
+  unset(CASE_CTEST_TEST_RAW_ARGS)
+endfunction()
+run_label_and()
+
 # Verify that test output can add additional labels
 function(run_extra_labels)
   set(CASE_CMAKELISTS_SUFFIX_CODE [[

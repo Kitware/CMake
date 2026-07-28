@@ -238,3 +238,26 @@ block()
     "PRESET my-include-preset PRESETS_FILE /nonexistent/path/presets.json")
   run_mc_test(TestPresetBadFile "${PSEUDO_VALGRIND}")
 endblock()
+
+#-----------------------------------------------------------------------------
+# Verify that INCLUDE_LABEL / EXCLUDE_LABEL accept more than one value that
+# form an AND relationship, and that the change propagates to ctest_memcheck().
+block()
+  set(CMAKELISTS_EXTRA_CODE [[
+add_test(NAME test1 COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST test1 PROPERTY LABELS foo)
+add_test(NAME test2 COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST test2 PROPERTY LABELS bar)
+add_test(NAME test3 COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST test3 PROPERTY LABELS foo bar)
+]])
+  set(CTEST_MEMCHECK_ARGS "INCLUDE_LABEL foo bar")
+  run_mc_test(LabelAndInclude "${PSEUDO_VALGRIND}")
+
+  set(CTEST_MEMCHECK_ARGS "EXCLUDE_LABEL foo bar")
+  run_mc_test(LabelAndExclude "${PSEUDO_VALGRIND}")
+
+  set(CTEST_MEMCHECK_ARGS "INCLUDE_LABEL foo")
+  run_mc_test(LabelAndIncludeSingle "${PSEUDO_VALGRIND}")
+  unset(CTEST_MEMCHECK_ARGS)
+endblock()

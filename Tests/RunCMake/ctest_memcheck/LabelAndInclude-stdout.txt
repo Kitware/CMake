@@ -1,0 +1,6 @@
+Memory check project [^
+]*/LabelAndInclude-build
+    Start [0-9]+: test3
+1/1 MemCheck #[0-9]+: test3 \.+ +Passed +[0-9\.]+ sec
++
+100% tests passed out of 1
