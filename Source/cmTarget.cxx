@@ -351,7 +351,6 @@ TargetProperty const StaticTargetProperties[] = {
   COMMON_LANGUAGE_PROPERTIES(C),
   // ---- C++
   COMMON_LANGUAGE_PROPERTIES(CXX),
-  { "CXX_MODULE_STD"_s, IC::CanCompileSources },
   // ---- CSharp
   { "DOTNET_SDK"_s, IC::NonImportedTarget },
   { "DOTNET_TARGET_FRAMEWORK"_s, IC::TargetWithCommands },
@@ -1886,7 +1885,6 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
     // ---- C++
     "CXX_COMPILER_LAUNCHER",
     "CXX_VISIBILITY_PRESET",
-    "CXX_MODULE_STD",
 
     // Static analysis
     "CXX_CLANG_TIDY",

@@ -1,0 +1,5 @@
+import std;
+
+int main()
+{
+}

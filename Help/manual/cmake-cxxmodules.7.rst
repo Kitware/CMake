@@ -91,7 +91,8 @@ library combinations:
 
 * Clang 18.1.2 and newer with standard library ``libc++`` or ``libstdc++``
 * MSVC toolset 14.36 and newer (provided with Visual Studio 17.6 and newer)
-* GCC 15 and newer
+* GCC 15 and newer, with the exception of MacOS
+* GCC 16 and newer on MacOS
 
   .. note::
 
@@ -100,12 +101,12 @@ library combinations:
 
 .. _`Ubuntu issue 2141579`: https://bugs.launchpad.net/ubuntu/+source/gcc-15/+bug/2141579
 
-The :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable lists standard levels
-which have support for ``import std`` in the active C++ toolchain.
+Only the :ref:`Ninja Generators` currently support ``import std`` because
+:ref:`Visual Studio Generators` do not support building :term:`BMIs <BMI>`
+for ``IMPORTED`` targets.
 
-Additionally, only the :ref:`Ninja Generators` currently support
-``import std`` at this time because :ref:`Visual Studio Generators` do not
-support building :term:`BMIs <BMI>` for ``IMPORTED`` targets.
+``import std`` is available for all language standards which support C++ module
+scanning (ie, C++20 and newer).
 
 .. note::
 

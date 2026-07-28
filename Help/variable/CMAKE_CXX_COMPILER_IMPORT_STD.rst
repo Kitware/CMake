@@ -1,6 +1,12 @@
 CMAKE_CXX_COMPILER_IMPORT_STD
 -----------------------------
 
+.. versionchanged:: 4.5
+
+   Reporting of supported C++ standard levels has been removed as toolchains
+   no longer control generation of standard library targets.
+   ``CMAKE_CXX_COMPILER_IMPORT_STD`` is left undefined.
+
 .. versionadded:: 3.30
 
 A list of C++ standard levels for which ``import std`` support exists for the

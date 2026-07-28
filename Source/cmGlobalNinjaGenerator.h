@@ -32,6 +32,10 @@ class cmMakefile;
 class cmake;
 struct cmCxxModuleExportInfo;
 
+namespace Json {
+class Value;
+}
+
 /**
  * \class cmGlobalNinjaGenerator
  * \brief Write a build.ninja file.

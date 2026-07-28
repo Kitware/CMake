@@ -8,8 +8,8 @@ if (NOT TARGET CXXModules::import_std_not_in_export)
     "Missing imported target")
 endif ()
 
-function (check_property expected property)
-  get_property(actual TARGET CXXModules::import_std_not_in_export
+function (check_property expected property target)
+  get_property(actual TARGET ${target}
     PROPERTY "${property}")
   if (NOT DEFINED actual)
     if (NOT expected STREQUAL "<UNDEF>")
@@ -22,12 +22,11 @@ function (check_property expected property)
   endif ()
 endfunction ()
 
-check_property("<UNDEF>" "IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES")
-check_property("<UNDEF>" "IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS")
-check_property("cxx_std_23" "IMPORTED_CXX_MODULES_COMPILE_FEATURES")
-check_property("" "IMPORTED_CXX_MODULES_LINK_LIBRARIES")
-check_property("<UNDEF>" "INTERFACE_LINK_LIBRARIES")
-check_property("1" "CXX_MODULE_STD")
+check_property("<UNDEF>" "IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES" CXXModules::import_std_not_in_export)
+check_property("<UNDEF>" "IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS" CXXModules::import_std_not_in_export)
+check_property("cxx_std_23" "IMPORTED_CXX_MODULES_COMPILE_FEATURES" CXXModules::import_std_not_in_export)
+check_property("" "IMPORTED_CXX_MODULES_LINK_LIBRARIES" CXXModules::import_std_not_in_export)
+check_property("<UNDEF>" "INTERFACE_LINK_LIBRARIES" CXXModules::import_std_not_in_export)
 
 # Extract the export-dependent targets from the export file.
 file(STRINGS "${import_std_not_in_export_DIR}/import_std_not_in_export-targets.cmake" usage_dependent_targets
@@ -41,5 +40,17 @@ string(REPLACE "\"" "" usage_dependent_targets "${usage_dependent_targets}")
 
 if ("@cmake_cxx_std" IN_LIST usage_dependent_targets)
   message(SEND_ERROR
-    "The main export requires the '@cmake_cxx_std' target")
+    "The CMake config export requires the '@cmake_cxx_std' target")
 endif ()
+
+# CPS import test
+find_package(import_std_not_in_export_cps CONFIG REQUIRED)
+if (NOT TARGET import_std_not_in_export_cps::import_std_not_in_export)
+  message(FATAL_ERROR "Missing CPS imported target")
+endif ()
+
+check_property("<UNDEF>" "IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES" import_std_not_in_export_cps::import_std_not_in_export)
+check_property("<UNDEF>" "IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS" import_std_not_in_export_cps::import_std_not_in_export)
+check_property("<UNDEF>" "IMPORTED_CXX_MODULES_COMPILE_FEATURES" import_std_not_in_export_cps::import_std_not_in_export)
+check_property("<UNDEF>" "IMPORTED_CXX_MODULES_LINK_LIBRARIES" import_std_not_in_export_cps::import_std_not_in_export)
+check_property("<UNDEF>" "INTERFACE_LINK_LIBRARIES" import_std_not_in_export_cps::import_std_not_in_export)

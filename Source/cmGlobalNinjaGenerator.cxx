@@ -2716,6 +2716,14 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   };
   std::map<std::string, AvailableModuleInfo> mod_files;
 
+  struct ImportErrorInfo
+  {
+    std::string Message;
+    std::set<std::string> Modules;
+  };
+  std::vector<ImportErrorInfo> importErrors;
+  Json::Value transitiveInterfaceObjects(Json::objectValue);
+
   // Populate the module map with those provided by linked targets first.
   for (std::string const& linked_target_dir : linked_target_dirs) {
     std::string const ltmn =
@@ -2782,6 +2790,42 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
             for (auto j = i->begin(); j != i->end(); ++j) {
               usages.Usage[i.key().asString()].insert(j->asString());
             }
+          }
+        }
+      }
+      Json::Value const& import_error = ltm["import-error"];
+      if (import_error.isObject()) {
+        ImportErrorInfo info;
+        info.Message = import_error["message"].asString();
+        Json::Value const& errModules = import_error["modules"];
+        if (errModules.isArray()) {
+          for (auto const& m : errModules) {
+            info.Modules.insert(m.asString());
+          }
+        }
+        if (!info.Modules.empty()) {
+          importErrors.push_back(std::move(info));
+        }
+      }
+      Json::Value const& linked_interface_objects = ltm["interface-objects"];
+      if (linked_interface_objects.isObject()) {
+        for (auto i = linked_interface_objects.begin();
+             i != linked_interface_objects.end(); ++i) {
+          if (!transitiveInterfaceObjects.isMember(i.key().asString())) {
+            transitiveInterfaceObjects[i.key().asString()] = *i;
+          }
+        }
+      }
+    }
+  }
+
+  if (!importErrors.empty()) {
+    for (cmScanDepInfo const& object : objects) {
+      for (auto const& r : object.Requires) {
+        for (auto const& ie : importErrors) {
+          if (ie.Modules.count(r.LogicalName)) {
+            cmSystemTools::Error(ie.Message);
+            return false;
           }
         }
       }
@@ -3051,7 +3095,36 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     forward_info(tmi_target_modules, fmft["modules"]);
     forward_info(target_references, fmft["references"]);
     forward_info(target_usages, fmft["usages"]);
+    forward_info(transitiveInterfaceObjects, fmft["interface-objects"]);
   }
+
+  // Compute the set of modules actually imported by sources in this target.
+  std::set<std::string> usedModules;
+  for (cmScanDepInfo const& object : objects) {
+    for (auto const& r : object.Requires) {
+      usedModules.insert(r.LogicalName);
+    }
+  }
+
+  // Merge direct interface objects into the accumulated set.
+  // Direct objects are filtered: only keep those for modules that are
+  // actually imported by sources in this target. Transitive objects from
+  // linked targets were already filtered in their originating target.
+  if (cxx_interface_objects && cxx_interface_objects->isObject()) {
+    Json::Value const& directObjects =
+      (*cxx_interface_objects)["module-objects"];
+    if (directObjects.isObject()) {
+      for (auto i = directObjects.begin(); i != directObjects.end(); ++i) {
+        std::string moduleName = i.key().asString();
+        if (usedModules.count(moduleName) &&
+            !transitiveInterfaceObjects.isMember(moduleName)) {
+          transitiveInterfaceObjects[i.key().asString()] = *i;
+        }
+      }
+    }
+  }
+
+  target_module_info["interface-objects"] = transitiveInterfaceObjects;
 
   cmGeneratedFileStream tmf(target_mods_file);
   tmf.SetCopyIfDifferent(true);
@@ -3075,27 +3148,16 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // Write the interface objects response file if configured.
   if (cxx_interface_objects && cxx_interface_objects->isObject()) {
     Json::Value const& rspFile = (*cxx_interface_objects)["rsp-file"];
-    Json::Value const& moduleObjects =
-      (*cxx_interface_objects)["module-objects"];
-    if (rspFile.isString() && moduleObjects.isObject()) {
-      std::set<std::string> usedModules;
-      for (cmScanDepInfo const& object : objects) {
-        for (auto const& r : object.Requires) {
-          usedModules.insert(r.LogicalName);
-        }
-      }
-
+    if (rspFile.isString()) {
       cmGeneratedFileStream rsp(rspFile.asString());
       rsp.SetCopyIfDifferent(true);
       auto* lg = this->LocalGenerators.back().get();
-      for (auto i = moduleObjects.begin(); i != moduleObjects.end(); ++i) {
-        std::string moduleName = i.key().asString();
-        if (usedModules.count(moduleName)) {
-          rsp << lg->ConvertToOutputFormat(
-                   lg->MaybeRelativeToTopBinDir((*i).asString()),
-                   cmOutputConverter::RESPONSE)
-              << "\n";
-        }
+
+      for (auto const& objPath : transitiveInterfaceObjects) {
+        rsp << lg->ConvertToOutputFormat(
+                 lg->MaybeRelativeToTopBinDir(objPath.asString()),
+                 cmOutputConverter::RESPONSE)
+            << "\n";
       }
     }
   }

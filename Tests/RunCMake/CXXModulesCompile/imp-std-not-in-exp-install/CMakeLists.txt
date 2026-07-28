@@ -1,12 +1,10 @@
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
-  "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
+  "25d6f6aa-be65-4692-b44e-87b23e96d4e1")
 
 cmake_minimum_required(VERSION 3.29)
 project(cxx_modules_import_std_not_in_export CXX)
 
 include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
-
-set(CMAKE_CXX_MODULE_STD 1)
 
 add_library(import_std_not_in_export)
 target_sources(import_std_not_in_export
@@ -35,6 +33,11 @@ set(\${CMAKE_FIND_PACKAGE_NAME}_FOUND 1)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/import_std_not_in_export-config.cmake"
   DESTINATION "lib/cmake/import_std_not_in_export")
 
+install(PACKAGE_INFO import_std_not_in_export_cps
+  EXPORT export
+  DESTINATION "lib/cmake/import_std_not_in_export_cps"
+  CXX_MODULES_DIRECTORY "import_std_not_in_export-cxx-modules-cps")
+
 add_test(NAME main COMMAND main)
 
 set(generator
@@ -53,6 +56,7 @@ add_test(NAME import_std_not_in_export_build
     "${CMAKE_COMMAND}"
     "-Dexpected_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/miu"
     "-Dimport_std_not_in_export_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/import_std_not_in_export"
+    "-Dimport_std_not_in_export_cps_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/import_std_not_in_export_cps"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")
