@@ -436,39 +436,6 @@ function(instrument test)
   endif()
 endfunction()
 
-if (INSTRUMENTATION_INTERRUPT_REAL)
-  # RunCMake.InstrumentationInterrupt runs ONLY the real-signal/
-  # console-event interrupt case, as it must be excluded from MemCheck.
-  #
-  # POSIX delivers a real SIGINT to a contained process group.  On Windows, only
-  # the Ninja generator is exercised: its native tool reliably stops on the
-  # console event and does not re-broadcast it to the runner; the other Windows
-  # make-family generators are covered by the injection seam instead.
-  if (NOT WIN32 OR RunCMake_GENERATOR MATCHES "Ninja")
-    instrument(interrupt-build INTERRUPT
-      CHECK_SCRIPT check-interrupted.cmake
-    )
-    # Interrupt a parallel `cmake --install` with a real OS signal, proving the
-    # cooperative cancellation stops pending install scripts and skips the hook.
-    instrument(interrupt-install INSTALL_INTERRUPT
-      CHECK_SCRIPT check-installation-interrupted.cmake
-    )
-    # Interrupt a `ctest` run with a real OS signal, proving the scheduler stops
-    # launching pending tests, skips the hook, and preserves the `ctest -F`
-    # checkpoint so the interrupted test set can be resumed.
-    instrument(interrupt-test CTEST_INTERRUPT
-      CHECK_SCRIPT check-test-interrupted.cmake
-    )
-    # Interrupt a `ctest` run and then resume it with `ctest -F`, proving the
-    # checkpoint keeps the finished test (skipped on resume) but not the
-    # in-flight test killed by the interrupt (re-run on resume).
-    instrument(interrupt-test-failover CTEST_FAILOVER
-      CHECK_SCRIPT check-test-failover.cmake
-    )
-  endif()
-  return()
-endif()
-
 # Bad Queries
 instrument(bad-option BAD_QUERY
   CHECK_SCRIPT check-query-dir.cmake
@@ -740,6 +707,38 @@ if(NOT Skip_BUILD_MAKE_PROGRAM_Case)
         "-DINSTRUMENT_COMPILE_TRACE=DEFAULT"
         "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
       CHECK_SCRIPT check-data-dir.cmake
+    )
+  endif()
+endif()
+
+if (INSTRUMENTATION_INTERRUPT_REAL)
+  # RunCMake.InstrumentationInterrupt runs ONLY the real-signal/
+  # console-event interrupt case, as it must be excluded from MemCheck.
+  #
+  # POSIX delivers a real SIGINT to a contained process group.  On Windows, only
+  # the Ninja generator is exercised: its native tool reliably stops on the
+  # console event and does not re-broadcast it to the runner; the other Windows
+  # make-family generators are covered by the injection seam instead.
+  if (NOT WIN32 OR RunCMake_GENERATOR MATCHES "Ninja")
+    instrument(interrupt-build INTERRUPT
+      CHECK_SCRIPT check-interrupted.cmake
+    )
+    # Interrupt a parallel `cmake --install` with a real OS signal, proving the
+    # cooperative cancellation stops pending install scripts and skips the hook.
+    instrument(interrupt-install INSTALL_INTERRUPT
+      CHECK_SCRIPT check-installation-interrupted.cmake
+    )
+    # Interrupt a `ctest` run with a real OS signal, proving the scheduler stops
+    # launching pending tests, skips the hook, and preserves the `ctest -F`
+    # checkpoint so the interrupted test set can be resumed.
+    instrument(interrupt-test CTEST_INTERRUPT
+      CHECK_SCRIPT check-test-interrupted.cmake
+    )
+    # Interrupt a `ctest` run and then resume it with `ctest -F`, proving the
+    # checkpoint keeps the finished test (skipped on resume) but not the
+    # in-flight test killed by the interrupt (re-run on resume).
+    instrument(interrupt-test-failover CTEST_FAILOVER
+      CHECK_SCRIPT check-test-failover.cmake
     )
   endif()
 endif()
