@@ -9,6 +9,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
@@ -503,27 +504,99 @@ FastbuildExecNode cmFastbuildTargetGenerator::GetAppleTextStubCommand() const
   res.PreBuildDependencies.emplace(this->GetTargetName());
   return res;
 }
-FastbuildExecNode cmFastbuildTargetGenerator::GetDepsCheckExec(
+
+namespace {
+std::vector<std::vector<cm::string_view>> GroupDeps(
+  FastbuildExecNode const& depender, size_t commandLineUsedLength)
+{
+  std::vector<cm::string_view> depsCheckExecNames;
+  depsCheckExecNames.reserve(
+    depender.OutputsAlias.PreBuildDependencies.size() +
+    depender.ByproductsAlias.PreBuildDependencies.size());
+  for (FastbuildTargetDep const& dep :
+       depender.OutputsAlias.PreBuildDependencies) {
+    depsCheckExecNames.emplace_back(dep.Name);
+  }
+  for (FastbuildTargetDep const& dep :
+       depender.ByproductsAlias.PreBuildDependencies) {
+    depsCheckExecNames.emplace_back(dep.Name);
+  }
+
+  size_t commandLineLimit = cmSystemTools::CalculateCommandLineLengthLimit();
+
+  std::vector<std::vector<cm::string_view>> depsCheckExecNamesGrouped;
+  if (commandLineLimit == 0) {
+    depsCheckExecNamesGrouped.emplace_back(std::move(depsCheckExecNames));
+    return depsCheckExecNamesGrouped;
+  }
+
+  commandLineLimit -= commandLineUsedLength;
+
+  std::vector<cm::string_view> currentGroup;
+  currentGroup.reserve(depsCheckExecNames.size());
+  size_t currentGroupSizeMayUse = commandLineLimit;
+
+  for (size_t i = 0; i < depsCheckExecNames.size(); ++i) {
+    cm::string_view depsCheckExecName = depsCheckExecNames[i];
+    if (currentGroupSizeMayUse > depsCheckExecName.size()) {
+      currentGroup.emplace_back(depsCheckExecName);
+
+      // +1 for the space between arguments
+      currentGroupSizeMayUse -= depsCheckExecName.size() + 1;
+      continue;
+    }
+
+    // Current dependency cannot be placed in the current group
+    if (currentGroup.empty()) {
+      cmSystemTools::Error(cmStrCat("Failed to group dependencies: command "
+                                    "line limit exceeded. Filename too long: ",
+                                    depsCheckExecName,
+                                    ". Size limit: ", commandLineLimit));
+      return {};
+    }
+
+    depsCheckExecNamesGrouped.emplace_back(std::move(currentGroup));
+    currentGroup.clear();
+    currentGroup.reserve(depsCheckExecNames.size() - i);
+    currentGroupSizeMayUse = commandLineLimit;
+
+    // Go back to the previous dependency to check if it can be placed in the
+    // current group.
+    --i;
+  }
+
+  if (!currentGroup.empty()) {
+    depsCheckExecNamesGrouped.emplace_back(std::move(currentGroup));
+  }
+
+  return depsCheckExecNamesGrouped;
+}
+}
+
+std::vector<FastbuildExecNode> cmFastbuildTargetGenerator::GetDepsCheckExecs(
   FastbuildExecNode const& depender)
 {
-  FastbuildExecNode exec;
-  exec.Name = depender.Name + "-check-depends";
-  exec.ExecAlways = true;
-  exec.ExecUseStdOutAsOutput = true;
-  exec.ExecOutput = depender.ExecOutput + ".deps-checker";
-  exec.ExecExecutable = cmSystemTools::GetCMakeCommand();
-  exec.ExecArguments =
-    cmStrCat(std::move(exec.ExecArguments),
-             "-E cmake_fastbuild_check_depends ", depender.ExecOutput);
-  for (auto const& dep : depender.OutputsAlias.PreBuildDependencies) {
+  std::string const& executable = cmSystemTools::GetCMakeCommand();
+  std::string execArgumentsBase =
+    cmStrCat("-E cmake_fastbuild_check_depends ", depender.ExecOutput, ' ');
+
+  std::vector<std::vector<cm::string_view>> depsCheckExecNamesGrouped =
+    GroupDeps(depender, executable.size() + execArgumentsBase.size());
+
+  std::vector<FastbuildExecNode> res;
+  res.reserve(depsCheckExecNamesGrouped.size());
+  for (size_t i = 0; i < depsCheckExecNamesGrouped.size(); ++i) {
+    FastbuildExecNode exec;
+    exec.Name = cmStrCat(depender.Name, "-check-depends-", i);
+    exec.ExecAlways = true;
+    exec.ExecUseStdOutAsOutput = true;
+    exec.ExecOutput = cmStrCat(depender.ExecOutput, '.', i, ".deps-checker");
+    exec.ExecExecutable = executable;
     exec.ExecArguments =
-      cmStrCat(std::move(exec.ExecArguments), ' ', dep.Name);
+      cmJoinStrings(depsCheckExecNamesGrouped[i], " ", execArgumentsBase);
+    res.emplace_back(std::move(exec));
   }
-  for (auto const& dep : depender.ByproductsAlias.PreBuildDependencies) {
-    exec.ExecArguments =
-      cmStrCat(std::move(exec.ExecArguments), ' ', dep.Name);
-  }
-  return exec;
+  return res;
 }
 
 FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
@@ -679,10 +752,20 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
       }
     }
     if (exec.NeedsDepsCheckExec) {
-      auto depsCheckExec = GetDepsCheckExec(exec);
-      LogMessage("Adding deps check Exec: " + depsCheckExec.Name);
-      exec.PreBuildDependencies.emplace(depsCheckExec.Name);
-      this->GetGlobalGenerator()->AddTarget(std::move(depsCheckExec));
+      std::vector<FastbuildExecNode> depsCheckExecs = GetDepsCheckExecs(exec);
+
+      std::vector<cm::string_view> depsCheckExecNames;
+      depsCheckExecNames.reserve(depsCheckExecs.size());
+      for (FastbuildExecNode const& depsCheckExec : depsCheckExecs) {
+        depsCheckExecNames.emplace_back(depsCheckExec.Name);
+      }
+      LogMessage(
+        cmJoinStrings(depsCheckExecNames, ", ", "Adding deps check Exec: "));
+
+      for (FastbuildExecNode& depsCheckExec : depsCheckExecs) {
+        exec.PreBuildDependencies.emplace(depsCheckExec.Name);
+        this->GetGlobalGenerator()->AddTarget(std::move(depsCheckExec));
+      }
     }
   }
   return execs;
