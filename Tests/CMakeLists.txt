@@ -925,6 +925,8 @@ if(BUILD_TESTING)
 
   ADD_TEST_MACRO(CommandLength CommandLength)
 
+  ADD_TEST_MACRO(PlusInFileName PlusInFileName)
+
   ADD_TEST_MACRO(EmptyDepends ${CMAKE_CTEST_COMMAND})
 
   add_test(CustomCommandWorkingDirectory  ${CMAKE_CTEST_COMMAND}
