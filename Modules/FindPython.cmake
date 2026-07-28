@@ -183,7 +183,7 @@ This module defines the following variables
     * IronPython
     * PyPy
 
-``Python3_FREE_THREADED``
+``Python_FREE_THREADED``
   .. versionadded:: 4.4
 
   Boolean value, which is ``true`` if the python is free threaded (i.e.
@@ -363,6 +363,10 @@ Hints
     threaded python), is added and is optional. If not specified, the value is
     ``OFF``.
 
+  .. versionadded:: 4.4.1
+    The ``pydebug`` flag is now supported on ``Windows`` systems for ``Python``
+    3.14+.
+
   Each element can be set to one of the following:
 
   * ``ON``: Corresponding flag is selected.
@@ -371,8 +375,10 @@ Hints
 
   .. note::
 
-    If ``Python3_FIND_ABI`` is not defined, any ABI, excluding the
-    ``gil_disabled`` flag, will be searched.
+    If ``Python_FIND_ABI`` is not defined, the following default apply:
+
+      * On ``POSIX`` systems: ``ANY``, ``ANY``, ``ANY``, ``OFF``.
+      * On ``Windows`` systems: ``OFF``, ``OFF``, ``OFF``, ``OFF``.
 
   From this 4-tuple, various ABIs will be searched starting from the most
   specialized to the most general. Moreover, when ``ANY`` is specified for
@@ -386,7 +392,10 @@ Hints
     set (Python_FIND_ABI "ON" "ANY" "ANY" "ON")
 
   The following flags combinations will be appended, in that order, to the
-  artifact names: ``tdmu``, ``tdm``, ``tdu``, and ``td``.
+  artifact names:
+
+    * On ``POSIX`` systems: ``tdmu``, ``tdm``, ``tdu``, and ``td``.
+    * On ``Windows`` systems: ``tmu_d``, ``tm_d``, ``tu_d``, and ``t_d``.
 
   And to search any possible ABIs:
 
@@ -394,18 +403,24 @@ Hints
 
     set (Python_FIND_ABI "ANY" "ANY" "ANY" "ANY")
 
-  The following combinations, in that order, will be used: ``mu``, ``m``,
-  ``u``, ``<empty>``, ``dmu``, ``dm``, ``du``, ``d``, ``tmu``, ``tm``, ``tu``,
-  ``t``, ``tdmu``, ``tdm``, ``tdu``, and ``td``.
+  The following combinations, in that order, will be used:
+
+  * On ``POSIX`` systems: ``mu``, ``m``, ``u``, ``<empty>``, ``dmu``, ``dm``,
+    ``du``, ``d``, ``tmu``, ``tm``, ``tu``, ``t``, ``tdmu``, ``tdm``, ``tdu``,
+    and ``td``.
+  * On ``Windows`` systems: ``mu``, ``m``, ``u``, ``<empty>``, ``mu_d``,
+    ``m_d``, ``u_d``, ``_d``, ``tmu``, ``tm``, ``tu``, ``t``, ``tmu_d``, ``tm_d``,
+    ``tu_d``, and ``t_d``.
 
   .. note::
 
-    This hint is useful only on ``POSIX`` systems except for the
-    ``gil_disabled`` flag. So, on ``Windows`` systems,
-    when ``Python_FIND_ABI`` is defined, ``Python`` distributions from
-    `python.org <https://www.python.org/>`_ will be found only if the value for
-    each flag is ``OFF`` or ``ANY`` except for the fourth one
-    (``gil_disabled``).
+    This hint is fully usable on ``POSIX`` systems. On ``Windows`` systems,
+    only the ``gil_disabled`` and ``pydebug`` flags are supported. Moreover,
+    the ``pydebug`` flag is only supported for ``Python`` 3.14+. So, on
+    ``Windows`` systems, when ``Python_FIND_ABI`` is defined, ``Python``
+    distributions from `python.org <https://www.python.org/>`_ will be found
+    only if the value for the flags ``pymalloc`` and ``unicode`` is ``OFF`` or
+    ``ANY``.
 
 ``Python_FIND_STRATEGY``
   .. versionadded:: 3.15
@@ -659,7 +674,7 @@ If the library type is not specified, ``MODULE`` is assumed.
   was introduced. Specifying only major version ``3`` is equivalent to ``3.2``.
 
 .. versionchanged:: 4.4
-  When ``USE_SABI`` is specified, if ``Python3_FREE_THREADED`` is ``true`` and
+  When ``USE_SABI`` is specified, if ``Python_FREE_THREADED`` is ``true`` and
   Python version is ``3.15`` or upper, ``Py_TARGET_ABI3T`` preprocessor
   definition will be defined rather than ``Py_LIMITED_API`` (see :pep:`803` for
   more details).
