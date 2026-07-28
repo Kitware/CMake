@@ -20,10 +20,18 @@ if (NOT "$ENV{CMAKE_CI_TEST_TIMEOUT}" STREQUAL "")
   set(CTEST_TEST_TIMEOUT "$ENV{CMAKE_CI_TEST_TIMEOUT}")
 endif ()
 
+set(test_load "${nproc}")
+# Tart VMs start up with lots of macOS tasks running, so they end up stalling
+# waiting for the load from them to fade away. Set the load to 0 on such
+# runners because they are always configured to run a single job at a time.
+if ("$ENV{CI_RUNNER_TAGS}" MATCHES "\"tart\"")
+  set(test_load "0")
+endif ()
+
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_exclusions.cmake")
 ctest_test(
   PARALLEL_LEVEL "${nproc}"
-  TEST_LOAD "${nproc}"
+  TEST_LOAD "${test_load}"
   OUTPUT_JUNIT "${CTEST_BINARY_DIRECTORY}/junit.xml"
   RETURN_VALUE test_result
   EXCLUDE "${test_exclusions}")
