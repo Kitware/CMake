@@ -441,5 +441,5 @@ Changes made since CMake 4.4.0 include the following.
 4.4.1
 -----
 
-* The :module:`FindPython`, :module:`FindPython3` modules learned to manage, on
-  ``Windows`` systems, the ``pydebug`` ABI flag.
+* The :module:`FindPython`, :module:`FindPython3` modules learned
+  to manage, on ``Windows`` systems, the ``pydebug`` ABI flag.
