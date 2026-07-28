@@ -487,7 +487,8 @@ they were added and a summary of the new features and changes is given below.
         :preset:`configurePresets.errors`.
 
       * The ``installAbsoluteDestination`` field was added to
-        :preset:`configurePresets.warnings` and :preset:`configurePresets.errors`.
+        :preset:`configurePresets.warnings` and
+        :preset:`configurePresets.errors`.
 
     * Changes to `Macro Expansion`_
 
@@ -500,6 +501,15 @@ they were added and a summary of the new features and changes is given below.
 
       * The :preset:`testPresets.execution.testPassthroughArguments` field was
         added to forward arguments to test executables.
+
+  ``13``
+    .. versionadded:: 4.5
+
+    * Changes to `Configure Presets <Configure Preset_>`_:
+
+      * The ``strict`` and ``nonTargetDirective`` fields were added to
+        :preset:`configurePresets.warnings` and
+        :preset:`configurePresets.errors`.
 
 Schema
 ======

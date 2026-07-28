@@ -26,6 +26,9 @@ exist to add libraries (:command:`target_link_libraries` or
 .. |command_name| replace:: ``add_link_options``
 .. include:: include/GENEX_NOTE.rst
 
+.. |target_command_name| replace:: :command:`target_link_options`
+.. include:: include/NON_TARGET_NOTE.rst
+
 .. include:: include/DEVICE_LINK_OPTIONS.rst
 
 .. include:: include/OPTIONS_SHELL.rst

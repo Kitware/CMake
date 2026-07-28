@@ -2,16 +2,23 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLinkLibrariesCommand.h"
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
 bool cmLinkLibrariesCommand(std::vector<std::string> const& args,
                             cmExecutionStatus& status)
 {
+  cmMakefile& mf = status.GetMakefile();
+
+  mf.IssueDiagnostic(cmDiagnostics::CMD_NON_TARGET_DIRECTIVE,
+                     "Use of non-target directives is not recommended. "
+                     "Consider target_link_libraries instead.");
+
   if (args.empty()) {
     return true;
   }
-  cmMakefile& mf = status.GetMakefile();
+
   // add libraries, note that there is an optional prefix
   // of debug and optimized than can be used
   for (auto i = args.begin(); i != args.end(); ++i) {

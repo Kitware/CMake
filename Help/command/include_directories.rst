@@ -32,11 +32,8 @@ considered in dependency calculations - see compiler docs.
 .. |command_name| replace:: ``include_directories``
 .. include:: include/GENEX_NOTE.rst
 
-.. note::
-
-  Prefer the :command:`target_include_directories` command to add include
-  directories to individual targets and optionally propagate/export them
-  to dependents.
+.. |target_command_name| replace:: :command:`target_include_directories`
+.. include:: include/NON_TARGET_NOTE.rst
 
 See Also
 ^^^^^^^^

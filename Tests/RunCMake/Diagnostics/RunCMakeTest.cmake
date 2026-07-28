@@ -29,3 +29,6 @@ block()
   set(RunCMake_TEST_NO_CLEAN 1)
   run_persist_test(Persist2 -Wauthor)
 endblock()
+
+run_cmake_with_options(NonTargetDirectives -Wstrict)
+run_cmake_with_options(NonTargetDirectives -Wnon-target-directive)
