@@ -36,6 +36,25 @@ function(instrument test)
     "BAD_QUERY"
   )
   cmake_parse_arguments(ARGS "${OPTIONS}" "CHECK_SCRIPT" "CONFIGURE_ARGS" ${ARGN})
+
+  if(NOT CMake_TEST_INSTRUMENTATION_VARIANT)
+    if(ARGS_BUILD_MAKE_PROGRAM OR ARGS_INTERRUPT OR ARGS_INSTALL_INTERRUPT OR ARGS_CTEST_INTERRUPT)
+      return()
+    endif()
+  endif()
+
+  if(CMake_TEST_INSTRUMENTATION_VARIANT STREQUAL "MakeProgram")
+    if(NOT ARGS_BUILD_MAKE_PROGRAM)
+      return()
+    endif()
+  endif()
+
+  if(CMake_TEST_INSTRUMENTATION_VARIANT STREQUAL "InterruptReal")
+    if(NOT (ARGS_INTERRUPT OR ARGS_INSTALL_INTERRUPT OR ARGS_CTEST_INTERRUPT))
+      return()
+    endif()
+  endif()
+
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
   set(v1 ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation/v1)
   set(v1 ${v1} PARENT_SCOPE)
@@ -548,17 +567,21 @@ instrument(cmake-command-custom-content
   CONFIGURE_ARGS "-DN=2"
   CHECK_SCRIPT check-custom-content.cmake
 )
-set(indexDir ${v1}/data/index)
-set(fakeIndex ${indexDir}/index-0.json)
-file(MAKE_DIRECTORY ${indexDir})
-file(TOUCH ${fakeIndex})
+if(NOT CMake_TEST_INSTRUMENTATION_VARIANT)
+  set(indexDir ${v1}/data/index)
+  set(fakeIndex ${indexDir}/index-0.json)
+  file(MAKE_DIRECTORY ${indexDir})
+  file(TOUCH ${fakeIndex})
+endif()
 # fakeIndex newer than all content files prevents their deletion
 set(EXPECTED_CONTENT_FILES 2)
 instrument(cmake-command-custom-content
   NO_CONFIGURE MANUAL_HOOK PRESERVE_DATA
   CHECK_SCRIPT check-custom-content-removed.cmake
 )
-file(REMOVE ${fakeIndex})
+if(NOT CMake_TEST_INSTRUMENTATION_VARIANT)
+  file(REMOVE ${fakeIndex})
+endif()
 # old content files will be removed if no index file exists
 set(EXPECTED_CONTENT_FILES 1)
 instrument(cmake-command-custom-content
@@ -658,7 +681,7 @@ endif()
 # overall cmakeBuild/cmakeInstall snippet, recording the interrupting signal,
 # and skips the corresponding post-command hook.  These cases use the
 # deterministic test seam (no OS event); the real OS-event counterparts run in
-# the separate RunCMake.InstrumentationInterrupt suite.
+# the separate RunCMake.InstrumentationInterruptReal suite.
 instrument(interrupt-build INTERRUPT_SEAM
   CHECK_SCRIPT check-interrupted.cmake
 )
@@ -711,34 +734,32 @@ if(NOT Skip_BUILD_MAKE_PROGRAM_Case)
   endif()
 endif()
 
-if (INSTRUMENTATION_INTERRUPT_REAL)
-  # RunCMake.InstrumentationInterrupt runs ONLY the real-signal/
-  # console-event interrupt case, as it must be excluded from MemCheck.
-  #
-  # POSIX delivers a real SIGINT to a contained process group.  On Windows, only
-  # the Ninja generator is exercised: its native tool reliably stops on the
-  # console event and does not re-broadcast it to the runner; the other Windows
-  # make-family generators are covered by the injection seam instead.
-  if (NOT WIN32 OR RunCMake_GENERATOR MATCHES "Ninja")
-    instrument(interrupt-build INTERRUPT
-      CHECK_SCRIPT check-interrupted.cmake
-    )
-    # Interrupt a parallel `cmake --install` with a real OS signal, proving the
-    # cooperative cancellation stops pending install scripts and skips the hook.
-    instrument(interrupt-install INSTALL_INTERRUPT
-      CHECK_SCRIPT check-installation-interrupted.cmake
-    )
-    # Interrupt a `ctest` run with a real OS signal, proving the scheduler stops
-    # launching pending tests, skips the hook, and preserves the `ctest -F`
-    # checkpoint so the interrupted test set can be resumed.
-    instrument(interrupt-test CTEST_INTERRUPT
-      CHECK_SCRIPT check-test-interrupted.cmake
-    )
-    # Interrupt a `ctest` run and then resume it with `ctest -F`, proving the
-    # checkpoint keeps the finished test (skipped on resume) but not the
-    # in-flight test killed by the interrupt (re-run on resume).
-    instrument(interrupt-test-failover CTEST_FAILOVER
-      CHECK_SCRIPT check-test-failover.cmake
-    )
-  endif()
+# RunCMake.InstrumentationInterruptReal runs ONLY the real-signal/
+# console-event interrupt case, as it must be excluded from MemCheck.
+#
+# POSIX delivers a real SIGINT to a contained process group.  On Windows, only
+# the Ninja generator is exercised: its native tool reliably stops on the
+# console event and does not re-broadcast it to the runner; the other Windows
+# make-family generators are covered by the injection seam instead.
+if (NOT WIN32 OR RunCMake_GENERATOR MATCHES "Ninja")
+  instrument(interrupt-build INTERRUPT
+    CHECK_SCRIPT check-interrupted.cmake
+  )
+  # Interrupt a parallel `cmake --install` with a real OS signal, proving the
+  # cooperative cancellation stops pending install scripts and skips the hook.
+  instrument(interrupt-install INSTALL_INTERRUPT
+    CHECK_SCRIPT check-installation-interrupted.cmake
+  )
+  # Interrupt a `ctest` run with a real OS signal, proving the scheduler stops
+  # launching pending tests, skips the hook, and preserves the `ctest -F`
+  # checkpoint so the interrupted test set can be resumed.
+  instrument(interrupt-test CTEST_INTERRUPT
+    CHECK_SCRIPT check-test-interrupted.cmake
+  )
+  # Interrupt a `ctest` run and then resume it with `ctest -F`, proving the
+  # checkpoint keeps the finished test (skipped on resume) but not the
+  # in-flight test killed by the interrupt (re-run on resume).
+  instrument(interrupt-test-failover CTEST_FAILOVER
+    CHECK_SCRIPT check-test-failover.cmake
+  )
 endif()
