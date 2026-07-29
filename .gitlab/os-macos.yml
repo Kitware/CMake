@@ -7,7 +7,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
 
 .macos_tart:
-    image: "registry.hub.docker.com/kitware/macos-ci-images:macos-26-xcode-26.6-20260710"
+    image: "registry.hub.docker.com/kitware/macos-ci-images:macos-26-xcode-26.6-20260724"
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
         TART_EXECUTOR_HOST_DIR: "false"
