@@ -78,8 +78,6 @@ protected:
   std::string LanguageCompilerRule(std::string const& lang,
                                    std::string const& config,
                                    WithScanning withScanning) const;
-  std::string LanguageEmitModuleRule(std::string const& lang,
-                                     std::string const& config) const;
   std::string LanguagePreprocessAndScanRule(std::string const& lang,
                                             std::string const& config) const;
   std::string LanguageScanRule(std::string const& lang,
