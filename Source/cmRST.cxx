@@ -34,11 +34,13 @@ cmRST::cmRST(std::ostream& os, std::string docroot)
   , ModuleRST(R"(^#\[(=*)\[\.rst:$)")
   , CMakeRole("(:cmake)?:("
               "cref|"
-              "command|cpack_gen|diagnostic|generator|genex|"
-              "variable|envvar|module|policy|"
-              "prop_cache|prop_dir|prop_gbl|prop_inst|prop_sf|"
+              "program|command|cpack_gen|diagnostic|envvar|generator|genex|"
+              "manual|module|policy|preset|variable|"
+              "prop_cache|prop_dir|prop_fs|prop_gbl|prop_inst|prop_sf|"
               "prop_test|prop_tgt|"
-              "manual"
+              "option|cmake-option|cmake-build-option|cmake-install-option|"
+              "cmake-workflow-option|cpack-option|ctest-option|"
+              "ctest-dashboard-option"
               "):`(<*([^`<]|[^` \t]<)*)([ \t]+<[^`]*>)?`")
   , InlineLink("`(<*([^`<]|[^` \t]<)*)([ \t]+<[^`]*>)?`_")
   , InlineLiteral("``([^`]*)``")

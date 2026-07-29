@@ -36,6 +36,33 @@ Inline link Link Text <With \-escaped Brackets>.
 Inline literal ``__`` followed by inline link Link Text.
 Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
 
+Try running ``cmake``.
+Enable ``CMD_AUTHOR`` warnings with ``-Wauthor``,
+or with the ``configurePresets.warnings.author`` preset field.
+Read the ``cmake(1)`` manual.
+Learn about the ``GNUInstallDirs`` module.
+Policy ``CMP9999`` doesn't exist. (Yet?)
+
+Some properties that don't exist:
+- ``NO_SUCH_CACHE_PROPERTY``
+- ``NO_SUCH_DIRECTORY_PROPERTY``
+- ``NO_SUCH_FILESET_PROPERTY``
+- ``NO_SUCH_GLOBAL_PROPERTY``
+- ``NO_SUCH_INSTALL_PROPERTY``
+- ``NO_SUCH_SOURCE_FILE_PROPERTY``
+- ``NO_SUCH_TEST_PROPERTY``
+- ``NO_SUCH_TARGET_PROPERTY``
+
+Various ways to reference command-line options:
+- ``cmake --build \<dir\>``
+- ``--log-level``
+- ``--parallel``
+- ``--config``
+- ``--preset``
+- ``-G``
+- ``--parallel``
+- ``--build-dir``
+
 First TOC entry.
 
 |not replaced|
