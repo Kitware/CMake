@@ -439,11 +439,22 @@ add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMAKE_CXX_SIMULATE_ID=${CMAKE_CXX_SIMULATE_ID}
                           -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
 if(CMAKE_GENERATOR MATCHES "Make|Ninja|FASTBuild")
-  add_RunCMake_test(Instrumentation -DPython_EXECUTABLE=${Python_EXECUTABLE}
-                                    -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
-                                    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-                                    -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
-                                    -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
+  function(add_RunCMake_Instrumentation_test variant)
+    add_RunCMake_test(Instrumentation${variant}
+      TEST_DIR Instrumentation
+      -DPython_EXECUTABLE=${Python_EXECUTABLE}
+      -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+      -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
+      -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
+      -DCMake_TEST_INSTRUMENTATION_VARIANT=${variant}
+    )
+    set_property(TEST RunCMake.Instrumentation${variant} APPEND PROPERTY
+      LABELS "Instrumentation"
+    )
+  endfunction()
+  add_RunCMake_Instrumentation_test("")
+  add_RunCMake_Instrumentation_test(MakeProgram)
 endif()
 add_RunCMake_test(ConfigDir)
 if(CMake_TEST_FindPython2)
