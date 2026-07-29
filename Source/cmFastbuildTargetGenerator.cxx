@@ -634,7 +634,7 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
 
     if (!cmdLines.empty()) {
       std::string const scriptFileName = GetScriptFilename(execName);
-      cmsys::ofstream scriptFile(scriptFileName.c_str());
+      cmsys::ofstream scriptFile(scriptFileName);
 
       AddOutput(ccg, execNode);
       AddExecArguments(execNode, scriptFileName);
