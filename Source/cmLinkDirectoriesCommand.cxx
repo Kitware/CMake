@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLinkDirectoriesCommand.h"
 
+#include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
@@ -15,11 +16,16 @@ static void AddLinkDir(cmMakefile& mf, std::string const& dir,
 bool cmLinkDirectoriesCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
+  cmMakefile& mf = status.GetMakefile();
+
+  mf.IssueDiagnostic(cmDiagnostics::CMD_NON_TARGET_DIRECTIVE,
+                     "Use of non-target directives is not recommended. "
+                     "Consider target_link_directories instead.");
+
   if (args.empty()) {
     return true;
   }
 
-  cmMakefile& mf = status.GetMakefile();
   bool before = mf.IsOn("CMAKE_LINK_DIRECTORIES_BEFORE");
 
   auto i = args.cbegin();

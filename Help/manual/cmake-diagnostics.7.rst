@@ -90,6 +90,8 @@ The following categories are defined:
    /diagnostic/CMD_DEPRECATED
    /diagnostic/CMD_EXPERIMENTAL
    /diagnostic/CMD_INSTALL_ABSOLUTE_DESTINATION
+   /diagnostic/CMD_NON_TARGET_DIRECTIVE
    /diagnostic/CMD_POLICY
+   /diagnostic/CMD_STRICT
    /diagnostic/CMD_UNINITIALIZED
    /diagnostic/CMD_UNUSED_CLI

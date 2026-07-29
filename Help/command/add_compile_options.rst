@@ -16,6 +16,9 @@ directory and below.
   These options are not used when linking.
   See the :command:`add_link_options` command for that.
 
+.. |target_command_name| replace:: :command:`target_compile_options`
+.. include:: include/NON_TARGET_NOTE.rst
+
 Arguments
 ^^^^^^^^^
 

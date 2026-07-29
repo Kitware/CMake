@@ -16,9 +16,15 @@ flags, but it is intended to add preprocessor definitions.
 
   This command has been superseded by alternatives:
 
-  * Use :command:`add_compile_definitions` to add preprocessor definitions.
-  * Use :command:`include_directories` to add include directories.
-  * Use :command:`add_compile_options` to add other options.
+  * Use :command:`add_compile_definitions`
+    or :command:`target_compile_definitions`
+    to add preprocessor definitions.
+  * Use :command:`add_compile_options`
+    or :command:`target_compile_options`
+    to add other options.
+  * Use :command:`include_directories`
+    or :command:`target_include_directories`
+    to add include directories.
 
 Flags beginning in ``-D`` or ``/D`` that look like preprocessor definitions are
 automatically added to the :prop_dir:`COMPILE_DEFINITIONS` directory

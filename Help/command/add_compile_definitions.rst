@@ -27,7 +27,5 @@ language syntax may require escapes to specify some values).
 .. |command_name| replace:: ``add_compile_definitions``
 .. include:: include/GENEX_NOTE.rst
 
-See Also
-^^^^^^^^
-
-* The command :command:`target_compile_definitions` adds target-specific definitions.
+.. |target_command_name| replace:: :command:`target_compile_definitions`
+.. include:: include/NON_TARGET_NOTE.rst

@@ -50,6 +50,15 @@
   :cmake-option:`-Wno-error=install-absolute-destination` on the command line.
   This may not be set to ``true`` if ``warnings.installAbsoluteDestination`` is set to ``false``.
 
+.. _`CMakePresets.configurePresets.errors.nonTargetDirective`:
+
+``nonTargetDirective``
+  .. presets-versionadded:: 13
+
+  An optional boolean. Equivalent to passing :cmake-option:`-Werror=non-target-directive` or
+  :cmake-option:`-Wno-error=non-target-directive` on the command line.
+  This may not be set to ``true`` if ``warnings.nonTargetDirective`` is set to ``false``.
+
 .. _`CMakePresets.configurePresets.errors.policy`:
 
 ``policy``
@@ -58,6 +67,15 @@
   An optional boolean. Equivalent to passing :cmake-option:`-Werror=policy` or
   :cmake-option:`-Wno-error=policy` on the command line.
   This may not be set to ``true`` if ``warnings.policy`` is set to ``false``.
+
+.. _`CMakePresets.configurePresets.errors.strict`:
+
+``strict``
+  .. presets-versionadded:: 13
+
+  An optional boolean. Equivalent to passing :cmake-option:`-Werror=strict` or
+  :cmake-option:`-Wno-error=strict` on the command line.
+  This may not be set to ``true`` if ``warnings.strict`` is set to ``false``.
 
 .. _`CMakePresets.configurePresets.errors.uninitialized`:
 

@@ -13,7 +13,10 @@ the current directory or below by commands such as :command:`add_executable`
 or :command:`add_library`.  See the :command:`target_link_libraries` command
 for meaning of arguments.
 
+.. |command_name| replace:: ``link_libraries``
+.. |target_command_name| replace:: :command:`target_link_libraries`
 .. note::
-  The :command:`target_link_libraries` command should be preferred whenever
-  possible.  Library dependencies are chained automatically, so directory-wide
+  .. include:: include/NON_TARGET_NOTE_BODY.rst
+
+  Library dependencies are chained automatically, so directory-wide
   specification of link libraries is rarely needed.

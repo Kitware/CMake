@@ -5,7 +5,7 @@ CMD_INSTALL_ABSOLUTE_DESTINATION
 
 .. diagnostic::
   :default: ignore
-  :parent: CMD_AUTHOR
+  :parent: CMD_STRICT
 
   Warn when an :command:`install` command specifies an absolute ``DESTINATION``
   path.  Absolute destinations are typically undesirable because they prevent
