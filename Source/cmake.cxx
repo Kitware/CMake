@@ -4228,38 +4228,46 @@ bool cmake::Open(std::string const& dir, DryRun dryRun)
 }
 
 #if !defined(CMAKE_BOOTSTRAP)
+namespace {
+std::string WorkflowStepLabel(cm::static_string_view type,
+                              std::string const& name)
+{
+  return cmStrCat("of type \"", type, "\" named \"", name, '"');
+}
+}
+
 template <typename T>
 T const* cmake::FindPresetForWorkflow(
   cm::static_string_view type,
   std::map<std::string, cmCMakePresetsGraph::PresetPair<T>> const& presets,
   cmCMakePresetsGraph::WorkflowPreset::WorkflowStep const& step)
 {
+  std::string const stepLabel = WorkflowStepLabel(type, step.PresetName);
   auto it = presets.find(step.PresetName);
   if (it == presets.end()) {
-    cmSystemTools::Error(cmStrCat("No such ", type, " preset in ",
-                                  this->GetHomeDirectory(), ": \"",
-                                  step.PresetName, '"'));
+    cmSystemTools::Error(cmStrCat("No such preset for workflow step ",
+                                  stepLabel, " in ",
+                                  this->GetHomeDirectory()));
     return nullptr;
   }
 
   if (it->second.Unexpanded.Hidden) {
-    cmSystemTools::Error(cmStrCat("Cannot use hidden ", type, " preset in ",
-                                  this->GetHomeDirectory(), ": \"",
-                                  step.PresetName, '"'));
+    cmSystemTools::Error(
+      cmStrCat("Cannot use hidden preset for workflow step ", stepLabel,
+               " in ", this->GetHomeDirectory()));
     return nullptr;
   }
 
   if (!it->second.Expanded) {
-    cmSystemTools::Error(cmStrCat("Could not evaluate ", type, " preset \"",
-                                  step.PresetName,
-                                  "\": Invalid macro expansion"));
+    cmSystemTools::Error(cmStrCat("Could not evaluate workflow step ",
+                                  stepLabel, ": Invalid macro expansion"));
     return nullptr;
   }
 
   if (!it->second.Expanded->ConditionResult) {
-    cmSystemTools::Error(cmStrCat("Cannot use disabled ", type, " preset in ",
-                                  this->GetHomeDirectory(), ": \"",
-                                  step.PresetName, '"'));
+    cmSystemTools::Error(
+      cmStrCat("Cannot use disabled preset for workflow step ", stepLabel,
+               " in ", this->GetHomeDirectory()));
     return nullptr;
   }
 
@@ -4437,13 +4445,17 @@ int cmake::Workflow(cmCMakePresetsWorkflowArgs const& args)
               << std::flush;
     cmUVProcessChain::Status const status = step.Action();
     if (status.ExitStatus != 0) {
+      cmSystemTools::Error(
+        cmStrCat("Workflow step ", WorkflowStepLabel(step.Type, step.Name),
+                 " failed with exit code ", status.ExitStatus));
       exitStatus = static_cast<int>(status.ExitStatus);
       break;
     }
     auto const codeReasonPair = status.GetException();
     if (codeReasonPair.first != cmUVProcessChain::ExceptionCode::None) {
-      std::cout << "Step command ended abnormally: " << codeReasonPair.second
-                << std::endl;
+      cmSystemTools::Error(
+        cmStrCat("Workflow step ", WorkflowStepLabel(step.Type, step.Name),
+                 " command ended abnormally: ", codeReasonPair.second));
       exitStatus =
         status.SpawnResult != 0 ? status.SpawnResult : status.TermSignal;
       break;

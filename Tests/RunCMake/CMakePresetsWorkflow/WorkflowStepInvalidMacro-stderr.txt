@@ -1,1 +1,1 @@
-^CMake Error: Could not evaluate configure preset "default": Invalid macro expansion$
+^CMake Error: Could not evaluate workflow step of type "configure" named "default": Invalid macro expansion$
