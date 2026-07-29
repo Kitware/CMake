@@ -3,7 +3,6 @@
 #include "cmRST.h"
 
 #include <algorithm>
-#include <cstddef>
 #include <iterator>
 #include <utility>
 
@@ -16,9 +15,8 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
-cmRST::cmRST(std::ostream& os, std::string docroot)
-  : OS(os)
-  , DocRoot(std::move(docroot))
+cmRST::cmRST(std::string docroot)
+  : DocRoot(std::move(docroot))
   , CMakeDirective("^.. (cmake:)?("
                    "command|diagnostic|envvar|genex|signature|variable"
                    ")::")
@@ -46,8 +44,10 @@ cmRST::cmRST(std::ostream& os, std::string docroot)
                  "((\\|[^| \t\r\n]([^|\r\n]*[^| \t\r\n])?\\|)(__|_|))"
                  "([^A-Za-z0-9_]|$)")
   , TocTreeLink("^.*[ \t]+<([^>]+)>$")
+  , Header(R"(^(#+|\*+|=+|-+|\^+|"+)$)")
 {
-  this->Replace["|release|"] = cmVersion::GetCMakeVersion();
+  this->Replace.emplace_back();
+  this->Replace[0]["|release|"] = cmVersion::GetCMakeVersion();
 }
 
 bool cmRST::ProcessFile(std::string const& fname, bool isModule)
@@ -232,7 +232,7 @@ void cmRST::ProcessLine(std::string const& line)
     this->MarkupType = Markup::Normal;
     this->DirectiveType = Directive::LiteralBlock;
     this->MarkupLines.emplace_back();
-    this->OutputLine("", false);
+    this->OutputLine({}, false);
   }
   // Print non-markup lines.
   else {
@@ -248,14 +248,33 @@ void cmRST::NormalLine(std::string const& line)
   this->OutputLine(line, true);
 }
 
-void cmRST::OutputLine(std::string const& line_in, bool inlineMarkup)
+void cmRST::OutputLine(std::string const& line, bool inlineMarkup)
 {
   if (this->OutputLinePending) {
-    this->OS << "\n";
+    this->OutputLines.emplace_back(std::string{}, 0, false);
     this->OutputLinePending = false;
   }
-  if (inlineMarkup) {
-    std::string line = this->ReplaceSubstitutions(line_in);
+  this->OutputLines.emplace_back(line, this->ContextOffset, inlineMarkup);
+}
+
+void cmRST::Write(std::ostream& os)
+{
+  for (ContentLine const& c : this->OutputLines) {
+    this->WriteLine(os, c);
+  }
+}
+
+void cmRST::WriteLine(std::ostream& os, ContentLine const& content)
+{
+  if (content.InlineMarkup) {
+    if (this->LastLength && this->Header.find(content.Content.c_str())) {
+      os << std::string(this->LastLength, content.Content[0]) << '\n';
+      return;
+    }
+
+    this->LastLength = 0;
+    std::string line =
+      this->ReplaceSubstitutions(content.Content, content.Context);
     std::string::size_type pos = 0;
     for (;;) {
       std::string::size_type* first = nullptr;
@@ -279,7 +298,8 @@ void cmRST::OutputLine(std::string const& line_in, bool inlineMarkup)
         }
       }
       if (first == &role_start) {
-        this->OS << line.substr(pos, role_start);
+        this->LastLength += role_start;
+        os << line.substr(pos, role_start);
         std::string text = this->CMakeRole.match(3);
         // If a command reference has no explicit target and
         // no explicit "(...)" then add "()" to the text.
@@ -288,25 +308,31 @@ void cmRST::OutputLine(std::string const& line_in, bool inlineMarkup)
             text.find_first_of("()") == std::string::npos) {
           text += "()";
         }
-        this->OS << "``" << text << "``";
+        this->LastLength += 4 + text.size();
+        os << "``" << text << "``";
         pos += this->CMakeRole.end();
       } else if (first == &lit_start) {
-        this->OS << line.substr(pos, lit_start);
+        this->LastLength += lit_start;
+        os << line.substr(pos, lit_start);
         std::string text = this->InlineLiteral.match(1);
         pos += this->InlineLiteral.end();
-        this->OS << "``" << text << "``";
+        this->LastLength += 4 + text.size();
+        os << "``" << text << "``";
       } else if (first == &link_start) {
-        this->OS << line.substr(pos, link_start);
+        this->LastLength += link_start;
+        os << line.substr(pos, link_start);
         std::string text = this->InlineLink.match(1);
         bool escaped = false;
         for (char c : text) {
           if (escaped) {
             escaped = false;
-            this->OS << c;
+            ++this->LastLength;
+            os << c;
           } else if (c == '\\') {
             escaped = true;
           } else {
-            this->OS << c;
+            ++this->LastLength;
+            os << c;
           }
         }
         pos += this->InlineLink.end();
@@ -314,13 +340,16 @@ void cmRST::OutputLine(std::string const& line_in, bool inlineMarkup)
         break;
       }
     }
-    this->OS << line.substr(pos) << "\n";
+    this->LastLength += line.size() - pos;
+    os << line.substr(pos) << '\n';
   } else {
-    this->OS << line_in << "\n";
+    this->LastLength = content.Content.size();
+    os << content.Content << '\n';
   }
 }
 
-std::string cmRST::ReplaceSubstitutions(std::string const& line)
+std::string cmRST::ReplaceSubstitutions(std::string const& line,
+                                        size_t context)
 {
   std::string out;
   std::string::size_type pos = 0;
@@ -328,12 +357,12 @@ std::string cmRST::ReplaceSubstitutions(std::string const& line)
     std::string::size_type start = this->Substitution.start(2);
     std::string::size_type end = this->Substitution.end(2);
     std::string substitute = this->Substitution.match(3);
-    auto replace = this->Replace.find(substitute);
-    if (replace != this->Replace.end()) {
+    auto replace = this->Replace[context].find(substitute);
+    if (replace != this->Replace[context].end()) {
       std::pair<std::set<std::string>::iterator, bool> replaced =
         this->Replaced.insert(substitute);
       if (replaced.second) {
-        substitute = this->ReplaceSubstitutions(replace->second);
+        substitute = this->ReplaceSubstitutions(replace->second, context);
         this->Replaced.erase(replaced.first);
       }
     }
@@ -360,10 +389,13 @@ bool cmRST::ProcessInclude(std::string file, Include type)
 {
   bool found = false;
   if (this->IncludeDepth < 10) {
-    cmRST r(this->OS, this->DocRoot);
+    cmRST r(this->DocRoot);
     r.IncludeDepth = this->IncludeDepth + 1;
     r.OutputLinePending = this->OutputLinePending;
-    if (type != Include::TocTree) {
+    if (type == Include::TocTree) {
+      r.ContextOffset = this->ContextOffset + this->Replace.size();
+    } else {
+      r.ContextOffset = this->ContextOffset;
       r.Replace = this->Replace;
     }
     if (file[0] == '/') {
@@ -372,9 +404,16 @@ bool cmRST::ProcessInclude(std::string file, Include type)
       file = this->DocDir + "/" + file;
     }
     found = r.ProcessFile(file, type == Include::Module);
-    if (type != Include::TocTree) {
-      this->Replace = r.Replace;
+    if (type == Include::TocTree) {
+      this->Replace.insert(this->Replace.end(),
+                           std::make_move_iterator(r.Replace.begin()),
+                           std::make_move_iterator(r.Replace.end()));
+    } else {
+      this->Replace = std::move(r.Replace);
     }
+    this->OutputLines.insert(this->OutputLines.end(),
+                             std::make_move_iterator(r.OutputLines.begin()),
+                             std::make_move_iterator(r.OutputLines.end()));
     this->OutputLinePending = r.OutputLinePending;
   }
   return found;
@@ -398,7 +437,7 @@ void cmRST::ProcessDirectiveCodeBlock()
 void cmRST::ProcessDirectiveReplace()
 {
   // Record markup lines as replacement text.
-  std::string& replacement = this->Replace[this->ReplaceName];
+  std::string& replacement = this->Replace[0][this->ReplaceName];
   replacement += cmJoin(this->MarkupLines, " ");
   this->ReplaceName.clear();
 }

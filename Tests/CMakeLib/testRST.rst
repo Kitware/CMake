@@ -154,3 +154,14 @@ A literal block can be empty::
 
 .. include:: testRSTinclude1.rst
 .. include:: /testRSTinclude2.rst
+
+Testing a |delayed substitution|.
+
+.. |delayed substitution| replace:: replacement defined after use
+
+|header substitution|
+^^^^^^^^^^^^^^^^^^^^^
+
+.. |header substitution| replace:: this text is a different length
+
+Substitutions in headers should cause the header line's length to be updated.

@@ -4,10 +4,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmsys/RegularExpression.hxx"
@@ -25,8 +27,9 @@
 class cmRST
 {
 public:
-  cmRST(std::ostream& os, std::string docroot);
+  cmRST(std::string docroot);
   bool ProcessFile(std::string const& fname, bool isModule = false);
+  void Write(std::ostream& os);
 
 private:
   enum class Include
@@ -51,13 +54,29 @@ private:
     TocTree
   };
 
+  struct ContentLine
+  {
+    ContentLine() = default;
+    ContentLine(std::string l, size_t c, bool m)
+      : Content{ std::move(l) }
+      , Context{ c }
+      , InlineMarkup{ m }
+    {
+    }
+
+    std::string Content;
+    size_t Context;
+    bool InlineMarkup;
+  };
+
   void ProcessRST(std::istream& is);
   void ProcessModule(std::istream& is);
   void Reset();
   void ProcessLine(std::string const& line);
   void NormalLine(std::string const& line);
   void OutputLine(std::string const& line, bool inlineMarkup);
-  std::string ReplaceSubstitutions(std::string const& line);
+  void WriteLine(std::ostream& os, ContentLine const& content);
+  std::string ReplaceSubstitutions(std::string const& line, size_t context);
   void OutputMarkupLines(bool inlineMarkup);
   bool ProcessInclude(std::string file, Include type);
   void ProcessDirectiveParsedLiteral();
@@ -67,9 +86,9 @@ private:
   void ProcessDirectiveTocTree();
   static void UnindentLines(std::vector<std::string>& lines);
 
-  std::ostream& OS;
   std::string DocRoot;
   int IncludeDepth = 0;
+  size_t ContextOffset = 0;
   bool OutputLinePending = false;
   bool LastLineEndedInColonColon = false;
   Markup MarkupType = Markup::None;
@@ -90,10 +109,13 @@ private:
   cmsys::RegularExpression InlineLiteral;
   cmsys::RegularExpression Substitution;
   cmsys::RegularExpression TocTreeLink;
+  cmsys::RegularExpression Header;
 
+  std::string::size_type LastLength;
   std::vector<std::string> MarkupLines;
+  std::vector<ContentLine> OutputLines;
   std::string DocDir;
-  std::map<std::string, std::string> Replace;
+  std::vector<std::map<std::string, std::string>> Replace;
   std::set<std::string> Replaced;
   std::string ReplaceName;
 };
