@@ -91,6 +91,16 @@ bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
                           std::vector<std::string>& testList,
                           cmExecutionStatus& status)
 {
+  if (args.DiscoveryProperties.size() % 2 != 0) {
+    status.SetError(" DISCOVERY_PROPERTIES must be key-value pairs.");
+    return false;
+  }
+
+  if (args.TestProperties.size() % 2 != 0) {
+    status.SetError(" TEST_PROPERTIES must be key-value pairs.");
+    return false;
+  }
+
   cmsys::RegularExpression re;
   if (!re.compile(AddAnchors(args.DiscoveryMatch))) {
     std::string e = "DISCOVERY_MATCH failed to compile regex \"" +

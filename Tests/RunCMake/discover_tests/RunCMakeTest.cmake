@@ -23,6 +23,11 @@ block()
     ${CMAKE_CTEST_COMMAND} -C Debug -N -R "ExpandLists.")
 endblock()
 
+block()
+  run_cmake(bad-discovery-properties-cmake)
+  run_cmake(bad-test-properties-cmake)
+endblock()
+
 function(run_case CASE)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${CASE}-build)
   run_cmake(${CASE})
@@ -30,6 +35,9 @@ function(run_case CASE)
   run_cmake_command(${CASE}-build ${CMAKE_COMMAND} --build .  --config Debug)
   run_cmake_command(${CASE}-test ${CMAKE_CTEST_COMMAND} -C Debug)
 endfunction()
+
+run_case(bad-discovery-properties-ctest)
+run_case(bad-test-properties-ctest)
 
 run_case(bad-command)
 run_case(bad-regex)
