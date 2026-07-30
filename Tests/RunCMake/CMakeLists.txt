@@ -451,20 +451,27 @@ add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}
                           -DCMake_TEST_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON})
 if(CMAKE_GENERATOR MATCHES "Make|Ninja|FASTBuild")
-  add_RunCMake_test(Instrumentation -DPython_EXECUTABLE=${Python_EXECUTABLE}
-                                    -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
-                                    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-                                    -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
-                                    -DCMAKE_EXECUTABLE_SUFFIX=${CMAKE_EXECUTABLE_SUFFIX}
-                                    -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
-  # The real-signal/console-event interrupt case runs in its own suite so it can
-  # be excluded from MemCheck (the interrupted cmake is killed by a real signal)
-  # without dropping leak coverage for the rest of the instrumentation tests.
-  add_RunCMake_test(InstrumentationInterrupt TEST_DIR Instrumentation
-                                    -DINSTRUMENTATION_INTERRUPT_REAL=1
-                                    -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
-                                    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-                                    -DCMAKE_EXECUTABLE_SUFFIX=${CMAKE_EXECUTABLE_SUFFIX})
+  function(add_RunCMake_Instrumentation_test variant)
+    add_RunCMake_test(Instrumentation${variant}
+      TEST_DIR Instrumentation
+      -DPython_EXECUTABLE=${Python_EXECUTABLE}
+      -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+      -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
+      -DCMAKE_EXECUTABLE_SUFFIX=${CMAKE_EXECUTABLE_SUFFIX}
+      -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
+      -DCMake_TEST_INSTRUMENTATION_VARIANT=${variant}
+    )
+    set_property(TEST RunCMake.Instrumentation${variant} APPEND PROPERTY
+      LABELS "Instrumentation"
+    )
+  endfunction()
+  add_RunCMake_Instrumentation_test("")
+  add_RunCMake_Instrumentation_test(MakeProgram)
+  # The real-signal/console-event interrupt case runs in its own suite so it
+  # can be excluded from MemCheck (the interrupted cmake is killed by a real
+  # signal).
+  add_RunCMake_Instrumentation_test(InterruptReal)
 endif()
 add_RunCMake_test(ConfigDir)
 if(CMake_TEST_FindPython2)
