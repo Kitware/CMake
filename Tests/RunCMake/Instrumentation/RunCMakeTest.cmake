@@ -29,6 +29,19 @@ function(instrument test)
     "BAD_QUERY"
   )
   cmake_parse_arguments(ARGS "${OPTIONS}" "CHECK_SCRIPT" "CONFIGURE_ARGS" ${ARGN})
+
+  if(NOT CMake_TEST_INSTRUMENTATION_VARIANT)
+    if(ARGS_BUILD_MAKE_PROGRAM)
+      return()
+    endif()
+  endif()
+
+  if(CMake_TEST_INSTRUMENTATION_VARIANT STREQUAL "MakeProgram")
+    if(NOT ARGS_BUILD_MAKE_PROGRAM)
+      return()
+    endif()
+  endif()
+
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
   set(v1 ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation/v1)
   set(v1 ${v1} PARENT_SCOPE)
@@ -325,17 +338,21 @@ instrument(cmake-command-custom-content
   CONFIGURE_ARGS "-DN=2"
   CHECK_SCRIPT check-custom-content.cmake
 )
-set(indexDir ${v1}/data/index)
-set(fakeIndex ${indexDir}/index-0.json)
-file(MAKE_DIRECTORY ${indexDir})
-file(TOUCH ${fakeIndex})
+if(NOT CMake_TEST_INSTRUMENTATION_VARIANT)
+  set(indexDir ${v1}/data/index)
+  set(fakeIndex ${indexDir}/index-0.json)
+  file(MAKE_DIRECTORY ${indexDir})
+  file(TOUCH ${fakeIndex})
+endif()
 # fakeIndex newer than all content files prevents their deletion
 set(EXPECTED_CONTENT_FILES 2)
 instrument(cmake-command-custom-content
   NO_CONFIGURE MANUAL_HOOK PRESERVE_DATA
   CHECK_SCRIPT check-custom-content-removed.cmake
 )
-file(REMOVE ${fakeIndex})
+if(NOT CMake_TEST_INSTRUMENTATION_VARIANT)
+  file(REMOVE ${fakeIndex})
+endif()
 # old content files will be removed if no index file exists
 set(EXPECTED_CONTENT_FILES 1)
 instrument(cmake-command-custom-content
