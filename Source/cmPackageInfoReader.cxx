@@ -1005,6 +1005,7 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
       std::string const& fullName = cmStrCat(package, "::"_s, name);
       AppendProperty(makefile, target, "LINK_LIBRARIES"_s, {}, fullName);
     }
+    target->SetExportPassthrough(true);
   }
 
   return true;

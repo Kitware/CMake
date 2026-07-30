@@ -1,0 +1,11 @@
+find_package(
+  foo REQUIRED CONFIG
+  NO_DEFAULT_PATH
+  PATHS ${CMAKE_CURRENT_LIST_DIR}
+  )
+
+add_library(bar INTERFACE)
+target_link_libraries(bar INTERFACE $<1:foo>)
+
+install(TARGETS bar EXPORT bar)
+export(EXPORT bar)
