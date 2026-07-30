@@ -2,4 +2,4 @@
 \[2/3\] Linking C executable Release[\/]echo(\.exe)?
 \[3/3\] [^
 ]*
-'[^']*[\/]Tests[\/]RunCMake[\/]NinjaMultiConfig[\/]CustomCommandOutputGenex-build'\$ '[^']*[\/]Tests[\/]RunCMake[\/]NinjaMultiConfig[\/]CustomCommandOutputGenex-build[\/]Release[\/]echo(\.exe)?' 'Release' 'echo_dbgx_byproduct_Release\.txt'$
+'[^']*[\/]Tests[\/]RunCMake[\/]NinjaMultiConfigCustomCommands[\/]CustomCommandOutputGenex-build'\$ '[^']*[\/]Tests[\/]RunCMake[\/]NinjaMultiConfigCustomCommands[\/]CustomCommandOutputGenex-build[\/]Release[\/]echo(\.exe)?' 'Release' 'echo_dbgx_byproduct_Release\.txt'$

@@ -81,6 +81,8 @@ endfunction()
 
 ###############################################################################
 
+if(CMake_TEST_NinjaMultiConfig_VARIANT STREQUAL "Simple")
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Simple-build)
 # IMPORTANT: Setting RelWithDebInfo as the first item in CMAKE_CONFIGURATION_TYPES
 # generates a build.ninja file with that configuration
@@ -193,6 +195,8 @@ run_cmake_build(SimpleCrossConfigs all-in-relwithdebinfo-graph RelWithDebInfo si
 run_ninja(SimpleCrossConfigs clean-all-in-release-graph build-Release.ninja clean:all)
 run_cmake_build(SimpleCrossConfigs all-all-in-release-graph Release all:all)
 run_cmake_build(SimpleCrossConfigs all-relwithdebinfo-in-release-graph Release all:RelWithDebInfo)
+
+elseif(CMake_TEST_NinjaMultiConfig_VARIANT STREQUAL "CustomCommands")
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/PostBuild-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
@@ -391,6 +395,8 @@ run_cmake(CustomCommandDepfile)
 run_cmake(CustomCommandDepfileAsOutput)
 run_cmake(CustomCommandDepfileAsByproduct)
 
+else()
+
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
 run_cmake(PerConfigSources)
 unset(RunCMake_TEST_OPTIONS)
@@ -562,4 +568,5 @@ if(CMake_TEST_Qt_version)
       endforeach()
     endforeach()
   endif()
+endif()
 endif()
