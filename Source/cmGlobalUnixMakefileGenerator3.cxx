@@ -470,10 +470,15 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
 }
 
 namespace {
-std::string ConvertToMakefilePathForUnix(std::string const& path)
+std::string ConvertToMakefilePathForUnix(std::string const& path,
+                                         bool isForceQuote)
 {
+  bool const quote = isForceQuote;
   std::string result;
-  result.reserve(path.size());
+  result.reserve(path.size() + (quote ? 2 : 0));
+  if (quote) {
+    result.push_back('"');
+  }
   for (char c : path) {
     switch (c) {
       case '=':
@@ -493,13 +498,18 @@ std::string ConvertToMakefilePathForUnix(std::string const& path)
         break;
     }
   }
+  if (quote) {
+    result.push_back('"');
+  }
   return result;
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-std::string ConvertToMakefilePathForWindows(std::string const& path)
+std::string ConvertToMakefilePathForWindows(std::string const& path,
+                                            bool isForceQuote)
 {
-  bool const quote = path.find_first_of(" #") != std::string::npos;
+  bool const quote =
+    isForceQuote || path.find_first_of(" #") != std::string::npos;
   std::string result;
   result.reserve(path.size() + (quote ? 2 : 0));
   if (quote) {
@@ -533,12 +543,19 @@ std::string ConvertToMakefilePathForWindows(std::string const& path)
 std::string cmGlobalUnixMakefileGenerator3::ConvertToMakefilePath(
   std::string const& path) const
 {
+  // Watcom WMake treats '+' as special. Quote the whole path so names
+  // containing '+' (e.g. test+1.c, stdc++.cmake) are accepted.
+  bool const isWatcomWMake =
+    this->GetCMakeInstance()->GetState()->UseWatcomWMake();
+  bool const isForceQuote =
+    isWatcomWMake && path.find('+') != std::string::npos;
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
   if (!this->ForceUnixPaths) {
-    return ConvertToMakefilePathForWindows(path);
+    return ConvertToMakefilePathForWindows(path, isForceQuote);
   }
 #endif
-  return ConvertToMakefilePathForUnix(path);
+  return ConvertToMakefilePathForUnix(path, isForceQuote);
 }
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
