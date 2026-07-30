@@ -40,11 +40,12 @@ int testRST(int argc, char* argv[])
       return 1;
     }
 
-    cmRST r(fout, dir);
+    cmRST r(dir);
     if (!r.ProcessFile(fname)) {
       std::cerr << "Could not open input " << fname << std::endl;
       return 1;
     }
+    r.Write(fout);
   }
 
   // Compare expected and actual outputs.

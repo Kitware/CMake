@@ -41,6 +41,8 @@ First TOC entry.
 |not replaced|
 Second TOC entry.
 
+Replacements should work within a toctree.
+
 CMake Module Content
 
 More CMake Module Content
@@ -147,3 +149,10 @@ End of first include.
 Cross-include substitution text with ``some_cmd()`` reference.
 
 End of second include.
+
+Testing a replacement defined after use.
+
+this text is a different length
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Substitutions in headers should cause the header line's length to be updated.

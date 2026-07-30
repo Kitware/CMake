@@ -558,10 +558,11 @@ bool cmDocumentation::PrintFiles(std::ostream& os, std::string const& pattern)
   std::vector<std::string> files;
   this->GlobHelp(files, pattern);
   std::sort(files.begin(), files.end());
-  cmRST r(os, cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help"));
+  cmRST r(cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help"));
   for (std::string const& f : files) {
     found = r.ProcessFile(f) || found;
   }
+  r.Write(os);
   return found;
 }
 
