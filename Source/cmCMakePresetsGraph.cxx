@@ -11,6 +11,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -146,7 +147,7 @@ bool VisitPreset(
     auto& parentPreset = parent->second.Unexpanded;
     if (!preset.OriginFile->ReachableFiles.count(parentPreset.OriginFile)) {
       cmCMakePresetsErrors::INHERITED_PRESET_UNREACHABLE_FROM_FILE(
-        preset.Name, preset.kind(), &graph.parseState);
+        preset.Name, i, preset.kind(), &graph.parseState);
       return false;
     }
 
@@ -703,7 +704,9 @@ bool SetupWorkflowConfigurePreset(T const& preset,
                                   cmJSONState* state)
 {
   if (preset.ConfigurePreset != configurePreset->Name) {
-    cmCMakePresetsErrors::INVALID_WORKFLOW_STEPS(configurePreset->Name, state);
+    cmCMakePresetsErrors::WORKFLOW_STEP_CONFIGURE_PRESET_MISMATCH(
+      preset.kind(), preset.Name, preset.ConfigurePreset,
+      configurePreset->Name, state);
     return false;
   }
   return true;
@@ -947,6 +950,13 @@ bool cmCMakePresetsGraph::ConfigurePreset::VisitPresetAfterInherit(
       auto const ei = preset.Errors.find(w.first);
       if (ei != preset.Errors.end()) {
         if (w.second == false && ei->second == true) {
+          cm::string_view const diagnostic =
+            version < 12 && w.first == cmDiagnostics::CMD_AUTHOR
+            ? cm::string_view{ "dev" }
+            : cmCMakePresetsGraphInternal::GetDiagnosticJSONName(w.first);
+          this->ErrorDetail = cmStrCat("\"errors.", diagnostic,
+                                       "\" is enabled while \"warnings.",
+                                       diagnostic, "\" is disabled");
           return false;
         }
       }
@@ -1276,14 +1286,16 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       auto const configurePreset =
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
       if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::INVALID_CONFIGURE_PRESET(it.first,
-                                                       &this->parseState);
+        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
+          it.first, BuildPreset::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
         return false;
       }
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
             configurePreset->second.Unexpanded.OriginFile)) {
         cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, &this->parseState);
+          it.first, BuildPreset::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
         return false;
       }
 
@@ -1306,14 +1318,16 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       auto const configurePreset =
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
       if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::INVALID_CONFIGURE_PRESET(it.first,
-                                                       &this->parseState);
+        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
+          it.first, TestPreset::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
         return false;
       }
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
             configurePreset->second.Unexpanded.OriginFile)) {
         cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, &this->parseState);
+          it.first, TestPreset::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
         return false;
       }
 
@@ -1336,14 +1350,16 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
       auto const configurePreset =
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
       if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::INVALID_CONFIGURE_PRESET(it.first,
-                                                       &this->parseState);
+        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
+          it.first, PackagePreset::kind(),
+          it.second.Unexpanded.ConfigurePreset, &this->parseState);
         return false;
       }
       if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
             configurePreset->second.Unexpanded.OriginFile)) {
         cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, &this->parseState);
+          it.first, PackagePreset::kind(),
+          it.second.Unexpanded.ConfigurePreset, &this->parseState);
         return false;
       }
 

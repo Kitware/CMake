@@ -1,0 +1,3 @@
+^CPack Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsPackage/ConfigurePresetUnreachable:
+Package preset "package-child" references configure preset "cfg-parent", but "cfg-parent" is not reachable from the preset's file$

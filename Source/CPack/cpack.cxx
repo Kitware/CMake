@@ -276,7 +276,7 @@ int main(int argc, char const* const* argv)
     if (result != true) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "Could not read presets from "
-                    << workingDirectory << ":"
+                    << workingDirectory << ":\n"
                     << presetsGraph.parseState.GetErrorMessage() << '\n');
       return 1;
     }

@@ -47,10 +47,13 @@ void CYCLIC_PRESET_INHERITANCE(std::string const& presetName,
                                std::string const& kind, cmJSONState* state);
 
 void INHERITED_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
+                                            std::string const& inheritedPreset,
                                             std::string const& kind,
                                             cmJSONState* state);
 
 void CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
+                                            std::string const& kind,
+                                            std::string const& configurePreset,
                                             cmJSONState* state);
 
 void INVALID_MACRO_EXPANSION(std::string const& presetName,
@@ -66,8 +69,10 @@ void INCLUDE_UNSUPPORTED(Json::Value const*, cmJSONState* state);
 
 void INVALID_INCLUDE(Json::Value const* value, cmJSONState* state);
 
-void INVALID_CONFIGURE_PRESET(std::string const& presetName,
-                              cmJSONState* state);
+void CONFIGURE_PRESET_NOT_FOUND(std::string const& presetName,
+                                std::string const& kind,
+                                std::string const& configurePreset,
+                                cmJSONState* state);
 
 void INSTALL_PREFIX_UNSUPPORTED(Json::Value const* value, cmJSONState* state);
 
@@ -87,6 +92,14 @@ void TEST_OUTPUT_TRUNCATION_UNSUPPORTED(cmJSONState* state);
 
 void INVALID_WORKFLOW_STEPS(std::string const& workflowStep,
                             cmJSONState* state);
+
+void WORKFLOW_STEP_CONFIGURE_PRESET_MISMATCH(
+  std::string const& kind, std::string const& workflowStep,
+  std::string const& stepConfigurePreset,
+  std::string const& workflowConfigurePreset, cmJSONState* state);
+
+void INVALID_TEST_FILTER_INCLUDE_INDEX(Json::Value const* value,
+                                       cmJSONState* state);
 
 void NO_WORKFLOW_STEPS(std::string const& presetName, cmJSONState* state);
 

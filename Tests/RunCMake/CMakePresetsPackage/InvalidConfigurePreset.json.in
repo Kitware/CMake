@@ -1,0 +1,16 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "package-release",
+      "configurePreset": "does-not-exist"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "buildPresets": [
     {
       "name": "x",
-      "configurePreset": "x"
+      "configurePreset": "cfg-parent"
     }
   ]
 }

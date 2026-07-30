@@ -1,0 +1,14 @@
+{
+  "version": 6,
+  "workflowPresets": [
+    {
+      "name": "WorkflowStepInvalidType",
+      "steps": [
+        {
+          "type": 42,
+          "name": "configure"
+        }
+      ]
+    }
+  ]
+}

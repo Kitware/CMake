@@ -7,14 +7,16 @@
 
 #include <cmext/string_view>
 
-#include <cm3p/json/value.h>
-
 #include "cmCMakePresetsErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
 
 class cmJSONState;
+
+namespace Json {
+class Value;
+}
 
 namespace {
 using WorkflowPreset = cmCMakePresetsGraph::WorkflowPreset;
@@ -27,26 +29,28 @@ bool WorkflowStepTypeHelper(WorkflowPreset::WorkflowStep::Type& out,
     return false;
   }
 
-  if (!value->isString()) {
+  std::string workflowType;
+  if (!cmCMakePresetsGraphInternal::PresetStringHelper(workflowType, value,
+                                                       state)) {
     return false;
   }
 
-  if (value->asString() == "configure") {
+  if (workflowType == "configure") {
     out = WorkflowPreset::WorkflowStep::Type::Configure;
     return true;
   }
 
-  if (value->asString() == "build") {
+  if (workflowType == "build") {
     out = WorkflowPreset::WorkflowStep::Type::Build;
     return true;
   }
 
-  if (value->asString() == "test") {
+  if (workflowType == "test") {
     out = WorkflowPreset::WorkflowStep::Type::Test;
     return true;
   }
 
-  if (value->asString() == "package") {
+  if (workflowType == "package") {
     out = WorkflowPreset::WorkflowStep::Type::Package;
     return true;
   }

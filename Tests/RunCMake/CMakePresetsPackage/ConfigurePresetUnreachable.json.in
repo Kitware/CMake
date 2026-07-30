@@ -1,0 +1,9 @@
+{
+  "version": 6,
+  "packagePresets": [
+    {
+      "name": "package-child",
+      "configurePreset": "cfg-parent"
+    }
+  ]
+}
