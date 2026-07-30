@@ -34,6 +34,7 @@ run_cmake(CheckIncludeFilesOkNoC)
 run_cmake(CheckIncludeFilesMissingLanguage)
 run_cmake(CheckIncludeFilesUnknownArgument)
 run_cmake(CheckIncludeFilesUnknownLanguage)
+run_cmake(CheckRequiredFlags)
 
 block()
     # Set common variables
