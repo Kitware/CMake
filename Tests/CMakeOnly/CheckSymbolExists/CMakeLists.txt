@@ -14,6 +14,13 @@ set(CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 include(CheckSymbolExists)
 
+set(CMAKE_REQUIRED_FLAGS "-DCSE_REQUIRED_FLAG")
+check_symbol_exists(required_flag_symbol "cm_cse.h" CSE_RESULT_REQUIRED_FLAG)
+if(NOT CSE_RESULT_REQUIRED_FLAG)
+  message(SEND_ERROR "CheckSymbolExists did not honor CMAKE_REQUIRED_FLAGS")
+endif()
+unset(CMAKE_REQUIRED_FLAGS)
+
 foreach(_config_type Release RelWithDebInfo MinSizeRel Debug)
   set(CMAKE_TRY_COMPILE_CONFIGURATION ${_config_type})
   unset(CSE_RESULT_${_config_type} CACHE)
