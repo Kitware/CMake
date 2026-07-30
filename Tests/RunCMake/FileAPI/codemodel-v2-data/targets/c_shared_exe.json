@@ -21,7 +21,7 @@
                 [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 18,
+                        "line": 21,
                         "command": "add_executable",
                         "hasParent": true
                     },
@@ -77,7 +77,7 @@
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 18,
+            "line": 21,
             "command": "add_executable",
             "hasParent": true
         },
@@ -127,7 +127,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 19,
+                    "line": 22,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },
@@ -163,7 +163,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 19,
+                    "line": 22,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },
@@ -196,7 +196,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 19,
+                    "line": 22,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },

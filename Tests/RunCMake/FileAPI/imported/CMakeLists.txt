@@ -29,6 +29,12 @@ if(NOT CMAKE_GENERATOR STREQUAL "Xcode" OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "
 endif()
 
 add_library(imported_interface_lib INTERFACE IMPORTED)
+set_target_properties(imported_interface_lib PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+target_sources(imported_interface_lib
+  INTERFACE FILE_SET HEADERS BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ../empty.h
+)
 add_executable(link_imported_interface_exe ../empty.c)
 target_link_libraries(link_imported_interface_exe PRIVATE imported_interface_lib)
 

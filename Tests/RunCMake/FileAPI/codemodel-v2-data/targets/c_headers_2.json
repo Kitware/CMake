@@ -44,6 +44,12 @@
       ]
     }
   ],
+  "interfaceIncludes": [
+    {
+      "path": "^.*/Tests/RunCMake/FileAPI/fileset$",
+      "isSystem": null
+    }
+  ],
   "interfaceSources": [
     {
       "path": "^fileset/h1\\.h$",
