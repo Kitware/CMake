@@ -790,6 +790,8 @@ class CMakeDomain(Domain):
         # Other `object_types` cannot be created except by the `CMakeTransform`
     }
     roles = {
+        # NOTE: When adding roles here, consider whether cmRST should also be
+        # updated.
         # General CMake reference roles.
         'cref':       CMakeCRefRole(),
         'command':    CMakeXRefRole(fix_parens=True, lowercase=True),
