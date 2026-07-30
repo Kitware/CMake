@@ -103,7 +103,8 @@ protected:
 
   FastbuildExecNodes GenerateCommands(FastbuildBuildStep buildStep);
   FastbuildExecNode GetAppleTextStubCommand() const;
-  FastbuildExecNode GetDepsCheckExec(FastbuildExecNode const& depender);
+  std::vector<FastbuildExecNode> GetDepsCheckExecs(
+    FastbuildExecNode const& depender);
 
   std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
