@@ -213,7 +213,7 @@ This module defines the following variables
 
   Information computed from ``sysconfig.get_config_var('EXT_SUFFIX')`` or
   ``sysconfig.get_config_var('SOABI')`` or
-  ``python3-config --extension-suffix``.
+  ``python-config --extension-suffix``.
 
 ``Python_SOSABI``
   .. versionadded:: 3.26
@@ -224,6 +224,16 @@ This module defines the following variables
   COMPONENT ``Interpreter`` was specified. Otherwise, the extension is ``abi3``
   or ``abi3t`` except for ``Windows``, ``MSYS`` and ``CYGWIN`` for which this
   is an empty string.
+
+``Python_SOSABI_PLATFORM``
+  .. versionadded:: 4.5
+
+  Extension suffix, with the platform triplet, for modules using the Stable
+  Application Binary Interface. This information is only available on some
+  platforms. This is an empty string for the other platforms.
+
+  Information computed from ``importlib.machinery.EXTENSION_SUFFIXES`` if the
+  COMPONENT ``Interpreter`` was specified. Otherwise, this is an empty string.
 
 ``Python_Compiler_FOUND``
   Boolean indicating whether system has the Python compiler.
@@ -681,6 +691,11 @@ If the library type is not specified, ``MODULE`` is assumed.
 
   When option ``WITH_SOABI`` is also specified,  the module suffix will include
   the ``Python_SOSABI`` value, if any.
+
+.. versionadded:: 4.5
+  If the sub-option ``PLATFORM`` of ``WITH_SOABI`` option is specified, the
+  module suffix will include preferably the ``Python_SOSABI_PLATFORM`` value,
+  if any or, as fallback, the ``Python_SOSABI`` value.
 
 .. versionadded:: 3.30
   For ``MODULE`` type, the :prop_tgt:`DEBUG_POSTFIX` target property is
