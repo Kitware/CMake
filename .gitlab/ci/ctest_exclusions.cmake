@@ -34,7 +34,6 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_valgrind")
     "^RunCMake.Autogen_Qt6_1$"
     "^RunCMake.GoogleTest$"
     "^RunCMake.CXXModules$"
-    "^RunCMake.CXXModulesCompile$"
     "^RunCMake.CommandLine$"
 
     # Too spurious under Valgrind.
