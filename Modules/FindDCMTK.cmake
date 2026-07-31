@@ -18,11 +18,10 @@ the DICOM Standard (Digital Imaging and Communications in Medicine).
   This module is now able to find a version of DCMTK that does or does not
   export a ``DCMTKConfig.cmake`` file.
 
-  DCMTK since its version `3.6.1_20140617
-  <https://git.dcmtk.org/?p=dcmtk.git;a=commit;h=662ae187c493c6b9a73dd5e3875372cebd0c11fe>`_
-  supports and installs :ref:`package configuration file
-  <Config File Packages>` (``DCMTKConfig.cmake``) for use with the
-  :command:`find_package` command in *config mode*.
+  DCMTK, since version ``3.6.1_20140617``, supports and installs a
+  :ref:`package configuration file <Config File Packages>`
+  (``DCMTKConfig.cmake``) for use with the :command:`find_package`
+  command in *config mode*.
 
   This module now applies a two-step process:
 
