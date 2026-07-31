@@ -1,0 +1,2 @@
+CMake Error at .* \(discover_tests\):
+  discover_tests TEST_PROPERTIES must be key-value pairs.

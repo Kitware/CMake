@@ -586,6 +586,14 @@ function(gtest_discover_tests target)
     endif()
     set(arg_DISCOVERY_MODE ${CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE})
   endif()
+  if(arg_PROPERTIES)
+    list(LENGTH arg_PROPERTIES _len_PROPERTIES)
+    math(EXPR _odd_PROPERTIES "${_len_PROPERTIES} % 2")
+    if(_odd_PROPERTIES)
+      list(POP_BACK arg_PROPERTIES _back_PROPERTY)
+      message(AUTHOR_WARNING "PROPERTIES should be key-value pairs.  Ignoring unpaired key '${_back_PROPERTY}'.")
+    endif()
+  endif()
 
   get_property(test_launcher
     TARGET ${target}
