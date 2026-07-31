@@ -1,5 +1,12 @@
 include(RunCMake)
 
+function(run_configure_and_build name)
+  run_cmake(${name})
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${name}-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${name}-build ${CMAKE_COMMAND} --build . --config Debug)
+endfunction()
+
 run_cmake(CMP0175-OLD)
 run_cmake(CMP0175-WARN)
 run_cmake(CMP0175-NEW)
@@ -26,12 +33,7 @@ if(RunCMake_GENERATOR MATCHES "Visual Studio")
   run_cmake(RemoveEmptyCommands)
 endif()
 
-run_cmake(AssigningMultipleTargets)
-set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AssigningMultipleTargets-build)
-set(RunCMake_TEST_NO_CLEAN 1)
-run_cmake_command(AssigningMultipleTargets-build ${CMAKE_COMMAND} --build .)
-unset(RunCMake_TEST_BINARY_DIR)
-unset(RunCMake_TEST_NO_CLEAN)
+run_configure_and_build(AssigningMultipleTargets)
 
 if(NOT RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
   run_cmake(WorkingDirectory)
@@ -49,27 +51,15 @@ if(NOT RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
 endif()
 
 function(test_genex name)
-  run_cmake(${name})
+  run_configure_and_build(${name})
 
-  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${name}-build")
-  set(RunCMake_TEST_NO_CLEAN 1)
-  run_cmake_command(${name}-build ${CMAKE_COMMAND} --build .)
-
-  if(NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/wdir/touched")
+  if(NOT EXISTS "${RunCMake_BINARY_DIR}/${name}-build/wdir/touched")
     message(SEND_ERROR "File not created by target-dependent add_custom_command()!")
   endif()
-
-  unset(RunCMake_TEST_NO_CLEAN)
-  unset(RunCMake_TEST_BINARY_DIR)
 endfunction()
 
 test_genex(TargetGenexEvent)
 
 if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
-  block()
-    run_cmake(CommentGenex)
-    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CommentGenex-build)
-    set(RunCMake_TEST_NO_CLEAN 1)
-    run_cmake_command(CommentGenex-build ${CMAKE_COMMAND} --build .)
-  endblock()
+  run_configure_and_build(CommentGenex)
 endif()
