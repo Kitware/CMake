@@ -30,11 +30,11 @@ endif()
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_valgrind")
   list(APPEND test_exclusions
     # Tests that timeout under valgrind.
-    "^RunCMake.NinjaMultiConfig$"
     "^RunCMake.Autogen_Qt6_1$"
-    "^RunCMake.GoogleTest$"
-    "^RunCMake.CXXModules$"
     "^RunCMake.CommandLine$"
+    "^RunCMake.CXXModules$"
+    "^RunCMake.GoogleTest$"
+    "^RunCMake.NinjaMultiConfig$"
 
     # Too spurious under Valgrind.
     "^RunCMake.testUVProcessChain$"
