@@ -110,6 +110,16 @@ bool cmDiscoverTestsCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  if (arguments.DiscoveryProperties.size() % 2 != 0) {
+    status.SetError(" DISCOVERY_PROPERTIES must be key-value pairs.");
+    return false;
+  }
+
+  if (arguments.TestProperties.size() % 2 != 0) {
+    status.SetError(" TEST_PROPERTIES must be key-value pairs.");
+    return false;
+  }
+
   cmMakefile& mf = status.GetMakefile();
   mf.AddTestGenerator(cm::make_unique<DiscoveryGenerator>(std::move(arguments),
                                                           mf.GetBacktrace()));
