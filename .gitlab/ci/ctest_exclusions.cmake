@@ -34,6 +34,7 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_valgrind")
     "^RunCMake.CommandLine$"
     "^RunCMake.CXXModules$"
     "^RunCMake.GoogleTest$"
+    "^RunCMake.Instrumentation$"
     "^RunCMake.NinjaMultiConfig$"
 
     # Too spurious under Valgrind.
