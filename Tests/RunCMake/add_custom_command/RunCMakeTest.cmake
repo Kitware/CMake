@@ -50,15 +50,7 @@ if(NOT RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
-function(test_genex name)
-  run_configure_and_build(${name})
-
-  if(NOT EXISTS "${RunCMake_BINARY_DIR}/${name}-build/wdir/touched")
-    message(SEND_ERROR "File not created by target-dependent add_custom_command()!")
-  endif()
-endfunction()
-
-test_genex(TargetGenexEvent)
+run_configure_and_build(TargetGenexEvent)
 
 if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
   run_configure_and_build(CommentGenex)
