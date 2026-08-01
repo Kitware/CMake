@@ -210,6 +210,8 @@ public:
 
   void SetSymbolic(bool value);
 
+  void SetExportPassthrough(bool value);
+
   //! Set/Get a property of this target file
   void SetProperty(std::string const& prop, cmValue value);
   void SetProperty(std::string const& prop, std::nullptr_t)
@@ -253,6 +255,13 @@ public:
   bool CanCompileSources() const;
   void SetIsForTryCompile();
   bool IsForTryCompile() const;
+
+  /**
+   * Get the list of targets which should replace this target on export. This
+   * equals the target's interface link libraries iff the target is an export
+   * passthrough target. For all other targets, this returns an empty list.
+   */
+  std::vector<std::string> GetExportTargets() const;
 
   bool GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
                        cmValue& imp, std::string& suffix) const;

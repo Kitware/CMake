@@ -398,6 +398,21 @@ bool cmExportFileGenerator::AddTargetNamespace(std::string& input,
     return false;
   }
 
+  std::vector<std::string> replace = tgt->Target->GetExportTargets();
+  if (!replace.empty()) {
+    std::vector<std::string> out;
+    out.reserve(replace.size());
+
+    bool result = true;
+    for (std::string& t : replace) {
+      result = this->AddTargetNamespace(t, target, lg) && result;
+      out.emplace_back(std::move(t));
+    }
+
+    input = cmJoin(out, ";"_s);
+    return result;
+  }
+
   cmFindPackageStack const& pkgStack = tgt->Target->GetFindPackageStack();
   if (!pkgStack.Empty() ||
       tgt->Target->GetProperty("EXPORT_FIND_PACKAGE_NAME")) {

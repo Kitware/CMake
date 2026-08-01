@@ -631,6 +631,7 @@ public:
   bool PerConfig = false;
   bool IsSymbolic = false;
   bool IsForTryCompile = false;
+  bool IsExportPassthrough = false;
   cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::set<std::string> CodegenDependencies;
@@ -2150,6 +2151,12 @@ void cmTarget::SetSymbolic(bool const value)
   this->impl->IsSymbolic = value;
 }
 
+void cmTarget::SetExportPassthrough(bool value)
+{
+  assert(this->impl->TargetType == cm::TargetType::INTERFACE_LIBRARY);
+  this->impl->IsExportPassthrough = value;
+}
+
 void cmTarget::SetProperty(std::string const& prop, cmValue value)
 {
   if (!IsSettableProperty(this->impl->Makefile, this, prop)) {
@@ -3005,6 +3012,14 @@ void cmTarget::SetIsForTryCompile()
 bool cmTarget::IsForTryCompile() const
 {
   return this->impl->IsForTryCompile;
+}
+
+std::vector<std::string> cmTarget::GetExportTargets() const
+{
+  if (this->impl->IsExportPassthrough) {
+    return cm::remove_BT(this->impl->InterfaceLinkLibraries.Entries);
+  }
+  return {};
 }
 
 char const* cmTarget::GetSuffixVariableInternal(
