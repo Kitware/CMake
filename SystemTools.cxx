@@ -495,112 +495,36 @@ public:
   }
 };
 
+#ifdef _WIN32
 /**
  * SystemTools static variables singleton class.
  */
 class SystemToolsStatic
 {
 public:
-#ifdef _WIN32
-  static std::string GetCasePathName(std::string const& pathIn);
   static char const* GetEnvBuffered(char const* key);
+  // This map exists so that the encoding conversion performed on Windows has a
+  // storage location which behaves like the global environment. Note that if
+  // an environment variable is set, previously returned values of that
+  // variable's value may be invalidated (and it is just as hazardous as
+  // keeping `getenv` results across `setenv` calls on POSIX platforms).
   std::map<std::string, std::string> EnvMap;
-#endif
-
-  /**
-   * Actual implementation of ReplaceString.
-   */
-  static void ReplaceString(std::string& source, char const* replace,
-                            size_t replaceSize, std::string const& with);
-
-  /**
-   * Actual implementation of FileIsFullPath.
-   */
-  static bool FileIsFullPath(char const*, size_t);
-
-  /**
-   * Find a filename (file or directory) in the system PATH, with
-   * optional extra paths.
-   */
-  static std::string FindName(
-    std::string const& name,
-    std::vector<std::string> const& userPaths = std::vector<std::string>(),
-    bool no_system_path = false);
 };
 
 // Do NOT initialize.  Default initialization to zero is necessary.
 static SystemToolsStatic* SystemToolsStatics;
 
-#ifdef _WIN32
-std::string SystemToolsStatic::GetCasePathName(std::string const& pathIn)
+char const* SystemToolsStatic::GetEnvBuffered(char const* key)
 {
-  std::string casePath;
-
-  // First check if the file is relative. We don't fix relative paths since the
-  // real case depends on the root directory and the given path fragment may
-  // have meaning elsewhere in the project.
-  if (!SystemTools::FileIsFullPath(pathIn)) {
-    // This looks unnecessary, but it allows for the return value optimization
-    // since all return paths return the same local variable.
-    casePath = pathIn;
-    return casePath;
-  }
-
-  std::vector<std::string> path_components;
-  SystemTools::SplitPath(pathIn, path_components);
-
-  // Start with root component.
-  std::vector<std::string>::size_type idx = 0;
-  casePath = path_components[idx++];
-  // make sure drive letter is always upper case
-  if (casePath.size() > 1 && casePath[1] == ':') {
-    casePath[0] = kwsysString_toupper(casePath[0]);
-  }
-  char const* sep = "";
-
-  // If network path, fill casePath with server/share so FindFirstFile
-  // will work after that.  Maybe someday call other APIs to get
-  // actual case of servers and shares.
-  if (path_components.size() > 2 && path_components[0] == "//") {
-    casePath += path_components[idx++];
-    casePath += '/';
-    casePath += path_components[idx++];
-    sep = "/";
-  }
-
-  // Convert case of all components that exist.
-  bool converting = true;
-  for (; idx < path_components.size(); idx++) {
-    casePath += sep;
-    sep = "/";
-
-    if (converting) {
-      // If path component contains wildcards, we skip matching
-      // because these filenames are not allowed on windows,
-      // and we do not want to match a different file.
-      if (path_components[idx].find('*') != std::string::npos ||
-          path_components[idx].find('?') != std::string::npos) {
-        converting = false;
-      } else {
-        std::string test_str = casePath;
-        test_str += path_components[idx];
-
-        WIN32_FIND_DATAW findData;
-        HANDLE hFind =
-          ::FindFirstFileW(Encoding::ToWide(test_str).c_str(), &findData);
-        if (INVALID_HANDLE_VALUE != hFind) {
-          auto case_file_name = Encoding::ToNarrow(findData.cFileName);
-          path_components[idx] = std::move(case_file_name);
-          ::FindClose(hFind);
-        } else {
-          converting = false;
-        }
-      }
+  std::string env;
+  if (SystemTools::GetEnv(key, env)) {
+    std::string& menv = SystemToolsStatics->EnvMap[key];
+    if (menv != env) {
+      menv = std::move(env);
     }
-
-    casePath += path_components[idx];
+    return menv.c_str();
   }
-  return casePath;
+  return nullptr;
 }
 #endif
 
@@ -640,21 +564,6 @@ void SystemTools::GetPath(std::vector<std::string>& path, char const* env)
     SystemTools::ConvertToUnixSlashes(*i);
   }
 }
-
-#if defined(_WIN32)
-char const* SystemToolsStatic::GetEnvBuffered(char const* key)
-{
-  std::string env;
-  if (SystemTools::GetEnv(key, env)) {
-    std::string& menv = SystemToolsStatics->EnvMap[key];
-    if (menv != env) {
-      menv = std::move(env);
-    }
-    return menv.c_str();
-  }
-  return nullptr;
-}
-#endif
 
 char const* SystemTools::GetEnv(char const* key)
 {
@@ -972,8 +881,8 @@ void SystemTools::ReplaceString(std::string& source,
     return;
   }
 
-  SystemToolsStatic::ReplaceString(source, replace.c_str(), replace.size(),
-                                   with);
+  SystemTools::ReplaceStringImpl(source, replace.c_str(), replace.size(),
+                                 with);
 }
 
 void SystemTools::ReplaceString(std::string& source, char const* replace,
@@ -984,13 +893,13 @@ void SystemTools::ReplaceString(std::string& source, char const* replace,
     return;
   }
 
-  SystemToolsStatic::ReplaceString(source, replace, strlen(replace),
-                                   with ? with : "");
+  SystemTools::ReplaceStringImpl(source, replace, strlen(replace),
+                                 with ? with : "");
 }
 
-void SystemToolsStatic::ReplaceString(std::string& source, char const* replace,
-                                      size_t replaceSize,
-                                      std::string const& with)
+void SystemTools::ReplaceStringImpl(std::string& source, char const* replace,
+                                    size_t replaceSize,
+                                    std::string const& with)
 {
   char const* src = source.c_str();
   char* searchPos = const_cast<char*>(strstr(src, replace));
@@ -2880,7 +2789,7 @@ size_t SystemTools::GetMaximumFilePathLength()
  * the system search path.  Returns the full path to the file if it is
  * found.  Otherwise, the empty string is returned.
  */
-std::string SystemToolsStatic::FindName(
+std::string SystemTools::FindNameImpl(
   std::string const& name, std::vector<std::string> const& userPaths,
   bool no_system_path)
 {
@@ -2918,7 +2827,7 @@ std::string SystemTools::FindFile(std::string const& name,
                                   bool no_system_path)
 {
   std::string tryPath =
-    SystemToolsStatic::FindName(name, userPaths, no_system_path);
+    SystemTools::FindNameImpl(name, userPaths, no_system_path);
   if (!tryPath.empty() && !SystemTools::FileIsDirectory(tryPath)) {
     return SystemTools::CollapseFullPath(tryPath);
   }
@@ -2936,7 +2845,7 @@ std::string SystemTools::FindDirectory(
   bool no_system_path)
 {
   std::string tryPath =
-    SystemToolsStatic::FindName(name, userPaths, no_system_path);
+    SystemTools::FindNameImpl(name, userPaths, no_system_path);
   if (!tryPath.empty() && SystemTools::FileIsDirectory(tryPath)) {
     return SystemTools::CollapseFullPath(tryPath);
   }
@@ -3464,15 +3373,6 @@ std::string SystemTools::RelativePath(std::string const& local,
   return relativePath;
 }
 
-std::string SystemTools::GetActualCaseForPath(std::string const& p)
-{
-#ifdef _WIN32
-  return SystemToolsStatic::GetCasePathName(p);
-#else
-  return p;
-#endif
-}
-
 char const* SystemTools::SplitPathRootComponent(std::string const& p,
                                                 std::string* root)
 {
@@ -3989,18 +3889,8 @@ bool SystemTools::LocateFileInDir(char const* filename, char const* dir,
   return res;
 }
 
-bool SystemTools::FileIsFullPath(std::string const& in_name)
-{
-  return SystemToolsStatic::FileIsFullPath(in_name.c_str(), in_name.size());
-}
-
-bool SystemTools::FileIsFullPath(char const* in_name)
-{
-  return SystemToolsStatic::FileIsFullPath(
-    in_name, in_name[0] ? (in_name[1] ? 2 : 1) : 0);
-}
-
-bool SystemToolsStatic::FileIsFullPath(char const* in_name, size_t len)
+namespace {
+bool FileIsFullPathImpl(char const* in_name, size_t len)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   // On Windows, the name must be at least two characters long.
@@ -4031,6 +3921,17 @@ bool SystemToolsStatic::FileIsFullPath(char const* in_name, size_t len)
     return true;
   }
   return false;
+}
+}
+
+bool SystemTools::FileIsFullPath(std::string const& in_name)
+{
+  return FileIsFullPathImpl(in_name.c_str(), in_name.size());
+}
+
+bool SystemTools::FileIsFullPath(char const* in_name)
+{
+  return FileIsFullPathImpl(in_name, in_name[0] ? (in_name[1] ? 2 : 1) : 0);
 }
 
 Status SystemTools::GetShortPath(std::string const& path,
@@ -4654,6 +4555,13 @@ std::string SystemTools::DecodeURL(std::string const& url)
   return ret;
 }
 
+#if defined(__VMS) || defined(_WIN32)
+#  define KWSYS_NEED_SYSTEM_TOOLS_MANAGER 1
+#else
+#  define KWSYS_NEED_SYSTEM_TOOLS_MANAGER 0
+#endif
+
+#if KWSYS_NEED_SYSTEM_TOOLS_MANAGER
 // ----------------------------------------------------------------------
 // Do NOT initialize.  Default initialization to zero is necessary.
 static unsigned int SystemToolsManagerCount;
@@ -4678,7 +4586,7 @@ SystemToolsManager::~SystemToolsManager()
   }
 }
 
-#if defined(__VMS)
+#  if defined(__VMS)
 // On VMS we configure the run time C library to be more UNIX like.
 // https://h71000.www7.hp.com/doc/732final/5763/5763pro_004.html
 extern "C" int decc$feature_get_index(char* name);
@@ -4690,22 +4598,27 @@ static int SetVMSFeature(char* name, int value)
   i = decc$feature_get_index(name);
   return i >= 0 && (decc$feature_set_value(i, 1, value) >= 0 || errno == 0);
 }
-#endif
+#  endif
 
 void SystemTools::ClassInitialize()
 {
-#ifdef __VMS
+#  ifdef __VMS
   SetVMSFeature("DECC$FILENAME_UNIX_ONLY", 1);
-#endif
+#  endif
 
+#  ifdef _WIN32
   // Create statics singleton instance
   SystemToolsStatics = new SystemToolsStatic;
+#  endif
 }
 
 void SystemTools::ClassFinalize()
 {
+#  ifdef _WIN32
   delete SystemToolsStatics;
+#  endif
 }
+#endif
 
 } // namespace KWSYS_NAMESPACE
 
