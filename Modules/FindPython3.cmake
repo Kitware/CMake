@@ -227,6 +227,16 @@ This module defines the following variables
   or ``abi3t`` except for ``Windows``, ``MSYS`` and ``CYGWIN`` for which this
   is an empty string.
 
+``Python3_SOSABI_PLATFORM``
+  .. versionadded:: 4.5
+
+  Extension suffix, with the platform triplet, for modules using the Stable
+  Application Binary Interface. This information is only available on some
+  platforms. This is an empty string for the other platforms.
+
+  Information computed from ``importlib.machinery.EXTENSION_SUFFIXES`` if the
+  COMPONENT ``Interpreter`` was specified. Otherwise, this is an empty string.
+
 ``Python3_Compiler_FOUND``
   Boolean indicating whether system has the Python 3 compiler.
 ``Python3_COMPILER``
@@ -653,7 +663,7 @@ of Python module naming rules:
 
 .. code-block:: cmake
 
-  Python3_add_library (<name> [STATIC | SHARED | MODULE [USE_SABI <version>] [WITH_SOABI]]
+  Python3_add_library (<name> [STATIC | SHARED | MODULE [USE_SABI <version>] [WITH_SOABI [PLATFORM]]]
                        <source1> [<source2> ...])
 
 If the library type is not specified, ``MODULE`` is assumed.
@@ -680,6 +690,11 @@ If the library type is not specified, ``MODULE`` is assumed.
 
   When option ``WITH_SOABI`` is also specified,  the module suffix will include
   the ``Python3_SOSABI`` value, if any.
+
+.. versionadded:: 4.5
+  If the sub-option ``PLATFORM`` of ``WITH_SOABI`` option is specified, the
+  module suffix will include preferably the ``Python3_SOSABI_PLATFORM`` value,
+  if any or, as fallback, the ``Python3_SOSABI`` value.
 
 .. versionadded:: 3.30
   For ``MODULE`` type, the :prop_tgt:`DEBUG_POSTFIX` target property is

@@ -47,6 +47,21 @@ if (Python3_SOSABI)
   endif()
 endif()
 
+Python3_add_library (spam3_2 MODULE USE_SABI 3 WITH_SOABI PLATFORM spam.c)
+target_compile_definitions (spam3_2 PRIVATE PYTHON3)
+
+if (Python3_SOSABI_PLATFORM)
+  get_property (suffix TARGET spam3_2 PROPERTY SUFFIX)
+  if (NOT suffix MATCHES "^\\.${Python3_SOSABI_PLATFORM}")
+    message(FATAL_ERROR "Module suffix do not include Python3_SOSABI_PLATFORM")
+  endif()
+elseif(Python3_SOSABI)
+  get_property (suffix TARGET spam3_2 PROPERTY SUFFIX)
+  if (NOT suffix MATCHES "^\\.${Python3_SOSABI}")
+    message(FATAL_ERROR "Module suffix do not include Python3_SOSABI")
+  endif()
+endif()
+
 
 add_test (NAME python3_spam3
           COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam3>"
