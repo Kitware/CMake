@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
+#include <istream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -23,8 +24,19 @@ class cmJSONState
 
 public:
   using JsonPair = std::pair<std::string const, Json::Value const*>;
+
+  enum class StrictMode
+  {
+    Strict,
+    Relaxed,
+  };
+
   cmJSONState() = default;
-  cmJSONState(std::string jsonFile, Json::Value* root);
+  cmJSONState(std::string jsonFile, Json::Value* root,
+              StrictMode strictMode = StrictMode::Strict);
+  cmJSONState(std::istream& jsonIStream, Json::Value* root,
+              StrictMode strictMode = StrictMode::Strict);
+
   void AddError(std::string const& errMsg);
   void AddErrorAtValue(std::string const& errMsg, Json::Value const* value);
   void AddErrorAtOffset(std::string const& errMsg, std::ptrdiff_t offset);
@@ -58,6 +70,8 @@ public:
   bool allowComments = false;
 
 private:
+  void ReadJSONStream(std::istream& jsonIStream, Json::Value* root,
+                      StrictMode strictMode);
   std::string GetJsonContext(Location loc);
   Location LocateInDocument(ptrdiff_t offset);
   std::string Filename;

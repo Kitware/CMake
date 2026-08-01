@@ -1,6 +1,15 @@
 CMake Error at [^
 ]*:1 \(cmake_instrumentation\):
-  cmake_instrumentation failed to parse custom content as JSON: Not valid
-  JSON content
+  cmake_instrumentation failed to parse custom content as JSON:
+(
+   Syntax error: value, object or array expected\.
+
+  Not valid JSON content
+
+  \^|
+   JSON Parse Error:
+   \* Line 1, Column 1
+    Syntax error: value, object or array expected\.
+)
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
