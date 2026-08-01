@@ -1,0 +1,7 @@
+^CMake Warning \(author\) at [^
+]*/Modules/GoogleTest.cmake:[0-9]+ \(message\):
+  PROPERTIES should be key-value pairs.  Ignoring unpaired key 'PROP2'.
+Call Stack \(most recent call first\):
+  PropertiesOdd.cmake:[0-9]+ \(gtest_discover_tests\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

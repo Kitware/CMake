@@ -11,6 +11,8 @@ else()
   set(fs_delay 1.125)
 endif()
 
+run_cmake(PropertiesOdd)
+
 function(run_GoogleTest DISCOVERY_MODE)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-build)
