@@ -43,8 +43,17 @@ typedef @KWSYS_NAMESPACE@_VA_LIST::hack_va_list va_list;
 
 namespace @KWSYS_NAMESPACE@ {
 
+#ifdef _WIN32
 class SystemToolsStatic;
+#endif
 
+#if defined(__VMS) || defined(_WIN32)
+#  define @KWSYS_NAMESPACE@_NEED_SYSTEM_TOOLS_MANAGER 1
+#else
+#  define @KWSYS_NAMESPACE@_NEED_SYSTEM_TOOLS_MANAGER 0
+#endif
+
+#if @KWSYS_NAMESPACE@_NEED_SYSTEM_TOOLS_MANAGER
 /** \class SystemToolsManager
  * \brief Use to make sure SystemTools is initialized before it is used
  * and is the last static object destroyed
@@ -63,6 +72,7 @@ public:
 // SystemTools. It will make sure SystemTools is initialized
 // before it is used and is the last static object destroyed.
 static SystemToolsManager SystemToolsManagerInstance;
+#endif
 
 // Flags for use with TestFileAccess.  Use a typedef in case any operating
 // system in the future needs a special type.  These are flags that may be
@@ -360,15 +370,6 @@ public:
    *  on the current platform ("" for unix, ".exe" for Windows).
    */
   static char const* GetExecutableExtension();
-
-  /**
-   * Given a path on a Windows machine, return the actual case of
-   * the path as it exists on disk.  Path components that do not
-   * exist on disk are returned unchanged.  Relative paths are always
-   * returned unchanged.  Drive letters are always made upper case.
-   * This does nothing on non-Windows systems but return the path.
-   */
-  static std::string GetActualCaseForPath(std::string const& path);
 
   /**
    * Given the path to a program executable, get the directory part of
@@ -1017,6 +1018,7 @@ public:
   static std::string DecodeURL(std::string const& url);
 
 private:
+#if @KWSYS_NAMESPACE@_NEED_SYSTEM_TOOLS_MANAGER
   static void ClassInitialize();
   static void ClassFinalize();
 
@@ -1027,9 +1029,25 @@ private:
   {
     return &SystemToolsManagerInstance;
   }
+#endif
 
+  static void ReplaceStringImpl(std::string& source, char const* replace,
+                                size_t replaceSize, std::string const& with);
+  /**
+   * Find a filename (file or directory) in the system PATH, with
+   * optional extra paths.
+   */
+  static std::string FindNameImpl(
+    std::string const& name,
+    std::vector<std::string> const& userPaths = std::vector<std::string>(),
+    bool no_system_path = false);
+
+#ifdef _WIN32
   friend class SystemToolsStatic;
+#endif
+#if @KWSYS_NAMESPACE@_NEED_SYSTEM_TOOLS_MANAGER
   friend class SystemToolsManager;
+#endif
 };
 
 } // namespace @KWSYS_NAMESPACE@
