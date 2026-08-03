@@ -4,9 +4,9 @@
 
 #include <vector>
 
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 
+#include "cmJSONState.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
 
@@ -25,10 +25,11 @@ cm::optional<Json::Value> cmParsePlist(std::string const& filename)
     return cm::nullopt;
   }
 
-  Json::Reader reader;
   Json::Value value;
   cmUVIStream outputStream(chain.OutputStream());
-  if (!reader.parse(outputStream, value)) {
+  cmJSONState parseState(outputStream, &value,
+                         cmJSONState::StrictMode::Relaxed);
+  if (!parseState.errors.empty()) {
     return cm::nullopt;
   }
   return cm::optional<Json::Value>(value);
