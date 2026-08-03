@@ -195,7 +195,7 @@ public:
 
   void GetObjectSources(std::vector<cmSourceFile const*>&,
                         std::string const& config) const;
-  std::string const& GetObjectName(cmSourceFile const* file);
+  std::string const& GetObjectName(cmSourceFile const* file) const;
   char const* GetCustomObjectExtension() const;
 
   bool HasExplicitObjectName(cmSourceFile const* file) const;
@@ -233,7 +233,7 @@ public:
 
   std::set<cmLinkItem> const& GetUtilityItems() const;
 
-  void ComputeObjectMapping();
+  void ComputeObjectMapping() const;
 
   cmValue GetFeature(std::string const& feature,
                      std::string const& config) const;
@@ -1148,6 +1148,7 @@ public:
   std::string GetImportedXcFrameworkPath(std::string const& config) const;
 
   bool ApplyCXXStdTarget();
+  bool HasCxxImportModuleErrors() const;
   cmCxxModuleUsageEffects const& GetCxxModuleUsageEffects(
     std::string const& config) const;
   cmGeneratorTarget const* GetTargetForCxxModules(

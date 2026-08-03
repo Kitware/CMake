@@ -50,6 +50,7 @@
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -291,7 +292,8 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
                  R"(" but the source is not classified as a "CXX" source.)"));
     }
 
-    if (!this->GeneratorTarget->Target->IsNormal()) {
+    if (!this->GeneratorTarget->Target->IsNormal() &&
+        !this->GeneratorTarget->Target->CxxModuleNeedsInterfaceObjects()) {
       if (this->GetMakefile()
             ->GetDefinition("CMAKE_CXX_COMPILE_BMI")
             .IsEmpty()) {
@@ -1356,6 +1358,25 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     build.Outputs.push_back(this->GetDyndepFilePath(language, config));
     build.ImplicitOuts.emplace_back(
       cmStrCat(this->GetObjectFileDir(config), '/', language, "Modules.json"));
+    // Add interface objects response file as implicit output if needed.
+    {
+      bool multiConfig = this->GetGlobalGenerator()->IsMultiConfig();
+      std::string configDir = multiConfig ? cmStrCat('/', config) : "";
+      std::string rspPath =
+        cmStrCat(this->GeneratorTarget->GetSupportDirectory(), configDir,
+                 "/CXXInterfaceObjects.rsp");
+      bool hasInterfaceObjects = false;
+      for (auto const& pair :
+           this->GeneratorTarget->GetSyntheticDeps(config)) {
+        if (pair.first->Target->CxxModuleNeedsInterfaceObjects()) {
+          hasInterfaceObjects = true;
+          break;
+        }
+      }
+      if (hasInterfaceObjects) {
+        build.ImplicitOuts.emplace_back(this->ConvertToNinjaPath(rspPath));
+      }
+    }
     build.ImplicitDeps.emplace_back(
       this->GetTargetDependInfoPath(language, config));
     {
@@ -2439,6 +2460,70 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
   cmDyndepCollation::AddCollationInformation(tdi, this->GeneratorTarget,
                                              config, cb);
 #endif
+
+  // Collect interface objects from tagged synthetics for the response file.
+  {
+    auto const& synthDeps = this->GeneratorTarget->GetSyntheticDeps(config);
+    if (!synthDeps.empty()) {
+      bool multiConfig = this->GetGlobalGenerator()->IsMultiConfig();
+      std::string configDir = multiConfig ? cmStrCat('/', config) : "";
+      std::string configUpper = cmSystemTools::UpperCase(config);
+      std::string modulesProp = cmStrCat("IMPORTED_CXX_MODULES_", configUpper);
+
+      Json::Value interfaceObjects(Json::objectValue);
+      Json::Value moduleObjects(Json::objectValue);
+      bool hasInterfaceObjects = false;
+
+      for (auto const& pair : synthDeps) {
+        auto const* nativeGT = pair.first;
+        if (!nativeGT->Target->CxxModuleNeedsInterfaceObjects()) {
+          continue;
+        }
+        hasInterfaceObjects = true;
+
+        for (auto const* synthGT : pair.second) {
+          std::string objDir =
+            cmStrCat(synthGT->GetSupportDirectory(), configDir);
+          cmValue importedModules = synthGT->Target->GetProperty(modulesProp);
+          if (!importedModules) {
+            continue;
+          }
+
+          for (auto const& entry : cmList{ *importedModules }) {
+            auto nameSep = entry.find('=');
+            if (nameSep == std::string::npos) {
+              continue;
+            }
+            auto moduleName = entry.substr(0, nameSep);
+            auto nameAndPath = entry.substr(nameSep + 1);
+            auto commaSep = nameAndPath.find(',');
+            std::string sourcePath = commaSep == std::string::npos
+              ? nameAndPath
+              : nameAndPath.substr(0, commaSep);
+
+            cmSourceFile const* sf = synthGT->Makefile->GetSource(
+              sourcePath, cmSourceFileLocationKind::Known);
+            if (!sf) {
+              continue;
+            }
+
+            std::string const& objName = synthGT->GetObjectName(sf);
+            std::string objPath = cmStrCat(objDir, '/', objName);
+            moduleObjects[moduleName] = objPath;
+          }
+        }
+      }
+
+      if (hasInterfaceObjects) {
+        std::string rspPath =
+          cmStrCat(this->GeneratorTarget->GetSupportDirectory(), configDir,
+                   "/CXXInterfaceObjects.rsp");
+        interfaceObjects["rsp-file"] = rspPath;
+        interfaceObjects["module-objects"] = moduleObjects;
+        tdi["cxx-interface-objects"] = interfaceObjects;
+      }
+    }
+  }
 
   std::string const tdin = this->GetTargetDependInfoPath(lang, config);
   cmGeneratedFileStream tdif(tdin);

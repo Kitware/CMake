@@ -811,6 +811,7 @@ protected:
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
   bool ApplyCXXStdTarget();
+  void WriteCxxImportErrorModules();
   bool DiscoverSyntheticTargets();
 
   bool AddHeaderSetVerification();

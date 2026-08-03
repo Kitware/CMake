@@ -1,5 +1,5 @@
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
-  "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
+  "25d6f6aa-be65-4692-b44e-87b23e96d4e1")
 set(CMAKE_CXX_STDLIB_MODULES_JSON
   "${CMAKE_CURRENT_LIST_DIR}/../dummy-std/manifest/dummy-std.modules.json"
 )
@@ -8,8 +8,6 @@ cmake_minimum_required(VERSION 3.29)
 project(cxx_modules_import_std CXX)
 
 include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
-
-set(CMAKE_CXX_MODULE_STD 1)
 
 add_executable(main
   main.cxx)

@@ -152,19 +152,8 @@ function(cmake_determine_compiler_support lang)
       endif()
     endif ()
 
-    # Find the module metadata for import std
-    set(CMAKE_CXX_COMPILER_IMPORT_STD "")
     cmake_cxx_find_modules_json()
-    foreach(_cmake_import_std_version IN ITEMS 23 26)
-      if(CMAKE_CXX${_cmake_import_std_version}_COMPILE_FEATURES)
-        # Modules JSON covers all versions, otherwise rely on toolchain targets
-        if(CMAKE_CXX_STDLIB_MODULES_JSON)
-          list(APPEND CMAKE_CXX_COMPILER_IMPORT_STD ${_cmake_import_std_version})
-        endif()
-      endif()
-    endforeach()
 
-    set(CMAKE_CXX_COMPILER_IMPORT_STD ${CMAKE_CXX_COMPILER_IMPORT_STD} PARENT_SCOPE)
     set(CMAKE_CXX_STDLIB_MODULES_JSON ${CMAKE_CXX_STDLIB_MODULES_JSON} PARENT_SCOPE)
     set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "${CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE}" PARENT_SCOPE)
 

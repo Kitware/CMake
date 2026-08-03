@@ -422,7 +422,9 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       kind = SourceKindCustomCommand;
     } else if (!this->Target->IsNormal() && !this->Target->IsImported() &&
                fs && (fs->GetType() == cm::FileSetMetadata::CXX_MODULES)) {
-      kind = SourceKindCxxModuleSource;
+      kind = this->Target->CxxModuleNeedsInterfaceObjects()
+        ? SourceKindObjectSource
+        : SourceKindCxxModuleSource;
     } else if (this->Target->GetType() == cm::TargetType::UTILITY ||
                this->Target->GetType() == cm::TargetType::INTERFACE_LIBRARY
                // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165

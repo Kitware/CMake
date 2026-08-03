@@ -1,6 +1,11 @@
 CMAKE_CXX_MODULE_STD
 --------------------
 
+.. versionchanged:: 4.5
+
+   ``CMAKE_CXX_MODULE_STD`` no longer has any effect. ``import std;`` is handled
+   automatically on all sources with :prop_tgt:`CXX_SCAN_FOR_MODULES` enabled.
+
 .. versionadded:: 3.30
 
 Whether to add utility targets as dependencies to targets with at least

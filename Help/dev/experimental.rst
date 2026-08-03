@@ -66,7 +66,7 @@ In order to activate support for ``import std`` in C++23 and newer targets,
 set
 
 * variable ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` to
-* value ``f35a9ac6-8463-4d38-8eec-5d6008153e7d``.
+* value ``25d6f6aa-be65-4692-b44e-87b23e96d4e1``.
 
 This UUID may change in future versions of CMake.  Be sure to use the value
 documented here by the source tree of the version of CMake with which you are
@@ -75,11 +75,7 @@ CMake, usually as part of a ``project()`` call.
 
 When activated, this experimental feature provides the following:
 
-* The ``CXX_MODULE_STD`` target property and its initializing variable
-  ``CMAKE_CXX_MODULE_STD``.
-
-* Targets with the property set to a true value and at least ``cxx_std_23``
-  may use ``import std;`` in any scanned C++ source file.
+* Targets may use ``import std;`` in any scanned C++ source file.
 
 Build database support
 ======================

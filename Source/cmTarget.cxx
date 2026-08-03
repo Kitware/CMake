@@ -351,7 +351,6 @@ TargetProperty const StaticTargetProperties[] = {
   COMMON_LANGUAGE_PROPERTIES(C),
   // ---- C++
   COMMON_LANGUAGE_PROPERTIES(CXX),
-  { "CXX_MODULE_STD"_s, IC::CanCompileSources },
   // ---- CSharp
   { "DOTNET_SDK"_s, IC::NonImportedTarget },
   { "DOTNET_TARGET_FRAMEWORK"_s, IC::TargetWithCommands },
@@ -632,6 +631,7 @@ public:
   bool IsSymbolic = false;
   bool IsForTryCompile = false;
   bool IsExportPassthrough = false;
+  bool CxxModuleNeedsInterfaceObjects = false;
   cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::set<std::string> CodegenDependencies;
@@ -1188,6 +1188,16 @@ cmPolicies::PolicyStatus cmTarget::GetPolicyStatus(
 cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
 {
   return this->impl->Makefile->GetGlobalGenerator();
+}
+
+bool cmTarget::CxxModuleNeedsInterfaceObjects() const
+{
+  return this->impl->CxxModuleNeedsInterfaceObjects;
+}
+
+void cmTarget::SetCxxModuleNeedsInterfaceObjects(bool v)
+{
+  this->impl->CxxModuleNeedsInterfaceObjects = v;
 }
 
 BTs<std::string> const* cmTarget::GetLanguageStandardProperty(
@@ -1875,7 +1885,6 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
     // ---- C++
     "CXX_COMPILER_LAUNCHER",
     "CXX_VISIBILITY_PRESET",
-    "CXX_MODULE_STD",
 
     // Static analysis
     "CXX_CLANG_TIDY",

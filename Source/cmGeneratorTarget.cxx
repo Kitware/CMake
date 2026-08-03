@@ -708,7 +708,7 @@ void cmGeneratorTarget::GetObjectSources(
   this->VisitedConfigsForObjects.insert(config);
 }
 
-void cmGeneratorTarget::ComputeObjectMapping()
+void cmGeneratorTarget::ComputeObjectMapping() const
 {
   auto const& configs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
@@ -863,7 +863,8 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
   return false;
 }
 
-std::string const& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
+std::string const& cmGeneratorTarget::GetObjectName(
+  cmSourceFile const* file) const
 {
   this->ComputeObjectMapping();
   auto const useShortPaths = this->GetUseShortObjectNames()
@@ -906,7 +907,7 @@ void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile const* sf)
 
 bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 {
-  const_cast<cmGeneratorTarget*>(this)->ComputeObjectMapping();
+  this->ComputeObjectMapping();
   auto it = this->ExplicitObjectName.find(file);
   return it != this->ExplicitObjectName.end();
 }
@@ -5331,7 +5332,6 @@ bool cmGeneratorTarget::IsNullImpliedByLinkLibraries(
 
 namespace {
 bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
-                           std::string const& targetName,
                            std::vector<std::string> const& configs)
 {
 #ifndef CMAKE_BOOTSTRAP
@@ -5343,25 +5343,33 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
     auto errorMessage =
       makefile->GetDefinition("CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE");
     if (!errorMessage.IsEmpty()) {
-      makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat(R"(The "CXX_MODULE_STD" property on target ")", targetName,
-                 "\" requires toolchain support, but it was not provided.  "
-                 "Reason:\n  ",
-                 *errorMessage));
-      return false;
+      auto* stdlibTgt = makefile->AddImportedTarget(
+        "@cmake_cxx_std", cm::TargetType::INTERFACE_LIBRARY,
+        cm::ImportedTargetScope::Global);
+      stdlibTgt->SetProperty("CXX_IMPORT_ERROR_MESSAGE", *errorMessage);
+      stdlibTgt->SetProperty("CXX_IMPORT_ERROR_MODULES", "std;std.compat");
+
+      auto gt = cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
+      lg->AddImportedGeneratorTarget(gt.get());
+      lg->AddOwnedImportedGeneratorTarget(std::move(gt));
+      return true;
     }
 
     auto metadataPath =
       makefile->GetDefinition("CMAKE_CXX_STDLIB_MODULES_JSON");
     if (metadataPath.IsEmpty()) {
-      makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat(
-          R"("The "CXX_MODULE_STD" property on target ")", targetName,
-          "\" requires CMAKE_CXX_STDLIB_MODULES_JSON be set, but it was not "
-          "provided by the toolchain."));
-      return false;
+      auto* stdlibTgt = makefile->AddImportedTarget(
+        "@cmake_cxx_std", cm::TargetType::INTERFACE_LIBRARY,
+        cm::ImportedTargetScope::Global);
+      stdlibTgt->SetProperty(
+        "CXX_IMPORT_ERROR_MESSAGE",
+        R"(CMAKE_CXX_STDLIB_MODULES_JSON set to empty string)");
+      stdlibTgt->SetProperty("CXX_IMPORT_ERROR_MODULES", "std;std.compat");
+
+      auto gt = cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
+      lg->AddImportedGeneratorTarget(gt.get());
+      lg->AddOwnedImportedGeneratorTarget(std::move(gt));
+      return true;
     }
 
     auto parseResult = cmCxxModuleMetadata::LoadFromFile(*metadataPath);
@@ -5377,8 +5385,9 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
     metadata = std::move(*parseResult.Meta);
   }
 
-  auto* stdlibTgt = makefile->AddLibrary(
-    "@cmake_cxx_std", cm::TargetType::STATIC_LIBRARY, {}, true);
+  auto* stdlibTgt = makefile->AddImportedTarget(
+    "@cmake_cxx_std", cm::TargetType::INTERFACE_LIBRARY,
+    cm::ImportedTargetScope::Global);
   cmCxxModuleMetadata::PopulateTarget(*stdlibTgt, *metadata, configs);
   cmStandardLevelResolver standardResolver(makefile);
   standardResolver.AddRequiredTargetFeature(stdlibTgt, "cxx_std_20");
@@ -5387,7 +5396,13 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
     gt->ComputeCompileFeatures(config);
   }
 
-  lg->AddGeneratorTarget(std::move(gt));
+  auto compilerId = makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
+  if (compilerId == "MSVC") {
+    stdlibTgt->SetCxxModuleNeedsInterfaceObjects(true);
+  }
+
+  lg->AddImportedGeneratorTarget(gt.get());
+  lg->AddOwnedImportedGeneratorTarget(std::move(gt));
 
 #endif // CMAKE_BOOTSTRAP
 
@@ -5397,66 +5412,26 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
 
 bool cmGeneratorTarget::ApplyCXXStdTarget()
 {
-  std::vector<std::string> const& configs =
-    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
-  auto std_prop = this->GetProperty("CXX_MODULE_STD");
-  if (!std_prop) {
-    // TODO(cxxmodules): Add a target policy to flip the default here. Set
-    // `std_prop` based on it.
+  if (!cmExperimental::HasSupportEnabled(
+        *this->Makefile, cmExperimental::Feature::CxxImportStd)) {
     return true;
   }
 
-  std::string std_prop_value;
-  if (std_prop) {
-    // Evaluate generator expressions.
-    cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance());
-    auto cge = ge.Parse(*std_prop);
-    if (!cge) {
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
-                 this->GetName(), "\" is not a valid generator expression."));
-      return false;
-    }
-    // But do not allow context-sensitive queries. Whether a target uses
-    // `import std` should not depend on configuration or properties of the
-    // consumer (head target). The link language also shouldn't matter, so ban
-    // it as well.
-    if (cge->GetHadHeadSensitiveCondition()) {
-      // Not reachable; all target-sensitive genexes actually fail to parse.
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
-                 this->GetName(),
-                 "\" contains a condition that queries the "
-                 "consuming target which is not supported."));
-      return false;
-    }
-    if (cge->GetHadLinkLanguageSensitiveCondition()) {
-      // Not reachable; all link language genexes actually fail to parse.
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
-                 this->GetName(),
-                 "\" contains a condition that queries the "
-                 "link language which is not supported."));
-      return false;
-    }
-    std_prop_value = cge->Evaluate(this->LocalGenerator, "");
-    if (cge->GetHadContextSensitiveCondition()) {
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
-                 this->GetName(),
-                 "\" contains a context-sensitive condition "
-                 "that is not supported."));
-      return false;
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+
+  bool needsStd = false;
+  if (this->Target->IsImported()) {
+    needsStd = this->HaveInterfaceCxx20ModuleSources();
+  } else {
+    for (auto const& config : configs) {
+      if (this->NeedCxxDyndep(config) == CxxModuleSupport::Enabled) {
+        needsStd = true;
+        break;
+      }
     }
   }
-  auto use_std = cmIsOn(std_prop_value);
-
-  // If we have a value and it is not true, there's nothing to do.
-  if (std_prop && !use_std) {
+  if (!needsStd) {
     return true;
   }
 
@@ -5464,27 +5439,24 @@ bool cmGeneratorTarget::ApplyCXXStdTarget()
   // already exist. BMI compatibility handles per-consumer standard level
   // differences by creating synthetic targets as needed.
   if (!this->Makefile->FindTargetToUse("@cmake_cxx_std") &&
-      !CreateCxxStdlibTarget(this->Makefile, this->LocalGenerator,
-                             this->GetName(), configs)) {
+      !CreateCxxStdlibTarget(this->Makefile, this->LocalGenerator, configs)) {
     return false;
   }
 
-  this->Target->AppendProperty("LINK_LIBRARIES",
-                               "$<BUILD_LOCAL_INTERFACE:@cmake_cxx_std>");
-
-  // Check the experimental feature here. A toolchain may have
-  // skipped the check in the toolchain preparation logic.
-  if (!cmExperimental::HasSupportEnabled(
-        *this->Makefile, cmExperimental::Feature::CxxImportStd)) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "Experimental `import std` support not enabled when detecting "
-      "toolchain; it must be set before `CXX` is enabled (usually a "
-      "`project()` call).");
-    return false;
+  if (this->Target->IsImported()) {
+    this->Target->AppendProperty("IMPORTED_CXX_MODULES_LINK_LIBRARIES",
+                                 "@cmake_cxx_std");
+  } else {
+    this->Target->AppendProperty("LINK_LIBRARIES",
+                                 "$<BUILD_LOCAL_INTERFACE:@cmake_cxx_std>");
   }
 
   return true;
+}
+
+bool cmGeneratorTarget::HasCxxImportModuleErrors() const
+{
+  return this->Target->GetProperty("CXX_IMPORT_ERROR_MODULES") != nullptr;
 }
 
 cmCxxModuleUsageEffects const& cmGeneratorTarget::GetCxxModuleUsageEffects(
@@ -5541,6 +5513,9 @@ cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
   auto* lg = this->GetLocalGenerator();
   auto* tgt =
     mf->AddSynthesizedTarget(cm::TargetType::INTERFACE_LIBRARY, targetName);
+  if (model->CxxModuleNeedsInterfaceObjects()) {
+    tgt->SetCxxModuleNeedsInterfaceObjects(true);
+  }
 
   // Copy relevant information from the existing target.
 
@@ -5590,11 +5565,6 @@ cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
   // this.
   for (auto const& innerConfig : allConfigs) {
     gtp->ComputeCompileFeatures(innerConfig);
-  }
-  // See `cmGlobalGenerator::ApplyCXXStdTarget` in
-  // `cmGlobalGenerator::Compute` for non-synthetic target resolutions.
-  if (!gtp->ApplyCXXStdTarget()) {
-    return nullptr;
   }
 
   lg->AddGeneratorTarget(std::move(gtp));

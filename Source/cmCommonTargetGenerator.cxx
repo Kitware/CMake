@@ -31,6 +31,38 @@
 #include "cmTargetTypes.h"
 #include "cmValue.h"
 
+namespace {
+bool LinkedTargetHasModules(cmGeneratorTarget const* target,
+                            std::string const& lang, std::string const& config,
+                            cmGlobalCommonGenerator const* gg,
+                            cmGeneratorTarget const* currentTarget)
+{
+  if (!target) {
+    return false;
+  }
+  if (lang == "CXX"_s && target->HasCxxImportModuleErrors()) {
+    return true;
+  }
+  if (target->IsImported()) {
+    return false;
+  }
+  if (!gg->TargetOrderIndexLess(target, currentTarget)) {
+    return false;
+  }
+  if (target->GetType() == cm::TargetType::INTERFACE_LIBRARY &&
+      !target->IsSynthetic()) {
+    return false;
+  }
+  if (lang == "CXX"_s && target->HaveCxx20ModuleSources()) {
+    return true;
+  }
+  if (lang == "Fortran"_s && target->HaveFortranSources(config)) {
+    return true;
+  }
+  return false;
+}
+}
+
 cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
   : GeneratorTarget(gt)
   , Makefile(gt->Makefile)
@@ -252,18 +284,8 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories(
       }
 
       if (mappedLinkee &&
-          !mappedLinkee->IsImported()
-          // Skip targets that build after this one in a static lib cycle.
-          && gg->TargetOrderIndexLess(mappedLinkee, this->GeneratorTarget)
-          // We can ignore the INTERFACE_LIBRARY items because
-          // Target->GetLinkInformation already processed their
-          // link interface and they don't have any output themselves.
-          && (mappedLinkee->GetType() != cm::TargetType::INTERFACE_LIBRARY
-              // Synthesized targets may have relevant rules.
-              || mappedLinkee->IsSynthetic()) &&
-          ((lang == "CXX"_s && mappedLinkee->HaveCxx20ModuleSources()) ||
-           (lang == "Fortran"_s &&
-            mappedLinkee->HaveFortranSources(config)))) {
+          LinkedTargetHasModules(mappedLinkee, lang, config, gg,
+                                 this->GeneratorTarget)) {
         cmLocalGenerator* lg = mappedLinkee->GetLocalGenerator();
         std::string di = mappedLinkee->GetSupportDirectory();
         if (lg->GetGlobalGenerator()->IsMultiConfig()) {

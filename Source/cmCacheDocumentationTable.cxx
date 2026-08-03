@@ -215,8 +215,6 @@ Entry const kEntries[] = {
     "Default value for CUDA_STANDARD_REQUIRED target property if set when a target is created. See the cmake-compile-features(7) manual for information on compile features and a list of supported compilers."_s },
   { "CMAKE_CXX_EXTENSIONS"_s,
     "Default value for CXX_EXTENSIONS target property if set when a target is created. See the cmake-compile-features(7) manual for information on compile features and a list of supported compilers."_s },
-  { "CMAKE_CXX_MODULE_STD"_s,
-    "Whether to add utility targets as dependencies for C++23 targets"_s },
   { "CMAKE_CXX_SCAN_FOR_MODULES"_s,
     "Whether to scan C++ source files for module dependencies"_s },
   { "CMAKE_CXX_STANDARD"_s,

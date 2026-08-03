@@ -93,27 +93,6 @@ foreach (fileset_type IN LISTS fileset_types)
   run_cmake("NotCXXSource${fileset_type}")
 endforeach ()
 
-if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
-  run_cmake(CXXImportStdConfig)
-  run_cmake(CXXImportStdHeadTarget)
-  run_cmake(CXXImportStdLinkLanguage)
-  run_cmake(CXXImportStdInvalidGenex)
-endif ()
-
-if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
-    NOT have_cxx23_import_std)
-  run_cmake(NoCXX23TargetUnset)
-  run_cmake(NoCXX23TargetNotRequired)
-  run_cmake(NoCXX23TargetRequired)
-endif ()
-
-if ("cxx_std_26" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
-    NOT have_cxx26_import_std)
-  run_cmake(NoCXX26TargetUnset)
-  run_cmake(NoCXX26TargetNotRequired)
-  run_cmake(NoCXX26TargetRequired)
-endif ()
-
 run_cmake(InstallBMI)
 run_cmake(InstallBMIGenericArgs)
 run_cmake(InstallBMIIgnore)

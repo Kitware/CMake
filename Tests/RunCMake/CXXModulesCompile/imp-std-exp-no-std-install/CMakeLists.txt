@@ -1,5 +1,5 @@
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
-  "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
+  "25d6f6aa-be65-4692-b44e-87b23e96d4e1")
 
 cmake_minimum_required(VERSION 3.29)
 project(cxx_modules_import_std_export_no_std CXX)
@@ -14,9 +14,6 @@ target_sources(import_std_export_no_std
     FILE_SET use_std TYPE CXX_MODULES FILES
       impl-uses-std.cxx)
 target_compile_features(import_std_export_no_std PUBLIC cxx_std_23)
-set_property(TARGET import_std_export_no_std
-  PROPERTY
-    CXX_MODULE_STD "$<BOOL:$<BUILD_LOCAL_INTERFACE:1>>")
 
 add_executable(main
   main.cxx)
@@ -38,6 +35,11 @@ set(\${CMAKE_FIND_PACKAGE_NAME}_FOUND 1)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/import_std_export_no_std-config.cmake"
   DESTINATION "lib/cmake/import_std_export_no_std")
 
+install(PACKAGE_INFO import_std_export_no_std_cps
+  EXPORT export
+  DESTINATION "lib/cmake/import_std_export_no_std_cps"
+  CXX_MODULES_DIRECTORY "import_std_export_no_std-cxx-modules-cps")
+
 add_test(NAME main COMMAND main)
 
 set(generator
@@ -56,6 +58,7 @@ add_test(NAME import_std_export_no_std_build
     "${CMAKE_COMMAND}"
     "-Dexpected_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/miu"
     "-Dimport_std_export_no_std_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/import_std_export_no_std"
+    "-Dimport_std_export_no_std_cps_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/import_std_export_no_std_cps"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")
