@@ -2,16 +2,17 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmVSSetupHelper.h"
 
+#include <sstream>
 #include <utility>
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include <cm3p/json/reader.h>
 #  include <cm3p/json/value.h>
 #endif
 
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
+#include "cmJSONState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -340,14 +341,10 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
   }
 
   // Parse JSON output and iterate over elements
-  Json::CharReaderBuilder builder;
-  auto jsonReader = std::unique_ptr<Json::CharReader>(builder.newCharReader());
   Json::Value json;
-  std::string error;
-
-  if (!jsonReader->parse(json_output.data(),
-                         json_output.data() + json_output.size(), &json,
-                         &error)) {
+  std::istringstream iss(json_output);
+  cmJSONState parseState(iss, &json, cmJSONState::StrictMode::Relaxed);
+  if (!parseState.errors.empty()) {
     return false;
   }
 
