@@ -15,7 +15,6 @@
 #include <cmext/string_view>
 
 #include <cm3p/curl/curl.h>
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 
 #include "cmAlgorithms.h"
@@ -25,6 +24,7 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmJSONState.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -616,12 +616,13 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                      "Request upload response: [" << response << "]\n",
                      this->Quiet);
   Json::Value json;
-  Json::Reader reader;
-  if (!internalTest && !reader.parse(response, json)) {
+  std::istringstream iss(response);
+  cmJSONState parseState(response, &json, cmJSONState::StrictMode::Relaxed);
+  if (!internalTest && !parseState.errors.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "error parsing json string ["
-                 << response << "]\n"
-                 << reader.getFormattedErrorMessages() << "\n");
+               "error parsing json string [" << response << "]\n"
+                                             << parseState.GetErrorMessage()
+                                             << "\n");
     return -1;
   }
   if (!internalTest && json["status"].asInt() != 0) {
@@ -691,11 +692,12 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                                             << fstr.str());
     return -1;
   }
-  if (!reader.parse(response, json)) {
+  parseState = cmJSONState(response, &json, cmJSONState::StrictMode::Relaxed);
+  if (!parseState.errors.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "error parsing json string ["
-                 << response << "]\n"
-                 << reader.getFormattedErrorMessages() << "\n");
+               "error parsing json string [" << response << "]\n"
+                                             << parseState.GetErrorMessage()
+                                             << "\n");
     return -1;
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
