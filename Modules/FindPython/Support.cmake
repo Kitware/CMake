@@ -1791,6 +1791,9 @@ block (SCOPE_FOR VARIABLES PROPAGATE _${_PYTHON_PREFIX}_ARCHITECTURE_ID)
     set (_${_PYTHON_PREFIX}_ARCHITECTURE_ID "${CMAKE_SYSTEM_PROCESSOR}")
     break()
   endwhile()
+  # normalize architecture name
+  string(REPLACE "aarch" "ARM" _${_PYTHON_PREFIX}_ARCHITECTURE_ID "${_${_PYTHON_PREFIX}_ARCHITECTURE_ID}")
+  string(TOUPPER "${_${_PYTHON_PREFIX}_ARCHITECTURE_ID}" _${_PYTHON_PREFIX}_ARCHITECTURE_ID)
 endblock()
 
 # Python and Anaconda distributions: define which architectures can be used
