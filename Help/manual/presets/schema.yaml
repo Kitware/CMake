@@ -1657,9 +1657,11 @@ properties:
               enum:
                 - human
                 - json-v1
+                - json-v1-raw
               description:
                 An optional string. Equivalent to passing --show-only on the
-                command line. Value must be "human" or "json-v1".
+                command line. Value must be "human", "json-v1", or
+                "json-v1-raw".
               sphinxDescription: |
                 An optional string. Equivalent to passing
                 :ctest-option:`--show-only` on the command line. The string
@@ -1668,6 +1670,8 @@ properties:
                 * ``human``
 
                 * ``json-v1``
+
+                * ``json-v1-raw``
             repeat:
               type: object
               description:

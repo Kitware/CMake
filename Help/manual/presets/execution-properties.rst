@@ -55,6 +55,8 @@
 
   * ``json-v1``
 
+  * ``json-v1-raw``
+
 .. _`CMakePresets.testPresets.execution.repeat`:
 
 ``repeat``

@@ -338,6 +338,14 @@ bool cmCTestSetDirectoryPropertiesCommand::InitialPass(
   return this->TestHandler->SetDirectoryProperties(args);
 }
 
+void AppendRawProperty(std::string& property, std::string const& value)
+{
+  if (!property.empty() && !value.empty()) {
+    property += ';';
+  }
+  property += value;
+}
+
 // get the next number in a string with numbers separated by ,
 // pos is the start of the search and pos2 is the end of the search
 // pos becomes pos2 after a call to GetNextNumber.
@@ -2392,32 +2400,42 @@ bool cmCTestTestHandler::SetTestsProperties(
               }
             }
           } else if (key == "WILL_FAIL"_s) {
+            rt.RawProperties[key] = val;
             rt.WillFail = cmIsOn(val);
           } else if (key == "DISABLED"_s) {
+            rt.RawProperties[key] = val;
             rt.Disabled = cmIsOn(val);
           } else if (key == "ATTACHED_FILES"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmExpandList(val, rt.AttachedFiles);
           } else if (key == "ATTACHED_FILES_ON_FAIL"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmExpandList(val, rt.AttachOnFail);
           } else if (key == "RESOURCE_LOCK"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList lval{ val };
 
             rt.ProjectResources.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_SETUP"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList lval{ val };
 
             rt.FixturesSetup.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_CLEANUP"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList lval{ val };
 
             rt.FixturesCleanup.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_REQUIRED"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList lval{ val };
 
             rt.FixturesRequired.insert(lval.begin(), lval.end());
           } else if (key == "TIMEOUT"_s) {
+            rt.RawProperties[key] = val;
             rt.Timeout = cmDuration(atof(val.c_str()));
           } else if (key == "TIMEOUT_SIGNAL_NAME"_s) {
+            rt.RawProperties[key] = val;
 #ifdef _WIN32
             rt.AppendError("TIMEOUT_SIGNAL_NAME is not supported on Windows.");
 #else
@@ -2443,6 +2461,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
 #endif
           } else if (key == "TIMEOUT_SIGNAL_GRACE_PERIOD"_s) {
+            rt.RawProperties[key] = val;
 #ifdef _WIN32
             rt.AppendError(
               "TIMEOUT_SIGNAL_GRACE_PERIOD is not supported on Windows.");
@@ -2465,46 +2484,60 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
 #endif
           } else if (key == "COST"_s) {
+            rt.RawProperties[key] = val;
             rt.Cost = static_cast<float>(atof(val.c_str()));
           } else if (key == "REQUIRED_FILES"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmExpandList(val, rt.RequiredFiles);
           } else if (key == "RUN_SERIAL"_s) {
+            rt.RawProperties[key] = val;
             rt.RunSerial = cmIsOn(val);
           } else if (key == "FAIL_REGULAR_EXPRESSION"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.ErrorRegularExpressions.emplace_back(cr, cr);
             }
           } else if (key == "SKIP_REGULAR_EXPRESSION"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.SkipRegularExpressions.emplace_back(cr, cr);
             }
           } else if (key == "PROCESSORS"_s) {
+            rt.RawProperties[key] = val;
             rt.Processors = atoi(val.c_str());
             if (rt.Processors < 1) {
               rt.Processors = 1;
             }
           } else if (key == "PROCESSOR_AFFINITY"_s) {
+            rt.RawProperties[key] = val;
             rt.WantAffinity = cmIsOn(val);
           } else if (key == "RESOURCE_GROUPS"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             if (!ParseResourceGroupsProperty(val, rt.ResourceGroups)) {
               return false;
             }
           } else if (key == "GENERATED_RESOURCE_SPEC_FILE"_s) {
+            rt.RawProperties[key] = val;
             rt.GeneratedResourceSpecFile = val;
           } else if (key == "SKIP_RETURN_CODE"_s) {
+            rt.RawProperties[key] = val;
             rt.SkipReturnCode = atoi(val.c_str());
             if (rt.SkipReturnCode < 0 || rt.SkipReturnCode > 255) {
               rt.SkipReturnCode = -1;
             }
           } else if (key == "DEPENDS"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmExpandList(val, rt.Depends);
           } else if (key == "ENVIRONMENT"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmExpandList(val, rt.Environment);
           } else if (key == "ENVIRONMENT_MODIFICATION"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmExpandList(val, rt.EnvironmentModification);
           } else if (key == "LABELS"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList Labels{ val };
             rt.Labels.insert(rt.Labels.end(), Labels.begin(), Labels.end());
             // sort the array
@@ -2513,6 +2546,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             auto new_end = std::unique(rt.Labels.begin(), rt.Labels.end());
             rt.Labels.erase(new_end, rt.Labels.end());
           } else if (key == "MEASUREMENT"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             size_t pos = val.find_first_of('=');
             if (pos != std::string::npos) {
               std::string mKey = val.substr(0, pos);
@@ -2522,13 +2556,16 @@ bool cmCTestTestHandler::SetTestsProperties(
               rt.Measurements[val] = "1";
             }
           } else if (key == "PASS_REGULAR_EXPRESSION"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.RequiredRegularExpressions.emplace_back(cr, cr);
             }
           } else if (key == "WORKING_DIRECTORY"_s) {
+            rt.RawProperties[key] = val;
             rt.Directory = val;
           } else if (key == "TIMEOUT_AFTER_MATCH"_s) {
+            AppendRawProperty(rt.RawProperties[key], val);
             cmList propArgs{ val };
             if (propArgs.size() != 2) {
               cmCTestLog(this->CTest, WARNING,
@@ -2582,6 +2619,8 @@ bool cmCTestTestHandler::SetDirectoryProperties(
       std::string cwd = cmSystemTools::GetLogicalWorkingDirectory();
       if (cwd == rt.Directory) {
         if (key == "LABELS"_s) {
+          AppendRawProperty(rt.RawProperties[key], val);
+
           cmList DirectoryLabels{ val };
           rt.Labels.insert(rt.Labels.end(), DirectoryLabels.begin(),
                            DirectoryLabels.end());
@@ -2622,6 +2661,7 @@ bool cmCTestTestHandler::AddTest(std::vector<std::string> const& args)
   test.Args = args;
   test.CTestDirectory = cmSystemTools::GetLogicalWorkingDirectory();
   test.Directory = test.CTestDirectory;
+  test.RawProperties["WORKING_DIRECTORY"] = test.CTestDirectory;
   cmCTestOptionalLog(this->CTest, DEBUG,
                      "Set test directory: " << test.Directory << std::endl,
                      this->Quiet);

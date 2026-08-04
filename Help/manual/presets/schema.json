@@ -3391,9 +3391,10 @@
       "type": "string",
       "enum": [
         "human",
-        "json-v1"
+        "json-v1",
+        "json-v1-raw"
       ],
-      "description": "An optional string. Equivalent to passing --show-only on the command line. Value must be \"human\" or \"json-v1\"."
+      "description": "An optional string. Equivalent to passing --show-only on the command line. Value must be \"human\", \"json-v1\", or \"json-v1-raw\"."
     },
     "testPresets.execution.repeat@v2..v9": {
       "type": "object",

@@ -11,6 +11,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -150,50 +151,80 @@ public:
     std::string Name;
     // working directory for test, overridden by WORKING_DIRECTORY property
     std::string Directory;
+    std::string DirectoryRaw;
     // Original directory of test creation
     std::string CTestDirectory;
     std::vector<std::string> Args;
     std::vector<std::string> RequiredFiles;
+    std::string RequiredFilesRaw;
     std::vector<std::string> Depends;
+    std::string DependsRaw;
     std::vector<std::string> AttachedFiles;
+    std::string AttachedFilesRaw;
     std::vector<std::string> AttachOnFail;
+    std::string AttachOnFailRaw;
     std::vector<std::pair<cmsys::RegularExpression, std::string>>
       ErrorRegularExpressions;
+    std::string ErrorRegularExpressionsRaw;
     std::vector<std::pair<cmsys::RegularExpression, std::string>>
       RequiredRegularExpressions;
+    std::string RequiredRegularExpressionsRaw;
     std::vector<std::pair<cmsys::RegularExpression, std::string>>
       SkipRegularExpressions;
+    std::string SkipRegularExpressionsRaw;
     std::vector<std::pair<cmsys::RegularExpression, std::string>>
       TimeoutRegularExpressions;
+    std::string TimeoutRegularExpressionsRaw;
     std::map<std::string, std::string> Measurements;
+    std::string MeasurementsRaw;
     std::map<std::string, std::string> CustomProperties;
+    std::unordered_map<std::string, std::string> RawProperties;
     bool IsInBasedOnREOptions = true;
     bool WillFail = false;
+    std::string WillFailRaw;
     bool Disabled = false;
+    std::string DisabledRaw;
     float Cost = 0;
+    std::string CostRaw;
     int PreviousRuns = 0;
     bool RunSerial = false;
+    std::string RunSerialRaw;
     cm::optional<cmDuration> Timeout;
+    std::string TimeoutRaw;
     cm::optional<Signal> TimeoutSignal;
+    std::string TimeoutSignalRaw;
     cm::optional<cmDuration> TimeoutGracePeriod;
+    std::string TimeoutGracePeriodRaw;
     cmDuration AlternateTimeout;
     int Index = 0;
     // Requested number of process slots
     int Processors = 1;
+    std::string ProcessorsRaw;
     bool WantAffinity = false;
+    std::string WantAffinityRaw;
     std::vector<size_t> Affinity;
     // return code of test which will mark test as "not run"
     int SkipReturnCode = -1;
+    std::string SkipReturnCodeRaw;
     std::vector<std::string> Environment;
+    std::string EnvironmentRaw;
     std::vector<std::string> EnvironmentModification;
+    std::string EnvironmentModificationRaw;
     std::vector<std::string> Labels;
+    std::string LabelsRaw;
     std::set<std::string> ProjectResources; // RESOURCE_LOCK
+    std::string ProjectResourcesRaw;
     std::set<std::string> FixturesSetup;
+    std::string FixturesSetupRaw;
     std::set<std::string> FixturesCleanup;
+    std::string FixturesCleanupRaw;
     std::set<std::string> FixturesRequired;
+    std::string FixturesRequiredRaw;
     std::set<std::string> RequireSuccessDepends;
     std::vector<std::vector<cmCTestTestResourceRequirement>> ResourceGroups;
+    std::string ResourceGroupsRaw;
     std::string GeneratedResourceSpecFile;
+    std::string GeneratedResourceSpecFileRaw;
     std::string BuildDepends;
     // Private test generator properties used to track backtraces
     cmListFileBacktrace Backtrace;
