@@ -90,8 +90,8 @@ void CYCLIC_INCLUDE(std::string const& file, cmJSONState* state);
 
 void TEST_OUTPUT_TRUNCATION_UNSUPPORTED(cmJSONState* state);
 
-void INVALID_WORKFLOW_STEPS(std::string const& workflowStep,
-                            cmJSONState* state);
+void INVALID_WORKFLOW_STEPS(cm::string_view stepType,
+                            std::string const& stepName, cmJSONState* state);
 
 void WORKFLOW_STEP_CONFIGURE_PRESET_MISMATCH(
   std::string const& kind, std::string const& workflowStep,
@@ -103,13 +103,16 @@ void INVALID_TEST_FILTER_INCLUDE_INDEX(Json::Value const* value,
 
 void NO_WORKFLOW_STEPS(std::string const& presetName, cmJSONState* state);
 
-void FIRST_WORKFLOW_STEP_NOT_CONFIGURE(std::string const& stepName,
+void FIRST_WORKFLOW_STEP_NOT_CONFIGURE(cm::string_view stepType,
+                                       std::string const& stepName,
                                        cmJSONState* state);
 
-void CONFIGURE_WORKFLOW_STEP_NOT_FIRST(std::string const& stepName,
+void CONFIGURE_WORKFLOW_STEP_NOT_FIRST(cm::string_view stepType,
+                                       std::string const& stepName,
                                        cmJSONState* state);
 
-void WORKFLOW_STEP_UNREACHABLE_FROM_FILE(std::string const& workflowStep,
+void WORKFLOW_STEP_UNREACHABLE_FROM_FILE(cm::string_view stepType,
+                                         std::string const& stepName,
                                          cmJSONState* state);
 
 void CTEST_JUNIT_UNSUPPORTED(cmJSONState* state);

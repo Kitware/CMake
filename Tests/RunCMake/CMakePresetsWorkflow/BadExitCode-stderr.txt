@@ -1,4 +1,5 @@
 ^Errors while running CTest
 Output from these tests are in: [^
 ]*/Tests/RunCMake/CMakePresetsWorkflow/BadExitCode/build/Testing/Temporary/LastTest\.log
-Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely\.$
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely\.
+CMake Error: Workflow step of type "test" named "default" failed with exit code 8$
