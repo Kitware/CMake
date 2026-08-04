@@ -2187,11 +2187,17 @@ SystemTools::CopyStatus SystemTools::CopyFileIfNewer(
   }
 }
 
-#define KWSYS_ST_BUFFER 4096
+// 4 KiB. This value is historical.
+#define KWSYS_ST_STACK_BUFFER (1 << 12)
+// 1 MiB. This seems to be the maximum value that modern Windows CopyFile uses.
+#define KWSYS_ST_HEAP_BUFFER (1 << 20)
+// 16 KiB. This seems roughly appropriate.
+#define KWSYS_ST_HEAP_SWITCHOVER (1 << 14)
 
 bool SystemTools::FilesDiffer(std::string const& source,
                               std::string const& destination)
 {
+  // Get the size of the files. If they are different sizes, they differ.
 
 #if defined(_WIN32)
   WIN32_FILE_ATTRIBUTE_DATA statSource;
@@ -2215,8 +2221,9 @@ bool SystemTools::FilesDiffer(std::string const& source,
   if (statSource.nFileSizeHigh == 0 && statSource.nFileSizeLow == 0) {
     return false;
   }
-  auto nleft =
-    ((__int64)statSource.nFileSizeHigh << 32) + statSource.nFileSizeLow;
+  auto const fileSize =
+    (static_cast<unsigned long long>(statSource.nFileSizeHigh) << 32) +
+    statSource.nFileSizeLow;
 
 #else
 
@@ -2237,51 +2244,87 @@ bool SystemTools::FilesDiffer(std::string const& source,
   if (statSource.st_size == 0) {
     return false;
   }
-  off_t nleft = statSource.st_size;
+  auto const fileSize = static_cast<unsigned long long>(statSource.st_size);
 #endif
 
-#if defined(_WIN32)
-  kwsys::ifstream finSource(source.c_str(), (std::ios::binary | std::ios::in));
-  kwsys::ifstream finDestination(destination.c_str(),
-                                 (std::ios::binary | std::ios::in));
-#else
-  kwsys::ifstream finSource(source.c_str());
-  kwsys::ifstream finDestination(destination.c_str());
-#endif
-  if (!finSource || !finDestination) {
+  // Open the files using C I/O to avoid `fstream`'s internal buffer.
+  FILE* const fSource = Fopen(source.c_str(), "rb");
+  if (!fSource) {
+    return true;
+  }
+  FILE* const fDestination = Fopen(destination.c_str(), "rb");
+  if (!fDestination) {
+    fclose(fSource);
     return true;
   }
 
-  // Compare the files a block at a time.
-  char source_buf[KWSYS_ST_BUFFER];
-  char dest_buf[KWSYS_ST_BUFFER];
-  while (nleft > 0) {
-    // Read a block from each file.
-    std::streamsize nnext = (nleft > KWSYS_ST_BUFFER)
-      ? KWSYS_ST_BUFFER
-      : static_cast<std::streamsize>(nleft);
-    finSource.read(source_buf, nnext);
-    finDestination.read(dest_buf, nnext);
+  // Prepare the buffers for reading the files. Use stack buffers for the first
+  // comparison regardless of file size for a quick exit for early differences.
+  char* heapBuffer = nullptr;
+  bool triedHeapBuffer = false;
+  char sourceStackBuffer[KWSYS_ST_STACK_BUFFER];
+  char destStackBuffer[KWSYS_ST_STACK_BUFFER];
+  char* source_buf = sourceStackBuffer;
+  char* dest_buf = destStackBuffer;
+  size_t bufferSize = KWSYS_ST_STACK_BUFFER;
 
+  // Compare the files a block at a time.
+  auto blockSize = bufferSize;
+  auto nleft = fileSize;
+  while (true) {
+    // Read a block from each file.
     // If either failed to read assume they are different.
-    if (static_cast<std::streamsize>(finSource.gcount()) != nnext ||
-        static_cast<std::streamsize>(finDestination.gcount()) != nnext) {
-      return true;
+    auto nnext = static_cast<size_t>(nleft > blockSize ? blockSize : nleft);
+    if (fread(source_buf, 1, nnext, fSource) != nnext) {
+      break;
+    }
+    if (fread(dest_buf, 1, nnext, fDestination) != nnext) {
+      break;
     }
 
     // If this block differs the file differs.
     if (memcmp(static_cast<void const*>(source_buf),
-               static_cast<void const*>(dest_buf),
-               static_cast<size_t>(nnext)) != 0) {
-      return true;
+               static_cast<void const*>(dest_buf), nnext) != 0) {
+      break;
     }
 
     // Update the byte count remaining.
     nleft -= nnext;
+
+    // If no bytes remain, the files are the same.
+    if (nleft == 0) {
+      break;
+    }
+
+    // Switch from stack buffers to heap buffers if we haven't already tried,
+    // enough file size remains, and the allocation succeeds.
+    if (!triedHeapBuffer && nleft > KWSYS_ST_HEAP_SWITCHOVER) {
+      triedHeapBuffer = true;
+      auto heapBufferSize = 2 *
+        static_cast<size_t>(nleft < KWSYS_ST_HEAP_BUFFER
+                              ? nleft
+                              : KWSYS_ST_HEAP_BUFFER);
+      heapBuffer = static_cast<char*>(malloc(heapBufferSize));
+      if (heapBuffer) {
+        bufferSize = heapBufferSize / 2;
+        source_buf = heapBuffer;
+        dest_buf = source_buf + bufferSize;
+      }
+    }
+
+    // Buffer size allowing, scale up the block size. The more bytes we've seen
+    // without difference, the less likely the following bytes will differ, so
+    // the larger the optimal block size that balances the number of reads with
+    // the number of wasted bytes read beyond the first difference.
+    blockSize = bufferSize < blockSize * 2 ? bufferSize : blockSize * 2;
   }
 
-  // No differences found.
-  return false;
+  // Free resources.
+  free(heapBuffer);
+  fclose(fDestination);
+  fclose(fSource);
+
+  return nleft > 0;
 }
 
 bool SystemTools::TextFilesDiffer(std::string const& path1,
@@ -2313,54 +2356,82 @@ bool SystemTools::TextFilesDiffer(std::string const& path1,
 SystemTools::CopyStatus SystemTools::CopyFileContentBlockwise(
   std::string const& source, std::string const& destination)
 {
-  // Open files
-  kwsys::ifstream fin(source.c_str(), std::ios::in | std::ios::binary);
-  if (!fin) {
-    return CopyStatus{ Status::POSIX_errno(), CopyStatus::SourcePath };
-  }
-
   // try and remove the destination file so that read only destination files
   // can be written to.
   // If the remove fails continue so that files in read only directories
   // that do not allow file removal can be modified.
   SystemTools::RemoveFile(destination);
 
-  kwsys::ofstream fout(destination.c_str(),
-                       std::ios::out | std::ios::trunc | std::ios::binary);
+  // Open the files using C I/O to avoid `fstream`'s internal buffer.
+  FILE* const fin = Fopen(source.c_str(), "rb");
+  if (!fin) {
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::SourcePath };
+  }
+  FILE* const fout = Fopen(destination.c_str(), "wb");
   if (!fout) {
-    return CopyStatus{ Status::POSIX_errno(), CopyStatus::DestPath };
+    auto status = Status::POSIX_errno();
+    fclose(fin);
+    return CopyStatus{ status, CopyStatus::DestPath };
   }
 
-  // This copy loop is very sensitive on certain platforms with
-  // slightly broken stream libraries (like HPUX).  Normally, it is
-  // incorrect to not check the error condition on the fin.read()
-  // before using the data, but the fin.gcount() will be zero if an
-  // error occurred.  Therefore, the loop should be safe everywhere.
-  while (fin) {
-    int const bufferSize = 4096;
-    char buffer[bufferSize];
+  // Attempt to get the size of the source file. Failure (0) is tolerated.
+  auto const fileSize = FileLength(source);
 
-    fin.read(buffer, bufferSize);
-    if (fin.gcount()) {
-      fout.write(buffer, fin.gcount());
-    } else {
+  // Prepare the buffer for reading the file. Use a stack buffer for small
+  // files and a heap buffer for large files if the allocation succeeds.
+  char* heapBuffer = nullptr;
+  char stackBuffer[KWSYS_ST_STACK_BUFFER];
+  char* buffer = stackBuffer;
+  size_t bufferSize = KWSYS_ST_STACK_BUFFER;
+  if (fileSize > KWSYS_ST_HEAP_SWITCHOVER) {
+    auto heapBufferSize = static_cast<size_t>(
+      fileSize < KWSYS_ST_HEAP_BUFFER ? fileSize : KWSYS_ST_HEAP_BUFFER);
+    heapBuffer = static_cast<char*>(malloc(heapBufferSize));
+    if (heapBuffer) {
+      bufferSize = heapBufferSize;
+      buffer = heapBuffer;
+    }
+  }
+
+  auto status = Status::Success();
+  auto path = CopyStatus::NoPath;
+
+  // Copy the file a block at a time and detect short reads/writes.
+  while (status.IsSuccess()) {
+    auto bytesRead = fread(buffer, 1, bufferSize, fin);
+    if (bytesRead > 0 && fwrite(buffer, 1, bytesRead, fout) != bytesRead) {
+      status = Status::POSIX_errno();
+      path = CopyStatus::DestPath;
+      break;
+    }
+
+    if (bytesRead < bufferSize) {
+      if (ferror(fin)) {
+        status = Status::POSIX_errno();
+        path = CopyStatus::SourcePath;
+      }
       break;
     }
   }
 
-  // Make sure the operating system has finished writing the file
-  // before closing it.  This will ensure the file is finished before
-  // the check below.
-  fout.flush();
-
-  fin.close();
-  fout.close();
-
-  if (!fout) {
-    return CopyStatus{ Status::POSIX_errno(), CopyStatus::DestPath };
+  // Make sure the operating system has finished writing the file.
+  if (status.IsSuccess() && fflush(fout) != 0) {
+    status = Status::POSIX_errno();
+    path = CopyStatus::DestPath;
   }
 
-  return CopyStatus{ Status::Success(), CopyStatus::NoPath };
+  // Free resources.
+  free(heapBuffer);
+  if (fclose(fout) != 0 && status.IsSuccess()) {
+    status = Status::POSIX_errno();
+    path = CopyStatus::DestPath;
+  }
+  if (fclose(fin) != 0 && status.IsSuccess()) {
+    status = Status::POSIX_errno();
+    path = CopyStatus::SourcePath;
+  }
+
+  return CopyStatus{ status, path };
 }
 
 /**
@@ -2604,24 +2675,20 @@ Status SystemTools::CopyADirectory(std::string const& source,
 }
 
 // return size of file; also returns zero if no file exists
-unsigned long SystemTools::FileLength(std::string const& filename)
+unsigned long long SystemTools::FileLength(std::string const& filename)
 {
-  unsigned long length = 0;
+  unsigned long long length = 0;
 #ifdef _WIN32
   WIN32_FILE_ATTRIBUTE_DATA fs;
   if (GetFileAttributesExW(Encoding::ToWindowsExtendedPath(filename).c_str(),
                            GetFileExInfoStandard, &fs) != 0) {
-    /* To support the full 64-bit file size, use fs.nFileSizeHigh
-     * and fs.nFileSizeLow to construct the 64 bit size
-
-    length = ((__int64)fs.nFileSizeHigh << 32) + fs.nFileSizeLow;
-     */
-    length = static_cast<unsigned long>(fs.nFileSizeLow);
+    length = (static_cast<unsigned long long>(fs.nFileSizeHigh) << 32) +
+      fs.nFileSizeLow;
   }
 #else
   struct stat fs;
   if (stat(filename.c_str(), &fs) == 0) {
-    length = static_cast<unsigned long>(fs.st_size);
+    length = static_cast<unsigned long long>(fs.st_size);
   }
 #endif
   return length;

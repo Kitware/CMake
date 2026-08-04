@@ -349,7 +349,7 @@ public:
   /**
    * Return file length
    */
-  static unsigned long FileLength(std::string const& filename);
+  static unsigned long long FileLength(std::string const& filename);
 
   /**
      Change the modification time or create a file
