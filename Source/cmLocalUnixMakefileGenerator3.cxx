@@ -1235,6 +1235,48 @@ void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
   }
 }
 
+std::string cmLocalUnixMakefileGenerator3::TrimLongCommand(
+  std::string cmd, std::string& line) const
+{
+  cm::static_string_view longCommandFinalizer = "..."_s;
+
+  size_t commandLineLimit = cmSystemTools::CalculateCommandLineLengthLimit();
+  if (commandLineLimit == 0) {
+    // No limit, just return the command as is.
+    return cmStrCat(std::move(cmd), this->EscapeForShell(line));
+  }
+
+  size_t usedCommandLineLength = cmd.size() + longCommandFinalizer.size();
+
+  if (usedCommandLineLength >= commandLineLimit) {
+    cmSystemTools::Error(cmStrCat(
+      "CMake command line length limit exceeded for command: ", cmd, line));
+    return cmd;
+  }
+
+  size_t remainingSpace = commandLineLimit - usedCommandLineLength;
+  if (remainingSpace < line.size()) {
+    line.erase(remainingSpace);
+    line.append(longCommandFinalizer.data(), longCommandFinalizer.size());
+  }
+
+  // re-escape the line: we cannot just trim the line, because it may contain
+  // characters that cannot be removed without their pairs:
+  // * quotes in the end of the line
+  // * backslash-escaped characters in the middle of the line
+  std::string escapedLine = this->EscapeForShell(line);
+  size_t overflowSize = escapedLine.size() > remainingSpace
+    ? escapedLine.size() - remainingSpace
+    : 0;
+  if (overflowSize > 0) {
+    line.erase(remainingSpace - overflowSize);
+    line.append(longCommandFinalizer.data(), longCommandFinalizer.size());
+    escapedLine = this->EscapeForShell(line);
+  }
+
+  return cmStrCat(std::move(cmd), std::move(escapedLine));
+}
+
 void cmLocalUnixMakefileGenerator3::AppendEcho(
   std::vector<std::string>& commands, std::string const& text, EchoColor color,
   EchoProgress const* progress)
@@ -1288,7 +1330,7 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
                              progress->Dir, cmOutputConverter::SHELL),
                            " --progress-num=", progress->Arg, ' ');
           }
-          cmd += this->EscapeForShell(line);
+          cmd = this->TrimLongCommand(std::move(cmd), line);
         }
         commands.emplace_back(std::move(cmd));
       }

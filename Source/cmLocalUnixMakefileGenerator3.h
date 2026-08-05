@@ -250,6 +250,8 @@ protected:
                         cmDepends::DependencyMap& validDeps);
   void CheckMultipleOutputs(bool verbose);
 
+  std::string TrimLongCommand(std::string cmd, std::string& line) const;
+
 private:
   std::string MaybeConvertWatcomShellCommand(std::string const& cmd);
 
