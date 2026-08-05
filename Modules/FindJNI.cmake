@@ -417,6 +417,18 @@ set(_JNI_JAVA_DIRECTORIES_BASE
   # SuSE specific paths for default JVM
   /usr/lib64/jvm/java
   /usr/lib64/jvm/jre
+  /usr/lib64/jvm/java-26-openjdk
+  /usr/lib64/jvm/jre-26-openjdk
+  /usr/lib64/jvm/java-25-openjdk
+  /usr/lib64/jvm/jre-25-openjdk
+  /usr/lib64/jvm/java-21-openjdk
+  /usr/lib64/jvm/jre-21-openjdk
+  /usr/lib64/jvm/java-17-openjdk
+  /usr/lib64/jvm/jre-17-openjdk
+  /usr/lib64/jvm/java-11-openjdk
+  /usr/lib64/jvm/jre-11-openjdk
+  /usr/lib64/jvm/java-1.8.0-openjdk
+  /usr/lib64/jvm/jre-1.8.0-openjdk
   )
 
 set(_JNI_JAVA_AWT_LIBRARY_TRIES)
