@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <exception>
 #include <limits>
-#include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <utility>
 
@@ -19,12 +19,12 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
 #include "cmCMakeString.hxx"
 #include "cmExecutionStatus.h"
+#include "cmJSONState.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -909,15 +909,12 @@ Json::Value& ResolvePath(Json::Value& json, Args path)
 
 Json::Value ReadJson(std::string const& jsonstr)
 {
-  Json::CharReaderBuilder builder;
-  builder["collectComments"] = false;
-  auto jsonReader = std::unique_ptr<Json::CharReader>(builder.newCharReader());
+  std::istringstream iss(jsonstr);
   Json::Value json;
-  std::string error;
-  if (!jsonReader->parse(jsonstr.data(), jsonstr.data() + jsonstr.size(),
-                         &json, &error)) {
-    throw json_error(
-      cmStrCat("failed parsing json string:\n"_s, jsonstr, '\n', error));
+  cmJSONState parseState(iss, &json, cmJSONState::StrictMode::Relaxed);
+  if (!parseState.errors.empty()) {
+    throw json_error(cmStrCat("failed parsing json string:\n"_s,
+                              parseState.GetErrorMessage()));
   }
   return json;
 }

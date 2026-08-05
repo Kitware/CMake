@@ -48,6 +48,7 @@ endif()
 
 set(json1 [=[
 {
+  // This is a comment
   "foo" : "bar",
   "array" : [5, "val", {"some": "other"}, null],
   "types" : {
@@ -66,7 +67,7 @@ set(json1 [=[
     "true" : true
   },
   "object": {
-    "foo": "bar"
+    "foo": "bar"  // This is an inline comment
   },
   "special" : {
     "foo;bar" : "value1",
