@@ -14,9 +14,9 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
-static bool GetSourceFilePropertyGENERATED(std::string const& name,
-                                           cmMakefile& mf,
-                                           cmValue& propertyValue)
+namespace {
+bool GetSourceFilePropertyGENERATED(std::string const& name, cmMakefile& mf,
+                                    cmValue& propertyValue)
 {
   // Globally set as generated?
   // Note: If the given "name" only contains a filename or a relative path
@@ -26,13 +26,11 @@ static bool GetSourceFilePropertyGENERATED(std::string const& name,
   //       generated in the build-directory. Therefore, we first check for
   //       a generated file in the build-directory before we check for a
   //       generated file in the source-directory.
-  static std::string const sOne = "1";
-  static std::string const sZero = "0";
   {
     auto file =
       cmSystemTools::CollapseFullPath(name, mf.GetCurrentBinaryDirectory());
     if (mf.GetGlobalGenerator()->IsGeneratedFile(file)) {
-      propertyValue = cmValue(sOne);
+      propertyValue = cmValue::True;
       return true;
     }
   }
@@ -40,12 +38,13 @@ static bool GetSourceFilePropertyGENERATED(std::string const& name,
     auto file =
       cmSystemTools::CollapseFullPath(name, mf.GetCurrentSourceDirectory());
     if (mf.GetGlobalGenerator()->IsGeneratedFile(file)) {
-      propertyValue = cmValue(sOne);
+      propertyValue = cmValue::True;
       return true;
     }
   }
-  propertyValue = cmValue(sZero);
+  propertyValue = cmValue::False;
   return true;
+}
 }
 
 cmGetSourceFilePropertyResult cmGetSourceFileProperty(
