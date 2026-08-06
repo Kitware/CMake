@@ -25,6 +25,7 @@ function(instrument test)
     "STATIC_QUERY"
     "DYNAMIC_QUERY"
     "CAPTURE_OUTPUT_QUERY"
+    "PROCESS_METRICS_QUERY"
     "COMPILE_TRACE_QUERY"
     "COMPILE_TRACE_QUERY_NULL"
     "TRACE_QUERY"
@@ -87,6 +88,7 @@ function(instrument test)
   endif()
   set(ARGS_COMPILE_TRACE_QUERY ${ARGS_COMPILE_TRACE_QUERY} PARENT_SCOPE)
   set(ARGS_COMPILE_TRACE_QUERY_NULL ${ARGS_COMPILE_TRACE_QUERY_NULL} PARENT_SCOPE)
+  set(ARGS_PROCESS_METRICS_QUERY ${ARGS_PROCESS_METRICS_QUERY} PARENT_SCOPE)
   set(GET_HOOK
     "\\\"${CMAKE_COMMAND}\\\""
     "-DSTATIC_QUERY=${static_query_hook_arg}"
@@ -144,6 +146,12 @@ function(instrument test)
   set(RunCMake_TEST_NO_CLEAN 1)
   if (ARGS_FAIL)
     list(APPEND ARGS_CONFIGURE_ARGS "-DFAIL=ON")
+  endif()
+  if (ARGS_PROCESS_METRICS_QUERY)
+    list(APPEND ARGS_CONFIGURE_ARGS "-DPROCESS_METRICS_QUERY=ON")
+    if (Python_EXECUTABLE)
+      list(APPEND ARGS_CONFIGURE_ARGS "-DPython_EXECUTABLE=${Python_EXECUTABLE}")
+    endif()
   endif()
   if (ARGS_DISABLE_TEST)
     list(APPEND ARGS_CONFIGURE_ARGS "-DDISABLE_TEST=ON")
@@ -618,6 +626,14 @@ instrument(cmake-command-capture-output
   BUILD CAPTURE_OUTPUT_QUERY
   CHECK_SCRIPT check-data-dir.cmake
 )
+
+# Test process metrics
+if (Python_EXECUTABLE)
+  instrument(cmake-command-process-metrics
+    BUILD INSTALL INSTALL_PARALLEL TEST PROCESS_METRICS_QUERY
+    CHECK_SCRIPT check-data-dir.cmake
+  )
+endif()
 
 # Test compile trace collection
 if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang")

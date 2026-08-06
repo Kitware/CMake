@@ -24,6 +24,22 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E true
   OUTPUT output1 output2
 )
+if (PROCESS_METRICS_QUERY)
+  add_custom_command(
+    OUTPUT process_metrics_custom.stamp
+    COMMAND ${Python_EXECUTABLE}
+            ${CMAKE_CURRENT_LIST_DIR}/process_metrics_memory.py
+            ${CMAKE_CURRENT_BINARY_DIR}/process_metrics_custom.stamp
+    VERBATIM
+  )
+  add_custom_command(
+    OUTPUT process_metrics_cpu_custom.stamp
+    COMMAND ${Python_EXECUTABLE}
+            ${CMAKE_CURRENT_LIST_DIR}/process_metrics_cpu.py
+            ${CMAKE_CURRENT_BINARY_DIR}/process_metrics_cpu_custom.stamp
+    VERBATIM
+  )
+endif()
 add_custom_command(
   COMMAND $<TARGET_FILE:main>
   OUTPUT output3
@@ -53,8 +69,20 @@ set_property(SOURCE output1 output2 output3 PROPERTY SYMBOLIC 1)
 add_custom_target(customTarget ALL
   COMMAND ${CMAKE_COMMAND} -E true
   DEPENDS output1 output3 shell_redirect.out
+          $<$<BOOL:${PROCESS_METRICS_QUERY}>:process_metrics_custom.stamp>
+          $<$<BOOL:${PROCESS_METRICS_QUERY}>:process_metrics_cpu_custom.stamp>
 )
 add_test(NAME test COMMAND $<TARGET_FILE:main>)
+if (PROCESS_METRICS_QUERY)
+  add_test(NAME process_metrics_memory_test
+    COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/process_metrics_memory.py
+            ${CMAKE_CURRENT_BINARY_DIR}/process_metrics_memory_test.stamp
+  )
+  add_test(NAME process_metrics_cpu_test
+    COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/process_metrics_cpu.py
+            ${CMAKE_CURRENT_BINARY_DIR}/process_metrics_cpu_test.stamp
+  )
+endif()
 if(DISABLE_TEST)
   set_tests_properties(test PROPERTIES DISABLED TRUE)
 endif()

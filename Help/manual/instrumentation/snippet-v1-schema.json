@@ -392,6 +392,40 @@
             "type": "null"
           }
         ]
+      },
+      "processMetrics": {
+        "description": "Kernel-reported resource usage accumulated for child processes executed by the instrumentation wrapper, or null when unavailable.",
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "maxRSS",
+              "userTimeUSec",
+              "systemTimeUSec"
+            ],
+            "properties": {
+              "maxRSS": {
+                "type": "integer",
+                "description": "Maximum resident set size reported for wrapped child processes, in KiB.",
+                "minimum": 0
+              },
+              "userTimeUSec": {
+                "type": "integer",
+                "description": "User CPU time reported for wrapped child processes, in microseconds.",
+                "minimum": 0
+              },
+              "systemTimeUSec": {
+                "type": "integer",
+                "description": "System CPU time reported for wrapped child processes, in microseconds.",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ]
       }
     },
     "snippetV1_0": {
@@ -625,6 +659,9 @@
         },
         "interruptSignal": {
           "$ref": "#/definitions/fields/interruptSignal"
+        },
+        "processMetrics": {
+          "$ref": "#/definitions/fields/processMetrics"
         }
       },
       "additionalProperties": false,

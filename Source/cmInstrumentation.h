@@ -16,11 +16,11 @@
 
 #include <cm3p/json/value.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifndef CMAKE_BOOTSTRAP
 #  include <cmsys/SystemInformation.hxx>
 #endif
-#include <stdint.h>
 
 #include "cmFileLock.h"
 #include "cmInstrumentationQuery.h"
@@ -45,11 +45,35 @@ public:
                     LoadQueriesAfter loadQueries = LoadQueriesAfter::Yes);
   void LoadQueries();
   void CheckCDashVariable();
+  struct TimeValue
+  {
+    long tv_sec;
+    long tv_usec;
+  };
+
+  struct ProcessMetrics
+  {
+    TimeValue ru_utime{};
+    TimeValue ru_stime{};
+    long ru_maxrss = 0;
+
+#ifndef CMAKE_BOOTSTRAP
+    ProcessMetrics() = default;
+    ProcessMetrics(cmsys::SystemInformation::ProcessResourceUsage const& usage)
+      : ru_utime{ usage.ru_utime.tv_sec, usage.ru_utime.tv_usec }
+      , ru_stime{ usage.ru_stime.tv_sec, usage.ru_stime.tv_usec }
+      , ru_maxrss(usage.ru_maxrss)
+    {
+    }
+#endif
+  };
+
   struct CommandResult
   {
     int ExitCode;
     cm::optional<std::string> StdOut;
     cm::optional<std::string> StdErr;
+    cm::optional<ProcessMetrics> ChildResourceUsage;
   };
 
   int InstrumentCommand(
@@ -59,14 +83,13 @@ public:
     cm::optional<std::map<std::string, std::string>> arrayOptions =
       cm::nullopt,
     LoadQueriesAfter reloadQueriesAfterCommand = LoadQueriesAfter::No);
-  std::string InstrumentTest(std::string const& name,
-                             std::string const& command,
-                             std::vector<std::string> const& args,
-                             int64_t result,
-                             std::chrono::steady_clock::time_point steadyStart,
-                             std::chrono::system_clock::time_point systemStart,
-                             std::string config,
-                             cm::optional<std::string> output = cm::nullopt);
+  std::string InstrumentTest(
+    std::string const& name, std::string const& command,
+    std::vector<std::string> const& args, int64_t result,
+    std::chrono::steady_clock::time_point steadyStart,
+    std::chrono::system_clock::time_point systemStart, std::string config,
+    cm::optional<std::string> output = cm::nullopt,
+    cm::optional<ProcessMetrics> processMetrics = cm::nullopt);
   void GetPreTestStats();
   bool HasQuery() const;
   bool HasOption(cmInstrumentationQuery::Option option) const;
@@ -127,6 +150,7 @@ private:
   static std::string ComputeSuffixTime(
     cm::optional<std::chrono::system_clock::time_point> time = cm::nullopt);
   static bool IsInstrumentableTargetType(cm::TargetType type);
+  static Json::Value ResourceUsageToJSON(ProcessMetrics const& usage);
   void PrepareDataForCDash(std::string const& data_dir,
                            std::string const& index_path);
   std::string GetCompileTraceFile(std::vector<std::string> const& command,

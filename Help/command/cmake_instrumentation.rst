@@ -25,7 +25,7 @@ The ``API_VERSION`` and ``DATA_VERSION`` must always be given.
 See :ref:`cmake-instrumentation API v1` for details.
 
 ``DATA_VERSION`` is a version value of the form ``major`` or ``major.minor``.
-Currently, the maximum supported version is ``1.1``. See
+Currently, the maximum supported version is ``1.2``. See
 :ref:`cmake-instrumentation Data Version` for details.
 
 Each of the optional keywords ``HOOKS``, ``OPTIONS``, and ``CALLBACK``
@@ -74,7 +74,7 @@ equivalent JSON query file.
 
   cmake_instrumentation(
     API_VERSION 1
-    DATA_VERSION 1.0
+    DATA_VERSION 1.2
     HOOKS postGenerate preCMakeBuild postCMakeBuild
     OPTIONS staticSystemInformation dynamicSystemInformation compileTrace trace
     CALLBACK ${CMAKE_COMMAND} -P /path/to/handle_data.cmake
@@ -87,7 +87,10 @@ equivalent JSON query file.
 .. code-block:: json
 
   {
-    "version": 1,
+    "version": {
+      "major": 1,
+      "minor": 2
+    },
     "hooks": [
       "postGenerate", "preCMakeBuild", "postCMakeBuild"
     ],

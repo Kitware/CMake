@@ -7,6 +7,10 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
+#include <cmsys/SystemInformation.hxx>
+
 #include "cmCTestLaunchReporter.h"
 
 namespace cmsys {
@@ -26,6 +30,7 @@ public:
   {
     Normal,
     Instrument,
+    InstrumentTest,
   };
 
   /** Entry point from ctest executable main().  */
@@ -55,6 +60,11 @@ private:
   // The real command line after response file expansion.
   std::vector<std::string> RealArgs;
   void HandleRealArg(char const* arg);
+  std::string MetricsFile;
+
+  cm::optional<cmsys::SystemInformation::ProcessResourceUsage>
+    ChildResourceUsage;
+  void WriteMetricsFile() const;
 
   // Whether or not any data have been written to stdout or stderr.
   bool HaveOut;

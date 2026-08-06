@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCTestTestHandler.h"
@@ -107,6 +109,19 @@ public:
   }
 
 private:
+  struct TimeValue
+  {
+    long tv_sec;
+    long tv_usec;
+  };
+
+  struct ProcessMetrics
+  {
+    TimeValue ru_utime{};
+    TimeValue ru_stime{};
+    long ru_maxrss = 0;
+  };
+
   bool NeedsToRepeat();
   void ParseOutputForMeasurements();
   void ExeNotFound(std::string exe);
@@ -115,6 +130,7 @@ private:
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
   std::string GenerateLLVMPath(std::string fileString);
+  std::string GetTestMetricsFile() const;
   void CollectLLVMCoverage();
   void SetupResourcesEnvironment(cmEnvironment& env);
 
@@ -134,6 +150,9 @@ private:
   std::string StartTime;
   std::string ActualCommand;
   std::vector<std::string> Arguments;
+  std::string InstrumentationCommand;
+  std::vector<std::string> InstrumentationArguments;
+  cm::optional<ProcessMetrics> ProcessResourceUsage;
   bool UseAllocatedResources = false;
   std::vector<std::map<
     std::string, std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>>

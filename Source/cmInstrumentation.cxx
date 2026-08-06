@@ -50,6 +50,7 @@ using LoadQueriesAfter = cmInstrumentation::LoadQueriesAfter;
 namespace {
 cmInstrumentationQuery::Version latestDataVersion =
   cmInstrumentationQuery::LatestDataVersion();
+
 }
 
 std::map<std::string, std::string> cmInstrumentation::cdashSnippetsMap = {
@@ -605,7 +606,8 @@ std::string cmInstrumentation::InstrumentTest(
   std::vector<std::string> const& args, int64_t result,
   std::chrono::steady_clock::time_point steadyStart,
   std::chrono::system_clock::time_point systemStart, std::string config,
-  cm::optional<std::string> output)
+  cm::optional<std::string> output,
+  cm::optional<ProcessMetrics> processMetrics)
 {
   // Store command info
   Json::Value root(this->preTestStats);
@@ -619,6 +621,11 @@ std::string cmInstrumentation::InstrumentTest(
   if (this->HasOption(cmInstrumentationQuery::Option::CaptureOutput)) {
     root["stdout"] = output ? *output : "";
     root["stderr"] = "";
+  }
+  if (this->HasOption(cmInstrumentationQuery::Option::ProcessMetrics)) {
+    root["processMetrics"] = processMetrics
+      ? cmInstrumentation::ResourceUsageToJSON(*processMetrics)
+      : Json::nullValue;
   }
 
   // Post-Command
@@ -735,6 +742,16 @@ int cmInstrumentation::InstrumentCommand(
     if (callbackResult.StdErr) {
       root["stderr"] = *callbackResult.StdErr;
     }
+  }
+  bool const supportsProcessMetrics = command_type == "compile" ||
+    command_type == "link" || command_type == "custom" ||
+    command_type == "install" || command_type == "test";
+  if (this->HasOption(cmInstrumentationQuery::Option::ProcessMetrics) &&
+      supportsProcessMetrics) {
+    root["processMetrics"] = callbackResult.ChildResourceUsage
+      ? cmInstrumentation::ResourceUsageToJSON(
+          *callbackResult.ChildResourceUsage)
+      : Json::nullValue;
   }
 
   // Exit early if configure didn't generate a query
@@ -986,7 +1003,7 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
   int ret = this->InstrumentCommand(
     "build", {},
     [waitForBuild]() -> cmInstrumentation::CommandResult {
-      return { waitForBuild(), cm::nullopt, cm::nullopt };
+      return { waitForBuild(), cm::nullopt, cm::nullopt, cm::nullopt };
     },
     cm::nullopt, cm::nullopt, LoadQueriesAfter::Yes);
   this->buildLock.Release();
@@ -1249,6 +1266,17 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
   } catch (...) {
     cmSystemTools::Error("Error writing Google trace output.");
   }
+}
+
+Json::Value cmInstrumentation::ResourceUsageToJSON(ProcessMetrics const& usage)
+{
+  Json::Value root(Json::objectValue);
+  root["maxRSS"] = static_cast<Json::Value::UInt64>(usage.ru_maxrss);
+  root["userTimeUSec"] = static_cast<Json::Value::UInt64>(
+    usage.ru_utime.tv_sec * 1000000ULL + usage.ru_utime.tv_usec);
+  root["systemTimeUSec"] = static_cast<Json::Value::UInt64>(
+    usage.ru_stime.tv_sec * 1000000ULL + usage.ru_stime.tv_usec);
+  return root;
 }
 
 Json::Value cmInstrumentation::BuildTraceEvent(std::vector<uint64_t>& workers,

@@ -239,6 +239,28 @@ previously included data is removed or reformatted such that scripts written to
 parse this data may become incompatible with the new format. A new minor version
 number will be created whenever new data becomes available.
 
+.. versionadded:: 4.4
+
+  `API v1`_ gained Data version ``1.1``.
+
+  * The ``captureOutput`` `option <v1 Query Files_>`_ and corresponding
+    ``stderr`` and ``stdout`` snippet fields to capture command output were
+    added.
+
+  * The ``compileTrace`` `option <v1 Query Files_>`_ was added which enables
+    the collection of compiler trace files.
+
+.. versionadded:: 4.5
+
+  `API v1`_ gained Data version ``1.2``.
+
+  * An ``interruptSignal`` field was added to appropriate snippet files to flag
+    whether they exited due to interrupt.
+
+  * The ``processMetrics`` `option <v1 Query Files_>`_ and corresponding
+    ``processMetrics`` snippet field for reporting child process resource usage
+    were added.
+
 .. _`cmake-instrumentation v1 Query Files`:
 
 v1 Query Files
@@ -324,6 +346,14 @@ key is required, but all other fields are optional.
 
       Only available as of data version ``1.1``.
 
+    ``processMetrics``
+      .. versionadded:: 4.5
+
+      Enables collection of kernel-reported resource usage for the command.
+      When enabled, certain snippets will include a ``processMetrics`` field.
+
+      Only available as of data version ``1.2``.
+
     ``cdashSubmit``
       Enables including instrumentation data in CDash. This is
       equivalent to having the :envvar:`CTEST_USE_INSTRUMENTATION` environment
@@ -370,6 +400,7 @@ Example:
       "staticSystemInformation",
       "dynamicSystemInformation",
       "captureOutput",
+      "processMetrics",
       "cdashSubmit",
       "trace"
     ]
@@ -565,6 +596,27 @@ Snippet files have a filename with the syntax
       The Average CPU Load at ``timeStart + duration``, or ``null`` if it
       cannot be determined.
 
+  ``processMetrics``
+    .. versionadded:: 4.5
+
+    Kernel-reported resource usage accumulated for the command. Only included
+    when the ``processMetrics`` `option <v1 Query Files_>`_ is enabled and the
+    snippet is one of ``compile``, ``link``, ``custom``, ``install``, or
+    ``test``.
+
+    ``maxRSS``
+      Maximum resident set size in KiB.
+
+    ``userTimeUSec``
+      User CPU time in microseconds.
+
+    ``systemTimeUSec``
+      System CPU time in microseconds.
+
+    If the data could not be collected, this object is ``null``.
+
+    Only available as of data version ``1.2``.
+
   ``cmakeContent``
     The path to a `v1 CMake Content File`_ located under ``data``, which
     contains information about the CMake configure and generate steps
@@ -584,7 +636,7 @@ Example:
   {
     "version": {
       "major": 1,
-      "minor": 1
+      "minor": 2
     },
     "command" : "\"/usr/bin/c++\" \"-MD\" \"-MT\" \"CMakeFiles/main.dir/main.cxx.o\" \"-MF\" \"CMakeFiles/main.dir/main.cxx.o.d\" \"-o\" \"CMakeFiles/main.dir/main.cxx.o\" \"-c\" \"<src>/main.cxx\"",
     "role" : "compile",
@@ -604,6 +656,12 @@ Example:
       "afterHostMemoryUsed" : 6635680.0
       "beforeCPULoadAverage" : 2.3500000000000001,
       "beforeHostMemoryUsed" : 6635832.0
+    },
+    "processMetrics" :
+    {
+      "maxRSS" : 21032,
+      "userTimeUSec" : 18000,
+      "systemTimeUSec" : 5000
     },
     "timeStart" : 1737053448177,
     "duration" : 31,
