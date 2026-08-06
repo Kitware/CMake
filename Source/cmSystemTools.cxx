@@ -1556,7 +1556,7 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
   CopyInputRecent inputRecent, std::string* err)
 {
   switch (when) {
-    case CopyWhen::Always:
+    case CopyWhen::Unconditional:
       break;
     case CopyWhen::OnlyIfDifferent:
       if (!FilesDiffer(oldname, newname)) {

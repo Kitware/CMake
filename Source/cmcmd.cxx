@@ -1096,7 +1096,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     if (args[1] == "copy_directory" ||
         args[1] == "copy_directory_if_different" ||
         args[1] == "copy_directory_if_newer") {
-      cmsys::SystemTools::CopyWhen when = cmsys::SystemTools::CopyWhen::Always;
+      cmsys::SystemTools::CopyWhen when =
+        cmsys::SystemTools::CopyWhen::Unconditional;
       if (args[1] == "copy_directory_if_different") {
         when = cmsys::SystemTools::CopyWhen::OnlyIfDifferent;
       } else if (args[1] == "copy_directory_if_newer") {
