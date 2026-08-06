@@ -167,11 +167,21 @@ if(CMake_TEST_FindPython2_CPython)
                                  OPTIONS -DPython_REQUESTED_VERSION=2)
   if(CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin" AND NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     run_python(CrossCompiling-TARGET TYPE Python2 VARIANT Python2)
+    run_python(CrossCompiling-TARGET TYPE Python2 VARIANT Python2.crossenv
+                                     OPTIONS "-DPython2_CROSSCOMPILING_EMULATOR=")
     run_python(CrossCompiling-TARGET TYPE Python VARIANT Python.V2
                                      OPTIONS -DPython_REQUESTED_VERSION=2)
+    run_python(CrossCompiling-TARGET TYPE Python VARIANT Python.V2.crossenv
+                                     OPTIONS -DPython_REQUESTED_VERSION=2
+                                             "-DPython_CROSSCOMPILING_EMULATOR=")
     run_python(CrossCompiling-BOTH TYPE Python2 VARIANT Python2)
+    run_python(CrossCompiling-BOTH TYPE Python2 VARIANT Python2.crossenv
+                                   OPTIONS "-DPython2_CROSSCOMPILING_EMULATOR=")
     run_python(CrossCompiling-BOTH TYPE Python VARIANT Python.V2
                                    OPTIONS -DPython_REQUESTED_VERSION=2)
+    run_python(CrossCompiling-BOTH TYPE Python VARIANT Python.V2.crossenv
+                                   OPTIONS -DPython_REQUESTED_VERSION=2
+                                           "-DPython_CROSSCOMPILING_EMULATOR=")
   endif()
 endif()
 
@@ -225,9 +235,19 @@ if(CMake_TEST_FindPython3_CPython)
     run_python(CrossCompiling-TARGET TYPE Python3 VARIANT Python3)
     run_python(CrossCompiling-TARGET TYPE Python VARIANT Python.V3
                                      OPTIONS -DPython_REQUESTED_VERSION=3)
+    run_python(CrossCompiling-TARGET TYPE Python3 VARIANT Python3.crossenv
+                                     OPTIONS "-DPython3_CROSSCOMPILING_EMULATOR=")
+    run_python(CrossCompiling-TARGET TYPE Python VARIANT Python.V3.crossenv
+                                     OPTIONS -DPython_REQUESTED_VERSION=3
+                                             "-DPython_CROSSCOMPILING_EMULATOR=")
     run_python(CrossCompiling-BOTH TYPE Python3 VARIANT Python3)
+    run_python(CrossCompiling-BOTH TYPE Python3 VARIANT Python3.crossenv
+                                   OPTIONS "-DPython3_CROSSCOMPILING_EMULATOR=")
     run_python(CrossCompiling-BOTH TYPE Python VARIANT Python.V3
                                         OPTIONS -DPython_REQUESTED_VERSION=3)
+    run_python(CrossCompiling-BOTH TYPE Python VARIANT Python.V3.crossenv
+                                        OPTIONS -DPython_REQUESTED_VERSION=3
+                                                "-DPython_CROSSCOMPILING_EMULATOR=")
   endif()
 endif()
 

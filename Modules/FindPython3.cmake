@@ -651,6 +651,19 @@ can be controlled with the following variable:
     ``_FOUND`` variables (i.e. without the custom prefix) are also defined by
     each call to the :command:`find_package` command.
 
+``Python3_CROSSCOMPILING_EMULATOR``
+  .. versionadded:: 4.5
+
+  This variable is only used when the :variable:`CMAKE_CROSSCOMPILING` variable
+  is on and the policy :policy:`CMP0190` is ``NEW``. It should point to a
+  command on the host system that can run executable built for the target
+  system. This variable takes precedence over the
+  :variable:`CMAKE_CROSSCOMPILING_EMULATOR` variable.
+
+  Moreover, to support some specific cases (like
+  `crossenv <https://github.com/robotpy/crossenv>`_), it is possible to set an
+  empty string to this variable.
+
 Commands
 ^^^^^^^^
 

@@ -1034,7 +1034,7 @@ function (_PYTHON_GET_LAUNCHER _PYTHON_PGL_NAME)
   endif()
 
   if (_${_PYTHON_PREFIX}_CROSSCOMPILING)
-    set (${_PYTHON_PGL_NAME} "${CMAKE_CROSSCOMPILING_EMULATOR}" PARENT_SCOPE)
+    set (${_PYTHON_PGL_NAME} "${_${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR}" PARENT_SCOPE)
     return()
   endif()
 
@@ -1642,16 +1642,23 @@ endif()
 
 ## handle cross-compiling constraints for components:
 ##  If Interpreter and/or Compiler are specified with Development components
-##  the CMAKE_CROSSCOMPILING_EMULATOR variable should be defined
+##  the Python_CROSSCOMPILING_EMULATOR or CMAKE_CROSSCOMPILING_EMULATOR variable
+##  should be defined
 cmake_policy (GET CMP0190 _${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY)
 unset (_${_PYTHON_PREFIX}_CROSSCOMPILING)
+unset (_${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR)
 if (CMAKE_CROSSCOMPILING AND _${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY STREQUAL "NEW")
   if (${_PYTHON_BASE}_FIND_COMPONENTS MATCHES "Interpreter|Compiler"
       AND ${_PYTHON_BASE}_FIND_COMPONENTS MATCHES "Development")
-    if (CMAKE_CROSSCOMPILING_EMULATOR)
+    if (DEFINED ${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR OR CMAKE_CROSSCOMPILING_EMULATOR)
       set (_${_PYTHON_PREFIX}_CROSSCOMPILING TRUE)
+      if (DEFINED ${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR)
+        set (_${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR "${${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR}")
+      else()
+        set (_${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR "${CMAKE_CROSSCOMPILING_EMULATOR}")
+      endif()
     else()
-      _python_display_failure ("${_PYTHON_PREFIX}: When cross-compiling, Interpreter and/or Compiler components cannot be searched when CMAKE_CROSSCOMPILING_EMULATOR variable is not specified (see policy CMP0190)." FATAL)
+      _python_display_failure ("${_PYTHON_PREFIX}: When cross-compiling, Interpreter and/or Compiler components cannot be searched when ${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR or CMAKE_CROSSCOMPILING_EMULATOR variable is not specified (see policy CMP0190)." FATAL)
     endif()
   endif()
 endif()
