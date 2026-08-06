@@ -131,7 +131,7 @@ _cmake()
                 COMPREPLY=( $( compgen -W "$target_options" -- "$quoted" ) )
             else
                 local targets=$( cmake --build "$build_dir" --target help 2>/dev/null \
-                    | sed -n -e 's/^... \([^ ]*\).*$/\1/p' \
+                    | sed -n -e 's/^\.\.\. \([^ ]*\).*$/\1/p' \
                        -e '/^\[/d' -e 's/^\([^ :]*\):.*$/\1/p' | \
                 grep -v '^/' | sort -u )
                 COMPREPLY=( $( compgen -W "$targets $target_options" -- "$quoted" ) )
