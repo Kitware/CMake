@@ -88,6 +88,26 @@ run_cmake_command(E___run_co_compile-no-cc ${CMAKE_COMMAND} -E __run_co_compile 
 run_cmake_command(E___run_co_compile-tidy-remove-fixes ${CMAKE_COMMAND} -E __run_co_compile "--tidy=${CMAKE_COMMAND}\\;-E\\;true\\;--export-fixes=${RunCMake_BINARY_DIR}/tidy-fixes.yaml" -- ${CMAKE_COMMAND} -E true)
 
 block()
+  set(RunCMake_TEST_BINARY_DIR
+    ${RunCMake_BINARY_DIR}/E___create_def-build)
+  run_cmake(E___create_def)
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  # bitcode.obj contains LLVM bitcode magic followed by padding.
+  run_cmake_command(E___create_def-nm-not-found ${CMAKE_COMMAND} -E __create_def nm-not-found.def nm-not-found.objs --nm=cmake-nm-does-not-exist)
+
+  if(CMAKE_HOST_UNIX)
+    set(fake_nm ${RunCMake_SOURCE_DIR}/fake-nm.sh)
+    set(RunCMake-check-file E___create_def-nm-check.cmake)
+    run_cmake_command(E___create_def-nm-single ${CMAKE_COMMAND} -E __create_def single.def single.objs --nm=${fake_nm})
+    run_cmake_command(E___create_def-nm-symbol-types ${CMAKE_COMMAND} -E __create_def symbol-types.def symbol-types.objs --nm=${fake_nm})
+    run_cmake_command(E___create_def-nm-multiple ${CMAKE_COMMAND} -E __create_def multiple.def multiple.objs --nm=${fake_nm})
+    run_cmake_command(E___create_def-nm-spaces ${CMAKE_COMMAND} -E __create_def spaces.def spaces.objs --nm=${fake_nm})
+    run_cmake_command(E___create_def-nm-mixed ${CMAKE_COMMAND} -E __create_def mixed.def mixed.objs --nm=${fake_nm})
+  endif()
+endblock()
+
+block()
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/list-cache-build)
   run_cmake(list-cache)
   set(RunCMake_TEST_NO_CLEAN 1)

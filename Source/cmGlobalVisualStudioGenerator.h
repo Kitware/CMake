@@ -156,6 +156,9 @@ public:
 protected:
   cmGlobalVisualStudioGenerator(cmake* cm);
 
+  /** Return true when using a Visual Studio clang-cl toolset.  */
+  virtual bool IsClangClToolset() const { return false; }
+
   virtual bool InitializePlatform(cmMakefile* mf);
 
   void AddExtraIDETargets() override;

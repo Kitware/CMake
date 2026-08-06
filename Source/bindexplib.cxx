@@ -64,7 +64,9 @@
  */
 #include "bindexplib.h"
 
+#include <algorithm>
 #include <cstddef> // IWYU pragma: keep
+#include <iostream>
 #include <sstream>
 #include <vector>
 
@@ -77,6 +79,9 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmGeneratedFileStream.h"
+#include "cmOutputConverter.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #ifdef _WIN32
@@ -356,26 +361,57 @@ private:
 };
 #endif
 
-static bool DumpFileWithLlvmNm(std::string const& nmPath, char const* filename,
-                               std::set<std::string>& symbols,
-                               std::set<std::string>& dataSymbols)
+static bool CreateResponseFile(std::vector<std::string> const& arguments,
+                               std::string const& responseFile)
 {
+  cmGeneratedFileStream responseStream;
+  responseStream.Open(responseFile, true, true);
+  if (!responseStream) {
+    std::cerr << "Could not open response file '" << responseFile << "'.\n";
+    return false;
+  }
+
+  int responseFlags = cmOutputConverter::Shell_Flag_IsResponse;
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  responseFlags |= cmOutputConverter::Shell_Flag_IsUnix;
+#endif
+  for (auto const& argument : arguments) {
+    responseStream << cmOutputConverter::EscapeForShell(argument,
+                                                        responseFlags)
+                   << '\n';
+  }
+  if (!responseStream.Close()) {
+    std::cerr << "Could not write response file '" << responseFile << "'.\n";
+    return false;
+  }
+
+  return true;
+}
+
+static bool DumpFileWithNm(std::string const& nmPath,
+                           std::string const& filename,
+                           std::set<std::string>& symbols,
+                           std::set<std::string>& dataSymbols)
+{
+  std::string const nmName = cmSystemTools::GetFilenameName(nmPath);
   std::string output;
+  std::string error;
   // break up command line into a vector
   std::vector<std::string> command;
   command.push_back(nmPath);
   command.emplace_back("--no-weak");
   command.emplace_back("--defined-only");
   command.emplace_back("--format=posix");
-  command.emplace_back(filename);
+  command.emplace_back("--print-file-name");
+  command.push_back(filename);
 
   // run the command
   int exit_code = 0;
-  cmSystemTools::RunSingleCommand(command, &output, &output, &exit_code,
-                                  nullptr, cmSystemTools::OUTPUT_NONE);
+  bool const commandResult = cmSystemTools::RunSingleCommand(
+    command, &output, &error, &exit_code, nullptr, cmSystemTools::OUTPUT_NONE);
 
-  if (exit_code != 0) {
-    fprintf(stderr, "llvm-nm returned an error: %s\n", output.c_str());
+  if (!commandResult || exit_code != 0) {
+    std::cerr << nmName << " returned an error: " << output << error << '\n';
     return false;
   }
 
@@ -385,39 +421,107 @@ static bool DumpFileWithLlvmNm(std::string const& nmPath, char const* filename,
     if (line.empty()) { // last line
       continue;
     }
-    size_t sym_end = line.find(' ');
-    if (sym_end == std::string::npos) {
-      fprintf(stderr, "Couldn't parse llvm-nm output line: %s\n",
-              line.c_str());
+    size_t const filename_end = line.find(": ");
+    if (filename_end == std::string::npos) {
+      std::cerr << "Couldn't parse " << nmName << " output line: " << line
+                << '\n';
       return false;
     }
-    if (line.size() < sym_end) {
-      fprintf(stderr, "Couldn't parse llvm-nm output line: %s\n",
-              line.c_str());
+    size_t const sym_start = filename_end + 2;
+    size_t const sym_end = line.find(' ', sym_start);
+    if (sym_end == std::string::npos) {
+      std::cerr << "Couldn't parse " << nmName << " output line: " << line
+                << '\n';
+      return false;
+    }
+    if (line.size() <= sym_end + 1) {
+      std::cerr << "Couldn't parse " << nmName << " output line: " << line
+                << '\n';
       return false;
     }
     char const sym_type = line[sym_end + 1];
-    line.resize(sym_end);
+    std::string const symbol = line.substr(sym_start, sym_end - sym_start);
     switch (sym_type) {
+      case 'B':
+      case 'C':
       case 'D':
-        dataSymbols.insert(line);
-        break;
+        dataSymbols.insert(symbol);
+        continue;
       case 'T':
-        symbols.insert(line);
-        break;
+        symbols.insert(symbol);
+        continue;
+      case 'R':
+        if (cmHasLiteralPrefix(symbol, "??_7")) {
+          dataSymbols.insert(symbol);
+        }
+        continue;
+      case 'A':
+      case 'I':
+      case 'N':
+      case 'S':
+      case 'U':
+      case 'V':
+      case 'W':
+      case 'a':
+      case 'b':
+      case 'c':
+      case 'd':
+      case 'i':
+      case 'n':
+      case 'r':
+      case 's':
+      case 't':
+      case 'v':
+      case 'w':
+        continue;
+      default:
+        std::cerr << "Ignoring symbol '" << symbol
+                  << "' with unrecognized type '" << sym_type
+                  << "' in object '" << line.substr(0, filename_end) << "'.\n";
     }
   }
 
   return true;
 }
 
-static bool DumpFile(std::string const& nmPath, char const* filename,
-                     std::set<std::string>& symbols,
-                     std::set<std::string>& dataSymbols)
+static bool DumpFileWithNm(std::string const& nmPath,
+                           std::vector<std::string> const& objectFiles,
+                           std::string const& responseFile,
+                           std::set<std::string>& symbols,
+                           std::set<std::string>& dataSymbols)
+{
+  if (!CreateResponseFile(objectFiles, responseFile)) {
+    return false;
+  }
+  std::string const rspFile = '@' + responseFile;
+  bool result = DumpFileWithNm(nmPath, rspFile, symbols, dataSymbols);
+  cmSystemTools::RemoveFile(responseFile);
+  return result;
+}
+
+enum class DumpFileResult
+{
+  Success,
+  Failed,
+  LLVMBitcodeDetected,
+  NotImplemented,
+};
+
+static DumpFileResult DumpFile(std::string const& filename,
+                               std::set<std::string>& symbols,
+                               std::set<std::string>& dataSymbols)
 {
 #ifndef _WIN32
-  return DumpFileWithLlvmNm(nmPath, filename, symbols, dataSymbols);
+  static_cast<void>(filename);
+  static_cast<void>(symbols);
+  static_cast<void>(dataSymbols);
+  return DumpFileResult::NotImplemented;
 #else
+  if (filename.empty()) {
+    fprintf(stderr, "No object file was specified.\n");
+    return DumpFileResult::Failed;
+  }
+
   HANDLE hFile;
   HANDLE hFileMapping;
   LPVOID lpFileBase;
@@ -427,8 +531,9 @@ static bool DumpFile(std::string const& nmPath, char const* filename,
                       FILE_ATTRIBUTE_NORMAL, 0);
 
   if (hFile == INVALID_HANDLE_VALUE) {
-    fprintf(stderr, "Couldn't open file '%s' with CreateFile()\n", filename);
-    return false;
+    fprintf(stderr, "Couldn't open file '%s' with CreateFile()\n",
+            filename.c_str());
+    return DumpFileResult::Failed;
   }
 
   hFileMapping =
@@ -436,7 +541,7 @@ static bool DumpFile(std::string const& nmPath, char const* filename,
   if (hFileMapping == 0) {
     CloseHandle(hFile);
     fprintf(stderr, "Couldn't open file mapping with CreateFileMapping()\n");
-    return false;
+    return DumpFileResult::Failed;
   }
 
   lpFileBase = MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
@@ -444,13 +549,14 @@ static bool DumpFile(std::string const& nmPath, char const* filename,
     CloseHandle(hFileMapping);
     CloseHandle(hFile);
     fprintf(stderr, "Couldn't map view of file with MapViewOfFile()\n");
-    return false;
+    return DumpFileResult::Failed;
   }
 
+  DumpFileResult result = DumpFileResult::Success;
   const PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)lpFileBase;
   if (dosHeader->e_magic == IMAGE_DOS_SIGNATURE) {
     fprintf(stderr, "File is an executable.  I don't dump those.\n");
-    return false;
+    result = DumpFileResult::Failed;
   } else {
     const PIMAGE_FILE_HEADER imageHeader = (PIMAGE_FILE_HEADER)lpFileBase;
     /* Does it look like a COFF OBJ file??? */
@@ -494,33 +600,72 @@ static bool DumpFile(std::string const& nmPath, char const* filename,
         (h->Sig1 == 0x4342 && h->Sig2 == 0xDEC0) ||
         // 0x0B17C0DE - llvm bitcode BC wrapper
         (h->Sig1 == 0x0B17 && h->Sig2 == 0xC0DE)) {
-
-        return DumpFileWithLlvmNm(nmPath, filename, symbols, dataSymbols);
-
+        result = DumpFileResult::LLVMBitcodeDetected;
       } else {
-        printf("unrecognized file format in '%s, %u'\n", filename,
+        printf("unrecognized file format in '%s, %u'\n", filename.c_str(),
                imageHeader->Machine);
-        return false;
+        result = DumpFileResult::Failed;
       }
     }
   }
   UnmapViewOfFile(lpFileBase);
   CloseHandle(hFileMapping);
   CloseHandle(hFile);
-  return true;
+  return result;
 #endif
 }
 
-bool bindexplib::AddObjectFile(char const* filename)
+bool bindexplib::AddObjectFile(std::string const& objectFile)
 {
-  return DumpFile(this->NmPath, filename, this->Symbols, this->DataSymbols);
+  auto const result = DumpFile(objectFile, this->Symbols, this->DataSymbols);
+  if (result == DumpFileResult::Success) {
+    return true;
+  }
+  if (result == DumpFileResult::Failed) {
+    return false;
+  }
+  if (this->NmPath.empty()) {
+    std::cerr << "No nm tool was specified for object file '" << objectFile
+              << "'.\n";
+    return false;
+  }
+  return DumpFileWithNm(this->NmPath, objectFile, this->Symbols,
+                        this->DataSymbols);
 }
 
-bool bindexplib::AddDefinitionFile(char const* filename)
+bool bindexplib::AddObjectFile(std::vector<std::string> const& objectFiles,
+                               std::string const& responseFile)
 {
-  cmsys::ifstream infile(filename);
+  std::vector<std::string> objectFilesTryNm;
+  for (auto const& objectFile : objectFiles) {
+    auto const result = DumpFile(objectFile, this->Symbols, this->DataSymbols);
+    if (result == DumpFileResult::Success) {
+      continue;
+    }
+    if (result == DumpFileResult::Failed) {
+      return false;
+    }
+    objectFilesTryNm.push_back(objectFile);
+  }
+
+  if (objectFilesTryNm.empty()) {
+    return true;
+  }
+  if (this->NmPath.empty()) {
+    std::cerr << "No nm tool was specified for object file '"
+              << objectFilesTryNm.front() << "'.\n";
+    return false;
+  }
+
+  return DumpFileWithNm(this->NmPath, objectFilesTryNm, responseFile,
+                        this->Symbols, this->DataSymbols);
+}
+
+bool bindexplib::AddDefinitionFile(std::string const& definitionFile)
+{
+  cmsys::ifstream infile(definitionFile.c_str());
   if (!infile) {
-    fprintf(stderr, "Couldn't open definition file '%s'\n", filename);
+    std::cerr << "Couldn't open definition file '" << definitionFile << "'\n";
     return false;
   }
   std::string str;
@@ -544,15 +689,26 @@ bool bindexplib::AddDefinitionFile(char const* filename)
   return true;
 }
 
-void bindexplib::WriteFile(FILE* file)
+bool bindexplib::AddDefinitionFile(
+  std::vector<std::string> const& definitionFiles)
 {
-  fprintf(file, "EXPORTS \n");
-  for (std::string const& ds : this->DataSymbols) {
-    fprintf(file, "\t%s \t DATA\n", ds.c_str());
+  return std::all_of(definitionFiles.cbegin(), definitionFiles.cend(),
+                     [this](std::string const& definitionFile) {
+                       return this->AddDefinitionFile(definitionFile);
+                     });
+}
+
+bool bindexplib::WriteFile(std::ostream& output)
+{
+  output << "EXPORTS \n";
+  for (auto const& ds : this->DataSymbols) {
+    output << '\t' << ds << " \t DATA\n";
   }
-  for (std::string const& s : this->Symbols) {
-    fprintf(file, "\t%s\n", s.c_str());
+  for (auto const& s : this->Symbols) {
+    output << '\t' << s << '\n';
   }
+  output.flush();
+  return output.good();
 }
 
 void bindexplib::SetNmPath(std::string const& nm)

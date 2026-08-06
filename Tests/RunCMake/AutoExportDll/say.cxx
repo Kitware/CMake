@@ -13,6 +13,7 @@ int WINAPI foo();
 // test regular C
 int bar();
 int objlib();
+int objlib_maybe_lto();
 void justnop();
 }
 
@@ -45,6 +46,9 @@ int main()
   printf("\n");
   bar();
   objlib();
+  if (objlib_maybe_lto() != 8) {
+    return 1;
+  }
   printf("\n");
   cliFunction();
   printf("\n");

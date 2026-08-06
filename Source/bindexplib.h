@@ -4,17 +4,20 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstdio>
+#include <iosfwd>
 #include <set>
 #include <string>
+#include <vector>
 
 class bindexplib
 {
 public:
-  bindexplib() { NmPath = "nm"; }
-  bool AddDefinitionFile(char const* filename);
-  bool AddObjectFile(char const* filename);
-  void WriteFile(FILE* file);
+  bool AddDefinitionFile(std::string const& definitionFile);
+  bool AddDefinitionFile(std::vector<std::string> const& definitionFiles);
+  bool AddObjectFile(std::string const& objectFile);
+  bool AddObjectFile(std::vector<std::string> const& objectFiles,
+                     std::string const& responseFile = "exports.def.objs.rsp");
+  bool WriteFile(std::ostream& output);
 
   void SetNmPath(std::string const& nm);
 

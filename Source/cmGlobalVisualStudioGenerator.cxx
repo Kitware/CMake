@@ -733,6 +733,11 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
 
   cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
     { cmakeCommand, "-E", "__create_def", mdi->DefFile, objs_file });
+  cmValue const nmExecutable =
+    gt->Target->GetMakefile()->GetDefinition("CMAKE_NM");
+  if (!cmIsOff(nmExecutable) && this->IsClangClToolset()) {
+    commandLines[0].emplace_back(cmStrCat("--nm=", *nmExecutable));
+  }
   cmCustomCommand command;
   command.SetOutputs(outputs);
   command.SetCommandLines(commandLines);
