@@ -8,7 +8,7 @@ macro(__windows_compiler_orangec lang)
   set(CMAKE_${lang}_CREATE_WIN32_EXE "-Wg")
   set(CMAKE_${lang}_CREATE_CONSOLE_EXE "-Wc")
 
-  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
+  if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
     if(NOT CMAKE_RC_COMPILER_INIT)
       set(CMAKE_RC_COMPILER_INIT orc)
     endif()
