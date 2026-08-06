@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -65,6 +66,49 @@ public:
 
   /** Build a JSON object with major and minor fields.  */
   static Json::Value BuildVersion(unsigned int major, unsigned int minor);
+
+  /** Return the subset of 'entries' to delete after a configure: those not
+      named in 'replyNames' whose identity ('getId') also matches no reply.
+      Deciding by identity rather than name keeps an entry that aliases a
+      just-written reply on a case-insensitive filesystem; an entry whose
+      identity cannot be obtained is retained.  Static/templated for tests. */
+  template <typename FileIdT>
+  static std::vector<std::string> FilesToRemove(
+    std::vector<std::string> const& entries,
+    std::unordered_set<std::string> const& replyNames,
+    std::function<bool(std::string const&, FileIdT&)> const& getId)
+  {
+    std::vector<FileIdT> keptIds;
+    for (std::string const& name : replyNames) {
+      FileIdT id;
+      if (getId(name, id)) {
+        keptIds.push_back(id);
+      }
+    }
+
+    std::vector<std::string> toRemove;
+    for (std::string const& entry : entries) {
+      if (replyNames.find(entry) != replyNames.end()) {
+        continue;
+      }
+      FileIdT id;
+      if (!getId(entry, id)) {
+        continue;
+      }
+      bool aliasesKept = false;
+      for (FileIdT const& keptId : keptIds) {
+        if (id == keptId) {
+          aliasesKept = true;
+          break;
+        }
+      }
+      if (aliasesKept) {
+        continue;
+      }
+      toRemove.push_back(entry);
+    }
+    return toRemove;
+  }
 
 private:
   cmake* CMakeInstance;

@@ -6,6 +6,7 @@
 #include <cassert>
 #include <chrono>
 #include <ctime>
+#include <functional>
 #include <iomanip>
 #include <iterator>
 #include <sstream>
@@ -155,12 +156,20 @@ std::vector<std::string> cmFileAPI::LoadDir(std::string const& dir)
 void cmFileAPI::RemoveOldReplyFiles()
 {
   std::string const reply_dir = this->APIv1 + "/reply";
-  std::vector<std::string> files = this->LoadDir(reply_dir);
-  for (std::string const& f : files) {
-    if (this->ReplyFiles.find(f) == this->ReplyFiles.end()) {
-      std::string file = cmStrCat(reply_dir, '/', f);
-      cmSystemTools::RemoveFile(file);
-    }
+  std::vector<std::string> const files = this->LoadDir(reply_dir);
+
+  // Reply names embed the configuration verbatim, so on a case-insensitive
+  // filesystem a "debug" reply can alias a just-written "Debug" one; deleting
+  // by name would strip a file the index still cites.  Decide by identity.
+  std::vector<std::string> const toRemove =
+    cmFileAPI::FilesToRemove<cmSystemTools::FileId>(
+      files, this->ReplyFiles,
+      [&reply_dir](std::string const& name,
+                   cmSystemTools::FileId& id) -> bool {
+        return cmSystemTools::GetFileId(cmStrCat(reply_dir, '/', name), id);
+      });
+  for (std::string const& f : toRemove) {
+    cmSystemTools::RemoveFile(cmStrCat(reply_dir, '/', f));
   }
 }
 

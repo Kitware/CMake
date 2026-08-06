@@ -125,6 +125,19 @@ run_cmake(ProjectQueryGood)
 run_cmake(ProjectQueryBad)
 run_cmake(FailConfigure)
 
+# Reconfiguring with a case-only build-type change (Debug -> debug) must not
+# leave the reply index citing a target file that cleanup deleted on a
+# case-insensitive filesystem (Windows, default macOS).
+function(run_config_case)
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ConfigCaseReconfigure-build)
+    run_cmake_with_options(ConfigCaseReconfigure -DCMAKE_BUILD_TYPE=Debug)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(ConfigCaseReconfigure-recon ${CMAKE_COMMAND} . -DCMAKE_BUILD_TYPE=debug)
+  endif()
+endfunction()
+run_config_case()
+
 function(run_object object)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${object}-build)
   list(APPEND RunCMake_TEST_OPTIONS ${ARGN} -DCMAKE_POLICY_DEFAULT_CMP0118=NEW)
