@@ -11,6 +11,7 @@
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
+#include "cmOutputConverter.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
@@ -64,8 +65,9 @@ bool cmGlobVerificationManager::SaveVerificationScript(const std::string& path,
     verifyScriptFile << "\n";
 
     verifyScriptFile << "set(OLD_GLOB\n";
-    for (const std::string& file : v.Files) {
-      verifyScriptFile << "  \"" << file << "\"\n";
+    for (std::string const& file : v.Files) {
+      verifyScriptFile << "  " << cmOutputConverter::EscapeForCMake(file)
+                       << '\n';
     }
     verifyScriptFile << "  )\n";
 
