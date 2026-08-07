@@ -1,0 +1,5 @@
+CMake Warning \(deprecated\) at .*CMakePrintHelpers\.cmake:[0-9]+ \(message\):
+  cmake_print_variables\(\) is deprecated\.  Use cmake_language\(PRINT_VARIABLES\)
+  instead\.
+Call Stack \(most recent call first\):
+  VariablesDeprecation\.cmake:[0-9]+ \(cmake_print_variables\)

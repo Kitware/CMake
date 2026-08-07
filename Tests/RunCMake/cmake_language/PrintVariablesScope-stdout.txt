@@ -1,0 +1,11 @@
+-- Printing variables\.\.\.
+ +Variables in scope at '.*PrintVariablesScope/CMakeLists\.txt'
+ +matching NAME_REGEX '\^\(parent_|child_\)' \(case sensitive\):
+ +child_local = "c_val"
+ +CACHE{parent_cache}:STRING = "p_cache_val"
+ +parent_regular = "p_val"
+-- Printing variables\.\.\.
+ +Variables in scope at '.*PrintVariablesScope\.cmake'
+ +matching NAME_REGEX '\^\(parent_|child_\)' \(case sensitive\):
+ +CACHE{parent_cache}:STRING = "p_cache_val"
+ +parent_regular = "p_val"

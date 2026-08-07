@@ -1,0 +1,12 @@
+-- Printing variables\.\.\.
+ Named variables:
+   source_dir = "src"
+   binary_dir = "build"
+   NOT_SET = <NOTFOUND>
+
+-- Printing variables\.\.\.
+ Named variables:
+   source_dir = "src"
+   NOT_SET = <NOTFOUND>
+   binary_dir = "build"
+   ALSO_NOT_SET = <NOTFOUND>

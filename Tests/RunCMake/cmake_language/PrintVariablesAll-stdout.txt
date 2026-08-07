@@ -1,0 +1,16 @@
+-- Printing variables\.\.\.
+ Variables in scope at '.*PrintVariablesAll\.cmake' matching name '\^MY_' \(case sensitive\):
+   MY_BAR = "beta"
+   MY_BAZ = "alpha-too"
+   MY_FOO = "alpha"
+
+-- Printing variables\.\.\.
+ Variables in scope at '.*PrintVariablesAll\.cmake' matching value '\^alpha' \(case sensitive\):
+   MY_BAZ = "alpha-too"
+   MY_FOO = "alpha"
+   OTHER_ALPHA = "alpha-other"
+
+-- Printing variables\.\.\.
+ Variables in scope at '.*PrintVariablesAll\.cmake' matching name '\^MY_' and value '\^alpha' \(case sensitive\):
+   MY_BAZ = "alpha-too"
+   MY_FOO = "alpha"

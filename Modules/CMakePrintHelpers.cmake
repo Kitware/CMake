@@ -41,6 +41,10 @@ This module provides the following commands:
 
 .. command:: cmake_print_variables
 
+  .. deprecated:: 4.5
+
+    Use :command:`cmake_language(PRINT_VARIABLES)` instead.
+
   Prints each variable name followed by its value:
 
   .. code-block:: cmake
@@ -86,14 +90,23 @@ Gives::
 #]=======================================================================]
 
 function(cmake_print_variables)
-  set(msg "")
-  foreach(var ${ARGN})
-    if(msg)
-      string(APPEND msg " ; ")
+  message(DEPRECATION
+    "cmake_print_variables() is deprecated. Use cmake_language(PRINT_VARIABLES) instead.")
+
+  set(_cpvmode_reserved_keywords
+    ALL NAMED NAME_REGEX VALUE_REGEX IGNORE_CASE __CMAKE_PRINT_VARIABLES)
+  foreach(_arg IN LISTS ARGV)
+    if(_arg IN_LIST _cpvmode_reserved_keywords)
+      message(FATAL_ERROR
+        "cmake_print_variables() got \"${_arg}\", which is a reserved "
+        "keyword in cmake_language(PRINT_VARIABLES).  If you wish to use "
+        "it as a keyword to the command, use cmake_language(PRINT_VARIABLES) "
+        "directly.")
+      return()
     endif()
-    string(APPEND msg "${var}=\"${${var}}\"")
   endforeach()
-  message(STATUS "${msg}")
+
+  cmake_language(PRINT_VARIABLES NAMED ${ARGN} __CMAKE_PRINT_VARIABLES)
 endfunction()
 
 

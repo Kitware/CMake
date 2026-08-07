@@ -1,0 +1,3 @@
+CMake Error at PrintVariablesNamedWithIgnoreCase\.cmake:[0-9]+ \(cmake_language\):
+  cmake_language NAME_REGEX, VALUE_REGEX, and IGNORE_CASE in
+  cmake_language\(PRINT_VARIABLES\) call are only valid with ALL, not NAMED\.

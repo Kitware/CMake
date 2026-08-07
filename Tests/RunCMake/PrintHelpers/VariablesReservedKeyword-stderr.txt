@@ -1,0 +1,6 @@
+CMake Error at .*CMakePrintHelpers\.cmake:[0-9]+ \(message\):
+  cmake_print_variables\(\) got "ALL", which is a reserved keyword in
+  cmake_language\(PRINT_VARIABLES\)\.  If you wish to use it as a keyword to the
+  command, use cmake_language\(PRINT_VARIABLES\) directly\.
+Call Stack \(most recent call first\):
+  VariablesReservedKeyword\.cmake:[0-9]+ \(cmake_print_variables\)

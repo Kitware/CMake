@@ -1,0 +1,3 @@
+-- Printing variables\.\.\.
+ +Variables in scope at '.*PrintVariablesUnfiltered\.cmake':
+.* +zz_unfiltered_marker = "present"

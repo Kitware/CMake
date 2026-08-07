@@ -1,0 +1,7 @@
+-- Printing variables\.\.\.
+ +Variables in scope at '.*PrintVariablesCacheAnnotation\.cmake'
+ +matching NAME_REGEX '\^\(typed_cache|uninit_cache|shadowed\)\$' \(case sensitive\):
+ +shadowed = "regular_val"
+ +CACHE{shadowed}:STRING = "cache_val"
+ +CACHE{typed_cache}:FILEPATH = "/filepath/in/cache"
+ +CACHE{uninit_cache} = "raw_value"

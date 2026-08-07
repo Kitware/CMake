@@ -1,0 +1,10 @@
+CMake Warning at PrintVariablesEmptyMatch\.cmake:[0-9]+ \(cmake_language\):
+  No variables in scope matching name 'ZZZ_NEVER_MATCHES_ANY_NAME' \(case
+  sensitive\) in cmake_language\(PRINT_VARIABLES \.\.\.\)\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Warning at PrintVariablesEmptyMatch\.cmake:[0-9]+ \(cmake_language\):
+  No variables in scope matching value 'ZZZ_NEVER_MATCHES_ANY_VALUE' \(case
+  sensitive\) in cmake_language\(PRINT_VARIABLES \.\.\.\)\.

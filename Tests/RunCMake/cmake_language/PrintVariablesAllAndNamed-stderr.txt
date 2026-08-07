@@ -1,0 +1,3 @@
+^CMake Error at PrintVariablesAllAndNamed\.cmake:[0-9]+ \(cmake_language\):
+  cmake_language ALL and NAMED keywords in cmake_language\(PRINT_VARIABLES\)
+  call are mutually exclusive\.
