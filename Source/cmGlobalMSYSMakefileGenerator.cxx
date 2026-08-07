@@ -45,13 +45,6 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(
 {
   mf->AddDefinition("MSYS", "1");
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
-
-  if (!mf->IsSet("CMAKE_AR") && !this->CMakeInstance->GetIsInTryCompile() &&
-      !(1 == l.size() && l[0] == "NONE"_s)) {
-    cmSystemTools::Error(
-      "CMAKE_AR was not found, please set to archive program. " +
-      mf->GetSafeDefinition("CMAKE_AR"));
-  }
 }
 
 cmDocumentationEntry cmGlobalMSYSMakefileGenerator::GetDocumentation()
