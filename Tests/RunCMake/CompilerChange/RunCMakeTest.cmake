@@ -48,6 +48,15 @@ endif()
 # Set up "toolchain" files
 file(WRITE "${RunCMake_BINARY_DIR}/foo.cmake" "set(toolchain_var foo)\n")
 file(WRITE "${RunCMake_BINARY_DIR}/bar.cmake" "set(toolchain_var bar)\n")
+if(UNIX)
+  # Can't use file(TO_NATIVE_PATH) because it escapes spaces and cmake_path is
+  # 3.20
+  set(foo_TOOLCHAIN_FILE "${RunCMake_BINARY_DIR}/foo.cmake")
+  set(bar_TOOLCHAIN_FILE "${RunCMake_BINARY_DIR}/bar.cmake")
+else()
+  set(foo_TOOLCHAIN_FILE "${RunCMake_BINARY_DIR}\\foo.cmake")
+  set(bar_TOOLCHAIN_FILE "${RunCMake_BINARY_DIR}\\bar.cmake")
+endif()
 
 # New toolchain path comes from file
 block()
@@ -70,11 +79,11 @@ endblock()
 block()
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ToolchainFromCmdline-build)
   run_cmake_with_options(ToolchainFromCmdline-step1
-    "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_BINARY_DIR}/foo.cmake"
+    "-DCMAKE_TOOLCHAIN_FILE=${foo_TOOLCHAIN_FILE}"
   )
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_with_options(ToolchainFromCmdline-step2
-    "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_BINARY_DIR}/bar.cmake"
+    "-DCMAKE_TOOLCHAIN_FILE=${bar_TOOLCHAIN_FILE}"
   )
 endblock()
 
@@ -85,7 +94,7 @@ block()
     ${RunCMake_SOURCE_DIR}/ToolchainFromCmdlineOnce-stdout.txt
   )
   run_cmake_with_options(ToolchainFromCmdlineOnce-step1
-    "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_BINARY_DIR}/foo.cmake"
+    "-DCMAKE_TOOLCHAIN_FILE=${foo_TOOLCHAIN_FILE}"
   )
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake(ToolchainFromCmdlineOnce-step2)
