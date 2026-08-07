@@ -172,6 +172,10 @@ else()
 
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/test")
+  if(NOT CMAKE_HOST_SYSTEM_NAME MATCHES "Windows|CYGWIN|MSYS")
+    # Test literal quotes in matched file names.
+    file(WRITE "${RunCMake_TEST_BINARY_DIR}/test/\".txt" "")
+  endif()
   set(tf_1  "${RunCMake_TEST_BINARY_DIR}/test/1.txt")
   file(WRITE "${tf_1}" "1")
 
