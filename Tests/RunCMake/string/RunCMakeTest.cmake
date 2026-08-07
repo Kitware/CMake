@@ -7,6 +7,7 @@ run_cmake(JSONWrongMode)
 run_cmake(JSONOneArg)
 run_cmake(JSONNoArgs)
 run_cmake(JSONBadJson)
+run_cmake(JSONArraySplitNoArray)
 
 run_cmake(Append)
 run_cmake(AppendNoArgs)
