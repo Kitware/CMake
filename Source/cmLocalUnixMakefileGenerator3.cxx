@@ -1241,6 +1241,16 @@ std::string cmLocalUnixMakefileGenerator3::TrimLongCommand(
   cm::static_string_view longCommandFinalizer = "..."_s;
 
   size_t commandLineLimit = cmSystemTools::CalculateCommandLineLengthLimit();
+
+  if (this->GetState()->UseBorlandMake()) {
+    constexpr size_t BORLAND_MAKE_COMMAND_LINE_LIMIT = 4096;
+    commandLineLimit =
+      std::min(commandLineLimit, BORLAND_MAKE_COMMAND_LINE_LIMIT);
+    if (commandLineLimit == 0) {
+      commandLineLimit = BORLAND_MAKE_COMMAND_LINE_LIMIT;
+    }
+  }
+
   if (commandLineLimit == 0) {
     // No limit, just return the command as is.
     return cmStrCat(std::move(cmd), this->EscapeForShell(line));
