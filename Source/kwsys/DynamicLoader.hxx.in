@@ -49,18 +49,19 @@ public:
 // They are different on several different OS's
 #if defined(__hpux)
   typedef shl_t LibraryHandle;
+  static constexpr LibraryHandle InvalidLibrary = 0;
 #elif defined(_WIN32) && !defined(__CYGWIN__)
   typedef HMODULE LibraryHandle;
-#elif defined(__APPLE__)
-#  if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
+  static constexpr LibraryHandle InvalidLibrary = nullptr;
+#elif defined(__APPLE__) && (MAC_OS_X_VERSION_MAX_ALLOWED < 1030)
   typedef NSModule LibraryHandle;
-#  else
-  typedef void* LibraryHandle;
-#  endif
+  static constexpr LibraryHandle InvalidLibrary = 0;
 #elif defined(__BEOS__)
   typedef image_id LibraryHandle;
+  static constexpr LibraryHandle InvalidLibrary = 0;
 #else // POSIX
   typedef void* LibraryHandle;
+  static constexpr LibraryHandle InvalidLibrary = nullptr;
 #endif
 
   // Return type from DynamicLoader::GetSymbolAddress.
