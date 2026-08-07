@@ -1,0 +1,29 @@
+{
+  "version": 13,
+  "configurePresets": [
+    {
+      "name": "configure",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build/configure"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "environment": {
+        "TEST_PRESET_NAME": "${presetName}",
+        "TEST_CONFIGURE_PRESET_NAME": "${configurePresetName}"
+      }
+    },
+    {
+      "name": "test",
+      "inherits": "base",
+      "configurePreset": "configure",
+      "configuration": "Debug",
+      "output": {
+        "verbosity": "verbose"
+      }
+    }
+  ]
+}

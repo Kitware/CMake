@@ -95,6 +95,8 @@ run_cmake_test_presets(Good
                        "${GoodTestPresets}")
 unset(CMakePresetsTest_ASSETS)
 
+run_cmake_test_presets(ConfigurePresetName "configure" "" "test")
+
 run_cmake_test_presets(InvalidConfigurePreset "default" "" "badConfigurePreset")
 
 set(CMakePresetsTest_NO_CONFIGURE 1)

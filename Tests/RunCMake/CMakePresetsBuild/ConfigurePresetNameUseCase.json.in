@@ -1,0 +1,26 @@
+{
+    "version": 13,
+    "configurePresets": [
+        {
+            "name": "release",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${configurePresetName}"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "environment": {
+                "TEST_PRESET_NAME": "${presetName}",
+                "TEST_CONFIGURE_PRESET_NAME": "${configurePresetName}",
+                "SOME_PATH": "${sourceDir}/build/${configurePresetName}/generated"
+            }
+        },
+        {
+            "name": "build-release",
+            "inherits": "base",
+            "configurePreset": "release"
+        }
+    ]
+}

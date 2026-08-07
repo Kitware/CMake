@@ -1,0 +1,31 @@
+{
+  "version": 13,
+  "configurePresets": [
+    {
+      "name": "configure",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build/configure"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generators": [
+        "External"
+      ],
+      "environment": {
+        "TEST_PRESET_NAME": "${presetName}",
+        "TEST_CONFIGURE_PRESET_NAME": "${configurePresetName}"
+      }
+    },
+    {
+      "name": "package",
+      "inherits": "base",
+      "configurePreset": "configure",
+      "variables": {
+        "CPACK_EXTERNAL_PACKAGE_SCRIPT": "${sourceDir}/build/configure/check-preset-names.cmake"
+      }
+    }
+  ]
+}
