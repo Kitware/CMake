@@ -619,6 +619,13 @@ add_RunCMake_test(LanguageStandards
 )
 set_property(TEST RunCMake.LanguageStandards APPEND PROPERTY LABELS "CUDA" "HIP")
 
+add_RunCMake_test(EnableLanguageSubdir
+  -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+  -DCMake_TEST_RESOURCES=${CMake_TEST_RESOURCES})
+if(CMake_TEST_CUDA)
+  set_property(TEST RunCMake.EnableLanguageSubdir APPEND PROPERTY LABELS "CUDA")
+endif()
+
 add_RunCMake_test(LinkItemValidation)
 add_RunCMake_test(LinkStatic)
 add_RunCMake_test(ARCHIVER-prefix -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})

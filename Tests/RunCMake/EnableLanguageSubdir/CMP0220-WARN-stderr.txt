@@ -1,0 +1,10 @@
+CMake Warning \(policy\) at cxx/CMakeLists\.txt:[0-9]+ \(enable_language\):
+  Policy CMP0220 is not set: Languages enabled in subdirectories propagate to
+  the top-level directory\.  Run "cmake --help-policy CMP0220" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  For compatibility with older versions of CMake, the language configuration
+  set by this call is not propagated to the enclosing variable scopes\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

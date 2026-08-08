@@ -30,7 +30,21 @@ public:
   void SetDefinition(std::string const& name, cm::string_view value);
   void RemoveDefinition(std::string const& name);
   std::vector<std::string> ClosureKeys() const;
+  std::vector<std::string> LocalKeys() const;
   bool RaiseScope(std::string const& var, char const* varDef);
+
+  enum class CheckCMP0220
+  {
+    No,
+    Yes,
+  };
+  enum class WarnCMP0220
+  {
+    No,
+    Yes,
+  };
+  WarnCMP0220 RaiseToRoot(std::string const& var, char const* varDef,
+                          CheckCMP0220 checkCMP0220);
 
   void SetListFile(std::string const& listfile);
 
@@ -54,6 +68,7 @@ public:
   void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
   cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id,
                                      bool parent_scope = false) const;
+  cmPolicies::PolicyStatus GetScopePolicy(cmPolicies::PolicyID id) const;
   void PushPolicy(cmPolicies::PolicyMap const& entry, bool weak);
   bool PopPolicy();
   bool CanPopPolicyScope() const;

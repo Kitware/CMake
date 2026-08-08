@@ -3992,6 +3992,25 @@ void cmMakefile::RaiseScope(std::vector<std::string> const& variables)
   }
 }
 
+cmStateSnapshot::WarnCMP0220 cmMakefile::RaiseToRoot(std::string const& var,
+                                                     char const* varDef)
+{
+  if (var.empty()) {
+    return cmStateSnapshot::WarnCMP0220::No;
+  }
+  cmStateSnapshot::WarnCMP0220 const warnCMP0220 =
+    this->StateSnapshot.RaiseToRoot(var, varDef,
+                                    cmStateSnapshot::CheckCMP0220::No);
+#ifndef CMAKE_BOOTSTRAP
+  cmVariableWatch* vv = this->GetVariableWatch();
+  if (vv) {
+    vv->VariableAccessed(var, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
+                         varDef, this);
+  }
+#endif
+  return warnCMP0220;
+}
+
 cmTarget* cmMakefile::AddImportedTarget(std::string const& name,
                                         cm::TargetType type,
                                         cm::ImportedTargetScope scope)

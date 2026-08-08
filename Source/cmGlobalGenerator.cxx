@@ -626,6 +626,13 @@ void cmGlobalGenerator::EnableLanguage(
     return;
   }
 
+  bool propagate = true;
+  // If enable_language calls logic that calls enable_language, we don't
+  // need to propagate variables twice
+  if (!this->LanguagesInProgress.empty()) {
+    propagate = false;
+  }
+
   std::set<std::string> cur_languages(languages.begin(), languages.end());
   for (std::string const& li : cur_languages) {
     if (!this->LanguagesInProgress.insert(li).second) {
@@ -656,6 +663,12 @@ void cmGlobalGenerator::EnableLanguage(
         }
       }
     }
+  }
+
+  // Variable scope to capture enable_language variables to be raised to root.
+  std::unique_ptr<cmMakefile::VariablePushPop> variableScope;
+  if (propagate) {
+    variableScope = cm::make_unique<cmMakefile::VariablePushPop>(mf);
   }
 
   bool fatalError = false;
@@ -1108,6 +1121,30 @@ void cmGlobalGenerator::EnableLanguage(
 
   for (std::string const& lang : cur_languages) {
     this->LanguagesInProgress.erase(lang);
+  }
+
+  // Propagate captured variables and set them at all scopes up to the root
+  if (propagate) {
+    cmStateSnapshot snapshot = mf->GetStateSnapshot();
+    bool warnCMP0220 = false;
+    for (std::string const& key : snapshot.LocalKeys()) {
+      // Should never need to propagate unsets
+      if (!key.empty()) {
+        if (mf->RaiseToRoot(key, snapshot.GetDefinition(key).GetCStr()) ==
+            cmStateSnapshot::WarnCMP0220::Yes) {
+          warnCMP0220 = true;
+        }
+      }
+    }
+
+    if (warnCMP0220 &&
+        mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0220")) {
+      mf->IssuePolicyWarning(
+        cmPolicies::CMP0220, {},
+        "For compatibility with older versions of CMake, the language "
+        "configuration set by this call is not propagated to the enclosing "
+        "variable scopes.");
+    }
   }
 }
 
