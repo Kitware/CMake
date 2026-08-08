@@ -1570,7 +1570,7 @@ bool HandleCopyFile(std::vector<std::string> const& args,
   if (arguments.OnlyIfDifferent) {
     when = cmSystemTools::CopyWhen::OnlyIfDifferent;
   } else {
-    when = cmSystemTools::CopyWhen::Always;
+    when = cmSystemTools::CopyWhen::Unconditional;
   }
   cmSystemTools::CopyInputRecent const inputRecent = arguments.InputMayBeRecent
     ? cmSystemTools::CopyInputRecent::Yes

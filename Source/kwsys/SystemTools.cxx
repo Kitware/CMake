@@ -2599,7 +2599,7 @@ SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
                                                SystemTools::CopyWhen when)
 {
   switch (when) {
-    case SystemTools::CopyWhen::Always:
+    case SystemTools::CopyWhen::Unconditional:
       return SystemTools::CopyFileAlways(source, destination);
     case SystemTools::CopyWhen::OnlyIfDifferent:
       return SystemTools::CopyFileIfDifferent(source, destination);
@@ -2617,7 +2617,7 @@ SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
                                                bool always)
 {
   return SystemTools::CopyAFile(source, destination,
-                                always ? CopyWhen::Always
+                                always ? CopyWhen::Unconditional
                                        : CopyWhen::OnlyIfDifferent);
 }
 
@@ -2670,7 +2670,7 @@ Status SystemTools::CopyADirectory(std::string const& source,
                                    std::string const& destination, bool always)
 {
   return SystemTools::CopyADirectory(source, destination,
-                                     always ? CopyWhen::Always
+                                     always ? CopyWhen::Unconditional
                                             : CopyWhen::OnlyIfDifferent);
 }
 

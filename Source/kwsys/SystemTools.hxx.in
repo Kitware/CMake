@@ -665,7 +665,7 @@ public:
 
   enum class CopyWhen
   {
-    Always,
+    Unconditional,
     OnlyIfDifferent,
     OnlyIfNewer,
   };
@@ -675,20 +675,20 @@ public:
    */
   static CopyStatus CopyAFile(std::string const& source,
                               std::string const& destination,
-                              CopyWhen when = CopyWhen::Always);
+                              CopyWhen when = CopyWhen::Unconditional);
   static CopyStatus CopyAFile(std::string const& source,
                               std::string const& destination, bool always);
 
   /**
    * Copy content directory to another directory with all files and
    * subdirectories.  The "when" argument controls when files are copied:
-   * Always: all files are always copied.
+   * Unconditional: all files are always copied.
    * OnlyIfDifferent: only files that have changed are copied.
    * OnlyIfNewer: only files that are newer than the destination are copied.
    */
   static Status CopyADirectory(std::string const& source,
                                std::string const& destination,
-                               CopyWhen when = CopyWhen::Always);
+                               CopyWhen when = CopyWhen::Unconditional);
   static Status CopyADirectory(std::string const& source,
                                std::string const& destination, bool always);
 
