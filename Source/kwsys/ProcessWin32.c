@@ -30,6 +30,7 @@ a UNIX-style select system call.
 #endif
 #include <io.h>     /* _unlink */
 #include <stdio.h>  /* snprintf */
+#include <stdlib.h> /* malloc */
 #include <string.h> /* strlen, strdup */
 
 #ifndef _MAX_FNAME
