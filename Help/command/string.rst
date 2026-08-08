@@ -49,6 +49,9 @@ Synopsis
            {`GET <JSON-GET_>`__ | `GET_RAW <JSON-GET-RAW_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__}
            <json-string> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `ARRAY_SPLIT <JSON-ARRAY_SPLIT_>`__
+           <json-string> [<member|index> ...])
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
            `REMOVE <JSON-REMOVE_>`__
            <json-string> <member|index> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
@@ -606,6 +609,39 @@ string is passed as a single argument even if it contains semicolons.
   Get the length of an element in ``<json-string>`` at the location
   given by the list of ``<member|index>`` arguments.
   Requires an element of array or object type.
+
+.. signature::
+  string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
+         ARRAY_SPLIT <json-string> [<member|index> ...])
+  :target: JSON-ARRAY_SPLIT
+
+  .. versionadded:: 4.5
+
+  Split the array in ``<json-string>`` at the location given by the list of
+  ``<member|index>`` arguments into a :ref:`semicolon-separated list <CMake
+  Language Lists>`, one entry per array element.  Requires an element of array
+  type.
+
+  This enables iterating an array with a single parse of ``<json-string>``,
+  instead of re-parsing the whole string for each element:
+
+  .. code-block:: cmake
+
+    string(JSON elements ARRAY_SPLIT "${json}")
+    foreach(element IN LISTS elements)
+      string(JSON value GET "${element}" some_member)
+    endforeach()
+
+  Each entry is the corresponding element re-serialized as compact JSON.  It is
+  *semantically* equal to the source element (as compared by
+  :cref:`EQUAL <JSON-EQUAL_>`), but not necessarily byte-for-byte identical:
+  insignificant whitespace is removed and object members may be reordered.
+
+  The result is a regular CMake list and should be consumed with list-aware
+  constructs such as :command:`foreach(IN LISTS) <foreach>` or the
+  :command:`list` command.  Elements may contain characters that are encoded to
+  keep the list well-formed, so operating on the raw ``<out-var>`` value with
+  plain string operations may expose that internal encoding.
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]

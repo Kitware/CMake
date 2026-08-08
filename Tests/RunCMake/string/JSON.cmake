@@ -711,3 +711,212 @@ string(JSON result PARTIAL_EQUAL
 if(result)
   message(SEND_ERROR "Expected OFF got ${result} for duplicate array mismatch in object")
 endif()
+
+# Test ARRAY_SPLIT
+
+# Split the top-level array in <json>, assert the element count matches LENGTH
+# and each element is semantically equal to the corresponding source element,
+# then return the split list in <out-var> (if given).  Elements are always read
+# back through a list-aware reader so the encoded list is exercised end-to-end.
+function(assert_array_split json)
+  string(JSON _split ERROR_VARIABLE _err ARRAY_SPLIT "${json}")
+  if(_err)
+    message(SEND_ERROR "Unexpected ARRAY_SPLIT error: ${_err}\n for: ${json}")
+    return()
+  endif()
+  string(JSON _len LENGTH "${json}")
+  list(LENGTH _split _n)
+  if(NOT _n EQUAL _len)
+    message(SEND_ERROR "ARRAY_SPLIT gave ${_n} elements, expected ${_len}\n for: ${json}")
+    return()
+  endif()
+  set(_i 0)
+  foreach(_element IN LISTS _split)
+    string(JSON _src GET_RAW "${json}" ${_i})
+    string(JSON _eq ERROR_VARIABLE _eqerr EQUAL "${_element}" "${_src}")
+    if(_eqerr)
+      message(SEND_ERROR "ARRAY_SPLIT element ${_i} is not valid JSON: ${_eqerr}\n element: ${_element}")
+    elseif(NOT _eq)
+      message(SEND_ERROR "ARRAY_SPLIT element ${_i}\n ${_element}\n not equal to source\n ${_src}")
+    endif()
+    math(EXPR _i "${_i} + 1")
+  endforeach()
+  if(ARGC GREATER 1)
+    set(${ARGV1} "${_split}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# Basic array of objects: cardinality, order, and member access.
+assert_array_split([=[
+[
+  { "A": 1, "B": "one" },
+  { "A": 2, "B": "two" },
+  { "A": 3, "B": "three" }
+]
+]=] elements)
+list(GET elements 0 element0)
+string(JSON a GET "${element0}" A)
+assert_strequal("${a}" 1)
+string(JSON b GET "${element0}" B)
+assert_strequal("${b}" one)
+list(GET elements 2 element2)
+string(JSON b GET "${element2}" B)
+assert_strequal("${b}" three)
+
+# Empty array, top-level and via a path.
+assert_array_split("[]" empty)
+list(LENGTH empty emptyLen)
+assert_strequal("${emptyLen}" 0)
+string(JSON pathEmpty ERROR_VARIABLE error ARRAY_SPLIT [=[{"data":[]}]=] data)
+if(error)
+  message(SEND_ERROR "Unexpected error: ${error}")
+endif()
+list(LENGTH pathEmpty pathEmptyLen)
+assert_strequal("${pathEmptyLen}" 0)
+
+# Path-located array.
+set(doc [=[{ "outer": { "data": [10, 20, 30] } }]=])
+string(JSON pathSplit ERROR_VARIABLE error ARRAY_SPLIT "${doc}" outer data)
+if(error)
+  message(SEND_ERROR "Unexpected error: ${error}")
+endif()
+list(LENGTH pathSplit pathSplitLen)
+assert_strequal("${pathSplitLen}" 3)
+list(GET pathSplit 1 pathElement1)
+assert_strequal("${pathElement1}" 20)
+
+# Scalars: cardinality preserved (no empty-element collapsing) and types kept.
+assert_array_split([=[[null, false, 0, ""]]=] scalars)
+list(LENGTH scalars scalarsLen)
+assert_strequal("${scalarsLen}" 4)
+list(GET scalars 0 scalar0)
+string(JSON scalarType TYPE "${scalar0}")
+assert_strequal("${scalarType}" NULL)
+list(GET scalars 1 scalar1)
+string(JSON scalarType TYPE "${scalar1}")
+assert_strequal("${scalarType}" BOOLEAN)
+list(GET scalars 2 scalar2)
+string(JSON scalarType TYPE "${scalar2}")
+assert_strequal("${scalarType}" NUMBER)
+list(GET scalars 3 scalar3)
+string(JSON scalarType TYPE "${scalar3}")
+assert_strequal("${scalarType}" STRING)
+
+# Numbers: integer, real, exponent, and large integer round-trip.
+assert_array_split([=[[1, 1000.0, 1e3, 1234567890]]=])
+
+# Nested arrays and objects: structural brackets left intact.
+assert_array_split([=[[[1,2],[3,4]]]=] nested)
+list(GET nested 0 nested0)
+string(JSON nestedType TYPE "${nested0}")
+assert_strequal("${nestedType}" ARRAY)
+string(JSON nestedVal GET "${nested0}" 1)
+assert_strequal("${nestedVal}" 2)
+assert_array_split([=[[{"x":1},{"y":2}]]=] objects)
+list(GET objects 1 objects1)
+string(JSON objectsType TYPE "${objects1}")
+assert_strequal("${objectsType}" OBJECT)
+string(JSON objectsVal GET "${objects1}" y)
+assert_strequal("${objectsVal}" 2)
+
+# Whitespace and object-member-order canonicalization compare EQUAL.
+assert_array_split([=[[  {  "b" : 1 ,  "a" : 2  }  ]]=])
+
+# Adversarial: ';' inside a string value must not split the element.
+assert_array_split([=[[{"cmd":"a;b"},{"d":4}]]=] semicolon)
+list(LENGTH semicolon semicolonLen)
+assert_strequal("${semicolonLen}" 2)
+list(GET semicolon 0 semicolon0)
+string(JSON semicolonVal GET "${semicolon0}" cmd)
+assert_strequal("${semicolonVal}" "a;b")
+
+# Adversarial: an unbalanced '[' or ']' inside a string must not merge elements.
+assert_array_split([=[[{"a":"["},{"b":2}]]=] openBracket)
+list(LENGTH openBracket openBracketLen)
+assert_strequal("${openBracketLen}" 2)
+list(GET openBracket 0 openBracket0)
+string(JSON openBracketVal GET "${openBracket0}" a)
+assert_strequal("${openBracketVal}" "[")
+assert_array_split([=[[{"a":"]"},{"b":2}]]=] closeBracket)
+list(LENGTH closeBracket closeBracketLen)
+assert_strequal("${closeBracketLen}" 2)
+list(GET closeBracket 0 closeBracket0)
+string(JSON closeBracketVal GET "${closeBracket0}" a)
+assert_strequal("${closeBracketVal}" "]")
+
+# Adversarial: several brackets in one string value.
+assert_array_split([=[[{"s":"[[]]["},{"z":0}]]=] brackets)
+list(GET brackets 0 brackets0)
+string(JSON bracketsVal GET "${brackets0}" s)
+assert_strequal("${bracketsVal}" "[[]][")
+
+# Adversarial: a bracket in an object *key* (keys are strings too).
+assert_array_split([=[[{"[k]":1},{"y":2}]]=] keyBracket)
+list(GET keyBracket 0 keyBracket0)
+string(JSON keyBracketVal GET "${keyBracket0}" "[k]")
+assert_strequal("${keyBracketVal}" 1)
+string(JSON keyBracketName MEMBER "${keyBracket0}" 0)
+assert_strequal("${keyBracketName}" "[k]")
+
+# Adversarial: ';' adjacent to backslashes (value is a\;b).
+assert_array_split([==[[{"cmd":"a\\;b"},{"d":4}]]==] semiBackslash)
+list(GET semiBackslash 0 semiBackslash0)
+string(JSON semiBackslashVal GET "${semiBackslash0}" cmd)
+assert_strequal("${semiBackslashVal}" [==[a\;b]==])
+
+# Adversarial: an escaped quote before a bracket (value is x"[y).
+assert_array_split([==[[{"a":"x\"[y"},{"b":2}]]==] quoteBracket)
+list(GET quoteBracket 0 quoteBracket0)
+string(JSON quoteBracketVal GET "${quoteBracket0}" a)
+assert_strequal("${quoteBracketVal}" [==[x"[y]==])
+
+# Adversarial: a string value ending in an escaped backslash (value is x\).
+assert_array_split([==[[{"a":"x\\"},{"b":2}]]==] endBackslash)
+list(GET endBackslash 0 endBackslash0)
+string(JSON endBackslashVal GET "${endBackslash0}" a)
+assert_strequal("${endBackslashVal}" [==[x\]==])
+
+# Adversarial: literal "\u005B" text (six characters) must stay unchanged.
+assert_array_split([==[[{"a":"\\u005B"},{"b":2}]]==] literalEscape)
+list(GET literalEscape 0 literalEscape0)
+string(JSON literalEscapeVal GET "${literalEscape0}" a)
+assert_strequal("${literalEscapeVal}" [==[\u005B]==])
+
+# Unicode survives compact re-serialization (reuse the unicode fixture).
+file(READ ${CMAKE_CURRENT_LIST_DIR}/json/unicode.json unicode)
+assert_array_split("[${unicode}]" unicodeSplit)
+list(GET unicodeSplit 0 unicodeElement)
+string(JSON unicodeVal GET "${unicodeElement}" datalinkescape)
+string(JSON unicodeSrc GET "${unicode}" datalinkescape)
+assert_strequal("${unicodeVal}" "${unicodeSrc}")
+
+# Error handling with ERROR_VARIABLE: non-array target must mirror the NOTFOUND
+# form that LENGTH produces for the same input, and report an ARRAY message.
+
+# Non-array (string) at top level.
+string(JSON asResult ERROR_VARIABLE asError ARRAY_SPLIT "\"text\"")
+string(JSON lenResult ERROR_VARIABLE lenError LENGTH "\"text\"")
+assert_strequal("${asResult}" "${lenResult}")
+assert_strequal("${asError}" "ARRAY_SPLIT needs to be called with an element of type ARRAY, got STRING")
+
+# Object at top level is also rejected (LENGTH would accept it, so no cross-check
+# on the message, but the NOTFOUND form matches the string case above).
+string(JSON objResult ERROR_VARIABLE objError ARRAY_SPLIT "{}")
+assert_strequal("${objResult}" "${asResult}")
+assert_strequal("${objError}" "ARRAY_SPLIT needs to be called with an element of type ARRAY, got OBJECT")
+
+# Non-array (string) at a path.
+string(JSON pathResult ERROR_VARIABLE pathError ARRAY_SPLIT [=[{"data":"text"}]=] data)
+string(JSON pathLenResult ERROR_VARIABLE pathLenError LENGTH [=[{"data":"text"}]=] data)
+assert_strequal("${pathResult}" "${pathLenResult}")
+assert_strequal("${pathResult}" "data-NOTFOUND")
+assert_strequal("${pathError}" "ARRAY_SPLIT needs to be called with an element of type ARRAY, got STRING")
+
+# Non-existent path mirrors LENGTH's <path>-NOTFOUND and reports an error.
+string(JSON missResult ERROR_VARIABLE missError ARRAY_SPLIT [=[{"a":1}]=] b)
+string(JSON missLenResult ERROR_VARIABLE missLenError LENGTH [=[{"a":1}]=] b)
+assert_strequal("${missResult}" "${missLenResult}")
+assert_strequal("${missResult}" "b-NOTFOUND")
+if(NOT missError)
+  message(SEND_ERROR "Expected an error for a non-existent ARRAY_SPLIT path")
+endif()
