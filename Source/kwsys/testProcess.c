@@ -23,6 +23,8 @@
 
 #if defined(_WIN32)
 #  include <windows.h>
+
+#  include <shellapi.h>
 #else
 #  include <signal.h>
 #  include <unistd.h>
