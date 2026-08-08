@@ -1345,7 +1345,7 @@ bool SystemTools::FileExists(std::string const& filename)
         return false;
       }
 
-      byte buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+      BYTE buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
       DWORD bytesReturned = 0;
 
       if (!DeviceIoControl(handle, FSCTL_GET_REPARSE_POINT, nullptr, 0, buffer,
@@ -3091,7 +3091,7 @@ bool SystemTools::FileIsSymlinkWithAttr(std::wstring const& path,
       if (hFile == INVALID_HANDLE_VALUE) {
         return false;
       }
-      byte buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+      BYTE buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
       DWORD bytesReturned = 0;
       if (!DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, nullptr, 0, buffer,
                            MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &bytesReturned,
@@ -3157,7 +3157,7 @@ Status SystemTools::ReadSymlink(std::string const& newName,
   if (hFile == INVALID_HANDLE_VALUE) {
     return Status::Windows_GetLastError();
   }
-  byte buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+  BYTE buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
   DWORD bytesReturned = 0;
   Status status;
   if (!DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, nullptr, 0, buffer,

@@ -65,6 +65,7 @@
 using siginfo_t = int;
 #  endif
 #  include <powerbase.h>
+#  include <winternl.h> // NTSTATUS
 #else
 #  include <sys/types.h>
 
