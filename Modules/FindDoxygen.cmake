@@ -1172,6 +1172,51 @@ function(doxygen_list_to_quoted_strings LIST_VARIABLE)
     endif()
 endfunction()
 
+function(_doxygen_collect_output_dirs outputDirs)
+    # Collect user-provided output directories for known output formats
+    set(_doxygen_output_formats DOCBOOK HTML LATEX MAN RTF SQLITE3 XML)
+    set(_doxygen_output_dirs "")
+    foreach(_format IN LISTS _doxygen_output_formats)
+        set(_doxygen_generate_format "DOXYGEN_GENERATE_${_format}")
+        if(DEFINED "${_doxygen_generate_format}" AND ${${_doxygen_generate_format}})
+            set(_doxygen_format_output "DOXYGEN_${_format}_OUTPUT")
+            if(DEFINED _doxygen_format_output)
+                list(APPEND _doxygen_output_dirs "${${_doxygen_format_output}}" )
+            endif()
+            unset(_doxygen_format_output)
+        endif()
+        unset(_doxygen_generate_format)
+    endforeach()
+    set(${outputDirs} ${_doxygen_output_dirs} PARENT_SCOPE)
+endfunction()
+
+function(_doxygen_resolve_output_dirs parentDir childDirs outputDirs)
+    # Resolve relative and absolute paths for output directories
+    # parentDir:  parent directory (e.g., DOXYGEN_OUTPUT_DIRECTORY -> docs)
+    # childDirs:  child directories list (e.g., "html;foo/xml")
+    # outputDirs: output list of resolved directories
+    #             (e.g., "docs/html;docs/foo/xml")
+    if(NOT DEFINED parentDir)
+        message(FATAL_ERROR "Undefined parent output directory given")
+    endif()
+    if(NOT parentDir)
+        message(FATAL_ERROR "Empty parent output directory given")
+    endif()
+
+    set(_doxygen_output_dirs "")
+    foreach(_dir IN LISTS childDirs)
+        cmake_path(IS_RELATIVE _dir _is_rel)
+        if(_is_rel)
+            cmake_path(ABSOLUTE_PATH _dir
+                       BASE_DIRECTORY "${parentDir}"
+                       NORMALIZE
+                       OUTPUT_VARIABLE _doxygen_resolved_dir)
+            list(APPEND _doxygen_output_dirs "${_doxygen_resolved_dir}")
+        endif()
+    endforeach()
+    set(${outputDirs} "${_doxygen_output_dirs}" PARENT_SCOPE)
+endfunction()
+
 function(doxygen_add_docs targetName)
     set(_options ALL USE_STAMP_FILE USES_TERMINAL)
     set(_one_value_args WORKING_DIRECTORY COMMENT CONFIG_FILE)
@@ -1336,19 +1381,6 @@ doxygen_add_docs() for target ${targetName}")
     # already set and we have not provided above
     include("${CMAKE_BINARY_DIR}/CMakeDoxygenDefaults.cmake" OPTIONAL)
 
-    # Cleanup built HTMLs on "make clean"
-    # TODO Any other dirs?
-    if(DOXYGEN_GENERATE_HTML)
-        if(IS_ABSOLUTE "${DOXYGEN_HTML_OUTPUT}")
-            set(_args_clean_html_dir "${DOXYGEN_HTML_OUTPUT}")
-        else()
-            set(_args_clean_html_dir
-                "${DOXYGEN_OUTPUT_DIRECTORY}/${DOXYGEN_HTML_OUTPUT}")
-        endif()
-        set_property(DIRECTORY APPEND PROPERTY
-            ADDITIONAL_CLEAN_FILES "${_args_clean_html_dir}")
-    endif()
-
     # Build up a list of files we can identify from the inputs so we can list
     # them as DEPENDS and SOURCES in the custom command/target (the latter
     # makes them display in IDEs). This must be done before we transform the
@@ -1470,6 +1502,19 @@ doxygen_add_docs() for target ${targetName}")
     # later in the custom target's commands.
     set( _original_doxygen_output_dir ${DOXYGEN_OUTPUT_DIRECTORY} )
 
+    # Collect the output directories for each DOXYGEN_${format}_OUTPUT
+    # if the corresponding DOXYGEN_GENERATE_${format} is YES
+    _doxygen_collect_output_dirs(_doxygen_output_dirs)
+
+    # Resolve the output directories as absolute paths
+    # that can be given to make_directory() and appended to
+    # the ADDITIONAL_CLEAN_FILES target property
+    _doxygen_resolve_output_dirs("${_original_doxygen_output_dir}"
+                                 "${_doxygen_output_dirs}"
+                                 _doxygen_resolved_output_dirs)
+
+    unset(_doxygen_output_dirs)
+
     foreach(_item IN LISTS _doxygen_quoted_options)
         doxygen_quote_value(DOXYGEN_${_item})
     endforeach()
@@ -1503,7 +1548,7 @@ doxygen_add_docs() for target ${targetName}")
         add_custom_command(
             VERBATIM
             OUTPUT ${__stamp_file}
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${_original_doxygen_output_dir}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${_doxygen_resolved_output_dirs}
             COMMAND "${DOXYGEN_EXECUTABLE}" "${_target_doxyfile}"
             COMMAND ${CMAKE_COMMAND} -E touch ${__stamp_file}
             WORKING_DIRECTORY "${_args_WORKING_DIRECTORY}"
@@ -1522,7 +1567,7 @@ doxygen_add_docs() for target ${targetName}")
         add_custom_target( ${targetName}
             ${_all}
             VERBATIM
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${_original_doxygen_output_dir}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${_doxygen_resolved_output_dirs}
             COMMAND "${DOXYGEN_EXECUTABLE}" "${_target_doxyfile}"
             WORKING_DIRECTORY "${_args_WORKING_DIRECTORY}"
             DEPENDS "${_target_doxyfile}" ${_sources}
@@ -1531,5 +1576,10 @@ doxygen_add_docs() for target ${targetName}")
             SOURCES ${_sources}
         )
     endif()
+
+    # Add the DOXYGEN_${format}_OUTPUT directories as additional clean files
+    # to the Doxygen target (rather than as a directory property)
+    set_property(TARGET ${targetName} APPEND PROPERTY
+                 ADDITIONAL_CLEAN_FILES "${_doxygen_resolved_output_dirs}")
 
 endfunction()
