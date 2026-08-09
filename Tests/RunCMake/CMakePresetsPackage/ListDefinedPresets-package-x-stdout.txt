@@ -1,0 +1,6 @@
+^Defined package presets:
+
+  "default"
+  "with-description" +- With Description
+  "unavailable-generator"
+    Unavailable: one or more package generators are not available$

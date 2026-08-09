@@ -1,0 +1,24 @@
+^Defined package presets:
+
+  "default"
+  "enabled-package"
+  "disabled-package"
+    Unavailable: condition evaluated to false: false
+
+  "disabled-configure-package"
+    Unavailable: configure preset "disabled-expression": condition evaluated to false: .*CMAKE_PRESET_TEST_UNFULFILLED_ENV.*
+
+  "disabled-package-and-configure"
+    Unavailable: condition evaluated to false: false
+
+  "invalid-package"
+    Unavailable: unsupported macro expansion
+
+  "hidden-configure-package"
+    Unavailable: configure preset "hidden": hidden
+
+  "invalid-configure-package"
+    Unavailable: configure preset "invalid": unsupported macro expansion
+
+  "unsupported-configure-package"
+    Unavailable: configure preset "unsupported-generator": generator "Invalid Generator" is not available$

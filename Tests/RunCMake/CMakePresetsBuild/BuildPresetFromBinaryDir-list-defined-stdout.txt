@@ -1,0 +1,8 @@
+^Defined build presets:
+
+  "build-default" +- build-default displayName
+  "empty"
+  "display" +- display displayName
+  "true"
+  "false" +- false displayName
+    Unavailable: condition evaluated to false: false$

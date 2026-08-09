@@ -1,0 +1,29 @@
+^Available configure presets:
+
+  "default"
+  "disabled-expression"
+
+Available build presets:
+
+  "default"
+  "enabled-build"
+  "disabled-configure-build"
+
+Available test presets:
+
+  "default"
+  "enabled-test"
+  "disabled-configure-test"
+
+Available package presets:
+
+  "default"
+  "enabled-package"
+  "disabled-configure-package"
+
+Available workflow presets:
+
+  "default"
+  "with-description" +- With Description
+  "enabled-dependent-steps"
+  "disabled-expression-step"$

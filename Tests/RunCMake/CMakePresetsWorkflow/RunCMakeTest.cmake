@@ -51,7 +51,9 @@ function(run_cmake_workflow_presets name)
     set(RunCMake-check-file "check.cmake")
   endif()
 
-  if(CMakePresets_DIRECT_ARG)
+  if(CMakePresets_NO_PRESET)
+    set(preset_arg)
+  elseif(CMakePresets_DIRECT_ARG)
     set(preset_arg "${name}")
   elseif(eq)
     set(eq 0 PARENT_SCOPE)
@@ -95,10 +97,144 @@ unset(CMakePresets_FILE)
 unset(CMakePresets_FILE_ARG)
 
 run_cmake_workflow_presets(ListPresets --list-presets)
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/ListPresets.json.in")
+unset(ENV{CMAKE_PRESET_TEST_UNFULFILLED_ENV})
+set(CMakePresets_NO_PRESET TRUE)
+run_cmake_workflow_presets(ListAllPresets --list-presets)
+run_cmake_workflow_presets(ListDefinedPresets --list-presets=defined)
+unset(CMakePresets_NO_PRESET)
+run_cmake_command(ListAllPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=all
+)
+run_cmake_command(ListDefinedPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=all-defined
+)
+set(RunCMake-stdout-file ListDefinedConfigurePresetTypes-stdout.txt)
+run_cmake_command(ListDefinedConfigurePresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=defined
+)
+run_cmake_command(ListConfigureDefinedPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=configure-defined
+)
+unset(RunCMake-stdout-file)
+run_cmake_command(ListBuildPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=build
+)
+run_cmake_command(ListTestPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=test
+)
+run_cmake_command(ListPackagePresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=package
+)
+run_cmake_command(ListWorkflowPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=workflow
+)
+set(RunCMake-stdout-file ListDefinedBuildPresetsCommand-stdout.txt)
+run_cmake_command(ListBuildDefinedPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=build-defined
+)
+unset(RunCMake-stdout-file)
+set(RunCMake-stdout-file ListDefinedTestPresetsCommand-stdout.txt)
+run_cmake_command(ListTestDefinedPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=test-defined
+)
+unset(RunCMake-stdout-file)
+set(RunCMake-stdout-file ListDefinedPackagePresetsCommand-stdout.txt)
+run_cmake_command(ListPackageDefinedPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=package-defined
+)
+unset(RunCMake-stdout-file)
+set(RunCMake-stdout-file ListDefinedPresets-stdout.txt)
+run_cmake_command(ListWorkflowDefinedPresetTypes
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=workflow-defined
+)
+unset(RunCMake-stdout-file)
+set(ListPresets_FILE
+  "${RunCMake_BINARY_DIR}/ListAllPresets/CMakePresets.json")
+run_cmake_command(ListBuildPresetsCommand
+  ${CMAKE_COMMAND}
+  --build
+  "--presets-file=${ListPresets_FILE}"
+  --list-presets
+)
+run_cmake_command(ListDefinedBuildPresetsCommand
+  ${CMAKE_COMMAND}
+  --build
+  "--presets-file=${ListPresets_FILE}"
+  --list-presets=defined
+)
+run_cmake_command(ListTestPresetsCommand
+  ${CMAKE_CTEST_COMMAND}
+  "--presets-file=${ListPresets_FILE}"
+  --list-presets
+)
+run_cmake_command(ListDefinedTestPresetsCommand
+  ${CMAKE_CTEST_COMMAND}
+  "--presets-file=${ListPresets_FILE}"
+  --list-presets=defined
+)
+run_cmake_command(ListPackagePresetsCommand
+  ${CMAKE_CPACK_COMMAND}
+  "--presets-file=${ListPresets_FILE}"
+  --list-presets
+)
+run_cmake_command(ListDefinedPackagePresetsCommand
+  ${CMAKE_CPACK_COMMAND}
+  "--presets-file=${ListPresets_FILE}"
+  --list-presets=defined
+)
+run_cmake_command(ListTestPresetsInvalidValue
+  ${CMAKE_CTEST_COMMAND}
+  --list-presets=invalid
+)
+run_cmake_command(ListPackagePresetsInvalidValue
+  ${CMAKE_CPACK_COMMAND}
+  --list-presets=invalid
+)
+set(ENV{CMAKE_PRESET_TEST_UNFULFILLED_ENV} "set_value")
+run_cmake_command(ListAllPresetTypesConditionTrue
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=all
+)
+run_cmake_command(ListDefinedPresetTypesConditionTrue
+  ${CMAKE_COMMAND}
+  -S "${RunCMake_BINARY_DIR}/ListAllPresets"
+  --list-presets=all-defined
+)
+unset(ENV{CMAKE_PRESET_TEST_UNFULFILLED_ENV})
+unset(ListPresets_FILE)
+unset(CMakePresets_FILE)
+
 run_cmake_command(PresetsNoArg-workflow ${CMAKE_COMMAND} "--workflow" "--preset")
 run_cmake_command(PresetsNoArgEq-workflow ${CMAKE_COMMAND} "--workflow" "--preset=")
 run_cmake_command(PresetsFileNoArg-workflow ${CMAKE_COMMAND} "--workflow" "--presets-file")
 run_cmake_workflow_presets(InvalidOption -DINVALID_OPTION)
+run_cmake_workflow_presets(ListPresetsInvalidValue --list-presets=invalid)
 
 set(RunCMake_TEST_NO_CLEAN TRUE)
 file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/Fresh")

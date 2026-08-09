@@ -1,0 +1,24 @@
+^Defined build presets:
+
+  "default"
+  "enabled-build"
+  "disabled-build"
+    Unavailable: condition evaluated to false: false
+
+  "disabled-configure-build"
+    Unavailable: configure preset "disabled-expression": condition evaluated to false: .*CMAKE_PRESET_TEST_UNFULFILLED_ENV.*
+
+  "disabled-build-and-configure"
+    Unavailable: condition evaluated to false: false
+
+  "invalid-build"
+    Unavailable: unsupported macro expansion
+
+  "hidden-configure-build"
+    Unavailable: configure preset "hidden": hidden
+
+  "invalid-configure-build"
+    Unavailable: configure preset "invalid": unsupported macro expansion
+
+  "unsupported-configure-build"
+    Unavailable: configure preset "unsupported-generator": generator "Invalid Generator" is not available$

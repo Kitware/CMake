@@ -533,8 +533,16 @@ int do_build(int ac, char const* const* av)
                      CommandArgument::setToValue(presetsArgs.PresetName) },
     CommandArgument{ "--presets-file", "No file specified for --presets-file",
                      CommandArgument::Values::One, presetFileLambda },
-    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
-                     CommandArgument::setToTrue(presetsArgs.ListPresets) },
+    CommandArgument{ "--list-presets", CommandArgument::Values::ZeroOrOne,
+                     [&presetsArgs](std::string const& value) -> bool {
+                       if (presetsArgs.SetListPresets(value)) {
+                         return true;
+                       }
+                       cmSystemTools::Error(
+                         "Invalid value specified for --list-presets.\n"
+                         "The only supported value is \"defined\".");
+                       return false;
+                     } },
     CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne,
                      CommandArgument::RequiresSeparator::No, jLambda },
     CommandArgument{ "--parallel", CommandArgument::Values::ZeroOrOne,
@@ -644,8 +652,8 @@ int do_build(int ac, char const* const* av)
       "                 = Specify a build preset.\n"
       "  --presets-file <file>, --presets-file=<file>\n"
       "                 = Specify the path to a presets file.\n"
-      "  --list-presets[=<type>]\n"
-      "                 = List available build presets.\n"
+      "  --list-presets[=defined]\n"
+      "                 = List available or all defined build presets.\n"
       "  --parallel [<jobs>], -j [<jobs>]\n"
       "                 = Build in parallel using the given number of jobs. \n"
       "                   If <jobs> is omitted the native build tool's \n"
@@ -1046,8 +1054,17 @@ int do_workflow(int ac, char const* const* av)
                          cmSystemTools::ToNormalizedPathOnDisk(value);
                        return true;
                      } },
-    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
-                     CommandArgument::setToTrue(presetsArgs.ListPresets) },
+    CommandArgument{ "--list-presets", CommandArgument::Values::ZeroOrOne,
+                     [&presetsArgs](std::string const& value) -> bool {
+                       if (presetsArgs.SetListPresets(value)) {
+                         return true;
+                       }
+                       std::cerr
+                         << "Invalid value specified for --list-presets.\n"
+                            "The only supported value in workflow mode is "
+                            "\"defined\".\n";
+                       return false;
+                     } },
     CommandArgument{ "--fresh", CommandArgument::Values::Zero,
                      CommandArgument::setToTrue(presetsArgs.Fresh) }
   };
@@ -1088,11 +1105,12 @@ int do_workflow(int ac, char const* const* av)
     std::cerr <<
       "Usage: cmake --workflow <options>\n"
       "Options:\n"
-      "  --preset <preset>     = Workflow preset to execute.\n"
-      "  --presets-file <file> = Path to a presets file.\n"
-      "  --list-presets        = List available workflow presets.\n"
-      "  --fresh               = Configure a fresh build tree, removing any "
-                                "existing cache file.\n"
+      "  --preset <preset>        = Workflow preset to execute.\n"
+      "  --presets-file <file>    = Path to a presets file.\n"
+      "  --list-presets[=defined] = List available or all defined workflow "
+                                    "presets.\n"
+      "  --fresh                  = Configure a fresh build tree, removing "
+                                   "any existing cache file.\n"
       ;
     /* clang-format on */
     return 1;

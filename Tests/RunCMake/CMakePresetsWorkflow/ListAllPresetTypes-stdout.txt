@@ -1,0 +1,24 @@
+^Available configure presets:
+
+  "default"
+
+Available build presets:
+
+  "default"
+  "enabled-build"
+
+Available test presets:
+
+  "default"
+  "enabled-test"
+
+Available package presets:
+
+  "default"
+  "enabled-package"
+
+Available workflow presets:
+
+  "default"
+  "with-description" +- With Description
+  "enabled-dependent-steps"$

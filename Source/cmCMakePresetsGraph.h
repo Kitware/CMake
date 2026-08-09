@@ -24,6 +24,12 @@ enum class PackageResolveMode;
 class cmCMakePresetsGraph
 {
 public:
+  enum class PresetListMode
+  {
+    Available,
+    Defined,
+  };
+
   std::string errors;
   cmJSONState parseState;
 
@@ -467,16 +473,28 @@ public:
 
   std::string GetGeneratorForPreset(std::string const& presetName) const;
 
-  void PrintConfigurePresetList() const;
+  using ConfigurePresetUsabilityCheck =
+    std::function<cm::optional<std::string>(ConfigurePreset const&)>;
+
   void PrintConfigurePresetList(
-    std::function<bool(ConfigurePreset const&)> const& filter) const;
-  void PrintBuildPresetList() const;
-  void PrintTestPresetList() const;
-  void PrintPackagePresetList() const;
+    PresetListMode mode = PresetListMode::Available,
+    ConfigurePresetUsabilityCheck const& usabilityCheck = {}) const;
+  void PrintBuildPresetList(
+    PresetListMode mode = PresetListMode::Available,
+    ConfigurePresetUsabilityCheck const& configureUsabilityCheck = {}) const;
+  void PrintTestPresetList(
+    PresetListMode mode = PresetListMode::Available,
+    ConfigurePresetUsabilityCheck const& configureUsabilityCheck = {}) const;
   void PrintPackagePresetList(
-    std::function<bool(PackagePreset const&)> const& filter) const;
-  void PrintWorkflowPresetList() const;
-  void PrintAllPresets() const;
+    PresetListMode mode = PresetListMode::Available,
+    ConfigurePresetUsabilityCheck const& configureUsabilityCheck = {}) const;
+  void PrintPackagePresetList(
+    std::function<bool(PackagePreset const&)> const& packageGeneratorsPresent,
+    PresetListMode mode = PresetListMode::Available,
+    ConfigurePresetUsabilityCheck const& configureUsabilityCheck = {}) const;
+  void PrintWorkflowPresetList(
+    PresetListMode mode = PresetListMode::Available,
+    ConfigurePresetUsabilityCheck const& configureUsabilityCheck = {}) const;
 
 private:
   enum class RootType
@@ -498,6 +516,10 @@ private:
                     ReadReason readReason, std::vector<File*>& inProgressFiles,
                     File*& file, std::string& errMsg);
   void ClearPresets();
+
+  cm::optional<std::string> GetWorkflowUnavailableReason(
+    WorkflowPreset const& preset,
+    ConfigurePresetUsabilityCheck const& configureUsabilityCheck) const;
 
   static std::string GetFilename(std::string const& sourceDir);
   static std::string GetUserFilename(std::string const& sourceDir);

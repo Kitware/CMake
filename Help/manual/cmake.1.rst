@@ -735,9 +735,16 @@ Options
 
 .. option:: --list-presets[=<type>]
 
- Lists the available presets of the specified ``<type>``.  Valid values for
- ``<type>`` are ``configure``, ``build``, ``test``, ``package``, or ``all``.
- If ``<type>`` is omitted, ``configure`` is assumed.
+ Lists presets according to the specified ``<type>``.  Valid values are
+ ``configure``, ``build``, ``test``, ``package``, ``workflow``, ``all``, or
+ any of those values with ``-defined`` appended.  The ``defined`` value is an
+ alias for ``configure-defined``.  If ``<type>`` is omitted, ``configure`` is
+ assumed.
+
+ The values without the ``-defined`` suffix list available presets.  The
+ suffixed values list all non-hidden defined presets of the selected type,
+ including unavailable presets with the reason they cannot be used.  The
+ ``all`` and ``all-defined`` values select every preset type.
 
  .. versionchanged:: 4.4
    If :cmake-option:`--presets-file` is specified, the presets defined in the
@@ -745,6 +752,9 @@ Options
    (whether via :cmake-option:`-S` or the current working directory) must
    contain ``CMakePresets.json`` and/or ``CMakeUserPresets.json``.
    In prior versions, the latter was strictly required.
+
+ .. versionadded:: 4.5
+   Support for the ``workflow``, ``defined``, and ``-defined`` values.
 
 .. option:: --debugger
 
@@ -845,9 +855,11 @@ following options:
   If ``--presets-file`` is given, presets defined in ``CMakePresets.json`` and
   ``CMakeUserPresets.json`` will be ignored.
 
-.. option:: --list-presets
+.. option:: --list-presets[=defined]
 
-  Lists the available build presets.
+  Lists the available build presets. With ``defined``, all non-hidden defined
+  build presets are listed, including unavailable presets with the reason they
+  cannot be used.
 
   .. versionchanged:: 4.4
     ``cmake --build <dir> --list-presets`` no longer needs to be called from
@@ -855,6 +867,9 @@ following options:
     If :cmake-build-option:`--presets-file` is specified, only presets defined
     in the given ``<file>`` will be listed; otherwise, the presets file(s) are
     inferred from the current build directory's ``CMakeCache.txt``.
+
+  .. versionadded:: 4.5
+    Support for the ``defined`` value.
 
 .. option:: -j [<jobs>], --parallel [<jobs>]
 
@@ -1979,9 +1994,11 @@ The options are:
   If ``--presets-file`` is given, presets defined in ``CMakePresets.json`` and
   ``CMakeUserPresets.json`` will be ignored.
 
-.. option:: --list-presets
+.. option:: --list-presets[=defined]
 
-  Lists the available workflow presets.
+  Lists the available workflow presets. With ``defined``, all defined
+  workflow presets are listed. Unavailable presets are shown with the first
+  unavailable step and its reason.
 
   .. versionchanged:: 4.4
     If :cmake-workflow-option:`--presets-file` is specified, neither of
@@ -1989,6 +2006,9 @@ The options are:
     present, and only presets defined in the given ``<file>`` will be listed.
     Otherwise, they are required to be present in the top level source
     directory.  In prior versions, this was strictly required.
+
+  .. versionadded:: 4.5
+    Support for the ``defined`` value.
 
 .. option:: --fresh
 

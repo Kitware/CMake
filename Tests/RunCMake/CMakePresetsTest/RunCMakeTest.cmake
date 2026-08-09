@@ -104,6 +104,8 @@ run_cmake_test_presets(ListPresets "" "" "x" "--list-presets")
 run_cmake_command(PresetsNoArg-test ${CMAKE_CTEST_COMMAND} "--preset")
 run_cmake_command(PresetsNoArgEq-test ${CMAKE_CTEST_COMMAND} "--preset=")
 run_cmake_command(PresetsFileNoArg-test ${CMAKE_CTEST_COMMAND} "--presets-file")
+run_cmake_command(PresetsInvalidOptionPrefix-test
+  ${CMAKE_CTEST_COMMAND} "--preset-invalid")
 
 set(CMakePresetsTest_FILE "${RunCMake_SOURCE_DIR}/Condition.json.in")
 run_cmake_test_presets(ConditionListPresets "" "" "x" "--list-presets")
