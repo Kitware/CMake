@@ -2,8 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "QCMakeCacheView.h"
 #include <QObject>
+
+#include "QCMakeCacheView.h"
 
 class QCMakeCacheModelTest : public QObject
 {

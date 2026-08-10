@@ -2,8 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "QCMakePreset.h"
 #include <QObject>
+
+#include "QCMakePreset.h"
 
 class QCMakePresetTest : public QObject
 {
