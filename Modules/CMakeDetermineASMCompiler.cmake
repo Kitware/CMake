@@ -297,7 +297,7 @@ endif()
 # configure variables set in this file for fast reload later on
 block()
   foreach(_var IN ITEMS
-      # Keep in sync with Internal/CMakeTestASMLinker.
+      # Keep in sync with Internal/CMakeInspectASMLinker.
       COMPILER
       COMPILER_ID
       COMPILER_ARG1
@@ -306,6 +306,8 @@ block()
       COMPILER_RANLIB
       COMPILER_VERSION
       COMPILER_ARCHITECTURE_ID
+      COMPILER_FRONTEND_VARIANT
+      SIMULATE_ID
       )
     set(_CMAKE_ASM_${_var} "${CMAKE_ASM${ASM_DIALECT}_${_var}}")
   endforeach()
