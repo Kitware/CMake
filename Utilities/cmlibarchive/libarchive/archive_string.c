@@ -450,6 +450,8 @@ default_iconv_charset(const char *charset) {
 	return locale_charset();
 #elif HAVE_NL_LANGINFO
 	return nl_langinfo(CODESET);
+#elif defined(__BIONIC__)
+	return "UTF-8";
 #else
 	return "";
 #endif
@@ -1314,7 +1316,17 @@ create_sconv_object(const char *fc, const char *tc,
 			else if (strcmp(fc, "CP932") == 0)
 				sc->cd = iconv_open(tc, "SJIS");
 		}
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(__FreeBSD__) && !defined(HAVE_LIBICONV)
+		/*
+		 * FreeBSD's native iconv() by default returns the number of
+		 * invalid characters in the input string, as specified by
+		 * POSIX, but iconv_strncat_in_locale() assumes GNU iconv
+		 * semantics.
+		 */
+		int v = 1;
+
+		(void)iconvctl(sc->cd, ICONV_SET_ILSEQ_INVALID, &v);
+#elif defined(_WIN32) && !defined(__CYGWIN__)
 		/*
 		 * archive_mstring on Windows directly convert multi-bytes
 		 * into archive_wstring in order not to depend on locale
@@ -1362,7 +1374,7 @@ free_sconv_object(struct archive_string_conv *sc)
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-# if defined(WINAPI_FAMILY_PARTITION) && !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+# if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #  define GetOEMCP() CP_OEMCP
 # endif
 
@@ -1713,7 +1725,7 @@ get_sconv_object(struct archive *a, const char *fc, const char *tc, int flag)
 		if (a != NULL) {
 #if HAVE_ICONV
 			archive_set_error(a, ARCHIVE_ERRNO_MISC,
-			    "iconv_open failed : Cannot handle ``%s''",
+			    "iconv_open failed: Cannot handle ``%s''",
 			    (flag & SCONV_TO_CHARSET)?tc:fc);
 #else
 			archive_set_error(a, ARCHIVE_ERRNO_MISC,
@@ -2315,7 +2327,7 @@ best_effort_strncat_in_locale(struct archive_string *as, const void *_p,
 
 	remaining = length;
 	itp = (const uint8_t *)_p;
-	while (*itp && remaining > 0) {
+	while (remaining > 0 && *itp) {
 		if (*itp > 127) {
 			// Non-ASCII: Substitute with suitable replacement
 			if (sc->flag & SCONV_TO_UTF8) {
@@ -2330,6 +2342,7 @@ best_effort_strncat_in_locale(struct archive_string *as, const void *_p,
 			archive_strappend_char(as, *itp);
 		}
 		++itp;
+		--remaining;
 	}
 	return (return_value);
 }
