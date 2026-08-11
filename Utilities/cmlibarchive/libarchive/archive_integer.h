@@ -27,6 +27,10 @@
 #ifndef ARCHIVE_INTEGER_H_INCLUDED
 #define ARCHIVE_INTEGER_H_INCLUDED
 
+#ifdef CM_PARSE_DATE
+#define HAVE_STDINT_H 1
+#define USE_STDCKDINT 0
+#else
 #include "archive_platform.h"
 
 /* Note:  This is a purely internal header! */
@@ -34,6 +38,7 @@
 
 #ifndef __LIBARCHIVE_BUILD
 #error This header is only to be used internally to libarchive.
+#endif
 #endif
 
 #ifdef HAVE_INTSAFE_H
