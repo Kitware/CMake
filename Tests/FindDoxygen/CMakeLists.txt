@@ -1,5 +1,5 @@
 add_test(NAME FindDoxygen.SimpleTest COMMAND
-  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
   --build-and-test
   "${CMake_SOURCE_DIR}/Tests/FindDoxygen/SimpleTest"
   "${CMake_BINARY_DIR}/Tests/FindDoxygen/SimpleTest"
@@ -9,7 +9,7 @@ add_test(NAME FindDoxygen.SimpleTest COMMAND
 )
 
 add_test(NAME FindDoxygen.QuotingTest COMMAND
-  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
   --build-and-test
   "${CMake_SOURCE_DIR}/Tests/FindDoxygen/QuotingTest"
   "${CMake_BINARY_DIR}/Tests/FindDoxygen/QuotingTest"
@@ -19,17 +19,27 @@ add_test(NAME FindDoxygen.QuotingTest COMMAND
 )
 
 add_test(NAME FindDoxygen.AllTarget COMMAND
-  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
   --build-and-test
   "${CMake_SOURCE_DIR}/Tests/FindDoxygen/AllTarget"
   "${CMake_BINARY_DIR}/Tests/FindDoxygen/AllTarget"
   ${build_generator_args}
   --build-options ${build_options}
-  --test-command ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --test-command ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
+)
+
+add_test(NAME FindDoxygen.CleanTarget COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/FindDoxygen/CleanTarget"
+  "${CMake_BINARY_DIR}/Tests/FindDoxygen/CleanTarget"
+  ${build_generator_args}
+  --build-options ${build_options}
+  --test-command ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
 )
 
 add_test(NAME FindDoxygen.StampFile COMMAND
-  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
   --build-and-test
   "${CMake_SOURCE_DIR}/Tests/FindDoxygen/StampFile"
   "${CMake_BINARY_DIR}/Tests/FindDoxygen/StampFile"
@@ -40,7 +50,7 @@ add_test(NAME FindDoxygen.StampFile COMMAND
 
 if(CMake_TEST_FindDoxygen_Dot)
   add_test(NAME FindDoxygen.DotComponentTest COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindDoxygen/DotComponentTestTest"
     "${CMake_BINARY_DIR}/Tests/FindDoxygen/DotComponentTestTest"
