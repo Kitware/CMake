@@ -869,6 +869,16 @@ following options:
   Some native build tools always build in parallel.  The use of ``<jobs>``
   value of ``1`` can be used to limit to a single job.
 
+  .. versionadded:: 4.5
+    When CMake is the one passing the parallel flag to the build tool (through
+    this option or the :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` environment
+    variable) and that tool is GNU Make 4.0 or newer, the output of each
+    recipe is grouped so that concurrent jobs do not interleave.  Request
+    parallelism natively, e.g. ``cmake --build . -- -j``, to opt out and
+    stream output as it is produced.  Since
+    :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` likewise enables grouping, unset it
+    to opt out when it is set.
+
 .. option:: -t <tgt>..., --target <tgt>...
 
   Build ``<tgt>`` instead of the default target.  Multiple targets may be

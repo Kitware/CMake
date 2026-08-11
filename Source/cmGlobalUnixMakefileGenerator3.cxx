@@ -11,6 +11,9 @@
 #include <cmext/algorithm>
 #include <cmext/memory>
 
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -589,6 +592,21 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     } else {
       makeCommand.Add(cmStrCat("-j", jobs));
     }
+
+    // Group each recipe's output so parallel jobs do not interleave.  Only
+    // done when CMake is the one passing the parallel flag to make; a native
+    // `-- -j` leaves jobs unset and thus opts out.  Grouping requires GNU
+    // Make 4.0+ (its --output-sync); IsGNUMakeJobServerAware() excludes
+    // non-GNU makes such as JOM before the version probe runs.  Emitted
+    // before the user's make options so a native `-- -O<mode>` overrides it.
+    if (this->IsGNUMakeJobServerAware() &&
+        this->MakeSupportsOutputSync(makeProgram)) {
+      makeCommand.Add("-Otarget");
+      // Set the (empty by default) USES_TERMINAL recipe prefix to "+" so
+      // GNU Make leaves those recipes unbuffered, keeping interactive
+      // commands able to reach the terminal under -Otarget.
+      makeCommand.Add("CMAKE_USES_TERMINAL_PREFIX=+");
+    }
   }
 
   makeCommand.Add(makeOptions.begin(), makeOptions.end());
@@ -602,6 +620,35 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     }
   }
   return { std::move(makeCommand) };
+}
+
+bool cmGlobalUnixMakefileGenerator3::MakeSupportsOutputSync(
+  std::string const& makeProgram)
+{
+  if (this->OutputSyncSupportState == OutputSyncSupport::Unknown) {
+    // Any probe failure (spawn error, timeout, non-GNU or old make) leaves
+    // grouping off; it is a convenience and must never fail the build.
+    this->OutputSyncSupportState = OutputSyncSupport::No;
+
+    std::string version;
+    std::string error;
+    int retVal = 1;
+    std::vector<std::string> command{ this->SelectMakeProgram(makeProgram),
+                                      "--version" };
+    if (cmSystemTools::RunSingleCommand(command, &version, &error, &retVal,
+                                        nullptr, cmSystemTools::OUTPUT_NONE,
+                                        cmDuration(30)) &&
+        retVal == 0) {
+      // GNU Make's version line is not localized, so no LC_ALL=C is needed.
+      cmsys::RegularExpression versionRegex("GNU Make ([0-9]+(\\.[0-9]+)*)");
+      if (versionRegex.find(version) &&
+          !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                         versionRegex.match(1), "4.0")) {
+        this->OutputSyncSupportState = OutputSyncSupport::Yes;
+      }
+    }
+  }
+  return this->OutputSyncSupportState == OutputSyncSupport::Yes;
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(

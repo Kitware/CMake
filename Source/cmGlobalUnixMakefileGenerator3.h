@@ -309,6 +309,18 @@ protected:
 private:
   char const* GetBuildIgnoreErrorsFlag() const override { return "-i"; }
 
+  // Probe the make tool (once, memoized) for whether it is GNU Make 4.0 or
+  // newer and thus supports grouped output via --output-sync.
+  bool MakeSupportsOutputSync(std::string const& makeProgram);
+
+  enum class OutputSyncSupport
+  {
+    Unknown,
+    Yes,
+    No
+  };
+  OutputSyncSupport OutputSyncSupportState = OutputSyncSupport::Unknown;
+
   std::map<cmStateSnapshot, std::set<cmGeneratorTarget const*>,
            cmStateSnapshot::StrictWeakOrder>
     DirectoryTargetsMap;

@@ -135,3 +135,130 @@ if(MAKE_IS_GNU)
   # commands with the '+' operator.
   run_cmake(GNUMakeJobServerAware)
 endif()
+
+# Output synchronization (-Otarget) is emitted only for the GNU Make family of
+# generators.  Drive these cases with a fake "make" so the behavior can be
+# asserted independently of the host's real make tool.
+if(FAKE_MAKE AND RunCMake_GENERATOR MATCHES "Unix Makefiles|MinGW Makefiles|MSYS Makefiles")
+  function(run_OutputSync)
+    # Use the fake make for the configure step so the build steps inherit it
+    # from the cache.
+    set(RunCMake_MAKE_PROGRAM "${FAKE_MAKE}")
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/OutputSync-build)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+    file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+    run_cmake(OutputSync)
+
+    set(RunCMake-check-file OutputSync-check.cmake)
+    set(record "${RunCMake_TEST_BINARY_DIR}/fake_make_record.txt")
+    set(marker "${RunCMake_TEST_BINARY_DIR}/fake_make_probe.txt")
+    set(ENV{FAKE_MAKE_RECORD} "${record}")
+    set(ENV{FAKE_MAKE_PROBE_MARKER} "${marker}")
+
+    # CMake-driven parallel build with GNU Make >= 4.0: group the output.
+    file(REMOVE "${record}" "${marker}")
+    set(ENV{FAKE_MAKE_VERSION} "GNU Make 4.4.1")
+    set(expect_otarget 1)
+    set(expect_uses_terminal_flag 1)
+    set(expect_probe 1)
+    run_cmake_command(OutputSync-parallel ${CMAKE_COMMAND} --build . --parallel 2)
+
+    # Serial build: no grouping and no probe.
+    file(REMOVE "${record}" "${marker}")
+    set(expect_otarget 0)
+    set(expect_uses_terminal_flag 0)
+    set(expect_probe 0)
+    run_cmake_command(OutputSync-serial ${CMAKE_COMMAND} --build .)
+
+    # Native "-- -j" opt-out: CMake adds neither -j nor -Otarget, no probe.
+    file(REMOVE "${record}" "${marker}")
+    set(expect_otarget 0)
+    set(expect_uses_terminal_flag 0)
+    set(expect_probe 0)
+    run_cmake_command(OutputSync-native-j ${CMAKE_COMMAND} --build . -- -j)
+
+    # A user's native "-O" overrides CMake's: -Otarget appears before -Onone.
+    file(REMOVE "${record}" "${marker}")
+    set(expect_otarget 1)
+    set(expect_uses_terminal_flag 1)
+    set(expect_probe 1)
+    set(expect_order_onone 1)
+    run_cmake_command(OutputSync-override ${CMAKE_COMMAND} --build . --parallel 2 -- -Onone)
+    unset(expect_order_onone)
+
+    # GNU Make < 4.0 does not support --output-sync.
+    file(REMOVE "${record}" "${marker}")
+    set(ENV{FAKE_MAKE_VERSION} "GNU Make 3.81")
+    set(expect_otarget 0)
+    set(expect_uses_terminal_flag 0)
+    set(expect_probe 1)
+    run_cmake_command(OutputSync-old ${CMAKE_COMMAND} --build . --parallel 2)
+
+    # 4.0 is the first release to support --output-sync; verify the lower
+    # boundary and the rest of the 4.0-4.2 series are classified as supported.
+    foreach(v IN ITEMS 4.0 4.1 4.2)
+      file(REMOVE "${record}" "${marker}")
+      set(ENV{FAKE_MAKE_VERSION} "GNU Make ${v}")
+      set(expect_otarget 1)
+      set(expect_uses_terminal_flag 1)
+      set(expect_probe 1)
+      run_cmake_command(OutputSync-v${v} ${CMAKE_COMMAND} --build . --parallel 2)
+    endforeach()
+
+    # A non-GNU make is not grouped.
+    file(REMOVE "${record}" "${marker}")
+    set(ENV{FAKE_MAKE_VERSION} "bmake version 20200710")
+    set(expect_otarget 0)
+    set(expect_uses_terminal_flag 0)
+    set(expect_probe 1)
+    run_cmake_command(OutputSync-nongnu ${CMAKE_COMMAND} --build . --parallel 2)
+
+    # Unparsable "--version" output: probe fails gracefully, build still runs.
+    file(REMOVE "${record}" "${marker}")
+    set(ENV{FAKE_MAKE_VERSION} "garbage output")
+    set(expect_otarget 0)
+    set(expect_uses_terminal_flag 0)
+    set(expect_probe 1)
+    run_cmake_command(OutputSync-garbage ${CMAKE_COMMAND} --build . --parallel 2)
+
+    # Probe exits non-zero: treated as unsupported, build still runs.
+    file(REMOVE "${record}" "${marker}")
+    set(ENV{FAKE_MAKE_VERSION} "GNU Make 4.4.1")
+    set(ENV{FAKE_MAKE_VERSION_RESULT} "2")
+    set(expect_otarget 0)
+    set(expect_uses_terminal_flag 0)
+    set(expect_probe 1)
+    run_cmake_command(OutputSync-probe-fail ${CMAKE_COMMAND} --build . --parallel 2)
+    unset(ENV{FAKE_MAKE_VERSION_RESULT})
+
+    # --clean-first runs two build commands but probes only once (memoized).
+    file(REMOVE "${record}" "${marker}")
+    set(ENV{FAKE_MAKE_VERSION} "GNU Make 4.4.1")
+    set(expect_otarget 1)
+    set(expect_otarget_count 2)
+    set(expect_uses_terminal_flag 1)
+    set(expect_probe 1)
+    set(expect_probe_count 1)
+    run_cmake_command(OutputSync-clean-first ${CMAKE_COMMAND} --build . --parallel 2 --clean-first)
+    unset(expect_otarget_count)
+    unset(expect_probe_count)
+
+    unset(ENV{FAKE_MAKE_VERSION})
+    unset(ENV{FAKE_MAKE_RECORD})
+    unset(ENV{FAKE_MAKE_PROBE_MARKER})
+  endfunction()
+  run_OutputSync()
+
+  # USES_TERMINAL recipe prefixing is a generation-time change; inspect the
+  # generated build.make directly.
+  function(run_OutputSyncUsesTerminal)
+    set(RunCMake_MAKE_PROGRAM "${FAKE_MAKE}")
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/OutputSyncUsesTerminal-build)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+    file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+    run_cmake(OutputSyncUsesTerminal)
+  endfunction()
+  run_OutputSyncUsesTerminal()
+endif()
