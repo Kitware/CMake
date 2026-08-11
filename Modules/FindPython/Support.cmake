@@ -1020,7 +1020,7 @@ function (_PYTHON_GET_LAUNCHER _PYTHON_PGL_NAME)
   endif()
 
   if (_${_PYTHON_PREFIX}_CROSSCOMPILING)
-    set (${_PYTHON_PGL_NAME} "${CMAKE_CROSSCOMPILING_EMULATOR}" PARENT_SCOPE)
+    set (${_PYTHON_PGL_NAME} "${_${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR}" PARENT_SCOPE)
     return()
   endif()
 
@@ -1629,15 +1629,22 @@ endif()
 ## handle cross-compiling constraints for components:
 ##  If Interpreter and/or Compiler are specified with Development components
 ##  the CMAKE_CROSSCOMPILING_EMULATOR variable should be defined
-cmake_policy (GET CMP0190 _${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY)
 unset (_${_PYTHON_PREFIX}_CROSSCOMPILING)
-if (CMAKE_CROSSCOMPILING AND _${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY STREQUAL "NEW")
+unset (_${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR)
+if (CMAKE_CROSSCOMPILING)
   if (${_PYTHON_BASE}_FIND_COMPONENTS MATCHES "Interpreter|Compiler"
       AND ${_PYTHON_BASE}_FIND_COMPONENTS MATCHES "Development")
-    if (CMAKE_CROSSCOMPILING_EMULATOR)
-      set (_${_PYTHON_PREFIX}_CROSSCOMPILING TRUE)
+    cmake_policy (GET CMP0190 _${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY)
+    if (_${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY STREQUAL "NEW")
+      if (CMAKE_CROSSCOMPILING_EMULATOR)
+        set (_${_PYTHON_PREFIX}_CROSSCOMPILING TRUE)
+        set (_${_PYTHON_PREFIX}_CROSSCOMPILING_EMULATOR "${CMAKE_CROSSCOMPILING_EMULATOR}")
+      else()
+        _python_display_failure ("${_PYTHON_PREFIX}: When cross-compiling, Interpreter and/or Compiler components cannot be searched when CMAKE_CROSSCOMPILING_EMULATOR variable is not specified (see policy CMP0190)." FATAL)
+      endif()
     else()
-      _python_display_failure ("${_PYTHON_PREFIX}: When cross-compiling, Interpreter and/or Compiler components cannot be searched when CMAKE_CROSSCOMPILING_EMULATOR variable is not specified (see policy CMP0190)." FATAL)
+      # CMP0190 == OLD : no condition regarding crosscompiling environment
+      set (_${_PYTHON_PREFIX}_CROSSCOMPILING TRUE)
     endif()
   endif()
 endif()
