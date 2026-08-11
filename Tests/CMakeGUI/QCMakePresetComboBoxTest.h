@@ -2,8 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "QCMakePresetComboBox.h"
 #include <QObject>
+
+#include "QCMakePresetComboBox.h"
 
 class QCMakePresetComboBoxTest : public QObject
 {

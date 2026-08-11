@@ -4,14 +4,15 @@
 
 #include <utility>
 
-#include "QCMakePreset.h"
-#include "QCMakePresetItemModel.h"
 #include <QHash>
 #include <QMetaType>
 #include <QSignalSpy>
 #include <QVariant>
 #include <QVector>
 #include <QtTest>
+
+#include "QCMakePreset.h"
+#include "QCMakePresetItemModel.h"
 
 using QItemDataHash = QHash<Qt::ItemDataRole, QVariant>;
 

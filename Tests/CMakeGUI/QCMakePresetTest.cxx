@@ -4,8 +4,9 @@
 
 #include <utility>
 
-#include "QCMakePreset.h"
 #include <QtTest>
+
+#include "QCMakePreset.h"
 
 namespace {
 QCMakePreset makePreset()

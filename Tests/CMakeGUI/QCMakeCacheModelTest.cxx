@@ -5,8 +5,9 @@
 #include <algorithm>
 #include <iostream>
 
-#include "QCMakeCacheView.h"
 #include <QtTest>
+
+#include "QCMakeCacheView.h"
 
 namespace {
 QCMakeProperty makeProperty(
