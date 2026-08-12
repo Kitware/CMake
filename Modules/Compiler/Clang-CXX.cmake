@@ -37,18 +37,21 @@ if((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0 AND CMAKE_CXX_COMPILER
   endif ()
   if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     set(_clang "-clang:")
+    set(_srcsep "-- ")
   else()
     set(_clang "")
+    set(_srcsep "")
   endif()
   string(CONCAT CMAKE_CXX_SCANDEP_SOURCE
     "\"${CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS}\""
     " -format=p1689"
     " --"
     " <CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS>"
-    " -x c++ <SOURCE> -c ${_clang}-o ${_clang}<OBJECT>"
+    " -x c++ -c ${_clang}-o ${_clang}<OBJECT>"
     "${_clang_scan_deps_resource_dir}"
     " ${_clang}-MT ${_clang}<DYNDEP_FILE>"
     " ${_clang}-MD ${_clang}-MF ${_clang}<DEP_FILE>"
+    " ${_srcsep}<SOURCE>"
     # Write to a temporary file. If the scan fails, we do not want to update
     # the actual output file as `ninja` (at least) assumes that failed
     # commands either delete or leave output files alone. See Issue#25419.
@@ -62,6 +65,7 @@ if((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0 AND CMAKE_CXX_COMPILER
   set(CMAKE_CXX_MODULE_MAP_FORMAT "clang")
   set(CMAKE_CXX_MODULE_MAP_FLAG "@<MODULE_MAP_FILE>")
   set(CMAKE_CXX_COMPILE_BMI
-    "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> ${_clang}-o ${_clang}<OBJECT> --precompile <SOURCE>")
+    "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> ${_clang}-o ${_clang}<OBJECT> --precompile ${_srcsep}<SOURCE>")
   unset(_clang)
+  unset(_srcsep)
 endif()
