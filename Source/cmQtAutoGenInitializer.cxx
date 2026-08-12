@@ -1373,6 +1373,16 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
        gen.find("Visual Studio") != std::string::npos || gen == "Xcode");
   }();
 
+  // Under VS, attach the autogen custom command to the origin target instead
+  // of creating separate targets, to reduce the number of targets loaded into
+  // the IDE.  The dependencies of the origin target then provide the ordering
+  // that '_autogen_timestamp_deps' provides otherwise.  The conditions match
+  // those of the PRE_BUILD event below, so that the '_autogen' target keeps
+  // existing wherever it did before depfiles were enabled for VS.
+  bool const attachToOrigin = useDepfile &&
+    this->AutogenTarget.DependFiles.empty() &&
+    !this->AutogenTarget.GlobalTarget && this->GlobalGen->IsVisualStudio();
+
   // Files provided by the autogen target
   std::vector<std::string> autogenByproducts;
   std::vector<std::string> timestampByproducts;
@@ -1404,6 +1414,12 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         autogenByproducts.push_back(file.second);
       }
     }
+  }
+
+  if (attachToOrigin) {
+    // Without an autogen target the timestamp command provides all byproducts.
+    cm::append(timestampByproducts, autogenByproducts);
+    autogenByproducts.clear();
   }
 
   // Compose target comment
@@ -1517,8 +1533,9 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   } else {
 
     // Add link library target dependencies to the autogen target
-    // dependencies
-    if (this->AutogenTarget.DependOrigin) {
+    // dependencies.  Not needed when attaching to the origin target, which
+    // already depends on its own link libraries.
+    if (this->AutogenTarget.DependOrigin && !attachToOrigin) {
       // add_dependencies/addUtility do not support generator expressions.
       // We depend only on the libraries found in all configs therefore.
       std::map<cmGeneratorTarget const*, std::size_t> targetsPartOfAllConfigs;
@@ -1555,41 +1572,43 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     if (useDepfile) {
       // Create a custom command that generates a timestamp file and
       // has a depfile assigned. The depfile is created by JobDepFilesMergeT.
-      //
-      // Also create an additional '_autogen_timestamp_deps' that the custom
-      // command will depend on. It will have no sources or commands to
-      // execute, but it will have dependencies that would originally be
-      // assigned to the pre-Qt 5.15 'autogen' target. These dependencies will
-      // serve as a list of order-only dependencies for the custom command,
-      // without forcing the custom command to re-execute.
-      //
-      // The dependency tree would then look like
-      // '_autogen_timestamp_deps (order-only)' <- '/timestamp' file <-
-      // '_autogen' target.
-      auto const timestampTargetName =
-        cmStrCat(this->GenTarget->GetName(), "_autogen_timestamp_deps");
+      if (!attachToOrigin) {
+        // Also create an additional '_autogen_timestamp_deps' that the custom
+        // command will depend on. It will have no sources or commands to
+        // execute, but it will have dependencies that would originally be
+        // assigned to the pre-Qt 5.15 'autogen' target. These dependencies
+        // will serve as a list of order-only dependencies for the custom
+        // command, without forcing the custom command to re-execute.
+        //
+        // The dependency tree would then look like
+        // '_autogen_timestamp_deps (order-only)' <- '/timestamp' file <-
+        // '_autogen' target.
+        auto const timestampTargetName =
+          cmStrCat(this->GenTarget->GetName(), "_autogen_timestamp_deps");
 
-      auto cc = cm::make_unique<cmCustomCommand>();
-      cc->SetWorkingDirectory(this->Dir.Work.c_str());
-      cc->SetDepends(dependencies);
-      cc->SetEscapeOldStyle(false);
-      timestampTarget = this->LocalGen->AddUtilityCommand(timestampTargetName,
-                                                          true, std::move(cc));
+        auto cc = cm::make_unique<cmCustomCommand>();
+        cc->SetWorkingDirectory(this->Dir.Work.c_str());
+        cc->SetDepends(dependencies);
+        cc->SetEscapeOldStyle(false);
+        timestampTarget = this->LocalGen->AddUtilityCommand(
+          timestampTargetName, true, std::move(cc));
 
-      this->LocalGen->AddGeneratorTarget(
-        cm::make_unique<cmGeneratorTarget>(timestampTarget, this->LocalGen));
+        this->LocalGen->AddGeneratorTarget(
+          cm::make_unique<cmGeneratorTarget>(timestampTarget, this->LocalGen));
 
-      // Set FOLDER property on the timestamp target, so it appears in the
-      // appropriate folder in an IDE or in the file api.
-      if (!this->TargetsFolder.empty()) {
-        timestampTarget->SetProperty("FOLDER", this->TargetsFolder);
+        // Set FOLDER property on the timestamp target, so it appears in the
+        // appropriate folder in an IDE or in the file api.
+        if (!this->TargetsFolder.empty()) {
+          timestampTarget->SetProperty("FOLDER", this->TargetsFolder);
+        }
+
+        // Make '/timestamp' file depend on '_autogen_timestamp_deps'.
+        dependencies.clear();
+        dependencies.push_back(timestampTargetName);
       }
 
-      // Make '/timestamp' file depend on '_autogen_timestamp_deps' and on the
-      // moc and uic executables (whichever are enabled).
-      dependencies.clear();
-      dependencies.push_back(timestampTargetName);
-
+      // Make '/timestamp' file depend on the moc and uic executables
+      // (whichever are enabled).
       AddAutogenExecutableToDependencies(this->Moc, dependencies);
       AddAutogenExecutableToDependencies(this->Uic, dependencies);
       std::string outputFile;
@@ -1634,7 +1653,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
           { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
         this->AddGeneratedSource(outputFile, this->Moc);
       }
-      cc = cm::make_unique<cmCustomCommand>();
+      auto cc = cm::make_unique<cmCustomCommand>();
       cc->SetOutputs(outputFile);
       cc->SetByproducts(timestampByproducts);
       cc->SetDepends(dependencies);
@@ -1651,48 +1670,57 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       autogenComment.clear();
     }
 
-    // Create autogen target
-    auto cc = cm::make_unique<cmCustomCommand>();
-    cc->SetWorkingDirectory(this->Dir.Work.c_str());
-    cc->SetByproducts(autogenByproducts);
-    cc->SetDepends(dependencies);
-    cc->SetCommandLines(commandLines);
-    cc->SetEscapeOldStyle(false);
-    cc->SetComment(autogenComment.c_str());
-    cmTarget* autogenTarget = this->LocalGen->AddUtilityCommand(
-      this->AutogenTarget.Name, true, std::move(cc));
-    // Create autogen generator target
-    this->LocalGen->AddGeneratorTarget(
-      cm::make_unique<cmGeneratorTarget>(autogenTarget, this->LocalGen));
-
-    // Order the autogen target(s) just before the original target.
-    cmTarget* orderTarget = timestampTarget ? timestampTarget : autogenTarget;
-    // Forward origin utilities to autogen target
-    if (this->AutogenTarget.DependOrigin) {
-      for (BT<std::pair<std::string, bool>> const& depName :
-           this->GenTarget->GetUtilities()) {
-        orderTarget->AddUtility(depName.Value.first, false, this->Makefile);
+    if (attachToOrigin) {
+      // Add additional autogen target dependencies to the origin target
+      for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
+        this->GenTarget->Target->AddUtility(depTarget->GetName(), false,
+                                            this->Makefile);
       }
-    }
+    } else {
+      // Create autogen target
+      auto cc = cm::make_unique<cmCustomCommand>();
+      cc->SetWorkingDirectory(this->Dir.Work.c_str());
+      cc->SetByproducts(autogenByproducts);
+      cc->SetDepends(dependencies);
+      cc->SetCommandLines(commandLines);
+      cc->SetEscapeOldStyle(false);
+      cc->SetComment(autogenComment.c_str());
+      cmTarget* autogenTarget = this->LocalGen->AddUtilityCommand(
+        this->AutogenTarget.Name, true, std::move(cc));
+      // Create autogen generator target
+      this->LocalGen->AddGeneratorTarget(
+        cm::make_unique<cmGeneratorTarget>(autogenTarget, this->LocalGen));
 
-    // Add additional autogen target dependencies to autogen target
-    for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
-      orderTarget->AddUtility(depTarget->GetName(), false, this->Makefile);
-    }
+      // Order the autogen target(s) just before the original target.
+      cmTarget* orderTarget =
+        timestampTarget ? timestampTarget : autogenTarget;
+      // Forward origin utilities to autogen target
+      if (this->AutogenTarget.DependOrigin) {
+        for (BT<std::pair<std::string, bool>> const& depName :
+             this->GenTarget->GetUtilities()) {
+          orderTarget->AddUtility(depName.Value.first, false, this->Makefile);
+        }
+      }
 
-    // Set FOLDER property in autogen target
-    if (!this->TargetsFolder.empty()) {
-      autogenTarget->SetProperty("FOLDER", this->TargetsFolder);
-    }
+      // Add additional autogen target dependencies to autogen target
+      for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
+        orderTarget->AddUtility(depTarget->GetName(), false, this->Makefile);
+      }
 
-    // Add autogen target to the origin target dependencies
-    this->GenTarget->Target->AddUtility(this->AutogenTarget.Name, false,
-                                        this->Makefile);
+      // Set FOLDER property in autogen target
+      if (!this->TargetsFolder.empty()) {
+        autogenTarget->SetProperty("FOLDER", this->TargetsFolder);
+      }
 
-    // Add autogen target to the global autogen target dependencies
-    if (this->AutogenTarget.GlobalTarget) {
-      this->GlobalInitializer->AddToGlobalAutoGen(this->LocalGen,
-                                                  this->AutogenTarget.Name);
+      // Add autogen target to the origin target dependencies
+      this->GenTarget->Target->AddUtility(this->AutogenTarget.Name, false,
+                                          this->Makefile);
+
+      // Add autogen target to the global autogen target dependencies
+      if (this->AutogenTarget.GlobalTarget) {
+        this->GlobalInitializer->AddToGlobalAutoGen(this->LocalGen,
+                                                    this->AutogenTarget.Name);
+      }
     }
   }
 

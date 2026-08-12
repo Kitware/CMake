@@ -84,4 +84,68 @@ Automatic MOC for target sub_exe_2")
       endif()
     endblock()
   endif()
+
+  if(RunCMake_GENERATOR MATCHES "Visual Studio"
+      AND QtCore_VERSION VERSION_GREATER_EQUAL 5.15.0)
+    block()
+      macro(check_project_exists target expected)
+        if(EXISTS "${RunCMake_TEST_BINARY_DIR}/${target}.vcxproj")
+          set(actual TRUE)
+        else()
+          set(actual FALSE)
+        endif()
+        if("${actual}" STREQUAL "${expected}")
+          set(check_result "PASSED")
+          set(message_type "STATUS")
+        else()
+          set(check_result "FAILED")
+          set(message_type "FATAL_ERROR")
+        endif()
+        message(${message_type}
+          "QtAutoMocVsTargets-\"${target}.vcxproj\" exists is ${actual}, expected ${expected} - ${check_result}")
+      endmacro()
+
+      set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/QtAutoMocVsTargets-build)
+      run_cmake_with_options(QtAutoMocVsTargets ${RunCMake_TEST_OPTIONS})
+      set(RunCMake_TEST_NO_CLEAN 1)
+
+      # A plain AUTOMOC target does not get extra projects.
+      check_project_exists(plain_lib TRUE)
+      check_project_exists(plain_lib_autogen FALSE)
+      check_project_exists(plain_lib_autogen_timestamp_deps FALSE)
+      # A target with a GENERATED dependency keeps them.
+      check_project_exists(gen_dep_lib_autogen TRUE)
+      check_project_exists(gen_dep_lib_autogen_timestamp_deps TRUE)
+
+      # The first build must run AUTOMOC.  Assert it, so that the checks below
+      # cannot pass just because the message is missing from the build output.
+      set(RunCMake_TEST_EXPECT_stdout "Automatic MOC for target plain_lib")
+      run_cmake_command(QtAutoMocVsTargets-build ${CMAKE_COMMAND} --build . --config Debug)
+      unset(RunCMake_TEST_EXPECT_stdout)
+
+      set(RunCMake_TEST_NOT_EXPECT_stdout "Automatic MOC for target plain_lib|\
+Automatic MOC for target gen_dep_lib")
+      # Assert that the depfile prevents AUTOMOC from running again.
+      set(RunCMake_TEST_VARIANT_DESCRIPTION "-Don't execute AUTOMOC again")
+      run_cmake_command(QtAutoMocVsTargets-build ${CMAKE_COMMAND} --build . --config Debug)
+      # Touch the source file of a library that 'plain_lib' links.  This must
+      # not cause a rerun of AUTOMOC.
+      file(TOUCH "${RunCMake_SOURCE_DIR}/simple_lib.cpp")
+      set(RunCMake_TEST_VARIANT_DESCRIPTION "-Don't execute AUTOMOC for a dependency change")
+      run_cmake_command(QtAutoMocVsTargets-build ${CMAKE_COMMAND} --build . --config Debug)
+      # Files in AUTOGEN_TARGET_DEPENDS are order-only dependencies.  Touching
+      # one must not cause a rerun of AUTOMOC either.
+      file(TOUCH "${RunCMake_SOURCE_DIR}/autogen_dep.txt")
+      set(RunCMake_TEST_VARIANT_DESCRIPTION "-Don't execute AUTOMOC for an AUTOGEN_TARGET_DEPENDS file")
+      run_cmake_command(QtAutoMocVsTargets-build ${CMAKE_COMMAND} --build . --config Debug)
+      unset(RunCMake_TEST_NOT_EXPECT_stdout)
+
+      # Another configuration has its own timestamp file, so it builds again.
+      set(RunCMake_TEST_EXPECT_stdout "Automatic MOC for target plain_lib")
+      set(RunCMake_TEST_VARIANT_DESCRIPTION "-Release")
+      run_cmake_command(QtAutoMocVsTargets-build ${CMAKE_COMMAND} --build . --config Release)
+      unset(RunCMake_TEST_EXPECT_stdout)
+      unset(RunCMake_TEST_VARIANT_DESCRIPTION)
+    endblock()
+  endif()
 endif ()
