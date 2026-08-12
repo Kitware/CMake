@@ -1615,7 +1615,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         for (std::string const& config : this->ConfigsList) {
           auto tempTimestampFileName = timestampFileWithoutConfig + config;
           auto tempDepFile = depFileWithoutConfig + config;
-          outputFileWithConfig.Config[config] = tempTimestampFileName;
+          outputFileWithConfig.Config[config] =
+            cmStrCat(this->Dir.Build, '/', tempTimestampFileName);
           this->AutogenTarget.DepFileRuleName.Config[config] =
             cmStrCat(this->Dir.RelativeBuild, '/', tempTimestampFileName);
           this->AutogenTarget.DepFile.Config[config] = tempDepFile;
