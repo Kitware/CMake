@@ -9,7 +9,8 @@ add_cuda_test_macro(Cuda.ObjectLibrary CudaObjectLibrary)
 add_cuda_test_macro(Cuda.MixedStandardLevels1 MixedStandardLevels1)
 add_cuda_test_macro(Cuda.MixedStandardLevels2 MixedStandardLevels2)
 add_cuda_test_macro(Cuda.MixedStandardLevels3 MixedStandardLevels3)
-if(NOT WIN32 OR NOT CMake_TEST_CUDA STREQUAL "Clang") # MSVC std lib needs C++14
+if(NOT WIN32 AND CMake_TEST_CUDA STREQUAL "NVIDIA")
+  # MSVC std lib, and newer clang needs C++14
   add_cuda_test_macro(Cuda.MixedStandardLevels4 MixedStandardLevels4)
   add_cuda_test_macro(Cuda.MixedStandardLevels5 MixedStandardLevels5)
 endif()

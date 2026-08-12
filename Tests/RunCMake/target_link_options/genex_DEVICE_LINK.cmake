@@ -36,7 +36,6 @@ if (CMake_TEST_CUDA)
   target_link_options(LinkOptions_CMP0105_OLD PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>)
 
   cmake_policy(SET CMP0105 NEW)
-
   add_executable(LinkOptions_CMP0105_NEW LinkOptionsDevice.cu)
   set_property(TARGET LinkOptions_CMP0105_NEW PROPERTY CUDA_SEPARABLE_COMPILATION ON)
   target_link_options(LinkOptions_CMP0105_NEW PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>)
@@ -45,7 +44,6 @@ if (CMake_TEST_CUDA)
   set_property(TARGET LinkOptions_device PROPERTY CUDA_SEPARABLE_COMPILATION ON)
   target_link_options(LinkOptions_device PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>
                                                  $<HOST_LINK:${pre}BADFLAG_NORMAL_LINK${obj}>)
-
   add_executable(LinkOptions_host_link_options LinkOptionsDevice.cu)
   set_property(TARGET LinkOptions_host_link_options PROPERTY CUDA_SEPARABLE_COMPILATION ON)
   if(CMake_TEST_CUDA STREQUAL "NVIDIA")
@@ -57,4 +55,8 @@ if (CMake_TEST_CUDA)
   add_executable(LinkOptions_no_device LinkOptionsDevice.cu)
   target_link_options(LinkOptions_no_device PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>
                                                     $<HOST_LINK:${pre}BADFLAG_NORMAL_LINK${obj}>)
+
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/info.cmake"
+    "set(CMAKE_CUDA_COMPILER_HAS_DEVICE_LINK_PHASE \"${CMAKE_CUDA_COMPILER_HAS_DEVICE_LINK_PHASE}\")\n"
+  )
 endif()

@@ -21,6 +21,14 @@ macro(__TestCompiler_setTryCompileTargetType)
       set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
       set(__CMAKE_TEST_COMPILER_TARGET_TYPE_RESTORE 1)
     endif()
+
+    if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang" AND
+      CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 20.0 AND
+      CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 23.0)
+      # https://github.com/llvm/llvm-project/issues/191041
+      set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+      set(__CMAKE_TEST_COMPILER_TARGET_TYPE_RESTORE 1)
+    endif()
   endif()
 endmacro()
 
