@@ -1,0 +1,8 @@
+.*--.*
+ +Properties for TARGET mylib:
+ +mylib\.TYPE = "STATIC_LIBRARY"
+ +mylib\.NAME = "mylib"
+
+--.*
+ +Properties for SOURCE [^"]+/stub\.c:
+ +[^"]+/stub\.c\.LANGUAGE = "C"

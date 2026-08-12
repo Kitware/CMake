@@ -5,8 +5,10 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <initializer_list>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -23,10 +25,15 @@
 #include "cmDependencyProvider.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
+#include "cmGeneratorTarget.h"
+#include "cmGetPropertyCommand.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkItem.h"
 #include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h" // IWYU pragma: keep
+#include "cmPropertyMap.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -34,6 +41,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetPropertyComputer.h"
+#include "cmTargetPropertyHelper.h"
 #include "cmValue.h"
 #include "cmake.h"
 
@@ -785,8 +794,649 @@ bool cmCMakeLanguageCommandPRINT_VARIABLES(
                       parsedArgs.CmakePrintVariables);
   return true;
 }
+// Walks every target reachable from `root` through any linkage - PUBLIC,
+// INTERFACE, PRIVATE, and `$<LINK_ONLY:>`-wrapped deps.  At each level we
+// union the link implementation and link interface, each queried with both
+// UseTo::Compile and UseTo::Link, so deps that only appear under LINK_ONLY
+// (which evaluates to empty under UseTo::Compile) still come through.
+std::vector<cmGeneratorTarget const*> CollectDependentTargets(
+  cmGeneratorTarget const* root, std::string const& config)
+{
+  std::vector<cmGeneratorTarget const*> deps;
+  std::set<cmGeneratorTarget const*> visited;
+  visited.insert(root);
+  std::vector<cmGeneratorTarget const*> queue;
+  queue.push_back(root);
+  while (!queue.empty()) {
+    cmGeneratorTarget const* cur = queue.back();
+    queue.pop_back();
+    auto visit = [&](std::vector<cmLinkItem> const& libs) {
+      for (cmLinkItem const& item : libs) {
+        cmGeneratorTarget const* dep = item.Target;
+        if (!dep || !visited.insert(dep).second) {
+          continue;
+        }
+        deps.push_back(dep);
+        queue.push_back(dep);
+      }
+    };
+    for (auto useTo : { cmGeneratorTarget::UseTo::Compile,
+                        cmGeneratorTarget::UseTo::Link }) {
+      if (cmLinkImplementationLibraries const* impl =
+            cur->GetLinkImplementationLibraries(config, useTo)) {
+        visit(impl->Libraries);
+      }
+      if (cmLinkInterfaceLibraries const* iface =
+            cur->GetLinkInterfaceLibraries(config, root, useTo)) {
+        visit(iface->Libraries);
+      }
+    }
+  }
+  return deps;
 }
 
+// Append one property line to `out`:
+//   "   <entityName>.<propertyName> = \"<value>\""
+// A null `value` writes "<NOTFOUND>" instead of "= \"...\"".
+void WritePropertyLine(std::string& out, std::string const& entityName,
+                       std::string const& propertyName, cmValue value)
+{
+  out += cmStrCat("   ", entityName, ".", propertyName);
+  if (value) {
+    out += cmStrCat(" = \"", *value, "\"");
+  } else {
+    out += " = <NOTFOUND>";
+  }
+  out += "\n";
+}
+
+enum class BlockKind
+{
+  Explicit,
+  All,
+};
+
+enum class HeaderSuffix
+{
+  None,
+  Reachable,
+};
+
+void EmitBlockHeader(
+  std::string& out, std::string const& entityName,
+  std::string const& entityType, BlockKind kind, HeaderSuffix suffix,
+  cm::optional<std::string> const& nameRegexStr = cm::nullopt,
+  cm::optional<std::string> const& valueRegexStr = cm::nullopt)
+{
+  out +=
+    cmStrCat(" ", (kind == BlockKind::All ? "All properties" : "Properties"),
+             " for ", entityType, " ", entityName);
+  if (suffix == HeaderSuffix::Reachable) {
+    out += " (and all reachable)";
+  }
+  if (kind == BlockKind::All && (nameRegexStr || valueRegexStr)) {
+    out += " matching";
+    if (nameRegexStr) {
+      out += cmStrCat(" name '", *nameRegexStr, "'");
+    }
+    if (nameRegexStr && valueRegexStr) {
+      out += " and";
+    }
+    if (valueRegexStr) {
+      out += cmStrCat(" value '", *valueRegexStr, "'");
+    }
+  }
+  out += ":\n";
+}
+
+// Build the "no properties matched" warning text used when the regex filter
+// wipes everything out for a target's ALL block.  Returned without any
+// "Warning:" prefix - callers feed it to IssueMessage, which adds the
+// standard "CMake Warning at <file>:<line>" framing.
+std::string EmptyMatchWarningMessage(
+  std::string const& entityName, std::string const& entityType,
+  cm::optional<std::string> const& nameRegexStr,
+  cm::optional<std::string> const& valueRegexStr)
+{
+  std::string msg =
+    cmStrCat("No properties for ", entityType, " ", entityName, " matching");
+  if (nameRegexStr) {
+    msg += cmStrCat(" name '", *nameRegexStr, "'");
+  }
+  if (nameRegexStr && valueRegexStr) {
+    msg += " and";
+  }
+  if (valueRegexStr) {
+    msg += cmStrCat(" value '", *valueRegexStr, "'");
+  }
+  msg += " in cmake_language(PRINT_PROPERTIES ...).";
+  return msg;
+}
+
+// Entity kinds supported by cmake_language(PRINT_PROPERTIES).
+enum class EntityKind
+{
+  Target,
+  Source,
+  Test,
+  Directory,
+  Cache
+};
+
+// Display name used in PRINT_PROPERTIES output ("TARGET", "SOURCE", etc.).
+char const* EntityTypeName(EntityKind kind)
+{
+  switch (kind) {
+    case EntityKind::Target:
+      return "TARGET";
+    case EntityKind::Source:
+      return "SOURCE";
+    case EntityKind::Test:
+      return "TEST";
+    case EntityKind::Directory:
+      return "DIRECTORY";
+    case EntityKind::Cache:
+      return "CACHE";
+  }
+  return "";
+}
+
+// Dispatch a property lookup to the appropriate per-entity helper.
+bool GetPropertyHelper(cmExecutionStatus& status, EntityKind kind,
+                       std::string const& name,
+                       std::string const& propertyName, cmValue& out)
+{
+  switch (kind) {
+    case EntityKind::Target:
+      return GetPropertyCommand::LookupTargetProperty(status, name,
+                                                      propertyName, out);
+    case EntityKind::Source:
+      return GetPropertyCommand::LookupSourceProperty(status, name,
+                                                      propertyName, out);
+    case EntityKind::Test:
+      return GetPropertyCommand::LookupTestProperty(status, name, propertyName,
+                                                    out);
+    case EntityKind::Directory:
+      return GetPropertyCommand::LookupDirectoryProperty(status, name,
+                                                         propertyName, out);
+    case EntityKind::Cache:
+      return GetPropertyCommand::LookupCacheProperty(status, name,
+                                                     propertyName, out);
+  }
+  return false;
+}
+
+// Emit one ALL-mode block: prints all properties matching the specified
+// regexes for a head target (`targets[0]`) and optionally any reachable
+// dependencies (`targets[1]` and on).
+bool EmitAllPropertiesBlock(std::string& out, std::string const& headerName,
+                            std::vector<cmTarget*> const& targets,
+                            HeaderSuffix suffix,
+                            cm::optional<cmsys::RegularExpression>& nameRegex,
+                            cm::optional<cmsys::RegularExpression>& valueRegex,
+                            cm::optional<std::string> const& nameRegexStr,
+                            cm::optional<std::string> const& valueRegexStr)
+{
+  std::string groupBuf;
+  bool groupEmitted = false;
+  for (cmTarget* t : targets) {
+    std::string const& rowName =
+      (t == targets.front()) ? headerName : t->GetName();
+    for (auto const& kv : t->GetExtendedProperties().GetList()) {
+      if (nameRegex && !nameRegex->find(kv.first)) {
+        continue;
+      }
+      if (valueRegex && !valueRegex->find(kv.second)) {
+        continue;
+      }
+      WritePropertyLine(groupBuf, rowName, kv.first, cmValue(kv.second));
+      groupEmitted = true;
+    }
+  }
+  if (!groupEmitted) {
+    return false;
+  }
+  EmitBlockHeader(out, headerName, "TARGET", BlockKind::All, suffix,
+                  nameRegexStr, valueRegexStr);
+  out += groupBuf;
+  return true;
+}
+
+// Outcome of emitting a NAMED-mode block.
+enum class NamedBlockResult
+{
+  Failed,  // a property lookup hard-failed
+  Emitted, // at least one property line was written
+  Empty,   // every requested property was skipped; header suppressed
+};
+
+// Emit one block of user-specified properties for a head target (`targets[0]`)
+// and optionally any reachable dependencies (`targets[1]` and on).
+NamedBlockResult EmitNamedPropertiesBlock(
+  std::string& out, std::string const& headerName,
+  std::vector<cmTarget*> const& targets,
+  std::vector<std::string> const& namedProperties, HeaderSuffix suffix,
+  cmMakefile& mf)
+{
+  bool headerWritten = false;
+  for (cmTarget* t : targets) {
+    std::string const& rowName =
+      (t == targets.front()) ? headerName : t->GetName();
+    for (std::string const& propName : namedProperties) {
+      // A computed location property may not be read from a non-imported
+      // target; skip it with a warning rather than triggering the getter's
+      // fatal error.
+      if (!t->IsImported() &&
+          cmTargetPropertyComputer::IsComputedLocationProperty(t->GetType(),
+                                                               propName)) {
+        mf.IssueMessage(
+          MessageType::WARNING,
+          cmStrCat("The ", propName,
+                   " property may not be read from non-imported target \"",
+                   rowName, "\"; skipping."));
+        continue;
+      }
+      cmValue v;
+      if (cmGetTargetProperty(rowName, t, propName, mf, v) !=
+          cmGetTargetPropertyResult::Success) {
+        return NamedBlockResult::Failed;
+      }
+      if (!headerWritten) {
+        EmitBlockHeader(out, headerName, "TARGET", BlockKind::Explicit,
+                        suffix);
+        headerWritten = true;
+      }
+      WritePropertyLine(out, rowName, propName, v);
+    }
+  }
+  return headerWritten ? NamedBlockResult::Emitted : NamedBlockResult::Empty;
+}
+
+bool PrintPropertiesConfigureTime(
+  cmExecutionStatus& status, std::vector<std::string> const& namedProperties,
+  bool all, std::vector<std::string> const& entityNames, EntityKind kind,
+  cm::optional<std::string> const& propertyNameRegexStr,
+  cm::optional<std::string> const& propertyValueRegexStr,
+  cm::optional<cmsys::RegularExpression>& propertyNameRegex,
+  cm::optional<cmsys::RegularExpression>& propertyValueRegex,
+  std::string const& messagePrefix)
+{
+  cmMakefile& makefile = status.GetMakefile();
+  bool const hasRegex = propertyNameRegexStr || propertyValueRegexStr;
+  std::string out = messagePrefix;
+  bool anyEmitted = false;
+  for (auto const& entityName : entityNames) {
+    if (kind == EntityKind::Target) {
+      cmTarget* target = makefile.FindTargetToUse(entityName);
+      if (!target) {
+        out += cmStrCat("\n No such TARGET \"", entityName, "\" !\n\n");
+        anyEmitted = true;
+        continue;
+      }
+      if (all) {
+        bool const emitted = EmitAllPropertiesBlock(
+          out, entityName, { target }, HeaderSuffix::None, propertyNameRegex,
+          propertyValueRegex, propertyNameRegexStr, propertyValueRegexStr);
+        if (emitted) {
+          anyEmitted = true;
+        } else if (hasRegex) {
+          makefile.IssueMessage(MessageType::WARNING,
+                                EmptyMatchWarningMessage(
+                                  entityName, "TARGET", propertyNameRegexStr,
+                                  propertyValueRegexStr));
+        }
+      } else {
+        NamedBlockResult const result = EmitNamedPropertiesBlock(
+          out, entityName, { target }, namedProperties, HeaderSuffix::None,
+          makefile);
+        if (result == NamedBlockResult::Failed) {
+          status.SetError(cmStrCat(
+            "failed to retrieve properties for TARGET \"", entityName, "\""));
+          return false;
+        }
+        if (result == NamedBlockResult::Emitted) {
+          anyEmitted = true;
+        }
+      }
+    } else {
+      EmitBlockHeader(out, entityName, EntityTypeName(kind),
+                      BlockKind::Explicit, HeaderSuffix::None);
+      for (auto const& propertyName : namedProperties) {
+        cmValue v;
+        if (!GetPropertyHelper(status, kind, entityName, propertyName, v)) {
+          return false;
+        }
+        WritePropertyLine(out, entityName, propertyName, v);
+      }
+      anyEmitted = true;
+    }
+  }
+  if (anyEmitted) {
+    makefile.DisplayStatus(out, -1);
+  }
+  return true;
+}
+
+bool PrintTargetPropertiesDeferred(
+  std::vector<std::string> targetNames,
+  std::vector<std::string> namedProperties, bool all,
+  cm::optional<std::string> propertyNameRegexStr,
+  cm::optional<std::string> propertyValueRegexStr,
+  cm::optional<cmsys::RegularExpression> propertyNameRegex,
+  cm::optional<cmsys::RegularExpression> propertyValueRegex,
+  bool followDependencies, std::string messagePrefix,
+  cmExecutionStatus& status)
+{
+  cmListFileBacktrace const bt = status.GetMakefile().GetBacktrace();
+  status.GetMakefile().AddGeneratorAction(
+    [targetNames, namedProperties, all, propertyNameRegexStr,
+     propertyValueRegexStr, propertyNameRegex, propertyValueRegex,
+     followDependencies, messagePrefix, bt](
+      cmLocalGenerator& lg, cmListFileBacktrace const& /*lambdaBt*/) mutable {
+      std::vector<std::string> const configs =
+        lg.GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+      std::string const config =
+        configs.empty() ? std::string() : configs.front();
+      bool const hasRegex = propertyNameRegexStr || propertyValueRegexStr;
+      cmake* cmakeInst = lg.GetMakefile()->GetCMakeInstance();
+
+      std::string out = messagePrefix;
+      bool anyEmitted = false;
+      for (std::string const& name : targetNames) {
+        cmGeneratorTarget* root = lg.FindGeneratorTargetToUse(name);
+        if (!root) {
+          out += cmStrCat("\n No such TARGET \"", name, "\" !\n\n");
+          anyEmitted = true;
+          continue;
+        }
+        std::vector<cmTarget*> targets;
+        targets.push_back(root->Target);
+        HeaderSuffix const suffix =
+          followDependencies ? HeaderSuffix::Reachable : HeaderSuffix::None;
+        if (followDependencies) {
+          for (cmGeneratorTarget const* dep :
+               CollectDependentTargets(root, config)) {
+            targets.push_back(dep->Target);
+          }
+        }
+        if (all) {
+          bool const emitted = EmitAllPropertiesBlock(
+            out, name, targets, suffix, propertyNameRegex, propertyValueRegex,
+            propertyNameRegexStr, propertyValueRegexStr);
+          if (emitted) {
+            anyEmitted = true;
+          } else if (hasRegex) {
+            cmakeInst->IssueMessage(
+              MessageType::WARNING,
+              EmptyMatchWarningMessage(name, "TARGET", propertyNameRegexStr,
+                                       propertyValueRegexStr),
+              bt);
+          }
+        } else {
+          NamedBlockResult const result = EmitNamedPropertiesBlock(
+            out, name, targets, namedProperties, suffix, *lg.GetMakefile());
+          if (result == NamedBlockResult::Failed) {
+            cmakeInst->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat("failed to retrieve properties for TARGET \"", name,
+                       "\""),
+              bt);
+            return;
+          }
+          if (result == NamedBlockResult::Emitted) {
+            anyEmitted = true;
+          }
+        }
+      }
+      if (anyEmitted) {
+        lg.GetMakefile()->DisplayStatus(out, -1);
+      }
+    },
+    cmMakefile::GeneratorActionWhen::AfterGeneratorTargets);
+  return true;
+}
+
+bool cmCMakeLanguageCommandPRINT_PROPERTIES(
+  std::vector<std::string> const& args, cmExecutionStatus& status)
+{
+  struct PrintPropertiesArg : public ArgumentParser::ParseResult
+  {
+    bool All = false;
+    ArgumentParser::NonEmpty<std::vector<std::string>> Named;
+    cm::optional<std::string> PropertyNameRegex;
+    cm::optional<std::string> PropertyValueRegex;
+    // Internal: set by the deprecated cmake_print_properties() module wrapper
+    // to select the historical leading-blank-line output instead of the
+    // banner.  Not part of the public interface.
+    bool CmakePrintProperties = false;
+  };
+
+  auto ArgsParser =
+    cmArgumentParser<PrintPropertiesArg>()
+      .Bind("ALL"_s, &PrintPropertiesArg::All)
+      .Bind("NAMED"_s, &PrintPropertiesArg::Named)
+      .Bind("PROPERTY_NAME_REGEX"_s, &PrintPropertiesArg::PropertyNameRegex)
+      .Bind("PROPERTY_VALUE_REGEX"_s, &PrintPropertiesArg::PropertyValueRegex)
+      .Bind("__CMAKE_PRINT_PROPERTIES"_s,
+            &PrintPropertiesArg::CmakePrintProperties);
+
+  std::vector<std::string> unparsed;
+  auto parsedArgs = ArgsParser.Parse(args, &unparsed);
+
+  if (unparsed.empty()) {
+    return FatalError(status,
+                      cmStrCat("mode keyword missing in ",
+                               "cmake_language(PRINT_PROPERTIES) call, ",
+                               "there must be exactly one of TARGETS SOURCES "
+                               "TESTS DIRECTORIES CACHE_ENTRIES"));
+  }
+
+  if (parsedArgs.MaybeReportError(status.GetMakefile())) {
+    cmSystemTools::SetFatalErrorOccurred();
+    return true;
+  }
+
+  // Second parse args to get the mode
+  struct PrintPropertiesModesArgs : public ArgumentParser::ParseResult
+  {
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Targets;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Sources;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Tests;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Directories;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> CacheEntries;
+    bool Deferred = false;
+    bool FollowDependencies = false;
+  };
+  auto const ArgsParserMode =
+    cmArgumentParser<PrintPropertiesModesArgs>()
+      .Bind("TARGETS"_s, &PrintPropertiesModesArgs::Targets)
+      .Bind("SOURCES"_s, &PrintPropertiesModesArgs::Sources)
+      .Bind("TESTS"_s, &PrintPropertiesModesArgs::Tests)
+      .Bind("DIRECTORIES"_s, &PrintPropertiesModesArgs::Directories)
+      .Bind("CACHE_ENTRIES"_s, &PrintPropertiesModesArgs::CacheEntries)
+      .Bind("DEFERRED"_s, &PrintPropertiesModesArgs::Deferred)
+      .Bind("FOLLOW_DEPENDENCIES"_s,
+            &PrintPropertiesModesArgs::FollowDependencies);
+
+  std::vector<std::string> modeArgs = unparsed;
+  unparsed.clear();
+  auto parsedArgsMode = ArgsParserMode.Parse(modeArgs, &unparsed);
+
+  if (!unparsed.empty()) {
+    return FatalError(
+      status, cmStrCat("Unknown keywords: \"", cmJoin(unparsed, " "), "\""));
+  }
+
+  if (parsedArgsMode.MaybeReportError(status.GetMakefile())) {
+    cmSystemTools::SetFatalErrorOccurred();
+    return true;
+  }
+  std::vector<std::string> modes;
+  std::vector<std::string> items;
+  EntityKind kind = EntityKind::Target;
+  if (!parsedArgsMode.Targets.empty()) {
+    modes.push_back("TARGETS");
+    items = parsedArgsMode.Targets;
+    kind = EntityKind::Target;
+  }
+  if (!parsedArgsMode.Sources.empty()) {
+    modes.push_back("SOURCES");
+    items = parsedArgsMode.Sources;
+    kind = EntityKind::Source;
+  }
+  if (!parsedArgsMode.Tests.empty()) {
+    modes.push_back("TESTS");
+    items = parsedArgsMode.Tests;
+    kind = EntityKind::Test;
+  }
+  if (!parsedArgsMode.Directories.empty()) {
+    modes.push_back("DIRECTORIES");
+    items = parsedArgsMode.Directories;
+    kind = EntityKind::Directory;
+  }
+  if (!parsedArgsMode.CacheEntries.empty()) {
+    modes.push_back("CACHE_ENTRIES");
+    items = parsedArgsMode.CacheEntries;
+    kind = EntityKind::Cache;
+  }
+
+  if (modes.empty()) {
+    return FatalError(status,
+                      cmStrCat("mode keyword missing in ",
+                               "cmake_language(PRINT_PROPERTIES) call, ",
+                               "there must be exactly one of TARGETS SOURCES "
+                               "TESTS DIRECTORIES CACHE_ENTRIES"));
+  }
+  if (modes.size() > 1) {
+    return FatalError(status,
+                      cmStrCat("multiple mode keywords used in ",
+                               "cmake_language(PRINT_PROPERTIES) call, ",
+                               "there must be exactly one of TARGETS SOURCES "
+                               "TESTS DIRECTORIES CACHE_ENTRIES."));
+  }
+  std::string const mode = modes[0];
+  bool const isTargets = (mode == "TARGETS");
+  bool const hasNamed = !parsedArgs.Named.empty();
+  bool const hasRegex =
+    parsedArgs.PropertyNameRegex || parsedArgs.PropertyValueRegex;
+
+  if (!isTargets) {
+    if (parsedArgs.All) {
+      return FatalError(status,
+                        cmStrCat("ALL keyword in ",
+                                 "cmake_language(PRINT_PROPERTIES) call ",
+                                 "is only valid with the TARGETS scope."));
+    }
+    if (hasRegex) {
+      return FatalError(
+        status,
+        cmStrCat("PROPERTY_NAME_REGEX and PROPERTY_VALUE_REGEX in ",
+                 "cmake_language(PRINT_PROPERTIES) call ",
+                 "are only valid with the TARGETS scope and ALL."));
+    }
+    if (parsedArgsMode.Deferred) {
+      return FatalError(status,
+                        cmStrCat("DEFERRED keyword in ",
+                                 "cmake_language(PRINT_PROPERTIES) call ",
+                                 "is only valid with the TARGETS scope."));
+    }
+    if (parsedArgsMode.FollowDependencies) {
+      return FatalError(status,
+                        cmStrCat("FOLLOW_DEPENDENCIES keyword in ",
+                                 "cmake_language(PRINT_PROPERTIES) call ",
+                                 "is only valid with the TARGETS scope."));
+    }
+    if (!hasNamed) {
+      return FatalError(status,
+                        cmStrCat("NAMED keyword missing in ",
+                                 "cmake_language(PRINT_PROPERTIES) call ",
+                                 "with ", mode, " scope."));
+    }
+  } else {
+    // ALL and NAMED are mutually exclusive on TARGETS.
+    if (parsedArgs.All && hasNamed) {
+      return FatalError(status,
+                        cmStrCat("ALL and NAMED keywords in ",
+                                 "cmake_language(PRINT_PROPERTIES) call ",
+                                 "are mutually exclusive."));
+    }
+    // Regex filters require ALL - explicit or implicit.  Combining regex
+    // with NAMED is an error.
+    if (hasNamed && hasRegex) {
+      return FatalError(
+        status,
+        cmStrCat("PROPERTY_NAME_REGEX and PROPERTY_VALUE_REGEX in ",
+                 "cmake_language(PRINT_PROPERTIES) call ",
+                 "are only valid with ALL, not NAMED."));
+    }
+  }
+
+  // FOLLOW_DEPENDENCIES implies DEFERRED.
+  if (parsedArgsMode.FollowDependencies) {
+    parsedArgsMode.Deferred = true;
+  }
+
+  // Default to ALL when neither ALL nor NAMED is given (TARGETS only - the
+  // non-TARGETS path already rejected this combination above).
+  bool const all = parsedArgs.All || !hasNamed;
+
+  // __CMAKE_PRINT_PROPERTIES marks the deprecated cmake_print_properties()
+  // wrapper, which is always NAMED; reject it in ALL enumeration mode.
+  if (all && parsedArgs.CmakePrintProperties) {
+    return FatalError(status,
+                      cmStrCat("__CMAKE_PRINT_PROPERTIES in ",
+                               "cmake_language(PRINT_PROPERTIES) call ",
+                               "is only valid with NAMED."));
+  }
+
+  // Compile regexes once up front so syntax errors are reported here rather
+  // than from inside helpers (in particular, from the deferred lambda at
+  // generate time).
+  cm::optional<cmsys::RegularExpression> propertyNameRegex;
+  cm::optional<cmsys::RegularExpression> propertyValueRegex;
+  if (parsedArgs.PropertyNameRegex) {
+    cmsys::RegularExpression re;
+    if (!re.compile(*parsedArgs.PropertyNameRegex)) {
+      return FatalError(status,
+                        cmStrCat("PROPERTY_NAME_REGEX regular expression \"",
+                                 *parsedArgs.PropertyNameRegex,
+                                 "\" cannot compile."));
+    }
+    propertyNameRegex = std::move(re);
+  }
+  if (parsedArgs.PropertyValueRegex) {
+    cmsys::RegularExpression re;
+    if (!re.compile(*parsedArgs.PropertyValueRegex)) {
+      return FatalError(status,
+                        cmStrCat("PROPERTY_VALUE_REGEX regular expression \"",
+                                 *parsedArgs.PropertyValueRegex,
+                                 "\" cannot compile."));
+    }
+    propertyValueRegex = std::move(re);
+  }
+
+  // The message opens with a leading banner line.  The internal
+  // __CMAKE_PRINT_PROPERTIES marker (not part of the public interface) selects
+  // the legacy format instead; cmake_print_properties() sets it to reproduce
+  // its historical leading blank line.
+  std::string const messagePrefix = parsedArgs.CmakePrintProperties
+    ? std::string("\n")
+    : std::string("Printing properties...\n");
+
+  if (parsedArgsMode.Deferred) {
+    return PrintTargetPropertiesDeferred(
+      items, parsedArgs.Named, all, parsedArgs.PropertyNameRegex,
+      parsedArgs.PropertyValueRegex, std::move(propertyNameRegex),
+      std::move(propertyValueRegex), parsedArgsMode.FollowDependencies,
+      messagePrefix, status);
+  }
+
+  return PrintPropertiesConfigureTime(
+    status, parsedArgs.Named, all, items, kind, parsedArgs.PropertyNameRegex,
+    parsedArgs.PropertyValueRegex, propertyNameRegex, propertyValueRegex,
+    messagePrefix);
+}
+}
 bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
                             cmExecutionStatus& status)
 {
@@ -1005,6 +1655,14 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
     }
     return makefile.GetCMakeInstance()->PopTraceCmd() ||
       FatalError(status, "TRACE OFF request without a corresponding TRACE ON");
+  }
+
+  if (expArgs[expArg] == "PRINT_PROPERTIES") {
+    ++expArg;
+    finishArgs();
+    std::vector<std::string> const printPropertyArgs(expArgs.begin() + expArg,
+                                                     expArgs.end());
+    return cmCMakeLanguageCommandPRINT_PROPERTIES(printPropertyArgs, status);
   }
 
   return FatalError(status, "called with unknown meta-operation");

@@ -1,0 +1,3 @@
+-- Printing properties\.\.\.
+ +Properties for TARGET myimp:
+ +myimp\.LOCATION = "/imported/libmyimp\.so"

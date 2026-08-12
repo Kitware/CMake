@@ -1,0 +1,7 @@
+-- Configuring done .*
+-- Printing properties\.\.\.
+ +Properties for TARGET mylib \(and all reachable\):
+ +mylib\.MY_PROP = "mylib"
+ +debug_dep\.MY_PROP = "debug"
+
+-- Generating done .*

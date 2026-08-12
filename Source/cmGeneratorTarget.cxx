@@ -4631,7 +4631,7 @@ std::string cmGeneratorTarget::ComputeVersionedName(std::string const& prefix,
 
 std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
 {
-  return this->Target->GetProperties().GetKeys();
+  return this->Target->GetDirectProperties().GetKeys();
 }
 
 void cmGeneratorTarget::ReportPropertyOrigin(

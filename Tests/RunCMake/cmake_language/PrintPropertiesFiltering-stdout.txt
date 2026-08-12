@@ -1,0 +1,15 @@
+-- Printing properties\.\.\.
+ +All properties for TARGET mylib matching name 'INTERFACE':
+ +mylib.INTERFACE_CXX_MODULE_SETS = \"\"
+ +mylib.INTERFACE_HEADER_SETS = \"HEADERS\"
+ +mylib.INTERFACE_INCLUDE_DIRECTORIES = \"\$\<BUILD_INTERFACE:[^\"]*/Tests/RunCMake/cmake_language\>\"
+ +mylib.INTERFACE_SOURCE_SETS = \"\"
+
+-- Printing properties\.\.\.
+ +All properties for TARGET mylib matching value 'HEADERS':
+ +mylib.HEADER_SETS = \"HEADERS\"
+ +mylib.INTERFACE_HEADER_SETS = \"HEADERS\"
+
+-- Printing properties\.\.\.
+ +All properties for TARGET mylib matching name 'INTERFACE' and value 'HEADERS':
+ +mylib.INTERFACE_HEADER_SETS = \"HEADERS\"

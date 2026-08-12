@@ -1,0 +1,9 @@
+-- Printing properties\.\.\.
+ Properties for TEST test_a:
+   test_a\.MY_PROP = "a_val"
+   test_a\.TIMEOUT = "30"
+   test_a\.NOT_SET = <NOTFOUND>
+ Properties for TEST test_b:
+   test_b\.MY_PROP = "b_val"
+   test_b\.TIMEOUT = "60"
+   test_b\.NOT_SET = <NOTFOUND>

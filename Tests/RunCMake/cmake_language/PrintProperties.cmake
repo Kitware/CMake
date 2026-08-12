@@ -9,18 +9,18 @@ add_library(nothing STATIC nothing.c nothing.h)
 add_executable(something something.c something.h)
 target_link_libraries(something PUBLIC nothing)
 
-include(CMakePrintHelpers)
-
-cmake_print_properties(
+cmake_language(
+  PRINT_PROPERTIES
   TARGETS nothing something
-  PROPERTIES
+  NAMED
     LINKER_LANGUAGE
     TYPE
 )
 
-cmake_print_properties(
+cmake_language(
+  PRINT_PROPERTIES
   SOURCES nothing.c something.c
-  PROPERTIES
+  NAMED
     COMPILE_DEFINITIONS
     LANGUAGE
 )

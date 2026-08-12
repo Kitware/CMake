@@ -1,0 +1,16 @@
+-- Configuring done .*
+CMake Warning at PrintPropertiesEmptyMatch\.cmake:[0-9]+ \(cmake_language\):
+  No properties for TARGET mylib matching name 'ZZZ_NO_SUCH_PROPERTY' in
+  cmake_language\(PRINT_PROPERTIES \.\.\.\)\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Warning at PrintPropertiesEmptyMatch\.cmake:[0-9]+ \(cmake_language\):
+  No properties for TARGET mylib matching value 'ZZZ_NO_SUCH_VALUE' in
+  cmake_language\(PRINT_PROPERTIES \.\.\.\)\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+-- Generating done .*

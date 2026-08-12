@@ -1,0 +1,13 @@
+-- Configuring done .*
+-- Printing properties\.\.\.
+ +All properties for TARGET mylib \(and all reachable\) matching name '\^MY_PROP':
+ +mylib\.MY_PROP = "mylib"
+ +mylib\.MY_PROP_2 = "mylib2"
+ +intermediate\.MY_PROP = "intermediate"
+ +intermediate\.MY_PROP_2 = "intermediate2"
+ +leaflib\.MY_PROP = "leaf"
+ +leaflib\.MY_PROP_2 = "leaf2"
+ +linkonlylib\.MY_PROP = "linkonly"
+ +linkonlylib\.MY_PROP_2 = "linkonly2"
+
+-- Generating done .*

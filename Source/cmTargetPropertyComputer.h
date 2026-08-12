@@ -5,9 +5,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <utility>
 
 #include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 #include "cmTargetTypes.h"
 #include "cmValue.h"
 
@@ -23,13 +23,55 @@ public:
     if (cmValue loc = GetLocation(tgt, prop, mf)) {
       return loc;
     }
-    if (cmSystemTools::GetFatalErrorOccurred()) {
-      return nullptr;
-    }
     if (prop == "SOURCES") {
       return GetSources(tgt);
     }
     return nullptr;
+  }
+
+  // True if `prop` is a *computed* location property for `type` -- i.e. one of
+  // LOCATION, LOCATION_<CONFIG>, or <CONFIG>_LOCATION on a target type that
+  // synthesizes a location.  Reading one of these from a non-imported target
+  // is an error.  Excludes IMPORTED_LOCATION and XCODE_ATTRIBUTE_*.  If
+  // non-null, `config` is filled with the requested configuration ("" for
+  // plain LOCATION).
+  static bool IsComputedLocationProperty(cm::TargetType type,
+                                         std::string const& prop,
+                                         std::string* config = nullptr)
+  {
+    switch (type) {
+      case cm::TargetType::EXECUTABLE:
+      case cm::TargetType::STATIC_LIBRARY:
+      case cm::TargetType::SHARED_LIBRARY:
+      case cm::TargetType::MODULE_LIBRARY:
+      case cm::TargetType::UNKNOWN_LIBRARY:
+        break;
+      default:
+        return false;
+    }
+    if (prop == "LOCATION") {
+      if (config) {
+        config->clear();
+      }
+      return true;
+    }
+    if (cmHasLiteralPrefix(prop, "LOCATION_")) {
+      if (config) {
+        *config = prop.substr(9);
+      }
+      return true;
+    }
+    if (cmHasLiteralSuffix(prop, "_LOCATION") &&
+        !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
+      std::string c(prop.c_str(), prop.size() - 9);
+      if (c != "IMPORTED") {
+        if (config) {
+          *config = std::move(c);
+        }
+        return true;
+      }
+    }
+    return false;
   }
 
 private:
@@ -43,48 +85,18 @@ private:
   template <typename Target>
   static cmValue GetLocation(Target const* tgt, std::string const& prop,
                              cmMakefile const& mf)
-
   {
     // Watch for special "computed" properties that are dependent on
     // other properties or variables.  Always recompute them.
-    if (tgt->GetType() == cm::TargetType::EXECUTABLE ||
-        tgt->GetType() == cm::TargetType::STATIC_LIBRARY ||
-        tgt->GetType() == cm::TargetType::SHARED_LIBRARY ||
-        tgt->GetType() == cm::TargetType::MODULE_LIBRARY ||
-        tgt->GetType() == cm::TargetType::UNKNOWN_LIBRARY) {
-      static std::string const propLOCATION = "LOCATION";
-      if (prop == propLOCATION) {
-        if (!tgt->IsImported()) {
-          IssueLocationPropertyError(tgt->GetName(), mf);
-          return nullptr;
-        }
-        return cmValue(ImportedLocation(tgt, std::string()));
-      }
-
-      // Support "LOCATION_<CONFIG>".
-      if (cmHasLiteralPrefix(prop, "LOCATION_")) {
-        if (!tgt->IsImported()) {
-          IssueLocationPropertyError(tgt->GetName(), mf);
-          return nullptr;
-        }
-        std::string configName = prop.substr(9);
-        return cmValue(ImportedLocation(tgt, configName));
-      }
-
-      // Support "<CONFIG>_LOCATION".
-      if (cmHasLiteralSuffix(prop, "_LOCATION") &&
-          !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
-        std::string configName(prop.c_str(), prop.size() - 9);
-        if (configName != "IMPORTED") {
-          if (!tgt->IsImported()) {
-            IssueLocationPropertyError(tgt->GetName(), mf);
-            return nullptr;
-          }
-          return cmValue(ImportedLocation(tgt, configName));
-        }
-      }
+    std::string config;
+    if (!IsComputedLocationProperty(tgt->GetType(), prop, &config)) {
+      return nullptr;
     }
-    return nullptr;
+    if (!tgt->IsImported()) {
+      IssueLocationPropertyError(tgt->GetName(), mf);
+      return nullptr;
+    }
+    return cmValue(ImportedLocation(tgt, config));
   }
 
   template <typename Target>

@@ -290,7 +290,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
                                             target->GetPolicyMap()));
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "Properties", supportsVariableType,
-                  target->GetProperties().GetList()));
+                  target->GetDirectProperties().GetList()));
 
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "IncludeDirectories", supportsVariableType,

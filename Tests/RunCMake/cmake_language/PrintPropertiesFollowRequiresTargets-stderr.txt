@@ -1,0 +1,3 @@
+^CMake Error at PrintPropertiesFollowRequiresTargets\.cmake:[0-9]+ \(cmake_language\):
+  cmake_language FOLLOW_DEPENDENCIES keyword in
+  cmake_language\(PRINT_PROPERTIES\) call is only valid with the TARGETS scope\.

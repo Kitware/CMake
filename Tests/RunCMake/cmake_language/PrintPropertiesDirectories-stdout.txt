@@ -1,0 +1,9 @@
+-- Printing properties\.\.\.
+ Properties for DIRECTORY \.:
+   \.\.MY_PROP = "top_val"
+   \.\.LABELS = "top_label"
+   \.\.NOT_SET = <NOTFOUND>
+ Properties for DIRECTORY PrintPropertiesDirectories-sub:
+   PrintPropertiesDirectories-sub\.MY_PROP = "sub_val"
+   PrintPropertiesDirectories-sub\.LABELS = "sub_label"
+   PrintPropertiesDirectories-sub\.NOT_SET = <NOTFOUND>

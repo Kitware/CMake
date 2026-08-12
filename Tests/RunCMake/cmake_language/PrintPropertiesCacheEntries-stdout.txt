@@ -1,0 +1,9 @@
+-- Printing properties\.\.\.
+ Properties for CACHE MY_CACHE_A:
+   MY_CACHE_A\.TYPE = "STRING"
+   MY_CACHE_A\.HELPSTRING = "help A"
+   MY_CACHE_A\.NOT_SET = <NOTFOUND>
+ Properties for CACHE MY_CACHE_B:
+   MY_CACHE_B\.TYPE = "PATH"
+   MY_CACHE_B\.HELPSTRING = "help B"
+   MY_CACHE_B\.NOT_SET = <NOTFOUND>

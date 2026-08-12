@@ -3,11 +3,10 @@
 #include "cmGetTargetPropertyCommand.h"
 
 #include "cmExecutionStatus.h"
-#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
-#include "cmTarget.h"
+#include "cmTargetPropertyHelper.h"
 #include "cmValue.h"
 
 bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
@@ -19,45 +18,24 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
   }
   std::string const& var = args[0];
   std::string const& targetName = args[1];
-  std::string prop;
-  bool prop_exists = false;
+  std::string const& propertyName = args[2];
   cmMakefile& mf = status.GetMakefile();
 
-  if (cmTarget* tgt = mf.FindTargetToUse(targetName)) {
-    if (args[2] == "ALIASED_TARGET" || args[2] == "ALIAS_GLOBAL") {
-      if (mf.IsAlias(targetName)) {
-        prop_exists = true;
-        if (args[2] == "ALIASED_TARGET") {
-
-          prop = tgt->GetName();
-        }
-        if (args[2] == "ALIAS_GLOBAL") {
-          prop =
-            mf.GetGlobalGenerator()->IsAlias(targetName) ? "TRUE" : "FALSE";
-        }
-      }
-    } else if (!args[2].empty()) {
-      cmValue prop_cstr = nullptr;
-      prop_cstr = tgt->GetComputedProperty(args[2], mf);
-      if (!prop_cstr) {
-        prop_cstr = tgt->GetProperty(args[2]);
-      }
-      if (prop_cstr) {
-        prop = *prop_cstr;
-        prop_exists = true;
-      }
+  cmValue propValue;
+  auto result = cmGetTargetProperty(targetName, propertyName, mf, propValue);
+  if (result == cmGetTargetPropertyResult::Success) {
+    if (propValue) {
+      mf.AddDefinition(var, *propValue);
+      return true;
     }
-  } else {
+    mf.AddDefinition(var, var + "-NOTFOUND");
+    return true;
+  }
+  if (result == cmGetTargetPropertyResult::TargetNotFound) {
     mf.IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("get_target_property() called with non-existent target \"",
                targetName, "\"."));
-    return false;
   }
-  if (prop_exists) {
-    mf.AddDefinition(var, prop);
-    return true;
-  }
-  mf.AddDefinition(var, var + "-NOTFOUND");
-  return true;
+  return false;
 }

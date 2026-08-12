@@ -20,6 +20,16 @@ Synopsis
   cmake_language(`PRINT_TARGETS`_ <filter>...)
   cmake_language(`PRINT_VARIABLES`_
                  [{ ALL [<filter>...] | NAMED <vars>... }])
+  cmake_language(PRINT_PROPERTIES
+                 `TARGETS <PRINT_PROPERTIES-TARGETS_>`__ <targets>...
+                 <options>...
+                 [{ ALL [<filter>] | NAMED <properties>... }])
+  cmake_language(PRINT_PROPERTIES
+                 { `SOURCES <PRINT_PROPERTIES-SOURCES_>`__       <sources>... |
+                   `DIRECTORIES <PRINT_PROPERTIES-DIRECTORIES_>`__   <dirs>...    |
+                   `TESTS <PRINT_PROPERTIES-TESTS_>`__         <tests>...   |
+                   `CACHE_ENTRIES <PRINT_PROPERTIES-CACHE_ENTRIES_>`__ <entries>... }
+                 NAMED <properties>...)
 
 Introduction
 ^^^^^^^^^^^^
@@ -683,3 +693,169 @@ Gives::
    Variables in scope at '/path/to/CMakeLists.txt' matching name '^MY_' (case sensitive):
      MY_FLAG = "on"
      CACHE{MY_PATH}:FILEPATH = "/some/path"
+
+Printing Properties
+^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.5
+
+.. signature::
+  cmake_language(PRINT_PROPERTIES
+    TARGETS <targets>... <options>...
+   [{ ALL [<filter>] | NAMED <properties>... }])
+  :target: PRINT_PROPERTIES-TARGETS
+
+  Prints the values of properties for the specified targets.
+  The set of properties to print may be specified by one of:
+
+  ``ALL [<filter>]`` (default)
+    Enumerates every property set on each named target, printing one entry
+    per property.
+
+    The optional ``<filter>`` may be one of:
+
+    ``PROPERTY_NAME_REGEX <name-regex>``
+      Print properties whose name matches the given regular expression.
+    ``PROPERTY_VALUE_REGEX <value-regex>``
+      Print properties whose value matches the given regular expression.
+
+    If no property survives the regex filters for a given target, a
+    ``CMake Warning`` is emitted in place of that target's block.
+
+  ``NAMED <properties>...``
+    Prints exactly the named properties on each entity, in the order given.
+    A property that is not set prints as ``<NOTFOUND>``.
+
+  The ``<options>...`` are:
+
+  ``DEFERRED``
+    Defers the print to generation time rather than running during
+    configure.  Useful when the properties of interest are populated by
+    later configure-time commands.  On its own it does not change which
+    targets are visited - only the named targets are printed.
+
+  ``FOLLOW_DEPENDENCIES``
+    Implies ``DEFERRED``.  When set, the walk visits every target reachable
+    from each named target through any linkage - ``PUBLIC``, ``INTERFACE``,
+    ``PRIVATE``, and :genex:`$<LINK_ONLY:...>` - and prints the requested
+    properties for each.
+
+    .. note::
+       ``FOLLOW_DEPENDENCIES`` does not turn on generator-expression
+       evaluation for the property *values* this command prints.
+       The only place generator expression evaluation happens is internal:
+       on each visited target's link list (the effective ``LINK_LIBRARIES`` /
+       ``INTERFACE_LINK_LIBRARIES``), evaluated solely to identify which
+       dependencies are reachable.  Every printed property value,
+       including the link-list properties themselves, is emitted exactly
+       as stored, with generator expressions intact and unsubstituted.
+       This matches the behavior of :command:`get_target_property`.
+
+.. signature::
+  cmake_language(PRINT_PROPERTIES SOURCES <sources>... NAMED <properties>...)
+  cmake_language(PRINT_PROPERTIES DIRECTORIES <dirs>... NAMED <properties>...)
+  cmake_language(PRINT_PROPERTIES TESTS <tests>... NAMED <properties>...)
+  cmake_language(PRINT_PROPERTIES CACHE_ENTRIES <entries>... NAMED <properties>...)
+  :target:
+    PRINT_PROPERTIES-SOURCES
+    PRINT_PROPERTIES-DIRECTORIES
+    PRINT_PROPERTIES-TESTS
+    PRINT_PROPERTIES-CACHE_ENTRIES
+
+  Prints the values of properties for the specified source files, directories,
+  tests, or cache entries.  Exactly one scope keyword must be specified.
+  The set of properties to print must be specified by:
+
+  ``NAMED <properties>...``
+    Prints exactly the named properties on each entity, in the order given.
+    A property that is not set prints as ``<NOTFOUND>``.
+
+Printing Properties Examples
+""""""""""""""""""""""""""""
+
+Printing the ``LOCATION`` and ``INTERFACE_INCLUDE_DIRECTORIES`` properties for
+both targets ``foo`` and ``bar``:
+
+.. code-block:: cmake
+
+  cmake_language(
+    PRINT_PROPERTIES
+    TARGETS foo bar
+    NAMED LOCATION INTERFACE_INCLUDE_DIRECTORIES
+  )
+
+Gives::
+
+  -- Printing properties...
+   Properties for TARGET foo:
+     foo.LOCATION = "/usr/lib/libfoo.so"
+     foo.INTERFACE_INCLUDE_DIRECTORIES = "/usr/include;/usr/include/foo"
+   Properties for TARGET bar:
+     bar.LOCATION = "/usr/lib/libbar.so"
+     bar.INTERFACE_INCLUDE_DIRECTORIES = "/usr/include;/usr/include/bar"
+
+Printing all properties on a target, filtered to a couple of names:
+
+.. code-block:: cmake
+
+  add_library(my_lib src.cpp)
+
+  cmake_language(
+    PRINT_PROPERTIES
+    TARGETS my_lib
+    ALL
+    PROPERTY_NAME_REGEX "AUTOMOC"
+    PROPERTY_VALUE_REGEX "(ON|OFF)"
+  )
+
+Gives::
+
+  -- Printing properties...
+   All properties for TARGET my_lib matching name 'AUTOMOC' and value '(ON|OFF)':
+     my_lib.AUTOMOC_COMPILER_PREDEFINES = "ON"
+     my_lib.AUTOMOC_PATH_PREFIX = "OFF"
+
+Deferring the print of one target's properties to generation time, without
+visiting any dependencies:
+
+.. code-block:: cmake
+
+  add_executable(myexe main.c)
+
+  cmake_language(
+    PRINT_PROPERTIES
+    TARGETS myexe
+    DEFERRED
+    NAMED SOURCES
+  )
+
+Gives::
+
+  -- Printing properties...
+   Properties for TARGET myexe:
+     myexe.SOURCES = "main.c"
+
+Printing a property on a target and every reachable dependency:
+
+.. code-block:: cmake
+
+  add_library(leaflib STATIC src.c)
+  set_target_properties(leaflib PROPERTIES MY_PROP "leaf")
+
+  add_library(mylib STATIC src.c)
+  target_link_libraries(mylib PRIVATE leaflib)
+  set_target_properties(mylib PROPERTIES MY_PROP "mylib")
+
+  cmake_language(
+    PRINT_PROPERTIES
+    TARGETS mylib
+    FOLLOW_DEPENDENCIES
+    NAMED MY_PROP
+  )
+
+Gives::
+
+  -- Printing properties...
+   Properties for TARGET mylib (and all reachable):
+     mylib.MY_PROP = "mylib"
+     leaflib.MY_PROP = "leaf"

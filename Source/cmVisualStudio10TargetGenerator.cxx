@@ -1117,7 +1117,8 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
         this->GeneratorTarget->GetProperty("VS_DOTNET_REFERENCES")) {
     references.assign(*vsDotNetReferences);
   }
-  cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
+  cmPropertyMap const& props =
+    this->GeneratorTarget->Target->GetDirectProperties();
   for (auto const& i : props.GetList()) {
     static cm::string_view const vsDnRef = "VS_DOTNET_REFERENCE_";
     if (cmHasPrefix(i.first, vsDnRef)) {
@@ -1228,7 +1229,8 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
     cmStrCat(refpropPrefix, ref, refpropInfix);
   using CustomTags = std::map<std::string, std::string>;
   CustomTags tags;
-  cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
+  cmPropertyMap const& props =
+    this->GeneratorTarget->Target->GetDirectProperties();
   for (auto const& i : props.GetList()) {
     if (cmHasPrefix(i.first, refPropFullPrefix) && !i.second.empty()) {
       tags[i.first.substr(refPropFullPrefix.length())] = i.second;

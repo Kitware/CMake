@@ -1,0 +1,2 @@
+.*Properties for TARGET mylib:.*
+.*mylib\.TYPE = "STATIC_LIBRARY".*
