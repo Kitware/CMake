@@ -106,6 +106,7 @@ run_cmake(TRANSFORM-PREPEND)
 run_cmake(TRANSFORM-REPLACE)
 run_cmake(TRANSFORM-APPLY)
 run_cmake(TRANSFORM-PREDICATE)
+run_cmake(TRANSFORM-PREDICATE-Reentrant)
 run_cmake(CMP0186)
 
 # argument tests

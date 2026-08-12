@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <functional>
 #include <iterator>
-#include <set>
 #include <stdexcept>
 #include <utility>
 
@@ -659,49 +658,36 @@ private:
 class TransformAction
 {
 public:
+  // Public because an inherited constructor keeps the base's access.
+  explicit TransformAction(TransformSelector& selector)
+    : Selector(selector)
+  {
+  }
   virtual ~TransformAction() = default;
 
-  void Initialize(TransformSelector* selector) { this->Selector = selector; }
-  virtual void Initialize(TransformSelector*, std::string const&) {}
-  virtual void Initialize(TransformSelector*, std::string const&,
-                          std::string const&)
+  std::string operator()(std::string const& s)
   {
+    return this->Selector.InSelection(s) ? this->ApplyTo(s) : s;
   }
-  virtual void Initialize(TransformSelector* selector,
-                          std::vector<std::string> const&)
-  {
-    this->Initialize(selector);
-  }
-
-  virtual std::string operator()(std::string const& s) = 0;
 
 protected:
-  TransformSelector* Selector;
+  virtual std::string ApplyTo(std::string const& s) = 0;
+
+  TransformSelector& Selector;
 };
 class TransformActionAppend : public TransformAction
 {
 public:
-  using TransformAction::Initialize;
-
-  void Initialize(TransformSelector* selector,
-                  std::string const& append) override
+  TransformActionAppend(TransformSelector& selector, std::string append)
+    : TransformAction(selector)
+    , Append(std::move(append))
   {
-    TransformAction::Initialize(selector);
-    this->Append = append;
-  }
-  void Initialize(TransformSelector* selector,
-                  std::vector<std::string> const& append) override
-  {
-    this->Initialize(selector, append.front());
   }
 
-  std::string operator()(std::string const& s) override
+protected:
+  std::string ApplyTo(std::string const& s) override
   {
-    if (this->Selector->InSelection(s)) {
-      return cmStrCat(s, this->Append);
-    }
-
-    return s;
+    return cmStrCat(s, this->Append);
   }
 
 private:
@@ -710,27 +696,16 @@ private:
 class TransformActionPrepend : public TransformAction
 {
 public:
-  using TransformAction::Initialize;
-
-  void Initialize(TransformSelector* selector,
-                  std::string const& prepend) override
+  TransformActionPrepend(TransformSelector& selector, std::string prepend)
+    : TransformAction(selector)
+    , Prepend(std::move(prepend))
   {
-    TransformAction::Initialize(selector);
-    this->Prepend = prepend;
-  }
-  void Initialize(TransformSelector* selector,
-                  std::vector<std::string> const& prepend) override
-  {
-    this->Initialize(selector, prepend.front());
   }
 
-  std::string operator()(std::string const& s) override
+protected:
+  std::string ApplyTo(std::string const& s) override
   {
-    if (this->Selector->InSelection(s)) {
-      return cmStrCat(this->Prepend, s);
-    }
-
-    return s;
+    return cmStrCat(this->Prepend, s);
   }
 
 private:
@@ -739,64 +714,59 @@ private:
 class TransformActionToUpper : public TransformAction
 {
 public:
-  std::string operator()(std::string const& s) override
-  {
-    if (this->Selector->InSelection(s)) {
-      return cmSystemTools::UpperCase(s);
-    }
+  using TransformAction::TransformAction;
 
-    return s;
+protected:
+  std::string ApplyTo(std::string const& s) override
+  {
+    return cmSystemTools::UpperCase(s);
   }
 };
 class TransformActionToLower : public TransformAction
 {
 public:
-  std::string operator()(std::string const& s) override
-  {
-    if (this->Selector->InSelection(s)) {
-      return cmSystemTools::LowerCase(s);
-    }
+  using TransformAction::TransformAction;
 
-    return s;
+protected:
+  std::string ApplyTo(std::string const& s) override
+  {
+    return cmSystemTools::LowerCase(s);
   }
 };
 class TransformActionStrip : public TransformAction
 {
 public:
-  std::string operator()(std::string const& s) override
-  {
-    if (this->Selector->InSelection(s)) {
-      return cmTrimWhitespace(s);
-    }
+  using TransformAction::TransformAction;
 
-    return s;
+protected:
+  std::string ApplyTo(std::string const& s) override
+  {
+    return cmTrimWhitespace(s);
   }
 };
 class TransformActionGenexStrip : public TransformAction
 {
 public:
-  std::string operator()(std::string const& s) override
-  {
-    if (this->Selector->InSelection(s)) {
-      return cmGeneratorExpression::Preprocess(
-        s, cmGeneratorExpression::StripAllGeneratorExpressions);
-    }
+  using TransformAction::TransformAction;
 
-    return s;
+protected:
+  std::string ApplyTo(std::string const& s) override
+  {
+    return cmGeneratorExpression::Preprocess(
+      s, cmGeneratorExpression::StripAllGeneratorExpressions);
   }
 };
 class TransformActionReplace : public TransformAction
 {
 public:
-  using TransformAction::Initialize;
-
-  void Initialize(TransformSelector* selector, std::string const& regex,
-                  std::string const& replace) override
+  TransformActionReplace(TransformSelector& selector, std::string const& regex,
+                         std::string const& replace)
+    : TransformAction(selector)
+    // Makefile is legitimately null when cmList is used directly from C++;
+    // cmStringReplaceHelper handles that.
+    , ReplaceHelper(cm::make_unique<cmStringReplaceHelper>(regex, replace,
+                                                           selector.Makefile))
   {
-    TransformAction::Initialize(selector);
-    this->ReplaceHelper = cm::make_unique<cmStringReplaceHelper>(
-      regex, replace, selector->Makefile);
-
     if (!this->ReplaceHelper->IsRegularExpressionValid()) {
       throw transform_error(
         cmStrCat("sub-command TRANSFORM, action REPLACE: Failed to compile "
@@ -808,28 +778,18 @@ public:
                                      this->ReplaceHelper->GetError(), '.'));
     }
   }
-  void Initialize(TransformSelector* selector,
-                  std::vector<std::string> const& args) override
+
+protected:
+  std::string ApplyTo(std::string const& s) override
   {
-    this->Initialize(selector, args[0], args[1]);
-  }
+    std::string output;
 
-  std::string operator()(std::string const& s) override
-  {
-    if (this->Selector->InSelection(s)) {
-      // Scan through the input for all matches.
-      std::string output;
-
-      if (!this->ReplaceHelper->Replace(s, output)) {
-        throw transform_error(
-          cmStrCat("sub-command TRANSFORM, action REPLACE: ",
-                   this->ReplaceHelper->GetError(), '.'));
-      }
-
-      return output;
+    if (!this->ReplaceHelper->Replace(s, output)) {
+      throw transform_error(cmStrCat("sub-command TRANSFORM, action REPLACE: ",
+                                     this->ReplaceHelper->GetError(), '.'));
     }
 
-    return s;
+    return output;
   }
 
 private:
@@ -839,34 +799,20 @@ private:
 class TransformActionApply : public TransformAction
 {
 public:
-  using TransformAction::Initialize;
-
-  void Initialize(TransformSelector* selector, std::string const& functionName,
-                  cmMakefile& makefile)
+  TransformActionApply(TransformSelector& selector, std::string functionName,
+                       cmMakefile& makefile)
+    : TransformAction(selector)
+    , FunctionName(std::move(functionName))
+    , Makefile(&makefile)
+    , OutputVar(OutputVarFor("_cmake_transform_apply_out_", makefile))
   {
-    TransformAction::Initialize(selector);
-    this->FunctionName = functionName;
-    this->Makefile = &makefile;
-    this->OutputVar = OutputVarFor("_cmake_transform_apply_out_", makefile);
-
     RequireFunction(makefile, this->FunctionName,
                     "sub-command TRANSFORM, action APPLY");
   }
 
-  void Initialize(TransformSelector* /*selector*/,
-                  std::vector<std::string> const& /*args*/) override
+protected:
+  std::string ApplyTo(std::string const& s) override
   {
-    // This overload must not be used for APPLY - it lacks cmMakefile context.
-    throw transform_error(
-      "sub-command TRANSFORM, action APPLY requires cmMakefile context.");
-  }
-
-  std::string operator()(std::string const& s) override
-  {
-    if (!this->Selector->InSelection(s)) {
-      return s;
-    }
-
     // Unset the output variable before calling
     this->Makefile->RemoveDefinition(this->OutputVar);
 
@@ -899,7 +845,6 @@ public:
     // cmValue pointer).
     std::string output = *result;
 
-    // Clean up
     this->Makefile->RemoveDefinition(this->OutputVar);
 
     return output;
@@ -911,68 +856,44 @@ private:
   std::string OutputVar;
 };
 
-// Descriptor of action
-// Arity: number of arguments required for the action
-// Transform: Object implementing the action
+// Arity: number of arguments required for the action.
+//
+// Keep this a bare aggregate of literal types: CMake still builds as C++11,
+// where a member initializer, a constructor, or a cm::string_view member
+// would break the constexpr table below.
 struct ActionDescriptor
 {
-  ActionDescriptor(cmList::TransformAction action)
-    : Action(action)
-  {
-  }
-  ActionDescriptor(cmList::TransformAction action, std::string name,
-                   std::size_t arity,
-                   std::unique_ptr<TransformAction> transform)
-    : Action(action)
-    , Name(std::move(name))
-    , Arity(arity)
-    , Transform(std::move(transform))
-  {
-  }
-
-  operator cmList::TransformAction() const { return this->Action; }
-
   cmList::TransformAction Action;
-  std::string Name;
-  std::size_t Arity = 0;
-  std::unique_ptr<TransformAction> Transform;
+  char const* Name;
+  std::size_t Arity;
 };
 
-// Build a set of supported actions.
-using ActionDescriptorSet = std::set<
-  ActionDescriptor,
-  std::function<bool(cmList::TransformAction, cmList::TransformAction)>>;
+constexpr ActionDescriptor Descriptors[] = {
+  { cmList::TransformAction::APPEND, "APPEND", 1 },
+  { cmList::TransformAction::PREPEND, "PREPEND", 1 },
+  { cmList::TransformAction::TOUPPER, "TOUPPER", 0 },
+  { cmList::TransformAction::TOLOWER, "TOLOWER", 0 },
+  { cmList::TransformAction::STRIP, "STRIP", 0 },
+  { cmList::TransformAction::GENEX_STRIP, "GENEX_STRIP", 0 },
+  { cmList::TransformAction::REPLACE, "REPLACE", 2 },
+  { cmList::TransformAction::APPLY, "APPLY", 1 },
+};
 
-ActionDescriptorSet Descriptors([](cmList::TransformAction x,
-                                   cmList::TransformAction y) {
-  return x < y;
-});
-
-ActionDescriptorSet::iterator TransformConfigure(
+ActionDescriptor const& TransformConfigure(
   cmList::TransformAction action,
   std::unique_ptr<cmList::TransformSelector>& selector, std::size_t arity)
 {
-  if (Descriptors.empty()) {
-    Descriptors.emplace(cmList::TransformAction::APPEND, "APPEND", 1,
-                        cm::make_unique<TransformActionAppend>());
-    Descriptors.emplace(cmList::TransformAction::PREPEND, "PREPEND", 1,
-                        cm::make_unique<TransformActionPrepend>());
-    Descriptors.emplace(cmList::TransformAction::TOUPPER, "TOUPPER", 0,
-                        cm::make_unique<TransformActionToUpper>());
-    Descriptors.emplace(cmList::TransformAction::TOLOWER, "TOLOWER", 0,
-                        cm::make_unique<TransformActionToLower>());
-    Descriptors.emplace(cmList::TransformAction::STRIP, "STRIP", 0,
-                        cm::make_unique<TransformActionStrip>());
-    Descriptors.emplace(cmList::TransformAction::GENEX_STRIP, "GENEX_STRIP", 0,
-                        cm::make_unique<TransformActionGenexStrip>());
-    Descriptors.emplace(cmList::TransformAction::REPLACE, "REPLACE", 2,
-                        cm::make_unique<TransformActionReplace>());
-    Descriptors.emplace(cmList::TransformAction::APPLY, "APPLY", 1,
-                        cm::make_unique<TransformActionApply>());
+  // Not indexed by the enum value: this table is in registration order, and
+  // cmList.h declares TOLOWER before TOUPPER.
+  ActionDescriptor const* descriptor = nullptr;
+  for (auto const& candidate : Descriptors) {
+    if (candidate.Action == action) {
+      descriptor = &candidate;
+      break;
+    }
   }
 
-  auto descriptor = Descriptors.find(action);
-  if (descriptor == Descriptors.end()) {
+  if (!descriptor) {
     throw transform_error(cmStrCat(" sub-command TRANSFORM, ",
                                    static_cast<int>(action),
                                    " invalid action."));
@@ -987,7 +908,56 @@ ActionDescriptorSet::iterator TransformConfigure(
     selector = cm::make_unique<TransformNoSelector>();
   }
 
-  return descriptor;
+  return *descriptor;
+}
+
+// Precondition: TransformConfigure has validated the arity, so args is
+// indexed unchecked.
+std::unique_ptr<TransformAction> MakeTransformAction(
+  ActionDescriptor const& descriptor, TransformSelector& selector,
+  std::vector<std::string> const& args)
+{
+  switch (descriptor.Action) {
+    case cmList::TransformAction::APPEND:
+      return cm::make_unique<TransformActionAppend>(selector, args[0]);
+    case cmList::TransformAction::PREPEND:
+      return cm::make_unique<TransformActionPrepend>(selector, args[0]);
+    case cmList::TransformAction::TOUPPER:
+      return cm::make_unique<TransformActionToUpper>(selector);
+    case cmList::TransformAction::TOLOWER:
+      return cm::make_unique<TransformActionToLower>(selector);
+    case cmList::TransformAction::STRIP:
+      return cm::make_unique<TransformActionStrip>(selector);
+    case cmList::TransformAction::GENEX_STRIP:
+      return cm::make_unique<TransformActionGenexStrip>(selector);
+    case cmList::TransformAction::REPLACE:
+      return cm::make_unique<TransformActionReplace>(selector, args[0],
+                                                     args[1]);
+    case cmList::TransformAction::APPLY:
+      // APPLY needs a cmMakefile, which this factory does not receive; only
+      // the cmMakefile overload of cmList::transform can build it.
+      break;
+  }
+
+  throw transform_error(
+    "sub-command TRANSFORM, action APPLY requires cmMakefile context.");
+}
+
+void TransformValues(cmList::container_type& values,
+                     cmList::TransformAction action,
+                     std::vector<std::string> const& args,
+                     std::unique_ptr<cmList::TransformSelector>& selector)
+{
+  ActionDescriptor const& descriptor =
+    TransformConfigure(action, selector, args.size());
+
+  auto& sel = static_cast<TransformSelector&>(*selector);
+  std::unique_ptr<TransformAction> transformer =
+    MakeTransformAction(descriptor, sel, args);
+
+  sel.Transform(values, [&transformer](std::string const& s) -> std::string {
+    return (*transformer)(s);
+  });
 }
 }
 
@@ -1101,15 +1071,7 @@ cmList::TransformSelector::NewPREDICATE(std::string const& functionName,
 cmList& cmList::transform(TransformAction action,
                           std::unique_ptr<TransformSelector> selector)
 {
-  auto descriptor = TransformConfigure(action, selector, 0);
-
-  descriptor->Transform->Initialize(
-    static_cast<::TransformSelector*>(selector.get()));
-
-  static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&descriptor](std::string const& s) -> std::string {
-      return (*descriptor->Transform)(s);
-    });
+  TransformValues(this->Values, action, {}, selector);
 
   return *this;
 }
@@ -1117,15 +1079,7 @@ cmList& cmList::transform(TransformAction action,
 cmList& cmList::transform(TransformAction action, std::string const& arg,
                           std::unique_ptr<TransformSelector> selector)
 {
-  auto descriptor = TransformConfigure(action, selector, 1);
-
-  descriptor->Transform->Initialize(
-    static_cast<::TransformSelector*>(selector.get()), arg);
-
-  static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&descriptor](std::string const& s) -> std::string {
-      return (*descriptor->Transform)(s);
-    });
+  TransformValues(this->Values, action, { arg }, selector);
 
   return *this;
 }
@@ -1134,15 +1088,7 @@ cmList& cmList::transform(TransformAction action, std::string const& arg1,
                           std::string const& arg2,
                           std::unique_ptr<TransformSelector> selector)
 {
-  auto descriptor = TransformConfigure(action, selector, 2);
-
-  descriptor->Transform->Initialize(
-    static_cast<::TransformSelector*>(selector.get()), arg1, arg2);
-
-  static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&descriptor](std::string const& s) -> std::string {
-      return (*descriptor->Transform)(s);
-    });
+  TransformValues(this->Values, action, { arg1, arg2 }, selector);
 
   return *this;
 }
@@ -1151,15 +1097,7 @@ cmList& cmList::transform(TransformAction action,
                           std::vector<std::string> const& args,
                           std::unique_ptr<TransformSelector> selector)
 {
-  auto descriptor = TransformConfigure(action, selector, args.size());
-
-  descriptor->Transform->Initialize(
-    static_cast<::TransformSelector*>(selector.get()), args);
-
-  static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&descriptor](std::string const& s) -> std::string {
-      return (*descriptor->Transform)(s);
-    });
+  TransformValues(this->Values, action, args, selector);
 
   return *this;
 }
@@ -1168,20 +1106,24 @@ cmList& cmList::transform(TransformAction action, std::string const& arg,
                           cmMakefile& makefile,
                           std::unique_ptr<TransformSelector> selector)
 {
-  // Validate action and arity via the static registry.
+  // This overload performs APPLY unconditionally.  Without this check the
+  // other arity-1 actions, APPEND and PREPEND, would pass the arity
+  // validation below and then silently run APPLY instead.
+  if (action != TransformAction::APPLY) {
+    throw transform_error(
+      "sub-command TRANSFORM: only action APPLY accepts a cmMakefile.");
+  }
+
+  // Validates the arity and defaults the selector.
   TransformConfigure(action, selector, 1);
 
-  // Create a local instance rather than reusing the singleton from
-  // Descriptors.  A user function invoked by APPLY may itself call
-  // list(TRANSFORM ... APPLY ...), which would clobber a shared instance.
-  TransformActionApply applyAction;
-  applyAction.Initialize(static_cast<::TransformSelector*>(selector.get()),
-                         arg, makefile);
+  auto& sel = static_cast<::TransformSelector&>(*selector);
+  TransformActionApply applyAction(sel, arg, makefile);
 
-  static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&applyAction](std::string const& s) -> std::string {
-      return applyAction(s);
-    });
+  sel.Transform(this->Values,
+                [&applyAction](std::string const& s) -> std::string {
+                  return applyAction(s);
+                });
 
   return *this;
 }
