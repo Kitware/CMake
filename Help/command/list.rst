@@ -371,6 +371,8 @@ Modification
       variable.  The function must set the output variable to a boolean
       value.  Standard CMake boolean evaluation is used.
       If the function does not set the output variable, it is an error.
+      The function is evaluated for each element in turn, immediately
+      before that element would be transformed.
 
       Example:
 

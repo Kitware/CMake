@@ -790,6 +790,31 @@ bool testTransform()
       result = false;
     }
   }
+  {
+    // No cmMakefile through this overload, so APPLY must throw.
+    cmList list({ "AA", "BB" });
+
+    try {
+      list.transform(cmList::TransformAction::APPLY,
+                     std::vector<std::string>{ "someFunction" });
+#ifndef __clang_analyzer__ /* clang-analyzer cannot see throw skips this */
+      result = false;
+#endif
+    } catch (cmList::transform_error const&) {
+    }
+  }
+  {
+    // No cmMakefile through this overload, so APPLY must throw.
+    cmList list({ "AA", "BB" });
+
+    try {
+      list.transform(cmList::TransformAction::APPLY, "someFunction");
+#ifndef __clang_analyzer__ /* clang-analyzer cannot see throw skips this */
+      result = false;
+#endif
+    } catch (cmList::transform_error const&) {
+    }
+  }
 
   checkResult(result);
 
