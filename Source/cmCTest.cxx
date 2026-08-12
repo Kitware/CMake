@@ -2864,7 +2864,7 @@ void cmCTest::SetStopTime(std::string const& time_str)
 
   tzone_offset *= 100;
   char buf[1024];
-  snprintf(buf, sizeof(buf), "%d%02d%02d %s %+05i", lctime->tm_year + 1900,
+  snprintf(buf, sizeof(buf), "%d-%02d-%02d %s %+05i", lctime->tm_year + 1900,
            lctime->tm_mon + 1, lctime->tm_mday, time_str.c_str(),
            tzone_offset);
 
