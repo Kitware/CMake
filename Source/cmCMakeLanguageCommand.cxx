@@ -389,7 +389,6 @@ struct PrintTargetsArgs : public ArgumentParser::ParseResult
   bool ImportedOnly = false;
   bool NoImported = false;
   bool IgnoreCase = false;
-  cm::optional<std::string> MessagePrefix;
 };
 
 // Lists every target that currently exists, optionally filtered by a
@@ -414,8 +413,7 @@ bool cmCMakeLanguageCommandPRINT_TARGETS(
       .Bind("REGEX"_s, &PrintTargetsArgs::Regex)
       .Bind("IMPORTED_ONLY"_s, &PrintTargetsArgs::ImportedOnly)
       .Bind("NO_IMPORTED"_s, &PrintTargetsArgs::NoImported)
-      .Bind("IGNORE_CASE"_s, &PrintTargetsArgs::IgnoreCase)
-      .Bind("__MESSAGE_PREFIX"_s, &PrintTargetsArgs::MessagePrefix);
+      .Bind("IGNORE_CASE"_s, &PrintTargetsArgs::IgnoreCase);
 
   std::vector<std::string> unparsed;
   auto parsedArgs = ArgsParser.Parse(body, &unparsed);
@@ -502,11 +500,8 @@ bool cmCMakeLanguageCommandPRINT_TARGETS(
   }
 
   if (anyMatched) {
-    // The message opens with a banner line.  The internal __MESSAGE_PREFIX
-    // keyword overrides it (used by wrappers to reproduce legacy output); it
-    // is not part of the public interface.
-    std::string const messagePrefix =
-      parsedArgs.MessagePrefix.value_or("Printing targets...\n");
+    // The message opens with a banner line.
+    std::string out = "Printing targets...\n";
     // The header reflects the imported-filter mode and any REGEX in effect.
     char const* label = "All targets";
     if (parsedArgs.ImportedOnly) {
@@ -514,7 +509,7 @@ bool cmCMakeLanguageCommandPRINT_TARGETS(
     } else if (parsedArgs.NoImported) {
       label = "Non-imported targets";
     }
-    std::string out = cmStrCat(messagePrefix, " ", label);
+    out += cmStrCat(" ", label);
     if (parsedArgs.Regex) {
       out += cmStrCat(
         " matching REGEX '", *parsedArgs.Regex, "' (",
