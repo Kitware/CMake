@@ -1,0 +1,4 @@
+CMake Error at [^
+]*CMakeSwiftInformation\.cmake:[0-9]+ \(message\):
+  Policy CMP0215 is set to 'NEW', which requires policies CMP0157 and CMP0195
+  to be set to 'NEW', but CMP0157 and CMP0195 are not\.

@@ -5,7 +5,7 @@ if(NOT actual_stdout MATCHES
 endif()
 
 if(NOT actual_stdout MATCHES
-    "swiftc(\\.exe)?\"? [^\n]* -emit-module @.*L\\.swiftmodule\\.rsp")
+    "swiftc(\\.exe)?\"? [^\n]* -emit-module @.*L\\.swiftmodule(/|\\\\)[-_a-zA-Z0-9]+\\.swiftmodule\\.rsp")
   string(APPEND RunCMake_TEST_FAILED
     "No Swift emit-module response-file command found for target L.\n")
 endif()

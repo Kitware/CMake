@@ -184,15 +184,11 @@ if(RunCMake_GENERATOR MATCHES "Ninja")
   endblock()
 
   block()
-    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/EmitModuleSeparatelyExistingModulePath-build)
-    run_cmake(EmitModuleSeparatelyExistingModulePath)
-    set(RunCMake_TEST_NO_CLEAN 1)
-    # -v: verbose to capture executed commands -n: dry-run to avoid actually compiling
-    run_cmake_command(EmitModuleSeparatelyExistingModulePath-build ${CMAKE_COMMAND} --build . -- -vn)
+    run_cmake(EmitModuleSeparatelyOrdering)
   endblock()
 
   block()
-    run_cmake(EmitModuleSeparatelyOrdering)
+    run_cmake(EmitModuleSeparatelyRequiresPolicies)
   endblock()
 
   block()

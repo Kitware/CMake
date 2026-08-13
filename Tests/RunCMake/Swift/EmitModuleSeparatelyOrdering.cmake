@@ -1,4 +1,5 @@
 cmake_policy(SET CMP0157 NEW)
+cmake_policy(SET CMP0195 NEW)
 cmake_policy(SET CMP0215 NEW)
 
 if(NOT CMAKE_GENERATOR MATCHES "Ninja")
