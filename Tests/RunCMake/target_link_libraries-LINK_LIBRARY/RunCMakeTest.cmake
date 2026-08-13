@@ -123,6 +123,11 @@ if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES 
   if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION GREATER_EQUAL "12")
     run_cmake_target(apple_library needed_library main-needed_library)
   endif()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
+  run_cmake(linux_library_external)
+  run_cmake_target(linux_library_external build external)
+  run_cmake_with_options(linux_library "-DRunCMake_BINARY_DIR=${RunCMake_BINARY_DIR}")
+  run_cmake_target(linux_library needed_library main-needed_library)
 endif()
 
 # WHOLE_ARCHIVE feature

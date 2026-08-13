@@ -101,6 +101,19 @@
     Uses the ``-needed_library`` or ``-needed-l`` option as appropriate,
     with the same linker constraints as ``NEEDED_FRAMEWORK``.
 
+  Linux
+    .. versionadded:: 4.5
+
+    Wraps the library with ``--no-as-needed`` / ``--as-needed`` to force
+    an entry in the binary's ``DT_NEEDED`` list regardless of whether any
+    symbols from the library are directly referenced.  When the linker
+    supports ``--push-state`` / ``--pop-state`` (GNU ld >= 2.25, gold,
+    LLD, MOLD), the state-stacking form is used instead to correctly
+    restore the pre-existing ``--as-needed`` state rather than
+    unconditionally enabling it after the library.  This feature is only
+    meaningful for shared libraries; applying it to a static library
+    produces a developer warning and has no effect.
+
 ``REEXPORT_LIBRARY``
   This is similar to the ``REEXPORT_FRAMEWORK`` feature,  except it is for use
   with non-framework targets or libraries (Apple platforms only).

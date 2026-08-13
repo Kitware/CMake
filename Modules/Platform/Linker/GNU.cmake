@@ -57,6 +57,31 @@ function(__cmake_set_whole_archive_feature __linker __linker_options)
   set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED "${CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED}" PARENT_SCOPE)
 endfunction()
 
+# NEEDED_LIBRARY Feature for LINK_LIBRARY generator expression
+## Force a shared library into DT_NEEDED even when no symbols are referenced
+function(__cmake_set_needed_library_feature __linker __linker_options)
+  unset(__lang)
+  if(ARGC EQUAL "3")
+    set(__lang "${ARGV2}_")
+  endif()
+
+  __cmake_check_linker_pushpop_state("${__linker}" "${__linker_options}" ${ARGV2})
+
+  ## NEEDED_LIBRARY: Force DT_NEEDED entry for a shared library
+  if(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED)
+    set(CMAKE_${__lang}LINK_LIBRARY_USING_NEEDED_LIBRARY "LINKER:--push-state,--no-as-needed"
+                                                         "<LINK_ITEM>"
+                                                         "LINKER:--pop-state" PARENT_SCOPE)
+  else()
+    set(CMAKE_${__lang}LINK_LIBRARY_USING_NEEDED_LIBRARY "LINKER:--no-as-needed"
+                                                         "<LINK_ITEM>"
+                                                         "LINKER:--as-needed" PARENT_SCOPE)
+  endif()
+  set(CMAKE_${__lang}LINK_LIBRARY_USING_NEEDED_LIBRARY_SUPPORTED TRUE PARENT_SCOPE)
+  set(CMAKE_${__lang}LINK_LIBRARY_NEEDED_LIBRARY_ATTRIBUTES LIBRARY_TYPE=SHARED DEDUPLICATION=DEFAULT OVERRIDE=DEFAULT PARENT_SCOPE)
+  set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED "${CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED}" PARENT_SCOPE)
+endfunction()
 
 ## Configure system linker
 __cmake_set_whole_archive_feature("${CMAKE_LINKER}" "")
+__cmake_set_needed_library_feature("${CMAKE_LINKER}" "")
