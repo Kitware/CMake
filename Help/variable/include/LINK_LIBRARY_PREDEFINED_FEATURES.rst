@@ -94,9 +94,12 @@
 
 ``NEEDED_LIBRARY``
   This is similar to the ``NEEDED_FRAMEWORK`` feature, except it is for use
-  with non-framework targets or libraries (Apple platforms only).
-  It uses the ``-needed_library`` or ``-needed-l`` option as appropriate,
-  and has the same linker constraints as ``NEEDED_FRAMEWORK``.
+  with non-framework targets or libraries.  This feature is only supported
+  on the following platforms:
+
+  Apple
+    Uses the ``-needed_library`` or ``-needed-l`` option as appropriate,
+    with the same linker constraints as ``NEEDED_FRAMEWORK``.
 
 ``REEXPORT_LIBRARY``
   This is similar to the ``REEXPORT_FRAMEWORK`` feature,  except it is for use
