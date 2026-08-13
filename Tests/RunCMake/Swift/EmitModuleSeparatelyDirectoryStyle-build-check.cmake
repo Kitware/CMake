@@ -1,3 +1,9 @@
+# Older Swift compilers may not set CMAKE_Swift_MODULE_TRIPLE
+# Check that we built something before verifying the output
+if(EXISTS "${RunCMake_TEST_BINARY_DIR}/no-swift-module-triple")
+  return()
+endif()
+
 string(
   REGEX MATCHALL
   "swiftc(\\.exe)?\"? [^\n]* -emit-module-path [^\n]*L\\.swiftmodule[^ \n]*"

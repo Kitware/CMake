@@ -10,6 +10,13 @@ set(CMAKE_NINJA_FORCE_RESPONSE_FILE TRUE)
 
 enable_language(Swift)
 
+# Older Swift compilers may not set CMAKE_Swift_MODULE_TRIPLE
+# Don't build anything if we can't do the nested module structure
+if(NOT CMAKE_Swift_MODULE_TRIPLE)
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/no-swift-module-triple" "")
+  return()
+endif()
+
 add_library(L STATIC L.swift)
 add_library(LClient STATIC LClient.swift)
 target_link_libraries(LClient PRIVATE L)

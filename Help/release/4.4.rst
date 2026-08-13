@@ -455,6 +455,6 @@ Changes made since CMake 4.4.0 include the following.
 
 .. 4.4.3
 
-  * Swift policy :poilcy:`CMP0215`'s ``NEW`` behavior has been updated
+  * Swift policy :policy:`CMP0215`'s ``NEW`` behavior has been updated
     to require policies :policy:`CMP0157` and :policy:`CMP0195` to also
     be set to ``NEW``.
