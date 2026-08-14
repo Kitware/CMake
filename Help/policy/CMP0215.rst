@@ -24,13 +24,15 @@ The :prop_tgt:`Swift_SEPARATE_MODULE_EMISSION` target property and
 corresponding :variable:`CMAKE_Swift_SEPARATE_MODULE_EMISSION` variable
 may be set to enable or disable the behavior on a per-target basis.
 
-.. note::
-
-   Separate module emission takes effect only when policy :policy:`CMP0157`
-   is set to ``NEW`` prior to the first :command:`project` or
-   :command:`enable_language` command that enables the Swift language.
-   The dedicated ``.swiftmodule`` edge is available only in the split
-   Swift build model.
+The ``NEW`` behavior requires that policies :policy:`CMP0157` and
+:policy:`CMP0195` are also set to ``NEW``.  :policy:`CMP0157` selects the
+split Swift build model that provides the dedicated ``.swiftmodule`` edge,
+and must be set prior to the first :command:`project` or
+:command:`enable_language` command that enables the Swift language.
+:policy:`CMP0195` places the module in the Swift module directory structure
+that the dedicated edge writes.  If either policy is not ``NEW`` while
+``CMP0215`` is ``NEW``, CMake issues a fatal error when the Swift language
+is enabled.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.4
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn

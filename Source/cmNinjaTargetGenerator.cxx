@@ -1293,7 +1293,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     this->GeneratorTarget->GetObjectSources(objectSources, config);
 
     std::vector<cmSourceFile const*> swiftSources;
-
     for (cmSourceFile const* sf : objectSources) {
       if (this->GetLocalGenerator()->IsSplitSwiftBuild() &&
           sf->GetLanguage() == "Swift") {
@@ -1303,6 +1302,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
                                         firstForConfig);
       }
     }
+
     WriteSwiftObjectBuildStatement(swiftSources, config, fileConfig,
                                    firstForConfig);
   }
@@ -2244,9 +2244,6 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     this->GetGlobalGenerator()->GetLanguageOutputExtension(language)));
   objBuild.RspFile = cmStrCat(targetObjectFilename, ".swift.rsp");
 
-  // Importable targets keep -emit-module on compile so swiftc still emits
-  // .swiftdoc.  When splitting module emission, both the .swiftmodule output
-  // and -emit-module flags move entirely to the separate emit-module edge.
   if (targetIsImportable) {
     this->Configs[config].SwiftModuleOutput = moduleFilepath;
   }
@@ -2288,8 +2285,8 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
   std::string const moduleOutputPath =
     this->LocalGenerator->ConvertToOutputFormat(moduleFilepath,
                                                 cmOutputConverter::SHELL);
-  if (targetIsImportable && !emitModuleSeparately &&
-      commonFlags.find("-emit-module-path") == std::string::npos) {
+
+  if (targetIsImportable && !emitModuleSeparately) {
     std::string const emitModuleFlag = "-emit-module";
     std::string const modulePathFlag = "-emit-module-path";
     this->LocalGenerator->AppendFlags(
@@ -2338,11 +2335,9 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     // Skip if the flags already contain one (e.g. a directory-style path
     // set by the target's compile options).
     modBuild.Variables["FLAGS"] = commonFlags;
-    if (commonFlags.find("-emit-module-path") == std::string::npos) {
-      this->LocalGenerator->AppendFlags(
-        modBuild.Variables["FLAGS"],
-        cmStrCat("-emit-module-path ", moduleOutputPath));
-    }
+    this->LocalGenerator->AppendFlags(
+      modBuild.Variables["FLAGS"],
+      cmStrCat("-emit-module-path ", moduleOutputPath));
 
     modBuild.RspFile = cmStrCat(moduleFilepath, ".rsp");
 
