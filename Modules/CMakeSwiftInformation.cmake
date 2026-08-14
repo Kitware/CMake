@@ -109,6 +109,47 @@ else()
 endif()
 unset(__SWIFT_COMP_MODE_CMP0157)
 
+# Separate Swift module emission (see policy CMP0215) is available only in the
+# split build model selected by policy CMP0157, and it writes the module into
+# the Swift module directory structure selected by policy CMP0195.  When
+# CMP0215 is NEW, require both to also be NEW.  This is a Ninja-only feature,
+# so only enforce the requirement for Ninja generators.
+if(CMAKE_GENERATOR MATCHES "Ninja")
+  cmake_policy(GET CMP0215 __SWIFT_SEPARATE_MODULE_CMP0215)
+  if(__SWIFT_SEPARATE_MODULE_CMP0215 STREQUAL "NEW")
+    set(__SWIFT_SEPARATE_MODULE_UNMET "")
+    cmake_policy(GET CMP0157 __SWIFT_SEPARATE_MODULE_CMP0157)
+    if(NOT __SWIFT_SEPARATE_MODULE_CMP0157 STREQUAL "NEW")
+      list(APPEND __SWIFT_SEPARATE_MODULE_UNMET CMP0157)
+    endif()
+    cmake_policy(GET CMP0195 __SWIFT_SEPARATE_MODULE_CMP0195)
+    if(NOT __SWIFT_SEPARATE_MODULE_CMP0195 STREQUAL "NEW")
+      list(APPEND __SWIFT_SEPARATE_MODULE_UNMET CMP0195)
+    endif()
+    if(__SWIFT_SEPARATE_MODULE_UNMET)
+      list(LENGTH __SWIFT_SEPARATE_MODULE_UNMET __SWIFT_SEPARATE_MODULE_UNMET_COUNT)
+      list(JOIN __SWIFT_SEPARATE_MODULE_UNMET " and " __SWIFT_SEPARATE_MODULE_UNMET_STR)
+      if(__SWIFT_SEPARATE_MODULE_UNMET_COUNT GREATER 1)
+        set(__SWIFT_SEPARATE_MODULE_VERB "are")
+      else()
+        set(__SWIFT_SEPARATE_MODULE_VERB "is")
+      endif()
+      message(FATAL_ERROR
+        "Policy CMP0215 is set to 'NEW', which requires policies CMP0157 and "
+        "CMP0195 to be set to 'NEW', but ${__SWIFT_SEPARATE_MODULE_UNMET_STR} "
+        "${__SWIFT_SEPARATE_MODULE_VERB} not.  Note that CMP0157 must be set "
+        "before the Swift language is enabled.")
+    endif()
+    unset(__SWIFT_SEPARATE_MODULE_CMP0157)
+    unset(__SWIFT_SEPARATE_MODULE_CMP0195)
+    unset(__SWIFT_SEPARATE_MODULE_UNMET)
+    unset(__SWIFT_SEPARATE_MODULE_UNMET_COUNT)
+    unset(__SWIFT_SEPARATE_MODULE_UNMET_STR)
+    unset(__SWIFT_SEPARATE_MODULE_VERB)
+  endif()
+  unset(__SWIFT_SEPARATE_MODULE_CMP0215)
+endif()
+
 cmake_initialize_per_config_variable(CMAKE_Swift_FLAGS "Swift Compiler Flags")
 
 if(NOT CMAKE_Swift_NUM_THREADS MATCHES "^[0-9]+$")
