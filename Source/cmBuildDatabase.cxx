@@ -10,7 +10,6 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
@@ -22,6 +21,7 @@
 #include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmJSONState.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmSourceFile.h"
@@ -179,12 +179,11 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
 {
   Json::Value mcdb;
   {
-    cmsys::ifstream mcdbf(path.c_str(), std::ios::in | std::ios::binary);
-    Json::Reader reader;
-    if (!reader.parse(mcdbf, mcdb, false)) {
+    cmJSONState parseState(path, &mcdb);
+    if (!parseState.errors.empty()) {
       cmSystemTools::Error(
         cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                 reader.getFormattedErrorMessages()));
+                 parseState.GetErrorMessage()));
       return {};
     }
   }
