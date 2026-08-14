@@ -298,7 +298,7 @@ static time_t windows_filetime_to_posix_time(const FILETIME& ft)
 typedef KWSYS_NAMESPACE::SystemTools::mode_t mode_t;
 #  endif
 
-inline int Mkdir(std::string const& dir, mode_t const* mode)
+static inline int Mkdir(std::string const& dir, mode_t const* mode)
 {
   int ret =
     _wmkdir(KWSYS_NAMESPACE::Encoding::ToWindowsExtendedPath(dir).c_str());
@@ -306,12 +306,12 @@ inline int Mkdir(std::string const& dir, mode_t const* mode)
     KWSYS_NAMESPACE::SystemTools::SetPermissions(dir, *mode);
   return ret;
 }
-inline int Rmdir(std::string const& dir)
+static inline int Rmdir(std::string const& dir)
 {
   return _wrmdir(
     KWSYS_NAMESPACE::Encoding::ToWindowsExtendedPath(dir).c_str());
 }
-inline char const* Getcwd(char* buf, unsigned int len)
+static inline char const* Getcwd(char* buf, unsigned int len)
 {
   std::vector<wchar_t> w_buf(len);
   if (_wgetcwd(&w_buf[0], len)) {
@@ -329,15 +329,16 @@ inline char const* Getcwd(char* buf, unsigned int len)
   }
   return 0;
 }
-inline int Chdir(std::string const& dir)
+static inline int Chdir(std::string const& dir)
 {
   // We cannot use ToWindowsExtendedPath here because that causes a
   // UNC path to be recorded as the process working directory, and
   // can break child processes.
   return _wchdir(KWSYS_NAMESPACE::Encoding::ToWide(dir).c_str());
 }
-inline void Realpath(std::string const& path, std::string& resolved_path,
-                     std::string* errorMessage = nullptr)
+static inline void Realpath(std::string const& path,
+                            std::string& resolved_path,
+                            std::string* errorMessage = nullptr)
 {
   std::wstring tmp = KWSYS_NAMESPACE::Encoding::ToWide(path);
   wchar_t fullpath[MAX_PATH];
@@ -372,25 +373,26 @@ inline void Realpath(std::string const& path, std::string& resolved_path,
 
 #  include <fcntl.h>
 #  include <unistd.h>
-inline int Mkdir(std::string const& dir, mode_t const* mode)
+static inline int Mkdir(std::string const& dir, mode_t const* mode)
 {
   return mkdir(dir.c_str(), mode ? *mode : 00777);
 }
-inline int Rmdir(std::string const& dir)
+static inline int Rmdir(std::string const& dir)
 {
   return rmdir(dir.c_str());
 }
-inline char const* Getcwd(char* buf, unsigned int len)
+static inline char const* Getcwd(char* buf, unsigned int len)
 {
   return getcwd(buf, len);
 }
 
-inline int Chdir(std::string const& dir)
+static inline int Chdir(std::string const& dir)
 {
   return chdir(dir.c_str());
 }
-inline void Realpath(std::string const& path, std::string& resolved_path,
-                     std::string* errorMessage = nullptr)
+static inline void Realpath(std::string const& path,
+                            std::string& resolved_path,
+                            std::string* errorMessage = nullptr)
 {
   char resolved_name[KWSYS_SYSTEMTOOLS_MAXPATH];
 
