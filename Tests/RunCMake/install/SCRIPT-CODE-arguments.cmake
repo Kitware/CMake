@@ -1,0 +1,7 @@
+install(SCRIPT)
+install(CODE)
+install(CODE SCRIPT install_script.cmake)
+install(CODE "" COMPONENT)
+install(CODE "" UNKNOWN)
+install(CODE "" COMPONENT "" COMPONENT "")
+install(CODE "" COMPONENT "" ALL_COMPONENTS)

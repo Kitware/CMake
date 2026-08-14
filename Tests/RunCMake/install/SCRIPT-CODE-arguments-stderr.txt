@@ -1,0 +1,50 @@
+CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
+  install SCRIPT given invalid argument:
+
+    SCRIPT: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
+  install CODE given invalid argument:
+
+    CODE: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
+  install CODE given invalid argument:
+
+    CODE: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
+  install CODE given invalid argument:
+
+    COMPONENT: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
+  install CODE given unknown argument: "UNKNOWN"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
+  install given more than one COMPONENT for the SCRIPT or CODE signature of
+  the INSTALL command\.  Use multiple INSTALL commands with one COMPONENT
+  each\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
+  install ALL_COMPONENTS and COMPONENT are mutually exclusive
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
