@@ -1,14 +1,14 @@
-.*--.*
+.*-- Printing targets\.\.\.
  +All targets matching REGEX '\^zz_print_targets_' \(case sensitive\):
  +zz_print_targets_iface \(INTERFACE_LIBRARY\)
  +zz_print_targets_imp \(STATIC_LIBRARY, IMPORTED\)
  +zz_print_targets_lib \(STATIC_LIBRARY\)
  +zz_print_targets_util \(UTILITY\)
-.*--.*
+.*-- Printing targets\.\.\.
  +Non-imported targets matching REGEX '\^zz_print_targets_' \(case sensitive\):
  +zz_print_targets_iface \(INTERFACE_LIBRARY\)
  +zz_print_targets_lib \(STATIC_LIBRARY\)
  +zz_print_targets_util \(UTILITY\)
-.*--.*
+.*-- Printing targets\.\.\.
  +Imported targets matching REGEX '\^zz_print_targets_' \(case sensitive\):
  +zz_print_targets_imp \(STATIC_LIBRARY, IMPORTED\)

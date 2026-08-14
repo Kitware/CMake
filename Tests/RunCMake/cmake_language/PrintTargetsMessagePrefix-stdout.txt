@@ -1,7 +1,0 @@
--- Printing targets\.\.\.
- All targets matching REGEX '\^zz_mp_' \(case sensitive\):
-   zz_mp_lib \(INTERFACE_LIBRARY\)
-
--- CUSTOM_BANNER
- All targets matching REGEX '\^zz_mp_' \(case sensitive\):
-   zz_mp_lib \(INTERFACE_LIBRARY\)

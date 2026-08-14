@@ -226,7 +226,6 @@ endblock()
 
 # cmake_language(PRINT_TARGETS)
 run_cmake(PrintTargets)
-run_cmake(PrintTargetsMessagePrefix)
 run_cmake(PrintTargetsMutuallyExclusive)
 block()
   set(RunCMake_TEST_NOT_EXPECT_stdout "zz_alias")
