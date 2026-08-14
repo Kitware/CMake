@@ -11,7 +11,6 @@
 #include <cm/memory>
 #include <cmext/string_view>
 
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 
 #include "cmsys/FStream.hxx"
@@ -24,6 +23,7 @@
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmIDEFlagTable.h"
+#include "cmJSONState.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
@@ -1379,39 +1379,35 @@ cmIDEFlagTable const* cmLoadFlagTableJson(std::string const& flagJsonPath,
   if (savedFlagIterator != loadedFlagJsonFiles.end()) {
     ret = savedFlagIterator->second.data();
   } else {
-    Json::Reader reader;
-    cmsys::ifstream stream;
-
-    stream.open(flagJsonPath.c_str(), std::ios_base::in);
-    if (stream) {
-      Json::Value flags;
-      if (reader.parse(stream, flags, false) && flags.isArray()) {
-        std::vector<cmIDEFlagTable> flagTable;
-        for (auto const& flag : flags) {
-          Json::Value const& vsminJson = flag["vsmin"];
-          if (vsminJson.isString()) {
-            std::string const& vsmin = vsminJson.asString();
-            if (!vsmin.empty()) {
-              if (!vsVer ||
-                  cmSystemTools::VersionCompareGreater(vsmin, *vsVer)) {
-                continue;
-              }
+    Json::Value flags;
+    cmJSONState parseState(flagJsonPath, &flags,
+                           cmJSONState::StrictMode::Relaxed);
+    if (parseState.errors.empty() && flags.isArray()) {
+      std::vector<cmIDEFlagTable> flagTable;
+      for (auto const& flag : flags) {
+        Json::Value const& vsminJson = flag["vsmin"];
+        if (vsminJson.isString()) {
+          std::string const& vsmin = vsminJson.asString();
+          if (!vsmin.empty()) {
+            if (!vsVer ||
+                cmSystemTools::VersionCompareGreater(vsmin, *vsVer)) {
+              continue;
             }
           }
-          cmIDEFlagTable flagEntry;
-          flagEntry.IDEName = cmLoadFlagTableString(flag, "name");
-          flagEntry.commandFlag = cmLoadFlagTableString(flag, "switch");
-          flagEntry.comment = cmLoadFlagTableString(flag, "comment");
-          flagEntry.value = cmLoadFlagTableString(flag, "value");
-          flagEntry.special = cmLoadFlagTableSpecial(flag, "flags");
-          flagTable.push_back(flagEntry);
         }
-        cmIDEFlagTable endFlag{ "", "", "", "", 0 };
-        flagTable.push_back(endFlag);
-
-        loadedFlagJsonFiles[flagJsonPath] = flagTable;
-        ret = loadedFlagJsonFiles[flagJsonPath].data();
+        cmIDEFlagTable flagEntry;
+        flagEntry.IDEName = cmLoadFlagTableString(flag, "name");
+        flagEntry.commandFlag = cmLoadFlagTableString(flag, "switch");
+        flagEntry.comment = cmLoadFlagTableString(flag, "comment");
+        flagEntry.value = cmLoadFlagTableString(flag, "value");
+        flagEntry.special = cmLoadFlagTableSpecial(flag, "flags");
+        flagTable.push_back(flagEntry);
       }
+      cmIDEFlagTable endFlag{ "", "", "", "", 0 };
+      flagTable.push_back(endFlag);
+
+      loadedFlagJsonFiles[flagJsonPath] = flagTable;
+      ret = loadedFlagJsonFiles[flagJsonPath].data();
     }
   }
   return ret;
