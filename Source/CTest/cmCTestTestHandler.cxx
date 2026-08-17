@@ -2351,6 +2351,27 @@ std::string cmCTestTestHandler::cmCTestTestProperties::GetStampFile()
   return cmCryptoHash(cmCryptoHash::AlgoMD5).HashString(this->Name) + ".stamp";
 }
 
+namespace {
+cm::optional<cmCTestTestHandler::FixtureRepeatMode> ParseFixtureRepeatMode(
+  cmCTestTestHandler::cmCTestTestProperties& rt, std::string const& val)
+{
+  using Mode = cmCTestTestHandler::FixtureRepeatMode;
+  if (val == "AROUND_ALL_REPEATS"_s) {
+    return Mode::AroundAllRepeats;
+  }
+  if (val == "AROUND_EACH_REPEAT"_s) {
+    return Mode::AroundEachRepeat;
+  }
+  if (val == "EACH_TEST_SEPARATELY"_s) {
+    return Mode::EachTestSeparately;
+  }
+  rt.AppendError(cmStrCat("FIXTURE_REPEAT_MODE \"", val,
+                          "\" not recognized. Must be AROUND_ALL_REPEATS, "
+                          "AROUND_EACH_REPEAT, or EACH_TEST_SEPARATELY."));
+  return cm::nullopt;
+}
+}
+
 bool cmCTestTestHandler::SetTestsProperties(
   std::vector<std::string> const& args)
 {
@@ -2433,6 +2454,11 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmList lval{ val };
 
             rt.FixturesRequired.insert(lval.begin(), lval.end());
+          } else if (key == "FIXTURE_REPEAT_MODE"_s) {
+            rt.RawProperties[key] = val;
+            rt.RequestedFixtureRepeatMode = ParseFixtureRepeatMode(rt, val);
+          } else if (key == "_CMAKE_DEFAULT_FIXTURE_REPEAT_MODE"_s) {
+            rt.DefaultFixtureRepeatMode = ParseFixtureRepeatMode(rt, val);
           } else if (key == "TIMEOUT"_s) {
             rt.RawProperties[key] = val;
             rt.Timeout = cmDuration(atof(val.c_str()));

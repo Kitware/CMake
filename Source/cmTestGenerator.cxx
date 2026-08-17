@@ -314,6 +314,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     os << " _CMAKE_TEST_BUILD_DEPENDS "
        << cmScriptGenerator::Quote(depList.to_string());
   }
+  this->GenerateDefaultFixtureRepeatMode(os);
   os << ' ';
   this->GenerateBacktrace(os, this->Test->GetBacktrace());
   os << ")\n";
@@ -367,9 +368,44 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
   for (auto const& i : this->Test->GetProperties().GetList()) {
     fout << " " << i.first << " " << cmScriptGenerator::Quote(i.second);
   }
+  this->GenerateDefaultFixtureRepeatMode(fout);
   fout << ' ';
   this->GenerateBacktrace(fout, this->Test->GetBacktrace());
   fout << ")\n";
+}
+
+void cmTestGenerator::GenerateDefaultFixtureRepeatMode(std::ostream& os)
+{
+  // Nothing to choose for a test that is not part of a fixture, or that
+  // names a mode itself.
+  if (this->Test->GetProperty("FIXTURE_REPEAT_MODE") ||
+      (!this->Test->GetProperty("FIXTURES_SETUP") &&
+       !this->Test->GetProperty("FIXTURES_CLEANUP"))) {
+    return;
+  }
+
+  // Write the mode the policy chose into the test file, so that ctest reads
+  // a mode rather than the policy settings behind it.  Only NEW needs
+  // writing: with nothing written, ctest already uses the
+  // EACH_TEST_SEPARATELY behavior of CMake 4.4 and below.
+  switch (this->Test->GetCMP0224()) {
+    case cmPolicies::WARN:
+      // Warn only on request.  Fixtures are common, and the choice of mode
+      // matters only to those who run ctest --repeat.  Collect the tests
+      // rather than warning about each: a project that sets its fixtures up
+      // in an add_test() wrapper would fill the console.
+      if (this->Test->GetMakefile()->PolicyOptionalWarningEnabled(
+            "CMAKE_POLICY_WARNING_CMP0224")) {
+        this->LG->GetGlobalGenerator()->AddCMP0224WarnTest(
+          this->Test->GetName());
+      }
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::NEW:
+      os << " _CMAKE_DEFAULT_FIXTURE_REPEAT_MODE AROUND_EACH_REPEAT";
+      break;
+  }
 }
 
 void cmTestGenerator::GenerateBacktrace(std::ostream& os,

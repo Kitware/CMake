@@ -391,6 +391,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
   }
   cmCTestRunTest::EndTestResult testResult;
   testResult.Passed = passed || skipped;
+  testResult.TestStatus = this->TestResult.Status;
   if (res == cmProcess::State::Expired &&
       this->TestProcess->GetTimeoutReason() ==
         cmProcess::TimeoutReason::StopTime) {
@@ -1001,7 +1002,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   // the test, and blanks on its other runs.  Which run that is has to be
   // decided before the run finishes: with until-fail it is the last run, and
   // with until-pass and after-timeout the repetitions may end early, so it
-  // is the first.
+  // is the first.  A test that its fixture repeats records every run.
   bool countThisRun = true;
   switch (this->RepeatMode) {
     case cmCTest::Repeat::Never:

@@ -89,6 +89,11 @@ the provided regular expression and replacement strings.
   replacement strings and may reference capture groups from
   ``DISCOVERY_MATCH``.
 
+  .. versionchanged:: 4.5
+    If the properties make the discovered tests part of a test fixture, and
+    they do not set :prop_test:`FIXTURE_REPEAT_MODE`, policy :policy:`CMP0224`
+    determines the behavior when the :ctest-option:`--repeat` option is used.
+
 CTest executes the discovery step to obtain the list of tests and then runs
 each discovered test using the command-line produced by ``COMMAND`` together
 with ``TEST_ARGS``.  The pass/fail behavior of each discovered test follows

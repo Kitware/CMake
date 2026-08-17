@@ -13,6 +13,7 @@ cmTest::cmTest(cmMakefile* mf)
   : Backtrace(mf->GetBacktrace())
   , PolicyStatusCMP0158(mf->GetPolicyStatus(cmPolicies::CMP0158))
   , PolicyStatusCMP0178(mf->GetPolicyStatus(cmPolicies::CMP0178))
+  , PolicyStatusCMP0224(mf->GetPolicyStatus(cmPolicies::CMP0224))
 {
   this->Makefile = mf;
   this->OldStyle = true;

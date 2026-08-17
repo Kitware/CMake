@@ -31,8 +31,8 @@ public:
   explicit cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler, int index);
 
   // Report this run as run `number` of `count` in the test's "(run N/M)"
-  // suffix.  A test that repeats on its own starts at run 1 and counts up
-  // itself.
+  // suffix.  A test repeating on its own starts at run 1 and counts up
+  // itself; a test repeated by its fixture is told which run it is.
   void SetRunNumber(int number, int count)
   {
     this->RunNumber = number;
@@ -76,6 +76,7 @@ public:
   {
     bool Passed = false;
     bool StopTimePassed = false;
+    int TestStatus = cmCTestTestHandler::NOT_RUN;
   };
 
   // launch the test process, return whether it started correctly
@@ -160,6 +161,8 @@ private:
   std::vector<std::map<
     std::string, std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>>
     AllocatedResources;
+  // Never unless this test repeats itself.  A test repeated by its fixture
+  // leaves this Never; the fixture decides when to repeat.
   cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   int RunNumber = 1; // which run of the test this is
   int RunCount = 1;  // how many runs it may be given

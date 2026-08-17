@@ -1566,6 +1566,11 @@ void cmGlobalGenerator::AddCMP0068WarnTarget(std::string const& target)
   this->CMP0068WarnTargets.insert(target);
 }
 
+void cmGlobalGenerator::AddCMP0224WarnTest(std::string const& test)
+{
+  this->CMP0224WarnTests.insert(test);
+}
+
 bool cmGlobalGenerator::ShouldWarnCMP0210(std::string const& lang)
 {
   return this->WarnedCMP0210Languages.insert(lang).second;
@@ -1685,6 +1690,9 @@ bool cmGlobalGenerator::Compute()
 
   // clear targets to issue warning CMP0068 for
   this->CMP0068WarnTargets.clear();
+
+  // clear tests to issue warning CMP0224 for
+  this->CMP0224WarnTests.clear();
 
   // Check whether this generator is allowed to run.
   if (!this->CheckALLOW_DUPLICATE_CUSTOM_TARGETS()) {
@@ -1961,6 +1969,22 @@ void cmGlobalGenerator::Generate()
       ;
     /* clang-format on */
     for (std::string const& t : this->CMP0068WarnTargets) {
+      w << ' ' << t << '\n';
+    }
+    this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_POLICY,
+                                              w.str());
+  }
+
+  if (!this->CMP0224WarnTests.empty()) {
+    std::ostringstream w;
+    /* clang-format off */
+    w <<
+      cmPolicies::GetPolicyWarning(cmPolicies::CMP0224) << "\n"
+      "For compatibility with older versions of CMake, the fixtures of the "
+      "following tests will use EACH_TEST_SEPARATELY mode:\n"
+      ;
+    /* clang-format on */
+    for (std::string const& t : this->CMP0224WarnTests) {
       w << ' ' << t << '\n';
     }
     this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_POLICY,

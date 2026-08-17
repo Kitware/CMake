@@ -67,6 +67,7 @@ private:
 
 protected:
   void GenerateBacktrace(std::ostream& os, cmListFileBacktrace bt);
+  void GenerateDefaultFixtureRepeatMode(std::ostream& os);
   void GenerateCommand(std::ostream& os,
                        std::vector<std::string> const& command,
                        std::string const& config, bool expand,

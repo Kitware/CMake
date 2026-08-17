@@ -177,6 +177,46 @@ private:
   cm::optional<std::size_t> ResourceSpecSetupTest;
   bool HasInvalidGeneratedResourceSpec = false;
 
+  // Tests that ctest --repeat repeats as a unit because they take part in a
+  // fixture using AROUND_EACH_REPEAT mode.
+  struct RepeatGroup
+  {
+    // The group's tests, each mapped to its dependencies within the group.
+    // Dependencies on tests outside the group are satisfied by the first
+    // repetition and are not restored for the later ones.
+    std::map<int, TestSet> Tests;
+    // Repetitions still to run after the current one.
+    int RepetitionsLeft = 0;
+    // Tests that have not finished the current repetition.
+    std::size_t Unfinished = 0;
+    // Whether every test finished the current repetition successfully.
+    bool AllCompleted = true;
+    // Whether any test timed out during the current repetition.
+    bool AnyTimedOut = false;
+  };
+  std::vector<RepeatGroup> RepeatGroups;
+  // Index into RepeatGroups of each test that belongs to a group.
+  std::map<int, int> RepeatGroupOfTest;
+  // Fixture setup and cleanup tests that run only once, because their
+  // fixture brackets all repetitions of the tests requiring it.
+  std::set<int> TestsRunOnce;
+
+  // Work out how ctest --repeat repeats each test of a fixture, filling in
+  // the members above.  Returns false if fixtures that repeat together
+  // disagree on the mode.
+  bool ComputeFixtureRepetition();
+  // Put the given tests in one repeat group, merging any group they already
+  // belong to.
+  void AddRepeatGroup(std::set<int> const& tests);
+  // Record the result of a test belonging to a repeat group, and re-queue
+  // the group if it just finished a repetition and another one is due.
+  void FinishRepeatGroupTest(int test, int testStatus);
+  // Record the group's tests once it has run its last repetition.
+  void FinishRepeatGroup(RepeatGroup const& group);
+  // Run the group's tests again, dropping the results of the repetition it
+  // just finished.
+  void RequeueRepeatGroup(RepeatGroup const& group);
+
   // Tests pending selection to start.  They may have dependencies.
   TestMap PendingTests;
   // List of pending test indexes, ordered by cost.

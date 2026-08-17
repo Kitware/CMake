@@ -20,10 +20,10 @@ primary effects:
   set require any fixture listed in ``FIXTURES_SETUP``.
 
 A setup test can have multiple fixtures listed in its ``FIXTURES_SETUP``
-property. It will execute only once for the whole CTest run, not once for each
-fixture. A fixture can also have more than one setup test defined. If there are
-multiple setup tests for a fixture, projects can control their order with the
-usual :prop_test:`DEPENDS` test property if necessary.
+property. It will execute once for all of them, not once for each fixture. A
+fixture can also have more than one setup test defined. If there are multiple
+setup tests for a fixture, projects can control their order with the usual
+:prop_test:`DEPENDS` test property if necessary.
 
 A setup test is allowed to require other fixtures, but not any fixture listed
 in its ``FIXTURES_SETUP`` property. For example:
@@ -45,6 +45,12 @@ in its ``FIXTURES_SETUP`` property. For example:
 If any of a fixture's setup tests fail, none of the tests listing that fixture
 in its :prop_test:`FIXTURES_REQUIRED` property will be run. Cleanup tests will,
 however, still be executed.
+
+.. versionchanged:: 4.5
+
+  The :prop_test:`FIXTURE_REPEAT_MODE` property selects how a fixture behaves
+  when :manual:`ctest(1)` repeats tests with :ctest-option:`--repeat`.  See
+  also :policy:`CMP0224`.
 
 See :prop_test:`FIXTURES_REQUIRED` for a more complete discussion of how to use
 test fixtures.

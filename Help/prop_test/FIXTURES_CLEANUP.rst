@@ -20,10 +20,10 @@ primary effects:
   set require any fixture listed in ``FIXTURES_CLEANUP``.
 
 A cleanup test can have multiple fixtures listed in its ``FIXTURES_CLEANUP``
-property. It will execute only once for the whole CTest run, not once for each
-fixture. A fixture can also have more than one cleanup test defined. If there
-are multiple cleanup tests for a fixture, projects can control their order with
-the usual :prop_test:`DEPENDS` test property if necessary.
+property. It will execute once for all of them, not once for each fixture. A
+fixture can also have more than one cleanup test defined. If there are multiple
+cleanup tests for a fixture, projects can control their order with the usual
+:prop_test:`DEPENDS` test property if necessary.
 
 A cleanup test is allowed to require other fixtures, but not any fixture listed
 in its ``FIXTURES_CLEANUP`` property. For example:
@@ -44,6 +44,12 @@ in its ``FIXTURES_CLEANUP`` property. For example:
 
 Cleanup tests will execute even if setup or regular tests for that fixture fail
 or are skipped.
+
+.. versionchanged:: 4.5
+
+  The :prop_test:`FIXTURE_REPEAT_MODE` property selects how a fixture behaves
+  when :manual:`ctest(1)` repeats tests with :ctest-option:`--repeat`.  See
+  also :policy:`CMP0224`.
 
 See :prop_test:`FIXTURES_REQUIRED` for a more complete discussion of how to use
 test fixtures.

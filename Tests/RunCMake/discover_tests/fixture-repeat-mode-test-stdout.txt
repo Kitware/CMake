@@ -1,0 +1,13 @@
+^Test project .*/Tests/RunCMake/discover_tests/fixture-repeat-mode-build
+    Start 1: setup_case_one \(run 1/2\)
+1/2 Test #1: setup_case_one \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 2: needs_fixture \(run 1/2\)
+2/2 Test #2: needs_fixture \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 1: setup_case_one \(run 2/2\)
+1/2 Test #1: setup_case_one \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 2: needs_fixture \(run 2/2\)
+2/2 Test #2: needs_fixture \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
++
+100% tests passed out of 2
++
+Total Test time \(real\) = +[0-9\.]+ sec$

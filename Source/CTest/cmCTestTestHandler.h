@@ -143,6 +143,15 @@ public:
     std::string Name;
   };
 
+  // How ctest --repeat treats a fixture.  See the FIXTURE_REPEAT_MODE test
+  // property and policy CMP0224.
+  enum class FixtureRepeatMode
+  {
+    AroundAllRepeats,  // the fixture runs once, around all repetitions
+    AroundEachRepeat,  // the fixture repeats with the tests requiring it
+    EachTestSeparately // every test repeats on its own
+  };
+
   struct cmCTestTestProperties
   {
     void AppendError(cm::string_view err);
@@ -221,6 +230,10 @@ public:
     std::set<std::string> FixturesRequired;
     std::string FixturesRequiredRaw;
     std::set<std::string> RequireSuccessDepends;
+    // For the fixtures this test sets up or cleans up.  A mode requested by
+    // any of a fixture's own tests wins over the default recorded for them.
+    cm::optional<FixtureRepeatMode> RequestedFixtureRepeatMode;
+    cm::optional<FixtureRepeatMode> DefaultFixtureRepeatMode;
     std::vector<std::vector<cmCTestTestResourceRequirement>> ResourceGroups;
     std::string ResourceGroupsRaw;
     std::string GeneratedResourceSpecFile;
