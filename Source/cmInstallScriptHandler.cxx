@@ -12,7 +12,6 @@
 
 #include <cm/memory>
 
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 #include <cm3p/uv.h>
 
@@ -79,10 +78,6 @@ cmInstallScriptHandler::cmInstallScriptHandler(
     indexIsFresh = cacheTime <= cmSystemTools::ModifiedTime(file);
   }
   if (indexIsFresh) {
-    Json::CharReaderBuilder rbuilder;
-    auto jsonReader =
-      std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
-    std::vector<char> content;
     Json::Value value;
     cmJSONState state(file, &value);
     this->Parallel = value["Parallel"].asBool();
