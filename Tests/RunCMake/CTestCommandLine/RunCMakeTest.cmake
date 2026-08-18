@@ -216,8 +216,15 @@ block()
   set(RunCMake_TEST_BINARY_DIR "${out_of_date_build_dir}")
   run_cmake(out-of-date-configure)
   run_cmake_command(out-of-date-build "${CMAKE_COMMAND}" --build "${out_of_date_build_dir}" ${out_of_date_build_config_args})
+  # file_gen is created below, so file-test is initially Not Run.
+  set(RunCMake_TEST_EXPECT_RESULT 8)
+  set(RunCMake_TEST_EXPECT_stdout "file-test.*Not Run")
+  set(RunCMake_TEST_EXPECT_stderr "Unable to find build dependency: [^\n]*file_gen")
   run_cmake_command(out-of-date-initial-test
     "${CMAKE_CTEST_COMMAND}" ${out_of_date_ctest_config_args} -V --test-dir "${out_of_date_build_dir}")
+  unset(RunCMake_TEST_EXPECT_RESULT)
+  unset(RunCMake_TEST_EXPECT_stdout)
+  unset(RunCMake_TEST_EXPECT_stderr)
 
   # Sleep for timestamp compare
   execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1.125)

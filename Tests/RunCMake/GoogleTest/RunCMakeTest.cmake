@@ -492,6 +492,32 @@ function(run_GoogleTest_discovery_duplicate)
   unset(RunCMake_TEST_OUTPUT_MERGE)
 endfunction()
 
+function(run_GoogleTest_build_depends)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-build-depends-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(GoogleTestBuildDepends)
+
+  run_cmake_command(GoogleTest-build-depends-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target test_prep/all
+  )
+
+  run_cmake_command(GoogleTest-build-depends-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -R "^PREP:basic\\.case_(foo|bar)$"
+    --no-label-summary
+  )
+endfunction()
+
 foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
   message(STATUS "Testing ${DISCOVERY_MODE} discovery mode via CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE global override...")
   run_GoogleTest(${DISCOVERY_MODE})
@@ -546,3 +572,7 @@ if (NOT RunCMake_GENERATOR MATCHES "(Borland|NMake|Watcom)")
 endif()
 
 run_GoogleTest_discovery_duplicate()
+
+if(RunCMake_GENERATOR MATCHES "Ninja|FASTBuild|Makefiles")
+  run_GoogleTest_build_depends()
+endif()

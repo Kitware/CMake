@@ -1308,7 +1308,7 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
 
     std::map<std::string, TestPrepTarget> testPrepTargets;
     for (auto const& localGen : this->LocalGenerators) {
-      auto* lg = static_cast<cmLocalNinjaGenerator*>(localGen.get());
+      cmLocalGenerator* lg = localGen.get();
       auto const& testGenerators = lg->GetMakefile()->GetTestGenerators();
       for (auto const& tester : testGenerators) {
         cmTestGenerator::BuildDependencies testDeps;
@@ -1330,6 +1330,27 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
              testDeps.Files) {
           testPrepTarget.ExplicitDeps.push_back(
             this->ConvertToNinjaPath(file.Path));
+        }
+      }
+
+      cmLocalGenerator::DirectoryTestPrepTarget directoryTarget;
+      if (!lg->GetDirectoryTestPrepTarget(directoryTarget, config)) {
+        continue;
+      }
+
+      std::string const depName =
+        this->ConvertToNinjaPath(directoryTarget.Name);
+      TestPrepTarget& testPrepTarget = testPrepTargets[depName];
+      testPrepTarget.Comment = std::move(directoryTarget.Comment);
+
+      for (cmLocalGenerator::DirectoryTestPrepDependency const& dep :
+           directoryTarget.Dependencies) {
+        if (dep.Target) {
+          this->AppendTargetOutputs(dep.Target, testPrepTarget.ExplicitDeps,
+                                    config, DependOnTargetArtifact);
+        } else {
+          testPrepTarget.ExplicitDeps.push_back(
+            this->ConvertToNinjaPath(dep.Raw));
         }
       }
     }
@@ -1369,7 +1390,8 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
       }
     }
   } else {
-    writeConfig(std::string(), *this->GetCommonFileStream());
+    writeConfig(this->Makefiles.front()->GetSafeDefinition("CMAKE_BUILD_TYPE"),
+                *this->GetCommonFileStream());
   }
 }
 

@@ -17,7 +17,6 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"
@@ -114,24 +113,29 @@ cmTest* cmTestGenerator::GetTest() const
   return this->Test;
 }
 
-bool cmTestGenerator::GetBuildDependencies(cmLocalGenerator* lg,
-                                           std::string const& config,
-                                           BuildDependencies& info)
+bool cmTestGenerator::EvaluateBuildDependencies(
+  cmLocalGenerator* lg, std::string const& config,
+  cmListFileBacktrace const& backtrace, std::string const& testName,
+  std::vector<std::string> const& command,
+  std::vector<std::string> const& buildDepends, BuildDependencies& info,
+  cmMakefile* mf)
 {
-  if (this->Test == nullptr ||
-      !cmGeneratorExpression::IsValidTargetName(this->Test->GetName()) ||
-      cmGlobalGenerator::IsReservedTarget(this->Test->GetName())) {
+  if (!cmGeneratorExpression::IsValidTargetName(testName) ||
+      cmGlobalGenerator::IsReservedTarget(testName)) {
     return false;
   }
 
   std::set<cmGeneratorTarget*> dependencies;
 
   // Get dependencies from generator expressions
-  cmGeneratorExpression ge(*this->Test->GetMakefile()->GetCMakeInstance(),
-                           this->Test->GetBacktrace());
-  for (std::string const& arg : this->Test->GetCommand()) {
+  cmGeneratorExpression ge(*mf->GetCMakeInstance(), backtrace);
+  std::string exe;
+  for (std::string const& arg : command) {
     auto parsed = ge.Parse(arg);
-    parsed->Evaluate(lg, config);
+    std::string const& evaluated = parsed->Evaluate(lg, config);
+    if (exe.empty()) {
+      exe = evaluated;
+    }
     for (cmGeneratorTarget* dep : parsed->GetTargets()) {
       if (dep && !dep->IsImported()) {
         dependencies.insert(dep);
@@ -140,8 +144,7 @@ bool cmTestGenerator::GetBuildDependencies(cmLocalGenerator* lg,
   }
 
   // Add target executed by test
-  if (!this->Test->GetCommand().empty()) {
-    std::string exe = this->Test->GetCommand().front();
+  if (!exe.empty()) {
     cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(exe);
     if (target && target->GetType() == cm::TargetType::EXECUTABLE &&
         !target->IsImported()) {
@@ -150,7 +153,7 @@ bool cmTestGenerator::GetBuildDependencies(cmLocalGenerator* lg,
   }
 
   // Add dependencies from BUILD_DEPENDS keyword
-  for (auto const& depName : this->Test->GetDependencies()) {
+  for (std::string const& depName : buildDepends) {
     if (depName.empty()) {
       continue;
     }
@@ -164,14 +167,6 @@ bool cmTestGenerator::GetBuildDependencies(cmLocalGenerator* lg,
       info.Files.push_back(std::move(file));
       continue;
     }
-    if (depTarget->IsImported()) {
-      lg->GetMakefile()->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Test \"", this->Test->GetName(), "\" DEPENDS target \"",
-                 depName, "\" which is imported and cannot be built."),
-        this->Test->GetBacktrace());
-      return false;
-    }
     dependencies.insert(depTarget);
   }
 
@@ -181,6 +176,19 @@ bool cmTestGenerator::GetBuildDependencies(cmLocalGenerator* lg,
     }
   }
   return true;
+}
+
+bool cmTestGenerator::GetBuildDependencies(cmLocalGenerator* lg,
+                                           std::string const& config,
+                                           BuildDependencies& info)
+{
+  if (this->Test == nullptr) {
+    return false;
+  }
+  return EvaluateBuildDependencies(
+    lg, config, this->Test->GetBacktrace(), this->Test->GetName(),
+    this->Test->GetCommand(), this->Test->GetDependencies(), info,
+    this->Test->GetMakefile());
 }
 
 void cmTestGenerator::GenerateScriptActions(std::ostream& os, Indent indent)

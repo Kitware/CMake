@@ -30,6 +30,7 @@
 #include "cmInstrumentation.h"
 #include "cmInstrumentationQuery.h"
 #include "cmJSONState.h"
+#include "cmList.h"
 #include "cmProcess.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -667,6 +668,20 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
     this->TestResult.CompletionStatus = "Unable to find executable";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
+  }
+  // log and return if we did not find any other test dependencies
+  for (std::string const& dep : cmList{ this->TestProperties->BuildDepends }) {
+    if (!dep.empty() && !cmSystemTools::FileExists(dep)) {
+      std::string const msg = "Unable to find build dependency: " + dep;
+      *this->TestHandler->LogFile << msg << std::endl;
+      cmCTestLog(this->CTest, ERROR_MESSAGE, msg, '\n');
+      this->TestResult.Output = msg;
+      this->TestResult.FullCommandLine.clear();
+      this->TestResult.Environment.clear();
+      this->TestResult.CompletionStatus = "Build Dependencies Missing";
+      this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+      return false;
+    }
   }
   this->StartTime = this->CTest->CurrentTime();
   if (this->CTest->GetInstrumentation().HasQuery()) {

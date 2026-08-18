@@ -78,6 +78,31 @@ struct cmSourcesWithOutput
 class cmLocalGenerator : public cmOutputConverter
 {
 public:
+  struct DirectoryTestPrepDependency
+  {
+    DirectoryTestPrepDependency(std::string raw, cmGeneratorTarget* target,
+                                cmGeneratorTarget* owner = nullptr,
+                                bool generated = false)
+      : Raw(std::move(raw))
+      , Target(target)
+      , Owner(owner)
+      , Generated(generated)
+    {
+    }
+
+    std::string Raw;
+    cmGeneratorTarget* Target;
+    cmGeneratorTarget* Owner;
+    bool Generated;
+  };
+
+  struct DirectoryTestPrepTarget
+  {
+    std::string Name;
+    std::string Comment;
+    std::vector<DirectoryTestPrepDependency> Dependencies;
+  };
+
   cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile);
   ~cmLocalGenerator() override;
 
@@ -134,6 +159,11 @@ public:
   virtual std::unique_ptr<cmRulePlaceholderExpander>
   CreateRulePlaceholderExpander(
     cmBuildStep buildStep = cmBuildStep::Compile) const;
+
+  void AddDirectoryTestPrepDependency(std::string const& config,
+                                      DirectoryTestPrepDependency dependency);
+  bool GetDirectoryTestPrepTarget(DirectoryTestPrepTarget& out,
+                                  std::string const& config);
 
   std::string GetExeExportFlags(std::string const& linkLanguage,
                                 cmGeneratorTarget& tgt) const;
@@ -708,6 +738,8 @@ protected:
 #endif
 
 private:
+  std::map<std::string, std::vector<DirectoryTestPrepDependency>>
+    DiscoveryTestPrepDependencies;
   /**
    * See LinearGetSourceFileWithOutput for background information
    */

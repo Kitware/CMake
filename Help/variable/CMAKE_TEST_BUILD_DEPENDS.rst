@@ -18,6 +18,9 @@ target for all such tests. Building these targets ensures the test executable,
 targets referenced by test command generator expressions, and explicit
 ``BUILD_DEPENDS`` entries are up-to-date before the test runs.
 
+Modules may also extend ``test_prep/all`` with directory-scoped dependencies
+via the :prop_dir:`CMAKE_TEST_BUILD_DEPENDS` directory property.
+
 Tests whose names are not valid target names are excluded from this behavior.
 If multiple tests in different directories share the same name, their
 dependencies are merged into a single ``test_prep/<name>`` target.

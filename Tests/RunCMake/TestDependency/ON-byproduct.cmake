@@ -5,7 +5,7 @@ project(TestDependencyByproduct C)
 
 enable_testing()
 
-add_executable(TestDependencyByproductExe main.c)
+add_executable(TestDependencyByproductExe ../add_test/main.c)
 add_custom_command(TARGET TestDependencyByproductExe POST_BUILD
   COMMAND
     "${CMAKE_COMMAND}" -E touch

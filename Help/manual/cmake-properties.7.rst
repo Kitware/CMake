@@ -72,6 +72,7 @@ Properties on Directories
    /prop_dir/CACHE_VARIABLES
    /prop_dir/CLEAN_NO_CUSTOM
    /prop_dir/CMAKE_CONFIGURE_DEPENDS
+   /prop_dir/CMAKE_TEST_BUILD_DEPENDS
    /prop_dir/COMPILE_DEFINITIONS
    /prop_dir/COMPILE_OPTIONS
    /prop_dir/DEFINITIONS

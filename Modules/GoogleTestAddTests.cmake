@@ -97,6 +97,7 @@ macro(write_test_to_file)
     "set_tests_properties(${guarded_testname}\n"
     "  PROPERTIES\n"
     "    ${maybe_DISABLED}\n"
+    "    _CMAKE_TEST_BUILD_DEPENDS [==[${arg_TEST_EXECUTABLE}]==]\n"
     "    ${maybe_LOCATION}\n"
     "    WORKING_DIRECTORY [==[${arg_TEST_WORKING_DIR}]==]\n"
     "    SKIP_REGULAR_EXPRESSION [==[\\[  SKIPPED \\]]==]\n"

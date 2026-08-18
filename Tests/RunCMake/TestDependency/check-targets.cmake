@@ -16,7 +16,7 @@ file(GLOB build_files LIST_DIRECTORIES false
 set(found FALSE)
 foreach(build_file IN LISTS build_files)
   file(READ "${build_file}" content)
-  if(content MATCHES "test_prep.all|test_prep.TargetBuildTest")
+  if(content MATCHES "test_prep.all|test_prep.TargetBuildTest|test_prep.directory_")
     set(found TRUE)
     break()
   endif()

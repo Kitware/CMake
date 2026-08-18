@@ -865,6 +865,7 @@ add_RunCMake_test(string
   -DCMake_TEST_NO_64BIT_TIME=${CMake_TEST_NO_64BIT_TIME}
   )
 add_RunCMake_test(test_include_dirs)
+add_RunCMake_test(TestDependency)
 add_RunCMake_test(BundleUtilities)
 if(APPLE)
   add_RunCMake_test(INSTALL_NAME_DIR)

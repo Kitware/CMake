@@ -5,7 +5,7 @@ project(TestDependencyInterface C)
 
 enable_testing()
 
-add_executable(TestDependencyInterfaceExe main.c)
+add_executable(TestDependencyInterfaceExe ../add_test/main.c)
 
 # Header-only INTERFACE library is not part of the build system and must be
 # filtered out of the test_prep dependencies so that no dead

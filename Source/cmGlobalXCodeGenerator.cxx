@@ -5248,6 +5248,30 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
     root->GetBinaryDirectory());
 }
 
+std::string cmGlobalXCodeGenerator::GetTestBuildDependencyPath(
+  cmGeneratorTarget const* target, std::string const& config) const
+{
+  // Replicates the CMake-language logic that computes _test_bundle_dir in
+  // xctest_add_test() in Modules/FindXCTest.cmake.
+  if (!target->IsImported() && target->IsXCTestOnApple() &&
+      this->XcodeVersion >= 73) {
+    cmValue testeeName = target->GetProperty("XCTEST_TESTEE");
+    cmGeneratorTarget const* testee = testeeName
+      ? target->GetLocalGenerator()->FindGeneratorTargetToUse(*testeeName)
+      : nullptr;
+    if (testee && testee->IsAppBundleOnApple()) {
+      std::string path = testee->GetMacContentDirectory(
+        config, cmStateEnums::RuntimeBinaryArtifact);
+      if (!(this->XcodeBuildSystem == BuildSystem::Twelve &&
+            this->XcodeVersion < 125 && this->SystemName != "Darwin"_s)) {
+        path += "/PlugIns";
+      }
+      return cmStrCat(path, '/', target->GetFullName(config));
+    }
+  }
+  return this->cmGlobalGenerator::GetTestBuildDependencyPath(target, config);
+}
+
 bool cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
   std::string const& xcProjDir, cmLocalGenerator* root)
 {

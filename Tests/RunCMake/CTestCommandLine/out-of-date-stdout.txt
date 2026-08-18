@@ -4,4 +4,4 @@ Test project .*
 .*Start 3: shared-test.*
 .*Start 4: module-test.*
 .*Start 5: object-test.*
-.*Start 6: file-test.*
+.*Start 8: file-test.*

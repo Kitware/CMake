@@ -12,6 +12,7 @@ struct cmTestDiscoveryArgs : ArgumentParser::ParseResult
   ArgumentParser::NonEmpty<std::vector<std::string>> DiscoveryArgs;
   ArgumentParser::NonEmpty<std::string> DiscoveryMatch;
   ArgumentParser::MaybeEmpty<std::vector<std::string>> DiscoveryProperties;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> BuildDepends;
   ArgumentParser::NonEmpty<std::string> TestName;
   ArgumentParser::NonEmpty<std::vector<std::string>> TestArgs;
   ArgumentParser::MaybeEmpty<std::vector<std::string>> TestProperties;
@@ -26,6 +27,7 @@ auto cmTestDiscoveryParser() -> cmArgumentParser<Args>
     .Bind("DISCOVERY_ARGS"_s, &Args::DiscoveryArgs)
     .Bind("DISCOVERY_MATCH"_s, &Args::DiscoveryMatch)
     .Bind("DISCOVERY_PROPERTIES"_s, &Args::DiscoveryProperties)
+    .Bind("BUILD_DEPENDS"_s, &Args::BuildDepends)
     .Bind("TEST_NAME"_s, &Args::TestName)
     .Bind("TEST_ARGS"_s, &Args::TestArgs)
     .Bind("TEST_PROPERTIES"_s, &Args::TestProperties);
