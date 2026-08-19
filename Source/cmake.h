@@ -712,6 +712,14 @@ protected:
   void RunCheckForUnusedVariables();
   int HandleDeleteCacheVariables(
     std::map<std::string, std::string> const& var);
+  /**
+   * Warn about different CMAKE_SYSTEM_ENVIRONMENT_ID, ignore, or refresh the
+   * cache depending on CMAKE_SYSTEM_ENVIRONMENT_ACTION.
+   *
+   * @return 0 on success or -1 if LoadCache fails.
+   */
+  int HandleDifferentSystemEnvironmentId(std::string envId,
+                                         std::string cachedId);
 
   using RegisteredGeneratorsVector =
     std::vector<std::unique_ptr<cmGlobalGeneratorFactory>>;

@@ -1,0 +1,2 @@
+CMake Error:
+  Unsupported CMAKE_SYSTEM_ENVIRONMENT_ACTION 'bar'
