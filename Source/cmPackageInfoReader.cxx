@@ -11,17 +11,16 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 #include <cm3p/json/version.h>
 
-#include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCxxModuleMetadata.h"
 #include "cmExecutionStatus.h"
 #include "cmFileSet.h"
 #include "cmFileSetMetadata.h"
+#include "cmJSONState.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -88,21 +87,9 @@ std::string GetRealDir(std::string const& path)
 
 Json::Value ReadJson(std::string const& fileName)
 {
-  // Open the specified file.
-  cmsys::ifstream file(fileName.c_str(), std::ios::in | std::ios::binary);
-  if (!file) {
-#if JSONCPP_VERSION_HEXA < 0x01070300
-    return Json::Value::null;
-#else
-    return Json::Value::nullSingleton();
-#endif
-  }
-
-  // Read file content and translate JSON.
   Json::Value data;
-  Json::CharReaderBuilder builder;
-  builder["collectComments"] = false;
-  if (!Json::parseFromStream(builder, file, &data, nullptr)) {
+  cmJSONState parseState(fileName, &data, cmJSONState::StrictMode::Relaxed);
+  if (!parseState.errors.empty()) {
 #if JSONCPP_VERSION_HEXA < 0x01070300
     return Json::Value::null;
 #else
