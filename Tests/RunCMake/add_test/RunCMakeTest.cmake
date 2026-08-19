@@ -1,5 +1,8 @@
 include(RunCMake)
 
+# Isolate our ctest runs from external environment.
+unset(ENV{CTEST_PARALLEL_LEVEL})
+
 set(ENV{CTEST_OUTPUT_ON_FAILURE} 1)
 
 function(run_case CASE_NAME)

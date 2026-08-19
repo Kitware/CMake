@@ -1,5 +1,8 @@
 include(RunCMake)
 
+# Isolate our ctest runs from external environment.
+unset(ENV{CTEST_PARALLEL_LEVEL})
+
 set(RunCMake_TEST_OPTIONS
     "-DCMAKE_CROSSCOMPILING_EMULATOR=${PSEUDO_EMULATOR}")
 
