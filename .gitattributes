@@ -3,6 +3,7 @@
 .clang-format    export-ignore
 .clang-tidy      export-ignore
 .codespellrc     export-ignore
+.devcontainer    export-ignore
 .editorconfig    export-ignore
 .pre-commit-config.yaml export-ignore
 .typos.toml      export-ignore

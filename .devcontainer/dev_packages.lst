@@ -1,0 +1,44 @@
+# Packages that make the container a comfortable place to work in, but that
+# building CMake, running its test suite, and building its documentation do
+# not need, and so are not part of `deps_packages.lst`.
+#
+# Additions for personal use belong in `.devcontainer/hooks/root.sh`.
+# See `Help/dev/devcontainer.rst`.
+
+# Make the shell pleasant to work in interactively.  `unminimize` restores
+# the documentation of the packages the base image provides, which it ships
+# without; see `Help/dev/devcontainer.rst`.
+bash-completion
+less
+man-db
+manpages
+manpages-dev
+nano
+unminimize
+vim
+
+# Build CMake.
+ccache
+cmake
+ninja-build
+
+# Debug CMake.
+gdb
+
+# Build the documentation.
+python3-sphinx
+
+# Satisfy our style rules.  Our `.clang-format` requires `clang-format`
+# version 18, exactly, so install that version by name.  Do not install the
+# unversioned `clang-format` package: it provides a much newer version.
+clang-format-18
+pre-commit
+
+# Run `glab` and `glab-axi`, and reach GitLab over SSH.  `nodejs` and `npm`
+# are needed both to install `glab-axi` and to run it.
+nodejs
+npm
+openssh-client
+
+# Let the unprivileged container user install more packages.
+sudo

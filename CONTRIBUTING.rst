@@ -26,6 +26,8 @@ To contribute patches:
 #. Fork the upstream `CMake Repository`_ into a personal account.
 #. Run `Utilities/SetupForDevelopment.sh`_ for local git configuration.
 #. See `Building CMake`_ for building CMake locally.
+   Optionally, see the `CMake Dev Container Guide`_ for a ready-made
+   development environment.
 #. See the `CMake Source Code Guide`_ for coding guidelines
    and the `CMake Testing Guide`_ for testing instructions.
 #. Create a topic branch named suitably for your work.
@@ -52,6 +54,7 @@ preparing or submitting a change.
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 .. _`Utilities/SetupForDevelopment.sh`: Utilities/SetupForDevelopment.sh
 .. _`Building CMake`: README.rst#building-cmake
+.. _`CMake Dev Container Guide`: Help/dev/devcontainer.rst
 .. _`CMake Source Code Guide`: Help/dev/source.rst
 .. _`CMake Testing Guide`: Help/dev/testing.rst
 .. _`commit messages`: Help/dev/review.rst#commit-messages
