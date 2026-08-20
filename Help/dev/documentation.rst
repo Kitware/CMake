@@ -24,6 +24,24 @@ repository to ``build/html`` and ``build/man`` directories:
   $ cmake -S Utilities/Sphinx -B build -DSPHINX_HTML=ON -DSPHINX_MAN=ON
   $ cmake --build build
 
+Depending on how Sphinx is installed on the system, optionally configure with
+``-DSPHINX_EXECUTABLE=/path/to/sphinx-build``.
+
+Sphinx Extensions
+-----------------
+
+When building the HTML help, CMake uses the following third-party
+`extensions`_:
+
+* `sphinx-copybutton`_: Adds an interactive copy button to the corner of
+  ``code-block`` directives. To generate the documentation locally with this
+  extension, configure CMake as above with ``-DSPHINX_HTML_COPYBUTTON=ON``.
+  Ensure the extension is installed in the same environment (or on the system)
+  as the ``SPHINX_EXECUTABLE``.
+
+.. _`extensions`: https://www.sphinx-doc.org/en/master/usage/extensions/index.html
+.. _`sphinx-copybutton`: https://sphinx-copybutton.readthedocs.io/en/latest/
+
 Markup Constructs
 -----------------
 
