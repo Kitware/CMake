@@ -31,6 +31,15 @@ RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
     sh /root/install_deps.sh
 
+# Install the GitLab CLI, `glab`, and `glab-axi`, an agent-ergonomic wrapper
+# around it, for interacting with our GitLab instance.  Keep the packages
+# `npm` downloads in a cache, and unpack the `glab` release in a `tmpfs`, so
+# that neither leaves anything behind in the image.
+RUN --mount=type=bind,source=install_glab.sh,target=/root/install_glab.sh \
+    --mount=type=cache,target=/root/.npm,sharing=locked \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/install_glab.sh
+
 # Create an unprivileged user matching the typical host account so that files
 # created in the mounted source tree are not owned by `root`.
 RUN --mount=type=bind,source=create_user.sh,target=/root/create_user.sh \

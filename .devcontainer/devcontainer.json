@@ -4,11 +4,23 @@
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "cmake-dev",
+  "containerEnv": {
+    "GITLAB_HOST": "gitlab.kitware.com"
+  },
+  "remoteEnv": {
+    "GITLAB_CLIENT_ID": "${localEnv:GITLAB_CLIENT_ID}",
+    "GITLAB_TOKEN": "${localEnv:GITLAB_TOKEN}"
+  },
   "mounts": [
     {
       "type": "volume",
       "source": "cmake-dev-ccache",
       "target": "/home/cmake-dev/.cache/ccache"
+    },
+    {
+      "type": "volume",
+      "source": "cmake-dev-glab-cli",
+      "target": "/home/cmake-dev/.config/glab-cli"
     }
   ],
   "postAttachCommand": "${containerWorkspaceFolder}/.devcontainer/setup-status.sh",

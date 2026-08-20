@@ -128,15 +128,41 @@ against, the container provides:
 
 * ``gdb``, to debug CMake as described in the `CMake Debugging Guide`_.
 
+* ``glab``, the `GitLab CLI`_, to work with merge requests, issues, and
+  pipelines on our GitLab instance, and `glab-axi`_, a wrapper around it
+  whose output follows the `AXI`_ conventions:
+
+  .. code-block:: console
+
+    $ glab mr list
+    $ glab-axi mr view 1234
+
+  See `GitLab Authentication`_ below for the one-time setup they need.
+
 .. _`C++ Code Style`: source.rst#c-code-style
 .. _`.pre-commit-config.yaml`: ../../.pre-commit-config.yaml
 .. _`CMake Documentation Guide`: documentation.rst
 .. _`CMake Debugging Guide`: debug.rst
+.. _`GitLab CLI`: https://docs.gitlab.com/editor_extensions/gitlab_cli/
+.. _`glab-axi`: https://github.com/karotkriss/glab-axi
+.. _`AXI`: https://axi.md
 
 The base image ships without documentation, but the container keeps the man
 pages and other documentation of every package installed on top of it.  Run
 ``sudo unminimize`` to restore the documentation of the packages the base
 image itself provides.
+
+GitLab Authentication
+=====================
+
+The container sets ``GITLAB_HOST`` to ``gitlab.kitware.com`` so that ``glab``
+and ``glab-axi`` address our GitLab instance by default.  Both still need a
+credential for it.  `.devcontainer/setup-status.sh`_ reports whether a
+working credential has been configured and provides instructions to do so if
+not.  It is run automatically when attaching to the container.
+
+A ``GITLAB_TOKEN`` or ``GITLAB_CLIENT_ID`` set on the host is passed through
+to the container, so a credential configured outside it is used as-is.
 
 Local Customization
 ===================
