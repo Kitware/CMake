@@ -149,7 +149,7 @@ set(CPACK_COMPONENT_GROUP_DEVELOPMENT_DESCRIPTION
 # depend on the libraries component.
 set(CPACK_COMPONENT_HEADERS_DEPENDS libraries)
 
-# Create two installation types with pre-selected components.
+# Create two installation types with preselected components.
 # The "Developer" installation has just the library and headers,
 # while the "Full" installation has everything.
 set(CPACK_ALL_INSTALL_TYPES Full Developer)
