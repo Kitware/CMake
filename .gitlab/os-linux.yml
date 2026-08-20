@@ -82,7 +82,7 @@
 ### Fedora
 
 .fedora44:
-    image: "kitware/cmake:ci-fedora44-x86_64-2026-04-30"
+    image: "kitware/cmake:ci-fedora44-x86_64-2026-08-20"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"

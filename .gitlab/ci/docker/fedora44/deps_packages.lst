@@ -35,6 +35,7 @@ zlib-devel
 # Install documentation tools.
 python3-sphinx
 python3-sphinxcontrib-qthelp
+python3-sphinx-copybutton
 qt5-qttools-devel
 qt6-qttools-devel
 texinfo
