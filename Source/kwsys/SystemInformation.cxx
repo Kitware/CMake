@@ -4003,7 +4003,6 @@ std::string SystemInformationImplementation::GetProgramStack(int firstFrame,
     DWORD64 symDisplacement = 0;
     bool haveName =
       SymFromAddr(process, address, &symDisplacement, symbol) != FALSE;
-    DWORD64 moduleBase = SymGetModuleBase64(process, address);
     // When a module has no matching PDB, dbghelp falls back to its export
     // table and reports the nearest preceding export, which is generally not
     // the (non-exported) function the address really belongs to. Names are
