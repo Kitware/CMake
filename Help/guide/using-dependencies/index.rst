@@ -290,7 +290,7 @@ arbitrary use cases.
 When a dependency is added to the project with :module:`FetchContent`, the
 project links to the dependency's targets just like any other target from the
 project.  If the dependency provides namespaced targets of the form
-``SomePrefix::ThingName``, the project should link to those rather than to
+``SomePackage::ThingName``, the project should link to those rather than to
 any non-namespaced targets.  See the next section for why this is recommended.
 
 Not all dependencies can be brought into the project this way.  Some
