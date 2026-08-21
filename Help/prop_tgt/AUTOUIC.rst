@@ -9,6 +9,7 @@ commands like :module:`qt4_wrap_ui() <FindQt4>`, `qt5_wrap_ui()`_, etc.
 Currently, Qt versions 4 to 6 are supported.
 
 .. _`qt5_wrap_ui()`: https://doc.qt.io/archives/qt-5.15/qtwidgets-cmake-qt5-wrap-ui.html
+.. _`qt_add_ui()`: https://doc.qt.io/qt-6/qt-add-ui.html
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOUIC`
 variable if it is set when a target is created.
@@ -25,7 +26,7 @@ target's sources for include statements of the form
 
 .. code-block:: c++
 
-  #include "ui_<ui_base>.h"
+  #include "<path>ui_<ui_base>.h"
 
 Once such an include statement is found in a file, CMake searches for the
 ``uic`` input file ``<ui_base>.ui``
@@ -34,17 +35,49 @@ Once such an include statement is found in a file, CMake searches for the
 - in the :prop_tgt:`AUTOUIC_SEARCH_PATHS` of the target.
 
 If the ``<ui_base>.ui`` file was found, ``uic`` is called on it to generate
-``ui_<ui_base>.h`` in the directory
+``<path>ui_<ui_base>.h`` in the directory
 
 - ``<AUTOGEN_BUILD_DIR>/include`` for single configuration generators or in
 - ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>`` for
   :prop_gbl:`multi configuration <GENERATOR_IS_MULTI_CONFIG>` generators.
 
 Where ``<AUTOGEN_BUILD_DIR>`` is the value of the target property
-:prop_tgt:`AUTOGEN_BUILD_DIR`.
+:prop_tgt:`AUTOGEN_BUILD_DIR`.  The optional ``<path>`` is taken from the
+``#include`` statement and is unrelated to the location of the
+``<ui_base>.ui`` file.
 
 The include directory is automatically added to the target's
 :prop_tgt:`INCLUDE_DIRECTORIES`.
+
+
+Generated ui header files as target sources
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``.ui`` files need not be listed in the sources of a target for ``AUTOUIC``
+to process them, because they are located through the ``#include`` statements
+described above.  Listing them makes them visible in IDEs.
+
+For every ``.ui`` file known in the current directory, whether or not it is
+listed in a target, CMake registers the header to be generated from it as a
+source of each target in that directory that has ``AUTOUIC`` enabled.  This
+happens at configure time, when the ``#include`` statements are not known
+yet, so the name is predicted by assuming that ``<path>`` matches the
+directory of the ``.ui`` file relative to
+:variable:`CMAKE_CURRENT_SOURCE_DIR`.  Where that assumption does not hold,
+the predicted path does not name a file that is ever generated.  This happens
+for example when the ``.ui`` file lies outside of
+:variable:`CMAKE_CURRENT_SOURCE_DIR`, or when it lies in a subdirectory but is
+included without a directory prefix.  IDEs are then unable to open the
+generated header, and because the build system is not told where the header
+really appears, a change to the ``.ui`` file can require two build invocations
+before the files including the header are recompiled.
+
+To avoid the prediction, use Qt's `qt_add_ui()`_ command instead of
+``AUTOUIC``.  It is available since Qt 6.8, optionally takes the include
+prefix through its ``INCLUDE_PREFIX`` argument, and creates ``uic`` rules
+whose outputs are known at configure time.  It disables ``AUTOUIC`` for the
+target it is called on, so all ``.ui`` files of that target have to be passed
+to it.
 
 
 Modifiers
