@@ -97,7 +97,7 @@ _cmake()
             ;;
     esac
 
-    if $is_old_completion; then
+    if $is_old_completion && type -t _split_longopt >/dev/null; then
         _split_longopt && split=true
     fi
 
@@ -252,6 +252,12 @@ _cmake()
         [[ $was_split ]] && return
     fi
 
+    if ! type -t _parse_help >/dev/null; then
+      _parse_help() {
+        "$@" | sed -e 's/^[ ]*\(-[-A-Za-z]*\).*$/\1/;t' -e d
+      }
+    fi
+
     if [[ "$cur" == -* ]]; then
         # FIXME(#26100): `cmake --help` is missing some options and does not
         # have any mode-specific options like `cmake --build`'s `--config`.
@@ -260,7 +266,11 @@ _cmake()
         [[ $COMPREPLY ]] && return
     fi
 
-    _filedir
+    if type -t _filedir >/dev/null; then
+      _filedir
+    else
+      COMPREPLY=( $(compgen -fd -- ${cur}) )
+    fi
 } &&
 complete -F _cmake cmake
 
