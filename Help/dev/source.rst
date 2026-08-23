@@ -50,6 +50,9 @@ follow (which are not enforced by other tooling):
 
   * Lambdas: ``auto f = []() {...};``
 
+* Use ``CM_UNREACHABLE`` for logically unreachable code paths instead of
+  ad-hoc ``assert(false ...)`` statements or comment-only placeholders.
+
 C++ Subset Permitted
 ====================
 
@@ -234,6 +237,9 @@ Available features are:
 
   * ``<cm/type_traits>``:
     ``cm::is_scoped_enum``
+
+  * ``<cm/utility>``:
+    ``cm::unreachable``
 
 Additionally, some useful non-standard extensions to the C++ standard library
 are available in headers under the directory ``cmext/`` in namespace ``cm``.
