@@ -9,9 +9,11 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include <cm3p/json/value.h>
 
+#include "cmCMakePresetsErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmJSONHelpers.h"
 #include "cmSystemTools.h"
@@ -327,4 +329,41 @@ cmJSONHelper<std::nullptr_t> SchemaHelper();
 
 bool CheckDiagnostics(cmJSONState* state, int version,
                       cmCMakePresetsGraph::ConfigurePreset& preset);
+
+// Binds the fields common to every preset kind.
+template <typename T>
+cmJSONHelperBuilder::Object<T> BindPresetIdentityFields(
+  cmJSONHelperBuilder::Object<T> obj)
+{
+  obj.Bind("name"_s, &cmCMakePresetsGraph::Preset::Name, PresetNameHelper)
+    .Bind("inherits"_s, &cmCMakePresetsGraph::Preset::Inherits,
+          PresetVectorOneOrMoreStringHelper, false)
+    .Bind("hidden"_s, &cmCMakePresetsGraph::Preset::Hidden, PresetBoolHelper,
+          false)
+    .template Bind<std::nullptr_t>(
+      "vendor"_s, nullptr, VendorHelper(cmCMakePresetsErrors::INVALID_PRESET),
+      false)
+    .Bind("displayName"_s, &cmCMakePresetsGraph::Preset::DisplayName,
+          PresetStringHelper, false)
+    .Bind("description"_s, &cmCMakePresetsGraph::Preset::Description,
+          PresetStringHelper, false)
+    .Bind("condition"_s, &cmCMakePresetsGraph::Preset::ConditionEvaluator,
+          PresetConditionHelper, false);
+  return obj;
+}
+
+// Binds the fields shared by build, test, and package presets, which resolve
+// against a configure preset.
+template <typename T>
+cmJSONHelperBuilder::Object<T> BindDependentPresetFields(
+  cmJSONHelperBuilder::Object<T> obj)
+{
+  obj
+    .Bind("environment"_s, &cmCMakePresetsGraph::Preset::Environment,
+          EnvironmentMapHelper, false)
+    .Bind("configurePreset"_s, &T::ConfigurePreset, PresetStringHelper, false)
+    .Bind("inheritConfigureEnvironment"_s, &T::InheritConfigureEnvironment,
+          PresetOptionalBoolHelper, false);
+  return obj;
+}
 }

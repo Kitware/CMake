@@ -1,9 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
-#include <cstddef>
 #include <functional>
-#include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -58,30 +55,10 @@ std::function<bool(BuildPreset&, Json::Value const*, cmJSONState*)> const
 };
 
 auto const BuildPresetHelper =
-  JSONHelperBuilder::Object<BuildPreset>(
-    cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)
-    .Bind("name"_s, &BuildPreset::Name,
-          cmCMakePresetsGraphInternal::PresetNameHelper)
-    .Bind("inherits"_s, &BuildPreset::Inherits,
-          cmCMakePresetsGraphInternal::PresetVectorOneOrMoreStringHelper,
-          false)
-    .Bind("hidden"_s, &BuildPreset::Hidden,
-          cmCMakePresetsGraphInternal::PresetBoolHelper, false)
-    .Bind<std::nullptr_t>("vendor"_s, nullptr,
-                          cmCMakePresetsGraphInternal::VendorHelper(
-                            cmCMakePresetsErrors::INVALID_PRESET),
-                          false)
-    .Bind("displayName"_s, &BuildPreset::DisplayName,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("description"_s, &BuildPreset::Description,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("environment"_s, &BuildPreset::Environment,
-          cmCMakePresetsGraphInternal::EnvironmentMapHelper, false)
-    .Bind("configurePreset"_s, &BuildPreset::ConfigurePreset,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("inheritConfigureEnvironment"_s,
-          &BuildPreset::InheritConfigureEnvironment,
-          cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
+  cmCMakePresetsGraphInternal::BindDependentPresetFields(
+    cmCMakePresetsGraphInternal::BindPresetIdentityFields(
+      JSONHelperBuilder::Object<BuildPreset>(
+        cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)))
     .Bind("jobs"_s, &BuildPreset::Jobs,
           cmCMakePresetsGraphInternal::PresetOptionalUIntHelper, false)
     .Bind("targets"_s, &BuildPreset::Targets,
@@ -95,8 +72,6 @@ auto const BuildPresetHelper =
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
     .Bind("nativeToolOptions"_s, &BuildPreset::NativeToolOptions,
           cmCMakePresetsGraphInternal::PresetVectorStringHelper, false)
-    .Bind("condition"_s, &BuildPreset::ConditionEvaluator,
-          cmCMakePresetsGraphInternal::PresetConditionHelper, false)
     .Bind("resolvePackageReferences"_s, ResolvePackageReferencesHelper, false);
 }
 

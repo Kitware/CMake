@@ -1,10 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include <cassert>
-#include <cstddef>
 #include <functional>
 #include <map>
-#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -285,23 +283,9 @@ auto const PresetTraceHelper =
           cmCMakePresetsGraphInternal::PresetStringHelper, false);
 
 auto const ConfigurePresetHelper =
-  JSONHelperBuilder::Object<ConfigurePreset>(
-    cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)
-    .Bind("name"_s, &ConfigurePreset::Name,
-          cmCMakePresetsGraphInternal::PresetNameHelper)
-    .Bind("inherits"_s, &ConfigurePreset::Inherits,
-          cmCMakePresetsGraphInternal::PresetVectorOneOrMoreStringHelper,
-          false)
-    .Bind("hidden"_s, &ConfigurePreset::Hidden,
-          cmCMakePresetsGraphInternal::PresetBoolHelper, false)
-    .Bind<std::nullptr_t>("vendor"_s, nullptr,
-                          cmCMakePresetsGraphInternal::VendorHelper(
-                            cmCMakePresetsErrors::INVALID_PRESET),
-                          false)
-    .Bind("displayName"_s, &ConfigurePreset::DisplayName,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("description"_s, &ConfigurePreset::Description,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
+  cmCMakePresetsGraphInternal::BindPresetIdentityFields(
+    JSONHelperBuilder::Object<ConfigurePreset>(
+      cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false))
     .Bind("generator"_s, &ConfigurePreset::Generator,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
     .Bind("architecture"_s, ArchitectureHelper, false)
@@ -323,9 +307,7 @@ auto const ConfigurePresetHelper =
     .Bind("warnings"_s, PresetWarningsHelper, false)
     .Bind("errors"_s, PresetErrorsHelper, false)
     .Bind("debug"_s, PresetDebugHelper, false)
-    .Bind("trace"_s, PresetTraceHelper, false)
-    .Bind("condition"_s, &ConfigurePreset::ConditionEvaluator,
-          cmCMakePresetsGraphInternal::PresetConditionHelper, false);
+    .Bind("trace"_s, PresetTraceHelper, false);
 }
 
 namespace cmCMakePresetsGraphInternal {

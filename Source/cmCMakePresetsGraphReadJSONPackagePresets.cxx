@@ -1,9 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
-#include <cstddef>
 #include <functional>
 #include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -36,30 +34,10 @@ auto const VariablesHelper = cmJSONHelperBuilder::Map<std::string>(
   cmCMakePresetsErrors::INVALID_VARIABLE, VariableHelper);
 
 auto const PackagePresetHelper =
-  cmJSONHelperBuilder::Object<PackagePreset>(
-    cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)
-    .Bind("name"_s, &PackagePreset::Name,
-          cmCMakePresetsGraphInternal::PresetNameHelper)
-    .Bind("inherits"_s, &PackagePreset::Inherits,
-          cmCMakePresetsGraphInternal::PresetVectorOneOrMoreStringHelper,
-          false)
-    .Bind("hidden"_s, &PackagePreset::Hidden,
-          cmCMakePresetsGraphInternal::PresetBoolHelper, false)
-    .Bind<std::nullptr_t>("vendor"_s, nullptr,
-                          cmCMakePresetsGraphInternal::VendorHelper(
-                            cmCMakePresetsErrors::INVALID_PRESET),
-                          false)
-    .Bind("displayName"_s, &PackagePreset::DisplayName,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("description"_s, &PackagePreset::Description,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("environment"_s, &PackagePreset::Environment,
-          cmCMakePresetsGraphInternal::EnvironmentMapHelper, false)
-    .Bind("configurePreset"_s, &PackagePreset::ConfigurePreset,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("inheritConfigureEnvironment"_s,
-          &PackagePreset::InheritConfigureEnvironment,
-          cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
+  cmCMakePresetsGraphInternal::BindDependentPresetFields(
+    cmCMakePresetsGraphInternal::BindPresetIdentityFields(
+      cmJSONHelperBuilder::Object<PackagePreset>(
+        cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)))
     .Bind("generators"_s, &PackagePreset::Generators,
           cmCMakePresetsGraphInternal::PresetVectorStringHelper, false)
     .Bind("configurations"_s, &PackagePreset::Configurations,
@@ -75,9 +53,7 @@ auto const PackagePresetHelper =
     .Bind("packageDirectory"_s, &PackagePreset::PackageDirectory,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
     .Bind("vendorName"_s, &PackagePreset::VendorName,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("condition"_s, &PackagePreset::ConditionEvaluator,
-          cmCMakePresetsGraphInternal::PresetConditionHelper, false);
+          cmCMakePresetsGraphInternal::PresetStringHelper, false);
 }
 
 namespace cmCMakePresetsGraphInternal {

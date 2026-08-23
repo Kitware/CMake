@@ -1,9 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
-#include <cstddef>
 #include <functional>
-#include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -368,30 +365,10 @@ auto const TestPresetFilterHelper =
             TestPresetOptionalFilterExcludeHelper, false));
 
 auto const TestPresetHelper =
-  JSONHelperBuilder::Object<TestPreset>(
-    cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)
-    .Bind("name"_s, &TestPreset::Name,
-          cmCMakePresetsGraphInternal::PresetNameHelper)
-    .Bind("inherits"_s, &TestPreset::Inherits,
-          cmCMakePresetsGraphInternal::PresetVectorOneOrMoreStringHelper,
-          false)
-    .Bind("hidden"_s, &TestPreset::Hidden,
-          cmCMakePresetsGraphInternal::PresetBoolHelper, false)
-    .Bind<std::nullptr_t>("vendor"_s, nullptr,
-                          cmCMakePresetsGraphInternal::VendorHelper(
-                            cmCMakePresetsErrors::INVALID_PRESET),
-                          false)
-    .Bind("displayName"_s, &TestPreset::DisplayName,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("description"_s, &TestPreset::Description,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("environment"_s, &TestPreset::Environment,
-          cmCMakePresetsGraphInternal::EnvironmentMapHelper, false)
-    .Bind("configurePreset"_s, &TestPreset::ConfigurePreset,
-          cmCMakePresetsGraphInternal::PresetStringHelper, false)
-    .Bind("inheritConfigureEnvironment"_s,
-          &TestPreset::InheritConfigureEnvironment,
-          cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
+  cmCMakePresetsGraphInternal::BindDependentPresetFields(
+    cmCMakePresetsGraphInternal::BindPresetIdentityFields(
+      JSONHelperBuilder::Object<TestPreset>(
+        cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)))
     .Bind("configuration"_s, &TestPreset::Configuration,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
     .Bind("overwriteConfigurationFile"_s,
@@ -401,9 +378,7 @@ auto const TestPresetHelper =
           false)
     .Bind("filter"_s, &TestPreset::Filter, TestPresetFilterHelper, false)
     .Bind("execution"_s, &TestPreset::Execution, TestPresetExecutionHelper,
-          false)
-    .Bind("condition"_s, &TestPreset::ConditionEvaluator,
-          cmCMakePresetsGraphInternal::PresetConditionHelper, false);
+          false);
 }
 
 namespace cmCMakePresetsGraphInternal {
