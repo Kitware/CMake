@@ -29,6 +29,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
+#include "cmUnreachable.h"
 #include "cmake.h"
 
 #if defined(__clang__) && defined(__has_warning)
@@ -835,7 +836,7 @@ Json::Value cmFileAPI::BuildCodeModel(Object object)
   if (object.Version == 2) {
     version = BuildVersion(2, CodeModelV2Minor);
   } else {
-    return codemodel; // should be unreachable
+    CM_UNREACHABLE;
   }
 
   return codemodel;
@@ -870,7 +871,7 @@ Json::Value cmFileAPI::BuildConfigureLog(Object object)
   if (object.Version == 1) {
     version = BuildVersion(1, ConfigureLogV1Minor);
   } else {
-    return configureLog; // should be unreachable
+    CM_UNREACHABLE;
   }
 
   return configureLog;
@@ -904,7 +905,7 @@ Json::Value cmFileAPI::BuildCache(Object object)
   if (object.Version == 2) {
     version = BuildVersion(2, CacheV2Minor);
   } else {
-    return cache; // should be unreachable
+    CM_UNREACHABLE;
   }
 
   return cache;
@@ -938,7 +939,7 @@ Json::Value cmFileAPI::BuildCMakeFiles(Object object)
   if (object.Version == 1) {
     version = BuildVersion(1, CMakeFilesV1Minor);
   } else {
-    return cmakeFiles; // should be unreachable
+    CM_UNREACHABLE;
   }
 
   return cmakeFiles;
@@ -972,7 +973,7 @@ Json::Value cmFileAPI::BuildToolchains(Object object)
   if (object.Version == 1) {
     version = BuildVersion(1, ToolchainsV1Minor);
   } else {
-    return toolchains; // should be unreachable
+    CM_UNREACHABLE;
   }
 
   return toolchains;

@@ -1,6 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
-#include <cassert>
 #include <map>
 #include <string>
 
@@ -8,6 +7,7 @@
 
 #include "cmCMakePresetsGraph.h"
 #include "cmStringAlgorithms.h"
+#include "cmUnreachable.h"
 
 template <class T>
 cmCMakePresetsGraph::PresetResolveResult<T> cmCMakePresetsGraph::ResolvePreset(
@@ -94,7 +94,7 @@ cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError(
     case Status::Success:
       return cm::nullopt;
   }
-  assert(false && "Unreachable.");
+  CM_UNREACHABLE;
   return cm::nullopt;
 }
 

@@ -14,6 +14,7 @@
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUnreachable.h"
 #include "cmVisualStudioSlnData.h"
 
 namespace {
@@ -182,7 +183,7 @@ LineFormat cmVisualStudioSlnParser::State::NextLineFormat() const
     case FileStateIgnore:
       return LineVerbatim;
     default:
-      assert(false);
+      CM_UNREACHABLE;
       return LineVerbatim;
   }
 }

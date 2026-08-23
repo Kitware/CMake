@@ -55,6 +55,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetTypes.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 #include "cmake.h"
 
@@ -3388,8 +3389,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
               return false;
           }
 
-          // Should be unreachable
-          assert(false);
+          CM_UNREACHABLE;
           return false;
         }();
 
@@ -5140,7 +5140,7 @@ static cmPolicies::PolicyStatus statusForTarget(cmGeneratorTarget const* tgt,
 
 #undef RETURN_POLICY
 
-  assert(false && "Unreachable code. Not a valid policy");
+  CM_UNREACHABLE;
   return cmPolicies::WARN;
 }
 
@@ -5155,7 +5155,7 @@ static cmPolicies::PolicyID policyForString(char const* policy_id)
 
 #undef RETURN_POLICY_ID
 
-  assert(false && "Unreachable code. Not a valid policy");
+  CM_UNREACHABLE;
   return cmPolicies::CMPCOUNT;
 }
 

@@ -7,6 +7,8 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmUnreachable.h"
+
 char const* cmXCodeObject::PBXTypeNames[] = {
   /* clang-format needs this comment to break after the opening brace */
   "PBXGroup",
@@ -68,7 +70,8 @@ bool cmXCodeObject::IsEmpty() const
     case OBJECT:
       return this->Object == nullptr;
   }
-  return true; // unreachable, but quiets warnings
+  CM_UNREACHABLE;
+  return true;
 }
 
 void cmXCodeObject::Indent(int level, std::ostream& out)

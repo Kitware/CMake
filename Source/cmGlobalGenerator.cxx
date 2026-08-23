@@ -66,6 +66,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetExport.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
@@ -2423,7 +2424,7 @@ bool cmGlobalGenerator::UseShortObjectNames(
       strategy = this->QtAutogenIntDirStrategy;
       break;
     default:
-      assert(false);
+      CM_UNREACHABLE;
       break;
   }
   return this->SupportsShortObjectNames() &&

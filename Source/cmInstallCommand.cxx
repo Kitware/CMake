@@ -3,7 +3,6 @@
 #include "cmInstallCommand.h"
 
 #include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <map>
@@ -58,6 +57,7 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmTargetTypes.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 
 namespace {
@@ -1490,7 +1490,7 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
         }
         break;
       default:
-        assert(false && "This should never happen");
+        CM_UNREACHABLE;
         break;
     }
 

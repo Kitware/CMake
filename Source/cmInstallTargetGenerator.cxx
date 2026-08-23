@@ -33,6 +33,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetTypes.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 #include "cmake.h"
 
@@ -246,8 +247,7 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
     case cm::TargetType::INTERFACE_LIBRARY:
       // Not reachable. We never create a cmInstallTargetGenerator for
       // an INTERFACE_LIBRARY.
-      assert(false &&
-             "INTERFACE_LIBRARY targets have no installable outputs.");
+      CM_UNREACHABLE;
       break;
 
     case cm::TargetType::OBJECT_LIBRARY: {
