@@ -1237,6 +1237,54 @@ std::string cmCMakePresetsGraph::GetGeneratorForPreset(
   return {};
 }
 
+template <typename T>
+bool cmCMakePresetsGraph::ResolveDependentPresets(
+  std::map<std::string, PresetPair<T>>& presets)
+{
+  for (auto& it : presets) {
+    if (!it.second.Unexpanded.Hidden) {
+      auto const configurePreset =
+        this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
+      if (configurePreset == this->ConfigurePresets.end()) {
+        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
+          it.first, T::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
+        return false;
+      }
+      if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
+            configurePreset->second.Unexpanded.OriginFile)) {
+        cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
+          it.first, T::kind(), it.second.Unexpanded.ConfigurePreset,
+          &this->parseState);
+        return false;
+      }
+      if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true)) {
+        it.second.Unexpanded.Environment.insert(
+          configurePreset->second.Unexpanded.Environment.begin(),
+          configurePreset->second.Unexpanded.Environment.end());
+      }
+    }
+    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
+      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
+                                                    &this->parseState);
+      return false;
+    }
+  }
+  return true;
+}
+
+template bool
+cmCMakePresetsGraph::ResolveDependentPresets<cmCMakePresetsGraph::BuildPreset>(
+  std::map<std::string, PresetPair<cmCMakePresetsGraph::BuildPreset>>&);
+
+template bool
+cmCMakePresetsGraph::ResolveDependentPresets<cmCMakePresetsGraph::TestPreset>(
+  std::map<std::string, PresetPair<cmCMakePresetsGraph::TestPreset>>&);
+
+template bool cmCMakePresetsGraph::ResolveDependentPresets<
+  cmCMakePresetsGraph::PackagePreset>(
+  std::map<std::string, PresetPair<cmCMakePresetsGraph::PackagePreset>>&);
+
 bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
   std::string const& presetsFile, ReadOption readFilesOption)
 {
@@ -1300,100 +1348,10 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
     }
   }
 
-  for (auto& it : this->BuildPresets) {
-    if (!it.second.Unexpanded.Hidden) {
-      auto const configurePreset =
-        this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
-      if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
-          it.first, BuildPreset::kind(), it.second.Unexpanded.ConfigurePreset,
-          &this->parseState);
-        return false;
-      }
-      if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
-            configurePreset->second.Unexpanded.OriginFile)) {
-        cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, BuildPreset::kind(), it.second.Unexpanded.ConfigurePreset,
-          &this->parseState);
-        return false;
-      }
-
-      if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true)) {
-        it.second.Unexpanded.Environment.insert(
-          configurePreset->second.Unexpanded.Environment.begin(),
-          configurePreset->second.Unexpanded.Environment.end());
-      }
-    }
-
-    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
-      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
-                                                    &this->parseState);
-      return false;
-    }
-  }
-
-  for (auto& it : this->TestPresets) {
-    if (!it.second.Unexpanded.Hidden) {
-      auto const configurePreset =
-        this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
-      if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
-          it.first, TestPreset::kind(), it.second.Unexpanded.ConfigurePreset,
-          &this->parseState);
-        return false;
-      }
-      if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
-            configurePreset->second.Unexpanded.OriginFile)) {
-        cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, TestPreset::kind(), it.second.Unexpanded.ConfigurePreset,
-          &this->parseState);
-        return false;
-      }
-
-      if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true)) {
-        it.second.Unexpanded.Environment.insert(
-          configurePreset->second.Unexpanded.Environment.begin(),
-          configurePreset->second.Unexpanded.Environment.end());
-      }
-    }
-
-    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
-      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
-                                                    &this->parseState);
-      return false;
-    }
-  }
-
-  for (auto& it : this->PackagePresets) {
-    if (!it.second.Unexpanded.Hidden) {
-      auto const configurePreset =
-        this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
-      if (configurePreset == this->ConfigurePresets.end()) {
-        cmCMakePresetsErrors::CONFIGURE_PRESET_NOT_FOUND(
-          it.first, PackagePreset::kind(),
-          it.second.Unexpanded.ConfigurePreset, &this->parseState);
-        return false;
-      }
-      if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
-            configurePreset->second.Unexpanded.OriginFile)) {
-        cmCMakePresetsErrors::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(
-          it.first, PackagePreset::kind(),
-          it.second.Unexpanded.ConfigurePreset, &this->parseState);
-        return false;
-      }
-
-      if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true)) {
-        it.second.Unexpanded.Environment.insert(
-          configurePreset->second.Unexpanded.Environment.begin(),
-          configurePreset->second.Unexpanded.Environment.end());
-      }
-    }
-
-    if (!ExpandMacros(this, it.second.Unexpanded, it.second.Expanded)) {
-      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(it.first,
-                                                    &this->parseState);
-      return false;
-    }
+  if (!ResolveDependentPresets(this->BuildPresets) ||
+      !ResolveDependentPresets(this->TestPresets) ||
+      !ResolveDependentPresets(this->PackagePresets)) {
+    return false;
   }
 
   for (auto& it : this->WorkflowPresets) {

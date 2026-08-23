@@ -435,6 +435,9 @@ public:
     PresetResolveStatus status, std::string const& errorPresetName,
     std::string const& directory);
 
+  template <class T>
+  bool ResolveDependentPresets(std::map<std::string, PresetPair<T>>& presets);
+
   std::map<std::string, PresetPair<ConfigurePreset>> ConfigurePresets;
   std::map<std::string, PresetPair<BuildPreset>> BuildPresets;
   std::map<std::string, PresetPair<TestPreset>> TestPresets;
