@@ -1163,9 +1163,11 @@ Signatures
   are installed in the ``RUNTIME`` destination and component on DLL platforms,
   and in the ``LIBRARY`` destination and component on non-DLL platforms.
   macOS frameworks are installed in the ``FRAMEWORK`` destination and component.
-  Targets built within the build tree will never be installed as runtime
-  dependencies, nor will their own dependencies, unless the targets themselves
-  are installed with :command:`install(TARGETS)`.
+
+  .. note::
+    Targets built within the build tree will never be installed as runtime
+    dependencies, nor will their own dependencies, unless the targets themselves
+    are installed with :command:`install(TARGETS)`.
 
   The generated install script calls :command:`file(GET_RUNTIME_DEPENDENCIES)`
   on the build-tree files to calculate the runtime dependencies. The build-tree
