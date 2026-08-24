@@ -97,7 +97,19 @@ Provided Tools
 In addition to the compiler and the external dependencies CMake can build
 against, the container provides:
 
-* ``cmake`` and ``ninja``, to build CMake with.
+* ``cmake`` and ``ninja``, to build CMake with.  ``cmake`` comes from the
+  `Kitware APT repository`_, which the container configures, so it is the
+  latest CMake release rather than the older one Ubuntu carries, and
+  ``apt-get`` offers each new release as it is published:
+
+  .. code-block:: console
+
+    $ sudo apt-get update
+    $ sudo apt-get install --only-upgrade cmake
+
+  The repository also carries release candidates, in a suite named after the
+  Ubuntu release with ``-rc`` appended.  Add it to the ``Suites`` field of
+  ``/etc/apt/sources.list.d/kitware.sources`` to install those as well.
 
 * ``ccache``, to speed up repeated builds, e.g.:
 
@@ -139,6 +151,7 @@ against, the container provides:
 
   See `GitLab Authentication`_ below for the one-time setup they need.
 
+.. _`Kitware APT repository`: https://apt.kitware.com
 .. _`C++ Code Style`: source.rst#c-code-style
 .. _`.pre-commit-config.yaml`: ../../.pre-commit-config.yaml
 .. _`CMake Documentation Guide`: documentation.rst

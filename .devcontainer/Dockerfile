@@ -5,8 +5,9 @@
 # The images our CI infrastructure uses, described under `.gitlab/ci/docker/`,
 # are built on the distributions we test CMake against and are minimized for
 # CI use.  Prepare the environment from scratch on Ubuntu instead: it offers
-# the broadest ecosystem of packages and tooling for development, including a
-# recent `cmake` and the `clang-format` version our style rules require.
+# the broadest ecosystem of packages and tooling for development, including
+# the `clang-format` version our style rules require and the Kitware APT
+# repository through which CMake itself is published.
 ARG BASE_IMAGE=ubuntu:26.04
 
 FROM ${BASE_IMAGE}
@@ -14,6 +15,21 @@ FROM ${BASE_IMAGE}
 ARG USERNAME=cmake-dev
 ARG USER_UID=1000
 ARG USER_GID=${USER_UID}
+
+# The SHA-256 of the signing key `apt.kitware.com` publishes.  Kitware rotates
+# that key every few years; updating this hash both approves the new key and
+# forces the step below to fetch it again rather than reuse a cached layer.
+# Read the current value with:
+# curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | sha256sum
+ARG KITWARE_PUBLIC_KEY_SHA256=801bc629e356c3c96f184351272914222ce427777400fa7d1baed3ab180b3e3b
+
+# Add the Kitware APT repository, which carries CMake releases newer than the
+# ones the distribution provides, before installing anything from it below.
+RUN --mount=type=bind,source=install_kitware_archive.sh,target=/root/install_kitware_archive.sh \
+    --mount=type=bind,source=docker-clean,target=/etc/apt/apt.conf.d/docker-clean \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    sh /root/install_kitware_archive.sh ${KITWARE_PUBLIC_KEY_SHA256}
 
 # Install the packages needed to build CMake, run its test suite, build its
 # documentation, and satisfy its style rules, along with a few more that make
