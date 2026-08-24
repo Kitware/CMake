@@ -6,10 +6,13 @@ Additional target dependencies of the corresponding
 
   .. note::
 
-    If Qt 5.15 or later is used and the generator is either :generator:`Ninja`
-    or :ref:`Makefile Generators`, additional target dependencies are added to
-    the :ref:`<ORIGIN>_autogen_timestamp_deps <<ORIGIN>_autogen_timestamp_deps>`
-    target instead of the :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>` target.
+    If the
+    :ref:`<ORIGIN>_autogen_timestamp_deps <<ORIGIN>_autogen_timestamp_deps>`
+    target is created, additional target dependencies are added to it instead
+    of the :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>` target.  When using the
+    :ref:`Visual Studio Generators`, the ``moc`` and ``uic`` step may be part
+    of the ``<ORIGIN>`` target itself, in which case the dependencies are added
+    to ``<ORIGIN>``.  See the :manual:`cmake-qt(7)` manual for details.
 
 
 Targets which have their :prop_tgt:`AUTOMOC` or :prop_tgt:`AUTOUIC` property
