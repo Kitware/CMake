@@ -8,10 +8,13 @@ Switch for forwarding origin target dependencies to the corresponding
 
   .. note::
 
-    If Qt 5.15 or later is used and the generator is either :generator:`Ninja`
-    or :ref:`Makefile Generators`, origin target dependencies are forwarded to
-    the :ref:`<ORIGIN>_autogen_timestamp_deps <<ORIGIN>_autogen_timestamp_deps>`
-    target instead of :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>`.
+    If the
+    :ref:`<ORIGIN>_autogen_timestamp_deps <<ORIGIN>_autogen_timestamp_deps>`
+    target is created, origin target dependencies are forwarded to it instead
+    of :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>`.  When using the
+    :ref:`Visual Studio Generators`, the ``moc`` and ``uic`` step may be part
+    of the ``<ORIGIN>`` target itself, in which case they need no forwarding.
+    See the :manual:`cmake-qt(7)` manual for details.
 
 Targets which have their :prop_tgt:`AUTOMOC` or :prop_tgt:`AUTOUIC` property
 ``ON`` have a corresponding :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>` target
