@@ -37,8 +37,8 @@ RUN --mount=type=bind,source=install_kitware_archive.sh,target=/root/install_kit
 #
 # Cache the package lists and the downloaded archives, and hide the
 # `docker-clean` configuration the base image provides so that it does not
-# discard them, so that rebuilding the container downloads only what has
-# changed since the last build.
+# discard them.  A rebuild then downloads only what has changed since the
+# last build.
 RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
     --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=bind,source=dev_packages.lst,target=/root/dev_packages.lst \
