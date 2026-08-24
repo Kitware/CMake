@@ -13,5 +13,8 @@ macro(__linux_linker_gnu lang)
     __cmake_set_whole_archive_feature("${CMAKE_${lang}_COMPILER_LINKER}"
                                       "${CMAKE_${lang}_COMPILER_LINKER_ARCHITECTURE_FLAGS}"
                                       "${lang}")
+    __cmake_set_needed_library_feature("${CMAKE_${lang}_COMPILER_LINKER}"
+                                       "${CMAKE_${lang}_COMPILER_LINKER_ARCHITECTURE_FLAGS}"
+                                       "${lang}")
   endif()
 endmacro()
