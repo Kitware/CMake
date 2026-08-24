@@ -18,11 +18,9 @@
 #include <cmext/memory>
 #include <cmext/string_view>
 
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
-#include "cmsys/FStream.hxx"
 #include "cmsys/String.h"
 
 #include "cmCustomCommand.h"
@@ -34,6 +32,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstrumentation.h"
+#include "cmJSONState.h"
 #include "cmLinkLineComputer.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -2584,12 +2583,11 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
     Json::Value tdio;
     Json::Value const& tdi = tdio;
     {
-      cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
-      Json::Reader reader;
-      if (!reader.parse(tdif, tdio, false)) {
+      cmJSONState parseState(arg_tdi, &tdio, cmJSONState::StrictMode::Relaxed);
+      if (!parseState.errors.empty()) {
         cmSystemTools::Error(
           cmStrCat("-E cmake_ninja_depends failed to parse ", arg_tdi,
-                   reader.getFormattedErrorMessages()));
+                   parseState.GetErrorMessage()));
         return info;
       }
     }
@@ -2729,17 +2727,11 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     std::string const ltmn =
       cmStrCat(linked_target_dir, '/', arg_lang, "Modules.json");
     Json::Value ltm;
-    cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
-    if (!ltmf) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to open ",
-                                    ltmn, " for module information"));
-      return false;
-    }
-    Json::Reader reader;
-    if (!reader.parse(ltmf, ltm, false)) {
+    cmJSONState parseState(ltmn, &ltm, cmJSONState::StrictMode::Relaxed);
+    if (!parseState.errors.empty()) {
       cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                     linked_target_dir,
-                                    reader.getFormattedErrorMessages()));
+                                    parseState.GetErrorMessage()));
       return false;
     }
     if (ltm.isObject()) {
@@ -2891,19 +2883,12 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     std::string const modules_info_path =
       cmStrCat(native_target_dir, '/', arg_lang, "Modules.json");
     Json::Value native_modules_info;
-    cmsys::ifstream modules_file(modules_info_path.c_str(),
-                                 std::ios::in | std::ios::binary);
-    if (!modules_file) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to open ",
-                                    modules_info_path,
-                                    " for module information"));
-      return false;
-    }
-    Json::Reader reader;
-    if (!reader.parse(modules_file, native_modules_info, false)) {
+    cmJSONState parseState(modules_info_path, &native_modules_info,
+                           cmJSONState::StrictMode::Relaxed);
+    if (!parseState.errors.empty()) {
       cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                     modules_info_path,
-                                    reader.getFormattedErrorMessages()));
+                                    parseState.GetErrorMessage()));
       return false;
     }
     if (native_modules_info.isObject()) {
@@ -3059,17 +3044,11 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     std::string const fmftn =
       cmStrCat(forward_modules_from_target_dir, '/', arg_lang, "Modules.json");
     Json::Value fmft;
-    cmsys::ifstream fmftf(fmftn.c_str(), std::ios::in | std::ios::binary);
-    if (!fmftf) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to open ",
-                                    fmftn, " for module information"));
-      return false;
-    }
-    Json::Reader reader;
-    if (!reader.parse(fmftf, fmft, false)) {
+    cmJSONState parseState(fmftn, &fmft, cmJSONState::StrictMode::Relaxed);
+    if (!parseState.errors.empty()) {
       cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                     forward_modules_from_target_dir,
-                                    reader.getFormattedErrorMessages()));
+                                    parseState.GetErrorMessage()));
       return false;
     }
     if (!fmft.isObject()) {
@@ -3210,12 +3189,10 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   Json::Value tdio;
   Json::Value const& tdi = tdio;
   {
-    cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
-    Json::Reader reader;
-    if (!reader.parse(tdif, tdio, false)) {
+    cmJSONState parseState(arg_tdi, &tdio, cmJSONState::StrictMode::Relaxed);
+    if (!parseState.errors.empty()) {
       cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
-                                    arg_tdi,
-                                    reader.getFormattedErrorMessages()));
+                                    arg_tdi, parseState.GetErrorMessage()));
       return 1;
     }
   }

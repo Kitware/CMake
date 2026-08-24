@@ -78,7 +78,9 @@ std::string cmJSONState::GetErrorMessage(bool showContext)
       message = cmStrCat(message, GetJsonContext(loc), '\n');
     }
   }
-  message.pop_back();
+  if (!message.empty()) {
+    message.pop_back();
+  }
   return message;
 }
 
