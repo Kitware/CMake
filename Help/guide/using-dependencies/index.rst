@@ -211,7 +211,7 @@ Imported Targets
 ----------------
 
 Both config files and Find module files can define :ref:`Imported targets`.
-These will typically have names of the form ``SomePrefix::ThingName``.
+These will typically have names of the form ``SomePackage::ThingName``.
 Where these are available, the project should prefer to use them instead of
 any CMake variables that may also be provided.  Such targets typically carry
 usage requirements and apply things like header search paths, compiler
@@ -239,7 +239,7 @@ from it might look like the following:
 
   find_package(SomePackage REQUIRED)
   add_executable(MyExe main.cpp)
-  target_link_libraries(MyExe PRIVATE SomePrefix::LibName)
+  target_link_libraries(MyExe PRIVATE SomePackage::LibName)
 
 Note that the above call to :command:`find_package` could be resolved by
 a config file or a Find module.  It uses only the basic arguments supported
@@ -290,7 +290,7 @@ arbitrary use cases.
 When a dependency is added to the project with :module:`FetchContent`, the
 project links to the dependency's targets just like any other target from the
 project.  If the dependency provides namespaced targets of the form
-``SomePrefix::ThingName``, the project should link to those rather than to
+``SomePackage::ThingName``, the project should link to those rather than to
 any non-namespaced targets.  See the next section for why this is recommended.
 
 Not all dependencies can be brought into the project this way.  Some
