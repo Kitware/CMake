@@ -556,13 +556,20 @@ void cmCTestRunTest::StartTest(std::unique_ptr<cmCTestRunTest> runner,
 bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 {
   this->TotalNumberOfTests = total; // save for rerun case
+
+  std::string runIterationSuffix{};
+  if (this->NumberOfRunsTotal > 1) {
+    runIterationSuffix = " (run " +
+      std::to_string(1 + this->NumberOfRunsTotal - this->NumberOfRunsLeft) +
+      "/" + std::to_string(this->NumberOfRunsTotal) + ")";
+  }
   if (!this->CTest->GetTestProgressOutput()) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(2 * getNumWidth(total) + 8)
-                 << "Start "
-                 << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
-                 << this->TestProperties->Index << ": "
-                 << this->TestProperties->Name << std::endl);
+    cmCTestLog(
+      this->CTest, HANDLER_OUTPUT,
+      std::setw(2 * getNumWidth(total) + 8)
+        << "Start " << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
+        << this->TestProperties->Index << ": " << this->TestProperties->Name
+        << runIterationSuffix << std::endl);
   } else {
     std::string testName = this->GetTestPrefix(completed, total) +
       this->TestProperties->Name + "\n";
