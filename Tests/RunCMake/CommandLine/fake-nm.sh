@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -eu
 
@@ -87,9 +87,9 @@ process_object()
       start_symbol "${object}" first T
       ;;
     *no-symbols.obj)
-      sleep 0.1
+      sleep 1
       printf '%s: no symbols\n' "${object}" >&2
-      sleep 0.1
+      sleep 1
       finish_symbol
       ;;
     *second.obj)
