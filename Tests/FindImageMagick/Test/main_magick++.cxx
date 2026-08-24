@@ -11,6 +11,14 @@ int main()
   std::string found_version =
     std::string(MagickLibVersionText) + MagickLibAddendum;
 
+  // Pre-release builds append an annotation such as " (Beta)" to
+  // MagickLibAddendum which FindImageMagick's ImageMagick_VERSION does not
+  // include.
+  std::string::size_type annotation = found_version.find(" (");
+  if (annotation != std::string::npos) {
+    found_version.erase(annotation);
+  }
+
   std::cout << "Found ImageMagick version " << found_version
             << ", expected version " << CMAKE_EXPECTED_IMAGEMAGICK_VERSION
             << "\n";

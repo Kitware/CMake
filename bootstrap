@@ -85,6 +85,7 @@ cmake_bootstrap_debugger=""
 cmake_sphinx_info=""
 cmake_sphinx_man=""
 cmake_sphinx_html=""
+cmake_sphinx_html_copybutton=""
 cmake_sphinx_qthelp=""
 cmake_sphinx_latexpdf=""
 cmake_sphinx_build=""
@@ -736,13 +737,14 @@ Configuration:
   --debugger              enable debugger support (default if supported)
   --no-debugger           disable debugger support
 
-  --sphinx-info           build Info manual with Sphinx
-  --sphinx-man            build man pages with Sphinx
-  --sphinx-html           build html help with Sphinx
-  --sphinx-qthelp         build qch help with Sphinx
-  --sphinx-latexpdf       build PDF with Sphinx using LaTeX
-  --sphinx-build=<sb>     use <sb> as the sphinx-build executable
-  --sphinx-flags=<flags>  pass <flags> to sphinx-build executable
+  --sphinx-info             build Info manual with Sphinx
+  --sphinx-man              build man pages with Sphinx
+  --sphinx-html             build html help with Sphinx
+  --sphinx-html-copybutton  build html help with the sphinx-copybutton extension
+  --sphinx-qthelp           build qch help with Sphinx
+  --sphinx-latexpdf         build PDF with Sphinx using LaTeX
+  --sphinx-build=<sb>       use <sb> as the sphinx-build executable
+  --sphinx-flags=<flags>    pass <flags> to sphinx-build executable
 
 Directory and file names:
   --prefix=PREFIX         install files in tree rooted at PREFIX
@@ -1004,6 +1006,7 @@ while test $# != 0; do
   --sphinx-info) cmake_sphinx_info="1" ;;
   --sphinx-man) cmake_sphinx_man="1" ;;
   --sphinx-html) cmake_sphinx_html="1" ;;
+  --sphinx-html-copybutton) cmake_sphinx_html_copybutton="1" ;;
   --sphinx-qthelp) cmake_sphinx_qthelp="1" ;;
   --sphinx-latexpdf) cmake_sphinx_latexpdf="1" ;;
   --sphinx-build=*) cmake_sphinx_build=`cmake_arg "$1"` ;;
@@ -2016,6 +2019,11 @@ fi
 if test "x${cmake_bootstrap_debugger}" != "x"; then
   echo '
 set (CMake_ENABLE_DEBUGGER '"${cmake_bootstrap_debugger}"' CACHE BOOL "Enable CMake debugger support" FORCE)
+' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
+fi
+if test "x${cmake_sphinx_html_copybutton}" != "x"; then
+  echo '
+set (SPHINX_HTML_COPYBUTTON "'"${cmake_sphinx_html_copybutton}"'" CACHE BOOL "Build html help with the sphinx-copybutton extension" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if test "x${cmake_sphinx_info}" != "x"; then

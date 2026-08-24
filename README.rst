@@ -57,12 +57,14 @@ generator and options.  Then build it and install it.
 To build the documentation, install `Sphinx`_ and configure CMake with
 ``-DSPHINX_HTML=ON`` and/or ``-DSPHINX_MAN=ON`` to enable the "html" or
 "man" builder.  Add ``-DSPHINX_EXECUTABLE=/path/to/sphinx-build`` if the
-tool is not found automatically.
+tool is not found automatically.  See the `CMake Documentation Guide`_ for
+details.
 
 To run the test suite, run ``ctest`` in the CMake build directory after
 building.  See the `CMake Testing Guide`_ for details.
 
 .. _`Sphinx`: https://sphinx-doc.org
+.. _`CMake Documentation Guide`: Help/dev/documentation.rst
 .. _`CMake Testing Guide`: Help/dev/testing.rst
 
 Building CMake from Scratch

@@ -116,7 +116,7 @@ The command has a few modes by which it searches for packages:
     A call to ``find_package()`` can be redirected internally to a package
     provided by the :module:`FetchContent` module.  To the caller, the behavior
     will appear similar to Config mode, except that the search logic is
-    by-passed and the component information is not used.  See
+    bypassed and the component information is not used.  See
     :command:`FetchContent_Declare` and :command:`FetchContent_MakeAvailable`
     for further details.
 

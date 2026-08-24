@@ -1246,7 +1246,7 @@ bool cmFindPackageCommand::FindPackage(
       // When this property is set, the FetchContent module has already been
       // included at least once, so we know the FetchContent_MakeAvailable()
       // command will be defined. Any future find_package() calls after this
-      // one for this package will by-pass this once-only delegation.
+      // one for this package will bypass this once-only delegation.
       // The following call will typically create a <name>-config.cmake file
       // in the redirectsDir, which we still want to process like any other
       // config file to ensure we follow normal find_package() processing.

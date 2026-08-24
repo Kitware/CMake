@@ -30,7 +30,10 @@ exclude_patterns = [
     'manual/presets/*.rst',
     ]
 
-extensions = ['cmake']
+extensions = [
+    'cmake',
+    @conf_copybutton_ext@
+]
 templates_path = ['@conf_path@/templates']
 
 nitpicky = True
