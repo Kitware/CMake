@@ -674,6 +674,13 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
                       "NULL=nul\n"
                       "!ENDIF\n";
   }
+  if (gg->IsGNUMakeJobServerAware()) {
+    // Toggle for USES_TERMINAL recipes: empty here, set to "+" by
+    // "cmake --build" under --output-sync (see AppendCustomCommand).
+    makefileStream << "# Prefix for USES_TERMINAL recipes under output sync.\n"
+                      "CMAKE_USES_TERMINAL_PREFIX =\n"
+                      "\n";
+  }
   if (this->IsWindowsShell()) {
     makefileStream << "SHELL = cmd.exe\n"
                       "\n";
@@ -1135,6 +1142,16 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   if (ccg.GetCC().GetJobserverAware() && gg->IsGNUMakeJobServerAware()) {
     std::transform(commands1.begin(), commands1.end(), commands1.begin(),
                    [](std::string const& cmd) { return cmStrCat('+', cmd); });
+  } else if (ccg.GetCC().GetUsesTerminal() && gg->IsGNUMakeJobServerAware()) {
+    // Prefix USES_TERMINAL recipes with $(CMAKE_USES_TERMINAL_PREFIX): empty
+    // by default, but set to "+" by "cmake --build" under --output-sync so
+    // GNU Make leaves the recipe unbuffered and an interactive command keeps
+    // the terminal.  Jobserver-aware commands already carry "+" from the
+    // branch above and are excluded here to avoid a doubled prefix.
+    std::transform(commands1.begin(), commands1.end(), commands1.begin(),
+                   [](std::string const& cmd) {
+                     return cmStrCat("$(CMAKE_USES_TERMINAL_PREFIX)", cmd);
+                   });
   }
 
   // push back the custom commands
