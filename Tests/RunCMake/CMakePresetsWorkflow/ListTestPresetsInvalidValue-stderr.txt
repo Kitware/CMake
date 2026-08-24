@@ -1,0 +1,2 @@
+^CMake Error: Invalid value specified for --list-presets\.
+The only supported value is "defined"\.$

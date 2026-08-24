@@ -59,6 +59,8 @@ class cmCMakePresetsGraph::Condition
 public:
   virtual ~Condition() = default;
 
+  std::string ConditionJson;
+
   virtual bool Evaluate(
     cmCMakePresetsGraphInternal::MacroExpanderVector const& expanders,
     int version, cm::optional<bool>& out) const = 0;

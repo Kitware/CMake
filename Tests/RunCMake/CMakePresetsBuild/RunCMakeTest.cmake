@@ -91,6 +91,8 @@ set(CMakePresetsBuild_BUILD_ONLY 1)
 run_cmake_command(PresetsNoArg-build ${CMAKE_COMMAND} "--build" "--preset")
 run_cmake_command(PresetsNoArgEq-build ${CMAKE_COMMAND} "--build" "--preset=")
 run_cmake_Command(PresetsFileNoArg-build ${CMAKE_COMMAND} "--build" "--presets-file")
+run_cmake_command(ListPresetsInvalidValue-build
+  ${CMAKE_COMMAND} "--build" "--list-presets=invalid")
 run_cmake_build_presets(ListPresets "x" "x" "--list-presets" "")
 run_cmake_build_presets(NoConfigurePreset "x" "noConfigurePreset" "")
 run_cmake_build_presets(Invalid "x" "hidden;vendorMacro" "")
@@ -127,6 +129,15 @@ block()
   set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}")
   run_cmake_command("${name}-configure"
     "${CMAKE_COMMAND}" "--preset" "default")
+
+  # Verify listing presets using a build directory to infer the presets file
+  # from its CMake cache.
+  run_cmake_command("${name}-list"
+    "${CMAKE_COMMAND}" "--build" "${RunCMake_TEST_BINARY_DIR}"
+    "--list-presets")
+  run_cmake_command("${name}-list-defined"
+    "${CMAKE_COMMAND}" "--build" "${RunCMake_TEST_BINARY_DIR}"
+    "--list-presets=defined")
 
   # Verify calling `cmake --build <dir> --preset <pre>` from the
   # binary directory.

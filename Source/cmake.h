@@ -261,7 +261,12 @@ public:
   bool SetArgsFromPreset(cmCMakePresetsConfigureArgs const& args,
                          bool haveBinaryDirArg);
 
-  void PrintPresetList(cmCMakePresetsGraph const& graph) const;
+  cmCMakePresetsGraph::ConfigurePresetUsabilityCheck
+  CreateConfigurePresetUsabilityCheck() const;
+
+  void PrintPresetList(cmCMakePresetsGraph const& graph,
+                       cmCMakePresetsGraph::PresetListMode mode =
+                         cmCMakePresetsGraph::PresetListMode::Available) const;
 #endif
 
   //! Return the global generator assigned to this instance of cmake

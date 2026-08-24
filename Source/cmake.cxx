@@ -1461,26 +1461,31 @@ void cmake::SetArgs(std::vector<std::string> const& args)
   arguments.emplace_back(
     "--list-presets", CommandArgument::Values::ZeroOrOne,
     [&](std::string const& value, cmake*) -> bool {
-      if (value.empty() || value == "configure") {
+      std::string type = value;
+      auto const mode = presetsArgs.ParseListPresetsMode(type);
+
+      if (type.empty() || type == "configure") {
         presetsArgs.ListPresets = ListPresets::Configure;
-      } else if (value == "build") {
+      } else if (type == "build") {
         presetsArgs.ListPresets = ListPresets::Build;
-      } else if (value == "test") {
+      } else if (type == "test") {
         presetsArgs.ListPresets = ListPresets::Test;
-      } else if (value == "package") {
+      } else if (type == "package") {
         presetsArgs.ListPresets = ListPresets::Package;
-      } else if (value == "workflow") {
+      } else if (type == "workflow") {
         presetsArgs.ListPresets = ListPresets::Workflow;
-      } else if (value == "all") {
+      } else if (type == "all") {
         presetsArgs.ListPresets = ListPresets::All;
       } else {
         cmSystemTools::Error(
           "Invalid value specified for --list-presets.\n"
-          "Valid values are configure, build, test, package, or all. "
-          "When no value is passed the default is configure.");
+          "Valid values are configure, build, test, package, workflow, all, "
+          "defined, or any of the type values suffixed with -defined. When "
+          "no value is passed the default is configure.");
         return false;
       }
 
+      presetsArgs.ListPresetsMode = mode;
       return true;
     });
 
@@ -2057,24 +2062,39 @@ bool cmake::SetArgsFromPreset(cmCMakePresetsConfigureArgs const& args,
   }
 
   if (args.ListPresets != ListPresets::None) {
+    auto configureUsabilityCheck = this->CreateConfigurePresetUsabilityCheck();
     switch (args.ListPresets) {
       case ListPresets::Configure:
-        this->PrintPresetList(presetsGraph);
+        presetsGraph.PrintConfigurePresetList(args.ListPresetsMode,
+                                              configureUsabilityCheck);
         break;
       case ListPresets::Build:
-        presetsGraph.PrintBuildPresetList();
+        presetsGraph.PrintBuildPresetList(args.ListPresetsMode,
+                                          configureUsabilityCheck);
         break;
       case ListPresets::Test:
-        presetsGraph.PrintTestPresetList();
+        presetsGraph.PrintTestPresetList(args.ListPresetsMode,
+                                         configureUsabilityCheck);
         break;
       case ListPresets::Package:
-        presetsGraph.PrintPackagePresetList();
+        presetsGraph.PrintPackagePresetList(args.ListPresetsMode,
+                                            configureUsabilityCheck);
         break;
       case ListPresets::Workflow:
-        presetsGraph.PrintWorkflowPresetList();
+        presetsGraph.PrintWorkflowPresetList(args.ListPresetsMode,
+                                             configureUsabilityCheck);
         break;
       case ListPresets::All:
-        presetsGraph.PrintAllPresets();
+        presetsGraph.PrintConfigurePresetList(args.ListPresetsMode,
+                                              configureUsabilityCheck);
+        presetsGraph.PrintBuildPresetList(args.ListPresetsMode,
+                                          configureUsabilityCheck);
+        presetsGraph.PrintTestPresetList(args.ListPresetsMode,
+                                         configureUsabilityCheck);
+        presetsGraph.PrintPackagePresetList(args.ListPresetsMode,
+                                            configureUsabilityCheck);
+        presetsGraph.PrintWorkflowPresetList(args.ListPresetsMode,
+                                             configureUsabilityCheck);
         break;
       default:
         break;
@@ -2192,23 +2212,32 @@ bool cmake::SetArgsFromPreset(cmCMakePresetsConfigureArgs const& args,
   return true;
 }
 
-void cmake::PrintPresetList(cmCMakePresetsGraph const& graph) const
+cmCMakePresetsGraph::ConfigurePresetUsabilityCheck
+cmake::CreateConfigurePresetUsabilityCheck() const
 {
   std::vector<GeneratorInfo> generators;
   this->GetRegisteredGenerators(generators);
-  auto filter =
-    [&generators](cmCMakePresetsGraph::ConfigurePreset const& preset) -> bool {
-    if (preset.Generator.empty()) {
-      return true;
-    }
-    auto condition = [&preset](GeneratorInfo const& info) -> bool {
-      return info.name == preset.Generator;
-    };
-    auto it = std::find_if(generators.begin(), generators.end(), condition);
-    return it != generators.end();
-  };
 
-  graph.PrintConfigurePresetList(filter);
+  std::set<std::string> generatorNames;
+  for (auto const& generator : generators) {
+    generatorNames.insert(generator.name);
+  }
+
+  return [generatorNames](cmCMakePresetsGraph::ConfigurePreset const& preset)
+           -> cm::optional<std::string> {
+    if (preset.Generator.empty() ||
+        generatorNames.count(preset.Generator) != 0) {
+      return cm::nullopt;
+    }
+    return cmStrCat("generator \"", preset.Generator, "\" is not available");
+  };
+}
+
+void cmake::PrintPresetList(cmCMakePresetsGraph const& graph,
+                            cmCMakePresetsGraph::PresetListMode mode) const
+{
+  graph.PrintConfigurePresetList(mode,
+                                 this->CreateConfigurePresetUsabilityCheck());
 }
 #endif
 
@@ -3926,8 +3955,11 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
       return 1;
     }
 
-    if (presetsArgs.ListPresets) {
-      settingsFile.PrintBuildPresetList();
+    if (presetsArgs.ListPresetsMode) {
+      auto configureUsabilityCheck =
+        this->CreateConfigurePresetUsabilityCheck();
+      settingsFile.PrintBuildPresetList(*presetsArgs.ListPresetsMode,
+                                        configureUsabilityCheck);
       return 0;
     }
 
@@ -4310,8 +4342,10 @@ int cmake::Workflow(cmCMakePresetsWorkflowArgs const& args)
     return 1;
   }
 
-  if (args.ListPresets) {
-    settingsFile.PrintWorkflowPresetList();
+  if (args.ListPresetsMode) {
+    auto configureUsabilityCheck = this->CreateConfigurePresetUsabilityCheck();
+    settingsFile.PrintWorkflowPresetList(*args.ListPresetsMode,
+                                         configureUsabilityCheck);
     return 0;
   }
 

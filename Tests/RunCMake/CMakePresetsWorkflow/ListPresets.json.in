@@ -3,6 +3,181 @@
   "configurePresets": [
     {
       "name": "default"
+    },
+    {
+      "name": "disabled",
+      "displayName": "Disabled Configure",
+      "condition": false
+    },
+    {
+      "name": "disabled-expression",
+      "condition": {
+        "type": "equals",
+        "lhs": "$env{CMAKE_PRESET_TEST_UNFULFILLED_ENV}",
+        "rhs": "set_value"
+      }
+    },
+    {
+      "name": "hidden",
+      "hidden": true
+    },
+    {
+      "name": "invalid",
+      "binaryDir": "$vendor{invalid}"
+    },
+    {
+      "name": "unsupported-generator",
+      "generator": "Invalid Generator"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "enabled-build",
+      "configurePreset": "default",
+      "condition": true
+    },
+    {
+      "name": "disabled-build",
+      "configurePreset": "default",
+      "condition": false
+    },
+    {
+      "name": "disabled-configure-build",
+      "configurePreset": "disabled-expression",
+      "condition": true
+    },
+    {
+      "name": "disabled-build-and-configure",
+      "configurePreset": "disabled-expression",
+      "condition": false
+    },
+    {
+      "name": "hidden-build",
+      "hidden": true,
+      "configurePreset": "default"
+    },
+    {
+      "name": "invalid-build",
+      "configurePreset": "default",
+      "environment": {
+        "INVALID": "$vendor{invalid}"
+      }
+    },
+    {
+      "name": "hidden-configure-build",
+      "configurePreset": "hidden"
+    },
+    {
+      "name": "invalid-configure-build",
+      "configurePreset": "invalid"
+    },
+    {
+      "name": "unsupported-configure-build",
+      "configurePreset": "unsupported-generator"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "enabled-test",
+      "configurePreset": "default",
+      "condition": true
+    },
+    {
+      "name": "disabled-test",
+      "configurePreset": "default",
+      "condition": false
+    },
+    {
+      "name": "disabled-configure-test",
+      "configurePreset": "disabled-expression",
+      "condition": true
+    },
+    {
+      "name": "disabled-test-and-configure",
+      "configurePreset": "disabled-expression",
+      "condition": false
+    },
+    {
+      "name": "hidden-test",
+      "hidden": true,
+      "configurePreset": "default"
+    },
+    {
+      "name": "invalid-test",
+      "configurePreset": "default",
+      "environment": {
+        "INVALID": "$vendor{invalid}"
+      }
+    },
+    {
+      "name": "hidden-configure-test",
+      "configurePreset": "hidden"
+    },
+    {
+      "name": "invalid-configure-test",
+      "configurePreset": "invalid"
+    },
+    {
+      "name": "unsupported-configure-test",
+      "configurePreset": "unsupported-generator"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "enabled-package",
+      "configurePreset": "default",
+      "condition": true
+    },
+    {
+      "name": "disabled-package",
+      "configurePreset": "default",
+      "condition": false
+    },
+    {
+      "name": "disabled-configure-package",
+      "configurePreset": "disabled-expression",
+      "condition": true
+    },
+    {
+      "name": "disabled-package-and-configure",
+      "configurePreset": "disabled-expression",
+      "condition": false
+    },
+    {
+      "name": "hidden-package",
+      "hidden": true,
+      "configurePreset": "default"
+    },
+    {
+      "name": "invalid-package",
+      "configurePreset": "default",
+      "environment": {
+        "INVALID": "$vendor{invalid}"
+      }
+    },
+    {
+      "name": "hidden-configure-package",
+      "configurePreset": "hidden"
+    },
+    {
+      "name": "invalid-configure-package",
+      "configurePreset": "invalid"
+    },
+    {
+      "name": "unsupported-configure-package",
+      "configurePreset": "unsupported-generator"
     }
   ],
   "workflowPresets": [
@@ -23,6 +198,189 @@
         {
           "type": "configure",
           "name": "default"
+        }
+      ]
+    },
+    {
+      "name": "enabled-dependent-steps",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "enabled-build"
+        },
+        {
+          "type": "test",
+          "name": "enabled-test"
+        },
+        {
+          "type": "package",
+          "name": "enabled-package"
+        }
+      ]
+    },
+    {
+      "name": "disabled-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "disabled"
+        }
+      ]
+    },
+    {
+      "name": "disabled-expression-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "disabled-expression"
+        }
+      ]
+    },
+    {
+      "name": "disabled-build-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "disabled-build"
+        }
+      ]
+    },
+    {
+      "name": "disabled-test-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "test",
+          "name": "disabled-test"
+        }
+      ]
+    },
+    {
+      "name": "disabled-package-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "package",
+          "name": "disabled-package"
+        }
+      ]
+    },
+    {
+      "name": "hidden-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "hidden"
+        }
+      ]
+    },
+    {
+      "name": "invalid-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "invalid"
+        }
+      ]
+    },
+    {
+      "name": "unsupported-generator-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "unsupported-generator"
+        }
+      ]
+    },
+    {
+      "name": "hidden-build-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "hidden-build"
+        }
+      ]
+    },
+    {
+      "name": "invalid-build-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "invalid-build"
+        }
+      ]
+    },
+    {
+      "name": "hidden-test-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "test",
+          "name": "hidden-test"
+        }
+      ]
+    },
+    {
+      "name": "invalid-test-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "test",
+          "name": "invalid-test"
+        }
+      ]
+    },
+    {
+      "name": "hidden-package-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "package",
+          "name": "hidden-package"
+        }
+      ]
+    },
+    {
+      "name": "invalid-package-step",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "package",
+          "name": "invalid-package"
         }
       ]
     }

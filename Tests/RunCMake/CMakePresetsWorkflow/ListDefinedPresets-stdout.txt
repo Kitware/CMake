@@ -1,0 +1,46 @@
+^Defined workflow presets:
+
+  "default"
+  "with-description" +- With Description
+  "enabled-dependent-steps"
+  "disabled-step"
+    Unavailable: step 1: configure preset "disabled": condition evaluated to false: false
+
+  "disabled-expression-step"
+    Unavailable: step 1: configure preset "disabled-expression": condition evaluated to false: .*CMAKE_PRESET_TEST_UNFULFILLED_ENV.*
+
+  "disabled-build-step"
+    Unavailable: step 2: build preset "disabled-build": condition evaluated to false: false
+
+  "disabled-test-step"
+    Unavailable: step 2: test preset "disabled-test": condition evaluated to false: false
+
+  "disabled-package-step"
+    Unavailable: step 2: package preset "disabled-package": condition evaluated to false: false
+
+  "hidden-step"
+    Unavailable: step 1: configure preset "hidden": hidden
+
+  "invalid-step"
+    Unavailable: step 1: configure preset "invalid": unsupported macro expansion
+
+  "unsupported-generator-step"
+    Unavailable: step 1: configure preset "unsupported-generator": generator "Invalid Generator" is not available
+
+  "hidden-build-step"
+    Unavailable: step 2: build preset "hidden-build": hidden
+
+  "invalid-build-step"
+    Unavailable: step 2: build preset "invalid-build": unsupported macro expansion
+
+  "hidden-test-step"
+    Unavailable: step 2: test preset "hidden-test": hidden
+
+  "invalid-test-step"
+    Unavailable: step 2: test preset "invalid-test": unsupported macro expansion
+
+  "hidden-package-step"
+    Unavailable: step 2: package preset "hidden-package": hidden
+
+  "invalid-package-step"
+    Unavailable: step 2: package preset "invalid-package": unsupported macro expansion$

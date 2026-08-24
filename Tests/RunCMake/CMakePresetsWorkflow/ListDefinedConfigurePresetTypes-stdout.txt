@@ -1,0 +1,14 @@
+^Defined configure presets:
+
+  "default"
+  "disabled" +- Disabled Configure
+    Unavailable: condition evaluated to false: false
+
+  "disabled-expression"
+    Unavailable: condition evaluated to false: .*CMAKE_PRESET_TEST_UNFULFILLED_ENV.*
+
+  "invalid"
+    Unavailable: unsupported macro expansion
+
+  "unsupported-generator"
+    Unavailable: generator "Invalid Generator" is not available$

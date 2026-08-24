@@ -1,0 +1,24 @@
+^Defined test presets:
+
+  "default"
+  "enabled-test"
+  "disabled-test"
+    Unavailable: condition evaluated to false: false
+
+  "disabled-configure-test"
+    Unavailable: configure preset "disabled-expression": condition evaluated to false: .*CMAKE_PRESET_TEST_UNFULFILLED_ENV.*
+
+  "disabled-test-and-configure"
+    Unavailable: condition evaluated to false: false
+
+  "invalid-test"
+    Unavailable: unsupported macro expansion
+
+  "hidden-configure-test"
+    Unavailable: configure preset "hidden": hidden
+
+  "invalid-configure-test"
+    Unavailable: configure preset "invalid": unsupported macro expansion
+
+  "unsupported-configure-test"
+    Unavailable: configure preset "unsupported-generator": generator "Invalid Generator" is not available$

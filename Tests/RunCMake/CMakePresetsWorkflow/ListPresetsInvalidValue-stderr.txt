@@ -1,4 +1,5 @@
-^Unknown argument -DINVALID_OPTION
+^Invalid value specified for --list-presets\.
+The only supported value in workflow mode is "defined"\.
 Usage: cmake --workflow <options>
 Options:
   --preset <preset>        = Workflow preset to execute\.

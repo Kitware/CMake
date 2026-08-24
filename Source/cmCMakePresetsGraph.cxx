@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <functional>
 #include <iomanip>
 #include <iostream>
@@ -527,22 +528,28 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
   return ExpandMacroResult::Ok;
 }
 
-void PrintPresets(
-  std::vector<cmCMakePresetsGraph::Preset const*> const& presets)
+struct PresetListEntry
+{
+  cmCMakePresetsGraph::Preset const* Preset;
+  cm::optional<std::string> UnavailableReason;
+};
+
+void PrintPresets(std::vector<PresetListEntry> const& presets)
 {
   if (presets.empty()) {
     return;
   }
 
-  auto presetWithLongestName =
-    std::max_element(presets.begin(), presets.end(),
-                     [](cmCMakePresetsGraph::Preset const* a,
-                        cmCMakePresetsGraph::Preset const* b) {
-                       return a->Name.length() < b->Name.length();
-                     });
-  auto longestLength = (*presetWithLongestName)->Name.length();
+  auto presetWithLongestName = std::max_element(
+    presets.begin(), presets.end(),
+    [](PresetListEntry const& a, PresetListEntry const& b) {
+      return a.Preset->Name.length() < b.Preset->Name.length();
+    });
+  auto longestLength = presetWithLongestName->Preset->Name.length();
 
-  for (auto const* preset : presets) {
+  for (auto entryIt = presets.begin(); entryIt != presets.end(); ++entryIt) {
+    auto const& entry = *entryIt;
+    auto const* preset = entry.Preset;
     std::string name = cmStrCat("  \"", preset->Name, '"');
     if (!preset->DisplayName.empty()) {
       int const width = static_cast<int>(longestLength + name.length() -
@@ -552,38 +559,106 @@ void PrintPresets(
     } else {
       std::cout << name << '\n';
     }
+    if (entry.UnavailableReason) {
+      std::cout << "    Unavailable: " << *entry.UnavailableReason << '\n';
+      if (entryIt + 1 != presets.end()) {
+        std::cout << '\n';
+      }
+    }
   }
 }
 
-struct AlwaysTrue
+template <typename PresetType>
+cm::optional<std::string> GetUnavailableReason(
+  cmCMakePresetsGraph::PresetPair<PresetType> const& preset)
 {
-  template <typename T>
-  constexpr bool operator()(T const&) const noexcept
-  {
-    return true;
+  if (preset.Unexpanded.Hidden) {
+    return "hidden";
   }
-};
+  if (!preset.Expanded) {
+    // Expansion errors abort preset loading.  A missing expanded preset means
+    // expansion was ignored, such as for an unsupported vendor macro.
+    return "unsupported macro expansion";
+  }
+  if (!preset.Expanded->ConditionResult) {
+    auto const& condition = preset.Expanded->ConditionEvaluator;
+    return cmStrCat("condition evaluated to false",
+                    !condition || condition->ConditionJson.empty()
+                      ? ""
+                      : cmStrCat(": ", condition->ConditionJson));
+  }
+  return cm::nullopt;
+}
 
-template <typename PresetType, typename Filter = AlwaysTrue>
+template <typename PresetType>
+cm::optional<std::string> GetUnavailableReason(
+  std::string const& name,
+  std::map<std::string, PresetPair<PresetType>> const& presets)
+{
+  auto const preset = presets.find(name);
+  if (preset == presets.end()) {
+    return cmStrCat(PresetType::kind(), " preset \"", name,
+                    "\" does not exist");
+  }
+  auto reason = GetUnavailableReason(preset->second);
+  if (!reason) {
+    return cm::nullopt;
+  }
+  return cmStrCat(PresetType::kind(), " preset \"", name, "\": ", *reason);
+}
+
+cm::optional<std::string> GetUnavailableReason(
+  std::string const& name,
+  std::map<std::string, PresetPair<ConfigurePreset>> const& presets,
+  cmCMakePresetsGraph::ConfigurePresetUsabilityCheck const&
+    additionalUsabilityCheck)
+{
+  auto const preset = presets.find(name);
+  if (preset == presets.end()) {
+    return cmStrCat("configure preset \"", name, "\" does not exist");
+  }
+  auto reason = GetUnavailableReason(preset->second);
+  if (!reason && additionalUsabilityCheck) {
+    assert(preset->second.Expanded);
+    reason = additionalUsabilityCheck(*preset->second.Expanded);
+  }
+  if (!reason) {
+    return cm::nullopt;
+  }
+  return cmStrCat("configure preset \"", name, "\": ", *reason);
+}
+
+template <typename PresetType, typename UsabilityCheck>
 void PrintPresetList(
   cmCMakePresetsGraph const* const graph,
   std::map<std::string, cmCMakePresetsGraph::PresetPair<PresetType>>
     cmCMakePresetsGraph::*data,
-  std::vector<std::string> cmCMakePresetsGraph::*index, Filter filter = {})
+  std::vector<std::string> cmCMakePresetsGraph::*index,
+  cmCMakePresetsGraph::PresetListMode mode,
+  UsabilityCheck const& additionalUsabilityCheck)
 {
-  std::vector<cmCMakePresetsGraph::Preset const*> presets;
+  std::vector<PresetListEntry> presets;
   presets.reserve((graph->*index).size());
-  for (auto const& p : graph->*index) {
-    auto const& preset = (graph->*data).at(p);
-    if (!preset.Unexpanded.Hidden && preset.Expanded &&
-        preset.Expanded->ConditionResult && filter(preset.Unexpanded)) {
-      presets.push_back(
-        static_cast<cmCMakePresetsGraph::Preset const*>(&preset.Unexpanded));
+  for (auto const& name : graph->*index) {
+    auto const& preset = (graph->*data).at(name);
+    if (preset.Unexpanded.Hidden) {
+      continue;
+    }
+    auto reason = GetUnavailableReason(preset);
+    if (!reason) {
+      assert(preset.Expanded);
+      reason = additionalUsabilityCheck(*preset.Expanded);
+    }
+    if (mode == cmCMakePresetsGraph::PresetListMode::Defined || !reason) {
+      presets.push_back({ &preset.Unexpanded, std::move(reason) });
     }
   }
 
   if (!presets.empty()) {
-    std::cout << (gSkipNewLine ? "" : "\n") << "Available "
+    std::cout << (gSkipNewLine ? "" : "\n")
+              << (mode == cmCMakePresetsGraph::PresetListMode::Defined
+                    ? "Defined "
+                    : "Available ")
               << PresetType::kind() << " presets:\n\n";
     gSkipNewLine = false;
     PrintPresets(presets);
@@ -1472,58 +1547,129 @@ void cmCMakePresetsGraph::ClearPresets()
   this->Files.clear();
 }
 
-void cmCMakePresetsGraph::PrintConfigurePresetList() const
-{
-  PrintPresetList<ConfigurePreset>(this,
-                                   &cmCMakePresetsGraph::ConfigurePresets,
-                                   &cmCMakePresetsGraph::ConfigurePresetOrder);
-}
-
 void cmCMakePresetsGraph::PrintConfigurePresetList(
-  std::function<bool(ConfigurePreset const&)> const& filter) const
+  PresetListMode mode,
+  ConfigurePresetUsabilityCheck const& usabilityCheck) const
 {
+  auto check = [&usabilityCheck](
+                 ConfigurePreset const& preset) -> cm::optional<std::string> {
+    if (!usabilityCheck) {
+      return cm::nullopt;
+    }
+    return usabilityCheck(preset);
+  };
   PrintPresetList<ConfigurePreset>(
     this, &cmCMakePresetsGraph::ConfigurePresets,
-    &cmCMakePresetsGraph::ConfigurePresetOrder, filter);
+    &cmCMakePresetsGraph::ConfigurePresetOrder, mode, check);
 }
 
-void cmCMakePresetsGraph::PrintBuildPresetList() const
+void cmCMakePresetsGraph::PrintBuildPresetList(
+  PresetListMode mode,
+  ConfigurePresetUsabilityCheck const& configureUsabilityCheck) const
 {
+  auto usabilityCheck = [this,
+                         &configureUsabilityCheck](BuildPreset const& preset) {
+    return GetUnavailableReason(preset.ConfigurePreset, this->ConfigurePresets,
+                                configureUsabilityCheck);
+  };
   PrintPresetList<BuildPreset>(this, &cmCMakePresetsGraph::BuildPresets,
-                               &cmCMakePresetsGraph::BuildPresetOrder);
+                               &cmCMakePresetsGraph::BuildPresetOrder, mode,
+                               usabilityCheck);
 }
 
-void cmCMakePresetsGraph::PrintTestPresetList() const
+void cmCMakePresetsGraph::PrintTestPresetList(
+  PresetListMode mode,
+  ConfigurePresetUsabilityCheck const& configureUsabilityCheck) const
 {
+  auto usabilityCheck = [this,
+                         &configureUsabilityCheck](TestPreset const& preset) {
+    return GetUnavailableReason(preset.ConfigurePreset, this->ConfigurePresets,
+                                configureUsabilityCheck);
+  };
   PrintPresetList<TestPreset>(this, &cmCMakePresetsGraph::TestPresets,
-                              &cmCMakePresetsGraph::TestPresetOrder);
-}
-
-void cmCMakePresetsGraph::PrintPackagePresetList() const
-{
-  PrintPresetList<PackagePreset>(this, &cmCMakePresetsGraph::PackagePresets,
-                                 &cmCMakePresetsGraph::PackagePresetOrder);
+                              &cmCMakePresetsGraph::TestPresetOrder, mode,
+                              usabilityCheck);
 }
 
 void cmCMakePresetsGraph::PrintPackagePresetList(
-  std::function<bool(PackagePreset const&)> const& filter) const
+  PresetListMode mode,
+  ConfigurePresetUsabilityCheck const& configureUsabilityCheck) const
 {
+  auto usabilityCheck = [this, &configureUsabilityCheck](
+                          PackagePreset const& preset) {
+    return GetUnavailableReason(preset.ConfigurePreset, this->ConfigurePresets,
+                                configureUsabilityCheck);
+  };
   PrintPresetList<PackagePreset>(this, &cmCMakePresetsGraph::PackagePresets,
                                  &cmCMakePresetsGraph::PackagePresetOrder,
-                                 filter);
+                                 mode, usabilityCheck);
 }
 
-void cmCMakePresetsGraph::PrintWorkflowPresetList() const
+void cmCMakePresetsGraph::PrintPackagePresetList(
+  std::function<bool(PackagePreset const&)> const& packageGeneratorsPresent,
+  PresetListMode mode,
+  ConfigurePresetUsabilityCheck const& configureUsabilityCheck) const
 {
+  auto usabilityCheck = [this, &packageGeneratorsPresent,
+                         &configureUsabilityCheck](
+                          PackagePreset const& preset) {
+    auto configureReason = GetUnavailableReason(
+      preset.ConfigurePreset, this->ConfigurePresets, configureUsabilityCheck);
+    if (configureReason) {
+      return configureReason;
+    }
+    cm::optional<std::string> generatorReason;
+    if (!packageGeneratorsPresent(preset)) {
+      generatorReason = "one or more package generators are not available";
+    }
+    return generatorReason;
+  };
+  PrintPresetList<PackagePreset>(this, &cmCMakePresetsGraph::PackagePresets,
+                                 &cmCMakePresetsGraph::PackagePresetOrder,
+                                 mode, usabilityCheck);
+}
+
+void cmCMakePresetsGraph::PrintWorkflowPresetList(
+  PresetListMode mode,
+  ConfigurePresetUsabilityCheck const& configureUsabilityCheck) const
+{
+  auto usabilityCheck = [this, &configureUsabilityCheck](
+                          WorkflowPreset const& preset) {
+    return this->GetWorkflowUnavailableReason(preset, configureUsabilityCheck);
+  };
   PrintPresetList<WorkflowPreset>(this, &cmCMakePresetsGraph::WorkflowPresets,
-                                  &cmCMakePresetsGraph::WorkflowPresetOrder);
+                                  &cmCMakePresetsGraph::WorkflowPresetOrder,
+                                  mode, usabilityCheck);
 }
 
-void cmCMakePresetsGraph::PrintAllPresets() const
+cm::optional<std::string> cmCMakePresetsGraph::GetWorkflowUnavailableReason(
+  WorkflowPreset const& preset,
+  ConfigurePresetUsabilityCheck const& configureUsabilityCheck) const
 {
-  this->PrintConfigurePresetList();
-  this->PrintBuildPresetList();
-  this->PrintTestPresetList();
-  this->PrintPackagePresetList();
-  this->PrintWorkflowPresetList();
+  using Type = WorkflowPreset::WorkflowStep::Type;
+
+  std::size_t stepNumber = 0;
+  for (auto const& step : preset.Steps) {
+    ++stepNumber;
+    cm::optional<std::string> reason;
+    switch (step.PresetType) {
+      case Type::Configure:
+        reason = GetUnavailableReason(step.PresetName, this->ConfigurePresets,
+                                      configureUsabilityCheck);
+        break;
+      case Type::Build:
+        reason = GetUnavailableReason(step.PresetName, this->BuildPresets);
+        break;
+      case Type::Test:
+        reason = GetUnavailableReason(step.PresetName, this->TestPresets);
+        break;
+      case Type::Package:
+        reason = GetUnavailableReason(step.PresetName, this->PackagePresets);
+        break;
+    }
+    if (reason) {
+      return cmStrCat("step ", stepNumber, ": ", *reason);
+    }
+  }
+  return cm::nullopt;
 }

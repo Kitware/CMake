@@ -16,6 +16,11 @@
       "displayName": "With Description",
       "description": "This preset has a description",
       "configurePreset": "default"
+    },
+    {
+      "name": "unavailable-generator",
+      "configurePreset": "default",
+      "generators": ["Invalid Generator"]
     }
   ]
 }

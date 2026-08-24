@@ -395,6 +395,13 @@ unset(CMakePresets_FILE_ARG_EXTRA_FILES)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/ListPresets.json.in")
 run_cmake_presets(ListPresets --list-presets)
 run_cmake_presets(ListPresetsInvalidType --list-presets=invalid-type)
+set(RunCMake_TEST_EXPECT_RESULT 1)
+run_cmake_presets(ListPresetsInvalidDefinedPrefix --list-presets=-defined)
+set(RunCMake-stderr-file ListPresetsInvalidType-stderr.txt)
+run_cmake_presets(ListPresetsInvalidRepeatedDefined
+  --list-presets=configure-defined-defined)
+unset(RunCMake_TEST_EXPECT_RESULT)
+unset(RunCMake-stderr-file)
 
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/ListPresetsWorkingDir")
 set(RunCMake_TEST_NO_CLEAN 1)

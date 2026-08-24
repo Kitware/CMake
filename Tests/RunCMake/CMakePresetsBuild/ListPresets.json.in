@@ -35,6 +35,7 @@
         {
             "name": "false",
             "inherits": "build-default",
+            "displayName": "false displayName",
             "condition": false
         }
     ]

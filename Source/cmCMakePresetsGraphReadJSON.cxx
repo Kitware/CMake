@@ -14,6 +14,7 @@
 #include <cmext/string_view>
 
 #include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
 
 #include "cmCMakePresetsErrors.h"
 #include "cmCMakePresetsGraph.h"
@@ -431,6 +432,11 @@ bool PresetConditionHelper(
 {
   std::unique_ptr<cmCMakePresetsGraph::Condition> ptr;
   auto result = ConditionHelper(ptr, value, state);
+  if (result && ptr) {
+    Json::StreamWriterBuilder writer;
+    writer["indentation"] = "";
+    ptr->ConditionJson = Json::writeString(writer, *value);
+  }
   out = std::move(ptr);
   return result;
 }
