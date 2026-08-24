@@ -77,7 +77,8 @@ macro(__compiler_gnu lang)
   # '-flto' introduced since GCC 4.5:
   # * https://gcc.gnu.org/onlinedocs/gcc-4.4.7/gcc/Option-Summary.html (no)
   # * https://gcc.gnu.org/onlinedocs/gcc-4.5.4/gcc/Option-Summary.html (yes)
-  if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.5)
+  # * It does not support AIX.
+  if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.5 AND NOT CMAKE_SYSTEM_NAME STREQUAL "AIX")
     set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
 
     set(__lto_flags "")
