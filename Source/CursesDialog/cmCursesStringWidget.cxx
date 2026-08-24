@@ -150,7 +150,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
       form_driver(form, REQ_BEG_FIELD);
     } else if (key == ctrl('e') || key == KEY_END) {
       form_driver(form, REQ_END_FIELD);
-    } else if (key == 127 || key == KEY_BACKSPACE) {
+    } else if (key == ctrl('h') || key == 127 || key == KEY_BACKSPACE) {
       FIELD* cur = current_field(form);
       form_driver(form, REQ_DEL_PREV);
       if (current_field(form) != cur) {
