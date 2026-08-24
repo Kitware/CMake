@@ -23,5 +23,8 @@ dpkg-reconfigure --frontend=noninteractive locales
 
 # `Utilities/Scripts/clang-format.bash` finds `clang-format-18` by name, but
 # make the unversioned name resolve to version 18 as well so that tools
-# looking for it get the version our style rules require.
+# looking for it get the version our style rules require.  `CMakeLists.txt`
+# searches for `clang-tidy` only under the unversioned name, so the version
+# installed by name needs one too.
 ln -s "$(command -v clang-format-18)" /usr/local/bin/clang-format
+ln -s "$(command -v clang-tidy-22)" /usr/local/bin/clang-tidy

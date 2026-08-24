@@ -36,6 +36,21 @@ ninja-build
 gdb
 valgrind
 
+# Analyze CMake.  `clazy` is the compiler our Clazy CI job builds with,
+# `clang-tools` provides `scan-build`, and `clang-tidy` runs the checks in
+# `.clang-tidy`.  Name the version of `clang-tidy` our checks are written
+# against: `Utilities/ClangTidyModule` tracks the Clang release our CI image
+# carries, and older versions report `cmake-use-cmsys-fstream` where they
+# should not.  Ubuntu's unversioned `clang-tidy` package is a release behind.
+# `clazy` and `clang-tools` are whatever versions Ubuntu carries, so expect
+# their diagnostics to differ from those jobs'.  CMake's own checks are not
+# among them either way: `CMake_USE_CLANG_TIDY_MODULE` needs
+# `Utilities/ClangTidyModule` built against Clang's development files, which
+# are not installed here.
+clang-tidy-22
+clang-tools
+clazy
+
 # Build the documentation.
 python3-sphinx
 

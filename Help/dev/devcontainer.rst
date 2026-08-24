@@ -159,6 +159,22 @@ against, the container provides:
     $ cmake --build build-asan
     $ ctest --test-dir build-asan
 
+* ``clang-tidy``, ``scan-build``, and ``clazy``, the compiler our Clazy CI
+  job builds with, to analyze CMake rather than only compile it:
+
+  .. code-block:: console
+
+    $ cmake -G Ninja -B build-tidy -S . -DCMake_RUN_CLANG_TIDY=ON
+    $ cmake -G Ninja -B build-clazy -S . -DCMAKE_CXX_COMPILER=clazy
+
+  ``clang-tidy`` is the version our checks are written against, which is
+  not the one Ubuntu's unversioned package provides.  ``scan-build`` and
+  ``clazy`` are whatever versions Ubuntu carries rather than the ones our
+  CI image does, so expect their diagnostics to differ from those jobs'.
+  CMake's own checks are not available either way:
+  ``CMake_USE_CLANG_TIDY_MODULE`` needs `Utilities/ClangTidyModule`_ built
+  against Clang's development files, which the container does not install.
+
 * ``glab``, the `GitLab CLI`_, to work with merge requests, issues, and
   pipelines on our GitLab instance, and `glab-axi`_, a wrapper around it
   whose output follows the `AXI`_ conventions:
@@ -173,6 +189,7 @@ against, the container provides:
 .. _`Kitware APT repository`: https://apt.kitware.com
 .. _`C++ Code Style`: source.rst#c-code-style
 .. _`.pre-commit-config.yaml`: ../../.pre-commit-config.yaml
+.. _`Utilities/ClangTidyModule`: ../../Utilities/ClangTidyModule
 .. _`CMake Documentation Guide`: documentation.rst
 .. _`CMake Debugging Guide`: debug.rst
 .. _`GitLab CLI`: https://docs.gitlab.com/editor_extensions/gitlab_cli/
