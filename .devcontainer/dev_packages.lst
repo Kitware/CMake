@@ -17,13 +17,24 @@ nano
 unminimize
 vim
 
-# Build CMake.
+# Build CMake.  `g++` comes from `deps_packages.lst`, as CI builds with it;
+# `clang` is here for developers who prefer to build with it instead.
+#
+# `gfortran` is named only to keep the Fortran-only `gcc-16` build that
+# Ubuntu 26.04 carries out of the container: `libopenmpi-dev` lists
+# `gfortran-16` first among the alternatives it accepts, and Clang, which
+# selects the newest GCC installation it finds, cannot link against one that
+# provides no C++ standard library.
 ccache
+clang
 cmake
+gfortran
 ninja-build
 
-# Debug CMake.
+# Debug and diagnose CMake.  The sanitizer runtimes come with the compilers,
+# so building with `-fsanitize=` needs nothing installed here.
 gdb
+valgrind
 
 # Build the documentation.
 python3-sphinx

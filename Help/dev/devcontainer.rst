@@ -111,6 +111,13 @@ against, the container provides:
   Ubuntu release with ``-rc`` appended.  Add it to the ``Suites`` field of
   ``/etc/apt/sources.list.d/kitware.sources`` to install those as well.
 
+* ``clang``, for developers who would rather build with it than with the
+  default ``g++``:
+
+  .. code-block:: console
+
+    $ cmake -G Ninja -B build-clang -S . -DCMAKE_CXX_COMPILER=clang++
+
 * ``ccache``, to speed up repeated builds, e.g.:
 
   .. code-block:: console
@@ -139,6 +146,18 @@ against, the container provides:
   `CMake Documentation Guide`_.
 
 * ``gdb``, to debug CMake as described in the `CMake Debugging Guide`_.
+
+* ``valgrind``, and the sanitizer runtimes that come with ``g++`` and
+  ``clang``, to run CMake and its tests under a memory checker, the way the
+  sanitizer and Valgrind jobs of our CI do:
+
+  .. code-block:: console
+
+    $ cmake -G Ninja -B build-asan -S . \
+        -DCMAKE_C_FLAGS=-fsanitize=address \
+        -DCMAKE_CXX_FLAGS=-fsanitize=address
+    $ cmake --build build-asan
+    $ ctest --test-dir build-asan
 
 * ``glab``, the `GitLab CLI`_, to work with merge requests, issues, and
   pipelines on our GitLab instance, and `glab-axi`_, a wrapper around it
