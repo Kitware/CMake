@@ -7,6 +7,7 @@ if(WIN32)
     [[mybin]]
     [[mybin/exe\.exe]]
     [[mybin/(lib)?lib1\.dll]]
+    [[mybin/(lib)?lib5\.dll]]
     [[myinclude]]
     [[myinclude/obj3\.h]]
     [[mylib]]
@@ -22,6 +23,7 @@ elseif(MSYS)
     [[mybin]]
     [[mybin/exe\.exe]]
     [[mybin/msys-lib1\.dll]]
+    [[mybin/msys-lib5\.dll]]
     [[myinclude]]
     [[myinclude/obj3\.h]]
     [[mylib]]
@@ -36,6 +38,7 @@ elseif(CYGWIN)
     [[lib4/cyglib4\.dll]]
     [[mybin]]
     [[mybin/cyglib1\.dll]]
+    [[mybin/cyglib5\.dll]]
     [[mybin/exe\.exe]]
     [[myinclude]]
     [[myinclude/obj3\.h]]
@@ -56,6 +59,7 @@ else()
     [[mylib]]
     [[mylib/liblib1\.(dylib|so)]]
     [[mylib/liblib2\.a]]
+    [[mylib/liblib5\.so]]
     )
 endif()
 check_installed("^${_check_files}$")

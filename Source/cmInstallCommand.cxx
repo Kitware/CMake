@@ -972,21 +972,23 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       } break;
       case cm::TargetType::MODULE_LIBRARY: {
         // Modules use LIBRARY properties.
+        std::string moduleDest;
         if (!libraryArgs.GetDestination().empty()) {
-          libraryGenerator = CreateInstallTargetGenerator(
-            target, libraryArgs, false, helper.CaptureContext());
-          libraryGenerator->SetNamelinkMode(namelinkMode);
-          namelinkOnly =
-            (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
-          if (runtimeDependencySet) {
-            runtimeDependencySet->AddModule(libraryGenerator.get());
-          }
+          moduleDest = libraryArgs.GetDestination();
+        } else if (target.IsDLLPlatform()) {
+          moduleDest = helper.GetRuntimeDestination(nullptr);
         } else {
-          status.SetError(
-            cmStrCat("TARGETS given no LIBRARY DESTINATION for module "
-                     "target \"",
-                     target.GetName(), "\"."));
-          return false;
+          moduleDest = helper.GetLibraryDestination(nullptr);
+        }
+
+        libraryGenerator = CreateInstallTargetGenerator(
+          target, libraryArgs, false, helper.CaptureContext(), moduleDest);
+
+        libraryGenerator->SetNamelinkMode(namelinkMode);
+        namelinkOnly =
+          (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
+        if (runtimeDependencySet) {
+          runtimeDependencySet->AddModule(libraryGenerator.get());
         }
       } break;
       case cm::TargetType::OBJECT_LIBRARY: {

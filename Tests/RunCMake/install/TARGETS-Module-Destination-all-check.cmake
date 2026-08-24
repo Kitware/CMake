@@ -1,0 +1,34 @@
+if(WIN32)
+  set(_check_files
+    [[bin]]
+    [[bin/(lib)?mod1\.dll]]
+    [[bin/(lib)?mod3\.dll]]
+    [[plugins]]
+    [[plugins/(lib)?mod2\.dll]]
+    )
+elseif(MSYS)
+  set(_check_files
+    [[bin]]
+    [[bin/msys-mod1\.dll]]
+    [[bin/msys-mod3\.dll]]
+    [[plugins]]
+    [[plugins/msys-mod2\.dll]]
+    )
+elseif(CYGWIN)
+  set(_check_files
+    [[bin]]
+    [[bin/cygmod1\.dll]]
+    [[bin/cygmod3\.dll]]
+    [[plugins]]
+    [[plugins/cygmod2\.dll]]
+    )
+else()
+  set(_check_files
+    [[lib]]
+    [[lib/libmod1\.so]]
+    [[lib/libmod3\.so]]
+    [[plugins]]
+    [[plugins/libmod2\.so]]
+    )
+endif()
+check_installed("^${_check_files}$")
