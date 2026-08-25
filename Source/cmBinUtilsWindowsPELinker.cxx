@@ -103,30 +103,31 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
   std::string origin = cmSystemTools::GetFilenamePath(file);
 
   for (auto const& lib : depends) {
-    if (!this->Archive->IsPreExcluded(lib.LowerCase)) {
-      std::string path;
-      bool resolved = false;
-      if (!this->ResolveDependency(lib.LowerCase, origin, path, resolved)) {
+    if (this->Archive->IsPreExcluded(lib.LowerCase)) {
+      continue;
+    }
+    std::string path;
+    bool resolved = false;
+    if (!this->ResolveDependency(lib.LowerCase, origin, path, resolved)) {
+      return false;
+    }
+    if (resolved) {
+      if (this->Archive->IsPostExcluded(path)) {
+        continue;
+      }
+#ifdef _WIN32
+      ReplaceWithActualNameCasing(path);
+#else
+      path.replace(path.end() - lib.Original.size(), path.end(), lib.Original);
+#endif
+      bool unique;
+      this->Archive->AddResolvedPath(lib.Original, path, unique);
+      if (unique &&
+          !this->ScanDependencies(path, cm::TargetType::SHARED_LIBRARY)) {
         return false;
       }
-      if (resolved) {
-        if (!this->Archive->IsPostExcluded(path)) {
-#ifdef _WIN32
-          ReplaceWithActualNameCasing(path);
-#else
-          path.replace(path.end() - lib.Original.size(), path.end(),
-                       lib.Original);
-#endif
-          bool unique;
-          this->Archive->AddResolvedPath(lib.Original, path, unique);
-          if (unique &&
-              !this->ScanDependencies(path, cm::TargetType::SHARED_LIBRARY)) {
-            return false;
-          }
-        }
-      } else {
-        this->Archive->AddUnresolvedPath(lib.Original);
-      }
+    } else {
+      this->Archive->AddUnresolvedPath(lib.Original);
     }
   }
 
@@ -155,11 +156,12 @@ bool cmBinUtilsWindowsPELinker::ResolveDependency(std::string const& name,
 
   for (auto const& searchPath : dirs) {
     path = cmStrCat(searchPath, '/', name);
-    if (cmSystemTools::PathExists(path)) {
-      this->NormalizePath(path);
-      resolved = true;
-      return true;
+    if (!cmSystemTools::PathExists(path)) {
+      continue;
     }
+    this->NormalizePath(path);
+    resolved = true;
+    return true;
   }
 
   resolved = false;
