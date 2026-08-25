@@ -43,6 +43,8 @@ public:
     std::string const& search, std::vector<std::string>& command) const;
   bool IsPreExcluded(std::string const& name) const;
   bool IsPostExcluded(std::string const& name) const;
+  bool IsPostExcluded(std::string const& name,
+                      std::string const& fileName) const;
 
   void AddResolvedPath(std::string const& name, std::string const& path,
                        bool& unique, std::vector<std::string> rpaths = {});

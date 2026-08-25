@@ -4,17 +4,18 @@
 #include "cmBinUtilsWindowsPELinker.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <sstream>
 #include <utility>
 #include <vector>
 
+#include <cm/filesystem>
 #include <cm/memory>
 
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
 #include "cmRuntimeDependencyArchive.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetTypes.h"
 
@@ -22,11 +23,15 @@
 #  include <windows.h>
 
 #  include "cmsys/Encoding.hxx"
+
+#  include "cmStringAlgorithms.h"
+#else
+#  include "cmsys/Directory.hxx"
 #endif
 
-#ifdef _WIN32
 namespace {
 
+#ifdef _WIN32
 std::string ReplaceWithActualNameCasing(std::string path)
 {
   WIN32_FIND_DATAW findData;
@@ -39,9 +44,30 @@ std::string ReplaceWithActualNameCasing(std::string path)
   }
   return path;
 }
+#else
+bool FindCaseInsensitive(std::string const& dir, std::string const& lowerName,
+                         std::string& foundPath)
+{
+  if (!cmSystemTools::FileIsDirectory(dir)) {
+    return false;
+  }
+  cmsys::Directory directory;
+  if (!directory.Load(dir)) {
+    return false;
+  }
+  for (std::size_t i = 0; i < directory.GetNumberOfFiles(); ++i) {
+    cm::filesystem::path fileName = directory.GetFile(i);
 
+    if (cmSystemTools::LowerCase(fileName) == lowerName) {
+      foundPath += dir / fileName;
+      return true;
+    }
+  }
+
+  return false;
 }
 #endif
+}
 
 cmBinUtilsWindowsPELinker::cmBinUtilsWindowsPELinker(
   cmRuntimeDependencyArchive* archive)
@@ -107,7 +133,7 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
       return false;
     }
     if (resolved) {
-      if (this->Archive->IsPostExcluded(path.LowerName)) {
+      if (this->Archive->IsPostExcluded(path.LowerName, path.CasedName)) {
         continue;
       }
       bool unique;
@@ -146,19 +172,23 @@ bool cmBinUtilsWindowsPELinker::ResolveDependency(Dependency const& lib,
   dirs.insert(dirs.begin(), origin);
 
   for (auto const& searchPath : dirs) {
+#ifdef _WIN32
     path.LowerName = cmStrCat(searchPath, '/', lib.LowerName);
     if (!cmSystemTools::PathExists(path.LowerName)) {
       continue;
     }
     this->NormalizePath(path.LowerName);
-#ifdef _WIN32
     path.CasedName = ReplaceWithActualNameCasing(path.LowerName);
 #else
-    path.CasedName = [&lib](std::string libPath) -> std::string {
-      libPath.replace(libPath.end() - lib.CasedName.size(), libPath.end(),
-                      lib.CasedName);
+    if (!FindCaseInsensitive(searchPath, lib.LowerName, path.CasedName)) {
+      continue;
+    }
+    this->NormalizePath(path.CasedName);
+    path.LowerName = [&lib](std::string libPath) -> std::string {
+      libPath.replace(libPath.end() - lib.LowerName.size(), libPath.end(),
+                      lib.LowerName);
       return libPath;
-    }(path.LowerName);
+    }(path.CasedName);
 #endif
     resolved = true;
     return true;
