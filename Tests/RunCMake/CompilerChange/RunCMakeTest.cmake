@@ -135,3 +135,52 @@ block()
     "-DCMAKE_TOOLCHAIN_FILE=foo.cmake"
   )
 endblock()
+
+unset(ENV{CMAKE_SYSTEM_ENVIRONMENT_ID})
+unset(ENV{CMAKE_SYSTEM_ENVIRONMENT_ACTION})
+
+block()
+  set(ENV{CMAKE_SYSTEM_ENVIRONMENT_ID} original)
+  run_cmake(SystemEnvironmentId)
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+# Unchanged environment id should not emit a warning.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION Unchanged)
+  run_cmake(SystemEnvironmentId)
+
+  set(ENV{CMAKE_SYSTEM_ENVIRONMENT_ID} different)
+
+# Changed environment id should emit a warning by default.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION Changed)
+  set(RunCMake-stderr-file SystemEnvironmentIdChanged-stderr.txt)
+  run_cmake(SystemEnvironmentId)
+
+# Changed environment id with IGNORE action should not emit a warning.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION ChangedIgnore)
+  set(ENV{CMAKE_SYSTEM_ENVIRONMENT_ACTION} IGNORE)
+  unset(RunCMake-stderr-file)
+  run_cmake(SystemEnvironmentId)
+
+# Changed environment id with WARN action should not emit a warning.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION ChangedWarn)
+  set(ENV{CMAKE_SYSTEM_ENVIRONMENT_ACTION} WARN)
+  set(RunCMake-stderr-file SystemEnvironmentIdChanged-stderr.txt)
+  run_cmake(SystemEnvironmentId)
+
+# Changed environment id with REFRESH action should refresh the cache.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION ChangedRefresh)
+  set(ENV{CMAKE_SYSTEM_ENVIRONMENT_ACTION} REFRESH)
+  set(RunCMake-stderr-file SystemEnvironmentIdChangedRefresh-stderr.txt)
+  run_cmake(SystemEnvironmentId)
+
+# Unrecognized CMAKE_SYSTEM_ENVIRONMENT_ACTION should error.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION InvalidAction)
+  set(ENV{CMAKE_SYSTEM_ENVIRONMENT_ID} foo)
+  set(ENV{CMAKE_SYSTEM_ENVIRONMENT_ACTION} bar)
+  set(RunCMake_TEST_EXPECT_RESULT 1)
+  set(RunCMake-stderr-file SystemEnvironmentIdInvalidAction-stderr.txt)
+  run_cmake(SystemEnvironmentId)
+endblock()
+
+unset(ENV{CMAKE_SYSTEM_ENVIRONMENT_ACTION})
+unset(ENV{CMAKE_SYSTEM_ENVIRONMENT_ID})

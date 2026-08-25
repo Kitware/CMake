@@ -1,0 +1,8 @@
+CMake Warning:
+  CMAKE_SYSTEM_ENVIRONMENT_ID: different
+
+  Does not match the previous value: original
+
+  The configure results are probably outdated\.  ?Consider running cmake with
+  --fresh, removing the CMakeCache\.txt file and CMakeFiles directory, or
+  choosing a different binary directory\.

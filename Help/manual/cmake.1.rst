@@ -219,6 +219,11 @@ Options
    from any previous run will be removed. The download, update, and patch
    steps will therefore be forced to re-execute.
 
+ .. versionadded:: 4.5
+   See the :envvar:`CMAKE_SYSTEM_ENVIRONMENT_ID` and
+   :envvar:`CMAKE_SYSTEM_ENVIRONMENT_ACTION` environment variables for a
+   mechanism to hint to :program:`cmake` when ``--fresh`` may be necessary.
+
 .. option:: -L[A][H]
 
  List non-advanced cached variables.

@@ -32,6 +32,8 @@ Environment Variables that Change Behavior
    /envvar/CMAKE_PROGRAM_PATH
    /envvar/CMAKE_TLS_VERIFY
    /envvar/CMAKE_TLS_VERSION
+   /envvar/CMAKE_SYSTEM_ENVIRONMENT_ACTION
+   /envvar/CMAKE_SYSTEM_ENVIRONMENT_ID
    /envvar/NO_COLOR
    /envvar/SSL_CERT_DIR
    /envvar/SSL_CERT_FILE

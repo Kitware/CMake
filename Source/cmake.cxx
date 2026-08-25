@@ -3062,6 +3062,68 @@ void cmake::InitializeInstrumentation()
 #endif
 }
 
+int cmake::HandleDifferentSystemEnvironmentId(std::string envId,
+                                              std::string cachedId)
+{
+  enum class Action
+  {
+    Ignore,
+    Warn,
+    Refresh,
+  } action = Action::Warn;
+  static std::string const actionEnvName = "CMAKE_SYSTEM_ENVIRONMENT_ACTION";
+  if (cmSystemTools::HasEnv(actionEnvName)) {
+    std::string actionEnv;
+    cmSystemTools::GetEnv(actionEnvName, actionEnv);
+    if (actionEnv == "IGNORE") {
+      action = Action::Ignore;
+    } else if (actionEnv == "WARN") {
+      action = Action::Warn;
+    } else if (actionEnv == "REFRESH") {
+      action = Action::Refresh;
+    } else {
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Unsupported ", actionEnvName, " '", actionEnv, '\''));
+      return -1;
+    }
+  }
+  switch (action) {
+    case Action::Ignore:
+      break;
+    case Action::Warn: {
+      std::string msg = cmStrCat(
+        "CMAKE_SYSTEM_ENVIRONMENT_ID: ", envId,
+        "\nDoes not match the previous value: ", cachedId,
+        "\nThe configure results are probably outdated. Consider running"
+        " cmake with --fresh, removing the CMakeCache.txt file and"
+        " CMakeFiles directory, or choosing a different binary"
+        " directory.");
+      this->IssueMessage(MessageType::WARNING, msg);
+      break;
+    }
+    case Action::Refresh: {
+      std::string msg =
+        cmStrCat("CMAKE_SYSTEM_ENVIRONMENT_ID: ", envId,
+                 "\nDoes not match the previous value: ", cachedId,
+                 "\nThe cache will be refreshed automatically.");
+      this->IssueMessage(MessageType::MESSAGE, msg);
+      this->DeleteCache(this->GetHomeOutputDirectory());
+      if (this->LoadCache() < 0) {
+        cmSystemTools::Error(
+          "Error executing cmake::LoadCache(). Aborting.\n");
+        return -1;
+      }
+      this->AddCacheEntry(
+        "CMAKE_SYSTEM_ENVIRONMENT_ID", envId,
+        "Opaque identifier for the current system environment",
+        cmStateEnums::INTERNAL);
+      break;
+    }
+  }
+  return 0;
+}
+
 // handle a command line invocation
 int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
 {
@@ -3107,6 +3169,24 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
     if (this->LoadCache() < 0) {
       cmSystemTools::Error("Error executing cmake::LoadCache(). Aborting.\n");
       return -1;
+    }
+    std::string const idKey = "CMAKE_SYSTEM_ENVIRONMENT_ID";
+    cmValue cachedEnvId = this->State->GetInitializedCacheValue(idKey);
+    std::string sysEnvId;
+    cmSystemTools::GetEnv(idKey, sysEnvId);
+    if (cachedEnvId) {
+      if (sysEnvId != *cachedEnvId) {
+        if (this->HandleDifferentSystemEnvironmentId(sysEnvId, *cachedEnvId) <
+            0) {
+          // Failed to LoadCache()
+          return -1;
+        }
+      }
+    } else {
+      this->AddCacheEntry(
+        idKey, sysEnvId,
+        "Opaque identifier for the current system environment",
+        cmStateEnums::INTERNAL);
     }
   } else {
     if (this->FreshCache) {
