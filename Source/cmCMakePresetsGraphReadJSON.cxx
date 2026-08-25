@@ -32,6 +32,8 @@ using BuildPreset = cmCMakePresetsGraph::BuildPreset;
 using TestPreset = cmCMakePresetsGraph::TestPreset;
 using PackagePreset = cmCMakePresetsGraph::PackagePreset;
 using WorkflowPreset = cmCMakePresetsGraph::WorkflowPreset;
+template <typename T>
+using PresetPair = cmCMakePresetsGraph::PresetPair<T>;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 using JSONHelperBuilder = cmJSONHelperBuilder;
 using ExpandMacroResult = cmCMakePresetsGraphInternal::ExpandMacroResult;
@@ -329,6 +331,41 @@ public:
     return ExpandMacroResult::Ignore;
   }
 };
+
+template <typename T>
+bool RegisterPresets(std::vector<T>& presets, cmCMakePresetsGraph::File* file,
+                     std::map<std::string, PresetPair<T>>& out,
+                     std::vector<std::string>& order, cmJSONState* state,
+                     std::function<bool(T&)> const& checkVersionSupport = {})
+{
+  for (auto& preset : presets) {
+    preset.OriginFile = file;
+    if (preset.Name.empty()) {
+      // No error, already handled by PresetNameHelper
+      return false;
+    }
+
+    if (!ExpandImmediateMacros<T>(preset)) {
+      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name, state);
+      return false;
+    }
+
+    if (checkVersionSupport && !checkVersionSupport(preset)) {
+      return false;
+    }
+
+    PresetPair<T> presetPair;
+    presetPair.Unexpanded = preset;
+    presetPair.Expanded = cm::nullopt;
+    if (!out.emplace(preset.Name, presetPair).second) {
+      cmCMakePresetsErrors::DUPLICATE_PRESETS(preset.Name, state);
+      return false;
+    }
+
+    order.push_back(preset.Name);
+  }
+  return true;
+}
 }
 
 namespace cmCMakePresetsGraphInternal {
@@ -591,19 +628,7 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
   file->Version = v;
   file->ReachableFiles.insert(file);
 
-  for (auto& preset : presets.ConfigurePresets) {
-    preset.OriginFile = file;
-    if (preset.Name.empty()) {
-      // No error, already handled by PresetNameHelper
-      return false;
-    }
-
-    if (!ExpandImmediateMacros<ConfigurePreset>(preset)) {
-      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
-                                                    &this->parseState);
-      return false;
-    }
-
+  auto const configureVersionCheck = [&](ConfigurePreset& preset) -> bool {
     // Support for installDir presets added in version 3.
     if (v < 3 && !preset.InstallDir.empty()) {
       cmCMakePresetsErrors::INSTALL_PREFIX_UNSUPPORTED(&root["installDir"],
@@ -638,73 +663,33 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
     }
 
     // Support for diagnostics.
-    if (!cmCMakePresetsGraphInternal::CheckDiagnostics(&this->parseState, v,
-                                                       preset)) {
-      return false;
-    }
+    return cmCMakePresetsGraphInternal::CheckDiagnostics(&this->parseState, v,
+                                                         preset);
+  };
 
-    PresetPair<ConfigurePreset> presetPair;
-    presetPair.Unexpanded = preset;
-    presetPair.Expanded = cm::nullopt;
-    if (!this->ConfigurePresets.emplace(preset.Name, presetPair).second) {
-      cmCMakePresetsErrors::DUPLICATE_PRESETS(preset.Name, &this->parseState);
-      return false;
-    }
-
-    this->ConfigurePresetOrder.push_back(preset.Name);
+  if (!RegisterPresets<ConfigurePreset>(
+        presets.ConfigurePresets, file, this->ConfigurePresets,
+        this->ConfigurePresetOrder, &this->parseState,
+        configureVersionCheck)) {
+    return false;
   }
 
-  for (auto& preset : presets.BuildPresets) {
-    preset.OriginFile = file;
-    if (preset.Name.empty()) {
-      // No error, already handled by PresetNameHelper
-      return false;
-    }
-
-    if (!ExpandImmediateMacros<BuildPreset>(preset)) {
-      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
-                                                    &this->parseState);
-      return false;
-    }
-
-    PresetPair<BuildPreset> presetPair;
-    presetPair.Unexpanded = preset;
-    presetPair.Expanded = cm::nullopt;
-    if (!this->BuildPresets.emplace(preset.Name, presetPair).second) {
-      cmCMakePresetsErrors::DUPLICATE_PRESETS(preset.Name, &this->parseState);
-      return false;
-    }
-
+  auto const buildVersionCheck = [&](BuildPreset& preset) -> bool {
     // Support for conditions added in version 3.
     if (v < 3 && preset.ConditionEvaluator) {
       cmCMakePresetsErrors::CONDITION_UNSUPPORTED(&this->parseState);
       return false;
     }
+    return true;
+  };
 
-    this->BuildPresetOrder.push_back(preset.Name);
+  if (!RegisterPresets<BuildPreset>(presets.BuildPresets, file,
+                                    this->BuildPresets, this->BuildPresetOrder,
+                                    &this->parseState, buildVersionCheck)) {
+    return false;
   }
 
-  for (auto& preset : presets.TestPresets) {
-    preset.OriginFile = file;
-    if (preset.Name.empty()) {
-      // No error, already handled by PresetNameHelper
-      return false;
-    }
-
-    if (!ExpandImmediateMacros<TestPreset>(preset)) {
-      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
-                                                    &this->parseState);
-      return false;
-    }
-
-    PresetPair<TestPreset> presetPair;
-    presetPair.Unexpanded = preset;
-    presetPair.Expanded = cm::nullopt;
-    if (!this->TestPresets.emplace(preset.Name, presetPair).second) {
-      cmCMakePresetsErrors::DUPLICATE_PRESETS(preset.Name, &this->parseState);
-      return false;
-    }
-
+  auto const testVersionCheck = [&](TestPreset& preset) -> bool {
     // Support for conditions added in version 3.
     if (v < 3 && preset.ConditionEvaluator) {
       cmCMakePresetsErrors::CONDITION_UNSUPPORTED(&this->parseState);
@@ -738,61 +723,29 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
       return false;
     }
 
-    this->TestPresetOrder.push_back(preset.Name);
+    return true;
+  };
+
+  if (!RegisterPresets<TestPreset>(presets.TestPresets, file,
+                                   this->TestPresets, this->TestPresetOrder,
+                                   &this->parseState, testVersionCheck)) {
+    return false;
   }
 
-  for (auto& preset : presets.PackagePresets) {
-    preset.OriginFile = file;
-    if (preset.Name.empty()) {
-      // No error, already handled by PresetNameHelper
-      return false;
-    }
-
-    if (!ExpandImmediateMacros<PackagePreset>(preset)) {
-      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
-                                                    &this->parseState);
-      return false;
-    }
-
-    PresetPair<PackagePreset> presetPair;
-    presetPair.Unexpanded = preset;
-    presetPair.Expanded = cm::nullopt;
-    if (!this->PackagePresets.emplace(preset.Name, presetPair).second) {
-      cmCMakePresetsErrors::DUPLICATE_PRESETS(preset.Name, &this->parseState);
-      return false;
-    }
-
-    // Support for conditions added in version 3, but this requires version 5
-    // already, so no action needed.
-
-    this->PackagePresetOrder.push_back(preset.Name);
+  // Support for conditions added in version 3, but this requires version 5
+  // already, so no action needed.
+  if (!RegisterPresets<PackagePreset>(
+        presets.PackagePresets, file, this->PackagePresets,
+        this->PackagePresetOrder, &this->parseState)) {
+    return false;
   }
 
-  for (auto& preset : presets.WorkflowPresets) {
-    preset.OriginFile = file;
-    if (preset.Name.empty()) {
-      // No error, already handled by PresetNameHelper
-      return false;
-    }
-
-    if (!ExpandImmediateMacros<WorkflowPreset>(preset)) {
-      cmCMakePresetsErrors::INVALID_MACRO_EXPANSION(preset.Name,
-                                                    &this->parseState);
-      return false;
-    }
-
-    PresetPair<WorkflowPreset> presetPair;
-    presetPair.Unexpanded = preset;
-    presetPair.Expanded = cm::nullopt;
-    if (!this->WorkflowPresets.emplace(preset.Name, presetPair).second) {
-      cmCMakePresetsErrors::DUPLICATE_PRESETS(preset.Name, &this->parseState);
-      return false;
-    }
-
-    // Support for conditions added in version 3, but this requires version 6
-    // already, so no action needed.
-
-    this->WorkflowPresetOrder.push_back(preset.Name);
+  // Support for conditions added in version 3, but this requires version 6
+  // already, so no action needed.
+  if (!RegisterPresets<WorkflowPreset>(
+        presets.WorkflowPresets, file, this->WorkflowPresets,
+        this->WorkflowPresetOrder, &this->parseState)) {
+    return false;
   }
 
   auto const includeFile = [this, &inProgressFiles,
