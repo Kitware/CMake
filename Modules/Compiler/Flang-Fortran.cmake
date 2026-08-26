@@ -1,6 +1,9 @@
 include(Compiler/Clang)
 __compiler_clang(Fortran)
 
+# No -isystem for Fortran because it will not find .mod files.
+unset(CMAKE_INCLUDE_SYSTEM_FLAG_Fortran)
+
 set(CMAKE_Fortran_SUBMODULE_SEP "-")
 set(CMAKE_Fortran_SUBMODULE_EXT ".mod")
 
