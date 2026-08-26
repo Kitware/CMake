@@ -442,6 +442,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   endif()
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/.git")
+  option(CMake_VERSION_NO_GIT "Do not attempt to determine CMake version from Git" OFF)
+endif()
+
 #-----------------------------------------------------------------------
 # The main section of the CMakeLists file
 #
