@@ -654,13 +654,50 @@ int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
   // Run the IAR C-STAT command line. Capture its output.
   if (!cmSystemTools::RunSingleCommand(icstat_cmd, &stdOut, &stdErr, &ret,
                                        nullptr, cmSystemTools::OUTPUT_NONE)) {
-    std::cerr << "Error running '" << icstat_cmd[0] << "': " << stdOut << '\n';
+    std::cerr << "C-STAT: Error running '" << icstat_cmd[0] << "': " << stdOut
+              << '\n';
     return 1;
   }
+
+  // Post-process successful output for consistent messaging and path cleanup.
   if (ret == 0) {
-    std::cerr << "Warning: C-STAT static analysis reported diagnostics:\n";
-  } else {
-    std::cerr << "Error: C-STAT static analysis reported failure:\n";
+    // Harmonize IAR C-STAT headers between the first-time analysis
+    // and subsequent builds that use cached results.
+    std::cerr << "C-STAT: ";
+    if (stdOut.find("Analyzing") == std::string::npos) {
+      std::string prepend;
+      prepend =
+        cmStrCat("Analyzing ", cmSystemTools::GetFilenameName(sourceFile),
+                 " (cached)\n");
+      stdOut.insert(0, prepend);
+    }
+
+    // Single-pass removal of consecutive spurious relative paths,
+    // `"../` or `"..\`, that might appear after a newline followed by
+    // an opening quote, effectively displaying paths relative to
+    // CMAKE_SOURCE_DIR.
+    // Example: `\n"../../../src/file.c` -> `\n"src/file.c`
+    std::string cleaned;
+    size_t const n = stdOut.size();
+    cleaned.reserve(n);
+    size_t pos = 0;
+    while (pos < n) {
+      if (pos + 1 < n && stdOut[pos] == '\n' && stdOut[pos + 1] == '"') {
+        cleaned += "\n\"";
+        pos += 2; // skip `\n"`
+
+        while (pos + 2 < n && stdOut[pos] == '.' && stdOut[pos + 1] == '.' &&
+               (stdOut[pos + 2] == '/' || stdOut[pos + 2] == '\\')) {
+          pos += 3; // skip `../` or `..\`
+        }
+      } else {
+        cleaned += stdOut[pos];
+        ++pos;
+      }
+    }
+    stdOut.swap(cleaned);
+  } else if (ret != 0) {
+    std::cerr << "C-STAT ";
   }
   std::cerr << stdOut;
   std::cerr << stdErr;
