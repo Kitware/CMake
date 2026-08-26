@@ -623,18 +623,15 @@ int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
 {
   // Construct the IAR C-STAT command line.
   cmList icstat_cmd{ runCmd, cmList::EmptyElements::Yes };
-  std::string icstat_analyze{ "analyze" };
-  std::string icstat_dashdash{ "--" };
   std::string stdOut;
   std::string stdErr;
   int ret;
 
-  icstat_cmd.push_back(icstat_analyze);
-  icstat_cmd.push_back(sourceFile);
-  icstat_cmd.push_back(icstat_dashdash);
+  std::string const double_dash{ "--" };
+  icstat_cmd.push_back(double_dash);
 
   for (auto const& cmd : orig_cmd) {
-    icstat_cmd.push_back(cmd);
+    icstat_cmd.emplace_back(cmd);
   }
 
   // Create the default manifest ruleset file when not found
