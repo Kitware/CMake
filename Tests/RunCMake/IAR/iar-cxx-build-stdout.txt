@@ -1,1 +1,2 @@
-Warning: C-STAT static analysis reported diagnostics.*Severity
+Warning: C-STAT static analysis reported diagnostics.*C-STAT analyze source: [^
+]*module\.cxx.*Severity

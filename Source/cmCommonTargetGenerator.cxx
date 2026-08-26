@@ -624,7 +624,7 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
         cmStrCat(icstat, checksParam, dbParam));
     }
     if (cmNonempty(tidy) || (cmNonempty(cpplint)) || (cmNonempty(cppcheck)) ||
-        cmNonempty(pvs)) {
+        cmNonempty(pvs) || cmNonempty(icstat)) {
       code_check += " --source=";
       code_check +=
         this->GeneratorTarget->GetLocalGenerator()->ConvertToOutputFormat(
