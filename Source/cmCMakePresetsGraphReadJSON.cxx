@@ -44,7 +44,7 @@ using cmCMakePresetsGraphInternal::ExpandMacros;
 using cmCMakePresetsGraphInternal::ExpandImmediateMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 12;
+constexpr int MAX_VERSION = 13;
 
 struct CMakeVersion
 {

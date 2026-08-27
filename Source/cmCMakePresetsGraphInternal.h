@@ -92,6 +92,36 @@ public:
 };
 
 template <typename T>
+std::string const* GetConfigurePresetName(T const& /*preset*/)
+{
+  return nullptr;
+}
+
+inline std::string const* GetConfigurePresetName(
+  cmCMakePresetsGraph::ConfigurePreset const& preset)
+{
+  return &preset.Name;
+}
+
+inline std::string const* GetConfigurePresetName(
+  cmCMakePresetsGraph::BuildPreset const& preset)
+{
+  return &preset.ConfigurePreset;
+}
+
+inline std::string const* GetConfigurePresetName(
+  cmCMakePresetsGraph::TestPreset const& preset)
+{
+  return &preset.ConfigurePreset;
+}
+
+inline std::string const* GetConfigurePresetName(
+  cmCMakePresetsGraph::PackagePreset const& preset)
+{
+  return &preset.ConfigurePreset;
+}
+
+template <typename T>
 class PresetMacroExpander : public MacroExpander
 {
   cmCMakePresetsGraph const& Graph;
@@ -112,6 +142,16 @@ public:
       if (macroName == "presetName") {
         macroOut += Preset.Name;
         return ExpandMacroResult::Ok;
+      }
+      if (macroName == "configurePresetName") {
+        if (version < 13) {
+          return ExpandMacroResult::Error;
+        }
+        if (auto const* configurePresetName = GetConfigurePresetName(Preset)) {
+          macroOut += *configurePresetName;
+          return ExpandMacroResult::Ok;
+        }
+        return ExpandMacroResult::Error;
       }
       if (macroName == "generator") {
         // Generator only makes sense if preset is not hidden.

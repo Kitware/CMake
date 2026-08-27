@@ -260,6 +260,18 @@ Recognized macros include:
 
   This is a preset-specific macro.
 
+``${configurePresetName}``
+  .. presets-versionadded:: 13
+
+  Name of the configure preset associated with the preset being evaluated.
+  For configure presets, this is equivalent to ``${presetName}``. For build,
+  test, and package presets, this is the name specified by the
+  ``configurePreset`` field.
+
+  This macro is not available for workflow presets.
+
+  This is a preset-specific macro.
+
 ``${generator}``
   Generator specified in the preset's ``generator`` field. For build and
   test presets, this will evaluate to the generator specified by
@@ -512,6 +524,10 @@ they were added and a summary of the new features and changes is given below.
       * The ``strict`` and ``nonTargetDirective`` fields were added to
         :preset:`configurePresets.warnings` and
         :preset:`configurePresets.errors`.
+
+    * Changes to `Macro Expansion`_
+
+      * The ``${configurePresetName}`` macro was added.
 
 Schema
 ======

@@ -1,0 +1,13 @@
+{
+  "version": 12,
+  "configurePresets": [
+    {
+      "name": "ConfigurePresetNameFuture",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "TEST_CONFIGURE_PRESET_NAME": "${configurePresetName}"
+      }
+    }
+  ]
+}
