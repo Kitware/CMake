@@ -38,6 +38,8 @@ block()
 endblock()
 
 run_cmake(GetAbs)
+run_cmake(NoArch)
+run_cmake(NoLanguages)
 run_cmake(NoSystem)
 
 foreach(case

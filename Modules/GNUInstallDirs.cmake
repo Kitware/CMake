@@ -90,6 +90,10 @@ where ``<dir>`` is one of:
   :variable:`CMAKE_INSTALL_PREFIX` is ``/usr``.
   When cross-compiling, the default is ``lib``.
 
+  In projects that enable no languages, e.g.,
+  ``project(... LANGUAGES NONE)``, no target architecture information
+  is available, so the default is ``lib``.
+
   .. note::
 
     When an alternative installation prefix is specified with the
@@ -444,10 +448,13 @@ set(_GNUInstallDirs_DATAROOTDIR_DEFAULT "share")
 function(_GNUInstallDirs_LIBDIR_get_default out_var install_prefix)
   set(${out_var} "${_GNUInstallDirs_LIBDIR_DEFAULT}")
 
-  if (NOT DEFINED CMAKE_SYSTEM_NAME OR NOT DEFINED CMAKE_SIZEOF_VOID_P)
-    message(AUTHOR_WARNING
-      "Unable to determine default CMAKE_INSTALL_LIBDIR directory because no target architecture is known. "
-      "Please enable at least one language before including GNUInstallDirs.")
+  if(NOT DEFINED CMAKE_SYSTEM_NAME)
+    message(AUTHOR_WARNING "Unable to determine default CMAKE_INSTALL_LIBDIR directory because no target platform is known.")
+  elseif(NOT DEFINED CMAKE_SIZEOF_VOID_P)
+    get_property(_enabled_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    if(NOT _enabled_languages STREQUAL "NONE")
+      message(AUTHOR_WARNING "Unable to determine default CMAKE_INSTALL_LIBDIR directory because no target architecture is known.")
+    endif()
   endif()
 
   # When not cross-compiling, detect the host distro's arch-specific 'lib'.
