@@ -131,15 +131,6 @@ std::string cmNinjaTargetGenerator::LanguageCompilerRule(
     withScanning == WithScanning::Yes ? "_scanned_" : "_unscanned_", config);
 }
 
-std::string cmNinjaTargetGenerator::LanguageEmitModuleRule(
-  std::string const& lang, std::string const& config) const
-{
-  return cmStrCat(
-    lang, "_EMIT_MODULE__",
-    cmGlobalNinjaGenerator::EncodeRuleName(this->GeneratorTarget->GetName()),
-    '_', config);
-}
-
 std::string cmNinjaTargetGenerator::LanguagePreprocessAndScanRule(
   std::string const& lang, std::string const& config) const
 {
@@ -1054,40 +1045,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
   rule.Comment = cmStrCat("Rule for compiling ", lang, " files.");
   rule.Description = cmStrCat("Building ", lang, " object $out");
   this->GetGlobalGenerator()->AddRule(rule);
-
-  // Write a separate emit-module rule for Swift (produces .swiftmodule
-  // without compile outputs, enabling downstream modules to compile in
-  // parallel with upstream compilation).
-  if (lang == "Swift" && withScanning == WithScanning::No) {
-    std::string const emitModCmdVar = "CMAKE_Swift_EMIT_MODULE";
-    cmValue emitModCmdVal = mf->GetDefinition(emitModCmdVar);
-    if (emitModCmdVal) {
-      cmNinjaRule emitModRule(this->LanguageEmitModuleRule(lang, config));
-      cmRulePlaceholderExpander::RuleVariables emVars = vars;
-      std::string emFlags = "$FLAGS";
-      if (!responseFlag.empty()) {
-        // Reset placeholders after compile response-file setup.
-        emVars.Source = "$in";
-        emVars.Object = "$out";
-        emVars.Defines = "$DEFINES";
-        emVars.Includes = "$INCLUDES";
-        SetupResponseFile(emitModRule, emVars, emFlags, lang, responseFlag);
-      }
-
-      emVars.Flags = emFlags.c_str();
-      emitModRule.Restat = "1";
-
-      cmList emitModCmds = ExpandRuleCommands(
-        *emitModCmdVal, emVars, mf, lang, launcher, cldeps,
-        this->GetLocalGenerator(), rulePlaceholderExpander.get());
-      emitModRule.Command = this->GetLocalGenerator()->BuildCommandLine(
-        emitModCmds, config, config);
-      emitModRule.Comment = "Rule for emitting Swift .swiftmodule files.";
-      emitModRule.Description =
-        cmStrCat("Emitting Swift .swiftmodule ", "$out");
-      this->GetGlobalGenerator()->AddRule(emitModRule);
-    }
-  }
 }
 
 void cmNinjaTargetGenerator::WriteObjectBuildStatements(
@@ -2150,39 +2107,18 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
   }
 
   std::string const language = "Swift";
+  cmGeneratorTarget const& target = *this->GeneratorTarget;
+
+  std::string const moduleName = target.GetSwiftModuleName();
+  std::string const moduleFilePath =
+    this->ConvertToNinjaPath(target.GetSwiftModulePath(config));
+
   std::string const objectDir = this->ConvertToNinjaPath(
     cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
              this->GetGlobalGenerator()->ConfigDirectory(config)));
-
-  cmGeneratorTarget const& target = *this->GeneratorTarget;
-  cmNinjaBuild objBuild(
-    this->LanguageCompilerRule(language, config, WithScanning::No));
-  cmNinjaVars& vars = objBuild.Variables;
-
-  // The swift toolchain leaves outputs untouched if there are no meaningful
-  // changes to input files (e.g. addition of a comment).
-  vars.emplace("restat", "1");
-
-  std::string const moduleName = target.GetSwiftModuleName();
-  std::string const moduleFilepath =
-    this->ConvertToNinjaPath(target.GetSwiftModulePath(config));
-
-  vars.emplace("description",
-               cmStrCat("Building Swift Module '", moduleName, "' with ",
-                        sources.size(),
-                        sources.size() == 1 ? " source" : " sources"));
-
-  bool const isSingleOutput = [this, compileMode]() -> bool {
-    bool isMultiThread = false;
-    if (cmValue numThreadStr =
-          this->GetMakefile()->GetDefinition("CMAKE_Swift_NUM_THREADS")) {
-      unsigned long numThreads;
-      cmStrToULong(*numThreadStr, &numThreads);
-      // numThreads == 1 is multi-threaded according to swiftc
-      isMultiThread = numThreads > 0;
-    }
-    return !isMultiThread && compileMode == cmSwiftCompileMode::Wholemodule;
-  }();
+  std::string const moduleObjectFilename = this->ConvertToNinjaPath(cmStrCat(
+    objectDir, '/', moduleName,
+    this->GetGlobalGenerator()->GetLanguageOutputExtension(language)));
 
   // Does this swift target emit a module file for importing into other
   // targets?
@@ -2196,13 +2132,20 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
   };
   bool const targetIsImportable = isImportableTarget(target);
 
-  // Check if we can emit the module separately (produces .swiftmodule before
-  // compilation finishes, enabling downstream modules to compile in parallel).
-  bool const emitModuleSeparately = [&]() -> bool {
-    if (!targetIsImportable ||
-        !this->GetMakefile()->GetDefinition("CMAKE_Swift_EMIT_MODULE")) {
-      return false;
+  // num-threads 0 && wmo -> one object file for the entire module
+  bool const isSingleOutput = [this, compileMode]() -> bool {
+    bool isMultiThread = false;
+    if (cmValue numThreadStr =
+          this->GetMakefile()->GetDefinition("CMAKE_Swift_NUM_THREADS")) {
+      unsigned long numThreads;
+      cmStrToULong(*numThreadStr, &numThreads);
+      // numThreads == 1 is multi-threaded according to swiftc
+      isMultiThread = numThreads > 0;
     }
+    return !isMultiThread && compileMode == cmSwiftCompileMode::Wholemodule;
+  }();
+
+  bool const emitModuleSeparately = [&]() -> bool {
     cmValue prop =
       this->GeneratorTarget->GetProperty("Swift_SEPARATE_MODULE_EMISSION");
     if (prop) {
@@ -2211,154 +2154,218 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     return this->GeneratorTarget->GetPolicyStatusCMP0215() == cmPolicies::NEW;
   }();
 
-  // Build flags common to both compile and emit-module edges.
-  if (target.GetType() != cm::TargetType::EXECUTABLE) {
-    // Without `-emit-library` or `-emit-executable`, targets with a single
-    // source file parse as a Swift script instead of like normal source. For
-    // non-executable targets, append this to ensure that they are parsed like
-    // a normal source.
-    this->LocalGenerator->AppendFlags(vars["FLAGS"], "-parse-as-library");
-  }
-  if (target.GetType() == cm::TargetType::STATIC_LIBRARY) {
-    this->LocalGenerator->AppendFlags(vars["FLAGS"], "-static");
-  }
-  this->LocalGenerator->AppendFlags(vars["FLAGS"],
-                                    cmStrCat("-module-name ", moduleName));
+  //  1. Common:
+  //    Variables:
+  //      - Flags:
+  //        - module-name
+  //        - module-link-name
+  //        - parse as library
+  //        - Swift_FLAGS
+  //        - output-file-map
+  //      - Defines (all)
+  //      - Include directories (all)
+  //      - restat: 1
+  //    Source List
+  //
+  //  2. Module Build Specific:
+  //    Variables:
+  //      - Flags
+  //        - emit-module-path
+  //    - module build description
+  //    - Module response file
+  //    - Module Outputs
+  //
+  //  3. Object Build Specific:
+  //    Variables:
+  //      - Flags:
+  //        - -o
+  //        - -c
+  //    - Object response file
+  //    - Object Outputs
 
-  if (target.GetType() != cm::TargetType::EXECUTABLE) {
-    std::string const libraryLinkNameFlag = "-module-link-name";
-    std::string const libraryLinkName =
-      this->GetGeneratorTarget()->GetLibraryNames(config).Base;
-    this->LocalGenerator->AppendFlags(
-      vars["FLAGS"], cmStrCat(libraryLinkNameFlag, ' ', libraryLinkName));
-  }
-  this->LocalGenerator->AppendFlags(vars["FLAGS"],
-                                    this->GetFlags(language, config));
-  vars["DEFINES"] = this->GetDefines(language, config);
-  vars["INCLUDES"] = this->GetIncludes(language, config);
-  vars["CONFIG"] = config;
+  //
+  //// Common variables
+  //
+  cmNinjaVars commonVariables;
+  cmNinjaDeps commonExplicitDeps;
+  cmNinjaDeps objectOutputs;
+  {
+    this->LocalGenerator->AppendFlags(commonVariables["FLAGS"],
+                                      cmStrCat("-module-name ", moduleName));
 
-  // target-level object filename
-  std::string const targetObjectFilename = this->ConvertToNinjaPath(cmStrCat(
-    objectDir, '/', moduleName,
-    this->GetGlobalGenerator()->GetLanguageOutputExtension(language)));
-  objBuild.RspFile = cmStrCat(targetObjectFilename, ".swift.rsp");
+    if (target.GetType() != cm::TargetType::EXECUTABLE) {
+      std::string const libraryLinkNameFlag = "-module-link-name ";
+      std::string const libraryLinkName =
+        this->GetGeneratorTarget()->GetLibraryNames(config).Base;
 
-  if (targetIsImportable) {
-    this->Configs[config].SwiftModuleOutput = moduleFilepath;
-  }
-  if (targetIsImportable && !emitModuleSeparately) {
-    objBuild.Outputs.push_back(moduleFilepath);
-  }
+      this->LocalGenerator->AppendFlags(
+        commonVariables["FLAGS"],
+        cmStrCat(libraryLinkNameFlag, libraryLinkName));
+      this->LocalGenerator->AppendFlags(commonVariables["FLAGS"],
+                                        "-parse-as-library");
+    }
+    if (target.GetType() == cm::TargetType::STATIC_LIBRARY) {
+      this->LocalGenerator->AppendFlags(commonVariables["FLAGS"], "-static");
+    }
 
-  if (isSingleOutput) {
-    objBuild.Outputs.push_back(targetObjectFilename);
-    this->Configs[config].Objects.push_back(targetObjectFilename);
-  }
+    this->LocalGenerator->AppendFlags(commonVariables["FLAGS"],
+                                      this->GetFlags(language, config));
+    commonVariables.emplace("DEFINES", this->GetDefines(language, config));
+    commonVariables.emplace("INCLUDES", this->GetIncludes(language, config));
+    commonVariables.emplace("CONFIG", config);
+    commonVariables.emplace("restat", "1");
 
-  for (cmSourceFile const* sf : sources) {
-    // Add dependency to object build on each source file
-    std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(sf);
-    objBuild.ExplicitDeps.push_back(sourceFilePath);
+    for (cmSourceFile const* sf : sources) {
+      std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(sf);
+      commonExplicitDeps.push_back(sourceFilePath);
 
-    if (!isSingleOutput) {
-      // Object outputs
-      std::string const objectFilepath =
-        this->ConvertToNinjaPath(this->GetObjectFilePath(sf, config));
-      this->EnsureParentDirectoryExists(objectFilepath);
-      objBuild.Outputs.push_back(objectFilepath);
-      this->Configs[config].Objects.push_back(objectFilepath);
+      if (!isSingleOutput) {
+        std::string const objectFilePath =
+          this->ConvertToNinjaPath(this->GetObjectFilePath(sf, config));
+        this->EnsureParentDirectoryExists(objectFilePath);
+        objectOutputs.push_back(objectFilePath);
+        this->Configs[config].Objects.push_back(objectFilePath);
 
-      // Add OFM data
-      this->EmitSwiftDependencyInfo(sf, config);
+        this->EmitSwiftDependencyInfo(sf, config);
+      }
+    }
+
+    if (isSingleOutput) {
+      objectOutputs.push_back(moduleObjectFilename);
+      this->Configs[config].Objects.push_back(moduleObjectFilename);
+    } else {
+      this->GenerateSwiftOutputFileMap(config, commonVariables["FLAGS"]);
     }
   }
 
-  if (!isSingleOutput) {
-    this->GenerateSwiftOutputFileMap(config, vars["FLAGS"]);
-  }
-
-  // Save common flags for the emit-module edge before adding
-  // compile-specific flags (-emit-module, -emit-module-path, -o).
-  std::string const commonFlags = vars["FLAGS"];
-
-  std::string const moduleOutputPath =
-    this->LocalGenerator->ConvertToOutputFormat(moduleFilepath,
-                                                cmOutputConverter::SHELL);
-
-  if (targetIsImportable && !emitModuleSeparately) {
-    std::string const emitModuleFlag = "-emit-module";
-    std::string const modulePathFlag = "-emit-module-path";
-    this->LocalGenerator->AppendFlags(
-      vars["FLAGS"], { emitModuleFlag, modulePathFlag, moduleOutputPath });
-  }
-
-  if (isSingleOutput) {
-    this->LocalGenerator->AppendFlags(vars["FLAGS"],
-                                      cmStrCat("-o ", targetObjectFilename));
-  }
-
-  if (firstForConfig) {
-    this->ExportSwiftObjectCompileCommand(
-      sources, targetObjectFilename, vars["FLAGS"], vars["DEFINES"],
-      vars["INCLUDES"], config, isSingleOutput);
-  }
-
-  for (cmTargetDepend const& dep :
-       this->GetGlobalGenerator()->GetTargetDirectDepends(&target)) {
-    if (!dep->IsLanguageUsed("Swift", config)) {
-      continue;
+  //
+  //// Module build
+  //
+  cmNinjaVars moduleVariables;
+  cmNinjaDeps moduleOutputs;
+  cmNinjaDeps importedModuleDeps;
+  {
+    for (cmTargetDepend const& dep :
+         this->GetGlobalGenerator()->GetTargetDirectDepends(&target)) {
+      if (!dep->IsLanguageUsed("Swift", config)) {
+        continue;
+      }
+      // If the dependency emits a swiftmodule, add a dependency edge on that
+      // swiftmodule to the ninja build graph.
+      if (isImportableTarget(*dep)) {
+        std::string const depModuleFilepath =
+          this->ConvertToNinjaPath(dep->GetSwiftModulePath(config));
+        importedModuleDeps.push_back(depModuleFilepath);
+      }
     }
 
-    // If the dependency emits a swiftmodule, add a dependency edge on that
-    // swiftmodule to the ninja build graph.
-    if (isImportableTarget(*dep)) {
-      std::string const depModuleFilepath =
-        this->ConvertToNinjaPath(dep->GetSwiftModulePath(config));
-      objBuild.ImplicitDeps.push_back(depModuleFilepath);
+    if (targetIsImportable) {
+      this->LocalGenerator->AppendFlags(moduleVariables["FLAGS"],
+                                        "-emit-module");
+      this->Configs[config].SwiftModuleOutput = moduleFilePath;
+
+      std::string const moduleOutputPath =
+        this->LocalGenerator->ConvertToOutputFormat(moduleFilePath,
+                                                    cmOutputConverter::SHELL);
+      this->LocalGenerator->AppendFlags(
+        moduleVariables["FLAGS"],
+        cmStrCat("-emit-module-path ", moduleOutputPath));
+      this->EnsureParentDirectoryExists(moduleFilePath);
+      moduleOutputs.push_back(moduleFilePath);
+
+      if (emitModuleSeparately) {
+        cmNinjaBuild moduleBuild(
+          this->LanguageCompilerRule(language, config, WithScanning::No));
+        moduleBuild.Variables = moduleVariables;
+        this->LocalGenerator->AppendFlags(moduleBuild.Variables["FLAGS"],
+                                          commonVariables["FLAGS"]);
+        this->LocalGenerator->AppendFlags(moduleBuild.Variables["DEFINES"],
+                                          commonVariables["DEFINES"]);
+        this->LocalGenerator->AppendFlags(moduleBuild.Variables["INCLUDES"],
+                                          commonVariables["INCLUDES"]);
+        moduleBuild.Variables.insert(commonVariables.begin(),
+                                     commonVariables.end());
+
+        moduleBuild.ExplicitDeps = commonExplicitDeps;
+        moduleBuild.ImplicitDeps = importedModuleDeps;
+        moduleBuild.Variables.emplace(
+          "description",
+          cmStrCat("Building Swift Module '", moduleName, "' with ",
+                   sources.size(),
+                   sources.size() == 1 ? " source" : " sources"));
+        moduleBuild.Outputs = moduleOutputs;
+        moduleBuild.RspFile = cmStrCat(moduleFilePath, ".rsp");
+
+        moduleBuild.OrderOnlyDeps.push_back(
+          this->OrderDependsTargetForTarget(config));
+
+        this->GetGlobalGenerator()->WriteBuild(
+          this->GetImplFileStream(fileConfig), moduleBuild,
+          this->ForceResponseFile() ? -1 : 0);
+      }
     }
   }
 
-  objBuild.OrderOnlyDeps.push_back(this->OrderDependsTargetForTarget(config));
+  //
+  //// Object build
+  //
+  {
+    cmNinjaBuild objectBuild(
+      this->LanguageCompilerRule(language, config, WithScanning::No));
+    cmNinjaVars& objectVariables = objectBuild.Variables;
 
-  // Write a separate emit-module build edge that produces .swiftmodule
-  // without compile outputs. This allows downstream Swift targets to start
-  // compiling as soon as the module interface is ready, overlapping with
-  // upstream compilation and linking.
-  if (emitModuleSeparately) {
-    cmNinjaBuild modBuild = objBuild;
-    modBuild.Rule = this->LanguageEmitModuleRule(language, config);
+    this->LocalGenerator->AppendFlags(objectVariables["FLAGS"], "-c");
+    if (isSingleOutput) {
+      this->LocalGenerator->AppendFlags(objectVariables["FLAGS"],
+                                        cmStrCat("-o ", moduleObjectFilename));
+    }
 
-    // Start from common flags (shared with compile edge) and add
-    // emit-module-specific flags.  The emit-module rule template already
-    // contains -emit-module, so we only need -emit-module-path here.
-    // Skip if the flags already contain one (e.g. a directory-style path
-    // set by the target's compile options).
-    modBuild.Variables["FLAGS"] = commonFlags;
-    this->LocalGenerator->AppendFlags(
-      modBuild.Variables["FLAGS"],
-      cmStrCat("-emit-module-path ", moduleOutputPath));
+    this->LocalGenerator->AppendFlags(objectBuild.Variables["FLAGS"],
+                                      commonVariables["FLAGS"]);
+    this->LocalGenerator->AppendFlags(objectBuild.Variables["DEFINES"],
+                                      commonVariables["DEFINES"]);
+    this->LocalGenerator->AppendFlags(objectBuild.Variables["INCLUDES"],
+                                      commonVariables["INCLUDES"]);
+    objectBuild.Variables.insert(commonVariables.begin(),
+                                 commonVariables.end());
+    objectVariables.emplace(
+      "description",
+      cmStrCat("Building Swift Module '", moduleName, "' objects with ",
+               sources.size(), sources.size() == 1 ? " source" : " sources"));
+    objectBuild.ExplicitDeps = commonExplicitDeps;
+    objectBuild.ImplicitDeps = importedModuleDeps;
+    objectBuild.Outputs = objectOutputs;
+    objectBuild.RspFile = cmStrCat(moduleObjectFilename, ".swift.rsp");
+    objectBuild.OrderOnlyDeps.push_back(
+      this->OrderDependsTargetForTarget(config));
 
-    modBuild.RspFile = cmStrCat(moduleFilepath, ".rsp");
+    if (emitModuleSeparately && targetIsImportable) {
+      // Both edges share the same -output-file-map; serialize the compile
+      // edge after emit-module so they do not race on the module .swiftdeps.
+      objectBuild.OrderOnlyDeps.push_back(moduleFilePath);
+    } else {
+      this->LocalGenerator->AppendFlags(objectBuild.Variables["FLAGS"],
+                                        moduleVariables["FLAGS"]);
+      objectBuild.Outputs.insert(objectBuild.Outputs.end(),
+                                 moduleOutputs.begin(), moduleOutputs.end());
+    }
 
-    // Output is just the .swiftmodule
-    this->EnsureParentDirectoryExists(moduleFilepath);
-    modBuild.Outputs.clear();
-    modBuild.Outputs.push_back(moduleFilepath);
+    if (firstForConfig) {
+      this->ExportSwiftObjectCompileCommand(
+        sources, moduleObjectFilename,
+        cmStrCat(commonVariables["FLAGS"], ' ', moduleVariables["FLAGS"], ' ',
+                 objectVariables["FLAGS"]),
+        cmStrCat(commonVariables["DEFINES"], ' ', moduleVariables["DEFINES"],
+                 ' ', objectVariables["DEFINES"]),
+        cmStrCat(commonVariables["INCLUDES"], ' ', moduleVariables["INCLUDES"],
+                 ' ', objectVariables["INCLUDES"]),
+        config, isSingleOutput);
+    }
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
-                                           modBuild,
+                                           objectBuild,
                                            this->ForceResponseFile() ? -1 : 0);
-
-    // Both edges share the same -output-file-map; serialize the compile
-    // edge after emit-module so they do not race on the module .swiftdeps.
-    objBuild.OrderOnlyDeps.push_back(moduleFilepath);
   }
-
-  // Write object build
-  this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
-                                         objBuild,
-                                         this->ForceResponseFile() ? -1 : 0);
 }
 
 void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,

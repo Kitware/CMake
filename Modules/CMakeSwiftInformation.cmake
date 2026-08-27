@@ -163,11 +163,7 @@ if(CMAKE_Swift_COMPILATION_MODE_DEFAULT)
     # Omit the object output. The output is controlled by the output-file-map
     # for normal builds. For wholemodule builds, CMake appends the appropriate
     # flags.
-    set(CMAKE_Swift_COMPILE_OBJECT "<CMAKE_Swift_COMPILER> ${CMAKE_Swift_PARALLEL_FLAGS} -c <DEFINES> <FLAGS> <INCLUDES> <SOURCE>")
-  endif()
-
-  if(NOT CMAKE_Swift_EMIT_MODULE)
-    set(CMAKE_Swift_EMIT_MODULE "<CMAKE_Swift_COMPILER> ${CMAKE_Swift_PARALLEL_FLAGS} -emit-module <DEFINES> <FLAGS> <INCLUDES> <SOURCE>")
+    set(CMAKE_Swift_COMPILE_OBJECT "<CMAKE_Swift_COMPILER> ${CMAKE_Swift_PARALLEL_FLAGS} <DEFINES> <FLAGS> <INCLUDES> <SOURCE>")
   endif()
 
   if(NOT CMAKE_Swift_CREATE_SHARED_LIBRARY)
