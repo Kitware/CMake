@@ -19,6 +19,19 @@ class @KWSYS_NAMESPACE@_EXPORT SystemInformation
   SystemInformationImplementation* Implementation;
 
 public:
+  struct TimeValue
+  {
+    long tv_sec;
+    long tv_usec;
+  };
+
+  struct ProcessResourceUsage
+  {
+    TimeValue ru_utime{};
+    TimeValue ru_stime{};
+    long ru_maxrss = 0;
+  };
+
   // possible parameter values for DoesCPUSupportFeature()
   static long int const CPU_FEATURE_MMX = 1 << 0;
   static long int const CPU_FEATURE_MMX_PLUS = 1 << 1;
@@ -137,6 +150,12 @@ public:
 
   // Get system RAM used by this process id in units of KiB.
   long long GetProcMemoryUsed();
+
+  // Retrieve resource usage for a finished child process. On Unix, this
+  // queries RUSAGE_CHILDREN for the current process. On Windows, the caller
+  // provides the child process handle to query.
+  static bool GetProcessResourceUsage(ProcessResourceUsage& usage,
+                                      void* processHandle = nullptr);
 
   // Return the load average of the machine or -0.0 if it cannot
   // be determined.
