@@ -101,28 +101,30 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
     if (this->Archive->IsPreExcluded(lib.LowerName)) {
       continue;
     }
-    std::string path;
+    Dependency path;
     bool resolved = false;
-    if (!this->ResolveDependency(lib.LowerName, origin, path, resolved)) {
+    if (!this->ResolveDependency(lib.LowerName, origin, path.LowerName,
+                                 resolved)) {
       return false;
     }
     if (resolved) {
-      if (this->Archive->IsPostExcluded(path)) {
+      if (this->Archive->IsPostExcluded(path.LowerName)) {
         continue;
       }
 #ifdef _WIN32
-      path = ReplaceWithActualNameCasing(path);
+      path.CasedName = ReplaceWithActualNameCasing(path.LowerName);
 #else
-      path = [&lib](std::string libPath) -> std::string {
+      path.CasedName = [&lib](std::string libPath) -> std::string {
         libPath.replace(libPath.end() - lib.CasedName.size(), libPath.end(),
                         lib.CasedName);
         return libPath;
-      }(path);
+      }(path.LowerName);
 #endif
       bool unique;
-      this->Archive->AddResolvedPath(lib.CasedName, path, unique);
+      this->Archive->AddResolvedPath(lib.CasedName, path.CasedName, unique);
       if (unique &&
-          !this->ScanDependencies(path, cm::TargetType::SHARED_LIBRARY)) {
+          !this->ScanDependencies(path.CasedName,
+                                  cm::TargetType::SHARED_LIBRARY)) {
         return false;
       }
     } else {

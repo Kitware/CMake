@@ -25,6 +25,7 @@ private:
 
   struct Dependency
   {
+    Dependency() = default;
     Dependency(std::string casedName);
     std::string CasedName;
     std::string LowerName;
