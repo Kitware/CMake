@@ -78,6 +78,12 @@ bool cmBinUtilsWindowsPELinker::Prepare()
   return true;
 }
 
+cmBinUtilsWindowsPELinker::Dependency::Dependency(std::string casedName)
+  : CasedName(std::move(casedName))
+  , LowerName(cmSystemTools::LowerCase(CasedName))
+{
+}
+
 bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
                                                  cm::TargetType /* unused */)
 {
@@ -86,29 +92,18 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
     return false;
   }
 
-  struct WinPEDependency
-  {
-    WinPEDependency(std::string o)
-      : Original(std::move(o))
-      , LowerCase(cmSystemTools::LowerCase(Original))
-    {
-    }
-    std::string const Original;
-    std::string const LowerCase;
-  };
-
-  std::vector<WinPEDependency> depends;
+  std::vector<Dependency> depends;
   depends.reserve(needed.size());
   std::move(needed.begin(), needed.end(), std::back_inserter(depends));
   std::string origin = cmSystemTools::GetFilenamePath(file);
 
-  for (auto const& lib : depends) {
-    if (this->Archive->IsPreExcluded(lib.LowerCase)) {
+  for (Dependency const& lib : depends) {
+    if (this->Archive->IsPreExcluded(lib.LowerName)) {
       continue;
     }
     std::string path;
     bool resolved = false;
-    if (!this->ResolveDependency(lib.LowerCase, origin, path, resolved)) {
+    if (!this->ResolveDependency(lib.LowerName, origin, path, resolved)) {
       return false;
     }
     if (resolved) {
@@ -118,16 +113,17 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
 #ifdef _WIN32
       ReplaceWithActualNameCasing(path);
 #else
-      path.replace(path.end() - lib.Original.size(), path.end(), lib.Original);
+      path.replace(path.end() - lib.CasedName.size(), path.end(),
+                   lib.CasedName);
 #endif
       bool unique;
-      this->Archive->AddResolvedPath(lib.Original, path, unique);
+      this->Archive->AddResolvedPath(lib.CasedName, path, unique);
       if (unique &&
           !this->ScanDependencies(path, cm::TargetType::SHARED_LIBRARY)) {
         return false;
       }
     } else {
-      this->Archive->AddUnresolvedPath(lib.Original);
+      this->Archive->AddUnresolvedPath(lib.CasedName);
     }
   }
 
