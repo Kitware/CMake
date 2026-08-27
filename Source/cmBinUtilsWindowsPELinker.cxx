@@ -27,17 +27,17 @@
 #ifdef _WIN32
 namespace {
 
-void ReplaceWithActualNameCasing(std::string& path)
+std::string ReplaceWithActualNameCasing(std::string path)
 {
   WIN32_FIND_DATAW findData;
   HANDLE hFind = ::FindFirstFileW(
     cmsys::Encoding::ToWindowsExtendedPath(path).c_str(), &findData);
-
   if (hFind != INVALID_HANDLE_VALUE) {
     auto onDiskName = cmsys::Encoding::ToNarrow(findData.cFileName);
     ::FindClose(hFind);
     path.replace(path.end() - onDiskName.size(), path.end(), onDiskName);
   }
+  return path;
 }
 
 }
@@ -111,10 +111,13 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
         continue;
       }
 #ifdef _WIN32
-      ReplaceWithActualNameCasing(path);
+      path = ReplaceWithActualNameCasing(path);
 #else
-      path.replace(path.end() - lib.CasedName.size(), path.end(),
-                   lib.CasedName);
+      path = [&lib](std::string libPath) -> std::string {
+        libPath.replace(libPath.end() - lib.CasedName.size(), libPath.end(),
+                        lib.CasedName);
+        return libPath;
+      }(path);
 #endif
       bool unique;
       this->Archive->AddResolvedPath(lib.CasedName, path, unique);
