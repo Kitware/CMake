@@ -103,23 +103,13 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
     }
     Dependency path;
     bool resolved = false;
-    if (!this->ResolveDependency(lib.LowerName, origin, path.LowerName,
-                                 resolved)) {
+    if (!this->ResolveDependency(lib, origin, path, resolved)) {
       return false;
     }
     if (resolved) {
       if (this->Archive->IsPostExcluded(path.LowerName)) {
         continue;
       }
-#ifdef _WIN32
-      path.CasedName = ReplaceWithActualNameCasing(path.LowerName);
-#else
-      path.CasedName = [&lib](std::string libPath) -> std::string {
-        libPath.replace(libPath.end() - lib.CasedName.size(), libPath.end(),
-                        lib.CasedName);
-        return libPath;
-      }(path.LowerName);
-#endif
       bool unique;
       this->Archive->AddResolvedPath(lib.CasedName, path.CasedName, unique);
       if (unique &&
@@ -135,9 +125,9 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
   return true;
 }
 
-bool cmBinUtilsWindowsPELinker::ResolveDependency(std::string const& name,
+bool cmBinUtilsWindowsPELinker::ResolveDependency(Dependency const& lib,
                                                   std::string const& origin,
-                                                  std::string& path,
+                                                  Dependency& path,
                                                   bool& resolved)
 {
   auto dirs = this->Archive->GetSearchDirectories();
@@ -156,11 +146,20 @@ bool cmBinUtilsWindowsPELinker::ResolveDependency(std::string const& name,
   dirs.insert(dirs.begin(), origin);
 
   for (auto const& searchPath : dirs) {
-    path = cmStrCat(searchPath, '/', name);
-    if (!cmSystemTools::PathExists(path)) {
+    path.LowerName = cmStrCat(searchPath, '/', lib.LowerName);
+    if (!cmSystemTools::PathExists(path.LowerName)) {
       continue;
     }
-    this->NormalizePath(path);
+    this->NormalizePath(path.LowerName);
+#ifdef _WIN32
+    path.CasedName = ReplaceWithActualNameCasing(path.LowerName);
+#else
+    path.CasedName = [&lib](std::string libPath) -> std::string {
+      libPath.replace(libPath.end() - lib.CasedName.size(), libPath.end(),
+                      lib.CasedName);
+      return libPath;
+    }(path.LowerName);
+#endif
     resolved = true;
     return true;
   }

@@ -31,6 +31,6 @@ private:
     std::string LowerName;
   };
 
-  bool ResolveDependency(std::string const& name, std::string const& origin,
-                         std::string& path, bool& resolved);
+  bool ResolveDependency(Dependency const& lib, std::string const& origin,
+                         Dependency& path, bool& resolved);
 };
