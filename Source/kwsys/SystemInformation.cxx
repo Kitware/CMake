@@ -28,6 +28,7 @@
 // https://msdn.microsoft.com/en-us/library/ms683219(VS.85).aspx
 
 #include "kwsysPrivate.h"
+
 #include KWSYS_HEADER(String.h)
 #include KWSYS_HEADER(SystemInformation.hxx)
 #include KWSYS_HEADER(Process.h)
@@ -48,6 +49,10 @@
 #include <limits>
 #include <map>
 #include <set>
+
+#if !defined(_WIN32)
+#  include <sys/resource.h>
+#endif
 #include <sstream>
 #include <string>
 #include <vector>
@@ -67,15 +72,16 @@ using siginfo_t = int;
 #  include <powerbase.h>
 #  include <winternl.h> // NTSTATUS
 #else
-#  include <sys/types.h>
-
 #  include <cerrno> // extern int errno;
 #  include <csignal>
+
 #  include <fcntl.h>
+#  include <unistd.h>
+
 #  include <sys/resource.h> // getrlimit
 #  include <sys/time.h>
+#  include <sys/types.h>
 #  include <sys/utsname.h> // int uname(struct utsname *buf);
-#  include <unistd.h>
 #endif
 
 #if defined(__CYGWIN__) && !defined(_WIN32)
@@ -87,6 +93,7 @@ using siginfo_t = int;
   defined(__DragonFly__)
 #  include <netdb.h>
 #  include <netinet/in.h>
+
 #  include <sys/param.h>
 #  include <sys/socket.h>
 #  include <sys/sysctl.h>
@@ -108,6 +115,7 @@ using siginfo_t = int;
 #  include <mach/vm_statistics.h>
 #  include <netdb.h>
 #  include <netinet/in.h>
+
 #  include <sys/socket.h>
 #  include <sys/sysctl.h>
 #  if defined(KWSYS_SYS_HAS_IFADDRS_H)
@@ -124,6 +132,7 @@ using siginfo_t = int;
   defined(__GLIBC__) || defined(__GNU__)
 #  include <netdb.h>
 #  include <netinet/in.h>
+
 #  include <sys/socket.h>
 #  if defined(KWSYS_SYS_HAS_IFADDRS_H)
 #    include <ifaddrs.h>
@@ -155,6 +164,18 @@ using ResourceLimitType = struct rlimit;
 #  include <OS.h>
 #endif
 
+#if defined(_WIN32) || defined(__CYGWIN__)
+namespace {
+unsigned __int64 fileTimeToUInt64(FILETIME const& ft)
+{
+  LARGE_INTEGER out;
+  out.HighPart = ft.dwHighDateTime;
+  out.LowPart = ft.dwLowDateTime;
+  return out.QuadPart;
+}
+}
+#endif
+
 #if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
 #  include <execinfo.h>
 #  if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
@@ -171,6 +192,7 @@ using ResourceLimitType = struct rlimit;
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
 #include <memory.h>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64) &&            \
@@ -778,6 +800,72 @@ double SystemInformation::GetLoadAverage()
 long long SystemInformation::GetProcessId()
 {
   return this->Implementation->GetProcessId();
+}
+
+bool SystemInformation::GetProcessResourceUsage(
+  SystemInformation::ProcessResourceUsage& usage, void* processHandle)
+{
+#if defined(_WIN32)
+#  if defined(KWSYS_SYS_HAS_PSAPI)
+  HANDLE hProc = static_cast<HANDLE>(processHandle);
+  if (!hProc) {
+    return false;
+  }
+
+  FILETIME creationTime;
+  FILETIME exitTime;
+  FILETIME kernelTime;
+  FILETIME userTime;
+  if (!GetProcessTimes(hProc, &creationTime, &exitTime, &kernelTime,
+                       &userTime)) {
+    return false;
+  }
+
+  PROCESS_MEMORY_COUNTERS pmc;
+  if (!GetProcessMemoryInfo(hProc, &pmc, sizeof(pmc))) {
+    return false;
+  }
+
+  usage = SystemInformation::ProcessResourceUsage{};
+  usage.ru_maxrss =
+    static_cast<decltype(usage.ru_maxrss)>(pmc.PeakWorkingSetSize / 1024);
+
+  unsigned __int64 const user100ns = fileTimeToUInt64(userTime);
+  unsigned __int64 const kernel100ns = fileTimeToUInt64(kernelTime);
+  unsigned __int64 const userUSec = user100ns / 10ULL;
+  unsigned __int64 const kernelUSec = kernel100ns / 10ULL;
+
+  usage.ru_utime.tv_sec = static_cast<long>(userUSec / 1000000ULL);
+  usage.ru_utime.tv_usec = static_cast<long>(userUSec % 1000000ULL);
+  usage.ru_stime.tv_sec = static_cast<long>(kernelUSec / 1000000ULL);
+  usage.ru_stime.tv_usec = static_cast<long>(kernelUSec % 1000000ULL);
+  return true;
+#  else // !defined(KWSYS_SYS_HAS_PSAPI)
+  static_cast<void>(usage);
+  static_cast<void>(processHandle);
+  return false;
+#  endif
+#else // !defined(_WIN32)
+  static_cast<void>(processHandle);
+  struct rusage rusage;
+  if (getrusage(RUSAGE_CHILDREN, &rusage) != 0) {
+    return false;
+  }
+  usage = SystemInformation::ProcessResourceUsage{};
+  usage.ru_maxrss = rusage.ru_maxrss;
+#  if defined(__APPLE__)
+  // Apple platforms report bytes.  Convert to KiB.
+  usage.ru_maxrss /= 1024;
+#  elif defined(__sun)
+  // Solaris platforms report pages.  Convert to KiB.
+  usage.ru_maxrss *= getpagesize() / 1024;
+#  endif
+  usage.ru_utime.tv_sec = rusage.ru_utime.tv_sec;
+  usage.ru_utime.tv_usec = rusage.ru_utime.tv_usec;
+  usage.ru_stime.tv_sec = rusage.ru_stime.tv_sec;
+  usage.ru_stime.tv_usec = rusage.ru_stime.tv_usec;
+  return true;
+#endif
 }
 
 void SystemInformation::SetStackTraceOnError(int enable)
@@ -1388,13 +1476,6 @@ double calculateCPULoad(unsigned __int64 idleTicks,
   return load;
 }
 
-unsigned __int64 fileTimeToUInt64(FILETIME const& ft)
-{
-  LARGE_INTEGER out;
-  out.HighPart = ft.dwHighDateTime;
-  out.LowPart = ft.dwLowDateTime;
-  return out.QuadPart;
-}
 #endif
 
 } // anonymous namespace
