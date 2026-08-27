@@ -43,6 +43,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetTypes.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 #include "cmVersionMacros.h"
 #include "cmWindowsRegistry.h"
@@ -3668,7 +3669,7 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
         case pdt::Cps:
           return "cps";
       }
-      assert(false);
+      CM_UNREACHABLE;
       return "<UNKNOWN>";
     };
 
@@ -3712,7 +3713,7 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
         case cmFindPackageCommand::RequiredStatus::RequiredFromFindVar:
           return "required_from_find_variable";
       }
-      assert(false);
+      CM_UNREACHABLE;
       return "<UNKNOWN>";
     };
     log.BeginObject("settings"_s);
@@ -3749,7 +3750,7 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
           case cmFindCommon::RootPathModeBoth:
             return "BOTH";
         }
-        assert(false);
+        CM_UNREACHABLE;
         return "<UNKNOWN>";
       };
       log.BeginObject("paths"_s);
@@ -3789,7 +3790,7 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
       case cmFindPackageCommand::FoundPackageMode::Provider:
         return "provider";
     }
-    assert(false);
+    CM_UNREACHABLE;
     return "<UNKNOWN>";
   };
   if (!fpc->ConsideredPaths.empty()) {
@@ -3813,7 +3814,7 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
         case cmFindPackageCommand::SearchResult::NotFound:
           return "not_found";
       }
-      assert(false);
+      CM_UNREACHABLE;
       return "<UNKNOWN>";
     };
 

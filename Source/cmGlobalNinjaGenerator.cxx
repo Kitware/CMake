@@ -3,7 +3,6 @@
 #include "cmGlobalNinjaGenerator.h"
 
 #include <algorithm>
-#include <cassert>
 #include <cstdio>
 #include <functional>
 #include <iterator>
@@ -57,6 +56,7 @@
 #include "cmTargetTypes.h"
 #include "cmTest.h"
 #include "cmTestGenerator.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -3021,7 +3021,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       case LookupMethod::IncludeQuote:
         return "include-quote"_s;
     }
-    assert(false && "unsupported lookup method");
+    CM_UNREACHABLE;
     return ""_s;
   };
 

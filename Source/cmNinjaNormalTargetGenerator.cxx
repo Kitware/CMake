@@ -3,7 +3,6 @@
 #include "cmNinjaNormalTargetGenerator.h"
 
 #include <algorithm>
-#include <cassert>
 #include <iterator>
 #include <set>
 #include <sstream>
@@ -44,6 +43,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetTypes.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 
 cmNinjaNormalTargetGenerator::cmNinjaNormalTargetGenerator(
@@ -831,7 +831,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
     case cm::TargetType::EXECUTABLE:
       break;
     default:
-      assert(false && "Unexpected target type");
+      CM_UNREACHABLE;
   }
   return std::move(linkCmds.data());
 }

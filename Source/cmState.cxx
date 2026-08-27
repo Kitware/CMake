@@ -27,6 +27,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetTypes.h"
+#include "cmUnreachable.h"
 #include "cmake.h"
 
 namespace cmStateDetail {
@@ -78,7 +79,7 @@ std::string const& cmState::GetTargetTypeName(cm::TargetType targetType)
     case cm::TargetType::UNKNOWN_LIBRARY:
       return propUNKNOWN_LIBRARY;
   }
-  assert(false && "Unexpected target type");
+  CM_UNREACHABLE;
   return propEmpty;
 }
 

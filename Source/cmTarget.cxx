@@ -44,6 +44,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetPropertyComputer.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 #include "cmXcFramework.h"
 #include "cmake.h"
@@ -2972,7 +2973,7 @@ bool cmTarget::IsNormal() const
     case Visibility::Foreign:
       return false;
   }
-  assert(false && "unknown visibility (IsNormal)");
+  CM_UNREACHABLE;
   return false;
 }
 
@@ -2987,7 +2988,7 @@ bool cmTarget::IsSynthetic() const
     case Visibility::Foreign:
       return false;
   }
-  assert(false && "unknown visibility (IsSynthetic)");
+  CM_UNREACHABLE;
   return false;
 }
 
@@ -3002,7 +3003,7 @@ bool cmTargetInternals::IsImported() const
     case cmTarget::Visibility::Generated:
       return false;
   }
-  assert(false && "unknown visibility (IsImported)");
+  CM_UNREACHABLE;
   return false;
 }
 
@@ -3022,7 +3023,7 @@ bool cmTarget::IsImportedGloballyVisible() const
     case Visibility::Foreign:
       return false;
   }
-  assert(false && "unknown visibility (IsImportedGloballyVisible)");
+  CM_UNREACHABLE;
   return false;
 }
 
@@ -3037,7 +3038,7 @@ bool cmTarget::IsForeign() const
     case Visibility::ImportedGlobally:
       return false;
   }
-  assert(false && "unknown visibility (isForeign)");
+  CM_UNREACHABLE;
   return false;
 }
 

@@ -3,7 +3,6 @@
 #include "cmGeneratorExpression.h"
 
 #include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <memory>
 #include <stack>
@@ -26,6 +25,7 @@
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUnreachable.h"
 #include "cmake.h"
 
 cmGeneratorExpression::cmGeneratorExpression(cmake& cmakeInstance,
@@ -283,7 +283,7 @@ static std::string stripExportInterface(
       foundGenex = FoundGenex::BuildLocalInterface;
       pos += cmStrLen("$<BUILD_LOCAL_INTERFACE:");
     } else {
-      assert(false && "Invalid position found");
+      CM_UNREACHABLE;
     }
     nestingLevel = 1;
     char const* c = input.data() + pos;
@@ -406,8 +406,7 @@ std::string cmGeneratorExpression::Preprocess(cm::string_view input,
     return stripExportInterface(input, context, importPrefix);
   }
 
-  assert(false &&
-         "cmGeneratorExpression::Preprocess called with invalid args");
+  CM_UNREACHABLE;
   return std::string();
 }
 

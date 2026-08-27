@@ -11,6 +11,7 @@
 #include <cmext/memory>
 
 #include "cmGeneratorExpressionEvaluator.h"
+#include "cmUnreachable.h"
 
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
   std::vector<cmGeneratorExpressionToken> tokens)
@@ -234,11 +235,11 @@ void cmGeneratorExpressionParser::ParseContent(
       if (this->NestingLevel == 0) {
         extendText(result, this->it);
       } else {
-        assert(false && "Got unexpected syntax token.");
+        CM_UNREACHABLE;
       }
       assert(this->it != this->Tokens.end());
       ++this->it;
       return;
   }
-  assert(false && "Unhandled token in generator expression.");
+  CM_UNREACHABLE;
 }

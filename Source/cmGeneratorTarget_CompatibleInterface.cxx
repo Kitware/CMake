@@ -30,6 +30,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetTypes.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 
 namespace {
@@ -136,8 +137,7 @@ char const* getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
 {
   switch (t) {
     case BoolType:
-      assert(false &&
-             "String compatibility check function called for boolean");
+      CM_UNREACHABLE;
       return nullptr;
     case StringType:
       return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
@@ -146,7 +146,7 @@ char const* getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
     case NumberMaxType:
       return tgt->GetLinkInterfaceDependentNumberMaxProperty(prop, config);
   }
-  assert(false && "Unreachable!");
+  CM_UNREACHABLE;
   return nullptr;
 }
 
@@ -367,7 +367,7 @@ static std::string compatibilityType(CompatibleType t)
     case NumberMinType:
       return "Numeric minimum compatibility";
   }
-  assert(false && "Unreachable!");
+  CM_UNREACHABLE;
   return "";
 }
 
@@ -381,7 +381,7 @@ static std::string compatibilityAgree(CompatibleType t, bool dominant)
     case NumberMinType:
       return dominant ? "(Dominant)\n" : "(Ignored)\n";
   }
-  assert(false && "Unreachable!");
+  CM_UNREACHABLE;
   return "";
 }
 
@@ -524,7 +524,7 @@ std::pair<bool, char const*> consistentProperty(char const* lhs,
     case NumberMaxType:
       return consistentNumberProperty(lhs, rhs, t);
   }
-  assert(false && "Unreachable!");
+  CM_UNREACHABLE;
   return { false, nullptr };
 }
 
@@ -558,7 +558,7 @@ static std::pair<bool, std::string> consistentProperty(std::string const& lhs,
                value.first ? std::string(value.second) : null_ptr };
     }
   }
-  assert(false && "Unreachable!");
+  CM_UNREACHABLE;
   return { false, null_ptr };
 }
 

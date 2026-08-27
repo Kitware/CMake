@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCxxModuleMapper.h"
 
-#include <cassert>
 #include <cstddef>
 #include <set>
 #include <sstream>
@@ -16,6 +15,7 @@
 #include "cmScanDepFormat.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUnreachable.h"
 
 CxxBmiLocation::CxxBmiLocation() = default;
 
@@ -216,7 +216,7 @@ std::string CxxModuleMapContentMsvc(CxxModuleLocations const& loc,
       case LookupMethod::IncludeQuote:
         return "-headerUnit:quote"_s;
     }
-    assert(false && "unsupported lookup method");
+    CM_UNREACHABLE;
     return ""_s;
   };
 
@@ -265,7 +265,7 @@ bool CxxModuleUsage::AddReference(std::string const& logical,
         case LookupMethod::IncludeQuote:
           return "include-quote"_s;
       }
-      assert(false && "unsupported lookup method");
+      CM_UNREACHABLE;
       return ""_s;
     };
 
@@ -432,7 +432,7 @@ std::string CxxModuleMapContent(CxxModuleMapFormat format,
       return CxxModuleMapContentMsvc(loc, obj, usages);
   }
 
-  assert(false);
+  CM_UNREACHABLE;
   return {};
 }
 
@@ -446,6 +446,6 @@ CxxModuleMapMode CxxModuleMapOpenMode(CxxModuleMapFormat format)
       return CxxModuleMapMode::Default;
   }
 
-  assert(false);
+  CM_UNREACHABLE;
   return CxxModuleMapMode::Default;
 }

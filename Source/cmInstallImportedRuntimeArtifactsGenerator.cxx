@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallImportedRuntimeArtifactsGenerator.h"
 
-#include <cassert>
 #include <string>
 #include <utility>
 #include <vector>
@@ -16,6 +15,7 @@
 #include "cmLocalGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmTargetTypes.h"
+#include "cmUnreachable.h"
 
 namespace {
 cmsys::RegularExpression const FrameworkRegularExpression(
@@ -143,7 +143,7 @@ void cmInstallImportedRuntimeArtifactsGenerator::GenerateScriptForConfig(
       }
       break;
     default:
-      assert(false && "This should never happen");
+      CM_UNREACHABLE;
       break;
   }
 }

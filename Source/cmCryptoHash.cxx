@@ -2,14 +2,14 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCryptoHash.h"
 
-#include <cassert>
-
 #include <cm/memory>
 
 #include <cm3p/kwiml/int.h>
 #include <cm3p/rhash.h>
 
 #include "cmsys/FStream.hxx"
+
+#include "cmUnreachable.h"
 
 static unsigned int const cmCryptoHashAlgoToId[] = {
   /* clang-format needs this comment to break after the opening brace */
@@ -109,7 +109,7 @@ std::string cmCryptoHash::GetHashAlgoName() const
     case RHASH_SHA3_512:
       return "SHA3_512";
   }
-  assert(false);
+  CM_UNREACHABLE;
   return "UNKNOWN";
 }
 
