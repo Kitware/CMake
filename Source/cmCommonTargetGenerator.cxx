@@ -607,21 +607,22 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
     }
     if (cmNonempty(icstat)) {
       code_check += " --icstat=";
+      // Unless specified otherwise via CMAKE_<LANG>_ICSTAT,
+      // populate the icstat command line using default options
+      // for its mandatory parameters.
       std::string checksParam{};
-      std::string dbParam{};
-      // Set default values for mandatory parameters
-      std::string checksFile{ "cstat_sel_checks.txt" };
-      std::string dbFile{ "cstat.db" };
-      // Populate the command line with C-STAT
-      // mandatory parameters unless specified
       if (icstat.find("--checks=") == std::string::npos) {
+        std::string const checksFile{ "cstat_sel_checks.txt" };
         checksParam = cmStrCat(";--checks=", checksFile);
       }
+      std::string dbParam{};
       if (icstat.find("--db=") == std::string::npos) {
+        std::string const dbFile{ "cstat.db" };
         dbParam = cmStrCat(";--db=", dbFile);
       }
+      std::string analyzeCmd{ ";analyze" };
       code_check += this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-        cmStrCat(icstat, checksParam, dbParam));
+        cmStrCat(icstat, checksParam, dbParam, analyzeCmd));
     }
     if (cmNonempty(tidy) || (cmNonempty(cpplint)) || (cmNonempty(cppcheck)) ||
         cmNonempty(pvs) || cmNonempty(icstat)) {
