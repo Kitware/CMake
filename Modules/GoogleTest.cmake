@@ -696,49 +696,50 @@ function(gtest_discover_tests target)
         "for the same target '${target}'. This invocation will be ignored."
       )
       return()
-    else()
-      set_property(
-        TARGET ${_gt_real_target}
-        APPEND PROPERTY _GT_POST_BUILD_DISCOVERY "${discovery_file}"
-      )
-      # Make sure that TEST_LAUNCHER and CROSSCOMPILING_EMULATOR appear on the
-      # command line, so that CMake can add them as implicit dependencies in the
-      # case where they are executable targets.
-      add_custom_command(
-        TARGET ${target} POST_BUILD
-        BYPRODUCTS "${ctest_tests_file}"
-        COMMAND "${CMAKE_COMMAND}" -P "${discovery_file}" -- "${test_executor}"
-      )
-
-      string(CONCAT discovery_content
-        "include(\"${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake\")"         "\n"
-        "gtest_discover_tests_impl("                                          "\n"
-        "  TEST_TARGET"            " [==[${target}]==]"                       "\n"
-        "  TEST_EXECUTABLE"        " [==[$<TARGET_FILE:${target}>]==]"        "\n"
-        "  TEST_EXECUTOR"          " [==[${test_executor}]==]"                "\n"
-        "  TEST_WORKING_DIR"       " [==[${arg_WORKING_DIRECTORY}]==]"        "\n"
-        "  TEST_EXTRA_ARGS"        " [==[${arg_EXTRA_ARGS}]==]"               "\n"
-        "  TEST_PROPERTIES"        " [==[${arg_PROPERTIES}]==]"               "\n"
-        "  TEST_PREFIX"            " [==[${arg_TEST_PREFIX}]==]"              "\n"
-        "  TEST_SUFFIX"            " [==[${arg_TEST_SUFFIX}]==]"              "\n"
-        "  TEST_FILTER"            " [==[${arg_TEST_FILTER}]==]"              "\n"
-        "  NO_PRETTY_TYPES"        " [==[${arg_NO_PRETTY_TYPES}]==]"          "\n"
-        "  NO_PRETTY_VALUES"       " [==[${arg_NO_PRETTY_VALUES}]==]"         "\n"
-        "  TEST_LIST"              " [==[${arg_TEST_LIST}]==]"                "\n"
-        "  CTEST_FILE"             " [==[${ctest_tests_file}]==]"             "\n"
-        "  TEST_DISCOVERY_TIMEOUT" " [==[${arg_DISCOVERY_TIMEOUT}]==]"        "\n"
-        "  TEST_DISCOVERY_EXTRA_ARGS [==[${arg_DISCOVERY_EXTRA_ARGS}]==]"     "\n"
-        "  TEST_XML_OUTPUT_DIR"    " [==[${arg_XML_OUTPUT_DIR}]==]"           "\n"
-        "  TEST_JSON_OUTPUT_DIR"   " [==[${CMAKE_CURRENT_BINARY_DIR}]==]"     "\n"
-        ")"                                                                   "\n"
-      )
-      file(GENERATE OUTPUT "${discovery_file}" CONTENT "${discovery_content}")
-
-      string(CONCAT ctest_include_content
-        "if(EXISTS \"${ctest_tests_file}\")"                                  "\n"
-        "  include(\"${ctest_tests_file}\")"                                  "\n"
-      )
     endif()
+
+    set_property(
+      TARGET ${_gt_real_target}
+      APPEND PROPERTY _GT_POST_BUILD_DISCOVERY "${discovery_file}"
+    )
+
+    # Make sure that TEST_LAUNCHER and CROSSCOMPILING_EMULATOR appear on the
+    # command line, so that CMake can add them as implicit dependencies in the
+    # case where they are executable targets.
+    add_custom_command(
+      TARGET ${target} POST_BUILD
+      BYPRODUCTS "${ctest_tests_file}"
+      COMMAND "${CMAKE_COMMAND}" -P "${discovery_file}" -- "${test_executor}"
+    )
+
+    string(CONCAT discovery_content
+      "include(\"${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake\")"         "\n"
+      "gtest_discover_tests_impl("                                          "\n"
+      "  TEST_TARGET"            " [==[${target}]==]"                       "\n"
+      "  TEST_EXECUTABLE"        " [==[$<TARGET_FILE:${target}>]==]"        "\n"
+      "  TEST_EXECUTOR"          " [==[${test_executor}]==]"                "\n"
+      "  TEST_WORKING_DIR"       " [==[${arg_WORKING_DIRECTORY}]==]"        "\n"
+      "  TEST_EXTRA_ARGS"        " [==[${arg_EXTRA_ARGS}]==]"               "\n"
+      "  TEST_PROPERTIES"        " [==[${arg_PROPERTIES}]==]"               "\n"
+      "  TEST_PREFIX"            " [==[${arg_TEST_PREFIX}]==]"              "\n"
+      "  TEST_SUFFIX"            " [==[${arg_TEST_SUFFIX}]==]"              "\n"
+      "  TEST_FILTER"            " [==[${arg_TEST_FILTER}]==]"              "\n"
+      "  NO_PRETTY_TYPES"        " [==[${arg_NO_PRETTY_TYPES}]==]"          "\n"
+      "  NO_PRETTY_VALUES"       " [==[${arg_NO_PRETTY_VALUES}]==]"         "\n"
+      "  TEST_LIST"              " [==[${arg_TEST_LIST}]==]"                "\n"
+      "  CTEST_FILE"             " [==[${ctest_tests_file}]==]"             "\n"
+      "  TEST_DISCOVERY_TIMEOUT" " [==[${arg_DISCOVERY_TIMEOUT}]==]"        "\n"
+      "  TEST_DISCOVERY_EXTRA_ARGS [==[${arg_DISCOVERY_EXTRA_ARGS}]==]"     "\n"
+      "  TEST_XML_OUTPUT_DIR"    " [==[${arg_XML_OUTPUT_DIR}]==]"           "\n"
+      "  TEST_JSON_OUTPUT_DIR"   " [==[${CMAKE_CURRENT_BINARY_DIR}]==]"     "\n"
+      ")"                                                                   "\n"
+    )
+    file(GENERATE OUTPUT "${discovery_file}" CONTENT "${discovery_content}")
+
+    string(CONCAT ctest_include_content
+      "if(EXISTS \"${ctest_tests_file}\")"                                  "\n"
+      "  include(\"${ctest_tests_file}\")"                                  "\n"
+    )
 
   elseif(arg_DISCOVERY_MODE STREQUAL "PRE_TEST")
     set(test_xml_output "")
