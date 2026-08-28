@@ -146,14 +146,29 @@ void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root,
 #if JSONCPP_VERSION_HEXA >= 0x01090600
   // Has StructuredError
   std::unique_ptr<Json::CharReader> const reader(builder.newCharReader());
-  reader->parse(this->doc.data(), this->doc.data() + this->doc.size(), root,
-                &errMsg);
-  std::vector<Json::CharReader::StructuredError> structuredErrors =
-    reader->getStructuredErrors();
-  for (auto const& structuredError : structuredErrors) {
-    this->AddErrorAtOffset(structuredError.message,
-                           structuredError.offset_start);
+#  if JSON_USE_EXCEPTION
+  // Only this CharReader-based parse() can throw, and only when built with
+  // support for exceptions. Older jsoncpp aborts on bad inputs instead.
+  try {
+#  endif
+    reader->parse(this->doc.data(), this->doc.data() + this->doc.size(), root,
+                  &errMsg);
+    std::vector<Json::CharReader::StructuredError> structuredErrors =
+      reader->getStructuredErrors();
+    for (auto const& structuredError : structuredErrors) {
+      this->AddErrorAtOffset(structuredError.message,
+                             structuredError.offset_start);
+    }
+#  if JSON_USE_EXCEPTION
+  } catch (Json::Exception const& e) {
+    if (this->Filename.empty()) {
+      errMsg = cmStrCat("JSON Parse Error:\n ", e.what());
+    } else {
+      errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n", e.what());
+    }
+    this->AddError(errMsg);
   }
+#  endif
 #else
   // No StructuredError Available, Use error string from jsonCpp
   if (!Json::parseFromStream(builder, jsonIStream, root, &errMsg)) {
