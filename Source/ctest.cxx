@@ -211,6 +211,10 @@ int main(int argc, char const* const* argv)
     return cmCTestLaunch::Main(argc, argv, cmCTestLaunch::Op::Instrument);
   }
 
+  if (argc >= 2 && strcmp(argv[1], "--instrument-test") == 0) {
+    return cmCTestLaunch::Main(argc, argv, cmCTestLaunch::Op::InstrumentTest);
+  }
+
   // Dispatch post-build instrumentation daemon for ninja
   if (argc == 3 && strcmp(argv[1], "--start-instrumentation") == 0) {
     return cmInstrumentation(argv[2]).SpawnBuildDaemon();

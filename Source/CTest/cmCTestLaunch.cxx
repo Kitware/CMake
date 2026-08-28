@@ -9,13 +9,17 @@
 #include <iterator>
 #include <map>
 #include <memory>
+#include <utility>
 
 #include <cm/optional>
 
+#include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
 #include <cm3p/uv.h>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/SystemInformation.hxx"
 
 #include "cmCMakePath.h"
 #include "cmCTestLaunchReporter.h"
@@ -77,7 +81,8 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
     DoingCount,
     DoingFilterPrefix,
     DoingConfig,
-    DoingObjectDir
+    DoingObjectDir,
+    DoingMetricsFile,
   };
   Doing doing = DoingNone;
   int arg0 = 0;
@@ -113,6 +118,8 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       doing = DoingConfig;
     } else if (strcmp(arg, "--object-dir") == 0) {
       doing = DoingObjectDir;
+    } else if (strcmp(arg, "--metrics-file") == 0) {
+      doing = DoingMetricsFile;
     } else if (doing == DoingOutput) {
       this->Reporter.OptionOutput = arg;
       doing = DoingNone;
@@ -168,6 +175,9 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
     } else if (doing == DoingObjectDir) {
       this->Reporter.OptionObjectDir = arg;
       doing = DoingNone;
+    } else if (doing == DoingMetricsFile) {
+      this->MetricsFile = arg;
+      doing = DoingNone;
     }
   }
 
@@ -222,6 +232,8 @@ void cmCTestLaunch::RunChild()
     this->Reporter.ExitCode = 0;
     return;
   }
+
+  this->ChildResourceUsage = cm::nullopt;
 
   this->CapturedStdOut.clear();
   this->CapturedStdErr.clear();
@@ -316,13 +328,27 @@ void cmCTestLaunch::RunChild()
     this->Reporter.ExitCode =
       static_cast<int>(this->Reporter.Status.ExitStatus);
   }
+
+  cmsys::SystemInformation::ProcessResourceUsage processUsage{};
+  if (cmsys::SystemInformation::GetProcessResourceUsage(
+        processUsage, chain.GetNativeProcessHandle(0))) {
+    this->ChildResourceUsage = processUsage;
+  }
 }
 
 int cmCTestLaunch::Run()
 {
+  if (this->Operation == Op::InstrumentTest) {
+    this->RunChild();
+    this->WriteMetricsFile();
+    return this->Reporter.ExitCode;
+  }
+
   auto instrumentation = cmInstrumentation(this->Reporter.OptionBuildDir);
   bool const captureOutput =
     instrumentation.HasOption(cmInstrumentationQuery::Option::CaptureOutput);
+  bool const processMetrics =
+    instrumentation.HasOption(cmInstrumentationQuery::Option::ProcessMetrics);
   std::map<std::string, std::string> options;
   if (this->Reporter.OptionTargetName != "TARGET_NAME") {
     options["target"] = this->Reporter.OptionTargetName;
@@ -337,13 +363,18 @@ int cmCTestLaunch::Run()
   arrayOptions["targetLabels"] = this->Reporter.OptionTargetLabels;
   instrumentation.InstrumentCommand(
     this->Reporter.OptionCommandType, this->RealArgV,
-    [this, captureOutput]() -> cmInstrumentation::CommandResult {
+    [this, captureOutput,
+     processMetrics]() -> cmInstrumentation::CommandResult {
       this->RunChild();
       cmInstrumentation::CommandResult result;
       result.ExitCode = this->Reporter.ExitCode;
       if (captureOutput) {
         result.StdOut = this->CapturedStdOut;
         result.StdErr = this->CapturedStdErr;
+      }
+      if (processMetrics && this->ChildResourceUsage) {
+        result.ChildResourceUsage =
+          cmInstrumentation::ProcessMetrics(*this->ChildResourceUsage);
       }
       return result;
     },
@@ -360,6 +391,30 @@ int cmCTestLaunch::Run()
   }
 
   return this->Reporter.ExitCode;
+}
+
+void cmCTestLaunch::WriteMetricsFile() const
+{
+  if (this->MetricsFile.empty() || !this->ChildResourceUsage) {
+    return;
+  }
+
+  Json::Value root(Json::objectValue);
+  Json::Value processMetrics(Json::objectValue);
+  processMetrics["maxRSS"] =
+    static_cast<Json::Value::UInt64>(this->ChildResourceUsage->ru_maxrss);
+  processMetrics["userTimeUSec"] = static_cast<Json::Value::UInt64>(
+    this->ChildResourceUsage->ru_utime.tv_sec * 1000000ULL +
+    this->ChildResourceUsage->ru_utime.tv_usec);
+  processMetrics["systemTimeUSec"] = static_cast<Json::Value::UInt64>(
+    this->ChildResourceUsage->ru_stime.tv_sec * 1000000ULL +
+    this->ChildResourceUsage->ru_stime.tv_usec);
+  root["processMetrics"] = std::move(processMetrics);
+
+  cmsys::ofstream out(this->MetricsFile.c_str(),
+                      std::ios::out | std::ios::trunc | std::ios::binary);
+  Json::StreamWriterBuilder builder;
+  out << Json::writeString(builder, root) << "\n";
 }
 
 bool cmCTestLaunch::CheckResults()

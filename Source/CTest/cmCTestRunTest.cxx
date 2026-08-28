@@ -17,6 +17,8 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include <cm3p/json/value.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -27,6 +29,8 @@
 #include "cmDuration.h"
 #include "cmEnvironment.h"
 #include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
+#include "cmJSONState.h"
 #include "cmProcess.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -694,6 +698,9 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 void cmCTestRunTest::ComputeArguments()
 {
   this->Arguments.clear(); // reset because this might be a rerun
+  this->InstrumentationCommand.clear();
+  this->InstrumentationArguments.clear();
+  this->ProcessResourceUsage = cm::nullopt;
   auto j = this->TestProperties->Args.begin();
   ++j; // skip test name
   // find the test executable
@@ -730,6 +737,31 @@ void cmCTestRunTest::ComputeArguments()
        this->TestHandler->TestOptions.TestPassthroughArguments) {
     testCommand = cmStrCat(std::move(testCommand), " \"", arg, '"');
     this->Arguments.push_back(arg);
+  }
+
+  this->InstrumentationCommand = this->ActualCommand;
+  this->InstrumentationArguments = this->Arguments;
+
+  if (this->CTest->GetInstrumentation().HasOption(
+        cmInstrumentationQuery::Option::ProcessMetrics)) {
+    std::string const realCommand = this->ActualCommand;
+    std::vector<std::string> realArguments = this->Arguments;
+    std::string metricsFile = GetTestMetricsFile();
+    cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(metricsFile));
+
+    this->ActualCommand = cmSystemTools::GetCTestCommand();
+    this->Arguments.clear();
+    this->Arguments.insert(this->Arguments.end(),
+                           { "--instrument-test", "--metrics-file",
+                             metricsFile, "--", realCommand });
+    this->Arguments.insert(this->Arguments.end(), realArguments.begin(),
+                           realArguments.end());
+
+    testCommand = cmSystemTools::ConvertToOutputPath(this->ActualCommand);
+    for (std::string const& arg : this->Arguments) {
+      testCommand += cmStrCat(" \"", arg, '"');
+    }
+    this->TestResult.Environment.clear();
   }
   this->TestResult.FullCommandLine = testCommand;
 
@@ -1055,6 +1087,15 @@ std::string cmCTestRunTest::GenerateLLVMPath(std::string fileString)
   return cmStrCat(profRawRoot, fileString);
 }
 
+std::string cmCTestRunTest::GetTestMetricsFile() const
+{
+  std::string safeName = this->TestProperties->Name;
+  cmSystemTools::ReplaceString(safeName, "/", "_");
+  cmSystemTools::ReplaceString(safeName, "\\", "_");
+  return cmStrCat(this->CTest->GetInstrumentation().GetDataDir(),
+                  "/test/test-", safeName, "-", this->Index, ".json");
+}
+
 void cmCTestRunTest::CollectLLVMCoverage()
 {
   // find all *.profraw files
@@ -1131,11 +1172,43 @@ void cmCTestRunTest::FinalizeTest(bool started)
   }
 
   if (started && this->CTest->GetInstrumentation().HasQuery()) {
+    if (this->CTest->GetInstrumentation().HasOption(
+          cmInstrumentationQuery::Option::ProcessMetrics)) {
+      std::string metricsFile = GetTestMetricsFile();
+      if (cmSystemTools::FileExists(metricsFile)) {
+        Json::Value root;
+        cmJSONState state(metricsFile, &root);
+        if (state.errors.empty()) {
+          ProcessMetrics usage{};
+          Json::Value const& processMetrics = root["processMetrics"];
+          usage.ru_maxrss = processMetrics["maxRSS"].asLargestUInt();
+          auto userUSec = processMetrics["userTimeUSec"].asLargestUInt();
+          auto systemUSec = processMetrics["systemTimeUSec"].asLargestUInt();
+          usage.ru_utime.tv_sec = static_cast<long>(userUSec / 1000000ULL);
+          usage.ru_utime.tv_usec = static_cast<long>(userUSec % 1000000ULL);
+          usage.ru_stime.tv_sec = static_cast<long>(systemUSec / 1000000ULL);
+          usage.ru_stime.tv_usec = static_cast<long>(systemUSec % 1000000ULL);
+          this->ProcessResourceUsage = usage;
+        }
+        cmSystemTools::RemoveFile(metricsFile);
+      }
+    }
+    cm::optional<cmInstrumentation::ProcessMetrics> processMetrics;
+    if (this->ProcessResourceUsage) {
+      cmInstrumentation::ProcessMetrics metrics;
+      metrics.ru_maxrss = this->ProcessResourceUsage->ru_maxrss;
+      metrics.ru_utime.tv_sec = this->ProcessResourceUsage->ru_utime.tv_sec;
+      metrics.ru_utime.tv_usec = this->ProcessResourceUsage->ru_utime.tv_usec;
+      metrics.ru_stime.tv_sec = this->ProcessResourceUsage->ru_stime.tv_sec;
+      metrics.ru_stime.tv_usec = this->ProcessResourceUsage->ru_stime.tv_usec;
+      processMetrics = metrics;
+    }
     std::string data_file = this->CTest->GetInstrumentation().InstrumentTest(
-      this->TestProperties->Name, this->ActualCommand, this->Arguments,
-      this->TestProcess->GetExitValue(), this->TestProcess->GetStartTime(),
+      this->TestProperties->Name, this->InstrumentationCommand,
+      this->InstrumentationArguments, this->TestProcess->GetExitValue(),
+      this->TestProcess->GetStartTime(),
       this->TestProcess->GetSystemStartTime(),
-      this->GetCTest()->GetConfigType(), this->ProcessOutput);
+      this->GetCTest()->GetConfigType(), this->ProcessOutput, processMetrics);
     this->TestResult.InstrumentationFile = data_file;
   }
   this->MultiTestHandler.FinishTestProcess(this->TestProcess->GetRunner(),

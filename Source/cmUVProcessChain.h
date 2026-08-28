@@ -118,6 +118,7 @@ public:
   std::vector<Status const*> GetStatus() const;
   Status const& GetStatus(std::size_t index) const;
   bool Finished() const;
+  void* GetNativeProcessHandle(std::size_t index) const;
 
   /** Terminate any remaining child processes.
       Call this only after exiting the event loop, and at most once.  */

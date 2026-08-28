@@ -525,6 +525,19 @@ bool cmUVProcessChain::Finished() const
   return this->Data->ProcessesCompleted >= this->Data->Processes.size();
 }
 
+void* cmUVProcessChain::GetNativeProcessHandle(std::size_t index) const
+{
+  if (index >= this->Data->Processes.size()) {
+    return nullptr;
+  }
+#ifdef _WIN32
+  return this->Data->Processes[index]->Process->process_handle;
+#else
+  static_cast<void>(index);
+  return nullptr;
+#endif
+}
+
 void cmUVProcessChain::Terminate()
 {
   this->Data->Terminate();

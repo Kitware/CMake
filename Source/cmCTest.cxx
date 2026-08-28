@@ -2795,7 +2795,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
         return instrumentation.InstrumentCommand(
           "ctest", args,
           [&processHandler]() -> cmInstrumentation::CommandResult {
-            return { processHandler(), cm::nullopt, cm::nullopt };
+            return { processHandler(), cm::nullopt, cm::nullopt, cm::nullopt };
           },
           data);
       });

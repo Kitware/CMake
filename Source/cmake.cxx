@@ -2838,7 +2838,7 @@ int cmake::ActualConfigure()
   int ret = this->Instrumentation->InstrumentCommand(
     "configure", this->cmdArgs,
     [doConfigure]() -> cmInstrumentation::CommandResult {
-      return { doConfigure(), cm::nullopt, cm::nullopt };
+      return { doConfigure(), cm::nullopt, cm::nullopt, cm::nullopt };
     },
     cm::nullopt, cm::nullopt,
     this->GetIsInTryCompile() ? cmInstrumentation::LoadQueriesAfter::No
@@ -3321,7 +3321,7 @@ int cmake::Generate()
   int ret = this->Instrumentation->InstrumentCommand(
     "generate", this->cmdArgs,
     [doGenerate]() -> cmInstrumentation::CommandResult {
-      return { doGenerate(), cm::nullopt, cm::nullopt };
+      return { doGenerate(), cm::nullopt, cm::nullopt, cm::nullopt };
     });
   if (ret != 0) {
     return ret;
@@ -4271,7 +4271,7 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
         return instrumentation.InstrumentCommand(
           "cmakeBuild", args,
           [&doBuild]() -> cmInstrumentation::CommandResult {
-            return { doBuild(), cm::nullopt, cm::nullopt };
+            return { doBuild(), cm::nullopt, cm::nullopt, cm::nullopt };
           });
       });
   int buildresult = buildOutcome.ExitCode;

@@ -1012,7 +1012,7 @@ int do_install(int ac, char const* const* av)
         return instrumentation.InstrumentCommand(
           "cmakeInstall", cmd,
           [&doInstall]() -> cmInstrumentation::CommandResult {
-            return { doInstall(), cm::nullopt, cm::nullopt };
+            return { doInstall(), cm::nullopt, cm::nullopt, cm::nullopt };
           });
       });
   ret = installOutcome.ExitCode;
