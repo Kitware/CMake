@@ -5,7 +5,7 @@ list(
     ${CMAKE_CURRENT_SOURCE_DIR}/999-LastFallbackScript.cmake
   )
 
-cmake_host_system_information(RESULT UFS QUERY DISTRIB_INFO)
+cmake_host_system_information(RESULT UFS QUERY FROM_SYSROOT ON DISTRIB_INFO)
 
 foreach(VAR IN LISTS UFS)
   message(STATUS "${VAR}=`${${VAR}}`")

@@ -9,7 +9,7 @@ Synopsis
 .. parsed-literal::
 
   `Query host system specific information`_
-    cmake_host_system_information(RESULT <variable> `QUERY`_ <key> ...)
+    cmake_host_system_information(RESULT <variable> `QUERY`_ [FROM_SYSROOT <bool>] <key> ...)
 
   `Query the Windows registry`_
     cmake_host_system_information(RESULT <variable> `QUERY WINDOWS_REGISTRY`_ <key> ...)
@@ -18,13 +18,26 @@ Query host system specific information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. signature::
-  cmake_host_system_information(RESULT <variable> QUERY <key> ...)
+  cmake_host_system_information(RESULT <variable> QUERY [FROM_SYSROOT <bool>] <key> ...)
   :target:
     QUERY
 
 Queries system information of the host system on which cmake runs.
 One or more ``<key>`` can be provided to select the information to be
 queried.  The list of queried values is stored in ``<variable>``.
+
+.. versionadded:: 4.5
+
+  The ``FROM_SYSROOT <bool>`` option controls whether ``DISTRIB_*`` keys read
+  the os-release under :variable:`CMAKE_SYSROOT` or the host os-release:
+
+  * A true value reads the os-release under :variable:`CMAKE_SYSROOT`, i.e. the
+    target distribution.  This is useful, for example, to label packages for
+    the target system.
+  * A false value reads the host os-release, ignoring :variable:`CMAKE_SYSROOT`.
+    This is the default.  See policy :policy:`CMP0221`.
+
+  It affects only ``DISTRIB_*`` keys.
 
 ``<key>`` can be one of the following values:
 
@@ -269,6 +282,15 @@ If :file:`/etc/os-release` file is not found, the command tries to gather OS
 identification via fallback scripts.  The fallback script can use `various
 distribution-specific files`_ to collect OS identification data and map it
 into `man 5 os-release`_ variables.
+
+.. versionadded:: 4.5
+
+  The ``DISTRIB_*`` keys, including the fallback scripts, read the os-release
+  under the selected root (see ``FROM_SYSROOT`` above and policy
+  :policy:`CMP0221`): the host root, or the :variable:`CMAKE_SYSROOT` (target)
+  root.  For ``DISTRIB_INFO``, only the names in the returned list are
+  authoritative; reusing ``<variable>`` across queries may leave stale
+  ``<variable>_<key>`` definitions from a previous root.
 
 Fallback Interface Variables
 """"""""""""""""""""""""""""

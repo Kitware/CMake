@@ -1,0 +1,44 @@
+CMP0221
+-------
+
+.. versionadded:: 4.5
+
+:command:`cmake_host_system_information` ``DISTRIB_*`` queries read the host
+os-release.
+
+The :command:`cmake_host_system_information` command is documented to query
+information about the host system on which CMake runs.  However, its
+``DISTRIB_*`` queries read the :file:`/etc/os-release` (or
+:file:`/usr/lib/os-release`) file under the :variable:`CMAKE_SYSROOT`, if set.
+During cross compilation this reports the *target* distribution rather than
+the host, contradicting the rest of the command.
+
+The ``OLD`` behavior of this policy is for ``DISTRIB_*`` queries with no
+``FROM_SYSROOT`` to read the os-release under :variable:`CMAKE_SYSROOT`.
+The ``NEW`` behavior is for such queries to read the host os-release,
+ignoring :variable:`CMAKE_SYSROOT`.
+
+Either behavior may be requested explicitly, regardless of this policy, with
+the ``FROM_SYSROOT <bool>`` option:
+
+* A false value reads the host os-release.
+* A true value reads the os-release under :variable:`CMAKE_SYSROOT`, which is
+  useful for querying the target distribution (e.g. for packaging).
+
+.. code-block:: cmake
+
+  # Always the host distribution:
+  cmake_host_system_information(RESULT host QUERY FROM_SYSROOT OFF DISTRIB_ID)
+
+  # Always the target (CMAKE_SYSROOT) distribution:
+  cmake_host_system_information(RESULT target QUERY FROM_SYSROOT ON DISTRIB_ID)
+
+The warning is issued only when it can matter: a ``DISTRIB_*`` query with no
+``FROM_SYSROOT`` while :variable:`CMAKE_SYSROOT` is non-empty.  Passing
+``FROM_SYSROOT``, or leaving :variable:`CMAKE_SYSROOT` empty, is silent.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.5
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

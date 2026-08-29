@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <cm/optional>
 #include <cm/string_view>
@@ -28,6 +29,7 @@
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -325,17 +327,49 @@ cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
   return {};
 }
 
+// Fallback os-release scripts read ${CMAKE_SYSROOT} directly, so point it at
+// the effective root while they run; restored on destruction even if one
+// fails.
+class SysrootOverride
+{
+public:
+  SysrootOverride(cmMakefile& makefile, std::string const& root)
+    : Makefile(makefile)
+  {
+    cmValue value = this->Makefile.GetDefinition("CMAKE_SYSROOT");
+    this->Existed = static_cast<bool>(value);
+    if (this->Existed) {
+      this->Saved = *value;
+    }
+    this->Makefile.AddDefinition("CMAKE_SYSROOT", root);
+  }
+  ~SysrootOverride()
+  {
+    if (this->Existed) {
+      this->Makefile.AddDefinition("CMAKE_SYSROOT", this->Saved);
+    } else {
+      this->Makefile.RemoveDefinition("CMAKE_SYSROOT");
+    }
+  }
+  SysrootOverride(SysrootOverride const&) = delete;
+  SysrootOverride& operator=(SysrootOverride const&) = delete;
+
+private:
+  cmMakefile& Makefile;
+  std::string Saved;
+  bool Existed;
+};
+
 std::map<std::string, std::string> GetOSReleaseVariables(
-  cmExecutionStatus& status)
+  cmExecutionStatus& status, std::string const& root)
 {
   auto& makefile = status.GetMakefile();
-  auto const& sysroot = makefile.GetSafeDefinition("CMAKE_SYSROOT");
 
   std::map<std::string, std::string> data;
   // Based on
   // https://www.freedesktop.org/software/systemd/man/latest/os-release.html
   for (auto name : { "/etc/os-release"_s, "/usr/lib/os-release"_s }) {
-    auto const& filename = cmStrCat(sysroot, name);
+    auto const& filename = cmStrCat(root, name);
     if (cmSystemTools::FileExists(filename)) {
       cmsys::ifstream fin(filename.c_str());
       for (std::string line; !std::getline(fin, line).fail();) {
@@ -397,6 +431,8 @@ std::map<std::string, std::string> GetOSReleaseVariables(
   // Name of the variable to put the results
   std::string const result_variable{ "CMAKE_GET_OS_RELEASE_FALLBACK_RESULT" };
 
+  SysrootOverride const sysrootOverride(makefile, root);
+
   for (auto const& script : scripts) {
     // Unset the result variable
     makefile.RemoveDefinition(result_variable);
@@ -440,17 +476,21 @@ std::map<std::string, std::string> GetOSReleaseVariables(
   return data;
 }
 
-cm::optional<std::string> GetDistribValue(cmExecutionStatus& status,
-                                          std::string const& key,
-                                          std::string const& variable)
+cm::optional<std::string> GetDistribValue(
+  cmExecutionStatus& status, std::string const& key,
+  std::string const& variable, std::string const& root,
+  cm::optional<std::map<std::string, std::string>>& os_release)
 {
   auto const prefix = "DISTRIB_"_s;
   if (!cmHasPrefix(key, prefix)) {
     return {};
   }
 
-  static std::map<std::string, std::string> const s_os_release =
-    GetOSReleaseVariables(status);
+  // Parse once per call, not in a static: a static would freeze the first
+  // call's result and ignore a later change of root.
+  if (!os_release.has_value()) {
+    os_release = GetOSReleaseVariables(status, root);
+  }
 
   auto& makefile = status.GetMakefile();
 
@@ -458,7 +498,7 @@ cm::optional<std::string> GetDistribValue(cmExecutionStatus& status,
     key.substr(prefix.size(), key.size() - prefix.size());
   if (subkey == "INFO"_s) {
     std::string vars;
-    for (auto const& kv : s_os_release) {
+    for (auto const& kv : *os_release) {
       auto cmake_var_name = cmStrCat(variable, '_', kv.first);
       vars += DELIM[!vars.empty()] + cmake_var_name;
       makefile.AddDefinition(cmake_var_name, kv.second);
@@ -467,8 +507,8 @@ cm::optional<std::string> GetDistribValue(cmExecutionStatus& status,
   }
 
   // Query individual variable
-  auto const it = s_os_release.find(subkey);
-  if (it != s_os_release.cend()) {
+  auto const it = os_release->find(subkey);
+  if (it != os_release->cend()) {
     return it->second;
   }
 
@@ -739,6 +779,82 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
                                 status, variable);
   }
 
+  // FROM_SYSROOT <bool> selects the CMAKE_SYSROOT (target) or host root for
+  // DISTRIB_* keys.  Handled after the registry signature above, since a
+  // registry argument could itself be "FROM_SYSROOT".
+  enum class SysrootMode
+  {
+    Default,
+    Host,
+    Target,
+  };
+  auto mode = SysrootMode::Default;
+  std::vector<std::string> keys;
+  for (size_t i = current_index + 1; i < args.size(); ++i) {
+    if (args[i] != "FROM_SYSROOT"_s) {
+      keys.push_back(args[i]);
+      continue;
+    }
+    if (mode != SysrootMode::Default) {
+      status.SetError("FROM_SYSROOT may be given at most once.");
+      return false;
+    }
+    if (i + 1 >= args.size()) {
+      status.SetError("FROM_SYSROOT requires a boolean value.");
+      return false;
+    }
+    std::string const& value = args[++i];
+    if (cmIsOn(value)) {
+      mode = SysrootMode::Target;
+    } else if (cmIsOff(value)) {
+      mode = SysrootMode::Host;
+    } else {
+      status.SetError(cmStrCat("FROM_SYSROOT requires a boolean value, got \"",
+                               value, "\"."));
+      return false;
+    }
+  }
+
+  cmMakefile& makefile = status.GetMakefile();
+
+  bool anyDistrib = false;
+  for (std::string const& key : keys) {
+    if (cmHasPrefix(key, "DISTRIB_"_s)) {
+      anyDistrib = true;
+      break;
+    }
+  }
+
+  std::string const& sysroot = makefile.GetSafeDefinition("CMAKE_SYSROOT");
+
+  bool selectHost = false;
+  switch (mode) {
+    case SysrootMode::Host:
+      selectHost = true;
+      break;
+    case SysrootMode::Target:
+      selectHost = false;
+      break;
+    case SysrootMode::Default:
+      switch (makefile.GetPolicyStatus(cmPolicies::CMP0221)) {
+        case cmPolicies::NEW:
+          selectHost = true;
+          break;
+        case cmPolicies::WARN:
+          // Warn only where OLD and NEW diverge: a DISTRIB_* query with a
+          // real sysroot.  Empty sysroot or non-DISTRIB keys stay silent.
+          if (anyDistrib && !sysroot.empty()) {
+            makefile.IssuePolicyWarning(cmPolicies::CMP0221);
+          }
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          selectHost = false;
+          break;
+      }
+      break;
+  }
+  std::string const effectiveRoot = selectHost ? std::string{} : sysroot;
+
   static cmsys::SystemInformation info;
   static auto initialized = false;
   if (!initialized) {
@@ -748,16 +864,19 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     initialized = true;
   }
 
+  cm::optional<std::map<std::string, std::string>> os_release;
   std::string result_list;
-  for (auto i = current_index + 1; i < args.size(); ++i) {
+  for (std::string const& key : keys) {
     result_list += DELIM[!result_list.empty()];
 
-    auto const& key = args[i];
     // clang-format off
     auto value =
       GetValueChained(
           [&]() { return GetValue(info, key); }
-        , [&]() { return GetDistribValue(status, key, variable); }
+        , [&]() {
+            return GetDistribValue(status, key, variable, effectiveRoot,
+                                   os_release);
+          }
 #ifdef _WIN32
         , [&]() { return GetWindowsValue(status, key); }
 #endif
@@ -770,7 +889,7 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     result_list += value.value();
   }
 
-  status.GetMakefile().AddDefinition(variable, result_list);
+  makefile.AddDefinition(variable, result_list);
 
   return true;
 }
