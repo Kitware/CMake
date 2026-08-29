@@ -68,6 +68,9 @@ Options
   Set a CPack variable.  This will override any value set for ``<var>`` in the
   input file read by :program:`cpack`.
 
+  .. versionadded:: 4.0
+    The single-argument form ``-D<var>=<value>`` is now supported.
+
 .. option:: --config <configFile>
 
   Specify the configuration file read by :program:`cpack` to provide the packaging
