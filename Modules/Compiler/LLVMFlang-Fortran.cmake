@@ -15,6 +15,10 @@ set(CMAKE_Fortran_POSTPROCESS_FLAG "-ffixed-line-length-72")
 
 set(CMAKE_Fortran_COMPILE_OPTIONS_TARGET "--target=")
 
+if(CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+  set(CMAKE_Fortran_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror")
+endif()
+
 set(CMAKE_Fortran_LINKER_WRAPPER_FLAG "-Wl,")
 set(CMAKE_Fortran_LINKER_WRAPPER_FLAG_SEP ",")
 
