@@ -1,0 +1,2 @@
+^CMake Error: Unknown argument --toolchan\. Did you mean: --toolchain\?
+CMake Error: Run 'cmake --help' for all supported options\.$

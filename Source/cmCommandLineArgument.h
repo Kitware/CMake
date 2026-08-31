@@ -291,3 +291,18 @@ private:
       !(arg.size() >= 2 && cmsysString_isdigit(arg[1]));
   }
 };
+
+template <typename FunctionSignature>
+std::string cmFindClosestCommandLineArgument(
+  std::string const& arg,
+  std::vector<cmCommandLineArgument<FunctionSignature>> const& arguments)
+{
+  std::vector<std::string> candidates;
+  candidates.reserve(arguments.size());
+  for (auto const& option : arguments) {
+    if (!option.Name.empty()) {
+      candidates.push_back(option.Name);
+    }
+  }
+  return cmFindClosestString(arg, candidates);
+}
