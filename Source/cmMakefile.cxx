@@ -100,6 +100,12 @@ std::string const kCMAKE_CURRENT_LIST_DIR = "CMAKE_CURRENT_LIST_DIR";
 std::string const kCMAKE_CURRENT_LIST_FILE = "CMAKE_CURRENT_LIST_FILE";
 std::string const kCMAKE_PARENT_LIST_FILE = "CMAKE_PARENT_LIST_FILE";
 
+std::string findClosestCommand(std::string const& name,
+                               std::vector<std::string> const& commands)
+{
+  return cmFindClosestString(name, commands);
+}
+
 class FileScopeBase
 {
 protected:
@@ -643,6 +649,11 @@ bool cmMakefile::ExecuteCommand(cmListFileFunction const& lff,
     if (!cmSystemTools::GetFatalErrorOccurred()) {
       std::string error =
         cmStrCat("Unknown CMake command \"", lff.OriginalName(), "\".");
+      std::string const suggestion = findClosestCommand(
+        lff.OriginalName(), this->GetState()->GetCommandNames());
+      if (!suggestion.empty()) {
+        error = cmStrCat(error, " Did you mean: \"", suggestion, "\"?");
+      }
       this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
       cmSystemTools::SetFatalErrorOccurred();

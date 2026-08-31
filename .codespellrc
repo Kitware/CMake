@@ -17,6 +17,7 @@ skip =
   Source/kwsys/*,
   Tests/RunCMake/CPack/tests/DMG_SLA/German.*,
   Tests/RunCMake/ParseImplicitData/*.input,
+  Tests/RunCMake/cmake_language/call_typo_function.cmake,
   Tests/StringFileTest/test.utf8,
   Utilities/cm*,
   *.pfx,
