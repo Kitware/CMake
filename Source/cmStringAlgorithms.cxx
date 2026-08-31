@@ -7,6 +7,7 @@
 #include <cstddef> // IWYU pragma: keep
 #include <cstdio>
 #include <cstdlib>
+#include <limits>
 
 #include "cmsys/String.h"
 
@@ -84,6 +85,73 @@ std::string cmEscapeQuotes(cm::string_view str)
     result += ch;
   }
   return result;
+}
+
+std::size_t cmLevenshteinDistance(cm::string_view a, cm::string_view b)
+{
+  if (a == b) {
+    return 0;
+  }
+
+  std::size_t const aSize = a.size();
+  std::size_t const bSize = b.size();
+  if (aSize == 0) {
+    return bSize;
+  }
+  if (bSize == 0) {
+    return aSize;
+  }
+
+  std::vector<std::size_t> previous(bSize + 1, 0);
+  std::vector<std::size_t> current(bSize + 1, 0);
+
+  for (std::size_t j = 0; j <= bSize; ++j) {
+    previous[j] = j;
+  }
+
+  for (std::size_t i = 1; i <= aSize; ++i) {
+    current[0] = i;
+    for (std::size_t j = 1; j <= bSize; ++j) {
+      std::size_t const substitutionCost = (a[i - 1] == b[j - 1]) ? 0 : 1;
+      current[j] = std::min({ previous[j] + 1, current[j - 1] + 1,
+                              previous[j - 1] + substitutionCost });
+    }
+    previous.swap(current);
+  }
+
+  return previous[bSize];
+}
+
+std::string cmFindClosestString(cm::string_view input,
+                                std::vector<std::string> const& candidates)
+{
+  if (candidates.empty()) {
+    return std::string();
+  }
+
+  std::string best;
+  std::size_t bestDistance = std::numeric_limits<std::size_t>::max();
+  for (std::string const& candidate : candidates) {
+    std::size_t const distance = cmLevenshteinDistance(input, candidate);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = candidate;
+    }
+  }
+
+  // Scale the acceptable edit distance with the input length (roughly one
+  // typo per 5 characters), but keep it within [kMinDistance, kMaxDistance]
+  // so very short inputs still allow one edit and very long inputs don't
+  // start accepting barely-related matches.
+  std::size_t const kMinDistance = 1;
+  std::size_t const kMaxDistance = 4;
+  std::size_t const maxDistance =
+    std::min(kMaxDistance, std::max(kMinDistance, input.size() / 5 + 1));
+  if (bestDistance > maxDistance) {
+    return std::string();
+  }
+
+  return best;
 }
 
 namespace {

@@ -64,6 +64,13 @@ std::string cmRemoveQuotes(cm::string_view str);
 /** Escape quotes in a string.  */
 std::string cmEscapeQuotes(cm::string_view str);
 
+/** Compute the Levenshtein distance between two strings.  */
+std::size_t cmLevenshteinDistance(cm::string_view a, cm::string_view b);
+
+/** Return the closest candidate string to the given input.  */
+std::string cmFindClosestString(cm::string_view input,
+                                std::vector<std::string> const& candidates);
+
 /** Joins elements of a range with separator into a single string.  */
 template <typename Range>
 std::string cmJoin(Range const& rng, cm::string_view separator)
