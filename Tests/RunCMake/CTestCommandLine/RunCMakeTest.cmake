@@ -951,6 +951,7 @@ endfunction()
 run_output_junit_invalid()
 
 run_cmake_command(invalid-ctest-argument ${CMAKE_CTEST_COMMAND} --not-a-valid-ctest-argument)
+run_cmake_command(invalid-ctest-argument-did-you-mean ${CMAKE_CTEST_COMMAND} --parallell 2)
 
 block()
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TimeoutDefault)
