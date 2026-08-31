@@ -2518,6 +2518,26 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       }
       return 1;
     }
+
+    std::vector<std::string> availableCommands =
+      CommandLineHelpEntryNames(AvailableCommands);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    cm::append(availableCommands,
+               CommandLineHelpEntryNames(AvailableWindowsCommands));
+#endif
+    // Some commands above only fall through to here when they were
+    // matched by name but had the wrong number/form of arguments; only
+    // offer a suggestion when the name itself is not recognized.
+    if (std::find(availableCommands.begin(), availableCommands.end(),
+                  args[1]) == availableCommands.end()) {
+      std::string error = cmStrCat("Unknown command \"", args[1], "\".");
+      std::string const suggestion =
+        cmFindClosestString(args[1], availableCommands);
+      if (!suggestion.empty()) {
+        error = cmStrCat(error, " Did you mean \"", suggestion, "\"?");
+      }
+      cmSystemTools::Error(error);
+    }
   }
 
   CMakeCommandUsage(args[0]);
