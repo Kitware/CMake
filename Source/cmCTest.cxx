@@ -69,6 +69,7 @@
 #include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
+#include "cmUnreachable.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmVersionConfig.h"
@@ -1695,6 +1696,7 @@ bool cmCTest::SetArgsFromPreset(cmCMakePresetsArgs const& args)
           break;
         case cmCMakePresetsGraph::TestPreset::OutputOptions::VerbosityEnum::
           Default:
+          CM_FALLTHROUGH;
         default:
           // leave default settings
           break;
@@ -1758,7 +1760,7 @@ bool cmCTest::SetArgsFromPreset(cmCMakePresetsArgs const& args)
           break;
         case cmCMakePresetsGraph::TestPreset::ExecutionOptions::ShowOnlyEnum::
           Human:
-          // intentional fallthrough (human is the default)
+          CM_FALLTHROUGH;
         default:
           break;
       }
@@ -1780,7 +1782,7 @@ bool cmCTest::SetArgsFromPreset(cmCMakePresetsArgs const& args)
           this->Impl->RepeatMode = cmCTest::Repeat::AfterTimeout;
           break;
         default:
-          // should never default since mode is required
+          CM_UNREACHABLE;
           return false;
       }
     }
@@ -1813,7 +1815,7 @@ bool cmCTest::SetArgsFromPreset(cmCMakePresetsArgs const& args)
           NoTestsActionEnum::Default:
           break;
         default:
-          // should never default
+          CM_UNREACHABLE;
           return false;
       }
     }
