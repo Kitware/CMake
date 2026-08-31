@@ -334,6 +334,12 @@ bool cmRuntimeDependencyArchive::IsPreExcluded(std::string const& name) const
 
 bool cmRuntimeDependencyArchive::IsPostExcluded(std::string const& name) const
 {
+  return this->IsPostExcluded(name, name);
+}
+
+bool cmRuntimeDependencyArchive::IsPostExcluded(
+  std::string const& name, std::string const& fileName) const
+{
   cmsys::RegularExpressionMatch match;
   auto const regexMatch =
     [&match, name](cmsys::RegularExpression const& regex) -> bool {
@@ -344,8 +350,8 @@ bool cmRuntimeDependencyArchive::IsPostExcluded(std::string const& name) const
       std::vector<cmsys::RegularExpression> const& regexes) -> bool {
     return std::any_of(regexes.begin(), regexes.end(), regexMatch);
   };
-  auto const fileMatch = [name](std::string const& file) -> bool {
-    return cmSystemTools::SameFile(file, name);
+  auto const fileMatch = [fileName](std::string const& file) -> bool {
+    return cmSystemTools::SameFile(file, fileName);
   };
   auto const fileSearch =
     [&fileMatch](std::vector<std::string> const& files) -> bool {

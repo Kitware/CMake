@@ -23,6 +23,14 @@ public:
 private:
   std::unique_ptr<cmBinUtilsWindowsPEGetRuntimeDependenciesTool> Tool;
 
-  bool ResolveDependency(std::string const& name, std::string const& origin,
-                         std::string& path, bool& resolved);
+  struct Dependency
+  {
+    Dependency() = default;
+    Dependency(std::string casedName);
+    std::string CasedName;
+    std::string LowerName;
+  };
+
+  bool ResolveDependency(Dependency const& lib, std::string const& origin,
+                         Dependency& path, bool& resolved);
 };

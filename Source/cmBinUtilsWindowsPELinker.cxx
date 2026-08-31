@@ -4,17 +4,18 @@
 #include "cmBinUtilsWindowsPELinker.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <sstream>
 #include <utility>
 #include <vector>
 
+#include <cm/filesystem>
 #include <cm/memory>
 
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
 #include "cmRuntimeDependencyArchive.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetTypes.h"
 
@@ -22,26 +23,51 @@
 #  include <windows.h>
 
 #  include "cmsys/Encoding.hxx"
+
+#  include "cmStringAlgorithms.h"
+#else
+#  include "cmsys/Directory.hxx"
 #endif
 
-#ifdef _WIN32
 namespace {
 
-void ReplaceWithActualNameCasing(std::string& path)
+#ifdef _WIN32
+std::string ReplaceWithActualNameCasing(std::string path)
 {
   WIN32_FIND_DATAW findData;
   HANDLE hFind = ::FindFirstFileW(
     cmsys::Encoding::ToWindowsExtendedPath(path).c_str(), &findData);
-
   if (hFind != INVALID_HANDLE_VALUE) {
     auto onDiskName = cmsys::Encoding::ToNarrow(findData.cFileName);
     ::FindClose(hFind);
     path.replace(path.end() - onDiskName.size(), path.end(), onDiskName);
   }
+  return path;
 }
+#else
+bool FindCaseInsensitive(std::string const& dir, std::string const& lowerName,
+                         std::string& foundPath)
+{
+  if (!cmSystemTools::FileIsDirectory(dir)) {
+    return false;
+  }
+  cmsys::Directory directory;
+  if (!directory.Load(dir)) {
+    return false;
+  }
+  for (std::size_t i = 0; i < directory.GetNumberOfFiles(); ++i) {
+    cm::filesystem::path fileName = directory.GetFile(i);
 
+    if (cmSystemTools::LowerCase(fileName) == lowerName) {
+      foundPath += dir / fileName;
+      return true;
+    }
+  }
+
+  return false;
 }
 #endif
+}
 
 cmBinUtilsWindowsPELinker::cmBinUtilsWindowsPELinker(
   cmRuntimeDependencyArchive* archive)
@@ -78,6 +104,12 @@ bool cmBinUtilsWindowsPELinker::Prepare()
   return true;
 }
 
+cmBinUtilsWindowsPELinker::Dependency::Dependency(std::string casedName)
+  : CasedName(std::move(casedName))
+  , LowerName(cmSystemTools::LowerCase(CasedName))
+{
+}
+
 bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
                                                  cm::TargetType /* unused */)
 {
@@ -86,56 +118,42 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(std::string const& file,
     return false;
   }
 
-  struct WinPEDependency
-  {
-    WinPEDependency(std::string o)
-      : Original(std::move(o))
-      , LowerCase(cmSystemTools::LowerCase(Original))
-    {
-    }
-    std::string const Original;
-    std::string const LowerCase;
-  };
-
-  std::vector<WinPEDependency> depends;
+  std::vector<Dependency> depends;
   depends.reserve(needed.size());
   std::move(needed.begin(), needed.end(), std::back_inserter(depends));
   std::string origin = cmSystemTools::GetFilenamePath(file);
 
-  for (auto const& lib : depends) {
-    if (!this->Archive->IsPreExcluded(lib.LowerCase)) {
-      std::string path;
-      bool resolved = false;
-      if (!this->ResolveDependency(lib.LowerCase, origin, path, resolved)) {
+  for (Dependency const& lib : depends) {
+    if (this->Archive->IsPreExcluded(lib.LowerName)) {
+      continue;
+    }
+    Dependency path;
+    bool resolved = false;
+    if (!this->ResolveDependency(lib, origin, path, resolved)) {
+      return false;
+    }
+    if (resolved) {
+      if (this->Archive->IsPostExcluded(path.LowerName, path.CasedName)) {
+        continue;
+      }
+      bool unique;
+      this->Archive->AddResolvedPath(lib.CasedName, path.CasedName, unique);
+      if (unique &&
+          !this->ScanDependencies(path.CasedName,
+                                  cm::TargetType::SHARED_LIBRARY)) {
         return false;
       }
-      if (resolved) {
-        if (!this->Archive->IsPostExcluded(path)) {
-#ifdef _WIN32
-          ReplaceWithActualNameCasing(path);
-#else
-          path.replace(path.end() - lib.Original.size(), path.end(),
-                       lib.Original);
-#endif
-          bool unique;
-          this->Archive->AddResolvedPath(lib.Original, path, unique);
-          if (unique &&
-              !this->ScanDependencies(path, cm::TargetType::SHARED_LIBRARY)) {
-            return false;
-          }
-        }
-      } else {
-        this->Archive->AddUnresolvedPath(lib.Original);
-      }
+    } else {
+      this->Archive->AddUnresolvedPath(lib.CasedName);
     }
   }
 
   return true;
 }
 
-bool cmBinUtilsWindowsPELinker::ResolveDependency(std::string const& name,
+bool cmBinUtilsWindowsPELinker::ResolveDependency(Dependency const& lib,
                                                   std::string const& origin,
-                                                  std::string& path,
+                                                  Dependency& path,
                                                   bool& resolved)
 {
   auto dirs = this->Archive->GetSearchDirectories();
@@ -154,12 +172,26 @@ bool cmBinUtilsWindowsPELinker::ResolveDependency(std::string const& name,
   dirs.insert(dirs.begin(), origin);
 
   for (auto const& searchPath : dirs) {
-    path = cmStrCat(searchPath, '/', name);
-    if (cmSystemTools::PathExists(path)) {
-      this->NormalizePath(path);
-      resolved = true;
-      return true;
+#ifdef _WIN32
+    path.LowerName = cmStrCat(searchPath, '/', lib.LowerName);
+    if (!cmSystemTools::PathExists(path.LowerName)) {
+      continue;
     }
+    this->NormalizePath(path.LowerName);
+    path.CasedName = ReplaceWithActualNameCasing(path.LowerName);
+#else
+    if (!FindCaseInsensitive(searchPath, lib.LowerName, path.CasedName)) {
+      continue;
+    }
+    this->NormalizePath(path.CasedName);
+    path.LowerName = [&lib](std::string libPath) -> std::string {
+      libPath.replace(libPath.end() - lib.LowerName.size(), libPath.end(),
+                      lib.LowerName);
+      return libPath;
+    }(path.CasedName);
+#endif
+    resolved = true;
+    return true;
   }
 
   resolved = false;
