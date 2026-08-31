@@ -8,9 +8,9 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
-#include "cmsys/FStream.hxx"
 #include "cmsys/String.h"
 
 #include "cmDiagnostics.h"
@@ -18,18 +18,13 @@
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmSarif.h"
-#include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmValue.h"
+#include "cmTimestamp.h"
 #include "cmVersionConfig.h"
-#include "cmake.h"
 
 // CMake-specific SARIF helpers
 namespace {
-
-constexpr char const* CMakeSarifOutputFlag = "CMAKE_EXPORT_SARIF";
-constexpr char const* DefaultSarifFile = ".cmake/sarif/cmake.sarif";
 
 /// @brief Express the location of a `cmListFileContext` in SARIF
 /// @param[in] uriBaseIds A list of logical base directory names and their path
@@ -44,8 +39,7 @@ constexpr char const* DefaultSarifFile = ".cmake/sarif/cmake.sarif";
 /// map. Bases are tried in order.
 cmSarif::Location LocationFromContext(
   cmListFileContext const& lfc,
-  std::vector<std::pair<cm::string_view, cm::string_view>> const&
-    uriBaseIds = {})
+  std::vector<std::pair<std::string, std::string>> const& uriBaseIds = {})
 {
   cmSarif::Location location;
   location.Physical.Artifact.Uri = lfc.FilePath;
@@ -55,10 +49,10 @@ cmSarif::Location LocationFromContext(
   // provided.
   for (auto const& baseUri : uriBaseIds) {
     std::string relative = cmSystemTools::RelativeIfUnder(
-      std::string(baseUri.second), location.Physical.Artifact.Uri);
+      baseUri.second, location.Physical.Artifact.Uri);
     if (relative != location.Physical.Artifact.Uri) {
       location.Physical.Artifact.Uri = relative;
-      location.Physical.Artifact.UriBaseId = std::string(baseUri.first);
+      location.Physical.Artifact.UriBaseId = baseUri.first;
     }
   }
 
@@ -83,8 +77,7 @@ cmSarif::Location LocationFromContext(
 
 cm::optional<cmSarif::Location> LastLocation(
   cmListFileBacktrace backtrace,
-  std::vector<std::pair<cm::string_view, cm::string_view>> const&
-    uriBaseIds = {})
+  std::vector<std::pair<std::string, std::string>> const& uriBaseIds = {})
 {
   if (backtrace.Empty()) {
     return {};
@@ -94,8 +87,7 @@ cm::optional<cmSarif::Location> LastLocation(
 
 cm::optional<cmSarif::Stack> StackFromBacktrace(
   cmListFileBacktrace bt,
-  std::vector<std::pair<cm::string_view, cm::string_view>> const&
-    uriBaseIds = {})
+  std::vector<std::pair<std::string, std::string>> const& uriBaseIds = {})
 {
   if (bt.Empty()) {
     return {};
@@ -205,90 +197,48 @@ cmSarif::ResultSeverityLevel SarifLevelFromMessageType(MessageType type)
 
 } // namespace
 
-cmCMakeSarifLogger::cmCMakeSarifLogger(cmake& cm)
-  : CM(cm)
-{
-  if (this->CM.GetState()->GetRole() == cmState::Role::Project) {
-    cm.MarkCliAsUsed(CMakeSarifOutputFlag);
-  }
-}
-
 cmCMakeSarifLogger::~cmCMakeSarifLogger()
 {
   this->GenerateForRun();
 }
 
-cm::optional<std::string> cmCMakeSarifLogger::FileOutputPath() const
+void cmCMakeSarifLogger::SetOutputPath(std::string const& path)
 {
-  // If a SARIF path was specified via CLI, use it. Otherwise, check whether
-  // logging is enabled via the project cache variable and use the default
-  // path if so.
-  if (cm::optional<std::string> specifiedPath = this->CM.GetSarifFilePath()) {
-    return specifiedPath;
-  }
-  if (this->CM.GetState()->GetRole() == cmState::Role::Project &&
-      this->CM.GetCacheDefinition(CMakeSarifOutputFlag).IsOn()) {
-    return cmStrCat(this->CM.GetHomeOutputDirectory(), '/', DefaultSarifFile);
-  }
-  return cm::nullopt;
+  this->FilePath = path;
 }
 
-bool cmCMakeSarifLogger::WriteFile(std::string const& path,
-                                   bool createParentDirectories) const
+void cmCMakeSarifLogger::AddBaseDirectory(cm::string_view name,
+                                          cm::string_view path)
 {
-  if (createParentDirectories) {
-    if (!cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(path))
-           .IsSuccess()) {
-      return false;
-    }
-  }
+  this->UriBaseIds.emplace_back(std::string(name), std::string(path));
+  this->CMakeRun.OriginalUriBaseIds.emplace(
+    std::string(name),
+    cmSarif::ArtifactLocation{ cmStrCat("file://", path, "/"), "" });
+}
 
-  cmsys::ofstream outputFile(path);
-  if (!outputFile.good()) {
-    return false;
-  }
-
-  // Run object to build
-  cmSarif::Run run;
-  run.Tool = CreateCMakeTool();
+void cmCMakeSarifLogger::RecordDiagnostics(
+  std::vector<cmMessenger::Message> const& messages)
+{
+  this->CMakeRun.Tool = CreateCMakeTool();
 
   // Helper to add rules to the run as encountered in results and get their
   // index for reporting
-  std::unordered_map<std::string, std::size_t> ruleIndices;
   auto use_rule = [&](MessageType type, cmDiagnosticCategory category) {
-    std::string category_name = RuleIdForMessageType(type, category);
-    auto result = ruleIndices.emplace(category_name, 0);
-    if (result.second) {
-      result.first->second = run.Tool.Driver.Rules.size();
-      run.Tool.Driver.Rules.emplace_back(
-        ReportingDescriptorForMessageType(type, category));
+    auto category_name = RuleIdForMessageType(type, category);
+    auto ruleIt = this->RuleIndices.find(category_name);
+    if (ruleIt != this->RuleIndices.end()) {
+      return std::make_pair(category_name, ruleIt->second);
     }
-    return *result.first;
+
+    this->CMakeRun.Tool.Driver.Rules.emplace_back(
+      ReportingDescriptorForMessageType(type, category));
+    this->RuleIndices.emplace(category_name,
+                              this->CMakeRun.Tool.Driver.Rules.size() - 1);
+    return std::make_pair(category_name,
+                          this->CMakeRun.Tool.Driver.Rules.size() - 1);
   };
 
-  // Make a prioritized list of base directories applicable in this context.
-  // This is used for normalizing the paths of related locations.
-  std::vector<std::pair<cm::string_view, cm::string_view>> uriBaseIds;
-
-  std::string const& binDir = this->CM.GetHomeOutputDirectory();
-  if (!binDir.empty()) {
-    uriBaseIds.emplace_back("CMAKE_BINARY_DIR", binDir);
-  }
-
-  std::string const& homeDir = this->CM.GetHomeDirectory();
-  if (!homeDir.empty()) {
-    uriBaseIds.emplace_back("CMAKE_SOURCE_DIR", homeDir);
-  }
-
-  // Log the base directories for this run.
-  for (auto const& base : uriBaseIds) {
-    run.OriginalUriBaseIds.emplace(
-      std::string(base.first),
-      cmSarif::ArtifactLocation{ cmStrCat("file://", base.second, "/"), "" });
-  }
-
-  cmMessenger const& messenger = *this->CM.GetMessenger();
-  for (auto const& message : messenger.GetDisplayedMessages()) {
+  for (auto const& message : messages) {
     // SARIF should only emit diagnostic messages, not general messages/logs
     switch (message.Type) {
       case MessageType::MESSAGE:
@@ -306,29 +256,55 @@ bool cmCMakeSarifLogger::WriteFile(std::string const& path,
     result.RuleId = ruleInfo.first;
     result.RuleIndex = ruleInfo.second;
     result.Message = cmSarif::Message{ message.Text };
-    result.Location = LastLocation(message.Backtrace, uriBaseIds);
+    result.Location = LastLocation(message.Backtrace, this->UriBaseIds);
     if (cm::optional<cmSarif::Stack> stack =
-          StackFromBacktrace(message.Backtrace, uriBaseIds)) {
+          StackFromBacktrace(message.Backtrace, this->UriBaseIds)) {
       result.Stacks.emplace_back(std::move(*stack));
     }
     result.Level = SarifLevelFromMessageType(message.Type);
 
-    run.Results.emplace_back(std::move(result));
+    this->CMakeRun.Results.emplace_back(std::move(result));
+  }
+}
+
+void cmCMakeSarifLogger::RecordInvocation(
+  int ac, char const* const* av, int exitCode,
+  std::chrono::system_clock::time_point startTime,
+  std::chrono::system_clock::time_point endTime)
+{
+  cmTimestamp timestamp;
+
+  cmSarif::Invocation invocation;
+  invocation.Arguments.assign(av, av + ac);
+  invocation.ExecutableLocation.Uri = cmSystemTools::GetCMakeCommand();
+  invocation.StartTimeUtc = timestamp.CreateTimestampFromTimeT(
+    std::chrono::system_clock::to_time_t(startTime), "", true);
+  invocation.EndTimeUtc = timestamp.CreateTimestampFromTimeT(
+    std::chrono::system_clock::to_time_t(endTime), "", true);
+  invocation.ExitCode = exitCode;
+  invocation.ExecutionSuccessful = (exitCode == 0);
+
+  this->CMakeRun.Invocations.emplace_back(std::move(invocation));
+}
+
+bool cmCMakeSarifLogger::WriteFile(std::string const& path) const
+{
+  std::string const dir = cmSystemTools::GetFilenamePath(path);
+  if (!cmSystemTools::FileIsDirectory(dir)) {
+    return false;
   }
 
-  return cmSarif::WriteLog(path, run);
+  return cmSarif::WriteLog(path, this->CMakeRun);
 }
 
 void cmCMakeSarifLogger::GenerateForRun() const
 {
-  cm::optional<std::string> path = this->FileOutputPath();
-  if (!path) {
+  if (this->FilePath.empty()) {
     return;
   }
 
-  // If using the default path within the build dir, ensure parents are created
-  bool const createParents = !this->CM.GetSarifFilePath().has_value();
-  if (!this->WriteFile(*path, createParents)) {
-    cmSystemTools::Error(cmStrCat("Failed to write SARIF log to ", *path));
+  if (!this->WriteFile(this->FilePath)) {
+    cmSystemTools::Error(
+      cmStrCat("Failed to write SARIF log to ", this->FilePath));
   }
 }

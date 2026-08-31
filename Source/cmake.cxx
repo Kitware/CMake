@@ -84,7 +84,6 @@
 #  include <cm3p/json/writer.h>
 
 #  include "cmCMakePresetsArgs.h"
-#  include "cmCMakeSarifLogger.h"
 #  include "cmConfigureLog.h"
 #  include "cmFileAPI.h"
 #  include "cmGraphVizWriter.h"
@@ -1366,16 +1365,6 @@ void cmake::SetArgs(std::vector<std::string> const& args)
         state->SetIgnoreLinkWarningAsError(true);
         return true;
       } },
-#ifndef CMAKE_BOOTSTRAP
-    CommandArgument{ "--sarif-output", "No file specified for --sarif-output",
-                     CommandArgument::Values::One,
-                     [](std::string const& value, cmake* state) -> bool {
-                       state->SarifFilePath =
-                         cmSystemTools::ToNormalizedPathOnDisk(value);
-                       state->SarifFileOutput = true;
-                       return true;
-                     } },
-#endif
     CommandArgument{ "--debugger", CommandArgument::Values::Zero,
                      [](std::string const&, cmake* state) -> bool {
 #ifdef CMake_ENABLE_DEBUGGER
@@ -3137,8 +3126,9 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
   }
 
 #ifndef CMAKE_BOOTSTRAP
-  // Configure the SARIF log for the current run
-  cmCMakeSarifLogger sarifLogger(*this);
+  if (this->State->GetRole() == cmState::Role::Project) {
+    this->MarkCliAsUsed("CMAKE_EXPORT_SARIF");
+  }
 
   this->VariableWatch->AddWatch("CMAKE_WARN_DEPRECATED", cmDeprecatedWatch);
   this->VariableWatch->AddWatch("CMAKE_ERROR_DEPRECATED", cmDeprecatedWatch);

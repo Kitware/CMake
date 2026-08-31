@@ -29,6 +29,7 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmValue.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -599,11 +600,16 @@ public:
   cmMessenger* GetMessenger() const { return this->Messenger.get(); }
 
 #ifndef CMAKE_BOOTSTRAP
-  /// Get the SARIF file path if set manually for this run
-  cm::optional<std::string> GetSarifFilePath() const
+  /// Get the file path for SARIF logging if enabled by cache variable.
+  cm::optional<std::string> GetProjectSarifFile() const
   {
-    return (this->SarifFileOutput ? cm::make_optional(this->SarifFilePath)
-                                  : cm::nullopt);
+    if (this->State->GetRole() == cmState::Role::Project) {
+      if (this->GetCacheDefinition("CMAKE_EXPORT_SARIF").IsOn()) {
+        return cmStrCat(this->GetHomeOutputDirectory(),
+                        "/.cmake/sarif/cmake.sarif"_s);
+      }
+    }
+    return cm::nullopt;
   }
 #endif
 
@@ -849,11 +855,6 @@ private:
   void AlterDiagnostic(DiagnosticAlterationMethod alteration,
                        cmDiagnosticCategory category,
                        cmDiagnosticAction desiredAction, bool recurse);
-
-#ifndef CMAKE_BOOTSTRAP
-  bool SarifFileOutput = false;
-  std::string SarifFilePath;
-#endif
 
   std::vector<std::string> TraceOnlyThisSources;
 
