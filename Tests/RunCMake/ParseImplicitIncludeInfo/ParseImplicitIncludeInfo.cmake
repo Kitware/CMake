@@ -58,10 +58,12 @@ if(CMAKE_HOST_WIN32)
   # The KWSys actual-case cache breaks case sensitivity on Windows.
   list(FILTER targets EXCLUDE REGEX "-XL|-SunPro")
 else()
-  # Windows drive letters are not recognized as absolute on other platforms.
-  list(FILTER targets EXCLUDE REGEX "mingw")
-  # Windows path separators are not parsed properly on other platforms
-  list(FILTER targets EXCLUDE REGEX "CUDA-NVIDIA")
+  list(REMOVE_ITEM targets
+    # Windows drive letters are not recognized as absolute on other platforms.
+    mingw.org-C-GNU-4.9.3 mingw.org-CXX-GNU-4.9.3
+    # Windows path separators are not parsed properly on other platforms
+    windows_x86_64-CUDA-NVIDIA-13.1.115
+  )
 endif()
 
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitIncludeInfo.cmake)
