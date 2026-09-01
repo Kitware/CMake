@@ -6,8 +6,8 @@ unzip
 # Compilers
 g++
 g++-aarch64-linux-gnu
-clang-22
-libomp-22-dev
+clang-23
+libomp-23-dev
 
 # CUDA Extras
 cuda-cross-sbsa-13-2
