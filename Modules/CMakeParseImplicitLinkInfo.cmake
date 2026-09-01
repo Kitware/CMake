@@ -125,7 +125,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
       elseif("${line}" MATCHES "^export XL_LINKER=(.*/${linker})[ \t]*$") # IBM XL
         set(linker_tool "${CMAKE_MATCH_1}")
         string(APPEND log "  link line: [${line}] ==> linker [${linker_tool}]\n")
-      elseif("${line}" MATCHES "--with-ld=") # GNU
+      elseif("${line}" MATCHES "^Configured with: ") # GNU
         # The GNU compiler reports how it was configured.
         # This does not account for -fuse-ld= so use it only as a fallback.
         if("${line}" MATCHES " --with-ld=([^ ]+/${linker})( |$)")
