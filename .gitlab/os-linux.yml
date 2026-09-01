@@ -585,6 +585,12 @@
         CMAKE_CONFIGURATION: cuda13.2_nvidia
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.cuda13.2_clang:
+    extends: .cuda13.2
+    variables:
+        CMAKE_ARCH: x86_64
+        CMAKE_CONFIGURATION: cuda13.2_clang
+
 ### HIP builds
 
 .hip6.3:
