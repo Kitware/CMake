@@ -1,0 +1,3 @@
+libs=mingw32;gcc;moldname;mingwex;kernel32;pthread;advapi32;shell32;user32;kernel32;mingw32;gcc;moldname;mingwex;kernel32
+dirs=C:/DoesNotExist/straw \(perl\) 5\.42-pdl/c/lib/gcc/x86_64-w64-mingw32/13\.2\.0;C:/DoesNotExist/straw \(perl\) 5\.42-pdl/c/lib/gcc;C:/DoesNotExist/straw \(perl\) 5\.42-pdl/c/x86_64-w64-mingw32/lib;C:/DoesNotExist/straw \(perl\) 5\.42-pdl/c/lib
+linker_tool=C:/DoesNotExist/straw \(perl\) 5\.42-pdl/c/x86_64-w64-mingw32/bin/ld\.exe

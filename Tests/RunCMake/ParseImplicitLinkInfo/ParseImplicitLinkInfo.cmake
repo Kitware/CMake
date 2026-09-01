@@ -60,6 +60,7 @@ set(targets
   sunos-C-SunPro-5.13.0 sunos-CXX-SunPro-5.13.0 sunos-Fortran-SunPro-8.8.0
   sunos5.10_sparc32-C-GNU-5.5.0 sunos5.10_sparc32-CXX-GNU-5.5.0 sunos5.10_sparc32-Fortran-GNU-5.5.0
   sunos5.11_i386-C-GNU-5.5.0 sunos5.11_i386-CXX-GNU-5.5.0 sunos5.11_i386-Fortran-GNU-5.5.0
+  windows_x86_64-C-GNU-13.2.0-space windows_x86_64-CXX-GNU-13.2.0-space windows_x86_64-Fortran-GNU-13.2.0-space
   windows_x86_64-C-MSVC-19.36.32543.0 windows_x86_64-CXX-MSVC-19.36.32543.0
   windows_x86_64-C-MSVC-19.38.33130.0-VS windows_x86_64-CXX-MSVC-19.38.33130.0-VS
   windows_x86_64-C-MSVC-19.50.35724.0 windows_x86_64-CXX-MSVC-19.50.35724.0
