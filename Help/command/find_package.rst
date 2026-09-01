@@ -333,7 +333,7 @@ is stored in the CMake variable ``<PackageName>_CONFIG``.
 .. note::
 
   Because CPS files are not permitted to have names that do *not* match the
-  package name, specifying ``CONFIGS`` will suppress searcing for CPS files.
+  package name, specifying ``CONFIGS`` will suppress searching for CPS files.
 
 All configuration files which have been considered by CMake while
 searching for the package with an appropriate version are stored in the
