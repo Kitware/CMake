@@ -71,14 +71,6 @@ set(targets
   windows_arm64-C-Clang-17.0.1-MSVC windows_arm64-CXX-Clang-17.0.1-MSVC windows_arm64-Fortran-LLVMFlang-17.0.1-MSVC
   )
 
-if(CMAKE_HOST_WIN32)
-  # The KWSys actual-case cache breaks case sensitivity on Windows.
-  list(FILTER targets EXCLUDE REGEX "-XL|-SunPro")
-else()
-  # Windows drive letters are not recognized as absolute on other platforms.
-  list(FILTER targets EXCLUDE REGEX "mingw")
-endif()
-
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseLibraryArchitecture.cmake)
 
