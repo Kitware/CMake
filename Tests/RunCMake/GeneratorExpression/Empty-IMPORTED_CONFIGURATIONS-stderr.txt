@@ -1,0 +1,6 @@
+(CMake Error in CMakeLists.txt:
+  IMPORTED_LOCATION not set for imported target "imported"( configuration
+  "[A-Za-z]+")?\.
+
+)+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.
