@@ -125,7 +125,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
       elseif("${line}" MATCHES "^export XL_LINKER=(.*/${linker})[ \t]*$") # IBM XL
         set(linker_tool "${CMAKE_MATCH_1}")
         string(APPEND log "  link line: [${line}] ==> linker [${linker_tool}]\n")
-      elseif("${line}" MATCHES "--with-ld=") # GNU
+      elseif("${line}" MATCHES "^Configured with: ") # GNU
         # The GNU compiler reports how it was configured.
         # This does not account for -fuse-ld= so use it only as a fallback.
         if("${line}" MATCHES " --with-ld=([^ ]+/${linker})( |$)")
@@ -303,6 +303,22 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
         string(REPLACE ":" ";" paths "${CMAKE_MATCH_2}")
         list(APPEND implicit_dirs_tmp ${paths})
         string(APPEND log "    dirs [${paths}]\n")
+      endif()
+    elseif(NOT link_line_parsed
+        AND "${line}" MATCHES [[ld\.exe ([^-]|-[^L])*(( -L([^ ]| +[^-])+)+) ([^-]|-[^l])*(( -l[^ ]+)+)]])
+      set(link_line_parsed 1)
+      set(implicit_dirs_str "${CMAKE_MATCH_2}")
+      set(implicit_libs_str "${CMAKE_MATCH_6}")
+      string(APPEND log "  link line: [${line}]\n")
+      if(EXTRA_PARSE_COMPUTE_IMPLICIT_DIRS)
+        string(REPLACE " -L" ";" implicit_dirs_tmp "${implicit_dirs_str}")
+        list(REMOVE_ITEM implicit_dirs_tmp "")
+        string(APPEND log "    dirs [${implicit_dirs_tmp}]\n")
+      endif()
+      if(EXTRA_PARSE_COMPUTE_IMPLICIT_LIBS)
+        string(REPLACE " -l" ";" implicit_libs_tmp "${implicit_libs_str}")
+        list(REMOVE_ITEM implicit_libs_tmp "")
+        string(APPEND log "    libs [${implicit_libs_tmp}]\n")
       endif()
     else()
       string(APPEND log "  ignore line: [${line}]\n")
