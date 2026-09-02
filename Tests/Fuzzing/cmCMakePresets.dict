@@ -1,0 +1,91 @@
+# CMakePresets.json dictionary
+
+# Structure
+"{"
+"}"
+"["
+"]"
+":"
+","
+"\""
+
+# Top-level
+"version"
+"cmakeMinimumRequired"
+"include"
+"vendor"
+"configurePresets"
+"buildPresets"
+"testPresets"
+"packagePresets"
+"workflowPresets"
+
+# Common preset fields
+"name"
+"inherits"
+"hidden"
+"displayName"
+"description"
+"environment"
+"condition"
+
+# Configure preset fields
+"generator"
+"architecture"
+"toolset"
+"toolchainFile"
+"binaryDir"
+"installDir"
+"cacheVariables"
+"warnings"
+"errors"
+"debug"
+"strategy"
+"value"
+"type"
+
+# Build, test, package and workflow preset fields
+"configurePreset"
+"configuration"
+"targets"
+"jobs"
+"generators"
+"steps"
+
+# Macros expanded by ExpandMacros()
+"${sourceDir}"
+"${sourceParentDir}"
+"${sourceDirName}"
+"${presetName}"
+"${generator}"
+"${hostSystemName}"
+"${fileDir}"
+"${dollar}"
+"${pathListSep}"
+"$env{"
+"$penv{"
+"$vendor{"
+
+# Condition types
+"const"
+"equals"
+"notEquals"
+"inList"
+"notInList"
+"matches"
+"notMatches"
+"anyOf"
+"allOf"
+"not"
+"conditions"
+"lhs"
+"rhs"
+"regex"
+"list"
+"string"
+
+# Values seen in real files
+"included.json"
+"Ninja"
+"true"
+"false"

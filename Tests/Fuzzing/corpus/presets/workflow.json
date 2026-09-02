@@ -1,0 +1,15 @@
+{
+  "version": 8,
+  "configurePresets": [ { "name": "c", "generator": "Ninja", "binaryDir": "${sourceDir}/w" } ],
+  "buildPresets": [ { "name": "b", "configurePreset": "c", "targets": [ "all" ], "jobs": 2 } ],
+  "testPresets": [ { "name": "t", "configurePreset": "c" } ],
+  "packagePresets": [ { "name": "p", "configurePreset": "c", "generators": [ "TGZ" ] } ],
+  "workflowPresets": [
+    { "name": "w", "steps": [
+      { "type": "configure", "name": "c" },
+      { "type": "build", "name": "b" },
+      { "type": "test", "name": "t" },
+      { "type": "package", "name": "p" }
+    ] }
+  ]
+}

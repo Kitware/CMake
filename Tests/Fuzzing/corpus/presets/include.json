@@ -1,0 +1,5 @@
+{
+  "version": 6,
+  "include": [ "included.json" ],
+  "configurePresets": [ { "name": "outer", "generator": "Ninja", "binaryDir": "${sourceDir}/o" } ]
+}

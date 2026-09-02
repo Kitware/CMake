@@ -1,0 +1,8 @@
+{
+  "version": 6,
+  "configurePresets": [
+    { "name": "base", "hidden": true, "generator": "Ninja", "binaryDir": "${sourceDir}/b" },
+    { "name": "mid", "hidden": true, "inherits": "base", "cacheVariables": { "A": "1" } },
+    { "name": "leaf", "inherits": [ "mid", "base" ], "cacheVariables": { "B": { "type": "BOOL", "value": "ON" } } }
+  ]
+}
