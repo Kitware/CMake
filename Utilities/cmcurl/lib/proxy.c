@@ -146,7 +146,7 @@ static bool match_host(const char *token, size_t tokenlen,
   /* A: example.com matches 'example.com'
      B: www.example.com matches 'example.com'
      C: nonexample.com DOES NOT match 'example.com'
-  */
+   */
   if(tokenlen == namelen)
     /* case A, exact match */
     match = curl_strnequal(token, name, namelen);
@@ -282,8 +282,6 @@ UNITTEST bool proxy_check_noproxy(const char *name, const char *no_proxy)
 static char *proxy_detect_proxy(struct Curl_easy *data,
                                 const struct Curl_scheme *scheme)
 {
-  char *proxy = NULL;
-
   /* If proxy was not specified, we check for default proxy environment
    * variables, to enable i.e Lynx compliance:
    *
@@ -301,58 +299,63 @@ static char *proxy_detect_proxy(struct Curl_easy *data,
    * For compatibility, the all-uppercase versions of these variables are
    * checked if the lowercase versions do not exist.
    */
-  char proxy_env[20];
-  const char *envp;
-  VERBOSE(envp = proxy_env);
+  const char *env_name = NULL;
+  char *proxy = NULL;
+  char name_buf[20];
 
-  curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy", scheme->name);
+  /* Try scheme specific env var first, unless http(s).
+   * lowercase first, then uppercase. */
+  if((scheme != &Curl_scheme_https) && (scheme != &Curl_scheme_http)) {
+    curl_msnprintf(name_buf, sizeof(name_buf), "%s_proxy", scheme->name);
+    env_name = name_buf;
+    proxy = curl_getenv(env_name);
+    if(!proxy) {
+      Curl_strntoupper(name_buf, name_buf, sizeof(name_buf));
+      proxy = curl_getenv(env_name);
+    }
+  }
 
-  /* read the protocol proxy: */
-  proxy = curl_getenv(proxy_env);
-
-  /*
-   * We do not try the uppercase version of HTTP_PROXY because of
-   * security reasons:
-   *
-   * When curl is used in a webserver application
-   * environment (cgi or php), this environment variable can
-   * be controlled by the web server user by setting the
-   * http header 'Proxy:' to some value.
-   *
-   * This can cause 'internal' http/ftp requests to be
-   * arbitrarily redirected by any external attacker.
-   */
-  if(!proxy && !curl_strequal("http_proxy", proxy_env)) {
-    /* There was no lowercase variable, try the uppercase version: */
-    Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
-    proxy = curl_getenv(proxy_env);
+  if(!proxy &&
+     ((scheme == &Curl_scheme_https) || (scheme == &Curl_scheme_wss))) {
+    /* Not found, check 'https' env vars, also for 'wss'.
+     * Again, first lowercase then uppercase. */
+    env_name = "https_proxy";
+    proxy = curl_getenv(env_name);
+    if(!proxy) {
+      env_name = "HTTPS_PROXY";
+      proxy = curl_getenv(env_name);
+    }
+  }
+  else if(!proxy &&
+          ((scheme == &Curl_scheme_http) || (scheme == &Curl_scheme_ws))) {
+    /* Not found, check 'http' env vars, also for 'ws'.
+     * We do NOT try the uppercase version 'HTTP_PROXY' because of
+     * security reasons:
+     *
+     * When curl is used in a webserver application
+     * environment (cgi or php), this environment variable can
+     * be controlled by the web server user by setting the
+     * http header 'Proxy:' to some value.
+     *
+     * This can cause 'internal' http/ftp requests to be
+     * arbitrarily redirected by any external attacker.
+     */
+    env_name = "http_proxy";
+    proxy = curl_getenv(env_name);
   }
 
   if(!proxy) {
-#ifndef CURL_DISABLE_WEBSOCKETS
-    /* websocket proxy fallbacks */
-    if(curl_strequal("ws_proxy", proxy_env)) {
-      proxy = curl_getenv("http_proxy");
-    }
-    else if(curl_strequal("wss_proxy", proxy_env)) {
-      proxy = curl_getenv("https_proxy");
-      if(!proxy)
-        proxy = curl_getenv("HTTPS_PROXY");
-    }
+    /* still not found, last resort checks. */
+    env_name = "all_proxy";
+    proxy = curl_getenv(env_name);
     if(!proxy) {
-#endif
-      envp = "all_proxy";
-      proxy = curl_getenv(envp); /* default proxy to use */
-      if(!proxy) {
-        envp = "ALL_PROXY";
-        proxy = curl_getenv(envp);
-      }
-#ifndef CURL_DISABLE_WEBSOCKETS
+      env_name = "ALL_PROXY";
+      proxy = curl_getenv(env_name);
     }
-#endif
   }
+
   if(proxy)
-    infof(data, "Uses proxy env variable %s == '%s'", envp, proxy);
+    infof(data, "Uses proxy env variable %s == '%s'", env_name, proxy);
 
   return proxy;
 }
@@ -448,21 +451,21 @@ static CURLcode parse_proxy(struct Curl_easy *data,
 
   if(proxyuser || proxypasswd) {
     result = Curl_creds_create(proxyuser, proxypasswd, NULL, NULL,
-                               data->set.str[STRING_PROXY_SERVICE_NAME],
+                               CURL_EASY_STR(data, STRING_PROXY_SERVICE_NAME),
                                CREDS_URL, &proxyinfo->creds);
     if(result)
       goto error;
   }
   else if(!for_pre_proxy &&
-          (data->set.str[STRING_PROXYUSERNAME] ||
-           data->set.str[STRING_PROXYPASSWORD] ||
-           data->set.str[STRING_PROXY_SERVICE_NAME])) {
+          (CURL_EASY_STR(data, STRING_PROXYUSERNAME) ||
+           CURL_EASY_STR(data, STRING_PROXYPASSWORD) ||
+           CURL_EASY_STR(data, STRING_PROXY_SERVICE_NAME))) {
     /* No user/passwd in URL, if this is not a pre-proxy, the
      * CURLOPT_PROXY* settings apply. */
-    result = Curl_creds_create(data->set.str[STRING_PROXYUSERNAME],
-                               data->set.str[STRING_PROXYPASSWORD],
+    result = Curl_creds_create(CURL_EASY_STR(data, STRING_PROXYUSERNAME),
+                               CURL_EASY_STR(data, STRING_PROXYPASSWORD),
                                NULL, NULL,
-                               data->set.str[STRING_PROXY_SERVICE_NAME],
+                               CURL_EASY_STR(data, STRING_PROXY_SERVICE_NAME),
                                CREDS_OPTION, &proxyinfo->creds);
   }
   else
@@ -495,7 +498,7 @@ static bool proxy_do_not_proxy(struct Curl_easy *data)
   if(data->state.origin->scheme->flags & PROTOPT_NONETWORK)
     return TRUE;
 
-  no_proxy = data->set.str[STRING_NOPROXY];
+  no_proxy = CURL_EASY_STR(data, STRING_NOPROXY);
   if(!no_proxy) {
     const char *p = "no_proxy";
     env_no_proxy = curl_getenv(p);
@@ -518,6 +521,7 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
 {
   char *proxy = NULL;
   char *pre_proxy = NULL;
+  const char *str = NULL;
   bool do_env_detect = TRUE;
   CURLcode result = CURLE_OK;
 
@@ -533,9 +537,10 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
    * Detect what (if any) proxy to use
    *************************************************************/
   /* the empty config strings disable proxy use and env detects */
-  if(data->set.str[STRING_PROXY]) {
-    if(*data->set.str[STRING_PROXY]) {
-      proxy = curlx_strdup(data->set.str[STRING_PROXY]);
+  str = CURL_EASY_STR(data, STRING_PROXY);
+  if(str) {
+    if(*str) {
+      proxy = curlx_strdup(str);
       /* if global proxy is set, this is it */
       if(!proxy) {
         failf(data, "memory shortage");
@@ -547,9 +552,10 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
       do_env_detect = FALSE;
   }
 
-  if(data->set.str[STRING_PRE_PROXY]) {
-    if(*data->set.str[STRING_PRE_PROXY]) {
-      pre_proxy = curlx_strdup(data->set.str[STRING_PRE_PROXY]);
+  str = CURL_EASY_STR(data, STRING_PRE_PROXY);
+  if(str) {
+    if(*str) {
+      pre_proxy = curlx_strdup(str);
       /* if global socks proxy is set, this is it */
       if(!pre_proxy) {
         failf(data, "memory shortage");

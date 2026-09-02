@@ -34,12 +34,6 @@
 #include "uint-spbset.h"
 #include "multihandle.h"
 
-
-static void mev_in_callback(struct Curl_multi *multi, bool value)
-{
-  multi->in_callback = value;
-}
-
 #ifdef DEBUGBUILD
 #define SH_ENTRY_MAGIC 0x570091d
 #endif
@@ -207,13 +201,17 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
 
   /* We managed this socket before, tell the socket callback to forget it. */
   if(entry->announced && multi->socket_cb) {
+    struct Curl_mapi_guard guard;
+
     NOVERBOSE((void)cause);
     CURL_TRC_M(data, "ev %s, call(fd=%" FMT_SOCKET_T ", ev=REMOVE)", cause, s);
-    mev_in_callback(multi, TRUE);
+    CURL_CBAPI_MULTI_START(&guard, multi, multi_socket_cb);
     rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                           multi->socket_userp, entry->user_data);
-    mev_in_callback(multi, FALSE);
-    entry->announced = FALSE;
+    CURL_CBAPI_END(&guard);
+    entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
+    if(entry)
+      entry->announced = FALSE;
   }
 
   mev_sh_entry_kill(multi, s);
@@ -281,10 +279,13 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
   CURL_TRC_M(data, "ev update call(fd=%" FMT_SOCKET_T ", ev=%s%s)",
              s, (comboaction & CURL_POLL_IN) ? "IN" : "",
              (comboaction & CURL_POLL_OUT) ? "OUT" : "");
-  mev_in_callback(multi, TRUE);
-  rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
-                        entry->user_data);
-  mev_in_callback(multi, FALSE);
+  {
+    struct Curl_mapi_guard guard;
+    CURL_CBAPI_MULTI_START(&guard, multi, multi_socket_cb);
+    rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
+                          entry->user_data);
+    CURL_CBAPI_MULTI_END(&guard);
+  }
   if(rc == -1) {
     multi->dead = TRUE;
     return CURLM_ABORTED_BY_CALLBACK;

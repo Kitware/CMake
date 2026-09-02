@@ -65,7 +65,7 @@
 #ifdef HAVE_LIBZ
 
 #if !defined(ZLIB_VERNUM) || (ZLIB_VERNUM < 0x1252)
-#error "requires zlib 1.2.5.2 or newer"
+#error "zlib 1.2.5.2 or greater required"
 #endif
 
 typedef enum {
@@ -206,6 +206,14 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       /* No more data to flush: exit loop. */
       break;
     case Z_STREAM_END:
+      if((started == ZLIB_INIT_GZIP) && (z->avail_in >= 2) &&
+         (z->next_in[0] == 0x1f) && (z->next_in[1] == 0x8b)) {
+        /* a second gzip member follows; curl does not support
+           multi-member gzip responses */
+        failf(data, "Multi-member gzip response not supported");
+        result = exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
+        break;
+      }
       result = process_trailer(data, zp);
       break;
     case Z_DATA_ERROR:
@@ -289,8 +297,10 @@ static void deflate_do_close(struct Curl_easy *data,
 static const struct Curl_cwtype deflate_encoding = {
   "deflate",
   NULL,
+  CURL_CW_FLAG_BLOWUP,
   deflate_do_init,
   deflate_do_write,
+  Curl_cwriter_def_flush,
   deflate_do_close,
   sizeof(struct zlib_writer)
 };
@@ -350,8 +360,10 @@ static void gzip_do_close(struct Curl_easy *data,
 static const struct Curl_cwtype gzip_encoding = {
   "gzip",
   "x-gzip",
+  CURL_CW_FLAG_BLOWUP,
   gzip_do_init,
   gzip_do_write,
+  Curl_cwriter_def_flush,
   gzip_do_close,
   sizeof(struct zlib_writer)
 };
@@ -483,8 +495,10 @@ static void brotli_do_close(struct Curl_easy *data,
 static const struct Curl_cwtype brotli_encoding = {
   "br",
   NULL,
+  CURL_CW_FLAG_BLOWUP,
   brotli_do_init,
   brotli_do_write,
+  Curl_cwriter_def_flush,
   brotli_do_close,
   sizeof(struct brotli_writer)
 };
@@ -596,8 +610,10 @@ static void zstd_do_close(struct Curl_easy *data,
 static const struct Curl_cwtype zstd_encoding = {
   "zstd",
   NULL,
+  CURL_CW_FLAG_BLOWUP,
   zstd_do_init,
   zstd_do_write,
+  Curl_cwriter_def_flush,
   zstd_do_close,
   sizeof(struct zstd_writer)
 };
@@ -607,8 +623,10 @@ static const struct Curl_cwtype zstd_encoding = {
 static const struct Curl_cwtype identity_encoding = {
   "identity",
   "none",
+  0,
   Curl_cwriter_def_init,
   Curl_cwriter_def_write,
+  Curl_cwriter_def_flush,
   Curl_cwriter_def_close,
   sizeof(struct Curl_cwriter)
 };
@@ -694,8 +712,10 @@ static void error_do_close(struct Curl_easy *data,
 static const struct Curl_cwtype error_writer = {
   "ce-error",
   NULL,
+  0,
   error_do_init,
   error_do_write,
+  Curl_cwriter_def_flush,
   error_do_close,
   sizeof(struct Curl_cwriter)
 };
@@ -763,7 +783,8 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
        * Exception is "chunked" transfer-encoding which always must happen */
       if((is_transfer && !data->set.http_transfer_encoding && !is_chunked) ||
          (!is_transfer && data->set.http_ce_skip)) {
-        bool is_identity = curl_strnequal(name, "identity", 8);
+        bool is_identity = (namelen == 8) &&
+                           curl_strnequal(name, "identity", 8);
         /* not requested, ignore */
         CURL_TRC_WRITE(data, "decoder not requested, ignored: %.*s",
                        (int)namelen, name);

@@ -112,6 +112,8 @@ struct sbuffer {
 };
 
 struct schannel_ssl_backend_data {
+  unsigned char *send_buffer;
+  size_t send_buffer_len;
   struct sbuffer encdata;
   struct sbuffer decdata;
   struct Curl_schannel_cred *cred;
@@ -147,9 +149,7 @@ struct schannel_cert_share {
   struct curltime time;              /* when the cached store was created */
 };
 
-/*
-* size of the structure: 20 bytes.
-*/
+/* size of the structure: 20 bytes */
 struct num_ip_data {
   DWORD size; /* 04 bytes */
   union {

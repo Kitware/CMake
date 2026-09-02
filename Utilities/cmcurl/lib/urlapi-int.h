@@ -34,11 +34,11 @@ struct Curl_URL {
   char *options; /* IMAP only? */
   char *host;
   char *zoneid; /* for numerical IPv6 addresses */
-  char *port;
   char *path;
   char *query;
   char *fragment;
-  unsigned short portnum; /* the numerical version (if 'port' is set) */
+  uint16_t portnum; /* the numerical port if present */
+  BIT(port_present);    /* to support missing port */
   BIT(query_present);    /* to support blank */
   BIT(fragment_present); /* to support blank */
   BIT(guessed_scheme);   /* when a URL without scheme is parsed */
@@ -64,5 +64,7 @@ CURLUcode Curl_junkscan(const char *url, size_t *urllen, bool allowspace);
 #define U_CURLU_PATH_AS_IS (unsigned int)CURLU_PATH_AS_IS
 
 bool Curl_url_same_origin(CURLU *base, CURLU *href);
+
+CURLUcode Curl_url_get_port(CURLU *u, uint16_t *pport);
 
 #endif /* HEADER_CURL_URLAPI_INT_H */

@@ -65,7 +65,7 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
     if(!ntlm)
       return CURLE_OUT_OF_MEMORY;
 
-    header += strlen("NTLM");
+    header += CURL_CSTRLEN("NTLM");
     curlx_str_passblanks(&header);
     if(*header) {
       unsigned char *hdr;
@@ -168,9 +168,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     if(!Curl_pSecFn)
       return result;
   }
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   ntlm->sslContext = conn->sslContext;
-#endif
 #endif
 
   Curl_bufref_init(&ntlmmsg);

@@ -32,7 +32,7 @@
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER < 0x03020000
-#error "mbedTLS 3.2.0 or later required"
+#error "mbedTLS 3.2.0 or greater required"
 #endif
 #include <psa/crypto_config.h>
 #endif
@@ -61,12 +61,12 @@ typedef struct ossl_sha256_ctx my_sha256_ctx;
 static CURLcode my_sha256_init(void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  ctx->openssl_ctx = EVP_MD_CTX_create();
+  ctx->openssl_ctx = EVP_MD_CTX_new();
   if(!ctx->openssl_ctx)
     return CURLE_OUT_OF_MEMORY;
 
   if(!EVP_DigestInit_ex(ctx->openssl_ctx, EVP_sha256(), NULL)) {
-    EVP_MD_CTX_destroy(ctx->openssl_ctx);
+    EVP_MD_CTX_free(ctx->openssl_ctx);
     return CURLE_FAILED_INIT;
   }
   return CURLE_OK;
@@ -84,7 +84,7 @@ static void my_sha256_final(unsigned char *digest, void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
-  EVP_MD_CTX_destroy(ctx->openssl_ctx);
+  EVP_MD_CTX_free(ctx->openssl_ctx);
 }
 
 #elif defined(USE_WOLFSSL)
@@ -148,8 +148,9 @@ typedef psa_hash_operation_t my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *ctx)
 {
-  memset(ctx, 0, sizeof(my_sha256_ctx));
-  if(psa_hash_setup(ctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
+  psa_hash_operation_t *pctx = (psa_hash_operation_t *)ctx;
+  *pctx = psa_hash_operation_init();
+  if(psa_hash_setup(pctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
@@ -381,12 +382,11 @@ static CURLcode my_sha256_init(void *in)
   return CURLE_OK;
 }
 
-/*
-   Process a block of memory though the hash
+/* Process a block of memory though the hash
    @param md     The hash state
    @param in     The data to hash
    @param inlen  The length of the data (octets)
-*/
+ */
 static void my_sha256_update(void *ctx,
                              const unsigned char *in,
                              unsigned int len)
@@ -421,12 +421,11 @@ static void my_sha256_update(void *ctx,
   }
 }
 
-/*
-   Terminate the hash to get the digest
+/* Terminate the hash to get the digest
    @param md  The hash state
    @param out [out] The destination of the hash (32 bytes)
    @return 0 if successful
-*/
+ */
 static void my_sha256_final(unsigned char *out, void *ctx)
 {
   struct sha256_state *md = ctx;

@@ -278,7 +278,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
 
     infof(data, "got option=(%s) value=(%s)", option, value);
 
-    if((strlen(TFTP_OPTION_BLKSIZE) == olen) &&
+    if((CURL_CSTRLEN(TFTP_OPTION_BLKSIZE) == olen) &&
        checkprefix(TFTP_OPTION_BLKSIZE, option)) {
       curl_off_t blksize;
       if(curlx_str_number(&value, &blksize, TFTP_BLKSIZE_MAX)) {
@@ -308,7 +308,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
       infof(data, "blksize parsed from OACK (%u) requested (%u)",
             state->blksize, state->requested_blksize);
     }
-    else if((strlen(TFTP_OPTION_TSIZE) == olen) &&
+    else if((CURL_CSTRLEN(TFTP_OPTION_TSIZE) == olen) &&
             checkprefix(TFTP_OPTION_TSIZE, option)) {
       curl_off_t tsize = 0;
       /* tsize should be ignored on upload: Who cares about the size of the
@@ -942,7 +942,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
 
   /* we do not keep TFTP connections up because there is none or little gain
    * for UDP */
-  connclose(conn, "TFTP");
+  connclose(conn);
 
   state->data = data;
   state->sockfd = conn->sock[FIRSTSOCKET];
@@ -957,7 +957,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
 
   ((struct sockaddr *)&state->local_addr)->sa_family =
-    (CURL_SA_FAMILY_T)(remote_addr->family);
+    (CURL_SA_FAMILY_T)remote_addr->family;
 
   result = tftp_set_timeouts(state);
   if(result)
@@ -987,8 +987,6 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
     }
     conn->bits.bound = TRUE;
   }
-
-  Curl_pgrsStartNow(data);
 
   *done = TRUE;
 

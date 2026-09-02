@@ -36,7 +36,7 @@
 
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER < 0x03020000
-#error "mbedTLS 3.2.0 or later required"
+#error "mbedTLS 3.2.0 or greater required"
 #endif
 #include <psa/crypto_config.h>
 #include <mbedtls/net_sockets.h>
@@ -268,7 +268,7 @@ static uint16_t mbed_cipher_suite_walk_str(const char **str, const char **end)
   static const char ecjpake_suite[] = "TLS_ECJPAKE_WITH_AES_128_CCM_8";
 
   if(!id) {
-    if((len == sizeof(ecjpake_suite) - 1) &&
+    if((len == CURL_CSTRLEN(ecjpake_suite)) &&
        curl_strnequal(ecjpake_suite, *str, len))
       id = MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8;
   }
@@ -453,9 +453,11 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
       mbed_extract_certinfo(data, crt);
   }
 
+  /* `verifypeer` and `verifyhost` are independent, so clear the flags of a
+     disabled check only. The name mismatch belongs to `verifyhost`. */
   if(!conn_config->verifypeer)
-    *flags = 0;
-  else if(!conn_config->verifyhost)
+    *flags &= MBEDTLS_X509_BADCERT_CN_MISMATCH;
+  if(!conn_config->verifyhost)
     *flags &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
 
   if(*flags) {
@@ -786,6 +788,38 @@ static CURLcode mbed_load_crl(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static bool mbed_apply_session(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct Curl_ssl_session *sc_session)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct mbed_ssl_backend_data *backend =
+    (struct mbed_ssl_backend_data *)connssl->backend;
+
+  if(sc_session && sc_session->sdata && sc_session->sdata_len) {
+    mbedtls_ssl_session session;
+    int ret;
+
+    mbedtls_ssl_session_init(&session);
+    ret = mbedtls_ssl_session_load(&session, sc_session->sdata,
+                                   sc_session->sdata_len);
+    if(ret) {
+      failf(data, "SSL session error loading: -0x%x", (unsigned int)-ret);
+    }
+    else {
+      ret = mbedtls_ssl_set_session(&backend->ssl, &session);
+      if(ret)
+        failf(data, "SSL session error setting: -0x%x", (unsigned int)-ret);
+    }
+    mbedtls_ssl_session_free(&session);
+    if(!ret) {
+      infof(data, "SSL reusing session ID");
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
 static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
@@ -795,6 +829,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   int ret;
+  bool session_applied = FALSE;
   CURLcode result;
   char errorbuf[128];
 
@@ -899,8 +934,22 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
                                    MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
 #endif
 
+  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+    /* FTP is a bitch. On TLS secured transfers, it is a common server
+     * option to require the client to use the SAME TLS session as on
+     * the control connection or it fails the request. See #22225. */
+    struct Curl_ssl_session *scs =
+      Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    if(scs) {
+      if(mbed_apply_session(cf, data, scs)) {
+        CURL_TRC_CF(data, cf, "applied SSL session from control connection");
+        session_applied = TRUE;
+      }
+    }
+  }
+
   /* Check if there is a cached ID we can/should use here! */
-  if(Curl_ssl_scache_use(cf, data)) {
+  if(!session_applied && Curl_ssl_scache_use(cf, data)) {
     struct Curl_ssl_session *sc_session = NULL;
     CURLcode sresult = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
                                             &sc_session);
@@ -1026,10 +1075,11 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
 #ifdef HAVE_PINNED_PUBKEY
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
 #else
-  const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  const char * const pinnedpubkey =
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
 #endif
 #endif
 
@@ -1196,13 +1246,22 @@ static CURLcode mbed_new_session(struct Curl_cfilter *cf,
                                    connssl->negotiated.alpn, 0, 0,
                                    &sc_session);
   sdata = NULL;  /* call took ownership */
-  if(!result)
+  if(!result && /* return a duplicate if asked for and FTP */
+     (cf->conn->scheme->family == CURLPROTO_FTP)) {
+    Curl_ssl_session_destroy(connssl->session);
+    result = Curl_ssl_session_dup(sc_session, &connssl->session);
+  }
+
+  if(!result) {
     result = Curl_ssl_scache_put(cf, data, connssl->peer.scache_key,
                                  sc_session);
+    sc_session = NULL;
+  }
 
 out:
   if(msession_alloced)
     mbedtls_ssl_session_free(&session);
+  Curl_ssl_session_destroy(sc_session);
   curlx_free(sdata);
   return result;
 }
@@ -1468,19 +1527,19 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
-  if(ssl_connect_1 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_1) {
     result = mbed_connect_step1(cf, data);
     if(result)
       return result;
   }
 
-  if(ssl_connect_2 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_2) {
     result = mbed_connect_step2(cf, data);
     if(result)
       return result;
   }
 
-  if(ssl_connect_3 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_3) {
     /* For tls1.3 we get notified about new sessions */
     struct ssl_connect_data *ctx = cf->ctx;
     struct mbed_ssl_backend_data *backend =
@@ -1495,7 +1554,7 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_done;
   }
 
-  if(ssl_connect_done == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_done) {
     connssl->state = ssl_connection_complete;
     *done = TRUE;
   }

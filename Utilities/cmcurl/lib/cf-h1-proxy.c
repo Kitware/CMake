@@ -135,7 +135,7 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 
   curlx_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
-  Curl_httpchunk_init(data, &ts->ch, TRUE);
+  Curl_httpchunk_init(data, &ts->ch, TRUE, TRUE);
 
   *pts = ts;
   return tunnel_reinit(cf, data, ts);
@@ -329,7 +329,7 @@ static CURLcode on_resp_header_udp(struct Curl_cfilter *cf,
             k->httpcode);
     }
     else {
-      const char *p = header + strlen("Content-Length:");
+      const char *p = header + CURL_CSTRLEN("Content-Length:");
       if(curlx_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
         return CURLE_WEIRD_SERVER_REPLY;
@@ -419,7 +419,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
             k->httpcode);
     }
     else {
-      const char *p = header + strlen("Content-Length:");
+      const char *p = header + CURL_CSTRLEN("Content-Length:");
       if(curlx_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
         return CURLE_WEIRD_SERVER_REPLY;
@@ -980,7 +980,7 @@ CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
   ts->httpversion = httpversion;
   curlx_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
-  Curl_httpchunk_init(data, &ts->ch, TRUE);
+  Curl_httpchunk_init(data, &ts->ch, TRUE, TRUE);
 
   pctx = curlx_calloc(1, sizeof(*pctx));
   if(!pctx) {

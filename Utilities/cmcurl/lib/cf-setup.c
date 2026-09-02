@@ -159,7 +159,7 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
 /* Get the origin curl connects its socket to.
  * Can be origin or the first proxy. */
 static struct Curl_peer *conn_get_first_origin(struct connectdata *conn,
-                                             int sockindex)
+                                             int8_t sockindex)
 {
 #ifndef CURL_DISABLE_PROXY
   if(conn->socks_proxy.peer)
@@ -202,9 +202,9 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
     }
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
-    result = cf_ip_happy_insert_after(cf, data, first_origin, first_peer,
-                                      first_transport,
-                                      tunnel_peer, ctx->transport);
+    result = Curl_cf_ip_happy_insert_after(cf, data, first_origin, first_peer,
+                                           first_transport,
+                                           tunnel_peer, ctx->transport);
     if(result) {
       CURL_TRC_CF(data, cf, "adding happy eyeballs failed -> %d", (int)result);
       return result;
@@ -251,7 +251,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
                     (int)result);
         return result;
       }
-      result = Curl_cf_quic_insert_after(cf, origin, peer);
+      result = Curl_cf_quic_insert_after(cf, data, origin, peer);
       if(result) {
         CURL_TRC_CF(data, cf, "adding QUIC filter failed -> %d", (int)result);
         return result;
@@ -273,12 +273,15 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
       else
 #endif
       {
-        /* Another FTP quirk: when adding SSL verification, to a DATA
-         * connection, always verify against the control's origin */
-        struct Curl_peer *origin = Curl_conn_get_origin(cf->conn, FIRSTSOCKET);
-        struct Curl_peer *peer =
-          Curl_conn_get_destination(cf->conn, cf->sockindex);
-        result = Curl_cf_ssl_insert_after(cf, data, origin, peer);
+        /* FTP is a bitch. Wherever we really connect to on the DATA
+         * (secondary) connection, many servers require TLS sessions reuse
+         * to prove they are talking to the same client.
+         * For the TLS session lookup to work, we need to instantiate
+         * the SSL filter with the same peers as FIRSTSOCKET. See #22225
+         * Meaning: cf->sockindex does not matter here. */
+        result = Curl_cf_ssl_insert_after(cf, data,
+          Curl_conn_get_origin(cf->conn, FIRSTSOCKET),
+          Curl_conn_get_destination(cf->conn, FIRSTSOCKET));
       }
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for origin failed -> %d",
@@ -442,7 +445,7 @@ out:
 
 CURLcode Curl_cf_setup_add(struct Curl_easy *data,
                            struct connectdata *conn,
-                           int sockindex,
+                           int8_t sockindex,
                            uint8_t transport,
                            int ssl_mode)
 {

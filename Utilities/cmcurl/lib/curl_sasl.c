@@ -142,7 +142,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
 void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
                     const struct SASLproto *params)
 {
-  unsigned long auth = data->set.httpauth;
+  uint32_t auth = data->set.httpauth;
 
   sasl->params = params;           /* Set protocol dependent parameters */
   sasl->state = SASL_STOP;         /* Not yet running */
@@ -229,7 +229,7 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
   if(!result && (sasl->params->flags & SASL_FLAG_BASE64)) {
     const char *serverdata = Curl_bufref_ptr(out);
 
-    if(!*serverdata || *serverdata == '=')
+    if(!*serverdata)
       Curl_bufref_set(out, NULL, 0, NULL);
     else {
       unsigned char *msg;
@@ -252,9 +252,7 @@ static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
   if(sasl->params->flags & SASL_FLAG_BASE64) {
     if(!Curl_bufref_ptr(msg))                   /* Empty message. */
       Curl_bufref_set(msg, "", 0, NULL);
-    else if(!Curl_bufref_len(msg))              /* Explicit empty response. */
-      Curl_bufref_set(msg, "=", 1, NULL);
-    else {
+    else if(Curl_bufref_len(msg)) {
       char *base64;
       size_t base64len;
 
