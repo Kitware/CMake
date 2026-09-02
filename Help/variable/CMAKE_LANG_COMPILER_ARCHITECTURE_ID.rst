@@ -6,8 +6,13 @@ CMAKE_<LANG>_COMPILER_ARCHITECTURE_ID
 :ref:`List <CMake Language Lists>` of identifiers indicating the
 target architecture(s) of the compiler for language ``<LANG>``.
 
-Typically the list has one entry unless :variable:`CMAKE_OSX_ARCHITECTURES`
-lists multiple architectures.
+Typically the list has one entry unless the compiler stores multiple
+architectures in each object file.  For example:
+
+* The build targets an Apple platform with
+  :variable:`CMAKE_OSX_ARCHITECTURES` listing multiple architectures.
+* The build targets Windows ARM64 with the MSVC ABI using Clang with
+  the ``-marm64x`` flag.
 
 Possible values for each platform are documented in the following sections.
 
