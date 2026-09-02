@@ -144,8 +144,8 @@ struct ssh_conn {
 
   /* common */
   const char *passphrase;     /* pass-phrase to use */
-  char *rsa_pub;              /* strdup'ed public key file */
-  char *rsa;                  /* strdup'ed private key file */
+  char *pub_key;              /* strdup'ed public key file */
+  char *priv_key;             /* strdup'ed private key file */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
   struct curl_slist *quote_item; /* for the quote option */
@@ -220,7 +220,7 @@ struct ssh_conn {
 
 #ifdef USE_LIBSSH
 #if LIBSSH_VERSION_INT < SSH_VERSION_INT(0, 9, 0)
-#error "SCP/SFTP protocols require libssh 0.9.0 or later"
+#error "SCP/SFTP protocols require libssh 0.9.0 or greater"
 #endif
 #endif
 

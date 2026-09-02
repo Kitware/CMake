@@ -46,7 +46,7 @@ bool Curl_auth_is_ntlm_supported(void)
 
   /* Query the security package for NTLM */
   status = Curl_pSecFn->QuerySecurityPackageInfo(
-                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     CURL_UNCONST(TEXT(SP_NAME_NTLM)),
                                      &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
@@ -95,7 +95,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Query the security package for NTLM */
   status = Curl_pSecFn->QuerySecurityPackageInfo(
-                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     CURL_UNCONST(TEXT(SP_NAME_NTLM)),
                                      &SecurityPackage);
   if(status != SEC_E_OK) {
     failf(data, "SSPI: could not get auth info");
@@ -135,7 +135,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Acquire our credentials handle */
   status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     CURL_UNCONST(TEXT(SP_NAME_NTLM)),
                                      SECPKG_CRED_OUTBOUND, NULL,
                                      ntlm->p_identity, NULL, NULL,
                                      ntlm->credentials, NULL);
@@ -242,6 +242,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   SecBufferDesc type_3_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
+  SecPkgContext_Bindings pkgBindings = { 0, NULL };
 
   (void)creds;
 
@@ -253,7 +254,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   type_2_bufs[0].pvBuffer   = ntlm->input_token;
   type_2_bufs[0].cbBuffer   = curlx_uztoul(ntlm->input_token_len);
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   /* SSL context comes from schannel.
    * When extended protection is used in IIS server,
    * we have to pass a second SecBuffer to the SecBufferDesc
@@ -262,9 +262,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
    * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
    */
   if(ntlm->sslContext) {
-    SEC_CHANNEL_BINDINGS channelBindings;
-    SecPkgContext_Bindings pkgBindings;
-    pkgBindings.Bindings = &channelBindings;
     status = Curl_pSecFn->QueryContextAttributes(
       ntlm->sslContext,
       SECPKG_ATTR_ENDPOINT_BINDINGS,
@@ -277,7 +274,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
       type_2_bufs[1].pvBuffer = pkgBindings.Bindings;
     }
   }
-#endif
 
   /* Setup the type-3 "output" security buffer */
   type_3_desc.ulVersion = SECBUFFER_VERSION;
@@ -296,6 +292,10 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                                   0, ntlm->context,
                                                   &type_3_desc,
                                                   &attrs, NULL);
+
+  if(pkgBindings.Bindings)
+    Curl_pSecFn->FreeContextBuffer(pkgBindings.Bindings);
+
   if(status != SEC_E_OK) {
     infof(data, "NTLM handshake failure (type-3 message): Status=0x%08lx",
           (unsigned long)status);

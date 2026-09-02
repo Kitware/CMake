@@ -21,30 +21,28 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-if(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: @CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
+set(_manifest "@PROJECT_BINARY_DIR@/install_manifest.txt")
+if(NOT EXISTS "${_manifest}")
+  message(FATAL_ERROR "Cannot find install manifest: ${_manifest}")
 endif()
 
-if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
+set(_destdir "$ENV{DESTDIR}")
+if(NOT _destdir STREQUAL "")
+  message(STATUS "DESTDIR environment: ${_destdir}")
 endif()
-message(${CMAKE_INSTALL_PREFIX})
 
-file(READ "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt" _files)
+file(READ "${_manifest}" _files)
 string(REGEX REPLACE "\n" ";" _files "${_files}")
-foreach(_file ${_files})
-  message(STATUS "Uninstalling $ENV{DESTDIR}${_file}")
-  if(IS_SYMLINK "$ENV{DESTDIR}${_file}" OR EXISTS "$ENV{DESTDIR}${_file}")
-    execute_process(
-      COMMAND "@CMAKE_COMMAND@" -E remove "$ENV{DESTDIR}${_file}"
-      RESULT_VARIABLE rm_retval
-      OUTPUT_QUIET
-      ERROR_QUIET
-    )
-    if(NOT "${rm_retval}" STREQUAL 0)
-      message(FATAL_ERROR "Problem when removing $ENV{DESTDIR}${_file}")
+foreach(_file IN LISTS _files)
+  set(_target "${_destdir}${_file}")
+  if(IS_SYMLINK "${_target}" OR EXISTS "${_target}")
+    file(REMOVE "${_target}")
+    if(IS_SYMLINK "${_target}" OR EXISTS "${_target}")
+      message(STATUS "Failed to delete: ${_target}")
+    else()
+      message(STATUS "Uninstalled: ${_target}")
     endif()
   else()
-    message(STATUS "File $ENV{DESTDIR}${_file} does not exist.")
+    message(STATUS "File does not exist: ${_target}")
   endif()
 endforeach()

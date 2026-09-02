@@ -44,13 +44,14 @@
 #endif
 
 #include "urldata.h"
+#include "api.h"
 #include "transfer.h"
+#include "vdns/hostip.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
 #include "vquic/vquic.h"
 #include "url.h"
 #include "getinfo.h"
-#include "hostip.h"
 #include "curlx/strdup.h"
 #include "easyif.h"
 #include "multiif.h"
@@ -79,7 +80,9 @@
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int initialized;
+#ifdef _WIN32
 static long easy_init_flags;
+#endif
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
@@ -135,6 +138,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_ccalloc = (curl_calloc_callback)calloc;
   }
 
+  if(Curl_win32_init(flags)) {
+    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
+    goto fail;
+  }
+
   if(Curl_trc_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
     goto fail;
@@ -150,11 +158,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
-  if(Curl_win32_init(flags)) {
-    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
-    goto fail;
-  }
-
   if(Curl_amiga_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_amiga_init failed\n"));
     goto fail;
@@ -166,7 +169,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 
   if(Curl_async_global_init()) {
-    DEBUGF(curl_mfprintf(stderr, "Error: resolver_global_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_async_global_init failed\n"));
     goto fail;
   }
 
@@ -175,7 +178,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
+#ifdef _WIN32
   easy_init_flags = flags;
+#else
+  (void)flags;
+#endif
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_GLOBAL_INIT"))
@@ -267,10 +274,12 @@ void curl_global_cleanup(void)
   }
 
   Curl_ssl_cleanup();
+  Curl_vquic_cleanup();
   Curl_async_global_cleanup();
 
 #ifdef _WIN32
   Curl_win32_cleanup(easy_init_flags);
+  easy_init_flags = 0;
 #endif
 
   Curl_amiga_cleanup();
@@ -280,8 +289,6 @@ void curl_global_cleanup(void)
 #ifdef DEBUGBUILD
   curlx_free(leakpointer);
 #endif
-
-  easy_init_flags = 0;
 
   global_init_unlock();
 }
@@ -756,13 +763,9 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   /* if the handle has a connection still attached (it is/was a connect-only
      handle) then disconnect before performing */
   if(data->conn) {
-    struct connectdata *c;
-    curl_socket_t s;
+    struct connectdata *conn = data->conn;
     Curl_detach_connection(data);
-    s = Curl_getconnectinfo(data, &c);
-    if((s != CURL_SOCKET_BAD) && c) {
-      Curl_conn_terminate(data, c, TRUE);
-    }
+    Curl_conn_close(data, conn, TRUE);
     DEBUGASSERT(!data->conn);
   }
 
@@ -776,7 +779,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  if(multi->in_callback)
+  if(Curl_api_multi_is_in_callback(multi))
     return CURLE_RECURSIVE_API_CALL;
 
   /* Copy relevant easy options to the multi handle */
@@ -784,7 +787,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   curl_multi_setopt(multi, CURLMOPT_QUICK_EXIT, (long)data->set.quick_exit);
 
   data->multi_easy = NULL; /* pretend it does not exist */
-  mresult = curl_multi_add_handle(multi, data);
+  mresult = Curl_multi_add_handle(multi, data);
   if(mresult) {
     curl_multi_cleanup(multi);
     if(mresult == CURLM_OUT_OF_MEMORY)
@@ -803,7 +806,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 
   /* ignoring the return code is not nice, but atm we cannot really handle
      a failure here, room for future improvement! */
-  (void)curl_multi_remove_handle(multi, data);
+  (void)Curl_multi_remove_handle(multi, data);
 
   sigpipe_restore(&sigpipe_ctx);
 
@@ -817,7 +820,14 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
  */
 CURLcode curl_easy_perform(CURL *curl)
 {
-  return easy_perform(curl, FALSE);
+  struct Curl_eapi_guard guard = { 0 };
+  CURLcode result;
+
+  if(CURL_EAPI_ENTER(&guard, curl, easy_perform, &result)) {
+    result = easy_perform(curl, FALSE);
+  }
+  CURL_EAPI_LEAVE(&guard);
+  return result;
 }
 
 #ifdef DEBUGBUILD
@@ -827,7 +837,14 @@ CURLcode curl_easy_perform(CURL *curl)
  */
 CURLcode curl_easy_perform_ev(struct Curl_easy *easy)
 {
-  return easy_perform(easy, TRUE);
+  struct Curl_eapi_guard guard;
+  CURLcode result;
+
+  if(CURL_EAPI_ENTER(&guard, easy, easy_perform_ev, &result)) {
+    result = easy_perform(easy, TRUE);
+  }
+  CURL_EAPI_LEAVE(&guard);
+  return result;
 }
 #endif
 
@@ -837,13 +854,16 @@ CURLcode curl_easy_perform_ev(struct Curl_easy *easy)
  */
 void curl_easy_cleanup(CURL *curl)
 {
-  struct Curl_easy *data = curl;
-  if(GOOD_EASY_HANDLE(data)) {
+  struct Curl_eapi_guard guard;
+
+  if(CURL_EAPI_ENTER(&guard, curl, easy_cleanup, NULL)) {
+    struct Curl_easy *data = curl;
     struct Curl_sigpipe_ctx sigpipe_ctx;
     sigpipe_ignore(data, &sigpipe_ctx);
     Curl_close(&data);
     sigpipe_restore(&sigpipe_ctx);
   }
+  CURL_EAPI_LEAVE(&guard);
 }
 
 /*
@@ -853,27 +873,28 @@ void curl_easy_cleanup(CURL *curl)
 #undef curl_easy_getinfo
 CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
 {
-  struct Curl_easy *data = curl;
-  va_list arg;
-  void *paramp;
+  struct Curl_eapi_guard guard;
   CURLcode result;
 
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(CURL_EAPI_ENTER(&guard, curl, easy_getinfo, &result)) {
+    struct Curl_easy *data = curl;
+    va_list arg;
+    void *paramp;
 
-  va_start(arg, info);
-  paramp = va_arg(arg, void *);
+    va_start(arg, info);
+    paramp = va_arg(arg, void *);
 
-  result = Curl_getinfo(data, info, paramp);
+    result = Curl_getinfo(data, info, paramp);
 
-  va_end(arg);
+    va_end(arg);
+  }
+  CURL_EAPI_LEAVE(&guard);
   return result;
 }
 
 static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 {
   CURLcode result = CURLE_OK;
-  enum dupstring i;
   enum dupblob j;
 
   /* Copy src->set into dst->set first, then deal with the strings
@@ -882,17 +903,17 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   dst->set.mimepostp = NULL;
 #endif
+  dst->set.str_copypostfields = NULL;
+
+  Curl_u8_strset_init(&dst->set.strings);
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
-  memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
   memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
 
   /* duplicate all strings */
-  for(i = (enum dupstring)0; i < STRING_LASTZEROTERMINATED; i++) {
-    result = Curl_setstropt(&dst->set.str[i], src->set.str[i]);
-    if(result)
-      return result;
-  }
+  result = Curl_u8_strset_copy(&dst->set.strings, &src->set.strings);
+  if(result)
+    return result;
 
   /* duplicate all blobs */
   for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
@@ -902,18 +923,18 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   }
 
   /* duplicate memory areas pointed to */
-  i = STRING_COPYPOSTFIELDS;
-  if(src->set.str[i]) {
+  if(src->set.str_copypostfields) {
     if(src->set.postfieldsize == -1)
-      dst->set.str[i] = curlx_strdup(src->set.str[i]);
+      dst->set.str_copypostfields = curlx_strdup(src->set.str_copypostfields);
     else
       /* postfieldsize is curl_off_t, curlx_memdup() takes a size_t ... */
-      dst->set.str[i] = curlx_memdup(src->set.str[i],
-                                     curlx_sotouz(src->set.postfieldsize));
-    if(!dst->set.str[i])
+      dst->set.str_copypostfields =
+        curlx_memdup(src->set.str_copypostfields,
+                     curlx_sotouz(src->set.postfieldsize));
+    if(!dst->set.str_copypostfields)
       return CURLE_OUT_OF_MEMORY;
     /* point to the new copy */
-    dst->set.postfields = dst->set.str[i];
+    dst->set.postfields = dst->set.str_copypostfields;
   }
 
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
@@ -952,122 +973,125 @@ static void dupeasy_meta_freeentry(void *p)
  */
 CURL *curl_easy_duphandle(CURL *curl)
 {
-  struct Curl_easy *data = curl;
+  struct Curl_eapi_guard guard;
   struct Curl_easy *outcurl = NULL;
 
-  if(!GOOD_EASY_HANDLE(data))
-    goto fail;
-  outcurl = curlx_calloc(1, sizeof(struct Curl_easy));
-  if(!outcurl)
-    goto fail;
+  if(CURL_EAPI_ENTER(&guard, curl, easy_duphandle, NULL)) {
+    struct Curl_easy *data = curl;
+    const char *str;
 
-  /*
-   * We setup a few buffers we need. We should probably make them
-   * get setup on-demand in the code, as that would probably decrease
-   * the likeliness of us forgetting to init a buffer here in the future.
-   */
-  outcurl->set.buffer_size = data->set.buffer_size;
+    outcurl = curlx_calloc(1, sizeof(struct Curl_easy));
+    if(!outcurl)
+      goto fail;
 
-  Curl_hash_init(&outcurl->meta_hash, 23,
-                 Curl_hash_str, curlx_str_key_compare, dupeasy_meta_freeentry);
-  curlx_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
-  Curl_bufref_init(&outcurl->state.url);
-  Curl_bufref_init(&outcurl->state.referer);
-  Curl_netrc_init(&outcurl->state.netrc);
+    /*
+     * We setup a few buffers we need. We should probably make them
+     * get setup on-demand in the code, as that would probably decrease
+     * the likeliness of us forgetting to init a buffer here in the future.
+     */
+    outcurl->set.buffer_size = data->set.buffer_size;
 
-  /* the connection pool is setup on demand */
-  outcurl->state.lastconnect_id = -1;
-  outcurl->state.recent_conn_id = -1;
-  outcurl->id = -1;
-  outcurl->mid = UINT32_MAX;
-  outcurl->master_mid = UINT32_MAX;
+    Curl_hash_init(&outcurl->meta_hash, 23,
+                   Curl_hash_str, curlx_str_key_compare,
+                   dupeasy_meta_freeentry);
+    curlx_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
+    Curl_bufref_init(&outcurl->state.url);
+    Curl_bufref_init(&outcurl->state.referer);
+    Curl_netrc_init(&outcurl->state.netrc);
+
+    /* the connection pool is setup on demand */
+    outcurl->state.lastconnect_id = -1;
+    outcurl->id = -1;
+    outcurl->mid = UINT32_MAX;
+    outcurl->master_mid = UINT32_MAX;
 
 #ifndef CURL_DISABLE_HTTP
-  Curl_llist_init(&outcurl->state.httphdrs, NULL);
+    Curl_llist_init(&outcurl->state.httphdrs, NULL);
 #endif
-  Curl_initinfo(outcurl);
+    Curl_initinfo(outcurl);
 
-  /* copy all userdefined values */
-  if(dupset(outcurl, data))
-    goto fail;
+    /* copy all userdefined values */
+    if(dupset(outcurl, data))
+      goto fail;
 
-  outcurl->progress.hide     = data->progress.hide;
-  outcurl->progress.callback = data->progress.callback;
+    outcurl->progress.hide     = data->progress.hide;
+    outcurl->progress.callback = data->progress.callback;
 
 #ifndef CURL_DISABLE_COOKIES
-  outcurl->state.cookielist = NULL;
-  if(data->cookies && data->state.cookie_engine) {
-    /* If cookies are enabled in the parent handle, we enable them
-       in the clone as well! */
-    outcurl->cookies = Curl_cookie_init();
-    if(!outcurl->cookies)
-      goto fail;
-    outcurl->state.cookie_engine = TRUE;
-  }
+    outcurl->state.cookielist = NULL;
+    if(data->cookies && data->state.cookie_engine) {
+      /* If cookies are enabled in the parent handle, we enable them
+         in the clone as well! */
+      outcurl->cookies = Curl_cookie_init();
+      if(!outcurl->cookies)
+        goto fail;
+      outcurl->state.cookie_engine = TRUE;
+    }
 
-  if(data->state.cookielist) {
-    outcurl->state.cookielist = Curl_slist_duplicate(data->state.cookielist);
-    if(!outcurl->state.cookielist)
-      goto fail;
-  }
+    if(data->state.cookielist) {
+      outcurl->state.cookielist = Curl_slist_duplicate(data->state.cookielist);
+      if(!outcurl->state.cookielist)
+        goto fail;
+    }
 #endif
 
-  if(Curl_bufref_ptr(&data->state.url)) {
-    Curl_bufref_set(&outcurl->state.url,
-                    Curl_bufref_dup(&data->state.url), 0,
-                    curl_free);
-    if(!Curl_bufref_ptr(&outcurl->state.url))
-      goto fail;
-  }
-  if(Curl_bufref_ptr(&data->state.referer)) {
-    Curl_bufref_set(&outcurl->state.referer,
-                    Curl_bufref_dup(&data->state.referer), 0,
-                    curl_free);
-    if(!Curl_bufref_ptr(&outcurl->state.referer))
-      goto fail;
-  }
+    if(Curl_bufref_ptr(&data->state.url)) {
+      Curl_bufref_set(&outcurl->state.url,
+                      Curl_bufref_dup(&data->state.url), 0,
+                      curl_free);
+      if(!Curl_bufref_ptr(&outcurl->state.url))
+        goto fail;
+    }
+    if(Curl_bufref_ptr(&data->state.referer)) {
+      Curl_bufref_set(&outcurl->state.referer,
+                      Curl_bufref_dup(&data->state.referer), 0,
+                      curl_free);
+      if(!Curl_bufref_ptr(&outcurl->state.referer))
+        goto fail;
+    }
 
-  /* Reinitialize an SSL engine for the new handle
-   * note: the engine name has already been copied by dupset */
-  if(outcurl->set.str[STRING_SSL_ENGINE]) {
-    if(Curl_ssl_set_engine(outcurl, outcurl->set.str[STRING_SSL_ENGINE]))
-      goto fail;
-  }
+    /* Reinitialize an SSL engine for the new handle
+     * note: the engine name has already been copied by dupset */
+    str = CURL_EASY_STR(outcurl, STRING_SSL_ENGINE);
+    if(str) {
+      if(Curl_ssl_set_engine(outcurl, str))
+        goto fail;
+    }
 
 #ifndef CURL_DISABLE_ALTSVC
-  if(data->asi) {
-    outcurl->asi = Curl_altsvc_init();
-    if(!outcurl->asi)
-      goto fail;
-    if(outcurl->set.str[STRING_ALTSVC])
-      (void)Curl_altsvc_load(outcurl->asi, outcurl->set.str[STRING_ALTSVC]);
-  }
+    if(data->asi) {
+      outcurl->asi = Curl_altsvc_init();
+      if(!outcurl->asi)
+        goto fail;
+      str = CURL_EASY_STR(outcurl, STRING_ALTSVC);
+      if(str)
+        (void)Curl_altsvc_load(outcurl->asi, str);
+    }
 #endif
 #ifndef CURL_DISABLE_HSTS
-  if(data->hsts) {
-    outcurl->hsts = Curl_hsts_init();
-    if(!outcurl->hsts)
-      goto fail;
-    if(outcurl->set.str[STRING_HSTS])
-      (void)Curl_hsts_loadfile(outcurl,
-                               outcurl->hsts, outcurl->set.str[STRING_HSTS]);
-    (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
+    if(data->hsts) {
+      outcurl->hsts = Curl_hsts_init();
+      if(!outcurl->hsts)
+        goto fail;
+      str = CURL_EASY_STR(outcurl, STRING_HSTS);
+      if(str)
+        (void)Curl_hsts_loadfile(outcurl, outcurl->hsts, str);
+      (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
 
-    /* Copy entries learned at runtime. (E.g. Strict-Transport-Security
-       headers.) */
-    if(Curl_hsts_copy(outcurl->hsts, data->hsts))
-      goto fail;
-  }
+      /* Copy entries learned at runtime. (E.g. Strict-Transport-Security
+         headers.) */
+      if(Curl_hsts_copy(outcurl->hsts, data->hsts))
+        goto fail;
+    }
 #endif
 
-  outcurl->magic = CURLEASY_MAGIC_NUMBER;
-
-  /* we reach this point and thus we are OK */
-
+    /* we reach this point and thus we are OK */
+    outcurl->magic = CURLEASY_MAGIC_NUMBER;
+  }
+  CURL_EAPI_LEAVE(&guard);
   return outcurl;
 
 fail:
-
   if(outcurl) {
 #ifndef CURL_DISABLE_COOKIES
     curlx_free(outcurl->cookies);
@@ -1079,6 +1103,7 @@ fail:
     curlx_free(outcurl);
   }
 
+  CURL_EAPI_LEAVE(&guard);
   return NULL;
 }
 
@@ -1088,38 +1113,40 @@ fail:
  */
 void curl_easy_reset(CURL *curl)
 {
-  struct Curl_easy *data = curl;
-  if(!GOOD_EASY_HANDLE(data))
-    return;
+  struct Curl_eapi_guard guard;
 
-  Curl_req_hard_reset(&data->req, data);
-  Curl_hash_clean(&data->meta_hash);
+  if(CURL_EAPI_ENTER(&guard, curl, easy_reset, NULL)) {
+    struct Curl_easy *data = curl;
 
-  /* clear all meta data */
-  Curl_meta_reset(data);
-  /* zero out UserDefined data: */
-  Curl_freeset(data);
-  memset(&data->set, 0, sizeof(struct UserDefined));
-  Curl_init_userdefined(data);
+    data->state.lastconnect_id = -1; /* clear remembered connection id */
+    Curl_req_hard_reset(&data->req, data);
+    Curl_hash_clean(&data->meta_hash);
 
-  /* zero out Progress data: */
-  memset(&data->progress, 0, sizeof(struct Progress));
+    /* clear all meta data */
+    Curl_meta_reset(data);
+    /* zero out UserDefined data: */
+    Curl_freeset(data);
+    memset(&data->set, 0, sizeof(struct UserDefined));
+    Curl_init_userdefined(data);
 
-  /* zero out PureInfo data: */
-  Curl_initinfo(data);
+    /* zero out Progress data: */
+    memset(&data->progress, 0, sizeof(struct Progress));
 
-  data->progress.hide = TRUE;
-  data->state.current_speed = -1; /* init to negative == impossible */
-  data->state.recent_conn_id = -1; /* clear remembered connection id */
+    /* zero out PureInfo data: */
+    Curl_initinfo(data);
 
-  /* zero out authentication data: */
-  memset(&data->state.authhost, 0, sizeof(struct auth));
-  memset(&data->state.authproxy, 0, sizeof(struct auth));
+    data->progress.hide = TRUE;
+
+    /* zero out authentication data: */
+    memset(&data->state.authhost, 0, sizeof(struct auth));
+    memset(&data->state.authproxy, 0, sizeof(struct auth));
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
-  Curl_http_auth_cleanup_digest(data);
+    Curl_http_auth_cleanup_digest(data);
 #endif
-  data->master_mid = UINT32_MAX;
+    data->master_mid = UINT32_MAX;
+  }
+  CURL_EAPI_LEAVE(&guard);
 }
 
 /*
@@ -1137,62 +1164,60 @@ void curl_easy_reset(CURL *curl)
  */
 CURLcode curl_easy_pause(CURL *curl, int action)
 {
+  struct Curl_eapi_guard guard;
   CURLcode result = CURLE_OK;
-  bool recursive = FALSE;
-  bool changed = FALSE;
-  struct Curl_easy *data = curl;
-  bool recv_paused, recv_paused_new;
-  bool send_paused, send_paused_new;
 
-  if(!GOOD_EASY_HANDLE(data) || !data->conn)
-    /* crazy input, do not continue */
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(CURL_EAPI_ENTER(&guard, curl, easy_pause, &result)) {
+    bool changed = FALSE;
+    struct Curl_easy *data = curl;
+    bool recv_paused, recv_paused_new;
+    bool send_paused, send_paused_new;
 
-  if(Curl_is_in_callback(data))
-    recursive = TRUE;
+    if(!data->conn) {
+      /* crazy input, do not continue */
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
 
-  recv_paused = Curl_xfer_recv_is_paused(data);
-  recv_paused_new = (action & CURLPAUSE_RECV);
-  send_paused = Curl_xfer_send_is_paused(data);
-  send_paused_new = (action & CURLPAUSE_SEND);
+    recv_paused = Curl_xfer_recv_is_paused(data);
+    recv_paused_new = (action & CURLPAUSE_RECV);
+    send_paused = Curl_xfer_send_is_paused(data);
+    send_paused_new = (action & CURLPAUSE_SEND);
 
-  if((send_paused != send_paused_new) ||
-     (send_paused_new != Curl_creader_is_paused(data))) {
-    changed = TRUE;
-    result = Curl_1st_fatal(
-      result, Curl_xfer_pause_send(data, send_paused_new));
-  }
+    if((send_paused != send_paused_new) ||
+       (send_paused_new != Curl_creader_is_paused(data))) {
+      changed = TRUE;
+      result = Curl_1st_fatal(
+        result, Curl_xfer_pause_send(data, send_paused_new));
+    }
 
-  if(recv_paused != recv_paused_new) {
-    changed = TRUE;
-    result = Curl_1st_fatal(
-      result, Curl_xfer_pause_recv(data, recv_paused_new));
-  }
+    if(recv_paused != recv_paused_new) {
+      changed = TRUE;
+      result = Curl_1st_fatal(
+        result, Curl_xfer_pause_recv(data, recv_paused_new));
+    }
 
-  /* If not completely pausing both directions now, run again in any case. */
-  if(!Curl_xfer_is_blocked(data)) {
-    /* reset the too-slow time keeper */
-    data->state.keeps_speed.tv_sec = 0;
-    if(data->multi) {
-      Curl_multi_mark_dirty(data); /* make it run */
-      /* On changes, tell application to update its timers. */
-      if(changed) {
-        if(Curl_update_timer(data->multi) && !result)
-          result = CURLE_ABORTED_BY_CALLBACK;
+    /* If not completely pausing both directions, run again in any case. */
+    if(!Curl_xfer_is_blocked(data)) {
+      /* reset the too-slow time keeper */
+      data->state.keeps_speed.tv_sec = 0;
+      if(data->multi) {
+        Curl_multi_mark_dirty(data); /* make it run */
+        /* On changes, tell application to update its timers. */
+        if(changed) {
+          if(Curl_update_timer(data->multi) && !result)
+            result = CURLE_ABORTED_BY_CALLBACK;
+        }
       }
     }
+
+    if(!result && changed && !data->state.done && data->multi)
+      /* pause/unpausing may result in multi event changes */
+      if(Curl_multi_ev_assess_xfer(data->multi, data) && !result)
+        result = CURLE_ABORTED_BY_CALLBACK;
   }
-
-  if(!result && changed && !data->state.done && data->multi)
-    /* pause/unpausing may result in multi event changes */
-    if(Curl_multi_ev_assess_xfer(data->multi, data) && !result)
-      result = CURLE_ABORTED_BY_CALLBACK;
-
-  if(recursive)
-    /* this might have called a callback recursively which might have set this
-       to false again on exit */
-    Curl_set_in_callback(data, TRUE);
-
+out:
+  CURL_EAPI_LEAVE(&guard);
   return result;
 }
 
@@ -1213,7 +1238,8 @@ static CURLcode easy_connection(struct Curl_easy *data,
   sfd = Curl_getconnectinfo(data, connp);
 
   if(sfd == CURL_SOCKET_BAD) {
-    failf(data, "Failed to get recent socket");
+    failf(data, "Failed to get last socket used for connection #%" FMT_OFF_T,
+          data->state.lastconnect_id);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
@@ -1225,16 +1251,11 @@ static CURLcode easy_connection(struct Curl_easy *data,
  * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
  * Returns CURLE_OK on success, error code on error.
  */
-CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
+CURLcode Curl_easy_recv(struct Curl_easy *data,
+                        void *buffer, size_t buflen, size_t *n)
 {
   CURLcode result;
   struct connectdata *c;
-  struct Curl_easy *data = curl;
-
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
 
   result = easy_connection(data, &c);
   if(result)
@@ -1243,10 +1264,22 @@ CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    Curl_attach_connection(data, c, TRUE);
 
   *n = 0;
   return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
+}
+
+CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
+{
+  struct Curl_eapi_guard guard;
+  CURLcode result;
+
+  if(CURL_EAPI_ENTER(&guard, curl, easy_recv, &result)) {
+    result = Curl_easy_recv(curl, buffer, buflen, n);
+  }
+  CURL_EAPI_LEAVE(&guard);
+  return result;
 }
 
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -1262,7 +1295,7 @@ CURLcode Curl_connect_only_attach(struct Curl_easy *data)
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    Curl_attach_connection(data, c, TRUE);
 
   return CURLE_OK;
 }
@@ -1288,7 +1321,7 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    Curl_attach_connection(data, c, TRUE);
 
   sigpipe_ignore(data, &sigpipe_ctx);
   result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, FALSE, n);
@@ -1306,16 +1339,17 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
 CURLcode curl_easy_send(CURL *curl, const void *buffer, size_t buflen,
                         size_t *n)
 {
-  size_t written = 0;
+  struct Curl_eapi_guard guard;
   CURLcode result;
-  struct Curl_easy *data = curl;
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
 
-  result = Curl_senddata(data, buffer, buflen, &written);
-  *n = written;
+  if(CURL_EAPI_ENTER(&guard, curl, easy_send, &result)) {
+    struct Curl_easy *data = curl;
+    size_t written = 0;
+
+    result = Curl_senddata(data, buffer, buflen, &written);
+    *n = written;
+  }
+  CURL_EAPI_LEAVE(&guard);
   return result;
 }
 
@@ -1324,16 +1358,15 @@ CURLcode curl_easy_send(CURL *curl, const void *buffer, size_t buflen,
  */
 CURLcode curl_easy_upkeep(CURL *curl)
 {
-  struct Curl_easy *data = curl;
-  /* Verify that we got an easy handle we can work with. */
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  struct Curl_eapi_guard guard;
+  CURLcode result;
 
-  if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
-
-  /* Use the common function to keep connections alive. */
-  return Curl_cpool_upkeep(data);
+  if(CURL_EAPI_ENTER(&guard, curl, easy_upkeep, &result)) {
+    /* Use the common function to keep connections alive. */
+    result = Curl_cpool_upkeep((struct Curl_easy *)curl);
+  }
+  CURL_EAPI_LEAVE(&guard);
+  return result;
 }
 
 CURLcode curl_easy_ssls_import(CURL *curl, const char *session_key,
@@ -1341,13 +1374,15 @@ CURLcode curl_easy_ssls_import(CURL *curl, const char *session_key,
                                const unsigned char *sdata, size_t sdata_len)
 {
 #if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
-  struct Curl_easy *data = curl;
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(Curl_is_in_callback(data) || Curl_ssl_scache_is_locked(data))
-    return CURLE_RECURSIVE_API_CALL;
-  return Curl_ssl_session_import(data, session_key,
-                                 shmac, shmac_len, sdata, sdata_len);
+  struct Curl_eapi_guard guard;
+  CURLcode result;
+
+  if(CURL_EAPI_ENTER(&guard, curl, easy_ssls_import, &result)) {
+    result = Curl_ssl_session_import((struct Curl_easy *)curl, session_key,
+                                     shmac, shmac_len, sdata, sdata_len);
+  }
+  CURL_EAPI_LEAVE(&guard);
+  return result;
 #else
   (void)curl;
   (void)session_key;
@@ -1364,12 +1399,15 @@ CURLcode curl_easy_ssls_export(CURL *curl,
                                void *userptr)
 {
 #if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
-  struct Curl_easy *data = curl;
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(Curl_is_in_callback(data) || Curl_ssl_scache_is_locked(data))
-    return CURLE_RECURSIVE_API_CALL;
-  return Curl_ssl_session_export(data, export_fn, userptr);
+  struct Curl_eapi_guard guard;
+  CURLcode result;
+
+  if(CURL_EAPI_ENTER(&guard, curl, easy_ssls_export, &result)) {
+    result = Curl_ssl_session_export((struct Curl_easy *)curl,
+                                     export_fn, userptr);
+  }
+  CURL_EAPI_LEAVE(&guard);
+  return result;
 #else
   (void)curl;
   (void)export_fn;

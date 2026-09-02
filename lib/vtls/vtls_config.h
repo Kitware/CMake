@@ -47,10 +47,6 @@ struct ssl_primary_config {
   struct curl_blob *ca_info_blob;
   struct curl_blob *issuercert_blob;
   struct curl_blob *key_blob;
-#ifdef USE_TLS_SRP
-  char *username; /* TLS username (for, e.g., SRP) */
-  char *password; /* TLS password (for, e.g., SRP) */
-#endif
   char *curves;          /* list of curves to use */
   uint32_t version_max; /* max supported version the client wants to use */
   uint8_t ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */
@@ -58,6 +54,7 @@ struct ssl_primary_config {
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */
+  BIT(native_ca_store); /* use the native CA store of operating system */
   BIT(cache_session);    /* cache session or not */
   BIT(deep_copy);        /* members are deep copies, eg. owned here */
 };
@@ -74,7 +71,6 @@ struct ssl_config_data {
   BIT(no_partialchain); /* do not accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
-  BIT(native_ca_store); /* use the native CA store of operating system */
   BIT(auto_client_cert);   /* automatically locate and use a client
                               certificate for authentication (Schannel) */
   BIT(custom_cafile); /* application has set custom CA file */

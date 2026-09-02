@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#define KEYLOG_LABEL_MAXLEN (sizeof("CLIENT_HANDSHAKE_TRAFFIC_SECRET") - 1)
+#define KEYLOG_LABEL_MAXLEN CURL_CSTRLEN("CLIENT_HANDSHAKE_TRAFFIC_SECRET")
 
 #define CLIENT_RANDOM_SIZE  32
 
@@ -61,10 +61,10 @@ const char *Curl_tls_keylog_file_name(void);
  * Appends a key log file entry.
  * Returns true iff the key log file is open and a valid entry was provided.
  */
-bool Curl_tls_keylog_write(
-  const char *label,
-  const unsigned char client_random[CLIENT_RANDOM_SIZE],
-  const unsigned char *secret, size_t secretlen);
+bool Curl_tls_keylog_write(const char *label,
+                           const unsigned char *client_random,
+                           size_t random_size,
+                           const unsigned char *secret, size_t secretlen);
 
 /*
  * Appends a line to the key log file, ensure it is terminated by an LF.

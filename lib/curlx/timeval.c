@@ -25,26 +25,24 @@
 
 #ifdef _WIN32
 
-#include "system_win32.h"
-
-LARGE_INTEGER Curl_freq;
+static LARGE_INTEGER s_time_freq;
 
 /* For tool or tests, we must initialize before calling curlx_now().
    Providing this function here is wrong. */
 void curlx_now_init(void)
 {
-  QueryPerformanceFrequency(&Curl_freq);
+  QueryPerformanceFrequency(&s_time_freq);
 }
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
 void curlx_pnow(struct curltime *pnow)
 {
   LARGE_INTEGER count;
-  DEBUGASSERT(Curl_freq.QuadPart);
+  DEBUGASSERT(s_time_freq.QuadPart);
   QueryPerformanceCounter(&count);
-  pnow->tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
-  pnow->tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
-                        Curl_freq.QuadPart);
+  pnow->tv_sec = (time_t)(count.QuadPart / s_time_freq.QuadPart);
+  pnow->tv_usec = (int)((count.QuadPart % s_time_freq.QuadPart) * 1000000 /
+                        s_time_freq.QuadPart);
 }
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) || \
@@ -214,6 +212,11 @@ timediff_t curlx_timediff_ceil_ms(struct curltime newer,
   else if(diff <= (TIMEDIFF_T_MIN / 1000))
     return TIMEDIFF_T_MIN;
   return (diff * 1000) + ((newer.tv_usec - older.tv_usec + 999) / 1000);
+}
+
+timediff_t curlx_us_to_ceil_ms(timediff_t us)
+{
+  return (us / 1000) + ((us > 0) && (us % 1000));
 }
 
 /*

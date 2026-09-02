@@ -52,7 +52,7 @@
 
 #define TIMESTAMP_SIZE 17
 
-/* hex-encoded with trailing null */
+/* hex-encoded with null-terminator */
 #define SHA256_HEX_LENGTH ((2 * CURL_SHA256_DIGEST_LENGTH) + 1)
 
 #define MAX_QUERY_COMPONENTS 128
@@ -223,8 +223,7 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
 }
 
 /* Normalize the query part. Make sure %2B is left percent encoded, and not
-   decoded to plus, then encoded to space.
-*/
+   decoded to plus, then encoded to space. */
 static CURLcode normalize_query(const char *string, size_t len,
                                 struct dynbuf *db)
 {
@@ -370,7 +369,6 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
 
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
 static CURLcode make_headers(struct Curl_easy *data,
-                             const char *hostname,
                              char *timestamp,
                              const char *provider1,
                              size_t plen, /* length of provider1 */
@@ -398,16 +396,10 @@ static CURLcode make_headers(struct Curl_easy *data,
   /* provider1 lowercase */
   Curl_strntolower(&date_full_hdr[2], provider1, plen);
 
-  if(!Curl_checkheaders(data, STRCONST("Host"))) {
-    char *fullhost;
-
-    if(data->state.aptr.host) {
-      /* remove /r/n as the separator for canonical request must be '\n' */
-      size_t pos = strcspn(data->state.aptr.host, "\n\r");
-      fullhost = curlx_memdup0(data->state.aptr.host, pos);
-    }
-    else
-      fullhost = curl_maprintf("host:%s", hostname);
+  if(!Curl_checkheaders(data, STRCONST("Host")) &&
+     data->state.http_host) {
+    /* Host: [host]:[port] */
+    char *fullhost = curlx_strdup(data->state.http_host);
 
     if(fullhost)
       head = Curl_slist_append_nodup(NULL, fullhost);
@@ -627,7 +619,7 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
   }
   else {
     /* Fall back to s3's UNSIGNED-PAYLOAD */
-    size_t len = sizeof(S3_UNSIGNED_PAYLOAD) - 1;
+    size_t len = CURL_CSTRLEN(S3_UNSIGNED_PAYLOAD);
     DEBUGASSERT(len < SHA256_HEX_LENGTH); /* 16 < 65 */
     memcpy(sha_hex, S3_UNSIGNED_PAYLOAD, len);
     sha_hex[len] = 0;
@@ -824,14 +816,13 @@ static CURLcode parse_sigv4_params(struct Curl_easy *data,
                                    struct Curl_str *region,
                                    struct Curl_str *service)
 {
-  const char *line = data->set.str[STRING_AWS_SIGV4];
+  const char *line = CURL_EASY_STR(data, STRING_AWS_SIGV4);
   if(!line || !*line)
     line = "aws:amz";
 
   /* provider0[:provider1[:region[:service]]]
 
-     No string can be longer than N bytes of non-whitespace
-  */
+     No string can be longer than N bytes of non-whitespace */
   if(curlx_str_until(&line, provider0, MAX_SIGV4_LEN, ':')) {
     failf(data, "first aws-sigv4 provider cannot be empty");
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -938,7 +929,6 @@ static CURLcode get_timestamp(char *timestamp, size_t stampsize)
 }
 
 static CURLcode make_canonical_request(struct Curl_easy *data,
-                                       const char *hostname,
                                        char *timestamp,
                                        struct Curl_str *provider1,
                                        struct Curl_str *service,
@@ -958,7 +948,7 @@ static CURLcode make_canonical_request(struct Curl_easy *data,
   curlx_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
   curlx_dyn_init(&canonical_path, CURL_MAX_HTTP_HEADER);
 
-  result = make_headers(data, hostname, timestamp,
+  result = make_headers(data, timestamp,
                         curlx_str(provider1), curlx_strlen(provider1),
                         date_header_out, content_sha256_hdr,
                         canonical_headers, signed_headers);
@@ -1148,7 +1138,7 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
     goto fail;
 
   /* provider 0 uppercase */
-  Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
+  Curl_strntoupper(&auth_headers[CURL_CSTRLEN("Authorization: ")],
                    curlx_str(provider0), curlx_strlen(provider0));
 
   curlx_free(data->req.hd_auth);
@@ -1213,7 +1203,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     result = get_timestamp(timestamp, sizeof(timestamp));
 
   if(!result)
-    result = make_canonical_request(data, hostname, timestamp,
+    result = make_canonical_request(data, timestamp,
                                     &provider1, &service,
                                     method, payload_hash, payload_hash_len,
                                     &date_header, content_sha256_hdr,

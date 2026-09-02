@@ -276,7 +276,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   size_t start_user = 0;
   size_t start_pwd = 0;
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
-  const size_t clen = strlen("curl");
+  const size_t clen = CURL_CSTRLEN("curl");
   char *packet = NULL;
 
   /* extracting username from request */
@@ -347,8 +347,10 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
     result = mqtt_send(data, packet, packetlen);
 
 end:
-  if(packet)
+  if(packet) {
+    curlx_memzero(packet, packetlen);
     curlx_free(packet);
+  }
   Curl_creds_unlink(&data->state.creds);
   return result;
 }
@@ -438,7 +440,7 @@ static CURLcode mqtt_get_topic(struct Curl_easy *data,
   const char *path = data->state.up.path;
   CURLcode result = CURLE_URL_MALFORMAT;
   if(strlen(path) > 1) {
-    result = Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
+    result = Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_CTRL);
     if(!result && (*topiclen > 0xffff)) {
       failf(data, "Too long MQTT topic");
       result = CURLE_URL_MALFORMAT;
@@ -627,7 +629,7 @@ static bool mqtt_decode_len(size_t *lenp, const unsigned char *buf,
 }
 
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-static const char *statenames[] = {
+static const char * const statenames[] = {
   "MQTT_FIRST",
   "MQTT_REMAINING_LENGTH",
   "MQTT_CONNACK",
@@ -975,7 +977,7 @@ static CURLcode mqtts_connecting(struct Curl_easy *data, bool *done)
 
   result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
   if(result)
-    connclose(conn, "Failed TLS connection");
+    connclose(conn);
   return result;
 }
 

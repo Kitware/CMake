@@ -121,6 +121,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_CONN_INFO_UPDATE (256 + 0) /* 0          NULL     ignored */
 #define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
 #define CF_CTRL_FLUSH            (256 + 2) /* 0          NULL     first fail */
+#define CF_CTRL_REPORT_STATS     (256 + 3) /* 0          NULL     ignored */
 
 /**
  * Handle event/control for the filter.
@@ -156,13 +157,17 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
                         null-terminated string or NULL if none
                         selected/handshake not done. Implemented by filter
                         types CF_TYPE_SSL or CF_TYPE_IP_CONNECT.
+ * - CF_QUERY_REALLY_CONNECTED: implemented in socket filters to return
+ *                      if a reply from a server has really arrived. For
+ *                      non-UDP sockets this is TRUE when the socket became
+ *                      writable. For UDP sockets, this is TRUE when the
+ *                      first byte from the peer was received.
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
 #define CF_QUERY_CONNECT_REPLY_MS   2  /* number     -        */
 #define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
-#define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
-#define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
+/* unused 4 + 5 */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
@@ -175,6 +180,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_SSL_CTX_INFO      13  /* -    struct curl_tlssessioninfo * */
 #define CF_QUERY_TRANSPORT         14  /* TRNSPRT_*  - * */
 #define CF_QUERY_ALPN_NEGOTIATED   15  /* -          const char * */
+#define CF_QUERY_REALLY_CONNECTED  16  /* TRUE/FALSE - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -197,7 +203,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  * CF_TYPE_HTTP        implement a version of the HTTP protocol
  * CF_TYPE_SETUP       filter is only needed for connection setup and
  *                     can be removed once connected
- * CF_TYPE_HTTPSRR     filter that wants HTTPS-RR information
+ * CF_TYPE_DNS         filter managing DNS resolve operations
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
@@ -205,7 +211,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 #define CF_TYPE_PROXY       (1 << 3)
 #define CF_TYPE_HTTP        (1 << 4)
 #define CF_TYPE_SETUP       (1 << 5)
-#define CF_TYPE_HTTPSRR     (1 << 6)
+#define CF_TYPE_DNS         (1 << 6)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -231,7 +237,7 @@ struct Curl_cfilter {
   struct Curl_cfilter *next;     /* next filter in chain */
   void *ctx;                     /* filter type specific settings */
   struct connectdata *conn;      /* the connection this filter belongs to */
-  int sockindex;                 /* the index the filter is installed at */
+  int8_t sockindex;                 /* the index the filter is installed at */
   BIT(connected);                /* != 0 iff this filter is connected */
   BIT(shutdown);                 /* != 0 iff this filter has shut down */
 };
@@ -286,7 +292,7 @@ CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
  */
 void Curl_conn_cf_add(struct Curl_easy *data,
                       struct connectdata *conn,
-                      int sockindex,
+                      int8_t sockindex,
                       struct Curl_cfilter *cf);
 
 /**
@@ -314,7 +320,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
  * Remove and destroy all filters at chain `sockindex` on connection `conn`.
  */
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
-                              struct connectdata *conn, int sockindex);
+                              struct connectdata *conn, int8_t sockindex);
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -343,6 +349,9 @@ CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
 bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
                               struct Curl_easy *data);
 
+bool Curl_conn_cf_is_ip_connected(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data);
+
 unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
                                          struct Curl_easy *data);
 
@@ -352,10 +361,6 @@ int Curl_protocol_for_transport(uint8_t transport);
 const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
                                              struct Curl_easy *data);
 
-/* The filter (or one of its sub-filters) wants HTTPS-RR information. */
-bool Curl_conn_cf_wants_httpsrr(struct Curl_cfilter *cf,
-                                struct Curl_easy *data);
-
 #define CURL_CF_SSL_DEFAULT  (-1)
 #define CURL_CF_SSL_DISABLE  0
 #define CURL_CF_SSL_ENABLE   1
@@ -363,31 +368,31 @@ bool Curl_conn_cf_wants_httpsrr(struct Curl_cfilter *cf,
 /**
  * Check if a filter chain at `sockindex` for connection `conn` exists.
  */
-bool Curl_conn_is_setup(struct connectdata *conn, int sockindex);
+bool Curl_conn_is_setup(struct connectdata *conn, int8_t sockindex);
 
 /**
  * Check if the filter chain at `sockindex` for connection `conn` is
  * completely connected.
  */
-bool Curl_conn_is_connected(struct connectdata *conn, int sockindex);
+bool Curl_conn_is_connected(struct connectdata *conn, int8_t sockindex);
 
 /**
  * Determine if we have reached the remote host on IP level, e.g.
  * have a TCP connection. This turns TRUE before a possible SSL
  * handshake has been started/done.
  */
-bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex);
+bool Curl_conn_is_ip_connected(struct Curl_easy *data, int8_t sockindex);
 
 /**
  * Determine if the connection is using SSL to the remote host
  * (or will be once connected). This will return FALSE, if SSL
  * is only used in proxying and not for the tunnel itself.
  */
-bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex);
+bool Curl_conn_is_ssl(struct connectdata *conn, int8_t sockindex);
 
 /* Determine if the connection has one or more proxy filters.
  * e.g. is tunneling. */
-bool Curl_conn_is_tunneling(struct connectdata *conn, int sockindex);
+bool Curl_conn_is_tunneling(struct connectdata *conn, int8_t sockindex);
 
 /*
  * Fill `info` with information about the TLS instance securing the connection
@@ -395,18 +400,18 @@ bool Curl_conn_is_tunneling(struct connectdata *conn, int sockindex);
  * FALSE. 'query' should be CF_QUERY_SSL_INFO or CF_QUERY_SSL_CTX_INFO.
  */
 bool Curl_conn_get_ssl_info(struct Curl_easy *data,
-                            struct connectdata *conn, int sockindex,
+                            struct connectdata *conn, int8_t sockindex,
                             int query,
                             struct curl_tlssessioninfo *info);
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex,
+                               struct connectdata *conn, int8_t sockindex,
                                bool *is_ipv6, struct ip_quadruple *ipquad);
 
 /**
  * Connection provides multiplexing of easy handles at `socketindex`.
  */
-bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex);
+bool Curl_conn_is_multiplex(struct connectdata *conn, int8_t sockindex);
 
 /**
  * Return the HTTP version used on the FIRSTSOCKET connection filters
@@ -426,33 +431,38 @@ const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
 void Curl_conn_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
 
+void Curl_conn_cntrl_report_stats(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex);
+
 void Curl_conn_remove_setup_filters(struct Curl_easy *data,
-                                    int sockindex);
+                                    int8_t sockindex);
 
 /**
  * Shutdown the connection at `sockindex` non-blocking, using timeout
  * from `data->set.shutdowntimeout`, default DEFAULT_SHUTDOWN_TIMEOUT_MS.
  * Return CURLE_OK and *done == FALSE if not finished.
  */
-CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done);
+CURLcode Curl_conn_shutdown(struct Curl_easy *data,
+                            int8_t sockindex, bool *done);
 
 /**
  * Return if data is pending in some connection filter at chain
  * `sockindex` for connection `data->conn`.
  */
 bool Curl_conn_data_pending(struct Curl_easy *data,
-                            int sockindex);
+                            int8_t sockindex);
 
 /**
  * Return TRUE if any of the connection filters at chain `sockindex`
  * have data still to send.
  */
-bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex);
+bool Curl_conn_needs_flush(struct Curl_easy *data, int8_t sockindex);
 
 /**
  * Flush any pending data on the connection filters at chain `sockindex`.
  */
-CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex);
+CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex);
 
 /**
  * Return the socket used on data's connection for FIRSTSOCKET,
@@ -463,12 +473,12 @@ curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data);
 
 /* Return a pointer to the connected socket address or NULL. */
 const struct Curl_sockaddr_ex *
-Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex);
+Curl_conn_get_remote_addr(struct Curl_easy *data, int8_t sockindex);
 
 /**
  * Tell filters to forget about the socket at sockindex.
  */
-void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex);
+void Curl_conn_forget_socket(struct Curl_easy *data, int8_t sockindex);
 
 /**
  * Adjust the pollset for the filter chain starting at `cf`.
@@ -498,7 +508,7 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
  * `data->conn`. Copy at most `len` bytes into `buf`. Return the
  * actual number of bytes copied in `*pnread`or an error.
  */
-CURLcode Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
+CURLcode Curl_cf_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
                       size_t len, size_t *pnread);
 
 /**
@@ -506,7 +516,7 @@ CURLcode Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
  * at connection `data->conn`. Return the actual number of bytes written
  * in `*pnwritten` or on error.
  */
-CURLcode Curl_cf_send(struct Curl_easy *data, int sockindex,
+CURLcode Curl_cf_send(struct Curl_easy *data, int8_t sockindex,
                       const uint8_t *buf, size_t len, bool eos,
                       size_t *pnwritten);
 
@@ -562,11 +572,10 @@ bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
                         bool *input_pending);
 
 /**
- * Try to upkeep the connection filters at sockindex.
+ * Try to upkeep the connection filters.
  */
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              int sockindex);
+                              struct connectdata *conn);
 
 /**
  * Get the remote hostname and port that the connection is currently
@@ -576,7 +585,7 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
  * During connect, when tunneling proxies are involved (http or socks),
  * it will be the name and port the proxy currently negotiates with.
  */
-void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
+void Curl_conn_get_current_host(struct Curl_easy *data, int8_t sockindex,
                                 const char **phost, int *pport);
 
 /**
@@ -585,18 +594,18 @@ void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
  */
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                     struct connectdata *conn,
-                                    int sockindex);
+                                    int8_t sockindex);
 
 /**
  * Get the underlying error code for a transfer stream or 0 if not known.
  */
 int Curl_conn_get_stream_error(struct Curl_easy *data,
                                struct connectdata *conn,
-                               int sockindex);
+                               int8_t sockindex);
 
 #ifdef CURLVERBOSE
 void Curl_conn_trc_filters(struct Curl_easy *data,
-                           int sockindex, const char *info);
+                           int8_t sockindex, const char *info);
 #endif
 
 /**
@@ -604,20 +613,20 @@ void Curl_conn_trc_filters(struct Curl_easy *data,
  * Useful in calling `Curl_conn_send()/Curl_conn_recv()` with the
  * correct socket index.
  */
-int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
+int8_t Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
 
 /*
  * Receive data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
  * Return CURLE_AGAIN iff blocked on receiving.
  */
-CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
+CURLcode Curl_conn_recv(struct Curl_easy *data, int8_t sockindex,
                         char *buf, size_t len, size_t *pnread);
 
 /*
  * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
  * Return CURLE_AGAIN iff blocked on sending.
  */
-CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
+CURLcode Curl_conn_send(struct Curl_easy *data, int8_t sockindex,
                         const void *buf, size_t len, bool eos,
                         size_t *pnwritten);
 
