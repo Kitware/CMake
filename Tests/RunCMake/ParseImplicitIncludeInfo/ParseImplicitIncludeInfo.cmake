@@ -41,6 +41,7 @@ set(targets
     linux_nostdinc-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
     linux_nostdinc_i-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
   linux-C-XL-16.1.0.0 linux-CXX-XL-16.1.0.0
+  linux-CUDA-Clang-23.1.0
   linux-CUDA-NVIDIA-10.1.168-CLANG linux-CUDA-NVIDIA-10.1.168-XLClang-v-empty
     linux-CUDA-NVIDIA-9.2.148-GCC
   linux-custom_clang-C-Clang-13.0.0 linux-custom_clang-CXX-Clang-13.0.0
