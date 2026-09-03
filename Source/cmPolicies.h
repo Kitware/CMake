@@ -662,6 +662,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0220,                                                     \
          "Languages enabled in subdirectories propagate to the top-level "    \
          "directory.",                                                        \
+         4, 5, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0221,                                                     \
+         "cmake_host_system_information() DISTRIB_* queries read the host "   \
+         "os-release.",                                                       \
          4, 5, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

@@ -1,0 +1,4 @@
+^CMake Error at [^
+]*/DistribSysrootBadValue\.cmake:[0-9]+ \(cmake_host_system_information\):
+  cmake_host_system_information FROM_SYSROOT requires a boolean value, got
+  "bogus"\.$

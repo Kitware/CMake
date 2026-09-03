@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.5
 .. toctree::
    :maxdepth: 1
 
+   CMP0221: cmake_host_system_information() DISTRIB_* queries read the host os-release. </policy/CMP0221>
    CMP0220: Languages enabled in subdirectories propagate to the top-level directory. </policy/CMP0220>
 
 Policies Introduced by CMake 4.4

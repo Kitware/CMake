@@ -1,0 +1,8 @@
+^CMake Warning \(policy\) at [^
+]*/DistribPolicyWarn\.cmake:[0-9]+ \(cmake_host_system_information\):
+  Policy CMP0221 is not set: cmake_host_system_information\(\) DISTRIB_\*
+  queries read the host os-release\.  Run "cmake --help-policy CMP0221" for
+  policy details\.  Use the cmake_policy command to set the policy and
+  suppress this warning\.
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.$
