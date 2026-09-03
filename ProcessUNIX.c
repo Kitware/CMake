@@ -1839,7 +1839,8 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
   /* Make sure the child is in the process group before we proceed.  This
      avoids race conditions with calls to the kill function that we make for
      signalling process groups.  */
-  while ((readRes = read(pgidPipe[0], &tmp, 1)) > 0) {
+  while ((readRes = read(pgidPipe[0], &tmp, 1)) > 0 ||
+         (readRes < 0 && errno == EINTR)) {
   }
   if (readRes < 0) {
     sigprocmask(SIG_SETMASK, &old_mask, 0);
