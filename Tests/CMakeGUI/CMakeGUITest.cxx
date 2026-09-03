@@ -353,6 +353,33 @@ void CMakeGUITest::presetArg_data()
     << CMakeGUITest_BINARY_DIR "/presetArg-presetConfigExists/src"
     << CMakeGUITest_BINARY_DIR "/presetArg-presetConfigExists/src/build"
     << makePresetProperties("presetArg-presetConfigExists");
+  QCMakePropertyList installDirProperties{
+    QCMakeProperty{
+      /*Key=*/"CMAKE_INSTALL_PREFIX",
+      /*Value=*/
+      QString::fromLocal8Bit(CMakeGUITest_BINARY_DIR
+                             "/presetArg-installDir/src/install"),
+      /*Strings=*/{},
+      /*Help=*/"",
+      /*Type=*/QCMakeProperty::PATH,
+      /*Advanced=*/false,
+    },
+    QCMakeProperty{
+      /*Key=*/"CMAKE_TOOLCHAIN_FILE",
+      /*Value=*/
+      QString::fromLocal8Bit(CMakeGUITest_BINARY_DIR
+                             "/presetArg-installDir/src/toolchain.cmake"),
+      /*Strings=*/{},
+      /*Help=*/"",
+      /*Type=*/QCMakeProperty::FILEPATH,
+      /*Advanced=*/false,
+    },
+  };
+  QTest::newRow("installDir")
+    << WindowSetupHelper{} << "installDir"
+    << CMakeGUITest_BINARY_DIR "/presetArg-installDir/src"
+    << CMakeGUITest_BINARY_DIR "/presetArg-installDir/src/build"
+    << installDirProperties;
   QTest::newRow("noExist") << WindowSetupHelper{} << QString{}
                            << CMakeGUITest_BINARY_DIR "/presetArg-noExist/src"
                            << "" << QCMakePropertyList{};

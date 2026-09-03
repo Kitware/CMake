@@ -470,6 +470,14 @@ QCMakePropertyList QCMake::properties() const
     auto const& p =
       this->CMakePresetsGraph.ConfigurePresets.at(presetName).Expanded;
     if (p) {
+      for (auto const& v : p->CacheVariables) {
+        if (!v.second) {
+          continue;
+        }
+        auto prop = cache_to_property(v);
+        add_to_property_list(ret, std::move(prop));
+      }
+      // Dedicated fields override same-named cacheVariables, so apply last.
       if (!p->ToolchainFile.empty()) {
         using CacheVariable = cmCMakePresetsGraph::CacheVariable;
         CacheVariable var{ "FILEPATH", p->ToolchainFile };
@@ -479,11 +487,13 @@ QCMakePropertyList QCMake::properties() const
         auto prop = cache_to_property(value);
         add_to_property_list(ret, std::move(prop));
       }
-      for (auto const& v : p->CacheVariables) {
-        if (!v.second) {
-          continue;
-        }
-        auto prop = cache_to_property(v);
+      if (!p->InstallDir.empty()) {
+        using CacheVariable = cmCMakePresetsGraph::CacheVariable;
+        CacheVariable var{ "PATH", p->InstallDir };
+        std::pair<std::string, cm::optional<CacheVariable>> value = {
+          "CMAKE_INSTALL_PREFIX", var
+        };
+        auto prop = cache_to_property(value);
         add_to_property_list(ret, std::move(prop));
       }
     }

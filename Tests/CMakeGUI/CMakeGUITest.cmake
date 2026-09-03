@@ -176,6 +176,11 @@ run_cmake_gui_test(presetArg:presetConfigExists
     -S "${CMakeGUITest_BINARY_DIR}/presetArg-presetConfigExists/src"
     "--preset=ninja"
   )
+run_cmake_gui_test(presetArg:installDir
+  ARGS
+    -S "${CMakeGUITest_BINARY_DIR}/presetArg-installDir/src/"
+    "--preset=installDir"
+  )
 run_cmake_gui_test(presetArg:noExist
   ARGS
     -S "${CMakeGUITest_BINARY_DIR}/presetArg-noExist/src"
