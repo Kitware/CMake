@@ -3707,7 +3707,8 @@ bool cmTarget::GetMappedConfigNew(std::string desiredConfig, cmValue& loc,
   }
 
   // Get imported configurations, if specified.
-  if (cmValue iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
+  cmValue const iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS");
+  if (!iconfigs.IsEmpty()) {
     cmList const availableConfigs{ cmSystemTools::UpperCase(*iconfigs) };
 
     if (!mappedConfigs.empty()) {
