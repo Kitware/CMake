@@ -1,0 +1,19 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "cond",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/c",
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
+          { "type": "matches", "string": "${presetName}", "regex": "^co" },
+          { "type": "inList", "string": "a", "list": [ "a", "b" ] },
+          { "type": "not", "condition": { "type": "const", "value": false } }
+        ]
+      }
+    }
+  ]
+}

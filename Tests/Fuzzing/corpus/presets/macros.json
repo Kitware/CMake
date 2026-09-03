@@ -1,0 +1,14 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "macros",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/${presetName}/${hostSystemName}/${sourceDirName}",
+      "installDir": "$env{HOME}/$penv{PATH}/${dollar}/${pathListSep}",
+      "toolchainFile": "${fileDir}/tc.cmake",
+      "environment": { "X": "${sourceParentDir}", "Y": "$env{X}" },
+      "cacheVariables": { "G": "${generator}" }
+    }
+  ]
+}

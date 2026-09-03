@@ -71,6 +71,9 @@ add_fuzzer(cmPkgConfigParserFuzzer cmPkgConfigParserFuzzer.cxx)
 # JSON parser fuzzer
 add_fuzzer(cmJSONParserFuzzer cmJSONParserFuzzer.cxx)
 
+# CMakePresets.json graph fuzzer
+add_fuzzer(cmCMakePresetsFuzzer cmCMakePresetsFuzzer.cxx)
+
 # GCC dependency file fuzzer
 add_fuzzer(cmGccDepfileFuzzer cmGccDepfileFuzzer.cxx)
 
