@@ -4094,6 +4094,12 @@ std::string cmGeneratorTarget::GetLinkerTool(std::string const& lang,
     "CMAKE_", lang, this->IsDeviceLink() ? "_DEVICE_" : "_", "LINK_MODE");
   auto mode = this->Makefile->GetDefinition(linkMode);
   if (!mode || mode != "LINKER"_s) {
+    // On the Visual Studio generators the project links via the platform
+    // toolset, so languages without a LINKER-mode toolchain (e.g. ASM_NASM)
+    // must not force a linker; defer to the toolset's default.
+    if (this->GetGlobalGenerator()->IsVisualStudio()) {
+      return std::string{};
+    }
     return this->Makefile->GetDefinition("CMAKE_LINKER");
   }
 
