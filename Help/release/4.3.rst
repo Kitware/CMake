@@ -309,3 +309,10 @@ Changes made since CMake 4.3.0 include the following.
   ``version`` field format.  It is now an object with major and minor version
   components, ``{ "major": 1, "minor": 0 }``.  Previously it was an integer
   with only the major version, ``1``.
+
+4.3.5
+-----
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
