@@ -30,10 +30,13 @@ class cmCTestRunTest
 public:
   explicit cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler, int index);
 
-  void SetNumberOfRuns(int n)
+  // Report this run as run `number` of `count` in the test's "(run N/M)"
+  // suffix.  A test that repeats on its own starts at run 1 and counts up
+  // itself.
+  void SetRunNumber(int number, int count)
   {
-    this->NumberOfRunsLeft = n;
-    this->NumberOfRunsTotal = n;
+    this->RunNumber = number;
+    this->RunCount = count;
   }
 
   void SetRepeatMode(cmCTest::Repeat r) { this->RepeatMode = r; }
@@ -158,9 +161,9 @@ private:
     std::string, std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>>
     AllocatedResources;
   cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
-  int NumberOfRunsLeft = 1;  // default to 1 run of the test
-  int NumberOfRunsTotal = 1; // default to 1 run of the test
-  bool RunAgain = false;     // default to not having to run again
+  int RunNumber = 1; // which run of the test this is
+  int RunCount = 1;  // how many runs it may be given
+  bool RunAgain = false;
   bool UseLLVMCov = false;
   size_t TotalNumberOfTests;
 };

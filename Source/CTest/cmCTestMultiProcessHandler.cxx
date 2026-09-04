@@ -274,7 +274,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
 
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     testRun->SetRepeatMode(this->RepeatMode);
-    testRun->SetNumberOfRuns(this->RepeatCount);
+    testRun->SetRunNumber(1, this->RepeatCount);
   }
   if (this->UseResourceSpec) {
     testRun->SetUseAllocatedResources(true);
