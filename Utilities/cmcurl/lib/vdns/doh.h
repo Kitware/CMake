@@ -39,12 +39,16 @@ typedef enum {
   DOH_OUT_OF_MEM,           /* 5 */
   DOH_DNS_RDATA_LEN,        /* 6 */
   DOH_DNS_MALFORMAT,        /* 7 */
-  DOH_DNS_BAD_RCODE,        /* 8 - no such name */
+  DOH_DNS_BAD_RCODE,        /* 8 - unsuccessful rcode, not NXDOMAIN */
   DOH_DNS_UNEXPECTED_TYPE,  /* 9 */
   DOH_DNS_UNEXPECTED_CLASS, /* 10 */
   DOH_NO_CONTENT,           /* 11 */
   DOH_DNS_BAD_ID,           /* 12 */
-  DOH_DNS_NAME_TOO_LONG     /* 13 */
+  DOH_DNS_NAME_TOO_LONG,    /* 13 */
+  DOH_DNS_NXDOMAIN,         /* 14 - no such name */
+  DOH_HTTP_FAILED,          /* failure at the HTTP level */
+  DOH_OOM,                  /* out of memory */
+  DOH_CODE_LAST             /* Not used, limit */
 } DOHcode;
 
 typedef enum {
@@ -97,20 +101,11 @@ struct doh_request {
   DNStype dnstype;
 };
 
-struct doh_response {
-  uint32_t probe_mid;
-  struct dynbuf body;
-  DNStype dnstype;
-  CURLcode result;
-};
-
 /* each transfer firing off DoH requests has this
  * as easy meta for CURL_EZM_DOH_MASTER */
 struct doh_probes {
-  struct doh_response probe_resp[DOH_SLOT_COUNT];
-  unsigned int pending; /* still outstanding probes */
-  uint16_t port;
-  const char *host;
+  uint32_t probe_mid[DOH_SLOT_COUNT];
+  DOHcode probe_rc[DOH_SLOT_COUNT];
 };
 
 /*
@@ -125,7 +120,6 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
                               struct Curl_dns_entry **pdns);
 
 #define DOH_MAX_ADDR  24
-#define DOH_MAX_CNAME 4
 #define DOH_MAX_HTTPS 4
 
 struct dohaddr {
@@ -152,11 +146,9 @@ struct dohhttps_rr {
 #endif
 
 struct dohentry {
-  struct dynbuf cname[DOH_MAX_CNAME];
   struct dohaddr addr[DOH_MAX_ADDR];
   int numaddr;
   unsigned int ttl;
-  int numcname;
 #ifdef USE_HTTPSRR
   struct dohhttps_rr https_rrs[DOH_MAX_HTTPS];
   int numhttps_rrs;

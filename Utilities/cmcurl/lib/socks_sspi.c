@@ -37,7 +37,7 @@
 #include "curlx/multibyte.h"
 
 /*
- * Helper sspi error functions.
+ * Helper SSPI error functions.
  */
 static int check_sspi_err(struct Curl_easy *data,
                           SECURITY_STATUS status,
@@ -77,8 +77,7 @@ static CURLcode socks5_sspi_setup(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
 
   status =
-    Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                       (TCHAR *)CURL_UNCONST(TEXT("Kerberos")),
+    Curl_pSecFn->AcquireCredentialsHandle(NULL, CURL_UNCONST(TEXT("Kerberos")),
                                           SECPKG_CRED_OUTBOUND,
                                           NULL, NULL, NULL, NULL,
                                           cred_handle, NULL);

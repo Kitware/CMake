@@ -38,7 +38,6 @@ typedef enum {
   TIMER_PRETRANSFER,
   TIMER_STARTTRANSFER,
   TIMER_POSTRANSFER,
-  TIMER_STARTACCEPT,
   TIMER_REDIRECT,
   TIMER_LAST /* must be last */
 } timerid;
@@ -47,7 +46,7 @@ typedef enum {
 const struct curltime *Curl_pgrs_now(struct Curl_easy *data);
 
 int Curl_pgrsDone(struct Curl_easy *data);
-void Curl_pgrsStartNow(struct Curl_easy *data);
+void Curl_pgrsStart(struct Curl_easy *data, const struct curltime *pnow);
 void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size);
 CURLcode Curl_pgrs_deliver_check(struct Curl_easy *data, size_t delta);
@@ -58,10 +57,12 @@ void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size);
 
 /* perform progress update, invoking callbacks at intervals */
 CURLcode Curl_pgrsUpdate(struct Curl_easy *data);
+CURLcode Curl_pgrsUpdateX(struct Curl_easy *data, const struct curltime *pnow);
 /* perform progress update, no callbacks invoked */
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data);
 /* perform progress update with callbacks and speed checks */
 CURLcode Curl_pgrsCheck(struct Curl_easy *data);
+CURLcode Curl_pgrsCheckX(struct Curl_easy *data, const struct curltime *pnow);
 
 /* Inform progress/speedcheck about receive/send pausing */
 void Curl_pgrsRecvPause(struct Curl_easy *data, bool enable);
@@ -84,5 +85,9 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
 void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent);
 
 void Curl_pgrsCompleted(struct Curl_easy *data);
+
+timediff_t Curl_pgrs_since_ms(struct Curl_easy *data,
+                              const struct curltime *pnow,
+                              timerid timer);
 
 #endif /* HEADER_CURL_PROGRESS_H */

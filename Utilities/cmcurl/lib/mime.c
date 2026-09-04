@@ -223,7 +223,7 @@ static char *escape_string(struct Curl_easy *data,
   table = formtable;
   /* data can be NULL when this function is called indirectly from
      curl_formget(). */
-  if(strategy == MIMESTRATEGY_MAIL || (data && (data->set.mime_formescape)))
+  if(strategy == MIMESTRATEGY_MAIL || (data && data->set.mime_formescape))
     table = mimetable;
 
   curlx_dyn_init(&db, CURL_MAX_INPUT_LENGTH);
@@ -419,12 +419,21 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
   return cursize;
 }
 
+/* The maximum input size that does not cause an overflow. */
+#define BASE64_MAX_INPUT_SIZE                                           \
+  (((CURL_OFF_T_MAX / (MAX_ENCODED_LINE_LENGTH + 2)) *                  \
+    MAX_ENCODED_LINE_LENGTH / 4) * 3 - 3)
+
 static curl_off_t encoder_base64_size(curl_mimepart *part)
 {
   curl_off_t size = part->datasize;
 
   if(size <= 0)
     return size;    /* Unknown size or no data. */
+
+  /* Prevent integer overflows */
+  if(size > BASE64_MAX_INPUT_SIZE)
+    return -1;
 
   /* Compute base64 character count. */
   size = 4 * (1 + ((size - 1) / 3));
@@ -1708,6 +1717,16 @@ static CURLcode add_content_disposition(struct Curl_easy *data,
     CURLcode result = CURLE_OK;
     char *name = NULL;
     char *filename = NULL;
+    /* The mail (and legacy mime_formescape) strategy quotes the name and
+       filename with a backslash and has no in-band way to represent a CR or
+       LF, so one embedded in the value would split the generated header. The
+       form strategy percent-encodes CR/LF (see escape_string) and is safe. */
+    bool backslash = (strategy == MIMESTRATEGY_MAIL) ||
+                     (data && data->set.mime_formescape);
+    if(backslash &&
+       ((part->name && part->name[strcspn(part->name, "\r\n")]) ||
+        (part->filename && part->filename[strcspn(part->filename, "\r\n")])))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
 
     if(part->name) {
       name = escape_string(data, part->name, strategy);

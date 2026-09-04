@@ -26,7 +26,7 @@
 #include "curl_setup.h"
 
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
-#include "httpsrr.h"
+#include "vdns/httpsrr.h"
 #endif
 
 struct Curl_easy;
@@ -82,15 +82,7 @@ void Curl_async_global_cleanup(void);
 CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
                                 struct Curl_resolv_async *async);
 
-const struct Curl_addrinfo *Curl_async_get_ai(struct Curl_easy *data,
-                                              struct Curl_resolv_async *async,
-                                              int ai_family,
-                                              unsigned int index);
-
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *Curl_async_get_https(
-  struct Curl_easy *data,
-  struct Curl_resolv_async *async);
 bool Curl_async_knows_https(struct Curl_easy *data,
                             struct Curl_resolv_async *async);
 #endif /* USE_HTTPSRR */
@@ -114,14 +106,10 @@ int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms);
 /* async resolving implementation using c-ares alone */
 struct async_ares_ctx {
   ares_channel channel;
-  struct Curl_addrinfo *res_A;
-  struct Curl_addrinfo *res_AAAA;
   int ares_status;               /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
   CURLcode result;               /* CURLE_OK or error handling response */
-  struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
-#ifdef USE_HTTPSRR
-  struct Curl_https_rrinfo hinfo;
-#endif
+  BIT(transient_err); /* an A/AAAA query failed without the resolver
+                         answering that the name does not exist */
 };
 
 void Curl_async_ares_shutdown(struct Curl_easy *data,
@@ -137,14 +125,15 @@ struct async_thrdd_item;
 
 /* Context for threaded resolver */
 struct async_thrdd_ctx {
-  struct async_thrdd_item *res_A; /* ipv4 result */
-  struct async_thrdd_item *res_AAAA; /* ipv6 result */
+  struct async_thrdd_item *res_A; /* IPv4 final result */
+  struct async_thrdd_item *res_AAAA; /* IPv6 final result */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct {
     ares_channel channel;
-    struct Curl_https_rrinfo hinfo;
   } rr;
 #endif
+  BIT(processed_A);
+  BIT(processed_AAAA);
 };
 
 void Curl_async_thrdd_shutdown(struct Curl_easy *data,
@@ -210,11 +199,9 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 /* convert these functions if an asynch resolver is not used */
 #define Curl_async_global_init()        CURLE_OK
 #define Curl_async_global_cleanup()     Curl_nop_stmt
-#define Curl_async_get_ai(a, b, c, d)   NULL
 #define Curl_async_await(a, b, c)       CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_pollset(x, y, z)     CURLE_OK
-#define Curl_async_get_https(x, y)      NULL
 #define Curl_async_knows_https(x, y)    TRUE
 #endif /* !CURLRES_ASYNCH */
 
@@ -226,6 +213,12 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 
 struct Curl_resolv_async {
   struct Curl_resolv_async *next;
+  struct Curl_peer *peer;
+  struct Curl_addrinfo *ai_A;
+  struct Curl_addrinfo *ai_AAAA;
+#ifdef USE_HTTPSRR
+  struct Curl_https_rrinfo *httpsrr;
+#endif
 #ifdef USE_RESOLV_ARES
   struct async_ares_ctx ares;
 #elif defined(USE_RESOLV_THREADED)
@@ -240,8 +233,6 @@ struct Curl_resolv_async {
   CURLcode result;
   uint32_t poll_interval;
   uint32_t id; /* unique id per easy handle of the resolve operation */
-  /* what is being resolved */
-  uint16_t port;
   uint8_t dns_queries; /* what queries are being performed */
   uint8_t dns_responses; /* what queries had responses so far. */
   uint8_t transport;
@@ -251,7 +242,10 @@ struct Curl_resolv_async {
   BIT(for_proxy);
   BIT(done);
   BIT(shutdown);
-  char hostname[1];
+  BIT(negative_answer); /* resolver answered that the name does not
+                           exist. Only such failures may be cached as
+                           negative entries, not transient or local
+                           resolver failures. */
 };
 
 timediff_t Curl_async_timeleft_ms(struct Curl_easy *data,

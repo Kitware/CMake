@@ -129,7 +129,10 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         continue;
 
       DEBUGASSERT(curlx_strlen(&name) && value);
-      if(data->state.aptr.host &&
+      /* trim surrounding whitespace so a padded field name (e.g.
+         `Authorization :`) cannot slip past the Authorization/Cookie check */
+      curlx_str_trimblanks(&name);
+      if(data->state.http_host &&
          /* a Host: header was sent already, do not pass on any custom Host:
             header as that will produce *two* in the same request! */
          curlx_str_casecompare(&name, "Host"))
@@ -198,6 +201,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
                                           proxy_http_ver ver)
 {
   char *authority = NULL;
+  const char *ua;
   int httpversion = proxy_http_ver_major(ver);
   CURLcode result;
   struct httpreq *req = NULL;
@@ -212,7 +216,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
     goto out;
   }
 
-  result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT") - 1,
+  result = Curl_http_req_make(&req, "CONNECT", CURL_CSTRLEN("CONNECT"),
                               NULL, 0, authority, strlen(authority),
                               NULL, 0);
   if(result)
@@ -239,10 +243,10 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
+  ua = CURL_EASY_STR(data, STRING_USERAGENT);
   if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
-     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
-    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
-                              data->set.str[STRING_USERAGENT]);
+     ua && *ua) {
+    result = Curl_dynhds_cadd(&req->headers, "User-Agent", ua);
     if(result)
       goto out;
   }
@@ -273,7 +277,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
                                              struct Curl_peer *dest,
                                              proxy_http_ver ver)
 {
-  const char *proxy_scheme = "http";
+  const char *proxy_scheme = "http", *ua;
   const char *proxy_host = cf->conn->http_proxy.peer->hostname;
   int httpversion = proxy_http_ver_major(ver);
   char *authority = NULL;
@@ -337,7 +341,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
   }
 
   if(ver == PROXY_HTTP_V1) {
-    result = Curl_http_req_make(&req, "GET", sizeof("GET")-1,
+    result = Curl_http_req_make(&req, "GET", CURL_CSTRLEN("GET"),
                                 proxy_scheme, strlen(proxy_scheme),
                                 authority, strlen(authority),
                                 path, strlen(path));
@@ -345,7 +349,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
       goto out;
   }
   else if(ver == PROXY_HTTP_V2 || ver == PROXY_HTTP_V3) {
-    result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT") - 1,
+    result = Curl_http_req_make(&req, "CONNECT", CURL_CSTRLEN("CONNECT"),
                                 proxy_scheme, strlen(proxy_scheme),
                                 authority, strlen(authority),
                                 path, strlen(path));
@@ -378,11 +382,11 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
       goto out;
   }
 
+  ua = CURL_EASY_STR(data, STRING_USERAGENT);
   if(ver == PROXY_HTTP_V1 &&
      !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
-     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
-    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
-                              data->set.str[STRING_USERAGENT]);
+     ua && *ua) {
+    result = Curl_dynhds_cadd(&req->headers, "User-Agent", ua);
     if(result)
       goto out;
   }
@@ -449,10 +453,10 @@ CURLcode Curl_http_proxy_create_tunnel_request(
     return result;
 
   if(udp_tunnel)
-    infof(data, "Establishing %s proxy UDP tunnel to %s:%s",
+    infof(data, "Establishing %s proxy UDP tunnel to %s:%u",
           (ver == PROXY_HTTP_V2) ? "HTTP/2" :
           (ver == PROXY_HTTP_V3) ? "HTTP/3" : "HTTP",
-          data->state.up.hostname, data->state.up.port);
+          dest->user_hostname, dest->port);
   else
     infof(data, "Establishing %s proxy tunnel to %s",
           (ver == PROXY_HTTP_V2) ? "HTTP/2" :

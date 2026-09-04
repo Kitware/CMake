@@ -53,6 +53,10 @@
 
 /* scheme is not URL encoded, the longest libcurl supported ones are... */
 #define MAX_SCHEME_LEN 40
+#define MAX_ZONEID_LEN 16
+
+/* characters not allowed in hostnames */
+#define HOSTNAME_INVALID_CHARS " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%|"
 
 /*
  * If USE_IPV6 is disabled, we still want to parse IPv6 addresses, so make
@@ -69,11 +73,11 @@ static void free_urlhandle(struct Curl_URL *u)
 {
   curlx_free(u->scheme);
   curlx_free(u->user);
+  curlx_strzero(u->password);
   curlx_free(u->password);
   curlx_free(u->options);
   curlx_free(u->host);
   curlx_free(u->zoneid);
-  curlx_free(u->port);
   curlx_free(u->path);
   curlx_free(u->query);
   curlx_free(u->fragment);
@@ -206,7 +210,7 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
       if(s && (ISALNUM(s) || (s == '+') || (s == '-') || (s == '.'))) {
         /* RFC 3986 3.1 explains:
            scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-        */
+         */
       }
       else {
         break;
@@ -322,6 +326,7 @@ UNITTEST CURLUcode parse_hostname_login(struct Curl_URL *u,
   }
 
   if(passwdp) {
+    curlx_strzero(u->password);
     curlx_free(u->password);
     u->password = passwdp;
   }
@@ -338,9 +343,11 @@ UNITTEST CURLUcode parse_hostname_login(struct Curl_URL *u,
 out:
 
   curlx_free(userp);
+  curlx_strzero(passwdp);
   curlx_free(passwdp);
   curlx_free(optionsp);
   curlx_safefree(u->user);
+  curlx_strzero(u->password);
   curlx_safefree(u->password);
   curlx_safefree(u->options);
 
@@ -358,6 +365,8 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
   /*
    * Find the end of an IPv6 address on the ']' ending bracket.
    */
+  u->portnum = 0;
+  u->port_present = FALSE;
   if(hostname[0] == '[') {
     portptr = strchr(hostname, ']');
     if(!portptr)
@@ -377,28 +386,30 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
   if(portptr) {
     curl_off_t port;
     size_t keep = portptr - hostname;
+    int rc;
 
     /* Browser behavior adaptation. If there is a colon with no digits after,
        cut off the name there which makes us ignore the colon and use the
        default port. Firefox, Chrome and Safari all do that.
 
        Do not do it if the URL has no scheme, to make something that looks like
-       a scheme not work!
-    */
+       a scheme not work! */
     curlx_dyn_setlen(host, keep);
     portptr++;
     if(!*portptr)
       return has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
-
-    if(curlx_str_number(&portptr, &port, 0xffff) || *portptr)
+    if(*portptr == '\\')
+      return CURLUE_BACKSLASH;
+    rc = curlx_str_number(&portptr, &port, 0xffff);
+    if(rc)
+      return CURLUE_BAD_PORT_NUMBER;
+    else if(*portptr == '\\')
+      return CURLUE_BACKSLASH;
+    else if(*portptr)
       return CURLUE_BAD_PORT_NUMBER;
 
-    u->portnum = (unsigned short)port;
-    /* generate a new port number string to get rid of leading zeroes etc */
-    curlx_free(u->port);
-    u->port = curl_maprintf("%" CURL_FORMAT_CURL_OFF_T, port);
-    if(!u->port)
-      return CURLUE_OUT_OF_MEMORY;
+    u->portnum = (uint16_t)port;
+    u->port_present = TRUE;
   }
 
   return CURLUE_OK;
@@ -428,13 +439,13 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
     hlen = len;
     if(hostname[len] == '%') {
       /* this could now be '%[zone id]' */
-      char zoneid[16];
+      char zoneid[MAX_ZONEID_LEN];
       int i = 0;
       char *h = &hostname[len + 1];
       /* pass '25' if present and is a URL encoded percent sign */
       if(!strncmp(h, "25", 2) && h[2] && (h[2] != ']'))
         h += 2;
-      while(*h && (*h != ']') && (i < 15))
+      while(*h && (*h != ']') && (i < (MAX_ZONEID_LEN - 1)))
         zoneid[i++] = *h++;
       if(!i || (']' != *h))
         return CURLUE_BAD_IPV6;
@@ -456,7 +467,7 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
     hostname[hlen] = 0; /* end the address there */
     if(curlx_inet_pton(AF_INET6, hostname, dest) != 1)
       return CURLUE_BAD_IPV6;
-    if(curlx_inet_ntop(AF_INET6, dest, hostname, hlen + 1)) {
+    if(!curlx_inet_ntop(AF_INET6, dest, hostname, hlen + 1)) {
       hlen = strlen(hostname); /* might be shorter now */
       hostname[hlen + 1] = 0;
     }
@@ -477,7 +488,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
     return ipv6_parse(u, hostname, hlen);
   else {
     /* letters from the second string are not ok */
-    len = strcspn(hostname, " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%|");
+    len = strcspn(hostname, HOSTNAME_INVALID_CHARS);
     if(hlen != len)
       /* hostname with bad content */
       return CURLUE_BAD_HOSTNAME;
@@ -583,7 +594,7 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
       return HOST_NAME;
     curlx_dyn_reset(host);
     result = curlx_dyn_addf(host, "%u.%u.%u.%u",
-                            (parts[0]),
+                            parts[0],
                             ((parts[1] >> 16) & 0xff),
                             ((parts[1] >> 8) & 0xff),
                             (parts[1] & 0xff));
@@ -593,8 +604,8 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
       return HOST_NAME;
     curlx_dyn_reset(host);
     result = curlx_dyn_addf(host, "%u.%u.%u.%u",
-                            (parts[0]),
-                            (parts[1]),
+                            parts[0],
+                            parts[1],
                             ((parts[2] >> 8) & 0xff),
                             (parts[2] & 0xff));
     break;
@@ -604,10 +615,10 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
       return HOST_NAME;
     curlx_dyn_reset(host);
     result = curlx_dyn_addf(host, "%u.%u.%u.%u",
-                            (parts[0]),
-                            (parts[1]),
-                            (parts[2]),
-                            (parts[3]));
+                            parts[0],
+                            parts[1],
+                            parts[2],
+                            parts[3]);
     break;
   }
   if(result)
@@ -666,12 +677,11 @@ static CURLUcode parse_authority(struct Curl_URL *u,
   }
 
   uc = parse_port(u, host, has_scheme);
-  if(uc)
-    return uc;
 
   if(!curlx_dyn_len(host))
+    /* this makes no-host errors override port number problems */
     uc = CURLUE_NO_HOST;
-  else
+  if(!uc)
     uc = urldecode_host(host);
   if(uc)
     return uc;
@@ -740,6 +750,29 @@ static bool is_dot(const char **str, size_t *clen)
 
 #define ISSLASH(x) ((x) == '/')
 
+/* prescan the string to see if it needs work */
+static bool needs_dedotdot(const char *p, size_t pn)
+{
+  /* a single byte path cannot be cleaned up */
+  if(pn < 2)
+    return FALSE;
+  while(pn) {
+    if(is_dot(&p, &pn)) {
+      /* "./" or dot before end of string */
+      if(!pn || ISSLASH(*p))
+        return TRUE;
+      /* "../" or ".." before end of string */
+      else if(is_dot(&p, &pn) && (!pn || ISSLASH(*p)))
+        return TRUE;
+    }
+    else {
+      p++;
+      pn--;
+    }
+  }
+  return FALSE;
+}
+
 /*
  * dedotdotify()
  *
@@ -751,7 +784,8 @@ static bool is_dot(const char **str, size_t *clen)
  *
  * RETURNS
  *
- * Zero for success and 'out' set to an allocated dedotdotified string.
+ * Zero for success and 'out' set to an allocated string (or NULL if there's
+ * nothing to do).
  *
  * @unittest 1395
  */
@@ -766,8 +800,7 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
   size_t dlen = clen;
 
   *outp = NULL;
-  /* a single byte path cannot be cleaned up */
-  if(clen < 2)
+  if(!needs_dedotdot(input, clen))
     return 0;
 
   curlx_dyn_init(&out, clen + 1);
@@ -964,22 +997,30 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
   const char *schemep = NULL;
 
   if(schemelen) {
-    int i = 0;
+    int num_slashes = 0;
     const char *p = &url[schemelen + 1];
-    while((*p == '/') && (i < 4)) {
-      p++;
-      i++;
+    if(!Curl_get_scheme(schemebuf) && !(flags & CURLU_NON_SUPPORT_SCHEME))
+      return CURLUE_UNSUPPORTED_SCHEME;
+
+    if(!ISSLASH(*p))
+      /* less than one */
+      return CURLUE_BAD_SLASHES;
+    if((flags & CURLU_NO_AUTHORITY)) {
+      while(ISSLASH(*p) && (num_slashes < 2)) {
+        p++;
+        num_slashes++;
+      }
+    }
+    else {
+      while(ISSLASH(*p) && (num_slashes < 4)) {
+        p++;
+        num_slashes++;
+      }
+      if(num_slashes > 3)
+        return CURLUE_BAD_SLASHES;
     }
 
     schemep = schemebuf;
-    if(!Curl_get_scheme(schemep) &&
-       !(flags & CURLU_NON_SUPPORT_SCHEME))
-      return CURLUE_UNSUPPORTED_SCHEME;
-
-    if((i < 1) || (i > 3))
-      /* less than one or more than three slashes */
-      return CURLUE_BAD_SLASHES;
-
     *hostpp = p; /* hostname starts here */
   }
   else {
@@ -1270,16 +1311,16 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
 
   case '#':
     /* fragment-only change */
-    if(u->fragment)
+    if(u->fragment_present)
       cutoff = strchr(protsep, '#');
     break;
 
   default:
     /* path or query-only change */
-    if(u->query && u->query[0])
+    if(u->query_present)
       /* remove existing query */
       cutoff = strchr(protsep, '?');
-    else if(u->fragment && u->fragment[0])
+    else if(u->fragment_present)
       /* Remove existing fragment */
       cutoff = strchr(protsep, '#');
 
@@ -1344,12 +1385,12 @@ CURLU *curl_url_dup(const CURLU *in)
     DUP(u, in, password);
     DUP(u, in, options);
     DUP(u, in, host);
-    DUP(u, in, port);
     DUP(u, in, path);
     DUP(u, in, query);
     DUP(u, in, fragment);
     DUP(u, in, zoneid);
     u->portnum = in->portnum;
+    u->port_present = in->port_present;
     u->fragment_present = in->fragment_present;
     u->query_present = in->query_present;
   }
@@ -1484,7 +1525,7 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
   else {
     const char *scheme;
     char *options = u->options;
-    char *port = u->port;
+    char *port = NULL;
     const struct Curl_scheme *h = NULL;
     char schemebuf[MAX_SCHEME_LEN + 5];
     if(u->scheme)
@@ -1494,19 +1535,26 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
     else
       return CURLUE_NO_SCHEME;
 
+    if(u->port_present) {
+      curl_msnprintf(portbuf, sizeof(portbuf), "%u", u->portnum);
+      port = portbuf;
+    }
+
     h = Curl_get_scheme(scheme);
     if(h) {
-      if(!port && (flags & CURLU_DEFAULT_PORT)) {
+      if(!u->port_present && (flags & CURLU_DEFAULT_PORT)) {
         /* there is no stored port number, but asked to deliver a default one
            for the scheme */
         curl_msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         port = portbuf;
       }
-      else if(port && (h->defport == u->portnum) &&
-              (flags & CURLU_NO_DEFAULT_PORT))
+      else if(u->port_present && (h->defport == u->portnum) &&
+              (flags & CURLU_NO_DEFAULT_PORT)) {
         /* there is a stored port number, but asked to inhibit if it matches
            the default port for the scheme */
         port = NULL;
+      }
+
       if(!(h->flags & PROTOPT_URLOPTIONS))
         options = NULL;
     }
@@ -1614,10 +1662,24 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     ifmissing = CURLUE_NO_ZONEID;
     break;
   case CURLUPART_PORT:
-    ptr = u->port;
+    ptr = NULL;
     ifmissing = CURLUE_NO_PORT;
     flags &= ~U_CURLU_URLDECODE; /* never for port */
-    if(!ptr && (flags & CURLU_DEFAULT_PORT) && u->scheme) {
+    if(u->port_present) {
+      const struct Curl_scheme *h = u->scheme ?
+                                    Curl_get_scheme(u->scheme) : NULL;
+      /* there is a stored port number, but ask to inhibit if
+         it matches the default one for the scheme */
+      if(h && (h->defport == u->portnum) &&
+         (flags & CURLU_NO_DEFAULT_PORT)) {
+        ptr = NULL;
+      }
+      else {
+        curl_msnprintf(portbuf, sizeof(portbuf), "%u", u->portnum);
+        ptr = portbuf;
+      }
+    }
+    else if((flags & CURLU_DEFAULT_PORT) && u->scheme) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */
       const struct Curl_scheme *h = Curl_get_scheme(u->scheme);
@@ -1625,14 +1687,6 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
         curl_msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         ptr = portbuf;
       }
-    }
-    else if(ptr && u->scheme) {
-      /* there is a stored port number, but ask to inhibit if
-         it matches the default one for the scheme */
-      const struct Curl_scheme *h = Curl_get_scheme(u->scheme);
-      if(h && (h->defport == u->portnum) &&
-         (flags & CURLU_NO_DEFAULT_PORT))
-        ptr = NULL;
     }
     break;
   case CURLUPART_PATH:
@@ -1645,7 +1699,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     ifmissing = CURLUE_NO_QUERY;
     plusdecode = flags & CURLU_URLDECODE;
     if(ptr && !ptr[0] && !(flags & CURLU_GET_EMPTY))
-      /* there was a blank query and the user do not ask for it */
+      /* there was a blank query and the user does not ask for it */
       ptr = NULL;
     break;
   case CURLUPART_FRAGMENT:
@@ -1700,7 +1754,6 @@ static CURLUcode set_url_scheme(CURLU *u, const char *scheme,
 
 static CURLUcode set_url_port(CURLU *u, const char *provided_port)
 {
-  char *tmp;
   curl_off_t port;
   if(!ISDIGIT(provided_port[0]))
     /* not a number */
@@ -1708,12 +1761,8 @@ static CURLUcode set_url_port(CURLU *u, const char *provided_port)
   if(curlx_str_number(&provided_port, &port, 0xffff) || *provided_port)
     /* weirdly provided number, not good! */
     return CURLUE_BAD_PORT_NUMBER;
-  tmp = curl_maprintf("%" CURL_FORMAT_CURL_OFF_T, port);
-  if(!tmp)
-    return CURLUE_OUT_OF_MEMORY;
-  curlx_free(u->port);
-  u->port = tmp;
-  u->portnum = (unsigned short)port;
+  u->portnum = (uint16_t)port;
+  u->port_present = TRUE;
   return CURLUE_OK;
 }
 
@@ -1755,7 +1804,10 @@ static CURLUcode set_url(CURLU *u, const char *url, size_t part_size,
   /* if the old URL is incomplete (we cannot get an absolute URL in
      'oldurl'), replace the existing with the new.
      Always include "scheme://" to make the URL "complete" */
-  uc = curl_url_get(u, CURLUPART_URL, &oldurl, flags& ~CURLU_NO_GUESS_SCHEME);
+  /* Preserve empty query/fragment separators: they affect where relative
+     references splice into the base URL. */
+  uc = curl_url_get(u, CURLUPART_URL, &oldurl,
+                    (flags & ~CURLU_NO_GUESS_SCHEME) | CURLU_GET_EMPTY);
   if(uc == CURLUE_OUT_OF_MEMORY)
     return uc;
   else if(uc)
@@ -1783,6 +1835,7 @@ static CURLUcode urlset_clear(CURLU *u, CURLUPart what)
     curlx_safefree(u->user);
     break;
   case CURLUPART_PASSWORD:
+    curlx_strzero(u->password);
     curlx_safefree(u->password);
     break;
   case CURLUPART_OPTIONS:
@@ -1796,7 +1849,7 @@ static CURLUcode urlset_clear(CURLU *u, CURLUPart what)
     break;
   case CURLUPART_PORT:
     u->portnum = 0;
-    curlx_safefree(u->port);
+    u->port_present = FALSE;
     break;
   case CURLUPART_PATH:
     curlx_safefree(u->path);
@@ -1952,7 +2005,7 @@ static CURLUcode url_sethost(CURLU *u, struct dynbuf *encp,
       bad = TRUE;
     curlx_free(decoded);
   }
-  else if(hostname_check(u, (char *)CURL_UNCONST(newp), n))
+  else if(hostname_check(u, newp, n))
     bad = TRUE;
   if(bad) {
     curlx_dyn_free(encp);
@@ -2059,6 +2112,8 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     if(status)
       return status;
 
+    if(what == CURLUPART_PASSWORD)
+      curlx_strzero(*storep);
     curlx_free(*storep);
     *storep = (char *)CURL_UNCONST(newp);
   }
@@ -2077,26 +2132,42 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href)
   if(href->host) {
     if(!curl_strequal(base->host, href->host))
       return FALSE;
-    if(!curl_strequal(base->zoneid ? base->zoneid : "",
-                      href->zoneid ? href->zoneid : ""))
-      return FALSE;
-    if(!curl_strequal(base->port, href->port)) {
-      /* This may still match if only one has an explicit port
-       * and it is the default for the scheme. */
-      if(base->port && href->port)
-        return FALSE;
 
+    if(base->port_present != href->port_present) {
+      /* one is present, one is not */
       s = Curl_get_scheme(base->scheme);
       if(!s) /* Cannot match default port for unknown scheme */
         return FALSE;
-
-      /* The port which is set must be the default one */
-      if((base->port && (base->portnum != s->defport)) ||
-         (href->port && (href->portnum != s->defport)))
+      /* to match, the present one must be the default port */
+      if((base->port_present && (base->portnum != s->defport)) ||
+         (href->port_present && (href->portnum != s->defport)))
         return FALSE;
     }
+    else if(base->portnum != href->portnum) /* both present or missing */
+      return FALSE;
+
+    if(!curl_strequal(base->zoneid ? base->zoneid : "",
+                      href->zoneid ? href->zoneid : ""))
+      return FALSE;
   }
-  else if(href->port) /* no host in href, then there must be no port */
+  else if(href->port_present) /* no host in href, then there must be no port */
     return FALSE;
   return TRUE;
+}
+
+CURLUcode Curl_url_get_port(CURLU *u, uint16_t *pport)
+{
+  if(u->port_present) {
+    *pport = u->portnum;
+    return CURLUE_OK;
+  }
+  else if(u->scheme) {
+    const struct Curl_scheme *s = Curl_get_scheme(u->scheme);
+    if(s && s->defport) {
+      *pport = s->defport;
+      return CURLUE_OK;
+    }
+  }
+  *pport = 0;
+  return CURLUE_NO_PORT;
 }

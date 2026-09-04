@@ -43,12 +43,14 @@
 
 #include "urldata.h"
 #include "connect.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
-#include "hostip.h"
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
 #include "url.h"
+#include "vdns/hostip.h"
+#include "vdns/httpsrr.h"
 
 /***********************************************************************
  * Only for builds using asynchronous name resolves
@@ -69,7 +71,7 @@ timediff_t Curl_async_timeleft_ms(struct Curl_easy *data,
 #ifdef USE_ARES
 
 #if ARES_VERSION < 0x011000
-#error "requires c-ares 1.16.0 or newer"
+#error "c-ares 1.16.0 or greater required"
 #endif
 
 /*
@@ -238,6 +240,14 @@ void Curl_async_destroy(struct Curl_easy *data,
 #ifndef CURL_DISABLE_DOH
     Curl_doh_cleanup(data, async);
 #endif
+    if(async->ai_A)
+      Curl_freeaddrinfo(async->ai_A);
+    if(async->ai_AAAA)
+      Curl_freeaddrinfo(async->ai_AAAA);
+#ifdef USE_HTTPSRR
+    Curl_httpsrr_destroy(async->httpsrr);
+#endif
+    Curl_peer_unlink(&async->peer);
     curlx_safefree(async);
   }
 }
@@ -256,9 +266,10 @@ CURLcode Curl_async_failed(struct Curl_easy *data,
   }
 #endif
 
-  failf(data, "Could not resolve %s: %s%s%s%s",
-        host_or_proxy, async->hostname,
-        detail ? " (" : "", detail ? detail : "", detail ? ")" : "");
+  if(async->dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA))
+    failf(data, "Could not resolve %s: %s%s%s%s",
+          host_or_proxy, async->peer->hostname,
+          detail ? " (" : "", detail ? detail : "", detail ? ")" : "");
   return result;
 }
 

@@ -60,7 +60,6 @@
 
 #include "sendf.h"
 #include "curl_trc.h"
-#include "hostip.h"
 #include "progress.h"
 #include "transfer.h"
 #include "escape.h"
@@ -208,7 +207,7 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
                                           struct SMTP *smtp)
 {
   CURLcode result = CURLE_OK;
-  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+  const char *custom = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
 
   /* URL decode the custom request */
   if(custom)
@@ -250,16 +249,26 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
  * calling function deems it to be) then the input will be returned in
  * the address part with the hostname being NULL.
  */
-static CURLcode smtp_parse_address(const char *fqma, char **address,
-                                   struct hostname *host, const char **suffix)
+static CURLcode smtp_parse_address(struct Curl_easy *data, const char *fqma,
+                                   char **address, struct hostname *host,
+                                   const char **suffix)
 {
   CURLcode result = CURLE_OK;
   size_t length;
   char *addressend;
+  char *dup;
+
+  /* A CR or LF in the address ends up verbatim in the MAIL FROM/RCPT TO
+     command line, so a crafted address could smuggle further SMTP commands
+     onto the wire. Reject it before the command is built. */
+  if(strpbrk(fqma, "\r\n")) {
+    failf(data, "Refusing to send email address with a CR or LF");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it does not contain the delimiters if specified */
-  char *dup = curlx_strdup(fqma[0] == '<' ? fqma + 1 : fqma);
+  dup = curlx_strdup(fqma[0] == '<' ? fqma + 1 : fqma);
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 
@@ -736,7 +745,8 @@ static CURLcode smtp_perform_auth(struct Curl_easy *data,
 
   if(ir) {                                  /* AUTH <mech> ...<crlf> */
     /* Send the AUTH command with the initial response */
-    result = Curl_pp_sendf(data, &smtpc->pp, "AUTH %s %s", mech, ir);
+    result = Curl_pp_sendf(data, &smtpc->pp, "AUTH %s %s",
+                           mech, *ir ? ir : "=");
   }
   else {
     /* Send the AUTH command */
@@ -842,7 +852,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
 
       /* Parse the mailbox to verify into the local address and hostname
          parts, converting the hostname to an IDN A-label if necessary */
-      result = smtp_parse_address(smtp->rcpt->data,
+      result = smtp_parse_address(data, smtp->rcpt->data,
                                   &address, &host, &suffix);
       if(result)
         return result;
@@ -868,7 +878,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
     else {
       /* Establish whether we should report that we support SMTPUTF8 for EXPN
          commands to the server as per RFC-6531 sect. 3.1 point 6 */
-      utf8 = (smtpc->utf8_supported) && (!strcmp(smtp->custom, "EXPN"));
+      utf8 = smtpc->utf8_supported && !strcmp(smtp->custom, "EXPN");
 
       /* Send the custom recipient based command such as the EXPN command */
       result = Curl_pp_sendf(data, &smtpc->pp,
@@ -902,6 +912,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
   char *from = NULL;
   char *auth = NULL;
   char *size = NULL;
+  const char *str;
   CURLcode result = CURLE_OK;
 
   /* We notify the server we are sending UTF-8 data if a) it supports the
@@ -911,15 +922,15 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
   bool utf8 = FALSE;
 
   /* Calculate the FROM parameter */
-  if(data->set.str[STRING_MAIL_FROM]) {
+  str = CURL_EASY_STR(data, STRING_MAIL_FROM);
+  if(str) {
     char *address = NULL;
     struct hostname host = { NULL, NULL, NULL, NULL };
     const char *suffix = "";
 
     /* Parse the FROM mailbox into the local address and hostname parts,
        converting the hostname to an IDN A-label if necessary */
-    result = smtp_parse_address(data->set.str[STRING_MAIL_FROM],
-                                &address, &host, &suffix);
+    result = smtp_parse_address(data, str, &address, &host, &suffix);
     if(result)
       goto out;
 
@@ -952,16 +963,16 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
   }
 
   /* Calculate the optional AUTH parameter */
-  if(data->set.str[STRING_MAIL_AUTH] && smtpc->sasl.authused) {
-    if(data->set.str[STRING_MAIL_AUTH][0] != '\0') {
+  str = CURL_EASY_STR(data, STRING_MAIL_AUTH);
+  if(str && smtpc->sasl.authused) {
+    if(str[0] != '\0') {
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
       const char *suffix = "";
 
       /* Parse the AUTH mailbox into the local address and hostname parts,
          converting the hostname to an IDN A-label if necessary */
-      result = smtp_parse_address(data->set.str[STRING_MAIL_AUTH],
-                                  &address, &host, &suffix);
+      result = smtp_parse_address(data, str, &address, &host, &suffix);
       if(result)
         goto out;
 
@@ -1097,7 +1108,7 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data,
 
   /* Parse the recipient mailbox into the local address and hostname parts,
      converting the hostname to an IDN A-label if necessary */
-  result = smtp_parse_address(smtp->rcpt->data,
+  result = smtp_parse_address(data, smtp->rcpt->data,
                               &address, &host, &suffix);
   if(result)
     return result;
@@ -1412,8 +1423,8 @@ static CURLcode smtp_state_rcpt_resp(struct Curl_easy *data,
 
   is_smtp_err = (smtpcode / 100 != 2);
 
-  /* If there is multiple RCPT TO to be issued, it is possible to ignore errors
-     and proceed with only the valid addresses. */
+  /* If there are multiple RCPT TO commands to issue, it is possible to
+     ignore errors and proceed with only the valid addresses. */
   is_smtp_blocking_err = (is_smtp_err && !data->set.mail_rcpt_allowfails);
 
   if(is_smtp_err) {
@@ -1646,7 +1657,7 @@ static const struct SASLproto saslsmtp = {
   smtp_continue_auth,   /* Send authentication continuation */
   smtp_cancel_auth,     /* Cancel authentication */
   smtp_get_message,     /* Get SASL response message */
-  512 - 8,              /* Max line len - strlen("AUTH ") - 1 space - crlf */
+  512 - 8,              /* Max line len - strlen("AUTH ") - 1 space - CRLF */
   334,                  /* Code received when continuation is expected */
   235,                  /* Code to receive upon authentication success */
   SASL_AUTH_DEFAULT,    /* Default mechanisms */
@@ -1728,7 +1739,8 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
   curlx_safefree(smtp->custom);
 
   if(status) {
-    connclose(conn, "SMTP done with bad status"); /* marked for closure */
+    CURL_TRC_M(data, "SMTP done with bad status");
+    connclose(conn); /* marked for closure */
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.mail_rcpt &&

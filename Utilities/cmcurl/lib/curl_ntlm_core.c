@@ -76,7 +76,7 @@
 #elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
 #  include <mbedtls/version.h>
 #  if MBEDTLS_VERSION_NUMBER < 0x03020000
-#  error "mbedTLS 3.2.0 or later required"
+#  error "mbedTLS 3.2.0 or greater required"
 #  endif
 #  include <mbedtls/des.h>
 #  define USE_MBEDTLS_DES
@@ -551,7 +551,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(const unsigned char *ntlmv2hash,
                                        unsigned char **ntresp,
                                        unsigned int *ntresp_len)
 {
-  /* NTLMv2 response structure :
+  /* NTLMv2 response structure:
   -----------------------------------------------------------------------------
   0     HMAC MD5         16 bytes
   ------BLOB-------------------------------------------------------------------

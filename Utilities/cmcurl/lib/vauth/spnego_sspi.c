@@ -48,7 +48,7 @@ bool Curl_auth_is_spnego_supported(void)
 
   /* Query the security package for Negotiate */
   status = Curl_pSecFn->QuerySecurityPackageInfo(
-                                (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
+                                CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
                                 &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
@@ -93,6 +93,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   SecBufferDesc chlg_desc;
   SecBufferDesc resp_desc;
   unsigned long attrs;
+  SecPkgContext_Bindings pkgBindings = { 0, NULL };
 
   if(nego->context && nego->status == SEC_E_OK) {
     /* We finished successfully our part of authentication, but server
@@ -114,7 +115,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   if(!nego->output_token) {
     /* Query the security package for Negotiate */
     nego->status = Curl_pSecFn->QuerySecurityPackageInfo(
-                                (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
+                                CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
                                 &SecurityPackage);
     if(nego->status != SEC_E_OK) {
       failf(data, "SSPI: could not get auth info");
@@ -148,6 +149,21 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       /* Use the current Windows user */
       nego->p_identity = NULL;
 
+    /* Exclude NTLM from SPNEGO negotiation via the PackageList field */
+    if(!nego->p_identity) {
+      memset(&nego->identity, 0, sizeof(nego->identity));
+      nego->identity.Version = SEC_WINNT_AUTH_IDENTITY_VERSION;
+      nego->identity.Length = sizeof(nego->identity);
+      nego->identity.Flags = CURL_SEC_WINNT_AUTH_IDENTITY;
+      nego->p_identity = &nego->identity;
+    }
+
+    /* Use the special name "!ntlm" to prevent NTLM from being used:
+     * https://learn.microsoft.com/windows/win32/api/sspi/ns-sspi-sec_winnt_auth_identity_exa
+     */
+    nego->identity.PackageList = CURL_UNCONST(TEXT("!ntlm"));
+    nego->identity.PackageListLength = 5;
+
     /* Allocate our credentials handle */
     nego->credentials = curlx_calloc(1, sizeof(CredHandle));
     if(!nego->credentials)
@@ -155,7 +171,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
     /* Acquire our credentials handle */
     nego->status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
+                                CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
                                 SECPKG_CRED_OUTBOUND, NULL,
                                 nego->p_identity, NULL, NULL,
                                 nego->credentials, NULL);
@@ -169,6 +185,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     if(!nego->context)
       return CURLE_OUT_OF_MEMORY;
   }
+
+  chlg_desc.ulVersion = SECBUFFER_VERSION;
+  chlg_desc.cBuffers = 0;
+  chlg_desc.pBuffers = chlg_buf;
 
   if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
@@ -185,37 +205,30 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     }
 
     /* Setup the challenge "input" security buffer */
-    chlg_desc.ulVersion    = SECBUFFER_VERSION;
     chlg_desc.cBuffers     = 1;
-    chlg_desc.pBuffers     = &chlg_buf[0];
     chlg_buf[0].BufferType = SECBUFFER_TOKEN;
     chlg_buf[0].pvBuffer   = chlg;
     chlg_buf[0].cbBuffer   = curlx_uztoul(chlglen);
+  }
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-    /* SSL context comes from Schannel.
-     * When extended protection is used in IIS server,
-     * we have to pass a second SecBuffer to the SecBufferDesc
-     * otherwise IIS does not pass the authentication (401 response).
-     * Minimum supported version is Windows 7.
-     * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
-     */
-    if(nego->sslContext) {
-      SEC_CHANNEL_BINDINGS channelBindings;
-      SecPkgContext_Bindings pkgBindings;
-      pkgBindings.Bindings = &channelBindings;
-      nego->status = Curl_pSecFn->QueryContextAttributes(
-          nego->sslContext,
-          SECPKG_ATTR_ENDPOINT_BINDINGS,
-          &pkgBindings);
-      if(nego->status == SEC_E_OK) {
-        chlg_desc.cBuffers++;
-        chlg_buf[1].BufferType = SECBUFFER_CHANNEL_BINDINGS;
-        chlg_buf[1].cbBuffer   = pkgBindings.BindingsLength;
-        chlg_buf[1].pvBuffer   = pkgBindings.Bindings;
-      }
+  /* SSL context comes from Schannel.
+   * When extended protection is used in IIS server, pass its channel
+   * bindings on the initial call too. HTTP Negotiate can create and send a
+   * Kerberos token before receiving a challenge from the server.
+   * Minimum supported version is Windows 7.
+   * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
+   */
+  if(nego->sslContext) {
+    nego->status = Curl_pSecFn->QueryContextAttributes(
+        nego->sslContext,
+        SECPKG_ATTR_ENDPOINT_BINDINGS,
+        &pkgBindings);
+    if(nego->status == SEC_E_OK) {
+      SecBuffer *binding_buf = &chlg_buf[chlg_desc.cBuffers++];
+      binding_buf->BufferType = SECBUFFER_CHANNEL_BINDINGS;
+      binding_buf->cbBuffer   = pkgBindings.BindingsLength;
+      binding_buf->pvBuffer   = pkgBindings.Bindings;
     }
-#endif
   }
 
   /* Setup the response "output" security buffer */
@@ -237,10 +250,14 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                              nego->spn,
                                              sspi_flags,
                                              0, SECURITY_NATIVE_DREP,
-                                             chlg ? &chlg_desc : NULL,
+                                             chlg_desc.cBuffers ?
+                                               &chlg_desc : NULL,
                                              0, nego->context,
                                              &resp_desc, &attrs, NULL);
   }
+
+  if(pkgBindings.Bindings)
+    Curl_pSecFn->FreeContextBuffer(pkgBindings.Bindings);
 
   /* Free the decoded challenge as it is not required anymore */
   curlx_free(chlg);

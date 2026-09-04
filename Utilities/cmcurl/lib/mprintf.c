@@ -395,22 +395,26 @@ static bool parse_conversion(const char f, unsigned int *flagp,
     flags |= FLAGS_CHAR;
     break;
   case 'f':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
+    break;
+  case 'F':
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
+    flags |= FLAGS_UPPER;
     break;
   case 'e':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATE;
     break;
   case 'E':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATE | FLAGS_UPPER;
     break;
   case 'g':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATG;
     break;
   case 'G':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATG | FLAGS_UPPER;
     break;
   default:
@@ -618,6 +622,10 @@ static int parsefmt(const char *format,
       iptr->val.dnum = va_arg(arglist, double);
       break;
 
+    case MTYPE_LONGDOUBLE:
+      iptr->val.dnum = (double)va_arg(arglist, long double);
+      break;
+
     default:
       DEBUGASSERT(NULL); /* unexpected */
       break;
@@ -678,7 +686,7 @@ static bool out_double(void *userp,
       prec = maxprec - 1;
     if(width > 0 && prec <= width)
       maxprec -= width;
-    while(val >= 10.0) {
+    while(maxprec && (val >= 10.0)) {
       val /= 10;
       maxprec--;
     }
@@ -699,7 +707,7 @@ static bool out_double(void *userp,
   else if(flags & FLAGS_FLOATG)
     *fptr++ = (char)((flags & FLAGS_UPPER) ? 'G' : 'g');
   else
-    *fptr++ = 'f';
+    *fptr++ = (flags & FLAGS_UPPER) ? 'F' : 'f';
 
   *fptr = 0; /* and a final null-termination */
 
@@ -712,9 +720,7 @@ static bool out_double(void *userp,
 #ifdef _WIN32
   curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
 #else
-  /* !checksrc! disable BANNEDFUNC 1 */
-  /* !checksrc! disable LONGLINE */
-  /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
+  /* !checksrc! disable BANNEDFUNC 2 */
   snprintf(work, BUFFSIZE, fmt, dnum);
 #endif
 #ifdef CURL_HAVE_DIAG
@@ -878,9 +884,9 @@ static bool out_string(void *userp,
 
   if(!str) {
     /* Write null string if there is space. */
-    if(prec == -1 || prec >= (int)sizeof(nilstr) - 1) {
+    if(prec == -1 || prec >= (int)CURL_CSTRLEN(nilstr)) {
       str = nilstr;
-      len = sizeof(nilstr) - 1;
+      len = CURL_CSTRLEN(nilstr);
       /* Disable quotes around (nil) */
       flags &= ~(unsigned int)FLAGS_ALT;
     }
@@ -939,7 +945,7 @@ static bool out_pointer(void *userp,
     int width = p->width;
     int flags = p->flags;
 
-    width -= (int)(sizeof(nilstr) - 1);
+    width -= (int)CURL_CSTRLEN(nilstr);
     if(flags & FLAGS_LEFT)
       while(width-- > 0)
         OUTCHAR(' ');
@@ -1065,6 +1071,7 @@ static int formatf(void *userp, /* untouched by format(), sent to the
       break;
 
     case MTYPE_DOUBLE:
+    case MTYPE_LONGDOUBLE:
       if(out_double(userp, stream, &p, iptr->val.dnum, work, &done))
         return done;
       break;

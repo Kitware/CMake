@@ -164,7 +164,7 @@ static CURLcode oldap_map_error(int rc, CURLcode result)
 static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
 {
   CURLcode result = CURLE_OK;
-  int rc = LDAP_URL_ERR_BADURL;
+  int rc;
   static const char * const url_errs[] = {
     "success",
     "out of memory",
@@ -180,9 +180,16 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
   };
 
   *ludp = NULL;
-  if(!data->state.up.user && !data->state.up.password &&
-     !data->state.up.options)
+  /* `ldap_url_parse() seems to be terrible with urls
+   * that have user/pass/options in it. So when we have options or
+   * creds from the url, fail without calling the function.
+   * Yes, this is super-weird code and I do not like it. */
+  if((data->state.creds && (data->state.creds->source == CREDS_URL)) ||
+     data->state.up.options)
+    rc = LDAP_URL_ERR_BADURL;
+  else
     rc = ldap_url_parse(Curl_bufref_ptr(&data->state.url), ludp);
+
   if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
 
@@ -605,7 +612,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  li->proto = ldap_pvt_url_scheme2proto(data->state.up.scheme);
+  li->proto = ldap_pvt_url_scheme2proto(data->state.origin->scheme->name);
 
   /* Initialize the SASL storage */
   Curl_sasl_init(&li->sasl, data, &saslldap);
@@ -614,10 +621,11 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  hosturl = curl_maprintf("%s://%s:%d",
+  hosturl = curl_maprintf("%s://%s:%u",
                           conn->scheme->name,
-                          (data->state.up.hostname[0] == '[') ?
-                          data->state.up.hostname : conn->origin->hostname,
+                          conn->origin->ipv6 ?
+                          conn->origin->user_hostname :
+                          conn->origin->hostname,
                           conn->origin->port);
   if(!hosturl) {
     result = CURLE_OUT_OF_MEMORY;
@@ -783,8 +791,19 @@ static CURLcode oldap_state_sasl_resp(struct Curl_easy *data,
   }
   else {
     result = Curl_sasl_continue(&li->sasl, data, code, &progress);
-    if(!result && progress != SASL_INPROGRESS)
-      oldap_state(data, li, OLDAP_STOP);
+    if(!result) {
+      switch(progress) {
+      case SASL_DONE:
+        oldap_state(data, li, OLDAP_STOP);   /* Authenticated */
+        break;
+      case SASL_IDLE:            /* No mechanism left after cancellation */
+        failf(data, "Authentication cancelled");
+        result = CURLE_LOGIN_DENIED;
+        break;
+      default:
+        break;
+      }
+    }
   }
 
   if(li->servercred)
@@ -1081,7 +1100,7 @@ static CURLcode client_write(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
+static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
                            size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
@@ -1187,9 +1206,11 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
           break;
 
         if(!binary) {
-          /* check for leading or trailing whitespace */
+          /* check for a leading ':' or '<' (not a SAFE-INIT-CHAR per RFC
+             2849) or leading or trailing whitespace */
           if(bvals[i].bv_len &&
-             (ISBLANK(bvals[i].bv_val[0]) ||
+             ((bvals[i].bv_val[0] == ':') || (bvals[i].bv_val[0] == '<') ||
+              ISBLANK(bvals[i].bv_val[0]) ||
               ISBLANK(bvals[i].bv_val[bvals[i].bv_len - 1])))
             binval = TRUE;
           else {

@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "cw-out.h"
 
 /**
  * Type of data that is being written to the client (application)
@@ -60,6 +61,8 @@ struct Curl_easy;
  */
 CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
                            size_t len) WARN_UNUSED_RESULT;
+
+CURLcode Curl_client_flush(struct Curl_easy *data);
 
 /**
  * Free all resources related to client writing.
@@ -102,19 +105,26 @@ typedef enum {
   CURL_CW_RAW,  /* raw data written, before any decoding */
   CURL_CW_TRANSFER_DECODE, /* remove transfer-encodings */
   CURL_CW_PROTOCOL, /* after transfer, but before content decoding */
+  CURL_CW_BEFORE_DECODE, /* after protocol, but before content decoding */
   CURL_CW_CONTENT_DECODE, /* remove content-encodings */
   CURL_CW_CLIENT  /* data written to client */
 } Curl_cwriter_phase;
+
+/* writer may blow up size of write data, e.g. zip bombs */
+#define CURL_CW_FLAG_BLOWUP     (1U << 0)
 
 /* Client Writer Type, provides the implementation */
 struct Curl_cwtype {
   const char *name;        /* writer name. */
   const char *alias;       /* writer name alias, maybe NULL. */
+  uint8_t flags;           /* flags for writer behaviour */
   CURLcode (*do_init)(struct Curl_easy *data,
                       struct Curl_cwriter *writer);
   CURLcode (*do_write)(struct Curl_easy *data,
                        struct Curl_cwriter *writer, int type,
                        const char *buf, size_t nbytes);
+  CURLcode (*do_flush)(struct Curl_easy *data,
+                       struct Curl_cwriter *writer);
   void (*do_close)(struct Curl_easy *data,
                    struct Curl_cwriter *writer);
   size_t cwriter_size;  /* sizeof() allocated struct Curl_cwriter */
@@ -172,20 +182,16 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
 struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
                                               const char *name);
 
-/**
- * Convenience method for calling `writer->do_write()` that
- * checks for NULL writer.
- */
-CURLcode Curl_cwriter_write(struct Curl_easy *data,
-                            struct Curl_cwriter *writer, int type,
-                            const char *buf, size_t nbytes);
+/* Convenience method for calling `writer->do_write()` that
+ * checks for NULL writer. */
+#define Curl_cwriter_write(d, w, t, b, n) \
+  ((w) ? (w)->cwt->do_write((d), (w), (t), (b), (n)) : CURLE_WRITE_ERROR)
 
-/**
- * Return TRUE iff client writer is paused.
- */
-bool Curl_cwriter_is_paused(struct Curl_easy *data);
+#define Curl_cwriter_flush(d, w) \
+  ((w) ? (w)->cwt->do_flush((d), (w)) : CURLE_WRITE_ERROR)
 
-bool Curl_cwriter_is_content_decoding(struct Curl_easy *data);
+/* TRUE if client writer is paused. */
+#define Curl_cwriter_is_paused(d)     ((bool)(d)->req.writer.paused)
 
 /**
  * Unpause client writer and flush any buffered date to the client.
@@ -201,6 +207,8 @@ CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
 CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
                                 struct Curl_cwriter *writer, int type,
                                 const char *buf, size_t nbytes);
+CURLcode Curl_cwriter_def_flush(struct Curl_easy *data,
+                                struct Curl_cwriter *writer);
 void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
 

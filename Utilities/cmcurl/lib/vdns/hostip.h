@@ -52,8 +52,8 @@ struct Curl_peer;
 #define CURL_DNSQ_AAAA        (1U << 1)
 #define CURL_DNSQ_HTTPS       (1U << 2)
 
-#define CURL_DNSQ_ALL         (CURL_DNSQ_A | CURL_DNSQ_AAAA | CURL_DNSQ_HTTPS)
-#define CURL_DNSQ_IP(x)       (uint8_t)((x)&(CURL_DNSQ_A | CURL_DNSQ_AAAA))
+#define CURL_DNSQ_ADDR        (uint8_t)(CURL_DNSQ_A | CURL_DNSQ_AAAA)
+#define CURL_DNSQ_IS_ADDR(x)  (uint8_t)((x)&(CURL_DNSQ_ADDR))
 
 #ifdef CURLVERBOSE
 const char *Curl_resolv_query_str(uint8_t dns_queries);
@@ -140,7 +140,8 @@ void Curl_resolv_destroy(struct Curl_easy *data, uint32_t resolv_id);
 /* How much time has gone by since start of resolve.
  * Returns CURL_TIMEOUT_RESOLVE_MS if `resolv_id` is no longer valid. */
 timediff_t Curl_resolv_elapsed_ms(struct Curl_easy *data,
-                                  uint32_t resolv_id);
+                                  uint32_t resolv_id,
+                                  const struct curltime *pnow);
 
 /* Return TRUE if `resolv_id` has answers (positive or negative) to
  * all queries in `dns_queries`.
@@ -153,6 +154,22 @@ const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
                                                int ai_family,
                                                unsigned int index);
 #ifdef USE_HTTPSRR
+
+/* Start DNS resolving for HTTPS records. Returns
+ * - CURLE_OK: `*pdns` is the resolved DNS entry (needs to be unlinked).
+    *          `*presolv_id` is 0.
+ * - CURLE_AGAIN: resolve is asynchronous and not finished yet.
+ *             `presolv_id` is the identifier for querying results later.
+ * - other: the operation failed, `*pdns` is NULL, `*presolv_id` is 0.
+ */
+CURLcode Curl_resolv_https(struct Curl_easy *data,
+                           struct Curl_peer *peer,
+                           bool for_proxy,
+                           timediff_t timeout_ms,
+                           uint32_t *presolv_id,
+                           struct Curl_dns_entry **pdns);
+
+
 const struct Curl_https_rrinfo *Curl_resolv_get_https(struct Curl_easy *data,
                                                       uint32_t resolv_id);
 bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
@@ -162,7 +179,7 @@ bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
 #define Curl_resolv_shutdown_all(x)      Curl_nop_stmt
 #define Curl_resolv_destroy_all(x)       Curl_nop_stmt
 #define Curl_resolv_take_result(x, y, z) CURLE_NOT_BUILT_IN
-#define Curl_resolv_elapsed_ms(x, y)     CURL_TIMEOUT_RESOLVE_MS
+#define Curl_resolv_elapsed_ms(x, y, z)  CURL_TIMEOUT_RESOLVE_MS
 #define Curl_resolv_has_answers(x, y, z) TRUE
 #define Curl_resolv_get_ai(x, y, z, a)   NULL
 #define Curl_resolv_get_https(x, y)      NULL

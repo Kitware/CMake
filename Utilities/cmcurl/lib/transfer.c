@@ -51,15 +51,13 @@
 #endif
 
 #ifndef HAVE_SOCKET
-#error "We cannot compile without socket() support!"
+#error "We cannot compile without socket() support"
 #endif
 
 #include "urldata.h"
 
-#include "hostip.h"
 #include "cfilters.h"
 #include "cw-out.h"
-#include "dnscache.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -73,6 +71,7 @@
 #include "setopt.h"
 #include "headers.h"
 #include "bufref.h"
+#include "rtsp.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_IMAP)
@@ -155,7 +154,7 @@ static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
   if(!data || !data->conn)
     return FALSE;
-  return Curl_shutdown_started(data, data->conn->recv_idx);
+  return Curl_shutdown_started(data->conn, data->conn->recv_idx);
 }
 
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
@@ -250,8 +249,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     bytestoread = xfer_blen;
 
     if(bytestoread && Curl_rlimit_active(&data->progress.dl.rlimit)) {
-      curl_off_t dl_avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
-                                              Curl_pgrs_now(data));
+      curl_off_t dl_avail = Curl_rlimit_avail(&data->progress.dl.rlimit, NULL);
 #if 0
       DEBUGF(infof(data, "dl_rlimit, available=%" FMT_OFF_T, dl_avail));
 #endif
@@ -356,6 +354,7 @@ static CURLcode sendrecv_ul(struct Curl_easy *data)
 CURLcode Curl_sendrecv(struct Curl_easy *data)
 {
   struct SingleRequest *k = &data->req;
+  const struct curltime *pnow = NULL;
   CURLcode result = CURLE_OK;
 
   if(Curl_xfer_is_blocked(data)) {
@@ -378,25 +377,20 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
       goto out;
   }
 
-  result = Curl_pgrsCheck(data);
-  if(result)
-    goto out;
-
+  pnow = Curl_pgrs_now(data);
   if(CURL_REQ_WANT_IO(data)) {
-    if(Curl_timeleft_ms(data) < 0) {
+    if(Curl_timeleft_now_ms(data, pnow) < 0) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
               FMT_OFF_T " bytes received",
-              curlx_ptimediff_ms(Curl_pgrs_now(data),
-                                 &data->progress.t_startsingle),
+              Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE),
               k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " bytes received",
-              curlx_ptimediff_ms(Curl_pgrs_now(data),
-                                 &data->progress.t_startsingle),
+              Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE),
               k->bytecount);
       }
       result = CURLE_OPERATION_TIMEDOUT;
@@ -408,7 +402,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
      * The transfer has been performed. Make some general checks before
      * returning.
      */
-    if(!(data->req.no_body) && (k->size != -1) &&
+    if(!data->req.no_body && (k->size != -1) &&
        (k->bytecount != k->size) && !k->newurl) {
       failf(data, "transfer closed with %" FMT_OFF_T
             " bytes remaining to read", k->size - k->bytecount);
@@ -421,7 +415,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
   if(!CURL_REQ_WANT_IO(data))
     data->req.done = TRUE;
 
-  result = Curl_pgrsUpdate(data);
+  result = Curl_pgrsCheckX(data, pnow);
 
 out:
   if(result)
@@ -455,7 +449,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
    * By resetting it here, we ensure each new request starts fresh. */
   data->state.retrycount = 0;
 
-  if(!data->set.str[STRING_SET_URL] && !data->set.uh) {
+  if(!CURL_EASY_STR(data, STRING_SET_URL) && !data->set.uh) {
     /* we cannot do anything without URL */
     failf(data, "No URL set");
     return CURLE_URL_MALFORMAT;
@@ -464,19 +458,22 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   /* CURLOPT_CURLU overrides CURLOPT_URL and the contents of the CURLU handle
      is allowed to be changed by the user between transfers */
   if(data->set.uh) {
+    char *url = NULL;
     CURLUcode uc;
-    curlx_free(data->set.str[STRING_SET_URL]);
-    uc = curl_url_get(data->set.uh,
-                      CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
+    uc = curl_url_get(data->set.uh, CURLUPART_URL, &url, 0);
     if(uc) {
       /* clear the pointer to not point to freed memory anymore */
       Curl_bufref_set(&data->state.url, NULL, 0, NULL);
       failf(data, "No URL set");
       return CURLE_URL_MALFORMAT;
     }
+    result = CURL_EASY_STR_SETN(data, STRING_SET_URL, url);
+    if(result)
+      return result;
   }
 
-  Curl_bufref_set(&data->state.url, data->set.str[STRING_SET_URL], 0, NULL);
+  Curl_bufref_set(&data->state.url, CURL_EASY_STR(data, STRING_SET_URL),
+                  0, NULL);
 
   if(data->set.postfields && data->set.set_resume_from) {
     /* we cannot */
@@ -509,9 +506,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   Curl_data_priority_clear_state(data);
   if(data->set.http_auto_referer)
     Curl_bufref_free(&data->state.referer);
-  if(data->set.str[STRING_SET_REFERER])
-    Curl_bufref_set(&data->state.referer, data->set.str[STRING_SET_REFERER],
-                    0, NULL);
+  if(CURL_EASY_STR(data, STRING_SET_REFERER))
+    Curl_bufref_set(&data->state.referer,
+                    CURL_EASY_STR(data, STRING_SET_REFERER), 0, NULL);
   else
     Curl_bufref_free(&data->state.referer);
 
@@ -527,7 +524,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     data->state.infilesize = 0;
 
   /* If there is a list of cookie files to read, do it now! */
-  result = Curl_cookie_loadfiles(data);
+  result = Curl_cookie_loadfiles(data,
+                                 data->set.cookiesession ?
+                                 COOKIE_NOSESSION : 0);
   if(!result)
     Curl_cookie_run(data); /* activate */
 
@@ -555,7 +554,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
     Curl_initinfo(data); /* reset session-specific information "variables" */
     Curl_pgrsResetTransferSizes(data);
-    Curl_pgrsStartNow(data);
+    Curl_pgrsStart(data, NULL);
 
     /* In case the handle is reused and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now
@@ -583,18 +582,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
 #endif
     result = Curl_hsts_loadcb(data, data->hsts);
-  }
-
-  /*
-   * Set user-agent. Used for HTTP, but since we can attempt to tunnel
-   * anything through an HTTP proxy we cannot limit this based on protocol.
-   */
-  if(!result && data->set.str[STRING_USERAGENT]) {
-    curlx_free(data->state.aptr.uagent);
-    data->state.aptr.uagent =
-      curl_maprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
-    if(!data->state.aptr.uagent)
-      return CURLE_OUT_OF_MEMORY;
   }
 
   data->req.headerbytecount = 0;
@@ -659,7 +646,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 
-    connclose(conn, "retry"); /* close this connection */
+    connclose(conn); /* close this connection */
     conn->bits.retry = TRUE; /* mark this as a connection we are about to
                                 retry. Marking it this way should prevent i.e
                                 HTTP transfers to return error because nothing
@@ -671,8 +658,8 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 
 static void xfer_setup(
   struct Curl_easy *data,   /* transfer */
-  int send_idx,             /* sockindex to send on or -1 */
-  int recv_idx,             /* sockindex to receive on or -1 */
+  int8_t send_idx,             /* sockindex to send on or -1 */
+  int8_t recv_idx,             /* sockindex to receive on or -1 */
   curl_off_t recv_size      /* how much to receive, -1 if unknown */
   )
 {
@@ -720,20 +707,20 @@ void Curl_xfer_setup_nop(struct Curl_easy *data)
 }
 
 void Curl_xfer_setup_sendrecv(struct Curl_easy *data,
-                              int sockindex,
+                              int8_t sockindex,
                               curl_off_t recv_size)
 {
   xfer_setup(data, sockindex, sockindex, recv_size);
 }
 
 void Curl_xfer_setup_send(struct Curl_easy *data,
-                          int sockindex)
+                          int8_t sockindex)
 {
   xfer_setup(data, sockindex, -1, -1);
 }
 
 void Curl_xfer_setup_recv(struct Curl_easy *data,
-                          int sockindex,
+                          int8_t sockindex,
                           curl_off_t recv_size)
 {
   xfer_setup(data, -1, sockindex, recv_size);

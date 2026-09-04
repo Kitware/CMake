@@ -58,7 +58,6 @@
 
 #include "sendf.h"
 #include "curl_trc.h"
-#include "hostip.h"
 #include "progress.h"
 #include "transfer.h"
 #include "escape.h"
@@ -251,7 +250,7 @@ static CURLcode pop3_parse_custom_request(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   struct POP3 *pop3 = Curl_meta_get(data, CURL_META_POP3_EASY);
-  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+  const char *custom = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
 
   if(!pop3)
     return CURLE_FAILED_INIT;
@@ -620,7 +619,8 @@ static CURLcode pop3_perform_auth(struct Curl_easy *data,
 
   if(ir) {                                  /* AUTH <mech> ...<crlf> */
     /* Send the AUTH command with the initial response */
-    result = Curl_pp_sendf(data, &pop3c->pp, "AUTH %s %s", mech, ir);
+    result = Curl_pp_sendf(data, &pop3c->pp, "AUTH %s %s",
+                           mech, *ir ? ir : "=");
   }
   else {
     /* Send the AUTH command */
@@ -1406,7 +1406,7 @@ static const struct SASLproto saslpop3 = {
   pop3_continue_auth,   /* Send authentication continuation */
   pop3_cancel_auth,     /* Send authentication cancellation */
   pop3_get_message,     /* Get SASL response message */
-  255 - 8,              /* Max line len - strlen("AUTH ") - 1 space - crlf */
+  255 - 8,              /* Max line len - strlen("AUTH ") - 1 space - CRLF */
   '*',                  /* Code received when continuation is expected */
   '+',                  /* Code to receive upon authentication success */
   SASL_AUTH_DEFAULT,    /* Default mechanisms */
@@ -1477,7 +1477,8 @@ static CURLcode pop3_done(struct Curl_easy *data, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    connclose(data->conn, "POP3 done with bad status");
+    CURL_TRC_M(data, "POP3 done with bad status");
+    connclose(data->conn);
     result = status;         /* use the already set error code */
   }
 

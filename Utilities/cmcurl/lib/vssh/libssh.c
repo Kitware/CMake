@@ -45,7 +45,6 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "curl_trc.h"
-#include "hostip.h"
 #include "progress.h"
 #include "transfer.h"
 #include "vssh/ssh.h"
@@ -110,10 +109,10 @@ static CURLcode sftp_error_to_CURLE(int err)
 }
 
 /* Multiple options:
- * 1. data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256] is set with a SHA256
- *    hash.
- * 2. data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] is set with an MD5
- *    hash (90s style auth, not sure we should have it here)
+ * 1. CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256) is set
+ *    with a SHA256 hash.
+ * 2. CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5) is set
+ *    with an MD5 hash (90s style auth, not sure we should have it here)
  * 3. data->set.ssh_keyfunc callback is set. Then we do trust on first
  *    use. We even save on knownhosts if CURLKHSTAT_FINE_ADD_TO_FILE
  *    is returned by it.
@@ -144,9 +143,9 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
   if(rc != SSH_OK)
     return rc;
 
-  if(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256]) {
+  if(CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256)) {
     const char *pubkey_sha256 =
-      data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256];
+      CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256);
     char *fingerprint_b64 = NULL;
     size_t fingerprint_b64_len;
     size_t pub_pos = 0;
@@ -198,8 +197,9 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     goto cleanup;
   }
 
-  if(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) {
-    const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
+  if(CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5)) {
+    const char *pubkey_md5 =
+      CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5);
     char md5buffer[33];
     int i;
 
@@ -228,7 +228,7 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     goto cleanup;
   }
 
-  if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
+  if(CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS)) {
 
     /* Get the known_key from the known hosts file */
     vstate = ssh_session_get_known_hosts_entry(sshc->ssh_session,
@@ -290,6 +290,8 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     }
 
     if(func) { /* use callback to determine action */
+      struct Curl_mapi_guard guard;
+
       rc = ssh_pki_export_pubkey_base64(pubkey, &found_base64);
       if(rc != SSH_OK)
         goto cleanup;
@@ -321,11 +323,11 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
         goto cleanup;
       }
 
-      Curl_set_in_callback(data, TRUE);
+      CURL_CBAPI_START(&guard, data, easy_ssh_keyfunc);
       rc = func(data, knownkeyp, /* from the knownhosts file */
                 &foundkey,       /* from the remote host */
                 keymatch, data->set.ssh_keyfunc_userp);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
 
       switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
@@ -832,8 +834,7 @@ static int myssh_in_AUTHLIST(struct Curl_easy *data,
   /* For public key auth we need either the private key or
      CURLSSH_AUTH_AGENT. */
   if((sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) &&
-     (data->set.str[STRING_SSH_PRIVATE_KEY] ||
-      (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
+     (sshc->priv_key || (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
     myssh_to(data, sshc, SSH_AUTH_PKEY_INIT);
     infof(data, "Authentication using SSH public key file");
   }
@@ -863,7 +864,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
 
   /* Two choices, (1) private key was given on CMD,
    * (2) use the "default" keys. */
-  if(data->set.str[STRING_SSH_PRIVATE_KEY]) {
+  if(sshc->priv_key) {
     if(sshc->pubkey && !data->set.ssl.primary.key_passwd) {
       rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
       if(rc == SSH_AUTH_AGAIN)
@@ -875,13 +876,11 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
       }
     }
 
-    rc = ssh_pki_import_privkey_file(data->
-                                     set.str[STRING_SSH_PRIVATE_KEY],
+    rc = ssh_pki_import_privkey_file(sshc->priv_key,
                                      data->set.ssl.primary.key_passwd, NULL,
                                      NULL, &sshc->privkey);
     if(rc != SSH_OK) {
-      failf(data, "Could not load private key file %s",
-            data->set.str[STRING_SSH_PRIVATE_KEY]);
+      failf(data, "Could not load private key file %s", sshc->priv_key);
       rc = myssh_to_ERROR(data, sshc, CURLE_LOGIN_DENIED);
       return rc;
     }
@@ -1100,10 +1099,11 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
     int seekerr = CURL_SEEKFUNC_OK;
     /* Let's read off the proper amount of bytes from the input. */
     if(data->set.seek_func) {
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_seek_func);
       seekerr = data->set.seek_func(data->set.seek_client,
                                     data->state.resume_from, SEEK_SET);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {
@@ -1761,7 +1761,7 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
   return SSH_NO_ERROR;
 }
 
-static void conn_forget_socket(struct Curl_easy *data, int sockindex)
+static void conn_forget_socket(struct Curl_easy *data, int8_t sockindex)
 {
   struct connectdata *conn = data->conn;
   if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
@@ -1916,8 +1916,8 @@ static void sshc_cleanup(struct ssh_conn *sshc)
       sshc->pubkey = NULL;
     }
 
-    curlx_safefree(sshc->rsa_pub);
-    curlx_safefree(sshc->rsa);
+    curlx_safefree(sshc->pub_key);
+    curlx_safefree(sshc->priv_key);
     curlx_safefree(sshc->quote_path1);
     curlx_safefree(sshc->quote_path2);
     curlx_dyn_free(&sshc->readdir_buf);
@@ -2238,7 +2238,7 @@ static CURLcode myssh_in_SESSION_FREE(struct Curl_easy *data,
   /* the code we are about to return */
   result = sshc->actualcode;
   memset(sshc, 0, sizeof(struct ssh_conn));
-  connclose(data->conn, "SSH session free");
+  connclose(data->conn);
   sshc->state = SSH_SESSION_FREE;   /* current */
   sshc->nextstate = SSH_NO_STATE;
   myssh_to(data, sshc, SSH_STOP);
@@ -2448,36 +2448,6 @@ static CURLcode myssh_statemachine(struct Curl_easy *data,
   return result;
 }
 
-/* called by the multi interface to figure out what socket(s) to wait for and
-   for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
-static CURLcode myssh_pollset(struct Curl_easy *data,
-                              struct easy_pollset *ps)
-{
-  struct connectdata *conn = data->conn;
-  struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
-  int waitfor;
-
-  if(!sshc || (sock == CURL_SOCKET_BAD))
-    return CURLE_FAILED_INIT;
-
-  waitfor = sshc->waitfor ? sshc->waitfor : data->req.io_flags;
-  if(waitfor) {
-    int flags = 0;
-    if(waitfor & REQ_IO_RECV)
-      flags |= CURL_POLL_IN;
-    if(waitfor & REQ_IO_SEND)
-      flags |= CURL_POLL_OUT;
-    DEBUGASSERT(flags);
-    CURL_TRC_SSH(data, "pollset, flags=%x", (unsigned int)flags);
-    return Curl_pollset_change(data, ps, sock, flags, 0);
-  }
-  /* While we still have a session, we listen incoming data. */
-  if(sshc->ssh_session)
-    return Curl_pollset_change(data, ps, sock, CURL_POLL_IN, 0);
-  return CURLE_OK;
-}
-
 /* called repeatedly until done from multi.c */
 static CURLcode myssh_multi_statemach(struct Curl_easy *data,
                                       bool *done)
@@ -2485,8 +2455,8 @@ static CURLcode myssh_multi_statemach(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
-  bool block;    /* we store the status and use that to provide a ssh_pollset()
-                    implementation */
+  bool block;    /* we store the status and use that to provide
+                    a Curl_ssh_pollset() implementation */
   CURLcode result;
 
   if(!sshc || !sshp)
@@ -2577,7 +2547,7 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
      Curl_meta_set(data, CURL_META_SSH_EASY, sshp, myssh_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return Curl_ssh_setup_pkey(data, sshc);
 }
 
 static Curl_recv scp_recv, sftp_recv;
@@ -2615,9 +2585,11 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
   }
 
+  /* For IPv6 origins, use the `user_hostname` that has the "[]" enclosure.
+   * Otherwise, use `hostname` that is IDN converted. */
   rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_HOST,
-                       (data->state.up.hostname[0] == '[') ?
-                       data->state.up.hostname : conn->origin->hostname);
+                       conn->origin->ipv6 ?
+                       conn->origin->user_hostname : conn->origin->hostname);
 
   if(rc != SSH_OK) {
     failf(data, "Could not set remote host");
@@ -2647,15 +2619,16 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     }
   }
 
-  if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
-    infof(data, "Known hosts: %s", data->set.str[STRING_SSH_KNOWNHOSTS]);
+  if(CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS)) {
+    infof(data, "Known hosts: %s",
+          CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
     rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_KNOWNHOSTS,
-                         data->set.str[STRING_SSH_KNOWNHOSTS]);
+                         CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
     if(rc == SSH_OK)
       /* libssh has two separate options for this. Set both to the same file
          to avoid surprises */
       rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_GLOBAL_KNOWNHOSTS,
-                           data->set.str[STRING_SSH_KNOWNHOSTS]);
+                           CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
     if(rc != SSH_OK) {
       failf(data, "Could not set known hosts file path");
       return CURLE_FAILED_INIT;
@@ -2683,9 +2656,8 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   sshc->privkey = NULL;
   sshc->pubkey = NULL;
 
-  if(data->set.str[STRING_SSH_PUBLIC_KEY]) {
-    rc = ssh_pki_import_pubkey_file(data->set.str[STRING_SSH_PUBLIC_KEY],
-                                    &sshc->pubkey);
+  if(sshc->pub_key) {
+    rc = ssh_pki_import_pubkey_file(sshc->pub_key, &sshc->pubkey);
     if(rc != SSH_OK) {
       failf(data, "Could not load public key file");
       return CURLE_FAILED_INIT;
@@ -2808,7 +2780,7 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
   return myssh_done(data, sshc, status);
 }
 
-static CURLcode scp_send(struct Curl_easy *data, int sockindex,
+static CURLcode scp_send(struct Curl_easy *data, int8_t sockindex,
                          const uint8_t *mem, size_t len, bool eos,
                          size_t *pnwritten)
 {
@@ -2842,7 +2814,7 @@ static CURLcode scp_send(struct Curl_easy *data, int sockindex,
   return CURLE_OK;
 }
 
-static CURLcode scp_recv(struct Curl_easy *data, int sockindex,
+static CURLcode scp_recv(struct Curl_easy *data, int8_t sockindex,
                          char *mem, size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
@@ -2968,7 +2940,7 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 }
 
 /* return number of sent bytes */
-static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
+static CURLcode sftp_send(struct Curl_easy *data, int8_t sockindex,
                           const uint8_t *mem, size_t len, bool eos,
                           size_t *pnwritten)
 {
@@ -3049,7 +3021,7 @@ static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
  * Return number of received (decrypted) bytes
  * or <0 on error
  */
-static CURLcode sftp_recv(struct Curl_easy *data, int sockindex,
+static CURLcode sftp_recv(struct Curl_easy *data, int8_t sockindex,
                           char *mem, size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
@@ -3168,10 +3140,10 @@ const struct Curl_protocol Curl_protocol_scp = {
   myssh_connect,                        /* connect_it */
   myssh_multi_statemach,                /* connecting */
   scp_doing,                            /* doing */
-  myssh_pollset,                        /* proto_pollset */
-  myssh_pollset,                        /* doing_pollset */
+  Curl_ssh_pollset,                     /* proto_pollset */
+  Curl_ssh_pollset,                     /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  myssh_pollset,                        /* perform_pollset */
+  Curl_ssh_pollset,                     /* perform_pollset */
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -3191,10 +3163,10 @@ const struct Curl_protocol Curl_protocol_sftp = {
   myssh_connect,                        /* connect_it */
   myssh_multi_statemach,                /* connecting */
   sftp_doing,                           /* doing */
-  myssh_pollset,                        /* proto_pollset */
-  myssh_pollset,                        /* doing_pollset */
+  Curl_ssh_pollset,                     /* proto_pollset */
+  Curl_ssh_pollset,                     /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  myssh_pollset,                        /* perform_pollset */
+  Curl_ssh_pollset,                     /* perform_pollset */
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */

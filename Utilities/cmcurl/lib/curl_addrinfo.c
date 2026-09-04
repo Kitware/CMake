@@ -24,24 +24,24 @@
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #ifdef HAVE_NETINET_IN6_H
-#  include <netinet/in6.h>
+#include <netinet/in6.h>
 #endif
 #ifdef HAVE_NETDB_H
-#  include <netdb.h>
+#include <netdb.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#  include <arpa/inet.h>
+#include <arpa/inet.h>
 #endif
 #ifdef HAVE_SYS_UN_H
-#  include <sys/un.h>
+#include <sys/un.h>
 #endif
 
 #ifdef __VMS
-#  include <in.h>
-#  include <inet.h>
+#include <in.h>
+#include <inet.h>
 #endif
 
 #include <stddef.h>  /* for offsetof() */
@@ -77,6 +77,21 @@ void Curl_freeaddrinfo(struct Curl_addrinfo *cahead)
     canext = ca->ai_next;
     curlx_free(ca);
   }
+}
+
+struct Curl_addrinfo *Curl_addrinfo_get(struct Curl_addrinfo *ai,
+                                        int ai_family,
+                                        unsigned int n)
+{
+  unsigned int i;
+  for(i = 0; ai; ai = ai->ai_next) {
+    if(ai->ai_family == ai_family) {
+      if(i == n)
+        return ai;
+      ++i;
+    }
+  }
+  return NULL;
 }
 
 #ifdef HAVE_GETADDRINFO

@@ -30,7 +30,7 @@ option(CURL_USE_PKGCONFIG "Enable pkg-config to detect @PROJECT_NAME@ dependenci
 
 if(CMAKE_VERSION VERSION_LESS @CMAKE_MINIMUM_REQUIRED_VERSION@)
   message(STATUS "@PROJECT_NAME@: @PROJECT_NAME@-specific Find modules require "
-    "CMake @CMAKE_MINIMUM_REQUIRED_VERSION@ or upper, found: ${CMAKE_VERSION}.")
+    "CMake @CMAKE_MINIMUM_REQUIRED_VERSION@ or greater, found: ${CMAKE_VERSION}.")
 endif()
 
 include(CMakeFindDependencyMacro)
@@ -74,7 +74,7 @@ if("@USE_ARES@")
   list(APPEND _curl_libs CURL::cares)
 endif()
 if("@HAVE_GSSAPI@")
-  find_dependency(GSS MODULE)
+  find_dependency(GSS MODULE COMPONENTS "@GSS_FLAVOR@")
   list(APPEND _curl_libs CURL::gss)
 endif()
 if("@USE_BACKTRACE@")

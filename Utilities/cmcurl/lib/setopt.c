@@ -41,7 +41,6 @@
 #include "curl_share.h"
 #include "vtls/vtls.h"
 #include "curl_trc.h"
-#include "hostip.h"
 #include "setopt.h"
 #include "altsvc.h"
 #include "hsts.h"
@@ -79,23 +78,15 @@ static CURLcode setopt_set_timeout_ms(timediff_t *ptimeout_ms, long ms)
   return CURLE_OK;
 }
 
-CURLcode Curl_setstropt(char **charp, const char *s)
+CURLcode Curl_setstropt(struct Curl_easy *data,
+                        enum dupstring id, const char *s)
 {
-  /* Release the previous storage at `charp' and replace by a dynamic storage
-     copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
+  size_t slen = s ? strlen(s) : 0;
+  DEBUGASSERT((unsigned)id <= UINT8_MAX);
+  if(s && (slen > CURL_MAX_INPUT_LENGTH))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  curlx_safefree(*charp);
-
-  if(s) {
-    if(strlen(s) > CURL_MAX_INPUT_LENGTH)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-
-    *charp = curlx_strdup(s);
-    if(!*charp)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
-  return CURLE_OK;
+  return CURL_EASY_STR_SET(data, (uint8_t)id, s, slen);
 }
 
 CURLcode Curl_setblobopt(struct curl_blob **blobp,
@@ -154,23 +145,19 @@ static CURLcode setstropt_userpwd(const char *option, char **userp,
   curlx_free(*userp);
   *userp = user;
 
+  curlx_strzero(*passwdp);
   curlx_free(*passwdp);
   *passwdp = passwd;
 
   return CURLE_OK;
 }
 
-static CURLcode setstropt_interface(char *option, char **devp,
-                                    char **ifacep, char **hostp)
+static CURLcode setstropt_interface(struct Curl_easy *data, char *option)
 {
   char *dev = NULL;
   char *iface = NULL;
   char *host = NULL;
   CURLcode result;
-
-  DEBUGASSERT(devp);
-  DEBUGASSERT(ifacep);
-  DEBUGASSERT(hostp);
 
   if(option) {
     /* Parse the interface details if set, otherwise clear them all */
@@ -178,16 +165,21 @@ static CURLcode setstropt_interface(char *option, char **devp,
     if(result)
       return result;
   }
-  curlx_free(*devp);
-  *devp = dev;
 
-  curlx_free(*ifacep);
-  *ifacep = iface;
-
-  curlx_free(*hostp);
-  *hostp = host;
-
-  return CURLE_OK;
+  result = CURL_EASY_STR_SETN(data, STRING_DEVICE, dev);
+  dev = NULL;
+  if(!result) {
+    result = CURL_EASY_STR_SETN(data, STRING_INTERFACE, iface);
+    iface = NULL;
+  }
+  if(!result) {
+    result = CURL_EASY_STR_SETN(data, STRING_BINDHOST, host);
+    host = NULL;
+  }
+  curlx_free(dev);
+  curlx_free(iface);
+  curlx_free(host);
+  return result;
 }
 
 #ifdef USE_SSL
@@ -355,46 +347,10 @@ static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
    * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...) Would this be
    * better if the RTSPREQ_* were moved into here?
    */
-  Curl_RtspReq rtspreq = RTSPREQ_NONE;
-  switch(arg) {
-  case CURL_RTSPREQ_OPTIONS:
-    rtspreq = RTSPREQ_OPTIONS;
-    break;
-  case CURL_RTSPREQ_DESCRIBE:
-    rtspreq = RTSPREQ_DESCRIBE;
-    break;
-  case CURL_RTSPREQ_ANNOUNCE:
-    rtspreq = RTSPREQ_ANNOUNCE;
-    break;
-  case CURL_RTSPREQ_SETUP:
-    rtspreq = RTSPREQ_SETUP;
-    break;
-  case CURL_RTSPREQ_PLAY:
-    rtspreq = RTSPREQ_PLAY;
-    break;
-  case CURL_RTSPREQ_PAUSE:
-    rtspreq = RTSPREQ_PAUSE;
-    break;
-  case CURL_RTSPREQ_TEARDOWN:
-    rtspreq = RTSPREQ_TEARDOWN;
-    break;
-  case CURL_RTSPREQ_GET_PARAMETER:
-    rtspreq = RTSPREQ_GET_PARAMETER;
-    break;
-  case CURL_RTSPREQ_SET_PARAMETER:
-    rtspreq = RTSPREQ_SET_PARAMETER;
-    break;
-  case CURL_RTSPREQ_RECORD:
-    rtspreq = RTSPREQ_RECORD;
-    break;
-  case CURL_RTSPREQ_RECEIVE:
-    rtspreq = RTSPREQ_RECEIVE;
-    break;
-  default:
+  if((arg <= CURL_RTSPREQ_NONE) || (arg >= CURL_RTSPREQ_LAST))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
 
-  data->set.rtspreq = rtspreq;
+  data->set.rtspreq = (unsigned char)arg;
   return CURLE_OK;
 }
 #endif /* !CURL_DISABLE_RTSP */
@@ -988,7 +944,7 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_ENABLE_NPN:
     break;
   case CURLOPT_SSLENGINE_DEFAULT:
-    curlx_safefree(s->str[STRING_SSL_ENGINE]);
+    CURL_EASY_STR_CLEAR(data, STRING_SSL_ENGINE);
     result = Curl_ssl_set_engine_default(data);
     break;
   default:
@@ -1098,10 +1054,23 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
   case CURLOPT_STREAM_WEIGHT:
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
     if((arg >= 1) && (arg <= 256))
-      s->priority.weight = (int)arg;
+      s->weight = (int)arg;
     break;
 #else
     result = CURLE_NOT_BUILT_IN;
+    break;
+#endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG_ALGORITHM:
+    if(arg != CURLHTTPSIG_NONE &&
+       arg != CURLHTTPSIG_ED25519 &&
+       arg != CURLHTTPSIG_HMAC_SHA256)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    s->httpsig_algorithm = (uint8_t)arg;
+    if(arg)
+      s->httpauth = (uint32_t)CURLAUTH_HTTPSIG;
+    else
+      s->httpauth &= ~(uint32_t)CURLAUTH_HTTPSIG;
     break;
 #endif
   default:
@@ -1234,9 +1203,8 @@ static CURLcode setopt_long_misc(struct Curl_easy *data, CURLoption option,
   case CURLOPT_POSTFIELDSIZE:
     if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    if(s->postfieldsize < arg &&
-       s->postfields == s->str[STRING_COPYPOSTFIELDS]) {
-      curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
+    if(s->postfieldsize < arg && s->str_copypostfields) {
+      curlx_safefree(s->str_copypostfields);
       s->postfields = NULL;
     }
     s->postfieldsize = arg;
@@ -1449,6 +1417,26 @@ static CURLcode setopt_mimepost(struct Curl_easy *data, curl_mime *mimep)
 #endif /* !CURL_DISABLE_MIME */
 #endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
 
+static CURLcode setopt_share(struct Curl_easy *data, struct Curl_share *set)
+{
+  CURLcode result;
+
+  if(data->conn) {
+    /* As this handle already has a connection attached, changing share now
+       would be complicated and error-prone */
+    infof(data, "Cannot change share object while in use");
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  else {
+    /* disconnect from old share, if any and possible */
+    result = Curl_share_easy_unlink(data);
+    if(!result && GOOD_SHARE_HANDLE(set))
+      /* use new share if it set */
+      result = Curl_share_easy_link(data, set);
+  }
+  return result;
+}
+
 /* assorted pointer type arguments */
 static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
                                 va_list param)
@@ -1461,7 +1449,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
      * pass CURLU to set URL
      */
     Curl_bufref_free(&data->state.url);
-    curlx_safefree(s->str[STRING_SET_URL]);
+    CURL_EASY_STR_CLEAR(data, STRING_SET_URL);
     s->uh = va_arg(param, CURLU *);
     break;
 #ifndef CURL_DISABLE_HTTP
@@ -1496,30 +1484,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     if(!s->err)
       s->err = stderr;
     break;
-  case CURLOPT_SHARE: {
-    struct Curl_share *set = va_arg(param, struct Curl_share *);
-
-    /* disconnect from old share, if any and possible */
-    result = Curl_share_easy_unlink(data);
-    if(result)
-      return result;
-
-    /* use new share if it set */
-    if(GOOD_SHARE_HANDLE(set)) {
-      result = Curl_share_easy_link(data, set);
-      if(result)
-        return result;
-    }
-    break;
-  }
-
-#ifdef USE_HTTP2
-  case CURLOPT_STREAM_DEPENDS:
-  case CURLOPT_STREAM_DEPENDS_E:
-    /* not doing stream dependencies any longer, but accept options
-     * for backward compatibility */
-    break;
-#endif
+  case CURLOPT_SHARE:
+    return setopt_share(data, va_arg(param, struct Curl_share *));
 
   default:
     return CURLE_UNKNOWN_OPTION;
@@ -1552,7 +1518,9 @@ static CURLcode cookielist(struct Curl_easy *data, const char *ptr)
   }
   else if(curl_strequal(ptr, "RELOAD")) {
     /* reload cookies from file */
-    return Curl_cookie_loadfiles(data);
+    return Curl_cookie_loadfiles(data, COOKIE_NOPSL |
+                                 (data->set.cookiesession ?
+                                  COOKIE_NOSESSION : 0));
   }
   else {
     if(!data->cookies) {
@@ -1567,15 +1535,20 @@ static CURLcode cookielist(struct Curl_easy *data, const char *ptr)
     if(strlen(ptr) > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
+    /* Adding these cookies without the PSL check, because the PSL is not
+       initialized until *perform() time, and this might be called before
+       that */
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     if(checkprefix("Set-Cookie:", ptr))
       /* HTTP Header format line */
-      result = Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11,
-                               NULL, NULL, TRUE);
+      result = Curl_cookie_add(data, data->cookies, ptr + 11,
+                               NULL, NULL,
+                               COOKIE_HTTPHEADER | COOKIE_SECURE |
+                               COOKIE_NOPSL);
     else
       /* Netscape format line */
-      result = Curl_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
-                               NULL, TRUE);
+      result = Curl_cookie_add(data, data->cookies, ptr, NULL,
+                               NULL, COOKIE_SECURE | COOKIE_NOPSL);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
   return result;
@@ -1622,13 +1595,14 @@ static CURLcode cookiefile(struct Curl_easy *data, const char *ptr)
 #ifndef CURL_DISABLE_PROXY
 static CURLcode setproxy(struct Curl_easy *data, const char *proxy)
 {
-  if((data->set.str[STRING_PROXY] && proxy) &&
+  const char *str = CURL_EASY_STR(data, STRING_PROXY);
+  if(str && proxy &&
      /* there was one set, is this a new one? */
-     !strcmp(data->set.str[STRING_PROXY], proxy))
+     !strcmp(str, proxy))
     return CURLE_OK; /* same one as before */
 
   changeproxy(data);
-  return Curl_setstropt(&data->set.str[STRING_PROXY], proxy);
+  return Curl_setstropt(data, STRING_PROXY, proxy);
 }
 
 static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
@@ -1647,16 +1621,23 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 
     /* URL decode the components */
     if(!result) {
-      curlx_safefree(s->str[STRING_PROXYUSERNAME]);
-      curlx_safefree(s->str[STRING_PROXYPASSWORD]);
-      if(u)
-        result = Curl_urldecode(u, 0, &s->str[STRING_PROXYUSERNAME], NULL,
-                                REJECT_ZERO);
+      char *str = NULL;
+      CURL_EASY_STR_CLEAR(data, STRING_PROXYUSERNAME);
+      CURL_EASY_STR_CLEAR(data, STRING_PROXYPASSWORD);
+      if(u) {
+        result = Curl_urldecode(u, 0, &str, NULL, REJECT_ZERO);
+        if(!result)
+          result = Curl_u8_strset_setn(&s->strings, STRING_PROXYUSERNAME, str);
+      }
+      if(!result && p) {
+        str = NULL;
+        result = Curl_urldecode(p, 0, &str, NULL, REJECT_ZERO);
+        if(!result)
+          result = Curl_u8_strset_setn(&s->strings, STRING_PROXYPASSWORD, str);
+      }
     }
-    if(!result && p)
-      result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
-                              REJECT_ZERO);
     curlx_free(u);
+    curlx_strzero(p);
     curlx_free(p);
     break;
   }
@@ -1664,55 +1645,55 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
     /*
      * authentication username to use in the operation
      */
-    return Curl_setstropt(&s->str[STRING_PROXYUSERNAME], ptr);
+    return Curl_setstropt(data, STRING_PROXYUSERNAME, ptr);
 
   case CURLOPT_PROXYPASSWORD:
     /*
      * authentication password to use in the operation
      */
-    return Curl_setstropt(&s->str[STRING_PROXYPASSWORD], ptr);
+    return Curl_setstropt(data, STRING_PROXYPASSWORD, ptr);
 
   case CURLOPT_NOPROXY:
     /*
      * proxy exception list
      */
-    return Curl_setstropt(&s->str[STRING_NOPROXY], ptr);
+    return Curl_setstropt(data, STRING_NOPROXY, ptr);
   case CURLOPT_PROXY_SSLCERT:
     /*
      * String that holds filename of the SSL certificate to use for proxy
      */
-    return Curl_setstropt(&s->str[STRING_CERT_PROXY], ptr);
+    return Curl_setstropt(data, STRING_CERT_PROXY, ptr);
   case CURLOPT_PROXY_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use for proxy
      */
-    return Curl_setstropt(&s->str[STRING_CERT_TYPE_PROXY], ptr);
+    return Curl_setstropt(data, STRING_CERT_TYPE_PROXY, ptr);
   case CURLOPT_PROXY_SSLKEY:
     /*
      * String that holds filename of the SSL key to use for proxy
      */
-    return Curl_setstropt(&s->str[STRING_KEY_PROXY], ptr);
+    return Curl_setstropt(data, STRING_KEY_PROXY, ptr);
   case CURLOPT_PROXY_KEYPASSWD:
     /*
      * String that holds the SSL private key password for proxy.
      */
-    return Curl_setstropt(&s->str[STRING_KEY_PASSWD_PROXY], ptr);
+    return Curl_setstropt(data, STRING_KEY_PASSWD_PROXY, ptr);
   case CURLOPT_PROXY_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL key to use for proxy
      */
-    return Curl_setstropt(&s->str[STRING_KEY_TYPE_PROXY], ptr);
+    return Curl_setstropt(data, STRING_KEY_TYPE_PROXY, ptr);
   case CURLOPT_PROXY_SSL_CIPHER_LIST:
     if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST)) {
       /* set a list of cipher we want to use in the SSL connection for proxy */
-      return Curl_setstropt(&s->str[STRING_SSL_CIPHER_LIST_PROXY], ptr);
+      return Curl_setstropt(data, STRING_SSL_CIPHER_LIST_PROXY, ptr);
     }
     else
       return CURLE_NOT_BUILT_IN;
   case CURLOPT_PROXY_TLS13_CIPHERS:
     if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
       /* set preferred list of TLS 1.3 cipher suites for proxy */
-      return Curl_setstropt(&s->str[STRING_SSL_CIPHER13_LIST_PROXY], ptr);
+      return Curl_setstropt(data, STRING_SSL_CIPHER13_LIST_PROXY, ptr);
     else
       return CURLE_NOT_BUILT_IN;
   case CURLOPT_PROXY:
@@ -1734,13 +1715,13 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
      * If the proxy is set to "" or NULL we explicitly say that we do not want
      * to use the socks proxy.
      */
-    return Curl_setstropt(&s->str[STRING_PRE_PROXY], ptr);
+    return Curl_setstropt(data, STRING_PRE_PROXY, ptr);
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
   case CURLOPT_PROXY_SERVICE_NAME:
     /*
      * Set proxy authentication service name for Kerberos 5 and SPNEGO
      */
-    return Curl_setstropt(&s->str[STRING_PROXY_SERVICE_NAME], ptr);
+    return Curl_setstropt(data, STRING_PROXY_SERVICE_NAME, ptr);
   case CURLOPT_PROXY_PINNEDPUBLICKEY:
     /*
      * Set pinned public key for SSL connection.
@@ -1748,7 +1729,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
-      return Curl_setstropt(&s->str[STRING_SSL_PINNEDPUBLICKEY_PROXY], ptr);
+      return Curl_setstropt(data, STRING_SSL_PINNEDPUBLICKEY_PROXY, ptr);
 #endif
     return CURLE_NOT_BUILT_IN;
 
@@ -1756,18 +1737,19 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
     /*
      * Set the client IP to send through HAProxy PROXY protocol
      */
-    result = Curl_setstropt(&s->str[STRING_HAPROXY_CLIENT_IP], ptr);
+    result = Curl_setstropt(data, STRING_HAPROXY_CLIENT_IP, ptr);
 
     /* enable the HAProxy protocol if an IP is provided */
-    s->haproxyprotocol = !!s->str[STRING_HAPROXY_CLIENT_IP];
+    s->haproxyprotocol = !!CURL_EASY_STR(data, STRING_HAPROXY_CLIENT_IP);
     break;
   case CURLOPT_PROXY_CAINFO:
     /*
      * Set CA info SSL connection for proxy. Specify filename of the
      * CA certificate
      */
-    result = Curl_setstropt(&s->str[STRING_SSL_CAFILE_PROXY], ptr);
-    s->proxy_ssl.custom_cafile = !!s->str[STRING_SSL_CAFILE_PROXY];
+    result = Curl_setstropt(data, STRING_SSL_CAFILE_PROXY, ptr);
+    s->proxy_ssl.custom_cafile =
+      !!CURL_EASY_STR(data, STRING_SSL_CAFILE_PROXY);
     return result;
   case CURLOPT_PROXY_CRLFILE:
     /*
@@ -1775,14 +1757,14 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
      * CRL to check certificates revocation
      */
     if(Curl_ssl_supports(data, SSLSUPP_CRLFILE))
-      return Curl_setstropt(&s->str[STRING_SSL_CRLFILE_PROXY], ptr);
+      return Curl_setstropt(data, STRING_SSL_CRLFILE_PROXY, ptr);
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_PROXY_ISSUERCERT:
     /*
      * Set Issuer certificate file to check certificates issuer
      */
     if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT))
-      return Curl_setstropt(&s->str[STRING_SSL_ISSUERCERT_PROXY], ptr);
+      return Curl_setstropt(data, STRING_SSL_ISSUERCERT_PROXY, ptr);
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_PROXY_CAPATH:
     /*
@@ -1792,8 +1774,9 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
-      result = Curl_setstropt(&s->str[STRING_SSL_CAPATH_PROXY], ptr);
-      s->proxy_ssl.custom_capath = !!s->str[STRING_SSL_CAPATH_PROXY];
+      result = Curl_setstropt(data, STRING_SSL_CAPATH_PROXY, ptr);
+      s->proxy_ssl.custom_capath =
+        !!CURL_EASY_STR(data, STRING_SSL_CAPATH_PROXY);
       return result;
     }
 #endif
@@ -1816,8 +1799,16 @@ static CURLcode setopt_copypostfields(const char *ptr, struct UserDefined *s)
   CURLcode result = CURLE_OK;
   if(s->postfieldsize < -1)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(!ptr || s->postfieldsize == -1)
-    result = Curl_setstropt(&s->str[STRING_COPYPOSTFIELDS], ptr);
+  if(!ptr || s->postfieldsize == -1) {
+    if(ptr && (strlen(ptr) > CURL_MAX_INPUT_LENGTH))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    curlx_safefree(s->str_copypostfields);
+    if(ptr) {
+      s->str_copypostfields = curlx_strdup(ptr);
+      if(!s->str_copypostfields)
+        return CURLE_OUT_OF_MEMORY;
+    }
+  }
   else {
     size_t pflen = curlx_sotouz_range(s->postfieldsize, 0, SIZE_MAX);
     if(pflen == SIZE_MAX)
@@ -1825,19 +1816,18 @@ static CURLcode setopt_copypostfields(const char *ptr, struct UserDefined *s)
     else {
       /* Allocate even when size == 0. This satisfies the need of possible
          later address compare to detect the COPYPOSTFIELDS mode, and to mark
-         that postfields is used rather than read function or form data.
-      */
+         that postfields is used rather than read function or form data. */
       char *p = curlx_memdup0(ptr, pflen);
       if(!p)
         return CURLE_OUT_OF_MEMORY;
       else {
-        curlx_free(s->str[STRING_COPYPOSTFIELDS]);
-        s->str[STRING_COPYPOSTFIELDS] = p;
+        curlx_free(s->str_copypostfields);
+        s->str_copypostfields = p;
       }
     }
   }
 
-  s->postfields = s->str[STRING_COPYPOSTFIELDS];
+  s->postfields = s->str_copypostfields;
   s->method = HTTPREQ_POST;
   return result;
 }
@@ -1865,12 +1855,12 @@ static CURLcode setopt_ech(struct Curl_easy *data, const char *ptr)
       else if(plen > 4 && !strncmp(ptr, "ecl:", 4)) {
         if(!s->tls_ech)
           s->tls_ech = CURLECH_HARD;
-        result = Curl_setstropt(&s->str[STRING_ECH_CONFIG], ptr + 4);
+        result = Curl_setstropt(data, STRING_ECH_CONFIG, ptr + 4);
       }
       else if(plen > 3 && !strncmp(ptr, "pn:", 3)) {
         if(!s->tls_ech)
           s->tls_ech = CURLECH_HARD;
-        result = Curl_setstropt(&s->str[STRING_ECH_PUBLIC], ptr + 3);
+        result = Curl_setstropt(data, STRING_ECH_PUBLIC, ptr + 3);
       }
       else
         result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1879,7 +1869,7 @@ static CURLcode setopt_ech(struct Curl_easy *data, const char *ptr)
   return result;
 }
 #else
-#define setopt_ech(x,y) CURLE_NOT_BUILT_IN
+#define setopt_ech(x, y) CURLE_NOT_BUILT_IN
 #endif
 
 #if defined(USE_SSL) || defined(USE_SSH)
@@ -1888,22 +1878,21 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
                                 char *ptr)
 {
   CURLcode result = CURLE_OK;
-  struct UserDefined *s = &data->set;
 
   switch(option) {
   case CURLOPT_KEYPASSWD:
     /*
      * String that holds the SSL or SSH private key password.
      */
-    result = Curl_setstropt(&s->str[STRING_KEY_PASSWD], ptr);
+    result = Curl_setstropt(data, STRING_KEY_PASSWD, ptr);
     break;
 #ifdef USE_SSL
   case CURLOPT_CAINFO:
     /*
      * Set CA info for SSL connection. Specify filename of the CA certificate
      */
-    result = Curl_setstropt(&s->str[STRING_SSL_CAFILE], ptr);
-    s->ssl.custom_cafile = !!s->str[STRING_SSL_CAFILE];
+    result = Curl_setstropt(data, STRING_SSL_CAFILE, ptr);
+    data->set.ssl.custom_cafile = !!CURL_EASY_STR(data, STRING_SSL_CAFILE);
     return result;
   case CURLOPT_CAPATH:
     /*
@@ -1912,8 +1901,8 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      */
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
-      result = Curl_setstropt(&s->str[STRING_SSL_CAPATH], ptr);
-      s->ssl.custom_capath = !!s->str[STRING_SSL_CAPATH];
+      result = Curl_setstropt(data, STRING_SSL_CAPATH, ptr);
+      data->set.ssl.custom_capath = !!CURL_EASY_STR(data, STRING_SSL_CAPATH);
       return result;
     }
     return CURLE_NOT_BUILT_IN;
@@ -1923,18 +1912,18 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * to check certificates revocation
      */
     if(Curl_ssl_supports(data, SSLSUPP_CRLFILE))
-      return Curl_setstropt(&s->str[STRING_SSL_CRLFILE], ptr);
+      return Curl_setstropt(data, STRING_SSL_CRLFILE, ptr);
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_SSL_CIPHER_LIST:
     if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
       /* set a list of cipher we want to use in the SSL connection */
-      return Curl_setstropt(&s->str[STRING_SSL_CIPHER_LIST], ptr);
+      return Curl_setstropt(data, STRING_SSL_CIPHER_LIST, ptr);
     else
       return CURLE_NOT_BUILT_IN;
   case CURLOPT_TLS13_CIPHERS:
     if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
       /* set preferred list of TLS 1.3 cipher suites */
-      return Curl_setstropt(&s->str[STRING_SSL_CIPHER13_LIST], ptr);
+      return Curl_setstropt(data, STRING_SSL_CIPHER13_LIST, ptr);
     else
       return CURLE_NOT_BUILT_IN;
   case CURLOPT_RANDOM_FILE:
@@ -1946,7 +1935,7 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * Set an SSL_CTX callback parameter pointer
      */
     if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX)) {
-      s->ssl.fsslctxp = ptr;
+      data->set.ssl.fsslctxp = ptr;
       break;
     }
     else
@@ -1955,28 +1944,28 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     /*
      * String that holds filename of the SSL certificate to use
      */
-    return Curl_setstropt(&s->str[STRING_CERT], ptr);
+    return Curl_setstropt(data, STRING_CERT, ptr);
   case CURLOPT_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use
      */
-    return Curl_setstropt(&s->str[STRING_CERT_TYPE], ptr);
+    return Curl_setstropt(data, STRING_CERT_TYPE, ptr);
   case CURLOPT_SSLKEY:
     /*
      * String that holds filename of the SSL key to use
      */
-    return Curl_setstropt(&s->str[STRING_KEY], ptr);
+    return Curl_setstropt(data, STRING_KEY, ptr);
   case CURLOPT_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL key to use
      */
-    return Curl_setstropt(&s->str[STRING_KEY_TYPE], ptr);
+    return Curl_setstropt(data, STRING_KEY_TYPE, ptr);
   case CURLOPT_SSLENGINE:
     /*
      * String that holds the SSL crypto engine.
      */
     if(ptr && ptr[0]) {
-      result = Curl_setstropt(&s->str[STRING_SSL_ENGINE], ptr);
+      result = Curl_setstropt(data, STRING_SSL_ENGINE, ptr);
       if(!result) {
         result = Curl_ssl_set_engine(data, ptr);
       }
@@ -1988,7 +1977,7 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * to check certificates issuer
      */
     if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT))
-      return Curl_setstropt(&s->str[STRING_SSL_ISSUERCERT], ptr);
+      return Curl_setstropt(data, STRING_SSL_ISSUERCERT, ptr);
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_SSL_EC_CURVES:
     /*
@@ -1996,7 +1985,7 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * Specify colon-delimited list of curve algorithm names.
      */
     if(Curl_ssl_supports(data, SSLSUPP_SSL_EC_CURVES))
-      return Curl_setstropt(&s->str[STRING_SSL_EC_CURVES], ptr);
+      return Curl_setstropt(data, STRING_SSL_EC_CURVES, ptr);
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_SSL_SIGNATURE_ALGORITHMS:
     /*
@@ -2004,7 +1993,7 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * Specify colon-delimited list of signature scheme names.
      */
     if(Curl_ssl_supports(data, SSLSUPP_SIGNATURE_ALGORITHMS))
-      return Curl_setstropt(&s->str[STRING_SSL_SIGNATURE_ALGORITHMS], ptr);
+      return Curl_setstropt(data, STRING_SSL_SIGNATURE_ALGORITHMS, ptr);
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_PINNEDPUBLICKEY:
     /*
@@ -2012,7 +2001,7 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * Specify filename of the public key in DER format.
      */
     if(Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
-      return Curl_setstropt(&s->str[STRING_SSL_PINNEDPUBLICKEY], ptr);
+      return Curl_setstropt(data, STRING_SSL_PINNEDPUBLICKEY, ptr);
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_ECH:
     return setopt_ech(data, ptr);
@@ -2041,7 +2030,7 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      */
     s->postfields = ptr;
     /* Release old copied data. */
-    curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
+    curlx_safefree(s->str_copypostfields);
     s->method = HTTPREQ_POST;
     break;
 
@@ -2056,20 +2045,18 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      * If the encoding is set to "" we use an Accept-Encoding header that
      * encompasses all the encodings we support.
      * If the encoding is set to NULL we do not send an Accept-Encoding header
-     * and ignore an received Content-Encoding header.
+     * and ignore any received Content-Encoding header.
      *
      */
     if(ptr && !*ptr) {
       ptr = Curl_get_content_encodings();
-      if(ptr) {
-        curlx_free(s->str[STRING_ENCODING]);
-        s->str[STRING_ENCODING] = ptr;
-      }
+      if(ptr)
+        result = CURL_EASY_STR_SETN(data, STRING_ENCODING, ptr);
       else
         result = CURLE_OUT_OF_MEMORY;
       return result;
     }
-    return Curl_setstropt(&s->str[STRING_ENCODING], ptr);
+    return Curl_setstropt(data, STRING_ENCODING, ptr);
 
 #ifndef CURL_DISABLE_AWS
   case CURLOPT_AWS_SIGV4:
@@ -2077,34 +2064,51 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      * String that is merged to some authentication
      * parameters are used by the algorithm.
      */
-    result = Curl_setstropt(&s->str[STRING_AWS_SIGV4], ptr);
+    result = Curl_setstropt(data, STRING_AWS_SIGV4, ptr);
     /*
-     * Basic been set by default it need to be unset here
+     * Basic has been set by default; it needs to be unset here.
      */
-    if(s->str[STRING_AWS_SIGV4])
+    if(CURL_EASY_STR(data, STRING_AWS_SIGV4))
       s->httpauth = CURLAUTH_AWS_SIGV4;
+    else
+      s->httpauth &= ~(uint32_t)CURLAUTH_AWS_SIGV4;
     break;
 #endif
-  case CURLOPT_REFERER:
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG_KEY:
+    result = Curl_setstropt(data, STRING_HTTPSIG_KEY, ptr);
+    break;
+  case CURLOPT_HTTPSIG_KEYID:
+    result = Curl_setstropt(data, STRING_HTTPSIG_KEYID, ptr);
+    break;
+  case CURLOPT_HTTPSIG_HEADERS:
+    result = Curl_setstropt(data, STRING_HTTPSIG_HEADERS, ptr);
+    break;
+#endif
+  case CURLOPT_REFERER: {
     /*
      * String to set in the HTTP Referer: field.
      */
-    Curl_bufref_free(&data->state.referer);
-    result = Curl_setstropt(&s->str[STRING_SET_REFERER], ptr);
+    struct bufref *oldref = &data->state.referer;
+    /* free the old after the storing the new in case the input is actually
+       pointing back to this */
+    result = Curl_setstropt(data, STRING_SET_REFERER, ptr);
+    Curl_bufref_free(oldref);
     break;
+  }
 
   case CURLOPT_USERAGENT:
     /*
      * String to use in the HTTP User-Agent field
      */
-    return Curl_setstropt(&s->str[STRING_USERAGENT], ptr);
+    return Curl_setstropt(data, STRING_USERAGENT, ptr);
 
 #ifndef CURL_DISABLE_COOKIES
   case CURLOPT_COOKIE:
     /*
      * Cookie string to send to the remote server in the request.
      */
-    return Curl_setstropt(&s->str[STRING_COOKIE], ptr);
+    return Curl_setstropt(data, STRING_COOKIE, ptr);
 
   case CURLOPT_COOKIEFILE:
     return cookiefile(data, ptr);
@@ -2113,7 +2117,7 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
     /*
      * Set cookie filename to dump all cookies to when we are done.
      */
-    result = Curl_setstropt(&s->str[STRING_COOKIEJAR], ptr);
+    result = Curl_setstropt(data, STRING_COOKIEJAR, ptr);
     if(!result) {
       /*
        * Activate the cookie parser. This may or may not already
@@ -2150,12 +2154,12 @@ static CURLcode setopt_cptr_ssh(struct Curl_easy *data, CURLoption option,
     /*
      * Use this file instead of the $HOME/.ssh/id_dsa.pub file
      */
-    return Curl_setstropt(&s->str[STRING_SSH_PUBLIC_KEY], ptr);
+    return Curl_setstropt(data, STRING_SSH_PUBLIC_KEY, ptr);
   case CURLOPT_SSH_PRIVATE_KEYFILE:
     /*
      * Use this file instead of the $HOME/.ssh/id_dsa file
      */
-    return Curl_setstropt(&s->str[STRING_SSH_PRIVATE_KEY], ptr);
+    return Curl_setstropt(data, STRING_SSH_PRIVATE_KEY, ptr);
   case CURLOPT_SSH_KEYDATA:
     /*
      * Custom client data to pass to the SSH keyfunc callback
@@ -2167,18 +2171,18 @@ static CURLcode setopt_cptr_ssh(struct Curl_easy *data, CURLoption option,
      * Option to allow for the MD5 of the host public key to be checked
      * for validation purposes.
      */
-    return Curl_setstropt(&s->str[STRING_SSH_HOST_PUBLIC_KEY_MD5], ptr);
+    return Curl_setstropt(data, STRING_SSH_HOST_PUBLIC_KEY_MD5, ptr);
   case CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256:
     /*
      * Option to allow for the SHA256 of the host public key to be checked
      * for validation purposes.
      */
-    return Curl_setstropt(&s->str[STRING_SSH_HOST_PUBLIC_KEY_SHA256], ptr);
+    return Curl_setstropt(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256, ptr);
   case CURLOPT_SSH_KNOWNHOSTS:
     /*
      * Store the filename to read known hosts from.
      */
-    return Curl_setstropt(&s->str[STRING_SSH_KNOWNHOSTS], ptr);
+    return Curl_setstropt(data, STRING_SSH_KNOWNHOSTS, ptr);
 #ifdef USE_LIBSSH2
   case CURLOPT_SSH_HOSTKEYDATA:
     /*
@@ -2205,15 +2209,15 @@ static CURLcode setopt_cptr_ftp(struct Curl_easy *data, CURLoption option,
     /*
      * Use FTP PORT, this also specifies which IP address to use
      */
-    result = Curl_setstropt(&s->str[STRING_FTPPORT], ptr);
-    s->ftp_use_port = !!(s->str[STRING_FTPPORT]);
+    result = Curl_setstropt(data, STRING_FTPPORT, ptr);
+    s->ftp_use_port = !!CURL_EASY_STR(data, STRING_FTPPORT);
     break;
 
   case CURLOPT_FTP_ACCOUNT:
-    return Curl_setstropt(&s->str[STRING_FTP_ACCOUNT], ptr);
+    return Curl_setstropt(data, STRING_FTP_ACCOUNT, ptr);
 
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
-    return Curl_setstropt(&s->str[STRING_FTP_ALTERNATIVE_TO_USER], ptr);
+    return Curl_setstropt(data, STRING_FTP_ALTERNATIVE_TO_USER, ptr);
 
   case CURLOPT_KRBLEVEL:
     return CURLE_NOT_BUILT_IN; /* removed in 8.17.0 */
@@ -2233,44 +2237,41 @@ static CURLcode setopt_cptr_ftp(struct Curl_easy *data, CURLoption option,
 static CURLcode setopt_cptr_net(struct Curl_easy *data, CURLoption option,
                                 char *ptr)
 {
-  struct UserDefined *s = &data->set;
   switch(option) {
   case CURLOPT_INTERFACE:
     /*
      * Set what interface or address/hostname to bind the socket to when
      * performing an operation and thus what from-IP your connection will use.
      */
-    return setstropt_interface(ptr,
-                               &s->str[STRING_DEVICE],
-                               &s->str[STRING_INTERFACE],
-                               &s->str[STRING_BINDHOST]);
+    return setstropt_interface(data, ptr);
+
 #ifdef USE_RESOLV_ARES
   case CURLOPT_DNS_SERVERS:
-    return Curl_setstropt(&s->str[STRING_DNS_SERVERS], ptr);
+    return Curl_setstropt(data, STRING_DNS_SERVERS, ptr);
 
   case CURLOPT_DNS_INTERFACE:
-    return Curl_setstropt(&s->str[STRING_DNS_INTERFACE], ptr);
+    return Curl_setstropt(data, STRING_DNS_INTERFACE, ptr);
 
   case CURLOPT_DNS_LOCAL_IP4:
-    return Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP4], ptr);
+    return Curl_setstropt(data, STRING_DNS_LOCAL_IP4, ptr);
 
   case CURLOPT_DNS_LOCAL_IP6:
-    return Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP6], ptr);
+    return Curl_setstropt(data, STRING_DNS_LOCAL_IP6, ptr);
 #endif
 #ifdef USE_UNIX_SOCKETS
   case CURLOPT_UNIX_SOCKET_PATH:
-    s->abstract_unix_socket = FALSE;
-    return Curl_setstropt(&s->str[STRING_UNIX_SOCKET_PATH], ptr);
+    data->set.abstract_unix_socket = FALSE;
+    return Curl_setstropt(data, STRING_UNIX_SOCKET_PATH, ptr);
 
   case CURLOPT_ABSTRACT_UNIX_SOCKET:
-    s->abstract_unix_socket = TRUE;
-    return Curl_setstropt(&s->str[STRING_UNIX_SOCKET_PATH], ptr);
+    data->set.abstract_unix_socket = TRUE;
+    return Curl_setstropt(data, STRING_UNIX_SOCKET_PATH, ptr);
 #endif
 #ifndef CURL_DISABLE_DOH
   case CURLOPT_DOH_URL:
     {
-      CURLcode result = Curl_setstropt(&s->str[STRING_DOH], ptr);
-      s->doh = !!(s->str[STRING_DOH]);
+      CURLcode result = Curl_setstropt(data, STRING_DOH, ptr);
+      data->set.doh = !!CURL_EASY_STR(data, STRING_DOH);
       return result;
     }
 #endif
@@ -2287,19 +2288,19 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
 
   switch(option) {
   case CURLOPT_REQUEST_TARGET:
-    return Curl_setstropt(&s->str[STRING_TARGET], ptr);
+    return Curl_setstropt(data, STRING_TARGET, ptr);
 #ifndef CURL_DISABLE_NETRC
   case CURLOPT_NETRC_FILE:
-    return Curl_setstropt(&s->str[STRING_NETRC_FILE], ptr);
+    return Curl_setstropt(data, STRING_NETRC_FILE, ptr);
 #endif
   case CURLOPT_CUSTOMREQUEST:
-    return Curl_setstropt(&s->str[STRING_CUSTOMREQUEST], ptr);
+    return Curl_setstropt(data, STRING_CUSTOMREQUEST, ptr);
 
     /* we do not set s->method = HTTPREQ_CUSTOM; here, we continue as if we
        were using the already set type and this changes the actual request
        keyword */
   case CURLOPT_SERVICE_NAME:
-    return Curl_setstropt(&s->str[STRING_SERVICE_NAME], ptr);
+    return Curl_setstropt(data, STRING_SERVICE_NAME, ptr);
 
   case CURLOPT_HEADERDATA:
     s->writeheader = ptr;
@@ -2341,27 +2342,40 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
     s->errorbuffer = ptr;
     break;
   case CURLOPT_URL:
-    result = Curl_setstropt(&s->str[STRING_SET_URL], ptr);
-    Curl_bufref_set(&data->state.url, s->str[STRING_SET_URL], 0, NULL);
+    result = Curl_setstropt(data, STRING_SET_URL, ptr);
+    Curl_bufref_set(&data->state.url,
+                    CURL_EASY_STR(data, STRING_SET_URL), 0, NULL);
     break;
 
-  case CURLOPT_USERPWD:
-    return setstropt_userpwd(ptr, &s->str[STRING_USERNAME],
-                             &s->str[STRING_PASSWORD]);
+  case CURLOPT_USERPWD: {
+    char *u = NULL, *p = NULL;
+    result = setstropt_userpwd(ptr, &u, &p);
+    if(!result) {
+      result = CURL_EASY_STR_SETN(data, STRING_USERNAME, u);
+      u = NULL;
+    }
+    if(!result) {
+      result = CURL_EASY_STR_SETN(data, STRING_PASSWORD, p);
+      p = NULL;
+    }
+    curlx_free(u);
+    curlx_free(p);
+    return result;
+  }
 
   case CURLOPT_USERNAME:
-    return Curl_setstropt(&s->str[STRING_USERNAME], ptr);
+    return Curl_setstropt(data, STRING_USERNAME, ptr);
 
   case CURLOPT_PASSWORD:
-    return Curl_setstropt(&s->str[STRING_PASSWORD], ptr);
+    return Curl_setstropt(data, STRING_PASSWORD, ptr);
 
   case CURLOPT_LOGIN_OPTIONS:
-    return Curl_setstropt(&s->str[STRING_OPTIONS], ptr);
+    return Curl_setstropt(data, STRING_OPTIONS, ptr);
 
   case CURLOPT_XOAUTH2_BEARER:
-    return Curl_setstropt(&s->str[STRING_BEARER], ptr);
+    return Curl_setstropt(data, STRING_BEARER, ptr);
   case CURLOPT_RANGE:
-    return Curl_setstropt(&s->str[STRING_SET_RANGE], ptr);
+    return Curl_setstropt(data, STRING_SET_RANGE, ptr);
   case CURLOPT_PRIVATE:
     s->private_data = ptr;
     break;
@@ -2389,49 +2403,36 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_DEFAULT_PROTOCOL:
     /* Set the protocol to use when the URL does not include any protocol */
-    return Curl_setstropt(&s->str[STRING_DEFAULT_PROTOCOL], ptr);
+    return Curl_setstropt(data, STRING_DEFAULT_PROTOCOL, ptr);
 #ifndef CURL_DISABLE_SMTP
   case CURLOPT_MAIL_FROM:
     /* Set the SMTP mail originator */
-    return Curl_setstropt(&s->str[STRING_MAIL_FROM], ptr);
+    return Curl_setstropt(data, STRING_MAIL_FROM, ptr);
   case CURLOPT_MAIL_AUTH:
     /* Set the SMTP auth originator */
-    return Curl_setstropt(&s->str[STRING_MAIL_AUTH], ptr);
+    return Curl_setstropt(data, STRING_MAIL_AUTH, ptr);
 #endif
   case CURLOPT_SASL_AUTHZID:
     /* Authorization identity (identity to act as) */
-    return Curl_setstropt(&s->str[STRING_SASL_AUTHZID], ptr);
+    return Curl_setstropt(data, STRING_SASL_AUTHZID, ptr);
 #ifndef CURL_DISABLE_RTSP
   case CURLOPT_RTSP_SESSION_ID:
-    return Curl_setstropt(&s->str[STRING_RTSP_SESSION_ID], ptr);
+    return Curl_setstropt(data, STRING_RTSP_SESSION_ID, ptr);
   case CURLOPT_RTSP_STREAM_URI:
-    return Curl_setstropt(&s->str[STRING_RTSP_STREAM_URI], ptr);
+    return Curl_setstropt(data, STRING_RTSP_STREAM_URI, ptr);
   case CURLOPT_RTSP_TRANSPORT:
-    return Curl_setstropt(&s->str[STRING_RTSP_TRANSPORT], ptr);
+    return Curl_setstropt(data, STRING_RTSP_TRANSPORT, ptr);
   case CURLOPT_INTERLEAVEDATA:
     s->rtp_out = ptr;
     break;
 #endif /* !CURL_DISABLE_RTSP */
-#ifdef USE_TLS_SRP
   case CURLOPT_TLSAUTH_USERNAME:
-    return Curl_setstropt(&s->str[STRING_TLSAUTH_USERNAME], ptr);
   case CURLOPT_TLSAUTH_PASSWORD:
-    return Curl_setstropt(&s->str[STRING_TLSAUTH_PASSWORD], ptr);
   case CURLOPT_TLSAUTH_TYPE:
-    if(ptr && !curl_strequal(ptr, "SRP"))
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
-#ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
-    return Curl_setstropt(&s->str[STRING_TLSAUTH_USERNAME_PROXY], ptr);
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:
-    return Curl_setstropt(&s->str[STRING_TLSAUTH_PASSWORD_PROXY], ptr);
   case CURLOPT_PROXY_TLSAUTH_TYPE:
-    if(ptr && !curl_strequal(ptr, "SRP"))
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
-#endif
-#endif
+    return CURLE_NOT_BUILT_IN;
 #ifndef CURL_DISABLE_HSTS
   case CURLOPT_HSTSREADDATA:
     s->hsts_read_userp = ptr;
@@ -2447,7 +2448,7 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
         return CURLE_OUT_OF_MEMORY;
     }
     if(ptr) {
-      result = Curl_setstropt(&s->str[STRING_HSTS], ptr);
+      result = Curl_setstropt(data, STRING_HSTS, ptr);
       if(result)
         return result;
       /* this needs to build a list of filenames to read from, so that it can
@@ -2479,7 +2480,7 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
       if(!data->asi)
         return CURLE_OUT_OF_MEMORY;
     }
-    result = Curl_setstropt(&s->str[STRING_ALTSVC], ptr);
+    result = Curl_setstropt(data, STRING_ALTSVC, ptr);
     if(result)
       break;
     if(ptr)
@@ -2499,24 +2500,25 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 {
   typedef CURLcode (*ptrfunc)(struct Curl_easy *data, CURLoption option,
                               char *ptr);
+  /* Order by likeliness */
   static const ptrfunc setopt_call[] = {
+    setopt_cptr_misc,
+#if defined(USE_SSL) || defined(USE_SSH)
+    setopt_cptr_ssl,
+#endif
 #ifndef CURL_DISABLE_PROXY
     setopt_cptr_proxy,
 #endif
-#if defined(USE_SSL) || defined(USE_SSH)
-    setopt_cptr_ssl,
+    setopt_cptr_net,
+#ifndef CURL_DISABLE_FTP
+    setopt_cptr_ftp,
 #endif
 #ifdef USE_SSH
     setopt_cptr_ssh,
 #endif
-#ifndef CURL_DISABLE_FTP
-    setopt_cptr_ftp,
-#endif
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
     setopt_cptr_http_mqtt,
 #endif
-    setopt_cptr_net,
-    setopt_cptr_misc,
   };
   size_t i;
 
@@ -2739,10 +2741,9 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
-    if(s->postfieldsize < offt &&
-       s->postfields == s->str[STRING_COPYPOSTFIELDS]) {
+    if(s->postfieldsize < offt && s->str_copypostfields) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
+      curlx_safefree(s->str_copypostfields);
       s->postfields = NULL;
     }
     s->postfieldsize = offt;
@@ -2906,10 +2907,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     case CURLOPT_MIMEPOST:         /* curl_mime * */
     case CURLOPT_STDERR:           /* FILE * */
     case CURLOPT_SHARE:            /* CURLSH * */
-    case CURLOPT_STREAM_DEPENDS:   /* CURL * */
-    case CURLOPT_STREAM_DEPENDS_E: /* CURL * */
     case CURLOPT_CURLU:            /* CURLU * */
       return setopt_pointers(data, option, param);
+    case CURLOPT_STREAM_DEPENDS:   /* CURL * */
+    case CURLOPT_STREAM_DEPENDS_E: /* CURL * */
+      return CURLE_OK;
     default:
       break;
     }
@@ -2930,23 +2932,24 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
  * NOTE: This is one of few API functions that are allowed to be called from
  * within a callback.
  */
-
 #undef curl_easy_setopt
 CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...)
 {
-  va_list arg;
+  struct Curl_eapi_guard guard;
   CURLcode result;
-  struct Curl_easy *data = curl;
 
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(CURL_EAPI_ENTER(&guard, curl, easy_setopt, &result)) {
+    struct Curl_easy *data = curl;
+    va_list arg;
 
-  va_start(arg, option);
+    va_start(arg, option);
 
-  result = Curl_vsetopt(data, option, arg);
+    result = Curl_vsetopt(data, option, arg);
 
-  va_end(arg);
-  if(result == CURLE_BAD_FUNCTION_ARGUMENT)
-    failf(data, "setopt 0x%x got bad argument", (unsigned int)option);
+    va_end(arg);
+    if(result == CURLE_BAD_FUNCTION_ARGUMENT)
+      failf(data, "setopt 0x%x got bad argument", (unsigned int)option);
+  }
+  CURL_EAPI_LEAVE(&guard);
   return result;
 }
