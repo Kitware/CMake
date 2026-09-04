@@ -805,7 +805,7 @@ Signatures
 
     ``REGEX <regex>``
       Match any portion of the full path of a file with a
-      :ref:`regular expression <Regex Specification>`.
+      :ref:`regular expression <CMake Language Regex Specification>`.
       One may use ``/`` and ``$`` to limit matching to the end of a path.
 
     Each ``<match-rule>`` may be followed by ``<match-option>`` arguments.

@@ -689,3 +689,79 @@ To avoid problems, consider the following advice:
 
   Note that this approach does not apply to :command:`macro` implementations
   because they reference arguments using placeholders, not real variables.
+
+.. _`CMake Language Regex Specification`:
+
+Regex Specification
+===================
+
+Several CMake commands accept regular expressions, including
+:command:`string(REGEX ...) <string>`, :command:`if(MATCHES)`,
+:command:`list(FILTER)`, and others, as well as command-line options such as
+:option:`ctest -L` and related modes.
+
+The following characters have special meaning in regular expressions:
+
+``^``
+  Matches at beginning of input
+``$``
+  Matches at end of input
+``.``
+  Matches any single character
+``\<char>``
+  Matches the single character specified by ``<char>``.  Use this to
+  match special regex characters, e.g. ``\.`` for a literal ``.``
+  or ``\\`` for a literal backslash ``\``.  Escaping a non-special
+  character is unnecessary but allowed, e.g. ``\a`` matches ``a``.
+``[ ]``
+  Matches any character(s) inside the brackets.
+  To match a literal ``]``, make it the first character, e.g., ``[]ab]``.
+``[^ ]``
+  Matches any character(s) not inside the brackets.
+  To not match a literal ``]``, make it the first character, e.g., ``[^]ab]``.
+``-``
+  Inside brackets, specifies an inclusive range between characters on
+  either side, e.g., ``[a-f]`` is ``[abcdef]``.
+  To match a literal ``-`` using brackets, make it the first or the last
+  character, e.g., ``[+*/-]`` matches basic mathematical operators.
+``*``
+  Matches preceding pattern zero or more times
+``+``
+  Matches preceding pattern one or more times
+``?``
+  Matches preceding pattern zero or once only
+``|``
+  Matches a pattern on either side of the ``|``
+``()``
+  Saves a matched subexpression, which can be referenced
+  in the ``REGEX REPLACE`` operation.
+
+  .. versionadded:: 3.9
+    All regular expression-related commands, including e.g.
+    :command:`if(MATCHES)`, save subgroup matches in the variables
+    :variable:`CMAKE_MATCH_<n>` for ``<n>`` 0..9.
+
+.. noqa: spellcheck off
+
+``*``, ``+`` and ``?`` have higher precedence than concatenation.  ``|``
+has lower precedence than concatenation.  This means that the regular
+expression ``^ab+d$`` matches ``abbd`` but not ``ababd``, and the regular
+expression ``^(ab|cd)$`` matches ``ab`` but not ``abd``.
+
+.. noqa: spellcheck on
+
+CMake language :ref:`Escape Sequences` such as ``\t``, ``\r``, ``\n``,
+and ``\\`` may be used to construct literal tabs, carriage returns,
+newlines, and backslashes (respectively) to pass in a regex.  For example:
+
+* The quoted argument ``"[ \t\r\n]"`` specifies a regex that matches
+  any single whitespace character.
+* The quoted argument ``"[/\\]"`` specifies a regex that matches
+  a single forward slash ``/`` or backslash ``\``.
+* The quoted argument ``"[A-Za-z0-9_]"`` specifies a regex that matches
+  any single "word" character in the C locale.
+* The quoted argument ``"\\(\\a\\+b\\)"`` specifies a regex that matches
+  the exact string ``(a+b)``.  Each ``\\`` is parsed in a quoted argument
+  as just ``\``, so the regex itself is actually ``\(\a\+\b\)``.  This
+  can alternatively be specified in a :ref:`bracket argument` without
+  having to escape the backslashes, e.g. ``[[\(\a\+\b\)]]``.

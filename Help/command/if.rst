@@ -276,8 +276,8 @@ Comparisons
   :target: MATCHES
 
   True if the given string or variable's value matches the given regular
-  expression.  See :ref:`Regex Specification` for regex format.  ``()`` groups
-  are captured in :variable:`CMAKE_MATCH_<n>` variables.
+  expression.  See the :ref:`CMake Language Regex Specification` for regex
+  format.  ``()`` groups are captured in :variable:`CMAKE_MATCH_<n>` variables.
 
 .. signature:: if(<variable|string> LESS <variable|string>)
   :target: LESS
