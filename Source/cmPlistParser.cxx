@@ -2,6 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmPlistParser.h"
 
+#include <iterator>
+#include <sstream>
+#include <string>
 #include <vector>
 
 #include <cm3p/json/value.h>
@@ -25,10 +28,16 @@ cm::optional<Json::Value> cmParsePlist(std::string const& filename)
     return cm::nullopt;
   }
 
-  Json::Value value;
+  // Buffer plutil's output into a seekable stream. cmJSONState must be able
+  // peek at a leading BOM, which the process pipe behind cmUVIStream can't
+  // handle.
   cmUVIStream outputStream(chain.OutputStream());
-  cmJSONState parseState(outputStream, &value,
-                         cmJSONState::StrictMode::Relaxed);
+  std::string output{ std::istreambuf_iterator<char>(outputStream),
+                      std::istreambuf_iterator<char>() };
+  std::istringstream jsonStream(output);
+
+  Json::Value value;
+  cmJSONState parseState(jsonStream, &value, cmJSONState::StrictMode::Relaxed);
   if (!parseState.errors.empty()) {
     return cm::nullopt;
   }

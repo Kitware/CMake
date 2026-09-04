@@ -26,8 +26,6 @@ cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root,
     this->AddError(cmStrCat("File not found: ", this->Filename));
     return;
   }
-  // If there's a BOM, toss it.
-  cmsys::FStream::ReadBOM(fin);
 
   this->ReadJSONStream(fin, root, strictMode);
 }
@@ -127,6 +125,9 @@ void cmJSONState::pop_stack()
 void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root,
                                  StrictMode strictMode)
 {
+  // If there's a BOM, toss it.
+  cmsys::FStream::ReadBOM(jsonIStream);
+
   // Save the entire document.
   std::streampos inBegin = jsonIStream.tellg();
   this->doc = std::string(std::istreambuf_iterator<char>(jsonIStream),
