@@ -1638,8 +1638,13 @@ void cmCTestMultiProcessHandler::CheckResume()
 
 void cmCTestMultiProcessHandler::RemoveTest(int index)
 {
-  this->OrderedTests.erase(
-    std::find(this->OrderedTests.begin(), this->OrderedTests.end(), index));
+  auto const oi =
+    std::find(this->OrderedTests.begin(), this->OrderedTests.end(), index);
+  if (oi == this->OrderedTests.end()) {
+    // The checkpoint names a test this run does not have pending.
+    return;
+  }
+  this->OrderedTests.erase(oi);
   this->PendingTests.erase(index);
   this->Properties.erase(index);
   this->Completed++;
