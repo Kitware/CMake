@@ -502,7 +502,9 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           set(BLAS_mkl_END_GROUP "")
         endif()
         # Switch to GNU Fortran ABI regarding how functions return complex numbers and how characters are passed (but not on Apple, where MKL does not provide it).
-        if(CMAKE_Fortran_COMPILER_LOADED AND (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" OR CMAKE_Fortran_COMPILER_ID STREQUAL "LCC") AND NOT APPLE)
+        # GNU and LLVMFlang families of compilers follow modern C99 _Complex ABI convention.
+        # Intel, IntelLLVM, NVHPC follows the legacy convention.
+        if(CMAKE_Fortran_COMPILER_LOADED AND NOT (CMAKE_Fortran_COMPILER_ID MATCHES "^Intel" OR CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC") AND NOT APPLE)
             set(BLAS_mkl_INTFACE "gf")
         else()
             set(BLAS_mkl_INTFACE "intel")
