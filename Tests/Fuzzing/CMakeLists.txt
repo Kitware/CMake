@@ -100,3 +100,6 @@ add_fuzzer(cmFileLockFuzzer cmFileLockFuzzer.cxx)
 
 # CMake script fuzzer
 add_fuzzer(cmScriptFuzzer cmScriptFuzzer.cxx)
+
+# Fortran dependency scanner fuzzer
+add_fuzzer(cmFortranParserFuzzer cmFortranParserFuzzer.cxx)
