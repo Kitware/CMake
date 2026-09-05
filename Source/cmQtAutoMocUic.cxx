@@ -560,8 +560,19 @@ public:
   void CreateParseJobs(SourceFileMapT const& sourceMap);
 
 private:
+  // Kind of source-entry array in the info file. Headers are 4-tuples carrying
+  // a moc build path; sources are 3-tuples without one.
+  enum class SourceEntryKind
+  {
+    Header,
+    Source,
+  };
+
   // -- Abstract processing interface
   bool InitFromInfo(InfoT const& info) override;
+  // Read the source-entry array of the given kind from the info file into the
+  // matching source map.
+  bool InitSourceEntries(InfoT const& info, SourceEntryKind kind);
   void InitJobs();
   bool Process() override;
   // -- Settings file
@@ -2380,6 +2391,113 @@ cmQtAutoMocUicT::cmQtAutoMocUicT()
 }
 cmQtAutoMocUicT::~cmQtAutoMocUicT() = default;
 
+bool cmQtAutoMocUicT::InitSourceEntries(InfoT const& info,
+                                        SourceEntryKind kind)
+{
+  cm::string_view key;
+  cm::string_view fileNoun;
+  SourceFileMapT* map = nullptr;
+  switch (kind) {
+    case SourceEntryKind::Header:
+      key = "HEADERS";
+      fileNoun = "header";
+      map = &this->BaseEval().Headers;
+      break;
+    case SourceEntryKind::Source:
+      key = "SOURCES";
+      fileNoun = "source";
+      map = &this->BaseEval().Sources;
+      break;
+  }
+  // Sources are 3-tuples; headers add a moc build path.
+  bool const isHeader = kind != SourceEntryKind::Source;
+
+  Json::Value const& entries = info.GetValue(std::string(key));
+  if (!entries.isArray()) {
+    return info.LogError(cmStrCat(key, " JSON value is not an array."));
+  }
+  Json::ArrayIndex const entrySize = isHeader ? 4u : 3u;
+  Json::ArrayIndex const configsIndex = isHeader ? 3u : 2u;
+  Json::ArrayIndex const arraySize = entries.size();
+  for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+    auto testEntry = [&info, key, ii](bool test, cm::string_view msg) -> bool {
+      if (!test) {
+        info.LogError(cmStrCat(key, " entry ", ii, ": ", msg));
+      }
+      return !test;
+    };
+
+    Json::Value const& entry = entries[ii];
+    if (testEntry(entry.isArray(), "JSON value is not an array.") ||
+        testEntry(entry.size() == entrySize, "JSON array size invalid.")) {
+      return false;
+    }
+
+    Json::Value const& entryName = entry[0u];
+    Json::Value const& entryFlags = entry[1u];
+    Json::Value const& entryConfigs = entry[configsIndex];
+    if (testEntry(entryName.isString(),
+                  "JSON value for name is not a string.") ||
+        testEntry(entryFlags.isString(),
+                  "JSON value for flags is not a string.") ||
+        testEntry(entryConfigs.isNull() || entryConfigs.isArray(),
+                  "JSON value for configs is not null or array.")) {
+      return false;
+    }
+    if (isHeader &&
+        testEntry(entry[2u].isString(),
+                  "JSON value for build path is not a string.")) {
+      return false;
+    }
+
+    std::string name = entryName.asString();
+    std::string flags = entryFlags.asString();
+    if (testEntry(flags.size() == 2, "Invalid flags string size")) {
+      return false;
+    }
+
+    if (entryConfigs.isArray()) {
+      bool configFound = false;
+      Json::ArrayIndex const configArraySize = entryConfigs.size();
+      for (Json::ArrayIndex ci = 0; ci != configArraySize; ++ci) {
+        Json::Value const& config = entryConfigs[ci];
+        if (testEntry(config.isString(),
+                      "JSON value in config array is not a string.")) {
+          return false;
+        }
+        configFound = configFound || config.asString() == this->InfoConfig();
+      }
+      if (!configFound) {
+        continue;
+      }
+    }
+
+    cmFileTime fileTime;
+    if (!fileTime.Load(name)) {
+      return info.LogError(cmStrCat("The ", fileNoun, " file ",
+                                    this->MessagePath(name),
+                                    " does not exist."));
+    }
+
+    SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
+    sourceHandle->FileTime = fileTime;
+    sourceHandle->IsHeader = isHeader;
+    sourceHandle->Moc = (flags[0] == 'M');
+    sourceHandle->Uic = (flags[1] == 'U');
+    if (isHeader && sourceHandle->Moc && this->MocConst().Enabled) {
+      std::string build = entry[2u].asString();
+      if (build.empty()) {
+        return info.LogError(cmStrCat("The ", fileNoun, " file ",
+                                      this->MessagePath(name),
+                                      " has an empty build path."));
+      }
+      sourceHandle->BuildPath = std::move(build);
+    }
+    map->emplace(std::move(name), std::move(sourceHandle));
+  }
+  return true;
+}
+
 bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
@@ -2616,158 +2734,13 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
   }
 
   // -- Headers
-  {
-    Json::Value const& val = info.GetValue("HEADERS");
-    if (!val.isArray()) {
-      return info.LogError("HEADERS JSON value is not an array.");
-    }
-    Json::ArrayIndex const arraySize = val.size();
-    for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
-      // Test entry closure
-      auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
-        if (!test) {
-          info.LogError(cmStrCat("HEADERS entry ", ii, ": ", msg));
-        }
-        return !test;
-      };
-
-      Json::Value const& entry = val[ii];
-      if (testEntry(entry.isArray(), "JSON value is not an array.") ||
-          testEntry(entry.size() == 4, "JSON array size invalid.")) {
-        return false;
-      }
-
-      Json::Value const& entryName = entry[0u];
-      Json::Value const& entryFlags = entry[1u];
-      Json::Value const& entryBuild = entry[2u];
-      Json::Value const& entryConfigs = entry[3u];
-      if (testEntry(entryName.isString(),
-                    "JSON value for name is not a string.") ||
-          testEntry(entryFlags.isString(),
-                    "JSON value for flags is not a string.") ||
-          testEntry(entryConfigs.isNull() || entryConfigs.isArray(),
-                    "JSON value for configs is not null or array.") ||
-          testEntry(entryBuild.isString(),
-                    "JSON value for build path is not a string.")) {
-        return false;
-      }
-
-      std::string name = entryName.asString();
-      std::string flags = entryFlags.asString();
-      std::string build = entryBuild.asString();
-      if (testEntry(flags.size() == 2, "Invalid flags string size")) {
-        return false;
-      }
-
-      if (entryConfigs.isArray()) {
-        bool configFound = false;
-        Json::ArrayIndex const configArraySize = entryConfigs.size();
-        for (Json::ArrayIndex ci = 0; ci != configArraySize; ++ci) {
-          Json::Value const& config = entryConfigs[ci];
-          if (testEntry(config.isString(),
-                        "JSON value in config array is not a string.")) {
-            return false;
-          }
-          configFound = configFound || config.asString() == this->InfoConfig();
-        }
-        if (!configFound) {
-          continue;
-        }
-      }
-
-      cmFileTime fileTime;
-      if (!fileTime.Load(name)) {
-        return info.LogError(cmStrCat(
-          "The header file ", this->MessagePath(name), " does not exist."));
-      }
-
-      SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
-      sourceHandle->FileTime = fileTime;
-      sourceHandle->IsHeader = true;
-      sourceHandle->Moc = (flags[0] == 'M');
-      sourceHandle->Uic = (flags[1] == 'U');
-      if (sourceHandle->Moc && this->MocConst().Enabled) {
-        if (build.empty()) {
-          return info.LogError(
-            cmStrCat("Header file ", ii, " build path is empty"));
-        }
-        sourceHandle->BuildPath = std::move(build);
-      }
-      this->BaseEval().Headers.emplace(std::move(name),
-                                       std::move(sourceHandle));
-    }
+  if (!this->InitSourceEntries(info, SourceEntryKind::Header)) {
+    return false;
   }
 
   // -- Sources
-  {
-    Json::Value const& val = info.GetValue("SOURCES");
-    if (!val.isArray()) {
-      return info.LogError("SOURCES JSON value is not an array.");
-    }
-    Json::ArrayIndex const arraySize = val.size();
-    for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
-      // Test entry closure
-      auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
-        if (!test) {
-          info.LogError(cmStrCat("SOURCES entry ", ii, ": ", msg));
-        }
-        return !test;
-      };
-
-      Json::Value const& entry = val[ii];
-      if (testEntry(entry.isArray(), "JSON value is not an array.") ||
-          testEntry(entry.size() == 3, "JSON array size invalid.")) {
-        return false;
-      }
-
-      Json::Value const& entryName = entry[0u];
-      Json::Value const& entryFlags = entry[1u];
-      Json::Value const& entryConfigs = entry[2u];
-      if (testEntry(entryName.isString(),
-                    "JSON value for name is not a string.") ||
-          testEntry(entryFlags.isString(),
-                    "JSON value for flags is not a string.") ||
-          testEntry(entryConfigs.isNull() || entryConfigs.isArray(),
-                    "JSON value for configs is not null or array.")) {
-        return false;
-      }
-
-      std::string name = entryName.asString();
-      std::string flags = entryFlags.asString();
-      if (testEntry(flags.size() == 2, "Invalid flags string size")) {
-        return false;
-      }
-
-      if (entryConfigs.isArray()) {
-        bool configFound = false;
-        Json::ArrayIndex const configArraySize = entryConfigs.size();
-        for (Json::ArrayIndex ci = 0; ci != configArraySize; ++ci) {
-          Json::Value const& config = entryConfigs[ci];
-          if (testEntry(config.isString(),
-                        "JSON value in config array is not a string.")) {
-            return false;
-          }
-          configFound = configFound || config.asString() == this->InfoConfig();
-        }
-        if (!configFound) {
-          continue;
-        }
-      }
-
-      cmFileTime fileTime;
-      if (!fileTime.Load(name)) {
-        return info.LogError(cmStrCat(
-          "The source file ", this->MessagePath(name), " does not exist."));
-      }
-
-      SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
-      sourceHandle->FileTime = fileTime;
-      sourceHandle->IsHeader = false;
-      sourceHandle->Moc = (flags[0] == 'M');
-      sourceHandle->Uic = (flags[1] == 'U');
-      this->BaseEval().Sources.emplace(std::move(name),
-                                       std::move(sourceHandle));
-    }
+  if (!this->InitSourceEntries(info, SourceEntryKind::Source)) {
+    return false;
   }
 
   // -- Init derived information
