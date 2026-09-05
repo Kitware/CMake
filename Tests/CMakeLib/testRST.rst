@@ -40,6 +40,9 @@ Inline cref :cref:`Link_Text_<Placeholder> <ExternalDest>`.
 Inline link `Link Dest`_.
 Inline link `Link Text <ExternalDest>`_.
 Inline link `Link Text \<With \\-escaped Brackets\> <ExternalDest>`_.
+Inline link anon `Link Dest`__.
+Inline link anon `Link Text <ExternalDest>`__.
+Inline link anon `Link Text \<With \\-escaped Brackets\> <ExternalDest>`__.
 Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
 
