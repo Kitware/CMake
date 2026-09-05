@@ -1386,7 +1386,7 @@ if(BLA_VENDOR STREQUAL "NVPL" OR BLA_VENDOR STREQUAL "All")
           set(_blas_lib "nvpl::blas${_nvpl_int}${_nvpl_thread}")
 
           if(TARGET ${_blas_lib})
-            set(BLAS_LIBRARIES ${_blas_lib})
+            get_target_property(BLAS_LIBRARIES ${_blas_lib} IMPORTED_LOCATION_RELEASE)
             break()
           endif()
 
