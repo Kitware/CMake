@@ -63,6 +63,9 @@ public:
     bool SkipUic = false;
     bool MocIt = false;
     bool UicIt = false;
+    // Memoized GetMocBuildPath() result. Mutable because the info file
+    // writer reaches this through const references.
+    mutable std::string MocBuildPath;
   };
   using MUFileHandle = std::unique_ptr<MUFile>;
 
@@ -119,7 +122,8 @@ private:
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
 
-  cmSourceFile* RegisterGeneratedSource(std::string const& filename);
+  cmSourceFile* RegisterGeneratedSource(std::string const& filename,
+                                        bool scanForModules = false);
   cmSourceFile* AddGeneratedSource(std::string const& filename,
                                    GenVarsT const& genVars,
                                    bool prepend = false);
@@ -140,7 +144,7 @@ private:
                             std::string const& fileName);
   void ConfigFileClean(ConfigString& configString);
 
-  std::string GetMocBuildPath(MUFile const& muf);
+  std::string const& GetMocBuildPath(MUFile const& muf);
 
   bool GetQtExecutable(GenVarsT& genVars, std::string const& executable,
                        bool ignoreMissingTarget) const;
@@ -204,6 +208,7 @@ private:
     // Sources to process
     std::unordered_map<cmSourceFile*, MUFileHandle> Headers;
     std::unordered_map<cmSourceFile*, MUFileHandle> Sources;
+    std::unordered_map<cmSourceFile*, MUFileHandle> ModuleUnits;
     std::vector<MUFile*> FilesGenerated;
     std::vector<cmSourceFile*> CMP0100HeadersWarn;
   } AutogenTarget;
