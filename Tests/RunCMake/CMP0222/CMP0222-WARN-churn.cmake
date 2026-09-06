@@ -1,0 +1,5 @@
+set(PATH_IS_PREFIX "yes")
+set(other "yes")
+if(NOT PATH_IS_PREFIX AND other)
+  message(SEND_ERROR "condition should be false")
+endif()

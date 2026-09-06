@@ -1,0 +1,21 @@
+CMake Warning \(policy\) at CMP0222-WARN\.cmake:[0-9]+ \(if\):
+  Policy CMP0222 is not set: The if\(\) command supports path prefix tests
+  using PATH_IS_PREFIX operator\.  Run "cmake --help-policy CMP0222" for
+  policy details\.  Use the cmake_policy command to set the policy and
+  suppress this warning\.
+
+  PATH_IS_PREFIX will be interpreted as an operator when the policy is set to
+  NEW\.  Since the policy is not set the OLD behavior will be used\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.
+
+CMake Error at CMP0222-WARN\.cmake:[0-9]+ \(if\):
+  if given arguments:
+
+    "/path1" "PATH_IS_PREFIX" "/path2"
+
+  Unknown arguments specified
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
