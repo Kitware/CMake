@@ -1,0 +1,22 @@
+include(RunCMake)
+
+run_cmake(CMP0225-NEW)
+run_cmake(CMP0225-OLD)
+run_cmake(CMP0225-WARN)
+run_cmake(CMP0225-WARN-prefix)
+run_cmake(CMP0225-NEW-custom)
+run_cmake(CMP0225-NEW-empty)
+run_cmake(CMP0225-WARN-empty)
+
+function(run_CMP0225_effective case)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake(${case})
+  run_cmake_command(${case}-build ${CMAKE_COMMAND} --build .)
+endfunction()
+
+run_CMP0225_effective(CMP0225-Effective-NEW)
+run_CMP0225_effective(CMP0225-Effective-Args)
+run_CMP0225_effective(CMP0225-Effective-Flag)

@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.5
 .. toctree::
    :maxdepth: 1
 
+   CMP0225: ExternalProject sets CMAKE_INSTALL_PREFIX to <INSTALL_DIR> in the default configure command. </policy/CMP0225>
    CMP0224: Test fixtures use AROUND_EACH_REPEAT mode by default with ctest --repeat. </policy/CMP0224>
    CMP0223: An empty path is not a prefix of any path. </policy/CMP0223>
    CMP0222: The if() command supports path prefix tests using PATH_IS_PREFIX operator. </policy/CMP0222>

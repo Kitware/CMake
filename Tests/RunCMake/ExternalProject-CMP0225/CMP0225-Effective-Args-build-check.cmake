@@ -1,0 +1,11 @@
+set(cache "${RunCMake_TEST_BINARY_DIR}/Sub-build/CMakeCache.txt")
+if(NOT EXISTS "${cache}")
+  set(RunCMake_TEST_FAILED "External project was not configured: ${cache}")
+  return()
+endif()
+file(STRINGS "${cache}" prefix_line REGEX "^CMAKE_INSTALL_PREFIX:" ENCODING UTF-8)
+set(expected "CMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/override")
+if(NOT prefix_line STREQUAL expected)
+  set(RunCMake_TEST_FAILED
+    "Caller CMAKE_ARGS prefix should win.\n  expected: ${expected}\n  actual:   ${prefix_line}")
+endif()

@@ -1,0 +1,52 @@
+CMP0225
+-------
+
+.. versionadded:: 4.5
+
+:command:`ExternalProject_Add` sets :variable:`CMAKE_INSTALL_PREFIX` to
+``<INSTALL_DIR>`` in the default configure command.
+
+When no ``CONFIGURE_COMMAND`` is given, :command:`ExternalProject_Add` drives
+the external project as a CMake project with a default configure command.
+CMake 4.4 and below do not pass :variable:`CMAKE_INSTALL_PREFIX` in that
+command, so the external project's install step uses CMake's built-in default
+prefix, such as ``/usr/local`` on Unix or ``C:/Program Files`` on Windows,
+rather than the ``INSTALL_DIR`` that the module reserves for it inside the
+build tree.  Installing to a shared system prefix as a side effect of a build
+is surprising and often fails for lack of permission.
+
+CMake 4.5 and above prefer to set :variable:`CMAKE_INSTALL_PREFIX` to the
+external project's ``INSTALL_DIR``, so that it installs to the location the
+module reserves for it.
+
+The ``OLD`` behavior of this policy does not set
+:variable:`CMAKE_INSTALL_PREFIX` in the default configure command.  The
+``NEW`` behavior sets it to the external project's ``INSTALL_DIR``.
+
+This policy affects only the default configure command; a custom
+``CONFIGURE_COMMAND``, including an empty one, is unaffected.
+
+A :variable:`CMAKE_INSTALL_PREFIX` given by the caller in ``CMAKE_ARGS`` (for
+example, through :option:`cmake --install-prefix`) or in ``CMAKE_CACHE_ARGS``
+still takes precedence.  A prefix given in ``CMAKE_CACHE_DEFAULT_ARGS`` does
+not, matching that option's non-overriding-default semantics.
+
+Setting :variable:`CMAKE_INSTALL_PREFIX` in the external project also has
+effects beyond the install location:
+:variable:`CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT` is left false, and the
+prefix is prepended to :variable:`CMAKE_SYSTEM_PREFIX_PATH`, which can change
+``find_*()`` results.  These effects apply even when the install step is
+disabled with ``INSTALL_COMMAND ""``.
+
+Adopting the ``NEW`` behavior in an existing build tree reconfigures the
+external project and overwrites its cached :variable:`CMAKE_INSTALL_PREFIX`;
+returning to the ``OLD`` behavior does not restore the previous cached value.
+As with the other directory placeholders, changing ``INSTALL_DIR`` later may
+not reconfigure the external project with every generator, so its build tree
+may need to be cleaned for the cached prefix to update.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.5
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

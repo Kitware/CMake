@@ -676,6 +676,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0224,                                                     \
          "Test fixtures use AROUND_EACH_REPEAT mode by default with "         \
          "ctest --repeat.",                                                   \
+         4, 5, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0225,                                                     \
+         "ExternalProject sets CMAKE_INSTALL_PREFIX to <INSTALL_DIR> in the " \
+         "default configure command.",                                        \
          4, 5, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
