@@ -9,9 +9,35 @@
     "abstract": true,
     "symbolic": null,
     "isGeneratorProvided": null,
-    "fileSets": null,
+    "fileSets": [
+        {
+            "name": "HEADERS",
+            "type": "HEADERS",
+            "visibility": "INTERFACE",
+            "baseDirectories": [
+                "^imported/\\.\\.$"
+            ]
+        }
+    ],
     "sources": [],
-    "interfaceSources": null,
+    "interfaceIncludes": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/imported$",
+            "isSystem": true
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/imported/\\.\\.$",
+            "isSystem": true
+        }
+    ],
+    "interfaceSources": [
+        {
+            "path": "^empty\\.h$",
+            "isGenerated": null,
+            "fileSetNames": ["HEADERS"],
+            "sourceGroupName": "Header Files"
+        }
+    ],
     "sourceGroups": null,
     "compileGroups": null,
     "backtrace": [

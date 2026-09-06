@@ -511,6 +511,7 @@ class Target
   Json::Value DumpSources(FileSetDatabase const& fsdb);
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
                          Json::ArrayIndex si, FileSetDatabase const& fsdb);
+  Json::Value DumpInterfaceIncludes();
   Json::Value DumpInterfaceSources(FileSetDatabase const& fsdb);
   Json::Value DumpInterfaceSource(std::string path, Json::ArrayIndex si,
                                   FileSetDatabase const& fsdb);
@@ -1381,6 +1382,11 @@ Json::Value Target::Dump()
       target["interfaceSources"] = std::move(interfaceSources);
     }
 
+    auto interfaceIncludes = this->DumpInterfaceIncludes();
+    if (!interfaceIncludes.empty()) {
+      target["interfaceIncludes"] = std::move(interfaceIncludes);
+    }
+
     Json::Value folder = this->DumpFolder();
     if (!folder.isNull()) {
       target["folder"] = std::move(folder);
@@ -1995,6 +2001,48 @@ Json::Value Target::DumpInterfaceSources(FileSetDatabase const& fsdb)
   }
 
   return interfaceSources;
+}
+
+Json::Value Target::DumpInterfaceIncludes()
+{
+  Json::Value interfaceIncludes = Json::arrayValue;
+
+  std::set<std::string> systemIncludes;
+  cmValue systemIncludesProp =
+    this->GT->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES");
+  if (systemIncludesProp) {
+    cmList includes{ cmGeneratorExpression::Evaluate(
+      *systemIncludesProp, this->GT->GetLocalGenerator(), this->Config,
+      this->GT) };
+    for (std::string include : includes) {
+      cmSystemTools::ConvertToUnixSlashes(include);
+      systemIncludes.emplace(std::move(include));
+    }
+  }
+
+  cmValue prop = this->GT->GetProperty("INTERFACE_INCLUDE_DIRECTORIES");
+  if (prop) {
+    cmList includes{ cmGeneratorExpression::Evaluate(
+      *prop, this->GT->GetLocalGenerator(), this->Config, this->GT) };
+
+    bool const targetTreatsOwnIncludesAsSystem =
+      this->GT->GetPropertyAsBool("SYSTEM") &&
+      (!this->GT->IsImported() ||
+       !this->GT->GetPropertyAsBool("IMPORTED_NO_SYSTEM"));
+
+    for (std::string include : includes) {
+      cmSystemTools::ConvertToUnixSlashes(include);
+
+      bool const isSystem = targetTreatsOwnIncludesAsSystem ||
+        systemIncludes.find(include) != systemIncludes.end();
+
+      JBT<std::string> path(include);
+      interfaceIncludes.append(
+        this->DumpInclude({ std::move(path), isSystem }));
+    }
+  }
+
+  return interfaceIncludes;
 }
 
 Json::Value Target::DumpInterfaceSource(std::string path, Json::ArrayIndex si,

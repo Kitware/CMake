@@ -11,6 +11,16 @@
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [],
+    "interfaceIncludes": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI$",
+            "isSystem": null
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/dir$",
+            "isSystem": true
+        }
+    ],
     "interfaceSources": null,
     "sourceGroups": null,
     "compileGroups": null,

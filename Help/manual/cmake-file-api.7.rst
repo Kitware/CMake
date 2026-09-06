@@ -1712,6 +1712,31 @@ with members:
     file set; see also policy :policy:`CMP0211`. The value is
     an array of unsigned integer 0-based indexes into the ``fileSets`` array.
 
+``interfaceIncludes``
+  .. codemodel-versionadded:: 2.12
+
+  An optional member that is present when the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
+  property is set on a target. Note that non-private ``HEADERS`` file sets
+  automatically populate this property.
+
+  The value is a JSON array with an entry for each directory.
+  Transitive usage requirements from dependencies are not included.
+  Each entry is a JSON object with members:
+
+  ``path``
+    A string specifying the path to the include directory,
+    represented with forward slashes.
+
+  ``isSystem``
+    Optional member that is present with boolean value ``true`` if
+    the include directory is marked as a system include directory.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the command invocation that added this include directory is available.
+    The value is an unsigned integer 0-based index into the
+    ``backtraceGraph`` member's ``nodes`` array.
+
 ``sourceGroups``
   Optional member that is present when sources are grouped together by
   the :command:`source_group` command or by default.  The value is a

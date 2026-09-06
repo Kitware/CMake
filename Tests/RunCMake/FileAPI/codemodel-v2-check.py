@@ -13,7 +13,7 @@ def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
     major = 2
-    minor = 11
+    minor = 12
     check_index_object(o[0], "codemodel", major, minor, check_object_codemodel(g, major, minor))
 
 def check_backtrace(t, b, backtrace):
@@ -322,6 +322,9 @@ def check_target(c, major, minor):
             expected_keys.append("interfaceSources")
             assert is_list(obj["interfaceSources"])
             assert len(obj["interfaceSources"]) == len(expected["interfaceSources"])
+
+        if expected.get("interfaceIncludes") is not None:
+            expected_keys.append("interfaceIncludes")
 
         assert is_dict(obj["paths"])
         assert sorted(obj["paths"].keys()) == ["build", "source"]
@@ -902,6 +905,26 @@ def check_target(c, major, minor):
                              check_exception=lambda a, e: "Compile group: %s" % a["language"],
                              missing_exception=lambda e: "Compile group: %s" % e["language"],
                              extra_exception=lambda a: "Compile group: %s" % a["language"])
+
+        if expected.get("interfaceIncludes") is not None:
+            def check_interface_include(actual, expected):
+                assert is_dict(actual)
+                expected_keys = ["path"]
+
+                assert matches(actual["path"], expected["path"])
+
+                if expected["isSystem"] is not None:
+                    expected_keys.append("isSystem")
+                    assert is_bool(actual["isSystem"], expected["isSystem"])
+
+                assert sorted(actual.keys()) == sorted(expected_keys)
+
+            check_list_match(lambda a, e: matches(a["path"], e["path"]),
+                             obj["interfaceIncludes"], expected["interfaceIncludes"],
+                             check=check_interface_include,
+                             check_exception=lambda a, e: "Interface include: %s" % a["path"],
+                             missing_exception=lambda e: "Interface include: %s" % e["path"],
+                             extra_exception=lambda a: "Interface include: %s" % a["path"])
 
         assert sorted(obj.keys()) == sorted(expected_keys)
 

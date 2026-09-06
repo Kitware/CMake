@@ -9,6 +9,9 @@ set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
 
 include("${CMAKE_CURRENT_LIST_DIR}/include_test.cmake")
 
+target_include_directories(interface_lib INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/dir")
+set_property(TARGET interface_lib APPEND PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/dir")
+
 add_library(c_lib empty.c)
 add_executable(c_exe empty.c)
 target_link_libraries(c_exe PRIVATE c_lib)

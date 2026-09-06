@@ -17,7 +17,7 @@
     "backtrace": [
         {
             "file": "^imported/CMakeLists\\.txt$",
-            "line": 48,
+            "line": 54,
             "command": "add_library",
             "hasParent": true
         },

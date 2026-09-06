@@ -21,7 +21,7 @@
                 [
                     {
                         "file": "^imported/CMakeLists\\.txt$",
-                        "line": 36,
+                        "line": 42,
                         "command": "add_executable",
                         "hasParent": true
                     },
@@ -65,7 +65,7 @@
     "backtrace": [
         {
             "file": "^imported/CMakeLists\\.txt$",
-            "line": 36,
+            "line": 42,
             "command": "add_executable",
             "hasParent": true
         },
@@ -110,7 +110,7 @@
             "backtrace": [
                 {
                     "file": "^imported/CMakeLists\\.txt$",
-                    "line": 37,
+                    "line": 43,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },
@@ -131,7 +131,7 @@
             "backtrace": [
                 {
                     "file": "^imported/CMakeLists\\.txt$",
-                    "line": 37,
+                    "line": 43,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },
