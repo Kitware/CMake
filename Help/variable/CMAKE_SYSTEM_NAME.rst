@@ -4,8 +4,9 @@ CMAKE_SYSTEM_NAME
 The name of the operating system for which CMake is to build.
 See the :variable:`CMAKE_SYSTEM_VERSION` variable for the OS version.
 
-Note that ``CMAKE_SYSTEM_NAME`` is not set to anything by default when running
-in script mode, since it's not building anything.
+When run in :option:`cmake -P` script mode, CMake sets
+:variable:`CMAKE_HOST_SYSTEM_NAME` but does not set ``CMAKE_SYSTEM_NAME`` by
+default, since it's not building anything.
 
 System Name for Host Builds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
