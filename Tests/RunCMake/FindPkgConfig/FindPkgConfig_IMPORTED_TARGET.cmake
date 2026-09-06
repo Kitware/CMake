@@ -150,3 +150,41 @@ if (NOT c_opts STREQUAL expected_c_opts)
       "expected: \"${expected_c_opts}\", got \"${c_opts}\""
     )
 endif ()
+
+# GNU ld's "-l:<filename>" exact-file syntax: a named file resolves via
+# find_library(); an unresolved one keeps its ":<filename>".
+file(WRITE ${fakePkgDir}/lib/libcmakeinternalfakeexact.a "")
+file(WRITE ${fakePkgDir}/lib/cmakeinternalfakeexactnoprefix.a "")
+set(pname fakeexactpackage)
+file(WRITE ${fakePkgDir}/lib/pkgconfig/${pname}.pc
+"Name: FakeExactPackage
+Description: Dummy package for FindPkgConfig -l:<filename> exact-file test
+Version: 1.2.3
+Libs: -l:libcmakeinternalfakeexact.a -l:cmakeinternalfakeexactnoprefix.a -l:libcmakeinternalfakemissing.a -lcmakeinternalfakepackage2
+")
+
+pkg_check_modules(FakeExactPackage REQUIRED QUIET IMPORTED_TARGET fakeexactpackage)
+
+# check that the "-l:<name>" exact-file form resolves to a full library path
+list(FIND FakeExactPackage_LINK_LIBRARIES "${fakePkgDir}/lib/libcmakeinternalfakeexact.a" idx)
+if (idx EQUAL -1)
+  message(FATAL_ERROR "-l: exact file not resolved: ${FakeExactPackage_LINK_LIBRARIES}")
+endif()
+
+# check that a non-conventional exact file (no lib prefix) also resolves
+list(FIND FakeExactPackage_LINK_LIBRARIES "${fakePkgDir}/lib/cmakeinternalfakeexactnoprefix.a" idx)
+if (idx EQUAL -1)
+  message(FATAL_ERROR "-l: non-conventional exact file not resolved: ${FakeExactPackage_LINK_LIBRARIES}")
+endif()
+
+# check that an unresolved exact file keeps its ":<name>" token for the linker
+list(FIND FakeExactPackage_LINK_LIBRARIES ":libcmakeinternalfakemissing.a" idx)
+if (idx EQUAL -1)
+  message(FATAL_ERROR "-l: unresolved exact file did not preserve its token: ${FakeExactPackage_LINK_LIBRARIES}")
+endif()
+
+# check that a conventional -l entry still resolves alongside -l: entries
+list(FIND FakeExactPackage_LINK_LIBRARIES "${fakePkgDir}/lib/libcmakeinternalfakepackage2.a" idx)
+if (idx EQUAL -1)
+  message(FATAL_ERROR "conventional -l entry not resolved alongside -l: entries: ${FakeExactPackage_LINK_LIBRARIES}")
+endif()
