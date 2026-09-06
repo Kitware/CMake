@@ -1,0 +1,11 @@
+{
+    "version":6,
+    "configurePresets": [
+        {
+            "name": [],
+            "cacheVariables": {
+                "": {}
+            }
+        }
+    ]
+}
