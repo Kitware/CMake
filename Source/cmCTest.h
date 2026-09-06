@@ -204,9 +204,12 @@ public:
 
   cm::optional<unsigned int> GetRandomSeed() const;
 
-  /** The max output width */
+  /** The max output width with overrides taken into account */
   int GetMaxTestNameWidth() const;
-  void SetMaxTestNameWidth(int w);
+
+  /** The maximum width of all test names */
+  int GetLongestTestNameWidth() const;
+  void SetLongestTestNameWidth(int w);
 
   /**
    * Run a single executable command and put the stdout and stderr

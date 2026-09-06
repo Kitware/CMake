@@ -374,8 +374,9 @@ void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
     }
     xml.EndElement(); // Results
     if (memoryErrors > 0) {
-      int const maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
       std::string outname = result.Name + " ";
+      size_t const maxTestNameWidth = std::max<size_t>(
+        this->CTest->GetMaxTestNameWidth(), result.Name.size());
       outname.resize(maxTestNameWidth + 4, '.');
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                          cc + 1 << "/" << total << " MemCheck: #"

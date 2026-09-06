@@ -1129,3 +1129,36 @@ block()
     -D CTEST_SUBMIT_PARTS=BadPart
   )
 endblock()
+
+# Test the --max-width/-W flag.
+function(run_TestMaxWidth name kind lastName args)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestMaxWidth${kind})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+  add_test(test1 \"${CMAKE_COMMAND}\" -E echo test)
+  add_test(test2 \"${CMAKE_COMMAND}\" -E echo test)
+  add_test(${lastName} \"${CMAKE_COMMAND}\" -E echo test)
+")
+  run_cmake_command(${name} ${CMAKE_CTEST_COMMAND} ${args})
+endfunction()
+
+function(run_TestMaxWidthShort name width)
+  run_TestMaxWidth(${name} Short test3 "${width}")
+endfunction()
+function(run_TestMaxWidthLong name width)
+  run_TestMaxWidth(
+    ${name}
+    Long
+    TestNameIsLongerThanTheDefault30CharactersSoTheMaxWidthIncreases
+    "${width}"
+  )
+endfunction()
+
+run_TestMaxWidthShort(MaxWidthShortUnset "")
+run_TestMaxWidthShort(MaxWidthShort10 "--max-width 10")
+run_TestMaxWidthShort(MaxWidthShort0 "--max-width 0")
+run_TestMaxWidthLong(MaxWidthLongUnset "")
+run_TestMaxWidthLong(MaxWidthLong70 "-W 70")
+run_TestMaxWidthLong(MaxWidthLong30 "-W 30")

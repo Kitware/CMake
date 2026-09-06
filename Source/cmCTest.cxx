@@ -161,7 +161,10 @@ struct cmCTest::Private
     std::chrono::steady_clock::now();
   cmDuration TimeLimit = cmCTest::MaxDuration();
 
-  int MaxTestNameWidth = 30;
+  // Longest width of all test names (does not take any override into account).
+  int LongestTestNameWidth = 30;
+  // Override from the command line or profile for the maximum width.
+  cm::optional<int> MaxTestNameWidthOverride;
 
   cm::optional<size_t> ParallelLevel = 1;
   bool ParallelLevelSetInCli = false;
@@ -1721,7 +1724,8 @@ bool cmCTest::SetArgsFromPreset(cmCMakePresetsArgs const& args)
       expandedPreset->Output->SubprojectSummary.value_or(true);
 
     if (expandedPreset->Output->MaxTestNameWidth) {
-      this->Impl->MaxTestNameWidth = *expandedPreset->Output->MaxTestNameWidth;
+      this->Impl->MaxTestNameWidthOverride =
+        expandedPreset->Output->MaxTestNameWidth;
     }
   }
 
@@ -1969,7 +1973,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return true;
   };
   auto const dashW = [this](std::string const& width) -> bool {
-    this->Impl->MaxTestNameWidth = atoi(width.c_str());
+    this->Impl->MaxTestNameWidthOverride = atoi(width.c_str());
     return true;
   };
   auto const dashA = [this, &processSteps](std::string const& notes) -> bool {
@@ -3150,12 +3154,18 @@ bool cmCTest::ShouldPrintLabels() const
 
 int cmCTest::GetMaxTestNameWidth() const
 {
-  return this->Impl->MaxTestNameWidth;
+  return this->Impl->MaxTestNameWidthOverride.value_or(
+    this->Impl->LongestTestNameWidth);
 }
 
-void cmCTest::SetMaxTestNameWidth(int w)
+int cmCTest::GetLongestTestNameWidth() const
 {
-  this->Impl->MaxTestNameWidth = w;
+  return this->Impl->LongestTestNameWidth;
+}
+
+void cmCTest::SetLongestTestNameWidth(int w)
+{
+  this->Impl->LongestTestNameWidth = w;
 }
 
 void cmCTest::SetProduceXML(bool v)
