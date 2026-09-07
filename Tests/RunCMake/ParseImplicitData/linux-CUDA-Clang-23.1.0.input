@@ -1,0 +1,92 @@
+CMAKE_LANG=CUDA
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_CUDA_COMPILER_ABI=ELF
+CMAKE_CUDA_COMPILER_AR=/usr/bin/llvm-ar-23
+CMAKE_CUDA_COMPILER_ARCHITECTURE_ID=x86_64
+CMAKE_CUDA_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CUDA_COMPILER_ID=Clang
+CMAKE_CUDA_COMPILER_LAUNCHER=
+CMAKE_CUDA_COMPILER_LOADED=1
+CMAKE_CUDA_COMPILER_RANLIB=/usr/bin/llvm-ranlib-23
+CMAKE_CUDA_COMPILER_TARGET=
+CMAKE_CUDA_COMPILER_VERSION=23.1.0
+CMAKE_CUDA_COMPILER_VERSION_INTERNAL=
+Change Dir: '/tmp/ii/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /tmp/cmake/.gitlab/ninja -v cmTC_097ec
+[1/2] /usr/bin/clang++-23    --offload-arch=sm_75 --cuda-path=/usr/local/cuda   -v -MD -MT CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o -MF CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o.d -x cuda -c /tmp/cmake/Modules/CMakeCUDACompilerABI.cu -o CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o
+Ubuntu clang version 23.1.0 (++20260818083557+55feb0a3b6b7-1~exp1~20260818083714.47)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/lib/llvm-23/bin
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/13
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/13
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found CUDA installation: /usr/local/cuda, version 13.2
+ "/usr/lib/llvm-23/bin/clang" -cc1 -triple nvptx64-nvidia-cuda -aux-triple x86_64-pc-linux-gnu -S -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCUDACompilerABI.cu -mrelocation-model static -mframe-pointer=all -fno-rounding-math -no-integrated-as -aux-target-cpu x86-64 -fcuda-is-device -mllvm -enable-memcpyopt-without-libcalls -fno-threadsafe-statics -mlink-builtin-bitcode /usr/local/cuda/nvvm/libdevice/libdevice.10.bc -target-sdk-version=13.2 -target-cpu sm_75 -target-feature +ptx92 -debugger-tuning=gdb -fno-dwarf-directory-asm -fdebug-compilation-dir=/tmp/ii/CMakeFiles/CMakeTmp -v -resource-dir /usr/lib/llvm-23/lib/clang/23 -dependency-file CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o.d -MT CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o -sys-header-deps -internal-isystem /usr/lib/llvm-23/lib/clang/23/include/cuda_wrappers -include __clang_cuda_runtime_wrapper.h -D__CUDA_ARCH_LIST__=750 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/backward -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/backward -internal-isystem /usr/lib/llvm-23/lib/clang/23/include -internal-isystem /usr/local/include -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/local/cuda/include -internal-isystem /usr/lib/llvm-23/lib/clang/23/include -internal-isystem /usr/local/include -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fno-autolink -ferror-limit 19 --offload-new-driver -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -cuid=59af999eafed7ec1 -fdwarf2-cfi-asm -o /tmp/CMakeCUDACompilerABI-sm_75-150984.s -x cuda /tmp/cmake/Modules/CMakeCUDACompilerABI.cu
+clang -cc1 version 23.1.0 based upon LLVM 23.1.0 default target x86_64-pc-linux-gnu
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13"
+ignoring duplicate directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13"
+ignoring duplicate directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/backward"
+ignoring duplicate directory "/usr/lib/llvm-23/lib/clang/23/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include/x86_64-linux-gnu"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/llvm-23/lib/clang/23/include/cuda_wrappers
+ /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13
+ /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13
+ /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/backward
+ /usr/lib/llvm-23/lib/clang/23/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+ /usr/local/cuda/include
+End of search list.
+ "/usr/local/cuda/bin/ptxas" -m64 -O0 -v --gpu-name sm_75 --output-file /tmp/CMakeCUDACompilerABI-sm_75-dd12d4.o /tmp/CMakeCUDACompilerABI-sm_75-150984.s
+ptxas info    : 0 bytes gmem
+ "/usr/local/cuda/bin/fatbinary" -64 --create /tmp/CMakeCUDACompilerABI-2ad3ea.fatbin --image3=kind=elf,sm=75,file=/tmp/CMakeCUDACompilerABI-sm_75-dd12d4.o
+ "/usr/lib/llvm-23/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -aux-triple nvptx64-nvidia-cuda -target-sdk-version=13.2 -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCUDACompilerABI.cu -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/ii/CMakeFiles/CMakeTmp -v -fcoverage-compilation-dir=/tmp/ii/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-23/lib/clang/23 -dependency-file CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o.d -MT CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o -sys-header-deps -internal-isystem /usr/lib/llvm-23/lib/clang/23/include/cuda_wrappers -include __clang_cuda_runtime_wrapper.h -D__CUDA_ARCH_LIST__=750 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/backward -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/backward -internal-isystem /usr/lib/llvm-23/lib/clang/23/include -internal-isystem /usr/local/include -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/lib/llvm-23/lib/clang/23/include -internal-isystem /usr/local/include -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/local/cuda/include -fdeprecated-macro -ferror-limit 19 --offload-new-driver -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fcuda-include-gpubinary /tmp/CMakeCUDACompilerABI-2ad3ea.fatbin -cuid=59af999eafed7ec1 -faddrsig -fdwarf2-cfi-asm -o CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o -x cuda /tmp/cmake/Modules/CMakeCUDACompilerABI.cu
+clang -cc1 version 23.1.0 based upon LLVM 23.1.0 default target x86_64-pc-linux-gnu
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13"
+ignoring duplicate directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13"
+ignoring duplicate directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/backward"
+ignoring duplicate directory "/usr/lib/llvm-23/lib/clang/23/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include/x86_64-linux-gnu"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/llvm-23/lib/clang/23/include/cuda_wrappers
+ /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13
+ /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13
+ /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/backward
+ /usr/lib/llvm-23/lib/clang/23/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+ /usr/local/cuda/include
+End of search list.
+[2/2] : && /usr/bin/clang++-23 --cuda-path=/usr/local/cuda -v -Wl,-v --offload-link CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o -o cmTC_097ec  -lcudadevrt  -lcudart_static  -lrt  -lpthread  -ldl -L"/usr/local/cuda/lib64" && :
+Ubuntu clang version 23.1.0 (++20260818083557+55feb0a3b6b7-1~exp1~20260818083714.47)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/lib/llvm-23/bin
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/13
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/13
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found CUDA installation: /usr/local/cuda, version 13.2
+ "/usr/lib/llvm-23/bin/clang-linker-wrapper" --host-triple=x86_64-pc-linux-gnu --wrapper-verbose --cuda-path=/usr/local/cuda --device-compiler=--cuda-path=/usr/local/cuda --linker-path=/usr/bin/ld -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -pie -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_097ec /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o -L/usr/local/cuda/lib64 -L/usr/lib/gcc/x86_64-linux-gnu/13 -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib64 -L/lib -L/usr/lib -L/usr/local/cuda/lib64/stubs -v CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o -lcudadevrt -lcudart_static -lrt -lpthread -ldl -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o /lib/x86_64-linux-gnu/crtn.o --verbose
+ "/usr/bin/ld" -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -pie -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_097ec /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o -L /usr/local/cuda/lib64 -L /usr/lib/gcc/x86_64-linux-gnu/13 -L /usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib64 -L /lib/x86_64-linux-gnu -L /lib/../lib64 -L /usr/lib/x86_64-linux-gnu -L /usr/lib64 -L /lib -L /usr/lib -L /usr/local/cuda/lib64/stubs -v CMakeFiles/cmTC_097ec.dir/CMakeCUDACompilerABI.cu.o -l cudadevrt -l cudart_static -l rt -l pthread -l dl -l stdc++ -l m -l gcc_s -l gcc -l c -l gcc_s -l gcc /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o /lib/x86_64-linux-gnu/crtn.o --verbose
+GNU ld (GNU Binutils for Ubuntu) 2.42

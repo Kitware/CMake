@@ -1,0 +1,4 @@
+libs=cudadevrt;cudart_static;rt;pthread;dl;stdc\+\+;m;gcc_s;gcc;c;gcc_s;gcc
+dirs=/usr/local/cuda/lib64;/usr/lib/gcc/x86_64-linux-gnu/13;/usr/lib64;/lib/x86_64-linux-gnu;/lib64;/usr/lib/x86_64-linux-gnu;/lib;/usr/lib;/usr/local/cuda/lib64/stubs
+library_arch=x86_64-linux-gnu
+linker_tool=/usr/bin/ld
