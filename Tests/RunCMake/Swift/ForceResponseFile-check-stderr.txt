@@ -1,0 +1,1 @@
+^(ninja: warning: ignoring jobserver: Dry-run mode \[\])?$

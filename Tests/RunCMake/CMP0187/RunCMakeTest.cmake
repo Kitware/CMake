@@ -6,7 +6,6 @@ block()
 
   if(RunCMake_GENERATOR MATCHES "Ninja.*")
     set(RunCMake_TEST_NO_CLEAN 1)
-    # -n: dry-run to avoid actually compiling, -v: verbose to capture executed command
     run_cmake_command(CMP0187-NEW-build ${CMAKE_COMMAND} --build .)
   endif()
 endblock()
@@ -17,7 +16,6 @@ block()
 
   if(RunCMake_GENERATOR MATCHES "Ninja.*")
     set(RunCMake_TEST_NO_CLEAN 1)
-    # -n: dry-run to avoid actually compiling, -v: verbose to capture executed command
     run_cmake_command(CMP0187-OLD-build ${CMAKE_COMMAND} --build .)
   endif()
 endblock()
@@ -28,7 +26,6 @@ block()
 
   if(RunCMake_GENERATOR MATCHES "Ninja.*")
     set(RunCMake_TEST_NO_CLEAN 1)
-    # -n: dry-run to avoid actually compiling, -v: verbose to capture executed command
     run_cmake_command(CMP0187-NEW-CMP0115-OLD-build ${CMAKE_COMMAND} --build .)
   endif()
 endblock()
