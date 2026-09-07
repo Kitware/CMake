@@ -42,7 +42,10 @@ std::string getPresetName(cmJSONState* state)
 {
   Json::Value const* preset = getPreset(state);
   if (preset && preset->isMember("name")) {
-    return preset->operator[]("name").asString();
+    Json::Value const& name = preset->operator[]("name");
+    if (name.isConvertibleTo(Json::ValueType::stringValue)) {
+      return name.asString();
+    }
   }
   return "";
 }
