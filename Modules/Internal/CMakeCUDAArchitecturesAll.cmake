@@ -12,6 +12,12 @@ function(cmake_cuda_architectures_all lang lang_var_)
     # Initial set based on CUDA 13.0.
     set(CMAKE_CUDA_ARCHITECTURES_ALL 75 80 86 87 88 89 90 100 103 110 120 121)
     set(CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR 75 80 90 100 110 120)
+
+    if((CMAKE_${lang}_COMPILER_ID STREQUAL "Clang" AND CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 23.0))
+      list(REMOVE_ITEM CMAKE_CUDA_ARCHITECTURES_ALL 110)
+      list(REMOVE_ITEM CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR 110)
+    endif()
+
   else()
     # Initial set based on CUDA 7.0.
     set(CMAKE_CUDA_ARCHITECTURES_ALL 20 21 30 35 37 50 52 53)

@@ -4,6 +4,13 @@
 
 #include "embedded_objs.h"
 
+#if defined(CUDA_VERSION) &&                                                  \
+  CUDA_VERSION >= 13000 // get version from cuda.h header (clang cuda)
+#  define CUDA_13_OR_GREATER
+#elif defined(__CUDACC_VER_MAJOR__) &&                                        \
+  __CUDACC_VER_MAJOR__ >= 13 // get version from nvcc compiler defines
+#  define CUDA_13_OR_GREATER
+#endif
 int main()
 {
   cuInit(0);
@@ -18,7 +25,7 @@ int main()
   cuDeviceGet(&device, 0);
 
   CUcontext context;
-#if defined(__CUDACC_VER_MAJOR__) && __CUDACC_VER_MAJOR__ >= 13
+#if defined(CUDA_13_OR_GREATER)
   CUctxCreateParams params = {};
   params.execAffinityParams = nullptr;
   params.numExecAffinityParams = 0;

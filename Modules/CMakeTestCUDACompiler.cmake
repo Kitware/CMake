@@ -54,6 +54,7 @@ endif()
 # any makefiles or projects.
 if(NOT CMAKE_CUDA_COMPILER_WORKS)
   PrintTestCompilerStatus("CUDA")
+  __TestCompiler_setTryCompileTargetType()
   string(CONCAT __TestCompiler_testCudaCompilerSource
     "#ifndef __CUDACC__\n"
     "# error \"The CMAKE_CUDA_COMPILER is set to an invalid CUDA compiler\"\n"
@@ -69,7 +70,7 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
     NO_CACHE
     OUTPUT_VARIABLE __CMAKE_CUDA_COMPILER_OUTPUT)
   unset(__TestCompiler_testCudaCompilerSource)
-
+  __TestCompiler_restoreTryCompileTargetType()
   if(NOT CMAKE_CUDA_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")
     string(REPLACE "\n" "\n  " _output "${__CMAKE_CUDA_COMPILER_OUTPUT}")

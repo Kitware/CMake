@@ -575,7 +575,7 @@
 
 .cuda13.2:
     extends: .cuda
-    image: "kitware/cmake:ci-cuda13.2-x86_64-2026-05-13"
+    image: "kitware/cmake:ci-cuda13.2-x86_64-2026-09-01"
     variables:
         CMAKE_ARCH: x86_64
 
@@ -584,6 +584,12 @@
     variables:
         CMAKE_CONFIGURATION: cuda13.2_nvidia
         CTEST_NO_WARNINGS_ALLOWED: 1
+
+.cuda13.2_clang:
+    extends: .cuda13.2
+    variables:
+        CMAKE_ARCH: x86_64
+        CMAKE_CONFIGURATION: cuda13.2_clang
 
 ### HIP builds
 

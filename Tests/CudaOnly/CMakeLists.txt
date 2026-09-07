@@ -13,7 +13,8 @@ add_cuda_test_macro(CudaOnly.EnableStandard CudaOnlyEnableStandard)
 add_cuda_test_macro(CudaOnly.ExportPTX CudaOnlyExportPTX)
 add_cuda_test_macro(CudaOnly.SharedRuntimePlusToolkit CudaOnlySharedRuntimePlusToolkit)
 add_cuda_test_macro(CudaOnly.StaticRuntimePlusToolkit CudaOnlyStaticRuntimePlusToolkit)
-if(NOT WIN32 OR NOT CMake_TEST_CUDA STREQUAL "Clang") # MSVC std lib needs C++14
+if(NOT WIN32 AND CMake_TEST_CUDA STREQUAL "NVIDIA")
+  # MSVC std lib, and newer clang needs C++14
   add_cuda_test_macro(CudaOnly.Standard98 CudaOnlyStandard98)
 endif()
 set(CudaOnly.Toolkit_BUILD_OPTIONS -DHAS_CUPTI:BOOL=${CMake_TEST_CUDA_CUPTI})
@@ -24,12 +25,13 @@ add_cuda_test_macro(CudaOnly.TryCompileTargetStatic CudaOnlyTryCompileTargetStat
 add_cuda_test_macro(CudaOnly.Unity CudaOnlyUnity)
 add_cuda_test_macro(CudaOnly.WithDefs CudaOnlyWithDefs)
 add_cuda_test_macro(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
-add_cuda_test_macro(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
 add_cuda_test_macro(CudaOnly.SeparateCompilation main/CudaOnlySeparateCompilation)
 add_cuda_test_macro(CudaOnly.SeparateCompilationPTX CudaOnlySeparateCompilationPTX)
 add_cuda_test_macro(CudaOnly.SeparateCompilationTargetObjects CudaOnlySeparateCompilationTargetObjects)
 
 if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
+  add_cuda_test_macro(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
+
   # Clang doesn't have flags for selecting the runtime.
   add_cuda_test_macro(CudaOnly.SharedRuntimeViaCUDAFlags CudaOnlySharedRuntimeViaCUDAFlags)
 
