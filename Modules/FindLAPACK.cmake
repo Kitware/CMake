@@ -36,13 +36,14 @@ This module defines the following variables:
   Boolean indicating whether the library implementing the LAPACK interface
   was found.
 ``LAPACK_LINKER_FLAGS``
-  Uncached list of required linker flags (excluding ``-l`` and ``-L``).
+  List of required linker flags, excluding ``-l`` and ``-L``,
+  to pass to :command:`target_link_options`.
 ``LAPACK_LIBRARIES``
-  Uncached list of libraries (using full path name) to link against to use
-  LAPACK.
+  List of libraries to link via :command:`target_link_libraries`
+  to use LAPACK.
 ``LAPACK95_LIBRARIES``
-  Uncached list of libraries (using full path name) to link against to use
-  LAPACK95.
+  List of libraries to link via :command:`target_link_libraries`
+  to use LAPACK95.
 ``LAPACK95_FOUND``
   Boolean indicating whether the library implementing the LAPACK95 interface
   was found.
