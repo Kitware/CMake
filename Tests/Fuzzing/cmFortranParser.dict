@@ -1,0 +1,36 @@
+# Fortran dependency scanner dictionary
+
+# Module dependency statements
+"module "
+"submodule "
+"end module"
+"use "
+"use, intrinsic ::"
+"only:"
+"include "
+"#include "
+
+# Submodule parent syntax
+"submodule ("
+")"
+":"
+
+# Preprocessor directives the scanner tracks
+"#define"
+"#undef"
+"#ifdef"
+"#ifndef"
+"#if defined"
+"#elif"
+"#else"
+"#endif"
+
+# Fixed-form and continuation punctuation
+"&"
+"!"
+"c "
+"*"
+"'"
+"\""
+";"
+"::"
