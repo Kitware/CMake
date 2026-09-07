@@ -65,6 +65,14 @@ at least one of the following:
   directory and no other :command:`project` calls between themselves and that
   common :command:`project` call.
 
+.. versionadded:: 4.5
+
+  Contents of ``XCODE_EMBED_<type>`` may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  Xcode shares one copy-files build phase across all configurations, so the
+  embedded set cannot vary by configuration.  A generator expression whose
+  result depends on the configuration is rejected with an error.
+
 See also :prop_tgt:`XCODE_EMBED_<type>_PATH`,
 :prop_tgt:`XCODE_EMBED_<type>_REMOVE_HEADERS_ON_COPY` and
 :prop_tgt:`XCODE_EMBED_<type>_CODE_SIGN_ON_COPY`.
