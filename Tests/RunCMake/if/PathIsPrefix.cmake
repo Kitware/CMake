@@ -1,4 +1,5 @@
 cmake_policy(SET CMP0222 NEW)
+cmake_policy(SET CMP0223 NEW)
 
 # The operator is an if() spelling of cmake_path(IS_PREFIX), so assert that
 # the two agree rather than repeating a table of expected values here.  What

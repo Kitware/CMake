@@ -964,6 +964,25 @@ bool GetNumericArguments(
   return true;
 }
 
+// CMP0223: an empty path used to be a prefix of every path.
+bool IsPrefixCMP0223(cmCMakePath const& prefix, cm::GenEx::Evaluation* eval)
+{
+  if (!prefix.IsEmpty()) {
+    return false;
+  }
+  cmLocalGenerator const* const lg = eval->Context.LG;
+  switch (lg->GetPolicyStatus(cmPolicies::CMP0223)) {
+    case cmPolicies::WARN:
+      lg->IssuePolicyWarning(cmPolicies::CMP0223, {}, {}, eval->Backtrace);
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      return true;
+    case cmPolicies::NEW:
+      break;
+  }
+  return false;
+}
+
 bool CheckPathParametersEx(cm::GenEx::Evaluation* eval,
                            GeneratorExpressionContent const* cnt,
                            cm::string_view option, std::size_t count,
@@ -1208,12 +1227,14 @@ static const struct PathNode : public cmGeneratorExpressionNode
             if (CheckPathParametersEx(
                   ev, cnt, normalize ? "IS_PREFIX,NORMALIZE"_s : "IS_PREFIX"_s,
                   args.size(), 2)) {
+              cmCMakePath prefix{ args[0] };
+              cmCMakePath value{ args[1] };
               if (normalize) {
-                return ToString(cmCMakePath{ args[0] }.Normal().IsPrefix(
-                  cmCMakePath{ args[1] }.Normal()));
+                prefix = prefix.Normal();
+                value = value.Normal();
               }
-              return ToString(
-                cmCMakePath{ args[0] }.IsPrefix(cmCMakePath{ args[1] }));
+              return ToString(prefix.IsPrefix(value) ||
+                              IsPrefixCMP0223(prefix, ev));
             }
             return std::string{};
           } },

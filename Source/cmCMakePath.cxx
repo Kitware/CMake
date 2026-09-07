@@ -83,6 +83,11 @@ cmCMakePath cmCMakePath::Absolute(cm::filesystem::path const& base) const
 
 bool cmCMakePath::IsPrefix(cmCMakePath const& path) const
 {
+  // An empty path is not a prefix of any path, including another empty path.
+  if (this->Path.empty()) {
+    return false;
+  }
+
   auto prefix_it = this->Path.begin();
   auto prefix_end = this->Path.end();
   auto path_it = path.Path.begin();

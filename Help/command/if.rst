@@ -459,6 +459,9 @@ Path Comparisons
   Normalize with :command:`cmake_path(NORMAL_PATH)` first if that must be
   rejected.
 
+  An empty prefix is not a prefix of any path.  See policy
+  :policy:`CMP0223`.
+
   Equivalent to :command:`cmake_path(IS_PREFIX)` and
   ``$<PATH:IS_PREFIX>`` without their ``NORMALIZE`` option.  See
   :command:`cmake_path(IS_PREFIX)` for more details.

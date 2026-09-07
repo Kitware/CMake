@@ -1236,6 +1236,12 @@ All paths are expected to be in cmake-style format.
   When the ``NORMALIZE`` option is specified, ``path`` and ``input`` are
   :ref:`normalized <Normalization>` before the check.
 
+  An empty ``path`` is not a prefix of any ``input``.
+
+  .. versionchanged:: 4.5
+    An empty ``path`` was previously a prefix of every ``input``.  See
+    policy :policy:`CMP0223`.
+
 .. _GenEx Path Decomposition:
 
 Path Decomposition
