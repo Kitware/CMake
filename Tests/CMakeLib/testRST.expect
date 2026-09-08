@@ -33,6 +33,9 @@ Inline cref ``Link_Text_<Placeholder>``.
 Inline link Link Dest.
 Inline link Link Text.
 Inline link Link Text <With \-escaped Brackets>.
+Inline link anon Link Dest.
+Inline link anon Link Text.
+Inline link anon Link Text <With \-escaped Brackets>.
 Inline literal ``__`` followed by inline link Link Text.
 Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
 

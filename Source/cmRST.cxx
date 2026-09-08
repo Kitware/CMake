@@ -40,7 +40,7 @@ cmRST::cmRST(std::string docroot)
               "cmake-workflow-option|cpack-option|ctest-option|"
               "ctest-dashboard-option"
               "):`(<*([^`<]|[^` \t]<)*)([ \t]+<[^`]*>)?`")
-  , InlineLink("`(<*([^`<]|[^` \t]<)*)([ \t]+<[^`]*>)?`_")
+  , InlineLink("`(<*([^`<]|[^` \t]<)*)([ \t]+<[^`]*>)?`__?")
   , InlineLiteral("``([^`]*)``")
   , Substitution("(^|[^A-Za-z0-9_])"
                  "((\\|[^| \t\r\n]([^|\r\n]*[^| \t\r\n])?\\|)(__|_|))"
