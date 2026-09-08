@@ -501,13 +501,19 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           set(BLAS_mkl_START_GROUP "")
           set(BLAS_mkl_END_GROUP "")
         endif()
-        # Switch to GNU Fortran support layer if needed (but not on Apple, where MKL does not provide it)
+        # Switch to GNU Fortran ABI regarding how functions return complex numbers and how characters are passed (but not on Apple, where MKL does not provide it).
         if(CMAKE_Fortran_COMPILER_LOADED AND (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" OR CMAKE_Fortran_COMPILER_ID STREQUAL "LCC") AND NOT APPLE)
             set(BLAS_mkl_INTFACE "gf")
+        else()
+            set(BLAS_mkl_INTFACE "intel")
+        endif()
+        # Switch to GNU libgomp ABI regarding the OpenMP runtime.
+        if(OpenMP_FOUND AND NOT OpenMP_iomp5_LIBRARY)
+            # Most OpenMP runtime libraries claim to support drop-in replacement of libgomp.
             set(BLAS_mkl_THREADING "gnu")
             set(BLAS_mkl_OMP "gomp")
         else()
-            set(BLAS_mkl_INTFACE "intel")
+            # Safe to select Intel OpenMP runtime when compiler doesn't directly enable OpenMP or the runtime found was already iomp5.
             set(BLAS_mkl_THREADING "intel")
             set(BLAS_mkl_OMP "iomp5")
         endif()
