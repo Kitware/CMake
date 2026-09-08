@@ -36,12 +36,13 @@ This module defines the following variables:
   Boolean indicating whether the library implementing the BLAS interface
   was found.
 ``BLAS_LINKER_FLAGS``
-  Uncached list of required linker flags (excluding ``-l`` and ``-L``).
+  List of required linker flags, excluding ``-l`` and ``-L``,
+  to pass to :command:`target_link_options`.
 ``BLAS_LIBRARIES``
-  Uncached list of libraries (using full path name) to link against
+  List of libraries to link via :command:`target_link_libraries`
   to use BLAS (may be empty if compiler implicitly links BLAS).
 ``BLAS95_LIBRARIES``
-  Uncached list of libraries (using full path name) to link against
+  List of libraries to link via :command:`target_link_libraries`
   to use BLAS95 interface.
 ``BLAS95_FOUND``
   Boolean indicating whether the library implementing the BLAS95 interface
