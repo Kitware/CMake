@@ -13,10 +13,12 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmCMakePresetsGraph.h"
 #include "cmCTestHandlerCommand.h"
 
 class cmExecutionStatus;
 class cmCTestTestHandler;
+class cmMakefile;
 
 class cmCTestTestCommand : public cmCTestHandlerCommand
 {
@@ -85,6 +87,19 @@ protected:
 
 private:
   std::string GetName() const override { return "ctest_test"; }
+
+  struct ResolvedTestPreset
+  {
+    std::string SourceDirectory;
+    std::string PresetsFile;
+    std::string EffectivePreset;
+    std::unique_ptr<cmCMakePresetsGraph> PresetsGraph;
+    cmCMakePresetsGraph::TestPreset const* ExpandedPreset = nullptr;
+  };
+
+  cm::optional<ResolvedTestPreset> ResolveTestPreset(
+    cmMakefile& mf, std::string const& presetArg,
+    std::string const& presetsFileArg, cmExecutionStatus& status) const;
 
   virtual std::unique_ptr<cmCTestTestHandler> InitializeActualHandler(
     HandlerArguments& arguments, cmExecutionStatus& status) const;
