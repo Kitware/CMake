@@ -4,6 +4,13 @@
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "cmake-dev",
+  // Name the workspace path explicitly rather than take the default a tool
+  // picks for itself, so that the path is the same under every tool and in
+  // the CI job of `.gitlab/ci/devcontainer-run.sh`, which mounts the source
+  // tree itself.  `create_user.sh` creates the directory and gives it to the
+  // container user.
+  "workspaceFolder": "/home/cmake-dev/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/cmake-dev/workspace,type=bind",
   "containerEnv": {
     "GITLAB_HOST": "gitlab.kitware.com"
   },
