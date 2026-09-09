@@ -261,7 +261,8 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       // If the test did not pass, reprint test name and error
       std::string output = this->GetTestPrefix(completed, total);
       std::string testName = this->TestProperties->Name;
-      int const maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+      size_t const maxTestNameWidth =
+        std::max<size_t>(this->CTest->GetMaxTestNameWidth(), testName.size());
       testName.resize(maxTestNameWidth + 4, '.');
 
       output += testName;
@@ -1041,8 +1042,9 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
                << indexStr.str();
   outputStream << " ";
 
-  int const maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
   std::string outname = this->TestProperties->Name + " ";
+  size_t const maxTestNameWidth =
+    std::max<size_t>(this->CTest->GetMaxTestNameWidth(), outname.size() - 1);
   outname.resize(maxTestNameWidth + 4, '.');
   outputStream << outname;
 

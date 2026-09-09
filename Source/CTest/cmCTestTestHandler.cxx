@@ -1351,15 +1351,15 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
 
 void cmCTestTestHandler::UpdateMaxTestNameWidth()
 {
-  std::string::size_type max = this->CTest->GetMaxTestNameWidth();
+  std::string::size_type max = this->CTest->GetLongestTestNameWidth();
   for (cmCTestTestProperties& p : this->TestList) {
     if (max < p.Name.size()) {
       max = p.Name.size();
     }
   }
   if (static_cast<std::string::size_type>(
-        this->CTest->GetMaxTestNameWidth()) != max) {
-    this->CTest->SetMaxTestNameWidth(static_cast<int>(max));
+        this->CTest->GetLongestTestNameWidth()) != max) {
+    this->CTest->SetLongestTestNameWidth(static_cast<int>(max));
   }
 }
 
