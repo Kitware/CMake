@@ -756,18 +756,26 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
       continue()
     endif()
 
+    # "-l:<file>" is GNU ld's exact-file syntax; keep the colon-bearing token so
+    # an unresolved lib still falls back to a linker-usable "-l:<file>".
+    if (_pkg_search MATCHES "^:(.+)$")
+      set(_pkg_find_names "${CMAKE_MATCH_1}")
+    else()
+      set(_pkg_find_names "${_pkg_search}")
+    endif()
+
     if(_search_paths)
         # Firstly search in -L paths
-        find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
-                     NAMES ${_pkg_search}
+        find_library(pkgcfg_lib_${_prefix}_${_pkg_find_names}
+                     NAMES ${_pkg_find_names}
                      HINTS ${_search_paths} NO_DEFAULT_PATH)
     endif()
-    find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
-                 NAMES ${_pkg_search}
+    find_library(pkgcfg_lib_${_prefix}_${_pkg_find_names}
+                 NAMES ${_pkg_find_names}
                  ${_find_opts})
-    mark_as_advanced(pkgcfg_lib_${_prefix}_${_pkg_search})
-    if(pkgcfg_lib_${_prefix}_${_pkg_search})
-      list(APPEND _libs "${pkgcfg_lib_${_prefix}_${_pkg_search}}")
+    mark_as_advanced(pkgcfg_lib_${_prefix}_${_pkg_find_names})
+    if(pkgcfg_lib_${_prefix}_${_pkg_find_names})
+      list(APPEND _libs "${pkgcfg_lib_${_prefix}_${_pkg_find_names}}")
     else()
       list(APPEND _libs ${_pkg_search})
     endif()
