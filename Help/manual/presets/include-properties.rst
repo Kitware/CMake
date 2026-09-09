@@ -8,8 +8,8 @@
   Equivalent to passing :ctest-option:`--tests-regex` on the
   command line. This field supports `macro expansion`_.
 
-  CMake regex syntax is described under
-  :ref:`string(REGEX) <Regex Specification>`.
+  See the :ref:`CMake Language Regex Specification` for the
+  regex syntax.
 
 .. _`CMakePresets.testPresets.filter.include.label`:
 

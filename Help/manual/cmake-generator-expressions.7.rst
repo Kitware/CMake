@@ -444,8 +444,8 @@ String Queries
   ``ALL``
     Match as many times as possible and return the matches as a list.
 
-  See the :ref:`Regular expressions specification <Regex Specification>` for
-  the syntax of the ``regular_expression`` parameter.
+  See the :ref:`CMake Language Regex Specification` for the syntax of the
+  ``regular_expression`` parameter.
 
 .. _`String Generating Generator Expressions`:
 

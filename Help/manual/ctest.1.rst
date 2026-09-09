@@ -274,8 +274,8 @@ The options for running tests are:
 
 .. option:: -L <regex>, --label-regex <regex>
 
- Run tests with labels matching regular expression as described under
- :ref:`string(REGEX) <Regex Specification>`.
+ Run tests with labels matching regular expression as described in the
+ :ref:`CMake Language Regex Specification`.
 
  This option tells CTest to run only the tests whose labels match the
  given regular expression.  When more than one ``-L`` option is given,

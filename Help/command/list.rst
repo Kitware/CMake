@@ -135,8 +135,8 @@ Modification
 
         list(FILTER <list> <INCLUDE|EXCLUDE> REGEX <regular_expression>)
 
-      For more information on regular expressions look under
-      :ref:`string(REGEX) <Regex Specification>`.
+      For more information on regular expressions, see the
+      :ref:`CMake Language Regex Specification`.
 
     ``PREDICATE``
       Specify a user-defined :command:`function` as a predicate.

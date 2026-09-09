@@ -114,7 +114,7 @@ Reading
 
     ``REGEX <regex>``
       Consider only strings that match the given regular expression,
-      as described under :ref:`string(REGEX) <Regex Specification>`.
+      as described in the :ref:`CMake Language Regex Specification`.
 
       .. versionchanged:: 3.29
         Capture groups from the last match in the file are stored in

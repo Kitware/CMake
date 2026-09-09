@@ -590,8 +590,8 @@ Printing Targets
 
   ``REGEX <regex>``
     Only list targets whose name matches the given
-    :ref:`regular expression <Regex Specification>`.  If no target matches,
-    a warning is issued.
+    :ref:`regular expression <CMake Language Regex Specification>`.
+    If no target matches, a warning is issued.
 
   ``IGNORE_CASE``
     Match the ``REGEX`` case-insensitively.  Only valid with ``REGEX``.
@@ -646,10 +646,10 @@ Printing Variables
 
     ``NAME_REGEX <name-regex>``
       Print only variables whose name matches the given
-      :ref:`regular expression <Regex Specification>`.
+      :ref:`regular expression <CMake Language Regex Specification>`.
     ``VALUE_REGEX <value-regex>``
       Print only variables whose value matches the given
-      :ref:`regular expression <Regex Specification>`.
+      :ref:`regular expression <CMake Language Regex Specification>`.
     ``IGNORE_CASE``
       Lower-case both the pattern and the candidate string before matching,
       so ``NAME_REGEX`` and ``VALUE_REGEX`` match case-insensitively.
