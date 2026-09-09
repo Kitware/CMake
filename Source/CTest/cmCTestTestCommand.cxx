@@ -2,8 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestTestCommand.h"
 
+#include <cassert>
 #include <chrono>
 #include <cstdlib>
+#include <map>
 #include <ratio>
 #include <sstream>
 #include <string>
@@ -105,13 +107,49 @@ cmCTestTestCommand::ResolveTestPreset(cmMakefile& mf,
   return cm::optional<ResolvedTestPreset>(std::move(resolved));
 }
 
+bool cmCTestTestCommand::ExecuteHandlerCommand(TestArguments& args,
+                                               cmExecutionStatus& status) const
+{
+  cmMakefile& mf = status.GetMakefile();
+
+  // Resolve the preset once here (rather than letting InitializeHandler()
+  // resolve it again) so its Environment can be applied for the duration of
+  // the whole test run, without parsing the presets file (and emitting errors,
+  // etc.) more than once.
+  this->CachedPresetResolution.emplace(
+    ResolveTestPreset(mf, args.Preset, args.PresetsFile, status));
+
+  cmSystemTools::SaveRestoreEnvironment restoreEnv;
+  if (*this->CachedPresetResolution &&
+      (*this->CachedPresetResolution)->ExpandedPreset) {
+    for (auto const& var :
+         (*this->CachedPresetResolution)->ExpandedPreset->Environment) {
+      if (var.second) {
+        cmSystemTools::PutEnv(cmStrCat(var.first, '=', *var.second));
+      }
+    }
+  }
+
+  // Special case for CTest environment variables specified in a preset, which
+  // are handled by cmCTest much earlier than here, and would otherwise be
+  // ignored.
+  if (!this->CTest->UpdateStateFromEnvironment()) {
+    return false;
+  }
+
+  return cmCTestHandlerCommand::ExecuteHandlerCommand(args, status);
+}
+
 std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
   HandlerArguments& arguments, cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<TestArguments&>(arguments);
-  auto resolvedPreset =
-    ResolveTestPreset(mf, args.Preset, args.PresetsFile, status);
+
+  assert(this->CachedPresetResolution);
+  cm::optional<ResolvedTestPreset> resolvedPreset =
+    std::move(*this->CachedPresetResolution);
+  this->CachedPresetResolution.reset();
   if (!resolvedPreset) {
     return nullptr;
   }

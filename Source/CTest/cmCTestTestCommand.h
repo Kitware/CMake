@@ -25,6 +25,17 @@ class cmCTestTestCommand : public cmCTestHandlerCommand
 public:
   using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
+  cmCTestTestCommand(cmCTestTestCommand const& other)
+    : cmCTestHandlerCommand(other)
+  {
+  }
+
+  cmCTestTestCommand& operator=(cmCTestTestCommand const& other)
+  {
+    cmCTestHandlerCommand::operator=(other);
+    return *this;
+  }
+
 protected:
   struct TestArguments : HandlerArguments
   {
@@ -53,6 +64,9 @@ protected:
     std::string Preset;
     std::string PresetsFile;
   };
+
+  bool ExecuteHandlerCommand(TestArguments& args,
+                             cmExecutionStatus& status) const;
 
   template <typename Args>
   static auto MakeTestParser() -> cmArgumentParser<Args>
@@ -100,6 +114,12 @@ private:
   cm::optional<ResolvedTestPreset> ResolveTestPreset(
     cmMakefile& mf, std::string const& presetArg,
     std::string const& presetsFileArg, cmExecutionStatus& status) const;
+
+  // Set by ExecuteHandlerCommand() (resolves the preset once, up
+  // front) and consumed by InitializeHandler() to avoid parsing the presets
+  // file (and emitting error messages, etc.) more than once.
+  mutable cm::optional<cm::optional<ResolvedTestPreset>>
+    CachedPresetResolution;
 
   virtual std::unique_ptr<cmCTestTestHandler> InitializeActualHandler(
     HandlerArguments& arguments, cmExecutionStatus& status) const;
