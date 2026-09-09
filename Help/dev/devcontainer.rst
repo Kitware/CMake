@@ -217,40 +217,94 @@ Local Customization
 ===================
 
 The container is meant to be an unconstrained space that each developer may
-adapt.  Two optional scripts, if present, run while the container image is
-built:
+adapt.  `.devcontainer/run-hooks.sh`_ runs an optional script, if one is
+present, at each of five points in the container's life:
 
-``.devcontainer/hooks/root.sh``
-  Runs as ``root``, e.g. to install additional packages.
+``.devcontainer/hooks/initialize.sh``
+  Runs on the host, before the container is created or started, e.g. to
+  prepare something the container goes on to use.
 
-``.devcontainer/hooks/user.sh``
-  Runs as the unprivileged container user, e.g. to populate a shell
-  configuration file.
+``.devcontainer/hooks/build.sh``
+  Runs while the image is built, e.g. to install additional packages.
 
-Each runs in the home directory of the user it runs as, with ``HOME`` naming
-that directory.
+``.devcontainer/hooks/post-create.sh``
+  Runs once, when the container is created, and unlike ``build.sh`` runs with
+  the source tree mounted, e.g. to prepare something in the work tree itself.
+
+``.devcontainer/hooks/post-start.sh``
+  Runs each time the container starts, e.g. to start a background service.
+  Note that a container may be started by a tool that never attaches to it.
+
+``.devcontainer/hooks/post-attach.sh``
+  Runs each time a tool attaches to the container, concurrently with the
+  report described under `GitLab Authentication`_ above rather than before or
+  after it, so expect whatever it prints to interleave with that report.
+
+``build.sh`` runs as the container user, in that user's home directory, rather
+than as ``root``; reach for ``sudo`` for whatever needs privilege.  One hook
+that can be either user is simpler to write against than two that each can be
+one.  Bear in mind that ``sudo`` resets ``HOME`` to ``root``'s, so pass ``-H``
+or ``-E`` where a command cares which home it writes to.  The three
+container hooks that follow it likewise run as the container user, in the
+workspace directory; ``post-start.sh`` and ``post-attach.sh`` run again on
+every start and attach, so write those two to be repeatable.
+
+Each hook is given ``CMAKE_DEVCONTAINER_HOOKS_DIR``, naming the ``hooks``
+directory itself, so that a hook needing a file it brought along need not work
+out where it was installed.  Every hook but ``build.sh`` is given
+``CMAKE_DEVCONTAINER_STATE_DIR`` as well, a directory to keep runtime state
+in: it is part of the source tree, bind-mounted from the host, so what a hook
+leaves there outlives the container.  It sits beside the ``hooks`` directory
+rather than inside it, because the two are worth different things: hooks are
+written by hand and worth carrying to another clone, while state is written by
+whatever they start and worth carrying nowhere.
+`.devcontainer/.dockerignore`_ also keeps it out of the image build context,
+which state written as ``root`` would otherwise make unreadable.  ``build.sh``
+is given neither a state directory nor a writable ``hooks`` directory, because
+a build keeps nothing a later phase could read back: whatever it writes, it
+writes into the image.
+
+A failing ``build.sh`` fails the image build, because an image whose
+customizations did not apply is quietly wrong.  The other three are reported
+and otherwise ignored: they run against a container that already exists, where
+the same strictness would turn a typo into an environment its author can no
+longer open in order to fix it.
 
 The whole ``hooks`` directory is ignored by Git, apart from its
 ``.gitignore``, so customizations never appear in a commit, may bring along
 whatever other files they need, and are preserved across updates to the
-tracked container definition.  For example, to add a package and a shell
-alias:
+tracked container definition.  For example, to add a package, a shell alias,
+and a service that runs for as long as the container does:
 
 .. code-block:: console
 
-  $ cat > .devcontainer/hooks/root.sh <<'EOF'
-  apt-get update && apt-get install -y tmux
-  EOF
-  $ cat > .devcontainer/hooks/user.sh <<'EOF'
+  $ cat > .devcontainer/hooks/build.sh <<'EOF'
+  sudo apt-get update && sudo apt-get install -y tmux
   echo "alias b='cmake --build build'" >> ~/.bashrc
   EOF
+  $ cat > .devcontainer/hooks/post-start.sh <<'EOF'
+  pidof my-service > /dev/null ||
+      my-service --daemon --state "$CMAKE_DEVCONTAINER_STATE_DIR/my-service"
+  EOF
 
-Rebuild the container to apply them, e.g. with the
-``Dev Containers: Rebuild Container`` command in Visual Studio Code.
+Rebuild the container to apply a new or changed ``build.sh``, e.g. with the
+``Dev Containers: Rebuild Container`` command in Visual Studio Code.  The
+other three hooks are read afresh each time they run.
 
-Larger or longer-lived changes may of course be made by editing
-`.devcontainer/Dockerfile`_ or `.devcontainer/devcontainer.json`_ directly,
-but take care not to commit them accidentally.
+``initialize.sh`` is the one hook that runs outside the container, so it is
+also the one that depends on the host: it needs ``sh`` on the ``PATH`` there.
+That is a given on a Unix host and, on Windows, comes with Git for Windows.
 
+Some things a container needs must be settled before it exists, and so cannot
+come from a hook: added capabilities, extra mounts, `Dev Container Features`_,
+and arguments to the container engine all belong to
+`.devcontainer/devcontainer.json`_.  Those, and any larger or longer-lived
+change, may of course be made by editing that file or
+`.devcontainer/Dockerfile`_ directly, but take care not to commit them
+accidentally.
+
+.. _`.devcontainer/run-hooks.sh`: ../../.devcontainer/run-hooks.sh
+.. _`.devcontainer/.dockerignore`: ../../.devcontainer/.dockerignore
+.. _`Dev Container Features`: https://containers.dev/features
 .. _`.devcontainer/Dockerfile`: ../../.devcontainer/Dockerfile
 .. _`.devcontainer/devcontainer.json`: ../../.devcontainer/devcontainer.json

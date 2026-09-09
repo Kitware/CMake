@@ -30,7 +30,43 @@
       "target": "/home/cmake-dev/.config/glab-cli"
     }
   ],
-  "postAttachCommand": "${containerWorkspaceFolder}/.devcontainer/setup-status.sh",
+  // Run the optional local customization hooks.  Each phase is a no-op unless
+  // the developer has written that hook.  See `Help/dev/devcontainer.rst`.
+  //
+  // Each is written as a named entry, the form that runs entries concurrently
+  // and says which one is speaking.  Only `postAttachCommand` has two, but
+  // naming the hook everywhere keeps its output labeled the same way, and
+  // leaves room for a second entry beside it.
+  //
+  // `initializeCommand` runs on the host, so unlike the others it needs a
+  // POSIX shell there; naming `sh` explicitly, in the form that starts no
+  // shell of its own, is what makes that work outside a Unix host.
+  "initializeCommand": {
+    "hooks": [
+      "sh",
+      "${localWorkspaceFolder}/.devcontainer/run-hooks.sh",
+      "initialize"
+    ]
+  },
+  "postCreateCommand": {
+    "hooks": [
+      "${containerWorkspaceFolder}/.devcontainer/run-hooks.sh",
+      "post-create"
+    ]
+  },
+  "postStartCommand": {
+    "hooks": [
+      "${containerWorkspaceFolder}/.devcontainer/run-hooks.sh",
+      "post-start"
+    ]
+  },
+  "postAttachCommand": {
+    "setup-status": ["${containerWorkspaceFolder}/.devcontainer/setup-status.sh"],
+    "hooks": [
+      "${containerWorkspaceFolder}/.devcontainer/run-hooks.sh",
+      "post-attach"
+    ]
+  },
   "customizations": {
     "vscode": {
       "extensions": [

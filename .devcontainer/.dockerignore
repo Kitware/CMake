@@ -1,0 +1,7 @@
+# The image build sends this directory to the container engine as its build
+# context.  The state hooks keep at run time is of no use to a build and,
+# having been written inside the container, may well be owned by a user the
+# build cannot even read it as.  Leave it behind.
+#
+# See `Help/dev/devcontainer.rst`.
+state/

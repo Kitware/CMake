@@ -61,24 +61,23 @@ RUN --mount=type=bind,source=install_glab.sh,target=/root/install_glab.sh \
 RUN --mount=type=bind,source=create_user.sh,target=/root/create_user.sh \
     sh /root/create_user.sh ${USERNAME} ${USER_UID} ${USER_GID}
 
-# Run the optional local customization scripts.  They are ignored by Git so
-# that developers may customize the container without modifying tracked files
-# or risking that the customizations end up in a commit.  See
-# `Help/dev/devcontainer.rst`.
+# Run the optional local customization hook for the build, if the developer
+# has written one.  It is ignored by Git so that developers may customize the
+# container without modifying tracked files or risking that the customizations
+# end up in a commit.  See `Help/dev/devcontainer.rst`.
+#
+# It runs as the container user, who may `sudo`, rather than as `root`: one
+# hook that can reach either is simpler to write against than two that each
+# reach one.  Mount it beside the dispatcher that runs it, under the same
+# parent it has in the source tree, so that the dispatcher locates it here the
+# same way it does when a container lifecycle command runs it.
 #
 # `USER` sets neither the working directory nor `HOME`, and BuildKit passes a
 # `RUN` only the environment the image records, which names just `PATH`.  Say
-# where each hook runs and whose home it writes to, so that a hook may spell a
-# path relative to either.
-WORKDIR /root
-RUN --mount=type=bind,source=hooks,target=/opt/cmake-dev-hooks \
-    if test -f /opt/cmake-dev-hooks/root.sh; then \
-        HOME=/root sh -e /opt/cmake-dev-hooks/root.sh; \
-    fi
-
+# where the hook runs and whose home it writes to, so that it may spell a path
+# relative to either.
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
-RUN --mount=type=bind,source=hooks,target=/opt/cmake-dev-hooks \
-    if test -f /opt/cmake-dev-hooks/user.sh; then \
-        HOME=/home/${USERNAME} sh -e /opt/cmake-dev-hooks/user.sh; \
-    fi
+RUN --mount=type=bind,source=run-hooks.sh,target=/opt/cmake-dev/run-hooks.sh \
+    --mount=type=bind,source=hooks,target=/opt/cmake-dev/hooks \
+    HOME=/home/${USERNAME} sh /opt/cmake-dev/run-hooks.sh build
