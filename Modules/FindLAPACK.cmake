@@ -751,15 +751,15 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       list(APPEND _lapack_nvpl_threads "_seq")
     endif()
 
-    find_package(nvpl QUIET)
-    if(nvpl_FOUND)
+    find_package(nvpl QUIET COMPONENTS lapack)
+    if(nvpl_lapack_FOUND)
       foreach(_nvpl_thread IN LISTS _lapack_nvpl_threads)
         foreach(_nvpl_int IN LISTS _lapack_nvpl_ints)
 
           set(_lapack_lib "nvpl::lapack${_nvpl_int}${_nvpl_thread}")
 
           if(TARGET ${_lapack_lib})
-            set(LAPACK_LIBRARIES ${_lapack_lib})
+            get_target_property(LAPACK_LIBRARIES ${_lapack_lib} IMPORTED_LOCATION_RELEASE)
             break()
           endif()
 

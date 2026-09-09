@@ -1387,15 +1387,15 @@ if(BLA_VENDOR STREQUAL "NVPL" OR BLA_VENDOR STREQUAL "All")
   endif()
 
   if(NOT BLAS_LIBRARIES)
-    find_package(nvpl QUIET)
-    if(nvpl_FOUND)
+    find_package(nvpl QUIET COMPONENTS blas)
+    if(nvpl_blas_FOUND)
       foreach(_nvpl_thread IN LISTS _blas_nvpl_threads)
         foreach(_nvpl_int IN LISTS _blas_nvpl_ints)
 
           set(_blas_lib "nvpl::blas${_nvpl_int}${_nvpl_thread}")
 
           if(TARGET ${_blas_lib})
-            set(BLAS_LIBRARIES ${_blas_lib})
+            get_target_property(BLAS_LIBRARIES ${_blas_lib} IMPORTED_LOCATION_RELEASE)
             break()
           endif()
 
