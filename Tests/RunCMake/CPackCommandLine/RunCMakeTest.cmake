@@ -7,6 +7,7 @@ set(CPACK_PACKAGE_VERSION "1")
 ]])
 set(RunCMake_TEST_NO_CLEAN 1)
 run_cmake_command(NotAGenerator ${CMAKE_CPACK_COMMAND} -G NotAGenerator)
+run_cmake_command(UnknownArgumentDidYouMean ${CMAKE_CPACK_COMMAND} --verbos)
 unset(RunCMake_TEST_NO_CLEAN)
 
 function(run_MultiConfig)

@@ -265,6 +265,11 @@ int main(int argc, char const* const* argv)
     }
     if (!matched && cmHasPrefix(arg, '-')) {
       std::string error = cmStrCat("Unknown argument: ", arg);
+      std::string const suggestion =
+        cmFindClosestCommandLineArgument(arg, arguments);
+      if (!suggestion.empty()) {
+        error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+      }
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR, error << '\n');
       parsed = false;
     }
