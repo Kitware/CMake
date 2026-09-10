@@ -670,6 +670,8 @@ t:cuda13.2-clang:
         - .linux_x86_64_tags_cuda_arch_75
         - .rules
         - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:hip6.3-nvidia:
     extends:
