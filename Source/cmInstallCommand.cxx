@@ -62,6 +62,65 @@
 
 namespace {
 
+struct InstallCategoryFlags
+{
+  bool Archive = false;
+  bool Library = false;
+  bool Namelink = false;
+  bool Importlink = false;
+  bool Runtime = false;
+  bool Object = false;
+  bool Framework = false;
+  bool Bundle = false;
+  bool PrivateHeader = false;
+  bool PublicHeader = false;
+  bool Resource = false;
+  std::vector<bool> FileSet;
+  bool CxxModuleBmi = false;
+};
+
+struct InstallContext
+{
+  std::unique_ptr<cmInstallCommandArguments> GenericArgs;
+  std::unique_ptr<cmInstallCommandArguments> ArchiveArgs;
+  std::unique_ptr<cmInstallCommandArguments> LibraryArgs;
+  std::unique_ptr<cmInstallCommandArguments> RuntimeArgs;
+  std::unique_ptr<cmInstallCommandArguments> ObjectArgs;
+  std::unique_ptr<cmInstallCommandArguments> FrameworkArgs;
+  std::unique_ptr<cmInstallCommandArguments> BundleArgs;
+  std::unique_ptr<cmInstallCommandArguments> PrivateHeaderArgs;
+  std::unique_ptr<cmInstallCommandArguments> PublicHeaderArgs;
+  std::unique_ptr<cmInstallCommandArguments> ResourceArgs;
+  std::unique_ptr<cmInstallCommandArguments> CxxModuleBmiArgs;
+  cmInstallCommandIncludesArgument IncludesArgs;
+  std::vector<cmInstallCommandFileSetArguments> FileSetArgs;
+
+  cmInstallTargetGenerator::NamelinkModeType NamelinkMode =
+    cmInstallTargetGenerator::NamelinkModeNone;
+  cmInstallTargetGenerator::NamelinkModeType ImportlinkMode =
+    cmInstallTargetGenerator::NamelinkModeNone;
+  std::string Exports;
+  cmInstallRuntimeDependencySet* RuntimeDependencySet = nullptr;
+
+  void BindGenericArguments()
+  {
+    cmInstallCommandArguments* generic = this->GenericArgs.get();
+    this->ArchiveArgs->SetGenericArguments(generic);
+    this->LibraryArgs->SetGenericArguments(generic);
+    this->RuntimeArgs->SetGenericArguments(generic);
+    this->ObjectArgs->SetGenericArguments(generic);
+    this->FrameworkArgs->SetGenericArguments(generic);
+    this->BundleArgs->SetGenericArguments(generic);
+    this->PrivateHeaderArgs->SetGenericArguments(generic);
+    this->PublicHeaderArgs->SetGenericArguments(generic);
+    this->ResourceArgs->SetGenericArguments(generic);
+    this->CxxModuleBmiArgs->SetGenericArguments(generic);
+    for (auto& fileSetArg : this->FileSetArgs) {
+      fileSetArg.SetGenericArguments(generic);
+    }
+  }
+};
+
 struct RuntimeDependenciesArgs
 {
   ArgumentParser::MaybeEmpty<std::vector<std::string>> Directories;
@@ -139,10 +198,18 @@ public:
   std::string DefaultComponentName;
 };
 
+std::vector<std::string> const& SelectConfigurations(
+  cmInstallCommandArguments const& args,
+  cm::optional<std::vector<std::string>> const& configurations)
+{
+  return configurations ? *configurations : args.GetConfigurations();
+}
+
 std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
   cmTarget& target, cmInstallCommandArguments const& args, bool impLib,
   cmDiagnosticContext context, std::string const& destination,
-  bool forceOpt = false, bool namelink = false)
+  bool forceOpt = false, bool namelink = false,
+  cm::optional<std::vector<std::string>> const& configurations = {})
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(target.GetMakefile());
@@ -151,53 +218,49 @@ std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
     namelink ? args.GetNamelinkComponent() : args.GetComponent();
   auto g = cm::make_unique<cmInstallTargetGenerator>(
     target.GetName(), destination, impLib, args.GetPermissions(),
-    args.GetConfigurations(), component, message, args.GetExcludeFromAll(),
-    args.GetOptional() || forceOpt, std::move(context));
+    SelectConfigurations(args, configurations), component, message,
+    args.GetExcludeFromAll(), args.GetOptional() || forceOpt,
+    std::move(context));
   target.AddInstallGenerator(g.get());
   return g;
 }
 
 std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
   cmTarget& target, cmInstallCommandArguments const& args, bool impLib,
-  cmDiagnosticContext context, bool forceOpt = false, bool namelink = false)
+  cmDiagnosticContext context, bool forceOpt = false, bool namelink = false,
+  cm::optional<std::vector<std::string>> const& configurations = {})
 {
   return CreateInstallTargetGenerator(target, args, impLib, std::move(context),
                                       args.GetDestination(), forceOpt,
-                                      namelink);
+                                      namelink, configurations);
 }
 
 std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
   cmMakefile* mf, std::vector<std::string> const& absFiles,
   cmInstallCommandArguments const& args, bool programs,
-  std::string const& destination)
+  std::string const& destination,
+  cm::optional<std::vector<std::string>> const& configurations = {})
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(mf);
   return cm::make_unique<cmInstallFilesGenerator>(
     absFiles, destination, programs, args.GetPermissions(),
-    args.GetConfigurations(), args.GetComponent(), message,
+    SelectConfigurations(args, configurations), args.GetComponent(), message,
     args.GetExcludeFromAll(), args.GetRename(), args.GetOptional(),
     cmInstallGenerator::CaptureContext(mf));
 }
 
-std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
-  cmMakefile* mf, std::vector<std::string> const& absFiles,
-  cmInstallCommandArguments const& args, bool programs)
-{
-  return CreateInstallFilesGenerator(mf, absFiles, args, programs,
-                                     args.GetDestination());
-}
-
 std::unique_ptr<cmInstallFileSetGenerator> CreateInstallFileSetGenerator(
   Helper& helper, cmTarget& target,
-  cmInstallCommandFileSetArguments const& args)
+  cmInstallCommandFileSetArguments const& args,
+  cm::optional<std::vector<std::string>> const& configurations = {})
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);
   return cm::make_unique<cmInstallFileSetGenerator>(
     target.GetName(), args.GetFileSet(), args.GetDestination(),
-    args.GetPermissions(), args.GetConfigurations(), args.GetComponent(),
-    message, args.GetExcludeFromAll(), args.GetOptional(),
+    args.GetPermissions(), SelectConfigurations(args, configurations),
+    args.GetComponent(), message, args.GetExcludeFromAll(), args.GetOptional(),
     helper.CaptureContext());
 }
 
@@ -298,6 +361,535 @@ bool AddBundleExecutable(Helper& helper,
       "A runtime dependency set may only have one bundle executable.");
     return false;
   }
+  return true;
+}
+
+void RegisterInstallComponents(cmMakefile* makefile, InstallContext const& ctx,
+                               InstallCategoryFlags const& flags)
+{
+  cmGlobalGenerator* gg = makefile->GetGlobalGenerator();
+
+  // Tell the global generator about any installation component names
+  // specified
+  if (flags.Archive) {
+    gg->AddInstallComponent(ctx.ArchiveArgs->GetComponent());
+  }
+  if (flags.Library) {
+    gg->AddInstallComponent(ctx.LibraryArgs->GetComponent());
+  }
+  if (flags.Namelink) {
+    gg->AddInstallComponent(ctx.LibraryArgs->GetNamelinkComponent());
+  }
+  if (flags.Importlink) {
+    gg->AddInstallComponent(ctx.ArchiveArgs->GetNamelinkComponent());
+  }
+  if (flags.Runtime) {
+    gg->AddInstallComponent(ctx.RuntimeArgs->GetComponent());
+  }
+  if (flags.Object) {
+    gg->AddInstallComponent(ctx.ObjectArgs->GetComponent());
+  }
+  if (flags.Framework) {
+    gg->AddInstallComponent(ctx.FrameworkArgs->GetComponent());
+  }
+  if (flags.Bundle) {
+    gg->AddInstallComponent(ctx.BundleArgs->GetComponent());
+  }
+  if (flags.PrivateHeader) {
+    gg->AddInstallComponent(ctx.PrivateHeaderArgs->GetComponent());
+  }
+  if (flags.PublicHeader) {
+    gg->AddInstallComponent(ctx.PublicHeaderArgs->GetComponent());
+  }
+  if (flags.Resource) {
+    gg->AddInstallComponent(ctx.ResourceArgs->GetComponent());
+  }
+  for (std::size_t i = 0; i < ctx.FileSetArgs.size(); ++i) {
+    if (flags.FileSet[i]) {
+      gg->AddInstallComponent(ctx.FileSetArgs[i].GetComponent());
+    }
+  }
+  if (flags.CxxModuleBmi) {
+    gg->AddInstallComponent(ctx.CxxModuleBmiArgs->GetComponent());
+  }
+}
+
+bool CreateInstallGeneratorsForTarget(
+  Helper& helper, cmTarget& target, InstallContext const& ctx,
+  InstallCategoryFlags& flags, std::string& error,
+  cm::optional<std::vector<std::string>> configurations = {})
+{
+  cmInstallCommandArguments const& archiveArgs = *ctx.ArchiveArgs;
+  cmInstallCommandArguments const& libraryArgs = *ctx.LibraryArgs;
+  cmInstallCommandArguments const& runtimeArgs = *ctx.RuntimeArgs;
+  cmInstallCommandArguments const& objectArgs = *ctx.ObjectArgs;
+  cmInstallCommandArguments const& frameworkArgs = *ctx.FrameworkArgs;
+  cmInstallCommandArguments const& bundleArgs = *ctx.BundleArgs;
+  cmInstallCommandArguments const& privateHeaderArgs = *ctx.PrivateHeaderArgs;
+  cmInstallCommandArguments const& publicHeaderArgs = *ctx.PublicHeaderArgs;
+  cmInstallCommandArguments const& resourceArgs = *ctx.ResourceArgs;
+  cmInstallCommandArguments const& cxxModuleBmiArgs = *ctx.CxxModuleBmiArgs;
+  cmInstallCommandIncludesArgument const& includesArgs = ctx.IncludesArgs;
+  std::vector<cmInstallCommandFileSetArguments> const& fileSetArgs =
+    ctx.FileSetArgs;
+  cmInstallTargetGenerator::NamelinkModeType const namelinkMode =
+    ctx.NamelinkMode;
+  cmInstallTargetGenerator::NamelinkModeType const importlinkMode =
+    ctx.ImportlinkMode;
+  std::string const& exports = ctx.Exports;
+  cmInstallRuntimeDependencySet* runtimeDependencySet =
+    ctx.RuntimeDependencySet;
+
+  auto fail = [&](std::string const& msg) -> bool {
+    error = msg;
+    helper.SetError(msg);
+    return false;
+  };
+
+  std::unique_ptr<cmInstallTargetGenerator> archiveGenerator;
+  std::unique_ptr<cmInstallTargetGenerator> libraryGenerator;
+  std::unique_ptr<cmInstallTargetGenerator> namelinkGenerator;
+  std::unique_ptr<cmInstallTargetGenerator> importlinkGenerator;
+  std::unique_ptr<cmInstallTargetGenerator> runtimeGenerator;
+  std::unique_ptr<cmInstallTargetGenerator> objectGenerator;
+  std::unique_ptr<cmInstallTargetGenerator> frameworkGenerator;
+  std::unique_ptr<cmInstallTargetGenerator> bundleGenerator;
+  std::unique_ptr<cmInstallFilesGenerator> privateHeaderGenerator;
+  std::unique_ptr<cmInstallFilesGenerator> publicHeaderGenerator;
+  std::unique_ptr<cmInstallFilesGenerator> resourceGenerator;
+  std::vector<std::unique_ptr<cmInstallFileSetGenerator>> fileSetGenerators;
+  std::unique_ptr<cmInstallCxxModuleBmiGenerator> cxxModuleBmiGenerator;
+
+  // Avoid selecting default destinations for PUBLIC_HEADER and
+  // PRIVATE_HEADER if any artifacts are specified.
+  bool artifactsSpecified = false;
+
+  // Track whether this is a namelink-only rule.
+  bool namelinkOnly = false;
+
+  auto addTargetExport = [&]() -> bool {
+    // Add this install rule to an export if one was specified.
+    if (!exports.empty()) {
+      auto interfaceFileSets = target.GetAllInterfaceFileSets();
+      if (std::any_of(
+            interfaceFileSets.begin(), interfaceFileSets.end(),
+            [&](std::string const& name) -> bool {
+              return !std::any_of(
+                fileSetArgs.begin(), fileSetArgs.end(),
+                [&](cmInstallCommandFileSetArguments const& fileSetArg)
+                  -> bool { return fileSetArg.GetFileSet() == name; });
+            })) {
+        return fail(cmStrCat("TARGETS target ", target.GetName(),
+                             " is exported but not all of its interface "
+                             "file sets are installed"));
+      }
+
+      auto te = cm::make_unique<cmTargetExport>();
+      te->TargetName = target.GetName();
+      te->ArchiveGenerator = archiveGenerator.get();
+      te->BundleGenerator = bundleGenerator.get();
+      te->FrameworkGenerator = frameworkGenerator.get();
+      te->HeaderGenerator = publicHeaderGenerator.get();
+      te->LibraryGenerator = libraryGenerator.get();
+      te->RuntimeGenerator = runtimeGenerator.get();
+      te->ObjectsGenerator = objectGenerator.get();
+      for (auto const& gen : fileSetGenerators) {
+        te->FileSetGenerators[gen->GetFileSetName()] = gen.get();
+      }
+      te->CxxModuleBmiGenerator = cxxModuleBmiGenerator.get();
+      target.AddInstallIncludeDirectories(
+        *te, cmMakeRange(includesArgs.GetIncludeDirs()));
+      te->NamelinkOnly = namelinkOnly;
+      helper.Makefile->GetGlobalGenerator()
+        ->GetExportSets()[exports]
+        .AddTargetExport(std::move(te));
+    }
+    return true;
+  };
+
+  switch (target.GetType()) {
+    case cm::TargetType::SHARED_LIBRARY: {
+      // Shared libraries are handled differently on DLL and non-DLL
+      // platforms.  All windows platforms are DLL platforms including
+      // cygwin.  Currently no other platform is a DLL platform.
+      if (target.IsDLLPlatform()) {
+        // When in namelink only mode skip all libraries on Windows.
+        if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+          namelinkOnly = true;
+          return addTargetExport();
+        }
+
+        // This is a DLL platform.
+        if (!archiveArgs.GetDestination().empty()) {
+          // The import library uses the ARCHIVE properties.
+          archiveGenerator = CreateInstallTargetGenerator(
+            target, archiveArgs, true, helper.CaptureContext(), false, false,
+            configurations);
+          artifactsSpecified = true;
+        }
+        if (!runtimeArgs.GetDestination().empty()) {
+          // The DLL uses the RUNTIME properties.
+          runtimeGenerator = CreateInstallTargetGenerator(
+            target, runtimeArgs, false, helper.CaptureContext(), false, false,
+            configurations);
+          artifactsSpecified = true;
+        }
+        if (!archiveGenerator && !runtimeGenerator) {
+          archiveGenerator = CreateInstallTargetGenerator(
+            target, archiveArgs, true, helper.CaptureContext(),
+            helper.GetArchiveDestination(nullptr), false, false,
+            configurations);
+          runtimeGenerator = CreateInstallTargetGenerator(
+            target, runtimeArgs, false, helper.CaptureContext(),
+            helper.GetRuntimeDestination(nullptr), false, false,
+            configurations);
+        }
+        if (runtimeDependencySet && runtimeGenerator) {
+          runtimeDependencySet->AddLibrary(runtimeGenerator.get());
+        }
+      } else {
+        // This is a non-DLL platform.
+        // If it is marked with FRAMEWORK property use the FRAMEWORK set of
+        // INSTALL properties. Otherwise, use the LIBRARY properties.
+        if (target.IsFrameworkOnApple()) {
+          // When in namelink only mode skip frameworks.
+          if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+            namelinkOnly = true;
+            return addTargetExport();
+          }
+
+          // Use the FRAMEWORK properties.
+          if (!frameworkArgs.GetDestination().empty()) {
+            frameworkGenerator = CreateInstallTargetGenerator(
+              target, frameworkArgs, false, helper.CaptureContext(), false,
+              false, configurations);
+          } else {
+            return fail(
+              cmStrCat("TARGETS given no FRAMEWORK DESTINATION for shared "
+                       "library FRAMEWORK target \"",
+                       target.GetName(), "\"."));
+          }
+        } else {
+          // The shared library uses the LIBRARY properties.
+          if (!libraryArgs.GetDestination().empty()) {
+            artifactsSpecified = true;
+          }
+          if (namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
+            libraryGenerator = CreateInstallTargetGenerator(
+              target, libraryArgs, false, helper.CaptureContext(),
+              helper.GetLibraryDestination(&libraryArgs), false, false,
+              configurations);
+            libraryGenerator->SetNamelinkMode(
+              cmInstallTargetGenerator::NamelinkModeSkip);
+          }
+          if (namelinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
+            namelinkGenerator = CreateInstallTargetGenerator(
+              target, libraryArgs, false, helper.CaptureContext(),
+              helper.GetLibraryDestination(&libraryArgs), false, true,
+              configurations);
+            namelinkGenerator->SetNamelinkMode(
+              cmInstallTargetGenerator::NamelinkModeOnly);
+          }
+          namelinkOnly =
+            (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
+
+          if (target.GetMakefile()->PlatformSupportsAppleTextStubs() &&
+              target.IsSharedLibraryWithExports()) {
+            // Apple .tbd files use the ARCHIVE properties
+            if (!archiveArgs.GetDestination().empty()) {
+              artifactsSpecified = true;
+            }
+            if (importlinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
+              archiveGenerator = CreateInstallTargetGenerator(
+                target, archiveArgs, true, helper.CaptureContext(),
+                helper.GetLibraryDestination(&archiveArgs), false, false,
+                configurations);
+              archiveGenerator->SetImportlinkMode(
+                cmInstallTargetGenerator::NamelinkModeSkip);
+            }
+            if (importlinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
+              importlinkGenerator = CreateInstallTargetGenerator(
+                target, archiveArgs, true, helper.CaptureContext(),
+                helper.GetLibraryDestination(&archiveArgs), false, true,
+                configurations);
+              importlinkGenerator->SetImportlinkMode(
+                cmInstallTargetGenerator::NamelinkModeOnly);
+            }
+            namelinkOnly =
+              (importlinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
+          }
+        }
+        if (runtimeDependencySet && libraryGenerator) {
+          runtimeDependencySet->AddLibrary(libraryGenerator.get());
+        }
+      }
+    } break;
+    case cm::TargetType::STATIC_LIBRARY: {
+      // If it is marked with FRAMEWORK property use the FRAMEWORK set of
+      // INSTALL properties. Otherwise, use the LIBRARY properties.
+      if (target.IsFrameworkOnApple()) {
+        // When in namelink only mode skip frameworks.
+        if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+          namelinkOnly = true;
+          return addTargetExport();
+        }
+
+        // Use the FRAMEWORK properties.
+        if (!frameworkArgs.GetDestination().empty()) {
+          frameworkGenerator = CreateInstallTargetGenerator(
+            target, frameworkArgs, false, helper.CaptureContext(), false,
+            false, configurations);
+        } else {
+          return fail(
+            cmStrCat("TARGETS given no FRAMEWORK DESTINATION for static "
+                     "library FRAMEWORK target \"",
+                     target.GetName(), "\"."));
+        }
+      } else {
+        // Static libraries use ARCHIVE properties.
+        if (!archiveArgs.GetDestination().empty()) {
+          artifactsSpecified = true;
+        }
+        archiveGenerator = CreateInstallTargetGenerator(
+          target, archiveArgs, false, helper.CaptureContext(),
+          helper.GetArchiveDestination(&archiveArgs), false, false,
+          configurations);
+      }
+    } break;
+    case cm::TargetType::MODULE_LIBRARY: {
+      // Modules use LIBRARY properties.
+      std::string moduleDest;
+      if (!libraryArgs.GetDestination().empty()) {
+        moduleDest = libraryArgs.GetDestination();
+      } else if (target.IsDLLPlatform()) {
+        moduleDest = helper.GetRuntimeDestination(nullptr);
+      } else {
+        moduleDest = helper.GetLibraryDestination(nullptr);
+      }
+
+      libraryGenerator = CreateInstallTargetGenerator(
+        target, libraryArgs, false, helper.CaptureContext(), moduleDest, false,
+        false, configurations);
+
+      libraryGenerator->SetNamelinkMode(namelinkMode);
+      namelinkOnly =
+        (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
+      if (runtimeDependencySet) {
+        runtimeDependencySet->AddModule(libraryGenerator.get());
+      }
+    } break;
+    case cm::TargetType::OBJECT_LIBRARY: {
+      // Objects use OBJECT properties.
+      if (!objectArgs.GetDestination().empty()) {
+        // Verify that we know where the objects are to install them.
+        std::string reason;
+        if (!target.HasKnownObjectFileLocation(&reason)) {
+          return fail(
+            cmStrCat("TARGETS given OBJECT library \"", target.GetName(),
+                     "\" whose objects may not be installed", reason, '.'));
+        }
+
+        objectGenerator = CreateInstallTargetGenerator(
+          target, objectArgs, false, helper.CaptureContext(), false, false,
+          configurations);
+      } else {
+        // Installing an OBJECT library without a destination transforms
+        // it to an INTERFACE library.  It installs no files but can be
+        // exported.
+      }
+    } break;
+    case cm::TargetType::EXECUTABLE: {
+      if (target.IsAppBundleOnApple()) {
+        // Application bundles use the BUNDLE properties.
+        if (!bundleArgs.GetDestination().empty()) {
+          bundleGenerator = CreateInstallTargetGenerator(
+            target, bundleArgs, false, helper.CaptureContext(), false, false,
+            configurations);
+        }
+        if (!bundleGenerator) {
+          return fail(cmStrCat("TARGETS given no BUNDLE DESTINATION for "
+                               "MACOSX_BUNDLE executable target \"",
+                               target.GetName(), "\"."));
+        }
+        if (runtimeDependencySet) {
+          if (!AddBundleExecutable(helper, runtimeDependencySet,
+                                   bundleGenerator.get())) {
+            error = helper.Status.GetError();
+            return false;
+          }
+        }
+      } else {
+        // Executables use the RUNTIME properties.
+        if (!runtimeArgs.GetDestination().empty()) {
+          artifactsSpecified = true;
+        }
+        runtimeGenerator = CreateInstallTargetGenerator(
+          target, runtimeArgs, false, helper.CaptureContext(),
+          helper.GetRuntimeDestination(&runtimeArgs), false, false,
+          configurations);
+        if (runtimeDependencySet) {
+          runtimeDependencySet->AddExecutable(runtimeGenerator.get());
+        }
+      }
+
+      // On DLL platforms an executable may also have an import
+      // library.  Install it to the archive destination if it
+      // exists.
+      if ((target.IsDLLPlatform() || target.IsAIX()) &&
+          !archiveArgs.GetDestination().empty() &&
+          target.IsExecutableWithExports()) {
+        // The import library uses the ARCHIVE properties.
+        artifactsSpecified = true;
+        archiveGenerator = CreateInstallTargetGenerator(
+          target, archiveArgs, true, helper.CaptureContext(), true, false,
+          configurations);
+      }
+    } break;
+    case cm::TargetType::INTERFACE_LIBRARY:
+      // Nothing to do. An INTERFACE_LIBRARY can be installed, but the
+      // only effect of that is to make it exportable. It installs no
+      // other files itself.
+    default:
+      // This should never happen due to the above type check.
+      // Ignore the case.
+      break;
+  }
+
+  // These well-known sets of files are installed *automatically* for
+  // FRAMEWORK SHARED library targets on the Mac as part of installing the
+  // FRAMEWORK.  For other target types or on other platforms, they are not
+  // installed automatically and so we need to create install files
+  // generators for them.
+  bool createInstallGeneratorsForTargetFileSets = true;
+
+  if (target.IsFrameworkOnApple()) {
+    createInstallGeneratorsForTargetFileSets = false;
+  }
+
+  if (createInstallGeneratorsForTargetFileSets && !namelinkOnly) {
+    cmValue files = target.GetProperty("PRIVATE_HEADER");
+    if (cmNonempty(files)) {
+      cmList relFiles{ *files };
+      std::vector<std::string> absFiles;
+      if (!helper.MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles)) {
+        error = helper.Status.GetError();
+        return false;
+      }
+
+      // Create the files install generator.
+      if (!artifactsSpecified || !privateHeaderArgs.GetDestination().empty()) {
+        privateHeaderGenerator = CreateInstallFilesGenerator(
+          helper.Makefile, absFiles, privateHeaderArgs, false,
+          helper.GetIncludeDestination(&privateHeaderArgs), configurations);
+      } else {
+        helper.Makefile->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
+          cmStrCat("Target ", target.GetName(),
+                   " has PRIVATE_HEADER files"
+                   " but no PRIVATE_HEADER DESTINATION."));
+      }
+    }
+
+    files = target.GetProperty("PUBLIC_HEADER");
+    if (cmNonempty(files)) {
+      cmList relFiles{ *files };
+      std::vector<std::string> absFiles;
+      if (!helper.MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles)) {
+        error = helper.Status.GetError();
+        return false;
+      }
+
+      // Create the files install generator.
+      if (!artifactsSpecified || !publicHeaderArgs.GetDestination().empty()) {
+        publicHeaderGenerator = CreateInstallFilesGenerator(
+          helper.Makefile, absFiles, publicHeaderArgs, false,
+          helper.GetIncludeDestination(&publicHeaderArgs), configurations);
+      } else {
+        helper.Makefile->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
+          cmStrCat("Target ", target.GetName(),
+                   " has PUBLIC_HEADER files"
+                   " but no PUBLIC_HEADER DESTINATION."));
+      }
+    }
+
+    files = target.GetProperty("RESOURCE");
+    if (cmNonempty(files)) {
+      cmList relFiles{ *files };
+      std::vector<std::string> absFiles;
+      if (!helper.MakeFilesFullPath("RESOURCE", relFiles, absFiles)) {
+        error = helper.Status.GetError();
+        return false;
+      }
+
+      // Create the files install generator.
+      if (!resourceArgs.GetDestination().empty()) {
+        resourceGenerator = CreateInstallFilesGenerator(
+          helper.Makefile, absFiles, resourceArgs, false,
+          resourceArgs.GetDestination(), configurations);
+      } else if (!target.IsAppBundleOnApple()) {
+        helper.Makefile->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
+          cmStrCat("Target ", target.GetName(),
+                   " has RESOURCE files but no RESOURCE DESTINATION."));
+      }
+    }
+  }
+
+  if (!namelinkOnly) {
+    for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
+      fileSetGenerators.push_back(CreateInstallFileSetGenerator(
+        helper, target, fileSetArgs[i], configurations));
+      flags.FileSet[i] = true;
+    }
+  }
+
+  if (!cxxModuleBmiArgs.GetDestination().empty()) {
+    cxxModuleBmiGenerator = cm::make_unique<cmInstallCxxModuleBmiGenerator>(
+      target.GetName(), helper.GetCxxModulesBmiDestination(&cxxModuleBmiArgs),
+      cxxModuleBmiArgs.GetPermissions(),
+      SelectConfigurations(cxxModuleBmiArgs, configurations),
+      cxxModuleBmiArgs.GetComponent(),
+      cmInstallGenerator::SelectMessageLevel(target.GetMakefile()),
+      cxxModuleBmiArgs.GetExcludeFromAll(), cxxModuleBmiArgs.GetOptional(),
+      helper.CaptureContext());
+    target.SetHaveInstallRule(true);
+  }
+
+  // Add this install rule to an export if one was specified.
+  if (!addTargetExport()) {
+    return false;
+  }
+
+  // Keep track of whether we're installing anything in each category
+  flags.Archive = flags.Archive || archiveGenerator;
+  flags.Library = flags.Library || libraryGenerator;
+  flags.Namelink = flags.Namelink || namelinkGenerator;
+  flags.Importlink = flags.Importlink || importlinkGenerator;
+  flags.Runtime = flags.Runtime || runtimeGenerator;
+  flags.Object = flags.Object || objectGenerator;
+  flags.Framework = flags.Framework || frameworkGenerator;
+  flags.Bundle = flags.Bundle || bundleGenerator;
+  flags.PrivateHeader = flags.PrivateHeader || privateHeaderGenerator;
+  flags.PublicHeader = flags.PublicHeader || publicHeaderGenerator;
+  flags.Resource = flags.Resource || resourceGenerator;
+  flags.CxxModuleBmi = flags.CxxModuleBmi || cxxModuleBmiGenerator;
+
+  helper.Makefile->AddInstallGenerator(std::move(archiveGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(libraryGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(namelinkGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(importlinkGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(runtimeGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(objectGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(frameworkGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(bundleGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(privateHeaderGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(publicHeaderGenerator));
+  helper.Makefile->AddInstallGenerator(std::move(resourceGenerator));
+  for (auto& gen : fileSetGenerators) {
+    helper.Makefile->AddInstallGenerator(std::move(gen));
+  }
+  helper.Makefile->AddInstallGenerator(std::move(cxxModuleBmiGenerator));
   return true;
 }
 
@@ -737,532 +1329,49 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     }
   }
 
-  // Keep track of whether we will be performing an installation of
-  // any files of the given type.
-  bool installsArchive = false;
-  bool installsLibrary = false;
-  bool installsNamelink = false;
-  bool installsImportlink = false;
-  bool installsRuntime = false;
-  bool installsObject = false;
-  bool installsFramework = false;
-  bool installsBundle = false;
-  bool installsPrivateHeader = false;
-  bool installsPublicHeader = false;
-  bool installsResource = false;
-  std::vector<bool> installsFileSet(fileSetArgs.size(), false);
-  bool installsCxxModuleBmi = false;
+  auto ctx = std::make_shared<InstallContext>();
+  ctx->GenericArgs = cm::make_unique<cmInstallCommandArguments>(genericArgs);
+  ctx->ArchiveArgs = cm::make_unique<cmInstallCommandArguments>(archiveArgs);
+  ctx->LibraryArgs = cm::make_unique<cmInstallCommandArguments>(libraryArgs);
+  ctx->RuntimeArgs = cm::make_unique<cmInstallCommandArguments>(runtimeArgs);
+  ctx->ObjectArgs = cm::make_unique<cmInstallCommandArguments>(objectArgs);
+  ctx->FrameworkArgs =
+    cm::make_unique<cmInstallCommandArguments>(frameworkArgs);
+  ctx->BundleArgs = cm::make_unique<cmInstallCommandArguments>(bundleArgs);
+  ctx->PrivateHeaderArgs =
+    cm::make_unique<cmInstallCommandArguments>(privateHeaderArgs);
+  ctx->PublicHeaderArgs =
+    cm::make_unique<cmInstallCommandArguments>(publicHeaderArgs);
+  ctx->ResourceArgs = cm::make_unique<cmInstallCommandArguments>(resourceArgs);
+  ctx->CxxModuleBmiArgs =
+    cm::make_unique<cmInstallCommandArguments>(cxxModuleBmiArgs);
+  ctx->IncludesArgs = includesArgs;
+  ctx->FileSetArgs = fileSetArgs;
+  ctx->NamelinkMode = namelinkMode;
+  ctx->ImportlinkMode = importlinkMode;
+  ctx->Exports = exports;
+  ctx->RuntimeDependencySet = runtimeDependencySet;
+  ctx->BindGenericArguments();
+
+  InstallCategoryFlags flags;
+  flags.FileSet.resize(ctx->FileSetArgs.size(), false);
 
   // Generate install script code to install the given targets.
   for (cmTarget* ti : targets) {
-    // Handle each target type.
-    cmTarget& target = *ti;
-    std::unique_ptr<cmInstallTargetGenerator> archiveGenerator;
-    std::unique_ptr<cmInstallTargetGenerator> libraryGenerator;
-    std::unique_ptr<cmInstallTargetGenerator> namelinkGenerator;
-    std::unique_ptr<cmInstallTargetGenerator> importlinkGenerator;
-    std::unique_ptr<cmInstallTargetGenerator> runtimeGenerator;
-    std::unique_ptr<cmInstallTargetGenerator> objectGenerator;
-    std::unique_ptr<cmInstallTargetGenerator> frameworkGenerator;
-    std::unique_ptr<cmInstallTargetGenerator> bundleGenerator;
-    std::unique_ptr<cmInstallFilesGenerator> privateHeaderGenerator;
-    std::unique_ptr<cmInstallFilesGenerator> publicHeaderGenerator;
-    std::unique_ptr<cmInstallFilesGenerator> resourceGenerator;
-    std::vector<std::unique_ptr<cmInstallFileSetGenerator>> fileSetGenerators;
-    std::unique_ptr<cmInstallCxxModuleBmiGenerator> cxxModuleBmiGenerator;
-
-    // Avoid selecting default destinations for PUBLIC_HEADER and
-    // PRIVATE_HEADER if any artifacts are specified.
-    bool artifactsSpecified = false;
-
-    // Track whether this is a namelink-only rule.
-    bool namelinkOnly = false;
-
-    auto addTargetExport = [&]() -> bool {
-      // Add this install rule to an export if one was specified.
-      if (!exports.empty()) {
-        auto interfaceFileSets = target.GetAllInterfaceFileSets();
-        if (std::any_of(
-              interfaceFileSets.begin(), interfaceFileSets.end(),
-              [=](std::string const& name) -> bool {
-                return !std::any_of(
-                  fileSetArgs.begin(), fileSetArgs.end(),
-                  [=](cmInstallCommandFileSetArguments const& fileSetArg)
-                    -> bool { return fileSetArg.GetFileSet() == name; });
-              })) {
-          status.SetError(cmStrCat("TARGETS target ", target.GetName(),
-                                   " is exported but not all of its interface "
-                                   "file sets are installed"));
-          return false;
-        }
-
-        auto te = cm::make_unique<cmTargetExport>();
-        te->TargetName = target.GetName();
-        te->ArchiveGenerator = archiveGenerator.get();
-        te->BundleGenerator = bundleGenerator.get();
-        te->FrameworkGenerator = frameworkGenerator.get();
-        te->HeaderGenerator = publicHeaderGenerator.get();
-        te->LibraryGenerator = libraryGenerator.get();
-        te->RuntimeGenerator = runtimeGenerator.get();
-        te->ObjectsGenerator = objectGenerator.get();
-        for (auto const& gen : fileSetGenerators) {
-          te->FileSetGenerators[gen->GetFileSetName()] = gen.get();
-        }
-        te->CxxModuleBmiGenerator = cxxModuleBmiGenerator.get();
-        target.AddInstallIncludeDirectories(
-          *te, cmMakeRange(includesArgs.GetIncludeDirs()));
-        te->NamelinkOnly = namelinkOnly;
-        helper.Makefile->GetGlobalGenerator()
-          ->GetExportSets()[exports]
-          .AddTargetExport(std::move(te));
-      }
-      return true;
-    };
-
-    switch (target.GetType()) {
-      case cm::TargetType::SHARED_LIBRARY: {
-        // Shared libraries are handled differently on DLL and non-DLL
-        // platforms.  All windows platforms are DLL platforms including
-        // cygwin.  Currently no other platform is a DLL platform.
-        if (target.IsDLLPlatform()) {
-          // When in namelink only mode skip all libraries on Windows.
-          if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
-            namelinkOnly = true;
-            if (!addTargetExport()) {
-              return false;
-            }
-            continue;
-          }
-
-          // This is a DLL platform.
-          if (!archiveArgs.GetDestination().empty()) {
-            // The import library uses the ARCHIVE properties.
-            archiveGenerator = CreateInstallTargetGenerator(
-              target, archiveArgs, true, helper.CaptureContext());
-            artifactsSpecified = true;
-          }
-          if (!runtimeArgs.GetDestination().empty()) {
-            // The DLL uses the RUNTIME properties.
-            runtimeGenerator = CreateInstallTargetGenerator(
-              target, runtimeArgs, false, helper.CaptureContext());
-            artifactsSpecified = true;
-          }
-          if (!archiveGenerator && !runtimeGenerator) {
-            archiveGenerator = CreateInstallTargetGenerator(
-              target, archiveArgs, true, helper.CaptureContext(),
-              helper.GetArchiveDestination(nullptr));
-            runtimeGenerator = CreateInstallTargetGenerator(
-              target, runtimeArgs, false, helper.CaptureContext(),
-              helper.GetRuntimeDestination(nullptr));
-          }
-          if (runtimeDependencySet && runtimeGenerator) {
-            runtimeDependencySet->AddLibrary(runtimeGenerator.get());
-          }
-        } else {
-          // This is a non-DLL platform.
-          // If it is marked with FRAMEWORK property use the FRAMEWORK set of
-          // INSTALL properties. Otherwise, use the LIBRARY properties.
-          if (target.IsFrameworkOnApple()) {
-            // When in namelink only mode skip frameworks.
-            if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
-              namelinkOnly = true;
-              if (!addTargetExport()) {
-                return false;
-              }
-              continue;
-            }
-
-            // Use the FRAMEWORK properties.
-            if (!frameworkArgs.GetDestination().empty()) {
-              frameworkGenerator = CreateInstallTargetGenerator(
-                target, frameworkArgs, false, helper.CaptureContext());
-            } else {
-              status.SetError(
-                cmStrCat("TARGETS given no FRAMEWORK DESTINATION for shared "
-                         "library FRAMEWORK target \"",
-                         target.GetName(), "\"."));
-              return false;
-            }
-          } else {
-            // The shared library uses the LIBRARY properties.
-            if (!libraryArgs.GetDestination().empty()) {
-              artifactsSpecified = true;
-            }
-            if (namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
-              libraryGenerator = CreateInstallTargetGenerator(
-                target, libraryArgs, false, helper.CaptureContext(),
-                helper.GetLibraryDestination(&libraryArgs));
-              libraryGenerator->SetNamelinkMode(
-                cmInstallTargetGenerator::NamelinkModeSkip);
-            }
-            if (namelinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
-              namelinkGenerator = CreateInstallTargetGenerator(
-                target, libraryArgs, false, helper.CaptureContext(),
-                helper.GetLibraryDestination(&libraryArgs), false, true);
-              namelinkGenerator->SetNamelinkMode(
-                cmInstallTargetGenerator::NamelinkModeOnly);
-            }
-            namelinkOnly =
-              (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
-
-            if (target.GetMakefile()->PlatformSupportsAppleTextStubs() &&
-                target.IsSharedLibraryWithExports()) {
-              // Apple .tbd files use the ARCHIVE properties
-              if (!archiveArgs.GetDestination().empty()) {
-                artifactsSpecified = true;
-              }
-              if (importlinkMode !=
-                  cmInstallTargetGenerator::NamelinkModeOnly) {
-                archiveGenerator = CreateInstallTargetGenerator(
-                  target, archiveArgs, true, helper.CaptureContext(),
-                  helper.GetLibraryDestination(&archiveArgs));
-                archiveGenerator->SetImportlinkMode(
-                  cmInstallTargetGenerator::NamelinkModeSkip);
-              }
-              if (importlinkMode !=
-                  cmInstallTargetGenerator::NamelinkModeSkip) {
-                importlinkGenerator = CreateInstallTargetGenerator(
-                  target, archiveArgs, true, helper.CaptureContext(),
-                  helper.GetLibraryDestination(&archiveArgs), false, true);
-                importlinkGenerator->SetImportlinkMode(
-                  cmInstallTargetGenerator::NamelinkModeOnly);
-              }
-              namelinkOnly =
-                (importlinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
-            }
-          }
-          if (runtimeDependencySet && libraryGenerator) {
-            runtimeDependencySet->AddLibrary(libraryGenerator.get());
-          }
-        }
-      } break;
-      case cm::TargetType::STATIC_LIBRARY: {
-        // If it is marked with FRAMEWORK property use the FRAMEWORK set of
-        // INSTALL properties. Otherwise, use the LIBRARY properties.
-        if (target.IsFrameworkOnApple()) {
-          // When in namelink only mode skip frameworks.
-          if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
-            namelinkOnly = true;
-            if (!addTargetExport()) {
-              return false;
-            }
-            continue;
-          }
-
-          // Use the FRAMEWORK properties.
-          if (!frameworkArgs.GetDestination().empty()) {
-            frameworkGenerator = CreateInstallTargetGenerator(
-              target, frameworkArgs, false, helper.CaptureContext());
-          } else {
-            status.SetError(
-              cmStrCat("TARGETS given no FRAMEWORK DESTINATION for static "
-                       "library FRAMEWORK target \"",
-                       target.GetName(), "\"."));
-            return false;
-          }
-        } else {
-          // Static libraries use ARCHIVE properties.
-          if (!archiveArgs.GetDestination().empty()) {
-            artifactsSpecified = true;
-          }
-          archiveGenerator = CreateInstallTargetGenerator(
-            target, archiveArgs, false, helper.CaptureContext(),
-            helper.GetArchiveDestination(&archiveArgs));
-        }
-      } break;
-      case cm::TargetType::MODULE_LIBRARY: {
-        // Modules use LIBRARY properties.
-        std::string moduleDest;
-        if (!libraryArgs.GetDestination().empty()) {
-          moduleDest = libraryArgs.GetDestination();
-        } else if (target.IsDLLPlatform()) {
-          moduleDest = helper.GetRuntimeDestination(nullptr);
-        } else {
-          moduleDest = helper.GetLibraryDestination(nullptr);
-        }
-
-        libraryGenerator = CreateInstallTargetGenerator(
-          target, libraryArgs, false, helper.CaptureContext(), moduleDest);
-
-        libraryGenerator->SetNamelinkMode(namelinkMode);
-        namelinkOnly =
-          (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
-        if (runtimeDependencySet) {
-          runtimeDependencySet->AddModule(libraryGenerator.get());
-        }
-      } break;
-      case cm::TargetType::OBJECT_LIBRARY: {
-        // Objects use OBJECT properties.
-        if (!objectArgs.GetDestination().empty()) {
-          // Verify that we know where the objects are to install them.
-          std::string reason;
-          if (!target.HasKnownObjectFileLocation(&reason)) {
-            status.SetError(
-              cmStrCat("TARGETS given OBJECT library \"", target.GetName(),
-                       "\" whose objects may not be installed", reason, '.'));
-            return false;
-          }
-
-          objectGenerator = CreateInstallTargetGenerator(
-            target, objectArgs, false, helper.CaptureContext());
-        } else {
-          // Installing an OBJECT library without a destination transforms
-          // it to an INTERFACE library.  It installs no files but can be
-          // exported.
-        }
-      } break;
-      case cm::TargetType::EXECUTABLE: {
-        if (target.IsAppBundleOnApple()) {
-          // Application bundles use the BUNDLE properties.
-          if (!bundleArgs.GetDestination().empty()) {
-            bundleGenerator = CreateInstallTargetGenerator(
-              target, bundleArgs, false, helper.CaptureContext());
-          }
-          if (!bundleGenerator) {
-            status.SetError(cmStrCat("TARGETS given no BUNDLE DESTINATION for "
-                                     "MACOSX_BUNDLE executable target \"",
-                                     target.GetName(), "\"."));
-            return false;
-          }
-          if (runtimeDependencySet) {
-            if (!AddBundleExecutable(helper, runtimeDependencySet,
-                                     bundleGenerator.get())) {
-              return false;
-            }
-          }
-        } else {
-          // Executables use the RUNTIME properties.
-          if (!runtimeArgs.GetDestination().empty()) {
-            artifactsSpecified = true;
-          }
-          runtimeGenerator = CreateInstallTargetGenerator(
-            target, runtimeArgs, false, helper.CaptureContext(),
-            helper.GetRuntimeDestination(&runtimeArgs));
-          if (runtimeDependencySet) {
-            runtimeDependencySet->AddExecutable(runtimeGenerator.get());
-          }
-        }
-
-        // On DLL platforms an executable may also have an import
-        // library.  Install it to the archive destination if it
-        // exists.
-        if ((target.IsDLLPlatform() || target.IsAIX()) &&
-            !archiveArgs.GetDestination().empty() &&
-            target.IsExecutableWithExports()) {
-          // The import library uses the ARCHIVE properties.
-          artifactsSpecified = true;
-          archiveGenerator = CreateInstallTargetGenerator(
-            target, archiveArgs, true, helper.CaptureContext(), true);
-        }
-      } break;
-      case cm::TargetType::INTERFACE_LIBRARY:
-        // Nothing to do. An INTERFACE_LIBRARY can be installed, but the
-        // only effect of that is to make it exportable. It installs no
-        // other files itself.
-      default:
-        // This should never happen due to the above type check.
-        // Ignore the case.
-        break;
-    }
-
-    // These well-known sets of files are installed *automatically* for
-    // FRAMEWORK SHARED library targets on the Mac as part of installing the
-    // FRAMEWORK.  For other target types or on other platforms, they are not
-    // installed automatically and so we need to create install files
-    // generators for them.
-    bool createInstallGeneratorsForTargetFileSets = true;
-
-    if (target.IsFrameworkOnApple()) {
-      createInstallGeneratorsForTargetFileSets = false;
-    }
-
-    if (createInstallGeneratorsForTargetFileSets && !namelinkOnly) {
-      cmValue files = target.GetProperty("PRIVATE_HEADER");
-      if (cmNonempty(files)) {
-        cmList relFiles{ *files };
-        std::vector<std::string> absFiles;
-        if (!helper.MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles)) {
-          return false;
-        }
-
-        // Create the files install generator.
-        if (!artifactsSpecified ||
-            !privateHeaderArgs.GetDestination().empty()) {
-          privateHeaderGenerator = CreateInstallFilesGenerator(
-            helper.Makefile, absFiles, privateHeaderArgs, false,
-            helper.GetIncludeDestination(&privateHeaderArgs));
-        } else {
-          helper.Makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
-            cmStrCat("Target ", target.GetName(),
-                     " has PRIVATE_HEADER files"
-                     " but no PRIVATE_HEADER DESTINATION."));
-        }
-      }
-
-      files = target.GetProperty("PUBLIC_HEADER");
-      if (cmNonempty(files)) {
-        cmList relFiles{ *files };
-        std::vector<std::string> absFiles;
-        if (!helper.MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles)) {
-          return false;
-        }
-
-        // Create the files install generator.
-        if (!artifactsSpecified ||
-            !publicHeaderArgs.GetDestination().empty()) {
-          publicHeaderGenerator = CreateInstallFilesGenerator(
-            helper.Makefile, absFiles, publicHeaderArgs, false,
-            helper.GetIncludeDestination(&publicHeaderArgs));
-        } else {
-          helper.Makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
-            cmStrCat("Target ", target.GetName(),
-                     " has PUBLIC_HEADER files"
-                     " but no PUBLIC_HEADER DESTINATION."));
-        }
-      }
-
-      files = target.GetProperty("RESOURCE");
-      if (cmNonempty(files)) {
-        cmList relFiles{ *files };
-        std::vector<std::string> absFiles;
-        if (!helper.MakeFilesFullPath("RESOURCE", relFiles, absFiles)) {
-          return false;
-        }
-
-        // Create the files install generator.
-        if (!resourceArgs.GetDestination().empty()) {
-          resourceGenerator = CreateInstallFilesGenerator(
-            helper.Makefile, absFiles, resourceArgs, false);
-        } else if (!target.IsAppBundleOnApple()) {
-          helper.Makefile->IssueDiagnostic(
-            cmDiagnostics::CMD_AUTHOR,
-            cmStrCat("Target ", target.GetName(),
-                     " has RESOURCE files but no RESOURCE DESTINATION."));
-        }
-      }
-    }
-
-    if (!namelinkOnly) {
-      for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
-        fileSetGenerators.push_back(
-          CreateInstallFileSetGenerator(helper, target, fileSetArgs[i]));
-        installsFileSet[i] = true;
-      }
-    }
-
-    if (!cxxModuleBmiArgs.GetDestination().empty()) {
-      cxxModuleBmiGenerator = cm::make_unique<cmInstallCxxModuleBmiGenerator>(
-        target.GetName(),
-        helper.GetCxxModulesBmiDestination(&cxxModuleBmiArgs),
-        cxxModuleBmiArgs.GetPermissions(),
-        cxxModuleBmiArgs.GetConfigurations(), cxxModuleBmiArgs.GetComponent(),
-        cmInstallGenerator::SelectMessageLevel(target.GetMakefile()),
-        cxxModuleBmiArgs.GetExcludeFromAll(), cxxModuleBmiArgs.GetOptional(),
-        helper.CaptureContext());
-      target.SetHaveInstallRule(true);
-    }
-
-    // Add this install rule to an export if one was specified.
-    if (!addTargetExport()) {
+    std::string error;
+    if (!CreateInstallGeneratorsForTarget(helper, *ti, *ctx, flags, error)) {
       return false;
     }
-
-    // Keep track of whether we're installing anything in each category
-    installsArchive = installsArchive || archiveGenerator;
-    installsLibrary = installsLibrary || libraryGenerator;
-    installsNamelink = installsNamelink || namelinkGenerator;
-    installsImportlink = installsImportlink || importlinkGenerator;
-    installsRuntime = installsRuntime || runtimeGenerator;
-    installsObject = installsObject || objectGenerator;
-    installsFramework = installsFramework || frameworkGenerator;
-    installsBundle = installsBundle || bundleGenerator;
-    installsPrivateHeader = installsPrivateHeader || privateHeaderGenerator;
-    installsPublicHeader = installsPublicHeader || publicHeaderGenerator;
-    installsResource = installsResource || resourceGenerator;
-    installsCxxModuleBmi = installsCxxModuleBmi || cxxModuleBmiGenerator;
-
-    helper.Makefile->AddInstallGenerator(std::move(archiveGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(libraryGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(namelinkGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(importlinkGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(runtimeGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(objectGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(frameworkGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(bundleGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(privateHeaderGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(publicHeaderGenerator));
-    helper.Makefile->AddInstallGenerator(std::move(resourceGenerator));
-    for (auto& gen : fileSetGenerators) {
-      helper.Makefile->AddInstallGenerator(std::move(gen));
-    }
-    helper.Makefile->AddInstallGenerator(std::move(cxxModuleBmiGenerator));
   }
 
   if (runtimeDependenciesArgVector && !runtimeDependencySet->Empty()) {
     AddInstallRuntimeDependenciesGenerator(
-      helper, runtimeDependencySet, runtimeArgs, libraryArgs, frameworkArgs,
-      std::move(runtimeDependenciesArgs), installsRuntime, installsLibrary,
-      installsFramework);
+      helper, runtimeDependencySet, *ctx->RuntimeArgs, *ctx->LibraryArgs,
+      *ctx->FrameworkArgs, std::move(runtimeDependenciesArgs), flags.Runtime,
+      flags.Library, flags.Framework);
   }
 
-  // Tell the global generator about any installation component names
-  // specified
-  if (installsArchive) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      archiveArgs.GetComponent());
-  }
-  if (installsLibrary) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      libraryArgs.GetComponent());
-  }
-  if (installsNamelink) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      libraryArgs.GetNamelinkComponent());
-  }
-  if (installsImportlink) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      archiveArgs.GetNamelinkComponent());
-  }
-  if (installsRuntime) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      runtimeArgs.GetComponent());
-  }
-  if (installsObject) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      objectArgs.GetComponent());
-  }
-  if (installsFramework) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      frameworkArgs.GetComponent());
-  }
-  if (installsBundle) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      bundleArgs.GetComponent());
-  }
-  if (installsPrivateHeader) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      privateHeaderArgs.GetComponent());
-  }
-  if (installsPublicHeader) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      publicHeaderArgs.GetComponent());
-  }
-  if (installsResource) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      resourceArgs.GetComponent());
-  }
-  for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
-    if (installsFileSet[i]) {
-      helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-        fileSetArgs[i].GetComponent());
-    }
-  }
-  if (installsCxxModuleBmi) {
-    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
-      cxxModuleBmiArgs.GetComponent());
-  }
+  RegisterInstallComponents(helper.Makefile, *ctx, flags);
 
   return true;
 }
