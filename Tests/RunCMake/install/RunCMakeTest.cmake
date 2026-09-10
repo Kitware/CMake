@@ -191,6 +191,8 @@ elseif (CMake_TEST_install_VARIANT STREQUAL "Targets")
   run_install_test(TARGETS-Defaults)
   run_install_test(TARGETS-Module-Destination)
   run_install_test(TARGETS-SymbolicComponent)
+  run_install_test(TARGETS-RUNTIME_DEPENDENCY_TARGETS)
+  run_cmake(TARGETS-RUNTIME_DEPENDENCY_TARGETS-EXPORT)
 
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     run_install_test(TARGETS-NAMELINK-No-Tweak)

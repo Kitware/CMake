@@ -1,0 +1,73 @@
+if(WIN32)
+  set(_check_files
+      [[bin]]
+      [[bin/first]]
+      [[bin/first/exe_1\.exe]]
+      [[bin/first/(lib)?shared_1\.dll]]
+      [[bin/first/(lib)?shared_2\.dll]]
+      [[bin/first/(lib)?shared_3\.dll]]
+      [[bin/second]]
+      [[bin/second/exe_2\.exe]]
+      [[bin/second/(lib)?shared_1\.dll]]
+      [[bin/second/(lib)?shared_2\.dll]]
+      [[bin/second/(lib)?shared_3\.dll]])
+elseif(MSYS)
+  set(_check_files
+      [[bin]]
+      [[bin/first]]
+      [[bin/first/exe_1\.exe]]
+      [[bin/first/msys-shared_1\.dll]]
+      [[bin/first/msys-shared_2\.dll]]
+      [[bin/first/msys-shared_3\.dll]]
+      [[bin/second]]
+      [[bin/second/exe_2\.exe]]
+      [[bin/second/msys-shared_1\.dll]]
+      [[bin/second/msys-shared_2\.dll]]
+      [[bin/second/msys-shared_3\.dll]])
+elseif(CYGWIN)
+  set(_check_files
+      [[bin]]
+      [[bin/first]]
+      [[bin/first/cygshared_1\.dll]]
+      [[bin/first/cygshared_2\.dll]]
+      [[bin/first/cygshared_3\.dll]]
+      [[bin/first/exe_1\.exe]]
+      [[bin/second]]
+      [[bin/second/cygshared_1\.dll]]
+      [[bin/second/cygshared_2\.dll]]
+      [[bin/second/cygshared_3\.dll]]
+      [[bin/second/exe_2\.exe]])
+elseif(AIX)
+  set(_check_files
+      [[bin]]
+      [[bin/first]]
+      [[bin/first/exe_1]]
+      [[bin/second]]
+      [[bin/second/exe_2]]
+      [[lib]]
+      [[lib/first]]
+      [[lib/first/libshared_1\.a]]
+      [[lib/first/libshared_2\.a]]
+      [[lib/first/libshared_3\.a]]
+      [[lib/second]]
+      [[lib/second/libshared_1\.a]]
+      [[lib/second/libshared_2\.a]]
+      [[lib/second/libshared_3\.a]])
+else()
+  set(_check_files
+      [[bin]]
+      [[bin/first]]
+      [[bin/first/exe_1]]
+      [[bin/second]]
+      [[bin/second/exe_2]]
+      [[lib]]
+      [[lib/first]]
+      [[lib/first/libshared_1\.(dylib|so)]]
+      [[lib/first/libshared_2\.(dylib|so)]]
+      [[lib/first/libshared_3\.(dylib|so)]]
+      [[lib/second]]
+      [[lib/second/libshared_1\.(dylib|so)]]
+      [[lib/second/libshared_2\.(dylib|so)]]
+      [[lib/second/libshared_3\.(dylib|so)]])
+endif()
+check_installed("^${_check_files}$")

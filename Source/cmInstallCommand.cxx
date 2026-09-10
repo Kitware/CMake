@@ -19,12 +19,14 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmCMakePath.h"
+#include "cmComputeLinkInformation.h"
 #include "cmDiagnosticContext.h"
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportSet.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallAndroidMKExportGenerator.h"
 #include "cmInstallCMakeConfigExportGenerator.h"
@@ -44,6 +46,7 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmList.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPackageInfoArguments.h"
@@ -60,7 +63,15 @@
 #include "cmUnreachable.h"
 #include "cmValue.h"
 
+class cmListFileBacktrace;
+
 namespace {
+
+enum class RuntimeOnly
+{
+  No,
+  Yes,
+};
 
 struct InstallCategoryFlags
 {
@@ -120,6 +131,57 @@ struct InstallContext
     }
   }
 };
+
+void CollectEvaluatedTransitiveSharedModuleTargets(
+  cmLocalGenerator& lg, std::vector<std::string> const& rootNames,
+  std::set<cmTarget*>& out, std::string const& config)
+{
+  std::set<cmGeneratorTarget const*> visited;
+  std::vector<cmGeneratorTarget const*> stack;
+  std::set<std::string> const rootNameSet(rootNames.begin(), rootNames.end());
+
+  auto consider = [&](cmGeneratorTarget const* dep) {
+    if (!dep || dep->IsImported()) {
+      return;
+    }
+    if (!visited.insert(dep).second) {
+      return;
+    }
+    cm::TargetType type = dep->GetType();
+    if (type == cm::TargetType::SHARED_LIBRARY) {
+      if (rootNameSet.find(dep->GetName()) == rootNameSet.end()) {
+        out.insert(dep->Target);
+      }
+      stack.push_back(dep);
+    }
+  };
+  auto enqueue = [&](cmGeneratorTarget const* current) {
+    cmComputeLinkInformation* linkInfo = current->GetLinkInformation(config);
+    std::set<cmGeneratorTarget const*> const& sharedTargets =
+      linkInfo->GetSharedLibrariesLinked();
+
+    for (cmGeneratorTarget const* dep : sharedTargets) {
+      consider(dep);
+    }
+  };
+
+  for (std::string const& name : rootNames) {
+    cmGeneratorTarget* root = lg.FindGeneratorTargetToUse(name);
+    if (!root) {
+      root = lg.GetGlobalGenerator()->FindGeneratorTarget(name);
+    }
+    if (!root) {
+      continue;
+    }
+    visited.insert(root);
+    enqueue(root);
+  }
+  while (!stack.empty()) {
+    cmGeneratorTarget const* current = stack.back();
+    stack.pop_back();
+    enqueue(current);
+  }
+}
 
 struct RuntimeDependenciesArgs
 {
@@ -417,7 +479,8 @@ void RegisterInstallComponents(cmMakefile* makefile, InstallContext const& ctx,
 bool CreateInstallGeneratorsForTarget(
   Helper& helper, cmTarget& target, InstallContext const& ctx,
   InstallCategoryFlags& flags, std::string& error,
-  cm::optional<std::vector<std::string>> configurations = {})
+  cm::optional<std::vector<std::string>> configurations = {},
+  RuntimeOnly runtimeOnly = RuntimeOnly::No)
 {
   cmInstallCommandArguments const& archiveArgs = *ctx.ArchiveArgs;
   cmInstallCommandArguments const& libraryArgs = *ctx.LibraryArgs;
@@ -514,27 +577,32 @@ bool CreateInstallGeneratorsForTarget(
       // cygwin.  Currently no other platform is a DLL platform.
       if (target.IsDLLPlatform()) {
         // When in namelink only mode skip all libraries on Windows.
-        if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+        if (runtimeOnly == RuntimeOnly::No &&
+            namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
           namelinkOnly = true;
           return addTargetExport();
         }
 
         // This is a DLL platform.
-        if (!archiveArgs.GetDestination().empty()) {
+        if (runtimeOnly == RuntimeOnly::No &&
+            !archiveArgs.GetDestination().empty()) {
           // The import library uses the ARCHIVE properties.
           archiveGenerator = CreateInstallTargetGenerator(
             target, archiveArgs, true, helper.CaptureContext(), false, false,
             configurations);
           artifactsSpecified = true;
         }
-        if (!runtimeArgs.GetDestination().empty()) {
+        if (runtimeOnly == RuntimeOnly::Yes ||
+            !runtimeArgs.GetDestination().empty()) {
           // The DLL uses the RUNTIME properties.
           runtimeGenerator = CreateInstallTargetGenerator(
-            target, runtimeArgs, false, helper.CaptureContext(), false, false,
+            target, runtimeArgs, false, helper.CaptureContext(),
+            helper.GetRuntimeDestination(&runtimeArgs), false, false,
             configurations);
           artifactsSpecified = true;
         }
-        if (!archiveGenerator && !runtimeGenerator) {
+        if (runtimeOnly == RuntimeOnly::No && !archiveGenerator &&
+            !runtimeGenerator) {
           archiveGenerator = CreateInstallTargetGenerator(
             target, archiveArgs, true, helper.CaptureContext(),
             helper.GetArchiveDestination(nullptr), false, false,
@@ -553,7 +621,8 @@ bool CreateInstallGeneratorsForTarget(
         // INSTALL properties. Otherwise, use the LIBRARY properties.
         if (target.IsFrameworkOnApple()) {
           // When in namelink only mode skip frameworks.
-          if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+          if (runtimeOnly == RuntimeOnly::No &&
+              namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
             namelinkOnly = true;
             return addTargetExport();
           }
@@ -574,7 +643,8 @@ bool CreateInstallGeneratorsForTarget(
           if (!libraryArgs.GetDestination().empty()) {
             artifactsSpecified = true;
           }
-          if (namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
+          if (runtimeOnly == RuntimeOnly::Yes ||
+              namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
             libraryGenerator = CreateInstallTargetGenerator(
               target, libraryArgs, false, helper.CaptureContext(),
               helper.GetLibraryDestination(&libraryArgs), false, false,
@@ -582,7 +652,8 @@ bool CreateInstallGeneratorsForTarget(
             libraryGenerator->SetNamelinkMode(
               cmInstallTargetGenerator::NamelinkModeSkip);
           }
-          if (namelinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
+          if (runtimeOnly == RuntimeOnly::No &&
+              namelinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
             namelinkGenerator = CreateInstallTargetGenerator(
               target, libraryArgs, false, helper.CaptureContext(),
               helper.GetLibraryDestination(&libraryArgs), false, true,
@@ -590,10 +661,11 @@ bool CreateInstallGeneratorsForTarget(
             namelinkGenerator->SetNamelinkMode(
               cmInstallTargetGenerator::NamelinkModeOnly);
           }
-          namelinkOnly =
+          namelinkOnly = runtimeOnly == RuntimeOnly::No &&
             (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
 
-          if (target.GetMakefile()->PlatformSupportsAppleTextStubs() &&
+          if (runtimeOnly == RuntimeOnly::No &&
+              target.GetMakefile()->PlatformSupportsAppleTextStubs() &&
               target.IsSharedLibraryWithExports()) {
             // Apple .tbd files use the ARCHIVE properties
             if (!archiveArgs.GetDestination().empty()) {
@@ -625,6 +697,9 @@ bool CreateInstallGeneratorsForTarget(
       }
     } break;
     case cm::TargetType::STATIC_LIBRARY: {
+      if (runtimeOnly == RuntimeOnly::Yes) {
+        break;
+      }
       // If it is marked with FRAMEWORK property use the FRAMEWORK set of
       // INSTALL properties. Otherwise, use the LIBRARY properties.
       if (target.IsFrameworkOnApple()) {
@@ -671,14 +746,20 @@ bool CreateInstallGeneratorsForTarget(
         target, libraryArgs, false, helper.CaptureContext(), moduleDest, false,
         false, configurations);
 
-      libraryGenerator->SetNamelinkMode(namelinkMode);
-      namelinkOnly =
+      libraryGenerator->SetNamelinkMode(
+        runtimeOnly == RuntimeOnly::Yes
+          ? cmInstallTargetGenerator::NamelinkModeNone
+          : namelinkMode);
+      namelinkOnly = runtimeOnly == RuntimeOnly::No &&
         (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
       if (runtimeDependencySet) {
         runtimeDependencySet->AddModule(libraryGenerator.get());
       }
     } break;
     case cm::TargetType::OBJECT_LIBRARY: {
+      if (runtimeOnly == RuntimeOnly::Yes) {
+        break;
+      }
       // Objects use OBJECT properties.
       if (!objectArgs.GetDestination().empty()) {
         // Verify that we know where the objects are to install them.
@@ -699,6 +780,9 @@ bool CreateInstallGeneratorsForTarget(
       }
     } break;
     case cm::TargetType::EXECUTABLE: {
+      if (runtimeOnly == RuntimeOnly::Yes) {
+        break;
+      }
       if (target.IsAppBundleOnApple()) {
         // Application bundles use the BUNDLE properties.
         if (!bundleArgs.GetDestination().empty()) {
@@ -760,7 +844,8 @@ bool CreateInstallGeneratorsForTarget(
   // FRAMEWORK.  For other target types or on other platforms, they are not
   // installed automatically and so we need to create install files
   // generators for them.
-  bool createInstallGeneratorsForTargetFileSets = true;
+  bool createInstallGeneratorsForTargetFileSets =
+    runtimeOnly == RuntimeOnly::No;
 
   if (target.IsFrameworkOnApple()) {
     createInstallGeneratorsForTargetFileSets = false;
@@ -836,7 +921,7 @@ bool CreateInstallGeneratorsForTarget(
     }
   }
 
-  if (!namelinkOnly) {
+  if (runtimeOnly == RuntimeOnly::No && !namelinkOnly) {
     for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
       fileSetGenerators.push_back(CreateInstallFileSetGenerator(
         helper, target, fileSetArgs[i], configurations));
@@ -844,7 +929,8 @@ bool CreateInstallGeneratorsForTarget(
     }
   }
 
-  if (!cxxModuleBmiArgs.GetDestination().empty()) {
+  if (runtimeOnly == RuntimeOnly::No &&
+      !cxxModuleBmiArgs.GetDestination().empty()) {
     cxxModuleBmiGenerator = cm::make_unique<cmInstallCxxModuleBmiGenerator>(
       target.GetName(), helper.GetCxxModulesBmiDestination(&cxxModuleBmiArgs),
       cxxModuleBmiArgs.GetPermissions(),
@@ -857,7 +943,12 @@ bool CreateInstallGeneratorsForTarget(
   }
 
   // Add this install rule to an export if one was specified.
-  if (!addTargetExport()) {
+  // Transitive runtime artifacts from RUNTIME_DEPENDENCY_TARGETS are
+  // included; skip if this call created no runtime install generators.
+  bool const hasRuntimeArtifact = libraryGenerator || runtimeGenerator ||
+    frameworkGenerator || bundleGenerator;
+  if ((runtimeOnly == RuntimeOnly::No || hasRuntimeArtifact) &&
+      !addTargetExport()) {
     return false;
   }
 
@@ -891,6 +982,63 @@ bool CreateInstallGeneratorsForTarget(
   }
   helper.Makefile->AddInstallGenerator(std::move(cxxModuleBmiGenerator));
   return true;
+}
+
+bool InstallTargetsGroupedByConfig(
+  Helper& helper, InstallContext const& ctx, InstallCategoryFlags& flags,
+  cmLocalGenerator& lg,
+  std::map<std::string, std::set<cmTarget*>> const& byConfig,
+  std::vector<std::string> const& configs)
+{
+  std::map<cmTarget*, std::size_t> hits;
+  for (std::pair<std::string const, std::set<cmTarget*>> const& e : byConfig) {
+    for (cmTarget* t : e.second) {
+      ++hits[t];
+    }
+  }
+  std::set<cmTarget*> common;
+  std::size_t const n = configs.size();
+  for (std::pair<cmTarget* const, std::size_t> const& h : hits) {
+    if (h.second == n) {
+      common.insert(h.first);
+    }
+  }
+
+  auto installDep =
+    [&](cmTarget& dep,
+        cm::optional<std::vector<std::string>> configurations) -> bool {
+    std::string error;
+    if (!CreateInstallGeneratorsForTarget(helper, dep, ctx, flags, error,
+                                          configurations, RuntimeOnly::Yes)) {
+      lg.IssueMessage(MessageType::FATAL_ERROR, error);
+      return false;
+    }
+    return true;
+  };
+
+  for (cmTarget* dep : common) {
+    if (!installDep(*dep, cm::nullopt)) {
+      return false;
+    }
+  }
+
+  std::map<cmTarget*, std::vector<std::string>> configSpecific;
+  for (std::string const& config : configs) {
+    auto it = byConfig.find(config);
+    if (it == byConfig.end()) {
+      continue;
+    }
+    for (cmTarget* dep : it->second) {
+      if (common.find(dep) == common.end()) {
+        configSpecific[dep].push_back(config);
+      }
+    }
+  }
+  return std::all_of(
+    configSpecific.begin(), configSpecific.end(),
+    [&](std::pair<cmTarget* const, std::vector<std::string>> const& e) {
+      return installDep(*e.first, e.second);
+    });
 }
 
 void CheckAbsoluteDestination(Helper& helper, std::string const& destination)
@@ -1045,6 +1193,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>>
     runtimeDependenciesArgVector;
   std::string runtimeDependencySetArg;
+  bool installTransitiveDependencies = false;
   std::vector<std::string> unknownArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName,
                                         *helper.Makefile);
@@ -1052,6 +1201,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   genericArgs.Bind("EXPORT"_s, exports);
   genericArgs.Bind("RUNTIME_DEPENDENCIES"_s, runtimeDependenciesArgVector);
   genericArgs.Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
+  genericArgs.Bind("RUNTIME_DEPENDENCY_TARGETS"_s,
+                   installTransitiveDependencies);
   genericArgs.Parse(genericArgVector, &unknownArgs);
   bool success = genericArgs.Finalize();
 
@@ -1224,6 +1375,14 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     return false;
   }
 
+  if (installTransitiveDependencies) {
+    if (!exports.empty()) {
+      status.SetError("TARGETS RUNTIME_DEPENDENCY_TARGETS cannot be used "
+                      "with EXPORT.");
+      return false;
+    }
+  }
+
   cmInstallRuntimeDependencySet* runtimeDependencySet = nullptr;
   if (runtimeDependenciesArgVector) {
     if (!runtimeDependencySetArg.empty()) {
@@ -1347,6 +1506,40 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   ctx->Exports = exports;
   ctx->RuntimeDependencySet = runtimeDependencySet;
   ctx->BindGenericArguments();
+
+  if (installTransitiveDependencies) {
+    std::vector<std::string> rootNames;
+    rootNames.reserve(targets.size());
+    for (cmTarget const* t : targets) {
+      rootNames.push_back(t->GetName());
+    }
+
+    helper.Makefile->AddGeneratorAction(
+      [ctx, rootNames](cmLocalGenerator& lg, cmListFileBacktrace const&) {
+        std::vector<std::string> configs =
+          lg.GetMakefile()->GetGeneratorConfigs(
+            cmMakefile::IncludeEmptyConfig);
+
+        std::map<std::string, std::set<cmTarget*>> transitiveTargetsByConfig;
+        for (std::string const& config : configs) {
+          CollectEvaluatedTransitiveSharedModuleTargets(
+            lg, rootNames, transitiveTargetsByConfig[config], config);
+        }
+
+        cmExecutionStatus genStatus(*lg.GetMakefile());
+        Helper genHelper(genStatus);
+        InstallCategoryFlags flags;
+
+        if (!InstallTargetsGroupedByConfig(genHelper, *ctx, flags, lg,
+                                           transitiveTargetsByConfig,
+                                           configs)) {
+          return;
+        }
+
+        RegisterInstallComponents(lg.GetMakefile(), *ctx, flags);
+      },
+      cmMakefile::GeneratorActionWhen::AfterGeneratorTargets);
+  }
 
   InstallCategoryFlags flags;
   flags.FileSet.resize(ctx->FileSetArgs.size(), false);
