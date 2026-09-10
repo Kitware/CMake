@@ -1,7 +1,8 @@
 IMPORTED_LOCATION
 -----------------
 
-Full path to the main file on disk for an ``IMPORTED`` target.
+Full path to the main file on disk for an
+:ref:`IMPORTED <Imported Targets>` target.
 
 Set this to the location of an ``IMPORTED`` target file on disk.  For
 executables this is the location of the executable file.  For ``STATIC``

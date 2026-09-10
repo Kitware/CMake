@@ -1,7 +1,8 @@
 IMPORTED_IMPLIB
 ---------------
 
-Full path to the import library for an ``IMPORTED`` target.
+Full path to the import library for an
+:ref:`IMPORTED <Imported Targets>` target.
 
 This property may be set:
 
