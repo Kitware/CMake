@@ -211,6 +211,12 @@ int testRegularExpression(int, char*[])
   // 'o'-'a'.
   run("charclass.no_escape_invalid_range", ExpectCompile("[\\n-a]", false));
 
+  // By contrast, a literal newline byte '\n' adjacent to '-' forms the
+  // ascending, valid range '\n'(0x0A)-'a'(0x61).
+  run("charclass.literal_newline_in_range", ExpectCompile("[\n-a]", true));
+  run("charclass.literal_newline_range_match",
+      ExpectMatch("[\n-a]+", "q\n19abz", "\n19a", 1, 5));
+
   // Class ranges work over raw byte values, including non-printable
   // control bytes such as \001 (0x01) through \037 (0x1F).
   run("charclass.octal_literal_byte_range",
