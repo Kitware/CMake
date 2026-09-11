@@ -2842,6 +2842,8 @@ void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
                                       this->Makefile->GetDefinition(cmStrCat(
                                         "CMAKE_", lang, "_COMPILER_VERSION")),
                                       "20.0")) {
+      bool const separableCompilation =
+        cmIsOn(this->GetSafeProperty("CUDA_SEPARABLE_COMPILATION"));
       for (CudaArchitecture& architecture : architectures) {
         flags =
           cmStrCat(std::move(flags), " --offload-arch=sm_", architecture.name);
@@ -2851,8 +2853,13 @@ void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
             MessageType::WARNING,
             "Clang doesn't support disabling CUDA real code generation.");
         }
-
-        if (architecture.virtual_) {
+        if (architecture.virtual_ && separableCompilation &&
+            !this->Makefile->GetCMakeInstance()->GetIsInTryCompile()) {
+          this->Makefile->IssueMessage(
+            MessageType::WARNING,
+            "Clang 20+ CUDA offloading model doesn't support virtual archs "
+            "when CUDA_SEPARABLE_COMPILATION is enabled.");
+        } else if (architecture.virtual_) {
           flags = cmStrCat(std::move(flags), " --cuda-include-ptx=sm_",
                            architecture.name);
         }
