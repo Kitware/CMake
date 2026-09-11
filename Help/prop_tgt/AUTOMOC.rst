@@ -107,6 +107,29 @@ be generated in a different location than if it was not included.  This is
 described in the section `Output file location`_.
 
 
+C++ module unit processing
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+C++ module interface and partition units that are members of a
+``FILE_SET`` of type ``CXX_MODULES`` (see :prop_tgt:`CXX_MODULE_SETS`)
+are scanned by ``AUTOMOC`` for a Qt macro from
+:prop_tgt:`AUTOMOC_MACRO_NAMES`, just like other source files.  Running
+``moc`` on them requires Qt 6.13 or newer, whose ``moc`` supports C++
+module units.  With older Qt, a Qt macro found in such a unit is
+reported as an error, and a unit without one is left alone.
+
+If a Qt macro is found, ``moc`` is run on the module unit and its
+generated output is compiled as its own translation unit, as a module
+implementation unit of the same module.  This output participates in
+the target's C++ module dependency scanning like any other source.  It
+is not added to the ``mocs_compilation.cpp`` file described in
+`Output file location`_.
+
+Module implementation units and private module fragments are not
+supported: ``moc`` rejects a Qt macro found in either of these, and
+``AUTOMOC`` does not work around that restriction.
+
+
 Output file location
 ^^^^^^^^^^^^^^^^^^^^
 

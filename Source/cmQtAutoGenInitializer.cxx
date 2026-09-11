@@ -33,10 +33,12 @@
 #include "cmCustomCommandLines.h"
 #include "cmDiagnostics.h"
 #include "cmEvaluatedTargetProperty.h"
+#include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
@@ -1009,6 +1011,17 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     this->AutogenTarget.Sources.emplace(muf->SF, std::move(muf));
   };
 
+  auto addMUModuleUnit = [this](MUFileHandle&& muf) {
+    if (muf->SkipMoc) {
+      return;
+    }
+    // AUTOUIC is not wired up for module units (the uic eval pass ignores
+    // the ModuleUnits collection), so don't carry a UicIt flag nothing acts
+    // on.
+    muf->UicIt = false;
+    this->AutogenTarget.ModuleUnits.emplace(muf->SF, std::move(muf));
+  };
+
   // Scan through target files
   {
     // Scan through target files
@@ -1020,7 +1033,15 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
       // Register files that will be scanned by moc or uic
       if (this->MocOrUicEnabled()) {
-        if (cm->IsAHeaderExtension(extLower)) {
+        // Query one config only: file-set membership can differ per
+        // config, but a per-config module unit kind is not modeled here.
+        cmGeneratorFileSet const* fileSet =
+          this->GenTarget->GetFileSetForSource(this->ConfigDefault,
+                                               acs.Source);
+        if (fileSet &&
+            fileSet->GetType() == cm::FileSetMetadata::CXX_MODULES) {
+          addMUModuleUnit(makeMUFile(acs.Source, fullPath, acs.Configs, true));
+        } else if (cm->IsAHeaderExtension(extLower)) {
           addMUHeader(makeMUFile(acs.Source, fullPath, acs.Configs, true),
                       extLower);
         } else if (cm->IsACLikeSourceExtension(extLower)) {
@@ -1405,6 +1426,68 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       }
     } else {
       autogenByproducts.push_back(this->Moc.CompilationFileGenex);
+    }
+
+    // Module-unit moc outputs are implementation units ("module M;") that
+    // are compiled individually rather than folded into
+    // mocs_compilation.cpp, and must be scanned so dyndep can order them
+    // after the module's BMI.
+    // Sort by path so GetMocBuildPath's dedup-suffix assignment and the
+    // AddSource order below do not depend on unordered_map hash order.
+    // moc can only process C++ module units since Qt 6.13.  With older Qt
+    // there is no moc output to compile, and cmQtAutoMocUic reports any
+    // meta-object macro found in such a unit instead.
+    std::vector<MUFile*> moduleUnits;
+    if (this->QtVersion >= IntegerVersion(6, 13)) {
+      moduleUnits.reserve(this->AutogenTarget.ModuleUnits.size());
+      for (auto const& pair : this->AutogenTarget.ModuleUnits) {
+        moduleUnits.push_back(pair.second.get());
+      }
+      std::sort(moduleUnits.begin(), moduleUnits.end(),
+                [](MUFile const* a, MUFile const* b) {
+                  return (a->FullPath < b->FullPath);
+                });
+    }
+    for (MUFile* mufPtr : moduleUnits) {
+      MUFile& muf = *mufPtr;
+      if (!muf.MocIt) {
+        continue;
+      }
+      std::string const& mocBuildPath = this->GetMocBuildPath(muf);
+      if (!this->MultiConfig || this->GlobalGen->IsXcode()) {
+        std::string const outPath =
+          cmStrCat(this->Dir.Include.Default, '/', mocBuildPath);
+        cmSourceFile* sf = this->RegisterGeneratedSource(outPath, true);
+        // A PCH force-include would inject declarations ahead of the
+        // module implementation unit's "module M;", which may only be
+        // preceded by comments and preprocessor directives.
+        sf->SetProperty("SKIP_PRECOMPILE_HEADERS", "ON");
+        this->GenTarget->AddSource(outPath);
+        // Declare as a byproduct so Ninja re-stats it after autogen reruns.
+        if (useDepfile) {
+          timestampByproducts.push_back(outPath);
+        } else {
+          autogenByproducts.push_back(outPath);
+        }
+      } else {
+        for (auto const& cfg : this->ConfigsList) {
+          std::string const outPath =
+            cmStrCat(this->Dir.Include.Config.at(cfg), '/', mocBuildPath);
+          cmSourceFile* sf = this->RegisterGeneratedSource(outPath, true);
+          // A PCH force-include would inject declarations ahead of the
+          // module implementation unit's "module M;", which may only be
+          // preceded by comments and preprocessor directives.
+          sf->SetProperty("SKIP_PRECOMPILE_HEADERS", "ON");
+          this->GenTarget->AddSource(
+            cmStrCat("$<$<CONFIG:"_s, cfg, ">:"_s, outPath, ">"_s));
+          // Declare as a byproduct so Ninja re-stats it after autogen reruns.
+          if (useDepfile) {
+            timestampByproducts.push_back(outPath);
+          } else {
+            autogenByproducts.push_back(outPath);
+          }
+        }
+      }
     }
   }
 
@@ -1906,6 +1989,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
   std::set<std::string> uic_skip;
   std::vector<MUFile const*> headers;
   std::vector<MUFile const*> sources;
+  std::vector<MUFile const*> moduleUnits;
 
   // Filter headers
   {
@@ -1950,6 +2034,21 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       }
     }
     std::sort(sources.begin(), sources.end(),
+              [](MUFile const* a, MUFile const* b) {
+                return (a->FullPath < b->FullPath);
+              });
+  }
+
+  // Filter module units
+  {
+    moduleUnits.reserve(this->AutogenTarget.ModuleUnits.size());
+    for (auto const& pair : this->AutogenTarget.ModuleUnits) {
+      MUFile const* const muf = pair.second.get();
+      if (muf->MocIt) {
+        moduleUnits.emplace_back(muf);
+      }
+    }
+    std::sort(moduleUnits.begin(), moduleUnits.end(),
               [](MUFile const* a, MUFile const* b) {
                 return (a->FullPath < b->FullPath);
               });
@@ -2016,6 +2115,15 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       jval[1u] = cmStrCat(muf->MocIt ? 'M' : 'm', muf->UicIt ? 'U' : 'u');
       jval[2u] = cfgArray(muf->Configs);
     });
+  info.SetArrayArray("CXX_MODULE_UNITS", moduleUnits,
+                     [this, &cfgArray](Json::Value& jval, MUFile const* muf) {
+                       jval.resize(4u);
+                       jval[0u] = muf->FullPath;
+                       jval[1u] = cmStrCat(muf->MocIt ? 'M' : 'm',
+                                           muf->UicIt ? 'U' : 'u');
+                       jval[2u] = cfgArray(muf->Configs);
+                       jval[3u] = this->GetMocBuildPath(*muf);
+                     });
 
   // Write moc settings
   if (this->Moc.Enabled) {
@@ -2170,7 +2278,7 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
 }
 
 cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
-  std::string const& filename)
+  std::string const& filename, bool scanForModules)
 {
   cmSourceFile* gFile = this->Makefile->GetOrCreateSource(filename, true);
   gFile->SetSpecialSourceType(
@@ -2178,7 +2286,7 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
   gFile->MarkAsGenerated();
   gFile->SetProperty("SKIP_AUTOGEN", "1");
   gFile->SetProperty("SKIP_LINTING", "ON");
-  gFile->SetProperty("CXX_SCAN_FOR_MODULES", "0");
+  gFile->SetProperty("CXX_SCAN_FOR_MODULES", scanForModules ? "1" : "0");
   return gFile;
 }
 
@@ -2457,9 +2565,15 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target,
   return res;
 }
 
-std::string cmQtAutoGenInitializer::GetMocBuildPath(MUFile const& muf)
+std::string const& cmQtAutoGenInitializer::GetMocBuildPath(MUFile const& muf)
 {
-  std::string res;
+  // The de-duplication below is not idempotent: without memoizing, a second
+  // call for the same file would hand out a different path.
+  if (!muf.MocBuildPath.empty()) {
+    return muf.MocBuildPath;
+  }
+
+  std::string& res = muf.MocBuildPath;
   if (!muf.MocIt) {
     return res;
   }

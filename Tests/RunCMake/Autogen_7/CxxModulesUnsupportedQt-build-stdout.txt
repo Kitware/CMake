@@ -1,0 +1,1 @@
+contains a "Q_OBJECT" macro, but it is a C\+\+ module unit and moc from Qt [0-9]+\.[0-9]+ cannot process those\.
