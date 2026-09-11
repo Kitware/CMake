@@ -841,7 +841,7 @@ Signatures
 
   .. code-block:: cmake
 
-    install([[SCRIPT <file>] [CODE <code>]]
+    install({ SCRIPT <file> | CODE <code> }...
             [ALL_COMPONENTS | COMPONENT <component>]
             [EXCLUDE_FROM_ALL])
 
