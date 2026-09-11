@@ -1,0 +1,126 @@
+# Packages needed to build CMake, run its test suite, and build its
+# documentation.
+#
+# This list mirrors `.gitlab/ci/docker/debian13-x86_64/deps_packages.lst`,
+# section by section, so that the two are easy to compare as our
+# dependencies evolve.  Package names differ where Ubuntu names them
+# differently, and entries needed only by our CI infrastructure are left out
+# with a note saying so.
+#
+# Additions for personal use belong in `.devcontainer/hooks/root.sh`.
+# See `Help/dev/devcontainer.rst`.
+
+locales
+
+# Install build requirements.
+libssl-dev
+
+# Install development tools.
+g++
+curl
+git
+
+# The base image carries no certificate store, which `curl` and `apt` need
+# to reach anything over HTTPS.
+ca-certificates
+
+# Install optional external build dependencies.
+libarchive-dev
+libbz2-dev
+libcurl4-gnutls-dev
+libexpat1-dev
+libjsoncpp-dev
+liblzma-dev
+libncurses-dev
+librhash-dev
+libuv1-dev
+libzstd-dev
+zlib1g-dev
+
+# NOTE `include-what-you-use` is not provided here.  CI builds it from
+# source, which is more than a development container needs.
+
+# Tools needed for the test suite.
+jq
+
+# Packages needed to test CTest.
+brz
+cvs
+subversion
+mercurial
+
+# Install ASM_NASM language toolchain.
+nasm
+
+# NOTE The HIP language toolchain, `hipcc`, is not provided here.  It is
+# large and rarely needed while working on CMake itself.
+
+# NOTE The IAR compiler is not provided here, so neither are the packages it
+# depends on.
+
+# Packages needed to test find modules.
+alsa-utils
+aspell
+aspell-en
+doxygen graphviz
+freeglut3-dev
+libgnutls28-dev
+libarchive-dev
+libaspell-dev
+libblas-dev
+libboost-dev
+libboost-filesystem-dev
+libboost-program-options-dev
+libboost-python-dev
+libboost-thread-dev
+libbz2-dev
+libcups2-dev
+libcurl4-gnutls-dev
+libdevil-dev
+libfontconfig1-dev
+libfreetype-dev
+libgdal-dev
+libgif-dev
+libgl1-mesa-dev
+libglew-dev
+libgmock-dev
+libgrpc++-dev libgrpc-dev
+libgsl-dev
+libgtest-dev
+libgtk2.0-dev
+libhdf5-dev
+libhdf5-mpich-dev
+libhdf5-openmpi-dev
+libicu-dev
+libinput-dev
+libjpeg-dev
+libjsoncpp-dev
+liblapack-dev
+liblzma-dev
+libmagick++-dev
+libopenal-dev
+libopenmpi-dev openmpi-bin
+libosp-dev
+libpng-dev
+libpq-dev postgresql-server-dev-18
+libprotobuf-dev libprotobuf-c-dev libprotoc-dev protobuf-compiler protobuf-compiler-grpc
+libsdl1.2-dev
+libsqlite3-dev
+libtiff-dev
+libuv1-dev
+libwxgtk3.2-dev
+libx11-dev
+libxalan-c-dev
+libxerces-c-dev
+libxml2-dev libxml2-utils
+libxslt1-dev xsltproc
+openjdk-25-jdk
+python3 python3-dev python3-numpy pypy3 pypy3-dev python3-venv
+qtbase5-dev qtbase5-dev-tools
+rbenv ruby-build
+ruby ruby-dev
+swig
+unixodbc-dev
+
+# NOTE The packages needed to test ironpython are not provided here.  Ubuntu
+# no longer carries `libmono-system-windows-forms4.0-cil`.

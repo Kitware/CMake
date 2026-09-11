@@ -657,6 +657,13 @@
         - docker
         - linux-x86_64
 
+.linux_x86_64_priv_tags:
+    tags:
+        - cmake
+        - docker
+        - linux-x86_64
+        - privileged
+
 .linux_x86_64_v3_tags:
     tags:
         - cmake
@@ -969,3 +976,11 @@
           -DCMake_SPHINX_CMAKE_ORG_OUTDATED=$CMAKE_CI_SPHINX_OUTDATED
           -DCMake_VERSION_NO_GIT=$CMAKE_CI_VERSION_NO_GIT
         - ninja
+
+### Devcontainer testing
+
+.cmake_test_devcontainer:
+    stage: test
+    script:
+        - dnf install -y --setopt=install_weak_deps=False podman
+        - .gitlab/ci/devcontainer-run.sh

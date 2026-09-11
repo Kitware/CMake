@@ -1,0 +1,85 @@
+{
+  "name": "CMake",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "cmake-dev",
+  // Name the workspace path explicitly rather than take the default a tool
+  // picks for itself, so that the path is the same under every tool and in
+  // the CI job of `.gitlab/ci/devcontainer-run.sh`, which mounts the source
+  // tree itself.  `create_user.sh` creates the directory and gives it to the
+  // container user.
+  "workspaceFolder": "/home/cmake-dev/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/cmake-dev/workspace,type=bind",
+  "containerEnv": {
+    "GITLAB_HOST": "gitlab.kitware.com"
+  },
+  "remoteEnv": {
+    "GITLAB_CLIENT_ID": "${localEnv:GITLAB_CLIENT_ID}",
+    "GITLAB_TOKEN": "${localEnv:GITLAB_TOKEN}"
+  },
+  "mounts": [
+    {
+      "type": "volume",
+      "source": "cmake-dev-ccache",
+      "target": "/home/cmake-dev/.cache/ccache"
+    },
+    {
+      "type": "volume",
+      "source": "cmake-dev-glab-cli",
+      "target": "/home/cmake-dev/.config/glab-cli"
+    }
+  ],
+  // Run the optional local customization hooks.  Each phase is a no-op unless
+  // the developer has written that hook.  See `Help/dev/devcontainer.rst`.
+  //
+  // Each is written as a named entry, the form that runs entries concurrently
+  // and says which one is speaking.  Only `postAttachCommand` has two, but
+  // naming the hook everywhere keeps its output labeled the same way, and
+  // leaves room for a second entry beside it.
+  //
+  // `initializeCommand` runs on the host, so unlike the others it needs a
+  // POSIX shell there; naming `sh` explicitly, in the form that starts no
+  // shell of its own, is what makes that work outside a Unix host.
+  "initializeCommand": {
+    "hooks": [
+      "sh",
+      "${localWorkspaceFolder}/.devcontainer/run-hooks.sh",
+      "initialize"
+    ]
+  },
+  "postCreateCommand": {
+    "hooks": [
+      "${containerWorkspaceFolder}/.devcontainer/run-hooks.sh",
+      "post-create"
+    ]
+  },
+  "postStartCommand": {
+    "hooks": [
+      "${containerWorkspaceFolder}/.devcontainer/run-hooks.sh",
+      "post-start"
+    ]
+  },
+  "postAttachCommand": {
+    "setup-status": ["${containerWorkspaceFolder}/.devcontainer/setup-status.sh"],
+    "hooks": [
+      "${containerWorkspaceFolder}/.devcontainer/run-hooks.sh",
+      "post-attach"
+    ]
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "EditorConfig.EditorConfig",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools",
+        "lextudio.restructuredtext",
+        "llvm-vs-code-extensions.vscode-clangd"
+      ],
+      "settings": {
+        "C_Cpp.clang_format_path": "/usr/bin/clang-format-18",
+        "cmake.configureOnOpen": false
+      }
+    }
+  }
+}

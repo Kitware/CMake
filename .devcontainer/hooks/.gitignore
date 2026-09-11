@@ -1,0 +1,5 @@
+# Local customizations applied while building the development container.
+# Everything here is ignored, except this file, so that customizations may
+# bring along whatever files they need.  See `Help/dev/devcontainer.rst`.
+/*
+!/.gitignore

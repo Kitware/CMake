@@ -36,6 +36,7 @@ Developer Documentation
 
 CMake developer documentation is provided by the following documents:
 
+* The `CMake Dev Container Guide`_.
 * The `CMake Source Code Guide`_.
 * The `CMake Documentation Guide`_.
 * The `CMake Testing Guide`_.
@@ -43,6 +44,7 @@ CMake developer documentation is provided by the following documents:
 * The `CMake Debugging Guide`_.
 * The `CMake Diagnostics Guide`_.
 
+.. _`CMake Dev Container Guide`: devcontainer.rst
 .. _`CMake Source Code Guide`: source.rst
 .. _`CMake Documentation Guide`: documentation.rst
 .. _`CMake Testing Guide`: testing.rst

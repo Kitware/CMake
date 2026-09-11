@@ -1,0 +1,70 @@
+# Packages that make the container a comfortable place to work in, but that
+# building CMake, running its test suite, and building its documentation do
+# not need, and so are not part of `deps_packages.lst`.
+#
+# Additions for personal use belong in `.devcontainer/hooks/root.sh`.
+# See `Help/dev/devcontainer.rst`.
+
+# Make the shell pleasant to work in interactively.  `unminimize` restores
+# the documentation of the packages the base image provides, which it ships
+# without; see `Help/dev/devcontainer.rst`.
+bash-completion
+less
+man-db
+manpages
+manpages-dev
+nano
+unminimize
+vim
+
+# Build CMake.  `g++` comes from `deps_packages.lst`, as CI builds with it;
+# `clang` is here for developers who prefer to build with it instead.
+#
+# `gfortran` is named only to keep the Fortran-only `gcc-16` build that
+# Ubuntu 26.04 carries out of the container: `libopenmpi-dev` lists
+# `gfortran-16` first among the alternatives it accepts, and Clang, which
+# selects the newest GCC installation it finds, cannot link against one that
+# provides no C++ standard library.
+ccache
+clang
+cmake
+gfortran
+ninja-build
+
+# Debug and diagnose CMake.  The sanitizer runtimes come with the compilers,
+# so building with `-fsanitize=` needs nothing installed here.
+gdb
+valgrind
+
+# Analyze CMake.  `clazy` is the compiler our Clazy CI job builds with,
+# `clang-tools` provides `scan-build`, and `clang-tidy` runs the checks in
+# `.clang-tidy`.  Name the version of `clang-tidy` our checks are written
+# against: `Utilities/ClangTidyModule` tracks the Clang release our CI image
+# carries, and older versions report `cmake-use-cmsys-fstream` where they
+# should not.  Ubuntu's unversioned `clang-tidy` package is a release behind.
+# `clazy` and `clang-tools` are whatever versions Ubuntu carries, so expect
+# their diagnostics to differ from those jobs'.  CMake's own checks are not
+# among them either way: `CMake_USE_CLANG_TIDY_MODULE` needs
+# `Utilities/ClangTidyModule` built against Clang's development files, which
+# are not installed here.
+clang-tidy-22
+clang-tools
+clazy
+
+# Build the documentation.
+python3-sphinx
+
+# Satisfy our style rules.  Our `.clang-format` requires `clang-format`
+# version 18, exactly, so install that version by name.  Do not install the
+# unversioned `clang-format` package: it provides a much newer version.
+clang-format-18
+pre-commit
+
+# Run `glab` and `glab-axi`, and reach GitLab over SSH.  `nodejs` and `npm`
+# are needed both to install `glab-axi` and to run it.
+nodejs
+npm
+openssh-client
+
+# Let the unprivileged container user install more packages.
+sudo

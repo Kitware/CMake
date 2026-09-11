@@ -193,6 +193,16 @@ l:clazy-fedora44:
         - .rules
     needs: []
 
+t:devcontainer-fedora44:
+    extends:
+        - .fedora44
+        - .cmake_test_devcontainer
+        - .linux_x86_64_priv_tags
+        - .rules
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+    needs: []
+
 # Coverage builds
 
 b:fedora44-gcc-gcov:
