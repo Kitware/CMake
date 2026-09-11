@@ -1,0 +1,8 @@
+^CMake Error at CMP0222-NEW-churn\.cmake:[0-9]+ \(if\):
+  if given arguments:
+
+    "NOT" "PATH_IS_PREFIX" "STREQUAL" "yes"
+
+  Unknown arguments specified
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

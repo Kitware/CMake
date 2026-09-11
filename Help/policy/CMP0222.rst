@@ -1,0 +1,17 @@
+CMP0222
+-------
+
+.. versionadded:: 4.5
+
+The :command:`if` command supports path prefix tests using
+``PATH_IS_PREFIX`` operator.
+
+The ``OLD`` behavior for this policy is to ignore the ``PATH_IS_PREFIX``
+operator.  The ``NEW`` behavior is to interpret the ``PATH_IS_PREFIX``
+operator.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.5
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

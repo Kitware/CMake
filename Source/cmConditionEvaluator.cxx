@@ -66,6 +66,7 @@ auto const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL"_s;
 auto const keyVERSION_LESS = "VERSION_LESS"_s;
 auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
 auto const keyPATH_EQUAL = "PATH_EQUAL"_s;
+auto const keyPATH_IS_PREFIX = "PATH_IS_PREFIX"_s;
 
 cmSystemTools::CompareOp const MATCH2CMPOP[5] = {
   cmSystemTools::OP_LESS, cmSystemTools::OP_LESS_EQUAL,
@@ -222,6 +223,7 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
   : Makefile(makefile)
   , Backtrace(std::move(bt))
   , Policy139Status(makefile.GetPolicyStatus(cmPolicies::CMP0139))
+  , Policy222Status(makefile.GetPolicyStatus(cmPolicies::CMP0222))
 {
 }
 
@@ -675,6 +677,26 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         this->Makefile.IssuePolicyWarning(
           cmPolicies::CMP0139, {},
           "PATH_EQUAL will be interpreted as an operator "
+          "when the policy is set to NEW.  "
+          "Since the policy is not set the OLD behavior will be used."_s);
+      }
+    }
+
+    else if (this->IsKeyword(keyPATH_IS_PREFIX, *args.next)) {
+
+      if (this->Policy222Status != cmPolicies::OLD &&
+          this->Policy222Status != cmPolicies::WARN) {
+
+        cmValue lhs = this->GetVariableOrString(*args.current);
+        cmValue rhs = this->GetVariableOrString(*args.nextnext);
+        auto const result = cmCMakePath{ *lhs }.IsPrefix(cmCMakePath{ *rhs });
+        newArgs.ReduceTwoArgs(result, args);
+      }
+
+      else if (this->Policy222Status == cmPolicies::WARN) {
+        this->Makefile.IssuePolicyWarning(
+          cmPolicies::CMP0222, {},
+          "PATH_IS_PREFIX will be interpreted as an operator "
           "when the policy is set to NEW.  "
           "Since the policy is not set the OLD behavior will be used."_s);
       }

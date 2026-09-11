@@ -429,6 +429,40 @@ Path Comparisons
 
   See :command:`cmake_path(COMPARE)` for more details.
 
+.. signature:: if(<variable|string> PATH_IS_PREFIX <variable|string>)
+  :target: PATH_IS_PREFIX
+
+  .. versionadded:: 4.5
+
+  True if the path on the left is a prefix of the path on the right.
+
+  .. code-block:: cmake
+
+    # comparison is TRUE
+    if ("/a/b" PATH_IS_PREFIX "/a/b/c")
+       ...
+    endif()
+
+    # comparison is FALSE: '/a/bc' is a sibling, not a child
+    if ("/a/b" PATH_IS_PREFIX "/a/bc")
+       ...
+    endif()
+
+  Component-wise comparison is superior to a regular expression match
+  against the start of the path.  The ``if (<path> MATCHES "^<prefix>")``
+  idiom mishandles regex metacharacters in ``<prefix>`` and accepts
+  siblings.
+
+  The test is lexical, not a containment check.  No
+  :ref:`path normalization <Normalization>` is performed, so a ``..``
+  escape still tests true: ``"/a/b" PATH_IS_PREFIX "/a/b/../../etc"``.
+  Normalize with :command:`cmake_path(NORMAL_PATH)` first if that must be
+  rejected.
+
+  Equivalent to :command:`cmake_path(IS_PREFIX)` and
+  ``$<PATH:IS_PREFIX>`` without their ``NORMALIZE`` option.  See
+  :command:`cmake_path(IS_PREFIX)` for more details.
+
 Variable Expansion
 ^^^^^^^^^^^^^^^^^^
 
