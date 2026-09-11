@@ -149,37 +149,32 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     }
 
     std::string buildCommand =
-      cmStrCat('"', cmSystemTools::GetCMakeCommand(), '"');
-    buildCommand += " --build . --preset \"";
-    buildCommand += effectivePreset;
-    buildCommand += "\"";
+      cmStrCat('"', cmSystemTools::GetCMakeCommand(),
+               "\" --build . --preset \"", effectivePreset, '"');
 
     if (!presetsFile.empty()) {
-      buildCommand += " --presets-file \"";
-      buildCommand += presetsFile;
-      buildCommand += "\"";
+      buildCommand = cmStrCat(std::move(buildCommand), " --presets-file \"",
+                              presetsFile, '"');
     }
 
     if (!cmakeBuildConfiguration.empty()) {
-      buildCommand += " --config \"";
-      buildCommand += cmakeBuildConfiguration;
-      buildCommand += "\"";
+      buildCommand = cmStrCat(std::move(buildCommand), " --config \"",
+                              cmakeBuildConfiguration, '"');
     }
 
     if (!cmakeBuildTarget.empty()) {
-      buildCommand += " --target \"";
-      buildCommand += cmakeBuildTarget;
-      buildCommand += "\"";
+      buildCommand = cmStrCat(std::move(buildCommand), " --target \"",
+                              cmakeBuildTarget, '"');
     }
 
     if (!args.ParallelLevel.empty()) {
-      buildCommand += " --parallel ";
-      buildCommand += args.ParallelLevel;
+      buildCommand =
+        cmStrCat(std::move(buildCommand), " --parallel ", args.ParallelLevel);
     }
 
     if (!cmakeBuildAdditionalFlags.empty()) {
-      buildCommand += " -- ";
-      buildCommand += cmakeBuildAdditionalFlags;
+      buildCommand =
+        cmStrCat(std::move(buildCommand), " -- ", cmakeBuildAdditionalFlags);
     }
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -197,9 +192,9 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       auto globalGenerator =
         mf.GetCMakeInstance()->CreateGlobalGenerator(*cmakeGeneratorName);
       if (!globalGenerator) {
-        std::string e = cmStrCat("could not create generator named \"",
-                                 *cmakeGeneratorName, '"');
-        mf.IssueMessage(MessageType::FATAL_ERROR, e);
+        mf.IssueMessage(MessageType::FATAL_ERROR,
+                        cmStrCat("could not create generator named \"",
+                                 *cmakeGeneratorName, '"'));
         cmSystemTools::SetFatalErrorOccurred();
         return nullptr;
       }
@@ -217,14 +212,14 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       this->CTest->SetCTestConfiguration("MakeCommand", buildCommand,
                                          args.Quiet);
     } else {
-      std::ostringstream ostr;
+      std::string error;
       /* clang-format off */
-      ostr << "has no project to build. If this is a "
+      error = "has no project to build. If this is a "
         "\"built with CMake\" project, verify that CTEST_CMAKE_GENERATOR "
         "is set. Otherwise, set CTEST_BUILD_COMMAND to build the project "
         "with a custom command line.";
       /* clang-format on */
-      status.SetError(ostr.str());
+      status.SetError(error);
       return nullptr;
     }
   }

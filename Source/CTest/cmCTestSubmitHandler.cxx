@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <sstream>
+#include <utility>
 
 #include <cm/iomanip>
 #include <cm/optional>
@@ -245,21 +246,19 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         // Provide extra arguments to CDash so that it can initialize and
         // return a buildid.
         cmCTestCurl ctest_curl(this->CTest);
-        upload_as += "&build=";
-        upload_as +=
-          ctest_curl.Escape(this->CTest->GetCTestConfiguration("BuildName"));
-        upload_as += "&site=";
-        upload_as +=
-          ctest_curl.Escape(this->CTest->GetCTestConfiguration("Site"));
-        upload_as += "&stamp=";
-        upload_as += ctest_curl.Escape(this->CTest->GetCurrentTag());
-        upload_as += "-";
-        upload_as += ctest_curl.Escape(this->CTest->GetTestGroupString());
+        upload_as = cmStrCat(
+          std::move(upload_as), "&build=",
+          ctest_curl.Escape(this->CTest->GetCTestConfiguration("BuildName")),
+          "&site=",
+          ctest_curl.Escape(this->CTest->GetCTestConfiguration("Site")),
+          "&stamp=", ctest_curl.Escape(this->CTest->GetCurrentTag()), '-',
+          ctest_curl.Escape(this->CTest->GetTestGroupString()));
         if (cmake* cm = this->CMake) {
           cmValue subproject = cm->GetState()->GetGlobalProperty("SubProject");
           if (subproject) {
-            upload_as += "&subproject=";
-            upload_as += ctest_curl.Escape(*subproject);
+            upload_as =
+              cmStrCat(std::move(upload_as),
+                       "&subproject=", ctest_curl.Escape(*subproject));
           }
         }
       }
@@ -275,13 +274,12 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         this->CTest->GenerateDoneFile();
       }
 
-      upload_as += "&MD5=";
-
       if (this->InternalTest) {
-        upload_as += "ffffffffffffffffffffffffffffffff";
+        upload_as += "&MD5=ffffffffffffffffffffffffffffffff";
       } else {
         cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
-        upload_as += hasher.HashFile(local_file);
+        upload_as =
+          cmStrCat(std::move(upload_as), "&MD5=", hasher.HashFile(local_file));
       }
 
       if (!cmSystemTools::FileExists(local_file)) {
@@ -729,8 +727,8 @@ int cmCTestSubmitHandler::ProcessHandler()
     this->HTTPProxyType = 1;
     this->HTTPProxy = proxy;
     if (getenv("HTTP_PROXY_PORT")) {
-      this->HTTPProxy += ":";
-      this->HTTPProxy += getenv("HTTP_PROXY_PORT");
+      this->HTTPProxy =
+        cmStrCat(std::move(this->HTTPProxy), ':', getenv("HTTP_PROXY_PORT"));
     }
     if (char const* proxy_type = getenv("HTTP_PROXY_TYPE")) {
       std::string type = proxy_type;
@@ -747,8 +745,8 @@ int cmCTestSubmitHandler::ProcessHandler()
       this->HTTPProxyAuth = getenv("HTTP_PROXY_USER");
     }
     if (getenv("HTTP_PROXY_PASSWD")) {
-      this->HTTPProxyAuth += ":";
-      this->HTTPProxyAuth += getenv("HTTP_PROXY_PASSWD");
+      this->HTTPProxyAuth = cmStrCat(std::move(this->HTTPProxyAuth), ':',
+                                     getenv("HTTP_PROXY_PASSWD"));
     }
   }
 
@@ -779,9 +777,9 @@ int cmCTestSubmitHandler::ProcessHandler()
   if (this->CTest->AddIfExists(cmCTest::PartCoverage, "Coverage.xml")) {
     std::vector<std::string> gfiles;
     std::string gpath =
-      buildDirectory + "/Testing/" + this->CTest->GetCurrentTag();
+      cmStrCat(buildDirectory, "/Testing/", this->CTest->GetCurrentTag());
     std::string::size_type glen = gpath.size() + 1;
-    gpath = gpath + "/CoverageLog*";
+    gpath += "/CoverageLog*";
     cmCTestOptionalLog(this->CTest, DEBUG,
                        "Globbing for: " << gpath << std::endl, this->Quiet);
     if (cmSystemTools::SimpleGlob(gpath, gfiles, 1)) {
@@ -848,9 +846,9 @@ int cmCTestSubmitHandler::ProcessHandler()
   std::string url = this->CTest->GetSubmitURL();
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                      "   SubmitURL: " << url << '\n', this->Quiet);
-  if (!this->SubmitUsingHTTP(buildDirectory + "/Testing/" +
-                               this->CTest->GetCurrentTag(),
-                             files, prefix, url)) {
+  if (!this->SubmitUsingHTTP(
+        cmStrCat(buildDirectory, "/Testing/", this->CTest->GetCurrentTag()),
+        files, prefix, url)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "   Problems when submitting via HTTP\n");
     ofs << "   Problems when submitting via HTTP\n";
@@ -877,10 +875,9 @@ std::string cmCTestSubmitHandler::GetSubmitResultsPrefix()
 {
   std::string buildname =
     cmCTest::SafeBuildIdField(this->CTest->GetCTestConfiguration("BuildName"));
-  std::string name = this->CTest->GetCTestConfiguration("Site") + "___" +
-    buildname + "___" + this->CTest->GetCurrentTag() + "-" +
-    this->CTest->GetTestGroupString() + "___XML___";
-  return name;
+  return cmStrCat(this->CTest->GetCTestConfiguration("Site"), "___", buildname,
+                  "___", this->CTest->GetCurrentTag(), '-',
+                  this->CTest->GetTestGroupString(), "___XML___");
 }
 
 void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)

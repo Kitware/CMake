@@ -83,8 +83,7 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
     }
   }
 
-  this->ProcessOutput += line;
-  this->ProcessOutput += "\n";
+  this->ProcessOutput = cmStrCat(std::move(this->ProcessOutput), line, '\n');
 
   // Check for TIMEOUT_AFTER_MATCH property.
   if (!this->TestProperties->TimeoutRegularExpressions.empty()) {
@@ -136,10 +135,9 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
     if (!found) {
       reason = "Required regular expression not found. Regex=[";
       for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
-        reason += pass.second;
-        reason += "\n";
+        reason = cmStrCat(std::move(reason), pass.second, '\n');
       }
-      reason += "]";
+      reason += ']';
       forceFail = true;
     }
   }
@@ -265,16 +263,15 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
         std::max<size_t>(this->CTest->GetMaxTestNameWidth(), testName.size());
       testName.resize(maxTestNameWidth + 4, '.');
 
-      output += testName;
-      output += outputStream.str();
+      output = cmStrCat(std::move(output), testName, outputStream.str());
       outputStream.str("");
       outputStream.clear();
       outputStream << output;
       cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, "\n"); // flush
     }
     if (completed == total) {
-      std::string testName = this->GetTestPrefix(completed, total) +
-        this->TestProperties->Name + "\n";
+      std::string testName = cmStrCat(this->GetTestPrefix(completed, total),
+                                      this->TestProperties->Name, '\n');
       cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
     }
   }
@@ -384,7 +381,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
     std::string const stampDir = this->CTest->GetStampDir();
     cmSystemTools::MakeDirectory(stampDir);
     std::string const stampFile =
-      stampDir + "/" + this->TestProperties->GetStampFile();
+      cmStrCat(stampDir, '/', this->TestProperties->GetStampFile());
     cmSystemTools::Touch(stampFile, true);
   }
   // If the test does not need to rerun push the current TestResult onto the
@@ -564,9 +561,9 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 
   std::string runIterationSuffix{};
   if (this->NumberOfRunsTotal > 1) {
-    runIterationSuffix = " (run " +
-      std::to_string(1 + this->NumberOfRunsTotal - this->NumberOfRunsLeft) +
-      "/" + std::to_string(this->NumberOfRunsTotal) + ")";
+    runIterationSuffix =
+      cmStrCat(" (run ", 1 + this->NumberOfRunsTotal - this->NumberOfRunsLeft,
+               '/', this->NumberOfRunsTotal, ')');
   }
   if (!this->CTest->GetTestProgressOutput()) {
     cmCTestLog(
@@ -576,8 +573,8 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
         << this->TestProperties->Index << ": " << this->TestProperties->Name
         << runIterationSuffix << std::endl);
   } else {
-    std::string testName = this->GetTestPrefix(completed, total) +
-      this->TestProperties->Name + "\n";
+    std::string testName = cmStrCat(this->GetTestPrefix(completed, total),
+                                    this->TestProperties->Name, '\n');
     cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
   }
 
@@ -624,7 +621,7 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
   if (!this->FailedDependencies.empty()) {
     std::string msg = "Failed test dependencies:";
     for (std::string const& failedDep : this->FailedDependencies) {
-      msg += " " + failedDep;
+      msg = cmStrCat(std::move(msg), ' ', failedDep);
     }
     *this->TestHandler->LogFile << msg << std::endl;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, msg << std::endl);
@@ -722,15 +719,11 @@ void cmCTestRunTest::ComputeArguments()
   // Prepends memcheck args to our command string
   this->TestHandler->GenerateTestCommand(this->Arguments, this->Index);
   for (std::string const& arg : this->Arguments) {
-    testCommand += " \"";
-    testCommand += arg;
-    testCommand += "\"";
+    testCommand = cmStrCat(std::move(testCommand), " \"", arg, '"');
   }
 
   for (; j != this->TestProperties->Args.end(); ++j) {
-    testCommand += " \"";
-    testCommand += *j;
-    testCommand += "\"";
+    testCommand = cmStrCat(std::move(testCommand), " \"", *j, '"');
     this->Arguments.push_back(*j);
   }
   // Append passthrough arguments from ctest command line (after --)
@@ -759,9 +752,7 @@ void cmCTestRunTest::ComputeArguments()
                            realArguments.end());
 
     testCommand = cmSystemTools::ConvertToOutputPath(this->ActualCommand);
-    for (std::string const& arg : this->Arguments) {
-      testCommand += cmStrCat(" \"", arg, '"');
-    }
+    testCommand += cmWrap(" \"", this->Arguments, "\"", "");
     this->TestResult.Environment.clear();
   }
   this->TestResult.FullCommandLine = testCommand;

@@ -9,6 +9,7 @@
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
 bool cmInstallTargetsCommand(std::vector<std::string> const& args,
@@ -49,8 +50,8 @@ bool cmInstallTargetsCommand(std::vector<std::string> const& args,
         ti->second.SetRuntimeInstallPath(runtimeDir);
         ti->second.SetHaveInstallRule(true);
       } else {
-        std::string str = "Cannot find target: \"" + *s + "\" to install.";
-        status.SetError(str);
+        status.SetError(
+          cmStrCat("Cannot find target: \"", *s, "\" to install."));
         return false;
       }
     }

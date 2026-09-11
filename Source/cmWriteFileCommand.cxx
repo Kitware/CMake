@@ -42,9 +42,8 @@ bool cmWriteFileCommand(std::vector<std::string> const& args,
   }
 
   if (!mf.CanIWriteThisFile(fileName)) {
-    std::string e =
-      "attempted to write a file: " + fileName + " into a source directory.";
-    status.SetError(e);
+    status.SetError(cmStrCat("attempted to write a file: ", fileName,
+                             " into a source directory."));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -73,10 +72,8 @@ bool cmWriteFileCommand(std::vector<std::string> const& args,
   cmsys::ofstream file(fileName.c_str(),
                        overwrite ? std::ios::out : std::ios::app);
   if (!file) {
-    std::string error =
-      cmStrCat("Internal CMake error when trying to open file: ", fileName,
-               " for writing.");
-    status.SetError(error);
+    status.SetError(cmStrCat("Internal CMake error when trying to open file: ",
+                             fileName, " for writing."));
     return false;
   }
   file << message << '\n';

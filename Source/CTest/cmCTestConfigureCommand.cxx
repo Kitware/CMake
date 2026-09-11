@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/memory>
@@ -43,22 +44,20 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
                                std::string const presetsFile,
                                std::string& configureCommand)
 {
-  configureCommand = cmStrCat('"', cmSystemTools::GetCMakeCommand(), '"');
-  configureCommand += " \"-S";
-  configureCommand += cmSystemTools::CollapseFullPath(sourceDirectory);
-  configureCommand += "\"";
+  configureCommand =
+    cmStrCat('"', cmSystemTools::GetCMakeCommand(), "\" \"-S",
+             cmSystemTools::CollapseFullPath(sourceDirectory), '"');
 
   if (!buildDirectory.empty()) {
-    configureCommand += " \"-B";
-    configureCommand += cmSystemTools::CollapseFullPath(buildDirectory);
-    configureCommand += "\"";
+    configureCommand =
+      cmStrCat(std::move(configureCommand), " \"-B",
+               cmSystemTools::CollapseFullPath(buildDirectory), '"');
   }
 
   cmValue cmakeGenerator = mf.GetDefinition("CTEST_CMAKE_GENERATOR");
   if (cmNonempty(cmakeGenerator)) {
-    configureCommand += " \"-G";
-    configureCommand += cmakeGenerator;
-    configureCommand += "\"";
+    configureCommand =
+      cmStrCat(std::move(configureCommand), " \"-G", cmakeGenerator, '"');
   }
 
   bool presetProvidesBuildDir = false;
@@ -86,16 +85,12 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
 
     auto const* expandedPreset = resolveResult.Preset;
 
-    configureCommand += " \"--preset\"";
-    configureCommand += " \"";
-    configureCommand += presetName;
-    configureCommand += "\"";
+    configureCommand = cmStrCat(std::move(configureCommand),
+                                R"( "--preset" ")", presetName, '"');
 
     if (!presetsFile.empty()) {
-      configureCommand += " \"--presets-file\"";
-      configureCommand += " \"";
-      configureCommand += presetsFile;
-      configureCommand += "\"";
+      configureCommand = cmStrCat(std::move(configureCommand),
+                                  R"( "--presets-file" ")", presetsFile, '"');
     }
 
     if (!expandedPreset->BinaryDir.empty()) {
@@ -149,25 +144,22 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
     }
     initialCache.Close();
 
-    configureCommand += " \"-C";
-    configureCommand += initialCacheFile;
-    configureCommand += "\"";
+    configureCommand =
+      cmStrCat(std::move(configureCommand), " \"-C", initialCacheFile, '"');
   }
 
   cmValue cmakeGeneratorPlatform =
     mf.GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
   if (cmNonempty(cmakeGeneratorPlatform)) {
-    configureCommand += " \"-A";
-    configureCommand += *cmakeGeneratorPlatform;
-    configureCommand += "\"";
+    configureCommand = cmStrCat(std::move(configureCommand), " \"-A",
+                                *cmakeGeneratorPlatform, '"');
   }
 
   cmValue cmakeGeneratorToolset =
     mf.GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
   if (cmNonempty(cmakeGeneratorToolset)) {
-    configureCommand += " \"-T";
-    configureCommand += *cmakeGeneratorToolset;
-    configureCommand += "\"";
+    configureCommand = cmStrCat(std::move(configureCommand), " \"-T",
+                                *cmakeGeneratorToolset, '"');
   }
 
   // Append OPTIONS to the configure command.
@@ -183,16 +175,15 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
 
   auto const optionsList = cmList(options);
   for (std::string const& option : optionsList) {
-    configureCommand += " \"";
-    configureCommand += option;
-    configureCommand += "\"";
+    configureCommand =
+      cmStrCat(std::move(configureCommand), " \"", option, '"');
   }
 
   cmValue cmakeBuildType = mf.GetDefinition("CTEST_CONFIGURATION_TYPE");
   if (!multiConfig && !buildTypeInOptions && cmNonempty(cmakeBuildType)) {
-    configureCommand += " \"-DCMAKE_BUILD_TYPE:STRING=";
-    configureCommand += cmakeBuildType;
-    configureCommand += "\"";
+    configureCommand =
+      cmStrCat(std::move(configureCommand),
+               " \"-DCMAKE_BUILD_TYPE:STRING=", cmakeBuildType, '"');
   }
 
   return true;

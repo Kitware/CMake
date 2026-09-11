@@ -723,8 +723,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
 {
   std::string command = make;
   if (!makeFlags.empty()) {
-    command += " ";
-    command += makeFlags;
+    command = cmStrCat(std::move(command), ' ', makeFlags);
   }
 
   std::string generator = this->GlobalGenerator->GetName();
@@ -733,29 +732,20 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     // These need to be escaped, see
     // https://gitlab.kitware.com/cmake/cmake/-/issues/13952
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += " /NOLOGO /f ";
-    command += makefileName;
-    command += " VERBOSE=1 ";
-    command += target;
+    command = cmStrCat(std::move(command), " /NOLOGO /f ", makefileName,
+                       " VERBOSE=1 ", target);
   } else if (generator == "MinGW Makefiles") {
     // no escaping of spaces in this case, see
     // https://gitlab.kitware.com/cmake/cmake/-/issues/10014
     std::string const& makefileName = makefile;
-    command += " -f \"";
-    command += makefileName;
-    command += "\" ";
-    command += " VERBOSE=1 ";
-    command += target;
+    command = cmStrCat(std::move(command), " -f \"", makefileName, "\" ",
+                       " VERBOSE=1 ", target);
   } else if (generator == "Ninja") {
-    command += " -v ";
-    command += target;
+    command = cmStrCat(std::move(command), " -v ", target);
   } else {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += " -f \"";
-    command += makefileName;
-    command += "\" ";
-    command += " VERBOSE=1 ";
-    command += target;
+    command = cmStrCat(std::move(command), " -f \"", makefileName, "\" ",
+                       " VERBOSE=1 ", target);
   }
   return command;
 }

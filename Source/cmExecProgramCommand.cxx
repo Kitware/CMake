@@ -3,6 +3,7 @@
 #include "cmExecProgramCommand.h"
 
 #include <cstdio>
+#include <utility>
 
 #include "cmsys/Process.h"
 
@@ -68,8 +69,7 @@ bool cmExecProgramCommand(std::vector<std::string> const& args,
       haveoutput_variable = false;
       doingargs = true;
     } else if (doingargs) {
-      arguments += arg;
-      arguments += " ";
+      arguments = cmStrCat(std::move(arguments), arg, ' ');
       count++;
     }
   }
@@ -156,13 +156,12 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
         std::string cmd = quoted.match(1);
         std::string args = quoted.match(2);
         if (!cmSystemTools::FileExists(cmd)) {
-          shortCmd = cmd;
+          shortCmd = std::move(cmd);
         } else if (!cmSystemTools::GetShortPath(cmd, shortCmd)) {
           cmSystemTools::Error("GetShortPath failed for " + cmd);
           return false;
         }
-        shortCmd += " ";
-        shortCmd += args;
+        shortCmd = cmStrCat(std::move(shortCmd), ' ', std::move(args));
 
         command = shortCmd;
       } else {
@@ -247,13 +246,13 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
       break;
     case cmsysProcess_State_Exception:
       retVal = -1;
-      msg += "\nProcess terminated due to: ";
-      msg += cmsysProcess_GetExceptionString(cp);
+      msg = cmStrCat(std::move(msg), "\nProcess terminated due to: ",
+                     cmsysProcess_GetExceptionString(cp));
       break;
     case cmsysProcess_State_Error:
       retVal = -1;
-      msg += "\nProcess failed because: ";
-      msg += cmsysProcess_GetErrorString(cp);
+      msg = cmStrCat(std::move(msg), "\nProcess failed because: ",
+                     cmsysProcess_GetErrorString(cp));
       break;
     case cmsysProcess_State_Expired:
       retVal = -1;
@@ -263,11 +262,9 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
   if (!msg.empty()) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
     // Old Windows process execution printed this info.
-    msg += "\n\nfor command: ";
-    msg += command;
+    msg = cmStrCat(std::move(msg), "\n\nfor command: ", command);
     if (dir) {
-      msg += "\nin dir: ";
-      msg += dir;
+      msg = cmStrCat(std::move(msg), "\nin dir: ", dir);
     }
     msg += "\n";
     if (verbose) {

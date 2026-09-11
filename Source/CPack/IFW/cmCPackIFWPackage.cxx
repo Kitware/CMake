@@ -126,9 +126,9 @@ std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent* component)
   if (!component) {
     return "";
   }
-  cmValue option =
-    this->GetOption("CPACK_IFW_COMPONENT_" +
-                    cmsys::SystemTools::UpperCase(component->Name) + "_NAME");
+  cmValue option = this->GetOption(
+    cmStrCat("CPACK_IFW_COMPONENT_",
+             cmsys::SystemTools::UpperCase(component->Name), "_NAME"));
   return option ? *option : component->Name;
 }
 
@@ -195,8 +195,9 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   // Restore default configuration
   this->DefaultConfiguration();
 
-  std::string prefix = "CPACK_IFW_COMPONENT_" +
-    cmsys::SystemTools::UpperCase(component->Name) + "_";
+  std::string prefix =
+    cmStrCat("CPACK_IFW_COMPONENT_",
+             cmsys::SystemTools::UpperCase(component->Name), '_');
 
   // Display name
   this->DisplayName[""] = component->DisplayName;
@@ -283,8 +284,9 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   // Restore default configuration
   this->DefaultConfiguration();
 
-  std::string prefix = "CPACK_IFW_COMPONENT_GROUP_" +
-    cmsys::SystemTools::UpperCase(group->Name) + "_";
+  std::string prefix =
+    cmStrCat("CPACK_IFW_COMPONENT_GROUP_",
+             cmsys::SystemTools::UpperCase(group->Name), '_');
 
   this->DisplayName[""] = group->DisplayName;
   this->Description[""] = group->Description;
@@ -344,8 +346,8 @@ int cmCPackIFWPackage::ConfigureFromGroup(std::string const& groupName)
   // Group configuration
 
   cmCPackComponentGroup group;
-  std::string prefix =
-    "CPACK_COMPONENT_GROUP_" + cmsys::SystemTools::UpperCase(groupName) + "_";
+  std::string prefix = cmStrCat("CPACK_COMPONENT_GROUP_",
+                                cmsys::SystemTools::UpperCase(groupName), '_');
 
   if (cmValue option = this->GetOption(prefix + "DISPLAY_NAME")) {
     group.DisplayName = *option;
@@ -544,9 +546,11 @@ void cmCPackIFWPackage::GeneratePackageFile()
   // Lazy directory initialization
   if (this->Directory.empty()) {
     if (this->Installer) {
-      this->Directory = this->Installer->Directory + "/packages/" + this->Name;
+      this->Directory =
+        cmStrCat(this->Installer->Directory, "/packages/", this->Name);
     } else if (this->Generator) {
-      this->Directory = this->Generator->toplevel + "/packages/" + this->Name;
+      this->Directory =
+        cmStrCat(this->Generator->toplevel, "/packages/", this->Name);
     }
   }
 
@@ -597,7 +601,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   // Script (copy to meta dir)
   if (!this->Script.empty()) {
     std::string name = cmSystemTools::GetFilenameName(this->Script);
-    std::string path = this->Directory + "/meta/" + name;
+    std::string path = cmStrCat(this->Directory, "/meta/", name);
     cmsys::SystemTools::CopyFileIfDifferent(this->Script, path);
     xout.Element("Script", name);
   }
@@ -606,7 +610,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   std::vector<std::string> userInterfaces = this->UserInterfaces;
   for (std::string& userInterface : userInterfaces) {
     std::string name = cmSystemTools::GetFilenameName(userInterface);
-    std::string path = this->Directory + "/meta/" + name;
+    std::string path = cmStrCat(this->Directory, "/meta/", name);
     cmsys::SystemTools::CopyFileIfDifferent(userInterface, path);
     userInterface = name;
   }
@@ -622,7 +626,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   std::vector<std::string> translations = this->Translations;
   for (std::string& translation : translations) {
     std::string name = cmSystemTools::GetFilenameName(translation);
-    std::string path = this->Directory + "/meta/" + name;
+    std::string path = cmStrCat(this->Directory, "/meta/", name);
     cmsys::SystemTools::CopyFileIfDifferent(translation, path);
     translation = name;
   }
@@ -697,7 +701,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   std::vector<std::string> licenses = this->Licenses;
   for (size_t i = 1; i < licenses.size(); i += 2) {
     std::string name = cmSystemTools::GetFilenameName(licenses[i]);
-    std::string path = this->Directory + "/meta/" + name;
+    std::string path = cmStrCat(this->Directory, "/meta/", name);
     cmsys::SystemTools::CopyFileIfDifferent(licenses[i], path);
     licenses[i] = name;
   }

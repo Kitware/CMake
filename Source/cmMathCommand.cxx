@@ -48,8 +48,7 @@ bool cmMathCommand(std::vector<std::string> const& args,
       args, status, -1, std::numeric_limits<long long>::min(),
       std::numeric_limits<long long>::max(), "decrementing"_s);
   }
-  std::string e = "does not recognize sub-command " + subCommand;
-  status.SetError(e);
+  status.SetError(cmStrCat("does not recognize sub-command ", subCommand));
   return false;
 }
 
@@ -87,21 +86,19 @@ bool HandleExprCommand(std::vector<std::string> const& args,
         } else if (argument == "HEXADECIMAL") {
           outputFormat = NumericFormat::HEXADECIMAL;
         } else {
-          std::string error = messageHint + "value \"" + argument +
-            "\" for option \"" + option + "\" is invalid.";
-          status.SetError(error);
+          status.SetError(cmStrCat(messageHint, "value \"", argument,
+                                   "\" for option \"", option,
+                                   "\" is invalid."));
           return false;
         }
       } else {
-        std::string error =
-          messageHint + "missing argument for option \"" + option + "\".";
-        status.SetError(error);
+        status.SetError(cmStrCat(messageHint, "missing argument for option \"",
+                                 option, "\"."));
         return false;
       }
     } else {
-      std::string error =
-        messageHint + "option \"" + option + "\" is unknown.";
-      status.SetError(error);
+      status.SetError(
+        cmStrCat(messageHint, "option \"", option, "\" is unknown."));
       return false;
     }
   }
