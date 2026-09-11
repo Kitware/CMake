@@ -316,89 +316,84 @@ void CheckAbsoluteDestination(Helper& helper, std::string const& destination)
 bool HandleScriptMode(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
 {
-  Helper helper(status);
+  struct Arguments : ArgumentParser::ParseResult
+  {
+    struct Script
+    {
+      std::string Value;
+      bool IsCode;
+    };
 
-  std::string component = helper.DefaultComponentName;
-  int componentCount = 0;
-  bool doingScript = false;
-  bool doingCode = false;
-  bool excludeFromAll = false;
-  bool allComponents = false;
+    ArgumentParser::Continue AddScript(cm::string_view keyword,
+                                       cm::string_view value)
+    {
+      this->Scripts.push_back({ std::string(value), keyword == "CODE"_s });
+      return ArgumentParser::Continue::No;
+    }
 
-  // Scan the args once for COMPONENT. Only allow one.
-  //
-  for (size_t i = 0; i < args.size(); ++i) {
-    if (args[i] == "COMPONENT" && i + 1 < args.size()) {
-      ++componentCount;
-      ++i;
-      component = args[i];
+    ArgumentParser::Continue AddComponent(cm::string_view value)
+    {
+      this->Components.emplace_back(value);
+      return ArgumentParser::Continue::No;
     }
-    if (args[i] == "EXCLUDE_FROM_ALL") {
-      excludeFromAll = true;
-    } else if (args[i] == "ALL_COMPONENTS") {
-      allComponents = true;
-    }
+
+    std::vector<Script> Scripts;
+    std::vector<std::string> Components;
+    bool ExcludeFromAll = false;
+    bool AllComponents = false;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("SCRIPT"_s, &Arguments::AddScript)
+      .Bind("CODE"_s, &Arguments::AddScript)
+      .Bind("COMPONENT"_s, &Arguments::AddComponent)
+      .Bind("EXCLUDE_FROM_ALL"_s, &Arguments::ExcludeFromAll)
+      .Bind("ALL_COMPONENTS"_s, &Arguments::AllComponents);
+
+  std::vector<std::string> unknownArgs;
+  Arguments arguments = parser.Parse(args, &unknownArgs);
+  if (!arguments.Check(args[0], &unknownArgs, status)) {
+    return false;
   }
 
-  if (componentCount > 1) {
+  if (arguments.Components.size() > 1) {
     status.SetError("given more than one COMPONENT for the SCRIPT or CODE "
                     "signature of the INSTALL command. "
                     "Use multiple INSTALL commands with one COMPONENT each.");
     return false;
   }
 
-  if (allComponents && componentCount == 1) {
+  if (arguments.AllComponents && !arguments.Components.empty()) {
     status.SetError("ALL_COMPONENTS and COMPONENT are mutually exclusive");
     return false;
   }
 
-  // Scan the args again, this time adding install generators each time we
-  // encounter a SCRIPT or CODE arg:
-  //
-  for (std::string const& arg : args) {
-    if (arg == "SCRIPT") {
-      doingScript = true;
-      doingCode = false;
-    } else if (arg == "CODE") {
-      doingScript = false;
-      doingCode = true;
-    } else if (arg == "COMPONENT") {
-      doingScript = false;
-      doingCode = false;
-    } else if (doingScript) {
-      doingScript = false;
-      std::string script = arg;
-      if (!cmHasLiteralPrefix(script, "$<INSTALL_PREFIX>")) {
-        if (!cmSystemTools::FileIsFullPath(script)) {
-          script =
-            cmStrCat(helper.Makefile->GetCurrentSourceDirectory(), '/', arg);
-        }
-        if (cmSystemTools::FileIsDirectory(script)) {
-          status.SetError("given a directory as value of SCRIPT argument.");
-          return false;
-        }
+  Helper helper(status);
+  std::string const component = arguments.Components.empty()
+    ? helper.DefaultComponentName
+    : arguments.Components.front();
+
+  for (Arguments::Script& script : arguments.Scripts) {
+    if (!script.IsCode &&
+        !cmHasLiteralPrefix(script.Value, "$<INSTALL_PREFIX>")) {
+      if (!cmSystemTools::FileIsFullPath(script.Value)) {
+        script.Value = cmStrCat(helper.Makefile->GetCurrentSourceDirectory(),
+                                '/', script.Value);
       }
-      helper.Makefile->AddInstallGenerator(
-        cm::make_unique<cmInstallScriptGenerator>(
-          script, false, component, excludeFromAll, allComponents,
-          helper.Makefile->GetBacktrace()));
-    } else if (doingCode) {
-      doingCode = false;
-      std::string const& code = arg;
-      helper.Makefile->AddInstallGenerator(
-        cm::make_unique<cmInstallScriptGenerator>(
-          code, true, component, excludeFromAll, allComponents,
-          helper.Makefile->GetBacktrace()));
+      if (cmSystemTools::FileIsDirectory(script.Value)) {
+        status.SetError("given a directory as value of SCRIPT argument.");
+        return false;
+      }
     }
   }
 
-  if (doingScript) {
-    status.SetError("given no value for SCRIPT argument.");
-    return false;
-  }
-  if (doingCode) {
-    status.SetError("given no value for CODE argument.");
-    return false;
+  for (Arguments::Script& script : arguments.Scripts) {
+    helper.Makefile->AddInstallGenerator(
+      cm::make_unique<cmInstallScriptGenerator>(
+        std::move(script.Value), script.IsCode, component,
+        arguments.ExcludeFromAll, arguments.AllComponents,
+        helper.Makefile->GetBacktrace()));
   }
 
   // Tell the global generator about any installation component names
