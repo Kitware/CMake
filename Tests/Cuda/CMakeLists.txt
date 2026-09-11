@@ -25,7 +25,7 @@ add_cuda_test_macro(Cuda.StaticRuntimePlusToolkit StaticRuntimePlusToolkit)
 add_cuda_test_macro(Cuda.Complex CudaComplex)
 add_cuda_test_macro(Cuda.ProperLinkFlags ProperLinkFlags)
 
-if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
+if(NOT CMake_TEST_CUDA STREQUAL "Clang")
   # Clang lacks __CUDACC_VER*__ defines.
   add_cuda_test_macro(Cuda.ProperDeviceLibraries ProperDeviceLibraries)
   add_cuda_test_macro(Cuda.ToolkitBeforeLang ToolkitBeforeLang)
