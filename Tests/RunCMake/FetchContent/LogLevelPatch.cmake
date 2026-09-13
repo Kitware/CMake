@@ -1,0 +1,7 @@
+if(EXISTS "${PATCH_COUNT_FILE}")
+  file(READ "${PATCH_COUNT_FILE}" patch_count)
+else()
+  set(patch_count 0)
+endif()
+math(EXPR patch_count "${patch_count} + 1")
+file(WRITE "${PATCH_COUNT_FILE}" "${patch_count}")

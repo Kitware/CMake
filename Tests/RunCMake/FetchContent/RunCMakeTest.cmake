@@ -36,6 +36,17 @@ run_cmake_with_cmp0168(MakeAvailable)
 run_cmake_with_cmp0168(MakeAvailableTwice)
 run_cmake_with_cmp0168(MakeAvailableUndeclared)
 run_cmake_with_cmp0168(VerifyHeaderSet)
+block(SCOPE_FOR VARIABLES)
+  # The direct-population scripts must be independent of the configure-time
+  # log level. Steps should not be seen as out-of-date just because the user
+  # re-ran configure with a different verbosity.
+  # Reuse the build tree for a quiet then verbose configuration.
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LogLevel-direct-build)
+  run_cmake(LogLevel)
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-verbose")
+  run_cmake_with_options(LogLevel --log-level=VERBOSE)
+endblock()
 
 run_cmake_with_cmp0168(FindDependencyExport
   -D "CMAKE_PROJECT_TOP_LEVEL_INCLUDES=${CMAKE_CURRENT_LIST_DIR}/FindDependencyExportDP.cmake"
