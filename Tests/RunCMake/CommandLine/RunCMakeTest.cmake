@@ -42,6 +42,7 @@ run_cmake_command(versionVJsonNoArg ${CMAKE_COMMAND} /V=json-v1)
 run_cmake_command(NoArgs ${CMAKE_COMMAND})
 run_cmake_command(InvalidArg1 ${CMAKE_COMMAND} -invalid)
 run_cmake_command(InvalidArg2 ${CMAKE_COMMAND} --invalid)
+run_cmake_command(InvalidArg3 ${CMAKE_COMMAND} --toolchan)
 run_cmake_command(Wizard ${CMAKE_COMMAND} -i)
 run_cmake_command(C-no-arg ${CMAKE_COMMAND} -B DummyBuildDir -C)
 run_cmake_command(C-no-arg2 ${CMAKE_COMMAND} -B DummyBuildDir -C -T)
@@ -60,6 +61,7 @@ run_cmake_command(U-no-arg ${CMAKE_COMMAND} -B DummyBuildDir -U)
 run_cmake_command(U-no-src ${CMAKE_COMMAND} -B DummyBuildDir -U VAR)
 run_cmake_command(Uno-src ${CMAKE_COMMAND} -B DummyBuildDir -UVAR)
 run_cmake_command(E-no-arg ${CMAKE_COMMAND} -E)
+run_cmake_command(E_unknown-command-did-you-mean ${CMAKE_COMMAND} -E enviroment)
 run_cmake_command(E_capabilities ${CMAKE_COMMAND} -E capabilities)
 run_cmake_command(E_capabilities-arg ${CMAKE_COMMAND} -E capabilities --extra-arg)
 run_cmake_command(E_compare_files-different-eol ${CMAKE_COMMAND} -E compare_files ${RunCMake_SOURCE_DIR}/compare_files/lf ${RunCMake_SOURCE_DIR}/compare_files/crlf)
@@ -145,6 +147,8 @@ run_cmake_command(build-unknown-command-long
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR} --invalid-command)
 run_cmake_command(build-unknown-command-partial-match
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR} --targetinvalid)
+run_cmake_command(build-unknown-command-did-you-mean
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR} --targe)
 run_cmake_command(build-invalid-target-syntax
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR} --target=invalid)
 run_cmake_command(build-no-generator
@@ -164,6 +168,8 @@ run_cmake_command(install-unknown-command-short
   ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR} -invalid-command)
 run_cmake_command(install-unknown-command-long
   ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR} --invalid-command)
+run_cmake_command(install-unknown-command-did-you-mean
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR} --compnent)
 run_cmake_command(install-options-to-vars
   ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-install-options-to-vars
   --strip --prefix /var/test --config sample --component pack)

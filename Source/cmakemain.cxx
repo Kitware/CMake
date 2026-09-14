@@ -635,7 +635,13 @@ int do_build(int ac, char const* const* av)
       if (!(matched && parsed)) {
         buildArgs.binaryDir.clear();
         if (!matched) {
-          std::cerr << "Unknown argument " << arg << std::endl;
+          std::string error = cmStrCat("Unknown argument ", arg);
+          std::string const suggestion =
+            cmFindClosestCommandLineArgument(arg, arguments);
+          if (!suggestion.empty()) {
+            error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+          }
+          std::cerr << error << std::endl;
         }
         break;
       }
@@ -933,7 +939,13 @@ int do_install(int ac, char const* const* av)
       if (!(matched && parsed)) {
         dir.clear();
         if (!matched) {
-          std::cerr << "Unknown argument " << arg << std::endl;
+          std::string error = cmStrCat("Unknown argument ", arg);
+          std::string const suggestion =
+            cmFindClosestCommandLineArgument(arg, arguments);
+          if (!suggestion.empty()) {
+            error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+          }
+          std::cerr << error << std::endl;
         }
         break;
       }
@@ -1136,7 +1148,13 @@ int do_workflow(int ac, char const* const* av)
     if (!(matched && parsed)) {
       if (!matched) {
         presetsArgs.Clear();
-        std::cerr << "Unknown argument " << arg << std::endl;
+        std::string error = cmStrCat("Unknown argument ", arg);
+        std::string const suggestion =
+          cmFindClosestCommandLineArgument(arg, arguments);
+        if (!suggestion.empty()) {
+          error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+        }
+        std::cerr << error << std::endl;
       }
       break;
     }

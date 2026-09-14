@@ -1,0 +1,4 @@
+^CMake Error: Unknown command "enviroment"\. Did you mean "environment"\?
+CMake Error: cmake version .*
+Usage: .* -E <command> \[arguments\.\.\.\]
+Available commands:

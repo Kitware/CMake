@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmcmd.h"
 
+#include <algorithm>
 #include <functional>
 #include <iomanip>
 #include <iterator>
@@ -51,8 +52,6 @@
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP) || defined(CMAKE_BOOTSTRAP_MAKEFILES)
-#  include <algorithm>
-
 #  include "cmCMakePath.h"
 #  include "cmProcessTools.h"
 #endif
@@ -98,63 +97,119 @@ std::ostream& operator<<(
 }
 
 namespace {
+struct cmCommandLineHelpEntry
+{
+  char const* Name;
+  char const* Usage;
+  char const* Help;
+};
+
 // ATTENTION If you add new commands, change here,
 // and in `cmakemain.cxx` in the options table
-char const* const HELP_AVAILABLE_COMMANDS = R"(Available commands:
-  bin2c                     - Turn a binary file into a C array
-  capabilities              - Report capabilities built into cmake in JSON format
-  cat [--] <files>...       - concat the files and print them to the standard output
-  chdir dir cmd [args...]   - run command in a given directory
-  compare_files [--ignore-eol] file1 file2
-                            - check if file1 is same as file2
-  copy <file>... destination | -t <destination> <file>...
-                            - copy files to destination (either file or directory)
-  copy_directory <dir>... destination | -t <destination> <dir>...
-                            - copy content of <dir>... directories to 'destination' directory
-  copy_directory_if_different <dir>... destination | -t <destination> <dir>...
-                            - copy changed content of <dir>... directories to 'destination' directory
-  copy_directory_if_newer <dir>... destination | -t <destination> <dir>...
-                            - copy newer content of <dir>... directories to 'destination' directory
-  copy_if_different <file>... destination | -t <destination> <file>...
-                            - copy files if source has changed
-  copy_if_newer <file>... destination | -t <destination> <file>...
-                            - copy files if source is newer than destination
-  echo [<string>...]        - displays arguments as text
-  echo_append [<string>...] - displays arguments as text but no new line
-  env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]
-                            - run command in a modified environment
-  environment               - display the current environment
-  make_directory <dir>...   - create parent and <dir> directories
-  md5sum <file>...          - create MD5 checksum of files
-  sha1sum <file>...         - create SHA1 checksum of files
-  sha224sum <file>...       - create SHA224 checksum of files
-  sha256sum <file>...       - create SHA256 checksum of files
-  sha384sum <file>...       - create SHA384 checksum of files
-  sha512sum <file>...       - create SHA512 checksum of files
-  remove [-f] <file>...     - remove the file(s), use -f to force it (deprecated: use rm instead)
-  remove_directory <dir>... - remove directories and their contents (deprecated: use rm instead)
-  rename oldname newname    - rename a file or directory (on one volume)
-  rm [-rRf] [--] <file/dir>... - remove files or directories, use -f to force it, r or R to remove directories and their contents recursively
-  sleep <number>...         - sleep for given number of seconds
-  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]
-                            - create or extract a tar or zip archive
-  time command [args...]    - run command and display elapsed time
-  touch <file>...           - touch a <file>.
-  touch_nocreate <file>...  - touch a <file> but do not create it.
-  create_symlink old new    - create a symbolic link new -> old
-  create_hardlink old new   - create a hard link new -> old
-  true                      - do nothing with an exit code of 0
-  false                     - do nothing with an exit code of 1
-)";
+std::vector<cmCommandLineHelpEntry> const AvailableCommands = {
+  { "bin2c", "", "Turn a binary file into a C array" },
+  { "capabilities", "",
+    "Report capabilities built into cmake in JSON format" },
+  { "cat", "[--] <files>...",
+    "concat the files and print them to the standard output" },
+  { "chdir", "dir cmd [args...]", "run command in a given directory" },
+  { "compare_files", "[--ignore-eol] file1 file2",
+    "check if file1 is same as file2" },
+  { "copy", "<file>... destination | -t <destination> <file>...",
+    "copy files to destination (either file or directory)" },
+  { "copy_directory", "<dir>... destination | -t <destination> <dir>...",
+    "copy content of <dir>... directories to 'destination' directory" },
+  { "copy_directory_if_different",
+    "<dir>... destination | -t <destination> <dir>...",
+    "copy changed content of <dir>... directories to 'destination' "
+    "directory" },
+  { "copy_directory_if_newer",
+    "<dir>... destination | -t <destination> <dir>...",
+    "copy newer content of <dir>... directories to 'destination' "
+    "directory" },
+  { "copy_if_different", "<file>... destination | -t <destination> <file>...",
+    "copy files if source has changed" },
+  { "copy_if_newer", "<file>... destination | -t <destination> <file>...",
+    "copy files if source is newer than destination" },
+  { "echo", "[<string>...]", "displays arguments as text" },
+  { "echo_append", "[<string>...]",
+    "displays arguments as text but no new line" },
+  { "env", "[--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]",
+    "run command in a modified environment" },
+  { "environment", "", "display the current environment" },
+  { "make_directory", "<dir>...", "create parent and <dir> directories" },
+  { "md5sum", "<file>...", "create MD5 checksum of files" },
+  { "sha1sum", "<file>...", "create SHA1 checksum of files" },
+  { "sha224sum", "<file>...", "create SHA224 checksum of files" },
+  { "sha256sum", "<file>...", "create SHA256 checksum of files" },
+  { "sha384sum", "<file>...", "create SHA384 checksum of files" },
+  { "sha512sum", "<file>...", "create SHA512 checksum of files" },
+  { "remove", "[-f] <file>...",
+    "remove the file(s), use -f to force it (deprecated: use rm instead)" },
+  { "remove_directory", "<dir>...",
+    "remove directories and their contents (deprecated: use rm instead)" },
+  { "rename", "oldname newname",
+    "rename a file or directory (on one volume)" },
+  { "rm", "[-rRf] [--] <file/dir>...",
+    "remove files or directories, use -f to force it, r or R to remove "
+    "directories and their contents recursively" },
+  { "sleep", "<number>...", "sleep for given number of seconds" },
+  { "tar", "[cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]",
+    "create or extract a tar or zip archive" },
+  { "time", "command [args...]", "run command and display elapsed time" },
+  { "touch", "<file>...", "touch a <file>." },
+  { "touch_nocreate", "<file>...", "touch a <file> but do not create it." },
+  { "create_symlink", "old new", "create a symbolic link new -> old" },
+  { "create_hardlink", "old new", "create a hard link new -> old" },
+  { "true", "", "do nothing with an exit code of 0" },
+  { "false", "", "do nothing with an exit code of 1" },
+};
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
-char const* const HELP_AVAILABLE_WINDOWS_COMMANDS =
-  R"(Available on Windows only:
-  delete_regv key           - delete registry value
-  env_vs8_wince sdkname     - displays a batch file which sets the environment for the provided Windows CE SDK installed in VS2005
-  env_vs9_wince sdkname     - displays a batch file which sets the environment for the provided Windows CE SDK installed in VS2008
-  write_regv key value      - write registry value
-)";
+std::vector<cmCommandLineHelpEntry> const AvailableWindowsCommands = {
+  { "delete_regv", "key", "delete registry value" },
+  { "env_vs8_wince", "sdkname",
+    "displays a batch file which sets the environment for the provided "
+    "Windows CE SDK installed in VS2005" },
+  { "env_vs9_wince", "sdkname",
+    "displays a batch file which sets the environment for the provided "
+    "Windows CE SDK installed in VS2008" },
+  { "write_regv", "key value", "write registry value" },
+};
 #endif
+
+std::string FormatCommandLineHelp(
+  cm::string_view header, std::vector<cmCommandLineHelpEntry> const& entries)
+{
+  std::size_t const helpColumn = 28;
+  std::string result = cmStrCat(header, ":\n");
+  for (cmCommandLineHelpEntry const& entry : entries) {
+    std::string invocation = entry.Name;
+    if (*entry.Usage) {
+      invocation = cmStrCat(invocation, ' ', entry.Usage);
+    }
+    std::string line = cmStrCat("  ", invocation);
+    if (line.size() + 2 <= helpColumn) {
+      line.resize(helpColumn, ' ');
+      result = cmStrCat(result, line, "- ", entry.Help, '\n');
+    } else {
+      result = cmStrCat(result, line, '\n', std::string(helpColumn, ' '), "- ",
+                        entry.Help, '\n');
+    }
+  }
+  return result;
+}
+
+std::vector<std::string> CommandLineHelpEntryNames(
+  std::vector<cmCommandLineHelpEntry> const& entries)
+{
+  std::vector<std::string> names;
+  names.reserve(entries.size());
+  for (cmCommandLineHelpEntry const& entry : entries) {
+    names.emplace_back(entry.Name);
+  }
+  return names;
+}
 
 void CMakeCommandUsage(std::string const& program)
 {
@@ -170,9 +225,10 @@ void CMakeCommandUsage(std::string const& program)
     "Usage: "
   , program
   , " -E <command> [arguments...]\n"
-  , HELP_AVAILABLE_COMMANDS
+  , FormatCommandLineHelp("Available commands", AvailableCommands)
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  , HELP_AVAILABLE_WINDOWS_COMMANDS
+  , FormatCommandLineHelp("Available on Windows only",
+                          AvailableWindowsCommands)
 #endif
   );
   /* clang-format on */
@@ -2461,6 +2517,26 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         return cmTransformDepfile(format, *lgd, args[8], args[9]) ? 0 : 2;
       }
       return 1;
+    }
+
+    std::vector<std::string> availableCommands =
+      CommandLineHelpEntryNames(AvailableCommands);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    cm::append(availableCommands,
+               CommandLineHelpEntryNames(AvailableWindowsCommands));
+#endif
+    // Some commands above only fall through to here when they were
+    // matched by name but had the wrong number/form of arguments; only
+    // offer a suggestion when the name itself is not recognized.
+    if (std::find(availableCommands.begin(), availableCommands.end(),
+                  args[1]) == availableCommands.end()) {
+      std::string error = cmStrCat("Unknown command \"", args[1], "\".");
+      std::string const suggestion =
+        cmFindClosestString(args[1], availableCommands);
+      if (!suggestion.empty()) {
+        error = cmStrCat(error, " Did you mean \"", suggestion, "\"?");
+      }
+      cmSystemTools::Error(error);
     }
   }
 

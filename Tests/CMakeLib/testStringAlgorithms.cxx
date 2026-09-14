@@ -313,5 +313,36 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
               "cmStrLen returns length of empty literal string");
   }
 
+  // ----------------------------------------------------------------------
+  // Test cmLevenshteinDistance
+  {
+    assert_ok(cmLevenshteinDistance("", "") == 0,
+              "cmLevenshteinDistance empty strings");
+    assert_ok(cmLevenshteinDistance("abc", "abc") == 0,
+              "cmLevenshteinDistance identical strings");
+    assert_ok(cmLevenshteinDistance("", "abc") == 3,
+              "cmLevenshteinDistance empty vs non-empty");
+    assert_ok(cmLevenshteinDistance("abc", "") == 3,
+              "cmLevenshteinDistance non-empty vs empty");
+    assert_ok(cmLevenshteinDistance("toolchain", "tolchain") == 1,
+              "cmLevenshteinDistance single deletion");
+    assert_ok(cmLevenshteinDistance("kitten", "sitting") == 3,
+              "cmLevenshteinDistance words");
+  }
+
+  // ----------------------------------------------------------------------
+  // Test cmFindClosestString
+  {
+    std::vector<std::string> const candidates = { "--build", "--install",
+                                                  "--toolchain",
+                                                  "--install-prefix" };
+    assert_string(cmFindClosestString("--toolchan", candidates), "--toolchain",
+                  "cmFindClosestString finds close match");
+    assert_string(cmFindClosestString("--totally-unrelated", candidates), "",
+                  "cmFindClosestString rejects distant strings");
+    assert_string(cmFindClosestString("anything", {}), "",
+                  "cmFindClosestString empty candidates");
+  }
+
   return failed;
 }

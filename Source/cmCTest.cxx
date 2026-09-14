@@ -2615,7 +2615,15 @@ int cmCTest::Run(std::vector<std::string> const& args)
       }
     }
     if (!matched && cmHasPrefix(arg, '-') && !isPresetArgument(arg)) {
-      cmSystemTools::Error(cmStrCat("Unknown argument: ", arg));
+      std::string error = cmStrCat("Unknown argument: ", arg);
+      std::vector<CommandArgument> allArguments = arguments;
+      cm::append(allArguments, presetArguments);
+      std::string const suggestion =
+        cmFindClosestCommandLineArgument(arg, allArguments);
+      if (!suggestion.empty()) {
+        error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+      }
+      cmSystemTools::Error(error);
       cmSystemTools::Error("Run 'ctest --help' for all supported options.");
       return 1;
     }

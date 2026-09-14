@@ -235,6 +235,7 @@ run_cmake_command(PresetsNoArgEq-workflow ${CMAKE_COMMAND} "--workflow" "--prese
 run_cmake_command(PresetsFileNoArg-workflow ${CMAKE_COMMAND} "--workflow" "--presets-file")
 run_cmake_workflow_presets(InvalidOption -DINVALID_OPTION)
 run_cmake_workflow_presets(ListPresetsInvalidValue --list-presets=invalid)
+run_cmake_command(UnknownOptionDidYouMean ${CMAKE_COMMAND} "--workflow" "--fresh" "--presett")
 
 set(RunCMake_TEST_NO_CLEAN TRUE)
 file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/Fresh")
