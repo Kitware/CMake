@@ -766,18 +766,26 @@ function(_ep_add_script_commands script_var work_dir cmd)
 
   # There can be multiple COMMANDs, but we have to split those up to
   # one command per call to execute_process()
+  string(CONCAT execute_process_precmd
+    "cmake_language(GET_MESSAGE_LOG_LEVEL _ep_step_log_level)\n"
+    "if(_ep_step_log_level MATCHES \"VERBOSE|DEBUG|TRACE\")\n"
+    "  set(_ep_step_maybe_command_echo COMMAND_ECHO STDOUT)\n"
+    "else()\n"
+    "  set(_ep_step_maybe_command_echo)\n"
+    "endif()\n"
+  )
   string(CONCAT execute_process_cmd
     "execute_process(\n"
     "  WORKING_DIRECTORY \"${work_dir}\"\n"
     "  COMMAND_ERROR_IS_FATAL LAST\n"
+    "  \${_ep_step_maybe_command_echo}\n"
+    "  COMMAND "
   )
-  cmake_language(GET_MESSAGE_LOG_LEVEL active_log_level)
-  if(active_log_level MATCHES "VERBOSE|DEBUG|TRACE")
-    string(APPEND execute_process_cmd "  COMMAND_ECHO STDOUT\n")
-  endif()
-  string(APPEND execute_process_cmd "  COMMAND ")
 
-  string(APPEND ${script_var} "${execute_process_cmd}")
+  string(APPEND ${script_var}
+    "${execute_process_precmd}"
+    "${execute_process_cmd}"
+  )
 
   foreach(cmd_arg IN LISTS cmd)
     if(cmd_arg STREQUAL "COMMAND")
