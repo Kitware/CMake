@@ -11,6 +11,7 @@ set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
 set(CTEST_USE_LAUNCHERS                 TRUE)
 
 ctest_start(Experimental)
+@CASE_CTEST_PREFIX_CODE@
 ctest_configure()
 ctest_build()
 ctest_test()

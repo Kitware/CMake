@@ -1,7 +1,7 @@
 include(RunCTest)
 
 function(run_InstrumentationInCTestXML CASE_NAME)
-  cmake_parse_arguments(ARGS "USE_INSTRUMENTATION_ENV_VARS;USE_VERBOSE_INSTRUMENTATION;USE_INSTRUMENTATION_CMD" "" "" ${ARGN})
+  cmake_parse_arguments(ARGS "USE_INSTRUMENTATION_ENV_VARS;USE_VERBOSE_INSTRUMENTATION;USE_INSTRUMENTATION_CMD;USE_LOCAL_INSTRUMENTATION;USE_STALE_CDASH" "" "" ${ARGN})
   if(ARGS_USE_VERBOSE_INSTRUMENTATION)
     set(ENV{CTEST_USE_VERBOSE_INSTRUMENTATION} "1")
     set(RunCMake_USE_VERBOSE_INSTRUMENTATION 1)
@@ -22,6 +22,26 @@ function(run_InstrumentationInCTestXML CASE_NAME)
     set(RunCMake_USE_VERBOSE_INSTRUMENTATION 0)
   endif()
 
+  if(ARGS_USE_LOCAL_INSTRUMENTATION)
+    set(CASE_CMAKELISTS_SUFFIX_CODE [[
+cmake_instrumentation(
+  API_VERSION 1
+  DATA_VERSION 1
+)
+]])
+  endif()
+
+  if(ARGS_USE_STALE_CDASH)
+    set(CASE_CTEST_PREFIX_CODE [=[
+# Simulate staged data left by an earlier run with cdashSubmit enabled.
+foreach(subdir configure build/commands build/targets/old-target)
+  file(WRITE "${CTEST_BINARY_DIRECTORY}/.cmake/instrumentation/v1/cdash/${subdir}/old.json"
+    [[{"command":"old","role":"custom","dynamicSystemInformation":{"afterHostMemoryUsed":123}}]]
+  )
+endforeach()
+]=])
+  endif()
+
   configure_file(${RunCMake_SOURCE_DIR}/main.c
                  ${RunCMake_BINARY_DIR}/${CASE_NAME}/main.c COPYONLY)
   run_ctest("${CASE_NAME}")
@@ -38,4 +58,10 @@ run_InstrumentationInCTestXML(VerboseInstrumentationInCTestXML
 )
 run_InstrumentationInCTestXML(InstrumentationInCTestXMLWithCmd
   USE_INSTRUMENTATION_CMD
+)
+run_InstrumentationInCTestXML(InstrumentationWithoutCDashSubmit
+  USE_LOCAL_INSTRUMENTATION
+)
+run_InstrumentationInCTestXML(InstrumentationWithoutCDashSubmitWithStaleData
+  USE_LOCAL_INSTRUMENTATION USE_STALE_CDASH
 )

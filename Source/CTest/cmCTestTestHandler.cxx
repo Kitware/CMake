@@ -1659,7 +1659,9 @@ void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
     xml.EndElement(); // Value
     xml.EndElement(); // Measurement
 
-    if (!result.InstrumentationFile.empty()) {
+    if (!result.InstrumentationFile.empty() &&
+        this->CTest->GetInstrumentation().HasOption(
+          cmInstrumentationQuery::Option::CDashSubmit)) {
       std::string instrument_file_path =
         cmStrCat(this->CTest->GetInstrumentation().GetCDashDir(), "/test/",
                  result.InstrumentationFile);

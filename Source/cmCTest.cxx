@@ -3869,6 +3869,11 @@ cmInstrumentation& cmCTest::GetInstrumentation()
 void cmCTest::ConvertInstrumentationSnippetsToXML(cmXMLWriter& xml,
                                                   std::string const& subdir)
 {
+  if (!this->GetInstrumentation().HasOption(
+        cmInstrumentationQuery::Option::CDashSubmit)) {
+    return;
+  }
+
   std::string data_dir =
     cmStrCat(this->GetInstrumentation().GetCDashDir(), '/', subdir);
 
