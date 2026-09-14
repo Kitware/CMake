@@ -1037,6 +1037,14 @@ public:
   {
   }
 
+  XCodeGeneratorExpressionInterpreter(cmLocalGenerator* localGenerator,
+                                      cmGeneratorTarget* headTarget)
+    : cmGeneratorExpressionInterpreter(
+        localGenerator, "NO-PER-CONFIG-SUPPORT-IN-XCODE", headTarget)
+    , Target(headTarget)
+  {
+  }
+
   XCodeGeneratorExpressionInterpreter(
     XCodeGeneratorExpressionInterpreter const&) = delete;
   XCodeGeneratorExpressionInterpreter& operator=(
@@ -1055,13 +1063,23 @@ public:
       this->cmGeneratorExpressionInterpreter::Evaluate(expression, property);
     if (this->CompiledGeneratorExpression->GetHadContextSensitiveCondition()) {
       std::ostringstream e;
-      /* clang-format off */
-      e <<
-          "Xcode does not support per-config per-source " << property << ":\n"
-          "  " << expression << "\n"
-          "specified for source:\n"
-          "  " << this->SourceFile->ResolveFullPath() << '\n';
-      /* clang-format on */
+      if (this->SourceFile) {
+        /* clang-format off */
+        e <<
+            "Xcode does not support per-config per-source " << property << ":\n"
+            "  " << expression << "\n"
+            "specified for source:\n"
+            "  " << this->SourceFile->ResolveFullPath() << '\n';
+        /* clang-format on */
+      } else {
+        /* clang-format off */
+        e <<
+            "Xcode does not support per-config " << property << ":\n"
+            "  " << expression << "\n"
+            "specified for target:\n"
+            "  " << this->Target->GetName() << '\n';
+        /* clang-format on */
+      }
       this->LocalGenerator->IssueMessage(MessageType::FATAL_ERROR, e.str());
     }
 
@@ -1070,6 +1088,7 @@ public:
 
 private:
   cmSourceFile* SourceFile = nullptr;
+  cmGeneratorTarget* Target = nullptr;
 };
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
@@ -4396,6 +4415,14 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
     return;
   }
 
+  // Xcode shares one copy-files build phase across all configurations, so the
+  // embedded set cannot vary by config. Evaluate the property and reject any
+  // generator expression whose result depends on the configuration.
+  XCodeGeneratorExpressionInterpreter genexInterpreter(gt->GetLocalGenerator(),
+                                                       gt);
+  std::string const& evaluatedFiles =
+    genexInterpreter.Evaluate(*files, embedPropertyName);
+
   // Create an "Embedded Frameworks" build phase
   auto* copyFilesBuildPhase =
     this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
@@ -4418,7 +4445,7 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
                                     this->CreateString("0"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   // Collect all embedded frameworks and dylibs and add them to build phase
-  cmList relFiles{ *files };
+  cmList relFiles{ evaluatedFiles };
   for (std::string const& relFile : relFiles) {
     cmXCodeObject* buildFile{ nullptr };
     std::string filePath = relFile;

@@ -21,6 +21,13 @@ function(ExternalDependencies)
 endfunction()
 ExternalDependencies()
 
+# A generator expression that does not depend on the configuration is honored.
+run_cmake(EmbedFrameworksGenex)
+
+# A generator expression whose result depends on the configuration cannot be
+# honored, because Xcode shares one copy-files build phase across all configs.
+run_cmake(EmbedFrameworksPerConfig)
+
 function(TestFlagsOn testName dependencyName)
   set(RunCMake_TEST_NO_CLEAN 1)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${testName}-${dependencyName}-build)

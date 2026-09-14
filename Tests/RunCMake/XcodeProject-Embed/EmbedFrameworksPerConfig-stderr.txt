@@ -1,0 +1,10 @@
+^CMake Error in CMakeLists\.txt:
+  Xcode does not support per-config XCODE_EMBED_FRAMEWORKS:
+
+    \$<\$<CONFIG:Debug>:foo\.framework>
+
+  specified for target:
+
+    app
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$
