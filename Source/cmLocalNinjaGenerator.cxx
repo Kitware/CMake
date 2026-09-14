@@ -25,6 +25,8 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -476,6 +478,13 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
             "echo Batch file failed at line %FAIL_LINE% "
             "with errorcode %ERRORLEVEL%\n"
             "exit /b %ERROR_CODE%";
+#elif !defined(CMAKE_BOOTSTRAP)
+  if (this->GetCMakeInstance()->GetInstrumentation()->HasOption(
+        cmInstrumentationQuery::Option::ProcessMetrics)) {
+    // Prevent shell exec optimization from passing accumulated child resource
+    // usage to the final instrumentation wrapper.
+    script << ":\n";
+  }
 #endif
 
   return scriptPath;
@@ -567,6 +576,14 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     }
     cmd << *li;
   }
+#  ifndef CMAKE_BOOTSTRAP
+  if (this->GetCMakeInstance()->GetInstrumentation()->HasOption(
+        cmInstrumentationQuery::Option::ProcessMetrics)) {
+    // Prevent shell exec optimization from passing accumulated child resource
+    // usage to the final instrumentation wrapper.
+    cmd << " && :";
+  }
+#  endif
 #endif
   return cmd.str();
 }

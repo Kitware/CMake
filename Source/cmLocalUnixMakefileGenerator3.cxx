@@ -29,6 +29,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -631,7 +632,24 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
 
   if (!commands.empty()) {
     // Write the list of commands.
-    os << cmWrap("\t", commands, "", "\n") << '\n';
+    bool protectProcessMetrics = false;
+#if !defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
+    if (this->GetCMakeInstance()->GetInstrumentation()->HasOption(
+          cmInstrumentationQuery::Option::ProcessMetrics)) {
+      // Prevent shell exec optimization from passing accumulated child
+      // resource usage to the final instrumentation wrapper.
+      protectProcessMetrics = true;
+    }
+#endif
+    for (std::string const& command : commands) {
+      os << '\t' << command;
+      // Preserve the instrumentation daemon's explicit exec command.
+      if (protectProcessMetrics && !command.empty() &&
+          !cmHasLiteralPrefix(command, "exec ")) {
+        os << " && :";
+      }
+      os << '\n';
+    }
   }
   if (symbolic && !this->IsWatcomWMake()) {
     os << ".PHONY : " << tgt << '\n';
