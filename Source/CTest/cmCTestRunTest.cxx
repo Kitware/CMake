@@ -1175,8 +1175,8 @@ void cmCTestRunTest::FinalizeTest(bool started)
           ProcessMetrics usage{};
           Json::Value const& processMetrics = root["processMetrics"];
           usage.ru_maxrss = processMetrics["maxRSS"].asLargestUInt();
-          auto userUSec = processMetrics["userTimeUSec"].asLargestUInt();
-          auto systemUSec = processMetrics["systemTimeUSec"].asLargestUInt();
+          auto userUSec = processMetrics["userTime"].asLargestUInt();
+          auto systemUSec = processMetrics["systemTime"].asLargestUInt();
           usage.ru_utime.tv_sec = static_cast<long>(userUSec / 1000000ULL);
           usage.ru_utime.tv_usec = static_cast<long>(userUSec % 1000000ULL);
           usage.ru_stime.tv_sec = static_cast<long>(systemUSec / 1000000ULL);

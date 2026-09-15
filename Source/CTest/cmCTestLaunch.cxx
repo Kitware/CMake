@@ -403,10 +403,10 @@ void cmCTestLaunch::WriteMetricsFile() const
   Json::Value processMetrics(Json::objectValue);
   processMetrics["maxRSS"] =
     static_cast<Json::Value::UInt64>(this->ChildResourceUsage->ru_maxrss);
-  processMetrics["userTimeUSec"] = static_cast<Json::Value::UInt64>(
+  processMetrics["userTime"] = static_cast<Json::Value::UInt64>(
     this->ChildResourceUsage->ru_utime.tv_sec * 1000000ULL +
     this->ChildResourceUsage->ru_utime.tv_usec);
-  processMetrics["systemTimeUSec"] = static_cast<Json::Value::UInt64>(
+  processMetrics["systemTime"] = static_cast<Json::Value::UInt64>(
     this->ChildResourceUsage->ru_stime.tv_sec * 1000000ULL +
     this->ChildResourceUsage->ru_stime.tv_usec);
   root["processMetrics"] = std::move(processMetrics);
