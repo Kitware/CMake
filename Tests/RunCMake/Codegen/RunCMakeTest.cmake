@@ -25,6 +25,7 @@ run_codegen("min-graph-3")
 run_codegen("add-dependencies")
 run_codegen("add-custom-command-depends")
 run_codegen("byproducts")
+run_codegen("add-dependencies-not-all")
 
 # Error handling
 run_cmake("implicit-depends")
