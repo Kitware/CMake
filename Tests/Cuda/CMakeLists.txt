@@ -22,10 +22,12 @@ add_cuda_test_macro(Cuda.Toolkit Toolkit)
 add_cuda_test_macro(Cuda.IncludePathNoToolkit IncludePathNoToolkit)
 add_cuda_test_macro(Cuda.SharedRuntimePlusToolkit SharedRuntimePlusToolkit)
 add_cuda_test_macro(Cuda.StaticRuntimePlusToolkit StaticRuntimePlusToolkit)
-add_cuda_test_macro(Cuda.Complex CudaComplex)
 add_cuda_test_macro(Cuda.ProperLinkFlags ProperLinkFlags)
 
-if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
+if(NOT CMake_TEST_CUDA STREQUAL "Clang")
+  # Clang 20+ lack support for RDC+PTX
+  add_cuda_test_macro(Cuda.Complex CudaComplex)
+
   # Clang lacks __CUDACC_VER*__ defines.
   add_cuda_test_macro(Cuda.ProperDeviceLibraries ProperDeviceLibraries)
   add_cuda_test_macro(Cuda.ToolkitBeforeLang ToolkitBeforeLang)
