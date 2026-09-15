@@ -1,0 +1,27 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "raceA",
+      "generator": "@CMakeGUITest_GENERATOR@",
+      "binaryDir": "${sourceParentDir}/build",
+      "cacheVariables": {
+        "RACE_VALUE": {
+          "type": "STRING",
+          "value": "presetA"
+        }
+      }
+    },
+    {
+      "name": "raceB",
+      "generator": "@CMakeGUITest_GENERATOR@",
+      "binaryDir": "${sourceParentDir}/build",
+      "cacheVariables": {
+        "RACE_VALUE": {
+          "type": "STRING",
+          "value": "presetB"
+        }
+      }
+    }
+  ]
+}

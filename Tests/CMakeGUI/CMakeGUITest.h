@@ -28,4 +28,8 @@ private slots:
   void presetArg();
   void presetArg_data();
   void changingPresets();
+  void presetApplyOrdering();
+  void presetApplyOrdering_data();
+  void presetApplyStartup();
+  void presetApplyStartup_data();
 };

@@ -81,6 +81,8 @@ public slots:
   void setBinaryDirectory(QString const& dir);
   /// set the preset name to use
   void setPreset(QString const& name, bool setBinary = true);
+  /// apply a preset on behalf of the UI, emitting a tokenized completion
+  void applyPreset(QString const& name, bool setBinary, quint64 requestId);
   /// set the desired generator to use
   void setGenerator(QString const& generator);
   /// set the desired generator to use
@@ -149,6 +151,9 @@ signals:
   void presetsChanged(QVector<QCMakePreset> const& presets);
   /// signal when the selected preset changes
   void presetChanged(QString const& name);
+  /// signal when a tokenized preset application finishes, with its properties
+  void presetApplied(quint64 requestId, QString const& name,
+                     QCMakePropertyList const& vars);
   /// signal when there's an error reading the presets files
   void presetLoadError(QString const& dir, QString const& error);
   /// signal for progress events
@@ -195,4 +200,5 @@ protected:
   QAtomicInt InterruptFlag;
   QProcessEnvironment StartEnvironment;
   QProcessEnvironment Environment;
+  bool ApplyingPreset = false;
 };

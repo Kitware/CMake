@@ -59,6 +59,8 @@ protected slots:
   void updateBinaryDirectory(QString const& dir);
   void updatePresets(QVector<QCMakePreset> const& presets);
   void updatePreset(QString const& name);
+  void onPresetApplied(quint64 requestId, QString const& name,
+                       QCMakePropertyList const& properties);
   void showPresetLoadError(QString const& dir, QString const& message);
   void showProgress(QString const& msg, float percent);
   void setEnabledState(bool);
@@ -105,6 +107,9 @@ protected:
     Generating
   };
   void enterState(State s);
+  // Recompute command/control availability from state and pending.  Kept out
+  // of enterState() since pending can toggle without a lifecycle change.
+  void updateCommandState();
 
   void closeEvent(QCloseEvent*);
   void dragEnterEvent(QDragEnterEvent*);
@@ -123,6 +128,10 @@ protected:
   State CurrentState;
   QString DeferredPreset;
   bool StartupBinaryDirectory = false;
+  // Only the completion matching LatestPresetRequestId is accepted; a request
+  // is outstanding while PresetApplicationPending holds.
+  quint64 LatestPresetRequestId = 0;
+  bool PresetApplicationPending = false;
 
   QTextCharFormat ErrorFormat;
   QTextCharFormat MessageFormat;

@@ -294,6 +294,8 @@ void CMakeSetupDialog::initialize()
                    this, &CMakeSetupDialog::updatePresets);
   QObject::connect(this->CMakeThread->cmakeInstance(), &QCMake::presetChanged,
                    this, &CMakeSetupDialog::updatePreset);
+  QObject::connect(this->CMakeThread->cmakeInstance(), &QCMake::presetApplied,
+                   this, &CMakeSetupDialog::onPresetApplied);
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    &QCMake::presetLoadError, this,
                    &CMakeSetupDialog::showPresetLoadError);
@@ -442,6 +444,11 @@ void CMakeSetupDialog::doConfigure()
     return;
   }
 
+  // Preset still applying: its cache values aren't in the model yet.
+  if (this->PresetApplicationPending) {
+    return;
+  }
+
   if (!prepareConfigure()) {
     return;
   }
@@ -547,6 +554,12 @@ void CMakeSetupDialog::doGenerate()
   if (this->CurrentState == Generating) {
     // stop generate
     doInterrupt();
+    return;
+  }
+
+  // Preset still applying: prepareConfigure() would read worker state that
+  // applyPreset() is still mutating.
+  if (this->PresetApplicationPending) {
     return;
   }
 
@@ -730,9 +743,35 @@ void CMakeSetupDialog::updatePresets(QVector<QCMakePreset> const& presets)
   this->Preset->setToolTip(presets.isEmpty() ? PRESETS_DISABLED_TOOLTIP : "");
 
   if (!this->DeferredPreset.isNull()) {
-    this->Preset->setPresetName(this->DeferredPreset);
+    QString const deferred = this->DeferredPreset;
     this->DeferredPreset = QString{};
+    // An available preset selection submits a real request and keeps the gate
+    // engaged; an unavailable one applies nothing, so release the gate here.
+    this->Preset->setPresetName(deferred);
+    if (this->Preset->presetName() != deferred) {
+      this->PresetApplicationPending = false;
+      this->updateCommandState();
+    }
   }
+}
+
+void CMakeSetupDialog::onPresetApplied(quint64 requestId, QString const& name,
+                                       QCMakePropertyList const& properties)
+{
+  // Latest request wins; ignore a superseded completion.
+  if (requestId != this->LatestPresetRequestId) {
+    return;
+  }
+
+  this->CacheValues->cacheModel()->setProperties(properties);
+  // Reconcile in case the combo drifted from what actually applied.
+  if (this->Preset->presetName() != name) {
+    this->Preset->blockSignals(true);
+    this->Preset->setPresetName(name);
+    this->Preset->blockSignals(false);
+  }
+  this->PresetApplicationPending = false;
+  this->updateCommandState();
 }
 
 void CMakeSetupDialog::updatePreset(QString const& name)
@@ -806,9 +845,18 @@ void CMakeSetupDialog::onBinaryDirectoryChanged(QString const& dir)
 
 void CMakeSetupDialog::onBuildPresetChanged(QString const& name)
 {
-  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(), "setPreset",
+  // Applying is async: gate the dependent actions now, until the completion
+  // lands.
+  quint64 const requestId = ++this->LatestPresetRequestId;
+  this->PresetApplicationPending = true;
+  // First Generate after an apply must reconfigure with the new inputs.
+  this->ConfigureNeeded = true;
+  this->updateCommandState();
+
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(), "applyPreset",
                             Qt::QueuedConnection, Q_ARG(QString, name),
-                            Q_ARG(bool, !this->StartupBinaryDirectory));
+                            Q_ARG(bool, !this->StartupBinaryDirectory),
+                            Q_ARG(quint64, requestId));
   this->StartupBinaryDirectory = false;
 }
 
@@ -820,6 +868,12 @@ void CMakeSetupDialog::setSourceDirectory(QString const& dir)
 void CMakeSetupDialog::setDeferredPreset(QString const& preset)
 {
   this->DeferredPreset = preset;
+  // A --preset isn't applied until presets load; gate now so nothing runs
+  // with default inputs during that startup window.
+  if (!preset.isNull()) {
+    this->PresetApplicationPending = true;
+    this->updateCommandState();
+  }
 }
 
 void CMakeSetupDialog::showProgress(QString const& /*msg*/, float percent)
@@ -1206,11 +1260,66 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateButton->setText(tr("&Stop"));
   } else if (s == ReadyConfigure || s == ReadyGenerate) {
     this->setEnabledState(true);
-    this->GenerateButton->setEnabled(true);
-    this->GenerateAction->setEnabled(true);
-    this->ConfigureButton->setEnabled(true);
     this->ConfigureButton->setText(tr("&Configure"));
     this->GenerateButton->setText(tr("&Generate"));
+    this->updateCommandState();
+  }
+}
+
+void CMakeSetupDialog::updateCommandState()
+{
+  bool const pending = this->PresetApplicationPending;
+
+  switch (this->CurrentState) {
+    case Interrupting:
+      this->ConfigureButton->setEnabled(false);
+      this->GenerateButton->setEnabled(false);
+      this->ConfigureAction->setEnabled(false);
+      this->GenerateAction->setEnabled(false);
+      this->OpenProjectButton->setEnabled(false);
+      break;
+    case Configuring:
+      this->ConfigureButton->setEnabled(true); // acts as Stop
+      this->GenerateButton->setEnabled(false);
+      this->ConfigureAction->setEnabled(false);
+      this->GenerateAction->setEnabled(false);
+      this->OpenProjectButton->setEnabled(false);
+      break;
+    case Generating:
+      this->GenerateButton->setEnabled(true); // acts as Stop
+      this->ConfigureButton->setEnabled(false);
+      this->ConfigureAction->setEnabled(false);
+      this->GenerateAction->setEnabled(false);
+      this->OpenProjectButton->setEnabled(false);
+      break;
+    case ReadyConfigure:
+    case ReadyGenerate: {
+      bool const enabled = !pending;
+      this->ConfigureButton->setEnabled(enabled);
+      this->GenerateButton->setEnabled(enabled);
+      this->ConfigureAction->setEnabled(enabled);
+      this->GenerateAction->setEnabled(enabled);
+
+      // Gate everything that reads or mutates the still-stale model, but keep
+      // the combo live so the user can pick a different preset.
+      this->CacheValues->cacheModel()->setEditEnabled(enabled);
+      this->SourceDirectory->setEnabled(enabled);
+      this->BrowseSourceDirectoryButton->setEnabled(enabled);
+      this->BinaryDirectory->setEnabled(enabled);
+      this->BrowseBinaryDirectoryButton->setEnabled(enabled);
+      this->ReloadCacheAction->setEnabled(enabled);
+      this->DeleteCacheAction->setEnabled(enabled);
+      this->ReloadPresetsButton->setEnabled(enabled);
+      this->AddEntry->setEnabled(enabled);
+      this->Environment->setEnabled(enabled);
+      this->Preset->setEnabled(!this->Preset->presets().isEmpty());
+      if (enabled) {
+        this->selectionChanged(); // let selection re-enable Remove
+      } else {
+        this->RemoveEntry->setEnabled(false);
+      }
+      break;
+    }
   }
 }
 

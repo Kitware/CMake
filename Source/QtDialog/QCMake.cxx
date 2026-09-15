@@ -35,6 +35,25 @@ static QString sanitizedDirPath(QString const& dir)
   return result;
 }
 
+namespace {
+// Holds a flag set for the duration of a scope; clears it even on early exit.
+class ScopedFlag
+{
+public:
+  explicit ScopedFlag(bool& flag)
+    : Flag(flag)
+  {
+    this->Flag = true;
+  }
+  ~ScopedFlag() { this->Flag = false; }
+  ScopedFlag(ScopedFlag const&) = delete;
+  ScopedFlag& operator=(ScopedFlag const&) = delete;
+
+private:
+  bool& Flag;
+};
+}
+
 QCMake::QCMake(QObject* p)
   : QObject(p)
   , StartEnvironment(QProcessEnvironment::systemEnvironment())
@@ -44,6 +63,7 @@ QCMake::QCMake(QObject* p)
   qRegisterMetaType<QCMakePropertyList>();
   qRegisterMetaType<QProcessEnvironment>();
   qRegisterMetaType<QVector<QCMakePreset>>();
+  qRegisterMetaType<quint64>("quint64");
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -135,7 +155,9 @@ void QCMake::setBinaryDirectory(QString const& _dir)
     }
 
     QCMakePropertyList props = this->properties();
-    emit this->propertiesChanged(props);
+    if (!this->ApplyingPreset) {
+      emit this->propertiesChanged(props);
+    }
     cmValue homeDir = state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
     if (homeDir) {
       setSourceDirectory(QString(homeDir->c_str()));
@@ -168,7 +190,9 @@ void QCMake::setPreset(QString const& name, bool setBinary)
 {
   if (this->PresetName != name) {
     this->PresetName = name;
-    emit this->presetChanged(this->PresetName);
+    if (!this->ApplyingPreset) {
+      emit this->presetChanged(this->PresetName);
+    }
 
     if (!name.isNull()) {
       std::string presetName(name.toStdString());
@@ -191,8 +215,22 @@ void QCMake::setPreset(QString const& name, bool setBinary)
         }
       }
     }
-    emit this->propertiesChanged(this->properties());
+    if (!this->ApplyingPreset) {
+      emit this->propertiesChanged(this->properties());
+    }
   }
+}
+
+void QCMake::applyPreset(QString const& name, bool setBinary,
+                         quint64 requestId)
+{
+  {
+    // Silence the intermediate, untagged notifications so the completion below
+    // is the only model update the UI trusts for this request.
+    ScopedFlag applying(this->ApplyingPreset);
+    this->setPreset(name, setBinary);
+  }
+  emit this->presetApplied(requestId, this->PresetName, this->properties());
 }
 
 void QCMake::setGenerator(QString const& gen)
