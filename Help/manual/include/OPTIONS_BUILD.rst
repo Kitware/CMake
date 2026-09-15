@@ -74,6 +74,12 @@
  precedence regardless of order because of the nature of non-``FORCE``
  ``set(... CACHE ...)`` calls.
 
+ .. note::
+
+   When passing a :ref:`semicolon-separated list <CMake Language Lists>`
+   of paths on Windows, avoid paths with a trailing ``\``, as it may
+   escape the following ``;`` during list expansion.
+
 .. option:: -U <globbing_expr>
 
  Remove matching entries from CMake ``CACHE``.
