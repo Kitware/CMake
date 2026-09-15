@@ -18,6 +18,7 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR
     ararc
     arpcp
   HINTS ${__tasking_hints}
+  NAMES_PER_DIR
   NO_CMAKE_PATH
   NO_CMAKE_ENVIRONMENT_PATH
   DOC "Tasking Archiver"

@@ -10,6 +10,7 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR
   NAMES
     dar
   HINTS ${__diab_path}
+  NAMES_PER_DIR
   NO_CMAKE_PATH
   NO_CMAKE_ENVIRONMENT_PATH
   DOC "Diab Archiver"

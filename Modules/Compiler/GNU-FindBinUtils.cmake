@@ -22,6 +22,7 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR
     "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ar${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ar${_CMAKE_COMPILER_SUFFIX}"
   HINTS ${__gcc_hints}
+  NAMES_PER_DIR
   NO_CMAKE_PATH
   NO_CMAKE_ENVIRONMENT_PATH
   DOC "A wrapper around 'ar' adding the appropriate '--plugin' option for the GCC compiler"
@@ -36,6 +37,7 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB
     "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ranlib${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ranlib${_CMAKE_COMPILER_SUFFIX}"
   HINTS ${__gcc_hints}
+  NAMES_PER_DIR
   NO_CMAKE_PATH
   NO_CMAKE_ENVIRONMENT_PATH
   DOC "A wrapper around 'ranlib' adding the appropriate '--plugin' option for the GCC compiler"

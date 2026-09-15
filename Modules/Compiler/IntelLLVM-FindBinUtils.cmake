@@ -32,6 +32,7 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ar-${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ar"
   HINTS ${__intel_llvm_hints}
+  NAMES_PER_DIR
   NO_CMAKE_PATH
   NO_CMAKE_ENVIRONMENT_PATH
   DOC "LLVM archiver"
@@ -45,6 +46,7 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ranlib-${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ranlib"
   HINTS ${__intel_llvm_hints}
+  NAMES_PER_DIR
   NO_CMAKE_PATH
   NO_CMAKE_ENVIRONMENT_PATH
   DOC "Generate index for LLVM archive"
