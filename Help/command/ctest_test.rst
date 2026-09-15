@@ -115,6 +115,13 @@ The options are:
     default level of parallelism, or unbounded parallelism, respectively, as
     documented by the :option:`ctest --parallel` option.
 
+  If given, this argument takes precedence over a test preset's
+  :preset:`testPresets.execution.jobs` field. Both this argument and that
+  field take precedence over the :envvar:`CTEST_PARALLEL_LEVEL` environment
+  variable, and over an explicit :option:`ctest --parallel` given on the
+  command line. See :envvar:`CTEST_PARALLEL_LEVEL` for the full precedence
+  order.
+
 ``RESOURCE_SPEC_FILE <file>``
   .. versionadded:: 3.16
 
