@@ -923,14 +923,8 @@ bool HandleScriptMode(std::vector<std::string> const& args,
       return ArgumentParser::Continue::No;
     }
 
-    ArgumentParser::Continue AddComponent(cm::string_view value)
-    {
-      this->Components.emplace_back(value);
-      return ArgumentParser::Continue::No;
-    }
-
     std::vector<Script> Scripts;
-    std::vector<std::string> Components;
+    cm::optional<std::string> Component;
     bool ExcludeFromAll = false;
     bool AllComponents = false;
   };
@@ -939,7 +933,7 @@ bool HandleScriptMode(std::vector<std::string> const& args,
     cmArgumentParser<Arguments>{}
       .Bind("SCRIPT"_s, &Arguments::AddScript)
       .Bind("CODE"_s, &Arguments::AddScript)
-      .Bind("COMPONENT"_s, &Arguments::AddComponent)
+      .Bind("COMPONENT"_s, &Arguments::Component)
       .Bind("EXCLUDE_FROM_ALL"_s, &Arguments::ExcludeFromAll)
       .Bind("ALL_COMPONENTS"_s, &Arguments::AllComponents);
 
@@ -949,22 +943,15 @@ bool HandleScriptMode(std::vector<std::string> const& args,
     return false;
   }
 
-  if (arguments.Components.size() > 1) {
-    status.SetError("given more than one COMPONENT for the SCRIPT or CODE "
-                    "signature of the INSTALL command. "
-                    "Use multiple INSTALL commands with one COMPONENT each.");
-    return false;
-  }
-
-  if (arguments.AllComponents && !arguments.Components.empty()) {
+  if (arguments.AllComponents && arguments.Component.has_value()) {
     status.SetError("ALL_COMPONENTS and COMPONENT are mutually exclusive");
     return false;
   }
 
   Helper helper(status);
-  std::string const component = arguments.Components.empty()
-    ? helper.DefaultComponentName
-    : arguments.Components.front();
+  std::string const component = arguments.Component.has_value()
+    ? *arguments.Component
+    : helper.DefaultComponentName;
 
   for (Arguments::Script& script : arguments.Scripts) {
     if (!script.IsCode &&
