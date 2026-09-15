@@ -801,7 +801,7 @@ if(BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All")
   unset(_blas_flexiblas_lib)
 endif()
 
-# OpenBLAS? (http://www.openblas.net)
+# OpenBLAS? (https://www.openmathlib.org/OpenBLAS)
 if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
   set(_blas_openblas_lib "openblas")
 
