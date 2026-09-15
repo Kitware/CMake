@@ -24,6 +24,7 @@
 #endif
 
 #include <sstream>
+#include <utility>
 
 using namespace cmFSPermissions;
 
@@ -386,12 +387,10 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     std::string file;
     if (!f.empty() && !cmSystemTools::FileIsFullPath(f)) {
       if (!this->FilesFromDir.empty()) {
-        file = this->FilesFromDir;
+        file = cmStrCat(this->FilesFromDir, '/', f);
       } else {
-        file = this->Makefile->GetCurrentSourceDirectory();
+        file = cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', f);
       }
-      file += "/";
-      file += f;
     } else if (!this->FilesFromDir.empty()) {
       this->Status.SetError("option FILES_FROM_DIR requires all files "
                             "to be specified as relative paths.");
@@ -412,22 +411,19 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     if (!this->FilesFromDir.empty()) {
       std::string dir = cmSystemTools::GetFilenamePath(f);
       if (!dir.empty()) {
-        toFile += "/";
-        toFile += dir;
+        toFile = cmStrCat(std::move(toFile), '/', dir);
       }
     }
     std::string const& toName = this->ToName(fromName);
     if (!toName.empty()) {
-      toFile += "/";
-      toFile += toName;
+      toFile = cmStrCat(std::move(toFile), '/', toName);
     }
 
     // Construct the full path to the source file.  The file name may
     // have been changed above.
     std::string fromFile = fromDir;
     if (!fromName.empty()) {
-      fromFile += "/";
-      fromFile += fromName;
+      fromFile = cmStrCat(std::move(fromFile), '/', std::move(fromName));
     }
 
     if (!this->Install(fromFile, toFile)) {

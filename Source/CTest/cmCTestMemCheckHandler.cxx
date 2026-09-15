@@ -18,6 +18,7 @@
 
 #include "cmCTest.h"
 #include "cmDuration.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
@@ -165,9 +166,7 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
       arg.replace(pos, 2, index);
     }
     args.push_back(arg);
-    memcheckcommand += " \"";
-    memcheckcommand += arg;
-    memcheckcommand += "\"";
+    memcheckcommand = cmStrCat(std::move(memcheckcommand), " \"", arg, '"');
 
     if (nextArgIsDir) {
       nextArgIsDir = false;
@@ -188,15 +187,14 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
     if (!memTesterEnvironmentVariable.empty()) {
       // If we are using env to pass options, append all the options to
       // this string with space separation.
-      memTesterEnvironmentVariable += " " + arg;
+      memTesterEnvironmentVariable =
+        cmStrCat(std::move(memTesterEnvironmentVariable), ' ', arg);
     }
     // for regular options just add them to args and memcheckcommand
     // which is just used for display
     else {
       args.push_back(arg);
-      memcheckcommand += " \"";
-      memcheckcommand += arg;
-      memcheckcommand += "\"";
+      memcheckcommand = cmStrCat(std::move(memcheckcommand), " \"", arg, '"');
     }
   }
   // if this is an env option type, then add the env string as a single
@@ -206,7 +204,8 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
     if (pos != std::string::npos) {
       memTesterEnvironmentVariable.replace(pos, 2, index);
     }
-    memcheckcommand += " " + memTesterEnvironmentVariable;
+    memcheckcommand =
+      cmStrCat(std::move(memcheckcommand), ' ', memTesterEnvironmentVariable);
     args.push_back(memTesterEnvironmentVariable);
   }
 
@@ -339,7 +338,7 @@ void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
   xml.StartElement("TestList");
   cmCTestMemCheckHandler::TestResultsVector::size_type cc;
   for (cmCTestTestResult const& result : this->TestResults) {
-    std::string testPath = result.Path + "/" + result.Name;
+    std::string testPath = cmStrCat(result.Path, '/', result.Name);
     xml.Element("Test", this->CTest->GetShortPathToFile(testPath));
   }
   xml.EndElement(); // TestList
@@ -746,10 +745,9 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       }
       // Quote log_path with single quotes; see
       // https://bugs.chromium.org/p/chromium/issues/detail?id=467936
-      std::string outputFile =
-        envVar + "=log_path='" + this->MemoryTesterOutputFile + "'";
       this->MemoryTesterEnvironmentVariable =
-        outputFile + suppressionsOption + extraOptions;
+        cmStrCat(envVar, "=log_path='", this->MemoryTesterOutputFile, '\'',
+                 suppressionsOption, extraOptions);
       break;
     }
     default:
@@ -1290,16 +1288,15 @@ void cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(
   {
     cmsys::ifstream ifs(ofile.c_str());
     if (!ifs) {
-      std::string log = "Cannot read memory tester output file: " + ofile;
-      cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 cmStrCat("Cannot read memory tester output file: ", ofile)
+                   << std::endl);
       return;
     }
-    res.Output += BOUNDS_CHECKER_MARKER;
-    res.Output += "\n";
+    res.Output = cmStrCat(std::move(res.Output), BOUNDS_CHECKER_MARKER, '\n');
     std::string line;
     while (cmSystemTools::GetLineFromStream(ifs, line)) {
-      res.Output += line;
-      res.Output += "\n";
+      res.Output = cmStrCat(std::move(res.Output), line, '\n');
     }
   }
   cmSystemTools::Delay(1000);

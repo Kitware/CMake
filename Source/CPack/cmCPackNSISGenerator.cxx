@@ -301,9 +301,8 @@ int cmCPackNSISGenerator::PackageFiles()
       installTypes[installType.second.Index - 1] = &installType.second;
     }
     for (cmCPackInstallationType* installType : installTypes) {
-      installTypesCode += "InstType \"";
-      installTypesCode += installType->DisplayName;
-      installTypesCode += "\"\n";
+      installTypesCode = cmStrCat(std::move(installTypesCode), "InstType \"",
+                                  installType->DisplayName, "\"\n");
     }
 
     // Create installation groups first
@@ -315,10 +314,11 @@ int cmCPackNSISGenerator::PackageFiles()
 
       // Add the group description, if any.
       if (!group.second.Description.empty()) {
-        groupDescriptions += "  !insertmacro MUI_DESCRIPTION_TEXT ${" +
-          group.first + "} \"" +
-          cmCPackNSISGenerator::TranslateNewlines(group.second.Description) +
-          "\"\n";
+        groupDescriptions = cmStrCat(
+          std::move(groupDescriptions),
+          "  !insertmacro MUI_DESCRIPTION_TEXT ${", group.first, "} \"",
+          cmCPackNSISGenerator::TranslateNewlines(group.second.Description),
+          "\"\n");
       }
     }
 
@@ -338,18 +338,20 @@ int cmCPackNSISGenerator::PackageFiles()
       }
 
       // Add this component to the various section lists.
-      sectionList += R"(  !insertmacro "${MacroName}" ")";
-      sectionList += comp.first;
-      sectionList += "\"\n";
-      selectedVarsList += "Var " + comp.first + "_selected\n";
-      selectedVarsList += "Var " + comp.first + "_was_installed\n";
+      sectionList =
+        cmStrCat(std::move(sectionList), R"(  !insertmacro "${MacroName}" ")",
+                 comp.first, "\"\n");
+      selectedVarsList =
+        cmStrCat(std::move(selectedVarsList), "Var ", comp.first,
+                 "_selected\nVar ", comp.first, "_was_installed\n");
 
       // Add the component description, if any.
       if (!comp.second.Description.empty()) {
-        componentDescriptions += "  !insertmacro MUI_DESCRIPTION_TEXT ${" +
-          comp.first + "} \"" +
-          cmCPackNSISGenerator::TranslateNewlines(comp.second.Description) +
-          "\"\n";
+        componentDescriptions = cmStrCat(
+          std::move(componentDescriptions),
+          "  !insertmacro MUI_DESCRIPTION_TEXT ${", comp.first, "} \"",
+          cmCPackNSISGenerator::TranslateNewlines(comp.second.Description),
+          "\"\n");
       }
     }
 
@@ -360,9 +362,10 @@ int cmCPackNSISGenerator::PackageFiles()
       this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_COMPONENTS_DESC",
                               "!define MUI_COMPONENTSPAGE_NODESC");
     } else {
-      componentDescriptions = "!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN\n" +
-        componentDescriptions + groupDescriptions +
-        "!insertmacro MUI_FUNCTION_DESCRIPTION_END\n";
+      componentDescriptions =
+        cmStrCat("!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN\n",
+                 std::move(componentDescriptions), groupDescriptions,
+                 "!insertmacro MUI_FUNCTION_DESCRIPTION_END\n");
       this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_COMPONENTS_DESC",
                               componentDescriptions);
     }
@@ -499,7 +502,7 @@ int cmCPackNSISGenerator::InitializeInternal()
     return 0;
   }
 
-  std::string nsisCmd = "\"" + nsisPath + "\" " NSIS_OPT "VERSION";
+  std::string nsisCmd = cmStrCat('"', nsisPath, "\" " NSIS_OPT "VERSION");
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Test NSIS version: " << nsisCmd << std::endl);
   std::string output;
@@ -718,15 +721,10 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
   cmCPackComponent* component, std::ostream& macrosOut)
 {
   // Basic description of the component
-  std::string componentCode = "Section ";
-  if (component->IsDisabledByDefault) {
-    componentCode += "/o ";
-  }
-  componentCode += "\"";
-  if (component->IsHidden) {
-    componentCode += "-";
-  }
-  componentCode += component->DisplayName + "\" " + component->Name + "\n";
+  std::string componentCode =
+    cmStrCat("Section ", component->IsDisabledByDefault ? "/o " : "", '"',
+             component->IsHidden ? "-" : "", component->DisplayName, "\" ",
+             component->Name, '\n');
   if (component->IsRequired) {
     componentCode += "  SectionIn RO\n";
   } else if (!component->InstallationTypes.empty()) {
@@ -735,7 +733,8 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
          component->InstallationTypes) {
       out << " " << installType->Index;
     }
-    componentCode += "  SectionIn" + out.str() + "\n";
+    componentCode =
+      cmStrCat(std::move(componentCode), "  SectionIn", out.str(), '\n');
   }
 
   std::string const componentOutputDir =
@@ -868,8 +867,9 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     /* clang-format on */
     componentCode += out.str();
   } else {
-    componentCode += "  File /r \"${INST_DIR}\\" +
-      this->GetSanitizedDirOrFileName(component->Name) + "\\*.*\"\n";
+    componentCode =
+      cmStrCat(std::move(componentCode), "  File /r \"${INST_DIR}\\",
+               this->GetSanitizedDirOrFileName(component->Name), "\\*.*\"\n");
   }
   componentCode += "SectionEnd\n";
 
@@ -967,15 +967,10 @@ std::string cmCPackNSISGenerator::CreateComponentGroupDescription(
     return {};
   }
 
-  std::string code = "SectionGroup ";
-  if (group->IsExpandedByDefault) {
-    code += "/e ";
-  }
-  if (group->IsBold) {
-    code += "\"!" + group->DisplayName + "\" " + group->Name + "\n";
-  } else {
-    code += "\"" + group->DisplayName + "\" " + group->Name + "\n";
-  }
+  std::string code =
+    cmStrCat("SectionGroup ", group->IsExpandedByDefault ? "/e " : "",
+             group->IsBold ? "\"!" : "\"", group->DisplayName, "\" ",
+             group->Name, '\n');
 
   for (cmCPackComponentGroup* g : group->Subgroups) {
     code += this->CreateComponentGroupDescription(g, macrosOut);

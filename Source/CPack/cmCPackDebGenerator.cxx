@@ -202,7 +202,7 @@ void DebGenerator::generateControlFile() const
 bool DebGenerator::generateDataTar() const
 {
   std::string filename_data_tar =
-    this->WorkDir + "/data.tar" + this->CompressionSuffix;
+    cmStrCat(this->WorkDir, "/data.tar", this->CompressionSuffix);
   cmGeneratedFileStream fileStream_data_tar;
   fileStream_data_tar.Open(filename_data_tar, false, true);
   if (!fileStream_data_tar) {
@@ -317,7 +317,7 @@ std::string DebGenerator::generateMD5File() const
                     "Problem computing the md5 of " << file << std::endl);
     }
 
-    output += "  " + file + "\n";
+    output = cmStrCat(std::move(output), "  ", file, '\n');
     // debian md5sums entries are like this:
     // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
     // thus strip the full path (with the trailing slash)
@@ -333,7 +333,7 @@ std::string DebGenerator::generateMD5File() const
 bool DebGenerator::generateControlTar(std::string const& md5Filename) const
 {
   std::string filename_control_tar =
-    this->WorkDir + "/control.tar" + this->CompressionSuffix;
+    cmStrCat(this->WorkDir, "/control.tar", this->CompressionSuffix);
 
   cmGeneratedFileStream fileStream_control_tar;
   fileStream_control_tar.Open(filename_control_tar, false, true);
@@ -466,7 +466,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     cmList controlExtraList{ this->ControlExtra };
     for (std::string const& i : controlExtraList) {
       std::string filenamename = cmsys::SystemTools::GetFilenameName(i);
-      std::string localcopy = this->WorkDir + "/" + filenamename;
+      std::string localcopy = cmStrCat(this->WorkDir, '/', filenamename);
 
       if (this->PermissionStrictPolicy) {
         control_tar.SetPermissions(
@@ -500,7 +500,8 @@ bool DebGenerator::generateDeb() const
   // difference is that debian uses the BSD ar style archive whereas most
   // Linux distro have a GNU ar.
   // See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=161593 for more info
-  std::string const outputPath = this->TopLevelDir + "/" + this->OutputName;
+  std::string const outputPath =
+    cmStrCat(this->TopLevelDir, '/', this->OutputName);
   std::string const tlDir = this->WorkDir + "/";
   cmGeneratedFileStream debStream;
   debStream.Open(outputPath, false, true);
@@ -581,13 +582,14 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(
     cmSystemTools::GetParentDirectory(this->toplevel));
-  std::string outputFileName(*this->GetOption("CPACK_PACKAGE_FILE_NAME") +
-                             "-" + packageName + this->GetOutputExtension());
+  std::string outputFileName(
+    cmStrCat(*this->GetOption("CPACK_PACKAGE_FILE_NAME"), '-', packageName,
+             this->GetOutputExtension()));
 
-  localToplevel += "/" + sanitizedPkgDirName;
+  localToplevel = cmStrCat(std::move(localToplevel), '/', sanitizedPkgDirName);
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
-  packageFileName += "/" + outputFileName;
+  packageFileName = cmStrCat(std::move(packageFileName), '/', outputFileName);
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
   this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */
@@ -672,12 +674,12 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   // if must be here otherwise non component paths have a trailing / while
   // components don't
   if (!compInstDirName.empty()) {
-    localToplevel += "/" + compInstDirName;
+    localToplevel = cmStrCat(std::move(localToplevel), '/', compInstDirName);
   }
 
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
-  packageFileName += "/" + outputFileName;
+  packageFileName = cmStrCat(std::move(packageFileName), '/', outputFileName);
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
   this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */

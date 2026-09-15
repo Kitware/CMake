@@ -211,9 +211,7 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
     if (variable == "TARGET_QUOTED") {
       std::string targetQuoted = this->ReplaceValues->Target;
       if (!targetQuoted.empty() && targetQuoted.front() != '\"') {
-        targetQuoted = '\"';
-        targetQuoted += this->ReplaceValues->Target;
-        targetQuoted += '\"';
+        targetQuoted = cmStrCat('"', this->ReplaceValues->Target, '"');
       }
       return targetQuoted;
     }
@@ -330,24 +328,22 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
 
   if (compIt != this->Compilers.end()) {
     std::string const& compilerPath =
-      this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER"];
+      this->VariableMappings[cmStrCat("CMAKE_", compIt->second, "_COMPILER")];
     std::string ret = this->ConvertToOutputForExisting(compilerPath);
-    std::string const& compilerArg1 =
-      this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER_ARG1"];
-    std::string const& compilerTarget =
-      this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER_TARGET"];
-    std::string const& compilerOptionTarget =
-      this->VariableMappings["CMAKE_" + compIt->second +
-                             "_COMPILE_OPTIONS_TARGET"];
+    std::string const& compilerArg1 = this->VariableMappings[cmStrCat(
+      "CMAKE_", compIt->second, "_COMPILER_ARG1")];
+    std::string const& compilerTarget = this->VariableMappings[cmStrCat(
+      "CMAKE_", compIt->second, "_COMPILER_TARGET")];
+    std::string const& compilerOptionTarget = this->VariableMappings[cmStrCat(
+      "CMAKE_", compIt->second, "_COMPILE_OPTIONS_TARGET")];
     std::string const& compilerExternalToolchain =
-      this->VariableMappings["CMAKE_" + compIt->second +
-                             "_COMPILER_EXTERNAL_TOOLCHAIN"];
+      this->VariableMappings[cmStrCat("CMAKE_", compIt->second,
+                                      "_COMPILER_EXTERNAL_TOOLCHAIN")];
     std::string const& compilerOptionExternalToolchain =
-      this->VariableMappings["CMAKE_" + compIt->second +
-                             "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN"];
-    std::string const& compilerOptionSysroot =
-      this->VariableMappings["CMAKE_" + compIt->second +
-                             "_COMPILE_OPTIONS_SYSROOT"];
+      this->VariableMappings[cmStrCat("CMAKE_", compIt->second,
+                                      "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN")];
+    std::string const& compilerOptionSysroot = this->VariableMappings[cmStrCat(
+      "CMAKE_", compIt->second, "_COMPILE_OPTIONS_SYSROOT")];
 
     if (compIt->second == this->ReplaceValues->Language &&
         this->ReplaceValues->Launcher) {
@@ -360,20 +356,17 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
     // if there are required arguments to the compiler add it
     // to the compiler string
     if (!compilerArg1.empty()) {
-      ret += " ";
-      ret += compilerArg1;
+      ret = cmStrCat(std::move(ret), ' ', compilerArg1);
     }
     if (!compilerTarget.empty() && !compilerOptionTarget.empty()) {
-      ret += " ";
-      ret += compilerOptionTarget;
-      ret += compilerTarget;
+      ret =
+        cmStrCat(std::move(ret), ' ', compilerOptionTarget, compilerTarget);
     }
     if (!compilerExternalToolchain.empty() &&
         !compilerOptionExternalToolchain.empty()) {
-      ret += " ";
-      ret += compilerOptionExternalToolchain;
-      ret +=
-        this->OutputConverter->EscapeForShell(compilerExternalToolchain, true);
+      ret = cmStrCat(std::move(ret), ' ', compilerOptionExternalToolchain,
+                     this->OutputConverter->EscapeForShell(
+                       compilerExternalToolchain, true));
     }
     std::string sysroot;
     // Some platforms may use separate sysroots for compiling and linking.
@@ -384,9 +377,8 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       sysroot = this->CompilerSysroot;
     }
     if (!sysroot.empty() && !compilerOptionSysroot.empty()) {
-      ret += " ";
-      ret += compilerOptionSysroot;
-      ret += this->OutputConverter->EscapeForShell(sysroot, true);
+      ret = cmStrCat(std::move(ret), ' ', compilerOptionSysroot,
+                     this->OutputConverter->EscapeForShell(sysroot, true));
     }
     return ret;
   }

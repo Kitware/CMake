@@ -43,12 +43,9 @@ std::string computeInstallObjectDir(cmGeneratorTarget* gt,
 {
   std::string objectDir = "objects";
   if (!config.empty()) {
-    objectDir += "-";
-    objectDir += config;
+    objectDir = cmStrCat(std::move(objectDir), '-', config);
   }
-  objectDir += "/";
-  objectDir += gt->GetName();
-  return objectDir;
+  return cmStrCat(std::move(objectDir), '/', gt->GetName());
 }
 
 void computeFilesToInstall(
@@ -208,7 +205,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   } else {
     char const* no_rename = nullptr;
     if (!files.FromDir.empty()) {
-      literalArgs += " FILES_FROM_DIR \"" + files.FromDir + "\"";
+      literalArgs = cmStrCat(std::move(literalArgs), " FILES_FROM_DIR \"",
+                             files.FromDir, '"');
     }
     this->AddInstallRule(os, dest, files.Type, files.From, optional,
                          this->FilePermissions.c_str(), no_dir_permissions,
@@ -336,13 +334,10 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
         // Install the whole app bundle directory.
         files.Type = cmInstallType_DIRECTORY;
         files.UseSourcePermissions = true;
-        from1 += ".";
-        from1 += ext;
+        from1 = cmStrCat(std::move(from1), '.', ext);
 
         // Tweaks apply to the binary inside the bundle.
-        to1 += ".";
-        to1 += ext;
-        to1 += "/";
+        to1 = cmStrCat(std::move(to1), '.', ext, '/');
         if (!mf->PlatformIsAppleEmbedded()) {
           to1 += "Contents/MacOS/";
         }

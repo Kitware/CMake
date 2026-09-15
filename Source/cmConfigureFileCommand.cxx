@@ -4,6 +4,7 @@
 
 #include <set>
 #include <sstream>
+#include <utility>
 
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -45,14 +46,14 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
 
   // If the output location is already a directory put the file in it.
   if (cmSystemTools::FileIsDirectory(outputFile)) {
-    outputFile += "/";
-    outputFile += cmSystemTools::GetFilenameName(inFile);
+    outputFile = cmStrCat(std::move(outputFile), '/',
+                          cmSystemTools::GetFilenameName(inFile));
   }
 
   if (!status.GetMakefile().CanIWriteThisFile(outputFile)) {
-    std::string e = "attempted to configure a file: " + outputFile +
-      " into a source directory.";
-    status.SetError(e);
+    status.SetError(
+      cmStrCat("attempted to configure a file: ", std::move(outputFile),
+               " into a source directory."));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -148,15 +149,14 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
     } else if (doing == Doing::DoingFilePermissions) {
       filePermissionOptions.push_back(args[i]);
     } else {
-      unknown_args += " ";
-      unknown_args += args[i];
-      unknown_args += "\n";
+      unknown_args = cmStrCat(std::move(unknown_args), ' ', args[i], '\n');
     }
   }
   if (!unknown_args.empty()) {
-    std::string msg = cmStrCat(
-      "configure_file called with unknown argument(s):\n", unknown_args);
-    status.GetMakefile().IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, msg);
+    status.GetMakefile().IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
+      cmStrCat("configure_file called with unknown argument(s):\n",
+               unknown_args));
   }
 
   if (useSourcePermissions && noSourcePermissions) {

@@ -343,14 +343,13 @@ std::string cmCommonTargetGenerator::ComputeTargetCompilePDB(
     // A trailing slash tells the toolchain to add its default file name.
     compilePdbPath = this->GeneratorTarget->GetSupportDirectory();
     if (this->GlobalCommonGenerator->IsMultiConfig()) {
-      compilePdbPath += "/";
-      compilePdbPath += config;
+      compilePdbPath = cmStrCat(std::move(compilePdbPath), '/', config);
     }
-    compilePdbPath += "/";
+    compilePdbPath += '/';
     if (this->GeneratorTarget->GetType() == cm::TargetType::STATIC_LIBRARY) {
       // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
-      compilePdbPath += this->GeneratorTarget->GetName();
-      compilePdbPath += ".pdb";
+      compilePdbPath = cmStrCat(std::move(compilePdbPath),
+                                this->GeneratorTarget->GetName(), ".pdb");
     }
   }
 
@@ -496,8 +495,6 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
       compilerLauncher.clear();
     }
     if (cmNonempty(iwyu)) {
-      code_check += " --iwyu=";
-
       // Only add --driver-mode if it is not already specified, as adding
       // it unconditionally might override a user-specified driver-mode
       if (iwyu.find("--driver-mode=") == std::string::npos) {
@@ -511,12 +508,14 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
           driverMode = lang == "C" ? "gcc" : "g++";
         }
 
-        code_check +=
-          this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-            cmStrCat(iwyu, ";--driver-mode=", driverMode));
+        code_check =
+          cmStrCat(std::move(code_check), " --iwyu=",
+                   this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
+                     cmStrCat(iwyu, ";--driver-mode=", driverMode)));
       } else {
-        code_check +=
-          this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(iwyu);
+        code_check = cmStrCat(
+          std::move(code_check), " --iwyu=",
+          this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(iwyu));
       }
     }
     if (cmNonempty(tidy)) {
@@ -577,36 +576,35 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
         this->GeneratorTarget->GetLocalGenerator()->GetMakefile();
       std::string extraPvsArgs;
       if (lang == "CXX") {
-        extraPvsArgs +=
+        extraPvsArgs =
           cmStrCat(";--cxx;", mf->GetDefinition("CMAKE_CXX_COMPILER"));
       } else if (lang == "C") {
-        extraPvsArgs +=
+        extraPvsArgs =
           cmStrCat(";--cc;", mf->GetDefinition("CMAKE_C_COMPILER"));
       }
       // cocompile args
-      code_check += " --pvs-studio=";
-      code_check += this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-        cmStrCat(pvs, extraPvsArgs));
-      code_check += " --object=";
-      code_check +=
+      code_check = cmStrCat(
+        std::move(code_check), " --pvs-studio=",
+        this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
+          cmStrCat(pvs, extraPvsArgs)),
+        " --object=",
         this->GeneratorTarget->GetLocalGenerator()->ConvertToOutputFormat(
           cmSystemTools::CollapseFullPath(
             cmStrCat(this->GeneratorTarget->GetObjectDirectory(config), '/',
                      this->GeneratorTarget->GetObjectName(&source))),
-          cmOutputConverter::SHELL);
+          cmOutputConverter::SHELL));
     }
     if (cmNonempty(cpplint)) {
-      code_check += " --cpplint=";
-      code_check +=
-        this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(cpplint);
+      code_check = cmStrCat(
+        std::move(code_check), " --cpplint=",
+        this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(cpplint));
     }
     if (cmNonempty(cppcheck)) {
-      code_check += " --cppcheck=";
-      code_check +=
-        this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(cppcheck);
+      code_check = cmStrCat(
+        std::move(code_check), " --cppcheck=",
+        this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(cppcheck));
     }
     if (cmNonempty(icstat)) {
-      code_check += " --icstat=";
       // Unless specified otherwise via CMAKE_<LANG>_ICSTAT,
       // populate the icstat command line using default options
       // for its mandatory parameters.
@@ -620,16 +618,18 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
         std::string const dbFile{ "cstat.db" };
         dbParam = cmStrCat(";--db=", dbFile);
       }
-      std::string analyzeCmd{ ";analyze" };
-      code_check += this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-        cmStrCat(icstat, checksParam, dbParam, analyzeCmd));
+      cm::string_view const analyzeCmd{ ";analyze" };
+      code_check =
+        cmStrCat(std::move(code_check), " --icstat=",
+                 this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
+                   cmStrCat(icstat, checksParam, dbParam, analyzeCmd)));
     }
     if (cmNonempty(tidy) || (cmNonempty(cpplint)) || (cmNonempty(cppcheck)) ||
         cmNonempty(pvs) || cmNonempty(icstat)) {
-      code_check += " --source=";
-      code_check +=
+      code_check = cmStrCat(
+        std::move(code_check), " --source=",
         this->GeneratorTarget->GetLocalGenerator()->ConvertToOutputFormat(
-          source.GetFullPath(), cmOutputConverter::SHELL);
+          source.GetFullPath(), cmOutputConverter::SHELL));
     }
     code_check += " -- ";
     return code_check;
