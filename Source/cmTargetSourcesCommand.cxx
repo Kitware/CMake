@@ -42,7 +42,7 @@ auto const FileSetArgsParser = cmArgumentParser<FileSetArgs>()
 
 struct FileSetsArgs
 {
-  std::vector<std::vector<std::string>> FileSets;
+  ArgumentParser::MaybeEmpty<std::vector<std::vector<std::string>>> FileSets;
 };
 
 auto const FileSetsArgsParser =

@@ -13,6 +13,9 @@
 class cmValue
 {
 public:
+  static cmValue True;
+  static cmValue False;
+
   cmValue() noexcept = default;
   cmValue(std::nullptr_t) noexcept {}
   explicit cmValue(std::string const* value) noexcept

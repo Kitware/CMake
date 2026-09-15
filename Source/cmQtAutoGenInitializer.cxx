@@ -19,6 +19,7 @@
 #include <cm/algorithm>
 #include <cm/iterator>
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -1593,7 +1594,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetOutputs(timestampFileGenex);
       cc->SetDepends(uicDependencies);
       cc->SetComment("");
-      cc->SetWorkingDirectory(this->Dir.Work.c_str());
+      cc->SetWorkingDirectory(this->Dir.Work);
       cc->SetEscapeOldStyle(false);
       cc->SetStdPipesUTF8(stdPipesUTF8);
       this->LocalGen->AddCustomCommandToOutput(std::move(cc));
@@ -1607,9 +1608,9 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     cmCustomCommand cc;
     cc.SetByproducts(autogenByproducts);
     cc.SetCommandLines(commandLines);
-    cc.SetComment(autogenComment.c_str());
+    cc.SetComment(autogenComment);
     cc.SetBacktrace(this->Makefile->GetBacktrace());
-    cc.SetWorkingDirectory(this->Dir.Work.c_str());
+    cc.SetWorkingDirectory(this->Dir.Work);
     cc.SetStdPipesUTF8(stdPipesUTF8);
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
@@ -1671,7 +1672,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
           cmStrCat(this->GenTarget->GetName(), "_autogen_timestamp_deps");
 
         auto cc = cm::make_unique<cmCustomCommand>();
-        cc->SetWorkingDirectory(this->Dir.Work.c_str());
+        cc->SetWorkingDirectory(this->Dir.Work);
         cc->SetDepends(dependencies);
         cc->SetEscapeOldStyle(false);
         timestampTarget = this->LocalGen->AddUtilityCommand(
@@ -1742,8 +1743,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetByproducts(timestampByproducts);
       cc->SetDepends(dependencies);
       cc->SetCommandLines(commandLines);
-      cc->SetComment(autogenComment.c_str());
-      cc->SetWorkingDirectory(this->Dir.Work.c_str());
+      cc->SetComment(autogenComment);
+      cc->SetWorkingDirectory(this->Dir.Work);
       cc->SetEscapeOldStyle(false);
       cc->SetDepfile(depFile);
       cc->SetStdPipesUTF8(stdPipesUTF8);
@@ -1763,12 +1764,12 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     } else {
       // Create autogen target
       auto cc = cm::make_unique<cmCustomCommand>();
-      cc->SetWorkingDirectory(this->Dir.Work.c_str());
+      cc->SetWorkingDirectory(this->Dir.Work);
       cc->SetByproducts(autogenByproducts);
       cc->SetDepends(dependencies);
       cc->SetCommandLines(commandLines);
       cc->SetEscapeOldStyle(false);
-      cc->SetComment(autogenComment.c_str());
+      cc->SetComment(autogenComment);
       cmTarget* autogenTarget = this->LocalGen->AddUtilityCommand(
         this->AutogenTarget.Name, true, std::move(cc));
       // Create autogen generator target
@@ -1878,9 +1879,9 @@ bool cmQtAutoGenInitializer::InitRccTargets()
                FileProjectRelativePath(this->Makefile, qrc.QrcFile));
 
     auto cc = cm::make_unique<cmCustomCommand>();
-    cc->SetWorkingDirectory(this->Dir.Work.c_str());
+    cc->SetWorkingDirectory(this->Dir.Work);
     cc->SetCommandLines(commandLines);
-    cc->SetComment(ccComment.c_str());
+    cc->SetComment(ccComment);
     cc->SetStdPipesUTF8(true);
 
     if (qrc.Generated || this->Rcc.GlobalTarget) {

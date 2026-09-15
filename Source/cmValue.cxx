@@ -8,6 +8,14 @@
 
 #include "cmStringAlgorithms.h"
 
+namespace {
+std::string True{ "1" };
+std::string False{ "0" };
+}
+
+cmValue cmValue::True{ ::True };
+cmValue cmValue::False{ ::False };
+
 std::string cmValue::Empty;
 
 bool cmValue::IsOn(cm::string_view value) noexcept

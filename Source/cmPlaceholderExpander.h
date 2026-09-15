@@ -10,9 +10,16 @@
 class cmPlaceholderExpander
 {
 public:
+  enum class HandleGenex
+  {
+    No,
+    Yes
+  };
+
   virtual ~cmPlaceholderExpander() = default;
 
-  std::string& ExpandVariables(std::string& string);
+  std::string& ExpandVariables(std::string& string,
+                               HandleGenex handleGenex = HandleGenex::No);
 
 protected:
   virtual std::string ExpandVariable(std::string const& variable) = 0;

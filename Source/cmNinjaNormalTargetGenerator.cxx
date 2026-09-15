@@ -1520,7 +1520,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
                                      true, config);
         localGen.AppendCustomCommandLines(ccg, *cmdLineLists[i]);
         if (cc.GetComment()) {
-          auto cge = ge.Parse(cc.GetComment());
+          auto cge = ge.Parse(cc.GetComment().value());
           cmdComments[i]->emplace_back(
             cge->Evaluate(this->GetLocalGenerator(), config));
         }

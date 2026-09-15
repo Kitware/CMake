@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmCustomCommandLines.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
@@ -50,9 +52,9 @@ public:
     return this->WorkingDirectory;
   }
 
-  void SetWorkingDirectory(char const* workingDirectory)
+  void SetWorkingDirectory(std::string const& workingDirectory)
   {
-    this->WorkingDirectory = (workingDirectory ? workingDirectory : "");
+    this->WorkingDirectory = workingDirectory;
   }
 
   /** Get the list of command lines.  */
@@ -60,8 +62,8 @@ public:
   void SetCommandLines(cmCustomCommandLines commandLines);
 
   /** Get the comment string for the command.  */
-  char const* GetComment() const;
-  void SetComment(char const* comment);
+  cm::optional<std::string> const& GetComment() const;
+  void SetComment(cm::optional<std::string> comment);
 
   /** Get a value indicating if the command uses UTF-8 output pipes. */
   bool GetStdPipesUTF8() const { return this->StdPipesUTF8; }
@@ -148,13 +150,12 @@ private:
   cmListFileBacktrace Backtrace;
   cmImplicitDependsList ImplicitDepends;
   std::string Target;
-  std::string Comment;
+  cm::optional<std::string> Comment;
   std::string WorkingDirectory;
   std::string Depfile;
   std::string JobPool;
   std::string Role;
   bool JobserverAware = false;
-  bool HaveComment = false;
   bool EscapeAllowMakeVars = false;
   bool EscapeOldStyle = true;
   bool UsesTerminal = false;

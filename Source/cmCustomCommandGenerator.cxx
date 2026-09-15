@@ -152,7 +152,7 @@ std::string EvaluateDepfile(std::string const& path,
   return cge->Evaluate(lg, config);
 }
 
-std::string EvaluateComment(char const* comment,
+std::string EvaluateComment(std::string const& comment,
                             cmGeneratorExpression const& ge,
                             cmLocalGenerator* lg, std::string const& config)
 {
@@ -484,12 +484,12 @@ std::string cmCustomCommandGenerator::GetInternalDepfile() const
 
 cm::optional<std::string> cmCustomCommandGenerator::GetComment() const
 {
-  char const* comment = this->CC->GetComment();
-  if (!comment) {
+  if (!this->CC->GetComment()) {
     return cm::nullopt;
   }
-  if (!*comment) {
-    return std::string();
+  std::string const& comment = this->CC->GetComment().value();
+  if (comment.empty()) {
+    return comment;
   }
 
   cmGeneratorExpression ge(*this->LG->GetCMakeInstance(),

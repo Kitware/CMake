@@ -77,16 +77,14 @@ void cmCustomCommand::SetCommandLines(cmCustomCommandLines commandLines)
   this->CommandLines = std::move(commandLines);
 }
 
-char const* cmCustomCommand::GetComment() const
+cm::optional<std::string> const& cmCustomCommand::GetComment() const
 {
-  char const* no_comment = nullptr;
-  return this->HaveComment ? this->Comment.c_str() : no_comment;
+  return this->Comment;
 }
 
-void cmCustomCommand::SetComment(char const* comment)
+void cmCustomCommand::SetComment(cm::optional<std::string> comment)
 {
-  this->Comment = comment ? comment : "";
-  this->HaveComment = (comment != nullptr);
+  this->Comment = std::move(comment);
 }
 
 void cmCustomCommand::AppendCommands(cmCustomCommandLines const& commandLines)

@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string>
 #include <cm/string_view>
 #include <cmext/algorithm>

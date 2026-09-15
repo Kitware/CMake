@@ -829,7 +829,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
         cc = cm::make_unique<cmCustomCommand>();
         cc->SetCommandLines(legacyDependHelperCommandLines);
         cc->SetComment("Depend check for xcode");
-        cc->SetWorkingDirectory(legacyDependHelperDir.c_str());
+        cc->SetWorkingDirectory(legacyDependHelperDir);
         gen->AddCustomCommandToTarget(
           target->GetName(), cmCustomCommandType::POST_BUILD, std::move(cc),
           cmObjectLibraryCommands::Accept);
