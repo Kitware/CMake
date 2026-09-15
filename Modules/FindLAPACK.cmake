@@ -522,7 +522,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     unset(_lapack_flexiblas_lib)
   endif()
 
-  # OpenBLAS? (http://www.openblas.net)
+  # OpenBLAS? (https://www.openmathlib.org/OpenBLAS)
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All"))
     set(_lapack_openblas_lib "openblas")
