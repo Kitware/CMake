@@ -328,7 +328,7 @@ run_Parallel(env-0)
 set(ENV{CTEST_PARALLEL_LEVEL} 3)
 run_Parallel(env-3)
 unset(ENV{CTEST_PARALLEL_LEVEL})
-unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING)
+unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING})
 
 function(run_TestLoad name load)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestLoad)
