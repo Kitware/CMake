@@ -3944,7 +3944,7 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
         continue;
       }
       if (key == "role" || key == "target" || key == "targetType" ||
-          key == "targetLabels") {
+          key == "targetLabels" || key == "processMetrics") {
         continue;
       }
       // Truncate the full command line if verbose instrumentation
@@ -3975,6 +3975,26 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
     xml.Attribute("name", measurement_name);
     xml.Element("Value", dynamic_information[key].asString());
     xml.EndElement(); // NamedMeasurement
+  }
+
+  // Record available processMetrics as integer measurements.
+  Json::Value const& process_metrics = root["processMetrics"];
+  if (process_metrics.isObject()) {
+    for (char const* key : { "maxRSS", "userTime", "systemTime" }) {
+      Json::Value const& value = process_metrics[key];
+      if (value.isNull()) {
+        continue;
+      }
+      std::string measurement_name = key;
+      measurement_name[0] =
+        static_cast<char>(cmsysString_toupper(measurement_name[0]));
+
+      xml.StartElement("NamedMeasurement");
+      xml.Attribute("type", "numeric/integer");
+      xml.Attribute("name", measurement_name);
+      xml.Element("Value", value.asString());
+      xml.EndElement(); // NamedMeasurement
+    }
   }
 
   // Record information about outputs and their sizes if found.
