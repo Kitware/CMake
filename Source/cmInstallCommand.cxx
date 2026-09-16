@@ -1312,23 +1312,30 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   }
 
   auto ctx = std::make_shared<InstallContext>();
-  ctx->GenericArgs = cm::make_unique<cmInstallCommandArguments>(genericArgs);
-  ctx->ArchiveArgs = cm::make_unique<cmInstallCommandArguments>(archiveArgs);
-  ctx->LibraryArgs = cm::make_unique<cmInstallCommandArguments>(libraryArgs);
-  ctx->RuntimeArgs = cm::make_unique<cmInstallCommandArguments>(runtimeArgs);
-  ctx->ObjectArgs = cm::make_unique<cmInstallCommandArguments>(objectArgs);
+  ctx->GenericArgs =
+    cm::make_unique<cmInstallCommandArguments>(std::move(genericArgs));
+  ctx->ArchiveArgs =
+    cm::make_unique<cmInstallCommandArguments>(std::move(archiveArgs));
+  ctx->LibraryArgs =
+    cm::make_unique<cmInstallCommandArguments>(std::move(libraryArgs));
+  ctx->RuntimeArgs =
+    cm::make_unique<cmInstallCommandArguments>(std::move(runtimeArgs));
+  ctx->ObjectArgs =
+    cm::make_unique<cmInstallCommandArguments>(std::move(objectArgs));
   ctx->FrameworkArgs =
-    cm::make_unique<cmInstallCommandArguments>(frameworkArgs);
-  ctx->BundleArgs = cm::make_unique<cmInstallCommandArguments>(bundleArgs);
+    cm::make_unique<cmInstallCommandArguments>(std::move(frameworkArgs));
+  ctx->BundleArgs =
+    cm::make_unique<cmInstallCommandArguments>(std::move(bundleArgs));
   ctx->PrivateHeaderArgs =
-    cm::make_unique<cmInstallCommandArguments>(privateHeaderArgs);
+    cm::make_unique<cmInstallCommandArguments>(std::move(privateHeaderArgs));
   ctx->PublicHeaderArgs =
-    cm::make_unique<cmInstallCommandArguments>(publicHeaderArgs);
-  ctx->ResourceArgs = cm::make_unique<cmInstallCommandArguments>(resourceArgs);
+    cm::make_unique<cmInstallCommandArguments>(std::move(publicHeaderArgs));
+  ctx->ResourceArgs =
+    cm::make_unique<cmInstallCommandArguments>(std::move(resourceArgs));
   ctx->CxxModuleBmiArgs =
-    cm::make_unique<cmInstallCommandArguments>(cxxModuleBmiArgs);
-  ctx->IncludesArgs = includesArgs;
-  ctx->FileSetArgs = fileSetArgs;
+    cm::make_unique<cmInstallCommandArguments>(std::move(cxxModuleBmiArgs));
+  ctx->IncludesArgs = std::move(includesArgs);
+  ctx->FileSetArgs = std::move(fileSetArgs);
   ctx->NamelinkMode = namelinkMode;
   ctx->ImportlinkMode = importlinkMode;
   ctx->Exports = exports;
