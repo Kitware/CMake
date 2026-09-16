@@ -106,6 +106,13 @@
     Equivalent to passing :ctest-option:`--no-tests=ignore`
     on the command line.
 
+  If set, this field is overridden by the
+  :envvar:`CTEST_NO_TESTS_ACTION` environment variable,
+  including when that variable is instead set via this test
+  preset's own :preset:`testPresets.environment` field.
+  See :envvar:`CTEST_NO_TESTS_ACTION` for the full precedence
+  order.
+
 .. _`CMakePresets.testPresets.execution.testPassthroughArguments`:
 
 ``testPassthroughArguments``

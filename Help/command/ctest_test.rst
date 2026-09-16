@@ -212,6 +212,13 @@ The options are:
   See also the :variable:`CTEST_TEST_PRESET` and
   :variable:`CTEST_PRESET` variables.
 
+  In general, only preset fields which have equivalent options to
+  ``ctest_test`` are supported. An exception is the
+  :preset:`testPresets.environment`, which can hold a value for the
+  :envvar:`CTEST_NO_TESTS_ACTION` environment variable and will be respected,
+  despite ``ctest_test`` not having an equivalent option to the
+  :preset:`testPresets.execution.noTestsAction` presets field.
+
 ``PRESETS_FILE <file>``
   .. versionadded:: 4.4
 

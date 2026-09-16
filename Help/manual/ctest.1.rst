@@ -556,7 +556,9 @@ The options for running tests are:
  .. versionadded:: 3.26
 
  This option can also be set by setting the :envvar:`CTEST_NO_TESTS_ACTION`
- environment variable.
+ environment variable. See the documentation of that variable for how it
+ interacts with a test preset's :preset:`testPresets.execution.noTestsAction`
+ field.
 
 .. option:: --collect-instrumentation <build>
 
