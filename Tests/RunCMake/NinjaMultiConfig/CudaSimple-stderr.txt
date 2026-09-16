@@ -1,0 +1,4 @@
+^(CMake Warning in CMakeLists.txt:
+  Clang 20\+ CUDA offloading model doesn't support virtual archs when
+  CUDA_SEPARABLE_COMPILATION is enabled.
+*)*$
