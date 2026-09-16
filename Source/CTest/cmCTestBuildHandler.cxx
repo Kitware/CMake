@@ -608,6 +608,11 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
 
 void cmCTestBuildHandler::GenerateInstrumentationXML(cmXMLWriter& xml)
 {
+  if (!this->CTest->GetInstrumentation().HasOption(
+        cmInstrumentationQuery::Option::CDashSubmit)) {
+    return;
+  }
+
   // Record instrumentation data on a per-target basis.
   cmsys::Directory targets_dir;
   std::string targets_snippet_dir = cmStrCat(
