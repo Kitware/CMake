@@ -1340,6 +1340,12 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   add_RunCMake_test(CompilerArgs)
 
   # Enable supported languages for {Compiler,Linker}Launcher.
+  if(DEFINED CMake_TEST_CUDA)
+    list(APPEND LauncherCommon_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+  endif()
+  if(DEFINED CMake_TEST_HIP)
+    list(APPEND LauncherCommon_ARGS -DCMake_TEST_HIP=${CMake_TEST_HIP})
+  endif()
   if(DEFINED CMake_TEST_OBJC)
     list(APPEND LauncherCommon_ARGS -DCMake_TEST_OBJC=${CMake_TEST_OBJC})
   endif()
@@ -1351,18 +1357,12 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   if(DEFINED CMake_TEST_ISPC)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
   endif()
-  if(DEFINED CMake_TEST_CUDA)
-    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
-  endif()
-  if(DEFINED CMake_TEST_HIP)
-    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_HIP=${CMake_TEST_HIP})
-  endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
     PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
   add_RunCMake_test(LinkerLauncher)
   set_property(TEST RunCMake.LinkerLauncher APPEND
-    PROPERTY LABELS "Fortran")
+    PROPERTY LABEL "CUDA" "HIP" "Fortran")
 endif()
 
 set(cpack_tests

@@ -55,6 +55,11 @@ if(NOT CMAKE_HIP_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_HIP_COMPILER_LAUNCHER})
     CACHE STRING "Compiler launcher for HIP.")
 endif()
 
+if(NOT CMAKE_HIP_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_HIP_LINKER_LAUNCHER})
+  set(CMAKE_HIP_LINKER_LAUNCHER "$ENV{CMAKE_HIP_LINKER_LAUNCHER}"
+          CACHE STRING "Linker launcher for HIP.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 _cmake_common_language_platform_flags(HIP)
 

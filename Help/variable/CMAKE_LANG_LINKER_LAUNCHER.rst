@@ -11,6 +11,10 @@ This is done only when ``<LANG>`` is one of:
 
 * ``CXX``
 
+* ``CUDA``
+
+  .. versionadded:: 4.5
+
 * ``OBJC``
 
 * ``OBJCXX``
@@ -18,6 +22,10 @@ This is done only when ``<LANG>`` is one of:
 * ``Fortran``
 
   .. versionadded:: 4.1
+
+* ``HIP``
+
+  .. versionadded:: 4.5
 
 This variable is initialized to the :envvar:`CMAKE_<LANG>_LINKER_LAUNCHER`
 environment variable if it is set.

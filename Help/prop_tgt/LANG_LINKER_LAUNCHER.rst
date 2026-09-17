@@ -6,12 +6,24 @@
 This property is implemented only when ``<LANG>`` is one of:
 
 * ``C``
+
 * ``CXX``
+
+* ``CUDA``
+
+  .. versionadded:: 4.5
+
 * ``OBJC``
+
 * ``OBJCXX``
+
 * ``Fortran``
 
   .. versionadded:: 4.1
+
+* ``HIP``
+
+  .. versionadded:: 4.5
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a
 command line for a linker launching tool. The :ref:`Makefile Generators` and the
