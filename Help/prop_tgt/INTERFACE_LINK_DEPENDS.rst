@@ -17,7 +17,7 @@ build properties of the consumer.
 Contents of ``INTERFACE_LINK_DEPENDS`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
--manual for more on defining buildsystem properties.
+manual for more on defining buildsystem properties.
 
 Link dependency files usage requirements commonly differ between the build-tree
 and the install-tree.  The :genex:`BUILD_INTERFACE` and
