@@ -11,19 +11,11 @@ This is done only when ``<LANG>`` is one of:
 
 * ``CXX``
 
-* ``CUDA``
-
-  .. versionadded:: 4.1
-
 * ``OBJC``
 
 * ``OBJCXX``
 
 * ``Fortran``
-
-  .. versionadded:: 4.1
-
-* ``HIP``
 
   .. versionadded:: 4.1
 
