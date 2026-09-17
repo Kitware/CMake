@@ -20,11 +20,11 @@ manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 -manual for more on defining buildsystem properties.
 
 Link dependency files usage requirements commonly differ between the build-tree
-and the install-tree.  The ``BUILD_INTERFACE`` and ``INSTALL_INTERFACE``
-generator expressions can be used to describe separate usage requirements
-based on the usage location.  Relative paths are allowed within the
-``INSTALL_INTERFACE`` expression and are interpreted relative to the
-installation prefix.  For example:
+and the install-tree.  The :genex:`BUILD_INTERFACE` and
+:genex:`INSTALL_INTERFACE` generator expressions can be used to describe
+separate usage requirements based on the usage location.  Relative paths are
+allowed within the ``INSTALL_INTERFACE`` expression and are interpreted
+relative to the installation prefix.  For example:
 
 .. code-block:: cmake
 
