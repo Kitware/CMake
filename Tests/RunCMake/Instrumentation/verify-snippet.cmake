@@ -112,9 +112,14 @@ function(verify_snippet_file snippet contents)
   endif()
 
   set(snippet_schema "${CMAKE_CURRENT_LIST_DIR}/../../../Help/manual/instrumentation/snippet-v1-schema.json")
-  validate_json_schema("${snippet_schema}" "${snippet}")
-  if (RunCMake_TEST_FAILED)
-    add_error("${RunCMake_TEST_FAILED}")
+  block(SCOPE_FOR VARIABLES PROPAGATE schema_error)
+    # Capture only the error message from this validate_json_chema call
+    set(RunCMake_TEST_FAILED "")
+    validate_json_schema("${snippet_schema}" "${snippet}")
+    set(schema_error "${RunCMake_TEST_FAILED}")
+  endblock()
+  if (schema_error)
+    add_error("${schema_error}")
   endif()
 
   return(PROPAGATE ERROR_MESSAGE RunCMake_TEST_FAILED role)
