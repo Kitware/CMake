@@ -23,31 +23,38 @@ get_filename_component(__clang_hint_2 "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COM
 set(__clang_hints ${__clang_hint_1} ${__clang_hint_2})
 
 # http://manpages.ubuntu.com/manpages/precise/en/man1/llvm-ar.1.html
-find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR NAMES
+find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR
+  NAMES
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ar-${__version_x_y}"
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ar-${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ar${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ar"
-    HINTS ${__clang_hints}
-    NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH
-    DOC "LLVM archiver"
+  HINTS ${__clang_hints}
+  NAMES_PER_DIR
+  NO_CMAKE_PATH
+  NO_CMAKE_ENVIRONMENT_PATH
+  DOC "LLVM archiver"
 )
 mark_as_advanced(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR)
 
 # http://manpages.ubuntu.com/manpages/precise/en/man1/llvm-ranlib.1.html
-find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB NAMES
+find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB
+  NAMES
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ranlib-${__version_x_y}"
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ranlib-${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ranlib${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}llvm-ranlib"
-    HINTS ${__clang_hints}
-    NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH
-    DOC "Generate index for LLVM archive"
+  HINTS ${__clang_hints}
+  NAMES_PER_DIR
+  NO_CMAKE_PATH
+  NO_CMAKE_ENVIRONMENT_PATH
+  DOC "Generate index for LLVM archive"
 )
 mark_as_advanced(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB)
 
 # clang-scan-deps
-find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_CLANG_SCAN_DEPS NAMES
+find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_CLANG_SCAN_DEPS
+  NAMES
     "${_CMAKE_TOOLCHAIN_PREFIX}clang-scan-deps-${__version_x_y}"
     "${_CMAKE_TOOLCHAIN_PREFIX}clang-scan-deps-${__version_x}"
     "${_CMAKE_TOOLCHAIN_PREFIX}clang-scan-deps${__version_x}"
@@ -58,8 +65,10 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_CLANG_SCAN_DEPS NAMES
     "clang-scan-deps-${__version_x}"
     "clang-scan-deps${__version_x}"
     "clang-scan-deps"
-    HINTS ${__clang_hints}
-    NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH
-    DOC "`clang-scan-deps` dependency scanner"
+  HINTS ${__clang_hints}
+  NAMES_PER_DIR
+  NO_CMAKE_PATH
+  NO_CMAKE_ENVIRONMENT_PATH
+  DOC "`clang-scan-deps` dependency scanner"
 )
 mark_as_advanced(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_CLANG_SCAN_DEPS)

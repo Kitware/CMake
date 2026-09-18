@@ -10,9 +10,17 @@ endif()
 get_filename_component(__tasking_hints "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" DIRECTORY)
 
 find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR
-  NAMES artc ararm armcs ar51 ararc arpcp
+  NAMES
+    artc
+    ararm
+    armcs
+    ar51
+    ararc
+    arpcp
   HINTS ${__tasking_hints}
-  NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH
+  NAMES_PER_DIR
+  NO_CMAKE_PATH
+  NO_CMAKE_ENVIRONMENT_PATH
   DOC "Tasking Archiver"
 )
 mark_as_advanced(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR)
