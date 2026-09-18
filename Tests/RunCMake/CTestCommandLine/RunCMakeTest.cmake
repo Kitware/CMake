@@ -328,7 +328,7 @@ run_Parallel(env-0)
 set(ENV{CTEST_PARALLEL_LEVEL} 3)
 run_Parallel(env-3)
 unset(ENV{CTEST_PARALLEL_LEVEL})
-unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING)
+unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING})
 
 function(run_TestLoad name load)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestLoad)
@@ -867,6 +867,84 @@ block()
     -D "CTEST_UPDATE_COMMAND=${CMAKE_COMMAND}"
     -D "CTEST_UPDATE_VERSION_ONLY=1"
     -V)
+endblock()
+
+# Environment variables from a test preset selected by -D CTEST_PRESET are
+# applied when dashboard mode runs the Test step.
+block()
+  set(src "${RunCMake_BINARY_DIR}/TestPresetCLIVarEnvironment")
+  set(bin "${RunCMake_BINARY_DIR}/TestPresetCLIVarEnvironment-build")
+  file(REMOVE_RECURSE "${src}" "${bin}")
+  file(MAKE_DIRECTORY "${src}" "${bin}")
+  configure_file("${RunCMake_SOURCE_DIR}/TestPresetCLIVarEnvironment-CMakePresets.json.in"
+                 "${src}/CMakePresets.json" @ONLY)
+  file(WRITE "${bin}/DartConfiguration.tcl"
+    "BuildDirectory: ${bin}\n"
+    "SourceDirectory: ${src}\n")
+  file(WRITE "${bin}/CTestTestfile.cmake" "
+add_test(print-env \"${CMAKE_COMMAND}\" -E environment)
+set_tests_properties(print-env PROPERTIES PASS_REGULAR_EXPRESSION \"DASHBOARD_PRESET_ENV=from-preset\")
+")
+  set(RunCMake_TEST_SOURCE_DIR "${src}")
+  set(RunCMake_TEST_BINARY_DIR "${bin}")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(TestPresetCLIVarEnvironment
+    ${CMAKE_CTEST_COMMAND}
+    -M Experimental
+    -D "CTEST_PRESET=my-test-preset"
+    -T Test
+    -V)
+endblock()
+
+# CTEST_PARALLEL_LEVEL set by a test preset's environment is respected.
+block()
+  set(src "${RunCMake_BINARY_DIR}/TestPresetParallelLevelEnvironment")
+  set(bin "${RunCMake_BINARY_DIR}/TestPresetParallelLevelEnvironment-build")
+  file(REMOVE_RECURSE "${src}" "${bin}")
+  file(MAKE_DIRECTORY "${src}" "${bin}")
+  configure_file("${RunCMake_SOURCE_DIR}/TestPresetParallelLevelEnvironment-CMakePresets.json.in"
+                 "${src}/CMakePresets.json" @ONLY)
+  file(WRITE "${bin}/DartConfiguration.tcl"
+    "BuildDirectory: ${bin}\n"
+    "SourceDirectory: ${src}\n")
+  file(WRITE "${bin}/CTestTestfile.cmake" "
+foreach(i RANGE 1 6)
+  add_test(test\${i} \"${CMAKE_COMMAND}\" -E true)
+endforeach()
+")
+  set(RunCMake_TEST_SOURCE_DIR "${src}")
+  set(RunCMake_TEST_BINARY_DIR "${bin}")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  # Spoof a number of processors to make these tests predictable.
+  set(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING} 1)
+  run_cmake_command(TestPresetParallelLevelEnvironment
+    ${CMAKE_CTEST_COMMAND}
+    -M Experimental
+    -D "CTEST_PRESET=my-test-preset"
+    -T Test)
+  unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING})
+endblock()
+
+# CTEST_NO_TESTS_ACTION set by a test preset's environment is respected.
+block()
+  set(src "${RunCMake_BINARY_DIR}/TestPresetNoTestsActionEnvironment")
+  set(bin "${RunCMake_BINARY_DIR}/TestPresetNoTestsActionEnvironment-build")
+  file(REMOVE_RECURSE "${src}" "${bin}")
+  file(MAKE_DIRECTORY "${src}" "${bin}")
+  configure_file("${RunCMake_SOURCE_DIR}/TestPresetNoTestsActionEnvironment-CMakePresets.json.in"
+                 "${src}/CMakePresets.json" @ONLY)
+  file(WRITE "${bin}/DartConfiguration.tcl"
+    "BuildDirectory: ${bin}\n"
+    "SourceDirectory: ${src}\n")
+  file(WRITE "${bin}/CTestTestfile.cmake" "")
+  set(RunCMake_TEST_SOURCE_DIR "${src}")
+  set(RunCMake_TEST_BINARY_DIR "${bin}")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(TestPresetNoTestsActionEnvironment
+    ${CMAKE_CTEST_COMMAND}
+    -M Experimental
+    -D "CTEST_PRESET=my-test-preset"
+    -T Test)
 endblock()
 
 # Test --output-junit
