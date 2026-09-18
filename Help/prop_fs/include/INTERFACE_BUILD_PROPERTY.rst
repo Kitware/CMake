@@ -13,4 +13,4 @@ unaffected.
 Contents of |PROPERTY_INTERFACE_NAME| may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
--manual for more on defining buildsystem properties.
+manual for more on defining buildsystem properties.
