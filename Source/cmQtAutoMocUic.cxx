@@ -359,7 +359,8 @@ public:
     /** @brief Run an external process. Use only during Process() call!  */
     bool RunProcess(GenT genType, cmWorkerPool::ProcessResultT& result,
                     std::vector<std::string> const& command,
-                    std::string* infoMessage = nullptr);
+                    std::string* infoMessage = nullptr,
+                    bool mergedOutput = true);
   };
 
   /** Fence job utility class.  */
@@ -863,7 +864,8 @@ void cmQtAutoMocUicT::JobT::MaybeWriteResponseFile(
 bool cmQtAutoMocUicT::JobT::RunProcess(GenT genType,
                                        cmWorkerPool::ProcessResultT& result,
                                        std::vector<std::string> const& command,
-                                       std::string* infoMessage)
+                                       std::string* infoMessage,
+                                       bool mergedOutput)
 {
   // Log command
   if (this->Log().Verbose()) {
@@ -878,7 +880,7 @@ bool cmQtAutoMocUicT::JobT::RunProcess(GenT genType,
   }
   // Run command
   return this->cmWorkerPool::JobT::RunProcess(
-    result, command, this->BaseConst().AutogenBuildDir);
+    result, command, this->BaseConst().AutogenBuildDir, mergedOutput);
 }
 
 void cmQtAutoMocUicT::JobMocPredefsT::Process()
@@ -904,13 +906,15 @@ void cmQtAutoMocUicT::JobMocPredefsT::Process()
       // Check if response file is necessary
       MaybeWriteResponseFile(this->MocConst().PredefsFileAbs, cmd);
 
-      // Execute command
-      if (!this->RunProcess(GenT::MOC, result, cmd, reason.get())) {
+      // Execute command.  Keep stderr out of the captured stdout, which is
+      // written to the predefs file verbatim: MSVC-like compilers echo the
+      // name of the source file they preprocess.
+      if (!this->RunProcess(GenT::MOC, result, cmd, reason.get(), false)) {
         this->LogCommandError(GenT::MOC,
                               cmStrCat("The content generation command for ",
                                        this->MessagePath(predefsFileAbs),
                                        " failed.\n", result.ErrorMessage),
-                              cmd, result.StdOut);
+                              cmd, result.StdOut + result.StdErr);
         return;
       }
     }
