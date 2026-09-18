@@ -670,7 +670,9 @@ class cmMakefile;
   SELECT(POLICY, CMP0222,                                                     \
          "The if() command supports path prefix tests using "                 \
          "PATH_IS_PREFIX operator.",                                          \
-         4, 5, 0, WARN)
+         4, 5, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0223, "An empty path is not a prefix of any path.", 4, 5, \
+         0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

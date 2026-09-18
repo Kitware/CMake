@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0223 NEW)
 
 include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
 unset (errors)
@@ -99,15 +100,15 @@ if (NOT output)
   list (APPEND errors "'${prefix}' is not prefix of './a/b'")
 endif()
 
-# The empty path is a prefix of every path, including itself.
+# The empty path is not a prefix of any path, including itself.
 set (prefix "")
 cmake_path(IS_PREFIX prefix "/a/b" output)
-if (NOT output)
-  list (APPEND errors "the empty path is not prefix of '/a/b'")
+if (output)
+  list (APPEND errors "the empty path is a prefix of '/a/b'")
 endif()
 cmake_path(IS_PREFIX prefix "" output)
-if (NOT output)
-  list (APPEND errors "the empty path is not prefix of itself")
+if (output)
+  list (APPEND errors "the empty path is a prefix of itself")
 endif()
 set (prefix "/a")
 cmake_path(IS_PREFIX prefix "" output)

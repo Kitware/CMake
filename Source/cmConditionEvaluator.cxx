@@ -117,6 +117,24 @@ bool looksLikeSpecialVariable(std::string const& var,
   return ((prefix.size() + 3) <= varNameLen) &&
     cmHasPrefix(var, cmStrCat(prefix, '{')) && var[varNameLen - 1] == '}';
 }
+
+// CMP0223: an empty path used to be a prefix of every path.
+bool IsPrefixCMP0223(cmCMakePath const& prefix, cmMakefile& mf)
+{
+  if (!prefix.IsEmpty()) {
+    return false;
+  }
+  switch (mf.GetPolicyStatus(cmPolicies::CMP0223)) {
+    case cmPolicies::WARN:
+      mf.IssuePolicyWarning(cmPolicies::CMP0223);
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      return true;
+    case cmPolicies::NEW:
+      break;
+  }
+  return false;
+}
 } // anonymous namespace
 
 #if defined(__SUNPRO_CC)
@@ -689,7 +707,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
         cmValue lhs = this->GetVariableOrString(*args.current);
         cmValue rhs = this->GetVariableOrString(*args.nextnext);
-        auto const result = cmCMakePath{ *lhs }.IsPrefix(cmCMakePath{ *rhs });
+        cmCMakePath const prefix{ *lhs };
+        auto const result = prefix.IsPrefix(cmCMakePath{ *rhs }) ||
+          IsPrefixCMP0223(prefix, this->Makefile);
         newArgs.ReduceTwoArgs(result, args);
       }
 

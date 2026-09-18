@@ -1,0 +1,4 @@
+CMake Warning \(policy\) at CMP0223-genex-common\.cmake:[0-9]+ \(file\):
+  Policy CMP0223 is not set: An empty path is not a prefix of any path\.  Run
+  "cmake --help-policy CMP0223" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.

@@ -1,0 +1,5 @@
+file(READ "${RunCMake_TEST_BINARY_DIR}/result.txt" generated)
+set(expected "empty=1 normalize=1 nonempty=1")
+if(NOT generated STREQUAL expected)
+  set(RunCMake_TEST_FAILED "generated: ${generated}\nexpected: ${expected}")
+endif()

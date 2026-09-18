@@ -20,6 +20,7 @@
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSubcommandTable.h"
@@ -839,6 +840,24 @@ bool HandleIsRelativeCommand(std::vector<std::string> const& args,
   return true;
 }
 
+// CMP0223: an empty path used to be a prefix of every path.
+bool IsPrefixCMP0223(cmCMakePath const& prefix, cmMakefile& mf)
+{
+  if (!prefix.IsEmpty()) {
+    return false;
+  }
+  switch (mf.GetPolicyStatus(cmPolicies::CMP0223)) {
+    case cmPolicies::WARN:
+      mf.IssuePolicyWarning(cmPolicies::CMP0223);
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      return true;
+    case cmPolicies::NEW:
+      break;
+  }
+  return false;
+}
+
 bool HandleIsPrefixCommand(std::vector<std::string> const& args,
                            cmExecutionStatus& status)
 {
@@ -869,13 +888,15 @@ bool HandleIsPrefixCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  bool isPrefix;
+  cmCMakePath prefix{ inputPath };
+  cmCMakePath value{ input };
   if (arguments.Normalize) {
-    isPrefix =
-      cmCMakePath(inputPath).Normal().IsPrefix(cmCMakePath(input).Normal());
-  } else {
-    isPrefix = cmCMakePath(inputPath).IsPrefix(input);
+    prefix = prefix.Normal();
+    value = value.Normal();
   }
+
+  bool const isPrefix =
+    prefix.IsPrefix(value) || IsPrefixCMP0223(prefix, status.GetMakefile());
 
   status.GetMakefile().AddDefinitionBool(output, isPrefix);
 

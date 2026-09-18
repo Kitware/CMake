@@ -456,6 +456,12 @@ meaning of each path component.
   When the ``NORMALIZE`` option is specified, ``<path-var>`` and ``<input>``
   are :ref:`normalized <Normalization>` before the check.
 
+  An empty path is not a prefix of any path.
+
+  .. versionchanged:: 4.5
+    An empty path was previously a prefix of every path.  See policy
+    :policy:`CMP0223`.
+
   .. code-block:: cmake
 
     set(path "/a/b/c")

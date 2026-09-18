@@ -1,0 +1,8 @@
+CMake Warning \(policy\) at CMP0223-WARN\.cmake:[0-9]+ \(cmake_path\):
+  Policy CMP0223 is not set: An empty path is not a prefix of any path\.  Run
+  "cmake --help-policy CMP0223" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

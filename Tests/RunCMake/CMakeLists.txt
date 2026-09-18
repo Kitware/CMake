@@ -187,6 +187,7 @@ endif()
 add_RunCMake_test(CMP0217)
 add_RunCMake_test(CMP0219)
 add_RunCMake_test(CMP0222)
+add_RunCMake_test(CMP0223)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   add_RunCMake_test(CMP0194 -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
