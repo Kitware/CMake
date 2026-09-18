@@ -13,6 +13,6 @@ add_custom_command(
 
 add_custom_target(hpp_creator ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/generated.hpp)
 
-# This test will fail if add_dependencies isn't account for in the
+# This test will fail if add_dependencies isn't accounted for in the
 # codegen build graph
 add_dependencies(hpp_creator foobar)

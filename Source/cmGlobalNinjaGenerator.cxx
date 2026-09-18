@@ -1558,6 +1558,21 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
   outputs.insert(outs.begin(), outs.end());
 }
 
+void cmGlobalNinjaGenerator::AppendCodegenTargetDepends(
+  cmGeneratorTarget const* target, cmNinjaDeps& deps,
+  std::string const& config) const
+{
+  std::set<std::string> const& codegenDeps = target->Target->GetCodegenDeps();
+  for (cmTargetDepend const& targetDep :
+       this->GetTargetDirectDepends(target)) {
+    if (targetDep->IsInBuildSystem() &&
+        codegenDeps.count(targetDep->GetName())) {
+      this->AppendTargetOutputs(targetDep, deps, config,
+                                DependOnTargetArtifact);
+    }
+  }
+}
+
 void cmGlobalNinjaGenerator::AddTargetAlias(std::string const& alias,
                                             cmGeneratorTarget* target,
                                             std::string const& config)
@@ -1727,6 +1742,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
           if (this->IsExcludedFromAllInConfig(t, config)) {
             continue;
           }
+
+          this->AppendCodegenTargetDepends(t.GT, build.ExplicitDeps, config);
+
           std::vector<cmSourceFile const*> customCommandSources;
           t.GT->GetCustomCommands(customCommandSources, config);
           for (cmSourceFile const* sf : customCommandSources) {
