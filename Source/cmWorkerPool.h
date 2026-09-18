@@ -101,9 +101,12 @@ public:
     /**
      * Run an external read only process.
      * Use only during JobT::Process() call!
+     * @arg mergedOutput Append the process stderr to ProcessResultT::StdOut
+     *      instead of ProcessResultT::StdErr.
      */
     bool RunProcess(ProcessResultT& result, std::vector<std::string> command,
-                    std::string const& workingDirectory);
+                    std::string const& workingDirectory,
+                    bool mergedOutput = true);
 
   private:
     //! Needs access to Work()
