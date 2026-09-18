@@ -192,7 +192,8 @@ The options for running tests are:
     * Otherwise, if the value is ``0``, parallelism is unbounded.
 
  This option may instead be specified by the :envvar:`CTEST_PARALLEL_LEVEL`
- environment variable.
+ environment variable.  See the documentation of that variable for how it
+ interacts with a test preset's :preset:`testPresets.execution.jobs` field.
 
  This option can be used with the :prop_test:`PROCESSORS` test property.
  See the `Label and Subproject Summary`_.
@@ -567,7 +568,9 @@ The options for running tests are:
  .. versionadded:: 3.26
 
  This option can also be set by setting the :envvar:`CTEST_NO_TESTS_ACTION`
- environment variable.
+ environment variable. See the documentation of that variable for how it
+ interacts with a test preset's :preset:`testPresets.execution.noTestsAction`
+ field.
 
 .. option:: --collect-instrumentation <build>
 

@@ -20,6 +20,11 @@
   :ctest-option:`--parallel` on the command line. If the value is
   ``0``, it is equivalent to unbounded parallelism.
 
+  If set, this field takes precedence over the
+  :envvar:`CTEST_PARALLEL_LEVEL` environment variable,
+  including when that variable is instead set via this test
+  preset's own :preset:`testPresets.environment` field.
+
   .. presets-versionchanged:: 11
 
     This field can also be a string, in which case it must be
@@ -102,6 +107,13 @@
   ``ignore``
     Equivalent to passing :ctest-option:`--no-tests=ignore`
     on the command line.
+
+  If set, this field is overridden by the
+  :envvar:`CTEST_NO_TESTS_ACTION` environment variable,
+  including when that variable is instead set via this test
+  preset's own :preset:`testPresets.environment` field.
+  See :envvar:`CTEST_NO_TESTS_ACTION` for the full precedence
+  order.
 
 .. _`CMakePresets.testPresets.execution.testPassthroughArguments`:
 

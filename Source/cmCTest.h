@@ -102,6 +102,13 @@ public:
   cm::optional<size_t> GetParallelLevel() const;
   void SetParallelLevel(cm::optional<size_t> level);
 
+  /**
+   * Check environment variables controlling CTest's behavior and update state
+   * accordingly, when the corresponding command-line toggles are unset.
+   * Returns false if there are errors during parsing.
+   */
+  bool UpdateStateFromEnvironment();
+
   unsigned long GetTestLoad() const;
   void SetTestLoad(unsigned long);
 
