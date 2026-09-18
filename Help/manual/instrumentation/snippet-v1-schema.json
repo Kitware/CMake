@@ -400,8 +400,8 @@
             "type": "object",
             "required": [
               "maxRSS",
-              "userTimeUSec",
-              "systemTimeUSec"
+              "userTime",
+              "systemTime"
             ],
             "properties": {
               "maxRSS": {
@@ -409,12 +409,12 @@
                 "description": "Maximum resident set size reported for wrapped child processes, in KiB.",
                 "minimum": 0
               },
-              "userTimeUSec": {
+              "userTime": {
                 "type": "integer",
                 "description": "User CPU time reported for wrapped child processes, in microseconds.",
                 "minimum": 0
               },
-              "systemTimeUSec": {
+              "systemTime": {
                 "type": "integer",
                 "description": "System CPU time reported for wrapped child processes, in microseconds.",
                 "minimum": 0

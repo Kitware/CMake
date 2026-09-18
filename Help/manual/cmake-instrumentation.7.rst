@@ -607,10 +607,10 @@ Snippet files have a filename with the syntax
     ``maxRSS``
       Maximum resident set size in KiB.
 
-    ``userTimeUSec``
+    ``userTime``
       User CPU time in microseconds.
 
-    ``systemTimeUSec``
+    ``systemTime``
       System CPU time in microseconds.
 
     If the data could not be collected, this object is ``null``.
@@ -660,8 +660,8 @@ Example:
     "processMetrics" :
     {
       "maxRSS" : 21032,
-      "userTimeUSec" : 18000,
-      "systemTimeUSec" : 5000
+      "userTime" : 18000,
+      "systemTime" : 5000
     },
     "timeStart" : 1737053448177,
     "duration" : 31,

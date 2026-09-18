@@ -1,7 +1,7 @@
 include(RunCTest)
 
 function(run_InstrumentationInCTestXML CASE_NAME)
-  cmake_parse_arguments(ARGS "USE_INSTRUMENTATION_ENV_VARS;USE_VERBOSE_INSTRUMENTATION;USE_INSTRUMENTATION_CMD;USE_LOCAL_INSTRUMENTATION;USE_STALE_CDASH" "" "" ${ARGN})
+  cmake_parse_arguments(ARGS "USE_INSTRUMENTATION_ENV_VARS;USE_VERBOSE_INSTRUMENTATION;USE_INSTRUMENTATION_CMD;USE_LOCAL_INSTRUMENTATION;USE_STALE_CDASH;USE_PROCESS_METRICS" "" "" ${ARGN})
   if(ARGS_USE_VERBOSE_INSTRUMENTATION)
     set(ENV{CTEST_USE_VERBOSE_INSTRUMENTATION} "1")
     set(RunCMake_USE_VERBOSE_INSTRUMENTATION 1)
@@ -42,6 +42,12 @@ endforeach()
 ]=])
   endif()
 
+  if(ARGS_USE_PROCESS_METRICS)
+    set(ENV{USE_PROCESS_METRICS} "1")
+  else()
+    set(ENV{USE_PROCESS_METRICS} "0")
+  endif()
+
   configure_file(${RunCMake_SOURCE_DIR}/main.c
                  ${RunCMake_BINARY_DIR}/${CASE_NAME}/main.c COPYONLY)
   run_ctest("${CASE_NAME}")
@@ -64,4 +70,7 @@ run_InstrumentationInCTestXML(InstrumentationWithoutCDashSubmit
 )
 run_InstrumentationInCTestXML(InstrumentationWithoutCDashSubmitWithStaleData
   USE_LOCAL_INSTRUMENTATION USE_STALE_CDASH
+)
+run_InstrumentationInCTestXML(ProcessMetricsInCTestXML
+  USE_PROCESS_METRICS
 )

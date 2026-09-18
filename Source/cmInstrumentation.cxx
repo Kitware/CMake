@@ -1272,9 +1272,9 @@ Json::Value cmInstrumentation::ResourceUsageToJSON(ProcessMetrics const& usage)
 {
   Json::Value root(Json::objectValue);
   root["maxRSS"] = static_cast<Json::Value::UInt64>(usage.ru_maxrss);
-  root["userTimeUSec"] = static_cast<Json::Value::UInt64>(
+  root["userTime"] = static_cast<Json::Value::UInt64>(
     usage.ru_utime.tv_sec * 1000000ULL + usage.ru_utime.tv_usec);
-  root["systemTimeUSec"] = static_cast<Json::Value::UInt64>(
+  root["systemTime"] = static_cast<Json::Value::UInt64>(
     usage.ru_stime.tv_sec * 1000000ULL + usage.ru_stime.tv_usec);
   return root;
 }

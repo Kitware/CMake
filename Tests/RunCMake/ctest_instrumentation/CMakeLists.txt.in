@@ -13,4 +13,12 @@ if($ENV{USE_INSTRUMENTATION_CMD})
     CUSTOM_CONTENT exampleContent STRING exampleData
   )
 endif()
+if($ENV{USE_PROCESS_METRICS})
+  cmake_instrumentation(
+    API_VERSION 1
+    DATA_VERSION 1.2
+    OPTIONS processMetrics cdashSubmit
+    CALLBACK "${CMAKE_COMMAND}" -P "@RunCMake_SOURCE_DIR@/save-process-metrics.cmake"
+  )
+endif()
 @CASE_CMAKELISTS_SUFFIX_CODE@
