@@ -126,6 +126,10 @@ void StringConcatenationUseCmstrcatCheck::check(
 void StringConcatenationUseCmstrcatCheck::issueCorrection(
   ExprChain const& Chain, MatchFinder::MatchResult const& Result)
 {
+  if (Chain.second.size() < 2) {
+    return;
+  }
+
   std::vector<FixItHint> FixIts;
   CXXOperatorCallExpr const* ExprNode;
   std::vector<clang::CXXOperatorCallExpr const*>::const_iterator It =
