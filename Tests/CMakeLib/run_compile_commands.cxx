@@ -9,6 +9,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class CompileCommandParser
@@ -102,7 +103,7 @@ private:
   void ExpectOrDie(char c, std::string const& message)
   {
     if (!this->Expect(c)) {
-      this->ErrorExit(std::string("'") + c + "' expected " + message + ".");
+      this->ErrorExit(cmStrCat('\'', c, "' expected ", message, '.'));
     }
   }
 

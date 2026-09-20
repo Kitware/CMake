@@ -2845,10 +2845,10 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
             lookup.domain = CACHE;
           } else {
             if (this->cmNamedCurly.find(next)) {
-              errorstr = "Syntax $" +
-                std::string(next, this->cmNamedCurly.end()) +
-                "{} is not supported.  Only ${}, $ENV{}, "
-                "and $CACHE{} are allowed.";
+              errorstr = cmStrCat("Syntax $",
+                                  std::string(next, this->cmNamedCurly.end()),
+                                  "{} is not supported.  Only ${}, $ENV{}, "
+                                  "and $CACHE{} are allowed.");
               mtype = MessageType::FATAL_ERROR;
               error = true;
             }
@@ -3424,9 +3424,9 @@ int cmMakefile::TryCompile(std::string const& srcdir,
   auto gg = cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
   if (!gg) {
     this->IssueMessage(MessageType::INTERNAL_ERROR,
-                       "Global generator '" +
-                         this->GetGlobalGenerator()->GetName() +
-                         "' could not be created.");
+                       cmStrCat("Global generator '",
+                                this->GetGlobalGenerator()->GetName(),
+                                "' could not be created."));
     cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;

@@ -72,8 +72,9 @@ void cmOSXBundleGenerator::CreateFramework(
     this->GT->GetFrameworkDirectory(config, cmGeneratorTarget::ContentLevel),
     '/');
 
-  std::string newoutpath = outpath + "/" +
-    this->GT->GetFrameworkDirectory(config, cmGeneratorTarget::FullLevel);
+  std::string newoutpath = cmStrCat(
+    outpath, '/',
+    this->GT->GetFrameworkDirectory(config, cmGeneratorTarget::FullLevel));
 
   std::string frameworkVersion = this->GT->GetFrameworkVersion();
 

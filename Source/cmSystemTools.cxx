@@ -2726,8 +2726,7 @@ bool extract_tar(std::string const& arFileName,
 
     while ((ar = archive_match_path_unmatched_inclusions_next(matching, &p)) ==
            ARCHIVE_OK) {
-      cmSystemTools::Error("tar: " + std::string(p) +
-                           ": Not found in archive");
+      cmSystemTools::Error(cmStrCat("tar: ", p, ": Not found in archive"));
       error_occurred = true;
     }
     if (error_occurred) {

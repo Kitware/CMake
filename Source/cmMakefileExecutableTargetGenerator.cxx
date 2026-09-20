@@ -99,8 +99,8 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   // Get the name of the device object to generate.
   std::string const& objExt =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
-  std::string const targetOutput =
-    this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
+  std::string const targetOutput = cmStrCat(
+    this->GeneratorTarget->ObjectDirectory, "cmake_device_link", objExt);
   this->DeviceLinkObject = targetOutput;
 
   this->NumberOfProgressActions++;
@@ -347,8 +347,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Make sure we have a link language.
   if (linkLanguage.empty()) {
-    cmSystemTools::Error("Cannot determine link language for target \"" +
-                         this->GeneratorTarget->GetName() + "\".");
+    cmSystemTools::Error(
+      cmStrCat("Cannot determine link language for target \"",
+               this->GeneratorTarget->GetName(), "\"."));
     return;
   }
 
@@ -528,11 +529,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
                             buildObjs, depends, useWatcomQuote, linkLanguage);
     if (!this->DeviceLinkObject.empty()) {
-      buildObjs += " " +
-        this->LocalGenerator->ConvertToOutputFormat(
-          this->LocalGenerator->MaybeRelativeToCurBinDir(
-            this->DeviceLinkObject),
-          cmOutputConverter::SHELL);
+      buildObjs = cmStrCat(buildObjs, ' ',
+                           this->LocalGenerator->ConvertToOutputFormat(
+                             this->LocalGenerator->MaybeRelativeToCurBinDir(
+                               this->DeviceLinkObject),
+                             cmOutputConverter::SHELL));
     }
 
     // maybe create .def file from list of objects

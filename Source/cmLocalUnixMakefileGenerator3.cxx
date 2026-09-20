@@ -1441,11 +1441,11 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
     char buffer[12];
     int ni = 0;
     snprintf(buffer, sizeof(buffer), "%04d", ni);
-    ret = str1 + str2 + buffer;
+    ret = cmStrCat(str1, str2, buffer);
     while (this->ShortMakeVariableMap.count(ret) && ni < 1000) {
       ++ni;
       snprintf(buffer, sizeof(buffer), "%04d", ni);
-      ret = str1 + str2 + buffer;
+      ret = cmStrCat(str1, str2, buffer);
     }
     if (ni == 1000) {
       cmSystemTools::Error("Borland makefile variable length too long");
@@ -2385,7 +2385,7 @@ void cmLocalUnixMakefileGenerator3::CreateCDCommand(
     // directory and build because make resets the directory between
     // each command.
     std::string outputForExisting = this->ConvertToOutputForExisting(tgtDir);
-    std::string prefix = cd_cmd + outputForExisting + " && ";
+    std::string prefix = cmStrCat(cd_cmd, outputForExisting, " && ");
     std::transform(commands.begin(), commands.end(), commands.begin(),
                    [&prefix](std::string const& s) { return prefix + s; });
   }

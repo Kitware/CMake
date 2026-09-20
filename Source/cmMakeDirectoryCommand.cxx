@@ -5,6 +5,7 @@
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // cmMakeDirectoryCommand
@@ -22,8 +23,8 @@ bool cmMakeDirectoryCommand(std::vector<std::string> const& args,
     return false;
   }
   if (!mf.CanIWriteThisFile(args[0])) {
-    std::string e = "attempted to create a directory: " + args[0] +
-      " into a source directory.";
+    std::string e = cmStrCat("attempted to create a directory: ", args[0],
+                             " into a source directory.");
     status.SetError(e);
     cmSystemTools::SetFatalErrorOccurred();
     return false;

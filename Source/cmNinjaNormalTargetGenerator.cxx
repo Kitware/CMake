@@ -268,7 +268,7 @@ bool cmNinjaNormalTargetGenerator::CheckUseResponseFileForLibraries(
 {
   // Check for an explicit setting one way or the other.
   std::string const responseVar =
-    "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_LIBRARIES";
+    cmStrCat("CMAKE_", l, "_USE_RESPONSE_FILE_FOR_LIBRARIES");
 
   // If the option is defined, read it's value
   if (cmValue val = this->Makefile->GetDefinition(responseVar)) {
@@ -864,8 +864,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
                globalGen->ConfigDirectory(config), '/'));
   targetOutputDir = globalGen->ExpandCFGIntDir(targetOutputDir, config);
 
-  std::string targetOutputReal =
-    this->ConvertToNinjaPath(targetOutputDir + "cmake_device_link" + objExt);
+  std::string targetOutputReal = this->ConvertToNinjaPath(
+    cmStrCat(targetOutputDir, "cmake_device_link", objExt));
 
   if (firstForConfig) {
     globalGen->GetByproductsForCleanTarget(config).push_back(targetOutputReal);
@@ -1309,9 +1309,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     // step.
     cmSourceFile const* mainCrateRoot = gt->GetRustMainCrateRoot(config);
     if (!mainCrateRoot) {
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                   "Target " + gt->GetName() +
-                                     " has no main crate root.");
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Target ", gt->GetName(), " has no main crate root."));
       return;
     }
     std::string mainCrateRootPath =
@@ -1469,7 +1469,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     if (cmValue d = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX")) {
       dbg_suffix = *d;
     }
-    vars["TARGET_PDB"] = components.base + components.suffix + dbg_suffix;
+    vars["TARGET_PDB"] =
+      cmStrCat(components.base, components.suffix, dbg_suffix);
   }
 
   std::string const objPath =

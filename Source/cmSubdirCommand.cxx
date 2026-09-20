@@ -35,17 +35,17 @@ bool cmSubdirCommand(std::vector<std::string> const& args,
     }
 
     // if they specified a relative path then compute the full
-    std::string srcPath = mf.GetCurrentSourceDirectory() + "/" + i;
+    std::string srcPath = cmStrCat(mf.GetCurrentSourceDirectory(), '/', i);
     if (cmSystemTools::FileIsDirectory(srcPath)) {
-      std::string binPath = mf.GetCurrentBinaryDirectory() + "/" + i;
+      std::string binPath = cmStrCat(mf.GetCurrentBinaryDirectory(), '/', i);
       mf.AddSubDirectory(srcPath, binPath, excludeFromAll, false, false);
     }
     // otherwise it is a full path
     else if (cmSystemTools::FileIsDirectory(i)) {
       // we must compute the binPath from the srcPath, we just take the last
       // element from the source path and use that
-      std::string binPath = mf.GetCurrentBinaryDirectory() + "/" +
-        cmSystemTools::GetFilenameName(i);
+      std::string binPath = cmStrCat(mf.GetCurrentBinaryDirectory(), '/',
+                                     cmSystemTools::GetFilenameName(i));
       mf.AddSubDirectory(i, binPath, excludeFromAll, false, false);
     } else {
       status.SetError(cmStrCat("Incorrect SUBDIRS command. Directory: ", i,
