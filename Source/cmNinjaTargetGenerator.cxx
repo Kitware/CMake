@@ -47,7 +47,6 @@
 #include "cmNinjaUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
@@ -1598,15 +1597,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // If compiler launcher was specified and not consumed above, it
   // goes to the beginning of the command line.
   if (!compilerLauncher.empty()) {
-    cmList args{ compilerLauncher, cmList::EmptyElements::Yes };
-    if (!args.empty()) {
-      args[0] = this->LocalGenerator->ConvertToOutputFormat(
-        args[0], cmOutputConverter::SHELL);
-      for (std::string& i : cmMakeRange(args.begin() + 1, args.end())) {
-        i = this->LocalGenerator->EscapeForShell(i);
-      }
-      vars["LAUNCHER"] = args.join(" ") + " ";
-    }
+    vars["LAUNCHER"] =
+      cmStrCat(this->ConvertLauncherToShell(compilerLauncher), ' ');
   }
 
   if (this->GetMakefile()->GetSafeDefinition(

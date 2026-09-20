@@ -51,3 +51,10 @@ foreach(lang ${langs})
     run_compiler_launcher_env(${lang}-launch-env)
   endif()
 endforeach()
+
+if(NOT RunCMake_GENERATOR MATCHES "FASTBuild")
+  # FIXME(#27402): FASTBuild builds its launcher command line without shell
+  # quoting, so it can't handle empty or special-character arguments.
+  run_compiler_launcher(C-special-args)
+  run_compiler_launcher(C-special-args-cppcheck)
+endif()
