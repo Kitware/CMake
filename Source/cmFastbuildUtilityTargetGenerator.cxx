@@ -75,8 +75,8 @@ void cmFastbuildUtilityTargetGenerator::Generate()
     if (target && target->GetType() == cm::TargetType::INTERFACE_LIBRARY) {
       for (auto const& dep : target->GetUtilities()) {
         auto const& depName = this->ConvertToFastbuildPath(dep.Value.first);
-        LogMessage("Transitively propagating iface dep: " + depName +
-                   ", is cross: " + std::to_string(dep.Value.second));
+        LogMessage(cmStrCat("Transitively propagating iface dep: ", depName,
+                            ", is cross: ", std::to_string(dep.Value.second)));
         nonImportedUtils.emplace_back(depName);
         addUtilDepToTarget(this->ConvertToFastbuildPath(depName));
       }
@@ -117,8 +117,8 @@ void cmFastbuildUtilityTargetGenerator::Generate()
   for (auto& exec : GenerateCommands(FastbuildBuildStep::REST).Nodes) {
     addUtilDepToTarget(exec.Name);
     for (auto const& dep : TargetDirectDependencies) {
-      LogMessage("Direct dep " + dep->GetName() +
-                 "-all propagating to CC: " + exec.Name);
+      LogMessage(cmStrCat("Direct dep ", dep->GetName(),
+                          "-all propagating to CC: ", exec.Name));
       // All custom commands from within the target must be executed AFTER all
       // the target's deps.
       exec.PreBuildDependencies.emplace(dep->GetName());

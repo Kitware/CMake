@@ -184,7 +184,7 @@ std::vector<std::string> GetPkgConfSysCflags(cmMakefile& mf)
       std::string tmp;
       cmSystemTools::GetEnv(var, tmp);
       if (!tmp.empty()) {
-        paths += ";" + tmp;
+        paths = cmStrCat(paths, ';', tmp);
       }
     }
   };

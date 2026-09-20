@@ -567,7 +567,7 @@ std::string cmGraphVizWriter::ItemNameWithAliases(
 
   auto nameWithAliases = itemName;
   for(auto const& item : items) {
-    nameWithAliases += "\\n(" + item + ")";
+    nameWithAliases = cmStrCat(nameWithAliases, "\\n(" , item , ')');
   }
 
   return nameWithAliases;
@@ -578,10 +578,10 @@ std::string cmGraphVizWriter::GetEdgeStyle(DependencyType dt)
   std::string style;
   switch (dt) {
     case DependencyType::LinkPrivate:
-      style = "[ style = " + std::string(GRAPHVIZ_EDGE_STYLE_PRIVATE) + " ]";
+      style = cmStrCat("[ style = ", GRAPHVIZ_EDGE_STYLE_PRIVATE, " ]");
       break;
     case DependencyType::LinkInterface:
-      style = "[ style = " + std::string(GRAPHVIZ_EDGE_STYLE_INTERFACE) + " ]";
+      style = cmStrCat("[ style = ", GRAPHVIZ_EDGE_STYLE_INTERFACE, " ]");
       break;
     default:
       break;

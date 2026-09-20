@@ -462,7 +462,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
     } else {
       this->ResolveTargetsInGeneratorExpression(li, target, lg);
     }
-    input += sep + li;
+    input = cmStrCat(input, sep, li);
     sep = ";";
   }
 }

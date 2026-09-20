@@ -1082,8 +1082,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       if (testLangs.find(LinkerLanguage) == testLangs.end()) {
         this->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
-          "Linker language '" + LinkerLanguage +
-            "' must be enabled in project(LANGUAGES).");
+          cmStrCat("Linker language '", LinkerLanguage,
+                   "' must be enabled in project(LANGUAGES)."));
       }
 
       fprintf(fout, "set_property(TARGET %s PROPERTY LINKER_LANGUAGE %s)\n",

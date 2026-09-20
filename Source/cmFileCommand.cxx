@@ -755,7 +755,7 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
         expr = status.GetMakefile().GetCurrentSourceDirectory();
         // Handle script mode
         if (!expr.empty()) {
-          expr += "/" + *i;
+          expr = cmStrCat(expr, '/', *i);
         } else {
           expr = *i;
         }
@@ -2126,10 +2126,10 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     std::string dir = cmSystemTools::GetFilenamePath(file);
     if (!dir.empty() && !cmSystemTools::FileExists(dir) &&
         !cmSystemTools::MakeDirectory(dir)) {
-      std::string errstring = "DOWNLOAD error: cannot create directory '" +
-        dir +
-        "' - Specify file by full path name and verify that you "
-        "have directory creation and file write privileges.";
+      std::string errstring =
+        cmStrCat("DOWNLOAD error: cannot create directory '", dir,
+                 "' - Specify file by full path name and verify that you "
+                 "have directory creation and file write privileges.");
       status.SetError(errstring);
       return false;
     }
@@ -2358,10 +2358,10 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     if (expectedHash != actualHash) {
       if (!statusVar.empty() && res == 0) {
         status.GetMakefile().AddDefinition(statusVar,
-                                           "1;HASH mismatch: "
-                                           "expected: " +
-                                             expectedHash +
-                                             " actual: " + actualHash);
+                                           cmStrCat("1;HASH mismatch: "
+                                                    "expected: ",
+                                                    expectedHash,
+                                                    " actual: ", actualHash));
       }
 
       status.SetError(cmStrCat("DOWNLOAD HASH mismatch\n"
@@ -3644,8 +3644,8 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
 
   cmMakefile& makeFile = status.GetMakefile();
   if (!makeFile.CanIWriteThisFile(outputFile)) {
-    cmSystemTools::Error("Attempt to write file: " + outputFile +
-                         " into a source directory.");
+    cmSystemTools::Error(cmStrCat("Attempt to write file: ", outputFile,
+                                  " into a source directory."));
     return false;
   }
 

@@ -82,8 +82,9 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
       // replace any variables
       std::string const& temps = *s;
       if (!cmSystemTools::GetFilenamePath(temps).empty()) {
-        testf = cmSystemTools::GetFilenamePath(temps) + "/" +
-          cmSystemTools::GetFilenameWithoutLastExtension(temps) + ext;
+        testf =
+          cmStrCat(cmSystemTools::GetFilenamePath(temps), '/',
+                   cmSystemTools::GetFilenameWithoutLastExtension(temps), ext);
       } else {
         testf = cmSystemTools::GetFilenameWithoutLastExtension(temps) + ext;
       }

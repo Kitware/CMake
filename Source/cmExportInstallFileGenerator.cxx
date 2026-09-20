@@ -605,7 +605,7 @@ void cmExportInstallFileGenerator::PopulateIncludeDirectoriesInterface(
 
   std::string includes = (input ? *input : "");
   char const* const sep = input ? ";" : "";
-  includes += sep + exportDirs;
+  includes = cmStrCat(includes, sep, exportDirs);
   std::string prepro = cmGeneratorExpression::Preprocess(
     includes, preprocessRule, this->GetImportPrefixWithSlash());
   if (!prepro.empty()) {

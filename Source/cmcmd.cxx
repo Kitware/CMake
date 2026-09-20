@@ -3400,8 +3400,8 @@ int cmVSLink::LinkNonIncremental()
     }
 
     // Run the manifest tool to embed the final manifest in the binary.
-    std::string mtOut = "/outputresource:" + this->TargetFile +
-      (this->Type == 1 ? ";#1" : ";#2");
+    std::string mtOut = cmStrCat("/outputresource:", this->TargetFile,
+                                 (this->Type == 1 ? ";#1" : ";#2"));
     return this->RunMT(mtOut, false);
   }
 

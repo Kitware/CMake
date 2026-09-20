@@ -4834,7 +4834,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       std::string linkedTargetsContent = getLinkedTargetsContent(
         target, interfacePropertyName, eval, &dagChecker, usage);
       if (!linkedTargetsContent.empty()) {
-        result += (result.empty() ? "" : ";") + linkedTargetsContent;
+        result =
+          cmStrCat(result, (result.empty() ? "" : ";"), linkedTargetsContent);
       }
     }
     return result;

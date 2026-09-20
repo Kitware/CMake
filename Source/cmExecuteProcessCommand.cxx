@@ -135,8 +135,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     return true;
   }
   if (!unparsedArguments.empty()) {
-    status.SetError(" given unknown argument \"" + unparsedArguments.front() +
-                    "\".");
+    status.SetError(cmStrCat(" given unknown argument \"",
+                             unparsedArguments.front(), "\"."));
     return false;
   }
 
@@ -159,8 +159,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   }
 
   if (!status.GetMakefile().CanIWriteThisFile(outputFilename)) {
-    status.SetError("attempted to output into a file: " + outputFilename +
-                    " into a source directory.");
+    status.SetError(cmStrCat("attempted to output into a file: ",
+                             outputFilename, " into a source directory."));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }

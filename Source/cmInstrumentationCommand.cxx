@@ -146,8 +146,8 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     return true;
   }
   if (!unparsedArguments.empty()) {
-    status.SetError("given unknown argument \"" + unparsedArguments.front() +
-                    "\".");
+    status.SetError(
+      cmStrCat("given unknown argument \"", unparsedArguments.front(), "\"."));
     return false;
   }
   int apiVersion;

@@ -41,7 +41,8 @@ bool cmExportBuildCMakeConfigGenerator::GenerateMainFile(std::ostream& os)
     std::string sep;
     bool generatedInterfaceRequired = false;
     auto visitor = [&](cmGeneratorTarget const* te) {
-      expectedTargets += sep + this->Namespace + te->GetExportName();
+      expectedTargets =
+        cmStrCat(expectedTargets, sep, this->Namespace, te->GetExportName());
       sep = " ";
 
       generatedInterfaceRequired |=

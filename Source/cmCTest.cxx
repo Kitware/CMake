@@ -707,7 +707,7 @@ bool cmCTest::OpenOutputFile(std::string const& path, std::string const& name,
 {
   std::string testingDir = this->Impl->BinaryDir + "/Testing";
   if (!path.empty()) {
-    testingDir += "/" + path;
+    testingDir = cmStrCat(testingDir, '/', path);
   }
   if (cmSystemTools::FileExists(testingDir)) {
     if (!cmSystemTools::FileIsDirectory(testingDir)) {
