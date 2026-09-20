@@ -115,12 +115,20 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
                                      this->CompileDefinitionsEntries);
 
   CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetCompileWrappersEntries(),
+                                     this->CompileWrappersEntries);
+
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
                                      t->GetLinkOptionsEntries(),
                                      this->LinkOptionsEntries);
 
   CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
                                      t->GetLinkDirectoriesEntries(),
                                      this->LinkDirectoriesEntries);
+
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetLinkWrappersEntries(),
+                                     this->LinkWrappersEntries);
 
   CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
                                      t->GetPrecompileHeadersEntries(),
@@ -544,9 +552,11 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->LinkImplClosureForUsageMap.clear();
   this->LinkImplMap.clear();
   this->LinkImplUsageRequirementsOnlyMap.clear();
+  this->LinkWrappersCache.clear();
   this->IncludeDirectoriesCache.clear();
   this->CompileOptionsCache.clear();
   this->CompileDefinitionsCache.clear();
+  this->CompileWrappersCache.clear();
   this->CustomTransitiveBuildPropertiesMap.clear();
   this->CustomTransitiveInterfacePropertiesMap.clear();
   this->PrecompileHeadersCache.clear();

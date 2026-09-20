@@ -1,0 +1,5 @@
+.*-E env CW_SELECTOR=1 [^
+]*[/\]main\.cxx['"
+ ].*-E env LW_SELECTOR=1 [^
+]*([ /\:]|-e)maincxx(\.exe)?['"
+ ]

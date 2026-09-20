@@ -1,0 +1,11 @@
+^CMake Error at InterfaceDNE\.cmake:[0-9]+ \(target_link_libraries\):
+  Specified wrapper 'NOT_A_COMPILE_WRAPPER' for target 'main' does not exist\.
+  Set the GLOBAL property 'CMAKE_COMPILE_WRAPPER_NOT_A_COMPILE_WRAPPER'\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at InterfaceDNE\.cmake:[0-9]+ \(target_link_libraries\):
+  Specified wrapper 'NOT_A_LINK_WRAPPER' for target 'main' does not exist\.
+  Set the GLOBAL property 'CMAKE_LINK_WRAPPER_NOT_A_LINK_WRAPPER'\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

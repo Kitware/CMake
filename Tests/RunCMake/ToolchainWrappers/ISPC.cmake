@@ -1,0 +1,6 @@
+include(common.cmake)
+enable_language(CXX ISPC)
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  set(CMAKE_ISPC_FLAGS "--arch=x86")
+endif()
+example_exe(main.cxx test.ispc)

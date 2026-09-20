@@ -3499,8 +3499,8 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       reportError(
         eval, content->GetOriginalExpression(),
         "$<COMPILE_LANGUAGE:...> may only be used to specify include "
-        "directories, compile definitions, compile options, and to evaluate "
-        "components of the file(GENERATE) command.");
+        "directories, compile definitions, compile options, compile wrappers, "
+        "and to evaluate components of the file(GENERATE) command.");
       return std::string();
     }
 
@@ -3549,9 +3549,9 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
         eval, content->GetOriginalExpression(),
         "$<COMPILE_LANG_AND_ID:lang,id> may only be used with binary "
         "targets "
-        "to specify include directories, compile definitions, and compile "
-        "options.  It may not be used with the add_custom_command, "
-        "add_custom_target, or file(GENERATE) commands.");
+        "to specify include directories, compile definitions, compile "
+        "options, and compile wrappers.  It may not be used with the "
+        "add_custom_command, add_custom_target, or file(GENERATE) commands.");
       return std::string();
     }
     cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
@@ -3597,8 +3597,8 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
           dagChecker->EvaluatingLinkerLauncher())) {
       reportError(eval, content->GetOriginalExpression(),
                   "$<LINK_LANGUAGE:...> may only be used with binary targets "
-                  "to specify link libraries, link directories, link options "
-                  "and link depends.");
+                  "to specify link libraries, link directories, link options, "
+                  "link depends, and link wrappers.");
       return std::string();
     }
     if (dagChecker->EvaluatingLinkLibraries() && parameters.empty()) {
@@ -3693,9 +3693,8 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
       reportError(
         eval, content->GetOriginalExpression(),
         "$<LINK_LANG_AND_ID:lang,id> may only be used with binary targets "
-        "to specify link libraries, link directories, link options, and "
-        "link "
-        "depends.");
+        "to specify link libraries, link directories, link options, link "
+        "depends, and link wrappers.");
       return std::string();
     }
 

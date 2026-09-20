@@ -143,6 +143,7 @@ syn keyword cmakeProperty contained
             \ COMPILE_PDB_NAME
             \ COMPILE_PDB_OUTPUT_DIRECTORY
             \ COMPILE_WARNING_AS_ERROR
+            \ COMPILE_WRAPPERS
             \ COST
             \ CPACK_DESKTOP_SHORTCUTS
             \ CPACK_NEVER_OVERWRITE
@@ -279,6 +280,7 @@ syn keyword cmakeProperty contained
             \ INTERFACE_COMPILE_DEFINITIONS
             \ INTERFACE_COMPILE_FEATURES
             \ INTERFACE_COMPILE_OPTIONS
+            \ INTERFACE_COMPILE_WRAPPERS
             \ INTERFACE_CXX_MODULE_SETS
             \ INTERFACE_HEADER_SETS
             \ INTERFACE_HEADER_SETS_TO_VERIFY
@@ -289,6 +291,7 @@ syn keyword cmakeProperty contained
             \ INTERFACE_LINK_LIBRARIES_DIRECT
             \ INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE
             \ INTERFACE_LINK_OPTIONS
+            \ INTERFACE_LINK_WRAPPERS
             \ INTERFACE_POSITION_INDEPENDENT_CODE
             \ INTERFACE_PRECOMPILE_HEADERS
             \ INTERFACE_SOURCES
@@ -325,6 +328,7 @@ syn keyword cmakeProperty contained
             \ LINK_SEARCH_START_STATIC
             \ LINK_WARNING_AS_ERROR
             \ LINK_WHAT_YOU_USE
+            \ LINK_WRAPPERS
             \ LISTFILE_STACK
             \ LOCATION
             \ MACHO_COMPATIBILITY_VERSION

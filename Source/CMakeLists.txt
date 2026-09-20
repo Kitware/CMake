@@ -336,6 +336,7 @@ add_library(
   cmGeneratorTarget_Options.cxx
   cmGeneratorTarget_Sources.cxx
   cmGeneratorTarget_TransitiveProperty.cxx
+  cmGeneratorTarget_Wrappers.cxx
   cmLinkItemGraphVisitor.cxx
   cmLinkItemGraphVisitor.h
   cmGetPipes.cxx

@@ -672,14 +672,18 @@ public:
   UsageRequirementProperty CompileOptions;
   UsageRequirementProperty CompileFeatures;
   UsageRequirementProperty CompileDefinitions;
+  UsageRequirementProperty CompileWrappers;
   UsageRequirementProperty PrecompileHeaders;
   UsageRequirementProperty Sources;
   UsageRequirementProperty LinkOptions;
   UsageRequirementProperty LinkDirectories;
   UsageRequirementProperty LinkLibraries;
+  UsageRequirementProperty LinkWrappers;
+  UsageRequirementProperty InterfaceCompileWrappers;
   UsageRequirementProperty InterfaceLinkLibraries;
   UsageRequirementProperty InterfaceLinkLibrariesDirect;
   UsageRequirementProperty InterfaceLinkLibrariesDirectExclude;
+  UsageRequirementProperty InterfaceLinkWrappers;
   UsageRequirementProperty ImportedCxxModulesIncludeDirectories;
   UsageRequirementProperty ImportedCxxModulesCompileDefinitions;
   UsageRequirementProperty ImportedCxxModulesCompileFeatures;
@@ -734,15 +738,19 @@ cmTargetInternals::cmTargetInternals(std::string name, cm::TargetType type,
   , CompileOptions("COMPILE_OPTIONS"_s)
   , CompileFeatures("COMPILE_FEATURES"_s)
   , CompileDefinitions("COMPILE_DEFINITIONS"_s)
+  , CompileWrappers("COMPILE_WRAPPERS"_s)
   , PrecompileHeaders("PRECOMPILE_HEADERS"_s)
   , Sources("SOURCES"_s, UsageRequirementProperty::AppendEmpty::Yes)
   , LinkOptions("LINK_OPTIONS"_s)
   , LinkDirectories("LINK_DIRECTORIES"_s)
   , LinkLibraries("LINK_LIBRARIES"_s)
+  , LinkWrappers("LINK_WRAPPERS"_s)
+  , InterfaceCompileWrappers("INTERFACE_COMPILE_WRAPPERS"_s)
   , InterfaceLinkLibraries("INTERFACE_LINK_LIBRARIES"_s)
   , InterfaceLinkLibrariesDirect("INTERFACE_LINK_LIBRARIES_DIRECT"_s)
   , InterfaceLinkLibrariesDirectExclude(
       "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE"_s)
+  , InterfaceLinkWrappers("INTERFACE_LINK_WRAPPERS"_s)
   , ImportedCxxModulesIncludeDirectories(
       "IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES"_s)
   , ImportedCxxModulesCompileDefinitions(
@@ -1784,6 +1792,11 @@ cmBTStringRange cmTarget::GetCompileDefinitionsEntries() const
   return cmMakeRange(this->impl->CompileDefinitions.Entries);
 }
 
+cmBTStringRange cmTarget::GetCompileWrappersEntries() const
+{
+  return cmMakeRange(this->impl->CompileWrappers.Entries);
+}
+
 cmBTStringRange cmTarget::GetPrecompileHeadersEntries() const
 {
   return cmMakeRange(this->impl->PrecompileHeaders.Entries);
@@ -1797,6 +1810,11 @@ cmBTStringRange cmTarget::GetSourceEntries() const
 cmBTStringRange cmTarget::GetLinkOptionsEntries() const
 {
   return cmMakeRange(this->impl->LinkOptions.Entries);
+}
+
+cmBTStringRange cmTarget::GetLinkWrappersEntries() const
+{
+  return cmMakeRange(this->impl->LinkWrappers.Entries);
 }
 
 cmBTStringRange cmTarget::GetLinkDirectoriesEntries() const
@@ -2082,6 +2100,7 @@ MAKE_PROP(OBJCXX_STANDARD);
 MAKE_PROP(COMPILE_DEFINITIONS);
 MAKE_PROP(COMPILE_FEATURES);
 MAKE_PROP(COMPILE_OPTIONS);
+MAKE_PROP(COMPILE_WRAPPERS);
 MAKE_PROP(PRECOMPILE_HEADERS);
 MAKE_PROP(CUDA_CUBIN_COMPILATION);
 MAKE_PROP(CUDA_FATBIN_COMPILATION);
@@ -2098,6 +2117,7 @@ MAKE_PROP(IMPORTED_CXX_MODULES_COMPILE_OPTIONS);
 MAKE_PROP(IMPORTED_CXX_MODULES_LINK_LIBRARIES);
 MAKE_PROP(LINK_DIRECTORIES);
 MAKE_PROP(LINK_LIBRARIES);
+MAKE_PROP(LINK_WRAPPERS);
 MAKE_PROP(MANUALLY_ADDED_DEPENDENCIES);
 MAKE_PROP(NAME);
 MAKE_PROP(SOURCES);
@@ -2107,9 +2127,11 @@ MAKE_PROP(BINARY_DIR);
 MAKE_PROP(SOURCE_DIR);
 MAKE_PROP(FALSE);
 MAKE_PROP(TRUE);
+MAKE_PROP(INTERFACE_COMPILE_WRAPPERS);
 MAKE_PROP(INTERFACE_LINK_LIBRARIES);
 MAKE_PROP(INTERFACE_LINK_LIBRARIES_DIRECT);
 MAKE_PROP(INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE);
+MAKE_PROP(INTERFACE_LINK_WRAPPERS);
 #undef MAKE_PROP
 }
 
@@ -2248,14 +2270,18 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
     &this->impl->CompileOptions,
     &this->impl->CompileFeatures,
     &this->impl->CompileDefinitions,
+    &this->impl->CompileWrappers,
     &this->impl->PrecompileHeaders,
     &this->impl->Sources,
     &this->impl->LinkOptions,
     &this->impl->LinkDirectories,
     &this->impl->LinkLibraries,
+    &this->impl->LinkWrappers,
+    &this->impl->InterfaceCompileWrappers,
     &this->impl->InterfaceLinkLibraries,
     &this->impl->InterfaceLinkLibrariesDirect,
     &this->impl->InterfaceLinkLibrariesDirectExclude,
+    &this->impl->InterfaceLinkWrappers,
     &this->impl->ImportedCxxModulesIncludeDirectories,
     &this->impl->ImportedCxxModulesCompileDefinitions,
     &this->impl->ImportedCxxModulesCompileFeatures,
@@ -2368,14 +2394,18 @@ void cmTarget::AppendProperty(std::string const& prop,
     &this->impl->CompileOptions,
     &this->impl->CompileFeatures,
     &this->impl->CompileDefinitions,
+    &this->impl->CompileWrappers,
     &this->impl->PrecompileHeaders,
     &this->impl->Sources,
     &this->impl->LinkOptions,
     &this->impl->LinkDirectories,
     &this->impl->LinkLibraries,
+    &this->impl->LinkWrappers,
+    &this->impl->InterfaceCompileWrappers,
     &this->impl->InterfaceLinkLibraries,
     &this->impl->InterfaceLinkLibrariesDirect,
     &this->impl->InterfaceLinkLibrariesDirectExclude,
+    &this->impl->InterfaceLinkWrappers,
     &this->impl->ImportedCxxModulesIncludeDirectories,
     &this->impl->ImportedCxxModulesCompileDefinitions,
     &this->impl->ImportedCxxModulesCompileFeatures,
@@ -2755,9 +2785,11 @@ std::unordered_set<std::string> const& cmTarget::GetSpecialPropertyNames()
     propCOMPILE_FEATURES,
     propCOMPILE_OPTIONS,
     propCOMPILE_DEFINITIONS,
+    propCOMPILE_WRAPPERS,
     propPRECOMPILE_HEADERS,
     propLINK_OPTIONS,
     propLINK_DIRECTORIES,
+    propLINK_WRAPPERS,
     propIMPORTED,
     propIMPORTED_GLOBAL,
     propMANUALLY_ADDED_DEPENDENCIES,
@@ -2766,9 +2798,11 @@ std::unordered_set<std::string> const& cmTarget::GetSpecialPropertyNames()
     propSOURCE_DIR,
     propSOURCES,
     propSYMBOLIC,
+    propINTERFACE_COMPILE_WRAPPERS,
     propINTERFACE_LINK_LIBRARIES,
     propINTERFACE_LINK_LIBRARIES_DIRECT,
     propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE,
+    propINTERFACE_LINK_WRAPPERS,
     propIMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES,
     propIMPORTED_CXX_MODULES_COMPILE_DEFINITIONS,
     propIMPORTED_CXX_MODULES_COMPILE_FEATURES,
@@ -2807,14 +2841,18 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
       &this->impl->CompileOptions,
       &this->impl->CompileFeatures,
       &this->impl->CompileDefinitions,
+      &this->impl->CompileWrappers,
       &this->impl->PrecompileHeaders,
       &this->impl->Sources,
       &this->impl->LinkOptions,
       &this->impl->LinkDirectories,
       &this->impl->LinkLibraries,
+      &this->impl->LinkWrappers,
+      &this->impl->InterfaceCompileWrappers,
       &this->impl->InterfaceLinkLibraries,
       &this->impl->InterfaceLinkLibrariesDirect,
       &this->impl->InterfaceLinkLibrariesDirectExclude,
+      &this->impl->InterfaceLinkWrappers,
       &this->impl->ImportedCxxModulesIncludeDirectories,
       &this->impl->ImportedCxxModulesCompileDefinitions,
       &this->impl->ImportedCxxModulesCompileFeatures,

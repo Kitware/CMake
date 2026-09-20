@@ -1,0 +1,27 @@
+CMake Debug Log at common\.cmake:[0-9]+ \(set_target_properties\):
+  Used compile wrappers for target main:
+
+   \* EXAMPLE_1
+   \* EXAMPLE_2
+
+Call Stack \(most recent call first\):
+  DebugProps\.cmake:[0-9]+ \(example_exe\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Debug Log at common\.cmake:[0-9]+ \(set_target_properties\):
+  Used link wrappers for target main:
+
+   \* EXAMPLE_2
+
+Call Stack \(most recent call first\):
+  DebugProps\.cmake:[0-9]+ \(example_exe\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Debug Log at common\.cmake:[0-9]+ \(target_link_libraries\):
+  Used link wrappers for target main:
+
+   \* EXAMPLE_1
+
+Call Stack \(most recent call first\):
+  DebugProps\.cmake:[0-9]+ \(example_exe\)
+  CMakeLists\.txt:[0-9]+ \(include\)

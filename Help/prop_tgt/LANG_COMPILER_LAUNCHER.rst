@@ -19,3 +19,9 @@ when a target is created.
 
   The property value may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+.. versionadded:: 4.5
+
+  Any wrappers specified by :prop_tgt:`COMPILE_WRAPPERS` and
+  :prop_tgt:`INTERFACE_COMPILE_WRAPPERS` are placed before the launcher
+  command line.  See :prop_tgt:`COMPILE_WRAPPERS` for details.

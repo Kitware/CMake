@@ -1,0 +1,15 @@
+.*ctest(\.exe)?"? --launch [^
+]*--language C[^
+]* -- [^
+]*-E env CW_OUTER=1 [^
+]*-E env CW_INNER=2 [^
+]*-E env CL_LAUNCH=1 [^
+]*[/\\]main\.c['"
+ ].*ctest(\.exe)?"? --launch [^
+]*--language C[^
+]* -- [^
+]*-E env LW_OUTER=1 [^
+]*-E env LW_INNER=2 [^
+]*-E env LL_LAUNCH=1 [^
+]*([ /\\:]|-e)main(\.exe)?['"
+ ]

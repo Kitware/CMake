@@ -1,0 +1,7 @@
+.*__run_co_compile --launcher=[^
+]*-E;env;CW_OUTER=1;[^
+]*-E;env;CW_INNER=2;[^
+]*-E;env;CL_LAUNCH=1[^
+]* --cppcheck=[^
+]*-E;true[^
+]* --source=

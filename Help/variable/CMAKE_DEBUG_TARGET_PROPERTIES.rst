@@ -8,13 +8,29 @@ debug output for when evaluating target properties.  Currently it can
 only be used when evaluating:
 
 * :prop_tgt:`AUTOUIC_OPTIONS`
+
 * :prop_tgt:`COMPILE_DEFINITIONS`
+
 * :prop_tgt:`COMPILE_FEATURES`
+
 * :prop_tgt:`COMPILE_OPTIONS`
+
+* :prop_tgt:`COMPILE_WRAPPERS`
+
+  .. versionadded:: 4.5
+
 * :prop_tgt:`INCLUDE_DIRECTORIES`
+
 * :prop_tgt:`LINK_DIRECTORIES`
+
 * :prop_tgt:`LINK_OPTIONS`
+
+* :prop_tgt:`LINK_WRAPPERS`
+
+  .. versionadded:: 4.5
+
 * :prop_tgt:`POSITION_INDEPENDENT_CODE`
+
 * :prop_tgt:`SOURCES`
 
 target properties and any other property listed in

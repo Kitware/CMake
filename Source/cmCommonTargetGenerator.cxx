@@ -18,6 +18,7 @@
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -427,6 +428,21 @@ std::vector<std::string> cmCommonTargetGenerator::GetCompilerLauncher(
   std::vector<std::string> compilerLauncher;
   if (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
       lang == "HIP" || lang == "ISPC" || lang == "OBJC" || lang == "OBJCXX") {
+    // FIXME(#27402,#28110): The FASTBuild generator's limitations w.r.t.
+    // shell escaping and command line ordering means we can't support
+    // wrappers for now.
+    std::string const generatorName =
+      this->GeneratorTarget->GetLocalGenerator()
+        ->GetGlobalGenerator()
+        ->GetName();
+    if (generatorName.find("FASTBuild") == std::string::npos) {
+      // Wrappers go outside of the launcher.
+      compilerLauncher = this->ParseWrappers(
+        this->GeneratorTarget->GetCompileWrappers(config, lang),
+        "CMAKE_COMPILE_WRAPPER_"_s, "COMPILE_WRAPPERS"_s,
+        this->GeneratorTarget->GetName(), config, lang);
+    }
+
     std::string const propName = cmStrCat(lang, "_COMPILER_LAUNCHER");
     cmValue cLauncherValue = this->GeneratorTarget->GetProperty(propName);
     std::string const evaluatedCLauncher = cmGeneratorExpression::Evaluate(
@@ -647,6 +663,21 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkerLauncher(
 {
   std::vector<std::string> linkLauncher;
   std::string const lang = this->GeneratorTarget->GetLinkerLanguage(config);
+
+  // FIXME(#27402,#28110): The FASTBuild generator's limitations w.r.t.
+  // shell escaping and command line ordering means we can't support
+  // wrappers for now.
+  std::string const generatorName = this->GeneratorTarget->GetLocalGenerator()
+                                      ->GetGlobalGenerator()
+                                      ->GetName();
+  if (generatorName.find("FASTBuild") == std::string::npos) {
+    // Wrappers go outside of the launcher.
+    linkLauncher =
+      this->ParseWrappers(this->GeneratorTarget->GetLinkWrappers(config, lang),
+                          "CMAKE_LINK_WRAPPER_"_s, "LINK_WRAPPERS"_s,
+                          this->GeneratorTarget->GetName(), config, lang);
+  }
+
   std::string const propName = cmStrCat(lang, "_LINKER_LAUNCHER");
   cmValue launcherProp = this->GeneratorTarget->GetProperty(propName);
   if (cmNonempty(launcherProp)) {
@@ -734,4 +765,47 @@ void cmCommonTargetGenerator::ComputeRustFlagsForObjects(
   for (std::string const& obj : objects) {
     processObject(obj);
   }
+}
+
+std::vector<std::string> cmCommonTargetGenerator::ParseWrappers(
+  std::vector<BT<std::string>> const& wrappers, cm::string_view prefix,
+  cm::string_view targetPropName, std::string const& targetName,
+  std::string const& config, std::string const& lang) const
+{
+  std::vector<std::string> wrapperCommandLine;
+  if (wrappers.empty()) {
+    return wrapperCommandLine;
+  }
+
+  cm::GenEx::Context context(this->LocalCommonGenerator, config, lang);
+
+  for (BT<std::string> const& wrapper : wrappers) {
+    std::string const wrapperPropName = cmStrCat(prefix, wrapper.Value);
+    cmValue globalPropValue =
+      this->Makefile->GetState()->GetGlobalProperty(wrapperPropName);
+    if (!globalPropValue.IsSet()) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Specified wrapper \'", wrapper.Value, "\' for target \'",
+                 targetName, "\' does not exist. Set the GLOBAL property \'",
+                 wrapperPropName, "\'."),
+        wrapper.Backtrace);
+      return {};
+    }
+
+    cmGeneratorExpressionDAGChecker dagChecker{ this->GeneratorTarget,
+                                                std::string(targetPropName),
+                                                nullptr, nullptr, context };
+    std::string const evaluatedWrapper = cmGeneratorExpression::Evaluate(
+      *globalPropValue, context.LG, context.Config, this->GeneratorTarget,
+      &dagChecker, this->GeneratorTarget, context.Language);
+    // An empty definition is a no-op wrapper, but empty arguments within a
+    // non-empty definition must reach the command line.
+    if (!evaluatedWrapper.empty()) {
+      cm::append(wrapperCommandLine,
+                 cmList{ evaluatedWrapper, cmList::EmptyElements::Yes });
+    }
+  }
+
+  return wrapperCommandLine;
 }
