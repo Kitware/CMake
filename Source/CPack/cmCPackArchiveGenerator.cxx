@@ -286,8 +286,8 @@ std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
   std::string componentUpper(cmSystemTools::UpperCase(component));
   std::string packageFileName;
 
-  if (cmValue v = this->GetOptionIfSet("CPACK_ARCHIVE_" + componentUpper +
-                                       "_FILE_NAME")) {
+  if (cmValue v = this->GetOptionIfSet(
+        cmStrCat("CPACK_ARCHIVE_", componentUpper, "_FILE_NAME"))) {
     packageFileName += *v;
   } else if ((v = this->GetOptionIfSet("CPACK_ARCHIVE_FILE_NAME"))) {
     packageFileName +=
@@ -328,8 +328,9 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "   - packaging component: " << component->Name << std::endl);
   // Add the files of this component to the archive
-  std::string localToplevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
-  localToplevel += "/" + this->GetSanitizedDirOrFileName(component->Name);
+  std::string localToplevel(
+    cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), '/',
+             this->GetSanitizedDirOrFileName(component->Name)));
   // Change to local toplevel
   cmWorkingDirectory workdir(localToplevel);
   if (workdir.Failed()) {
@@ -426,8 +427,9 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                     "Packaging component group: " << compG.first << std::endl);
       // Begin the archive for this group
-      std::string packageFileName = std::string(this->toplevel) + "/" +
-        this->GetArchiveComponentFileName(compG.first, true);
+      std::string packageFileName =
+        cmStrCat(this->toplevel, '/',
+                 this->GetArchiveComponentFileName(compG.first, true));
 
       Deduplicator deduplicator;
 
@@ -455,8 +457,9 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
             << "> does not belong to any group, package it separately."
             << std::endl);
         std::string packageFileName = std::string(this->toplevel);
-        packageFileName +=
-          "/" + this->GetArchiveComponentFileName(comp.first, false);
+        packageFileName =
+          cmStrCat(packageFileName, '/',
+                   this->GetArchiveComponentFileName(comp.first, false));
 
         {
           DECLARE_AND_OPEN_ARCHIVE(packageFileName, archive);
@@ -473,8 +476,9 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
   else {
     for (auto& comp : this->Components) {
       std::string packageFileName = std::string(this->toplevel);
-      packageFileName +=
-        "/" + this->GetArchiveComponentFileName(comp.first, false);
+      packageFileName =
+        cmStrCat(packageFileName, '/',
+                 this->GetArchiveComponentFileName(comp.first, false));
 
       {
         DECLARE_AND_OPEN_ARCHIVE(packageFileName, archive);

@@ -15,6 +15,7 @@
 #include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -77,7 +78,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   cmsys::ifstream ilfs(inLicFile.c_str());
   std::string licenseText;
   while (cmSystemTools::GetLineFromStream(ilfs, line)) {
-    licenseText += line + "\n";
+    licenseText = cmStrCat(licenseText, line, '\n');
   }
   this->SetOptionIfNotSet("CPACK_RESOURCE_FILE_LICENSE_CONTENT", licenseText);
 
@@ -88,7 +89,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   cmsys::ifstream ifs(inFile.c_str());
   std::string packageHeaderText;
   while (cmSystemTools::GetLineFromStream(ifs, line)) {
-    packageHeaderText += line + "\n";
+    packageHeaderText = cmStrCat(packageHeaderText, line, '\n');
   }
 
   // Configure in the values

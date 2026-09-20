@@ -114,7 +114,7 @@ int cmCPackGenerator::PrepareNames()
   // Determine temporary packaging-directory.
   std::string tmpDirectory = cmStrCat(topDirectory, '/', pkgBaseFileName);
   // Determine path to temporary package file.
-  std::string tmpPkgFilePath = topDirectory + "/" + pkgFileName;
+  std::string tmpPkgFilePath = cmStrCat(topDirectory, '/', pkgFileName);
 
   // Set CPack variables which are not set already.
   this->SetOptionIfNotSet("CPACK_REMOVE_TOPLEVEL_DIRECTORY", "1");
@@ -620,8 +620,9 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       if (this->SupportsComponentInstallation() &&
           !(this->IsOn("CPACK_MONOLITHIC_INSTALL"))) {
         // Determine the installation types for this project (if provided).
-        std::string installTypesVar = "CPACK_" +
-          cmSystemTools::UpperCase(project.Component) + "_INSTALL_TYPES";
+        std::string installTypesVar =
+          cmStrCat("CPACK_", cmSystemTools::UpperCase(project.Component),
+                   "_INSTALL_TYPES");
         cmValue installTypes = this->GetOption(installTypesVar);
         if (!installTypes.IsEmpty()) {
           cmList installTypesList{ installTypes };
@@ -837,7 +838,7 @@ int cmCPackGenerator::InstallCMakeProject(
     if (cmHasPrefix(dir, '/')) {
       dir = tempInstallDirectory + dir;
     } else {
-      dir = tempInstallDirectory + "/" + dir;
+      dir = cmStrCat(tempInstallDirectory, '/', dir);
     }
     /*
      *  We must re-set DESTDIR for each component
@@ -987,8 +988,8 @@ int cmCPackGenerator::InstallCMakeProject(
     // define component specific var
     if (componentInstall) {
       std::string absoluteDestFileComponent =
-        std::string("CPACK_ABSOLUTE_DESTINATION_FILES") + "_" +
-        this->GetComponentInstallSuffix(component);
+        cmStrCat("CPACK_ABSOLUTE_DESTINATION_FILES_",
+                 this->GetComponentInstallSuffix(component));
       if (cmValue v = this->GetOption(absoluteDestFileComponent)) {
         std::string absoluteDestFilesListComponent = cmStrCat(*v, ';', *d);
         this->SetOption(absoluteDestFileComponent,
@@ -1665,12 +1666,13 @@ std::string cmCPackGenerator::GetComponentPackageFileName(
   std::string suffix = "-" + groupOrComponentName;
   /* check if we should use DISPLAY name */
   std::string dispNameVar =
-    "CPACK_" + this->Name + "_USE_DISPLAY_NAME_IN_FILENAME";
+    cmStrCat("CPACK_", this->Name, "_USE_DISPLAY_NAME_IN_FILENAME");
   if (this->IsOn(dispNameVar)) {
     /* the component Group case */
     if (isGroupName) {
-      std::string groupDispVar = "CPACK_COMPONENT_GROUP_" +
-        cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
+      std::string groupDispVar = cmStrCat(
+        "CPACK_COMPONENT_GROUP_",
+        cmSystemTools::UpperCase(groupOrComponentName), "_DISPLAY_NAME");
       cmValue groupDispName = this->GetOption(groupDispVar);
       if (groupDispName) {
         suffix = "-" + *groupDispName;
@@ -1678,8 +1680,9 @@ std::string cmCPackGenerator::GetComponentPackageFileName(
     }
     /* the [single] component case */
     else {
-      std::string dispVar = "CPACK_COMPONENT_" +
-        cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
+      std::string dispVar = cmStrCat(
+        "CPACK_COMPONENT_", cmSystemTools::UpperCase(groupOrComponentName),
+        "_DISPLAY_NAME");
       cmValue dispName = this->GetOption(dispVar);
       if (dispName) {
         suffix = "-" + *dispName;

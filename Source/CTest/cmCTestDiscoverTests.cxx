@@ -103,8 +103,8 @@ bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
 
   cmsys::RegularExpression re;
   if (!re.compile(AddAnchors(args.DiscoveryMatch))) {
-    std::string e = "DISCOVERY_MATCH failed to compile regex \"" +
-      args.DiscoveryMatch + "\".";
+    std::string e = cmStrCat("DISCOVERY_MATCH failed to compile regex \"",
+                             args.DiscoveryMatch, "\".");
     status.SetError(e);
     return false;
   }

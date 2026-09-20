@@ -13,6 +13,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmList.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -81,7 +82,7 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
                      end(compG.second.Components),
                      std::back_inserter(components),
                      [](cmCPackComponent const* comp) { return comp->Name; });
-      this->SetOption("CPACK_NUGET_" + compGUp + "_GROUP_COMPONENTS",
+      this->SetOption(cmStrCat("CPACK_NUGET_", compGUp, "_GROUP_COMPONENTS"),
                       cmList::to_string(components));
     }
     if (!groups.empty()) {

@@ -164,7 +164,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(std::string const& file,
   } else {
     checkDir = fSrcDir;
   }
-  fFile = checkDir + "/" + relPath;
+  fFile = cmStrCat(checkDir, '/', relPath);
   fFile = cmSystemTools::GetFilenamePath(fFile);
 
   if (fileDir == fFile) {
@@ -492,7 +492,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   // Handle all the files in the extra coverage globs that have no cov data
   for (std::string const& u : uncovered) {
     std::string fileName = cmSystemTools::GetFilenameName(u);
-    std::string fullPath = cont.SourceDir + "/" + u;
+    std::string fullPath = cmStrCat(cont.SourceDir, '/', u);
 
     covLogXML.StartElement("File");
     covLogXML.Attribute("Name", fileName);
@@ -1866,11 +1866,11 @@ std::string cmCTestCoverageHandler::FindFile(
   std::string fileNameNoE =
     cmSystemTools::GetFilenameWithoutLastExtension(fileName);
   // First check in source and binary directory
-  std::string fullName = cont->SourceDir + "/" + fileNameNoE + ".py";
+  std::string fullName = cmStrCat(cont->SourceDir, '/', fileNameNoE, ".py");
   if (cmSystemTools::FileExists(fullName)) {
     return fullName;
   }
-  fullName = cont->BinaryDir + "/" + fileNameNoE + ".py";
+  fullName = cmStrCat(cont->BinaryDir, '/', fileNameNoE, ".py");
   if (cmSystemTools::FileExists(fullName)) {
     return fullName;
   }
@@ -2436,7 +2436,7 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.RecurseThroughSymlinksOff();
-    std::string glob = cont->SourceDir + "/" + ecg;
+    std::string glob = cmStrCat(cont->SourceDir, '/', ecg);
     gl.FindFiles(glob);
     std::vector<std::string> files = gl.GetFiles();
     for (std::string const& f : files) {

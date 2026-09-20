@@ -750,8 +750,8 @@ bool cmCPackInnoSetupGenerator::ProcessComponents()
     return false;
   }
 
-  codeIncludes.push_back("#include " + QuotePath(componentsScriptTemplate) +
-                         "\n");
+  codeIncludes.push_back(
+    cmStrCat("#include ", QuotePath(componentsScriptTemplate), '\n'));
 
   return true;
 }

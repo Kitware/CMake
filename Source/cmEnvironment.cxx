@@ -64,7 +64,7 @@ std::vector<std::string> cmEnvironment::GetVariables() const
   result.reserve(this->Map.size());
   for (auto const& elem : this->Map) {
     if (elem.second) {
-      result.push_back(elem.first + '=' + *elem.second);
+      result.push_back(cmStrCat(elem.first, '=', *elem.second));
     }
   }
   return result;
@@ -208,7 +208,7 @@ void cmEnvironmentModification::ApplyTo(cmEnvironment& env)
 
   for (auto const& e : this->Entries) {
     if (e.Op == "set") {
-      env.PutEnv(e.Name + "=" + e.Value);
+      env.PutEnv(cmStrCat(e.Name, '=', e.Value));
     } else if (e.Op == "unset") {
       env.UnPutEnv(e.Name);
     } else if (e.Op == "string_append") {
