@@ -11,7 +11,7 @@ This property is implemented only when ``<LANG>`` is one of:
 
 * ``CUDA``
 
-  .. versionadded:: 4.1
+  .. versionadded:: 4.5
 
 * ``OBJC``
 
@@ -23,7 +23,7 @@ This property is implemented only when ``<LANG>`` is one of:
 
 * ``HIP``
 
-  .. versionadded:: 4.1
+  .. versionadded:: 4.5
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a
 command line for a linker launching tool. The :ref:`Makefile Generators` and the

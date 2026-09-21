@@ -54,6 +54,19 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       return result;
     }
   }
+  if (this->ReplaceValues->Language && this->ReplaceValues->Launcher &&
+      variable ==
+        cmStrCat("CMAKE_", this->ReplaceValues->Language,
+                 "_HOST_LINK_LAUNCHER")) {
+    auto mapIt = this->VariableMappings.find(variable);
+    std::string result = mapIt != this->VariableMappings.end()
+      ? this->ConvertToOutputForExisting(mapIt->second)
+      : variable;
+    // Add launcher as part of expansion so that it always appears
+    // immediately before the command itself, regardless of whether the
+    // overall rule template contains other content at the front.
+    return cmStrCat(this->ReplaceValues->Launcher, ' ', result);
+  }
   if (this->ReplaceValues->Manifests) {
     if (variable == "MANIFESTS") {
       return this->ReplaceValues->Manifests;
