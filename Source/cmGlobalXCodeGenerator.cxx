@@ -4765,8 +4765,6 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->RootObject = nullptr;
   this->MainGroupChildren = nullptr;
   this->FrameworkGroup = nullptr;
-  cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
   cmXCodeObject* listObjs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   for (std::string const& CurrentConfigurationType :
        this->CurrentConfigurationTypes) {
@@ -4824,7 +4822,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->RootObject->SetId(
     this->GetOrCreateId(project_id, this->RootObject->GetId()));
 
-  group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   this->RootObject->AddAttribute("mainGroup",
                                  this->CreateObjectReference(mainGroup));
   this->RootObject->AddAttribute("buildSettings", group);
