@@ -859,9 +859,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       if (install_name_dir.empty()) {
         vars.TargetInstallNameDir = "";
       } else {
-        // Convert to a path for the native build tool.
-        install_name_dir = this->LocalGenerator->ConvertToOutputFormat(
-          install_name_dir, cmOutputConverter::SHELL);
+        // The install name is target data embedded in the binary, not a
+        // host path: escape it for the shell without converting separators.
+        install_name_dir =
+          this->LocalGenerator->EscapeForShell(install_name_dir, true);
         vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }
