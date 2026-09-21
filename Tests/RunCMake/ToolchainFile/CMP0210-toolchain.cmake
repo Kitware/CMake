@@ -1,0 +1,5 @@
+get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
+if(_IN_TC)
+  cmake_policy(GET CMP0210 cmp0210)
+  message("try_compile CMP0210='${cmp0210}'")
+endif()
