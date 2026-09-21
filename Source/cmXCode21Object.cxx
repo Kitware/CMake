@@ -59,7 +59,6 @@ void cmXCode21Object::PrintList(
   out << "objects = {\n";
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXAggregateTarget);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXBuildFile);
-  cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXBuildStyle);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXContainerItemProxy);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXFileReference);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXFrameworksBuildPhase);

@@ -4765,19 +4765,6 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->RootObject = nullptr;
   this->MainGroupChildren = nullptr;
   this->FrameworkGroup = nullptr;
-  cmXCodeObject* listObjs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  for (std::string const& CurrentConfigurationType :
-       this->CurrentConfigurationTypes) {
-    cmXCodeObject* buildStyle =
-      this->CreateObject(cmXCodeObject::PBXBuildStyle);
-    std::string const& name = CurrentConfigurationType;
-    buildStyle->AddAttribute("name", this->CreateString(name));
-    buildStyle->SetComment(name);
-    cmXCodeObject* sgroup = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-    sgroup->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
-    buildStyle->AddAttribute("buildSettings", sgroup);
-    listObjs->AddObject(buildStyle);
-  }
 
   cmXCodeObject* mainGroup = this->CreateObject(cmXCodeObject::PBXGroup);
   this->MainGroupChildren = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -4827,7 +4814,6 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->RootObject->AddAttribute("mainGroup",
                                  this->CreateObjectReference(mainGroup));
   this->RootObject->AddAttribute("buildSettings", projectBuildSettings);
-  this->RootObject->AddAttribute("buildStyles", listObjs);
   this->RootObject->AddAttribute("hasScannedForEncodings",
                                  this->CreateString("0"));
   cmXCodeObject* projectAttributes =
