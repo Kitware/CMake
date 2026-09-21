@@ -174,10 +174,12 @@ std::vector<BT<std::string>> ProcessIncludes(
 //
 // Class cmGeneratorFileSet
 //
-cmGeneratorFileSet::cmGeneratorFileSet(cmGeneratorTarget const* target,
-                                       cmFileSet const* fileSet)
+cmGeneratorFileSet::cmGeneratorFileSet(
+  cmGeneratorTarget const* target, cmFileSet const* fileSet,
+  cm::FileSetMetadata::FileSetDomain domain)
   : Target(target)
   , FileSet(fileSet)
+  , Domain(domain)
 {
   auto& cmake = *target->GetLocalGenerator()->GetCMakeInstance();
 

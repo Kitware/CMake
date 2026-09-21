@@ -80,6 +80,7 @@ These commands are available only in CMake projects.
    /command/add_compile_definitions
    /command/add_compile_options
    /command/add_custom_command
+   /command/add_custom_rule
    /command/add_custom_target
    /command/add_definitions
    /command/add_dependencies

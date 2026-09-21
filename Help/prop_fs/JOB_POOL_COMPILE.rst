@@ -24,5 +24,6 @@ This property is undefined by default.
 See Also
 ^^^^^^^^
 
+* :prop_rule:`JOB_POOL_COMPILE` rule property
 * :prop_sf:`JOB_POOL_COMPILE` source file property
 * :prop_tgt:`JOB_POOL_COMPILE` target property

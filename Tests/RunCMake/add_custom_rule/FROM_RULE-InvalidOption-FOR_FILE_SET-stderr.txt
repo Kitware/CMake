@@ -1,0 +1,5 @@
+CMake Error at FROM_RULE-InvalidOption-FOR_FILE_SET\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule cannot create RULE "rule" because the "CHAIN" and
+  "OVERRIDE" options of CONFIGURATOR "for_fs" are mutually exclusive\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

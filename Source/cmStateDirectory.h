@@ -75,6 +75,8 @@ public:
   void AddNormalTargetName(std::string const& name);
   void AddImportedTargetName(std::string const& name);
 
+  void AddRuleName(std::string const& name);
+
 private:
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator
     DirectoryState;

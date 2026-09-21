@@ -28,10 +28,13 @@ std::string& cmPlaceholderExpander::ExpandVariables(std::string& s,
       s = expandedInput;
       return s;
     }
-    char c = s[start + 1];
-    // if the next char after the < is not A-Za-z then
+
+    // if the previous character is a '$',  this is a generator expression
+    // or if the next char after the < is not A-Za-z then
     // skip it and try to find the next < in the string
-    if (!cmsysString_isalpha(c)) {
+    if ((handleGenex == HandleGenex::Yes && start != 0 &&
+         s[start - 1] == '$') ||
+        !cmsysString_isalpha(s[start + 1])) {
       start = s.find('<', start + 1);
     } else {
       // extract the var

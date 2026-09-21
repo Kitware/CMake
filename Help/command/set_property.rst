@@ -7,6 +7,7 @@ Set a named property in a given scope.
 
   set_property({GLOBAL                                    |
                 DIRECTORY [<dir>]                         |
+                RULE      <rule>...                       |
                 TARGET    <target>...                     |
                 FILE_SET  <file_set>... TARGET <target>   |
                 SOURCE    <source>...
@@ -35,6 +36,12 @@ It must be one of the following:
 
   .. versionadded:: 3.19
     ``<dir>`` may reference a binary directory.
+
+``RULE``
+  .. versionadded:: 4.5
+
+  Scope may name zero or more existing rules in the current directory, created
+  by the :command:`add_custom_rule` command.
 
 ``TARGET``
   Scope may name zero or more existing targets.

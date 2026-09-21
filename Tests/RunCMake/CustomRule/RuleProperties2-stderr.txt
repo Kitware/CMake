@@ -1,0 +1,28 @@
+CMake Error at RuleProperties2\.cmake:[0-9]+ \(set_property\):
+  "COMMENT" property can't be set during generation for rules \("foo1"\)
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt
+
+
+CMake Error in CMakeLists\.txt:
+  Erroneous execution of the CONFIGURATOR "configurator1", from the RULE
+  "foo1", for the FILE_SET "fs1" of TARGET "foo"\.
+
+
+CMake Error at RuleProperties2\.cmake:[0-9]+ \(set_property\):
+  rule properties cannot be changed during generation \("foo2"\)
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt
+
+
+CMake Error in CMakeLists\.txt:
+  Erroneous execution of the CONFIGURATOR "configurator2", from the RULE
+  "foo2", for the FILE_SET "fs2" of TARGET "foo"\.
+
+
+CMake Error at RuleProperties2\.cmake:[0-9]+ \(add_library\):
+  No SOURCES given to target: foo
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

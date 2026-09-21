@@ -171,6 +171,15 @@ struct FileSetType
                               cmTargetInternals const* impl) const;
 };
 
+struct FileSetRule
+{
+  std::vector<BT<std::string>> SelfEntries;
+  std::vector<BT<std::string>> InterfaceEntries;
+
+  void AddFileSet(std::string const& name, cm::FileSetMetadata::Visibility vis,
+                  cmListFileBacktrace bt);
+};
+
 struct UsageRequirementProperty
 {
   enum class AppendEmpty
@@ -675,6 +684,7 @@ public:
   UsageRequirementProperty ImportedCxxModulesLinkLibraries;
 
   std::unordered_map<cm::string_view, FileSetType> FileSetTypes;
+  std::unordered_map<std::string, FileSetRule> FileSetRules;
 
   cmTargetInternals(std::string name, cm::TargetType type,
                     cmTarget::Visibility visibility, cmMakefile* mf,
@@ -915,6 +925,18 @@ cmPropertyMap FileSetType::GetProperties(cmTarget const* tgt,
   }
 
   return propertyMap;
+}
+
+void FileSetRule::AddFileSet(std::string const& name,
+                             cm::FileSetMetadata::Visibility vis,
+                             cmListFileBacktrace bt)
+{
+  if (cm::FileSetMetadata::VisibilityIsForSelf(vis)) {
+    this->SelfEntries.emplace_back(name, bt);
+  }
+  if (cm::FileSetMetadata::VisibilityIsForInterface(vis)) {
+    this->InterfaceEntries.emplace_back(name, std::move(bt));
+  }
 }
 
 template <typename ValueType>
@@ -3331,14 +3353,16 @@ cmFileSet* cmTarget::GetFileSet(std::string const& name)
 
 std::pair<cmFileSet*, bool> cmTarget::GetOrCreateFileSet(
   std::string const& name, std::string const& type,
-  cm::FileSetMetadata::Visibility vis)
+  cm::FileSetMetadata::Visibility vis, cmMakefile* mf)
 {
-  auto result = this->impl->FileSets.emplace(
-    name, cmFileSet(this->GetMakefile(), this, name, type, vis));
+  auto result =
+    this->impl->FileSets.emplace(name, cmFileSet(mf, this, name, type, vis));
   if (result.second) {
     auto bt = this->impl->Makefile->GetBacktrace();
     if (cm::contains(this->impl->FileSetTypes, type)) {
       this->impl->FileSetTypes.at(type).AddFileSet(name, vis, std::move(bt));
+    } else {
+      this->impl->FileSetRules[type].AddFileSet(name, vis, std::move(bt));
     }
   }
   return std::make_pair(&result.first->second, result.second);
@@ -3365,25 +3389,36 @@ std::string cmTarget::GetInterfaceFileSetsPropertyName(
   return "";
 }
 
-std::vector<std::string> cmTarget::GetAllFileSetNames() const
+std::vector<std::string> cmTarget::GetAllFileSetNames(
+  cm::FileSetMetadata::FileSetDomainSet domains) const
 {
   std::vector<std::string> result;
 
+  bool const useNative =
+    domains.contains(cm::FileSetMetadata::FileSetDomain::NATIVE);
+  bool const useRule =
+    domains.contains(cm::FileSetMetadata::FileSetDomain::RULE);
+
   for (auto const& it : this->impl->FileSets) {
-    result.push_back(it.first);
+    bool nativeType =
+      cm::contains(this->impl->FileSetTypes, it.second.GetType());
+
+    if ((useNative && nativeType) || (useRule && !nativeType)) {
+      result.push_back(it.first);
+    }
   }
 
   return result;
 }
 
 namespace {
-std::vector<std::string> RetrieveFileSetNames(
+void RetrieveFileSetNames(
   std::unordered_map<cm::string_view, FileSetType> const& fileSetTypes,
   std::function<
     std::vector<BT<std::string>> const&(FileSetType const& fileSetType)>
-    GetFileSets)
+    GetFileSets,
+  std::vector<std::string>& result)
 {
-  std::vector<std::string> result;
   auto inserter = std::back_inserter(result);
 
   auto appendEntries = [=](std::vector<BT<std::string>> const& entries) {
@@ -3396,27 +3431,79 @@ std::vector<std::string> RetrieveFileSetNames(
   for (auto const& fileSetType : fileSetTypes) {
     appendEntries(GetFileSets(fileSetType.second));
   }
+}
+
+void RetrieveFileSetNames(
+  std::unordered_map<std::string, FileSetRule> const& fileSetRules,
+  std::function<
+    std::vector<BT<std::string>> const&(FileSetRule const& fileSetRule)>
+    GetFileSets,
+  std::vector<std::string>& result)
+{
+  auto appendEntries = [&result](std::vector<BT<std::string>> const& entries) {
+    for (auto const& entry : entries) {
+      result.push_back(entry.Value);
+    }
+  };
+
+  for (auto const& fileSetRule : fileSetRules) {
+    appendEntries(GetFileSets(fileSetRule.second));
+  }
+}
+}
+
+std::vector<std::string> cmTarget::GetAllPrivateFileSets(
+  cm::FileSetMetadata::FileSetDomainSet domains) const
+{
+  std::vector<std::string> result;
+
+  if (domains.contains(cm::FileSetMetadata::FileSetDomain::NATIVE)) {
+    RetrieveFileSetNames(
+      this->impl->FileSetTypes,
+      [](FileSetType const& fileSetType)
+        -> std::vector<BT<std::string>> const& {
+        return fileSetType.SelfEntries.Entries;
+      },
+      result);
+  }
+  if (domains.contains(cm::FileSetMetadata::FileSetDomain::RULE)) {
+    RetrieveFileSetNames(
+      this->impl->FileSetRules,
+      [](FileSetRule const& fileSetRule)
+        -> std::vector<BT<std::string>> const& {
+        return fileSetRule.SelfEntries;
+      },
+      result);
+  }
 
   return result;
 }
-}
 
-std::vector<std::string> cmTarget::GetAllPrivateFileSets() const
+std::vector<std::string> cmTarget::GetAllInterfaceFileSets(
+  cm::FileSetMetadata::FileSetDomainSet domains) const
 {
-  return RetrieveFileSetNames(
-    this->impl->FileSetTypes,
-    [](FileSetType const& fileSetType) -> std::vector<BT<std::string>> const& {
-      return fileSetType.SelfEntries.Entries;
-    });
-}
+  std::vector<std::string> result;
 
-std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
-{
-  return RetrieveFileSetNames(
-    this->impl->FileSetTypes,
-    [](FileSetType const& fileSetType) -> std::vector<BT<std::string>> const& {
-      return fileSetType.InterfaceEntries.Entries;
-    });
+  if (domains.contains(cm::FileSetMetadata::FileSetDomain::NATIVE)) {
+    RetrieveFileSetNames(
+      this->impl->FileSetTypes,
+      [](FileSetType const& fileSetType)
+        -> std::vector<BT<std::string>> const& {
+        return fileSetType.InterfaceEntries.Entries;
+      },
+      result);
+  }
+  if (domains.contains(cm::FileSetMetadata::FileSetDomain::RULE)) {
+    RetrieveFileSetNames(
+      this->impl->FileSetRules,
+      [](FileSetRule const& fileSetRule)
+        -> std::vector<BT<std::string>> const& {
+        return fileSetRule.InterfaceEntries;
+      },
+      result);
+  }
+
+  return result;
 }
 
 bool cmTarget::HasFileSets() const

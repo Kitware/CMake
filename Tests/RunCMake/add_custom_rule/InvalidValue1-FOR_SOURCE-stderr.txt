@@ -1,0 +1,4 @@
+CMake Error at InvalidValue1-FOR_SOURCE\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule command specified for "FOR_SOURCE" does not exist: src\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -88,6 +88,7 @@ Properties on Directories
    /prop_dir/RULE_LAUNCH_COMPILE
    /prop_dir/RULE_LAUNCH_CUSTOM
    /prop_dir/RULE_LAUNCH_LINK
+   /prop_dir/RULES
    /prop_dir/SOURCE_DIR
    /prop_dir/SUBDIRECTORIES
    /prop_dir/SYSTEM
@@ -98,6 +99,39 @@ Properties on Directories
    /prop_dir/VS_GLOBAL_SECTION_PRE_section
    /prop_dir/VS_SOLUTION_ITEMS
    /prop_dir/VS_STARTUP_PROJECT
+
+.. _`Rule Properties`:
+
+Properties on Rules
+===================
+
+.. toctree::
+   :maxdepth: 1
+
+   /prop_rule/BYPRODUCTS
+   /prop_rule/COMMAND
+   /prop_rule/COMMAND_INDEX
+   /prop_rule/COMMAND_COUNT
+   /prop_rule/COMMAND_EXPAND_LISTS
+   /prop_rule/COMMENT
+   /prop_rule/COMPILE_DEFINITIONS
+   /prop_rule/COMPILE_OPTIONS
+   /prop_rule/DEPENDS_EXPLICIT_ONLY
+   /prop_rule/DEPENDS
+   /prop_rule/DEPFILE
+   /prop_rule/FILE_SET_CONFIGURATORS
+   /prop_rule/GLOBAL
+   /prop_rule/INCLUDE_DIRECTORIES
+   /prop_rule/JOB_POOL_COMPILE
+   /prop_rule/JOB_SERVER_AWARE
+   /prop_rule/NAME
+   /prop_rule/OUTPUT
+   /prop_rule/OUTPUT_FILE_SET
+   /prop_rule/PARENT_RULE
+   /prop_rule/SOURCE_CONFIGURATORS
+   /prop_rule/USES_TERMINAL
+   /prop_rule/VERBATIM
+   /prop_rule/WORKING_DIRECTORY
 
 .. _`Target Properties`:
 
@@ -555,6 +589,7 @@ Properties on File Sets
    /prop_fs/INTERFACE_COMPILE_OPTIONS
    /prop_fs/INTERFACE_INCLUDE_DIRECTORIES
    /prop_fs/INTERFACE_SOURCES
+   /prop_fs/RULE_PATTERNS
    /prop_fs/SCOPE
    /prop_fs/SKIP_LINTING
    /prop_fs/SKIP_PRECOMPILE_HEADERS
@@ -632,6 +667,7 @@ Properties on Source Files
    /prop_sf/OBJECT_DEPENDS
    /prop_sf/OBJECT_NAME
    /prop_sf/OBJECT_OUTPUTS
+   /prop_sf/RULE_PATTERNS
    /prop_sf/Rust_EMIT
    /prop_sf/SKIP_AUTOGEN
    /prop_sf/SKIP_AUTOMOC

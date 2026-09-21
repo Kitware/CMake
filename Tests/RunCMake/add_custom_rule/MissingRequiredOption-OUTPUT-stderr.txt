@@ -1,0 +1,5 @@
+CMake Error at MissingRequiredOption-OUTPUT\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule cannot create RULE "rule" because the mandatory options
+  "COMMAND" or "OUTPUT" are missing\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

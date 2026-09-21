@@ -32,6 +32,7 @@
 
 class cmCompiledGeneratorExpression;
 class cmComputeLinkInformation;
+class cmGeneratorRule;
 class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
@@ -255,6 +256,9 @@ public:
   cmGeneratorTarget* FindLocalNonAliasGeneratorTarget(
     std::string const& name) const;
   cmGeneratorTarget* FindGeneratorTargetToUse(std::string const& name) const;
+
+  void AddGeneratorRule(std::unique_ptr<cmGeneratorRule> gr);
+  cmGeneratorRule* FindGeneratorRuleToUse(std::string const& name) const;
 
   /**
    * Process a list of include directories
@@ -683,6 +687,11 @@ protected:
   GeneratorTargetMap ImportedGeneratorTargets;
   GeneratorTargetVector OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;
+
+  using GeneratorRuleMap = std::unordered_map<std::string, cmGeneratorRule*>;
+  GeneratorRuleMap GeneratorRuleSearchIndex;
+  using GeneratorRuleVector = std::vector<std::unique_ptr<cmGeneratorRule>>;
+  GeneratorRuleVector GeneratorRules;
 
   std::map<std::string, std::string> Compilers;
   std::map<std::string, std::string> VariableMappings;

@@ -1,0 +1,2 @@
+
+add_custom_rule(rule COMMAND cmd OUTPUT output CONFIGURATOR FOR_FILE_SET FOR_SOURCE)

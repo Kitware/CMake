@@ -1,0 +1,6 @@
+CMake Error at FROM_RULE-MissingRequiredValue-FOR_FILE_SET\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule given invalid argument:
+
+    FOR_FILE_SET: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

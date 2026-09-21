@@ -163,6 +163,10 @@ add_library(
   cmCryptoHash.h
   cmCurl.cxx
   cmCurl.h
+  cmRule.cxx
+  cmRule.h
+  cmCustomRule.cxx
+  cmSpecializedRule.cxx
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmCustomCommandGenerator.cxx
@@ -320,6 +324,8 @@ add_library(
   cmGeneratorFileSet.h
   cmGeneratorFileSets.cxx
   cmGeneratorFileSets.h
+  cmGeneratorRule.cxx
+  cmGeneratorRule.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
   cmGeneratorTarget_CompatibleInterface.cxx
@@ -585,6 +591,8 @@ add_library(
   cmAddCustomCommandCommand.h
   cmAddCustomTargetCommand.cxx
   cmAddCustomTargetCommand.h
+  cmAddCustomRuleCommand.cxx
+  cmAddCustomRuleCommand.h
   cmAddDefinitionsCommand.cxx
   cmAddDefinitionsCommand.h
   cmAddDependenciesCommand.cxx

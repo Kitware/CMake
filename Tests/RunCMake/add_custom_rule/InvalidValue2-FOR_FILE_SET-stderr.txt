@@ -1,0 +1,4 @@
+CMake Error at InvalidValue2-FOR_FILE_SET\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule command specified for "FOR_FILE_SET" is not a function: fs\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

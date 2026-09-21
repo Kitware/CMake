@@ -1,0 +1,5 @@
+CMake Error at InvalidDuplicateOption-FOR_FILE_SET\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule only one occurrence of "FOR_FILE_SET" or "FOR_SOURCE"
+  sub-options of "CONFIGURATOR" option is allowed\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

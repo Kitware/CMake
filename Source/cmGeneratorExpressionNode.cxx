@@ -35,6 +35,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorFileSet.h"
+#include "cmGeneratorRule.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
@@ -4442,6 +4443,89 @@ static const struct SourcePropertyNode : public cmGeneratorExpressionNode
   }
 } sourcePropertyNode;
 
+static const struct RulePropertyNode : public cmGeneratorExpressionNode
+{
+  RulePropertyNode() {} // NOLINT(modernize-use-equals-default)
+
+  // This node handles errors on parameter count itself.
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
+  {
+    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
+
+    std::string ruleName = parameters.front();
+    std::string const& propertyName = parameters.back();
+
+    if (ruleName.empty() && propertyName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<RULE_PROPERTY:rule,prop> expression requires a "
+                  "non-empty rule name and property name.");
+      return std::string{};
+    }
+    if (ruleName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<RULE_PROPERTY:rule,prop> expression requires a "
+                  "non-empty rule name.");
+      return std::string{};
+    }
+    if (propertyName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<RULE_PROPERTY:src,prop> expression requires a "
+                  "non-empty property name.");
+      return std::string{};
+    }
+    if (!propertyNameValidator.find(propertyName)) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "Property name not supported.");
+      return std::string{};
+    }
+
+    cmValue propertyValue;
+    cmGeneratorRule* genRule = nullptr;
+
+    genRule = eval->Context.LG->FindGeneratorRuleToUse(ruleName);
+
+    if (!genRule) {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("Rule \"", ruleName, "\" is not known to CMake."));
+      return std::string{};
+    }
+
+    propertyValue = genRule->GetProperty(propertyName);
+
+    if (propertyName == "INCLUDE_DIRECTORIES"_s ||
+        propertyName == "COMPILE_OPTIONS"_s ||
+        propertyName == "COMPILE_DEFINITIONS"_s) {
+      cmGeneratorExpressionDAGChecker dagChecker{
+        eval->HeadTarget, propertyName,  content,
+        dagCheckerParent, eval->Context, eval->Backtrace,
+      };
+      switch (dagChecker.Check()) {
+        case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+          dagChecker.ReportError(eval, content->GetOriginalExpression());
+          return std::string{};
+        case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+          // No error. We just skip cyclic references.
+          return std::string{};
+        case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+          CM_FALLTHROUGH;
+        case cmGeneratorExpressionDAGChecker::DAG:
+          break;
+      }
+
+      return cmGeneratorExpression::StripEmptyListElements(
+        this->EvaluateDependentExpression(propertyValue, eval,
+                                          eval->HeadTarget, &dagChecker,
+                                          eval->CurrentTarget));
+    }
+    return propertyValue;
+  }
+} rulePropertyNode;
+
 static std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
   cm::GenEx::Evaluation* eval, cmGeneratorExpressionDAGChecker* dagChecker,
@@ -6453,6 +6537,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "COMMA", &commaNode },
     { "SEMICOLON", &semicolonNode },
     { "QUOTE", &quoteNode },
+    { "RULE_PROPERTY", &rulePropertyNode },
     { "SOURCE_EXISTS", &sourceExistsNode },
     { "SOURCE_PROPERTY", &sourcePropertyNode },
     { "FILE_SET_EXISTS", &fileSetExistsNode },

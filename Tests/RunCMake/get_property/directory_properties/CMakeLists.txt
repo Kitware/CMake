@@ -8,5 +8,8 @@ add_library(my::InterfaceSub ALIAS InterfaceSub)
 add_library(Imported1Sub INTERFACE IMPORTED)
 add_library(Imported2Sub INTERFACE IMPORTED)
 
+add_custom_rule(Rule1Sub OUTPUT out COMMAND cmd)
+add_custom_rule(Rule2Sub FROM_RULE Rule1Sub)
+
 add_test(Sub/test1 COMMAND "${CMAKE_COMMAND}" -E echo "Sub/test1")
 add_test(Sub/test2 COMMAND "${CMAKE_COMMAND}" -E echo "Sub/test2")

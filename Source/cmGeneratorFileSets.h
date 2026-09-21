@@ -14,6 +14,7 @@
 
 #include <cm/string_view>
 
+#include "cmFileSetMetadata.h"
 #include "cmTargetPropertyEntry.h"
 
 namespace cm {
@@ -67,6 +68,8 @@ public:
 
   std::vector<std::unique_ptr<TargetPropertyEntry>> GetSources(
     cm::GenEx::Context const& context, cmGeneratorTarget const* target,
+    cm::FileSetMetadata::FileSetDomainSet
+      domains = { cm::FileSetMetadata::FileSetDomain::NATIVE },
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
   std::vector<std::unique_ptr<TargetPropertyEntry>> GetSources(
     std::string type, cm::GenEx::Context const& context,
@@ -75,6 +78,8 @@ public:
 
   std::vector<std::unique_ptr<TargetPropertyEntry>> GetInterfaceSources(
     cm::GenEx::Context const& context, cmGeneratorTarget const* target,
+    cm::FileSetMetadata::FileSetDomainSet
+      domains = { cm::FileSetMetadata::FileSetDomain::NATIVE },
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
   std::vector<std::unique_ptr<TargetPropertyEntry>> GetInterfaceSources(
     std::string type, cm::GenEx::Context const& context,

@@ -36,6 +36,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorFileSet.h"
+#include "cmGeneratorRule.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
@@ -895,6 +896,26 @@ cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
     return ti->second;
   }
   return nullptr;
+}
+
+void cmLocalGenerator::AddGeneratorRule(std::unique_ptr<cmGeneratorRule> gr)
+{
+  cmGeneratorRule* gr_ptr = gr.get();
+
+  this->GeneratorRules.push_back(std::move(gr));
+  this->GeneratorRuleSearchIndex.emplace(gr_ptr->GetName(), gr_ptr);
+  this->GlobalGenerator->IndexGeneratorRule(gr_ptr);
+}
+
+cmGeneratorRule* cmLocalGenerator::FindGeneratorRuleToUse(
+  std::string const& name) const
+{
+  auto ri = this->GeneratorRuleSearchIndex.find(name);
+  if (ri != this->GeneratorRuleSearchIndex.end()) {
+    return ri->second;
+  }
+
+  return this->GetGlobalGenerator()->FindGeneratorRule(name);
 }
 
 void cmLocalGenerator::ComputeTargetManifest()

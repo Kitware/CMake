@@ -1,0 +1,8 @@
+CMake Error at MissingRequiredValues1\.cmake:[0-9]+ \(add_custom_rule\):
+  add_custom_rule given invalid arguments:
+
+    COMMAND: missing required value
+    DEPFILE: missing required value
+    OUTPUT: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

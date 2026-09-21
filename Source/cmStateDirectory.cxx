@@ -386,6 +386,10 @@ cmValue cmStateDirectory::GetProperty(std::string const& prop,
     output = cmList::to_string(this->DirectoryState->ImportedTargetNames);
     return cmValue(output);
   }
+  if (prop == "RULES"_s) {
+    output = cmList::to_string(this->DirectoryState->RuleNames);
+    return cmValue(output);
+  }
 
   if (prop == "LISTFILE_STACK") {
     std::vector<std::string> listFiles;
@@ -461,4 +465,9 @@ void cmStateDirectory::AddNormalTargetName(std::string const& name)
 void cmStateDirectory::AddImportedTargetName(std::string const& name)
 {
   this->DirectoryState->ImportedTargetNames.emplace_back(name);
+}
+
+void cmStateDirectory::AddRuleName(std::string const& name)
+{
+  this->DirectoryState->RuleNames.push_back(name);
 }
