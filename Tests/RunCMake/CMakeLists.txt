@@ -1298,29 +1298,33 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
     -DPSEUDO_CPPCHECK=$<TARGET_FILE:pseudo_cppcheck>
     )
 
+  add_RunCMake_test(ctest_labels_for_subprojects)
+  add_RunCMake_test(CompilerArgs)
+
+  # Enable supported languages for {Compiler,Linker}Launcher.
+  if(DEFINED CMake_TEST_OBJC)
+    list(APPEND LauncherCommon_ARGS -DCMake_TEST_OBJC=${CMake_TEST_OBJC})
+  endif()
+  if(CMAKE_Fortran_COMPILER)
+    list(APPEND LauncherCommon_ARGS -DCMake_TEST_Fortran=1)
+  endif()
+  set(CompilerLauncher_ARGS ${LauncherCommon_ARGS})
+  set(LinkerLauncher_ARGS ${LauncherCommon_ARGS})
+  if(DEFINED CMake_TEST_ISPC)
+    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
+  endif()
   if(DEFINED CMake_TEST_CUDA)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
   endif()
   if(DEFINED CMake_TEST_HIP)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_HIP=${CMake_TEST_HIP})
   endif()
-  if(DEFINED CMake_TEST_ISPC)
-    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
-  endif()
-  if(DEFINED CMake_TEST_OBJC)
-    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_OBJC=${CMake_TEST_OBJC})
-    list(APPEND LinkerLauncher_ARGS   -DCMake_TEST_OBJC=${CMake_TEST_OBJC})
-  endif()
-  if(CMAKE_Fortran_COMPILER)
-    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_Fortran=1)
-  endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
     PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
-
-  add_RunCMake_test(ctest_labels_for_subprojects)
-  add_RunCMake_test(CompilerArgs)
   add_RunCMake_test(LinkerLauncher)
+  set_property(TEST RunCMake.LinkerLauncher APPEND
+    PROPERTY LABELS "Fortran")
 endif()
 
 set(cpack_tests
