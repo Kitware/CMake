@@ -66,6 +66,38 @@ if (RunCMake_GENERATOR MATCHES "(Ninja|Makefiles|Visual Studio)")
   run_cmake_AutoExport(AutoExportShort ".o/0cb3d702")
 endif ()
 
+# Verify that the two bindexplib backends, the COFF symbol table walker used
+# on Windows hosts and the nm reader used on other hosts, export the same
+# symbols from a fixed set of object files.
+function(run_create_def)
+  set(nm_arg "")
+  if(NOT CMAKE_HOST_WIN32)
+    # Reading COFF object files on other hosts requires llvm-nm.
+    find_program(LLVM_NM NAMES llvm-nm)
+    if(NOT LLVM_NM)
+      return()
+    endif()
+    # llvm-nm 16 is the first version that reads ARM64EC object files.
+    execute_process(COMMAND "${LLVM_NM}" --version
+      OUTPUT_VARIABLE nm_version ERROR_QUIET)
+    if(NOT nm_version MATCHES "LLVM version ([0-9]+)" OR CMAKE_MATCH_1 LESS 16)
+      return()
+    endif()
+    set(nm_arg "--nm=${LLVM_NM}")
+  endif()
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/CreateDef-build")
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake_command(CreateDef ${CMAKE_COMMAND}
+    "-Dcmake=${CMAKE_COMMAND}"
+    "-Dnm=${nm_arg}"
+    "-Dsrc=${RunCMake_SOURCE_DIR}"
+    "-Dbin=${RunCMake_TEST_BINARY_DIR}"
+    -P "${RunCMake_SOURCE_DIR}/CreateDef.cmake"
+    )
+endfunction()
+run_create_def()
+
 function(run_AIXExportExplicit)
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/AIXExportExplicit-build")
   run_cmake(AIXExportExplicit)

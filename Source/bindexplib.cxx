@@ -67,14 +67,16 @@
 #include <algorithm>
 #include <cstddef> // IWYU pragma: keep
 #include <iostream>
+#include <map>
 #include <sstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #ifdef _WIN32
 #  include <windows.h>
 
 #  include "cmsys/Encoding.hxx"
-#  include "cmsys/String.h"
 #endif
 
 #include "cmsys/FStream.hxx"
@@ -83,6 +85,133 @@
 #include "cmOutputConverter.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+namespace {
+
+enum class Arch
+{
+  Generic,
+  I386,
+  ARM64EC,
+};
+
+/*
+ * The two backends below, the COFF symbol table walker used on Windows
+ * hosts and the nm reader used everywhere else, must select the same
+ * symbols, so every rule that depends only on the symbol name is shared.
+ */
+
+bool SymbolIsFromManagedCode(std::string const& symbol)
+{
+  return symbol == "__t2m" || symbol == "__m2mep" || symbol == "__mep" ||
+    symbol.find("$$F") != std::string::npos ||
+    symbol.find("$$J") != std::string::npos;
+}
+
+bool SymbolIsOperatorExternC(std::string const& symbol)
+{
+  return symbol.find_first_not_of("=<>+-*/%,?|~!^&[]()") == std::string::npos;
+}
+
+/*
+ * The "(vector) deleting destructor" must not be exported:
+ *  "??_G"  scalar deleting dtor
+ *  "??_E"  vector deleting dtor
+ */
+bool SymbolIsDeletingDestructor(std::string const& symbol)
+{
+  return cmHasLiteralPrefix(symbol, "??_G") ||
+    cmHasLiteralPrefix(symbol, "??_E");
+}
+
+bool SymbolIsVftable(std::string const& symbol)
+{
+  return cmHasLiteralPrefix(symbol, "??_7");
+}
+
+bool SymbolIsArm64ECThunk(std::string const& symbol)
+{
+  return symbol.find("$ientry_thunk") != std::string::npos ||
+    symbol.find("$entry_thunk") != std::string::npos ||
+    symbol.find("$iexit_thunk") != std::string::npos ||
+    symbol.find("$exit_thunk") != std::string::npos;
+}
+
+/*
+ * Strip the decorations that must not appear in the generated .def file.
+ */
+void NormalizeSymbolName(std::string& symbol, Arch arch)
+{
+  // clear out any leading spaces
+  symbol.erase(0, symbol.find_first_not_of(" \t\n\v\f\r"));
+  // if it starts with _ and has an @ then it is a __cdecl
+  // so remove the @ stuff for the export
+  if (!symbol.empty() && symbol[0] == '_') {
+    std::string::size_type posAt = symbol.find('@');
+    if (posAt != std::string::npos) {
+      symbol.erase(posAt);
+    }
+  }
+  // For i386 builds we need to remove _
+  if (arch == Arch::I386 && !symbol.empty() && symbol[0] == '_') {
+    symbol.erase(0, 1);
+  }
+}
+
+/*
+ * Symbols that are never exported, whatever section they are defined in.
+ */
+bool SymbolIsExcluded(std::string const& symbol, Arch arch)
+{
+  // The original code had a check for
+  //     symbol.find("real@") == std::string::npos)
+  // but this disallows member functions with the name "real".
+  return symbol.empty() || SymbolIsDeletingDestructor(symbol) ||
+    // Skip symbols containing a dot, that are from managed code,
+    // or that are C++ operators incorrectly declared extern "C".
+    symbol.find('.') != std::string::npos || SymbolIsFromManagedCode(symbol) ||
+    SymbolIsOperatorExternC(symbol) ||
+    // Skip arm64ec thunk symbols.
+    (arch == Arch::ARM64EC && SymbolIsArm64ECThunk(symbol));
+}
+
+/*
+ * Read the machine type out of a COFF object file header so that the nm
+ * backend can apply the same architecture-specific rules as the COFF
+ * symbol table walker.  Inputs that are not COFF object files, such as
+ * LLVM bitcode, are reported as generic.
+ */
+Arch GetObjectArch(std::string const& filename)
+{
+  cmsys::ifstream fin(filename.c_str(), std::ios::in | std::ios::binary);
+  if (!fin) {
+    return Arch::Generic;
+  }
+  unsigned char header[8] = { 0 };
+  fin.read(reinterpret_cast<char*>(header), sizeof(header));
+  if (!fin) {
+    return Arch::Generic;
+  }
+  auto readWord = [&header](size_t i) -> unsigned int {
+    return static_cast<unsigned int>(header[i]) |
+      (static_cast<unsigned int>(header[i + 1]) << 8);
+  };
+  unsigned int machine = readWord(0);
+  if (machine == 0x0000 && readWord(2) == 0xffff) {
+    // In a /bigobj file the machine type follows Sig1, Sig2 and Version.
+    machine = readWord(6);
+  }
+  switch (machine) {
+    case 0x014c: // IMAGE_FILE_MACHINE_I386
+      return Arch::I386;
+    case 0xa641: // IMAGE_FILE_MACHINE_ARM64EC
+      return Arch::ARM64EC;
+    default:
+      return Arch::Generic;
+  }
+}
+
+} // namespace
 
 #ifdef _WIN32
 #  ifndef IMAGE_FILE_MACHINE_ARM
@@ -144,13 +273,6 @@ typedef struct _cmIMAGE_SYMBOL_EX
   BYTE NumberOfAuxSymbols;
 } cmIMAGE_SYMBOL_EX;
 typedef cmIMAGE_SYMBOL_EX UNALIGNED* cmPIMAGE_SYMBOL_EX;
-
-enum class Arch
-{
-  Generic,
-  I386,
-  ARM64EC,
-};
 
 PIMAGE_SECTION_HEADER GetSectionHeaderOffset(
   PIMAGE_FILE_HEADER pImageFileHeader)
@@ -266,63 +388,24 @@ public:
             symbol = stringTable + pSymbolTable->N.Name.Long;
           }
 
-          // clear out any leading spaces
-          while (cmsysString_isspace(symbol[0]))
-            symbol.erase(0, 1);
-          // if it starts with _ and has an @ then it is a __cdecl
-          // so remove the @ stuff for the export
-          if (symbol[0] == '_') {
-            std::string::size_type posAt = symbol.find('@');
-            if (posAt != std::string::npos) {
-              symbol.erase(posAt);
-            }
-          }
-          // For i386 builds we need to remove _
-          if (this->SymbolArch == Arch::I386 && symbol[0] == '_') {
-            symbol.erase(0, 1);
-          }
-
-          // Check whether it is "Scalar deleting destructor" and "Vector
-          // deleting destructor"
-          // if scalarPrefix and vectorPrefix are not found then print
-          // the symbol
-          char const* scalarPrefix = "??_G";
-          char const* vectorPrefix = "??_E";
-          char const* vftablePrefix = "??_7";
-          // The original code had a check for
-          //     symbol.find("real@") == std::string::npos)
-          // but this disallows member functions with the name "real".
-          if (symbol.compare(0, 4, scalarPrefix) &&
-              symbol.compare(0, 4, vectorPrefix)) {
+          NormalizeSymbolName(symbol, this->SymbolArch);
+          if (!SymbolIsExcluded(symbol, this->SymbolArch)) {
             SectChar = this->SectionHeaders[pSymbolTable->SectionNumber - 1]
                          .Characteristics;
-            // Skip symbols containing a dot, are from managed code,
-            // or are C++ operators incorrectly declared extern "C".
-            if (symbol.find('.') == std::string::npos &&
-                !SymbolIsFromManagedCode(symbol) &&
-                !SymbolIsOperatorExternC(symbol)) {
-              // skip arm64ec thunk symbols
-              if (this->SymbolArch != Arch::ARM64EC ||
-                  (symbol.find("$ientry_thunk") == std::string::npos &&
-                   symbol.find("$entry_thunk") == std::string::npos &&
-                   symbol.find("$iexit_thunk") == std::string::npos &&
-                   symbol.find("$exit_thunk") == std::string::npos)) {
-                if ((!pSymbolTable->Type &&
-                     // Read only (i.e. constants) must be excluded
-                     (SectChar & IMAGE_SCN_MEM_WRITE)) ||
-                    (this->SymbolArch == Arch::ARM64EC &&
-                     // vftable symbols are DATA on ARM64EC
-                     symbol.compare(0, 4, vftablePrefix) == 0)) {
-                  this->DataSymbols.insert(symbol);
-                } else if (pSymbolTable->Type ||
-                           !(SectChar & IMAGE_SCN_MEM_READ) ||
-                           (SectChar & IMAGE_SCN_MEM_EXECUTE) ||
-                           (this->SymbolArch != Arch::ARM64EC &&
-                            // vftable symbols fail if marked as DATA
-                            symbol.compare(0, 4, vftablePrefix) == 0)) {
-                  this->Symbols.insert(symbol);
-                }
-              }
+            if ((!pSymbolTable->Type &&
+                 // Read only (i.e. constants) must be excluded
+                 (SectChar & IMAGE_SCN_MEM_WRITE)) ||
+                (this->SymbolArch == Arch::ARM64EC &&
+                 // vftable symbols are DATA on ARM64EC
+                 SymbolIsVftable(symbol))) {
+              this->DataSymbols.insert(symbol);
+            } else if (pSymbolTable->Type ||
+                       !(SectChar & IMAGE_SCN_MEM_READ) ||
+                       (SectChar & IMAGE_SCN_MEM_EXECUTE) ||
+                       (this->SymbolArch != Arch::ARM64EC &&
+                        // vftable symbols fail if marked as DATA
+                        SymbolIsVftable(symbol))) {
+              this->Symbols.insert(symbol);
             }
           }
         }
@@ -338,19 +421,6 @@ public:
   }
 
 private:
-  bool SymbolIsFromManagedCode(std::string const& symbol)
-  {
-    return symbol == "__t2m" || symbol == "__m2mep" || symbol == "__mep" ||
-      symbol.find("$$F") != std::string::npos ||
-      symbol.find("$$J") != std::string::npos;
-  }
-
-  bool SymbolIsOperatorExternC(std::string const& symbol)
-  {
-    return symbol.find_first_not_of("=<>+-*/%,?|~!^&[]()") ==
-      std::string::npos;
-  }
-
   std::set<std::string>& Symbols;
   std::set<std::string>& DataSymbols;
   DWORD_PTR SymbolCount;
@@ -415,6 +485,12 @@ static bool DumpFileWithNm(std::string const& nmPath,
     return false;
   }
 
+  // The COFF symbol table walker applies rules that depend on the object
+  // file's architecture, but nm does not report it.  Read it from the
+  // object files named in the output, remembering it because one nm run
+  // may cover many object files.
+  std::map<std::string, Arch> archOfObject;
+
   std::istringstream ss(output);
   std::string line;
   while (std::getline(ss, line)) {
@@ -440,10 +516,22 @@ static bool DumpFileWithNm(std::string const& nmPath,
       return false;
     }
     char const sym_type = line[sym_end + 1];
-    std::string const symbol = line.substr(sym_start, sym_end - sym_start);
+    std::string const objectFile = line.substr(0, filename_end);
+    std::string symbol = line.substr(sym_start, sym_end - sym_start);
+
+    auto archEntry = archOfObject.find(objectFile);
+    if (archEntry == archOfObject.end()) {
+      archEntry =
+        archOfObject.emplace(objectFile, GetObjectArch(objectFile)).first;
+    }
+    Arch const arch = archEntry->second;
+
+    NormalizeSymbolName(symbol, arch);
+    if (SymbolIsExcluded(symbol, arch)) {
+      continue;
+    }
     switch (sym_type) {
       case 'B':
-      case 'C':
       case 'D':
         dataSymbols.insert(symbol);
         continue;
@@ -451,11 +539,21 @@ static bool DumpFileWithNm(std::string const& nmPath,
         symbols.insert(symbol);
         continue;
       case 'R':
-        if (cmHasLiteralPrefix(symbol, "??_7")) {
-          dataSymbols.insert(symbol);
+        // Read only (i.e. constants) must be excluded, but vftables live
+        // there too.  They fail if marked as DATA, except on ARM64EC where
+        // they must be marked as DATA.
+        if (SymbolIsVftable(symbol)) {
+          if (arch == Arch::ARM64EC) {
+            dataSymbols.insert(symbol);
+          } else {
+            symbols.insert(symbol);
+          }
         }
         continue;
       case 'A':
+      case 'C':
+        // Common symbols have no section, and the COFF symbol table walker
+        // rejects symbols whose section number is not positive.
       case 'I':
       case 'N':
       case 'S':
@@ -477,7 +575,7 @@ static bool DumpFileWithNm(std::string const& nmPath,
       default:
         std::cerr << "Ignoring symbol '" << symbol
                   << "' with unrecognized type '" << sym_type
-                  << "' in object '" << line.substr(0, filename_end) << "'.\n";
+                  << "' in object '" << objectFile << "'.\n";
     }
   }
 

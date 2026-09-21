@@ -1,0 +1,13 @@
+EXPORTS
+	?bssData@@3HA 	 DATA
+	?writableData@@3HA 	 DATA
+	cWritableData 	 DATA
+	??0Virt@@QEAA@XZ
+	??1Virt@@UEAA@XZ
+	??_7Virt@@6B@
+	?CodeFunction@@YAHXZ
+	?DeleteOne@@YAXPEAVVirt@@@Z
+	?Method@Virt@@UEAAHXZ
+	?UseConstData@@YAPEBHXZ
+	?UseLocalFunction@@YAHXZ
+	CFunction
