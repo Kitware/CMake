@@ -693,6 +693,13 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               *cmp0197 == "NEW"_s ? "NEW" : "OLD");
     }
 
+    /* Set per-language link flags policy to match outer project.
+       It affects platform modules.  */
+    if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0210) !=
+        cmPolicies::NEW) {
+      fprintf(fout, "cmake_policy(SET CMP0210 OLD)\n");
+    }
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs += cmStrCat(' ', li);
@@ -905,15 +912,6 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
      */
     fprintf(fout, "cmake_policy(SET CMP0181 %s)\n",
             this->Makefile->GetPolicyStatus(cmPolicies::CMP0181) ==
-                cmPolicies::NEW
-              ? "NEW"
-              : "OLD");
-
-    /* Set the appropriate policy information for passing
-     * CMAKE_<LANG>_LINK_FLAGS
-     */
-    fprintf(fout, "cmake_policy(SET CMP0210 %s)\n",
-            this->Makefile->GetPolicyStatus(cmPolicies::CMP0210) ==
                 cmPolicies::NEW
               ? "NEW"
               : "OLD");
