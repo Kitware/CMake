@@ -143,6 +143,7 @@ function(_setup_mingw_config_and_build source_dir build_dir)
   find_program(MINGW_GFORTRAN
     NAMES gfortran
     PATHS
+      c:/mingw64/bin
       c:/MinGW/bin
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin"
     )
