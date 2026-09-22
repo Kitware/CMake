@@ -1,0 +1,11 @@
+CPack: Create package using APK
+CPack: Install projects(
+CPack: - Run preinstall target for: CPackAPKGenerator)?
+CPack: - Install project: CPackAPKGenerator \[Release\](
+CPack: - Run preinstall target for: CPackAPKGenerator)?
+CPack: - Install project: CPackAPKGenerator \[Release\]
+CPack: Create package
+(-- CPack APK: Generating a debug keystore at '[^
+]*'\.
+)?CPack: - package: [^
+]*/APKSuperBuild-build/APKGeneratorTest-1\.2\.3\.apk generated\.

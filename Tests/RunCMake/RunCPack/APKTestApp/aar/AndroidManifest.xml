@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.lib">
+  <uses-sdk android:minSdkVersion="21"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+  <queries>
+    <package android:name="com.example.other"/>
+    <provider android:authorities="com.example.queried"/>
+  </queries>
+  <application>
+    <service android:name=".LibService" android:label="1 > 0"
+        android:exported="false"/>
+    <activity android:name=".LibActivity"/>
+    <activity-alias android:name="LibAlias"
+        android:targetActivity=".LibActivity"/>
+    <provider android:name="com.example.lib.LibProvider"
+        android:authorities="${applicationId}.lib"
+        tools:node="merge">
+      <meta-data android:name="com.example.lib.key" android:value="value"/>
+      <meta-data android:name="com.example.lib.RemovedKey"
+          android:value="value" tools:node="remove"/>
+    </provider>
+    <provider android:name="androidx.startup.InitializationProvider"
+        android:authorities="${applicationId}.androidx-startup"
+        android:exported="false" tools:node="merge">
+      <meta-data android:name="com.example.lib.Initializer"
+          android:value="androidx.startup"/>
+    </provider>
+    <!-- <activity android:name=".Commented"/> -->
+    <activity android:name=".Removed" tools:node="remove"/>
+  </application>
+</manifest>

@@ -1521,6 +1521,13 @@ endif()
 
 add_RunCMake_test_group(CPack "${cpack_tests}")
 
+if(CMake_TEST_CPACK_APK)
+  add_RunCMake_test(CPack_APK
+    -DCMake_TEST_CPACK_APK_SDK_ROOT=${CMake_TEST_CPACK_APK_SDK_ROOT}
+    -DCMake_TEST_CPACK_APK_TOOLCHAIN_FILE=${CMake_TEST_CPACK_APK_TOOLCHAIN_FILE}
+  )
+endif()
+
 if(CMake_TEST_CPACK_APPIMAGE)
   add_RunCMake_test(CPack_AppImage
     -DCMake_TEST_CPACK_APPIMAGE_RUNTIME_FILE=${CMake_TEST_CPACK_APPIMAGE_RUNTIME_FILE}

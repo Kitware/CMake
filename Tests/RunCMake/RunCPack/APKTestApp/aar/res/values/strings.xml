@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">From the library</string>
+  <string name="lib_name">APK Generator Test Library</string>
+</resources>

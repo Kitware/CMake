@@ -13,6 +13,7 @@ Generators
 .. toctree::
    :maxdepth: 1
 
+   /cpack_gen/apk
    /cpack_gen/appimage
    /cpack_gen/archive
    /cpack_gen/bundle
