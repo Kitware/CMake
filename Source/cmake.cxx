@@ -1107,7 +1107,11 @@ void cmake::SetArgs(std::vector<std::string> const& args)
                      CommandArgument::RequiresSeparator::No, SourceArgLambda },
     CommandArgument{ "-H", "No source directory specified for -H",
                      CommandArgument::Values::One,
-                     CommandArgument::RequiresSeparator::No, SourceArgLambda },
+                     CommandArgument::RequiresSeparator::No,
+                     [&](std::string const& value, cmake* state) -> bool {
+                       warnDeprecated("-H", "-S");
+                       return SourceArgLambda(value, state);
+                     } },
     CommandArgument{ "-O", CommandArgument::Values::Zero,
                      IgnoreAndTrueLambda },
     CommandArgument{ "-B", "No build directory specified for -B",
