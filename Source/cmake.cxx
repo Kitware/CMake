@@ -450,6 +450,11 @@ Json::Value cmake::ReportCapabilitiesJson() const
   }
   obj["generators"] = generators;
   obj["fileApi"] = cmFileAPI::ReportCapabilities();
+  cmInstrumentationQuery::Version const dataVersion =
+    cmInstrumentationQuery::LatestDataVersion();
+  obj["instrumentation"]["apiVersion"] = 1;
+  obj["instrumentation"]["dataVersion"]["major"] = dataVersion.Major;
+  obj["instrumentation"]["dataVersion"]["minor"] = dataVersion.Minor;
   obj["serverMode"] = false;
   obj["tls"] = static_cast<bool>(curlVersion->features & CURL_VERSION_SSL);
 #  ifdef CMake_ENABLE_DEBUGGER
