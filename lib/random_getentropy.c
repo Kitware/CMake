@@ -6,11 +6,8 @@
                         \___/_/\_\ .__/ \__,_|\__|
                                  |_| XML parser
 
-   Copyright (c) 2000      Clark Cooper <coopercc@users.sourceforge.net>
-   Copyright (c) 2002      Greg Stein <gstein@users.sourceforge.net>
-   Copyright (c) 2005      Karl Waclawek <karl@waclawek.net>
-   Copyright (c) 2017-2023 Sebastian Pipping <sebastian@pipping.org>
-   Copyright (c) 2023      Orgad Shaneh <orgad.shaneh@audiocodes.com>
+   Copyright (c) 2026 Sebastian Pipping <sebastian@pipping.org>
+   Copyright (c) 2026 Matthew Fernandez <matthew.fernandez@gmail.com>
    Licensed under the MIT license:
 
    Permission is  hereby granted,  free of charge,  to any  person obtaining
@@ -35,16 +32,31 @@
    SPDX-License-Identifier: MIT
 */
 
-#ifndef WINCONFIG_H
-#define WINCONFIG_H
+#include "random_getentropy.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#undef WIN32_LEAN_AND_MEAN
+// NOTE: Please keep this block in sync with its two siblings in files
+//       `configure.ac` and `ConfigureChecks.cmake`!
+#if defined(__APPLE__)
+#  include <sys/random.h>
+#else
+#  if defined(__GLIBC__) && ! defined(_DEFAULT_SOURCE)
+#    define _DEFAULT_SOURCE 1
+#  endif
+#  if ! defined(_GNU_SOURCE)
+#    define _GNU_SOURCE 1 /* for musl */
+#  endif
+#  include <unistd.h>
+#endif // ! defined(__APPLE__)
 
-#include <memory.h>
-#include <string.h>
+#include "memory_sanitizer.h"
+#include <errno.h>
 
-#endif /* ndef WINCONFIG_H */
+bool
+writeRandomBytes_getentropy(void *target, size_t count) {
+  errno = 0;
+  const bool success = (getentropy(target, count) == 0);
+  // MSan does not understand `getentropy`, so explain its effects
+  if (success)
+    MSAN_UNPOISON(target, count);
+  return success;
+}

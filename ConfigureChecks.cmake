@@ -22,10 +22,29 @@ check_symbol_exists("getpagesize" "unistd.h" HAVE_GETPAGESIZE)
 check_symbol_exists("mmap" "sys/mman.h" HAVE_MMAP)
 check_symbol_exists("getrandom" "sys/random.h" HAVE_GETRANDOM)
 
-check_symbol_exists("arc4random_buf" "stdlib.h" HAVE_ARC4RANDOM_BUF)
-if(NOT HAVE_ARC4RANDOM_BUF)
-    check_symbol_exists("arc4random" "stdlib.h" HAVE_ARC4RANDOM)
-endif()
+check_c_source_compiles("
+    #if ! defined(_DEFAULT_SOURCE)
+    # define _DEFAULT_SOURCE 1 /* for glibc */
+    #endif
+    #include <stdlib.h>
+    int main(void) {
+      char dummy[123];
+      arc4random_buf(dummy, 0U);
+      return 0;
+    }"
+    HAVE_ARC4RANDOM_BUF)
+
+check_c_source_compiles("
+    #if ! defined(_DEFAULT_SOURCE)
+    # define _DEFAULT_SOURCE 1 /* for glibc */
+    #endif
+    #include <stdlib.h>
+    int main(void) {
+        arc4random();
+        return 0;
+    }"
+    HAVE_ARC4RANDOM)
+
 set(CMAKE_REQUIRED_LIBRARIES)
 
 #/* Define to 1 if you have the ANSI C header files. */
@@ -55,6 +74,27 @@ if(NOT HAVE_OFF_T)
 endif()
 
 check_c_source_compiles("
+        // NOTE: Please keep this block in sync with its two siblings in files
+        //       `configure.ac` and `lib/random_getentropy.c`!
+        #if defined(__APPLE__)
+        #  include <sys/random.h>
+        #else
+        #  if defined(__GLIBC__) && ! defined(_DEFAULT_SOURCE)
+        #    define _DEFAULT_SOURCE 1
+        #  endif
+        #  if ! defined(_GNU_SOURCE)
+        #    define _GNU_SOURCE 1 /* for musl */
+        #  endif
+        #  include <unistd.h>
+        #endif // ! defined(__APPLE__)
+
+        int main(void) {
+            return getentropy(NULL, 0U);
+        }
+    "
+    HAVE_GETENTROPY)
+
+check_c_source_compiles("
         #define _GNU_SOURCE
         #include <stdlib.h>  /* for NULL */
         #include <unistd.h>  /* for syscall */
@@ -79,9 +119,11 @@ if (_FLAG_DETECTION_UNUSABLE)
         " than English?"
     )
     set(FLAG_WSTRICT_ALIASING FALSE)
+    set(FLAG_WIMPLICIT_FALLTHROUGH FALSE)
     set(FLAG_VISIBILITY FALSE)
 else()
     check_c_compiler_flag("-Wstrict-aliasing=3" FLAG_WSTRICT_ALIASING)
+    check_c_compiler_flag("-Wimplicit-fallthrough" FLAG_WIMPLICIT_FALLTHROUGH)
     check_c_compiler_flag("-fvisibility=hidden" FLAG_VISIBILITY)
 endif()
 

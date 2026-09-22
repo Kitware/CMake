@@ -6,11 +6,7 @@
                         \___/_/\_\ .__/ \__,_|\__|
                                  |_| XML parser
 
-   Copyright (c) 2000      Clark Cooper <coopercc@users.sourceforge.net>
-   Copyright (c) 2002      Greg Stein <gstein@users.sourceforge.net>
-   Copyright (c) 2005      Karl Waclawek <karl@waclawek.net>
-   Copyright (c) 2017-2023 Sebastian Pipping <sebastian@pipping.org>
-   Copyright (c) 2023      Orgad Shaneh <orgad.shaneh@audiocodes.com>
+   Copyright (c) 2026 Matthew Fernandez <matthew.fernandez@gmail.com>
    Licensed under the MIT license:
 
    Permission is  hereby granted,  free of charge,  to any  person obtaining
@@ -35,16 +31,23 @@
    SPDX-License-Identifier: MIT
 */
 
-#ifndef WINCONFIG_H
-#define WINCONFIG_H
+#if ! defined(MEMORY_SANITIZER_H)
+#  define MEMORY_SANITIZER_H 1
 
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#undef WIN32_LEAN_AND_MEAN
+#  if defined(__has_feature)
+#    if __has_feature(memory_sanitizer)
+#      include <sanitizer/msan_interface.h>
 
-#include <memory.h>
-#include <string.h>
+// inform Memory Sanitizer that [base, base + extent) is now initialized
+#      define MSAN_UNPOISON(base, extent) __msan_unpoison((base), (extent))
 
-#endif /* ndef WINCONFIG_H */
+#    endif
+#  endif
+
+#  if ! defined(MSAN_UNPOISON)
+#    define MSAN_UNPOISON(base, extent)                                        \
+      do {                                                                     \
+      } while (0)
+#  endif
+
+#endif // ! defined(MEMORY_SANITIZER_H)

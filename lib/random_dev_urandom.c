@@ -6,11 +6,8 @@
                         \___/_/\_\ .__/ \__,_|\__|
                                  |_| XML parser
 
-   Copyright (c) 2000      Clark Cooper <coopercc@users.sourceforge.net>
-   Copyright (c) 2002      Greg Stein <gstein@users.sourceforge.net>
-   Copyright (c) 2005      Karl Waclawek <karl@waclawek.net>
-   Copyright (c) 2017-2023 Sebastian Pipping <sebastian@pipping.org>
-   Copyright (c) 2023      Orgad Shaneh <orgad.shaneh@audiocodes.com>
+   Copyright (c) 2017-2026 Sebastian Pipping <sebastian@pipping.org>
+   Copyright (c) 2026      Matthew Fernandez <matthew.fernandez@gmail.com>
    Licensed under the MIT license:
 
    Permission is  hereby granted,  free of charge,  to any  person obtaining
@@ -35,16 +32,43 @@
    SPDX-License-Identifier: MIT
 */
 
-#ifndef WINCONFIG_H
-#define WINCONFIG_H
+#include "random_dev_urandom.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
+#if ! defined(_POSIX_C_SOURCE)                                                 \
+    || (defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE < 200809L))
+#  define _POSIX_C_SOURCE 200809L // for O_CLOEXEC
 #endif
-#include <windows.h>
-#undef WIN32_LEAN_AND_MEAN
 
-#include <memory.h>
-#include <string.h>
+#include <errno.h>
+#include <fcntl.h>  // open
+#include <unistd.h> // close
 
-#endif /* ndef WINCONFIG_H */
+/* Extract entropy from /dev/urandom */
+bool
+writeRandomBytes_dev_urandom(void *target, size_t count) {
+  int success = false; /* full count bytes written? */
+  size_t bytesWrittenTotal = 0;
+
+  const int fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
+  if (fd < 0) {
+    return false;
+  }
+
+  do {
+    void *const currentTarget = (char *)target + bytesWrittenTotal;
+    const size_t bytesToWrite = count - bytesWrittenTotal;
+
+    errno = 0;
+
+    const ssize_t bytesWrittenMore = read(fd, currentTarget, bytesToWrite);
+
+    if (bytesWrittenMore > 0) {
+      bytesWrittenTotal += bytesWrittenMore;
+      if (bytesWrittenTotal >= count)
+        success = true;
+    }
+  } while (! success && (errno == EINTR));
+
+  close(fd);
+  return success;
+}

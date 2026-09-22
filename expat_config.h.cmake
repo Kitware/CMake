@@ -24,6 +24,9 @@
 /* Define to 1 if you have the `getrandom' function. */
 #cmakedefine HAVE_GETRANDOM
 
+/* Define to 1 if you have the `getentropy' function. */
+#cmakedefine HAVE_GETENTROPY
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #cmakedefine HAVE_INTTYPES_H
 

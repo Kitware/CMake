@@ -6,11 +6,8 @@
                         \___/_/\_\ .__/ \__,_|\__|
                                  |_| XML parser
 
-   Copyright (c) 2000      Clark Cooper <coopercc@users.sourceforge.net>
-   Copyright (c) 2002      Greg Stein <gstein@users.sourceforge.net>
-   Copyright (c) 2005      Karl Waclawek <karl@waclawek.net>
-   Copyright (c) 2017-2023 Sebastian Pipping <sebastian@pipping.org>
-   Copyright (c) 2023      Orgad Shaneh <orgad.shaneh@audiocodes.com>
+   Copyright (c) 2026 Sebastian Pipping <sebastian@pipping.org>
+   Copyright (c) 2026 Matthew Fernandez <matthew.fernandez@gmail.com>
    Licensed under the MIT license:
 
    Permission is  hereby granted,  free of charge,  to any  person obtaining
@@ -35,16 +32,18 @@
    SPDX-License-Identifier: MIT
 */
 
-#ifndef WINCONFIG_H
-#define WINCONFIG_H
+#include "random_arc4random_buf.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
+#if ! defined(_DEFAULT_SOURCE)
+#  define _DEFAULT_SOURCE 1 /* for glibc */
 #endif
-#include <windows.h>
-#undef WIN32_LEAN_AND_MEAN
 
-#include <memory.h>
-#include <string.h>
+#include "memory_sanitizer.h"
+#include <stdlib.h> // for arc4random_buf
 
-#endif /* ndef WINCONFIG_H */
+void
+writeRandomBytes_arc4random_buf(void *target, size_t count) {
+  arc4random_buf(target, count);
+  // MSan does not understand `arc4random_buf`, so explain its effects
+  MSAN_UNPOISON(target, count);
+}
