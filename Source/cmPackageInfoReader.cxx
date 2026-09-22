@@ -31,6 +31,12 @@
 #include "cmTargetTypes.h"
 #include "cmValue.h"
 
+// When adding or changing CPS schema versions, component types, languages, or
+// branch-selecting attributes, review Tests/Fuzzing/cmPackageInfoReader.dict.
+// Add tokens including keys that help mutations reach the new paths; keep the
+// dictionary focused on useful parser inputs, not an exhaustive list of CPS
+// keywords.
+
 namespace {
 
 // Map of CPS language names to CMake language name.  Case insensitivity is
