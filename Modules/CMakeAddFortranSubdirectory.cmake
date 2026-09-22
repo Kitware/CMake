@@ -233,7 +233,7 @@ function(cmake_add_fortran_subdirectory subdir)
   # create build and configure wrapper scripts
   _setup_mingw_config_and_build("${source_dir}" "${build_dir}")
   # create the external project
-  externalproject_add(${project_name}_build
+  ExternalProject_Add(${project_name}_build
     SOURCE_DIR ${source_dir}
     BINARY_DIR ${build_dir}
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
