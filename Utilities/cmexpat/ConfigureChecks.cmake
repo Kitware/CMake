@@ -49,25 +49,3 @@ check_c_source_compiles("
             return 0;
         }"
     HAVE_SYSCALL_GETRANDOM)
-
-# If the compiler produces non-English messages and does not
-# listen to CMake's request for English through environment variables
-# LC_ALL/LC_MESSAGES/LANG, then command `check_c_compiler_flag` can produce
-# false positives as seen with e.g. `cl` of MSVC 19.44.35217 configured
-# to report errors in Italian language.
-check_c_compiler_flag("-no-such-thing" _FLAG_DETECTION_UNUSABLE)
-
-if (_FLAG_DETECTION_UNUSABLE)
-    message(WARNING
-        "Your compiler breaks CMake's command `check_c_compiler_flag`."
-        " HINT: Is it configured to report errors in a language other"
-        " than English?"
-    )
-    set(FLAG_WSTRICT_ALIASING FALSE)
-    set(FLAG_VISIBILITY FALSE)
-else()
-    check_c_compiler_flag("-Wstrict-aliasing=3" FLAG_WSTRICT_ALIASING)
-    check_c_compiler_flag("-fvisibility=hidden" FLAG_VISIBILITY)
-endif()
-
-check_library_exists(m cos "" _EXPAT_LIBM_FOUND)
