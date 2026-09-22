@@ -53,6 +53,7 @@ auto const keyOR = "OR"_s;
 auto const keyParenL = "("_s;
 auto const keyParenR = ")"_s;
 auto const keyPOLICY = "POLICY"_s;
+auto const keyRULE = "RULE"_s;
 auto const keySTREQUAL = "STREQUAL"_s;
 auto const keySTRGREATER = "STRGREATER"_s;
 auto const keySTRGREATER_EQUAL = "STRGREATER_EQUAL"_s;
@@ -514,6 +515,12 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       cmPolicies::PolicyID pid;
       newArgs.ReduceOneArg(
         cmPolicies::GetPolicyID(args.next->GetValue().c_str(), pid), args);
+    }
+    // does a rule exist
+    else if (this->IsKeyword(keyRULE, *args.current)) {
+      newArgs.ReduceOneArg(
+        static_cast<bool>(this->Makefile.FindRuleToUse(args.next->GetValue())),
+        args);
     }
     // does a target exist
     else if (this->IsKeyword(keyTARGET, *args.current)) {

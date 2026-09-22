@@ -24,3 +24,5 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|MSVC|SunPro|XL|HP")
   run_configure_and_build(Configurators)
   run_configure_and_build(DerivedRule)
 endif()
+
+run_cmake(ExistenceCheck)

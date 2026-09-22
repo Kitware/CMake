@@ -44,8 +44,8 @@ Compound conditions are evaluated in the following order of precedence:
 2. Unary tests such as:
 
   * The `Existence Checks`_ :cref:`COMMAND`, :cref:`DEFINED`,
-    :cref:`DIAGNOSTIC`, :cref:`EXISTS`, :cref:`POLICY`, :cref:`TARGET`, and
-    :cref:`TEST`.
+    :cref:`DIAGNOSTIC`, :cref:`EXISTS`, :cref:`POLICY`, :cref:`RULE`,
+    :cref:`TARGET`, and :cref:`TEST`.
   * The `File Operations`_ :cref:`IS_READABLE`, :cref:`IS_WRITABLE`,
     :cref:`IS_EXECUTABLE`, :cref:`IS_DIRECTORY`, :cref:`IS_SYMLINK`, and
     :cref:`IS_ABSOLUTE`.
@@ -141,6 +141,13 @@ Existence Checks
 .. signature:: if(POLICY <policy-id>)
 
   True if the given name is an existing policy (of the form ``CMP<NNNN>``).
+
+.. signature:: if(RULE <rule-name>)
+
+  .. versionadded:: 4.5
+
+  True if the given name is an existing rule created by a call to the
+  :command:`add_custom_rule` command and is visible in the current directory.
 
 .. signature:: if(TARGET <target-name>)
 
