@@ -6,6 +6,7 @@
 .devcontainer    export-ignore
 .editorconfig    export-ignore
 .pre-commit-config.yaml export-ignore
+.pvsconfig       export-ignore
 .typos.toml      export-ignore
 sgconfig.yml     export-ignore
 
