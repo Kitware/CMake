@@ -1,0 +1,7 @@
+Error: test "needs_both" takes part in fixtures with conflicting FIXTURE_REPEAT_MODE values:
+  fixture "B" uses AROUND_ALL_REPEATS
+  fixture "A" uses AROUND_EACH_REPEAT
+Fixtures that share a test must use the same mode\.
+Errors while running CTest
+Output from these tests are in: .*/Testing/Temporary/LastTest\.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely\.

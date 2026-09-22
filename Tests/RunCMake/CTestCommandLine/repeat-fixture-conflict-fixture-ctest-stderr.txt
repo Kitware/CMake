@@ -1,0 +1,7 @@
+Error: the setup and cleanup tests of fixture "MyFixture" request conflicting FIXTURE_REPEAT_MODE values:
+  "fixture_cleanup" requests AROUND_ALL_REPEATS
+  "fixture_setup" requests AROUND_EACH_REPEAT
+All setup and cleanup tests of a fixture must request the same mode\.
+Errors while running CTest
+Output from these tests are in: .*/Testing/Temporary/LastTest\.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely\.

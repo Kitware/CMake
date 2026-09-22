@@ -9,11 +9,15 @@
 #include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
 #include <functional>
+#include <initializer_list>
 #include <iomanip>
 #include <iostream>
 #include <list>
+#include <map>
+#include <set>
 #include <sstream>
 #include <stack>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -21,6 +25,7 @@
 #include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
+#include <cm/vector>
 #include <cmext/algorithm>
 
 #include <cm3p/json/value.h>
@@ -42,6 +47,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVJobServerClient.h"
+#include "cmUnreachable.h"
 #include "cmWorkingDirectory.h"
 
 namespace {
@@ -95,6 +101,36 @@ cm::optional<CostEntry> splitCostLine(cm::string_view line)
   return CostEntry{ line.substr(0, pos1), prev, cost };
 }
 
+std::string FixtureRepeatModeString(cmCTestTestHandler::FixtureRepeatMode mode)
+{
+  switch (mode) {
+    case cmCTestTestHandler::FixtureRepeatMode::AroundAllRepeats:
+      return "AROUND_ALL_REPEATS";
+    case cmCTestTestHandler::FixtureRepeatMode::AroundEachRepeat:
+      return "AROUND_EACH_REPEAT";
+    case cmCTestTestHandler::FixtureRepeatMode::EachTestSeparately:
+      return "EACH_TEST_SEPARATELY";
+  }
+  CM_UNREACHABLE;
+}
+
+// A fixture and everything ctest needs to decide how it repeats.
+struct Fixture
+{
+  // The fixture's own setup and cleanup tests.
+  std::set<int> SetupAndCleanupTests;
+  // Those tests and the tests requiring the fixture, which together are
+  // everything that repeats with it in AROUND_EACH_REPEAT mode.
+  std::set<int> AllTests;
+  // The modes the setup and cleanup tests request.  Each is mapped to one
+  // test that requests it, so that a report of conflicting modes can name
+  // the tests responsible.
+  std::map<cmCTestTestHandler::FixtureRepeatMode, int> RequestedModes;
+  // The mode CMake recorded as the CMP0224 default, taken from the first
+  // setup or cleanup test that carries one.
+  cm::optional<cmCTestTestHandler::FixtureRepeatMode> DefaultMode;
+};
+
 }
 
 namespace cmsys {
@@ -144,12 +180,165 @@ bool cmCTestMultiProcessHandler::SetTests(TestMap tests,
     this->HasCycles = !this->CheckCycles();
     this->HasInvalidGeneratedResourceSpec =
       !this->CheckGeneratedResourceSpec();
-    if (this->HasCycles || this->HasInvalidGeneratedResourceSpec) {
+    if (this->HasCycles || this->HasInvalidGeneratedResourceSpec ||
+        !this->ComputeFixtureRepetition()) {
       return false;
     }
     this->CreateTestCostList();
   }
   return true;
+}
+
+bool cmCTestMultiProcessHandler::ComputeFixtureRepetition()
+{
+  using Mode = cmCTestTestHandler::FixtureRepeatMode;
+
+  if (this->RepeatMode == cmCTest::Repeat::Never || this->RepeatCount <= 1) {
+    return true;
+  }
+
+  // Collect the tests taking part in each fixture and the modes its own
+  // setup and cleanup tests ask for.
+  std::map<std::string, Fixture> fixtures;
+  for (auto const& p : this->Properties) {
+    int const test = p.first;
+    auto const& props = *p.second;
+    for (std::string const& name : props.FixturesRequired) {
+      fixtures[name].AllTests.insert(test);
+    }
+    for (std::set<std::string> const* own :
+         { &props.FixturesSetup, &props.FixturesCleanup }) {
+      for (std::string const& name : *own) {
+        Fixture& fixture = fixtures[name];
+        fixture.SetupAndCleanupTests.insert(test);
+        fixture.AllTests.insert(test);
+        if (props.RequestedFixtureRepeatMode) {
+          fixture.RequestedModes.emplace(*props.RequestedFixtureRepeatMode,
+                                         test);
+        } else if (!fixture.DefaultMode) {
+          fixture.DefaultMode = props.DefaultFixtureRepeatMode;
+        }
+      }
+    }
+  }
+
+  // Resolve each fixture's mode.  A mode requested by one of its own tests
+  // applies to the whole fixture, so its own tests must agree.
+  std::map<std::string, Mode> fixtureMode;
+  for (auto const& fi : fixtures) {
+    Fixture const& fixture = fi.second;
+    if (fixture.RequestedModes.size() > 1) {
+      std::string e =
+        cmStrCat("Error: the setup and cleanup tests of fixture \"", fi.first,
+                 "\" request conflicting FIXTURE_REPEAT_MODE values:\n");
+      for (auto const& r : fixture.RequestedModes) {
+        e += cmStrCat("  \"", this->GetName(r.second), "\" requests ",
+                      FixtureRepeatModeString(r.first), '\n');
+      }
+      e += "All setup and cleanup tests of a fixture must request the same "
+           "mode.\n";
+      cmCTestLog(this->CTest, ERROR_MESSAGE, e);
+      return false;
+    }
+    fixtureMode[fi.first] = !fixture.RequestedModes.empty()
+      ? fixture.RequestedModes.begin()->first
+      : fixture.DefaultMode.value_or(Mode::EachTestSeparately);
+  }
+
+  // Fixtures that share a test repeat together, so they must agree as well.
+  // Otherwise a test could repeat with one fixture after another fixture it
+  // takes part in has been cleaned up.
+  for (auto const& p : this->Properties) {
+    auto const& props = *p.second;
+    std::map<Mode, std::string> modes;
+    for (std::set<std::string> const* used :
+         { &props.FixturesSetup, &props.FixturesCleanup,
+           &props.FixturesRequired }) {
+      for (std::string const& name : *used) {
+        modes.emplace(fixtureMode[name], name);
+      }
+    }
+    if (modes.size() > 1) {
+      std::string e = cmStrCat("Error: test \"", this->GetName(p.first),
+                               "\" takes part in fixtures with conflicting "
+                               "FIXTURE_REPEAT_MODE values:\n");
+      for (auto const& m : modes) {
+        e += cmStrCat("  fixture \"", m.second, "\" uses ",
+                      FixtureRepeatModeString(m.first), '\n');
+      }
+      e += "Fixtures that share a test must use the same mode.\n";
+      cmCTestLog(this->CTest, ERROR_MESSAGE, e);
+      return false;
+    }
+  }
+
+  // Record what the resolved modes ask of each fixture's tests.
+  for (auto const& fi : fixtures) {
+    switch (fixtureMode[fi.first]) {
+      case Mode::AroundAllRepeats:
+        this->TestsRunOnce.insert(fi.second.SetupAndCleanupTests.begin(),
+                                  fi.second.SetupAndCleanupTests.end());
+        break;
+      case Mode::AroundEachRepeat:
+        this->AddRepeatGroup(fi.second.AllTests);
+        break;
+      case Mode::EachTestSeparately:
+        break;
+    }
+  }
+
+  // Record what each group needs to repeat itself.
+  for (auto& group : this->RepeatGroups) {
+    group.RepetitionsLeft = this->RepeatCount - 1;
+    group.Unfinished = group.Tests.size();
+    for (auto& t : group.Tests) {
+      // Keep only dependencies within the group.  Dependencies on other
+      // tests are satisfied once, by the group's first repetition.
+      for (int depend : this->PendingTests[t.first].Depends) {
+        if (group.Tests.count(depend) != 0) {
+          t.second.insert(depend);
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+void cmCTestMultiProcessHandler::AddRepeatGroup(std::set<int> const& tests)
+{
+  // Reuse the group of any test that is already in one, so that fixtures
+  // sharing a test end up repeating together.
+  int groupNumber = -1;
+  for (int test : tests) {
+    auto const gi = this->RepeatGroupOfTest.find(test);
+    if (gi != this->RepeatGroupOfTest.end()) {
+      groupNumber = gi->second;
+      break;
+    }
+  }
+  if (groupNumber < 0) {
+    groupNumber = static_cast<int>(this->RepeatGroups.size());
+    this->RepeatGroups.emplace_back();
+  }
+  RepeatGroup& group = this->RepeatGroups[groupNumber];
+
+  for (int test : tests) {
+    auto const gi = this->RepeatGroupOfTest.find(test);
+    if (gi == this->RepeatGroupOfTest.end()) {
+      this->RepeatGroupOfTest[test] = groupNumber;
+      group.Tests[test];
+    } else if (gi->second != groupNumber) {
+      // Move the tests of the other group over.  It is left behind empty in
+      // RepeatGroups, where no test refers to it any more.
+      RepeatGroup& other = this->RepeatGroups[gi->second];
+      for (auto const& t : other.Tests) {
+        this->RepeatGroupOfTest[t.first] = groupNumber;
+      }
+      group.Tests.insert(other.Tests.begin(), other.Tests.end());
+      other.Tests.clear();
+    }
+  }
 }
 
 // Set the max number of tests that can be run at the same time.
@@ -273,8 +462,15 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
 
   if (this->RepeatMode != cmCTest::Repeat::Never) {
-    testRun->SetRepeatMode(this->RepeatMode);
-    testRun->SetNumberOfRuns(this->RepeatCount);
+    auto const gi = this->RepeatGroupOfTest.find(test);
+    if (gi != this->RepeatGroupOfTest.end()) {
+      // The group repeats the test, so report the repetition it is running.
+      int const left = this->RepeatGroups[gi->second].RepetitionsLeft;
+      testRun->SetRunNumber(this->RepeatCount - left, this->RepeatCount);
+    } else if (this->TestsRunOnce.count(test) == 0) {
+      testRun->SetRepeatMode(this->RepeatMode);
+      testRun->SetRunNumber(1, this->RepeatCount);
+    }
   }
   if (this->UseResourceSpec) {
     testRun->SetUseAllocatedResources(true);
@@ -829,18 +1025,35 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
     this->Failed->push_back(properties->Name);
   }
 
-  for (auto& t : this->PendingTests) {
-    t.second.Depends.erase(test);
+  // Let the tests waiting on this one start.  A test that its fixture
+  // repeats releases only the other tests of its group; the tests outside
+  // it have to wait for the group's last repetition, so FinishRepeatGroup
+  // releases those.
+  auto const group = this->RepeatGroupOfTest.find(test);
+  bool const repeatsWithFixture = group != this->RepeatGroupOfTest.end();
+  for (auto& pending : this->PendingTests) {
+    if (repeatsWithFixture) {
+      auto const pendingGroup = this->RepeatGroupOfTest.find(pending.first);
+      if (pendingGroup == this->RepeatGroupOfTest.end() ||
+          pendingGroup->second != group->second) {
+        continue;
+      }
+    }
+    pending.second.Depends.erase(test);
   }
 
   // A test killed by the interrupt (e.g. Ctrl+C) never truly finished, so do
   // not record it in the checkpoint; otherwise `ctest -F` would skip it when
-  // resuming this interrupted run.
-  if (cmInstrumentationInterrupt::PendingInterruptSignal() == 0) {
+  // resuming this interrupted run.  A test that its fixture repeats is
+  // recorded by FinishRepeatGroup instead, once its group is done.
+  if (cmInstrumentationInterrupt::PendingInterruptSignal() == 0 &&
+      !repeatsWithFixture) {
     this->WriteCheckpoint(test);
   }
   this->DeallocateResources(test);
   this->UnlockResources(test);
+
+  this->FinishRepeatGroupTest(test, testResult.TestStatus);
 
   runner.reset();
 
@@ -848,6 +1061,90 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
     this->JobServerClient->ReleaseToken();
   }
   this->StartNextTestsOnIdle();
+}
+
+void cmCTestMultiProcessHandler::FinishRepeatGroupTest(int test,
+                                                       int testStatus)
+{
+  auto const gi = this->RepeatGroupOfTest.find(test);
+  if (gi == this->RepeatGroupOfTest.end()) {
+    return;
+  }
+  RepeatGroup& group = this->RepeatGroups[gi->second];
+
+  group.AllCompleted &= testStatus == cmCTestTestHandler::COMPLETED;
+  group.AnyTimedOut |= testStatus == cmCTestTestHandler::TIMEOUT;
+  if (--group.Unfinished > 0) {
+    return;
+  }
+
+  // The group finished a repetition.  Repeat it under the same conditions
+  // that make an individual test repeat.  See cmCTestRunTest::NeedsToRepeat.
+  bool const conditionMet =
+    (this->RepeatMode == cmCTest::Repeat::UntilFail && group.AllCompleted) ||
+    (this->RepeatMode == cmCTest::Repeat::UntilPass && !group.AllCompleted) ||
+    (this->RepeatMode == cmCTest::Repeat::AfterTimeout && group.AnyTimedOut);
+  bool const runEnding = this->StopTimePassed ||
+    (this->CheckStopOnFailure() && !this->Failed->empty()) ||
+    cmInstrumentationInterrupt::PendingInterruptSignal() != 0;
+  if (group.RepetitionsLeft == 0 || !conditionMet || runEnding) {
+    this->FinishRepeatGroup(group);
+    return;
+  }
+
+  group.RepetitionsLeft--;
+  group.Unfinished = group.Tests.size();
+  group.AllCompleted = true;
+  group.AnyTimedOut = false;
+  this->RequeueRepeatGroup(group);
+}
+
+void cmCTestMultiProcessHandler::FinishRepeatGroup(RepeatGroup const& group)
+{
+  // The group has run its last repetition, so record its tests the way a
+  // test repeating on its own is recorded once it stops repeating: in the
+  // checkpoint, unless the interrupt cut the group short, and as satisfying
+  // the tests outside the group that were waiting on them.
+  bool const interrupted =
+    cmInstrumentationInterrupt::PendingInterruptSignal() != 0;
+  for (auto const& t : group.Tests) {
+    if (!interrupted) {
+      this->WriteCheckpoint(t.first);
+    }
+    for (auto& pending : this->PendingTests) {
+      pending.second.Depends.erase(t.first);
+    }
+  }
+}
+
+void cmCTestMultiProcessHandler::RequeueRepeatGroup(RepeatGroup const& group)
+{
+  // Only the last repetition of the group counts, as for a test repeating on
+  // its own, so drop the results of the repetition just finished.  Leaving a
+  // failure behind would also keep the tests requiring the fixture from
+  // running again, since their dependency on it has to have succeeded.
+  for (auto const& t : group.Tests) {
+    std::string const& name = this->Properties[t.first]->Name;
+    cm::erase(*this->Passed, name);
+    cm::erase(*this->Failed, name);
+  }
+  cm::erase_if(*this->TestResults,
+               [&group](cmCTestTestHandler::cmCTestTestResult const& result) {
+                 return group.Tests.count(result.TestCount) != 0;
+               });
+  this->Completed -= group.Tests.size();
+
+  for (auto const& t : group.Tests) {
+    TestInfo info;
+    info.Depends = t.second;
+    this->PendingTests[t.first] = std::move(info);
+    this->OrderedTests.push_back(t.first);
+  }
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     "Re-queued " << group.Tests.size()
+                                  << " tests to repeat their fixture"
+                                  << std::endl,
+                     this->Quiet);
 }
 
 void cmCTestMultiProcessHandler::UpdateCostData()
@@ -1256,6 +1553,13 @@ static Json::Value DumpCTestProperties(
                         raw ? rawProperties["FIXTURES_SETUP"]
                             : DumpToJsonArray(testProperties.FixturesSetup)));
   }
+  if (testProperties.RequestedFixtureRepeatMode) {
+    properties.append(
+      DumpCTestProperty("FIXTURE_REPEAT_MODE",
+                        raw ? rawProperties["FIXTURE_REPEAT_MODE"]
+                            : Json::Value(FixtureRepeatModeString(
+                                *testProperties.RequestedFixtureRepeatMode))));
+  }
   if (!testProperties.GeneratedResourceSpecFile.empty()) {
     properties.append(
       DumpCTestProperty("GENERATED_RESOURCE_SPEC_FILE",
@@ -1638,8 +1942,13 @@ void cmCTestMultiProcessHandler::CheckResume()
 
 void cmCTestMultiProcessHandler::RemoveTest(int index)
 {
-  this->OrderedTests.erase(
-    std::find(this->OrderedTests.begin(), this->OrderedTests.end(), index));
+  auto const oi =
+    std::find(this->OrderedTests.begin(), this->OrderedTests.end(), index);
+  if (oi == this->OrderedTests.end()) {
+    // The checkpoint names a test this run does not have pending.
+    return;
+  }
+  this->OrderedTests.erase(oi);
   this->PendingTests.erase(index);
   this->Properties.erase(index);
   this->Completed++;

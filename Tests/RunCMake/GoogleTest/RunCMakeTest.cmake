@@ -13,6 +13,10 @@ endif()
 
 run_cmake(PropertiesOdd)
 
+# Policy CMP0224 has to reach the tests that discovery creates.
+run_cmake(FixtureRepeatMode-NEW)
+run_cmake(FixtureRepeatMode-OLD)
+
 function(run_GoogleTest DISCOVERY_MODE)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-build)

@@ -708,6 +708,7 @@ public:
   cmExportBuildFileGenerator* GetExportedTargetsFile(
     std::string const& filename) const;
   void AddCMP0068WarnTarget(std::string const& target);
+  void AddCMP0224WarnTest(std::string const& test);
 
   virtual bool SupportsShortObjectNames() const;
   bool UseShortObjectNames(
@@ -1054,6 +1055,9 @@ private:
 
   // track targets to issue CMP0068 warning for.
   std::set<std::string> CMP0068WarnTargets;
+
+  // track tests to issue CMP0224 warning for.
+  std::set<std::string> CMP0224WarnTests;
 
   std::unordered_set<std::string> WarnedCMP0210Languages;
 

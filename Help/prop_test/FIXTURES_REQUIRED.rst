@@ -26,6 +26,12 @@ behavior can be overridden with the :option:`-FS <ctest -FS>`,
 :option:`-FC <ctest -FC>` and :option:`-FA <ctest -FA>` command line options to
 :manual:`ctest(1)` if desired.
 
+.. versionchanged:: 4.5
+
+  The :prop_test:`FIXTURE_REPEAT_MODE` property selects how a fixture behaves
+  when :manual:`ctest(1)` repeats tests with :ctest-option:`--repeat`.  See
+  also :policy:`CMP0224`.
+
 Since setup and cleanup tasks are also tests, they can have an ordering
 specified by the :prop_test:`DEPENDS` test property just like any other tests.
 This can be exploited to implement setup or cleanup using multiple tests for a

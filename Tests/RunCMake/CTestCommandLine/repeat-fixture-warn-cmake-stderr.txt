@@ -1,0 +1,14 @@
+CMake Warning \(policy\):
+  Policy CMP0224 is not set: Test fixtures use AROUND_EACH_REPEAT mode by
+  default with ctest --repeat\.  Run "cmake --help-policy CMP0224" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  For compatibility with older versions of CMake, the fixtures of the
+  following tests will use EACH_TEST_SEPARATELY mode:
+
+   fixture_cleanup
+   fixture_setup
+
+This warning is for project developers\.  Use -Wno-author or -Wno-policy to
+suppress it\.

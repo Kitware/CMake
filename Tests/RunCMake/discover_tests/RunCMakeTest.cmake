@@ -28,6 +28,17 @@ block()
   run_cmake(bad-test-properties-cmake)
 endblock()
 
+block()
+  # Policy CMP0224 has to reach the tests that discovery creates.
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/fixture-repeat-mode-build")
+  run_cmake(fixture-repeat-mode)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(fixture-repeat-mode-build
+    ${CMAKE_COMMAND} --build . --config Debug)
+  run_cmake_command(fixture-repeat-mode-test
+    ${CMAKE_CTEST_COMMAND} -C Debug --repeat until-fail:2)
+endblock()
+
 function(run_case CASE)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${CASE}-build)
   run_cmake(${CASE})

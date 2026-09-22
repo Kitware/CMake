@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.5
 .. toctree::
    :maxdepth: 1
 
+   CMP0224: Test fixtures use AROUND_EACH_REPEAT mode by default with ctest --repeat. </policy/CMP0224>
    CMP0223: An empty path is not a prefix of any path. </policy/CMP0223>
    CMP0222: The if() command supports path prefix tests using PATH_IS_PREFIX operator. </policy/CMP0222>
    CMP0221: cmake_host_system_information() DISTRIB_* queries read the host os-release. </policy/CMP0221>

@@ -256,6 +256,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     Specifies additional properties to be set on all tests discovered by this
     invocation of ``gtest_discover_tests()``.
 
+    .. versionchanged:: 4.5
+      If the properties make the discovered tests part of a test fixture, and
+      they do not set :prop_test:`FIXTURE_REPEAT_MODE`, policy :policy:`CMP0224`
+      determines the behavior when the :ctest-option:`--repeat` option is used.
+
   ``TEST_LIST var``
     Make the list of tests available in the variable ``var``, rather than the
     default ``<target>_TESTS``.  This can be useful when the same test
@@ -593,6 +598,17 @@ function(gtest_discover_tests target)
       list(POP_BACK arg_PROPERTIES _back_PROPERTY)
       message(AUTHOR_WARNING "PROPERTIES should be key-value pairs.  Ignoring unpaired key '${_back_PROPERTY}'.")
     endif()
+  endif()
+
+  # For policy CMP0224, only NEW needs carrying through.  With nothing
+  # recorded, ctest already uses the EACH_TEST_SEPARATELY behavior of
+  # CMake 4.4 and below.
+  cmake_policy(GET CMP0224 _CMP0224
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  if(_CMP0224 STREQUAL "NEW")
+    list(APPEND arg_PROPERTIES
+      _CMAKE_DEFAULT_FIXTURE_REPEAT_MODE AROUND_EACH_REPEAT)
   endif()
 
   get_property(test_launcher

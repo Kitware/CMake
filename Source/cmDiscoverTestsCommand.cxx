@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
@@ -17,6 +18,7 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmScriptGenerator.h"
 #include "cmTestDiscovery.h"
 #include "cmTestGenerator.h"
@@ -89,6 +91,17 @@ private:
   cmListFileBacktrace Backtrace;
 };
 
+bool SetsFixtureRepeatMode(std::vector<std::string> const& properties)
+{
+  for (std::size_t i = 0; i < properties.size(); i += 2) {
+    if (properties[i] == "FIXTURE_REPEAT_MODE"_s ||
+        properties[i] == "_CMAKE_DEFAULT_FIXTURE_REPEAT_MODE"_s) {
+      return true;
+    }
+  }
+  return false;
+}
+
 } // namespace
 
 bool cmDiscoverTestsCommand(std::vector<std::string> const& args,
@@ -121,6 +134,18 @@ bool cmDiscoverTestsCommand(std::vector<std::string> const& args,
   }
 
   cmMakefile& mf = status.GetMakefile();
+
+  // The discovered tests are created while ctest runs, too late for the
+  // policy to reach them.  Only NEW needs carrying through.  With nothing
+  // recorded, ctest already uses the EACH_TEST_SEPARATELY behavior of
+  // CMake 4.4 and below.
+  if (mf.GetPolicyStatus(cmPolicies::CMP0224) == cmPolicies::NEW &&
+      !SetsFixtureRepeatMode(arguments.TestProperties)) {
+    arguments.TestProperties.emplace_back(
+      "_CMAKE_DEFAULT_FIXTURE_REPEAT_MODE");
+    arguments.TestProperties.emplace_back("AROUND_EACH_REPEAT");
+  }
+
   mf.AddTestGenerator(cm::make_unique<DiscoveryGenerator>(std::move(arguments),
                                                           mf.GetBacktrace()));
   return true;

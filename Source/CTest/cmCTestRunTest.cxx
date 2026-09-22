@@ -391,6 +391,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
   }
   cmCTestRunTest::EndTestResult testResult;
   testResult.Passed = passed || skipped;
+  testResult.TestStatus = this->TestResult.Status;
   if (res == cmProcess::State::Expired &&
       this->TestProcess->GetTimeoutReason() ==
         cmProcess::TimeoutReason::StopTime) {
@@ -424,8 +425,7 @@ bool cmCTestRunTest::StartAgain(std::unique_ptr<cmCTestRunTest> runner,
 
 bool cmCTestRunTest::NeedsToRepeat()
 {
-  this->NumberOfRunsLeft--;
-  if (this->NumberOfRunsLeft == 0) {
+  if (this->RunNumber == this->RunCount) {
     return false;
   }
   // If a test is marked as NOT_RUN it will not be repeated
@@ -433,9 +433,8 @@ bool cmCTestRunTest::NeedsToRepeat()
   if (this->TestResult.Status == cmCTestTestHandler::NOT_RUN) {
     return false;
   }
-  // if number of runs left is not 0, and we are running until
-  // we find a failed (or passed) test, then return true so the test can be
-  // restarted
+  // The test has runs left, so run it again if we are running until we find
+  // a failed (or passed) test.
   if ((this->RepeatMode == cmCTest::Repeat::UntilFail &&
        this->TestResult.Status == cmCTestTestHandler::COMPLETED) ||
       (this->RepeatMode == cmCTest::Repeat::UntilPass &&
@@ -443,6 +442,7 @@ bool cmCTestRunTest::NeedsToRepeat()
       (this->RepeatMode == cmCTest::Repeat::AfterTimeout &&
        this->TestResult.Status == cmCTestTestHandler::TIMEOUT)) {
     this->RunAgain = true;
+    this->RunNumber++;
     return true;
   }
   return false;
@@ -559,11 +559,10 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 {
   this->TotalNumberOfTests = total; // save for rerun case
 
-  std::string runIterationSuffix{};
-  if (this->NumberOfRunsTotal > 1) {
+  std::string runIterationSuffix;
+  if (this->RunCount > 1) {
     runIterationSuffix =
-      cmStrCat(" (run ", 1 + this->NumberOfRunsTotal - this->NumberOfRunsLeft,
-               '/', this->NumberOfRunsTotal, ')');
+      cmStrCat(" (run ", this->RunNumber, '/', this->RunCount, ')');
   }
   if (!this->CTest->GetTestProgressOutput()) {
     cmCTestLog(
@@ -999,18 +998,25 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 {
   std::ostringstream outputStream;
 
-  // If this is the last or only run of this test, or progress output is
-  // requested, then print out completed / total.
-  // Only issue is if a test fails and we are running until fail
-  // then it will never print out the completed / total, same would
-  // got for run until pass.  Trick is when this is called we don't
-  // yet know if we are passing or failing.
-  bool const progressOnLast =
-    (this->RepeatMode != cmCTest::Repeat::UntilPass &&
-     this->RepeatMode != cmCTest::Repeat::AfterTimeout);
-  if ((progressOnLast && this->NumberOfRunsLeft == 1) ||
-      (!progressOnLast && this->NumberOfRunsLeft == this->NumberOfRunsTotal) ||
-      this->CTest->GetTestProgressOutput()) {
+  // Print "completed/total" on the run whose result is the one recorded for
+  // the test, and blanks on its other runs.  Which run that is has to be
+  // decided before the run finishes: with until-fail it is the last run, and
+  // with until-pass and after-timeout the repetitions may end early, so it
+  // is the first.  A test that its fixture repeats records every run.
+  bool countThisRun = true;
+  switch (this->RepeatMode) {
+    case cmCTest::Repeat::Never:
+      break;
+    case cmCTest::Repeat::UntilFail:
+      countThisRun = this->RunNumber == this->RunCount;
+      break;
+    case cmCTest::Repeat::UntilPass:
+      CM_FALLTHROUGH;
+    case cmCTest::Repeat::AfterTimeout:
+      countThisRun = this->RunNumber == 1;
+      break;
+  }
+  if (countThisRun || this->CTest->GetTestProgressOutput()) {
     outputStream << std::setw(getNumWidth(total)) << completed << "/";
     outputStream << std::setw(getNumWidth(total)) << total << " ";
   }

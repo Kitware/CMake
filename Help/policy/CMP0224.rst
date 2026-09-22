@@ -1,0 +1,46 @@
+CMP0224
+-------
+
+.. versionadded:: 4.5
+
+Test fixtures use ``AROUND_EACH_REPEAT`` mode by default with
+:option:`ctest --repeat`.
+
+When :manual:`ctest(1)` repeats tests with its :ctest-option:`--repeat`
+option, CMake 4.4 and below repeated fixture setup and cleanup tests along
+with the tests that require them.  Each test, including the fixture tests,
+ran all of its repetitions before the next test started::
+
+  setup (xN) -> test (xN) -> cleanup (xN)
+
+CMake 4.5 and above prefer to repeat the fixture as a whole, so that each
+repetition of a test is surrounded by its own fixture setup and cleanup::
+
+  (setup -> test -> cleanup) xN
+
+This policy provides compatibility with projects that rely on the old
+behavior.  It determines the default behavior when the
+:prop_test:`FIXTURE_REPEAT_MODE` test property is not set.  The ``OLD``
+behavior for this policy is ``EACH_TEST_SEPARATELY``.  The ``NEW`` behavior
+for this policy is ``AROUND_EACH_REPEAT``.
+
+The property describes a fixture rather than one test, so setting it on any
+one of a fixture's setup or cleanup tests is enough to make this policy
+irrelevant to that fixture.
+
+Tests are not always created during the configure step by :command:`add_test`.
+The :command:`discover_tests` and :command:`gtest_discover_tests` commands
+defer test discovery to the build or test step, but they apply the policy
+setting as recorded when they were called.  If a project adds tests through
+its own script listed in :prop_dir:`TEST_INCLUDE_FILES`, it should set
+:prop_test:`FIXTURE_REPEAT_MODE` on its fixture tests explicitly.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.5
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: include/STANDARD_ADVICE.rst
+
+See documentation of the
+:variable:`CMAKE_POLICY_WARNING_CMP0224 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
+variable to control the warning.
+
+.. include:: include/DEPRECATED.rst

@@ -614,6 +614,7 @@ Properties on Tests
    /prop_test/ENVIRONMENT
    /prop_test/ENVIRONMENT_MODIFICATION
    /prop_test/FAIL_REGULAR_EXPRESSION
+   /prop_test/FIXTURE_REPEAT_MODE
    /prop_test/FIXTURES_CLEANUP
    /prop_test/FIXTURES_REQUIRED
    /prop_test/FIXTURES_SETUP

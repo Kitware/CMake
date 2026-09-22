@@ -1,0 +1,29 @@
+^Test project .*/Tests/RunCMake/CTestCommandLine/repeat-fixture-depends-build
+    Start 1: fixture_setup \(run 1/3\)
+1/4 Test #1: fixture_setup \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 2: test_with_fixture \(run 1/3\)
+2/4 Test #2: test_with_fixture \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 3: fixture_cleanup \(run 1/3\)
+3/4 Test #3: fixture_cleanup \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 1: fixture_setup \(run 2/3\)
+1/4 Test #1: fixture_setup \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 2: test_with_fixture \(run 2/3\)
+2/4 Test #2: test_with_fixture \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 3: fixture_cleanup \(run 2/3\)
+3/4 Test #3: fixture_cleanup \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 1: fixture_setup \(run 3/3\)
+1/4 Test #1: fixture_setup \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 2: test_with_fixture \(run 3/3\)
+2/4 Test #2: test_with_fixture \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 3: fixture_cleanup \(run 3/3\)
+3/4 Test #3: fixture_cleanup \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 4: after_fixture \(run 1/3\)
+    Test #4: after_fixture \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 4: after_fixture \(run 2/3\)
+    Test #4: after_fixture \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 4: after_fixture \(run 3/3\)
+4/4 Test #4: after_fixture \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
++
+100% tests passed out of 4
++
+Total Test time \(real\) = +[0-9\.]+ sec$

@@ -1,0 +1,35 @@
+^Test project .*/Tests/RunCMake/CTestCommandLine/repeat-fixture-merge-build
+    Start 1: setupA \(run 1/3\)
+1/5 Test #1: setupA \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 2: setupB \(run 1/3\)
+2/5 Test #2: setupB \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 3: setupC \(run 1/3\)
+3/5 Test #3: setupC \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 4: testA \(run 1/3\)
+4/5 Test #4: testA \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 5: testB \(run 1/3\)
+5/5 Test #5: testB \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 1: setupA \(run 2/3\)
+1/5 Test #1: setupA \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 2: setupB \(run 2/3\)
+2/5 Test #2: setupB \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 3: setupC \(run 2/3\)
+3/5 Test #3: setupC \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 4: testA \(run 2/3\)
+4/5 Test #4: testA \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 5: testB \(run 2/3\)
+5/5 Test #5: testB \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 1: setupA \(run 3/3\)
+1/5 Test #1: setupA \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 2: setupB \(run 3/3\)
+2/5 Test #2: setupB \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 3: setupC \(run 3/3\)
+3/5 Test #3: setupC \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 4: testA \(run 3/3\)
+4/5 Test #4: testA \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
+    Start 5: testB \(run 3/3\)
+5/5 Test #5: testB \.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.   Passed +[0-9\.]+ sec
++
+100% tests passed out of 5
++
+Total Test time \(real\) = +[0-9\.]+ sec$
