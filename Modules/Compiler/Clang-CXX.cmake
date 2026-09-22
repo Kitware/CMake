@@ -20,6 +20,31 @@ if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_DRIVER_MODE "cl")
 endif()
 
+# 'Compiler/GNU' is not included when clang simulates MSVC, so the predefines
+# command is not set up there.
+if(NOT DEFINED CMAKE_CXX_COMPILER_PREDEFINES_COMMAND)
+  set(CMAKE_CXX_COMPILER_PREDEFINES_COMMAND "${CMAKE_CXX_COMPILER}")
+  if(CMAKE_CXX_COMPILER_ARG1)
+    separate_arguments(_COMPILER_ARGS NATIVE_COMMAND "${CMAKE_CXX_COMPILER_ARG1}")
+    list(APPEND CMAKE_CXX_COMPILER_PREDEFINES_COMMAND ${_COMPILER_ARGS})
+    unset(_COMPILER_ARGS)
+  endif()
+  if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+    # '-dM' is a cc1 option in this driver mode, and '-EP' also echoes the
+    # preprocessed source, hence the empty translation unit.
+    list(APPEND CMAKE_CXX_COMPILER_PREDEFINES_COMMAND
+      "-nologo" "-w" "-Xclang" "-dM" "-EP"
+      "${CMAKE_ROOT}/Modules/CMakeCXXCompilerPredefines.cpp")
+  else()
+    list(APPEND CMAKE_CXX_COMPILER_PREDEFINES_COMMAND
+      "-w" "-dM" "-E" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+  endif()
+  if(CMAKE_CXX_COMPILER_TARGET)
+    list(APPEND CMAKE_CXX_COMPILER_PREDEFINES_COMMAND
+      "--target=${CMAKE_CXX_COMPILER_TARGET}")
+  endif()
+endif()
+
 if((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0 AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU") OR
    (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1 AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
   if (CMAKE_CXX_COMPILER_CLANG_RESOURCE_DIR)

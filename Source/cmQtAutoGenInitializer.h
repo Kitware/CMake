@@ -111,6 +111,9 @@ private:
     return (this->Moc.Enabled || this->Uic.Enabled);
   }
 
+  /** Whether the CXX compiler targets the MSVC ABI.  */
+  bool IsMsvcAbi() const;
+
   bool InitMoc();
   bool InitUic();
   bool InitRcc();

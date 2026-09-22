@@ -713,6 +713,13 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   return true;
 }
 
+bool cmQtAutoGenInitializer::IsMsvcAbi() const
+{
+  return this->Makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") ==
+    "MSVC" ||
+    this->Makefile->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID") == "MSVC";
+}
+
 bool cmQtAutoGenInitializer::InitMoc()
 {
   // Mocs compilation file
@@ -814,10 +821,12 @@ bool cmQtAutoGenInitializer::InitMoc()
     auto getDefs = [this](std::string const& cfg) -> std::set<std::string> {
       std::set<std::string> defines;
       this->LocalGen->GetTargetDefines(this->GenTarget, cfg, "CXX", defines);
-      if (this->Moc.PredefsCmd.empty() &&
-          this->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") ==
-            "Windows") {
-        // Add WIN32 definition if we don't have a moc_predefs.h
+      if (this->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") ==
+            "Windows" &&
+          (this->Moc.PredefsCmd.empty() || this->IsMsvcAbi())) {
+        // Add WIN32 definition if moc_predefs.h cannot supply it.  Targeting
+        // the MSVC ABI it comes from our default flags rather than from the
+        // compiler, so it never appears in moc_predefs.h.
         defines.insert("WIN32");
       }
       return defines;

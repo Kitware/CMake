@@ -11,6 +11,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(MocPredefs MocPredefs.cxx)
 
 if(NOT DEFINED CMAKE_CXX_COMPILER_PREDEFINES_COMMAND)
+  # Do not silently skip on toolchains that are expected to provide it.
+  if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION GREATER_EQUAL 1928)
+      OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"
+          AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+    message(FATAL_ERROR
+      "CMAKE_CXX_COMPILER_PREDEFINES_COMMAND is not defined for "
+      "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}.")
+  endif()
   return()
 endif()
 

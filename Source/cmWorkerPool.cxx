@@ -401,7 +401,7 @@ public:
    */
   bool RunProcess(cmWorkerPool::ProcessResultT& result,
                   std::vector<std::string> command,
-                  std::string const& workingDirectory);
+                  std::string const& workingDirectory, bool mergedOutput);
 
 private:
   // -- Libuv callbacks
@@ -434,7 +434,8 @@ cmWorkerPoolWorker::~cmWorkerPoolWorker()
 
 bool cmWorkerPoolWorker::RunProcess(cmWorkerPool::ProcessResultT& result,
                                     std::vector<std::string> command,
-                                    std::string const& workingDirectory)
+                                    std::string const& workingDirectory,
+                                    bool mergedOutput)
 {
   if (command.empty()) {
     return false;
@@ -443,7 +444,7 @@ bool cmWorkerPoolWorker::RunProcess(cmWorkerPool::ProcessResultT& result,
   {
     std::lock_guard<std::mutex> lock(this->Proc_.Mutex);
     this->Proc_.ROP = cm::make_unique<cmUVReadOnlyProcess>();
-    this->Proc_.ROP->setup(&result, true, std::move(command),
+    this->Proc_.ROP->setup(&result, mergedOutput, std::move(command),
                            workingDirectory);
   }
   // Send asynchronous process start request to libuv loop
@@ -737,11 +738,13 @@ cmWorkerPool::JobT::~JobT() = default;
 
 bool cmWorkerPool::JobT::RunProcess(ProcessResultT& result,
                                     std::vector<std::string> command,
-                                    std::string const& workingDirectory)
+                                    std::string const& workingDirectory,
+                                    bool mergedOutput)
 {
   // Get worker by index
   auto* worker = this->Pool_->Int_->Workers.at(this->WorkerIndex_).get();
-  return worker->RunProcess(result, std::move(command), workingDirectory);
+  return worker->RunProcess(result, std::move(command), workingDirectory,
+                            mergedOutput);
 }
 
 cmWorkerPool::cmWorkerPool()
