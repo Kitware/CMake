@@ -57,3 +57,4 @@ The supported languages are:
   Pelles C toolchain assembler.
 
 ``ASM-ATT``
+  AT&T-syntax assembler (e.g. GNU ``as``)
