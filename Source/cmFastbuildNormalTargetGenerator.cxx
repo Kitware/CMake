@@ -822,11 +822,12 @@ void cmFastbuildNormalTargetGenerator::AddCompilerLaunchersForLanguages()
     this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE", Config);
   // See if we need to use a compiler launcher like ccache or distcc
   for (std::string const& language : Languages) {
-    std::string const compilerLauncher =
+    std::vector<std::string> expanded =
       cmCommonTargetGenerator::GetCompilerLauncher(language, Config);
-    LogMessage("compilerLauncher: " + compilerLauncher);
-    std::vector<std::string> expanded;
-    cmExpandList(compilerLauncher, expanded);
+    LogMessage("compilerLauncher: " + cmJoin(expanded, ";"));
+    // FIXME(#27402): Empty arguments are not supported here.
+    expanded.erase(std::remove(expanded.begin(), expanded.end(), ""),
+                   expanded.end());
 
     if (!expanded.empty()) {
       std::string const exe = expanded[0];
@@ -844,14 +845,8 @@ void cmFastbuildNormalTargetGenerator::AddCompilerLaunchersForLanguages()
 }
 void cmFastbuildNormalTargetGenerator::AddLinkerLauncher()
 {
-  std::string const linkerLauncher =
+  std::vector<std::string> args =
     cmCommonTargetGenerator::GetLinkerLauncher(Config);
-  std::vector<std::string> args;
-#ifdef _WIN32
-  cmSystemTools::ParseWindowsCommandLine(linkerLauncher.c_str(), args);
-#else
-  cmSystemTools::ParseUnixCommandLine(linkerLauncher.c_str(), args);
-#endif
   if (!args.empty()) {
     std::string const exe = std::move(args[0]);
     args.erase(args.begin());
@@ -1191,7 +1186,7 @@ std::string cmFastbuildNormalTargetGenerator::ComputeCodeCheckOptions(
   if (skipCodeCheck) {
     return {};
   }
-  std::string compilerLauncher;
+  std::vector<std::string> compilerLauncher;
   std::string staticCheckRule = this->GenerateCodeCheckRules(
     srcFile, compilerLauncher, "", Config, nullptr);
   LogMessage(cmStrCat("CodeCheck: ", staticCheckRule));

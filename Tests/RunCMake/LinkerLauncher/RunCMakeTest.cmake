@@ -48,3 +48,9 @@ foreach(lang ${langs})
     run_linker_launcher_env(${lang}-launch-env)
   endif()
 endforeach()
+
+if(NOT RunCMake_GENERATOR MATCHES "FASTBuild")
+  # FIXME(#27402): FASTBuild builds its launcher command line without shell
+  # quoting, so it can't handle empty or special-character arguments.
+  run_linker_launcher(C-special-args)
+endif()

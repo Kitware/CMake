@@ -8,6 +8,7 @@
 
 #include <cm/filesystem>
 #include <cm/string_view>
+#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include "cmComputeLinkInformation.h"
@@ -150,7 +151,7 @@ std::string cmCommonTargetGenerator::GetFlags(std::string const& l,
                                               std::string const& config,
                                               std::string const& arch)
 {
-  std::string const key = config + arch;
+  std::string const key = cmStrCat(config, arch);
 
   auto i = this->Configs[key].FlagsByLanguage.find(l);
   if (i == this->Configs[key].FlagsByLanguage.end()) {
@@ -364,8 +365,8 @@ std::string cmCommonTargetGenerator::GetManifests(std::string const& config)
   std::vector<std::string> manifests;
   manifests.reserve(manifest_srcs.size());
 
-  std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
-  std::string manifestFlag = this->Makefile->GetDefinition(
+  std::string const lang = this->GeneratorTarget->GetLinkerLanguage(config);
+  std::string const manifestFlag = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", lang, "_LINKER_MANIFEST_FLAG"));
   for (cmSourceFile const* manifest_src : manifest_srcs) {
     manifests.push_back(manifestFlag +
@@ -397,7 +398,8 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
                                                char const* name, bool so)
 {
   // Lookup the flag to specify the version.
-  std::string fvar = cmStrCat("CMAKE_", lang, "_OSX_", name, "_VERSION_FLAG");
+  std::string const fvar =
+    cmStrCat("CMAKE_", lang, "_OSX_", name, "_VERSION_FLAG");
   cmValue flag = this->Makefile->GetDefinition(fvar);
 
   // Skip if no such flag.
@@ -409,9 +411,9 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
   int major;
   int minor;
   int patch;
-  std::string prop = cmStrCat("MACHO_", name, "_VERSION");
-  std::string fallback_prop = so ? "SOVERSION" : "VERSION";
-  this->GeneratorTarget->GetTargetVersionFallback(prop, fallback_prop, major,
+  std::string const prop = cmStrCat("MACHO_", name, "_VERSION");
+  std::string const fallbackProp = so ? "SOVERSION" : "VERSION";
+  this->GeneratorTarget->GetTargetVersionFallback(prop, fallbackProp, major,
                                                   minor, patch);
   if (major > 0 || minor > 0 || patch > 0) {
     // Append the flag since a non-zero version is specified.
@@ -421,30 +423,31 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
   }
 }
 
-std::string cmCommonTargetGenerator::GetCompilerLauncher(
+std::vector<std::string> cmCommonTargetGenerator::GetCompilerLauncher(
   std::string const& lang, std::string const& config)
 {
-  std::string compilerLauncher;
+  std::vector<std::string> compilerLauncher;
   if (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
       lang == "HIP" || lang == "ISPC" || lang == "OBJC" || lang == "OBJCXX") {
-    std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
-    cmValue clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-    std::string const evaluatedClauncher = cmGeneratorExpression::Evaluate(
-      *clauncher, this->GeneratorTarget->GetLocalGenerator(), config,
+    std::string const propName = cmStrCat(lang, "_COMPILER_LAUNCHER");
+    cmValue cLauncherValue = this->GeneratorTarget->GetProperty(propName);
+    std::string const evaluatedCLauncher = cmGeneratorExpression::Evaluate(
+      *cLauncherValue, this->GeneratorTarget->GetLocalGenerator(), config,
       this->GeneratorTarget, nullptr, this->GeneratorTarget, lang);
-    if (!evaluatedClauncher.empty()) {
-      compilerLauncher = evaluatedClauncher;
+    if (!evaluatedCLauncher.empty()) {
+      cm::append(compilerLauncher,
+                 cmList{ evaluatedCLauncher, cmList::EmptyElements::Yes });
     }
   }
   return compilerLauncher;
 }
 
 std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
-  cmSourceFile const& source, std::string& compilerLauncher,
+  cmSourceFile const& source, std::vector<std::string>& compilerLauncher,
   std::string const& cmakeCmd, std::string const& config,
   std::function<std::string(std::string const&)> const& pathConverter)
 {
-  auto const lang = source.GetLanguage();
+  std::string const lang = source.GetLanguage();
   std::string tidy;
   std::string iwyu;
   std::string cpplint;
@@ -453,11 +456,11 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
   std::string pvs;
 
   auto evaluateProp = [&](std::string const& prop) -> std::string {
-    auto const value = this->GeneratorTarget->GetProperty(prop);
+    cmValue const value = this->GeneratorTarget->GetProperty(prop);
     if (!value) {
       return std::string{};
     }
-    auto evaluatedProp = cmGeneratorExpression::Evaluate(
+    std::string evaluatedProp = cmGeneratorExpression::Evaluate(
       *value, this->GeneratorTarget->GetLocalGenerator(), config,
       this->GeneratorTarget, nullptr, this->GeneratorTarget, lang);
     return evaluatedProp;
@@ -487,11 +490,14 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
     std::string code_check = cmakeCmd + " -E __run_co_compile";
     if (!compilerLauncher.empty()) {
       // In __run_co_compile case the launcher command is supplied
-      // via --launcher=<maybe-list> and consumed
+      // via --launcher=<list> and consumed
+      for (std::string& arg : compilerLauncher) {
+        cmSystemTools::ReplaceString(arg, ";", "\\;");
+      }
       code_check =
         cmStrCat(std::move(code_check), " --launcher=",
                  this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-                   compilerLauncher));
+                   cmJoin(compilerLauncher, ";")));
       compilerLauncher.clear();
     }
     if (cmNonempty(iwyu)) {
@@ -529,12 +535,13 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
         driverMode = lang == "C" ? "gcc" : "g++";
       }
 
-      auto const generatorName = this->GeneratorTarget->GetLocalGenerator()
-                                   ->GetGlobalGenerator()
-                                   ->GetName();
-      auto const clangTidyExportFixedDir =
+      std::string const generatorName =
+        this->GeneratorTarget->GetLocalGenerator()
+          ->GetGlobalGenerator()
+          ->GetName();
+      std::string const clangTidyExportFixedDir =
         this->GeneratorTarget->GetClangTidyExportFixesDirectory(lang);
-      auto fixesFile = this->GetClangTidyReplacementsFilePath(
+      std::string fixesFile = this->GetClangTidyReplacementsFilePath(
         clangTidyExportFixedDir, source, config);
       std::string exportFixes;
       if (!clangTidyExportFixedDir.empty()) {
@@ -637,32 +644,44 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
   return "";
 }
 
-std::string cmCommonTargetGenerator::GetLinkerLauncher(
+std::vector<std::string> cmCommonTargetGenerator::GetLinkerLauncher(
   std::string const& config)
 {
-  std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
-  std::string propName = lang + "_LINKER_LAUNCHER";
+  std::vector<std::string> linkLauncher;
+  std::string const lang = this->GeneratorTarget->GetLinkerLanguage(config);
+  std::string const propName = cmStrCat(lang, "_LINKER_LAUNCHER");
   cmValue launcherProp = this->GeneratorTarget->GetProperty(propName);
   if (cmNonempty(launcherProp)) {
     cm::GenEx::Context context(this->LocalCommonGenerator, config, lang);
     cmGeneratorExpressionDAGChecker dagChecker{ this->GeneratorTarget,
                                                 propName, nullptr, nullptr,
                                                 context };
-    std::string evaluatedLinklauncher = cmGeneratorExpression::Evaluate(
+
+    std::string const evaluatedLinkLauncher = cmGeneratorExpression::Evaluate(
       *launcherProp, context.LG, context.Config, this->GeneratorTarget,
       &dagChecker, this->GeneratorTarget, context.Language);
-    // Convert ;-delimited list to single string
-    cmList args{ evaluatedLinklauncher, cmList::EmptyElements::Yes };
-    if (!args.empty()) {
-      args[0] = this->LocalCommonGenerator->ConvertToOutputFormat(
-        args[0], cmOutputConverter::SHELL);
-      for (std::string& i : cmMakeRange(args.begin() + 1, args.end())) {
-        i = this->LocalCommonGenerator->EscapeForShell(i);
-      }
-      return cmJoin(args, " ");
+    if (!evaluatedLinkLauncher.empty()) {
+      cm::append(linkLauncher,
+                 cmList{ evaluatedLinkLauncher, cmList::EmptyElements::Yes });
     }
   }
-  return std::string();
+  return linkLauncher;
+}
+
+std::string cmCommonTargetGenerator::ConvertLauncherToShell(
+  std::vector<std::string> const& launcher) const
+{
+  if (launcher.empty()) {
+    return std::string{};
+  }
+
+  std::vector<std::string> args = launcher;
+  args[0] = this->LocalCommonGenerator->ConvertToOutputFormat(
+    args[0], cmOutputConverter::SHELL);
+  for (std::string& arg : cmMakeRange(args.begin() + 1, args.end())) {
+    arg = this->LocalCommonGenerator->EscapeForShell(arg);
+  }
+  return cmJoin(args, " ");
 }
 
 bool cmCommonTargetGenerator::HaveRequiredLanguages(
@@ -715,7 +734,7 @@ void cmCommonTargetGenerator::ComputeRustFlagsForObjects(
                        obj, cmOutputConverter::SHELL);
     }
   };
-  for (auto const& obj : objects) {
+  for (std::string const& obj : objects) {
     processObject(obj);
   }
   linkCrates += rlibsArgs.str();

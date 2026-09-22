@@ -68,12 +68,12 @@ protected:
   std::string GetManifests(std::string const& config);
   std::string GetAIXExports(std::string const& config);
   std::string GenerateCodeCheckRules(
-    cmSourceFile const& source, std::string& compilerLauncher,
+    cmSourceFile const& source, std::vector<std::string>& compilerLauncher,
     std::string const& cmakeCmd, std::string const& config,
     std::function<std::string(std::string const&)> const& pathConverter);
 
-  std::string GetCompilerLauncher(std::string const& lang,
-                                  std::string const& config);
+  std::vector<std::string> GetCompilerLauncher(std::string const& lang,
+                                               std::string const& config);
 
   struct LinkedTargetDirs
   {
@@ -85,7 +85,10 @@ protected:
                                               std::string const& config) const;
   std::string ComputeTargetCompilePDB(std::string const& config) const;
 
-  std::string GetLinkerLauncher(std::string const& config);
+  std::vector<std::string> GetLinkerLauncher(std::string const& config);
+
+  std::string ConvertLauncherToShell(
+    std::vector<std::string> const& launcher) const;
 
   bool HaveRequiredLanguages(std::vector<cmSourceFile const*> const& sources,
                              std::set<std::string>& languagesNeeded) const;

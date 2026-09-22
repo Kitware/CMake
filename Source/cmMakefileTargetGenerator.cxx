@@ -1106,7 +1106,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     }
 
     // See if we need to use a compiler launcher like ccache or distcc
-    std::string compilerLauncher;
+    std::vector<std::string> compilerLauncher;
     if (!compileCommands.empty()) {
       compilerLauncher = GetCompilerLauncher(lang, config);
     }
@@ -1131,15 +1131,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     // If compiler launcher was specified and not consumed above, it
     // goes to the beginning of the command line.
     if (!compileCommands.empty() && !compilerLauncher.empty()) {
-      cmList args{ compilerLauncher, cmList::EmptyElements::Yes };
-      if (!args.empty()) {
-        args[0] = this->LocalGenerator->ConvertToOutputFormat(
-          args[0], cmOutputConverter::SHELL);
-        for (std::string& i : cmMakeRange(args.begin() + 1, args.end())) {
-          i = this->LocalGenerator->EscapeForShell(i);
-        }
-      }
-      compileCommands.front().insert(0, args.join(" ") + " ");
+      compileCommands.front().insert(
+        0, cmStrCat(this->ConvertLauncherToShell(compilerLauncher), ' '));
     }
 
     std::string launcher;

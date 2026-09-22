@@ -876,8 +876,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
     vars.LanguageCompileFlags = langFlags.c_str();
 
-    std::string linkerLauncher =
-      this->GetLinkerLauncher(this->GetConfigName());
+    std::string const linkerLauncher = this->ConvertLauncherToShell(
+      this->GetLinkerLauncher(this->GetConfigName()));
     if (cmNonempty(linkerLauncher)) {
       vars.Launcher = linkerLauncher.c_str();
     }
