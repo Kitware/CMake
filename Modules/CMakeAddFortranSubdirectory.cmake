@@ -44,7 +44,9 @@ This module provides the following command:
 
   * If Fortran is not supported in the current environment, but the
     current C or CXX compiler is ``MSVC``, this command searches common
-    locations for a MinGW ``gfortran`` compiler.
+    locations for a MinGW ``gfortran`` compiler and stores its full path
+    in the ``MINGW_GFORTRAN`` cache variable.  One may optionally set the
+    variable explicitly to specify a full path to a preferred ``gfortran``.
 
     If a ``gfortran`` compiler is found, the Fortran project located in
     ``<subdir>``  is built as an external project using MinGW tools, and
@@ -205,10 +207,14 @@ function(cmake_add_fortran_subdirectory subdir)
       )
   endif()
 
+  # If MSVC: if MINGW_GFORTRAN already defined, no point calling check_language,
+  # otherwise we can still detect the Intel Fortran compiler
+  if(NOT(MSVC AND MINGW_GFORTRAN))
+    check_language(Fortran)
+  endif()
   # if we are not using MSVC without fortran support
   # then just use the usual add_subdirectory to build
   # the fortran library
-  check_language(Fortran)
   if(NOT (MSVC AND (NOT CMAKE_Fortran_COMPILER)))
     add_subdirectory(${subdir})
     return()
