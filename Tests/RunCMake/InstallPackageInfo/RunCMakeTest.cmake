@@ -26,6 +26,16 @@ run_cmake(ReferencesWronglyImportedTarget)
 run_cmake(ReferencesWronglyNamespacedTarget)
 run_cmake(DependsMultipleDifferentNamespace)
 run_cmake(DependsMultipleDifferentSets)
+foreach(imported IN ITEMS ON OFF)
+  foreach(pkg_config_first IN ITEMS ON OFF)
+    set(RunCMake_TEST_VARIANT_DESCRIPTION
+      " (imported=${imported}, pkg_config_first=${pkg_config_first})")
+    run_cmake_with_options(PkgConfigCollision
+      -Dimported=${imported}
+      -Dpkg_config_first=${pkg_config_first})
+  endforeach()
+endforeach()
+unset(RunCMake_TEST_VARIANT_DESCRIPTION)
 
 # Test functionality
 run_cmake(Appendix)
@@ -38,6 +48,7 @@ run_cmake(Minimal)
 run_cmake(MinimalVersion)
 run_cmake(LowerCaseFile)
 run_cmake(Requirements)
+run_cmake(PkgConfig)
 run_cmake(PrivateLinkDependency)
 run_cmake(TargetTypes)
 run_cmake(DependsMultiple)

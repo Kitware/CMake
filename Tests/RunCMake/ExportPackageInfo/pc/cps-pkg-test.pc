@@ -1,0 +1,5 @@
+Name: cps-pkg-test
+Description: Dummy package for CPS + pkg-config interoperability export test
+Version: 1.0
+Libs: -L/dummy
+Cflags:

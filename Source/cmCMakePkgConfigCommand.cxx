@@ -861,6 +861,7 @@ cmTarget* CreateCMakeTarget(std::string const& name, std::string const& prefix,
 {
   auto* tgt = mf.AddForeignTarget("pkgcfg", cmStrCat(prefix, name));
 
+  tgt->SetForeignPackageName(name);
   tgt->AppendProperty("VERSION", pkg.Version());
 
   auto libs = pkg.Libs();
@@ -1097,10 +1098,88 @@ bool HandleImportCommand(std::vector<std::string> const& args,
     mf.AddImportedTarget(local_name, cm::TargetType::INTERFACE_LIBRARY,
                          cm::ImportedTargetScope::Local);
   tgt->AppendProperty("INTERFACE_LINK_LIBRARIES", foreign_name);
+  if (auto* ft = mf.FindTargetToUse(foreign_name, cm::TargetDomain::FOREIGN)) {
+    tgt->SetForeignTarget(ft);
+  }
+  return true;
+}
+
+bool PkgConfigImportPackageImpl(cmMakefile& mf, cmExecutionStatus& status,
+                                std::string const& name)
+{
+  std::string const prefix;
+
+  // A pkg-config package is referenced in CPS as "<name>:<name>" and linked
+  // directly as the foreign target which provides it, so there is no
+  // interface target to create here.
+  auto const foreignName = cmStrCat("@foreign_pkgcfg::", prefix, name);
+  if (mf.FindTargetToUse(foreignName, cm::TargetDomain::FOREIGN)) {
+    return true;
+  }
+
+  cmPkgConfigEnv pcEnv;
+  CollectEnv(mf, pcEnv, CommonArguments::EnvModeType::ENVMODE_PKGCONF);
+  if (pcEnv.Path) {
+    pcEnv.search = *pcEnv.Path;
+    if (pcEnv.LibDirs) {
+      pcEnv.search += *pcEnv.LibDirs;
+    }
+  } else if (pcEnv.LibDirs) {
+    pcEnv.search = *pcEnv.LibDirs;
+  }
+
+  ImportEnv imEnv{ false, true, false,
+                   CommonArguments::StrictnessType::STRICTNESS_PERMISSIVE };
+  ImportState state{ status, false };
+
+  cm::optional<cmPkgConfigResolver> maybePackage =
+    ImportPackage(name, cm::optional<std::string>{}, imEnv, pcEnv, state);
+  if (!maybePackage) {
+    return false;
+  }
+
+  pkgProviders providers;
+  pkgStack inStack;
+  std::unordered_map<std::string, cmPkgConfigResolver> outStack;
+
+  ImportEnv depEnv = imEnv;
+  depEnv.exact = false;
+
+  if (!CheckPackageDependencies(name, prefix, *maybePackage, inStack, outStack,
+                                providers, depEnv, state)) {
+    return false;
+  }
+  outStack.emplace(name, std::move(*maybePackage));
+
+  while (!inStack.empty()) {
+    auto depName = inStack.begin()->first;
+    auto reqs = inStack.begin()->second;
+    maybePackage = ImportPackage(depName, reqs, depEnv, pcEnv, state);
+    if (!maybePackage) {
+      return false;
+    }
+    if (!CheckPackageDependencies(depName, prefix, *maybePackage, inStack,
+                                  outStack, providers, depEnv, state)) {
+      return false;
+    }
+    inStack.erase(depName);
+    outStack.emplace(std::move(depName), std::move(*maybePackage));
+  }
+
+  for (auto& entry : outStack) {
+    CreateCMakeTarget(entry.first, prefix, entry.second, providers, mf);
+  }
+
   return true;
 }
 
 } // namespace
+
+bool cmImportPkgConfigPackage(cmMakefile& mf, cmExecutionStatus& status,
+                              std::string const& name)
+{
+  return PkgConfigImportPackageImpl(mf, status, name);
+}
 
 bool cmCMakePkgConfigCommand(std::vector<std::string> const& args,
                              cmExecutionStatus& status)

@@ -46,4 +46,11 @@ enum class ImportedTargetScope
   Local,
   Global,
 };
+
+enum class PackageDomain
+{
+  Unknown,
+  Default,
+  PkgConfig,
+};
 };

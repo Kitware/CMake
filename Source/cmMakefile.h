@@ -297,6 +297,10 @@ public:
   cmTarget* AddForeignTarget(std::string const& origin,
                              std::string const& name);
 
+  /** Find a foreign target previously created by AddForeignTarget.  */
+  cmTarget* FindForeignTarget(std::string const& origin,
+                              std::string const& name) const;
+
   std::pair<cmTarget&, bool> CreateNewTarget(
     std::string const& name, cm::TargetType type,
     cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes,

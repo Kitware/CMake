@@ -7,10 +7,15 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 
 #include <cm/optional>
 
 #include "cmConstStack.h"
+
+namespace cm {
+enum class PackageDomain;
+}
 
 /**
  * This data represents the actual contents of find_package
@@ -28,6 +33,7 @@ public:
   cm::optional<std::string> Website;
   cm::optional<std::string> PackageUrl;
   std::set<std::string> Components;
+  std::vector<cm::PackageDomain> Domains;
 };
 
 /**

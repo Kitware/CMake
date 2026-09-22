@@ -228,6 +228,19 @@ void cmExportPackageInfoGenerator::GeneratePackageRequires(
         data["version"] = *requirement.second.Version;
       }
 
+      if (!requirement.second.Domains.empty()) {
+        auto requirementDomains = Json::Value{ Json::arrayValue };
+        for (cm::PackageDomain domain : requirement.second.Domains) {
+          if (domain == cm::PackageDomain::PkgConfig) {
+            requirementDomains.append("pkg-config");
+          }
+        }
+        if (!requirementDomains.empty()) {
+          data["extensions"]["cmake"]["domains@v1"] =
+            std::move(requirementDomains);
+        }
+      }
+
       requirements[requirement.first] = data;
     }
   }
@@ -358,6 +371,25 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     return true;
   }
 
+  auto getRequirement =
+    [&](std::string const& name,
+        cmPackageInformation&& requirement) -> cmPackageInformation* {
+    // emplace may move from requirement even when the key already exists.
+    auto const domains = requirement.Domains;
+    auto record = this->Requirements.emplace(name, std::move(requirement));
+    if (!record.second) {
+      if (record.first->second.Domains != domains) {
+        target->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Package \"", this->GetPackageName(),
+                   "\" requires package \"", name,
+                   "\" in multiple domain sets. This is not supported."));
+        return nullptr;
+      }
+    }
+    return &record.first->second;
+  };
+
   if (linkedTarget->IsImported()) {
     // Target is imported from a found package.
     using Package = cm::optional<std::pair<std::string, cmPackageInformation>>;
@@ -379,6 +411,26 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     }(linkedTarget->Target);
 
     if (!pkgInfo) {
+      if (cmTarget* foreignTarget = linkedTarget->Target->GetForeignTarget()) {
+        cmPackageInformation reqInit;
+        reqInit.Domains = { cm::PackageDomain::PkgConfig };
+
+        std::string foreignPkgName = foreignTarget->GetForeignPackageName();
+        cmPackageInformation* req =
+          getRequirement(foreignPkgName, std::move(reqInit));
+        if (!req) {
+          return false;
+        }
+
+        // A pkg-config package has no components of its own; expose it as a
+        // component named after the package itself.
+        this->LinkTargets.emplace(
+          linkedName, cmStrCat(foreignPkgName, ':', foreignPkgName));
+
+        req->Components.emplace(std::move(foreignPkgName));
+        return true;
+      }
+
       target->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("Target \"", target->GetName(),
@@ -402,10 +454,13 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     }
 
     std::string component = linkedName.substr(prefix.length());
+    cmPackageInformation* req =
+      getRequirement(pkgName, std::move(pkgInfo->second));
+    if (!req) {
+      return false;
+    }
     this->LinkTargets.emplace(linkedName, cmStrCat(pkgName, ':', component));
-    cmPackageInformation& req =
-      this->Requirements.insert(std::move(*pkgInfo)).first->second;
-    req.Components.emplace(std::move(component));
+    req->Components.emplace(std::move(component));
     return true;
   }
 
@@ -428,8 +483,12 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     if (pkgName == this->GetPackageName()) {
       this->LinkTargets.emplace(linkedName, cmStrCat(':', component));
     } else {
+      cmPackageInformation* req = getRequirement(pkgName, {});
+      if (!req) {
+        return false;
+      }
       this->LinkTargets.emplace(linkedName, cmStrCat(pkgName, ':', component));
-      this->Requirements[pkgName].Components.emplace(std::move(component));
+      req->Components.emplace(std::move(component));
     }
     return true;
   }

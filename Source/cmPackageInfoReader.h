@@ -20,6 +20,7 @@ class cmTarget;
 
 namespace cm {
 enum class ImportedTargetScope;
+enum class PackageDomain;
 enum class TargetType;
 } // namespace cm
 
@@ -29,6 +30,7 @@ struct cmPackageRequirement
   std::string Version;
   std::vector<std::string> Components;
   std::vector<std::string> Hints;
+  std::vector<cm::PackageDomain> Domains;
 };
 
 /** \class cmPackageInfoReader
@@ -76,7 +78,11 @@ public:
   cm::optional<Pep440Version> ParseVersion(
     cm::optional<std::string> const& version) const;
 
-  std::vector<cmPackageRequirement> GetRequirements() const;
+  /// Requirements declared by this file, excluding inherited requirements.
+  std::vector<cmPackageRequirement> const& GetRequirements() const
+  {
+    return this->Requirements;
+  }
   std::vector<std::string> GetComponentNames() const;
 
   /// Create targets for components specified in the CPS file.
@@ -118,10 +124,16 @@ private:
                               Json::Value const& object) const;
 
   std::string ResolvePath(std::string path) const;
+  std::string ResolveTargetName(cmMakefile* makefile, std::string const& name,
+                                std::string const& context) const;
+
+  void ReadRequirements();
 
   std::string Path;
   Json::Value Data;
   std::string Prefix;
+  std::vector<cmPackageRequirement> Requirements;
+  std::map<std::string, std::vector<cm::PackageDomain>> RequirementDomains;
 
   std::map<std::string, cmTarget*> ComponentTargets;
   std::vector<std::string> DefaultConfigurations;

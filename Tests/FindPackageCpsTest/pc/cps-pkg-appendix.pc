@@ -1,0 +1,5 @@
+Name: cps-pkg-appendix
+Description: Dummy package for an appendix-local CPS requirement
+Version: 1.0
+Libs: -L/dummy
+Cflags:

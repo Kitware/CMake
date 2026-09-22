@@ -648,6 +648,8 @@ public:
   bool IsExportPassthrough = false;
   bool CxxModuleNeedsInterfaceObjects = false;
   cmTarget::Visibility TargetVisibility;
+  std::string ForeignPackageName;
+  cmTarget* ForeignTarget = nullptr;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::set<std::string> CodegenDependencies;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -3337,6 +3339,26 @@ std::string cmTarget::ImportedGetFullPath(
     result = cmStrCat(this->GetName(), "-NOTFOUND");
   }
   return result;
+}
+
+void cmTarget::SetForeignPackageName(std::string const& name)
+{
+  this->impl->ForeignPackageName = name;
+}
+
+std::string const& cmTarget::GetForeignPackageName() const
+{
+  return this->impl->ForeignPackageName;
+}
+
+void cmTarget::SetForeignTarget(cmTarget* target)
+{
+  this->impl->ForeignTarget = target;
+}
+
+cmTarget* cmTarget::GetForeignTarget() const
+{
+  return this->impl->ForeignTarget;
 }
 
 cmFileSet const* cmTarget::GetFileSet(std::string const& name) const
