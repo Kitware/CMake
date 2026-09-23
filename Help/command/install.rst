@@ -157,6 +157,7 @@ Signatures
 
     install(TARGETS <target>... [EXPORT <export-name>]
             [RUNTIME_DEPENDENCIES <arg>...|RUNTIME_DEPENDENCY_SET <set-name>]
+            [RUNTIME_DEPENDENCY_TARGETS]
             [<artifact-option>...]
             [<artifact-kind> <artifact-option>...]...
             [INCLUDES DESTINATION [<dir> ...]]
@@ -476,6 +477,36 @@ Signatures
 
     The ``RUNTIME_DEPENDENCIES`` and ``RUNTIME_DEPENDENCY_SET`` keywords are
     mutually exclusive.
+
+  ``RUNTIME_DEPENDENCY_TARGETS``
+    .. versionadded:: 4.5
+
+    This option installs runtime artifacts of non-imported ``SHARED``
+    library targets from the same build that appear on the computed
+    link lines of the listed ``<target>...`` and, recursively, of those
+    shared libraries.  The ``RUNTIME``, ``LIBRARY``, and ``FRAMEWORK``
+    destinations and other artifact options from this call apply to
+    those artifacts (``RUNTIME`` on DLL platforms, ``LIBRARY``
+    otherwise, and ``FRAMEWORK`` for macOS frameworks).
+
+    Unlike ``RUNTIME_DEPENDENCIES``, this option does not call
+    :command:`file(GET_RUNTIME_DEPENDENCIES)` and does not install files
+    that are not CMake targets of the current build.
+
+    This option may not be used with ``EXPORT``.  The call may specify
+    only runtime artifact groups (``RUNTIME``, ``LIBRARY``,
+    ``FRAMEWORK``, and ``BUNDLE``).
+
+    .. note::
+
+      Static, interface, and object libraries on a listed target's
+      link line are traversed only to discover shared libraries; they
+      are not themselves installed by this option.  Executables and
+      module libraries are not installed transitively.  Imported
+      targets are skipped.  Each :command:`install(TARGETS)` call with
+      this option installs the collected shared libraries into the
+      destinations of that call, even if another call already installs
+      the same target.
 
   :ref:`Interface Libraries` may be listed among the targets to install.
   They install no artifacts but will be included in an associated ``EXPORT``.
@@ -1180,6 +1211,9 @@ Signatures
     Targets built within the build tree will never be installed as runtime
     dependencies, nor will their own dependencies, unless the targets themselves
     are installed with :command:`install(TARGETS)`.
+    Use the ``RUNTIME_DEPENDENCY_TARGETS`` option of
+    :command:`install(TARGETS)` to install runtime artifacts of
+    non-imported shared libraries from the same build.
 
   The generated install script calls :command:`file(GET_RUNTIME_DEPENDENCIES)`
   on the build-tree files to calculate the runtime dependencies. The build-tree
