@@ -1249,6 +1249,21 @@ Available commands are:
         ``major`` and ``minor`` members specifying non-negative integer
         version components.
 
+  ``instrumentation``
+    .. versionadded:: 4.5
+
+    A JSON object describing the supported :manual:`cmake-instrumentation(7)`
+    versions.  Keys are:
+
+    ``apiVersion``
+      The supported instrumentation API version as an integer.
+      See :ref:`cmake-instrumentation API v1`.
+
+    ``dataVersion``
+      A JSON object containing ``major`` and ``minor`` integer members
+      specifying the latest supported instrumentation data version.
+      See :ref:`cmake-instrumentation Data Version`.
+
   ``serverMode``
     ``true`` if cmake supports server-mode and ``false`` otherwise.
     Always false since CMake 3.20.
