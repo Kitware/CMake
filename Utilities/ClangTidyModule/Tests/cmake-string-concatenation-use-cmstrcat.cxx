@@ -14,20 +14,18 @@ std::string concat;
 // Correction needed
 void test1()
 {
-  concat = a + b;
-  concat = a + " and this is a string literal";
-  concat = a + 'O';
-  concat = "This is a string literal" + b;
-  concat = 'O' + a;
   concat = a + " and this is a string literal" + 'O' + b;
 
-  concat += b;
-  concat += " and this is a string literal";
-  concat += 'o';
+  concat += a + a;
+  concat += " and this is a string literal" + a;
+  concat += b + 'o' + a;
   concat += b + " and this is a string literal " + 'o' + b;
 
+  if (true)
+    concat += a + b;
+
   std::pair<std::string, std::string> p;
-  concat = p.first + p.second;
+  concat = p.first + p.second + a;
 }
 
 // No correction needed
@@ -37,4 +35,17 @@ void test2()
   a = "This is a string literal";
   a = 'X';
   cmStrCat(a, b);
+
+  concat = a + b;
+  concat = a + " and this is a string literal";
+  concat = a + 'O';
+  concat = "This is a string literal" + b;
+  concat = 'O' + a;
+  concat += b;
+
+  std::pair<std::string, std::string> p;
+  concat = p.first + p.second;
+
+  if (true)
+    concat += a;
 }
