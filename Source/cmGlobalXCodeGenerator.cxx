@@ -3090,6 +3090,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   if (!sysdirs.IsEmpty()) {
     buildSettings->AddAttribute("SYSTEM_HEADER_SEARCH_PATHS",
                                 sysdirs.CreateList());
+    if (languages.count("Swift")) {
+      buildSettings->AddAttribute("SWIFT_SYSTEM_INCLUDE_PATHS",
+                                  sysdirs.CreateList());
+    }
   }
 
   if (this->XcodeVersion >= 60 && !emitSystemIncludes) {
