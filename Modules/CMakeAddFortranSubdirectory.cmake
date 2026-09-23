@@ -37,18 +37,22 @@ This module provides the following command:
       NO_EXTERNAL_INSTALL
     )
 
-  This command checks whether the current compiler supports Fortran or attempts
-  to locate a Fortran compiler.  If a compatible Fortran compiler is found, the
-  Fortran project located in ``<subdir>`` is added as a subdirectory to the
-  current project.
+  This command checks whether the current environment supports enabling Fortran:
 
-  If no Fortran compiler is found and the compiler is ``MSVC``, it searches for
-  the MinGW ``gfortran`` compiler.  In this case, the Fortran project is built
-  as an external project using MinGW tools, and Fortran-related imported targets
-  are created.  This setup works only if the Fortran code is built as a shared
-  DLL library, so the :variable:`BUILD_SHARED_LIBS` variable is enabled in the
-  external project.  Additionally, the :variable:`CMAKE_GNUtoMS` variable is set
-  to ``ON`` to ensure that Microsoft-compatible ``.lib`` files are created.
+  * If Fortran is supported in the current environment, the Fortran project
+    located in ``<subdir>`` is added as a subdirectory to the current project.
+
+  * If Fortran is not supported in the current environment, but the
+    current C or CXX compiler is ``MSVC``, this command searches common
+    locations for a MinGW ``gfortran`` compiler.
+
+    If a ``gfortran`` compiler is found, the Fortran project located in
+    ``<subdir>``  is built as an external project using MinGW tools, and
+    Fortran-related imported targets are created.  This setup works only
+    if the Fortran code is built as a shared DLL library, so the
+    :variable:`BUILD_SHARED_LIBS` variable is enabled in the external project.
+    Additionally, the :variable:`CMAKE_GNUtoMS` variable is set to ``ON`` to
+    ensure that Microsoft-compatible ``.lib`` files are created.
 
   The options are:
 
