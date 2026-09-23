@@ -240,6 +240,10 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
                    this->TestResult.ExceptionStatus);
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
     }
+  } else if ("SKIP_INSUFFICIENT_RESOURCES" ==
+             this->TestResult.CompletionStatus) {
+    outputStream << "***Skipped (Resource error)";
+    skipped = true;
   } else if ("Disabled" == this->TestResult.CompletionStatus) {
     outputStream << "***Not Run (Disabled) ";
   } else // cmProcess::State::Error

@@ -381,6 +381,7 @@ syn keyword cmakeProperty contained
             \ RESOURCE
             \ RESOURCE_GROUPS
             \ RESOURCE_LOCK
+            \ RESOURCE_ERROR_ACTION
             \ RULE_LAUNCH_COMPILE
             \ RULE_LAUNCH_CUSTOM
             \ RULE_LAUNCH_LINK
@@ -2231,6 +2232,7 @@ syn keyword cmakeVariable contained
             \ CTEST_P4_OPTIONS
             \ CTEST_P4_UPDATE_OPTIONS
             \ CTEST_RESOURCE_SPEC_FILE
+            \ CTEST_RESOURCE_ERROR_ACTION
             \ CTEST_RUN_CURRENT_SCRIPT
             \ CTEST_SCP_COMMAND
             \ CTEST_SCRIPT_DIRECTORY

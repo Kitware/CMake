@@ -21,4 +21,26 @@ bool SetTruncationMode(TruncationMode& mode, cm::string_view str)
   return true;
 }
 
+cm::optional<ResourceErrorAction> GetResourceErrorAction(cm::string_view str)
+{
+  if (str == "FAIL") {
+    return cmCTestTypes::ResourceErrorAction::Fail;
+  }
+  if (str == "SKIP") {
+    return cmCTestTypes::ResourceErrorAction::Skip;
+  }
+  return {};
+}
+
+std::string ResourceErrorActionToString(ResourceErrorAction action)
+{
+  switch (action) {
+    case cmCTestTypes::ResourceErrorAction::Fail:
+      return "FAIL";
+    case cmCTestTypes::ResourceErrorAction::Skip:
+      return "SKIP";
+  }
+  return {};
+}
+
 } // namespace cmCTestTypes

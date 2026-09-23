@@ -196,6 +196,7 @@ endfunction()
 
 run_ctest_resource_dynamic(dynamic-resource -VV)
 run_ctest_resource_dynamic(dynamic-resource-notenough)
+run_ctest_resource_dynamic(dynamic-resource-notenough-skip)
 run_ctest_resource_dynamic(dynamic-resource-nofile)
 run_ctest_resource_dynamic(dynamic-resource-multiple-generators)
 run_ctest_resource_dynamic(dynamic-resource-no-setup-fixture)

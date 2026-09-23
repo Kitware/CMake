@@ -35,6 +35,7 @@
 #include "cmCTestBinPacker.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
+#include "cmCTestTypes.h"
 #include "cmInstrumentationInterrupt.h"
 #include "cmJSONState.h"
 #include "cmListFileCache.h"
@@ -322,8 +323,19 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
       e << "\n";
     }
     e << "Resource spec file:\n\n  " << this->ResourceSpecFile;
-    cmCTestRunTest::StartFailure(std::move(testRun), this->Total, e.str(),
-                                 "Insufficient resources");
+
+    // Handle insufficient resources
+    auto const errorAction =
+      this->Properties[test]->ResourceErrorAction.value_or(
+        this->TestHandler->TestOptions.ResourceErrorAction);
+
+    if (errorAction == cmCTestTypes::ResourceErrorAction::Skip) {
+      cmCTestRunTest::StartFailure(std::move(testRun), this->Total, "",
+                                   "SKIP_INSUFFICIENT_RESOURCES");
+    } else { // "FAIL"
+      cmCTestRunTest::StartFailure(std::move(testRun), this->Total, e.str(),
+                                   "Insufficient resources");
+    }
     return;
   }
 
@@ -1261,6 +1273,12 @@ static Json::Value DumpCTestProperties(
       DumpCTestProperty("GENERATED_RESOURCE_SPEC_FILE",
                         raw ? rawProperties["GENERATED_RESOURCE_SPEC_FILE"]
                             : testProperties.GeneratedResourceSpecFile));
+  }
+  if (testProperties.ResourceErrorAction) {
+    properties.append(DumpCTestProperty(
+      "RESOURCE_ERROR_ACTION",
+      raw ? rawProperties["RESOURCE_ERROR_ACTION"]
+          : ResourceErrorActionToString(*testProperties.ResourceErrorAction)));
   }
   if (!testProperties.Labels.empty()) {
     properties.append(DumpCTestProperty(

@@ -2067,6 +2067,10 @@ must have resource allocation, then it can return a failing exit code or use
 the :prop_test:`SKIP_RETURN_CODE` or :prop_test:`SKIP_REGULAR_EXPRESSION`
 properties to indicate a skipped test.
 
+The :prop_test:`RESOURCE_ERROR_ACTION` test property can be used to steer the
+behavior in case the resources requested cannot be satisfied. By default the
+test is marked as failed.
+
 .. _`ctest-resource-specification-file`:
 
 Resource Specification File
