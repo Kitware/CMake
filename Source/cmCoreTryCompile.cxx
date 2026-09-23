@@ -687,6 +687,12 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       fprintf(fout, "cmake_policy(SET CMP0128 OLD)\n");
     }
 
+    // Set LINKER: prefix expansion to match outer project.
+    if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0181) !=
+        cmPolicies::NEW) {
+      fprintf(fout, "cmake_policy(SET CMP0181 OLD)\n");
+    }
+
     /* Set MSVC link -machine: policy to match outer project.  */
     if (cmValue cmp0197 = this->Makefile->GetDefinition(kCMAKE_MSVC_CMP0197)) {
       fprintf(fout, "cmake_policy(SET CMP0197 %s)\n",
@@ -906,15 +912,6 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           .IsEmpty()
         ? "OLD"
         : "NEW");
-
-    /* Set the appropriate policy information for the LINKER: prefix
-     * expansion
-     */
-    fprintf(fout, "cmake_policy(SET CMP0181 %s)\n",
-            this->Makefile->GetPolicyStatus(cmPolicies::CMP0181) ==
-                cmPolicies::NEW
-              ? "NEW"
-              : "OLD");
 
     // Honor CMAKE_EXE_LINKER_FLAGS in Swift if the outer project does.
     fprintf(fout, "cmake_policy(SET CMP0214 %s)\n",

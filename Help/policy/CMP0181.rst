@@ -38,4 +38,8 @@ expand the ``LINKER:`` prefix.
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
 .. include:: include/STANDARD_ADVICE.rst
 
+.. versionchanged:: 4.5
+  The policy is now set in :command:`try_compile` test projects early enough
+  to be queried by :variable:`toolchain files <CMAKE_TOOLCHAIN_FILE>`.
+
 .. include:: include/DEPRECATED.rst
