@@ -4822,20 +4822,23 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->RootObject->SetId(
     this->GetOrCreateId(project_id, this->RootObject->GetId()));
 
-  cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  cmXCodeObject* projectBuildSettings =
+    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   this->RootObject->AddAttribute("mainGroup",
                                  this->CreateObjectReference(mainGroup));
-  this->RootObject->AddAttribute("buildSettings", group);
+  this->RootObject->AddAttribute("buildSettings", projectBuildSettings);
   this->RootObject->AddAttribute("buildStyles", listObjs);
   this->RootObject->AddAttribute("hasScannedForEncodings",
                                  this->CreateString("0"));
-  group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  group->AddAttribute("BuildIndependentTargetsInParallel",
-                      this->CreateString("YES"));
+  cmXCodeObject* projectAttributes =
+    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  projectAttributes->AddAttribute("BuildIndependentTargetsInParallel",
+                                  this->CreateString("YES"));
   std::ostringstream v;
   v << std::setfill('0') << std::setw(4) << XcodeVersion * 10;
-  group->AddAttribute("LastUpgradeCheck", this->CreateString(v.str()));
-  this->RootObject->AddAttribute("attributes", group);
+  projectAttributes->AddAttribute("LastUpgradeCheck",
+                                  this->CreateString(v.str()));
+  this->RootObject->AddAttribute("attributes", projectAttributes);
   this->RootObject->AddAttribute("compatibilityVersion",
                                  this->CreateString("Xcode 3.2"));
   // Point Xcode at the top of the source tree.
