@@ -30,6 +30,8 @@ if (PROCESS_METRICS_QUERY)
     COMMAND ${Python_EXECUTABLE}
             ${CMAKE_CURRENT_LIST_DIR}/process_metrics_memory.py
             ${CMAKE_CURRENT_BINARY_DIR}/process_metrics_custom.stamp
+    # The last command must not inherit the preceding command's memory peak.
+    COMMAND ${CMAKE_COMMAND} -E true
     VERBATIM
   )
   add_custom_command(

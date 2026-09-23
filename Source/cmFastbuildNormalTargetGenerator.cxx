@@ -33,6 +33,8 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalFastbuildGenerator.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmLinkLineComputer.h"
 #include "cmLinkLineDeviceComputer.h"
 #include "cmList.h"
@@ -1151,19 +1153,30 @@ void cmFastbuildNormalTargetGenerator::CollapseAllExecsIntoOneScriptfile(
   }
   LogMessage("Writing collapsed Execs to " + scriptFileName);
   auto const shell = cmGlobalFastbuildGenerator::GetExternalShellExecutable();
+  char const* suffix = "\n";
+#if !defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
+  cmInstrumentation* instrumentation =
+    this->GetLocalGenerator()->GetCMakeInstance()->GetInstrumentation();
+  if (instrumentation->HasOption(
+        cmInstrumentationQuery::Option::ProcessMetrics)) {
+    // Prevent shell exec optimization from passing accumulated child resource
+    // usage to the final instrumentation wrapper.
+    suffix = " && :\n";
+  }
+#endif
   for (auto const& exec : execs) {
     if (exec.ScriptFile.empty()) {
       scriptFile << cmSystemTools::ConvertToOutputPath(exec.ExecExecutable)
-                 << " " << exec.ExecArguments << '\n';
+                 << " " << exec.ExecArguments << suffix;
     } else {
 #if defined(_WIN32)
       scriptFile << "call "
                  << cmSystemTools::ConvertToWindowsOutputPath(exec.ScriptFile)
-                 << '\n';
+                 << suffix;
 #else
       scriptFile << cmSystemTools::ConvertToOutputPath(shell) << " "
                  << cmSystemTools::ConvertToOutputPath(exec.ScriptFile)
-                 << '\n';
+                 << suffix;
 #endif
     }
   }

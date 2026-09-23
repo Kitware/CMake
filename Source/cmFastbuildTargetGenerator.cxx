@@ -21,6 +21,8 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalFastbuildGenerator.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalCommonGenerator.h"
@@ -38,6 +40,7 @@
 #include "cmTarget.h"
 #include "cmTargetTypes.h"
 #include "cmValue.h"
+#include "cmake.h"
 
 #define FASTBUILD_DOLLAR_TAG "FASTBUILD_DOLLAR_TAG"
 
@@ -181,6 +184,15 @@ void cmFastbuildTargetGenerator::WriteScriptEpilog(cmsys::ofstream& file) const
           "echo Batch file failed at line %FAIL_LINE% "
           "with errorcode %ERRORLEVEL%\n"
           "exit /b %ERROR_CODE%";
+#elif !defined(CMAKE_BOOTSTRAP)
+  cmInstrumentation* instrumentation =
+    this->GetLocalGenerator()->GetCMakeInstance()->GetInstrumentation();
+  if (instrumentation->HasOption(
+        cmInstrumentationQuery::Option::ProcessMetrics)) {
+    // Prevent shell exec optimization from passing accumulated child resource
+    // usage to the final instrumentation wrapper.
+    file << ":\n";
+  }
 #endif
 }
 
