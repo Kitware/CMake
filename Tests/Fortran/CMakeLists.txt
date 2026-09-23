@@ -48,6 +48,9 @@ endif()
 
 add_library(hello STATIC hello.f)
 add_library(world ${_SHARED} world.f ${world_def})
+if(APPLE AND CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang")
+  set_target_properties(world PROPERTIES VERSION 1.2.3 SOVERSION 1)
+endif()
 add_executable(testf testf.f)
 target_link_libraries(testf hello world)
 
