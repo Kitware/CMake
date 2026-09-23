@@ -573,8 +573,8 @@ void cmFastbuildNormalTargetGenerator::ComputePCH(
 
   // Reuse compiler options for PCH options.
   node.PCHOptions += origCompileOptions;
-  if (this->Makefile->GetSafeDefinition("CMAKE_" + language +
-                                        "_COMPILER_ID") == "MSVC") {
+  if (this->Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", language, "_COMPILER_ID")) == "MSVC") {
     cmSystemTools::ReplaceString(node.PCHOptions,
                                  FASTBUILD_2_INPUT_PLACEHOLDER,
                                  FASTBUILD_3_INPUT_PLACEHOLDER);
@@ -1796,8 +1796,9 @@ void cmFastbuildNormalTargetGenerator::AppendExternalObject(
     else if (target) {
       if (!linkedDeps.emplace(objLibName + FASTBUILD_OBJECTS_ALIAS_POSTFIX)
              .second) {
-        LogMessage("Object Target: " + objLibName +
-                   FASTBUILD_OBJECTS_ALIAS_POSTFIX " already linked");
+        LogMessage(cmStrCat("Object Target: ", objLibName,
+                            FASTBUILD_OBJECTS_ALIAS_POSTFIX
+                            " already linked"));
         continue;
       }
       linkerNode.LibrarianAdditionalInputs.emplace_back(
@@ -1885,8 +1886,8 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
     // Skip exported objects.
     // Tested in "ExportImport" test.
     if (depType == cm::TargetType::OBJECT_LIBRARY) {
-      LogMessage("target : " + item.Target->GetName() +
-                 " already linked... Skipping");
+      LogMessage(cmStrCat("target : ", item.Target->GetName(),
+                          " already linked... Skipping"));
       return;
     }
     // Tested in "ExportImport" test.

@@ -17,6 +17,7 @@
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
@@ -399,7 +400,7 @@ bool cmCTestBZR::LoadRevisions()
   std::string revs;
   if (atoi(this->OldRevision.c_str()) <= atoi(this->NewRevision.c_str())) {
     // DoRevision takes care of discarding the information about OldRevision
-    revs = this->OldRevision + ".." + this->NewRevision;
+    revs = cmStrCat(this->OldRevision, "..", this->NewRevision);
   } else {
     return true;
   }

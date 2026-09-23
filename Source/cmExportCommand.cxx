@@ -507,8 +507,8 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
   SetupArguments arguments = parser.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
-    status.SetError("SETUP given unknown argument: \"" + unknownArgs.front() +
-                    "\".");
+    status.SetError(cmStrCat("SETUP given unknown argument: \"",
+                             unknownArgs.front(), "\"."));
     return false;
   }
 

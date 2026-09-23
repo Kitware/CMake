@@ -25,6 +25,7 @@
 #  include "cmDebuggerPosixPipeConnection.h"
 #endif
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #ifdef _WIN32
@@ -36,8 +37,8 @@ static void sendCommands(std::shared_ptr<dap::ReaderWriter> const& debugger,
                          std::vector<std::string> const& initCommands)
 {
   for (auto const& command : initCommands) {
-    std::string contentLength = "Content-Length:";
-    contentLength += std::to_string(command.size()) + "\r\n\r\n";
+    std::string contentLength =
+      cmStrCat("Content-Length:", command.size(), "\r\n\r\n");
     debugger->write(contentLength.c_str(), contentLength.size());
     if (!debugger->write(command.c_str(), command.size())) {
       std::cout << "debugger write error" << std::endl;

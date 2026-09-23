@@ -37,7 +37,7 @@ static void cmFortranModuleAppendUpperLower(std::string const& mod,
   }
   std::string const& name = mod.substr(0, mod.size() - ext_len);
   std::string const& ext = mod.substr(mod.size() - ext_len);
-  mod_upper += cmSystemTools::UpperCase(name) + ext;
+  mod_upper = cmStrCat(mod_upper, cmSystemTools::UpperCase(name), ext);
   mod_lower += mod;
 }
 

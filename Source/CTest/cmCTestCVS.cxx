@@ -87,7 +87,7 @@ bool cmCTestCVS::UpdateImpl()
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
-    args.push_back("-D" + this->GetNightlyTime() + " UTC");
+    args.push_back(cmStrCat("-D", this->GetNightlyTime(), " UTC"));
   }
 
   // Run "cvs update" to update the work tree.
@@ -241,7 +241,7 @@ void cmCTestCVS::WriteXMLDirectory(cmXMLWriter& xml, std::string const& path,
   // Load revisions and write an entry for each file in this directory.
   std::vector<Revision> revisions;
   for (auto const& fi : dir) {
-    std::string full = path + slash + fi.first;
+    std::string full = cmStrCat(path, slash, fi.first);
 
     // Load two real or unknown revisions.
     revisions.clear();

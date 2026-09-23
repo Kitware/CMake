@@ -167,7 +167,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
     std::string line;
     std::string sep;
     while (cmSystemTools::GetLineFromStream(fin, line)) {
-      inputContent += sep + line;
+      inputContent = cmStrCat(inputContent, sep, line);
       sep = "\n";
     }
     inputContent += sep;

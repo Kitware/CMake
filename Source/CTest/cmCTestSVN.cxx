@@ -249,7 +249,7 @@ bool cmCTestSVN::UpdateImpl()
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
-    args.push_back("-r{" + this->GetNightlyTime() + " +0000}");
+    args.push_back(cmStrCat("-r{", this->GetNightlyTime(), " +0000}"));
   }
 
   std::vector<std::string> svn_update;
@@ -383,7 +383,7 @@ bool cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
   // We are interested in every revision included in the update.
   std::string revs;
   if (atoi(svninfo.OldRevision.c_str()) < atoi(svninfo.NewRevision.c_str())) {
-    revs = "-r" + svninfo.OldRevision + ":" + svninfo.NewRevision;
+    revs = cmStrCat("-r", svninfo.OldRevision, ':', svninfo.NewRevision);
   } else {
     revs = "-r" + svninfo.NewRevision;
   }

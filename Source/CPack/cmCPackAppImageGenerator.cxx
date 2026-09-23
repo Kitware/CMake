@@ -80,8 +80,9 @@ int cmCPackAppImageGenerator::PackageFiles()
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "Found Desktop file: \"" << desktopFile.value() << "\""
                                            << std::endl);
-    std::string desktopSymLink = this->toplevel + "/" +
-      cmSystemTools::GetFilenameName(desktopFile.value());
+    std::string desktopSymLink =
+      cmStrCat(this->toplevel, '/',
+               cmSystemTools::GetFilenameName(desktopFile.value()));
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "Desktop file destination: \"" << desktopSymLink << "\""
                                                  << std::endl);
@@ -139,7 +140,7 @@ int cmCPackAppImageGenerator::PackageFiles()
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "Icon file: \"" << *iconFile << "\"" << std::endl);
     std::string iconSymLink =
-      this->toplevel + "/" + cmSystemTools::GetFilenameName(*iconFile);
+      cmStrCat(this->toplevel, '/', cmSystemTools::GetFilenameName(*iconFile));
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "Icon link destination: \"" << iconSymLink << "\""
                                               << std::endl);
@@ -239,8 +240,9 @@ int cmCPackAppImageGenerator::PackageFiles()
     this->AppimagetoolPath,
     this->toplevel,
   };
-  command.emplace_back("../" + *this->GetOption("CPACK_PACKAGE_FILE_NAME") +
-                       this->GetOutputExtension());
+  command.emplace_back(cmStrCat("../",
+                                *this->GetOption("CPACK_PACKAGE_FILE_NAME"),
+                                this->GetOutputExtension()));
 
   auto addOptionFlag = [&command, this](std::string const& op,
                                         std::string commandFlag) {

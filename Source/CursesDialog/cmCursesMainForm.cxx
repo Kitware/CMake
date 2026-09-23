@@ -456,10 +456,11 @@ void cmCursesMainForm::UpdateProgress(std::string const& msg, float prog)
     int percentCompleted = static_cast<int>(100 * prog);
     this->LastProgress = (percentCompleted < 100 ? " " : "");
     this->LastProgress += (percentCompleted < 10 ? " " : "");
-    this->LastProgress += std::to_string(percentCompleted) + "% [";
+    this->LastProgress =
+      cmStrCat(this->LastProgress, std::to_string(percentCompleted), "% [");
     this->LastProgress.append(progressBarCompleted, '#');
     this->LastProgress.append(progressBarWidth - progressBarCompleted, ' ');
-    this->LastProgress += "] " + msg + "...";
+    this->LastProgress = cmStrCat(this->LastProgress, "] ", msg, "...");
     this->DisplayOutputs(std::string());
   } else {
     this->Outputs.emplace_back(msg);

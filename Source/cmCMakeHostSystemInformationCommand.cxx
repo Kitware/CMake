@@ -500,7 +500,7 @@ cm::optional<std::string> GetDistribValue(
     std::string vars;
     for (auto const& kv : *os_release) {
       auto cmake_var_name = cmStrCat(variable, '_', kv.first);
-      vars += DELIM[!vars.empty()] + cmake_var_name;
+      vars = cmStrCat(vars, DELIM[!vars.empty()], cmake_var_name);
       makefile.AddDefinition(cmake_var_name, kv.second);
     }
     return cm::optional<std::string>(std::move(vars));

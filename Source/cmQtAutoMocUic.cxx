@@ -1442,7 +1442,7 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::EvalSource(
             this->MocConst().MacrosString(),
             " macro.\nRunning moc on the header\n  ",
             this->MessagePath(headerHandle->FileName), "!\nBetter include ",
-            this->MessagePath("moc_" + incKey.Base + ".cpp"),
+            this->MessagePath(cmStrCat("moc_", incKey.Base, ".cpp")),
             " for a compatibility with regular mode.\n"
             "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       } else {
@@ -1451,10 +1451,10 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::EvalSource(
           cmStrCat(
             this->MessagePath(sourceFile.FileName), "\nincludes the moc file ",
             this->MessagePath(incKey.Key), " instead of ",
-            this->MessagePath("moc_" + incKey.Base + ".cpp"),
+            this->MessagePath(cmStrCat("moc_", incKey.Base, ".cpp")),
             ".\nRunning moc on the header\n  ",
             this->MessagePath(headerHandle->FileName), "!\nBetter include ",
-            this->MessagePath("moc_" + incKey.Base + ".cpp"),
+            this->MessagePath(cmStrCat("moc_", incKey.Base, ".cpp")),
             " for compatibility with regular mode.\n"
             "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       }
@@ -2223,8 +2223,9 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
     }
     if (!cmSystemTools::FileExists(depfile)) {
       this->Log().Warning(GenT::MOC,
-                          "Dependency file " + this->MessagePath(depfile) +
-                            " does not exist.");
+                          cmStrCat("Dependency file ",
+                                   this->MessagePath(depfile),
+                                   " does not exist."));
       return;
     }
     this->CacheEntry->Moc.Depends =

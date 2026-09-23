@@ -518,7 +518,8 @@ void TryRunCommandImpl::DoNotRunExecutable(
                "appropriately:\n   ",
                this->RunResultVariable, " (advanced)\n");
     if (out) {
-      errorMessage += "   " + internalRunOutputName + " (advanced)\n";
+      errorMessage =
+        cmStrCat(errorMessage, "   ", internalRunOutputName, " (advanced)\n");
     }
     errorMessage += detailsString;
     cmSystemTools::Error(errorMessage);

@@ -42,9 +42,9 @@ private:
     std::string sep;
     for (std::string const& it : content) {
       if (cmHasLiteralPrefix(it, "-D")) {
-        defs += sep + it.substr(2);
+        defs = cmStrCat(defs, sep, it.substr(2));
       } else {
-        defs += sep + it;
+        defs = cmStrCat(defs, sep, it);
       }
       sep = ";";
     }

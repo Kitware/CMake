@@ -20,6 +20,7 @@
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmScriptGenerator.h"
+#include "cmStringAlgorithms.h"
 #include "cmTestDiscovery.h"
 #include "cmTestGenerator.h"
 
@@ -119,7 +120,8 @@ bool cmDiscoverTestsCommand(std::vector<std::string> const& args,
   }
 
   if (!unparsed.empty()) {
-    status.SetError(" given unknown argument \"" + unparsed.front() + "\".");
+    status.SetError(
+      cmStrCat(" given unknown argument \"", unparsed.front(), "\"."));
     return false;
   }
 

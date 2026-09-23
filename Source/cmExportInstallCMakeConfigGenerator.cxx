@@ -49,7 +49,8 @@ bool cmExportInstallCMakeConfigGenerator::GenerateMainFile(std::ostream& os)
     std::string sep;
     auto visitor = [&](cmTargetExport const* te) {
       allTargets.push_back(te);
-      expectedTargets += sep + this->Namespace + te->Target->GetExportName();
+      expectedTargets = cmStrCat(expectedTargets, sep, this->Namespace,
+                                 te->Target->GetExportName());
       sep = " ";
     };
 

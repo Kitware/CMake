@@ -115,7 +115,7 @@ void cmRST::ProcessModule(std::istream& is)
       if (line == "#.rst:") {
         rst = "#";
       } else if (this->ModuleRST.find(line)) {
-        rst = "]" + this->ModuleRST.match(1) + "]";
+        rst = cmStrCat(']', this->ModuleRST.match(1), ']');
       }
     }
   }
@@ -403,7 +403,7 @@ bool cmRST::ProcessInclude(std::string file, Include type)
     if (file[0] == '/') {
       file = this->DocRoot + file;
     } else {
-      file = this->DocDir + "/" + file;
+      file = cmStrCat(this->DocDir, '/', file);
     }
     found = r.ProcessFile(file, type == Include::Module);
     if (type == Include::TocTree) {

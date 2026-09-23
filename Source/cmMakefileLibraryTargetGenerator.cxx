@@ -270,8 +270,8 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
   // Get the name of the device object to generate.
-  std::string const targetOutput =
-    this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
+  std::string const targetOutput = cmStrCat(
+    this->GeneratorTarget->ObjectDirectory, "cmake_device_link", objExt);
   this->DeviceLinkObject = targetOutput;
 
   this->NumberOfProgressActions++;
@@ -466,8 +466,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Make sure we have a link language.
   if (linkLanguage.empty()) {
-    cmSystemTools::Error("Cannot determine link language for target \"" +
-                         this->GeneratorTarget->GetName() + "\".");
+    cmSystemTools::Error(
+      cmStrCat("Cannot determine link language for target \"",
+               this->GeneratorTarget->GetName(), "\"."));
     return;
   }
 
@@ -764,11 +765,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                             useResponseFileForObjects, buildObjs, depends,
                             useWatcomQuote, linkLanguage, responseMode);
     if (!this->DeviceLinkObject.empty()) {
-      buildObjs += " " +
-        this->LocalGenerator->ConvertToOutputFormat(
-          this->LocalGenerator->MaybeRelativeToCurBinDir(
-            this->DeviceLinkObject),
-          cmOutputConverter::SHELL);
+      buildObjs = cmStrCat(buildObjs, ' ',
+                           this->LocalGenerator->ConvertToOutputFormat(
+                             this->LocalGenerator->MaybeRelativeToCurBinDir(
+                               this->DeviceLinkObject),
+                             cmOutputConverter::SHELL));
     }
 
     std::string const& aixExports = this->GetAIXExports(this->GetConfigName());

@@ -8,6 +8,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmParseDelphiCoverage::HTMLParser
@@ -133,7 +134,7 @@ public:
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.RecurseThroughSymlinksOff();
-    std::string glob = this->Coverage.SourceDir + "*/" + filename;
+    std::string glob = cmStrCat(this->Coverage.SourceDir, "*/", filename);
     gl.FindFiles(glob);
     std::vector<std::string> const& files = gl.GetFiles();
     if (files.empty()) {

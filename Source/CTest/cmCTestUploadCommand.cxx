@@ -16,6 +16,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
@@ -59,8 +60,8 @@ bool cmCTestUploadCommand::ExecuteUpload(UploadArguments& args,
   xml.StartElement("Site");
   xml.Attribute("BuildName", buildname);
   xml.Attribute("BuildStamp",
-                this->CTest->GetCurrentTag() + "-" +
-                  this->CTest->GetTestGroupString());
+                cmStrCat(this->CTest->GetCurrentTag(), '-',
+                         this->CTest->GetTestGroupString()));
   xml.Attribute("Name", mf.GetSafeDefinition("CTEST_SITE"));
   xml.Attribute("Generator",
                 std::string("ctest-") + cmVersion::GetCMakeVersion());

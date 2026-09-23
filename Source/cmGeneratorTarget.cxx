@@ -1326,7 +1326,7 @@ std::string cmGeneratorTarget::GetCompilePDBName(
       *config_name, this->LocalGenerator, config, this);
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
-    return components.prefix + pdbName + ".pdb";
+    return cmStrCat(components.prefix, pdbName, ".pdb");
   }
 
   cmValue name = this->GetProperty("COMPILE_PDB_NAME");
@@ -1335,7 +1335,7 @@ std::string cmGeneratorTarget::GetCompilePDBName(
       *name, this->LocalGenerator, config, this);
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
-    return components.prefix + pdbName + ".pdb";
+    return cmStrCat(components.prefix, pdbName, ".pdb");
   }
 
   // If the target is PCH-reused or PCH-reuses, we need a stable name for the
@@ -3211,8 +3211,8 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
     generatorTarget = reuseTarget;
   }
 
-  auto const inserted =
-    this->PchHeaders.insert(std::make_pair(language + config + arch, ""));
+  auto const inserted = this->PchHeaders.insert(
+    std::make_pair(cmStrCat(language, config, arch), ""));
   if (inserted.second) {
     std::vector<BT<std::string>> const headers =
       this->GetPrecompileHeaders(config, language);
@@ -3305,8 +3305,8 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
       language != "OBJCXX") {
     return std::string();
   }
-  auto const inserted =
-    this->PchSources.insert(std::make_pair(language + config + arch, ""));
+  auto const inserted = this->PchSources.insert(
+    std::make_pair(cmStrCat(language, config, arch), ""));
   if (inserted.second) {
     std::string const pchHeader = this->GetPchHeader(config, language, arch);
     if (pchHeader.empty()) {
@@ -3365,8 +3365,8 @@ std::string cmGeneratorTarget::GetPchFileObject(std::string const& config,
       language != "OBJCXX") {
     return std::string();
   }
-  auto const inserted =
-    this->PchObjectFiles.insert(std::make_pair(language + config + arch, ""));
+  auto const inserted = this->PchObjectFiles.insert(
+    std::make_pair(cmStrCat(language, config, arch), ""));
   if (inserted.second) {
     std::string const pchSource = this->GetPchSource(config, language, arch);
     if (pchSource.empty()) {
@@ -3388,8 +3388,8 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
                                           std::string const& language,
                                           std::string const& arch)
 {
-  auto const inserted =
-    this->PchFiles.insert(std::make_pair(language + config + arch, ""));
+  auto const inserted = this->PchFiles.insert(
+    std::make_pair(cmStrCat(language, config, arch), ""));
   if (inserted.second) {
     std::string& pchFile = inserted.first->second;
 
@@ -3448,7 +3448,7 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
   std::string const& arch)
 {
   auto const inserted = this->PchCreateCompileOptions.insert(
-    std::make_pair(language + config + arch, ""));
+    std::make_pair(cmStrCat(language, config, arch), ""));
   if (inserted.second) {
     std::string& createOptionList = inserted.first->second;
 
@@ -3496,7 +3496,7 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
   std::string const& arch)
 {
   auto const inserted = this->PchUseCompileOptions.insert(
-    std::make_pair(language + config + arch, ""));
+    std::make_pair(cmStrCat(language, config, arch), ""));
   if (inserted.second) {
     std::string& useOptionList = inserted.first->second;
 
@@ -3944,7 +3944,7 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
     targetNames.Output = components.prefix + targetNames.Base;
   } else {
     targetNames.Output =
-      components.prefix + targetNames.Base + components.suffix;
+      cmStrCat(components.prefix, targetNames.Base, components.suffix);
   }
 
 // The executable's real name on disk.
@@ -3977,7 +3977,7 @@ std::string cmGeneratorTarget::GetFullNameInternal(
 {
   NameComponents const& components =
     this->GetFullNameInternalComponents(config, artifact);
-  return components.prefix + components.base + components.suffix;
+  return cmStrCat(components.prefix, components.base, components.suffix);
 }
 
 std::string cmGeneratorTarget::ImportedGetLocation(

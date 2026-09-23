@@ -280,7 +280,8 @@ bool cmCTestDiscoverTestsCommand::InitialPass(
   }
 
   if (!unparsed.empty()) {
-    status.SetError(" given unknown argument \"" + unparsed.front() + "\".");
+    status.SetError(
+      cmStrCat(" given unknown argument \"", unparsed.front(), "\"."));
     return false;
   }
 
@@ -1083,7 +1084,7 @@ void cmCTestTestHandler::ComputeOutOfDateTests()
       continue;
     }
 
-    std::string const stampFile = stampDir + "/" + tp.GetStampFile();
+    std::string const stampFile = cmStrCat(stampDir, '/', tp.GetStampFile());
 
     if (!cmSystemTools::FileExists(stampFile)) {
       finalList.push_back(tp);
@@ -1129,17 +1130,17 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       setupRegExp = this->TestOptions.ExcludeFixtureSetupRegularExpression;
     } else {
       setupRegExp.append(
-        "(" + setupRegExp + ")|(" +
-        this->TestOptions.ExcludeFixtureSetupRegularExpression + ")");
+        cmStrCat('(', setupRegExp, ")|(",
+                 this->TestOptions.ExcludeFixtureSetupRegularExpression, ')'));
     }
   }
   if (!this->TestOptions.ExcludeFixtureCleanupRegularExpression.empty()) {
     if (cleanupRegExp.empty()) {
       cleanupRegExp = this->TestOptions.ExcludeFixtureCleanupRegularExpression;
     } else {
-      cleanupRegExp.append(
-        "(" + cleanupRegExp + ")|(" +
-        this->TestOptions.ExcludeFixtureCleanupRegularExpression + ")");
+      cleanupRegExp.append(cmStrCat(
+        '(', cleanupRegExp, ")|(",
+        this->TestOptions.ExcludeFixtureCleanupRegularExpression, ')'));
     }
   }
   cmsys::RegularExpression excludeSetupRegex(setupRegExp);
@@ -1574,7 +1575,7 @@ void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
   xml.Element("StartTestTime", this->StartTestTime);
   xml.StartElement("TestList");
   for (cmCTestTestResult const& result : this->TestResults) {
-    std::string testPath = result.Path + "/" + result.Name;
+    std::string testPath = cmStrCat(result.Path, '/', result.Name);
     xml.Element("Test", this->CTest->GetShortPathToFile(testPath));
   }
   xml.EndElement(); // TestList
@@ -1696,7 +1697,7 @@ void cmCTestTestHandler::WriteTestResultHeader(cmXMLWriter& xml,
   } else {
     xml.Attribute("Status", "failed");
   }
-  std::string testPath = result.Path + "/" + result.Name;
+  std::string testPath = cmStrCat(result.Path, '/', result.Name);
   xml.Element("Name", result.Name);
   xml.Element("Path", this->CTest->GetShortPathToFile(result.Path));
   xml.Element("FullName", this->CTest->GetShortPathToFile(testPath));
@@ -2128,7 +2129,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   }
 
   std::string lastTestsFailedLog =
-    this->CTest->GetBinaryDir() + "/Testing/Temporary/" + logName;
+    cmStrCat(this->CTest->GetBinaryDir(), "/Testing/Temporary/", logName);
 
   if (!cmSystemTools::FileExists(lastTestsFailedLog)) {
     if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels()) {
@@ -2210,7 +2211,7 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
         xml.StartElement("NamedMeasurement");
         xml.Attribute("name", parser.MeasurementName);
         xml.Attribute("text", "text/string");
-        xml.Element("Value", "File " + filename + " not found");
+        xml.Element("Value", cmStrCat("File ", filename, " not found"));
         xml.EndElement();
         cmCTestOptionalLog(
           this->CTest, HANDLER_OUTPUT,
@@ -2222,7 +2223,7 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
           xml.Attribute("name", parser.MeasurementName);
           xml.Attribute("type", "text/string");
           xml.Attribute("encoding", "none");
-          xml.Element("Value", "Image " + filename + " is empty");
+          xml.Element("Value", cmStrCat("Image ", filename, " is empty"));
           xml.EndElement();
         } else {
           if (parser.MeasurementType == "file") {
@@ -2328,7 +2329,7 @@ void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length,
   } else if (truncate == cmCTestTypes::TruncationMode::Middle) {
     char const* current = utf8_advance(begin, end, length / 2);
     output.erase(current - begin, output.size() - length);
-    output.insert(current - begin, "..." + msg + "...");
+    output.insert(current - begin, cmStrCat("...", msg, "..."));
   } else { // default or "tail"
     char const* current = utf8_advance(begin, end, length);
     output.erase(current - begin);

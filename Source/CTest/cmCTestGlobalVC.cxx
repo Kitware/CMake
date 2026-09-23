@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "cmCTest.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
@@ -82,7 +83,7 @@ void cmCTestGlobalVC::WriteXMLDirectory(cmXMLWriter& xml,
   xml.StartElement("Directory");
   xml.Element("Name", path);
   for (auto const& f : dir) {
-    std::string const full = path + slash + f.first;
+    std::string const full = cmStrCat(path, slash, f.first);
     this->WriteXMLEntry(xml, path, f.first, full, f.second);
   }
   xml.EndElement(); // Directory

@@ -260,8 +260,8 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
   xml.Element("Site", mf.GetSafeDefinition("CTEST_SITE"));
   xml.Element("BuildName", buildname);
   xml.Element("BuildStamp",
-              this->CTest->GetCurrentTag() + "-" +
-                this->CTest->GetTestGroupString());
+              cmStrCat(this->CTest->GetCurrentTag(), '-',
+                       this->CTest->GetTestGroupString()));
   xml.Element("StartDateTime", start_time);
   xml.Element("StartTime", start_time_time);
   xml.Element("UpdateCommand", vc->GetUpdateCommandLine());

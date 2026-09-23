@@ -182,21 +182,23 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     if (lang == "NONE") {
       continue;
     }
-    this->Compilers["CMAKE_" + lang + "_COMPILER"] = lang;
+    this->Compilers[cmStrCat("CMAKE_", lang, "_COMPILER")] = lang;
 
-    this->VariableMappings["CMAKE_" + lang + "_COMPILER"] =
-      this->Makefile->GetSafeDefinition("CMAKE_" + lang + "_COMPILER");
+    this->VariableMappings[cmStrCat("CMAKE_", lang, "_COMPILER")] =
+      this->Makefile->GetSafeDefinition(cmStrCat("CMAKE_", lang, "_COMPILER"));
 
-    std::string const& compilerArg1 = "CMAKE_" + lang + "_COMPILER_ARG1";
-    std::string const& compilerTarget = "CMAKE_" + lang + "_COMPILER_TARGET";
+    std::string const& compilerArg1 =
+      cmStrCat("CMAKE_", lang, "_COMPILER_ARG1");
+    std::string const& compilerTarget =
+      cmStrCat("CMAKE_", lang, "_COMPILER_TARGET");
     std::string const& compilerOptionTarget =
-      "CMAKE_" + lang + "_COMPILE_OPTIONS_TARGET";
+      cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_TARGET");
     std::string const& compilerExternalToolchain =
-      "CMAKE_" + lang + "_COMPILER_EXTERNAL_TOOLCHAIN";
+      cmStrCat("CMAKE_", lang, "_COMPILER_EXTERNAL_TOOLCHAIN");
     std::string const& compilerOptionExternalToolchain =
-      "CMAKE_" + lang + "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN";
+      cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN");
     std::string const& compilerOptionSysroot =
-      "CMAKE_" + lang + "_COMPILE_OPTIONS_SYSROOT";
+      cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_SYSROOT");
 
     this->VariableMappings[compilerArg1] =
       this->Makefile->GetSafeDefinition(compilerArg1);
@@ -1204,7 +1206,7 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
   // Add compile flag for the MSVC compiler only.
   cmMakefile* mf = this->GetMakefile();
   if (cmValue jmc =
-        mf->GetDefinition("CMAKE_" + lang + "_COMPILE_OPTIONS_JMC")) {
+        mf->GetDefinition(cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_JMC"))) {
 
     // Handle Just My Code debugging flags, /JMC.
     // If the target is a Managed C++ one, /JMC is not compatible.
@@ -1709,7 +1711,8 @@ void cmLocalGenerator::GetTargetFlags(
       }
 
       if (this->Makefile->IsOn("BUILD_SHARED_LIBS")) {
-        std::string sFlagVar = "CMAKE_SHARED_BUILD_" + linkLanguage + "_FLAGS";
+        std::string sFlagVar =
+          cmStrCat("CMAKE_SHARED_BUILD_", linkLanguage, "_FLAGS");
         exeFlags += this->Makefile->GetSafeDefinition(sFlagVar);
         exeFlags += " ";
       }
@@ -2002,7 +2005,7 @@ void cmLocalGenerator::OutputLinkLibraries(
 
   std::string libPathFlag;
   if (cmValue value = this->Makefile->GetDefinition(
-        "CMAKE_" + cli.GetLinkLanguage() + "_LIBRARY_PATH_FLAG")) {
+        cmStrCat("CMAKE_", cli.GetLinkLanguage(), "_LIBRARY_PATH_FLAG"))) {
     libPathFlag = *value;
   } else {
     libPathFlag =
@@ -2010,8 +2013,8 @@ void cmLocalGenerator::OutputLinkLibraries(
   }
 
   std::string libPathTerminator;
-  if (cmValue value = this->Makefile->GetDefinition(
-        "CMAKE_" + cli.GetLinkLanguage() + "_LIBRARY_PATH_TERMINATOR")) {
+  if (cmValue value = this->Makefile->GetDefinition(cmStrCat(
+        "CMAKE_", cli.GetLinkLanguage(), "_LIBRARY_PATH_TERMINATOR"))) {
     libPathTerminator = *value;
   } else {
     libPathTerminator =
@@ -2099,7 +2102,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     if (sysroot && *sysroot == "/") {
       sysroot = nullptr;
     }
-    std::string sysrootFlagVar = "CMAKE_" + lang + "_SYSROOT_FLAG";
+    std::string sysrootFlagVar = cmStrCat("CMAKE_", lang, "_SYSROOT_FLAG");
     cmValue sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
     if (cmNonempty(sysrootFlag)) {
       if (!this->AppleArchSysroots.empty() &&
@@ -2110,7 +2113,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
             continue;
           }
           if (filterArch.empty() || filterArch == arch) {
-            flags += " -Xarch_" + arch + " ";
+            flags = cmStrCat(flags, " -Xarch_", arch, " ");
             // Combine sysroot flag and path to work with -Xarch
             std::string arch_sysroot = *sysrootFlag + archSysroot;
             flags += this->ConvertToOutputFormat(arch_sysroot, SHELL);
@@ -2128,7 +2131,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
     if (cmNonempty(deploymentTarget)) {
       std::string deploymentTargetFlagVar =
-        "CMAKE_" + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
+        cmStrCat("CMAKE_", lang, "_OSX_DEPLOYMENT_TARGET_FLAG");
       cmValue deploymentTargetFlag =
         this->Makefile->GetDefinition(deploymentTargetFlagVar);
       if (cmNonempty(deploymentTargetFlag) &&
@@ -2272,16 +2275,16 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       *msvcRuntimeLibraryValue, this, config, target);
     if (!msvcRuntimeLibrary.empty()) {
       if (cmValue msvcRuntimeLibraryOptions = this->Makefile->GetDefinition(
-            "CMAKE_" + lang + "_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_" +
-            msvcRuntimeLibrary)) {
+            cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_",
+                     msvcRuntimeLibrary))) {
         this->AppendCompileOptions(flags, *msvcRuntimeLibraryOptions);
       } else if (compilerTargetsMsvcABI &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the MSVC ABI so it needs a known runtime library.
-        this->IssueMessage(MessageType::FATAL_ERROR,
-                           "MSVC_RUNTIME_LIBRARY value '" +
-                             msvcRuntimeLibrary + "' not known for this " +
-                             lang + " compiler.");
+        this->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("MSVC_RUNTIME_LIBRARY value '", msvcRuntimeLibrary,
+                   "' not known for this ", lang, " compiler."));
       }
     }
   }
@@ -2299,18 +2302,19 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     std::string const watcomRuntimeLibrary = cmGeneratorExpression::Evaluate(
       *watcomRuntimeLibraryValue, this, config, target);
     if (!watcomRuntimeLibrary.empty()) {
-      if (cmValue watcomRuntimeLibraryOptions = this->Makefile->GetDefinition(
-            "CMAKE_" + lang + "_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_" +
-            watcomRuntimeLibrary)) {
+      if (cmValue watcomRuntimeLibraryOptions =
+            this->Makefile->GetDefinition(cmStrCat(
+              "CMAKE_", lang, "_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_",
+              watcomRuntimeLibrary))) {
         this->AppendCompileOptions(flags, *watcomRuntimeLibraryOptions);
       } else if (compilerTargetsWatcomABI &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the Watcom ABI so it needs a known runtime
         // library.
-        this->IssueMessage(MessageType::FATAL_ERROR,
-                           "WATCOM_RUNTIME_LIBRARY value '" +
-                             watcomRuntimeLibrary + "' not known for this " +
-                             lang + " compiler.");
+        this->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("WATCOM_RUNTIME_LIBRARY value '", watcomRuntimeLibrary,
+                   "' not known for this ", lang, " compiler."));
       }
     }
   }
@@ -2526,7 +2530,8 @@ static void AddVisibilityCompileOption(std::string& flags,
                                        cmLocalGenerator* lg,
                                        std::string const& lang)
 {
-  std::string compileOption = "CMAKE_" + lang + "_COMPILE_OPTIONS_VISIBILITY";
+  std::string compileOption =
+    cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_VISIBILITY");
   cmValue opt = lg->GetMakefile()->GetDefinition(compileOption);
   if (!opt) {
     return;
@@ -3482,9 +3487,9 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
         filename_base, pathMode);
     } else {
       // unity mode is set to an unsupported value
-      std::string e("Invalid UNITY_BUILD_MODE value of " + *unityMode +
-                    " assigned to target " + target->GetName() +
-                    ". Acceptable values are BATCH and GROUP.");
+      std::string e(cmStrCat("Invalid UNITY_BUILD_MODE value of ", *unityMode,
+                             " assigned to target ", target->GetName(),
+                             ". Acceptable values are BATCH and GROUP."));
       this->IssueMessage(MessageType::FATAL_ERROR, e);
     }
 
@@ -3719,7 +3724,7 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
       return;
   }
 
-  std::string const name = "CMAKE_" + lang + "_LINK_OPTIONS_IPO";
+  std::string const name = cmStrCat("CMAKE_", lang, "_LINK_OPTIONS_IPO");
   cmValue rawFlagsList = this->Makefile->GetDefinition(name);
   if (!rawFlagsList) {
     return;
@@ -3752,12 +3757,13 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
 
   std::string const mode = cmIsOn(PICValue) ? "PIE" : "NO_PIE";
 
-  std::string supported = "CMAKE_" + lang + "_LINK_" + mode + "_SUPPORTED";
+  std::string supported =
+    cmStrCat("CMAKE_", lang, "_LINK_", mode, "_SUPPORTED");
   if (this->Makefile->GetDefinition(supported).IsOff()) {
     return;
   }
 
-  std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_" + mode;
+  std::string name = cmStrCat("CMAKE_", lang, "_LINK_OPTIONS_", mode);
 
   auto pieFlags = this->Makefile->GetSafeDefinition(name);
   if (pieFlags.empty()) {

@@ -106,7 +106,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildRepogenCommand()
     std::string ifwArg = (*it)->Name;
     ++it;
     while (it != this->DownloadedPackages.end()) {
-      ifwArg += "," + (*it)->Name;
+      ifwArg = cmStrCat(ifwArg, ',', (*it)->Name);
       ++it;
     }
     ifwCmd.emplace_back(ifwArg);
@@ -200,7 +200,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
     ifwArg = path + *it;
     ++it;
     while (it != this->Installer.Resources.end()) {
-      ifwArg += "," + path + *it;
+      ifwArg = cmStrCat(ifwArg, ',', path, *it);
       ++it;
     }
     ifwCmd.emplace_back(ifwArg);
@@ -241,7 +241,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
     ifwArg = (*it)->Name;
     ++it;
     while (it != this->DownloadedPackages.end()) {
-      ifwArg += "," + (*it)->Name;
+      ifwArg = cmStrCat(ifwArg, ',', (*it)->Name);
       ++it;
     }
     ifwCmd.emplace_back(ifwArg);
@@ -251,7 +251,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
     // Binary
     auto bit = this->BinaryPackages.begin();
     while (bit != this->BinaryPackages.end()) {
-      ifwArg += (*bit)->Name + ",";
+      ifwArg = cmStrCat(ifwArg, (*bit)->Name, ',');
       ++bit;
     }
     // Depend
@@ -259,7 +259,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
     ifwArg += it->second.Name;
     ++it;
     while (it != this->DependentPackages.end()) {
-      ifwArg += "," + it->second.Name;
+      ifwArg = cmStrCat(ifwArg, ',', it->second.Name);
       ++it;
     }
     ifwCmd.emplace_back(ifwArg);
@@ -310,7 +310,8 @@ char const* cmCPackIFWGenerator::GetPackagingInstallPrefix()
   std::string tmpPref = defPrefix ? defPrefix : "";
 
   if (this->Components.empty()) {
-    tmpPref += "packages/" + this->GetRootPackageName() + "/data";
+    tmpPref =
+      cmStrCat(tmpPref, "packages/", this->GetRootPackageName(), "/data");
   }
 
   this->SetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX", tmpPref);
@@ -471,8 +472,9 @@ std::string cmCPackIFWGenerator::GetComponentInstallSuffix(
     return cmStrCat(prefix, this->GetRootPackageName(), suffix);
   }
 
-  return prefix +
-    this->GetComponentPackageName(&this->Components[componentName]) + suffix;
+  return cmStrCat(
+    prefix, this->GetComponentPackageName(&this->Components[componentName]),
+    suffix);
 }
 
 std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
@@ -485,10 +487,11 @@ std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
     return cmStrCat(prefix, this->GetRootPackageName(), suffix);
   }
 
-  return prefix +
+  return cmStrCat(
+    prefix,
     this->GetSanitizedDirOrFileName(
-      this->GetComponentPackageName(&this->Components[componentName])) +
-    suffix;
+      this->GetComponentPackageName(&this->Components[componentName])),
+    suffix);
 }
 
 cmCPackComponent* cmCPackIFWGenerator::GetComponent(
@@ -624,15 +627,15 @@ std::string cmCPackIFWGenerator::GetGroupPackageName(
   if (cmCPackIFWPackage* package = this->GetGroupPackage(group)) {
     return package->Name;
   }
-  cmValue option =
-    this->GetOption("CPACK_IFW_COMPONENT_GROUP_" +
-                    cmsys::SystemTools::UpperCase(group->Name) + "_NAME");
+  cmValue option = this->GetOption(
+    cmStrCat("CPACK_IFW_COMPONENT_GROUP_",
+             cmsys::SystemTools::UpperCase(group->Name), "_NAME"));
   name = option ? *option : group->Name;
   if (group->ParentGroup) {
     cmCPackIFWPackage* package = this->GetGroupPackage(group->ParentGroup);
     bool dot = !this->ResolveDuplicateNames;
     if (dot && !cmHasPrefix(name, package->Name)) {
-      name = package->Name + "." + name;
+      name = cmStrCat(package->Name, '.', name);
     }
   }
   return name;
@@ -648,8 +651,9 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
   if (cmCPackIFWPackage* package = this->GetComponentPackage(component)) {
     return package->Name;
   }
-  std::string prefix = "CPACK_IFW_COMPONENT_" +
-    cmsys::SystemTools::UpperCase(component->Name) + "_";
+  std::string prefix =
+    cmStrCat("CPACK_IFW_COMPONENT_",
+             cmsys::SystemTools::UpperCase(component->Name), '_');
   cmValue option = this->GetOption(prefix + "NAME");
   name = option ? *option : component->Name;
   if (component->Group) {
@@ -661,7 +665,7 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
     }
     bool dot = !this->ResolveDuplicateNames;
     if (dot && !cmHasPrefix(name, package->Name)) {
-      name = package->Name + "." + name;
+      name = cmStrCat(package->Name, '.', name);
     }
   }
   return name;

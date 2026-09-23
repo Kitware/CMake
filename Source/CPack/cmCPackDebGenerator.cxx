@@ -520,9 +520,10 @@ bool DebGenerator::generateDeb() const
   deb.SetUNAMEAndGNAME("root", "root");
 
   if (!deb.Add(tlDir + "debian-binary", tlDir.length()) ||
-      !deb.Add(tlDir + "control.tar" + this->CompressionSuffix,
+      !deb.Add(cmStrCat(tlDir, "control.tar", this->CompressionSuffix),
                tlDir.length()) ||
-      !deb.Add(tlDir + "data.tar" + this->CompressionSuffix, tlDir.length())) {
+      !deb.Add(cmStrCat(tlDir, "data.tar", this->CompressionSuffix),
+               tlDir.length())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error creating debian package:\n"
                   "#top level directory: "
@@ -919,8 +920,8 @@ bool cmCPackDebGenerator::createDbgsymDDeb()
   controlValues["Version"] = *debian_pkg_version;
   controlValues["Auto-Built-Package"] = "debug-symbols";
   controlValues["Depends"] =
-    *this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_NAME") + std::string(" (= ") +
-    *debian_pkg_version + ")";
+    cmStrCat(*this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_NAME"),
+             " (= ", *debian_pkg_version, ')');
   controlValues["Section"] = "debug";
   controlValues["Priority"] = "optional";
   controlValues["Architecture"] =
@@ -973,8 +974,8 @@ std::string cmCPackDebGenerator::GetComponentInstallSuffix(
   }
   // We have to find the name of the COMPONENT GROUP
   // the current COMPONENT belongs to.
-  std::string groupVar =
-    "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
+  std::string groupVar = cmStrCat(
+    "CPACK_COMPONENT_", cmSystemTools::UpperCase(componentName), "_GROUP");
   if (cmValue v = this->GetOption(groupVar)) {
     return *v;
   }

@@ -1099,7 +1099,8 @@ void cmCTestBuildHandler::ProcessBuffer(char const* data, size_t length,
 
         // Copy pre-context to report
         for (std::string const& pc : this->PreContext) {
-          errorwarning.PreContext += pc + "\n";
+          errorwarning.PreContext =
+            cmStrCat(errorwarning.PreContext, pc, '\n');
         }
         this->PreContext.clear();
 

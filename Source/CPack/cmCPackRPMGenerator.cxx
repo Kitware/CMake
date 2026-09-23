@@ -82,10 +82,10 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
       this->GetOption("CPACK_PACKAGE_FILE_NAME"), packageName, true) +
     this->GetOutputExtension());
 
-  localToplevel += "/" + sanitizedPkgDirName;
+  localToplevel = cmStrCat(localToplevel, '/', sanitizedPkgDirName);
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
-  packageFileName += "/" + outputFileName;
+  packageFileName = cmStrCat(packageFileName, '/', outputFileName);
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
   this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */
@@ -146,8 +146,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         std::transform(component.begin(), component.end(), component.begin(),
                        cmsysString_toupper);
 
-        if (this->IsOn("CPACK_RPM_" + compIt->first + "_DEBUGINFO_PACKAGE") ||
-            this->IsOn("CPACK_RPM_" + component + "_DEBUGINFO_PACKAGE")) {
+        if (this->IsOn(
+              cmStrCat("CPACK_RPM_", compIt->first, "_DEBUGINFO_PACKAGE")) ||
+            this->IsOn(
+              cmStrCat("CPACK_RPM_", component, "_DEBUGINFO_PACKAGE"))) {
           shouldSet = false;
           break;
         }
@@ -160,8 +162,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         std::transform(component.begin(), component.end(), component.begin(),
                        cmsysString_toupper);
 
-        if (this->IsOn("CPACK_RPM_" + compGIt->first + "_DEBUGINFO_PACKAGE") ||
-            this->IsOn("CPACK_RPM_" + component + "_DEBUGINFO_PACKAGE")) {
+        if (this->IsOn(
+              cmStrCat("CPACK_RPM_", compGIt->first, "_DEBUGINFO_PACKAGE")) ||
+            this->IsOn(
+              cmStrCat("CPACK_RPM_", component, "_DEBUGINFO_PACKAGE"))) {
           shouldSet = false;
           break;
         }
@@ -177,9 +181,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
             std::transform(component.begin(), component.end(),
                            component.begin(), cmsysString_toupper);
 
-            if (this->IsOn("CPACK_RPM_" + compIt->first +
-                           "_DEBUGINFO_PACKAGE") ||
-                this->IsOn("CPACK_RPM_" + component + "_DEBUGINFO_PACKAGE")) {
+            if (this->IsOn(cmStrCat("CPACK_RPM_", compIt->first,
+                                    "_DEBUGINFO_PACKAGE")) ||
+                this->IsOn(
+                  cmStrCat("CPACK_RPM_", component, "_DEBUGINFO_PACKAGE"))) {
               shouldSet = false;
               break;
             }
@@ -389,11 +394,11 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(
     std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
     this->GetOutputExtension());
   // all GROUP in one vs all COMPONENT in one
-  localToplevel += "/" + compInstDirName;
+  localToplevel = cmStrCat(localToplevel, '/', compInstDirName);
 
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
-  packageFileName += "/" + outputFileName;
+  packageFileName = cmStrCat(packageFileName, '/', outputFileName);
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
   this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */
@@ -457,8 +462,8 @@ std::string cmCPackRPMGenerator::GetComponentInstallSuffix(
   }
   // We have to find the name of the COMPONENT GROUP
   // the current COMPONENT belongs to.
-  std::string groupVar =
-    "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
+  std::string groupVar = cmStrCat(
+    "CPACK_COMPONENT_", cmSystemTools::UpperCase(componentName), "_GROUP");
   if (cmValue v = this->GetOption(groupVar)) {
     return *v;
   }

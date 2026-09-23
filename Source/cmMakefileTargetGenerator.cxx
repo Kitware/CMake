@@ -990,7 +990,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   std::string includesString = this->LocalGenerator->GetIncludeFlags(
     includes, this->GeneratorTarget, lang, config);
   this->LocalGenerator->AppendFlags(includesString,
-                                    "$(" + lang + "_INCLUDES)");
+                                    cmStrCat("$(", lang, "_INCLUDES)"));
   vars.Includes = includesString.c_str();
 
   std::string dependencyTarget;
@@ -1061,7 +1061,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
     cmList compileCommands;
     std::string const& compileRule = this->Makefile->GetRequiredDefinition(
-      "CMAKE_" + lang + "_COMPILE_OBJECT");
+      cmStrCat("CMAKE_", lang, "_COMPILE_OBJECT"));
     compileCommands.assign(compileRule);
 
     if (this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS") &&
@@ -1078,13 +1078,13 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         compileCommand.replace(lfPos, langFlags.size(),
                                this->GetFlags(lang, this->GetConfigName()));
       }
-      std::string const langDefines = std::string("$(") + lang + "_DEFINES)";
+      std::string const langDefines = cmStrCat("$(", lang, "_DEFINES)");
       std::string::size_type const ldPos = compileCommand.find(langDefines);
       if (ldPos != std::string::npos) {
         compileCommand.replace(ldPos, langDefines.size(),
                                this->GetDefines(lang, this->GetConfigName()));
       }
-      std::string const langIncludes = std::string("$(") + lang + "_INCLUDES)";
+      std::string const langIncludes = cmStrCat("$(", lang, "_INCLUDES)");
       std::string::size_type const liPos = compileCommand.find(langIncludes);
       if (liPos != std::string::npos) {
         compileCommand.replace(liPos, langIncludes.size(),
@@ -2147,7 +2147,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
 {
   // Check for an explicit setting one way or the other.
   std::string const responseVar =
-    "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_OBJECTS";
+    cmStrCat("CMAKE_", l, "_USE_RESPONSE_FILE_FOR_OBJECTS");
   if (cmValue val = this->Makefile->GetDefinition(responseVar)) {
     if (!val->empty()) {
       return val.IsOn();
@@ -2186,7 +2186,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForLibraries(
 {
   // Check for an explicit setting one way or the other.
   std::string const responseVar =
-    "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_LIBRARIES";
+    cmStrCat("CMAKE_", l, "_USE_RESPONSE_FILE_FOR_LIBRARIES");
   if (cmValue val = this->Makefile->GetDefinition(responseVar)) {
     if (!val->empty()) {
       return val.IsOn();
@@ -2253,7 +2253,7 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
     std::string linkPath;
     this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                               frameworkPath, linkPath);
-    linkLibs = frameworkPath + linkPath + linkLibs;
+    linkLibs = cmStrCat(frameworkPath, linkPath, linkLibs);
   }
 
   if (useResponseFile &&
@@ -2343,9 +2343,9 @@ bool cmMakefileTargetGenerator::CreateRustLinkArguments(
       this->GeneratorTarget->GetRustMainCrateRoot(this->GetConfigName());
     if (!mainCrateRoot) {
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                   "Target " +
-                                     this->GeneratorTarget->GetName() +
-                                     " has no main crate root.");
+                                   cmStrCat("Target ",
+                                            this->GeneratorTarget->GetName(),
+                                            " has no main crate root."));
       return false;
     }
     rustMainCrateRootPath = mainCrateRoot->GetFullPath();
@@ -2377,7 +2377,7 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 
   if (useResponseFile) {
     std::string const responseFlagVar =
-      "CMAKE_" + lang + "_RESPONSE_FILE_FLAG";
+      cmStrCat("CMAKE_", lang, "_RESPONSE_FILE_FLAG");
     std::string responseFlag =
       this->Makefile->GetSafeDefinition(responseFlagVar);
     if (responseFlag.empty()) {

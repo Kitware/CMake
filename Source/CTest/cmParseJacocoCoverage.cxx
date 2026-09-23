@@ -48,7 +48,7 @@ protected:
                          "Reading file: " << fileName << std::endl,
                          this->Coverage.Quiet);
 
-      this->FilePath = this->PackagePath + "/" + fileName;
+      this->FilePath = cmStrCat(this->PackagePath, '/', fileName);
       cmsys::ifstream fin(this->FilePath.c_str());
       if (!fin) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,

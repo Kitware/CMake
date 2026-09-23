@@ -316,7 +316,7 @@ std::string TargetId(cmGeneratorTarget const* gt, std::string const& topBuild)
     topBuild, gt->GetLocalGenerator()->GetCurrentBinaryDirectory());
   std::string hash = hasher.HashString(path);
   hash.resize(20, '0');
-  return gt->GetName() + CMAKE_DIRECTORY_ID_SEP + hash;
+  return cmStrCat(gt->GetName(), CMAKE_DIRECTORY_ID_SEP, hash);
 }
 
 struct CompileData
@@ -755,7 +755,7 @@ Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
   std::replace(safeTargetName.begin(), safeTargetName.end(), ':', '_');
   std::string prefix = "target-" + safeTargetName;
   if (!this->Config.empty()) {
-    prefix += "-" + this->Config;
+    prefix = cmStrCat(prefix, '-', this->Config);
   }
   Json::Value target = this->FileAPI.MaybeJsonFile(t.Dump(), prefix);
   target["name"] = gt->GetName();
@@ -856,7 +856,7 @@ Json::Value CodemodelConfig::DumpDirectoryObject(Directory& d)
     }
   }
   if (!this->Config.empty()) {
-    prefix += "-" + this->Config;
+    prefix = cmStrCat(prefix, '-', this->Config);
   }
 
   DirectoryObject dir(d.LocalGenerator, this->VersionMajor, this->VersionMinor,

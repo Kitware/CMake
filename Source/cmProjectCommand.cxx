@@ -106,8 +106,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (!IncludeByVariable(status,
-                         "CMAKE_PROJECT_" + projectName + "_INCLUDE_BEFORE")) {
+  if (!IncludeByVariable(
+        status, cmStrCat("CMAKE_PROJECT_", projectName, "_INCLUDE_BEFORE"))) {
     return false;
   }
 
@@ -202,7 +202,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   if (prArgs.Version) {
     if (!vx.find(*prArgs.Version)) {
       std::string e =
-        R"(VERSION ")" + *prArgs.Version + R"(" format invalid.)";
+        cmStrCat(R"(VERSION ")", *prArgs.Version, R"(" format invalid.)");
       mf.IssueMessage(MessageType::FATAL_ERROR, e);
       cmSystemTools::SetFatalErrorOccurred();
       return true;
@@ -242,8 +242,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   if (prArgs.CompatVersion) {
     if (!vx.find(*prArgs.CompatVersion)) {
-      std::string e =
-        R"(COMPAT_VERSION ")" + *prArgs.CompatVersion + R"(" format invalid.)";
+      std::string e = cmStrCat(R"(COMPAT_VERSION ")", *prArgs.CompatVersion,
+                               R"(" format invalid.)");
       mf.IssueMessage(MessageType::FATAL_ERROR, e);
       cmSystemTools::SetFatalErrorOccurred();
       return true;
@@ -319,8 +319,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (!IncludeByVariable(status,
-                         "CMAKE_PROJECT_" + projectName + "_INCLUDE")) {
+  if (!IncludeByVariable(
+        status, cmStrCat("CMAKE_PROJECT_", projectName, "_INCLUDE"))) {
     return false;
   }
 

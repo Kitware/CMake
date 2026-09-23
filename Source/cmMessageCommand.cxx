@@ -55,8 +55,8 @@ void ReportCheckResult(cm::string_view what, std::string result,
                        cmMakefile& mf)
 {
   if (mf.GetCMakeInstance()->HasCheckInProgress()) {
-    auto text = mf.GetCMakeInstance()->GetTopCheckInProgressMessage() + " - " +
-      std::move(result);
+    auto text = cmStrCat(mf.GetCMakeInstance()->GetTopCheckInProgressMessage(),
+                         " - ", std::move(result));
     mf.DisplayStatus(IndentText(std::move(text), mf), -1);
   } else {
     mf.GetMessenger()->DisplayMessage(

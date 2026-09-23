@@ -961,7 +961,7 @@ bool cmQtAutoGenInitializer::InitRcc()
             this->GenTarget->GetSafeProperty(kw.AUTORCC_OPTIONS);
           std::string const nozstd = "--no-zstd";
           if (rccOptions.find(nozstd) == std::string::npos) {
-            rccOptions.append(";" + nozstd + ";");
+            rccOptions.append(cmStrCat(';', nozstd, ';'));
           }
           this->GenTarget->Target->SetProperty(kw.AUTORCC_OPTIONS, rccOptions);
         }

@@ -110,7 +110,7 @@ std::string cmCTestGIT::FindGitDir()
   // Git reports a relative path only when the .git directory is in
   // the current directory.
   if (git_dir[0] == '.') {
-    git_dir = this->SourceDirectory + "/" + git_dir;
+    git_dir = cmStrCat(this->SourceDirectory, '/', git_dir);
   }
 #if defined(_WIN32) && !defined(__CYGWIN__)
   else if (git_dir[0] == '/') {
@@ -602,7 +602,7 @@ char const cmCTestGIT::CommitParser::SectionSep[SectionCount] = { '\n', '\n',
 bool cmCTestGIT::LoadRevisions()
 {
   // Use 'git rev-list ... | git diff-tree ...' to get revisions.
-  std::string range = this->OldRevision + ".." + this->NewRevision;
+  std::string range = cmStrCat(this->OldRevision, "..", this->NewRevision);
   std::string git = this->CommandLineTool;
   std::vector<std::string> git_rev_list = { git, "rev-list", "--reverse",
                                             range, "--" };

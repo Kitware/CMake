@@ -1550,24 +1550,24 @@ std::string cmTarget::GetDebugGeneratorExpressions(
   std::vector<std::string> debugConfigs =
     this->impl->Makefile->GetCMakeInstance()->GetDebugConfigs();
 
-  std::string configString = "$<CONFIG:" + debugConfigs[0] + ">";
+  std::string configString = cmStrCat("$<CONFIG:", debugConfigs[0], '>');
 
   if (debugConfigs.size() > 1) {
     for (std::string const& conf : cmMakeRange(debugConfigs).advance(1)) {
-      configString += ",$<CONFIG:" + conf + ">";
+      configString = cmStrCat(configString, ",$<CONFIG:", conf, '>');
     }
-    configString = "$<OR:" + configString + ">";
+    configString = cmStrCat("$<OR:", configString, '>');
   }
 
   if (llt == OPTIMIZED_LibraryType) {
-    configString = "$<NOT:" + configString + ">";
+    configString = cmStrCat("$<NOT:", configString, '>');
   }
-  return "$<" + configString + ":" + value + ">";
+  return cmStrCat("$<", configString, ':', value, '>');
 }
 
 static std::string targetNameGenex(std::string const& lib)
 {
-  return "$<TARGET_NAME:" + lib + ">";
+  return cmStrCat("$<TARGET_NAME:", lib, '>');
 }
 
 bool cmTarget::PushTLLCommandTrace(TLLSignature signature,
@@ -2528,7 +2528,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
     dirs += this->impl->Makefile->GetCurrentSourceDirectory();
     if (!dirs.empty()) {
       this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                           ("$<BUILD_INTERFACE:" + dirs + ">"));
+                           (cmStrCat("$<BUILD_INTERFACE:", dirs, '>')));
     }
   }
 }
@@ -3525,16 +3525,16 @@ bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
   if (!value.empty()) {
     if (value[0] == '-') {
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                   prop + " property value\n  " + value +
-                                     "\nmay not start with '-'.");
+                                   cmStrCat(prop, " property value\n  ", value,
+                                            "\nmay not start with '-'."));
       return false;
     }
     std::string::size_type bad = value.find_first_of(":/\\;");
     if (bad != std::string::npos) {
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                   prop + " property value\n  " + value +
-                                     "\nmay not contain '" +
-                                     value.substr(bad, 1) + "'.");
+                                   cmStrCat(prop, " property value\n  ", value,
+                                            "\nmay not contain '",
+                                            value.substr(bad, 1), "'."));
       return false;
     }
   }
