@@ -183,7 +183,9 @@ struct cmCTest::Private
 
   std::string NotesFiles;
 
+  // Default for the current mode; an explicit user choice takes precedence.
   bool InteractiveDebugMode = true;
+  cm::optional<bool> InteractiveDebugModeCli;
 
   bool ShortDateFormat = true;
 
@@ -451,7 +453,7 @@ void cmCTest::Initialize(std::string const& binary_dir)
     this->Impl->Parts[p].SubmitFiles.clear();
   }
 
-  if (!this->Impl->InteractiveDebugMode) {
+  if (!this->GetInteractiveDebugMode()) {
     this->BlockTestErrorDiagnostics();
   } else {
     cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
@@ -766,12 +768,18 @@ int cmCTest::ProcessSteps()
   this->Impl->ExtraVerbose = this->Impl->Verbose;
   this->Impl->Verbose = true;
   this->Impl->ProduceXML = true;
+  // Dashboard mode defaults to non-interactive even if no model is set.
+  this->Impl->InteractiveDebugMode = false;
 
   // Minimal dashboard client script configuration.
   this->SetCTestConfiguration("BuildDirectory", this->Impl->BinaryDir);
 
   this->UpdateCTestConfiguration();
-  this->BlockTestErrorDiagnostics();
+  if (!this->GetInteractiveDebugMode()) {
+    this->BlockTestErrorDiagnostics();
+  } else {
+    cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
+  }
 
   if (this->GetCTestConfiguration("TimeOut").empty()) {
     this->SetCTestConfiguration(
@@ -1834,8 +1842,8 @@ bool cmCTest::SetArgsFromPreset(cmCMakePresetsArgs const& args)
     }
 
     if (expandedPreset->Execution->InteractiveDebugging) {
-      this->Impl->InteractiveDebugMode =
-        *expandedPreset->Execution->InteractiveDebugging;
+      this->Impl->InteractiveDebugModeCli =
+        expandedPreset->Execution->InteractiveDebugging;
     }
 
     if (expandedPreset->Execution->ScheduleRandom.value_or(false)) {
@@ -2461,7 +2469,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
     CommandArgument{ "--max-width", CommandArgument::Values::One, dashW },
     CommandArgument{ "--interactive-debug-mode", CommandArgument::Values::One,
                      [this](std::string const& idm) -> bool {
-                       this->Impl->InteractiveDebugMode = cmIsOn(idm);
+                       this->Impl->InteractiveDebugModeCli = cmIsOn(idm);
                        return true;
                      } },
     CommandArgument{ "--http-header", CommandArgument::Values::One,
@@ -2780,7 +2788,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
   this->Impl->Verbose = true;
 
   cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
-  if (!this->Impl->InteractiveDebugMode) {
+  if (!this->GetInteractiveDebugMode()) {
     this->BlockTestErrorDiagnostics();
   } else {
     cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
@@ -3244,7 +3252,8 @@ bool cmCTest::GetExtraVerbose() const
 
 bool cmCTest::GetInteractiveDebugMode() const
 {
-  return this->Impl->InteractiveDebugMode;
+  return this->Impl->InteractiveDebugModeCli.value_or(
+    this->Impl->InteractiveDebugMode);
 }
 
 bool cmCTest::GetLabelSummary() const

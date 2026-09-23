@@ -1263,6 +1263,11 @@ set(CTestCommandLine_ARGS
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND CTestCommandLine_ARGS -DTEST_AFFINITY=$<TARGET_FILE:testAffinity>)
 endif()
+# Tests inherit ctest's error mode only through a flag of the bundled libuv.
+if(WIN32 AND NOT CMAKE_USE_SYSTEM_LIBUV)
+  add_executable(testErrorMode testErrorMode.c)
+  list(APPEND CTestCommandLine_ARGS -DTEST_ERROR_MODE=$<TARGET_FILE:testErrorMode>)
+endif()
 add_executable(print_stdin print_stdin.c)
 add_RunCMake_test(CTestCommandLine -DTEST_PRINT_STDIN=$<TARGET_FILE:print_stdin>)
 add_RunCMake_test(CacheNewline)
