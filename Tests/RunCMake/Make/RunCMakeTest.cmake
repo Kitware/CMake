@@ -262,3 +262,5 @@ if(FAKE_MAKE AND RunCMake_GENERATOR MATCHES "Unix Makefiles|MinGW Makefiles|MSYS
   endfunction()
   run_OutputSyncUsesTerminal()
 endif()
+
+run_cmake(InstallNameDir)

@@ -1074,8 +1074,9 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
       std::string install_dir =
         this->GetGeneratorTarget()->GetInstallNameDirForBuildTree(config);
       if (!install_dir.empty()) {
-        vars["INSTALLNAME_DIR"] = localGen.ConvertToOutputFormat(
-          install_dir, cmOutputConverter::SHELL);
+        // The install name is target data embedded in the binary,
+        // not a host path: escape it without converting separators.
+        vars["INSTALLNAME_DIR"] = localGen.EscapeForShell(install_dir, true);
       }
     }
   }
@@ -1437,8 +1438,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     if (targetType == cm::TargetType::SHARED_LIBRARY) {
       std::string install_dir = gt->GetInstallNameDirForBuildTree(config);
       if (!install_dir.empty()) {
-        vars["INSTALLNAME_DIR"] = localGen.ConvertToOutputFormat(
-          install_dir, cmOutputConverter::SHELL);
+        // The install name is target data embedded in the binary,
+        // not a host path: escape it without converting separators.
+        vars["INSTALLNAME_DIR"] = localGen.EscapeForShell(install_dir, true);
       }
     }
   }

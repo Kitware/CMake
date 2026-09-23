@@ -465,3 +465,5 @@ endif()
 run_cmake(LINK_OPTIONSWithNewlines)
 
 run_cmake(StaticLibShort)
+
+run_cmake(InstallNameDir)
