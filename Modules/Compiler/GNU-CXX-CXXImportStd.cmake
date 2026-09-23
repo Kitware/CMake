@@ -15,7 +15,8 @@ function (_cmake_cxx_find_modules_json)
       RESULT_VARIABLE _gnu_libstdcxx_modules_json_file_res
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_STRIP_TRAILING_WHITESPACE)
-    if (_gnu_libstdcxx_modules_json_file_res)
+    if (_gnu_libstdcxx_modules_json_file_res OR
+        NOT EXISTS "${_gnu_libstdcxx_modules_json_file}")
       set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Could not find `libstdc++.modules.json` resource" PARENT_SCOPE)
       return ()
     endif ()
