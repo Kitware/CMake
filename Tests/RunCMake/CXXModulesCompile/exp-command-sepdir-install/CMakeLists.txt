@@ -11,7 +11,8 @@ install(TARGETS export_sepdir
 install(EXPORT CXXModules
   NAMESPACE CXXModules::
   DESTINATION "lib/cmake/export_sepdir"
-  FILE "export_sepdir-targets.cmake")
+  FILE "export_sepdir-targets.cmake"
+  CXX_MODULES_DIRECTORY "export_sepdir-cxx-modules")
 install(PACKAGE_INFO "export_sepdir_cps"
   EXPORT CXXModules
   DESTINATION "lib/cmake/export_sepdir_cps"
