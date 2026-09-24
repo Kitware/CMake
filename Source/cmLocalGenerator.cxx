@@ -2687,7 +2687,7 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 
   if (!newFlags.empty() && !allSpaces) {
     if (!flags.empty()) {
-      flags += " ";
+      flags += ' ';
     }
     flags += newFlags;
   }
