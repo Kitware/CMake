@@ -1,0 +1,6 @@
+add_executable(SyclOnlySeparateCompilation ../main.sycl)
+target_link_libraries(SyclOnlySeparateCompilation PRIVATE SYCLSeparateLibB SYCLSeparateLibC)
+set_target_properties(SyclOnlySeparateCompilation PROPERTIES
+  SYCL_CXX_STANDARD 17 SYCL_CXX_STANDARD_REQUIRED TRUE)
+target_compile_definitions(SyclOnlySeparateCompilation PRIVATE TEST_SECOND_LIBRARY)
+sycl_add_runtime_test(SeparateCompilation SyclOnlySeparateCompilation)

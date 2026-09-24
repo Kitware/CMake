@@ -1,0 +1,5 @@
+libs=svml;irng;stdc\+\+;imf;m;gcc_s;gcc;irc;dl;gcc_s;gcc;sycl;sycl-devicelib-host;c;gcc_s;gcc;irc_s
+dirs=/opt/intel/oneapi/compiler/2026.0/lib;/opt/intel/oneapi/compiler/2026.0/lib/clang/22/lib/x86_64-unknown-linux-gnu;/usr/lib64/gcc/x86_64-pc-linux-gnu/16;/usr/lib64;/lib64;/opt/intel/oneapi/compiler/2026.0/opt/compiler/lib;/lib;/usr/lib;/opt/intel/oneapi/tcm/1.5/lib;/opt/intel/oneapi/umf/1.1/lib;/opt/intel/oneapi/tbb/2023.0/lib/intel64/gcc4.8
+library_arch=x86_64-unknown-linux-gnu
+linker_tool=/usr/bin/ld
+linker_arch=-m;elf_x86_64

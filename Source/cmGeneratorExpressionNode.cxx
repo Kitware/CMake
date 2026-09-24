@@ -3070,7 +3070,8 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 static CompilerIdNode const cCompilerIdNode("C"), cxxCompilerIdNode("CXX"),
   cudaCompilerIdNode("CUDA"), objcCompilerIdNode("OBJC"),
   objcxxCompilerIdNode("OBJCXX"), fortranCompilerIdNode("Fortran"),
-  hipCompilerIdNode("HIP"), ispcCompilerIdNode("ISPC");
+  hipCompilerIdNode("HIP"), ispcCompilerIdNode("ISPC"),
+  syclCompilerIdNode("SYCL");
 
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
@@ -3134,7 +3135,7 @@ static CompilerVersionNode const cCompilerVersionNode("C"),
   cxxCompilerVersionNode("CXX"), cudaCompilerVersionNode("CUDA"),
   objcCompilerVersionNode("OBJC"), objcxxCompilerVersionNode("OBJCXX"),
   fortranCompilerVersionNode("Fortran"), ispcCompilerVersionNode("ISPC"),
-  hipCompilerVersionNode("HIP");
+  hipCompilerVersionNode("HIP"), syclCompilerVersionNode("SYCL");
 
 struct CompilerFrontendVariantNode : public cmGeneratorExpressionNode
 {
@@ -3204,7 +3205,8 @@ static CompilerFrontendVariantNode const cCompilerFrontendVariantNode("C"),
   objcxxCompilerFrontendVariantNode("OBJCXX"),
   fortranCompilerFrontendVariantNode("Fortran"),
   hipCompilerFrontendVariantNode("HIP"),
-  ispcCompilerFrontendVariantNode("ISPC");
+  ispcCompilerFrontendVariantNode("ISPC"),
+  syclCompilerFrontendVariantNode("SYCL");
 
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {
@@ -3814,7 +3816,8 @@ struct CompilerLinkerIdNode : public cmGeneratorExpressionNode
 static CompilerLinkerIdNode const cCompilerLinkerIdNode("C"),
   cxxCompilerLinkerIdNode("CXX"), cudaCompilerLinkerIdNode("CUDA"),
   objcCompilerLinkerIdNode("OBJC"), objcxxCompilerLinkerIdNode("OBJCXX"),
-  fortranCompilerLinkerIdNode("Fortran"), hipCompilerLinkerIdNode("HIP");
+  fortranCompilerLinkerIdNode("Fortran"), hipCompilerLinkerIdNode("HIP"),
+  syclCompilerLinkerIdNode("SYCL");
 
 struct CompilerLinkerFrontendVariantNode : public cmGeneratorExpressionNode
 {
@@ -3885,7 +3888,8 @@ static CompilerLinkerFrontendVariantNode const
   objcCompilerLinkerFrontendVariantNode("OBJC"),
   objcxxCompilerLinkerFrontendVariantNode("OBJCXX"),
   fortranCompilerLinkerFrontendVariantNode("Fortran"),
-  hipCompilerLinkerFrontendVariantNode("HIP");
+  hipCompilerLinkerFrontendVariantNode("HIP"),
+  syclCompilerLinkerFrontendVariantNode("SYCL");
 
 static const struct LinkLibraryNode : public cmGeneratorExpressionNode
 {
@@ -6485,6 +6489,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "CUDA_COMPILER_ID", &cudaCompilerIdNode },
     { "Fortran_COMPILER_ID", &fortranCompilerIdNode },
     { "HIP_COMPILER_ID", &hipCompilerIdNode },
+    { "SYCL_COMPILER_ID", &syclCompilerIdNode },
     { "VERSION_GREATER", &versionGreaterNode },
     { "VERSION_GREATER_EQUAL", &versionGreaterEqNode },
     { "VERSION_LESS", &versionLessNode },
@@ -6497,6 +6502,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "OBJCXX_COMPILER_VERSION", &objcxxCompilerVersionNode },
     { "Fortran_COMPILER_VERSION", &fortranCompilerVersionNode },
     { "HIP_COMPILER_VERSION", &hipCompilerVersionNode },
+    { "SYCL_COMPILER_VERSION", &syclCompilerVersionNode },
     { "C_COMPILER_FRONTEND_VARIANT", &cCompilerFrontendVariantNode },
     { "CXX_COMPILER_FRONTEND_VARIANT", &cxxCompilerFrontendVariantNode },
     { "CUDA_COMPILER_FRONTEND_VARIANT", &cudaCompilerFrontendVariantNode },
@@ -6505,6 +6511,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "Fortran_COMPILER_FRONTEND_VARIANT",
       &fortranCompilerFrontendVariantNode },
     { "HIP_COMPILER_FRONTEND_VARIANT", &hipCompilerFrontendVariantNode },
+    { "SYCL_COMPILER_FRONTEND_VARIANT", &syclCompilerFrontendVariantNode },
     { "PLATFORM_ID", &platformIdNode },
     { "COMPILE_FEATURES", &compileFeaturesNode },
     { "CONFIGURATION", &configurationNode },
@@ -6619,6 +6626,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "CUDA_COMPILER_LINKER_ID", &cudaCompilerLinkerIdNode },
     { "Fortran_COMPILER_LINKER_ID", &fortranCompilerLinkerIdNode },
     { "HIP_COMPILER_LINKER_ID", &hipCompilerLinkerIdNode },
+    { "SYCL_COMPILER_LINKER_ID", &syclCompilerLinkerIdNode },
     { "C_COMPILER_LINKER_FRONTEND_VARIANT",
       &cCompilerLinkerFrontendVariantNode },
     { "CXX_COMPILER_LINKER_FRONTEND_VARIANT",
@@ -6633,6 +6641,8 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
       &fortranCompilerLinkerFrontendVariantNode },
     { "HIP_COMPILER_LINKER_FRONTEND_VARIANT",
       &hipCompilerLinkerFrontendVariantNode },
+    { "SYCL_COMPILER_LINKER_FRONTEND_VARIANT",
+      &syclCompilerLinkerFrontendVariantNode },
     { "LINK_LIBRARY", &linkLibraryNode },
     { "LINK_GROUP", &linkGroupNode },
     { "HOST_LINK", &hostLinkNode },

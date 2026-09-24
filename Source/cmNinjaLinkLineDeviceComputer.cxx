@@ -3,12 +3,14 @@
 
 #include "cmNinjaLinkLineDeviceComputer.h"
 
+#include <utility>
+
 #include "cmGlobalNinjaGenerator.h"
 
 cmNinjaLinkLineDeviceComputer::cmNinjaLinkLineDeviceComputer(
   cmOutputConverter* outputConverter, cmStateDirectory const& stateDir,
-  cmGlobalNinjaGenerator const* gg)
-  : cmLinkLineDeviceComputer(outputConverter, stateDir)
+  cmGlobalNinjaGenerator const* gg, std::string language)
+  : cmLinkLineDeviceComputer(outputConverter, stateDir, std::move(language))
   , GG(gg)
 {
 }

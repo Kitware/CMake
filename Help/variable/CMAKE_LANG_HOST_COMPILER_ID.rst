@@ -8,3 +8,11 @@ and :variable:`CMAKE_<LANG>_COMPILER_ID` is ``NVIDIA``.
 It contains the identity of the host compiler invoked by ``nvcc``,
 either by default or as specified by :variable:`CMAKE_<LANG>_HOST_COMPILER`,
 among possibilities documented by :variable:`CMAKE_<LANG>_COMPILER_ID`.
+
+.. versionadded:: 4.5
+  This variable is also available when ``<LANG>`` is ``SYCL`` and
+  :variable:`CMAKE_<LANG>_COMPILER_ID` is ``AdaptiveCpp``.  It identifies the
+  underlying host compiler used by the AdaptiveCpp driver.
+
+  .. note::
+    SYCL support is experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.

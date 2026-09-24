@@ -38,6 +38,7 @@
 #include "cmGeneratorFileSets.h"
 #include "cmGeneratorOptions.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkLineDeviceComputer.h"
 #include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -930,8 +931,17 @@ BTs<std::string> const* cmGeneratorTarget::GetLanguageStandardProperty(
     return &langStandardIter->second;
   }
 
-  return this->Target->GetLanguageStandardProperty(
-    cmStrCat(lang, "_STANDARD"));
+  if (BTs<std::string> const* languageStandard =
+        this->Target->GetLanguageStandardProperty(
+          cmStandardLevelResolver::GetStandardPropertyName(lang))) {
+    return languageStandard;
+  }
+
+  if (this->IsSYCLAppendMode(lang)) {
+    return this->GetLanguageStandardProperty("CXX", config);
+  }
+
+  return nullptr;
 }
 
 cmValue cmGeneratorTarget::GetLanguageStandard(std::string const& lang,
@@ -950,12 +960,17 @@ cmValue cmGeneratorTarget::GetLanguageStandard(std::string const& lang,
 cmValue cmGeneratorTarget::GetPropertyWithPairedLanguageSupport(
   std::string const& lang, char const* suffix) const
 {
-  cmValue propertyValue = this->Target->GetProperty(cmStrCat(lang, suffix));
+  std::string const property = std::string(suffix) == "_STANDARD_REQUIRED"
+    ? cmStrCat(cmStandardLevelResolver::GetStandardPropertyName(lang),
+               "_REQUIRED")
+    : cmStrCat(lang, suffix);
+  cmValue propertyValue = this->Target->GetProperty(property);
   if (!propertyValue) {
     // Check if we should use the value set by another language.
     if (lang == "OBJC") {
       propertyValue = this->GetPropertyWithPairedLanguageSupport("C", suffix);
-    } else if (lang == "OBJCXX" || lang == "CUDA" || lang == "HIP") {
+    } else if (lang == "OBJCXX" || lang == "CUDA" || lang == "HIP" ||
+               this->IsSYCLAppendMode(lang)) {
       propertyValue =
         this->GetPropertyWithPairedLanguageSupport("CXX", suffix);
     }
@@ -973,6 +988,36 @@ bool cmGeneratorTarget::GetLanguageStandardRequired(
 {
   return this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED")
     .IsOn();
+}
+
+cmGeneratorTarget::SYCLExtensionMode cmGeneratorTarget::GetSYCLExtensionMode()
+  const
+{
+  cmValue mode = this->GetProperty("SYCL_EXTENSION_MODE");
+  if (mode.IsEmpty()) {
+    return SYCLExtensionMode::Append;
+  }
+
+  std::string normalizedMode = cmSystemTools::UpperCase(*mode);
+  if (normalizedMode == "APPEND") {
+    return SYCLExtensionMode::Append;
+  }
+  if (normalizedMode == "REPLACE") {
+    return SYCLExtensionMode::Replace;
+  }
+
+  this->LocalGenerator->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Target \"", this->GetName(),
+             "\" has an invalid SYCL_EXTENSION_MODE value \"", *mode,
+             "\".  Expected APPEND or REPLACE."));
+  return SYCLExtensionMode::Append;
+}
+
+bool cmGeneratorTarget::IsSYCLAppendMode(std::string const& lang) const
+{
+  return lang == "SYCL" &&
+    this->GetSYCLExtensionMode() == SYCLExtensionMode::Append;
 }
 
 void cmGeneratorTarget::GetModuleDefinitionSources(
@@ -2135,7 +2180,7 @@ namespace {
 
 bool IsSupportedClassifiedFlagsLanguage(std::string const& lang)
 {
-  return lang == "CXX"_s;
+  return lang == "CXX"_s || lang == "SYCL"_s;
 }
 
 bool CanUseCompilerLauncher(std::string const& lang)
@@ -2143,7 +2188,7 @@ bool CanUseCompilerLauncher(std::string const& lang)
   // Also found in `cmCommonTargetGenerator::GetCompilerLauncher`.
   return lang == "C"_s || lang == "CXX"_s || lang == "Fortran"_s ||
     lang == "CUDA"_s || lang == "HIP"_s || lang == "ISPC"_s ||
-    lang == "OBJC"_s || lang == "OBJCXX"_s;
+    lang == "SYCL"_s || lang == "OBJC"_s || lang == "OBJCXX"_s;
 }
 
 // FIXME: return a vector of `cm::string_view` instead to avoid lots of tiny
@@ -2666,9 +2711,13 @@ cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
 void cmGeneratorTarget::AddExplicitLanguageFlags(
   std::string& flags, cmSourceFile const& sf, std::string const& config) const
 {
-  if (auto const language =
-        this->FileSets->GetLanguageForSource(config, &sf)) {
-    this->LocalGenerator->AppendFeatureOptions(flags, *language,
+  auto const fileSetLanguage =
+    this->FileSets->GetLanguageForSource(config, &sf);
+  std::string const effectiveLanguage =
+    this->GetSourceFileLanguage(&sf, config);
+  if (fileSetLanguage ||
+      (!effectiveLanguage.empty() && effectiveLanguage != sf.GetLanguage())) {
+    this->LocalGenerator->AppendFeatureOptions(flags, effectiveLanguage,
                                                "EXPLICIT_LANGUAGE");
     return;
   }
@@ -2691,6 +2740,63 @@ void cmGeneratorTarget::AddExplicitLanguageFlags(
 
   this->LocalGenerator->AppendFeatureOptions(flags, *lang,
                                              "EXPLICIT_LANGUAGE");
+}
+
+void cmGeneratorTarget::AddSYCLDeviceTargetFlags(cmBuildStep compileOrLink,
+                                                 std::string const& config,
+                                                 std::string& flags) const
+{
+  if (compileOrLink == cmBuildStep::Link && !this->IsDeviceLink() &&
+      requireDeviceLinking(*this, *this->LocalGenerator, config, "SYCL")) {
+    return;
+  }
+  std::string targets = this->GetSafeProperty("SYCL_DEVICE_TARGETS");
+  auto const& compiler =
+    this->Makefile->GetSafeDefinition("CMAKE_SYCL_COMPILER_ID");
+  bool const acpp = compiler == "AdaptiveCpp";
+  auto const& baseline =
+    this->Makefile->GetSafeDefinition("_CMAKE_SYCL_DEVICE_TARGETS");
+  if (targets.empty()) {
+    targets = baseline;
+  }
+  bool multipass = false;
+  if (acpp) {
+    static std::unordered_set<std::string> const multipassFlows{
+      "cuda", "cuda.integrated-multipass", "cuda.explicit-multipass",
+      "hip",  "hip.integrated-multipass",  "hip.explicit-multipass"
+    };
+    for (auto const& entry : cmList{ targets }) {
+      std::string const flow = cmSystemTools::LowerCase(
+        cmTrimWhitespace(entry.substr(0, entry.find(':'))));
+      if (multipassFlows.find(flow) != multipassFlows.end()) {
+        multipass = true;
+      }
+    }
+  }
+  if (!targets.empty() && !cmIsOff(targets)) {
+    std::string option;
+    if (acpp) {
+      option = "--acpp-targets=" + targets;
+    } else if (compiler == "IntelLLVM") {
+      option = "-fsycl-targets=" + cmJoin(cmList{ targets }, ",");
+    } else if (compiler == "Clang") {
+      option = "--offload-targets=" + cmJoin(cmList{ targets }, ",");
+    } else {
+      this->LocalGenerator->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("SYCL_DEVICE_TARGETS is not supported by the ", compiler,
+                 " compiler."));
+      return;
+    }
+    flags = cmStrCat(std::move(flags), ' ',
+                     this->LocalGenerator->EscapeForShell(option));
+  }
+  bool const callerSelectsLanguage =
+    acpp && !targets.empty() && cmIsOff(targets);
+  if (compileOrLink == cmBuildStep::Compile && !multipass &&
+      !callerSelectsLanguage) {
+    flags += " -x c++";
+  }
 }
 
 void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
@@ -3702,7 +3808,53 @@ bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config)
 bool cmGeneratorTarget::ComputeCompileFeatures(
   std::string const& config, std::set<LanguagePair> const& languagePairs)
 {
+  cmStandardLevelResolver standardResolver(this->Makefile);
   for (auto const& language : languagePairs) {
+    if (language.first == "SYCL") {
+      if (!this->IsSYCLAppendMode(language.first)) {
+        continue;
+      }
+
+      std::string key =
+        cmStrCat(cmSystemTools::UpperCase(config), '-', language.first);
+      BTs<std::string> const* currentStandard = nullptr;
+      auto current = this->LanguageStandardMap.find(key);
+      if (current != this->LanguageStandardMap.end()) {
+        currentStandard = &current->second;
+      } else {
+        currentStandard = this->Target->GetLanguageStandardProperty(
+          cmStandardLevelResolver::GetStandardPropertyName(language.first));
+      }
+
+      BTs<std::string> const* pairedStandard =
+        this->GetLanguageStandardProperty(language.second, config);
+      BTs<std::string> defaultStandard;
+      if (!pairedStandard && !currentStandard) {
+        if (cmValue value = this->Makefile->GetDefinition(
+              cmStrCat("CMAKE_", language.second, "_STANDARD_DEFAULT"))) {
+          defaultStandard = BTs<std::string>(*value);
+          pairedStandard = &defaultStandard;
+        }
+        if (cmValue value =
+              this->Makefile->GetDefinition("CMAKE_SYCL_STANDARD_DEFAULT")) {
+          if (!pairedStandard ||
+              standardResolver.IsLaterStandard(language.first, *value,
+                                               pairedStandard->Value)) {
+            defaultStandard = BTs<std::string>(*value);
+            pairedStandard = &defaultStandard;
+          }
+        }
+      }
+
+      if (pairedStandard &&
+          (!currentStandard ||
+           standardResolver.IsLaterStandard(
+             language.first, pairedStandard->Value, currentStandard->Value))) {
+        this->LanguageStandardMap[key] = *pairedStandard;
+      }
+      continue;
+    }
+
     BTs<std::string> const* generatorTargetLanguageStandard =
       this->GetLanguageStandardProperty(language.first, config);
     if (!generatorTargetLanguageStandard) {
@@ -6322,11 +6474,14 @@ cmGeneratorFileSet const* cmGeneratorTarget::GetFileSetForSource(
 std::string cmGeneratorTarget::GetSourceFileLanguage(
   cmSourceFile const* source, std::string const& config) const
 {
-  if (auto const language =
+  std::string language = source->GetLanguage();
+  if (auto const overrideLanguage =
         this->FileSets->GetLanguageForSource(config, source)) {
-    return *language;
+    language = *overrideLanguage;
   }
-  return source->GetLanguage();
+  return language == "CXX"_s && this->FileSets->HasSyclHeaders(config)
+    ? "SYCL"
+    : language;
 }
 
 std::string cmGeneratorTarget::BuildDatabasePath(

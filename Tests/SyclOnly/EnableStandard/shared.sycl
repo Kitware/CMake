@@ -1,0 +1,10 @@
+#if __cplusplus < 202002L
+#  error "sycl_cxx_std_20 was not honored"
+#endif
+
+#include <type_traits>
+
+int shared_value()
+{
+  return std::is_constant_evaluated() ? 0 : 20;
+}

@@ -9,6 +9,7 @@ The variations are:
 * :variable:`CMAKE_HIP_EXTENSIONS`
 * :variable:`CMAKE_OBJC_EXTENSIONS`
 * :variable:`CMAKE_OBJCXX_EXTENSIONS`
+* :variable:`CMAKE_SYCL_EXTENSIONS`
 
 Default values for :prop_tgt:`<LANG>_EXTENSIONS` target properties if set when
 a target is created.  For the compiler's default setting see

@@ -1,0 +1,2 @@
+-- Check for working SYCL compiler: [^
+]* - works

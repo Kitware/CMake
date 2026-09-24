@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <AvailableItemName Include="SYCL"><Targets>SYCLCompile</Targets></AvailableItemName>
+  </ItemGroup>
+  <PropertyGroup>
+    <ExecutablePath Condition="'$(SYCLCompilerDirectory)' != ''">$(SYCLCompilerDirectory);$(ExecutablePath)</ExecutablePath>
+    <LibraryPath Condition="'$(SYCLCompilerDirectory)' != '' and Exists('$(SYCLCompilerDirectory)../lib')">$([System.IO.Path]::GetFullPath('$(SYCLCompilerDirectory)../lib'));$(LibraryPath)</LibraryPath>
+    <BeforeClCompileTargets>$(BeforeClCompileTargets);SYCLCompile</BeforeClCompileTargets>
+    <ComputeLinkInputsTargets>$(ComputeLinkInputsTargets);ComputeSYCLOutput;ComputeSYCLDeviceLinkOutput</ComputeLinkInputsTargets>
+    <ComputeLibInputsTargets>$(ComputeLibInputsTargets);ComputeSYCLOutput;ComputeSYCLDeviceLinkOutput</ComputeLibInputsTargets>
+    <SYCLToolName>$([System.IO.Path]::GetFileNameWithoutExtension('$(SYCLToolExe)'))</SYCLToolName>
+  </PropertyGroup>
+  <!-- Reuse native Link execution and tracking, replacing only its linker
+       command syntax with the selected SYCL frontend's shared CMake rule. -->
+  <UsingTask TaskName="SYCLLink" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <BuildingInIDE ParameterType="System.Boolean"/>
+      <Sources ParameterType="Microsoft.Build.Framework.ITaskItem[]"/>
+      <OutputFile ParameterType="System.String"/>
+      <ToolExe ParameterType="System.String"/>
+      <AdditionalOptions ParameterType="System.String"/>
+      <TrackerLogDirectory ParameterType="System.String"/>
+      <TLogReadFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]"/>
+      <TLogWriteFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]"/>
+      <TrackFileAccess ParameterType="System.Boolean"/>
+      <MinimalRebuildFromTracking ParameterType="System.Boolean"/>
+      <ToolArchitecture ParameterType="System.String"/>
+      <TrackerFrameworkPath ParameterType="System.String"/>
+      <TrackerSdkPath ParameterType="System.String"/>
+      <TrackedInputFilesToIgnore ParameterType="Microsoft.Build.Framework.ITaskItem[]"/>
+      <YieldDuringToolExecution ParameterType="System.Boolean"/>
+      <SkippedExecution ParameterType="System.Boolean" Output="true"/>
+    </ParameterGroup>
+    <Task>
+      <Reference Include="$(VCTargetsPath)Microsoft.Build.CppTasks.Common.dll"/>
+      <Code Type="Class" Language="cs"><![CDATA[
+        public class SYCLLink : Microsoft.Build.CPPTasks.Link
+        {
+          protected override string GenerateCommandLineCommands(CommandLineFormat format, EscapeFormat escape)
+          {
+            return "";
+          }
+
+          protected override string GenerateResponseFileCommands(CommandLineFormat format, EscapeFormat escape)
+          {
+            return AdditionalOptions;
+          }
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <ItemDefinitionGroup>
+    <SYCLDeviceLink>
+      <TrackerLogDirectory>$(TLogLocation)SYCLDeviceLink\</TrackerLogDirectory>
+    </SYCLDeviceLink>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CoreCppClean Include="$(TLogLocation)SYCLDeviceLink\"/>
+  </ItemGroup>
+  <ItemGroup Condition="'$(CMakeSYCLDeviceLinkObject)' != ''">
+    <SYCLDeviceLink Include="$(CMakeSYCLDeviceLinkObject)"/>
+  </ItemGroup>
+  <!-- Follow SelectClCompile: retain all sources for object computation and
+       cleanup, and select a separate list for a selected-file build. -->
+  <Target Name="SelectSYCLCompile" DependsOnTargets="_SelectedFiles">
+    <ItemGroup>
+      <SYCL Remove="@(SYCL)" Condition="'%(SYCL.ExcludedFromBuild)' == 'true'"/>
+      <_SYCLCompile Include="@(SYCL)" Condition="'@(SelectedFiles)' == '' or '%(SYCL.Identity)' == '@(SelectedFiles)'"/>
+      <_SYCLCompile Condition="'@(SelectedFiles)' != ''">
+        <MinimalRebuildFromTracking>false</MinimalRebuildFromTracking>
+      </_SYCLCompile>
+      <ClDirsToMake Include="@(_SYCLCompile-&gt;Metadata('ObjectFileName')-&gt;DirectoryName()-&gt;Distinct()-&gt;ClearMetadata())"/>
+    </ItemGroup>
+  </Target>
+  <Target Name="SYCLCompile" DependsOnTargets="SelectSYCLCompile;MakeDirsForCl" Condition="'@(SYCL)' != ''">
+    <PropertyGroup>
+      <CLToolArchitecture Condition="'$(CLToolArchitecture)' == ''">$(VCToolArchitecture)</CLToolArchitecture>
+      <CLDeleteOutputOnExecute Condition="'$(CLDeleteOutputOnExecute)' == ''">true</CLDeleteOutputOnExecute>
+    </PropertyGroup>
+    <CL Condition="'@(_SYCLCompile)' != ''"
+        BuildingInIDE="$(BuildingInsideVisualStudio)"
+        Sources="@(_SYCLCompile)"
+        ToolExe="$(SYCLToolExe)"
+        ObjectFileName="%(_SYCLCompile.ObjectFileName)"
+        AdditionalIncludeDirectories="%(_SYCLCompile.AdditionalIncludeDirectories)"
+        PreprocessorDefinitions="%(_SYCLCompile.PreprocessorDefinitions)"
+        AdditionalOptions="$(LlvmArchitectureSwitch) %(_SYCLCompile.AdditionalOptions)"
+        SuppressStartupBanner="%(_SYCLCompile.SuppressStartupBanner)"
+        TrackerLogDirectory="$(TLogLocation)"
+        ExcludedInputPaths="$(ExcludePath)"
+        TLogReadFiles="$(TLogLocation)$(SYCLToolName)*.read.*.tlog"
+        TLogWriteFiles="$(TLogLocation)$(SYCLToolName)*.write.*.tlog"
+        TrackFileAccess="$(TrackFileAccess)"
+        MinimalRebuildFromTracking="%(_SYCLCompile.MinimalRebuildFromTracking)"
+        ToolArchitecture="$(CLToolArchitecture)"
+        TrackerFrameworkPath="$(CLTrackerFrameworkPath)"
+        TrackerSdkPath="$(CLTrackerSdkPath)"
+        TrackedInputFilesToIgnore="@(ClNoDependencies)"
+        TrackedOutputFilesToIgnore="@(ClTrackedOutputFilesToIgnore)"
+        DeleteOutputOnExecute="$(CLDeleteOutputOnExecute)"
+        YieldDuringToolExecution="$(ClYieldDuringToolExecution)"/>
+  </Target>
+  <Target Name="ComputeSYCLOutput" Condition="'@(SYCL)' != ''">
+    <ItemGroup>
+      <Link Include="@(SYCL-&gt;Metadata('ObjectFileName')-&gt;Distinct()-&gt;ClearMetadata())" Condition="'%(SYCL.ExcludedFromBuild)' != 'true'"/>
+      <Lib Include="@(SYCL-&gt;Metadata('ObjectFileName')-&gt;Distinct()-&gt;ClearMetadata())" Condition="'%(SYCL.ExcludedFromBuild)' != 'true'"/>
+    </ItemGroup>
+  </Target>
+  <!-- Match native TlogCleanup, including SYCL sources compiled by CL. -->
+  <Target Name="TlogCleanup" DependsOnTargets="$(TlogCleanupDependsOn)" Condition="'$(CleanupTlogItems)' != 'false' and '$(DesigntimeBuild)' != 'true' and '$(SelectedFiles)' == ''">
+    <CleanupStaleTlogItems Sources="@(ClCompile);@(SYCL)"
+                          ItemOutputMetadataName="ObjectFileName" OutputExtension="obj"
+                          TLogDirectory="$(TLogLocation)" TLogNamePrefix="Cl"
+                          TrackFileAccess="$(TrackFileAccess)"
+                          DynamicDebugging="%(ClCompile.UseDynamicDebugging)"/>
+    <CleanupStaleTlogItems Condition="'$(SYCLToolName)' != '' and '$(SYCLToolName)' != 'cl'"
+                          Sources="@(ClCompile);@(SYCL)"
+                          ItemOutputMetadataName="ObjectFileName" OutputExtension="obj"
+                          TLogDirectory="$(TLogLocation)" TLogNamePrefix="$(SYCLToolName)"
+                          TrackFileAccess="$(TrackFileAccess)"/>
+  </Target>
+  <Target Name="SYCLDeviceLink" Condition="'@(SYCLDeviceLink)' != ''">
+    <RemoveDuplicates Inputs="@(Link);@(Lib)">
+      <Output TaskParameter="Filtered" ItemName="_SYCLDeviceInputs"/>
+    </RemoveDuplicates>
+    <PropertyGroup>
+      <LinkToolArchitecture Condition="'$(LinkToolArchitecture)' == ''">$(VCToolArchitecture)</LinkToolArchitecture>
+      <_SYCLDeviceInputArguments>@(_SYCLDeviceInputs-&gt;'&quot;%(FullPath)&quot;', ' ')</_SYCLDeviceInputArguments>
+      <_SYCLDeviceArguments>$([System.String]::Copy('%(SYCLDeviceLink.AdditionalOptions)').Replace('__CMAKE_SYCL_OBJECTS__', '$(_SYCLDeviceInputArguments)'))</_SYCLDeviceArguments>
+      <!-- Compile, device link and final link use the same executable, unlike
+           ClangCL's separate compiler and linker. Keep their logs separate. -->
+    </PropertyGroup>
+    <MakeDir Directories="%(SYCLDeviceLink.TrackerLogDirectory)"/>
+    <SYCLLink Sources="@(_SYCLDeviceInputs)" OutputFile="$(CMakeSYCLDeviceLinkObject)"
+              ToolExe="%(SYCLDeviceLink.ToolExe)" AdditionalOptions="$(LlvmArchitectureSwitch) $(_SYCLDeviceArguments)"
+              TrackerLogDirectory="%(SYCLDeviceLink.TrackerLogDirectory)"
+              TLogReadFiles="%(SYCLDeviceLink.TrackerLogDirectory)$(SYCLToolName)*.read.*.tlog"
+              TLogWriteFiles="%(SYCLDeviceLink.TrackerLogDirectory)$(SYCLToolName)*.write.*.tlog"
+              TrackFileAccess="$(TrackFileAccess)"
+              MinimalRebuildFromTracking="$(TrackFileAccess)"
+              ToolArchitecture="$(LinkToolArchitecture)"
+              TrackerFrameworkPath="$(LinkTrackerFrameworkPath)"
+              TrackerSdkPath="$(LinkTrackerSdkPath)"
+              TrackedInputFilesToIgnore="@(LinkNoDependencies)"
+              YieldDuringToolExecution="$(LinkYieldDuringToolExecution)"/>
+  </Target>
+  <Target Name="ComputeSYCLDeviceLinkOutput" Condition="'$(CMakeSYCLDeviceLinkObject)' != ''" DependsOnTargets="SYCLDeviceLink">
+    <ItemGroup>
+      <Link Include="$(CMakeSYCLDeviceLinkObject)"/>
+      <Lib Include="$(CMakeSYCLDeviceLinkObject)"/>
+    </ItemGroup>
+  </Target>
+  <Import Project="$(MSBuildThisFileDirectory)sycl-link.targets" Condition="'$(CMakeSYCLLink)' == 'true'"/>
+</Project>

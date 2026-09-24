@@ -1,0 +1,8 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file LICENSE.rst or https://cmake.org/licensing for details.
+
+set(_CMAKE_SYCL_ADAPTIVECPP_VERSION "${CMAKE_SYCL_COMPILER_VERSION}")
+set(CMAKE_SYCL_COMPILER_VERSION "${CMAKE_SYCL_HOST_COMPILER_VERSION}")
+include(Compiler/${CMAKE_SYCL_HOST_COMPILER_ID}-FindBinUtils OPTIONAL)
+set(CMAKE_SYCL_COMPILER_VERSION "${_CMAKE_SYCL_ADAPTIVECPP_VERSION}")
+unset(_CMAKE_SYCL_ADAPTIVECPP_VERSION)

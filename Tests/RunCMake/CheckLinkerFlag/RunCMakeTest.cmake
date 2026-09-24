@@ -17,6 +17,10 @@ if (CMake_TEST_CUDA)
   run_cmake(CheckLinkerFlagCUDA)
 endif()
 
+if (CMake_TEST_SYCL)
+  run_cmake_with_options(CheckLinkerFlagSYCL -Wno-experimental)
+endif()
+
 if (CMake_TEST_HIP)
   run_cmake(CheckLinkerFlagHIP)
 endif()

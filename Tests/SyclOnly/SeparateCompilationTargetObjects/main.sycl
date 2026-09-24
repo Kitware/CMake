@@ -1,0 +1,14 @@
+#include "../utils/TestDevice.h"
+
+int foo();
+int bar();
+
+int main()
+{
+  if (!sycl_test_device_available()) {
+    return 77;
+  }
+  int first = foo();
+  int second = bar();
+  return first || second;
+}

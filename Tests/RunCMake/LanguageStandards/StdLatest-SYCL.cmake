@@ -1,0 +1,5 @@
+set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+enable_language(SYCL)
+message(STATUS "CMAKE_SYCL_STANDARD_LATEST='${CMAKE_SYCL_STANDARD_LATEST}'")
+add_executable(StdLatest StdLatest-SYCL.sycl)
+target_compile_features(StdLatest PRIVATE sycl_cxx_std_${CMAKE_SYCL_STANDARD_LATEST})

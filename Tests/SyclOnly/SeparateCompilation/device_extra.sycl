@@ -1,0 +1,5 @@
+#include "device.h"
+SYCL_EXTERNAL int device_offset()
+{
+  return 0;
+}

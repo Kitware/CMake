@@ -1014,15 +1014,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts"));
   }
 
-  // At the moment, it is assumed that C, C++, Fortran, and CUDA have both
-  // assembly and preprocessor capabilities. The same is true for the
-  // ability to export compile commands
   bool const lang_has_preprocessor =
     ((lang == "C") || (lang == "CXX") || (lang == "OBJC") ||
      (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA") ||
-     lang == "ISPC" || lang == "HIP" || lang == "ASM");
-  bool const lang_has_assembly = lang_has_preprocessor;
-  bool const lang_can_export_cmds = lang_has_preprocessor;
+     lang == "SYCL" || lang == "ISPC" || lang == "HIP" || lang == "ASM");
 
   auto rulePlaceholderExpander =
     this->LocalGenerator->CreateRulePlaceholderExpander();
@@ -1067,7 +1062,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     compileCommands.assign(compileRule);
 
     if (this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS") &&
-        lang_can_export_cmds && compileCommands.size() == 1) {
+        lang_has_preprocessor && compileCommands.size() == 1) {
       std::string compileCommand = compileCommands[0];
 
       // no launcher for CMAKE_EXPORT_COMPILE_COMMANDS
@@ -1243,8 +1238,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
   bool do_preprocess_rules = lang_has_preprocessor &&
     this->LocalGenerator->GetCreatePreprocessedSourceRules();
-  bool do_assembly_rules =
-    lang_has_assembly && this->LocalGenerator->GetCreateAssemblySourceRules();
+  bool do_assembly_rules = lang_has_preprocessor &&
+    this->LocalGenerator->GetCreateAssemblySourceRules();
   if (do_preprocess_rules || do_assembly_rules) {
     std::vector<std::string> force_depends;
     force_depends.emplace_back("cmake_force");

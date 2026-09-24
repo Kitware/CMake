@@ -21,6 +21,10 @@ if (CMake_TEST_CUDA)
   run_cmake(CheckCompilerFlagCUDA)
 endif()
 
+if (CMake_TEST_SYCL)
+  run_cmake_with_options(CheckCompilerFlagSYCL -Wno-experimental)
+endif()
+
 if(CMake_TEST_ISPC)
   run_cmake(CheckCompilerFlagISPC)
 endif()

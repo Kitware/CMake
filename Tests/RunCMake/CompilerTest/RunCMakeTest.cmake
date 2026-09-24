@@ -1,5 +1,9 @@
 include(RunCMake)
 
+if(CMake_TEST_SYCL)
+  list(APPEND RunCMake_TEST_OPTIONS -Wno-experimental)
+endif()
+
 run_cmake(C)
 run_cmake(CXX)
 
@@ -13,6 +17,10 @@ endif()
 
 if(CMake_TEST_HIP)
   run_cmake(HIP)
+endif()
+
+if(CMake_TEST_SYCL)
+  run_cmake(SYCL)
 endif()
 
 if(CMake_TEST_ISPC)

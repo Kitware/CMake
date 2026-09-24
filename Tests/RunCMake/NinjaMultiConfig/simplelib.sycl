@@ -1,0 +1,9 @@
+#include <sycl/sycl.hpp>
+
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
+int simplelib()
+{
+  return 0;
+}

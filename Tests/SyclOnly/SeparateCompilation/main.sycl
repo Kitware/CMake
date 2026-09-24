@@ -1,0 +1,19 @@
+#include "../utils/TestDevice.h"
+
+int launch_kernel();
+#ifdef TEST_SECOND_LIBRARY
+int launch_kernel2();
+#endif
+
+int main()
+{
+  if (!sycl_test_device_available()) {
+    return 77;
+  }
+#ifdef TEST_SECOND_LIBRARY
+  if (launch_kernel2() != 42) {
+    return 1;
+  }
+#endif
+  return launch_kernel() == 42 ? 0 : 1;
+}

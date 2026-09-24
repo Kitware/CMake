@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 4.4)
+set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+project(CXXStandardSetTwice CXX SYCL)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(CXXStandardSetTwice main.sycl)
+target_compile_features(CXXStandardSetTwice PUBLIC cxx_std_20)

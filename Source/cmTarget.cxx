@@ -39,6 +39,7 @@
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
+#include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -367,6 +368,16 @@ TargetProperty const StaticTargetProperties[] = {
   COMMON_LANGUAGE_PROPERTIES(C),
   // ---- C++
   COMMON_LANGUAGE_PROPERTIES(CXX),
+  // ---- SYCL
+  { "SYCL_COMPILER_LAUNCHER"_s, IC::CanCompileSources },
+  { "SYCL_CXX_STANDARD"_s, IC::CanCompileSources },
+  { "SYCL_CXX_STANDARD_REQUIRED"_s, IC::CanCompileSources },
+  { "SYCL_EXTENSIONS"_s, IC::CanCompileSources },
+  { "SYCL_VISIBILITY_PRESET"_s, IC::CanCompileSources },
+  { "SYCL_EXTENSION_MODE"_s, IC::CanCompileSources },
+  { "SYCL_DEVICE_TARGETS"_s, IC::CanCompileSources },
+  { "SYCL_SEPARABLE_COMPILATION"_s, IC::CanCompileSources },
+  { "SYCL_RESOLVE_DEVICE_SYMBOLS"_s, IC::CanCompileSources },
   // ---- CSharp
   { "DOTNET_SDK"_s, IC::NonImportedTarget },
   { "DOTNET_TARGET_FRAMEWORK"_s, IC::TargetWithCommands },
@@ -480,6 +491,8 @@ TargetProperty const StaticTargetProperties[] = {
   // ---- HIP
   { "HIP_LINKER_LAUNCHER"_s, IC::CanCompileSources },
   { "HIP_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
+  // ---- SYCL
+  { "SYCL_LINKER_LAUNCHER"_s, IC::CanCompileSources },
   // ---- Objective C
   { "OBJC_LINKER_LAUNCHER"_s, IC::CanCompileSources },
   // ---- Objective C++
@@ -1300,7 +1313,8 @@ void cmTarget::SetLanguageStandardProperty(std::string const& lang,
   }
 
   BTs<std::string>& languageStandardProperty =
-    this->impl->LanguageStandardProperties[cmStrCat(lang, "_STANDARD")];
+    this->impl->LanguageStandardProperties
+      [cmStandardLevelResolver::GetStandardPropertyName(lang)];
   if (languageStandardProperty.Value != value) {
     languageStandardProperty.Value = value;
     languageStandardProperty.Backtraces.clear();
@@ -2102,6 +2116,7 @@ MAKE_PROP(CUDA_STANDARD);
 MAKE_PROP(HIP_STANDARD);
 MAKE_PROP(OBJC_STANDARD);
 MAKE_PROP(OBJCXX_STANDARD);
+MAKE_PROP(SYCL_CXX_STANDARD);
 MAKE_PROP(COMPILE_DEFINITIONS);
 MAKE_PROP(COMPILE_FEATURES);
 MAKE_PROP(COMPILE_OPTIONS);
@@ -2367,7 +2382,8 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
     }
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
              prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
-             prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD) {
+             prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD ||
+             prop == propSYCL_CXX_STANDARD) {
     if (value) {
       this->impl->LanguageStandardProperties[prop] =
         BTs<std::string>(value, this->impl->Makefile->GetBacktrace());
@@ -2438,7 +2454,8 @@ void cmTarget::AppendProperty(std::string const& prop,
       MessageType::FATAL_ERROR, prop + " property may not be APPENDed.");
   } else if (prop == "C_STANDARD" || prop == "CXX_STANDARD" ||
              prop == "CUDA_STANDARD" || prop == "HIP_STANDARD" ||
-             prop == "OBJC_STANDARD" || prop == "OBJCXX_STANDARD") {
+             prop == "OBJC_STANDARD" || prop == "OBJCXX_STANDARD" ||
+             prop == "SYCL_CXX_STANDARD") {
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be appended.");
   } else {
@@ -2784,6 +2801,7 @@ std::unordered_set<std::string> const& cmTarget::GetSpecialPropertyNames()
     propHIP_STANDARD,
     propOBJC_STANDARD,
     propOBJCXX_STANDARD,
+    propSYCL_CXX_STANDARD,
     propLINK_LIBRARIES,
     propTYPE,
     propINCLUDE_DIRECTORIES,
@@ -2829,7 +2847,8 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
   if (specialProps.count(prop)) {
     if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
         prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
-        prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD) {
+        prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD ||
+        prop == propSYCL_CXX_STANDARD) {
       auto propertyIter = this->impl->LanguageStandardProperties.find(prop);
       if (propertyIter == this->impl->LanguageStandardProperties.end()) {
         return nullptr;

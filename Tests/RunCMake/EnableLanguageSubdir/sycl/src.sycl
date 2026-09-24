@@ -1,0 +1,9 @@
+#include <sycl/sycl.hpp>
+#include "src.h"
+
+void hello_world()
+{
+  sycl::queue queue;
+  queue.single_task<class HelloWorldKernel>([] {});
+  queue.wait_and_throw();
+}

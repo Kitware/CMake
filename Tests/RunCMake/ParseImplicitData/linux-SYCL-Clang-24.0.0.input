@@ -1,0 +1,583 @@
+CMAKE_LANG=SYCL
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_SYCL_COMPILER_ABI=ELF
+CMAKE_SYCL_COMPILER_AR=/opt/llvm/bin/llvm-ar
+CMAKE_SYCL_COMPILER_ARCHITECTURE_ID=x86_64
+CMAKE_SYCL_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_SYCL_COMPILER_ID=Clang
+CMAKE_SYCL_COMPILER_LAUNCHER=
+CMAKE_SYCL_COMPILER_LOADED=1
+CMAKE_SYCL_COMPILER_RANLIB=/opt/llvm/bin/llvm-ranlib
+CMAKE_SYCL_COMPILER_TARGET=
+CMAKE_SYCL_COMPILER_VERSION=24.0.0
+CMAKE_SYCL_COMPILER_VERSION_INTERNAL=
+Change Dir: '/tmp/opencode/sycl-ninja-capture/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/ninja -v cmTC_d282f
+[1/2] /opt/llvm/bin/clang++ -fsycl   -std=gnu++20   -v -MD -MT CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o -MF CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o.d -x c++ -o CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o -c '/opt/cmake source/Modules/CMakeSYCLCompilerABI.sycl'
+clang version 24.0.0git (git@github.com:llvm/llvm-project.git 152d32ee3550f4e54f2e4ae47dfaa8b9b6ec72a1)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/llvm/bin
+Found candidate GCC installation: /usr/lib/gcc/x86_64-pc-linux-gnu/15.3.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-pc-linux-gnu/16
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/15.3.0
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/16
+Selected GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/16
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Selected multilib: .@m64
+Found CUDA installation: /opt/cuda, version 13.4
+Found HIP installation: /opt/rocm, version 7.2.53211
+ "/opt/llvm/bin/clang-24" -cc1 -triple spirv64-unknown-unknown -aux-triple x86_64-unknown-linux-gnu -fsycl-is-device -O2 -sycl-std=2020 -Wspir-compat -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeSYCLCompilerABI.sycl -mrelocation-model static -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -aux-target-cpu x86-64 -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/opencode/sycl-ninja-capture/CMakeFiles/CMakeTmp -v -fcoverage-compilation-dir=/tmp/opencode/sycl-ninja-capture/CMakeFiles/CMakeTmp -resource-dir /opt/llvm/lib/clang/24 -dependency-file CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o.d -MT CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o -sys-header-deps -internal-isystem /opt/llvm/bin/../include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16 -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16 -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward -internal-isystem /opt/llvm/lib/clang/24/include -internal-isystem /opt/llvm/bin/../include/x86_64-unknown-linux-gnu -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /opt/llvm/lib/clang/24/include -internal-isystem /opt/llvm/bin/../include/x86_64-unknown-linux-gnu -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -std=gnu++20 -fdeprecated-macro -ferror-limit 19 -fgpu-rdc -fgnuc-version=4.2.1 -fno-implicit-modules -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -o /tmp/CMakeSYCLCompilerABI-fa7633.bc -x c++ "/opt/cmake source/Modules/CMakeSYCLCompilerABI.sycl"
+clang -cc1 version 24.0.0git based upon LLVM 24.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward"
+ignoring duplicate directory "/opt/llvm/lib/clang/24/include"
+ignoring duplicate directory "/opt/llvm/bin/../include/x86_64-unknown-linux-gnu"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/opt/llvm/lib/clang/24/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/llvm/bin/../include
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward
+ /opt/llvm/lib/clang/24/include
+ /opt/llvm/bin/../include/x86_64-unknown-linux-gnu
+ /usr/local/include
+ /usr/include
+End of search list.
+ "/opt/llvm/bin/llvm-offload-binary" -o /tmp/CMakeSYCLCompilerABI-67deae.out --image=file=/tmp/CMakeSYCLCompilerABI-fa7633.bc,triple=spirv64-unknown-unknown,arch=generic,kind=sycl
+ "/opt/llvm/bin/clang-24" -cc1 -triple x86_64-unknown-linux-gnu -aux-triple spirv64-unknown-unknown -fsycl-is-host -sycl-std=2020 -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeSYCLCompilerABI.sycl -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/opencode/sycl-ninja-capture/CMakeFiles/CMakeTmp -v -fcoverage-compilation-dir=/tmp/opencode/sycl-ninja-capture/CMakeFiles/CMakeTmp -resource-dir /opt/llvm/lib/clang/24 -dependency-file CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o.d -MT CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o -sys-header-deps -internal-isystem /opt/llvm/bin/../include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16 -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16 -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward -internal-isystem /opt/llvm/lib/clang/24/include -internal-isystem /opt/llvm/bin/../include/x86_64-unknown-linux-gnu -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /opt/llvm/lib/clang/24/include -internal-isystem /opt/llvm/bin/../include/x86_64-unknown-linux-gnu -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -std=gnu++20 -fdeprecated-macro -ferror-limit 19 -fgpu-rdc -fgnuc-version=4.2.1 -fno-implicit-modules -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fembed-offload-object=/tmp/CMakeSYCLCompilerABI-67deae.out -faddrsig -fdwarf2-cfi-asm -o CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o -x c++ "/opt/cmake source/Modules/CMakeSYCLCompilerABI.sycl"
+clang -cc1 version 24.0.0git based upon LLVM 24.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward"
+ignoring duplicate directory "/opt/llvm/lib/clang/24/include"
+ignoring duplicate directory "/opt/llvm/bin/../include/x86_64-unknown-linux-gnu"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/llvm/bin/../include
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward
+ /opt/llvm/lib/clang/24/include
+ /opt/llvm/bin/../include/x86_64-unknown-linux-gnu
+ /usr/local/include
+ /usr/include
+End of search list.
+[2/2] : && /opt/llvm/bin/clang++ -fsycl  -v CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o -o cmTC_d282f   && :
+clang version 24.0.0git (git@github.com:llvm/llvm-project.git 152d32ee3550f4e54f2e4ae47dfaa8b9b6ec72a1)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/llvm/bin
+Found candidate GCC installation: /usr/lib/gcc/x86_64-pc-linux-gnu/15.3.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-pc-linux-gnu/16
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/15.3.0
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/16
+Selected GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/16
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Selected multilib: .@m64
+Found CUDA installation: /opt/cuda, version 13.4
+Found HIP installation: /opt/rocm, version 7.2.53211
+ "/opt/llvm/bin/clang-linker-wrapper" --device-compiler=spirv64-unknown-unknown=-v --host-triple=x86_64-unknown-linux-gnu --wrapper-verbose --linker-path=/usr/bin/ld --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -pie -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_d282f /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/Scrt1.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crti.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtbeginS.o -L/opt/llvm/bin/../lib/x86_64-unknown-linux-gnu -L/opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu -L/usr/lib64/gcc/x86_64-pc-linux-gnu/16 -L/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64 -L/lib/../lib64 -L/usr/lib64 -L/lib -L/usr/lib CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtendS.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crtn.o --verbose
+ "/opt/llvm/bin/clang" --no-default-config -o /tmp/cmTC_d282f.spirv64.-08ad3d.img -dumpdir cmTC_d282f.spirv64..img. --target=spirv64-unknown-unknown /tmp/CMakeSYCLCompilerABI.sycl-spirv64-unknown-unknown-generic-3e88fe.o --sycl-link -v
+clang version 24.0.0git (git@github.com:llvm/llvm-project.git 152d32ee3550f4e54f2e4ae47dfaa8b9b6ec72a1)
+Target: spirv64-unknown-unknown
+Thread model: posix
+InstalledDir: /opt/llvm/bin
+ "/opt/llvm/bin/clang-sycl-linker" -triple=spirv64-unknown-unknown /tmp/CMakeSYCLCompilerABI.sycl-spirv64-unknown-unknown-generic-3e88fe.o -o /tmp/cmTC_d282f.spirv64.-08ad3d.img -v
+link: inputs: /tmp/CMakeSYCLCompilerABI.sycl-spirv64-unknown-unknown-generic-3e88fe.o output: /tmp/cmTC_d282f.spirv64.-08ad3d.img-5cf683.bc
+LLVM backend: input: /tmp/cmTC_d282f.spirv64.-08ad3d.img-5cf683.bc, output: /tmp/cmTC_d282f.spirv64.-08ad3d-385ed1.spv
+sycl-bundle: image kind: spv, triple: spirv64-unknown-unknown, arch:
+ "/usr/bin/ld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -pie -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_d282f /tmp/cmTC_d282f.sycl.image.wrapper-7f6f32.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/Scrt1.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crti.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtbeginS.o -L /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu -L /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu -L /usr/lib64/gcc/x86_64-pc-linux-gnu/16 -L /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64 -L /lib/../lib64 -L /usr/lib64 -L /lib -L /usr/lib CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so -l stdc++ -l m -l gcc_s -l gcc -l c -l gcc_s -l gcc /usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtendS.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crtn.o --verbose
+GNU ld (GNU Binutils) 2.47
+  Supported emulations:
+   elf_x86_64
+   elf_i386
+   elf32_x86_64
+   i386pep
+   i386pe
+   elf64bpf
+using internal linker script:
+==================================================
+/* Script for -pie -z combreloc -z separate-code */
+/* Copyright (C) 2014-2026 Free Software Foundation, Inc.
+   Copying and distribution of this script, with or without modification,
+   are permitted in any medium without royalty provided the copyright
+   notice and this notice are preserved.  */
+OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64")
+OUTPUT_ARCH(i386:x86-64)
+ENTRY(_start)
+SEARCH_DIR("/usr/x86_64-pc-linux-gnu/lib64") SEARCH_DIR("/usr/lib") SEARCH_DIR("/usr/local/lib") SEARCH_DIR("/usr/x86_64-pc-linux-gnu/lib")
+SECTIONS
+{
+  PROVIDE (__executable_start = SEGMENT_START("text-segment", 0))
+  . = SEGMENT_START("text-segment", 0) + SIZEOF_HEADERS
+  /* Place the build-id as close to the ELF headers as possible.  This
+     maximises the chance the build-id will be present in core files,
+     which GDB can then use to locate the associated debuginfo file.  */
+  .note.gnu.build-id  : { *(.note.gnu.build-id) }
+  .interp         : { *(.interp) }
+  .hash           : { *(.hash) }
+  .gnu.hash       : { *(.gnu.hash) }
+  .dynsym         : { *(.dynsym) }
+  .dynstr         : { *(.dynstr) }
+  .gnu.version    : { *(.gnu.version) }
+  .gnu.version_d  : { *(.gnu.version_d) }
+  .gnu.version_r  : { *(.gnu.version_r) }
+  .rela.dyn       :
+    {
+      *(.rela.init)
+      *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
+      *(.rela.fini)
+      *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+      *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
+      *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
+      *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
+      *(.rela.ctors)
+      *(.rela.dtors)
+      *(.rela.got)
+      *(.rela.tls)
+      *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
+      *(.rela.ldata .rela.ldata.* .rela.gnu.linkonce.l.*)
+      *(.rela.lbss .rela.lbss.* .rela.gnu.linkonce.lb.*)
+      *(.rela.lrodata .rela.lrodata.* .rela.gnu.linkonce.lr.*)
+      *(.rela.ifunc)
+    }
+  .rela.plt       :
+    {
+      *(.rela.plt)
+      *(.rela.iplt)
+    }
+  .relr.dyn : { *(.relr.dyn) }
+  /* Align the text segment.  */
+  . = ALIGN(CONSTANT (MAXPAGESIZE))
+  /* Start of the executable code region.  */
+  .init           :
+  {
+    KEEP (*(SORT_NONE(.init)))
+  }
+  .plt            : { *(.plt) *(.iplt) }
+.plt.got        : { *(.plt.got) }
+.plt.sec        : { *(.plt.sec) }
+  .text           :
+  {
+    *(.text.unlikely .text.*_unlikely .text.unlikely.*)
+    *(.text.exit .text.exit.*)
+    *(.text.startup .text.startup.*)
+    *(.text.hot .text.hot.*)
+    *(SORT(.text.sorted.*))
+    *(.text .stub .text.* .gnu.linkonce.t.*)
+    /* .gnu.warning sections are handled specially by elf.em.  */
+    *(.gnu.warning)
+  }
+  .fini           :
+  {
+    KEEP (*(SORT_NONE(.fini)))
+  }
+  PROVIDE (__etext = .)
+  PROVIDE (_etext = .)
+  PROVIDE (etext = .)
+  /* Align the text segment.  */
+  . = ALIGN(CONSTANT (MAXPAGESIZE))
+  /* Start of the Read Only Data region.  */
+  /* Adjust the address for the rodata segment.  We want to adjust up to
+     the same address within the page on the next page up.  */
+  . = SEGMENT_START("rodata-segment", ALIGN(CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 1)))
+  .rodata         : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
+  .rodata1        : { *(.rodata1) }
+  .eh_frame_hdr   : { *(.eh_frame_hdr) *(.eh_frame_entry .eh_frame_entry.*) }
+  .eh_frame       : ONLY_IF_RO { KEEP (*(.eh_frame)) *(.eh_frame.*) }
+  .sframe         : ONLY_IF_RO { KEEP (*(.sframe)) *(.sframe.*) }
+  .gcc_except_table   : ONLY_IF_RO { *(.gcc_except_table .gcc_except_table.*) }
+  .gnu_extab   : ONLY_IF_RO { *(.gnu_extab*) }
+  /* These sections are generated by the Sun/Oracle C++ compiler.  */
+  .exception_ranges   : ONLY_IF_RO { *(.exception_ranges*) }
+  /* Various note sections.  Placed here so that they are always included
+     in the read-only segment and not treated as orphan sections.  The
+     current orphan handling algorithm does place note sections after R/O
+     data, but this is not guaranteed to always be the case.  */
+  .note.build-id :      { *(.note.build-id) }
+  .note.GNU-stack :     { *(.note.GNU-stack) }
+  .note.gnu.property :  { *(.note.gnu.property) }
+  .note.ABI-tag :       { *(.note.ABI-tag) }
+  .note.package :       { *(.note.package) }
+  .note.dlopen :        { *(.note.dlopen) }
+  .note.netbsd.ident :  { *(.note.netbsd.ident) }
+  .note.openbsd.ident : { *(.note.openbsd.ident) }
+  /* Start of the Read Write Data region.  */
+  /* Adjust the address for the data segment.  We want to adjust up to
+     the same address within the page on the next page up.  */
+  . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
+  /* Exception handling.  */
+  .eh_frame       : ONLY_IF_RW { KEEP (*(.eh_frame)) *(.eh_frame.*) }
+  .sframe         : ONLY_IF_RW { KEEP (*(.sframe)) *(.sframe.*) }
+  .gnu_extab      : ONLY_IF_RW { *(.gnu_extab) }
+  .gcc_except_table   : ONLY_IF_RW { *(.gcc_except_table .gcc_except_table.*) }
+  .exception_ranges   : ONLY_IF_RW { *(.exception_ranges*) }
+  /* Thread Local Storage sections.  */
+  .tdata	  :
+   {
+     PROVIDE_HIDDEN (__tdata_start = .)
+     *(.tdata .tdata.* .gnu.linkonce.td.*)
+   }
+  .tbss		  : { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) }
+  .preinit_array    :
+  {
+    PROVIDE_HIDDEN (__preinit_array_start = .)
+    KEEP (*(.preinit_array))
+    PROVIDE_HIDDEN (__preinit_array_end = .)
+  }
+  .init_array    :
+  {
+    PROVIDE_HIDDEN (__init_array_start = .)
+    KEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+    KEEP (*(.init_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .ctors))
+    PROVIDE_HIDDEN (__init_array_end = .)
+  }
+  .fini_array    :
+  {
+    PROVIDE_HIDDEN (__fini_array_start = .)
+    KEEP (*(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*)))
+    KEEP (*(.fini_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .dtors))
+    PROVIDE_HIDDEN (__fini_array_end = .)
+  }
+  .ctors          :
+  {
+    /* gcc uses crtbegin.o to find the start of
+       the constructors, so we make sure it is
+       first.  Because this is a wildcard, it
+       doesn't matter if the user does not
+       actually link against crtbegin.o the
+       linker won't look for a file to match a
+       wildcard.  The wildcard also means that it
+       doesn't matter which directory crtbegin.o
+       is in.  */
+    KEEP (*crtbegin.o(.ctors))
+    KEEP (*crtbegin?.o(.ctors))
+    /* We don't want to include the .ctor section from
+       the crtend.o file until after the sorted ctors.
+       The .ctor section from the crtend file contains the
+       end of ctors marker and it must be last */
+    KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .ctors))
+    KEEP (*(SORT(.ctors.*)))
+    KEEP (*(.ctors))
+  }
+  .dtors          :
+  {
+    KEEP (*crtbegin.o(.dtors))
+    KEEP (*crtbegin?.o(.dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*(.dtors))
+  }
+  .jcr            : { KEEP (*(.jcr)) }
+  .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }
+  .dynamic        : { *(.dynamic) }
+  .got            : { *(.got) *(.igot) }
+  . = DATA_SEGMENT_RELRO_END (SIZEOF (.got.plt) >= 24 ? 24 : 0, .)
+  .got.plt        : { *(.got.plt) *(.igot.plt) }
+  .data           :
+  {
+    *(.data .data.* .gnu.linkonce.d.*)
+    SORT(CONSTRUCTORS)
+  }
+  .data1          : { *(.data1) }
+  _edata = .
+  PROVIDE (edata = .)
+  . = ALIGN(ALIGNOF(NEXT_SECTION))
+  __bss_start = .
+  .bss            :
+  {
+    *(.dynbss)
+    *(.bss .bss.* .gnu.linkonce.b.*)
+    *(COMMON)
+    /* Align here to ensure that in the common case of there only being one
+       type of .bss section, the section occupies space up to _end.
+       Align after .bss to ensure correct alignment even if the
+       .bss section disappears because there are no input sections.
+       FIXME: Why do we need it? When there is no .bss section, we do not
+       pad the .data section.  */
+      . = ALIGN(. != 0 ? 64 / 8 : 1)
+  }
+    .lbss   :
+    {
+      *(.dynlbss)
+      *(.lbss .lbss.* .gnu.linkonce.lb.*)
+      *(LARGE_COMMON)
+    }
+    . = ALIGN(64 / 8)
+  /* Start of the Large Data region.  */
+  . = SEGMENT_START("ldata-segment", .)
+  .lrodata   ALIGN(CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 1)) :
+  {
+    *(.lrodata .lrodata.* .gnu.linkonce.lr.*)
+  }
+  .ldata   ALIGN(CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 1)) :
+  {
+    *(.ldata .ldata.* .gnu.linkonce.l.*)
+      . = ALIGN(. != 0 ? 64 / 8 : 1)
+  }
+  . = ALIGN(64 / 8)
+  _end = .
+  PROVIDE (end = .)
+  . = DATA_SEGMENT_END (.)
+  /* Start of the Tiny Data region.  */
+  /* Stabs debugging sections.  */
+  .stab          0 : { *(.stab) }
+  .stabstr       0 : { *(.stabstr) }
+  .stab.excl     0 : { *(.stab.excl) }
+  .stab.exclstr  0 : { *(.stab.exclstr) }
+  .stab.index    0 : { *(.stab.index) }
+  .stab.indexstr 0 : { *(.stab.indexstr) }
+  .comment 0 (INFO) : { *(.comment) LINKER_VERSION }
+  .gnu.build.attributes : { *(.gnu.build.attributes .gnu.build.attributes.*) }
+  /* DWARF debug sections.
+     Symbols in the DWARF debugging sections are relative to the beginning
+     of the section so we begin them at 0.  */
+  /* DWARF 1.  */
+  .debug          0 : { *(.debug) }
+  .line           0 : { *(.line) }
+  /* GNU DWARF 1 extensions.  */
+  .debug_srcinfo  0 : { *(.debug_srcinfo) }
+  .debug_sfnames  0 : { *(.debug_sfnames) }
+  /* DWARF 1.1 and DWARF 2.  */
+  .debug_aranges  0 : { *(.debug_aranges) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+  /* DWARF 2.  */
+  .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
+  .debug_abbrev   0 : { *(.debug_abbrev) }
+  .debug_line     0 : { *(.debug_line .debug_line.* .debug_line_end) }
+  .debug_frame    0 : { *(.debug_frame) }
+  .debug_str      0 : { *(.debug_str) }
+  .debug_loc      0 : { *(.debug_loc) }
+  .debug_macinfo  0 : { *(.debug_macinfo) }
+  /* SGI/MIPS DWARF 2 extensions.  */
+  .debug_weaknames 0 : { *(.debug_weaknames) }
+  .debug_funcnames 0 : { *(.debug_funcnames) }
+  .debug_typenames 0 : { *(.debug_typenames) }
+  .debug_varnames  0 : { *(.debug_varnames) }
+  /* DWARF 3.  */
+  .debug_pubtypes 0 : { *(.debug_pubtypes) }
+  .debug_ranges   0 : { *(.debug_ranges) }
+  /* DWARF 5.  */
+  .debug_addr     0 : { *(.debug_addr) }
+  .debug_line_str 0 : { *(.debug_line_str) }
+  .debug_loclists 0 : { *(.debug_loclists) }
+  .debug_macro    0 : { *(.debug_macro) }
+  .debug_names    0 : { *(.debug_names) }
+  .debug_rnglists 0 : { *(.debug_rnglists) }
+  .debug_str_offsets 0 : { *(.debug_str_offsets) }
+  .debug_sup      0 : { *(.debug_sup) }
+  .gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }
+  /DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.gnu.lto_*) *(.gnu_object_only) }
+}
+
+
+==================================================
+/usr/bin/ld: mode elf_x86_64
+attempt to open /tmp/cmTC_d282f.sycl.image.wrapper-7f6f32.o succeeded
+/tmp/cmTC_d282f.sycl.image.wrapper-7f6f32.o
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/Scrt1.o succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/Scrt1.o
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crti.o succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crti.o
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtbeginS.o succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtbeginS.o
+attempt to open CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o succeeded
+CMakeFiles/cmTC_d282f.dir/CMakeSYCLCompilerABI.sycl.o
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so succeeded
+/opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libstdc++.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libstdc++.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libstdc++.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libstdc++.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libstdc++.so succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/libstdc++.so
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libm.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libm.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libm.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libm.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libm.so failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libm.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libm.so succeeded
+opened script file /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libm.so
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libm.so
+opened script file /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libm.so
+attempt to open /usr/lib/libm.so.6 succeeded
+/usr/lib/libm.so.6
+attempt to open /usr/lib/libmvec.so.1 succeeded
+/usr/lib/libmvec.so.1
+/usr/lib/libmvec.so.1
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc_s.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc_s.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc_s.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc_s.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so succeeded
+opened script file /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so
+opened script file /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so.1 failed
+attempt to open libgcc_s.so.1 failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc_s.so.1 failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc_s.so.1 failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so.1 failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libgcc_s.so.1 succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libgcc_s.so.1
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.so failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.so failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libc.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libc.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libc.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libc.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libc.so failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libc.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libc.so succeeded
+opened script file /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libc.so
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libc.so
+opened script file /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libc.so
+attempt to open /usr/lib/libc.so.6 succeeded
+/usr/lib/libc.so.6
+attempt to open /usr/lib/libc_nonshared.a succeeded
+/usr/lib/libc_nonshared.a
+(/usr/lib/libc_nonshared.a)atexit.oS
+attempt to open /usr/lib/ld-linux-x86-64.so.2 succeeded
+/usr/lib/ld-linux-x86-64.so.2
+/usr/lib/libc_nonshared.a
+/usr/lib/ld-linux-x86-64.so.2
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc_s.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc_s.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc_s.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc_s.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so succeeded
+opened script file /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so
+opened script file /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so.1 failed
+attempt to open libgcc_s.so.1 failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc_s.so.1 failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc_s.so.1 failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc_s.so.1 failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libgcc_s.so.1 succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/libgcc_s.so.1
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.so failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc.so failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libgcc.a failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc.so failed
+attempt to open /opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu/libgcc.a failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.so failed
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/libgcc.a
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtendS.o succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtendS.o
+attempt to open /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crtn.o succeeded
+/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crtn.o
+libLLVMOffload.so.24.0git needed by /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so
+found libLLVMOffload.so.24.0git at /opt/llvm/lib/x86_64-unknown-linux-gnu/libLLVMOffload.so.24.0git
+libz.so.1 needed by /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so
+attempt to open /opt/llvm/lib/x86_64-unknown-linux-gnu/libz.so.1 failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libz.so.1 failed
+attempt to open /opt/llvm/lib/x86_64-unknown-linux-gnu/libz.so.1 failed
+attempt to open libz.so.1 failed
+attempt to open /opt/cuda/lib64/libz.so.1 failed
+attempt to open /opt/cuda/nvvm/lib64/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/lib/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/libz.so.1 failed
+attempt to open /opt/intel/oneapi/debugger/latest/debugger/opt/debugger/lib/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/2026.0/lib/libz.so.1 failed
+attempt to open /opt/intel/oneapi/lib/intel64/libz.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64/libz.so.1 failed
+attempt to open /usr/lib/perf/libz.so.1 failed
+attempt to open /opt/rocm/lib/libz.so.1 failed
+attempt to open /usr/lib/libfakeroot/libz.so.1 failed
+attempt to open /usr/x86_64-pc-linux-gnu/lib64/libz.so.1 failed
+found libz.so.1 at /usr/lib/libz.so.1
+libzstd.so.1 needed by /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so
+attempt to open /opt/llvm/lib/x86_64-unknown-linux-gnu/libzstd.so.1 failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libzstd.so.1 failed
+attempt to open /opt/llvm/lib/x86_64-unknown-linux-gnu/libzstd.so.1 failed
+attempt to open libzstd.so.1 failed
+attempt to open /opt/cuda/lib64/libzstd.so.1 failed
+attempt to open /opt/cuda/nvvm/lib64/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/lib/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/debugger/latest/debugger/opt/debugger/lib/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/2026.0/lib/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/lib/intel64/libzstd.so.1 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64/libzstd.so.1 failed
+attempt to open /usr/lib/perf/libzstd.so.1 failed
+attempt to open /opt/rocm/lib/libzstd.so.1 failed
+attempt to open /usr/lib/libfakeroot/libzstd.so.1 failed
+attempt to open /usr/x86_64-pc-linux-gnu/lib64/libzstd.so.1 failed
+found libzstd.so.1 at /usr/lib/libzstd.so.1
+liblzma.so.5 needed by /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so
+attempt to open /opt/llvm/lib/x86_64-unknown-linux-gnu/liblzma.so.5 failed
+attempt to open /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/liblzma.so.5 failed
+attempt to open /opt/llvm/lib/x86_64-unknown-linux-gnu/liblzma.so.5 failed
+attempt to open liblzma.so.5 failed
+attempt to open /opt/cuda/lib64/liblzma.so.5 failed
+attempt to open /opt/cuda/nvvm/lib64/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/latest/lib/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/lib/x64/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/debugger/latest/debugger/opt/debugger/lib/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/2026.0/lib/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/lib/intel64/liblzma.so.5 failed
+attempt to open /opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64/liblzma.so.5 failed
+attempt to open /usr/lib/perf/liblzma.so.5 failed
+attempt to open /opt/rocm/lib/liblzma.so.5 failed
+attempt to open /usr/lib/libfakeroot/liblzma.so.5 failed
+attempt to open /usr/x86_64-pc-linux-gnu/lib64/liblzma.so.5 failed
+found liblzma.so.5 at /usr/lib/liblzma.so.5
+ld-linux-x86-64.so.2 needed by /opt/llvm/bin/../lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so
+found ld-linux-x86-64.so.2 at /usr/lib/ld-linux-x86-64.so.2

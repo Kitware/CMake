@@ -1,4 +1,5 @@
 ^CMake Error at LANGUAGE-Headers\.cmake:[0-9]+ \(set_property\):
-  LANGUAGE property may only be set on a SOURCES file set\.
+  LANGUAGE property on a HEADERS file set is experimental and must be enabled
+  by the CMAKE_EXPERIMENTAL_SYCL gate\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

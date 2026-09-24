@@ -1,0 +1,28 @@
+#ifndef SYCL_LANGUAGE_FLAG
+#  error "Missing SYCL language flags"
+#endif
+#ifdef EXPECT_APPEND
+#  ifndef CXX_LANGUAGE_FLAG
+#    error "APPEND did not inherit CXX language flags"
+#  endif
+#  if __cplusplus < 202002L
+#    error "APPEND did not inherit CXX_STANDARD"
+#  endif
+#else
+#  ifdef CXX_LANGUAGE_FLAG
+#    error "REPLACE inherited CXX language flags"
+#  endif
+#  if defined(_MSVC_LANG)
+#    if _MSVC_LANG != 201703L
+#      error "REPLACE did not honor SYCL_CXX_STANDARD"
+#    endif
+#  elif __cplusplus != 201703L
+#    error "REPLACE did not honor SYCL_CXX_STANDARD"
+#  endif
+#endif
+
+int feature_cxx();
+int main()
+{
+  return feature_cxx();
+}

@@ -1,0 +1,8 @@
+#include "kernel.h"
+
+class BarKernel;
+
+int bar()
+{
+  return run_kernel<BarKernel>();
+}

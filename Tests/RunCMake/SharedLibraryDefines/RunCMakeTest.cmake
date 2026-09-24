@@ -1,5 +1,9 @@
 include(RunCMake)
 
+if(CMake_TEST_SYCL)
+  list(APPEND RunCMake_TEST_OPTIONS -Wno-experimental)
+endif()
+
 function(configure_and_build case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
   run_cmake(${case})
@@ -18,4 +22,7 @@ configure_and_build(CXX)
 
 if(CMake_TEST_CUDA)
   configure_and_build(CUDA)
+endif()
+if(CMake_TEST_SYCL)
+  configure_and_build(SYCL)
 endif()

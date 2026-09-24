@@ -21,6 +21,7 @@ public:
     MappedPackageInfo,
     ExportBuildDatabase,
     Rust,
+    SYCL,
 
     Sentinel,
   };

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 4.4)
+project(NotEnabled CXX)
+add_library(HasSyclProps lib.cxx)
+target_compile_features(HasSyclProps PUBLIC cxx_std_17)
+set_property(TARGET HasSyclProps PROPERTY SYCL_SEPARABLE_COMPILATION ON)
+set_property(TARGET HasSyclProps PROPERTY SYCL_RESOLVE_DEVICE_SYMBOLS ON)
+add_executable(SyclNotEnabled main.cxx)
+target_link_libraries(SyclNotEnabled PRIVATE HasSyclProps)

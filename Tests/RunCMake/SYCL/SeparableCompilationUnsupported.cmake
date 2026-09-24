@@ -1,0 +1,5 @@
+set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+enable_language(SYCL)
+unset(CMAKE_SYCL_COMPILE_OPTIONS_SEPARABLE_COMPILATION_OFF)
+add_library(unsupported OBJECT main.sycl)
+set_property(TARGET unsupported PROPERTY SYCL_SEPARABLE_COMPILATION OFF)

@@ -19,7 +19,8 @@ class cmLinkLineDeviceComputer : public cmLinkLineComputer
 {
 public:
   cmLinkLineDeviceComputer(cmOutputConverter* outputConverter,
-                           cmStateDirectory const& stateDir);
+                           cmStateDirectory const& stateDir,
+                           std::string language = "CUDA");
   ~cmLinkLineDeviceComputer() override;
 
   cmLinkLineDeviceComputer(cmLinkLineDeviceComputer const&) = delete;
@@ -35,7 +36,14 @@ public:
 
   std::string GetLinkerLanguage(cmGeneratorTarget* target,
                                 std::string const& config) override;
+
+private:
+  std::string Language;
 };
 
-bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
-                          std::string const& config);
+bool requireDeviceLinking(cmGeneratorTarget const& target,
+                          cmLocalGenerator& lg, std::string const& config,
+                          std::string const& language = "CUDA");
+
+std::string deviceLinkLanguage(cmGeneratorTarget& target, cmLocalGenerator& lg,
+                               std::string const& config);

@@ -1,0 +1,6 @@
+#include "../utils/TestDevice.h"
+
+bool device_available()
+{
+  return sycl_test_device_available();
+}

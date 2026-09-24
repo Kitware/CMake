@@ -132,10 +132,12 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
-  bool const requiresDeviceLinking = requireDeviceLinking(
+  this->DeviceLinkLanguage = deviceLinkLanguage(
     *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
-  if (requiresDeviceLinking) {
-    this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", false);
+  if (!this->DeviceLinkLanguage.empty()) {
+    this->WriteDeviceLibraryRules(
+      cmStrCat("CMAKE_", this->DeviceLinkLanguage, "_DEVICE_LINK_LIBRARY"),
+      false);
   }
 
   std::string linkLanguage =
@@ -158,17 +160,19 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   }
 
   if (!relink) {
-    bool const requiresDeviceLinking = requireDeviceLinking(
+    this->DeviceLinkLanguage = deviceLinkLanguage(
       *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
-    if (requiresDeviceLinking) {
-      this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", relink);
+    if (!this->DeviceLinkLanguage.empty()) {
+      this->WriteDeviceLibraryRules(
+        cmStrCat("CMAKE_", this->DeviceLinkLanguage, "_DEVICE_LINK_LIBRARY"),
+        relink);
     }
   }
 
   std::string linkLanguage =
     this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName());
-  std::string linkRuleVar =
-    cmStrCat("CMAKE_", linkLanguage, "_CREATE_SHARED_LIBRARY");
+  std::string linkRuleVar = this->GeneratorTarget->GetCreateRuleVariable(
+    linkLanguage, this->GetConfigName());
 
   if (this->GeneratorTarget->IsArchivedAIXSharedLibrary()) {
     linkRuleVar =
@@ -203,17 +207,19 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
   if (!relink) {
-    bool const requiresDeviceLinking = requireDeviceLinking(
+    this->DeviceLinkLanguage = deviceLinkLanguage(
       *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
-    if (requiresDeviceLinking) {
-      this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", relink);
+    if (!this->DeviceLinkLanguage.empty()) {
+      this->WriteDeviceLibraryRules(
+        cmStrCat("CMAKE_", this->DeviceLinkLanguage, "_DEVICE_LINK_LIBRARY"),
+        relink);
     }
   }
 
   std::string linkLanguage =
     this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName());
-  std::string linkRuleVar =
-    cmStrCat("CMAKE_", linkLanguage, "_CREATE_SHARED_MODULE");
+  std::string linkRuleVar = this->GeneratorTarget->GetCreateRuleVariable(
+    linkLanguage, this->GetConfigName());
 
   std::string extraFlags;
   this->LocalGenerator->AppendTargetCreationLinkFlags(
@@ -265,8 +271,10 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
   std::vector<std::string> commands;
-  std::string const objExt =
-    this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
+  this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
+  cmGeneratorTarget::DeviceLinkSetter deviceLink(*this->GeneratorTarget);
+  std::string const objExt = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", this->DeviceLinkLanguage, "_OUTPUT_EXTENSION"));
 
   // Get the name of the device object to generate.
   std::string const targetOutput = cmStrCat(
@@ -279,7 +287,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     this->MakeEchoProgress(progress);
     // Add the link message.
     std::string buildEcho = cmStrCat(
-      "Linking CUDA device code ",
+      "Linking ", this->DeviceLinkLanguage, " device code ",
       this->LocalGenerator->ConvertToOutputFormat(
         this->LocalGenerator->MaybeRelativeToCurBinDir(this->DeviceLinkObject),
         cmOutputConverter::SHELL));
@@ -287,10 +295,11 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
 
-  if (this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID") == "Clang") {
+  if (this->DeviceLinkLanguage == "CUDA" &&
+      this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID") == "Clang") {
     this->WriteDeviceLinkRule(commands, targetOutput);
   } else {
-    this->WriteNvidiaDeviceLibraryRules(linkRuleVar, relink, commands,
+    this->WriteDriverDeviceLibraryRules(linkRuleVar, relink, commands,
                                         targetOutput);
   }
 
@@ -298,11 +307,11 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   this->WriteTargetDriverRule(targetOutput, relink);
 }
 
-void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
+void cmMakefileLibraryTargetGenerator::WriteDriverDeviceLibraryRules(
   std::string const& linkRuleVar, bool relink,
   std::vector<std::string>& commands, std::string const& targetOutput)
 {
-  std::string linkLanguage = "CUDA";
+  std::string const& linkLanguage = this->DeviceLinkLanguage;
 
   // Build list of dependencies.
   std::vector<std::string> depends;
@@ -340,7 +349,8 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
     std::unique_ptr<cmLinkLineDeviceComputer> linkLineComputer(
       new cmLinkLineDeviceComputer(
         this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+        this->LocalGenerator->GetStateSnapshot().GetDirectory(),
+        linkLanguage));
     linkLineComputer->SetForResponse(useResponseFileForLibs);
     linkLineComputer->SetRelink(relink);
 

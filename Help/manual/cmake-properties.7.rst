@@ -28,6 +28,7 @@ Properties of Global Scope
    /prop_gbl/CMAKE_CXX_KNOWN_FEATURES
    /prop_gbl/CMAKE_HIP_KNOWN_FEATURES
    /prop_gbl/CMAKE_LINK_WRAPPER_NAME
+   /prop_gbl/CMAKE_SYCL_KNOWN_FEATURES
    /prop_gbl/CMAKE_ROLE
    /prop_gbl/DEBUG_CONFIGURATIONS
    /prop_gbl/DISABLED_FEATURES
@@ -471,6 +472,13 @@ Properties on Targets
    /prop_tgt/Swift_MODULE_NAME
    /prop_tgt/Swift_PACKAGE_NAME
    /prop_tgt/Swift_SEPARATE_MODULE_EMISSION
+   /prop_tgt/SYCL_CXX_STANDARD
+   /prop_tgt/SYCL_CXX_STANDARD_REQUIRED
+   /prop_tgt/SYCL_DEVICE_TARGETS
+   /prop_tgt/SYCL_EXTENSIONS
+   /prop_tgt/SYCL_EXTENSION_MODE
+   /prop_tgt/SYCL_RESOLVE_DEVICE_SYMBOLS
+   /prop_tgt/SYCL_SEPARABLE_COMPILATION
    /prop_tgt/SYMBOLIC
    /prop_tgt/SYSTEM
    /prop_tgt/TEST_LAUNCHER

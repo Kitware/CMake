@@ -1,0 +1,5 @@
+^CMake Error at FileSetHeadersExperimental\.cmake:[0-9]+ \(target_sources\):
+  target_sources File set TYPE "SYCL_HEADERS" is experimental and must be
+  enabled by the CMAKE_EXPERIMENTAL_SYCL gate\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

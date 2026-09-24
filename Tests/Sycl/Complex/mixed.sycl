@@ -1,0 +1,10 @@
+#define KERNEL_NAME ComplexMixedKernel
+#define LAUNCH_FUNCTION mixed_launch_kernel
+#include "launch.sycl"
+
+bool dynamic_kernel();
+
+int mixed_kernel()
+{
+  return dynamic_kernel() ? mixed_launch_kernel() : -1;
+}

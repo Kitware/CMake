@@ -394,17 +394,17 @@ unset(__WINDOWS_MSVC_CMP0184)
 
 # Use manifest directly on the linker's command line.
 set(_CMAKE_FASTBUILD_MANIFESTS "")
-if(CMAKE_GENERATOR MATCHES "FASTBuild")
+if(CMAKE_GENERATOR MATCHES "FASTBuild|Visual Studio")
   string(APPEND _CMAKE_FASTBUILD_MANIFESTS " <MANIFESTS>")
 endif()
 
 macro(__windows_compiler_msvc lang)
-  if(NOT MSVC_VERSION LESS 1400 AND NOT CMAKE_GENERATOR MATCHES "FASTBuild")
+  if(NOT MSVC_VERSION LESS 1400 AND NOT CMAKE_GENERATOR MATCHES "FASTBuild|Visual Studio")
     # for 2005 make sure the manifest is put in the dll with mt
     set(_CMAKE_VS_LINK_DLL "<CMAKE_COMMAND> -E vs_link_dll --msvc-ver=${MSVC_VERSION} --intdir=<OBJECT_DIR> --rc=<CMAKE_RC_COMPILER> --mt=<CMAKE_MT> --manifests <MANIFESTS> -- ")
     set(_CMAKE_VS_LINK_EXE "<CMAKE_COMMAND> -E vs_link_exe --msvc-ver=${MSVC_VERSION} --intdir=<OBJECT_DIR> --rc=<CMAKE_RC_COMPILER> --mt=<CMAKE_MT> --manifests <MANIFESTS> -- ")
   endif()
-  if (CMAKE_GENERATOR MATCHES "FASTBuild")
+  if (CMAKE_GENERATOR MATCHES "FASTBuild|Visual Studio")
     set(CMAKE_${lang}_LINKER_MANIFEST_FLAG " /MANIFEST:EMBED /MANIFESTINPUT:")
   endif()
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "")
@@ -497,6 +497,7 @@ macro(__windows_compiler_msvc lang)
   if("x${lang}" STREQUAL "xC" OR
       "x${lang}" STREQUAL "xCXX" OR
       "x${lang}" STREQUAL "xHIP" OR
+      "x${lang}" STREQUAL "xSYCL" OR
       ("x${lang}" STREQUAL "xCUDA" AND
        CMAKE_CUDA_COMPILER_ID STREQUAL "Clang"))
     if(CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT)

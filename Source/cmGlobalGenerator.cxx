@@ -642,7 +642,21 @@ void cmGlobalGenerator::EnableLanguage(
     propagate = false;
   }
 
-  std::set<std::string> cur_languages(languages.begin(), languages.end());
+  std::vector<std::string> languagesToEnable = languages;
+  auto syclPos =
+    std::find(languagesToEnable.begin(), languagesToEnable.end(), "SYCL");
+  if (syclPos != languagesToEnable.end()) {
+    auto cxxPos =
+      std::find(languagesToEnable.begin(), languagesToEnable.end(), "CXX");
+    if (cxxPos == languagesToEnable.end()) {
+      languagesToEnable.insert(syclPos, "CXX");
+    } else if (cxxPos > syclPos) {
+      std::rotate(syclPos, cxxPos, cxxPos + 1);
+    }
+  }
+
+  std::set<std::string> cur_languages(languagesToEnable.begin(),
+                                      languagesToEnable.end());
   for (std::string const& li : cur_languages) {
     if (!this->LanguagesInProgress.insert(li).second) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
@@ -656,7 +670,7 @@ void cmGlobalGenerator::EnableLanguage(
 
   if (this->TryCompileOuterMakefile) {
     // In a try-compile we can only enable languages provided by caller.
-    for (std::string const& lang : languages) {
+    for (std::string const& lang : languagesToEnable) {
       if (lang == "NONE") {
         this->SetLanguageEnabled("NONE", mf);
       } else {
@@ -848,7 +862,7 @@ void cmGlobalGenerator::EnableLanguage(
 
   // Check that the languages are supported by the generator and its
   // native build tool found above.
-  if (!this->CheckLanguages(languages, mf)) {
+  if (!this->CheckLanguages(languagesToEnable, mf)) {
     return;
   }
 
@@ -867,7 +881,7 @@ void cmGlobalGenerator::EnableLanguage(
   // load the CMakeDetermine(LANG)Compiler.cmake file to find
   // the compiler
 
-  for (std::string const& lang : languages) {
+  for (std::string const& lang : languagesToEnable) {
     needSetLanguageEnabledMaps[lang] = false;
 
     if (lang == "Rust" &&
@@ -875,6 +889,15 @@ void cmGlobalGenerator::EnableLanguage(
                                            cmExperimental::Feature::Rust)) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        "Experimental Rust support is not enabled.");
+      cmSystemTools::SetFatalErrorOccurred();
+      return;
+    }
+
+    if (lang == "SYCL" &&
+        !cmExperimental::HasSupportEnabled(*this->Makefiles[0].get(),
+                                           cmExperimental::Feature::SYCL)) {
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       "Experimental SYCL support is not enabled.");
       cmSystemTools::SetFatalErrorOccurred();
       return;
     }
@@ -972,7 +995,7 @@ void cmGlobalGenerator::EnableLanguage(
   }
   // loop over languages again loading CMake(LANG)Information.cmake
   //
-  for (std::string const& lang : languages) {
+  for (std::string const& lang : languagesToEnable) {
     if (lang == "NONE") {
       this->SetLanguageEnabled("NONE", mf);
       continue;
@@ -1119,7 +1142,7 @@ void cmGlobalGenerator::EnableLanguage(
   }
   // Inform any extra generator of the new language.
   if (this->ExtraGenerator) {
-    this->ExtraGenerator->EnableLanguage(languages, mf, false);
+    this->ExtraGenerator->EnableLanguage(languagesToEnable, mf, false);
   }
 
   if (fatalError) {

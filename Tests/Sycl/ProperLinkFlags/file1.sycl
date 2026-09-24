@@ -1,0 +1,7 @@
+#if !defined(SYCL_FLAGS) || defined(CXX_FLAGS)
+#  error "The isolated SYCL flags were not used"
+#endif
+int sycl_value()
+{
+  return 42;
+}

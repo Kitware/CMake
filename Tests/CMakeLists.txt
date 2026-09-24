@@ -452,6 +452,7 @@ if(BUILD_TESTING)
   string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_CXX "${CMake_TEST_CXX_STANDARDS}")
   string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_CUDA "${CMake_TEST_CUDA_STANDARDS}")
   string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_HIP "${CMake_TEST_HIP_STANDARDS}")
+  string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_SYCL "${CMake_TEST_SYCL_STANDARDS}")
   set(CompileFeatures_BUILD_OPTIONS
     -DCMake_TEST_CXX=${CMake_TEST_CXX}
     -DCMake_TEST_C_STANDARDS=${TEST_STDS_C}
@@ -460,9 +461,11 @@ if(BUILD_TESTING)
     -DCMake_TEST_CUDA_STANDARDS=${TEST_STDS_CUDA}
     -DCMake_TEST_HIP=${CMake_TEST_HIP}
     -DCMake_TEST_HIP_STANDARDS=${TEST_STDS_HIP}
+    -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
+    -DCMake_TEST_SYCL_STANDARDS=${TEST_STDS_SYCL}
     )
   ADD_TEST_MACRO(CompileFeatures CompileFeatures)
-  set_property(TEST CompileFeatures APPEND PROPERTY LABELS "CUDA" "HIP")
+  set_property(TEST CompileFeatures APPEND PROPERTY LABELS "CUDA" "HIP" "SYCL")
   set_property(TEST CompileFeatures APPEND PROPERTY LABELS "PellesC")
 
   ADD_TEST_MACRO(CMakeCommands.target_compile_features)
@@ -1570,6 +1573,12 @@ if(BUILD_TESTING)
   if(CMake_TEST_CUDA)
     add_subdirectory(Cuda)
     add_subdirectory(CudaOnly)
+  endif()
+
+  if(CMake_TEST_SYCL AND
+     NOT CMAKE_GENERATOR MATCHES "Xcode")
+    add_subdirectory(Sycl)
+    add_subdirectory(SyclOnly)
   endif()
 
   if(CMake_TEST_HIP)

@@ -39,6 +39,7 @@
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmLinkLineComputer.h"
 #include "cmLinkLineDeviceComputer.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -49,6 +50,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPropertyMap.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
@@ -438,6 +440,10 @@ void cmVisualStudio10TargetGenerator::Generate()
     if (!this->ComputeNasmOptions()) {
       return;
     }
+    this->ComputeSYCLOptions();
+    if (!this->ComputeSYCLDeviceLinkOptions()) {
+      return;
+    }
     if (!this->ComputeLinkOptions()) {
       return;
     }
@@ -787,6 +793,11 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
                                       true);
         Elem(e1, "Import").Attribute("Project", propsLocal);
       }
+      if (this->GlobalGenerator->GetLanguageEnabled("SYCL")) {
+        Elem(e1, "Import")
+          .Attribute("Project",
+                     GetCMakeFilePath("Templates/MSBuild/sycl.props"));
+      }
     }
     {
       Elem e1(e0, "ImportGroup");
@@ -884,6 +895,11 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
         std::string nasmTargets =
           GetCMakeFilePath("Templates/MSBuild/nasm.targets");
         Elem(e1, "Import").Attribute("Project", nasmTargets);
+      }
+      if (this->GlobalGenerator->GetLanguageEnabled("SYCL")) {
+        Elem(e1, "Import")
+          .Attribute("Project",
+                     GetCMakeFilePath("Templates/MSBuild/sycl.targets"));
       }
     }
     if (this->ProjectType == VsProjectType::vcxproj &&
@@ -1040,6 +1056,11 @@ void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
 {
   e1.Attribute("Label", "Globals");
   e1.Element("ProjectGuid", cmStrCat('{', this->GUID, '}'));
+  if (this->ProjectType == VsProjectType::vcxproj &&
+      this->GlobalGenerator->GetLanguageEnabled("SYCL")) {
+    e1.Element("SYCLToolExe",
+               this->Makefile->GetDefinition("CMAKE_SYCL_COMPILER"));
+  }
 
   cmValue vsProjectTypes =
     this->GeneratorTarget->GetProperty("VS_GLOBAL_PROJECT_TYPES");
@@ -2553,8 +2574,36 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
     all_configs.push_back(ci);
   }
 
-  std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
+  std::vector<cmGeneratorTarget::AllConfigSource> sources =
     this->GeneratorTarget->GetAllConfigSources();
+
+  // A SYCL file set can change a source's language in only some
+  // configurations. Give each tool its own item, excluded in the other
+  // configurations.
+  if (this->GlobalGenerator->GetLanguageEnabled("SYCL")) {
+    auto const count = sources.size();
+    for (size_t i = 0; i < count; ++i) {
+      auto& source = sources[i];
+      if (source.Kind != cmGeneratorTarget::SourceKindObjectSource) {
+        continue;
+      }
+      std::vector<size_t> syclConfigs;
+      std::vector<size_t> otherConfigs;
+      for (auto ci : source.Configs) {
+        auto& configs = this->GeneratorTarget->GetSourceFileLanguage(
+                          source.Source, this->Configurations[ci]) == "SYCL"_s
+          ? syclConfigs
+          : otherConfigs;
+        configs.push_back(ci);
+      }
+      if (!syclConfigs.empty() && !otherConfigs.empty()) {
+        auto syclSource = source;
+        syclSource.Configs = std::move(syclConfigs);
+        source.Configs = std::move(otherConfigs);
+        sources.push_back(std::move(syclSource));
+      }
+    }
+  }
 
   cmSourceFile const* srcCMakeLists =
     this->LocalGenerator->CreateVCProjBuildRule();
@@ -2611,7 +2660,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         case cmGeneratorTarget::SourceKindCxxModuleSource:
         case cmGeneratorTarget::SourceKindUnityBatched:
         case cmGeneratorTarget::SourceKindObjectSource: {
-          std::string const& lang = si.Source->GetLanguage();
+          std::string const lang =
+            this->GlobalGenerator->GetLanguageEnabled("SYCL")
+            ? this->GeneratorTarget->GetSourceFileLanguage(
+                si.Source, this->Configurations[si.Configs.front()])
+            : si.Source->GetLanguage();
           if (lang == "C"_s || lang == "CXX"_s) {
             tool = "ClCompile";
           } else if (lang == "ASM_MARMASM"_s &&
@@ -2630,6 +2683,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
           } else if (lang == "CUDA"_s &&
                      this->GlobalGenerator->IsCudaEnabled()) {
             tool = "CudaCompile";
+          } else if (lang == "SYCL"_s) {
+            tool = "SYCL";
           } else {
             tool = "None";
           }
@@ -2816,6 +2871,73 @@ void cmVisualStudio10TargetGenerator::FinishWritingSource(
                                   setting.second);
       }
     }
+  }
+}
+
+void cmVisualStudio10TargetGenerator::ComputeSYCLOptions()
+{
+  if (this->ProjectType != VsProjectType::vcxproj ||
+      !this->GlobalGenerator->GetLanguageEnabled("SYCL")) {
+    return;
+  }
+  auto expander = this->LocalGenerator->CreateRulePlaceholderExpander();
+  cmRulePlaceholderExpander::RuleVariables vars;
+  vars.Language = "SYCL";
+  std::string compiler = "<CMAKE_SYCL_COMPILER>";
+  expander->ExpandRuleVariables(this->LocalGenerator, compiler, vars);
+  std::vector<std::string> compilerCommand;
+  cmSystemTools::ParseWindowsCommandLine(compiler.c_str(), compilerCommand);
+  std::string compilerFlags;
+  for (size_t i = 1; i < compilerCommand.size(); ++i) {
+    this->LocalGenerator->AppendFlagEscape(compilerFlags, compilerCommand[i]);
+  }
+  this->LocalGenerator->AppendFlags(
+    compilerFlags, this->Makefile->GetDefinition("_CMAKE_SYCL_REQUIRED_FLAG"));
+  for (auto const& config : this->Configurations) {
+    if (!this->GeneratorTarget->IsLanguageUsed("SYCL", config)) {
+      continue;
+    }
+    auto options = cm::make_unique<Options>(this->LocalGenerator,
+                                            Options::Compiler, nullptr);
+    std::string flags;
+    this->LocalGenerator->GetTargetCompileFlags(this->GeneratorTarget, config,
+                                                "SYCL", flags, "");
+    options->Parse(cmStrCat(compilerFlags, ' ', flags));
+    std::set<std::string> defines;
+    this->LocalGenerator->GetTargetDefines(this->GeneratorTarget, config,
+                                           "SYCL", defines);
+    for (auto const& define : defines) {
+      options->AddDefine(define);
+    }
+    if (this->GeneratorTarget->GetPolicyStatusCMP0203() != cmPolicies::NEW &&
+        (this->GeneratorTarget->GetType() == cm::TargetType::SHARED_LIBRARY ||
+         this->GeneratorTarget->GetType() == cm::TargetType::MODULE_LIBRARY)) {
+      // ClCompile receives these definitions from the native MSBuild toolset.
+      options->AddDefines(this->Makefile->GetDefinition(
+        "CMAKE_SYCL_SHARED_LIBRARY_COMPILE_DEFINITIONS"));
+    }
+    options->AddIncludes(this->GetIncludes(config, "SYCL"));
+    this->SYCLOptions[config] = std::move(options);
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WriteSYCLOptions(
+  Elem& e1, std::string const& config)
+{
+  auto const sycl = this->SYCLOptions.find(config);
+  if (sycl != this->SYCLOptions.end()) {
+    Elem e2(e1, "SYCL");
+    OptionsHelper options(*sycl->second, e2);
+    options.OutputAdditionalIncludeDirectories("SYCL");
+    options.PrependInheritedString("AdditionalOptions");
+    options.OutputFlagMap();
+    options.OutputPreprocessorDefinitions("SYCL");
+  }
+  auto const device = this->SYCLDeviceLinkOptions.find(config);
+  if (device != this->SYCLDeviceLinkOptions.end()) {
+    Elem e3(e1, "SYCLDeviceLink");
+    OptionsHelper deviceOptions(*device->second, e3);
+    deviceOptions.OutputFlagMap();
   }
 }
 
@@ -3164,6 +3286,11 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
   e1.Element("_ProjectFileVersion", "10.0.20506.1");
   for (std::string const& config : this->Configurations) {
     std::string const cond = this->CalcCondition(config);
+    auto const device = this->SYCLDeviceLinkOptions.find(config);
+    if (device != this->SYCLDeviceLinkOptions.end()) {
+      e1.WritePlatformConfigTag("CMakeSYCLDeviceLinkObject", cond,
+                                device->second->GetFlag("OutputFile"));
+    }
 
     std::string fullIntermediateDir =
       cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config, '/');
@@ -3183,6 +3310,9 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
       if (ttype == cm::TargetType::SHARED_LIBRARY ||
           ttype == cm::TargetType::MODULE_LIBRARY ||
           ttype == cm::TargetType::EXECUTABLE) {
+        if (this->GeneratorTarget->GetLinkerLanguage(config) == "SYCL"_s) {
+          e1.WritePlatformConfigTag("CMakeSYCLLink", cond, "true");
+        }
         auto linker = this->GeneratorTarget->GetLinkerTool(config);
         if (!linker.empty()) {
           ConvertToWindowsSlash(linker);
@@ -4574,6 +4704,153 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   }
 }
 
+bool cmVisualStudio10TargetGenerator::ComputeSYCLDeviceLinkOptions()
+{
+  if (this->ProjectType != VsProjectType::vcxproj ||
+      !this->GlobalGenerator->GetLanguageEnabled("SYCL")) {
+    return true;
+  }
+  return std::all_of(this->Configurations.begin(), this->Configurations.end(),
+                     [this](std::string const& config) {
+                       return !requireDeviceLinking(*this->GeneratorTarget,
+                                                    *this->LocalGenerator,
+                                                    config, "SYCL") ||
+                         this->ComputeSYCLLinkOptions(config, true);
+                     });
+}
+
+bool cmVisualStudio10TargetGenerator::ComputeSYCLLinkOptions(
+  std::string const& config, bool device)
+{
+  auto* target = this->GeneratorTarget;
+  auto* cli = target->GetLinkInformation(config);
+  if (!cli) {
+    return false;
+  }
+  auto options = cm::make_unique<Options>(this->LocalGenerator,
+                                          Options::Linker, nullptr, this);
+
+  std::vector<std::string> libraries;
+  std::vector<std::string> targetsFiles;
+  this->AddLibraries(*cli, libraries, targetsFiles, config);
+  for (auto const& file : targetsFiles) {
+    this->AddTargetsFileAndConfigPair(file, config);
+  }
+  if (!device) {
+    options->AddFlag("AdditionalDependencies", libraries);
+  }
+
+  std::string linkLibraries;
+  std::string languageFlags;
+  std::string linkFlags;
+  std::string frameworkPath;
+  std::string linkPath;
+  if (device) {
+    cmGeneratorTarget::DeviceLinkSetter setter(*target);
+    cmLinkLineDeviceComputer deviceLine(
+      this->LocalGenerator,
+      this->LocalGenerator->GetStateSnapshot().GetDirectory(), "SYCL");
+    this->LocalGenerator->GetDeviceLinkFlags(deviceLine, config, linkLibraries,
+                                             linkFlags, frameworkPath,
+                                             linkPath, target);
+    this->LocalGenerator->AddLanguageFlagsForLinking(languageFlags, target,
+                                                     "SYCL", config);
+  } else {
+    auto linkLine = this->GlobalGenerator->CreateLinkLineComputer(
+      this->LocalGenerator,
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
+    linkLine->SetForResponse(true);
+    std::vector<BT<std::string>> manifestFlags{ BT<std::string>{
+      "LINKER:/MANIFEST:EMBED" } };
+    target->ResolveLinkerWrapper(manifestFlags, "SYCL");
+    this->LocalGenerator->AppendFlags(linkFlags, manifestFlags);
+    this->LocalGenerator->GetTargetFlags(linkLine.get(), config, linkLibraries,
+                                         languageFlags, linkFlags,
+                                         frameworkPath, linkPath, target);
+    if (target->GetType() != cm::TargetType::EXECUTABLE) {
+      this->LocalGenerator->AddLanguageFlagsForLinking(languageFlags, target,
+                                                       "SYCL", config);
+    }
+  }
+  std::string output = target->GetFullPath(config);
+  if (device) {
+    output = cmStrCat(target->GetSupportDirectory(), '/', config,
+                      "/sycl_device_link.obj");
+  }
+  auto const importLibrary =
+    target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact);
+  auto const names = target->GetType() == cm::TargetType::EXECUTABLE
+    ? target->GetExecutableNames(config)
+    : target->GetLibraryNames(config);
+  auto const pdb = cmStrCat(target->GetPDBDirectory(config), '/', names.PDB);
+  options->AddFlag("OutputFile", output);
+  if (!device) {
+    options->AddFlag("ImportLibrary", importLibrary);
+    options->AddFlag("ProgramDatabaseFile", pdb);
+  }
+
+  auto expander =
+    this->LocalGenerator->CreateRulePlaceholderExpander(cmBuildStep::Link);
+  expander->SetTargetImpLib(
+    this->LocalGenerator->EscapeForShell(importLibrary));
+  std::string targetPath = this->LocalGenerator->EscapeForShell(output);
+  std::string targetPDB = this->LocalGenerator->EscapeForShell(pdb);
+  std::string objectDir =
+    this->LocalGenerator->EscapeForShell("$(IntDir)", true);
+  int major;
+  int minor;
+  target->GetTargetVersion(major, minor);
+  auto versionMajor = std::to_string(major);
+  auto versionMinor = std::to_string(minor);
+  std::vector<cmSourceFile const*> manifestSources;
+  target->GetManifests(manifestSources, config);
+  std::string manifests;
+  for (auto const* source : manifestSources) {
+    this->LocalGenerator->AppendFlags(
+      manifests,
+      this->Makefile->GetDefinition("CMAKE_SYCL_LINKER_MANIFEST_FLAG"));
+    this->LocalGenerator->AppendFlagEscape(manifests, source->GetFullPath());
+  }
+
+  cmRulePlaceholderExpander::RuleVariables vars;
+  vars.Language = "SYCL";
+  vars.Target = targetPath.c_str();
+  vars.TargetPDB = targetPDB.c_str();
+  vars.TargetVersionMajor = versionMajor.c_str();
+  vars.TargetVersionMinor = versionMinor.c_str();
+  vars.ObjectDir = objectDir.c_str();
+  vars.Objects = "__CMAKE_SYCL_OBJECTS__";
+  std::string allLibraries = cmStrCat(frameworkPath, linkPath, linkLibraries);
+  vars.LinkLibraries = allLibraries.c_str();
+  vars.Flags = languageFlags.c_str();
+  vars.LanguageCompileFlags = languageFlags.c_str();
+  vars.LinkFlags = linkFlags.c_str();
+  vars.Manifests = manifests.c_str();
+  std::string rule = target->GetCreateRuleVariable("SYCL", config);
+  if (device) {
+    rule = target->GetType() == cm::TargetType::EXECUTABLE
+      ? "CMAKE_SYCL_DEVICE_LINK_EXECUTABLE"
+      : "CMAKE_SYCL_DEVICE_LINK_LIBRARY";
+  }
+  cmList commands(this->Makefile->GetRequiredDefinition(rule));
+  expander->ExpandRuleVariables(this->LocalGenerator, commands.front(), vars);
+  std::vector<std::string> command;
+  cmSystemTools::ParseWindowsCommandLine(commands.front().c_str(), command);
+  options->AddFlag("ToolExe", command.front());
+  std::string arguments;
+  for (size_t i = 1; i < command.size(); ++i) {
+    this->LocalGenerator->AppendFlagEscape(
+      arguments, this->GlobalGenerator->ExpandCFGIntDir(command[i], config));
+  }
+  options->AddFlag("AdditionalOptions", arguments);
+  if (device) {
+    this->SYCLDeviceLinkOptions[config] = std::move(options);
+  } else {
+    this->LinkOptions[config] = std::move(options);
+  }
+  return true;
+}
+
 bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
 {
   if (this->GeneratorTarget->GetType() == cm::TargetType::EXECUTABLE ||
@@ -4591,6 +4868,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
 bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::string const& config)
 {
+  if (this->GeneratorTarget->GetLinkerLanguage(config) == "SYCL"_s) {
+    return this->ComputeSYCLLinkOptions(config);
+  }
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
   auto pOptions = cm::make_unique<Options>(
     this->LocalGenerator, Options::Linker, gg->GetLinkFlagTable(), this);
@@ -5018,6 +5298,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups(Elem& e0)
       this->WriteMarmasmOptions(e1, c);
       this->WriteMasmOptions(e1, c);
       this->WriteNasmOptions(e1, c);
+      this->WriteSYCLOptions(e1, c);
     }
 
     if (this->WindowsKernelMode) {

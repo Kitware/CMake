@@ -8,6 +8,7 @@
 #include <string>
 
 #include "cmLinkLineComputer.h"
+#include "cmLinkLineDeviceComputer.h"
 
 class cmGlobalFastbuildGenerator;
 class cmOutputConverter;
@@ -23,6 +24,20 @@ public:
   cmFastbuildLinkLineComputer(cmFastbuildLinkLineComputer const&) = delete;
   cmFastbuildLinkLineComputer& operator=(cmFastbuildLinkLineComputer const&) =
     delete;
+
+  std::string ConvertToLinkReference(std::string const& input) const override;
+
+private:
+  cmGlobalFastbuildGenerator const* GG;
+};
+
+class cmFastbuildLinkLineDeviceComputer : public cmLinkLineDeviceComputer
+{
+public:
+  cmFastbuildLinkLineDeviceComputer(cmOutputConverter* outputConverter,
+                                    cmStateDirectory const& stateDir,
+                                    cmGlobalFastbuildGenerator const* gg,
+                                    std::string language);
 
   std::string ConvertToLinkReference(std::string const& input) const override;
 

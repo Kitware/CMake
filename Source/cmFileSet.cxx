@@ -11,6 +11,7 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include "cmExperimental.h"
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -268,10 +269,20 @@ void cmFileSet::SetProperty(std::string const& prop, cmValue value)
       this->InterfaceCompileDefinitions.emplace_back(value, lfbt);
     }
   } else if (prop == LANGUAGE) {
-    if (this->GetType() != cm::FileSetMetadata::SOURCES) {
+    if (this->GetType() != cm::FileSetMetadata::SOURCES &&
+        this->GetType() != cm::FileSetMetadata::HEADERS) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        "LANGUAGE property may only be set on a SOURCES file set.");
+        "LANGUAGE property may only be set on a SOURCES or HEADERS file set.");
+      return;
+    }
+    if (this->GetType() == cm::FileSetMetadata::HEADERS &&
+        !cmExperimental::HasSupportEnabled(*this->Makefile,
+                                           cmExperimental::Feature::SYCL)) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "LANGUAGE property on a HEADERS file set is experimental and must be "
+        "enabled by the CMAKE_EXPERIMENTAL_SYCL gate.");
       return;
     }
     if (value && cmGeneratorExpression::Find(*value) != std::string::npos) {

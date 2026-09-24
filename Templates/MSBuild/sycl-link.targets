@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup>
+    <Link>
+      <TrackerLogDirectory>$(TLogLocation)SYCLLink\</TrackerLogDirectory>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CoreCppClean Include="$(TLogLocation)SYCLLink\"/>
+  </ItemGroup>
+  <!-- Preserve native _Link input collection, resources and build events. -->
+  <Target Name="Link" Condition="'@(Link)' != ''" DependsOnTargets="ComputeLinkSwitches">
+    <PropertyGroup>
+      <_SYCLLinkInputArguments>@(Link-&gt;'&quot;%(FullPath)&quot;', ' ')</_SYCLLinkInputArguments>
+      <_SYCLLinkArguments>$([System.String]::Copy('%(Link.AdditionalOptions)').Replace('__CMAKE_SYCL_OBJECTS__', '$(_SYCLLinkInputArguments)'))</_SYCLLinkArguments>
+    </PropertyGroup>
+    <MakeDir Directories="%(Link.TrackerLogDirectory)"/>
+    <SYCLLink BuildingInIDE="$(BuildingInsideVisualStudio)"
+              Sources="@(Link)" OutputFile="%(Link.OutputFile)"
+              ToolExe="%(Link.ToolExe)" AdditionalOptions="$(LlvmArchitectureSwitch) $(_SYCLLinkArguments)"
+              TrackerLogDirectory="%(Link.TrackerLogDirectory)"
+              TLogReadFiles="%(Link.TrackerLogDirectory)$(SYCLToolName)*.read.*.tlog"
+              TLogWriteFiles="%(Link.TrackerLogDirectory)$(SYCLToolName)*.write.*.tlog"
+              TrackFileAccess="$(TrackFileAccess)"
+              MinimalRebuildFromTracking="$(Link_MinimalRebuildFromTracking)"
+              ToolArchitecture="$(LinkToolArchitecture)"
+              TrackerFrameworkPath="$(LinkTrackerFrameworkPath)"
+              TrackerSdkPath="$(LinkTrackerSdkPath)"
+              TrackedInputFilesToIgnore="@(LinkNoDependencies)"
+              YieldDuringToolExecution="$(LinkYieldDuringToolExecution)">
+      <Output TaskParameter="SkippedExecution" PropertyName="LinkSkippedExecution"/>
+    </SYCLLink>
+    <Message Text="$(MSBuildProjectFile) -&gt; $(TargetPath)" Importance="High"/>
+  </Target>
+  <!-- The shared frontend-driver rule requests manifest embedding. -->
+  <Target Name="LinkEmbedManifest"/>
+</Project>

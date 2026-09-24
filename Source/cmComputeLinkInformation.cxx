@@ -1052,11 +1052,9 @@ void cmComputeLinkInformation::AddImplicitLinkInfo()
     this->Target->GetLinkClosure(this->Config);
   for (std::string const& li : lc->Languages) {
 
-    if (li == "CUDA" || li == "HIP") {
+    if (li == "CUDA" || li == "HIP" || li == "SYCL") {
       // These need to go before the other implicit link information
       // as they could require symbols from those other library
-      // Currently restricted as CUDA and HIP are the only languages
-      // we have documented runtime behavior controls for
       this->AddRuntimeLinkLibrary(li);
     }
 
@@ -1092,6 +1090,10 @@ std::string const gcc_s_asneeded = "gcc_s_asneeded";
 
 void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 {
+  std::string const& libraries = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_LIBRARIES"));
+  std::string const& directories = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_DIRECTORIES"));
   auto const impliedByLinkerLanguage = [this](std::string const& lib) -> bool {
     if (cm::contains(this->ImplicitLinkLibs, lib)) {
       return true;
@@ -1109,9 +1111,8 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 
   // Add libraries for this language that are not implied by the
   // linker language.
-  std::string libVar = cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_LIBRARIES");
-  if (cmValue libs = this->Makefile->GetDefinition(libVar)) {
-    cmList libsList{ *libs };
+  if (!libraries.empty()) {
+    cmList libsList{ libraries };
     for (std::string const& i : libsList) {
       if (!impliedByLinkerLanguage(i)) {
         this->AddItem({ i });
@@ -1121,9 +1122,8 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 
   // Add linker search paths for this language that are not
   // implied by the linker language.
-  std::string dirVar = cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_DIRECTORIES");
-  if (cmValue dirs = this->Makefile->GetDefinition(dirVar)) {
-    cmList dirsList{ *dirs };
+  if (!directories.empty()) {
+    cmList dirsList{ directories };
     this->OrderLinkerSearchPath->AddLanguageDirectories(dirsList);
   }
 }

@@ -1,5 +1,9 @@
 include(RunCMake)
 
+if(CMake_TEST_SYCL)
+  list(APPEND RunCMake_TEST_OPTIONS -Wno-experimental)
+endif()
+
 function(configure_and_build case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
   run_cmake(${case})
@@ -43,6 +47,11 @@ endif()
 # ancestor scope, so they require a working CUDA toolchain.
 if(CMake_TEST_CUDA)
   foreach(case IN ITEMS CUDAParent CUDASibling)
+    configure_and_build(${case})
+  endforeach()
+endif()
+if(CMake_TEST_SYCL)
+  foreach(case IN ITEMS SYCLParent SYCLSibling)
     configure_and_build(${case})
   endforeach()
 endif()

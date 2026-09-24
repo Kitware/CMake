@@ -216,6 +216,12 @@ cm::optional<std::string> cmGeneratorFileSets::GetLanguageForSource(
   return language->second;
 }
 
+bool cmGeneratorFileSets::HasSyclHeaders(std::string const& config) const
+{
+  this->BuildInfoCache(config);
+  return this->Configs[config].HasSyclHeaders;
+}
+
 std::vector<std::unique_ptr<cm::TargetPropertyEntry>>
 cmGeneratorFileSets::GetSources(
   std::function<bool(cmGeneratorFileSet const*)> include,
@@ -449,6 +455,32 @@ void GetInterfaceFiles(
     }
   }
 }
+
+bool HasInterfaceSyclHeaders(
+  cmGeneratorTarget const* target, cmGeneratorTarget const* headTarget,
+  std::string const& config,
+  std::unordered_set<cmGeneratorTarget const*>& targets)
+{
+  for (auto const* fileSet :
+       target->GetInterfaceFileSets(cm::FileSetMetadata::HEADERS)) {
+    if (fileSet->GetProperty("LANGUAGE") == cm::FileSetMetadata::SYCL) {
+      return true;
+    }
+  }
+
+  if (cmLinkInterfaceLibraries const* iface =
+        target->GetLinkInterfaceLibraries(config, headTarget,
+                                          cmGeneratorTarget::UseTo::Compile)) {
+    for (cmLinkItem const& lib : iface->Libraries) {
+      if (lib.Target && lib.Target != target &&
+          targets.insert(lib.Target).second &&
+          HasInterfaceSyclHeaders(lib.Target, headTarget, config, targets)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 }
 
 void cmGeneratorFileSets::BuildInfoCache(std::string const& config) const
@@ -460,6 +492,13 @@ void cmGeneratorFileSets::BuildInfoCache(std::string const& config) const
   }
 
   cm::GenEx::Context context(this->LocalGenerator, config);
+
+  info.HasSyclHeaders = std::any_of(
+    this->GetFileSets(cm::FileSetMetadata::HEADERS).begin(),
+    this->GetFileSets(cm::FileSetMetadata::HEADERS).end(),
+    [](cmGeneratorFileSet const* fileSet) {
+      return fileSet->GetProperty("LANGUAGE") == cm::FileSetMetadata::SYCL;
+    });
 
   for (auto const& item : this->FileSets) {
     auto const* fileSet = item.second.get();
@@ -479,11 +518,17 @@ void cmGeneratorFileSets::BuildInfoCache(std::string const& config) const
 
   // retrieve all files inherited from dependent targets
   std::unordered_set<cmGeneratorTarget const*> targets;
+  std::unordered_set<cmGeneratorTarget const*> syclHeaderTargets;
 
   if (cmLinkImplementationLibraries const* impl =
         this->Target->GetLinkImplementationLibraries(
           config, cmGeneratorTarget::UseTo::Compile)) {
     for (cmLinkItem const& lib : impl->Libraries) {
+      if (!info.HasSyclHeaders && lib.Target &&
+          syclHeaderTargets.insert(lib.Target).second) {
+        info.HasSyclHeaders = HasInterfaceSyclHeaders(
+          lib.Target, this->Target, config, syclHeaderTargets);
+      }
       if (lib.Target && targets.insert(lib.Target).second) {
         GetInterfaceFiles(lib.Target, this->Target, context, targets,
                           info.InterfaceFileSetCache);

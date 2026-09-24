@@ -28,7 +28,7 @@ protected:
   void WriteModuleLibraryRules(bool relink);
 
   void WriteDeviceLibraryRules(std::string const& linkRule, bool relink);
-  void WriteNvidiaDeviceLibraryRules(std::string const& linkRuleVar,
+  void WriteDriverDeviceLibraryRules(std::string const& linkRuleVar,
                                      bool relink,
                                      std::vector<std::string>& commands,
                                      std::string const& targetOutput);

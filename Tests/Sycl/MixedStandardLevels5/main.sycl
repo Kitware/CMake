@@ -1,0 +1,8 @@
+#if __cplusplus < 201703L
+#  error "SYCL inherited the CXX-only C++14 requirement"
+#endif
+int cxx_value();
+int main()
+{
+  return cxx_value() == 14 ? 0 : 1;
+}

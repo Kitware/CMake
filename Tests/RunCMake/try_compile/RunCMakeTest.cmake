@@ -1,5 +1,12 @@
 include(RunCMake)
 
+set(try_compile_lang_options)
+if(CMake_TEST_SYCL)
+  list(APPEND try_compile_lang_options -Wno-experimental)
+endif()
+
+set(RunCMake_TEST_OPTIONS ${try_compile_lang_options})
+
 # Detect information from the toolchain:
 # - CMAKE_C_COMPILER_ID
 # - CMAKE_C_COMPILER_VERSION
@@ -12,6 +19,7 @@ include(RunCMake)
 # - CMAKE_OBJCXX_STANDARD_DEFAULT
 run_cmake_with_options(Inspect
   -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
+  -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
   )
 include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
 
@@ -29,11 +37,13 @@ run_cmake(ProjectBinDirEmpty)
 run_cmake(OldProjectSrcDirEmpty)
 run_cmake(OldProjectBinDirEmpty)
 
-set(RunCMake_TEST_OPTIONS -Dtry_compile_DEFS=old_signature.cmake)
+set(RunCMake_TEST_OPTIONS ${try_compile_lang_options}
+  -Dtry_compile_DEFS=old_signature.cmake)
 include(${RunCMake_SOURCE_DIR}/old_and_new_signature_tests.cmake)
 unset(RunCMake_TEST_OPTIONS)
 
-set(RunCMake_TEST_OPTIONS -Dtry_compile_DEFS=new_signature.cmake)
+set(RunCMake_TEST_OPTIONS ${try_compile_lang_options}
+  -Dtry_compile_DEFS=new_signature.cmake)
 include(${RunCMake_SOURCE_DIR}/old_and_new_signature_tests.cmake)
 unset(RunCMake_TEST_OPTIONS)
 
@@ -49,6 +59,12 @@ run_cmake(NonSourceCompileDefinitions)
 run_cmake(Verbose)
 
 run_cmake(ProjectVars)
+
+if(CMake_TEST_SYCL)
+  set(RunCMake_TEST_OPTIONS ${try_compile_lang_options})
+  run_cmake(SYCLNoPlatformVariables)
+  unset(RunCMake_TEST_OPTIONS)
+endif()
 
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(PlatformVariables)

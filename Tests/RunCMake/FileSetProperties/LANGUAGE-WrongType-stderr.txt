@@ -1,4 +1,4 @@
 ^CMake Error at LANGUAGE-WrongType\.cmake:[0-9]+ \(set_property\):
-  LANGUAGE property may only be set on a SOURCES file set\.
+  LANGUAGE property may only be set on a SOURCES or HEADERS file set\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

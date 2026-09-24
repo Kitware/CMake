@@ -110,7 +110,7 @@ protected:
   void WriteObjectDependRules(cmSourceFile const& source,
                               std::vector<std::string>& depends);
 
-  // CUDA device linking.
+  // CUDA/SYCL device linking.
   void WriteDeviceLinkRule(std::vector<std::string>& commands,
                            std::string const& output);
 
@@ -255,6 +255,7 @@ protected:
   // objects used by this target
   std::vector<std::string> Objects;
   std::vector<std::string> ExternalObjects;
+  std::string DeviceLinkLanguage;
 
   // Set of object file names that will be built in this directory.
   std::set<std::string> ObjectFiles;

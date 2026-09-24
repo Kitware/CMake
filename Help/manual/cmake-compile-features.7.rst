@@ -20,12 +20,16 @@ CMake provides a primary user interface based on granular handling of
 the features, not the language standard that introduced the feature.
 
 The :prop_gbl:`CMAKE_C_KNOWN_FEATURES`, :prop_gbl:`CMAKE_CUDA_KNOWN_FEATURES`,
-and :prop_gbl:`CMAKE_CXX_KNOWN_FEATURES` global properties contain all the
-features known to CMake, regardless of compiler support for the feature.
-The :variable:`CMAKE_C_COMPILE_FEATURES`, :variable:`CMAKE_CUDA_COMPILE_FEATURES`
-, and :variable:`CMAKE_CXX_COMPILE_FEATURES` variables contain all features
-CMake knows are known to the compiler, regardless of language standard
-or compile flags needed to use them.
+:prop_gbl:`CMAKE_CXX_KNOWN_FEATURES`, and :prop_gbl:`CMAKE_SYCL_KNOWN_FEATURES`
+global properties contain all the features known to CMake, regardless of
+compiler support for the feature. The :variable:`CMAKE_C_COMPILE_FEATURES`,
+:variable:`CMAKE_CUDA_COMPILE_FEATURES`, :variable:`CMAKE_CXX_COMPILE_FEATURES`,
+and :variable:`CMAKE_SYCL_COMPILE_FEATURES` variables contain all features CMake
+knows are known to the compiler, regardless of language standard or compile
+flags needed to use them.
+
+.. note::
+   SYCL support is experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.
 
 Features known to CMake are named mostly following the same convention
 as the Clang feature test macros.  There are some exceptions, such as
@@ -36,6 +40,15 @@ Note that there are no separate compile features properties or variables for
 the ``OBJC`` or ``OBJCXX`` languages.  These are based off ``C`` or ``C++``
 respectively, so the properties and variables for their corresponding base
 language should be used instead.
+
+SYCL uses the ``cxx_*`` names for granular C++ compile features in addition to
+the ``sycl_cxx_std_*`` meta-features.  For a target containing only SYCL sources,
+these granular features select the target's :prop_tgt:`SYCL_CXX_STANDARD` rather
+than its :prop_tgt:`CXX_STANDARD`.
+
+.. note::
+   SYCL compile features are experimental and gated by
+   ``CMAKE_EXPERIMENTAL_SYCL``.
 
 Compile Feature Requirements
 ============================
@@ -283,6 +296,18 @@ versions specified for each:
 
 * ``Clang``: Clang compiler 5.0+.
 * ``NVIDIA``: NVIDIA nvcc compiler 7.5+.
+
+CMake is currently aware of the
+:prop_tgt:`C++ standards for SYCL <SYCL_CXX_STANDARD>` and their compile
+features available from the following
+:variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>`:
+
+* ``AdaptiveCpp``: AdaptiveCpp compiler.
+* ``Clang``: SYCL-capable Clang distributions.
+* ``IntelLLVM``: Intel oneAPI DPC++/C++ compiler.
+
+.. note::
+   SYCL support is experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.
 
 .. _`Language Standard Flags`:
 

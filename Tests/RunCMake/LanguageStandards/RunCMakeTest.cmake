@@ -1,5 +1,9 @@
 include(RunCMake)
 
+if(CMake_TEST_SYCL)
+  list(APPEND RunCMake_TEST_OPTIONS -Wno-experimental)
+endif()
+
 # Detect information from the toolchain:
 # - CMAKE_C_STANDARD_DEFAULT
 # - CMAKE_CXX_STANDARD_DEFAULT
@@ -25,6 +29,9 @@ if(CMake_TEST_CUDA)
 endif()
 if(CMake_TEST_HIP)
   run_StdLatest(HIP)
+endif()
+if(CMake_TEST_SYCL)
+  run_StdLatest(SYCL)
 endif()
 if(CMake_TEST_OBJC)
   run_StdLatest(OBJC)

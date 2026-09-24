@@ -1,0 +1,5 @@
+libs=/opt/llvm/lib/x86_64-unknown-linux-gnu/libLLVMSYCL.so;stdc\+\+;m;gcc_s;gcc;c;gcc_s;gcc
+dirs=/opt/llvm/lib/x86_64-unknown-linux-gnu;/opt/llvm/lib/clang/24/lib/x86_64-unknown-linux-gnu;/usr/lib64/gcc/x86_64-pc-linux-gnu/16;/usr/lib64;/lib64;/lib;/usr/lib
+library_arch=x86_64-unknown-linux-gnu
+linker_tool=/usr/bin/ld
+linker_arch=-m;elf_x86_64

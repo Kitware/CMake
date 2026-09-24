@@ -1,0 +1,7 @@
+#if __cplusplus < 202002L
+#  error "cxx_std_20 was not propagated to SYCL"
+#endif
+int main()
+{
+  return 0;
+}

@@ -91,3 +91,39 @@ In order to activate support for Rust, set
 This UUID may change in future versions of CMake.  Be sure to use the value
 documented here by the source tree of the version of CMake with which you are
 experimenting.
+
+SYCL Support
+============
+
+In order to activate support for SYCL, set
+
+* variable ``CMAKE_EXPERIMENTAL_SYCL`` to
+* value ``c0d1fb10-2ece-420e-9d29-7d7f2b300f25``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.
+
+When activated, this experimental feature provides the following:
+
+* The experimental ``SYCL`` language, including ``enable_language(SYCL)`` and
+  ``project(... LANGUAGES SYCL)``.
+
+* Target properties and variables for SYCL language standard selection.
+
+* The ``SYCL_EXTENSION_MODE`` target property, which controls whether SYCL
+  sources use only SYCL language flags and feature requirements or prepend C++
+  language flags and combine C++ feature and standard requirements.
+
+* The ``SYCL`` and ``SYCL_HEADERS`` file set type aliases, which initialize the
+  :prop_fs:`LANGUAGE` property.  ``SYCL`` selects the language of a ``SOURCES``
+  file set, while ``SYCL_HEADERS`` marks a ``HEADERS`` file set as requiring
+  SYCL for C++ sources that can reach it.
+
+The SYCL language is supported by Makefile, Ninja, FASTBuild, and Visual Studio
+generators with AdaptiveCpp, SYCL-capable Clang, or IntelLLVM compiler drivers.
+
+:prop_tgt:`SYCL_SEPARABLE_COMPILATION` controls separate compilation of device
+code.  :prop_tgt:`SYCL_RESOLVE_DEVICE_SYMBOLS` controls device linking, including
+for static libraries used by C++-only consumers.  See these properties for
+supported compiler and generator configurations.

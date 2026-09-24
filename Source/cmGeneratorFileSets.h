@@ -68,6 +68,7 @@ public:
                                                 cmSourceFile const* sf) const;
   cm::optional<std::string> GetLanguageForSource(std::string const& config,
                                                  cmSourceFile const* sf) const;
+  bool HasSyclHeaders(std::string const& config) const;
 
   std::vector<std::unique_ptr<TargetPropertyEntry>> GetSources(
     cm::GenEx::Context const& context, cmGeneratorTarget const* target,
@@ -122,6 +123,7 @@ private:
     std::map<std::string, std::unordered_set<cmGeneratorFileSet const*>>
       InterfaceFileSetCache;
     std::unordered_map<std::string, std::string> LanguageCache;
+    bool HasSyclHeaders = false;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
 

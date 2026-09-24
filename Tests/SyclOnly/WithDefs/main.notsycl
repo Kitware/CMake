@@ -1,0 +1,35 @@
+#include <inc_sycl.h>
+#if !defined(INC_SYCL) || !defined(PACKED_DEFINE)
+#  error "Missing include path or complex directory definition"
+#endif
+#if !defined(FLAG_COMPILE_LANG_SYCL) || !FLAG_LANG_IS_SYCL
+#  error "Wrong compile-option language context"
+#endif
+#if !defined(DEF_COMPILE_LANG_SYCL) || !DEF_LANG_IS_SYCL
+#  error "Wrong compile-definition language context"
+#endif
+#if !defined(DEF_SYCL_COMPILER) || !defined(DEF_SYCL_COMPILER_VERSION)
+#  error "Missing compiler ID or version"
+#endif
+#if defined(_MSC_VER)
+#  pragma pack(push, 1)
+#  undef PACKED_DEFINE
+#  define PACKED_DEFINE
+#endif
+struct PACKED_DEFINE result_type
+{
+  bool valid;
+  int value;
+#if defined(NDEBUG) && !defined(DEFREL)
+#  error "Missing release definition"
+#endif
+};
+#if defined(_MSC_VER)
+#  pragma pack(pop)
+#endif
+static_assert(sizeof(result_type) == sizeof(bool) + sizeof(int),
+              "The complex definition was not honored");
+int main()
+{
+  return 0;
+}

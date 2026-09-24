@@ -9,6 +9,7 @@ The variations are:
 * :prop_tgt:`HIP_EXTENSIONS`
 * :prop_tgt:`OBJC_EXTENSIONS`
 * :prop_tgt:`OBJCXX_EXTENSIONS`
+* :prop_tgt:`SYCL_EXTENSIONS`
 
 These properties specify whether compiler-specific extensions are requested.
 

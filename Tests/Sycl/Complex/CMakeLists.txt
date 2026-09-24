@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 4.4)
+set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+project(Complex CXX SYCL)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+include(Test.cmake)
+# Remove gate when IntelLLVM -fsycl-link bug is fixed
+if(CMAKE_SYCL_COMPILER_ID STREQUAL "IntelLLVM")
+  sycl_not_supported("IntelLLVM -fsycl-link cannot produce a single device-link output")
+  return()
+endif()
+if(NOT CMAKE_SYCL_COMPILE_OPTIONS_SEPARABLE_COMPILATION_ON)
+  sycl_not_supported("${CMAKE_SYCL_COMPILER_ID} has no explicit SYCL separable compilation")
+  return()
+endif()
+set(CMAKE_SYCL_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_SYCL_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+add_library(SyclComplexCppBase SHARED dynamic.cpp)
+add_library(SyclComplexSharedLib SHARED dynamic.sycl)
+target_link_libraries(SyclComplexSharedLib PUBLIC SyclComplexCppBase)
+add_library(SyclComplexSeparableLib STATIC
+  device.sycl device_extra.sycl launch.sycl)
+add_library(SyclComplexMixedLib SHARED mixed.cpp mixed.sycl)
+target_link_libraries(SyclComplexMixedLib
+  PUBLIC SyclComplexSharedLib PRIVATE SyclComplexSeparableLib)
+set_target_properties(SyclComplexMixedLib SyclComplexSeparableLib PROPERTIES
+  POSITION_INDEPENDENT_CODE ON SYCL_SEPARABLE_COMPILATION ON)
+# SYCL has no CUDA_RUNTIME_LIBRARY/CUDAToolkit counterpart.
+add_executable(SyclComplex main.cpp)
+target_link_libraries(SyclComplex PRIVATE SyclComplexMixedLib)
+sycl_add_runtime_test(Complex SyclComplex)

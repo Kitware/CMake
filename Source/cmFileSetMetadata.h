@@ -42,6 +42,8 @@ bool VisibilityIsForInterface(Visibility vis);
 // Pre-defined FileSet types
 extern cm::string_view const HEADERS;
 extern cm::string_view const SOURCES;
+extern cm::string_view const SYCL;
+extern cm::string_view const SYCL_HEADERS;
 extern cm::string_view const CXX_MODULES;
 
 enum class FileSetLookup

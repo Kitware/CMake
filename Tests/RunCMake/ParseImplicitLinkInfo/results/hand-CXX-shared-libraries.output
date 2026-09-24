@@ -1,0 +1,5 @@
+libs=/opt/runtime libs/libunversioned.so;/opt/runtime libs/libversioned.so.1.2;/opt/runtime libs/libdarwin.1.dylib;/opt/runtime libs/libstatic.a;stdc\+\+;c
+dirs=/opt/runtime libs
+library_arch=
+linker_tool=/usr/bin/ld
+linker_arch=-m;elf_x86_64

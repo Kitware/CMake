@@ -202,6 +202,7 @@ function(run_cmake test)
     "(^|\n)((==[0-9]+=="
     "|[^\n]*BullseyeCoverage "
     "|[a-z]+\\([0-9]+\\) malloc:"
+    "|acpp warning: No optimization flag was given, optimizations are disabled by default\\."
     "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
     "|flang-new: warning: argument unused during compilation: .-flang-experimental-exec."
     "|icp?x: remark: Note that use of .-g. without any optimization-level option will turn off most compiler optimizations"

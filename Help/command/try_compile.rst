@@ -87,6 +87,8 @@ Try Compiling Source Files
               [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]]
               [<LANG>_STANDARD <std>]
               [<LANG>_STANDARD_REQUIRED <bool>]
+              [SYCL_CXX_STANDARD <std>]
+              [SYCL_CXX_STANDARD_REQUIRED <bool>]
               [<LANG>_EXTENSIONS <bool>]
               )
 
@@ -139,6 +141,8 @@ The signature above is recommended for clarity.
               [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]]
               [<LANG>_STANDARD <std>]
               [<LANG>_STANDARD_REQUIRED <bool>]
+              [SYCL_CXX_STANDARD <std>]
+              [SYCL_CXX_STANDARD_REQUIRED <bool>]
               [<LANG>_EXTENSIONS <bool>]
               )
 
@@ -303,6 +307,24 @@ The options for the above signatures are:
   :prop_tgt:`OBJCXX_STANDARD_REQUIRED`,or :prop_tgt:`CUDA_STANDARD_REQUIRED`
   target property of the generated project.
 
+``SYCL_CXX_STANDARD <std>``
+  .. versionadded:: 4.5
+
+  .. note::
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
+  Specify the :prop_tgt:`SYCL_CXX_STANDARD` target property of the generated
+  project.  This selects the C++ language version for SYCL compilation.
+
+``SYCL_CXX_STANDARD_REQUIRED <bool>``
+  .. versionadded:: 4.5
+
+  .. note::
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
+  Specify the :prop_tgt:`SYCL_CXX_STANDARD_REQUIRED` target property of the
+  generated project.
+
 ``<LANG>_EXTENSIONS <bool>``
   .. versionadded:: 3.8
 
@@ -398,6 +420,17 @@ configuration:
 
   Their values are used to set the corresponding target properties in
   the generated project (unless overridden by an explicit option).
+
+  .. versionadded:: 4.5
+    For SYCL compilations, :variable:`CMAKE_SYCL_CXX_STANDARD`,
+    :variable:`CMAKE_SYCL_CXX_STANDARD_REQUIRED`, and
+    :variable:`CMAKE_SYCL_EXTENSIONS` initialize the corresponding target
+    properties under the same conditions.  The ``SYCL_CXX_STANDARD`` and
+    ``SYCL_CXX_STANDARD_REQUIRED`` options also enable honoring language
+    standard variables.
+
+    .. note::
+      Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
 
 .. versionchanged:: 3.14
   For the :generator:`Green Hills MULTI` generator, the GHS toolset and target
