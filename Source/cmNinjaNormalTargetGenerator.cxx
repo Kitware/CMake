@@ -560,15 +560,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     std::string targetVersionMajor;
     std::string targetVersionMinor;
     {
-      std::ostringstream majorStream;
-      std::ostringstream minorStream;
       int major;
       int minor;
       this->GetGeneratorTarget()->GetTargetVersion(major, minor);
-      majorStream << major;
-      minorStream << minor;
-      targetVersionMajor = majorStream.str();
-      targetVersionMinor = minorStream.str();
+      targetVersionMajor = std::to_string(major);
+      targetVersionMinor = std::to_string(minor);
     }
     vars.TargetVersionMajor = targetVersionMajor.c_str();
     vars.TargetVersionMinor = targetVersionMinor.c_str();
@@ -1254,7 +1250,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
     vars["SWIFT_SOURCES"] = [this, config]() -> std::string {
       std::vector<cmSourceFile const*> sourceFiles;
-      std::stringstream oss;
+      std::string result;
 
       this->GetGeneratorTarget()->GetObjectSources(sourceFiles, config);
       cmLocalGenerator const* LocalGen = this->GetLocalGenerator();
@@ -1262,11 +1258,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
         std::string const sourcePath = source->GetLanguage() == "Swift"
           ? this->GetCompiledSourceNinjaPath(source)
           : this->GetObjectFilePath(source, config);
-        oss << " "
-            << LocalGen->ConvertToOutputFormat(sourcePath,
-                                               cmOutputConverter::SHELL);
+        result = cmStrCat(std::move(result), ' ',
+                          LocalGen->ConvertToOutputFormat(
+                            sourcePath, cmOutputConverter::SHELL));
       }
-      return oss.str();
+      return result;
     }();
 
     // Since we do not perform object builds, compute the
