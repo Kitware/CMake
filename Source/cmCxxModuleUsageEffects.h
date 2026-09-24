@@ -17,9 +17,11 @@ public:
   cmCxxModuleUsageEffects(cmGeneratorTarget const* gt,
                           std::string const& config);
   std::string const& GetHash() const;
+  std::string const& GetMsvcRuntimeLibrary() const;
   std::vector<BT<std::string>> const& GetPreprocessorCompileOptions() const;
 
 private:
   std::string Hash;
+  std::string MsvcRuntimeLibrary;
   std::vector<BT<std::string>> PreprocessorCompileOptions;
 };

@@ -11,6 +11,7 @@
 #include <cmext/string_view>
 
 #include "cmCryptoHash.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -320,6 +321,17 @@ cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(cmGeneratorTarget const* gt,
                gt->GetLanguageStandardRequired("CXX") ? "TRUE" : "FALSE"));
   }
 
+  cmValue runtimeDefault =
+    gt->Makefile->GetDefinition("CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT");
+  if (cmNonempty(runtimeDefault)) {
+    cmValue runtime = gt->GetProperty("MSVC_RUNTIME_LIBRARY");
+    this->MsvcRuntimeLibrary =
+      cmGeneratorExpression::Evaluate(runtime ? *runtime : *runtimeDefault,
+                                      gt->GetLocalGenerator(), config, gt);
+    AppendUsage(usageHashInput,
+                cmStrCat("MSVC_RUNTIME_LIBRARY:", this->MsvcRuntimeLibrary));
+  }
+
   cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
   this->Hash = hasher.HashString(usageHashInput);
 }
@@ -327,6 +339,11 @@ cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(cmGeneratorTarget const* gt,
 std::string const& cmCxxModuleUsageEffects::GetHash() const
 {
   return this->Hash;
+}
+
+std::string const& cmCxxModuleUsageEffects::GetMsvcRuntimeLibrary() const
+{
+  return this->MsvcRuntimeLibrary;
 }
 
 std::vector<BT<std::string>> const&

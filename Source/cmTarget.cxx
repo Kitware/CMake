@@ -21,6 +21,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
+#include "cmCxxModuleUsageEffects.h"
 #include "cmFileSet.h"
 #include "cmFileSetMetadata.h"
 #include "cmFindPackageStack.h"
@@ -1854,6 +1855,9 @@ void cmTarget::CopyUsageEffects(cmGeneratorTarget const* gt,
   }
   copyProperty(tgt, this, "CXX_EXTENSIONS");
   copyProperty(tgt, this, "CXX_STANDARD_REQUIRED");
+  this->SetProperty(
+    "MSVC_RUNTIME_LIBRARY",
+    gt->GetCxxModuleUsageEffects(config).GetMsvcRuntimeLibrary());
 }
 
 void cmTarget::CopyPolicyStatuses(cmTarget const* tgt)
@@ -1942,7 +1946,6 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
     // ---- Windows
     "MSVC_DEBUG_INFORMATION_FORMAT",
     "MSVC_RUNTIME_CHECKS",
-    "MSVC_RUNTIME_LIBRARY",
     "VS_PLATFORM_TOOLSET",
     // ---- OpenWatcom
     "WATCOM_RUNTIME_LIBRARY",
