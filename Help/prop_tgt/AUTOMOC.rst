@@ -172,6 +172,12 @@ CMake generated file
 
 which is added to the target's sources.
 
+.. versionadded:: 4.5
+  This file is scanned for C++ module dependencies under the same
+  conditions as the target's own sources (see
+  :prop_tgt:`CXX_SCAN_FOR_MODULES`), so a header processed by ``moc``
+  may import a C++ module.  Earlier versions never scanned it.
+
 
 Qt version detection
 ^^^^^^^^^^^^^^^^^^^^

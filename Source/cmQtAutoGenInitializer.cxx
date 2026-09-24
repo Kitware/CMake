@@ -1420,7 +1420,11 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   std::vector<std::string> autogenByproducts;
   std::vector<std::string> timestampByproducts;
   if (this->Moc.Enabled) {
-    this->AddGeneratedSource(this->Moc.CompilationFile, this->Moc, true);
+    // mocs_compilation.cpp includes the moc output of the target's headers,
+    // and through it those headers themselves, so it may well import a C++
+    // module even though nothing generated declares one.
+    this->AddGeneratedSource(this->Moc.CompilationFile, this->Moc,
+                             /*prepend=*/true, ModuleScan::LikeTarget);
     if (useDepfile) {
       if (this->CrossConfig &&
           this->GlobalGen->GetName().find("Ninja") != std::string::npos &&
@@ -2306,15 +2310,20 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
     case ModuleScan::Always:
       gFile->SetProperty("CXX_SCAN_FOR_MODULES", "1");
       break;
+    case ModuleScan::LikeTarget:
+      // Leave it to the target property, policy CMP0155, and whether the
+      // compiler and the generator support scanning.
+      break;
   }
   return gFile;
 }
 
 cmSourceFile* cmQtAutoGenInitializer::AddGeneratedSource(
-  std::string const& filename, GenVarsT const& genVars, bool prepend)
+  std::string const& filename, GenVarsT const& genVars, bool prepend,
+  ModuleScan moduleScan)
 {
   // Register source at makefile
-  cmSourceFile* gFile = this->RegisterGeneratedSource(filename);
+  cmSourceFile* gFile = this->RegisterGeneratedSource(filename, moduleScan);
   // Add source file to target
   this->GenTarget->AddSource(filename, prepend);
 
@@ -2326,20 +2335,21 @@ cmSourceFile* cmQtAutoGenInitializer::AddGeneratedSource(
 
 void cmQtAutoGenInitializer::AddGeneratedSource(ConfigString const& filename,
                                                 GenVarsT const& genVars,
-                                                bool prepend)
+                                                bool prepend,
+                                                ModuleScan moduleScan)
 {
   // XXX(xcode-per-cfg-src): Drop the Xcode-specific part of the condition
   // when the Xcode generator supports per-config sources.
   if (!this->MultiConfig || this->GlobalGen->IsXcode()) {
     cmSourceFile* sf =
-      this->AddGeneratedSource(filename.Default, genVars, prepend);
+      this->AddGeneratedSource(filename.Default, genVars, prepend, moduleScan);
     handleSkipPch(sf);
     return;
   }
   for (auto const& cfg : this->ConfigsList) {
     std::string const& filenameCfg = filename.Config.at(cfg);
     // Register source at makefile
-    cmSourceFile* sf = this->RegisterGeneratedSource(filenameCfg);
+    cmSourceFile* sf = this->RegisterGeneratedSource(filenameCfg, moduleScan);
     handleSkipPch(sf);
     // Add source file to target for this configuration.
     this->GenTarget->AddSource(
