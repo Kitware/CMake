@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <sstream>
 #include <utility>
 
 #include "cmCPackIFWCommon.h"
@@ -26,11 +25,8 @@ void cmCPackIFWInstaller::printSkippedOptionWarning(
   std::string const& optionName, std::string const& optionValue)
 {
   cmCPackIFWLogger(
-    WARNING,
-    "Option "
-      << optionName << " contains the value \"" << optionValue
-      << "\" but will be skipped because the specified file does not exist."
-      << std::endl);
+    WARNING, "Option ", optionName, " contains the value \"", optionValue,
+    "\" but will be skipped because the specified file does not exist.\n");
 }
 
 void cmCPackIFWInstaller::ConfigureFromOptions()
@@ -149,10 +145,8 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     if (this->WizardStyle != "Modern" && this->WizardStyle != "Aero" &&
         this->WizardStyle != "Mac" && this->WizardStyle != "Classic") {
       cmCPackIFWLogger(
-        WARNING,
-        "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \""
-          << option << "\". Expected values are: Modern, Aero, Mac, Classic."
-          << std::endl);
+        WARNING, "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \"",
+        option, "\". Expected values are: Modern, Aero, Mac, Classic.\n");
     }
   }
 
@@ -198,12 +192,11 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         currentVersionMsg = "an older QtIFW version";
       }
       cmCPackIFWLogger(
-        WARNING,
-        "Option CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST is set to \""
-          << option
-          << "\", but it is only supported with QtIFW version 4.0 or later. "
-             "It is being ignored because you are using "
-          << currentVersionMsg << std::endl);
+        WARNING, "Option CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST is set to \"",
+        option,
+        "\", but it is only supported with QtIFW version 4.0 or later. "
+        "It is being ignored because you are using ",
+        currentVersionMsg, '\n');
     }
   }
 
@@ -332,11 +325,10 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         cmCPackIFWLogger(
           WARNING,
           "Option \"CPACK_IFW_PACKAGE_PRODUCT_IMAGE_URLS\" will be skipped "
-          "because it contains "
-            << this->ProductImageUrls.size()
-            << " elements while \"CPACK_IFW_PACKAGE_PRODUCT_IMAGES\" "
-               "contains "
-            << this->ProductImages.size() << " elements." << std::endl);
+          "because it contains ",
+          this->ProductImageUrls.size(),
+          " elements while \"CPACK_IFW_PACKAGE_PRODUCT_IMAGES\" contains ",
+          this->ProductImages.size(), " elements.\n");
         this->ProductImageUrls.clear();
       }
     }
@@ -667,10 +659,9 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
         cmsys::SystemTools::CopyFileIfDifferent(this->Resources[i], path);
         resources.push_back(std::move(name));
       } else {
-        cmCPackIFWLogger(WARNING,
-                         "Can't copy resources from \""
-                           << this->Resources[i]
-                           << "\". Resource will be skipped." << std::endl);
+        cmCPackIFWLogger(WARNING, "Can't copy resources from \"",
+                         this->Resources[i],
+                         "\". Resource will be skipped.\n");
       }
     }
     this->Resources = resources;
