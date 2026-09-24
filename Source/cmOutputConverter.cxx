@@ -191,7 +191,7 @@ std::string cmOutputConverter::ConvertToOutputFormat(cm::string_view source,
                                                      OutputFormat format,
                                                      bool useWatcomQuote) const
 {
-  std::string result(source);
+  std::string result;
   // Convert it to an output path.
   if (format == SHELL || format == NINJAMULTI) {
     result = this->ConvertDirectorySeparatorsForShell(source);
@@ -199,7 +199,9 @@ std::string cmOutputConverter::ConvertToOutputFormat(cm::string_view source,
                                   format == NINJAMULTI);
   } else if (format == RESPONSE) {
     result =
-      this->EscapeForShell(result, false, false, useWatcomQuote, false, true);
+      this->EscapeForShell(source, false, false, useWatcomQuote, false, true);
+  } else {
+    result = std::string(source);
   }
   return result;
 }
