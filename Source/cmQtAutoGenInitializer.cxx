@@ -1468,7 +1468,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       if (!this->MultiConfig || this->GlobalGen->IsXcode()) {
         std::string const outPath =
           cmStrCat(this->Dir.Include.Default, '/', mocBuildPath);
-        cmSourceFile* sf = this->RegisterGeneratedSource(outPath, true);
+        cmSourceFile* sf =
+          this->RegisterGeneratedSource(outPath, ModuleScan::Always);
         // A PCH force-include would inject declarations ahead of the
         // module implementation unit's "module M;", which may only be
         // preceded by comments and preprocessor directives.
@@ -1484,7 +1485,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         for (auto const& cfg : this->ConfigsList) {
           std::string const outPath =
             cmStrCat(this->Dir.Include.Config.at(cfg), '/', mocBuildPath);
-          cmSourceFile* sf = this->RegisterGeneratedSource(outPath, true);
+          cmSourceFile* sf =
+            this->RegisterGeneratedSource(outPath, ModuleScan::Always);
           // A PCH force-include would inject declarations ahead of the
           // module implementation unit's "module M;", which may only be
           // preceded by comments and preprocessor directives.
@@ -2289,7 +2291,7 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
 }
 
 cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
-  std::string const& filename, bool scanForModules)
+  std::string const& filename, ModuleScan moduleScan)
 {
   cmSourceFile* gFile = this->Makefile->GetOrCreateSource(filename, true);
   gFile->SetSpecialSourceType(
@@ -2297,7 +2299,14 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
   gFile->MarkAsGenerated();
   gFile->SetProperty("SKIP_AUTOGEN", "1");
   gFile->SetProperty("SKIP_LINTING", "ON");
-  gFile->SetProperty("CXX_SCAN_FOR_MODULES", scanForModules ? "1" : "0");
+  switch (moduleScan) {
+    case ModuleScan::Never:
+      gFile->SetProperty("CXX_SCAN_FOR_MODULES", "0");
+      break;
+    case ModuleScan::Always:
+      gFile->SetProperty("CXX_SCAN_FOR_MODULES", "1");
+      break;
+  }
   return gFile;
 }
 
