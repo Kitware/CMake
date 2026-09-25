@@ -24,6 +24,7 @@
 #include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
+#include "cmCMakePkgConfigCommand.h"
 #include "cmConfigureLog.h"
 #include "cmDependencyProvider.h"
 #include "cmDiagnostics.h"
@@ -2193,8 +2194,17 @@ bool cmFindPackageCommand::FindPackageDependencies(
   std::string const& filePath, cmPackageInfoReader const& reader,
   RequiredStatus required)
 {
-  // Get package requirements.
-  for (cmPackageRequirement const& dep : reader.GetRequirements()) {
+  for (auto const& dep : reader.GetRequirements()) {
+    // Try domain-based resolution first.
+#ifndef CMAKE_BOOTSTRAP
+    if (cm::contains(dep.Domains, cm::PackageDomain::PkgConfig)) {
+      cmExecutionStatus status{ *this->Makefile };
+      if (cmImportPkgConfigPackage(*this->Makefile, status, dep.Name)) {
+        continue;
+      }
+    }
+#endif
+
     cmExecutionStatus status{ *this->Makefile };
     cmMakefile::CallRAII scope{ this->Makefile, filePath, status };
 

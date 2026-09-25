@@ -289,6 +289,11 @@ public:
 
   bool HasKnownObjectFileLocation(std::string* reason = nullptr) const;
 
+  void SetForeignPackageName(std::string const& name);
+  std::string const& GetForeignPackageName() const;
+  void SetForeignTarget(cmTarget* target);
+  cmTarget* GetForeignTarget() const;
+
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 

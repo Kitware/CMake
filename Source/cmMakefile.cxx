@@ -4084,6 +4084,13 @@ cmTarget* cmMakefile::AddForeignTarget(std::string const& origin,
   return this->ImportedTargetsOwned.back().get();
 }
 
+cmTarget* cmMakefile::FindForeignTarget(std::string const& origin,
+                                        std::string const& name) const
+{
+  return this->FindTargetToUse(cmStrCat("@foreign_", origin, "::", name),
+                               cm::TargetDomain::FOREIGN);
+}
+
 cmTarget* cmMakefile::FindTargetToUse(std::string const& name,
                                       cm::TargetDomainSet domains) const
 {

@@ -8,6 +8,10 @@
 #include <vector>
 
 class cmExecutionStatus;
+class cmMakefile;
 
 bool cmCMakePkgConfigCommand(std::vector<std::string> const& args,
                              cmExecutionStatus& status);
+
+bool cmImportPkgConfigPackage(cmMakefile& mf, cmExecutionStatus& status,
+                              std::string const& name);

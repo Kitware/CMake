@@ -509,12 +509,19 @@ std::unique_ptr<cmPackageInfoReader> cmPackageInfoReader::Read(
   if (parent) {
     reader->ComponentTargets = parent->ComponentTargets;
     reader->DefaultConfigurations = parent->DefaultConfigurations;
+    reader->RequirementDomains = parent->RequirementDomains;
   } else {
     for (std::string const& config :
          ReadList(reader->Data, "configurations")) {
       reader->DefaultConfigurations.emplace_back(
         cmSystemTools::UpperCase(config));
     }
+  }
+
+  // Read package-level requirements. (Configuration supplements are not
+  // allowed to declare package requirements.)
+  if (cmSystemTools::GetFilenameName(path).find('@') == std::string::npos) {
+    reader->ReadRequirements();
   }
 
   // Check for a default license.
@@ -590,24 +597,56 @@ cmPackageInfoReader::ParseVersion(
   return cm::nullopt;
 }
 
-std::vector<cmPackageRequirement> cmPackageInfoReader::GetRequirements() const
+void cmPackageInfoReader::ReadRequirements()
 {
-  std::vector<cmPackageRequirement> requirements;
-
   auto const& requirementObjects = this->Data["requires"];
   if (!requirementObjects.isObject()) {
-    return {};
+    return;
   }
 
   for (auto ri = requirementObjects.begin(), re = requirementObjects.end();
        ri != re; ++ri) {
-    cmPackageRequirement r{ ri.name(), ToString((*ri)["version"]),
+    cmPackageRequirement r{ ri.name(),
+                            ToString((*ri)["version"]),
                             ReadList(*ri, "components"),
-                            ReadList(*ri, "hints") };
-    requirements.emplace_back(std::move(r));
+                            ReadList(*ri, "hints"),
+                            {} };
+    for (std::string const& domain :
+         ReadList(GetExtensions(*ri), "domains@v1")) {
+      r.Domains.push_back(domain == "pkg-config" ? cm::PackageDomain::PkgConfig
+                                                 : cm::PackageDomain::Unknown);
+    }
+    if (!r.Domains.empty()) {
+      this->RequirementDomains[r.Name] = r.Domains;
+    } else {
+      // A local declaration without domains clears any inherited domains.
+      this->RequirementDomains.erase(r.Name);
+    }
+    this->Requirements.emplace_back(std::move(r));
+  }
+}
+
+std::string cmPackageInfoReader::ResolveTargetName(
+  cmMakefile* makefile, std::string const& name,
+  std::string const& context) const
+{
+  // A pkg-config package is exposed as a single component of the same name.
+  // Only resolve it to a foreign target if this requirement opts in.
+  std::string::size_type const n = name.find(':');
+  if (n != std::string::npos && n > 0 &&
+      name.substr(0, n) == name.substr(n + 1)) {
+    std::string const package = name.substr(0, n);
+    auto const di = this->RequirementDomains.find(package);
+    if (di != this->RequirementDomains.end() &&
+        cm::contains(di->second, cm::PackageDomain::PkgConfig)) {
+      if (cmTarget* foreignTarget =
+            makefile->FindForeignTarget("pkgcfg", package)) {
+        return foreignTarget->GetName();
+      }
+    }
   }
 
-  return requirements;
+  return NormalizeTargetName(name, context);
 }
 
 std::vector<std::string> cmPackageInfoReader::GetComponentNames() const
@@ -794,24 +833,26 @@ void cmPackageInfoReader::SetTargetProperties(
   // Add transitive dependencies.
   for (std::string const& dep : ReadList(data, "requires")) {
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration,
-                   NormalizeTargetName(dep, package));
+                   this->ResolveTargetName(makefile, dep, package));
   }
 
   for (std::string const& dep : ReadList(data, "compile_requires")) {
     std::string const& lib =
-      cmStrCat("$<COMPILE_ONLY:"_s, NormalizeTargetName(dep, package), '>');
+      cmStrCat("$<COMPILE_ONLY:"_s,
+               this->ResolveTargetName(makefile, dep, package), '>');
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
   }
 
   for (std::string const& dep : ReadList(data, "link_requires")) {
-    std::string const& lib =
-      cmStrCat("$<LINK_ONLY:"_s, NormalizeTargetName(dep, package), '>');
+    std::string const& lib = cmStrCat(
+      "$<LINK_ONLY:"_s, this->ResolveTargetName(makefile, dep, package), '>');
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
   }
 
   for (std::string const& dep : ReadList(data, "dyld_requires")) {
     AppendImportProperty(makefile, target, "LINK_DEPENDENT_LIBRARIES"_s,
-                         configuration, NormalizeTargetName(dep, package));
+                         configuration,
+                         this->ResolveTargetName(makefile, dep, package));
   }
 
   for (std::string const& lib : ReadList(data, "link_libraries")) {

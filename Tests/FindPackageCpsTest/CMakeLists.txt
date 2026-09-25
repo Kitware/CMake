@@ -457,3 +457,51 @@ else()
     "include set 'bar' files"
     "${CMAKE_SOURCE_DIR}/include/bar.h")
 endif()
+
+###############################################################################
+# Test CPS + pkg-config interoperability.
+
+set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/pc")
+find_package(pc-link-test)
+if(NOT pc-link-test_FOUND)
+  message(SEND_ERROR "pc-link-test not found !")
+elseif(NOT TARGET pc-link-test::Parent)
+  message(SEND_ERROR "pc-link-test::Parent missing !")
+elseif(NOT TARGET pc-link-test::InheritsRequirement)
+  message(SEND_ERROR "pc-link-test::InheritsRequirement missing !")
+elseif(NOT TARGET pc-link-test::ShadowsRequirement)
+  message(SEND_ERROR "pc-link-test::ShadowsRequirement missing !")
+elseif(NOT TARGET pc-link-test::UnknownDomain)
+  message(SEND_ERROR "pc-link-test::UnknownDomain missing !")
+endif()
+
+expect_property(pc-link-test::Parent INTERFACE_LINK_LIBRARIES
+  "link libraries (from pkg-config dependency)"
+  "@foreign_pkgcfg::cps-pkg-test"
+  "$<$<CONFIG:debug>:$<COMPILE_ONLY:@foreign_pkgcfg::cps-pkg-test>>"
+  "$<$<CONFIG:debug>:$<LINK_ONLY:@foreign_pkgcfg::cps-pkg-test>>")
+expect_property(pc-link-test::Parent IMPORTED_LINK_DEPENDENT_LIBRARIES_DEBUG
+  "dyld requirements (from pkg-config dependency)"
+  "@foreign_pkgcfg::cps-pkg-test")
+
+# Appendices inherit base requirement domains and keep additional requirements
+# local. Configuration supplements inherit both levels of requirement domains.
+# Their package-level requires blocks are ignored, including attempted
+# overrides of the inherited pkg-config domains.
+expect_property(pc-link-test::InheritsRequirement INTERFACE_LINK_LIBRARIES
+  "link libraries (from inherited and local dependencies)"
+  "@foreign_pkgcfg::cps-pkg-test"
+  "@foreign_pkgcfg::cps-pkg-appendix"
+  "$<$<CONFIG:debug>:@foreign_pkgcfg::cps-pkg-test>"
+  "$<$<CONFIG:debug>:@foreign_pkgcfg::cps-pkg-appendix>")
+expect_property(pc-link-test::ShadowsRequirement INTERFACE_LINK_LIBRARIES
+  "link libraries (from shadowing dependency)"
+  "cps-pkg-test::cps-pkg-test"
+  "$<COMPILE_ONLY:cps-pkg-test::cps-pkg-test>"
+  "$<LINK_ONLY:cps-pkg-test::cps-pkg-test>")
+expect_property(pc-link-test::ShadowsRequirement IMPORTED_LINK_DEPENDENT_LIBRARIES
+  "dyld requirements (from shadowing dependency)"
+  "cps-pkg-test::cps-pkg-test")
+expect_property(pc-link-test::UnknownDomain INTERFACE_LINK_LIBRARIES
+  "link libraries (from unknown domain dependency)"
+  "cps-pkg-test::cps-pkg-test")
