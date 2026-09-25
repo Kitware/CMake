@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <sstream>
 
 #include <cm/string_view>
 
@@ -108,8 +107,8 @@ bool cmCTestHandlerCommand::InvokeImpl(
   }
 
   if (!success) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               this->GetName() << ' ' << status.GetError() << '\n');
+    cmCTestLog(this->CTest, ERROR_MESSAGE, this->GetName(), ' ',
+               status.GetError(), '\n');
   }
 
   cmMakefile& mf = status.GetMakefile();
@@ -146,12 +145,12 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
         "BuildDirectory", cmSystemTools::CollapseFullPath(bdir), args.Quiet);
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "CTEST_BINARY_DIRECTORY not set" << std::endl);
+                 "CTEST_BINARY_DIRECTORY not set\n");
     }
   }
   if (!args.Source.empty()) {
-    cmCTestLog(this->CTest, DEBUG,
-               "Set source directory to: " << args.Source << std::endl);
+    cmCTestLog(this->CTest, DEBUG, "Set source directory to: ", args.Source,
+               '\n');
     this->CTest->SetCTestConfiguration(
       "SourceDirectory", cmSystemTools::CollapseFullPath(args.Source),
       args.Quiet);
@@ -167,12 +166,11 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
     this->CTest->SetCTestConfiguration("ChangeId", *changeId, args.Quiet);
   }
 
-  cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl);
+  cmCTestLog(this->CTest, DEBUG, "Initialize handler\n");
   auto handler = this->InitializeHandler(args, status);
   if (!handler) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot instantiate test handler " << this->GetName()
-                                                  << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot instantiate test handler ",
+               this->GetName(), '\n');
     return false;
   }
 

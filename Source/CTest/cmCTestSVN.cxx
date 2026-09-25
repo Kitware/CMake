@@ -110,9 +110,8 @@ bool cmCTestSVN::NoteOldRevision()
     this->Log << "Revision for repository '" << svninfo.LocalPath
               << "' before update: " << svninfo.OldRevision << "\n";
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   Old revision of external repository '"
-                 << svninfo.LocalPath << "' is: " << svninfo.OldRevision
-                 << "\n");
+               "   Old revision of external repository '", svninfo.LocalPath,
+               "' is: ", svninfo.OldRevision, '\n');
   }
 
   // Set the global old revision to the one of the root
@@ -132,9 +131,8 @@ bool cmCTestSVN::NoteNewRevision()
     this->Log << "Revision for repository '" << svninfo.LocalPath
               << "' after update: " << svninfo.NewRevision << "\n";
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   New revision of external repository '"
-                 << svninfo.LocalPath << "' is: " << svninfo.NewRevision
-                 << "\n");
+               "   New revision of external repository '", svninfo.LocalPath,
+               "' is: ", svninfo.NewRevision, '\n');
 
     // svninfo.Root = ""; // uncomment to test GuessBase
     this->Log << "Repository '" << svninfo.LocalPath

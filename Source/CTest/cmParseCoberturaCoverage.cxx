@@ -40,8 +40,7 @@ protected:
     if (this->InSources && this->InSource) {
       this->FilePaths.push_back(tmp);
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "Adding Source: " << tmp << std::endl,
-                         this->Coverage.Quiet);
+                         this->Coverage.Quiet, "Adding Source: ", tmp, '\n');
     }
   }
 
@@ -58,9 +57,8 @@ protected:
       while (true) {
         if (strcmp(atts[tagCount], "filename") == 0) {
           cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                             "Reading file: " << atts[tagCount + 1]
-                                              << std::endl,
-                             this->Coverage.Quiet);
+                             this->Coverage.Quiet,
+                             "Reading file: ", atts[tagCount + 1], '\n');
           std::string filename = atts[tagCount + 1];
           this->CurFileName.clear();
 
@@ -92,9 +90,8 @@ protected:
             fin.open(this->CurFileName.c_str());
             if (!fin) {
               cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                                 "Skipping system file " << filename
-                                                         << std::endl,
-                                 this->Coverage.Quiet);
+                                 this->Coverage.Quiet, "Skipping system file ",
+                                 filename, '\n');
 
               this->SkipThisClass = true;
               break;

@@ -44,11 +44,11 @@ bool cmParseMumpsCoverage::ReadCoverageFile(char const* file)
         this->LoadCoverageData(path);
       } else {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Parse Error in Mumps coverage file :\n"
-                     << file << "\ntype: [" << type << "]\npath:[" << path
-                     << "]\n"
-                        "input line: ["
-                     << line << "]\n");
+                   "Parse Error in Mumps coverage file :\n", file, "\ntype: [",
+                   type, "]\npath:[", path,
+                   "]\n"
+                   "input line: [",
+                   line, "]\n");
       }
     }
   }

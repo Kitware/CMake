@@ -110,8 +110,7 @@ bool cmCTestHG::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Old revision of repository is: " << this->OldRevision
-                                                  << "\n");
+             "   Old revision of repository is: ", this->OldRevision, '\n');
   this->PriorRev.Rev = this->OldRevision;
   return true;
 }
@@ -120,8 +119,7 @@ bool cmCTestHG::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   New revision of repository is: " << this->NewRevision
-                                                  << "\n");
+             "   New revision of repository is: ", this->NewRevision, '\n');
   return true;
 }
 

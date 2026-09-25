@@ -10,7 +10,6 @@
 #include <cstdlib>
 #include <functional>
 #include <initializer_list>
-#include <iomanip>
 #include <iostream>
 #include <list>
 #include <map>
@@ -411,8 +410,7 @@ void cmCTestMultiProcessHandler::InitializeLoop()
     *this->Loop, /*onToken=*/[this]() { this->JobServerReceivedToken(); },
     /*onDisconnect=*/nullptr);
   if (this->JobServerClient) {
-    cmCTestLog(this->CTest, OUTPUT,
-               "Connected to MAKE jobserver" << std::endl);
+    cmCTestLog(this->CTest, OUTPUT, "Connected to MAKE jobserver\n");
   }
 }
 
@@ -457,8 +455,8 @@ void cmCTestMultiProcessHandler::RunTests()
 
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "test " << test << "\n", this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, "test ",
+                     test, "\n");
 
   auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
 
@@ -694,8 +692,7 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
   if (!this->StopTimePassed) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "The stop time has been passed. "
-               "Stopping all tests."
-                 << std::endl);
+               "Stopping all tests.\n");
     this->StopTimePassed = true;
   }
 }
@@ -914,10 +911,9 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
       // We found a test that fits in the spare load.
       allTestsFailedTestLoadCheck = false;
-      cmCTestLog(this->CTest, DEBUG,
-                 "OK to run "
-                   << this->GetName(test) << ", it requires " << processors
-                   << " procs & system load is: " << systemLoad << std::endl);
+      cmCTestLog(this->CTest, DEBUG, "OK to run ", this->GetName(test),
+                 ", it requires ", processors,
+                 " procs & system load is: ", systemLoad, '\n');
     }
 
     // Exclude tests that are too big to fit in the concurrency limit.
@@ -965,19 +961,19 @@ void cmCTestMultiProcessHandler::StartNextTests()
     } else if (!testWithMinProcessors.empty()) {
       /* clang-format off */
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                 "System Load: " << systemLoad << ", "
-                 "Max Allowed Load: " << this->TestLoad << ", "
-                 "Smallest test " << testWithMinProcessors <<
-                 " requires " << minProcessorsRequired);
+        "System Load: ", systemLoad, ", "
+        "Max Allowed Load: ", this->TestLoad, ", "
+        "Smallest test ", testWithMinProcessors,
+        " requires ", minProcessorsRequired);
       /* clang-format on */
     } else {
       /* clang-format off */
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                 "System Load: " << systemLoad << ", "
-                 "Max Allowed Load: " << this->TestLoad);
+        "System Load: ", systemLoad, ", "
+        "Max Allowed Load: ", this->TestLoad);
       /* clang-format on */
     }
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "*****" << std::endl);
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "*****\n");
 
     // Try again later when the load might be lower.
     this->StartNextTestsOnTimer();
@@ -1152,11 +1148,9 @@ void cmCTestMultiProcessHandler::RequeueRepeatGroup(RepeatGroup const& group)
     this->PendingTests[t.first] = std::move(info);
     this->OrderedTests.push_back(t.first);
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Re-queued " << group.Tests.size()
-                                  << " tests to repeat their fixture"
-                                  << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "Re-queued ", group.Tests.size(),
+                     " tests to repeat their fixture\n");
 }
 
 void cmCTestMultiProcessHandler::UpdateCostData()
@@ -1871,45 +1865,40 @@ void cmCTestMultiProcessHandler::PrintTestList()
 
     if (!p.Labels.empty()) // print the labels
     {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "Labels:", this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                         "Labels:");
     }
     for (std::string const& label : p.Labels) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " " << label,
-                         this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, " ",
+                         label);
     }
     if (!p.Labels.empty()) // print the labels
     {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl,
-                         this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                         '\n');
     }
 
     if (this->TestHandler->MemCheck) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "  Memory Check",
-                         this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                         "  Memory Check");
     } else {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "  Test", this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, "  Test");
     }
-    std::ostringstream indexStr;
-    indexStr << " #" << p.Index << ":";
+    std::string indexStr = cmStrCat(" #", p.Index, ':');
     cmCTestOptionalLog(
-      this->CTest, HANDLER_OUTPUT,
-      std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
-        << indexStr.str(),
-      this->Quiet);
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " " << p.Name,
-                       this->Quiet);
+      this->CTest, HANDLER_OUTPUT, this->Quiet,
+      cmPadToWidth(3 + getNumWidth(this->TestHandler->GetMaxIndex()),
+                   std::move(indexStr)));
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, ' ', p.Name);
     if (p.Disabled) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " (Disabled)",
-                         this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                         " (Disabled)");
     }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl, this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, '\n');
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     std::endl
-                       << "Total Tests: " << this->Total << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, '\n',
+                     "Total Tests: ", this->Total, '\n');
 }
 
 void cmCTestMultiProcessHandler::PrintLabels()
@@ -1921,15 +1910,15 @@ void cmCTestMultiProcessHandler::PrintLabels()
   }
 
   if (!allLabels.empty()) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "All Labels:" << std::endl,
-                       this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                       "All Labels:\n");
   } else {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "No Labels Exist" << std::endl, this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                       "No Labels Exist\n");
   }
   for (std::string const& label : allLabels) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "  " << label << std::endl,
-                       this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, "  ", label,
+                       '\n');
   }
 }
 
@@ -1986,9 +1975,8 @@ int cmCTestMultiProcessHandler::FindMaxIndex()
 // Returns true if no cycles exist in the dependency graph
 bool cmCTestMultiProcessHandler::CheckCycles()
 {
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Checking test dependency graph..." << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "Checking test dependency graph...\n");
   for (auto const& it : this->PendingTests) {
     // DFS from each element to itself
     int root = it.first;
@@ -2002,12 +1990,11 @@ bool cmCTestMultiProcessHandler::CheckCycles()
         for (auto const& d : this->PendingTests[test].Depends) {
           if (d == root) {
             // cycle exists
-            cmCTestLog(
-              this->CTest, ERROR_MESSAGE,
-              "Error: a cycle exists in the test dependency graph "
-              "for the test \""
-                << this->Properties[root]->Name
-                << "\".\nPlease fix the cycle and run ctest again.\n");
+            cmCTestLog(this->CTest, ERROR_MESSAGE,
+                       "Error: a cycle exists in the test dependency graph "
+                       "for the test \"",
+                       this->Properties[root]->Name,
+                       "\".\nPlease fix the cycle and run ctest again.\n");
             return false;
           }
           s.push(d);
@@ -2015,9 +2002,8 @@ bool cmCTestMultiProcessHandler::CheckCycles()
       }
     }
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Checking test dependency graph end" << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "Checking test dependency graph end\n");
   return true;
 }
 
@@ -2026,18 +2012,16 @@ bool cmCTestMultiProcessHandler::CheckGeneratedResourceSpec()
   for (auto& test : this->Properties) {
     if (!test.second->GeneratedResourceSpecFile.empty()) {
       if (this->ResourceSpecSetupTest) {
-        cmCTestLog(
-          this->CTest, ERROR_MESSAGE,
-          "Only one test may define the GENERATED_RESOURCE_SPEC_FILE property"
-            << std::endl);
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "Only one test may define the GENERATED_RESOURCE_SPEC_FILE "
+                   "property\n");
         return false;
       }
 
       if (test.second->FixturesSetup.size() != 1) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "Test that defines GENERATED_RESOURCE_SPEC_FILE must have "
-                   "exactly one FIXTURES_SETUP"
-                     << std::endl);
+                   "exactly one FIXTURES_SETUP\n");
         return false;
       }
 
@@ -2051,10 +2035,10 @@ bool cmCTestMultiProcessHandler::CheckGeneratedResourceSpec()
       if (!test.second->ResourceGroups.empty() &&
           !test.second->FixturesRequired.count(
             this->ResourceSpecSetupFixture)) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "All tests that have RESOURCE_GROUPS must include the "
-                   "resource spec generator fixture in their FIXTURES_REQUIRED"
-                     << std::endl);
+        cmCTestLog(
+          this->CTest, ERROR_MESSAGE,
+          "All tests that have RESOURCE_GROUPS must include the "
+          "resource spec generator fixture in their FIXTURES_REQUIRED\n");
         return false;
       }
     }
@@ -2064,13 +2048,12 @@ bool cmCTestMultiProcessHandler::CheckGeneratedResourceSpec()
     if (this->ResourceSpecSetupTest) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "GENERATED_RESOURCE_SPEC_FILE test property cannot be used "
-                 "in conjunction with ResourceSpecFile option"
-                   << std::endl);
+                 "in conjunction with ResourceSpecFile option\n");
       return false;
     }
     std::string error;
     if (!this->InitResourceAllocator(error)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, error << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, error, '\n');
       return false;
     }
   }

@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildCommand.h"
 
-#include <sstream>
 #include <utility>
 
 #include <cm/memory>
@@ -109,9 +108,8 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       if (presetCheck == PresetCheckResult::Found) {
         effectivePreset = *v;
       } else {
-        cmCTestLog(this->CTest, WARNING,
-                   "No build preset named \""
-                     << *v << "\" found, ignoring CTEST_PRESET." << std::endl);
+        cmCTestLog(this->CTest, WARNING, "No build preset named \"", *v,
+                   "\" found, ignoring CTEST_PRESET.\n");
       }
     }
   }
@@ -125,10 +123,9 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
                                        args.Quiet);
   } else if (!effectivePreset.empty()) {
     if (cmNonempty(ctestBuildCommand)) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "Ignoring CTEST_BUILD_COMMAND because preset \""
-                           << effectivePreset << "\" is in use.\n",
-                         args.Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+                         "Ignoring CTEST_BUILD_COMMAND because preset \"",
+                         effectivePreset, "\" is in use.\n");
     }
     cmCMakePresetsGraph presetsGraph;
     if (!presetsGraph.ReadProjectPresets(sourceDirectory, presetsFile)) {
@@ -177,8 +174,8 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
         cmStrCat(std::move(buildCommand), " -- ", cmakeBuildAdditionalFlags);
     }
 
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "SetMakeCommand:" << buildCommand << "\n", args.Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+                       "SetMakeCommand:", buildCommand, '\n');
     this->CTest->SetCTestConfiguration("MakeCommand", buildCommand,
                                        args.Quiet);
   } else {
@@ -206,9 +203,8 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
         cmakeBuildTarget, cmakeBuildConfiguration, args.ParallelLevel,
         cmakeBuildAdditionalFlags, false);
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "SetMakeCommand:" << buildCommand << "\n",
-                         args.Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+                         "SetMakeCommand:", buildCommand, '\n');
       this->CTest->SetCTestConfiguration("MakeCommand", buildCommand,
                                          args.Quiet);
     } else {

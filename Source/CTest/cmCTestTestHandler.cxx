@@ -444,8 +444,8 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
   if (dval) {
     if (!SetTruncationMode(this->TestOptions.OutputTruncation, *dval)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Invalid value for CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION: "
-                   << *dval << std::endl);
+                 "Invalid value for CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION: ",
+                 *dval, '\n');
     }
   }
 }
@@ -454,7 +454,7 @@ int cmCTestTestHandler::PreProcessHandler()
 {
   if (!this->ExecuteCommands(this->CustomPreTest)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Problem executing pre-test command(s)." << std::endl);
+               "Problem executing pre-test command(s).\n");
     return 0;
   }
   return 1;
@@ -464,7 +464,7 @@ int cmCTestTestHandler::PostProcessHandler()
 {
   if (!this->ExecuteCommands(this->CustomPostTest)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Problem executing post-test command(s)." << std::endl);
+               "Problem executing post-test command(s).\n");
     return 0;
   }
   return 1;
@@ -478,12 +478,9 @@ int cmCTestTestHandler::ProcessHandler()
 
   this->TestResults.clear();
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     (this->MemCheck ? "Memory check" : "Test")
-                       << " project "
-                       << cmSystemTools::GetLogicalWorkingDirectory()
-                       << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                     (this->MemCheck ? "Memory check" : "Test"), " project ",
+                     cmSystemTools::GetLogicalWorkingDirectory(), '\n');
   if (!this->CTest->GetShowOnly() && !this->PreProcessHandler()) {
     return -1;
   }
@@ -508,8 +505,7 @@ int cmCTestTestHandler::ProcessHandler()
   if (passed.size() + failed.size() == 0) {
     if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels() &&
         this->CTest->GetNoTestsMode() != cmCTest::NoTests::Ignore) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "No tests were found!!!" << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "No tests were found!!!\n");
       if (this->CTest->GetNoTestsMode() == cmCTest::NoTests::Error) {
         noTestsFoundError = true;
       }
@@ -517,13 +513,11 @@ int cmCTestTestHandler::ProcessHandler()
   } else {
     if (this->HandlerVerbose && !passed.empty() &&
         (this->UseIncludeRegExpFlag || this->UseExcludeRegExpFlag)) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         std::endl
-                           << "The following tests passed:" << std::endl,
-                         this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                         "\nThe following tests passed:\n");
       for (std::string const& j : passed) {
-        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                           "\t" << j << std::endl, this->Quiet);
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                           '\t', j, '\n');
       }
     }
 
@@ -615,7 +609,7 @@ bool cmCTestTestHandler::ProcessOptions()
       }
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Repeat option invalid value: " << *repeat << std::endl);
+                 "Repeat option invalid value: ", *repeat, '\n');
       return false;
     }
   }
@@ -628,8 +622,7 @@ bool cmCTestTestHandler::ProcessOptions()
       unsigned long plevel = 0;
       if (!cmStrToULong(*parallelLevel, &plevel)) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "ParallelLevel invalid value: " << *parallelLevel
-                                                   << std::endl);
+                   "ParallelLevel invalid value: ", *parallelLevel, '\n');
         return false;
       }
       this->CTest->SetParallelLevel(plevel);
@@ -690,9 +683,8 @@ void cmCTestTestHandler::LogTestSummary(std::vector<std::string> const& passed,
   }
   char realBuf[1024];
   snprintf(realBuf, sizeof(realBuf), "%6.2f sec", durationInSecs.count());
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "\nTotal Test time (real) = " << realBuf << "\n",
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                     "\nTotal Test time (real) = ", realBuf, "\n");
 }
 
 void cmCTestTestHandler::LogDisabledTests(
@@ -701,8 +693,7 @@ void cmCTestTestHandler::LogDisabledTests(
   if (!disabledTests.empty()) {
     cmGeneratedFileStream ofs;
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::endl
-                 << "The following tests did not run:" << std::endl);
+               "\nThe following tests did not run:\n");
     this->StartLogFile("TestsDisabled", ofs);
 
     char const* disabled_reason;
@@ -714,10 +705,9 @@ void cmCTestTestHandler::LogDisabledTests(
       } else {
         disabled_reason = "Skipped";
       }
-      std::ostringstream msg;
-      msg << "\t" << std::setw(3) << dt.TestCount << " - " << dt.Name << " ("
-          << disabled_reason << ")\n";
-      cmCTestColorLog(this->CTest, HANDLER_OUTPUT, disabledAttrs, msg.str());
+      cmCTestColorLog(this->CTest, HANDLER_OUTPUT, disabledAttrs, '\t',
+                      cmPadToWidth(3, std::to_string(dt.TestCount)), " - ",
+                      dt.Name, " (", disabled_reason, ")\n");
     }
   }
 }
@@ -727,9 +717,7 @@ void cmCTestTestHandler::LogFailedTests(std::vector<std::string> const& failed,
 {
   if (!failed.empty()) {
     cmGeneratedFileStream ofs;
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::endl
-                 << "The following tests FAILED:" << std::endl);
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "\nThe following tests FAILED:\n");
     this->StartLogFile("TestsFailed", ofs);
 
     for (cmCTestTestResult const& ft : resultsSet) {
@@ -752,10 +740,9 @@ void cmCTestTestHandler::LogFailedTests(std::vector<std::string> const& failed,
             : maxLen - ft_name_and_status.size();
           labels = cmStrCat(std::string(ns, ' '), cmJoin(p.Labels, " "));
         }
-        std::ostringstream msg;
-        msg << "\t" << std::setw(3) << ft.TestCount << " - "
-            << ft_name_and_status << labels << "\n";
-        cmCTestColorLog(this->CTest, HANDLER_OUTPUT, testAttrs, msg.str());
+        cmCTestColorLog(this->CTest, HANDLER_OUTPUT, testAttrs, '\t',
+                        cmPadToWidth(3, std::to_string(ft.TestCount)), " - ",
+                        ft_name_and_status, labels, "\n");
       }
     }
   }
@@ -768,10 +755,8 @@ bool cmCTestTestHandler::GenerateXML()
     if (!this->StartResultingXML(
           (this->MemCheck ? cmCTest::PartMemCheck : cmCTest::PartTest),
           (this->MemCheck ? "DynamicAnalysis" : "Test"), xmlfile)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Cannot create "
-                   << (this->MemCheck ? "memory check" : "testing")
-                   << " XML file" << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create ",
+                 (this->MemCheck ? "memory check" : "testing"), " XML file\n");
       this->LogFile = nullptr;
       return false;
     }
@@ -790,7 +775,7 @@ bool cmCTestTestHandler::GenerateXML()
     if (!this->StartResultingXML(cmCTest::PartTest, "DynamicAnalysis-Test",
                                  xmlfile)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Cannot create testing XML file" << std::endl);
+                 "Cannot create testing XML file\n");
       this->LogFile = nullptr;
       return false;
     }
@@ -851,11 +836,11 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
   }
   // now print times
   if (doSubProject) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "\nSubproject Time Summary:", this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                       "\nSubproject Time Summary:");
   } else {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "\nLabel Time Summary:", this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                       "\nLabel Time Summary:");
   }
   for (std::string const& i : labels) {
     std::string label = i;
@@ -870,11 +855,8 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
       labelCountStr << "s";
     }
     labelCountStr << ")";
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "\n"
-                         << label << " = " << buf << " "
-                         << labelCountStr.str(),
-                       this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, "\n", label,
+                       " = ", buf, ' ', labelCountStr.str());
     if (this->LogFile) {
       *this->LogFile << "\n" << i << " = " << buf << "\n";
     }
@@ -882,7 +864,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
   if (this->LogFile) {
     *this->LogFile << "\n";
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n", this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, '\n');
 }
 
 /**
@@ -1118,9 +1100,8 @@ void cmCTestTestHandler::ComputeOutOfDateTests()
 
 void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
 {
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Updating test list for fixtures" << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "Updating test list for fixtures\n");
 
   // Prepare regular expression evaluators
   std::string setupRegExp(this->TestOptions.ExcludeFixtureRegularExpression);
@@ -1256,11 +1237,10 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
             1 + static_cast<int>(std::distance(this->TestList.begin(), lotIt));
           ++fixtureTestsAdded;
 
-          cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                             "Added setup test "
-                               << p.Name << " required by fixture "
-                               << requiredFixtureName << std::endl,
-                             this->Quiet);
+          cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                             "Added setup test ", p.Name,
+                             " required by fixture ", requiredFixtureName,
+                             '\n');
         }
       }
 
@@ -1287,11 +1267,10 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
             1 + static_cast<int>(std::distance(this->TestList.begin(), lotIt));
           ++fixtureTestsAdded;
 
-          cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                             "Added cleanup test "
-                               << p.Name << " required by fixture "
-                               << requiredFixtureName << std::endl,
-                             this->Quiet);
+          cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                             "Added cleanup test ", p.Name,
+                             " required by fixture ", requiredFixtureName,
+                             '\n');
         }
       }
     }
@@ -1343,11 +1322,9 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
     }
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Added " << fixtureTestsAdded
-                              << " tests to meet fixture requirements"
-                              << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "Added ", fixtureTestsAdded,
+                     " tests to meet fixture requirements\n");
 }
 
 void cmCTestTestHandler::UpdateMaxTestNameWidth()
@@ -1374,9 +1351,8 @@ bool cmCTestTestHandler::GetValue(char const* tag, int& value,
     fin >> value;
     ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
   } else {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "parse error: missing tag: " << tag << " found [" << line << "]"
-                                            << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "parse error: missing tag: ", tag,
+               " found [", line, "]\n");
     ret = false;
   }
   return ret;
@@ -1392,9 +1368,8 @@ bool cmCTestTestHandler::GetValue(char const* tag, double& value,
     fin >> value;
     ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
   } else {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "parse error: missing tag: " << tag << " found [" << line << "]"
-                                            << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "parse error: missing tag: ", tag,
+               " found [", line, "]\n");
     ret = false;
   }
   return ret;
@@ -1419,9 +1394,8 @@ bool cmCTestTestHandler::GetValue(char const* tag, bool& value,
 #endif
     ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
   } else {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "parse error: missing tag: " << tag << " found [" << line << "]"
-                                            << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "parse error: missing tag: ", tag,
+               " found [", line, "]\n");
     ret = false;
   }
   return ret;
@@ -1437,9 +1411,8 @@ bool cmCTestTestHandler::GetValue(char const* tag, size_t& value,
     fin >> value;
     ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
   } else {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "parse error: missing tag: " << tag << " found [" << line << "]"
-                                            << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "parse error: missing tag: ", tag,
+               " found [", line, "]\n");
     ret = false;
   }
   return ret;
@@ -1454,9 +1427,8 @@ bool cmCTestTestHandler::GetValue(char const* tag, std::string& value,
   if (line == tag) {
     ret = cmSystemTools::GetLineFromStream(fin, value);
   } else {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "parse error: missing tag: " << tag << " found [" << line << "]"
-                                            << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "parse error: missing tag: ", tag,
+               " found [", line, "]\n");
     ret = false;
   }
   return ret;
@@ -1760,14 +1732,14 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
 {
   for (std::string const& it : vec) {
     int retVal = 0;
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Run command: " << it << std::endl, this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                       "Run command: ", it, '\n');
     if (!cmSystemTools::RunSingleCommand(it, nullptr, nullptr, &retVal,
                                          nullptr, cmSystemTools::OUTPUT_MERGE
                                          /*this->Verbose*/) ||
         retVal != 0) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Problem running command: " << it << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem running command: ", it,
+                 '\n');
       return 0;
     }
   }
@@ -1902,12 +1874,10 @@ std::string cmCTestTestHandler::FindExecutable(
     }
   }
   if (fullPath.empty()) {
-    cmCTestLog(ctest, HANDLER_OUTPUT,
-               "Could not find executable "
-                 << testCommand << "\n"
-                 << "Looked in the following places:\n");
+    cmCTestLog(ctest, HANDLER_OUTPUT, "Could not find executable ",
+               testCommand, "\nLooked in the following places:\n");
     for (std::string const& f : failed) {
-      cmCTestLog(ctest, HANDLER_OUTPUT, f << "\n");
+      cmCTestLog(ctest, HANDLER_OUTPUT, f, '\n');
     }
   }
 
@@ -1932,8 +1902,8 @@ bool cmCTestTestHandler::GetListOfTests()
     this->ExcludeTestsRegularExpression.compile(
       this->TestOptions.ExcludeRegularExpression);
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Constructing a list of tests" << std::endl, this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "Constructing a list of tests\n");
   cmake cm(cmState::Role::CTest);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
@@ -1990,8 +1960,8 @@ bool cmCTestTestHandler::GetListOfTests()
     auto action = cmCTestTypes::GetResourceErrorAction(*specErrorAction);
     if (!action) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Invalid value for CTEST_RESOURCE_ERROR_ACTION: "
-                   << *specErrorAction << std::endl);
+                 "Invalid value for CTEST_RESOURCE_ERROR_ACTION: ",
+                 *specErrorAction, '\n');
     } else {
       this->TestOptions.ResourceErrorAction = *action;
     }
@@ -2012,9 +1982,8 @@ bool cmCTestTestHandler::GetListOfTests()
     }
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Done constructing a list of tests" << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "Done constructing a list of tests\n");
   return true;
 }
 
@@ -2112,8 +2081,8 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
 
   cmsys::Directory directory;
   if (!directory.Load(dirName)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Unable to read the contents of " << dirName << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to read the contents of ",
+               dirName, '\n');
     return;
   }
 
@@ -2144,8 +2113,8 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
 
   if (!cmSystemTools::FileExists(lastTestsFailedLog)) {
     if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 lastTestsFailedLog << " does not exist!" << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, lastTestsFailedLog,
+                 " does not exist!\n");
     }
     return;
   }
@@ -2169,10 +2138,8 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   } else if (!this->CTest->GetShowOnly() &&
              !this->CTest->ShouldPrintLabels()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Problem reading file: "
-                 << lastTestsFailedLog
-                 << " while generating list of previously failed tests."
-                 << std::endl);
+               "Problem reading file: ", lastTestsFailedLog,
+               " while generating list of previously failed tests.\n");
   }
 }
 
@@ -2192,9 +2159,8 @@ cm::optional<std::set<std::string>> cmCTestTestHandler::ReadTestListFile(
     result = std::move(testNames);
   } else {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Problem reading test list file: "
-                 << testListFileName
-                 << " while generating list of tests to run." << std::endl);
+               "Problem reading test list file: ", testListFileName,
+               " while generating list of tests to run.\n");
   }
   return result;
 }
@@ -2224,9 +2190,8 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
         xml.Attribute("text", "text/string");
         xml.Element("Value", cmStrCat("File ", filename, " not found"));
         xml.EndElement();
-        cmCTestOptionalLog(
-          this->CTest, HANDLER_OUTPUT,
-          "File \"" << filename << "\" not found." << std::endl, this->Quiet);
+        cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, "File \"",
+                           filename, "\" not found.\n");
       } else {
         long len = cmSystemTools::FileLength(filename);
         if (len == 0) {
@@ -2565,9 +2530,9 @@ bool cmCTestTestHandler::SetTestsProperties(
             rt.RawProperties[key] = val;
             rt.ResourceErrorAction = cmCTestTypes::GetResourceErrorAction(val);
             if (!rt.ResourceErrorAction) {
-              cmCTestLog(this->CTest, ERROR_MESSAGE,
-                         "Invalid value for CTEST_RESOURCE_ERROR_ACTION: "
-                           << val << std::endl);
+              cmCTestLog(
+                this->CTest, ERROR_MESSAGE,
+                "Invalid value for CTEST_RESOURCE_ERROR_ACTION: ", val, '\n');
               return false;
             }
 
@@ -2619,8 +2584,8 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmList propArgs{ val };
             if (propArgs.size() != 2) {
               cmCTestLog(this->CTest, WARNING,
-                         "TIMEOUT_AFTER_MATCH expects two arguments, found "
-                           << propArgs.size() << std::endl);
+                         "TIMEOUT_AFTER_MATCH expects two arguments, found ",
+                         propArgs.size(), '\n');
             } else {
               rt.AlternateTimeout = cmDuration(atof(propArgs[0].c_str()));
               cmList lval{ propArgs[1] };
@@ -2690,8 +2655,8 @@ bool cmCTestTestHandler::SetDirectoryProperties(
 bool cmCTestTestHandler::AddTest(std::vector<std::string> const& args)
 {
   std::string const& testname = args[0];
-  cmCTestOptionalLog(this->CTest, DEBUG, "Add test: " << args[0] << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Add test: ", args[0],
+                     '\n');
 
   if (this->UseExcludeRegExpFlag && this->UseExcludeRegExpFirst &&
       this->ExcludeTestsRegularExpression.find(testname)) {
@@ -2699,10 +2664,9 @@ bool cmCTestTestHandler::AddTest(std::vector<std::string> const& args)
   }
 
   if (cm::contains(this->CustomTestsIgnore, testname)) {
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Ignore " << (this->MemCheck ? "memcheck" : "test")
-                                 << ": " << testname << std::endl,
-                       this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                       "Ignore ", (this->MemCheck ? "memcheck" : "test"), ": ",
+                       testname, '\n');
     return true;
   }
 
@@ -2712,9 +2676,8 @@ bool cmCTestTestHandler::AddTest(std::vector<std::string> const& args)
   test.CTestDirectory = cmSystemTools::GetLogicalWorkingDirectory();
   test.Directory = test.CTestDirectory;
   test.RawProperties["WORKING_DIRECTORY"] = test.CTestDirectory;
-  cmCTestOptionalLog(this->CTest, DEBUG,
-                     "Set test directory: " << test.Directory << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
+                     "Set test directory: ", test.Directory, '\n');
 
   if (this->UseIncludeRegExpFlag &&
       (!this->IncludeTestsRegularExpression.find(testname) ||
@@ -2757,8 +2720,8 @@ bool cmCTestTestHandler::WriteJUnitXML()
   xmlfile.Open(this->TestOptions.JUnitXMLFileName);
   if (!xmlfile) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Problem opening file: " << this->TestOptions.JUnitXMLFileName
-                                        << std::endl);
+               "Problem opening file: ", this->TestOptions.JUnitXMLFileName,
+               '\n');
     return false;
   }
   cmXMLWriter xml(xmlfile);

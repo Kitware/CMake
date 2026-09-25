@@ -3,6 +3,7 @@
 #include "cmExportCommand.h"
 
 #include <map>
+#include <ostream>
 #include <utility>
 
 #include <cm/memory>

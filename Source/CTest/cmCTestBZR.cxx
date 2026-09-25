@@ -158,8 +158,7 @@ bool cmCTestBZR::NoteOldRevision()
   this->OldRevision = this->LoadInfo();
   this->Log << "Revision before update: " << this->OldRevision << "\n";
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Old revision of repository is: " << this->OldRevision
-                                                  << "\n");
+             "   Old revision of repository is: ", this->OldRevision, '\n');
   this->PriorRev.Rev = this->OldRevision;
   return true;
 }
@@ -169,8 +168,7 @@ bool cmCTestBZR::NoteNewRevision()
   this->NewRevision = this->LoadInfo();
   this->Log << "Revision after update: " << this->NewRevision << "\n";
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   New revision of repository is: " << this->NewRevision
-                                                  << "\n");
+             "   New revision of repository is: ", this->NewRevision, '\n');
   this->Log << "URL = " << this->URL << "\n";
   return true;
 }
@@ -392,8 +390,7 @@ bool cmCTestBZR::LoadRevisions()
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per revision):\n"
-             "    "
-               << std::flush);
+             "    ");
 
   // We are interested in every revision included in the update.
   this->Revisions.clear();
@@ -414,7 +411,7 @@ bool cmCTestBZR::LoadRevisions()
     OutputLogger err(this->Log, "log-err> ");
     this->RunChild(bzr_log, &out, &err);
   }
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, '\n');
   return true;
 }
 

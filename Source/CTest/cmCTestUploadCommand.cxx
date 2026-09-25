@@ -44,8 +44,7 @@ bool cmCTestUploadCommand::ExecuteUpload(UploadArguments& args,
   cmGeneratedFileStream ofs;
   if (!this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(), "Upload.xml",
                                    ofs)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot open Upload.xml file" << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open Upload.xml file\n");
     return false;
   }
   std::string buildname =
@@ -70,8 +69,8 @@ bool cmCTestUploadCommand::ExecuteUpload(UploadArguments& args,
   xml.Element("Time", std::chrono::system_clock::now());
 
   for (std::string const& file : args.Files) {
-    cmCTestOptionalLog(this->CTest, OUTPUT,
-                       "\tUpload file: " << file << std::endl, args.Quiet);
+    cmCTestOptionalLog(this->CTest, OUTPUT, args.Quiet,
+                       "\tUpload file: ", file, '\n');
     xml.StartElement("File");
     xml.Attribute("filename", file);
     xml.StartElement("Content");
