@@ -1072,6 +1072,59 @@ block()
     -T Test)
 endblock()
 
+# CTest itself and the tests it runs must agree on the debug mode: tests see
+# only that mode's environment marker and, on Windows, its error mode.
+function(run_InteractiveDebugMode case mode)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/InteractiveDebugMode-${case})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  if(mode STREQUAL "interactive")
+    set(expect_env "CTEST_INTERACTIVE_DEBUG_MODE=1")
+    set(reject_env "DASHBOARD_TEST_FROM_CTEST=")
+  else()
+    set(expect_env "DASHBOARD_TEST_FROM_CTEST=")
+    set(reject_env "CTEST_INTERACTIVE_DEBUG_MODE=")
+  endif()
+  set(tests "
+add_test(env \"${CMAKE_COMMAND}\" -E environment)
+set_tests_properties(env PROPERTIES
+  PASS_REGULAR_EXPRESSION \"${expect_env}\"
+  FAIL_REGULAR_EXPRESSION \"${reject_env}\")
+")
+  if(TEST_ERROR_MODE)
+    string(APPEND tests "add_test(error-mode \"${TEST_ERROR_MODE}\" ${mode})\n")
+  endif()
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "${tests}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/DartConfiguration.tcl"
+    "BuildDirectory: ${RunCMake_TEST_BINARY_DIR}\n"
+    "SourceDirectory: ${RunCMake_TEST_BINARY_DIR}\n")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/script.cmake" "
+set(CTEST_SOURCE_DIRECTORY \"${RunCMake_TEST_BINARY_DIR}\")
+set(CTEST_BINARY_DIRECTORY \"${RunCMake_TEST_BINARY_DIR}\")
+ctest_start(Experimental)
+ctest_test(RETURN_VALUE rv)
+if(rv)
+  message(FATAL_ERROR \"ctest_test failed: \${rv}\")
+endif()
+")
+  set(presets "${RunCMake_SOURCE_DIR}/InteractiveDebugMode-${case}-CMakePresets.json.in")
+  if(EXISTS "${presets}")
+    configure_file("${presets}" "${RunCMake_TEST_BINARY_DIR}/CMakePresets.json" @ONLY)
+  endif()
+  # CTest never unsets these, so an outer CTest would leak them into the case.
+  unset(ENV{DASHBOARD_TEST_FROM_CTEST})
+  unset(ENV{DART_TEST_FROM_DART})
+  unset(ENV{CTEST_INTERACTIVE_DEBUG_MODE})
+  run_cmake_command(InteractiveDebugMode-${case} ${CMAKE_CTEST_COMMAND} ${ARGN})
+endfunction()
+run_InteractiveDebugMode(Default interactive)
+run_InteractiveDebugMode(PresetOff non-interactive --preset=default)
+run_InteractiveDebugMode(Script non-interactive -S script.cmake)
+run_InteractiveDebugMode(ScriptOn interactive -S script.cmake --interactive-debug-mode 1)
+run_InteractiveDebugMode(DashT non-interactive -T Test)
+run_InteractiveDebugMode(OnDashD interactive --interactive-debug-mode 1 -D ExperimentalTest)
+
 # Test --output-junit
 function(run_output_junit)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/output-junit)
