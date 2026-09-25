@@ -38,6 +38,16 @@
 
 #define SIGKILL         9
 
+static int uv__windows8_or_later(void) {
+  OSVERSIONINFOW os_info;
+  if (!pRtlGetVersion)
+    return 0;
+  os_info.dwOSVersionInfoSize = sizeof(os_info);
+  os_info.szCSDVersion[0] = L'\0';
+  pRtlGetVersion(&os_info);
+  return os_info.dwMajorVersion > 6 ||
+    (os_info.dwMajorVersion == 6 && os_info.dwMinorVersion >= 2);
+}
 
 typedef struct env_var {
   const WCHAR* const wide;
@@ -1062,7 +1072,8 @@ int uv_spawn(uv_loop_t* loop,
    * PROC_THREAD_ATTRIBUTE_HANDLE_LIST ensures only these specific handles are
    * inherited, closing the race condition where concurrent uv_spawn calls
    * could cause handles intended for one child to leak into another. */
-  {
+  /* Windows 8 or above is required to avoid failing on console handles.  */
+  if (uv__windows8_or_later()) {
 #define CHILD_STDIO_COUNT(buffer)                   \
     *((unsigned int*) (buffer))
     int count = CHILD_STDIO_COUNT(child_stdio_buffer);

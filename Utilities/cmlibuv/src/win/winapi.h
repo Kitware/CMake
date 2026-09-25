@@ -4848,6 +4848,16 @@ typedef VOID (WINAPI *sGetSystemTimePreciseAsFileTime)
              (LPFILETIME lpSystemTimeAsFileTime);
 extern sGetSystemTimePreciseAsFileTime pGetSystemTimePreciseAsFileTime;
 #define GetSystemTimePreciseAsFileTime pGetSystemTimePreciseAsFileTime
+
+typedef VOID (WINAPI *sWaitOnAddress)
+             (volatile VOID*, PVOID, SIZE_T, DWORD);
+extern sWaitOnAddress pWaitOnAddress;
+#define WaitOnAddress pWaitOnAddress
+
+typedef VOID (WINAPI *sWakeByAddressSingle)
+             (PVOID);
+extern sWakeByAddressSingle pWakeByAddressSingle;
+#define WakeByAddressSingle pWakeByAddressSingle
 #endif
 
 #endif /* UV_WIN_WINAPI_H_ */
