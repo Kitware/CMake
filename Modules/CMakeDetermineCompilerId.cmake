@@ -393,6 +393,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   endif ()
 
   set(CMAKE_${lang}_STANDARD_LIBRARY "")
+  set(CMAKE_${lang}_STANDARD_LIBRARY_INCLUDE_DIRECTORY "")
   if ("x${lang}" STREQUAL "xCXX" AND
       EXISTS "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${lang}-DetectStdlib.h" AND
       ("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang") OR
@@ -414,11 +415,23 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       endforeach()
     endif ()
 
+    # Locate the standard library headers selected by Clang, including toolsets
+    # discovered by the driver without a developer command prompt environment.
+    set(_stdlib_trace_flags)
+    if (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+      if (CMAKE_${lang}_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+        list(APPEND _stdlib_trace_flags -clang:-H)
+      else ()
+        list(APPEND _stdlib_trace_flags -H)
+      endif ()
+    endif ()
+
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}"
         ${CMAKE_${lang}_COMPILER_ID_ARG1}
         ${_inc_dirs}
         ${CMAKE_CXX_COMPILER_ID_FLAGS_LIST}
+        ${_stdlib_trace_flags}
         -E
         -x c++-header
         "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${lang}-DetectStdlib.h"
@@ -429,6 +442,13 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       ERROR_STRIP_TRAILING_WHITESPACE)
     if (_lang_stdlib_res EQUAL 0)
       string(REGEX REPLACE ".*CMAKE-STDLIB-DETECT: (.+)\n.*" "\\1" "CMAKE_${lang}_STANDARD_LIBRARY" "${_lang_stdlib_out}")
+      if (_stdlib_trace_flags AND
+          _lang_stdlib_err MATCHES "(^|\n)\\. ([^\r\n]*[/\\\\]version)(\r?\n|$)")
+        # Clang may escape backslashes in the include trace on Windows.
+        string(REPLACE "\\\\" "/" _stdlib_version_header "${CMAKE_MATCH_2}")
+        string(REPLACE "\\" "/" _stdlib_version_header "${_stdlib_version_header}")
+        cmake_path(GET _stdlib_version_header PARENT_PATH CMAKE_${lang}_STANDARD_LIBRARY_INCLUDE_DIRECTORY)
+      endif ()
     endif ()
   endif ()
 
@@ -506,6 +526,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_COMPILER_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "${CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR}" PARENT_SCOPE)
   set(CMAKE_${lang}_STANDARD_LIBRARY "${CMAKE_${lang}_STANDARD_LIBRARY}" PARENT_SCOPE)
+  set(CMAKE_${lang}_STANDARD_LIBRARY_INCLUDE_DIRECTORY "${CMAKE_${lang}_STANDARD_LIBRARY_INCLUDE_DIRECTORY}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_APPLE_SYSROOT "${CMAKE_${lang}_COMPILER_APPLE_SYSROOT}" PARENT_SCOPE)
 endfunction()
 
