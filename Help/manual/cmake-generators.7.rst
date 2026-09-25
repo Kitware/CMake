@@ -34,7 +34,8 @@ Command-Line Build Tool Generators
 
 These generators support command-line build tools.  In order to use them,
 one must launch CMake from a command-line prompt whose environment is
-already configured for the chosen compiler and build tool.
+already configured for the chosen compiler and build tool.  Additionally,
+the build itself must be launched from the same environment.
 
 .. _`Makefile Generators`:
 
