@@ -59,6 +59,9 @@ int uv__async_fork(uv_loop_t* loop) {
   return 0;
 }
 
+void uv__async_notify(uv_async_t* handle) {
+}
+
 void uv__async_stop(uv_loop_t* loop) {
 }
 
