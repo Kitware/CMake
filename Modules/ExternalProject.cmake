@@ -96,9 +96,14 @@ external project.
 
 ``INSTALL_DIR <dir>``
   Installation prefix to be placed in the ``<INSTALL_DIR>`` placeholder.
-  This does not actually configure the external project to install to
-  the given prefix. That must be done by passing appropriate arguments
-  to the external project configuration step, e.g. using ``<INSTALL_DIR>``.
+
+  When the default configure command is used (i.e. no ``CONFIGURE_COMMAND``
+  is given) and policy :policy:`CMP0225` is ``NEW``, the external project's
+  :variable:`CMAKE_INSTALL_PREFIX` defaults to ``<INSTALL_DIR>``.  Otherwise,
+  or for a custom configure command, setting ``INSTALL_DIR`` does not by itself
+  configure the external project to install to the given prefix; that must be
+  done by passing appropriate arguments to the external project configuration
+  step, e.g. using ``<INSTALL_DIR>``.
 
 If any of the above ``..._DIR`` options are not specified, their defaults
 are computed as follows. If the ``PREFIX`` option is given or the
@@ -585,6 +590,10 @@ overridden if required.
   adding any toolchain details, flags or other settings it wants to
   reuse from the main project or otherwise specify (see ``CMAKE_ARGS``,
   ``CMAKE_CACHE_ARGS`` and ``CMAKE_CACHE_DEFAULT_ARGS`` below).
+
+  When policy :policy:`CMP0225` is set to ``NEW``, the default configure
+  command also sets :variable:`CMAKE_INSTALL_PREFIX` to ``<INSTALL_DIR>``,
+  unless the caller specifies a prefix of their own.
 
   For non-CMake external projects, the ``CONFIGURE_COMMAND`` option must
   be used to override the default configure command
@@ -2656,7 +2665,6 @@ function(_ep_extract_configure_command var name)
       TARGET ${name}
       PROPERTY _EP_CMAKE_ARGS
     )
-    list(APPEND cmd ${cmake_args})
 
     # If there are any CMAKE_CACHE_ARGS or CMAKE_CACHE_DEFAULT_ARGS,
     # write an initial cache and use it
@@ -2668,6 +2676,25 @@ function(_ep_extract_configure_command var name)
       TARGET ${name}
       PROPERTY _EP_CMAKE_CACHE_DEFAULT_ARGS
     )
+
+    # Inject the <INSTALL_DIR> prefix ahead of the caller's arguments so an
+    # explicit CMAKE_INSTALL_PREFIX still wins.  See policy CMP0225.
+    if(_EP_CMP0225 STREQUAL "NEW")
+      list(APPEND cmd "-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>")
+    elseif(_EP_CMP0225 STREQUAL ""
+        AND NOT "${cmake_args};${cmake_cache_args};${cmake_cache_default_args}"
+          MATCHES "CMAKE_INSTALL_PREFIX|install-prefix")
+      cmake_policy(GET_WARNING CMP0225 _ep_cmp0225_warning)
+      message(AUTHOR_WARNING
+        "${_ep_cmp0225_warning}\n"
+        "ExternalProject_Add(${name}) uses the default configure command "
+        "without a CMAKE_INSTALL_PREFIX.  The OLD behavior leaves the external "
+        "project's install prefix at the CMake default; the NEW behavior sets "
+        "it to <INSTALL_DIR>."
+      )
+    endif()
+
+    list(APPEND cmd ${cmake_args})
 
     set(has_cmake_cache_args 0)
     if(NOT "${cmake_cache_args}" STREQUAL "")
@@ -3180,6 +3207,9 @@ function(ExternalProject_Add name)
     set(cmp0114 "NEW")
   endif()
   cmake_policy(GET CMP0135 _EP_CMP0135
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  cmake_policy(GET CMP0225 _EP_CMP0225
     PARENT_SCOPE # undocumented, do not use outside of CMake
   )
 

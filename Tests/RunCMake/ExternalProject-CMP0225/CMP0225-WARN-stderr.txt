@@ -1,0 +1,10 @@
+CMake Warning \(author\) at .*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
+  Policy CMP0225 is not set: ExternalProject sets CMAKE_INSTALL_PREFIX to
+  <INSTALL_DIR> in the default configure command\.  Run "cmake --help-policy
+  CMP0225" for policy details\.  Use the cmake_policy command to set the
+  policy and suppress this warning\.
+
+  ExternalProject_Add\(Sub\) uses the default configure command without a
+  CMAKE_INSTALL_PREFIX\.  The OLD behavior leaves the external project's
+  install prefix at the CMake default; the NEW behavior sets it to
+  <INSTALL_DIR>\.

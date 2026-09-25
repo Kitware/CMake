@@ -5,6 +5,7 @@ else()
   cmake_policy(SET CMP0114 OLD) # Test deprecated behavior.
 endif()
 cmake_policy(SET CMP0135 NEW)
+cmake_policy(SET CMP0225 NEW)
 
 include(ExternalProject)
 

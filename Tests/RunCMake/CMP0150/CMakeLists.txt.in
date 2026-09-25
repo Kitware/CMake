@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 project(@projName@ LANGUAGES NONE)
 
 @policyCommand@
+cmake_policy(SET CMP0225 NEW)
 
 include(ExternalProject)
 ExternalProject_Add(ep-@depName@

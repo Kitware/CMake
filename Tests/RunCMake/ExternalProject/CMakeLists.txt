@@ -4,4 +4,5 @@ if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12 AND NOT RunCMake_TEST STREQ
   cmake_policy(SET CMP0114 NEW)
 endif()
 cmake_policy(SET CMP0135 NEW)
+cmake_policy(SET CMP0225 NEW)
 include(${RunCMake_TEST}.cmake)

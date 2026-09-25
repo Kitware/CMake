@@ -1251,6 +1251,7 @@ add_RunCMake_test(ExternalProject -DDETECT_JOBSERVER=$<TARGET_FILE:detect_jobser
 if(CMake_TEST_RunCMake_ExternalProject_RUN_SERIAL)
   set_property(TEST RunCMake.ExternalProject PROPERTY RUN_SERIAL TRUE)
 endif()
+add_RunCMake_test(ExternalProject-CMP0225)
 add_RunCMake_test(FetchContent)
 add_RunCMake_test(FetchContent_find_package)
 if(CMake_TEST_CLANG_COVERAGE)
