@@ -3423,6 +3423,7 @@ CTestVarConfigEntry const kCTestVarConfigMap[] = {
   { "CTEST_TEST_TIMEOUT",                  "TimeOut"                     },
   { "CTEST_TEST_COVERAGE_TOOL",            "CTestTestCoverageTool"       },
   { "CTEST_RESOURCE_SPEC_FILE",            "ResourceSpecFile"            },
+  { "CTEST_RESOURCE_ERROR_ACTION",         "ResourceErrorAction"         },
   { "CTEST_TEST_LOAD",                     "TestLoad"                    },
   // Coverage step
   { "CTEST_COVERAGE_COMMAND",              "CoverageCommand"             },

@@ -388,6 +388,12 @@ void cmLocalGenerator::GenerateTestFiles()
   if (!resourceSpecFile.empty()) {
     fout << "set(CTEST_RESOURCE_SPEC_FILE \"" << resourceSpecFile << "\")\n";
   }
+  std::string resourceErrorAction =
+    this->Makefile->GetSafeDefinition("CTEST_RESOURCE_ERROR_ACTION");
+  if (!resourceErrorAction.empty()) {
+    fout << "set(CTEST_RESOURCE_ERROR_ACTION \"" << resourceErrorAction
+         << "\")\n";
+  }
 
   auto writeTestIncludeFile = [this, &fout, &configurationTypes,
                                &config](std::string const& entry) {

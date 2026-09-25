@@ -1985,6 +1985,17 @@ bool cmCTestTestHandler::GetListOfTests()
   if (this->TestOptions.ResourceSpecFile.empty() && specFile) {
     this->TestOptions.ResourceSpecFile = *specFile;
   }
+  cmValue specErrorAction = mf.GetDefinition("CTEST_RESOURCE_ERROR_ACTION");
+  if (specErrorAction) {
+    auto action = cmCTestTypes::GetResourceErrorAction(*specErrorAction);
+    if (!action) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Invalid value for CTEST_RESOURCE_ERROR_ACTION: "
+                   << *specErrorAction << std::endl);
+    } else {
+      this->TestOptions.ResourceErrorAction = *action;
+    }
+  }
 
   if (!this->TestOptions.TestListFile.empty()) {
     this->TestsToRunByName =
@@ -2550,6 +2561,16 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "GENERATED_RESOURCE_SPEC_FILE"_s) {
             rt.RawProperties[key] = val;
             rt.GeneratedResourceSpecFile = val;
+          } else if (key == "RESOURCE_ERROR_ACTION"_s) {
+            rt.RawProperties[key] = val;
+            rt.ResourceErrorAction = cmCTestTypes::GetResourceErrorAction(val);
+            if (!rt.ResourceErrorAction) {
+              cmCTestLog(this->CTest, ERROR_MESSAGE,
+                         "Invalid value for CTEST_RESOURCE_ERROR_ACTION: "
+                           << val << std::endl);
+              return false;
+            }
+
           } else if (key == "SKIP_RETURN_CODE"_s) {
             rt.RawProperties[key] = val;
             rt.SkipReturnCode = atoi(val.c_str());

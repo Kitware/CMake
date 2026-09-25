@@ -797,6 +797,7 @@ Variables for CTest
    /variable/CTEST_P4_UPDATE_OPTIONS
    /variable/CTEST_PRESET
    /variable/CTEST_PRESETS_FILE
+   /variable/CTEST_RESOURCE_ERROR_ACTION
    /variable/CTEST_RESOURCE_SPEC_FILE
    /variable/CTEST_RUN_CURRENT_SCRIPT
    /variable/CTEST_SCRIPT_DIRECTORY

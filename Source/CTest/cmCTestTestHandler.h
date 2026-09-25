@@ -57,6 +57,8 @@ struct cmCTestTestOptions
   std::string TestListFile;
   std::string ExcludeTestListFile;
   std::string ResourceSpecFile;
+  cmCTestTypes::ResourceErrorAction ResourceErrorAction =
+    cmCTestTypes::ResourceErrorAction::Fail;
   std::string JUnitXMLFileName;
 
   std::string CoverageTool;
@@ -238,6 +240,7 @@ public:
     std::string ResourceGroupsRaw;
     std::string GeneratedResourceSpecFile;
     std::string GeneratedResourceSpecFileRaw;
+    cm::optional<cmCTestTypes::ResourceErrorAction> ResourceErrorAction;
     std::string BuildDepends;
     // Private test generator properties used to track backtraces
     cmListFileBacktrace Backtrace;

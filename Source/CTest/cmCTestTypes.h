@@ -5,6 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
+#include <cm/optional>
 #include <cm/string_view>
 
 namespace cmCTestTypes {
@@ -17,6 +20,16 @@ enum class TruncationMode
   Head
 };
 
+// Resource error action
+enum class ResourceErrorAction
+{
+  Fail,
+  Skip
+};
+
 bool SetTruncationMode(TruncationMode& mode, cm::string_view str);
+
+cm::optional<ResourceErrorAction> GetResourceErrorAction(cm::string_view str);
+std::string ResourceErrorActionToString(ResourceErrorAction action);
 
 } // namespace cmCTestTypes
