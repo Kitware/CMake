@@ -1,4 +1,4 @@
-CMake Error at MissingAppendixName.cmake:2 \(install\):
+CMake Error at MissingAppendixName\.cmake:2 \(install\):
   install CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO given APPENDIX directive for
   export "foo", but no appendix name was provided\.
 Call Stack \(most recent call first\):

@@ -3,6 +3,6 @@ CMake Error at no-arguments\.cmake:[0-9]+ \(file\):
 
     \$<SOURCE_PROPERTY:>
 
-  \$<SOURCE_PROPERTY> expression requires at least two parameters.
+  \$<SOURCE_PROPERTY> expression requires at least two parameters\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

@@ -3,6 +3,6 @@ CMake Error at bad-fileset\.cmake:4 \(file\):
 
     \$<FILE_SET_PROPERTY:foo,TARGET:foo,FOO>
 
-  FILE_SET "foo" is not known from CMake.
+  FILE_SET "foo" is not known from CMake\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:5 \(include\)

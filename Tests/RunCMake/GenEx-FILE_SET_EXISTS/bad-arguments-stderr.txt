@@ -4,6 +4,6 @@ CMake Error at bad-arguments\.cmake:[0-9]+ \(file\):
     \$<FILE_SET_EXISTS:fs,opt,foo>
 
   \$<FILE_SET_EXISTS> expression requires 2 comma separated parameters, but
-  got 3 instead.
+  got 3 instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

@@ -3,6 +3,6 @@ CMake Warning \(install-absolute-destination\) at EXPORT-AbsoluteDest-warn\.cmak
 
     /absolute/path
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-author or
 -Wno-install-absolute-destination to suppress it\.

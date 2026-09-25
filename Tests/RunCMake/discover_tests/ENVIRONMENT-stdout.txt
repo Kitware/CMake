@@ -1,4 +1,4 @@
-    Start [0-9]*: Env.case_two
+    Start [0-9]*: Env\.case_two
 .*
 
 100% tests passed out of 1

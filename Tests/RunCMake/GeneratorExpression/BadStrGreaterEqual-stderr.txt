@@ -1,39 +1,39 @@
-CMake Error at BadStrGreaterEqual.cmake:1 \(add_custom_target\):
+CMake Error at BadStrGreaterEqual\.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<STRGREATER_EQUAL>
 
   \$<STRGREATER_EQUAL> expression requires 2 comma separated parameters, but
-  got 0 instead.
+  got 0 instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-+CMake Error at BadStrGreaterEqual.cmake:1 \(add_custom_target\):
++CMake Error at BadStrGreaterEqual\.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<STRGREATER_EQUAL:>
 
   \$<STRGREATER_EQUAL> expression requires 2 comma separated parameters, but
-  got 1 instead.
+  got 1 instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at BadStrGreaterEqual.cmake:1 \(add_custom_target\):
+CMake Error at BadStrGreaterEqual\.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<STRGREATER_EQUAL:,,>
 
   \$<STRGREATER_EQUAL> expression requires 2 comma separated parameters, but
-  got 3 instead.
+  got 3 instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at BadStrGreaterEqual.cmake:1 \(add_custom_target\):
+CMake Error at BadStrGreaterEqual\.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<STRGREATER_EQUAL:something,,>
 
   \$<STRGREATER_EQUAL> expression requires 2 comma separated parameters, but
-  got 3 instead.
+  got 3 instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +

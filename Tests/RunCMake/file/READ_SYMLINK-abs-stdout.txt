@@ -1,2 +1,2 @@
 ^-- result: '0'
--- target: '[^']*/Tests/RunCMake/file/READ_SYMLINK-target.txt'$
+-- target: '[^']*/Tests/RunCMake/file/READ_SYMLINK-target\.txt'$

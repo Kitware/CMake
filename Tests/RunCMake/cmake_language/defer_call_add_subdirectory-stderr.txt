@@ -3,11 +3,11 @@
 Call Stack \(most recent call first\):
   CMakeLists\.txt:DEFERRED
 +
-CMake Warning \(deprecated\) at defer_call_add_subdirectory.cmake:2 \(subdirs\):
+CMake Warning \(deprecated\) at defer_call_add_subdirectory\.cmake:2 \(subdirs\):
   The 'subdirs' command has been superseded\.  Use the 'add_subdirectory'
   command instead\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:DEFERRED
+  CMakeLists\.txt:DEFERRED
 This warning is for project developers\.  Use -Wno-author or -Wno-deprecated
 to suppress it\.
 +

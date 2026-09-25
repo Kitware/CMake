@@ -4,6 +4,6 @@ CMake Error at no-fileset\.cmake:[0-9]+ \(file\):
     \$<FILE_SET_EXISTS:,TARGET:tgt>
 
   \$<FILE_SET_EXISTS:fileset,TARGET:tgt> expression requires a non-empty
-  FILE_SET name.
+  FILE_SET name\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
