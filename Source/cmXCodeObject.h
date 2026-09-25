@@ -31,7 +31,6 @@ public:
   enum PBXType
   {
     PBXGroup,
-    PBXBuildStyle,
     PBXProject,
     PBXHeadersBuildPhase,
     PBXSourcesBuildPhase,

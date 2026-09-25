@@ -12,7 +12,6 @@
 char const* cmXCodeObject::PBXTypeNames[] = {
   /* clang-format needs this comment to break after the opening brace */
   "PBXGroup",
-  "PBXBuildStyle",
   "PBXProject",
   "PBXHeadersBuildPhase",
   "PBXSourcesBuildPhase",

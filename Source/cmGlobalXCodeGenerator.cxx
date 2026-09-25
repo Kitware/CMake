@@ -4765,21 +4765,6 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->RootObject = nullptr;
   this->MainGroupChildren = nullptr;
   this->FrameworkGroup = nullptr;
-  cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
-  cmXCodeObject* listObjs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  for (std::string const& CurrentConfigurationType :
-       this->CurrentConfigurationTypes) {
-    cmXCodeObject* buildStyle =
-      this->CreateObject(cmXCodeObject::PBXBuildStyle);
-    std::string const& name = CurrentConfigurationType;
-    buildStyle->AddAttribute("name", this->CreateString(name));
-    buildStyle->SetComment(name);
-    cmXCodeObject* sgroup = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-    sgroup->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
-    buildStyle->AddAttribute("buildSettings", sgroup);
-    listObjs->AddObject(buildStyle);
-  }
 
   cmXCodeObject* mainGroup = this->CreateObject(cmXCodeObject::PBXGroup);
   this->MainGroupChildren = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -4824,20 +4809,22 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->RootObject->SetId(
     this->GetOrCreateId(project_id, this->RootObject->GetId()));
 
-  group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  cmXCodeObject* projectBuildSettings =
+    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   this->RootObject->AddAttribute("mainGroup",
                                  this->CreateObjectReference(mainGroup));
-  this->RootObject->AddAttribute("buildSettings", group);
-  this->RootObject->AddAttribute("buildStyles", listObjs);
+  this->RootObject->AddAttribute("buildSettings", projectBuildSettings);
   this->RootObject->AddAttribute("hasScannedForEncodings",
                                  this->CreateString("0"));
-  group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  group->AddAttribute("BuildIndependentTargetsInParallel",
-                      this->CreateString("YES"));
+  cmXCodeObject* projectAttributes =
+    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  projectAttributes->AddAttribute("BuildIndependentTargetsInParallel",
+                                  this->CreateString("YES"));
   std::ostringstream v;
   v << std::setfill('0') << std::setw(4) << XcodeVersion * 10;
-  group->AddAttribute("LastUpgradeCheck", this->CreateString(v.str()));
-  this->RootObject->AddAttribute("attributes", group);
+  projectAttributes->AddAttribute("LastUpgradeCheck",
+                                  this->CreateString(v.str()));
+  this->RootObject->AddAttribute("attributes", projectAttributes);
   this->RootObject->AddAttribute("compatibilityVersion",
                                  this->CreateString("Xcode 3.2"));
   // Point Xcode at the top of the source tree.
