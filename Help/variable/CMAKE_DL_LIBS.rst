@@ -2,24 +2,27 @@ CMAKE_DL_LIBS
 -------------
 
 This variable contains a name of the dynamic loading library, or a list of
-system libraries needed to use the ``dlopen()`` and ``dlclose()`` functions.
+system libraries needed to use the platform's dynamic loading functions.
+On most Unix-like systems, these are the functions declared in the
+``<dlfcn.h>`` header, such as ``dlopen()``, ``dlsym()``, ``dlerror()``, and
+``dlclose()``.
 
 Few examples of the values this variable is set to:
 
 ``dl``
   On most Unix-like systems.
 
-``-lld``
-  On AIX, prior to CMake 4.2.
+``ld``
+  On AIX.  Prior to CMake 4.2, the value was ``-lld``.
 
 ``dld``
   On HP-UX.
 
 ""
-  Empty string value or not set on systems that have ``dl*()`` functions
-  either in the default library that is implicitly linked (e.g., BSD-like
-  systems, Haiku, macOS, SunOS, etc.), or on systems that don't provide these
-  functions (e.g., Windows).
+  Empty string value or not set on systems that provide these functions in
+  the default library that is implicitly linked (e.g., BSD-like systems,
+  Haiku, macOS, etc.), or on systems that don't provide these functions
+  (e.g., Windows).
 
 Examples
 ^^^^^^^^
