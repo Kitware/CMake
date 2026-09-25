@@ -1560,6 +1560,10 @@ if(CUDAToolkit_FOUND)
 
   _CUDAToolkit_find_and_add_import_lib(OpenCL)
 
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.4)
+    _CUDAToolkit_find_and_add_import_lib(cufilt)
+  endif()
+
   find_program(CUDA_bin2c_EXECUTABLE
     NAMES bin2c
     HINTS ${CUDAToolkit_BIN_DIR}
@@ -1589,10 +1593,6 @@ if(CUDAToolkit_FOUND)
       target_include_directories(CUDA::sanitizer INTERFACE "${sanitizer_dir}/include")
     endif()
   endif()
-endif()
-
-if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.4)
-  _CUDAToolkit_find_and_add_import_lib(cufilt)
 endif()
 
 if(_CUDAToolkit_Pop_ROOT_PATH)
