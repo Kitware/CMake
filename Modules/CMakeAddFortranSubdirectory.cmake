@@ -37,18 +37,24 @@ This module provides the following command:
       NO_EXTERNAL_INSTALL
     )
 
-  This command checks whether the current compiler supports Fortran or attempts
-  to locate a Fortran compiler.  If a compatible Fortran compiler is found, the
-  Fortran project located in ``<subdir>`` is added as a subdirectory to the
-  current project.
+  This command checks whether the current environment supports enabling Fortran:
 
-  If no Fortran compiler is found and the compiler is ``MSVC``, it searches for
-  the MinGW ``gfortran`` compiler.  In this case, the Fortran project is built
-  as an external project using MinGW tools, and Fortran-related imported targets
-  are created.  This setup works only if the Fortran code is built as a shared
-  DLL library, so the :variable:`BUILD_SHARED_LIBS` variable is enabled in the
-  external project.  Additionally, the :variable:`CMAKE_GNUtoMS` variable is set
-  to ``ON`` to ensure that Microsoft-compatible ``.lib`` files are created.
+  * If Fortran is supported in the current environment, the Fortran project
+    located in ``<subdir>`` is added as a subdirectory to the current project.
+
+  * If Fortran is not supported in the current environment, but the
+    current C or CXX compiler is ``MSVC``, this command searches common
+    locations for a MinGW ``gfortran`` compiler and stores its full path
+    in the ``MINGW_GFORTRAN`` cache variable.  One may optionally set the
+    variable explicitly to specify a full path to a preferred ``gfortran``.
+
+    If a ``gfortran`` compiler is found, the Fortran project located in
+    ``<subdir>``  is built as an external project using MinGW tools, and
+    Fortran-related imported targets are created.  This setup works only
+    if the Fortran code is built as a shared DLL library, so the
+    :variable:`BUILD_SHARED_LIBS` variable is enabled in the external project.
+    Additionally, the :variable:`CMAKE_GNUtoMS` variable is set to ``ON`` to
+    ensure that Microsoft-compatible ``.lib`` files are created.
 
   The options are:
 
@@ -137,6 +143,7 @@ function(_setup_mingw_config_and_build source_dir build_dir)
   find_program(MINGW_GFORTRAN
     NAMES gfortran
     PATHS
+      c:/mingw64/bin
       c:/MinGW/bin
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin"
     )
@@ -201,10 +208,14 @@ function(cmake_add_fortran_subdirectory subdir)
       )
   endif()
 
+  # If MSVC: if MINGW_GFORTRAN already defined, no point calling check_language,
+  # otherwise we can still detect the Intel Fortran compiler
+  if(NOT(MSVC AND MINGW_GFORTRAN))
+    check_language(Fortran)
+  endif()
   # if we are not using MSVC without fortran support
   # then just use the usual add_subdirectory to build
   # the fortran library
-  check_language(Fortran)
   if(NOT (MSVC AND (NOT CMAKE_Fortran_COMPILER)))
     add_subdirectory(${subdir})
     return()
@@ -229,7 +240,7 @@ function(cmake_add_fortran_subdirectory subdir)
   # create build and configure wrapper scripts
   _setup_mingw_config_and_build("${source_dir}" "${build_dir}")
   # create the external project
-  externalproject_add(${project_name}_build
+  ExternalProject_Add(${project_name}_build
     SOURCE_DIR ${source_dir}
     BINARY_DIR ${build_dir}
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
