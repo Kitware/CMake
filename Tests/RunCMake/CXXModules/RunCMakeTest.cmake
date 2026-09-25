@@ -113,6 +113,7 @@ if (RunCMake_GENERATOR MATCHES "Ninja")
   run_cmake(NinjaDependInfoExportFilesystemSafe)
   run_cmake(NinjaDependInfoBMIInstall)
   run_cmake(NinjaForceResponseFile) # issue#25367
+  run_cmake(NinjaMSVCRuntimeLibrary)
   run_cmake(NinjaDependInfoCompileDatabase)
 elseif (RunCMake_GENERATOR MATCHES "Visual Studio")
   run_cmake(VisualStudioNoSyntheticTargets)
