@@ -110,8 +110,8 @@ bool cmParseCacheCoverage::ReadCMCovFile(char const* file)
                  "  line:\n"
                  "[",
                  line, "]\n");
-      for (std::string::size_type i = 0; i < separateLine.size(); ++i) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE, separateLine[1], ' ');
+      for (std::string const& l : separateLine) {
+        cmCTestLog(this->CTest, ERROR_MESSAGE, l, ' ');
       }
       cmCTestLog(this->CTest, ERROR_MESSAGE, "\n");
       return false;
