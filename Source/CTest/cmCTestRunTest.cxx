@@ -996,8 +996,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   // if this is one of several runs of a test just print blank space
   // to keep things neat
   else {
-    countField =
-      cmStrCat(cmPadToWidth(numWidth, "  "), cmPadToWidth(numWidth, "  "));
+    countField = cmPadToWidth(2 * numWidth + 2, " ");
   }
 
   std::string indexStr = cmStrCat(" #", this->Index, ':');
