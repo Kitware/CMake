@@ -158,7 +158,7 @@ std::vector<BT<std::string>> ProcessIncludes(
           MessageType::FATAL_ERROR,
           cmStrCat("File set \"", fileSetName, "\" from the target \"",
                    target->GetName(), "\" contains relative path in its ",
-                   property, ":\n  \"", include, "\""));
+                   property, ":\n  \"", include, '"'));
         return includes;
       }
 

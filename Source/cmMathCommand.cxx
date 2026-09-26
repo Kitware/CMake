@@ -141,7 +141,7 @@ bool HandleIncDecCommand(std::vector<std::string> const& args,
                          long long overflowFrom, long long overflowTo,
                          cm::string_view verbing)
 {
-  std::string const messageHint = cmStrCat("sub-command ", args[0], " ");
+  std::string const messageHint = cmStrCat("sub-command ", args[0], ' ');
   if (args.size() != 2) {
     status.SetError(cmStrCat(messageHint, "wrong number of arguments"));
     return false;
@@ -174,7 +174,7 @@ bool HandleIncDecCommand(std::vector<std::string> const& args,
     status.GetMakefile().IssueDiagnostic(
       cmDiagnosticCategory::CMD_AUTHOR,
       cmStrCat("signed integer overflow while ", verbing, ":\n  ", intValue,
-               "\n"));
+               '\n'));
     // Overflow is undefined behavior in C++, so define it manually
     newValue = overflowTo;
   }

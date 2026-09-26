@@ -634,7 +634,7 @@ void cmGlobalFastbuildGenerator::WriteVariable(std::string const& key,
 {
   Indent(indent);
   *this->BuildFileStream << "." << key
-                         << cmStrCat(" ", op, (value.empty() ? "" : " "))
+                         << cmStrCat(' ', op, (value.empty() ? "" : " "))
                          << value << "\n";
 }
 

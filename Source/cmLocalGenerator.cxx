@@ -2119,7 +2119,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
             continue;
           }
           if (filterArch.empty() || filterArch == arch) {
-            flags = cmStrCat(flags, " -Xarch_", arch, " ");
+            flags = cmStrCat(flags, " -Xarch_", arch, ' ');
             // Combine sysroot flag and path to work with -Xarch
             std::string arch_sysroot = *sysrootFlag + archSysroot;
             flags += this->ConvertToOutputFormat(arch_sysroot, SHELL);

@@ -196,7 +196,7 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
       if (uniqueIncludes.insert(entryInclude).second) {
         includes.emplace_back(entryInclude, entry.Backtrace);
         if (debugIncludes) {
-          usedIncludes += cmStrCat(" * ", entryInclude, "\n");
+          usedIncludes += cmStrCat(" * ", entryInclude, '\n');
         }
       }
     }

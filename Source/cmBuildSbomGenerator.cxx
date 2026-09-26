@@ -13,6 +13,6 @@ void cmBuildSbomGenerator::Compute(cmLocalGenerator* lg)
 bool cmBuildSbomGenerator::GenerateForBuild(std::string const& config)
 {
   cmGeneratedFileStream os(
-    cmStrCat(this->OutputFile, "-", config, ".spdx.json"));
+    cmStrCat(this->OutputFile, '-', config, ".spdx.json"));
   return this->Builder->Generate(os, config);
 }

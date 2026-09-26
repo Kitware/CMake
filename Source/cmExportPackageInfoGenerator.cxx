@@ -578,7 +578,7 @@ void cmExportPackageInfoGenerator::GenerateInterfaceCompileFeatures(
   for (auto const& value : cmList{ iter->second }) {
     if (cmHasLiteralPrefix(value, "c_std_")) {
       auto suffix = cm::string_view{ value }.substr(6, 2);
-      features.emplace(cmStrCat("c", suffix));
+      features.emplace(cmStrCat('c', suffix));
     } else if (cmHasLiteralPrefix(value, "cxx_std_")) {
       auto suffix = cm::string_view{ value }.substr(8, 2);
       features.emplace(cmStrCat("c++", suffix));

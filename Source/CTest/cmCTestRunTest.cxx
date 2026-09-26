@@ -1086,7 +1086,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 std::string cmCTestRunTest::GenerateLLVMPath(std::string fileString)
 {
   std::string dir = this->TestProperties->CTestDirectory;
-  std::string profRawRoot = cmStrCat(dir, "/", this->TestProperties->Name);
+  std::string profRawRoot = cmStrCat(dir, '/', this->TestProperties->Name);
   return cmStrCat(profRawRoot, fileString);
 }
 
@@ -1096,7 +1096,7 @@ std::string cmCTestRunTest::GetTestMetricsFile() const
   cmSystemTools::ReplaceString(safeName, "/", "_");
   cmSystemTools::ReplaceString(safeName, "\\", "_");
   return cmStrCat(this->CTest->GetInstrumentation().GetDataDir(),
-                  "/test/test-", safeName, "-", this->Index, ".json");
+                  "/test/test-", safeName, '-', this->Index, ".json");
 }
 
 void cmCTestRunTest::CollectLLVMCoverage()

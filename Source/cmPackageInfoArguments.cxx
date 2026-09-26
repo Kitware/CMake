@@ -96,5 +96,5 @@ std::string cmPackageInfoArguments::GetDefaultDestination(
   if (root.empty()) {
     return cmStrCat("cps/"_s, this->GetPackageDirName());
   }
-  return cmStrCat(root, '/', "cps/"_s, this->GetPackageDirName());
+  return cmStrCat(root, "/cps/"_s, this->GetPackageDirName());
 }

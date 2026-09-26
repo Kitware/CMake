@@ -135,7 +135,7 @@ bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
   if (!res) {
     status.SetError(cmStrCat(" failed to run command: ",
                              cmSystemTools::PrintSingleCommand(runCommand),
-                             "\n", stdErr));
+                             '\n', stdErr));
     return false;
   }
 

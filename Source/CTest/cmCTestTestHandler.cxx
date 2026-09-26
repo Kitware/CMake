@@ -673,13 +673,13 @@ void cmCTestTestHandler::LogTestSummary(std::vector<std::string> const& passed,
   }
   if (failed.empty()) {
     cmCTestColorLog(this->CTest, HANDLER_OUTPUT, summaryAttrs,
-                    cmStrCat("\n", std::lround(percent),
-                             "% tests passed out of ", total, "\n"));
+                    cmStrCat('\n', std::lround(percent),
+                             "% tests passed out of ", total, '\n'));
   } else {
     cmCTestColorLog(this->CTest, HANDLER_OUTPUT, summaryAttrs,
-                    cmStrCat("\n", std::lround(percent), "% tests passed, ",
+                    cmStrCat('\n', std::lround(percent), "% tests passed, ",
                              failed.size(), " tests failed out of ", total,
-                             "\n"));
+                             '\n'));
   }
   if ((!this->CTest->GetLabelsForSubprojects().empty() &&
        this->CTest->GetSubprojectSummary())) {

@@ -97,7 +97,7 @@ std::string cmSbomArguments::GetDefaultDestination(
   if (root.empty()) {
     return cmStrCat("sbom/"_s, this->GetPackageName());
   }
-  return cmStrCat(root, '/', "sbom/"_s, this->GetPackageName());
+  return cmStrCat(root, "/sbom/"_s, this->GetPackageName());
 }
 
 cmSbomArguments::SbomFormat cmSbomArguments::GetFormat() const

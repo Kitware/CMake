@@ -738,14 +738,14 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     // no escaping of spaces in this case, see
     // https://gitlab.kitware.com/cmake/cmake/-/issues/10014
     std::string const& makefileName = makefile;
-    command = cmStrCat(std::move(command), " -f \"", makefileName, "\" ",
-                       " VERBOSE=1 ", target);
+    command = cmStrCat(std::move(command), " -f \"", makefileName,
+                       "\" VERBOSE=1 ", target);
   } else if (generator == "Ninja") {
     command = cmStrCat(std::move(command), " -v ", target);
   } else {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command = cmStrCat(std::move(command), " -f \"", makefileName, "\" ",
-                       " VERBOSE=1 ", target);
+    command = cmStrCat(std::move(command), " -f \"", makefileName,
+                       "\" VERBOSE=1 ", target);
   }
   return command;
 }

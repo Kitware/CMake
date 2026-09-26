@@ -2269,7 +2269,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         return 1;
       };
       auto const isFilename = [](std::string const& arg) -> bool {
-        return arg == "-"_s || !cmHasLiteralPrefix(arg, "-");
+        return arg == "-"_s || !cmHasPrefix(arg, '-');
       };
 
       static char const validPlaceholderChars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
