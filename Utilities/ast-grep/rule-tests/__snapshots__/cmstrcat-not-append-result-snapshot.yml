@@ -1,0 +1,65 @@
+id: cmstrcat-not-append-result
+snapshots:
+  a += cmStrCat();:
+    fixed: a = cmStrCat(std::move(a));
+    labels:
+    - source: a += cmStrCat()
+      style: primary
+      start: 0
+      end: 15
+  a += cmStrCat(b, c):
+    fixed: a = cmStrCat(std::move(a), b, c)
+    labels:
+    - source: a += cmStrCat(b, c)
+      style: primary
+      start: 0
+      end: 19
+  a += cmStrCat(b, c);:
+    fixed: a = cmStrCat(std::move(a), b, c);
+    labels:
+    - source: a += cmStrCat(b, c)
+      style: primary
+      start: 0
+      end: 19
+  a.append(cmStrCat()):
+    fixed: a = cmStrCat(std::move(a))
+    labels:
+    - source: a.append(cmStrCat())
+      style: primary
+      start: 0
+      end: 20
+  a.append(cmStrCat(b, c)):
+    fixed: a = cmStrCat(std::move(a), b, c)
+    labels:
+    - source: a.append(cmStrCat(b, c))
+      style: primary
+      start: 0
+      end: 24
+  a.append(cmStrCat(b, c));:
+    fixed: a = cmStrCat(std::move(a), b, c);
+    labels:
+    - source: a.append(cmStrCat(b, c))
+      style: primary
+      start: 0
+      end: 24
+  cflags["Swift"] += cmStrCat(' ', defineString):
+    fixed: cflags["Swift"] = cmStrCat(std::move(cflags["Swift"]), ' ', defineString)
+    labels:
+    - source: cflags["Swift"] += cmStrCat(' ', defineString)
+      style: primary
+      start: 0
+      end: 46
+  cflags["Swift"] += cmStrCat(' ', defineString);:
+    fixed: cflags["Swift"] = cmStrCat(std::move(cflags["Swift"]), ' ', defineString);
+    labels:
+    - source: cflags["Swift"] += cmStrCat(' ', defineString)
+      style: primary
+      start: 0
+      end: 46
+  obj.field += cmStrCat(b, c);:
+    fixed: obj.field = cmStrCat(std::move(obj.field), b, c);
+    labels:
+    - source: obj.field += cmStrCat(b, c)
+      style: primary
+      start: 0
+      end: 27
