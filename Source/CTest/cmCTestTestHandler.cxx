@@ -1111,7 +1111,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       setupRegExp = this->TestOptions.ExcludeFixtureSetupRegularExpression;
     } else {
       setupRegExp =
-        cmStrCat(setupRegExp, '(', setupRegExp, ")|(",
+        cmStrCat('(', std::move(setupRegExp), ")|(",
                  this->TestOptions.ExcludeFixtureSetupRegularExpression, ')');
     }
   }
@@ -1120,7 +1120,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       cleanupRegExp = this->TestOptions.ExcludeFixtureCleanupRegularExpression;
     } else {
       cleanupRegExp = cmStrCat(
-        cleanupRegExp, '(', cleanupRegExp, ")|(",
+        '(', std::move(cleanupRegExp), ")|(",
         this->TestOptions.ExcludeFixtureCleanupRegularExpression, ')');
     }
   }
