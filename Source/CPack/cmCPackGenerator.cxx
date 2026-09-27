@@ -838,7 +838,7 @@ int cmCPackGenerator::InstallCMakeProject(
     if (cmHasPrefix(dir, '/')) {
       dir = tempInstallDirectory + dir;
     } else {
-      dir = cmStrCat(tempInstallDirectory, '/', dir);
+      dir = cmStrCat(tempInstallDirectory, '/', std::move(dir));
     }
     /*
      *  We must re-set DESTDIR for each component

@@ -136,7 +136,7 @@ bool handleQueryCommand(std::vector<std::string> const& args,
     std::string message("QUERY given invalid arguments:");
     for (std::string const& s : errors) {
       if (!s.empty()) {
-        message = cmStrCat(message, "\n  ", s);
+        message = cmStrCat(std::move(message), "\n  ", s);
       }
     }
     status.SetError(message);

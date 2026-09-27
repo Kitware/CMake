@@ -248,7 +248,7 @@ Arguments cmCoreTryCompile::ParseArgs(
       !unparsedArguments.empty()) {
     std::string m = "Unknown arguments:";
     for (auto const& i : unparsedArguments) {
-      m = cmStrCat(m, "\n  \"", i, '"');
+      m = cmStrCat(std::move(m), "\n  \"", i, '"');
     }
     this->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, m);
   }
@@ -1292,10 +1292,10 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         std::string err = status.GetString();
         switch (status.Path) {
           case cmsys::SystemTools::CopyStatus::SourcePath:
-            err = cmStrCat(err, " (input)");
+            err = cmStrCat(std::move(err), " (input)");
             break;
           case cmsys::SystemTools::CopyStatus::DestPath:
-            err = cmStrCat(err, " (output)");
+            err = cmStrCat(std::move(err), " (output)");
             break;
           default:
             break;
@@ -1307,7 +1307,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           "to destination specified by COPY_FILE:\n"
           "  '", copyFile, "'\n"
           "because:\n"
-          "  ", err, '\n',
+          "  ", std::move(err), '\n',
           this->FindErrorMessage);
         /* clang-format on */
         if (!arguments.CopyFileError) {
@@ -1418,7 +1418,7 @@ void cmCoreTryCompile::FindOutputFile(std::string const& targetName)
     std::string const cfg = !tcConfig.empty()
       ? cmSystemTools::UpperCase(tcConfig)
       : TryCompileDefaultConfig;
-    tmpOutputFile = cmStrCat(tmpOutputFile, '_', cfg);
+    tmpOutputFile = cmStrCat(std::move(tmpOutputFile), '_', cfg);
   }
   tmpOutputFile += "_loc";
 

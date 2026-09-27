@@ -755,7 +755,7 @@ Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
   std::replace(safeTargetName.begin(), safeTargetName.end(), ':', '_');
   std::string prefix = "target-" + safeTargetName;
   if (!this->Config.empty()) {
-    prefix = cmStrCat(prefix, '-', this->Config);
+    prefix = cmStrCat(std::move(prefix), '-', this->Config);
   }
   Json::Value target = this->FileAPI.MaybeJsonFile(t.Dump(), prefix);
   target["name"] = gt->GetName();
@@ -846,9 +846,9 @@ Json::Value CodemodelConfig::DumpDirectoryObject(Directory& d)
   std::string buildDirRel = RelativeIfUnder(
     this->TopBuild, d.Snapshot.GetDirectory().GetCurrentBinary());
   if (!cmSystemTools::FileIsFullPath(buildDirRel)) {
-    prefix = cmStrCat(prefix, '-', buildDirRel);
+    prefix = cmStrCat(std::move(prefix), '-', buildDirRel);
   } else if (!cmSystemTools::FileIsFullPath(sourceDirRel)) {
-    prefix = cmStrCat(prefix, '-', sourceDirRel);
+    prefix = cmStrCat(std::move(prefix), '-', sourceDirRel);
   }
   for (char& c : prefix) {
     if (c == '/' || c == '\\') {
@@ -856,7 +856,7 @@ Json::Value CodemodelConfig::DumpDirectoryObject(Directory& d)
     }
   }
   if (!this->Config.empty()) {
-    prefix = cmStrCat(prefix, '-', this->Config);
+    prefix = cmStrCat(std::move(prefix), '-', this->Config);
   }
 
   DirectoryObject dir(d.LocalGenerator, this->VersionMajor, this->VersionMinor,

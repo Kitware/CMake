@@ -301,7 +301,7 @@ void cmInstrumentation::RemoveOldFiles(std::string const& dataSubdir)
   std::string oldIndex =
     this->GetFileByTimestamp(LatestOrOldest::Oldest, "index");
   if (!oldIndex.empty()) {
-    oldIndex = cmStrCat(this->dataDir, "/index/", oldIndex);
+    oldIndex = cmStrCat(this->dataDir, "/index/", std::move(oldIndex));
   }
   if (cmSystemTools::FileExists(dataSubdirPath)) {
     std::string latestFile =

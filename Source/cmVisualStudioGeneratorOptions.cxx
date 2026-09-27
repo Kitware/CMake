@@ -282,7 +282,7 @@ void cmVisualStudioGeneratorOptions::PrependInheritedString(
     return;
   }
   std::string& value = i->second[0];
-  value = cmStrCat("%(", key, ") ", value);
+  value = cmStrCat("%(", key, ") ", std::move(value));
 }
 
 void cmVisualStudioGeneratorOptions::Reparse(std::string const& key)

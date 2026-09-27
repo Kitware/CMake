@@ -186,15 +186,15 @@ std::string FormatCommandLineHelp(
   for (cmCommandLineHelpEntry const& entry : entries) {
     std::string invocation = entry.Name;
     if (*entry.Usage) {
-      invocation = cmStrCat(invocation, ' ', entry.Usage);
+      invocation = cmStrCat(std::move(invocation), ' ', entry.Usage);
     }
     std::string line = cmStrCat("  ", invocation);
     if (line.size() + 2 <= helpColumn) {
       line.resize(helpColumn, ' ');
-      result = cmStrCat(result, line, "- ", entry.Help, '\n');
+      result = cmStrCat(std::move(result), line, "- ", entry.Help, '\n');
     } else {
-      result = cmStrCat(result, line, '\n', std::string(helpColumn, ' '), "- ",
-                        entry.Help, '\n');
+      result = cmStrCat(std::move(result), line, '\n',
+                        std::string(helpColumn, ' '), "- ", entry.Help, '\n');
     }
   }
   return result;
@@ -894,9 +894,10 @@ std::function<std::ostream&(std::ostream& sout)> Bin2CPrintChars(
         BIN2C_ROW_WIDTH +
       cmStrLen("\n"));
     for (std::size_t i = 0; i < BIN2C_ROW_WIDTH; i++) {
-      line = cmStrCat(line, base == Bin2CBase::Hex ? " 0x__," : "____,");
+      line =
+        cmStrCat(std::move(line), base == Bin2CBase::Hex ? " 0x__," : "____,");
     }
-    line = cmStrCat(line, '\n');
+    line = cmStrCat(std::move(line), '\n');
 
     bool any = false;
     std::uint64_t pos = 0;
@@ -2534,7 +2535,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       std::string const suggestion =
         cmFindClosestString(args[1], availableCommands);
       if (!suggestion.empty()) {
-        error = cmStrCat(error, " Did you mean \"", suggestion, "\"?");
+        error =
+          cmStrCat(std::move(error), " Did you mean \"", suggestion, "\"?");
       }
       cmSystemTools::Error(error);
     }

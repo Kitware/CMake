@@ -482,7 +482,7 @@ bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
   while (cmSystemTools::ReadSymlink(fromFile, newFromFile)) {
     if (!cmSystemTools::FileIsFullPath(newFromFile)) {
       std::string fromFilePath = cmSystemTools::GetFilenamePath(fromFile);
-      newFromFile = cmStrCat(fromFilePath, '/', newFromFile);
+      newFromFile = cmStrCat(fromFilePath, '/', std::move(newFromFile));
     }
 
     std::string symlinkTarget = cmSystemTools::GetFilenameName(newFromFile);

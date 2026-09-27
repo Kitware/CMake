@@ -735,7 +735,7 @@ cmList ExpandRuleCommands(std::string const& command,
     commands.append(extraCommands);
   }
   for (std::string& cmd : commands) {
-    cmd = cmStrCat(launcher, cmd);
+    cmd = cmStrCat(launcher, std::move(cmd));
     rulePlaceholderExpander->ExpandRuleVariables(localGenerator, cmd, vars);
   }
   return commands;
@@ -844,7 +844,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
           cmStrCat("CMAKE_", lang, "_SCANDEP_SOURCE"));
         scanCommands.assign(scanCommand);
         for (auto& i : scanCommands) {
-          i = cmStrCat(launcher, i);
+          i = cmStrCat(launcher, std::move(i));
         }
       } else {
         scanRuleName = this->LanguagePreprocessAndScanRule(lang, config);
@@ -853,7 +853,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
           cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE"));
         scanCommands.assign(ppCommand);
         for (auto& i : scanCommands) {
-          i = cmStrCat(launcher, i);
+          i = cmStrCat(launcher, std::move(i));
         }
         scanCommands.emplace_back(GetScanCommand(
           cmakeCmd, tdi, lang, "$out", "$DYNDEP_INTERMEDIATE_FILE", "$in"));
@@ -1005,7 +1005,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
           "CUDA_SEPARABLE_COMPILATION")) {
       std::string const& rdcFlag =
         this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-      cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
+      cudaCompileMode = cmStrCat(std::move(cudaCompileMode), rdcFlag, ' ');
     }
     static std::array<cm::string_view, 4> const compileModes{
       { "PTX"_s, "CUBIN"_s, "FATBIN"_s, "OPTIX"_s }
@@ -1017,7 +1017,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
       if (this->GeneratorTarget->GetPropertyAsBool(propName)) {
         std::string const& flag =
           this->Makefile->GetRequiredDefinition(defName);
-        cudaCompileMode = cmStrCat(cudaCompileMode, flag);
+        cudaCompileMode = cmStrCat(std::move(cudaCompileMode), flag);
         useNormalCompileMode = false;
         break;
       }
@@ -1025,7 +1025,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
     if (useNormalCompileMode) {
       std::string const& wholeFlag =
         this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
-      cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+      cudaCompileMode = cmStrCat(std::move(cudaCompileMode), wholeFlag);
     }
     vars.CudaCompileMode = cudaCompileMode.c_str();
   }
@@ -1370,7 +1370,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
         if (!native_gt->IsImported()) {
           std::string native_dir = native_gt->GetSupportDirectory();
           if (this->GetGlobalGenerator()->IsMultiConfig()) {
-            native_dir = cmStrCat(native_dir, '/', config);
+            native_dir = cmStrCat(std::move(native_dir), '/', config);
           }
           build.ImplicitDeps.emplace_back(this->ConvertToNinjaPath(
             cmStrCat(native_dir, '/', language, "Modules.json")));
@@ -2435,7 +2435,7 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
       if (!nativeGT->IsImported()) {
         std::string nativeDir = nativeGT->GetSupportDirectory();
         if (this->GetGlobalGenerator()->IsMultiConfig()) {
-          nativeDir = cmStrCat(nativeDir, '/', config);
+          nativeDir = cmStrCat(std::move(nativeDir), '/', config);
         }
         tdi["native-target-dir"] = nativeDir;
       }
@@ -2639,7 +2639,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
           "CUDA_SEPARABLE_COMPILATION")) {
       std::string const& rdcFlag =
         this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-      cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
+      cudaCompileMode = cmStrCat(std::move(cudaCompileMode), rdcFlag, ' ');
     }
     static std::array<cm::string_view, 4> const compileModes{
       { "PTX"_s, "CUBIN"_s, "FATBIN"_s, "OPTIX"_s }
@@ -2651,7 +2651,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
       if (this->GeneratorTarget->GetPropertyAsBool(propName)) {
         std::string const& flag =
           this->Makefile->GetRequiredDefinition(defName);
-        cudaCompileMode = cmStrCat(cudaCompileMode, flag);
+        cudaCompileMode = cmStrCat(std::move(cudaCompileMode), flag);
         useNormalCompileMode = false;
         break;
       }
@@ -2659,7 +2659,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     if (useNormalCompileMode) {
       std::string const& wholeFlag =
         this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
-      cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+      cudaCompileMode = cmStrCat(std::move(cudaCompileMode), wholeFlag);
     }
     compileObjectVars.CudaCompileMode = cudaCompileMode.c_str();
   }

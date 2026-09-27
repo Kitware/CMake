@@ -693,7 +693,7 @@ bool cmCTest::OpenOutputFile(std::string const& path, std::string const& name,
 {
   std::string testingDir = this->Impl->BinaryDir + "/Testing";
   if (!path.empty()) {
-    testingDir = cmStrCat(testingDir, '/', path);
+    testingDir = cmStrCat(std::move(testingDir), '/', path);
   }
   if (cmSystemTools::FileExists(testingDir)) {
     if (!cmSystemTools::FileIsDirectory(testingDir)) {
@@ -2648,7 +2648,8 @@ int cmCTest::Run(std::vector<std::string> const& args)
       std::string const suggestion =
         cmFindClosestCommandLineArgument(arg, allArguments);
       if (!suggestion.empty()) {
-        error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+        error =
+          cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
       }
       cmSystemTools::Error(error);
       cmSystemTools::Error("Run 'ctest --help' for all supported options.");
@@ -3939,7 +3940,7 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
         std::string command_str = root[key].asString();
         std::string truncated = command_str.substr(0, command_str.find(' '));
         if (command_str != truncated) {
-          truncated = cmStrCat(truncated, " (truncated)");
+          truncated = cmStrCat(std::move(truncated), " (truncated)");
         }
         xml.Attribute(key.c_str(), truncated);
         continue;

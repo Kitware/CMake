@@ -254,9 +254,9 @@ int cmCPackNSISGenerator::PackageFiles()
 
     for (auto& arg : expandedArguments) {
       if (!cmHasPrefix(arg, NSIS_OPT)) {
-        nsisPreArguments = cmStrCat(nsisPreArguments, NSIS_OPT);
+        nsisPreArguments = cmStrCat(std::move(nsisPreArguments), NSIS_OPT);
       }
-      nsisPreArguments = cmStrCat(nsisPreArguments, arg, ' ');
+      nsisPreArguments = cmStrCat(std::move(nsisPreArguments), arg, ' ');
     }
   }
 
@@ -266,9 +266,9 @@ int cmCPackNSISGenerator::PackageFiles()
     cmList expandedArguments{ nsisArguments };
     for (auto& arg : expandedArguments) {
       if (!cmHasPrefix(arg, NSIS_OPT)) {
-        nsisPostArguments = cmStrCat(nsisPostArguments, NSIS_OPT);
+        nsisPostArguments = cmStrCat(std::move(nsisPostArguments), NSIS_OPT);
       }
-      nsisPostArguments = cmStrCat(nsisPostArguments, arg, ' ');
+      nsisPostArguments = cmStrCat(std::move(nsisPostArguments), arg, ' ');
     }
   }
 
@@ -396,7 +396,7 @@ int cmCPackNSISGenerator::PackageFiles()
     cmStrCat('"', this->GetOption("CPACK_INSTALLER_PROGRAM"), "\" ",
              nsisPreArguments, " \"", nsisFileName, '"');
   if (!nsisPostArguments.empty()) {
-    nsisCmd = cmStrCat(nsisCmd, ' ', nsisPostArguments);
+    nsisCmd = cmStrCat(std::move(nsisCmd), ' ', nsisPostArguments);
   }
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd << std::endl);
   std::string output;

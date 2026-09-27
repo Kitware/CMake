@@ -2138,7 +2138,7 @@ void cmGlobalGenerator::WriteCxxImportErrorModules()
       for (auto const& config : configs) {
         auto dir = tgt->GetSupportDirectory();
         if (this->IsMultiConfig()) {
-          dir = cmStrCat(dir, '/', config);
+          dir = cmStrCat(std::move(dir), '/', config);
         }
         cmSystemTools::MakeDirectory(dir);
 
@@ -2835,24 +2835,27 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   makeCommand =
     cmStrCat(cmSystemTools::ConvertToOutputPath(makeCommand), " --build .");
   if (!config.empty()) {
-    makeCommand = cmStrCat(makeCommand, " --config \"", config, '"');
+    makeCommand =
+      cmStrCat(std::move(makeCommand), " --config \"", config, '"');
   }
   if (!parallel.empty()) {
-    makeCommand = cmStrCat(makeCommand, " --parallel \"", parallel, '"');
+    makeCommand =
+      cmStrCat(std::move(makeCommand), " --parallel \"", parallel, '"');
   }
   if (!target.empty()) {
-    makeCommand = cmStrCat(makeCommand, " --target \"", target, '"');
+    makeCommand =
+      cmStrCat(std::move(makeCommand), " --target \"", target, '"');
   }
   char const* sep = " -- ";
   if (ignoreErrors) {
     char const* iflag = this->GetBuildIgnoreErrorsFlag();
     if (iflag && *iflag) {
-      makeCommand = cmStrCat(makeCommand, sep, iflag);
+      makeCommand = cmStrCat(std::move(makeCommand), sep, iflag);
       sep = " ";
     }
   }
   if (!native.empty()) {
-    makeCommand = cmStrCat(makeCommand, sep, native);
+    makeCommand = cmStrCat(std::move(makeCommand), sep, native);
   }
   return makeCommand;
 }

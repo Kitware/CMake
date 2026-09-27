@@ -421,7 +421,7 @@ void cmFastbuildNormalTargetGenerator::ApplyLinkRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_LINK", Config);
   if (cmNonempty(val)) {
     LogMessage("RULE_LAUNCH_LINK: " + val);
-    command = cmStrCat(val, ' ', command);
+    command = cmStrCat(val, ' ', std::move(command));
   }
 }
 
@@ -777,7 +777,7 @@ std::string cmFastbuildNormalTargetGenerator::GetCudaCompileMode() const
   if (this->GeneratorTarget->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
     std::string const& rdcFlag =
       this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-    cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
+    cudaCompileMode = cmStrCat(std::move(cudaCompileMode), rdcFlag, ' ');
   }
   static std::array<cm::string_view, 4> const compileModes{
     { "PTX"_s, "CUBIN"_s, "FATBIN"_s, "OPTIX"_s }
@@ -788,7 +788,7 @@ std::string cmFastbuildNormalTargetGenerator::GetCudaCompileMode() const
     auto defName = cmStrCat("_CMAKE_CUDA_", mode, "_FLAG");
     if (this->GeneratorTarget->GetPropertyAsBool(propName)) {
       std::string const& flag = this->Makefile->GetRequiredDefinition(defName);
-      cudaCompileMode = cmStrCat(cudaCompileMode, flag);
+      cudaCompileMode = cmStrCat(std::move(cudaCompileMode), flag);
       useNormalCompileMode = false;
       break;
     }
@@ -796,7 +796,7 @@ std::string cmFastbuildNormalTargetGenerator::GetCudaCompileMode() const
   if (useNormalCompileMode) {
     std::string const& wholeFlag =
       this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
-    cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+    cudaCompileMode = cmStrCat(std::move(cudaCompileMode), wholeFlag);
   }
   return cudaCompileMode;
 }

@@ -240,15 +240,16 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   {
     // Write explicit outputs
     for (std::string const& output : build.Outputs) {
-      buildStr = cmStrCat(buildStr, ' ', this->EncodePath(output));
+      buildStr = cmStrCat(std::move(buildStr), ' ', this->EncodePath(output));
     }
     // Write implicit outputs
     if (!build.ImplicitOuts.empty()) {
       // Assume Ninja is new enough to support implicit outputs.
       // Callers should not populate this field otherwise.
-      buildStr = cmStrCat(buildStr, " |");
+      buildStr = cmStrCat(std::move(buildStr), " |");
       for (std::string const& implicitOut : build.ImplicitOuts) {
-        buildStr = cmStrCat(buildStr, ' ', this->EncodePath(implicitOut));
+        buildStr =
+          cmStrCat(std::move(buildStr), ' ', this->EncodePath(implicitOut));
       }
     }
 
@@ -259,16 +260,16 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     if (!build.WorkDirOuts.empty()) {
       if (this->SupportsImplicitOuts() && build.ImplicitOuts.empty()) {
         // Make them implicit outputs if supported by this version of Ninja.
-        buildStr = cmStrCat(buildStr, " |");
+        buildStr = cmStrCat(std::move(buildStr), " |");
       }
       for (std::string const& workdirOut : build.WorkDirOuts) {
-        buildStr = cmStrCat(buildStr, " ${cmake_ninja_workdir}",
+        buildStr = cmStrCat(std::move(buildStr), " ${cmake_ninja_workdir}",
                             this->EncodePath(workdirOut));
       }
     }
 
     // Write the rule.
-    buildStr = cmStrCat(buildStr, ": ", build.Rule);
+    buildStr = cmStrCat(std::move(buildStr), ": ", build.Rule);
   }
 
   std::string arguments;

@@ -197,7 +197,7 @@ std::unique_ptr<cmCustomCommand> cmGeneratorRule::CreateCustomCommand() const
         std::string path = expandVariables(item);
         if (!cmSystemTools::FileIsFullPath(path) &&
             !cmGeneratorExpression::StartsWithGeneratorExpression(path)) {
-          path = cmStrCat(binaryDirectory, '/', path);
+          path = cmStrCat(binaryDirectory, '/', std::move(path));
         }
         cmSystemTools::ConvertToUnixSlashes(path);
         if (cmSystemTools::FileIsFullPath(path)) {

@@ -714,7 +714,7 @@ void cmFindBaseDebugState::WriteDebug() const
   for (auto const& state : this->FailedSearchLocations) {
     std::string path = cmStrCat("  ", state.path);
     if (!state.regexName.empty()) {
-      path = cmStrCat(path, '/', state.regexName);
+      path = cmStrCat(std::move(path), '/', state.regexName);
     }
     buffer += cmStrCat(path, '\n');
   }

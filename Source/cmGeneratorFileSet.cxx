@@ -458,7 +458,8 @@ std::vector<std::string> cmGeneratorFileSet::EvaluateDirectoryEntries(
     cmList dirs{ entry };
     for (std::string dir : dirs) {
       if (!cmSystemTools::FileIsFullPath(dir)) {
-        dir = cmStrCat(context.LG->GetCurrentSourceDirectory(), '/', dir);
+        dir = cmStrCat(context.LG->GetCurrentSourceDirectory(), '/',
+                       std::move(dir));
       }
 
       auto dirCacheResult = dirCache.emplace(dir, DirCacheEntry());
@@ -508,7 +509,8 @@ void cmGeneratorFileSet::EvaluateFileEntry(
   auto files = cge->Evaluate(context, dagChecker, target);
   for (std::string file : cmList{ files }) {
     if (!cmSystemTools::FileIsFullPath(file)) {
-      file = cmStrCat(context.LG->GetCurrentSourceDirectory(), '/', file);
+      file = cmStrCat(context.LG->GetCurrentSourceDirectory(), '/',
+                      std::move(file));
     }
     auto collapsedFile = cmSystemTools::CollapseFullPath(file);
     std::string baseDir;

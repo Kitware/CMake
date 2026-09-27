@@ -232,9 +232,9 @@ bool cmSourceFile::FindFullPath(std::string* error,
   switch (cmp0115) {
     case cmPolicies::OLD:
     case cmPolicies::WARN:
-      err = cmStrCat(err, "\nTried extensions");
+      err = cmStrCat(std::move(err), "\nTried extensions");
       for (auto const& ext : exts) {
-        err = cmStrCat(err, " .", ext);
+        err = cmStrCat(std::move(err), " .", ext);
       }
       break;
     case cmPolicies::NEW:

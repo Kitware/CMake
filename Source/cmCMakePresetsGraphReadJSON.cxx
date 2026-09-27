@@ -787,7 +787,7 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
 
     if (!cmSystemTools::FileIsFullPath(include)) {
       auto directory = cmSystemTools::GetFilenamePath(filename);
-      include = cmStrCat(directory, '/', include);
+      include = cmStrCat(directory, '/', std::move(include));
     }
 
     if ((result = includeFile(include, rootType, ReadReason::Included,

@@ -266,11 +266,11 @@ void cmMakefile::IssuePolicyWarning(cmPolicies::PolicyID policy,
 {
   std::string msg = cmPolicies::GetPolicyWarning(policy);
   if (!preface.empty() && !postface.empty()) {
-    msg = cmStrCat(preface, '\n', msg, '\n', postface);
+    msg = cmStrCat(preface, '\n', std::move(msg), '\n', postface);
   } else if (!preface.empty()) {
-    msg = cmStrCat(preface, '\n', msg);
+    msg = cmStrCat(preface, '\n', std::move(msg));
   } else if (!postface.empty()) {
-    msg = cmStrCat(msg, '\n', postface);
+    msg = cmStrCat(std::move(msg), '\n', postface);
   }
   this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, msg,
                         cmDiagnosticContext{ bt });
@@ -653,7 +653,8 @@ bool cmMakefile::ExecuteCommand(cmListFileFunction const& lff,
       std::string const suggestion = findClosestCommand(
         lff.OriginalName(), this->GetState()->GetCommandNames());
       if (!suggestion.empty()) {
-        error = cmStrCat(error, " Did you mean: \"", suggestion, "\"?");
+        error =
+          cmStrCat(std::move(error), " Did you mean: \"", suggestion, "\"?");
       }
       this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
@@ -2663,7 +2664,7 @@ cm::optional<std::string> cmMakefile::DeferGetCall(std::string const& id) const
       if (dc.Id == id) {
         tmp = dc.Command.OriginalName();
         for (cmListFileArgument const& arg : dc.Command.Arguments()) {
-          tmp = cmStrCat(tmp, ';', arg.Value);
+          tmp = cmStrCat(std::move(tmp), ';', arg.Value);
         }
         break;
       }
@@ -2984,7 +2985,8 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
       // arguments on multiple lines.
       e += cmStrCat("at\n  ", filename, ':', line, '\n');
     }
-    errorstr = cmStrCat(e, "when parsing string\n  ", source, '\n', errorstr);
+    errorstr = cmStrCat(e, "when parsing string\n  ", source, '\n',
+                        std::move(errorstr));
     mtype = MessageType::FATAL_ERROR;
   } else {
     // Append the rest of the unchanged part of the string.
@@ -3605,7 +3607,7 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
         break;
       }
       if (debug) {
-        debugBuffer = cmStrCat(debugBuffer, "  ", itempl, '\n');
+        debugBuffer = cmStrCat(std::move(debugBuffer), "  ", itempl, '\n');
       }
     }
   }
@@ -3616,7 +3618,8 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
   if (!cmSystemTools::FileExists(moduleInCMakeRoot)) {
     if (debug) {
-      debugBuffer = cmStrCat(debugBuffer, "  ", moduleInCMakeRoot, '\n');
+      debugBuffer =
+        cmStrCat(std::move(debugBuffer), "  ", moduleInCMakeRoot, '\n');
     }
     moduleInCMakeRoot.clear();
   }

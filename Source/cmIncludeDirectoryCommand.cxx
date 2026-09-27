@@ -132,7 +132,7 @@ static void NormalizeInclude(cmMakefile& mf, std::string& inc)
     cmSystemTools::ConvertToUnixSlashes(inc);
     if (!cmSystemTools::FileIsFullPath(inc) &&
         !cmGeneratorExpression::StartsWithGeneratorExpression(inc)) {
-      inc = cmStrCat(mf.GetCurrentSourceDirectory(), '/', inc);
+      inc = cmStrCat(mf.GetCurrentSourceDirectory(), '/', std::move(inc));
     }
   }
 }

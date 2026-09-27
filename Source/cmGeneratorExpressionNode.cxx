@@ -5070,7 +5070,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       }
 
       for (auto& o : objects) {
-        o = cmStrCat(obj_dir, o);
+        o = cmStrCat(obj_dir, std::move(o));
       }
     }
 

@@ -400,7 +400,7 @@ Json::Value cmCxxModuleMetadata::ToJsonValue(cmCxxModuleMetadata const& meta)
     cmSystemTools::GetFilenamePath(meta.MetadataFilePath);
 
   if (!cmSystemTools::FileIsFullPath(meta.MetadataFilePath)) {
-    manifestRoot = cmStrCat('/', manifestRoot);
+    manifestRoot = cmStrCat('/', std::move(manifestRoot));
   }
 
   for (auto const& m : meta.Modules) {

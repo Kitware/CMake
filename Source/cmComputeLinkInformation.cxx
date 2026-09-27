@@ -2272,7 +2272,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
           d.erase(0, rootPath.size());
         } else if (cmNonempty(stagePath) && cmHasPrefix(d, *stagePath)) {
           d.erase(0, (*stagePath).size());
-          d = cmStrCat(installPrefix, '/', d);
+          d = cmStrCat(installPrefix, '/', std::move(d));
           cmSystemTools::ConvertToUnixSlashes(d);
         } else if (use_relative_build_rpath) {
           // If expansion of the $ORIGIN token is supported and permitted per
@@ -2281,7 +2281,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
               cmSystemTools::IsSubDirectory(d, topBinaryDir)) {
             d = cmSystemTools::RelativePath(targetOutputDir, d);
             if (!d.empty()) {
-              d = cmStrCat(originToken, '/', d);
+              d = cmStrCat(originToken, '/', std::move(d));
             } else {
               d = originToken;
             }
@@ -2304,7 +2304,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
             d.erase(0, rootPath.size());
           } else if (cmNonempty(stagePath) && cmHasPrefix(d, *stagePath)) {
             d.erase(0, (*stagePath).size());
-            d = cmStrCat(installPrefix, '/', d);
+            d = cmStrCat(installPrefix, '/', std::move(d));
             cmSystemTools::ConvertToUnixSlashes(d);
           }
           if (emitted.insert(d).second) {

@@ -755,7 +755,7 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
         expr = status.GetMakefile().GetCurrentSourceDirectory();
         // Handle script mode
         if (!expr.empty()) {
-          expr = cmStrCat(expr, '/', *i);
+          expr = cmStrCat(std::move(expr), '/', *i);
         } else {
           expr = *i;
         }
@@ -3112,7 +3112,7 @@ bool HandleTimestampCommand(std::vector<std::string> const& args,
   std::string filename = args[argsIndex++];
   if (!cmsys::SystemTools::FileIsFullPath(filename)) {
     filename = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/',
-                        filename);
+                        std::move(filename));
   }
 
   std::string const& outputVariable = args[argsIndex++];
@@ -3946,7 +3946,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
       if (cmSystemTools::FileIsFullPath(parsedArgs.Destination)) {
         destDir = parsedArgs.Destination;
       } else {
-        destDir = cmStrCat(destDir, '/', parsedArgs.Destination);
+        destDir = cmStrCat(std::move(destDir), '/', parsedArgs.Destination);
       }
 
       if (!cmSystemTools::MakeDirectory(destDir)) {
@@ -3956,8 +3956,8 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
       }
 
       if (!cmSystemTools::FileIsFullPath(inFile)) {
-        inFile =
-          cmStrCat(cmSystemTools::GetLogicalWorkingDirectory(), '/', inFile);
+        inFile = cmStrCat(cmSystemTools::GetLogicalWorkingDirectory(), '/',
+                          std::move(inFile));
       }
     }
 

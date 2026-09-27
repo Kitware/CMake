@@ -476,12 +476,12 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
         // This command was specified as a path to a file in the
         // current directory.  Add a leading "./" so it can run
         // without the current directory being in the search path.
-        cmd = cmStrCat("./", cmd);
+        cmd = cmStrCat("./", std::move(cmd));
       }
       cmd = this->LocalGenerator->ConvertToOutputFormat(
         cmd, cmOutputConverter::SHELL);
       if (useCall) {
-        cmd = cmStrCat("call ", cmd);
+        cmd = cmStrCat("call ", std::move(cmd));
       }
       ccg.AppendArguments(c, cmd);
       cmdLines.push_back(std::move(cmd));

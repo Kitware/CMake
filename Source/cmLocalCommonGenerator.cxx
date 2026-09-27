@@ -70,7 +70,7 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
     std::string incflag =
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_INCLUDE_FLAG");
     if (!incflag.empty()) {
-      incflag = cmStrCat(incflag, mod_dir);
+      incflag = cmStrCat(std::move(incflag), mod_dir);
       this->AppendFlags(flags, incflag);
     }
   }

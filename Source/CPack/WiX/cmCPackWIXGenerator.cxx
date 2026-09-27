@@ -1357,11 +1357,12 @@ void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
   if (this->WixVersion >= 4 &&
       cm::contains(this->WixExtensions, "WixToolset.UI.wixext") &&
       !cm::contains(namespaces, "ui")) {
-    xmlns = cmStrCat(
-      xmlns, "\n    xmlns:ui=\"http://wixtoolset.org/schemas/v4/wxs/ui\"");
+    xmlns =
+      cmStrCat(std::move(xmlns),
+               "\n    xmlns:ui=\"http://wixtoolset.org/schemas/v4/wxs/ui\"");
   }
   for (auto& ns : namespaces) {
-    xmlns = cmStrCat(xmlns, "\n    xmlns:", ns.first, "=\"",
+    xmlns = cmStrCat(std::move(xmlns), "\n    xmlns:", ns.first, "=\"",
                      cmWIXSourceWriter::EscapeAttributeValue(ns.second), '"');
   }
   SetOption("CPACK_WIX_CUSTOM_XMLNS_EXPANDED", xmlns);

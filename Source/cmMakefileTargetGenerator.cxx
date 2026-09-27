@@ -1033,7 +1033,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
             "CUDA_SEPARABLE_COMPILATION")) {
         std::string const& rdcFlag =
           this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-        cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
+        cudaCompileMode = cmStrCat(std::move(cudaCompileMode), rdcFlag, ' ');
       }
 
       static std::array<cm::string_view, 4> const compileModes{
@@ -1046,7 +1046,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         if (this->GeneratorTarget->GetPropertyAsBool(propName)) {
           std::string const& flag =
             this->Makefile->GetRequiredDefinition(defName);
-          cudaCompileMode = cmStrCat(cudaCompileMode, flag);
+          cudaCompileMode = cmStrCat(std::move(cudaCompileMode), flag);
           useNormalCompileMode = false;
           break;
         }
@@ -1054,7 +1054,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       if (useNormalCompileMode) {
         std::string const& wholeFlag =
           this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
-        cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+        cudaCompileMode = cmStrCat(std::move(cudaCompileMode), wholeFlag);
       }
       vars.CudaCompileMode = cudaCompileMode.c_str();
     }
@@ -1192,7 +1192,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
     // Expand placeholders in the commands.
     for (std::string& compileCommand : compileCommands) {
-      compileCommand = cmStrCat(launcher, compileCommand);
+      compileCommand = cmStrCat(launcher, std::move(compileCommand));
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    compileCommand, vars);
     }
@@ -2253,7 +2253,7 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
     std::string linkPath;
     this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                               frameworkPath, linkPath);
-    linkLibs = cmStrCat(frameworkPath, linkPath, linkLibs);
+    linkLibs = cmStrCat(frameworkPath, linkPath, std::move(linkLibs));
   }
 
   if (useResponseFile &&

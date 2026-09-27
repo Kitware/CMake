@@ -108,7 +108,7 @@ std::string cmCTestGIT::FindGitDir()
   // Git reports a relative path only when the .git directory is in
   // the current directory.
   if (git_dir[0] == '.') {
-    git_dir = cmStrCat(this->SourceDirectory, '/', git_dir);
+    git_dir = cmStrCat(this->SourceDirectory, '/', std::move(git_dir));
   }
 #if defined(_WIN32) && !defined(__CYGWIN__)
   else if (git_dir[0] == '/') {

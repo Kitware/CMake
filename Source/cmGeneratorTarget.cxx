@@ -1826,7 +1826,7 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree(
         dir =
           cmGeneratorExpression::Evaluate(dir, this->LocalGenerator, config);
         if (!dir.empty()) {
-          dir = cmStrCat(dir, '/');
+          dir = cmStrCat(std::move(dir), '/');
         }
       }
     }
@@ -2580,12 +2580,13 @@ cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
           // A trailing slash tells the toolchain to add its default file name.
           compilePdbPath = this->GetSupportDirectory();
           if (gg->IsMultiConfig()) {
-            compilePdbPath = cmStrCat(compilePdbPath, '/', config);
+            compilePdbPath = cmStrCat(std::move(compilePdbPath), '/', config);
           }
           compilePdbPath += '/';
           if (targetType == cm::TargetType::STATIC_LIBRARY) {
             // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
-            compilePdbPath = cmStrCat(compilePdbPath, this->GetName(), ".pdb");
+            compilePdbPath =
+              cmStrCat(std::move(compilePdbPath), this->GetName(), ".pdb");
           }
         }
       }
@@ -2734,7 +2735,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
                                       this->Makefile->GetDefinition(cmStrCat(
                                         "CMAKE_", lang, "_COMPILER_VERSION")),
                                       "11.5")) {
-      flags = cmStrCat(flags, " -arch=", arch);
+      flags = cmStrCat(std::move(flags), " -arch=", arch);
       return;
     }
     if (arch == "all") {
@@ -2759,7 +2760,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
                                       this->Makefile->GetDefinition(cmStrCat(
                                         "CMAKE_", lang, "_COMPILER_VERSION")),
                                       "11.6")) {
-      flags = cmStrCat(flags, " -arch=", arch);
+      flags = cmStrCat(std::move(flags), " -arch=", arch);
       return;
     }
     arch = *native;
@@ -3056,8 +3057,8 @@ std::string cmGeneratorTarget::GetClangTidyExportFixesDirectory(
 
   std::string path = *val;
   if (!cmSystemTools::FileIsFullPath(path)) {
-    path =
-      cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/', path);
+    path = cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+                    std::move(path));
   }
   return cmSystemTools::CollapseFullPath(path);
 }
@@ -3231,13 +3232,13 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
     filename = generatorTarget->GetCMFSupportDirectory();
 
     if (this->GetGlobalGenerator()->IsMultiConfig()) {
-      filename = cmStrCat(filename, '/', config);
+      filename = cmStrCat(std::move(filename), '/', config);
     }
 
     // This is acceptable as its the source file, won't have a rename/hash
-    filename =
-      cmStrCat(filename, "/cmake_pch", arch.empty() ? "" : cmStrCat('_', arch),
-               languageToExtension.at(language));
+    filename = cmStrCat(std::move(filename), "/cmake_pch",
+                        arch.empty() ? "" : cmStrCat('_', arch),
+                        languageToExtension.at(language));
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
     if (!haveReuseTarget) {
@@ -3333,15 +3334,17 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
         { "OBJCXX", ".objcxx.hxx.mm" }
       };
 
-      filename = cmStrCat(filename, arch.empty() ? "" : cmStrCat('_', arch),
-                          languageToExtension.at(language));
+      filename =
+        cmStrCat(std::move(filename), arch.empty() ? "" : cmStrCat('_', arch),
+                 languageToExtension.at(language));
     } else {
       std::map<std::string, std::string> const languageToExtension = {
         { "C", ".c" }, { "CXX", ".cxx" }, { "OBJC", ".m" }, { "OBJCXX", ".mm" }
       };
 
-      filename = cmStrCat(filename, arch.empty() ? "" : cmStrCat('_', arch),
-                          languageToExtension.at(language));
+      filename =
+        cmStrCat(std::move(filename), arch.empty() ? "" : cmStrCat('_', arch),
+                 languageToExtension.at(language));
     }
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
@@ -3463,15 +3466,17 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
       std::string instantiateOption =
         this->Makefile->GetSafeDefinition(varName);
       if (!instantiateOption.empty()) {
-        createOptionList = cmStrCat(createOptionList, ';', instantiateOption);
+        createOptionList =
+          cmStrCat(std::move(createOptionList), ';', instantiateOption);
       }
     }
 
     std::string const createOptVar =
       cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_CREATE_PCH");
 
-    createOptionList = cmStrCat(
-      createOptionList, ';', this->Makefile->GetSafeDefinition(createOptVar));
+    createOptionList =
+      cmStrCat(std::move(createOptionList), ';',
+               this->Makefile->GetSafeDefinition(createOptVar));
 
     std::string const pchHeader = this->GetPchHeader(config, language, arch);
     std::string const pchFile = this->GetPchFile(config, language, arch);
@@ -3512,7 +3517,7 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
       this->GetSafeProperty(useOptVar);
 
     useOptionList = cmStrCat(
-      useOptionList, ';',
+      std::move(useOptionList), ';',
       useOptionListProperty.empty()
         ? this->Makefile->GetSafeDefinition(cmStrCat("CMAKE_", useOptVar))
         : useOptionListProperty);
@@ -6146,7 +6151,8 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
       if (effStandard.empty()) {
         effStandard = "; no C++ standard found";
       } else {
-        effStandard = cmStrCat("; found \"cxx_std_", effStandard, '"');
+        effStandard =
+          cmStrCat("; found \"cxx_std_", std::move(effStandard), '"');
       }
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,

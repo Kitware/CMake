@@ -2599,7 +2599,7 @@ std::string const& cmQtAutoGenInitializer::GetMocBuildPath(MUFile const& muf)
 
   // File name already emitted.
   // Try appending the header suffix to the base path.
-  basePath = cmStrCat(basePath, '_', muf.SF->GetExtension());
+  basePath = cmStrCat(std::move(basePath), '_', muf.SF->GetExtension());
   res = cmStrCat(basePath, ".cpp");
   if (this->Moc.EmittedBuildPaths.emplace(res).second) {
     return res;

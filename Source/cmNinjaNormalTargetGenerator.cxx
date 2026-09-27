@@ -362,7 +362,7 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeDeviceLinkCmd();
     for (std::string& linkCmd : linkCmds) {
-      linkCmd = cmStrCat(launcher, linkCmd);
+      linkCmd = cmStrCat(launcher, std::move(linkCmd));
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    linkCmd, vars);
     }
@@ -600,7 +600,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd(config);
     for (std::string& linkCmd : linkCmds) {
-      linkCmd = cmStrCat(launcher, linkCmd);
+      linkCmd = cmStrCat(launcher, std::move(linkCmd));
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    linkCmd, vars);
     }

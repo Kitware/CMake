@@ -176,7 +176,8 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             std::string filename = *filenameOpt;
 
             if (fileCgesContextSensitive) {
-              filename = cmStrCat("$<$<CONFIG:", config, ">:", filename, '>');
+              filename = cmStrCat("$<$<CONFIG:", config,
+                                  ">:", std::move(filename), '>');
             }
             stubSources.emplace_back(std::move(filename));
           }

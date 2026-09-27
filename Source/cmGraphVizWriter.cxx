@@ -567,7 +567,7 @@ std::string cmGraphVizWriter::ItemNameWithAliases(
 
   auto nameWithAliases = itemName;
   for(auto const& item : items) {
-    nameWithAliases = cmStrCat(nameWithAliases, "\\n(" , item , ')');
+    nameWithAliases = cmStrCat(std::move(nameWithAliases), "\\n(" , item , ')');
   }
 
   return nameWithAliases;

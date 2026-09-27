@@ -1553,10 +1553,11 @@ bool cmFindPackageCommand::FindModule(bool& found)
     moduleFileName, system, this->DebugModeEnabled(), debugBuffer);
   if (this->DebugModeEnabled()) {
     if (mfile.empty()) {
-      debugBuffer = cmStrCat(debugBuffer, "The file was not found.\n");
-    } else {
       debugBuffer =
-        cmStrCat(debugBuffer, "The file was found at\n  ", mfile, '\n');
+        cmStrCat(std::move(debugBuffer), "The file was not found.\n");
+    } else {
+      debugBuffer = cmStrCat(std::move(debugBuffer),
+                             "The file was found at\n  ", mfile, '\n');
     }
     this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
@@ -2536,7 +2537,7 @@ void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
   // And now the general CMake environment variables
   paths.AddEnvPath("CMAKE_PREFIX_PATH");
   if (this->DebugModeEnabled()) {
-    debugBuffer = cmStrCat(debugBuffer,
+    debugBuffer = cmStrCat(std::move(debugBuffer),
                            "CMAKE_PREFIX_PATH env variable "
                            "[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH].\n");
     debugOffset = collectPathsForDebug(debugBuffer, paths, debugOffset);
@@ -2546,7 +2547,7 @@ void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
   paths.AddEnvPath("CMAKE_APPBUNDLE_PATH");
   if (this->DebugModeEnabled()) {
     debugBuffer =
-      cmStrCat(debugBuffer,
+      cmStrCat(std::move(debugBuffer),
                "CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env "
                "variables [CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH].\n");
     collectPathsForDebug(debugBuffer, paths, debugOffset);
@@ -2570,7 +2571,7 @@ void cmFindPackageCommand::FillPrefixesCMakeVariable()
   paths.AddCMakePath("CMAKE_APPBUNDLE_PATH");
   if (this->DebugModeEnabled()) {
     debugBuffer =
-      cmStrCat(debugBuffer,
+      cmStrCat(std::move(debugBuffer),
                "CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables "
                "[CMAKE_FIND_USE_CMAKE_PATH].\n");
     collectPathsForDebug(debugBuffer, paths, debugOffset);

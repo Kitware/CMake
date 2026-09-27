@@ -278,9 +278,9 @@ void cmCTestLaunchReporter::DumpFileToXML(cmXMLElement& e3, char const* tag,
       continue;
     }
     if (this->Match(line, this->RegexWarningSuppress)) {
-      line = cmStrCat("[CTest: warning suppressed] ", line);
+      line = cmStrCat("[CTest: warning suppressed] ", std::move(line));
     } else if (this->Match(line, this->RegexWarning)) {
-      line = cmStrCat("[CTest: warning matched] ", line);
+      line = cmStrCat("[CTest: warning matched] ", std::move(line));
     }
     e4.Content(sep);
     e4.Content(line);

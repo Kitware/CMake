@@ -184,7 +184,7 @@ std::vector<std::string> GetPkgConfSysCflags(cmMakefile& mf)
       std::string tmp;
       cmSystemTools::GetEnv(var, tmp);
       if (!tmp.empty()) {
-        paths = cmStrCat(paths, ';', tmp);
+        paths = cmStrCat(std::move(paths), ';', tmp);
       }
     }
   };
@@ -667,7 +667,7 @@ cm::optional<cmPkgConfigResolver> ImportPackage(
     if (!state.err) {
       std::string req_str = cmStrCat('\'', reqs.begin()->parent, '\'');
       for (auto it = reqs.begin() + 1; it != reqs.end(); ++it) {
-        req_str = cmStrCat(req_str, ", '", it->parent, '\'');
+        req_str = cmStrCat(std::move(req_str), ", '", it->parent, '\'');
       }
       warn_or_error(cmStrCat("Could not find pkg-config: '", package,
                              "' required by: ", req_str),

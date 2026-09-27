@@ -518,8 +518,8 @@ void TryRunCommandImpl::DoNotRunExecutable(
                "appropriately:\n   ",
                this->RunResultVariable, " (advanced)\n");
     if (out) {
-      errorMessage =
-        cmStrCat(errorMessage, "   ", internalRunOutputName, " (advanced)\n");
+      errorMessage = cmStrCat(std::move(errorMessage), "   ",
+                              internalRunOutputName, " (advanced)\n");
     }
     errorMessage += detailsString;
     cmSystemTools::Error(errorMessage);
