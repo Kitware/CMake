@@ -542,7 +542,10 @@ public:
           if (!lff.Arguments().empty()) {
             std::string args;
             for (auto const& a : lff.Arguments()) {
-              args = cmStrCat(args, args.empty() ? "" : " ", a.Value);
+              args = cmStrCat(std::move(args), a.Value, ' ');
+            }
+            if (!args.empty()) {
+              args.pop_back();
             }
             argsValue["functionArgs"] = args;
           }

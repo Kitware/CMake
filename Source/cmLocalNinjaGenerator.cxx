@@ -918,16 +918,17 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
 
   std::string output;
   std::vector<std::string> const& outputs = ccg.GetOutputs();
-  for (size_t i = 0; i < outputs.size(); ++i) {
-    output = cmStrCat(output,
-                      this->ConvertToOutputFormat(
-                        ccg.GetWorkingDirectory().empty()
-                          ? this->MaybeRelativeToCurBinDir(outputs[i])
-                          : outputs[i],
-                        cmOutputConverter::SHELL));
-    if (i != outputs.size() - 1) {
-      output = cmStrCat(output, ',');
-    }
+  for (std::string const& ccgOut : outputs) {
+    output = cmStrCat(
+      std::move(output),
+      this->ConvertToOutputFormat(ccg.GetWorkingDirectory().empty()
+                                    ? this->MaybeRelativeToCurBinDir(ccgOut)
+                                    : ccgOut,
+                                  cmOutputConverter::SHELL),
+      ',');
+  }
+  if (!output.empty()) {
+    output.pop_back();
   }
   vars.Output = output.c_str();
 
