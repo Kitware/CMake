@@ -4080,6 +4080,31 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
   }
 } deviceLinkNode;
 
+static const struct GlobalPropertyNode : public cmGeneratorExpressionNode
+{
+  GlobalPropertyNode() {} // NOLINT(modernize-use-equals-default)
+
+  // This node handles errors on parameter count itself.
+  int NumExpectedParameters() const override { return 1; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagCheckerParent*/) const override
+  {
+    auto const& propertyName = parameters[0];
+
+    if (propertyName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<GLOBAL_PROPERTY:property> expression requires a "
+                  "non-empty property name.");
+      return std::string{};
+    }
+    cmake* cm = eval->Context.LG->GetCMakeInstance();
+    return cm->GetState()->GetGlobalProperty(propertyName);
+  }
+} globalPropertyNode;
+
 namespace {
 bool GetFileSet(std::vector<std::string> const& parameters,
                 cm::GenEx::Evaluation* eval,
@@ -6538,6 +6563,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "COMMA", &commaNode },
     { "SEMICOLON", &semicolonNode },
     { "QUOTE", &quoteNode },
+    { "GLOBAL_PROPERTY", &globalPropertyNode },
     { "RULE_PROPERTY", &rulePropertyNode },
     { "SOURCE_EXISTS", &sourceExistsNode },
     { "SOURCE_PROPERTY", &sourcePropertyNode },

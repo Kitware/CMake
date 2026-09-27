@@ -1449,6 +1449,19 @@ Configuration Expressions
   in ``...`` are evaluated using the custom command's "command config".
   With other generators, the content of ``...`` is evaluated normally.
 
+Global Expressions
+------------------
+
+Global Properties
+^^^^^^^^^^^^^^^^^
+
+.. genex:: $<GLOBAL_PROPERTY:prop>
+
+  .. versionadded:: 4.5
+
+  Value of the global property ``prop``, or empty if
+  the property is not set.
+
 Rule-Dependent Expressions
 --------------------------
 

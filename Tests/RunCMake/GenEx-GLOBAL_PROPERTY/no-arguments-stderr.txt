@@ -1,0 +1,8 @@
+CMake Error at no-arguments\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<GLOBAL_PROPERTY>
+
+  \$<GLOBAL_PROPERTY> expression requires exactly one parameter\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
