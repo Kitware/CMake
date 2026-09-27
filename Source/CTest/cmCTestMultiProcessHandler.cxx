@@ -232,8 +232,8 @@ bool cmCTestMultiProcessHandler::ComputeFixtureRepetition()
         cmStrCat("Error: the setup and cleanup tests of fixture \"", fi.first,
                  "\" request conflicting FIXTURE_REPEAT_MODE values:\n");
       for (auto const& r : fixture.RequestedModes) {
-        e += cmStrCat("  \"", this->GetName(r.second), "\" requests ",
-                      FixtureRepeatModeString(r.first), '\n');
+        e = cmStrCat(std::move(e), "  \"", this->GetName(r.second),
+                     "\" requests ", FixtureRepeatModeString(r.first), '\n');
       }
       e += "All setup and cleanup tests of a fixture must request the same "
            "mode.\n";
@@ -263,8 +263,8 @@ bool cmCTestMultiProcessHandler::ComputeFixtureRepetition()
                                "\" takes part in fixtures with conflicting "
                                "FIXTURE_REPEAT_MODE values:\n");
       for (auto const& m : modes) {
-        e += cmStrCat("  fixture \"", m.second, "\" uses ",
-                      FixtureRepeatModeString(m.first), '\n');
+        e = cmStrCat(std::move(e), "  fixture \"", m.second, "\" uses ",
+                     FixtureRepeatModeString(m.first), '\n');
       }
       e += "Fixtures that share a test must use the same mode.\n";
       cmCTestLog(this->CTest, ERROR_MESSAGE, e);

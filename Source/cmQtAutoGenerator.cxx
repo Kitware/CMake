@@ -3,6 +3,7 @@
 #include "cmQtAutoGenerator.h"
 
 #include <iterator>
+#include <utility>
 
 #include <cm3p/json/reader.h>
 
@@ -105,9 +106,10 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
   std::string msg = cmStrCat(
     '\n', HeadLine(cmStrCat(GeneratorName(genType), " subprocess error")),
     message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
-  msg += cmStrCat(HeadLine("Command"), QuotedCommand(command), "\n\n");
-  msg += cmStrCat(HeadLine("Output"), output,
-                  cmHasSuffix(output, '\n') ? "\n" : "\n\n");
+  msg = cmStrCat(std::move(msg), HeadLine("Command"), QuotedCommand(command),
+                 "\n\n");
+  msg = cmStrCat(std::move(msg), HeadLine("Output"), output,
+                 cmHasSuffix(output, '\n') ? "\n" : "\n\n");
   {
     std::lock_guard<std::mutex> lock(this->Mutex_);
     cmSystemTools::Stderr(msg);

@@ -3819,7 +3819,7 @@ void cmLocalGenerator::AppendWarningAsErrorLinkerFlags(
   std::string errorMessage;
   for (auto const& option : wErrorOptions) {
     if (option != "DRIVER"_s && option != "LINKER"_s) {
-      errorMessage += cmStrCat("  ", option, '\n');
+      errorMessage = cmStrCat(std::move(errorMessage), "  ", option, '\n');
       continue;
     }
 

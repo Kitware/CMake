@@ -317,12 +317,12 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
   if ((rootDef || rootEnv) && this->WarnedCMP0074.insert(rootVar).second) {
     std::string e;
     if (rootDef) {
-      e += cmStrCat("CMake variable ", rootVar, " is set to:\n  ", *rootDef,
-                    '\n');
+      e = cmStrCat(std::move(e), "CMake variable ", rootVar, " is set to:\n  ",
+                   *rootDef, '\n');
     }
     if (rootEnv) {
-      e += cmStrCat("Environment variable ", rootVar, " is set to:\n  ",
-                    *rootEnv, '\n');
+      e = cmStrCat(std::move(e), "Environment variable ", rootVar,
+                   " is set to:\n  ", *rootEnv, '\n');
     }
     e += "For compatibility, CMake is ignoring the variable.";
     this->IssuePolicyWarning(cmPolicies::CMP0074, {}, e);
@@ -336,12 +336,12 @@ void cmMakefile::MaybeWarnCMP0144(std::string const& rootVar, cmValue rootDef,
   if ((rootDef || rootEnv) && this->WarnedCMP0144.insert(rootVar).second) {
     std::string e;
     if (rootDef) {
-      e += cmStrCat("CMake variable ", rootVar, " is set to:\n  ", *rootDef,
-                    '\n');
+      e = cmStrCat(std::move(e), "CMake variable ", rootVar, " is set to:\n  ",
+                   *rootDef, '\n');
     }
     if (rootEnv) {
-      e += cmStrCat("Environment variable ", rootVar, " is set to:\n  ",
-                    *rootEnv, '\n');
+      e = cmStrCat(std::move(e), "Environment variable ", rootVar,
+                   " is set to:\n  ", *rootEnv, '\n');
     }
     e += "For compatibility, find_package is ignoring the variable, but "
          "code in a .cmake module might still use it.";
@@ -1186,15 +1186,15 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
     std::string e;
     if (cmTarget const* t = this->FindTargetToUse(target)) {
       if (t->IsImported()) {
-        e += cmStrCat("TARGET '", target,
-                      "' is IMPORTED and does not build here.");
+        e = cmStrCat(std::move(e), "TARGET '", target,
+                     "' is IMPORTED and does not build here.");
       } else {
-        e +=
-          cmStrCat("TARGET '", target, "' was not created in this directory.");
+        e = cmStrCat(std::move(e), "TARGET '", target,
+                     "' was not created in this directory.");
       }
     } else {
-      e += cmStrCat("No TARGET '", target,
-                    "' has been created in this directory.");
+      e = cmStrCat(std::move(e), "No TARGET '", target,
+                   "' has been created in this directory.");
     }
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e, lfbt);
     return nullptr;
@@ -2725,7 +2725,7 @@ void cmMakefile::IssueCMP0219Warning(
     if (!oldArgs.empty()) {
       oldArgs += '\n';
     }
-    oldArgs += cmStrCat(" \"", arg, '"');
+    oldArgs = cmStrCat(std::move(oldArgs), " \"", arg, '"');
   }
 
   std::string newArgs = oldArgs;
@@ -2961,10 +2961,11 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
         if (!openstack.empty() &&
             !(cmsysString_isalnum(inc) || inc == '_' || inc == '/' ||
               inc == '.' || inc == '+' || inc == '-')) {
-          errorstr += cmStrCat("Invalid character ('", inc);
+          errorstr =
+            cmStrCat(std::move(errorstr), "Invalid character ('", inc);
           result.append(last, in - last);
-          errorstr += cmStrCat("') in a variable name: '",
-                               result.substr(openstack.back().loc), '\'');
+          errorstr = cmStrCat(std::move(errorstr), "') in a variable name: '",
+                              result.substr(openstack.back().loc), '\'');
           mtype = MessageType::FATAL_ERROR;
           error = true;
         }
@@ -2986,7 +2987,7 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
       // This filename and line number may be more specific than the
       // command context because one command invocation can have
       // arguments on multiple lines.
-      e += cmStrCat("at\n  ", filename, ':', line, '\n');
+      e = cmStrCat(std::move(e), "at\n  ", filename, ':', line, '\n');
     }
     errorstr = cmStrCat(e, "when parsing string\n  ", source, '\n',
                         std::move(errorstr));

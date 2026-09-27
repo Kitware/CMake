@@ -145,8 +145,8 @@ void cmLinkLineComputer::ComputeLinkPath(
           type = cmStateEnums::ImportLibraryArtifact;
         }
 
-        linkPathNoBT +=
-          cmStrCat(' ', libPathFlag,
+        linkPathNoBT =
+          cmStrCat(std::move(linkPathNoBT), ' ', libPathFlag,
                    this->ConvertToOutputForExisting(
                      item.Target->GetDirectory(cli.GetConfig(), type)),
                    libPathTerminator, ' ');
@@ -210,8 +210,8 @@ std::string cmLinkLineComputer::ComputeFrameworkPath(
 
   std::string frameworkPath;
   for (auto const& fd : cli.GetFrameworkPaths()) {
-    frameworkPath +=
-      cmStrCat(fwSearchFlag, this->ConvertToOutputFormat(fd), ' ');
+    frameworkPath = cmStrCat(std::move(frameworkPath), fwSearchFlag,
+                             this->ConvertToOutputFormat(fd), ' ');
   }
   return frameworkPath;
 }

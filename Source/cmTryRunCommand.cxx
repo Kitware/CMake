@@ -3,6 +3,7 @@
 #include "cmTryRunCommand.h"
 
 #include <stdexcept>
+#include <utility>
 
 #include <cm/optional>
 #include <cmext/string_view>
@@ -273,7 +274,8 @@ void TryRunCommandImpl::RunExecutable(std::string const& runArgs,
     this->Makefile->GetSafeDefinition("CMAKE_CROSSCOMPILING_EMULATOR");
   if (!emulator.empty()) {
     cmList emulatorWithArgs{ emulator };
-    finalCommand += cmStrCat(
+    finalCommand = cmStrCat(
+      std::move(finalCommand),
       cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0]), ' ',
       cmWrap("\"", cmMakeRange(emulatorWithArgs).advance(1), "\"", " "), ' ');
   }
@@ -444,8 +446,8 @@ void TryRunCommandImpl::DoNotRunExecutable(
                  "enter \"FAILED_TO_RUN\".\n");
       if (stdOut || stdErr) {
         if (stdOut) {
-          comment += cmStrCat(
-            internalRunOutputStdOutName,
+          comment = cmStrCat(
+            std::move(comment), internalRunOutputStdOutName,
             "\n   contains the text the executable would have printed on "
             "stdout.\n"
             "   If the executable would not have been able to run, set ",
@@ -457,8 +459,8 @@ void TryRunCommandImpl::DoNotRunExecutable(
             "called with the given arguments.\n");
         }
         if (stdErr) {
-          comment += cmStrCat(
-            internalRunOutputStdErrName,
+          comment = cmStrCat(
+            std::move(comment), internalRunOutputStdErrName,
             "\n   contains the text the executable would have printed on "
             "stderr.\n"
             "   If the executable would not have been able to run, set ",
@@ -470,8 +472,8 @@ void TryRunCommandImpl::DoNotRunExecutable(
             "called with the given arguments.\n");
         }
       } else if (out) {
-        comment += cmStrCat(
-          internalRunOutputName,
+        comment = cmStrCat(
+          std::move(comment), internalRunOutputName,
           "\n   contains the text the executable would have printed on stdout "
           "and stderr.\n"
           "   If the executable would not have been able to run, set ",
@@ -483,19 +485,20 @@ void TryRunCommandImpl::DoNotRunExecutable(
           "called with the given arguments.\n");
       }
 
-      comment +=
-        cmStrCat("The ", compileResultVariable,
+      comment =
+        cmStrCat(std::move(comment), "The ", compileResultVariable,
                  " variable holds the build result for this try_run().\n\n");
       if (srcFile) {
-        comment += cmStrCat("Source file   : ", *srcFile, '\n');
+        comment =
+          cmStrCat(std::move(comment), "Source file   : ", *srcFile, '\n');
       }
-      comment += cmStrCat("Executable    : ", copyDest,
-                          "\n"
-                          "Run arguments : ",
-                          runArgs,
-                          "\n"
-                          "   Called from: ",
-                          this->Makefile->FormatListFileStack());
+      comment = cmStrCat(std::move(comment), "Executable    : ", copyDest,
+                         "\n"
+                         "Run arguments : ",
+                         runArgs,
+                         "\n"
+                         "   Called from: ",
+                         this->Makefile->FormatListFileStack());
       cmsys::SystemTools::ReplaceString(comment, "\n", "\n# ");
       file << comment << "\n\n";
 

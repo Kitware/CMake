@@ -2726,7 +2726,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       std::set<std::string> defines(targetSwiftDefines.begin(),
                                     targetSwiftDefines.end());
       this->CurrentLocalGenerator->JoinDefines(defines, defineString, "Swift");
-      cflags["Swift"] += cmStrCat(' ', defineString);
+      cflags["Swift"] =
+        cmStrCat(std::move(cflags["Swift"]), ' ', defineString);
     } else {
       BuildObjectListOrString swiftDefs(this, true);
       this->AppendDefines(swiftDefs, targetSwiftDefines);
@@ -3108,7 +3109,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         includes, gtgt, language, configName);
 
       if (!includeFlags.empty()) {
-        cflags[language] += cmStrCat(' ', includeFlags);
+        cflags[language] =
+          cmStrCat(std::move(cflags[language]), ' ', includeFlags);
       }
     }
   }

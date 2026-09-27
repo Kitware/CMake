@@ -107,7 +107,7 @@ int cmCPackGenerator::PrepareNames()
   {
     cmValue toplevelTag = this->GetOption("CPACK_TOPLEVEL_TAG");
     if (toplevelTag) {
-      topDirectory += cmStrCat(toplevelTag, '/');
+      topDirectory = cmStrCat(std::move(topDirectory), toplevelTag, '/');
     }
   }
   topDirectory += *this->GetOption("CPACK_GENERATOR");

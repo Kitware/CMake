@@ -154,7 +154,8 @@ void Tree::BuildVirtualFolder(cmXMLWriter& xml) const
 void Tree::BuildVirtualFolderImpl(std::string& virtualFolders,
                                   std::string const& prefix) const
 {
-  virtualFolders += cmStrCat("CMake Files\\", prefix, this->path, "\\;");
+  virtualFolders = cmStrCat(std::move(virtualFolders), "CMake Files\\", prefix,
+                            this->path, "\\;");
   for (Tree const& folder : this->folders) {
     folder.BuildVirtualFolderImpl(virtualFolders,
                                   cmStrCat(prefix, this->path, '\\'));

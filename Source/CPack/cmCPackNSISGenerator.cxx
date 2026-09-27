@@ -131,11 +131,13 @@ int cmCPackNSISGenerator::PackageFiles()
     std::string installerIconCode;
     if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_MUI_ICON")) {
       std::string iconFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
-      installerIconCode += cmStrCat("!define MUI_ICON ", iconFile, '\n');
+      installerIconCode = cmStrCat(std::move(installerIconCode),
+                                   "!define MUI_ICON ", iconFile, '\n');
     }
     if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_MUI_UNIICON")) {
       std::string iconFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
-      installerIconCode += cmStrCat("!define MUI_UNICON ", iconFile, '\n');
+      installerIconCode = cmStrCat(std::move(installerIconCode),
+                                   "!define MUI_UNICON ", iconFile, '\n');
     }
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
@@ -739,7 +741,8 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
 
   std::string const componentOutputDir =
     this->CustomComponentInstallDirectory(component->Name);
-  componentCode += cmStrCat("  SetOutPath \"", componentOutputDir, "\"\n");
+  componentCode = cmStrCat(std::move(componentCode), "  SetOutPath \"",
+                           componentOutputDir, "\"\n");
 
   // Create the actual installation commands
   if (component->IsDownloaded) {

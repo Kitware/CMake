@@ -347,10 +347,10 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
       error =
         cmStrCat("The rcc list process failed for ", Quoted(qrcFile), '\n');
       if (!rccStdOut.empty()) {
-        error += cmStrCat(rccStdOut, '\n');
+        error = cmStrCat(std::move(error), rccStdOut, '\n');
       }
       if (!rccStdErr.empty()) {
-        error += cmStrCat(rccStdErr, '\n');
+        error = cmStrCat(std::move(error), rccStdErr, '\n');
       }
       return false;
     }

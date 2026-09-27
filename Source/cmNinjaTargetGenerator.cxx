@@ -555,7 +555,7 @@ std::string cmNinjaTargetGenerator::GetTargetFilePath(
   if (path.empty() || path == ".") {
     return name;
   }
-  path += cmStrCat('/', name);
+  path = cmStrCat(std::move(path), '/', name);
   return path;
 }
 
@@ -920,7 +920,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
     // source if that was performed).
     std::string ddModmapArg;
     if (!modmapFormat.empty()) {
-      ddModmapArg += cmStrCat(" --modmapfmt=", modmapFormat);
+      ddModmapArg =
+        cmStrCat(std::move(ddModmapArg), " --modmapfmt=", modmapFormat);
     }
     {
       std::vector<std::string> ddCmds;
@@ -984,7 +985,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
     if (!depfileFlags.empty()) {
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    depfileFlags, vars);
-      flags += cmStrCat(' ', depfileFlags);
+      flags = cmStrCat(std::move(flags), ' ', depfileFlags);
     }
   }
 
@@ -993,7 +994,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
       mf->GetRequiredDefinition(cmStrCat("CMAKE_", lang, "_MODULE_MAP_FLAG"));
     cmSystemTools::ReplaceString(modmapFlags, "<MODULE_MAP_FILE>",
                                  "$DYNDEP_MODULE_MAP_FILE");
-    flags += cmStrCat(' ', modmapFlags);
+    flags = cmStrCat(std::move(flags), ' ', modmapFlags);
   }
 
   vars.Flags = flags.c_str();
@@ -2614,7 +2615,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
       // corresponding file path.
       cmSystemTools::ReplaceString(modmapFlags, "<MODULE_MAP_FILE>",
                                    cmStrCat(objectFileName, ".modmap"));
-      fullFlags += cmStrCat(' ', modmapFlags);
+      fullFlags = cmStrCat(std::move(fullFlags), ' ', modmapFlags);
     }
   }
 

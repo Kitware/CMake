@@ -278,14 +278,16 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
     // Write explicit dependencies.
     for (std::string const& explicitDep : build.ExplicitDeps) {
-      arguments += cmStrCat(' ', this->EncodePath(explicitDep));
+      arguments =
+        cmStrCat(std::move(arguments), ' ', this->EncodePath(explicitDep));
     }
 
     // Write implicit dependencies.
     if (!build.ImplicitDeps.empty()) {
       arguments += " |";
       for (std::string const& implicitDep : build.ImplicitDeps) {
-        arguments += cmStrCat(' ', this->EncodePath(implicitDep));
+        arguments =
+          cmStrCat(std::move(arguments), ' ', this->EncodePath(implicitDep));
       }
     }
 
@@ -293,7 +295,8 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     if (!build.OrderOnlyDeps.empty()) {
       arguments += " ||";
       for (std::string const& orderOnlyDep : build.OrderOnlyDeps) {
-        arguments += cmStrCat(' ', this->EncodePath(orderOnlyDep));
+        arguments =
+          cmStrCat(std::move(arguments), ' ', this->EncodePath(orderOnlyDep));
       }
     }
 
@@ -3313,7 +3316,7 @@ void cmGlobalNinjaGenerator::AppendDirectoryForConfig(
   std::string const& suffix, std::string& dir)
 {
   if (!config.empty() && this->IsMultiConfig()) {
-    dir += cmStrCat(prefix, config, suffix);
+    dir = cmStrCat(std::move(dir), prefix, config, suffix);
   }
 }
 

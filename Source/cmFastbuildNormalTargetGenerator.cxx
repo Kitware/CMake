@@ -435,8 +435,8 @@ void cmFastbuildNormalTargetGenerator::ApplyLWYUToLinkerCommand(
     std::string args = " -E __run_co_compile --lwyu=";
     args += this->GetLocalGenerator()->EscapeForShell(*lwyuCheck);
 
-    args += cmStrCat(
-      " --source=",
+    args = cmStrCat(
+      std::move(args), " --source=",
       this->ConvertToFastbuildPath(this->GetGeneratorTarget()->GetFullPath(
         Config, cmStateEnums::RuntimeBinaryArtifact,
         /*realname=*/true)));
@@ -1946,7 +1946,7 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
          ? FASTBUILD_OBJECTS_ALIAS_POSTFIX
          : FASTBUILD_LINK_ARTIFACTS_ALIAS_POSTFIX);
     if (!linkerNode.Arch.empty()) {
-      dep += cmStrCat('-', linkerNode.Arch);
+      dep = cmStrCat(std::move(dep), '-', linkerNode.Arch);
     }
     // If we have a special way of linking the dep, we can't have it in
     // ".Libraries" (since there might be multiple such deps, but
@@ -2252,8 +2252,9 @@ void cmFastbuildNormalTargetGenerator::AddLipoCommand(FastbuildTarget& target)
   for (auto const& ArchSpecificTarget : target.LinkerNode) {
     exec.ExecInput.emplace_back(ArchSpecificTarget.LinkerOutput);
   }
-  exec.ExecArguments += cmStrCat("-create -output ", target.RealOutput, ' ',
-                                 cmJoin(exec.ExecInput, " "));
+  exec.ExecArguments =
+    cmStrCat(std::move(exec.ExecArguments), "-create -output ",
+             target.RealOutput, ' ', cmJoin(exec.ExecInput, " "));
   target.PostBuildExecNodes.Alias.PreBuildDependencies.emplace(
     exec.ExecOutput);
   target.PostBuildExecNodes.Nodes.emplace_back(std::move(exec));
@@ -2375,8 +2376,9 @@ void cmFastbuildNormalTargetGenerator::GenerateLink(
     this->GetGlobalGenerator()->AddFileToClean(linkerNode.LinkerOutput);
     target.RealOutput = targetOutputReal;
     if (!arch.empty()) {
-      linkerNode.Name += cmStrCat('-', arch);
-      linkerNode.LinkerOutput += cmStrCat('.', arch);
+      linkerNode.Name = cmStrCat(std::move(linkerNode.Name), '-', arch);
+      linkerNode.LinkerOutput =
+        cmStrCat(std::move(linkerNode.LinkerOutput), '.', arch);
       linkerNode.Arch = arch;
     }
     linkerNode.Linker = executable;

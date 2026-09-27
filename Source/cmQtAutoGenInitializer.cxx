@@ -961,7 +961,7 @@ bool cmQtAutoGenInitializer::InitRcc()
             this->GenTarget->GetSafeProperty(kw.AUTORCC_OPTIONS);
           std::string const nozstd = "--no-zstd";
           if (rccOptions.find(nozstd) == std::string::npos) {
-            rccOptions.append(cmStrCat(';', nozstd, ';'));
+            rccOptions = cmStrCat(std::move(rccOptions), ';', nozstd, ';');
           }
           this->GenTarget->Target->SetProperty(kw.AUTORCC_OPTIONS, rccOptions);
         }
@@ -1251,7 +1251,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       }
       std::string files;
       for (MUFile const* muf : this->AutogenTarget.FilesGenerated) {
-        files += cmStrCat("  ", Quoted(muf->FullPath), '\n');
+        files = cmStrCat(std::move(files), "  ", Quoted(muf->FullPath), '\n');
       }
       this->Makefile->IssuePolicyWarning(
         cmPolicies::CMP0071, {},
@@ -1281,7 +1281,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     }
     std::string files;
     for (cmSourceFile const* sf : this->AutogenTarget.CMP0100HeadersWarn) {
-      files += cmStrCat("  ", Quoted(sf->GetFullPath()), '\n');
+      files =
+        cmStrCat(std::move(files), "  ", Quoted(sf->GetFullPath()), '\n');
     }
     this->Makefile->IssuePolicyWarning(
       cmPolicies::CMP0100, {},
@@ -1349,7 +1350,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         // Replace '-' with '_'. The former is not valid for symbol names.
         std::replace(name.begin(), name.end(), '-', '_');
         if (!qrc.Unique) {
-          name += cmStrCat('_', qrc.QrcPathChecksum);
+          name = cmStrCat(std::move(name), '_', qrc.QrcPathChecksum);
         }
         std::vector<std::string> nameOpts;
         nameOpts.emplace_back("-name");
@@ -1899,7 +1900,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
       {
         ccName = cmStrCat(this->GenTarget->GetName(), "_arcc_", qrc.QrcName);
         if (!qrc.Unique) {
-          ccName += cmStrCat('_', qrc.QrcPathChecksum);
+          ccName = cmStrCat(std::move(ccName), '_', qrc.QrcPathChecksum);
         }
 
         cc->SetByproducts(ccOutput);

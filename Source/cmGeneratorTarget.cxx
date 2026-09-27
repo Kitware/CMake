@@ -2900,7 +2900,8 @@ void cmGeneratorTarget::AddISPCTargetFlags(std::string& flags) const
   if (compiler == "Intel") {
     cmList targets(arch);
     if (!targets.empty()) {
-      flags += cmStrCat(" --target=", cmWrap("", targets, "", ","));
+      flags =
+        cmStrCat(std::move(flags), " --target=", cmWrap("", targets, "", ","));
     }
   }
 }

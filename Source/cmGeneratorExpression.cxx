@@ -213,7 +213,7 @@ static std::string extractAllGeneratorExpressions(
     }
     std::string::size_type const traversed = (c - cStart) + 1;
     if (!*c) {
-      result += cmStrCat("$<", input.substr(pos, traversed));
+      result = cmStrCat(std::move(result), "$<", input.substr(pos, traversed));
     }
     pos += traversed;
     lastPos = pos;

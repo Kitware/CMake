@@ -3557,7 +3557,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       if (!clrString.empty()) {
         clrString = cmStrCat(':', std::move(clrString));
       }
-      flags += cmStrCat(" /clr", clrString);
+      flags = cmStrCat(std::move(flags), " /clr", clrString);
     }
   }
 

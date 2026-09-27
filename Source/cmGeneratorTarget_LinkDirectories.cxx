@@ -76,7 +76,8 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
       if (uniqueDirectories.insert(entryDirectory).second) {
         directories.emplace_back(entryDirectory, entry.Backtrace);
         if (debugDirectories) {
-          usedDirectories += cmStrCat(" * ", entryDirectory, '\n');
+          usedDirectories =
+            cmStrCat(std::move(usedDirectories), " * ", entryDirectory, '\n');
         }
       }
     }

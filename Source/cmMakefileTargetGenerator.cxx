@@ -1174,17 +1174,18 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         // compiler must be launched through a wrapper to pick-up dependencies
         std::string depFilter =
           "$(CMAKE_COMMAND) -E cmake_cl_compile_depends ";
-        depFilter += cmStrCat("--dep-file=", shellDependencyFile);
-        depFilter +=
-          cmStrCat(" --working-dir=",
+        depFilter =
+          cmStrCat(std::move(depFilter), "--dep-file=", shellDependencyFile);
+        depFilter =
+          cmStrCat(std::move(depFilter), " --working-dir=",
                    this->LocalGenerator->ConvertToOutputFormat(
                      this->LocalGenerator->GetCurrentBinaryDirectory(),
                      cmOutputConverter::SHELL));
         auto const& prefix = this->Makefile->GetSafeDefinition(
           cmStrCat("CMAKE_", lang, "_CL_SHOWINCLUDES_PREFIX"));
-        depFilter += cmStrCat(" --filter-prefix=",
-                              this->LocalGenerator->ConvertToOutputFormat(
-                                prefix, cmOutputConverter::SHELL));
+        depFilter = cmStrCat(std::move(depFilter), " --filter-prefix=",
+                             this->LocalGenerator->ConvertToOutputFormat(
+                               prefix, cmOutputConverter::SHELL));
         depFilter += " -- ";
         compileCommands.front().insert(0, depFilter);
       }
@@ -1698,7 +1699,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
     std::string const cubin =
       cmStrCat(objectDir, "sm_", architecture, ".cubin");
 
-    profiles += cmStrCat(" -im=profile=sm_", architecture, ",file=", cubin);
+    profiles = cmStrCat(std::move(profiles), " -im=profile=sm_", architecture,
+                        ",file=", cubin);
     fatbinaryDepends.emplace_back(cubin);
 
     std::string command = cmStrCat(
@@ -2310,8 +2312,9 @@ void cmMakefileTargetGenerator::CreateObjectLists(
       std::string objects_rsp = this->CreateResponseFile(
         responseFileName, object_strings[i], makefile_depends, linkLanguage);
 
-      buildObjs +=
-        cmStrCat(sep, // Separate from previous response file references.
+      buildObjs =
+        cmStrCat(std::move(buildObjs),
+                 sep, // Separate from previous response file references.
                  responseFlag, // Reference the response file.
                  this->LocalGenerator->ConvertToOutputFormat(
                    objects_rsp, cmOutputConverter::SHELL));

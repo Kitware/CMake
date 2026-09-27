@@ -957,7 +957,7 @@ void cmCTestRunTest::SetupResourcesEnvironment(cmEnvironment& env)
           var += ';';
         }
         firstName = false;
-        var += cmStrCat("id:", it2.Id, ",slots:", it2.Slots);
+        var = cmStrCat(std::move(var), "id:", it2.Id, ",slots:", it2.Slots);
       }
       env.PutEnv(var);
     }

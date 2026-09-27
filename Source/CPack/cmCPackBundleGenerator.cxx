@@ -233,11 +233,12 @@ int cmCPackBundleGenerator::SignBundle(std::string const& src_dir)
       cmStrCat(this->GetOption("CPACK_COMMAND_CODESIGN"), ' ', sign_parameter,
                " -s \"", cpack_apple_cert_app, '"');
     if (this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS")) {
-      temp_codesign_cmd +=
-        cmStrCat(" --entitlements ",
+      temp_codesign_cmd =
+        cmStrCat(std::move(temp_codesign_cmd), " --entitlements ",
                  this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS"));
     }
-    temp_codesign_cmd += cmStrCat(" \"", bundle_path, '"');
+    temp_codesign_cmd =
+      cmStrCat(std::move(temp_codesign_cmd), " \"", bundle_path, '"');
 
     if (!this->RunCommand(temp_codesign_cmd, &output)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,

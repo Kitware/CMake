@@ -440,7 +440,7 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
   scriptPath += '/';
   scriptPath += customStep;
   if (this->GlobalGenerator->IsMultiConfig()) {
-    scriptPath += cmStrCat('-', commandConfig);
+    scriptPath = cmStrCat(std::move(scriptPath), '-', commandConfig);
   }
 #ifdef _WIN32
   scriptPath += ".bat";

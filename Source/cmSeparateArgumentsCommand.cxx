@@ -3,6 +3,7 @@
 #include "cmSeparateArgumentsCommand.h"
 
 #include <algorithm>
+#include <utility>
 
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -116,7 +117,7 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
     }
 
     if (!program.empty()) {
-      program += cmStrCat(';', programArgs);
+      program = cmStrCat(std::move(program), ';', programArgs);
     }
 
     status.GetMakefile().AddDefinition(var, program);

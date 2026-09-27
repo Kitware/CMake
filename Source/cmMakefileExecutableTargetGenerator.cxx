@@ -618,7 +618,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
             cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
           " -E __run_co_compile --lwyu=");
         cmakeCommand += this->LocalGenerator->EscapeForShell(*lwyuCheck);
-        cmakeCommand += cmStrCat(" --source=", targetOutPathReal);
+        cmakeCommand =
+          cmStrCat(std::move(cmakeCommand), " --source=", targetOutPathReal);
         real_link_commands.push_back(std::move(cmakeCommand));
       }
     }

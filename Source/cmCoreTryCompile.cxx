@@ -708,7 +708,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     std::string projectLangs;
     for (std::string const& li : testLangs) {
-      projectLangs += cmStrCat(' ', li);
+      projectLangs = cmStrCat(std::move(projectLangs), ' ', li);
       std::string rulesOverrideBase = "CMAKE_USER_MAKE_RULES_OVERRIDE";
       std::string rulesOverrideLang = cmStrCat(rulesOverrideBase, '_', li);
       if (cmValue rulesOverridePath =
@@ -1090,7 +1090,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (arguments.LinkLibraries) {
       std::string libsToLink = " ";
       for (std::string const& i : *arguments.LinkLibraries) {
-        libsToLink += cmStrCat('"', cmTrimWhitespace(i), "\" ");
+        libsToLink =
+          cmStrCat(std::move(libsToLink), '"', cmTrimWhitespace(i), "\" ");
       }
       fprintf(fout, "target_link_libraries(%s %s)\n", targetName.c_str(),
               libsToLink.c_str());

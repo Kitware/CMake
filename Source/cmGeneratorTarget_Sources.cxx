@@ -161,7 +161,7 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
       if (uniqueSrcs.insert(src).second) {
         srcs.emplace_back(src, entry.Backtrace);
         if (debugSources) {
-          usedSources += cmStrCat(" * ", src, '\n');
+          usedSources = cmStrCat(std::move(usedSources), " * ", src, '\n');
         }
       } else {
         auto const& fileSets =

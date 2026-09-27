@@ -1110,18 +1110,18 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
     if (setupRegExp.empty()) {
       setupRegExp = this->TestOptions.ExcludeFixtureSetupRegularExpression;
     } else {
-      setupRegExp.append(
-        cmStrCat('(', setupRegExp, ")|(",
-                 this->TestOptions.ExcludeFixtureSetupRegularExpression, ')'));
+      setupRegExp =
+        cmStrCat(setupRegExp, '(', setupRegExp, ")|(",
+                 this->TestOptions.ExcludeFixtureSetupRegularExpression, ')');
     }
   }
   if (!this->TestOptions.ExcludeFixtureCleanupRegularExpression.empty()) {
     if (cleanupRegExp.empty()) {
       cleanupRegExp = this->TestOptions.ExcludeFixtureCleanupRegularExpression;
     } else {
-      cleanupRegExp.append(cmStrCat(
-        '(', cleanupRegExp, ")|(",
-        this->TestOptions.ExcludeFixtureCleanupRegularExpression, ')'));
+      cleanupRegExp = cmStrCat(
+        cleanupRegExp, '(', cleanupRegExp, ")|(",
+        this->TestOptions.ExcludeFixtureCleanupRegularExpression, ')');
     }
   }
   cmsys::RegularExpression excludeSetupRegex(setupRegExp);

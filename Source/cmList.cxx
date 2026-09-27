@@ -1139,7 +1139,7 @@ std::string& cmList::append(std::string& list, std::string&& value)
   if (list.empty()) {
     list = std::move(value);
   } else {
-    list += cmStrCat(cmList::element_separator, value);
+    list = cmStrCat(std::move(list), cmList::element_separator, value);
   }
 
   return list;

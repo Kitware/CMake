@@ -1576,7 +1576,8 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::RegisterIncluded(
       std::string files =
         cmStrCat("  ", this->MessagePath(includerFileHandle->FileName), '\n');
       for (auto const& item : handle->IncluderFiles) {
-        files += cmStrCat("  ", this->MessagePath(item->FileName), '\n');
+        files = cmStrCat(std::move(files), "  ",
+                         this->MessagePath(item->FileName), '\n');
       }
       this->LogError(
         GenT::MOC,
@@ -1772,7 +1773,8 @@ bool cmQtAutoMocUicT::JobEvalCacheUicT::RegisterMapping(
       std::string files =
         cmStrCat("  ", this->MessagePath(includerFileHandle->FileName), '\n');
       for (auto const& item : handle->IncluderFiles) {
-        files += cmStrCat("  ", this->MessagePath(item->FileName), '\n');
+        files = cmStrCat(std::move(files), "  ",
+                         this->MessagePath(item->FileName), '\n');
       }
       this->LogError(
         GenT::UIC,
@@ -2194,7 +2196,8 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
     if (!this->Mapping->IncluderFiles.empty()) {
       includers = "included by\n";
       for (auto const& item : this->Mapping->IncluderFiles) {
-        includers += cmStrCat("  ", this->MessagePath(item->FileName), '\n');
+        includers = cmStrCat(std::move(includers), "  ",
+                             this->MessagePath(item->FileName), '\n');
       }
     }
     this->LogCommandError(GenT::MOC,
@@ -2265,7 +2268,8 @@ void cmQtAutoMocUicT::JobCompileUicT::Process()
     // Uic command failed
     std::string includers;
     for (auto const& item : this->Mapping->IncluderFiles) {
-      includers += cmStrCat("  ", this->MessagePath(item->FileName), '\n');
+      includers = cmStrCat(std::move(includers), "  ",
+                           this->MessagePath(item->FileName), '\n');
     }
     this->LogCommandError(GenT::UIC,
                           cmStrCat("The uic process failed to compile\n  ",
@@ -3069,7 +3073,7 @@ bool cmQtAutoMocUicT::SettingsFileWrite()
       auto SettingAppend = [&content](cm::string_view key,
                                       cm::string_view value) {
         if (!value.empty()) {
-          content += cmStrCat(key, ':', value, '\n');
+          content = cmStrCat(std::move(content), key, ':', value, '\n');
         }
       };
       SettingAppend("moc", this->SettingsStringMoc_);

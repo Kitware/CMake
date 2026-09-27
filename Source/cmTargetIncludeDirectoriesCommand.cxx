@@ -3,6 +3,7 @@
 #include "cmTargetIncludeDirectoriesCommand.h"
 
 #include <set>
+#include <utility>
 
 #include <cm/optional>
 
@@ -51,9 +52,9 @@ std::string TargetIncludeDirectoriesImpl::Join(
   for (std::string const& it : content) {
     if (cmSystemTools::FileIsFullPath(it) ||
         cmGeneratorExpression::Find(it) == 0) {
-      dirs += cmStrCat(sep, it);
+      dirs = cmStrCat(std::move(dirs), sep, it);
     } else {
-      dirs += cmStrCat(sep, prefix, it);
+      dirs = cmStrCat(std::move(dirs), sep, prefix, it);
     }
     sep = ";";
   }
