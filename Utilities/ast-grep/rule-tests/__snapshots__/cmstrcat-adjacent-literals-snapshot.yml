@@ -168,10 +168,6 @@ snapshots:
       style: secondary
       start: 0
       end: 56
-    - source: _s
-      style: secondary
-      start: 43
-      end: 45
     - source: ','
       style: secondary
       start: 28
@@ -221,10 +217,6 @@ snapshots:
     - source: '"string_view"_s'
       style: primary
       start: 19
-      end: 34
-    - source: _s
-      style: secondary
-      start: 32
       end: 34
     - source: cmStrCat(variable, "string_view"_s, "literal", variable)
       style: secondary
