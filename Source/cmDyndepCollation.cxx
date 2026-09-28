@@ -32,6 +32,7 @@
 #include "cmInstallFileSetGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
@@ -109,12 +110,14 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
     auto files_per_dirs = file_set->GetFiles(context, gt);
 
     Json::Value fs_dest = Json::nullValue;
-    for (auto const& ig : gt->Makefile->GetInstallGenerators()) {
-      if (auto const* fsg =
-            dynamic_cast<cmInstallFileSetGenerator const*>(ig.get())) {
-        if (fsg->GetTarget() == gt && fsg->GetFileSet() == file_set) {
-          fs_dest = fsg->GetDestination(config);
-          continue;
+    // The install rule may be in a different directory than the target.
+    for (auto const& lg : gt->GetGlobalGenerator()->GetLocalGenerators()) {
+      for (auto const& ig : lg->GetMakefile()->GetInstallGenerators()) {
+        if (auto const* fsg =
+              dynamic_cast<cmInstallFileSetGenerator const*>(ig.get())) {
+          if (fsg->GetTarget() == gt && fsg->GetFileSet() == file_set) {
+            fs_dest = fsg->GetDestination(config);
+          }
         }
       }
     }
@@ -229,12 +232,14 @@ Json::Value CollationInformationBmiInstallation(cmGeneratorTarget const* gt,
                                                 std::string const& config)
 {
   cmInstallCxxModuleBmiGenerator const* bmi_gen = nullptr;
-  for (auto const& ig : gt->Makefile->GetInstallGenerators()) {
-    if (auto const* bmig =
-          dynamic_cast<cmInstallCxxModuleBmiGenerator const*>(ig.get())) {
-      if (bmig->GetTarget() == gt) {
-        bmi_gen = bmig;
-        continue;
+  // The install rule may be in a different directory than the target.
+  for (auto const& lg : gt->GetGlobalGenerator()->GetLocalGenerators()) {
+    for (auto const& ig : lg->GetMakefile()->GetInstallGenerators()) {
+      if (auto const* bmig =
+            dynamic_cast<cmInstallCxxModuleBmiGenerator const*>(ig.get())) {
+        if (bmig->GetTarget() == gt) {
+          bmi_gen = bmig;
+        }
       }
     }
   }
