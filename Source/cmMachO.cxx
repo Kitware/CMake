@@ -375,9 +375,12 @@ cmMachO::StringList cmMachO::GetArchitectures() const
       char const* archName = "unknown";
 #if __MAC_OS_X_VERSION_MIN_REQUIRED >= 130000
       if (__builtin_available(macOS 13.0, *)) {
-        archName = (header.CpuType & CPU_TYPE_ARM)
-          ? macho_arch_name_for_cpu_type(header.CpuType, header.CpuSubType)
-          : macho_arch_name_for_cpu_type(header.CpuType, CPU_SUBTYPE_MULTIPLE);
+        if (char const* archNameForCpuType = (header.CpuType & CPU_TYPE_ARM)
+              ? macho_arch_name_for_cpu_type(header.CpuType, header.CpuSubType)
+              : macho_arch_name_for_cpu_type(header.CpuType,
+                                             CPU_SUBTYPE_MULTIPLE)) {
+          archName = archNameForCpuType;
+        }
       } else
 #endif
       {
