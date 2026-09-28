@@ -3,7 +3,6 @@
 #include "cmCommonTargetGenerator.h"
 
 #include <algorithm>
-#include <sstream>
 #include <utility>
 
 #include <cm/filesystem>
@@ -417,9 +416,8 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
                                                   minor, patch);
   if (major > 0 || minor > 0 || patch > 0) {
     // Append the flag since a non-zero version is specified.
-    std::ostringstream vflag;
-    vflag << *flag << major << "." << minor << "." << patch;
-    this->LocalCommonGenerator->AppendFlags(flags, vflag.str());
+    std::string vflag = cmStrCat(*flag, major, '.', minor, '.', patch);
+    this->LocalCommonGenerator->AppendFlags(flags, vflag);
   }
 }
 
@@ -714,8 +712,6 @@ void cmCommonTargetGenerator::ComputeRustFlagsForObjects(
   std::string& linkCrates, std::string& nativeObjects,
   std::vector<std::string> const& objects)
 {
-  std::stringstream rlibsArgs;
-  std::stringstream objectsArgs;
   auto const processObject = [&](std::string const& obj) {
     cm::filesystem::path const objPath(obj);
     if (objPath.extension() == ".rlib") {
@@ -725,18 +721,17 @@ void cmCommonTargetGenerator::ComputeRustFlagsForObjects(
       // common usage in Rust.
       std::string objStem = objPath.stem().string();
       objStem = objStem.substr(3, objStem.length() - 6);
-      rlibsArgs << " --extern=" << objStem << "="
-                << this->LocalCommonGenerator->ConvertToOutputFormat(
-                     obj, cmOutputConverter::SHELL);
+      linkCrates = cmStrCat(std::move(linkCrates), " --extern=", objStem, "=",
+                            this->LocalCommonGenerator->ConvertToOutputFormat(
+                              obj, cmOutputConverter::SHELL));
     } else {
-      objectsArgs << " -Clink-arg="
-                  << this->LocalCommonGenerator->ConvertToOutputFormat(
-                       obj, cmOutputConverter::SHELL);
+      nativeObjects =
+        cmStrCat(std::move(nativeObjects), " -Clink-arg=",
+                 this->LocalCommonGenerator->ConvertToOutputFormat(
+                   obj, cmOutputConverter::SHELL));
     }
   };
   for (std::string const& obj : objects) {
     processObject(obj);
   }
-  linkCrates += rlibsArgs.str();
-  nativeObjects += objectsArgs.str();
 }

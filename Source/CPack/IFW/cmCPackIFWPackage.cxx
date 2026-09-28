@@ -239,10 +239,9 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
     cmExpandList(option, this->Licenses);
     if (this->Licenses.size() % 2 != 0) {
       cmCPackIFWLogger(
-        WARNING,
-        prefix << "LICENSES"
-               << " should contain pairs of <display_name> and <file_path>."
-               << std::endl);
+        WARNING, prefix,
+        "LICENSES"
+        " should contain pairs of <display_name> and <file_path>.\n");
       this->Licenses.clear();
     }
   }
@@ -251,11 +250,10 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   if (cmValue option = this->GetOption(prefix + "PRIORITY")) {
     this->SortingPriority = *option;
     cmCPackIFWLogger(
-      WARNING,
-      "The \"PRIORITY\" option is set "
-        << "for component \"" << component->Name << "\", but there option is "
-        << "deprecated. Please use \"SORTING_PRIORITY\" option instead."
-        << std::endl);
+      WARNING, "The \"PRIORITY\" option is set for component \"",
+      component->Name,
+      "\", but there option is "
+      "deprecated. Please use \"SORTING_PRIORITY\" option instead.\n");
   }
 
   // Default
@@ -318,10 +316,9 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
     cmExpandList(option, this->Licenses);
     if (this->Licenses.size() % 2 != 0) {
       cmCPackIFWLogger(
-        WARNING,
-        prefix << "LICENSES"
-               << " should contain pairs of <display_name> and <file_path>."
-               << std::endl);
+        WARNING, prefix,
+        "LICENSES"
+        " should contain pairs of <display_name> and <file_path>.\n");
       this->Licenses.clear();
     }
   }
@@ -330,12 +327,10 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   if (cmValue option = this->GetOption(prefix + "PRIORITY")) {
     this->SortingPriority = *option;
     cmCPackIFWLogger(
-      WARNING,
-      "The \"PRIORITY\" option is set "
-        << "for component group \"" << group->Name
-        << "\", but there option is "
-        << "deprecated. Please use \"SORTING_PRIORITY\" option instead."
-        << std::endl);
+      WARNING, "The \"PRIORITY\" option is set for component group \"",
+      group->Name,
+      "\", but there option is "
+      "deprecated. Please use \"SORTING_PRIORITY\" option instead.\n");
   }
 
   return this->ConfigureFromPrefix(prefix);
@@ -690,11 +685,10 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
   if (warnUnsupportedNames) {
     cmCPackIFWLogger(
-      WARNING,
-      "The dependencies for component \""
-        << this->Name << "\" specify names that contain hyphens. "
-        << "This requires QtIFW 3.1 or later, but you are using version "
-        << this->Generator->FrameworkVersion << std::endl);
+      WARNING, "The dependencies for component \"", this->Name,
+      "\" specify names that contain hyphens. "
+      "This requires QtIFW 3.1 or later, but you are using version ",
+      this->Generator->FrameworkVersion, '\n');
   }
 
   // Licenses (copy to meta dir)

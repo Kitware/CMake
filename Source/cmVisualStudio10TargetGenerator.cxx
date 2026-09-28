@@ -1829,13 +1829,13 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     std::string script = lg->ConstructScript(ccg);
     bool symbolic = false;
     // input files for custom command
-    std::stringstream additional_inputs;
+    std::string additional_inputs;
     {
-      char const* sep = "";
+      cm::string_view sep;
       if (this->ProjectType == VsProjectType::csproj) {
         // csproj files do not attach the command to a specific file
         // so the primary input must be listed explicitly.
-        additional_inputs << source->GetFullPath();
+        additional_inputs = source->GetFullPath();
         sep = ";";
       }
 
@@ -1852,7 +1852,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
             continue;
           }
           ConvertToWindowsSlash(dep);
-          additional_inputs << sep << dep;
+          additional_inputs = cmStrCat(std::move(additional_inputs), sep, dep);
           sep = ";";
           if (!symbolic) {
             if (cmSourceFile* sf = this->Makefile->GetSource(
@@ -1872,17 +1872,18 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
         }
       }
       if (this->ProjectType != VsProjectType::csproj) {
-        additional_inputs << sep << "%(AdditionalInputs)";
+        additional_inputs =
+          cmStrCat(std::move(additional_inputs), sep, "%(AdditionalInputs)");
       }
     }
     // output files for custom command
-    std::stringstream outputs;
+    std::string outputs;
     {
-      char const* sep = "";
+      cm::string_view sep;
       for (std::string const& o : ccg.GetOutputs()) {
         std::string out = o;
         ConvertToWindowsSlash(out);
-        outputs << sep << out;
+        outputs = cmStrCat(std::move(outputs), sep, out);
         sep = ";";
         if (!symbolic) {
           if (cmSourceFile* sf = this->Makefile->GetSource(
@@ -1897,8 +1898,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
       std::string name =
         cmStrCat("CustomCommand_", c, '_', hasher.HashString(sourcePath));
-      this->WriteCustomRuleCSharp(e0, c, name, script, additional_inputs.str(),
-                                  outputs.str(), comment, ccg);
+      this->WriteCustomRuleCSharp(e0, c, name, script, additional_inputs,
+                                  outputs, comment, ccg);
     } else {
       BuildInParallel buildInParallel = BuildInParallel::No;
       if (command.GetCMP0147Status() == cmPolicies::NEW &&
@@ -1908,9 +1909,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
             "VS_CUSTOM_COMMAND_DISABLE_PARALLEL_BUILD")) {
         buildInParallel = BuildInParallel::Yes;
       }
-      this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
-                               outputs.str(), comment, ccg, symbolic,
-                               buildInParallel);
+      this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs, outputs,
+                               comment, ccg, symbolic, buildInParallel);
     }
   }
 }
@@ -2666,18 +2666,15 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       Elem e2(e1, tool);
       bool isCSharp = (si.Source->GetLanguage() == "CSharp"_s);
       if (isCSharp && !exclude_configs.empty()) {
-        std::stringstream conditions;
-        bool firstConditionSet{ false };
+        std::string conditions;
+        cm::string_view sep;
         for (auto const& ci : include_configs) {
-          if (firstConditionSet) {
-            conditions << " Or ";
-          }
-          conditions << "('$(Configuration)|$(Platform)'=='"
-                     << this->Configurations[ci] << '|' << this->Platform
-                     << "')";
-          firstConditionSet = true;
+          conditions = cmStrCat(
+            std::move(conditions), sep, "('$(Configuration)|$(Platform)'=='",
+            this->Configurations[ci], '|', this->Platform, "')");
+          sep = " Or ";
         }
-        e2.Attribute("Condition", conditions.str());
+        e2.Attribute("Condition", conditions);
       }
       this->WriteSource(e2, si.Source);
 

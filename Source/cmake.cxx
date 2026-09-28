@@ -251,13 +251,12 @@ bool cmakeCheckStampFile(std::string const& stampName)
 
   // The build system is up to date.  The stamp file has been removed
   // by the VS IDE due to a "rebuild" request.  Restore it atomically.
-  std::ostringstream stampTempStream;
-  stampTempStream << stampName << ".tmp" << cmSystemTools::RandomNumber();
-  std::string stampTemp = stampTempStream.str();
+  std::string stampTemp =
+    cmStrCat(stampName, ".tmp", cmSystemTools::RandomNumber());
   {
     // TODO: Teach cmGeneratedFileStream to use a random temp file (with
     // multiple tries in unlikely case of conflict) and use that here.
-    cmsys::ofstream stamp(stampTemp.c_str());
+    cmsys::ofstream stamp(stampTemp);
     stamp << "# CMake generation timestamp file for this directory.\n";
   }
   std::string err;
@@ -2367,20 +2366,21 @@ int cmake::DoPreConfigureChecks()
   std::string srcList =
     cmStrCat(this->GetHomeDirectory(), '/', this->CMakeListName);
   if (!cmSystemTools::FileExists(srcList)) {
-    std::ostringstream err;
+    std::string err;
     if (cmSystemTools::FileIsDirectory(this->GetHomeDirectory())) {
-      err << "The source directory \"" << this->GetHomeDirectory()
-          << "\" does not appear to contain " << this->CMakeListName << ".\n";
+      err =
+        cmStrCat("The source directory \"", this->GetHomeDirectory(),
+                 "\" does not appear to contain ", this->CMakeListName, ".\n");
     } else if (cmSystemTools::FileExists(this->GetHomeDirectory())) {
-      err << "The source directory \"" << this->GetHomeDirectory()
-          << "\" is a file, not a directory.\n";
+      err = cmStrCat("The source directory \"", this->GetHomeDirectory(),
+                     "\" is a file, not a directory.\n");
     } else {
-      err << "The source directory \"" << this->GetHomeDirectory()
-          << "\" does not exist.\n";
+      err = cmStrCat("The source directory \"", this->GetHomeDirectory(),
+                     "\" does not exist.\n");
     }
-    err << "Specify --help for usage, or press the help button on the CMake "
+    err += "Specify --help for usage, or press the help button on the CMake "
            "GUI.";
-    cmSystemTools::Error(err.str());
+    cmSystemTools::Error(err);
     return -2;
   }
 
@@ -2419,16 +2419,15 @@ int cmake::HandleDeleteCacheVariables(
     return 0;
   }
   std::vector<SaveCacheEntry> saved;
-  std::ostringstream warning;
-  warning
-    << "You have changed variables that require your cache to be deleted.\n"
-       "Configure will be re-run and you may have to reset some variables.\n"
-       "The following variables have changed:\n";
+  std::string warning(
+    "You have changed variables that require your cache to be deleted.\n"
+    "Configure will be re-run and you may have to reset some variables.\n"
+    "The following variables have changed:\n");
   for (auto const& var : vars) {
     SaveCacheEntry save;
     save.key = var.first;
     save.value = var.second;
-    warning << save.key << "= " << save.value << '\n';
+    warning = cmStrCat(std::move(warning), save.key, "= ", save.value, '\n');
     cmValue existingValue = this->State->GetCacheEntryValue(save.key);
     if (existingValue) {
       save.type = this->State->GetCacheEntryType(save.key);
@@ -2459,7 +2458,7 @@ int cmake::HandleDeleteCacheVariables(
   for (SaveCacheEntry const& i : saved) {
     this->AddCacheEntry(i.key, i.value, i.help, i.type);
   }
-  cmSystemTools::Message(warning.str());
+  cmSystemTools::Message(warning);
   // avoid reconfigure if there were errors
   if (!cmSystemTools::GetErrorOccurredFlag()) {
     // re-run configure
@@ -3660,10 +3659,9 @@ int cmake::CheckBuildSystem()
   // If the file provided does not exist, we have to rerun.
   if (!cmSystemTools::FileExists(this->CheckBuildSystemArgument)) {
     if (verbose) {
-      std::ostringstream msg;
-      msg << "Re-run cmake missing file: " << this->CheckBuildSystemArgument
-          << '\n';
-      cmSystemTools::Stdout(msg.str());
+      std::string msg = cmStrCat(
+        "Re-run cmake missing file: ", this->CheckBuildSystemArgument, '\n');
+      cmSystemTools::Stdout(msg);
     }
     return 1;
   }
@@ -3678,10 +3676,9 @@ int cmake::CheckBuildSystem()
   if (!mf.ReadListFile(this->CheckBuildSystemArgument) ||
       cmSystemTools::GetErrorOccurredFlag()) {
     if (verbose) {
-      std::ostringstream msg;
-      msg << "Re-run cmake error reading : " << this->CheckBuildSystemArgument
-          << '\n';
-      cmSystemTools::Stdout(msg.str());
+      std::string msg = cmStrCat(
+        "Re-run cmake error reading : ", this->CheckBuildSystemArgument, '\n');
+      cmSystemTools::Stdout(msg);
     }
     // There was an error reading the file.  Just rerun.
     return 1;
@@ -3774,10 +3771,9 @@ int cmake::CheckBuildSystem()
     if (!this->FileTimeCache->Compare(out_oldest, dep_newest, &result) ||
         result < 0) {
       if (verbose) {
-        std::ostringstream msg;
-        msg << "Re-run cmake file: " << out_oldest
-            << " older than: " << dep_newest << '\n';
-        cmSystemTools::Stdout(msg.str());
+        std::string msg = cmStrCat("Re-run cmake file: ", out_oldest,
+                                   " older than: ", dep_newest, '\n');
+        cmSystemTools::Stdout(msg);
       }
       return 1;
     }
@@ -4622,16 +4618,16 @@ void cmake::RunCheckForUnusedVariables()
     this->CurrentSnapshot.GetDiagnostic(cmDiagnostics::CMD_UNUSED_CLI);
   if (action != cmDiagnostics::Ignore) {
     bool haveUnused = false;
-    std::ostringstream msg;
-    msg << "Manually-specified variables were not used by the project:";
+    std::string msg(
+      "Manually-specified variables were not used by the project:");
     for (auto const& it : this->UsedCliVariables) {
       if (!it.second) {
         haveUnused = true;
-        msg << "\n  " << it.first;
+        msg = cmStrCat(std::move(msg), "\n  ", it.first);
       }
     }
     if (haveUnused) {
-      this->IssueDiagnostic(cmDiagnostics::CMD_UNUSED_CLI, msg.str());
+      this->IssueDiagnostic(cmDiagnostics::CMD_UNUSED_CLI, msg);
     }
   }
 #endif

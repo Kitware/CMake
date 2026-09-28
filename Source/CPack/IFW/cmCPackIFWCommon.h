@@ -69,12 +69,11 @@ protected:
   void WriteGeneratedByToStrim(cmXMLWriter& xout) const;
 };
 
-#define cmCPackIFWLogger(logType, msg)                                        \
+#define cmCPackIFWLogger(logType, ...)                                        \
   do {                                                                        \
-    std::ostringstream cmCPackLog_msg;                                        \
-    cmCPackLog_msg << msg;                                                    \
     if (Generator) {                                                          \
+      std::string cmCPackLog_msg = cmStrCat("", __VA_ARGS__);                 \
       Generator->Logger->Log(cmCPackLog::LOG_##logType, __FILE__, __LINE__,   \
-                             cmCPackLog_msg.str().c_str());                   \
+                             cmCPackLog_msg.c_str(), cmCPackLog_msg.size());  \
     }                                                                         \
   } while (false)
