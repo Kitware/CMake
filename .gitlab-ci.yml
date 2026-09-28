@@ -123,6 +123,13 @@ l:spellcheck:
         - .rules
     needs: []
 
+l:ast-grep:
+    extends:
+        - .cmake_ast_grep_linux
+        - .linux_x86_64_tags
+        - .rules
+    needs: []
+
 l:iwyu-debian13:
     extends:
         - .debian13_iwyu
