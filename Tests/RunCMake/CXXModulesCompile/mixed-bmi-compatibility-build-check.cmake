@@ -28,17 +28,17 @@ foreach (consumer IN LISTS expected_consumers)
 
   file(READ "${depend_info_file}" depend_info_json)
 
-  # Extract linked-target-dirs array length and first element
+  # Extract linked-target-dirs.
   string(JSON linked_dirs_len LENGTH "${depend_info_json}" "linked-target-dirs")
   string(JSON linked_dirs GET "${depend_info_json}" "linked-target-dirs")
 
   if (consumer STREQUAL "consumer20")
-    set(expected_linked_tgt_regex "^importable\.dir$")
+    set(expected_linked_tgt_regex "^importable\\.dir$")
     set(expected_linked_tgt_desc "owning target dir for 'importable'")
     set(expected_linked_tgt_has_bmi 0)
   elseif (consumer STREQUAL "consumer23" OR
           consumer STREQUAL "consumer23flag")
-    set(expected_linked_tgt_regex "^importable@synth_[A-Za-z0-9_]+\.dir$")
+    set(expected_linked_tgt_regex "^importable@synth_[A-Za-z0-9_]+\\.dir$")
     set(expected_linked_tgt_desc "shared synthetic target dir for 'importable'")
     set(expected_linked_tgt_has_bmi 1)
   else ()
@@ -53,33 +53,38 @@ foreach (consumer IN LISTS expected_consumers)
     continue()
   endif ()
 
-  # For this test, expect exactly one linked target dir per consumer
-  if (NOT linked_dirs_len EQUAL 1)
+  set(importable_dirs "")
+  set(linked_dir "")
+  set(linked_tgt_name "")
+  foreach (idx RANGE "${linked_dirs_len}")
+    if (idx EQUAL linked_dirs_len)
+      break ()
+    endif ()
+    string(JSON candidate GET "${depend_info_json}" "linked-target-dirs" "${idx}")
+    if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
+      cmake_path(GET candidate PARENT_PATH candidate_root)
+    else ()
+      set(candidate_root "${candidate}")
+    endif ()
+    cmake_path(GET candidate_root FILENAME candidate_name)
+    if (candidate_name MATCHES "^importable(@synth_[A-Za-z0-9_]+)?\\.dir$")
+      list(APPEND importable_dirs "${candidate}")
+      set(linked_dir "${candidate}")
+      set(linked_tgt_name "${candidate_name}")
+    endif ()
+  endforeach ()
+
+  list(LENGTH importable_dirs importable_dirs_len)
+  if (NOT importable_dirs_len EQUAL 1)
     list(APPEND RunCMake_TEST_FAILED
-      "Expected 1 linked-target-dir for '${consumer}' but found ${linked_dirs_len}: ${linked_dirs}")
-    continue()
+      "Expected exactly one 'importable' linked-target-dir for '${consumer}' but found ${importable_dirs_len}: ${linked_dirs}")
+    continue ()
   endif ()
-
-  string(JSON linked_dir GET "${depend_info_json}" "linked-target-dirs" 0)
-
-  if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
-    cmake_path(GET linked_dir PARENT_PATH linked_tgt_root)
-  else ()
-    set(linked_tgt_root "${linked_dir}")
-  endif ()
-
-  cmake_path(GET linked_tgt_root FILENAME linked_tgt_name)
 
   if (NOT linked_tgt_name MATCHES "${expected_linked_tgt_regex}")
     list(APPEND RunCMake_TEST_FAILED
       "Consumer '${consumer}' should link to ${expected_linked_tgt_desc} but found ${linked_dir}")
     continue()
-  endif ()
-
-  if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
-    set(linked_output_dir "${linked_dir}/${config_dir}")
-  else ()
-    set(linked_output_dir "${linked_dir}")
   endif ()
 
   # Verify the linked target dir exists and contains a BMI

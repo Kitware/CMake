@@ -86,6 +86,8 @@ modules includes:
 ``import std`` Support
 ======================
 
+.. versionadded:: 4.5
+
 Support for ``import std`` is limited to the following toolchain and standard
 library combinations:
 
@@ -107,12 +109,6 @@ for ``IMPORTED`` targets.
 
 ``import std`` is available for all language standards which support C++ module
 scanning (ie, C++20 and newer).
-
-.. note::
-
-   This support is provided only when experimental support for
-   ``import std`` has been enabled by the
-   ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` gate.
 
 Generator Support
 =================
@@ -505,9 +501,6 @@ tracks these in its internal target representation structure (``cmTarget``).
 The set of sources which need to be scanned may be modified using the
 :command:`target_sources`, :command:`target_compile_features`, and
 :command:`set_property` commands.
-
-Additionally, targets may use the :prop_tgt:`CXX_MODULE_STD` target property
-to indicate that ``import std`` is desired within the target's sources.
 
 Generate
 ^^^^^^^^

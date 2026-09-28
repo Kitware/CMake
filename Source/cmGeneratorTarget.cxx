@@ -5446,11 +5446,6 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
 
 bool cmGeneratorTarget::ApplyCXXStdTarget()
 {
-  if (!cmExperimental::HasSupportEnabled(
-        *this->Makefile, cmExperimental::Feature::CxxImportStd)) {
-    return true;
-  }
-
   std::vector<std::string> const& configs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 

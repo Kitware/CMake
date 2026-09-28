@@ -29,14 +29,6 @@ cmExperimental::FeatureData const LookupTable[] = {
     "only for experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Always },
-  // CxxImportStd
-  { "CxxImportStd",
-    "25d6f6aa-be65-4692-b44e-87b23e96d4e1",
-    "CMAKE_EXPERIMENTAL_CXX_IMPORT_STD",
-    "CMake's support for `import std;` in C++23 and newer is experimental. It "
-    "is meant only for experimentation and feedback to CMake developers.",
-    {},
-    cmExperimental::TryCompileCondition::Always },
   // MappedPackageInfo
   { "MappedPackageInfo",
     "ababa1b5-7099-495f-a9cd-e22d38f274f2",
