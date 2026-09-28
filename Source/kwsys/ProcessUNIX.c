@@ -2339,14 +2339,20 @@ static void kwsysProcessChildErrorExit(int errorPipe)
 }
 
 /* Restores all signal handlers to their default values.  */
+/* However, preserve SIGHUP if ignored, e.g. using nohup. */
 static void kwsysProcessRestoreDefaultSignalHandlers(void)
 {
   struct sigaction act;
+#ifdef SIGHUP
+  sigaction(SIGHUP, 0, &act);
+  if (act.sa_handler != SIG_IGN) {
+    memset(&act, 0, sizeof(struct sigaction));
+    act.sa_handler = SIG_DFL;
+    sigaction(SIGHUP, &act, 0);
+  }
+#endif
   memset(&act, 0, sizeof(struct sigaction));
   act.sa_handler = SIG_DFL;
-#ifdef SIGHUP
-  sigaction(SIGHUP, &act, 0);
-#endif
 #ifdef SIGINT
   sigaction(SIGINT, &act, 0);
 #endif
