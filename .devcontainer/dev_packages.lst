@@ -60,6 +60,10 @@ python3-sphinx
 clang-format-18
 pre-commit
 
+# Unpack the `ast-grep` release that `install_ast_grep.sh` downloads, as
+# Ubuntu does not carry `ast-grep` itself.
+unzip
+
 # Run `glab` and `glab-axi`, and reach GitLab over SSH.  `nodejs` and `npm`
 # are needed both to install `glab-axi` and to run it.
 nodejs

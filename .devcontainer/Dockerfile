@@ -56,6 +56,13 @@ RUN --mount=type=bind,source=install_glab.sh,target=/root/install_glab.sh \
     --mount=type=tmpfs,target=/tmp \
     sh /root/install_glab.sh
 
+# Install `ast-grep`, to check our C++ code against the rules under
+# `Utilities/ast-grep`.  Unpack its release in a `tmpfs`, as for `glab`, so
+# that the download leaves nothing behind in the image.
+RUN --mount=type=bind,source=install_ast_grep.sh,target=/root/install_ast_grep.sh \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/install_ast_grep.sh
+
 # Create an unprivileged user matching the typical host account so that files
 # created in the mounted source tree are not owned by `root`.
 RUN --mount=type=bind,source=create_user.sh,target=/root/create_user.sh \

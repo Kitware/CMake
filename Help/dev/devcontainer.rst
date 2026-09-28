@@ -175,6 +175,16 @@ against, the container provides:
   ``CMake_USE_CLANG_TIDY_MODULE`` needs `Utilities/ClangTidyModule`_ built
   against Clang's development files, which the container does not install.
 
+* ``ast-grep``, to check our C++ code against the rules under
+  `Utilities/ast-grep`_, and to test the rules themselves:
+
+  .. code-block:: console
+
+    $ ast-grep scan
+    $ ast-grep test
+
+  It is the release our CI job runs, so it reports what that job reports.
+
 * ``glab``, the `GitLab CLI`_, to work with merge requests, issues, and
   pipelines on our GitLab instance, and `glab-axi`_, a wrapper around it
   whose output follows the `AXI`_ conventions:
@@ -190,6 +200,7 @@ against, the container provides:
 .. _`C++ Code Style`: source.rst#c-code-style
 .. _`.pre-commit-config.yaml`: ../../.pre-commit-config.yaml
 .. _`Utilities/ClangTidyModule`: ../../Utilities/ClangTidyModule
+.. _`Utilities/ast-grep`: ../../Utilities/ast-grep
 .. _`CMake Documentation Guide`: documentation.rst
 .. _`CMake Debugging Guide`: debug.rst
 .. _`GitLab CLI`: https://docs.gitlab.com/editor_extensions/gitlab_cli/
