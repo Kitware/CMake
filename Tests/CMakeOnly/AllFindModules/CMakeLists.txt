@@ -8,6 +8,10 @@ set(ORIGINAL_MODULE_PATH "${CMAKE_MODULE_PATH}")
 
 file(GLOB FIND_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../../../Modules/Find*.cmake" )
 
+if(CMAKE_C_COMPILER_ID MATCHES "Watcom")
+  list(FILTER FIND_MODULES EXCLUDE REGEX Modules/FindOpenCL.cmake)
+endif()
+
 macro(do_find MODULE_NAME)
     message(STATUS "   Checking Find${MODULE_NAME}")
     find_package(${MODULE_NAME})
