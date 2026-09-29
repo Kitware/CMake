@@ -1596,10 +1596,14 @@ void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
 
   struct TestPrepTarget
   {
+    std::string Name;
     std::string Comment;
     std::set<FastbuildTargetDep> Dependencies;
   };
 
+  // FASTBuild alias names are case-insensitive, so merge tests whose
+  // test_prep target names differ only in case.
+  std::string const allName = "test_prep/all";
   std::map<std::string, TestPrepTarget> testPrepTargets;
   for (auto const& localGen : this->LocalGenerators) {
     auto const& testGenerators = localGen->GetMakefile()->GetTestGenerators();
@@ -1611,7 +1615,11 @@ void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
       }
       std::string const depName =
         cmStrCat("test_prep/", tester->GetTest()->GetName());
-      auto& testPrepTarget = testPrepTargets[depName];
+      auto& testPrepTarget =
+        testPrepTargets[cmSystemTools::LowerCase(depName)];
+      if (testPrepTarget.Name.empty()) {
+        testPrepTarget.Name = depName;
+      }
       testPrepTarget.Comment =
         cmStrCat("Build dependencies for test ", tester->GetTest()->GetName());
 
@@ -1627,7 +1635,11 @@ void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
     if (localGen->GetDirectoryTestPrepTarget(
           directoryTarget,
           localGen->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"))) {
-      TestPrepTarget& testPrepTarget = testPrepTargets[directoryTarget.Name];
+      TestPrepTarget& testPrepTarget =
+        testPrepTargets[cmSystemTools::LowerCase(directoryTarget.Name)];
+      if (testPrepTarget.Name.empty()) {
+        testPrepTarget.Name = directoryTarget.Name;
+      }
       testPrepTarget.Comment = std::move(directoryTarget.Comment);
 
       for (cmLocalGenerator::DirectoryTestPrepDependency const& dep :
@@ -1642,11 +1654,18 @@ void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
   }
 
   FastbuildAliasNode allAliasNode;
-  allAliasNode.Name = "test_prep/all";
+  allAliasNode.Name = allName;
   allAliasNode.Hidden = false;
   for (auto& prepEntry : testPrepTargets) {
+    // A test whose target name matches test_prep/all is prepared by it.
+    if (prepEntry.first == allName) {
+      allAliasNode.PreBuildDependencies.insert(
+        prepEntry.second.Dependencies.begin(),
+        prepEntry.second.Dependencies.end());
+      continue;
+    }
     FastbuildAliasNode alias;
-    alias.Name = prepEntry.first;
+    alias.Name = prepEntry.second.Name;
     alias.Hidden = false;
     alias.PreBuildDependencies = std::move(prepEntry.second.Dependencies);
     if (alias.PreBuildDependencies.empty()) {
@@ -1654,7 +1673,7 @@ void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
     }
     this->WriteComment(prepEntry.second.Comment);
     this->WriteAlias(alias);
-    allAliasNode.PreBuildDependencies.emplace(prepEntry.first);
+    allAliasNode.PreBuildDependencies.emplace(prepEntry.second.Name);
   }
   if (!allAliasNode.PreBuildDependencies.empty()) {
     this->WriteComment("Build dependencies for all tests");
