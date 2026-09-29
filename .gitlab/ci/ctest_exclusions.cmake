@@ -20,6 +20,14 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_asan")
     )
 endif()
 
+if ("$ENV{CMAKE_CI_BUILD_NAME}" MATCHES "^intel20(16|17|18|19|20)")
+  list(APPEND test_exclusions
+    # The Intel Classic toolchain spuriously crashes on PCH.
+    "^RunCMake.PrecompileHeaders$"
+    "^RunCMake.PrecompileHeaders-Reuse$"
+    )
+endif()
+
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_jom")
   list(APPEND test_exclusions
     # JOM often fails with "Couldn't change working directory to ...".
