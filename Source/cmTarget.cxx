@@ -1978,7 +1978,6 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
 
     // Metadata
     "EchoString",
-    "EXPORT_COMPILE_COMMANDS",
     // Do *not* copy this property; it should be re-initialized at synthesis
     // time from the `CMAKE_EXPORT_BUILD_DATABASE` variable as `IMPORTED`
     // targets ignore the property initialization.
@@ -1991,6 +1990,12 @@ void cmTarget::CopyCxxModulesProperties(cmTarget const* tgt)
 
   for (auto const& prop : propertiesToCopy) {
     copyProperty(tgt, this, prop);
+  }
+
+  // Imported targets do not initialize this property.  Keep the synthetic
+  // target's initialization from CMAKE_EXPORT_COMPILE_COMMANDS instead.
+  if (!tgt->IsImported()) {
+    copyProperty(tgt, this, "EXPORT_COMPILE_COMMANDS");
   }
 
   static cm::static_string_view const perConfigPropertiesToCopy[] = {

@@ -353,6 +353,11 @@ if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
   if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION AND
       "bmionly" IN_LIST CMake_TEST_MODULE_COMPILATION)
     run_cxx_module_import_test(build exp-iface-build)
+    if ("compile_commands" IN_LIST CMake_TEST_MODULE_COMPILATION)
+      run_cxx_module_test(imp-mods imp-mods-exp-compile-commands
+        "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/exp-iface-build-build"
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+    endif ()
     run_cxx_module_import_test(build exp-iface-no-props-build -DNO_PROPERTIES=1)
     run_cxx_module_import_test(build exp-incdirs-build -DINCLUDE_PROPERTIES=1)
     run_cxx_module_import_test(build exp-bmi-and-iface-build -DWITH_BMIS=1)
