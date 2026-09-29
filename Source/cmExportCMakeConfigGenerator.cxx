@@ -127,13 +127,14 @@ void cmExportCMakeConfigGenerator::SetImportLinkInterface(
 
   if (!this->ExportOld) {
     cmLocalGenerator* lg = target->GetLocalGenerator();
-    std::ostringstream e;
-    e << "Target \"" << target->GetName()
-      << "\" has policy CMP0022 enabled, "
-         "but also has old-style LINK_INTERFACE_LIBRARIES properties "
-         "populated, but it was exported without the "
-         "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties";
-    lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    lg->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Target \"", target->GetName(),
+        "\" has policy CMP0022 enabled, "
+        "but also has old-style LINK_INTERFACE_LIBRARIES properties "
+        "populated, but it was exported without the "
+        "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties"));
     return;
   }
 

@@ -50,8 +50,7 @@ bool cmParsePHPCoverage::ReadCoverageArray(std::istream& in,
   buf[3] = 0;
   if (strcmp(buf, ";a:") != 0) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "failed to read start of coverage array, found : " << buf
-                                                                  << "\n");
+               "failed to read start of coverage array, found : ", buf, '\n');
     return false;
   }
   int size = 0;
@@ -137,7 +136,7 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
   buf[2] = 0;
   if (strcmp(buf, "s:") != 0) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "failed to read start of file info found: [" << buf << "]\n");
+               "failed to read start of file info found: [", buf, "]\n");
     return false;
   }
   char c;
@@ -155,15 +154,13 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
     std::string fileName = s.get();
     // read close quote
     if (in.get(c) && c != '"') {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "failed to read close quote\n"
-                   << "read [" << c << "]\n");
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read close quote\n",
+                 "read [", c, "]\n");
       return false;
     }
     if (!this->ReadCoverageArray(in, fileName)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "failed to read coverage array for file: " << fileName
-                                                            << "\n");
+                 "failed to read coverage array for file: ", fileName, "\n");
       return false;
     }
     return true;
@@ -187,8 +184,7 @@ bool cmParsePHPCoverage::ReadPHPData(char const* file)
   }
   for (int i = 0; i < size; i++) {
     if (!this->ReadFileInformation(in)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Failed to read file #" << i << "\n");
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Failed to read file #", i, "\n");
       return false;
     }
     in.get(c);

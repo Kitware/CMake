@@ -4,7 +4,7 @@
 
 #include <chrono>
 #include <cstdlib>
-#include <sstream>
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -238,10 +238,9 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   if (presetName.empty()) {
     configureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
   } else if (cmNonempty(mf.GetDefinition("CTEST_CONFIGURE_COMMAND"))) {
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Ignoring CTEST_CONFIGURE_COMMAND because preset \""
-                         << presetName << "\" is in use.\n",
-                       args.Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+                       "Ignoring CTEST_CONFIGURE_COMMAND because preset \"",
+                       presetName, "\" is in use.\n");
   }
   if (configureCommand.empty() &&
       !ConstructConfigureCommand(status, mf, sourceDirectory, buildDirectory,
@@ -250,13 +249,12 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     return false;
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Configure project\n",
-                     args.Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet,
+                     "Configure project\n");
 
   if (this->CTest->GetShowOnly()) {
-    cmCTestOptionalLog(this->CTest, DEBUG,
-                       "Configure with command: " << configureCommand << '\n',
-                       args.Quiet);
+    cmCTestOptionalLog(this->CTest, DEBUG, args.Quiet,
+                       "Configure with command: ", configureCommand, '\n');
     if (!args.ReturnValue.empty()) {
       mf.AddDefinition(args.ReturnValue, "0");
     }
@@ -268,9 +266,8 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     return false;
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Configure with command: " << configureCommand << '\n',
-                     args.Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+                     "Configure with command: ", configureCommand, '\n');
 
   int const submitIndex =
     args.SubmitIndex.empty() ? 0 : std::atoi(args.SubmitIndex.c_str());
@@ -292,7 +289,7 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   auto const elapsedMinutes =
     std::chrono::duration_cast<std::chrono::minutes>(endTime - startTime);
 
-  cmCTestOptionalLog(this->CTest, DEBUG, "End\n", args.Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG, args.Quiet, "End\n");
 
   if (!res || retVal) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -315,8 +312,7 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   cmGeneratedFileStream xmlFile;
   if (!this->CTest->StartResultingXML(cmCTest::PartConfigure, "Configure",
                                       submitIndex, xmlFile)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot open configure file" << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open configure file\n");
     return false;
   }
 

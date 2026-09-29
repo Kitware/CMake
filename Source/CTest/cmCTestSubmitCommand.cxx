@@ -50,19 +50,17 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
         &mf, "TLSVersion", "CTEST_TLS_VERSION", args.Quiet)) {
     if (cmValue tlsVersionVar = mf.GetDefinition("CMAKE_TLS_VERSION")) {
       cmCTestOptionalLog(
-        this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "SetCTestConfiguration from CMAKE_TLS_VERSION:TLSVersion:"
-          << *tlsVersionVar << std::endl,
-        args.Quiet);
+        this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+        "SetCTestConfiguration from CMAKE_TLS_VERSION:TLSVersion:",
+        *tlsVersionVar, '\n');
       this->CTest->SetCTestConfiguration("TLSVersion", *tlsVersionVar,
                                          args.Quiet);
     } else if (cm::optional<std::string> tlsVersionEnv =
                  cmSystemTools::GetEnvVar("CMAKE_TLS_VERSION")) {
       cmCTestOptionalLog(
-        this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "SetCTestConfiguration from ENV{CMAKE_TLS_VERSION}:TLSVersion:"
-          << *tlsVersionEnv << std::endl,
-        args.Quiet);
+        this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+        "SetCTestConfiguration from ENV{CMAKE_TLS_VERSION}:TLSVersion:",
+        *tlsVersionEnv, '\n');
       this->CTest->SetCTestConfiguration("TLSVersion", *tlsVersionEnv,
                                          args.Quiet);
     }
@@ -71,19 +69,17 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
         &mf, "TLSVerify", "CTEST_TLS_VERIFY", args.Quiet)) {
     if (cmValue tlsVerifyVar = mf.GetDefinition("CMAKE_TLS_VERIFY")) {
       cmCTestOptionalLog(
-        this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:"
-          << *tlsVerifyVar << std::endl,
-        args.Quiet);
+        this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+        "SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:",
+        *tlsVerifyVar, '\n');
       this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyVar,
                                          args.Quiet);
     } else if (cm::optional<std::string> tlsVerifyEnv =
                  cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
       cmCTestOptionalLog(
-        this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "SetCTestConfiguration from ENV{CMAKE_TLS_VERIFY}:TLSVerify:"
-          << *tlsVerifyEnv << std::endl,
-        args.Quiet);
+        this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
+        "SetCTestConfiguration from ENV{CMAKE_TLS_VERIFY}:TLSVerify:",
+        *tlsVerifyEnv, '\n');
       this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyEnv,
                                          args.Quiet);
     }

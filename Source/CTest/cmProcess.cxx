@@ -3,7 +3,6 @@
 #include "cmProcess.h"
 
 #include <csignal>
-#include <iostream>
 #include <ratio>
 #include <string>
 #include <utility>
@@ -76,8 +75,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   int status = timer.init(loop, this);
   if (status != 0) {
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Error initializing timer: " << uv_strerror(status)
-                                            << std::endl);
+               "Error initializing timer: ", uv_strerror(status), '\n');
     return false;
   }
 
@@ -91,8 +89,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   status = cmGetPipes(fds);
   if (status != 0) {
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Error initializing pipe: " << uv_strerror(status)
-                                           << std::endl);
+               "Error initializing pipe: ", uv_strerror(status), '\n');
     return false;
   }
 
@@ -148,16 +145,15 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 
   if (status != 0) {
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Error starting read events: " << uv_strerror(status)
-                                              << std::endl);
+               "Error starting read events: ", uv_strerror(status), '\n');
     return false;
   }
 
   status = this->Process.spawn(loop, options, this);
   if (status != 0) {
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Process not started\n " << this->Command << "\n["
-                                        << uv_strerror(status) << "]\n");
+               "Process not started\n ", this->Command, "\n[",
+               uv_strerror(status), "]\n");
     return false;
   }
 
@@ -257,7 +253,7 @@ void cmProcess::OnRead(ssize_t nread, uv_buf_t const* buf)
   if (nread != UV_EOF) {
     auto error = static_cast<int>(nread);
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Error reading stream: " << uv_strerror(error) << std::endl);
+               "Error reading stream: ", uv_strerror(error), '\n');
   }
 
   // Look for partial last lines.

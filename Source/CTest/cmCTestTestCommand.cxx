@@ -7,7 +7,6 @@
 #include <cstdlib>
 #include <map>
 #include <ratio>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -73,9 +72,8 @@ cmCTestTestCommand::ResolveTestPreset(cmMakefile& mf,
       if (presetCheck == PresetCheckResult::Found) {
         resolved.EffectivePreset = *v;
       } else {
-        cmCTestLog(this->CTest, WARNING,
-                   "No test preset named \""
-                     << *v << "\" found, ignoring CTEST_PRESET." << std::endl);
+        cmCTestLog(this->CTest, WARNING, "No test preset named \"", *v,
+                   "\" found, ignoring CTEST_PRESET.\n");
       }
     }
   }
@@ -285,15 +283,14 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
     if (!cmStrToULong(args.TestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
-                 "Invalid value for 'TEST_LOAD' : " << args.TestLoad
-                                                    << std::endl);
+                 "Invalid value for 'TEST_LOAD' : ", args.TestLoad, '\n');
     }
   } else if (cmNonempty(ctestTestLoad)) {
     if (!cmStrToULong(*ctestTestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
-                 "Invalid value for 'CTEST_TEST_LOAD' : " << *ctestTestLoad
-                                                          << std::endl);
+                 "Invalid value for 'CTEST_TEST_LOAD' : ", *ctestTestLoad,
+                 '\n');
     }
   } else {
     testLoad = this->CTest->GetTestLoad();

@@ -216,10 +216,9 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
 
   this->CTest->AddSubmitFile(cmCTest::PartUpdate, "Update.xml");
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "   Updating " << TypeToString(updateType)
-                                    << " repository: " << source_dir << '\n',
-                     args.Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Updating ",
+                     TypeToString(updateType), " repository: ", source_dir,
+                     '\n');
 
   // Make sure VCS tool messages are in English so we can parse them.
   cmCLocaleEnvironmentScope fixLocale;
@@ -277,24 +276,21 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
   int localModifications = 0;
   int numUpdated = vc->GetPathCount(cmCTestVC::PathUpdated);
   if (numUpdated) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Found " << numUpdated << " updated files\n",
-                       args.Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found ",
+                       numUpdated, " updated files\n");
   }
   if (int numModified = vc->GetPathCount(cmCTestVC::PathModified)) {
-    cmCTestOptionalLog(
-      this->CTest, HANDLER_OUTPUT,
-      "   Found " << numModified << " locally modified files\n", args.Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found ",
+                       numModified, " locally modified files\n");
     localModifications += numModified;
   }
   if (int numConflicting = vc->GetPathCount(cmCTestVC::PathConflicting)) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Found " << numConflicting << " conflicting files\n",
-                       args.Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found ",
+                       numConflicting, " conflicting files\n");
     localModifications += numConflicting;
   }
 
-  cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, args.Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG, args.Quiet, "End\n");
   std::string end_time = this->CTest->CurrentTime();
   xml.Element("EndDateTime", end_time);
   xml.Element("EndTime", std::chrono::system_clock::now());
@@ -307,16 +303,15 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
   if (localModifications) {
     xml.Content("Update error: "
                 "There are modified or conflicting files in the repository");
-    cmCTestLog(this->CTest, WARNING,
-               "   There are modified or conflicting files in the repository"
-                 << std::endl);
+    cmCTestLog(
+      this->CTest, WARNING,
+      "   There are modified or conflicting files in the repository\n");
   }
   if (!updated) {
     xml.Content("Update command failed:\n");
     xml.Content(vc->GetUpdateCommandLine());
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   Update command failed: " << vc->GetUpdateCommandLine()
-                                            << "\n");
+               "   Update command failed: ", vc->GetUpdateCommandLine(), '\n');
   }
   xml.EndElement(); // UpdateReturnStatus
   xml.EndElement(); // Update

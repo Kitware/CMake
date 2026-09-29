@@ -3,7 +3,6 @@
 #include "cmCTestCurl.h"
 
 #include <cstdio>
-#include <ostream>
 
 #include <cmext/algorithm>
 
@@ -145,7 +144,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   FILE* ftpfile = cmsys::SystemTools::Fopen(local_file, "rb");
   if (!ftpfile) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Could not open file for upload: " << local_file << "\n");
+               "Could not open file for upload: ", local_file, "\n");
     return false;
   }
   // set the url
@@ -165,9 +164,8 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
     ::curl_slist_append(nullptr, "Content-Type: text/xml");
   // Add any additional headers that the user specified.
   for (std::string const& h : this->HttpHeaders) {
-    cmCTestOptionalLog(this->CTest, DEBUG,
-                       "   Add HTTP Header: \"" << h << "\"" << std::endl,
-                       this->Quiet);
+    cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
+                       "   Add HTTP Header: \"", h, "\"\n");
     headers = ::curl_slist_append(headers, h.c_str());
   }
   ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, headers);
@@ -184,19 +182,18 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
 
   if (!responseData.empty()) {
     response = std::string(responseData.begin(), responseData.end());
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Curl response: [" << response << "]\n", this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                       "Curl response: [", response, "]\n");
   }
   std::string curlDebug;
   if (!debugData.empty()) {
     curlDebug = std::string(debugData.begin(), debugData.end());
-    cmCTestOptionalLog(this->CTest, DEBUG,
-                       "Curl debug: [" << curlDebug << "]\n", this->Quiet);
+    cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Curl debug: [",
+                       curlDebug, "]\n");
   }
   if (response.empty()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "No response from server.\n"
-                 << curlDebug << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "No response from server.\n",
+               curlDebug, '\n');
     return false;
   }
   return true;
@@ -206,11 +203,8 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
                               std::string const& fields, std::string& response)
 {
   response.clear();
-  cmCTestOptionalLog(this->CTest, DEBUG,
-                     "HttpRequest\n"
-                       << "url: " << url << "\n"
-                       << "fields " << fields << "\n",
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "HttpRequest\n",
+                     "url: ", url, '\n', "fields ", fields, '\n');
   if (!this->InitCurl()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed\n");
     return false;
@@ -233,9 +227,8 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
   struct curl_slist* headers = nullptr;
   if (!this->HttpHeaders.empty()) {
     for (std::string const& h : this->HttpHeaders) {
-      cmCTestOptionalLog(this->CTest, DEBUG,
-                         "   Add HTTP Header: \"" << h << "\"" << std::endl,
-                         this->Quiet);
+      cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
+                         "   Add HTTP Header: \"", h, "\"\n");
       headers = ::curl_slist_append(headers, h.c_str());
     }
   }
@@ -246,16 +239,15 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
 
   if (!responseData.empty()) {
     response = std::string(responseData.begin(), responseData.end());
-    cmCTestOptionalLog(this->CTest, DEBUG,
-                       "Curl response: [" << response << "]\n", this->Quiet);
+    cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Curl response: [",
+                       response, "]\n");
   }
   if (!debugData.empty()) {
     std::string curlDebug = std::string(debugData.begin(), debugData.end());
-    cmCTestOptionalLog(this->CTest, DEBUG,
-                       "Curl debug: [" << curlDebug << "]\n", this->Quiet);
+    cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Curl debug: [",
+                       curlDebug, "]\n");
   }
-  cmCTestOptionalLog(this->CTest, DEBUG, "Curl res: " << res << "\n",
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Curl res: ", res, "\n");
   return (res == 0);
 }
 

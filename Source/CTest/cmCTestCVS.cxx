@@ -217,7 +217,7 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
 void cmCTestCVS::LoadRevisions(std::string const& file, char const* branchFlag,
                                std::vector<Revision>& revisions)
 {
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, '.');
 
   // Run "cvs log" to get revisions of this file on this branch.
   std::string cvs = this->CommandLineTool;
@@ -264,14 +264,13 @@ bool cmCTestCVS::WriteXMLUpdates(cmXMLWriter& xml)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per updated file):\n"
-             "    "
-               << std::flush);
+             "    ");
 
   for (auto const& d : this->Dirs) {
     this->WriteXMLDirectory(xml, d.first, d.second);
   }
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, '\n');
 
   return true;
 }

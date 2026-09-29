@@ -96,25 +96,28 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir, quiet);
 
   if (smodel) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "Run dashboard with model "
-                         << smodel << std::endl
-                         << "   Source directory: " << *src_dir << std::endl
-                         << "   Build directory: " << *bld_dir << std::endl,
-                       quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, quiet,
+                       "Run dashboard with model ", smodel,
+                       "\n"
+                       "   Source directory: ",
+                       *src_dir,
+                       "\n"
+                       "   Build directory: ",
+                       *bld_dir, '\n');
   } else {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, quiet,
                        "Run dashboard with "
-                       "to-be-determined model"
-                         << std::endl
-                         << "   Source directory: " << *src_dir << std::endl
-                         << "   Build directory: " << *bld_dir << std::endl,
-                       quiet);
+                       "to-be-determined model\n"
+                       "   Source directory: ",
+                       *src_dir,
+                       "\n"
+                       "   Build directory: ",
+                       *bld_dir, '\n');
   }
   char const* group = this->CTest->GetSpecificGroup();
   if (group) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Group: " << group << std::endl, quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, quiet, "   Group: ", group,
+                       '\n');
   }
 
   // Log startup actions.
@@ -122,7 +125,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   cmGeneratedFileStream ofs(startLogFile);
   if (!ofs) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot create log file: LastStart.log" << std::endl);
+               "Cannot create log file: LastStart.log\n");
     return false;
   }
 
@@ -164,9 +167,8 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   if (!fname.empty()) {
-    cmCTestOptionalLog(
-      this->CTest, OUTPUT,
-      "   Reading ctest configuration file: " << fname << std::endl, quiet);
+    cmCTestOptionalLog(this->CTest, OUTPUT, quiet,
+                       "   Reading ctest configuration file: ", fname, '\n');
     bool readit = mf.ReadDependentFile(fname);
     if (!readit) {
       std::string m = cmStrCat("Could not find include file: ", fname);
@@ -185,22 +187,18 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->Initialize(binaryDir);
 
   cmCTestOptionalLog(
-    this->CTest, OUTPUT,
-    "   Site: " << this->CTest->GetCTestConfiguration("Site") << std::endl
-                << "   Build name: "
-                << cmCTest::SafeBuildIdField(
-                     this->CTest->GetCTestConfiguration("BuildName"))
-                << std::endl,
-    quiet);
+    this->CTest, OUTPUT, quiet,
+    "   Site: ", this->CTest->GetCTestConfiguration("Site"), '\n',
+    "   Build name: ",
+    cmCTest::SafeBuildIdField(this->CTest->GetCTestConfiguration("BuildName")),
+    '\n');
 
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY &&
       this->CTest->GetCTestConfiguration("NightlyStartTime").empty()) {
     cmCTestOptionalLog(
-      this->CTest, WARNING,
+      this->CTest, WARNING, quiet,
       "WARNING: No nightly start time found please set in CTestConfig.cmake"
-      " or DartConfig.cmake"
-        << std::endl,
-      quiet);
+      " or DartConfig.cmake\n");
     return false;
   }
 
@@ -216,10 +214,9 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  cmCTestOptionalLog(this->CTest, OUTPUT,
-                     "   Use " << this->CTest->GetTestGroupString() << " tag: "
-                               << this->CTest->GetCurrentTag() << std::endl,
-                     quiet);
+  cmCTestOptionalLog(this->CTest, OUTPUT, quiet, "   Use ",
+                     this->CTest->GetTestGroupString(),
+                     " tag: ", this->CTest->GetCurrentTag(), '\n');
   return true;
 }
 

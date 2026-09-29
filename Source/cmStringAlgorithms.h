@@ -382,6 +382,19 @@ inline void cmStripSuffixIfExists(std::string& str, cm::string_view suffix)
   }
 }
 
+/** Pad a string to a given width. */
+inline std::string cmPadToWidth(int width, std::string text)
+{
+  if (width <= 0) {
+    return text;
+  }
+  std::size_t width_size = static_cast<std::size_t>(width);
+  if (width_size > text.size()) {
+    text.insert(0, width_size - text.size(), ' ');
+  }
+  return text;
+}
+
 /** Converts a string to long. Expects that the whole string is an integer.  */
 bool cmStrToLong(char const* str, long* value);
 bool cmStrToLong(std::string const& str, long* value);

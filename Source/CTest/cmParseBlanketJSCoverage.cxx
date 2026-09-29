@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmParseBlanketJSCoverage.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 
@@ -114,26 +115,22 @@ cmParseBlanketJSCoverage::cmParseBlanketJSCoverage(
 bool cmParseBlanketJSCoverage::LoadCoverageData(
   std::vector<std::string> const& files)
 {
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Found " << files.size() << " Files" << std::endl,
-                     this->Coverage.Quiet);
-  for (std::string const& file : files) {
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Reading JSON File " << file << std::endl,
-                       this->Coverage.Quiet);
-
-    if (!this->ReadJSONFile(file)) {
-      return false;
-    }
-  }
-  return true;
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Coverage.Quiet,
+                     "Found ", files.size(), " Files\n");
+  return std::all_of(files.begin(), files.end(),
+                     [this](std::string const& file) {
+                       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                                          this->Coverage.Quiet,
+                                          "Reading JSON File ", file, '\n');
+                       return this->ReadJSONFile(file);
+                     });
 }
 
 bool cmParseBlanketJSCoverage::ReadJSONFile(std::string const& file)
 {
   cmParseBlanketJSCoverage::JSONParser parser(this->Coverage);
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     "Parsing " << file << std::endl, this->Coverage.Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Coverage.Quiet,
+                     "Parsing ", file, '\n');
   parser.ParseFile(file);
   return true;
 }

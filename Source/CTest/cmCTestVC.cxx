@@ -41,15 +41,15 @@ void cmCTestVC::SetSourceDirectory(std::string const& dir)
 bool cmCTestVC::InitialCheckout(std::string const& command)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   First perform the initial checkout: " << command << "\n");
+             "   First perform the initial checkout: ", command, "\n");
 
   // Make the parent directory in which to perform the checkout.
   std::string parent = cmSystemTools::GetFilenamePath(this->SourceDirectory);
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Perform checkout in directory: " << parent << "\n");
+             "   Perform checkout in directory: ", parent, "\n");
   if (!cmSystemTools::MakeDirectory(parent)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot create directory: " << parent << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create directory: ", parent,
+               '\n');
     return false;
   }
 
@@ -63,8 +63,7 @@ bool cmCTestVC::InitialCheckout(std::string const& command)
   bool result = this->RunChild(args, &out, &err, parent);
   this->Log << "--- End Initial Checkout ---\n";
   if (!result) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Initial checkout failed!" << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Initial checkout failed!\n");
   }
   return result;
 }
@@ -177,7 +176,7 @@ void cmCTestVC::SetNewRevision(std::string const& /*unused*/)
 bool cmCTestVC::UpdateImpl()
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-             "* Unknown VCS tool, not updating!" << std::endl);
+             "* Unknown VCS tool, not updating!\n");
   return true;
 }
 

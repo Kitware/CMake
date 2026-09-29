@@ -6,9 +6,9 @@
 
 #include <chrono>
 #include <ctime>
+#include <iosfwd>
 #include <map>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -19,6 +19,7 @@
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmStdIoTerminal.h"
+#include "cmStringAlgorithms.h"
 
 class cmake;
 class cmCMakePresetsArgs;
@@ -485,23 +486,11 @@ private:
   std::unique_ptr<Private> Impl;
 };
 
-#define cmCTestLog(ctSelf, logType, msg)                                      \
-  do {                                                                        \
-    std::ostringstream cmCTestLog_msg;                                        \
-    cmCTestLog_msg << msg;                                                    \
-    (ctSelf)->Log(cmCTest::logType, cmCTestLog_msg.str());                    \
-  } while (false)
+#define cmCTestLog(ctSelf, logType, ...)                                      \
+  (ctSelf)->Log(cmCTest::logType, cmStrCat("", __VA_ARGS__))
 
-#define cmCTestOptionalLog(ctSelf, logType, msg, suppress)                    \
-  do {                                                                        \
-    std::ostringstream cmCTestLog_msg;                                        \
-    cmCTestLog_msg << msg;                                                    \
-    (ctSelf)->Log(cmCTest::logType, cmCTestLog_msg.str(), suppress);          \
-  } while (false)
+#define cmCTestOptionalLog(ctSelf, logType, suppress, ...)                    \
+  (ctSelf)->Log(cmCTest::logType, cmStrCat("", __VA_ARGS__), suppress)
 
-#define cmCTestColorLog(ctSelf, logType, attrs, msg)                          \
-  do {                                                                        \
-    std::ostringstream cmCTestLog_msg;                                        \
-    cmCTestLog_msg << msg;                                                    \
-    (ctSelf)->Log(cmCTest::logType, cmCTestLog_msg.str(), attrs);             \
-  } while (false)
+#define cmCTestColorLog(ctSelf, logType, attrs, ...)                          \
+  (ctSelf)->Log(cmCTest::logType, cmStrCat("", __VA_ARGS__), attrs)

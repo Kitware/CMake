@@ -10,7 +10,6 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -846,15 +845,7 @@ bool parse_default_directory_permissions(std::string const& permissions,
     return false;
   }
 
-  std::ostringstream oss;
-  for (auto i = 0u; i < parsedPermissions.size(); i++) {
-    if (i != 0) {
-      oss << ';';
-    }
-    oss << parsedPermissions[i];
-  }
-
-  parsedPermissionsVar = oss.str();
+  parsedPermissionsVar = cmJoin(parsedPermissions, ";");
   return true;
 }
 
