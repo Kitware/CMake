@@ -721,7 +721,7 @@ void cmCommonTargetGenerator::ComputeRustFlagsForObjects(
       // common usage in Rust.
       std::string objStem = objPath.stem().string();
       objStem = objStem.substr(3, objStem.length() - 6);
-      linkCrates = cmStrCat(std::move(linkCrates), " --extern=", objStem, "=",
+      linkCrates = cmStrCat(std::move(linkCrates), " --extern=", objStem, '=',
                             this->LocalCommonGenerator->ConvertToOutputFormat(
                               obj, cmOutputConverter::SHELL));
     } else {
