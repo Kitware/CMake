@@ -7,7 +7,6 @@
 #include <cstdint>
 #include <map>
 #include <memory>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -18,6 +17,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmStringAlgorithms.h"
 #include "cmelf/elf32.h"
 #include "cmelf/elf64.h"
 #include "cmelf/elf_common.h"
@@ -452,9 +452,7 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
         this->ELFType = cmELF::FileTypeSpecificProc;
         break;
       }
-      std::ostringstream e;
-      e << "Unknown ELF file type " << eti;
-      this->SetErrorMessage(e.str().c_str());
+      this->SetErrorMessage(cmStrCat("Unknown ELF file type ", eti).c_str());
       return;
     }
   }

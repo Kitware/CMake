@@ -4,7 +4,6 @@
 #include "cmRuntimeDependencyArchive.h"
 
 #include <algorithm>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,6 +16,7 @@
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetTypes.h"
 
@@ -164,10 +164,9 @@ bool cmRuntimeDependencyArchive::Prepare()
   } else if (platform == "macos+macho") {
     this->Linker = cm::make_unique<cmBinUtilsMacOSMachOLinker>(this);
   } else {
-    std::ostringstream e;
-    e << "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM: "
-      << platform;
-    this->SetError(e.str());
+    this->SetError(
+      cmStrCat("Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM: ",
+               platform));
     return false;
   }
 

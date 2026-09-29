@@ -10,7 +10,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <initializer_list>
-#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <sstream>
@@ -2862,16 +2861,18 @@ int cmake::ActualConfigure()
 
   // configure result
   if (this->State->GetRole() == cmState::Role::Project) {
-    std::ostringstream msg;
+    std::string msg;
     if (cmSystemTools::GetErrorOccurredFlag()) {
-      msg << "Configuring incomplete, errors occurred!";
+      msg = "Configuring incomplete, errors occurred!";
     } else {
       auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         endTime - startTime);
-      msg << "Configuring done (" << std::fixed << std::setprecision(1)
-          << ms.count() / 1000.0L << "s)";
+      msg.resize(128);
+      // NOLINTNEXTLINE(readability-container-data-pointer)
+      msg.resize(snprintf(&msg[0], msg.size(), "Configuring done (%.1fs)",
+                          static_cast<double>(ms.count()) * 1e-3));
     }
-    this->UpdateProgress(msg.str(), -1);
+    this->UpdateProgress(msg, -1);
   }
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -3346,10 +3347,12 @@ int cmake::Generate()
   {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(endTime -
                                                                     startTime);
-    std::ostringstream msg;
-    msg << "Generating done (" << std::fixed << std::setprecision(1)
-        << ms.count() / 1000.0L << "s)";
-    this->UpdateProgress(msg.str(), -1);
+    std::string msg;
+    msg.resize(128);
+    // NOLINTNEXTLINE(readability-container-data-pointer)
+    msg.resize(snprintf(&msg[0], msg.size(), "Generating done (%.1fs)",
+                        static_cast<double>(ms.count()) * 1e-3));
+    this->UpdateProgress(msg, -1);
   }
   if (!this->GraphVizFile.empty()) {
     std::cout << "Generate graphviz: " << this->GraphVizFile << '\n';

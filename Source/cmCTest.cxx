@@ -14,7 +14,6 @@
 #include <iterator>
 #include <map>
 #include <ratio>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -3794,12 +3793,12 @@ bool cmCTest::StartResultingXML(Part part, char const* name, int submitIndex,
   if (submitIndex == 0) {
     submitIndex = this->Impl->SubmitIndex;
   }
-  std::ostringstream ostr;
-  ostr << name;
+  std::string fname;
   if (submitIndex > 0) {
-    ostr << "_" << submitIndex;
+    fname = cmStrCat(name, '_', submitIndex, ".xml");
+  } else {
+    fname = cmStrCat(name, ".xml");
   }
-  ostr << ".xml";
   if (this->Impl->CurrentTag.empty()) {
     cmCTestLog(this, ERROR_MESSAGE,
                "Current Tag empty, this may mean NightlyStartTime / "
@@ -3809,12 +3808,12 @@ bool cmCTest::StartResultingXML(Part part, char const* name, int submitIndex,
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
-  if (!this->OpenOutputFile(this->Impl->CurrentTag, ostr.str(), xofs, true)) {
+  if (!this->OpenOutputFile(this->Impl->CurrentTag, fname, xofs, true)) {
     cmCTestLog(this, ERROR_MESSAGE,
-               "Cannot create resulting XML file: ", ostr.str(), '\n');
+               "Cannot create resulting XML file: ", fname, '\n');
     return false;
   }
-  this->AddSubmitFile(part, ostr.str());
+  this->AddSubmitFile(part, fname);
   return true;
 }
 
@@ -3829,18 +3828,19 @@ bool cmCTest::StartLogFile(char const* name, int submitIndex,
   if (submitIndex == 0) {
     submitIndex = this->Impl->SubmitIndex;
   }
-  std::ostringstream ostr;
-  ostr << "Last" << name;
+  std::string fname;
   if (submitIndex > 0) {
-    ostr << "_" << submitIndex;
+    fname = cmStrCat("Last", name, '_', submitIndex);
+  } else {
+    fname = cmStrCat("Last", name);
   }
   if (!this->Impl->CurrentTag.empty()) {
-    ostr << "_" << this->Impl->CurrentTag;
+    fname = cmStrCat(std::move(fname), '_', this->Impl->CurrentTag, ".log");
+  } else {
+    fname = cmStrCat(std::move(fname), ".log");
   }
-  ostr << ".log";
-  if (!this->OpenOutputFile("Temporary", ostr.str(), xofs)) {
-    cmCTestLog(this, ERROR_MESSAGE, "Cannot create log file: ", ostr.str(),
-               '\n');
+  if (!this->OpenOutputFile("Temporary", fname, xofs)) {
+    cmCTestLog(this, ERROR_MESSAGE, "Cannot create log file: ", fname, '\n');
     return false;
   }
   return true;

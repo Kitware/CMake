@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -16,6 +15,7 @@
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
 #include "cmRuntimeDependencyArchive.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetTypes.h"
 
@@ -23,8 +23,6 @@
 #  include <windows.h>
 
 #  include "cmsys/Encoding.hxx"
-
-#  include "cmStringAlgorithms.h"
 #else
 #  include "cmsys/Directory.hxx"
 #endif
@@ -95,9 +93,8 @@ bool cmBinUtilsWindowsPELinker::Prepare()
       cm::make_unique<cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool>(
         this->Archive);
   } else {
-    std::ostringstream e;
-    e << "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: " << tool;
-    this->SetError(e.str());
+    this->SetError(cmStrCat(
+      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: ", tool));
     return false;
   }
 

@@ -3,7 +3,6 @@
 #include "cmExprParserHelper.h"
 
 #include <iostream>
-#include <sstream>
 #include <stdexcept>
 #include <utility>
 
@@ -95,9 +94,7 @@ int cmExprParserHelper::LexInput(char* buf, int maxlen)
 void cmExprParserHelper::Error(char const* str)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
-  std::ostringstream ostr;
-  ostr << str << " (" << pos << ")";
-  this->ErrorString = ostr.str();
+  this->ErrorString = cmStrCat(str, " (", pos, ')');
 }
 
 void cmExprParserHelper::Warning(std::string str)
@@ -108,10 +105,9 @@ void cmExprParserHelper::Warning(std::string str)
 void cmExprParserHelper::UnexpectedChar(char c)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
-  std::ostringstream ostr;
-  ostr << "Unexpected character in expression at position " << pos << ": " << c
-       << "\n";
-  this->WarningString += ostr.str();
+  this->WarningString = cmStrCat(
+    this->WarningString, "Unexpected character in expression at position ",
+    pos, ": ", c, '\n');
 }
 
 void cmExprParserHelper::SetResult(std::int64_t value)

@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetTraceDependencies.h"
 
-#include <sstream>
 #include <utility>
 
 #include <cmext/algorithm>
@@ -43,12 +42,11 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
       std::set<cmGeneratorTarget const*> const tgts =
         this->GlobalGenerator->GetFilenameTargetDepends(sf);
       if (cm::contains(tgts, this->GeneratorTarget)) {
-        std::ostringstream e;
-        e << "Evaluation output file\n  \"" << sf->ResolveFullPath()
-          << "\"\ndepends on the sources of a target it is used in.  This "
-             "is a dependency loop and is not allowed.";
         this->GeneratorTarget->LocalGenerator->IssueMessage(
-          MessageType::FATAL_ERROR, e.str());
+          MessageType::FATAL_ERROR,
+          cmStrCat("Evaluation output file\n  \"", sf->ResolveFullPath(),
+                   "\"\ndepends on the sources of a target it is used in.  "
+                   "This is a dependency loop and is not allowed."));
         return;
       }
       if (emitted.insert(sf).second && this->SourcesQueued.insert(sf).second) {

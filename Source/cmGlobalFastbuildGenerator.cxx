@@ -8,7 +8,6 @@
 #include <initializer_list>
 #include <iterator>
 #include <queue>
-#include <sstream>
 
 #include <cm/memory>
 
@@ -443,12 +442,11 @@ void cmGlobalFastbuildGenerator::Generate()
   if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
                                     this->FastbuildVersion,
                                     RequiredFastbuildVersion())) {
-    std::ostringstream msg;
-    msg << "The detected version of Fastbuild (" << this->FastbuildVersion;
-    msg << ") is less than the version of Fastbuild required by CMake (";
-    msg << this->RequiredFastbuildVersion() << ").";
-    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                           msg.str());
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The detected version of Fastbuild (", this->FastbuildVersion,
+               ") is less than the version of Fastbuild required by CMake (",
+               this->RequiredFastbuildVersion(), ")."));
     return;
   }
   this->ProcessEnvironment();

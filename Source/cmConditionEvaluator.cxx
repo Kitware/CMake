@@ -8,7 +8,6 @@
 #include <functional>
 #include <iterator>
 #include <list>
-#include <sstream>
 #include <utility>
 
 #include <cm/optional>
@@ -603,9 +602,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       auto const& rex = args.nextnext->GetValue();
       cmsys::RegularExpression regEntry;
       if (!regEntry.compile(rex)) {
-        std::ostringstream error;
-        error << "Regular expression \"" << rex << "\" cannot compile";
-        errorString = error.str();
+        errorString =
+          cmStrCat("Regular expression \"", rex, "\" cannot compile");
         status = MessageType::FATAL_ERROR;
         return false;
       }

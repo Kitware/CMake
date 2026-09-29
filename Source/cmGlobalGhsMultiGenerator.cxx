@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <functional>
 #include <map>
-#include <sstream>
+#include <ostream>
 #include <utility>
 
 #include <cm/memory>
@@ -681,11 +681,10 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
 
     // Print not implemented warning.
     if (this->GetCMakeInstance()->DoWriteGlobVerifyTarget()) {
-      std::ostringstream msg;
-      msg << "Any pre-check scripts, such as those generated for file(GLOB "
-             "CONFIGURE_DEPENDS), will not be run by gbuild.";
-      this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
-                                                msg.str());
+      this->GetCMakeInstance()->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
+        "Any pre-check scripts, such as those generated for file(GLOB "
+        "CONFIGURE_DEPENDS), will not be run by gbuild.");
     }
 
     // Sort the list of input files and remove duplicates.

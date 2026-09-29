@@ -4,7 +4,6 @@
 #include "cmBinUtilsLinuxELFLinker.h"
 
 #include <queue>
-#include <sstream>
 #include <unordered_set>
 #include <utility>
 
@@ -62,9 +61,8 @@ bool cmBinUtilsLinuxELFLinker::Prepare()
       cm::make_unique<cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool>(
         this->Archive);
   } else {
-    std::ostringstream e;
-    e << "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: " << tool;
-    this->SetError(e.str());
+    this->SetError(cmStrCat(
+      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: ", tool));
     return false;
   }
 
@@ -80,9 +78,8 @@ bool cmBinUtilsLinuxELFLinker::Prepare()
       return false;
     }
   } else {
-    std::ostringstream e;
-    e << "Invalid value for CMAKE_LDCONFIG_TOOL: " << ldConfigTool;
-    this->SetError(e.str());
+    this->SetError(
+      cmStrCat("Invalid value for CMAKE_LDCONFIG_TOOL: ", ldConfigTool));
     return false;
   }
 
@@ -214,13 +211,12 @@ bool cmBinUtilsLinuxELFLinker::ResolveDependency(
     path = cmStrCat(searchPath, '/', name);
     if (cmSystemTools::PathExists(path) &&
         FileHasArchitecture(path.c_str(), this->Machine)) {
-      std::ostringstream warning;
-      warning << "Dependency " << name << " found in search directory:\n  "
-              << searchPath
-              << "\nSee file(GET_RUNTIME_DEPENDENCIES) documentation for "
-              << "more information.";
-      this->Archive->GetMakefile()->IssueMessage(MessageType::WARNING,
-                                                 warning.str());
+      this->Archive->GetMakefile()->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat("Dependency ", name, " found in search directory:\n  ",
+                 searchPath,
+                 "\nSee file(GET_RUNTIME_DEPENDENCIES) documentation for more "
+                 "information."));
       resolved = true;
       return true;
     }

@@ -3,7 +3,7 @@
 #include "cmInstallExportGenerator.h"
 
 #include <map>
-#include <sstream>
+#include <ostream>
 #include <utility>
 
 #include "cmCryptoHash.h"
@@ -77,10 +77,9 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 {
   // Skip empty sets.
   if (this->ExportSet->GetTargetExports().empty()) {
-    std::ostringstream e;
-    e << "INSTALL(" << this->InstallSubcommand() << ") given unknown export \""
-      << this->ExportSet->GetName() << "\"";
-    cmSystemTools::Error(e.str());
+    cmSystemTools::Error(cmStrCat("INSTALL(", this->InstallSubcommand(),
+                                  ") given unknown export \"",
+                                  this->ExportSet->GetName(), '"'));
     return;
   }
 

@@ -4,7 +4,6 @@
 
 #include <cstring>
 #include <set>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -582,22 +581,23 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
     vsInstance = i;
     if (!this->vsSetupAPIHelper.SetVSInstance(
           this->GeneratorInstance, this->GeneratorInstanceVersion)) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "could not find specified instance of Visual Studio:\n"
-        "  " << i;
-      /* clang-format on */
-      if (!this->GeneratorInstance.empty() &&
-          this->GeneratorInstanceVersion.empty() &&
-          cmSystemTools::FileIsDirectory(this->GeneratorInstance)) {
-        e << "\n"
-             "The directory exists, but the instance is not known to the "
-             "Visual Studio Installer, and no 'version=' field was given.";
-      }
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          "Generator\n"
+          "  ",
+          this->GetName(),
+          "\n"
+          "could not find specified instance of Visual Studio:\n"
+          "  ",
+          i,
+          (!this->GeneratorInstance.empty() &&
+           this->GeneratorInstanceVersion.empty() &&
+           cmSystemTools::FileIsDirectory(this->GeneratorInstance))
+            ? "\n"
+              "The directory exists, but the instance is not known to the "
+              "Visual Studio Installer, and no 'version=' field was given."
+            : ""));
       return false;
     }
   } else if (!this->vsSetupAPIHelper.GetVSInstanceInfo(vsInstance)) {

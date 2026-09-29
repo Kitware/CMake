@@ -8,7 +8,6 @@
 #include <iterator>
 #include <map>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -604,10 +603,10 @@ int main(int argc, char const* const* argv)
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
               cmValue projVersionPatch =
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
-              std::ostringstream ostr;
-              ostr << *projVersionMajor << '.' << *projVersionMinor << '.'
-                   << *projVersionPatch;
-              mf->AddDefinition("CPACK_PACKAGE_VERSION", ostr.str());
+              mf->AddDefinition("CPACK_PACKAGE_VERSION",
+                                cmStrCat(*projVersionMajor, '.',
+                                         *projVersionMinor, '.',
+                                         *projVersionPatch));
             }
 
             int res = cpackGenerator->DoPackage();

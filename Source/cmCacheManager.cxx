@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include <sstream>
 #include <string>
 
 #include "cmsys/FStream.hxx"
@@ -109,10 +108,9 @@ bool cmCacheManager::LoadCache(std::string const& path, bool internal,
         }
       }
     } else {
-      std::ostringstream error;
-      error << "Parse error in cache file " << cacheFile << " on line "
-            << lineno << ". Offending entry: " << realbuffer;
-      cmSystemTools::Error(error.str());
+      cmSystemTools::Error(cmStrCat("Parse error in cache file ", cacheFile,
+                                    " on line ", lineno,
+                                    ". Offending entry: ", realbuffer));
     }
   }
   this->CacheMajorVersion = 0;
