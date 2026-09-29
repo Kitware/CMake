@@ -1,2 +1,2 @@
 #!/bin/sh
-ast-grep scan --error
+.gitlab/ast-grep/ast-grep scan --error
