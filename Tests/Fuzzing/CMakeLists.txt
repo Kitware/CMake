@@ -104,3 +104,6 @@ add_fuzzer(cmScriptFuzzer cmScriptFuzzer.cxx)
 
 # Fortran dependency scanner fuzzer
 add_fuzzer(cmFortranParserFuzzer cmFortranParserFuzzer.cxx)
+
+# CPS (Common Package Specification) package-info reader fuzzer
+add_fuzzer(cmPackageInfoReaderFuzzer cmPackageInfoReaderFuzzer.cxx)

@@ -1,0 +1,63 @@
+# Dictionary for the CPS (Common Package Specification) package-info reader.
+# Keys and values that gate the reader's branches: the accepted schema range,
+# the prefix marker, component types, and the per-configuration attributes.
+
+# Top-level keys
+"\"cps_version\""
+"\"name\""
+"\"version\""
+"\"compat_version\""
+"\"version_schema\""
+"\"cps_path\""
+"\"prefix\""
+"\"components\""
+"\"requires\""
+"\"configurations\""
+"\"default_configurations\""
+"\"default_license\""
+"\"license\""
+
+# Accepted schema versions (reader requires >= 0.13 and < 0.16)
+"\"0.13\""
+"\"0.14\""
+"\"0.15\""
+
+# Prefix resolution
+"\"@prefix@\""
+"\"@prefix@/cps\""
+
+# Version schemas
+"\"simple\""
+"\"custom\""
+"\"rpm\""
+"\"dpkg\""
+"\"pep440\""
+
+# Component types
+"\"type\""
+"\"interface\""
+"\"executable\""
+"\"archive\""
+"\"dylib\""
+"\"module\""
+"\"symbolic\""
+
+# Component attributes
+"\"location\""
+"\"includes\""
+"\"definitions\""
+"\"compile_flags\""
+"\"link_flags\""
+"\"link_libraries\""
+"\"compile_features\""
+"\"link_features\""
+"\"requires\""
+"\"configurations\""
+"\"file_sets\""
+"\"cxx_modules\""
+
+# Languages accepted for per-language properties
+"\"c\""
+"\"cpp\""
+"\"cxx\""
+"\"fortran\""
