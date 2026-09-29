@@ -353,7 +353,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
 
   // validate that all languages requested are enabled.
   std::set<std::string> requiredLangs;
-  if (this->HaveRequiredLanguages(objectSources, requiredLangs)) {
+  if (this->HaveRequiredLanguages(objectSources, this->GetConfigName(),
+                                  requiredLangs)) {
     for (cmSourceFile const* sf : objectSources) {
       // Generate this object file's rule file.
       this->WriteObjectRuleFiles(*sf);
@@ -601,7 +602,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   cmSourceFile const& source)
 {
   // Identify the language of the source file.
-  std::string const& lang = source.GetLanguage();
+  std::string const lang = this->GeneratorTarget->GetSourceFileLanguage(
+    &source, this->GetConfigName());
   if (lang.empty()) {
     // don't know anything about this file so skip it
     return;
@@ -719,7 +721,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
   // Explicitly add the explicit language flag before any other flag
   // so user flags can override it.
-  this->GeneratorTarget->AddExplicitLanguageFlags(flags, source);
+  this->GeneratorTarget->AddExplicitLanguageFlags(flags, source, config);
 
   // Add language-specific flags.
   std::string const langFlags =

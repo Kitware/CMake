@@ -145,7 +145,8 @@ cmFastbuildNormalTargetGenerator::cmFastbuildNormalTargetGenerator(
 std::string cmFastbuildNormalTargetGenerator::DetectCompilerFlags(
   cmSourceFile const& srcFile, std::string const& arch)
 {
-  std::string const language = srcFile.GetLanguage();
+  std::string const language =
+    this->GeneratorTarget->GetSourceFileLanguage(&srcFile, Config);
   cmGeneratorExpressionInterpreter genexInterpreter(
     this->GetLocalGenerator(), Config, this->GeneratorTarget, language);
 
@@ -174,7 +175,8 @@ std::string cmFastbuildNormalTargetGenerator::DetectCompilerFlags(
 
   std::string compileFlags =
     CompileFlagsByLangAndArch[std::make_pair(language, arch)];
-  this->GeneratorTarget->AddExplicitLanguageFlags(compileFlags, srcFile);
+  this->GeneratorTarget->AddExplicitLanguageFlags(compileFlags, srcFile,
+                                                  Config);
 
   if (cmValue const cflags = srcFile.GetProperty(COMPILE_FLAGS)) {
     this->LocalGenerator->AppendFlags(
@@ -450,7 +452,8 @@ void cmFastbuildNormalTargetGenerator::ApplyLWYUToLinkerCommand(
 std::string cmFastbuildNormalTargetGenerator::ComputeDefines(
   cmSourceFile const& srcFile)
 {
-  std::string const language = srcFile.GetLanguage();
+  std::string const language =
+    this->GeneratorTarget->GetSourceFileLanguage(&srcFile, Config);
   std::set<std::string> defines;
   cmGeneratorExpressionInterpreter genexInterpreter(
     this->GetLocalGenerator(), Config, this->GeneratorTarget, language);
@@ -506,7 +509,8 @@ void cmFastbuildNormalTargetGenerator::ComputePCH(
       !node.PCHOutputFile.empty()) {
     return;
   }
-  std::string const language = srcFile.GetLanguage();
+  std::string const language =
+    this->GeneratorTarget->GetSourceFileLanguage(&srcFile, Config);
   cmGeneratorExpressionInterpreter genexInterpreter(
     this->GetLocalGenerator(), Config, this->GeneratorTarget, language);
 
@@ -1324,7 +1328,8 @@ void cmFastbuildNormalTargetGenerator::AppendExtraResources(
 std::string cmFastbuildNormalTargetGenerator::GetCompileOptions(
   cmSourceFile const& srcFile, std::string const& arch)
 {
-  std::string const language = srcFile.GetLanguage();
+  std::string const language =
+    this->GeneratorTarget->GetSourceFileLanguage(&srcFile, Config);
   cmRulePlaceholderExpander::RuleVariables compileObjectVars =
     ComputeRuleVariables();
   std::string const compilerFlags = DetectCompilerFlags(srcFile, arch);
@@ -1473,12 +1478,15 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
 
     cmSourceFile const& srcFile = *source;
     std::string const pathToFile = srcFile.GetFullPath();
+    std::string const language =
+      this->GeneratorTarget->GetSourceFileLanguage(&srcFile, Config);
     cmGeneratorFileSet const* const fileSet =
       GeneratorTarget->GetFileSetForSource(Config, source);
     bool fileUsesUnity = useUnity;
     if (useUnity) {
       // Check if the source should be added to "UnityInputExcludedFiles".
-      if (IsExcludedFromUnity(GeneratorTarget, fileSet, srcFile)) {
+      if (IsExcludedFromUnity(GeneratorTarget, fileSet, srcFile) ||
+          language != srcFile.GetLanguage()) {
         fileUsesUnity = false;
         excludedFromUnity.emplace(pathToFile);
       }
@@ -1493,12 +1501,10 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
       ObjectOutDir, '/', this->GeneratorTarget->GetObjectName(source)));
 
     // Do not generate separate node for PCH source file.
-    if (this->GeneratorTarget->GetPchSource(Config, srcFile.GetLanguage()) ==
-        pathToFile) {
+    if (this->GeneratorTarget->GetPchSource(Config, language) == pathToFile) {
       continue;
     }
 
-    std::string const language = srcFile.GetLanguage();
     LogMessage(
       cmStrCat("Source file: ", this->ConvertToFastbuildPath(pathToFile)));
     LogMessage("Language: " + language);
@@ -1537,7 +1543,7 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
         // If file does not need PCH - it must be in another ObjectList.
         (fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
           srcFile.GetProperty("SKIP_PRECOMPILE_HEADERS"),
-        srcFile.GetLanguage()));
+        language));
 
       LogMessage("ObjectList Hash: " + objectListHash);
 

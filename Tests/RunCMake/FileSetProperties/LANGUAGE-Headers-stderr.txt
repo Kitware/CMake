@@ -1,0 +1,4 @@
+^CMake Error at LANGUAGE-Headers\.cmake:[0-9]+ \(set_property\):
+  LANGUAGE property may only be set on a SOURCES file set\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

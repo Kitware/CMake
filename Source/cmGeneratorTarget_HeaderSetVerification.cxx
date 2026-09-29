@@ -345,8 +345,7 @@ cm::optional<std::string> cmGeneratorTarget::ResolveHeaderLanguage(
   */
   if (!defaultLanguage) {
     std::set<std::string> langs;
-    for (AllConfigSource const& tgtSource : this->GetAllConfigSources()) {
-      std::string const& lang = tgtSource.Source->GetOrDetermineLanguage();
+    for (std::string const& lang : this->GetAllConfigCompileLanguages()) {
       if (isSupported(lang)) {
         langs.insert(lang);
       }

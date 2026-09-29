@@ -152,6 +152,8 @@ bool cmExportFileGenerator::PopulateFileSetInterfaceProperties(
                                          properties);
   this->PopulateFileSetInterfaceProperty("INTERFACE_COMPILE_OPTIONS", target,
                                          fileSet, preprocessRule, properties);
+  this->PopulateFileSetInterfaceProperty("LANGUAGE", target, fileSet,
+                                         preprocessRule, properties);
 
   return true;
 }

@@ -12,6 +12,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmFileSetMetadata.h"
@@ -65,6 +66,8 @@ public:
                                                 std::string const& file) const;
   cmGeneratorFileSet const* GetFileSetForSource(std::string const& config,
                                                 cmSourceFile const* sf) const;
+  cm::optional<std::string> GetLanguageForSource(std::string const& config,
+                                                 cmSourceFile const* sf) const;
 
   std::vector<std::unique_ptr<TargetPropertyEntry>> GetSources(
     cm::GenEx::Context const& context, cmGeneratorTarget const* target,
@@ -118,6 +121,7 @@ private:
       FileSetCache;
     std::map<std::string, std::unordered_set<cmGeneratorFileSet const*>>
       InterfaceFileSetCache;
+    std::unordered_map<std::string, std::string> LanguageCache;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
 

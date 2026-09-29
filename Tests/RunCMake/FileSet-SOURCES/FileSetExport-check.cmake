@@ -1,0 +1,7 @@
+file(READ "${RunCMake_TEST_BINARY_DIR}/export.cmake" content)
+if(NOT content MATCHES [[VERSION_LESS "4\.5\.0"]])
+  set(RunCMake_TEST_FAILED "Export does not require CMake 4.5")
+endif()
+if(NOT content MATCHES [[PROPERTY LANGUAGE "CXX"]])
+  set(RunCMake_TEST_FAILED "Export does not preserve LANGUAGE CXX")
+endif()

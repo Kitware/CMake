@@ -1,4 +1,4 @@
-enable_language(C)
+enable_language(C CXX)
 
 get_property(multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
@@ -21,17 +21,15 @@ endfunction()
 cmake_path(GET CMAKE_BINARY_DIR PARENT_PATH export_build_dir)
 cmake_path(APPEND export_build_dir "FileSetExport-build")
 
-if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_EQUAL 4.3
-    AND NOT CMAKE_PATCH_VERSION VERSION_LESS 20000000)
-  # development version for future 4.4: Force version 4.4
+if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_EQUAL 4.4
+     AND NOT CMAKE_PATCH_VERSION VERSION_LESS 20000000)
+  # development version for future 4.5: Force version 4.5
   set(CMAKE_VERSION_BACKUP "${CMAKE_VERSION}")
-  set(CMAKE_VERSION 4.4)
+  set(CMAKE_VERSION 4.5)
 endif()
 include("${export_build_dir}/export.cmake")
 include("${export_build_dir}/install/lib/cmake/export.cmake")
-if(CMAKE_VERSION VERSION_GREATER 4.3 AND CMAKE_VERSION VERSION_LESS 4.4
-    AND NOT CMake_VERSION_PATCH VERSION_LESS 20000000)
-  # development version for future 4.4: Force version 4.4
+if(DEFINED CMAKE_VERSION_BACKUP)
   set(CMAKE_VERSION "${CMAKE_VERSION_BACKUP}")
 endif()
 
@@ -42,7 +40,9 @@ assert_target_prop_eq(export::lib1 SOURCE_SET_a "${CMAKE_CURRENT_SOURCE_DIR}/lib
 assert_target_prop_eq(export::lib1 SOURCE_SET "${CMAKE_CURRENT_SOURCE_DIR}/lib5.c")
 assert_target_prop_eq(export::lib1 SOURCE_SET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lib5.c")
 
-assert_fileset_prop_eq(export::lib1 a INTERFACE_COMPILE_DEFINITIONS "INTERFACE_LIB1_A")
+assert_fileset_prop_eq(export::lib1 a LANGUAGE "CXX")
+assert_fileset_prop_eq(export::lib1 a INTERFACE_COMPILE_DEFINITIONS
+  "INTERFACE_LIB1_A;EXPECT_CXX;$<$<COMPILE_LANGUAGE:CXX>:EXPECTED_LANGUAGE>")
 assert_fileset_prop_eq(export::lib1 a INTERFACE_COMPILE_OPTIONS "-DOPT_INTERFACE_LIB1_A")
 assert_fileset_prop_eq(export::lib1 a INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/subdir2")
 
@@ -67,7 +67,9 @@ else()
   assert_target_prop_eq(install::lib1 SOURCE_SET_SOURCES "${export_build_dir}/install/sources/debug/lib5.c")
 endif()
 
-assert_fileset_prop_eq(install::lib1 a INTERFACE_COMPILE_DEFINITIONS "INTERFACE_LIB1_A")
+assert_fileset_prop_eq(install::lib1 a LANGUAGE "CXX")
+assert_fileset_prop_eq(install::lib1 a INTERFACE_COMPILE_DEFINITIONS
+  "INTERFACE_LIB1_A;EXPECT_CXX;$<$<COMPILE_LANGUAGE:CXX>:EXPECTED_LANGUAGE>")
 assert_fileset_prop_eq(install::lib1 a INTERFACE_COMPILE_OPTIONS "-DOPT_INTERFACE_LIB1_A")
 assert_fileset_prop_eq(install::lib1 a INTERFACE_INCLUDE_DIRECTORIES "${export_build_dir}/install/include/subdir2")
 

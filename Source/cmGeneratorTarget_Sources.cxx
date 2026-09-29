@@ -422,6 +422,8 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     SourceKind kind;
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
     cmGeneratorFileSet const* fs = this->GetFileSetForSource(config, sf);
+    sf->GetOrDetermineLanguage();
+    std::string const language = this->GetSourceFileLanguage(sf, config);
     if (sf->GetCustomCommand()) {
       kind = SourceKindCustomCommand;
     } else if (!this->Target->IsNormal() && !this->Target->IsImported() &&
@@ -443,8 +445,8 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       kind = SourceKindHeader;
     } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
       kind = SourceKindExternalObject;
-    } else if (!sf->GetOrDetermineLanguage().empty()) {
-      if (sf->GetOrDetermineLanguage() == "Rust") {
+    } else if (!language.empty()) {
+      if (language == "Rust") {
         // NOLINTNEXTLINE(bugprone-branch-clone)
         if (this->Target->GetType() == cm::TargetType::OBJECT_LIBRARY) {
           // There is no main crate root for object libraries.
@@ -562,11 +564,16 @@ cmGeneratorTarget::GetAllConfigSources(SourceKind kind) const
 void cmGeneratorTarget::ComputeAllConfigCompileLanguages() const
 {
   std::set<std::string> languages;
+  std::vector<std::string> const configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   std::vector<AllConfigSource> const& sources = this->GetAllConfigSources();
   for (AllConfigSource const& si : sources) {
-    std::string const& lang = si.Source->GetOrDetermineLanguage();
-    if (!lang.empty()) {
-      languages.emplace(lang);
+    for (size_t const configIndex : si.Configs) {
+      std::string const lang =
+        this->GetSourceFileLanguage(si.Source, configs[configIndex]);
+      if (!lang.empty()) {
+        languages.emplace(lang);
+      }
     }
   }
   this->AllConfigCompileLanguages = languages;

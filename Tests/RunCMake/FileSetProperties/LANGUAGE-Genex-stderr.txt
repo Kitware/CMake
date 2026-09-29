@@ -1,0 +1,4 @@
+^CMake Error at LANGUAGE-Genex\.cmake:[0-9]+ \(set_property\):
+  LANGUAGE file set property does not support generator expressions\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

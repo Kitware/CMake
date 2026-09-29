@@ -210,7 +210,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   std::string flags;
   // Explicitly add the explicit language flag before any other flag
   // so user flags can override it.
-  this->GeneratorTarget->AddExplicitLanguageFlags(flags, *source);
+  this->GeneratorTarget->AddExplicitLanguageFlags(flags, *source, config);
 
   if (!flags.empty()) {
     flags += " ";
@@ -1251,7 +1251,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     std::vector<cmSourceFile const*> swiftSources;
     for (cmSourceFile const* sf : objectSources) {
       if (this->GetLocalGenerator()->IsSplitSwiftBuild() &&
-          sf->GetLanguage() == "Swift") {
+          this->GeneratorTarget->GetSourceFileLanguage(sf, config) ==
+            "Swift") {
         swiftSources.push_back(sf);
       } else {
         this->WriteObjectBuildStatement(sf, config, fileConfig,
@@ -1525,7 +1526,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   cmSourceFile const* source, std::string const& config,
   std::string const& fileConfig, bool firstForConfig)
 {
-  std::string const language = source->GetLanguage();
+  std::string const language =
+    this->GeneratorTarget->GetSourceFileLanguage(source, config);
   std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
   std::string const targetSupportDir =
     this->ConvertToNinjaPath(this->GeneratorTarget->GetCMFSupportDirectory());
