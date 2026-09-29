@@ -796,6 +796,14 @@
         - .gitlab/ci/typos.bash
     interruptible: true
 
+.cmake_ast_grep_linux:
+    stage: build
+    extends: .fedora44
+    script:
+        - source .gitlab/ci/ast-grep-env.sh
+        - .gitlab/ci/ast-grep-scan.sh
+    interruptible: true
+
 .cmake_build_linux:
     stage: build
 
