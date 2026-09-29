@@ -3,6 +3,6 @@ CMake Error at bad-arguments\.cmake:[0-9]+ \(file\):
 
     \$<SOURCE_PROPERTY:src,opt,prop,foo>
 
-  \$<SOURCE_PROPERTY:...> expression requires at most three parameters.
+  \$<SOURCE_PROPERTY:...> expression requires at most three parameters\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

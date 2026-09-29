@@ -3,6 +3,6 @@ CMake Error at STRIP-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
 
     \$<STRING:STRIP,FOO,string>
 
-  'FOO' is unexpected.  'SPACES' expected.
+  'FOO' is unexpected\.  'SPACES' expected\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

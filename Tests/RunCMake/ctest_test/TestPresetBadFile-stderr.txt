@@ -1,1 +1,1 @@
-File not found: /nonexistent/path/presets.json$
+File not found: /nonexistent/path/presets\.json$

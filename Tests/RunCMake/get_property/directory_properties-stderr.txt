@@ -4,7 +4,7 @@ get_directory_property: -->value<--
 get_property: -->value<--
 get_directory_property: --><--
 get_property: --><--
-CMake Warning \(deprecated\) at directory_properties/CMakeLists.txt:2 \(subdirs\):
+CMake Warning \(deprecated\) at directory_properties/CMakeLists\.txt:2 \(subdirs\):
   The 'subdirs' command has been superseded\.  Use the 'add_subdirectory'
   command instead\.
 This warning is for project developers\.  Use -Wno-author or -Wno-deprecated

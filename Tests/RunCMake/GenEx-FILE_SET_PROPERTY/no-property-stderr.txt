@@ -4,6 +4,6 @@ CMake Error at no-property\.cmake:[0-9]+ \(file\):
     \$<FILE_SET_PROPERTY:foo,TARGET:foo,>
 
   \$<FILE_SET_PROPERTY:fileset,TARGET:tgt,prop> expression requires a
-  non-empty property name.
+  non-empty property name\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

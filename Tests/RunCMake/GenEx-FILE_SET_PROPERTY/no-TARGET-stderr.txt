@@ -3,6 +3,6 @@ CMake Error at no-TARGET\.cmake:[0-9]+ \(file\):
 
     \$<FILE_SET_PROPERTY:foo,TARGET:,FOO>
 
-  No value provided for the TARGET: option.
+  No value provided for the TARGET: option\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

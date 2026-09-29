@@ -3,6 +3,6 @@ CMake Error \(install-absolute-destination\) at FILES-AbsoluteDest-error\.cmake:
 
     /absolute/path
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This error is for project developers\.  Use -Wno-error=author or
 -Wno-error=install-absolute-destination to suppress it\.

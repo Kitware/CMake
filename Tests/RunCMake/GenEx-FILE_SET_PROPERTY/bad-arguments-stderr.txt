@@ -4,6 +4,6 @@ CMake Error at bad-arguments\.cmake:[0-9]+ \(file\):
     \$<FILE_SET_PROPERTY:fs,opt,prop,foo>
 
   \$<FILE_SET_PROPERTY> expression requires 3 comma separated parameters, but
-  got 4 instead.
+  got 4 instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

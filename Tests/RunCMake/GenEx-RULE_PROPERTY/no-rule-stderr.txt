@@ -1,4 +1,4 @@
-CMake Error at no-rule.cmake:[0-9]+ \(file\):
+CMake Error at no-rule\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<RULE_PROPERTY:,FOO>

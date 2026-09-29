@@ -3,6 +3,6 @@ CMake Error at bad-option\.cmake:[0-9]+ \(file\):
 
     \$<FILE_SET_EXISTS:foo,BAD_OPTION>
 
-  Invalid option.  TARGET: expected.
+  Invalid option\.  TARGET: expected\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

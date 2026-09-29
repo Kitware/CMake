@@ -1,2 +1,2 @@
 .Process file: [^
-]*CTestCoverage/ClangCoverage.c
+]*CTestCoverage/ClangCoverage\.c

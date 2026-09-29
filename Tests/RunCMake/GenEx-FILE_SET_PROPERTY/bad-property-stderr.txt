@@ -3,6 +3,6 @@ CMake Error at bad-property\.cmake:[0-9]+ \(file\):
 
     \$<FILE_SET_PROPERTY:foo,TARGET:foo,F\?OO>
 
-  Property name not supported.
+  Property name not supported\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

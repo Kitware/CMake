@@ -1,1 +1,1 @@
-C-STAT: Analyzing module.c.*Severity
+C-STAT: Analyzing module\.c.*Severity

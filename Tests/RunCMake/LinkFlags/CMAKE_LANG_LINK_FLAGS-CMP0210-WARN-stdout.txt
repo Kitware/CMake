@@ -4,7 +4,7 @@ CMake Warning \(policy\) in CMakeLists\.txt:
   the cmake_policy command to set the policy and suppress this warning\.
 
   For compatibility with older versions of CMake, CMAKE_C_LINK_FLAGS will be
-  ignored for all non-EXECUTABLE targets which use these flags.
+  ignored for all non-EXECUTABLE targets which use these flags\.
 This warning is for project developers\.  Use -Wno-author or -Wno-policy to
 suppress it\.
 
@@ -14,6 +14,6 @@ CMake Warning \(policy\) in CMakeLists\.txt:
   the cmake_policy command to set the policy and suppress this warning\.
 
   For compatibility with older versions of CMake, CMAKE_CXX_LINK_FLAGS will
-  be ignored for all non-EXECUTABLE targets which use these flags.
+  be ignored for all non-EXECUTABLE targets which use these flags\.
 This warning is for project developers\.  Use -Wno-author or -Wno-policy to
 suppress it\.

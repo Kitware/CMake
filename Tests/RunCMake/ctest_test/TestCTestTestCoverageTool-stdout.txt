@@ -1,3 +1,3 @@
 1: Using environment variable LLVM_PROFILE_FILE=[^
 ]*/Tests/RunCMake/ctest_test/[^
-]*_%p.profraw
+]*_%p\.profraw
