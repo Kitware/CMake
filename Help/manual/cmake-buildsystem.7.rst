@@ -37,6 +37,42 @@ is defined as an executable formed by compiling and linking ``zipapp.cpp``.
 When linking the ``zipapp`` executable, the ``archive`` static library is
 linked in.
 
+.. _`Target Names`:
+
+Target Names
+------------
+
+Targets are addressed by name throughout the buildsystem.  A target name
+must be non-empty and contain only ASCII letters, digits, ``_``, ``.``, ``+``,
+and ``-``.  As a special case, ``ALIAS`` and :prop_tgt:`IMPORTED`
+targets may also contain ``:``.  By convention, a double colon (``::``) is used
+as a namespace separator, such as ``Upstream::lib1``, to distinguish
+``ALIAS`` and ``IMPORTED`` targets from targets of other types, and to reduce
+the likelihood of naming collisions.  See the :manual:`cmake-packages(7)`
+manual for more details.
+
+Target names must be globally unique.  Non-``GLOBAL`` :prop_tgt:`IMPORTED`
+targets are visible only in the directory that defines them and their
+subdirectories.
+
+CMake reserves some names for special targets created by the build tools and
+project-wide convenience targets.
+
+* The names ``all``, ``ALL_BUILD``, ``help``, ``install``, ``INSTALL``,
+  ``preinstall``, ``clean``, ``edit_cache``, ``rebuild_cache``, and
+  ``ZERO_CHECK`` are always reserved.
+* Some modules reserve additional names: e.g., ``test`` when :module:`CTest`
+  is enabled, and ``package`` when :module:`CPack` is enabled.
+* Generators may also create their own convenience targets, such as
+  ``install/parallel`` with the :ref:`Ninja Generators`.  See the
+  :manual:`cmake-generators(7)` manual for the target names documented by
+  each generator.
+
+Some convenience targets derive their names from other names in the project.
+The ``test_prep/<name>`` targets use test names, which have their own
+representability rules beyond those above.  See also :command:`add_test` and
+:variable:`CMAKE_TEST_BUILD_DEPENDS`.
+
 .. _`Executables`:
 
 Executables

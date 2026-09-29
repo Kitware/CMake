@@ -42,7 +42,9 @@ Builtin Targets
 
     Tests with names that are not valid target names are excluded. If multiple
     tests in different directories share the same name, their dependencies are
-    merged into one ``test_prep/<test-name>`` target.
+    merged into one ``test_prep/<test-name>`` target. See the
+    :manual:`cmake-buildsystem(7)` manual for more details on
+    :ref:`Target Names`.
 
 ``test_prep/all``
 

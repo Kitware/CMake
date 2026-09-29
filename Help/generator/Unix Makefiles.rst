@@ -45,7 +45,8 @@ be created, containing the following targets:
     Tests whose names are not valid target names, and tests whose names
     contain a ``:`` character, are excluded.  If multiple tests in different
     directories share the same name, their dependencies are merged into one
-    ``test_prep/<test-name>`` target.
+    ``test_prep/<test-name>`` target.  See the :manual:`cmake-buildsystem(7)`
+    manual for more details on :ref:`Target Names`.
 
   ``test_prep/all``
     Depends on every generated ``test_prep/<test-name>`` target.
