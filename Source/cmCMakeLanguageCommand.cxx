@@ -509,11 +509,11 @@ bool cmCMakeLanguageCommandPRINT_TARGETS(
     } else if (parsedArgs.NoImported) {
       label = "Non-imported targets";
     }
-    out += cmStrCat(" ", label);
+    out += cmStrCat(' ', label);
     if (parsedArgs.Regex) {
       out += cmStrCat(
         " matching REGEX '", *parsedArgs.Regex, "' (",
-        parsedArgs.IgnoreCase ? "case insensitive" : "case sensitive", ")");
+        parsedArgs.IgnoreCase ? "case insensitive" : "case sensitive", ')');
     }
     out += cmStrCat(":\n", lines);
     makefile.DisplayStatus(out, -1);
@@ -567,7 +567,7 @@ void PrintVariablesNamed(cmMakefile& makefile,
       }
       first = false;
       cmValue v = makefile.GetDefinition(name);
-      msg += cmStrCat(name, "=\"", v ? *v : std::string(), "\"");
+      msg += cmStrCat(name, "=\"", v ? *v : std::string(), '"');
     }
     makefile.DisplayStatus(msg, -1);
     return;
@@ -663,9 +663,9 @@ bool PrintVariablesAll(cmMakefile& makefile, PrintVariablesArgs const& parsed,
     cmValue cached = state->GetInitializedCacheValue(name);
     if (cached && matches(name, *cached)) {
       auto const type = state->GetCacheEntryType(name);
-      body += cmStrCat("   CACHE{", name, "}");
+      body += cmStrCat("   CACHE{", name, '}');
       if (type != cmStateEnums::UNINITIALIZED) {
-        body += cmStrCat(":", cmState::CacheEntryTypeToString(type));
+        body += cmStrCat(':', cmState::CacheEntryTypeToString(type));
       }
       body += cmStrCat(" = \"", *cached, "\"\n");
       anyMatched = true;
@@ -676,17 +676,17 @@ bool PrintVariablesAll(cmMakefile& makefile, PrintVariablesArgs const& parsed,
     cmValue listFile = snapshot.GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string out =
       cmStrCat(PrintVariablesBanner, " Variables in scope at '",
-               listFile ? *listFile : std::string("<unknown>"), "'");
+               listFile ? *listFile : std::string("<unknown>"), '\'');
     if (parsed.NameRegex || parsed.ValueRegex) {
       out += " matching";
       if (parsed.NameRegex) {
-        out += cmStrCat(" name '", *parsed.NameRegex, "'");
+        out += cmStrCat(" name '", *parsed.NameRegex, '\'');
       }
       if (parsed.NameRegex && parsed.ValueRegex) {
         out += " and";
       }
       if (parsed.ValueRegex) {
-        out += cmStrCat(" value '", *parsed.ValueRegex, "'");
+        out += cmStrCat(" value '", *parsed.ValueRegex, '\'');
       }
       out += parsed.IgnoreCase ? " (case insensitive)" : " (case sensitive)";
     }
@@ -697,13 +697,13 @@ bool PrintVariablesAll(cmMakefile& makefile, PrintVariablesArgs const& parsed,
   if (!anyMatched && (parsed.NameRegex || parsed.ValueRegex)) {
     std::string msg = "No variables in scope matching";
     if (parsed.NameRegex) {
-      msg += cmStrCat(" name '", *parsed.NameRegex, "'");
+      msg += cmStrCat(" name '", *parsed.NameRegex, '\'');
     }
     if (parsed.NameRegex && parsed.ValueRegex) {
       msg += " and";
     }
     if (parsed.ValueRegex) {
-      msg += cmStrCat(" value '", *parsed.ValueRegex, "'");
+      msg += cmStrCat(" value '", *parsed.ValueRegex, '\'');
     }
     msg += parsed.IgnoreCase ? " (case insensitive)" : " (case sensitive)";
     msg += " in cmake_language(PRINT_VARIABLES ...).";
@@ -836,9 +836,9 @@ std::vector<cmGeneratorTarget const*> CollectDependentTargets(
 void WritePropertyLine(std::string& out, std::string const& entityName,
                        std::string const& propertyName, cmValue value)
 {
-  out += cmStrCat("   ", entityName, ".", propertyName);
+  out += cmStrCat("   ", entityName, '.', propertyName);
   if (value) {
-    out += cmStrCat(" = \"", *value, "\"");
+    out += cmStrCat(" = \"", *value, '"');
   } else {
     out += " = <NOTFOUND>";
   }
@@ -864,21 +864,21 @@ void EmitBlockHeader(
   cm::optional<std::string> const& valueRegexStr = cm::nullopt)
 {
   out +=
-    cmStrCat(" ", (kind == BlockKind::All ? "All properties" : "Properties"),
-             " for ", entityType, " ", entityName);
+    cmStrCat(' ', (kind == BlockKind::All ? "All properties" : "Properties"),
+             " for ", entityType, ' ', entityName);
   if (suffix == HeaderSuffix::Reachable) {
     out += " (and all reachable)";
   }
   if (kind == BlockKind::All && (nameRegexStr || valueRegexStr)) {
     out += " matching";
     if (nameRegexStr) {
-      out += cmStrCat(" name '", *nameRegexStr, "'");
+      out += cmStrCat(" name '", *nameRegexStr, '\'');
     }
     if (nameRegexStr && valueRegexStr) {
       out += " and";
     }
     if (valueRegexStr) {
-      out += cmStrCat(" value '", *valueRegexStr, "'");
+      out += cmStrCat(" value '", *valueRegexStr, '\'');
     }
   }
   out += ":\n";
@@ -894,15 +894,15 @@ std::string EmptyMatchWarningMessage(
   cm::optional<std::string> const& valueRegexStr)
 {
   std::string msg =
-    cmStrCat("No properties for ", entityType, " ", entityName, " matching");
+    cmStrCat("No properties for ", entityType, ' ', entityName, " matching");
   if (nameRegexStr) {
-    msg += cmStrCat(" name '", *nameRegexStr, "'");
+    msg += cmStrCat(" name '", *nameRegexStr, '\'');
   }
   if (nameRegexStr && valueRegexStr) {
     msg += " and";
   }
   if (valueRegexStr) {
-    msg += cmStrCat(" value '", *valueRegexStr, "'");
+    msg += cmStrCat(" value '", *valueRegexStr, '\'');
   }
   msg += " in cmake_language(PRINT_PROPERTIES ...).";
   return msg;
@@ -1086,7 +1086,7 @@ bool PrintPropertiesConfigureTime(
           makefile);
         if (result == NamedBlockResult::Failed) {
           status.SetError(cmStrCat(
-            "failed to retrieve properties for TARGET \"", entityName, "\""));
+            "failed to retrieve properties for TARGET \"", entityName, '"'));
           return false;
         }
         if (result == NamedBlockResult::Emitted) {
@@ -1174,7 +1174,7 @@ bool PrintTargetPropertiesDeferred(
             cmakeInst->IssueMessage(
               MessageType::FATAL_ERROR,
               cmStrCat("failed to retrieve properties for TARGET \"", name,
-                       "\""),
+                       '"'),
               bt);
             return;
           }
@@ -1220,10 +1220,10 @@ bool cmCMakeLanguageCommandPRINT_PROPERTIES(
 
   if (unparsed.empty()) {
     return FatalError(status,
-                      cmStrCat("mode keyword missing in ",
-                               "cmake_language(PRINT_PROPERTIES) call, ",
-                               "there must be exactly one of TARGETS SOURCES "
-                               "TESTS DIRECTORIES CACHE_ENTRIES"));
+                      "mode keyword missing in "
+                      "cmake_language(PRINT_PROPERTIES) call, "
+                      "there must be exactly one of TARGETS SOURCES "
+                      "TESTS DIRECTORIES CACHE_ENTRIES");
   }
 
   if (parsedArgs.MaybeReportError(status.GetMakefile())) {
@@ -1259,7 +1259,7 @@ bool cmCMakeLanguageCommandPRINT_PROPERTIES(
 
   if (!unparsed.empty()) {
     return FatalError(
-      status, cmStrCat("Unknown keywords: \"", cmJoin(unparsed, " "), "\""));
+      status, cmStrCat("Unknown keywords: \"", cmJoin(unparsed, " "), '"'));
   }
 
   if (parsedArgsMode.MaybeReportError(status.GetMakefile())) {
@@ -1297,17 +1297,17 @@ bool cmCMakeLanguageCommandPRINT_PROPERTIES(
 
   if (modes.empty()) {
     return FatalError(status,
-                      cmStrCat("mode keyword missing in ",
-                               "cmake_language(PRINT_PROPERTIES) call, ",
-                               "there must be exactly one of TARGETS SOURCES "
-                               "TESTS DIRECTORIES CACHE_ENTRIES"));
+                      "mode keyword missing in "
+                      "cmake_language(PRINT_PROPERTIES) call, "
+                      "there must be exactly one of TARGETS SOURCES "
+                      "TESTS DIRECTORIES CACHE_ENTRIES");
   }
   if (modes.size() > 1) {
     return FatalError(status,
-                      cmStrCat("multiple mode keywords used in ",
-                               "cmake_language(PRINT_PROPERTIES) call, ",
-                               "there must be exactly one of TARGETS SOURCES "
-                               "TESTS DIRECTORIES CACHE_ENTRIES."));
+                      "multiple mode keywords used in "
+                      "cmake_language(PRINT_PROPERTIES) call, "
+                      "there must be exactly one of TARGETS SOURCES "
+                      "TESTS DIRECTORIES CACHE_ENTRIES.");
   }
   std::string const mode = modes[0];
   bool const isTargets = (mode == "TARGETS");
@@ -1318,51 +1318,50 @@ bool cmCMakeLanguageCommandPRINT_PROPERTIES(
   if (!isTargets) {
     if (parsedArgs.All) {
       return FatalError(status,
-                        cmStrCat("ALL keyword in ",
-                                 "cmake_language(PRINT_PROPERTIES) call ",
-                                 "is only valid with the TARGETS scope."));
+                        "ALL keyword in "
+                        "cmake_language(PRINT_PROPERTIES) call "
+                        "is only valid with the TARGETS scope.");
     }
     if (hasRegex) {
-      return FatalError(
-        status,
-        cmStrCat("PROPERTY_NAME_REGEX and PROPERTY_VALUE_REGEX in ",
-                 "cmake_language(PRINT_PROPERTIES) call ",
-                 "are only valid with the TARGETS scope and ALL."));
+      return FatalError(status,
+                        "PROPERTY_NAME_REGEX and PROPERTY_VALUE_REGEX in "
+                        "cmake_language(PRINT_PROPERTIES) call "
+                        "are only valid with the TARGETS scope and ALL.");
     }
     if (parsedArgsMode.Deferred) {
       return FatalError(status,
-                        cmStrCat("DEFERRED keyword in ",
-                                 "cmake_language(PRINT_PROPERTIES) call ",
-                                 "is only valid with the TARGETS scope."));
+                        "DEFERRED keyword in "
+                        "cmake_language(PRINT_PROPERTIES) call "
+                        "is only valid with the TARGETS scope.");
     }
     if (parsedArgsMode.FollowDependencies) {
       return FatalError(status,
-                        cmStrCat("FOLLOW_DEPENDENCIES keyword in ",
-                                 "cmake_language(PRINT_PROPERTIES) call ",
-                                 "is only valid with the TARGETS scope."));
+                        "FOLLOW_DEPENDENCIES keyword in "
+                        "cmake_language(PRINT_PROPERTIES) call "
+                        "is only valid with the TARGETS scope.");
     }
     if (!hasNamed) {
       return FatalError(status,
-                        cmStrCat("NAMED keyword missing in ",
-                                 "cmake_language(PRINT_PROPERTIES) call ",
-                                 "with ", mode, " scope."));
+                        cmStrCat("NAMED keyword missing in "
+                                 "cmake_language(PRINT_PROPERTIES) call "
+                                 "with ",
+                                 mode, " scope."));
     }
   } else {
     // ALL and NAMED are mutually exclusive on TARGETS.
     if (parsedArgs.All && hasNamed) {
       return FatalError(status,
-                        cmStrCat("ALL and NAMED keywords in ",
-                                 "cmake_language(PRINT_PROPERTIES) call ",
-                                 "are mutually exclusive."));
+                        "ALL and NAMED keywords in "
+                        "cmake_language(PRINT_PROPERTIES) call "
+                        "are mutually exclusive.");
     }
     // Regex filters require ALL - explicit or implicit.  Combining regex
     // with NAMED is an error.
     if (hasNamed && hasRegex) {
-      return FatalError(
-        status,
-        cmStrCat("PROPERTY_NAME_REGEX and PROPERTY_VALUE_REGEX in ",
-                 "cmake_language(PRINT_PROPERTIES) call ",
-                 "are only valid with ALL, not NAMED."));
+      return FatalError(status,
+                        "PROPERTY_NAME_REGEX and PROPERTY_VALUE_REGEX in "
+                        "cmake_language(PRINT_PROPERTIES) call "
+                        "are only valid with ALL, not NAMED.");
     }
   }
 
@@ -1379,9 +1378,9 @@ bool cmCMakeLanguageCommandPRINT_PROPERTIES(
   // wrapper, which is always NAMED; reject it in ALL enumeration mode.
   if (all && parsedArgs.CmakePrintProperties) {
     return FatalError(status,
-                      cmStrCat("__CMAKE_PRINT_PROPERTIES in ",
-                               "cmake_language(PRINT_PROPERTIES) call ",
-                               "is only valid with NAMED."));
+                      "__CMAKE_PRINT_PROPERTIES in "
+                      "cmake_language(PRINT_PROPERTIES) call "
+                      "is only valid with NAMED.");
   }
 
   // Compile regexes once up front so syntax errors are reported here rather

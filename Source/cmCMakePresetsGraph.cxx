@@ -156,7 +156,7 @@ bool VisitPreset(
     if (parent == presets.end()) {
       cmCMakePresetsErrors::INVALID_PRESET_NAMED(
         preset.Name, preset.kind(), &graph.parseState,
-        cmStrCat("Could not find inherited preset \"", i, "\""));
+        cmStrCat("Could not find inherited preset \"", i, '"'));
       return false;
     }
 

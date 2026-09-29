@@ -89,8 +89,8 @@ std::string OutputVarFor(cm::string_view prefix, cmMakefile& makefile)
 {
   cmListFileContext context = makefile.GetBacktrace().Top();
   std::size_t hash =
-    std::hash<std::string>{}(cmStrCat(context.FilePath, ":", context.Line));
-  return cmStrCat(prefix, hash, "_");
+    std::hash<std::string>{}(cmStrCat(context.FilePath, ':', context.Line));
+  return cmStrCat(prefix, hash, '_');
 }
 
 void RequireFunction(cmMakefile const& makefile,

@@ -551,7 +551,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     GetOption("CPACK_WIX_COMPONENT_KEYS_REGISTRY_PATH");
   if (componentKeysRegistryPath.empty()) {
     componentKeysRegistryPath =
-      cmStrCat("Software\\", GetOption("CPACK_PACKAGE_VENDOR"), "\\",
+      cmStrCat("Software\\", GetOption("CPACK_PACKAGE_VENDOR"), '\\',
                GetOption("CPACK_PACKAGE_NAME"), "\\Components");
   }
   cmSystemTools::ReplaceString(componentKeysRegistryPath, "/", "\\");

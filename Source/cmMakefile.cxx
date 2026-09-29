@@ -2729,13 +2729,19 @@ void cmMakefile::IssueCMP0219Warning(
 
   this->IssueDiagnostic(
     cmDiagnostics::CMD_POLICY,
-    cmStrCat(
-      cmPolicies::GetPolicyWarning(cmPolicies::CMP0219), '\n', "Command \"",
-      calleeName, "\" called with arguments containing backslashes.\n",
-      "Since the policy is not set, backslashes in the arguments:\n", oldArgs,
-      "\n", "will be interpreted as escape sequences for compatibility.\n",
-      "Set the policy to NEW to instead pass\n", newArgs, "\n",
-      "so that argument parsing will preserve the original values."));
+    cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0219),
+             "\n"
+             "Command \"",
+             calleeName,
+             "\" called with arguments containing backslashes.\n"
+             "Since the policy is not set, backslashes in the arguments:\n",
+             oldArgs,
+             "\n"
+             "will be interpreted as escape sequences for compatibility.\n"
+             "Set the policy to NEW to instead pass\n",
+             newArgs,
+             "\n"
+             "so that argument parsing will preserve the original values."));
 }
 
 void cmMakefile::IssueCMP0219Warning(
@@ -3646,10 +3652,12 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
     if (status && actualName != requestedName) {
       this->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("The module name\n  ", requestedName, '\n',
+        cmStrCat("The module name\n  ", requestedName,
+                 "\n"
                  "does not match the case of the module file name on disk\n"
                  "  ",
-                 cmSystemTools::GetFilenamePath(result), '/', actualName, '\n',
+                 cmSystemTools::GetFilenamePath(result), '/', actualName,
+                 "\n"
                  "This may fail on case-sensitive file systems.  "
                  "Use the module name\n  ",
                  actualName, "\ninstead."));

@@ -534,7 +534,7 @@ std::string cmCustomCommandGenerator::StoreContentToFile(
     return "";
   }
 
-  std::string fileName = cmStrCat(fileDir, "/", hash.HashString(content));
+  std::string fileName = cmStrCat(fileDir, '/', hash.HashString(content));
 
   cmsys::ofstream file(fileName.c_str(), std::ios::out);
   if (!file) {

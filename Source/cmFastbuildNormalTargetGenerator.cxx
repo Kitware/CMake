@@ -2252,7 +2252,7 @@ void cmFastbuildNormalTargetGenerator::AddLipoCommand(FastbuildTarget& target)
   for (auto const& ArchSpecificTarget : target.LinkerNode) {
     exec.ExecInput.emplace_back(ArchSpecificTarget.LinkerOutput);
   }
-  exec.ExecArguments += cmStrCat("-create -output ", target.RealOutput, " ",
+  exec.ExecArguments += cmStrCat("-create -output ", target.RealOutput, ' ',
                                  cmJoin(exec.ExecInput, " "));
   target.PostBuildExecNodes.Alias.PreBuildDependencies.emplace(
     exec.ExecOutput);

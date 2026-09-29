@@ -195,7 +195,7 @@ bool cmSbomBuilder::AddPackageInformation(
 
   artifact.BuiltTime = cmSystemTools::GetCurrentDateTime("%FT%TZ");
   cmSpdxExternalRef externalRef;
-  externalRef.Locator = cmStrCat("cmake:find_package(", name, ")");
+  externalRef.Locator = cmStrCat("cmake:find_package(", name, ')');
   externalRef.ExternalRefType = "buildSystem";
   return true;
 }
@@ -312,7 +312,7 @@ bool cmSbomBuilder::GenerateLinkProperties(
         }
       }
       std::string pkgName =
-        cmStrCat(linkInfo.Package, ":", linkInfo.Component);
+        cmStrCat(linkInfo.Package, ':', linkInfo.Component);
       cmSpdxPackage pkg;
       pkg.Name = pkgName;
       pkg.SpdxId = cmStrCat("urn:", pkgName, "#Package");

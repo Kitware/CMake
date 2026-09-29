@@ -47,7 +47,7 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
             cmStrCat("Target \"", targetName,
                      "\" contains relative path"
                      " in its INTERFACE_LINK_DIRECTORIES:\n  \"",
-                     entryDirectory, "\""));
+                     entryDirectory, '"'));
           return;
         }
         switch (tgt->GetPolicyStatusCMP0081()) {

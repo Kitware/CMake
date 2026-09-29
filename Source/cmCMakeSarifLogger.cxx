@@ -213,7 +213,7 @@ void cmCMakeSarifLogger::AddBaseDirectory(cm::string_view name,
   this->UriBaseIds.emplace_back(std::string(name), std::string(path));
   this->CMakeRun.OriginalUriBaseIds.emplace(
     std::string(name),
-    cmSarif::ArtifactLocation{ cmStrCat("file://", path, "/"), "" });
+    cmSarif::ArtifactLocation{ cmStrCat("file://", path, '/'), "" });
 }
 
 void cmCMakeSarifLogger::RecordDiagnostics(
