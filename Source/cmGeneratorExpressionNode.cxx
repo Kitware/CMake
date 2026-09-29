@@ -360,6 +360,30 @@ static const struct BoolNode : public cmGeneratorExpressionNode
   }
 } boolNode;
 
+static const struct ArgsNode : public cmGeneratorExpressionNode
+{
+  ArgsNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(std::vector<std::string> const& parameters,
+                       cm::GenEx::Evaluation*,
+                       GeneratorExpressionContent const*,
+                       cmGeneratorExpressionDAGChecker*) const override
+  {
+    if (parameters.empty()) {
+      return std::string{};
+    }
+    if (parameters.size() == 1 && parameters[0].empty()) {
+      return parameters.front();
+    }
+
+    cmList args{ parameters.begin(), parameters.end(),
+                 cmList::ExpandElements::Yes, cmList::EmptyElements::Yes };
+    return cmStrCat("<ARGS>", args.join(","_s), "</ARGS>");
+  }
+} argsNode;
+
 static const struct IfNode : public cmGeneratorExpressionNode
 {
   IfNode() {} // NOLINT(modernize-use-equals-default)
@@ -6460,6 +6484,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "AND", &andNode },
     { "OR", &orNode },
     { "NOT", &notNode },
+    { "ARGS", &argsNode },
     { "C_COMPILER_ID", &cCompilerIdNode },
     { "CXX_COMPILER_ID", &cxxCompilerIdNode },
     { "OBJC_COMPILER_ID", &objcCompilerIdNode },

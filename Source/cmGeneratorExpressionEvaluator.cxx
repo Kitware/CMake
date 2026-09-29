@@ -2,6 +2,11 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluator.h"
 
+#include <iterator>
+
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #ifndef CMAKE_BOOTSTRAP
 #  include <cm3p/json/value.h>
 #endif
@@ -109,6 +114,33 @@ std::string GeneratorExpressionContent::Evaluate(
   this->EvaluateParameters(node, identifier, eval, dagChecker, parameters);
   if (eval->HadError) {
     return std::string();
+  }
+
+  if (!parameters.empty()) {
+    cm::string_view ARGS_BEGIN = "<ARGS>"_s;
+    cm::string_view ARGS_END = "</ARGS>"_s;
+
+    std::vector<std::string> args;
+    // split any parameter with the prefix <ARGS>:
+    for (auto const& param : parameters) {
+      if (cmHasPrefix(param, ARGS_BEGIN) && cmHasSuffix(param, ARGS_END)) {
+        auto values = param.substr(ARGS_BEGIN.length(),
+                                   param.length() - ARGS_BEGIN.length() -
+                                     ARGS_END.length());
+        if (values.empty()) {
+          args.push_back(std::move(values));
+          continue;
+        }
+
+        std::vector<std::string> tokens =
+          cmTokenize(values, ',', cmTokenizerMode::New);
+        args.insert(args.end(), std::make_move_iterator(tokens.begin()),
+                    std::make_move_iterator(tokens.end()));
+      } else {
+        args.push_back(param);
+      }
+    }
+    parameters = std::move(args);
   }
 
   {
