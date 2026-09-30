@@ -259,6 +259,15 @@
     variables:
         CMAKE_CONFIGURATION: windows_clang_ninja
 
+.windows_clang_ninja_novs:
+    extends:
+        - .windows_ninja
+
+    variables:
+        CMAKE_CONFIGURATION: windows_clang_ninja_novs
+        # Let Clang discover the installed toolset without a developer environment.
+        VCVARSALL: ""
+
 .windows_clang_nmake:
     extends:
         - .windows_nmake
