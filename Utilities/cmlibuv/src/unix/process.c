@@ -903,6 +903,16 @@ static int uv__spawn_and_init_child_posix_spawn(
   if (!posix_spawn_works)
     return UV_ENOSYS;
 
+#ifndef CMAKE_BOOTSTRAP
+#if defined(__linux__) || defined(__FreeBSD__)
+  if (options->cpumask != NULL) {
+    /* posix_spawn does not offer a way to set the child process
+       affinity, so fall back to the fork/exec code path.  */
+    return UV_ENOSYS;
+  }
+#endif
+#endif
+
   err = uv__spawn_set_posix_spawn_attrs(&attrs, options);
   if (err != 0)
     goto error;
