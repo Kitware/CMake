@@ -163,7 +163,7 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules(
     std::set<std::string> languages;
     std::vector<cmSourceFile const*> sourceFiles;
     this->GetGeneratorTarget()->GetObjectSources(sourceFiles, config);
-    if (this->HaveRequiredLanguages(sourceFiles, languages)) {
+    if (this->HaveRequiredLanguages(sourceFiles, config, languages)) {
       for (std::string const& language : languages) {
         this->WriteLanguageRules(language, config);
       }
@@ -175,7 +175,7 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules(
     std::set<std::string> languages;
     std::vector<cmSourceFile const*> sourceFiles;
     this->GetGeneratorTarget()->GetCxxModuleSources(sourceFiles, config);
-    if (this->HaveRequiredLanguages(sourceFiles, languages)) {
+    if (this->HaveRequiredLanguages(sourceFiles, config, languages)) {
       for (std::string const& language : languages) {
         this->WriteLanguageRules(language, config);
       }
@@ -1257,7 +1257,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       this->GetGeneratorTarget()->GetObjectSources(sourceFiles, config);
       cmLocalGenerator const* LocalGen = this->GetLocalGenerator();
       for (auto const& source : sourceFiles) {
-        std::string const sourcePath = source->GetLanguage() == "Swift"
+        std::string const sourcePath =
+          this->GetGeneratorTarget()->GetSourceFileLanguage(source, config) ==
+            "Swift"
           ? this->GetCompiledSourceNinjaPath(source)
           : this->GetObjectFilePath(source, config);
         result = cmStrCat(std::move(result), ' ',
@@ -1279,7 +1281,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     std::vector<cmSourceFile const*> sources;
     gt->GetObjectSources(sources, config);
     for (auto const& source : sources) {
-      if (source->GetLanguage() == "Swift") {
+      if (gt->GetSourceFileLanguage(source, config) == "Swift") {
         linkBuild.Outputs.push_back(
           this->ConvertToNinjaPath(this->GetObjectFilePath(source, config)));
         linkBuild.ExplicitDeps.emplace_back(

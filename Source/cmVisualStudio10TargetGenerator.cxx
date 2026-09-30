@@ -2866,21 +2866,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   cm::string_view const extLang = ext == "C"_s
     ? "C"_s
     : this->GlobalGenerator->GetLanguageFromExtension(ext);
-  std::string lang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  char const* compileAs = nullptr;
-  if (lang != extLang) {
-    if (lang == "CXX"_s) {
-      // force a C++ file type
-      compileAs = "CompileAsCpp";
-    } else if (lang == "C"_s) {
-      // force to c
-      compileAs = "CompileAsC";
-    }
-  }
-
-  bool noWinRT = this->TargetCompileAsWinRT && lang == "C"_s;
-
-  if (lang == "ASM_NASM"_s) {
+  if (this->LocalGenerator->GetSourceFileLanguage(sf) == "ASM_NASM"_s) {
     if (cmValue objectDeps = sf.GetProperty("OBJECT_DEPENDS")) {
       cmList depends{ *objectDeps };
       for (auto& d : depends) {
@@ -2893,6 +2879,20 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   bool isCppModule = false;
 
   for (std::string const& config : this->Configurations) {
+    std::string const lang =
+      this->GeneratorTarget->GetSourceFileLanguage(source, config);
+    char const* compileAs = nullptr;
+    if (lang != extLang) {
+      if (lang == "CXX"_s) {
+        // force a C++ file type
+        compileAs = "CompileAsCpp";
+      } else if (lang == "C"_s) {
+        // force to c
+        compileAs = "CompileAsC";
+      }
+    }
+    bool noWinRT = this->TargetCompileAsWinRT && lang == "C"_s;
+
     this->GeneratorTarget->NeedCxxModuleSupport(lang, config);
 
     std::string configUpper = cmSystemTools::UpperCase(config);
@@ -2990,7 +2990,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
          this->ScanSourceForModuleDependencies[config])) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
-      std::string const& srclang = source->GetLanguage();
+      std::string const& srclang = lang;
       if (srclang == "C"_s || srclang == "CXX"_s) {
         flagtable = gg->GetClFlagTable();
       } else if (srclang == "ASM_MARMASM"_s &&

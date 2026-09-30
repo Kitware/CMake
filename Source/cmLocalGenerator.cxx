@@ -2800,7 +2800,7 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
     // generating
     for (cmSourceFile const* sf : sources) {
       // Generate this object file's rule file.
-      std::string const& lang = sf->GetLanguage();
+      std::string const lang = target->GetSourceFileLanguage(sf, config);
       if (lang == "ISPC") {
         std::string const& objectName = target->GetObjectName(sf);
 
@@ -2856,7 +2856,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         sources.begin(), sources.end(),
         [&target, &config, &lang](cmSourceFile* sf) {
           auto const* const fileSet = target->GetFileSetForSource(config, sf);
-          return lang == sf->GetLanguage() &&
+          return lang == target->GetSourceFileLanguage(sf, config) &&
             !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
               sf->GetProperty("SKIP_PRECOMPILE_HEADERS"));
         });
@@ -2891,7 +2891,8 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         if (pchSource.empty() || pchHeader.empty()) {
           if (this->GetGlobalGenerator()->IsXcode() && !pchLangSet.empty()) {
             for (auto* sf : sources) {
-              auto const sourceLanguage = sf->GetLanguage();
+              auto const sourceLanguage =
+                target->GetSourceFileLanguage(sf, config);
               if (!sourceLanguage.empty() &&
                   pchLangSet.find(sourceLanguage) == pchLangSet.end()) {
                 sf->SetProperty("SKIP_PRECOMPILE_HEADERS", "ON");
@@ -3409,6 +3410,10 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
       if (fileSet &&
           !cm::FileSetMetadata::GetAttributes(fileSet->GetType())
              .contains(cm::FileSetMetadata::FileSetAttributes::UnityBuild)) {
+        continue;
+      }
+      if (target->GetSourceFileLanguage(sf, configs[ci]) !=
+          sf->GetOrDetermineLanguage()) {
         continue;
       }
       // Files which need C++ scanning cannot participate in unity builds as

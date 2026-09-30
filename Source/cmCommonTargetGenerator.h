@@ -91,6 +91,7 @@ protected:
     std::vector<std::string> const& launcher) const;
 
   bool HaveRequiredLanguages(std::vector<cmSourceFile const*> const& sources,
+                             std::string const& config,
                              std::set<std::string>& languagesNeeded) const;
 
   void ComputeRustFlagsForObjects(std::string& linkCrates,

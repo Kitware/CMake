@@ -445,7 +445,8 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
   std::string const& cmakeCmd, std::string const& config,
   std::function<std::string(std::string const&)> const& pathConverter)
 {
-  std::string const lang = source.GetLanguage();
+  std::string const lang =
+    this->GeneratorTarget->GetSourceFileLanguage(&source, config);
   std::string tidy;
   std::string iwyu;
   std::string cpplint;
@@ -683,11 +684,12 @@ std::string cmCommonTargetGenerator::ConvertLauncherToShell(
 }
 
 bool cmCommonTargetGenerator::HaveRequiredLanguages(
-  std::vector<cmSourceFile const*> const& sources,
+  std::vector<cmSourceFile const*> const& sources, std::string const& config,
   std::set<std::string>& languagesNeeded) const
 {
   for (cmSourceFile const* sf : sources) {
-    languagesNeeded.insert(sf->GetLanguage());
+    languagesNeeded.insert(
+      this->GeneratorTarget->GetSourceFileLanguage(sf, config));
   }
 
   auto* makefile = this->Makefile;

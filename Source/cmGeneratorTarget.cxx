@@ -2171,7 +2171,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
   }
 
   ClassifiedFlags flags;
-  std::string const& lang = sf->GetLanguage();
+  std::string const lang = this->GetSourceFileLanguage(sf, config);
 
   if (!IsSupportedClassifiedFlagsLanguage(lang)) {
     return flags;
@@ -2213,7 +2213,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     std::string mfFlags;
     // Explicitly add the explicit language flag before any other flag
     // so user flags can override it.
-    this->AddExplicitLanguageFlags(mfFlags, *sf);
+    this->AddExplicitLanguageFlags(mfFlags, *sf, config);
 
     for (auto const& flag : SplitFlags(mfFlags)) {
       flags.emplace_back(cls, kind, flag);
@@ -2560,7 +2560,7 @@ cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
   cmSourceFile const* sf, std::string const& config)
 {
   SourceVariables vars;
-  auto const language = sf->GetLanguage();
+  auto const language = this->GetSourceFileLanguage(sf, config);
   auto const targetType = this->GetType();
   auto const* const lg = this->GetLocalGenerator();
   auto const* const gg = this->GetGlobalGenerator();
@@ -2660,9 +2660,16 @@ cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
   return vars;
 }
 
-void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
-                                                 cmSourceFile const& sf) const
+void cmGeneratorTarget::AddExplicitLanguageFlags(
+  std::string& flags, cmSourceFile const& sf, std::string const& config) const
 {
+  if (auto const language =
+        this->FileSets->GetLanguageForSource(config, &sf)) {
+    this->LocalGenerator->AppendFeatureOptions(flags, *language,
+                                               "EXPLICIT_LANGUAGE");
+    return;
+  }
+
   cmValue lang = sf.GetProperty("LANGUAGE");
   if (!lang) {
     return;
@@ -5275,7 +5282,7 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
   std::vector<cmSourceFile*> sourceFiles;
   this->GetSourceFiles(sourceFiles, config);
   for (cmSourceFile* src : sourceFiles) {
-    std::string const& lang = src->GetOrDetermineLanguage();
+    std::string const lang = this->GetSourceFileLanguage(src, config);
     if (!lang.empty()) {
       languages.insert(lang);
     }
@@ -6004,8 +6011,9 @@ bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
 {
   auto sources = this->GetSourceFiles(config);
   bool const have_direct = std::any_of(
-    sources.begin(), sources.end(), [](BT<cmSourceFile*> const& sf) -> bool {
-      return sf.Value->GetLanguage() == "Fortran"_s;
+    sources.begin(), sources.end(),
+    [this, &config](BT<cmSourceFile*> const& sf) -> bool {
+      return this->GetSourceFileLanguage(sf.Value, config) == "Fortran"_s;
     });
   bool have_via_target_objects = false;
   if (!have_direct) {
@@ -6021,11 +6029,8 @@ bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
 
 bool cmGeneratorTarget::HaveFortranSources() const
 {
-  auto sources = this->GetAllConfigSources();
-  bool const have_direct = std::any_of(
-    sources.begin(), sources.end(), [](AllConfigSource const& sf) -> bool {
-      return sf.Source->GetLanguage() == "Fortran"_s;
-    });
+  bool const have_direct =
+    this->GetAllConfigCompileLanguages().count("Fortran") != 0;
   bool have_via_target_objects = false;
   if (!have_direct) {
     std::vector<std::string> configs =
@@ -6102,7 +6107,7 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
     auto sources = this->GetSourceFiles(config);
     for (auto const& source : sources) {
       auto const* sf = source.Value;
-      auto const& lang = sf->GetLanguage();
+      auto const lang = this->GetSourceFileLanguage(sf, config);
       if (lang != "CXX"_s) {
         continue;
       }
@@ -6308,6 +6313,16 @@ cmGeneratorFileSet const* cmGeneratorTarget::GetFileSetForSource(
   std::string const& config, cmSourceFile const* sf) const
 {
   return this->FileSets->GetFileSetForSource(config, sf);
+}
+
+std::string cmGeneratorTarget::GetSourceFileLanguage(
+  cmSourceFile const* source, std::string const& config) const
+{
+  if (auto const language =
+        this->FileSets->GetLanguageForSource(config, source)) {
+    return *language;
+  }
+  return source->GetLanguage();
 }
 
 std::string cmGeneratorTarget::BuildDatabasePath(

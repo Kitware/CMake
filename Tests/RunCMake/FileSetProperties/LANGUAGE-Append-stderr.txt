@@ -1,0 +1,4 @@
+^CMake Error at LANGUAGE-Append\.cmake:[0-9]+ \(set_property\):
+  LANGUAGE file set property does not support appending values\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

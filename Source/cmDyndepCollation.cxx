@@ -199,7 +199,8 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
     }
 
     auto const* sf = sf_entry.second.first;
-    if (!gt->NeedDyndepForSource(sf->GetLanguage(), config, sf)) {
+    std::string const language = gt->GetSourceFileLanguage(sf, config);
+    if (!gt->NeedDyndepForSource(language, config, sf)) {
       continue;
     }
 
@@ -208,7 +209,7 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
     Json::Value& tdi_source_info = tdi_sources[obj_path] = Json::objectValue;
 
     tdi_source_info["source"] = full_file;
-    tdi_source_info["language"] = sf->GetLanguage();
+    tdi_source_info["language"] = language;
   }
 
   return info;

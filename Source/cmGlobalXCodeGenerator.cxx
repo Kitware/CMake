@@ -1094,7 +1094,10 @@ private:
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   cmLocalGenerator* lg, cmSourceFile* sf, cmGeneratorTarget* gtgt)
 {
-  std::string lang = this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
+  // Sources are independent of the config but a config is needed to evaluate
+  // file set properties.
+  auto const& config = this->CurrentConfigurationTypes[0];
+  std::string lang = gtgt->GetSourceFileLanguage(sf, config);
 
   XCodeGeneratorExpressionInterpreter genexInterpreter(sf, lg, gtgt, lang);
 
@@ -1113,14 +1116,12 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   }
 
   // lookup for the associated file set, if any.
-  //// sources are independent of the config but needed here
-  auto const& config = this->CurrentConfigurationTypes[0];
   auto const* fileSet =
     gtgt->GetGeneratorFileSets()->GetFileSetForSource(config, sf);
 
   // Explicitly add the explicit language flag before any other flag
   // so user flags can override it.
-  gtgt->AddExplicitLanguageFlags(flags, *sf);
+  gtgt->AddExplicitLanguageFlags(flags, *sf, config);
 
   std::string const COMPILE_FLAGS("COMPILE_FLAGS");
   if (cmValue cflags = sf->GetProperty(COMPILE_FLAGS)) {

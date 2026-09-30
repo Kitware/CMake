@@ -39,7 +39,6 @@
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmScriptGenerator.h"
-#include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStdIoStream.h"
@@ -249,7 +248,8 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
       }
       LocalObjectInfo& info = localObjectFiles[objectName];
       info.HasSourceExtension = hasSourceExtension;
-      info.emplace_back(gt.get(), sf->GetLanguage());
+      info.emplace_back(gt.get(),
+                        gt->GetSourceFileLanguage(sf, this->GetConfigName()));
     }
   }
 }

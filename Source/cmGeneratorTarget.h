@@ -136,6 +136,8 @@ public:
                       std::string const& config) const;
   std::vector<BT<cmSourceFile*>> GetSourceFiles(
     std::string const& config) const;
+  std::string GetSourceFileLanguage(cmSourceFile const* source,
+                                    std::string const& config) const;
 
   /** Source file kinds (classifications).
       Generators use this to decide how to treat a source file.  */
@@ -611,8 +613,8 @@ public:
   SourceVariables GetSourceVariables(cmSourceFile const* sf,
                                      std::string const& config);
 
-  void AddExplicitLanguageFlags(std::string& flags,
-                                cmSourceFile const& sf) const;
+  void AddExplicitLanguageFlags(std::string& flags, cmSourceFile const& sf,
+                                std::string const& config) const;
 
   void AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
                                 std::string const& config,

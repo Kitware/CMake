@@ -637,6 +637,14 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
     std::string targetName = cmStrCat(this->Namespace, gte->GetExportName());
     for (auto const& type : types) {
       auto fsInfo = GetFileSetInformation(type);
+      if (fsInfo &&
+          std::any_of(gfs->GetInterfaceFileSets(type).begin(),
+                      gfs->GetInterfaceFileSets(type).end(),
+                      [](cmGeneratorFileSet const* fileSet) {
+                        return !fileSet->GetProperty("LANGUAGE").IsEmpty();
+                      })) {
+        fsInfo->CMakeVersion = "4.5.0"_s;
+      }
       if (fsInfo) {
         os << "if(NOT CMAKE_VERSION VERSION_LESS \"" << fsInfo->CMakeVersion
            << "\")\n  ";

@@ -19,6 +19,19 @@
 #  include "h1.h"
 #endif
 
-void f2(void)
+#if defined(EXPECT_CXX)
+#  if !defined(__cplusplus)
+#    error "Expected this source to be compiled as C++"
+#  endif
+#  if !defined(EXPECTED_LANGUAGE)
+#    error "COMPILE_LANGUAGE did not use the file set language"
+#  endif
+#endif
+
+#ifdef __cplusplus
+extern "C"
+#endif
+  void
+  f2(void)
 {
 }

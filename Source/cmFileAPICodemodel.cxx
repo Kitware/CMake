@@ -1497,7 +1497,7 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
 {
   CompileData fd;
 
-  fd.Language = sf->GetOrDetermineLanguage();
+  fd.Language = this->GT->GetSourceFileLanguage(sf, this->Config);
   if (fd.Language.empty()) {
     return fd;
   }

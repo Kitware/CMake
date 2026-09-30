@@ -344,17 +344,16 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   cmSourceFile* source, cmLocalGenerator* lg, cmGeneratorTarget* gtgt)
 {
   std::string flags;
-  std::string language = source->GetOrDetermineLanguage();
+  std::string const& config =
+    lg->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  std::string language = gtgt->GetSourceFileLanguage(source, config);
   if (language.empty()) {
     language = "C";
   }
 
   // Explicitly add the explicit language flag before any other flag
   // so user flags can override it.
-  gtgt->AddExplicitLanguageFlags(flags, *source);
-
-  std::string const& config =
-    lg->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  gtgt->AddExplicitLanguageFlags(flags, *source, config);
 
   lg->GetTargetCompileFlags(gtgt, config, language, flags);
 
