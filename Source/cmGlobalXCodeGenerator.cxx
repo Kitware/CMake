@@ -2751,6 +2751,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       }
     }
 
+    // Add Swift module-name to target
+    if (cmValue moduleName = gtgt->GetProperty("Swift_MODULE_NAME")) {
+      if (gtgt->GetPolicyStatusCMP0226() == cmPolicies::NEW) {
+        buildSettings->AddAttribute("PRODUCT_MODULE_NAME",
+                                    this->CreateString(*moduleName));
+      }
+    }
+
     // Add SWIFT_PACKAGE_NAME
     if (this->XcodeVersion >= 150) {
       std::string const packageName = gtgt->GetSwiftPackageName();
@@ -3426,6 +3434,18 @@ std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
   configlist->SetComment(comment);
   target->AddAttribute("buildConfigurationList",
                        this->CreateObjectReference(configlist));
+
+  if (gtgt->GetProperty("Swift_MODULE_NAME")) {
+    cmPolicies::PolicyStatus cmp0226 = gtgt->GetPolicyStatusCMP0226();
+    if (cmp0226 == cmPolicies::WARN) {
+      gtgt->GetLocalGenerator()->GetMakefile()->IssuePolicyWarning(
+        cmPolicies::CMP0226, {},
+        cmStrCat("Explicit Swift_MODULE_NAME is not applied to target \"",
+                 gtgt->GetName(), '"'),
+        gtgt->GetBacktrace());
+    }
+  }
+
   for (auto const& i : configList) {
     cmXCodeObject* config =
       this->CreateObject(cmXCodeObject::XCBuildConfiguration);

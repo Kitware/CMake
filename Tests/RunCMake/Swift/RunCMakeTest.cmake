@@ -244,4 +244,6 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR
   run_cmake(PackageName)
   run_cmake(CMP0216-OLD)
   run_cmake(CMP0216-NEW)
+  run_cmake(CMP0226-NEW)
+  run_cmake(CMP0226-OLD)
 endif()
