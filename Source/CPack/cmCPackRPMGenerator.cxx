@@ -82,10 +82,10 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
       this->GetOption("CPACK_PACKAGE_FILE_NAME"), packageName, true) +
     this->GetOutputExtension());
 
-  localToplevel = cmStrCat(localToplevel, '/', sanitizedPkgDirName);
+  localToplevel = cmStrCat(std::move(localToplevel), '/', sanitizedPkgDirName);
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
-  packageFileName = cmStrCat(packageFileName, '/', outputFileName);
+  packageFileName = cmStrCat(std::move(packageFileName), '/', outputFileName);
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
   this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */
@@ -394,11 +394,11 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(
     std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
     this->GetOutputExtension());
   // all GROUP in one vs all COMPONENT in one
-  localToplevel = cmStrCat(localToplevel, '/', compInstDirName);
+  localToplevel = cmStrCat(std::move(localToplevel), '/', compInstDirName);
 
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
-  packageFileName = cmStrCat(packageFileName, '/', outputFileName);
+  packageFileName = cmStrCat(std::move(packageFileName), '/', outputFileName);
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
   this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */

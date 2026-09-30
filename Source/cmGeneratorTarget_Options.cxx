@@ -82,7 +82,7 @@ void processOptions(cmGeneratorTarget const* tgt,
           options.emplace_back(opt, entry.Backtrace);
         }
         if (debugOptions) {
-          usedOptions += cmStrCat(" * ", opt, '\n');
+          usedOptions = cmStrCat(std::move(usedOptions), " * ", opt, '\n');
         }
       }
     }

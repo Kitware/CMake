@@ -41,8 +41,8 @@ bool cmExportBuildCMakeConfigGenerator::GenerateMainFile(std::ostream& os)
     std::string sep;
     bool generatedInterfaceRequired = false;
     auto visitor = [&](cmGeneratorTarget const* te) {
-      expectedTargets =
-        cmStrCat(expectedTargets, sep, this->Namespace, te->GetExportName());
+      expectedTargets = cmStrCat(std::move(expectedTargets), sep,
+                                 this->Namespace, te->GetExportName());
       sep = " ";
 
       generatedInterfaceRequired |=
@@ -155,7 +155,7 @@ void cmExportBuildCMakeConfigGenerator::GenerateImportTargetsConfig(
             !cmSystemTools::FileIsFullPath(importedXcFrameworkLocation)) {
           importedXcFrameworkLocation =
             cmStrCat(this->LG->GetCurrentBinaryDirectory(), '/',
-                     importedXcFrameworkLocation);
+                     std::move(importedXcFrameworkLocation));
         }
       }
       this->GenerateImportPropertyCode(os, config, suffix, target, properties,

@@ -37,3 +37,4 @@ invalid:
   - 'cmStrCat(variable, R"(raw_literal)", "literal", variable)'
   - 'cmStrCat(variable, "literal", "string_view"_s, variable)'
   - 'cmStrCat(variable, "string_view"_s, "literal", variable)'
+  - 'cmStrCat(variable, "string_view"_s, "another_view"_s, variable)'

@@ -221,12 +221,14 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     if (this->Names.empty()) {
       this->VariableDocumentation += "the (unknown) library be found";
     } else if (this->Names.size() == 1) {
-      this->VariableDocumentation +=
-        cmStrCat("the ", this->Names.front(), " library be found");
+      this->VariableDocumentation =
+        cmStrCat(std::move(this->VariableDocumentation), "the ",
+                 this->Names.front(), " library be found");
     } else {
-      this->VariableDocumentation += cmStrCat(
-        "one of the ", cmJoin(cmMakeRange(this->Names).retreat(1), ", "),
-        " or ", this->Names.back(), " libraries be found");
+      this->VariableDocumentation =
+        cmStrCat(std::move(this->VariableDocumentation), "one of the ",
+                 cmJoin(cmMakeRange(this->Names).retreat(1), ", "), " or ",
+                 this->Names.back(), " libraries be found");
     }
   }
 
@@ -698,30 +700,28 @@ void cmFindBaseDebugState::WriteDebug() const
     buffer += "  NO_DEFAULT_PATH Enabled\n";
   } else {
     // clang-format off
-    buffer += cmStrCat(
-      "  CMAKE_FIND_USE_CMAKE_PATH: ", !this->FindCommand->NoCMakePath,
-      "\n  CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: ", !this->FindCommand->NoCMakeEnvironmentPath,
-      "\n  CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: ", !this->FindCommand->NoSystemEnvironmentPath,
-      "\n  CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: ", !this->FindCommand->NoCMakeSystemPath,
-      "\n  CMAKE_FIND_USE_INSTALL_PREFIX: ", !this->FindCommand->NoCMakeInstallPath,
-      '\n'
-     );
+    buffer = cmStrCat(std::move(buffer), "  CMAKE_FIND_USE_CMAKE_PATH: ", !this->FindCommand->NoCMakePath,
+    "\n  CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: ", !this->FindCommand->NoCMakeEnvironmentPath,
+    "\n  CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: ", !this->FindCommand->NoSystemEnvironmentPath,
+    "\n  CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: ", !this->FindCommand->NoCMakeSystemPath,
+    "\n  CMAKE_FIND_USE_INSTALL_PREFIX: ", !this->FindCommand->NoCMakeInstallPath,
+    '\n');
     // clang-format on
   }
 
-  buffer +=
-    cmStrCat(this->CommandName, " considered the following locations:\n");
+  buffer = cmStrCat(std::move(buffer), this->CommandName,
+                    " considered the following locations:\n");
   for (auto const& state : this->FailedSearchLocations) {
     std::string path = cmStrCat("  ", state.path);
     if (!state.regexName.empty()) {
-      path = cmStrCat(path, '/', state.regexName);
+      path = cmStrCat(std::move(path), '/', state.regexName);
     }
-    buffer += cmStrCat(path, '\n');
+    buffer = cmStrCat(std::move(buffer), path, '\n');
   }
 
   if (this->HasBeenFound()) {
-    buffer += cmStrCat("The item was found at\n  ",
-                       this->FoundSearchLocation.path, '\n');
+    buffer = cmStrCat(std::move(buffer), "The item was found at\n  ",
+                      this->FoundSearchLocation.path, '\n');
   } else {
     buffer += "The item was not found.\n";
   }

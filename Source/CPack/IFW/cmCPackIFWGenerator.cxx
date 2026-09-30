@@ -105,7 +105,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildRepogenCommand()
     std::string ifwArg = (*it)->Name;
     ++it;
     while (it != this->DownloadedPackages.end()) {
-      ifwArg = cmStrCat(ifwArg, ',', (*it)->Name);
+      ifwArg = cmStrCat(std::move(ifwArg), ',', (*it)->Name);
       ++it;
     }
     ifwCmd.emplace_back(ifwArg);
@@ -194,7 +194,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
     ifwArg = path + *it;
     ++it;
     while (it != this->Installer.Resources.end()) {
-      ifwArg = cmStrCat(ifwArg, ',', path, *it);
+      ifwArg = cmStrCat(std::move(ifwArg), ',', path, *it);
       ++it;
     }
     ifwCmd.emplace_back(ifwArg);
@@ -234,7 +234,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
     ifwArg = (*it)->Name;
     ++it;
     while (it != this->DownloadedPackages.end()) {
-      ifwArg = cmStrCat(ifwArg, ',', (*it)->Name);
+      ifwArg = cmStrCat(std::move(ifwArg), ',', (*it)->Name);
       ++it;
     }
     ifwCmd.emplace_back(ifwArg);
@@ -244,7 +244,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
     // Binary
     auto bit = this->BinaryPackages.begin();
     while (bit != this->BinaryPackages.end()) {
-      ifwArg = cmStrCat(ifwArg, (*bit)->Name, ',');
+      ifwArg = cmStrCat(std::move(ifwArg), (*bit)->Name, ',');
       ++bit;
     }
     // Depend
@@ -252,7 +252,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
     ifwArg += it->second.Name;
     ++it;
     while (it != this->DependentPackages.end()) {
-      ifwArg = cmStrCat(ifwArg, ',', it->second.Name);
+      ifwArg = cmStrCat(std::move(ifwArg), ',', it->second.Name);
       ++it;
     }
     ifwCmd.emplace_back(ifwArg);
@@ -300,8 +300,8 @@ char const* cmCPackIFWGenerator::GetPackagingInstallPrefix()
   std::string tmpPref = defPrefix ? defPrefix : "";
 
   if (this->Components.empty()) {
-    tmpPref =
-      cmStrCat(tmpPref, "packages/", this->GetRootPackageName(), "/data");
+    tmpPref = cmStrCat(std::move(tmpPref), "packages/",
+                       this->GetRootPackageName(), "/data");
   }
 
   this->SetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX", tmpPref);
@@ -619,7 +619,7 @@ std::string cmCPackIFWGenerator::GetGroupPackageName(
     cmCPackIFWPackage* package = this->GetGroupPackage(group->ParentGroup);
     bool dot = !this->ResolveDuplicateNames;
     if (dot && !cmHasPrefix(name, package->Name)) {
-      name = cmStrCat(package->Name, '.', name);
+      name = cmStrCat(package->Name, '.', std::move(name));
     }
   }
   return name;
@@ -649,7 +649,7 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
     }
     bool dot = !this->ResolveDuplicateNames;
     if (dot && !cmHasPrefix(name, package->Name)) {
-      name = cmStrCat(package->Name, '.', name);
+      name = cmStrCat(package->Name, '.', std::move(name));
     }
   }
   return name;

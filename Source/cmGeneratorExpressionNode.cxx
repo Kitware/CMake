@@ -4859,8 +4859,12 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       std::string linkedTargetsContent = getLinkedTargetsContent(
         target, interfacePropertyName, eval, &dagChecker, usage);
       if (!linkedTargetsContent.empty()) {
-        result =
-          cmStrCat(result, (result.empty() ? "" : ";"), linkedTargetsContent);
+        if (result.empty()) {
+          result = std::move(linkedTargetsContent);
+        } else {
+          result =
+            cmStrCat(std::move(result), ';', std::move(linkedTargetsContent));
+        }
       }
     }
     return result;
@@ -5070,7 +5074,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       }
 
       for (auto& o : objects) {
-        o = cmStrCat(obj_dir, o);
+        o = cmStrCat(obj_dir, std::move(o));
       }
     }
 

@@ -462,7 +462,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
     } else {
       this->ResolveTargetsInGeneratorExpression(li, target, lg);
     }
-    input = cmStrCat(input, sep, li);
+    input = cmStrCat(std::move(input), sep, li);
     sep = ";";
   }
 }

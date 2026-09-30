@@ -1033,7 +1033,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
             "CUDA_SEPARABLE_COMPILATION")) {
         std::string const& rdcFlag =
           this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-        cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
+        cudaCompileMode = cmStrCat(std::move(cudaCompileMode), rdcFlag, ' ');
       }
 
       static std::array<cm::string_view, 4> const compileModes{
@@ -1046,7 +1046,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         if (this->GeneratorTarget->GetPropertyAsBool(propName)) {
           std::string const& flag =
             this->Makefile->GetRequiredDefinition(defName);
-          cudaCompileMode = cmStrCat(cudaCompileMode, flag);
+          cudaCompileMode = cmStrCat(std::move(cudaCompileMode), flag);
           useNormalCompileMode = false;
           break;
         }
@@ -1054,7 +1054,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       if (useNormalCompileMode) {
         std::string const& wholeFlag =
           this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
-        cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+        cudaCompileMode = cmStrCat(std::move(cudaCompileMode), wholeFlag);
       }
       vars.CudaCompileMode = cudaCompileMode.c_str();
     }
@@ -1174,17 +1174,18 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         // compiler must be launched through a wrapper to pick-up dependencies
         std::string depFilter =
           "$(CMAKE_COMMAND) -E cmake_cl_compile_depends ";
-        depFilter += cmStrCat("--dep-file=", shellDependencyFile);
-        depFilter +=
-          cmStrCat(" --working-dir=",
+        depFilter =
+          cmStrCat(std::move(depFilter), "--dep-file=", shellDependencyFile);
+        depFilter =
+          cmStrCat(std::move(depFilter), " --working-dir=",
                    this->LocalGenerator->ConvertToOutputFormat(
                      this->LocalGenerator->GetCurrentBinaryDirectory(),
                      cmOutputConverter::SHELL));
         auto const& prefix = this->Makefile->GetSafeDefinition(
           cmStrCat("CMAKE_", lang, "_CL_SHOWINCLUDES_PREFIX"));
-        depFilter += cmStrCat(" --filter-prefix=",
-                              this->LocalGenerator->ConvertToOutputFormat(
-                                prefix, cmOutputConverter::SHELL));
+        depFilter = cmStrCat(std::move(depFilter), " --filter-prefix=",
+                             this->LocalGenerator->ConvertToOutputFormat(
+                               prefix, cmOutputConverter::SHELL));
         depFilter += " -- ";
         compileCommands.front().insert(0, depFilter);
       }
@@ -1192,7 +1193,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
     // Expand placeholders in the commands.
     for (std::string& compileCommand : compileCommands) {
-      compileCommand = cmStrCat(launcher, compileCommand);
+      compileCommand = cmStrCat(launcher, std::move(compileCommand));
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    compileCommand, vars);
     }
@@ -1698,7 +1699,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
     std::string const cubin =
       cmStrCat(objectDir, "sm_", architecture, ".cubin");
 
-    profiles += cmStrCat(" -im=profile=sm_", architecture, ",file=", cubin);
+    profiles = cmStrCat(std::move(profiles), " -im=profile=sm_", architecture,
+                        ",file=", cubin);
     fatbinaryDepends.emplace_back(cubin);
 
     std::string command = cmStrCat(
@@ -2253,7 +2255,7 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
     std::string linkPath;
     this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                               frameworkPath, linkPath);
-    linkLibs = cmStrCat(frameworkPath, linkPath, linkLibs);
+    linkLibs = cmStrCat(frameworkPath, linkPath, std::move(linkLibs));
   }
 
   if (useResponseFile &&
@@ -2310,8 +2312,9 @@ void cmMakefileTargetGenerator::CreateObjectLists(
       std::string objects_rsp = this->CreateResponseFile(
         responseFileName, object_strings[i], makefile_depends, linkLanguage);
 
-      buildObjs +=
-        cmStrCat(sep, // Separate from previous response file references.
+      buildObjs =
+        cmStrCat(std::move(buildObjs),
+                 sep, // Separate from previous response file references.
                  responseFlag, // Reference the response file.
                  this->LocalGenerator->ConvertToOutputFormat(
                    objects_rsp, cmOutputConverter::SHELL));

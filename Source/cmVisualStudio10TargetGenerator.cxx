@@ -1124,8 +1124,8 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
     if (cmHasPrefix(i.first, vsDnRef)) {
       std::string path = i.second;
       if (!cmsys::SystemTools::FileIsFullPath(path)) {
-        path =
-          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', path);
+        path = cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/',
+                        std::move(path));
       }
       ConvertToWindowsSlash(path);
       this->DotNetHintReferences[""].emplace_back(
@@ -1209,8 +1209,8 @@ void cmVisualStudio10TargetGenerator::WriteImports(Elem& e0)
     cmList argsSplit{ *imports };
     for (auto& path : argsSplit) {
       if (!cmsys::SystemTools::FileIsFullPath(path)) {
-        path =
-          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', path);
+        path = cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/',
+                        std::move(path));
       }
       ConvertToWindowsSlash(path);
       Elem e1(e0, "Import");
@@ -3555,9 +3555,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
           this->GeneratorTarget->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
       std::string clrString = *clr;
       if (!clrString.empty()) {
-        clrString = cmStrCat(':', clrString);
+        clrString = cmStrCat(':', std::move(clrString));
       }
-      flags += cmStrCat(" /clr", clrString);
+      flags = cmStrCat(std::move(flags), " /clr", clrString);
     }
   }
 
@@ -3590,7 +3590,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         if (auto sysIncludeFlagWarning = this->Makefile->GetDefinition(
               cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", this->LangForClCompile,
                        "_WARNING"))) {
-          flags = cmStrCat(flags, ' ', *sysIncludeFlagWarning);
+          flags = cmStrCat(std::move(flags), ' ', *sysIncludeFlagWarning);
         }
       }
     } else {

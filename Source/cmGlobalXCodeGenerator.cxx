@@ -1103,10 +1103,10 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   std::string const& srcfmt = sf->GetSafeProperty("Fortran_FORMAT");
   switch (cmOutputConverter::GetFortranFormat(srcfmt)) {
     case cmOutputConverter::FortranFormatFixed:
-      flags = cmStrCat("-fixed ", flags);
+      flags = cmStrCat("-fixed ", std::move(flags));
       break;
     case cmOutputConverter::FortranFormatFree:
-      flags = cmStrCat("-free ", flags);
+      flags = cmStrCat("-free ", std::move(flags));
       break;
     default:
       break;
@@ -2168,8 +2168,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
     allConfigOutputs.insert(ccg.GetOutputs().begin(), ccg.GetOutputs().end());
 
     shellScript =
-      cmStrCat(shellScript, R"(if test "$CONFIGURATION" = ")", configName,
-               "\"; then :\n", this->ConstructScript(ccg), "fi\n");
+      cmStrCat(std::move(shellScript), R"(if test "$CONFIGURATION" = ")",
+               configName, "\"; then :\n", this->ConstructScript(ccg), "fi\n");
   }
 
   if (!cc.GetDepfile().empty()) {
@@ -2260,16 +2260,18 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
 
   std::string shellScript = "set -e\n";
   for (std::string const& configName : this->CurrentConfigurationTypes) {
-    shellScript = cmStrCat(shellScript, R"(if test "$CONFIGURATION" = ")",
-                           configName, "\"; then :\n");
+    shellScript =
+      cmStrCat(std::move(shellScript), R"(if test "$CONFIGURATION" = ")",
+               configName, "\"; then :\n");
     for (cmCustomCommand const& cc : commands) {
       cmCustomCommandGenerator ccg(cc, configName,
                                    this->CurrentLocalGenerator);
-      shellScript = cmStrCat(shellScript, this->ConstructScript(ccg));
+      shellScript =
+        cmStrCat(std::move(shellScript), this->ConstructScript(ccg));
       allConfigOutputs.insert(ccg.GetByproducts().begin(),
                               ccg.GetByproducts().end());
     }
-    shellScript = cmStrCat(shellScript, "fi\n");
+    shellScript = cmStrCat(std::move(shellScript), "fi\n");
   }
 
   cmXCodeObject* buildPhase =
@@ -2325,7 +2327,7 @@ std::string cmGlobalXCodeGenerator::ConstructScript(
   }
   wd = lg->ConvertToOutputFormat(wd, cmOutputConverter::SHELL);
   ReplaceScriptVars(wd);
-  script = cmStrCat(script, "  cd ", wd, '\n');
+  script = cmStrCat(std::move(script), "  cd ", wd, '\n');
   for (unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c) {
     std::string cmd = ccg.GetCommand(c);
     if (cmd.empty()) {
@@ -2335,7 +2337,7 @@ std::string cmGlobalXCodeGenerator::ConstructScript(
     cmd = lg->ConvertToOutputFormat(cmd, cmOutputConverter::SHELL);
     ccg.AppendArguments(c, cmd);
     ReplaceScriptVars(cmd);
-    script = cmStrCat(script, "  ", cmd, '\n');
+    script = cmStrCat(std::move(script), "  ", cmd, '\n');
   }
   return script;
 }
@@ -2724,7 +2726,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       std::set<std::string> defines(targetSwiftDefines.begin(),
                                     targetSwiftDefines.end());
       this->CurrentLocalGenerator->JoinDefines(defines, defineString, "Swift");
-      cflags["Swift"] += cmStrCat(' ', defineString);
+      cflags["Swift"] =
+        cmStrCat(std::move(cflags["Swift"]), ' ', defineString);
     } else {
       BuildObjectListOrString swiftDefs(this, true);
       this->AppendDefines(swiftDefs, targetSwiftDefines);
@@ -3106,7 +3109,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         includes, gtgt, language, configName);
 
       if (!includeFlags.empty()) {
-        cflags[language] += cmStrCat(' ', includeFlags);
+        cflags[language] =
+          cmStrCat(std::move(cflags[language]), ' ', includeFlags);
       }
     }
   }
@@ -4986,16 +4990,17 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
         std::vector<std::string> const& outputs =
           ccRoot.first->GetCustomCommand()->GetOutputs();
         if (!outputs.empty()) {
-          e = cmStrCat(e, "generating\n  ", outputs[0]);
+          e = cmStrCat(std::move(e), "generating\n  ", outputs[0]);
         } else {
-          e = cmStrCat(e, "driven by\n  ", ccRoot.first->GetFullPath());
+          e = cmStrCat(std::move(e), "driven by\n  ",
+                       ccRoot.first->GetFullPath());
         }
-        e = cmStrCat(e, "\nis attached to multiple targets:");
+        e = cmStrCat(std::move(e), "\nis attached to multiple targets:");
         for (cmGeneratorTarget const* gt : ccRoot.second) {
-          e = cmStrCat(e, "\n  ", gt->GetName());
+          e = cmStrCat(std::move(e), "\n  ", gt->GetName());
         }
         e = cmStrCat(
-          e,
+          std::move(e),
           "\nbut none of these is a common dependency of the other(s).  "
           "This is not allowed by the Xcode \"new build system\".");
         generator->IssueMessage(MessageType::FATAL_ERROR, e);

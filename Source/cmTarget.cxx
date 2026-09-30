@@ -1557,13 +1557,14 @@ std::string cmTarget::GetDebugGeneratorExpressions(
 
   if (debugConfigs.size() > 1) {
     for (std::string const& conf : cmMakeRange(debugConfigs).advance(1)) {
-      configString = cmStrCat(configString, ",$<CONFIG:", conf, '>');
+      configString =
+        cmStrCat(std::move(configString), ",$<CONFIG:", conf, '>');
     }
-    configString = cmStrCat("$<OR:", configString, '>');
+    configString = cmStrCat("$<OR:", std::move(configString), '>');
   }
 
   if (llt == OPTIMIZED_LibraryType) {
-    configString = cmStrCat("$<NOT:", configString, '>');
+    configString = cmStrCat("$<NOT:", std::move(configString), '>');
   }
   return cmStrCat("$<", configString, ':', value, '>');
 }
@@ -3279,8 +3280,9 @@ std::string cmTarget::ImportedGetFullPath(
           auto const* library = plist->SelectSuitableLibrary(
             *this->impl->Makefile, this->impl->Backtrace);
           if (library) {
-            result = cmStrCat(result, '/', library->LibraryIdentifier, '/',
-                              library->LibraryPath);
+            result =
+              cmStrCat(std::move(result), '/', library->LibraryIdentifier, '/',
+                       library->LibraryPath);
           } else {
             return "";
           }

@@ -462,7 +462,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
         this->Target->GetDebugGeneratorExpressions(lib, llt);
       if (cmGeneratorExpression::IsValidTargetName(lib) ||
           cmGeneratorExpression::Find(lib) != std::string::npos) {
-        configLib = cmStrCat("$<LINK_ONLY:", configLib, '>');
+        configLib = cmStrCat("$<LINK_ONLY:", std::move(configLib), '>');
       }
       this->AppendProperty("INTERFACE_LINK_LIBRARIES", configLib);
     }

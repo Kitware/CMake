@@ -160,7 +160,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   // Compute the effective install destination.
   std::string dest = this->GetDestination(config);
   if (!files.ToDir.empty()) {
-    dest = cmStrCat(dest, '/', files.ToDir);
+    dest = cmStrCat(std::move(dest), '/', files.ToDir);
   }
 
   // Tweak files located in the destination directory.

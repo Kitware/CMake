@@ -413,7 +413,7 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
 
     // Expand placeholders.
     for (auto& real_link_command : real_link_commands) {
-      real_link_command = cmStrCat(launcher, real_link_command);
+      real_link_command = cmStrCat(launcher, std::move(real_link_command));
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    real_link_command, vars);
     }
@@ -765,7 +765,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                             useResponseFileForObjects, buildObjs, depends,
                             useWatcomQuote, linkLanguage, responseMode);
     if (!this->DeviceLinkObject.empty()) {
-      buildObjs = cmStrCat(buildObjs, ' ',
+      buildObjs = cmStrCat(std::move(buildObjs), ' ',
                            this->LocalGenerator->ConvertToOutputFormat(
                              this->LocalGenerator->MaybeRelativeToCurBinDir(
                                this->DeviceLinkObject),
@@ -953,14 +953,15 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
               cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
             " -E __run_co_compile --lwyu=");
           cmakeCommand += this->LocalGenerator->EscapeForShell(*lwyuCheck);
-          cmakeCommand += cmStrCat(" --source=", targetOutPathReal);
+          cmakeCommand =
+            cmStrCat(std::move(cmakeCommand), " --source=", targetOutPathReal);
           real_link_commands.push_back(std::move(cmakeCommand));
         }
       }
 
       // Expand placeholders.
       for (auto& real_link_command : real_link_commands) {
-        real_link_command = cmStrCat(launcher, real_link_command);
+        real_link_command = cmStrCat(launcher, std::move(real_link_command));
         rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                      real_link_command, vars);
       }

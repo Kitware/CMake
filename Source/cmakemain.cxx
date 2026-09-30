@@ -638,7 +638,8 @@ int do_build(int ac, char const* const* av)
           std::string const suggestion =
             cmFindClosestCommandLineArgument(arg, arguments);
           if (!suggestion.empty()) {
-            error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+            error =
+              cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
           }
           std::cerr << error << std::endl;
         }
@@ -934,7 +935,8 @@ int do_install(int ac, char const* const* av)
           std::string const suggestion =
             cmFindClosestCommandLineArgument(arg, arguments);
           if (!suggestion.empty()) {
-            error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+            error =
+              cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
           }
           std::cerr << error << std::endl;
         }
@@ -1143,7 +1145,8 @@ int do_workflow(int ac, char const* const* av)
         std::string const suggestion =
           cmFindClosestCommandLineArgument(arg, arguments);
         if (!suggestion.empty()) {
-          error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+          error =
+            cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
         }
         std::cerr << error << std::endl;
       }

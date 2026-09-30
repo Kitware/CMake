@@ -289,7 +289,7 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories(
         cmLocalGenerator* lg = mappedLinkee->GetLocalGenerator();
         std::string di = mappedLinkee->GetSupportDirectory();
         if (lg->GetGlobalGenerator()->IsMultiConfig()) {
-          di = cmStrCat(di, '/', config);
+          di = cmStrCat(std::move(di), '/', config);
         }
         if (forward == Forwarding::Yes &&
             forward_emitted.insert(mappedLinkee).second) {

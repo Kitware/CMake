@@ -301,7 +301,7 @@ void cmInstrumentation::RemoveOldFiles(std::string const& dataSubdir)
   std::string oldIndex =
     this->GetFileByTimestamp(LatestOrOldest::Oldest, "index");
   if (!oldIndex.empty()) {
-    oldIndex = cmStrCat(this->dataDir, "/index/", oldIndex);
+    oldIndex = cmStrCat(this->dataDir, "/index/", std::move(oldIndex));
   }
   if (cmSystemTools::FileExists(dataSubdirPath)) {
     std::string latestFile =
@@ -867,15 +867,15 @@ std::string cmInstrumentation::GetCommandStr(
   std::vector<std::string> const& args)
 {
   std::string command_str;
-  for (size_t i = 0; i < args.size(); ++i) {
-    if (args[i].find(' ') != std::string::npos) {
-      command_str = cmStrCat(command_str, '"', args[i], '"');
+  for (std::string const& arg : args) {
+    if (arg.find(' ') != std::string::npos) {
+      command_str = cmStrCat(std::move(command_str), '"', arg, "\" ");
     } else {
-      command_str = cmStrCat(command_str, args[i]);
+      command_str = cmStrCat(std::move(command_str), arg, ' ');
     }
-    if (i < args.size() - 1) {
-      command_str = cmStrCat(command_str, ' ');
-    }
+  }
+  if (!command_str.empty()) {
+    command_str.pop_back();
   }
   return command_str;
 }

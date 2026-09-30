@@ -421,7 +421,7 @@ void cmFastbuildNormalTargetGenerator::ApplyLinkRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_LINK", Config);
   if (cmNonempty(val)) {
     LogMessage("RULE_LAUNCH_LINK: " + val);
-    command = cmStrCat(val, ' ', command);
+    command = cmStrCat(val, ' ', std::move(command));
   }
 }
 
@@ -435,8 +435,8 @@ void cmFastbuildNormalTargetGenerator::ApplyLWYUToLinkerCommand(
     std::string args = " -E __run_co_compile --lwyu=";
     args += this->GetLocalGenerator()->EscapeForShell(*lwyuCheck);
 
-    args += cmStrCat(
-      " --source=",
+    args = cmStrCat(
+      std::move(args), " --source=",
       this->ConvertToFastbuildPath(this->GetGeneratorTarget()->GetFullPath(
         Config, cmStateEnums::RuntimeBinaryArtifact,
         /*realname=*/true)));
@@ -777,7 +777,7 @@ std::string cmFastbuildNormalTargetGenerator::GetCudaCompileMode() const
   if (this->GeneratorTarget->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
     std::string const& rdcFlag =
       this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-    cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
+    cudaCompileMode = cmStrCat(std::move(cudaCompileMode), rdcFlag, ' ');
   }
   static std::array<cm::string_view, 4> const compileModes{
     { "PTX"_s, "CUBIN"_s, "FATBIN"_s, "OPTIX"_s }
@@ -788,7 +788,7 @@ std::string cmFastbuildNormalTargetGenerator::GetCudaCompileMode() const
     auto defName = cmStrCat("_CMAKE_CUDA_", mode, "_FLAG");
     if (this->GeneratorTarget->GetPropertyAsBool(propName)) {
       std::string const& flag = this->Makefile->GetRequiredDefinition(defName);
-      cudaCompileMode = cmStrCat(cudaCompileMode, flag);
+      cudaCompileMode = cmStrCat(std::move(cudaCompileMode), flag);
       useNormalCompileMode = false;
       break;
     }
@@ -796,7 +796,7 @@ std::string cmFastbuildNormalTargetGenerator::GetCudaCompileMode() const
   if (useNormalCompileMode) {
     std::string const& wholeFlag =
       this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
-    cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+    cudaCompileMode = cmStrCat(std::move(cudaCompileMode), wholeFlag);
   }
   return cudaCompileMode;
 }
@@ -1946,7 +1946,7 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
          ? FASTBUILD_OBJECTS_ALIAS_POSTFIX
          : FASTBUILD_LINK_ARTIFACTS_ALIAS_POSTFIX);
     if (!linkerNode.Arch.empty()) {
-      dep += cmStrCat('-', linkerNode.Arch);
+      dep = cmStrCat(std::move(dep), '-', linkerNode.Arch);
     }
     // If we have a special way of linking the dep, we can't have it in
     // ".Libraries" (since there might be multiple such deps, but
@@ -2252,8 +2252,9 @@ void cmFastbuildNormalTargetGenerator::AddLipoCommand(FastbuildTarget& target)
   for (auto const& ArchSpecificTarget : target.LinkerNode) {
     exec.ExecInput.emplace_back(ArchSpecificTarget.LinkerOutput);
   }
-  exec.ExecArguments += cmStrCat("-create -output ", target.RealOutput, ' ',
-                                 cmJoin(exec.ExecInput, " "));
+  exec.ExecArguments =
+    cmStrCat(std::move(exec.ExecArguments), "-create -output ",
+             target.RealOutput, ' ', cmJoin(exec.ExecInput, " "));
   target.PostBuildExecNodes.Alias.PreBuildDependencies.emplace(
     exec.ExecOutput);
   target.PostBuildExecNodes.Nodes.emplace_back(std::move(exec));
@@ -2375,8 +2376,9 @@ void cmFastbuildNormalTargetGenerator::GenerateLink(
     this->GetGlobalGenerator()->AddFileToClean(linkerNode.LinkerOutput);
     target.RealOutput = targetOutputReal;
     if (!arch.empty()) {
-      linkerNode.Name += cmStrCat('-', arch);
-      linkerNode.LinkerOutput += cmStrCat('.', arch);
+      linkerNode.Name = cmStrCat(std::move(linkerNode.Name), '-', arch);
+      linkerNode.LinkerOutput =
+        cmStrCat(std::move(linkerNode.LinkerOutput), '.', arch);
       linkerNode.Arch = arch;
     }
     linkerNode.Linker = executable;

@@ -107,7 +107,7 @@ int cmCPackGenerator::PrepareNames()
   {
     cmValue toplevelTag = this->GetOption("CPACK_TOPLEVEL_TAG");
     if (toplevelTag) {
-      topDirectory += cmStrCat(toplevelTag, '/');
+      topDirectory = cmStrCat(std::move(topDirectory), toplevelTag, '/');
     }
   }
   topDirectory += *this->GetOption("CPACK_GENERATOR");
@@ -838,7 +838,7 @@ int cmCPackGenerator::InstallCMakeProject(
     if (cmHasPrefix(dir, '/')) {
       dir = tempInstallDirectory + dir;
     } else {
-      dir = cmStrCat(tempInstallDirectory, '/', dir);
+      dir = cmStrCat(tempInstallDirectory, '/', std::move(dir));
     }
     /*
      *  We must re-set DESTDIR for each component

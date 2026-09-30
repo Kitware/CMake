@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <fcntl.h>
@@ -78,7 +79,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   cmsys::ifstream ilfs(inLicFile.c_str());
   std::string licenseText;
   while (cmSystemTools::GetLineFromStream(ilfs, line)) {
-    licenseText = cmStrCat(licenseText, line, '\n');
+    licenseText = cmStrCat(std::move(licenseText), line, '\n');
   }
   this->SetOptionIfNotSet("CPACK_RESOURCE_FILE_LICENSE_CONTENT", licenseText);
 
@@ -89,7 +90,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   cmsys::ifstream ifs(inFile.c_str());
   std::string packageHeaderText;
   while (cmSystemTools::GetLineFromStream(ifs, line)) {
-    packageHeaderText = cmStrCat(packageHeaderText, line, '\n');
+    packageHeaderText = cmStrCat(std::move(packageHeaderText), line, '\n');
   }
 
   // Configure in the values

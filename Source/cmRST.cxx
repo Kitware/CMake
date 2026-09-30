@@ -380,7 +380,7 @@ void cmRST::OutputMarkupLines(bool inlineMarkup)
 {
   for (auto line : this->MarkupLines) {
     if (!line.empty()) {
-      line = cmStrCat(' ', line);
+      line = cmStrCat(' ', std::move(line));
     }
     this->OutputLine(line, inlineMarkup);
   }
@@ -403,7 +403,7 @@ bool cmRST::ProcessInclude(std::string file, Include type)
     if (file[0] == '/') {
       file = this->DocRoot + file;
     } else {
-      file = cmStrCat(this->DocDir, '/', file);
+      file = cmStrCat(this->DocDir, '/', std::move(file));
     }
     found = r.ProcessFile(file, type == Include::Module);
     if (type == Include::TocTree) {

@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLinkDirectoriesCommand.h"
 
+#include <utility>
+
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -54,7 +56,8 @@ static void AddLinkDir(cmMakefile& mf, std::string const& dir,
   cmSystemTools::ConvertToUnixSlashes(unixPath);
   if (!cmSystemTools::FileIsFullPath(unixPath) &&
       !cmGeneratorExpression::StartsWithGeneratorExpression(unixPath)) {
-    unixPath = cmStrCat(mf.GetCurrentSourceDirectory(), '/', unixPath);
+    unixPath =
+      cmStrCat(mf.GetCurrentSourceDirectory(), '/', std::move(unixPath));
   }
   directories.push_back(unixPath);
 }

@@ -252,8 +252,8 @@ bool ParseResult::Check(cm::string_view context,
       (this->KeywordErrors.size() > 1 ? "arguments:"_s : "argument:"_s));
     for (auto const& kel : this->KeywordErrors) {
       for (auto const& ke : kel.second) {
-        msg =
-          cmStrCat(msg, "\n  "_s, kel.first, ": "_s, cmStripWhitespace(ke));
+        msg = cmStrCat(std::move(msg), "\n  "_s, kel.first, ": "_s,
+                       cmStripWhitespace(ke));
       }
     }
     status.SetError(msg);

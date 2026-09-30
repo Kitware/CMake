@@ -2119,7 +2119,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
             continue;
           }
           if (filterArch.empty() || filterArch == arch) {
-            flags = cmStrCat(flags, " -Xarch_", arch, ' ');
+            flags = cmStrCat(std::move(flags), " -Xarch_", arch, ' ');
             // Combine sysroot flag and path to work with -Xarch
             std::string arch_sysroot = *sysrootFlag + archSysroot;
             flags += this->ConvertToOutputFormat(arch_sysroot, SHELL);
@@ -2172,7 +2172,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                           flag.substr(verPos + kVERSION_MIN.size()));
         } else {
           // There is no placeholder, so append the value.
-          flag = cmStrCat(flag, *deploymentTarget);
+          flag = cmStrCat(std::move(flag), *deploymentTarget);
         }
 
         flags += " ";
@@ -2871,8 +2871,8 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           std::string const pchHeader =
             target->GetPchHeader(config, lang, arch);
           if (!pchHeader.empty()) {
-            useMultiArchPch = cmStrCat(useMultiArchPch, ";-Xarch_", arch,
-                                       ";-include", pchHeader);
+            useMultiArchPch = cmStrCat(std::move(useMultiArchPch), ";-Xarch_",
+                                       arch, ";-include", pchHeader);
           }
         }
 
@@ -3819,7 +3819,7 @@ void cmLocalGenerator::AppendWarningAsErrorLinkerFlags(
   std::string errorMessage;
   for (auto const& option : wErrorOptions) {
     if (option != "DRIVER"_s && option != "LINKER"_s) {
-      errorMessage += cmStrCat("  ", option, '\n');
+      errorMessage = cmStrCat(std::move(errorMessage), "  ", option, '\n');
       continue;
     }
 

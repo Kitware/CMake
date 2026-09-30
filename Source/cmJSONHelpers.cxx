@@ -22,7 +22,7 @@ ErrorGenerator EXPECTED_TYPE(std::string const& type)
     }
     std::string errMsg = cmStrCat('"', state->key(), "\" expected ", type);
     if (value && value->isConvertibleTo(Json::ValueType::stringValue)) {
-      errMsg = cmStrCat(errMsg, ", got: ", value->asString());
+      errMsg = cmStrCat(std::move(errMsg), ", got: ", value->asString());
     }
     state->AddErrorAtValue(errMsg, value);
   };

@@ -446,12 +446,13 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
   }
   std::string e;
   if (role == LinkItemRole::Implementation) {
-    e = cmStrCat(e, "Target \"", this->GetName(), "\" links to");
+    e = cmStrCat(std::move(e), "Target \"", this->GetName(), "\" links to");
   } else {
-    e = cmStrCat(e, "The link interface of target \"", this->GetName(),
-                 "\" contains");
+    e = cmStrCat(std::move(e), "The link interface of target \"",
+                 this->GetName(), "\" contains");
   }
-  e = cmStrCat(e, ":\n  ", item.AsStr(), "\nbut the target was not found.  ",
+  e = cmStrCat(std::move(e), ":\n  ", item.AsStr(),
+               "\nbut the target was not found.  ",
                missingTargetPossibleReasons);
   cmListFileBacktrace backtrace = item.Backtrace;
   if (backtrace.Empty()) {

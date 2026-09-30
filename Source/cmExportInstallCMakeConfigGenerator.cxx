@@ -49,8 +49,8 @@ bool cmExportInstallCMakeConfigGenerator::GenerateMainFile(std::ostream& os)
     std::string sep;
     auto visitor = [&](cmTargetExport const* te) {
       allTargets.push_back(te);
-      expectedTargets = cmStrCat(expectedTargets, sep, this->Namespace,
-                                 te->Target->GetExportName());
+      expectedTargets = cmStrCat(std::move(expectedTargets), sep,
+                                 this->Namespace, te->Target->GetExportName());
       sep = " ";
     };
 
@@ -289,7 +289,7 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetDirectories(
     std::string dest = cmOutputConverter::EscapeForCMake(
       result.UnescapedDestination, cmOutputConverter::WrapQuotes::NoWrap);
     if (!cmSystemTools::FileIsFullPath(result.UnescapedDestination)) {
-      dest = cmStrCat("${_IMPORT_PREFIX}/", dest);
+      dest = cmStrCat("${_IMPORT_PREFIX}/", std::move(dest));
     }
 
     if (result.HadContextSensitiveCondition && configs.size() != 1) {
@@ -327,7 +327,7 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetFiles(
                  unescapedDest, cmOutputConverter::WrapQuotes::NoWrap),
                '/');
     if (!cmSystemTools::FileIsFullPath(unescapedDest)) {
-      dest = cmStrCat("${_IMPORT_PREFIX}/", dest);
+      dest = cmStrCat("${_IMPORT_PREFIX}/", std::move(dest));
     }
 
     bool const contextSensitive =

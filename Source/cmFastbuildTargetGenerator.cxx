@@ -160,8 +160,8 @@ std::string cmFastbuildTargetGenerator::GetCustomCommandTargetName(
   extras += std::to_string(static_cast<int>(step));
 
   cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
-  targetName =
-    cmStrCat(targetName, '-', hash.HashString(extras).substr(0, 14));
+  targetName = cmStrCat(std::move(targetName), '-',
+                        hash.HashString(extras).substr(0, 14));
 
   return targetName;
 }
@@ -801,14 +801,14 @@ std::string cmFastbuildTargetGenerator::MakeCustomLauncher(
   std::vector<std::string> const& outputs = ccg.GetOutputs();
   for (size_t i = 0; i < outputs.size(); ++i) {
     output =
-      cmStrCat(output,
+      cmStrCat(std::move(output),
                this->LocalGenerator->ConvertToOutputFormat(
                  ccg.GetWorkingDirectory().empty()
                    ? this->LocalGenerator->MaybeRelativeToCurBinDir(outputs[i])
                    : outputs[i],
                  cmOutputConverter::SHELL));
     if (i != outputs.size() - 1) {
-      output = cmStrCat(output, ',');
+      output = cmStrCat(std::move(output), ',');
     }
   }
   vars.Output = output.c_str();

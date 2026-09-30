@@ -69,11 +69,12 @@ std::string cmJSONState::GetErrorMessage(bool showContext)
   for (auto const& error : this->errors) {
     Location loc = error.GetLocation();
     if (!filenameName.empty() && loc.line > 0) {
-      message = cmStrCat(message, filenameName, ':', loc.line, ": ");
+      message =
+        cmStrCat(std::move(message), filenameName, ':', loc.line, ": ");
     }
-    message = cmStrCat(message, error.GetErrorMessage(), '\n');
+    message = cmStrCat(std::move(message), error.GetErrorMessage(), '\n');
     if (showContext && loc.line > 0) {
-      message = cmStrCat(message, GetJsonContext(loc), '\n');
+      message = cmStrCat(std::move(message), GetJsonContext(loc), '\n');
     }
   }
   if (!message.empty()) {
@@ -174,9 +175,10 @@ void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root,
   // No StructuredError Available, Use error string from jsonCpp
   if (!Json::parseFromStream(builder, jsonIStream, root, &errMsg)) {
     if (this->Filename.empty()) {
-      errMsg = cmStrCat("JSON Parse Error:\n ", errMsg);
+      errMsg = cmStrCat("JSON Parse Error:\n ", std::move(errMsg));
     } else {
-      errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n", errMsg);
+      errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n",
+                        std::move(errMsg));
     }
     this->AddError(errMsg);
   }

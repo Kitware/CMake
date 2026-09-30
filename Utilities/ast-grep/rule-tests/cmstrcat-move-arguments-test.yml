@@ -1,0 +1,16 @@
+---
+id: cmstrcat-move-arguments
+valid:
+  - 'cmStrCat(a, b)'
+  - 'b = cmStrCat(a, c)'
+  - 'a = cmStrCat(b, c)'
+  - 'a = cmStrCat(std::move(a), b)'
+  - 'a = cmStrCat(a + b, c)'
+  - 'a = cmStrCat(obj.a, b)'
+  - 'a = cmStrCat(a, b, a)'
+  - 'a = cmStrCat(a, a)'
+invalid:
+  - 'a = cmStrCat(a, b)'
+  - 'a = cmStrCat(b, a)'
+  - 'a = cmStrCat(b, a, c)'
+  - 'result = cmStrCat("pre", result)'

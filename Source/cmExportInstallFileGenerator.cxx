@@ -183,7 +183,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     std::vector<std::string> objects;
     itgen->GetInstallObjectNames(config, objects);
     for (std::string& obj : objects) {
-      obj = cmStrCat(value, obj);
+      obj = cmStrCat(value, std::move(obj));
     }
 
     // Store the property.
@@ -605,7 +605,7 @@ void cmExportInstallFileGenerator::PopulateIncludeDirectoriesInterface(
 
   std::string includes = (input ? *input : "");
   char const* const sep = input ? ";" : "";
-  includes = cmStrCat(includes, sep, exportDirs);
+  includes = cmStrCat(std::move(includes), sep, exportDirs);
   std::string prepro = cmGeneratorExpression::Preprocess(
     includes, preprocessRule, this->GetImportPrefixWithSlash());
   if (!prepro.empty()) {

@@ -310,7 +310,7 @@ int cmCPackArchiveGenerator::InitializeInternal()
   if (!newExtensionValue.IsEmpty()) {
     std::string newExtension = *newExtensionValue;
     if (!cmHasPrefix(newExtension, '.')) {
-      newExtension = cmStrCat('.', newExtension);
+      newExtension = cmStrCat('.', std::move(newExtension));
     }
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "Using user-provided file extension "
@@ -458,7 +458,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
             << std::endl);
         std::string packageFileName = std::string(this->toplevel);
         packageFileName =
-          cmStrCat(packageFileName, '/',
+          cmStrCat(std::move(packageFileName), '/',
                    this->GetArchiveComponentFileName(comp.first, false));
 
         {
@@ -477,7 +477,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
     for (auto& comp : this->Components) {
       std::string packageFileName = std::string(this->toplevel);
       packageFileName =
-        cmStrCat(packageFileName, '/',
+        cmStrCat(std::move(packageFileName), '/',
                  this->GetArchiveComponentFileName(comp.first, false));
 
       {

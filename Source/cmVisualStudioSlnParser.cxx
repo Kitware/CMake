@@ -541,7 +541,8 @@ bool cmVisualStudioSlnParser::ParseBOM(std::istream& input, std::string& line,
     return false;
   }
   if (!this->LastResult.HadBOM) {
-    line = cmStrCat(bom, line); // it wasn't a BOM, prepend it to first line
+    line = cmStrCat(
+      bom, std::move(line)); // it wasn't a BOM, prepend it to first line
   }
   return true;
 }

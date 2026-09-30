@@ -362,7 +362,7 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeDeviceLinkCmd();
     for (std::string& linkCmd : linkCmds) {
-      linkCmd = cmStrCat(launcher, linkCmd);
+      linkCmd = cmStrCat(launcher, std::move(linkCmd));
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    linkCmd, vars);
     }
@@ -600,7 +600,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd(config);
     for (std::string& linkCmd : linkCmds) {
-      linkCmd = cmStrCat(launcher, linkCmd);
+      linkCmd = cmStrCat(launcher, std::move(linkCmd));
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    linkCmd, vars);
     }
@@ -771,7 +771,8 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
             this->ConvertToNinjaPath(this->GetGeneratorTarget()->GetFullPath(
               config, cmStateEnums::RuntimeBinaryArtifact,
               /*realname=*/true));
-          cmakeCommand += cmStrCat(" --source=", targetOutputReal);
+          cmakeCommand =
+            cmStrCat(std::move(cmakeCommand), " --source=", targetOutputReal);
           linkCmds.push_back(std::move(cmakeCommand));
         }
       }
@@ -944,8 +945,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatements(
         "--register-link-binaries=", ninjaOutputDir, "/cmake_cuda_register.h");
     }
 
-    fatbinary.Variables["PROFILES"] +=
-      cmStrCat(" -im=profile=sm_", architecture, ",file=", cubin);
+    fatbinary.Variables["PROFILES"] =
+      cmStrCat(std::move(fatbinary.Variables["PROFILES"]), " -im=profile=sm_",
+               architecture, ",file=", cubin);
     fatbinary.ExplicitDeps.emplace_back(cubin);
 
     globalGen->WriteBuild(this->GetCommonFileStream(), dlink);
@@ -1401,8 +1403,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       std::string rspPath =
         cmStrCat(this->GeneratorTarget->GetSupportDirectory(), configDir,
                  "/CXXInterfaceObjects.rsp");
-      vars["LINK_FLAGS"] += cmStrCat(
-        " @",
+      vars["LINK_FLAGS"] = cmStrCat(
+        std::move(vars["LINK_FLAGS"]), " @",
         this->GetLocalGenerator()->ConvertToOutputFormat(
           this->ConvertToNinjaPath(rspPath), cmOutputConverter::SHELL));
       linkBuild.ImplicitDeps.emplace_back(this->ConvertToNinjaPath(rspPath));

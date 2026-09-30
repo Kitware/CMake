@@ -1,0 +1,13 @@
+---
+id: cmstrcat-not-append-result
+valid:
+  - 'a = cmStrCat(b, c)'
+  - 'a = cmStrCat(std::move(a), b, c)'
+  - 'a += b'
+  - 'a.append(b)'
+  - 'a += other(cmStrCat(b, c))'
+invalid:
+  - 'a += cmStrCat(b, c)'
+  - 'a.append(cmStrCat(b, c))'
+  - 'obj.field += cmStrCat(b, c);'
+  - "cflags[\"Swift\"] += cmStrCat(' ', defineString)"

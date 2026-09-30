@@ -307,7 +307,7 @@ bool CheckExpandMacros(ConfigurePreset const& preset,
   if (!binaryDir.empty()) {
     if (graph) {
       if (!cmSystemTools::FileIsFullPath(binaryDir)) {
-        binaryDir = cmStrCat(graph->SourceDir, '/', binaryDir);
+        binaryDir = cmStrCat(graph->SourceDir, '/', std::move(binaryDir));
       }
       out->BinaryDir = cmSystemTools::CollapseFullPath(binaryDir);
       cmSystemTools::ConvertToUnixSlashes(out->BinaryDir);
@@ -324,7 +324,7 @@ bool CheckExpandMacros(ConfigurePreset const& preset,
 
     if (graph) {
       if (!cmSystemTools::FileIsFullPath(installDir)) {
-        installDir = cmStrCat(graph->SourceDir, '/', installDir);
+        installDir = cmStrCat(graph->SourceDir, '/', std::move(installDir));
       }
       out->InstallDir = cmSystemTools::CollapseFullPath(installDir);
       cmSystemTools::ConvertToUnixSlashes(out->InstallDir);

@@ -172,7 +172,7 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
   } else {
     // Interpret relative paths with respect to the current build dir.
     std::string const& dir = mf.GetCurrentBinaryDirectory();
-    fname = cmStrCat(dir, '/', fname);
+    fname = cmStrCat(dir, '/', std::move(fname));
   }
 
   std::vector<cmExportBuildFileGenerator::TargetExport> targets;
@@ -311,7 +311,7 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   } else {
     // Interpret relative paths with respect to the current build dir.
     std::string const& dir = mf.GetCurrentBinaryDirectory();
-    fname = cmStrCat(dir, '/', fname);
+    fname = cmStrCat(dir, '/', std::move(fname));
   }
 
   cm::optional<cmExportSet*> const exportSet =

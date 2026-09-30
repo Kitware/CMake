@@ -3,6 +3,7 @@
 #include "cmCreateTestSourceList.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -93,8 +94,9 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
       tests_func_name.end();
     tests_func_name.push_back(func_name);
     if (!already_declared) {
-      forwardDeclareCode +=
-        cmStrCat("extern int ", func_name, "(int, char*[]);\n");
+      forwardDeclareCode =
+        cmStrCat(std::move(forwardDeclareCode), "extern int ", func_name,
+                 "(int, char*[]);\n");
     }
   }
 

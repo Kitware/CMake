@@ -168,10 +168,6 @@ snapshots:
       style: secondary
       start: 0
       end: 56
-    - source: _s
-      style: secondary
-      start: 43
-      end: 45
     - source: ','
       style: secondary
       start: 28
@@ -216,15 +212,29 @@ snapshots:
       style: secondary
       start: 30
       end: 46
-  cmStrCat(variable, "string_view"_s, "literal", variable):
+  cmStrCat(variable, "string_view"_s, "another_view"_s, variable):
     labels:
     - source: '"string_view"_s'
       style: primary
       start: 19
       end: 34
-    - source: _s
+    - source: cmStrCat(variable, "string_view"_s, "another_view"_s, variable)
       style: secondary
-      start: 32
+      start: 0
+      end: 63
+    - source: ','
+      style: secondary
+      start: 34
+      end: 35
+    - source: '"another_view"_s'
+      style: secondary
+      start: 36
+      end: 52
+  cmStrCat(variable, "string_view"_s, "literal", variable):
+    labels:
+    - source: '"string_view"_s'
+      style: primary
+      start: 19
       end: 34
     - source: cmStrCat(variable, "string_view"_s, "literal", variable)
       style: secondary

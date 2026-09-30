@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileDefinitionsCommand.h"
 
+#include <utility>
+
 #include <cm/optional>
 
 #include "cmListFileCache.h"
@@ -42,9 +44,9 @@ private:
     std::string sep;
     for (std::string const& it : content) {
       if (cmHasLiteralPrefix(it, "-D")) {
-        defs = cmStrCat(defs, sep, it.substr(2));
+        defs = cmStrCat(std::move(defs), sep, it.substr(2));
       } else {
-        defs = cmStrCat(defs, sep, it);
+        defs = cmStrCat(std::move(defs), sep, it);
       }
       sep = ";";
     }

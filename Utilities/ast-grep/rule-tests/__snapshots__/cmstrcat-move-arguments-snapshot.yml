@@ -1,0 +1,78 @@
+id: cmstrcat-move-arguments
+snapshots:
+  a = cmStrCat(a, b):
+    fixed: a = cmStrCat(std::move(a), b)
+    labels:
+    - source: a
+      style: primary
+      start: 13
+      end: 14
+    - source: cmStrCat(a, b)
+      style: secondary
+      start: 4
+      end: 18
+    - source: (a, b)
+      style: secondary
+      start: 12
+      end: 18
+    - source: a = cmStrCat(a, b)
+      style: secondary
+      start: 0
+      end: 18
+  a = cmStrCat(b, a):
+    fixed: a = cmStrCat(b, std::move(a))
+    labels:
+    - source: a
+      style: primary
+      start: 16
+      end: 17
+    - source: cmStrCat(b, a)
+      style: secondary
+      start: 4
+      end: 18
+    - source: (b, a)
+      style: secondary
+      start: 12
+      end: 18
+    - source: a = cmStrCat(b, a)
+      style: secondary
+      start: 0
+      end: 18
+  a = cmStrCat(b, a, c):
+    fixed: a = cmStrCat(b, std::move(a), c)
+    labels:
+    - source: a
+      style: primary
+      start: 16
+      end: 17
+    - source: cmStrCat(b, a, c)
+      style: secondary
+      start: 4
+      end: 21
+    - source: (b, a, c)
+      style: secondary
+      start: 12
+      end: 21
+    - source: a = cmStrCat(b, a, c)
+      style: secondary
+      start: 0
+      end: 21
+  result = cmStrCat("pre", result):
+    fixed: result = cmStrCat("pre", std::move(result))
+    labels:
+    - source: result
+      style: primary
+      start: 25
+      end: 31
+    - source: cmStrCat("pre", result)
+      style: secondary
+      start: 9
+      end: 32
+    - source: ("pre", result)
+      style: secondary
+      start: 17
+      end: 32
+    - source: result = cmStrCat("pre", result)
+      style: secondary
+      start: 0
+      end: 32

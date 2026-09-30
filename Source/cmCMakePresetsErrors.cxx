@@ -54,7 +54,8 @@ std::string getVariableName(cmJSONState* state)
 {
   std::string var = state->key_after("cacheVariables");
   std::string errMsg = cmStrCat("variable \"", var, '"');
-  errMsg = cmStrCat(errMsg, " for preset \"", getPresetName(state), '"');
+  errMsg =
+    cmStrCat(std::move(errMsg), " for preset \"", getPresetName(state), '"');
   return errMsg;
 }
 
@@ -101,7 +102,7 @@ void INVALID_PRESET_NAMED(std::string const& presetName,
   std::string err_msg =
     cmStrCat("Invalid ", kind, " preset: \"", presetName, '"');
   if (!detail.empty()) {
-    err_msg = cmStrCat(err_msg, ": ", detail);
+    err_msg = cmStrCat(std::move(err_msg), ": ", detail);
   }
   state->AddError(err_msg);
 }
@@ -343,7 +344,7 @@ void INVALID_PRESET_NAME(Json::Value const* value, cmJSONState* state)
   std::string errMsg = "Invalid Preset Name";
   if (value && value->isConvertibleTo(Json::ValueType::stringValue) &&
       !value->asString().empty()) {
-    errMsg = cmStrCat(errMsg, ": ", value->asString());
+    errMsg = cmStrCat(std::move(errMsg), ": ", value->asString());
   }
   state->AddErrorAtValue(errMsg, value);
 }

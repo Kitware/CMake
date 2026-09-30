@@ -213,7 +213,7 @@ static std::string extractAllGeneratorExpressions(
     }
     std::string::size_type const traversed = (c - cStart) + 1;
     if (!*c) {
-      result += cmStrCat("$<", input.substr(pos, traversed));
+      result = cmStrCat(std::move(result), "$<", input.substr(pos, traversed));
     }
     pos += traversed;
     lastPos = pos;
@@ -320,13 +320,16 @@ static std::string stripExportInterface(
       auto remaining = input.substr(pos, traversed);
       switch (foundGenex) {
         case FoundGenex::BuildInterface:
-          result = cmStrCat(result, "$<BUILD_INTERFACE:", remaining);
+          result =
+            cmStrCat(std::move(result), "$<BUILD_INTERFACE:", remaining);
           break;
         case FoundGenex::InstallInterface:
-          result = cmStrCat(result, "$<INSTALL_INTERFACE:", remaining);
+          result =
+            cmStrCat(std::move(result), "$<INSTALL_INTERFACE:", remaining);
           break;
         case FoundGenex::BuildLocalInterface:
-          result = cmStrCat(result, "$<BUILD_LOCAL_INTERFACE:", remaining);
+          result =
+            cmStrCat(std::move(result), "$<BUILD_LOCAL_INTERFACE:", remaining);
           break;
       }
     }

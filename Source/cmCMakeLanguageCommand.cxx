@@ -493,9 +493,9 @@ bool cmCMakeLanguageCommandPRINT_TARGETS(
         continue;
       }
     }
-    lines +=
-      cmStrCat("   ", t.first, " (", cmState::GetTargetTypeName(t.second.Type),
-               t.second.Imported ? ", IMPORTED" : "", ")\n");
+    lines = cmStrCat(std::move(lines), "   ", t.first, " (",
+                     cmState::GetTargetTypeName(t.second.Type),
+                     t.second.Imported ? ", IMPORTED" : "", ")\n");
     anyMatched = true;
   }
 
@@ -509,13 +509,13 @@ bool cmCMakeLanguageCommandPRINT_TARGETS(
     } else if (parsedArgs.NoImported) {
       label = "Non-imported targets";
     }
-    out += cmStrCat(' ', label);
+    out = cmStrCat(std::move(out), ' ', label);
     if (parsedArgs.Regex) {
-      out += cmStrCat(
-        " matching REGEX '", *parsedArgs.Regex, "' (",
+      out = cmStrCat(
+        std::move(out), " matching REGEX '", *parsedArgs.Regex, "' (",
         parsedArgs.IgnoreCase ? "case insensitive" : "case sensitive", ')');
     }
-    out += cmStrCat(":\n", lines);
+    out = cmStrCat(std::move(out), ":\n", lines);
     makefile.DisplayStatus(out, -1);
   }
 
@@ -567,7 +567,7 @@ void PrintVariablesNamed(cmMakefile& makefile,
       }
       first = false;
       cmValue v = makefile.GetDefinition(name);
-      msg += cmStrCat(name, "=\"", v ? *v : std::string(), '"');
+      msg = cmStrCat(std::move(msg), name, "=\"", v ? *v : std::string(), '"');
     }
     makefile.DisplayStatus(msg, -1);
     return;
@@ -577,9 +577,9 @@ void PrintVariablesNamed(cmMakefile& makefile,
   for (std::string const& name : names) {
     cmValue v = makefile.GetDefinition(name);
     if (v) {
-      out += cmStrCat("   ", name, " = \"", *v, "\"\n");
+      out = cmStrCat(std::move(out), "   ", name, " = \"", *v, "\"\n");
     } else {
-      out += cmStrCat("   ", name, " = <NOTFOUND>\n");
+      out = cmStrCat(std::move(out), "   ", name, " = <NOTFOUND>\n");
     }
   }
   makefile.DisplayStatus(out, -1);
@@ -657,17 +657,18 @@ bool PrintVariablesAll(cmMakefile& makefile, PrintVariablesArgs const& parsed,
   for (std::string const& name : names) {
     cmValue regular = snapshot.GetDefinition(name);
     if (regular && matches(name, *regular)) {
-      body += cmStrCat("   ", name, " = \"", *regular, "\"\n");
+      body = cmStrCat(std::move(body), "   ", name, " = \"", *regular, "\"\n");
       anyMatched = true;
     }
     cmValue cached = state->GetInitializedCacheValue(name);
     if (cached && matches(name, *cached)) {
       auto const type = state->GetCacheEntryType(name);
-      body += cmStrCat("   CACHE{", name, '}');
+      body = cmStrCat(std::move(body), "   CACHE{", name, '}');
       if (type != cmStateEnums::UNINITIALIZED) {
-        body += cmStrCat(':', cmState::CacheEntryTypeToString(type));
+        body = cmStrCat(std::move(body), ':',
+                        cmState::CacheEntryTypeToString(type));
       }
-      body += cmStrCat(" = \"", *cached, "\"\n");
+      body = cmStrCat(std::move(body), " = \"", *cached, "\"\n");
       anyMatched = true;
     }
   }
@@ -680,30 +681,30 @@ bool PrintVariablesAll(cmMakefile& makefile, PrintVariablesArgs const& parsed,
     if (parsed.NameRegex || parsed.ValueRegex) {
       out += " matching";
       if (parsed.NameRegex) {
-        out += cmStrCat(" name '", *parsed.NameRegex, '\'');
+        out = cmStrCat(std::move(out), " name '", *parsed.NameRegex, '\'');
       }
       if (parsed.NameRegex && parsed.ValueRegex) {
         out += " and";
       }
       if (parsed.ValueRegex) {
-        out += cmStrCat(" value '", *parsed.ValueRegex, '\'');
+        out = cmStrCat(std::move(out), " value '", *parsed.ValueRegex, '\'');
       }
       out += parsed.IgnoreCase ? " (case insensitive)" : " (case sensitive)";
     }
-    out += cmStrCat(":\n", body);
+    out = cmStrCat(std::move(out), ":\n", body);
     makefile.DisplayStatus(out, -1);
   }
 
   if (!anyMatched && (parsed.NameRegex || parsed.ValueRegex)) {
     std::string msg = "No variables in scope matching";
     if (parsed.NameRegex) {
-      msg += cmStrCat(" name '", *parsed.NameRegex, '\'');
+      msg = cmStrCat(std::move(msg), " name '", *parsed.NameRegex, '\'');
     }
     if (parsed.NameRegex && parsed.ValueRegex) {
       msg += " and";
     }
     if (parsed.ValueRegex) {
-      msg += cmStrCat(" value '", *parsed.ValueRegex, '\'');
+      msg = cmStrCat(std::move(msg), " value '", *parsed.ValueRegex, '\'');
     }
     msg += parsed.IgnoreCase ? " (case insensitive)" : " (case sensitive)";
     msg += " in cmake_language(PRINT_VARIABLES ...).";
@@ -836,9 +837,9 @@ std::vector<cmGeneratorTarget const*> CollectDependentTargets(
 void WritePropertyLine(std::string& out, std::string const& entityName,
                        std::string const& propertyName, cmValue value)
 {
-  out += cmStrCat("   ", entityName, '.', propertyName);
+  out = cmStrCat(std::move(out), "   ", entityName, '.', propertyName);
   if (value) {
-    out += cmStrCat(" = \"", *value, '"');
+    out = cmStrCat(std::move(out), " = \"", *value, '"');
   } else {
     out += " = <NOTFOUND>";
   }
@@ -863,22 +864,22 @@ void EmitBlockHeader(
   cm::optional<std::string> const& nameRegexStr = cm::nullopt,
   cm::optional<std::string> const& valueRegexStr = cm::nullopt)
 {
-  out +=
-    cmStrCat(' ', (kind == BlockKind::All ? "All properties" : "Properties"),
-             " for ", entityType, ' ', entityName);
+  out = cmStrCat(std::move(out), ' ',
+                 (kind == BlockKind::All ? "All properties" : "Properties"),
+                 " for ", entityType, ' ', entityName);
   if (suffix == HeaderSuffix::Reachable) {
     out += " (and all reachable)";
   }
   if (kind == BlockKind::All && (nameRegexStr || valueRegexStr)) {
     out += " matching";
     if (nameRegexStr) {
-      out += cmStrCat(" name '", *nameRegexStr, '\'');
+      out = cmStrCat(std::move(out), " name '", *nameRegexStr, '\'');
     }
     if (nameRegexStr && valueRegexStr) {
       out += " and";
     }
     if (valueRegexStr) {
-      out += cmStrCat(" value '", *valueRegexStr, '\'');
+      out = cmStrCat(std::move(out), " value '", *valueRegexStr, '\'');
     }
   }
   out += ":\n";
@@ -896,13 +897,13 @@ std::string EmptyMatchWarningMessage(
   std::string msg =
     cmStrCat("No properties for ", entityType, ' ', entityName, " matching");
   if (nameRegexStr) {
-    msg += cmStrCat(" name '", *nameRegexStr, '\'');
+    msg = cmStrCat(std::move(msg), " name '", *nameRegexStr, '\'');
   }
   if (nameRegexStr && valueRegexStr) {
     msg += " and";
   }
   if (valueRegexStr) {
-    msg += cmStrCat(" value '", *valueRegexStr, '\'');
+    msg = cmStrCat(std::move(msg), " value '", *valueRegexStr, '\'');
   }
   msg += " in cmake_language(PRINT_PROPERTIES ...).";
   return msg;
@@ -1064,7 +1065,8 @@ bool PrintPropertiesConfigureTime(
     if (kind == EntityKind::Target) {
       cmTarget* target = makefile.FindTargetToUse(entityName);
       if (!target) {
-        out += cmStrCat("\n No such TARGET \"", entityName, "\" !\n\n");
+        out = cmStrCat(std::move(out), "\n No such TARGET \"", entityName,
+                       "\" !\n\n");
         anyEmitted = true;
         continue;
       }
@@ -1140,7 +1142,8 @@ bool PrintTargetPropertiesDeferred(
       for (std::string const& name : targetNames) {
         cmGeneratorTarget* root = lg.FindGeneratorTargetToUse(name);
         if (!root) {
-          out += cmStrCat("\n No such TARGET \"", name, "\" !\n\n");
+          out =
+            cmStrCat(std::move(out), "\n No such TARGET \"", name, "\" !\n\n");
           anyEmitted = true;
           continue;
         }

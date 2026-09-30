@@ -240,15 +240,16 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   {
     // Write explicit outputs
     for (std::string const& output : build.Outputs) {
-      buildStr = cmStrCat(buildStr, ' ', this->EncodePath(output));
+      buildStr = cmStrCat(std::move(buildStr), ' ', this->EncodePath(output));
     }
     // Write implicit outputs
     if (!build.ImplicitOuts.empty()) {
       // Assume Ninja is new enough to support implicit outputs.
       // Callers should not populate this field otherwise.
-      buildStr = cmStrCat(buildStr, " |");
+      buildStr = cmStrCat(std::move(buildStr), " |");
       for (std::string const& implicitOut : build.ImplicitOuts) {
-        buildStr = cmStrCat(buildStr, ' ', this->EncodePath(implicitOut));
+        buildStr =
+          cmStrCat(std::move(buildStr), ' ', this->EncodePath(implicitOut));
       }
     }
 
@@ -259,16 +260,16 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     if (!build.WorkDirOuts.empty()) {
       if (this->SupportsImplicitOuts() && build.ImplicitOuts.empty()) {
         // Make them implicit outputs if supported by this version of Ninja.
-        buildStr = cmStrCat(buildStr, " |");
+        buildStr = cmStrCat(std::move(buildStr), " |");
       }
       for (std::string const& workdirOut : build.WorkDirOuts) {
-        buildStr = cmStrCat(buildStr, " ${cmake_ninja_workdir}",
+        buildStr = cmStrCat(std::move(buildStr), " ${cmake_ninja_workdir}",
                             this->EncodePath(workdirOut));
       }
     }
 
     // Write the rule.
-    buildStr = cmStrCat(buildStr, ": ", build.Rule);
+    buildStr = cmStrCat(std::move(buildStr), ": ", build.Rule);
   }
 
   std::string arguments;
@@ -277,14 +278,16 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
     // Write explicit dependencies.
     for (std::string const& explicitDep : build.ExplicitDeps) {
-      arguments += cmStrCat(' ', this->EncodePath(explicitDep));
+      arguments =
+        cmStrCat(std::move(arguments), ' ', this->EncodePath(explicitDep));
     }
 
     // Write implicit dependencies.
     if (!build.ImplicitDeps.empty()) {
       arguments += " |";
       for (std::string const& implicitDep : build.ImplicitDeps) {
-        arguments += cmStrCat(' ', this->EncodePath(implicitDep));
+        arguments =
+          cmStrCat(std::move(arguments), ' ', this->EncodePath(implicitDep));
       }
     }
 
@@ -292,7 +295,8 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     if (!build.OrderOnlyDeps.empty()) {
       arguments += " ||";
       for (std::string const& orderOnlyDep : build.OrderOnlyDeps) {
-        arguments += cmStrCat(' ', this->EncodePath(orderOnlyDep));
+        arguments =
+          cmStrCat(std::move(arguments), ' ', this->EncodePath(orderOnlyDep));
       }
     }
 
@@ -3312,7 +3316,7 @@ void cmGlobalNinjaGenerator::AppendDirectoryForConfig(
   std::string const& suffix, std::string& dir)
 {
   if (!config.empty() && this->IsMultiConfig()) {
-    dir += cmStrCat(prefix, config, suffix);
+    dir = cmStrCat(std::move(dir), prefix, config, suffix);
   }
 }
 

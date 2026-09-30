@@ -957,7 +957,7 @@ void cmPackageInfoReader::AddTargetSources(cmMakefile* makefile,
         cmListFileBacktrace const& bt = makefile->GetBacktrace();
 
         for (std::string& file : files) {
-          file = cmStrCat(root, '/', file);
+          file = cmStrCat(root, '/', std::move(file));
         }
         fileSet.first->AddFileEntry(
           BT<std::string>{ cmList{ files }.to_string(), bt });

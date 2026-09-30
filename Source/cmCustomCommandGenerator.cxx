@@ -446,7 +446,8 @@ std::string cmCustomCommandGenerator::GetFullDepfile() const
   }
 
   if (!cmSystemTools::FileIsFullPath(depfile)) {
-    depfile = cmStrCat(this->LG->GetCurrentBinaryDirectory(), '/', depfile);
+    depfile =
+      cmStrCat(this->LG->GetCurrentBinaryDirectory(), '/', std::move(depfile));
   }
   return cmSystemTools::CollapseFullPath(depfile);
 }

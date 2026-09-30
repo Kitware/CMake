@@ -268,7 +268,8 @@ int main(int argc, char const* const* argv)
       std::string const suggestion =
         cmFindClosestCommandLineArgument(arg, arguments);
       if (!suggestion.empty()) {
-        error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+        error =
+          cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
       }
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR, error << '\n');
       parsed = false;

@@ -1,0 +1,12 @@
+---
+id: cmstrcat-not-append-result
+language: Cpp
+severity: warning
+message: Move argument to the `cmStrCat` if you assign the result to the same variable.
+ignores:
+  - Utilities/ClangTidyModule/Tests/**
+rule:
+  any:
+    - pattern: $A += cmStrCat($$$ARGS)
+    - pattern: $A.append(cmStrCat($$$ARGS))
+fix: $A = cmStrCat($A, $$$ARGS)

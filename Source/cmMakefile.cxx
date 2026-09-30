@@ -266,11 +266,11 @@ void cmMakefile::IssuePolicyWarning(cmPolicies::PolicyID policy,
 {
   std::string msg = cmPolicies::GetPolicyWarning(policy);
   if (!preface.empty() && !postface.empty()) {
-    msg = cmStrCat(preface, '\n', msg, '\n', postface);
+    msg = cmStrCat(preface, '\n', std::move(msg), '\n', postface);
   } else if (!preface.empty()) {
-    msg = cmStrCat(preface, '\n', msg);
+    msg = cmStrCat(preface, '\n', std::move(msg));
   } else if (!postface.empty()) {
-    msg = cmStrCat(msg, '\n', postface);
+    msg = cmStrCat(std::move(msg), '\n', postface);
   }
   this->IssueDiagnostic(cmDiagnostics::CMD_POLICY, msg,
                         cmDiagnosticContext{ bt });
@@ -317,12 +317,12 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
   if ((rootDef || rootEnv) && this->WarnedCMP0074.insert(rootVar).second) {
     std::string e;
     if (rootDef) {
-      e += cmStrCat("CMake variable ", rootVar, " is set to:\n  ", *rootDef,
-                    '\n');
+      e = cmStrCat(std::move(e), "CMake variable ", rootVar, " is set to:\n  ",
+                   *rootDef, '\n');
     }
     if (rootEnv) {
-      e += cmStrCat("Environment variable ", rootVar, " is set to:\n  ",
-                    *rootEnv, '\n');
+      e = cmStrCat(std::move(e), "Environment variable ", rootVar,
+                   " is set to:\n  ", *rootEnv, '\n');
     }
     e += "For compatibility, CMake is ignoring the variable.";
     this->IssuePolicyWarning(cmPolicies::CMP0074, {}, e);
@@ -336,12 +336,12 @@ void cmMakefile::MaybeWarnCMP0144(std::string const& rootVar, cmValue rootDef,
   if ((rootDef || rootEnv) && this->WarnedCMP0144.insert(rootVar).second) {
     std::string e;
     if (rootDef) {
-      e += cmStrCat("CMake variable ", rootVar, " is set to:\n  ", *rootDef,
-                    '\n');
+      e = cmStrCat(std::move(e), "CMake variable ", rootVar, " is set to:\n  ",
+                   *rootDef, '\n');
     }
     if (rootEnv) {
-      e += cmStrCat("Environment variable ", rootVar, " is set to:\n  ",
-                    *rootEnv, '\n');
+      e = cmStrCat(std::move(e), "Environment variable ", rootVar,
+                   " is set to:\n  ", *rootEnv, '\n');
     }
     e += "For compatibility, find_package is ignoring the variable, but "
          "code in a .cmake module might still use it.";
@@ -542,7 +542,10 @@ public:
           if (!lff.Arguments().empty()) {
             std::string args;
             for (auto const& a : lff.Arguments()) {
-              args = cmStrCat(args, args.empty() ? "" : " ", a.Value);
+              args = cmStrCat(std::move(args), a.Value, ' ');
+            }
+            if (!args.empty()) {
+              args.pop_back();
             }
             argsValue["functionArgs"] = args;
           }
@@ -653,7 +656,8 @@ bool cmMakefile::ExecuteCommand(cmListFileFunction const& lff,
       std::string const suggestion = findClosestCommand(
         lff.OriginalName(), this->GetState()->GetCommandNames());
       if (!suggestion.empty()) {
-        error = cmStrCat(error, " Did you mean: \"", suggestion, "\"?");
+        error =
+          cmStrCat(std::move(error), " Did you mean: \"", suggestion, "\"?");
       }
       this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
@@ -1182,15 +1186,15 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
     std::string e;
     if (cmTarget const* t = this->FindTargetToUse(target)) {
       if (t->IsImported()) {
-        e += cmStrCat("TARGET '", target,
-                      "' is IMPORTED and does not build here.");
+        e = cmStrCat(std::move(e), "TARGET '", target,
+                     "' is IMPORTED and does not build here.");
       } else {
-        e +=
-          cmStrCat("TARGET '", target, "' was not created in this directory.");
+        e = cmStrCat(std::move(e), "TARGET '", target,
+                     "' was not created in this directory.");
       }
     } else {
-      e += cmStrCat("No TARGET '", target,
-                    "' has been created in this directory.");
+      e = cmStrCat(std::move(e), "No TARGET '", target,
+                   "' has been created in this directory.");
     }
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e, lfbt);
     return nullptr;
@@ -2663,7 +2667,7 @@ cm::optional<std::string> cmMakefile::DeferGetCall(std::string const& id) const
       if (dc.Id == id) {
         tmp = dc.Command.OriginalName();
         for (cmListFileArgument const& arg : dc.Command.Arguments()) {
-          tmp = cmStrCat(tmp, ';', arg.Value);
+          tmp = cmStrCat(std::move(tmp), ';', arg.Value);
         }
         break;
       }
@@ -2721,7 +2725,7 @@ void cmMakefile::IssueCMP0219Warning(
     if (!oldArgs.empty()) {
       oldArgs += '\n';
     }
-    oldArgs += cmStrCat(" \"", arg, '"');
+    oldArgs = cmStrCat(std::move(oldArgs), " \"", arg, '"');
   }
 
   std::string newArgs = oldArgs;
@@ -2957,10 +2961,11 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
         if (!openstack.empty() &&
             !(cmsysString_isalnum(inc) || inc == '_' || inc == '/' ||
               inc == '.' || inc == '+' || inc == '-')) {
-          errorstr += cmStrCat("Invalid character ('", inc);
+          errorstr =
+            cmStrCat(std::move(errorstr), "Invalid character ('", inc);
           result.append(last, in - last);
-          errorstr += cmStrCat("') in a variable name: '",
-                               result.substr(openstack.back().loc), '\'');
+          errorstr = cmStrCat(std::move(errorstr), "') in a variable name: '",
+                              result.substr(openstack.back().loc), '\'');
           mtype = MessageType::FATAL_ERROR;
           error = true;
         }
@@ -2982,9 +2987,10 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
       // This filename and line number may be more specific than the
       // command context because one command invocation can have
       // arguments on multiple lines.
-      e += cmStrCat("at\n  ", filename, ':', line, '\n');
+      e = cmStrCat(std::move(e), "at\n  ", filename, ':', line, '\n');
     }
-    errorstr = cmStrCat(e, "when parsing string\n  ", source, '\n', errorstr);
+    errorstr = cmStrCat(e, "when parsing string\n  ", source, '\n',
+                        std::move(errorstr));
     mtype = MessageType::FATAL_ERROR;
   } else {
     // Append the rest of the unchanged part of the string.
@@ -3605,7 +3611,7 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
         break;
       }
       if (debug) {
-        debugBuffer = cmStrCat(debugBuffer, "  ", itempl, '\n');
+        debugBuffer = cmStrCat(std::move(debugBuffer), "  ", itempl, '\n');
       }
     }
   }
@@ -3616,7 +3622,8 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
   if (!cmSystemTools::FileExists(moduleInCMakeRoot)) {
     if (debug) {
-      debugBuffer = cmStrCat(debugBuffer, "  ", moduleInCMakeRoot, '\n');
+      debugBuffer =
+        cmStrCat(std::move(debugBuffer), "  ", moduleInCMakeRoot, '\n');
     }
     moduleInCMakeRoot.clear();
   }

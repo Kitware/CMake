@@ -131,11 +131,13 @@ int cmCPackNSISGenerator::PackageFiles()
     std::string installerIconCode;
     if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_MUI_ICON")) {
       std::string iconFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
-      installerIconCode += cmStrCat("!define MUI_ICON ", iconFile, '\n');
+      installerIconCode = cmStrCat(std::move(installerIconCode),
+                                   "!define MUI_ICON ", iconFile, '\n');
     }
     if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_MUI_UNIICON")) {
       std::string iconFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
-      installerIconCode += cmStrCat("!define MUI_UNICON ", iconFile, '\n');
+      installerIconCode = cmStrCat(std::move(installerIconCode),
+                                   "!define MUI_UNICON ", iconFile, '\n');
     }
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
@@ -254,9 +256,9 @@ int cmCPackNSISGenerator::PackageFiles()
 
     for (auto& arg : expandedArguments) {
       if (!cmHasPrefix(arg, NSIS_OPT)) {
-        nsisPreArguments = cmStrCat(nsisPreArguments, NSIS_OPT);
+        nsisPreArguments = cmStrCat(std::move(nsisPreArguments), NSIS_OPT);
       }
-      nsisPreArguments = cmStrCat(nsisPreArguments, arg, ' ');
+      nsisPreArguments = cmStrCat(std::move(nsisPreArguments), arg, ' ');
     }
   }
 
@@ -266,9 +268,9 @@ int cmCPackNSISGenerator::PackageFiles()
     cmList expandedArguments{ nsisArguments };
     for (auto& arg : expandedArguments) {
       if (!cmHasPrefix(arg, NSIS_OPT)) {
-        nsisPostArguments = cmStrCat(nsisPostArguments, NSIS_OPT);
+        nsisPostArguments = cmStrCat(std::move(nsisPostArguments), NSIS_OPT);
       }
-      nsisPostArguments = cmStrCat(nsisPostArguments, arg, ' ');
+      nsisPostArguments = cmStrCat(std::move(nsisPostArguments), arg, ' ');
     }
   }
 
@@ -396,7 +398,7 @@ int cmCPackNSISGenerator::PackageFiles()
     cmStrCat('"', this->GetOption("CPACK_INSTALLER_PROGRAM"), "\" ",
              nsisPreArguments, " \"", nsisFileName, '"');
   if (!nsisPostArguments.empty()) {
-    nsisCmd = cmStrCat(nsisCmd, ' ', nsisPostArguments);
+    nsisCmd = cmStrCat(std::move(nsisCmd), ' ', nsisPostArguments);
   }
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd << std::endl);
   std::string output;
@@ -739,7 +741,8 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
 
   std::string const componentOutputDir =
     this->CustomComponentInstallDirectory(component->Name);
-  componentCode += cmStrCat("  SetOutPath \"", componentOutputDir, "\"\n");
+  componentCode = cmStrCat(std::move(componentCode), "  SetOutPath \"",
+                           componentOutputDir, "\"\n");
 
   // Create the actual installation commands
   if (component->IsDownloaded) {

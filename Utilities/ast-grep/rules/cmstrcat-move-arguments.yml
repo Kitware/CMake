@@ -1,0 +1,28 @@
+---
+id: cmstrcat-move-arguments
+language: Cpp
+severity: warning
+message: Move argument to the `cmStrCat` if you assign the result to the same variable.
+ignores:
+  - Utilities/ClangTidyModule/Tests/**
+rule:
+  all:
+    - kind: identifier
+      pattern: $ARG
+      inside:
+        kind: argument_list
+        inside:
+          pattern: $CALL
+          matches: cmstrcat-call
+    - inside:
+        pattern: $ARG = $CALL
+        stopBy: end
+    - not:
+        any:
+          - precedes:
+              pattern: $ARG
+              stopBy: end
+          - follows:
+              pattern: $ARG
+              stopBy: end
+fix: std::move($ARG)

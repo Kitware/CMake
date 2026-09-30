@@ -133,7 +133,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
         case cm::TargetType::SHARED_LIBRARY:
         case cm::TargetType::STATIC_LIBRARY:
         case cm::TargetType::MODULE_LIBRARY:
-          visualname = cmStrCat("lib", visualname);
+          visualname = cmStrCat("lib", std::move(visualname));
           CM_FALLTHROUGH;
         case cm::TargetType::EXECUTABLE:
           xml->StartElement("Project");

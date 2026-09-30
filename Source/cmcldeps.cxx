@@ -268,7 +268,8 @@ int main()
     cmSystemTools::ReplaceString(clrest, objfile,
                                  cmStrCat("-Fo", objfile, ".obj"));
 
-    cl = cmStrCat('"', cl, "\" /P /DRC_INVOKED /nologo /showIncludes /TC ");
+    cl = cmStrCat('"', std::move(cl),
+                  "\" /P /DRC_INVOKED /nologo /showIncludes /TC ");
 
     // call cl in object dir so the .i is generated there
     std::string objdir;

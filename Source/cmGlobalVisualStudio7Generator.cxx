@@ -225,7 +225,7 @@ void cmGlobalVisualStudio7Generator::AppendDirectoryForConfig(
   std::string const& suffix, std::string& dir)
 {
   if (!config.empty()) {
-    dir += cmStrCat(prefix, config, suffix);
+    dir = cmStrCat(std::move(dir), prefix, config, suffix);
   }
 }
 

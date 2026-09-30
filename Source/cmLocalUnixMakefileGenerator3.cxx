@@ -90,7 +90,8 @@ void addInstrumentationCommand(cmInstrumentation* instrumentation,
      * Use exec so that Make is the parent process of the command.
      * Add a `;` to convince BSD make to not optimize out the shell.
      */
-    instrumentationCommand = cmStrCat("exec ", instrumentationCommand, " ;");
+    instrumentationCommand =
+      cmStrCat("exec ", std::move(instrumentationCommand), " ;");
 #  endif
     commands.push_back(instrumentationCommand);
   }
@@ -1060,7 +1061,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         // This command was specified as a path to a file in the
         // current directory.  Add a leading "./" so it can run
         // without the current directory being in the search path.
-        cmd = cmStrCat("./", cmd);
+        cmd = cmStrCat("./", std::move(cmd));
       }
 
       std::string launcher;
@@ -1084,16 +1085,17 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
           cmState::GetTargetTypeName(target->GetType()).c_str();
         std::string output;
         std::vector<std::string> const& outputs = ccg.GetOutputs();
-        for (size_t i = 0; i < outputs.size(); ++i) {
-          output = cmStrCat(output,
+        for (std::string const& ccgOut : outputs) {
+          output = cmStrCat(std::move(output),
                             this->ConvertToOutputFormat(
                               ccg.GetWorkingDirectory().empty()
-                                ? this->MaybeRelativeToCurBinDir(outputs[i])
-                                : outputs[i],
-                              cmOutputConverter::SHELL));
-          if (i != outputs.size() - 1) {
-            output = cmStrCat(output, ',');
-          }
+                                ? this->MaybeRelativeToCurBinDir(ccgOut)
+                                : ccgOut,
+                              cmOutputConverter::SHELL),
+                            ',');
+        }
+        if (!output.empty()) {
+          output.pop_back();
         }
         vars.Output = output.c_str();
 
@@ -1141,9 +1143,9 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       }
       if (launcher.empty()) {
         if (useCall) {
-          cmd = cmStrCat("call ", cmd);
+          cmd = cmStrCat("call ", std::move(cmd));
         } else if (this->IsNMake() && cmd[0] == '"') {
-          cmd = cmStrCat("echo >nul && ", cmd);
+          cmd = cmStrCat("echo >nul && ", std::move(cmd));
         }
       }
       commands1.push_back(std::move(cmd));
@@ -1370,7 +1372,7 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
             "@$(CMAKE_COMMAND) -E cmake_echo_color \"--switch=$(COLOR)\" ",
             color_name);
           if (progress) {
-            cmd = cmStrCat(cmd, "--progress-dir=",
+            cmd = cmStrCat(std::move(cmd), "--progress-dir=",
                            this->ConvertToOutputFormat(
                              progress->Dir, cmOutputConverter::SHELL),
                            " --progress-num=", progress->Arg, ' ');

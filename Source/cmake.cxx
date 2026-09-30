@@ -978,7 +978,7 @@ bool cmake::FindPackage(std::vector<std::string> const& args)
                                         lg->GetStateSnapshot().GetDirectory());
     lg->GetTargetFlags(&linkLineComputer, buildType, linkLibs, flags,
                        linkFlags, frameworkPath, linkPath, gtgt);
-    linkLibs = cmStrCat(frameworkPath, linkPath, linkLibs);
+    linkLibs = cmStrCat(frameworkPath, linkPath, std::move(linkLibs));
 
     printf("%s\n", linkLibs.c_str());
 
@@ -1566,7 +1566,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     std::string const suggestion =
       findClosestOption(possibleUnknownArg, arguments);
     if (!suggestion.empty()) {
-      error = cmStrCat(error, ". Did you mean: ", suggestion, '?');
+      error = cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
     }
     cmSystemTools::Error(error);
     cmSystemTools::Error("Run 'cmake --help' for all supported options.");

@@ -164,7 +164,7 @@ dap::StackTraceResponse GetStackTraceResponse(
       stackName.push_back('(');
       if (showParameterValues && !thread->Frames[i]->GetArguments().empty()) {
         for (auto const& arg : thread->Frames[i]->GetArguments()) {
-          stackName = cmStrCat(stackName, arg.Value, ", ");
+          stackName = cmStrCat(std::move(stackName), arg.Value, ", ");
         }
 
         stackName.erase(stackName.end() - 2, stackName.end());
@@ -174,8 +174,8 @@ dap::StackTraceResponse GetStackTraceResponse(
     }
 
     if (showLine) {
-      stackName =
-        cmStrCat(stackName, " Line: ", static_cast<int64_t>(stackFrame.line));
+      stackName = cmStrCat(std::move(stackName),
+                           " Line: ", static_cast<int64_t>(stackFrame.line));
     }
 
     stackFrame.name = stackName;

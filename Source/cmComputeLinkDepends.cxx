@@ -272,7 +272,8 @@ LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
               featureAttributes.LibraryTypes.emplace(
                 cm::TargetType::EXECUTABLE);
             } else {
-              errorMessage += cmStrCat("  ", option, '\n');
+              errorMessage =
+                cmStrCat(std::move(errorMessage), "  ", option, '\n');
               break;
             }
           }
@@ -290,7 +291,8 @@ LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
             featureAttributes.Deduplication =
               LinkLibraryFeatureAttributeSet::Default;
           } else {
-            errorMessage += cmStrCat("  ", option, '\n');
+            errorMessage =
+              cmStrCat(std::move(errorMessage), "  ", option, '\n');
           }
         } else if (processingOption.match(1) == "OVERRIDE") {
           featureAttributes.Override.clear();
@@ -299,7 +301,7 @@ LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
           featureAttributes.Override.insert(values.begin(), values.end());
         }
       } else {
-        errorMessage += cmStrCat("  ", option, '\n');
+        errorMessage = cmStrCat(std::move(errorMessage), "  ", option, '\n');
       }
     }
     if (!errorMessage.empty()) {
@@ -403,7 +405,8 @@ public:
                 } else if (processingOption.match(2) == "REVERSE") {
                   this->Order = Reverse;
                 } else {
-                  errorMessage += cmStrCat("  ", option, '\n');
+                  errorMessage =
+                    cmStrCat(std::move(errorMessage), "  ", option, '\n');
                 }
               } else if (processingOption.match(1) == "UNICITY" ||
                          processingOption.match(1) == "DEDUPLICATION") {
@@ -414,11 +417,13 @@ public:
                 } else if (processingOption.match(2) == "SHARED") {
                   this->Deduplication = Shared;
                 } else {
-                  errorMessage += cmStrCat("  ", option, '\n');
+                  errorMessage =
+                    cmStrCat(std::move(errorMessage), "  ", option, '\n');
                 }
               }
             } else {
-              errorMessage += cmStrCat("  ", option, '\n');
+              errorMessage =
+                cmStrCat(std::move(errorMessage), "  ", option, '\n');
             }
           }
           if (!errorMessage.empty()) {

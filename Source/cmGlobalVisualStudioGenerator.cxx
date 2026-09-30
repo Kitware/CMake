@@ -1153,7 +1153,7 @@ std::string cmGlobalVisualStudioGenerator::GetSLNFile(
   if (!slnFile.empty()) {
     slnFile.push_back('/');
   }
-  slnFile = cmStrCat(slnFile, projectName, ".sln");
+  slnFile = cmStrCat(std::move(slnFile), projectName, ".sln");
   if (this->Version >= cm::VS::Version::VS18) {
     slnFile += "x";
   }
