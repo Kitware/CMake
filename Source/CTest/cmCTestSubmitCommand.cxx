@@ -3,7 +3,6 @@
 #include "cmCTestSubmitCommand.h"
 
 #include <set>
-#include <sstream>
 #include <utility>
 
 #include <cm/memory>
@@ -19,6 +18,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -219,9 +219,8 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments,
     cm::erase_if(*(args.Parts), [this, &mf](std::string const& arg) -> bool {
       cmCTest::Part p = this->CTest->GetPartFromName(arg);
       if (p == cmCTest::PartCount) {
-        std::ostringstream e;
-        e << "Part name \"" << arg << "\" is invalid.";
-        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
+        mf.IssueMessage(MessageType::FATAL_ERROR,
+                        cmStrCat("Part name \"", arg, "\" is invalid."));
         return true;
       }
       return false;
@@ -231,10 +230,10 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments,
   if (args.Files) {
     cm::erase_if(*(args.Files), [&mf](std::string const& arg) -> bool {
       if (!cmSystemTools::FileExists(arg)) {
-        std::ostringstream e;
-        e << "File \"" << arg << "\" does not exist. Cannot submit "
-          << "a non-existent file.";
-        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
+        mf.IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("File \"", arg,
+                   "\" does not exist. Cannot submit a non-existent file."));
         return true;
       }
       return false;

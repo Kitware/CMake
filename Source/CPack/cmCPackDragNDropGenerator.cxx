@@ -224,13 +224,12 @@ int cmCPackDragNDropGenerator::PackageFiles()
   return 1;
 }
 
-bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
-                                         std::ostringstream& target)
+bool cmCPackDragNDropGenerator::CopyFile(std::string const& source,
+                                         std::string const& target)
 {
-  if (!cmSystemTools::CopyFileIfDifferent(source.str(), target.str())) {
+  if (!cmSystemTools::CopyFileIfDifferent(source, target)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error copying " << source.str() << " to " << target.str()
-                                   << std::endl);
+                  "Error copying " << source << " to " << target << std::endl);
 
     return false;
   }
@@ -238,10 +237,10 @@ bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
   return true;
 }
 
-bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
+bool cmCPackDragNDropGenerator::CreateEmptyFile(std::string const& target,
                                                 size_t size)
 {
-  cmsys::ofstream fout(target.str().c_str(), std::ios::out | std::ios::binary);
+  cmsys::ofstream fout(target.c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
     return false;
   }
@@ -327,24 +326,21 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
 
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
-  std::ostringstream staging;
-  staging << src_dir;
+  std::string const& staging = src_dir;
 
   // Add a symlink to /Applications so users can drag-and-drop the bundle
   // into it unless this behavior was disabled
   if (!cpack_dmg_disable_applications_symlink) {
-    std::ostringstream application_link;
-    application_link << staging.str() << "/Applications";
-    cmSystemTools::CreateSymlink("/Applications", application_link.str());
+    std::string const application_link = cmStrCat(staging, "/Applications");
+    cmSystemTools::CreateSymlink("/Applications", application_link);
   }
 
   // Optionally add a custom volume icon ...
   if (!cpack_package_icon->empty()) {
-    std::ostringstream package_icon_source;
-    package_icon_source << cpack_package_icon;
+    std::string const& package_icon_source = cpack_package_icon;
 
-    std::ostringstream package_icon_destination;
-    package_icon_destination << staging.str() << "/.VolumeIcon.icns";
+    std::string const package_icon_destination =
+      cmStrCat(staging, "/.VolumeIcon.icns");
 
     if (!this->CopyFile(package_icon_source, package_icon_destination)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -359,11 +355,10 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
   // Optionally add a custom .DS_Store file
   // (e.g. for setting background/layout) ...
   if (!cpack_dmg_ds_store->empty()) {
-    std::ostringstream package_settings_source;
-    package_settings_source << cpack_dmg_ds_store;
+    std::string const& package_settings_source = cpack_dmg_ds_store;
 
-    std::ostringstream package_settings_destination;
-    package_settings_destination << staging.str() << "/.DS_Store";
+    std::string const package_settings_destination =
+      cmStrCat(staging, "/.DS_Store");
 
     if (!this->CopyFile(package_settings_source,
                         package_settings_destination)) {
@@ -380,14 +375,12 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
   // Make sure the background file type is the same as the custom image
   // and that the file is hidden so it doesn't show up.
   if (!cpack_dmg_background_image->empty()) {
-    std::string const extension =
+    std::string extension =
       cmSystemTools::GetFilenameLastExtension(cpack_dmg_background_image);
-    std::ostringstream package_background_source;
-    package_background_source << cpack_dmg_background_image;
+    std::string const& package_background_source = cpack_dmg_background_image;
 
-    std::ostringstream package_background_destination;
-    package_background_destination << staging.str()
-                                   << "/.background/background" << extension;
+    std::string const package_background_destination =
+      cmStrCat(staging, "/.background/background", std::move(extension));
 
     if (!this->CopyFile(package_background_source,
                         package_background_destination)) {
@@ -408,8 +401,8 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
   // Create 1 MB dummy padding file in staging area when we need to remount
   // image, so we have enough space for storing changes ...
   if (remount_image) {
-    std::ostringstream dummy_padding;
-    dummy_padding << staging.str() << "/.dummy-padding-file";
+    std::string const dummy_padding =
+      cmStrCat(staging, "/.dummy-padding-file");
     if (!this->CreateEmptyFile(dummy_padding, 1048576)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error creating dummy padding file." << std::endl);
@@ -439,7 +432,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
              " create"
              " -ov"
              " -srcfolder \"",
-             staging.str(),
+             staging,
              "\""
              " -volname \"",
              cpack_dmg_volume_name,
@@ -484,9 +477,9 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
       temp_mount.substr(cmStrLen("/Volumes/"));
 
     // Remove dummy padding file so we have enough space on RW image ...
-    std::ostringstream dummy_padding;
-    dummy_padding << temp_mount << "/.dummy-padding-file";
-    if (!cmSystemTools::RemoveFile(dummy_padding.str())) {
+    std::string const dummy_padding =
+      cmStrCat(temp_mount, "/.dummy-padding-file");
+    if (!cmSystemTools::RemoveFile(dummy_padding)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error removing dummy padding file." << std::endl);
 

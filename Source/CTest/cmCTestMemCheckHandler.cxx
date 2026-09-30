@@ -64,14 +64,13 @@ public:
       this->ParseError(atts);
     }
     // Create the log
-    std::ostringstream ostr;
-    ostr << name << ":\n";
+    std::string ostr = cmStrCat(std::move(this->Log), name, ":\n");
     int i = 0;
     for (; atts[i]; i += 2) {
-      ostr << "   " << atts[i] << " - " << atts[i + 1] << "\n";
+      ostr =
+        cmStrCat(std::move(ostr), "   ", atts[i], " - ", atts[i + 1], '\n');
     }
-    ostr << "\n";
-    this->Log += ostr.str();
+    this->Log = cmStrCat(std::move(ostr), '\n');
   }
   void EndElement(std::string const& /*name*/) override {}
 

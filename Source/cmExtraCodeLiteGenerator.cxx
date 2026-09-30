@@ -647,14 +647,11 @@ std::string cmExtraCodeLiteGenerator::GetCleanCommand(
   cmMakefile const* mf, std::string const& targetName) const
 {
   std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
-  std::ostringstream ss;
   std::string buildcommand = this->GetBuildCommand(mf, "");
   if (!targetName.empty() && generator == "Ninja") {
-    ss << buildcommand << " -t clean " << targetName;
-  } else {
-    ss << buildcommand << " clean";
+    return cmStrCat(std::move(buildcommand), " -t clean ", targetName);
   }
-  return ss.str();
+  return cmStrCat(std::move(buildcommand), " clean");
 }
 
 std::string cmExtraCodeLiteGenerator::GetRebuildCommand(
@@ -671,13 +668,13 @@ std::string cmExtraCodeLiteGenerator::GetSingleFileBuildCommand(
   std::string const& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string const& generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   if (generator == "Unix Makefiles" || generator == "MinGW Makefiles") {
-    std::ostringstream ss;
 #if defined(_WIN32)
-    ss << make << " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).obj";
+    buildCommand = cmStrCat(
+      make, " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).obj");
 #else
-    ss << make << " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).o";
+    buildCommand =
+      cmStrCat(make, " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).o");
 #endif
-    buildCommand = ss.str();
   }
   return buildCommand;
 }

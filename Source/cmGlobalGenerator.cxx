@@ -188,16 +188,17 @@ bool cmGlobalGenerator::SetGeneratorInstance(std::string const& i,
     return true;
   }
 
-  std::ostringstream e;
-  /* clang-format off */
-  e <<
-    "Generator\n"
-    "  " << this->GetName() << "\n"
-    "does not support instance specification, but instance\n"
-    "  " << i << "\n"
-    "was specified.";
-  /* clang-format on */
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(MessageType::FATAL_ERROR,
+                   cmStrCat("Generator\n"
+                            "  ",
+                            this->GetName(),
+                            "\n"
+                            "does not support instance specification, but "
+                            "instance\n"
+                            "  ",
+                            i,
+                            "\n"
+                            "was specified."));
   return false;
 }
 
@@ -208,16 +209,17 @@ bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
     return true;
   }
 
-  std::ostringstream e;
-  /* clang-format off */
-  e <<
-    "Generator\n"
-    "  " << this->GetName() << "\n"
-    "does not support platform specification, but platform\n"
-    "  " << p << "\n"
-    "was specified.";
-  /* clang-format on */
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Generator\n"
+             "  ",
+             this->GetName(),
+             "\n"
+             "does not support platform specification, but platform\n"
+             "  ",
+             p,
+             "\n"
+             "was specified."));
   return false;
 }
 
@@ -227,16 +229,17 @@ bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts, bool,
   if (ts.empty()) {
     return true;
   }
-  std::ostringstream e;
-  /* clang-format off */
-  e <<
-    "Generator\n"
-    "  " << this->GetName() << "\n"
-    "does not support toolset specification, but toolset\n"
-    "  " << ts << "\n"
-    "was specified.";
-  /* clang-format on */
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Generator\n"
+             "  ",
+             this->GetName(),
+             "\n"
+             "does not support toolset specification, but toolset\n"
+             "  ",
+             ts,
+             "\n"
+             "was specified."));
   return false;
 }
 
@@ -416,10 +419,10 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
       }
 
       if (target->GetAllConfigSources().empty()) {
-        std::ostringstream e;
-        e << "No SOURCES given to target: " << target->GetName();
         this->GetCMakeInstance()->IssueMessage(
-          MessageType::FATAL_ERROR, e.str(), target->GetBacktrace());
+          MessageType::FATAL_ERROR,
+          cmStrCat("No SOURCES given to target: ", target->GetName()),
+          target->GetBacktrace());
         failed = true;
       }
     }
@@ -529,12 +532,11 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     }
   }
   if (mf->GetDefinition("CMAKE_MAKE_PROGRAM").IsOff()) {
-    std::ostringstream err;
-    err << "CMake was unable to find a build program corresponding to \""
-        << this->GetName()
-        << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
-           "probably need to select a different build tool.";
-    cmSystemTools::Error(err.str());
+    cmSystemTools::Error(
+      cmStrCat("CMake was unable to find a build program corresponding to \"",
+               this->GetName(),
+               "\".  CMAKE_MAKE_PROGRAM is not set.  You "
+               "probably need to select a different build tool."));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -642,11 +644,10 @@ void cmGlobalGenerator::EnableLanguage(
   std::set<std::string> cur_languages(languages.begin(), languages.end());
   for (std::string const& li : cur_languages) {
     if (!this->LanguagesInProgress.insert(li).second) {
-      std::ostringstream e;
-      e << "Language '" << li
-        << "' is currently being enabled.  "
-           "Recursive call not allowed.";
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Language '", li,
+                                "' is currently being enabled.  "
+                                "Recursive call not allowed."));
       cmSystemTools::SetFatalErrorOccurred();
       return;
     }
@@ -659,11 +660,10 @@ void cmGlobalGenerator::EnableLanguage(
         this->SetLanguageEnabled("NONE", mf);
       } else {
         if (!cm::contains(this->LanguagesReadyForTryCompile, lang)) {
-          std::ostringstream e;
-          e << "The test project needs language " << lang
-            << " which is not enabled.";
-          this->TryCompileOuterMakefile->IssueMessage(MessageType::FATAL_ERROR,
-                                                      e.str());
+          this->TryCompileOuterMakefile->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat("The test project needs language ", lang,
+                     " which is not enabled."));
           cmSystemTools::SetFatalErrorOccurred();
           return;
         }
@@ -1593,16 +1593,15 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
   }
 
   // This generator does not support duplicate custom targets.
-  std::ostringstream e;
-  // clang-format off
-  e << "This project has enabled the ALLOW_DUPLICATE_CUSTOM_TARGETS "
-       "global property.  "
-       "The \"" << this->GetName() << "\" generator does not support "
-       "duplicate custom targets.  "
-       "Consider using a Makefiles generator or fix the project to not "
-       "use duplicate target names.";
-  // clang-format on
-  cmSystemTools::Error(e.str());
+  cmSystemTools::Error(
+    cmStrCat("This project has enabled the ALLOW_DUPLICATE_CUSTOM_TARGETS "
+             "global property.  "
+             "The \"",
+             this->GetName(),
+             "\" generator does not support "
+             "duplicate custom targets.  "
+             "Consider using a Makefiles generator or fix the project to not "
+             "use duplicate target names."));
   return false;
 }
 
@@ -1625,17 +1624,17 @@ bool cmGlobalGenerator::UnsupportedVariableIsDefined(std::string const& name,
                                                      bool supported) const
 {
   if (!supported && this->Makefiles.front()->GetDefinition(name)) {
-    std::ostringstream e;
-    /* clang-format off */
-    e <<
-      "Generator\n"
-      "  " << this->GetName() << "\n"
-      "does not support variable\n"
-      "  " << name << "\n"
-      "but it has been specified."
-      ;
-    /* clang-format on */
-    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Generator\n"
+               "  ",
+               this->GetName(),
+               "\n"
+               "does not support variable\n"
+               "  ",
+               name,
+               "\n"
+               "but it has been specified."));
     return true;
   }
 
@@ -1967,36 +1966,26 @@ void cmGlobalGenerator::Generate()
   this->CheckTargetLinkLibraries();
 
   if (!this->CMP0068WarnTargets.empty()) {
-    std::ostringstream w;
-    /* clang-format off */
-    w <<
-      cmPolicies::GetPolicyWarning(cmPolicies::CMP0068) << "\n"
-      "For compatibility with older versions of CMake, the install_name "
-      "fields for the following targets are still affected by RPATH "
-      "settings:\n"
-      ;
-    /* clang-format on */
-    for (std::string const& t : this->CMP0068WarnTargets) {
-      w << ' ' << t << '\n';
-    }
-    this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_POLICY,
-                                              w.str());
+    this->GetCMakeInstance()->IssueDiagnostic(
+      cmDiagnostics::CMD_POLICY,
+      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0068),
+               "\n"
+               "For compatibility with older versions of CMake, the "
+               "install_name "
+               "fields for the following targets are still affected by RPATH "
+               "settings:\n",
+               cmWrap(" ", this->CMP0068WarnTargets, "\n", "")));
   }
 
   if (!this->CMP0224WarnTests.empty()) {
-    std::ostringstream w;
-    /* clang-format off */
-    w <<
-      cmPolicies::GetPolicyWarning(cmPolicies::CMP0224) << "\n"
-      "For compatibility with older versions of CMake, the fixtures of the "
-      "following tests will use EACH_TEST_SEPARATELY mode:\n"
-      ;
-    /* clang-format on */
-    for (std::string const& t : this->CMP0224WarnTests) {
-      w << ' ' << t << '\n';
-    }
-    this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_POLICY,
-                                              w.str());
+    this->GetCMakeInstance()->IssueDiagnostic(
+      cmDiagnostics::CMD_POLICY,
+      cmStrCat(
+        cmPolicies::GetPolicyWarning(cmPolicies::CMP0224),
+        "\n"
+        "For compatibility with older versions of CMake, the fixtures of the "
+        "following tests will use EACH_TEST_SEPARATELY mode:\n",
+        cmWrap(" ", this->CMP0224WarnTests, "\n", "")));
   }
 }
 
@@ -2998,11 +2987,12 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator const* root,
     // Check whether the genex expansion of the property agrees in all
     // configurations.
     if (trueCount > 0 && falseCount > 0) {
-      std::ostringstream e;
-      e << "The EXCLUDE_FROM_ALL property of target \"" << target->GetName()
-        << "\" varies by configuration. This is not supported by the \""
-        << root->GetGlobalGenerator()->GetName() << "\" generator.";
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The EXCLUDE_FROM_ALL property of target \"",
+                 target->GetName(),
+                 "\" varies by configuration. This is not supported by the \"",
+                 root->GetGlobalGenerator()->GetName(), "\" generator."));
     }
     return trueCount;
   }

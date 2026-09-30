@@ -3,12 +3,12 @@
 #include "cmCMakeMinimumRequired.h"
 
 #include <cstdio>
-#include <sstream>
 
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
@@ -60,10 +60,9 @@ bool cmCMakeMinimumRequired(std::vector<std::string> const& args,
     : std::string();
   if (dd != std::string::npos &&
       (version_min.empty() || version_max.empty())) {
-    std::ostringstream e;
-    e << "VERSION \"" << version_string
-      << R"(" does not have a version on both sides of "...".)";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("VERSION \"", version_string,
+               R"(" does not have a version on both sides of "...".)"));
     return false;
   }
 
@@ -85,9 +84,8 @@ bool cmCMakeMinimumRequired(std::vector<std::string> const& args,
   unsigned int required_tweak = 0;
   if (sscanf(version_min.c_str(), "%u.%u.%u.%u", &required_major,
              &required_minor, &required_patch, &required_tweak) < 2) {
-    std::ostringstream e;
-    e << "could not parse VERSION \"" << version_min << "\".";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("could not parse VERSION \"", version_min, "\"."));
     return false;
   }
 
@@ -99,11 +97,11 @@ bool cmCMakeMinimumRequired(std::vector<std::string> const& args,
       (current_major == required_major && current_minor == required_minor &&
        current_patch == required_patch && current_tweak < required_tweak)) {
     // The current version is too low.
-    std::ostringstream e;
-    e << "CMake " << version_min
-      << " or higher is required.  You are running version "
-      << cmVersion::GetCMakeVersion();
-    status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
+    status.GetMakefile().IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("CMake ", version_min,
+               " or higher is required.  You are running version ",
+               cmVersion::GetCMakeVersion()));
     cmSystemTools::SetFatalErrorOccurred();
     return true;
   }
@@ -158,9 +156,8 @@ bool EnforceUnknownArguments(std::string const& version_max,
     }
   }
 
-  std::ostringstream e;
-  e << "called with unknown argument \"" << unknown_arguments[0] << "\".";
-  status.SetError(e.str());
+  status.SetError(
+    cmStrCat("called with unknown argument \"", unknown_arguments[0], "\"."));
   return false;
 }
 }

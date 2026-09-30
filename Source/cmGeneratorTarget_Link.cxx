@@ -9,7 +9,6 @@
 #include <cstdio>
 #include <map>
 #include <set>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -176,17 +175,15 @@ public:
       return "";
     }
     if (this->Preferred.size() > 1) {
-      std::ostringstream e;
-      e << "Target " << this->Target->GetName()
-        << " contains multiple languages with the highest linker preference"
-        << " (" << this->Preference << "):\n";
-      for (std::string const& li : this->Preferred) {
-        e << "  " << li << "\n";
-      }
-      e << "Set the LINKER_LANGUAGE property for this target.";
       cmake* cm = this->Target->GetLocalGenerator()->GetCMakeInstance();
-      cm->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                       this->Target->GetBacktrace());
+      cm->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          "Target ", this->Target->GetName(),
+          " contains multiple languages with the highest linker preference (",
+          this->Preference, "):\n", cmWrap("  ", this->Preferred, "\n", ""),
+          "Set the LINKER_LANGUAGE property for this target."),
+        this->Target->GetBacktrace());
     }
     return *this->Preferred.begin();
   }
@@ -270,12 +267,11 @@ void cmGeneratorTarget::ComputeLinkClosure(std::string const& config,
 
     // linker language must not be changed between the two passes
     if (this->LinkerLanguage != lc.LinkerLanguage) {
-      std::ostringstream e;
-      e << "Evaluation of $<LINK_LANGUAGE:...> or $<LINK_LAND_AND_ID:...> "
-           "changes\nthe linker language for target \""
-        << this->GetName() << "\" (from '" << this->LinkerLanguage << "' to '"
-        << lc.LinkerLanguage << "') which is invalid.";
-      cmSystemTools::Error(e.str());
+      cmSystemTools::Error(cmStrCat(
+        "Evaluation of $<LINK_LANGUAGE:...> or $<LINK_LAND_AND_ID:...> "
+        "changes\nthe linker language for target \"",
+        this->GetName(), "\" (from '", this->LinkerLanguage, "' to '",
+        lc.LinkerLanguage, "') which is invalid."));
     }
   }
 }
@@ -1293,15 +1289,14 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(
 
   // Check deprecation, issue message with `bt` backtrace.
   if (resolved.Target->IsDeprecated()) {
-    std::ostringstream w;
-    /* clang-format off */
-    w <<
-      "The library that is being linked to, "  << resolved.Target->GetName() <<
-      ", is marked as being deprecated by the owner.  The message provided by "
-      "the developer is: \n" << resolved.Target->GetDeprecation() << "\n";
-    /* clang-format on */
-    this->LocalGenerator->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str(),
-                                          bt);
+    this->LocalGenerator->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
+      cmStrCat("The library that is being linked to, ",
+               resolved.Target->GetName(),
+               ", is marked as being deprecated by the owner.  The message "
+               "provided by the developer is: \n",
+               resolved.Target->GetDeprecation(), '\n'),
+      bt);
   }
 
   // Skip targets that will not really be linked.  This is probably a

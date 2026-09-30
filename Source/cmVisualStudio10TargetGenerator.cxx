@@ -903,14 +903,11 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
       // make sure custom commands are executed before build (if necessary)
       {
         Elem e1(e0, "PropertyGroup");
-        std::ostringstream oss;
-        oss << "\n";
-        for (std::string const& i : this->CSharpCustomCommandNames) {
-          oss << "      " << i << ";\n";
-        }
-        oss << "      "
-               "$(BuildDependsOn)\n";
-        e1.Element("BuildDependsOn", oss.str());
+        e1.Element(
+          "BuildDependsOn",
+          cmStrCat('\n',
+                   cmWrap("      ", this->CSharpCustomCommandNames, ";\n", ""),
+                   "      $(BuildDependsOn)\n"));
       }
     }
   }
@@ -4460,13 +4457,13 @@ void cmVisualStudio10TargetGenerator::WriteManifestOptions(
   if (!manifest_srcs.empty() || dpiAware) {
     Elem e2(e1, "Manifest");
     if (!manifest_srcs.empty()) {
-      std::ostringstream oss;
+      std::string oss;
       for (cmSourceFile const* mi : manifest_srcs) {
         std::string m = this->ConvertPath(mi->GetFullPath(), false);
         ConvertToWindowsSlash(m);
-        oss << m << ";";
+        oss = cmStrCat(std::move(oss), std::move(m), ';');
       }
-      e2.Element("AdditionalManifestFiles", oss.str());
+      e2.Element("AdditionalManifestFiles", oss);
     }
     if (dpiAware) {
       if (*dpiAware == "PerMonitor"_s) {
@@ -4991,14 +4988,11 @@ void cmVisualStudio10TargetGenerator::WriteMidlOptions(
   // on the CMake side?
   std::vector<std::string> const includes =
     this->GetIncludes(configName, "MIDL");
-  std::ostringstream oss;
-  for (std::string const& i : includes) {
-    oss << i << ";";
-  }
-  oss << "%(AdditionalIncludeDirectories)";
+  std::string const oss =
+    cmStrCat(cmWrap("", includes, ";", ""), "%(AdditionalIncludeDirectories)");
 
   Elem e2(e1, "Midl");
-  e2.Element("AdditionalIncludeDirectories", oss.str());
+  e2.Element("AdditionalIncludeDirectories", oss);
   e2.Element("OutputDirectory", "$(ProjectDir)/$(IntDir)");
   e2.Element("HeaderFileName", "%(Filename).h");
   e2.Element("TypeLibraryName", "%(Filename).tlb");

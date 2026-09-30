@@ -3529,12 +3529,9 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       std::string pathsStr = cmList::to_string(paths);
       status.GetMakefile().AddDefinition(varName, pathsStr);
     } else {
-      std::ostringstream e;
-      e << "Multiple conflicting paths found for " << val.first << ":";
-      for (auto const& path : val.second) {
-        e << "\n  " << path;
-      }
-      status.SetError(e.str());
+      status.SetError(cmStrCat("Multiple conflicting paths found for ",
+                               val.first, ':',
+                               cmWrap("\n  ", val.second, "", "")));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
@@ -3545,12 +3542,9 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
                             archive.GetUnresolvedPaths().begin(),
                             archive.GetUnresolvedPaths().end());
     } else {
-      std::ostringstream e;
-      e << "Could not resolve runtime dependencies:";
-      for (auto const& path : archive.GetUnresolvedPaths()) {
-        e << "\n  " << path;
-      }
-      status.SetError(e.str());
+      status.SetError(
+        cmStrCat("Could not resolve runtime dependencies:",
+                 cmWrap("\n  ", archive.GetUnresolvedPaths(), "", "")));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }

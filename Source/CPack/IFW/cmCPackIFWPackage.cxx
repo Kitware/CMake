@@ -4,7 +4,6 @@
 
 #include <cstddef>
 #include <map>
-#include <sstream>
 #include <utility>
 
 #include <cm/string_view>
@@ -646,19 +645,19 @@ void cmCPackIFWPackage::GeneratePackageFile()
   }
   // Write dependencies
   if (!compDepSet.empty()) {
-    std::ostringstream dependencies;
     auto it = compDepSet.begin();
     warnUnsupportedNames |=
       hyphensInNamesUnsupported && it->Name.find('-') != std::string::npos;
-    dependencies << it->NameWithCompare();
+    std::string dependencies = it->NameWithCompare();
     ++it;
     while (it != compDepSet.end()) {
       warnUnsupportedNames |=
         hyphensInNamesUnsupported && it->Name.find('-') != std::string::npos;
-      dependencies << "," << it->NameWithCompare();
+      dependencies =
+        cmStrCat(std::move(dependencies), ',', it->NameWithCompare());
       ++it;
     }
-    xout.Element("Dependencies", dependencies.str());
+    xout.Element("Dependencies", dependencies);
   }
 
   // Automatic dependency on
@@ -668,19 +667,19 @@ void cmCPackIFWPackage::GeneratePackageFile()
   }
   // Write automatic dependency on
   if (!compAutoDepSet.empty()) {
-    std::ostringstream dependencies;
     auto it = compAutoDepSet.begin();
     warnUnsupportedNames |=
       hyphensInNamesUnsupported && it->Name.find('-') != std::string::npos;
-    dependencies << it->NameWithCompare();
+    std::string dependencies = it->NameWithCompare();
     ++it;
     while (it != compAutoDepSet.end()) {
       warnUnsupportedNames |=
         hyphensInNamesUnsupported && it->Name.find('-') != std::string::npos;
-      dependencies << "," << it->NameWithCompare();
+      dependencies =
+        cmStrCat(std::move(dependencies), ',', it->NameWithCompare());
       ++it;
     }
-    xout.Element("AutoDependOn", dependencies.str());
+    xout.Element("AutoDependOn", dependencies);
   }
 
   if (warnUnsupportedNames) {
@@ -716,15 +715,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
   // Replaces
   if (!this->Replaces.empty()) {
-    std::ostringstream replaces;
-    auto it = this->Replaces.begin();
-    replaces << *it;
-    ++it;
-    while (it != this->Replaces.end()) {
-      replaces << "," << *it;
-      ++it;
-    }
-    xout.Element("Replaces", replaces.str());
+    xout.Element("Replaces", cmJoin(this->Replaces, ","));
   }
 
   if (!this->RequiresAdminRights.empty()) {

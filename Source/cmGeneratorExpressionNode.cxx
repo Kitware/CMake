@@ -12,7 +12,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <sstream>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
@@ -70,14 +69,12 @@ bool HasKnownObjectFileLocation(cm::GenEx::Evaluation* eval,
   std::string reason;
   if (!eval->EvaluateForBuildsystem &&
       !target->Target->HasKnownObjectFileLocation(&reason)) {
-    std::ostringstream e;
-    e << "The evaluation of the " << genex
-      << " generator expression "
-         "is only suitable for consumption by CMake (limited"
-      << reason
-      << ").  "
-         "It is not suitable for writing out elsewhere.";
-    reportError(eval, content->GetOriginalExpression(), e.str());
+    reportError(
+      eval, content->GetOriginalExpression(),
+      cmStrCat("The evaluation of the ", genex,
+               " generator expression is only suitable for consumption by "
+               "CMake (limited",
+               reason, ").  It is not suitable for writing out elsewhere."));
     return false;
   }
   return true;
@@ -310,10 +307,9 @@ struct BooleanOpNode : public cmGeneratorExpressionNode
         return this->failureVal;
       }
       if (param != this->successVal) {
-        std::ostringstream e;
-        e << "Parameters to $<" << this->op;
-        e << "> must resolve to either '0' or '1'.";
-        reportError(eval, content->GetOriginalExpression(), e.str());
+        reportError(eval, content->GetOriginalExpression(),
+                    cmStrCat("Parameters to $<", this->op,
+                             "> must resolve to either '0' or '1'."));
         return std::string();
       }
     }
@@ -764,10 +760,9 @@ static const struct TargetGenexEvalNode : public GenexEvaluator
     auto const* target =
       eval->Context.LG->FindGeneratorTargetToUse(targetName);
     if (!target) {
-      std::ostringstream e;
-      e << "$<TARGET_GENEX_EVAL:tgt, ...> target \"" << targetName
-        << "\" not found.";
-      reportError(eval, content->GetOriginalExpression(), e.str());
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("$<TARGET_GENEX_EVAL:tgt, ...> target \"",
+                           targetName, "\" not found."));
       return std::string();
     }
 
@@ -3003,11 +2998,11 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
     if (!eval->HeadTarget) {
-      std::ostringstream e;
-      e << "$<" << this->CompilerLanguage
-        << "_COMPILER_ID> may only be used with binary targets.  It may "
-           "not be used with add_custom_command or add_custom_target.";
-      reportError(eval, content->GetOriginalExpression(), e.str());
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("$<", this->CompilerLanguage,
+                 "_COMPILER_ID> may only be used with binary targets.  It may "
+                 "not be used with add_custom_command or add_custom_target."));
       return {};
     }
     return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
@@ -3068,11 +3063,11 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
     if (!eval->HeadTarget) {
-      std::ostringstream e;
-      e << "$<" << this->CompilerLanguage
-        << "_COMPILER_VERSION> may only be used with binary targets.  It "
-           "may not be used with add_custom_command or add_custom_target.";
-      reportError(eval, content->GetOriginalExpression(), e.str());
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("$<", this->CompilerLanguage,
+                           "_COMPILER_VERSION> may only be used with binary "
+                           "targets.  It may not be used with "
+                           "add_custom_command or add_custom_target."));
       return {};
     }
     return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
@@ -3132,11 +3127,12 @@ struct CompilerFrontendVariantNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
     if (!eval->HeadTarget) {
-      std::ostringstream e;
-      e << "$<" << this->CompilerLanguage
-        << "_COMPILER_FRONTEND_VARIANT> may only be used with binary targets. "
-           " It may not be used with add_custom_command or add_custom_target.";
-      reportError(eval, content->GetOriginalExpression(), e.str());
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("$<", this->CompilerLanguage,
+                 "_COMPILER_FRONTEND_VARIANT> may only be used with binary "
+                 "targets.  It may not be used with add_custom_command or "
+                 "add_custom_target."));
       return {};
     }
     return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
@@ -3329,14 +3325,15 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         }
         // for backwards compat invalid config names are only errors as
         // the first parameter
-        std::ostringstream e;
-        /* clang-format off */
-        e << "Warning evaluating generator expression:\n"
-          << "  " << content->GetOriginalExpression() << "\n"
-          << "The config name of \"" << param << "\" is invalid";
-        /* clang-format on */
         eval->Context.LG->GetCMakeInstance()->IssueMessage(
-          MessageType::WARNING, e.str(), eval->Backtrace);
+          MessageType::WARNING,
+          cmStrCat("Warning evaluating generator expression:\n"
+                   "  ",
+                   content->GetOriginalExpression(),
+                   "\n"
+                   "The config name of \"",
+                   param, "\" is invalid"),
+          eval->Backtrace);
       }
       firstParam = false;
     }
@@ -4659,9 +4656,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       target = lg->FindGeneratorTargetToUse(targetName);
 
       if (!target) {
-        std::ostringstream e;
-        e << "Target \"" << targetName << "\" not found.";
-        reportError(eval, content->GetOriginalExpression(), e.str());
+        reportError(eval, content->GetOriginalExpression(),
+                    cmStrCat("Target \"", targetName, "\" not found."));
         return std::string();
       }
       eval->AllTargets.insert(target);
@@ -4910,9 +4906,8 @@ static const struct targetIntermediateDirNode
       target = lg->FindGeneratorTargetToUse(targetName);
 
       if (!target) {
-        std::ostringstream e;
-        e << "Target \"" << targetName << "\" not found.";
-        reportError(eval, content->GetOriginalExpression(), e.str());
+        reportError(eval, content->GetOriginalExpression(),
+                    cmStrCat("Target \"", targetName, "\" not found."));
         return std::string();
       }
       eval->AllTargets.insert(target);
@@ -4971,10 +4966,9 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     cmGeneratorTarget* gt =
       eval->Context.LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
-      std::ostringstream e;
-      e << "Objects of target \"" << tgtName
-        << "\" referenced but no such target exists.";
-      reportError(eval, content->GetOriginalExpression(), e.str());
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("Objects of target \"", tgtName,
+                           "\" referenced but no such target exists."));
       return std::string();
     }
     cm::TargetType type = gt->GetType();
@@ -4983,11 +4977,11 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         type != cm::TargetType::SHARED_LIBRARY &&
         type != cm::TargetType::MODULE_LIBRARY &&
         type != cm::TargetType::OBJECT_LIBRARY) {
-      std::ostringstream e;
-      e << "Objects of target \"" << tgtName
-        << "\" referenced but is not one of the allowed target types "
-        << "(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT).";
-      reportError(eval, content->GetOriginalExpression(), e.str());
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("Objects of target \"", tgtName,
+                 "\" referenced but is not one of the allowed target types "
+                 "(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT)."));
       return std::string();
     }
     cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
@@ -5100,21 +5094,20 @@ struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
     cmGeneratorTarget* gt =
       eval->Context.LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
-      std::ostringstream e;
-      e << "Objects of target \"" << tgtName
-        << "\" referenced but no such target exists.";
-      reportError(eval, content->GetOriginalExpression(), e.str());
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("Objects of target \"", tgtName,
+                           "\" referenced but no such target exists."));
       return std::vector<std::string>();
     }
     cm::TargetType type = gt->GetType();
     if (type != cm::TargetType::EXECUTABLE &&
         type != cm::TargetType::SHARED_LIBRARY &&
         type != cm::TargetType::MODULE_LIBRARY) {
-      std::ostringstream e;
-      e << "Objects of target \"" << tgtName
-        << "\" referenced but is not one of the allowed target types "
-        << "(EXECUTABLE, SHARED, MODULE).";
-      reportError(eval, content->GetOriginalExpression(), e.str());
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("Objects of target \"", tgtName,
+                 "\" referenced but is not one of the allowed target types "
+                 "(EXECUTABLE, SHARED, MODULE)."));
       return std::vector<std::string>();
     }
 
@@ -6640,12 +6633,10 @@ void reportError(cm::GenEx::Evaluation* eval, std::string const& expr,
     return;
   }
 
-  std::ostringstream e;
-  /* clang-format off */
-  e << "Error evaluating generator expression:\n"
-    << "  " << expr << "\n"
-    << result;
-  /* clang-format on */
-  eval->Context.LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                                     e.str(), eval->Backtrace);
+  eval->Context.LG->GetCMakeInstance()->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Error evaluating generator expression:\n"
+             "  ",
+             expr, '\n', result),
+    eval->Backtrace);
 }

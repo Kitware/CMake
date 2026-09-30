@@ -933,17 +933,16 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     this->UseCpsFiles = false;
   }
   if (!this->UseFindModules && !this->UseConfigFiles) {
-    std::ostringstream e;
-    e << "given options exclusive to Module mode:\n";
+    std::string e = "given options exclusive to Module mode:\n";
     for (auto si : moduleArgs) {
-      e << "  " << args[si] << "\n";
+      e = cmStrCat(std::move(e), "  ", args[si], '\n');
     }
-    e << "and options exclusive to Config mode:\n";
+    e = cmStrCat(std::move(e), "and options exclusive to Config mode:\n");
     for (auto si : configArgs) {
-      e << "  " << args[si] << "\n";
+      e = cmStrCat(std::move(e), "  ", args[si], '\n');
     }
-    e << "The options are incompatible.";
-    this->SetError(e.str());
+    e = cmStrCat(std::move(e), "The options are incompatible.");
+    this->SetError(e);
     return false;
   }
 

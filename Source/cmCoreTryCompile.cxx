@@ -6,7 +6,6 @@
 #include <cstdio>
 #include <functional>
 #include <set>
-#include <sstream>
 #include <utility>
 
 #include <cm/string_view>
@@ -491,10 +490,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
   // do not allow recursive try Compiles
   if (this->BinaryDirectory == this->Makefile->GetHomeOutputDirectory()) {
-    std::ostringstream e;
-    e << "Attempt at a recursive or nested TRY_COMPILE in directory\n"
-      << "  " << this->BinaryDirectory << "\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Attempt at a recursive or nested TRY_COMPILE in directory\n"
+               "  ",
+               this->BinaryDirectory, '\n'));
     return cm::nullopt;
   }
 
@@ -580,19 +580,19 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       if (!lang.empty()) {
         testLangs.insert(std::string(lang));
       } else {
-        std::ostringstream err;
-        err << "Unknown extension \"" << ext
-            << "\" for file\n"
-               "  "
-            << si
-            << "\n"
-               "try_compile() works only for enabled languages.  "
-               "Currently these are:\n  ";
         std::vector<std::string> langs;
         gg->GetEnabledLanguages(langs);
-        err << cmJoin(langs, " ");
-        err << "\nSee project() command to enable other languages.";
-        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, err.str());
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Unknown extension \"", ext,
+                   "\" for file\n"
+                   "  ",
+                   si,
+                   "\n"
+                   "try_compile() works only for enabled languages.  "
+                   "Currently these are:\n  ",
+                   cmJoin(langs, " "),
+                   "\nSee project() command to enable other languages."));
         return cm::nullopt;
       }
     }
@@ -1038,13 +1038,12 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     }
 
     if (!warnCMP0067Variables.empty()) {
-      std::ostringstream w;
-      w << "For compatibility with older versions of CMake, try_compile is "
-           "not honoring language standard variables in the test project:\n"_s;
-      for (std::string const& vi : warnCMP0067Variables) {
-        w << "  " << vi << "\n";
-      }
-      this->Makefile->IssuePolicyWarning(cmPolicies::CMP0067, {}, w.str());
+      this->Makefile->IssuePolicyWarning(
+        cmPolicies::CMP0067, {},
+        cmStrCat("For compatibility with older versions of CMake, try_compile "
+                 "is not honoring language standard variables in the test "
+                 "project:\n",
+                 cmWrap("  ", warnCMP0067Variables, "\n", "")));
     }
 
     for (auto const& p : arguments.LangProps) {
@@ -1425,10 +1424,10 @@ void cmCoreTryCompile::FindOutputFile(std::string const& targetName)
 
   std::string command = cmStrCat(this->BinaryDirectory, tmpOutputFile);
   if (!cmSystemTools::FileExists(command)) {
-    std::ostringstream emsg;
-    emsg << "Unable to find the recorded try_compile output location:\n";
-    emsg << cmStrCat("  ", command, '\n');
-    this->FindErrorMessage = emsg.str();
+    this->FindErrorMessage =
+      cmStrCat("Unable to find the recorded try_compile output location:\n"
+               "  ",
+               command, '\n');
     return;
   }
 
@@ -1436,10 +1435,10 @@ void cmCoreTryCompile::FindOutputFile(std::string const& targetName)
   cmsys::ifstream ifs(command.c_str());
   cmSystemTools::GetLineFromStream(ifs, outputFileLocation);
   if (!cmSystemTools::FileExists(outputFileLocation)) {
-    std::ostringstream emsg;
-    emsg << "Recorded try_compile output location doesn't exist:\n";
-    emsg << cmStrCat("  ", outputFileLocation, '\n');
-    this->FindErrorMessage = emsg.str();
+    this->FindErrorMessage =
+      cmStrCat("Recorded try_compile output location doesn't exist:\n"
+               "  ",
+               outputFileLocation, '\n');
     return;
   }
 

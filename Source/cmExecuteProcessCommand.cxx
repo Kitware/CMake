@@ -7,7 +7,6 @@
 #include <iostream>
 #include <map>
 #include <memory>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -531,12 +530,12 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
         }
       }
       if (!failureIndices.empty()) {
-        std::ostringstream oss;
-        oss << "failed command indexes:\n";
+        std::string oss = "failed command indexes:\n";
         for (auto const& e : failureIndices) {
-          oss << "  " << e.first + 1 << ": \"" << e.second << "\"\n";
+          oss = cmStrCat(std::move(oss), "  ", e.first + 1, ": \"", e.second,
+                         "\"\n");
         }
-        status.SetError(oss.str());
+        status.SetError(oss);
         ret = false;
       }
     }

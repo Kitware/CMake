@@ -619,12 +619,11 @@ void cmGlobalNinjaGenerator::Generate()
   // Check minimum Ninja version.
   if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
                                     RequiredNinjaVersion())) {
-    std::ostringstream msg;
-    msg << "The detected version of Ninja (" << this->NinjaVersion;
-    msg << ") is less than the version of Ninja required by CMake (";
-    msg << cmGlobalNinjaGenerator::RequiredNinjaVersion() << ").";
-    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                           msg.str());
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The detected version of Ninja (", this->NinjaVersion,
+               ") is less than the version of Ninja required by CMake (",
+               cmGlobalNinjaGenerator::RequiredNinjaVersion(), ")."));
     return;
   }
   this->InitOutputPathPrefix();
@@ -919,18 +918,17 @@ bool cmGlobalNinjaGenerator::CheckCxxModuleSupport(CxxModuleSupportQuery query)
     !this->CMakeInstance->GetIsInTryCompile() &&
     query == CxxModuleSupportQuery::Expected;
   if (diagnose) {
-    std::ostringstream e;
-    /* clang-format off */
-    e <<
-      "The Ninja generator does not support C++20 modules "
-      "using Ninja version \n"
-      "  " << this->NinjaVersion << "\n"
-      "due to lack of required features.  "
-      "Ninja " << RequiredNinjaVersionForDyndepsCxx() <<
-      " or higher is required."
-      ;
-    /* clang-format on */
-    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The Ninja generator does not support C++20 modules "
+               "using Ninja version \n"
+               "  ",
+               this->NinjaVersion,
+               "\n"
+               "due to lack of required features.  "
+               "Ninja ",
+               RequiredNinjaVersionForDyndepsCxx(),
+               " or higher is required."));
     cmSystemTools::SetFatalErrorOccurred();
   }
   return false;
@@ -942,17 +940,17 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
     return true;
   }
 
-  std::ostringstream e;
-  /* clang-format off */
-  e <<
-    "The Ninja generator does not support Fortran using Ninja version\n"
-    "  " << this->NinjaVersion << "\n"
-    "due to lack of required features.  "
-    "Ninja " << RequiredNinjaVersionForDyndepsFortran() <<
-    " or higher is required."
-    ;
-  /* clang-format on */
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("The Ninja generator does not support Fortran using Ninja "
+             "version\n"
+             "  ",
+             this->NinjaVersion,
+             "\n"
+             "due to lack of required features.  "
+             "Ninja ",
+             RequiredNinjaVersionForDyndepsFortran(),
+             " or higher is required."));
   cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
@@ -963,17 +961,16 @@ bool cmGlobalNinjaGenerator::CheckISPC(cmMakefile* mf) const
     return true;
   }
 
-  std::ostringstream e;
-  /* clang-format off */
-  e <<
-    "The Ninja generator does not support ISPC using Ninja version\n"
-    "  " << this->NinjaVersion << "\n"
-    "due to lack of required features.  "
-    "Ninja " << RequiredNinjaVersionForMultipleOutputs() <<
-    " or higher is required."
-    ;
-  /* clang-format on */
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("The Ninja generator does not support ISPC using Ninja version\n"
+             "  ",
+             this->NinjaVersion,
+             "\n"
+             "due to lack of required features.  "
+             "Ninja ",
+             RequiredNinjaVersionForMultipleOutputs(),
+             " or higher is required."));
   cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
@@ -2019,19 +2016,21 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     reBuild.ExplicitDeps.push_back(verifyStampFile);
   } else if (!this->SupportsManifestRestat() &&
              cm->DoWriteGlobVerifyTarget()) {
-    std::ostringstream msg;
-    msg << "The detected version of Ninja:\n"
-        << "  " << this->NinjaVersion << "\n"
-        << "is less than the version of Ninja required by CMake for adding "
-           "restat dependencies to the build.ninja manifest regeneration "
-           "target:\n"
-        << "  "
-        << cmGlobalNinjaGenerator::RequiredNinjaVersionForManifestRestat()
-        << "\n";
-    msg << "Any pre-check scripts, such as those generated for file(GLOB "
-           "CONFIGURE_DEPENDS), will not be run by Ninja.";
-    this->GetCMakeInstance()->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
-                                              msg.str());
+    this->GetCMakeInstance()->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
+      cmStrCat(
+        "The detected version of Ninja:\n"
+        "  ",
+        this->NinjaVersion,
+        "\n"
+        "is less than the version of Ninja required by CMake for adding "
+        "restat dependencies to the build.ninja manifest regeneration "
+        "target:\n"
+        "  ",
+        cmGlobalNinjaGenerator::RequiredNinjaVersionForManifestRestat(),
+        "\n"
+        "Any pre-check scripts, such as those generated for file(GLOB "
+        "CONFIGURE_DEPENDS), will not be run by Ninja."));
   }
 
   std::sort(reBuild.ImplicitDeps.begin(), reBuild.ImplicitDeps.end());
@@ -3502,12 +3501,12 @@ bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
     this->DefaultFileConfig = configsList.front();
   }
   if (!configs.count(this->DefaultFileConfig)) {
-    std::ostringstream msg;
-    msg << "The configuration specified by "
-        << "CMAKE_DEFAULT_BUILD_TYPE (" << this->DefaultFileConfig
-        << ") is not present in CMAKE_CONFIGURATION_TYPES";
-    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                           msg.str());
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The configuration specified by "
+               "CMAKE_DEFAULT_BUILD_TYPE (",
+               this->DefaultFileConfig,
+               ") is not present in CMAKE_CONFIGURATION_TYPES"));
     return false;
   }
 
@@ -3515,11 +3514,9 @@ bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
     "CMAKE_CROSS_CONFIGS") };
   auto crossConfigs = ListSubsetWithAll(configs, configs, crossConfigsList);
   if (!crossConfigs) {
-    std::ostringstream msg;
-    msg << "CMAKE_CROSS_CONFIGS is not a subset of "
-        << "CMAKE_CONFIGURATION_TYPES";
-    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                           msg.str());
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "CMAKE_CROSS_CONFIGS is not a subset of CMAKE_CONFIGURATION_TYPES");
     return false;
   }
   this->CrossConfigs = *crossConfigs;
@@ -3532,11 +3529,10 @@ bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
   if (!defaultConfigsString.empty() &&
       defaultConfigsString != this->DefaultFileConfig &&
       (this->DefaultFileConfig.empty() || this->CrossConfigs.empty())) {
-    std::ostringstream msg;
-    msg << "CMAKE_DEFAULT_CONFIGS cannot be used without "
-        << "CMAKE_DEFAULT_BUILD_TYPE or CMAKE_CROSS_CONFIGS";
-    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                           msg.str());
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "CMAKE_DEFAULT_CONFIGS cannot be used without "
+      "CMAKE_DEFAULT_BUILD_TYPE or CMAKE_CROSS_CONFIGS");
     return false;
   }
 
@@ -3546,10 +3542,9 @@ bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
       ListSubsetWithAll(this->GetCrossConfigs(this->DefaultFileConfig),
                         this->CrossConfigs, defaultConfigsList);
     if (!defaultConfigs) {
-      std::ostringstream msg;
-      msg << "CMAKE_DEFAULT_CONFIGS is not a subset of CMAKE_CROSS_CONFIGS";
-      this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                             msg.str());
+      this->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "CMAKE_DEFAULT_CONFIGS is not a subset of CMAKE_CROSS_CONFIGS");
       return false;
     }
     this->DefaultConfigs = *defaultConfigs;

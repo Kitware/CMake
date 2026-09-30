@@ -56,12 +56,10 @@ void cmGeneratorExpressionEvaluationFile::Generate(
       return;
     }
     if (condResult != "1") {
-      std::ostringstream e;
-      e << "Evaluation file condition \"" << rawCondition
-        << "\" did "
-           "not evaluate to valid content. Got \""
-        << condResult << "\".";
-      lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      lg->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Evaluation file condition \"", rawCondition,
+                                "\" did not evaluate to valid content. Got \"",
+                                condResult, "\"."));
       return;
     }
   }
@@ -76,13 +74,13 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     if (it->second == outputContent) {
       return;
     }
-    std::ostringstream e;
-    e << "Evaluation file to be written multiple times with different "
-         "content. "
-         "This is generally caused by the content evaluating the "
-         "configuration type, language, or location of object files:\n "
-      << outputFileName;
-    lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    lg->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Evaluation file to be written multiple times with different "
+               "content. "
+               "This is generally caused by the content evaluating the "
+               "configuration type, language, or location of object files:\n ",
+               outputFileName));
     return;
   }
 
@@ -158,9 +156,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
     }
     cmsys::ifstream fin(inputFileName.c_str());
     if (!fin) {
-      std::ostringstream e;
-      e << "Evaluation file \"" << inputFileName << "\" cannot be read.";
-      lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      lg->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Evaluation file \"", inputFileName, "\" cannot be read."));
       return;
     }
 

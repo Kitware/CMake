@@ -359,9 +359,7 @@ bool cmCPackWIXGenerator::PackageWithWix3()
     std::string uniqueBaseName = baseName;
 
     while (usedBaseNames.find(uniqueBaseName) != usedBaseNames.end()) {
-      std::ostringstream tmp;
-      tmp << baseName << ++counter;
-      uniqueBaseName = tmp.str();
+      uniqueBaseName = cmStrCat(baseName, ++counter);
     }
 
     usedBaseNames.insert(uniqueBaseName);
@@ -530,10 +528,7 @@ void cmCPackWIXGenerator::AddDefinition(cmWIXSourceWriter& source,
                                         std::string const& name,
                                         std::string const& value)
 {
-  std::ostringstream tmp;
-  tmp << name << "=\"" << value << '"';
-
-  source.AddProcessingInstruction("define", tmp.str());
+  source.AddProcessingInstruction("define", cmStrCat(name, "=\"", value, '"'));
 }
 
 bool cmCPackWIXGenerator::CreateWiXSourceFiles()

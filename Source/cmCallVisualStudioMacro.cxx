@@ -454,9 +454,8 @@ int cmCallVisualStudioMacro::CallMacro(std::string const& slnFile,
 #endif
 
   if (err && LogErrorsAsMessages) {
-    std::ostringstream oss;
-    oss << "cmCallVisualStudioMacro::CallMacro failed, err = " << err;
-    cmSystemTools::Message(oss.str());
+    cmSystemTools::Message(
+      cmStrCat("cmCallVisualStudioMacro::CallMacro failed, err = ", err));
   }
 
   return 0;

@@ -13,7 +13,6 @@
 #include <iterator>
 #include <map>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -171,15 +170,14 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
     std::string pname = cmSystemTools::HelpFileName(p);
     std::string pfile = cmStrCat(pdir, pname, ".rst");
     if (cmSystemTools::FileExists(pfile, true)) {
-      std::ostringstream e;
-      e << "Target \"" << dependee->GetName() << "\" has property \"" << p
-        << "\" listed in its " << propName
-        << " property.  "
-           "This is not allowed.  Only user-defined properties may appear "
-           "listed in the "
-        << propName << " property.";
-      depender->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
-                                                  e.str());
+      depender->GetLocalGenerator()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Target \"", dependee->GetName(), "\" has property \"", p,
+                 "\" listed in its ", propName,
+                 " property.  "
+                 "This is not allowed.  Only user-defined properties may "
+                 "appear listed in the ",
+                 propName, " property."));
       return;
     }
     if (emitted.insert(p).second) {
@@ -315,15 +313,14 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
     std::string propsString = cmStrCat(
       cmJoin(cmMakeRange(props).retreat(1), ", "), " and the ", props.back());
 
-    std::ostringstream e;
-    e << "Property \"" << prop << "\" appears in both the " << propsString
-      << " property in the dependencies of target \"" << this->GetName()
-      << "\".  This is not allowed. A property may only require "
-         "compatibility "
-         "in a boolean interpretation, a numeric minimum, a numeric maximum "
-         "or a "
-         "string interpretation, but not a mixture.";
-    this->LocalGenerator->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    this->LocalGenerator->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Property \"", prop, "\" appears in both the ", propsString,
+               " property in the dependencies of target \"", this->GetName(),
+               "\".  This is not allowed. A property may only require "
+               "compatibility in a boolean interpretation, a numeric "
+               "minimum, a numeric maximum or a string interpretation, but "
+               "not a mixture."));
   }
 }
 
@@ -634,15 +631,11 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
         report += reportEntry;
         report += compatibilityAgree(t, propContent != consistent.second);
         if (!consistent.first) {
-          std::ostringstream e;
-          e << "Property " << p << " on target \"" << tgt->GetName()
-            << "\" does\nnot match the "
-               "INTERFACE_"
-            << p
-            << " property requirement\nof "
-               "dependency \""
-            << theTarget->GetName() << "\".\n";
-          cmSystemTools::Error(e.str());
+          cmSystemTools::Error(
+            cmStrCat("Property ", p, " on target \"", tgt->GetName(),
+                     "\" does\nnot match the INTERFACE_", p,
+                     " property requirement\nof dependency \"",
+                     theTarget->GetName(), "\".\n"));
           break;
         }
         propContent = consistent.second;
@@ -660,14 +653,13 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
         report += reportEntry;
         report += compatibilityAgree(t, propContent != consistent.second);
         if (!consistent.first) {
-          std::ostringstream e;
-          e << "Property " << p << " on target \"" << tgt->GetName()
-            << "\" is\nimplied to be " << defaultValue
-            << " because it was used to determine the link libraries\n"
-               "already. The INTERFACE_"
-            << p << " property on\ndependency \"" << theTarget->GetName()
-            << "\" is in conflict.\n";
-          cmSystemTools::Error(e.str());
+          cmSystemTools::Error(
+            cmStrCat("Property ", p, " on target \"", tgt->GetName(),
+                     "\" is\nimplied to be ", defaultValue,
+                     " because it was used to determine the link libraries\n"
+                     "already. The INTERFACE_",
+                     p, " property on\ndependency \"", theTarget->GetName(),
+                     "\" is in conflict.\n"));
           break;
         }
         propContent = consistent.second;
@@ -684,11 +676,10 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
           cmStrCat(std::move(report), reportEntry,
                    compatibilityAgree(t, propContent != consistent.second));
         if (!consistent.first) {
-          std::ostringstream e;
-          e << "The INTERFACE_" << p << " property of \""
-            << theTarget->GetName() << "\" does\nnot agree with the value of "
-            << p << " already determined\nfor \"" << tgt->GetName() << "\".\n";
-          cmSystemTools::Error(e.str());
+          cmSystemTools::Error(cmStrCat(
+            "The INTERFACE_", p, " property of \"", theTarget->GetName(),
+            "\" does\nnot agree with the value of ", p,
+            " already determined\nfor \"", tgt->GetName(), "\".\n"));
           break;
         }
         propContent = consistent.second;

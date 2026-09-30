@@ -3,7 +3,6 @@
 #include "cmMakefileExecutableTargetGenerator.h"
 
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -575,15 +574,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     std::string targetVersionMajor;
     std::string targetVersionMinor;
     {
-      std::ostringstream majorStream;
-      std::ostringstream minorStream;
       int major;
       int minor;
       this->GeneratorTarget->GetTargetVersion(major, minor);
-      majorStream << major;
-      minorStream << minor;
-      targetVersionMajor = majorStream.str();
-      targetVersionMinor = minorStream.str();
+      targetVersionMajor = std::to_string(major);
+      targetVersionMinor = std::to_string(minor);
     }
     vars.TargetVersionMajor = targetVersionMajor.c_str();
     vars.TargetVersionMinor = targetVersionMinor.c_str();

@@ -4,7 +4,6 @@
 #include "cmFileInstaller.h"
 
 #include <map>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -323,11 +322,11 @@ bool cmFileInstaller::CheckKeyword(std::string const& arg)
     }
   } else if (arg == "COMPONENTS" || arg == "CONFIGURATIONS" ||
              arg == "PROPERTIES") {
-    std::ostringstream e;
-    e << "INSTALL called with old-style " << arg << " argument.  "
-      << "This script was generated with an older version of CMake.  "
-      << "Re-run this cmake version on your build tree.";
-    this->Status.SetError(e.str());
+    this->Status.SetError(
+      cmStrCat("INSTALL called with old-style ", arg,
+               " argument.  "
+               "This script was generated with an older version of CMake.  "
+               "Re-run this cmake version on your build tree."));
     this->Doing = DoingError;
   } else {
     return this->cmFileCopier::CheckKeyword(arg);
@@ -369,9 +368,8 @@ bool cmFileInstaller::GetTargetTypeFromString(std::string const& stype)
   } else if (stype == "DIRECTORY") {
     this->InstallType = cmInstallType_DIRECTORY;
   } else {
-    std::ostringstream e;
-    e << "Option TYPE given unknown value \"" << stype << "\".";
-    this->Status.SetError(e.str());
+    this->Status.SetError(
+      cmStrCat("Option TYPE given unknown value \"", stype, "\"."));
     return false;
   }
   return true;

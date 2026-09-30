@@ -220,10 +220,11 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
     int res;
     if (!cmSystemTools::FileTimeCompare(src, dst, &res) || res > 0) {
       if (!cmSystemTools::CopyFileAlways(src, dst)) {
-        std::ostringstream oss;
-        oss << "Could not copy from: " << src << std::endl
-            << "                 to: " << dst << std::endl;
-        cmSystemTools::Message(oss.str(), "Warning");
+        cmSystemTools::Message(cmStrCat("Could not copy from: ", src,
+                                        "\n"
+                                        "                 to: ",
+                                        dst, '\n'),
+                               "Warning");
       }
     }
 

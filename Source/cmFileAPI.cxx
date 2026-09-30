@@ -792,15 +792,14 @@ bool cmFileAPI::ReadRequestVersion(Json::Value const& version, bool inArray,
 std::string cmFileAPI::NoSupportedVersion(
   std::vector<RequestVersion> const& versions)
 {
-  std::ostringstream msg;
-  msg << "no supported version specified";
+  std::string msg = "no supported version specified";
   if (!versions.empty()) {
-    msg << " among:";
+    msg += " among:";
     for (RequestVersion const& v : versions) {
-      msg << " " << v.Major << "." << v.Minor;
+      msg = cmStrCat(std::move(msg), ' ', v.Major, '.', v.Minor);
     }
   }
-  return msg.str();
+  return msg;
 }
 
 // The "codemodel" object kind.

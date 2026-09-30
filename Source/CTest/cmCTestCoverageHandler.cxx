@@ -393,9 +393,8 @@ int cmCTestCoverageHandler::ProcessHandler()
 
     cmsys::ifstream ifs(fullFileName.c_str());
     if (!ifs) {
-      std::ostringstream ostr;
-      ostr << "Cannot open source file: " << fullFileName;
-      errorsWhileAccumulating.push_back(ostr.str());
+      errorsWhileAccumulating.push_back(
+        cmStrCat("Cannot open source file: ", fullFileName));
       error++;
       continue;
     }
@@ -412,10 +411,9 @@ int cmCTestCoverageHandler::ProcessHandler()
     for (cc = 0; cc < fcov.size(); cc++) {
       if (!cmSystemTools::GetLineFromStream(ifs, line) &&
           cc != fcov.size() - 1) {
-        std::ostringstream ostr;
-        ostr << "Problem reading source file: " << fullFileName
-             << " line:" << cc << "  out total: " << fcov.size() - 1;
-        errorsWhileAccumulating.push_back(ostr.str());
+        errorsWhileAccumulating.push_back(
+          cmStrCat("Problem reading source file: ", fullFileName, " line:", cc,
+                   "  out total: ", fcov.size() - 1));
         error++;
         break;
       }
@@ -439,9 +437,8 @@ int cmCTestCoverageHandler::ProcessHandler()
       }
     }
     if (cmSystemTools::GetLineFromStream(ifs, line)) {
-      std::ostringstream ostr;
-      ostr << "Looks like there are more lines in the file: " << fullFileName;
-      errorsWhileAccumulating.push_back(ostr.str());
+      errorsWhileAccumulating.push_back(cmStrCat(
+        "Looks like there are more lines in the file: ", fullFileName));
     }
     float cper = 0;
     float cmet = 0;
@@ -483,9 +480,8 @@ int cmCTestCoverageHandler::ProcessHandler()
 
     cmsys::ifstream ifs(fullPath.c_str());
     if (!ifs) {
-      std::ostringstream ostr;
-      ostr << "Cannot open source file: " << fullPath;
-      errorsWhileAccumulating.push_back(ostr.str());
+      errorsWhileAccumulating.push_back(
+        cmStrCat("Cannot open source file: ", fullPath));
       error++;
       covLogXML.EndElement(); // Report
       covLogXML.EndElement(); // File
