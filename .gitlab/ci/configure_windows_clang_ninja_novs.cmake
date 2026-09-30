@@ -5,4 +5,5 @@ set(CMake_TEST_FindOpenMP "OFF" CACHE BOOL "")
 set(CMake_TEST_ASM_MASM "OFF" CACHE BOOL "")
 set(CMake_TEST_ASM_MARMASM "OFF" CACHE BOOL "")
 
+include("${CMAKE_CURRENT_LIST_DIR}/configure_windows_clang_cxx_modules_common.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/configure_windows_clang_common.cmake")
