@@ -115,8 +115,11 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->ClangTidyExportFixesDirs.clear();
   this->ClangTidyExportFixesFiles.clear();
 
+  this->TestPrepTargets.clear();
+  this->TestPrepEnabled = false;
+
   // Compute the "test_prep/" targets before generating the local makefiles
-  // so their convenience rules can be written into the top-level Makefile.
+  // so they can be emitted in a single pass.
   this->ComputeTestPrepTargets();
 
   // first do superclass method
@@ -1064,10 +1067,12 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
 
       for (cmTestGenerator::BuildDependencies::FileDependency const& file :
            deps.Files) {
-        if (file.Owner) {
+        if (cmGeneratorTarget* owner = file.Owner
+              ? file.Owner
+              : this->FindOutputOwningTarget(file.Path)) {
           // The file is the primary output of one build-system target; build
           // that target to produce the file.
-          rules.push_back(targetAllRule(file.Owner));
+          rules.push_back(targetAllRule(owner));
         } else if (file.Generated) {
           // The file is generated but cannot be attributed to a single owning
           // target (e.g. a byproduct or an ambiguous/shared output), so the
@@ -1088,6 +1093,8 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
         // file that already exists) and needs no build rule.
       }
     }
+
+    this->AddDirectoryTestPrepTargets(lg.get(), this->TestPrepTargets);
   }
 
   // Sort and de-duplicate each rule list (as the Ninja generator does).
@@ -1095,6 +1102,45 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
     std::vector<std::string>& rules = entry.second;
     std::sort(rules.begin(), rules.end());
     rules.erase(std::unique(rules.begin(), rules.end()), rules.end());
+  }
+}
+
+void cmGlobalUnixMakefileGenerator3::AddDirectoryTestPrepTargets(
+  cmLocalGenerator* lg,
+  std::map<std::string, std::vector<std::string>>& testPrepTargets)
+{
+  cmLocalGenerator::DirectoryTestPrepTarget directoryTarget;
+  if (!lg->GetDirectoryTestPrepTarget(
+        directoryTarget,
+        lg->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"))) {
+    return;
+  }
+
+  std::vector<std::string>& rules = testPrepTargets[directoryTarget.Name];
+
+  for (cmLocalGenerator::DirectoryTestPrepDependency const& dep :
+       directoryTarget.Dependencies) {
+    cmGeneratorTarget* target = dep.Target ? dep.Target : dep.Owner;
+    if (!target) {
+      target = this->FindOutputOwningTarget(dep.Raw);
+    }
+    if (target) {
+      auto* lg3 = static_cast<cmLocalUnixMakefileGenerator3*>(
+        target->GetLocalGenerator());
+      rules.push_back(
+        cmStrCat(lg3->GetRelativeTargetDirectory(target), "/all"));
+    } else if (dep.Generated) {
+      lg->GetMakefile()->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat("Directory test prep dependency\n  ", dep.Raw,
+                 "\nis generated but is not the unique output of a build "
+                 "target, so the \"",
+                 directoryTarget.Name,
+                 "\" target cannot build it with this generator.  Depend "
+                 "on the target that produces it (for example one created "
+                 "with add_custom_target) instead."),
+        lg->GetMakefile()->GetBacktrace());
+    }
   }
 }
 
@@ -1142,24 +1188,29 @@ void cmGlobalUnixMakefileGenerator3::WriteTestPrepConvenienceRules(
 
   std::vector<std::string> depends;
   std::vector<std::string> commands;
-  auto writeForward = [&](std::string const& prepName) {
-    depends.clear();
-    if (regenerate) {
-      depends.emplace_back("cmake_check_build_system");
-    }
-    commands.clear();
-    commands.push_back(lg.GetRecursiveMakeCall(makefile2, prepName));
-    lg.WriteMakeRule(ruleFileStream, "Build the dependencies of a test.",
-                     prepName, depends, commands, true);
-  };
 
   lg.WriteDivider(ruleFileStream);
   ruleFileStream << "# Convenience rules to build test dependencies.\n\n";
 
   for (auto const& entry : this->TestPrepTargets) {
-    writeForward(entry.first);
+    depends.clear();
+    if (regenerate) {
+      depends.emplace_back("cmake_check_build_system");
+    }
+    commands.clear();
+    commands.push_back(lg.GetRecursiveMakeCall(makefile2, entry.first));
+    lg.WriteMakeRule(ruleFileStream, "Build the dependencies of a test.",
+                     entry.first, depends, commands, true);
   }
-  writeForward("test_prep/all");
+
+  depends.clear();
+  if (regenerate) {
+    depends.emplace_back("cmake_check_build_system");
+  }
+  commands.clear();
+  commands.push_back(lg.GetRecursiveMakeCall(makefile2, "test_prep/all"));
+  lg.WriteMakeRule(ruleFileStream, "Build the dependencies of a test.",
+                   "test_prep/all", depends, commands, true);
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteHelpRule(

@@ -15,6 +15,7 @@ class cmListFileBacktrace;
 class cmGeneratorExpression;
 class cmGeneratorTarget;
 class cmLocalGenerator;
+class cmMakefile;
 class cmTest;
 
 /** \class cmTestGenerator
@@ -43,6 +44,13 @@ public:
     std::vector<FileDependency> Files;
   };
 
+  static bool EvaluateBuildDependencies(
+    cmLocalGenerator* lg, std::string const& config,
+    cmListFileBacktrace const& backtrace, std::string const& testName,
+    std::vector<std::string> const& command,
+    std::vector<std::string> const& buildDepends, BuildDependencies& info,
+    cmMakefile* mf);
+
   cmTestGenerator(cmTest* test,
                   std::vector<std::string> const& configurations =
                     std::vector<std::string>());
@@ -51,7 +59,7 @@ public:
   cmTestGenerator(cmTestGenerator const&) = delete;
   cmTestGenerator& operator=(cmTestGenerator const&) = delete;
 
-  void Compute(cmLocalGenerator* lg);
+  virtual void Compute(cmLocalGenerator* lg);
   bool GetBuildDependencies(cmLocalGenerator* lg, std::string const& config,
                             BuildDependencies& deps);
 

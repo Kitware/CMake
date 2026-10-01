@@ -5,7 +5,7 @@ project(TestDependencyFileGenerateConfig C)
 
 enable_testing()
 
-add_executable(TestDependencyGenexFileGenerate main.c)
+add_executable(TestDependencyGenexFileGenerate ../add_test/main.c)
 
 set(rc_file
   "${CMAKE_CURRENT_BINARY_DIR}/gen/TestDependencyGenexFileGenerate/$<CONFIG>/version.rc")

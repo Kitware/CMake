@@ -330,5 +330,8 @@ private:
   // rules that must be built to prepare the named test.  Populated by
   // ComputeTestPrepTargets when CMAKE_TEST_BUILD_DEPENDS is enabled.
   std::map<std::string, std::vector<std::string>> TestPrepTargets;
+  void AddDirectoryTestPrepTargets(
+    cmLocalGenerator* lg,
+    std::map<std::string, std::vector<std::string>>& testPrepTargets);
   bool TestPrepEnabled = false;
 };

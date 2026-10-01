@@ -1,4 +1,4 @@
-CMake Warning at TestDependency-ON-orphan\.cmake:[0-9]+ \(add_test\):
+CMake Warning at ON-orphan\.cmake:[0-9]+ \(add_test\):
   Test "OrphanTest" BUILD_DEPENDS file
 
     .*/TestDependencyOrphan-built\.txt

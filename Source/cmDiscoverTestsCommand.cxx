@@ -3,6 +3,7 @@
 #include "cmDiscoverTestsCommand.h"
 
 #include <cstddef>
+#include <map>
 #include <ostream>
 #include <utility>
 #include <vector>
@@ -15,6 +16,8 @@
 #include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -42,6 +45,42 @@ public:
   {
   }
 
+  void Compute(cmLocalGenerator* lg) override
+  {
+    this->cmTestGenerator::Compute(lg);
+    this->BuildDependenciesByConfig.clear();
+    if (!lg->GetMakefile()->IsOn("CMAKE_TESTING_ENABLED")) {
+      return;
+    }
+    bool const filterConfigs =
+      !lg->GetMakefile()
+         ->GetGeneratorConfigs(cmMakefile::OnlyMultiConfig)
+         .empty();
+    for (std::string const& config : lg->GetMakefile()->GetGeneratorConfigs(
+           cmMakefile::IncludeEmptyConfig)) {
+      if (filterConfigs && !this->GeneratesForConfig(config)) {
+        continue;
+      }
+      cmTestGenerator::BuildDependencies& deps =
+        this->BuildDependenciesByConfig[config];
+      if (!cmTestGenerator::EvaluateBuildDependencies(
+            lg, config, this->Backtrace, "discover_tests", this->Args.Command,
+            this->Args.BuildDepends, deps, lg->GetMakefile())) {
+        deps = {};
+        continue;
+      }
+      for (cmGeneratorTarget* target : deps.Targets) {
+        lg->AddDirectoryTestPrepDependency(config,
+                                           { target->GetName(), target });
+      }
+      for (cmTestGenerator::BuildDependencies::FileDependency const& file :
+           deps.Files) {
+        lg->AddDirectoryTestPrepDependency(
+          config, { file.Path, nullptr, file.Owner, file.Generated });
+      }
+    }
+  }
+
 private:
   void GenerateProperties(std::ostream& os, Indent indent,
                           std::vector<std::string> const& props,
@@ -60,6 +99,10 @@ private:
     // Set up generator expression evaluation context.
     cmGeneratorExpression ge(*this->LG->GetMakefile()->GetCMakeInstance(),
                              this->Backtrace);
+
+    std::vector<std::string> const buildDepends =
+      this->LG->GetGlobalGenerator()->GetTestBuildDependencyPaths(
+        config, this->BuildDependenciesByConfig.at(config));
 
     auto const in = indent.Next();
     os << indent << "discover_tests(COMMAND ";
@@ -85,11 +128,19 @@ private:
                              ge);
     os << '\n' << in.Next();
     this->GenerateBacktrace(os, this->Backtrace);
+    if (!buildDepends.empty()) {
+      os << '\n' << in << "BUILD_DEPENDS";
+      for (std::string const& dep : buildDepends) {
+        os << ' ' << Quote(dep);
+      }
+    }
     os << '\n' << in << ")\n";
   }
 
   Arguments Args;
   cmListFileBacktrace Backtrace;
+  std::map<std::string, cmTestGenerator::BuildDependencies>
+    BuildDependenciesByConfig;
 };
 
 bool SetsFixtureRepeatMode(std::vector<std::string> const& properties)

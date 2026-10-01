@@ -117,6 +117,8 @@ directory the test is created in.
     ``COMMAND`` also enable the :option:`--out-of-date <ctest --out-of-date>`
     behavior of :manual:`ctest(1)`.
 
+    Tests with missing build dependencies will not be run.
+
 ``COMMAND_EXPAND_LISTS``
   .. versionadded:: 3.16
 

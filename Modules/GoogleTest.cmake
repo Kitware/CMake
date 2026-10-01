@@ -740,6 +740,10 @@ function(gtest_discover_tests target)
   )
   file(GENERATE OUTPUT "${discovery_file}" CONTENT "${discovery_content}")
 
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_TEST_BUILD_DEPENDS
+    "${target}"
+  )
+
   set(ctest_include_content)
   if(arg_DISCOVERY_MODE STREQUAL "POST_BUILD")
     # Make sure that TEST_LAUNCHER and CROSSCOMPILING_EMULATOR appear on the

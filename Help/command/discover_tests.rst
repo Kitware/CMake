@@ -16,6 +16,7 @@ Register tests with names and properties discovered at test time by
     TEST_NAME <replacement>
     TEST_ARGS <replacement>...
     [TEST_PROPERTIES <key> <replacement> [<key> <replacement>]...]
+    [BUILD_DEPENDS <dependencies>...]
   )
 
 This command configures test discovery rather than defining a single test at
@@ -93,6 +94,25 @@ the provided regular expression and replacement strings.
     If the properties make the discovered tests part of a test fixture, and
     they do not set :prop_test:`FIXTURE_REPEAT_MODE`, policy :policy:`CMP0224`
     determines the behavior when the :ctest-option:`--repeat` option is used.
+
+``BUILD_DEPENDS``
+  Specify a list of targets or files that must be built before the test
+  discovery can run.
+
+  When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled with the
+  :ref:`Ninja Generators`, :generator:`FASTBuild`, or :ref:`Makefile
+  Generators`, these dependencies are built by the ``test_prep/all`` target.
+  If ``COMMAND`` names an executable target created by
+  :command:`add_executable`, that target is also added automatically.
+
+  Individual ``test_prep/<test-name>`` targets are not created for discovered
+  tests because their names are not known at generation time.
+
+  Build dependencies added by this argument, and an executable target
+  named by ``COMMAND``, also enable the
+  :ctest-option:`--out-of-date` behavior of :manual:`ctest(1)`.
+
+  Tests with missing build dependencies will not be run.
 
 CTest executes the discovery step to obtain the list of tests and then runs
 each discovered test using the command-line produced by ``COMMAND`` together

@@ -2,7 +2,7 @@ project(TestDependency C)
 
 enable_testing()
 
-add_executable(TestDependencyExe main.c)
+add_executable(TestDependencyExe ../add_test/main.c)
 add_custom_command(TARGET TestDependencyExe POST_BUILD
   COMMAND
     "${CMAKE_COMMAND}" -E touch
@@ -10,7 +10,7 @@ add_custom_command(TARGET TestDependencyExe POST_BUILD
   BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/TestDependencyExe-built.txt")
 
-add_executable(TestDependencyGenex main.c)
+add_executable(TestDependencyGenex ../add_test/main.c)
 add_custom_command(TARGET TestDependencyGenex POST_BUILD
   COMMAND
     "${CMAKE_COMMAND}" -E touch

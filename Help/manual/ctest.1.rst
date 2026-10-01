@@ -616,13 +616,16 @@ The options for running tests are:
  respect to their recorded build dependencies. Build dependencies include
  executables and targets in generator expressions as part of the test
  ``COMMAND``, as well as the outputs of targets or files added as explicit
- dependencies with the ``BUILD_DEPENDS`` argument of :command:`add_test`.
+ dependencies with the ``BUILD_DEPENDS`` argument of :command:`add_test` or
+ :command:`discover_tests`. Tests discovered by
+ :command:`gtest_discover_tests` also record their test executable as a build
+ dependency.
 
  A test is selected to run when any of its recorded build dependencies are
- newer than the test's last-run timestamp, or when the test has not been
- run before. Tests without any known build dependencies, including any tests
- not added by the :command:`add_test` command, are excluded when this argument
- is provided.
+ newer than the test's last-run timestamp, when any dependency is missing, or
+ when the test has not been run before. Selected tests with missing build
+ dependencies are reported as ``Not Run``. Tests without any known build
+ dependencies are excluded when this argument is provided.
 
 View Help
 =========

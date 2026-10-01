@@ -796,6 +796,9 @@ public:
                                   cmXcFrameworkPlist const& content);
 
 protected:
+  virtual std::string GetTestBuildDependencyPath(
+    cmGeneratorTarget const* target, std::string const& config) const;
+
   /** Get all targets produced under the given root, plus the transitive
       closure of targets on which they depend, possibly from other dirs.  */
   TargetDependSet GetTargetsForProject(

@@ -71,6 +71,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
+#include "cmTestGenerator.h"
 #include "cmUnreachable.h"
 #include "cmValue.h"
 #include "cmVersion.h"
@@ -1870,6 +1871,14 @@ bool cmGlobalGenerator::Compute()
     localGen->ComputeTargetManifest();
   }
 
+  // Register test preparation dependencies after custom-command outputs are
+  // known, but before generators compute their build graphs.
+  for (auto const& localGen : this->LocalGenerators) {
+    for (auto const& tester : localGen->GetMakefile()->GetTestGenerators()) {
+      tester->Compute(localGen.get());
+    }
+  }
+
   // Compute the inter-target dependencies.
   if (!this->ComputeTargetDepends()) {
     return false;
@@ -3251,9 +3260,15 @@ std::vector<std::string> cmGlobalGenerator::GetTestBuildDependencyPaths(
       }
       continue;
     }
-    uniqueDeps.insert(target->GetFullPath(config));
+    uniqueDeps.insert(this->GetTestBuildDependencyPath(target, config));
   }
   return { uniqueDeps.begin(), uniqueDeps.end() };
+}
+
+std::string cmGlobalGenerator::GetTestBuildDependencyPath(
+  cmGeneratorTarget const* target, std::string const& config) const
+{
+  return target->GetFullPath(config);
 }
 
 // If the file has no extension it's either a raw executable or might

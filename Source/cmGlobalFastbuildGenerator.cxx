@@ -1623,6 +1623,22 @@ void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
         testPrepTarget.Dependencies.emplace(depFile.Path);
       }
     }
+    cmLocalGenerator::DirectoryTestPrepTarget directoryTarget;
+    if (localGen->GetDirectoryTestPrepTarget(
+          directoryTarget,
+          localGen->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"))) {
+      TestPrepTarget& testPrepTarget = testPrepTargets[directoryTarget.Name];
+      testPrepTarget.Comment = std::move(directoryTarget.Comment);
+
+      for (cmLocalGenerator::DirectoryTestPrepDependency const& dep :
+           directoryTarget.Dependencies) {
+        if (dep.Target) {
+          testPrepTarget.Dependencies.emplace(dep.Target->GetName());
+        } else {
+          testPrepTarget.Dependencies.emplace(dep.Raw);
+        }
+      }
+    }
   }
 
   FastbuildAliasNode allAliasNode;

@@ -191,6 +191,7 @@ public:
     std::map<std::string, std::string> CustomProperties;
     std::unordered_map<std::string, std::string> RawProperties;
     bool IsInBasedOnREOptions = true;
+    bool IsOutOfDate = true;
     bool WillFail = false;
     std::string WillFailRaw;
     bool Disabled = false;

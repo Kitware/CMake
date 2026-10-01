@@ -243,6 +243,53 @@ cmLocalGenerator::CreateRulePlaceholderExpander(cmBuildStep buildStep) const
       : cmRulePlaceholderExpander::UseShortPaths::No);
 }
 
+void cmLocalGenerator::AddDirectoryTestPrepDependency(
+  std::string const& config, DirectoryTestPrepDependency dependency)
+{
+  this->DiscoveryTestPrepDependencies[config].push_back(std::move(dependency));
+}
+
+bool cmLocalGenerator::GetDirectoryTestPrepTarget(DirectoryTestPrepTarget& out,
+                                                  std::string const& config)
+{
+  cmValue const directoryTestPrepDependencies =
+    this->GetStateSnapshot().GetDirectory().GetProperty(
+      "CMAKE_TEST_BUILD_DEPENDS");
+  std::string const directoryId =
+    cmCryptoHash(cmCryptoHash::AlgoMD5)
+      .HashString(this->GetCurrentBinaryDirectory())
+      .substr(0, 8);
+  out.Name = cmStrCat("test_prep/directory_", directoryId);
+  out.Comment =
+    cmStrCat("Build extra dependencies for test prep in directory ",
+             this->GetCurrentBinaryDirectory());
+  out.Dependencies.clear();
+  auto const discovery = this->DiscoveryTestPrepDependencies.find(config);
+  if (discovery != this->DiscoveryTestPrepDependencies.end()) {
+    out.Dependencies = discovery->second;
+  }
+
+  cmList buildDepends;
+  if (directoryTestPrepDependencies) {
+    buildDepends.assign(
+      cmList{ *directoryTestPrepDependencies, cmList::EmptyElements::Yes });
+  }
+  cmTestGenerator::BuildDependencies deps;
+  cmTestGenerator::EvaluateBuildDependencies(
+    this, config, this->Makefile->GetBacktrace(), "directory_test_prep", {},
+    std::vector<std::string>(buildDepends.begin(), buildDepends.end()), deps,
+    this->Makefile);
+  for (cmGeneratorTarget* target : deps.Targets) {
+    out.Dependencies.push_back({ target->GetName(), target });
+  }
+  for (cmTestGenerator::BuildDependencies::FileDependency const& file :
+       deps.Files) {
+    out.Dependencies.push_back(
+      { file.Path, nullptr, file.Owner, file.Generated });
+  }
+  return !out.Dependencies.empty();
+}
+
 cmLocalGenerator::~cmLocalGenerator() = default;
 
 void cmLocalGenerator::IssueMessage(MessageType type, std::string const& text,
@@ -485,7 +532,6 @@ void cmLocalGenerator::GenerateTestFiles()
 
   // Ask each test generator to write its code.
   for (auto const& tester : this->Makefile->GetTestGenerators()) {
-    tester->Compute(this);
     tester->Generate(fout, config, configurationTypes);
   }
   using vec_t = std::vector<cmStateSnapshot>;

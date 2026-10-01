@@ -161,10 +161,15 @@ bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
     }
 
     auto testProperties = std::vector<std::string>{ testName, "PROPERTIES" };
-    testProperties.reserve(2 + args.TestProperties.size());
+    testProperties.reserve(2 + args.TestProperties.size() +
+                           (args.BuildDepends.empty() ? 0 : 2));
     for (std::size_t i = 0; i < args.TestProperties.size(); i += 2) {
       testProperties.push_back(args.TestProperties[i]);
       testProperties.push_back(replace(args.TestProperties[i + 1]));
+    }
+    if (!args.BuildDepends.empty()) {
+      testProperties.push_back("_CMAKE_TEST_BUILD_DEPENDS");
+      testProperties.push_back(cmList::to_string(args.BuildDepends));
     }
     if (!handler->SetTestsProperties(testProperties)) {
       return false;

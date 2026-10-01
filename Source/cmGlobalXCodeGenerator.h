@@ -143,6 +143,9 @@ public:
   };
 
 protected:
+  std::string GetTestBuildDependencyPath(
+    cmGeneratorTarget const* target, std::string const& config) const override;
+
   void AddExtraIDETargets() override;
   void Generate() override;
 
