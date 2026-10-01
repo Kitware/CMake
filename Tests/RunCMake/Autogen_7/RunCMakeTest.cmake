@@ -38,6 +38,13 @@ if (DEFINED with_qt_version)
     endif ()
   endif ()
 
+  # mocs_compilation.cpp is scanned for C++ module dependencies only when
+  # the target's own sources are.  A target that opts out must configure on
+  # any toolchain and generator, including those that cannot scan at all.
+  if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+    run_cmake(CxxModulesScanOptOut)
+  endif ()
+
   # AUTOMOC processes C++ module units only with Qt 6.13 or newer, whose moc
   # supports them.
   set(automoc_modules_supported 0)
@@ -58,6 +65,22 @@ if (DEFINED with_qt_version)
       run_cmake_with_options(CxxModules ${RunCMake_TEST_OPTIONS})
       set(RunCMake_TEST_NO_CLEAN 1)
       run_cmake_command(CxxModules-build ${CMAKE_COMMAND} --build . --config Debug)
+    endblock()
+  endif ()
+
+  # A header that imports a module is moc'd into mocs_compilation.cpp, which
+  # includes the header and therefore the import.  That aggregated
+  # translation unit has to be scanned for module dependencies like any
+  # other, or the compiler has no module map and reports the module as not
+  # found.  A successful build IS the assertion.  This needs no particular
+  # Qt version: the module unit here carries no meta-object macro.
+  if (cxx_modules_supported)
+    block()
+      set(RunCMake_TEST_SOURCE_DIR "${RunCMake_SOURCE_DIR}/cxx_modules_header_import")
+      set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/CxxModulesHeaderImport-build")
+      run_cmake_with_options(CxxModulesHeaderImport ${RunCMake_TEST_OPTIONS})
+      set(RunCMake_TEST_NO_CLEAN 1)
+      run_cmake_command(CxxModulesHeaderImport-build ${CMAKE_COMMAND} --build . --config Debug)
     endblock()
   endif ()
 

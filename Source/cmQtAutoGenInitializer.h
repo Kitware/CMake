@@ -125,13 +125,23 @@ private:
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
 
-  cmSourceFile* RegisterGeneratedSource(std::string const& filename,
-                                        bool scanForModules = false);
+  /** Whether a generated source is scanned for C++ module dependencies.  */
+  enum class ModuleScan
+  {
+    Never,      // It imports nothing.
+    Always,     // It is a unit of a module.
+    LikeTarget, // It may import whatever the target's own sources import.
+  };
+
+  cmSourceFile* RegisterGeneratedSource(
+    std::string const& filename, ModuleScan moduleScan = ModuleScan::Never);
   cmSourceFile* AddGeneratedSource(std::string const& filename,
                                    GenVarsT const& genVars,
-                                   bool prepend = false);
+                                   bool prepend = false,
+                                   ModuleScan moduleScan = ModuleScan::Never);
   void AddGeneratedSource(ConfigString const& filename,
-                          GenVarsT const& genVars, bool prepend = false);
+                          GenVarsT const& genVars, bool prepend = false,
+                          ModuleScan moduleScan = ModuleScan::Never);
   void AddToSourceGroup(std::string const& fileName,
                         cm::string_view genNameUpper);
   void AddCMakeProcessToCommandLines(std::string const& infoFile,
