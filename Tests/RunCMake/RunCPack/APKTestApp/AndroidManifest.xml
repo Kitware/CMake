@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:versionCode="5">
+  <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34"/>
+  <uses-permission android:name="android.permission.READ_PHONE_STATE"
+      tools:node="remove"/>
+  <application android:label="@string/app_name" android:hasCode="true">
+    <meta-data android:name="self" android:value="${applicationId}.self"/>
+    <meta-data android:name="flavor" android:value="${flavor}"/>
+    <provider android:name="androidx.startup.InitializationProvider"
+        android:authorities="${applicationId}.androidx-startup"
+        tools:node="merge">
+      <meta-data android:name="com.example.lib2.RemovedInitializer"
+          tools:node="remove"/>
+    </provider>
+  </application>
+</manifest>

@@ -1,0 +1,13 @@
+CPack: Create package using APK
+CPack: Install projects(
+CPack: - Run preinstall target for: CPackAPKGenerator)?
+CPack: - Install project: CPackAPKGenerator \[Release\]
+CPack: Create package
+-- CPack APK: Resolving Maven dependencies: com\.example\.maven:app-dep:1\.0
+(-- CPack APK: Downloaded file://[^
+]*/maven-repo/com/example/maven/[^
+]*
+)+(-- CPack APK: Generating a debug keystore at '[^
+]*'\.
+)?CPack: - package: [^
+]*/APKMaven-build/APKGeneratorTest-1\.2\.3\.apk generated\.

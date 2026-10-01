@@ -1276,6 +1276,8 @@ endif()
 #
 add_library(
   CPackLib
+  CPack/cmCPackAPKGenerator.cxx
+  CPack/cmCPackAPKGenerator.h
   CPack/cmCPackArchiveGenerator.cxx
   CPack/cmCPackComponentGroup.cxx
   CPack/cmCPackDebGenerator.cxx

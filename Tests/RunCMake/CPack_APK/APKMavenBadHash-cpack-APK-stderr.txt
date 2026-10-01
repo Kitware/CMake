@@ -1,0 +1,11 @@
+^CMake Error at [^
+]*/CPackAPKMaven\.cmake:[0-9]+ \(message\):
+  CPack APK: The file downloaded from
+
+    file://[^
+]*/maven-repo/com/example/maven/constrained/2\.0/constrained-2\.0\.jar
+
+  does not have the SHA1 hash the repository publishes\.
+
+    Expected: 0000000000000000000000000000000000000000
+    Actual:   [0-9a-f]+
