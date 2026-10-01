@@ -5,8 +5,8 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <set>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -400,9 +400,8 @@ bool cmExportInstallCMakeConfigGenerator::
   cmGeneratedFileStream os(fileName, true);
   if (!os) {
     std::string se = cmSystemTools::GetLastSystemError();
-    std::ostringstream e;
-    e << "cannot write to file \"" << fileName << "\": " << se;
-    cmSystemTools::Error(e.str());
+    cmSystemTools::Error(
+      cmStrCat("cannot write to file \"", fileName, "\": ", se));
     return false;
   }
   os.SetCopyIfDifferent(true);

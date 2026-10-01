@@ -10,6 +10,7 @@
 #include <cm3p/expat.h>
 
 #include "cmCPackGenerator.h"
+#include "cmStringAlgorithms.h"
 
 cmWIXPatchNode::Type cmWIXPatchText::type()
 {
@@ -79,9 +80,8 @@ void cmWIXPatchParser::StartFragment(char const** attributes)
 
     if (key == "Id"_s) {
       if (Fragments.find(value) != Fragments.end()) {
-        std::ostringstream tmp;
-        tmp << "Invalid reuse of 'CPackWixFragment' 'Id': " << value;
-        ReportValidationError(tmp.str());
+        ReportValidationError(
+          cmStrCat("Invalid reuse of 'CPackWixFragment' 'Id': ", value));
       }
 
       new_element = &Fragments[value];

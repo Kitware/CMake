@@ -3,7 +3,6 @@
 
 #include "cmBinUtilsMacOSMachOLinker.h"
 
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -45,9 +44,8 @@ bool cmBinUtilsMacOSMachOLinker::Prepare()
       cm::make_unique<cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool>(
         this->Archive);
   } else {
-    std::ostringstream e;
-    e << "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: " << tool;
-    this->SetError(e.str());
+    this->SetError(cmStrCat(
+      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: ", tool));
     return false;
   }
 

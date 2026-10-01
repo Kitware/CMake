@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <sstream>
 #include <string>
 
 #include <cm/vector>
@@ -32,10 +31,10 @@ bool cmCTestUploadCommand::ExecuteUpload(UploadArguments& args,
 
   cm::erase_if(args.Files, [&mf](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {
-      std::ostringstream e;
-      e << "File \"" << arg << "\" does not exist. Cannot submit "
-        << "a non-existent file.";
-      mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf.IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("File \"", arg,
+                 "\" does not exist. Cannot submit a non-existent file."));
       return true;
     }
     return false;

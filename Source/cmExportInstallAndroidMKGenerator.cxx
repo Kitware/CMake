@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
-#include <sstream>
+#include <ostream>
 #include <vector>
 
 #include "cmExportSet.h"
@@ -28,12 +28,10 @@ cmExportInstallAndroidMKGenerator::cmExportInstallAndroidMKGenerator(
 void cmExportInstallAndroidMKGenerator::ReportDuplicateTarget(
   std::string const& targetName) const
 {
-  std::ostringstream e;
-  e << "install(EXPORT_ANDROID_MK \"" << this->GetExportSet()->GetName()
-    << "\" ...) "
-    << "includes target \"" << targetName
-    << "\" more than once in the export set.";
-  this->ReportError(e.str());
+  this->ReportError(cmStrCat("install(EXPORT_ANDROID_MK \"",
+                             this->GetExportSet()->GetName(),
+                             "\" ...) includes target \"", targetName,
+                             "\" more than once in the export set."));
 }
 
 bool cmExportInstallAndroidMKGenerator::GenerateMainFile(std::ostream& os)

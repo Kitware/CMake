@@ -11,6 +11,7 @@
 
 #include "cmCMakeToWixPath.h"
 #include "cmInstalledFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWIXAccessControlList.h"
 
@@ -45,17 +46,17 @@ void cmWIXFilesSourceWriter::EmitShortcut(std::string const& id,
                                           std::string const& shortcutPrefix,
                                           size_t shortcutIndex)
 {
-  std::ostringstream shortcutId;
-  shortcutId << shortcutPrefix << id;
-
+  std::string shortcutId;
   if (shortcutIndex > 0) {
-    shortcutId << "_" << shortcutIndex;
+    shortcutId = cmStrCat(shortcutPrefix, id, '_', shortcutIndex);
+  } else {
+    shortcutId = cmStrCat(shortcutPrefix, id);
   }
 
   std::string fileId = std::string("CM_F") + id;
 
   BeginElement("Shortcut");
-  AddAttribute("Id", shortcutId.str());
+  AddAttribute("Id", shortcutId);
   AddAttribute("Name", shortcut.label);
   std::string target = "[#" + fileId + "]";
   AddAttribute("Target", target);

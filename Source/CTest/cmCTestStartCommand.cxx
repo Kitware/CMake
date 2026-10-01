@@ -3,7 +3,7 @@
 #include "cmCTestStartCommand.h"
 
 #include <cstddef>
-#include <sstream>
+#include <ios>
 #include <vector>
 
 #include "cmCTest.h"
@@ -35,9 +35,8 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
       cnt++;
       if (cnt >= args.size() || args[cnt] == "APPEND" ||
           args[cnt] == "QUIET") {
-        std::ostringstream e;
-        e << args[cnt - 1] << " argument missing group name";
-        status.SetError(e.str());
+        status.SetError(
+          cmStrCat(args[cnt - 1], " argument missing group name"));
         return false;
       }
       this->CTest->SetSpecificGroup(args[cnt].c_str());
@@ -134,12 +133,13 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
   if (!cmSystemTools::FileIsDirectory(sourceDir)) {
-    std::ostringstream e;
-    e << "given source path\n"
-      << "  " << sourceDir << "\n"
-      << "which is not an existing directory.  "
-      << "Set CTEST_CHECKOUT_COMMAND to a command line to create it.";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("given source path\n"
+               "  ",
+               sourceDir,
+               "\n"
+               "which is not an existing directory.  "
+               "Set CTEST_CHECKOUT_COMMAND to a command line to create it."));
     return false;
   }
 

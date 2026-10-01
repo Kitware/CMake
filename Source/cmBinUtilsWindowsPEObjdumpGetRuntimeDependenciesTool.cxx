@@ -3,12 +3,13 @@
 
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
 
-#include <sstream>
+#include <istream> // IWYU pragma: keep
 #include <vector>
 
 #include <cmsys/RegularExpression.hxx>
 
 #include "cmRuntimeDependencyArchive.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
@@ -37,9 +38,7 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
 
   auto process = builder.Start();
   if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
-    std::ostringstream e;
-    e << "Failed to start objdump process for:\n  " << file;
-    this->SetError(e.str());
+    this->SetError(cmStrCat("Failed to start objdump process for:\n  ", file));
     return false;
   }
 
@@ -55,15 +54,12 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   }
 
   if (!process.Wait()) {
-    std::ostringstream e;
-    e << "Failed to wait on objdump process for:\n  " << file;
-    this->SetError(e.str());
+    this->SetError(
+      cmStrCat("Failed to wait on objdump process for:\n  ", file));
     return false;
   }
   if (process.GetStatus(0).ExitStatus != 0) {
-    std::ostringstream e;
-    e << "Failed to run objdump on:\n  " << file;
-    this->SetError(e.str());
+    this->SetError(cmStrCat("Failed to run objdump on:\n  ", file));
     return false;
   }
 

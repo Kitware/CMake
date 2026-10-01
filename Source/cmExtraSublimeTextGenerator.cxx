@@ -4,8 +4,8 @@
 
 #include <cstring>
 #include <memory>
+#include <ostream>
 #include <set>
-#include <sstream>
 #include <utility>
 
 #include "cmsys/RegularExpression.hxx"
@@ -156,11 +156,11 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
 
         fout << "\n\t\t\t\"" << varName << "\":\"" << varValue << "\"";
       } else {
-        std::ostringstream e;
-        e << "Could not parse Env Vars specified in "
-             "\"CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS\""
-          << ", corrupted string " << t;
-        mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        mf->IssueMessage(MessageType::FATAL_ERROR,
+                         cmStrCat("Could not parse Env Vars specified in "
+                                  "\"CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS\""
+                                  ", corrupted string ",
+                                  t));
       }
     }
     fout << "\n\t\t}";

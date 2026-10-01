@@ -3,12 +3,13 @@
 
 #include "cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h"
 
-#include <sstream>
+#include <istream>
 #include <vector>
 
 #include <cmsys/RegularExpression.hxx>
 
 #include "cmRuntimeDependencyArchive.h"
+#include "cmStringAlgorithms.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
 
@@ -37,9 +38,7 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
 
   auto process = builder.Start();
   if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
-    std::ostringstream e;
-    e << "Failed to start otool process for:\n  " << file;
-    this->SetError(e.str());
+    this->SetError(cmStrCat("Failed to start otool process for:\n  ", file));
     return false;
   }
 
@@ -86,15 +85,11 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
   }
 
   if (!process.Wait()) {
-    std::ostringstream e;
-    e << "Failed to wait on otool process for:\n  " << file;
-    this->SetError(e.str());
+    this->SetError(cmStrCat("Failed to wait on otool process for:\n  ", file));
     return false;
   }
   if (process.GetStatus(0).ExitStatus != 0) {
-    std::ostringstream e;
-    e << "Failed to run otool on:\n  " << file;
-    this->SetError(e.str());
+    this->SetError(cmStrCat("Failed to run otool on:\n  ", file));
     return false;
   }
 

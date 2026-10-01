@@ -8,7 +8,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -606,21 +605,20 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
     return true;
   }
 
-  std::ostringstream e;
-  e << "Target \"" << target->GetName() << "\" references target \""
-    << linkedName << "\" ";
-  if (exportInfo.Sets.size() == 1) {
-    e << "that is in an export set which is exported multiple times "
-         "with different namespaces: ";
-  } else {
-    e << "that is in multiple export sets: ";
-  }
-  e << cmJoin(exportInfo.Files, ", ") << ".\n"
-    << "An SBOM cannot attribute a dependency exported in more than one "
-       "export set or with more than one namespace.  Consider "
-       "consolidating the exports of the \""
-    << linkedTarget->GetName() << "\" target to a single export.";
-  target->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  target->Makefile->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Target \"", target->GetName(), "\" references target \"",
+             linkedName, "\" ",
+             exportInfo.Sets.size() == 1
+               ? "that is in an export set which is exported multiple times "
+                 "with different namespaces: "
+               : "that is in multiple export sets: ",
+             cmJoin(exportInfo.Files, ", "),
+             ".\n"
+             "An SBOM cannot attribute a dependency exported in more than one "
+             "export set or with more than one namespace.  Consider "
+             "consolidating the exports of the \"",
+             linkedTarget->GetName(), "\" target to a single export."));
   return false;
 }
 

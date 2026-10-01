@@ -3,7 +3,6 @@
 #include "cmGlobalVisualStudio14Generator.h"
 
 #include <cstring>
-#include <sstream>
 
 #include <cm/vector>
 #include <cmext/string_view>
@@ -126,18 +125,19 @@ bool cmGlobalVisualStudio14Generator::VerifyNoGeneratorPlatformVersion(
   if (!this->GeneratorPlatformVersion) {
     return true;
   }
-  std::ostringstream e;
-  /* clang-format off */
-  e <<
-    "Generator\n"
-    "  " << this->GetName() << "\n"
-    "given platform specification containing a\n"
-    "  version=" << *this->GeneratorPlatformVersion << "\n"
-    "field.  The version field is not supported when targeting\n"
-    "  " << this->SystemName << ' ' << this->SystemVersion << '\n'
-    ;
-  /* clang-format on */
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Generator\n"
+             "  ",
+             this->GetName(),
+             "\n"
+             "given platform specification containing a\n"
+             "  version=",
+             *this->GeneratorPlatformVersion,
+             "\n"
+             "field.  The version field is not supported when targeting\n"
+             "  ",
+             this->SystemName, ' ', this->SystemVersion, '\n'));
   return false;
 }
 

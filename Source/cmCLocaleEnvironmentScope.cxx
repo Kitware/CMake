@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCLocaleEnvironmentScope.h"
 
-#include <sstream>
 #include <utility>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCLocaleEnvironmentScope::cmCLocaleEnvironmentScope()
@@ -37,17 +37,13 @@ void cmCLocaleEnvironmentScope::SetEnv(std::string const& key,
   if (value.empty()) {
     cmSystemTools::UnsetEnv(key.c_str());
   } else {
-    std::ostringstream tmp;
-    tmp << key << "=" << value;
-    cmSystemTools::PutEnv(tmp.str());
+    cmSystemTools::PutEnv(cmStrCat(key, '=', value));
   }
 }
 
 cmCLocaleEnvironmentScope::~cmCLocaleEnvironmentScope()
 {
   for (auto const& envb : this->EnvironmentBackup) {
-    std::ostringstream tmp;
-    tmp << envb.first << "=" << envb.second;
-    cmSystemTools::PutEnv(tmp.str());
+    cmSystemTools::PutEnv(cmStrCat(envb.first, '=', envb.second));
   }
 }

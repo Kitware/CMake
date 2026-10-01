@@ -4,6 +4,8 @@
 
 #include <cmext/string_view>
 
+#include "cmStringAlgorithms.h"
+
 cmWIXDirectoriesSourceWriter::cmWIXDirectoriesSourceWriter(
   unsigned long wixVersion, cmCPackLog* logger, std::string const& filename,
   GuidType componentGuidType, cmWIXInstallScope installScope,
@@ -126,9 +128,7 @@ cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
     if (i == installRoot.size() - 1) {
       AddAttribute("Id", "INSTALL_ROOT");
     } else {
-      std::ostringstream tmp;
-      tmp << "INSTALL_PREFIX_" << i;
-      AddAttribute("Id", tmp.str());
+      AddAttribute("Id", cmStrCat("INSTALL_PREFIX_", i));
     }
 
     AddAttribute("Name", installRoot[i]);

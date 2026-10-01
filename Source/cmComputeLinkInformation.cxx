@@ -3,7 +3,6 @@
 #include "cmComputeLinkInformation.h"
 
 #include <algorithm>
-#include <sstream>
 #include <utility>
 
 #include <cm/memory>
@@ -1897,10 +1896,9 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
     entry.Feature == DEFAULT ? cmGlobalGenerator::FrameworkFormat::Relaxed
                              : cmGlobalGenerator::FrameworkFormat::Extended);
   if (!fwDescriptor) {
-    std::ostringstream e;
-    e << "Could not parse framework path \"" << item << "\" linked by target "
-      << this->Target->GetName() << '.';
-    cmSystemTools::Error(e.str());
+    cmSystemTools::Error(cmStrCat("Could not parse framework path \"", item,
+                                  "\" linked by target ",
+                                  this->Target->GetName(), '.'));
     return;
   }
 

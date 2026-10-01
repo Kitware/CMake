@@ -3,11 +3,11 @@
 
 #include "cmStringReplaceHelper.h"
 
-#include <sstream>
 #include <utility>
 
 #include "cmMakefile.h"
 #include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
 
 cmStringReplaceHelper::cmStringReplaceHelper(std::string const& regex,
                                              std::string replace_expr,
@@ -53,11 +53,10 @@ bool cmStringReplaceHelper::Replace(cm::string_view input, std::string& output)
         // Replace with part of the match.
         auto n = replacement.Number;
         if (n > re.num_groups()) {
-          std::ostringstream error;
-          error << "replace expression \"" << this->ReplaceExpression
-                << "\" contains an out-of-range escape for regex \""
-                << this->RegExString << "\"";
-          this->ErrorString = error.str();
+          this->ErrorString =
+            cmStrCat("replace expression \"", this->ReplaceExpression,
+                     "\" contains an out-of-range escape for regex \"",
+                     this->RegExString, '"');
           return false;
         }
         output += re.match(n);
@@ -111,10 +110,9 @@ void cmStringReplaceHelper::ParseReplaceExpression()
         this->Replacements.emplace_back("\\");
       } else {
         this->ValidReplaceExpression = false;
-        std::ostringstream error;
-        error << "Unknown escape \"" << this->ReplaceExpression.substr(r, 2)
-              << "\" in replace-expression";
-        this->ErrorString = error.str();
+        this->ErrorString =
+          cmStrCat("Unknown escape \"", this->ReplaceExpression.substr(r, 2),
+                   "\" in replace-expression");
         return;
       }
       r += 2;

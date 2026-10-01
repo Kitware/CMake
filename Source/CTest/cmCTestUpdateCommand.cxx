@@ -3,7 +3,7 @@
 #include "cmCTestUpdateCommand.h"
 
 #include <chrono>
-#include <sstream>
+#include <iosfwd>
 #include <string>
 
 #include <cm/memory>
@@ -187,14 +187,9 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
     }
 
     if (updateCommand.empty()) {
-      std::ostringstream e;
-      e << "called with no update command specified. "
-           "Please set CTEST_UPDATE_COMMAND";
-      if (key) {
-        e << " or " << key;
-      }
-      e << '.';
-      status.SetError(e.str());
+      status.SetError(cmStrCat("called with no update command specified. "
+                               "Please set CTEST_UPDATE_COMMAND",
+                               key ? " or "_s : ""_s, key ? key : "", '.'));
       return false;
     }
   }
