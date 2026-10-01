@@ -1,0 +1,23 @@
+CMP0226
+-------
+
+.. versionadded:: 4.5
+
+Apply Swift module name to targets when using the :generator:`Xcode` generator.
+
+This policy ensures that the module name specified in
+:prop_tgt:`Swift_MODULE_NAME` is applied to the target when using the
+:generator:`Xcode` generator.
+
+The ``OLD`` behavior for this policy builds the Swift target with the target
+name as the module name. Setting :prop_tgt:`Swift_MODULE_NAME` has no effect on
+the compilation of targets.
+
+The ``NEW`` behavior applies custom Swift module names specified with the
+:prop_tgt:`Swift_MODULE_NAME` target property, if one is specified.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.5
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst
