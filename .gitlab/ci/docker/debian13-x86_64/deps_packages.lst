@@ -107,6 +107,7 @@ qtbase5-dev qtbase5-dev-tools
 rbenv ruby-build
 ruby ruby-dev
 swig
+tcl-dev tk-dev
 unixodbc-dev
 
 # Packages needed to test ironpython.

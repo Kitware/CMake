@@ -139,6 +139,8 @@ SDL-devel
 sqlite-devel
 swig
 systemd-devel
+tcl-devel
+tk-devel
 unixODBC-devel
 wxGTK-devel
 xalan-c-devel
