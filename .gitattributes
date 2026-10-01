@@ -51,6 +51,7 @@ coverage.xml.in  tab-indent
 *.make           tab-indent
 .hooks-config    tab-indent
 
+*.obj            -text
 *.pfx            -text
 *.png            -text
 *.png.in         -text
