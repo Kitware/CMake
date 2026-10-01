@@ -537,7 +537,8 @@ static void uv__spawn_init_posix_spawn(void) {
 #else
 #if !defined(__linux__) && !defined(_AIX) && !defined(__PASE__)
   posix_spawn_works = 1;
-#elif !defined(__ANDROID__)
+#elif !defined(__ANDROID__) && (!defined(__GLIBC__) || \
+   ((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 24))))
   pid_t pid;
   int status;
 
