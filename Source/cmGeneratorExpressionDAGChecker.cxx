@@ -159,7 +159,8 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingCompileExpression() const
   cm::string_view property(this->Top->Property);
 
   return property == "INCLUDE_DIRECTORIES"_s ||
-    property == "COMPILE_DEFINITIONS"_s || property == "COMPILE_OPTIONS"_s;
+    property == "COMPILE_DEFINITIONS"_s || property == "COMPILE_OPTIONS"_s ||
+    property == "COMPILE_WRAPPERS"_s;
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingSources() const
@@ -174,7 +175,7 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkExpression() const
 
   return property == "LINK_DIRECTORIES"_s || property == "LINK_OPTIONS"_s ||
     property == "LINK_DEPENDS"_s || property == "LINK_LIBRARY_OVERRIDE"_s ||
-    property == "LINKER_TYPE"_s;
+    property == "LINKER_TYPE"_s || property == "LINK_WRAPPERS"_s;
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkOptionsExpression() const

@@ -10,8 +10,12 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmValue.h"
 
+template <typename T>
+class BT;
 class cmGeneratorTarget;
 class cmGlobalCommonGenerator;
 class cmLocalCommonGenerator;
@@ -97,6 +101,11 @@ protected:
   void ComputeRustFlagsForObjects(std::string& linkCrates,
                                   std::string& nativeObjects,
                                   std::vector<std::string> const& objects);
+
+  std::vector<std::string> ParseWrappers(
+    std::vector<BT<std::string>> const& wrappers, cm::string_view prefix,
+    cm::string_view targetPropName, std::string const& targetName,
+    std::string const& config, std::string const& lang) const;
 
 private:
   using ByLanguageMap = std::map<std::string, std::string>;

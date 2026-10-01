@@ -4,7 +4,7 @@ CMake Error at add_executable\.cmake:1 \(add_executable\):
     \$<COMPILE_LANGUAGE>
 
   \$<COMPILE_LANGUAGE:\.\.\.> may only be used to specify include directories,
-  compile definitions, compile options, and to evaluate components of the
-  file\(GENERATE\) command\.
+  compile definitions, compile options, compile wrappers, and to evaluate
+  components of the file\(GENERATE\) command\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

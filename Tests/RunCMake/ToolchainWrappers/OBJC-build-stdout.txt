@@ -1,0 +1,7 @@
+.*-E env CW_OUTER=1 [^
+]*-E env CW_INNER=2 [^
+]*[/\]main\.m['"
+ ].*-E env LW_OUTER=1 [^
+]*-E env LW_INNER=2 [^
+]*[ /\:]main(\.exe)?['"
+ ]

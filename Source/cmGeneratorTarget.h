@@ -675,11 +675,19 @@ private:
   mutable ConfigAndLanguageToBTStrings IncludeDirectoriesCache;
   mutable ConfigAndLanguageToBTStrings CompileOptionsCache;
   mutable ConfigAndLanguageToBTStrings CompileDefinitionsCache;
+  mutable ConfigAndLanguageToBTStrings CompileWrappersCache;
   mutable ConfigAndLanguageToBTStrings PrecompileHeadersCache;
   mutable ConfigAndLanguageToBTStrings LinkOptionsCache;
   mutable ConfigAndLanguageToBTStrings LinkDirectoriesCache;
+  mutable ConfigAndLanguageToBTStrings LinkWrappersCache;
 
 public:
+  /** Get the wrapper entries for this target.  */
+  std::vector<BT<std::string>> GetCompileWrappers(
+    std::string const& config, std::string const& lang) const;
+  std::vector<BT<std::string>> GetLinkWrappers(std::string const& config,
+                                               std::string const& lang) const;
+
   /** Get the include directories for this target.  */
   std::vector<BT<std::string>> GetIncludeDirectories(
     std::string const& config, std::string const& lang) const;
@@ -1385,8 +1393,10 @@ private:
   TargetPropertyEntryVector CompileOptionsEntries;
   TargetPropertyEntryVector CompileFeaturesEntries;
   TargetPropertyEntryVector CompileDefinitionsEntries;
+  TargetPropertyEntryVector CompileWrappersEntries;
   TargetPropertyEntryVector LinkOptionsEntries;
   TargetPropertyEntryVector LinkDirectoriesEntries;
+  TargetPropertyEntryVector LinkWrappersEntries;
   TargetPropertyEntryVector PrecompileHeadersEntries;
   TargetPropertyEntryVector SourceEntries;
   mutable std::set<std::string> LinkImplicitNullProperties;
@@ -1472,11 +1482,13 @@ private:
   mutable bool DebugCompileOptionsDone = false;
   mutable bool DebugCompileFeaturesDone = false;
   mutable bool DebugCompileDefinitionsDone = false;
+  mutable bool DebugCompileWrappersDone = false;
   mutable bool DebugLinkOptionsDone = false;
   mutable bool DebugLinkDirectoriesDone = false;
   mutable bool DebugPrecompileHeadersDone = false;
   mutable bool DebugSourcesDone = false;
   mutable bool UtilityItemsDone = false;
+  mutable bool DebugLinkWrappersDone = false;
   enum class Tribool
   {
     False = 0x0,

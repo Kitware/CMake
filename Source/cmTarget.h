@@ -338,6 +338,9 @@ public:
   cmBTStringRange GetImportedCxxModulesCompileOptionsEntries() const;
 
   cmBTStringRange GetCompileFeaturesEntries() const;
+
+  cmBTStringRange GetCompileWrappersEntries() const;
+
   cmBTStringRange GetImportedCxxModulesCompileFeaturesEntries() const;
 
   cmBTStringRange GetCompileDefinitionsEntries() const;
@@ -347,6 +350,8 @@ public:
   cmBTStringRange GetSourceEntries() const;
 
   cmBTStringRange GetLinkOptionsEntries() const;
+
+  cmBTStringRange GetLinkWrappersEntries() const;
 
   cmBTStringRange GetLinkDirectoriesEntries() const;
 

@@ -1365,8 +1365,11 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   endif()
   set(CompilerLauncher_ARGS ${LauncherCommon_ARGS})
   set(LinkerLauncher_ARGS ${LauncherCommon_ARGS})
+  set(ToolchainWrappers_ARGS ${LauncherCommon_ARGS}
+    -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
   if(DEFINED CMake_TEST_ISPC)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
+    list(APPEND ToolchainWrappers_ARGS -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
   endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
@@ -1374,6 +1377,13 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   add_RunCMake_test(LinkerLauncher)
   set_property(TEST RunCMake.LinkerLauncher APPEND
     PROPERTY LABEL "CUDA" "HIP" "Fortran")
+  # FIXME(#27402,#28110): FASTBuild doesn't currently support this feature, but
+  # it should.
+  if (NOT "${CMAKE_GENERATOR}" STREQUAL "FASTBuild")
+    add_RunCMake_test(ToolchainWrappers)
+    set_property(TEST RunCMake.ToolchainWrappers APPEND
+      PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
+  endif()
 endif()
 
 set(cpack_tests

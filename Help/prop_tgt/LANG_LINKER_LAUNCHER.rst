@@ -38,3 +38,12 @@ created.
 
   The property value may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+The launcher is used only for linking executables, shared libraries, and
+module libraries.  It is not used when creating static libraries.
+
+.. versionadded:: 4.5
+
+  Any wrappers specified by :prop_tgt:`LINK_WRAPPERS` and
+  :prop_tgt:`INTERFACE_LINK_WRAPPERS` are placed before the launcher command
+  line. See :prop_tgt:`LINK_WRAPPERS` for details.

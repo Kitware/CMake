@@ -570,6 +570,12 @@ for compiling a target.
   List of header files to precompile and include when compiling
   sources in the target.
 
+:prop_tgt:`COMPILE_WRAPPERS`
+  .. versionadded:: 4.5
+
+  List of wrapper names to be prepended to the compile commands for a target's
+  sources. See also :prop_gbl:`CMAKE_COMPILE_WRAPPER_<NAME>`.
+
 :prop_tgt:`AUTOMOC_MACRO_NAMES`
   .. versionadded:: 3.10
 
@@ -626,6 +632,13 @@ for linking a target.
   shared library, or module library.  For example, linker scripts specified
   via :prop_tgt:`LINK_OPTIONS` may be listed here such that changing them
   causes binaries to be linked again.
+
+:prop_tgt:`LINK_WRAPPERS`
+  .. versionadded:: 4.5
+
+  List of wrapper names to be prepended to the link command for a target's
+  output artifact, if it is an executable, shared library, or module library.
+  See also :prop_gbl:`CMAKE_LINK_WRAPPER_<NAME>`.
 
 .. _`Target Usage Requirements`:
 
@@ -760,6 +773,13 @@ compiling consumers.
   List of header files to precompile and include when compiling
   sources in the target's consumers.
 
+:prop_tgt:`INTERFACE_COMPILE_WRAPPERS`
+  .. versionadded:: 4.5
+
+  List of wrapper names to be prepended to the compile commands when compiling
+  sources in the target's consumers. See also
+  :prop_gbl:`CMAKE_COMPILE_WRAPPER_<NAME>`.
+
 :prop_tgt:`INTERFACE_AUTOMOC_MACRO_NAMES`
   .. versionadded:: 3.27
 
@@ -808,6 +828,13 @@ linking consumers.
 
   List of files on which linking the target's consumers depends, for
   those that are executables, shared libraries, or module libraries.
+
+:prop_tgt:`INTERFACE_LINK_WRAPPERS`
+  .. versionadded:: 4.5
+
+  List of wrapper names to be prepended to the link commands for a target's
+  consumers' output artifact, for those that are executables, shared libraries,
+  and module libraries. See also :prop_gbl:`CMAKE_LINK_WRAPPER_<NAME>`.
 
 .. _`Custom Transitive Properties`:
 

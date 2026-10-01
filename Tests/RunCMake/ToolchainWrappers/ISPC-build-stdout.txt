@@ -1,0 +1,16 @@
+.*(-E env CW_OUTER=1 [^
+]*-E env CW_INNER=2 [^
+]*[/\]main\.cxx['"
+ ].*-E env CW_OUTER=1 [^
+]*-E env CW_INNER=2 [^
+]*[/\]test\.ispc['"
+ ]|-E env CW_OUTER=1 [^
+]*-E env CW_INNER=2 [^
+]*[/\]test\.ispc['"
+ ].*-E env CW_OUTER=1 [^
+]*-E env CW_INNER=2 [^
+]*[/\]main\.cxx['"
+ ]).*-E env LW_OUTER=1 [^
+]*-E env LW_INNER=2 [^
+]*[ /\:]main(\.exe)?['"
+ ]
