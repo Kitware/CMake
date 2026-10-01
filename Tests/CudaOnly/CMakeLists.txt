@@ -11,6 +11,7 @@ set(CudaOnly.CompileFlags_BUILD_OPTIONS -DCMake_TEST_CUDA_ARCH=${CMake_TEST_CUDA
 add_cuda_test_macro(CudaOnly.CompileFlags CudaOnlyCompileFlags)
 add_cuda_test_macro(CudaOnly.EnableStandard CudaOnlyEnableStandard)
 add_cuda_test_macro(CudaOnly.ExportPTX CudaOnlyExportPTX)
+add_cuda_test_macro(CudaOnly.LinkDirectory CudaOnlyLinkDirectory)
 add_cuda_test_macro(CudaOnly.SharedRuntimePlusToolkit CudaOnlySharedRuntimePlusToolkit)
 add_cuda_test_macro(CudaOnly.StaticRuntimePlusToolkit CudaOnlyStaticRuntimePlusToolkit)
 if(NOT WIN32 AND CMake_TEST_CUDA STREQUAL "NVIDIA")
