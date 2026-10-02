@@ -300,16 +300,16 @@ std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
 std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
   cmMakefile* mf, std::vector<std::string> const& absFiles,
   cmInstallCommandArguments const& args, bool programs,
-  std::string const& destination,
+  std::string const& destination, std::vector<std::string> const& buildDepends,
   cm::optional<std::vector<std::string>> const& configurations = {})
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(mf);
   return cm::make_unique<cmInstallFilesGenerator>(
     absFiles, destination, programs, args.GetPermissions(),
-    SelectConfigurations(args, configurations), args.GetComponent(), message,
-    args.GetExcludeFromAll(), args.GetRename(), args.GetOptional(),
-    cmInstallGenerator::CaptureContext(mf));
+    SelectConfigurations(args, configurations), args.GetComponent(),
+    buildDepends, message, args.GetExcludeFromAll(), args.GetRename(),
+    args.GetOptional(), cmInstallGenerator::CaptureContext(mf));
 }
 
 std::unique_ptr<cmInstallFileSetGenerator> CreateInstallFileSetGenerator(
@@ -865,7 +865,8 @@ bool CreateInstallGeneratorsForTarget(
       if (!artifactsSpecified || !privateHeaderArgs.GetDestination().empty()) {
         privateHeaderGenerator = CreateInstallFilesGenerator(
           helper.Makefile, absFiles, privateHeaderArgs, false,
-          helper.GetIncludeDestination(&privateHeaderArgs), configurations);
+          helper.GetIncludeDestination(&privateHeaderArgs),
+          std::vector<std::string>(), configurations);
         privateHeaderGenerator->SetOwningTarget(target.GetName());
       } else {
         helper.Makefile->IssueDiagnostic(
@@ -889,7 +890,8 @@ bool CreateInstallGeneratorsForTarget(
       if (!artifactsSpecified || !publicHeaderArgs.GetDestination().empty()) {
         publicHeaderGenerator = CreateInstallFilesGenerator(
           helper.Makefile, absFiles, publicHeaderArgs, false,
-          helper.GetIncludeDestination(&publicHeaderArgs), configurations);
+          helper.GetIncludeDestination(&publicHeaderArgs),
+          std::vector<std::string>(), configurations);
         publicHeaderGenerator->SetOwningTarget(target.GetName());
       } else {
         helper.Makefile->IssueDiagnostic(
@@ -913,7 +915,8 @@ bool CreateInstallGeneratorsForTarget(
       if (!resourceArgs.GetDestination().empty()) {
         resourceGenerator = CreateInstallFilesGenerator(
           helper.Makefile, absFiles, resourceArgs, false,
-          resourceArgs.GetDestination(), configurations);
+          resourceArgs.GetDestination(), std::vector<std::string>(),
+          configurations);
         resourceGenerator->SetOwningTarget(target.GetName());
       } else if (!target.IsAppBundleOnApple()) {
         helper.Makefile->IssueDiagnostic(
@@ -1076,6 +1079,7 @@ bool HandleScriptMode(std::vector<std::string> const& args,
 
     std::vector<Script> Scripts;
     cm::optional<std::string> Component;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> BuildDepends;
     bool ExcludeFromAll = false;
     bool AllComponents = false;
   };
@@ -1086,6 +1090,7 @@ bool HandleScriptMode(std::vector<std::string> const& args,
       .Bind("CODE"_s, &Arguments::AddScript)
       .Bind("COMPONENT"_s, &Arguments::Component)
       .Bind("EXCLUDE_FROM_ALL"_s, &Arguments::ExcludeFromAll)
+      .Bind("BUILD_DEPENDS"_s, &Arguments::BuildDepends)
       .Bind("ALL_COMPONENTS"_s, &Arguments::AllComponents);
 
   std::vector<std::string> unknownArgs;
@@ -1123,7 +1128,7 @@ bool HandleScriptMode(std::vector<std::string> const& args,
       cm::make_unique<cmInstallScriptGenerator>(
         std::move(script.Value), script.IsCode, component,
         arguments.ExcludeFromAll, arguments.AllComponents,
-        helper.Makefile->GetBacktrace()));
+        arguments.BuildDepends, helper.Makefile->GetBacktrace()));
   }
 
   // Tell the global generator about any installation component names
@@ -1831,7 +1836,9 @@ bool HandleFilesMode(std::vector<std::string> const& args,
   bool programs = (args[0] == "PROGRAMS");
   cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
   ArgumentParser::MaybeEmpty<std::vector<std::string>> files;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> depends;
   ica.Bind(programs ? "PROGRAMS"_s : "FILES"_s, files);
+  ica.Bind("BUILD_DEPENDS"_s, depends);
   std::vector<std::string> unknownArgs;
   ica.Parse(args, &unknownArgs);
 
@@ -1850,6 +1857,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
   }
 
   std::vector<std::string> const& filesVector = files;
+  std::vector<std::string> const& buildDepends = depends;
 
   // Check if there is something to do.
   if (filesVector.empty()) {
@@ -1903,7 +1911,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
 
   // Create the files install generator.
   helper.Makefile->AddInstallGenerator(CreateInstallFilesGenerator(
-    helper.Makefile, absFiles, ica, programs, destination));
+    helper.Makefile, absFiles, ica, programs, destination, buildDepends));
 
   // Tell the global generator about any installation component names
   // specified.
@@ -1930,6 +1938,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
     DoingPermsMatch,
     DoingConfigurations,
     DoingComponent,
+    DoingBuildDepends,
     DoingType
   };
   Doing doing = DoingDirs;
@@ -1943,6 +1952,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   std::string permissionsDir;
   std::vector<std::string> configurations;
   std::string component = helper.DefaultComponentName;
+  std::vector<std::string> buildDepends;
   std::string literalArgs;
   std::string type;
   for (unsigned int i = 1; i < args.size(); ++i) {
@@ -2067,6 +2077,15 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
 
       // Switch to setting the component property.
       doing = DoingComponent;
+    } else if (args[i] == "BUILD_DEPENDS") {
+      if (inMatchMode) {
+        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
+                                 "\" after PATTERN or REGEX."));
+        return false;
+      }
+
+      // Switch to adding build dependencies.
+      doing = DoingBuildDepends;
     } else if (args[i] == "EXCLUDE_FROM_ALL") {
       if (inMatchMode) {
         status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
@@ -2151,6 +2170,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
     } else if (doing == DoingComponent) {
       component = args[i];
       doing = DoingNone;
+    } else if (doing == DoingBuildDepends) {
+      buildDepends.push_back(args[i]);
     } else if (doing == DoingPermsFile) {
       // Check the requested permission.
       if (!cmInstallCommandArguments::CheckPermissions(args[i],
@@ -2215,8 +2236,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallDirectoryGenerator>(
       dirs, *destination, permissionsFile, permissionsDir, configurations,
-      component, message, excludeFromAll, literalArgs, optional,
-      helper.CaptureContext()));
+      component, std::move(buildDepends), message, excludeFromAll, literalArgs,
+      optional, helper.CaptureContext()));
 
   // Tell the global generator about any installation component names
   // specified.

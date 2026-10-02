@@ -3571,7 +3571,8 @@ void cmGlobalGenerator::CheckInstallPrepTargets()
                        "\nwhich is generated but is not the unique output of "
                        "a build target, so \"install_prep/\" targets cannot "
                        "build it with this generator.  Produce the file with "
-                       "a custom command attached to a single target to "
+                       "a custom command attached to a single target, or name "
+                       "the target that produces it with BUILD_DEPENDS, to "
                        "prepare it."),
               installer->GetDiagnosticContext());
           }

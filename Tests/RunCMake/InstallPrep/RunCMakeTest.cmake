@@ -122,6 +122,7 @@ run_install_prep(Imported install_prep/Imported Imported)
 run_install_prep(Documentation install_prep/Documentation Documentation)
 run_install_prep(ExcludedSubdirectory
   install_prep/ExcludedSubdirectory ExcludedSubdirectory)
+run_install_prep(BuildDepends install_prep/Payload Payload)
 run_install_prep(GeneratedFileSetHeaders install_prep/Headers Headers)
 run_install_prep(GeneratedTargetProperties install_prep/Headers Headers)
 run_install_prep(GeneratedByOtherTarget install_prep/Headers Headers)

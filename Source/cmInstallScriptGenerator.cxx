@@ -14,12 +14,14 @@
 
 cmInstallScriptGenerator::cmInstallScriptGenerator(
   std::string script, bool code, std::string const& component,
-  bool excludeFromAll, bool allComponents, cmListFileBacktrace backtrace)
+  bool excludeFromAll, bool allComponents,
+  std::vector<std::string> buildDepends, cmListFileBacktrace backtrace)
   : cmInstallGenerator("", std::vector<std::string>(), component,
                        MessageDefault, excludeFromAll, allComponents,
                        cmDiagnosticContext{ std::move(backtrace) })
   , Script(std::move(script))
   , Code(code)
+  , BuildDepends(std::move(buildDepends))
 {
   // We need per-config actions if the script has generator expressions.
   if (cmGeneratorExpression::Find(this->Script) != std::string::npos) {
@@ -32,6 +34,11 @@ cmInstallScriptGenerator::~cmInstallScriptGenerator() = default;
 bool cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
+  if (!this->ResolveBuildDepends(lg, this->Code ? "CODE" : "SCRIPT",
+                                 this->BuildDepends,
+                                 this->ResolvedBuildDepends)) {
+    return false;
+  }
 
   if (this->ActionsPerConfig) {
     switch (this->LocalGenerator->GetPolicyStatus(cmPolicies::CMP0087)) {
@@ -47,6 +54,13 @@ bool cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
   }
 
   return true;
+}
+
+void cmInstallScriptGenerator::GetInstallBuildDependencies(
+  std::string const& config, std::vector<BuildDependency>& dependencies) const
+{
+  AddBuildDependsDependencies(this->LocalGenerator, config,
+                              this->ResolvedBuildDepends, dependencies);
 }
 
 std::string cmInstallScriptGenerator::GetScript(

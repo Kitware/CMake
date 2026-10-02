@@ -25,9 +25,11 @@ public:
                           std::string const& dest, bool programs,
                           std::string filePermissions,
                           std::vector<std::string> const& configurations,
-                          std::string const& component, MessageLevel message,
-                          bool excludeFromAll, std::string rename,
-                          bool optional, cmDiagnosticContext context);
+                          std::string const& component,
+                          std::vector<std::string> buildDepends,
+                          MessageLevel message, bool excludeFromAll,
+                          std::string rename, bool optional,
+                          cmDiagnosticContext context);
   ~cmInstallFilesGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;
@@ -58,6 +60,8 @@ protected:
   std::vector<std::string> const Files;
   std::string const FilePermissions;
   std::string const Rename;
+  std::vector<std::string> const BuildDepends;
+  BuildDependsEntries ResolvedBuildDepends;
   std::string OwningTargetName;
   cmGeneratorTarget const* OwningTarget = nullptr;
   bool const Programs;

@@ -1,0 +1,4 @@
+^CMake Error at DIRECTORY-PATTERN-BUILD_DEPENDS\.cmake:[0-9]+ \(install\):
+  install DIRECTORY does not allow "BUILD_DEPENDS" after PATTERN or REGEX\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

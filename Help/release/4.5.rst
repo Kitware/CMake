@@ -75,6 +75,16 @@ Instrumentation
 Generators
 ----------
 
+* The :ref:`Ninja Generators`, :ref:`Makefile Generators`, and
+  :generator:`FASTBuild` generator now provide ``install_prep/all`` and
+  ``install_prep/<component>`` convenience build targets by default.  The
+  :variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` variable may be enabled to
+  skip generating them.  These targets build all known build dependencies for
+  an installation that does not select a component, or for the named install
+  component, respectively.  This includes targets that produce installed C++
+  module BMIs, module export metadata, or generated files.  See
+  :ref:`Install Preparation Targets`.
+
 * The :generator:`FASTBuild` generator and the :ref:`Makefile Generators`
   now generate ``test_prep/<test-name>`` and ``test_prep/all`` convenience
   build targets when the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is
@@ -185,6 +195,11 @@ Commands
   information rather than :command:`file(GET_RUNTIME_DEPENDENCIES)`.
   The option cannot be used with ``EXPORT`` and may only install runtime
   artifacts.
+
+* The :command:`install` command's ``FILES``, ``PROGRAMS``, ``DIRECTORY``,
+  ``SCRIPT``, and ``CODE`` signatures gained a ``BUILD_DEPENDS`` option to
+  specify targets or files needed to prepare files or run installation
+  code.  See :ref:`Install Preparation Targets`.
 
 * The :command:`math` command gained new ``INCREMENT`` and ``DECREMENT`` modes.
 

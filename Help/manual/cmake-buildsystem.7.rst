@@ -1886,9 +1886,12 @@ For example:
   set_property(TARGET B PROPERTY PUBLIC_HEADER
     "${CMAKE_CURRENT_BINARY_DIR}/byproduct.h")
 
-Rules created by the ``DIRECTORY``, ``SCRIPT``, and ``CODE`` signatures of
-the :command:`install` command, or by the deprecated
-:command:`install_targets` command, do not imply build dependencies.
+The ``BUILD_DEPENDS`` option of the ``FILES``, ``PROGRAMS``, ``DIRECTORY``,
+``SCRIPT``, and ``CODE`` signatures of the :command:`install` command can
+be used to specify targets or files that CMake cannot infer.  ``DIRECTORY``,
+``SCRIPT``, and ``CODE`` rules do not imply build dependencies without
+``BUILD_DEPENDS``.  The deprecated :command:`install_targets` command does not
+contribute dependencies.
 
 Install rules below a directory added with :prop_dir:`EXCLUDE_FROM_ALL` are
 ignored, matching installation from the parent directory.

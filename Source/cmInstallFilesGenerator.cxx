@@ -14,13 +14,15 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   std::vector<std::string> const& files, std::string const& dest,
   bool programs, std::string filePermissions,
   std::vector<std::string> const& configurations, std::string const& component,
-  MessageLevel message, bool excludeFromAll, std::string rename, bool optional,
+  std::vector<std::string> buildDepends, MessageLevel message,
+  bool excludeFromAll, std::string rename, bool optional,
   cmDiagnosticContext context)
   : cmInstallGenerator(dest, configurations, component, message,
                        excludeFromAll, false, std::move(context))
   , Files(files)
   , FilePermissions(std::move(filePermissions))
   , Rename(std::move(rename))
+  , BuildDepends(std::move(buildDepends))
   , Programs(programs)
   , Optional(optional)
 {
@@ -52,15 +54,27 @@ bool cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
   if (!this->OwningTargetName.empty()) {
     this->OwningTarget = lg->FindGeneratorTargetToUse(this->OwningTargetName);
   }
-  return true;
+  return this->ResolveBuildDepends(lg, this->Programs ? "PROGRAMS" : "FILES",
+                                   this->BuildDepends,
+                                   this->ResolvedBuildDepends);
 }
 
 void cmInstallFilesGenerator::GetInstallBuildDependencies(
   std::string const& config, std::vector<BuildDependency>& dependencies) const
 {
+  AddBuildDependsDependencies(this->LocalGenerator, config,
+                              this->ResolvedBuildDepends, dependencies);
+  std::vector<BuildDependency> generated;
   AddGeneratedFileDependencies(this->LocalGenerator->GetGlobalGenerator(),
                                config, this->OwningTarget,
-                               this->GetFiles(config), dependencies);
+                               this->GetFiles(config), generated);
+  for (BuildDependency& dependency : generated) {
+    // A generated file that no target prepares is assumed to be produced by
+    // the targets named by BUILD_DEPENDS, if any.
+    if (dependency.Target || this->ResolvedBuildDepends.Targets.empty()) {
+      dependencies.push_back(std::move(dependency));
+    }
+  }
 }
 
 std::string cmInstallFilesGenerator::GetDestination(
