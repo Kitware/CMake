@@ -161,8 +161,8 @@ find_library(TK_LIBRARY
   NAMES
   tk
   tk${TK_LIBRARY_VERSION} tk${TCL_TCLSH_VERSION} tk${TK_WISH_VERSION}
-  tk91 tk9.1 tk91t tk9.1t
-  tk90 tk9.0 tk90t tk9.0t
+  tcl9tk91 tcl9tk9.1 tk91 tk9.1 tk91t tk9.1t
+  tcl9tk90 tcl9tk9.0 tk90 tk9.0 tk90t tk9.0t
   tk86 tk8.6 tk86t tk8.6t
   tk85 tk8.5
   tk84 tk8.4
@@ -222,6 +222,7 @@ set(TCLTK_POSSIBLE_INCLUDE_PATH_SUFFIXES
   include/tcl8.3
   include/tcl8.2
   include/tcl8.0
+  include/tcl-tk
   )
 
 if(WIN32)

@@ -1538,6 +1538,7 @@ if(BUILD_TESTING)
       Protobuf
       SDL
       SQLite3
+      TCL
       TIFF
       Vulkan
       wxWidgets

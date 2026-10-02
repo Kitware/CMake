@@ -543,6 +543,7 @@ if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython2_SABIModule OR CMake_TEST_Fin
 endif()
 add_RunCMake_test(FindBoost)
 add_RunCMake_test(FindLua)
+add_RunCMake_test(FindTCL)
 if(CMake_TEST_FindRuby)
   add_RunCMake_test(FindRuby
     -DCMake_TEST_FindRuby_RBENV=${CMake_TEST_FindRuby_RBENV}
