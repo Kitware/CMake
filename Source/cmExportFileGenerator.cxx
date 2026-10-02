@@ -5,7 +5,6 @@
 #include <array>
 #include <cstddef>
 #include <functional>
-#include <sstream>
 #include <utility>
 
 #include <cm/memory>
@@ -72,9 +71,8 @@ bool cmExportFileGenerator::GenerateImportFile()
   }
   if (!foutPtr || !*foutPtr) {
     std::string se = cmSystemTools::GetLastSystemError();
-    std::ostringstream e;
-    e << "cannot write to file \"" << this->MainImportFile << "\": " << se;
-    cmSystemTools::Error(e.str());
+    cmSystemTools::Error(
+      cmStrCat("cannot write to file \"", this->MainImportFile, "\": ", se));
     return false;
   }
 
@@ -294,11 +292,11 @@ void getCompatibleInterfaceProperties(cmGeneratorTarget const* target,
 
   if (!info) {
     cmLocalGenerator* lg = target->GetLocalGenerator();
-    std::ostringstream e;
-    e << "Exporting the target \"" << target->GetName()
-      << "\" is not "
-         "allowed since its linker language cannot be determined";
-    lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    lg->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Exporting the target \"", target->GetName(),
+               "\" is not allowed since its linker language cannot be "
+               "determined"));
     return;
   }
 
@@ -844,11 +842,10 @@ bool cmExportFileGenerator::PopulateExportProperties(
       /* Black list reserved properties */
       if (cmHasLiteralPrefix(prop, "IMPORTED_") ||
           cmHasLiteralPrefix(prop, "INTERFACE_")) {
-        std::ostringstream e;
-        e << "Target \"" << gte->Target->GetName() << "\" contains property \""
-          << prop << "\" in EXPORT_PROPERTIES but IMPORTED_* and INTERFACE_* "
-          << "properties are reserved.";
-        errorMessage = e.str();
+        errorMessage = cmStrCat(
+          "Target \"", gte->Target->GetName(), "\" contains property \"", prop,
+          "\" in EXPORT_PROPERTIES but IMPORTED_* and INTERFACE_* "
+          "properties are reserved.");
         return false;
       }
       cmValue propertyValue = targetProperties.GetPropertyValue(prop);
@@ -860,11 +857,10 @@ bool cmExportFileGenerator::PopulateExportProperties(
       std::string evaluatedValue = cmGeneratorExpression::Preprocess(
         *propertyValue, cmGeneratorExpression::StripAllGeneratorExpressions);
       if (evaluatedValue != *propertyValue) {
-        std::ostringstream e;
-        e << "Target \"" << gte->Target->GetName() << "\" contains property \""
-          << prop << "\" in EXPORT_PROPERTIES but this property contains a "
-          << "generator expression. This is not allowed.";
-        errorMessage = e.str();
+        errorMessage = cmStrCat(
+          "Target \"", gte->Target->GetName(), "\" contains property \"", prop,
+          "\" in EXPORT_PROPERTIES but this property contains a "
+          "generator expression. This is not allowed.");
         return false;
       }
       properties[prop] = *propertyValue;

@@ -4,11 +4,12 @@
 
 #include <cstdio>
 #include <ctime>
-#include <sstream>
+#include <ostream>
 #include <vector>
 
 #include "cmCTest.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
 #include "cmXMLWriter.h"
@@ -85,13 +86,7 @@ bool cmCTestVC::RunChild(std::vector<std::string> const& cmd,
 
 std::string cmCTestVC::ComputeCommandLine(std::vector<std::string> const& cmd)
 {
-  std::ostringstream line;
-  char const* sep = "";
-  for (auto const& arg : cmd) {
-    line << sep << "\"" << arg << "\"";
-    sep = " ";
-  }
-  return line.str();
+  return cmWrap('"', cmd, '"', " ");
 }
 
 bool cmCTestVC::RunUpdateCommand(std::vector<std::string> const& cmd,

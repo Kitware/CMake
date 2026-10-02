@@ -12,7 +12,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <sstream>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -137,17 +136,19 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
       }
 
       if (!targetName.empty() && !cmSystemTools::FileIsFullPath(src)) {
-        std::ostringstream err;
         if (!targetName.empty()) {
-          err << "Target \"" << targetName
-              << "\" contains relative path in its INTERFACE_SOURCES:\n  \""
-              << src << "\"";
+          tgt->GetLocalGenerator()->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat("Target \"", targetName,
+                     "\" contains relative path in its INTERFACE_SOURCES:\n  "
+                     "\"",
+                     src, '"'));
         } else {
-          err << "Found relative path while evaluating sources of \""
-              << tgt->GetName() << "\":\n  \"" << src << "\"\n";
+          tgt->GetLocalGenerator()->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat("Found relative path while evaluating sources of \"",
+                     tgt->GetName(), "\":\n  \"", src, "\"\n"));
         }
-        tgt->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
-                                               err.str());
         return contextDependent;
       }
       src = fullPath;
@@ -376,12 +377,12 @@ cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
   auto it = this->KindedSourcesMap.find(key);
   if (it != this->KindedSourcesMap.end()) {
     if (!it->second.Initialized) {
-      std::ostringstream e;
-      e << "The SOURCES of \"" << this->GetName()
-        << "\" use a generator expression that depends on the "
-           "SOURCES themselves.";
       this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-        MessageType::FATAL_ERROR, e.str(), this->GetBacktrace());
+        MessageType::FATAL_ERROR,
+        cmStrCat("The SOURCES of \"", this->GetName(),
+                 "\" use a generator expression that depends on the "
+                 "SOURCES themselves."),
+        this->GetBacktrace());
       static KindedSources empty;
       return empty;
     }
@@ -503,15 +504,18 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
   }
 
   if (!badObjLib.empty()) {
-    std::ostringstream e;
-    e << "OBJECT library \"" << this->GetName() << "\" contains:\n";
+    std::string e =
+      cmStrCat("OBJECT library \"", this->GetName(), "\" contains:\n");
     for (cmSourceFile* i : badObjLib) {
-      e << "  " << i->GetLocation().GetName() << "\n";
+      e = cmStrCat(std::move(e), "  ", i->GetLocation().GetName(), '\n');
     }
-    e << "but may contain only sources that compile, header files, and "
-         "other files that would not affect linking of a normal library.";
+    e =
+      cmStrCat(std::move(e),
+               "but may contain only sources that compile, header files, and "
+               "other files that would not affect linking of a normal "
+               "library.");
     this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-      MessageType::FATAL_ERROR, e.str(), this->GetBacktrace());
+      MessageType::FATAL_ERROR, e, this->GetBacktrace());
   }
 }
 

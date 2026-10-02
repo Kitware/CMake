@@ -23,7 +23,6 @@
 #  include <cerrno>
 #endif
 
-#include <sstream>
 #include <utility>
 
 using namespace cmFSPermissions;
@@ -88,10 +87,9 @@ bool cmFileCopier::SetPermissions(std::string const& toFile,
 
     auto perm_status = cmSystemTools::SetPermissions(toFile, permissions);
     if (!perm_status) {
-      std::ostringstream e;
-      e << this->Name << " cannot set permissions on \"" << toFile
-        << "\": " << perm_status.GetString() << ".";
-      this->Status.SetError(e.str());
+      this->Status.SetError(cmStrCat(this->Name,
+                                     " cannot set permissions on \"", toFile,
+                                     "\": ", perm_status.GetString(), '.'));
       return false;
     }
   }
@@ -103,9 +101,8 @@ bool cmFileCopier::CheckPermissions(std::string const& arg,
                                     mode_t& permissions)
 {
   if (!cmFSPermissions::stringToModeT(arg, permissions)) {
-    std::ostringstream e;
-    e << this->Name << " given invalid permission \"" << arg << "\".";
-    this->Status.SetError(e.str());
+    this->Status.SetError(
+      cmStrCat(this->Name, " given invalid permission \"", arg, "\"."));
     return false;
   }
   return true;
@@ -127,17 +124,15 @@ bool cmFileCopier::ReportMissing(std::string const& fromFile)
 
 void cmFileCopier::NotBeforeMatch(std::string const& arg)
 {
-  std::ostringstream e;
-  e << "option " << arg << " may not appear before PATTERN or REGEX.";
-  this->Status.SetError(e.str());
+  this->Status.SetError(
+    cmStrCat("option ", arg, " may not appear before PATTERN or REGEX."));
   this->Doing = DoingError;
 }
 
 void cmFileCopier::NotAfterMatch(std::string const& arg)
 {
-  std::ostringstream e;
-  e << "option " << arg << " may not appear after PATTERN or REGEX.";
-  this->Status.SetError(e.str());
+  this->Status.SetError(
+    cmStrCat("option ", arg, " may not appear after PATTERN or REGEX."));
   this->Doing = DoingError;
 }
 
@@ -191,9 +186,8 @@ bool cmFileCopier::Parse(std::vector<std::string> const& args)
   for (unsigned int i = 1; i < args.size(); ++i) {
     // Check this argument.
     if (!this->CheckKeyword(args[i]) && !this->CheckValue(args[i])) {
-      std::ostringstream e;
-      e << "called with unknown argument \"" << args[i] << "\".";
-      this->Status.SetError(e.str());
+      this->Status.SetError(
+        cmStrCat("called with unknown argument \"", args[i], "\"."));
       return false;
     }
 
@@ -205,9 +199,7 @@ bool cmFileCopier::Parse(std::vector<std::string> const& args)
 
   // Require a destination.
   if (this->Destination.empty()) {
-    std::ostringstream e;
-    e << this->Name << " given no DESTINATION";
-    this->Status.SetError(e.str());
+    this->Status.SetError(cmStrCat(this->Name, " given no DESTINATION"));
     return false;
   }
 
@@ -337,9 +329,8 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       if (this->CurrentMatchRule->Regex.is_valid()) {
         this->Doing = DoingNone;
       } else {
-        std::ostringstream e;
-        e << "could not compile PATTERN \"" << arg << "\".";
-        this->Status.SetError(e.str());
+        this->Status.SetError(
+          cmStrCat("could not compile PATTERN \"", arg, "\"."));
         this->Doing = DoingError;
       }
     } break;
@@ -349,9 +340,8 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       if (this->CurrentMatchRule->Regex.is_valid()) {
         this->Doing = DoingNone;
       } else {
-        std::ostringstream e;
-        e << "could not compile REGEX \"" << arg << "\".";
-        this->Status.SetError(e.str());
+        this->Status.SetError(
+          cmStrCat("could not compile REGEX \"", arg, "\"."));
         this->Doing = DoingError;
       }
       break;
@@ -528,11 +518,9 @@ bool cmFileCopier::InstallSymlink(std::string const& fromFile,
   auto read_symlink_status =
     cmSystemTools::ReadSymlink(fromFile, symlinkTarget);
   if (!read_symlink_status) {
-    std::ostringstream e;
-    e << this->Name << " cannot read symlink \"" << fromFile
-      << "\" to duplicate at \"" << toFile
-      << "\": " << read_symlink_status.GetString() << ".";
-    this->Status.SetError(e.str());
+    this->Status.SetError(cmStrCat(
+      this->Name, " cannot read symlink \"", fromFile, "\" to duplicate at \"",
+      toFile, "\": ", read_symlink_status.GetString(), '.'));
     return false;
   }
 
@@ -604,10 +592,9 @@ bool cmFileCopier::InstallFile(std::string const& fromFile,
   if (copy) {
     auto copy_status = cmSystemTools::CopyAFile(fromFile, toFile);
     if (!copy_status) {
-      std::ostringstream e;
-      e << this->Name << " cannot copy file \"" << fromFile << "\" to \""
-        << toFile << "\": " << copy_status.GetString() << ".";
-      this->Status.SetError(e.str());
+      this->Status.SetError(cmStrCat(this->Name, " cannot copy file \"",
+                                     fromFile, "\" to \"", toFile,
+                                     "\": ", copy_status.GetString(), '.'));
       return false;
     }
   }
@@ -622,10 +609,9 @@ bool cmFileCopier::InstallFile(std::string const& fromFile,
     }
     auto copy_status = cmFileTimes::Copy(fromFile, toFile);
     if (!copy_status) {
-      std::ostringstream e;
-      e << this->Name << " cannot set modification time on \"" << toFile
-        << "\": " << copy_status.GetString() << ".";
-      this->Status.SetError(e.str());
+      this->Status.SetError(
+        cmStrCat(this->Name, " cannot set modification time on \"", toFile,
+                 "\": ", copy_status.GetString(), '.'));
       return false;
     }
   }
@@ -664,10 +650,9 @@ bool cmFileCopier::InstallDirectory(std::string const& source,
   auto makedir_status =
     cmSystemTools::MakeDirectory(destination, default_dir_mode);
   if (!makedir_status) {
-    std::ostringstream e;
-    e << this->Name << " cannot make directory \"" << destination
-      << "\": " << makedir_status.GetString() << ".";
-    this->Status.SetError(e.str());
+    this->Status.SetError(cmStrCat(this->Name, " cannot make directory \"",
+                                   destination,
+                                   "\": ", makedir_status.GetString(), '.'));
     return false;
   }
 

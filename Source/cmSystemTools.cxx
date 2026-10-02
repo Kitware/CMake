@@ -86,7 +86,6 @@
 #include <iostream>
 #include <memory>
 #include <random>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -3580,15 +3579,16 @@ static cm::optional<bool> ChangeRPathELF(std::string const& file,
         return true;
       }
       if (emsg2) {
-        std::ostringstream e;
-        /* clang-format off */
-        e << "The current " << se_name << " is:\n"
-             "  " << inRPath << "\n"
-             "which does not contain:\n"
-             "  " << oldRPath << "\n"
-             "as was expected.";
-        /* clang-format on */
-        *emsg2 = e.str();
+        *emsg2 = cmStrCat("The current ", se_name,
+                          " is:\n"
+                          "  ",
+                          inRPath,
+                          "\n"
+                          "which does not contain:\n"
+                          "  ",
+                          oldRPath,
+                          "\n"
+                          "as was expected.");
       }
       return false;
     }
@@ -3667,15 +3667,15 @@ static cm::optional<bool> ChangeRPathXCOFF(std::string const& file,
         return true;
       }
       if (emsg) {
-        std::ostringstream e;
-        /* clang-format off */
-        e << "The current RPATH is:\n"
-             "  " << libPath << "\n"
-             "which does not contain:\n"
-             "  " << oldRPath << "\n"
-             "as was expected.";
-        /* clang-format on */
-        *emsg = e.str();
+        *emsg = cmStrCat("The current RPATH is:\n"
+                         "  ",
+                         libPath,
+                         "\n"
+                         "which does not contain:\n"
+                         "  ",
+                         oldRPath,
+                         "\n"
+                         "as was expected.");
       }
       return false;
     }

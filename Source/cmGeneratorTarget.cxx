@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <sstream>
+#include <ostream>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -214,10 +214,9 @@ std::string cmGeneratorTarget::GetExportName() const
 
   if (cmNonempty(exportName)) {
     if (!cmGeneratorExpression::IsValidTargetName(*exportName)) {
-      std::ostringstream e;
-      e << "EXPORT_NAME property \"" << *exportName << "\" for \""
-        << this->GetName() << "\": is not valid.";
-      cmSystemTools::Error(e.str());
+      cmSystemTools::Error(cmStrCat("EXPORT_NAME property \"", *exportName,
+                                    "\" for \"", this->GetName(),
+                                    "\": is not valid."));
       return "";
     }
     return *exportName;
@@ -1441,19 +1440,16 @@ bool cmGeneratorTarget::NeedRelinkBeforeInstall(
   bool is_ninja = this->LocalGenerator->GetGlobalGenerator()->IsNinja();
 
   if (have_rpath && is_ninja) {
-    std::ostringstream w;
-    /* clang-format off */
-    w <<
-      "The install of the " << this->GetName() << " target requires changing "
-      "an RPATH from the build tree, but this is not supported with the Ninja "
-      "generator unless on an ELF-based or XCOFF-based platform.  "
-      "The CMAKE_BUILD_WITH_INSTALL_RPATH variable may be set to avoid this "
-      "relinking step."
-      ;
-    /* clang-format on */
-
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    cm->IssueMessage(MessageType::FATAL_ERROR, w.str(), this->GetBacktrace());
+    cm->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The install of the ", this->GetName(),
+               " target requires changing an RPATH from the build tree, but "
+               "this is not supported with the Ninja generator unless on an "
+               "ELF-based or XCOFF-based platform.  The "
+               "CMAKE_BUILD_WITH_INSTALL_RPATH variable may be set to avoid "
+               "this relinking step."),
+      this->GetBacktrace());
   }
 
   return have_rpath;
@@ -1590,19 +1586,16 @@ bool cmGeneratorTarget::DetermineHasMacOSXRpathInstallNameDir(
   }
 
   if (!this->Makefile->IsSet("CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG")) {
-    std::ostringstream w;
-    w << "Attempting to use ";
-    if (macosx_rpath) {
-      w << "MACOSX_RPATH";
-    } else {
-      w << "@rpath";
-    }
-    w << " without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being set.";
-    w << "  This could be because you are using a Mac OS X version";
-    w << " less than 10.5 or because CMake's platform configuration is";
-    w << " corrupt.";
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    cm->IssueMessage(MessageType::FATAL_ERROR, w.str(), this->GetBacktrace());
+    cm->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Attempting to use ",
+               macosx_rpath ? "MACOSX_RPATH"_s : "@rpath"_s,
+               " without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being set."
+               "  This could be because you are using a Mac OS X version"
+               " less than 10.5 or because CMake's platform configuration is"
+               " corrupt."),
+      this->GetBacktrace());
   }
 
   return true;
@@ -5257,11 +5250,12 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
   }
   if (lib != item) {
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    std::ostringstream e;
-    e << "Target \"" << this->GetName() << "\" links to item \"" << item
-      << "\" which has leading or trailing whitespace.  "
-      << "This is now an error according to policy CMP0004.";
-    cm->IssueMessage(MessageType::FATAL_ERROR, e.str(), this->GetBacktrace());
+    cm->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Target \"", this->GetName(), "\" links to item \"", item,
+               "\" which has leading or trailing whitespace.  "
+               "This is now an error according to policy CMP0004."),
+      this->GetBacktrace());
   }
   return lib;
 }

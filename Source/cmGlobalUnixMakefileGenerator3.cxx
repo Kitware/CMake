@@ -798,26 +798,19 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
 
       {
         // TODO: Convert the total progress count to a make variable.
-        std::ostringstream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
-        // # in target
-        progCmd << lg.ConvertToOutputFormat(progress.Dir,
-                                            cmOutputConverter::SHELL);
-        //
         std::set<cmGeneratorTarget const*> emitted;
-        progCmd << " "
-                << this->CountProgressMarksInTarget(gtarget.get(), emitted);
-        commands.push_back(progCmd.str());
+        commands.push_back(cmStrCat(
+          "$(CMAKE_COMMAND) -E cmake_progress_start ",
+          lg.ConvertToOutputFormat(progress.Dir, cmOutputConverter::SHELL),
+          ' ', this->CountProgressMarksInTarget(gtarget.get(), emitted)));
       }
       std::string tmp = "CMakeFiles/Makefile2";
       commands.push_back(lg.GetRecursiveMakeCall(tmp, localName));
       {
-        std::ostringstream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-        progCmd << lg.ConvertToOutputFormat(progress.Dir,
-                                            cmOutputConverter::SHELL);
-        progCmd << " 0";
-        commands.push_back(progCmd.str());
+        commands.push_back(cmStrCat(
+          "$(CMAKE_COMMAND) -E cmake_progress_start ",
+          lg.ConvertToOutputFormat(progress.Dir, cmOutputConverter::SHELL),
+          " 0"));
       }
       depends.clear();
       if (regenerate) {

@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <sstream>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
@@ -149,19 +148,17 @@ struct StandardLevelComputer
 
       cmValue opt = target->Target->GetMakefile()->GetDefinition(option_flag);
       if (!opt) {
-        std::ostringstream e;
-        e << "Target \"" << target->GetName()
-          << "\" requires the language "
-             "dialect \""
-          << this->Language << *standardProp << "\" "
-          << (ext ? "(with compiler extensions)" : "")
-          << ". But the current compiler \""
-          << makefile->GetSafeDefinition(
-               cmStrCat("CMAKE_", this->Language, "_COMPILER_ID"))
-          << "\" does not support this, or "
-             "CMake does not know the flags to enable it.";
-
-        makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Target \"", target->GetName(),
+                   "\" requires the language dialect \"", this->Language,
+                   *standardProp, "\" ",
+                   ext ? "(with compiler extensions)" : "",
+                   ". But the current compiler \"",
+                   makefile->GetSafeDefinition(
+                     cmStrCat("CMAKE_", this->Language, "_COMPILER_ID")),
+                   "\" does not support this, or "
+                   "CMake does not know the flags to enable it."));
       }
       return option_flag;
     }
@@ -607,19 +604,18 @@ bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
 
   cmList availableFeatures{ features };
   if (!cm::contains(availableFeatures, feature)) {
-    std::ostringstream e;
-    e << "The compiler feature \"" << feature << "\" is not known to " << lang
-      << " compiler\n\""
-      << this->Makefile->GetSafeDefinition(
-           cmStrCat("CMAKE_", lang, "_COMPILER_ID"))
-      << "\"\nversion "
-      << this->Makefile->GetSafeDefinition(
-           cmStrCat("CMAKE_", lang, "_COMPILER_VERSION"))
-      << '.';
+    std::string e = cmStrCat("The compiler feature \"", feature,
+                             "\" is not known to ", lang, " compiler\n\"",
+                             this->Makefile->GetSafeDefinition(
+                               cmStrCat("CMAKE_", lang, "_COMPILER_ID")),
+                             "\"\nversion ",
+                             this->Makefile->GetSafeDefinition(
+                               cmStrCat("CMAKE_", lang, "_COMPILER_VERSION")),
+                             '.');
     if (error) {
-      *error = e.str();
+      *error = std::move(e);
     } else {
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
     }
     return false;
   }
@@ -661,20 +657,13 @@ bool cmStandardLevelResolver::CompileFeatureKnown(
     lang = "HIP";
     return true;
   }
-  std::ostringstream e;
+  std::string e =
+    cmStrCat(error ? "specified" : "Specified", " unknown feature \"", feature,
+             "\" for target \"", targetName, "\".");
   if (error) {
-    e << "specified";
+    *error = std::move(e);
   } else {
-    e << "Specified";
-  }
-  e << " unknown feature \"" << feature
-    << "\" for "
-       "target \""
-    << targetName << "\".";
-  if (error) {
-    *error = e.str();
-  } else {
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
   }
   return false;
 }
@@ -704,17 +693,12 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
   std::string const& lang, std::string* error) const
 {
   if (!this->Makefile->GetGlobalGenerator()->GetLanguageEnabled(lang)) {
-    std::ostringstream e;
+    std::string e = cmStrCat(error ? "cannot"_s : "Cannot"_s,
+                             " use features from non-enabled language ", lang);
     if (error) {
-      e << "cannot";
+      *error = std::move(e);
     } else {
-      e << "Cannot";
-    }
-    e << " use features from non-enabled language " << lang;
-    if (error) {
-      *error = e.str();
-    } else {
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
     }
     return nullptr;
   }
@@ -723,23 +707,18 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
     cmStrCat("CMAKE_", lang, "_COMPILE_FEATURES"));
 
   if (!cmNonempty(featuresKnown)) {
-    std::ostringstream e;
+    std::string e = cmStrCat(error ? "no"_s : "No"_s, " known features for ",
+                             lang, " compiler\n\"",
+                             this->Makefile->GetSafeDefinition(
+                               cmStrCat("CMAKE_", lang, "_COMPILER_ID")),
+                             "\"\nversion ",
+                             this->Makefile->GetSafeDefinition(
+                               cmStrCat("CMAKE_", lang, "_COMPILER_VERSION")),
+                             '.');
     if (error) {
-      e << "no";
+      *error = std::move(e);
     } else {
-      e << "No";
-    }
-    e << " known features for " << lang << " compiler\n\""
-      << this->Makefile->GetSafeDefinition(
-           cmStrCat("CMAKE_", lang, "_COMPILER_ID"))
-      << "\"\nversion "
-      << this->Makefile->GetSafeDefinition(
-           cmStrCat("CMAKE_", lang, "_COMPILER_VERSION"))
-      << '.';
-    if (error) {
-      *error = e.str();
-    } else {
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
     }
     return nullptr;
   }

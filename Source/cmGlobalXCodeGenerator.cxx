@@ -1755,20 +1755,19 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
                                         this->CreateString("2147483647"));
       copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
                                         this->CreateString("6"));
-      std::ostringstream ostr;
+      std::string ostr;
       if (gtgt->IsFrameworkOnApple()) {
         // dstPath in frameworks is relative to Versions/<version>
-        ostr << keySources.first;
+        ostr = keySources.first;
       } else if (keySources.first != "MacOS"_s) {
         if (gtgt->Target->GetMakefile()->PlatformIsAppleEmbedded()) {
-          ostr << keySources.first;
+          ostr = keySources.first;
         } else {
           // dstPath in bundles is relative to Contents/MacOS
-          ostr << "../" << keySources.first;
+          ostr = cmStrCat("../", keySources.first);
         }
       }
-      copyFilesBuildPhase->AddAttribute("dstPath",
-                                        this->CreateString(ostr.str()));
+      copyFilesBuildPhase->AddAttribute("dstPath", this->CreateString(ostr));
       copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
                                         this->CreateString("0"));
       buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -2492,9 +2491,8 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
           makefileStream << "\\\n\t" << ConvertToMakefilePath(output);
         }
       } else {
-        std::ostringstream str;
-        str << "_buildpart_" << count++;
-        tname[&ccg.GetCC()] = cmStrCat(target->GetName(), str.str());
+        tname[&ccg.GetCC()] =
+          cmStrCat(target->GetName(), "_buildpart_", count++);
         makefileStream << "\\\n\t" << tname[&ccg.GetCC()];
       }
     }
@@ -3309,26 +3307,26 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     // MACHO_CURRENT_VERSION or VERSION -> current_version
     gtgt->GetTargetVersionFallback("MACHO_CURRENT_VERSION", "VERSION", major,
                                    minor, patch);
-    std::ostringstream v;
+    std::string v;
 
     // Xcode always wants at least 1.0.0 or nothing
     if (!(major == 0 && minor == 0 && patch == 0)) {
-      v << major << '.' << minor << '.' << patch;
+      v = cmStrCat(major, '.', minor, '.', patch);
     }
     buildSettings->AddAttribute("DYLIB_CURRENT_VERSION",
-                                this->CreateString(v.str()));
+                                this->CreateString(v));
 
     // MACHO_COMPATIBILITY_VERSION or SOVERSION -> compatibility_version
     gtgt->GetTargetVersionFallback("MACHO_COMPATIBILITY_VERSION", "SOVERSION",
                                    major, minor, patch);
-    std::ostringstream vso;
+    std::string vso;
 
     // Xcode always wants at least 1.0.0 or nothing
     if (!(major == 0 && minor == 0 && patch == 0)) {
-      vso << major << '.' << minor << '.' << patch;
+      vso = cmStrCat(major, '.', minor, '.', patch);
     }
     buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION",
-                                this->CreateString(vso.str()));
+                                this->CreateString(vso));
   }
 
   // Precompile Headers

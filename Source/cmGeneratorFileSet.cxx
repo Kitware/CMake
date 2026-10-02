@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <map>
-#include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -524,14 +523,12 @@ void cmGeneratorFileSet::EvaluateFileEntry(
       }
     }
     if (baseDir.empty()) {
-      std::ostringstream e;
-      e << "File:\n  " << file
-        << "\nmust be in one of the file set's base directories:";
-      for (auto const& dir : dirs) {
-        e << "\n  " << dir;
-      }
       context.LG->GetCMakeInstance()->IssueMessage(
-        MessageType::FATAL_ERROR, e.str(), cge->GetBacktrace());
+        MessageType::FATAL_ERROR,
+        cmStrCat("File:\n  ", file,
+                 "\nmust be in one of the file set's base directories:",
+                 cmWrap("\n  ", dirs, "", "")),
+        cge->GetBacktrace());
       return;
     }
 

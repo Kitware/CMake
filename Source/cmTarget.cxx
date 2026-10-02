@@ -2315,10 +2315,11 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
 
   if (prop == propIMPORTED_GLOBAL) {
     if (!value.IsOn()) {
-      std::ostringstream e;
-      e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
-        << this->impl->Name << "\")\n";
-      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      this->impl->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("IMPORTED_GLOBAL property can't be set to FALSE on targets "
+                 "(\"",
+                 this->impl->Name, "\")\n"));
       return;
     }
     /* no need to change anything if value does not change */
@@ -2721,16 +2722,15 @@ void CheckINTERFACE_LINK_LIBRARIES(std::string const& value,
   static cmsys::RegularExpression keys("(^|;)(debug|optimized|general)(;|$)");
   if (keys.find(value)) {
     // Report an error.
-    std::ostringstream e;
-
-    e << "Property INTERFACE_LINK_LIBRARIES may not contain link-type "
-         "keyword \""
-      << keys.match(2)
-      << "\".  The INTERFACE_LINK_LIBRARIES "
-         "property may contain configuration-sensitive generator-expressions "
-         "which may be used to specify per-configuration rules.";
-
-    context->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    context->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Property INTERFACE_LINK_LIBRARIES may not contain link-type "
+               "keyword \"",
+               keys.match(2),
+               "\".  The INTERFACE_LINK_LIBRARIES "
+               "property may contain configuration-sensitive "
+               "generator-expressions "
+               "which may be used to specify per-configuration rules."));
   }
 }
 
@@ -2743,11 +2743,11 @@ void CheckIMPORTED_GLOBAL(cmTarget const* target, cmMakefile* context)
                    return target == importTarget.get();
                  });
   if (it == targets.end()) {
-    std::ostringstream e;
-    e << "Attempt to promote imported target \"" << target->GetName()
-      << "\" to global scope (by setting IMPORTED_GLOBAL) "
-         "which is not built in this directory.";
-    context->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    context->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Attempt to promote imported target \"", target->GetName(),
+               "\" to global scope (by setting IMPORTED_GLOBAL) "
+               "which is not built in this directory."));
   }
 }
 }

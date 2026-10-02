@@ -730,13 +730,13 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
   if (component->IsRequired) {
     componentCode += "  SectionIn RO\n";
   } else if (!component->InstallationTypes.empty()) {
-    std::ostringstream out;
+    std::string indexes;
     for (cmCPackInstallationType const* installType :
          component->InstallationTypes) {
-      out << " " << installType->Index;
+      indexes = cmStrCat(std::move(indexes), ' ', installType->Index);
     }
     componentCode =
-      cmStrCat(std::move(componentCode), "  SectionIn", out.str(), '\n');
+      cmStrCat(std::move(componentCode), "  SectionIn", indexes, '\n');
   }
 
   std::string const componentOutputDir =
@@ -750,10 +750,9 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
       // Compute the name of the archive.
       std::string packagesDir =
         cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".dummy");
-      std::ostringstream out;
-      out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir) << "-"
-          << component->Name << ".zip";
-      component->ArchiveFile = out.str();
+      component->ArchiveFile =
+        cmStrCat(cmSystemTools::GetFilenameWithoutLastExtension(packagesDir),
+                 '-', component->Name, ".zip");
     }
 
     // Create the directory for the upload area
@@ -856,19 +855,20 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     if (totalSizeInKbytes == 0) {
       totalSizeInKbytes = 1;
     }
-    std::ostringstream out;
-    /* clang-format off */
-    out << "  AddSize " << totalSizeInKbytes << "\n"
-        << "  Push \"" << component->ArchiveFile << "\"\n"
-        << "  Call DownloadFile\n"
-        << "  ZipDLL::extractall \"$INSTDIR\\"
-        << component->ArchiveFile << "\" \"$INSTDIR\"\n"
-        <<  "  Pop $2 ; error message\n"
-                     "  StrCmp $2 \"success\" +2 0\n"
-                     "  MessageBox MB_OK \"Failed to unzip $2\"\n"
-                     "  Delete $INSTDIR\\$0\n";
-    /* clang-format on */
-    componentCode += out.str();
+    componentCode =
+      cmStrCat(std::move(componentCode), "  AddSize ", totalSizeInKbytes,
+               "\n"
+               "  Push \"",
+               component->ArchiveFile,
+               "\"\n"
+               "  Call DownloadFile\n"
+               "  ZipDLL::extractall \"$INSTDIR\\",
+               component->ArchiveFile,
+               "\" \"$INSTDIR\"\n"
+               "  Pop $2 ; error message\n"
+               "  StrCmp $2 \"success\" +2 0\n"
+               "  MessageBox MB_OK \"Failed to unzip $2\"\n"
+               "  Delete $INSTDIR\\$0\n");
   } else {
     componentCode =
       cmStrCat(std::move(componentCode), "  File /r \"${INST_DIR}\\",
@@ -921,19 +921,22 @@ std::string cmCPackNSISGenerator::CreateSelectionDependenciesDescription(
   }
   visited.insert(component);
 
-  std::ostringstream out;
+  std::string out;
   for (cmCPackComponent* depend : component->Dependencies) {
     // Write NSIS code to select this dependency
-    out << "  SectionGetFlags ${" << depend->Name << "} $0\n";
-    out << "  IntOp $0 $0 | ${SF_SELECTED}\n";
-    out << "  SectionSetFlags ${" << depend->Name << "} $0\n";
-    out << "  IntOp $" << depend->Name << "_selected 0 + ${SF_SELECTED}\n";
-    // Recurse
-    out
-      << this->CreateSelectionDependenciesDescription(depend, visited).c_str();
+    out =
+      cmStrCat(std::move(out), "  SectionGetFlags ${", depend->Name,
+               "} $0\n"
+               "  IntOp $0 $0 | ${SF_SELECTED}\n"
+               "  SectionSetFlags ${",
+               depend->Name,
+               "} $0\n"
+               "  IntOp $",
+               depend->Name, "_selected 0 + ${SF_SELECTED}\n",
+               this->CreateSelectionDependenciesDescription(depend, visited));
   }
 
-  return out.str();
+  return out;
 }
 
 std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription(
@@ -945,21 +948,24 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription(
   }
   visited.insert(component);
 
-  std::ostringstream out;
+  std::string out;
   for (cmCPackComponent* depend : component->ReverseDependencies) {
     // Write NSIS code to deselect this dependency
-    out << "  SectionGetFlags ${" << depend->Name << "} $0\n";
-    out << "  IntOp $1 ${SF_SELECTED} ~\n";
-    out << "  IntOp $0 $0 & $1\n";
-    out << "  SectionSetFlags ${" << depend->Name << "} $0\n";
-    out << "  IntOp $" << depend->Name << "_selected 0 + 0\n";
-
-    // Recurse
-    out << this->CreateDeselectionDependenciesDescription(depend, visited)
-             .c_str();
+    out = cmStrCat(
+      std::move(out), "  SectionGetFlags ${", depend->Name,
+      "} $0\n"
+      "  IntOp $1 ${SF_SELECTED} ~\n"
+      "  IntOp $0 $0 & $1\n"
+      "  SectionSetFlags ${",
+      depend->Name,
+      "} $0\n"
+      "  IntOp $",
+      depend->Name, "_selected 0 + 0\n",
+      // Recurse
+      this->CreateDeselectionDependenciesDescription(depend, visited));
   }
 
-  return out.str();
+  return out;
 }
 
 std::string cmCPackNSISGenerator::CreateComponentGroupDescription(

@@ -328,18 +328,18 @@ void cmLocalGenerator::ComputeObjectMaxPath()
       if (pmax >= 128) {
         this->ObjectPathMax = pmax;
       } else {
-        std::ostringstream w;
-        w << "CMAKE_OBJECT_PATH_MAX is set to " << pmax
-          << ", which is less than the minimum of 128.  "
-             "The value will be ignored.";
-        this->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
+        this->IssueDiagnostic(
+          cmDiagnostics::CMD_AUTHOR,
+          cmStrCat("CMAKE_OBJECT_PATH_MAX is set to ", pmax,
+                   ", which is less than the minimum of 128.  "
+                   "The value will be ignored."));
       }
     } else {
-      std::ostringstream w;
-      w << "CMAKE_OBJECT_PATH_MAX is set to \"" << *plen
-        << "\", which fails to parse as a positive integer.  "
-           "The value will be ignored.";
-      this->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, w.str());
+      this->IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
+        cmStrCat("CMAKE_OBJECT_PATH_MAX is set to \"", *plen,
+                 "\", which fails to parse as a positive integer.  "
+                 "The value will be ignored."));
     }
   }
   this->ObjectMaxPathViolations.clear();
@@ -1223,20 +1223,21 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
       continue;
     }
     if (standardResolver.IsLaterStandard(it.first, *standard, it.second)) {
-      std::ostringstream e;
-      e << "The COMPILE_FEATURES property of target \"" << target->GetName()
-        << "\" was evaluated when computing the link "
-           "implementation, and the \""
-        << it.first << "_STANDARD\" was \"" << it.second
-        << "\" for that computation.  Computing the "
-           "COMPILE_FEATURES based on the link implementation resulted in a "
-           "higher \""
-        << it.first << "_STANDARD\" \"" << *standard
-        << "\".  "
-           "This is not permitted. The COMPILE_FEATURES may not both depend "
-           "on "
-           "and be depended on by the link implementation.\n";
-      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The COMPILE_FEATURES property of target \"",
+                 target->GetName(),
+                 "\" was evaluated when computing the link "
+                 "implementation, and the \"",
+                 it.first, "_STANDARD\" was \"", it.second,
+                 "\" for that computation.  Computing the "
+                 "COMPILE_FEATURES based on the link implementation resulted "
+                 "in a higher \"",
+                 it.first, "_STANDARD\" \"", *standard,
+                 "\".  "
+                 "This is not permitted. The COMPILE_FEATURES may not both "
+                 "depend on "
+                 "and be depended on by the link implementation.\n"));
       return;
     }
   }
@@ -2596,12 +2597,11 @@ static void AddVisibilityCompileOption(std::string& flags,
   }
   if ((*prop != "hidden") && (*prop != "default") && (*prop != "protected") &&
       (*prop != "internal")) {
-    std::ostringstream e;
-    e << "Target " << target->GetName() << " uses unsupported value \""
-      << *prop << "\" for " << flagDefine << "."
-      << " The supported values are: default, hidden, protected, and "
-         "internal.";
-    cmSystemTools::Error(e.str());
+    cmSystemTools::Error(
+      cmStrCat("Target ", target->GetName(), " uses unsupported value \"",
+               *prop, "\" for ", flagDefine,
+               ". The supported values are: default, hidden, protected, and "
+               "internal."));
     return;
   }
   std::string option = *opt + *prop;
@@ -3062,11 +3062,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           std::string err;
           pchHeader_sf->ResolveFullPath(&err);
           if (!err.empty()) {
-            std::ostringstream msg;
-            msg << "Unable to resolve full path of PCH-header '" << pchHeader
-                << "' assigned to target " << target->GetName()
-                << ", although its path is supposed to be known!";
-            this->IssueMessage(MessageType::FATAL_ERROR, msg.str());
+            this->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat("Unable to resolve full path of PCH-header '",
+                       pchHeader, "' assigned to target ", target->GetName(),
+                       ", although its path is supposed to be known!"));
           }
           target->AddSource(pchHeader);
         }
@@ -4071,13 +4071,12 @@ void cmLocalGenerator::AppendIncludeDirectories(
 
   for (std::string const& include : includes_vec) {
     if (!cmSystemTools::FileIsFullPath(include)) {
-      std::ostringstream e;
-      e << "Found relative path while evaluating include directories of "
-           "\""
-        << sourceFile.GetLocation().GetName() << "\":\n  \"" << include
-        << "\"\n";
-
-      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Found relative path while evaluating include directories of "
+                 "\"",
+                 sourceFile.GetLocation().GetName(), "\":\n  \"", include,
+                 "\"\n"));
       return;
     }
 
@@ -4537,20 +4536,25 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
                                          this->ObjectPathMax)) {
       // Warn if this is the first time the path has been seen.
       if (this->ObjectMaxPathViolations.insert(dir_max).second) {
-        std::ostringstream m;
-        /* clang-format off */
-        m << "The object file directory\n"
-          << "  " << dir_max << "\n"
-          << "has " << dir_max.size() << " characters.  "
-          << "The maximum full path to an object file is "
-          << this->ObjectPathMax << " characters "
-          << "(see CMAKE_OBJECT_PATH_MAX).  "
-          << "Object file\n"
-          << "  " << ssin << "\n"
-          << "cannot be safely placed under this directory.  "
-          << "The build may not work correctly.";
-        /* clang-format on */
-        this->IssueMessage(MessageType::WARNING, m.str());
+        this->IssueMessage(
+          MessageType::WARNING,
+          cmStrCat("The object file directory\n"
+                   "  ",
+                   dir_max,
+                   "\n"
+                   "has ",
+                   dir_max.size(),
+                   " characters.  "
+                   "The maximum full path to an object file is ",
+                   this->ObjectPathMax,
+                   " characters "
+                   "(see CMAKE_OBJECT_PATH_MAX).  "
+                   "Object file\n"
+                   "  ",
+                   ssin,
+                   "\n"
+                   "cannot be safely placed under this directory.  "
+                   "The build may not work correctly."));
       }
     }
 
@@ -5041,30 +5045,28 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   std::string::size_type pos = define.find_first_of("(=");
   if (pos != std::string::npos) {
     if (define[pos] == '(') {
-      std::ostringstream e;
-      /* clang-format off */
-      e << "WARNING: Function-style preprocessor definitions may not be "
-           "passed on the compiler command line because many compilers "
-           "do not support it.\n"
-           "CMake is dropping a preprocessor definition: " << define << "\n"
-           "Consider defining the macro in a (configured) header file.\n";
-      /* clang-format on */
-      cmSystemTools::Message(e.str());
+      cmSystemTools::Message(cmStrCat(
+        "WARNING: Function-style preprocessor definitions may not be "
+        "passed on the compiler command line because many compilers "
+        "do not support it.\n"
+        "CMake is dropping a preprocessor definition: ",
+        define,
+        "\n"
+        "Consider defining the macro in a (configured) header file.\n"));
       return false;
     }
   }
 
   // Many compilers do not support # in the value so we disable it.
   if (define.find_first_of('#') != std::string::npos) {
-    std::ostringstream e;
-    /* clang-format off */
-    e << "WARNING: Preprocessor definitions containing '#' may not be "
-         "passed on the compiler command line because many compilers "
-         "do not support it.\n"
-         "CMake is dropping a preprocessor definition: " << define << "\n"
-         "Consider defining the macro in a (configured) header file.\n";
-    /* clang-format on */
-    cmSystemTools::Message(e.str());
+    cmSystemTools::Message(cmStrCat(
+      "WARNING: Preprocessor definitions containing '#' may not be "
+      "passed on the compiler command line because many compilers "
+      "do not support it.\n"
+      "CMake is dropping a preprocessor definition: ",
+      define,
+      "\n"
+      "Consider defining the macro in a (configured) header file.\n"));
     return false;
   }
 
@@ -5094,10 +5096,9 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
     }
   }
   if (!cmSystemTools::FileExists(inFile, true)) {
-    std::ostringstream e;
-    e << "Target " << target->GetName() << " Info.plist template \"" << inFile
-      << "\" could not be found.";
-    cmSystemTools::Error(e.str());
+    cmSystemTools::Error(cmStrCat("Target ", target->GetName(),
+                                  " Info.plist template \"", inFile,
+                                  "\" could not be found."));
     return;
   }
 
@@ -5133,10 +5134,9 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
     }
   }
   if (!cmSystemTools::FileExists(inFile, true)) {
-    std::ostringstream e;
-    e << "Target " << target->GetName() << " Info.plist template \"" << inFile
-      << "\" could not be found.";
-    cmSystemTools::Error(e.str());
+    cmSystemTools::Error(cmStrCat("Target ", target->GetName(),
+                                  " Info.plist template \"", inFile,
+                                  "\" could not be found."));
     return;
   }
 

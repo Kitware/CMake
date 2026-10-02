@@ -3,7 +3,6 @@
 #include "cmSetPropertyCommand.h"
 
 #include <set>
-#include <sstream>
 #include <unordered_set>
 
 #include <cm/optional>
@@ -925,12 +924,8 @@ bool HandleTestMode(cmExecutionStatus& status, std::set<std::string>& names,
 
   // Names that are still left were not found.
   if (!names.empty()) {
-    std::ostringstream e;
-    e << "given TEST names that do not exist:\n";
-    for (std::string const& name : names) {
-      e << "  " << name << "\n";
-    }
-    status.SetError(e.str());
+    status.SetError(cmStrCat("given TEST names that do not exist:\n",
+                             cmWrap("  ", names, "\n", "")));
     return false;
   }
   return true;

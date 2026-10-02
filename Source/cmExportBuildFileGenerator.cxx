@@ -242,9 +242,8 @@ void cmExportBuildFileGenerator::ComplainAboutMissingTarget(
 void cmExportBuildFileGenerator::ComplainAboutDuplicateTarget(
   std::string const& targetName) const
 {
-  std::ostringstream e;
-  e << "given target \"" << targetName << "\" more than once.";
-  this->ReportError(e.str());
+  this->ReportError(
+    cmStrCat("given target \"", targetName, "\" more than once."));
 }
 
 void cmExportBuildFileGenerator::IssueMessage(MessageType type,

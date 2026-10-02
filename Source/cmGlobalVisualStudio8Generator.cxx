@@ -121,47 +121,47 @@ bool cmGlobalVisualStudio8Generator::ParseGeneratorPlatform(
   for (; fi != fields.end(); ++fi) {
     std::string::size_type pos = fi->find('=');
     if (pos == fi->npos) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given platform specification\n"
-        "  " << p << "\n"
-        "that contains a field after the first ',' with no '='."
-        ;
-      /* clang-format on */
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Generator\n"
+                 "  ",
+                 this->GetName(),
+                 "\n"
+                 "given platform specification\n"
+                 "  ",
+                 p,
+                 "\n"
+                 "that contains a field after the first ',' with no '='."));
       return false;
     }
     std::string const key = fi->substr(0, pos);
     std::string const value = fi->substr(pos + 1);
     if (!handled.insert(key).second) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given platform specification\n"
-        "  " << p << "\n"
-        "that contains duplicate field key '" << key << "'."
-        ;
-      /* clang-format on */
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Generator\n"
+                                "  ",
+                                this->GetName(),
+                                "\n"
+                                "given platform specification\n"
+                                "  ",
+                                p,
+                                "\n"
+                                "that contains duplicate field key '",
+                                key, "'."));
       return false;
     }
     if (!this->ProcessGeneratorPlatformField(key, value)) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given platform specification\n"
-        "  " << p << "\n"
-        "that contains invalid field '" << *fi << "'."
-        ;
-      /* clang-format on */
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Generator\n"
+                                "  ",
+                                this->GetName(),
+                                "\n"
+                                "given platform specification\n"
+                                "  ",
+                                p,
+                                "\n"
+                                "that contains invalid field '",
+                                *fi, "'."));
       return false;
     }
   }

@@ -9,7 +9,6 @@
 #include <functional>
 #include <iterator>
 #include <map>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -378,15 +377,11 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
   std::string targetVersionMajor;
   std::string targetVersionMinor;
   {
-    std::ostringstream majorStream;
-    std::ostringstream minorStream;
     int major;
     int minor;
     this->GeneratorTarget->GetTargetVersion(major, minor);
-    majorStream << major;
-    minorStream << minor;
-    targetVersionMajor = majorStream.str();
-    targetVersionMinor = minorStream.str();
+    targetVersionMajor = std::to_string(major);
+    targetVersionMinor = std::to_string(minor);
   }
   vars.TargetVersionMajor = targetVersionMajor.c_str();
   vars.TargetVersionMinor = targetVersionMinor.c_str();

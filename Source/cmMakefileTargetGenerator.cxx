@@ -628,11 +628,11 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   if (this->ObjectFiles.find(obj) == this->ObjectFiles.end()) {
     this->ObjectFiles.insert(obj);
   } else {
-    std::ostringstream err;
-    err << "Warning: Source file \"" << source.GetFullPath()
-        << "\" is listed multiple times for target \""
-        << this->GeneratorTarget->GetName() << "\".";
-    cmSystemTools::Message(err.str(), "Warning");
+    cmSystemTools::Message(
+      cmStrCat("Warning: Source file \"", source.GetFullPath(),
+               "\" is listed multiple times for target \"",
+               this->GeneratorTarget->GetName(), "\"."),
+      "Warning");
     return;
   }
 
@@ -1849,9 +1849,8 @@ void cmMakefileTargetGenerator::MakeEchoProgress(
 {
   progress.Dir =
     cmStrCat(this->LocalGenerator->GetBinaryDirectory(), "/CMakeFiles");
-  std::ostringstream progressArg;
-  progressArg << "$(CMAKE_PROGRESS_" << this->NumberOfProgressActions << ")";
-  progress.Arg = progressArg.str();
+  progress.Arg =
+    cmStrCat("$(CMAKE_PROGRESS_", this->NumberOfProgressActions, ')');
 }
 
 void cmMakefileTargetGenerator::WriteObjectsVariable(

@@ -7,7 +7,6 @@
 #include "cmConfigure.h"
 
 #include <set>
-#include <sstream>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -170,20 +169,22 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
       }
 
       if (!cmSystemTools::FileIsFullPath(entryInclude)) {
-        std::ostringstream e;
         MessageType messageType = MessageType::FATAL_ERROR;
         if (!targetName.empty()) {
-          /* clang-format off */
-          e << "Target \"" << targetName << "\" contains relative "
-            "path in its INTERFACE_INCLUDE_DIRECTORIES:\n"
-            "  \"" << entryInclude << "\"";
-          /* clang-format on */
+          tgt->GetLocalGenerator()->IssueMessage(
+            messageType,
+            cmStrCat("Target \"", targetName,
+                     "\" contains relative path in its "
+                     "INTERFACE_INCLUDE_DIRECTORIES:\n"
+                     "  \"",
+                     entryInclude, '"'));
         } else {
-          e << "Found relative path while evaluating include directories of "
-               "\""
-            << tgt->GetName() << "\":\n  \"" << entryInclude << "\"\n";
+          tgt->GetLocalGenerator()->IssueMessage(
+            messageType,
+            cmStrCat("Found relative path while evaluating include "
+                     "directories of \"",
+                     tgt->GetName(), "\":\n  \"", entryInclude, "\"\n"));
         }
-        tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
         if (messageType == MessageType::FATAL_ERROR) {
           return;
         }

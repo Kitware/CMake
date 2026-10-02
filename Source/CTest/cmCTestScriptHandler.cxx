@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <functional>
 #include <map>
-#include <sstream>
 #include <utility>
 
 #include <cm/memory>
@@ -30,6 +29,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
 #include "cmake.h"
@@ -143,13 +143,9 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
       failed = true;
   }
   if (failed) {
-    std::ostringstream message;
-    message << "Error running command: [";
-    message << static_cast<int>(result.first) << "] ";
-    for (std::string const& arg : argv) {
-      message << arg << " ";
-    }
-    cmCTestLog(this->CTest, ERROR_MESSAGE, message.str(), '\n');
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error running command: [",
+               static_cast<int>(result.first), "] ", cmWrap("", argv, " ", ""),
+               '\n');
     return -1;
   }
   return retVal;

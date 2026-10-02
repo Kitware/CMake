@@ -5,7 +5,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -31,8 +30,8 @@ protected:
   int PackageFiles() override;
   bool SupportsComponentInstallation() const override;
 
-  bool CopyFile(std::ostringstream& source, std::ostringstream& target);
-  bool CreateEmptyFile(std::ostringstream& target, size_t size);
+  bool CopyFile(std::string const& source, std::string const& target);
+  bool CreateEmptyFile(std::string const& target, size_t size);
   bool RunCommand(std::string const& command, std::string* output = nullptr);
 
   std::string GetComponentInstallSuffix(

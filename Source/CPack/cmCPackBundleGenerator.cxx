@@ -82,31 +82,19 @@ int cmCPackBundleGenerator::ConstructBundle()
 
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
-  std::string const staging = toplevel;
+  std::string const& staging = toplevel;
 
-  std::ostringstream contents;
-  contents << staging << "/" << cpack_bundle_name
-           << ".app/"
-              "Contents";
+  std::string const contents =
+    cmStrCat(staging, '/', cpack_bundle_name, ".app/Contents");
 
-  std::ostringstream application;
-  application << contents.str()
-              << "/"
-                 "MacOS";
+  std::string const application = cmStrCat(contents, "/MacOS");
 
-  std::ostringstream resources;
-  resources << contents.str()
-            << "/"
-               "Resources";
+  std::string const resources = cmStrCat(contents, "/Resources");
 
   // Install a required, user-provided bundle metadata file ...
-  std::ostringstream plist_source;
-  plist_source << cpack_bundle_plist;
+  std::string const plist_source = cpack_bundle_plist;
 
-  std::ostringstream plist_target;
-  plist_target << contents.str()
-               << "/"
-                  "Info.plist";
+  std::string const plist_target = cmStrCat(contents, "/Info.plist");
 
   if (!this->CopyFile(plist_source, plist_target)) {
     cmCPackLogger(
@@ -118,11 +106,10 @@ int cmCPackBundleGenerator::ConstructBundle()
   }
 
   // Install a user-provided bundle icon ...
-  std::ostringstream icon_source;
-  icon_source << cpack_bundle_icon;
+  std::string const icon_source = cpack_bundle_icon;
 
-  std::ostringstream icon_target;
-  icon_target << resources.str() << "/" << cpack_bundle_name << ".icns";
+  std::string const icon_target =
+    cmStrCat(resources, '/', cpack_bundle_name, ".icns");
 
   if (!this->CopyFile(icon_source, icon_target)) {
     cmCPackLogger(
@@ -136,11 +123,10 @@ int cmCPackBundleGenerator::ConstructBundle()
   // Optionally a user-provided startup command (could be an
   // executable or a script) ...
   if (!cpack_bundle_startup_command->empty()) {
-    std::ostringstream command_source;
-    command_source << cpack_bundle_startup_command;
+    std::string const& command_source = cpack_bundle_startup_command;
 
-    std::ostringstream command_target;
-    command_target << application.str() << "/" << cpack_bundle_name;
+    std::string const command_target =
+      cmStrCat(application, '/', cpack_bundle_name);
 
     if (!this->CopyFile(command_source, command_target)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -151,7 +137,7 @@ int cmCPackBundleGenerator::ConstructBundle()
       return 0;
     }
 
-    cmSystemTools::SetPermissions(command_target.str().c_str(), 0777);
+    cmSystemTools::SetPermissions(command_target.c_str(), 0777);
   }
 
   return 1;

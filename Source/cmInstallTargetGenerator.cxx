@@ -762,15 +762,17 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
     ss >> darwin_major_version;
     if (!ss.fail() && darwin_major_version <= 9 &&
         (!oldRuntimeDirs.empty() || !newRuntimeDirs.empty())) {
-      std::ostringstream msg;
-      msg
-        << "WARNING: Target \"" << this->Target->GetName()
-        << "\" has runtime paths which cannot be changed during install.  "
-        << "To change runtime paths, OS X version 10.6 or newer is required.  "
-        << "Therefore, runtime paths will not be changed when installing.  "
-        << "CMAKE_BUILD_WITH_INSTALL_RPATH may be used to work around"
-           " this limitation.";
-      mf->IssueMessage(MessageType::WARNING, msg.str());
+      mf->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat("WARNING: Target \"", this->Target->GetName(),
+                 "\" has runtime paths which cannot be changed during "
+                 "install.  "
+                 "To change runtime paths, OS X version 10.6 or newer is "
+                 "required.  "
+                 "Therefore, runtime paths will not be changed when "
+                 "installing.  "
+                 "CMAKE_BUILD_WITH_INSTALL_RPATH may be used to work around"
+                 " this limitation."));
     } else {
       // To be consistent with older versions, runpath changes must be ordered,
       // deleted first, then added, *and* the same path must only appear once.
@@ -979,12 +981,14 @@ void cmInstallTargetGenerator::IssueCMP0095Warning(
   if (potentially_affected) {
     cmake const* const cm =
       this->Target->GetGlobalGenerator()->GetCMakeInstance();
-    std::ostringstream w;
-    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0095) << "\n";
-    w << "RPATH entries for target '" << this->Target->GetName() << "' "
-      << "will not be escaped in the intermediary "
-      << "cmake_install.cmake script.";
-    cm->IssueDiagnostic(cmDiagnostics::CMD_POLICY, w.str(),
-                        this->GetBacktrace());
+    cm->IssueDiagnostic(
+      cmDiagnostics::CMD_POLICY,
+      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0095),
+               "\n"
+               "RPATH entries for target '",
+               this->Target->GetName(),
+               "' will not be escaped in the intermediary "
+               "cmake_install.cmake script."),
+      this->GetBacktrace());
   }
 }
