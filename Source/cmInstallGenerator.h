@@ -7,6 +7,7 @@
 #include <functional>
 #include <iosfwd>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmDiagnosticContext.h"
@@ -16,6 +17,8 @@
 class cmLocalGenerator;
 class cmMakefile;
 class cmListFileBacktrace;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
 
 /** \class cmInstallGenerator
  * \brief Support class for generating install scripts.
@@ -24,6 +27,28 @@ class cmListFileBacktrace;
 class cmInstallGenerator : public cmScriptGenerator
 {
 public:
+  enum class BuildDependencyType
+  {
+    Normal,
+    InstallArtifact,
+    GeneratedFile,
+  };
+
+  struct BuildDependency
+  {
+    BuildDependency(cmGeneratorTarget const* target, BuildDependencyType type,
+                    std::string file = std::string())
+      : Target(target)
+      , Type(type)
+      , File(std::move(file))
+    {
+    }
+
+    cmGeneratorTarget const* Target;
+    BuildDependencyType Type;
+    std::string File; // only for GeneratedFile dependencies
+  };
+
   enum MessageLevel
   {
     MessageDefault,
@@ -75,6 +100,19 @@ public:
 
   virtual bool Compute(cmLocalGenerator*) { return true; }
 
+  virtual void GetInstallBuildDependencies(std::string const&,
+                                           std::vector<BuildDependency>&) const
+  {
+  }
+
+  virtual void GetInstallBuildDependencyComponents(
+    std::vector<std::string>& components) const
+  {
+    if (!this->Component.empty()) {
+      components.push_back(this->Component);
+    }
+  }
+
   std::string const& GetComponent() const { return this->Component; }
 
   bool GetExcludeFromAll() const { return this->ExcludeFromAll; }
@@ -109,6 +147,16 @@ protected:
                        std::string const& config, std::string const& dir,
                        std::vector<std::string> const& files,
                        TweakMethod const& tweak);
+
+  // Add dependencies for the files that the build produces among the given
+  // files.  A file linked by a target depends on building that target.  Any
+  // other generated file is attributed to the target owning the custom
+  // command that produces it or, if no single target owns it, such as for a
+  // byproduct, to the installing target, if any.
+  static void AddGeneratedFileDependencies(
+    cmGlobalGenerator* gg, std::string const& config,
+    cmGeneratorTarget const* target, std::vector<std::string> const& files,
+    std::vector<BuildDependency>& dependencies);
 
   // Information shared by most generator types.
   std::string Destination;

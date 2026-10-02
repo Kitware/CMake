@@ -1,0 +1,1 @@
+check_prepared(release_only)

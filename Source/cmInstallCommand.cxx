@@ -866,6 +866,7 @@ bool CreateInstallGeneratorsForTarget(
         privateHeaderGenerator = CreateInstallFilesGenerator(
           helper.Makefile, absFiles, privateHeaderArgs, false,
           helper.GetIncludeDestination(&privateHeaderArgs), configurations);
+        privateHeaderGenerator->SetOwningTarget(target.GetName());
       } else {
         helper.Makefile->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
@@ -889,6 +890,7 @@ bool CreateInstallGeneratorsForTarget(
         publicHeaderGenerator = CreateInstallFilesGenerator(
           helper.Makefile, absFiles, publicHeaderArgs, false,
           helper.GetIncludeDestination(&publicHeaderArgs), configurations);
+        publicHeaderGenerator->SetOwningTarget(target.GetName());
       } else {
         helper.Makefile->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
@@ -912,6 +914,7 @@ bool CreateInstallGeneratorsForTarget(
         resourceGenerator = CreateInstallFilesGenerator(
           helper.Makefile, absFiles, resourceArgs, false,
           resourceArgs.GetDestination(), configurations);
+        resourceGenerator->SetOwningTarget(target.GetName());
       } else if (!target.IsAppBundleOnApple()) {
         helper.Makefile->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,

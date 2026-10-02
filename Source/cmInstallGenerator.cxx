@@ -8,6 +8,8 @@
 #include <cm/string_view>
 
 #include "cmDiagnostics.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -280,6 +282,25 @@ std::string cmInstallGenerator::GetDestDirPath(std::string const& file)
   }
   toDestDirPath += file;
   return toDestDirPath;
+}
+
+void cmInstallGenerator::AddGeneratedFileDependencies(
+  cmGlobalGenerator* gg, std::string const& config,
+  cmGeneratorTarget const* target, std::vector<std::string> const& files,
+  std::vector<BuildDependency>& dependencies)
+{
+  for (std::string const& file : files) {
+    if (cmGeneratorTarget const* owner = gg->FindOutputOwningTarget(file)) {
+      dependencies.push_back(
+        { owner, BuildDependencyType::GeneratedFile, file });
+    } else if (cmGeneratorTarget const* linker =
+                 gg->FindArtifactOwningTarget(file, config)) {
+      dependencies.push_back({ linker, BuildDependencyType::Normal });
+    } else if (gg->IsGeneratedByBuild(file)) {
+      dependencies.push_back(
+        { target, BuildDependencyType::GeneratedFile, file });
+    }
+  }
 }
 
 void cmInstallGenerator::AddTweak(std::ostream& os, Indent indent,

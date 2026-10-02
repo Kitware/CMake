@@ -103,6 +103,8 @@ public:
 
   bool IsIPOSupported() const override { return true; }
 
+  bool SupportsInstallPrepFileDependencies() const override { return true; }
+
   /**
    * Write a build statement @a build to @a os.
    * @warning no escaping of any kind is done here.
@@ -532,6 +534,7 @@ private:
   void WriteDisclaimer(std::ostream& os) const;
 
   void WriteAssumedSourceDependencies();
+  void WriteInstallPrepTargets();
   void WriteTestPrepTargets();
 
   void WriteTargetAliases(std::ostream& os);

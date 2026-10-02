@@ -1,0 +1,2 @@
+check_prepared(debug_only)
+check_not_prepared(release_only)

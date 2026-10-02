@@ -558,6 +558,15 @@ bool cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
   return true;
 }
 
+void cmInstallTargetGenerator::GetInstallBuildDependencies(
+  std::string const& config, std::vector<BuildDependency>& dependencies) const
+{
+  if (!this->GetFiles(config).From.empty()) {
+    dependencies.push_back(
+      { this->Target, BuildDependencyType::InstallArtifact });
+  }
+}
+
 void cmInstallTargetGenerator::PreReplacementTweaks(std::ostream& os,
                                                     Indent indent,
                                                     std::string const& config,

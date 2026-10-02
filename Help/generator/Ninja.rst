@@ -31,6 +31,27 @@ Builtin Targets
     Created only if the :prop_gbl:`INSTALL_PARALLEL` global property is ``ON``.
     Runs the install step for each subdirectory independently and in parallel.
 
+``install_prep/<component>``
+
+  .. versionadded:: 4.5
+
+    Created if the project has install rules, unless the
+    :variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` or
+    :variable:`CMAKE_SKIP_INSTALL_RULES` variable is enabled. Builds all known
+    build dependencies for the named install component. Components whose
+    names cannot be represented safely are excluded. See
+    :ref:`Install Preparation Targets` and :ref:`Target Names`.
+
+``install_prep/all``
+
+  .. versionadded:: 4.5
+
+    Created if the project has install rules, unless the
+    :variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` or
+    :variable:`CMAKE_SKIP_INSTALL_RULES` variable is enabled. Builds all known
+    build dependencies for an installation that does not select a component.
+    See :ref:`Install Preparation Targets`.
+
 ``test_prep/<test-name>``
 
   .. versionadded:: 4.4

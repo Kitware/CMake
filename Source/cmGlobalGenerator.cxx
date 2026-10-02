@@ -51,6 +51,7 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallRuntimeDependencySet.h"
 #include "cmInstallSbomGenerator.h"
+#include "cmLinkItem.h"
 #include "cmLinkLineComputer.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -2583,6 +2584,8 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->GeneratedByBuildIndex.clear();
   this->GeneratedByBuildIndexComputed = false;
 
+  this->InstallPrepDependencies.clear();
+
   this->Makefiles.clear();
 
   this->LocalGenerators.clear();
@@ -3378,6 +3381,246 @@ std::string cmGlobalGenerator::GetTestBuildDependencyPath(
   cmGeneratorTarget const* target, std::string const& config) const
 {
   return target->GetFullPath(config);
+}
+
+std::vector<cmInstallGenerator::BuildDependency> const&
+cmGlobalGenerator::GetInstallPrepDependencies(
+  cmInstallGenerator const* installer, std::string const& config)
+{
+  auto const inserted = this->InstallPrepDependencies.emplace(
+    std::make_pair(installer, config),
+    std::vector<cmInstallGenerator::BuildDependency>());
+  if (inserted.second) {
+    installer->GetInstallBuildDependencies(config, inserted.first->second);
+  }
+  return inserted.first->second;
+}
+
+cmGlobalGenerator::InstallPrepTargets cmGlobalGenerator::GetInstallPrepTargets(
+  std::string const& config)
+{
+  InstallPrepTargets prepTargets;
+  if (!this->AreInstallPrepTargetsEnabled()) {
+    return prepTargets;
+  }
+
+  auto isRepresentableComponent = [this](std::string const& component) {
+    return component != "all" &&
+      this->IsInstallPrepComponentRepresentable(component);
+  };
+
+  for (std::string const& component : this->InstallComponents) {
+    if (isRepresentableComponent(component)) {
+      prepTargets.Components[component];
+    }
+  }
+
+  auto addDependency = [](InstallPrepTargets::TargetMap& targets,
+                          cmInstallGenerator::BuildDependency dependency) {
+    if (dependency.Type ==
+        cmInstallGenerator::BuildDependencyType::GeneratedFile) {
+      targets[dependency.Target].GeneratedFiles.insert(dependency.File);
+      return;
+    }
+    std::set<cmGeneratorTarget const*> visited;
+    std::function<void(cmGeneratorTarget const*,
+                       cmInstallGenerator::BuildDependencyType)>
+      addTarget;
+    addTarget = [&addTarget, &targets,
+                 &visited](cmGeneratorTarget const* target,
+                           cmInstallGenerator::BuildDependencyType type) {
+      if (!target || !visited.insert(target).second) {
+        return;
+      }
+      if (!target->IsInBuildSystem() || target->IsImported()) {
+        for (cmLinkItem const& utility : target->GetUtilityItems()) {
+          addTarget(utility.Target,
+                    cmInstallGenerator::BuildDependencyType::Normal);
+        }
+        return;
+      }
+
+      InstallPrepTargets::TargetRequirements& requirements = targets[target];
+      if (type == cmInstallGenerator::BuildDependencyType::InstallArtifact) {
+        requirements.InstallArtifact = true;
+      } else {
+        requirements.Normal = true;
+      }
+    };
+    addTarget(dependency.Target, dependency.Type);
+  };
+
+  for (auto const& localGen : this->LocalGenerators) {
+    if (this->IsExcluded(this->LocalGenerators.front().get(),
+                         localGen.get())) {
+      continue;
+    }
+
+    for (auto const& installer :
+         localGen->GetMakefile()->GetInstallGenerators()) {
+      if (!installer->InstallsForConfig(config)) {
+        continue;
+      }
+
+      std::vector<cmInstallGenerator::BuildDependency> const& dependencies =
+        this->GetInstallPrepDependencies(installer.get(), config);
+      std::vector<std::string> components;
+      installer->GetInstallBuildDependencyComponents(components);
+      for (cmInstallGenerator::BuildDependency const& dependency :
+           dependencies) {
+        if (!dependency.Target) {
+          // A generated file that no target prepares.
+          if (dependency.Type ==
+              cmInstallGenerator::BuildDependencyType::GeneratedFile) {
+            if (installer->GetAllComponentsFlag()) {
+              for (auto const& component : prepTargets.Components) {
+                prepTargets.ComponentFiles[component.first].insert(
+                  dependency.File);
+              }
+            } else {
+              for (std::string const& component : components) {
+                if (isRepresentableComponent(component)) {
+                  prepTargets.ComponentFiles[component].insert(
+                    dependency.File);
+                }
+              }
+            }
+            if (!installer->GetExcludeFromAll()) {
+              prepTargets.AllFiles.insert(dependency.File);
+            }
+          }
+          continue;
+        }
+
+        if (installer->GetAllComponentsFlag()) {
+          for (auto& component : prepTargets.Components) {
+            addDependency(component.second, dependency);
+          }
+        } else {
+          for (std::string const& component : components) {
+            if (isRepresentableComponent(component)) {
+              addDependency(prepTargets.Components[component], dependency);
+            }
+          }
+        }
+
+        if (!installer->GetExcludeFromAll()) {
+          addDependency(prepTargets.All, dependency);
+        }
+      }
+    }
+  }
+
+  return prepTargets;
+}
+
+bool cmGlobalGenerator::IsInstallPrepComponentRepresentable(
+  std::string const& component) const
+{
+  static cmsys::RegularExpression const invalidComponentRegex(
+    "[^a-zA-Z0-9_.:+/-]|(^|/)\\.?\\.?($|/)");
+  cmsys::RegularExpressionMatch match;
+  return !component.empty() &&
+    !invalidComponentRegex.find(component.c_str(), match);
+}
+
+void cmGlobalGenerator::CheckInstallPrepTargets()
+{
+  if (!this->AreInstallPrepTargetsEnabled()) {
+    return;
+  }
+
+  // Diagnose install rules with build dependencies that no preparation target
+  // builds.
+  std::vector<std::string> const configs =
+    this->Makefiles.front()->GetGeneratorConfigs(
+      cmMakefile::IncludeEmptyConfig);
+  std::set<std::string> unrepresentableComponents;
+  std::set<std::string> unpreparedFiles;
+  for (auto const& localGen : this->LocalGenerators) {
+    if (this->IsExcluded(this->LocalGenerators.front().get(),
+                         localGen.get())) {
+      continue;
+    }
+
+    for (auto const& installer :
+         localGen->GetMakefile()->GetInstallGenerators()) {
+      std::vector<cmInstallGenerator::BuildDependency> dependencies;
+      for (std::string const& config : configs) {
+        if (installer->InstallsForConfig(config)) {
+          std::vector<cmInstallGenerator::BuildDependency> const&
+            configDependencies =
+              this->GetInstallPrepDependencies(installer.get(), config);
+          dependencies.insert(dependencies.end(), configDependencies.begin(),
+                              configDependencies.end());
+        }
+      }
+
+      // A generated file that no target prepares.
+      if (!this->SupportsInstallPrepFileDependencies()) {
+        for (cmInstallGenerator::BuildDependency const& dependency :
+             dependencies) {
+          if (!dependency.Target &&
+              dependency.Type ==
+                cmInstallGenerator::BuildDependencyType::GeneratedFile &&
+              unpreparedFiles.insert(dependency.File).second) {
+            localGen->IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
+              cmStrCat("An install rule installs or depends on file\n  ",
+                       dependency.File,
+                       "\nwhich is generated but is not the unique output of "
+                       "a build target, so \"install_prep/\" targets cannot "
+                       "build it with this generator.  Produce the file with "
+                       "a custom command attached to a single target to "
+                       "prepare it."),
+              installer->GetDiagnosticContext());
+          }
+        }
+      }
+
+      if (installer->GetAllComponentsFlag() || dependencies.empty()) {
+        continue;
+      }
+
+      std::vector<std::string> components;
+      installer->GetInstallBuildDependencyComponents(components);
+      for (std::string const& component : components) {
+        if (component == "all") {
+          // A component named "all" has no preparation target of its own,
+          // and install_prep/all omits EXCLUDE_FROM_ALL rules.
+          if (installer->GetExcludeFromAll()) {
+            localGen->IssueDiagnostic(
+              cmDiagnostics::CMD_AUTHOR,
+              "An install rule in the component named \"all\" uses "
+              "EXCLUDE_FROM_ALL and has build dependencies, but no "
+              "install_prep/ target builds them: install_prep/all omits "
+              "EXCLUDE_FROM_ALL rules, and the \"all\" component has no "
+              "preparation target of its own.  Rename the component or "
+              "remove EXCLUDE_FROM_ALL.",
+              installer->GetDiagnosticContext());
+          }
+        } else if (!this->IsInstallPrepComponentRepresentable(component) &&
+                   unrepresentableComponents.insert(component).second) {
+          localGen->IssueDiagnostic(
+            cmDiagnostics::CMD_AUTHOR,
+            cmStrCat("The install component \"", component,
+                     "\" has build dependencies, but its name cannot be used "
+                     "in a build target name with this generator.  No "
+                     "\"install_prep/\" target will be generated for it.  "
+                     "Rename the component to build its dependencies with an "
+                     "\"install_prep/\" target."),
+            installer->GetDiagnosticContext());
+        }
+      }
+    }
+  }
+}
+
+bool cmGlobalGenerator::AreInstallPrepTargetsEnabled() const
+{
+  return !this->Makefiles.empty() && this->InstallTargetEnabled &&
+    !this->Makefiles.front()->IsOn("CMAKE_SKIP_INSTALL_PREP_TARGETS") &&
+    !this->Makefiles.front()->IsOn("CMAKE_SKIP_INSTALL_RULES");
 }
 
 // If the file has no extension it's either a raw executable or might

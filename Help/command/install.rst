@@ -47,6 +47,10 @@ are executed in order during installation.
   and the order that install rules added in different subdirectories will run is
   not guaranteed.
 
+.. versionadded:: 4.5
+  Some generators provide ``install_prep/`` build targets that build only the
+  prerequisites of an installation.  See :ref:`Install Preparation Targets`.
+
 Common Options
 """"""""""""""
 
@@ -121,6 +125,11 @@ signatures that specify them.  The common options are:
   :option:`--component <cmake--install --component>` option and the
   :module:`CPackComponent` module.  Global target ``list_install_components``
   lists all available components.
+
+  .. versionadded:: 4.5
+    Some generators provide an ``install_prep/<component>`` build target that
+    builds the prerequisites of installing a component.  See
+    :ref:`Install Preparation Targets`.
 
 ``EXCLUDE_FROM_ALL``
   .. versionadded:: 3.6

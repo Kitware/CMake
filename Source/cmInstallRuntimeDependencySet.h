@@ -41,6 +41,11 @@ public:
 
     virtual std::string GetItemPath(std::string const& config) const = 0;
 
+    virtual cmGeneratorTarget const* GetGeneratorTarget() const
+    {
+      return nullptr;
+    }
+
     virtual void AddPostExcludeFiles(
       std::string const& /*config*/, std::set<std::string>& /*files*/,
       cmInstallRuntimeDependencySet* /*set*/) const
@@ -57,6 +62,8 @@ public:
     }
 
     std::string GetItemPath(std::string const& config) const override;
+
+    cmGeneratorTarget const* GetGeneratorTarget() const override;
 
     void AddPostExcludeFiles(
       std::string const& config, std::set<std::string>& files,
@@ -75,6 +82,8 @@ public:
     }
 
     std::string GetItemPath(std::string const& config) const override;
+
+    cmGeneratorTarget const* GetGeneratorTarget() const override;
 
   private:
     cmInstallImportedRuntimeArtifactsGenerator* Target;
@@ -144,6 +153,9 @@ public:
   }
 
   Item* GetBundleExecutable() const { return this->BundleExecutable; }
+
+  void GetInstallBuildDependencies(
+    std::vector<cmGeneratorTarget const*>& dependencies) const;
 
   bool Empty() const
   {

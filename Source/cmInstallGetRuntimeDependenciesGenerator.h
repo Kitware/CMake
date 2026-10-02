@@ -32,6 +32,13 @@ public:
 
   bool Compute(cmLocalGenerator* lg) override;
 
+  void GetInstallBuildDependencies(
+    std::string const& config,
+    std::vector<BuildDependency>& dependencies) const override;
+
+  void GetInstallBuildDependencyComponents(
+    std::vector<std::string>& components) const override;
+
 protected:
   void GenerateScript(std::ostream& os) override;
 

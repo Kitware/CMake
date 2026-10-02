@@ -8,6 +8,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
 #include "cmList.h"
+#include "cmLocalGenerator.h"
 
 cmInstallFilesGenerator::cmInstallFilesGenerator(
   std::vector<std::string> const& files, std::string const& dest,
@@ -48,7 +49,18 @@ cmInstallFilesGenerator::~cmInstallFilesGenerator() = default;
 bool cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
+  if (!this->OwningTargetName.empty()) {
+    this->OwningTarget = lg->FindGeneratorTargetToUse(this->OwningTargetName);
+  }
   return true;
+}
+
+void cmInstallFilesGenerator::GetInstallBuildDependencies(
+  std::string const& config, std::vector<BuildDependency>& dependencies) const
+{
+  AddGeneratedFileDependencies(this->LocalGenerator->GetGlobalGenerator(),
+                               config, this->OwningTarget,
+                               this->GetFiles(config), dependencies);
 }
 
 std::string cmInstallFilesGenerator::GetDestination(

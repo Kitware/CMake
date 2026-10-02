@@ -26,6 +26,7 @@
 #include "cmDuration.h"
 #include "cmExportFileGenerator.h"
 #include "cmExportSet.h"
+#include "cmInstallGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmSbomBuilder.h"
 #include "cmStateSnapshot.h"
@@ -136,6 +137,44 @@ public:
   virtual std::vector<std::string> GetTestBuildDependencyPaths(
     std::string const& config,
     cmTestGenerator::BuildDependencies const& deps) const;
+
+  struct InstallPrepTargets
+  {
+    struct TargetRequirements
+    {
+      bool Normal = false;
+      bool InstallArtifact = false;
+      std::set<std::string> GeneratedFiles;
+    };
+
+    using TargetMap = std::map<cmGeneratorTarget const*, TargetRequirements>;
+
+    TargetMap All;
+    std::map<std::string, TargetMap> Components;
+
+    // Generated files that no target prepares, such as byproducts installed
+    // by install(FILES).  Only generators that support depending on them
+    // prepare these files.
+    std::set<std::string> AllFiles;
+    std::map<std::string, std::set<std::string>> ComponentFiles;
+  };
+
+  InstallPrepTargets GetInstallPrepTargets(std::string const& config);
+
+  // Whether install preparation targets can depend on a generated file that
+  // is not the unique output of a target.
+  virtual bool SupportsInstallPrepFileDependencies() const { return false; }
+
+  // Whether the name of an install component can be used in the name of its
+  // install preparation target.
+  virtual bool IsInstallPrepComponentRepresentable(
+    std::string const& component) const;
+
+  // Diagnose install rules that no install preparation target prepares.
+  // Generators that write install preparation targets call this once.
+  void CheckInstallPrepTargets();
+
+  bool AreInstallPrepTargetsEnabled() const;
 
   /** Check whether the given name matches the current generator.  */
   virtual bool MatchesGeneratorName(std::string const& name) const
@@ -1048,6 +1087,16 @@ private:
   // and invalidated whenever a local generator records a new path.
   std::unordered_set<std::string> GeneratedByBuildIndex;
   bool GeneratedByBuildIndexComputed = false;
+
+  // The build dependencies of each install rule for each configuration,
+  // computed once and shared by CheckInstallPrepTargets and
+  // GetInstallPrepTargets.
+  std::map<std::pair<cmInstallGenerator const*, std::string>,
+           std::vector<cmInstallGenerator::BuildDependency>>
+    InstallPrepDependencies;
+  std::vector<cmInstallGenerator::BuildDependency> const&
+  GetInstallPrepDependencies(cmInstallGenerator const* installer,
+                             std::string const& config);
 
   friend class cmake;
   void CreateGeneratorTargets(
