@@ -32,6 +32,9 @@ This module defines the following variables:
 
   Boolean indicating whether the Tcl Stub Library was found.
 
+  .. versionchanged:: 4.5
+    This no longer depends on the Tk and ttk stub libraries being found.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 
@@ -40,9 +43,10 @@ The following cache variables may also be set:
 ``TCL_STUB_LIBRARY``
   The path to the Tcl stub library.
 ``TK_STUB_LIBRARY``
-  The path to the Tk stub library.
+  The path to the Tk stub library, needed by extensions that use the Tk API.
 ``TTK_STUB_LIBRARY``
-  The path to the ttk stub library.
+  The path to a separate ttk stub library, if any.  Standard Tk builds put
+  the ttk stubs in the Tk stub library.
 
 Examples
 ^^^^^^^^
@@ -161,7 +165,7 @@ mark_as_advanced(
   TK_STUB_LIBRARY
   )
 
-if(TCL_STUB_LIBRARY AND TK_STUB_LIBRARY AND TTK_STUB_LIBRARY)
+if(TCL_STUB_LIBRARY)
   set(TclStub_FOUND TRUE)
 else()
   set(TclStub_FOUND FALSE)
