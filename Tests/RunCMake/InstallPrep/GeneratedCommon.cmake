@@ -2,7 +2,14 @@ enable_language(C)
 
 # Generators that can depend on individual files prepare a generated file by
 # running only the custom command that produces it.
-set(generated_target_source "${CMAKE_CURRENT_LIST_DIR}/neverbuild.c")
+#
+# The Makefile generators build the whole target instead, so its sources must
+# compile there.
+if(CMAKE_GENERATOR MATCHES "Make")
+  set(generated_target_source "${CMAKE_CURRENT_LIST_DIR}/lib.c")
+else()
+  set(generated_target_source "${CMAKE_CURRENT_LIST_DIR}/neverbuild.c")
+endif()
 
 # Add a custom command that generates the named file in the current binary
 # directory and store its full path in the given variable.

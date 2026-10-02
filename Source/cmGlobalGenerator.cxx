@@ -3616,6 +3616,28 @@ void cmGlobalGenerator::CheckInstallPrepTargets()
   }
 }
 
+bool cmGlobalGenerator::CheckInstallPrepGeneratedFile(
+  cmGeneratorTarget const* target, std::string const& file,
+  std::set<std::string>& diagnosed)
+{
+  if (this->FindOutputOwningTarget(file)) {
+    return true;
+  }
+  if (diagnosed.insert(file).second) {
+    target->GetLocalGenerator()->IssueDiagnostic(
+      cmDiagnostics::CMD_AUTHOR,
+      cmStrCat("Target \"", target->GetName(), "\" installs file\n  ", file,
+               "\nwhich is generated but is not the unique output of a build "
+               "target, so \"install_prep/\" targets cannot build it with "
+               "this generator.  They build target \"",
+               target->GetName(),
+               "\" instead, which must depend on the target that produces "
+               "the file (for example via add_dependencies)."),
+      target->GetBacktrace());
+  }
+  return false;
+}
+
 bool cmGlobalGenerator::AreInstallPrepTargetsEnabled() const
 {
   return !this->Makefiles.empty() && this->InstallTargetEnabled &&

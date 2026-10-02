@@ -75,7 +75,8 @@ Some convenience targets derive their names from other names in the project:
   and :variable:`CMAKE_TEST_BUILD_DEPENDS`.
 * The ``install_prep/<component>`` targets use install component names.
   A component name may contain the characters allowed in target names above,
-  plus ``:`` and ``/``.  See also :ref:`Install Preparation Targets`.
+  plus ``:`` and ``/``.  The :ref:`Makefile Generators` do not allow ``:``.
+  See also :ref:`Install Preparation Targets`.
 
 .. _`Executables`:
 
@@ -1781,8 +1782,9 @@ target properties with a limited set of names:
 Preparation Targets
 ===================
 
-The :ref:`Ninja Generators` provide convenience targets that build only the
-prerequisites of a later step, such as running tests or installing.
+The :ref:`Ninja Generators` and :ref:`Makefile Generators` provide convenience
+targets that build only the prerequisites of a later step, such as running
+tests or installing.
 
 .. _`Install Preparation Targets`:
 
@@ -1852,11 +1854,17 @@ and custom targets.  How such a file is prepared depends on how it is produced:
 * A file that is the output of a custom command attached to exactly one
   target is prepared by running that custom command.  The target which
   installs the file (or the file set to which the file belongs), if any, is
-  not built.
+  not built.  The :ref:`Makefile Generators` cannot depend on individual
+  files, so they build the target owning the custom command instead.
 
 * Any other generated file, such as a byproduct or the output of a custom
   command attached to more than one target, is prepared by depending on the
-  file itself, which runs whatever produces it.
+  file itself, which runs whatever produces it.  The
+  :ref:`Makefile Generators` cannot do so, so they warn.  If a target
+  installs the file (or the file set to which the file belongs), they build
+  that target instead, which must therefore depend on the producer, e.g.,
+  through :command:`add_dependencies`.  Otherwise, they do not prepare the
+  file.
 
 For example:
 
@@ -1869,7 +1877,8 @@ For example:
   set_property(TARGET A PROPERTY PUBLIC_HEADER
     "${CMAKE_CURRENT_BINARY_DIR}/generated.h")
 
-  # Preparation runs gen, the producer of the byproduct.
+  # Preparation runs gen, or with some generators builds B instead, so B
+  # must depend on the producer of its byproduct.
   add_custom_target(gen COMMAND ...
     BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/byproduct.h")
   add_library(B b.c)

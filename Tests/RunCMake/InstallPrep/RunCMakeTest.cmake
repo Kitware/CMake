@@ -61,7 +61,17 @@ macro(configure_install_prep test config)
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=${config})
   endif()
+  # Some generators issue additional diagnostics.
+  set(stderr_variant "")
+  if(RunCMake_GENERATOR MATCHES "Make")
+    set(stderr_variant make)
+  endif()
+  if(stderr_variant AND
+      EXISTS "${RunCMake_SOURCE_DIR}/${test}-stderr-${stderr_variant}.txt")
+    set(RunCMake-stderr-file ${test}-stderr-${stderr_variant}.txt)
+  endif()
   run_cmake(${test})
+  unset(RunCMake-stderr-file)
   set(RunCMake_TEST_NO_CLEAN TRUE)
 endmacro()
 
@@ -130,8 +140,14 @@ block()
   configure_install_prep(ComponentNames Debug)
   run_cmake_command(ComponentNames-all-build ${CMAKE_COMMAND}
     --build . --config Debug --target install_prep/all)
+  if(RunCMake_GENERATOR MATCHES "Make")
+    set(RunCMake_TEST_EXPECT_RESULT "[^0]")
+    set(RunCMake_TEST_OUTPUT_MERGE TRUE)
+  endif()
   run_cmake_command(ComponentNames-colon-build ${CMAKE_COMMAND}
     --build . --config Debug --target install_prep/Colon:Name)
+  unset(RunCMake_TEST_EXPECT_RESULT)
+  unset(RunCMake_TEST_OUTPUT_MERGE)
   run_missing_install_prep(ComponentNames-dotdot install_prep/Unsafe/../Name)
   run_missing_install_prep(ComponentNames-empty-segment
     install_prep/Empty//Segment)
@@ -180,4 +196,18 @@ endif()
 
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "^(Linux|Darwin)$")
   run_install_prep(Namelink install_prep/Namelink Namelink)
+endif()
+
+if(RunCMake_GENERATOR MATCHES "Make" AND
+    CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+  block()
+    configure_install_prep(MakefilePreinstall Debug)
+    run_cmake_command(MakefilePreinstall-prep ${CMAKE_COMMAND}
+      --build . --config Debug --target install_prep/Relink)
+    run_cmake_command(MakefilePreinstall-run
+      ${RunCMake_TEST_BINARY_DIR}/relink)
+    set(RunCMake-check-file MakefilePreinstall-install-check.cmake)
+    run_cmake_command(MakefilePreinstall-install ${CMAKE_COMMAND}
+      --install . --config Debug --component Relink)
+  endblock()
 endif()

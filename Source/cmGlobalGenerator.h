@@ -174,6 +174,14 @@ public:
   // Generators that write install preparation targets call this once.
   void CheckInstallPrepTargets();
 
+  // Whether a generated file to be prepared for installation is the unique
+  // output of a target.  Generators that cannot depend on a file with no such
+  // owner build its installing target instead, and call this to diagnose it
+  // once per file.
+  bool CheckInstallPrepGeneratedFile(cmGeneratorTarget const* target,
+                                     std::string const& file,
+                                     std::set<std::string>& diagnosed);
+
   bool AreInstallPrepTargetsEnabled() const;
 
   /** Check whether the given name matches the current generator.  */
