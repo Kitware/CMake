@@ -34,6 +34,22 @@ Built-in Targets
 
 .. versionadded:: 4.5
 
+  If the project has install rules, the generated build file provides the
+  following targets, unless :variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` or
+  :variable:`CMAKE_SKIP_INSTALL_RULES` is enabled:
+
+  ``install_prep/<component>``
+    Builds all known build dependencies for the install component named
+    ``<component>`` added by :command:`install`. Components whose names cannot
+    be represented safely are excluded. See :ref:`Install Preparation Targets`
+    and :ref:`Target Names`.
+
+  ``install_prep/all``
+    Builds all known build dependencies needed for an installation that does
+    not select a component. See :ref:`Install Preparation Targets`.
+
+.. versionadded:: 4.5
+
   When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled, the
   generated build file provides the following targets:
 

@@ -65,6 +65,8 @@ macro(configure_install_prep test config)
   set(stderr_variant "")
   if(RunCMake_GENERATOR MATCHES "Make")
     set(stderr_variant make)
+  elseif(RunCMake_GENERATOR STREQUAL "FASTBuild")
+    set(stderr_variant fastbuild)
   endif()
   if(stderr_variant AND
       EXISTS "${RunCMake_SOURCE_DIR}/${test}-stderr-${stderr_variant}.txt")
@@ -152,6 +154,13 @@ block()
   run_missing_install_prep(ComponentNames-empty-segment
     install_prep/Empty//Segment)
   run_missing_install_prep(ComponentNames-dot install_prep/./Dot)
+  foreach(case IN ITEMS "Mixed;upper" "mixed;lower" "All;all")
+    list(GET case 0 component)
+    list(GET case 1 dependency)
+    set(RunCMake-check-file ComponentNames-case-build-check.cmake)
+    run_cmake_command(ComponentNames-case-${dependency}-build ${CMAKE_COMMAND}
+      --build . --config Debug --target install_prep/${component})
+  endforeach()
 endblock()
 
 function(run_configured_install_prep test config)

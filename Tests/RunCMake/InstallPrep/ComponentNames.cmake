@@ -6,6 +6,19 @@ install(TARGETS colon_dependency
     COMPONENT "Colon:Name"
 )
 
+# Component names that differ only in case each get a working preparation
+# target, even where the build tool's target names are case-insensitive.
+foreach(case IN ITEMS "Mixed;upper" "mixed;lower" "All;all")
+  list(GET case 0 component)
+  list(GET case 1 dependency)
+  add_library(${dependency}_case_dependency STATIC EXCLUDE_FROM_ALL lib.c)
+  install(TARGETS ${dependency}_case_dependency
+    ARCHIVE DESTINATION lib
+      COMPONENT ${component}
+      EXCLUDE_FROM_ALL
+  )
+endforeach()
+
 # Components whose names are not representable get no preparation target,
 # which is diagnosed when they have build dependencies.
 add_library(unsafe_dependency STATIC EXCLUDE_FROM_ALL lib.c)

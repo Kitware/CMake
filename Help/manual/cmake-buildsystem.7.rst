@@ -1782,9 +1782,9 @@ target properties with a limited set of names:
 Preparation Targets
 ===================
 
-The :ref:`Ninja Generators` and :ref:`Makefile Generators` provide convenience
-targets that build only the prerequisites of a later step, such as running
-tests or installing.
+The :ref:`Ninja Generators`, :ref:`Makefile Generators`, and
+:generator:`FASTBuild` generator provide convenience targets that build only
+the prerequisites of a later step, such as running tests or installing.
 
 .. _`Install Preparation Targets`:
 
@@ -1860,11 +1860,11 @@ and custom targets.  How such a file is prepared depends on how it is produced:
 * Any other generated file, such as a byproduct or the output of a custom
   command attached to more than one target, is prepared by depending on the
   file itself, which runs whatever produces it.  The
-  :ref:`Makefile Generators` cannot do so, so they warn.  If a target
-  installs the file (or the file set to which the file belongs), they build
-  that target instead, which must therefore depend on the producer, e.g.,
-  through :command:`add_dependencies`.  Otherwise, they do not prepare the
-  file.
+  :ref:`Makefile Generators` and :generator:`FASTBuild` cannot do so, so they
+  warn.  If a target installs the file (or the file set to which the file
+  belongs), they build that target instead, which must therefore depend on
+  the producer, e.g., through :command:`add_dependencies`.  Otherwise, they
+  do not prepare the file.
 
 For example:
 
