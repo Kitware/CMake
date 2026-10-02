@@ -1,0 +1,1 @@
+#Fuzz::static;$<LINK_LIBRARY:WHOLE_ARCHIVE,fuzz_imported_static>;$<LINK_GROUP:RESCAN,fuzz_static,fuzz_imported_static>

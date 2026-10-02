@@ -1,0 +1,1 @@
+#fuzz_iface;$<LINK_ONLY:Fuzz::shared>;$<COMPILE_ONLY:fuzz_imported_static>;-lm
