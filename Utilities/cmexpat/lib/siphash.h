@@ -99,18 +99,7 @@
 #define SIPHASH_H
 
 #include <stddef.h> /* size_t */
-
-#include <cm3p/kwiml/int.h>
-
-#ifndef KWIML_INT_HAVE_UINT64_T
-# define uint64_t KWIML_INT_uint64_t
-#endif
-#ifndef KWIML_INT_HAVE_UINT32_T
-# define uint32_t KWIML_INT_uint32_t
-#endif
-#ifndef KWIML_INT_HAVE_UINT8_T
-# define uint8_t KWIML_INT_uint8_t
-#endif
+#include <stdint.h> /* uint64_t uint32_t uint8_t */
 
 /*
  * Workaround to not require a C++11 compiler for using ULL suffix
