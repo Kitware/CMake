@@ -96,6 +96,8 @@ the provided regular expression and replacement strings.
     determines the behavior when the :ctest-option:`--repeat` option is used.
 
 ``BUILD_DEPENDS``
+  .. versionadded:: 4.5
+
   Specify a list of targets or files that must be built before the test
   discovery can run.
 
