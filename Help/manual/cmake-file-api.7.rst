@@ -1719,7 +1719,7 @@ with members:
   property is set on a target. Note that non-private ``HEADERS`` file sets
   automatically populate this property.
 
-  The value is a JSON array with an entry for each directory.
+  The value is a JSON array with entries describing the directories.
   Transitive usage requirements from dependencies are not included.
   Each entry is a JSON object with members:
 
@@ -1730,6 +1730,12 @@ with members:
   ``isSystem``
     Optional member that is present with boolean value ``true`` if
     the include directory is marked as a system include directory.
+
+  ``languages``
+    Optional member that is present when the entry applies to only a subset
+    of enabled languages.  The value is an array of language strings for
+    which the path and its ``isSystem`` classification apply. This member is
+    omitted if the entry applies to all enabled languages.
 
   ``backtrace``
     Optional member that is present when a CMake language backtrace to

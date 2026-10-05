@@ -26,6 +26,7 @@
 #include "cmFileSetMetadata.h"
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorFileSet.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -2007,39 +2008,95 @@ Json::Value Target::DumpInterfaceIncludes()
 {
   Json::Value interfaceIncludes = Json::arrayValue;
 
-  std::set<std::string> systemIncludes;
+  cmValue prop = this->GT->GetProperty("INTERFACE_INCLUDE_DIRECTORIES");
   cmValue systemIncludesProp =
     this->GT->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES");
-  if (systemIncludesProp) {
-    cmList includes{ cmGeneratorExpression::Evaluate(
-      *systemIncludesProp, this->GT->GetLocalGenerator(), this->Config,
-      this->GT) };
-    for (std::string include : includes) {
+  if (!prop) {
+    return interfaceIncludes;
+  }
+
+  struct InterfaceInclude
+  {
+    std::string Path;
+    bool IsSystem;
+    std::set<std::string> Languages;
+  };
+
+  // Get enabled languages
+  std::vector<std::string> languages =
+    this->GT->Makefile->GetState()->GetEnabledLanguages();
+  languages.erase(std::remove(languages.begin(), languages.end(), "NONE"),
+                  languages.end());
+  if (languages.empty()) {
+    languages.emplace_back();
+  }
+
+  // Evaluate an INCLUDE_DIRECTORIES property with language context
+  auto evaluateIncludes =
+    [this](cmCompiledGeneratorExpression const& expression,
+           cm::GenEx::Context const& context) {
+      cmGeneratorExpressionDAGChecker dagChecker{ this->GT,
+                                                  "INCLUDE_DIRECTORIES",
+                                                  nullptr, nullptr, context };
+      return cmList{ expression.Evaluate(context, &dagChecker, this->GT,
+                                         this->GT) };
+    };
+
+  cmGeneratorExpression ge(*this->GT->Makefile->GetCMakeInstance());
+  auto includesExpression = ge.Parse(*prop);
+  auto systemIncludesExpression =
+    systemIncludesProp ? ge.Parse(*systemIncludesProp) : nullptr;
+  bool const targetTreatsOwnIncludesAsSystem =
+    this->GT->GetPropertyAsBool("SYSTEM") &&
+    (!this->GT->IsImported() ||
+     !this->GT->GetPropertyAsBool("IMPORTED_NO_SYSTEM"));
+  std::vector<InterfaceInclude> includes;
+
+  // Get includes for each enabled language and merge results
+  for (std::string const& language : languages) {
+    cm::GenEx::Context context(this->GT->GetLocalGenerator(), this->Config,
+                               language);
+    // Get per-language system include set
+    std::set<std::string> systemIncludes;
+    if (systemIncludesExpression) {
+      for (std::string include :
+           evaluateIncludes(*systemIncludesExpression, context)) {
+        cmSystemTools::ConvertToUnixSlashes(include);
+        systemIncludes.emplace(std::move(include));
+      }
+    }
+
+    // Get per-language includes
+    for (std::string include :
+         evaluateIncludes(*includesExpression, context)) {
       cmSystemTools::ConvertToUnixSlashes(include);
-      systemIncludes.emplace(std::move(include));
+      bool const isSystem = targetTreatsOwnIncludesAsSystem ||
+        systemIncludes.find(include) != systemIncludes.end();
+      auto entry = std::find_if(
+        includes.begin(), includes.end(),
+        [&include, isSystem](InterfaceInclude const& candidate) {
+          return candidate.Path == include && candidate.IsSystem == isSystem;
+        });
+      if (entry == includes.end()) {
+        entry = includes.insert(includes.end(),
+                                { std::move(include), isSystem, {} });
+      }
+      entry->Languages.insert(language);
     }
   }
 
-  cmValue prop = this->GT->GetProperty("INTERFACE_INCLUDE_DIRECTORIES");
-  if (prop) {
-    cmList includes{ cmGeneratorExpression::Evaluate(
-      *prop, this->GT->GetLocalGenerator(), this->Config, this->GT) };
-
-    bool const targetTreatsOwnIncludesAsSystem =
-      this->GT->GetPropertyAsBool("SYSTEM") &&
-      (!this->GT->IsImported() ||
-       !this->GT->GetPropertyAsBool("IMPORTED_NO_SYSTEM"));
-
-    for (std::string include : includes) {
-      cmSystemTools::ConvertToUnixSlashes(include);
-
-      bool const isSystem = targetTreatsOwnIncludesAsSystem ||
-        systemIncludes.find(include) != systemIncludes.end();
-
-      JBT<std::string> path(include);
-      interfaceIncludes.append(
-        this->DumpInclude({ std::move(path), isSystem }));
+  // Build JSON from InterfaceInclude vector
+  for (InterfaceInclude const& include : includes) {
+    Json::Value entry =
+      this->DumpInclude({ JBT<std::string>(include.Path), include.IsSystem });
+    if (include.Languages.size() != languages.size()) {
+      Json::Value entryLanguages = Json::arrayValue;
+      for (std::string const& language : include.Languages) {
+        entryLanguages.append(language);
+      }
+      entry["languages"] = std::move(entryLanguages);
     }
+    interfaceIncludes.append(std::move(entry));
   }
 
   return interfaceIncludes;
