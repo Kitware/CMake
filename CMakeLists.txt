@@ -208,7 +208,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     cmake_instrumentation(
         API_VERSION 1
         DATA_VERSION 1
-        OPTIONS cdashSubmit cdashVerbose trace
+        OPTIONS cdashSubmit cdashVerbose trace processMetrics
     )
   endif()
 endif()
