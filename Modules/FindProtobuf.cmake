@@ -579,6 +579,7 @@ using a deprecated command and its modern replacement:
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+cmake_policy(SET CMP0175 NEW) # add_custom_command() rejects invalid arguments
 
 function(protobuf_generate)
   set(_options APPEND_PATH DESCRIPTORS)
@@ -723,10 +724,12 @@ function(protobuf_generate)
 
     set(_comment "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}")
     if(protobuf_generate_PROTOC_OPTIONS)
-      set(_comment "${_comment}, protoc-options: ${protobuf_generate_PROTOC_OPTIONS}")
+      string(REPLACE ";" " " _protoc_options_str "${protobuf_generate_PROTOC_OPTIONS}")
+      set(_comment "${_comment}, protoc-options: ${_protoc_options_str}")
     endif()
     if(_plugin_options)
-      set(_comment "${_comment}, plugin-options: ${_plugin_options}")
+      string(REPLACE ";" " " _plugin_options_str "${_plugin_options}")
+      set(_comment "${_comment}, plugin-options: ${_plugin_options_str}")
     endif()
 
     add_custom_command(
@@ -734,7 +737,7 @@ function(protobuf_generate)
       COMMAND ${protobuf_generate_PROTOC_EXE}
       ARGS ${protobuf_generate_PROTOC_OPTIONS} --${protobuf_generate_LANGUAGE}_out ${_plugin_options}:${protobuf_generate_PROTOC_OUT_DIR} ${_plugin} ${_dll_desc_out} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} protobuf::protoc ${protobuf_generate_DEPENDENCIES}
-      COMMENT ${_comment}
+      COMMENT "${_comment}"
       VERBATIM )
   endforeach()
 

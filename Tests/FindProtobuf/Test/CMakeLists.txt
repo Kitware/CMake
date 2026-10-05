@@ -53,6 +53,18 @@ target_link_libraries(test_desc msgs ${Protobuf_LIBRARIES})
 target_compile_features(test_desc PRIVATE cxx_std_11)
 add_test(NAME test_desc COMMAND test_desc ${DESC_PROTO_DESC})
 
+# Multiple protoc and plugin options must still give add_custom_command a
+# single COMMENT.  The speed option is already this file's default.
+add_library(msgs_protoc_options msgs/example.proto)
+# NOTE: generated files will be placed under ${CMAKE_CURRENT_BINARY_DIR}/msgs/
+target_include_directories(msgs_protoc_options PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(msgs_protoc_options PUBLIC ${Protobuf_LIBRARIES})
+target_compile_definitions(msgs_protoc_options PRIVATE PROTO_EXPORT=)
+target_compile_features(msgs_protoc_options PRIVATE cxx_std_11)
+protobuf_generate(TARGET msgs_protoc_options DESCRIPTORS
+  EXPORT_MACRO PROTO_EXPORT PLUGIN_OPTIONS speed
+  PROTOC_OPTIONS --include_imports --include_source_info)
+
 if(CMake_TEST_FindProtobuf_gRPC)
   find_program(gRPC_CPP_PLUGIN grpc_cpp_plugin)
   add_library(msgs_grpc msgs/grpc/example_service.proto)
