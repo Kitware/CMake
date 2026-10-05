@@ -46,14 +46,6 @@ cmExperimental::FeatureData const LookupTable[] = {
     "meant only for experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Never },
-  { "GenerateSbom",
-    "248471c2-d905-4c9e-81b5-b89cd27965e1",
-    "CMAKE_EXPERIMENTAL_GENERATE_SBOM",
-    "CMake's support for generating software bill of materials (Sbom) "
-    "information in SPDX format is experimental. It is meant only for "
-    "experimentation and feedback to CMake developers.",
-    {},
-    cmExperimental::TryCompileCondition::Never },
   // Rust support
   { "Rust",
     "b6fdddce-bf66-41a5-bc5f-077f6fa4d2a1",

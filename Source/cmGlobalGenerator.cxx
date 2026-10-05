@@ -1796,13 +1796,11 @@ bool cmGlobalGenerator::Compute()
 
 #ifndef CMAKE_BOOTSTRAP
   bool isTryCompile = this->GetGlobalSetting("IN_TRY_COMPILE").IsOn();
-  bool sbomEnabled = cmExperimental::HasSupportEnabled(
-    *this->Makefiles[0], cmExperimental::Feature::GenerateSbom);
 
   // Automatically generate one SBOM per export set not already tied to an
   // explicit install(SBOM) call.
   cmValue sbomFormat = this->GetGlobalSetting("CMAKE_INSTALL_SBOM_FORMATS");
-  if (sbomFormat.IsSet() && sbomEnabled && !isTryCompile) {
+  if (sbomFormat.IsSet() && !isTryCompile) {
     cmSbomArguments formatArgs;
     formatArgs.Format = *sbomFormat;
     if (formatArgs.GetFormat() == cmSbomArguments::SbomFormat::NONE) {

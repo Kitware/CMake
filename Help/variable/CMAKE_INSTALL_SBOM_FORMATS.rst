@@ -3,10 +3,6 @@ CMAKE_INSTALL_SBOM_FORMATS
 
 .. versionadded:: 4.5
 
-.. note::
-
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_GENERATE_SBOM``.
-
 Enable automatic generation and installation of Software Bill of Materials
 (SBOM) documents for the project's install export sets.
 

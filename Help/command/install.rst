@@ -1254,10 +1254,7 @@ Signatures
 .. signature::
   install(SBOM <sbom-name> [...])
 
-  .. versionadded:: 4.3
-  .. note::
-
-    Experimental. Gated by ``CMAKE_EXPERIMENTAL_GENERATE_SBOM``.
+  .. versionadded:: 4.5
 
   Installs a |SBOM| or "SBOM" which describes the project:
 

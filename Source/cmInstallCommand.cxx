@@ -2803,12 +2803,6 @@ bool HandleSbomMode(std::vector<std::string> const& args,
                     cmExecutionStatus& status)
 {
 #ifndef CMAKE_BOOTSTRAP
-  if (!cmExperimental::HasSupportEnabled(
-        status.GetMakefile(), cmExperimental::Feature::GenerateSbom)) {
-    status.SetError("does not recognize sub-command SBOM");
-    return false;
-  }
-
   Helper helper(status);
   cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
 

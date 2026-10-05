@@ -1,8 +1,6 @@
 include(RunCMake)
 
 set(common_test_options
-  -Wno-author
-  "-DCMAKE_EXPERIMENTAL_GENERATE_SBOM:STRING=248471c2-d905-4c9e-81b5-b89cd27965e1"
   "-DCMAKE_INSTALL_SBOM_FORMATS:STRING=spdx"
   "-DCMAKE_INSTALL_LIBDIR=lib"
 )
