@@ -19,6 +19,10 @@
 #include "cmGetPipes.h"
 #include "cmUVHandlePtr.h"
 
+#ifdef _WIN32
+#  include <windows.h>
+#endif
+
 struct cmUVProcessChain::InternalData
 {
   struct StreamData
@@ -34,6 +38,17 @@ struct cmUVProcessChain::InternalData
     cm::uv_pipe_ptr InputPipe;
     cm::uv_pipe_ptr OutputPipe;
     Status ProcessStatus;
+
+#ifdef _WIN32
+    HANDLE NativeProcessHandle = nullptr;
+
+    ~ProcessData()
+    {
+      if (this->NativeProcessHandle) {
+        CloseHandle(this->NativeProcessHandle);
+      }
+    }
+#endif
 
     void Finish();
   };
@@ -418,6 +433,19 @@ void cmUVProcessChain::InternalData::SpawnProcess(
          process.Process.spawn(*this->Loop, options, &process)) < 0) {
     process.Finish();
   }
+#ifdef _WIN32
+  else {
+    // libuv may close its native handle before invoking the exit callback.
+    // Retain our own handle so callers can query child resource usage after
+    // the process exits.  Leave it null if duplication fails.
+    HANDLE handle = nullptr;
+    if (DuplicateHandle(GetCurrentProcess(), process.Process->process_handle,
+                        GetCurrentProcess(), &handle, 0, FALSE,
+                        DUPLICATE_SAME_ACCESS)) {
+      process.NativeProcessHandle = handle;
+    }
+  }
+#endif
   if (this->Builder->Detached) {
     uv_unref((uv_handle_t*)process.Process);
   }
@@ -531,7 +559,7 @@ void* cmUVProcessChain::GetNativeProcessHandle(std::size_t index) const
     return nullptr;
   }
 #ifdef _WIN32
-  return this->Data->Processes[index]->Process->process_handle;
+  return this->Data->Processes[index]->NativeProcessHandle;
 #else
   static_cast<void>(index);
   return nullptr;

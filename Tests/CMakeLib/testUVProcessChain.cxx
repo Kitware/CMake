@@ -19,6 +19,12 @@
 #include "cmUVStream.h"
 #include "cmUVStreambuf.h"
 
+#ifdef _WIN32
+#  include <windows.h>
+
+#  include "cmsys/SystemInformation.hxx"
+#endif
+
 struct ExpectedStatus
 {
   bool MatchExitStatus;
@@ -706,12 +712,66 @@ bool testUVProcessChainExternalLoop(char const* helperCommand)
   return true;
 }
 
+#ifdef _WIN32
+bool testUVProcessChainNativeHandle(char const* helperCommand)
+{
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand({ helperCommand, "pwd" });
+  auto chain = builder.Start();
+  HANDLE handle = chain.GetNativeProcessHandle(0);
+  if (!handle || handle == INVALID_HANDLE_VALUE) {
+    std::cout << "Missing native child process handle\n";
+    return false;
+  }
+  DWORD const pid = GetProcessId(handle);
+  if (!pid || pid == GetCurrentProcessId()) {
+    std::cout << "Native process handle does not identify the child\n";
+    return false;
+  }
+  DWORD exitCode;
+  FILETIME creationTime, exitTime, kernelTime, userTime;
+  if (!chain.Wait() || chain.GetNativeProcessHandle(0) != handle ||
+      GetProcessId(handle) != pid || !GetExitCodeProcess(handle, &exitCode) ||
+      exitCode != 0 ||
+      !GetProcessTimes(handle, &creationTime, &exitTime, &kernelTime,
+                       &userTime)) {
+    std::cout << "Native child process handle is not usable after exit\n";
+    return false;
+  }
+
+  cmUVProcessChainBuilder failingBuilder;
+  failingBuilder.AddCommand(
+    { "this_command_is_for_cmake_and_should_never_exist" });
+  auto failingChain = failingBuilder.Start();
+  if (failingChain.GetNativeProcessHandle(0) != nullptr) {
+    std::cout << "Failed spawn should not have a native process handle\n";
+    return false;
+  }
+
+  cmsys::SystemInformation::ProcessResourceUsage usage{};
+  if (cmsys::SystemInformation::GetProcessResourceUsage(
+        usage, INVALID_HANDLE_VALUE)) {
+    std::cout
+      << "Invalid child handle must not report current-process usage\n";
+    return false;
+  }
+  return true;
+}
+#endif
+
 int testUVProcessChain(int argc, char** const argv)
 {
   if (argc < 2) {
     std::cout << "Invalid arguments.\n";
     return -1;
   }
+
+#ifdef _WIN32
+  if (!testUVProcessChainNativeHandle(argv[1])) {
+    std::cout << "While executing testUVProcessChainNativeHandle().\n";
+    return -1;
+  }
+#endif
 
   if (!testUVProcessChainBuiltin(argv[1])) {
     std::cout << "While executing testUVProcessChainBuiltin().\n";
