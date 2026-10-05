@@ -5,6 +5,10 @@ function (run_cmake_AutoExport name dir)
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${name}-build")
   # start by cleaning up because we don't clean up along the way
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  set(RunCMake_TEST_OPTIONS
+    -DCMake_TEST_ASM_MASM=${CMake_TEST_ASM_MASM}
+    -DCMake_TEST_ASM_MARMASM=${CMake_TEST_ASM_MARMASM}
+  )
   # configure the AutoExport test
   run_cmake(${name})
   unset(RunCMake_TEST_OPTIONS)

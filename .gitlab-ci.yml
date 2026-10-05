@@ -1498,6 +1498,19 @@ t:windows-clang22.1-cl-ninja:
         CMAKE_CI_BUILD_NAME: windows_clang22.1_cl_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:windows-clang22.1-cl-ninja-novs:
+    extends:
+        - .windows_clang_ninja_novs
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.44
+        - .cmake_junit_artifacts
+        - .rules
+    needs:
+        - t:windows-vs2026-x64-ninja
+    variables:
+        CMAKE_CI_BUILD_NAME: windows_clang22.1_cl_ninja_novs
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:windows-clang22.1-cl-nmake:
     extends:
         - .windows_clang_nmake
@@ -1522,6 +1535,19 @@ t:windows-clang22.1-gnu-ninja:
         - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_BUILD_NAME: windows_clang22.1_gnu_ninja
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-clang22.1-gnu-ninja-novs:
+    extends:
+        - .windows_clang_ninja_novs
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.44
+        - .cmake_junit_artifacts
+        - .rules
+    needs:
+        - t:windows-vs2026-x64-ninja
+    variables:
+        CMAKE_CI_BUILD_NAME: windows_clang22.1_gnu_ninja_novs
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:windows-clang22.1-gnu-nmake:

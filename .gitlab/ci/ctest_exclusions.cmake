@@ -28,6 +28,13 @@ if ("$ENV{CMAKE_CI_BUILD_NAME}" MATCHES "^intel20(16|17|18|19|20)")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_novs")
+  list(APPEND test_exclusions
+    # BundleUtilities works only in a VS development environment.
+    "^BundleUtilities$"
+    )
+endif()
+
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_jom")
   list(APPEND test_exclusions
     # JOM often fails with "Couldn't change working directory to ...".
