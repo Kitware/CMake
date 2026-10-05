@@ -89,10 +89,6 @@
 /* whether byteorder is bigendian */
 #cmakedefine WORDS_BIGENDIAN
 
-/* Define to allow retrieving the byte offsets for attribute names and values.
- */
-#cmakedefine XML_ATTR_INFO
-
 /* Define to specify how much context to retain around the current parse
    point, 0 to disable. */
 #  define XML_CONTEXT_BYTES @XML_CONTEXT_BYTES@
