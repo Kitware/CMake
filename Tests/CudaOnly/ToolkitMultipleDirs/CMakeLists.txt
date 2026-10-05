@@ -19,4 +19,7 @@ message(STATUS "CUDAToolkit_LIBRARY_DIR: ${CUDAToolkit_LIBRARY_DIR}")
 message(STATUS "CUDAToolkit_NVCC_EXECUTABLE ${CUDAToolkit_NVCC_EXECUTABLE}")
 
 add_executable(CudaOnlyToolkitMultipleDirs main.cu)
+if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 13)
+  target_compile_features(CudaOnlyToolkitMultipleDirs PRIVATE cuda_std_17)
+endif()
 target_link_libraries(CudaOnlyToolkitMultipleDirs PRIVATE CUDA::toolkit)

@@ -496,7 +496,9 @@ macro(__windows_compiler_msvc lang)
 
   if("x${lang}" STREQUAL "xC" OR
       "x${lang}" STREQUAL "xCXX" OR
-      "x${lang}" STREQUAL "xHIP")
+      "x${lang}" STREQUAL "xHIP" OR
+      ("x${lang}" STREQUAL "xCUDA" AND
+       CMAKE_CUDA_COMPILER_ID STREQUAL "Clang"))
     if(CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT)
       set(_MDd "")
       set(_MD "")

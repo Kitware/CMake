@@ -116,4 +116,7 @@ if(HAS_CUPTI)
 endif()
 
 add_executable(CudaOnlyToolkit main.cu)
+if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 13)
+  target_compile_features(CudaOnlyToolkit PRIVATE cuda_std_17)
+endif()
 target_link_libraries(CudaOnlyToolkit PRIVATE CUDA::toolkit)

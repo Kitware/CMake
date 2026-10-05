@@ -1,7 +1,11 @@
 if(CMake_TEST_CUDA STREQUAL "NVIDIA")
   set(expected "-Xlinker=OPT1 -Xlinker=OPT2 -Xlinker=OPT3 -Xlinker=OPT4 -Xlinker=OPT5")
 elseif(CMake_TEST_CUDA STREQUAL "Clang")
-  set(expected "-Wl,OPT1 -Xlinker OPT2 -Xlinker OPT3 -Xlinker OPT4")
+  if(CMAKE_CUDA_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    set(expected "OPT1 OPT2 OPT3 OPT4")
+  else()
+    set(expected "-Wl,OPT1 -Xlinker OPT2 -Xlinker OPT3 -Xlinker OPT4")
+  endif()
 endif()
 
 if(NOT actual_stdout MATCHES "${expected}")
