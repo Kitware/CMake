@@ -10,6 +10,11 @@
 
 #include "cmsys/FStream.hxx"
 
+#if XML_MAJOR_VERSION < 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION < 9)
+#  define XML_GetCurrentLineNumber64 XML_GetCurrentLineNumber
+#  define XML_GetCurrentColumnNumber64 XML_GetCurrentColumnNumber
+#endif
+
 cmXMLParser::cmXMLParser()
 {
   this->Parser = nullptr;
@@ -182,8 +187,8 @@ void cmXMLParserCharacterDataHandler(void* parser, char const* data,
 void cmXMLParser::ReportXmlParseError()
 {
   XML_Parser parser = static_cast<XML_Parser>(this->Parser);
-  this->ReportError(static_cast<int>(XML_GetCurrentLineNumber(parser)),
-                    static_cast<int>(XML_GetCurrentColumnNumber(parser)),
+  this->ReportError(static_cast<int>(XML_GetCurrentLineNumber64(parser)),
+                    static_cast<int>(XML_GetCurrentColumnNumber64(parser)),
                     XML_ErrorString(XML_GetErrorCode(parser)));
 }
 
