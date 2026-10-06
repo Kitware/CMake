@@ -20,7 +20,6 @@ public:
     ExportPackageDependencies,
     MappedPackageInfo,
     ExportBuildDatabase,
-    GenerateSbom,
     Rust,
 
     Sentinel,

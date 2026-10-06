@@ -245,8 +245,7 @@ elseif (CMake_TEST_install_VARIANT STREQUAL "Exports")
   run_cmake_with_options(EXPORT_ANDROID_MK-AbsoluteDest-warn -Winstall-absolute-destination)
   run_cmake_with_options(PACKAGE_INFO-AbsoluteDest-error -Werror=install-absolute-destination)
   run_cmake_with_options(SBOM-AbsoluteDest-warn
-    -Winstall-absolute-destination
-    -DCMAKE_EXPERIMENTAL_GENERATE_SBOM=248471c2-d905-4c9e-81b5-b89cd27965e1)
+    -Winstall-absolute-destination)
   run_cmake(CMP0062-NEW)
   run_cmake(EXPORT-Component)
   run_cmake(EXPORT-FindDependencyExportGate)

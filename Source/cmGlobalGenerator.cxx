@@ -1796,13 +1796,21 @@ bool cmGlobalGenerator::Compute()
 
 #ifndef CMAKE_BOOTSTRAP
   bool isTryCompile = this->GetGlobalSetting("IN_TRY_COMPILE").IsOn();
-  bool sbomEnabled = cmExperimental::HasSupportEnabled(
-    *this->Makefiles[0], cmExperimental::Feature::GenerateSbom);
 
   // Automatically generate one SBOM per export set not already tied to an
   // explicit install(SBOM) call.
   cmValue sbomFormat = this->GetGlobalSetting("CMAKE_INSTALL_SBOM_FORMATS");
-  if (sbomFormat.IsSet() && sbomEnabled && !isTryCompile) {
+  if (sbomFormat.IsSet() && !isTryCompile) {
+    cmSbomArguments formatArgs;
+    formatArgs.Format = *sbomFormat;
+    if (formatArgs.GetFormat() == cmSbomArguments::SbomFormat::NONE) {
+      this->Makefiles[0]->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("CMAKE_INSTALL_SBOM_FORMATS given invalid format \"",
+                 *sbomFormat, "\"."));
+      return false;
+    }
+
     std::string projectName = this->LocalGenerators[0]->GetProjectName();
     for (auto& exportSet : this->ExportSets) {
       bool isCovered =
@@ -1816,6 +1824,7 @@ bool cmGlobalGenerator::Compute()
       }
 
       cmSbomArguments args;
+      args.Format = *sbomFormat;
       args.ProjectName = projectName;
       args.PackageName = exportSet.first;
       std::string dest = args.GetDefaultDestination(

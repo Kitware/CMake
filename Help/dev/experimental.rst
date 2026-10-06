@@ -80,25 +80,6 @@ When activated, this experimental feature provides the following:
 * Targets with the property set to a true value will have their C++ build
   information exported to the build database.
 
-Software Bill Of Materials (SBOM)
-=================================
-
-In order to activate support for the :command:`install(SBOM)` command,
-set
-
-* variable ``CMAKE_EXPERIMENTAL_GENERATE_SBOM`` to
-* value ``248471c2-d905-4c9e-81b5-b89cd27965e1``.
-
-This UUID may change in future versions of CMake.  Be sure to use the value
-documented here by the source tree of the version of CMake with which you are
-experimenting.
-
-When activated, this experimental feature provides the following:
-
-* The experimental ``export(SBOM)`` and ``install(SBOM)`` commands are
-  available to generate a Software Bill of Materials or "SBOM" for the current
-  project. See :command:`install(SBOM)` for a complete overview of the command.
-
 Rust Support
 ============
 

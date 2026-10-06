@@ -407,12 +407,6 @@ static bool HandlePackageInfoMode(std::vector<std::string> const& args,
 static bool HandleSbomMode(std::vector<std::string> const& args,
                            cmExecutionStatus& status)
 {
-  if (!cmExperimental::HasSupportEnabled(
-        status.GetMakefile(), cmExperimental::Feature::GenerateSbom)) {
-    status.SetError("does not recognize sub-command SBOM");
-    return false;
-  }
-
   struct SbomExportArguments
     : public cmSbomArguments
     , public ArgumentParser::ParseResult

@@ -1,9 +1,7 @@
 include(RunCMake)
 
 set(common_test_options
-  -Wno-author
-  "-DCMAKE_EXPERIMENTAL_GENERATE_SBOM:STRING=248471c2-d905-4c9e-81b5-b89cd27965e1"
-  "-DCMAKE_INSTALL_SBOM_FORMATS:STRING=JSON"
+  "-DCMAKE_INSTALL_SBOM_FORMATS:STRING=spdx"
   "-DCMAKE_INSTALL_LIBDIR=lib"
 )
 
@@ -53,5 +51,7 @@ run_cmake_install(PartialCoverage)
 run_cmake_error(ReferencesNonExportedTarget)
 
 run_cmake_configure(Config)
+run_cmake_configure(ExplicitFormat -DCMAKE_INSTALL_SBOM_FORMATS=spdx-3.0+json)
+run_cmake_configure(InvalidFormat -DCMAKE_INSTALL_SBOM_FORMATS=JSON)
 run_cmake_configure(Genex)
 run_cmake_configure(ForbiddenGenex)

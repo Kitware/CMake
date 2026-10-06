@@ -1,0 +1,2 @@
+CMake Error in CMakeLists\.txt:
+  CMAKE_INSTALL_SBOM_FORMATS given invalid format "JSON"\.
