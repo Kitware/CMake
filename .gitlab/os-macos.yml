@@ -7,7 +7,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
 
 .macos_tart:
-    image: "registry.hub.docker.com/kitware/macos-ci-images:macos-26-xcode-26.6-20260724"
+    image: "registry.hub.docker.com/kitware/macos-ci-images:macos-26-xcode-27.0-20261006"
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
         TART_EXECUTOR_HOST_DIR: "false"
@@ -86,6 +86,8 @@
 
 .macos10.10_package:
     extends: .macos_tart_build
+    # Xcode 26.6 is the last whose libc++ supports macOS versions prior to 11.
+    image: "registry.hub.docker.com/kitware/macos-ci-images:macos-26-xcode-26.6-20260724"
 
     variables:
         CMAKE_CONFIGURATION: macos10.10_package
