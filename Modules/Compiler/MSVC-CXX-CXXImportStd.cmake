@@ -1,6 +1,12 @@
 function (_cmake_cxx_find_modules_json)
   if (CMAKE_CXX_STDLIB_MODULES_JSON)
     set(_msvc_modules_json_file "${CMAKE_CXX_STDLIB_MODULES_JSON}")
+  elseif (CMAKE_CXX_STANDARD_LIBRARY_INCLUDE_DIRECTORY AND
+      EXISTS "${CMAKE_CXX_STANDARD_LIBRARY_INCLUDE_DIRECTORY}/../modules/modules.json")
+    # Prefer the toolset whose headers the compiler actually selected over
+    # environment variables that may refer to a different installation.
+    set(_msvc_modules_json_file "${CMAKE_CXX_STANDARD_LIBRARY_INCLUDE_DIRECTORY}/../modules/modules.json")
+    cmake_path(NORMAL_PATH _msvc_modules_json_file)
   else ()
     find_file(_msvc_modules_json_file
       NAME modules.json
