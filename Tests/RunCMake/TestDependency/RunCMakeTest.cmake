@@ -201,6 +201,21 @@ if(RunCMake_GENERATOR MATCHES "Ninja|FASTBuild|Makefiles")
         -R "^ImportedTest$")
     endblock()
 
+    # Test names that differ only in case each get a working test_prep target.
+    block()
+      set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ON-case-build)
+      run_cmake(ON-case)
+      set(RunCMake_TEST_NO_CLEAN 1)
+      foreach(case IN ITEMS "Mixed;upper" "mixed;lower" "All;all")
+        list(GET case 0 test)
+        list(GET case 1 dependency)
+        set(RunCMake-check-file ON-case-build-check.cmake)
+        run_cmake_command(ON-case-${dependency}-build
+          ${CMAKE_COMMAND} --build . ${TestDependency_BUILD_CONFIG_ARG}
+          --target test_prep/${test})
+      endforeach()
+    endblock()
+
     # Exceptions for Makefile generator
     if(RunCMake_GENERATOR MATCHES Makefiles)
       # Diagnostics specific to the Makefile generators.

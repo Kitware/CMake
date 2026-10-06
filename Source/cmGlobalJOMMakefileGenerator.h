@@ -49,6 +49,8 @@ public:
 
   bool IsGNUMakeJobServerAware() const override { return false; }
 
+  bool TargetNamesAreCaseInsensitive() const override { return true; }
+
 protected:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     std::string const& makeProgram, std::string const& projectName,

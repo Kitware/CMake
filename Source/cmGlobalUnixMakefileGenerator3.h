@@ -122,6 +122,13 @@ public:
   bool IsGNUMakeJobServerAware() const override { return true; }
 
   /**
+   * Utilized to determine if the make tool matches target names
+   * case-insensitively, so that generated target names may not differ
+   * only in case.
+   */
+  virtual bool TargetNamesAreCaseInsensitive() const { return false; }
+
+  /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
    * requests that they Generate.

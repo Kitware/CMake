@@ -1101,7 +1101,12 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
 cmGlobalUnixMakefileGenerator3::TestPrepTarget&
 cmGlobalUnixMakefileGenerator3::GetTestPrepTarget(std::string const& name)
 {
-  TestPrepTarget& testPrepTarget = this->TestPrepTargets[name];
+  // Merge targets whose names differ only in case where the make tool does
+  // not distinguish them. Keep the first spelling for the user-facing name.
+  TestPrepTarget& testPrepTarget =
+    this->TestPrepTargets[this->TargetNamesAreCaseInsensitive()
+                            ? cmSystemTools::LowerCase(name)
+                            : name];
   if (testPrepTarget.Name.empty()) {
     testPrepTarget.Name = name;
   }
@@ -1160,6 +1165,12 @@ void cmGlobalUnixMakefileGenerator3::WriteTestPrepRules(
   std::vector<std::string> no_commands;
   std::vector<std::string> allDeps;
   for (auto const& entry : this->TestPrepTargets) {
+    // A test whose target name matches "test_prep/all" is prepared by the
+    // rule for all tests.
+    if (entry.first == "test_prep/all") {
+      cm::append(allDeps, entry.second.Rules);
+      continue;
+    }
     std::vector<std::string> depends = entry.second.Rules;
     if (depends.empty() && !this->EmptyRuleHackDepends.empty()) {
       depends.push_back(this->EmptyRuleHackDepends);
@@ -1196,6 +1207,10 @@ void cmGlobalUnixMakefileGenerator3::WriteTestPrepConvenienceRules(
   ruleFileStream << "# Convenience rules to build test dependencies.\n\n";
 
   for (auto const& entry : this->TestPrepTargets) {
+    // The "test_prep/all" rule is written below.
+    if (entry.first == "test_prep/all") {
+      continue;
+    }
     depends.clear();
     if (regenerate) {
       depends.emplace_back("cmake_check_build_system");
