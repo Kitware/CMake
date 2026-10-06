@@ -3098,7 +3098,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
     return std::string(expr);
   };
 
-  std::vector<std::string> outputs;
+  std::vector<std::string> byproducts;
   auto replaceExtension = [](std::string const& path,
                              std::string const& ext) -> std::string {
     auto const dir = cmSystemTools::GetFilenamePath(path);
@@ -3134,8 +3134,15 @@ void cmLocalGenerator::CopyPchCompilePdb(
          << "    execute_process(COMMAND ${CMAKE_COMMAND}" << " -E sleep 1)\n"
          << "  endif()\n";
     file << "endforeach()\n";
-    outputs.push_back(configGenex(dest_file));
+    byproducts.push_back(configGenex(dest_file));
   }
+
+  // Multiple targets reusing the same PCH may share a compiler PDB
+  // directory, in which case they copy to the same destination.  Use a
+  // per-target stamp file as the rule output to avoid duplicate rules.
+  std::string const stamp_file = cmStrCat(target->GetSupportDirectory(),
+                                          "/copy_idb_pdb_", config, ".stamp");
+  file << "file(TOUCH \"" << stamp_file << "\")\n";
 
   cmCustomCommandLines commandLines =
     cmMakeSingleCommandLine({ configGenex(cmSystemTools::GetCMakeCommand()),
@@ -3159,12 +3166,12 @@ void cmLocalGenerator::CopyPchCompilePdb(
   }
 
   if (this->GetGlobalGenerator()->IsVisualStudio()) {
-    cc->SetByproducts(outputs);
+    cc->SetByproducts(byproducts);
     this->AddCustomCommandToTarget(
       target->GetName(), cmCustomCommandType::PRE_BUILD, std::move(cc),
       cmObjectLibraryCommands::Accept);
   } else {
-    cc->SetOutputs(outputs);
+    cc->SetOutputs(configGenex(stamp_file));
     cmSourceFile* copy_rule = this->AddCustomCommandToOutput(std::move(cc));
     if (copy_rule) {
       copy_rule->SetProperty("CXX_SCAN_FOR_MODULES", "0");
