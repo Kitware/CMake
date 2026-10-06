@@ -10,9 +10,12 @@ set_target_properties(CudaOnlyPDB PROPERTIES
   )
 
 set(pdbs
-  ${CMAKE_CURRENT_BINARY_DIR}/CompPDBDir/${CMAKE_CFG_INTDIR}/CompPDBName.pdb
   ${CMAKE_CURRENT_BINARY_DIR}/LinkPDBDir/${CMAKE_CFG_INTDIR}/LinkPDBName.pdb
   )
+if(NOT CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
+  list(APPEND pdbs
+    ${CMAKE_CURRENT_BINARY_DIR}/CompPDBDir/${CMAKE_CFG_INTDIR}/CompPDBName.pdb)
+endif()
 add_custom_command(TARGET CudaOnlyPDB POST_BUILD
   COMMAND ${CMAKE_COMMAND} -Dconfig=$<CONFIG> "-Dpdbs=${pdbs}"
                            -P ${CMAKE_CURRENT_SOURCE_DIR}/check_pdbs.cmake

@@ -90,6 +90,9 @@ foreach (cuda_lib IN LISTS nv_libs)
 endforeach()
 
 add_executable(Toolkit main.cpp)
+if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 13)
+  target_compile_features(Toolkit PRIVATE cxx_std_17)
+endif()
 target_link_libraries(Toolkit PRIVATE CUDA::toolkit)
 
 if(HAS_CUPTI)

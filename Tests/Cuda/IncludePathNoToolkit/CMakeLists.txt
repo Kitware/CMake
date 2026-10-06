@@ -7,5 +7,8 @@ project (IncludePathNoToolkit CXX CUDA)
 # the cuda runtime headers
 
 add_executable(IncludePathNoToolkit main.cpp)
+if(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION VERSION_GREATER_EQUAL 13)
+  target_compile_features(IncludePathNoToolkit PRIVATE cxx_std_17)
+endif()
 target_include_directories(IncludePathNoToolkit PRIVATE
                            ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})

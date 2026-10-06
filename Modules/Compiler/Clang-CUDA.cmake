@@ -25,7 +25,11 @@ set(_CMAKE_CUDA_PTX_FLAG "--cuda-device-only -S")
 if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 20.0)
   # Starting in 20.0, clang supports device linking as part of the host link phase
   set(CMAKE_CUDA_COMPILER_HAS_DEVICE_LINK_PHASE FALSE)
-  set(_CMAKE_CUDA_RDC_LINK_FLAG "--offload-link")
+  if(CMAKE_CUDA_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    set(_CMAKE_CUDA_RDC_LINK_FLAG "-clang:--offload-link")
+  else()
+    set(_CMAKE_CUDA_RDC_LINK_FLAG "--offload-link")
+  endif()
 endif()
 
 # Device linking is just regular linking so these are the same.

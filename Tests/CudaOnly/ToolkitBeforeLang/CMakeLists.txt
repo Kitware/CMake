@@ -23,4 +23,7 @@ foreach (cuda_lib IN LISTS cuda_libs)
 endforeach()
 
 add_executable(CudaOnlyToolkitBeforeLang main.cu)
+if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 13)
+  target_compile_features(CudaOnlyToolkitBeforeLang PRIVATE cuda_std_17)
+endif()
 target_link_libraries(CudaOnlyToolkitBeforeLang PRIVATE CUDA::toolkit)
