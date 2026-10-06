@@ -149,3 +149,7 @@ xz-devel
 
 # Packages needed to test third-party binaries.
 ncurses-compat-libs
+
+# Packages needed to test SYCL with AdaptiveCpp.
+clang20
+libomp20-devel

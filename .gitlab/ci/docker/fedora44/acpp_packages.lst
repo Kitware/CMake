@@ -1,0 +1,13 @@
+boost-devel
+clang20
+clang20-devel
+cmake
+gcc-c++
+git
+libomp20-devel
+lld20
+llvm20
+llvm20-devel
+ninja-build
+numactl-devel
+python3
