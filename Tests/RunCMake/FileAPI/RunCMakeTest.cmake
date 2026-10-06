@@ -124,6 +124,8 @@ run_cmake_with_options(InitialCache -C ${RunCMake_SOURCE_DIR}/InitialCache-scrip
 run_cmake(ProjectQueryGood)
 run_cmake(ProjectQueryBad)
 run_cmake(FailConfigure)
+run_cmake(InterfaceIncludes)
+run_cmake(InterfaceIncludesNoLanguages)
 
 # Reconfiguring with a case-only build-type change (Debug -> debug) must not
 # leave the reply index citing a target file that cleanup deleted on a

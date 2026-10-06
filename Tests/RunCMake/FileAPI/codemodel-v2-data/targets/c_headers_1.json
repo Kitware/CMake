@@ -232,10 +232,6 @@
       "isSystem": null
     },
     {
-      "path": "^.*/Tests/RunCMake/FileAPI/fileset$",
-      "isSystem": null
-    },
-    {
       "path": "^.*/Tests/RunCMake/FileAPI/fileset/dir$",
       "isSystem": null
     }
