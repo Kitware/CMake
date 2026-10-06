@@ -480,6 +480,50 @@
         "version"
       ],
       "additionalProperties": false
+    },
+    {
+      "description": "The presets specify the generator and the build directory, and optionally an array of variables and other arguments to pass to CMake.",
+      "properties": {
+        "$schema": {
+          "$ref": "#/definitions/$schema@v8.."
+        },
+        "version": {
+          "type": "integer",
+          "description": "A required integer representing the version of the JSON schema.",
+          "const": 14
+        },
+        "cmakeMinimumRequired": {
+          "$ref": "#/definitions/cmakeMinimumRequired@v10.."
+        },
+        "include": {
+          "$ref": "#/definitions/include@v4.."
+        },
+        "vendor": {
+          "$ref": "#/definitions/vendor@v1.."
+        },
+        "configurePresets": {
+          "$ref": "#/definitions/configurePresets@v14"
+        },
+        "buildPresets": {
+          "$ref": "#/definitions/buildPresets@v10.."
+        },
+        "testPresets": {
+          "$ref": "#/definitions/testPresets@v12.."
+        },
+        "packagePresets": {
+          "$ref": "#/definitions/packagePresets@v10.."
+        },
+        "workflowPresets": {
+          "$ref": "#/definitions/workflowPresets@v10.."
+        },
+        "$comment": {
+          "$ref": "#/definitions/$comment@v10.."
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "additionalProperties": false
     }
   ],
   "required": [
@@ -1017,6 +1061,86 @@
         ]
       }
     },
+    "configurePresets@v14": {
+      "type": "array",
+      "description": "An optional array of configure preset objects.",
+      "items": {
+        "type": "object",
+        "description": "A configure preset object.",
+        "unevaluatedProperties": false,
+        "properties": {
+          "name": {
+            "$ref": "#/definitions/configurePresets.name@v1.."
+          },
+          "hidden": {
+            "$ref": "#/definitions/configurePresets.hidden@v1.."
+          },
+          "inherits": {
+            "$ref": "#/definitions/configurePresets.inherits@v1.."
+          },
+          "condition": {
+            "$ref": "#/definitions/configurePresets.condition@v10.."
+          },
+          "vendor": {
+            "$ref": "#/definitions/configurePresets.vendor@v1.."
+          },
+          "displayName": {
+            "$ref": "#/definitions/configurePresets.displayName@v1.."
+          },
+          "description": {
+            "$ref": "#/definitions/configurePresets.description@v1.."
+          },
+          "generator": {
+            "$ref": "#/definitions/configurePresets.generator@v3.."
+          },
+          "architecture": {
+            "$ref": "#/definitions/configurePresets.architecture@v10.."
+          },
+          "toolset": {
+            "$ref": "#/definitions/configurePresets.toolset@v10.."
+          },
+          "toolchainFile": {
+            "$ref": "#/definitions/configurePresets.toolchainFile@v3.."
+          },
+          "graphviz": {
+            "$ref": "#/definitions/configurePresets.graphviz@v10.."
+          },
+          "binaryDir": {
+            "$ref": "#/definitions/configurePresets.binaryDir@v3.."
+          },
+          "installDir": {
+            "$ref": "#/definitions/configurePresets.installDir@v3.."
+          },
+          "cmakeExecutable": {
+            "$ref": "#/definitions/configurePresets.cmakeExecutable@v1.."
+          },
+          "cacheVariables": {
+            "$ref": "#/definitions/configurePresets.cacheVariables@v10.."
+          },
+          "environment": {
+            "$ref": "#/definitions/configurePresets.environment@v1.."
+          },
+          "warnings": {
+            "$ref": "#/definitions/configurePresets.warnings@v14"
+          },
+          "errors": {
+            "$ref": "#/definitions/configurePresets.errors@v14"
+          },
+          "debug": {
+            "$ref": "#/definitions/configurePresets.debug@v10.."
+          },
+          "trace": {
+            "$ref": "#/definitions/configurePresets.trace@v10.."
+          },
+          "$comment": {
+            "$ref": "#/definitions/$comment@v10.."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
     "configurePresets.name@v1..": {
       "type": "string",
       "minLength": 1,
@@ -1451,13 +1575,56 @@
           "$ref": "#/definitions/configurePresets.warnings.installAbsoluteDestination@v12.."
         },
         "nonTargetDirective": {
-          "$ref": "#/definitions/configurePresets.warnings.nonTargetDirective@v13"
+          "$ref": "#/definitions/configurePresets.warnings.nonTargetDirective@v13.."
         },
         "policy": {
           "$ref": "#/definitions/configurePresets.warnings.policy@v12.."
         },
         "strict": {
-          "$ref": "#/definitions/configurePresets.warnings.strict@v13"
+          "$ref": "#/definitions/configurePresets.warnings.strict@v13.."
+        },
+        "uninitialized": {
+          "$ref": "#/definitions/configurePresets.warnings.uninitialized@v1.."
+        },
+        "unusedCli": {
+          "$ref": "#/definitions/configurePresets.warnings.unusedCli@v1.."
+        },
+        "systemVars": {
+          "$ref": "#/definitions/configurePresets.warnings.systemVars@v1.."
+        },
+        "$comment": {
+          "$ref": "#/definitions/$comment@v10.."
+        }
+      }
+    },
+    "configurePresets.warnings@v14": {
+      "type": "object",
+      "description": "An optional object specifying the warnings to enable.",
+      "unevaluatedProperties": false,
+      "properties": {
+        "author": {
+          "$ref": "#/definitions/configurePresets.warnings.author@v12.."
+        },
+        "cpsNonConformingLocation": {
+          "$ref": "#/definitions/configurePresets.warnings.cpsNonConformingLocation@v14"
+        },
+        "deprecated": {
+          "$ref": "#/definitions/configurePresets.warnings.deprecated@v1.."
+        },
+        "experimental": {
+          "$ref": "#/definitions/configurePresets.warnings.experimental@v12.."
+        },
+        "installAbsoluteDestination": {
+          "$ref": "#/definitions/configurePresets.warnings.installAbsoluteDestination@v12.."
+        },
+        "nonTargetDirective": {
+          "$ref": "#/definitions/configurePresets.warnings.nonTargetDirective@v13.."
+        },
+        "policy": {
+          "$ref": "#/definitions/configurePresets.warnings.policy@v12.."
+        },
+        "strict": {
+          "$ref": "#/definitions/configurePresets.warnings.strict@v13.."
         },
         "uninitialized": {
           "$ref": "#/definitions/configurePresets.warnings.uninitialized@v1.."
@@ -1477,6 +1644,10 @@
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Wauthor or -Wno-author on the command line. This may not be set to false if errors.author is set to true."
     },
+    "configurePresets.warnings.cpsNonConformingLocation@v14": {
+      "type": "boolean",
+      "description": "An optional boolean. Equivalent to passing -Wcps-non-conforming-location or -Wno-cps-non-conforming-location on the command line. This may not be set to false if errors.cpsNonConformingLocation is set to true."
+    },
     "configurePresets.warnings.deprecated@v1..": {
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Wdeprecated or -Wno-deprecated on the command line. This may not be set to false if errors.deprecated is set to true."
@@ -1493,7 +1664,7 @@
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Winstall-absolute-destination or -Wno-install-absolute-destination on the command line. This may not be set to false if errors.installAbsoluteDestination is set to true."
     },
-    "configurePresets.warnings.nonTargetDirective@v13": {
+    "configurePresets.warnings.nonTargetDirective@v13..": {
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Wnon-target-directive or -Wno-non-target-directive on the command line. This may not be set to false if errors.nonTargetDirective is set to true."
     },
@@ -1501,7 +1672,7 @@
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Wpolicy or -Wno-policy on the command line. This may not be set to false if errors.policy is set to true."
     },
-    "configurePresets.warnings.strict@v13": {
+    "configurePresets.warnings.strict@v13..": {
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Wstrict or -Wno-strict on the command line. This may not be set to false if errors.strict is set to true."
     },
@@ -1595,13 +1766,53 @@
           "$ref": "#/definitions/configurePresets.errors.installAbsoluteDestination@v12.."
         },
         "nonTargetDirective": {
-          "$ref": "#/definitions/configurePresets.errors.nonTargetDirective@v13"
+          "$ref": "#/definitions/configurePresets.errors.nonTargetDirective@v13.."
         },
         "policy": {
           "$ref": "#/definitions/configurePresets.errors.policy@v12.."
         },
         "strict": {
-          "$ref": "#/definitions/configurePresets.errors.strict@v13"
+          "$ref": "#/definitions/configurePresets.errors.strict@v13.."
+        },
+        "uninitialized": {
+          "$ref": "#/definitions/configurePresets.errors.uninitialized@v12.."
+        },
+        "unusedCli": {
+          "$ref": "#/definitions/configurePresets.errors.unusedCli@v12.."
+        },
+        "$comment": {
+          "$ref": "#/definitions/$comment@v10.."
+        }
+      }
+    },
+    "configurePresets.errors@v14": {
+      "type": "object",
+      "description": "An optional object specifying the errors to enable.",
+      "unevaluatedProperties": false,
+      "properties": {
+        "author": {
+          "$ref": "#/definitions/configurePresets.errors.author@v12.."
+        },
+        "cpsNonConformingLocation": {
+          "$ref": "#/definitions/configurePresets.errors.cpsNonConformingLocation@v14"
+        },
+        "deprecated": {
+          "$ref": "#/definitions/configurePresets.errors.deprecated@v1.."
+        },
+        "experimental": {
+          "$ref": "#/definitions/configurePresets.errors.experimental@v12.."
+        },
+        "installAbsoluteDestination": {
+          "$ref": "#/definitions/configurePresets.errors.installAbsoluteDestination@v12.."
+        },
+        "nonTargetDirective": {
+          "$ref": "#/definitions/configurePresets.errors.nonTargetDirective@v13.."
+        },
+        "policy": {
+          "$ref": "#/definitions/configurePresets.errors.policy@v12.."
+        },
+        "strict": {
+          "$ref": "#/definitions/configurePresets.errors.strict@v13.."
         },
         "uninitialized": {
           "$ref": "#/definitions/configurePresets.errors.uninitialized@v12.."
@@ -1617,6 +1828,10 @@
     "configurePresets.errors.author@v12..": {
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Werror=author or -Wno-error=author on the command line. This may not be set to true if warnings.author is set to false."
+    },
+    "configurePresets.errors.cpsNonConformingLocation@v14": {
+      "type": "boolean",
+      "description": "An optional boolean. Equivalent to passing -Werror=cps-non-conforming-location or -Wno-error=cps-non-conforming-location on the command line. This may not be set to true if warnings.cpsNonConformingLocation is set to false."
     },
     "configurePresets.errors.deprecated@v1..": {
       "type": "boolean",
@@ -1634,7 +1849,7 @@
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Werror=install-absolute-destination or -Wno-error=install-absolute-destination on the command line. This may not be set to true if warnings.installAbsoluteDestination is set to false."
     },
-    "configurePresets.errors.nonTargetDirective@v13": {
+    "configurePresets.errors.nonTargetDirective@v13..": {
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Werror=non-target-directive or -Wno-error=non-target-directive on the command line. This may not be set to true if warnings.nonTargetDirective is set to false."
     },
@@ -1642,7 +1857,7 @@
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Werror=policy or -Wno-error=policy on the command line. This may not be set to true if warnings.policy is set to false."
     },
-    "configurePresets.errors.strict@v13": {
+    "configurePresets.errors.strict@v13..": {
       "type": "boolean",
       "description": "An optional boolean. Equivalent to passing -Werror=strict or -Wno-error=strict on the command line. This may not be set to true if warnings.strict is set to false."
     },

@@ -27,6 +27,7 @@
 
 #define CM_FOR_EACH_DIAGNOSTIC_TABLE(ACTION, SELECT)                          \
   SELECT(ACTION, Warn, CMD_NONE, CMD_AUTHOR, 12)                              \
+  SELECT(ACTION, Ignore, CMD_AUTHOR, CMD_CPS_NON_CONFORMING_LOCATION, 14)     \
   SELECT(ACTION, Warn, CMD_AUTHOR, CMD_DEPRECATED, 1)                         \
   SELECT(ACTION, Warn, CMD_AUTHOR, CMD_EXPERIMENTAL, 12)                      \
   SELECT(ACTION, Ignore, CMD_AUTHOR, CMD_STRICT, 13)                          \

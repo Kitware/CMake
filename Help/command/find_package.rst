@@ -103,6 +103,12 @@ The command has a few modes by which it searches for packages:
   version files is considerably more complicated than for Module mode
   (see :ref:`search procedure`).
 
+  .. versionadded:: 4.6
+    CMake may search for CPS files in locations that do not conform with the
+    `Package Searching`_ procedures for CPS. The
+    :diagnostic:`CMD_CPS_NON_CONFORMING_LOCATION` diagnostic can be enabled to
+    detect when a CPS file is read from a non-conforming location.
+
   The config and version files are typically installed as part of the
   package, so they tend to be more reliable than Find modules.  They usually
   contain direct knowledge of the package contents, so no searching or
@@ -1035,3 +1041,5 @@ found.
 
 .. _cps-version_schema: https://cps-org.github.io/cps/schema.html#version-schema
 .. |cps-version_schema| replace:: ``version_schema``
+
+.. _`Package Searching`: https://cps-org.github.io/cps/searching.html

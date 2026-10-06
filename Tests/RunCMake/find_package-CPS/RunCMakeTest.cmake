@@ -29,6 +29,9 @@ run_cmake(WrongName)
 run_cmake(BadPrefix1)
 run_cmake(BadPrefix2)
 
+# CMD_CPS_NON_CONFORMING_LOCATION test
+run_cmake(NonConformingLocation)
+
 # Version-matching tests
 run_cmake(ExactVersion)
 run_cmake(CompatVersion)

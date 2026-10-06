@@ -174,6 +174,9 @@ private:
   void StoreVersionFound();
   void SetConfigDirCacheVariable(std::string const& value);
 
+  // Emit a diagnostic for a CPS file found in a non-conforming location.
+  void IssueCpsLocationDiagnostic(cm::string_view detail = {});
+
   void PushFindPackageRootPathStack();
   void PopFindPackageRootPathStack();
   class PushPopRootPathStack;
@@ -252,6 +255,7 @@ private:
   bool VersionExact = false;
   std::string FileFound;
   FoundPackageMode FileFoundMode = FoundPackageMode::None;
+  bool FileLocationError = false;
   std::string VersionFound;
   unsigned int VersionFoundMajor = 0;
   unsigned int VersionFoundMinor = 0;
