@@ -1050,7 +1050,7 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
       }
 
       std::vector<std::string>& rules =
-        this->TestPrepTargets[cmStrCat("test_prep/", testName)];
+        this->GetTestPrepTarget(cmStrCat("test_prep/", testName)).Rules;
 
       // Target dependencies are filtered to build-system targets by
       // GetBuildDependencies.
@@ -1087,20 +1087,29 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
       }
     }
 
-    this->AddDirectoryTestPrepTargets(lg.get(), this->TestPrepTargets);
+    this->AddDirectoryTestPrepTargets(lg.get());
   }
 
   // Sort and de-duplicate each rule list (as the Ninja generator does).
   for (auto& entry : this->TestPrepTargets) {
-    std::vector<std::string>& rules = entry.second;
+    std::vector<std::string>& rules = entry.second.Rules;
     std::sort(rules.begin(), rules.end());
     rules.erase(std::unique(rules.begin(), rules.end()), rules.end());
   }
 }
 
+cmGlobalUnixMakefileGenerator3::TestPrepTarget&
+cmGlobalUnixMakefileGenerator3::GetTestPrepTarget(std::string const& name)
+{
+  TestPrepTarget& testPrepTarget = this->TestPrepTargets[name];
+  if (testPrepTarget.Name.empty()) {
+    testPrepTarget.Name = name;
+  }
+  return testPrepTarget;
+}
+
 void cmGlobalUnixMakefileGenerator3::AddDirectoryTestPrepTargets(
-  cmLocalGenerator* lg,
-  std::map<std::string, std::vector<std::string>>& testPrepTargets)
+  cmLocalGenerator* lg)
 {
   cmLocalGenerator::DirectoryTestPrepTarget directoryTarget;
   if (!lg->GetDirectoryTestPrepTarget(
@@ -1109,7 +1118,8 @@ void cmGlobalUnixMakefileGenerator3::AddDirectoryTestPrepTargets(
     return;
   }
 
-  std::vector<std::string>& rules = testPrepTargets[directoryTarget.Name];
+  std::vector<std::string>& rules =
+    this->GetTestPrepTarget(directoryTarget.Name).Rules;
 
   for (cmLocalGenerator::DirectoryTestPrepDependency const& dep :
        directoryTarget.Dependencies) {
@@ -1150,13 +1160,13 @@ void cmGlobalUnixMakefileGenerator3::WriteTestPrepRules(
   std::vector<std::string> no_commands;
   std::vector<std::string> allDeps;
   for (auto const& entry : this->TestPrepTargets) {
-    std::vector<std::string> depends = entry.second;
+    std::vector<std::string> depends = entry.second.Rules;
     if (depends.empty() && !this->EmptyRuleHackDepends.empty()) {
       depends.push_back(this->EmptyRuleHackDepends);
     }
     rootLG.WriteMakeRule(makefileStream, "Build the dependencies of a test.",
-                         entry.first, depends, no_commands, true);
-    allDeps.push_back(entry.first);
+                         entry.second.Name, depends, no_commands, true);
+    allDeps.push_back(entry.second.Name);
   }
 
   if (allDeps.empty() && !this->EmptyRuleHackDepends.empty()) {
@@ -1191,9 +1201,9 @@ void cmGlobalUnixMakefileGenerator3::WriteTestPrepConvenienceRules(
       depends.emplace_back("cmake_check_build_system");
     }
     commands.clear();
-    commands.push_back(lg.GetRecursiveMakeCall(makefile2, entry.first));
+    commands.push_back(lg.GetRecursiveMakeCall(makefile2, entry.second.Name));
     lg.WriteMakeRule(ruleFileStream, "Build the dependencies of a test.",
-                     entry.first, depends, commands, true);
+                     entry.second.Name, depends, commands, true);
   }
 
   depends.clear();

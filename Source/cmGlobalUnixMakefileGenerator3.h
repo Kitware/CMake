@@ -326,12 +326,18 @@ private:
     DirectoryTargetsMap;
   void InitializeProgressMarks() override;
 
-  // Ordered map of "test_prep/<name>" -> the "<target>.dir/all" recursive
-  // rules that must be built to prepare the named test.  Populated by
+  // A "test_prep/<name>" target and the "<target>.dir/all" recursive rules
+  // that must be built to prepare the named test.
+  struct TestPrepTarget
+  {
+    std::string Name;
+    std::vector<std::string> Rules;
+  };
+
+  // Ordered map of "test_prep/" target name -> its rules.  Populated by
   // ComputeTestPrepTargets when CMAKE_TEST_BUILD_DEPENDS is enabled.
-  std::map<std::string, std::vector<std::string>> TestPrepTargets;
-  void AddDirectoryTestPrepTargets(
-    cmLocalGenerator* lg,
-    std::map<std::string, std::vector<std::string>>& testPrepTargets);
+  std::map<std::string, TestPrepTarget> TestPrepTargets;
+  TestPrepTarget& GetTestPrepTarget(std::string const& name);
+  void AddDirectoryTestPrepTargets(cmLocalGenerator* lg);
   bool TestPrepEnabled = false;
 };
