@@ -7,6 +7,7 @@
     "corrupt": {
       "type": "archive",
       "link_location": []
-    }
+    },
+    "invalid": "not-an-object"
   }
 }

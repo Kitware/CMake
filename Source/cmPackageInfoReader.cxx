@@ -979,8 +979,6 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
 
   for (auto ci = components.begin(), ce = components.end(); ci != ce; ++ci) {
     cm::string_view const name = IterKey(ci);
-    std::string const& type =
-      cmSystemTools::LowerCase(ToString((*ci)["type"]));
 
     // Get and validate full target name.
     std::string const& fullName = cmStrCat(package, "::"_s, name);
@@ -992,12 +990,22 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
       }
     }
 
+    Json::Value const& component = *ci;
+    if (!component.isObject()) {
+      makefile->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat(R"(Component ")"_s, fullName, R"(" is not an object.)"_s));
+      continue;
+    }
+
     auto createTarget = [&](cm::TargetType typeEnum) {
-      return this->AddComponent(makefile, typeEnum, fullName, *ci, package,
-                                scope);
+      return this->AddComponent(makefile, typeEnum, fullName, component,
+                                package, scope);
     };
 
     cmTarget* target = nullptr;
+    std::string const& type =
+      cmSystemTools::LowerCase(ToString(component["type"]));
     if (type == "symbolic"_s) {
       target = createTarget(cm::TargetType::INTERFACE_LIBRARY);
       target->SetSymbolic(true);
