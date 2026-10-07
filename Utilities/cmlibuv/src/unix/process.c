@@ -537,6 +537,8 @@ static void uv__spawn_init_posix_spawn(void) {
 #elif defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED < 1080
   /* posix_spawn on macOS < 10.8 has been observed to cause
      kernel panics and/or resource exhaustion.  Always use fork.  */
+#elif defined(__sun__)
+  /* posix_spawn on Solaris has been observed to cause hangs.  */
 #else
 #if !defined(__linux__) && !defined(_AIX) && !defined(__PASE__)
   posix_spawn_works = 1;
