@@ -917,7 +917,7 @@ bool SystemInformation::GetProcessResourceUsage(
 #if defined(_WIN32)
 #  if defined(KWSYS_SYS_HAS_PSAPI)
   HANDLE hProc = static_cast<HANDLE>(processHandle);
-  if (!hProc) {
+  if (!hProc || hProc == INVALID_HANDLE_VALUE) {
     return false;
   }
 
