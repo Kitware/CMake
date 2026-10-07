@@ -181,6 +181,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     if (gl.FindFiles(cmStrCat(bcDir, "/CUDA *.props"))) {
       cudaTools = gl.GetFiles();
     }
+    this->GeneratorToolsetCudaVSIntegrationFolder = std::move(bcDir);
     if (!cudaTools.empty()) {
       std::for_each(cudaTools.begin(), cudaTools.end(), cmCudaToolVersion);
       std::sort(cudaTools.begin(), cudaTools.end(),
@@ -201,7 +202,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
                  "\n"
                  "cannot detect Visual Studio integration files in path\n"
                  "  ",
-                 bcDir));
+                 this->GeneratorToolsetCudaVSIntegrationFolder));
 
       // Clear the configured tool-set
       this->GeneratorToolsetCuda.clear();
@@ -340,6 +341,9 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   }
   if (char const* cuda = this->GetPlatformToolsetCuda()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA", cuda);
+  } else if (!this->GeneratorToolsetCudaVSIntegrationFolder.empty()) {
+    mf->AddDefinition("_CMAKE_VS_PLATFORM_TOOLSET_CUDA_INTEGRATION_DIR",
+                      this->GeneratorToolsetCudaVSIntegrationFolder);
   }
   if (char const* cudaDir = this->GetPlatformToolsetCudaCustomDir()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR", cudaDir);

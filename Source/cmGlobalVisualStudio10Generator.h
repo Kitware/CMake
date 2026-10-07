@@ -234,6 +234,7 @@ protected:
   std::string GeneratorToolsetCuda;
   std::string GeneratorToolsetCudaCustomDir;
   std::string GeneratorToolsetCudaNvccSubdir;
+  std::string GeneratorToolsetCudaVSIntegrationFolder;
   std::string GeneratorToolsetCudaVSIntegrationSubdir;
   cm::optional<std::string> GeneratorToolsetFortran;
   cm::optional<std::string> DefaultToolsetFortran;
