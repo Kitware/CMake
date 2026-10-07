@@ -28,6 +28,7 @@
 #include "cmCMakePath.h"
 #include "cmCMakeString.hxx"
 #include "cmComputeLinkInformation.h"
+#include "cmDirectoryPropertyHelper.h"
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpression.h"
@@ -4125,6 +4126,50 @@ static const struct GlobalPropertyNode : public cmGeneratorExpressionNode
   }
 } globalPropertyNode;
 
+static const struct DirectoryPropertyNode : public cmGeneratorExpressionNode
+{
+  DirectoryPropertyNode() {} // NOLINT(modernize-use-equals-default)
+
+  // This node handles errors on parameter count itself.
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagCheckerParent*/) const override
+  {
+    auto const& directoryName = parameters[0];
+    auto const& propertyName = parameters[1];
+
+    if (directoryName.empty()) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        "$<DIRECTORY_PROPERTY:directory,property> expression requires a "
+        "non-empty directory name.");
+      return std::string{};
+    }
+    if (propertyName.empty()) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        "$<DIRECTORY_PROPERTY:directory,property> expression requires a "
+        "non-empty property name.");
+      return std::string{};
+    }
+
+    cmValue value;
+    cmGetDirectoryPropertyResult status = cmGetDirectoryProperty(
+      directoryName, propertyName, *eval->Context.LG->GetMakefile(), value);
+    if (status == cmGetDirectoryPropertyResult::DirectoryNotFound) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("Directory \"", directoryName, "\" was not found."));
+      return std::string{};
+    }
+
+    return value;
+  }
+} directoryPropertyNode;
+
 namespace {
 bool GetFileSet(std::vector<std::string> const& parameters,
                 cm::GenEx::Evaluation* eval,
@@ -6585,6 +6630,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "SEMICOLON", &semicolonNode },
     { "QUOTE", &quoteNode },
     { "GLOBAL_PROPERTY", &globalPropertyNode },
+    { "DIRECTORY_PROPERTY", &directoryPropertyNode },
     { "RULE_PROPERTY", &rulePropertyNode },
     { "SOURCE_EXISTS", &sourceExistsNode },
     { "SOURCE_PROPERTY", &sourcePropertyNode },

@@ -1,0 +1,9 @@
+CMake Error at no-directory\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<DIRECTORY_PROPERTY:,FOO>
+
+  \$<DIRECTORY_PROPERTY:directory,property> expression requires a non-empty
+  directory name\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

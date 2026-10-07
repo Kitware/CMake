@@ -1462,6 +1462,20 @@ Global Properties
   Value of the global property ``prop``, or empty if
   the property is not set.
 
+Directory-dependent Expressions
+-------------------------------
+
+Directory Properties
+^^^^^^^^^^^^^^^^^^^^
+
+.. genex:: $<DIRECTORY_PROPERTY:dir,prop>
+
+  .. versionadded:: 4.5
+
+  Value of the property ``prop`` on the directory ``dir``, or empty if
+  the property is not set. An error will be raised if the directory is not
+  known by CMake.
+
 Rule-Dependent Expressions
 --------------------------
 
