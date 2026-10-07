@@ -34,7 +34,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <spawn.h>
+#ifndef __sun__
 #include <paths.h>
+#endif
 #include <dlfcn.h>
 #include <sched.h>
 
