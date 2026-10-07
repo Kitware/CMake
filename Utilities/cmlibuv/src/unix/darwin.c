@@ -165,6 +165,7 @@ void uv_loadavg(double avg[3]) {
 
 int uv_resident_set_memory(size_t* rss) {
   mach_msg_type_number_t count;
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 101100
   task_vm_info_data_t info;
   kern_return_t err;
 
@@ -182,6 +183,22 @@ int uv_resident_set_memory(size_t* rss) {
    */
   assert(err == KERN_SUCCESS);
   *rss = info.phys_footprint;
+#else
+  task_basic_info_data_t info;
+  kern_return_t err;
+
+  count = TASK_BASIC_INFO_COUNT;
+  err = task_info(mach_task_self(),
+                  TASK_BASIC_INFO,
+                  (task_info_t) &info,
+                  &count);
+  (void) &err;
+  /* task_info(TASK_BASIC_INFO) cannot really fail. Anything other than
+   * KERN_SUCCESS implies a libuv bug.
+   */
+  assert(err == KERN_SUCCESS);
+  *rss = info.resident_size;
+#endif
 
   return 0;
 }

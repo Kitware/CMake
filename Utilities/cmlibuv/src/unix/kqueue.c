@@ -237,7 +237,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
     }
 
    if ((w->events & UV__POLLPRI) == 0 && (w->pevents & UV__POLLPRI) != 0) {
-#ifdef __APPLE__
+#if defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101300
       /*
        * Use EVFILT_EXCEPT+ NOTE_OOB for macOS since it defines this flag.
        * FreeBSD does not.
@@ -386,7 +386,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
           revents |= UV__POLLRDHUP;
       }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101300
       /* Match EVFILT_EXCEPT used above for macOS. */
       if (ev->filter == EVFILT_EXCEPT) {
 #else
