@@ -35,6 +35,9 @@ public:
   /** Get the name of the rule */
   std::string const& GetName() const { return this->Name; }
 
+  cmRule const* GetRule() const { return this->Rule; }
+  cmTarget const* GetTarget() const { return this->Target; }
+
   bool IsGloballyVisible() const { return this->Rule->IsGloballyVisible(); }
 
   cmValue GetProperty(std::string const& property) const;
