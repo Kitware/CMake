@@ -1050,7 +1050,7 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
       }
 
       std::vector<std::string>& rules =
-        this->TestPrepTargets[cmStrCat("test_prep/", testName)];
+        this->GetTestPrepTarget(cmStrCat("test_prep/", testName)).Rules;
 
       // Target dependencies are filtered to build-system targets by
       // GetBuildDependencies.
@@ -1087,20 +1087,34 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
       }
     }
 
-    this->AddDirectoryTestPrepTargets(lg.get(), this->TestPrepTargets);
+    this->AddDirectoryTestPrepTargets(lg.get());
   }
 
   // Sort and de-duplicate each rule list (as the Ninja generator does).
   for (auto& entry : this->TestPrepTargets) {
-    std::vector<std::string>& rules = entry.second;
+    std::vector<std::string>& rules = entry.second.Rules;
     std::sort(rules.begin(), rules.end());
     rules.erase(std::unique(rules.begin(), rules.end()), rules.end());
   }
 }
 
+cmGlobalUnixMakefileGenerator3::TestPrepTarget&
+cmGlobalUnixMakefileGenerator3::GetTestPrepTarget(std::string const& name)
+{
+  // Merge targets whose names differ only in case where the make tool does
+  // not distinguish them. Keep the first spelling for the user-facing name.
+  TestPrepTarget& testPrepTarget =
+    this->TestPrepTargets[this->TargetNamesAreCaseInsensitive()
+                            ? cmSystemTools::LowerCase(name)
+                            : name];
+  if (testPrepTarget.Name.empty()) {
+    testPrepTarget.Name = name;
+  }
+  return testPrepTarget;
+}
+
 void cmGlobalUnixMakefileGenerator3::AddDirectoryTestPrepTargets(
-  cmLocalGenerator* lg,
-  std::map<std::string, std::vector<std::string>>& testPrepTargets)
+  cmLocalGenerator* lg)
 {
   cmLocalGenerator::DirectoryTestPrepTarget directoryTarget;
   if (!lg->GetDirectoryTestPrepTarget(
@@ -1109,7 +1123,8 @@ void cmGlobalUnixMakefileGenerator3::AddDirectoryTestPrepTargets(
     return;
   }
 
-  std::vector<std::string>& rules = testPrepTargets[directoryTarget.Name];
+  std::vector<std::string>& rules =
+    this->GetTestPrepTarget(directoryTarget.Name).Rules;
 
   for (cmLocalGenerator::DirectoryTestPrepDependency const& dep :
        directoryTarget.Dependencies) {
@@ -1150,13 +1165,19 @@ void cmGlobalUnixMakefileGenerator3::WriteTestPrepRules(
   std::vector<std::string> no_commands;
   std::vector<std::string> allDeps;
   for (auto const& entry : this->TestPrepTargets) {
-    std::vector<std::string> depends = entry.second;
+    // A test whose target name matches "test_prep/all" is prepared by the
+    // rule for all tests.
+    if (entry.first == "test_prep/all") {
+      cm::append(allDeps, entry.second.Rules);
+      continue;
+    }
+    std::vector<std::string> depends = entry.second.Rules;
     if (depends.empty() && !this->EmptyRuleHackDepends.empty()) {
       depends.push_back(this->EmptyRuleHackDepends);
     }
     rootLG.WriteMakeRule(makefileStream, "Build the dependencies of a test.",
-                         entry.first, depends, no_commands, true);
-    allDeps.push_back(entry.first);
+                         entry.second.Name, depends, no_commands, true);
+    allDeps.push_back(entry.second.Name);
   }
 
   if (allDeps.empty() && !this->EmptyRuleHackDepends.empty()) {
@@ -1186,14 +1207,18 @@ void cmGlobalUnixMakefileGenerator3::WriteTestPrepConvenienceRules(
   ruleFileStream << "# Convenience rules to build test dependencies.\n\n";
 
   for (auto const& entry : this->TestPrepTargets) {
+    // The "test_prep/all" rule is written below.
+    if (entry.first == "test_prep/all") {
+      continue;
+    }
     depends.clear();
     if (regenerate) {
       depends.emplace_back("cmake_check_build_system");
     }
     commands.clear();
-    commands.push_back(lg.GetRecursiveMakeCall(makefile2, entry.first));
+    commands.push_back(lg.GetRecursiveMakeCall(makefile2, entry.second.Name));
     lg.WriteMakeRule(ruleFileStream, "Build the dependencies of a test.",
-                     entry.first, depends, commands, true);
+                     entry.second.Name, depends, commands, true);
   }
 
   depends.clear();
