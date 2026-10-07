@@ -5,6 +5,7 @@ ARG BASE_IMAGE=fedora:44
 FROM ${BASE_IMAGE} AS dnf-cache
 # Populate DNF cache w/ the fresh metadata and prefetch packages.
 RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
+    --mount=type=bind,source=acpp_packages.lst,target=/root/acpp_packages.lst \
     --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
     --mount=type=bind,source=rbenv_packages.lst,target=/root/rbenv_packages.lst \
@@ -100,6 +101,26 @@ RUN --mount=type=bind,source=build_iwyu.sh,target=/root/build_iwyu.sh \
     sh /root/build_iwyu.sh
 
 
+FROM ${BASE_IMAGE} AS acpp-build-env
+LABEL maintainer="Brad King <brad.king@kitware.com>"
+# Pre-install prerequisites to build AdaptiveCpp.
+RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
+    --mount=type=bind,source=acpp_packages.lst,target=/root/acpp_packages.lst \
+    --mount=type=cache,from=dnf-cache,source=/var/cache/libdnf5,target=/var/cache/libdnf5,sharing=private \
+    --mount=type=tmpfs,target=/var/log \
+    --mount=type=tmpfs,target=/tmp \
+    dnf install -y $(grep '^[^#]\+$' /root/acpp_packages.lst)
+
+
+FROM acpp-build-env AS acpp-build
+LABEL maintainer="Brad King <brad.king@kitware.com>"
+# Build AdaptiveCpp.
+RUN --mount=type=bind,source=build_acpp.sh,target=/root/build_acpp.sh \
+    --mount=type=cache,target=/root/AdaptiveCpp \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/build_acpp.sh
+
+
 FROM ${BASE_IMAGE} AS p4-dl
 # Download Perforce.
 # NOTE `curl` is pre-installed in the base image.
@@ -133,3 +154,6 @@ RUN --mount=type=bind,from=rvm-build,source=/root,target=/root \
 
 RUN --mount=type=bind,from=rbenv-build,source=/root,target=/root \
     tar -C / -xf /root/rbenv.tar && rbenv global 3.4.9
+
+RUN --mount=type=bind,from=acpp-build,source=/root,target=/root \
+    tar -C / -xf /root/acpp.tar
