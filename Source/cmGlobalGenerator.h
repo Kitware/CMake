@@ -328,6 +328,10 @@ public:
   // one.  Used to resolve file-level test build dependencies.
   cmGeneratorTarget* FindOutputOwningTarget(std::string const& output);
 
+  // Whether the build generates the file, as the output or byproduct of a
+  // custom command or custom target.
+  bool IsGeneratedByBuild(std::string const& file) const;
+
   cmMakefile* GetCurrentMakefile() const
   {
     return this->CurrentConfigureMakefile;

@@ -2489,6 +2489,26 @@ cmGeneratorTarget* cmGlobalGenerator::FindOutputOwningTarget(
   return nullptr;
 }
 
+bool cmGlobalGenerator::IsGeneratedByBuild(std::string const& file) const
+{
+  // The output-to-source map records every generated path regardless of
+  // which target, if any, builds it.
+  std::string const collapsed = cmSystemTools::CollapseFullPath(file);
+  for (auto const& lg : this->LocalGenerators) {
+    cmSourcesWithOutput so = lg->GetSourcesWithOutput(collapsed);
+    if (so.Source || so.Target) {
+      return true;
+    }
+    if (file != collapsed) {
+      so = lg->GetSourcesWithOutput(file);
+      if (so.Source || so.Target) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 void cmGlobalGenerator::ClearGeneratorMembers()
 {
   this->BuildExportSets.clear();

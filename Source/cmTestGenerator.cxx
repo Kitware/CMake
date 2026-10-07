@@ -63,27 +63,6 @@ std::string TestName(cmTest* test)
   return name;
 }
 
-// Whether a path is produced by the build (a custom-command output or
-// byproduct) rather than a pre-existing file.  The output-to-source map
-// records every generated path regardless of which target, if any, builds it.
-bool fileIsGenerated(cmGlobalGenerator* gg, std::string const& file)
-{
-  std::string const collapsed = cmSystemTools::CollapseFullPath(file);
-  for (auto const& lg : gg->GetLocalGenerators()) {
-    cmSourcesWithOutput so = lg->GetSourcesWithOutput(collapsed);
-    if (so.Source || so.Target) {
-      return true;
-    }
-    if (file != collapsed) {
-      so = lg->GetSourcesWithOutput(file);
-      if (so.Source || so.Target) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 } // End: anonymous namespace
 
 cmTestGenerator::cmTestGenerator(
@@ -163,7 +142,7 @@ bool cmTestGenerator::EvaluateBuildDependencies(
       BuildDependencies::FileDependency file;
       file.Path = depName;
       file.Owner = gg->FindOutputOwningTarget(depName);
-      file.Generated = fileIsGenerated(gg, depName);
+      file.Generated = gg->IsGeneratedByBuild(depName);
       info.Files.push_back(std::move(file));
       continue;
     }
