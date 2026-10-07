@@ -1092,8 +1092,8 @@ static void uv__read(uv_stream_t* stream) {
         if (stream->read_cb != NULL) {
           uv__io_start(stream->loop, &stream->io_watcher, POLLIN);
           uv__stream_osx_interrupt_select(stream);
+          stream->read_cb(stream, 0, &buf);
         }
-        stream->read_cb(stream, 0, &buf);
 #if defined(__CYGWIN__) || defined(__MSYS__)
       } else if (errno == ECONNRESET && stream->type == UV_NAMED_PIPE) {
         uv__stream_eof(stream, &buf);
