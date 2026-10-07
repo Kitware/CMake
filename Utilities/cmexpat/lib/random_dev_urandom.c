@@ -49,7 +49,11 @@ writeRandomBytes_dev_urandom(void *target, size_t count) {
   int success = false; /* full count bytes written? */
   size_t bytesWrittenTotal = 0;
 
-  const int fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
+  const int fd = open("/dev/urandom", O_RDONLY
+#ifdef O_CLOEXEC
+                      | O_CLOEXEC
+#endif
+                      );
   if (fd < 0) {
     return false;
   }
