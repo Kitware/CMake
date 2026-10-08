@@ -3803,21 +3803,9 @@ int cmMakefile::ConfigureFile(std::string const& infile,
     return res;
   }
 
-  std::string newLineCharacters;
-  std::ios::openmode omode = std::ios::out | std::ios::trunc;
+  std::string newLineCharacters = "\n";
   if (newLine.IsValid()) {
     newLineCharacters = newLine.GetCharacters();
-    omode |= std::ios::binary;
-  } else {
-    newLineCharacters = "\n";
-  }
-  std::string tempOutputFile = cmStrCat(soutfile, ".tmp");
-  cmsys::ofstream fout(tempOutputFile.c_str(), omode);
-  if (!fout) {
-    cmSystemTools::Error("Could not open file for write in copy operation " +
-                         tempOutputFile);
-    cmSystemTools::ReportLastSystemError("");
-    return 0;
   }
   cmsys::ifstream fin(sinfile.c_str());
   if (!fin) {
@@ -3841,25 +3829,52 @@ int cmMakefile::ConfigureFile(std::string const& infile,
   // input file at the same time
   std::string inLine;
   std::string outLine;
+  std::string content;
   while (cmSystemTools::GetLineFromStream(fin, inLine)) {
     outLine.clear();
     this->ConfigureString(inLine, outLine, atOnly, escapeQuotes);
-    fout << outLine << newLineCharacters;
+    content += outLine;
+    content += newLineCharacters;
   }
-  // close the files before attempting to copy
   fin.close();
-  fout.close();
+#ifdef _WIN32
+  if (!newLine.IsValid()) {
+    // Translate new lines as writing in text mode would.
+    cmSystemTools::ReplaceString(content, "\n", "\r\n");
+  }
+#endif
 
-  auto status = cmSystemTools::MoveFileIfDifferent(tempOutputFile, soutfile);
+  // Avoid writing a temporary file just to find out nothing changed.
+  if (!cmSystemTools::FileHasContent(soutfile, content)) {
+    std::string tempOutputFile = cmStrCat(soutfile, ".tmp");
+    cmsys::ofstream fout(tempOutputFile.c_str(),
+                         std::ios::out | std::ios::trunc | std::ios::binary);
+    if (!fout) {
+      cmSystemTools::Error("Could not open file for write in copy operation " +
+                           tempOutputFile);
+      cmSystemTools::ReportLastSystemError("");
+      return 0;
+    }
+    fout << content;
+    fout.close();
+
+    // The content is known to differ, so replace the output without
+    // comparing the files again.
+    cmsys::Status status;
+    if (!cmSystemTools::RenameFile(tempOutputFile, soutfile)) {
+      status = cmSystemTools::CopyFileAlways(tempOutputFile, soutfile);
+      cmSystemTools::RemoveFile(tempOutputFile);
+    }
+    if (!status) {
+      this->IssueMessage(MessageType::FATAL_ERROR, status.GetString());
+      return 0;
+    }
+  }
+
+  auto status = cmSystemTools::SetPermissions(soutfile, permissions);
   if (!status) {
     this->IssueMessage(MessageType::FATAL_ERROR, status.GetString());
     res = 0;
-  } else {
-    status = cmSystemTools::SetPermissions(soutfile, permissions);
-    if (!status) {
-      this->IssueMessage(MessageType::FATAL_ERROR, status.GetString());
-      res = 0;
-    }
   }
 
   return res;

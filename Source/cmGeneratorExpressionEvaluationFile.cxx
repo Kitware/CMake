@@ -88,34 +88,37 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   this->Files.push_back(outputFileName);
   outputFiles[outputFileName] = outputContent;
 
-  bool openWithBinaryFlag = false;
-  if (!this->NewLineCharacter.empty()) {
-    openWithBinaryFlag = true;
+  // If no new line character is specified, use the platform's native one,
+  // as writing "\n" in text mode would.
+  std::string newLine = this->NewLineCharacter;
+  if (newLine.empty()) {
+#ifdef _WIN32
+    newLine = "\r\n";
+#else
+    newLine = "\n";
+#endif
   }
-  cmGeneratedFileStream fout;
-  fout.Open(outputFileName, false, openWithBinaryFlag);
-  if (!fout) {
+  std::string fileContent;
+  fileContent.reserve(outputContent.size());
+  std::istringstream iss(outputContent);
+  std::string line;
+  bool hasNewLine = false;
+  while (cmSystemTools::GetLineFromStream(iss, line, &hasNewLine)) {
+    fileContent += line;
+    if (hasNewLine || !this->NewLineCharacter.empty()) {
+      fileContent += newLine;
+    }
+  }
+
+  bool written = false;
+  if (!cmGeneratedFileStream::WriteIfDifferent(outputFileName, fileContent,
+                                               false, &written)) {
     lg->IssueMessage(MessageType::FATAL_ERROR,
                      "Could not open file for write in copy operation " +
                        outputFileName);
     return;
   }
-  fout.SetCopyIfDifferent(true);
-  std::istringstream iss(outputContent);
-  std::string line;
-  bool hasNewLine = false;
-  while (cmSystemTools::GetLineFromStream(iss, line, &hasNewLine)) {
-    fout << line;
-    if (!this->NewLineCharacter.empty()) {
-      fout << this->NewLineCharacter;
-    } else if (hasNewLine) {
-      // if new line character is not specified, the file will be opened in
-      // text mode. So, "\n" will be translated to the correct newline
-      // ending based on the platform.
-      fout << "\n";
-    }
-  }
-  if (fout.Close() && perm) {
+  if (written && perm) {
     cmSystemTools::SetPermissions(outputFileName.c_str(), perm);
   }
 }

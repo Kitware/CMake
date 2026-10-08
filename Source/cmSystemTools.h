@@ -230,6 +230,13 @@ public:
                                            std::string const& destination);
 
   /**
+   * Return true if the file exists and contains exactly the given bytes.
+   * Use this to avoid rewriting a file whose content would not change,
+   * without first writing the new content to a temporary file.
+   */
+  static bool FileHasContent(std::string const& path, cm::string_view content);
+
+  /**
    * According to the CreateProcessW documentation:
    *
    *   To run a batch file, you must start the command interpreter; set

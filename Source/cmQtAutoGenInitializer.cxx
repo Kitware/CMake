@@ -293,21 +293,15 @@ void InfoWriter::SetConfigArray(
 
 bool InfoWriter::Save(std::string const& filename)
 {
-  cmGeneratedFileStream fileStream;
-  fileStream.SetCopyIfDifferent(true);
-  fileStream.Open(filename, false, true);
-  if (!fileStream) {
-    return false;
-  }
-
+  std::ostringstream content;
   Json::StyledStreamWriter jsonWriter;
   try {
-    jsonWriter.write(fileStream, this->Value_);
+    jsonWriter.write(content, this->Value_);
   } catch (...) {
     return false;
   }
 
-  return fileStream.Close();
+  return cmGeneratedFileStream::WriteIfDifferent(filename, content.str());
 }
 
 cmQtAutoGen::ConfigStrings<std::vector<std::string>> generateListOptions(

@@ -1767,6 +1767,30 @@ cmsys::Status cmSystemTools::MoveFileIfDifferent(
   return res;
 }
 
+bool cmSystemTools::FileHasContent(std::string const& path,
+                                   cm::string_view content)
+{
+  // Compare sizes first to avoid opening the file when they differ.
+  // A missing file has length zero and is caught by opening it below.
+  if (FileLength(path) != content.size()) {
+    return false;
+  }
+  cmsys::ifstream fin(path.c_str(), std::ios::in | std::ios::binary);
+  if (!fin) {
+    return false;
+  }
+  char buffer[4096];
+  while (!content.empty()) {
+    std::size_t const n = std::min(content.size(), sizeof(buffer));
+    if (!fin.read(buffer, static_cast<std::streamsize>(n)) ||
+        content.compare(0, n, cm::string_view(buffer, n)) != 0) {
+      return false;
+    }
+    content.remove_prefix(n);
+  }
+  return true;
+}
+
 void cmSystemTools::Glob(std::string const& directory,
                          std::string const& regexp,
                          std::vector<std::string>& files)
