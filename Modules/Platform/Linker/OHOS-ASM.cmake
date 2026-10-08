@@ -1,0 +1,5 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file LICENSE.rst or https://cmake.org/licensing for details.
+
+# The OHOS SDK toolchain file uses -fuse-ld=lld
+include(Platform/Linker/OHOS-LLD-ASM)
