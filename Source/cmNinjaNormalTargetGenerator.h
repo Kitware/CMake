@@ -32,7 +32,8 @@ private:
 
   void WriteLinkRule(bool useResponseFile, std::string const& config,
                      std::vector<std::string> const& preLinkComments,
-                     std::vector<std::string> const& postBuildComments);
+                     std::vector<std::string> const& postBuildComments,
+                     bool hasPreLink, bool hasPostBuild);
   void WriteDeviceLinkRules(std::string const& config);
   void WriteDriverDeviceLinkRule(bool useResponseFile,
                                  std::string const& config);
