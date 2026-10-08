@@ -4,8 +4,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <initializer_list>
 #include <sstream>
+#include <unordered_set>
 #include <utility>
 
 #include <cmext/algorithm>
@@ -13,7 +15,10 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCryptoHash.h"
 #include "cmDuration.h"
+#include "cmFileTime.h"
+#include "cmGeneratedFileStream.h"
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -243,6 +248,30 @@ static void RccListParseContent(std::string const& content,
   }
 }
 
+static bool RccListReadQrcContent(std::string const& qrcFile,
+                                  std::string& qrcContents)
+{
+  cmsys::ifstream ifs(qrcFile.c_str());
+  if (!ifs) {
+    return false;
+  }
+  std::ostringstream osst;
+  osst << ifs.rdbuf();
+  qrcContents = osst.str();
+  return true;
+}
+
+static bool RccListReadQrc(std::string const& qrcFile,
+                           std::vector<std::string>& files)
+{
+  std::string qrcContents;
+  if (!RccListReadQrcContent(qrcFile, qrcContents)) {
+    return false;
+  }
+  RccListParseContent(qrcContents, files);
+  return true;
+}
+
 static bool RccListParseOutput(std::string const& rccStdOut,
                                std::string const& rccStdErr,
                                std::vector<std::string>& files,
@@ -292,6 +321,97 @@ static bool RccListParseOutput(std::string const& rccStdOut,
   return true;
 }
 
+// The header of a cached rcc listing identifies the rcc executable, its
+// options, and the qrc file.  The qrc file is identified by a hash of its
+// content, because its modification time may not change if it is modified
+// again within the time resolution of the file system.
+static std::string RccListCacheHeader(std::string const& rccExecutable,
+                                      std::vector<std::string> const& options,
+                                      std::string const& qrcFile,
+                                      std::string const& qrcContent)
+{
+  cmFileTime rccTime;
+  if (!rccTime.Load(rccExecutable)) {
+    return std::string();
+  }
+  cmCryptoHash sha256(cmCryptoHash::AlgoSHA256);
+  return cmStrCat(
+    "rcc=", rccExecutable, "\nrcc_time=", std::to_string(rccTime.GetTime()),
+    "\nrcc_size=", std::to_string(cmSystemTools::FileLength(rccExecutable)),
+    "\noptions=", cmJoin(options, ";"), "\nqrc=", qrcFile,
+    "\nqrc_sha256=", sha256.HashString(qrcContent), '\n');
+}
+
+static bool RccListReadCache(std::string const& cacheFile,
+                             std::string const& header,
+                             std::vector<std::string>& files)
+{
+  cmsys::ifstream fin(cacheFile.c_str(), std::ios::in | std::ios::binary);
+  if (!fin) {
+    return false;
+  }
+  std::ostringstream content;
+  content << fin.rdbuf();
+  std::string const cache = content.str();
+  if (!cmHasPrefix(cache, header)) {
+    return false;
+  }
+  std::vector<std::string> cachedFiles;
+  std::istringstream lines(cache.substr(header.size()));
+  std::string line;
+  while (std::getline(lines, line)) {
+    // Tolerate line endings converted to CRLF.
+    if (!line.empty() && line.back() == '\r') {
+      line.pop_back();
+    }
+    if (line.empty()) {
+      continue;
+    }
+    // rcc lists the content of directories, so the listing is outdated
+    // if a listed path became a directory.
+    if (cmSystemTools::FileIsDirectory(line)) {
+      return false;
+    }
+    cachedFiles.push_back(std::move(line));
+  }
+  cm::append(files, cachedFiles);
+  return true;
+}
+
+static void RccListWriteCache(std::string const& cacheFile,
+                              std::string const& header,
+                              std::string const& qrcContent,
+                              std::string const& qrcDir,
+                              std::vector<std::string>::const_iterator first,
+                              std::vector<std::string>::const_iterator last)
+{
+  // rcc lists the content of directories referred to by the qrc file, which
+  // may change without the qrc file changing.  Do not cache such listings.
+  // Rather than interpreting the qrc file the way rcc does, cache only
+  // listings in which rcc listed each entry of the qrc file as given.
+  // Directories, and entries rcc resolves differently, e.g. names with
+  // XML character references, are not listed as given.
+  {
+    std::vector<std::string> entries;
+    RccListParseContent(qrcContent, entries);
+    std::unordered_set<std::string> const listed(first, last);
+    for (std::string const& entry : entries) {
+      if (!listed.count(cmSystemTools::CollapseFullPath(
+            cmTrimWhitespace(entry), qrcDir))) {
+        cmSystemTools::RemoveFile(cacheFile);
+        return;
+      }
+    }
+  }
+
+  std::string content = header;
+  for (; first != last; ++first) {
+    content += *first;
+    content += '\n';
+  }
+  cmGeneratedFileStream::WriteIfDifferent(cacheFile, content, true);
+}
+
 cmQtAutoGen::RccLister::RccLister() = default;
 
 cmQtAutoGen::RccLister::RccLister(std::string rccExecutable,
@@ -303,7 +423,8 @@ cmQtAutoGen::RccLister::RccLister(std::string rccExecutable,
 
 bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
                                   std::vector<std::string>& files,
-                                  std::string& error, bool verbose) const
+                                  std::string& error, bool verbose,
+                                  std::string const& cacheFile) const
 {
   error.clear();
 
@@ -319,9 +440,23 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
   // contains non-ASCII characters.
   std::string const fileDir = cmSystemTools::GetFilenamePath(qrcFile);
 
+  std::size_t const firstFile = files.size();
+  std::string cacheHeader;
+  std::string qrcContent;
   if (!this->RccExecutable_.empty() &&
       cmSystemTools::FileExists(this->RccExecutable_, true) &&
       !this->ListOptions_.empty()) {
+
+    // Running rcc is expensive.  Reuse the listing of a previous run if
+    // neither rcc nor the qrc file changed since.
+    if (!cacheFile.empty() && RccListReadQrcContent(qrcFile, qrcContent)) {
+      cacheHeader = RccListCacheHeader(
+        this->RccExecutable_, this->ListOptions_, qrcFile, qrcContent);
+      if (!cacheHeader.empty() &&
+          RccListReadCache(cacheFile, cacheHeader, files)) {
+        return true;
+      }
+    }
 
     bool result = false;
     int retVal = 0;
@@ -360,28 +495,21 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
   } else {
     // We can't use rcc for the file listing.
     // Read the qrc file content into string and parse it.
-    {
-      std::string qrcContents;
-      {
-        cmsys::ifstream ifs(qrcFile.c_str());
-        if (ifs) {
-          std::ostringstream osst;
-          osst << ifs.rdbuf();
-          qrcContents = osst.str();
-        } else {
-          error = cmStrCat("The resource file ", Quoted(qrcFile),
-                           " is not readable\n");
-          return false;
-        }
-      }
-      // Parse string content
-      RccListParseContent(qrcContents, files);
+    if (!RccListReadQrc(qrcFile, files)) {
+      error =
+        cmStrCat("The resource file ", Quoted(qrcFile), " is not readable\n");
+      return false;
     }
   }
 
   // Convert relative paths to absolute paths
   for (std::string& entry : files) {
     entry = cmSystemTools::CollapseFullPath(entry, fileDir);
+  }
+
+  if (!cacheHeader.empty()) {
+    RccListWriteCache(cacheFile, cacheHeader, qrcContent, fileDir,
+                      files.cbegin() + firstFile, files.cend());
   }
   return true;
 }

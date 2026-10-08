@@ -43,6 +43,8 @@ public:
     std::string QrcName;
     std::string QrcPathChecksum;
     std::string InfoFile;
+    // Base name of the files caching the rcc listing of the qrc file
+    std::string ListFileBase;
     ConfigString SettingsFile;
     ConfigString OutputFile;
     std::string OutputFileGenex;

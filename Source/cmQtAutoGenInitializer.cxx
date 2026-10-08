@@ -1332,6 +1332,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
                                         qrc.QrcName, '_', qrc.QrcPathChecksum);
       qrc.LockFile = cmStrCat(base, "_Lock.lock");
       qrc.InfoFile = cmStrCat(base, "_Info.json");
+      qrc.ListFileBase = cmStrCat(base, "_List");
       this->ConfigFileNames(qrc.SettingsFile, cmStrCat(base, "_Used"), ".txt");
     }
     // rcc options
@@ -1364,8 +1365,9 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             RccLister const lister(
               this->Rcc.Executable.Config[config],
               this->Rcc.ExecutableFeatures.Config[config]->ListOptions);
-            if (!lister.list(qrc.QrcFile, qrc.Resources.Config[config],
-                             error)) {
+            if (!lister.list(
+                  qrc.QrcFile, qrc.Resources.Config[config], error, false,
+                  cmStrCat(qrc.ListFileBase, '_', config, ".txt"))) {
               cmSystemTools::Error(error);
               return false;
             }
@@ -1374,7 +1376,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           RccLister const lister(
             this->Rcc.Executable.Default,
             this->Rcc.ExecutableFeatures.Default->ListOptions);
-          if (!lister.list(qrc.QrcFile, qrc.Resources.Default, error)) {
+          if (!lister.list(qrc.QrcFile, qrc.Resources.Default, error, false,
+                           cmStrCat(qrc.ListFileBase, ".txt"))) {
             cmSystemTools::Error(error);
             return false;
           }

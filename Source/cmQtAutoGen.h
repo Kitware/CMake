@@ -147,9 +147,12 @@ public:
      * @brief Lists a files in the qrcFile
      * @arg files The file names are appended to this list
      * @arg error contains the error message when the function fails
+     * @arg cacheFile if not empty, the listing is cached in this file and
+     *      reused as long as neither rcc nor the qrcFile change
      */
     bool list(std::string const& qrcFile, std::vector<std::string>& files,
-              std::string& error, bool verbose = false) const;
+              std::string& error, bool verbose = false,
+              std::string const& cacheFile = std::string()) const;
 
   private:
     std::string RccExecutable_;
