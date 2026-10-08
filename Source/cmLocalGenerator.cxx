@@ -2605,32 +2605,35 @@ bool cmLocalGenerator::GetRealDependency(std::string const& inName,
   }
 
   // The name was not that of a CMake target.  It must name a file.
-  if (cmSystemTools::FileIsFullPath(inName)) {
+  dep = this->GetRealFileDependency(inName);
+  return true;
+}
+
+std::string cmLocalGenerator::GetRealFileDependency(
+  std::string const& name) const
+{
+  if (cmSystemTools::FileIsFullPath(name)) {
     // This is a full path.  Return it as given.
-    dep = inName;
-    return true;
+    return name;
   }
 
   // Check for a source file in this directory that matches the
   // dependency.
-  if (cmSourceFile* sf = this->Makefile->GetSource(inName)) {
-    dep = sf->ResolveFullPath();
-    return true;
+  if (cmSourceFile* sf = this->Makefile->GetSource(name)) {
+    return sf->ResolveFullPath();
   }
 
   // Treat the name as relative to the source directory in which it
   // was given.
-  dep = cmStrCat(this->GetCurrentSourceDirectory(), '/', inName);
+  std::string dep = cmStrCat(this->GetCurrentSourceDirectory(), '/', name);
 
   // If the in-source path does not exist, assume it instead lives in the
   // binary directory.
   if (!cmSystemTools::FileExists(dep)) {
-    dep = cmStrCat(this->GetCurrentBinaryDirectory(), '/', inName);
+    dep = cmStrCat(this->GetCurrentBinaryDirectory(), '/', name);
   }
 
-  dep = cmSystemTools::CollapseFullPath(dep);
-
-  return true;
+  return cmSystemTools::CollapseFullPath(dep);
 }
 
 static void AddVisibilityCompileOption(std::string& flags,

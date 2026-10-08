@@ -355,6 +355,17 @@ public:
   bool GetRealDependency(std::string const& name, std::string const& config,
                          std::string& dep, cmPolicies::PolicyStatus cmp0212);
 
+  /**
+   * Translate a file dependency as given in CMake code to a full path.
+   * - If \a name is a full path, it will be returned.
+   * - If \a name names a source file known to this directory, such as the
+   *   output of a custom command, its full path will be returned.
+   * - Otherwise \a name is treated as a relative path with respect to the
+   *   source directory of this generator if it exists there, or else the
+   *   binary directory.
+   */
+  std::string GetRealFileDependency(std::string const& name) const;
+
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */, bool /* verbose */) {}
 
