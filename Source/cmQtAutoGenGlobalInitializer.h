@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "cmQtAutoGen.h"
@@ -66,6 +67,11 @@ private:
   void AddToGlobalAutoRcc(cmLocalGenerator* localGen,
                           std::string const& targetName);
 
+  /// @brief Check whether a file exists, using a cached listing of its
+  /// directory to rule out files that do not exist without querying
+  /// the file system for each of them.
+  bool CachedFileExists(std::string const& path);
+
   cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle>
   GetCompilerFeatures(std::string const& generator,
                       cmQtAutoGen::ConfigString const& executable,
@@ -79,4 +85,7 @@ private:
     std::unordered_map<std::string, cmQtAutoGen::CompilerFeaturesHandle>>
     CompilerFeatures_;
   Keywords const Keywords_;
+  /// Lower case names in directories, see CachedFileExists.
+  std::unordered_map<std::string, std::unordered_set<std::string>>
+    DirectoryNames_;
 };

@@ -2,11 +2,14 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenGlobalInitializer.h"
 
+#include <algorithm>
 #include <set>
 #include <utility>
 
 #include <cm/memory>
 #include <cm/optional>
+
+#include "cmsys/Directory.hxx"
 
 #include "cmCustomCommand.h"
 #include "cmDiagnostics.h"
@@ -161,6 +164,46 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
 }
 
 cmQtAutoGenGlobalInitializer::~cmQtAutoGenGlobalInitializer() = default;
+
+bool cmQtAutoGenGlobalInitializer::CachedFileExists(std::string const& path)
+{
+  // Most of the header paths probed for a source file do not exist.
+  // A file whose name is not in the directory, compared without regard
+  // to case, cannot exist.  Names that are present, and names whose case
+  // cannot be folded reliably, are checked on disk as before.  So are
+  // names Windows may resolve without a matching directory entry: short
+  // 8.3 names, and names with a trailing dot or space.
+  //
+  // The listings are kept only while the per target initializers scan
+  // their sources.  Nothing creates files in the probed directories
+  // meanwhile; AUTOGEN writes only to its own build directories, and
+  // file(GENERATE) outputs are written later.
+  std::string const name = cmSystemTools::GetFilenameName(path);
+  bool const listable = !name.empty() && name.back() != '.' &&
+    name.back() != ' ' && name.find('~') == std::string::npos &&
+    std::all_of(name.begin(), name.end(),
+                [](char c) { return static_cast<unsigned char>(c) < 0x80; });
+  if (listable) {
+    std::string const dir = cmSystemTools::GetFilenamePath(path);
+    auto it = this->DirectoryNames_.find(dir);
+    if (it == this->DirectoryNames_.end()) {
+      cmsys::Directory d;
+      if (d.Load(dir)) {
+        std::unordered_set<std::string> names;
+        unsigned long const n = d.GetNumberOfFiles();
+        for (unsigned long i = 0; i < n; ++i) {
+          names.insert(cmSystemTools::LowerCase(d.GetFileName(i)));
+        }
+        it = this->DirectoryNames_.emplace(dir, std::move(names)).first;
+      }
+    }
+    if (it != this->DirectoryNames_.end() &&
+        !it->second.count(cmSystemTools::LowerCase(name))) {
+      return false;
+    }
+  }
+  return cmSystemTools::FileExists(path);
+}
 
 void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
   cmLocalGenerator* localGen, std::string const& name,
@@ -344,6 +387,8 @@ bool cmQtAutoGenGlobalInitializer::InitializeCustomTargets()
       return false;
     }
   }
+  // The directory listings are only valid while scanning sources.
+  this->DirectoryNames_.clear();
   return true;
 }
 

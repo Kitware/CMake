@@ -1112,10 +1112,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
               }
               // We only accept not-GENERATED files that do exist.
               if (!sf->GetIsGenerated() &&
-                  !cmSystemTools::FileExists(fullPath)) {
+                  !this->GlobalInitializer->CachedFileExists(fullPath)) {
                 continue;
               }
-            } else if (cmSystemTools::FileExists(fullPath)) {
+            } else if (this->GlobalInitializer->CachedFileExists(fullPath)) {
               // Create a new source file for the existing file
               sf = this->Makefile->CreateSource(fullPath, false, locationKind);
             }
