@@ -6,11 +6,7 @@
                         \___/_/\_\ .__/ \__,_|\__|
                                  |_| XML parser
 
-   Copyright (c) 2000      Clark Cooper <coopercc@users.sourceforge.net>
-   Copyright (c) 2002      Greg Stein <gstein@users.sourceforge.net>
-   Copyright (c) 2005      Karl Waclawek <karl@waclawek.net>
-   Copyright (c) 2017-2023 Sebastian Pipping <sebastian@pipping.org>
-   Copyright (c) 2023      Orgad Shaneh <orgad.shaneh@audiocodes.com>
+   Copyright (c) 2022-2026 Sebastian Pipping <sebastian@pipping.org>
    Licensed under the MIT license:
 
    Permission is  hereby granted,  free of charge,  to any  person obtaining
@@ -35,21 +31,60 @@
    SPDX-License-Identifier: MIT
 */
 
-#ifndef WINCONFIG_H
-#define WINCONFIG_H
+#include "xcs.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#undef WIN32_LEAN_AND_MEAN
-
-#include <memory.h>
-#include <string.h>
-
-#if defined(_MSC_VER)
-# pragma warning(push,1)
-# pragma warning(disable:4311)   /* pointer truncation */
+#if defined(XML_UNICODE)
+#  if defined(XML_UNICODE_WCHAR_T)
+#    include <wchar.h> // for wcscmp, wcslen, wcsncmp
+#  endif
+#else
+#  include <string.h> // for strcmp, strlen, strncmp
 #endif
 
-#endif /* ndef WINCONFIG_H */
+size_t
+xcslen(const XML_Char *s) {
+#ifdef XML_UNICODE
+#  ifdef XML_UNICODE_WCHAR_T
+  return wcslen(s);
+#  else
+  // XML_Char is unsigned short
+  size_t len = 0;
+  while (s[len]) {
+    len++;
+  }
+  return len;
+#  endif
+#else
+  return strlen(s);
+#endif
+}
+
+int
+xcscmp(const XML_Char *a, const XML_Char *b) {
+#if defined(XML_UNICODE)
+#  if defined(XML_UNICODE_WCHAR_T)
+  return wcscmp(a, b);
+#  else
+  for (; a[0] && b[0] && a[0] == b[0]; a++, b++)
+    ;
+  return a[0] - b[0];
+#  endif
+#else
+  return strcmp(a, b);
+#endif
+}
+
+int
+xcsncmp(const XML_Char *a, const XML_Char *b, size_t len) {
+#if defined(XML_UNICODE)
+#  if defined(XML_UNICODE_WCHAR_T)
+  return wcsncmp(a, b, len);
+#  else
+  for (; len > 0 && a[0] && b[0] && a[0] == b[0]; len--, a++, b++) {
+  }
+  return (len == 0) ? 0 : (a[0] - b[0]);
+#  endif
+#else
+  return strncmp(a, b, len);
+#endif
+}

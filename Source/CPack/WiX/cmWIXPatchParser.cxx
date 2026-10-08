@@ -12,6 +12,11 @@
 #include "cmCPackGenerator.h"
 #include "cmStringAlgorithms.h"
 
+#if XML_MAJOR_VERSION < 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION < 9)
+#  define XML_GetCurrentLineNumber64 XML_GetCurrentLineNumber
+#  define XML_GetCurrentColumnNumber64 XML_GetCurrentColumnNumber
+#endif
+
 cmWIXPatchNode::Type cmWIXPatchText::type()
 {
   return cmWIXPatchNode::TEXT;
@@ -147,10 +152,10 @@ void cmWIXPatchParser::ReportError(int line, int column, char const* msg)
 
 void cmWIXPatchParser::ReportValidationError(std::string const& message)
 {
-  ReportError(
-    XML_GetCurrentLineNumber(static_cast<XML_Parser>(this->Parser)),
-    XML_GetCurrentColumnNumber(static_cast<XML_Parser>(this->Parser)),
-    message.c_str());
+  XML_Parser parser = static_cast<XML_Parser>(this->Parser);
+  ReportError(static_cast<int>(XML_GetCurrentLineNumber64(parser)),
+              static_cast<int>(XML_GetCurrentColumnNumber64(parser)),
+              message.c_str());
 }
 
 bool cmWIXPatchParser::IsValid() const
