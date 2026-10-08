@@ -11,6 +11,7 @@
 #include <set>
 #include <stack>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -476,6 +477,12 @@ public:
     return *this->GeneratorExpressionParseCache;
   }
 
+  //! Cache for cmSystemTools::GetActualCaseForPath.
+  std::unordered_map<std::string, std::string>* GetActualCaseCache()
+  {
+    return &this->ActualCaseCache;
+  }
+
   //! Forget what is known about the file system, e.g. after files may
   //! have been removed or renamed.
   void InvalidateFileSystemCaches();
@@ -830,6 +837,7 @@ private:
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
   std::unique_ptr<cmGeneratorExpressionParseCache>
     GeneratorExpressionParseCache;
+  std::unordered_map<std::string, std::string> ActualCaseCache;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
 #ifndef CMAKE_BOOTSTRAP

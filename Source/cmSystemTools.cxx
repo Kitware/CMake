@@ -2047,7 +2047,8 @@ std::string cmSystemTools::RelativeIfUnder(std::string const& top,
   return out;
 }
 
-std::string cmSystemTools::GetActualCaseForPath(std::string const& p)
+std::string cmSystemTools::GetActualCaseForPath(
+  std::string const& p, std::unordered_map<std::string, std::string>* cache)
 {
 #ifdef _WIN32
   std::string casePath;
@@ -2101,15 +2102,32 @@ std::string cmSystemTools::GetActualCaseForPath(std::string const& p)
         std::string test_str = casePath;
         test_str += path_components[idx];
 
-        WIN32_FIND_DATAW findData;
-        HANDLE hFind = ::FindFirstFileW(
-          cmsys::Encoding::ToWide(test_str).c_str(), &findData);
-        if (INVALID_HANDLE_VALUE != hFind) {
-          auto case_file_name = cmsys::Encoding::ToNarrow(findData.cFileName);
-          path_components[idx] = std::move(case_file_name);
-          ::FindClose(hFind);
+        // Only components found to exist are cached, so that a path
+        // created later is still converted.
+        std::string const* cached = nullptr;
+        if (cache) {
+          auto it = cache->find(test_str);
+          if (it != cache->end()) {
+            cached = &it->second;
+          }
+        }
+        if (cached) {
+          path_components[idx] = *cached;
         } else {
-          converting = false;
+          WIN32_FIND_DATAW findData;
+          HANDLE hFind = ::FindFirstFileW(
+            cmsys::Encoding::ToWide(test_str).c_str(), &findData);
+          if (INVALID_HANDLE_VALUE != hFind) {
+            auto case_file_name =
+              cmsys::Encoding::ToNarrow(findData.cFileName);
+            ::FindClose(hFind);
+            if (cache) {
+              cache->emplace(std::move(test_str), case_file_name);
+            }
+            path_components[idx] = std::move(case_file_name);
+          } else {
+            converting = false;
+          }
         }
       }
     }
@@ -2118,6 +2136,7 @@ std::string cmSystemTools::GetActualCaseForPath(std::string const& p)
   }
   return casePath;
 #else
+  static_cast<void>(cache);
   return p;
 #endif
 }

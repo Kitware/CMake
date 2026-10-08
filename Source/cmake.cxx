@@ -2577,6 +2577,7 @@ int cmake::Configure()
 
 void cmake::InvalidateFileSystemCaches()
 {
+  this->ActualCaseCache.clear();
   if (this->GlobalGenerator) {
     this->GlobalGenerator->ClearSourceFileExistsCache();
   }
