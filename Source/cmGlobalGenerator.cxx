@@ -2604,6 +2604,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
   this->ExistingSourceFiles.clear();
+  this->RealPaths.clear();
   this->XcFrameworkPListContentMap.clear();
   this->BinaryDirectories.clear();
   this->GeneratedFiles.clear();
