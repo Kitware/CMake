@@ -12,6 +12,7 @@ else()
 endif()
 
 run_cmake(PropertiesOdd)
+run_cmake(AddTestsSourceLine)
 
 # Policy CMP0224 has to reach the tests that discovery creates.
 run_cmake(FixtureRepeatMode-NEW)
