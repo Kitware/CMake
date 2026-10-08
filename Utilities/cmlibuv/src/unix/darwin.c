@@ -165,6 +165,25 @@ void uv_loadavg(double avg[3]) {
 
 int uv_resident_set_memory(size_t* rss) {
   mach_msg_type_number_t count;
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 101100
+  task_vm_info_data_t info;
+  kern_return_t err;
+
+  /* phys_footprint, not resident_size: the latter keeps counting pages
+   * freed with madvise(MADV_FREE_REUSABLE), i.e. it never comes down.
+   */
+  count = TASK_VM_INFO_REV1_COUNT;
+  err = task_info(mach_task_self(),
+                  TASK_VM_INFO,
+                  (task_info_t) &info,
+                  &count);
+  (void) &err;
+  /* task_info(TASK_VM_INFO) cannot really fail. Anything other than
+   * KERN_SUCCESS implies a libuv bug.
+   */
+  assert(err == KERN_SUCCESS);
+  *rss = info.phys_footprint;
+#else
   task_basic_info_data_t info;
   kern_return_t err;
 
@@ -179,6 +198,7 @@ int uv_resident_set_memory(size_t* rss) {
    */
   assert(err == KERN_SUCCESS);
   *rss = info.resident_size;
+#endif
 
   return 0;
 }

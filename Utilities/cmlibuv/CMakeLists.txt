@@ -53,8 +53,18 @@ if(WIN32)
     )
   list(APPEND uv_defines
     WIN32_LEAN_AND_MEAN
-    _WIN32_WINNT=0x0600
     )
+  if(CMAKE_C_FLAGS MATCHES "(^| )[-/]D *_WIN32_WINNT=([0-9A-Fa-fx]+)( |$)")
+    # The user has explicitly specified a minimum version of Windows.
+    set(_WIN32_WINNT "${CMAKE_MATCH_2}")
+  else()
+    # Support Windows Vista by default.
+    set(_WIN32_WINNT 0x0600)
+    list(APPEND uv_defines _WIN32_WINNT=${_WIN32_WINNT})
+  endif()
+  if(_WIN32_WINNT GREATER_EQUAL 0x0602)
+    list(APPEND uv_libraries synchronization)
+  endif()
   list(APPEND uv_headers
     include/uv/win.h
     include/tree.h
