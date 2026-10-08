@@ -330,7 +330,14 @@ public:
 
   // Whether the build generates the file, as the output or byproduct of a
   // custom command or custom target.
-  bool IsGeneratedByBuild(std::string const& file) const;
+  bool IsGeneratedByBuild(std::string const& file);
+
+  // Called by local generators when they record a new output or byproduct,
+  // so that IsGeneratedByBuild rebuilds its index before its next lookup.
+  void InvalidateGeneratedByBuildIndex()
+  {
+    this->GeneratedByBuildIndexComputed = false;
+  }
 
   cmMakefile* GetCurrentMakefile() const
   {
@@ -1023,6 +1030,18 @@ private:
   std::map<std::string, std::vector<cmGeneratorTarget*>> OutputOwnerIndex;
   bool OutputOwnerIndexComputed = false;
   void ComputeOutputOwnerIndex();
+
+  // Map from a configuration to a map from a linked artifact (collapsed full
+  // path) to the build-system target(s) that produce it.  Built lazily for
+  // each configuration and cleared with the other generator members.
+  std::map<std::string, std::map<std::string, std::vector<cmGeneratorTarget*>>>
+    ArtifactOwnerIndex;
+
+  // Every output and byproduct path recorded by any local generator, keyed
+  // as for cmLocalGenerator::GetSourcesWithOutput.  Built lazily on first use
+  // and invalidated whenever a local generator records a new path.
+  std::unordered_set<std::string> GeneratedByBuildIndex;
+  bool GeneratedByBuildIndexComputed = false;
 
   friend class cmake;
   void CreateGeneratorTargets(

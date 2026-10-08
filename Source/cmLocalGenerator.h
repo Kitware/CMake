@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -473,6 +474,14 @@ public:
    * Return the source file which has the provided source name as output.
    */
   cmSourcesWithOutput GetSourcesWithOutput(std::string const& name) const;
+
+  /**
+   * Add every path recorded as an output or byproduct of a custom command or
+   * custom target in this directory, as they are keyed for the efficient
+   * full-path lookup of GetSourcesWithOutput.
+   */
+  void AppendOutputsAndByproducts(
+    std::unordered_set<std::string>& outputs) const;
 
   /**
    * Is there a source file that has the provided source name as an output?
