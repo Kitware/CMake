@@ -56,6 +56,7 @@ class cmCMakePresetsWorkflowArgs;
 class cmFileAPI;
 class cmInstrumentation;
 class cmFileTimeCache;
+class cmGeneratorExpressionParseCache;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmMessenger;
@@ -470,6 +471,11 @@ public:
    */
   cmFileTimeCache* GetFileTimeCache() { return this->FileTimeCache.get(); }
 
+  cmGeneratorExpressionParseCache& GetGeneratorExpressionParseCache()
+  {
+    return *this->GeneratorExpressionParseCache;
+  }
+
   bool WasLogLevelSetViaCLI() const { return this->LogLevelWasSetViaCLI; }
 
   //! Get the selected log level for `message()` commands during the cmake run.
@@ -818,6 +824,8 @@ private:
   bool InInitialCache = false;
   std::string CMakeListName;
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
+  std::unique_ptr<cmGeneratorExpressionParseCache>
+    GeneratorExpressionParseCache;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
 #ifndef CMAKE_BOOTSTRAP

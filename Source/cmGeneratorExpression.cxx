@@ -39,6 +39,51 @@ cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression() = default;
 
 cmGeneratorExpression::~cmGeneratorExpression() = default;
 
+struct cmGeneratorExpressionParseCache::Entry
+{
+  explicit Entry(std::string input)
+    : Input(std::move(input))
+  {
+  }
+
+  // The evaluators point into Input, so it must not change after parsing.
+  std::string const Input;
+  cmGeneratorExpressionEvaluatorVector Evaluators;
+  bool NeedsEvaluation = false;
+};
+
+cmGeneratorExpressionParseCache::cmGeneratorExpressionParseCache() = default;
+
+cmGeneratorExpressionParseCache::~cmGeneratorExpressionParseCache() = default;
+
+std::shared_ptr<cmGeneratorExpressionParseCache::Entry const>
+cmGeneratorExpressionParseCache::Get(std::string const& input)
+{
+  // Inputs without generator expressions are cheap to handle; do not
+  // grow the cache with them.
+  if (cmGeneratorExpression::Find(input) == cm::string_view::npos) {
+    return nullptr;
+  }
+
+  auto it = this->Entries.find(input);
+  if (it != this->Entries.end()) {
+    return it->second;
+  }
+
+  auto entry = std::make_shared<Entry>(input);
+  cmGeneratorExpressionLexer l;
+  std::vector<cmGeneratorExpressionToken> tokens = l.Tokenize(entry->Input);
+  entry->NeedsEvaluation = l.GetSawGeneratorExpression();
+  if (entry->NeedsEvaluation) {
+    cmGeneratorExpressionParser p(tokens);
+    p.Parse(entry->Evaluators);
+  }
+
+  // The key refers to the input owned by the entry.
+  cm::string_view const key = entry->Input;
+  return this->Entries.emplace(key, std::move(entry)).first->second;
+}
+
 std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
   std::string input) const
 {
@@ -85,13 +130,13 @@ std::string const& cmCompiledGeneratorExpression::Evaluate(
                              currentTarget ? currentTarget : headTarget,
                              this->EvaluateForBuildsystem, this->Backtrace);
 
-  if (!this->NeedsEvaluation) {
+  if (!this->Parsed || !this->Parsed->NeedsEvaluation) {
     return this->Input;
   }
 
   this->Output.clear();
 
-  for (auto const& it : this->Evaluators) {
+  for (auto const& it : this->Parsed->Evaluators) {
     this->Output += it->Evaluate(&eval, dagChecker);
 
     this->SeenTargetProperties.insert(eval.SeenTargetProperties.cbegin(),
@@ -127,14 +172,8 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
     cmakeInstance.CreateProfilingEntry("genex_compile", this->Input);
 #endif
 
-  cmGeneratorExpressionLexer l;
-  std::vector<cmGeneratorExpressionToken> tokens = l.Tokenize(this->Input);
-  this->NeedsEvaluation = l.GetSawGeneratorExpression();
-
-  if (this->NeedsEvaluation) {
-    cmGeneratorExpressionParser p(tokens);
-    p.Parse(this->Evaluators);
-  }
+  this->Parsed =
+    cmakeInstance.GetGeneratorExpressionParseCache().Get(this->Input);
 }
 
 std::string cmGeneratorExpression::StripEmptyListElements(
