@@ -170,7 +170,7 @@ Entry const kPatterns[] = {
 
   // === 1-placeholder, (22-literal-char bucket) ===
   { "CMAKE_<LANG>_LINKER_LAUNCHER"_s,
-    "Default value for the <LANG>_LINKER_LAUNCHER target property; names a launcher tool prepended to every <LANG> link command. Applies only when <LANG> is C, CXX, OBJC, OBJCXX, or CUDA."_s },
+    "Default value for the <LANG>_LINKER_LAUNCHER target property; names a launcher tool prepended to every <LANG> link command. Applies only when <LANG> is C, CXX, CUDA, OBJC, OBJCXX, Fortran, or HIP."_s },
   { "CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE"_s,
     "Path to a CMake language file included as the last step of any project() command call matching <PROJECT-NAME>. Intended for injecting custom code without modifying the project source."_s },
   { "CMAKE_XCODE_ATTRIBUTE_<an-attribute>"_s,
