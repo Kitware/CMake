@@ -99,7 +99,9 @@ the provided regular expression and replacement strings.
   .. versionadded:: 4.5
 
   Specify a list of targets or files that must be built before the test
-  discovery can run.
+  discovery can run.  A relative file path is interpreted with respect to the
+  current source directory if the file exists there, and otherwise with respect
+  to the current binary directory.
 
   When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled with the
   :ref:`Ninja Generators`, :generator:`FASTBuild`, or :ref:`Makefile

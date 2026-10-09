@@ -361,8 +361,8 @@ public:
    * - If \a name names a source file known to this directory, such as the
    *   output of a custom command, its full path will be returned.
    * - Otherwise \a name is treated as a relative path with respect to the
-   *   source directory of this generator if it exists there, or else the
-   *   binary directory.
+   *   source directory of this generator if it exists there, or else with
+   *   respect to its binary directory.
    */
   std::string GetRealFileDependency(std::string const& name) const;
 

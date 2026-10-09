@@ -16,10 +16,21 @@ add_custom_command(
 add_custom_target(TestDependencySubdirFile
   DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/TestDependencySubdirFile-built.txt")
 
+add_custom_command(
+  OUTPUT TestDependencySubdirRelative-built.txt
+  COMMAND
+    "${CMAKE_COMMAND}" -E touch TestDependencySubdirRelative-built.txt
+  VERBATIM)
+
+add_custom_target(TestDependencySubdirRelative
+  DEPENDS TestDependencySubdirRelative-built.txt)
+
 # Duplicate test name with parent directory
 add_test(NAME TargetBuildTest
   COMMAND
     "${CMAKE_COMMAND}" -E true
   BUILD_DEPENDS
     TestDependencySubdirPrereq
-    "${CMAKE_CURRENT_BINARY_DIR}/TestDependencySubdirFile-built.txt")
+    "${CMAKE_CURRENT_BINARY_DIR}/TestDependencySubdirFile-built.txt"
+    TestDependencySubdirRelative-built.txt
+    input.txt)

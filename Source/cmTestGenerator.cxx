@@ -140,9 +140,9 @@ bool cmTestGenerator::EvaluateBuildDependencies(
     if (!depTarget) {
       cmGlobalGenerator* gg = lg->GetGlobalGenerator();
       BuildDependencies::FileDependency file;
-      file.Path = depName;
-      file.Owner = gg->FindOutputOwningTarget(depName);
-      file.Generated = gg->IsGeneratedByBuild(depName);
+      file.Path = lg->GetRealFileDependency(depName);
+      file.Owner = gg->FindOutputOwningTarget(file.Path);
+      file.Generated = gg->IsGeneratedByBuild(file.Path);
       info.Files.push_back(std::move(file));
       continue;
     }
