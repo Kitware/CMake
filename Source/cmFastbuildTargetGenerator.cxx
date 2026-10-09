@@ -371,8 +371,10 @@ void cmFastbuildTargetGenerator::GetDepends(
   for (auto dep : ccg.GetDepends()) {
     LogMessage("Dep: " + dep);
     auto orig = dep;
+    std::string realDep;
     if (this->LocalCommonGenerator->GetRealDependency(
-          dep, Config, dep, ccg.GetCC().GetCMP0212Status())) {
+          orig, Config, realDep, ccg.GetCC().GetCMP0212Status())) {
+      dep = std::move(realDep);
       LogMessage("Real dep: " + dep);
       if (!dep.empty()) {
         LogMessage("Custom command real dep: " + dep);
@@ -380,6 +382,18 @@ void cmFastbuildTargetGenerator::GetDepends(
                this->ConvertToFastbuildPath(dep), this->LocalGenerator,
                Config) }) {
           fileLevelDeps.emplace_back(item);
+        }
+        // FASTBuild requires the node producing a file to be defined before
+        // the file is used as an input, so depend on the target that links
+        // it.
+        if (cmGeneratorTarget const* owner =
+              this->GetGlobalGenerator()->FindArtifactOwningTarget(dep,
+                                                                   Config)) {
+          if (owner != this->GeneratorTarget) {
+            LogMessage("Additional dep on artifact owner: " +
+                       owner->GetName());
+            targetDep.emplace(owner->GetName());
+          }
         }
       }
     }

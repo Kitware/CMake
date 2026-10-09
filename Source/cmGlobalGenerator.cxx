@@ -2524,12 +2524,61 @@ bool cmGlobalGenerator::IsGeneratedByBuild(std::string const& file)
   return false;
 }
 
+cmGeneratorTarget* cmGlobalGenerator::FindArtifactOwningTarget(
+  std::string const& artifact, std::string const& config)
+{
+  auto indexIt = this->ArtifactOwnerIndex.find(config);
+  if (indexIt == this->ArtifactOwnerIndex.end()) {
+    indexIt =
+      this->ArtifactOwnerIndex
+        .emplace(config,
+                 std::map<std::string, std::vector<cmGeneratorTarget*>>())
+        .first;
+    auto& index = indexIt->second;
+    for (auto const& lg : this->LocalGenerators) {
+      for (auto const& gt : lg->GetGeneratorTargets()) {
+        if (!gt->IsInBuildSystem()) {
+          continue;
+        }
+        switch (gt->GetType()) {
+          case cm::TargetType::EXECUTABLE:
+          case cm::TargetType::STATIC_LIBRARY:
+          case cm::TargetType::SHARED_LIBRARY:
+          case cm::TargetType::MODULE_LIBRARY:
+            break;
+          default:
+            continue;
+        }
+        std::set<std::string> artifacts;
+        artifacts.insert(cmSystemTools::CollapseFullPath(gt->GetFullPath(
+          config, cmStateEnums::RuntimeBinaryArtifact, /*realname=*/false)));
+        artifacts.insert(cmSystemTools::CollapseFullPath(gt->GetFullPath(
+          config, cmStateEnums::RuntimeBinaryArtifact, /*realname=*/true)));
+        if (gt->HasImportLibrary(config)) {
+          artifacts.insert(cmSystemTools::CollapseFullPath(
+            gt->GetFullPath(config, cmStateEnums::ImportLibraryArtifact)));
+        }
+        for (std::string const& path : artifacts) {
+          index[path].push_back(gt.get());
+        }
+      }
+    }
+  }
+  auto const& index = indexIt->second;
+  auto it = index.find(cmSystemTools::CollapseFullPath(artifact));
+  if (it != index.end() && it->second.size() == 1) {
+    return it->second.front();
+  }
+  return nullptr;
+}
+
 void cmGlobalGenerator::ClearGeneratorMembers()
 {
   this->BuildExportSets.clear();
 
   this->OutputOwnerIndex.clear();
   this->OutputOwnerIndexComputed = false;
+  this->ArtifactOwnerIndex.clear();
 
   this->GeneratedByBuildIndex.clear();
   this->GeneratedByBuildIndexComputed = false;

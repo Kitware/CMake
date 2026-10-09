@@ -339,6 +339,12 @@ public:
     this->GeneratedByBuildIndexComputed = false;
   }
 
+  // Find the single build-system target whose build produces the given path
+  // as a linked artifact for the given configuration, or nullptr if there is
+  // none or more than one.
+  cmGeneratorTarget* FindArtifactOwningTarget(std::string const& artifact,
+                                              std::string const& config);
+
   cmMakefile* GetCurrentMakefile() const
   {
     return this->CurrentConfigureMakefile;
