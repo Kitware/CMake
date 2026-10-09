@@ -47,6 +47,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmRule.h"
 #include "cmSourceFile.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
@@ -4578,25 +4579,43 @@ static const struct RulePropertyNode : public cmGeneratorExpressionNode
     cmGeneratorRule* genRule = nullptr;
 
     genRule = eval->Context.LG->FindGeneratorRuleToUse(ruleName);
-
     if (!genRule) {
       reportError(eval, content->GetOriginalExpression(),
                   cmStrCat("Rule \"", ruleName, "\" is not known to CMake."));
       return std::string{};
     }
 
+    // retrieve associated target
+    cmGeneratorTarget* target = eval->Context.LG->FindGeneratorTargetToUse(
+      genRule->GetTarget()->GetName());
+    if (!target) {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("Internal error for rule \"",
+                           genRule->GetRule()->GetName(), "\"."));
+      return std::string{};
+    }
+
     propertyValue = genRule->GetProperty(propertyName);
 
-    if (propertyName == "INCLUDE_DIRECTORIES"_s ||
-        propertyName == "COMPILE_OPTIONS"_s ||
-        propertyName == "COMPILE_DEFINITIONS"_s) {
+    static cmsys::RegularExpression commandIndex("^COMMAND_[0-9]+$");
+    if (propertyValue &&
+        (propertyName == "OUTPUT"_s || propertyName == "COMMAND"_s ||
+         commandIndex.find(propertyName) || propertyName == "DEPENDS"_s ||
+         propertyName == "DEPFILE"_s ||
+         propertyName == "INCLUDE_DIRECTORIES"_s ||
+         propertyName == "COMPILE_OPTIONS"_s ||
+         propertyName == "COMPILE_DEFINITIONS"_s ||
+         propertyName == "WORKING_DIRECTORY"_s ||
+         propertyName == "COMMENT"_s)) {
       cmGeneratorExpressionDAGChecker dagChecker{
-        eval->HeadTarget, propertyName,  content,
+        target,           propertyName,  content,
         dagCheckerParent, eval->Context, eval->Backtrace,
       };
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-          dagChecker.ReportError(eval, content->GetOriginalExpression());
+          reportError(eval, content->GetOriginalExpression(),
+                      cmStrCat("Self reference on rule \"",
+                               genRule->GetRule()->GetName(), "\"."));
           return std::string{};
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
           // No error. We just skip cyclic references.
@@ -4608,9 +4627,8 @@ static const struct RulePropertyNode : public cmGeneratorExpressionNode
       }
 
       return cmGeneratorExpression::StripEmptyListElements(
-        this->EvaluateDependentExpression(propertyValue, eval,
-                                          eval->HeadTarget, &dagChecker,
-                                          eval->CurrentTarget));
+        this->EvaluateDependentExpression(propertyValue, eval, target,
+                                          &dagChecker, target));
     }
     return propertyValue;
   }

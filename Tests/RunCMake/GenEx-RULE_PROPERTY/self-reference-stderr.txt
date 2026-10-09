@@ -1,0 +1,6 @@
+CMake Error in CMakeLists\.txt:
+  Error evaluating generator expression:
+
+    \$<RULE_PROPERTY:foo_[0-9]+,COMPILE_OPTIONS>
+
+  Self reference on rule "foo"\.

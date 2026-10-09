@@ -11,5 +11,6 @@ endfunction()
 run_cmake(no-arguments)
 run_cmake(no-rule)
 run_cmake(no-property)
+run_cmake(self-reference)
 
 run_configure_and_build(RULE_PROPERTY)

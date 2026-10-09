@@ -156,6 +156,13 @@ cmValue cmGeneratorRule::GetProperty(std::string const& property) const
     return this->Properties.GetPropertyValue(property);
   }
 
+  if (property == "WORKING_DIRECTORY") {
+    // property was not set by the user, so use the default
+    this->Properties.SetProperty(
+      property, this->GetMakefile().GetCurrentBinaryDirectory());
+    return this->Properties.GetPropertyValue(property);
+  }
+
   // property not yet instantiated, retrieve it from cmRule
   value = this->Rule->GetProperty(property);
   if (value) {
@@ -184,26 +191,32 @@ std::unique_ptr<cmCustomCommand> cmGeneratorRule::CreateCustomCommand() const
     return result;
   };
 
+  auto expandPath =
+    [&expandVariables](std::string const& binaryDirectory,
+                       std::string const& data) -> std::string {
+    std::string path = expandVariables(data);
+    if (cmGeneratorExpression::StartsWithGeneratorExpression(path)) {
+      cmSystemTools::ConvertToUnixSlashes(path);
+    } else {
+      if (cmSystemTools::FileIsFullPath(path)) {
+        path = cmSystemTools::CollapseFullPath(path);
+      } else {
+        path = cmSystemTools::CollapseFullPath(path, binaryDirectory);
+      }
+    }
+    return path;
+  };
+
   auto expandPaths =
-    [&expandVariables](
+    [&expandPath](
       std::string const& binaryDirectory,
       std::vector<std::string> const& data) -> std::vector<std::string> {
     std::vector<std::string> result;
     result.reserve(data.size());
     std::transform(
       data.begin(), data.end(), std::back_inserter(result),
-      [&expandVariables,
-       &binaryDirectory](std::string const& item) -> std::string {
-        std::string path = expandVariables(item);
-        if (!cmSystemTools::FileIsFullPath(path) &&
-            !cmGeneratorExpression::StartsWithGeneratorExpression(path)) {
-          path = cmStrCat(binaryDirectory, '/', std::move(path));
-        }
-        cmSystemTools::ConvertToUnixSlashes(path);
-        if (cmSystemTools::FileIsFullPath(path)) {
-          path = cmSystemTools::CollapseFullPath(path);
-        }
-        return path;
+      [&expandPath, &binaryDirectory](std::string const& item) -> std::string {
+        return expandPath(binaryDirectory, item);
       });
     return result;
   };
@@ -228,6 +241,11 @@ std::unique_ptr<cmCustomCommand> cmGeneratorRule::CreateCustomCommand() const
   }
 
   if (!this->Rule->GetDepfile().empty()) {
+    // store normalized path as property
+    this->Properties.SetProperty(
+      "DEPFILE",
+      expandPath(this->GetMakefile().GetCurrentBinaryDirectory(),
+                 this->Rule->GetDepfile()));
     cc->SetDepfile(expandVariables(this->Rule->GetDepfile()));
   }
   std::vector<std::string> depends{ 1, this->Source->GetFullPath() };
@@ -245,6 +263,10 @@ std::unique_ptr<cmCustomCommand> cmGeneratorRule::CreateCustomCommand() const
   }
 
   if (cmValue wd = this->Rule->GetProperty("WORKING_DIRECTORY")) {
+    // store normalized path as property
+    this->Properties.SetProperty(
+      "WORKING_DIRECTORY",
+      expandPath(this->GetMakefile().GetCurrentBinaryDirectory(), *wd));
     cc->SetWorkingDirectory(expandVariables(*wd));
   }
 
