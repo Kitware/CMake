@@ -1,0 +1,27 @@
+#include "TestDevice.h"
+
+int cxx_value();
+int sycl_value()
+{
+  return cxx_value() + 3;
+}
+
+bool device_available()
+{
+  return sycl_test_device_available();
+}
+
+bool dynamic_kernel()
+{
+  sycl::queue queue;
+  int* value = sycl::malloc_shared<int>(1, queue);
+  if (!value) {
+    return false;
+  }
+  *value = 0;
+  queue.single_task<class ComplexDynamicKernel>([=] { *value = 42; });
+  queue.wait_and_throw();
+  bool result = *value == 42;
+  sycl::free(value, queue);
+  return result;
+}

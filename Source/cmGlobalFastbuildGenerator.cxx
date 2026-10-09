@@ -1429,7 +1429,7 @@ void cmGlobalFastbuildGenerator::WriteTarget(FastbuildTarget const& target)
 
   // Libraries / executables.
   if (!target.LinkerNode.empty()) {
-    for (auto const& cudaDeviceLinkNode : target.CudaDeviceLinkNode) {
+    for (auto const& cudaDeviceLinkNode : target.DeviceLinkNodes) {
       this->WriteLinker(cudaDeviceLinkNode, target.AllowDistribution);
     }
     for (auto const& linkerNode : target.LinkerNode) {

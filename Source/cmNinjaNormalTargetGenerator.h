@@ -34,7 +34,7 @@ private:
                      std::vector<std::string> const& preLinkComments,
                      std::vector<std::string> const& postBuildComments);
   void WriteDeviceLinkRules(std::string const& config);
-  void WriteNvidiaDeviceLinkRule(bool useResponseFile,
+  void WriteDriverDeviceLinkRule(bool useResponseFile,
                                  std::string const& config);
 
   void WriteLinkStatement(std::string const& config,
@@ -45,7 +45,7 @@ private:
   void WriteDeviceLinkStatements(std::string const& config,
                                  std::vector<std::string> const& architectures,
                                  std::string const& output);
-  void WriteNvidiaDeviceLinkStatement(std::string const& config,
+  void WriteDriverDeviceLinkStatement(std::string const& config,
                                       std::string const& fileConfig,
                                       std::string const& outputDir,
                                       std::string const& output);
@@ -62,4 +62,5 @@ private:
   cmGeneratorTarget::Names TargetNames(std::string const& config) const;
   std::string TargetLinkLanguage(std::string const& config) const;
   std::string DeviceLinkObject;
+  std::string DeviceLinkLanguage;
 };

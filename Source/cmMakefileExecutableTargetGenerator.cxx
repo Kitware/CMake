@@ -87,17 +87,19 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   bool relink)
 {
 #ifndef CMAKE_BOOTSTRAP
-  bool const requiresDeviceLinking = requireDeviceLinking(
+  this->DeviceLinkLanguage = deviceLinkLanguage(
     *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
-  if (!requiresDeviceLinking) {
+  if (this->DeviceLinkLanguage.empty()) {
     return;
   }
+  this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
+  cmGeneratorTarget::DeviceLinkSetter deviceLink(*this->GeneratorTarget);
 
   std::vector<std::string> commands;
 
   // Get the name of the device object to generate.
-  std::string const& objExt =
-    this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
+  std::string const& objExt = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", this->DeviceLinkLanguage, "_OUTPUT_EXTENSION"));
   std::string const targetOutput = cmStrCat(
     this->GeneratorTarget->ObjectDirectory, "cmake_device_link", objExt);
   this->DeviceLinkObject = targetOutput;
@@ -108,7 +110,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     this->MakeEchoProgress(progress);
     // Add the link message.
     std::string buildEcho = cmStrCat(
-      "Linking CUDA device code ",
+      "Linking ", this->DeviceLinkLanguage, " device code ",
       this->LocalGenerator->ConvertToOutputFormat(
         this->LocalGenerator->MaybeRelativeToCurBinDir(this->DeviceLinkObject),
         cmOutputConverter::SHELL));
@@ -116,10 +118,11 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
 
-  if (this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID") == "Clang") {
+  if (this->DeviceLinkLanguage == "CUDA" &&
+      this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID") == "Clang") {
     this->WriteDeviceLinkRule(commands, targetOutput);
   } else {
-    this->WriteNvidiaDeviceExecutableRule(relink, commands, targetOutput);
+    this->WriteDriverDeviceExecutableRule(relink, commands, targetOutput);
   }
 
   // Write the main driver rule to build everything in this target.
@@ -129,11 +132,11 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 #endif
 }
 
-void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
+void cmMakefileExecutableTargetGenerator::WriteDriverDeviceExecutableRule(
   bool relink, std::vector<std::string>& commands,
   std::string const& targetOutput)
 {
-  std::string const linkLanguage = "CUDA";
+  std::string const& linkLanguage = this->DeviceLinkLanguage;
 
   // Build list of dependencies.
   std::vector<std::string> depends;
@@ -154,7 +157,8 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
   // Construct the main link rule.
-  std::string const linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_EXECUTABLE";
+  std::string const linkRuleVar =
+    cmStrCat("CMAKE_", linkLanguage, "_DEVICE_LINK_EXECUTABLE");
   std::string const linkRule = this->GetLinkRule(linkRuleVar);
   std::vector<std::string> commands1;
   cmList real_link_commands(linkRule);
@@ -172,7 +176,8 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     std::unique_ptr<cmLinkLineDeviceComputer> linkLineComputer(
       new cmLinkLineDeviceComputer(
         this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+        this->LocalGenerator->GetStateSnapshot().GetDirectory(),
+        linkLanguage));
     linkLineComputer->SetForResponse(useResponseFileForLibs);
     linkLineComputer->SetRelink(relink);
 

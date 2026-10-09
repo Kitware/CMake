@@ -1,0 +1,7 @@
+#ifndef ALWAYS_DEFINE
+#  error "The compile option did not reach the SYCL compiler"
+#endif
+int main()
+{
+  return 0;
+}

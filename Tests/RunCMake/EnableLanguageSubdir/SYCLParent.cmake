@@ -1,0 +1,6 @@
+set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+cmake_policy(SET CMP0220 NEW)
+enable_language(CXX)
+add_subdirectory(sycl)
+add_executable(main sycl-main.cxx)
+target_link_libraries(main PRIVATE sycl_lib)

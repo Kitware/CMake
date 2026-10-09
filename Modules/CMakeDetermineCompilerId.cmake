@@ -358,6 +358,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "GNU")
     endif()
   elseif("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xGNU"
+    OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xAdaptiveCpp"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xAppleClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xFujitsuClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xIBMClang"
@@ -544,19 +545,24 @@ function(CMAKE_DETERMINE_COMPILER_ID_WRITE lang src)
     PLATFORM_DEFAULT_COMPILER
   )
 
-  if(lang MATCHES "^(CUDA|HIP)$")
+  if(lang MATCHES "^(CUDA|HIP|SYCL)$")
     compiler_id_detection(CMAKE_${lang}_HOST_COMPILER_ID_CONTENT CXX
       PREFIX HOST_
       ID_STRING
       VERSION_STRINGS
     )
+    if(lang STREQUAL "SYCL")
+      set(host_compiler_condition "defined(__ADAPTIVECPP__) || defined(__ACPP__) || defined(__OPENSYCL__) || defined(__HIPSYCL__)")
+    else()
+      set(host_compiler_condition "defined(__NVCC__)")
+    endif()
     string(APPEND CMAKE_${lang}_COMPILER_ID_CONTENT
       "\n"
       "\n"
-      "/* Detect host compiler used by NVCC. */\n"
-      "#ifdef __NVCC__\n"
+      "/* Detect the underlying host compiler. */\n"
+      "#if ${host_compiler_condition}\n"
       "${CMAKE_${lang}_HOST_COMPILER_ID_CONTENT}\n"
-      "#endif /* __NVCC__ */\n"
+      "#endif\n"
     )
   endif()
 
@@ -737,6 +743,9 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
     set(id_src "${src}")
     set(id_compile "ClCompile")
+    if(lang STREQUAL SYCL)
+      set(id_cl_var "CLToolExe")
+    endif()
     if(id_cl_var)
       set(id_PostBuildEvent_Command "echo CMAKE_${lang}_COMPILER=$(${id_cl_var})")
     else()
@@ -746,7 +755,10 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     set(id_Import_targets "")
     set(id_ItemDefinitionGroup_entry "")
     set(id_Link_AdditionalDependencies "")
-    if(lang STREQUAL CUDA)
+    set(id_project_template "VS-${v}.${ext}.in")
+    if(lang STREQUAL SYCL)
+      set(id_project_template "VS-SYCL.vcxproj.in")
+    elseif(lang STREQUAL CUDA)
       if(NOT CMAKE_VS_PLATFORM_TOOLSET_CUDA)
         set(maybe_dir "")
         if(_CMAKE_VS_PLATFORM_TOOLSET_CUDA_INTEGRATION_DIR)
@@ -793,7 +805,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
         set(id_Link_AdditionalDependencies "<AdditionalDependencies>cudart_static.lib</AdditionalDependencies>")
       endif()
     endif()
-    configure_file(${CMAKE_ROOT}/Modules/CompilerId/VS-${v}.${ext}.in
+    configure_file(${CMAKE_ROOT}/Modules/CompilerId/${id_project_template}
       ${id_dir}/CompilerId${lang}.${ext} @ONLY)
     if(CMAKE_VS_MSBUILD_COMMAND AND NOT lang STREQUAL "Fortran")
       set(command "${CMAKE_VS_MSBUILD_COMMAND}" "CompilerId${lang}.${ext}"

@@ -1,0 +1,6 @@
+#include "../SeparateCompilation/device.h"
+
+SYCL_EXTERNAL int mixed_device_value()
+{
+  return 7;
+}

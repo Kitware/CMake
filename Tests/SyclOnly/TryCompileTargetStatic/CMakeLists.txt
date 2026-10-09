@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 4.4)
+set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+project(TryCompileTargetStatic LANGUAGES SYCL)
+add_executable(SyclOnlyTryCompileTargetStatic main.sycl)

@@ -206,6 +206,10 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
           verifyTargetName, cm::TargetType::OBJECT_LIBRARY, {}, true);
       }
 
+      if (cmValue mode = this->Target->GetProperty("SYCL_EXTENSION_MODE")) {
+        verifyTarget->SetProperty("SYCL_EXTENSION_MODE", mode);
+      }
+
       if (isInterface) {
         // Link to the original target so that we pick up its
         // interface compile options just like a consumer would.
@@ -223,17 +227,29 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
         // Copy language-standard properties for all supported
         // languages. We don't care if we set properties for languages
         // this target won't eventually use.
-        static std::array<std::string, 19> const propertiesToCopy{ {
-          "COMPILE_DEFINITIONS",    "COMPILE_FEATURES",
-          "COMPILE_FLAGS",          "COMPILE_OPTIONS",
-          "DEFINE_SYMBOL",          "INCLUDE_DIRECTORIES",
-          "LINK_LIBRARIES",         "C_STANDARD",
-          "C_STANDARD_REQUIRED",    "C_EXTENSIONS",
-          "CXX_STANDARD",           "CXX_STANDARD_REQUIRED",
-          "CXX_EXTENSIONS",         "OBJC_STANDARD",
-          "OBJC_STANDARD_REQUIRED", "OBJC_EXTENSIONS",
-          "OBJCXX_STANDARD",        "OBJCXX_STANDARD_REQUIRED",
+        static std::array<std::string, 22> const propertiesToCopy{ {
+          "COMPILE_DEFINITIONS",
+          "COMPILE_FEATURES",
+          "COMPILE_FLAGS",
+          "COMPILE_OPTIONS",
+          "DEFINE_SYMBOL",
+          "INCLUDE_DIRECTORIES",
+          "LINK_LIBRARIES",
+          "C_STANDARD",
+          "C_STANDARD_REQUIRED",
+          "C_EXTENSIONS",
+          "CXX_STANDARD",
+          "CXX_STANDARD_REQUIRED",
+          "CXX_EXTENSIONS",
+          "OBJC_STANDARD",
+          "OBJC_STANDARD_REQUIRED",
+          "OBJC_EXTENSIONS",
+          "OBJCXX_STANDARD",
+          "OBJCXX_STANDARD_REQUIRED",
           "OBJCXX_EXTENSIONS",
+          "SYCL_CXX_STANDARD",
+          "SYCL_CXX_STANDARD_REQUIRED",
+          "SYCL_EXTENSIONS",
         } };
         for (std::string const& prop : propertiesToCopy) {
           cmValue propValue = this->Target->GetProperty(prop);
@@ -315,11 +331,12 @@ cm::optional<std::string> cmGeneratorTarget::ResolveHeaderLanguage(
   cmSourceFile& source,
   cm::optional<cm::optional<std::string>>& defaultLanguage) const
 {
-  static std::array<cm::string_view, 4> const supportedLangs{ {
+  static std::array<cm::string_view, 5> const supportedLangs{ {
     "C",
     "CXX",
     "OBJC",
     "OBJCXX",
+    "SYCL",
   } };
   auto isSupported = [](cm::string_view lang) -> bool {
     return std::find(supportedLangs.begin(), supportedLangs.end(), lang) !=
@@ -362,8 +379,11 @@ cm::optional<std::string> cmGeneratorTarget::ResolveHeaderLanguage(
     }
 
     cm::optional<std::string> resolved;
-    if (langs.count("OBJCXX") || (langs.count("CXX") && langs.count("OBJC"))) {
+    if (langs.count("OBJCXX") ||
+        ((langs.count("CXX") || langs.count("SYCL")) && langs.count("OBJC"))) {
       resolved = "OBJCXX"; // promote
+    } else if (langs.count("SYCL")) {
+      resolved = "SYCL";
     } else if (langs.count("CXX")) {
       resolved = "CXX";
     } else if (langs.count("OBJC")) {
@@ -381,12 +401,13 @@ cm::optional<std::string> cmGeneratorTarget::GenerateStubForLanguage(
   std::string const& language, std::string const& headerFilename,
   std::string const& verifyTargetName, cmSourceFile& source) const
 {
-  static std::array<std::pair<cm::string_view, cm::string_view>, 4> const
+  static std::array<std::pair<cm::string_view, cm::string_view>, 5> const
     langToExt = { {
       { "C", ".c" },
       { "CXX", ".cxx" },
       { "OBJC", ".m" },
       { "OBJCXX", ".mm" },
+      { "SYCL", ".sycl" },
     } };
 
   // NOLINTNEXTLINE(readability-qualified-auto)

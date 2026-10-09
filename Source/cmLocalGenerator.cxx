@@ -997,9 +997,11 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   using LanguagePair = std::pair<std::string, std::string>;
-  std::vector<LanguagePair> pairedLanguages{
-    { "OBJC", "C" }, { "OBJCXX", "CXX" }, { "CUDA", "CXX" }, { "HIP", "CXX" }
-  };
+  std::vector<LanguagePair> pairedLanguages{ { "OBJC", "C" },
+                                             { "OBJCXX", "CXX" },
+                                             { "CUDA", "CXX" },
+                                             { "HIP", "CXX" },
+                                             { "SYCL", "CXX" } };
   std::set<LanguagePair> inferredEnabledLanguages;
   for (auto const& lang : pairedLanguages) {
     if (this->Makefile->GetState()->GetLanguageEnabled(lang.first)) {
@@ -1179,6 +1181,29 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
                                          std::string const& lang,
                                          std::string const& config)
 {
+  if (lang == "SYCL") {
+    cmValue separable = target->GetProperty("SYCL_SEPARABLE_COMPILATION");
+    char const* mode = separable.IsOn() ? "ON" : "OFF";
+    cmValue options = this->Makefile->GetDefinition(
+      cmStrCat("CMAKE_SYCL_COMPILE_OPTIONS_SEPARABLE_COMPILATION_", mode));
+    if (!options && separable) {
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Target \"", target->GetName(),
+                 "\" requests SYCL_SEPARABLE_COMPILATION=", mode,
+                 ", but the SYCL compiler configuration does not support "
+                 "this mode."));
+      return;
+    }
+    std::string separableFlags;
+    if (options) {
+      this->AppendCompileOptions(separableFlags, *options);
+    }
+    if (!separableFlags.empty()) {
+      flags.emplace_back(std::move(separableFlags));
+    }
+  }
+
   std::string langFlagRegexVar = cmStrCat("CMAKE_", lang, "_FLAG_REGEX");
 
   if (cmValue langFlagRegexStr =
@@ -1229,11 +1254,13 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
                  target->GetName(),
                  "\" was evaluated when computing the link "
                  "implementation, and the \"",
-                 it.first, "_STANDARD\" was \"", it.second,
+                 cmStandardLevelResolver::GetStandardPropertyName(it.first),
+                 "\" was \"", it.second,
                  "\" for that computation.  Computing the "
                  "COMPILE_FEATURES based on the link implementation resulted "
                  "in a higher \"",
-                 it.first, "_STANDARD\" \"", *standard,
+                 cmStandardLevelResolver::GetStandardPropertyName(it.first),
+                 "\" \"", *standard,
                  "\".  "
                  "This is not permitted. The COMPILE_FEATURES may not both "
                  "depend on "
@@ -1446,7 +1473,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     }
   }
 
-  bool const isCorCxx = (lang == "C" || lang == "CXX");
+  bool const isCorCxx = (lang == "C" || lang == "CXX" || lang == "SYCL");
 
   // Resolve symlinks in CPATH for comparison with resolved include paths.
   // We do this here instead of when EnvCPATH is populated in case symlinks
@@ -1621,7 +1648,7 @@ void cmLocalGenerator::GetDeviceLinkFlags(
   }
   if (ipoEnabled) {
     if (cmValue cudaIPOFlags = this->Makefile->GetDefinition(
-          "CMAKE_CUDA_DEVICE_LINK_OPTIONS_IPO")) {
+          cmStrCat("CMAKE_", linklang, "_DEVICE_LINK_OPTIONS_IPO"))) {
       linkFlags += *cudaIPOFlags;
     }
   }
@@ -1633,11 +1660,11 @@ void cmLocalGenerator::GetDeviceLinkFlags(
                               linkPath);
   }
 
-  this->AddVisibilityPresetFlags(linkFlags, target, "CUDA");
+  this->AddVisibilityPresetFlags(linkFlags, target, linklang);
   this->GetGlobalGenerator()->EncodeLiteral(linkFlags);
 
   std::vector<std::string> linkOpts;
-  target->GetLinkOptions(linkOpts, config, "CUDA");
+  target->GetLinkOptions(linkOpts, config, linklang);
   this->SetLinkScriptShell(this->GetGlobalGenerator()->GetUseLinkScript());
   // LINK_OPTIONS are escaped.
   this->AppendCompileOptions(linkFlags, linkOpts);
@@ -2137,7 +2164,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     std::vector<std::string> archs = target->GetAppleArchs(config, lang);
     if (!archs.empty() &&
         (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX" ||
-         lang == "ASM")) {
+         lang == "ASM" || lang == "SYCL")) {
       for (std::string const& arch : archs) {
         if (filterArch.empty() || filterArch == arch) {
           flags += " -arch ";
@@ -2235,9 +2262,26 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                                         std::string const& lang,
                                         std::string const& config)
 {
-  // Add language-specific flags.
-  this->AddConfigVariableFlags(flags, cmStrCat("CMAKE_", lang, "_FLAGS"),
-                               config);
+  if (target->IsSYCLAppendMode(lang)) {
+    this->AddConfigVariableFlags(flags, "CMAKE_CXX_FLAGS", config);
+    // Defaults initialized from the same source need only be applied once,
+    // otherwise retain both strings verbatim.
+    auto const appendSYCLFlags = [this, &flags](std::string const& suffix) {
+      auto const& syclFlags =
+        this->Makefile->GetDefinition(cmStrCat("CMAKE_SYCL_FLAGS", suffix));
+      if (syclFlags !=
+          this->Makefile->GetDefinition(cmStrCat("CMAKE_CXX_FLAGS", suffix))) {
+        this->AppendFlags(flags, syclFlags);
+      }
+    };
+    appendSYCLFlags("");
+    if (!config.empty()) {
+      appendSYCLFlags(cmStrCat('_', cmSystemTools::UpperCase(config)));
+    }
+  } else {
+    this->AddConfigVariableFlags(flags, cmStrCat("CMAKE_", lang, "_FLAGS"),
+                                 config);
+  }
 
   // Add the language standard flag for compiling, and sometimes linking.
   if (compileOrLink == cmBuildStep::Compile ||
@@ -2279,6 +2323,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   } else if (lang == "CUDA") {
     target->AddCUDAArchitectureFlags(compileOrLink, config, flags);
     target->AddCUDAToolkitFlags(flags);
+  } else if (lang == "SYCL") {
+    target->AddSYCLDeviceTargetFlags(compileOrLink, config, flags);
   } else if (lang == "ISPC") {
     target->AddISPCTargetFlags(flags);
   } else if (lang == "RC" &&
@@ -2443,6 +2489,15 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
   std::string const& config)
 {
   this->AddLanguageFlags(flags, target, cmBuildStep::Link, lang, config);
+
+  if (lang == "SYCL" && !target->IsDeviceLink() &&
+      this->Makefile->IsOn("CMAKE_SYCL_COMPILER_HAS_DEVICE_LINK_PHASE")) {
+    if (auto* linkInfo = target->GetLinkInformation(config)) {
+      if (requireDeviceLinking(*linkInfo->GetTarget(), *this, config, lang)) {
+        this->AppendFlags(flags, "-fno-sycl");
+      }
+    }
+  }
 
   if (target->IsIPOEnabled(lang, config)) {
     this->AppendFeatureOptions(flags, lang, "IPO");
@@ -2636,7 +2691,7 @@ void cmLocalGenerator::AddVisibilityPresetFlags(
 
   AddVisibilityCompileOption(flags, target, this, lang);
 
-  if (lang == "CXX" || lang == "OBJCXX") {
+  if (lang == "CXX" || lang == "OBJCXX" || lang == "SYCL") {
     AddInlineVisibilityCompileOption(flags, target, this, lang);
   }
 }

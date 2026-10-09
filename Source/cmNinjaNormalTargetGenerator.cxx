@@ -219,7 +219,7 @@ std::string cmNinjaNormalTargetGenerator::LanguageLinkerDeviceRule(
   std::string const& config) const
 {
   return cmStrCat(
-    this->TargetLinkLanguage(config), '_',
+    this->DeviceLinkLanguage, '_',
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()),
     "_DEVICE_LINKER__",
     cmGlobalNinjaGenerator::EncodeRuleName(
@@ -287,7 +287,7 @@ struct cmNinjaRemoveNoOpCommands
   }
 };
 
-void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
+void cmNinjaNormalTargetGenerator::WriteDriverDeviceLinkRule(
   bool useResponseFile, std::string const& config)
 {
   cmNinjaRule rule(this->LanguageLinkerDeviceRule(config));
@@ -297,14 +297,14 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
         .c_str();
-    vars.Language = "CUDA";
-    std::string linker =
-      this->GetGeneratorTarget()->GetLinkerTool("CUDA", config);
+    vars.Language = this->DeviceLinkLanguage.c_str();
+    std::string linker = this->GetGeneratorTarget()->GetLinkerTool(
+      this->DeviceLinkLanguage, config);
     vars.Linker = linker.c_str();
 
     // build response file name
-    std::string responseFlag = this->GetMakefile()->GetSafeDefinition(
-      "CMAKE_CUDA_RESPONSE_FILE_DEVICE_LINK_FLAG");
+    std::string responseFlag = this->GetMakefile()->GetSafeDefinition(cmStrCat(
+      "CMAKE_", this->DeviceLinkLanguage, "_RESPONSE_FILE_DEVICE_LINK_FLAG"));
 
     if (!useResponseFile || responseFlag.empty()) {
       vars.Objects = "$in";
@@ -321,7 +321,7 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
       }
 
       // add the link command in the file if necessary
-      if (this->CheckUseResponseFileForLibraries("CUDA")) {
+      if (this->CheckUseResponseFileForLibraries(this->DeviceLinkLanguage)) {
         rule.RspContent += " $LINK_LIBRARIES";
         vars.LinkLibraries = "";
       } else {
@@ -721,12 +721,12 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeDeviceLinkCmd()
     case cm::TargetType::STATIC_LIBRARY:
     case cm::TargetType::SHARED_LIBRARY:
     case cm::TargetType::MODULE_LIBRARY: {
-      linkCmds.assign(
-        this->GetMakefile()->GetDefinition("CMAKE_CUDA_DEVICE_LINK_LIBRARY"));
+      linkCmds.assign(this->GetMakefile()->GetDefinition(
+        cmStrCat("CMAKE_", this->DeviceLinkLanguage, "_DEVICE_LINK_LIBRARY")));
     } break;
     case cm::TargetType::EXECUTABLE: {
-      linkCmds.assign(this->GetMakefile()->GetDefinition(
-        "CMAKE_CUDA_DEVICE_LINK_EXECUTABLE"));
+      linkCmds.assign(this->GetMakefile()->GetDefinition(cmStrCat(
+        "CMAKE_", this->DeviceLinkLanguage, "_DEVICE_LINK_EXECUTABLE")));
     } break;
     default:
       break;
@@ -839,22 +839,19 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
   bool firstForConfig)
 {
   cmGlobalNinjaGenerator* globalGen = this->GetGlobalGenerator();
-  if (!globalGen->GetLanguageEnabled("CUDA")) {
-    return;
-  }
-
   cmGeneratorTarget* genTarget = this->GetGeneratorTarget();
-
-  bool requiresDeviceLinking = requireDeviceLinking(
-    *this->GeneratorTarget, *this->GetLocalGenerator(), config);
-  if (!requiresDeviceLinking) {
+  this->DeviceLinkLanguage =
+    deviceLinkLanguage(*genTarget, *this->GetLocalGenerator(), config);
+  if (this->DeviceLinkLanguage.empty()) {
     return;
   }
+  genTarget->GetLinkInformation(config);
+  cmGeneratorTarget::DeviceLinkSetter deviceLink(*genTarget);
 
   // First and very important step is to make sure while inside this
   // step our link language is set to CUDA
-  std::string const& objExt =
-    this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
+  std::string const& objExt = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", this->DeviceLinkLanguage, "_OUTPUT_EXTENSION"));
 
   std::string targetOutputDir =
     this->GetLocalGenerator()->MaybeRelativeToTopBinDir(
@@ -877,7 +874,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
     << cmState::GetTargetTypeName(genTarget->GetType()) << " target "
     << this->GetTargetName() << "\n\n";
 
-  if (this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID") == "Clang") {
+  if (this->DeviceLinkLanguage == "CUDA" &&
+      this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID") == "Clang") {
     std::string architecturesStr =
       this->GeneratorTarget->GetSafeProperty("CUDA_ARCHITECTURES");
 
@@ -892,7 +890,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
     this->WriteDeviceLinkStatements(config, cmList{ architecturesStr },
                                     targetOutputReal);
   } else {
-    this->WriteNvidiaDeviceLinkStatement(config, fileConfig, targetOutputDir,
+    this->WriteDriverDeviceLinkStatement(config, fileConfig, targetOutputDir,
                                          targetOutputReal);
   }
 }
@@ -983,7 +981,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatements(
   globalGen->WriteBuild(this->GetCommonFileStream(), dcompile);
 }
 
-void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
+void cmNinjaNormalTargetGenerator::WriteDriverDeviceLinkStatement(
   std::string const& config, std::string const& fileConfig,
   std::string const& outputDir, std::string const& output)
 {
@@ -1042,7 +1040,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
 
   cmNinjaLinkLineDeviceComputer linkLineComputer(
     this->GetLocalGenerator(),
-    this->GetLocalGenerator()->GetStateSnapshot().GetDirectory(), globalGen);
+    this->GetLocalGenerator()->GetStateSnapshot().GetDirectory(), globalGen,
+    this->DeviceLinkLanguage);
   linkLineComputer.SetUseNinjaMulti(globalGen->IsMultiConfig());
 
   localGen.GetDeviceLinkFlags(linkLineComputer, config, vars["LINK_LIBRARIES"],
@@ -1058,7 +1057,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
 
   // Compute language specific link flags.
   std::string langFlags;
-  localGen.AddLanguageFlagsForLinking(langFlags, genTarget, "CUDA", config);
+  localGen.AddLanguageFlagsForLinking(langFlags, genTarget,
+                                      this->DeviceLinkLanguage, config);
   vars["LANGUAGE_COMPILE_FLAGS"] = langFlags;
 
   auto const tgtNames = this->TargetNames(config);
@@ -1131,7 +1131,7 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   bool usedResponseFile = false;
   globalGen->WriteBuild(this->GetCommonFileStream(), build,
                         commandLineLengthLimit, &usedResponseFile);
-  this->WriteNvidiaDeviceLinkRule(usedResponseFile, config);
+  this->WriteDriverDeviceLinkRule(usedResponseFile, config);
 }
 
 void cmNinjaNormalTargetGenerator::WriteLinkStatement(

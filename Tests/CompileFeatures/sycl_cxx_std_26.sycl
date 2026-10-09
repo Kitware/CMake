@@ -1,0 +1,4 @@
+#include "cxx_std.h"
+#if defined(CXX_STD) && CXX_STD <= CXX_STD_23
+#  error "sycl_cxx_std_26 not honored"
+#endif

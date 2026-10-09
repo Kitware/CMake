@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SYCLCompilerDirectory>$([System.IO.Path]::GetDirectoryName('$(SYCLToolExe)'))\</SYCLCompilerDirectory>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <SYCL>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </SYCL>
+  </ItemDefinitionGroup>
+</Project>

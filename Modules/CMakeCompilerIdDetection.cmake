@@ -107,6 +107,10 @@ function(compiler_id_detection outvar lang)
       set(ordered_compilers NVIDIA Clang)
     endif()
 
+    if("x${lang}" STREQUAL "xSYCL")
+      list(PREPEND ordered_compilers AdaptiveCpp)
+    endif()
+
     if(CID_ID_DEFINE)
       foreach(Id ${ordered_compilers})
         string(APPEND CMAKE_${lang}_COMPILER_ID_CONTENT "# define ${CID_PREFIX}COMPILER_IS_${Id} 0\n")

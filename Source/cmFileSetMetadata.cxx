@@ -77,6 +77,8 @@ bool VisibilityIsForInterface(Visibility vis)
 
 cm::string_view const HEADERS = "HEADERS"_s;
 cm::string_view const SOURCES = "SOURCES"_s;
+cm::string_view const SYCL = "SYCL"_s;
+cm::string_view const SYCL_HEADERS = "SYCL_HEADERS"_s;
 cm::string_view const CXX_MODULES = "CXX_MODULES"_s;
 
 namespace {
@@ -94,6 +96,19 @@ std::map<cm::string_view, FileSetDescriptor> const FileSetDescriptors{
       DependencyMode ::Includables,
       { cm::FileSetMetadata::FileSetAttributes::FrameworkCompatible,
         cm::FileSetMetadata::FileSetAttributes::UnityBuild } } },
+  { cm::FileSetMetadata::SYCL,
+    { cm::FileSetMetadata::SOURCES,
+      cm::FileSetMetadata::FileSetLookup::Dependencies,
+      { DependencyMode ::IndependentFiles, DependencyMode ::Includables },
+      DependencyMode ::Includables,
+      { cm::FileSetMetadata::FileSetAttributes::FrameworkCompatible,
+        cm::FileSetMetadata::FileSetAttributes::UnityBuild } } },
+  { cm::FileSetMetadata::SYCL_HEADERS,
+    { cm::FileSetMetadata::HEADERS,
+      cm::FileSetMetadata::FileSetLookup::Target,
+      { DependencyMode ::Includables },
+      DependencyMode ::Includables,
+      { cm::FileSetMetadata::FileSetAttributes::FilesInMultipleFileSets } } },
   { cm::FileSetMetadata::CXX_MODULES,
     { cm::FileSetMetadata::CXX_MODULES,
       cm::FileSetMetadata::FileSetLookup::Target,
@@ -102,7 +117,8 @@ std::map<cm::string_view, FileSetDescriptor> const FileSetDescriptors{
       {} } },
 };
 
-std::vector<cm::string_view> KnownTypes{ HEADERS, SOURCES, CXX_MODULES };
+std::vector<cm::string_view> KnownTypes{ HEADERS, SOURCES, SYCL, SYCL_HEADERS,
+                                         CXX_MODULES };
 
 cmsys::RegularExpression const ValidNameRegex("^[a-z0-9][a-zA-Z0-9_]*$");
 }

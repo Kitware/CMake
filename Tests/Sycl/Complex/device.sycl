@@ -1,0 +1,6 @@
+#include "device.h"
+
+SYCL_EXTERNAL int device_value(int value)
+{
+  return value * 6 + device_offset();
+}

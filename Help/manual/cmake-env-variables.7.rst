@@ -87,6 +87,7 @@ Environment Variables for Languages
 .. toctree::
    :maxdepth: 1
 
+   /envvar/ACPP_TARGETS
    /envvar/ASM_DIALECT
    /envvar/ASM_DIALECTFLAGS
    /envvar/CC
@@ -103,6 +104,7 @@ Environment Variables for Languages
    /envvar/HIPCXX
    /envvar/HIPFLAGS
    /envvar/HIPHOSTCXX
+   /envvar/HIPSYCL_TARGETS
    /envvar/ISPC
    /envvar/ISPCFLAGS
    /envvar/OBJC
@@ -111,6 +113,8 @@ Environment Variables for Languages
    /envvar/OBJCXXFLAGS
    /envvar/RC
    /envvar/RCFLAGS
+   /envvar/SYCLCXX
+   /envvar/SYCLFLAGS
    /envvar/SWIFTC
 
 Environment Variables for CTest

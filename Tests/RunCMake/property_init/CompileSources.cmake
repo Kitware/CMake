@@ -48,6 +48,14 @@ set(properties
   ### Swift
   "Swift_LANGUAGE_VERSION"                  "2.3"               "<SAME>"
   "Swift_MODULE_DIRECTORY"                  "${dir}"            "<SAME>"
+  ### SYCL
+  "SYCL_COMPILER_LAUNCHER"                   "ccache"            "<SAME>"
+  "SYCL_CXX_STANDARD"                        "17"                "<SAME>"
+  "SYCL_CXX_STANDARD_REQUIRED"               "TRUE"              "<SAME>"
+  "SYCL_EXTENSIONS"                          "FALSE"             "<SAME>"
+  "SYCL_VISIBILITY_PRESET"                   "hidden"            "<SAME>"
+  "SYCL_SEPARABLE_COMPILATION"               "ON"                "<SAME>"
+  "SYCL_EXTENSION_MODE"                      "REPLACE"           "<SAME>"
   ### moc
   "AUTOMOC"                                 "OFF"               "<SAME>"
   "AUTOMOC_COMPILER_PREDEFINES"             "OFF"               "<SAME>"
@@ -111,6 +119,11 @@ set(properties
   "OBJC_LINKER_LAUNCHER"                    "ccache"            "<SAME>"
   ### Objective C++
   "OBJCXX_LINKER_LAUNCHER"                  "ccache"            "<SAME>"
+
+  ### SYCL
+  "SYCL_LINKER_LAUNCHER"                     "ccache"            "<SAME>"
+  # ON is not supported on object libraries; OFF still tests initialization.
+  "SYCL_RESOLVE_DEVICE_SYMBOLS"              "OFF"               "<SAME>"
 
   # Static analysis
   "SKIP_LINTING"                            "OFF"               "<SAME>"

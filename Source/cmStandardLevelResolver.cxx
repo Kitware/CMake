@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <set>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
@@ -17,6 +18,8 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include "cmFileSet.h"
+#include "cmFileSetMetadata.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -25,6 +28,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmSourceFile.h"
 #include "cmStandardLevel.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
@@ -45,7 +49,86 @@ char const* const CUDA_FEATURES[] = { nullptr FOR_EACH_CUDA_FEATURE(
 
 char const* const HIP_FEATURES[] = { nullptr FOR_EACH_HIP_FEATURE(
   FEATURE_STRING) };
+
+char const* const SYCL_FEATURES[] = { nullptr FOR_EACH_SYCL_FEATURE(
+  FEATURE_STRING) };
 #undef FEATURE_STRING
+
+bool TargetUsesSYCLCompileFeatures(cmMakefile* makefile,
+                                   std::string const& targetName)
+{
+  auto* globalGenerator = makefile->GetGlobalGenerator();
+  if (!globalGenerator->GetLanguageEnabled("SYCL")) {
+    return false;
+  }
+  if (!globalGenerator->GetLanguageEnabled("CXX")) {
+    return true;
+  }
+
+  cmTarget* target = makefile->FindTargetToUse(targetName);
+  if (!target) {
+    return false;
+  }
+
+  if (cmGeneratorTarget* generatorTarget =
+        globalGenerator->FindGeneratorTarget(targetName)) {
+    std::set<std::string> const languages =
+      generatorTarget->GetAllConfigCompileLanguages();
+    return languages.find("SYCL") != languages.end() &&
+      languages.find("CXX") == languages.end();
+  }
+
+  bool hasCxxSource = false;
+  bool hasSyclSource = false;
+  bool hasSyclHeaders = false;
+  auto recordLanguage = [&hasCxxSource, &hasSyclSource](cm::string_view lang) {
+    hasCxxSource = hasCxxSource || lang == "CXX"_s;
+    hasSyclSource = hasSyclSource || lang == "SYCL"_s;
+  };
+  for (auto const& name : target->GetAllPrivateFileSets()) {
+    cmFileSet const* fileSet = target->GetFileSet(name);
+    if (fileSet->GetType() == cm::FileSetMetadata::HEADERS) {
+      hasSyclHeaders =
+        hasSyclHeaders || fileSet->GetProperty("LANGUAGE") == "SYCL"_s;
+      continue;
+    }
+    if (fileSet->GetType() != cm::FileSetMetadata::SOURCES ||
+        fileSet->GetFileEntries().empty()) {
+      continue;
+    }
+    cmValue const language = fileSet->GetProperty("LANGUAGE");
+    if (!language.IsEmpty()) {
+      recordLanguage(*language);
+      continue;
+    }
+    for (auto const& entry : fileSet->GetFileEntries()) {
+      for (auto const& source : cmList{ entry.Value }) {
+        if (cmGeneratorExpression::Find(source) == std::string::npos) {
+          recordLanguage(target->GetMakefile()
+                           ->GetOrCreateSource(source)
+                           ->GetOrDetermineLanguage());
+        }
+      }
+    }
+  }
+  for (auto const& entry : target->GetSourceEntries()) {
+    cmList sources{ entry.Value };
+    for (auto const& source : sources) {
+      if (cmGeneratorExpression::Find(source) != std::string::npos) {
+        continue;
+      }
+      std::string const& language = target->GetMakefile()
+                                      ->GetOrCreateSource(source)
+                                      ->GetOrDetermineLanguage();
+      recordLanguage(language);
+    }
+  }
+  if (hasSyclHeaders && hasCxxSource) {
+    hasCxxSource = false;
+    hasSyclSource = true;
+  }
+  return hasSyclSource && !hasCxxSource;
+}
 
 int ParseStd(std::string const& level)
 {
@@ -188,9 +271,9 @@ struct StandardLevelComputer
     auto stdIt =
       std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(standardStr));
     if (stdIt == cm::cend(stds)) {
-      std::string e =
-        cmStrCat(this->Language, "_STANDARD is set to invalid value '",
-                 standardStr, '\'');
+      std::string e = cmStrCat(
+        cmStandardLevelResolver::GetStandardPropertyName(this->Language),
+        " is set to invalid value '", standardStr, '\'');
       makefile->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
                                                  target->GetBacktrace());
       return std::string{};
@@ -361,10 +444,11 @@ struct StandardLevelComputer
         std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
                   ParseStd(*existingStandard));
       if (existingLevelIter == cm::cend(this->Levels)) {
-        std::string const e =
-          cmStrCat("The ", this->Language, "_STANDARD property on target \"",
-                   targetName, "\" contained an invalid value: \"",
-                   *existingStandard, "\".");
+        std::string const e = cmStrCat(
+          "The ",
+          cmStandardLevelResolver::GetStandardPropertyName(this->Language),
+          " property on target \"", targetName,
+          "\" contained an invalid value: \"", *existingStandard, "\".");
         if (error) {
           *error = e;
         } else {
@@ -423,10 +507,11 @@ struct StandardLevelComputer
       std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
                 ParseStd(*existingStandard));
     if (existingLevelIter == cm::cend(this->Levels)) {
-      std::string const e =
-        cmStrCat("The ", this->Language, "_STANDARD property on target \"",
-                 target->GetName(), "\" contained an invalid value: \"",
-                 *existingStandard, "\".");
+      std::string const e = cmStrCat(
+        "The ",
+        cmStandardLevelResolver::GetStandardPropertyName(this->Language),
+        " property on target \"", target->GetName(),
+        "\" contained an invalid value: \"", *existingStandard, "\".");
       makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       return false;
     }
@@ -507,8 +592,18 @@ std::unordered_map<std::string,
   { "HIP",
     StandardLevelComputer{
       "HIP", std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+      std::vector<std::string>{ "98", "11", "14", "17", "20", "23", "26" } } },
+  { "SYCL",
+    StandardLevelComputer{
+      "SYCL", std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
       std::vector<std::string>{ "98", "11", "14", "17", "20", "23", "26" } } }
 };
+}
+
+std::string cmStandardLevelResolver::GetStandardPropertyName(
+  std::string const& lang)
+{
+  return lang == "SYCL" ? "SYCL_CXX_STANDARD" : cmStrCat(lang, "_STANDARD");
 }
 
 std::string cmStandardLevelResolver::GetCompileOptionDef(
@@ -577,10 +672,10 @@ bool cmStandardLevelResolver::AddRequiredTargetFeature(
   std::string newRequiredStandard;
   bool succeeded = this->GetNewRequiredStandard(
     target->GetName(), feature,
-    target->GetProperty(cmStrCat(lang, "_STANDARD")), featureLevel,
+    target->GetProperty(GetStandardPropertyName(lang)), featureLevel,
     newRequiredStandard, error);
   if (!newRequiredStandard.empty()) {
-    target->SetProperty(cmStrCat(lang, "_STANDARD"), newRequiredStandard);
+    target->SetProperty(GetStandardPropertyName(lang), newRequiredStandard);
   }
   return succeeded;
 }
@@ -639,6 +734,15 @@ bool cmStandardLevelResolver::CompileFeatureKnown(
   bool isCxxFeature =
     std::find_if(cm::cbegin(CXX_FEATURES) + 1, cm::cend(CXX_FEATURES),
                  cmStrCmp(feature)) != cm::cend(CXX_FEATURES);
+  bool isSYCLFeature =
+    std::find_if(cm::cbegin(SYCL_FEATURES) + 1, cm::cend(SYCL_FEATURES),
+                 cmStrCmp(feature)) != cm::cend(SYCL_FEATURES);
+  if (isSYCLFeature &&
+      (!isCxxFeature ||
+       TargetUsesSYCLCompileFeatures(this->Makefile, targetName))) {
+    lang = "SYCL";
+    return true;
+  }
   if (isCxxFeature) {
     lang = "CXX";
     return true;

@@ -1,0 +1,3 @@
+add_library(fileset_headers_experimental INTERFACE)
+target_sources(fileset_headers_experimental INTERFACE
+  FILE_SET sycl_headers TYPE SYCL_HEADERS)

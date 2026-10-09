@@ -1,0 +1,11 @@
+set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+enable_language(SYCL)
+if(NOT CMAKE_SYCL_BYTE_ORDER MATCHES "^(BIG_ENDIAN|LITTLE_ENDIAN)$")
+  message(FATAL_ERROR "CMAKE_SYCL_BYTE_ORDER has unexpected value '${CMAKE_SYCL_BYTE_ORDER}'")
+endif()
+
+include(TestBigEndian)
+test_big_endian(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN AND NOT CMAKE_SYCL_BYTE_ORDER STREQUAL "BIG_ENDIAN")
+  message(FATAL_ERROR "test_big_endian result does not match ABI result")
+endif()

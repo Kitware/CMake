@@ -1,0 +1,8 @@
+#if __cplusplus < 201703L
+#  error "SYCL must use at least C++17"
+#endif
+int cxx_value();
+int main()
+{
+  return cxx_value() == 20 ? 0 : 1;
+}

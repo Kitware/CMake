@@ -24,7 +24,7 @@ public:
 protected:
   virtual void WriteExecutableRule(bool relink);
   virtual void WriteDeviceExecutableRule(bool relink);
-  virtual void WriteNvidiaDeviceExecutableRule(
+  virtual void WriteDriverDeviceExecutableRule(
     bool relink, std::vector<std::string>& commands,
     std::string const& targetOutput);
 

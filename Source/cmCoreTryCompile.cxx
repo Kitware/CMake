@@ -40,7 +40,7 @@
 namespace {
 constexpr char const* unique_binary_directory = "CMAKE_BINARY_DIR_USE_MKDTEMP";
 
-std::array<cm::string_view, 9> const kLanguageNames{ {
+std::array<cm::string_view, 10> const kLanguageNames{ {
   "C"_s,
   "CUDA"_s,
   "CXX"_s,
@@ -49,6 +49,7 @@ std::array<cm::string_view, 9> const kLanguageNames{ {
   "ISPC"_s,
   "OBJC"_s,
   "OBJCXX"_s,
+  "SYCL"_s,
   "Swift"_s,
 } };
 
@@ -170,6 +171,9 @@ auto const TryCompileBaseSourcesArgParser =
     .BIND_LANG_PROPS(HIP)
     .BIND_LANG_PROPS(OBJC)
     .BIND_LANG_PROPS(OBJCXX)
+    .Bind("SYCL_CXX_STANDARD"_s, TryCompileLangProp)
+    .Bind("SYCL_CXX_STANDARD_REQUIRED"_s, TryCompileLangProp)
+    .Bind("SYCL_EXTENSIONS"_s, TryCompileLangProp)
   /* keep semicolon on own line */;
 
 auto const TryCompileBaseNewSourcesArgParser =
@@ -1010,8 +1014,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     std::vector<std::string> warnCMP0067Variables;
 
     if (honorStandard || warnCMP0067) {
-      static std::array<std::string, 6> const possibleLangs{
-        { "C", "CXX", "CUDA", "HIP", "OBJC", "OBJCXX" }
+      static std::array<std::string, 7> const possibleLangs{
+        { "C", "CXX", "CUDA", "HIP", "OBJC", "OBJCXX", "SYCL" }
       };
       static std::array<cm::string_view, 3> const langPropSuffixes{
         { "_STANDARD"_s, "_STANDARD_REQUIRED"_s, "_EXTENSIONS"_s }
@@ -1021,7 +1025,10 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           continue;
         }
         for (cm::string_view propSuffix : langPropSuffixes) {
-          std::string langProp = cmStrCat(lang, propSuffix);
+          std::string langProp = cmStrCat(
+            lang == "SYCL" && propSuffix != "_EXTENSIONS"_s ? "SYCL_CXX"
+                                                            : lang,
+            propSuffix);
           if (!arguments.LangProps.count(langProp)) {
             std::string langPropVar = cmStrCat("CMAKE_"_s, langProp);
             std::string value = this->Makefile->GetSafeDefinition(langPropVar);
@@ -1102,6 +1109,12 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
   }
 
   // Forward a set of variables to the inner project cache.
+  if (cmValue val = this->Makefile->GetDefinition("CMAKE_EXPERIMENTAL_SYCL")) {
+    arguments.CMakeFlags.emplace_back(
+      cmStrCat("-DCMAKE_EXPERIMENTAL_SYCL=", *val));
+    cmakeVariables.emplace("CMAKE_EXPERIMENTAL_SYCL", *val);
+  }
+
   if ((this->SrcFileSignature ||
        this->Makefile->GetPolicyStatus(cmPolicies::CMP0137) ==
          cmPolicies::NEW) &&
@@ -1132,6 +1145,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     vars.insert(kCMAKE_SYSROOT);
     vars.insert(kCMAKE_SYSROOT_COMPILE);
     vars.insert(kCMAKE_SYSROOT_LINK);
+    vars.insert("CMAKE_SYCL_DEVICE_TARGETS");
     vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_WATCOM_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_MSVC_DEBUG_INFORMATION_FORMAT"_s);

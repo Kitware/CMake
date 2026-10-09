@@ -23,6 +23,7 @@
 
 #include "cmCommonTargetGenerator.h"
 #include "cmCryptoHash.h"
+#include "cmFastbuildLinkLineComputer.h"
 #include "cmFastbuildTargetGenerator.h"
 #include "cmFileSetMetadata.h"
 #include "cmGeneratedFileStream.h"
@@ -240,15 +241,18 @@ void cmFastbuildNormalTargetGenerator::GetLinkerExecutableAndArgs(
 
   LogMessage("Link Command: " + command);
 
-  auto const& compilers = this->GetGlobalGenerator()->Compilers;
-  auto const linkerLauncherVarName = FASTBUILD_LINKER_LAUNCHER_PREFIX +
-    this->GeneratorTarget->GetLinkerLanguage(Config);
-  auto const iter = compilers.find(linkerLauncherVarName);
+  auto const launcher = cmCommonTargetGenerator::GetLinkerLauncher(Config);
   // Tested in "RunCMake.LinkerLauncher" test.
-  if (iter != compilers.end()) {
-    LogMessage("Linker launcher: " + iter->first);
-    outLinkerExecutable = iter->second.Executable;
-    outLinkerArgs = cmStrCat(iter->second.Args, ' ', command);
+  if (!launcher.empty() &&
+      this->GeneratorTarget->GetType() != cm::TargetType::STATIC_LIBRARY) {
+    outLinkerExecutable = launcher.front();
+    outLinkerArgs.clear();
+    for (std::size_t i = 1; i < launcher.size(); ++i) {
+      outLinkerArgs = cmStrCat(
+        std::move(outLinkerArgs),
+        cmGlobalFastbuildGenerator::QuoteIfHasSpaces(launcher[i]), ' ');
+    }
+    outLinkerArgs += command;
   } else {
     SplitLinkerFromArgs(command, outLinkerExecutable, outLinkerArgs);
   }
@@ -979,7 +983,7 @@ void cmFastbuildNormalTargetGenerator::Generate()
   std::vector<std::string> objectDepends;
   AddObjectDependencies(fastbuildTarget, objectDepends);
 
-  GenerateCudaDeviceLink(fastbuildTarget);
+  GenerateDeviceLink(fastbuildTarget);
 
   GenerateLink(fastbuildTarget, objectDepends);
 
@@ -1366,27 +1370,32 @@ std::vector<std::string> cmFastbuildNormalTargetGenerator::GetArches() const
   return arches;
 }
 
-void cmFastbuildNormalTargetGenerator::GetCudaDeviceLinkLinkerAndArgs(
-  std::string& linker, std::string& args) const
+void cmFastbuildNormalTargetGenerator::GetDeviceLinkLinkerAndArgs(
+  std::string const& language, std::string& linker, std::string& args) const
 {
-  std::string linkCmd =
-    this->GetMakefile()->GetDefinition("CMAKE_CUDA_DEVICE_LINK_"
-                                       "LIBRARY");
+  this->GeneratorTarget->GetLinkInformation(this->Config);
+  cmGeneratorTarget::DeviceLinkSetter deviceLink(*this->GeneratorTarget);
+  std::string linkCmd = this->GetMakefile()->GetSafeDefinition(
+    cmStrCat("CMAKE_", language, "_DEVICE_LINK_LIBRARY"));
   auto vars = ComputeRuleVariables();
-  vars.Language = "CUDA";
-  vars.Objects = FASTBUILD_1_INPUT_PLACEHOLDER;
+  vars.Language = language.c_str();
+  // Libraries2 tracks archive changes; the computed link line already contains
+  // these archives in driver-required order, so expand only local objects
+  // here.
+  vars.Objects = FASTBUILD_1_0_INPUT_PLACEHOLDER;
   vars.Target = FASTBUILD_2_INPUT_PLACEHOLDER;
   std::unique_ptr<cmLinkLineDeviceComputer> linkLineComputer(
-    new cmLinkLineDeviceComputer(
+    new cmFastbuildLinkLineDeviceComputer(
       this->LocalGenerator,
-      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+      this->LocalGenerator->GetStateSnapshot().GetDirectory(),
+      this->GetGlobalGenerator(), language));
   std::string linkLibs;
   std::string targetFlags;
   std::string linkFlags;
   std::string frameworkPath;
   std::string linkPath;
-  // So that the call to "GetTargetFlags" does not pollute "LinkLibs" and
-  // "LinkFlags" with unneeded values.
+  // GetTargetFlags also collects host link flags and libraries, which are not
+  // part of the device link.
   std::string dummyLinkLibs;
   std::string dummyLinkFlags;
   this->LocalCommonGenerator->GetDeviceLinkFlags(
@@ -1404,22 +1413,23 @@ void cmFastbuildNormalTargetGenerator::GetCudaDeviceLinkLinkerAndArgs(
   SplitLinkerFromArgs(linkCmd, linker, args);
 }
 
-void cmFastbuildNormalTargetGenerator::GenerateCudaDeviceLink(
+void cmFastbuildNormalTargetGenerator::GenerateDeviceLink(
   FastbuildTarget& target) const
 {
   auto const arches = this->GetArches();
-  if (!requireDeviceLinking(*this->GeneratorTarget, *this->GetLocalGenerator(),
-                            Config)) {
+  std::string const language = deviceLinkLanguage(
+    *this->GeneratorTarget, *this->GetLocalGenerator(), Config);
+  if (language.empty()) {
     return;
   }
-  LogMessage("GenerateCudaDeviceLink(...)");
+  LogMessage("GenerateDeviceLink(...)");
   for (auto const& arch : arches) {
     std::string linker;
     std::string args;
-    GetCudaDeviceLinkLinkerAndArgs(linker, args);
+    GetDeviceLinkLinkerAndArgs(language, linker, args);
 
     FastbuildLinkerNode deviceLinkNode;
-    deviceLinkNode.Name = cmStrCat(target.Name, "_cuda_device_link");
+    deviceLinkNode.Name = cmStrCat(target.Name, "_device_link");
     deviceLinkNode.Type = FastbuildLinkerNode::SHARED_LIBRARY;
     deviceLinkNode.Linker = std::move(linker);
     deviceLinkNode.LinkerOptions = std::move(args);
@@ -1428,16 +1438,36 @@ void cmFastbuildNormalTargetGenerator::GenerateCudaDeviceLink(
       FASTBUILD_DOLLAR_TAG "TargetOutDi"
                            "r" FASTBUILD_DOLLAR_TAG "/cmake_device_link",
       (args.empty() ? "" : "_" + arch),
-      this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_"
-                                        "EXTENSION")));
+      this->Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", language, "_OUTPUT_EXTENSION"))));
 
     // Input
     for (auto const& objList : target.ObjectListNodes) {
       deviceLinkNode.LibrarianAdditionalInputs.push_back(objList.Name);
     }
-    target.CudaDeviceLinkNode.emplace_back(std::move(deviceLinkNode));
+    deviceLinkNode.PreBuildDependencies.emplace(
+      target.Name + FASTBUILD_DEPS_ARTIFACTS_ALIAS_POSTFIX);
+    if (auto const* linkInfo =
+          this->GeneratorTarget->GetLinkInformation(this->Config)) {
+      for (auto const& dependency : linkInfo->GetDepends()) {
+        // ObjectList owns generated object nodes. Adding their paths here
+        // would create File nodes before FASTBuild discovers the objects.
+        if (cmHasLiteralSuffix(dependency, ".o") ||
+            cmHasLiteralSuffix(dependency, ".obj")) {
+          continue;
+        }
+        deviceLinkNode.Libraries2.push_back(
+          this->ConvertToFastbuildPath(dependency));
+      }
+    }
+    this->GetGlobalGenerator()->AddFileToClean(
+      cmStrCat(this->GeneratorTarget->GetObjectDirectory(this->Config),
+               "cmake_device_link", (args.empty() ? "" : "_" + arch),
+               this->Makefile->GetSafeDefinition(
+                 cmStrCat("CMAKE_", language, "_OUTPUT_EXTENSION"))));
+    target.DeviceLinkNodes.emplace_back(std::move(deviceLinkNode));
   }
-  LogMessage("GenerateCudaDeviceLink end");
+  LogMessage("GenerateDeviceLink end");
 }
 
 void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
@@ -1904,6 +1934,10 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
                           " already linked... Skipping"));
       return;
     }
+    if (UsingCommandLine || feature != "DEFAULT") {
+      AppendCommandLineDep(linkerNode, item);
+      return;
+    }
     // Tested in "ExportImport" test.
     cmList const list{ GetImportedLoc(item) };
     for (std::string const& linkDep : list) {
@@ -2038,7 +2072,7 @@ void cmFastbuildNormalTargetGenerator::AppendCommandLineDep(
 
   std::string formatted;
   if (item.Target && item.Target->IsImported()) {
-    formatted = GetImportedLoc(item);
+    formatted = item.GetFormattedItem(GetImportedLoc(item)).Value;
   } else {
     formatted = item.GetFormattedItem(item.Value.Value).Value;
   }
@@ -2057,6 +2091,10 @@ void cmFastbuildNormalTargetGenerator::AppendCommandLineDep(
   } else {
     // It's some link option, not a path.
     linkerNode.LinkerOptions += (" " + formatted);
+    if (item.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
+      AppendToLibraries2IfApplicable(
+        linkerNode, this->ConvertToFastbuildPath(item.Value.Value));
+    }
   }
 }
 
@@ -2149,7 +2187,7 @@ void cmFastbuildNormalTargetGenerator::AppendDirectObjectLibs(
 
 void cmFastbuildNormalTargetGenerator::AppendLinkDeps(
   std::set<FastbuildTargetDep>& preBuildDeps, FastbuildLinkerNode& linkerNode,
-  FastbuildLinkerNode& cudaDeviceLinkLinkerNode)
+  FastbuildLinkerNode& deviceLinkNode)
 {
   std::set<std::string> linkedObjects;
   cmComputeLinkInformation const* linkInfo =
@@ -2163,6 +2201,12 @@ void cmFastbuildNormalTargetGenerator::AppendLinkDeps(
   // Object libs that are linked directly to target (e.g.
   // add_executable(test_exe archiveObjs)
   AppendDirectObjectLibs(linkerNode, linkedObjects);
+  AppendExternalObject(linkerNode, linkedObjects);
+  if (!deviceLinkNode.Name.empty()) {
+    std::set<std::string> deviceObjects;
+    AppendDirectObjectLibs(deviceLinkNode, deviceObjects);
+    AppendExternalObject(deviceLinkNode, deviceObjects);
+  }
   std::size_t numberOfDirectlyLinkedObjects =
     linkerNode.LibrarianAdditionalInputs.size();
   // target_link_libraries.
@@ -2214,29 +2258,20 @@ void cmFastbuildNormalTargetGenerator::AppendLinkDeps(
     else if (item.Target) {
       AppendTargetDep(linkerNode, linkedObjects, item);
       AppendPrebuildDeps(linkerNode, item);
-      if (!item.Target->IsImported() &&
-          item.Target->GetType() == cm::TargetType::OBJECT_LIBRARY) {
-        ++numberOfDirectlyLinkedObjects;
-        cudaDeviceLinkLinkerNode.LibrarianAdditionalInputs.emplace_back(
-          cmStrCat(item.Target->GetName(), FASTBUILD_OBJECTS_ALIAS_POSTFIX));
-      }
 
     } else {
       AppendCommandLineDep(linkerNode, item);
       UsingCommandLine = true;
     }
   }
-  AppendExternalObject(linkerNode, linkedObjects);
-
-  if (!cudaDeviceLinkLinkerNode.Name.empty()) {
-    linkerNode.LibrarianAdditionalInputs.push_back(
-      cudaDeviceLinkLinkerNode.Name);
-    // CUDA device-link stub needs to go AFTER direct object dependencies, but
+  if (!deviceLinkNode.Name.empty()) {
+    // The device-link stub needs to go AFTER direct object dependencies, but
     // BEFORE all other dependencies. Needed for the correct left-to-right
     // symbols resolution on Linux.
-    std::swap(
-      linkerNode.LibrarianAdditionalInputs[numberOfDirectlyLinkedObjects],
-      linkerNode.LibrarianAdditionalInputs.back());
+    linkerNode.LibrarianAdditionalInputs.insert(
+      linkerNode.LibrarianAdditionalInputs.begin() +
+        numberOfDirectlyLinkedObjects,
+      deviceLinkNode.Name);
   }
 }
 
@@ -2387,11 +2422,11 @@ void cmFastbuildNormalTargetGenerator::GenerateLink(
     linkerNode.LinkerOptions += linkerOptions;
 
     // Check if we have CUDA device link stub for this target.
-    FastbuildLinkerNode dummyCudaDeviceLinkNode;
+    FastbuildLinkerNode dummyDeviceLinkNode;
     AppendLinkDeps(target.PreBuildDependencies, linkerNode,
-                   target.CudaDeviceLinkNode.size() > i
-                     ? target.CudaDeviceLinkNode[i]
-                     : dummyCudaDeviceLinkNode);
+                   target.DeviceLinkNodes.size() > i
+                     ? target.DeviceLinkNodes[i]
+                     : dummyDeviceLinkNode);
     ApplyLWYUToLinkerCommand(linkerNode);
 
     // On macOS, only the last LinkerNode performs lipo in POST_BUILD.

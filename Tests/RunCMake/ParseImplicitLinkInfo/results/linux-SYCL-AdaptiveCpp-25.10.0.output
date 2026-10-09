@@ -1,0 +1,5 @@
+libs=acpp-rt;acpp-common;stdc\+\+;m;omp;gcc_s;gcc;pthread;c;gcc_s;gcc
+dirs=/usr/lib;/usr/lib64/gcc/x86_64-pc-linux-gnu/16;/usr/lib64;/lib64;/lib;/usr/lib/llvm20/lib
+library_arch=
+linker_tool=/usr/bin/ld
+linker_arch=-m;elf_x86_64

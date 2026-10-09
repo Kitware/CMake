@@ -37,7 +37,7 @@ This module provides the following command:
   ``<lang>``
     The language of the compiler used for the check.  Supported languages are
     ``C``, ``CXX``, ``CUDA``, ``Fortran``, ``HIP``, ``OBJC``, ``OBJCXX``,
-    and ``Swift``.
+    ``Swift``, and ``SYCL``.
 
     .. versionadded:: 3.19
       Support for ``CUDA`` language.
@@ -47,6 +47,13 @@ This module provides the following command:
 
     .. versionadded:: 3.26
       Support for ``Swift`` language.
+
+    .. versionadded:: 4.5
+      Support for ``SYCL`` language.
+
+    .. note::
+      ``SYCL`` support is experimental and gated by
+      ``CMAKE_EXPERIMENTAL_SYCL``.
 
   ``<flag>``
     Linker flag(s) to check.  Multiple flags can be specified in one

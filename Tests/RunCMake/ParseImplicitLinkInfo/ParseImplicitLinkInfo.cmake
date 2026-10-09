@@ -24,6 +24,7 @@ set(targets
   freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0 freebsd-Fortran-GNU-4.6.4
   hand-C-empty hand-CXX-empty
   hand-C-relative hand-CXX-relative
+  hand-CXX-shared-libraries
   linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
   linux-C-GNU-10.2.1-static-libgcc
     linux-CXX-GNU-10.2.1-static-libstdc++
@@ -54,6 +55,9 @@ set(targets
   linux-Fortran-LFortran-0.55.0-clang
   linux-Fortran-LFortran-0.55.0-gcc
   linux-custom_clang-C-Clang-13.0.0 linux-custom_clang-CXX-Clang-13.0.0
+  linux-SYCL-AdaptiveCpp-25.10.0
+  linux-SYCL-Clang-24.0.0
+  linux-SYCL-IntelLLVM-2026.0.0
   mingw.org-C-GNU-4.9.3 mingw.org-CXX-GNU-4.9.3
   netbsd-C-GNU-4.8.5 netbsd-CXX-GNU-4.8.5
     netbsd_nostdinc-C-GNU-4.8.5 netbsd_nostdinc-CXX-GNU-4.8.5
@@ -150,6 +154,7 @@ foreach(t ${targets})
     set(implicit_objs "")
     set(library_arch_output "")
     set(linker_tool_output "")
+    unset(linker_arch_output)
     file(STRINGS ${outfile} outputs)
     foreach(line IN LISTS outputs)
       if(line MATCHES "libs=")
@@ -163,6 +168,9 @@ foreach(t ${targets})
       endif()
       if(line MATCHES "linker_tool=")
         string(REPLACE "linker_tool=" "" linker_tool_output "${line}")
+      endif()
+      if(line MATCHES "^linker_arch=")
+        string(REPLACE "linker_arch=" "" linker_arch_output "${line}")
       endif()
     endforeach()
 
@@ -191,7 +199,7 @@ foreach(t ${targets})
     cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)
 
     # File format
-    # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}\nlinker_tool=${linker_tool}\n")
+    # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}\nlinker_tool=${linker_tool}\nlinker_arch=${linker_tool_ARCH_FLAGS}\n")
 
     if(t MATCHES "windows" AND NOT CMAKE_HOST_WIN32)
       string(REPLACE "\\" "/" linker_tool "${linker_tool}")
@@ -210,6 +218,10 @@ foreach(t ${targets})
       message("${t} parse failed: state=${state}, '${library_arch}' does not match '^${library_arch_output}$'")
     elseif((linker_tool OR linker_tool_output) AND NOT "${linker_tool}" MATCHES "^${linker_tool_output}$")
       message("${t} parse failed: state=${state}, '${linker_tool}' does not match '^${linker_tool_output}$'")
+    endif()
+    if(DEFINED linker_arch_output AND
+       NOT "${linker_tool_ARCH_FLAGS}" STREQUAL "${linker_arch_output}")
+      message("${t} parse failed: linker architecture flags '${linker_tool_ARCH_FLAGS}' do not match '${linker_arch_output}'")
     endif()
   endblock()
 endforeach(t)

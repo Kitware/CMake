@@ -1,0 +1,8 @@
+#include "kernel.h"
+
+class FooKernel;
+
+int foo()
+{
+  return run_kernel<FooKernel>();
+}

@@ -1,0 +1,29 @@
+#include "device.h"
+
+#ifndef KERNEL_NAME
+#  define KERNEL_NAME SeparateCompilationKernel
+#endif
+#ifndef LAUNCH_FUNCTION
+#  define LAUNCH_FUNCTION launch_kernel
+#endif
+class KERNEL_NAME;
+
+#if defined(__GNUC__)
+__attribute__((visibility("default")))
+#endif
+int LAUNCH_FUNCTION()
+{
+  sycl::queue queue;
+  int* value = sycl::malloc_shared<int>(1, queue);
+  if (!value) {
+    return -1;
+  }
+  *value = 0;
+  queue.single_task<KERNEL_NAME>([=] {
+    *value = device_value(7);
+  });
+  queue.wait_and_throw();
+  int result = *value;
+  sycl::free(value, queue);
+  return result;
+}

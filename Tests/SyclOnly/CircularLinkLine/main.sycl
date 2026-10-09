@@ -1,0 +1,20 @@
+#include "device.h"
+#include "../utils/TestDevice.h"
+class CircularLinkLineKernel;
+int main()
+{
+  if (!sycl_test_device_available()) {
+    return 77;
+  }
+  sycl::queue queue;
+  int* value = sycl::malloc_shared<int>(1, queue);
+  if (!value) {
+    return 1;
+  }
+  *value = 0;
+  queue.single_task<CircularLinkLineKernel>([=] { *value = device1(); });
+  queue.wait_and_throw();
+  int result = *value;
+  sycl::free(value, queue);
+  return result == 42 ? 0 : 1;
+}

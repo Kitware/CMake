@@ -149,6 +149,10 @@ private:
   bool ComputeNasmOptions();
   bool ComputeNasmOptions(std::string const& config);
   void WriteNasmOptions(Elem& e1, std::string const& config);
+  void ComputeSYCLOptions();
+  bool ComputeSYCLLinkOptions(std::string const& config, bool device = false);
+  bool ComputeSYCLDeviceLinkOptions();
+  void WriteSYCLOptions(Elem& e1, std::string const& config);
 
   bool ComputeLinkOptions();
   bool ComputeLinkOptions(std::string const& config);
@@ -231,6 +235,8 @@ private:
   OptionsMap MarmasmOptions;
   OptionsMap MasmOptions;
   OptionsMap NasmOptions;
+  OptionsMap SYCLOptions;
+  OptionsMap SYCLDeviceLinkOptions;
   OptionsMap LinkOptions;
   std::string LangForClCompile;
 

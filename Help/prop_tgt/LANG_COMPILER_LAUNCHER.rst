@@ -4,7 +4,13 @@
 .. versionadded:: 3.4
 
 This property is implemented only when ``<LANG>`` is ``C``, ``CXX``,
-``Fortran``, ``HIP``, ``ISPC``, ``OBJC``, ``OBJCXX``, or ``CUDA``.
+``Fortran``, ``HIP``, ``ISPC``, ``OBJC``, ``OBJCXX``, ``CUDA``, or ``SYCL``.
+
+.. versionchanged:: 4.5
+  Added support for ``SYCL``.
+
+  .. note::
+    SYCL support is experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command line
 for a compiler launching tool. The :ref:`Makefile Generators` and the

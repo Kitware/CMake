@@ -2489,6 +2489,26 @@ closely related to most of the expressions in this sub-section.
   ``1`` if CMake's linker id of the HIP linker matches any one
   of the entries in ``linker_ids``, otherwise ``0``.
 
+.. genex:: $<SYCL_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.5
+
+  .. note::
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
+  CMake's linker id of the SYCL linker used.
+
+.. genex:: $<SYCL_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.5
+
+  .. note::
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the SYCL linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
 .. genex:: $<C_COMPILER_LINKER_FRONTEND_VARIANT>
 
   .. versionadded:: 4.2
@@ -2585,6 +2605,26 @@ closely related to most of the expressions in this sub-section.
 
   where ``variant_ids`` is a comma-separated list.
   ``1`` if CMake's linker frontend variant of the HIP linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<SYCL_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.5
+
+  .. note::
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
+  CMake's linker frontend variant of the SYCL linker used.
+
+.. genex:: $<SYCL_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.5
+
+  .. note::
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the SYCL linker matches
   any one of the entries in ``variant_ids``, otherwise ``0``.
 
 

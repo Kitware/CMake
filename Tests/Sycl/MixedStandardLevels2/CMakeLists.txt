@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 4.4)
+set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+project(MixedStandardLevels2 CXX SYCL)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(MixedStandardLevels2 main.sycl lib.cpp)
+target_compile_features(MixedStandardLevels2 PUBLIC sycl_cxx_std_17)

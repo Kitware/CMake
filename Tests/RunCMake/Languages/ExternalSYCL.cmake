@@ -1,0 +1,6 @@
+enable_language(C)
+add_library(ext_sycl IMPORTED STATIC)
+set_property(TARGET ext_sycl PROPERTY IMPORTED_LOCATION "/does_not_exist")
+set_property(TARGET ext_sycl PROPERTY IMPORTED_LINK_INTERFACE_LANGUAGES "SYCL")
+add_executable(main empty.c)
+target_link_libraries(main ext_sycl)

@@ -1,0 +1,7 @@
+int static_value();
+int shared_value();
+
+int main()
+{
+  return static_value() == 20 && shared_value() == 20 ? 0 : 1;
+}

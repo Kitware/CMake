@@ -186,8 +186,14 @@ void cmExportCMakeConfigGenerator::GeneratePolicyHeaderCode(std::ostream& os)
         "cmake_policy(VERSION "
      << this->RequiredCMakeVersionMajor << '.'
      << this->RequiredCMakeVersionMinor << '.'
-     << this->RequiredCMakeVersionPatch << "...4.3)\n";
+     << this->RequiredCMakeVersionPatch;
   /* clang-format on */
+  if (CMake_VERSION_ENCODE(
+        this->RequiredCMakeVersionMajor, this->RequiredCMakeVersionMinor,
+        this->RequiredCMakeVersionPatch) <= CMake_VERSION_ENCODE(4, 3, 0)) {
+    os << "...4.3";
+  }
+  os << ")\n";
 }
 
 void cmExportCMakeConfigGenerator::GeneratePolicyFooterCode(std::ostream& os)
@@ -637,12 +643,16 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
     std::string targetName = cmStrCat(this->Namespace, gte->GetExportName());
     for (auto const& type : types) {
       auto fsInfo = GetFileSetInformation(type);
-      if (fsInfo &&
-          std::any_of(gfs->GetInterfaceFileSets(type).begin(),
-                      gfs->GetInterfaceFileSets(type).end(),
-                      [](cmGeneratorFileSet const* fileSet) {
-                        return !fileSet->GetProperty("LANGUAGE").IsEmpty();
-                      })) {
+      bool const requiresFileSetLanguage = fsInfo &&
+        std::any_of(gfs->GetInterfaceFileSets(type).begin(),
+                    gfs->GetInterfaceFileSets(type).end(),
+                    [](cmGeneratorFileSet const* fileSet) {
+                      return fileSet->GetName() == cm::FileSetMetadata::SYCL ||
+                        fileSet->GetName() ==
+                        cm::FileSetMetadata::SYCL_HEADERS ||
+                        !fileSet->GetProperty("LANGUAGE").IsEmpty();
+                    });
+      if (requiresFileSetLanguage) {
         fsInfo->CMakeVersion = "4.5.0"_s;
       }
       if (fsInfo) {
@@ -674,12 +684,21 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
 
       if (fsInfo) {
         if (type == cm::FileSetMetadata::HEADERS) {
-          os << "\nelse()\n  set_property(TARGET " << targetName
-             << "\n    APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES";
-          for (auto const* fileSet : gfs->GetInterfaceFileSets(type)) {
-            os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
+          if (requiresFileSetLanguage) {
+            os << "\nelse()\n  message(FATAL_ERROR \"The target '"
+               << targetName
+               << "' cannot be imported because it relies on the 'LANGUAGE' "
+                  "property of a 'HEADERS' file set which is not supported "
+                  "by this CMake version.\")";
+          } else {
+            os << "\nelse()\n  set_property(TARGET " << targetName
+               << "\n    APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES";
+            for (auto const* fileSet : gfs->GetInterfaceFileSets(type)) {
+              os << "\n      "
+                 << this->GetFileSetDirectories(gte, fileSet, te);
+            }
+            os << "\n  )";
           }
-          os << "\n  )";
         } else if (type == cm::FileSetMetadata::SOURCES) {
           os << "\nelse()\n  message(FATAL_ERROR \"The target '" << targetName
              << "' cannot be imported because it relies on 'FILE_SET' of type "

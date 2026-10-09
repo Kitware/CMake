@@ -17,6 +17,8 @@ class cmStandardLevelResolver
 {
 
 public:
+  static std::string GetStandardPropertyName(std::string const& lang);
+
   explicit cmStandardLevelResolver(cmMakefile* makefile)
     : Makefile(makefile)
   {

@@ -9,6 +9,10 @@ The variations are:
 * :prop_tgt:`HIP_STANDARD`
 * :prop_tgt:`OBJC_STANDARD`
 * :prop_tgt:`OBJCXX_STANDARD`
+* :prop_tgt:`SYCL_CXX_STANDARD` (C++ standard for SYCL compilations)
+
+.. note::
+   SYCL support is experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.
 
 These properties specify language standard versions which are requested. When a
 newer standard is specified than is supported by the compiler, then it will

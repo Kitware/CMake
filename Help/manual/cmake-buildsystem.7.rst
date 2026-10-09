@@ -419,6 +419,35 @@ Acceptable file set types are:
   when building dependents. Sources specified by
   :prop_fs:`INTERFACE_SOURCES` propagate transitively to dependents.
 
+``SYCL``
+  .. versionadded:: 4.5
+
+  An alias for ``SOURCES`` that initializes the file set's
+  :prop_fs:`LANGUAGE` property to ``SYCL``.  Files in the set are compiled as
+  SYCL sources even when their file name extension would normally select
+  another language.  The source file's :prop_sf:`LANGUAGE` property is not
+  changed.
+
+  The file set is recorded as type ``SOURCES`` and otherwise has the same
+  behavior and target properties as that type.
+
+  This alias is experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
+``SYCL_HEADERS``
+  .. versionadded:: 4.5
+
+  An alias for ``HEADERS`` that initializes the file set's
+  :prop_fs:`LANGUAGE` property to ``SYCL``.  A target compiles all of its C++
+  sources as SYCL when this file set is visible to its own build, or is
+  reachable through the interface of a linked target.  This behavior
+  propagates transitively through linked target interfaces.
+
+  The file set is recorded as type ``HEADERS`` and otherwise has the same
+  behavior and target properties as that type.  The header files themselves
+  are not compiled.
+
+  This alias is experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
 ``CXX_MODULES``
   .. versionadded:: 3.28
 

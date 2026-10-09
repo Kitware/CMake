@@ -1016,3 +1016,15 @@ public:
   F(hip_std_20)                                                               \
   F(hip_std_23)                                                               \
   F(hip_std_26)
+
+#define FOR_EACH_SYCL_FEATURE(F)                                              \
+  F(sycl_cxx_std_98)                                                          \
+  F(sycl_cxx_std_11)                                                          \
+  F(sycl_cxx_std_14)                                                          \
+  F(sycl_cxx_std_17)                                                          \
+  F(sycl_cxx_std_20)                                                          \
+  F(sycl_cxx_std_23)                                                          \
+  F(sycl_cxx_std_26)                                                          \
+  FOR_EACH_CXX98_FEATURE(F)                                                   \
+  FOR_EACH_CXX11_FEATURE(F)                                                   \
+  FOR_EACH_CXX14_FEATURE(F)

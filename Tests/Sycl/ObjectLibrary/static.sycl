@@ -1,0 +1,4 @@
+int sycl_value()
+{
+  return 1;
+}

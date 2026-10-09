@@ -1,0 +1,14 @@
+#include <sycl/sycl.hpp>
+
+#ifdef _WIN32
+#  define IMPORT __declspec(dllimport)
+#else
+#  define IMPORT
+#endif
+
+IMPORT int simplelib();
+
+int main()
+{
+  return simplelib();
+}

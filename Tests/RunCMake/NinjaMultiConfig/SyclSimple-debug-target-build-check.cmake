@@ -1,0 +1,21 @@
+check_files("${RunCMake_TEST_BINARY_DIR}"
+  INCLUDE
+    ${GENERATED_FILES}
+    ${TARGET_FILE_simplesyclexe_Debug}
+    ${TARGET_EXE_LIB_FILE_simplesyclexe_Debug}
+    ${TARGET_OBJECT_FILES_simplesyclexe_Debug}
+    ${TARGET_FILE_simplesyclshared_Debug}
+    ${TARGET_LINKER_FILE_simplesyclshared_Debug}
+    ${TARGET_OBJECT_FILES_simplesyclshared_Debug}
+    ${TARGET_OBJECT_FILES_simplesyclobj_Debug}
+  EXCLUDE
+    ${TARGET_OBJECT_FILES_simplesyclexe_Release}
+    ${TARGET_OBJECT_FILES_simplesyclshared_Release}
+    ${TARGET_OBJECT_FILES_simplesyclobj_Release}
+    ${TARGET_OBJECT_FILES_simplesyclexe_MinSizeRel}
+    ${TARGET_OBJECT_FILES_simplesyclshared_MinSizeRel}
+    ${TARGET_OBJECT_FILES_simplesyclobj_MinSizeRel}
+    ${TARGET_OBJECT_FILES_simplesyclexe_RelWithDebInfo}
+    ${TARGET_OBJECT_FILES_simplesyclshared_RelWithDebInfo}
+    ${TARGET_OBJECT_FILES_simplesyclobj_RelWithDebInfo}
+  )

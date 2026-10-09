@@ -102,6 +102,20 @@ or ``PRIVATE`` and accepts the following arguments:
   types, the type does not need to be specified and the ``TYPE <type>``
   arguments can be omitted. For all other file set names, ``TYPE`` is required.
 
+  .. versionadded:: 4.5
+    ``SYCL`` may be specified as an alias for ``SOURCES``.  It initializes the
+    file set's :prop_fs:`LANGUAGE` property to ``SYCL``.
+
+    ``SYCL_HEADERS`` may be specified as an alias for ``HEADERS``.  It also
+    initializes :prop_fs:`LANGUAGE` to ``SYCL``.  A target with such a file set
+    in its own build specification, or reachable through linked interface
+    properties, compiles all of its C++ sources as SYCL.
+
+    The canonical spellings ``FILE_SET SYCL TYPE SOURCES`` and
+    ``FILE_SET SYCL_HEADERS TYPE HEADERS`` are also accepted.
+
+    Both aliases are experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.
+
 ``BASE_DIRS <dirs>...``
 
   An optional list of base directories of the file set. Any relative path

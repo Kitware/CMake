@@ -260,9 +260,9 @@ std::string cmDocumentation::GeneralizeKeyword(std::string cname)
 {
   std::map<std::string, std::vector<std::string> const> conversions;
   std::vector<std::string> languages = {
-    "C",      "CXX",      "CSharp",      "CUDA",     "OBJC",
-    "OBJCXX", "Fortran",  "HIP",         "ISPC",     "Swift",
-    "ASM",    "ASM_NASM", "ASM_MARMASM", "ASM_MASM", "ASM-ATT"
+    "C",        "CXX",         "CSharp",   "CUDA",   "OBJC", "OBJCXX",
+    "Fortran",  "HIP",         "ISPC",     "Swift",  "SYCL", "ASM",
+    "ASM_NASM", "ASM_MARMASM", "ASM_MASM", "ASM-ATT"
   };
   std::vector<std::string> configs = { "DEBUG", "RELEASE", "RELWITHDEBINFO",
                                        "MINSIZEREL" };

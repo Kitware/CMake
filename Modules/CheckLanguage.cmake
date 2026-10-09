@@ -92,6 +92,10 @@ macro(check_language lang)
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
     set(_input_variables "set(CMAKE_MODULE_PATH \"${CMAKE_MODULE_PATH}\")\n")
+    if("${lang}" STREQUAL "SYCL" AND DEFINED CMAKE_EXPERIMENTAL_SYCL)
+      string(APPEND _input_variables
+        "set(CMAKE_EXPERIMENTAL_SYCL \"${CMAKE_EXPERIMENTAL_SYCL}\")\n")
+    endif()
     get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
     list(REMOVE_ITEM _languages "NONE")
     if(NOT _languages STREQUAL "")

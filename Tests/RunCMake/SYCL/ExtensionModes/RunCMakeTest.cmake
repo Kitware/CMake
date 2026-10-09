@@ -1,0 +1,7 @@
+include(RunCMake)
+list(APPEND RunCMake_TEST_OPTIONS -Wno-experimental)
+set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}")
+run_cmake(Defaults)
+set(RunCMake_TEST_NO_CLEAN 1)
+run_cmake_command(Defaults-build "${CMAKE_COMMAND}" --build . --config Debug)
+run_cmake_command(Defaults-run "${CMAKE_CTEST_COMMAND}" -j -C Debug --output-on-failure)

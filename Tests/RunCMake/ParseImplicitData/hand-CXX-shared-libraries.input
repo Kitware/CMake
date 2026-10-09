@@ -1,0 +1,4 @@
+CMAKE_LANG=CXX
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_CXX_COMPILER_ID=Clang
+ "/usr/bin/ld" -m elf_x86_64 -o /tmp/output.so -dynamic-linker /lib64/ld-linux-x86-64.so.2 -plugin "/opt/compiler plugins/liblto_plugin.so" -L"/opt/runtime libs" "/opt/runtime libs/../runtime libs/libunversioned.so" "/opt/runtime libs/libversioned.so.1.2" "/opt/runtime libs/libdarwin.1.dylib" "/opt/runtime libs/libstatic.a" -lstdc++ -lc

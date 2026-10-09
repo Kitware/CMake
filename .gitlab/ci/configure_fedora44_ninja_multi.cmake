@@ -1,5 +1,6 @@
 if (NOT "$ENV{CMAKE_CI_NIGHTLY}" STREQUAL "")
   set(CMake_TEST_ISPC "ON" CACHE STRING "")
+  set(CMake_TEST_SYCL "ON" CACHE BOOL "")
 endif()
 set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database,import_std23" CACHE STRING "")
 set(CMake_TEST_Rust "ON" CACHE STRING "")

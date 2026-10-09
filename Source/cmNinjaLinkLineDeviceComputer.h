@@ -18,7 +18,8 @@ class cmNinjaLinkLineDeviceComputer : public cmLinkLineDeviceComputer
 public:
   cmNinjaLinkLineDeviceComputer(cmOutputConverter* outputConverter,
                                 cmStateDirectory const& stateDir,
-                                cmGlobalNinjaGenerator const* gg);
+                                cmGlobalNinjaGenerator const* gg,
+                                std::string language = "CUDA");
 
   cmNinjaLinkLineDeviceComputer(cmNinjaLinkLineDeviceComputer const&) = delete;
   cmNinjaLinkLineDeviceComputer& operator=(

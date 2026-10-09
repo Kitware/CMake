@@ -10,6 +10,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmFileSetMetadata.h"
 #include "cmGeneratorExpression.h"
@@ -230,15 +231,19 @@ bool TargetSourcesImpl::HandleOneFileSet(
                cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""), "\"."));
     return false;
   }
+  auto const fileSetDescriptor =
+    cm::FileSetMetadata::GetFileSetDescriptor(args.FileSet);
+  bool const isCanonicalAlias = !args.Type.empty() && fileSetDescriptor &&
+    fileSetDescriptor->Type == args.Type;
   if (!args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
-      args.Type != args.FileSet) {
+      args.Type != args.FileSet && !isCanonicalAlias) {
     this->SetError(cmStrCat("FILE_SET name starting with a capital letter "
                             "must match the TYPE name \"",
                             args.Type, "\"."));
     return false;
   }
 
-  bool const isDefault = args.Type == args.FileSet ||
+  bool const isDefault = isCanonicalAlias || args.Type == args.FileSet ||
     (args.Type.empty() && cm::FileSetMetadata::IsKnownType(args.FileSet));
 
   if (!isDefault && !cm::FileSetMetadata::IsValidName(args.FileSet)) {
@@ -248,8 +253,23 @@ bool TargetSourcesImpl::HandleOneFileSet(
     return false;
   }
 
-  std::string type = isDefault ? args.FileSet : args.Type;
+  std::string requestedType = isDefault ? args.FileSet : args.Type;
+  bool const isSycl = requestedType == cm::FileSetMetadata::SYCL ||
+    requestedType == cm::FileSetMetadata::SYCL_HEADERS;
+  if (isSycl &&
+      !cmExperimental::HasSupportEnabled(*this->Makefile,
+                                         cmExperimental::Feature::SYCL)) {
+    this->SetError(cmStrCat("File set TYPE \"", requestedType,
+                            "\" is experimental and must be enabled by "
+                            "the CMAKE_EXPERIMENTAL_SYCL gate."));
+    return false;
+  }
 
+  std::string type = requestedType;
+  if (auto const descriptor =
+        cm::FileSetMetadata::GetFileSetDescriptor(requestedType)) {
+    type = std::string{ descriptor->Type };
+  }
   if (cm::FileSetMetadata::IsKnownType(type) &&
       this->Target->GetType() == cm::TargetType::UTILITY) {
     this->SetError(
@@ -317,7 +337,12 @@ bool TargetSourcesImpl::HandleOneFileSet(
     }
   } else {
     type = fileSet.first->GetType();
-    if (!args.Type.empty() && args.Type != type) {
+    std::string specifiedType = args.Type;
+    if (auto const descriptor =
+          cm::FileSetMetadata::GetFileSetDescriptor(specifiedType)) {
+      specifiedType = std::string{ descriptor->Type };
+    }
+    if (!args.Type.empty() && specifiedType != type) {
       this->SetError(cmStrCat(
         "Type \"", args.Type, "\" for file set \"", fileSet.first->GetName(),
         "\" does not match original type \"", type, "\"."));
@@ -332,6 +357,10 @@ bool TargetSourcesImpl::HandleOneFileSet(
         '.'));
       return false;
     }
+  }
+
+  if (isSycl) {
+    fileSet.first->SetProperty("LANGUAGE", "SYCL");
   }
 
   auto files = this->Join(this->ConvertToAbsoluteContent(

@@ -72,9 +72,10 @@ private:
 
   std::vector<std::string> GetArches() const;
 
-  void GetCudaDeviceLinkLinkerAndArgs(std::string& linker,
-                                      std::string& args) const;
-  void GenerateCudaDeviceLink(FastbuildTarget& target) const;
+  void GetDeviceLinkLinkerAndArgs(std::string const& language,
+                                  std::string& linker,
+                                  std::string& args) const;
+  void GenerateDeviceLink(FastbuildTarget& target) const;
   void GenerateObjects(FastbuildTarget& target);
   FastbuildUnityNode GetOneUnity(std::set<std::string> const& excludedFiles,
                                  std::vector<std::string>& files,
@@ -123,7 +124,7 @@ private:
 
   void AppendLinkDeps(std::set<FastbuildTargetDep>& preBuildDeps,
                       FastbuildLinkerNode& linkerNode,
-                      FastbuildLinkerNode& cudaDeviceLinkLinkerNode);
+                      FastbuildLinkerNode& deviceLinkNode);
   void AddLipoCommand(FastbuildTarget& target);
   void GenerateModuleDefinitionInfo(FastbuildTarget& target) const;
   std::vector<FastbuildExecNode> GetSymlinkExecs() const;

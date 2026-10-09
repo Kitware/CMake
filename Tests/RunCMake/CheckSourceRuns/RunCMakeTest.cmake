@@ -27,6 +27,10 @@ if (CMake_TEST_CUDA)
   run_cmake(CheckSourceRunsCUDA)
 endif()
 
+if (CMake_TEST_SYCL)
+  run_cmake_with_options(CheckSourceRunsSYCL -Wno-experimental)
+endif()
+
 if (CMake_TEST_HIP)
   run_cmake(CheckSourceRunsHIP)
 endif()

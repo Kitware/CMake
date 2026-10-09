@@ -213,6 +213,14 @@ public:
 
   bool GetLanguageStandardRequired(std::string const& lang) const;
 
+  enum class SYCLExtensionMode
+  {
+    Append,
+    Replace
+  };
+
+  SYCLExtensionMode GetSYCLExtensionMode() const;
+  bool IsSYCLAppendMode(std::string const& lang) const;
   void GetModuleDefinitionSources(std::vector<cmSourceFile const*>&,
                                   std::string const& config) const;
   void GetExternalObjects(std::vector<cmSourceFile const*>&,
@@ -628,6 +636,9 @@ public:
   void AddHIPArchitectureFlags(cmBuildStep compileOrLink,
                                std::string const& config,
                                std::string& flags) const;
+  void AddSYCLDeviceTargetFlags(cmBuildStep compileOrLink,
+                                std::string const& config,
+                                std::string& flags) const;
 
   void AddISPCTargetFlags(std::string& flags) const;
 

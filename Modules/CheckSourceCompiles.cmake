@@ -47,13 +47,20 @@ This module provides the following command:
   ``<lang>``
     Language of the source code to check.  Supported languages are:
     ``C``, ``CXX``, ``CUDA``, ``Fortran``, ``HIP``, ``ISPC``, ``OBJC``,
-    ``OBJCXX``, and ``Swift``.
+    ``OBJCXX``, ``Swift``, and ``SYCL``.
 
     .. versionadded:: 3.21
       Support for ``HIP`` language.
 
     .. versionadded:: 3.26
       Support for ``Swift`` language.
+
+    .. versionadded:: 4.5
+      Support for ``SYCL`` language.
+
+    .. note::
+      ``SYCL`` support is experimental and gated by
+      ``CMAKE_EXPERIMENTAL_SYCL``.
 
   ``<code>``
     The source code to check.  This must be an entire program, as written

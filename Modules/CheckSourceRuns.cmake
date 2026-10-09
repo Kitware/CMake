@@ -41,10 +41,17 @@ This module provides the following command:
   ``<lang>``
     The programming language of the source ``<code>`` to check.  Supported
     languages are: ``C``, ``CXX``, ``CUDA``, ``Fortran``, ``HIP``, ``OBJC``,
-    and ``OBJCXX``.
+    ``OBJCXX``, and ``SYCL``.
 
     .. versionadded:: 3.21
       Support for ``HIP`` language.
+
+    .. versionadded:: 4.5
+      Support for ``SYCL`` language.
+
+    .. note::
+      ``SYCL`` support is experimental and gated by
+      ``CMAKE_EXPERIMENTAL_SYCL``.
 
   ``<code>``
     The source code to be tested.  It must contain a valid source program.

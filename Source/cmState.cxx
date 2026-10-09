@@ -704,6 +704,11 @@ cmValue cmState::GetGlobalProperty(std::string const& prop)
       &FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT)[1]);
     return cmValue(s_out);
   }
+  if (prop == "CMAKE_SYCL_KNOWN_FEATURES") {
+    static std::string const s_out(
+      &FOR_EACH_SYCL_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return cmValue(s_out);
+  }
   if (prop == "CMAKE_CXX98_KNOWN_FEATURES") {
     static std::string const s_out(
       &FOR_EACH_CXX98_FEATURE(STRING_LIST_ELEMENT)[1]);

@@ -427,7 +427,8 @@ std::vector<std::string> cmCommonTargetGenerator::GetCompilerLauncher(
 {
   std::vector<std::string> compilerLauncher;
   if (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
-      lang == "HIP" || lang == "ISPC" || lang == "OBJC" || lang == "OBJCXX") {
+      lang == "HIP" || lang == "ISPC" || lang == "OBJC" || lang == "OBJCXX" ||
+      lang == "SYCL") {
     // FIXME(#27402,#28110): The FASTBuild generator's limitations w.r.t.
     // shell escaping and command line ordering means we can't support
     // wrappers for now.

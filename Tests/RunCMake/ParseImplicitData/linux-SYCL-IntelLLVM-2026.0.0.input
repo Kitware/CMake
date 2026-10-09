@@ -1,0 +1,128 @@
+CMAKE_LANG=SYCL
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_SYCL_COMPILER_ABI=ELF
+CMAKE_SYCL_COMPILER_AR=/opt/intel/oneapi/compiler/2026.0/bin/compiler/llvm-ar
+CMAKE_SYCL_COMPILER_ARCHITECTURE_ID=x86_64
+CMAKE_SYCL_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_SYCL_COMPILER_ID=IntelLLVM
+CMAKE_SYCL_COMPILER_LAUNCHER=
+CMAKE_SYCL_COMPILER_LOADED=1
+CMAKE_SYCL_COMPILER_RANLIB=/opt/intel/oneapi/compiler/2026.0/bin/compiler/llvm-ranlib
+CMAKE_SYCL_COMPILER_TARGET=
+CMAKE_SYCL_COMPILER_VERSION=2026.0.0
+CMAKE_SYCL_COMPILER_VERSION_INTERNAL=
+Change Dir: '/tmp/opencode/sycl-ninja-capture-intel/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/ninja -v cmTC_a871e
+[1/2] /opt/intel/oneapi/compiler/2026.0/bin/icpx -fsycl   -std=gnu++20   -v -MD -MT CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -MF CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o.d -x c++ -o CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -c '/opt/cmake source/Modules/CMakeSYCLCompilerABI.sycl'
+Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/intel/oneapi/compiler/2026.0/bin/compiler
+Configuration file: /opt/intel/oneapi/compiler/2026.0/bin/compiler/../icpx.cfg
+Found candidate GCC installation: /usr/lib/gcc/x86_64-pc-linux-gnu/15.3.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-pc-linux-gnu/16
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/15.3.0
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/16
+Selected GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/16
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Selected multilib: .@m64
+Found CUDA installation: /opt/cuda, version
+Found HIP installation: /opt/rocm, version 7.2.53211
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang" -cc1 -triple spir64-unknown-unknown -O2 -aux-triple x86_64-unknown-linux-gnu -fsycl-is-device -fdeclare-spirv-builtins -fprofile-update=atomic -mllvm -sycl-opt -fenable-sycl-dae -Wno-sycl-strict -fsycl-int-header=/tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-header-4498e6.h -fsycl-int-footer=/tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-footer-9f4a65.h -sycl-std=2020 -ffine-grained-bitfield-accesses -fsycl-unique-prefix=uid5813c74bf9add11a -D__SYCL_ANY_DEVICE_HAS_ANY_ASPECT__=1 -Wspir-compat -fno-offload-use-alloca-addrspace-for-srets -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeSYCLCompilerABI.sycl -mrelocation-model static -fveclib=SVML -faltmathlib=LibDeviceIMFAltMathLibrary -mframe-pointer=all -fapprox-func -funsafe-math-optimizations -fno-signed-zeros -mreassociate -freciprocal-math -fdenormal-fp-math=preserve-sign,preserve-sign -ffp-contract=fast-honor-pragmas -fno-rounding-math -complex-range=basic -fno-offload-fp32-prec-div -fno-offload-fp32-prec-sqrt -mconstructor-aliases -aux-target-cpu x86-64 -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/opencode/sycl-ninja-capture-intel/CMakeFiles/CMakeTmp -v -fcoverage-compilation-dir=/tmp/opencode/sycl-ninja-capture-intel/CMakeFiles/CMakeTmp -fclang-abi-compat=22 -resource-dir /opt/intel/oneapi/compiler/2026.0/lib/clang/22 -dependency-file CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o.d -MT CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -sys-header-deps -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include/sycl/stl_wrappers -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include/sycl/stl_wrappers -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include -I/opt/intel/oneapi/umf/1.1/include -c-isystem /opt/intel/oneapi/umf/1.1/include -c-isystem /opt/intel/oneapi/tbb/2023.0/env/../include -cxx-isystem /opt/intel/oneapi/umf/1.1/include -cxx-isystem /opt/intel/oneapi/tbb/2023.0/env/../include -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../opt/compiler/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16 -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16 -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward -internal-isystem /opt/intel/oneapi/compiler/2026.0/lib/clang/22/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /opt/intel/oneapi/compiler/2026.0/lib/clang/22/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -std=gnu++20 -fdeprecated-macro -ferror-limit 19 -fgpu-rdc -fgnuc-version=4.2.1 -fno-implicit-modules -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -mllvm -disable-hir-generate-mkl-call -mllvm -intel-abi-compatible=true -fdwarf2-cfi-asm -fintel-compatibility -fintel-compatibility-disable=FakeLoad -fintel-libirc-allowed -fintel-libimf-allowed -o /tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-895d17.bc -x c++ "/opt/cmake source/Modules/CMakeSYCLCompilerABI.sycl"
+clang -cc1 version 22.1.0 based upon LLVM 22.1.0 default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/intel/oneapi/umf/1.1/include"
+  as it is a non-system directory that duplicates a system directory
+ignoring duplicate directory "/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include/sycl/stl_wrappers"
+ignoring duplicate directory "/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward"
+ignoring duplicate directory "/opt/intel/oneapi/compiler/2026.0/lib/clang/22/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/opt/intel/oneapi/compiler/2026.0/lib/clang/22/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/intel/oneapi/umf/1.1/include
+ /opt/intel/oneapi/tbb/2023.0/env/../include
+ /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include/sycl/stl_wrappers
+ /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include
+ /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../opt/compiler/include
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward
+ /opt/intel/oneapi/compiler/2026.0/lib/clang/22/include
+ /usr/local/include
+ /usr/include
+End of search list.
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang" -cc1 -triple x86_64-unknown-linux-gnu -O2 -fsycl-is-host -include-internal-header /tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-header-4498e6.h -dependency-filter /tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-header-4498e6.h -fsycl-enable-int-header-diags -include-internal-footer /tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-footer-9f4a65.h -dependency-filter /tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-footer-9f4a65.h -sycl-std=2020 -fsycl-unique-prefix=uid5813c74bf9add11a -D__SYCL_ANY_DEVICE_HAS_ANY_ASPECT__=1 -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeSYCLCompilerABI.sycl -mrelocation-model static -fveclib=SVML -faltmathlib=SVMLAltMathLibrary -mframe-pointer=none -fapprox-func -funsafe-math-optimizations -fno-signed-zeros -mreassociate -freciprocal-math -fdenormal-fp-math=preserve-sign,preserve-sign -ffp-contract=fast-honor-pragmas -fno-rounding-math -complex-range=promoted -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -mllvm -x86-enable-unaligned-vector-move=true -tune-cpu generic --dependent-lib=sycl-devicelib-host -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/opencode/sycl-ninja-capture-intel/CMakeFiles/CMakeTmp -v -fcoverage-compilation-dir=/tmp/opencode/sycl-ninja-capture-intel/CMakeFiles/CMakeTmp -fclang-abi-compat=22 -resource-dir /opt/intel/oneapi/compiler/2026.0/lib/clang/22 -dependency-file CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o.d -MT CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -sys-header-deps -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include/sycl/stl_wrappers -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include/sycl/stl_wrappers -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include -I/opt/intel/oneapi/umf/1.1/include -c-isystem /opt/intel/oneapi/umf/1.1/include -c-isystem /opt/intel/oneapi/tbb/2023.0/env/../include -cxx-isystem /opt/intel/oneapi/umf/1.1/include -cxx-isystem /opt/intel/oneapi/tbb/2023.0/env/../include -internal-isystem /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../opt/compiler/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16 -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16 -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward -internal-isystem /opt/intel/oneapi/compiler/2026.0/lib/clang/22/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /opt/intel/oneapi/compiler/2026.0/lib/clang/22/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -std=gnu++20 -fdeprecated-macro -ferror-limit 19 -fgpu-rdc -fgnuc-version=4.2.1 -fno-implicit-modules -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -mllvm -disable-hir-generate-mkl-call -mllvm -sycl-host -mllvm -loopopt=1 -floopopt-pipeline=light -mllvm -intel-abi-compatible=true -fdwarf2-cfi-asm -fintel-compatibility -fintel-libirc-allowed -fintel-libimf-allowed -o /tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-0de59d.o -x c++ "/opt/cmake source/Modules/CMakeSYCLCompilerABI.sycl"
+clang -cc1 version 22.1.0 based upon LLVM 22.1.0 default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../x86_64-pc-linux-gnu/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/intel/oneapi/umf/1.1/include"
+  as it is a non-system directory that duplicates a system directory
+ignoring duplicate directory "/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include/sycl/stl_wrappers"
+ignoring duplicate directory "/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward"
+ignoring duplicate directory "/opt/intel/oneapi/compiler/2026.0/lib/clang/22/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/intel/oneapi/umf/1.1/include
+ /opt/intel/oneapi/tbb/2023.0/env/../include
+ /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include/sycl/stl_wrappers
+ /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../include
+ /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../opt/compiler/include
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/x86_64-pc-linux-gnu
+ /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../include/c++/16/backward
+ /opt/intel/oneapi/compiler/2026.0/lib/clang/22/include
+ /usr/local/include
+ /usr/include
+End of search list.
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang-offload-bundler" -type=o -targets=sycl-spir64-unknown-unknown,host-x86_64-unknown-linux-gnu -output=CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -input=/tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-895d17.bc -input=/tmp/icpx-d11e070e20/CMakeSYCLCompilerABI-0de59d.o --verbose
+[2/2] : && /opt/intel/oneapi/compiler/2026.0/bin/icpx -fsycl  -v CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -o cmTC_a871e   && :
+Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/intel/oneapi/compiler/2026.0/bin/compiler
+Configuration file: /opt/intel/oneapi/compiler/2026.0/bin/compiler/../icpx.cfg
+Found candidate GCC installation: /usr/lib/gcc/x86_64-pc-linux-gnu/15.3.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-pc-linux-gnu/16
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/15.3.0
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/16
+Selected GCC installation: /usr/lib64/gcc/x86_64-pc-linux-gnu/16
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Selected multilib: .@m64
+Found CUDA installation: /opt/cuda, version
+Found HIP installation: /opt/rocm, version 7.2.53211
+/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang-offload-bundler -type=o -input=CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -list
+/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang-offload-bundler -type=o -input=CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -list
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang-offload-bundler" -type=o -targets=host-x86_64-unknown-linux-gnu,sycl-spir64-unknown-unknown -input=CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -output=/tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-87deee.o -output=/tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-c19d88.o -unbundle -allow-missing-bundles -base-temp-dir=/tmp/icpx-17fbb5a532 -verbose
+Uncompressed bundle.
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang-offload-bundler" -type=o -targets=host-x86_64-unknown-linux-gnu,sycl-spir64-unknown-unknown -input=CMakeFiles/cmTC_a871e.dir/CMakeSYCLCompilerABI.sycl.o -output=/tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-93e391.o -output=/tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-6023de.o -unbundle -allow-missing-bundles -base-temp-dir=/tmp/icpx-17fbb5a532 -verbose
+Uncompressed bundle.
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/spirv-to-ir-wrapper" /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-6023de.o -o /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-bae1a3.bc -llvm-spirv-opts "--spirv-preserve-auxdata --spirv-target-env=SPV-IR --spirv-builtin-format=global"
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/llvm-link" /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-bae1a3.bc -o /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-c2a908.bc --suppress-warnings
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/llvm-link" -only-needed /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-c2a908.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-crt.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-complex.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-complex-fp64.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-cmath.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-cmath-fp64.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-imf.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-imf-fp64.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-imf-bf16.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-fallback-cstring.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-fallback-complex.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-fallback-complex-fp64.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-fallback-cmath.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-fallback-cmath-fp64.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-fallback-imf.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-fallback-imf-fp64.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-fallback-imf-bf16.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-itt-user-wrappers.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-itt-compiler-wrappers.bc /opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib/libsycl-itt-stubs.bc -o /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-7c9191.bc --suppress-warnings
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/sycl-post-link" -O2 -device-globals --device-lib-dir=/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib -properties -spec-const=native -split=auto -emit-only-kernels-as-entry-points -emit-param-info -symbols -emit-exported-symbols -emit-imported-symbols -split-esimd -lower-esimd -o /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-92576e.table /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-7c9191.bc
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/file-table-tform" -extract=Code -drop_titles -o /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-9cebfb.txt /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-92576e.table
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/llvm-foreach" --in-file-list=/tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-9cebfb.txt --in-replace=/tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-9cebfb.txt --out-ext=spv --out-file-list=/tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-9a68b0.txt --out-replace=/tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-9a68b0.txt --out-dir=/tmp/icpx-17fbb5a532 -- /opt/intel/oneapi/compiler/2026.0/bin/compiler/llvm-spirv -o /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-9a68b0.txt -spirv-max-version=1.5 -spirv-debug-info-version=nonsemantic-shader-200 -spirv-allow-unknown-intrinsics=llvm.genx. -spirv-allow-unknown-intrinsics=llvm.genx. -spirv-ext=-all,+SPV_EXT_shader_atomic_float_add,+SPV_EXT_shader_atomic_float_min_max,+SPV_KHR_no_integer_wrap_decoration,+SPV_KHR_float_controls,+SPV_KHR_bit_instructions,+SPV_KHR_expect_assume,+SPV_KHR_linkonce_odr,+SPV_INTEL_subgroups,+SPV_INTEL_media_block_io,+SPV_INTEL_device_side_avc_motion_estimation,+SPV_INTEL_fpga_loop_controls,+SPV_INTEL_unstructured_loop_controls,+SPV_INTEL_fpga_reg,+SPV_INTEL_blocking_pipes,+SPV_INTEL_function_pointers,+SPV_INTEL_kernel_attributes,+SPV_INTEL_io_pipes,+SPV_INTEL_inline_assembly,+SPV_INTEL_arbitrary_precision_integers,+SPV_INTEL_float_controls2,+SPV_INTEL_vector_compute,+SPV_INTEL_fast_composite,+SPV_INTEL_arbitrary_precision_fixed_point,+SPV_INTEL_arbitrary_precision_floating_point,+SPV_INTEL_variable_length_array,+SPV_INTEL_fp_fast_math_mode,+SPV_INTEL_long_composites,+SPV_INTEL_arithmetic_fence,+SPV_INTEL_global_variable_decorations,+SPV_INTEL_cache_controls,+SPV_INTEL_fpga_buffer_location,+SPV_INTEL_fpga_argument_interfaces,+SPV_INTEL_fpga_invocation_pipelining_attributes,+SPV_INTEL_fpga_latency_control,+SPV_KHR_shader_clock,+SPV_INTEL_bindless_images,+SPV_INTEL_task_sequence,+SPV_INTEL_int4,+SPV_EXT_float8,+SPV_INTEL_optnone,+SPV_INTEL_bfloat16_conversion,+SPV_INTEL_joint_matrix,+SPV_INTEL_hw_thread_queries,+SPV_KHR_uniform_group_instructions,+SPV_INTEL_masked_gather_scatter,+SPV_INTEL_tensor_float32_conversion,+SPV_INTEL_optnone,+SPV_KHR_non_semantic_info,+SPV_KHR_cooperative_matrix,+SPV_EXT_shader_atomic_float16_add,+SPV_INTEL_memory_access_aliasing /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-9cebfb.txt
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/file-table-tform" -replace=Code,Code -o /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-b72502.table /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-92576e.table /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-9a68b0.txt
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang-offload-wrapper" -o=/tmp/icpx-17fbb5a532/wrapper-92aea0.bc -host=x86_64-unknown-linux-gnu -compile-opts=-ftarget-register-alloc-mode=pvc:-ze-intel-enable-auto-large-GRF-mode -target=spir64 -kind=sycl -batch /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-b72502.table
+ "/opt/intel/oneapi/compiler/2026.0/bin/compiler/clang" --target=x86_64-unknown-linux-gnu -Xclang -fignore-overflow-error -c -o /tmp/icpx-17fbb5a532/cmTC_a871e-wrapper-e8e797.o /tmp/icpx-17fbb5a532/wrapper-92aea0.bc
+ "/usr/bin/ld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_a871e /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/Scrt1.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crti.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtbeginS.o -L/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib -L/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib -L/opt/intel/oneapi/compiler/2026.0/lib/clang/22/lib/x86_64-unknown-linux-gnu -L/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib -L/usr/lib64/gcc/x86_64-pc-linux-gnu/16 -L/usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64 -L/lib/../lib64 -L/usr/lib64 -L/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../lib -L/opt/intel/oneapi/compiler/2026.0/bin/compiler/../../opt/compiler/lib -L/lib -L/usr/lib -L/opt/intel/oneapi/tcm/1.5/lib -L/opt/intel/oneapi/umf/1.1/lib -L/opt/intel/oneapi/tbb/2023.0/env/../lib/intel64/gcc4.8 -L/opt/intel/oneapi/compiler/2026.0/lib /tmp/icpx-17fbb5a532/CMakeSYCLCompilerABI-87deee.o /tmp/icpx-17fbb5a532/cmTC_a871e-wrapper-e8e797.o -Bstatic -lsvml -Bdynamic -Bstatic -lirng -Bdynamic -lstdc++ -Bstatic -limf -Bdynamic -lm -lgcc_s -lgcc -Bstatic -lirc -Bdynamic -ldl -lgcc_s -lgcc -lsycl -lsycl-devicelib-host -lc -lgcc_s -lgcc -Bstatic -lirc_s -Bdynamic /usr/lib64/gcc/x86_64-pc-linux-gnu/16/crtendS.o /usr/lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crtn.o

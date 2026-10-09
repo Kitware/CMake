@@ -320,7 +320,7 @@ struct FastbuildTarget : public FastbuildTargetBase
   std::vector<FastbuildObjectListNode> ObjectListNodes;
   std::vector<FastbuildUnityNode> UnityNodes;
   // Potentially multiple libs for different archs (apple only)
-  std::vector<FastbuildLinkerNode> CudaDeviceLinkNode;
+  std::vector<FastbuildLinkerNode> DeviceLinkNodes;
   std::vector<FastbuildLinkerNode> LinkerNode;
   std::string RealOutput;
   FastbuildAliasNode PreBuildExecNodes, ExecNodes;

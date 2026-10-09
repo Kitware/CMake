@@ -54,6 +54,14 @@ cmExperimental::FeatureData const LookupTable[] = {
     "It is meant only for experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Never },
+  // SYCL support
+  { "SYCL",
+    "c0d1fb10-2ece-420e-9d29-7d7f2b300f25",
+    "CMAKE_EXPERIMENTAL_SYCL",
+    "CMake's support for the SYCL programming language is experimental. "
+    "It is meant only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Never },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),

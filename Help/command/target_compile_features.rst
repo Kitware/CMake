@@ -13,10 +13,10 @@ Add expected compiler features to a target.
 
 Specifies compiler features required when compiling a given target.  If the
 feature is not listed in the :variable:`CMAKE_C_COMPILE_FEATURES`,
-:variable:`CMAKE_CUDA_COMPILE_FEATURES`, or :variable:`CMAKE_CXX_COMPILE_FEATURES`
-variables, then an error will be reported by CMake.  If the use of the feature requires
-an additional compiler flag, such as ``-std=gnu++11``, the flag will be added
-automatically.
+:variable:`CMAKE_CUDA_COMPILE_FEATURES`, :variable:`CMAKE_CXX_COMPILE_FEATURES`,
+or :variable:`CMAKE_SYCL_COMPILE_FEATURES` variables, then an error will be
+reported by CMake.  If the use of the feature requires an additional compiler
+flag, such as ``-std=gnu++11``, the flag will be added automatically.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the scope of the features.  ``PRIVATE`` and ``PUBLIC`` items will

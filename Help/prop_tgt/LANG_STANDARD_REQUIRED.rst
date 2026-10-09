@@ -9,6 +9,10 @@ The variations are:
 * :prop_tgt:`HIP_STANDARD_REQUIRED`
 * :prop_tgt:`OBJC_STANDARD_REQUIRED`
 * :prop_tgt:`OBJCXX_STANDARD_REQUIRED`
+* :prop_tgt:`SYCL_CXX_STANDARD_REQUIRED`
+
+.. note::
+   SYCL support is experimental and gated by ``CMAKE_EXPERIMENTAL_SYCL``.
 
 These properties specify whether the value of :prop_tgt:`<LANG>_STANDARD` is a
 requirement.  When false or unset, the :prop_tgt:`<LANG>_STANDARD` target

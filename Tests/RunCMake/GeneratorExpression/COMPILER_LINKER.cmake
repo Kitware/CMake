@@ -1,3 +1,6 @@
+if(LANG STREQUAL "SYCL")
+  set(CMAKE_EXPERIMENTAL_SYCL "c0d1fb10-2ece-420e-9d29-7d7f2b300f25")
+endif()
 
 set(languages C ${LANG})
 list(REMOVE_DUPLICATES languages)

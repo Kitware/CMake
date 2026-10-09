@@ -273,13 +273,16 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
   if(DEFINED CMake_TEST_CUDA)
     list(APPEND NinjaMultiConfig_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
   endif()
+  if(DEFINED CMake_TEST_SYCL)
+    list(APPEND NinjaMultiConfig_ARGS -DCMake_TEST_SYCL=${CMake_TEST_SYCL})
+  endif()
   function(add_RunCMake_NinjaMultiConfig_test variant)
     add_RunCMake_test(NinjaMultiConfig${variant}
       TEST_DIR NinjaMultiConfig
       ${NinjaMultiConfig_ARGS}
       -DCMake_TEST_NinjaMultiConfig_VARIANT=${variant})
     set_property(TEST RunCMake.NinjaMultiConfig${variant} APPEND
-      PROPERTY LABELS "CUDA" "NinjaMultiConfig")
+      PROPERTY LABELS "CUDA" "SYCL" "NinjaMultiConfig")
   endfunction()
   add_RunCMake_NinjaMultiConfig_test(Simple)
   add_RunCMake_NinjaMultiConfig_test(CustomCommands)
@@ -305,9 +308,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     )
 endif()
 
-add_RunCMake_test(ABI -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+add_RunCMake_test(ABI -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+                    -DCMake_TEST_SYCL=${CMake_TEST_SYCL})
 set_property(TEST RunCMake.ABI APPEND
-  PROPERTY LABELS "CUDA")
+  PROPERTY LABELS "CUDA" "SYCL")
 
 add_RunCMake_test(AndroidTestUtilities)
 if(CMake_TEST_APPLE_SILICON)
@@ -414,15 +418,15 @@ if(CMAKE_Fortran_COMPILER)
     list(APPEND CMake_TEST_LANG_VARS -DCMake_TEST_Fortran=1)
   endif()
 endif()
-foreach(lang IN ITEMS CUDA HIP ISPC)
+foreach(lang IN ITEMS CUDA HIP ISPC SYCL)
   if(CMake_TEST_${lang})
     list(APPEND CMake_TEST_LANG_VARS -DCMake_TEST_${lang}=1)
   endif()
 endforeach()
 add_RunCMake_test(CompilerId ${CMake_TEST_LANG_VARS})
-set_property(TEST RunCMake.CompilerId APPEND PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
+set_property(TEST RunCMake.CompilerId APPEND PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL")
 add_RunCMake_test(CompilerTest ${CMake_TEST_LANG_VARS})
-set_property(TEST RunCMake.CompilerTest APPEND PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
+set_property(TEST RunCMake.CompilerTest APPEND PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL")
 add_RunCMake_test(Configure -DMSVC_IDE=${MSVC_IDE})
 add_RunCMake_test(CpsExportImportBuild)
 add_RunCMake_test(CpsExportImportInstall)
@@ -599,8 +603,10 @@ add_RunCMake_test(GeneratorExpression
   -DCMake_TEST_Fortran=${CMake_TEST_Fortran}
   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
   -DCMake_TEST_HIP=${CMake_TEST_HIP}
+  -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
   -DCMAKE_C_OUTPUT_EXTENSION=${CMAKE_C_OUTPUT_EXTENSION}
 )
+set_property(TEST RunCMake.GeneratorExpression APPEND PROPERTY LABELS "SYCL")
 add_RunCMake_test(GeneratorExpressionShortCircuit)
 add_RunCMake_test(GeneratorInstance)
 add_RunCMake_test(GeneratorPlatform)
@@ -624,14 +630,19 @@ add_RunCMake_test(LanguageStandards
   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
   -DCMake_TEST_HIP=${CMake_TEST_HIP}
   -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
+  -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
 )
-set_property(TEST RunCMake.LanguageStandards APPEND PROPERTY LABELS "CUDA" "HIP")
+set_property(TEST RunCMake.LanguageStandards APPEND PROPERTY LABELS "CUDA" "HIP" "SYCL")
 
 add_RunCMake_test(EnableLanguageSubdir
   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+  -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
   -DCMake_TEST_RESOURCES=${CMake_TEST_RESOURCES})
 if(CMake_TEST_CUDA)
   set_property(TEST RunCMake.EnableLanguageSubdir APPEND PROPERTY LABELS "CUDA")
+endif()
+if(CMake_TEST_SYCL)
+  set_property(TEST RunCMake.EnableLanguageSubdir APPEND PROPERTY LABELS "SYCL")
 endif()
 
 add_RunCMake_test(LinkItemValidation)
@@ -655,6 +666,7 @@ add_RunCMake_test(INSTALL_OBJECT_NAME)
 add_RunCMake_test(OBJECT_NAME)
 add_RunCMake_test(ParseImplicitIncludeInfo)
 add_RunCMake_test(ParseImplicitLinkInfo)
+set_property(TEST RunCMake.ParseImplicitLinkInfo APPEND PROPERTY LABELS "SYCL")
 if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG)
   add_RunCMake_test(RuntimePath
     -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
@@ -663,6 +675,30 @@ if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG)
 endif()
 if(CMake_TEST_Rust)
   add_RunCMake_test(Rust)
+endif()
+if(CMake_TEST_SYCL)
+  add_RunCMake_test(SYCL.Experimental TEST_DIR SYCL/Experimental)
+  set_property(TEST RunCMake.SYCL.Experimental APPEND PROPERTY LABELS "SYCL")
+  foreach(case IN ITEMS Enable CompileFeatureContext UnsupportedGenerators)
+    add_RunCMake_test(SYCL.${case} TEST_DIR SYCL -DSYCL_TEST_CASE=${case})
+    set_property(TEST RunCMake.SYCL.${case} APPEND PROPERTY LABELS "SYCL")
+  endforeach()
+  if(NOT CMAKE_GENERATOR MATCHES "Xcode")
+    foreach(case IN ITEMS SeparableCompilationUnsupported DeviceTargetsTryCompile)
+      add_RunCMake_test(SYCL.${case} TEST_DIR SYCL -DSYCL_TEST_CASE=${case})
+      set_property(TEST RunCMake.SYCL.${case} APPEND PROPERTY LABELS "SYCL")
+    endforeach()
+    if(CMAKE_GENERATOR MATCHES "Makefiles|Ninja|FASTBuild")
+      add_RunCMake_test(SYCL.DeviceTargets TEST_DIR SYCL -DSYCL_TEST_CASE=DeviceTargets)
+      set_property(TEST RunCMake.SYCL.DeviceTargets APPEND PROPERTY LABELS "SYCL")
+    endif()
+    add_RunCMake_test(SYCL.ExtensionModes TEST_DIR SYCL/ExtensionModes)
+    set_property(TEST RunCMake.SYCL.ExtensionModes APPEND PROPERTY LABELS "SYCL")
+  endif()
+  foreach(case IN ITEMS Build ExportImport)
+    add_RunCMake_test(SYCL.FileSets.${case} TEST_DIR SYCL/FileSets -DSYCL_TEST_CASE=${case})
+    set_property(TEST RunCMake.SYCL.FileSets.${case} APPEND PROPERTY LABELS "SYCL")
+  endforeach()
 endif()
 add_RunCMake_test(ScriptMode)
 add_RunCMake_test(StandardLinkDirectories)
@@ -693,11 +729,12 @@ add_RunCMake_test(find_dependency)
 add_RunCMake_test(CompileDefinitions)
 add_RunCMake_test(CompileWarningAsError
   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+  -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
   -DCMake_TEST_Swift=${CMake_TEST_Swift}
   -DCMAKE_Swift_COMPILER_VERSION=${CMAKE_Swift_COMPILER_VERSION}
   )
 set_property(TEST RunCMake.CompileWarningAsError APPEND PROPERTY LABELS
-  "CUDA" "Swift")
+  "CUDA" "SYCL" "Swift")
 if((CMAKE_C_COMPILER_ID MATCHES "AppleClang|MSVC"
     OR (CMAKE_SYSTEM_NAME MATCHES "Linux|Windows" AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
     OR (CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_C_COMPILER_ID STREQUAL "SunPro")
@@ -885,6 +922,7 @@ function(add_RunCMake_test_try_compile)
       CMAKE_C_COMPILER_ID
       CMAKE_SYSTEM_NAME
       CMake_TEST_CUDA
+      CMake_TEST_SYCL
       CMake_TEST_ISPC
       CMake_TEST_HIP
       CMake_TEST_OBJC
@@ -896,7 +934,7 @@ function(add_RunCMake_test_try_compile)
   endforeach()
   add_RunCMake_test(try_compile)
   set_property(TEST RunCMake.try_compile APPEND
-    PROPERTY LABELS "CUDA;ISPC")
+    PROPERTY LABELS "CUDA;ISPC;SYCL")
 endfunction()
 add_RunCMake_test_try_compile()
 
@@ -1153,22 +1191,25 @@ add_RunCMake_test(target_compile_options
 add_RunCMake_test(target_include_directories)
 add_RunCMake_test(target_sources)
 add_RunCMake_test(CheckCompilerFlag   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+                                      -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
                                       -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
                                       -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
                                       -DCMake_TEST_HIP=${CMake_TEST_HIP}
                                       -DCMake_TEST_Swift=${CMake_TEST_Swift})
 add_RunCMake_test(CheckSourceCompiles -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+                                      -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
                                       -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
                                       -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
                                       -DCMake_TEST_HIP=${CMake_TEST_HIP}
                                       -DCMake_TEST_Swift=${CMake_TEST_Swift})
 add_RunCMake_test(CheckSourceRuns     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+                                      -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
                                       -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
                                       -DCMake_TEST_HIP=${CMake_TEST_HIP})
 set_property(TEST RunCMake.CheckCompilerFlag
                   RunCMake.CheckSourceCompiles
                   RunCMake.CheckSourceRuns
-    APPEND PROPERTY LABELS "CUDA" "HIP" "Fortran")
+    APPEND PROPERTY LABELS "CUDA" "HIP" "SYCL" "Fortran")
 set_property(TEST RunCMake.CheckSourceCompiles
                   RunCMake.CheckCompilerFlag
     APPEND PROPERTY LABELS "ISPC")
@@ -1179,8 +1220,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"
   add_RunCMake_test(CheckLinkerFlag -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                                     -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
                                     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+                                    -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
                                     -DCMake_TEST_HIP=${CMake_TEST_HIP})
-  set_property(TEST RunCMake.CheckLinkerFlag APPEND PROPERTY LABELS "CUDA" "HIP" "Fortran")
+  set_property(TEST RunCMake.CheckLinkerFlag APPEND PROPERTY LABELS "CUDA" "HIP" "SYCL" "Fortran")
 endif()
 
 
@@ -1362,6 +1404,9 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   if(DEFINED CMake_TEST_HIP)
     list(APPEND LauncherCommon_ARGS -DCMake_TEST_HIP=${CMake_TEST_HIP})
   endif()
+  if(DEFINED CMake_TEST_SYCL)
+    list(APPEND LauncherCommon_ARGS -DCMake_TEST_SYCL=${CMake_TEST_SYCL})
+  endif()
   if(DEFINED CMake_TEST_OBJC)
     list(APPEND LauncherCommon_ARGS -DCMake_TEST_OBJC=${CMake_TEST_OBJC})
   endif()
@@ -1378,16 +1423,16 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
-    PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
+    PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL")
   add_RunCMake_test(LinkerLauncher)
   set_property(TEST RunCMake.LinkerLauncher APPEND
-    PROPERTY LABEL "CUDA" "HIP" "Fortran")
+    PROPERTY LABELS "CUDA" "HIP" "Fortran" "SYCL")
   # FIXME(#27402,#28110): FASTBuild doesn't currently support this feature, but
   # it should.
   if (NOT "${CMAKE_GENERATOR}" STREQUAL "FASTBuild")
     add_RunCMake_test(ToolchainWrappers)
     set_property(TEST RunCMake.ToolchainWrappers APPEND
-      PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
+      PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL")
   endif()
 endif()
 
@@ -1699,8 +1744,9 @@ endif()
 
 add_RunCMake_test(SharedLibraryDefines
   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+  -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
 )
-set_property(TEST RunCMake.SharedLibraryDefines APPEND PROPERTY LABELS "CUDA")
+set_property(TEST RunCMake.SharedLibraryDefines APPEND PROPERTY LABELS "CUDA" "SYCL")
 
 add_RunCMake_test(MsvcCharsetDefines
   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}

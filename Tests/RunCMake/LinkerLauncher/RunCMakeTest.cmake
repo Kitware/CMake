@@ -1,5 +1,9 @@
 include(RunCMake)
 
+if(CMake_TEST_SYCL)
+  list(APPEND RunCMake_TEST_OPTIONS -Wno-experimental)
+endif()
+
 function(run_linker_launcher lang)
   # Preserve build tree so we can reuse it for the ${lang}-Build subtest below
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${lang}-build)
@@ -35,6 +39,9 @@ if(CMake_TEST_Fortran)
 endif()
 if(CMake_TEST_HIP)
   list(APPEND langs HIP)
+endif()
+if(CMake_TEST_SYCL)
+  list(APPEND langs SYCL)
 endif()
 if(CMake_TEST_OBJC)
   list(APPEND langs OBJC OBJCXX)

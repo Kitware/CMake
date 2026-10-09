@@ -1113,8 +1113,24 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
     dependee_index = ale.first;
     LinkEntry& entry = this->EntryList[dependee_index];
     bool supportedItem = true;
-    auto const& itemFeature =
+    std::string itemFeature =
       this->GetCurrentFeature(entry.Item.Value, item.Feature);
+    if (entry.Target &&
+        entry.Target->GetType() == cm::TargetType::STATIC_LIBRARY &&
+        entry.Target->GetPropertyAsBool("SYCL_RESOLVE_DEVICE_SYMBOLS") &&
+        (entry.Target->IsImported() ||
+         entry.Target->Makefile->IsOn(
+           "CMAKE_SYCL_COMPILER_HAS_DEVICE_LINK_PHASE"))) {
+      if (itemFeature != LinkEntry::DEFAULT &&
+          itemFeature != "WHOLE_ARCHIVE") {
+        this->CMakeInstance->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Finalized SYCL static library \"", entry.Item.Value,
+                   "\" requires the WHOLE_ARCHIVE link-library feature."),
+          this->Target->GetBacktrace());
+      }
+      itemFeature = "WHOLE_ARCHIVE";
+    }
     if (group && ale.second && entry.Target &&
         (entry.Target->GetType() == cm::TargetType::OBJECT_LIBRARY ||
          entry.Target->GetType() == cm::TargetType::INTERFACE_LIBRARY)) {
