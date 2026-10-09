@@ -428,6 +428,7 @@ Properties on Targets
    /prop_tgt/OUTPUT_NAME
    /prop_tgt/OUTPUT_NAME_CONFIG
    /prop_tgt/PCH_INSTANTIATE_TEMPLATES
+   /prop_tgt/PCH_WARNINGS
    /prop_tgt/PCH_WARN_INVALID
    /prop_tgt/PDB_NAME
    /prop_tgt/PDB_NAME_CONFIG

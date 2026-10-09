@@ -446,7 +446,7 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_PCH_EXTENSION .pch)
   set(CMAKE_LINK_PCH ON)
   if (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+    set(CMAKE_PCH_SYSTEM_HEADER_PRAGMA "#pragma clang system_header")
 
     # macOS paths usually start with /Users/*. Unfortunately, clang-cl interprets
     # paths starting with /U as macro undefines, so we need to put a -- before the
@@ -458,7 +458,7 @@ macro(__windows_compiler_msvc lang)
     endif()
   elseif(MSVC_VERSION GREATER_EQUAL 1913)
     # At least MSVC toolet 14.13 from VS 2017 15.6
-    set(CMAKE_PCH_PROLOGUE "#pragma system_header")
+    set(CMAKE_PCH_SYSTEM_HEADER_PRAGMA "#pragma system_header")
   endif()
   if (NOT ${CMAKE_${lang}_COMPILER_ID} STREQUAL "Clang")
     set(CMAKE_PCH_COPY_COMPILE_PDB ON)
