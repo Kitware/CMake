@@ -52,6 +52,22 @@ in directory:
   endif()
 endfunction()
 
+# Function called in *-check.cmake scripts to check that an installed
+# symlink points to the expected file.
+function(check_namelink link expect)
+  set(path "${CMAKE_INSTALL_PREFIX}/${link}")
+  if(NOT IS_SYMLINK "${path}")
+    string(APPEND RunCMake_TEST_FAILED "${link} is not a symlink.\n")
+  else()
+    file(READ_SYMLINK "${path}" actual)
+    if(NOT actual STREQUAL expect)
+      string(APPEND RunCMake_TEST_FAILED
+        "${link} points to ${actual}, expected ${expect}.\n")
+    endif()
+  endif()
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+endfunction()
+
 # Wrapper for run_cmake() that skips platforms on which we do not support editing the RPATH.
 function(run_cmake_EDIT_RPATH_only case)
   if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT MATCHES "^(ELF|XCOFF)$")
