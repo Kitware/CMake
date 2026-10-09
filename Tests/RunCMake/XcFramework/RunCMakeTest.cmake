@@ -7,30 +7,35 @@ else()
 endif()
 
 function(create_library type platform system_name archs sysroot)
+  string(REPLACE ";" "\\;" archs "${archs}")
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/create-${type}-${platform}-build)
-  run_cmake_with_options(create-${type}-${platform} -DCMAKE_SYSTEM_NAME=${system_name} -DCMAKE_OSX_ARCHITECTURES=${archs} -DCMAKE_OSX_SYSROOT=${sysroot} -DCMAKE_INSTALL_PREFIX=${RunCMake_TEST_BINARY_DIR}/install)
-
+  run_cmake_with_options(create-${type}-${platform}
+    "-DCMAKE_SYSTEM_NAME=${system_name}"
+    "-DCMAKE_OSX_ARCHITECTURES=${archs}"
+    "-DCMAKE_OSX_SYSROOT=${sysroot}"
+    "-DCMAKE_INSTALL_PREFIX=${RunCMake_TEST_BINARY_DIR}/install"
+  )
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(create-${type}-${platform}-build ${CMAKE_COMMAND} --build . --config Release)
   run_cmake_command(create-${type}-${platform}-install ${CMAKE_COMMAND} --install . --config Release)
 endfunction()
 
 function(create_libraries type)
-  create_library(${type} macos Darwin "${macos_archs_2}" macosx)
+  create_library(${type} macos Darwin "${macos_archs}" macosx)
   create_library(${type} ios iOS "arm64" iphoneos)
   if(maybe_ios_catalyst)
-    create_library(${type} ios-catalyst iOS "${macos_archs_2}" macosx)
+    create_library(${type} ios-catalyst iOS "${macos_archs}" macosx)
   endif()
   create_library(${type} tvos tvOS "arm64" appletvos)
-  create_library(${type} watchos watchOS "armv7k\\\\;arm64_32" watchos)
+  create_library(${type} watchos watchOS "${watch_archs}" watchos)
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
     create_library(${type} visionos visionOS "arm64" xros)
   endif()
-  create_library(${type} ios-simulator iOS "${macos_archs_2}" iphonesimulator)
-  create_library(${type} tvos-simulator tvOS "${macos_archs_2}" appletvsimulator)
+  create_library(${type} ios-simulator iOS "${macos_archs}" iphonesimulator)
+  create_library(${type} tvos-simulator tvOS "${macos_archs}" appletvsimulator)
   create_library(${type} watchos-simulator watchOS "${watch_sim_archs_2}" watchsimulator)
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
-    create_library(${type} visionos-simulator visionOS "${macos_archs_2}" xrsimulator)
+    create_library(${type} visionos-simulator visionOS "${macos_archs}" xrsimulator)
   endif()
 endfunction()
 
@@ -57,29 +62,34 @@ function(create_xcframework name type platforms)
 endfunction()
 
 function(create_executable name xcfname system_name archs sysroot)
+  string(REPLACE ";" "\\;" archs "${archs}")
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/create-executable-${name}-build)
-  run_cmake_with_options(create-executable-${name} -DCMAKE_SYSTEM_NAME=${system_name} -DCMAKE_OSX_ARCHITECTURES=${archs} -DCMAKE_OSX_SYSROOT=${sysroot} -DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-${xcfname}-build/mylib.xcframework)
-
+  run_cmake_with_options(create-executable-${name}
+    "-DCMAKE_SYSTEM_NAME=${system_name}"
+    "-DCMAKE_OSX_ARCHITECTURES=${archs}"
+    "-DCMAKE_OSX_SYSROOT=${sysroot}"
+    "-DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-${xcfname}-build/mylib.xcframework"
+  )
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(create-executable-${name}-build ${CMAKE_COMMAND} --build . --config Release)
 endfunction()
 
 function(create_executables name type)
-  create_executable(${name}-macos ${type} Darwin "${macos_archs_2}" macosx)
+  create_executable(${name}-macos ${type} Darwin "${macos_archs}" macosx)
   create_executable(${name}-ios ${type} iOS "arm64" iphoneos)
   if(maybe_ios_catalyst)
-    create_executable(${name}-ios-catalyst ${type} iOS "${macos_archs_2}" macosx)
+    create_executable(${name}-ios-catalyst ${type} iOS "${macos_archs}" macosx)
   endif()
   create_executable(${name}-tvos ${type} tvOS "arm64" appletvos)
-  create_executable(${name}-watchos ${type} watchOS "armv7k\\\\;arm64_32" watchos)
+  create_executable(${name}-watchos ${type} watchOS "${watch_archs}" watchos)
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
     create_executable(${name}-visionos ${type} visionOS "arm64" xros)
   endif()
-  create_executable(${name}-ios-simulator ${type} iOS "${macos_archs_2}" iphonesimulator)
-  create_executable(${name}-tvos-simulator ${type} tvOS "${macos_archs_2}" appletvsimulator)
+  create_executable(${name}-ios-simulator ${type} iOS "${macos_archs}" iphonesimulator)
+  create_executable(${name}-tvos-simulator ${type} tvOS "${macos_archs}" appletvsimulator)
   create_executable(${name}-watchos-simulator ${type} watchOS "${watch_sim_archs_2}" watchsimulator)
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
-    create_executable(${name}-visionos-simulator ${type} visionOS "${macos_archs_2}" xrsimulator)
+    create_executable(${name}-visionos-simulator ${type} visionOS "${macos_archs}" xrsimulator)
   endif()
 endfunction()
 
@@ -87,15 +97,19 @@ set(xcframework_platforms macos ios ${maybe_ios_catalyst} tvos watchos ios-simul
 if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
   list(APPEND xcframework_platforms visionos visionos-simulator)
 endif()
-if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12 AND NOT RunCMake_GENERATOR STREQUAL "FASTBuild")
-  set(macos_archs_1 "x86_64\\;arm64")
-  set(macos_archs_2 "x86_64\\\\;arm64")
+if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12)
+  set(macos_archs "x86_64;arm64")
   set(watch_sim_archs_2 "x86_64")
 else()
-  set(macos_archs_1 "x86_64")
-  set(macos_archs_2 "x86_64")
+  set(macos_archs "x86_64")
   set(watch_sim_archs_2 "i386")
 endif()
+if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 27)
+  set(watch_archs "arm64;arm64_32")
+else()
+  set(watch_archs "armv7k;arm64_32")
+endif()
+string(REPLACE ";" "\\;" macos_archs_escaped "${macos_archs}")
 
 create_libraries(library)
 create_libraries(framework)
@@ -104,17 +118,37 @@ create_xcframework(framework framework "${xcframework_platforms}")
 create_xcframework(incomplete framework "tvos;watchos")
 create_executables(library library)
 create_executables(framework framework)
-run_cmake_with_options(create-executable-incomplete -DCMAKE_SYSTEM_NAME=Darwin "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_OSX_SYSROOT=macosx -DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework)
+run_cmake_with_options(create-executable-incomplete
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_escaped}"
+  "-DCMAKE_OSX_SYSROOT=macosx"
+  "-DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework"
+)
 create_executables(target-library library)
 create_executables(target-framework framework)
-run_cmake_with_options(create-executable-target-incomplete -DCMAKE_SYSTEM_NAME=Darwin "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_OSX_SYSROOT=macosx -DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework)
+run_cmake_with_options(create-executable-target-incomplete
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_escaped}"
+  "-DCMAKE_OSX_SYSROOT=macosx"
+  "-DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework"
+)
 if(RunCMake_GENERATOR STREQUAL "Xcode" AND CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12)
   create_executables(library-link-phase library)
   create_executables(framework-link-phase framework)
-  run_cmake_with_options(create-executable-incomplete-link-phase -DCMAKE_SYSTEM_NAME=Darwin "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_OSX_SYSROOT=macosx -DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework)
+  run_cmake_with_options(create-executable-incomplete-link-phase
+    "-DCMAKE_SYSTEM_NAME=Darwin"
+    "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_escaped}"
+    "-DCMAKE_OSX_SYSROOT=macosx"
+    "-DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework"
+  )
   create_executables(target-library-link-phase library)
   create_executables(target-framework-link-phase framework)
-  run_cmake_with_options(create-executable-target-incomplete-link-phase -DCMAKE_SYSTEM_NAME=Darwin "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_OSX_SYSROOT=macosx -DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework)
+  run_cmake_with_options(create-executable-target-incomplete-link-phase
+    "-DCMAKE_SYSTEM_NAME=Darwin"
+    "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_escaped}"
+    "-DCMAKE_OSX_SYSROOT=macosx"
+    "-DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework"
+  )
 endif()
 
 # Ensure that .xcframework is found before .framework
@@ -130,7 +164,10 @@ run_cmake_command(find-library-script ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}
 file(REMOVE_RECURSE ${RunCMake_BINARY_DIR}/export-install)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-macos-build)
-run_cmake_with_options(export-macos -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
+run_cmake_with_options(export-macos
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -142,7 +179,12 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-ios-build)
-run_cmake_with_options(export-ios -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos "-DCMAKE_OSX_ARCHITECTURES=arm64" -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
+run_cmake_with_options(export-ios
+  "-DCMAKE_SYSTEM_NAME=iOS"
+  "-DCMAKE_OSX_SYSROOT=iphoneos"
+  "-DCMAKE_OSX_ARCHITECTURES=arm64"
+  "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -155,7 +197,12 @@ unset(RunCMake_TEST_BINARY_DIR)
 
 if(maybe_ios_catalyst)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-ios-catalyst-build)
-  run_cmake_with_options(export-ios-catalyst -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=macosx "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
+  run_cmake_with_options(export-ios-catalyst
+    "-DCMAKE_SYSTEM_NAME=iOS"
+    "-DCMAKE_OSX_SYSROOT=macosx"
+    "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_escaped}"
+    "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install"
+  )
   set(RunCMake_TEST_NO_CLEAN 1)
   set(_config_arg)
   if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -168,7 +215,12 @@ if(maybe_ios_catalyst)
 endif()
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-ios-simulator-build)
-run_cmake_with_options(export-ios-simulator -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
+run_cmake_with_options(export-ios-simulator
+  "-DCMAKE_SYSTEM_NAME=iOS"
+  "-DCMAKE_OSX_SYSROOT=iphonesimulator"
+  "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_escaped}"
+  "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -180,7 +232,10 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-macos-install-specific-no-xcframework-build)
-run_cmake_with_options(import-macos-install-specific-no-xcframework -DCMAKE_SYSTEM_NAME=Darwin -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/macos/cmake/mylib)
+run_cmake_with_options(import-macos-install-specific-no-xcframework
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/macos/cmake/mylib"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 set(_config_dir)
@@ -250,7 +305,10 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-macos-install-specific-build)
-run_cmake_with_options(import-macos-install-specific -DCMAKE_SYSTEM_NAME=Darwin -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/macos/cmake/mylib)
+run_cmake_with_options(import-macos-install-specific
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/macos/cmake/mylib"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -261,7 +319,10 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-macos-build-specific-build)
-run_cmake_with_options(import-macos-build-specific -DCMAKE_SYSTEM_NAME=Darwin -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-macos-build/lib/macos/cmake/mylib)
+run_cmake_with_options(import-macos-build-specific
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-Dmylib_DIR=${RunCMake_BINARY_DIR}/export-macos-build/lib/macos/cmake/mylib"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -272,7 +333,10 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-macos-install-specific-genex-build)
-run_cmake_with_options(import-macos-install-specific-genex -DCMAKE_SYSTEM_NAME=Darwin -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/macos/cmake/mylib)
+run_cmake_with_options(import-macos-install-specific-genex
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/macos/cmake/mylib"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -283,7 +347,10 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-macos-build-specific-genex-build)
-run_cmake_with_options(import-macos-build-specific-genex -DCMAKE_SYSTEM_NAME=Darwin -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-macos-build/lib/macos/cmake/mylib)
+run_cmake_with_options(import-macos-build-specific-genex
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-Dmylib_DIR=${RunCMake_BINARY_DIR}/export-macos-build/lib/macos/cmake/mylib"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -294,7 +361,10 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-macos-install-general-build)
-run_cmake_with_options(import-macos-install-general -DCMAKE_SYSTEM_NAME=Darwin -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/cmake/mylib)
+run_cmake_with_options(import-macos-install-general
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/cmake/mylib"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -305,7 +375,10 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-macos-build-general-build)
-run_cmake_with_options(import-macos-build-general -DCMAKE_SYSTEM_NAME=Darwin -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-macos-build/lib/cmake/mylib)
+run_cmake_with_options(import-macos-build-general
+  "-DCMAKE_SYSTEM_NAME=Darwin"
+  "-Dmylib_DIR=${RunCMake_BINARY_DIR}/export-macos-build/lib/cmake/mylib"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -316,7 +389,12 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-ios-install-general-build)
-run_cmake_with_options(import-ios-install-general -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos -DCMAKE_OSX_ARCHITECTURES=arm64 -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/cmake/mylib)
+run_cmake_with_options(import-ios-install-general
+  "-DCMAKE_SYSTEM_NAME=iOS"
+  "-DCMAKE_OSX_SYSROOT=iphoneos"
+  "-DCMAKE_OSX_ARCHITECTURES=arm64"
+  "-Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/cmake/mylib"
+)
 set(RunCMake_TEST_NO_CLEAN 1)
 set(_config_arg)
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
