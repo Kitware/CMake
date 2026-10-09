@@ -915,8 +915,15 @@ cmTarget* cmPackageInfoReader::AddComponent(
   // Set target properties.
   this->SetTargetProperties(makefile, target, data, package, {});
   auto const& cfgData = data["configurations"];
-  for (auto ci = cfgData.begin(), ce = cfgData.end(); ci != ce; ++ci) {
-    this->SetTargetProperties(makefile, target, *ci, package, IterKey(ci));
+  if (cfgData.isObject()) {
+    for (auto ci = cfgData.begin(), ce = cfgData.end(); ci != ce; ++ci) {
+      this->SetTargetProperties(makefile, target, *ci, package, IterKey(ci));
+    }
+  } else if (!cfgData.isNull()) {
+    makefile->IssueMessage(
+      MessageType::WARNING,
+      cmStrCat(R"(Component ")"_s, name,
+               R"(" attribute "configurations" is not an object.)"_s));
   }
 
   // Add target sources.
