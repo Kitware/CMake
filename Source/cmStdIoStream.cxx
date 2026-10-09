@@ -43,7 +43,7 @@ namespace {
 #else
 // List of known `TERM` names that support VT100 escape sequences.
 // Order by `LC_COLLATE=C sort` to search using `std::lower_bound`.
-std::array<cm::string_view, 57> const kVT100Names{ {
+std::array<cm::string_view, 58> const kVT100Names{ {
   "Eterm"_s,
   "alacritty"_s,
   "alacritty-direct"_s,
@@ -88,6 +88,7 @@ std::array<cm::string_view, 57> const kVT100Names{ {
   "screen-bce"_s,
   "screen-w"_s,
   "screen.linux"_s,
+  "screen.xterm-256color"_s,
   "st-256color"_s,
   "tmux"_s,
   "tmux-256color"_s,
