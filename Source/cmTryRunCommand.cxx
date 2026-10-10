@@ -288,6 +288,8 @@ void TryRunCommandImpl::RunExecutable(std::string const& runArgs,
     stdOut || stdErr ? stdErr : out, &retVal,
     workDir ? workDir->c_str() : nullptr, cmSystemTools::OUTPUT_NONE,
     cmDuration::zero());
+  // The executable may have removed or renamed files.
+  this->Makefile->GetCMakeInstance()->InvalidateFileSystemCaches();
   // set the run var
   std::string retStr = worked ? std::to_string(retVal) : "FAILED_TO_RUN";
   if (this->NoCache) {

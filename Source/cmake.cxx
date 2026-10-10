@@ -2575,10 +2575,19 @@ int cmake::Configure()
   return ret;
 }
 
+void cmake::InvalidateFileSystemCaches()
+{
+  // Caches of file system state are cleared here as they are added.
+}
+
 int cmake::ActualConfigure()
 {
   // Construct right now our path conversion table before it's too late:
   this->CleanupCommandsAndMacros();
+
+  // The file system may have changed since a previous configure in the
+  // same process.
+  this->InvalidateFileSystemCaches();
 
   // Do not keep the parse trees of a previous configure in the same
   // process alive.  Compiled expressions still referring to them share

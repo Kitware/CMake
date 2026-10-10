@@ -1372,6 +1372,9 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
     return;
   }
 
+  // Cached knowledge of the removed files becomes stale.
+  this->Makefile->GetCMakeInstance()->InvalidateFileSystemCaches();
+
   cmsys::Directory dir;
   dir.Load(binDir);
   std::set<std::string> deletedFiles;

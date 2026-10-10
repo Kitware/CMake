@@ -476,6 +476,10 @@ public:
     return *this->GeneratorExpressionParseCache;
   }
 
+  //! Forget what is known about the file system, e.g. after files may
+  //! have been removed or renamed.
+  void InvalidateFileSystemCaches();
+
   bool WasLogLevelSetViaCLI() const { return this->LogLevelWasSetViaCLI; }
 
   //! Get the selected log level for `message()` commands during the cmake run.
