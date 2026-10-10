@@ -2603,6 +2603,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
+  this->ExistingSourceFiles.clear();
   this->XcFrameworkPListContentMap.clear();
   this->BinaryDirectories.clear();
   this->GeneratedFiles.clear();
@@ -4516,6 +4517,18 @@ void cmGlobalGenerator::AddToManifest(std::string const& f)
   DirectoryContent& dc = this->DirectoryContentMap[dir];
   dc.Generated.insert(file);
   dc.All.insert(file);
+}
+
+bool cmGlobalGenerator::SourceFileExists(std::string const& path)
+{
+  if (this->ExistingSourceFiles.count(path)) {
+    return true;
+  }
+  if (cmSystemTools::FileExists(path, true)) {
+    this->ExistingSourceFiles.insert(path);
+    return true;
+  }
+  return false;
 }
 
 std::set<std::string> const& cmGlobalGenerator::GetDirectoryContent(

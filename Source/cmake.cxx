@@ -2577,7 +2577,9 @@ int cmake::Configure()
 
 void cmake::InvalidateFileSystemCaches()
 {
-  // Caches of file system state are cleared here as they are added.
+  if (this->GlobalGenerator) {
+    this->GlobalGenerator->ClearSourceFileExistsCache();
+  }
 }
 
 int cmake::ActualConfigure()

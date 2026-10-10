@@ -584,6 +584,15 @@ public:
   std::set<std::string> const& GetDirectoryContent(std::string const& dir,
                                                    bool needDisk = true);
 
+  /** Check whether a file exists for the purpose of resolving the
+      location of a source file.  Files found to exist are remembered until
+      the next configure, or until cmake::InvalidateFileSystemCaches,
+      because the same source file is typically looked up many times.
+      Missing files are always checked again so that files created later
+      are still found.  */
+  bool SourceFileExists(std::string const& path);
+  void ClearSourceFileExistsCache() { this->ExistingSourceFiles.clear(); }
+
   void IndexTarget(cmTarget* t);
   void IndexGeneratorTarget(cmGeneratorTarget* gt);
 
@@ -1135,6 +1144,9 @@ private:
     std::set<std::string> Generated;
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
+
+  // Files known to exist, see SourceFileExists.
+  std::unordered_set<std::string> ExistingSourceFiles;
 
   // Cache parsed PList files
   std::map<std::string, cmXcFrameworkPlist> XcFrameworkPListContentMap;
