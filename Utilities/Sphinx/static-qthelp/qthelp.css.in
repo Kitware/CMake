@@ -1,0 +1,300 @@
+/* Style the Qt Help (.qch) rendition of the documentation.
+ *
+ * The qthelp builder uses Sphinx's "nonav" theme, so the color scheme that
+ * the "default" theme contributes to the html build is not generated here,
+ * leaving help viewers with just the layout rules of "basic.css".  This
+ * template supplies a color scheme on top of them.  It is configured twice:
+ * with a light palette into "offline.css" and "offline-simple.css", and with
+ * a dark palette into "offline-dark.css".  Qt Creator serves the latter in
+ * place of the former when its own user interface theme is dark.
+ *
+ * Qt Creator's default help backend renders with litehtml, which supports
+ * much less CSS than a browser does, so keep the rules here simple.
+ */
+
+/* Undo the full-window layout of "cmake.css", which has no navigation bar or
+   footer to place in the qthelp output, and which litehtml cannot lay out. */
+html,
+body {
+  background-color: @qthelp_body_bg@;
+}
+
+body {
+  display: block;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  color: @qthelp_body_fg@;
+}
+
+div.document,
+div.documentwrapper {
+  background-color: @qthelp_body_bg@;
+}
+
+/* "basic.css" caps the body width for the html build, where a sidebar takes
+   up the rest of the window.  A help viewer has no sidebar, so use the whole
+   pane; it is usually narrow to begin with. */
+div.body {
+  background-color: @qthelp_body_bg@;
+  color: @qthelp_body_fg@;
+  height: auto;
+  max-width: none;
+  padding: 0 20px 30px 20px;
+}
+
+/* -- hyperlinks ------------------------------------------------------------ */
+
+a {
+  color: @qthelp_link@;
+  text-decoration: none;
+}
+
+a:visited {
+  color: @qthelp_link_visited@;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* -- headings -------------------------------------------------------------- */
+
+div.body h1,
+div.body h2,
+div.body h3,
+div.body h4,
+div.body h5,
+div.body h6 {
+  font-family: sans-serif;
+  background-color: @qthelp_head_bg@;
+  font-weight: normal;
+  color: @qthelp_head_fg@;
+  border-bottom: 1px solid @qthelp_head_border@;
+  margin: 20px -20px 10px -20px;
+  padding: 3px 0 3px 10px;
+}
+
+div.body h1 { margin-top: 0; font-size: 200%; }
+div.body h2 { font-size: 160%; }
+div.body h3 { font-size: 140%; }
+div.body h4 { font-size: 120%; }
+div.body h5 { font-size: 110%; }
+div.body h6 { font-size: 100%; }
+
+/* The section title links back to the table of contents.  Keep it looking
+   like a heading rather than like a link. */
+div.body h1 a.toc-backref,
+div.body h2 a.toc-backref,
+div.body h3 a.toc-backref,
+div.body h4 a.toc-backref,
+div.body h5 a.toc-backref,
+div.body h6 a.toc-backref {
+  color: @qthelp_head_fg@;
+  text-decoration: none;
+}
+
+a.headerlink {
+  color: @qthelp_headerlink@;
+  font-size: 0.8em;
+  padding: 0 4px 0 4px;
+  text-decoration: none;
+}
+
+a.headerlink:hover {
+  background-color: @qthelp_headerlink@;
+  color: @qthelp_body_bg@;
+}
+
+/* -- body text ------------------------------------------------------------- */
+
+div.body p,
+div.body dd,
+div.body li,
+div.body blockquote {
+  line-height: 130%;
+}
+
+.versionmodified {
+  color: @qthelp_muted@;
+}
+
+/* -- code ------------------------------------------------------------------ */
+
+pre {
+  padding: 5px;
+  background-color: @qthelp_pre_bg@;
+  color: @qthelp_pre_fg@;
+  line-height: 120%;
+  border: 1px solid @qthelp_pre_border@;
+  border-left: none;
+  border-right: none;
+}
+
+div.highlight {
+  background-color: @qthelp_pre_bg@;
+}
+
+code,
+code.docutils.literal {
+  background-color: @qthelp_code_bg@;
+  color: @qthelp_code_fg@;
+  padding: 0 1px 0 1px;
+  font-size: 0.95em;
+}
+
+/* Cross-reference links are rendered as inline code; let the link color win. */
+a code,
+a code.docutils.literal {
+  color: @qthelp_link@;
+}
+
+th code {
+  background-color: inherit;
+}
+
+.literal-block a.reference.internal {
+  background-color: @qthelp_literal_link_bg@;
+}
+
+/* "signature" directive argument, styled like a <pre> block. */
+.signature .sig {
+  background-color: @qthelp_pre_bg@;
+  color: @qthelp_pre_fg@;
+  border-color: @qthelp_pre_border@;
+}
+
+/* -- admonitions and topics ------------------------------------------------ */
+
+nav.contents,
+aside.topic,
+div.topic {
+  background-color: @qthelp_topic_bg@;
+  border: 1px solid @qthelp_note_border@;
+}
+
+div.admonition,
+div.note {
+  background-color: @qthelp_note_bg@;
+  border: 1px solid @qthelp_note_border@;
+}
+
+div.seealso {
+  background-color: @qthelp_seealso_bg@;
+  border: 1px solid @qthelp_seealso_border@;
+}
+
+div.warning {
+  background-color: @qthelp_warning_bg@;
+  border: 1px solid @qthelp_warning_border@;
+}
+
+p.admonition-title {
+  display: inline;
+}
+
+p.admonition-title:after {
+  content: ":";
+}
+
+div.admonition p.admonition-title + p {
+  display: inline;
+}
+
+div.outdated {
+  background-color: @qthelp_seealso_bg@;
+  color: @qthelp_body_fg@;
+}
+
+/* -- tables ---------------------------------------------------------------- */
+
+table.docutils {
+  border-collapse: collapse;
+}
+
+table.docutils td,
+table.docutils th {
+  border: 1px solid @qthelp_border@;
+}
+
+table.docutils th {
+  background-color: @qthelp_head_bg@;
+  color: @qthelp_head_fg@;
+}
+
+table.indextable tr.cap {
+  background-color: @qthelp_head_bg@;
+}
+
+/* The index and search result tables are layout-only. */
+table.indextable td,
+table.indextable th {
+  border: none;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid @qthelp_border@;
+}
+
+/* -- search highlighting --------------------------------------------------- */
+
+.highlighted,
+.highlight .hll {
+  background-color: @qthelp_hll_bg@;
+}
+
+/* -- syntax highlighting --------------------------------------------------- */
+
+/* Overrides for "pygments.css", which is generated from `colors.py` with a
+   light background in mind and is linked ahead of this file. */
+
+.highlight { background: @qthelp_pre_bg@; }
+.highlight .c,
+.highlight .ch,
+.highlight .cm,
+.highlight .cp,
+.highlight .cpf,
+.highlight .c1,
+.highlight .cs { color: @qthelp_tok_comment@; }
+.highlight .o,
+.highlight .ow { color: @qthelp_tok_operator@; }
+.highlight .s,
+.highlight .sa,
+.highlight .sb,
+.highlight .sc,
+.highlight .dl,
+.highlight .sd,
+.highlight .s2,
+.highlight .se,
+.highlight .sh,
+.highlight .si,
+.highlight .sx,
+.highlight .sr,
+.highlight .s1,
+.highlight .ss { color: @qthelp_tok_string@; }
+.highlight .m,
+.highlight .mb,
+.highlight .mf,
+.highlight .mh,
+.highlight .mi,
+.highlight .mo,
+.highlight .il { color: @qthelp_tok_number@; }
+.highlight .nb,
+.highlight .bp { color: @qthelp_tok_builtin@; }
+.highlight .nf,
+.highlight .fm { color: @qthelp_tok_function@; }
+.highlight .nv,
+.highlight .vc,
+.highlight .vg,
+.highlight .vi,
+.highlight .vm { color: @qthelp_tok_variable@; }
+.highlight .nt { color: @qthelp_tok_tag@; }
+.highlight .no { color: @qthelp_tok_constant@; }
+.highlight .ni { color: @qthelp_tok_entity@; }
+.highlight .na { color: @qthelp_tok_attribute@; }
+.highlight .nl { color: @qthelp_tok_label@; }
+.highlight .ne { color: @qthelp_tok_exception@; }
+.highlight .w { color: @qthelp_tok_whitespace@; }
