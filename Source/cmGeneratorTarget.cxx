@@ -2188,7 +2188,8 @@ bool CanUseCompilerLauncher(std::string const& lang)
   // Also found in `cmCommonTargetGenerator::GetCompilerLauncher`.
   return lang == "C"_s || lang == "CXX"_s || lang == "Fortran"_s ||
     lang == "CUDA"_s || lang == "HIP"_s || lang == "ISPC"_s ||
-    lang == "SYCL"_s || lang == "OBJC"_s || lang == "OBJCXX"_s;
+    lang == "SYCL"_s || lang == "OBJC"_s || lang == "OBJCXX"_s ||
+    lang == "Rust"_s;
 }
 
 // FIXME: return a vector of `cm::string_view` instead to avoid lots of tiny

@@ -1,6 +1,6 @@
 include(RunCMake)
 
-if(CMake_TEST_SYCL)
+if(CMake_TEST_SYCL OR CMake_TEST_Rust)
   list(APPEND RunCMake_TEST_OPTIONS -Wno-experimental)
 endif()
 
@@ -48,6 +48,9 @@ if(CMake_TEST_ISPC)
 endif()
 if(CMake_TEST_OBJC)
   list(APPEND langs OBJC OBJCXX)
+endif()
+if(CMake_TEST_Rust)
+  list(APPEND langs Rust)
 endif()
 
 foreach(lang ${langs})

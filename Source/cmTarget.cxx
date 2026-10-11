@@ -412,6 +412,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "Swift_SEPARATE_MODULE_EMISSION"_s, IC::CanCompileSources },
   // ---- Rust
   { "Rust_EDITION"_s, IC::CanCompileSources },
+  { "Rust_COMPILER_LAUNCHER"_s, IC::CanCompileSources },
   { "Rust_MAIN_CRATE_ROOT"_s, IC::CanCompileSources },
   // ---- moc
   { "AUTOMOC"_s, IC::CanCompileSources },

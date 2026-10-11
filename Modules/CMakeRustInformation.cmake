@@ -3,6 +3,11 @@
 
 include(CMakeLanguageInformation)
 
+if(NOT CMAKE_Rust_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_Rust_COMPILER_LAUNCHER})
+  set(CMAKE_Rust_COMPILER_LAUNCHER "$ENV{CMAKE_Rust_COMPILER_LAUNCHER}"
+          CACHE STRING "Compiler launcher for Rust.")
+endif()
+
 set(CMAKE_Rust_OUTPUT_EXTENSION .rlib)
 
 # Other values are supported to generate various outputs (LLVM bitcode, or IR,
