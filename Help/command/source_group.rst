@@ -31,6 +31,8 @@ To determine the group of a source file, the algorithm used is as follows:
 
 1. The file is part of a file set:
 
+  .. versionadded:: 4.5
+
   a. Use the :prop_fs:`SOURCE_GROUP` file set property if any.
   b. Search for the *last* group which explicitly lists this file set.
 

@@ -1,6 +1,8 @@
 COMPILE_OPTIONS
 ---------------
 
+.. versionadded:: 4.5
+
 List of options to pass to the compiler.
 
 This property holds a :ref:`semicolon-separated list <CMake Language Lists>`

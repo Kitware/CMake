@@ -78,10 +78,6 @@ Commands
 Variables
 ---------
 
-* The :variable:`CMAKE_CXX_STDLIB_MODULES_JSON` variable was added to set
-  the path to the ``import std`` metadata file for the standard library
-  rather than using the compiler to discover its location.
-
 * The :variable:`CMAKE_INTERMEDIATE_DIR_STRATEGY` variable and corresponding
   :envvar:`CMAKE_INTERMEDIATE_DIR_STRATEGY` environment variable were added
   to change the strategy used to name intermediate directories used for

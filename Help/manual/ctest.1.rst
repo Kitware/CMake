@@ -2286,8 +2286,8 @@ Job Server Integration
 
 .. versionadded:: 3.29
 
-.. versionchanged:: 4.5
-  Added support for job server integration on Windows.
+.. versionadded:: 4.5
+  Integration is now implemented on Windows.
 
 When running under the context of a `Job Server`_, CTest shares its job slots.
 This is independent of the :prop_test:`PROCESSORS` test property, which still

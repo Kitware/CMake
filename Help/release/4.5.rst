@@ -1,0 +1,474 @@
+CMake 4.5 Release Notes
+***********************
+
+.. only:: html
+
+  .. contents::
+
+Changes made since CMake 4.4 include the following.
+
+New Features
+============
+
+Diagnostics
+-----------
+
+* The :diagnostic:`CMD_NON_TARGET_DIRECTIVE` diagnostic category was added to
+  diagnose commands that affect the directory scope when comparable
+  target-specific commands exist. The use of such directives is discouraged.
+  This diagnostic may be controlled with the
+  :option:`-Wnon-target-directive <cmake -W>` command-line option,
+  the ``nonTargetDirective`` field in a
+  :manual:`CMake Presets <cmake-presets(7)>`
+  :preset:`configurePresets.warnings` object,
+  or the :command:`cmake_diagnostic` command.
+
+* The :diagnostic:`CMD_STRICT` diagnostic category was added to control
+  diagnostics regarding allowed but discouraged usage as a group.
+  This diagnostic may be controlled with the :option:`-Wstrict <cmake -W>`
+  command-line option, the ``strict`` field in a
+  :manual:`CMake Presets <cmake-presets(7)>`
+  :preset:`configurePresets.warnings` object,
+  or the :command:`cmake_diagnostic` command.
+
+Presets
+-------
+
+* :manual:`cmake-presets(7)` files now support schema version 13.
+
+* :manual:`cmake-presets(7)` gained the ``${configurePresetName}`` macro to
+  expand to the name of the configure preset associated with the preset being
+  evaluated. It is available for configure, build, test, and package presets,
+  but not for workflow presets.
+
+File-Based API
+--------------
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 ``version`` field has
+  been updated to 2.12.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" object gained
+  a new ``interfaceIncludes`` array field.
+
+Instrumentation
+---------------
+
+* The :manual:`cmake-instrumentation(7)` data version has been updated to 1.2.
+
+* :manual:`cmake-instrumentation(7)` now records an overall ``cmakeBuild``
+  snippet even when a :option:`cmake --build` invocation is interrupted by the
+  user (for example with Ctrl+C).  The snippet includes a new
+  ``interruptSignal`` field, recording the signal that interrupted the build,
+  so that consumers can distinguish an interrupted build from one that ran
+  to completion.
+
+* :manual:`cmake-instrumentation(7)` now records an overall ``cmakeInstall``
+  snippet, marked with the same ``interruptSignal`` field, when a
+  :option:`cmake --install` invocation is interrupted by the user.
+
+* :manual:`cmake-instrumentation(7)` now records an overall ``ctest`` snippet,
+  marked with the same ``interruptSignal`` field, when a :manual:`ctest(1)`
+  invocation is interrupted by the user.  On interrupt CTest stops scheduling
+  further tests and preserves its checkpoint file so that a later
+  :option:`ctest -F` can resume the interrupted test set.
+
+Generators
+----------
+
+* The :generator:`FASTBuild` generator and the :ref:`Makefile Generators`
+  now generate ``test_prep/<test-name>`` and ``test_prep/all`` convenience
+  build targets when the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is
+  enabled, matching the behavior of the :ref:`Ninja Generators`.  These
+  targets build the dependencies of tests added by :command:`add_test`,
+  including those listed with the ``BUILD_DEPENDS`` keyword.
+
+* :ref:`Makefile Generators` and :ref:`Ninja Generators` gained support
+  for adding a linker launcher with ``CUDA`` and ``HIP``.
+  See the :variable:`CMAKE_<LANG>_LINKER_LAUNCHER` variable
+  and :prop_tgt:`<LANG>_LINKER_LAUNCHER` target property for details.
+
+Languages
+---------
+
+* ``import std`` is now available for all C++ 20 and later code with
+  :prop_tgt:`CXX_SCAN_FOR_MODULES` enabled.
+
+Command-Line
+------------
+
+* The :option:`cmake -E capabilities <cmake-E capabilities>` output now includes
+  an ``instrumentation`` object reporting the supported instrumentation API
+  version and the latest supported data version.
+
+* The :option:`cmake --list-presets <cmake --list-presets>` option gained
+  ``*-defined`` values that list all non-hidden presets of the corresponding
+  type and explain why unavailable presets cannot be used. The ``defined``
+  value is an alias for ``configure-defined``, while ``all-defined`` selects
+  every type. Build, test, and package presets whose configure preset is
+  unavailable are now considered unavailable too.
+
+* The :option:`cmake --build --list-presets=defined
+  <cmake--build --list-presets>`,
+  :option:`ctest --list-presets=defined <ctest --list-presets>`, and
+  :option:`cpack --list-presets=defined <cpack --list-presets>` options were
+  added to list all defined build, test, and package presets, respectively.
+
+* The :option:`cmake --workflow --list-presets=defined
+  <cmake--workflow --list-presets>` option was added to provide the same
+  availability information for all defined workflow presets and their steps.
+
+Commands
+--------
+
+* The :command:`add_custom_rule` command was added to allow the definition of
+  pattern rules.
+
+* The :command:`add_dependencies` command now accepts :ref:`Alias Targets`.
+  Dependencies are added to the target the alias references.
+
+* The :command:`discover_tests` command gained a ``BUILD_DEPENDS`` argument to
+  support the :ctest-option:`--out-of-date` behavior of :manual:`ctest(1)`.
+
+* The :command:`cmake_language(PRINT_PROPERTIES)` command was added
+  to print CMake entities' properties in human-readable form for
+  debugging.
+
+* The :command:`cmake_language(PRINT_TARGETS)` command was added
+  to print the targets that currently exist in human-readable form
+  for debugging.
+
+* The :command:`cmake_language(PRINT_VARIABLES)` command was added
+  to print variables and their values in human-readable form for
+  debugging.
+
+* The :command:`file(ARCHIVE_CREATE)` command gained a ``PATTERNS_EXCLUDE``
+  option to omit files and directories matching the given patterns from the
+  created archive.
+
+* The :command:`file(ARCHIVE_EXTRACT)` command gained a ``PATTERNS_EXCLUDE``
+  option to omit archive entries matching the given patterns from being
+  extracted or listed.
+
+* The :command:`file(GET_RUNTIME_DEPENDENCIES)` command is now implemented
+  on FreeBSD.
+
+* The :command:`find_package` command now supports importing |CPS|_
+  `executable` components.
+
+* The :command:`function` command now sets the ``ARGNC`` variable, which
+  holds the number of arguments past the last expected argument.
+
+* The :command:`if` command gained a ``PATH_IS_PREFIX`` operator to test
+  whether one path is a prefix of another without accessing the filesystem.
+  See policy :policy:`CMP0222`.
+
+* The :command:`if` command gained a ``RULE`` operator to check if a rule
+  exists.
+
+* The :command:`install` and :command:`export` commands now accept
+  :ref:`Alias Targets`.  The commands operate on the underlying
+  aliased target.
+
+* The :command:`install(SBOM)` and :command:`export(SBOM)` commands were
+  added to generate Software Bill of Materials (SBOM) files.
+
+* The :command:`install(TARGETS)` command no longer requires a
+  ``LIBRARY DESTINATION`` for :ref:`Module Libraries`.  When no destination is
+  given, a module library is installed to the default ``RUNTIME``
+  destination on DLL platforms and to the default ``LIBRARY`` destination
+  on other platforms.
+
+* The :command:`install(TARGETS)` command gained a
+  ``RUNTIME_DEPENDENCY_TARGETS`` option to install runtime artifacts of
+  non-imported shared libraries from the same build that the named targets
+  link to.  Unlike ``RUNTIME_DEPENDENCIES``, this uses CMake target graph
+  information rather than :command:`file(GET_RUNTIME_DEPENDENCIES)`.
+  The option cannot be used with ``EXPORT`` and may only install runtime
+  artifacts.
+
+* The :command:`math` command gained new ``INCREMENT`` and ``DECREMENT`` modes.
+
+* The :command:`project` and :command:`enable_language` commands, when
+  called in subdirectories, now propagate support for enabled languages
+  to all ancestor scopes up to the top-level directory, including through
+  enclosing :command:`block` and :command:`function` scopes.
+  See policy :policy:`CMP0220`.
+
+* The :command:`set_property` and :command:`get_property` commands now
+  support :ref:`RULE properties <Rule Properties>`.
+
+* The :command:`set_property` and :command:`set_target_properties` commands
+  now accept :ref:`Alias Targets`. Properties are set on the target which
+  the alias references.
+
+* The :command:`string(JSON)` command gained an ``ARRAY_SPLIT`` mode that
+  splits a JSON array into a list of its elements with a single parse,
+  enabling linear-time array iteration instead of re-parsing the whole
+  JSON string for each element.
+
+* The :command:`target_compile_definitions`, :command:`target_compile_features`,
+  :command:`target_compile_options`, :command:`target_include_directories`,
+  :command:`target_link_directories`, :command:`target_link_libraries`,
+  :command:`target_link_options`, :command:`target_precompile_headers`,
+  and :command:`target_sources` commands now accept :ref:`Alias Targets`.
+  The command operates on the target the alias references.
+
+File Sets
+---------
+
+* |CPS|_ import by :command:`find_package`, and export by
+  :command:`install(PACKAGE_INFO)` and :command:`export(PACKAGE_INFO)`,
+  now support header file sets.
+
+* The :command:`source_group` command gained support for file sets.
+
+* The :prop_tgt:`FILE_SET_TYPES`, :prop_tgt:`FILE_SETS_<TYPE>`, and
+  :prop_tgt:`INTERFACE_FILE_SETS_<TYPE>` target properties were added to get
+  information about file sets attached to the target.
+
+* The :prop_fs:`LANGUAGE` file set property was added to select the compile
+  language for members of a ``SOURCES`` file set without modifying their
+  :prop_sf:`LANGUAGE` source file property.
+
+* The :prop_fs:`SOURCE_GROUP` file set property and :prop_sf:`SOURCE_GROUP`
+  source file property were added to provide a fine grain control over the
+  grouping of sources.
+
+Variables
+---------
+
+* The :variable:`CMAKE_CXX_STDLIB_MODULES_JSON` variable was added to set
+  the path to the ``import std`` metadata file for the standard library
+  rather than using the compiler to discover its location.
+
+* The :variable:`CMAKE_INSTALL_SBOM_FORMATS` variable was added
+  to enable Software Bill of Materials (SBOM) generation.
+
+Environment Variables
+---------------------
+
+* The :envvar:`CMAKE_SYSTEM_ENVIRONMENT_ID` environment variable was added to
+  hint to :manual:`cmake(1)` when :cmake-option:`--fresh` may be necessary,
+  along with :envvar:`CMAKE_SYSTEM_ENVIRONMENT_ACTION` to control what happens
+  when :envvar:`CMAKE_SYSTEM_ENVIRONMENT_ID` changes.
+
+Properties
+----------
+
+* The :prop_gbl:`CMAKE_COMPILE_WRAPPER_<NAME>` and
+  :prop_gbl:`CMAKE_LINK_WRAPPER_<NAME>` global properties were added alongside
+  the :prop_tgt:`COMPILE_WRAPPERS`, :prop_tgt:`LINK_WRAPPERS`,
+  :prop_tgt:`INTERFACE_COMPILE_WRAPPERS`, and
+  :prop_tgt:`INTERFACE_LINK_WRAPPERS` target properties. Together, for the
+  :ref:`Makefile Generators` and :ref:`Ninja Generators`, they support
+  wrapping compile and link commands for a given target or its consumers
+  with arbitrary command lines.
+
+* The :prop_dir:`CMAKE_TEST_BUILD_DEPENDS` directory property was added to
+  support directory-scoped build time dependencies for tests.
+
+* The :prop_tgt:`Fortran_BUILDING_INTRINSIC_MODULES` target property is now
+  honored by the :ref:`Ninja Generators`.  Previously it was only honored
+  by the :ref:`Makefile Generators`.
+
+* The :prop_tgt:`Swift_MODULE_NAME` target property is now honored by the
+  :generator:`Xcode` generator.  See policy :policy:`CMP0226`.
+
+* The :prop_dir:`TEST_INCLUDE_FILES` and :prop_dir:`TEST_INCLUDE_FILE`
+  directory properties now support :manual:`generator expressions
+  <cmake-generator-expressions(7)>` in the include path.  On multi-config
+  generators a ``$<CONFIG>``-parameterized path can select a different script
+  per configuration.
+
+* The :prop_tgt:`XCODE_EMBED_<type>` target property now supports
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  Because Xcode shares one copy-files build phase across all configurations,
+  an expression whose result depends on the configuration is rejected with
+  an error.
+
+Modules
+-------
+
+* The :module:`ExternalProject` module's :command:`ExternalProject_Add`
+  command now sets :variable:`CMAKE_INSTALL_PREFIX` to the external
+  project's ``INSTALL_DIR`` in its default configure command, so a CMake
+  external project installs into the prefix the module reserves for it
+  rather than the built-in default (e.g. ``/usr/local``).
+  A caller-supplied prefix still takes precedence.
+  See policy :policy:`CMP0225`.
+
+* The :module:`FindCUDAToolkit` module now creates ``CUDAToolkit::``
+  namespace targets and changes the existing ``CUDA::`` namespace targets
+  to be alias targets.
+
+* The :module:`FindDoxygen` module :command:`doxygen_add_docs` command
+  gained a ``USES_TERMINAL`` option to give the Doxygen command direct
+  access to the terminal during the build.
+
+* The :module:`FindPython`, :module:`FindPython2`, and :module:`FindPython3`
+  modules gained the possibility to override the
+  :variable:`CMAKE_CROSSCOMPILING_EMULATOR` variable by respectively, the
+  variables ``Python_CROSSCOMPILING_EMULATOR``,
+  ``Python2_CROSSCOMPILING_EMULATOR``, and ``Python3_CROSSCOMPILING_EMULATOR``.
+
+* The :module:`FindPython3` and :module:`FindPython` modules gained,
+  respectively, the variable ``Python3_SOSABI_PLATFORM`` and
+  ``Python_SOSABI_PLATFORM`` which gives, on some platforms, for the Stable
+  Application Binary Interface, the extension including the platform triplet.
+
+Generator Expressions
+---------------------
+
+* The :genex:`$<ARGS>` generator expression was added to convert a
+  :ref:`semicolon-separated list <CMake Language Lists>` into a comma-separated
+  list.
+
+* The :genex:`$<DIRECTORY_PROPERTY>` generator expression was added to query
+  directory properties.
+
+* The :genex:`$<GLOBAL_PROPERTY>` generator expression was added to query
+  global properties.
+
+* The :genex:`LIST` generator expression's ``FILTER`` and ``TRANSFORM``
+  operations gained a ``PREDICATE`` keyword that selects items by evaluating an
+  arbitrary generator expression once per item, with ``$<_0>`` referring to the
+  current item.  ``FILTER`` also gained an explicit ``REGEX`` keyword.
+
+* The :genex:`LIST` generator expression's ``SORT`` operation gained a
+  ``COMPARATOR`` option that orders items using an arbitrary generator
+  expression evaluated once per comparison, with ``$<_0>`` and ``$<_1>``
+  referring to the two items being compared.
+
+* The :genex:`LIST` generator expression's ``TRANSFORM`` operation gained an
+  ``APPLY`` action that evaluates an arbitrary generator expression for each
+  element, with ``$<_0>`` referring to the current element.
+
+* The :genex:`$<LINK_LIBRARY:NEEDED_LIBRARY,...>` generator expression feature
+  is now supported on Linux with GNU-compatible linkers (GNU ld, gold, LLD,
+  MOLD).
+
+* The :genex:`RULE_PROPERTY` generator expression was added to query
+  properties of rules created by the :command:`add_custom_rule` command.
+
+Autogen
+-------
+
+* :prop_tgt:`AUTOMOC` now processes C++ module interface and partition
+  units that are members of a ``FILE_SET`` of type ``CXX_MODULES``.
+  ``moc`` is run on such units and its generated output is compiled as a
+  module implementation unit of the same module.  This requires Qt 6.13
+  or newer, whose ``moc`` supports C++ module units.
+
+* :prop_tgt:`AUTOMOC` now has its generated ``mocs_compilation.cpp``
+  scanned for C++ module dependencies under the same conditions as the
+  target's own sources.  A header that imports a module may now be
+  processed by ``moc``.
+
+CTest
+-----
+
+* :manual:`ctest(1)` gained a :ctest-option:`--out-of-date` option to run
+  only tests whose recorded build dependencies are newer than the last time
+  the tests ran.
+
+* :manual:`ctest(1)` now supports :ref:`job server integration
+  <ctest-job-server-integration>` on Windows.
+
+* The :manual:`ctest(1)` :ctest-option:`--show-only` option gained a
+  ``json-v1-raw`` format in which the ``value`` for each test property
+  is the original unparsed string value specified in CMake.
+
+* The :command:`ctest_test` and :command:`ctest_memcheck` commands gained the
+  ability to accept more than one value for their ``INCLUDE_LABEL`` and
+  ``EXCLUDE_LABEL`` options.  When multiple regular expressions are given, a
+  test is selected only if each expression matches at least one of the test's
+  labels (i.e. the expressions form an ``AND`` relationship), matching the
+  behavior of repeating the :option:`ctest --label-regex` and
+  :option:`ctest --label-exclude` command-line options.
+
+* The :prop_test:`GENERATED_RESOURCE_SPEC_FILE` test property gained support
+  for relative paths.
+
+* The :prop_test:`FIXTURE_REPEAT_MODE` test property was added to select how
+  a test fixture behaves when :manual:`ctest(1)` repeats tests with its
+  :ctest-option:`--repeat` option.  See policy :policy:`CMP0224`.
+
+* The :prop_test:`RESOURCE_ERROR_ACTION` test property and
+  :variable:`CTEST_RESOURCE_ERROR_ACTION` variable were added to
+  configure the test behavior in case of insufficient resources.
+
+CPack
+-----
+
+* The :cpack_gen:`CPack APK Generator` was added to package Android
+  applications as APK files.  It drives the Android SDK build tools
+  directly and does not require Gradle.  Maven dependencies, such as the
+  AndroidX libraries, can be downloaded with
+  :variable:`CPACK_APK_MAVEN_DEPENDENCIES`.
+
+Deprecated and Removed Features
+===============================
+
+* The :generator:`Visual Studio 14 2015` generator has been removed.
+
+* The :module:`CMakePrintHelpers` module's :command:`cmake_print_properties`
+  command is now deprecated in favor of
+  :command:`cmake_language(PRINT_PROPERTIES)`.
+
+* The :module:`CMakePrintHelpers` module's :command:`cmake_print_variables`
+  command is now deprecated in favor of
+  :command:`cmake_language(PRINT_VARIABLES)`.
+
+* The :command:`install_files`, :command:`install_programs`,
+  :command:`install_targets`, :command:`make_directory`, :command:`remove`,
+  :command:`subdirs` and :command:`write_file` commands, which have been
+  deprecated since CMake 3.0, now emit deprecation diagnostics when used.
+
+Other Changes
+=============
+
+* The :option:`cmake --build` command now groups the output of each recipe in
+  a parallel build so that concurrent jobs do not interleave, when CMake is
+  the one passing the parallel flag to the build tool (via :option:`--parallel
+  <cmake--build --parallel>` or :envvar:`CMAKE_BUILD_PARALLEL_LEVEL`) and that
+  tool is GNU Make 4.0 or newer.  Request parallelism natively, e.g.
+  ``cmake --build . -- -j``, to opt out and stream output as it is produced.
+
+* The :option:`cmake --install` command now reports a non-zero exit code
+  when an install script fails.  Previously, a parallel install (enabled by
+  the :prop_gbl:`INSTALL_PARALLEL` global property) always reported success,
+  and a serial install could lose the failure of an earlier component that
+  exited via :command:`cmake_language(EXIT) <cmake_language>` when a later
+  component succeeded.
+
+* The :command:`cmake_host_system_information` command's ``DISTRIB_*`` queries
+  now read the host os-release by default.  See policy :policy:`CMP0221`.
+  A new ``FROM_SYSROOT <bool>`` option explicitly enables or disables reading
+  the target os-release from :variable:`CMAKE_SYSROOT`.
+
+* The :command:`cmake_path(IS_PREFIX)` command and the
+  :genex:`$<PATH:IS_PREFIX>` generator expression no longer treat
+  an empty path as a prefix of every path.  The :command:`if` command's
+  ``PATH_IS_PREFIX`` operator follows the same rule.
+  See policy :policy:`CMP0223`.
+
+* When CTest build launchers are enabled (see the :module:`CTestUseLaunchers`
+  module), a build rule that is terminated by a signal is now reported as a
+  build failure.  Previously such a rule was reported as success, so a crashed
+  compiler, linker, or custom command could be recorded as a passing build on
+  the dashboard.
+
+* The :prop_tgt:`ALIASED_TARGET` target property is now read-only.
+
+* The Qt Help (``.qch``) rendition of the documentation now carries its own
+  color scheme.  Previously it was rendered with layout rules only, because
+  the ``qthelp`` builder does not generate the color scheme that the HTML
+  documentation uses.  A dark variant is shipped alongside it, which help
+  viewers such as Qt Creator use when their own theme is dark.
+
+* The precompiled macOS binary provided on ``cmake.org`` now requires
+  macOS 11 or newer for command-line tools.  The :manual:`cmake-gui(1)`
+  application still requires macOS 12.
+
+.. _CPS: https://cps-org.github.io/cps/
+.. |CPS| replace:: Common Package Specification
