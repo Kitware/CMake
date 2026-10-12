@@ -913,8 +913,9 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
 
   cmsys::RegularExpression vgFIM(
     R"(== .*Invalid free\(\) / delete / delete\[\])");
-  cmsys::RegularExpression vgFMM(
+  cmsys::RegularExpression vgFMM1(
     R"(== .*Mismatched free\(\) / delete / delete \[\])");
+  cmsys::RegularExpression vgFMM2(R"(== .*Mismatched new/delete size)");
   cmsys::RegularExpression vgMLK1(
     "== .*[0-9,]+ bytes in [0-9,]+ blocks are definitely lost"
     " in loss record [0-9,]+ of [0-9,]+");
@@ -959,7 +960,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
       auto& line = lines[cc];
       if (vgFIM.find(line)) {
         failure = cmCTestMemCheckHandler::FIM;
-      } else if (vgFMM.find(line)) {
+      } else if (vgFMM1.find(line) || vgFMM2.find(line)) {
         failure = cmCTestMemCheckHandler::FMM;
       } else if (vgMLK1.find(line) || vgMLK2.find(line)) {
         failure = cmCTestMemCheckHandler::MLK;
