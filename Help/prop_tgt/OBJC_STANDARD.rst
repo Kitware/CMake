@@ -48,8 +48,7 @@ control whether compiler-specific extensions are enabled on a per-target basis.
 If the property is not set, and the project has set the :prop_tgt:`C_STANDARD`,
 the value of :prop_tgt:`C_STANDARD` is set for ``OBJC_STANDARD``.
 
-See the :manual:`cmake-compile-features(7)` manual for information on
-compile features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst
 
 This property is initialized by the value of
 the :variable:`CMAKE_OBJC_STANDARD` variable if it is set when a target

@@ -10,8 +10,7 @@ one of the supported values of the corresponding :prop_tgt:`<LANG>_STANDARD`
 target property; see the documentation of that property for a list of
 supported languages.
 
-See the :manual:`cmake-compile-features(7)` manual for information on compile
-features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst
 
 .. note::
 

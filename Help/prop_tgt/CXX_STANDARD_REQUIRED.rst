@@ -12,8 +12,7 @@ treated as optional and may "decay" to a previous standard if the requested is
 not available.  For compilers that have no notion of a standard level, such as
 MSVC 1800 (Visual Studio 2013) and lower, this has no effect.
 
-See the :manual:`cmake-compile-features(7)` manual for information on
-compile features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst
 
 This property is initialized by the value of
 the :variable:`CMAKE_CXX_STANDARD_REQUIRED` variable if it is set when a
