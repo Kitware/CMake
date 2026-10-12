@@ -9,5 +9,4 @@ scheme.
 This variable initializes the :prop_tgt:`XCODE_SCHEME_LAUNCH_MODE` property on
 all targets.
 
-Please refer to the :prop_tgt:`XCODE_GENERATE_SCHEME` target property
-documentation to see all Xcode schema related properties.
+.. include:: ../include/XCODE_SCHEME_NOTE.rst
