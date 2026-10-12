@@ -2486,7 +2486,13 @@ cmFastbuildNormalTargetGenerator::GetSymlinkExecs() const
           this->ConvertToFastbuildPath(postBuildExecNode.ExecOutput)));
       res.emplace_back(std::move(postBuildExecNode));
     };
-    generateSymlinkCommand(targetNames.Real, targetNames.Output);
+    // name -> soname -> realname
+    std::string const& outputLinkTarget =
+      (targetNames.SharedObject.empty() ||
+       targetNames.SharedObject == targetNames.Output)
+      ? targetNames.Real
+      : targetNames.SharedObject;
+    generateSymlinkCommand(outputLinkTarget, targetNames.Output);
     generateSymlinkCommand(targetNames.Real, targetNames.SharedObject);
     generateSymlinkCommand(targetNames.ImportReal, targetNames.ImportOutput);
   }
