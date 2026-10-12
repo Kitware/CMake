@@ -14,7 +14,5 @@ paths for the compiler.
 
 Relative paths should not be added to this property.
 
-Contents of ``INCLUDE_DIRECTORIES`` may use :manual:`generator expressions
-<cmake-generator-expressions(7)>` with the syntax ``$<...>``. See the
-:manual:`cmake-buildsystem(7)` manual for more on defining buildsystem
-properties.
+.. |genex_subject| replace:: ``INCLUDE_DIRECTORIES``
+.. include:: ../include/GENEX_NOTE.rst

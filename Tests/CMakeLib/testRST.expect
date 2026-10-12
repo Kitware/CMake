@@ -186,3 +186,5 @@ this text is a different length
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Substitutions in headers should cause the header line's length to be updated.
+
+A second definition uses only the last definition.

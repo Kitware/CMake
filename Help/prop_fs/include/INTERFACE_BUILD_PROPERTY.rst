@@ -10,7 +10,5 @@ determine the build properties of the consumer. These build properties are only
 applied to the sources of the file sets. The other sources of the consumer are
 unaffected.
 
-Contents of |PROPERTY_INTERFACE_NAME| may use "generator expressions"
-with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |genex_subject| replace:: |PROPERTY_INTERFACE_NAME|
+.. include:: /include/GENEX_NOTE.rst

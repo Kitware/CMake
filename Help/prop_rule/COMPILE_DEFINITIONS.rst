@@ -18,7 +18,5 @@ by the native build tool.
 
 .. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.rst
 
-Contents of ``COMPILE_DEFINITIONS`` may use :manual:`generator expressions
-<cmake-generator-expressions(7)>` with the syntax ``$<...>``. See the
-:manual:`cmake-buildsystem(7)` manual for more on defining buildsystem
-properties.
+.. |genex_subject| replace:: ``COMPILE_DEFINITIONS``
+.. include:: ../include/GENEX_NOTE.rst

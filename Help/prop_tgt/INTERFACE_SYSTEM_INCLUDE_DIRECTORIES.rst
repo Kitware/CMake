@@ -24,8 +24,5 @@ When target dependencies are specified using :command:`target_link_libraries`,
 CMake will read this property from all target dependencies to mark the
 same include directories as containing system headers.
 
-Contents of ``INTERFACE_SYSTEM_INCLUDE_DIRECTORIES`` may use "generator
-expressions" with the syntax ``$<...>``.  See the
-:manual:`cmake-generator-expressions(7)` manual for available expressions.
-See the :manual:`cmake-buildsystem(7)` manual for more on defining
-buildsystem properties.
+.. |genex_subject| replace:: ``INTERFACE_SYSTEM_INCLUDE_DIRECTORIES``
+.. include:: ../include/GENEX_NOTE.rst

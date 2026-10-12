@@ -15,8 +15,5 @@ model of the project and can break things.
 See the :variable:`CMAKE_XCODE_ATTRIBUTE_<an-attribute>` variable
 to set attributes on all targets in a directory tree.
 
-Contents of ``XCODE_ATTRIBUTE_<an-attribute>`` may use
-"generator expressions" with the syntax ``$<...>``.  See the
-:manual:`cmake-generator-expressions(7)` manual for available
-expressions.  See the :manual:`cmake-buildsystem(7)` manual
-for more on defining buildsystem properties.
+.. |genex_subject| replace:: ``XCODE_ATTRIBUTE_<an-attribute>``
+.. include:: ../include/GENEX_NOTE.rst

@@ -11,10 +11,8 @@ This property holds a :ref:`semicolon-separated list <CMake Language Lists>` of 
 specified so far for its target.  Use :command:`set_target_properties` or
 :command:`set_property` commands to set its content.
 
-Contents of ``STATIC_LIBRARY_OPTIONS`` may use "generator expressions" with the
-syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual
-for available expressions.  See the :manual:`cmake-buildsystem(7)` manual
-for more on defining buildsystem properties.
+.. |genex_subject| replace:: ``STATIC_LIBRARY_OPTIONS``
+.. include:: ../include/GENEX_NOTE.rst
 
 .. note::
 
