@@ -1642,9 +1642,6 @@ if (CMAKE_CROSSCOMPILING)
       else()
         _python_display_failure ("${_PYTHON_PREFIX}: When cross-compiling, Interpreter and/or Compiler components cannot be searched when CMAKE_CROSSCOMPILING_EMULATOR variable is not specified (see policy CMP0190)." FATAL)
       endif()
-    else()
-      # CMP0190 == OLD : no condition regarding crosscompiling environment
-      set (_${_PYTHON_PREFIX}_CROSSCOMPILING TRUE)
     endif()
   endif()
 endif()
@@ -1709,6 +1706,11 @@ endif()
 ## default: search any ABI
 if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR VERSION_LESS "3")
   # ABI not supported
+  unset (_${_PYTHON_PREFIX}_FIND_ABI)
+  set (_${_PYTHON_PREFIX}_ABIFLAGS "<none>")
+elseif(NOT DEFINED ${_PYTHON_PREFIX}_FIND_ABI
+    AND CMAKE_CROSSCOMPILING AND NOT _${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY STREQUAL "NEW")
+  # cannot manage ABI reliably
   unset (_${_PYTHON_PREFIX}_FIND_ABI)
   set (_${_PYTHON_PREFIX}_ABIFLAGS "<none>")
 else()
