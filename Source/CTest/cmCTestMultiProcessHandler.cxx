@@ -456,7 +456,7 @@ void cmCTestMultiProcessHandler::RunTests()
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, "test ",
-                     test, "\n");
+                     test, '\n');
 
   auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
 
@@ -1869,7 +1869,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
                          "Labels:");
     }
     for (std::string const& label : p.Labels) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, " ",
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, ' ',
                          label);
     }
     if (!p.Labels.empty()) // print the labels
@@ -1897,8 +1897,10 @@ void cmCTestMultiProcessHandler::PrintTestList()
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, '\n');
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, '\n',
-                     "Total Tests: ", this->Total, '\n');
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
+                     "\n"
+                     "Total Tests: ",
+                     this->Total, '\n');
 }
 
 void cmCTestMultiProcessHandler::PrintLabels()

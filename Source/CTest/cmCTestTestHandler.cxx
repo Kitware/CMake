@@ -684,7 +684,7 @@ void cmCTestTestHandler::LogTestSummary(std::vector<std::string> const& passed,
   char realBuf[1024];
   snprintf(realBuf, sizeof(realBuf), "%6.2f sec", durationInSecs.count());
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
-                     "\nTotal Test time (real) = ", realBuf, "\n");
+                     "\nTotal Test time (real) = ", realBuf, '\n');
 }
 
 void cmCTestTestHandler::LogDisabledTests(
@@ -742,7 +742,7 @@ void cmCTestTestHandler::LogFailedTests(std::vector<std::string> const& failed,
         }
         cmCTestColorLog(this->CTest, HANDLER_OUTPUT, testAttrs, '\t',
                         cmPadToWidth(3, std::to_string(ft.TestCount)), " - ",
-                        ft_name_and_status, labels, "\n");
+                        ft_name_and_status, labels, '\n');
       }
     }
   }
@@ -855,7 +855,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
       labelCountStr << "s";
     }
     labelCountStr << ")";
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, "\n", label,
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet, '\n', label,
                        " = ", buf, ' ', labelCountStr.str());
     if (this->LogFile) {
       *this->LogFile << "\n" << i << " = " << buf << "\n";

@@ -1637,7 +1637,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
         if (!success) {
           cmCTestLog(this->CTest, ERROR_MESSAGE,
                      "Error while parsing lcov file '", lcovFile,
-                     "':", " No source file name found!\n");
+                     "': No source file name found!\n");
           return 0;
         }
         srcname = srcname.substr(18);
@@ -2011,7 +2011,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
         // we have a new file so count it in the output
         count++;
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
-                           "Produce coverage for file: ", file, " ", count,
+                           "Produce coverage for file: ", file, ' ', count,
                            '\n');
         // start the file output
         covLogXML.StartElement("File");
@@ -2067,7 +2067,7 @@ int cmCTestCoverageHandler::RunBullseyeCommand(
   std::vector<std::string> args{ cmd };
   if (arg) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
-                       "Run : ", program, " ", arg, '\n');
+                       "Run : ", program, ' ', arg, '\n');
     args.emplace_back(arg);
   } else {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,

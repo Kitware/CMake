@@ -42,12 +42,12 @@ void cmCTestVC::SetSourceDirectory(std::string const& dir)
 bool cmCTestVC::InitialCheckout(std::string const& command)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   First perform the initial checkout: ", command, "\n");
+             "   First perform the initial checkout: ", command, '\n');
 
   // Make the parent directory in which to perform the checkout.
   std::string parent = cmSystemTools::GetFilenamePath(this->SourceDirectory);
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Perform checkout in directory: ", parent, "\n");
+             "   Perform checkout in directory: ", parent, '\n');
   if (!cmSystemTools::MakeDirectory(parent)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create directory: ", parent,
                '\n');

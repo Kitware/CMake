@@ -817,7 +817,7 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
                      "Run command:");
   for (auto const& arg : args) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, " \"",
-                       arg, "\"");
+                       arg, '"');
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, '\n');
 

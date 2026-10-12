@@ -113,7 +113,7 @@ bool cmParseCacheCoverage::ReadCMCovFile(char const* file)
       for (std::string const& l : separateLine) {
         cmCTestLog(this->CTest, ERROR_MESSAGE, l, ' ');
       }
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "\n");
+      cmCTestLog(this->CTest, ERROR_MESSAGE, '\n');
       return false;
     }
     // if we do not have a routine yet, then it should be

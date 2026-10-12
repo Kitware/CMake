@@ -1051,7 +1051,7 @@ bool cmCTest::RunMakeCommand(std::string const& command, std::string& output,
   output.clear();
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
   for (auto const& arg : args) {
-    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, " \"", arg, "\"");
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, " \"", arg, '"');
   }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, '\n');
 
@@ -2377,7 +2377,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
         } else {
           cmCTestLog(this, WARNING,
                      "Invalid value for '--test-output-size-passed': ", sz,
-                     "\n");
+                     '\n');
         }
         return true;
       } },
@@ -2391,7 +2391,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
         } else {
           cmCTestLog(this, WARNING,
                      "Invalid value for '--test-output-size-failed': ", sz,
-                     "\n");
+                     '\n');
         }
         return true;
       } },
@@ -2567,7 +2567,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
             static_cast<unsigned int>(seed_value);
         } else {
           cmCTestLog(this, WARNING,
-                     "Invalid value for '--schedule-random-seed': ", sz, "\n");
+                     "Invalid value for '--schedule-random-seed': ", sz, '\n');
         }
         return true;
       } },
@@ -3060,7 +3060,7 @@ void cmCTest::SetCTestConfiguration(char const* name, std::string const& value,
                                     bool suppress)
 {
   cmCTestOptionalLog(this, HANDLER_VERBOSE_OUTPUT, suppress,
-                     "SetCTestConfiguration:", name, ":", value, "\n");
+                     "SetCTestConfiguration:", name, ':', value, '\n');
 
   if (!name) {
     return;

@@ -1341,7 +1341,7 @@ void cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
       auto ofileWithoutPid = ofile.substr(0, pos);
       cmSystemTools::RenameFile(ofile, ofileWithoutPid);
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
-                         "Renaming: ", ofile, " to: ", ofileWithoutPid, "\n");
+                         "Renaming: ", ofile, " to: ", ofileWithoutPid, '\n');
     }
   }
 }

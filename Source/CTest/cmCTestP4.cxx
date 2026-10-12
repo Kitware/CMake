@@ -391,7 +391,7 @@ bool cmCTestP4::LoadRevisions()
   // Do not process updates
   if (this->OldRevision == "<unknown>" || this->NewRevision == "<unknown>") {
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   At least one of the revisions ",
+               "   At least one of the revisions "
                "is unknown. No repository changes will be reported.\n");
     return false;
   }

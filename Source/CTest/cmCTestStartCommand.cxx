@@ -192,7 +192,8 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   cmCTestOptionalLog(
     this->CTest, OUTPUT, quiet,
-    "   Site: ", this->CTest->GetCTestConfiguration("Site"), '\n',
+    "   Site: ", this->CTest->GetCTestConfiguration("Site"),
+    "\n"
     "   Build name: ",
     cmCTest::SafeBuildIdField(this->CTest->GetCTestConfiguration("BuildName")),
     '\n');

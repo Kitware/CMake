@@ -144,7 +144,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   FILE* ftpfile = cmsys::SystemTools::Fopen(local_file, "rb");
   if (!ftpfile) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Could not open file for upload: ", local_file, "\n");
+               "Could not open file for upload: ", local_file, '\n');
     return false;
   }
   // set the url
@@ -203,8 +203,13 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
                               std::string const& fields, std::string& response)
 {
   response.clear();
-  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "HttpRequest\n",
-                     "url: ", url, '\n', "fields ", fields, '\n');
+  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
+                     "HttpRequest\n"
+                     "url: ",
+                     url,
+                     "\n"
+                     "fields ",
+                     fields, '\n');
   if (!this->InitCurl()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed\n");
     return false;
@@ -247,7 +252,7 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
     cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Curl debug: [",
                        curlDebug, "]\n");
   }
-  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Curl res: ", res, "\n");
+  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Curl res: ", res, '\n');
   return (res == 0);
 }
 

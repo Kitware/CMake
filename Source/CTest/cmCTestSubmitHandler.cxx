@@ -160,13 +160,13 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
                            "  Set CURLOPT_SSLVERSION to ",
                            (tlsVersionStr ? *tlsVersionStr : "unknown value"),
-                           "\n");
+                           '\n');
         curl_easy_setopt(curl, CURLOPT_SSLVERSION, *curlOpts.TLSVersionOpt);
       }
       if (curlOpts.TLSVerifyOpt.has_value()) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
                            "  Set CURLOPT_SSL_VERIFYPEER to ",
-                           (*curlOpts.TLSVerifyOpt ? "on" : "off"), "\n");
+                           (*curlOpts.TLSVerifyOpt ? "on" : "off"), '\n');
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER,
                          *curlOpts.TLSVerifyOpt ? 1 : 0);
       }
@@ -648,13 +648,13 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
 
   if (!uploadSucceeded) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error uploading to CDash. ", file,
-               " ", url, " ", fstr.str());
+               ' ', url, ' ', fstr.str());
     return -1;
   }
   parseState = cmJSONState(response, &json, cmJSONState::StrictMode::Relaxed);
   if (!parseState.errors.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error parsing json string [",
-               response, "]\n", parseState.GetErrorMessage(), "\n");
+               response, "]\n", parseState.GetErrorMessage(), '\n');
     return -1;
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,

@@ -65,8 +65,8 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
       ctest_tag_found = true;
       this->TestResult.CustomCompletionStatus =
         this->TestHandler->CustomCompletionStatusRegex.match(1);
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(), ": ",
-                 "Test Details changed to '",
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(),
+                 ": Test Details changed to '",
                  this->TestResult.CustomCompletionStatus, "'\n");
     } else if (this->TestHandler->CustomLabelRegex.find(line)) {
       ctest_tag_found = true;
@@ -75,8 +75,8 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
       if (std::find(labels.begin(), labels.end(), label) == labels.end()) {
         labels.push_back(label);
         std::sort(labels.begin(), labels.end());
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(), ": ",
-                   "Test Label added: '", label, "'\n");
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(),
+                   ": Test Label added: '", label, "'\n");
       }
     }
     if (ctest_tag_found) {
@@ -90,8 +90,8 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   if (!this->TestProperties->TimeoutRegularExpressions.empty()) {
     for (auto& reg : this->TestProperties->TimeoutRegularExpressions) {
       if (reg.first.find(this->ProcessOutput)) {
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(), ": ",
-                   "Test timeout changed to ",
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(),
+                   ": Test timeout changed to ",
                    std::chrono::duration_cast<std::chrono::seconds>(
                      this->TestProperties->AlternateTimeout)
                      .count(),
@@ -270,7 +270,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       outputStream.str("");
       outputStream.clear();
       outputStream << output;
-      cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, "\n"); // flush
+      cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, '\n'); // flush
     }
     if (completed == total) {
       std::string testName = cmStrCat(this->GetTestPrefix(completed, total),
@@ -768,22 +768,22 @@ void cmCTestRunTest::ComputeArguments()
 
   // Print any test-specific env vars in verbose mode
   if (!this->TestProperties->Directory.empty()) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ": ",
-               "Working Directory: ", this->TestProperties->Directory, '\n');
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index,
+               ": Working Directory: ", this->TestProperties->Directory, '\n');
   }
 
   // Print any test-specific env vars in verbose mode
   if (!this->TestProperties->Environment.empty()) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ": ",
-               "Environment variables: \n");
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index,
+               ": Environment variables: \n");
   }
   for (std::string const& env : this->TestProperties->Environment) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ":  ", env,
                '\n');
   }
   if (!this->TestProperties->EnvironmentModification.empty()) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ": ",
-               "Environment variable modifications: \n");
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index,
+               ": Environment variable modifications: \n");
   }
   for (std::string const& envmod :
        this->TestProperties->EnvironmentModification) {
@@ -883,15 +883,15 @@ bool cmCTestRunTest::ForkProcess()
 
   if (timeout) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       this->TestHandler->GetQuiet(), this->Index, ": ",
-                       "Test timeout computed to be: ",
+                       this->TestHandler->GetQuiet(), this->Index,
+                       ": Test timeout computed to be: ",
                        cmDurationTo<unsigned int>(*timeout), '\n');
 
     this->TestProcess->SetTimeout(*timeout);
   } else {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       this->TestHandler->GetQuiet(), this->Index, ": ",
-                       "Test timeout suppressed by TIMEOUT property.\n");
+                       this->TestHandler->GetQuiet(), this->Index,
+                       ": Test timeout suppressed by TIMEOUT property.\n");
   }
 
   // Record the original environment before modifying it
