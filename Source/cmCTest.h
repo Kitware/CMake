@@ -15,6 +15,7 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
@@ -487,10 +488,10 @@ private:
 };
 
 #define cmCTestLog(ctSelf, logType, ...)                                      \
-  (ctSelf)->Log(cmCTest::logType, cmStrCat("", __VA_ARGS__))
+  (ctSelf)->Log(cmCTest::logType, cmStrCat(""_s, __VA_ARGS__))
 
 #define cmCTestOptionalLog(ctSelf, logType, suppress, ...)                    \
-  (ctSelf)->Log(cmCTest::logType, cmStrCat("", __VA_ARGS__), suppress)
+  (ctSelf)->Log(cmCTest::logType, cmStrCat(""_s, __VA_ARGS__), suppress)
 
 #define cmCTestColorLog(ctSelf, logType, attrs, ...)                          \
-  (ctSelf)->Log(cmCTest::logType, cmStrCat("", __VA_ARGS__), attrs)
+  (ctSelf)->Log(cmCTest::logType, cmStrCat(""_s, __VA_ARGS__), attrs)

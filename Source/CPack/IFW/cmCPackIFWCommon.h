@@ -7,6 +7,8 @@
 #include <map>
 #include <string>
 
+#include <cmext/string_view> // IWYU pragma: keep
+
 #include "cmValue.h"
 
 class cmCPackIFWGenerator;
@@ -72,7 +74,7 @@ protected:
 #define cmCPackIFWLogger(logType, ...)                                        \
   do {                                                                        \
     if (Generator) {                                                          \
-      std::string cmCPackLog_msg = cmStrCat("", __VA_ARGS__);                 \
+      std::string cmCPackLog_msg = cmStrCat(""_s, __VA_ARGS__);               \
       Generator->Logger->Log(cmCPackLog::LOG_##logType, __FILE__, __LINE__,   \
                              cmCPackLog_msg.c_str(), cmCPackLog_msg.size());  \
     }                                                                         \
