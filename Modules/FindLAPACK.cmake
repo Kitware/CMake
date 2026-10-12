@@ -759,7 +759,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
           set(_lapack_lib "nvpl::lapack${_nvpl_int}${_nvpl_thread}")
 
           if(TARGET ${_lapack_lib})
-            get_target_property(LAPACK_LIBRARIES ${_lapack_lib} IMPORTED_LOCATION_RELEASE)
+            set(LAPACK_LIBRARIES ${_lapack_lib})
             break()
           endif()
 
