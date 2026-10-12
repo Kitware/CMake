@@ -78,11 +78,11 @@ void cmGeneratorExpressionDAGChecker::ReportError(cm::GenEx::Evaluation* eval,
     eval->Context.LG->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("Error evaluating generator expression:\n"
-               "  ",
+               "  "_s,
                expr,
                "\n"
-               "Self reference on target \"",
-               eval->HeadTarget->GetName(), "\".\n"),
+               "Self reference on target \""_s,
+               eval->HeadTarget->GetName(), "\".\n"_s),
       parent->Backtrace);
     return;
   }
@@ -91,10 +91,10 @@ void cmGeneratorExpressionDAGChecker::ReportError(cm::GenEx::Evaluation* eval,
     eval->Context.LG->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("Error evaluating generator expression:\n"
-               "  ",
+               "  "_s,
                expr,
                "\n"
-               "Dependency loop found."),
+               "Dependency loop found."_s),
       eval->Backtrace);
   }
 
@@ -102,7 +102,7 @@ void cmGeneratorExpressionDAGChecker::ReportError(cm::GenEx::Evaluation* eval,
   while (parent) {
     eval->Context.LG->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Loop step ", loopStep, "\n  ",
+      cmStrCat("Loop step "_s, loopStep, "\n  "_s,
                parent->Content ? parent->Content->GetOriginalExpression()
                                : expr,
                '\n'),

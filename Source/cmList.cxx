@@ -14,6 +14,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -39,8 +40,9 @@ cm::string_view cmList::element_separator{ ";" };
 cmList cmList::sublist(size_type pos, size_type length) const
 {
   if (pos >= this->Values.size()) {
-    throw std::out_of_range(cmStrCat(
-      "begin index: ", pos, " is out of range 0 - ", this->Values.size() - 1));
+    throw std::out_of_range(cmStrCat("begin index: "_s, pos,
+                                     " is out of range 0 - "_s,
+                                     this->Values.size() - 1));
   }
 
   size_type count = (length == npos || pos + length > this->size())
@@ -105,13 +107,13 @@ void RequireFunction(cmMakefile const& makefile,
     makefile.GetState()->GetCommandType(functionName);
   if (!type) {
     throw cmList::transform_error(
-      cmStrCat(errorPrefix, ": unknown function \"", functionName, "\"."));
+      cmStrCat(errorPrefix, ": unknown function \""_s, functionName, "\"."_s));
   }
   if (*type == cmStateEnums::CommandType::Macro) {
     throw cmList::transform_error(
-      cmStrCat(errorPrefix, ": macro \"", functionName,
+      cmStrCat(errorPrefix, ": macro \""_s, functionName,
                "\" may not be used here;"
-               " define it as a function() instead."));
+               " define it as a function() instead."_s));
   }
 }
 
@@ -151,15 +153,15 @@ public:
     if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {
       throw cmList::transform_error(
-        cmStrCat(this->ErrorPrefix, ": function \"", this->FunctionName,
-                 "\" failed during execution."));
+        cmStrCat(this->ErrorPrefix, ": function \""_s, this->FunctionName,
+                 "\" failed during execution."_s));
     }
 
     cmValue result = this->Makefile->GetDefinition(this->OutputVar);
     if (!result) {
       throw cmList::transform_error(
-        cmStrCat(this->ErrorPrefix, ": function \"", this->FunctionName,
-                 "\" did not set the output variable."));
+        cmStrCat(this->ErrorPrefix, ": function \""_s, this->FunctionName,
+                 "\" did not set the output variable."_s));
     }
 
     bool boolResult = cmIsOn(*result);
@@ -228,15 +230,15 @@ public:
     if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {
       throw cmList::transform_error(
-        cmStrCat("sub-command SORT, COMPARATOR: function \"",
-                 this->FunctionName, "\" failed during execution."));
+        cmStrCat("sub-command SORT, COMPARATOR: function \""_s,
+                 this->FunctionName, "\" failed during execution."_s));
     }
 
     cmValue result = this->Makefile->GetDefinition(this->OutputVar);
     if (!result) {
       throw cmList::transform_error(
-        cmStrCat("sub-command SORT, COMPARATOR: function \"",
-                 this->FunctionName, "\" did not set the output variable."));
+        cmStrCat("sub-command SORT, COMPARATOR: function \""_s,
+                 this->FunctionName, "\" did not set the output variable."_s));
     }
 
     bool boolResult = cmIsOn(*result);
@@ -256,8 +258,8 @@ cmList& cmList::filter(cm::string_view pattern, FilterMode mode)
   cmsys::RegularExpression regex(std::string{ pattern });
   if (!regex.is_valid()) {
     throw std::invalid_argument(
-      cmStrCat("sub-command FILTER, mode REGEX failed to compile regex \"",
-               pattern, "\"."));
+      cmStrCat("sub-command FILTER, mode REGEX failed to compile regex \""_s,
+               pattern, "\"."_s));
   }
 
   auto it = std::remove_if(this->Values.begin(), this->Values.end(),
@@ -594,8 +596,8 @@ protected:
     }
     if (index < 0 || count <= static_cast<std::size_t>(index)) {
       throw transform_error(cmStrCat(
-        "sub-command TRANSFORM, selector ", this->Tag, ", index: ", index,
-        " out of range (-", count, ", ", count - 1, ")."));
+        "sub-command TRANSFORM, selector "_s, this->Tag, ", index: "_s, index,
+        " out of range (-"_s, count, ", "_s, count - 1, ")."_s));
     }
     return index;
   }
@@ -644,8 +646,8 @@ public:
     if (this->Start > this->Stop) {
       throw transform_error(
         cmStrCat("sub-command TRANSFORM, selector FOR "
-                 "expects <start> to be no greater than <stop> (",
-                 this->Start, " > ", this->Stop, ')'));
+                 "expects <start> to be no greater than <stop> ("_s,
+                 this->Start, " > "_s, this->Stop, ')'));
     }
 
     // compute indexes
@@ -786,12 +788,13 @@ public:
     if (!this->ReplaceHelper->IsRegularExpressionValid()) {
       throw transform_error(
         cmStrCat("sub-command TRANSFORM, action REPLACE: Failed to compile "
-                 "regex \"",
-                 regex, "\"."));
+                 "regex \""_s,
+                 regex, "\"."_s));
     }
     if (!this->ReplaceHelper->IsReplaceExpressionValid()) {
-      throw transform_error(cmStrCat("sub-command TRANSFORM, action REPLACE: ",
-                                     this->ReplaceHelper->GetError(), '.'));
+      throw transform_error(
+        cmStrCat("sub-command TRANSFORM, action REPLACE: "_s,
+                 this->ReplaceHelper->GetError(), '.'));
     }
   }
 
@@ -801,8 +804,9 @@ protected:
     std::string output;
 
     if (!this->ReplaceHelper->Replace(s, output)) {
-      throw transform_error(cmStrCat("sub-command TRANSFORM, action REPLACE: ",
-                                     this->ReplaceHelper->GetError(), '.'));
+      throw transform_error(
+        cmStrCat("sub-command TRANSFORM, action REPLACE: "_s,
+                 this->ReplaceHelper->GetError(), '.'));
     }
 
     return output;
@@ -851,16 +855,16 @@ protected:
     if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {
       throw transform_error(
-        cmStrCat("sub-command TRANSFORM, action APPLY: function \"",
-                 this->FunctionName, "\" failed during execution."));
+        cmStrCat("sub-command TRANSFORM, action APPLY: function \""_s,
+                 this->FunctionName, "\" failed during execution."_s));
     }
 
     // Read back the output variable
     cmValue result = this->Makefile->GetDefinition(this->OutputVar);
     if (!result) {
       throw transform_error(
-        cmStrCat("sub-command TRANSFORM, action APPLY: function \"",
-                 this->FunctionName, "\" did not set the output variable."));
+        cmStrCat("sub-command TRANSFORM, action APPLY: function \""_s,
+                 this->FunctionName, "\" did not set the output variable."_s));
     }
 
     // Copy the result before cleaning up (RemoveDefinition invalidates the
@@ -916,15 +920,15 @@ ActionDescriptor const& TransformConfigure(
   }
 
   if (!descriptor) {
-    throw transform_error(cmStrCat(" sub-command TRANSFORM, ",
+    throw transform_error(cmStrCat(" sub-command TRANSFORM, "_s,
                                    static_cast<int>(action),
-                                   " invalid action."));
+                                   " invalid action."_s));
   }
 
   if (descriptor->Arity != arity) {
-    throw transform_error(cmStrCat("sub-command TRANSFORM, action ",
-                                   descriptor->Name, " expects ",
-                                   descriptor->Arity, " argument(s)."));
+    throw transform_error(cmStrCat("sub-command TRANSFORM, action "_s,
+                                   descriptor->Name, " expects "_s,
+                                   descriptor->Arity, " argument(s)."_s));
   }
   if (!selector) {
     selector = cm::make_unique<TransformNoSelector>();
@@ -1061,8 +1065,8 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewREGEX(
   if (!selector->Validate()) {
     throw transform_error(
       cmStrCat("sub-command TRANSFORM, selector REGEX failed to compile "
-               "regex \"",
-               regex, "\"."));
+               "regex \""_s,
+               regex, "\"."_s));
   }
   // weird construct to please all compilers
   return std::unique_ptr<cmList::TransformSelector>(selector.release());
@@ -1075,8 +1079,8 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewREGEX(
   if (!selector->Validate()) {
     throw transform_error(
       cmStrCat("sub-command TRANSFORM, selector REGEX failed to compile "
-               "regex \"",
-               regex, "\"."));
+               "regex \""_s,
+               regex, "\"."_s));
   }
   // weird construct to please all compilers
   return std::unique_ptr<cmList::TransformSelector>(selector.release());
@@ -1191,7 +1195,7 @@ cmList::size_type cmList::ComputeIndex(index_type pos, bool boundCheck) const
   if (boundCheck) {
     if (this->Values.empty()) {
       throw std::out_of_range(
-        cmStrCat("index: ", pos, " out of range (0, 0)"));
+        cmStrCat("index: "_s, pos, " out of range (0, 0)"_s));
     }
 
     auto index = pos;
@@ -1201,9 +1205,9 @@ cmList::size_type cmList::ComputeIndex(index_type pos, bool boundCheck) const
         index = static_cast<index_type>(length) + index;
       }
       if (index < 0 || length <= static_cast<size_type>(index)) {
-        throw std::out_of_range(cmStrCat("index: ", pos, " out of range (-",
-                                         this->Values.size(), ", ",
-                                         this->Values.size() - 1, ')'));
+        throw std::out_of_range(
+          cmStrCat("index: "_s, pos, " out of range (-"_s, this->Values.size(),
+                   ", "_s, this->Values.size() - 1, ')'));
       }
     }
     return index;
@@ -1217,7 +1221,7 @@ cmList::size_type cmList::ComputeInsertIndex(index_type pos,
   if (boundCheck) {
     if (this->Values.empty() && pos != 0) {
       throw std::out_of_range(
-        cmStrCat("index: ", pos, " out of range (0, 0)"));
+        cmStrCat("index: "_s, pos, " out of range (0, 0)"_s));
     }
 
     auto index = pos;
@@ -1227,9 +1231,9 @@ cmList::size_type cmList::ComputeInsertIndex(index_type pos,
         index = static_cast<index_type>(length) + index;
       }
       if (index < 0 || length < static_cast<size_type>(index)) {
-        throw std::out_of_range(cmStrCat("index: ", pos, " out of range (-",
-                                         this->Values.size(), ", ",
-                                         this->Values.size(), ')'));
+        throw std::out_of_range(
+          cmStrCat("index: "_s, pos, " out of range (-"_s, this->Values.size(),
+                   ", "_s, this->Values.size(), ')'));
       }
     }
     return index;

@@ -8,6 +8,8 @@
 #include <map>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmFortranParser.h" /* Interface to parser object.  */
@@ -186,7 +188,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   }
 
   // Store the list of modules provided by this target.
-  std::string fiName = cmStrCat(this->TargetDirectory, "/fortran.internal");
+  std::string fiName = cmStrCat(this->TargetDirectory, "/fortran.internal"_s);
   cmGeneratedFileStream fiStream(fiName);
   fiStream << "# The fortran modules provided by this target.\n";
   fiStream << "provides\n";
@@ -198,7 +200,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   // Create a script to clean the modules.
   if (!provides.empty()) {
     std::string fcName =
-      cmStrCat(this->TargetDirectory, "/cmake_clean_Fortran.cmake");
+      cmStrCat(this->TargetDirectory, "/cmake_clean_Fortran.cmake"_s);
     cmGeneratedFileStream fcStream(fcName);
     fcStream << "# Remove fortran modules provided by this target.\n";
     fcStream << "FILE(REMOVE";
@@ -206,7 +208,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       std::string mod_upper = cmStrCat(mod_dir, '/');
       std::string mod_lower = cmStrCat(mod_dir, '/');
       cmFortranModuleAppendUpperLower(i, mod_upper, mod_lower);
-      std::string stamp = cmStrCat(stamp_dir, '/', i, ".stamp");
+      std::string stamp = cmStrCat(stamp_dir, '/', i, ".stamp"_s);
       fcStream << "\n"
                   "  \""
                << this->LocalGenerator->MaybeRelativeToCurBinDir(mod_lower)
@@ -256,8 +258,8 @@ bool cmDependsFortran::LocateModules()
     std::string fname = targetDir + "/fortran.internal";
     cmsys::ifstream fin(fname.c_str());
     if (!fin) {
-      cmSystemTools::Error(cmStrCat("-E cmake_depends failed to open ", fname,
-                                    " for module information"));
+      cmSystemTools::Error(cmStrCat("-E cmake_depends failed to open "_s,
+                                    fname, " for module information"_s));
       return false;
     }
     this->MatchRemoteModules(fin, targetDir);
@@ -319,7 +321,7 @@ void cmDependsFortran::ConsiderModule(std::string const& name,
   if (required != this->Internal->TargetRequires.end() &&
       required->second.empty()) {
     // The module is provided by a CMake target.  It will have a stamp file.
-    std::string stampFile = cmStrCat(stampDir, '/', name, ".stamp");
+    std::string stampFile = cmStrCat(stampDir, '/', name, ".stamp"_s);
     required->second = stampFile;
   }
 }
@@ -412,7 +414,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
       modFile = this->LocalGenerator->ConvertToOutputFormat(
         this->LocalGenerator->MaybeRelativeToTopBinDir(modFile),
         cmOutputConverter::SHELL);
-      std::string stampFile = cmStrCat(stamp_dir, '/', i, ".stamp");
+      std::string stampFile = cmStrCat(stamp_dir, '/', i, ".stamp"_s);
       stampFile = this->LocalGenerator->MaybeRelativeToTopBinDir(stampFile);
       std::string const stampFileForShell =
         this->LocalGenerator->ConvertToOutputFormat(stampFile,
@@ -446,7 +448,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
 
     // Make sure the module timestamp rule is evaluated by the time
     // the target finishes building.
-    std::string driver = cmStrCat(this->TargetDirectory, "/build");
+    std::string driver = cmStrCat(this->TargetDirectory, "/build"_s);
     driver = cmSystemTools::ConvertToOutputPath(
       this->LocalGenerator->MaybeRelativeToTopBinDir(driver));
     makeDepends << driver << ": " << obj_m << ".provides.build\n";

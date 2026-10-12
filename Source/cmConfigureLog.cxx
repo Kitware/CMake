@@ -101,7 +101,7 @@ void cmConfigureLog::EnsureInit()
   }
   assert(!this->Stream.is_open());
 
-  std::string name = cmStrCat(this->LogDir, "/CMakeConfigureLog.yaml");
+  std::string name = cmStrCat(this->LogDir, "/CMakeConfigureLog.yaml"_s);
   this->Stream.open(name.c_str(), std::ios::out | std::ios::app);
 
   this->Opened = true;

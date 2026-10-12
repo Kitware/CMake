@@ -43,11 +43,12 @@ void cmXCodeScheme::WriteXCodeSharedScheme(std::string const& xcProjDir,
 {
   // Create shared scheme sub-directory tree
   //
-  std::string xcodeSchemeDir = cmStrCat(xcProjDir, "/xcshareddata/xcschemes");
+  std::string xcodeSchemeDir =
+    cmStrCat(xcProjDir, "/xcshareddata/xcschemes"_s);
   cmSystemTools::MakeDirectory(xcodeSchemeDir);
 
   std::string xcodeSchemeFile =
-    cmStrCat(xcodeSchemeDir, '/', this->TargetName, ".xcscheme");
+    cmStrCat(xcodeSchemeDir, '/', this->TargetName, ".xcscheme"_s);
 
   cmGeneratedFileStream fout(xcodeSchemeFile);
   fout.SetCopyIfDifferent(true);
@@ -468,7 +469,7 @@ void cmXCodeScheme::WriteBuildableReference(cmXMLWriter& xout,
   std::string const noConfig; // FIXME: What config to use here?
   xout.Attribute("BuildableName", xcObj->GetTarget()->GetFullName(noConfig));
   xout.Attribute("BlueprintName", xcObj->GetTarget()->GetName());
-  xout.Attribute("ReferencedContainer", cmStrCat("container:", container));
+  xout.Attribute("ReferencedContainer", cmStrCat("container:"_s, container));
   xout.EndElement();
 }
 

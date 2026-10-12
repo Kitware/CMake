@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
@@ -69,9 +70,9 @@ bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinking(
         item.Target->GetType() == cm::TargetType::STATIC_LIBRARY &&
         // this dependency requires us to device link it
         !item.Target->GetPropertyAsBool(
-          cmStrCat(this->Language, "_RESOLVE_DEVICE_SYMBOLS")) &&
+          cmStrCat(this->Language, "_RESOLVE_DEVICE_SYMBOLS"_s)) &&
         item.Target->GetPropertyAsBool(
-          cmStrCat(this->Language, "_SEPARABLE_COMPILATION"));
+          cmStrCat(this->Language, "_SEPARABLE_COMPILATION"_s));
     });
 }
 
@@ -90,9 +91,9 @@ bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinkingIPOFlag(
         item.Target->GetType() == cm::TargetType::STATIC_LIBRARY &&
         // this dependency requires us to device link it
         !item.Target->GetPropertyAsBool(
-          cmStrCat(this->Language, "_RESOLVE_DEVICE_SYMBOLS")) &&
+          cmStrCat(this->Language, "_RESOLVE_DEVICE_SYMBOLS"_s)) &&
         item.Target->GetPropertyAsBool(
-          cmStrCat(this->Language, "_SEPARABLE_COMPILATION")) &&
+          cmStrCat(this->Language, "_SEPARABLE_COMPILATION"_s)) &&
         item.Target->IsIPOEnabled(this->Language, config);
     });
 }
@@ -111,13 +112,13 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
   bool skipItemAfterFramework = false;
   auto const librariesBegin = linkLibraries.size();
   cmMakefile const* mf = cli.GetTarget()->Makefile;
-  std::string const wholeArchive =
-    cmJoin(cmList(mf->GetSafeDefinition(cmStrCat(
-             "CMAKE_", this->Language, "_DEVICE_LINK_OPTIONS_WHOLE_ARCHIVE"))),
-           " ");
+  std::string const wholeArchive = cmJoin(
+    cmList(mf->GetSafeDefinition(cmStrCat(
+      "CMAKE_"_s, this->Language, "_DEVICE_LINK_OPTIONS_WHOLE_ARCHIVE"_s))),
+    " ");
   std::string const noWholeArchive = cmJoin(
     cmList(mf->GetSafeDefinition(cmStrCat(
-      "CMAKE_", this->Language, "_DEVICE_LINK_OPTIONS_NO_WHOLE_ARCHIVE"))),
+      "CMAKE_"_s, this->Language, "_DEVICE_LINK_OPTIONS_NO_WHOLE_ARCHIVE"_s))),
     " ");
 
   for (auto const& item : items) {
@@ -137,7 +138,7 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
           break;
         case cm::TargetType::STATIC_LIBRARY:
           skip = item.Target->GetPropertyAsBool(
-            cmStrCat(this->Language, "_RESOLVE_DEVICE_SYMBOLS"));
+            cmStrCat(this->Language, "_RESOLVE_DEVICE_SYMBOLS"_s));
           break;
         default:
           break;
@@ -223,12 +224,12 @@ bool requireDeviceLinking(cmGeneratorTarget const& target,
   }
 
   if (!lg.GetMakefile()->IsOn(
-        cmStrCat("CMAKE_", language, "_COMPILER_HAS_DEVICE_LINK_PHASE"))) {
+        cmStrCat("CMAKE_"_s, language, "_COMPILER_HAS_DEVICE_LINK_PHASE"_s))) {
     return false;
   }
 
   if (cmValue resolveDeviceSymbols =
-        target.GetProperty(cmStrCat(language, "_RESOLVE_DEVICE_SYMBOLS"))) {
+        target.GetProperty(cmStrCat(language, "_RESOLVE_DEVICE_SYMBOLS"_s))) {
     // If CUDA_RESOLVE_DEVICE_SYMBOLS has been explicitly set we need
     // to honor the value no matter what it is.
     return resolveDeviceSymbols.IsOn();
@@ -240,7 +241,7 @@ bool requireDeviceLinking(cmGeneratorTarget const& target,
     target.GetLinkClosure(config);
 
   if (cm::contains(closure->Languages, language)) {
-    if (target.GetProperty(cmStrCat(language, "_SEPARABLE_COMPILATION"))
+    if (target.GetProperty(cmStrCat(language, "_SEPARABLE_COMPILATION"_s))
           .IsOn()) {
       bool doDeviceLinking = false;
       switch (target.GetType()) {

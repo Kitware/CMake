@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
@@ -70,8 +71,8 @@ private:
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Cannot specify precompile headers for target \"", name,
-               "\" which is not built by this project."));
+      cmStrCat("Cannot specify precompile headers for target \""_s, name,
+               "\" which is not built by this project."_s));
   }
 
   std::string Join(std::vector<std::string> const& content) override

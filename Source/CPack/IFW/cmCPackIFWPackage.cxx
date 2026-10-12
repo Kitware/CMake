@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackIFWCommon.h"
@@ -126,8 +127,8 @@ std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent* component)
     return "";
   }
   cmValue option = this->GetOption(
-    cmStrCat("CPACK_IFW_COMPONENT_",
-             cmsys::SystemTools::UpperCase(component->Name), "_NAME"));
+    cmStrCat("CPACK_IFW_COMPONENT_"_s,
+             cmsys::SystemTools::UpperCase(component->Name), "_NAME"_s));
   return option ? *option : component->Name;
 }
 
@@ -195,7 +196,7 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   this->DefaultConfiguration();
 
   std::string prefix =
-    cmStrCat("CPACK_IFW_COMPONENT_",
+    cmStrCat("CPACK_IFW_COMPONENT_"_s,
              cmsys::SystemTools::UpperCase(component->Name), '_');
 
   // Display name
@@ -240,7 +241,7 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
       cmCPackIFWLogger(
         WARNING, prefix,
         "LICENSES"
-        " should contain pairs of <display_name> and <file_path>.\n");
+        " should contain pairs of <display_name> and <file_path>.\n"_s);
       this->Licenses.clear();
     }
   }
@@ -249,10 +250,10 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   if (cmValue option = this->GetOption(prefix + "PRIORITY")) {
     this->SortingPriority = *option;
     cmCPackIFWLogger(
-      WARNING, "The \"PRIORITY\" option is set for component \"",
+      WARNING, "The \"PRIORITY\" option is set for component \""_s,
       component->Name,
       "\", but there option is "
-      "deprecated. Please use \"SORTING_PRIORITY\" option instead.\n");
+      "deprecated. Please use \"SORTING_PRIORITY\" option instead.\n"_s);
   }
 
   // Default
@@ -282,7 +283,7 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   this->DefaultConfiguration();
 
   std::string prefix =
-    cmStrCat("CPACK_IFW_COMPONENT_GROUP_",
+    cmStrCat("CPACK_IFW_COMPONENT_GROUP_"_s,
              cmsys::SystemTools::UpperCase(group->Name), '_');
 
   this->DisplayName[""] = group->DisplayName;
@@ -317,7 +318,7 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
       cmCPackIFWLogger(
         WARNING, prefix,
         "LICENSES"
-        " should contain pairs of <display_name> and <file_path>.\n");
+        " should contain pairs of <display_name> and <file_path>.\n"_s);
       this->Licenses.clear();
     }
   }
@@ -326,10 +327,10 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   if (cmValue option = this->GetOption(prefix + "PRIORITY")) {
     this->SortingPriority = *option;
     cmCPackIFWLogger(
-      WARNING, "The \"PRIORITY\" option is set for component group \"",
+      WARNING, "The \"PRIORITY\" option is set for component group \""_s,
       group->Name,
       "\", but there option is "
-      "deprecated. Please use \"SORTING_PRIORITY\" option instead.\n");
+      "deprecated. Please use \"SORTING_PRIORITY\" option instead.\n"_s);
   }
 
   return this->ConfigureFromPrefix(prefix);
@@ -340,7 +341,7 @@ int cmCPackIFWPackage::ConfigureFromGroup(std::string const& groupName)
   // Group configuration
 
   cmCPackComponentGroup group;
-  std::string prefix = cmStrCat("CPACK_COMPONENT_GROUP_",
+  std::string prefix = cmStrCat("CPACK_COMPONENT_GROUP_"_s,
                                 cmsys::SystemTools::UpperCase(groupName), '_');
 
   if (cmValue option = this->GetOption(prefix + "DISPLAY_NAME")) {
@@ -541,10 +542,10 @@ void cmCPackIFWPackage::GeneratePackageFile()
   if (this->Directory.empty()) {
     if (this->Installer) {
       this->Directory =
-        cmStrCat(this->Installer->Directory, "/packages/", this->Name);
+        cmStrCat(this->Installer->Directory, "/packages/"_s, this->Name);
     } else if (this->Generator) {
       this->Directory =
-        cmStrCat(this->Generator->toplevel, "/packages/", this->Name);
+        cmStrCat(this->Generator->toplevel, "/packages/"_s, this->Name);
     }
   }
 
@@ -595,7 +596,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   // Script (copy to meta dir)
   if (!this->Script.empty()) {
     std::string name = cmSystemTools::GetFilenameName(this->Script);
-    std::string path = cmStrCat(this->Directory, "/meta/", name);
+    std::string path = cmStrCat(this->Directory, "/meta/"_s, name);
     cmsys::SystemTools::CopyFileIfDifferent(this->Script, path);
     xout.Element("Script", name);
   }
@@ -604,7 +605,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   std::vector<std::string> userInterfaces = this->UserInterfaces;
   for (std::string& userInterface : userInterfaces) {
     std::string name = cmSystemTools::GetFilenameName(userInterface);
-    std::string path = cmStrCat(this->Directory, "/meta/", name);
+    std::string path = cmStrCat(this->Directory, "/meta/"_s, name);
     cmsys::SystemTools::CopyFileIfDifferent(userInterface, path);
     userInterface = name;
   }
@@ -620,7 +621,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   std::vector<std::string> translations = this->Translations;
   for (std::string& translation : translations) {
     std::string name = cmSystemTools::GetFilenameName(translation);
-    std::string path = cmStrCat(this->Directory, "/meta/", name);
+    std::string path = cmStrCat(this->Directory, "/meta/"_s, name);
     cmsys::SystemTools::CopyFileIfDifferent(translation, path);
     translation = name;
   }
@@ -684,9 +685,9 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
   if (warnUnsupportedNames) {
     cmCPackIFWLogger(
-      WARNING, "The dependencies for component \"", this->Name,
+      WARNING, "The dependencies for component \""_s, this->Name,
       "\" specify names that contain hyphens. "
-      "This requires QtIFW 3.1 or later, but you are using version ",
+      "This requires QtIFW 3.1 or later, but you are using version "_s,
       this->Generator->FrameworkVersion, '\n');
   }
 
@@ -694,7 +695,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   std::vector<std::string> licenses = this->Licenses;
   for (size_t i = 1; i < licenses.size(); i += 2) {
     std::string name = cmSystemTools::GetFilenameName(licenses[i]);
-    std::string path = cmStrCat(this->Directory, "/meta/", name);
+    std::string path = cmStrCat(this->Directory, "/meta/"_s, name);
     cmsys::SystemTools::CopyFileIfDifferent(licenses[i], path);
     licenses[i] = name;
   }

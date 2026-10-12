@@ -186,9 +186,9 @@ bool cmLcovTracefile::MergeFiles(
     cmsys::ifstream fin(path.c_str());
     if (!fin || !tracefile.Read(fin, error)) {
       std::string warning =
-        cmStrCat("Skipping unreadable CMake listfile coverage file: ", path);
+        cmStrCat("Skipping unreadable CMake listfile coverage file: "_s, path);
       if (!error.empty()) {
-        warning = cmStrCat(std::move(warning), "\n  ", error);
+        warning = cmStrCat(std::move(warning), "\n  "_s, error);
       }
       warn(warning);
       allMerged = false;
@@ -302,13 +302,13 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
   std::string text;
   unsigned long lineNumber = 0;
   auto fail = [&](cm::string_view message) -> bool {
-    error = cmStrCat("line ", lineNumber, ": ", message);
+    error = cmStrCat("line "_s, lineNumber, ": "_s, message);
     return false;
   };
   auto failMalformed = [&fail](Record record,
                                std::string const& value) -> bool {
     return fail(
-      cmStrCat("malformed ", ToKey(record), " record \"", value, '"'));
+      cmStrCat("malformed "_s, ToKey(record), " record \""_s, value, '"'));
   };
 
   while (cmSystemTools::GetLineFromStream(is, text)) {
@@ -337,7 +337,7 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
         continue;
       case Record::SourceFile:
         if (inBlock) {
-          return fail(cmStrCat(ToKey(Record::SourceFile), " record before ",
+          return fail(cmStrCat(ToKey(Record::SourceFile), " record before "_s,
                                ToKey(Record::EndOfRecord)));
         }
         inBlock = true;
@@ -358,7 +358,8 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
         break;
     }
     if (!inBlock) {
-      return fail(cmStrCat(key, " record before ", ToKey(Record::SourceFile)));
+      return fail(
+        cmStrCat(key, " record before "_s, ToKey(Record::SourceFile)));
     }
 
     switch (record) {
@@ -385,7 +386,7 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
         auto it = nameToLine.find(name);
         if (it == nameToLine.end()) {
           return fail(cmStrCat(ToKey(Record::FunctionExecutionCount),
-                               " record for \"", name, "\" with no ",
+                               " record for \""_s, name, "\" with no "_s,
                                ToKey(Record::Function)));
         }
         block.Functions[it->second].Hits += hits;
@@ -426,10 +427,10 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
   }
 
   if (inBlock) {
-    return fail(cmStrCat("missing ", ToKey(Record::EndOfRecord)));
+    return fail(cmStrCat("missing "_s, ToKey(Record::EndOfRecord)));
   }
   if (!sawFile) {
-    return fail(cmStrCat("no ", ToKey(Record::SourceFile), " record"));
+    return fail(cmStrCat("no "_s, ToKey(Record::SourceFile), " record"_s));
   }
   return true;
 }

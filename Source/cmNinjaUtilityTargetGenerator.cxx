@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -71,8 +72,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
     configDir = gg->ConfigDirectory(fileConfig);
   }
   std::string utilCommandName =
-    cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles", configDir, '/',
-             this->GetTargetName(), ".util");
+    cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles"_s, configDir, '/',
+             this->GetTargetName(), ".util"_s);
   utilCommandName = this->ConvertToNinjaPath(utilCommandName);
 
   cmNinjaBuild phonyBuild("phony");

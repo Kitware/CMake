@@ -13,6 +13,7 @@
 
 #include <cm/optional>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmArgumentParserTypes.h"
 #include "cmDiagnostics.h"
@@ -170,7 +171,7 @@ bool cmSbomBuilder::AddPackageInformation(
   }
 
   cmSpdxOrganization org;
-  org.SpdxId = cmStrCat("urn:", name, "#Organization");
+  org.SpdxId = cmStrCat("urn:"_s, name, "#Organization"_s);
   org.Name = name;
   org.CreationInfo = artifact.CreationInfo;
   artifact.OriginatedBy.emplace_back(std::move(org));
@@ -193,7 +194,7 @@ bool cmSbomBuilder::AddPackageInformation(
 
   artifact.BuiltTime = cmSystemTools::GetCurrentDateTime("%FT%TZ");
   cmSpdxExternalRef externalRef;
-  externalRef.Locator = cmStrCat("cmake:find_package(", name, ')');
+  externalRef.Locator = cmStrCat("cmake:find_package("_s, name, ')');
   externalRef.ExternalRefType = "buildSystem";
   artifact.ExternalRef.emplace_back(std::move(externalRef));
   return true;
@@ -214,7 +215,7 @@ cmSpdxDocument cmSbomBuilder::GenerateSbom() const
 {
   cmSpdxDocument proj;
   proj.Name = this->PackageName;
-  proj.SpdxId = cmStrCat("urn:", this->PackageName, "#SPDXDocument");
+  proj.SpdxId = cmStrCat("urn:"_s, this->PackageName, "#SPDXDocument"_s);
   proj.ProfileConformance = { "core", "software" };
   proj.CreationInfo = &this->CreationInfo;
 
@@ -225,7 +226,7 @@ cmSpdxDocument cmSbomBuilder::GenerateSbom() const
   if (!this->DataLicense.empty()) {
     cmSpdxLicenseExpression licenseObject;
     licenseObject.SpdxId =
-      cmStrCat("urn:", this->PackageName, "#DataLicenseExpression");
+      cmStrCat("urn:"_s, this->PackageName, "#DataLicenseExpression"_s);
     licenseObject.CreationInfo = &this->CreationInfo;
     licenseObject.LicenseExpression = this->DataLicense;
     proj.DataLicense = std::move(licenseObject);
@@ -238,7 +239,7 @@ cmSpdxPackage cmSbomBuilder::GenerateLocalPackage(
   cmGeneratorTarget const* target) const
 {
   cmSpdxPackage package;
-  package.SpdxId = cmStrCat("urn:", target->GetName(), "#Package");
+  package.SpdxId = cmStrCat("urn:"_s, target->GetName(), "#Package"_s);
   package.Name = target->GetName();
   package.PrimaryPurpose = GetPurpose(target->GetType());
   package.CreationInfo = &this->CreationInfo;
@@ -308,7 +309,7 @@ cmSpdxPackage const* cmSbomBuilder::GetOrCreateLinkedPackage(
     : name;
   cmSpdxPackage package;
   package.Name = packageName;
-  package.SpdxId = cmStrCat("urn:", packageName, "#Package");
+  package.SpdxId = cmStrCat("urn:"_s, packageName, "#Package"_s);
   package.CreationInfo = &this->CreationInfo;
   if (info) {
     auto const requirement = this->Requirements.find(info->Package);
@@ -360,9 +361,10 @@ bool cmSbomBuilder::EvaluateLinkProperty(
     if (cge->GetHadHeadSensitiveCondition()) {
       target->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Property \"", property, "\" of target \"", target->GetName(),
+        cmStrCat("Property \""_s, property, "\" of target \""_s,
+                 target->GetName(),
                  "\" contains a generator expression that is not allowed for "
-                 "SBOM generation."));
+                 "SBOM generation."_s));
       return false;
     }
 
@@ -430,7 +432,7 @@ bool cmSbomBuilder::GenerateTarget(
       return;
     }
     relationship.SpdxId =
-      cmStrCat("urn:", *package->Name, '#', id, "Relationship");
+      cmStrCat("urn:"_s, *package->Name, '#', id, "Relationship"_s);
     relationship.RelationshipType = cmSpdxRelationship::DEPENDS_ON;
     relationship.Description = description;
     relationship.From = package;
@@ -448,7 +450,7 @@ bool cmSbomBuilder::GenerateTarget(
   if (!license && !this->NoProjectDefaults) {
     cmMakefile const* mf = target->Target->GetMakefile();
     std::string const projectName = mf->GetStateSnapshot().GetProjectName();
-    license = mf->GetDefinition(cmStrCat(projectName, "_SPDX_LICENSE"));
+    license = mf->GetDefinition(cmStrCat(projectName, "_SPDX_LICENSE"_s));
   }
 
   this->GenerateDeclaredLicense(package, *license);
@@ -462,13 +464,14 @@ void cmSbomBuilder::GenerateDeclaredLicense(cmSpdxPackage const* package,
     return;
   }
   cmSpdxLicenseExpression expression;
-  expression.SpdxId = cmStrCat("urn:", *package->Name, "#LicenseExpression");
+  expression.SpdxId =
+    cmStrCat("urn:"_s, *package->Name, "#LicenseExpression"_s);
   expression.CreationInfo = &this->CreationInfo;
   expression.LicenseExpression = license;
 
   cmSpdxRelationship relationship;
   relationship.SpdxId =
-    cmStrCat("urn:", *package->Name, "#DeclaredLicenseRelationship");
+    cmStrCat("urn:"_s, *package->Name, "#DeclaredLicenseRelationship"_s);
   relationship.CreationInfo = &this->CreationInfo;
   relationship.RelationshipType = cmSpdxRelationship::HAS_DECLARED_LICENSE;
   relationship.From = package;
@@ -502,14 +505,14 @@ cmSbomBuilder::LinkInfo cmSbomBuilder::NoteLinkedTarget(
     if (!pkgInfo) {
       target->Makefile->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("Target \"", target->GetName(),
-                 "\" references imported target \"", linkedName,
-                 "\" which does not come from any known package."));
+        cmStrCat("Target \""_s, target->GetName(),
+                 "\" references imported target \""_s, linkedName,
+                 "\" which does not come from any known package."_s));
       return { "", linkedName };
     }
 
     std::string const& pkgName = pkgInfo->first;
-    auto const prefix = cmStrCat(pkgName, "::");
+    auto const prefix = cmStrCat(pkgName, "::"_s);
     std::string component = cmHasPrefix(linkedName, prefix)
       ? linkedName.substr(prefix.length())
       : linkedName;
@@ -527,11 +530,11 @@ cmSbomBuilder::LinkInfo cmSbomBuilder::NoteLinkedTarget(
     if (!cmHasSuffix(linkNamespace, "::")) {
       target->Makefile->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("Target \"", target->GetName(), "\" references target \"",
+        cmStrCat("Target \""_s, target->GetName(), "\" references target \""_s,
                  linkedName,
                  "\", whose export does not use the standard namespace "
                  "separator.  The dependency will be recorded by its bare "
-                 "target name without provenance."));
+                 "target name without provenance."_s));
       return { "", linkedName };
     }
 
@@ -555,12 +558,12 @@ cmSbomBuilder::LinkInfo cmSbomBuilder::NoteLinkedTarget(
       target->Makefile->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
         cmStrCat(
-          "Target \"", target->GetName(), "\" references target \"",
+          "Target \""_s, target->GetName(), "\" references target \""_s,
           linkedName,
           "\" which has no install(EXPORT)/export(EXPORT) namespace and is "
-          "covered by multiple SBOMs: ",
-          cmJoin(sbomPackages, ", "), ".  Attributing to \"", pkgName,
-          "\" (first alphabetically)."));
+          "covered by multiple SBOMs: "_s,
+          cmJoin(sbomPackages, ", "), ".  Attributing to \""_s, pkgName,
+          "\" (first alphabetically)."_s));
     }
     std::string component = linkedTarget->GetExportName();
     this->Requirements[pkgName].Components.emplace(component);
@@ -569,8 +572,8 @@ cmSbomBuilder::LinkInfo cmSbomBuilder::NoteLinkedTarget(
 
   target->Makefile->IssueMessage(
     MessageType::FATAL_ERROR,
-    cmStrCat("Target \"", target->GetName(), "\" references target \"",
-             linkedName, "\" ",
+    cmStrCat("Target \""_s, target->GetName(), "\" references target \""_s,
+             linkedName, "\" "_s,
              exportInfo.Sets.size() == 1
                ? "that is in an export set which is exported multiple times "
                  "with different namespaces: "
@@ -579,7 +582,7 @@ cmSbomBuilder::LinkInfo cmSbomBuilder::NoteLinkedTarget(
              ".\n"
              "An SBOM cannot attribute a dependency exported in more than one "
              "export set or with more than one namespace.  Consider "
-             "consolidating the exports of the \"",
-             linkedTarget->GetName(), "\" target to a single export."));
+             "consolidating the exports of the \""_s,
+             linkedTarget->GetName(), "\" target to a single export."_s));
   return { "", linkedName };
 }

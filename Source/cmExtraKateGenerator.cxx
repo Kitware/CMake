@@ -8,6 +8,8 @@
 #include <set>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCMakePath.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -60,7 +62,7 @@ void cmExtraKateGenerator::Generate()
 void cmExtraKateGenerator::CreateKateProjectFile(
   cmLocalGenerator const& lg) const
 {
-  std::string filename = cmStrCat(lg.GetBinaryDirectory(), "/.kateproject");
+  std::string filename = cmStrCat(lg.GetBinaryDirectory(), "/.kateproject"_s);
   cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
@@ -169,7 +171,7 @@ void cmExtraKateGenerator::WriteTargets(cmLocalGenerator const& lg,
           this->AppendTarget(fout, targetName, configs, make, makeArgs,
                              currentDir, homeOutputDir);
           if (!this->UseNinja) {
-            std::string fastTarget = cmStrCat(targetName, "/fast");
+            std::string fastTarget = cmStrCat(targetName, "/fast"_s);
             this->AppendTarget(fout, fastTarget, configs, make, makeArgs,
                                currentDir, homeOutputDir);
           }
@@ -209,7 +211,7 @@ void cmExtraKateGenerator::AppendTarget(
          << make << " -C \\\"" << (this->UseNinja ? homeOutputDir : path)
          << "\\\" "
          << ((this->UseNinja && configs.size() > 1)
-               ? cmStrCat(" -f build-", conf, ".ninja")
+               ? cmStrCat(" -f build-"_s, conf, ".ninja"_s)
                : std::string())
          << makeArgs << " " << target << "\"}\n";
 
@@ -220,8 +222,8 @@ void cmExtraKateGenerator::AppendTarget(
 void cmExtraKateGenerator::CreateDummyKateProjectFile(
   cmLocalGenerator const& lg) const
 {
-  std::string filename =
-    cmStrCat(lg.GetBinaryDirectory(), '/', this->ProjectName, ".kateproject");
+  std::string filename = cmStrCat(lg.GetBinaryDirectory(), '/',
+                                  this->ProjectName, ".kateproject"_s);
   cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;

@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 /* clang-format off */
 #include "cmGeneratorTarget.h"
+
+#include <cmext/string_view>
 /* clang-format on */
 
 #include "cmConfigure.h"
@@ -66,7 +68,7 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
           headTarget->GetGlobalGenerator()->IndexGeneratorTargetUniquely(
             lib.Target);
         std::string genex =
-          cmStrCat("$<TARGET_OBJECTS:", std::move(uniqueName), '>');
+          cmStrCat("$<TARGET_OBJECTS:"_s, std::move(uniqueName), '>');
         cmGeneratorExpression ge(*headTarget->Makefile->GetCMakeInstance(),
                                  lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge =
@@ -142,15 +144,15 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
         if (!targetName.empty()) {
           tgt->GetLocalGenerator()->IssueMessage(
             MessageType::FATAL_ERROR,
-            cmStrCat("Target \"", targetName,
+            cmStrCat("Target \""_s, targetName,
                      "\" contains relative path in its INTERFACE_SOURCES:\n  "
-                     "\"",
+                     "\""_s,
                      src, '"'));
         } else {
           tgt->GetLocalGenerator()->IssueMessage(
             MessageType::FATAL_ERROR,
-            cmStrCat("Found relative path while evaluating sources of \"",
-                     tgt->GetName(), "\":\n  \"", src, "\"\n"));
+            cmStrCat("Found relative path while evaluating sources of \""_s,
+                     tgt->GetName(), "\":\n  \""_s, src, "\"\n"_s));
         }
         return contextDependent;
       }
@@ -166,7 +168,7 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
       if (uniqueSrcs.insert(src).second) {
         srcs.emplace_back(entrySfs[i], entry.Backtrace);
         if (debugSources) {
-          usedSources = cmStrCat(std::move(usedSources), " * ", src, '\n');
+          usedSources = cmStrCat(std::move(usedSources), " * "_s, src, '\n');
         }
       } else {
         auto const& fileSets =
@@ -189,18 +191,18 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
             case cmPolicies::WARN:
               tgt->GetLocalGenerator()->IssuePolicyWarning(
                 cmPolicies::CMP0211, {},
-                cmStrCat("In target \"", tgt->GetName(), "\" the file\n  ",
-                         src, "\nalready belongs to file set \"",
-                         fileSet->GetName(), "\"."));
+                cmStrCat("In target \""_s, tgt->GetName(), "\" the file\n  "_s,
+                         src, "\nalready belongs to file set \""_s,
+                         fileSet->GetName(), "\"."_s));
               CM_FALLTHROUGH;
             case cmPolicies::OLD:
               break;
             default:
               tgt->GetLocalGenerator()->IssueMessage(
                 MessageType::FATAL_ERROR,
-                cmStrCat("In target \"", tgt->GetName(), "\" the file\n  ",
-                         src, "\nalready belongs to file set \"",
-                         fileSet->GetName(), "\"."));
+                cmStrCat("In target \""_s, tgt->GetName(), "\" the file\n  "_s,
+                         src, "\nalready belongs to file set \""_s,
+                         fileSet->GetName(), "\"."_s));
           }
         }
       }
@@ -208,7 +210,7 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
     if (!usedSources.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        cmStrCat("Used sources for target ", tgt->GetName(), ":\n",
+        cmStrCat("Used sources for target "_s, tgt->GetName(), ":\n"_s,
                  usedSources),
         entry.Backtrace);
     }
@@ -384,9 +386,9 @@ cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
     if (!it->second.Initialized) {
       this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("The SOURCES of \"", this->GetName(),
+        cmStrCat("The SOURCES of \""_s, this->GetName(),
                  "\" use a generator expression that depends on the "
-                 "SOURCES themselves."),
+                 "SOURCES themselves."_s),
         this->GetBacktrace());
       static KindedSources empty;
       return empty;
@@ -508,15 +510,15 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
 
   if (!badObjLib.empty()) {
     std::string e =
-      cmStrCat("OBJECT library \"", this->GetName(), "\" contains:\n");
+      cmStrCat("OBJECT library \""_s, this->GetName(), "\" contains:\n"_s);
     for (cmSourceFile* i : badObjLib) {
-      e = cmStrCat(std::move(e), "  ", i->GetLocation().GetName(), '\n');
+      e = cmStrCat(std::move(e), "  "_s, i->GetLocation().GetName(), '\n');
     }
     e =
       cmStrCat(std::move(e),
                "but may contain only sources that compile, header files, and "
                "other files that would not affect linking of a normal "
-               "library.");
+               "library."_s);
     this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR, e, this->GetBacktrace());
   }

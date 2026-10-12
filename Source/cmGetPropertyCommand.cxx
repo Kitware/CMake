@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGetPropertyCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmDirectoryPropertyHelper.h"
 #include "cmExecutionStatus.h"
 #include "cmFileSet.h"
@@ -119,9 +121,9 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
     scope = cmProperty::INSTALL;
   } else {
     status.SetError(
-      cmStrCat("given invalid scope ", args[1],
+      cmStrCat("given invalid scope "_s, args[1],
                ".  Valid scopes are GLOBAL, DIRECTORY, RULE, TARGET, "
-               "FILE_SET, SOURCE, TEST, VARIABLE, CACHE, INSTALL."));
+               "FILE_SET, SOURCE, TEST, VARIABLE, CACHE, INSTALL."_s));
     return false;
   }
 
@@ -188,7 +190,8 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
       doing = DoingNone;
       propertyName = args[i];
     } else {
-      status.SetError(cmStrCat("given invalid argument \"", args[i], "\"."));
+      status.SetError(
+        cmStrCat("given invalid argument \""_s, args[i], "\"."_s));
       return false;
     }
   }
@@ -342,8 +345,8 @@ bool HandleRuleMode(cmExecutionStatus& status, std::string const& name,
     cmValue prop = rule->GetProperty(propertyName);
     return StoreResult(infoType, status.GetMakefile(), variable, prop);
   }
-  status.SetError(cmStrCat("could not find RULE ", name,
-                           ".  Perhaps it has not yet been created."));
+  status.SetError(cmStrCat("could not find RULE "_s, name,
+                           ".  Perhaps it has not yet been created."_s));
   return false;
 }
 
@@ -372,9 +375,9 @@ bool HandleFileSetMode(cmExecutionStatus& status, std::string const& name,
     cmValue prop = fileSet->GetProperty(propertyName);
     return StoreResult(infoType, status.GetMakefile(), variable, prop);
   }
-  status.SetError(cmStrCat("could not find FILE_SET ", name, " for TARGET ",
-                           target->GetName(),
-                           ".  Perhaps it has not yet been created."));
+  status.SetError(cmStrCat("could not find FILE_SET "_s, name,
+                           " for TARGET "_s, target->GetName(),
+                           ".  Perhaps it has not yet been created."_s));
   return false;
 }
 
@@ -457,8 +460,8 @@ bool HandleInstallMode(cmExecutionStatus& status, std::string const& name,
     return StoreResult(infoType, status.GetMakefile(), variable,
                        isSet ? value.c_str() : nullptr);
   }
-  status.SetError(
-    cmStrCat("given INSTALL name that could not be found or created: ", name));
+  status.SetError(cmStrCat(
+    "given INSTALL name that could not be found or created: "_s, name));
   return false;
 }
 }
@@ -479,8 +482,8 @@ bool LookupTargetProperty(cmExecutionStatus& status, std::string const& name,
     return true;
   }
   if (result == cmGetTargetPropertyResult::TargetNotFound) {
-    status.SetError(cmStrCat("could not find TARGET ", name,
-                             ".  Perhaps it has not yet been created."));
+    status.SetError(cmStrCat("could not find TARGET "_s, name,
+                             ".  Perhaps it has not yet been created."_s));
   }
   return false;
 }
@@ -525,7 +528,7 @@ bool LookupSourceProperty(
   if (result == cmGetSourceFilePropertyResult::Error ||
       result == cmGetSourceFilePropertyResult::SourceNotFound) {
     status.SetError(cmStrCat(
-      "given SOURCE name that could not be found or created: ", name));
+      "given SOURCE name that could not be found or created: "_s, name));
   }
   return false;
 }
@@ -558,7 +561,7 @@ bool LookupTestProperty(cmExecutionStatus& status, std::string const& name,
     return true;
   }
   if (result == cmGetTestPropertyResult::TestNotFound) {
-    status.SetError(cmStrCat("given TEST name that does not exist: ", name));
+    status.SetError(cmStrCat("given TEST name that does not exist: "_s, name));
   }
   return false;
 }

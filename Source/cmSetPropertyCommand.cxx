@@ -109,7 +109,7 @@ bool HandleFileSetTargetScopes(cmExecutionStatus& status,
   file_set_target = status.GetMakefile().FindTargetToUse(file_set_target_name);
   if (!file_set_target) {
     status.SetError(
-      cmStrCat("given non-existent TARGET ", file_set_target_name));
+      cmStrCat("given non-existent TARGET "_s, file_set_target_name));
     return false;
   }
   return true;
@@ -166,7 +166,7 @@ bool HandleSourceFileDirectoryScopes(
         status.GetMakefile().GetGlobalGenerator()->FindMakefile(
           absolute_dir_path);
       if (!dir_mf) {
-        status.SetError(cmStrCat("given non-existent DIRECTORY ", dir_path));
+        status.SetError(cmStrCat("given non-existent DIRECTORY "_s, dir_path));
         return false;
       }
       if (directory_makefiles_set.find(dir_mf) ==
@@ -182,7 +182,7 @@ bool HandleSourceFileDirectoryScopes(
       cmTarget* target = current_dir_mf->FindTargetToUse(target_name);
       if (!target) {
         status.SetError(cmStrCat(
-          "given non-existent target for TARGET_DIRECTORY ", target_name));
+          "given non-existent target for TARGET_DIRECTORY "_s, target_name));
         return false;
       }
       cmValue target_source_dir = target->GetProperty("BINARY_DIR");
@@ -264,7 +264,7 @@ bool HandleTestDirectoryScopes(cmExecutionStatus& status,
         absolute_dir_path);
     if (!dir_mf) {
       status.SetError(
-        cmStrCat("given non-existent DIRECTORY ", test_directory));
+        cmStrCat("given non-existent DIRECTORY "_s, test_directory));
       return false;
     }
     directory_makefile = dir_mf;
@@ -353,26 +353,26 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
     if (!cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
       mf.IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("Policy ", policy,
+        cmStrCat("Policy "_s, policy,
                  " is set to NEW and the following non-boolean value given "
-                 "for property 'GENERATED' is therefore not allowed:\n",
-                 propertyValue, "\nReplace it with a boolean value!\n"));
+                 "for property 'GENERATED' is therefore not allowed:\n"_s,
+                 propertyValue, "\nReplace it with a boolean value!\n"_s));
       return true;
     }
     if (cmIsOff(propertyValue)) {
       mf.IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("Unsetting the 'GENERATED' property is not allowed under ",
-                 policy, "!\n"));
+        cmStrCat("Unsetting the 'GENERATED' property is not allowed under "_s,
+                 policy, "!\n"_s));
       return true;
     }
     if (op == PropertyOp::Append || op == PropertyOp::AppendAsString) {
       mf.IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
         cmStrCat(
-          "Policy ", policy,
+          "Policy "_s, policy,
           " is set to NEW and appending to the 'GENERATED' property is "
-          "therefore not allowed. Only setting it to \"1\" is allowed!\n"));
+          "therefore not allowed. Only setting it to \"1\" is allowed!\n"_s));
       return true;
     }
     return false;
@@ -474,9 +474,9 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
     scope = cmProperty::INSTALL;
   } else {
     status.SetError(
-      cmStrCat("given invalid scope ", scopeName,
+      cmStrCat("given invalid scope "_s, scopeName,
                ".  Valid scopes are GLOBAL, DIRECTORY, RULE, TARGET, "
-               "FILE_SET, SOURCE, TEST, CACHE, INSTALL."));
+               "FILE_SET, SOURCE, TEST, CACHE, INSTALL."_s));
     return false;
   }
 
@@ -563,7 +563,7 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
       propertyValue += arg;
       remove = false;
     } else {
-      status.SetError(cmStrCat("given invalid argument \"", arg, "\"."));
+      status.SetError(cmStrCat("given invalid argument \""_s, arg, "\"."_s));
       return false;
     }
   }
@@ -735,8 +735,8 @@ bool HandleRuleMode(cmExecutionStatus& status,
       // Check the resulting value.
       rule->CheckProperty(propertyName, status.GetMakefile());
     } else {
-      status.SetError(cmStrCat("could not find RULE ", name,
-                               ".  Perhaps it has not yet been created."));
+      status.SetError(cmStrCat("could not find RULE "_s, name,
+                               ".  Perhaps it has not yet been created."_s));
       return false;
     }
   }
@@ -753,8 +753,8 @@ bool HandleTargetMode(cmExecutionStatus& status,
     // Better error message for alias properties set on an alias target.
     if (propertyName == "ALIASED_TARGET" || propertyName == "ALIAS_GLOBAL") {
       if (status.GetMakefile().IsAlias(name)) {
-        status.SetError(cmStrCat("can not set property ", propertyName,
-                                 " on an ALIAS target: ", name));
+        status.SetError(cmStrCat("can not set property "_s, propertyName,
+                                 " on an ALIAS target: "_s, name));
         return false;
       }
     }
@@ -770,8 +770,8 @@ bool HandleTargetMode(cmExecutionStatus& status,
         return false;
       }
     } else {
-      status.SetError(cmStrCat("could not find TARGET ", name,
-                               ".  Perhaps it has not yet been created."));
+      status.SetError(cmStrCat("could not find TARGET "_s, name,
+                               ".  Perhaps it has not yet been created."_s));
       return false;
     }
   }
@@ -815,9 +815,9 @@ bool HandleFileSetMode(cmExecutionStatus& status,
         return false;
       }
     } else {
-      status.SetError(cmStrCat("could not find FILE_SET ", name,
-                               " for TARGET ", target->GetName(),
-                               ".  Perhaps it has not yet been created."));
+      status.SetError(cmStrCat("could not find FILE_SET "_s, name,
+                               " for TARGET "_s, target->GetName(),
+                               ".  Perhaps it has not yet been created."_s));
       return false;
     }
   }
@@ -865,7 +865,7 @@ bool HandleSourceMode(cmExecutionStatus& status,
         }
       } else {
         status.SetError(cmStrCat(
-          "given SOURCE name that could not be found or created: ", name));
+          "given SOURCE name that could not be found or created: "_s, name));
         return false;
       }
     }
@@ -924,7 +924,7 @@ bool HandleTestMode(cmExecutionStatus& status, std::set<std::string>& names,
 
   // Names that are still left were not found.
   if (!names.empty()) {
-    status.SetError(cmStrCat("given TEST names that do not exist:\n",
+    status.SetError(cmStrCat("given TEST names that do not exist:\n"_s,
                              cmWrap("  ", names, "\n", "")));
     return false;
   }
@@ -957,23 +957,23 @@ bool HandleCacheMode(cmExecutionStatus& status,
 {
   if (propertyName == "ADVANCED") {
     if (!remove && !cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
-      status.SetError(cmStrCat("given non-boolean value \"", propertyValue,
-                               R"(" for CACHE property "ADVANCED".  )"));
+      status.SetError(cmStrCat("given non-boolean value \""_s, propertyValue,
+                               R"(" for CACHE property "ADVANCED".  )"_s));
       return false;
     }
   } else if (propertyName == "TYPE") {
     if (!cmState::IsCacheEntryType(propertyValue)) {
       status.SetError(
-        cmStrCat("given invalid CACHE entry TYPE \"", propertyValue, '"'));
+        cmStrCat("given invalid CACHE entry TYPE \""_s, propertyValue, '"'));
       return false;
     }
   } else if (propertyName != "HELPSTRING" && propertyName != "STRINGS" &&
              propertyName != "VALUE") {
     status.SetError(
-      cmStrCat("given invalid CACHE property ", propertyName,
+      cmStrCat("given invalid CACHE property "_s, propertyName,
                ".  "
                "Settable CACHE properties are: "
-               "ADVANCED, HELPSTRING, STRINGS, TYPE, and VALUE."));
+               "ADVANCED, HELPSTRING, STRINGS, TYPE, and VALUE."_s));
     return false;
   }
 
@@ -988,8 +988,8 @@ bool HandleCacheMode(cmExecutionStatus& status,
         return false;
       }
     } else {
-      status.SetError(cmStrCat("could not find CACHE variable ", name,
-                               ".  Perhaps it has not yet been created."));
+      status.SetError(cmStrCat("could not find CACHE variable "_s, name,
+                               ".  Perhaps it has not yet been created."_s));
       return false;
     }
   }
@@ -1033,7 +1033,7 @@ bool HandleInstallMode(cmExecutionStatus& status,
       }
     } else {
       status.SetError(cmStrCat(
-        "given INSTALL name that could not be found or created: ", name));
+        "given INSTALL name that could not be found or created: "_s, name));
       return false;
     }
   }

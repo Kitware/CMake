@@ -4,6 +4,8 @@
 
 #include <cassert>
 
+#include <cmext/string_view>
+
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -50,7 +52,7 @@ void cmOSXBundleGenerator::CreateAppBundle(std::string const& targetName,
   std::string plist = cmStrCat(
     outpath, '/',
     this->GT->GetAppBundleDirectory(config, cmGeneratorTarget::ContentLevel),
-    "/Info.plist");
+    "/Info.plist"_s);
   this->LocalGenerator->GenerateAppleInfoPList(this->GT, targetName, plist);
   this->Makefile->AddCMakeOutputFile(plist);
   outpath = out;
@@ -102,7 +104,7 @@ void cmOSXBundleGenerator::CreateFramework(
   std::string newName;
 
   // Make foo.framework/Versions
-  std::string versions = cmStrCat(contentdir, "Versions");
+  std::string versions = cmStrCat(contentdir, "Versions"_s);
   cmSystemTools::MakeDirectory(versions);
 
   // Make foo.framework/Versions/version
@@ -110,13 +112,13 @@ void cmOSXBundleGenerator::CreateFramework(
 
   // Current -> version
   oldName = frameworkVersion;
-  newName = cmStrCat(versions, "/Current");
+  newName = cmStrCat(versions, "/Current"_s);
   cmSystemTools::RemoveFile(newName);
   cmSystemTools::CreateSymlink(oldName, newName);
   this->Makefile->AddCMakeOutputFile(newName);
 
   // foo -> Versions/Current/foo
-  oldName = cmStrCat("Versions/Current/", name);
+  oldName = cmStrCat("Versions/Current/"_s, name);
   newName = cmStrCat(contentdir, name);
   cmSystemTools::RemoveFile(newName);
   cmSystemTools::CreateSymlink(oldName, newName);
@@ -126,7 +128,7 @@ void cmOSXBundleGenerator::CreateFramework(
     // foo.tbd -> Versions/Current/foo.tbd
     cmValue tbdSuffix =
       this->Makefile->GetDefinition("CMAKE_APPLE_IMPORT_FILE_SUFFIX");
-    oldName = cmStrCat("Versions/Current/", name, tbdSuffix);
+    oldName = cmStrCat("Versions/Current/"_s, name, tbdSuffix);
     newName = cmStrCat(contentdir, name, tbdSuffix);
     cmSystemTools::RemoveFile(newName);
     cmSystemTools::CreateSymlink(oldName, newName);
@@ -137,7 +139,7 @@ void cmOSXBundleGenerator::CreateFramework(
   if (this->MacContentFolders->find("Resources") !=
       this->MacContentFolders->end()) {
     oldName = "Versions/Current/Resources";
-    newName = cmStrCat(contentdir, "Resources");
+    newName = cmStrCat(contentdir, "Resources"_s);
     cmSystemTools::RemoveFile(newName);
     cmSystemTools::CreateSymlink(oldName, newName);
     this->Makefile->AddCMakeOutputFile(newName);
@@ -147,7 +149,7 @@ void cmOSXBundleGenerator::CreateFramework(
   if (this->MacContentFolders->find("Headers") !=
       this->MacContentFolders->end()) {
     oldName = "Versions/Current/Headers";
-    newName = cmStrCat(contentdir, "Headers");
+    newName = cmStrCat(contentdir, "Headers"_s);
     cmSystemTools::RemoveFile(newName);
     cmSystemTools::CreateSymlink(oldName, newName);
     this->Makefile->AddCMakeOutputFile(newName);
@@ -157,7 +159,7 @@ void cmOSXBundleGenerator::CreateFramework(
   if (this->MacContentFolders->find("PrivateHeaders") !=
       this->MacContentFolders->end()) {
     oldName = "Versions/Current/PrivateHeaders";
-    newName = cmStrCat(contentdir, "PrivateHeaders");
+    newName = cmStrCat(contentdir, "PrivateHeaders"_s);
     cmSystemTools::RemoveFile(newName);
     cmSystemTools::CreateSymlink(oldName, newName);
     this->Makefile->AddCMakeOutputFile(newName);
@@ -184,7 +186,7 @@ void cmOSXBundleGenerator::CreateCFBundle(std::string const& targetName,
   std::string plist = cmStrCat(
     root, '/',
     this->GT->GetCFBundleDirectory(config, cmGeneratorTarget::ContentLevel),
-    "/Info.plist");
+    "/Info.plist"_s);
   std::string name = cmSystemTools::GetFilenameName(targetName);
   this->LocalGenerator->GenerateAppleInfoPList(this->GT, name, plist);
   this->Makefile->AddCMakeOutputFile(plist);

@@ -6,6 +6,8 @@
 #include <istream>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include <cmsys/RegularExpression.hxx>
 
 #include "cmRuntimeDependencyArchive.h"
@@ -38,7 +40,7 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
 
   auto process = builder.Start();
   if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
-    this->SetError(cmStrCat("Failed to start otool process for:\n  ", file));
+    this->SetError(cmStrCat("Failed to start otool process for:\n  "_s, file));
     return false;
   }
 
@@ -85,11 +87,12 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
   }
 
   if (!process.Wait()) {
-    this->SetError(cmStrCat("Failed to wait on otool process for:\n  ", file));
+    this->SetError(
+      cmStrCat("Failed to wait on otool process for:\n  "_s, file));
     return false;
   }
   if (process.GetStatus(0).ExitStatus != 0) {
-    this->SetError(cmStrCat("Failed to run otool on:\n  ", file));
+    this->SetError(cmStrCat("Failed to run otool on:\n  "_s, file));
     return false;
   }
 

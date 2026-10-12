@@ -6,6 +6,8 @@
 #include <cstring>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -281,7 +283,7 @@ std::string cmDocumentation::GeneralizeKeyword(std::string cname)
   for (auto const& it : conversions) {
     for (auto const& to_replace : it.second) {
       cmsys::RegularExpression reg(
-        cmStrCat("(^|_)(", to_replace, ")(\\.|$|_)"));
+        cmStrCat("(^|_)("_s, to_replace, ")(\\.|$|_)"_s));
       if (reg.find(cname)) {
         cname.replace(reg.start(2), to_replace.length(), it.first);
       }
@@ -535,7 +537,7 @@ void cmDocumentation::GlobHelp(std::vector<std::string>& files,
 {
   cmsys::Glob gl;
   std::string findExpr =
-    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help/", pattern, ".rst");
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help/"_s, pattern, ".rst"_s);
   if (gl.FindFiles(findExpr)) {
     files = gl.GetFiles();
   }
@@ -568,7 +570,7 @@ bool cmDocumentation::PrintFiles(std::ostream& os, std::string const& pattern)
   std::vector<std::string> files;
   this->GlobHelp(files, pattern);
   std::sort(files.begin(), files.end());
-  cmRST r(cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help"));
+  cmRST r(cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help"_s));
   for (std::string const& f : files) {
     found = r.ProcessFile(f) || found;
   }
@@ -588,8 +590,8 @@ bool cmDocumentation::PrintHelpOneManual(std::ostream& os)
   if (mlen > 3 && mname[mlen - 3] == '(' && mname[mlen - 1] == ')') {
     mname = cmStrCat(mname.substr(0, mlen - 3), '.', mname[mlen - 2]);
   }
-  if (this->PrintFiles(os, cmStrCat("manual/", mname)) ||
-      this->PrintFiles(os, cmStrCat("manual/", mname, ".[0-9]"))) {
+  if (this->PrintFiles(os, cmStrCat("manual/"_s, mname)) ||
+      this->PrintFiles(os, cmStrCat("manual/"_s, mname, ".[0-9]"_s))) {
     return true;
   }
   // Argument was not a manual.  Complain.
@@ -612,22 +614,22 @@ bool cmDocumentation::PrintHelpOneArbitrary(std::ostream& os)
 
   // Support legacy style uppercase commands, with LANG and CONFIG
   // substitutions
-  bool found = this->PrintFiles(os, cmStrCat("*/", word));
+  bool found = this->PrintFiles(os, cmStrCat("*/"_s, word));
   if (found) {
     os << "\n";
   }
   found = this->PrintFiles(
-            os, cmStrCat("command/", cmSystemTools::LowerCase(word))) ||
+            os, cmStrCat("command/"_s, cmSystemTools::LowerCase(word))) ||
     found;
   if (found) {
     return true;
   }
-  found = this->PrintFiles(os, cmStrCat("*/", word_m));
+  found = this->PrintFiles(os, cmStrCat("*/"_s, word_m));
   if (found) {
     os << "\n";
   }
   found = this->PrintFiles(
-            os, cmStrCat("command/", cmSystemTools::LowerCase(word_m))) ||
+            os, cmStrCat("command/"_s, cmSystemTools::LowerCase(word_m))) ||
     found;
   if (found) {
     return true;
@@ -641,7 +643,7 @@ bool cmDocumentation::PrintHelpOneArbitrary(std::ostream& os)
 bool cmDocumentation::PrintHelpOneCommand(std::ostream& os)
 {
   std::string cname = cmSystemTools::LowerCase(this->CurrentArgument);
-  if (this->PrintFiles(os, cmStrCat("command/", cname))) {
+  if (this->PrintFiles(os, cmStrCat("command/"_s, cname))) {
     return true;
   }
   // Argument was not a command.  Complain.
@@ -660,7 +662,7 @@ bool cmDocumentation::PrintHelpListCommands(std::ostream& os)
 bool cmDocumentation::PrintHelpOneDiagnostic(std::ostream& os)
 {
   std::string dname = cmSystemTools::UpperCase(this->CurrentArgument);
-  if (this->PrintFiles(os, cmStrCat("diagnostic/", dname))) {
+  if (this->PrintFiles(os, cmStrCat("diagnostic/"_s, dname))) {
     return true;
   }
   // Argument was not a command.  Complain.
@@ -679,7 +681,7 @@ bool cmDocumentation::PrintHelpListDiagnostics(std::ostream& os)
 bool cmDocumentation::PrintHelpOneModule(std::ostream& os)
 {
   std::string mname = this->CurrentArgument;
-  if (this->PrintFiles(os, cmStrCat("module/", mname))) {
+  if (this->PrintFiles(os, cmStrCat("module/"_s, mname))) {
     return true;
   }
   // Argument was not a module.  Complain.
@@ -707,7 +709,7 @@ bool cmDocumentation::PrintHelpListModules(std::ostream& os)
 bool cmDocumentation::PrintHelpOneProperty(std::ostream& os)
 {
   std::string pname = cmSystemTools::HelpFileName(this->CurrentArgument);
-  if (this->PrintFiles(os, cmStrCat("prop_*/", pname))) {
+  if (this->PrintFiles(os, cmStrCat("prop_*/"_s, pname))) {
     return true;
   }
   // Argument was not a property.  Complain.
@@ -727,7 +729,7 @@ bool cmDocumentation::PrintHelpOnePolicy(std::ostream& os)
 {
   std::string pname = this->CurrentArgument;
   std::vector<std::string> files;
-  if (this->PrintFiles(os, cmStrCat("policy/", pname))) {
+  if (this->PrintFiles(os, cmStrCat("policy/"_s, pname))) {
     return true;
   }
 
@@ -755,12 +757,12 @@ bool cmDocumentation::PrintHelpListGenerators(std::ostream& os)
 bool cmDocumentation::PrintHelpOneVariable(std::ostream& os)
 {
   std::string vname = cmSystemTools::HelpFileName(this->CurrentArgument);
-  if (this->PrintFiles(os, cmStrCat("variable/", vname))) {
+  if (this->PrintFiles(os, cmStrCat("variable/"_s, vname))) {
     return true;
   }
   std::string const generalized = GeneralizeKeyword(vname);
   if (generalized != vname &&
-      this->PrintFiles(os, cmStrCat("variable/", generalized))) {
+      this->PrintFiles(os, cmStrCat("variable/"_s, generalized))) {
     return true;
   }
   // Argument was not a variable.  Complain.

@@ -10,6 +10,7 @@
 #include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
@@ -321,7 +322,7 @@ void cmFastbuildTargetGenerator::AddOutput(cmCustomCommandGenerator const& ccg,
     exec.ExecOutput = this->ConvertToFastbuildPath(dummyOutput);
     for (auto const& output : exec.OutputsAlias.PreBuildDependencies) {
       OutputsToReplace[output.Name] = exec.ExecOutput;
-      LogMessage(cmStrCat("Adding replace from ", output.Name, " to ",
+      LogMessage(cmStrCat("Adding replace from "_s, output.Name, " to "_s,
                           exec.ExecOutput));
     }
   };
@@ -402,15 +403,15 @@ void cmFastbuildTargetGenerator::GetDepends(
 
     auto const targetInfo = this->LocalGenerator->GetSourcesWithOutput(dep);
     if (targetInfo.Target) {
-      LogMessage(
-        cmStrCat("dep: ", dep, ", target: ", targetInfo.Target->GetName()));
+      LogMessage(cmStrCat("dep: "_s, dep, ", target: "_s,
+                          targetInfo.Target->GetName()));
       auto const& target = targetInfo.Target;
       auto const processCCs = [this, &currentCCName, &targetDep,
                                dep](std::vector<cmCustomCommand> const& ccs,
                                     FastbuildBuildStep step) {
         for (auto const& cc : ccs) {
           for (auto const& output : cc.GetOutputs()) {
-            LogMessage(cmStrCat("dep: ", dep, ", post output: ",
+            LogMessage(cmStrCat("dep: "_s, dep, ", post output: "_s,
                                 this->ConvertToFastbuildPath(output)));
             if (this->ConvertToFastbuildPath(output) == dep) {
               auto ccName = this->GetCustomCommandTargetName(cc, step);
@@ -421,7 +422,7 @@ void cmFastbuildTargetGenerator::GetDepends(
             }
           }
           for (auto const& byproduct : cc.GetByproducts()) {
-            LogMessage(cmStrCat("dep: ", dep, ", post byproduct: ",
+            LogMessage(cmStrCat("dep: "_s, dep, ", post byproduct: "_s,
                                 this->ConvertToFastbuildPath(byproduct)));
             if (this->ConvertToFastbuildPath(byproduct) == dep) {
               auto ccName = this->GetCustomCommandTargetName(cc, step);
@@ -440,7 +441,7 @@ void cmFastbuildTargetGenerator::GetDepends(
       continue;
     }
     if (!targetInfo.Source) {
-      LogMessage(cmStrCat("dep: ", dep, ", no source, byproduct: ",
+      LogMessage(cmStrCat("dep: "_s, dep, ", no source, byproduct: "_s,
                           targetInfo.SourceIsByproduct));
       // Tested in "OutDir" test.
       if (!cmSystemTools::FileIsFullPath(orig)) {
@@ -449,7 +450,7 @@ void cmFastbuildTargetGenerator::GetDepends(
       continue;
     }
     if (!targetInfo.Source->GetCustomCommand()) {
-      LogMessage(cmStrCat("dep: ", dep, ", no GetCustomCommand"));
+      LogMessage(cmStrCat("dep: "_s, dep, ", no GetCustomCommand"_s));
       continue;
     }
     if (targetInfo.Source && targetInfo.Source->GetCustomCommand()) {
@@ -522,7 +523,7 @@ FastbuildExecNode cmFastbuildTargetGenerator::GetAppleTextStubCommand() const
     return res;
   }
 
-  res.Name = cmStrCat("create_", names.ImportOutput, "_text_stub");
+  res.Name = cmStrCat("create_"_s, names.ImportOutput, "_text_stub"_s);
   res.ExecExecutable = std::move(executable);
   res.ExecArguments = std::move(args);
   res.ExecWorkingDir = this->LocalCommonGenerator->GetCurrentBinaryDirectory();
@@ -575,10 +576,10 @@ std::vector<std::vector<cm::string_view>> GroupDeps(
 
     // Current dependency cannot be placed in the current group
     if (currentGroup.empty()) {
-      cmSystemTools::Error(cmStrCat("Failed to group dependencies: command "
-                                    "line limit exceeded. Filename too long: ",
-                                    depsCheckExecName,
-                                    ". Size limit: ", commandLineLimit));
+      cmSystemTools::Error(
+        cmStrCat("Failed to group dependencies: command "
+                 "line limit exceeded. Filename too long: "_s,
+                 depsCheckExecName, ". Size limit: "_s, commandLineLimit));
       return {};
     }
 
@@ -605,7 +606,7 @@ std::vector<FastbuildExecNode> cmFastbuildTargetGenerator::GetDepsCheckExecs(
 {
   std::string const& executable = cmSystemTools::GetCMakeCommand();
   std::string execArgumentsBase =
-    cmStrCat("-E cmake_fastbuild_check_depends ", depender.ExecOutput, ' ');
+    cmStrCat("-E cmake_fastbuild_check_depends "_s, depender.ExecOutput, ' ');
 
   std::vector<std::vector<cm::string_view>> depsCheckExecNamesGrouped =
     GroupDeps(depender, executable.size() + execArgumentsBase.size());
@@ -614,10 +615,10 @@ std::vector<FastbuildExecNode> cmFastbuildTargetGenerator::GetDepsCheckExecs(
   res.reserve(depsCheckExecNamesGrouped.size());
   for (size_t i = 0; i < depsCheckExecNamesGrouped.size(); ++i) {
     FastbuildExecNode exec;
-    exec.Name = cmStrCat(depender.Name, "-check-depends-", i);
+    exec.Name = cmStrCat(depender.Name, "-check-depends-"_s, i);
     exec.ExecAlways = true;
     exec.ExecUseStdOutAsOutput = true;
-    exec.ExecOutput = cmStrCat(depender.ExecOutput, '.', i, ".deps-checker");
+    exec.ExecOutput = cmStrCat(depender.ExecOutput, '.', i, ".deps-checker"_s);
     exec.ExecExecutable = executable;
     exec.ExecArguments =
       cmJoinStrings(depsCheckExecNamesGrouped[i], " ", execArgumentsBase);
@@ -653,7 +654,7 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
       }
     }
   }
-  LogMessage(cmStrCat("Number of custom commands: ", commands.size()));
+  LogMessage(cmStrCat("Number of custom commands: "_s, commands.size()));
   for (cmCustomCommand const& customCommand : commands) {
     cmCustomCommandGenerator ccg(customCommand, Config, LocalCommonGenerator);
     std::string launcher = this->MakeCustomLauncher(ccg);
@@ -701,8 +702,8 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
                execNode.PreBuildDependencies);
     for (auto const& util : ccg.GetUtilities()) {
       auto const& utilTargetName = util.Value.first;
-      LogMessage(cmStrCat("Util: ", utilTargetName,
-                          ", cross: ", std::to_string(util.Value.second)));
+      LogMessage(cmStrCat("Util: "_s, utilTargetName, ", cross: "_s,
+                          std::to_string(util.Value.second)));
       auto* const target = this->Makefile->FindTargetToUse(utilTargetName);
 
       if (target && target->IsImported()) {
@@ -730,7 +731,7 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
 
     execs.Alias.PreBuildDependencies.emplace(execNode.Name);
 
-    LogMessage(cmStrCat("cmdLines size ", cmdLines.size()));
+    LogMessage(cmStrCat("cmdLines size "_s, cmdLines.size()));
 
     if (!cmdLines.empty()) {
       std::string const scriptFileName = GetScriptFilename(execName);
@@ -753,7 +754,8 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
       }
     }
     for (auto const& out : execNode.OutputsAlias.PreBuildDependencies) {
-      LogMessage(cmStrCat("Adding replace from ", out.Name, " to ", execName));
+      LogMessage(
+        cmStrCat("Adding replace from "_s, out.Name, " to "_s, execName));
       OutputToExecName[out.Name] = execName;
     }
     execs.Nodes.emplace_back(std::move(execNode));
@@ -762,8 +764,8 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
     for (auto& inputFile : exec.ExecInput) {
       auto const iter = OutputsToReplace.find(inputFile);
       if (iter != OutputsToReplace.end()) {
-        LogMessage(
-          cmStrCat("Replacing input: ", inputFile, " with ", iter->second));
+        LogMessage(cmStrCat("Replacing input: "_s, inputFile, " with "_s,
+                            iter->second));
         inputFile = iter->second;
       }
       auto const depIter = std::find_if(
@@ -772,7 +774,7 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
           return !OutputToExecName[dep.Name].empty();
         });
       if (depIter != exec.PreBuildDependencies.end()) {
-        LogMessage(cmStrCat("Replacing dep ", depIter->Name, " with ",
+        LogMessage(cmStrCat("Replacing dep "_s, depIter->Name, " with "_s,
                             OutputToExecName[depIter->Name]));
         exec.PreBuildDependencies.emplace(OutputToExecName[depIter->Name]);
         exec.PreBuildDependencies.erase(depIter);
@@ -920,7 +922,7 @@ std::string cmFastbuildTargetGenerator::GetClangTidyReplacementsFilePath(
   std::string const& objectName =
     this->GeneratorTarget->GetObjectName(&source);
   std::string path =
-    cmStrCat(directory, '/', objectDir, '/', objectName, ".yaml");
+    cmStrCat(directory, '/', objectDir, '/', objectName, ".yaml"_s);
   LogMessage("ClangTidy replacements file: " + path);
   return path;
 }

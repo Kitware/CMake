@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCryptoHash.h"
 #include "cmList.h"
 #include "cmStringAlgorithms.h"
@@ -63,10 +65,10 @@ std::string ImportedCxxModuleLookup::BmiNameForSource(std::string const& path)
   constexpr size_t HASH_TRUNCATION = 12;
   if (importit != this->ImportedInfo.end()) {
     auto safename = hasher.HashString(importit->second.Name);
-    bmiName = cmStrCat(safename.substr(0, HASH_TRUNCATION), ".bmi");
+    bmiName = cmStrCat(safename.substr(0, HASH_TRUNCATION), ".bmi"_s);
   } else {
     auto dirhash = hasher.HashString(path);
-    bmiName = cmStrCat(dirhash.substr(0, HASH_TRUNCATION), ".bmi");
+    bmiName = cmStrCat(dirhash.substr(0, HASH_TRUNCATION), ".bmi"_s);
   }
 
   this->GeneratorInfo.emplace(path, ImportedCxxModuleGeneratorInfo{ bmiName });

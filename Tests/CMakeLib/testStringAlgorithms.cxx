@@ -142,7 +142,7 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
     long long int nlli = -130000ll;
     unsigned long long int nulli = 130000ull;
     std::string val =
-      cmStrCat("<test>", ni, ',', nui, ',', nli, ',', nuli, ", ", nlli,
+      cmStrCat("<test>"_s, ni, ',', nui, ',', nli, ',', nuli, ", "_s, nlli,
                std::string(", "), nulli, cm::string_view("</test>"));
     std::string expect =
       "<test>-1100,1100,-12000,12000, -130000, 130000</test>";
@@ -152,7 +152,7 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
     float const val = 1.5f;
     float const div = 0.00001f;
     float f = 0.0f;
-    std::istringstream(cmStrCat("", val)) >> f;
+    std::istringstream(cmStrCat(""_s, val)) >> f;
     f -= val;
     assert_ok((f < div) && (f > -div), "cmStrCat float");
   }
@@ -160,7 +160,7 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
     double const val = 1.5;
     double const div = 0.00001;
     double d = 0.0;
-    std::istringstream(cmStrCat("", val)) >> d;
+    std::istringstream(cmStrCat(""_s, val)) >> d;
     d -= val;
     assert_ok((d < div) && (d > -div), "cmStrCat double");
   }
@@ -173,10 +173,10 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
     bool moved = true;
     for (int i = 0; i < 100; i++) {
       if (i % 2 == 0) {
-        val = cmStrCat(std::move(val), "move ");
+        val = cmStrCat(std::move(val), "move "_s);
         expect += "move ";
       } else {
-        val = cmStrCat("cmStrCat ", std::move(val));
+        val = cmStrCat("cmStrCat "_s, std::move(val));
         expect = "cmStrCat " + std::move(expect);
       }
       if (val.data() != data || val.capacity() != capacity) {

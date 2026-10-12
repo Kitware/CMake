@@ -8,6 +8,7 @@
 #include <ostream>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -110,8 +111,8 @@ bool cmCTestSVN::NoteOldRevision()
     this->Log << "Revision for repository '" << svninfo.LocalPath
               << "' before update: " << svninfo.OldRevision << "\n";
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   Old revision of external repository '", svninfo.LocalPath,
-               "' is: ", svninfo.OldRevision, '\n');
+               "   Old revision of external repository '"_s, svninfo.LocalPath,
+               "' is: "_s, svninfo.OldRevision, '\n');
   }
 
   // Set the global old revision to the one of the root
@@ -131,8 +132,8 @@ bool cmCTestSVN::NoteNewRevision()
     this->Log << "Revision for repository '" << svninfo.LocalPath
               << "' after update: " << svninfo.NewRevision << "\n";
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   New revision of external repository '", svninfo.LocalPath,
-               "' is: ", svninfo.NewRevision, '\n');
+               "   New revision of external repository '"_s, svninfo.LocalPath,
+               "' is: "_s, svninfo.NewRevision, '\n');
 
     // svninfo.Root = ""; // uncomment to test GuessBase
     this->Log << "Repository '" << svninfo.LocalPath
@@ -247,7 +248,7 @@ bool cmCTestSVN::UpdateImpl()
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
-    args.push_back(cmStrCat("-r{", this->GetNightlyTime(), " +0000}"));
+    args.push_back(cmStrCat("-r{"_s, this->GetNightlyTime(), " +0000}"_s));
   }
 
   std::vector<std::string> svn_update;
@@ -381,7 +382,7 @@ bool cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
   // We are interested in every revision included in the update.
   std::string revs;
   if (atoi(svninfo.OldRevision.c_str()) < atoi(svninfo.NewRevision.c_str())) {
-    revs = cmStrCat("-r", svninfo.OldRevision, ':', svninfo.NewRevision);
+    revs = cmStrCat("-r"_s, svninfo.OldRevision, ':', svninfo.NewRevision);
   } else {
     revs = "-r" + svninfo.NewRevision;
   }

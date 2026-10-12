@@ -66,7 +66,7 @@ bool cmCMakePolicyCommand(std::vector<std::string> const& args,
     return HandleIssueWarningMode(args, status);
   }
 
-  status.SetError(cmStrCat("given unknown first argument \"", args[0], '"'));
+  status.SetError(cmStrCat("given unknown first argument \""_s, args[0], '"'));
   return false;
 }
 
@@ -87,7 +87,7 @@ bool HandleSetMode(std::vector<std::string> const& args,
     policyStatus = cmPolicies::NEW;
   } else {
     status.SetError(
-      cmStrCat("SET given unrecognized policy status \"", args[2], '"'));
+      cmStrCat("SET given unrecognized policy status \""_s, args[2], '"'));
     return false;
   }
 
@@ -118,8 +118,8 @@ bool HandleGetMode(std::vector<std::string> const& args,
   cmPolicies::PolicyID pid;
   if (!cmPolicies::GetPolicyID(id.c_str(), pid)) {
     status.SetError(
-      cmStrCat("GET given policy \"", id,
-               "\" which is not known to this version of CMake."));
+      cmStrCat("GET given policy \""_s, id,
+               "\" which is not known to this version of CMake."_s));
     return false;
   }
 
@@ -166,8 +166,8 @@ bool HandleVersionMode(std::vector<std::string> const& args,
   if (dd != std::string::npos &&
       (version_min.empty() || version_max.empty())) {
     status.SetError(
-      cmStrCat("VERSION \"", version_string,
-               R"(" does not have a version on both sides of "...".)"));
+      cmStrCat("VERSION \""_s, version_string,
+               R"(" does not have a version on both sides of "...".)"_s));
     return false;
   }
 
@@ -191,8 +191,8 @@ bool HandleGetWarningMode(std::vector<std::string> const& args,
   cmPolicies::PolicyID pid;
   if (!cmPolicies::GetPolicyID(id.c_str(), pid)) {
     status.SetError(
-      cmStrCat("GET_WARNING given policy \"", id,
-               "\" which is not known to this version of CMake."));
+      cmStrCat("GET_WARNING given policy \""_s, id,
+               "\" which is not known to this version of CMake."_s));
     return false;
   }
 
@@ -231,8 +231,8 @@ bool HandleIssueWarningMode(std::vector<std::string> const& args,
   cmPolicies::PolicyID pid;
   if (!cmPolicies::GetPolicyID(id.c_str(), pid)) {
     status.SetError(
-      cmStrCat("ISSUE_WARNING given policy \"", id,
-               "\" which is not known to this version of CMake."));
+      cmStrCat("ISSUE_WARNING given policy \""_s, id,
+               "\" which is not known to this version of CMake."_s));
     return false;
   }
 

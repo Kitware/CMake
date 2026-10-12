@@ -6,6 +6,8 @@
 #include <memory>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -75,14 +77,15 @@ void cmVariableWatchCommandVariableAccessed(
     if (!makefile->ExecuteCommand(newLFF, status)) {
       cmSystemTools::Error(
         cmStrCat("Error in cmake code at\nUnknown:0:\nA command failed "
-                 "during the invocation of callback \"",
-                 data->Command, "\"."));
+                 "during the invocation of callback \""_s,
+                 data->Command, "\"."_s));
     }
   } else {
-    makefile->IssueMessage(
-      MessageType::LOG,
-      cmStrCat("Variable \"", variable, "\" was accessed using ", accessString,
-               " with value \"", (newValue ? newValue : ""), "\"."));
+    makefile->IssueMessage(MessageType::LOG,
+                           cmStrCat("Variable \""_s, variable,
+                                    "\" was accessed using "_s, accessString,
+                                    " with value \""_s,
+                                    (newValue ? newValue : ""), "\"."_s));
   }
 
   data->InCallback = false;
@@ -144,7 +147,7 @@ bool cmVariableWatchCommand(std::vector<std::string> const& args,
     command = args[1];
   }
   if (variable == "CMAKE_CURRENT_LIST_FILE") {
-    status.SetError(cmStrCat("cannot be set on the variable: ", variable));
+    status.SetError(cmStrCat("cannot be set on the variable: "_s, variable));
     return false;
   }
 

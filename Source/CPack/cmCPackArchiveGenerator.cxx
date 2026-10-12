@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
@@ -287,7 +289,7 @@ std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
   std::string packageFileName;
 
   if (cmValue v = this->GetOptionIfSet(
-        cmStrCat("CPACK_ARCHIVE_", componentUpper, "_FILE_NAME"))) {
+        cmStrCat("CPACK_ARCHIVE_"_s, componentUpper, "_FILE_NAME"_s))) {
     packageFileName += *v;
   } else if ((v = this->GetOptionIfSet("CPACK_ARCHIVE_FILE_NAME"))) {
     packageFileName +=

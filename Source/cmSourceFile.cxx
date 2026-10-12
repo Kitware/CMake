@@ -228,13 +228,13 @@ bool cmSourceFile::FindFullPath(std::string* error,
   }
 
   // Compose error
-  std::string err = cmStrCat("Cannot find source file:\n  ", lPath);
+  std::string err = cmStrCat("Cannot find source file:\n  "_s, lPath);
   switch (cmp0115) {
     case cmPolicies::OLD:
     case cmPolicies::WARN:
-      err = cmStrCat(std::move(err), "\nTried extensions");
+      err = cmStrCat(std::move(err), "\nTried extensions"_s);
       for (auto const& ext : exts) {
-        err = cmStrCat(std::move(err), " .", ext);
+        err = cmStrCat(std::move(err), " ."_s, ext);
       }
       break;
     case cmPolicies::NEW:

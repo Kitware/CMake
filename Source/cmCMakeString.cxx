@@ -11,6 +11,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCryptoHash.h"
@@ -58,7 +60,7 @@ CMakeString& CMakeString::Replace(std::string const& matchExpression,
     }
     if (!replaceHelper.IsRegularExpressionValid()) {
       throw std::invalid_argument(
-        cmStrCat("Failed to compile regex \"", matchExpression, '"'));
+        cmStrCat("Failed to compile regex \""_s, matchExpression, '"'));
     }
 
     std ::string output;
@@ -87,7 +89,7 @@ cmList CMakeString::Match(std::string const& matchExpression,
   cmsys::RegularExpression re;
   if (!re.compile(matchExpression)) {
     throw std::invalid_argument(
-      cmStrCat("Failed to compile regex \"", matchExpression, '"'));
+      cmStrCat("Failed to compile regex \""_s, matchExpression, '"'));
   }
 
   cmList output;
@@ -134,12 +136,13 @@ cmList CMakeString::Match(std::string const& matchExpression,
 CMakeString CMakeString::Substring(long begin, long count) const
 {
   if (begin < 0 || static_cast<size_type>(begin) > this->String_.size()) {
-    throw std::out_of_range(cmStrCat(
-      "begin index: ", begin, " is out of range 0 - ", this->String_.size()));
+    throw std::out_of_range(cmStrCat("begin index: "_s, begin,
+                                     " is out of range 0 - "_s,
+                                     this->String_.size()));
   }
   if (count < -1) {
     throw std::out_of_range(
-      cmStrCat("end index: ", count, " should be -1 or greater"));
+      cmStrCat("end index: "_s, count, " should be -1 or greater"_s));
   }
 
   return this->String_.substr(static_cast<size_type>(begin),
@@ -206,7 +209,7 @@ CMakeString& CMakeString::Hash(cm::string_view hashAlgorithm)
   }
 
   throw std::invalid_argument(
-    cmStrCat(hashAlgorithm, ": invalid hash algorithm."));
+    cmStrCat(hashAlgorithm, ": invalid hash algorithm."_s));
 }
 
 CMakeString& CMakeString::FromASCII(string_range codes)
@@ -221,11 +224,11 @@ CMakeString& CMakeString::FromASCII(string_range codes)
         output += static_cast<char>(ch);
       } else {
         throw std::invalid_argument(
-          cmStrCat("Character with code ", code, " does not exist."));
+          cmStrCat("Character with code "_s, code, " does not exist."_s));
       }
     } catch (...) {
       throw std::invalid_argument(
-        cmStrCat("Character with code ", code, " does not exist."));
+        cmStrCat("Character with code "_s, code, " does not exist."_s));
     }
   }
   this->String_ = std::move(output);

@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetLinkDirectoriesCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -24,8 +26,8 @@ private:
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Cannot specify link directories for target \"", name,
-               "\" which is not built by this project."));
+      cmStrCat("Cannot specify link directories for target \""_s, name,
+               "\" which is not built by this project."_s));
   }
 
   std::string Join(std::vector<std::string> const& content) override;

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h"
 #include "cmRuntimeDependencyArchive.h"
@@ -45,7 +46,7 @@ bool cmBinUtilsMacOSMachOLinker::Prepare()
         this->Archive);
   } else {
     this->SetError(cmStrCat(
-      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: ", tool));
+      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: "_s, tool));
     return false;
   }
 

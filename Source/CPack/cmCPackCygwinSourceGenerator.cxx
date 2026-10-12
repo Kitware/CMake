@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCPackCygwinSourceGenerator.h"
 
+#include <cmext/string_view>
+
 #include "cmsys/SystemTools.hxx"
 
 #include "cmCPackLog.h"
@@ -38,7 +40,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
 {
   // Create a tar file of the sources
   std::string packageDirFileName =
-    cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".tar.bz2");
+    cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".tar.bz2"_s);
   packageFileNames[0] = packageDirFileName;
   std::string output;
   // create tar.bz2 file with the list of source files

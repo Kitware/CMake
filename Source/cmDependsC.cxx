@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmFileTime.h"
@@ -40,12 +42,13 @@ cmDependsC::cmDependsC(cmLocalUnixMakefileGenerator3* lg,
   std::string scanRegex = "^.*$";
   std::string complainRegex = "^$";
   {
-    std::string scanRegexVar = cmStrCat("CMAKE_", lang, "_INCLUDE_REGEX_SCAN");
+    std::string scanRegexVar =
+      cmStrCat("CMAKE_"_s, lang, "_INCLUDE_REGEX_SCAN"_s);
     if (cmValue sr = mf->GetDefinition(scanRegexVar)) {
       scanRegex = *sr;
     }
     std::string complainRegexVar =
-      cmStrCat("CMAKE_", lang, "_INCLUDE_REGEX_COMPLAIN");
+      cmStrCat("CMAKE_"_s, lang, "_INCLUDE_REGEX_COMPLAIN"_s);
     if (cmValue cr = mf->GetDefinition(complainRegexVar)) {
       complainRegex = *cr;
     }
@@ -63,7 +66,7 @@ cmDependsC::cmDependsC(cmLocalUnixMakefileGenerator3* lg,
   this->SetupTransforms();
 
   this->CacheFileName =
-    cmStrCat(this->TargetDirectory, '/', lang, ".includecache");
+    cmStrCat(this->TargetDirectory, '/', lang, ".includecache"_s);
 
   this->ReadCacheFile();
 }
@@ -161,7 +164,7 @@ bool cmDependsC::WriteDependencies(std::set<std::string> const& sources,
       if (fullName.empty() &&
           this->IncludeRegexComplain.find(current.FileName)) {
         cmSystemTools::Error(
-          cmStrCat("Cannot find file \"", current.FileName, "\"."));
+          cmStrCat("Cannot find file \""_s, current.FileName, "\"."_s));
         return false;
       }
 

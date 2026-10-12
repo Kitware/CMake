@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmCTest.h"
@@ -40,7 +42,7 @@ protected:
     if (this->InSources && this->InSource) {
       this->FilePaths.push_back(tmp);
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         this->Coverage.Quiet, "Adding Source: ", tmp, '\n');
+                         this->Coverage.Quiet, "Adding Source: "_s, tmp, '\n');
     }
   }
 
@@ -56,8 +58,8 @@ protected:
       while (true) {
         if (strcmp(atts[tagCount], "filename") == 0) {
           cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                             this->Coverage.Quiet,
-                             "Reading file: ", atts[tagCount + 1], '\n');
+                             this->Coverage.Quiet, "Reading file: "_s,
+                             atts[tagCount + 1], '\n');
           std::string filename = atts[tagCount + 1];
           this->CurFileName.clear();
 
@@ -89,8 +91,8 @@ protected:
             fin.open(this->CurFileName.c_str());
             if (!fin) {
               cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                                 this->Coverage.Quiet, "Skipping system file ",
-                                 filename, '\n');
+                                 this->Coverage.Quiet,
+                                 "Skipping system file "_s, filename, '\n');
 
               this->SkipThisClass = true;
               break;

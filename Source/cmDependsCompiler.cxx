@@ -89,9 +89,9 @@ bool cmDependsCompiler::CheckDependencies(
     if (forceReadDeps || depFileTime.Compare(internalDepFileTime) >= 0) {
       status = false;
       if (this->Verbose) {
-        cmSystemTools::Stdout(cmStrCat("Dependencies file \"", depFile,
-                                       "\" is newer than depends file \"",
-                                       internalDepFile, "\".\n"));
+        cmSystemTools::Stdout(cmStrCat("Dependencies file \""_s, depFile,
+                                       "\" is newer than depends file \""_s,
+                                       internalDepFile, "\".\n"_s));
       }
 
       std::vector<std::string> depends;

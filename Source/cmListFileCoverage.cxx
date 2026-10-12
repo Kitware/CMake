@@ -56,14 +56,14 @@ bool cmListFileCoverage::Start(std::string& error)
   }
   std::string const& dir = *value;
   if (!cmSystemTools::FileIsFullPath(dir)) {
-    error = cmStrCat("CMAKE_LISTFILE_COVERAGE_DIR is not an absolute path: \"",
-                     dir, '"');
+    error = cmStrCat(
+      "CMAKE_LISTFILE_COVERAGE_DIR is not an absolute path: \""_s, dir, '"');
     return false;
   }
   cmsys::Status const status = cmSystemTools::MakeDirectory(dir);
   if (!status) {
-    error = cmStrCat("Cannot write CMake listfile coverage to directory \"",
-                     dir, "\": ", status.GetString());
+    error = cmStrCat("Cannot write CMake listfile coverage to directory \""_s,
+                     dir, "\": "_s, status.GetString());
     return false;
   }
 
@@ -75,15 +75,17 @@ bool cmListFileCoverage::Start(std::string& error)
   if (base.back() != '/') {
     base += '/';
   }
-  std::string outputPath = cmStrCat(
-    base, static_cast<long long>(uv_os_getpid()), '-', token.data(), ".info");
+  std::string outputPath =
+    cmStrCat(base, static_cast<long long>(uv_os_getpid()), '-', token.data(),
+             ".info"_s);
 
-  std::string const probePath = cmStrCat(outputPath, ".probe");
+  std::string const probePath = cmStrCat(outputPath, ".probe"_s);
   {
     cmsys::ofstream probe(probePath.c_str());
     if (!probe) {
-      error = cmStrCat("Cannot write CMake listfile coverage to directory \"",
-                       dir, "\": ", cmSystemTools::GetLastSystemError());
+      error =
+        cmStrCat("Cannot write CMake listfile coverage to directory \""_s, dir,
+                 "\": "_s, cmSystemTools::GetLastSystemError());
       return false;
     }
   }

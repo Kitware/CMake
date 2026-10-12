@@ -844,11 +844,12 @@ bool FileSetType::WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
     if (fileSetName.empty()) {
       impl->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat(this->ArbitraryDescription, " name cannot be empty."));
+        cmStrCat(this->ArbitraryDescription, " name cannot be empty."_s));
     } else {
       impl->AddDirectoryToFileSet(
         tgt, fileSetName, value, this->TypeName,
-        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, '"'), action);
+        cmStrCat(this->ArbitraryDescription, " \""_s, fileSetName, '"'),
+        action);
     }
     return true;
   }
@@ -857,11 +858,12 @@ bool FileSetType::WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
     if (fileSetName.empty()) {
       impl->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat(this->ArbitraryDescription, " name cannot be empty."));
+        cmStrCat(this->ArbitraryDescription, " name cannot be empty."_s));
     } else {
       impl->AddPathToFileSet(
         tgt, fileSetName, value, this->TypeName,
-        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, '"'), action);
+        cmStrCat(this->ArbitraryDescription, " \""_s, fileSetName, '"'),
+        action);
     }
     return true;
   }
@@ -1612,7 +1614,7 @@ cmSourceFile* cmTarget::AddSource(std::string const& src, bool before)
 
 void cmTarget::ClearDependencyInformation(cmMakefile& mf) const
 {
-  std::string depname = cmStrCat(this->GetName(), "_LIB_DEPENDS");
+  std::string depname = cmStrCat(this->GetName(), "_LIB_DEPENDS"_s);
   mf.RemoveCacheDefinition(depname);
 }
 
@@ -1627,25 +1629,25 @@ std::string cmTarget::GetDebugGeneratorExpressions(
   std::vector<std::string> debugConfigs =
     this->impl->Makefile->GetCMakeInstance()->GetDebugConfigs();
 
-  std::string configString = cmStrCat("$<CONFIG:", debugConfigs[0], '>');
+  std::string configString = cmStrCat("$<CONFIG:"_s, debugConfigs[0], '>');
 
   if (debugConfigs.size() > 1) {
     for (std::string const& conf : cmMakeRange(debugConfigs).advance(1)) {
       configString =
-        cmStrCat(std::move(configString), ",$<CONFIG:", conf, '>');
+        cmStrCat(std::move(configString), ",$<CONFIG:"_s, conf, '>');
     }
-    configString = cmStrCat("$<OR:", std::move(configString), '>');
+    configString = cmStrCat("$<OR:"_s, std::move(configString), '>');
   }
 
   if (llt == OPTIMIZED_LibraryType) {
-    configString = cmStrCat("$<NOT:", std::move(configString), '>');
+    configString = cmStrCat("$<NOT:"_s, std::move(configString), '>');
   }
-  return cmStrCat("$<", configString, ':', value, '>');
+  return cmStrCat("$<"_s, configString, ':', value, '>');
 }
 
 static std::string targetNameGenex(std::string const& lib)
 {
-  return cmStrCat("$<TARGET_NAME:", lib, '>');
+  return cmStrCat("$<TARGET_NAME:"_s, lib, '>');
 }
 
 bool cmTarget::PushTLLCommandTrace(TLLSignature signature,
@@ -1774,7 +1776,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
       this->impl->TargetType <= cm::TargetType::MODULE_LIBRARY &&
       (this->GetPolicyStatusCMP0073() == cmPolicies::OLD ||
        this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
-    std::string targetEntry = cmStrCat(this->impl->Name, "_LIB_DEPENDS");
+    std::string targetEntry = cmStrCat(this->impl->Name, "_LIB_DEPENDS"_s);
     std::string dependencies;
     cmValue old_val = mf.GetDefinition(targetEntry);
     if (old_val) {
@@ -2251,7 +2253,7 @@ struct ReadOnlyProperty
     } else if (this->Condition == ReadOnlyCondition::NonImported) {
       msg = " property can't be set on non-imported targets(\"";
     }
-    return cmStrCat(prop, msg, target->GetName(), "\")\n");
+    return cmStrCat(prop, msg, target->GetName(), "\")\n"_s);
   }
 
   bool isReadOnly(std::string const& prop, cmMakefile* context,
@@ -2395,8 +2397,8 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
       this->impl->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("IMPORTED_GLOBAL property can't be set to FALSE on targets "
-                 "(\"",
-                 this->impl->Name, "\")\n"));
+                 "(\""_s,
+                 this->impl->Name, "\")\n"_s));
       return;
     }
     /* no need to change anything if value does not change */
@@ -2420,8 +2422,8 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
       this->impl->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_VERSION");
     if (this->GetType() != cm::TargetType::OBJECT_LIBRARY) {
       auto e =
-        cmStrCat(prop, " property can only be applied to OBJECT targets(",
-                 this->impl->Name, ")\n");
+        cmStrCat(prop, " property can only be applied to OBJECT targets("_s,
+                 this->impl->Name, ")\n"_s);
       this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       return;
     }
@@ -2437,8 +2439,8 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
     if (flag_found) {
       this->impl->Properties.SetProperty(prop, value);
     } else {
-      auto e = cmStrCat(prop, " property is not supported by ", compiler,
-                        "  compiler version ", compilerVersion, '.');
+      auto e = cmStrCat(prop, " property is not supported by "_s, compiler,
+                        "  compiler version "_s, compilerVersion, '.');
       this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       return;
     }
@@ -2469,8 +2471,8 @@ void cmTarget::AppendProperty(std::string const& prop,
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("IMPORTED_GLOBAL property can't be appended, only set on "
-               "imported targets (\"",
-               this->impl->Name, "\")\n"));
+               "imported targets (\""_s,
+               this->impl->Name, "\")\n"_s));
   }
 
   UsageRequirementProperty* usageRequirements[] = {
@@ -2537,14 +2539,14 @@ void cmTargetInternals::AddDirectoryToFileSet(cmTarget* self,
   if (!fileSet) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat(description, "has not yet been created."));
+      cmStrCat(description, "has not yet been created."_s));
     return;
   }
   if (fileSet->GetType() != fileSetType) {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                 cmStrCat("File set \"", fileSetName,
-                                          "\" is not of type \"", fileSetType,
-                                          "\"."));
+                                 cmStrCat("File set \""_s, fileSetName,
+                                          "\" is not of type \""_s,
+                                          fileSetType, "\"."_s));
     return;
   }
   if (action == FileSetType::Action::Set) {
@@ -2568,14 +2570,14 @@ void cmTargetInternals::AddPathToFileSet(cmTarget* self,
   if (!fileSet) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat(description, "has not yet been created."));
+      cmStrCat(description, "has not yet been created."_s));
     return;
   }
   if (fileSet->GetType() != fileSetType) {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                 cmStrCat("File set \"", fileSetName,
-                                          "\" is not of type \"", fileSetType,
-                                          "\"."));
+                                 cmStrCat("File set \""_s, fileSetName,
+                                          "\" is not of type \""_s,
+                                          fileSetType, "\"."_s));
     return;
   }
   if (action == FileSetType::Action::Set) {
@@ -2597,9 +2599,9 @@ cmValue cmTargetInternals::GetFileSetDirectories(
   }
   if (fileSet->GetType() != fileSetType) {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                 cmStrCat("File set \"", fileSetName,
-                                          "\" is not of type \"", fileSetType,
-                                          "\"."));
+                                 cmStrCat("File set \""_s, fileSetName,
+                                          "\" is not of type \""_s,
+                                          fileSetType, "\"."_s));
     return nullptr;
   }
   static std::string output;
@@ -2617,9 +2619,9 @@ cmValue cmTargetInternals::GetFileSetPaths(cmTarget const* self,
   }
   if (fileSet->GetType() != fileSetType) {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                 cmStrCat("File set \"", fileSetName,
-                                          "\" is not of type \"", fileSetType,
-                                          "\"."));
+                                 cmStrCat("File set \""_s, fileSetName,
+                                          "\" is not of type \""_s,
+                                          fileSetType, "\"."_s));
     return nullptr;
   }
   static std::string output;
@@ -2649,7 +2651,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
     dirs += this->impl->Makefile->GetCurrentSourceDirectory();
     if (!dirs.empty()) {
       this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                           (cmStrCat("$<BUILD_INTERFACE:", dirs, '>')));
+                           (cmStrCat("$<BUILD_INTERFACE:"_s, dirs, '>')));
     }
   }
 }
@@ -2675,11 +2677,11 @@ bool CheckLinkLibraryPattern(UsageRequirementProperty const& usage,
     context->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(
-        "Property ", usage.Name, " contains the invalid item \"",
-        linkPattern.match(2), "\". The ", usage.Name,
-        " property may contain the generator-expression \"$<LINK_",
+        "Property "_s, usage.Name, " contains the invalid item \""_s,
+        linkPattern.match(2), "\". The "_s, usage.Name,
+        " property may contain the generator-expression \"$<LINK_"_s,
         linkPattern.match(3),
-        ":...>\" which may be used to specify how the libraries are linked."),
+        ":...>\" which may be used to specify how the libraries are linked."_s),
       item.Backtrace);
   }
 
@@ -2804,12 +2806,12 @@ void CheckINTERFACE_LINK_LIBRARIES(std::string const& value,
     context->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("Property INTERFACE_LINK_LIBRARIES may not contain link-type "
-               "keyword \"",
+               "keyword \""_s,
                keys.match(2),
                "\".  The INTERFACE_LINK_LIBRARIES "
                "property may contain configuration-sensitive "
                "generator-expressions "
-               "which may be used to specify per-configuration rules."));
+               "which may be used to specify per-configuration rules."_s));
   }
 }
 
@@ -2824,9 +2826,9 @@ void CheckIMPORTED_GLOBAL(cmTarget const* target, cmMakefile* context)
   if (it == targets.end()) {
     context->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Attempt to promote imported target \"", target->GetName(),
+      cmStrCat("Attempt to promote imported target \""_s, target->GetName(),
                "\" to global scope (by setting IMPORTED_GLOBAL) "
-               "which is not built in this directory."));
+               "which is not built in this directory."_s));
   }
 }
 }
@@ -3379,7 +3381,7 @@ std::string cmTarget::ImportedGetFullPath(
         } else if (imp) {
           result = *imp;
         } else {
-          std::string impProp = cmStrCat("IMPORTED_LOCATION", suffix);
+          std::string impProp = cmStrCat("IMPORTED_LOCATION"_s, suffix);
           if (cmValue config_location = this->GetProperty(impProp)) {
             result = *config_location;
           } else if (cmValue location =
@@ -3389,7 +3391,7 @@ std::string cmTarget::ImportedGetFullPath(
           if (result.empty() &&
               (this->GetType() == cm::TargetType::SHARED_LIBRARY ||
                this->IsExecutableWithExports())) {
-            impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
+            impProp = cmStrCat("IMPORTED_IMPLIB"_s, suffix);
             if (cmValue config_implib = this->GetProperty(impProp)) {
               result = *config_implib;
             } else if (cmValue implib = this->GetProperty("IMPORTED_IMPLIB")) {
@@ -3424,7 +3426,7 @@ std::string cmTarget::ImportedGetFullPath(
           result = *imp;
         } else if (this->GetType() == cm::TargetType::SHARED_LIBRARY ||
                    this->IsExecutableWithExports()) {
-          std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
+          std::string impProp = cmStrCat("IMPORTED_IMPLIB"_s, suffix);
           if (cmValue config_implib = this->GetProperty(impProp)) {
             result = *config_implib;
           } else if (cmValue implib = this->GetProperty("IMPORTED_IMPLIB")) {
@@ -3451,10 +3453,10 @@ std::string cmTarget::ImportedGetFullPath(
         }
 
         if (!config.empty()) {
-          configuration = cmStrCat(" configuration \"", config, '"');
+          configuration = cmStrCat(" configuration \""_s, config, '"');
         }
 
-        return cmStrCat(unset, " not set for imported target \"",
+        return cmStrCat(unset, " not set for imported target \""_s,
                         this->GetName(), '"', configuration, '.');
       };
 
@@ -3471,7 +3473,7 @@ std::string cmTarget::ImportedGetFullPath(
       }
     }
 
-    result = cmStrCat(this->GetName(), "-NOTFOUND");
+    result = cmStrCat(this->GetName(), "-NOTFOUND"_s);
   }
   return result;
 }
@@ -3676,16 +3678,17 @@ bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
   if (!value.empty()) {
     if (value[0] == '-') {
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                   cmStrCat(prop, " property value\n  ", value,
-                                            "\nmay not start with '-'."));
+                                   cmStrCat(prop, " property value\n  "_s,
+                                            value,
+                                            "\nmay not start with '-'."_s));
       return false;
     }
     std::string::size_type bad = value.find_first_of(":/\\;");
     if (bad != std::string::npos) {
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                   cmStrCat(prop, " property value\n  ", value,
-                                            "\nmay not contain '",
-                                            value.substr(bad, 1), "'."));
+                                   cmStrCat(prop, " property value\n  "_s,
+                                            value, "\nmay not contain '"_s,
+                                            value.substr(bad, 1), "'."_s));
       return false;
     }
   }
@@ -3779,7 +3782,7 @@ bool cmTarget::GetMappedConfigOld(std::string const& desired_config,
 
   cmList mappedConfigs;
   {
-    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_", config_upper);
+    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_"_s, config_upper);
     if (cmValue mapValue = this->GetProperty(mapProp)) {
       mappedConfigs.assign(*mapValue, cmList::EmptyElements::Yes);
     }
@@ -3814,7 +3817,7 @@ bool cmTarget::GetMappedConfigOld(std::string const& desired_config,
       std::string locProp = cmStrCat(locPropBase, '_', mcUpper);
       loc = this->GetProperty(locProp);
       if (allowImp) {
-        std::string impProp = cmStrCat("IMPORTED_IMPLIB_", mcUpper);
+        std::string impProp = cmStrCat("IMPORTED_IMPLIB_"_s, mcUpper);
         imp = this->GetProperty(impProp);
       }
 
@@ -3840,7 +3843,7 @@ bool cmTarget::GetMappedConfigOld(std::string const& desired_config,
     std::string locProp = cmStrCat(locPropBase, suffix);
     loc = this->GetProperty(locProp);
     if (allowImp) {
-      std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
+      std::string impProp = cmStrCat("IMPORTED_IMPLIB"_s, suffix);
       imp = this->GetProperty(impProp);
     }
   }
@@ -3872,7 +3875,7 @@ bool cmTarget::GetMappedConfigOld(std::string const& desired_config,
       std::string locProp = cmStrCat(locPropBase, suffix);
       loc = this->GetProperty(locProp);
       if (allowImp) {
-        std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
+        std::string impProp = cmStrCat("IMPORTED_IMPLIB"_s, suffix);
         imp = this->GetProperty(impProp);
       }
     }
@@ -3937,7 +3940,7 @@ bool cmTarget::GetMappedConfigNew(std::string desiredConfig, cmValue& loc,
   // Get configuration mapping, if present.
   cmList mappedConfigs;
   if (!desiredConfig.empty()) {
-    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_", desiredConfig);
+    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_"_s, desiredConfig);
     if (cmValue mapValue = this->GetProperty(mapProp)) {
       mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue),
                            cmList::EmptyElements::Yes);

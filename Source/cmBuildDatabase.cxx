@@ -182,7 +182,7 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
     cmJSONState parseState(path, &mcdb);
     if (!parseState.errors.empty()) {
       cmSystemTools::Error(
-        cmStrCat("-E cmake_module_compile_db failed to parse ", path,
+        cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
                  parseState.GetErrorMessage()));
       return {};
     }
@@ -191,8 +191,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
   Json::Value const& version = mcdb["version"];
   if (version.asUInt() > 1) {
     cmSystemTools::Error(
-      cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-               ": version ", version.asString()));
+      cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+               ": version "_s, version.asString()));
     return {};
   }
 
@@ -206,8 +206,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
       Json::Value const& name = set["name"];
       if (!name.isString()) {
         cmSystemTools::Error(
-          cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                   ": name is not a string"));
+          cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                   ": name is not a string"_s));
         return {};
       }
       Set_.Name = name.asString();
@@ -215,8 +215,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
       Json::Value const& family_name = set["family-name"];
       if (!family_name.isString()) {
         cmSystemTools::Error(
-          cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                   ": family-name is not a string"));
+          cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                   ": family-name is not a string"_s));
         return {};
       }
       Set_.FamilyName = family_name.asString();
@@ -224,15 +224,15 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
       Json::Value const& visible_sets = set["visible-sets"];
       if (!visible_sets.isArray()) {
         cmSystemTools::Error(
-          cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                   ": visible-sets is not an array"));
+          cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                   ": visible-sets is not an array"_s));
         return {};
       }
       for (auto const& visible_set : visible_sets) {
         if (!visible_set.isString()) {
           cmSystemTools::Error(
-            cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                     ": a visible-sets item is not a string"));
+            cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                     ": a visible-sets item is not a string"_s));
           return {};
         }
 
@@ -242,15 +242,15 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
       Json::Value const& translation_units = set["translation-units"];
       if (!translation_units.isArray()) {
         cmSystemTools::Error(
-          cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                   ": translation-units is not an array"));
+          cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                   ": translation-units is not an array"_s));
         return {};
       }
       for (auto const& translation_unit : translation_units) {
         if (!translation_unit.isObject()) {
           cmSystemTools::Error(
-            cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                     ": a translation-units item is not an object"));
+            cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                     ": a translation-units item is not an object"_s));
           return {};
         }
 
@@ -263,8 +263,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
           work_directory = TranslationUnit_.WorkDirectory;
         } else if (!workdir.isNull()) {
           cmSystemTools::Error(
-            cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                     ": work-directory is not a string"));
+            cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                     ": work-directory is not a string"_s));
           return {};
         }
 
@@ -283,8 +283,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
           Json::Value const& priv = translation_unit["private"];
           if (!priv.isBool()) {
             cmSystemTools::Error(
-              cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                       ": private is not a boolean"));
+              cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                       ": private is not a boolean"_s));
             return {};
           }
           TranslationUnit_.Private = priv.asBool();
@@ -294,16 +294,16 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
           Json::Value const& reqs = translation_unit["requires"];
           if (!reqs.isArray()) {
             cmSystemTools::Error(
-              cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                       ": requires is not an array"));
+              cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                       ": requires is not an array"_s));
             return {};
           }
 
           for (auto const& require : reqs) {
             if (!require.isString()) {
               cmSystemTools::Error(
-                cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                         ": a requires item is not a string"));
+                cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                         ": a requires item is not a string"_s));
               return {};
             }
 
@@ -315,16 +315,16 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
           Json::Value const& provides = translation_unit["provides"];
           if (!provides.isObject()) {
             cmSystemTools::Error(
-              cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                       ": provides is not an object"));
+              cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                       ": provides is not an object"_s));
             return {};
           }
 
           for (auto i = provides.begin(); i != provides.end(); ++i) {
             if (!i->isString()) {
               cmSystemTools::Error(
-                cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                         ": a provides value is not a string"));
+                cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                         ": a provides value is not a string"_s));
               return {};
             }
 
@@ -337,8 +337,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
             translation_unit["baseline-arguments"];
           if (!baseline_arguments.isArray()) {
             cmSystemTools::Error(
-              cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                       ": baseline_arguments is not an array"));
+              cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                       ": baseline_arguments is not an array"_s));
             return {};
           }
 
@@ -348,8 +348,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
                 baseline_argument.asString());
             } else {
               cmSystemTools::Error(
-                cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                         ": a baseline argument is not a string"));
+                cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                         ": a baseline argument is not a string"_s));
               return {};
             }
           }
@@ -360,8 +360,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
             translation_unit["local-arguments"];
           if (!local_arguments.isArray()) {
             cmSystemTools::Error(
-              cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                       ": local_arguments is not an array"));
+              cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                       ": local_arguments is not an array"_s));
             return {};
           }
 
@@ -371,8 +371,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
                 local_argument.asString());
             } else {
               cmSystemTools::Error(
-                cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                         ": a local argument is not a string"));
+                cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                         ": a local argument is not a string"_s));
               return {};
             }
           }
@@ -382,8 +382,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
           Json::Value const& arguments = translation_unit["arguments"];
           if (!arguments.isArray()) {
             cmSystemTools::Error(
-              cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                       ": arguments is not an array"));
+              cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                       ": arguments is not an array"_s));
             return {};
           }
 
@@ -392,8 +392,8 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
               TranslationUnit_.Arguments.emplace_back(argument.asString());
             } else {
               cmSystemTools::Error(
-                cmStrCat("-E cmake_module_compile_db failed to parse ", path,
-                         ": an argument is not a string"));
+                cmStrCat("-E cmake_module_compile_db failed to parse "_s, path,
+                         ": an argument is not a string"_s));
               return {};
             }
           }
@@ -546,7 +546,7 @@ int cmcmd_cmake_module_compile_db(
     for (auto const* i : inputs) {
       auto db = cmBuildDatabase::Load(*i);
       if (!db) {
-        cmSystemTools::Error(cmStrCat("failed to verify ", *i));
+        cmSystemTools::Error(cmStrCat("failed to verify "_s, *i));
         ret = EXIT_FAILURE;
       }
     }
@@ -562,7 +562,7 @@ int cmcmd_cmake_module_compile_db(
     for (auto const* i : inputs) {
       auto db = cmBuildDatabase::Load(*i);
       if (!db) {
-        cmSystemTools::Error(cmStrCat("failed to read ", *i));
+        cmSystemTools::Error(cmStrCat("failed to read "_s, *i));
         return EXIT_FAILURE;
       }
 
@@ -573,7 +573,7 @@ int cmcmd_cmake_module_compile_db(
     db.Write(*output);
   } else {
     cmSystemTools::Error(
-      cmStrCat("-E cmake_module_compile_db unknown subcommand ", *command));
+      cmStrCat("-E cmake_module_compile_db unknown subcommand "_s, *command));
     return EXIT_FAILURE;
   }
 

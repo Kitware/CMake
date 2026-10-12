@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 /* clang-format off */
 #include "cmGeneratorTarget.h"
+
+#include <cmext/string_view>
 /* clang-format on */
 
 #include <algorithm>
@@ -164,20 +166,20 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
 
   cmList props{ *prop };
   std::string pdir =
-    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help/prop_tgt/");
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help/prop_tgt/"_s);
 
   for (std::string const& p : props) {
     std::string pname = cmSystemTools::HelpFileName(p);
-    std::string pfile = cmStrCat(pdir, pname, ".rst");
+    std::string pfile = cmStrCat(pdir, pname, ".rst"_s);
     if (cmSystemTools::FileExists(pfile, true)) {
       depender->GetLocalGenerator()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Target \"", dependee->GetName(), "\" has property \"", p,
-                 "\" listed in its ", propName,
+        cmStrCat("Target \""_s, dependee->GetName(), "\" has property \""_s, p,
+                 "\" listed in its "_s, propName,
                  " property.  "
                  "This is not allowed.  Only user-defined properties may "
-                 "appear listed in the ",
-                 propName, " property."));
+                 "appear listed in the "_s,
+                 propName, " property."_s));
       return;
     }
     if (emitted.insert(p).second) {
@@ -310,17 +312,18 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
     }
     std::sort(props.begin(), props.end());
 
-    std::string propsString = cmStrCat(
-      cmJoin(cmMakeRange(props).retreat(1), ", "), " and the ", props.back());
+    std::string propsString =
+      cmStrCat(cmJoin(cmMakeRange(props).retreat(1), ", "), " and the "_s,
+               props.back());
 
     this->LocalGenerator->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Property \"", prop, "\" appears in both the ", propsString,
-               " property in the dependencies of target \"", this->GetName(),
+      cmStrCat("Property \""_s, prop, "\" appears in both the "_s, propsString,
+               " property in the dependencies of target \""_s, this->GetName(),
                "\".  This is not allowed. A property may only require "
                "compatibility in a boolean interpretation, a numeric "
                "minimum, a numeric maximum or a string interpretation, but "
-               "not a mixture."));
+               "not a mixture."_s));
   }
 }
 
@@ -583,7 +586,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   }
   bool propInitialized = explicitlySet;
 
-  std::string report = cmStrCat(" * Target \"", tgt->GetName());
+  std::string report = cmStrCat(" * Target \""_s, tgt->GetName());
   if (explicitlySet) {
     report += "\" has property content \"";
     report += valueAsString<PropertyType>(propContent);
@@ -632,10 +635,10 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
         report += compatibilityAgree(t, propContent != consistent.second);
         if (!consistent.first) {
           cmSystemTools::Error(
-            cmStrCat("Property ", p, " on target \"", tgt->GetName(),
-                     "\" does\nnot match the INTERFACE_", p,
-                     " property requirement\nof dependency \"",
-                     theTarget->GetName(), "\".\n"));
+            cmStrCat("Property "_s, p, " on target \""_s, tgt->GetName(),
+                     "\" does\nnot match the INTERFACE_"_s, p,
+                     " property requirement\nof dependency \""_s,
+                     theTarget->GetName(), "\".\n"_s));
           break;
         }
         propContent = consistent.second;
@@ -654,12 +657,12 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
         report += compatibilityAgree(t, propContent != consistent.second);
         if (!consistent.first) {
           cmSystemTools::Error(
-            cmStrCat("Property ", p, " on target \"", tgt->GetName(),
-                     "\" is\nimplied to be ", defaultValue,
+            cmStrCat("Property "_s, p, " on target \""_s, tgt->GetName(),
+                     "\" is\nimplied to be "_s, defaultValue,
                      " because it was used to determine the link libraries\n"
-                     "already. The INTERFACE_",
-                     p, " property on\ndependency \"", theTarget->GetName(),
-                     "\" is in conflict.\n"));
+                     "already. The INTERFACE_"_s,
+                     p, " property on\ndependency \""_s, theTarget->GetName(),
+                     "\" is in conflict.\n"_s));
           break;
         }
         propContent = consistent.second;
@@ -677,15 +680,15 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                    compatibilityAgree(t, propContent != consistent.second));
         if (!consistent.first) {
           cmSystemTools::Error(cmStrCat(
-            "The INTERFACE_", p, " property of \"", theTarget->GetName(),
-            "\" does\nnot agree with the value of ", p,
-            " already determined\nfor \"", tgt->GetName(), "\".\n"));
+            "The INTERFACE_"_s, p, " property of \""_s, theTarget->GetName(),
+            "\" does\nnot agree with the value of "_s, p,
+            " already determined\nfor \""_s, tgt->GetName(), "\".\n"_s));
           break;
         }
         propContent = consistent.second;
         continue;
       }
-      report = cmStrCat(std::move(report), reportEntry, "(Interface set)\n");
+      report = cmStrCat(std::move(report), reportEntry, "(Interface set)\n"_s);
       propContent = ifacePropContent;
       propInitialized = true;
     } else {

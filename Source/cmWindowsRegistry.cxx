@@ -155,7 +155,7 @@ KeyHandler KeyHandler::OpenKey(cm::string_view rootKey, cm::string_view subKey,
   } else if (rootKey == "HKU"_s || rootKey == "HKEY_USERS"_s) {
     hRootKey = HKEY_USERS;
   } else {
-    throw registry_error(cmStrCat(rootKey, ": invalid root key."));
+    throw registry_error(cmStrCat(rootKey, ": invalid root key."_s));
   }
   // Update path format
   auto key = ToWide(subKey);
@@ -288,7 +288,7 @@ std::string KeyHandler::ReadValue(cm::string_view name,
 
   auto valueType = ToValueType(type);
   if (!valueType || !supportedTypes.contains(*valueType)) {
-    throw registry_error(cmStrCat(type, ": unsupported type."));
+    throw registry_error(cmStrCat(type, ": unsupported type."_s));
   }
 
   switch (type) {
@@ -322,7 +322,7 @@ std::string KeyHandler::ReadValue(cm::string_view name,
       return this->ToNarrow(reinterpret_cast<wchar_t*>(data.get()));
     } break;
     default:
-      throw registry_error(cmStrCat(type, ": unsupported type."));
+      throw registry_error(cmStrCat(type, ": unsupported type."_s));
   }
 }
 

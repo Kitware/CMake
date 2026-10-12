@@ -62,7 +62,7 @@ bool cmMacroHelperCommand::operator()(
   // required by the signature
   if (expandedArgs.size() < this->Args.size() - 1) {
     std::string errorMsg =
-      cmStrCat("Macro invoked with incorrect arguments for macro named: ",
+      cmStrCat("Macro invoked with incorrect arguments for macro named: "_s,
                this->Args[0]);
     inStatus.SetError(errorMsg);
     return false;
@@ -99,12 +99,12 @@ bool cmMacroHelperCommand::operator()(
   std::vector<std::string> variables;
   variables.reserve(this->Args.size() - 1);
   for (unsigned int j = 1; j < this->Args.size(); ++j) {
-    variables.emplace_back(cmStrCat("${", this->Args[j], '}'));
+    variables.emplace_back(cmStrCat("${"_s, this->Args[j], '}'));
   }
   std::vector<std::string> argVs;
   argVs.reserve(expandedArgs.size());
   for (unsigned int j = 0; j < expandedArgs.size(); ++j) {
-    argVs.emplace_back(cmStrCat("${ARGV", j, '}'));
+    argVs.emplace_back(cmStrCat("${ARGV"_s, j, '}'));
   }
 
   cmMakefile::MacroPushPop macroScope(&makefile, this->FilePath,

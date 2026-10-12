@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
@@ -28,8 +29,8 @@ private:
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Cannot specify include directories for target \"", name,
-               "\" which is not built by this project."));
+      cmStrCat("Cannot specify include directories for target \""_s, name,
+               "\" which is not built by this project."_s));
   }
 
   bool HandleDirectContent(cmTarget* tgt,

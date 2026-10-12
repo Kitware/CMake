@@ -57,9 +57,9 @@ bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
                                          cmSystemTools::OUTPUT_NONE,
                                          cmDuration(30))) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("Running\n '", cmJoin(command, "' '"),
+                       cmStrCat("Running\n '"_s, cmJoin(command, "' '"),
                                 "'\n"
-                                "failed with:\n ",
+                                "failed with:\n "_s,
                                 err));
       cmSystemTools::SetFatalErrorOccurred();
       return false;

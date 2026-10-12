@@ -10,6 +10,7 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmsys/String.h"
 
@@ -139,7 +140,7 @@ std::string RuleIdForMessageType(MessageType type,
         sarifIdName += cmsysString_tolower(c);
       }
     }
-    return cmStrCat("CMake.", sarifIdName);
+    return cmStrCat("CMake."_s, sarifIdName);
   }
 
   // Fall back to message type if not a diagnostic
@@ -213,7 +214,7 @@ void cmCMakeSarifLogger::AddBaseDirectory(cm::string_view name,
   this->UriBaseIds.emplace_back(std::string(name), std::string(path));
   this->CMakeRun.OriginalUriBaseIds.emplace(
     std::string(name),
-    cmSarif::ArtifactLocation{ cmStrCat("file://", path, '/'), "" });
+    cmSarif::ArtifactLocation{ cmStrCat("file://"_s, path, '/'), "" });
 }
 
 void cmCMakeSarifLogger::RecordDiagnostics(
@@ -305,6 +306,6 @@ void cmCMakeSarifLogger::GenerateForRun() const
 
   if (!this->WriteFile(this->FilePath)) {
     cmSystemTools::Error(
-      cmStrCat("Failed to write SARIF log to ", this->FilePath));
+      cmStrCat("Failed to write SARIF log to "_s, this->FilePath));
   }
 }

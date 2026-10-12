@@ -7,6 +7,8 @@
 #include <ostream>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCTest.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -42,15 +44,15 @@ void cmCTestVC::SetSourceDirectory(std::string const& dir)
 bool cmCTestVC::InitialCheckout(std::string const& command)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   First perform the initial checkout: ", command, '\n');
+             "   First perform the initial checkout: "_s, command, '\n');
 
   // Make the parent directory in which to perform the checkout.
   std::string parent = cmSystemTools::GetFilenamePath(this->SourceDirectory);
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Perform checkout in directory: ", parent, '\n');
+             "   Perform checkout in directory: "_s, parent, '\n');
   if (!cmSystemTools::MakeDirectory(parent)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create directory: ", parent,
-               '\n');
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create directory: "_s,
+               parent, '\n');
     return false;
   }
 
@@ -64,7 +66,7 @@ bool cmCTestVC::InitialCheckout(std::string const& command)
   bool result = this->RunChild(args, &out, &err, parent);
   this->Log << "--- End Initial Checkout ---\n";
   if (!result) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Initial checkout failed!\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Initial checkout failed!\n"_s);
   }
   return result;
 }
@@ -171,7 +173,7 @@ void cmCTestVC::SetNewRevision(std::string const& /*unused*/)
 bool cmCTestVC::UpdateImpl()
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-             "* Unknown VCS tool, not updating!\n");
+             "* Unknown VCS tool, not updating!\n"_s);
   return true;
 }
 
@@ -186,7 +188,7 @@ bool cmCTestVC::WriteXML(cmXMLWriter& xml)
 bool cmCTestVC::WriteXMLUpdates(cmXMLWriter& /*unused*/)
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-             "* CTest cannot extract updates for this VCS tool.\n");
+             "* CTest cannot extract updates for this VCS tool.\n"_s);
   return true;
 }
 

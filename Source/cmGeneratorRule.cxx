@@ -182,10 +182,10 @@ std::unique_ptr<cmCustomCommand> cmGeneratorRule::CreateCustomCommand() const
     auto result = this->RuleExpander.ExpandPatterns(item);
     if (this->RuleExpander.InError) {
       throw rule_pattern_error{ cmStrCat(
-        "Pattern expression\n  ", item, "\nfrom rule \"",
-        this->GetRule()->GetName(), "\", used by the fileset \"",
-        this->FileSet->GetName(), "\" of the target \"",
-        this->Target->GetName(), "\", did not expand correctly.") };
+        "Pattern expression\n  "_s, item, "\nfrom rule \""_s,
+        this->GetRule()->GetName(), "\", used by the fileset \""_s,
+        this->FileSet->GetName(), "\" of the target \""_s,
+        this->Target->GetName(), "\", did not expand correctly."_s) };
     }
     return result;
   };
@@ -284,9 +284,9 @@ std::unique_ptr<cmCustomCommand> cmGeneratorRule::CreateCustomCommand() const
         !this->Rule->GetProperty("JOB_POOL_COMPILE")->empty()) {
       this->GetMakefile().IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("RULE \"", this->GetName(), "\": JOB_POOL \"",
+        cmStrCat("RULE \""_s, this->GetName(), "\": JOB_POOL \""_s,
                  expandVariables(this->Rule->GetProperty("JOB_POOL_COMPILE")),
-                 "\" is shadowed by USES_TERMINAL."));
+                 "\" is shadowed by USES_TERMINAL."_s));
     }
     if (!this->Rule->GetProperty("JOB_POOL_COMPILE")->empty()) {
       cc->SetJobPool(

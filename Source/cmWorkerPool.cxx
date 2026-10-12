@@ -12,6 +12,7 @@
 #include <thread>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include <cm3p/uv.h>
 
@@ -318,10 +319,10 @@ void cmUVReadOnlyProcess::UVExit(uv_process_t* handle, int64_t exitStatus,
     if (proc.Result()->ErrorMessage.empty()) {
       if (termSignal != 0) {
         proc.Result()->ErrorMessage = cmStrCat(
-          "Process was terminated by signal ", proc.Result()->TermSignal);
+          "Process was terminated by signal "_s, proc.Result()->TermSignal);
       } else if (exitStatus != 0) {
         proc.Result()->ErrorMessage = cmStrCat(
-          "Process failed with return value ", proc.Result()->ExitStatus);
+          "Process failed with return value "_s, proc.Result()->ExitStatus);
       }
     }
 
@@ -342,7 +343,7 @@ void cmUVReadOnlyProcess::UVPipeOutEnd(ssize_t error)
   // Process pipe error
   if ((error != 0) && !this->Result()->error()) {
     this->Result()->ErrorMessage = cmStrCat(
-      "Reading from stdout pipe failed with libuv error code ", error);
+      "Reading from stdout pipe failed with libuv error code "_s, error);
   }
   // Try finish
   this->UVTryFinish();
@@ -360,7 +361,7 @@ void cmUVReadOnlyProcess::UVPipeErrEnd(ssize_t error)
   // Process pipe error
   if ((error != 0) && !this->Result()->error()) {
     this->Result()->ErrorMessage = cmStrCat(
-      "Reading from stderr pipe failed with libuv error code ", error);
+      "Reading from stderr pipe failed with libuv error code "_s, error);
   }
   // Try finish
   this->UVTryFinish();

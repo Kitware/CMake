@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmOutputConverter.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -57,8 +59,8 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
   }
   if (this->ReplaceValues->Language && this->ReplaceValues->Launcher &&
       variable ==
-        cmStrCat("CMAKE_", this->ReplaceValues->Language,
-                 "_HOST_LINK_LAUNCHER")) {
+        cmStrCat("CMAKE_"_s, this->ReplaceValues->Language,
+                 "_HOST_LINK_LAUNCHER"_s)) {
     auto mapIt = this->VariableMappings.find(variable);
     std::string result = mapIt != this->VariableMappings.end()
       ? this->ConvertToOutputForExisting(mapIt->second)
@@ -341,23 +343,23 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
   auto compIt = this->Compilers.find(variable);
 
   if (compIt != this->Compilers.end()) {
-    std::string const& compilerPath =
-      this->VariableMappings[cmStrCat("CMAKE_", compIt->second, "_COMPILER")];
+    std::string const& compilerPath = this->VariableMappings[cmStrCat(
+      "CMAKE_"_s, compIt->second, "_COMPILER"_s)];
     std::string ret = this->ConvertToOutputForExisting(compilerPath);
     std::string const& compilerArg1 = this->VariableMappings[cmStrCat(
-      "CMAKE_", compIt->second, "_COMPILER_ARG1")];
+      "CMAKE_"_s, compIt->second, "_COMPILER_ARG1"_s)];
     std::string const& compilerTarget = this->VariableMappings[cmStrCat(
-      "CMAKE_", compIt->second, "_COMPILER_TARGET")];
+      "CMAKE_"_s, compIt->second, "_COMPILER_TARGET"_s)];
     std::string const& compilerOptionTarget = this->VariableMappings[cmStrCat(
-      "CMAKE_", compIt->second, "_COMPILE_OPTIONS_TARGET")];
+      "CMAKE_"_s, compIt->second, "_COMPILE_OPTIONS_TARGET"_s)];
     std::string const& compilerExternalToolchain =
-      this->VariableMappings[cmStrCat("CMAKE_", compIt->second,
-                                      "_COMPILER_EXTERNAL_TOOLCHAIN")];
+      this->VariableMappings[cmStrCat("CMAKE_"_s, compIt->second,
+                                      "_COMPILER_EXTERNAL_TOOLCHAIN"_s)];
     std::string const& compilerOptionExternalToolchain =
-      this->VariableMappings[cmStrCat("CMAKE_", compIt->second,
-                                      "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN")];
+      this->VariableMappings[cmStrCat(
+        "CMAKE_"_s, compIt->second, "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN"_s)];
     std::string const& compilerOptionSysroot = this->VariableMappings[cmStrCat(
-      "CMAKE_", compIt->second, "_COMPILE_OPTIONS_SYSROOT")];
+      "CMAKE_"_s, compIt->second, "_COMPILE_OPTIONS_SYSROOT"_s)];
 
     if (compIt->second == this->ReplaceValues->Language &&
         this->ReplaceValues->Launcher) {

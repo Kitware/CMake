@@ -131,13 +131,13 @@ cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
     return cached;
   }
 
-  std::string plistPath = cmStrCat(xcframeworkPath, "/Info.plist");
+  std::string plistPath = cmStrCat(xcframeworkPath, "/Info.plist"_s);
 
   auto value = cmParsePlist(plistPath);
   if (!value) {
     mf.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Unable to parse plist file:\n  ", plistPath), bt);
+      cmStrCat("Unable to parse plist file:\n  "_s, plistPath), bt);
     return cm::nullopt;
   }
 
@@ -147,16 +147,16 @@ cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
   if (!PlistMetadataHelper(metadata, &*value, &state)) {
     mf.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Invalid xcframework .plist file:\n  ", plistPath), bt);
+      cmStrCat("Invalid xcframework .plist file:\n  "_s, plistPath), bt);
     return cm::nullopt;
   }
   if (metadata.CFBundlePackageType != "XFWK"_s ||
       metadata.XCFrameworkFormatVersion != "1.0"_s) {
     mf.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Expected:\n  ", plistPath,
+      cmStrCat("Expected:\n  "_s, plistPath,
                "\nto have CFBundlePackageType \"XFWK\" and "
-               "XCFrameworkFormatVersion \"1.0\""),
+               "XCFrameworkFormatVersion \"1.0\""_s),
       bt);
     return cm::nullopt;
   }
@@ -165,7 +165,7 @@ cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
   if (!PlistHelper(plist, &*value, &state)) {
     mf.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Invalid xcframework .plist file:\n  ", plistPath), bt);
+      cmStrCat("Invalid xcframework .plist file:\n  "_s, plistPath), bt);
     return cm::nullopt;
   }
   plist.Path = plistPath;
@@ -213,8 +213,8 @@ cmXcFrameworkPlistLibrary const* cmXcFrameworkPlist::SelectSuitableLibrary(
 
   mf.GetCMakeInstance()->IssueMessage(
     MessageType::FATAL_ERROR,
-    cmStrCat("Unable to find suitable library in:\n  ", this->Path,
-             "\nfor system name \"", systemName, '"'),
+    cmStrCat("Unable to find suitable library in:\n  "_s, this->Path,
+             "\nfor system name \""_s, systemName, '"'),
     bt);
   return nullptr;
 }

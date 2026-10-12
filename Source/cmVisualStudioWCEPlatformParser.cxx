@@ -6,6 +6,8 @@
 #include <cstring>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -14,8 +16,8 @@ int cmVisualStudioWCEPlatformParser::ParseVersion(char const* version)
 {
   std::string const registryBase =
     cmGlobalVisualStudioGenerator::GetRegistryBase(version);
-  std::string const vckey = cmStrCat(registryBase, "\\Setup\\VC;ProductDir");
-  std::string const vskey = cmStrCat(registryBase, "\\Setup\\VS;ProductDir");
+  std::string const vckey = cmStrCat(registryBase, "\\Setup\\VC;ProductDir"_s);
+  std::string const vskey = cmStrCat(registryBase, "\\Setup\\VS;ProductDir"_s);
 
   if (!cmSystemTools::ReadRegistryValue(vckey, this->VcInstallDir,
                                         cmSystemTools::KeyWOW64_32) ||
@@ -28,7 +30,7 @@ int cmVisualStudioWCEPlatformParser::ParseVersion(char const* version)
   this->VcInstallDir.append("//");
 
   std::string const configFilename =
-    cmStrCat(this->VcInstallDir, "vcpackages/WCE.VCPlatform.config");
+    cmStrCat(this->VcInstallDir, "vcpackages/WCE.VCPlatform.config"_s);
 
   return this->ParseFile(configFilename.c_str());
 }

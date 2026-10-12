@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetLinkOptionsCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -22,8 +24,8 @@ private:
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Cannot specify link options for target \"", name,
-               "\" which is not built by this project."));
+      cmStrCat("Cannot specify link options for target \""_s, name,
+               "\" which is not built by this project."_s));
   }
 
   bool HandleDirectContent(cmTarget* tgt,

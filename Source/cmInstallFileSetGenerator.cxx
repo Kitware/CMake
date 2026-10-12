@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmDiagnosticContext.h"
 #include "cmFileSetMetadata.h"
@@ -84,9 +85,9 @@ bool cmInstallFileSetGenerator::Compute(cmLocalGenerator* lg)
 
   if (this->Destination.empty()) {
     lg->IssueMessage(MessageType::FATAL_ERROR,
-                     cmStrCat("File set \"", this->FileSetName,
-                              "\" installed by target \"", this->TargetName,
-                              "\" has no destination."));
+                     cmStrCat("File set \""_s, this->FileSetName,
+                              "\" installed by target \""_s, this->TargetName,
+                              "\" has no destination."_s));
     return false;
   }
 

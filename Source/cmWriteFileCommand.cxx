@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmWriteFileCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cm_sys_stat.h"
@@ -42,8 +44,8 @@ bool cmWriteFileCommand(std::vector<std::string> const& args,
   }
 
   if (!mf.CanIWriteThisFile(fileName)) {
-    status.SetError(cmStrCat("attempted to write a file: ", fileName,
-                             " into a source directory."));
+    status.SetError(cmStrCat("attempted to write a file: "_s, fileName,
+                             " into a source directory."_s));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -72,8 +74,9 @@ bool cmWriteFileCommand(std::vector<std::string> const& args,
   cmsys::ofstream file(fileName.c_str(),
                        overwrite ? std::ios::out : std::ios::app);
   if (!file) {
-    status.SetError(cmStrCat("Internal CMake error when trying to open file: ",
-                             fileName, " for writing."));
+    status.SetError(
+      cmStrCat("Internal CMake error when trying to open file: "_s, fileName,
+               " for writing."_s));
     return false;
   }
   file << message << '\n';

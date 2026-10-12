@@ -6,6 +6,8 @@
 #include <map>
 #include <sstream>
 
+#include <cmext/string_view>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmDuration.h"
@@ -31,7 +33,7 @@ int cmCPackProductBuildGenerator::PackageFiles()
 
   // Create the directory where component packages will be built.
   std::string basePackageDir =
-    cmStrCat(packageDirFileName, "/Contents/Packages");
+    cmStrCat(packageDirFileName, "/Contents/Packages"_s);
   if (!cmsys::SystemTools::MakeDirectory(basePackageDir.c_str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem creating component packages directory: "
@@ -58,7 +60,7 @@ int cmCPackProductBuildGenerator::PackageFiles()
     }
   }
 
-  std::string resDir = cmStrCat(packageDirFileName, "/Contents");
+  std::string resDir = cmStrCat(packageDirFileName, "/Contents"_s);
 
   if (cmValue v = this->GetOptionIfSet("CPACK_PRODUCTBUILD_RESOURCES_DIR")) {
     std::string userResDir = *v;
@@ -141,7 +143,7 @@ int cmCPackProductBuildGenerator::InitializeInternal()
 bool cmCPackProductBuildGenerator::RunProductBuild(std::string const& command)
 {
   std::string tmpFile = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
-                                 "/ProductBuildOutput.log");
+                                 "/ProductBuildOutput.log"_s);
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << command << std::endl);
   std::string output;
@@ -184,7 +186,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
     resDir += '/';
     resDir += component->Name;
   }
-  std::string scriptDir = cmStrCat(resDir, "/scripts");
+  std::string scriptDir = cmStrCat(resDir, "/scripts"_s);
 
   if (!cmsys::SystemTools::MakeDirectory(scriptDir.c_str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -210,7 +212,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   if (cmValue n = this->GetOption("CPACK_PRODUCTBUILD_IDENTIFIER")) {
     pkgId = *n;
   } else {
-    pkgId = cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
+    pkgId = cmStrCat("com."_s, this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
                      this->GetOption("CPACK_PACKAGE_NAME"));
   }
   if (component) {
@@ -254,7 +256,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
 cmValue cmCPackProductBuildGenerator::GetComponentScript(
   char const* script, char const* component_name)
 {
-  std::string scriptname = cmStrCat("CPACK_", script, '_');
+  std::string scriptname = cmStrCat("CPACK_"_s, script, '_');
   if (component_name) {
     scriptname += cmSystemTools::UpperCase(component_name);
     scriptname += '_';

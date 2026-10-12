@@ -4,6 +4,8 @@
 
 #include <algorithm>
 
+#include <cmext/string_view>
+
 #include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -229,8 +231,8 @@ bool ParseResult::MaybeReportError(cmMakefile& mf) const
   }
   std::string e;
   for (auto const& kel : this->KeywordErrors) {
-    e = cmStrCat(std::move(e), "Error after keyword \"", kel.first, "\":\n",
-                 cmJoin(kel.second, {}));
+    e = cmStrCat(std::move(e), "Error after keyword \""_s, kel.first,
+                 "\":\n"_s, cmJoin(kel.second, {}));
   }
   mf.IssueMessage(MessageType::FATAL_ERROR, e);
   return true;

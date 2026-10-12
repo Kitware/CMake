@@ -6,6 +6,7 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -45,11 +46,11 @@ bool cmQTWrapUICommand(std::vector<std::string> const& args,
       std::string srcName =
         cmSystemTools::GetFilenameWithoutLastExtension(arg);
       std::string hName =
-        cmStrCat(mf.GetCurrentBinaryDirectory(), '/', srcName, ".h");
+        cmStrCat(mf.GetCurrentBinaryDirectory(), '/', srcName, ".h"_s);
       std::string cxxName =
-        cmStrCat(mf.GetCurrentBinaryDirectory(), '/', srcName, ".cxx");
+        cmStrCat(mf.GetCurrentBinaryDirectory(), '/', srcName, ".cxx"_s);
       std::string mocName =
-        cmStrCat(mf.GetCurrentBinaryDirectory(), "/moc_", srcName, ".cxx");
+        cmStrCat(mf.GetCurrentBinaryDirectory(), "/moc_"_s, srcName, ".cxx"_s);
 
       // Compute the name of the ui file from which to generate others.
       std::string uiName;

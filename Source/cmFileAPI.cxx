@@ -49,8 +49,8 @@
 cmFileAPI::cmFileAPI(cmake* cm)
   : CMakeInstance(cm)
 {
-  this->APIv1 =
-    cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(), "/.cmake/api/v1");
+  this->APIv1 = cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(),
+                         "/.cmake/api/v1"_s);
 
   if (cm::optional<std::string> cmakeConfigDir =
         cmSystemTools::GetCMakeConfigDirectory()) {
@@ -65,8 +65,8 @@ cmFileAPI::cmFileAPI(cmake* cm)
 
 void cmFileAPI::ReadQueries()
 {
-  std::string const query_dir = cmStrCat(this->APIv1, "/query");
-  std::string const user_query_dir = cmStrCat(this->UserAPIv1, "/query");
+  std::string const query_dir = cmStrCat(this->APIv1, "/query"_s);
+  std::string const user_query_dir = cmStrCat(this->UserAPIv1, "/query"_s);
   this->QueryExists =
     this->QueryExists || cmSystemTools::FileIsDirectory(query_dir);
   if (!this->UserAPIv1.empty()) {
@@ -215,7 +215,7 @@ std::string cmFileAPI::WriteJsonFile(
 
   // Compute the final name for the file.
   std::string suffix = computeSuffix(tmpFile);
-  std::string suffixWithExtension = cmStrCat('-', suffix, ".json");
+  std::string suffixWithExtension = cmStrCat('-', suffix, ".json"_s);
   fileName = cmStrCat(prefix, suffixWithExtension);
 
   // Truncate the file name length
@@ -233,7 +233,7 @@ std::string cmFileAPI::WriteJsonFile(
     suffix = cmCryptoHash(cmCryptoHash::AlgoSHA256)
                .HashString(toBeRemoved)
                .substr(0, newHashLength);
-    suffixWithExtension = cmStrCat('-', suffix, ".json");
+    suffixWithExtension = cmStrCat('-', suffix, ".json"_s);
     fileName.replace(startPos, overLength, suffixWithExtension);
   }
 
@@ -378,7 +378,7 @@ bool cmFileAPI::ReadQuery(std::string const& query,
 void cmFileAPI::ReadClient(std::string const& client)
 {
   // Load queries for the client.
-  std::string clientDir = cmStrCat(this->APIv1, "/query/", client);
+  std::string clientDir = cmStrCat(this->APIv1, "/query/"_s, client);
   std::vector<std::string> queries = this->LoadDir(clientDir);
 
   // Read the queries and save for later.
@@ -397,7 +397,7 @@ void cmFileAPI::ReadClientQuery(std::string const& client, ClientQueryJson& q)
 {
   // Read the query.json file.
   std::string queryFile =
-    cmStrCat(this->APIv1, "/query/", client, "/query.json");
+    cmStrCat(this->APIv1, "/query/"_s, client, "/query.json"_s);
   Json::Value query;
   if (!this->ReadJsonFile(queryFile, query, q.Error)) {
     return;
@@ -533,7 +533,7 @@ char const* cmFileAPI::ObjectKindName(ObjectKind kind)
 
 std::string cmFileAPI::ObjectName(Object o)
 {
-  std::string name = cmStrCat(ObjectKindName(o.Kind), "-v", o.Version);
+  std::string name = cmStrCat(ObjectKindName(o.Kind), "-v"_s, o.Version);
   return name;
 }
 
@@ -628,7 +628,7 @@ cmFileAPI::ClientRequest cmFileAPI::BuildClientRequest(
   } else if (kindName == this->ObjectKindName(ObjectKind::InternalTest)) {
     r.Kind = ObjectKind::InternalTest;
   } else {
-    r.Error = cmStrCat("unknown request kind '", kindName, '\'');
+    r.Error = cmStrCat("unknown request kind '"_s, kindName, '\'');
     return r;
   }
 

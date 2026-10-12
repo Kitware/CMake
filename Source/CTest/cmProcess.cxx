@@ -8,6 +8,7 @@
 #include <utility>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/Process.h"
 
@@ -75,7 +76,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   int status = timer.init(loop, this);
   if (status != 0) {
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Error initializing timer: ", uv_strerror(status), '\n');
+               "Error initializing timer: "_s, uv_strerror(status), '\n');
     return false;
   }
 
@@ -89,7 +90,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   status = cmGetPipes(fds);
   if (status != 0) {
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Error initializing pipe: ", uv_strerror(status), '\n');
+               "Error initializing pipe: "_s, uv_strerror(status), '\n');
     return false;
   }
 
@@ -145,15 +146,15 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 
   if (status != 0) {
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Error starting read events: ", uv_strerror(status), '\n');
+               "Error starting read events: "_s, uv_strerror(status), '\n');
     return false;
   }
 
   status = this->Process.spawn(loop, options, this);
   if (status != 0) {
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Process not started\n ", this->Command, "\n[",
-               uv_strerror(status), "]\n");
+               "Process not started\n "_s, this->Command, "\n["_s,
+               uv_strerror(status), "]\n"_s);
     return false;
   }
 
@@ -253,7 +254,7 @@ void cmProcess::OnRead(ssize_t nread, uv_buf_t const* buf)
   if (nread != UV_EOF) {
     auto error = static_cast<int>(nread);
     cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
-               "Error reading stream: ", uv_strerror(error), '\n');
+               "Error reading stream: "_s, uv_strerror(error), '\n');
   }
 
   // Look for partial last lines.
@@ -755,7 +756,7 @@ std::string cmProcess::GetExitExceptionString() const
 #    endif
 #  endif
     default:
-      exception_str = cmStrCat("Signal ", this->Signal);
+      exception_str = cmStrCat("Signal "_s, this->Signal);
   }
 #endif
   return exception_str;

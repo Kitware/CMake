@@ -8,6 +8,8 @@
 #include <set>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmGeneratedFileStream.h"
@@ -87,7 +89,7 @@ void cmExtraSublimeTextGenerator::CreateProjectFile(
   std::string projectName = lgs[0]->GetProjectName();
 
   std::string const filename =
-    cmStrCat(outputDir, '/', projectName, ".sublime-project");
+    cmStrCat(outputDir, '/', projectName, ".sublime-project"_s);
 
   this->CreateNewProjectFile(lgs, filename);
 }
@@ -159,7 +161,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
         mf->IssueMessage(MessageType::FATAL_ERROR,
                          cmStrCat("Could not parse Env Vars specified in "
                                   "\"CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS\""
-                                  ", corrupted string ",
+                                  ", corrupted string "_s,
                                   t));
       }
     }
@@ -223,7 +225,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
           this->AppendTarget(fout, targetName, lg, target.get(), make.c_str(),
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);
-          std::string fastTarget = cmStrCat(targetName, "/fast");
+          std::string fastTarget = cmStrCat(targetName, "/fast"_s);
           this->AppendTarget(fout, fastTarget, lg, target.get(), make.c_str(),
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);
@@ -318,12 +320,12 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
   std::string generator = this->GlobalGenerator->GetName();
   if (generator == "NMake Makefiles") {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command = cmStrCat(std::move(command), R"(, "/NOLOGO", "/f", ")",
-                       std::move(makefileName), "\", \"", target, '"');
+    command = cmStrCat(std::move(command), R"(, "/NOLOGO", "/f", ")"_s,
+                       std::move(makefileName), "\", \""_s, target, '"');
   } else if (generator == "Ninja") {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command = cmStrCat(std::move(command), R"(, "-f", ")",
-                       std::move(makefileName), "\", \"", target, '"');
+    command = cmStrCat(std::move(command), R"(, "-f", ")"_s,
+                       std::move(makefileName), "\", \""_s, target, '"');
   } else {
     std::string makefileName;
     if (generator == "MinGW Makefiles") {
@@ -333,8 +335,8 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     } else {
       makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     }
-    command = cmStrCat(std::move(command), R"(, "-f", ")",
-                       std::move(makefileName), "\", \"", target, '"');
+    command = cmStrCat(std::move(command), R"(, "-f", ")"_s,
+                       std::move(makefileName), "\", \""_s, target, '"');
   }
   return command;
 }
@@ -397,7 +399,7 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
   }
 
   std::string defPropName =
-    cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
+    cmStrCat("COMPILE_DEFINITIONS_"_s, cmSystemTools::UpperCase(config));
   if (cmValue config_compile_defs = source->GetProperty(defPropName)) {
     lg->AppendDefines(
       defines,
@@ -453,7 +455,7 @@ bool cmExtraSublimeTextGenerator::Open(std::string const& bindir,
   }
 
   std::string filename =
-    cmStrCat(bindir, '/', projectName, ".sublime-project");
+    cmStrCat(bindir, '/', projectName, ".sublime-project"_s);
   if (dryRun) {
     return cmSystemTools::FileExists(filename, true);
   }

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 
@@ -133,7 +134,7 @@ bool cmTransformDepfile(cmDepfileFormat format, cmLocalGenerator const& lg,
   } else {
     lg.GetMakefile()->IssueMessage(
       MessageType::WARNING,
-      cmStrCat("Expected depfile does not exist.\n  ", infile));
+      cmStrCat("Expected depfile does not exist.\n  "_s, infile));
   }
 
   cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(outfile));

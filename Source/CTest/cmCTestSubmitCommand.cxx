@@ -51,7 +51,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
     if (cmValue tlsVersionVar = mf.GetDefinition("CMAKE_TLS_VERSION")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-        "SetCTestConfiguration from CMAKE_TLS_VERSION:TLSVersion:",
+        "SetCTestConfiguration from CMAKE_TLS_VERSION:TLSVersion:"_s,
         *tlsVersionVar, '\n');
       this->CTest->SetCTestConfiguration("TLSVersion", *tlsVersionVar,
                                          args.Quiet);
@@ -59,7 +59,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
                  cmSystemTools::GetEnvVar("CMAKE_TLS_VERSION")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-        "SetCTestConfiguration from ENV{CMAKE_TLS_VERSION}:TLSVersion:",
+        "SetCTestConfiguration from ENV{CMAKE_TLS_VERSION}:TLSVersion:"_s,
         *tlsVersionEnv, '\n');
       this->CTest->SetCTestConfiguration("TLSVersion", *tlsVersionEnv,
                                          args.Quiet);
@@ -70,7 +70,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
     if (cmValue tlsVerifyVar = mf.GetDefinition("CMAKE_TLS_VERIFY")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-        "SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:",
+        "SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:"_s,
         *tlsVerifyVar, '\n');
       this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyVar,
                                          args.Quiet);
@@ -78,7 +78,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
                  cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-        "SetCTestConfiguration from ENV{CMAKE_TLS_VERIFY}:TLSVerify:",
+        "SetCTestConfiguration from ENV{CMAKE_TLS_VERIFY}:TLSVerify:"_s,
         *tlsVerifyEnv, '\n');
       this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyEnv,
                                          args.Quiet);
@@ -220,7 +220,7 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments,
       cmCTest::Part p = this->CTest->GetPartFromName(arg);
       if (p == cmCTest::PartCount) {
         mf.IssueMessage(MessageType::FATAL_ERROR,
-                        cmStrCat("Part name \"", arg, "\" is invalid."));
+                        cmStrCat("Part name \""_s, arg, "\" is invalid."_s));
         return true;
       }
       return false;
@@ -232,8 +232,8 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments,
       if (!cmSystemTools::FileExists(arg)) {
         mf.IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("File \"", arg,
-                   "\" does not exist. Cannot submit a non-existent file."));
+          cmStrCat("File \""_s, arg,
+                   "\" does not exist. Cannot submit a non-existent file."_s));
         return true;
       }
       return false;

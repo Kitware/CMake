@@ -8,6 +8,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmExportSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
@@ -77,7 +79,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
   cmMakefile* mf = target->Makefile;
 
   if (target->GetType() == cm::TargetType::OBJECT_LIBRARY) {
-    std::string prop = cmStrCat("IMPORTED_OBJECTS", suffix);
+    std::string prop = cmStrCat("IMPORTED_OBJECTS"_s, suffix);
 
     // Compute all the object files inside this target and setup
     // IMPORTED_OBJECTS as a list of object files
@@ -95,7 +97,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
   } else {
     // Add the main target file.
     {
-      std::string prop = cmStrCat("IMPORTED_LOCATION", suffix);
+      std::string prop = cmStrCat("IMPORTED_LOCATION"_s, suffix);
       std::string value;
       if (target->IsAppBundleOnApple()) {
         value =
@@ -110,7 +112,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
 
     // Add the import library for windows DLLs.
     if (target->HasImportLibrary(config)) {
-      std::string prop = cmStrCat("IMPORTED_IMPLIB", suffix);
+      std::string prop = cmStrCat("IMPORTED_IMPLIB"_s, suffix);
       std::string value =
         target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact,
                             cmGeneratorTarget::NameType::Real);
@@ -245,7 +247,7 @@ void cmExportBuildFileGenerator::ComplainAboutDuplicateTarget(
   std::string const& targetName) const
 {
   this->ReportError(
-    cmStrCat("given target \"", targetName, "\" more than once."));
+    cmStrCat("given target \""_s, targetName, "\" more than once."_s));
 }
 
 void cmExportBuildFileGenerator::IssueMessage(MessageType type,

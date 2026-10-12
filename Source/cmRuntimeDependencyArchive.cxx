@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmBinUtilsLinuxELFLinker.h"
 #include "cmBinUtilsMacOSMachOLinker.h"
@@ -165,7 +166,7 @@ bool cmRuntimeDependencyArchive::Prepare()
     this->Linker = cm::make_unique<cmBinUtilsMacOSMachOLinker>(this);
   } else {
     this->SetError(
-      cmStrCat("Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM: ",
+      cmStrCat("Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM: "_s,
                platform));
     return false;
   }

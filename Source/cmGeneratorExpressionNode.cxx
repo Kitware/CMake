@@ -91,10 +91,10 @@ bool HasKnownObjectFileLocation(cm::GenEx::Evaluation* eval,
       !target->Target->HasKnownObjectFileLocation(&reason)) {
     reportError(
       eval, content->GetOriginalExpression(),
-      cmStrCat("The evaluation of the ", genex,
+      cmStrCat("The evaluation of the "_s, genex,
                " generator expression is only suitable for consumption by "
-               "CMake (limited",
-               reason, ").  It is not suitable for writing out elsewhere."));
+               "CMake (limited"_s,
+               reason, ").  It is not suitable for writing out elsewhere."_s));
     return false;
   }
   return true;
@@ -204,10 +204,10 @@ static cm::optional<std::vector<bool>> EvaluatePredicateMask(
     } else {
       reportError(
         eval, content->GetOriginalExpression(),
-        cmStrCat("sub-command ", subCommand,
+        cmStrCat("sub-command "_s, subCommand,
                  ", PREDICATE body must evaluate to \"0\" or \"1\", but "
-                 "evaluated to \"",
-                 r, "\"."));
+                 "evaluated to \""_s,
+                 r, "\"."_s));
       return result;
     }
   }
@@ -267,17 +267,17 @@ struct BoundOperandNode : public cmGeneratorExpressionNode
       std::size_t const count = eval->Context.BoundOperandCount();
       if (count == 0) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("$<_", this->Index,
+                    cmStrCat("$<_"_s, this->Index,
                              "> may only be used inside the body of a binding "
-                             "operation."));
+                             "operation."_s));
       } else {
         reportError(
           eval, content->GetOriginalExpression(),
           cmStrCat(
-            "$<_", this->Index,
+            "$<_"_s, this->Index,
             "> is out of range for the current binding operation, which "
-            "binds only ",
-            count, " operand(s) (maximum $<_", count - 1, ">)."));
+            "binds only "_s,
+            count, " operand(s) (maximum $<_"_s, count - 1, ">)."_s));
       }
       return std::string();
     }
@@ -328,8 +328,8 @@ struct BooleanOpNode : public cmGeneratorExpressionNode
       }
       if (param != this->successVal) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("Parameters to $<", this->op,
-                             "> must resolve to either '0' or '1'."));
+                    cmStrCat("Parameters to $<"_s, this->op,
+                             "> must resolve to either '0' or '1'."_s));
         return std::string();
       }
     }
@@ -396,7 +396,7 @@ static const struct ArgsNode : public cmGeneratorExpressionNode
 
     cmList args{ parameters.begin(), parameters.end(),
                  cmList::ExpandElements::Yes, cmList::EmptyElements::Yes };
-    return cmStrCat("<ARGS>", args.join(","_s), "</ARGS>");
+    return cmStrCat("<ARGS>"_s, args.join(","_s), "</ARGS>"_s);
   }
 } argsNode;
 
@@ -410,7 +410,7 @@ static const struct IfNode : public cmGeneratorExpressionNode
                                    std::string&) const override
   {
     return (parameters.empty() ||
-            parameters[0] != cmStrCat(parameters.size() - 1, ""));
+            parameters[0] != cmStrCat(parameters.size() - 1, ""_s));
   }
 
   std::string Evaluate(std::vector<std::string> const& parameters,
@@ -534,8 +534,8 @@ static const struct EqualNode : public cmGeneratorExpressionNode
     for (int i = 0; i < 2; ++i) {
       if (!ParameterToLong(parameters[i].c_str(), &numbers[i])) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("$<EQUAL> parameter ", parameters[i],
-                             " is not a valid integer."));
+                    cmStrCat("$<EQUAL> parameter "_s, parameters[i],
+                             " is not a valid integer."_s));
         return {};
       }
     }
@@ -805,8 +805,8 @@ static const struct TargetGenexEvalNode : public GenexEvaluator
       eval->Context.LG->FindGeneratorTargetToUse(targetName);
     if (!target) {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("$<TARGET_GENEX_EVAL:tgt, ...> target \"",
-                           targetName, "\" not found."));
+                  cmStrCat("$<TARGET_GENEX_EVAL:tgt, ...> target \""_s,
+                           targetName, "\" not found."_s));
       return std::string();
     }
 
@@ -944,12 +944,12 @@ bool CheckGenExParameters(cm::GenEx::Evaluation* eval,
         nbParameters = "four parameters";
         break;
       default:
-        nbParameters = cmStrCat(required, " parameters");
+        nbParameters = cmStrCat(required, " parameters"_s);
     }
-    reportError(eval, cnt->GetOriginalExpression(),
-                cmStrCat("$<", genex, ':', option, "> expression requires ",
-                         (exactly ? "exactly" : "at least"), ' ', nbParameters,
-                         '.'));
+    reportError(
+      eval, cnt->GetOriginalExpression(),
+      cmStrCat("$<"_s, genex, ':', option, "> expression requires "_s,
+               (exactly ? "exactly" : "at least"), ' ', nbParameters, '.'));
     return false;
   }
   return true;
@@ -998,7 +998,7 @@ bool GetNumericArguments(
     IndexType index;
     if (!GetNumericArgument(value, index)) {
       reportError(eval, cnt->GetOriginalExpression(),
-                  cmStrCat("index: \"", value, "\" is not a valid index"));
+                  cmStrCat("index: \""_s, value, "\" is not a valid index"_s));
       return false;
     }
     indexes.push_back(index);
@@ -1461,7 +1461,7 @@ static const struct PathNode : public cmGeneratorExpressionNode
     }
 
     reportError(eval, content->GetOriginalExpression(),
-                cmStrCat(parameters.front(), ": invalid option."));
+                cmStrCat(parameters.front(), ": invalid option."_s));
     return std::string{};
   }
 } pathNode;
@@ -1574,8 +1574,8 @@ static const struct StringNode : public cmGeneratorExpressionNode
                     if (arg != "FROM:BEGIN"_s && arg != "FROM:END"_s) {
                       reportError(
                         ev, cnt->GetOriginalExpression(),
-                        cmStrCat("Invalid value for '", FROM,
-                                 "' option. 'BEGIN' or 'END' expected."));
+                        cmStrCat("Invalid value for '"_s, FROM,
+                                 "' option. 'BEGIN' or 'END' expected."_s));
                       return std::string{};
                     }
                     opt = arg == "FROM:BEGIN"_s
@@ -1588,7 +1588,7 @@ static const struct StringNode : public cmGeneratorExpressionNode
                 if (opt == static_cast<cm::CMakeString::FindFrom>(-1)) {
                   reportError(
                     ev, cnt->GetOriginalExpression(),
-                    cmStrCat("Expected option '", FROM, "' is missing."));
+                    cmStrCat("Expected option '"_s, FROM, "' is missing."_s));
                   return std::string{};
                 }
                 from = opt;
@@ -1629,8 +1629,8 @@ static const struct StringNode : public cmGeneratorExpressionNode
                     if (arg != "SEEK:ONCE"_s && arg != "SEEK:ALL"_s) {
                       reportError(
                         ev, cnt->GetOriginalExpression(),
-                        cmStrCat("Invalid value for '", SEEK,
-                                 "' option. 'ONCE' or 'ALL' expected."));
+                        cmStrCat("Invalid value for '"_s, SEEK,
+                                 "' option. 'ONCE' or 'ALL' expected."_s));
                       return std::string{};
                     }
                     opt = arg == "SEEK:ONCE"_s
@@ -1643,7 +1643,7 @@ static const struct StringNode : public cmGeneratorExpressionNode
                 if (opt == static_cast<cm::CMakeString::MatchItems>(-1)) {
                   reportError(
                     ev, cnt->GetOriginalExpression(),
-                    cmStrCat("Expected option '", SEEK, "' is missing."));
+                    cmStrCat("Expected option '"_s, SEEK, "' is missing."_s));
                   return std::string{};
                 }
                 seek = opt;
@@ -1738,8 +1738,8 @@ static const struct StringNode : public cmGeneratorExpressionNode
                   length = std::stoul(arg.substr(LENGTH.size()));
                 } catch (std::exception const&) {
                   reportError(ev, cnt->GetOriginalExpression(),
-                              cmStrCat(arg, ": invalid numeric value for '",
-                                       LENGTH, "' option."));
+                              cmStrCat(arg, ": invalid numeric value for '"_s,
+                                       LENGTH, "' option."_s));
                   return std::string{};
                 }
                 continue;
@@ -1751,14 +1751,14 @@ static const struct StringNode : public cmGeneratorExpressionNode
                     std::stoul(arg.substr(RANDOM_SEED.size())));
                 } catch (std::exception const&) {
                   reportError(ev, cnt->GetOriginalExpression(),
-                              cmStrCat(arg, ": invalid numeric value for '",
-                                       RANDOM_SEED, "' option."));
+                              cmStrCat(arg, ": invalid numeric value for '"_s,
+                                       RANDOM_SEED, "' option."_s));
                   return std::string{};
                 }
                 continue;
               }
               reportError(ev, cnt->GetOriginalExpression(),
-                          cmStrCat(arg, ": invalid parameter."));
+                          cmStrCat(arg, ": invalid parameter."_s));
               return std::string{};
             }
 
@@ -1799,9 +1799,9 @@ static const struct StringNode : public cmGeneratorExpressionNode
                   nameSpace =
                     cm::string_view{ arg.c_str() + NAMESPACE.length() };
                   if (nameSpace.empty()) {
-                    reportError(
-                      ev, cnt->GetOriginalExpression(),
-                      cmStrCat("Invalid value for '", NAMESPACE, "' option."));
+                    reportError(ev, cnt->GetOriginalExpression(),
+                                cmStrCat("Invalid value for '"_s, NAMESPACE,
+                                         "' option."_s));
                     return std::string{};
                   }
                   continue;
@@ -1815,8 +1815,8 @@ static const struct StringNode : public cmGeneratorExpressionNode
                   if (value != "MD5"_s && value != "SHA1"_s) {
                     reportError(
                       ev, cnt->GetOriginalExpression(),
-                      cmStrCat("Invalid value for '", TYPE,
-                               "' option. 'MD5' or 'SHA1' expected."));
+                      cmStrCat("Invalid value for '"_s, TYPE,
+                               "' option. 'MD5' or 'SHA1' expected."_s));
                     return std::string{};
                   }
                   type = value == "MD5"_s ? cm::CMakeString::UUIDType::MD5
@@ -1828,8 +1828,8 @@ static const struct StringNode : public cmGeneratorExpressionNode
                   if (value != "UPPER"_s && value != "LOWER"_s) {
                     reportError(
                       ev, cnt->GetOriginalExpression(),
-                      cmStrCat("Invalid value for '", CASE,
-                               "' option. 'UPPER' or 'LOWER' expected."));
+                      cmStrCat("Invalid value for '"_s, CASE,
+                               "' option. 'UPPER' or 'LOWER' expected."_s));
                     return std::string{};
                   }
                   uuidCase = value == "UPPER"_s ? cm::CMakeString::Case::Upper
@@ -1837,19 +1837,19 @@ static const struct StringNode : public cmGeneratorExpressionNode
                   continue;
                 }
                 reportError(ev, cnt->GetOriginalExpression(),
-                            cmStrCat(arg, ": invalid parameter."));
+                            cmStrCat(arg, ": invalid parameter."_s));
                 return std::string{};
               }
               if (nameSpace.empty()) {
-                reportError(
-                  ev, cnt->GetOriginalExpression(),
-                  cmStrCat("Required option '", NAMESPACE, "' is missing."));
+                reportError(ev, cnt->GetOriginalExpression(),
+                            cmStrCat("Required option '"_s, NAMESPACE,
+                                     "' is missing."_s));
                 return std::string{};
               }
               if (type == static_cast<cm::CMakeString::UUIDType>(-1)) {
                 reportError(
                   ev, cnt->GetOriginalExpression(),
-                  cmStrCat("Required option '", TYPE, "' is missing."));
+                  cmStrCat("Required option '"_s, TYPE, "' is missing."_s));
                 return std::string{};
               }
 
@@ -1882,7 +1882,7 @@ static const struct StringNode : public cmGeneratorExpressionNode
                     ev, cnt->GetOriginalExpression(),
                     cmStrCat(
                       '\'', type,
-                      "' is unexpected. 'STRING' or 'REGEX' expected."));
+                      "' is unexpected. 'STRING' or 'REGEX' expected."_s));
                   return std::string{};
                 }
                 isRegex = type == "STRING"_s ? cm::CMakeString::Regex::No
@@ -1943,7 +1943,7 @@ static const struct StringNode : public cmGeneratorExpressionNode
               if (args.front() != "SPACES"_s) {
                 reportError(ev, cnt->GetOriginalExpression(),
                             cmStrCat('\'', args.front(),
-                                     "' is unexpected. 'SPACES' expected."));
+                                     "' is unexpected. 'SPACES' expected."_s));
                 return std::string{};
               }
 
@@ -1958,7 +1958,7 @@ static const struct StringNode : public cmGeneratorExpressionNode
               if (args.front() != "REGEX"_s) {
                 reportError(ev, cnt->GetOriginalExpression(),
                             cmStrCat('\'', args.front(),
-                                     "' is unexpected. 'REGEX' expected."));
+                                     "' is unexpected. 'REGEX' expected."_s));
                 return std::string{};
               }
 
@@ -1985,9 +1985,9 @@ static const struct StringNode : public cmGeneratorExpressionNode
                   auto const algo =
                     cm::string_view{ args[1].c_str() + ALGORITHM.length() };
                   if (algo.empty()) {
-                    reportError(
-                      ev, cnt->GetOriginalExpression(),
-                      cmStrCat("Missing value for '", ALGORITHM, "' option."));
+                    reportError(ev, cnt->GetOriginalExpression(),
+                                cmStrCat("Missing value for '"_s, ALGORITHM,
+                                         "' option."_s));
                     return std::string{};
                   }
                   return cm::CMakeString{ args.front() }.Hash(algo);
@@ -1997,8 +1997,8 @@ static const struct StringNode : public cmGeneratorExpressionNode
                 }
               }
               reportError(ev, cnt->GetOriginalExpression(),
-                          cmStrCat(args[1], ": invalid parameter. Option '",
-                                   ALGORITHM, "' expected."));
+                          cmStrCat(args[1], ": invalid parameter. Option '"_s,
+                                   ALGORITHM, "' expected."_s));
             }
             return std::string{};
           } },
@@ -2025,7 +2025,7 @@ static const struct StringNode : public cmGeneratorExpressionNode
     }
 
     reportError(eval, content->GetOriginalExpression(),
-                cmStrCat(parameters.front(), ": invalid option."));
+                cmStrCat(parameters.front(), ": invalid option."_s));
     return std::string{};
   }
 } stringNode;
@@ -2162,7 +2162,7 @@ std::string EvaluateTransformPredicate(
   if (!descriptor) {
     reportError(
       eval, content->GetOriginalExpression(),
-      cmStrCat(" sub-command TRANSFORM, ", action, " invalid action."));
+      cmStrCat(" sub-command TRANSFORM, "_s, action, " invalid action."_s));
     return std::string();
   }
 
@@ -2230,8 +2230,8 @@ SortOptionResult ParseSortOption(std::string const& arg,
     } else {
       reportError(eval, content->GetOriginalExpression(),
                   cmStrCat("sub-command SORT, an invalid COMPARE option has "
-                           "been specified: \"",
-                           option, "\"."));
+                           "been specified: \""_s,
+                           option, "\"."_s));
       return SortOptionResult::Error;
     }
     return SortOptionResult::Parsed;
@@ -2252,8 +2252,8 @@ SortOptionResult ParseSortOption(std::string const& arg,
     } else {
       reportError(eval, content->GetOriginalExpression(),
                   cmStrCat("sub-command SORT, an invalid CASE option has been "
-                           "specified: \"",
-                           option, "\"."));
+                           "specified: \""_s,
+                           option, "\"."_s));
       return SortOptionResult::Error;
     }
     return SortOptionResult::Parsed;
@@ -2275,8 +2275,8 @@ SortOptionResult ParseSortOption(std::string const& arg,
       reportError(
         eval, content->GetOriginalExpression(),
         cmStrCat("sub-command SORT, an invalid ORDER option has been "
-                 "specified: \"",
-                 option, "\"."));
+                 "specified: \""_s,
+                 option, "\"."_s));
       return SortOptionResult::Error;
     }
     return SortOptionResult::Parsed;
@@ -2326,7 +2326,7 @@ std::string EvaluateSortComparator(std::vector<std::string> const& parameters,
       case SortOptionResult::NotRecognized:
         reportError(
           eval, content->GetOriginalExpression(),
-          cmStrCat("sub-command SORT, option \"", arg, "\" is invalid."));
+          cmStrCat("sub-command SORT, option \""_s, arg, "\" is invalid."_s));
         return std::string();
     }
   }
@@ -2352,8 +2352,8 @@ std::string EvaluateSortComparator(std::vector<std::string> const& parameters,
     }
     throw cmList::transform_error(
       cmStrCat("sub-command SORT, COMPARATOR body must evaluate to \"0\" or "
-               "\"1\", but evaluated to \"",
-               r, "\"."));
+               "\"1\", but evaluated to \""_s,
+               r, "\"."_s));
   };
 
   try {
@@ -2388,8 +2388,8 @@ std::unique_ptr<cmList::TransformSelector> ParseTransformSelector(
     if ((tok == REGEX || tok == AT || tok == FOR) && selector) {
       reportError(
         eval, content->GetOriginalExpression(),
-        cmStrCat("sub-command TRANSFORM, selector already specified (",
-                 selector->GetTag(), ")."));
+        cmStrCat("sub-command TRANSFORM, selector already specified ("_s,
+                 selector->GetTag(), ")."_s));
       return nullptr;
     }
 
@@ -2416,8 +2416,8 @@ std::unique_ptr<cmList::TransformSelector> ParseTransformSelector(
           cmList::index_type value;
           if (!GetNumericArgument(index, value)) {
             reportError(eval, content->GetOriginalExpression(),
-                        cmStrCat("sub-command TRANSFORM, selector AT: '",
-                                 index, "': unexpected argument."));
+                        cmStrCat("sub-command TRANSFORM, selector AT: '"_s,
+                                 index, "': unexpected argument."_s));
             return nullptr;
           }
           indexes.push_back(value);
@@ -2472,8 +2472,8 @@ std::unique_ptr<cmList::TransformSelector> ParseTransformSelector(
 
     std::vector<std::string> const rest(tokens.begin() + i, tokens.end());
     reportError(eval, content->GetOriginalExpression(),
-                cmStrCat("sub-command TRANSFORM, '", cmJoin(rest, ", "),
-                         "': unexpected argument(s)."));
+                cmStrCat("sub-command TRANSFORM, '"_s, cmJoin(rest, ", "),
+                         "': unexpected argument(s)."_s));
     return nullptr;
   }
 
@@ -2606,8 +2606,8 @@ static const struct ListNode : public cmGeneratorExpressionNode
       if (op != "INCLUDE" && op != "EXCLUDE") {
         reportError(
           eval, content->GetOriginalExpression(),
-          cmStrCat("sub-command FILTER does not recognize operator \"", op,
-                   "\". It must be either INCLUDE or EXCLUDE."));
+          cmStrCat("sub-command FILTER does not recognize operator \""_s, op,
+                   "\". It must be either INCLUDE or EXCLUDE."_s));
         return std::string();
       }
       cmList list = GetList(parameters[1]);
@@ -2707,15 +2707,15 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 }
                 if (indexes[0] < 0) {
                   reportError(ev, cnt->GetOriginalExpression(),
-                              cmStrCat("begin index: ", indexes[0],
-                                       " is out of range 0 - ",
+                              cmStrCat("begin index: "_s, indexes[0],
+                                       " is out of range 0 - "_s,
                                        list.size() - 1));
                   return std::string{};
                 }
                 if (indexes[1] < -1) {
                   reportError(ev, cnt->GetOriginalExpression(),
-                              cmStrCat("length: ", indexes[1],
-                                       " should be -1 or greater"));
+                              cmStrCat("length: "_s, indexes[1],
+                                       " should be -1 or greater"_s));
                   return std::string{};
                 }
                 try {
@@ -2770,9 +2770,9 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                       false)) {
               cmList::index_type index;
               if (!GetNumericArgument(args[1], index)) {
-                reportError(
-                  ev, cnt->GetOriginalExpression(),
-                  cmStrCat("index: \"", args[1], "\" is not a valid index"));
+                reportError(ev, cnt->GetOriginalExpression(),
+                            cmStrCat("index: \""_s, args[1],
+                                     "\" is not a valid index"_s));
                 return std::string{};
               }
               try {
@@ -2869,8 +2869,9 @@ static const struct ListNode : public cmGeneratorExpressionNode
               if (op != "INCLUDE"_s && op != "EXCLUDE"_s) {
                 reportError(
                   ev, cnt->GetOriginalExpression(),
-                  cmStrCat("sub-command FILTER does not recognize operator \"",
-                           op, "\". It must be either INCLUDE or EXCLUDE."));
+                  cmStrCat(
+                    "sub-command FILTER does not recognize operator \""_s, op,
+                    "\". It must be either INCLUDE or EXCLUDE."_s));
                 return std::string{};
               }
               auto const& regex = explicitRegex ? args[3] : args[2];
@@ -2883,8 +2884,8 @@ static const struct ListNode : public cmGeneratorExpressionNode
               } catch (std::invalid_argument&) {
                 reportError(
                   ev, cnt->GetOriginalExpression(),
-                  cmStrCat("sub-command FILTER, failed to compile regex \"",
-                           regex, "\"."));
+                  cmStrCat("sub-command FILTER, failed to compile regex \""_s,
+                           regex, "\"."_s));
                 return std::string{};
               }
             }
@@ -2901,8 +2902,8 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 auto descriptor = FindTransformActionDescriptor(actionName);
                 if (!descriptor) {
                   reportError(ev, cnt->GetOriginalExpression(),
-                              cmStrCat(" sub-command TRANSFORM, ", actionName,
-                                       " invalid action."));
+                              cmStrCat(" sub-command TRANSFORM, "_s,
+                                       actionName, " invalid action."_s));
                   return std::string{};
                 }
 
@@ -2910,9 +2911,9 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 args.advance(1);
                 if (args.size() < descriptor->Arity) {
                   reportError(ev, cnt->GetOriginalExpression(),
-                              cmStrCat("sub-command TRANSFORM, action ",
-                                       actionName, " expects ",
-                                       descriptor->Arity, " argument(s)."));
+                              cmStrCat("sub-command TRANSFORM, action "_s,
+                                       actionName, " expects "_s,
+                                       descriptor->Arity, " argument(s)."_s));
                   return std::string{};
                 }
                 std::vector<std::string> arguments;
@@ -2969,8 +2970,8 @@ static const struct ListNode : public cmGeneratorExpressionNode
                     return std::string{};
                   case SortOptionResult::NotRecognized:
                     reportError(ev, cnt->GetOriginalExpression(),
-                                cmStrCat("sub-command SORT, option \"", arg,
-                                         "\" is invalid."));
+                                cmStrCat("sub-command SORT, option \""_s, arg,
+                                         "\" is invalid."_s));
                     return std::string{};
                 }
               }
@@ -2987,7 +2988,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
     }
 
     reportError(eval, content->GetOriginalExpression(),
-                cmStrCat(parameters.front(), ": invalid option."));
+                cmStrCat(parameters.front(), ": invalid option."_s));
     return std::string{};
   }
 } listNode;
@@ -3046,9 +3047,10 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
     if (!eval->HeadTarget) {
       reportError(
         eval, content->GetOriginalExpression(),
-        cmStrCat("$<", this->CompilerLanguage,
-                 "_COMPILER_ID> may only be used with binary targets.  It may "
-                 "not be used with add_custom_command or add_custom_target."));
+        cmStrCat(
+          "$<"_s, this->CompilerLanguage,
+          "_COMPILER_ID> may only be used with binary targets.  It may "
+          "not be used with add_custom_command or add_custom_target."_s));
       return {};
     }
     return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
@@ -3063,7 +3065,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
   {
     std::string const& compilerId =
       eval->Context.LG->GetMakefile()->GetSafeDefinition(
-        cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
+        cmStrCat("CMAKE_"_s, lang, "_COMPILER_ID"_s));
     if (parameters.empty()) {
       return compilerId;
     }
@@ -3111,10 +3113,10 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
   {
     if (!eval->HeadTarget) {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("$<", this->CompilerLanguage,
+                  cmStrCat("$<"_s, this->CompilerLanguage,
                            "_COMPILER_VERSION> may only be used with binary "
                            "targets.  It may not be used with "
-                           "add_custom_command or add_custom_target."));
+                           "add_custom_command or add_custom_target."_s));
       return {};
     }
     return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
@@ -3129,7 +3131,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
   {
     std::string const& compilerVersion =
       eval->Context.LG->GetMakefile()->GetSafeDefinition(
-        cmStrCat("CMAKE_", lang, "_COMPILER_VERSION"));
+        cmStrCat("CMAKE_"_s, lang, "_COMPILER_VERSION"_s));
     if (parameters.empty()) {
       return compilerVersion;
     }
@@ -3176,10 +3178,10 @@ struct CompilerFrontendVariantNode : public cmGeneratorExpressionNode
     if (!eval->HeadTarget) {
       reportError(
         eval, content->GetOriginalExpression(),
-        cmStrCat("$<", this->CompilerLanguage,
+        cmStrCat("$<"_s, this->CompilerLanguage,
                  "_COMPILER_FRONTEND_VARIANT> may only be used with binary "
                  "targets.  It may not be used with add_custom_command or "
-                 "add_custom_target."));
+                 "add_custom_target."_s));
       return {};
     }
     return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
@@ -3194,7 +3196,7 @@ struct CompilerFrontendVariantNode : public cmGeneratorExpressionNode
   {
     std::string const& compilerFrontendVariant =
       eval->Context.LG->GetMakefile()->GetSafeDefinition(
-        cmStrCat("CMAKE_", lang, "_COMPILER_FRONTEND_VARIANT"));
+        cmStrCat("CMAKE_"_s, lang, "_COMPILER_FRONTEND_VARIANT"_s));
     if (parameters.empty()) {
       return compilerFrontendVariant;
     }
@@ -3376,11 +3378,11 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         eval->Context.LG->GetCMakeInstance()->IssueMessage(
           MessageType::WARNING,
           cmStrCat("Warning evaluating generator expression:\n"
-                   "  ",
+                   "  "_s,
                    content->GetOriginalExpression(),
                    "\n"
-                   "The config name of \"",
-                   param, "\" is invalid"),
+                   "The config name of \""_s,
+                   param, "\" is invalid"_s),
           eval->Backtrace);
       }
       firstParam = false;
@@ -3476,7 +3478,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
           // CMake did for a very long time, and... Hyrum's Law.
           cmList mappedConfigs;
           std::string mapProp =
-            cmStrCat("MAP_IMPORTED_CONFIG_",
+            cmStrCat("MAP_IMPORTED_CONFIG_"_s,
                      cmSystemTools::UpperCase(eval->Context.Config));
           if (cmValue mapValue = eval->CurrentTarget->GetProperty(mapProp)) {
             mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue));
@@ -3697,7 +3699,7 @@ struct LinkerId
   {
     std::string const& linkerId =
       eval->Context.LG->GetMakefile()->GetSafeDefinition(
-        cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
+        cmStrCat("CMAKE_"_s, lang, "_COMPILER_ID"_s));
     if (parameters.empty()) {
       return linkerId;
     }
@@ -3793,9 +3795,9 @@ struct CompilerLinkerIdNode : public cmGeneratorExpressionNode
       reportError(
         eval, content->GetOriginalExpression(),
         cmStrCat(
-          "$<", this->Language,
+          "$<"_s, this->Language,
           "_COMPILER_LINKER_ID> may only be used with binary targets. It may "
-          "not be used with add_custom_command or add_custom_target."));
+          "not be used with add_custom_command or add_custom_target."_s));
       return {};
     }
     return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
@@ -3810,7 +3812,7 @@ struct CompilerLinkerIdNode : public cmGeneratorExpressionNode
   {
     std::string const& compilerLinkerId =
       eval->Context.LG->GetMakefile()->GetSafeDefinition(
-        cmStrCat("CMAKE_", lang, "_COMPILER_LINKER_ID"));
+        cmStrCat("CMAKE_"_s, lang, "_COMPILER_LINKER_ID"_s));
     if (parameters.empty()) {
       return compilerLinkerId;
     }
@@ -3861,10 +3863,10 @@ struct CompilerLinkerFrontendVariantNode : public cmGeneratorExpressionNode
       reportError(
         eval, content->GetOriginalExpression(),
         cmStrCat(
-          "$<", this->Language,
+          "$<"_s, this->Language,
           "_COMPILER_LINKER_FRONTEND_VARIANT> may only be used with binary "
           "targets. It may not be used with add_custom_command or "
-          "add_custom_target."));
+          "add_custom_target."_s));
       return {};
     }
     return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
@@ -3879,7 +3881,7 @@ struct CompilerLinkerFrontendVariantNode : public cmGeneratorExpressionNode
   {
     std::string const& compilerLinkerFrontendVariant =
       eval->Context.LG->GetMakefile()->GetSafeDefinition(
-        cmStrCat("CMAKE_", lang, "_COMPILER_LINKER_FRONTEND_VARIANT"));
+        cmStrCat("CMAKE_"_s, lang, "_COMPILER_LINKER_FRONTEND_VARIANT"_s));
     if (parameters.empty()) {
       return compilerLinkerFrontendVariant;
     }
@@ -3955,13 +3957,13 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
     auto const& feature = list.front();
     if (!featureNameValidator.find(feature)) {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("The feature name '", feature,
-                           "' contains invalid characters."));
+                  cmStrCat("The feature name '"_s, feature,
+                           "' contains invalid characters."_s));
       return std::string();
     }
 
-    auto const LL_BEGIN = cmStrCat("<LINK_LIBRARY:", feature, '>');
-    auto const LL_END = cmStrCat("</LINK_LIBRARY:", feature, '>');
+    auto const LL_BEGIN = cmStrCat("<LINK_LIBRARY:"_s, feature, '>');
+    auto const LL_END = cmStrCat("</LINK_LIBRARY:"_s, feature, '>');
 
     // filter out $<LINK_LIBRARY:..> tags with same feature
     // and raise an error for any different feature
@@ -4048,17 +4050,17 @@ static const struct LinkGroupNode : public cmGeneratorExpressionNode
     auto const& feature = list.front();
     if (!featureNameValidator.find(feature)) {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("The feature name '", feature,
-                           "' contains invalid characters."));
+                  cmStrCat("The feature name '"_s, feature,
+                           "' contains invalid characters."_s));
       return std::string();
     }
 
     auto const LG_BEGIN = cmStrCat(
-      "<LINK_GROUP:", feature, ':',
+      "<LINK_GROUP:"_s, feature, ':',
       cmJoin(cmRange<decltype(list.cbegin())>(list.cbegin() + 1, list.cend()),
              "|"_s),
       '>');
-    auto const LG_END = cmStrCat("</LINK_GROUP:", feature, '>');
+    auto const LG_END = cmStrCat("</LINK_GROUP:"_s, feature, '>');
 
     list.front() = LG_BEGIN;
     list.push_back(LG_END);
@@ -4195,7 +4197,7 @@ static const struct DirectoryPropertyNode : public cmGeneratorExpressionNode
     if (status == cmGetDirectoryPropertyResult::DirectoryNotFound) {
       reportError(
         eval, content->GetOriginalExpression(),
-        cmStrCat("Directory \"", directoryName, "\" was not found."));
+        cmStrCat("Directory \""_s, directoryName, "\" was not found."_s));
       return std::string{};
     }
 
@@ -4219,8 +4221,9 @@ bool GetFileSet(std::vector<std::string> const& parameters,
   if (cmHasPrefix(targetName, TARGET)) {
     targetName = targetName.substr(TARGET.length());
     if (targetName.empty()) {
-      reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("No value provided for the ", TARGET, " option."));
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("No value provided for the "_s, TARGET, " option."_s));
       return false;
     }
 
@@ -4230,13 +4233,13 @@ bool GetFileSet(std::vector<std::string> const& parameters,
     target = lg->FindGeneratorTargetToUse(targetName);
     if (!target) {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("Non-existent target: ", targetName));
+                  cmStrCat("Non-existent target: "_s, targetName));
       return false;
     }
     fileSet = target->GetFileSet(fileSetName);
   } else {
     reportError(eval, content->GetOriginalExpression(),
-                cmStrCat("Invalid option. ", TARGET, " expected."));
+                cmStrCat("Invalid option. "_s, TARGET, " expected."_s));
     return false;
   }
   return true;
@@ -4318,9 +4321,9 @@ static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
       return std::string{};
     }
     if (!fileSet) {
-      reportError(
-        eval, content->GetOriginalExpression(),
-        cmStrCat("FILE_SET \"", fileSetName, "\" is not known from CMake."));
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("FILE_SET \""_s, fileSetName,
+                           "\" is not known from CMake."_s));
       return std::string{};
     }
 
@@ -4378,7 +4381,7 @@ bool GetSourceFile(
       if (dir.empty()) {
         reportError(
           eval, content->GetOriginalExpression(),
-          cmStrCat("No value provided for the ", DIRECTORY, " option."));
+          cmStrCat("No value provided for the "_s, DIRECTORY, " option."_s));
         return false;
       }
       dir = cmSystemTools::CollapseFullPath(
@@ -4387,29 +4390,29 @@ bool GetSourceFile(
       if (!makefile) {
         reportError(
           eval, content->GetOriginalExpression(),
-          cmStrCat("Directory \"", dir, "\" is not known from CMake."));
+          cmStrCat("Directory \""_s, dir, "\" is not known from CMake."_s));
         return false;
       }
     } else if (cmHasPrefix(option, TARGET_DIRECTORY)) {
       auto targetName = option.substr(TARGET_DIRECTORY.length());
       if (targetName.empty()) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("No value provided for the ", TARGET_DIRECTORY,
-                             " option."));
+                    cmStrCat("No value provided for the "_s, TARGET_DIRECTORY,
+                             " option."_s));
         return false;
       }
       auto* target = makefile->FindTargetToUse(targetName);
       if (!target) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("Non-existent target: ", targetName));
+                    cmStrCat("Non-existent target: "_s, targetName));
         return false;
       }
       makefile = makefile->GetGlobalGenerator()->FindMakefile(
         target->GetProperty("BINARY_DIR"));
     } else {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("Invalid option. ", DIRECTORY, " or ",
-                           TARGET_DIRECTORY, " expected."));
+                  cmStrCat("Invalid option. "_s, DIRECTORY, " or "_s,
+                           TARGET_DIRECTORY, " expected."_s));
       return false;
     }
 
@@ -4508,9 +4511,9 @@ static const struct SourcePropertyNode : public cmGeneratorExpressionNode
       return std::string{};
     }
     if (!sourceFile) {
-      reportError(
-        eval, content->GetOriginalExpression(),
-        cmStrCat("Source file \"", sourceName, "\" is not known from CMake."));
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("Source file \""_s, sourceName,
+                           "\" is not known from CMake."_s));
       return std::string{};
     }
 
@@ -4600,8 +4603,9 @@ static const struct RulePropertyNode : public cmGeneratorExpressionNode
 
     genRule = eval->Context.LG->FindGeneratorRuleToUse(ruleName);
     if (!genRule) {
-      reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("Rule \"", ruleName, "\" is not known to CMake."));
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("Rule \""_s, ruleName, "\" is not known to CMake."_s));
       return std::string{};
     }
 
@@ -4610,8 +4614,8 @@ static const struct RulePropertyNode : public cmGeneratorExpressionNode
       genRule->GetTarget()->GetName());
     if (!target) {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("Internal error for rule \"",
-                           genRule->GetRule()->GetName(), "\"."));
+                  cmStrCat("Internal error for rule \""_s,
+                           genRule->GetRule()->GetName(), "\"."_s));
       return std::string{};
     }
 
@@ -4634,8 +4638,8 @@ static const struct RulePropertyNode : public cmGeneratorExpressionNode
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
           reportError(eval, content->GetOriginalExpression(),
-                      cmStrCat("Self reference on rule \"",
-                               genRule->GetRule()->GetName(), "\"."));
+                      cmStrCat("Self reference on rule \""_s,
+                               genRule->GetRule()->GetName(), "\"."_s));
           return std::string{};
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
           // No error. We just skip cyclic references.
@@ -4760,7 +4764,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
       if (!target) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("Target \"", targetName, "\" not found."));
+                    cmStrCat("Target \""_s, targetName, "\" not found."_s));
         return std::string();
       }
       eval->AllTargets.insert(target);
@@ -5007,7 +5011,7 @@ static const struct targetIntermediateDirNode
 
       if (!target) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("Target \"", targetName, "\" not found."));
+                    cmStrCat("Target \""_s, targetName, "\" not found."_s));
         return std::string();
       }
       eval->AllTargets.insert(target);
@@ -5067,8 +5071,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       eval->Context.LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("Objects of target \"", tgtName,
-                           "\" referenced but no such target exists."));
+                  cmStrCat("Objects of target \""_s, tgtName,
+                           "\" referenced but no such target exists."_s));
       return std::string();
     }
     cm::TargetType type = gt->GetType();
@@ -5079,9 +5083,9 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         type != cm::TargetType::OBJECT_LIBRARY) {
       reportError(
         eval, content->GetOriginalExpression(),
-        cmStrCat("Objects of target \"", tgtName,
+        cmStrCat("Objects of target \""_s, tgtName,
                  "\" referenced but is not one of the allowed target types "
-                 "(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT)."));
+                 "(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT)."_s));
       return std::string();
     }
     cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
@@ -5103,7 +5107,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         } while (semicolon != cm::string_view::npos);
       } else {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("Unrecognized argument:\n  ", arg));
+                    cmStrCat("Unrecognized argument:\n  "_s, arg));
         return std::string();
       }
     }
@@ -5111,7 +5115,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     if (gt->IsImported() && !sourceFilePaths.empty()) {
       reportError(
         eval, content->GetOriginalExpression(),
-        cmStrCat("Cannot use SOURCE_FILES argument on imported target \"",
+        cmStrCat("Cannot use SOURCE_FILES argument on imported target \""_s,
                  tgtName, '"'));
       return std::string();
     }
@@ -5124,15 +5128,16 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       if (!cmSystemTools::FileIsFullPath(path)) {
         reportError(
           eval, content->GetOriginalExpression(),
-          cmStrCat("Source file:\n  ", path, "\nis not an absolute path"));
+          cmStrCat("Source file:\n  "_s, path, "\nis not an absolute path"_s));
         return std::string();
       }
 
       auto const* sf = gt->Makefile->GetSource(path);
       if (!sf || !sourceFiles.count(sf)) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("Source file:\n  ", path,
-                             "\ndoes not exist for target \"", tgtName, '"'));
+                    cmStrCat("Source file:\n  "_s, path,
+                             "\ndoes not exist for target \""_s, tgtName,
+                             '"'));
         return std::string();
       }
       filteredSourceFiles.insert(sf);
@@ -5196,8 +5201,8 @@ struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
       eval->Context.LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
       reportError(eval, content->GetOriginalExpression(),
-                  cmStrCat("Objects of target \"", tgtName,
-                           "\" referenced but no such target exists."));
+                  cmStrCat("Objects of target \""_s, tgtName,
+                           "\" referenced but no such target exists."_s));
       return std::vector<std::string>();
     }
     cm::TargetType type = gt->GetType();
@@ -5206,9 +5211,9 @@ struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
         type != cm::TargetType::MODULE_LIBRARY) {
       reportError(
         eval, content->GetOriginalExpression(),
-        cmStrCat("Objects of target \"", tgtName,
+        cmStrCat("Objects of target \""_s, tgtName,
                  "\" referenced but is not one of the allowed target types "
-                 "(EXECUTABLE, SHARED, MODULE)."));
+                 "(EXECUTABLE, SHARED, MODULE)."_s));
       return std::vector<std::string>();
     }
     if (dagChecker &&
@@ -5332,7 +5337,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       std::vector<std::string> const& langAvailable =
         availableFeatures[lit.first];
       cmValue standardDefault = eval->Context.LG->GetMakefile()->GetDefinition(
-        cmStrCat("CMAKE_", lit.first, "_STANDARD_DEFAULT"));
+        cmStrCat("CMAKE_"_s, lit.first, "_STANDARD_DEFAULT"_s));
       for (std::string const& it : lit.second) {
         if (!cm::contains(langAvailable, it)) {
           return "0";
@@ -5655,7 +5660,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
     std::string language = target->GetLinkerLanguage(eval->Context.Config);
 
     std::string pdbSupportVar =
-      cmStrCat("CMAKE_", language, "_LINKER_SUPPORTS_PDB");
+      cmStrCat("CMAKE_"_s, language, "_LINKER_SUPPORTS_PDB"_s);
 
     if (!eval->Context.LG->GetMakefile()->IsOn(pdbSupportVar)) {
       ::reportError(eval, content->GetOriginalExpression(),
@@ -5919,14 +5924,14 @@ protected:
       eval->Context.LG->FindGeneratorTargetToUse(name);
     if (!target) {
       ::reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat("No target \"", name, '"'));
+                    cmStrCat("No target \""_s, name, '"'));
       return nullptr;
     }
     if (target->GetType() >= cm::TargetType::OBJECT_LIBRARY &&
         target->GetType() != cm::TargetType::UNKNOWN_LIBRARY) {
-      ::reportError(
-        eval, content->GetOriginalExpression(),
-        cmStrCat("Target \"", name, "\" is not an executable or library."));
+      ::reportError(eval, content->GetOriginalExpression(),
+                    cmStrCat("Target \""_s, name,
+                             "\" is not an executable or library."_s));
       return nullptr;
     }
     if (dagChecker &&
@@ -6179,7 +6184,7 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
     std::string language = target->GetLinkerLanguage(eval->Context.Config);
 
     std::string pdbSupportVar =
-      cmStrCat("CMAKE_", language, "_LINKER_SUPPORTS_PDB");
+      cmStrCat("CMAKE_"_s, language, "_LINKER_SUPPORTS_PDB"_s);
 
     if (!lg->GetMakefile()->IsOn(pdbSupportVar)) {
       ::reportError(
@@ -6553,7 +6558,7 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
     for (auto const& in : list_in) {
       if (!cmSystemTools::FileIsFullPath(in)) {
         reportError(eval, content->GetOriginalExpression(),
-                    cmStrCat('"', in, "\" is not an absolute path."));
+                    cmStrCat('"', in, "\" is not an absolute path."_s));
         return std::string();
       }
       list_out.emplace_back(converter.ConvertDirectorySeparatorsForShell(in));
@@ -6761,7 +6766,7 @@ void reportError(cm::GenEx::Evaluation* eval, std::string const& expr,
   eval->Context.LG->GetCMakeInstance()->IssueMessage(
     MessageType::FATAL_ERROR,
     cmStrCat("Error evaluating generator expression:\n"
-             "  ",
+             "  "_s,
              expr, '\n', result),
     eval->Backtrace);
 }

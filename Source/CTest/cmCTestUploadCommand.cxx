@@ -33,8 +33,8 @@ bool cmCTestUploadCommand::ExecuteUpload(UploadArguments& args,
     if (!cmSystemTools::FileExists(arg)) {
       mf.IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("File \"", arg,
-                 "\" does not exist. Cannot submit a non-existent file."));
+        cmStrCat("File \""_s, arg,
+                 "\" does not exist. Cannot submit a non-existent file."_s));
       return true;
     }
     return false;
@@ -43,7 +43,7 @@ bool cmCTestUploadCommand::ExecuteUpload(UploadArguments& args,
   cmGeneratedFileStream ofs;
   if (!this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(), "Upload.xml",
                                    ofs)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open Upload.xml file\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open Upload.xml file\n"_s);
     return false;
   }
   std::string buildname =
@@ -68,8 +68,8 @@ bool cmCTestUploadCommand::ExecuteUpload(UploadArguments& args,
   xml.Element("Time", std::chrono::system_clock::now());
 
   for (std::string const& file : args.Files) {
-    cmCTestOptionalLog(this->CTest, OUTPUT, args.Quiet,
-                       "\tUpload file: ", file, '\n');
+    cmCTestOptionalLog(this->CTest, OUTPUT, args.Quiet, "\tUpload file: "_s,
+                       file, '\n');
     xml.StartElement("File");
     xml.Attribute("filename", file);
     xml.StartElement("Content");

@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/Process.h"
 
 #include "cmExecutionStatus.h"
@@ -196,7 +198,7 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
 #else
   std::string commandInDir;
   if (dir) {
-    commandInDir = cmStrCat("cd \"", dir, "\" && ", command);
+    commandInDir = cmStrCat("cd \""_s, dir, "\" && "_s, command);
   } else {
     commandInDir = command;
   }
@@ -205,7 +207,7 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
 #  endif
   command = commandInDir;
   if (verbose) {
-    cmSystemTools::Stdout(cmStrCat("running ", command, '\n'));
+    cmSystemTools::Stdout(cmStrCat("running "_s, command, '\n'));
   }
   fflush(stdout);
   fflush(stderr);
@@ -250,12 +252,12 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
       break;
     case cmsysProcess_State_Exception:
       retVal = -1;
-      msg = cmStrCat(std::move(msg), "\nProcess terminated due to: ",
+      msg = cmStrCat(std::move(msg), "\nProcess terminated due to: "_s,
                      cmsysProcess_GetExceptionString(cp));
       break;
     case cmsysProcess_State_Error:
       retVal = -1;
-      msg = cmStrCat(std::move(msg), "\nProcess failed because: ",
+      msg = cmStrCat(std::move(msg), "\nProcess failed because: "_s,
                      cmsysProcess_GetErrorString(cp));
       break;
     case cmsysProcess_State_Expired:
@@ -266,9 +268,9 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
   if (!msg.empty()) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
     // Old Windows process execution printed this info.
-    msg = cmStrCat(std::move(msg), "\n\nfor command: ", command);
+    msg = cmStrCat(std::move(msg), "\n\nfor command: "_s, command);
     if (dir) {
-      msg = cmStrCat(std::move(msg), "\nin dir: ", dir);
+      msg = cmStrCat(std::move(msg), "\nin dir: "_s, dir);
     }
     msg += "\n";
     if (verbose) {

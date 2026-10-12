@@ -5,6 +5,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <cm3p/json/value.h>
 #endif
@@ -67,7 +69,7 @@ bool LoadVSInstanceVCToolsetVersion(VSInstanceInfo& vsInstanceInfo)
 {
   std::string const vcRoot = vsInstanceInfo.GetInstallLocation();
   std::string vcToolsVersionFile = cmStrCat(
-    vcRoot, "/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt");
+    vcRoot, "/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt"_s);
   std::string vcToolsVersion;
   cmsys::ifstream fin(vcToolsVersionFile.c_str());
   if (!fin || !cmSystemTools::GetLineFromStream(fin, vcToolsVersion)) {
@@ -75,7 +77,7 @@ bool LoadVSInstanceVCToolsetVersion(VSInstanceInfo& vsInstanceInfo)
   }
   vcToolsVersion = cmTrimWhitespace(vcToolsVersion);
   std::string const vcToolsDir =
-    cmStrCat(vcRoot, "/VC/Tools/MSVC/", vcToolsVersion);
+    cmStrCat(vcRoot, "/VC/Tools/MSVC/"_s, vcToolsVersion);
   if (!cmSystemTools::FileIsDirectory(vcToolsDir)) {
     return false;
   }
@@ -431,7 +433,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
   std::string envVSCommonToolsDir;
   std::string envVSCommonToolsDirEnvName =
-    cmStrCat("VS", this->Version, "0COMNTOOLS");
+    cmStrCat("VS"_s, this->Version, "0COMNTOOLS"_s);
 
   if (cmSystemTools::GetEnv(envVSCommonToolsDirEnvName, envVSCommonToolsDir)) {
     cmSystemTools::ConvertToUnixSlashes(envVSCommonToolsDir);
@@ -483,7 +485,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
       // If we've been given a hint then use it.
       if (!envVSCommonToolsDir.empty()) {
         std::string currentVSLocation =
-          cmStrCat(instanceInfo.GetInstallLocation(), "/Common7/Tools");
+          cmStrCat(instanceInfo.GetInstallLocation(), "/Common7/Tools"_s);
         if (cmSystemTools::ComparePath(currentVSLocation,
                                        envVSCommonToolsDir)) {
           chosenInstanceInfo = instanceInfo;

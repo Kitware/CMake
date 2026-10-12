@@ -128,7 +128,7 @@ cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
     if (i == installRoot.size() - 1) {
       AddAttribute("Id", "INSTALL_ROOT");
     } else {
-      AddAttribute("Id", cmStrCat("INSTALL_PREFIX_", i));
+      AddAttribute("Id", cmStrCat("INSTALL_PREFIX_"_s, i));
     }
 
     AddAttribute("Name", installRoot[i]);

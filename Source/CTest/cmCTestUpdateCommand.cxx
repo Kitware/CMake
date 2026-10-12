@@ -97,25 +97,25 @@ int DetermineType(std::string const& cmd)
 
 int DetectVCS(std::string const& dir)
 {
-  if (cmSystemTools::FileExists(cmStrCat(dir, "/CVS"))) {
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/CVS"_s))) {
     return e_CVS;
   }
-  if (cmSystemTools::FileExists(cmStrCat(dir, "/.svn"))) {
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.svn"_s))) {
     return e_SVN;
   }
-  if (cmSystemTools::FileExists(cmStrCat(dir, "/.bzr"))) {
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.bzr"_s))) {
     return e_BZR;
   }
-  if (cmSystemTools::FileExists(cmStrCat(dir, "/.git"))) {
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.git"_s))) {
     return e_GIT;
   }
-  if (cmSystemTools::FileExists(cmStrCat(dir, "/.hg"))) {
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.hg"_s))) {
     return e_HG;
   }
-  if (cmSystemTools::FileExists(cmStrCat(dir, "/.p4"))) {
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.p4"_s))) {
     return e_P4;
   }
-  if (cmSystemTools::FileExists(cmStrCat(dir, "/.p4config"))) {
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.p4config"_s))) {
     return e_P4;
   }
   return e_UNKNOWN;
@@ -188,7 +188,7 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
 
     if (updateCommand.empty()) {
       status.SetError(cmStrCat("called with no update command specified. "
-                               "Please set CTEST_UPDATE_COMMAND",
+                               "Please set CTEST_UPDATE_COMMAND"_s,
                                key ? " or "_s : ""_s, key ? key : "", '.'));
       return false;
     }
@@ -196,9 +196,9 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
 
   cmGeneratedFileStream ofs;
   if (!this->CTest->GetShowOnly()) {
-    std::string logFile = cmStrCat("LastUpdate_", currentTag, ".log");
+    std::string logFile = cmStrCat("LastUpdate_"_s, currentTag, ".log"_s);
     if (!this->CTest->OpenOutputFile("Temporary", logFile, ofs)) {
-      status.SetError(cmStrCat("cannot create log file: ", logFile));
+      status.SetError(cmStrCat("cannot create log file: "_s, logFile));
       return false;
     }
   }
@@ -211,8 +211,8 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
 
   this->CTest->AddSubmitFile(cmCTest::PartUpdate, "Update.xml");
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Updating ",
-                     TypeToString(updateType), " repository: ", source_dir,
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Updating "_s,
+                     TypeToString(updateType), " repository: "_s, source_dir,
                      '\n');
 
   // Make sure VCS tool messages are in English so we can parse them.
@@ -271,21 +271,21 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
   int localModifications = 0;
   int numUpdated = vc->GetPathCount(cmCTestVC::PathUpdated);
   if (numUpdated) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found ",
-                       numUpdated, " updated files\n");
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found "_s,
+                       numUpdated, " updated files\n"_s);
   }
   if (int numModified = vc->GetPathCount(cmCTestVC::PathModified)) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found ",
-                       numModified, " locally modified files\n");
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found "_s,
+                       numModified, " locally modified files\n"_s);
     localModifications += numModified;
   }
   if (int numConflicting = vc->GetPathCount(cmCTestVC::PathConflicting)) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found ",
-                       numConflicting, " conflicting files\n");
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet, "   Found "_s,
+                       numConflicting, " conflicting files\n"_s);
     localModifications += numConflicting;
   }
 
-  cmCTestOptionalLog(this->CTest, DEBUG, args.Quiet, "End\n");
+  cmCTestOptionalLog(this->CTest, DEBUG, args.Quiet, "End\n"_s);
   std::string end_time = this->CTest->CurrentTime();
   xml.Element("EndDateTime", end_time);
   xml.Element("EndTime", std::chrono::system_clock::now());
@@ -300,13 +300,13 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
                 "There are modified or conflicting files in the repository");
     cmCTestLog(
       this->CTest, WARNING,
-      "   There are modified or conflicting files in the repository\n");
+      "   There are modified or conflicting files in the repository\n"_s);
   }
   if (!updated) {
     xml.Content("Update command failed:\n");
     xml.Content(vc->GetUpdateCommandLine());
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   Update command failed: ", vc->GetUpdateCommandLine(), '\n');
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Update command failed: "_s,
+               vc->GetUpdateCommandLine(), '\n');
   }
   xml.EndElement(); // UpdateReturnStatus
   xml.EndElement(); // Update

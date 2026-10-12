@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmComputeLinkInformation.h"
 #include "cmDiagnosticContext.h"
@@ -205,7 +206,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   } else {
     char const* no_rename = nullptr;
     if (!files.FromDir.empty()) {
-      literalArgs = cmStrCat(std::move(literalArgs), " FILES_FROM_DIR \"",
+      literalArgs = cmStrCat(std::move(literalArgs), " FILES_FROM_DIR \""_s,
                              files.FromDir, '"');
     }
     this->AddInstallRule(os, dest, files.Type, files.From, optional,
@@ -286,7 +287,7 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
   if (this->Target->NeedRelinkBeforeInstall(config)) {
     fromDirConfig =
       cmStrCat(this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-               "/CMakeFiles/CMakeRelink.dir/");
+               "/CMakeFiles/CMakeRelink.dir/"_s);
   } else {
     cmStateEnums::ArtifactType artifact = this->ImportLibrary
       ? cmStateEnums::ImportLibraryArtifact
@@ -403,10 +404,10 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
             this->Target->GetGlobalGenerator()->GetCMakeInstance();
           cm->IssueDiagnostic(
             cmDiagnostics::CMD_AUTHOR,
-            cmStrCat("Target '", this->Target->GetName(),
+            cmStrCat("Target '"_s, this->Target->GetName(),
                      "' was changed to a FRAMEWORK sometime after install().  "
                      "This may result in the wrong install DESTINATION.  "
-                     "Set the FRAMEWORK property earlier."),
+                     "Set the FRAMEWORK property earlier."_s),
             this->GetBacktrace());
         } break;
       }
@@ -773,15 +774,15 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
         (!oldRuntimeDirs.empty() || !newRuntimeDirs.empty())) {
       mf->IssueMessage(
         MessageType::WARNING,
-        cmStrCat("WARNING: Target \"", this->Target->GetName(),
+        cmStrCat("WARNING: Target \""_s, this->Target->GetName(),
                  "\" has runtime paths which cannot be changed during "
                  "install.  "
                  "To change runtime paths, OS X version 10.6 or newer is "
-                 "required.  "
+                 "required.  "_s
                  "Therefore, runtime paths will not be changed when "
                  "installing.  "
                  "CMAKE_BUILD_WITH_INSTALL_RPATH may be used to work around"
-                 " this limitation."));
+                 " this limitation."_s));
     } else {
       // To be consistent with older versions, runpath changes must be ordered,
       // deleted first, then added, *and* the same path must only appear once.
@@ -994,10 +995,10 @@ void cmInstallTargetGenerator::IssueCMP0095Warning(
       cmDiagnostics::CMD_POLICY,
       cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0095),
                "\n"
-               "RPATH entries for target '",
+               "RPATH entries for target '"_s,
                this->Target->GetName(),
                "' will not be escaped in the intermediary "
-               "cmake_install.cmake script."),
+               "cmake_install.cmake script."_s),
       this->GetBacktrace());
   }
 }

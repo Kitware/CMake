@@ -224,14 +224,15 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   // Make sure there is a rule.
   if (build.Rule.empty()) {
     cmSystemTools::Error(cmStrCat(
-      "No rule for WriteBuild! called with comment: ", build.Comment));
+      "No rule for WriteBuild! called with comment: "_s, build.Comment));
     return;
   }
 
   // Make sure there is at least one output file.
   if (build.Outputs.empty()) {
-    cmSystemTools::Error(cmStrCat(
-      "No output files for WriteBuild! called with comment: ", build.Comment));
+    cmSystemTools::Error(
+      cmStrCat("No output files for WriteBuild! called with comment: "_s,
+               build.Comment));
     return;
   }
 
@@ -248,7 +249,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     if (!build.ImplicitOuts.empty()) {
       // Assume Ninja is new enough to support implicit outputs.
       // Callers should not populate this field otherwise.
-      buildStr = cmStrCat(std::move(buildStr), " |");
+      buildStr = cmStrCat(std::move(buildStr), " |"_s);
       for (std::string const& implicitOut : build.ImplicitOuts) {
         buildStr =
           cmStrCat(std::move(buildStr), ' ', this->EncodePath(implicitOut));
@@ -262,16 +263,16 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     if (!build.WorkDirOuts.empty()) {
       if (this->SupportsImplicitOuts() && build.ImplicitOuts.empty()) {
         // Make them implicit outputs if supported by this version of Ninja.
-        buildStr = cmStrCat(std::move(buildStr), " |");
+        buildStr = cmStrCat(std::move(buildStr), " |"_s);
       }
       for (std::string const& workdirOut : build.WorkDirOuts) {
-        buildStr = cmStrCat(std::move(buildStr), " ${cmake_ninja_workdir}",
+        buildStr = cmStrCat(std::move(buildStr), " ${cmake_ninja_workdir}"_s,
                             this->EncodePath(workdirOut));
       }
     }
 
     // Write the rule.
-    buildStr = cmStrCat(std::move(buildStr), ": ", build.Rule);
+    buildStr = cmStrCat(std::move(buildStr), ": "_s, build.Rule);
   }
 
   std::string arguments;
@@ -425,14 +426,14 @@ void cmGlobalNinjaGenerator::AddMacOSXContentRule()
 {
   {
     cmNinjaRule rule("COPY_OSX_CONTENT_FILE");
-    rule.Command = cmStrCat(this->CMakeCmd(), " -E copy $in $out");
+    rule.Command = cmStrCat(this->CMakeCmd(), " -E copy $in $out"_s);
     rule.Description = "Copying OS X Content $out";
     rule.Comment = "Rule for copying OS X bundle content file, with style.";
     this->AddRule(rule);
   }
   {
     cmNinjaRule rule("COPY_OSX_CONTENT_DIR");
-    rule.Command = cmStrCat(this->CMakeCmd(), " -E copy_directory $in $out");
+    rule.Command = cmStrCat(this->CMakeCmd(), " -E copy_directory $in $out"_s);
     rule.Description = "Copying OS X Content $out";
     rule.Comment = "Rule for copying OS X bundle content dir, with style.";
     this->AddRule(rule);
@@ -460,14 +461,15 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
   // Make sure the rule has a name.
   if (rule.Name.empty()) {
     cmSystemTools::Error(cmStrCat(
-      "No name given for WriteRule! called with comment: ", rule.Comment));
+      "No name given for WriteRule! called with comment: "_s, rule.Comment));
     return;
   }
 
   // Make sure a command is given.
   if (rule.Command.empty()) {
-    cmSystemTools::Error(cmStrCat(
-      "No command given for WriteRule! called with comment: ", rule.Comment));
+    cmSystemTools::Error(
+      cmStrCat("No command given for WriteRule! called with comment: "_s,
+               rule.Comment));
     return;
   }
 
@@ -475,7 +477,7 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
   if (!rule.RspFile.empty() && rule.RspContent.empty()) {
     cmSystemTools::Error(
       cmStrCat("rspfile but no rspfile_content given for WriteRule! "
-               "called with comment: ",
+               "called with comment: "_s,
                rule.Comment));
     return;
   }
@@ -519,7 +521,7 @@ void cmGlobalNinjaGenerator::WriteVariable(std::ostream& os,
   // Make sure we have a name.
   if (name.empty()) {
     cmSystemTools::Error(cmStrCat("No name given for WriteVariable! called "
-                                  "with comment: ",
+                                  "with comment: "_s,
                                   comment));
     return;
   }
@@ -623,9 +625,9 @@ void cmGlobalNinjaGenerator::Generate()
                                     RequiredNinjaVersion())) {
     this->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("The detected version of Ninja (", this->NinjaVersion,
-               ") is less than the version of Ninja required by CMake (",
-               cmGlobalNinjaGenerator::RequiredNinjaVersion(), ")."));
+      cmStrCat("The detected version of Ninja ("_s, this->NinjaVersion,
+               ") is less than the version of Ninja required by CMake ("_s,
+               cmGlobalNinjaGenerator::RequiredNinjaVersion(), ")."_s));
     return;
   }
   this->InitOutputPathPrefix();
@@ -700,10 +702,10 @@ void cmGlobalNinjaGenerator::CleanMetaData()
                                          nullptr,
                                          cmSystemTools::OUTPUT_NONE)) {
       this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                             cmStrCat("Running\n '",
+                                             cmStrCat("Running\n '"_s,
                                                       cmJoin(command, "' '"),
                                                       "'\n"
-                                                      "failed with:\n ",
+                                                      "failed with:\n "_s,
                                                       error));
       cmSystemTools::SetFatalErrorOccurred();
     }
@@ -769,9 +771,9 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
                                          nullptr,
                                          cmSystemTools::OUTPUT_NONE)) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("Running\n '", cmJoin(command, "' '"),
+                       cmStrCat("Running\n '"_s, cmJoin(command, "' '"),
                                 "'\n"
-                                "failed with:\n ",
+                                "failed with:\n "_s,
                                 error));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
@@ -854,10 +856,10 @@ void cmGlobalNinjaGenerator::CheckNinjaCodePage()
   if (!cmSystemTools::RunSingleCommand(command, &output, &error, &result,
                                        nullptr, cmSystemTools::OUTPUT_NONE)) {
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                           cmStrCat("Running\n '",
+                                           cmStrCat("Running\n '"_s,
                                                     cmJoin(command, "' '"),
                                                     "'\n"
-                                                    "failed with:\n ",
+                                                    "failed with:\n "_s,
                                                     error));
     cmSystemTools::SetFatalErrorOccurred();
   } else if (result == 0) {
@@ -926,13 +928,13 @@ bool cmGlobalNinjaGenerator::CheckCxxModuleSupport(CxxModuleSupportQuery query)
       MessageType::FATAL_ERROR,
       cmStrCat("The Ninja generator does not support C++20 modules "
                "using Ninja version \n"
-               "  ",
+               "  "_s,
                this->NinjaVersion,
                "\n"
                "due to lack of required features.  "
-               "Ninja ",
+               "Ninja "_s,
                RequiredNinjaVersionForDyndepsCxx(),
-               " or higher is required."));
+               " or higher is required."_s));
     cmSystemTools::SetFatalErrorOccurred();
   }
   return false;
@@ -948,13 +950,13 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
     MessageType::FATAL_ERROR,
     cmStrCat("The Ninja generator does not support Fortran using Ninja "
              "version\n"
-             "  ",
+             "  "_s,
              this->NinjaVersion,
              "\n"
              "due to lack of required features.  "
-             "Ninja ",
+             "Ninja "_s,
              RequiredNinjaVersionForDyndepsFortran(),
-             " or higher is required."));
+             " or higher is required."_s));
   cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
@@ -968,13 +970,13 @@ bool cmGlobalNinjaGenerator::CheckISPC(cmMakefile* mf) const
   mf->IssueMessage(
     MessageType::FATAL_ERROR,
     cmStrCat("The Ninja generator does not support ISPC using Ninja version\n"
-             "  ",
+             "  "_s,
              this->NinjaVersion,
              "\n"
              "due to lack of required features.  "
-             "Ninja ",
+             "Ninja "_s,
              RequiredNinjaVersionForMultipleOutputs(),
-             " or higher is required."));
+             " or higher is required."_s));
   cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
@@ -994,11 +996,11 @@ void cmGlobalNinjaGenerator::EnableLanguage(
     this->ResolveLanguageCompiler(l, mf, optional);
 #ifdef _WIN32
     std::string const& compilerId =
-      mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_COMPILER_ID"));
+      mf->GetSafeDefinition(cmStrCat("CMAKE_"_s, l, "_COMPILER_ID"_s));
     std::string const& simulateId =
-      mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_SIMULATE_ID"));
+      mf->GetSafeDefinition(cmStrCat("CMAKE_"_s, l, "_SIMULATE_ID"_s));
     std::string const& compilerFrontendVariant = mf->GetSafeDefinition(
-      cmStrCat("CMAKE_", l, "_COMPILER_FRONTEND_VARIANT"));
+      cmStrCat("CMAKE_"_s, l, "_COMPILER_FRONTEND_VARIANT"_s));
     if (DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant)) {
       this->MarkAsGCCOnWindows();
     }
@@ -1239,7 +1241,7 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
     this->GetCMakeInstance()->GetHomeOutputDirectory();
   if (!this->CompileCommandsStream) {
     std::string buildFilePath =
-      cmStrCat(buildFileDir, "/compile_commands.json");
+      cmStrCat(buildFileDir, "/compile_commands.json"_s);
 
     // Get a stream where to generate things.
     this->CompileCommandsStream =
@@ -1345,7 +1347,7 @@ void cmGlobalNinjaGenerator::WriteInstallPrepTargets()
       auto const it = prepTargets.ComponentFiles.find(component.first);
       std::set<std::string> const& files =
         it == prepTargets.ComponentFiles.end() ? noFiles : it->second;
-      writePrepTarget(cmStrCat("install_prep/", component.first),
+      writePrepTarget(cmStrCat("install_prep/"_s, component.first),
                       component.second, files);
     }
     writePrepTarget("install_prep/all", prepTargets.All, prepTargets.AllFiles);
@@ -1385,10 +1387,10 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
           continue;
         }
         std::string const depName = this->ConvertToNinjaPath(
-          cmStrCat("test_prep/", tester->GetTest()->GetName()));
+          cmStrCat("test_prep/"_s, tester->GetTest()->GetName()));
         // Merge with existing target if multiple tests have the same name
         auto& testPrepTarget = testPrepTargets[depName];
-        testPrepTarget.Comment = cmStrCat("Build dependencies for test ",
+        testPrepTarget.Comment = cmStrCat("Build dependencies for test "_s,
                                           tester->GetTest()->GetName());
 
         for (cmGeneratorTarget* depTarget : testDeps.Targets) {
@@ -1524,14 +1526,14 @@ void cmGlobalNinjaGenerator::WritePerConfigPhonyAliases(
 std::string cmGlobalNinjaGenerator::OrderDependsTargetForTarget(
   cmGeneratorTarget const* target, std::string const& /*config*/) const
 {
-  return cmStrCat("cmake_object_order_depends_target_", target->GetName());
+  return cmStrCat("cmake_object_order_depends_target_"_s, target->GetName());
 }
 
 std::string cmGlobalNinjaGenerator::OrderDependsTargetForTargetPrivate(
   cmGeneratorTarget const* target, std::string const& config) const
 {
   return cmStrCat(this->OrderDependsTargetForTarget(target, config),
-                  "_private");
+                  "_private"_s);
 }
 
 void cmGlobalNinjaGenerator::AppendTargetOutputs(
@@ -1897,10 +1899,10 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
 
       // Setup target
-      build.Comment = cmStrCat("Folder: ", currentBinaryDir);
+      build.Comment = cmStrCat("Folder: "_s, currentBinaryDir);
       build.Outputs.emplace_back();
       std::string const buildDirCodegenTarget =
-        this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/codegen"));
+        this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/codegen"_s));
       for (auto const& config : configs) {
         build.ExplicitDeps.clear();
         build.Outputs.front() =
@@ -1923,7 +1925,8 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         for (DirectoryTarget::Dir const& d : dt.Children) {
           if (!d.ExcludeFromAll) {
             build.ExplicitDeps.emplace_back(this->BuildAlias(
-              this->ConvertToNinjaPath(cmStrCat(d.Path, "/codegen")), config));
+              this->ConvertToNinjaPath(cmStrCat(d.Path, "/codegen"_s)),
+              config));
           }
         }
 
@@ -1978,10 +1981,10 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
 
     // Setup target
-    build.Comment = cmStrCat("Folder: ", currentBinaryDir);
+    build.Comment = cmStrCat("Folder: "_s, currentBinaryDir);
     build.Outputs.emplace_back();
     std::string const buildDirAllTarget =
-      this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/all"));
+      this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/all"_s));
     for (auto const& config : configs) {
       build.ExplicitDeps.clear();
       build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
@@ -1994,7 +1997,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       for (DirectoryTarget::Dir const& d : dt.Children) {
         if (!d.ExcludeFromAll) {
           build.ExplicitDeps.emplace_back(this->BuildAlias(
-            this->ConvertToNinjaPath(cmStrCat(d.Path, "/all")), config));
+            this->ConvertToNinjaPath(cmStrCat(d.Path, "/all"_s)), config));
         }
       }
       // Write target
@@ -2098,14 +2101,14 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   {
     cmNinjaRule rule("RERUN_CMAKE");
     rule.Command = cmStrCat(
-      this->CMakeCmd(), " --regenerate-during-build",
+      this->CMakeCmd(), " --regenerate-during-build"_s,
       cm->GetIgnoreCompileWarningAsError() ? " --compile-no-warning-as-error"
                                            : "",
       cm->GetIgnoreLinkWarningAsError() ? " --link-no-warning-as-error" : "",
-      " -S",
+      " -S"_s,
       lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
                                 cmOutputConverter::SHELL),
-      " -B",
+      " -B"_s,
       lg->ConvertToOutputFormat(lg->GetBinaryDirectory(),
                                 cmOutputConverter::SHELL));
     rule.Description = "Re-running CMake...";
@@ -2141,7 +2144,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     {
       cmNinjaRule rule("VERIFY_GLOBS");
       rule.Command =
-        cmStrCat(this->CMakeCmd(), " -P ",
+        cmStrCat(this->CMakeCmd(), " -P "_s,
                  lg->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
                                            cmOutputConverter::SHELL));
       rule.Description = "Re-checking globbed directories...";
@@ -2153,7 +2156,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     cmNinjaBuild phonyBuild("phony");
     phonyBuild.Comment = "Phony target to force glob verification run.";
     phonyBuild.Outputs.push_back(
-      cmStrCat(cm->GetGlobVerifyScript(), "_force"));
+      cmStrCat(cm->GetGlobVerifyScript(), "_force"_s));
     this->WriteBuild(os, phonyBuild);
 
     reBuild.Variables["restat"] = "1";
@@ -2179,17 +2182,17 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
       cmDiagnostics::CMD_AUTHOR,
       cmStrCat(
         "The detected version of Ninja:\n"
-        "  ",
+        "  "_s,
         this->NinjaVersion,
         "\n"
         "is less than the version of Ninja required by CMake for adding "
         "restat dependencies to the build.ninja manifest regeneration "
         "target:\n"
-        "  ",
+        "  "_s,
         cmGlobalNinjaGenerator::RequiredNinjaVersionForManifestRestat(),
         "\n"
         "Any pre-check scripts, such as those generated for file(GLOB "
-        "CONFIGURE_DEPENDS), will not be run by Ninja."));
+        "CONFIGURE_DEPENDS), will not be run by Ninja."_s));
   }
 
   std::sort(reBuild.ImplicitDeps.begin(), reBuild.ImplicitDeps.end());
@@ -2308,7 +2311,7 @@ bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
   {
     cmNinjaRule rule("CLEAN_ADDITIONAL");
     rule.Command = cmStrCat(
-      this->CMakeCmd(), " -DCONFIG=$CONFIG -P ",
+      this->CMakeCmd(), " -DCONFIG=$CONFIG -P "_s,
       lgr->ConvertToOutputFormat(this->NinjaOutputPath(cleanScriptRel),
                                  cmOutputConverter::SHELL));
     rule.Description = "Cleaning additional files...";
@@ -2347,7 +2350,8 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
   // Write rule
   {
     cmNinjaRule rule("CLEAN");
-    rule.Command = cmStrCat(this->NinjaCmd(), " $FILE_ARG -t clean $TARGETS");
+    rule.Command =
+      cmStrCat(this->NinjaCmd(), " $FILE_ARG -t clean $TARGETS"_s);
     rule.Description = "Cleaning all built files...";
     rule.Comment = "Rule for cleaning all built files.";
     WriteRule(*this->RulesFileStream, rule);
@@ -2380,7 +2384,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
         }
         if (this->IsMultiConfig()) {
           build.Variables["FILE_ARG"] = cmStrCat(
-            "-f ",
+            "-f "_s,
             this->NinjaOutputPath(
               cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(fileConfig)));
         }
@@ -2412,7 +2416,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 
       for (std::string const& fileConfig : this->GetConfigNames()) {
         build.Variables["FILE_ARG"] = cmStrCat(
-          "-f ",
+          "-f "_s,
           this->NinjaOutputPath(
             cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(fileConfig)));
         this->WriteBuild(*this->GetImplFileStream(fileConfig), build);
@@ -2464,7 +2468,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
 {
   {
     cmNinjaRule rule("HELP");
-    rule.Command = cmStrCat(this->NinjaCmd(), " -t targets");
+    rule.Command = cmStrCat(this->NinjaCmd(), " -t targets"_s);
     rule.Description = "All primary targets available:";
     rule.Comment = "Rule for printing all primary targets available.";
     WriteRule(*this->RulesFileStream, rule);
@@ -2484,14 +2488,14 @@ void cmGlobalNinjaGenerator::WriteTargetInstrument(std::ostream& os)
   {
     cmNinjaRule rule("START_INSTRUMENT");
     rule.Command = cmStrCat(
-      '"', cmSystemTools::GetCTestCommand(), "\" --start-instrumentation \"",
+      '"', cmSystemTools::GetCTestCommand(), "\" --start-instrumentation \""_s,
       this->GetCMakeInstance()->GetHomeOutputDirectory(), '"');
 #  ifndef _WIN32
     /*
      * On Unix systems, Ninja will prefix the command with `/bin/sh -c`.
      * Use exec so that Ninja is the parent process of the command.
      */
-    rule.Command = cmStrCat("exec ", rule.Command);
+    rule.Command = cmStrCat("exec "_s, rule.Command);
 #  endif
     rule.Description = "Collecting build metrics";
     rule.Comment = "Rule to initialize instrumentation daemon.";
@@ -2681,7 +2685,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
       arg_out = arg_src;
     } else {
       cmSystemTools::Error(
-        cmStrCat("-E cmake_ninja_depends unknown argument: ", arg));
+        cmStrCat("-E cmake_ninja_depends unknown argument: "_s, arg));
       return 1;
     }
   }
@@ -2719,8 +2723,8 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     info = cmcmd_cmake_ninja_depends_fortran(arg_tdi, arg_src, arg_src_orig);
   } else {
     cmSystemTools::Error(
-      cmStrCat("-E cmake_ninja_depends does not understand the ", arg_lang,
-               " language"));
+      cmStrCat("-E cmake_ninja_depends does not understand the "_s, arg_lang,
+               " language"_s));
     return 1;
   }
 
@@ -2742,7 +2746,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
 
   if (!cmScanDepFormat_P1689_Write(arg_ddi, info->ScanDep)) {
     cmSystemTools::Error(
-      cmStrCat("-E cmake_ninja_depends failed to write ", arg_ddi));
+      cmStrCat("-E cmake_ninja_depends failed to write "_s, arg_ddi));
     return 1;
   }
   return 0;
@@ -2777,7 +2781,7 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
       cmJSONState parseState(arg_tdi, &tdio, cmJSONState::StrictMode::Relaxed);
       if (!parseState.errors.empty()) {
         cmSystemTools::Error(
-          cmStrCat("-E cmake_ninja_depends failed to parse ", arg_tdi,
+          cmStrCat("-E cmake_ninja_depends failed to parse "_s, arg_tdi,
                    parseState.GetErrorMessage()));
         return info;
       }
@@ -2820,7 +2824,7 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   cmFortranParser parser(fc, includes, defines, finfo);
   if (!cmFortranParser_FilePush(&parser, arg_src.c_str())) {
     cmSystemTools::Error(
-      cmStrCat("-E cmake_ninja_depends failed to open ", arg_src));
+      cmStrCat("-E cmake_ninja_depends failed to open "_s, arg_src));
     return info;
   }
   if (cmFortran_yyparse(parser.Scanner) != 0) {
@@ -2888,8 +2892,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   for (std::string const& arg_ddi : arg_ddis) {
     cmScanDepInfo info;
     if (!cmScanDepFormat_P1689_Parse(arg_ddi, &info)) {
-      cmSystemTools::Error(
-        cmStrCat("-E cmake_ninja_dyndep failed to parse ddi file ", arg_ddi));
+      cmSystemTools::Error(cmStrCat(
+        "-E cmake_ninja_dyndep failed to parse ddi file "_s, arg_ddi));
       return false;
     }
     objects.push_back(std::move(info));
@@ -2916,11 +2920,11 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // Populate the module map with those provided by linked targets first.
   for (std::string const& linked_target_dir : linked_target_dirs) {
     std::string const ltmn =
-      cmStrCat(linked_target_dir, '/', arg_lang, "Modules.json");
+      cmStrCat(linked_target_dir, '/', arg_lang, "Modules.json"_s);
     Json::Value ltm;
     cmJSONState parseState(ltmn, &ltm, cmJSONState::StrictMode::Relaxed);
     if (!parseState.errors.empty()) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse "_s,
                                     linked_target_dir,
                                     parseState.GetErrorMessage()));
       return false;
@@ -3026,8 +3030,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     modmap_fmt = CxxModuleMapFormat::Msvc;
   } else {
     cmSystemTools::Error(
-      cmStrCat("-E cmake_ninja_dyndep does not understand the ", arg_modmapfmt,
-               " module map format"));
+      cmStrCat("-E cmake_ninja_dyndep does not understand the "_s,
+               arg_modmapfmt, " module map format"_s));
     return false;
   }
 
@@ -3072,12 +3076,12 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // module info from the native target
   if (!native_target_dir.empty()) {
     std::string const modules_info_path =
-      cmStrCat(native_target_dir, '/', arg_lang, "Modules.json");
+      cmStrCat(native_target_dir, '/', arg_lang, "Modules.json"_s);
     Json::Value native_modules_info;
     cmJSONState parseState(modules_info_path, &native_modules_info,
                            cmJSONState::StrictMode::Relaxed);
     if (!parseState.errors.empty()) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse "_s,
                                     modules_info_path,
                                     parseState.GetErrorMessage()));
       return false;
@@ -3137,7 +3141,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       if (!cycle_modules.empty()) {
         cmSystemTools::Error(
           cmStrCat("Circular dependency detected in the C++ module import "
-                   "graph. See modules named: \"",
+                   "graph. See modules named: \""_s,
                    cmJoin(cycle_modules, R"(", ")"_s), '"'));
         return false;
       }
@@ -3181,7 +3185,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         // `cmNinjaTargetGenerator::ExportObjectCompileCommand` to generate the
         // corresponding file path.
         cmGeneratedFileStream mmf;
-        mmf.Open(cmStrCat(object.PrimaryOutput, ".modmap"), false,
+        mmf.Open(cmStrCat(object.PrimaryOutput, ".modmap"_s), false,
                  CxxModuleMapOpenMode(*modmap_fmt) ==
                    CxxModuleMapMode::Binary);
         mmf.SetCopyIfDifferent(true);
@@ -3227,17 +3231,17 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // Store the map of modules provided by this target in a file for
   // use by dependents that reference this target in linked-target-dirs.
   std::string const target_mods_file = cmStrCat(
-    cmSystemTools::GetFilenamePath(arg_dd), '/', arg_lang, "Modules.json");
+    cmSystemTools::GetFilenamePath(arg_dd), '/', arg_lang, "Modules.json"_s);
 
   // Populate the module map with those provided by linked targets first.
   for (std::string const& forward_modules_from_target_dir :
        forward_modules_from_target_dirs) {
-    std::string const fmftn =
-      cmStrCat(forward_modules_from_target_dir, '/', arg_lang, "Modules.json");
+    std::string const fmftn = cmStrCat(forward_modules_from_target_dir, '/',
+                                       arg_lang, "Modules.json"_s);
     Json::Value fmft;
     cmJSONState parseState(fmftn, &fmft, cmJSONState::StrictMode::Relaxed);
     if (!parseState.errors.empty()) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse "_s,
                                     forward_modules_from_target_dir,
                                     parseState.GetErrorMessage()));
       return false;
@@ -3365,7 +3369,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
       arg_ddis.push_back(arg);
     } else {
       cmSystemTools::Error(
-        cmStrCat("-E cmake_ninja_dyndep unknown argument: ", arg));
+        cmStrCat("-E cmake_ninja_dyndep unknown argument: "_s, arg));
       return 1;
     }
   }
@@ -3387,7 +3391,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   {
     cmJSONState parseState(arg_tdi, &tdio, cmJSONState::StrictMode::Relaxed);
     if (!parseState.errors.empty()) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse "_s,
                                     arg_tdi, parseState.GetErrorMessage()));
       return 1;
     }
@@ -3609,13 +3613,13 @@ void cmGlobalNinjaMultiGenerator::CloseBuildFileStreams()
       this->ImplFileStreams[config].reset();
     } else {
       cmSystemTools::Error(
-        cmStrCat("Impl file stream for \"", config, "\" was not open."));
+        cmStrCat("Impl file stream for \""_s, config, "\" was not open."_s));
     }
     if (this->ConfigFileStreams[config]) {
       this->ConfigFileStreams[config].reset();
     } else {
       cmSystemTools::Error(
-        cmStrCat("Config file stream for \"", config, "\" was not open."));
+        cmStrCat("Config file stream for \""_s, config, "\" was not open."_s));
     }
   }
 }
@@ -3632,14 +3636,14 @@ void cmGlobalNinjaMultiGenerator::AppendNinjaFileArgument(
 std::string cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(
   std::string const& config)
 {
-  return cmStrCat("CMakeFiles/impl-", config,
+  return cmStrCat("CMakeFiles/impl-"_s, config,
                   cmGlobalNinjaMultiGenerator::NINJA_FILE_EXTENSION);
 }
 
 std::string cmGlobalNinjaMultiGenerator::GetNinjaConfigFilename(
   std::string const& config)
 {
-  return cmStrCat("build-", config,
+  return cmStrCat("build-"_s, config,
                   cmGlobalNinjaMultiGenerator::NINJA_FILE_EXTENSION);
 }
 
@@ -3679,9 +3683,9 @@ bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
     this->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("The configuration specified by "
-               "CMAKE_DEFAULT_BUILD_TYPE (",
+               "CMAKE_DEFAULT_BUILD_TYPE ("_s,
                this->DefaultFileConfig,
-               ") is not present in CMAKE_CONFIGURATION_TYPES"));
+               ") is not present in CMAKE_CONFIGURATION_TYPES"_s));
     return false;
   }
 
@@ -3736,6 +3740,6 @@ std::string cmGlobalNinjaMultiGenerator::GetDefaultBuildConfig() const
 std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTarget(
   cmGeneratorTarget const* target, std::string const& config) const
 {
-  return cmStrCat("cmake_object_order_depends_target_", target->GetName(), '_',
-                  cmSystemTools::UpperCase(config));
+  return cmStrCat("cmake_object_order_depends_target_"_s, target->GetName(),
+                  '_', cmSystemTools::UpperCase(config));
 }

@@ -5,6 +5,8 @@
 #include <ostream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -61,7 +63,7 @@ std::string cmInstallCxxModuleBmiGenerator::GetScriptLocation(
   }
 
   return cmStrCat(this->Target->GetCMFSupportDirectory(),
-                  "/install-cxx-module-bmi-", configName, ".cmake");
+                  "/install-cxx-module-bmi-"_s, configName, ".cmake"_s);
 }
 
 std::string cmInstallCxxModuleBmiGenerator::GetDestination(

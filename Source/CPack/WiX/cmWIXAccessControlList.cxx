@@ -3,6 +3,7 @@
 #include "cmWIXAccessControlList.h"
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmCPackGenerator.h"
 #include "cmStringAlgorithms.h"
@@ -119,7 +120,7 @@ void cmWIXAccessControlList::EmitBooleanAttribute(std::string const& entry,
 {
   if (!this->IsBooleanAttribute(name)) {
     this->ReportError(entry,
-                      cmStrCat("Unknown boolean attribute '", name, '\''));
+                      cmStrCat("Unknown boolean attribute '"_s, name, '\''));
   }
 
   this->SourceWriter.AddAttribute(name, "yes");

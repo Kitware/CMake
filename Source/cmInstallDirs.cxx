@@ -65,7 +65,7 @@ std::string GetLocalStateDirectory(cmMakefile const* makefile)
 std::string GetRunStateDirectory(cmMakefile const* makefile)
 {
   return GetDirectory(makefile, "CMAKE_INSTALL_RUNSTATEDIR",
-                      cmStrCat(GetLocalStateDirectory(makefile), "/run"));
+                      cmStrCat(GetLocalStateDirectory(makefile), "/run"_s));
 }
 
 std::string GetDataRootDirectory(cmMakefile const* makefile)
@@ -82,25 +82,25 @@ std::string GetDataDirectory(cmMakefile const* makefile)
 std::string GetInfoDirectory(cmMakefile const* makefile)
 {
   return GetDirectory(makefile, "CMAKE_INSTALL_INFODIR",
-                      cmStrCat(GetDataRootDirectory(makefile), "/info"));
+                      cmStrCat(GetDataRootDirectory(makefile), "/info"_s));
 }
 
 std::string GetLocaleDirectory(cmMakefile const* makefile)
 {
   return GetDirectory(makefile, "CMAKE_INSTALL_LOCALEDIR",
-                      cmStrCat(GetDataRootDirectory(makefile), "/locale"));
+                      cmStrCat(GetDataRootDirectory(makefile), "/locale"_s));
 }
 
 std::string GetManDirectory(cmMakefile const* makefile)
 {
   return GetDirectory(makefile, "CMAKE_INSTALL_MANDIR",
-                      cmStrCat(GetDataRootDirectory(makefile), "/man"));
+                      cmStrCat(GetDataRootDirectory(makefile), "/man"_s));
 }
 
 std::string GetDocDirectory(cmMakefile const* makefile)
 {
   return GetDirectory(makefile, "CMAKE_INSTALL_DOCDIR",
-                      cmStrCat(GetDataRootDirectory(makefile), "/doc"));
+                      cmStrCat(GetDataRootDirectory(makefile), "/doc"_s));
 }
 
 std::string GetLibExecDirectory(cmMakefile const* makefile)

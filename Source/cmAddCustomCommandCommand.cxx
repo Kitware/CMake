@@ -201,8 +201,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
       // Check if a preceding keyword expected a value but there wasn't one
       if (keywordExpectingValue) {
         std::string const msg =
-          cmStrCat("Keyword ", *keywordExpectingValue,
-                   " requires a value, but none was given.");
+          cmStrCat("Keyword "_s, *keywordExpectingValue,
+                   " requires a value, but none was given."_s);
         if (cmp0175 == cmPolicies::NEW) {
           mf.IssueMessage(MessageType::FATAL_ERROR, msg);
           return false;
@@ -271,7 +271,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
       } else if (copy == keyDEPFILE) {
         doing = doing_depfile;
         if (!mf.GetGlobalGenerator()->SupportsCustomCommandDepfile()) {
-          status.SetError(cmStrCat("Option DEPFILE not supported by ",
+          status.SetError(cmStrCat("Option DEPFILE not supported by "_s,
                                    mf.GetGlobalGenerator()->GetName()));
           return false;
         }

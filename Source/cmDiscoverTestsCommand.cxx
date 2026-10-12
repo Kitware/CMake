@@ -172,7 +172,7 @@ bool cmDiscoverTestsCommand(std::vector<std::string> const& args,
 
   if (!unparsed.empty()) {
     status.SetError(
-      cmStrCat(" given unknown argument \"", unparsed.front(), "\"."));
+      cmStrCat(" given unknown argument \""_s, unparsed.front(), "\"."_s));
     return false;
   }
 

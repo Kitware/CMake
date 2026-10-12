@@ -257,10 +257,10 @@ void AppendProperty(cmMakefile* makefile, cmTarget* target,
                     cm::string_view property, cm::string_view configuration,
                     std::string const& value)
 {
-  std::string const fullprop = cmStrCat("INTERFACE_", property);
+  std::string const fullprop = cmStrCat("INTERFACE_"_s, property);
   if (!configuration.empty()) {
     std::string const genexValue =
-      cmStrCat("$<$<CONFIG:", configuration, ">:", value, '>');
+      cmStrCat("$<$<CONFIG:"_s, configuration, ">:"_s, value, '>');
     target->AppendProperty(fullprop, genexValue, makefile->GetBacktrace());
   } else {
     target->AppendProperty(fullprop, value, makefile->GetBacktrace());
@@ -274,10 +274,10 @@ void AppendImportProperty(cmMakefile* makefile, cmTarget* target,
 {
   if (!configuration.empty()) {
     std::string const fullprop = cmStrCat(
-      "IMPORTED_", property, '_', cmSystemTools::UpperCase(configuration));
+      "IMPORTED_"_s, property, '_', cmSystemTools::UpperCase(configuration));
     target->AppendProperty(fullprop, value, makefile->GetBacktrace());
   } else {
-    std::string const fullprop = cmStrCat("IMPORTED_", property);
+    std::string const fullprop = cmStrCat("IMPORTED_"_s, property);
     target->AppendProperty(fullprop, value, makefile->GetBacktrace());
   }
 }
@@ -748,7 +748,7 @@ void cmPackageInfoReader::SetImportProperty(cmMakefile* makefile,
       makefile->IssueMessage(MessageType::WARNING,
                              cmStrCat("Failed to set property \""_s, property,
                                       "\" on target \""_s, target->GetName(),
-                                      "\": attribute \"", attribute,
+                                      "\": attribute \""_s, attribute,
                                       "\" is not a string."_s));
     }
   }
@@ -767,7 +767,7 @@ void cmPackageInfoReader::SetMetaProperty(
       makefile->IssueMessage(MessageType::WARNING,
                              cmStrCat("Failed to set property \""_s, property,
                                       "\" on target \""_s, target->GetName(),
-                                      "\": attribute \"", attribute,
+                                      "\": attribute \""_s, attribute,
                                       "\" is not a string."_s));
     }
   } else if (!defaultValue.empty()) {

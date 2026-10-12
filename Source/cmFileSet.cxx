@@ -117,8 +117,8 @@ struct ReadOnlyProperty
   {
     std::string msg;
     if (this->Condition == ReadOnlyCondition::All) {
-      msg = cmStrCat(" property is read-only for the file set \"",
-                     fileSet->GetName(), " of the target \"");
+      msg = cmStrCat(" property is read-only for the file set \""_s,
+                     fileSet->GetName(), " of the target \""_s);
     } else if (this->Condition == ReadOnlyCondition::Imported) {
       msg = " property can't be set on a file set attached to the imported "
             "target \"";
@@ -127,7 +127,7 @@ struct ReadOnlyProperty
         " property can't be set on a file set attached to the non-imported "
         "target \"";
     }
-    return cmStrCat(prop, msg, target->GetName(), "\"\n");
+    return cmStrCat(prop, msg, target->GetName(), "\"\n"_s);
   }
 
   bool isReadOnly(std::string const& prop, cmMakefile* context,

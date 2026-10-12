@@ -3,6 +3,8 @@
 
 #include "cmFileCopier.h"
 
+#include <cmext/string_view>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/Glob.hxx"
 
@@ -99,8 +101,8 @@ bool cmFileCopier::SetPermissions(std::string const& toFile,
     auto perm_status = cmSystemTools::SetPermissions(toFile, permissions);
     if (!perm_status) {
       this->Status.SetError(cmStrCat(this->Name,
-                                     " cannot set permissions on \"", toFile,
-                                     "\": ", perm_status.GetString(), '.'));
+                                     " cannot set permissions on \""_s, toFile,
+                                     "\": "_s, perm_status.GetString(), '.'));
       return false;
     }
   }
@@ -113,7 +115,7 @@ bool cmFileCopier::CheckPermissions(std::string const& arg,
 {
   if (!cmFSPermissions::stringToModeT(arg, permissions)) {
     this->Status.SetError(
-      cmStrCat(this->Name, " given invalid permission \"", arg, "\"."));
+      cmStrCat(this->Name, " given invalid permission \""_s, arg, "\"."_s));
     return false;
   }
   return true;
@@ -127,8 +129,8 @@ std::string const& cmFileCopier::ToName(std::string const& fromName)
 bool cmFileCopier::ReportMissing(std::string const& fromFile)
 {
   // The input file does not exist and installation is not optional.
-  this->Status.SetError(cmStrCat(this->Name, " cannot find \"", fromFile,
-                                 "\": ", cmSystemTools::GetLastSystemError(),
+  this->Status.SetError(cmStrCat(this->Name, " cannot find \""_s, fromFile,
+                                 "\": "_s, cmSystemTools::GetLastSystemError(),
                                  '.'));
   return false;
 }
@@ -136,14 +138,14 @@ bool cmFileCopier::ReportMissing(std::string const& fromFile)
 void cmFileCopier::NotBeforeMatch(std::string const& arg)
 {
   this->Status.SetError(
-    cmStrCat("option ", arg, " may not appear before PATTERN or REGEX."));
+    cmStrCat("option "_s, arg, " may not appear before PATTERN or REGEX."_s));
   this->Doing = DoingError;
 }
 
 void cmFileCopier::NotAfterMatch(std::string const& arg)
 {
   this->Status.SetError(
-    cmStrCat("option ", arg, " may not appear after PATTERN or REGEX."));
+    cmStrCat("option "_s, arg, " may not appear after PATTERN or REGEX."_s));
   this->Doing = DoingError;
 }
 
@@ -198,7 +200,7 @@ bool cmFileCopier::Parse(std::vector<std::string> const& args)
     // Check this argument.
     if (!this->CheckKeyword(args[i]) && !this->CheckValue(args[i])) {
       this->Status.SetError(
-        cmStrCat("called with unknown argument \"", args[i], "\"."));
+        cmStrCat("called with unknown argument \""_s, args[i], "\"."_s));
       return false;
     }
 
@@ -210,7 +212,7 @@ bool cmFileCopier::Parse(std::vector<std::string> const& args)
 
   // Require a destination.
   if (this->Destination.empty()) {
-    this->Status.SetError(cmStrCat(this->Name, " given no DESTINATION"));
+    this->Status.SetError(cmStrCat(this->Name, " given no DESTINATION"_s));
     return false;
   }
 
@@ -341,7 +343,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
         this->Doing = DoingNone;
       } else {
         this->Status.SetError(
-          cmStrCat("could not compile PATTERN \"", arg, "\"."));
+          cmStrCat("could not compile PATTERN \""_s, arg, "\"."_s));
         this->Doing = DoingError;
       }
     } break;
@@ -352,7 +354,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
         this->Doing = DoingNone;
       } else {
         this->Status.SetError(
-          cmStrCat("could not compile REGEX \"", arg, "\"."));
+          cmStrCat("could not compile REGEX \""_s, arg, "\"."_s));
         this->Doing = DoingError;
       }
       break;
@@ -509,8 +511,8 @@ bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
       cmsys::Status status =
         cmSystemTools::CreateSymlinkQuietly(symlinkTarget, toFile);
       if (!status) {
-        std::string e = cmStrCat(this->Name, " cannot create symlink\n  ",
-                                 toFile, "\nbecause: ", status.GetString());
+        std::string e = cmStrCat(this->Name, " cannot create symlink\n  "_s,
+                                 toFile, "\nbecause: "_s, status.GetString());
         this->Status.SetError(e);
         return false;
       }
@@ -531,9 +533,10 @@ bool cmFileCopier::InstallSymlink(std::string const& fromFile,
   auto read_symlink_status =
     cmSystemTools::ReadSymlink(fromFile, symlinkTarget);
   if (!read_symlink_status) {
-    this->Status.SetError(cmStrCat(
-      this->Name, " cannot read symlink \"", fromFile, "\" to duplicate at \"",
-      toFile, "\": ", read_symlink_status.GetString(), '.'));
+    this->Status.SetError(cmStrCat(this->Name, " cannot read symlink \""_s,
+                                   fromFile, "\" to duplicate at \""_s, toFile,
+                                   "\": "_s, read_symlink_status.GetString(),
+                                   '.'));
     return false;
   }
 
@@ -575,8 +578,8 @@ bool cmFileCopier::InstallSymlink(std::string const& fromFile,
         reason = status.GetString();
       }
       std::string e =
-        cmStrCat(this->Name, " cannot duplicate symlink\n  ", fromFile,
-                 "\nat\n  ", toFile, "\nbecause: ", reason);
+        cmStrCat(this->Name, " cannot duplicate symlink\n  "_s, fromFile,
+                 "\nat\n  "_s, toFile, "\nbecause: "_s, reason);
       this->Status.SetError(e);
       return false;
     }
@@ -605,9 +608,9 @@ bool cmFileCopier::InstallFile(std::string const& fromFile,
   if (copy) {
     auto copy_status = cmSystemTools::CopyAFile(fromFile, toFile);
     if (!copy_status) {
-      this->Status.SetError(cmStrCat(this->Name, " cannot copy file \"",
-                                     fromFile, "\" to \"", toFile,
-                                     "\": ", copy_status.GetString(), '.'));
+      this->Status.SetError(cmStrCat(this->Name, " cannot copy file \""_s,
+                                     fromFile, "\" to \""_s, toFile, "\": "_s,
+                                     copy_status.GetString(), '.'));
       return false;
     }
   }
@@ -623,8 +626,8 @@ bool cmFileCopier::InstallFile(std::string const& fromFile,
     auto copy_status = cmFileTimes::Copy(fromFile, toFile);
     if (!copy_status) {
       this->Status.SetError(
-        cmStrCat(this->Name, " cannot set modification time on \"", toFile,
-                 "\": ", copy_status.GetString(), '.'));
+        cmStrCat(this->Name, " cannot set modification time on \""_s, toFile,
+                 "\": "_s, copy_status.GetString(), '.'));
       return false;
     }
   }
@@ -663,9 +666,9 @@ bool cmFileCopier::InstallDirectory(std::string const& source,
   auto makedir_status =
     cmSystemTools::MakeDirectory(destination, default_dir_mode);
   if (!makedir_status) {
-    this->Status.SetError(cmStrCat(this->Name, " cannot make directory \"",
-                                   destination,
-                                   "\": ", makedir_status.GetString(), '.'));
+    this->Status.SetError(cmStrCat(this->Name, " cannot make directory \""_s,
+                                   destination, "\": "_s,
+                                   makedir_status.GetString(), '.'));
     return false;
   }
 

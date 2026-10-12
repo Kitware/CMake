@@ -9,6 +9,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/SystemInformation.hxx"
 
 #include "cmGeneratedFileStream.h"
@@ -70,8 +72,8 @@ void cmExtraCodeLiteGenerator::Generate()
       workspaceOutputDir = lg->GetCurrentBinaryDirectory();
       workspaceProjectName = lg->GetProjectName();
       workspaceSourcePath = lg->GetSourceDirectory();
-      workspaceFileName =
-        cmStrCat(workspaceOutputDir, '/', workspaceProjectName, ".workspace");
+      workspaceFileName = cmStrCat(workspaceOutputDir, '/',
+                                   workspaceProjectName, ".workspace"_s);
       this->WorkspacePath = lg->GetCurrentBinaryDirectory();
       break;
     }
@@ -123,7 +125,8 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
       cm::TargetType type = lt->GetType();
       std::string const& outputDir = lg->GetCurrentBinaryDirectory();
       std::string targetName = lt->GetName();
-      std::string filename = cmStrCat(outputDir, '/', targetName, ".project");
+      std::string filename =
+        cmStrCat(outputDir, '/', targetName, ".project"_s);
       retval.push_back(targetName);
       // Make the project file relative to the workspace
       std::string relafilename =
@@ -133,7 +136,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
         case cm::TargetType::SHARED_LIBRARY:
         case cm::TargetType::STATIC_LIBRARY:
         case cm::TargetType::MODULE_LIBRARY:
-          visualname = cmStrCat("lib", std::move(visualname));
+          visualname = cmStrCat("lib"_s, std::move(visualname));
           CM_FALLTHROUGH;
         case cm::TargetType::EXECUTABLE:
           xml->StartElement("Project");
@@ -163,7 +166,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByProjectMaps(
     std::string const& outputDir = it.second[0]->GetCurrentBinaryDirectory();
     std::string projectName = it.second[0]->GetProjectName();
     retval.push_back(projectName);
-    std::string filename = cmStrCat(outputDir, '/', projectName, ".project");
+    std::string filename = cmStrCat(outputDir, '/', projectName, ".project"_s);
 
     // Make the project file relative to the workspace
     filename = cmSystemTools::RelativePath(this->WorkspacePath, filename);
@@ -185,7 +188,7 @@ void cmExtraCodeLiteGenerator::CreateProjectFile(
 {
   std::string const& outputDir = lgs[0]->GetCurrentBinaryDirectory();
   std::string projectName = lgs[0]->GetProjectName();
-  std::string filename = cmStrCat(outputDir, '/', projectName, ".project");
+  std::string filename = cmStrCat(outputDir, '/', projectName, ".project"_s);
 
   this->CreateNewProjectFile(lgs, filename);
 }
@@ -649,15 +652,15 @@ std::string cmExtraCodeLiteGenerator::GetCleanCommand(
   std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   std::string buildcommand = this->GetBuildCommand(mf, "");
   if (!targetName.empty() && generator == "Ninja") {
-    return cmStrCat(std::move(buildcommand), " -t clean ", targetName);
+    return cmStrCat(std::move(buildcommand), " -t clean "_s, targetName);
   }
-  return cmStrCat(std::move(buildcommand), " clean");
+  return cmStrCat(std::move(buildcommand), " clean"_s);
 }
 
 std::string cmExtraCodeLiteGenerator::GetRebuildCommand(
   cmMakefile const* mf, std::string const& targetName) const
 {
-  return cmStrCat(this->GetCleanCommand(mf, targetName), " && ",
+  return cmStrCat(this->GetCleanCommand(mf, targetName), " && "_s,
                   this->GetBuildCommand(mf, targetName));
 }
 
@@ -670,10 +673,10 @@ std::string cmExtraCodeLiteGenerator::GetSingleFileBuildCommand(
   if (generator == "Unix Makefiles" || generator == "MinGW Makefiles") {
 #if defined(_WIN32)
     buildCommand = cmStrCat(
-      make, " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).obj");
+      make, " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).obj"_s);
 #else
-    buildCommand =
-      cmStrCat(make, " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).o");
+    buildCommand = cmStrCat(
+      make, " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).o"_s);
 #endif
   }
   return buildCommand;

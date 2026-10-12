@@ -542,9 +542,9 @@ bool CreateInstallGeneratorsForTarget(
                 [&](cmInstallCommandFileSetArguments const& fileSetArg)
                   -> bool { return fileSetArg.GetFileSet() == name; });
             })) {
-        return fail(cmStrCat("TARGETS target ", target.GetName(),
+        return fail(cmStrCat("TARGETS target "_s, target.GetName(),
                              " is exported but not all of its interface "
-                             "file sets are installed"));
+                             "file sets are installed"_s));
       }
 
       auto te = cm::make_unique<cmTargetExport>();
@@ -635,8 +635,8 @@ bool CreateInstallGeneratorsForTarget(
           } else {
             return fail(
               cmStrCat("TARGETS given no FRAMEWORK DESTINATION for shared "
-                       "library FRAMEWORK target \"",
-                       target.GetName(), "\"."));
+                       "library FRAMEWORK target \""_s,
+                       target.GetName(), "\"."_s));
           }
         } else {
           // The shared library uses the LIBRARY properties.
@@ -717,8 +717,8 @@ bool CreateInstallGeneratorsForTarget(
         } else {
           return fail(
             cmStrCat("TARGETS given no FRAMEWORK DESTINATION for static "
-                     "library FRAMEWORK target \"",
-                     target.GetName(), "\"."));
+                     "library FRAMEWORK target \""_s,
+                     target.GetName(), "\"."_s));
         }
       } else {
         // Static libraries use ARCHIVE properties.
@@ -766,8 +766,8 @@ bool CreateInstallGeneratorsForTarget(
         std::string reason;
         if (!target.HasKnownObjectFileLocation(&reason)) {
           return fail(
-            cmStrCat("TARGETS given OBJECT library \"", target.GetName(),
-                     "\" whose objects may not be installed", reason, '.'));
+            cmStrCat("TARGETS given OBJECT library \""_s, target.GetName(),
+                     "\" whose objects may not be installed"_s, reason, '.'));
         }
 
         objectGenerator = CreateInstallTargetGenerator(
@@ -792,8 +792,8 @@ bool CreateInstallGeneratorsForTarget(
         }
         if (!bundleGenerator) {
           return fail(cmStrCat("TARGETS given no BUNDLE DESTINATION for "
-                               "MACOSX_BUNDLE executable target \"",
-                               target.GetName(), "\"."));
+                               "MACOSX_BUNDLE executable target \""_s,
+                               target.GetName(), "\"."_s));
         }
         if (runtimeDependencySet) {
           if (!AddBundleExecutable(helper, runtimeDependencySet,
@@ -871,9 +871,9 @@ bool CreateInstallGeneratorsForTarget(
       } else {
         helper.Makefile->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
-          cmStrCat("Target ", target.GetName(),
+          cmStrCat("Target "_s, target.GetName(),
                    " has PRIVATE_HEADER files"
-                   " but no PRIVATE_HEADER DESTINATION."));
+                   " but no PRIVATE_HEADER DESTINATION."_s));
       }
     }
 
@@ -896,9 +896,9 @@ bool CreateInstallGeneratorsForTarget(
       } else {
         helper.Makefile->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
-          cmStrCat("Target ", target.GetName(),
+          cmStrCat("Target "_s, target.GetName(),
                    " has PUBLIC_HEADER files"
-                   " but no PUBLIC_HEADER DESTINATION."));
+                   " but no PUBLIC_HEADER DESTINATION."_s));
       }
     }
 
@@ -921,8 +921,8 @@ bool CreateInstallGeneratorsForTarget(
       } else if (!target.IsAppBundleOnApple()) {
         helper.Makefile->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
-          cmStrCat("Target ", target.GetName(),
-                   " has RESOURCE files but no RESOURCE DESTINATION."));
+          cmStrCat("Target "_s, target.GetName(),
+                   " has RESOURCE files but no RESOURCE DESTINATION."_s));
       }
     }
   }
@@ -1054,7 +1054,7 @@ void CheckAbsoluteDestination(Helper& helper, std::string const& destination)
       cmSystemTools::FileIsFullPath(destination)) {
     helper.Makefile->IssueDiagnostic(
       cmDiagnostics::CMD_INSTALL_ABSOLUTE_DESTINATION,
-      cmStrCat("INSTALL command given absolute DESTINATION path:\n  ",
+      cmStrCat("INSTALL command given absolute DESTINATION path:\n  "_s,
                destination));
   }
 }
@@ -1259,8 +1259,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
-    status.SetError(
-      cmStrCat("TARGETS given unknown argument \"", unknownArgs[0], "\"."));
+    status.SetError(cmStrCat("TARGETS given unknown argument \""_s,
+                             unknownArgs[0], "\"."_s));
     return false;
   }
 
@@ -1388,9 +1388,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     auto system = helper.Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
     if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
           system)) {
-      status.SetError(
-        cmStrCat("TARGETS RUNTIME_DEPENDENCIES is not supported on system \"",
-                 system, '"'));
+      status.SetError(cmStrCat(
+        "TARGETS RUNTIME_DEPENDENCIES is not supported on system \""_s, system,
+        '"'));
       return false;
     }
     if (helper.Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
@@ -1412,8 +1412,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
           system)) {
       status.SetError(cmStrCat(
-        "TARGETS RUNTIME_DEPENDENCY_SET is not supported on system \"", system,
-        '"'));
+        "TARGETS RUNTIME_DEPENDENCY_SET is not supported on system \""_s,
+        system, '"'));
       return false;
     }
     runtimeDependencySet =
@@ -1464,16 +1464,16 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           target->GetType() != cm::TargetType::OBJECT_LIBRARY &&
           target->GetType() != cm::TargetType::INTERFACE_LIBRARY) {
         status.SetError(
-          cmStrCat("TARGETS given target \"", tgt,
-                   "\" which is not an executable, library, or module."));
+          cmStrCat("TARGETS given target \""_s, tgt,
+                   "\" which is not an executable, library, or module."_s));
         return false;
       }
       // Store the target in the list to be installed.
       targets.push_back(target);
     } else {
       // Did not find the target.
-      status.SetError(
-        cmStrCat("TARGETS given target \"", tgt, "\" which does not exist."));
+      status.SetError(cmStrCat("TARGETS given target \""_s, tgt,
+                               "\" which does not exist."_s));
       return false;
     }
   }
@@ -1622,8 +1622,8 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
   if (!unknownArgs.empty()) {
     // Unknown argument.
     status.SetError(
-      cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given unknown argument \"",
-               unknownArgs[0], "\"."));
+      cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given unknown argument \""_s,
+               unknownArgs[0], "\"."_s));
     return false;
   }
 
@@ -1649,7 +1649,7 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
           system)) {
       status.SetError(
         cmStrCat("IMPORTED_RUNTIME_ARTIFACTS RUNTIME_DEPENDENCY_SET is not "
-                 "supported on system \"",
+                 "supported on system \""_s,
                  system, '"'));
       return false;
     }
@@ -1681,16 +1681,16 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
           target->GetType() != cm::TargetType::SHARED_LIBRARY &&
           target->GetType() != cm::TargetType::MODULE_LIBRARY) {
         status.SetError(
-          cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given target \"", tgt,
-                   "\" which is not an executable, library, or module."));
+          cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given target \""_s, tgt,
+                   "\" which is not an executable, library, or module."_s));
         return false;
       }
       // Store the target in the list to be installed.
       targets.push_back(target);
     } else {
       // Did not find the target.
-      status.SetError(cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given target \"",
-                               tgt, "\" which does not exist."));
+      status.SetError(cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given target \""_s,
+                               tgt, "\" which does not exist."_s));
       return false;
     }
   }
@@ -1739,8 +1739,8 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
           if (frameworkArgs.GetDestination().empty()) {
             status.SetError(cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given no "
                                      "FRAMEWORK DESTINATION for shared "
-                                     "library FRAMEWORK target \"",
-                                     target.GetName(), "\"."));
+                                     "library FRAMEWORK target \""_s,
+                                     target.GetName(), "\"."_s));
             return false;
           }
           frameworkGenerator = createInstallGenerator(
@@ -1768,8 +1768,8 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
           if (bundleArgs.GetDestination().empty()) {
             status.SetError(
               cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given no BUNDLE "
-                       "DESTINATION for MACOSX_BUNDLE executable target \"",
-                       target.GetName(), "\"."));
+                       "DESTINATION for MACOSX_BUNDLE executable target \""_s,
+                       target.GetName(), "\"."_s));
             return false;
           }
           bundleGenerator = createInstallGenerator(
@@ -1844,15 +1844,15 @@ bool HandleFilesMode(std::vector<std::string> const& args,
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
-    status.SetError(
-      cmStrCat(args[0], " given unknown argument \"", unknownArgs[0], "\"."));
+    status.SetError(cmStrCat(args[0], " given unknown argument \""_s,
+                             unknownArgs[0], "\"."_s));
     return false;
   }
 
   std::string type = ica.GetType();
   if (!type.empty() && allowedTypes.count(type) == 0) {
-    status.SetError(
-      cmStrCat(args[0], " given non-type \"", type, "\" with TYPE argument."));
+    status.SetError(cmStrCat(args[0], " given non-type \""_s, type,
+                             "\" with TYPE argument."_s));
     return false;
   }
 
@@ -1867,7 +1867,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
   if (!ica.GetRename().empty() && filesVector.size() > 1) {
     // The rename option works only with one file.
     status.SetError(
-      cmStrCat(args[0], " given RENAME option with more than one file."));
+      cmStrCat(args[0], " given RENAME option with more than one file."_s));
     return false;
   }
 
@@ -1881,12 +1881,12 @@ bool HandleFilesMode(std::vector<std::string> const& args,
     if (gg->IsExportedTargetsFile(file)) {
       helper.Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("The file\n  ", file,
+        cmStrCat("The file\n  "_s, file,
                  "\n"
                  "was generated by the export() command.  "
-                 "It may not be installed with the install() command.  "
-                 "Use the install(EXPORT) mechanism instead.  "
-                 "See the cmake-packages(7) manual for more."));
+                 "It may not be installed with the install() command.  "_s
+                 "Use the install(EXPORT) mechanism instead.  "_s
+                 "See the cmake-packages(7) manual for more."_s));
       return false;
     }
   }
@@ -1898,14 +1898,14 @@ bool HandleFilesMode(std::vector<std::string> const& args,
   if (!type.empty() && !ica.GetDestination().empty()) {
     status.SetError(cmStrCat(args[0],
                              " given both TYPE and DESTINATION arguments. "
-                             "You may only specify one."));
+                             "You may only specify one."_s));
     return false;
   }
 
   std::string destination = helper.GetDestinationForType(&ica, type);
   if (destination.empty()) {
     // A destination is required.
-    status.SetError(cmStrCat(args[0], " given no DESTINATION!"));
+    status.SetError(cmStrCat(args[0], " given no DESTINATION!"_s));
     return false;
   }
 
@@ -1958,8 +1958,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   for (unsigned int i = 1; i < args.size(); ++i) {
     if (args[i] == "DESTINATION") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -1967,8 +1967,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingDestination;
     } else if (args[i] == "TYPE") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -1976,8 +1976,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingType;
     } else if (args[i] == "OPTIONAL") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -1986,8 +1986,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingNone;
     } else if (args[i] == "MESSAGE_NEVER") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -2005,16 +2005,16 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
     } else if (args[i] == "EXCLUDE") {
       // Add this property to the current match rule.
       if (!inMatchMode || doing == DoingPattern || doing == DoingRegex) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" before a PATTERN or REGEX is given."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" before a PATTERN or REGEX is given."_s));
         return false;
       }
       literalArgs += " EXCLUDE";
       doing = DoingNone;
     } else if (args[i] == "PERMISSIONS") {
       if (!inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" before a PATTERN or REGEX is given."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" before a PATTERN or REGEX is given."_s));
         return false;
       }
 
@@ -2023,8 +2023,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingPermsMatch;
     } else if (args[i] == "FILE_PERMISSIONS") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -2032,8 +2032,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingPermsFile;
     } else if (args[i] == "DIRECTORY_PERMISSIONS") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -2041,8 +2041,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingPermsDir;
     } else if (args[i] == "USE_SOURCE_PERMISSIONS") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -2051,8 +2051,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingNone;
     } else if (args[i] == "FILES_MATCHING") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -2061,8 +2061,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingNone;
     } else if (args[i] == "CONFIGURATIONS") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -2070,8 +2070,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingConfigurations;
     } else if (args[i] == "COMPONENT") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -2079,8 +2079,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingComponent;
     } else if (args[i] == "BUILD_DEPENDS") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
 
@@ -2088,8 +2088,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingBuildDepends;
     } else if (args[i] == "EXCLUDE_FROM_ALL") {
       if (inMatchMode) {
-        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
-                                 "\" after PATTERN or REGEX."));
+        status.SetError(cmStrCat(args[0], " does not allow \""_s, args[i],
+                                 "\" after PATTERN or REGEX."_s));
         return false;
       }
       excludeFromAll = true;
@@ -2106,8 +2106,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
 
       // Make sure the name is a directory.
       if (cmSystemTools::FileExists(dir, true)) {
-        status.SetError(cmStrCat(args[0], " given non-directory \"", args[i],
-                                 "\" to install."));
+        status.SetError(cmStrCat(args[0], " given non-directory \""_s, args[i],
+                                 "\" to install."_s));
         return false;
       }
 
@@ -2137,8 +2137,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       doing = DoingNone;
     } else if (doing == DoingType) {
       if (allowedTypes.count(args[i]) == 0) {
-        status.SetError(cmStrCat(args[0], " given non-type \"", args[i],
-                                 "\" with TYPE argument."));
+        status.SetError(cmStrCat(args[0], " given non-type \""_s, args[i],
+                                 "\" with TYPE argument."_s));
         return false;
       }
 
@@ -2176,29 +2176,30 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       // Check the requested permission.
       if (!cmInstallCommandArguments::CheckPermissions(args[i],
                                                        permissionsFile)) {
-        status.SetError(cmStrCat(args[0], " given invalid file permission \"",
-                                 args[i], "\"."));
+        status.SetError(cmStrCat(
+          args[0], " given invalid file permission \""_s, args[i], "\"."_s));
         return false;
       }
     } else if (doing == DoingPermsDir) {
       // Check the requested permission.
       if (!cmInstallCommandArguments::CheckPermissions(args[i],
                                                        permissionsDir)) {
-        status.SetError(cmStrCat(
-          args[0], " given invalid directory permission \"", args[i], "\"."));
+        status.SetError(cmStrCat(args[0],
+                                 " given invalid directory permission \""_s,
+                                 args[i], "\"."_s));
         return false;
       }
     } else if (doing == DoingPermsMatch) {
       // Check the requested permission.
       if (!cmInstallCommandArguments::CheckPermissions(args[i], literalArgs)) {
-        status.SetError(
-          cmStrCat(args[0], " given invalid permission \"", args[i], "\"."));
+        status.SetError(cmStrCat(args[0], " given invalid permission \""_s,
+                                 args[i], "\"."_s));
         return false;
       }
     } else {
       // Unknown argument.
       status.SetError(
-        cmStrCat(args[0], " given unknown argument \"", args[i], "\"."));
+        cmStrCat(args[0], " given unknown argument \""_s, args[i], "\"."_s));
       return false;
     }
   }
@@ -2215,14 +2216,14 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   if (!destination.has_value()) {
     if (type.empty()) {
       // A destination is required.
-      status.SetError(cmStrCat(args[0], " given no DESTINATION!"));
+      status.SetError(cmStrCat(args[0], " given no DESTINATION!"_s));
       return false;
     }
     destination = helper.GetDestinationForType(nullptr, type);
   } else if (!type.empty()) {
     status.SetError(cmStrCat(args[0],
                              " given both TYPE and DESTINATION "
-                             "arguments. You may only specify one."));
+                             "arguments. You may only specify one."_s));
     return false;
   }
 
@@ -2270,8 +2271,8 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
-    status.SetError(
-      cmStrCat(args[0], " given unknown argument \"", unknownArgs[0], "\"."));
+    status.SetError(cmStrCat(args[0], " given unknown argument \""_s,
+                             unknownArgs[0], "\"."_s));
     return false;
   }
 
@@ -2282,7 +2283,7 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
   // Make sure there is a destination.
   if (ica.GetDestination().empty()) {
     // A destination is required.
-    status.SetError(cmStrCat(args[0], " given no DESTINATION!"));
+    status.SetError(cmStrCat(args[0], " given no DESTINATION!"_s));
     return false;
   }
 
@@ -2292,27 +2293,27 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
   // Check the file name.
   std::string fname = filename;
   if (fname.find_first_of(":/\\") != std::string::npos) {
-    status.SetError(cmStrCat(args[0], " given invalid export file name \"",
-                             fname,
-                             "\".  The FILE argument may not contain a path.  "
-                             "Specify the path in the DESTINATION argument."));
+    status.SetError(
+      cmStrCat(args[0], " given invalid export file name \""_s, fname,
+               "\".  The FILE argument may not contain a path.  "
+               "Specify the path in the DESTINATION argument."_s));
     return false;
   }
 
   // Check the file extension.
   if (!fname.empty() && !cmHasSuffix(fname, ".mk"_s)) {
     status.SetError(cmStrCat(
-      args[0], " given invalid export file name \"", fname,
-      R"(".  The FILE argument must specify a name ending in ".mk".)"));
+      args[0], " given invalid export file name \""_s, fname,
+      R"(".  The FILE argument must specify a name ending in ".mk".)"_s));
     return false;
   }
   if (fname.find_first_of(":/\\") != std::string::npos) {
     status.SetError(
-      cmStrCat(args[0], " given export name \"", exp,
+      cmStrCat(args[0], " given export name \""_s, exp,
                "\".  "
                "This name cannot be safely converted to a file name.  "
                "Specify a different export name or use the FILE option to set "
-               "a file name explicitly."));
+               "a file name explicitly."_s));
     return false;
   }
   // Use the default name
@@ -2528,8 +2529,8 @@ bool HandleExportMode(std::vector<std::string> const& args,
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
-    status.SetError(
-      cmStrCat(args[0], " given unknown argument \"", unknownArgs[0], "\"."));
+    status.SetError(cmStrCat(args[0], " given unknown argument \""_s,
+                             unknownArgs[0], "\"."_s));
     return false;
   }
 
@@ -2538,48 +2539,48 @@ bool HandleExportMode(std::vector<std::string> const& args,
   }
 
   if (exp.empty()) {
-    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+    status.SetError(cmStrCat(args[0], " missing EXPORT."_s));
     return false;
   }
 
   // Make sure there is a destination.
   if (ica.GetDestination().empty()) {
     // A destination is required.
-    status.SetError(cmStrCat(args[0], " given no DESTINATION!"));
+    status.SetError(cmStrCat(args[0], " given no DESTINATION!"_s));
     return false;
   }
 
   // Check the file name.
   std::string fname = filename;
   if (fname.find_first_of(":/\\") != std::string::npos) {
-    status.SetError(cmStrCat(args[0], " given invalid export file name \"",
-                             fname,
-                             "\".  "
-                             "The FILE argument may not contain a path.  "
-                             "Specify the path in the DESTINATION argument."));
+    status.SetError(
+      cmStrCat(args[0], " given invalid export file name \""_s, fname,
+               "\".  "
+               "The FILE argument may not contain a path.  "
+               "Specify the path in the DESTINATION argument."_s));
     return false;
   }
 
   // Check the file extension.
   if (!fname.empty() && !cmHasSuffix(fname, ".cmake"_s)) {
-    status.SetError(
-      cmStrCat(args[0], " given invalid export file name \"", fname,
-               "\".  "
-               "The FILE argument must specify a name ending in \".cmake\"."));
+    status.SetError(cmStrCat(
+      args[0], " given invalid export file name \""_s, fname,
+      "\".  "
+      "The FILE argument must specify a name ending in \".cmake\"."_s));
     return false;
   }
 
   // Construct the file name.
   if (fname.empty()) {
-    fname = cmStrCat(exp, ".cmake");
+    fname = cmStrCat(exp, ".cmake"_s);
 
     if (fname.find_first_of(":/\\") != std::string::npos) {
       status.SetError(cmStrCat(
-        args[0], " given export name \"", exp,
+        args[0], " given export name \""_s, exp,
         "\".  "
         "This name cannot be safely converted to a file name.  "
         "Specify a different export name or use the FILE option to set "
-        "a file name explicitly."));
+        "a file name explicitly."_s));
       return false;
     }
   }
@@ -2658,7 +2659,7 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
   }
 
   if (exportName.empty()) {
-    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+    status.SetError(cmStrCat(args[0], " missing EXPORT."_s));
     return false;
   }
 
@@ -2716,7 +2717,7 @@ bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
   if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
         system)) {
     status.SetError(cmStrCat(
-      "RUNTIME_DEPENDENCY_SET is not supported on system \"", system, '"'));
+      "RUNTIME_DEPENDENCY_SET is not supported on system \""_s, system, '"'));
     return false;
   }
 
@@ -2781,8 +2782,8 @@ bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
 
   if (!unknownArgs.empty()) {
     helper.SetError(
-      cmStrCat("RUNTIME_DEPENDENCY_SET given unknown argument \"",
-               unknownArgs.front(), "\"."));
+      cmStrCat("RUNTIME_DEPENDENCY_SET given unknown argument \""_s,
+               unknownArgs.front(), "\"."_s));
     return false;
   }
 
@@ -2849,12 +2850,12 @@ bool HandleSbomMode(std::vector<std::string> const& args,
 
   if (arguments.PackageName.empty()) {
     // TODO: Fix our use of the parser to enforce this.
-    status.SetError(cmStrCat(args[0], " missing SBOM name."));
+    status.SetError(cmStrCat(args[0], " missing SBOM name."_s));
     return false;
   }
 
   if (exportNames.empty()) {
-    status.SetError(cmStrCat(args[0], " missing EXPORTS."));
+    status.SetError(cmStrCat(args[0], " missing EXPORTS."_s));
     return false;
   }
 
@@ -2936,8 +2937,8 @@ bool Helper::MakeFilesFullPath(char const* modeName,
     // Make sure the file is not a directory.
     if (gpos == std::string::npos && !cmSystemTools::FileIsSymlink(file) &&
         cmSystemTools::FileIsDirectory(file)) {
-      this->SetError(
-        cmStrCat(modeName, " given directory \"", relFile, "\" to install."));
+      this->SetError(cmStrCat(modeName, " given directory \""_s, relFile,
+                              "\" to install."_s));
       return false;
     }
     // Store the file for installation.

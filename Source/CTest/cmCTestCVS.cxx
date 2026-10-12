@@ -6,6 +6,7 @@
 
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -87,7 +88,7 @@ bool cmCTestCVS::UpdateImpl()
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
-    args.push_back(cmStrCat("-D", this->GetNightlyTime(), " UTC"));
+    args.push_back(cmStrCat("-D"_s, this->GetNightlyTime(), " UTC"_s));
   }
 
   // Run "cvs update" to update the work tree.
@@ -207,7 +208,7 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
   if (tagStream && cmSystemTools::GetLineFromStream(tagStream, tagLine) &&
       tagLine.size() > 1 && tagLine[0] == 'T') {
     // Use the branch specified in the tag file.
-    std::string flag = cmStrCat("-r", cm::string_view(tagLine).substr(1));
+    std::string flag = cmStrCat("-r"_s, cm::string_view(tagLine).substr(1));
     return flag;
   }
   // Use the default branch.
@@ -264,7 +265,7 @@ bool cmCTestCVS::WriteXMLUpdates(cmXMLWriter& xml)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per updated file):\n"
-             "    ");
+             "    "_s);
 
   for (auto const& d : this->Dirs) {
     this->WriteXMLDirectory(xml, d.first, d.second);

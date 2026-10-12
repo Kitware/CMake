@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmIncludeGuardCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -23,7 +25,7 @@ enum IncludeGuardScope
 std::string GetIncludeGuardVariableName(std::string const& filePath)
 {
   cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
-  return cmStrCat("__INCGUARD_", hasher.HashString(filePath), "__");
+  return cmStrCat("__INCGUARD_"_s, hasher.HashString(filePath), "__"_s);
 }
 
 bool CheckIncludeGuardIsSet(cmMakefile* mf, std::string const& includeGuardVar)

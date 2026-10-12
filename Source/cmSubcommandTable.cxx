@@ -4,6 +4,8 @@
 
 #include <algorithm>
 
+#include <cmext/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmStringAlgorithms.h"
 
@@ -26,7 +28,7 @@ bool cmSubcommandTable::operator()(cm::string_view key,
   if (it != this->Impl.end() && it->first == key) {
     return it->second(args, status);
   }
-  std::string error = cmStrCat("does not recognize sub-command ", key);
+  std::string error = cmStrCat("does not recognize sub-command "_s, key);
   std::vector<std::string> candidates;
   candidates.reserve(this->Impl.size());
   for (Elem const& elem : this->Impl) {
@@ -35,7 +37,7 @@ bool cmSubcommandTable::operator()(cm::string_view key,
   std::string const suggestion = cmFindClosestString(key, candidates);
   if (!suggestion.empty()) {
     error =
-      cmStrCat(std::move(error), ". Did you mean: \"", suggestion, "\"?");
+      cmStrCat(std::move(error), ". Did you mean: \""_s, suggestion, "\"?"_s);
   }
   status.SetError(error);
   return false;

@@ -1,11 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
+
 #include "cmCacheManager.h"
 
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <string>
+
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
@@ -21,7 +24,7 @@
 
 void cmCacheManager::CleanCMakeFiles(std::string const& path)
 {
-  std::string glob = cmStrCat(path, "/CMakeFiles/*.cmake");
+  std::string glob = cmStrCat(path, "/CMakeFiles/*.cmake"_s);
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
@@ -32,7 +35,7 @@ bool cmCacheManager::LoadCache(std::string const& path, bool internal,
                                std::set<std::string>& excludes,
                                std::set<std::string>& includes)
 {
-  std::string cacheFile = cmStrCat(path, "/CMakeCache.txt");
+  std::string cacheFile = cmStrCat(path, "/CMakeCache.txt"_s);
   // clear the old cache, if we are reading in internal values
   if (internal) {
     this->Cache.clear();
@@ -95,10 +98,10 @@ bool cmCacheManager::LoadCache(std::string const& path, bool internal,
           // not visible in the gui
           if (!internal) {
             e.Type = cmStateEnums::INTERNAL;
-            helpString = cmStrCat("DO NOT EDIT, ", entryKey,
+            helpString = cmStrCat("DO NOT EDIT, "_s, entryKey,
                                   " loaded from external file.  "
-                                  "To change this value edit this file: ",
-                                  path, "/CMakeCache.txt");
+                                  "To change this value edit this file: "_s,
+                                  path, "/CMakeCache.txt"_s);
             e.SetProperty("HELPSTRING", helpString);
           }
           if (!this->ReadPropertyEntry(entryKey, e)) {
@@ -108,9 +111,9 @@ bool cmCacheManager::LoadCache(std::string const& path, bool internal,
         }
       }
     } else {
-      cmSystemTools::Error(cmStrCat("Parse error in cache file ", cacheFile,
-                                    " on line ", lineno,
-                                    ". Offending entry: ", realbuffer));
+      cmSystemTools::Error(cmStrCat("Parse error in cache file "_s, cacheFile,
+                                    " on line "_s, lineno,
+                                    ". Offending entry: "_s, realbuffer));
     }
   }
   this->CacheMajorVersion = 0;
@@ -146,16 +149,16 @@ bool cmCacheManager::LoadCache(std::string const& path, bool internal,
     std::string currentcwd = path;
     std::string oldcwd = *oldDir;
     cmSystemTools::ConvertToUnixSlashes(currentcwd);
-    currentcwd = cmStrCat(std::move(currentcwd), "/CMakeCache.txt");
-    oldcwd = cmStrCat(std::move(oldcwd), "/CMakeCache.txt");
+    currentcwd = cmStrCat(std::move(currentcwd), "/CMakeCache.txt"_s);
+    oldcwd = cmStrCat(std::move(oldcwd), "/CMakeCache.txt"_s);
     if (!cmSystemTools::SameFile(oldcwd, currentcwd)) {
       cmValue dir = this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
       std::string message =
-        cmStrCat("The current CMakeCache.txt directory ", currentcwd,
-                 " is different than the directory ", (dir ? *dir : ""),
+        cmStrCat("The current CMakeCache.txt directory "_s, currentcwd,
+                 " is different than the directory "_s, (dir ? *dir : ""),
                  " where CMakeCache.txt was created. This may result "
                  "in binaries being created in the wrong place. If you "
-                 "are not sure, reedit the CMakeCache.txt");
+                 "are not sure, reedit the CMakeCache.txt"_s);
       cmSystemTools::Error(message);
     }
   }
@@ -202,7 +205,7 @@ void cmCacheManager::WritePropertyEntries(std::ostream& os,
   for (char const* p : cmCacheManager::PersistentProperties) {
     if (cmValue value = e.GetProperty(p)) {
       std::string helpstring =
-        cmStrCat(p, " property for variable: ", entryKey);
+        cmStrCat(p, " property for variable: "_s, entryKey);
       cmCacheManager::OutputHelpString(os, helpstring);
 
       std::string key = cmStrCat(entryKey, '-', p);
@@ -218,12 +221,12 @@ void cmCacheManager::WritePropertyEntries(std::ostream& os,
 
 bool cmCacheManager::SaveCache(std::string const& path, cmMessenger* messenger)
 {
-  std::string cacheFile = cmStrCat(path, "/CMakeCache.txt");
+  std::string cacheFile = cmStrCat(path, "/CMakeCache.txt"_s);
   cmGeneratedFileStream fout(cacheFile);
   fout.SetCopyIfDifferent(true);
   if (!fout) {
-    cmSystemTools::Error(
-      cmStrCat("Unable to open cache file for save. ", std::move(cacheFile)));
+    cmSystemTools::Error(cmStrCat("Unable to open cache file for save. "_s,
+                                  std::move(cacheFile)));
     cmSystemTools::ReportLastSystemError("");
     return false;
   }
@@ -338,13 +341,13 @@ bool cmCacheManager::SaveCache(std::string const& path, cmMessenger* messenger)
   }
   fout << '\n';
   fout.Close();
-  std::string checkCacheFile = cmStrCat(path, "/CMakeFiles");
+  std::string checkCacheFile = cmStrCat(path, "/CMakeFiles"_s);
   cmSystemTools::MakeDirectory(checkCacheFile);
-  checkCacheFile = cmStrCat(std::move(checkCacheFile), "/cmake.check_cache");
+  checkCacheFile = cmStrCat(std::move(checkCacheFile), "/cmake.check_cache"_s);
   cmsys::ofstream checkCache(checkCacheFile.c_str());
   if (!checkCache) {
     cmSystemTools::Error(
-      cmStrCat("Unable to open check cache file for write. ",
+      cmStrCat("Unable to open check cache file for write. "_s,
                std::move(checkCacheFile)));
     return false;
   }
@@ -455,13 +458,13 @@ void cmCacheManager::OutputNewlineTruncationWarning(std::ostream& fout,
   if (value.find('\n') != std::string::npos) {
     if (messenger) {
       std::string message =
-        cmStrCat("Value of ", key, " contained a newline; truncating");
+        cmStrCat("Value of "_s, key, " contained a newline; truncating"_s);
       messenger->IssueMessage(MessageType::WARNING, message);
     }
 
     std::string comment =
-      cmStrCat("WARNING: Value of ", key,
-               " contained a newline and was truncated. Original value:");
+      cmStrCat("WARNING: Value of "_s, key,
+               " contained a newline and was truncated. Original value:"_s);
 
     OutputWarningComment(fout, comment, true);
     OutputWarningComment(fout, value, false);

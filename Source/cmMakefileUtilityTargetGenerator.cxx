@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -43,7 +44,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
 
   // Include the dependencies for the target.
   std::string dependFile =
-    cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.make");
+    cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.make"_s);
   *this->BuildFileStream
     << "# Include any custom commands dependencies for this target.\n"
     << this->GlobalGenerator->IncludeDirective << " " << root
@@ -61,7 +62,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   }
 
   std::string dependTimestamp =
-    cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts");
+    cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts"_s);
   if (!cmSystemTools::FileExists(dependTimestamp)) {
     // Write a dependency timestamp file.
     cmGeneratedFileStream depFileStream(

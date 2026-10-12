@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include <cm3p/json/value.h>
 
 #include "cmJSONState.h"
@@ -17,12 +19,12 @@ ErrorGenerator EXPECTED_TYPE(std::string const& type)
 {
   return [type](Json::Value const* value, cmJSONState* state) -> void {
     if (state->key().empty()) {
-      state->AddErrorAtValue(cmStrCat("Expected ", type), value);
+      state->AddErrorAtValue(cmStrCat("Expected "_s, type), value);
       return;
     }
-    std::string errMsg = cmStrCat('"', state->key(), "\" expected ", type);
+    std::string errMsg = cmStrCat('"', state->key(), "\" expected "_s, type);
     if (value && value->isConvertibleTo(Json::ValueType::stringValue)) {
-      errMsg = cmStrCat(std::move(errMsg), ", got: ", value->asString());
+      errMsg = cmStrCat(std::move(errMsg), ", got: "_s, value->asString());
     }
     state->AddErrorAtValue(errMsg, value);
   };
@@ -65,26 +67,26 @@ ObjectErrorGenerator INVALID_NAMED_OBJECT(
       std::string name = nameGenerator(value, state);
       switch (errorType) {
         case ObjectError::RequiredMissing:
-          state->AddErrorAtValue(cmStrCat("Invalid Required ", name), value);
+          state->AddErrorAtValue(cmStrCat("Invalid Required "_s, name), value);
           break;
         case ObjectError::InvalidObject:
-          state->AddErrorAtValue(cmStrCat("Invalid ", name), value);
+          state->AddErrorAtValue(cmStrCat("Invalid "_s, name), value);
           break;
         case ObjectError::ExtraField: {
           for (auto const& member : extraFields) {
             if (value) {
               state->AddErrorAtValue(
-                cmStrCat("Invalid extra field \"", member, "\" in ", name),
+                cmStrCat("Invalid extra field \""_s, member, "\" in "_s, name),
                 &(*value)[member]);
             } else {
-              state->AddError(
-                cmStrCat("Invalid extra field \"", member, "\" in ", name));
+              state->AddError(cmStrCat("Invalid extra field \""_s, member,
+                                       "\" in "_s, name));
             }
           }
         } break;
         case ObjectError::MissingRequired:
-          state->AddErrorAtValue(cmStrCat("Missing required field \"",
-                                          state->key(), "\" in ", name),
+          state->AddErrorAtValue(cmStrCat("Missing required field \""_s,
+                                          state->key(), "\" in "_s, name),
                                  value);
           break;
       }

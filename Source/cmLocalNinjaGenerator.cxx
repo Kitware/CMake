@@ -173,7 +173,7 @@ std::string cmLocalNinjaGenerator::GetObjectOutputRoot(
     return cmStrCat(this->GetBinaryDirectory(), '/',
                     this->GetGlobalGenerator()->GetShortBinaryOutputDir());
   }
-  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
+  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles"_s);
 }
 
 // Non-virtual public methods.
@@ -207,7 +207,7 @@ std::string cmLocalNinjaGenerator::GetLinkDependencyFile(
 {
   return cmStrCat(target->GetSupportDirectory(),
                   this->GetGlobalNinjaGenerator()->ConfigDirectory(config),
-                  "/link.d");
+                  "/link.d"_s);
 }
 
 // Virtual protected methods.
@@ -433,7 +433,7 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
   if (target) {
     scriptPath = target->GetSupportDirectory();
   } else {
-    scriptPath = cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
+    scriptPath = cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles"_s);
   }
   scriptPath += this->GetGlobalNinjaGenerator()->ConfigDirectory(outputConfig);
   cmSystemTools::MakeDirectory(scriptPath);
@@ -708,7 +708,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
     if (cmdLines.empty()) {
       cmNinjaBuild build("phony");
-      build.Comment = cmStrCat("Phony custom command for ", mainOutput);
+      build.Comment = cmStrCat("Phony custom command for "_s, mainOutput);
       build.Outputs = std::move(ccOutputs.ExplicitOuts);
       build.WorkDirOuts = std::move(ccOutputs.WorkDirOuts);
       build.ExplicitDeps = std::move(ninjaDeps);
@@ -749,7 +749,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
         }
       }
 
-      std::string comment = cmStrCat("Custom command for ", mainOutput);
+      std::string comment = cmStrCat("Custom command for "_s, mainOutput);
       gg->WriteCustomCommandBuild(
         this->BuildCommandLine(cmdLines, ccg.GetOutputConfig(), fileConfig,
                                customStep),
@@ -818,7 +818,7 @@ std::string cmLocalNinjaGenerator::CreateUtilityOutput(
   }
 
   std::string const base = cmStrCat(this->GetCurrentBinaryDirectory(),
-                                    "/CMakeFiles/", targetName, '-');
+                                    "/CMakeFiles/"_s, targetName, '-');
   // The output is not actually created so mark it symbolic.
   for (std::string const& config : this->GetConfigNames()) {
     std::string const force = cmStrCat(base, config);

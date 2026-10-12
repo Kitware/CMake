@@ -67,7 +67,8 @@ static std::function<bool(E&, Json::Value const*, cmJSONState*)> EnumHelper(
       }
     }
     state->AddErrorAtValue(
-      cmStrCat("Not a valid ", type, ": \"", value->asString(), '"'), value);
+      cmStrCat("Not a valid "_s, type, ": \""_s, value->asString(), '"'),
+      value);
     return false;
   };
 }

@@ -5,6 +5,8 @@
 #include <sstream>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCPackLog.h"
 #include "cmList.h"
 #include "cmStringAlgorithms.h"
@@ -43,7 +45,7 @@ int cmCPackBundleGenerator::InitializeInternal()
 char const* cmCPackBundleGenerator::GetPackagingInstallPrefix()
 {
   this->InstallPrefix = cmStrCat('/', this->GetOption("CPACK_BUNDLE_NAME"),
-                                 ".app/Contents/Resources");
+                                 ".app/Contents/Resources"_s);
 
   return this->InstallPrefix.c_str();
 }
@@ -85,16 +87,16 @@ int cmCPackBundleGenerator::ConstructBundle()
   std::string const& staging = toplevel;
 
   std::string const contents =
-    cmStrCat(staging, '/', cpack_bundle_name, ".app/Contents");
+    cmStrCat(staging, '/', cpack_bundle_name, ".app/Contents"_s);
 
-  std::string const application = cmStrCat(contents, "/MacOS");
+  std::string const application = cmStrCat(contents, "/MacOS"_s);
 
-  std::string const resources = cmStrCat(contents, "/Resources");
+  std::string const resources = cmStrCat(contents, "/Resources"_s);
 
   // Install a required, user-provided bundle metadata file ...
   std::string const plist_source = cpack_bundle_plist;
 
-  std::string const plist_target = cmStrCat(contents, "/Info.plist");
+  std::string const plist_target = cmStrCat(contents, "/Info.plist"_s);
 
   if (!this->CopyFile(plist_source, plist_target)) {
     cmCPackLogger(
@@ -109,7 +111,7 @@ int cmCPackBundleGenerator::ConstructBundle()
   std::string const icon_source = cpack_bundle_icon;
 
   std::string const icon_target =
-    cmStrCat(resources, '/', cpack_bundle_name, ".icns");
+    cmStrCat(resources, '/', cpack_bundle_name, ".icns"_s);
 
   if (!this->CopyFile(icon_source, icon_target)) {
     cmCPackLogger(
@@ -171,7 +173,7 @@ int cmCPackBundleGenerator::SignBundle(std::string const& src_dir)
     std::string output;
     std::string bundle_path;
     bundle_path =
-      cmStrCat(src_dir, '/', this->GetOption("CPACK_BUNDLE_NAME"), ".app");
+      cmStrCat(src_dir, '/', this->GetOption("CPACK_BUNDLE_NAME"), ".app"_s);
 
     // A list of additional files to sign, ie. frameworks and plugins.
     std::string const sign_parameter =
@@ -187,9 +189,9 @@ int cmCPackBundleGenerator::SignBundle(std::string const& src_dir)
     for (auto const& file : relFiles) {
       auto temp_sign_file_cmd =
         cmStrCat(this->GetOption("CPACK_COMMAND_CODESIGN"), ' ',
-                 sign_parameter, " -s \"", cpack_apple_cert_app, "\" -i ",
-                 this->GetOption("CPACK_APPLE_BUNDLE_ID"), " \"", bundle_path,
-                 file, '"');
+                 sign_parameter, " -s \""_s, cpack_apple_cert_app, "\" -i "_s,
+                 this->GetOption("CPACK_APPLE_BUNDLE_ID"), " \""_s,
+                 bundle_path, file, '"');
 
       if (!this->RunCommand(temp_sign_file_cmd, &output)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -203,7 +205,7 @@ int cmCPackBundleGenerator::SignBundle(std::string const& src_dir)
     // sign main binary
     auto temp_sign_binary_cmd =
       cmStrCat(this->GetOption("CPACK_COMMAND_CODESIGN"), ' ', sign_parameter,
-               " -s \"", cpack_apple_cert_app, "\" \"", bundle_path, '"');
+               " -s \""_s, cpack_apple_cert_app, "\" \""_s, bundle_path, '"');
 
     if (!this->RunCommand(temp_sign_binary_cmd, &output)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -217,14 +219,14 @@ int cmCPackBundleGenerator::SignBundle(std::string const& src_dir)
     // sign app bundle
     auto temp_codesign_cmd =
       cmStrCat(this->GetOption("CPACK_COMMAND_CODESIGN"), ' ', sign_parameter,
-               " -s \"", cpack_apple_cert_app, '"');
+               " -s \""_s, cpack_apple_cert_app, '"');
     if (this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS")) {
       temp_codesign_cmd =
-        cmStrCat(std::move(temp_codesign_cmd), " --entitlements ",
+        cmStrCat(std::move(temp_codesign_cmd), " --entitlements "_s,
                  this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS"));
     }
     temp_codesign_cmd =
-      cmStrCat(std::move(temp_codesign_cmd), " \"", bundle_path, '"');
+      cmStrCat(std::move(temp_codesign_cmd), " \""_s, bundle_path, '"');
 
     if (!this->RunCommand(temp_codesign_cmd, &output)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,

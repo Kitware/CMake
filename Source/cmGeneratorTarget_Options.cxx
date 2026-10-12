@@ -82,14 +82,14 @@ void processOptions(cmGeneratorTarget const* tgt,
           options.emplace_back(opt, entry.Backtrace);
         }
         if (debugOptions) {
-          usedOptions = cmStrCat(std::move(usedOptions), " * ", opt, '\n');
+          usedOptions = cmStrCat(std::move(usedOptions), " * "_s, opt, '\n');
         }
       }
     }
     if (!usedOptions.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        cmStrCat("Used ", logName, " for target ", tgt->GetName(), ":\n",
+        cmStrCat("Used "_s, logName, " for target "_s, tgt->GetName(), ":\n"_s,
                  usedOptions),
         entry.Backtrace);
     }
@@ -227,9 +227,9 @@ MsvcCharSetInfo GetMsvcCharSetInfo(
   using MsvcCharSet = cmGeneratorTarget::MsvcCharSet;
 
   if (tgt.Makefile->GetSafeDefinition(
-        cmStrCat("CMAKE_", lang, "_COMPILER_ID")) != "MSVC"_s &&
+        cmStrCat("CMAKE_"_s, lang, "_COMPILER_ID"_s)) != "MSVC"_s &&
       tgt.Makefile->GetSafeDefinition(
-        cmStrCat("CMAKE_", lang, "_SIMULATE_ID")) != "MSVC"_s) {
+        cmStrCat("CMAKE_"_s, lang, "_SIMULATE_ID"_s)) != "MSVC"_s) {
 
     // Only MSVC ABI uses this feature
     return { MsvcCharSet::None, false };
@@ -527,10 +527,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   if (this->IsDeviceLink()) {
     // wrap host link options
     std::string const wrapper(this->Makefile->GetSafeDefinition(
-      cmStrCat("CMAKE_", language, "_DEVICE_COMPILER_WRAPPER_FLAG")));
+      cmStrCat("CMAKE_"_s, language, "_DEVICE_COMPILER_WRAPPER_FLAG"_s)));
     cmList wrapperFlag{ wrapper };
     std::string const wrapperSep(this->Makefile->GetSafeDefinition(
-      cmStrCat("CMAKE_", language, "_DEVICE_COMPILER_WRAPPER_FLAG_SEP")));
+      cmStrCat("CMAKE_"_s, language, "_DEVICE_COMPILER_WRAPPER_FLAG_SEP"_s)));
     bool concatFlagAndArgs = true;
     if (!wrapperFlag.empty() && wrapperFlag.back() == " ") {
       concatFlagAndArgs = false;
@@ -586,12 +586,12 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolvePrefixWrapper(
   // replace "LINKER:" or "ARCHIVER:" prefixed elements by actual linker or
   // archiver wrapper
   std::string const wrapper(this->Makefile->GetSafeDefinition(
-    cmStrCat("CMAKE_", language, (this->IsDeviceLink() ? "_DEVICE_" : "_"),
-             prefix, "_WRAPPER_FLAG")));
+    cmStrCat("CMAKE_"_s, language, (this->IsDeviceLink() ? "_DEVICE_" : "_"),
+             prefix, "_WRAPPER_FLAG"_s)));
   cmList wrapperFlag{ wrapper };
   std::string const wrapperSep(this->Makefile->GetSafeDefinition(
-    cmStrCat("CMAKE_", language, (this->IsDeviceLink() ? "_DEVICE_" : "_"),
-             prefix, "_WRAPPER_FLAG_SEP")));
+    cmStrCat("CMAKE_"_s, language, (this->IsDeviceLink() ? "_DEVICE_" : "_"),
+             prefix, "_WRAPPER_FLAG_SEP"_s)));
   bool concatFlagAndArgs = true;
   if (!wrapperFlag.empty() && wrapperFlag.back() == " ") {
     concatFlagAndArgs = false;
@@ -632,8 +632,8 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolvePrefixWrapper(
                      }) != options.end()) {
       this->LocalGenerator->GetCMakeInstance()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("'SHELL:' prefix is not supported as part of '", prefix,
-                 ":' arguments."),
+        cmStrCat("'SHELL:' prefix is not supported as part of '"_s, prefix,
+                 ":' arguments."_s),
         this->GetBacktrace());
       return result;
     }

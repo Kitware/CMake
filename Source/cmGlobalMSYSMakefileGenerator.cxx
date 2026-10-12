@@ -25,7 +25,7 @@ cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator(cmake* cm)
 std::string cmGlobalMSYSMakefileGenerator::FindMinGW(
   std::string const& makeloc)
 {
-  std::string fstab = cmStrCat(makeloc, "/../etc/fstab");
+  std::string fstab = cmStrCat(makeloc, "/../etc/fstab"_s);
   cmsys::ifstream fin(fstab.c_str());
   std::string path;
   std::string mount;
@@ -34,7 +34,7 @@ std::string cmGlobalMSYSMakefileGenerator::FindMinGW(
     fin >> path;
     fin >> mount;
     if (mount == "/mingw"_s) {
-      mingwBin = cmStrCat(path, "/bin");
+      mingwBin = cmStrCat(path, "/bin"_s);
     }
   }
   return mingwBin;

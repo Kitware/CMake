@@ -38,14 +38,15 @@ bool cmGlobalVisualStudio11Generator::InitializeWindowsPhone(cmMakefile* mf)
   if (!this->SelectWindowsPhoneToolset(this->DefaultPlatformToolset)) {
     std::string e;
     if (this->DefaultPlatformToolset.empty()) {
-      e = cmStrCat(this->GetName(), " supports Windows Phone '8.0', but not '",
-                   this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION.");
+      e =
+        cmStrCat(this->GetName(), " supports Windows Phone '8.0', but not '"_s,
+                 this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION."_s);
     } else {
       e = cmStrCat(
         "A Windows Phone component with CMake requires both the Windows "
-        "Desktop SDK as well as the Windows Phone '",
+        "Desktop SDK as well as the Windows Phone '"_s,
         this->SystemVersion,
-        "' SDK. Please make sure that you have both installed");
+        "' SDK. Please make sure that you have both installed"_s);
     }
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
@@ -58,14 +59,15 @@ bool cmGlobalVisualStudio11Generator::InitializeWindowsStore(cmMakefile* mf)
   if (!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset)) {
     std::string e;
     if (this->DefaultPlatformToolset.empty()) {
-      e = cmStrCat(this->GetName(), " supports Windows Store '8.0', but not '",
-                   this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION.");
+      e =
+        cmStrCat(this->GetName(), " supports Windows Store '8.0', but not '"_s,
+                 this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION."_s);
     } else {
       e = cmStrCat(
         "A Windows Store component with CMake requires both the Windows "
-        "Desktop SDK as well as the Windows Store '",
+        "Desktop SDK as well as the Windows Store '"_s,
         this->SystemVersion,
-        "' SDK. Please make sure that you have both installed");
+        "' SDK. Please make sure that you have both installed"_s);
     }
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;

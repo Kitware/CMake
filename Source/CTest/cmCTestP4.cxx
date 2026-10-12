@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -365,7 +366,7 @@ bool cmCTestP4::NoteOldRevision()
   this->OldRevision = this->GetWorkingRevision();
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Old revision of repository is: ", this->OldRevision, '\n');
+             "   Old revision of repository is: "_s, this->OldRevision, '\n');
   this->PriorRev.Rev = this->OldRevision;
   return true;
 }
@@ -375,7 +376,7 @@ bool cmCTestP4::NoteNewRevision()
   this->NewRevision = this->GetWorkingRevision();
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   New revision of repository is: ", this->NewRevision, '\n');
+             "   New revision of repository is: "_s, this->NewRevision, '\n');
   return true;
 }
 
@@ -392,7 +393,7 @@ bool cmCTestP4::LoadRevisions()
   if (this->OldRevision == "<unknown>" || this->NewRevision == "<unknown>") {
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                "   At least one of the revisions "
-               "is unknown. No repository changes will be reported.\n");
+               "is unknown. No repository changes will be reported.\n"_s);
     return false;
   }
 
@@ -472,7 +473,7 @@ bool cmCTestP4::UpdateImpl()
   // If we couldn't get a revision number before updating, abort.
   if (this->OldRevision == "<unknown>") {
     this->UpdateCommandLine = "Unknown current revision";
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "   Unknown current revision\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "   Unknown current revision\n"_s);
     return false;
   }
 

@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -31,14 +33,14 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
         status.SetError("incorrect arguments to EXTRA_INCLUDE");
         return false;
       }
-      extraInclude = cmStrCat("#include \"", *i, "\"\n");
+      extraInclude = cmStrCat("#include \""_s, *i, "\"\n"_s);
     } else if (*i == "FUNCTION") {
       ++i;
       if (i == args.end()) {
         status.SetError("incorrect arguments to FUNCTION");
         return false;
       }
-      function = cmStrCat(*i, "(&ac, &av);\n");
+      function = cmStrCat(*i, "(&ac, &av);\n"_s);
     } else {
       tests.push_back(*i);
     }
@@ -95,8 +97,8 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
     tests_func_name.push_back(func_name);
     if (!already_declared) {
       forwardDeclareCode =
-        cmStrCat(std::move(forwardDeclareCode), "extern int ", func_name,
-                 "(int, char*[]);\n");
+        cmStrCat(std::move(forwardDeclareCode), "extern int "_s, func_name,
+                 "(int, char*[]);\n"_s);
     }
   }
 

@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmExprLexer.h"
 #include "cmStringAlgorithms.h"
 
@@ -42,22 +44,22 @@ int cmExprParserHelper::ParseString(char const* str, int verb)
     int res = cmExpr_yyparse(yyscanner);
     if (res != 0) {
       std::string e =
-        cmStrCat("cannot parse the expression: \"", this->InputBuffer,
-                 "\": ", this->ErrorString, '.');
+        cmStrCat("cannot parse the expression: \""_s, this->InputBuffer,
+                 "\": "_s, this->ErrorString, '.');
       this->SetError(std::move(e));
     }
   } catch (std::runtime_error const& fail) {
-    std::string e = cmStrCat("cannot evaluate the expression: \"",
-                             this->InputBuffer, "\": ", fail.what(), '.');
+    std::string e = cmStrCat("cannot evaluate the expression: \""_s,
+                             this->InputBuffer, "\": "_s, fail.what(), '.');
     this->SetError(std::move(e));
   } catch (std::out_of_range const&) {
     std::string e =
-      cmStrCat("cannot evaluate the expression: \"", this->InputBuffer,
-               "\": a numeric value is out of range.");
+      cmStrCat("cannot evaluate the expression: \""_s, this->InputBuffer,
+               "\": a numeric value is out of range."_s);
     this->SetError(std::move(e));
   } catch (...) {
-    std::string e =
-      cmStrCat("cannot parse the expression: \"", this->InputBuffer, "\".");
+    std::string e = cmStrCat("cannot parse the expression: \""_s,
+                             this->InputBuffer, "\"."_s);
     this->SetError(std::move(e));
   }
   cmExpr_yylex_destroy(yyscanner);
@@ -94,7 +96,7 @@ int cmExprParserHelper::LexInput(char* buf, int maxlen)
 void cmExprParserHelper::Error(char const* str)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
-  this->ErrorString = cmStrCat(str, " (", pos, ')');
+  this->ErrorString = cmStrCat(str, " ("_s, pos, ')');
 }
 
 void cmExprParserHelper::Warning(std::string str)
@@ -106,8 +108,8 @@ void cmExprParserHelper::UnexpectedChar(char c)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
   this->WarningString = cmStrCat(
-    this->WarningString, "Unexpected character in expression at position ",
-    pos, ": ", c, '\n');
+    this->WarningString, "Unexpected character in expression at position "_s,
+    pos, ": "_s, c, '\n');
 }
 
 void cmExprParserHelper::SetResult(std::int64_t value)
@@ -124,16 +126,16 @@ std::int64_t cmExprParserHelper::ShL(std::int64_t l, std::int64_t r)
 {
   if (l < 0) {
     this->Warning(
-      cmStrCat("left shift of negative value in:\n  ", l, " << ", r));
+      cmStrCat("left shift of negative value in:\n  "_s, l, " << "_s, r));
   }
   if (r < 0) {
     this->Warning(
-      cmStrCat("shift exponent is negative in:\n  ", l, " << ", r));
+      cmStrCat("shift exponent is negative in:\n  "_s, l, " << "_s, r));
     r &= 0x3F;
   }
   if (r >= 64) {
     this->Warning(
-      cmStrCat("shift exponent is too large in:\n  ", l, " << ", r));
+      cmStrCat("shift exponent is too large in:\n  "_s, l, " << "_s, r));
     r &= 0x3F;
   }
   return static_cast<std::int64_t>(static_cast<std::uint64_t>(l) << r);
@@ -143,12 +145,12 @@ std::int64_t cmExprParserHelper::ShR(std::int64_t l, std::int64_t r)
 {
   if (r < 0) {
     this->Warning(
-      cmStrCat("shift exponent is negative in:\n  ", l, " >> ", r));
+      cmStrCat("shift exponent is negative in:\n  "_s, l, " >> "_s, r));
     r &= 0x3F;
   }
   if (r >= 64) {
     this->Warning(
-      cmStrCat("shift exponent is too large in:\n  ", l, " >> ", r));
+      cmStrCat("shift exponent is too large in:\n  "_s, l, " >> "_s, r));
     r &= 0x3F;
   }
   return l >> r;
@@ -158,7 +160,8 @@ std::int64_t cmExprParserHelper::Add(std::int64_t l, std::int64_t r)
 {
   std::int64_t sum;
   if (this->AddOverflow(l, r, &sum)) {
-    this->Warning(cmStrCat("signed integer overflow in:\n  ", l, " + ", r));
+    this->Warning(
+      cmStrCat("signed integer overflow in:\n  "_s, l, " + "_s, r));
   }
   return sum;
 }
@@ -167,7 +170,8 @@ std::int64_t cmExprParserHelper::Sub(std::int64_t l, std::int64_t r)
 {
   std::int64_t diff;
   if (this->SubOverflow(l, r, &diff)) {
-    this->Warning(cmStrCat("signed integer overflow in:\n  ", l, " - ", r));
+    this->Warning(
+      cmStrCat("signed integer overflow in:\n  "_s, l, " - "_s, r));
   }
   return diff;
 }
@@ -176,7 +180,8 @@ std::int64_t cmExprParserHelper::Mul(std::int64_t l, std::int64_t r)
 {
   std::int64_t prod;
   if (this->MulOverflow(l, r, &prod)) {
-    this->Warning(cmStrCat("signed integer overflow in:\n  ", l, " * ", r));
+    this->Warning(
+      cmStrCat("signed integer overflow in:\n  "_s, l, " * "_s, r));
   }
   return prod;
 }
@@ -206,7 +211,7 @@ std::int64_t cmExprParserHelper::Mod(std::int64_t l, std::int64_t r)
 std::int64_t cmExprParserHelper::Neg(std::int64_t x)
 {
   if (static_cast<std::uint64_t>(x) == 0x8000000000000000) {
-    this->Warning(cmStrCat("signed integer cannot negate:\n  ", x));
+    this->Warning(cmStrCat("signed integer cannot negate:\n  "_s, x));
     return x;
   }
   return -x;

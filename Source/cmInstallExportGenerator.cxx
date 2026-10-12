@@ -6,6 +6,8 @@
 #include <ostream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmCryptoHash.h"
 #include "cmDiagnosticContext.h"
 #include "cmExportInstallFileGenerator.h"
@@ -66,7 +68,7 @@ std::string cmInstallExportGenerator::TempDirCalculate() const
   // Choose a temporary directory in which to generate the import
   // files to be installed.
   std::string path = cmStrCat(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), "/CMakeFiles/Export");
+    this->LocalGenerator->GetCurrentBinaryDirectory(), "/CMakeFiles/Export"_s);
   if (this->Destination.empty()) {
     return path;
   }
@@ -96,8 +98,8 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 {
   // Skip empty sets.
   if (this->ExportSet->GetTargetExports().empty()) {
-    cmSystemTools::Error(cmStrCat("INSTALL(", this->InstallSubcommand(),
-                                  ") given unknown export \"",
+    cmSystemTools::Error(cmStrCat("INSTALL("_s, this->InstallSubcommand(),
+                                  ") given unknown export \""_s,
                                   this->ExportSet->GetName(), '"'));
     return;
   }
@@ -161,7 +163,7 @@ void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
 
     // Remove old per-configuration export files if the main changes.
     std::string installedDir =
-      cmStrCat("$ENV{DESTDIR}",
+      cmStrCat("$ENV{DESTDIR}"_s,
                ConvertToAbsoluteDestination(cxxModuleDestination), '/');
     std::string installedFile = cmStrCat(installedDir, cxxModuleFilename);
     os << indent << "if(EXISTS \"" << installedFile << "\")\n";
@@ -226,7 +228,7 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   if (!configImportFilesGlob.empty()) {
     // Remove old per-configuration export files if the main changes.
     std::string installedDir = cmStrCat(
-      "$ENV{DESTDIR}", ConvertToAbsoluteDestination(this->Destination), '/');
+      "$ENV{DESTDIR}"_s, ConvertToAbsoluteDestination(this->Destination), '/');
     std::string installedFile = cmStrCat(installedDir, this->FileName);
     os << indent << "if(EXISTS \"" << installedFile << "\")\n";
     Indent indentN = indent.Next();

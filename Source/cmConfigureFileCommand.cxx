@@ -34,9 +34,9 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
 
   // If the input location is a directory, error out.
   if (cmSystemTools::FileIsDirectory(inputFile)) {
-    status.SetError(cmStrCat("input location\n  ", inputFile,
+    status.SetError(cmStrCat("input location\n  "_s, inputFile,
                              "\n"
-                             "is a directory but a file was expected."));
+                             "is a directory but a file was expected."_s));
     return false;
   }
 
@@ -51,9 +51,9 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
   }
 
   if (!status.GetMakefile().CanIWriteThisFile(outputFile)) {
-    status.SetError(
-      cmStrCat("attempted to configure a file: ", std::move(outputFile),
-               " into a source directory."));
+    status.SetError(cmStrCat("attempted to configure a file: "_s,
+                             std::move(outputFile),
+                             " into a source directory."_s));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -155,7 +155,7 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
   if (!unknown_args.empty()) {
     status.GetMakefile().IssueDiagnostic(
       cmDiagnostics::CMD_AUTHOR,
-      cmStrCat("configure_file called with unknown argument(s):\n",
+      cmStrCat("configure_file called with unknown argument(s):\n"_s,
                unknown_args));
   }
 

@@ -88,7 +88,7 @@ struct ReadOnlyProperty
         msg = " property can't be set during generation for rules (\"";
         break;
     }
-    return cmStrCat('"', prop, "\" ", msg, rule->GetName(), "\")\n");
+    return cmStrCat('"', prop, "\" "_s, msg, rule->GetName(), "\")\n"_s);
   }
 
   bool IsReadOnly(cm::string_view prop, cmRule const* rule) const
@@ -146,8 +146,8 @@ bool IsSettableProperty(cm::string_view prop, cmRule const* rule)
   if (rule->InGeneration()) {
     rule->GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("rule properties cannot be changed during generation (\"",
-               rule->GetName(), "\")\n"));
+      cmStrCat("rule properties cannot be changed during generation (\""_s,
+               rule->GetName(), "\")\n"_s));
     return false;
   }
 
@@ -236,8 +236,8 @@ cmFileSet* cmRule::GetOutputFileSet(cmTarget* target,
   if (expander.InError) {
     this->GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Output File Set name, for the rule \"", this->GetName(),
-               "\", did not expand correctly:\n  \"", outputName, "\"."));
+      cmStrCat("Output File Set name, for the rule \""_s, this->GetName(),
+               "\", did not expand correctly:\n  \""_s, outputName, "\"."_s));
     return nullptr;
   }
 
@@ -246,10 +246,11 @@ cmFileSet* cmRule::GetOutputFileSet(cmTarget* target,
   if (!result.second && result.first->GetType() != outputFileSet[1]) {
     this->GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("The output file set \"", outputName, "\", for the target \"",
-               target->GetName(), "\", has the type \"",
-               result.first->GetType(), "\" instead of \"", outputFileSet[1],
-               "\", as specified by the rule \"", this->GetName(), "\"."));
+      cmStrCat("The output file set \""_s, outputName,
+               "\", for the target \""_s, target->GetName(),
+               "\", has the type \""_s, result.first->GetType(),
+               "\" instead of \""_s, outputFileSet[1],
+               "\", as specified by the rule \""_s, this->GetName(), "\"."_s));
     return nullptr;
   }
 
@@ -269,8 +270,8 @@ cmFileSet* cmRule::GetOutputFileSet(cmTarget* target,
       if (expander.InError) {
         this->GetMakefile().IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("Base directories, for the rule \"", this->GetName(),
-                   "\", did not expand correctly."));
+          cmStrCat("Base directories, for the rule \""_s, this->GetName(),
+                   "\", did not expand correctly."_s));
         return nullptr;
       }
       result.first->AddDirectoryEntry(BT<std::string>{ dirs });
@@ -309,8 +310,8 @@ void cmRule::SetProperty(std::string const& prop, cmValue value)
     if (!value.IsOn()) {
       this->GetMakefile().IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("GLOBAL property can't be set to FALSE on rules (\"",
-                 this->GetName(), "\")"));
+        cmStrCat("GLOBAL property can't be set to FALSE on rules (\""_s,
+                 this->GetName(), "\")"_s));
       return;
     }
     /* no need to change anything if value does not change */
@@ -331,7 +332,7 @@ void cmRule::SetProperty(std::string const& prop, cmValue value)
       this->GetMakefile().IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat(
-          "specified file set type is erroneous. The supported types are: ",
+          "specified file set type is erroneous. The supported types are: "_s,
           cmJoin(cm::FileSetMetadata::GetKnownTypes(), ", "), '.'));
       return;
     }
@@ -369,8 +370,8 @@ void cmRule::AppendProperty(std::string const& prop, std::string const& value,
   if (prop == GLOBAL) {
     this->GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("GLOBAL property can't be appended, only set on rules (\"",
-               this->GetName(), "\")\n"));
+      cmStrCat("GLOBAL property can't be appended, only set on rules (\""_s,
+               this->GetName(), "\")\n"_s));
     return;
   }
 
@@ -503,9 +504,9 @@ void cmRule::CheckProperty(std::string const& prop, cmMakefile& context) const
     if (it == rules.end()) {
       context.IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Attempt to promote rule \"", this->GetName(),
+        cmStrCat("Attempt to promote rule \""_s, this->GetName(),
                  "\" to global scope (by setting GLOBAL) "
-                 "which is not created in this directory."));
+                 "which is not created in this directory."_s));
     }
   }
 }
@@ -558,10 +559,11 @@ bool ConfigureRule(cmRule::ConfiguratorSet const& configurators,
     cmExecutionStatus status(*mf);
     if (!mf->ExecuteCommand(command, status)) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("Erroneous execution of the CONFIGURATOR \"",
-                                *item.second, "\", from the RULE \"",
-                                *item.first, "\", for the FILE_SET \"",
-                                fileSet, "\" of TARGET \"", target, "\"."));
+                       cmStrCat("Erroneous execution of the CONFIGURATOR \""_s,
+                                *item.second, "\", from the RULE \""_s,
+                                *item.first, "\", for the FILE_SET \""_s,
+                                fileSet, "\" of TARGET \""_s, target,
+                                "\"."_s));
       return false;
     }
     UpdatePatterns(
@@ -600,7 +602,7 @@ bool cmRule::Instantiate(cmTarget const* target, cmFileSet const* fileSet,
 {
   // First, take patterns from <RULE>_PATTERNS source file property, if any
   if (cmValue sfPatterns =
-        source->GetProperty(cmStrCat(this->GetName(), "_PATTERNS"))) {
+        source->GetProperty(cmStrCat(this->GetName(), "_PATTERNS"_s))) {
     UpdatePatterns(patterns, cmList{ sfPatterns, cmList::EmptyElements::No });
   }
 

@@ -37,10 +37,10 @@ bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
       /* clang-format off */
       mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(
           "Generator\n"
-          "  ", this->GetName(), "\n"
+          "  "_s, this->GetName(), "\n"
           "given platform specification containing a\n"
           "  version=10.0\n"
-          "field.  The value 10.0 is only supported by VS 2019 and above.\n"
+          "field.  The value 10.0 is only supported by VS 2019 and above.\n"_s
           ));
       /* clang-format on */
       return false;
@@ -58,10 +58,10 @@ bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
       /* clang-format off */
       mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(
           "Generator\n"
-          "  ", this->GetName(), "\n"
+          "  "_s, this->GetName(), "\n"
           "given platform specification containing a\n"
           "  version=8.1\n"
-          "field, but the Windows 8.1 SDK is not installed.\n"
+          "field, but the Windows 8.1 SDK is not installed.\n"_s
           ));
       /* clang-format on */
       return false;
@@ -71,10 +71,10 @@ bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
       /* clang-format off */
       mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(
           "Generator\n"
-          "  ", this->GetName(), "\n"
+          "  "_s, this->GetName(), "\n"
           "given platform specification with empty\n"
           "  version=\n"
-          "field.\n"
+          "field.\n"_s
           ));
       /* clang-format on */
       return false;
@@ -83,10 +83,10 @@ bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
     /* clang-format off */
     mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(
         "Generator\n"
-        "  ", this->GetName(), "\n"
+        "  "_s, this->GetName(), "\n"
         "given platform specification containing a\n"
-        "  version=", version, "\n"
-        "field with unsupported value.\n"
+        "  version="_s, version, "\n"
+        "field with unsupported value.\n"_s
         ));
     /* clang-format on */
     return false;
@@ -128,15 +128,15 @@ bool cmGlobalVisualStudio14Generator::VerifyNoGeneratorPlatformVersion(
   mf->IssueMessage(
     MessageType::FATAL_ERROR,
     cmStrCat("Generator\n"
-             "  ",
+             "  "_s,
              this->GetName(),
              "\n"
              "given platform specification containing a\n"
-             "  version=",
+             "  version="_s,
              *this->GeneratorPlatformVersion,
              "\n"
              "field.  The version field is not supported when targeting\n"
-             "  ",
+             "  "_s,
              this->SystemName, ' ', this->SystemVersion, '\n'));
   return false;
 }
@@ -148,14 +148,14 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
     if (this->DefaultPlatformToolset.empty()) {
       e = cmStrCat(this->GetName(),
                    " supports Windows Store '8.0', '8.1' and "
-                   "'10.0', but not '",
-                   this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION.");
+                   "'10.0', but not '"_s,
+                   this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION."_s);
     } else {
       e = cmStrCat(
         "A Windows Store component with CMake requires both the Windows "
-        "Desktop SDK as well as the Windows Store '",
+        "Desktop SDK as well as the Windows Store '"_s,
         this->SystemVersion,
-        "' SDK. Please make sure that you have both installed");
+        "' SDK. Please make sure that you have both installed"_s);
     }
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
@@ -187,10 +187,11 @@ bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf)
     if (this->GeneratorPlatformVersion) {
       mf->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Generator\n  ", this->GetName(),
-                 "\ngiven platform specification with\n  version=",
-                 *this->GeneratorPlatformVersion,
-                 "\nfield, but no Windows SDK with that version was found."));
+        cmStrCat(
+          "Generator\n  "_s, this->GetName(),
+          "\ngiven platform specification with\n  version="_s,
+          *this->GeneratorPlatformVersion,
+          "\nfield, but no Windows SDK with that version was found."_s));
       return false;
     }
 
@@ -214,9 +215,9 @@ void cmGlobalVisualStudio14Generator::SetWindowsTargetPlatformVersion(
   if (!this->WindowsTargetPlatformVersion.empty() &&
       !cmSystemTools::VersionCompareEqual(this->WindowsTargetPlatformVersion,
                                           this->SystemVersion)) {
-    mf->DisplayStatus(cmStrCat("Selecting Windows SDK version ",
+    mf->DisplayStatus(cmStrCat("Selecting Windows SDK version "_s,
                                this->WindowsTargetPlatformVersion,
-                               " to target Windows ", this->SystemVersion,
+                               " to target Windows "_s, this->SystemVersion,
                                '.'),
                       -1);
   }
@@ -292,7 +293,7 @@ struct NoWindowsH
 {
   bool operator()(std::string const& p)
   {
-    return !cmSystemTools::FileExists(cmStrCat(p, "/um/windows.h"), true);
+    return !cmSystemTools::FileExists(cmStrCat(p, "/um/windows.h"_s), true);
   }
 };
 class WindowsSDKTooRecent
@@ -349,7 +350,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   std::vector<std::string> sdks;
   // Grab the paths of the different SDKs that are installed
   for (std::string const& i : win10Roots) {
-    std::string path = cmStrCat(i, "/Include/*");
+    std::string path = cmStrCat(i, "/Include/*"_s);
     cmSystemTools::GlobDirs(path, sdks);
   }
 

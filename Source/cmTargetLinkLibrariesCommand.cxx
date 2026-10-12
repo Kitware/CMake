@@ -91,9 +91,9 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   }
   if (!target) {
     mf.IssueMessage(MessageType::FATAL_ERROR,
-                    cmStrCat("Cannot specify link libraries for target \"",
+                    cmStrCat("Cannot specify link libraries for target \""_s,
                              args[0],
-                             "\" which is not built by this project."));
+                             "\" which is not built by this project."_s));
     cmSystemTools::SetFatalErrorOccurred();
     return true;
   }
@@ -108,8 +108,8 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     mf.IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(
-        "Utility target \"", target->GetName(),
-        "\" must not be used as the target of a target_link_libraries call."));
+        "Utility target \""_s, target->GetName(),
+        "\" must not be used as the target of a target_link_libraries call."_s));
     return false;
   }
 
@@ -305,8 +305,8 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   // Make sure the last argument was not a library type specifier.
   if (haveLLT) {
     mf.IssueMessage(MessageType::FATAL_ERROR,
-                    cmStrCat("The \"", LinkLibraryTypeNames[llt],
-                             "\" argument must be followed by a library."));
+                    cmStrCat("The \""_s, LinkLibraryTypeNames[llt],
+                             "\" argument must be followed by a library."_s));
     cmSystemTools::SetFatalErrorOccurred();
   }
 
@@ -319,9 +319,9 @@ static void LinkLibraryTypeSpecifierWarning(cmMakefile& mf, int left,
   mf.IssueDiagnostic(
     cmDiagnostics::CMD_AUTHOR,
     cmStrCat(
-      "Link library type specifier \"", LinkLibraryTypeNames[left],
-      "\" is followed by specifier \"", LinkLibraryTypeNames[right],
-      "\" instead of a library name.  The first specifier will be ignored."));
+      "Link library type specifier \""_s, LinkLibraryTypeNames[left],
+      "\" is followed by specifier \""_s, LinkLibraryTypeNames[right],
+      "\" instead of a library name.  The first specifier will be ignored."_s));
 }
 
 namespace {
@@ -408,11 +408,11 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
     if (this->RejectRemoteLinking) {
       this->Makefile.IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Attempt to add link library \"", lib, "\" to target \"",
+        cmStrCat("Attempt to add link library \""_s, lib, "\" to target \""_s,
                  this->Target->GetName(),
                  "\" which is not built in this "
                  "directory.\nThis is allowed only when policy CMP0079 "
-                 "is set to NEW."));
+                 "is set to NEW."_s));
       return false;
     }
 
@@ -427,11 +427,11 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
       this->Makefile.IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat(
-          "Target \"", lib, "\" of type ",
+          "Target \""_s, lib, "\" of type "_s,
           cmState::GetTargetTypeName(tgt->GetType()),
           " may not be linked into another target. One may link only to "
           "INTERFACE, OBJECT, STATIC or SHARED libraries, or to "
-          "executables with the ENABLE_EXPORTS property set."));
+          "executables with the ENABLE_EXPORTS property set."_s));
     }
 
     this->AffectsProperty("LINK_LIBRARIES");
@@ -462,7 +462,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
         this->Target->GetDebugGeneratorExpressions(lib, llt);
       if (cmGeneratorExpression::IsValidTargetName(lib) ||
           cmGeneratorExpression::Find(lib) != std::string::npos) {
-        configLib = cmStrCat("$<LINK_ONLY:", std::move(configLib), '>');
+        configLib = cmStrCat("$<LINK_ONLY:"_s, std::move(configLib), '>');
       }
       this->AppendProperty("INTERFACE_LINK_LIBRARIES", configLib);
     }

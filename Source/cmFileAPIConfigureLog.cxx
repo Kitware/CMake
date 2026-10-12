@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFileAPIConfigureLog.h"
 
+#include <cmext/string_view>
+
 #include <cm3p/json/value.h>
 
 #include "cmFileAPI.h"
@@ -41,7 +43,7 @@ Json::Value ConfigureLog::Dump()
 Json::Value ConfigureLog::DumpPath()
 {
   return cmStrCat(this->FileAPI.GetCMakeInstance()->GetHomeOutputDirectory(),
-                  "/CMakeFiles/CMakeConfigureLog.yaml");
+                  "/CMakeFiles/CMakeConfigureLog.yaml"_s);
 }
 
 Json::Value ConfigureLog::DumpEventKindNames()

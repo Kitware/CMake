@@ -5,6 +5,8 @@
 #include <ostream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmCTest.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -104,7 +106,7 @@ bool cmCTestGlobalVC::WriteXMLUpdates(cmXMLWriter& xml)
   bool result = true;
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per revision):\n"
-             "    ");
+             "    "_s);
   result = this->LoadRevisions() && result;
   cmCTestLog(this->CTest, HANDLER_OUTPUT, '\n');
 

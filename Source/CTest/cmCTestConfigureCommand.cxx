@@ -43,19 +43,19 @@ bool ConstructConfigureCommand(
   std::string const presetsFile, std::string& configureCommand)
 {
   configureCommand =
-    cmStrCat('"', cmSystemTools::GetCMakeCommand(), "\" \"-S",
+    cmStrCat('"', cmSystemTools::GetCMakeCommand(), "\" \"-S"_s,
              cmSystemTools::CollapseFullPath(sourceDirectory), '"');
 
   if (!buildDirectory.empty()) {
     configureCommand =
-      cmStrCat(std::move(configureCommand), " \"-B",
+      cmStrCat(std::move(configureCommand), " \"-B"_s,
                cmSystemTools::CollapseFullPath(buildDirectory), '"');
   }
 
   cmValue cmakeGenerator = mf.GetDefinition("CTEST_CMAKE_GENERATOR");
   if (cmNonempty(cmakeGenerator)) {
     configureCommand =
-      cmStrCat(std::move(configureCommand), " \"-G", cmakeGenerator, '"');
+      cmStrCat(std::move(configureCommand), " \"-G"_s, cmakeGenerator, '"');
   }
 
   bool presetProvidesBuildDir = false;
@@ -64,8 +64,8 @@ bool ConstructConfigureCommand(
   if (!presetName.empty()) {
     cmCMakePresetsGraph presetsGraph;
     if (!presetsGraph.ReadProjectPresets(sourceDirectory, presetsFile)) {
-      status.SetError(cmStrCat("\n Could not read presets from \"",
-                               sourceDirectory, "\":\n ",
+      status.SetError(cmStrCat("\n Could not read presets from \""_s,
+                               sourceDirectory, "\":\n "_s,
                                presetsGraph.parseState.GetErrorMessage()));
       return false;
     }
@@ -84,11 +84,12 @@ bool ConstructConfigureCommand(
     auto const* expandedPreset = resolveResult.Preset;
 
     configureCommand = cmStrCat(std::move(configureCommand),
-                                R"( "--preset" ")", presetName, '"');
+                                R"( "--preset" ")"_s, presetName, '"');
 
     if (!presetsFile.empty()) {
-      configureCommand = cmStrCat(std::move(configureCommand),
-                                  R"( "--presets-file" ")", presetsFile, '"');
+      configureCommand =
+        cmStrCat(std::move(configureCommand), R"( "--presets-file" ")"_s,
+                 presetsFile, '"');
     }
 
     if (!expandedPreset->BinaryDir.empty()) {
@@ -127,8 +128,8 @@ bool ConstructConfigureCommand(
   cmValue site = mf.GetDefinition("CTEST_SITE");
   cmValue buildName = mf.GetDefinition("CTEST_BUILD_NAME");
   if (cmNonempty(site) || cmNonempty(buildName)) {
-    std::string const initialCacheFile =
-      cmStrCat(outputDirectory, "/Temporary/CTestConfigureInitialCache.cmake");
+    std::string const initialCacheFile = cmStrCat(
+      outputDirectory, "/Temporary/CTestConfigureInitialCache.cmake"_s);
     cmGeneratedFileStream initialCache(initialCacheFile);
     if (cmNonempty(site)) {
       initialCache << "set(SITE " << cmOutputConverter::EscapeForCMake(*site)
@@ -142,20 +143,20 @@ bool ConstructConfigureCommand(
     initialCache.Close();
 
     configureCommand =
-      cmStrCat(std::move(configureCommand), " \"-C", initialCacheFile, '"');
+      cmStrCat(std::move(configureCommand), " \"-C"_s, initialCacheFile, '"');
   }
 
   cmValue cmakeGeneratorPlatform =
     mf.GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
   if (cmNonempty(cmakeGeneratorPlatform)) {
-    configureCommand = cmStrCat(std::move(configureCommand), " \"-A",
+    configureCommand = cmStrCat(std::move(configureCommand), " \"-A"_s,
                                 *cmakeGeneratorPlatform, '"');
   }
 
   cmValue cmakeGeneratorToolset =
     mf.GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
   if (cmNonempty(cmakeGeneratorToolset)) {
-    configureCommand = cmStrCat(std::move(configureCommand), " \"-T",
+    configureCommand = cmStrCat(std::move(configureCommand), " \"-T"_s,
                                 *cmakeGeneratorToolset, '"');
   }
 
@@ -173,14 +174,14 @@ bool ConstructConfigureCommand(
   auto const optionsList = cmList(options);
   for (std::string const& option : optionsList) {
     configureCommand =
-      cmStrCat(std::move(configureCommand), " \"", option, '"');
+      cmStrCat(std::move(configureCommand), " \""_s, option, '"');
   }
 
   cmValue cmakeBuildType = mf.GetDefinition("CTEST_CONFIGURATION_TYPE");
   if (!multiConfig && !buildTypeInOptions && cmNonempty(cmakeBuildType)) {
     configureCommand =
-      cmStrCat(std::move(configureCommand),
-               " \"-DCMAKE_BUILD_TYPE:STRING=", cmakeBuildType, '"');
+      cmStrCat(std::move(configureCommand), " \"-DCMAKE_BUILD_TYPE:STRING="_s,
+               cmakeBuildType, '"');
   }
 
   return true;
@@ -236,8 +237,8 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     configureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
   } else if (cmNonempty(mf.GetDefinition("CTEST_CONFIGURE_COMMAND"))) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-                       "Ignoring CTEST_CONFIGURE_COMMAND because preset \"",
-                       presetName, "\" is in use.\n");
+                       "Ignoring CTEST_CONFIGURE_COMMAND because preset \""_s,
+                       presetName, "\" is in use.\n"_s);
   }
   if (configureCommand.empty() &&
       !ConstructConfigureCommand(status, mf, sourceDirectory, buildDirectory,
@@ -247,11 +248,11 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, args.Quiet,
-                     "Configure project\n");
+                     "Configure project\n"_s);
 
   if (this->CTest->GetShowOnly()) {
     cmCTestOptionalLog(this->CTest, DEBUG, args.Quiet,
-                       "Configure with command: ", configureCommand, '\n');
+                       "Configure with command: "_s, configureCommand, '\n');
     if (!args.ReturnValue.empty()) {
       mf.AddDefinition(args.ReturnValue, "0");
     }
@@ -259,12 +260,12 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   }
 
   if (!cmSystemTools::MakeDirectory(buildDirectory)) {
-    status.SetError(cmStrCat("cannot create directory ", buildDirectory));
+    status.SetError(cmStrCat("cannot create directory "_s, buildDirectory));
     return false;
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-                     "Configure with command: ", configureCommand, '\n');
+                     "Configure with command: "_s, configureCommand, '\n');
 
   int const submitIndex =
     args.SubmitIndex.empty() ? 0 : std::atoi(args.SubmitIndex.c_str());
@@ -286,11 +287,11 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   auto const elapsedMinutes =
     std::chrono::duration_cast<std::chrono::minutes>(endTime - startTime);
 
-  cmCTestOptionalLog(this->CTest, DEBUG, args.Quiet, "End\n");
+  cmCTestOptionalLog(this->CTest, DEBUG, args.Quiet, "End\n"_s);
 
   if (!res || retVal) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Error(s) when configuring the project\n");
+               "Error(s) when configuring the project\n"_s);
   }
 
   if (!args.ReturnValue.empty()) {
@@ -309,7 +310,7 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   cmGeneratedFileStream xmlFile;
   if (!this->CTest->StartResultingXML(cmCTest::PartConfigure, "Configure",
                                       submitIndex, xmlFile)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open configure file\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open configure file\n"_s);
     return false;
   }
 

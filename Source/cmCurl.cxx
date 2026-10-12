@@ -208,7 +208,7 @@ std::string cmCurlSetNETRCOption(::CURL* curl, std::string const& netrc_level,
     } else if (netrc_level == "IGNORED") {
       curl_netrc_level = CURL_NETRC_IGNORED;
     } else {
-      e = cmStrCat("NETRC accepts OPTIONAL, IGNORED or REQUIRED but got: ",
+      e = cmStrCat("NETRC accepts OPTIONAL, IGNORED or REQUIRED but got: "_s,
                    netrc_level);
       return e;
     }

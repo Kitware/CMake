@@ -51,7 +51,7 @@ bool cmSetTestsPropertiesCommand(std::vector<std::string> const& args,
       directory, mf->GetCurrentSourceDirectory());
     mf = mf->GetGlobalGenerator()->FindMakefile(absDirectory);
     if (!mf) {
-      status.SetError(cmStrCat("given non-existent DIRECTORY ", directory));
+      status.SetError(cmStrCat("given non-existent DIRECTORY "_s, directory));
       return false;
     }
   }
@@ -67,7 +67,7 @@ bool cmSetTestsPropertiesCommand(std::vector<std::string> const& args,
       }
     } else {
       status.SetError(
-        cmStrCat("Can not find test to add properties to: ", tname));
+        cmStrCat("Can not find test to add properties to: "_s, tname));
       return false;
     }
   }

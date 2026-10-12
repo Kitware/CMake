@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmList.h"
@@ -82,8 +84,9 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
                      end(compG.second.Components),
                      std::back_inserter(components),
                      [](cmCPackComponent const* comp) { return comp->Name; });
-      this->SetOption(cmStrCat("CPACK_NUGET_", compGUp, "_GROUP_COMPONENTS"),
-                      cmList::to_string(components));
+      this->SetOption(
+        cmStrCat("CPACK_NUGET_"_s, compGUp, "_GROUP_COMPONENTS"_s),
+        cmList::to_string(components));
     }
     if (!groups.empty()) {
       this->SetOption("CPACK_NUGET_GROUPS", cmList::to_string(groups));

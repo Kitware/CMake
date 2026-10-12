@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAddExecutableCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -103,24 +105,24 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
 
     std::string const& aliasedName = *s;
     if (mf.IsAlias(aliasedName)) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
-                               "\" because target \"", aliasedName,
-                               "\" is itself an ALIAS."));
+      status.SetError(cmStrCat("cannot create ALIAS target \""_s, exename,
+                               "\" because target \""_s, aliasedName,
+                               "\" is itself an ALIAS."_s));
       return false;
     }
     cmTarget* aliasedTarget =
       mf.FindTargetToUse(aliasedName, { cm::TargetDomain::NATIVE });
     if (!aliasedTarget) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
-                               "\" because target \"", aliasedName,
-                               "\" does not already exist."));
+      status.SetError(cmStrCat("cannot create ALIAS target \""_s, exename,
+                               "\" because target \""_s, aliasedName,
+                               "\" does not already exist."_s));
       return false;
     }
     cm::TargetType type = aliasedTarget->GetType();
     if (type != cm::TargetType::EXECUTABLE) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
-                               "\" because target \"", aliasedName,
-                               "\" is not an executable."));
+      status.SetError(cmStrCat("cannot create ALIAS target \""_s, exename,
+                               "\" because target \""_s, aliasedName,
+                               "\" is not an executable."_s));
       return false;
     }
     mf.AddAlias(exename, aliasedName,
@@ -134,8 +136,8 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
     // Make sure the target does not already exist.
     if (mf.FindTargetToUse(exename)) {
       status.SetError(cmStrCat(
-        "cannot create imported target \"", exename,
-        "\" because another target with the same name already exists."));
+        "cannot create imported target \""_s, exename,
+        "\" because another target with the same name already exists."_s));
       return false;
     }
 

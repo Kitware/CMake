@@ -47,8 +47,8 @@ std::string processObjectKindVersions(cmFileAPI& fileApi,
       minorVersion = std::atoi(vStart);
     }
     if (majorVersion < 1 || minorVersion < 0) {
-      return cmStrCat("Given a malformed version \"", ver, "\" for ", keyword,
-                      '.');
+      return cmStrCat("Given a malformed version \""_s, ver, "\" for "_s,
+                      keyword, '.');
     }
     if (fileApi.AddProjectQuery(objectKind,
                                 static_cast<unsigned>(majorVersion),
@@ -56,8 +56,8 @@ std::string processObjectKindVersions(cmFileAPI& fileApi,
       return {};
     }
   }
-  return cmStrCat("None of the specified ", keyword,
-                  " versions is supported by this version of CMake.");
+  return cmStrCat("None of the specified "_s, keyword,
+                  " versions is supported by this version of CMake."_s);
 }
 
 bool handleQueryCommand(std::vector<std::string> const& args,
@@ -93,8 +93,8 @@ bool handleQueryCommand(std::vector<std::string> const& args,
     return true;
   }
   if (!unparsedArguments.empty()) {
-    status.SetError(cmStrCat("QUERY given unknown argument \"",
-                             unparsedArguments.front(), "\"."));
+    status.SetError(cmStrCat("QUERY given unknown argument \""_s,
+                             unparsedArguments.front(), "\"."_s));
     return false;
   }
 
@@ -105,9 +105,9 @@ bool handleQueryCommand(std::vector<std::string> const& args,
   }
   int const apiVersion = std::atoi(arguments.ApiVersion.c_str());
   if (apiVersion != 1) {
-    status.SetError(
-      cmStrCat("QUERY given unsupported API_VERSION \"", arguments.ApiVersion,
-               "\" (the only currently supported version is 1)."));
+    status.SetError(cmStrCat(
+      "QUERY given unsupported API_VERSION \""_s, arguments.ApiVersion,
+      "\" (the only currently supported version is 1)."_s));
     return false;
   }
 
@@ -136,7 +136,7 @@ bool handleQueryCommand(std::vector<std::string> const& args,
     std::string message("QUERY given invalid arguments:");
     for (std::string const& s : errors) {
       if (!s.empty()) {
-        message = cmStrCat(std::move(message), "\n  ", s);
+        message = cmStrCat(std::move(message), "\n  "_s, s);
       }
     }
     status.SetError(message);

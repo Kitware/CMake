@@ -21,6 +21,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <cmext/string_view>
+
 #include <windows.h>
 
 #include "cmsys/Encoding.hxx"
@@ -258,7 +260,7 @@ int main()
     cmSystemTools::ReplaceString(rest, "/nologo ", " ");
     std::string clrest = rest;
     if (haveNologo) {
-      rest = cmStrCat("/nologo ", std::move(rest));
+      rest = cmStrCat("/nologo "_s, std::move(rest));
     }
 
     // rc /fo X.dir\x.rc.res  =>  cl -FoX.dir\x.rc.res.obj
@@ -266,10 +268,10 @@ int main()
     cmSystemTools::ReplaceString(clrest, "/fo ", " ");
     cmSystemTools::ReplaceString(clrest, "-fo ", " ");
     cmSystemTools::ReplaceString(clrest, objfile,
-                                 cmStrCat("-Fo", objfile, ".obj"));
+                                 cmStrCat("-Fo"_s, objfile, ".obj"_s));
 
     cl = cmStrCat('"', std::move(cl),
-                  "\" /P /DRC_INVOKED /nologo /showIncludes /TC ");
+                  "\" /P /DRC_INVOKED /nologo /showIncludes /TC "_s);
 
     // call cl in object dir so the .i is generated there
     std::string objdir;

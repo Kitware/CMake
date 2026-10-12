@@ -288,34 +288,34 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   if (!this->Target->IsDLLPlatform() &&
       this->Target->GetType() == cm::TargetType::MODULE_LIBRARY) {
     std::string loader_flag_var =
-      cmStrCat("CMAKE_SHARED_MODULE_LOADER_", this->LinkLanguage, "_FLAG");
+      cmStrCat("CMAKE_SHARED_MODULE_LOADER_"_s, this->LinkLanguage, "_FLAG"_s);
     this->LoaderFlag = this->Makefile->GetDefinition(loader_flag_var);
   }
 
   // Get options needed to link libraries.
   if (cmValue flag = this->Makefile->GetDefinition(
-        cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_FLAG"))) {
+        cmStrCat("CMAKE_"_s, this->LinkLanguage, "_LINK_LIBRARY_FLAG"_s))) {
     this->LibLinkFlag = *flag;
   } else {
     this->LibLinkFlag =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   }
-  if (cmValue flag = this->Makefile->GetDefinition(
-        cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_FILE_FLAG"))) {
+  if (cmValue flag = this->Makefile->GetDefinition(cmStrCat(
+        "CMAKE_"_s, this->LinkLanguage, "_LINK_LIBRARY_FILE_FLAG"_s))) {
     this->LibLinkFileFlag = *flag;
   } else {
     this->LibLinkFileFlag =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FILE_FLAG");
   }
   if (cmValue suffix = this->Makefile->GetDefinition(
-        cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_SUFFIX"))) {
+        cmStrCat("CMAKE_"_s, this->LinkLanguage, "_LINK_LIBRARY_SUFFIX"_s))) {
     this->LibLinkSuffix = *suffix;
   } else {
     this->LibLinkSuffix =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
   }
-  if (cmValue flag = this->Makefile->GetDefinition(
-        cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_OBJECT_FILE_FLAG"))) {
+  if (cmValue flag = this->Makefile->GetDefinition(cmStrCat(
+        "CMAKE_"_s, this->LinkLanguage, "_LINK_OBJECT_FILE_FLAG"_s))) {
     this->ObjLinkFileFlag = *flag;
   } else {
     this->ObjLinkFileFlag =
@@ -329,9 +329,9 @@ cmComputeLinkInformation::cmComputeLinkInformation(
       ((this->Target->GetType() == cm::TargetType::EXECUTABLE)
          ? "EXECUTABLE"
          : "SHARED_LIBRARY");
-    std::string rtVar =
-      cmStrCat("CMAKE_", tType, "_RUNTIME_", this->LinkLanguage, "_FLAG");
-    std::string rtSepVar = cmStrCat(rtVar, "_SEP");
+    std::string rtVar = cmStrCat("CMAKE_"_s, tType, "_RUNTIME_"_s,
+                                 this->LinkLanguage, "_FLAG"_s);
+    std::string rtSepVar = cmStrCat(rtVar, "_SEP"_s);
     this->RuntimeFlag = this->Makefile->GetSafeDefinition(rtVar);
     this->RuntimeSep = this->Makefile->GetSafeDefinition(rtSepVar);
     this->RuntimeAlways = (this->Makefile->GetSafeDefinition(
@@ -340,15 +340,15 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->RuntimeUseChrpath = this->Target->IsChrpathUsed(config);
 
     // Get options needed to help find dependent libraries.
-    std::string rlVar =
-      cmStrCat("CMAKE_", tType, "_RPATH_LINK_", this->LinkLanguage, "_FLAG");
+    std::string rlVar = cmStrCat("CMAKE_"_s, tType, "_RPATH_LINK_"_s,
+                                 this->LinkLanguage, "_FLAG"_s);
     this->RPathLinkFlag = this->Makefile->GetSafeDefinition(rlVar);
   }
 
   // Check if we need to include the runtime search path at link time.
   {
-    std::string var = cmStrCat("CMAKE_SHARED_LIBRARY_LINK_",
-                               this->LinkLanguage, "_WITH_RUNTIME_PATH");
+    std::string var = cmStrCat("CMAKE_SHARED_LIBRARY_LINK_"_s,
+                               this->LinkLanguage, "_WITH_RUNTIME_PATH"_s);
     this->LinkWithRuntimePath = this->Makefile->IsOn(var);
   }
 
@@ -358,21 +358,21 @@ cmComputeLinkInformation::cmComputeLinkInformation(
       "__CMAKE_LINK_LIBRARY",
       LibraryFeatureDescriptor{
         "__CMAKE_LINK_LIBRARY",
-        cmStrCat(this->GetLibLinkFileFlag(), "<LIBRARY>") });
+        cmStrCat(this->GetLibLinkFileFlag(), "<LIBRARY>"_s) });
   }
   if (!this->GetObjLinkFileFlag().empty()) {
     this->LibraryFeatureDescriptors.emplace(
       "__CMAKE_LINK_OBJECT",
       LibraryFeatureDescriptor{
         "__CMAKE_LINK_OBJECT",
-        cmStrCat(this->GetObjLinkFileFlag(), "<LIBRARY>") });
+        cmStrCat(this->GetObjLinkFileFlag(), "<LIBRARY>"_s) });
   }
   if (!this->LoaderFlag->empty()) {
     // Define a Feature descriptor for the link of an executable with exports
     this->LibraryFeatureDescriptors.emplace(
       "__CMAKE_LINK_EXECUTABLE",
       LibraryFeatureDescriptor{ "__CMAKE_LINK_EXECUTABLE",
-                                cmStrCat(*this->LoaderFlag, "<LIBRARY>") });
+                                cmStrCat(*this->LoaderFlag, "<LIBRARY>"_s) });
   }
   // To link framework using a full path
   this->LibraryFeatureDescriptors.emplace(
@@ -556,8 +556,8 @@ bool cmComputeLinkInformation::Compute()
     } else {
       this->CMakeInstance->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("LINK_LIBRARIES_STRATEGY value '", *s,
-                 "' is not recognized."),
+        cmStrCat("LINK_LIBRARIES_STRATEGY value '"_s, *s,
+                 "' is not recognized."_s),
         this->Target->GetBacktrace());
       return false;
     }
@@ -798,16 +798,16 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     return it->second.Supported;
   }
 
-  auto featureName =
-    cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_USING_", feature);
+  auto featureName = cmStrCat("CMAKE_"_s, this->LinkLanguage,
+                              "_LINK_LIBRARY_USING_"_s, feature);
   cmValue featureSupported =
-    this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
+    this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"_s));
   if (!featureSupported) {
     // language specific variable is not defined, fallback to the more generic
     // one
-    featureName = cmStrCat("CMAKE_LINK_LIBRARY_USING_", feature);
+    featureName = cmStrCat("CMAKE_LINK_LIBRARY_USING_"_s, feature);
     featureSupported =
-      this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
+      this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"_s));
   }
   if (!featureSupported.IsOn()) {
     this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
@@ -815,11 +815,11 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     this->CMakeInstance->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(
-        "Feature '", feature,
+        "Feature '"_s, feature,
         "', specified through generator-expression '$<LINK_LIBRARY>' to "
-        "link target '",
-        this->Target->GetName(), "', is not supported for the '",
-        this->LinkLanguage, "' link language."),
+        "link target '"_s,
+        this->Target->GetName(), "', is not supported for the '"_s,
+        this->LinkLanguage, "' link language."_s),
       this->Target->GetBacktrace());
 
     return false;
@@ -832,11 +832,11 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     this->CMakeInstance->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(
-        "Feature '", feature,
+        "Feature '"_s, feature,
         "', specified through generator-expression '$<LINK_LIBRARY>' to "
-        "link target '",
-        this->Target->GetName(), "', is not defined for the '",
-        this->LinkLanguage, "' link language."),
+        "link target '"_s,
+        this->Target->GetName(), "', is not defined for the '"_s,
+        this->LinkLanguage, "' link language."_s),
       this->Target->GetBacktrace());
 
     return false;
@@ -850,11 +850,12 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
     this->CMakeInstance->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+      cmStrCat("Feature '"_s, feature, "', specified by variable '"_s,
+               featureName,
                "', is malformed (\"<LIBRARY>\", \"<LIB_ITEM>\", or "
-               "\"<LINK_ITEM>\" patterns "
-               "are missing) and cannot be used to link target '",
-               this->Target->GetName(), "'."),
+               "\"<LINK_ITEM>\" patterns "_s
+               "are missing) and cannot be used to link target '"_s,
+               this->Target->GetName(), "'."_s),
       this->Target->GetBacktrace());
 
     return false;
@@ -873,10 +874,11 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
     this->CMakeInstance->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+      cmStrCat("Feature '"_s, feature, "', specified by variable '"_s,
+               featureName,
                "', is malformed (wrong number of elements) and cannot be used "
-               "to link target '",
-               this->Target->GetName(), "'."),
+               "to link target '"_s,
+               this->Target->GetName(), "'."_s),
       this->Target->GetBacktrace());
 
     return false;
@@ -887,12 +889,13 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
     this->CMakeInstance->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+      cmStrCat("Feature '"_s, feature, "', specified by variable '"_s,
+               featureName,
                "', is malformed (\"<LIBRARY>\", \"<LIB_ITEM>\", or "
-               "\"<LINK_ITEM>\" patterns "
+               "\"<LINK_ITEM>\" patterns "_s
                "are missing for \"PATH{}\" alternative) and cannot be used to "
-               "link target '",
-               this->Target->GetName(), "'."),
+               "link target '"_s,
+               this->Target->GetName(), "'."_s),
       this->Target->GetBacktrace());
 
     return false;
@@ -903,12 +906,13 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
     this->CMakeInstance->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+      cmStrCat("Feature '"_s, feature, "', specified by variable '"_s,
+               featureName,
                "', is malformed (\"<LIBRARY>\", \"<LIB_ITEM>\", or "
-               "\"<LINK_ITEM>\" patterns "
+               "\"<LINK_ITEM>\" patterns "_s
                "are missing for \"NAME{}\" alternative) and cannot be used to "
-               "link target '",
-               this->Target->GetName(), "'."),
+               "link target '"_s,
+               this->Target->GetName(), "'."_s),
       this->Target->GetBacktrace());
 
     return false;
@@ -963,24 +967,24 @@ cmComputeLinkInformation::GetGroupFeature(std::string const& feature)
   }
 
   auto featureName =
-    cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_GROUP_USING_", feature);
+    cmStrCat("CMAKE_"_s, this->LinkLanguage, "_LINK_GROUP_USING_"_s, feature);
   cmValue featureSupported =
-    this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
+    this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"_s));
   if (!featureSupported) {
     // language specific variable is not defined, fallback to the more generic
     // one
-    featureName = cmStrCat("CMAKE_LINK_GROUP_USING_", feature);
+    featureName = cmStrCat("CMAKE_LINK_GROUP_USING_"_s, feature);
     featureSupported =
-      this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
+      this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"_s));
   }
   if (!featureSupported.IsOn()) {
     this->CMakeInstance->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Feature '", feature,
+      cmStrCat("Feature '"_s, feature,
                "', specified through generator-expression '$<LINK_GROUP>' to "
-               "link target '",
-               this->Target->GetName(), "', is not supported for the '",
-               this->LinkLanguage, "' link language."),
+               "link target '"_s,
+               this->Target->GetName(), "', is not supported for the '"_s,
+               this->LinkLanguage, "' link language."_s),
       this->Target->GetBacktrace());
     return this->GroupFeatureDescriptors.emplace(feature, FeatureDescriptor{})
       .first->second;
@@ -990,11 +994,11 @@ cmComputeLinkInformation::GetGroupFeature(std::string const& feature)
   if (!langFeature) {
     this->CMakeInstance->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Feature '", feature,
+      cmStrCat("Feature '"_s, feature,
                "', specified through generator-expression '$<LINK_GROUP>' to "
-               "link target '",
-               this->Target->GetName(), "', is not defined for the '",
-               this->LinkLanguage, "' link language."),
+               "link target '"_s,
+               this->Target->GetName(), "', is not defined for the '"_s,
+               this->LinkLanguage, "' link language."_s),
       this->Target->GetBacktrace());
     return this->GroupFeatureDescriptors.emplace(feature, FeatureDescriptor{})
       .first->second;
@@ -1016,10 +1020,11 @@ cmComputeLinkInformation::GetGroupFeature(std::string const& feature)
 
   this->CMakeInstance->IssueMessage(
     MessageType::FATAL_ERROR,
-    cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+    cmStrCat("Feature '"_s, feature, "', specified by variable '"_s,
+             featureName,
              "', is malformed (wrong number of elements) and cannot be used "
-             "to link target '",
-             this->Target->GetName(), "'."),
+             "to link target '"_s,
+             this->Target->GetName(), "'."_s),
     this->Target->GetBacktrace());
   return this->GroupFeatureDescriptors.emplace(feature, FeatureDescriptor{})
     .first->second;
@@ -1072,8 +1077,9 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
   if (runtimeLibrary.empty()) {
     return;
   }
-  if (cmValue runtimeLinkOptions = this->Makefile->GetDefinition(cmStrCat(
-        "CMAKE_", lang, "_RUNTIME_LIBRARY_LINK_OPTIONS_", runtimeLibrary))) {
+  if (cmValue runtimeLinkOptions = this->Makefile->GetDefinition(
+        cmStrCat("CMAKE_"_s, lang, "_RUNTIME_LIBRARY_LINK_OPTIONS_"_s,
+                 runtimeLibrary))) {
     cmList libs{ *runtimeLinkOptions };
     for (auto const& i : libs) {
       if (!cm::contains(this->ImplicitLinkLibs, i)) {
@@ -1091,9 +1097,9 @@ std::string const gcc_s_asneeded = "gcc_s_asneeded";
 void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 {
   std::string const& libraries = this->Makefile->GetSafeDefinition(
-    cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_LIBRARIES"));
+    cmStrCat("CMAKE_"_s, lang, "_IMPLICIT_LINK_LIBRARIES"_s));
   std::string const& directories = this->Makefile->GetSafeDefinition(
-    cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_DIRECTORIES"));
+    cmStrCat("CMAKE_"_s, lang, "_IMPLICIT_LINK_DIRECTORIES"_s));
   auto const impliedByLinkerLanguage = [this](std::string const& lib) -> bool {
     if (cm::contains(this->ImplicitLinkLibs, lib)) {
       return true;
@@ -1414,14 +1420,14 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   }
   if (target_type_str) {
     std::string static_link_type_flag_var =
-      cmStrCat("CMAKE_", target_type_str, "_LINK_STATIC_", this->LinkLanguage,
-               "_FLAGS");
+      cmStrCat("CMAKE_"_s, target_type_str, "_LINK_STATIC_"_s,
+               this->LinkLanguage, "_FLAGS"_s);
     static_link_type_flag =
       this->Makefile->GetDefinition(static_link_type_flag_var);
 
     std::string shared_link_type_flag_var =
-      cmStrCat("CMAKE_", target_type_str, "_LINK_DYNAMIC_", this->LinkLanguage,
-               "_FLAGS");
+      cmStrCat("CMAKE_"_s, target_type_str, "_LINK_DYNAMIC_"_s,
+               this->LinkLanguage, "_FLAGS"_s);
     shared_link_type_flag =
       this->Makefile->GetDefinition(shared_link_type_flag_var);
   }
@@ -1653,8 +1659,8 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
     if (!fwDescriptor) {
       this->CMakeInstance->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Could not parse framework path \"", item.Value,
-                 "\" linked by target ", this->Target->GetName(), '.'),
+        cmStrCat("Could not parse framework path \""_s, item.Value,
+                 "\" linked by target "_s, this->Target->GetName(), '.'),
         item.Backtrace);
       return;
     }
@@ -1905,8 +1911,8 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
     entry.Feature == DEFAULT ? cmGlobalGenerator::FrameworkFormat::Relaxed
                              : cmGlobalGenerator::FrameworkFormat::Extended);
   if (!fwDescriptor) {
-    cmSystemTools::Error(cmStrCat("Could not parse framework path \"", item,
-                                  "\" linked by target ",
+    cmSystemTools::Error(cmStrCat("Could not parse framework path \""_s, item,
+                                  "\" linked by target "_s,
                                   this->Target->GetName(), '.'));
     return;
   }
@@ -1986,10 +1992,10 @@ void cmComputeLinkInformation::DropDirectoryItem(BT<std::string> const& item)
   // user.
   this->CMakeInstance->IssueMessage(
     MessageType::WARNING,
-    cmStrCat("Target \"", this->Target->GetName(),
-             "\" requests linking to directory \"", item.Value,
+    cmStrCat("Target \""_s, this->Target->GetName(),
+             "\" requests linking to directory \""_s, item.Value,
              "\".  Targets may link only to libraries.  CMake is dropping "
-             "the item."),
+             "the item."_s),
     item.Backtrace);
 }
 
@@ -2004,7 +2010,7 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
 
   // Get language-specific implicit directories.
   std::string implicitDirVar = cmStrCat(
-    "CMAKE_", this->LinkLanguage, "_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES");
+    "CMAKE_"_s, this->LinkLanguage, "_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES"_s);
   implicitDirs.append(this->Makefile->GetDefinition(implicitDirVar));
 
   this->FrameworkPathsEmitted.insert(implicitDirs.begin(), implicitDirs.end());
@@ -2073,7 +2079,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
 
   // Get language-specific implicit directories.
   std::string implicitDirVar =
-    cmStrCat("CMAKE_", this->LinkLanguage, "_IMPLICIT_LINK_DIRECTORIES");
+    cmStrCat("CMAKE_"_s, this->LinkLanguage, "_IMPLICIT_LINK_DIRECTORIES"_s);
   implicitDirs.append(this->Makefile->GetDefinition(implicitDirVar));
 
   // Store implicit link directories.
@@ -2081,7 +2087,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
 
   // Get language-specific implicit libraries.
   std::string implicitLibVar =
-    cmStrCat("CMAKE_", this->LinkLanguage, "_IMPLICIT_LINK_LIBRARIES");
+    cmStrCat("CMAKE_"_s, this->LinkLanguage, "_IMPLICIT_LINK_LIBRARIES"_s);
   cmList implicitLibs{ this->Makefile->GetDefinition(implicitLibVar) };
 
   // Store implicit link libraries.
@@ -2333,10 +2339,10 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       this->Target->GetLinkClosure(this->Config);
     for (std::string const& li : lc->Languages) {
       std::string useVar = cmStrCat(
-        "CMAKE_", li, "_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH");
+        "CMAKE_"_s, li, "_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH"_s);
       if (this->Makefile->IsOn(useVar)) {
         std::string dirVar =
-          cmStrCat("CMAKE_", li, "_IMPLICIT_LINK_DIRECTORIES");
+          cmStrCat("CMAKE_"_s, li, "_IMPLICIT_LINK_DIRECTORIES"_s);
         if (cmValue dirs = this->Makefile->GetDefinition(dirVar)) {
           cmCLI_ExpandListUnique(*dirs, runtimeDirs, emitted);
         }

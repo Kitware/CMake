@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include <cmsys/RegularExpression.hxx>
 
 #include "cmArgumentParserTypes.h"
@@ -103,8 +105,8 @@ bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
 
   cmsys::RegularExpression re;
   if (!re.compile(AddAnchors(args.DiscoveryMatch))) {
-    std::string e = cmStrCat("DISCOVERY_MATCH failed to compile regex \"",
-                             args.DiscoveryMatch, "\".");
+    std::string e = cmStrCat("DISCOVERY_MATCH failed to compile regex \""_s,
+                             args.DiscoveryMatch, "\"."_s);
     status.SetError(e);
     return false;
   }
@@ -133,7 +135,7 @@ bool cmCTestDiscoverTests(cmTestDiscoveryArgs const& args,
     cmSystemTools::OUTPUT_NONE, props.Timeout, cmProcessOutput::Auto,
     env.GetVariables());
   if (!res) {
-    status.SetError(cmStrCat(" failed to run command: ",
+    status.SetError(cmStrCat(" failed to run command: "_s,
                              cmSystemTools::PrintSingleCommand(runCommand),
                              '\n', stdErr));
     return false;

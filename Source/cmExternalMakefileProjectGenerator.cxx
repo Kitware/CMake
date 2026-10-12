@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmStringAlgorithms.h"
 
 class cmMakefile;
@@ -23,7 +25,7 @@ std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
   if (extraGenerator.empty()) {
     return globalGenerator;
   }
-  return cmStrCat(extraGenerator, " - ", globalGenerator);
+  return cmStrCat(extraGenerator, " - "_s, globalGenerator);
 }
 
 bool cmExternalMakefileProjectGenerator::Open(

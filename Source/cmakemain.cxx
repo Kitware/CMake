@@ -16,6 +16,7 @@
 
 #include <cm/optional>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/uv.h>
 
@@ -657,12 +658,12 @@ int do_build(int ac, char const* const* av)
       if (!(matched && parsed)) {
         buildArgs.binaryDir.clear();
         if (!matched) {
-          std::string error = cmStrCat("Unknown argument ", arg);
+          std::string error = cmStrCat("Unknown argument "_s, arg);
           std::string const suggestion =
             cmFindClosestCommandLineArgument(arg, arguments);
           if (!suggestion.empty()) {
-            error =
-              cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
+            error = cmStrCat(std::move(error), ". Did you mean: "_s,
+                             suggestion, '?');
           }
           std::cerr << error << std::endl;
         }
@@ -954,12 +955,12 @@ int do_install(int ac, char const* const* av)
       if (!(matched && parsed)) {
         dir.clear();
         if (!matched) {
-          std::string error = cmStrCat("Unknown argument ", arg);
+          std::string error = cmStrCat("Unknown argument "_s, arg);
           std::string const suggestion =
             cmFindClosestCommandLineArgument(arg, arguments);
           if (!suggestion.empty()) {
-            error =
-              cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
+            error = cmStrCat(std::move(error), ". Did you mean: "_s,
+                             suggestion, '?');
           }
           std::cerr << error << std::endl;
         }
@@ -1035,7 +1036,7 @@ int do_install(int ac, char const* const* av)
     for (auto const& script : handler.GetScripts()) {
       if (!cmSystemTools::FileExists(script.path, true)) {
         cmSystemTools::Error(
-          cmStrCat("Install script does not exist:\n  ", script.path));
+          cmStrCat("Install script does not exist:\n  "_s, script.path));
         return 1;
       }
     }
@@ -1171,12 +1172,12 @@ int do_workflow(int ac, char const* const* av)
     if (!(matched && parsed)) {
       if (!matched) {
         presetsArgs.Clear();
-        std::string error = cmStrCat("Unknown argument ", arg);
+        std::string error = cmStrCat("Unknown argument "_s, arg);
         std::string const suggestion =
           cmFindClosestCommandLineArgument(arg, arguments);
         if (!suggestion.empty()) {
           error =
-            cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
+            cmStrCat(std::move(error), ". Did you mean: "_s, suggestion, '?');
         }
         std::cerr << error << std::endl;
       }

@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 
@@ -43,11 +45,11 @@ bool cmParseMumpsCoverage::ReadCoverageFile(char const* file)
         this->LoadCoverageData(path);
       } else {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Parse Error in Mumps coverage file :\n", file, "\ntype: [",
-                   type, "]\npath:[", path,
+                   "Parse Error in Mumps coverage file :\n"_s, file,
+                   "\ntype: ["_s, type, "]\npath:["_s, path,
                    "]\n"
-                   "input line: [",
-                   line, "]\n");
+                   "input line: ["_s,
+                   line, "]\n"_s);
       }
     }
   }
@@ -108,7 +110,7 @@ bool cmParseMumpsCoverage::LoadPackages(std::string const& d)
 {
   cmsys::Glob glob;
   glob.RecurseOn();
-  std::string pat = cmStrCat(d, "/*.m");
+  std::string pat = cmStrCat(d, "/*.m"_s);
   glob.FindFiles(pat);
   for (std::string& file : glob.GetFiles()) {
     std::string name = cmSystemTools::GetFilenameName(file);

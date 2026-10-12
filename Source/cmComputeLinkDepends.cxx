@@ -192,14 +192,15 @@ namespace {
 bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
                         std::string const& feature)
 {
-  auto featureSupported = cmStrCat(
-    "CMAKE_", linkLanguage, "_LINK_LIBRARY_USING_", feature, "_SUPPORTED");
+  auto featureSupported =
+    cmStrCat("CMAKE_"_s, linkLanguage, "_LINK_LIBRARY_USING_"_s, feature,
+             "_SUPPORTED"_s);
   if (cmValue perLangVar = makefile->GetDefinition(featureSupported)) {
     return perLangVar.IsOn();
   }
 
   featureSupported =
-    cmStrCat("CMAKE_LINK_LIBRARY_USING_", feature, "_SUPPORTED");
+    cmStrCat("CMAKE_LINK_LIBRARY_USING_"_s, feature, "_SUPPORTED"_s);
   return makefile->GetDefinition(featureSupported).IsOn();
 }
 
@@ -232,14 +233,14 @@ LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
     return it->second;
   }
 
-  auto featureAttributesVariable =
-    cmStrCat("CMAKE_", linkLanguage, "_LINK_LIBRARY_", feature, "_ATTRIBUTES");
+  auto featureAttributesVariable = cmStrCat(
+    "CMAKE_"_s, linkLanguage, "_LINK_LIBRARY_"_s, feature, "_ATTRIBUTES"_s);
   auto featureAttributesValues =
     makefile->GetDefinition(featureAttributesVariable);
   if (featureAttributesValues.IsEmpty()) {
     // try language agnostic definition
     featureAttributesVariable =
-      cmStrCat("CMAKE_LINK_LIBRARY_", feature, "_ATTRIBUTES");
+      cmStrCat("CMAKE_LINK_LIBRARY_"_s, feature, "_ATTRIBUTES"_s);
     featureAttributesValues =
       makefile->GetDefinition(featureAttributesVariable);
   }
@@ -273,7 +274,7 @@ LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
                 cm::TargetType::EXECUTABLE);
             } else {
               errorMessage =
-                cmStrCat(std::move(errorMessage), "  ", option, '\n');
+                cmStrCat(std::move(errorMessage), "  "_s, option, '\n');
               break;
             }
           }
@@ -292,7 +293,7 @@ LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
               LinkLibraryFeatureAttributeSet::Default;
           } else {
             errorMessage =
-              cmStrCat(std::move(errorMessage), "  ", option, '\n');
+              cmStrCat(std::move(errorMessage), "  "_s, option, '\n');
           }
         } else if (processingOption.match(1) == "OVERRIDE") {
           featureAttributes.Override.clear();
@@ -301,14 +302,14 @@ LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
           featureAttributes.Override.insert(values.begin(), values.end());
         }
       } else {
-        errorMessage = cmStrCat(std::move(errorMessage), "  ", option, '\n');
+        errorMessage = cmStrCat(std::move(errorMessage), "  "_s, option, '\n');
       }
     }
     if (!errorMessage.empty()) {
       makefile->GetCMakeInstance()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Erroneous option(s) for '", featureAttributesVariable,
-                 "':\n", errorMessage));
+        cmStrCat("Erroneous option(s) for '"_s, featureAttributesVariable,
+                 "':\n"_s, errorMessage));
     }
     return LinkLibraryFeatureAttributes.emplace(feature, featureAttributes)
       .first->second;
@@ -335,13 +336,13 @@ bool IsGroupFeatureSupported(cmMakefile* makefile,
                              std::string const& feature)
 {
   auto featureSupported = cmStrCat(
-    "CMAKE_", linkLanguage, "_LINK_GROUP_USING_", feature, "_SUPPORTED");
+    "CMAKE_"_s, linkLanguage, "_LINK_GROUP_USING_"_s, feature, "_SUPPORTED"_s);
   if (makefile->GetDefinition(featureSupported).IsOn()) {
     return true;
   }
 
   featureSupported =
-    cmStrCat("CMAKE_LINK_GROUP_USING_", feature, "_SUPPORTED");
+    cmStrCat("CMAKE_LINK_GROUP_USING_"_s, feature, "_SUPPORTED"_s);
   return makefile->GetDefinition(featureSupported).IsOn();
 }
 
@@ -390,7 +391,7 @@ public:
         }
 
         if (auto libProcessing = makefile->GetDefinition(cmStrCat(
-              "CMAKE_", linkLanguage, "_LINK_LIBRARIES_PROCESSING"))) {
+              "CMAKE_"_s, linkLanguage, "_LINK_LIBRARIES_PROCESSING"_s))) {
           // UNICITY keyword is just for compatibility with previous
           // implementation
           cmsys::RegularExpression processingOption{
@@ -406,7 +407,7 @@ public:
                   this->Order = Reverse;
                 } else {
                   errorMessage =
-                    cmStrCat(std::move(errorMessage), "  ", option, '\n');
+                    cmStrCat(std::move(errorMessage), "  "_s, option, '\n');
                 }
               } else if (processingOption.match(1) == "UNICITY" ||
                          processingOption.match(1) == "DEDUPLICATION") {
@@ -418,25 +419,26 @@ public:
                   this->Deduplication = Shared;
                 } else {
                   errorMessage =
-                    cmStrCat(std::move(errorMessage), "  ", option, '\n');
+                    cmStrCat(std::move(errorMessage), "  "_s, option, '\n');
                 }
               }
             } else {
               errorMessage =
-                cmStrCat(std::move(errorMessage), "  ", option, '\n');
+                cmStrCat(std::move(errorMessage), "  "_s, option, '\n');
             }
           }
           if (!errorMessage.empty()) {
             makefile->GetCMakeInstance()->IssueMessage(
               MessageType::FATAL_ERROR,
-              cmStrCat("Erroneous option(s) for 'CMAKE_", linkLanguage,
-                       "_LINK_LIBRARIES_PROCESSING':\n", errorMessage),
+              cmStrCat("Erroneous option(s) for 'CMAKE_"_s, linkLanguage,
+                       "_LINK_LIBRARIES_PROCESSING':\n"_s, errorMessage),
               target->GetBacktrace());
           }
           // For some environments, deduplication should be activated only if
           // both policies CMP0156 and CMP0179 are NEW
-          if (makefile->GetDefinition(cmStrCat(
-                "CMAKE_", linkLanguage, "_PLATFORM_LINKER_ID")) == "LLD"_s &&
+          if (makefile->GetDefinition(
+                cmStrCat("CMAKE_"_s, linkLanguage, "_PLATFORM_LINKER_ID"_s)) ==
+                "LLD"_s &&
               makefile->GetDefinition("CMAKE_EXECUTABLE_FORMAT") == "ELF"_s &&
               target->GetPolicyStatusCMP0179() != cmPolicies::NEW &&
               this->Deduplication == All) {
@@ -810,7 +812,7 @@ std::pair<size_t, bool> cmComputeLinkDepends::AddLinkEntry(
       this->BFSQueue.push(qe);
     } else {
       // Look for an old-style <item>_LIB_DEPENDS variable.
-      std::string var = cmStrCat(entry.Item.Value, "_LIB_DEPENDS");
+      std::string var = cmStrCat(entry.Item.Value, "_LIB_DEPENDS"_s);
       if (cmValue val = this->Makefile->GetDefinition(var)) {
         // The item dependencies are known.  Follow them.
         BFSEntry qe = { index, groupIndex, val->c_str() };
@@ -974,7 +976,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(
       // the export_library_dependencies command from CMake 2.4 and
       // lower.
       if (!haveLLT) {
-        std::string var = cmStrCat(d, "_LINK_TYPE");
+        std::string var = cmStrCat(d, "_LINK_TYPE"_s);
         if (cmValue val = this->Makefile->GetDefinition(var)) {
           if (*val == "debug") {
             llt = DEBUG_LibraryType;
@@ -1043,15 +1045,15 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
                               item.Feature)) {
         this->CMakeInstance->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
-          cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
+          cmStrCat("The 'IMPORTED' target '"_s, depender.Target->GetName(),
                    "' uses the generator-expression '$<LINK_LIBRARY>' with "
-                   "the feature '",
+                   "the feature '"_s,
                    item.Feature,
                    "', which is undefined or unsupported.\nDid you miss to "
-                   "define it by setting variables \"CMAKE_",
-                   this->LinkLanguage, "_LINK_LIBRARY_USING_", item.Feature,
-                   "\" and \"CMAKE_", this->LinkLanguage,
-                   "_LINK_LIBRARY_USING_", item.Feature, "_SUPPORTED\"?"),
+                   "define it by setting variables \"CMAKE_"_s,
+                   this->LinkLanguage, "_LINK_LIBRARY_USING_"_s, item.Feature,
+                   "\" and \"CMAKE_"_s, this->LinkLanguage,
+                   "_LINK_LIBRARY_USING_"_s, item.Feature, "_SUPPORTED\"?"_s),
           this->Target->GetBacktrace());
       }
     }
@@ -1098,15 +1100,15 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
                                    groupFeature)) {
         this->CMakeInstance->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
-          cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
+          cmStrCat("The 'IMPORTED' target '"_s, depender.Target->GetName(),
                    "' uses the generator-expression '$<LINK_GROUP>' with "
-                   "the feature '",
+                   "the feature '"_s,
                    groupFeature,
                    "', which is undefined or unsupported.\nDid you miss to "
-                   "define it by setting variables \"CMAKE_",
-                   this->LinkLanguage, "_LINK_GROUP_USING_", groupFeature,
-                   "\" and \"CMAKE_", this->LinkLanguage, "_LINK_GROUP_USING_",
-                   groupFeature, "_SUPPORTED\"?"),
+                   "define it by setting variables \"CMAKE_"_s,
+                   this->LinkLanguage, "_LINK_GROUP_USING_"_s, groupFeature,
+                   "\" and \"CMAKE_"_s, this->LinkLanguage,
+                   "_LINK_GROUP_USING_"_s, groupFeature, "_SUPPORTED\"?"_s),
           this->Target->GetBacktrace());
       }
     }
@@ -1129,8 +1131,8 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
           itemFeature != "WHOLE_ARCHIVE") {
         this->CMakeInstance->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("Finalized SYCL static library \"", entry.Item.Value,
-                   "\" requires the WHOLE_ARCHIVE link-library feature."),
+          cmStrCat("Finalized SYCL static library \""_s, entry.Item.Value,
+                   "\" requires the WHOLE_ARCHIVE link-library feature."_s),
           this->Target->GetBacktrace());
       }
       itemFeature = "WHOLE_ARCHIVE";
@@ -1142,14 +1144,14 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
       auto const& groupFeature = this->EntryList[group->first].Feature;
       this->CMakeInstance->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("The feature '", groupFeature,
+        cmStrCat("The feature '"_s, groupFeature,
                  "', specified as part of a generator-expression "
-                 "'$",
-                 LG_BEGIN, groupFeature, ">', will not be applied to the ",
+                 "'$"_s,
+                 LG_BEGIN, groupFeature, ">', will not be applied to the "_s,
                  (entry.Target->GetType() == cm::TargetType::OBJECT_LIBRARY
                     ? "OBJECT"
                     : "INTERFACE"),
-                 " library '", entry.Item.Value, "'."),
+                 " library '"_s, entry.Item.Value, "'."_s),
         this->Target->GetBacktrace());
     }
     // check if feature is applicable to this item
@@ -1161,12 +1163,12 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
         supportedItem = false;
         this->CMakeInstance->IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
-          cmStrCat("The feature '", itemFeature,
+          cmStrCat("The feature '"_s, itemFeature,
                    "', specified as part of a generator-expression "
-                   "'$<LINK_LIBRARY:",
-                   itemFeature, ">', will not be applied to the ",
-                   cmState::GetTargetTypeName(entry.Target->GetType()), " '",
-                   entry.Item.Value, "'."),
+                   "'$<LINK_LIBRARY:"_s,
+                   itemFeature, ">', will not be applied to the "_s,
+                   cmState::GetTargetTypeName(entry.Target->GetType()), " '"_s,
+                   entry.Item.Value, "'."_s),
           this->Target->GetBacktrace());
       }
     }
@@ -1190,11 +1192,12 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
               g.second.cend()) {
             this->CMakeInstance->IssueMessage(
               MessageType::FATAL_ERROR,
-              cmStrCat("Impossible to link target '", this->Target->GetName(),
-                       "' because the link item '", entry.Item.Value,
-                       "', specified with the group feature '", currentFeature,
-                       "', has already occurred with the feature '",
-                       groupFeature, "', which is not allowed."),
+              cmStrCat(
+                "Impossible to link target '"_s, this->Target->GetName(),
+                "' because the link item '"_s, entry.Item.Value,
+                "', specified with the group feature '"_s, currentFeature,
+                "', has already occurred with the feature '"_s, groupFeature,
+                "', which is not allowed."_s),
               this->Target->GetBacktrace());
             continue;
           }
@@ -1214,13 +1217,13 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
           // features override each other
           this->CMakeInstance->IssueMessage(
             MessageType::FATAL_ERROR,
-            cmStrCat("Impossible to link target '", this->Target->GetName(),
-                     "' because the link item '", entry.Item.Value,
-                     "' is specified with the features '", itemFeature,
-                     "' and '", entry.Feature,
+            cmStrCat("Impossible to link target '"_s, this->Target->GetName(),
+                     "' because the link item '"_s, entry.Item.Value,
+                     "' is specified with the features '"_s, itemFeature,
+                     "' and '"_s, entry.Feature,
                      "'"
                      ", and both have an 'OVERRIDE' attribute that overrides "
-                     "the other. Such cycles are not allowed."),
+                     "the other. Such cycles are not allowed."_s),
             this->Target->GetBacktrace());
         } else {
           if (itemFeatureAttributes.Override.find(entry.Feature) !=
@@ -1236,16 +1239,17 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
             this->CMakeInstance->IssueMessage(
               MessageType::FATAL_ERROR,
               cmStrCat(
-                "Impossible to link target '", this->Target->GetName(),
-                "' because the link item '", entry.Item.Value, "', specified ",
+                "Impossible to link target '"_s, this->Target->GetName(),
+                "' because the link item '"_s, entry.Item.Value,
+                "', specified "_s,
                 (itemFeature == LinkEntry::DEFAULT
                    ? "without any feature or 'DEFAULT' feature"
-                   : cmStrCat("with the feature '", itemFeature, '\'')),
-                ", has already occurred ",
+                   : cmStrCat("with the feature '"_s, itemFeature, '\'')),
+                ", has already occurred "_s,
                 (entry.Feature == LinkEntry::DEFAULT
                    ? "without any feature or 'DEFAULT' feature"
-                   : cmStrCat("with the feature '", entry.Feature, '\'')),
-                ", which is not allowed."),
+                   : cmStrCat("with the feature '"_s, entry.Feature, '\'')),
+                ", which is not allowed."_s),
               this->Target->GetBacktrace());
           }
         }
@@ -1439,8 +1443,8 @@ bool cmComputeLinkDepends::CheckCircularDependencies() const
           entry.Item.Value.substr(entry.Item.Value.find(':', 12) + 1);
         items.pop_back();
         std::replace(items.begin(), items.end(), '|', ',');
-        return cmStrCat("group \"", ExtractGroupFeature(entry.Item.Value),
-                        ":{", items, "}\"");
+        return cmStrCat("group \""_s, ExtractGroupFeature(entry.Item.Value),
+                        ":{"_s, items, "}\""_s);
       }
       return cmStrCat('"', entry.Item.Value, '"');
     };

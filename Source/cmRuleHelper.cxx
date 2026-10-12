@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -43,26 +44,26 @@ public:
 
     if (parent && !parent->Parent) {
       makefile.IssueMessage(MessageType::FATAL_ERROR,
-                            cmStrCat("Error evaluating the pattern \"",
+                            cmStrCat("Error evaluating the pattern \""_s,
                                      this->Pattern,
                                      "\" in the expression:\n"
-                                     "  ",
+                                     "  "_s,
                                      expression,
                                      "\n"
-                                     "Self reference on rule \"",
-                                     rule, "\".\n"));
+                                     "Self reference on rule \""_s,
+                                     rule, "\".\n"_s));
       return;
     }
 
     {
       makefile.IssueMessage(MessageType::FATAL_ERROR,
-                            cmStrCat("Error evaluating the pattern \"",
+                            cmStrCat("Error evaluating the pattern \""_s,
                                      this->Pattern,
                                      "\" in the expression:\n"
-                                     "  ",
+                                     "  "_s,
                                      expression,
                                      "\n"
-                                     "Dependency loop found."));
+                                     "Dependency loop found."_s));
     }
   }
 
@@ -122,7 +123,7 @@ std::string RulePatternPlaceholderExpander::ExpandVariable(
   this->InError = true;
   this->Makefile.IssueMessage(
     MessageType::FATAL_ERROR,
-    cmStrCat("The pattern \"", variable, "\" is not defined."));
+    cmStrCat("The pattern \""_s, variable, "\" is not defined."_s));
   // If there is no variable defined, mark unresolved variable by '<' and
   // '>'
   return cmStrCat('<', variable, '>');

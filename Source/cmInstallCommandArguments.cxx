@@ -58,7 +58,7 @@ cmInstallCommandArguments::cmInstallCommandArguments(
           this->Destination = cmCMakePath(arg).Normal().String();
         } else {
           this->Destination =
-            cmStrCat("$<PATH:CMAKE_PATH,NORMALIZE,", arg, '>');
+            cmStrCat("$<PATH:CMAKE_PATH,NORMALIZE,"_s, arg, '>');
         }
         return ArgumentParser::Continue::No;
       };

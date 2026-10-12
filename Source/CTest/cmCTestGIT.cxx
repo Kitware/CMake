@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/String.h"
@@ -74,7 +75,7 @@ bool cmCTestGIT::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Old revision of repository is: ", this->OldRevision, '\n');
+             "   Old revision of repository is: "_s, this->OldRevision, '\n');
   this->PriorRev.Rev = this->OldRevision;
   return true;
 }
@@ -83,7 +84,7 @@ bool cmCTestGIT::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   New revision of repository is: ", this->NewRevision, '\n');
+             "   New revision of repository is: "_s, this->NewRevision, '\n');
   return true;
 }
 
@@ -115,7 +116,7 @@ std::string cmCTestGIT::FindGitDir()
     // Cygwin Git reports a full path that Cygwin understands, but we
     // are a Windows application.  Run "cygpath" to get Windows path.
     std::string cygpath_exe =
-      cmStrCat(cmSystemTools::GetFilenamePath(git), "/cygpath.exe");
+      cmStrCat(cmSystemTools::GetFilenamePath(git), "/cygpath.exe"_s);
     if (cmSystemTools::FileExists(cygpath_exe)) {
       std::vector<std::string> cygpath = { cygpath_exe, "-w", git_dir };
       OneLineParser cygpath_out(this, "cygpath-out> ", git_dir_line);
@@ -600,7 +601,7 @@ char const cmCTestGIT::CommitParser::SectionSep[SectionCount] = { '\n', '\n',
 bool cmCTestGIT::LoadRevisions()
 {
   // Use 'git rev-list ... | git diff-tree ...' to get revisions.
-  std::string range = cmStrCat(this->OldRevision, "..", this->NewRevision);
+  std::string range = cmStrCat(this->OldRevision, ".."_s, this->NewRevision);
   std::string git = this->CommandLineTool;
   std::vector<std::string> git_rev_list = { git, "rev-list", "--reverse",
                                             range, "--" };

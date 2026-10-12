@@ -86,7 +86,7 @@ void cmWIXPatchParser::StartFragment(char const** attributes)
     if (key == "Id"_s) {
       if (Fragments.find(value) != Fragments.end()) {
         ReportValidationError(
-          cmStrCat("Invalid reuse of 'CPackWixFragment' 'Id': ", value));
+          cmStrCat("Invalid reuse of 'CPackWixFragment' 'Id': "_s, value));
       }
 
       new_element = &Fragments[value];

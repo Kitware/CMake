@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
@@ -159,9 +160,9 @@ bool cmQtAutoRccT::InitFromInfo(InfoT const& info)
 
   // -- Checks
   if (!this->RccExecutableTime_.Load(this->RccExecutable_)) {
-    return info.LogError(cmStrCat("The rcc executable ",
+    return info.LogError(cmStrCat("The rcc executable "_s,
                                   this->MessagePath(this->RccExecutable_),
-                                  " does not exist."));
+                                  " does not exist."_s));
   }
 
   return true;
@@ -231,9 +232,9 @@ bool cmQtAutoRccT::SettingsFileRead()
     // Touch the settings file to make sure it exists
     if (!cmSystemTools::Touch(this->SettingsFile_, true)) {
       this->Log().Error(GenT::RCC,
-                        cmStrCat("Touching the settings file ",
+                        cmStrCat("Touching the settings file "_s,
                                  this->MessagePath(this->SettingsFile_),
-                                 " failed."));
+                                 " failed."_s));
       return false;
     }
   }
@@ -244,9 +245,9 @@ bool cmQtAutoRccT::SettingsFileRead()
     if (!cmSystemTools::FileExists(this->LockFile_, true)) {
       if (!cmSystemTools::Touch(this->LockFile_, true)) {
         this->Log().Error(GenT::RCC,
-                          cmStrCat("Touching the lock file ",
+                          cmStrCat("Touching the lock file "_s,
                                    this->MessagePath(this->LockFile_),
-                                   " failed."));
+                                   " failed."_s));
         return false;
       }
     }
@@ -255,9 +256,10 @@ bool cmQtAutoRccT::SettingsFileRead()
       this->LockFile_, static_cast<unsigned long>(-1));
     if (!lockResult.IsOk()) {
       this->Log().Error(GenT::RCC,
-                        cmStrCat("Locking of the lock file ",
+                        cmStrCat("Locking of the lock file "_s,
                                  this->MessagePath(this->LockFile_),
-                                 " failed.\n", lockResult.GetOutputMessage()));
+                                 " failed.\n"_s,
+                                 lockResult.GetOutputMessage()));
       return false;
     }
   }
@@ -275,9 +277,9 @@ bool cmQtAutoRccT::SettingsFileRead()
         std::string error;
         if (!FileWrite(this->SettingsFile_, "", &error)) {
           this->Log().Error(GenT::RCC,
-                            cmStrCat("Clearing of the settings file ",
+                            cmStrCat("Clearing of the settings file "_s,
                                      this->MessagePath(this->SettingsFile_),
-                                     " failed.\n", error));
+                                     " failed.\n"_s, error));
           return false;
         }
       }
@@ -299,13 +301,13 @@ bool cmQtAutoRccT::SettingsFileWrite()
                          this->MessagePath(this->SettingsFile_));
     }
     // Write settings file
-    std::string content = cmStrCat("rcc:", this->SettingsString_, '\n');
+    std::string content = cmStrCat("rcc:"_s, this->SettingsString_, '\n');
     std::string error;
     if (!FileWrite(this->SettingsFile_, content, &error)) {
       this->Log().Error(GenT::RCC,
-                        cmStrCat("Writing of the settings file ",
+                        cmStrCat("Writing of the settings file "_s,
                                  this->MessagePath(this->SettingsFile_),
-                                 " failed.\n", error));
+                                 " failed.\n"_s, error));
       // Remove old settings file to trigger a full rebuild on the next run
       cmSystemTools::RemoveFile(this->SettingsFile_);
       return false;
@@ -323,9 +325,9 @@ bool cmQtAutoRccT::TestQrcRccFiles(bool& generate)
   // Test if the rcc input file exists
   if (!this->QrcFileTime_.Load(this->QrcFile_)) {
     this->Log().Error(GenT::RCC,
-                      cmStrCat("The resources file ",
+                      cmStrCat("The resources file "_s,
                                this->MessagePath(this->QrcFile_),
-                               " does not exist"));
+                               " does not exist"_s));
     return false;
   }
 
@@ -333,8 +335,8 @@ bool cmQtAutoRccT::TestQrcRccFiles(bool& generate)
   if (!this->RccFileTime_.Load(this->RccFileOutput_)) {
     if (this->Log().Verbose()) {
       this->Reason =
-        cmStrCat("Generating ", this->MessagePath(this->RccFileOutput_),
-                 ", because it doesn't exist, from ",
+        cmStrCat("Generating "_s, this->MessagePath(this->RccFileOutput_),
+                 ", because it doesn't exist, from "_s,
                  this->MessagePath(this->QrcFile_));
     }
     generate = true;
@@ -345,8 +347,8 @@ bool cmQtAutoRccT::TestQrcRccFiles(bool& generate)
   if (this->SettingsChanged_) {
     if (this->Log().Verbose()) {
       this->Reason =
-        cmStrCat("Generating ", this->MessagePath(this->RccFileOutput_),
-                 ", because the rcc settings changed, from ",
+        cmStrCat("Generating "_s, this->MessagePath(this->RccFileOutput_),
+                 ", because the rcc settings changed, from "_s,
                  this->MessagePath(this->QrcFile_));
     }
     generate = true;
@@ -357,9 +359,9 @@ bool cmQtAutoRccT::TestQrcRccFiles(bool& generate)
   if (this->RccFileTime_.Older(this->QrcFileTime_)) {
     if (this->Log().Verbose()) {
       this->Reason = cmStrCat(
-        "Generating ", this->MessagePath(this->RccFileOutput_),
-        ", because it is older than ", this->MessagePath(this->QrcFile_),
-        ", from ", this->MessagePath(this->QrcFile_));
+        "Generating "_s, this->MessagePath(this->RccFileOutput_),
+        ", because it is older than "_s, this->MessagePath(this->QrcFile_),
+        ", from "_s, this->MessagePath(this->QrcFile_));
     }
     generate = true;
     return true;
@@ -369,8 +371,8 @@ bool cmQtAutoRccT::TestQrcRccFiles(bool& generate)
   if (this->RccFileTime_.Older(this->RccExecutableTime_)) {
     if (this->Log().Verbose()) {
       this->Reason =
-        cmStrCat("Generating ", this->MessagePath(this->RccFileOutput_),
-                 ", because it is older than the rcc executable, from ",
+        cmStrCat("Generating "_s, this->MessagePath(this->RccFileOutput_),
+                 ", because it is older than the rcc executable, from "_s,
                  this->MessagePath(this->QrcFile_));
     }
     generate = true;
@@ -389,9 +391,9 @@ bool cmQtAutoRccT::TestResources(bool& generate)
     if (!lister.list(this->QrcFile_, this->Inputs_, error,
                      this->Log().Verbose())) {
       this->Log().Error(GenT::RCC,
-                        cmStrCat("Listing of ",
+                        cmStrCat("Listing of "_s,
                                  this->MessagePath(this->QrcFile_),
-                                 " failed.\n", error));
+                                 " failed.\n"_s, error));
       return false;
     }
   }
@@ -402,19 +404,19 @@ bool cmQtAutoRccT::TestResources(bool& generate)
     cmFileTime fileTime;
     if (!fileTime.Load(resFile)) {
       this->Log().Error(GenT::RCC,
-                        cmStrCat("The resource file ",
-                                 this->MessagePath(resFile), " listed in ",
+                        cmStrCat("The resource file "_s,
+                                 this->MessagePath(resFile), " listed in "_s,
                                  this->MessagePath(this->QrcFile_),
-                                 " does not exist."));
+                                 " does not exist."_s));
       return false;
     }
     // Check if the resource file is newer than the rcc output file
     if (this->RccFileTime_.Older(fileTime)) {
       if (this->Log().Verbose()) {
         this->Reason =
-          cmStrCat("Generating ", this->MessagePath(this->RccFileOutput_),
-                   ", because it is older than ", this->MessagePath(resFile),
-                   ", from ", this->MessagePath(this->QrcFile_));
+          cmStrCat("Generating "_s, this->MessagePath(this->RccFileOutput_),
+                   ", because it is older than "_s, this->MessagePath(resFile),
+                   ", from "_s, this->MessagePath(this->QrcFile_));
       }
       generate = true;
       break;
@@ -429,17 +431,17 @@ bool cmQtAutoRccT::TestInfoFile()
   if (this->RccFileTime_.Older(this->InfoFileTime())) {
     if (this->Log().Verbose()) {
       this->Log().Info(GenT::RCC,
-                       cmStrCat("Touching ",
+                       cmStrCat("Touching "_s,
                                 this->MessagePath(this->RccFileOutput_),
-                                " because it is older than ",
+                                " because it is older than "_s,
                                 this->MessagePath(this->InfoFile())));
     }
     // Touch build file
     if (!cmSystemTools::Touch(this->RccFileOutput_, false)) {
       this->Log().Error(GenT::RCC,
-                        cmStrCat("Touching ",
+                        cmStrCat("Touching "_s,
                                  this->MessagePath(this->RccFileOutput_),
-                                 " failed."));
+                                 " failed."_s));
       return false;
     }
     this->BuildFileChanged_ = true;
@@ -453,7 +455,7 @@ bool cmQtAutoRccT::GenerateRcc()
   // Make parent directory
   if (!MakeParentDirectory(this->RccFileOutput_)) {
     this->Log().Error(GenT::RCC,
-                      cmStrCat("Could not create parent directory of ",
+                      cmStrCat("Could not create parent directory of "_s,
                                this->MessagePath(this->RccFileOutput_)));
     return false;
   }
@@ -482,12 +484,12 @@ bool cmQtAutoRccT::GenerateRcc()
     cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
   if (!result || (retVal != 0)) {
     // rcc process failed
-    this->Log().ErrorCommand(GenT::RCC,
-                             cmStrCat("The rcc process failed to compile\n  ",
-                                      this->MessagePath(this->QrcFile_),
-                                      "\ninto\n  ",
-                                      this->MessagePath(this->RccFileOutput_)),
-                             cmd, rccStdOut + rccStdErr);
+    this->Log().ErrorCommand(
+      GenT::RCC,
+      cmStrCat("The rcc process failed to compile\n  "_s,
+               this->MessagePath(this->QrcFile_), "\ninto\n  "_s,
+               this->MessagePath(this->RccFileOutput_)),
+      cmd, rccStdOut + rccStdErr);
     cmSystemTools::RemoveFile(this->RccFileOutput_);
     return false;
   }
@@ -510,8 +512,8 @@ bool cmQtAutoRccT::GenerateWrapper()
     std::string content =
       cmStrCat("// This is an autogenerated configuration wrapper file.\n"
                "// Changes will be overwritten.\n"
-               "#include <",
-               this->MultiConfigOutput(), ">\n");
+               "#include <"_s,
+               this->MultiConfigOutput(), ">\n"_s);
 
     // Compare with existing file content
     bool fileDiffers = true;
@@ -525,29 +527,29 @@ bool cmQtAutoRccT::GenerateWrapper()
       // Write new wrapper file
       if (this->Log().Verbose()) {
         this->Log().Info(GenT::RCC,
-                         cmStrCat("Generating RCC wrapper file ",
+                         cmStrCat("Generating RCC wrapper file "_s,
                                   this->MessagePath(this->RccFilePublic_)));
       }
       std::string error;
       if (!FileWrite(this->RccFilePublic_, content, &error)) {
         this->Log().Error(GenT::RCC,
-                          cmStrCat("Generating RCC wrapper file ",
+                          cmStrCat("Generating RCC wrapper file "_s,
                                    this->MessagePath(this->RccFilePublic_),
-                                   " failed.\n", error));
+                                   " failed.\n"_s, error));
         return false;
       }
     } else if (this->BuildFileChanged_) {
       // Just touch the wrapper file
       if (this->Log().Verbose()) {
         this->Log().Info(GenT::RCC,
-                         cmStrCat("Touching RCC wrapper file ",
+                         cmStrCat("Touching RCC wrapper file "_s,
                                   this->MessagePath(this->RccFilePublic_)));
       }
       if (!cmSystemTools::Touch(this->RccFilePublic_, false)) {
         this->Log().Error(GenT::RCC,
-                          cmStrCat("Touching RCC wrapper file ",
+                          cmStrCat("Touching RCC wrapper file "_s,
                                    this->MessagePath(this->RccFilePublic_),
-                                   " failed."));
+                                   " failed."_s));
         return false;
       }
     }

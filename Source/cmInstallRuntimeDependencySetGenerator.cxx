@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmDiagnosticContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmInstallGenerator.h"
@@ -105,7 +107,7 @@ void cmInstallRuntimeDependencySetGenerator::GenerateScriptForConfig(
         break;
     }
   } else {
-    std::string depVar = cmStrCat(this->TmpVarPrefix, "_dep");
+    std::string depVar = cmStrCat(this->TmpVarPrefix, "_dep"_s);
 
     this->AddInstallRule(
       os, this->GetDestination(config), cmInstallType_SHARED_LIBRARY, {},
@@ -156,7 +158,7 @@ void cmInstallRuntimeDependencySetGenerator::GenerateAppleLibraryScript(
   os << indent << "if(NOT " << this->TmpVarPrefix
      << "_dep MATCHES \"\\\\.framework/\")\n";
 
-  auto depName = cmStrCat(this->TmpVarPrefix, "_dep");
+  auto depName = cmStrCat(this->TmpVarPrefix, "_dep"_s);
   this->AddInstallRule(
     os, this->GetDestination(config), cmInstallType_SHARED_LIBRARY, {}, false,
     this->Permissions.c_str(), nullptr, nullptr, " FOLLOW_SYMLINK_CHAIN",
@@ -164,10 +166,11 @@ void cmInstallRuntimeDependencySetGenerator::GenerateAppleLibraryScript(
 
   os << indent.Next() << "get_filename_component(" << this->TmpVarPrefix
      << "_dep_name \"${" << this->TmpVarPrefix << "_dep}\" NAME)\n";
-  auto depNameVar = cmStrCat("${", this->TmpVarPrefix, "_dep_name}");
-  this->GenerateInstallNameFixup(os, config, evaluatedRPaths,
-                                 cmStrCat("${", this->TmpVarPrefix, "_dep}"),
-                                 depNameVar, indent.Next());
+  auto depNameVar = cmStrCat("${"_s, this->TmpVarPrefix, "_dep_name}"_s);
+  this->GenerateInstallNameFixup(
+    os, config, evaluatedRPaths,
+    cmStrCat("${"_s, this->TmpVarPrefix, "_dep}"_s), depNameVar,
+    indent.Next());
 
   os << indent << "endif()\n";
 }
@@ -187,17 +190,18 @@ void cmInstallRuntimeDependencySetGenerator::GenerateAppleFrameworkScript(
      << indent.Next() << "set(" << this->TmpVarPrefix << "_path \"${"
      << this->TmpVarPrefix << "_dir}${" << this->TmpVarPrefix << "_name}\")\n";
 
-  auto depName = cmStrCat(this->TmpVarPrefix, "_path");
+  auto depName = cmStrCat(this->TmpVarPrefix, "_path"_s);
   this->AddInstallRule(
     os, this->GetDestination(config), cmInstallType_DIRECTORY, {}, false,
     this->Permissions.c_str(), nullptr, nullptr, " USE_SOURCE_PERMISSIONS",
     indent.Next(), depName.c_str());
 
-  auto depNameVar = cmStrCat("${", this->TmpVarPrefix, "_name}/${",
-                             this->TmpVarPrefix, "_file}");
-  this->GenerateInstallNameFixup(os, config, evaluatedRPaths,
-                                 cmStrCat("${", this->TmpVarPrefix, "_dep}"),
-                                 depNameVar, indent.Next());
+  auto depNameVar = cmStrCat("${"_s, this->TmpVarPrefix, "_name}/${"_s,
+                             this->TmpVarPrefix, "_file}"_s);
+  this->GenerateInstallNameFixup(
+    os, config, evaluatedRPaths,
+    cmStrCat("${"_s, this->TmpVarPrefix, "_dep}"_s), depNameVar,
+    indent.Next());
 
   os << indent << "endif()\n";
 }

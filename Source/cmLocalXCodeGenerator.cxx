@@ -6,6 +6,8 @@
 #include <ostream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalXCodeGenerator.h"
@@ -31,7 +33,7 @@ std::string cmLocalXCodeGenerator::GetTargetDirectory(
   cmGeneratorTarget const* target,
   cmStateEnums::IntermediateDirKind /*kind*/) const
 {
-  return cmStrCat(target->GetName(), ".dir");
+  return cmStrCat(target->GetName(), ".dir"_s);
 }
 
 void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
@@ -133,7 +135,7 @@ void cmLocalXCodeGenerator::ComputeObjectFilenames(
     cmSourceFile const* sf = si.first;
     std::string shortObjectName = this->GetShortObjectFileName(*sf);
     std::string longObjectName = cmStrCat(
-      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()), ".o");
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()), ".o"_s);
 
     std::string longObjectNameLower = cmSystemTools::LowerCase(longObjectName);
     counts[longObjectNameLower] += 1;

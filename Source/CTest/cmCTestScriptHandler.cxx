@@ -8,6 +8,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
@@ -82,7 +83,7 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
   argv.push_back(total_script_arg);
 
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-             "Executable for CTest is: ", cmSystemTools::GetCTestCommand(),
+             "Executable for CTest is: "_s, cmSystemTools::GetCTestCommand(),
              '\n');
 
   // now pass through all the other arguments
@@ -112,7 +113,7 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
   while ((pipe = cmSystemTools::WaitForLine(
             &process.GetLoop(), process.OutputStream(), process.ErrorStream(),
             line, out, err)) != cmSystemTools::WaitForLineResult::None) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: ", line, '\n');
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: "_s, line, '\n');
     if (pipe == cmSystemTools::WaitForLineResult::STDERR) {
       cmCTestLog(this->CTest, ERROR_MESSAGE, line, '\n');
     } else if (pipe == cmSystemTools::WaitForLineResult::STDOUT) {
@@ -131,21 +132,20 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
       retVal = static_cast<int>(status.ExitStatus);
       break;
     case cmUVProcessChain::ExceptionCode::Spawn:
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tError executing ctest: ", result.second, '\n');
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "\tError executing ctest: "_s,
+                 result.second, '\n');
       failed = true;
       break;
     default:
       retVal = status.TermSignal;
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tThere was an exception: ", result.second, ' ', retVal,
-                 '\n');
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "\tThere was an exception: "_s,
+                 result.second, ' ', retVal, '\n');
       failed = true;
   }
   if (failed) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error running command: [",
-               static_cast<int>(result.first), "] ", cmWrap("", argv, " ", ""),
-               '\n');
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error running command: ["_s,
+               static_cast<int>(result.first), "] "_s,
+               cmWrap("", argv, " ", ""), '\n');
     return -1;
   }
   return retVal;
@@ -174,7 +174,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->CMake->SetProgressCallback(
     [this](std::string const& m, float /*unused*/) {
       if (!m.empty()) {
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "-- ", m, '\n');
+        cmCTestLog(this->CTest, HANDLER_OUTPUT, "-- "_s, m, '\n');
       }
     });
 
@@ -264,7 +264,8 @@ int cmCTestScriptHandler::ReadInScript(std::string const& total_script_arg)
     this->Makefile->GetModulesFile("CTestScriptMode.cmake");
   if (!this->Makefile->ReadListFile(systemFile) ||
       cmSystemTools::GetErrorOccurredFlag()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:", systemFile, '\n');
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:"_s, systemFile,
+               '\n');
     return -1;
   }
 
@@ -303,12 +304,12 @@ int cmCTestScriptHandler::RunConfigurationScript(
 
   // read in the script
   if (pscope) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-               "Reading Script: ", total_script_arg, '\n');
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Reading Script: "_s,
+               total_script_arg, '\n');
     result = this->ReadInScript(total_script_arg);
   } else {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-               "Executing Script: ", total_script_arg, '\n');
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Executing Script: "_s,
+               total_script_arg, '\n');
     result = this->ExecuteScript(total_script_arg);
   }
 

@@ -76,7 +76,7 @@ bool cmSetSourceFilesPropertiesCommand(std::vector<std::string> const& args,
       source_file_target_directories.push_back(*options_it);
     } else {
       status.SetError(
-        cmStrCat("given invalid argument \"", *options_it, "\"."));
+        cmStrCat("given invalid argument \""_s, *options_it, "\"."_s));
     }
   }
 

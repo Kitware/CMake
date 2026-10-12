@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 
@@ -61,8 +63,8 @@ void cmParseCacheCoverage::RemoveUnCoveredFiles()
     }
     if (nothing) {
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         this->Coverage.Quiet,
-                         "No coverage found in: ", ci->first, '\n');
+                         this->Coverage.Quiet, "No coverage found in: "_s,
+                         ci->first, '\n');
       this->Coverage.TotalCoverage.erase(ci++);
     } else {
       ++ci;
@@ -74,15 +76,15 @@ bool cmParseCacheCoverage::ReadCMCovFile(char const* file)
 {
   cmsys::ifstream in(file);
   if (!in) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Can not open : ", file, '\n');
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Can not open : "_s, file, '\n');
     return false;
   }
   std::string line;
   if (!cmSystemTools::GetLineFromStream(in, line)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Empty file : ", file,
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Empty file : "_s, file,
                "  referenced in this line of cmcov data:\n"
-               "[",
-               line, "]\n");
+               "["_s,
+               line, "]\n"_s);
     return false;
   }
   std::vector<std::string> separateLine =
@@ -90,11 +92,11 @@ bool cmParseCacheCoverage::ReadCMCovFile(char const* file)
   if (separateLine.size() != 4 || separateLine[0] != "Routine" ||
       separateLine[1] != "Line" || separateLine[2] != "RtnLine" ||
       separateLine[3] != "Code") {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Bad first line of cmcov file : ", file,
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Bad first line of cmcov file : "_s,
+               file,
                "  line:\n"
-               "[",
-               line, "]\n");
+               "["_s,
+               line, "]\n"_s);
   }
   std::string routine;
   std::string filepath;
@@ -105,11 +107,11 @@ bool cmParseCacheCoverage::ReadCMCovFile(char const* file)
     // but we only care about the first 3 args anyway
     if (separateLine.size() < 4) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Bad line of cmcov file expected at least 4 found: ",
+                 "Bad line of cmcov file expected at least 4 found: "_s,
                  separateLine.size(), ' ', file,
                  "  line:\n"
-                 "[",
-                 line, "]\n");
+                 "["_s,
+                 line, "]\n"_s);
       for (std::string const& l : separateLine) {
         cmCTestLog(this->CTest, ERROR_MESSAGE, l, ' ');
       }
@@ -123,7 +125,7 @@ bool cmParseCacheCoverage::ReadCMCovFile(char const* file)
       // Find the full path to the file
       if (!this->FindMumpsFile(routine, filepath)) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Could not find mumps file for routine: ", routine, '\n');
+                   "Could not find mumps file for routine: "_s, routine, '\n');
         filepath.clear();
         continue; // move to next line
       }
@@ -150,9 +152,10 @@ bool cmParseCacheCoverage::ReadCMCovFile(char const* file)
     std::string::size_type linenumber = atoi(separateLine[1].c_str()) - 1;
     int count = atoi(separateLine[2].c_str());
     if (linenumber > coverageVector.size()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Parse error line is greater than number of lines in file: ",
-                 linenumber, ' ', filepath, '\n');
+      cmCTestLog(
+        this->CTest, ERROR_MESSAGE,
+        "Parse error line is greater than number of lines in file: "_s,
+        linenumber, ' ', filepath, '\n');
       continue; // skip setting count to avoid crash
     }
     // now add to count for linenumber

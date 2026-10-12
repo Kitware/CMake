@@ -5,6 +5,8 @@
 
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
@@ -54,8 +56,8 @@ bool cmStringReplaceHelper::Replace(cm::string_view input, std::string& output)
         auto n = replacement.Number;
         if (n > re.num_groups()) {
           this->ErrorString =
-            cmStrCat("replace expression \"", this->ReplaceExpression,
-                     "\" contains an out-of-range escape for regex \"",
+            cmStrCat("replace expression \""_s, this->ReplaceExpression,
+                     "\" contains an out-of-range escape for regex \""_s,
                      this->RegExString, '"');
           return false;
         }
@@ -111,8 +113,8 @@ void cmStringReplaceHelper::ParseReplaceExpression()
       } else {
         this->ValidReplaceExpression = false;
         this->ErrorString =
-          cmStrCat("Unknown escape \"", this->ReplaceExpression.substr(r, 2),
-                   "\" in replace-expression");
+          cmStrCat("Unknown escape \""_s, this->ReplaceExpression.substr(r, 2),
+                   "\" in replace-expression"_s);
         return;
       }
       r += 2;

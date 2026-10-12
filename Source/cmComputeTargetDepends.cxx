@@ -9,6 +9,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -370,8 +372,9 @@ void cmComputeTargetDepends::AddTargetDepend(size_t depender_index,
       (depender->GetType() != cm::TargetType::GLOBAL_TARGET)) {
     this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("The dependency target \"", dependee_name.AsStr(),
-               "\" of target \"", depender->GetName(), "\" does not exist."),
+      cmStrCat("The dependency target \""_s, dependee_name.AsStr(),
+               "\" of target \""_s, depender->GetName(),
+               "\" does not exist."_s),
       dependee_name.Backtrace);
   }
 

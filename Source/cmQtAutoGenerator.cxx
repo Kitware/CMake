@@ -5,6 +5,8 @@
 #include <iterator>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include <cm3p/json/reader.h>
 
 #include "cmsys/FStream.hxx"
@@ -60,7 +62,7 @@ std::string cmQtAutoGenerator::Logger::HeadLine(cm::string_view title)
 void cmQtAutoGenerator::Logger::Info(GenT genType,
                                      cm::string_view message) const
 {
-  std::string msg = cmStrCat(GeneratorName(genType), ": ", message,
+  std::string msg = cmStrCat(GeneratorName(genType), ": "_s, message,
                              cmHasSuffix(message, '\n') ? "" : "\n");
   {
     std::lock_guard<std::mutex> lock(this->Mutex_);
@@ -74,11 +76,11 @@ void cmQtAutoGenerator::Logger::Warning(GenT genType,
   std::string msg;
   if (message.find('\n') == std::string::npos) {
     // Single line message
-    msg = cmStrCat(GeneratorName(genType), " warning: ", message,
+    msg = cmStrCat(GeneratorName(genType), " warning: "_s, message,
                    cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   } else {
     // Multi line message
-    msg = cmStrCat(HeadLine(cmStrCat(GeneratorName(genType), " warning")),
+    msg = cmStrCat(HeadLine(cmStrCat(GeneratorName(genType), " warning"_s)),
                    message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   }
   {
@@ -91,7 +93,7 @@ void cmQtAutoGenerator::Logger::Error(GenT genType,
                                       cm::string_view message) const
 {
   std::string msg =
-    cmStrCat('\n', HeadLine(cmStrCat(GeneratorName(genType), " error")),
+    cmStrCat('\n', HeadLine(cmStrCat(GeneratorName(genType), " error"_s)),
              message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   {
     std::lock_guard<std::mutex> lock(this->Mutex_);
@@ -104,10 +106,10 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
   std::vector<std::string> const& command, std::string const& output) const
 {
   std::string msg = cmStrCat(
-    '\n', HeadLine(cmStrCat(GeneratorName(genType), " subprocess error")),
+    '\n', HeadLine(cmStrCat(GeneratorName(genType), " subprocess error"_s)),
     message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   msg = cmStrCat(std::move(msg), HeadLine("Command"), QuotedCommand(command),
-                 "\n\n");
+                 "\n\n"_s);
   msg = cmStrCat(std::move(msg), HeadLine("Output"), output,
                  cmHasSuffix(output, '\n') ? "\n" : "\n\n");
   {
@@ -277,12 +279,12 @@ bool cmQtAutoGenerator::InfoT::GetString(std::string const& key,
   Json::Value const& jval = this->Json_[key];
   if (!jval.isString()) {
     if (!jval.isNull() || required) {
-      return this->LogError(cmStrCat(key, " is not a string."));
+      return this->LogError(cmStrCat(key, " is not a string."_s));
     }
   } else {
     value = jval.asString();
     if (value.empty() && required) {
-      return this->LogError(cmStrCat(key, " is empty."));
+      return this->LogError(cmStrCat(key, " is empty."_s));
     }
   }
   return true;
@@ -297,11 +299,11 @@ bool cmQtAutoGenerator::InfoT::GetStringConfig(std::string const& key,
     Json::Value const& jval = this->Json_[configKey];
     if (!jval.isNull()) {
       if (!jval.isString()) {
-        return this->LogError(cmStrCat(configKey, " is not a string."));
+        return this->LogError(cmStrCat(configKey, " is not a string."_s));
       }
       value = jval.asString();
       if (required && value.empty()) {
-        return this->LogError(cmStrCat(configKey, " is empty."));
+        return this->LogError(cmStrCat(configKey, " is empty."_s));
       }
       return true;
     }
@@ -318,7 +320,7 @@ bool cmQtAutoGenerator::InfoT::GetBool(std::string const& key, bool& value,
     value = jval.asBool();
   } else {
     if (!jval.isNull() || required) {
-      return this->LogError(cmStrCat(key, " is not a boolean."));
+      return this->LogError(cmStrCat(key, " is not a boolean."_s));
     }
   }
   return true;
@@ -333,7 +335,7 @@ bool cmQtAutoGenerator::InfoT::GetUInt(std::string const& key,
     value = jval.asUInt();
   } else {
     if (!jval.isNull() || required) {
-      return this->LogError(cmStrCat(key, " is not an unsigned integer."));
+      return this->LogError(cmStrCat(key, " is not an unsigned integer."_s));
     }
   }
   return true;
@@ -346,7 +348,7 @@ bool cmQtAutoGenerator::InfoT::GetArray(std::string const& key,
   Json::Value const& jval = this->Json_[key];
   if (!jval.isArray()) {
     if (!jval.isNull() || required) {
-      return this->LogError(cmStrCat(key, " is not an array."));
+      return this->LogError(cmStrCat(key, " is not an array."_s));
     }
   }
   return GetJsonArray(list, jval) || !required;
@@ -359,7 +361,7 @@ bool cmQtAutoGenerator::InfoT::GetArray(std::string const& key,
   Json::Value const& jval = this->Json_[key];
   if (!jval.isArray()) {
     if (!jval.isNull() || required) {
-      return this->LogError(cmStrCat(key, " is not an array."));
+      return this->LogError(cmStrCat(key, " is not an array."_s));
     }
   }
   return GetJsonArray(list, jval) || !required;
@@ -374,10 +376,11 @@ bool cmQtAutoGenerator::InfoT::GetArrayConfig(std::string const& key,
     Json::Value const& jval = this->Json_[configKey];
     if (!jval.isNull()) {
       if (!jval.isArray()) {
-        return this->LogError(cmStrCat(configKey, " is not an array string."));
+        return this->LogError(
+          cmStrCat(configKey, " is not an array string."_s));
       }
       if (!GetJsonArray(list, jval) && required) {
-        return this->LogError(cmStrCat(configKey, " is empty."));
+        return this->LogError(cmStrCat(configKey, " is empty."_s));
       }
       return true;
     }
@@ -390,8 +393,8 @@ bool cmQtAutoGenerator::InfoT::LogError(GenT genType,
                                         cm::string_view message) const
 {
   this->Gen_.Log().Error(genType,
-                         cmStrCat("Info error in info file\n",
-                                  Quoted(this->Gen_.InfoFile()), ":\n",
+                         cmStrCat("Info error in info file\n"_s,
+                                  Quoted(this->Gen_.InfoFile()), ":\n"_s,
                                   message));
   return false;
 }
@@ -423,9 +426,9 @@ std::string cmQtAutoGenerator::MessagePath(cm::string_view path) const
 {
   std::string res;
   if (cmHasPrefix(path, this->ProjectDirs().Source)) {
-    res = cmStrCat("SRC:", path.substr(this->ProjectDirs().Source.size()));
+    res = cmStrCat("SRC:"_s, path.substr(this->ProjectDirs().Source.size()));
   } else if (cmHasPrefix(path, this->ProjectDirs().Binary)) {
-    res = cmStrCat("BIN:", path.substr(this->ProjectDirs().Binary.size()));
+    res = cmStrCat("BIN:"_s, path.substr(this->ProjectDirs().Binary.size()));
   } else {
     res = std::string(path);
   }
@@ -445,9 +448,9 @@ bool cmQtAutoGenerator::Run(cm::string_view infoFile, cm::string_view config,
 
   // Load info file time
   if (!this->InfoFileTime_.Load(this->InfoFile_)) {
-    cmSystemTools::Stderr(cmStrCat("AutoGen: The info file ",
+    cmSystemTools::Stderr(cmStrCat("AutoGen: The info file "_s,
                                    Quoted(this->InfoFile_),
-                                   " is not readable\n"));
+                                   " is not readable\n"_s));
     return false;
   }
 
@@ -461,13 +464,13 @@ bool cmQtAutoGenerator::Run(cm::string_view infoFile, cm::string_view config,
       if (!ifs) {
         this->Log().Error(
           this->GenType_,
-          cmStrCat("Could not to open info file ", Quoted(this->InfoFile_)));
+          cmStrCat("Could not to open info file "_s, Quoted(this->InfoFile_)));
         return false;
       }
       if (!info.Read(ifs)) {
         this->Log().Error(
           this->GenType_,
-          cmStrCat("Could not read info file ", Quoted(this->InfoFile_)));
+          cmStrCat("Could not read info file "_s, Quoted(this->InfoFile_)));
         return false;
       }
     }

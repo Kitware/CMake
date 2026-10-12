@@ -12,6 +12,7 @@
 
 #include <cm/memory>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/kwiml/abi.h>
 
@@ -452,7 +453,7 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
         this->ELFType = cmELF::FileTypeSpecificProc;
         break;
       }
-      this->SetErrorMessage(cmStrCat("Unknown ELF file type ", eti).c_str());
+      this->SetErrorMessage(cmStrCat("Unknown ELF file type "_s, eti).c_str());
       return;
     }
   }

@@ -8,6 +8,8 @@
 #include <memory>
 #include <sstream>
 
+#include <cmext/string_view>
+
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 #include <cm3p/json/version.h>
@@ -23,7 +25,7 @@ cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root,
 {
   cmsys::ifstream fin(this->Filename.c_str(), std::ios::in | std::ios::binary);
   if (!fin) {
-    this->AddError(cmStrCat("File not found: ", this->Filename));
+    this->AddError(cmStrCat("File not found: "_s, this->Filename));
     return;
   }
 
@@ -71,7 +73,7 @@ std::string cmJSONState::GetErrorMessage(bool showContext)
     Location loc = error.GetLocation();
     if (!filenameName.empty() && loc.line > 0) {
       message =
-        cmStrCat(std::move(message), filenameName, ':', loc.line, ": ");
+        cmStrCat(std::move(message), filenameName, ':', loc.line, ": "_s);
     }
     message = cmStrCat(std::move(message), error.GetErrorMessage(), '\n');
     if (showContext && loc.line > 0) {
@@ -174,9 +176,10 @@ void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root,
 #  if JSON_USE_EXCEPTION
   } catch (Json::Exception const& e) {
     if (this->Filename.empty()) {
-      errMsg = cmStrCat("JSON Parse Error:\n ", e.what());
+      errMsg = cmStrCat("JSON Parse Error:\n "_s, e.what());
     } else {
-      errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n", e.what());
+      errMsg =
+        cmStrCat("JSON Parse Error: "_s, this->Filename, ":\n"_s, e.what());
     }
     this->AddError(errMsg);
   }
@@ -185,9 +188,9 @@ void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root,
   // No StructuredError Available, Use error string from jsonCpp
   if (!Json::parseFromStream(builder, jsonIStream, root, &errMsg)) {
     if (this->Filename.empty()) {
-      errMsg = cmStrCat("JSON Parse Error:\n ", std::move(errMsg));
+      errMsg = cmStrCat("JSON Parse Error:\n "_s, std::move(errMsg));
     } else {
-      errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n",
+      errMsg = cmStrCat("JSON Parse Error: "_s, this->Filename, ":\n"_s,
                         std::move(errMsg));
     }
     this->AddError(errMsg);

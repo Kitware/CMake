@@ -395,7 +395,7 @@ std::map<std::string, std::string> GetOSReleaseVariables(
   cmsys::Glob gl;
   std::vector<std::string> scripts;
   auto const findExpr = cmStrCat(cmSystemTools::GetCMakeRoot(),
-                                 "/Modules/Internal/OSRelease/*.cmake");
+                                 "/Modules/Internal/OSRelease/*.cmake"_s);
   if (gl.FindFiles(findExpr)) {
     scripts = gl.GetFiles();
   }
@@ -538,7 +538,7 @@ std::string FindMSYSTEM_PREFIX(std::vector<std::string> prefixes)
       // In a legacy MSYSTEM environment (MinGW/MSYS 1.0) there is no
       // cygpath but we expect 'sh' to be in PATH.
       std::vector<std::string> sh_cmd{
-        "sh", "-c", cmStrCat("cd \"", prefix, "\" && cmd //c cd")
+        "sh", "-c", cmStrCat("cd \""_s, prefix, "\" && cmd //c cd"_s)
       };
       if (cmSystemTools::RunSingleCommand(sh_cmd, &out, &err, &ret, nullptr,
                                           cmSystemTools::OUTPUT_NONE)) {
@@ -696,8 +696,8 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
 
   Arguments const arguments = parser.Parse(args.advance(1), &invalidArgs);
   if (!invalidArgs.empty()) {
-    status.SetError(cmStrCat("given invalid argument(s) \"",
-                             cmJoin(invalidArgs, ", "_s), "\"."));
+    status.SetError(cmStrCat("given invalid argument(s) \""_s,
+                             cmJoin(invalidArgs, ", "_s), "\"."_s));
     return false;
   }
   if (arguments.MaybeReportError(status.GetMakefile())) {
@@ -714,7 +714,7 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
 
   if (!arguments.View.empty() && !cmWindowsRegistry::ToView(arguments.View)) {
     status.SetError(
-      cmStrCat("given invalid value for VIEW: ", arguments.View, '.'));
+      cmStrCat("given invalid value for VIEW: "_s, arguments.View, '.'));
     return false;
   }
 
@@ -809,8 +809,8 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     } else if (cmIsOff(value)) {
       mode = SysrootMode::Host;
     } else {
-      status.SetError(cmStrCat("FROM_SYSROOT requires a boolean value, got \"",
-                               value, "\"."));
+      status.SetError(cmStrCat(
+        "FROM_SYSROOT requires a boolean value, got \""_s, value, "\"."_s));
       return false;
     }
   }

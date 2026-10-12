@@ -13,6 +13,7 @@
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -592,7 +593,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       cmsys::RegularExpression regEntry;
       if (!regEntry.compile(rex)) {
         errorString =
-          cmStrCat("Regular expression \"", rex, "\" cannot compile");
+          cmStrCat("Regular expression \""_s, rex, "\" cannot compile"_s);
         status = MessageType::FATAL_ERROR;
         return false;
       }

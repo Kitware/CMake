@@ -10,6 +10,7 @@
 
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/json/value.h>
 #include <cm3p/uv.h>
@@ -229,7 +230,7 @@ std::string cmCTestBuildHandler::GetMakeCommand()
 {
   std::string makeCommand = this->CTest->GetCTestConfiguration("MakeCommand");
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
-                     "MakeCommand:", makeCommand, '\n');
+                     "MakeCommand:"_s, makeCommand, '\n');
 
   std::string configType = this->CTest->GetConfigType();
   if (configType.empty()) {
@@ -251,7 +252,7 @@ std::string cmCTestBuildHandler::GetMakeCommand()
 int cmCTestBuildHandler::ProcessHandler()
 {
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
-                     "Build project\n");
+                     "Build project\n"_s);
 
   // do we have time for this
   if (this->CTest->GetRemainingTimeAllowed() < std::chrono::minutes(2)) {
@@ -269,7 +270,7 @@ int cmCTestBuildHandler::ProcessHandler()
       this->ErrorWarningFileLineRegex.push_back(std::move(r));
     } else {
       cmCTestLog(
-        this->CTest, ERROR_MESSAGE, "Problem Compiling regular expression: ",
+        this->CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "_s,
         cmCTestWarningErrorFileLine[entry].RegularExpressionString, '\n');
     }
   }
@@ -278,7 +279,7 @@ int cmCTestBuildHandler::ProcessHandler()
   std::string makeCommand = this->GetMakeCommand();
   if (makeCommand.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot find MakeCommand key in the DartConfiguration.tcl\n");
+               "Cannot find MakeCommand key in the DartConfiguration.tcl\n"_s);
     return -1;
   }
 
@@ -287,7 +288,7 @@ int cmCTestBuildHandler::ProcessHandler()
   if (buildDirectory.empty()) {
     cmCTestLog(
       this->CTest, ERROR_MESSAGE,
-      "Cannot find BuildDirectory  key in the DartConfiguration.tcl\n");
+      "Cannot find BuildDirectory  key in the DartConfiguration.tcl\n"_s);
     return -1;
   }
 
@@ -299,7 +300,7 @@ int cmCTestBuildHandler::ProcessHandler()
   cmGeneratedFileStream ofs;
   auto elapsed_time_start = std::chrono::steady_clock::now();
   if (!this->StartLogFile("Build", ofs)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create build log file\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create build log file\n"_s);
   }
 
   this->LogFileName = ofs.GetTempName();
@@ -384,7 +385,7 @@ int cmCTestBuildHandler::ProcessHandler()
                                ofs);
   } else {
     cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
-                       "Build with command: ", makeCommand, '\n');
+                       "Build with command: "_s, makeCommand, '\n');
   }
 
   // Remember end build time and calculate elapsed time
@@ -419,7 +420,7 @@ int cmCTestBuildHandler::ProcessHandler()
   // Generate XML output
   cmGeneratedFileStream xofs;
   if (!this->StartResultingXML(cmCTest::PartBuild, "Build", xofs)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create build XML file\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create build XML file\n"_s);
     return -1;
   }
   cmXMLWriter xml(xofs);
@@ -437,16 +438,17 @@ int cmCTestBuildHandler::ProcessHandler()
   this->GenerateXMLFooter(xml, elapsed_build_time);
 
   if (!res || retVal || this->TotalErrors > 0) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error(s) when building project\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Error(s) when building project\n"_s);
   }
 
   // Display message about number of errors and warnings
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   ", this->TotalErrors,
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   "_s, this->TotalErrors,
              (this->TotalErrors >= this->MaxErrors ? " or more" : ""),
-             " Compiler errors\n");
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   ", this->TotalWarnings,
+             " Compiler errors\n"_s);
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   "_s, this->TotalWarnings,
              (this->TotalWarnings >= this->MaxWarnings ? " or more" : ""),
-             " Compiler warnings\n");
+             " Compiler warnings\n"_s);
 
   return retVal;
 }
@@ -609,7 +611,7 @@ void cmCTestBuildHandler::GenerateInstrumentationXML(cmXMLWriter& xml)
   // Record instrumentation data on a per-target basis.
   cmsys::Directory targets_dir;
   std::string targets_snippet_dir = cmStrCat(
-    this->CTest->GetInstrumentation().GetCDashDir(), "/build/targets");
+    this->CTest->GetInstrumentation().GetCDashDir(), "/build/targets"_s);
   if (targets_dir.Load(targets_snippet_dir) &&
       targets_dir.GetNumberOfFiles() > 0) {
     xml.StartElement("Targets");
@@ -628,7 +630,7 @@ void cmCTestBuildHandler::GenerateInstrumentationXML(cmXMLWriter& xml)
       // Load latest CMake content file
       Json::Value target_data;
       std::string cmake_content_file =
-        cmStrCat(CTest->GetInstrumentation().GetDataDir(), "/content/",
+        cmStrCat(CTest->GetInstrumentation().GetDataDir(), "/content/"_s,
                  this->CTest->GetInstrumentation().GetFileByTimestamp(
                    cmInstrumentation::LatestOrOldest::Latest, "content"));
       if (!cmake_content_file.empty() &&
@@ -663,7 +665,7 @@ void cmCTestBuildHandler::GenerateInstrumentationXML(cmXMLWriter& xml)
       }
 
       // Write instrumendation data for this target.
-      std::string target_subdir = cmStrCat("build/targets/", target_name);
+      std::string target_subdir = cmStrCat("build/targets/"_s, target_name);
       this->CTest->ConvertInstrumentationSnippetsToXML(xml, target_subdir);
       std::string target_dir_fullpath = cmStrCat(
         this->CTest->GetInstrumentation().GetCDashDir(), '/', target_subdir);
@@ -745,7 +747,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler)
   } else {
     // Compute a directory in which to store launcher fragments.
     std::string& launchDir = this->Handler->CTestLaunchDir;
-    launchDir = cmStrCat(this->CTest->GetOutputDir(), '/', tag, "/Build");
+    launchDir = cmStrCat(this->CTest->GetOutputDir(), '/', tag, "/Build"_s);
 
     // Clean out any existing launcher fragments.
     cmSystemTools::RemoveADirectory(launchDir);
@@ -754,7 +756,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler)
       // Enable launcher fragments.
       cmSystemTools::MakeDirectory(launchDir);
       this->WriteLauncherConfig();
-      std::string launchEnv = cmStrCat("CTEST_LAUNCH_LOGS=", launchDir);
+      std::string launchEnv = cmStrCat("CTEST_LAUNCH_LOGS="_s, launchDir);
       cmSystemTools::PutEnv(launchEnv);
     }
   }
@@ -781,7 +783,7 @@ void cmCTestBuildHandler::LaunchHelper::WriteLauncherConfig()
 
   // Give some testing configuration information to the launcher.
   std::string fname =
-    cmStrCat(this->Handler->CTestLaunchDir, "/CTestLaunchConfig.cmake");
+    cmStrCat(this->Handler->CTestLaunchDir, "/CTestLaunchConfig.cmake"_s);
   cmGeneratedFileStream fout(fname);
   std::string srcdir = this->CTest->GetCTestConfiguration("SourceDirectory");
   fout << "set(CTEST_SOURCE_DIRECTORY \"" << srcdir << "\")\n";
@@ -794,7 +796,7 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
     return;
   }
   std::string fname =
-    cmStrCat(this->Handler->CTestLaunchDir, "/Custom", purpose, ".txt");
+    cmStrCat(this->Handler->CTestLaunchDir, "/Custom"_s, purpose, ".txt"_s);
   cmGeneratedFileStream fout(fname);
   for (std::string const& m : matchers) {
     fout << m << "\n";
@@ -814,10 +816,10 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
-                     "Run command:");
+                     "Run command:"_s);
   for (auto const& arg : args) {
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, " \"",
-                       arg, '"');
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                       " \""_s, arg, '"');
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet, '\n');
 
@@ -842,10 +844,10 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
   cmProcessOutput processOutput(encoding);
   cmCTestOptionalLog(
     this->CTest, HANDLER_PROGRESS_OUTPUT, this->Quiet,
-    "   Each symbol represents ", tick_len, " bytes of output.\n",
+    "   Each symbol represents "_s, tick_len, " bytes of output.\n"_s,
     (this->UseCTestLaunch ? ""
                           : "   '!' represents an error and '*' a warning.\n"),
-    "    ");
+    "    "_s);
 
   // Initialize building structures
   this->BuildProcessingQueue.clear();
@@ -916,9 +918,9 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
                       &this->BuildProcessingQueue);
   this->ProcessBuffer(nullptr, 0, tick, tick_len, ofs,
                       &this->BuildProcessingErrorQueue);
-  cmCTestOptionalLog(
-    this->CTest, HANDLER_PROGRESS_OUTPUT, this->Quiet,
-    " Size of output: ", ((this->BuildOutputLogSize + 512) / 1024), "K\n");
+  cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, this->Quiet,
+                     " Size of output: "_s,
+                     ((this->BuildOutputLogSize + 512) / 1024), "K\n"_s);
 
   if (chain.Finished()) {
     auto const& status = chain.GetStatus(0);
@@ -928,7 +930,8 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
         if (retVal) {
           *retVal = static_cast<int>(status.ExitStatus);
           cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
-                             "Command exited with the value: ", *retVal, '\n');
+                             "Command exited with the value: "_s, *retVal,
+                             '\n');
           // if a non zero return value
           if (*retVal) {
             // If there was an error running command, report that on the
@@ -963,8 +966,9 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
               cmCTestBuildErrorWarning errorwarning;
               errorwarning.LineNumber = 0;
               errorwarning.LogLine = 1;
-              errorwarning.Text = cmStrCat(
-                "*** WARNING non-zero return value in ctest from: ", args[0]);
+              errorwarning.Text =
+                cmStrCat("*** WARNING non-zero return value in ctest from: "_s,
+                         args[0]);
               errorwarning.PreContext.clear();
               errorwarning.PostContext.clear();
               errorwarning.Error = false;
@@ -980,27 +984,27 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
         errorwarning.LineNumber = 0;
         errorwarning.LogLine = 1;
         errorwarning.Text =
-          cmStrCat("*** ERROR executing: ", exception.second);
+          cmStrCat("*** ERROR executing: "_s, exception.second);
         errorwarning.PreContext.clear();
         errorwarning.PostContext.clear();
         errorwarning.Error = true;
         this->ErrorsAndWarnings.push_back(std::move(errorwarning));
         this->TotalErrors++;
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "There was an error: ", exception.second, '\n');
+        cmCTestLog(this->CTest, ERROR_MESSAGE, "There was an error: "_s,
+                   exception.second, '\n');
       } break;
       default:
         if (retVal) {
           *retVal = status.TermSignal;
           cmCTestOptionalLog(this->CTest, WARNING, this->Quiet,
-                             "There was an exception: ", *retVal, '\n');
+                             "There was an exception: "_s, *retVal, '\n');
         }
         break;
     }
   } else {
     chain.Terminate();
     cmCTestOptionalLog(this->CTest, WARNING, this->Quiet,
-                       "There was a timeout\n");
+                       "There was a timeout\n"_s);
   }
 
   return true;
@@ -1126,9 +1130,9 @@ void cmCTestBuildHandler::ProcessBuffer(char const* data, size_t length,
                        this->LastTickChar);
     tickDisplayed = true;
     if (tick % tick_line_len == 0 && tick > 0) {
-      cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, this->Quiet,
-                         "  Size: ", ((this->BuildOutputLogSize + 512) / 1024),
-                         "K\n    ");
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_PROGRESS_OUTPUT, this->Quiet, "  Size: "_s,
+        ((this->BuildOutputLogSize + 512) / 1024), "K\n    "_s);
     }
   }
   if (tickDisplayed) {
@@ -1155,7 +1159,8 @@ int cmCTestBuildHandler::ProcessSingleLine(char const* data)
   std::string line;
   this->ColorRemover->Replace(input, line);
 
-  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Line: [", line, "]\n");
+  cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "Line: ["_s, line,
+                     "]\n"_s);
 
   int warningLine = 0;
   int errorLine = 0;
@@ -1168,9 +1173,9 @@ int cmCTestBuildHandler::ProcessSingleLine(char const* data)
     for (cmsys::RegularExpression& rx : this->ErrorMatchRegex) {
       if (rx.find(line.c_str())) {
         errorLine = 1;
-        cmCTestOptionalLog(
-          this->CTest, DEBUG, this->Quiet, "  Error Line: ", line,
-          " (matches: ", this->CustomErrorMatches[wrxCnt], ")\n");
+        cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet, "  Error Line: "_s,
+                           line, " (matches: "_s,
+                           this->CustomErrorMatches[wrxCnt], ")\n"_s);
         break;
       }
       wrxCnt++;
@@ -1180,9 +1185,9 @@ int cmCTestBuildHandler::ProcessSingleLine(char const* data)
     for (cmsys::RegularExpression& rx : this->ErrorExceptionRegex) {
       if (rx.find(line.c_str())) {
         errorLine = 0;
-        cmCTestOptionalLog(
-          this->CTest, DEBUG, this->Quiet, "  Not an error Line: ", line,
-          " (matches: ", this->CustomErrorExceptions[wrxCnt], ")\n");
+        cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
+                           "  Not an error Line: "_s, line, " (matches: "_s,
+                           this->CustomErrorExceptions[wrxCnt], ")\n"_s);
         break;
       }
       wrxCnt++;
@@ -1194,9 +1199,9 @@ int cmCTestBuildHandler::ProcessSingleLine(char const* data)
     for (cmsys::RegularExpression& rx : this->WarningMatchRegex) {
       if (rx.find(line.c_str())) {
         warningLine = 1;
-        cmCTestOptionalLog(
-          this->CTest, DEBUG, this->Quiet, "  Warning Line: ", line,
-          " (matches: ", this->CustomWarningMatches[wrxCnt], ")\n");
+        cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
+                           "  Warning Line: "_s, line, " (matches: "_s,
+                           this->CustomWarningMatches[wrxCnt], ")\n"_s);
         break;
       }
       wrxCnt++;
@@ -1207,9 +1212,9 @@ int cmCTestBuildHandler::ProcessSingleLine(char const* data)
     for (cmsys::RegularExpression& rx : this->WarningExceptionRegex) {
       if (rx.find(line.c_str())) {
         warningLine = 0;
-        cmCTestOptionalLog(
-          this->CTest, DEBUG, this->Quiet, "  Not a warning Line: ", line,
-          " (matches: ", this->CustomWarningExceptions[wrxCnt], ")\n");
+        cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
+                           "  Not a warning Line: "_s, line, " (matches: "_s,
+                           this->CustomWarningExceptions[wrxCnt], ")\n"_s);
         break;
       }
       wrxCnt++;

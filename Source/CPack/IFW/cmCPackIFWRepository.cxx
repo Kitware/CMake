@@ -4,6 +4,8 @@
 
 #include <cstddef>
 
+#include <cmext/string_view>
+
 #include "cmCPackIFWGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
@@ -43,7 +45,7 @@ bool cmCPackIFWRepository::ConfigureFromOptions()
   }
 
   std::string prefix = cmStrCat(
-    "CPACK_IFW_REPOSITORY_", cmsys::SystemTools::UpperCase(this->Name), '_');
+    "CPACK_IFW_REPOSITORY_"_s, cmsys::SystemTools::UpperCase(this->Name), '_');
 
   // Update
   if (this->IsOn(prefix + "ADD")) {

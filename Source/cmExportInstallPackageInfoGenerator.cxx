@@ -48,7 +48,7 @@ cmExportInstallPackageInfoGenerator::cmExportInstallPackageInfoGenerator(
 std::string cmExportInstallPackageInfoGenerator::GetConfigImportFileGlob()
   const
 {
-  std::string glob = cmStrCat(this->FileBase, "@*", this->FileExt);
+  std::string glob = cmStrCat(this->FileBase, "@*"_s, this->FileExt);
   return glob;
 }
 
@@ -189,9 +189,9 @@ std::string cmExportInstallPackageInfoGenerator::GenerateImportPrefix() const
       expDest = expDest.substr(n);
     } else {
       this->ReportError(
-        cmStrCat("install(PACKAGE_INFO \"", this->GetExportName(),
-                 "\" ...) specifies DESTINATION \"", expDest,
-                 "\" which is not a subdirectory of the install prefix."));
+        cmStrCat("install(PACKAGE_INFO \""_s, this->GetExportName(),
+                 "\" ...) specifies DESTINATION \""_s, expDest,
+                 "\" which is not a subdirectory of the install prefix."_s));
       return {};
     }
   }
@@ -257,10 +257,10 @@ bool cmExportInstallPackageInfoGenerator::GenerateFileSetProperties(
 
     if (!fileSet) {
       this->IssueMessage(MessageType::FATAL_ERROR,
-                         cmStrCat("File set \"", name,
-                                  "\" is listed in interface file sets of ",
+                         cmStrCat("File set \""_s, name,
+                                  "\" is listed in interface file sets of "_s,
                                   gte->GetName(),
-                                  " but has not been created"));
+                                  " but has not been created"_s));
       return false;
     }
 

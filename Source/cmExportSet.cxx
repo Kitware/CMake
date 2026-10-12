@@ -6,6 +6,8 @@
 #include <tuple>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMessageType.h"
@@ -43,10 +45,10 @@ bool cmExportSet::Compute(cmLocalGenerator* lg)
       if (tgtExport->FileSetGenerators.find(fileSetName) ==
           tgtExport->FileSetGenerators.end()) {
         lg->IssueMessage(MessageType::FATAL_ERROR,
-                         cmStrCat("File set \"", fileSetName,
-                                  "\" is listed in interface file sets of ",
+                         cmStrCat("File set \""_s, fileSetName,
+                                  "\" is listed in interface file sets of "_s,
                                   tgtExport->Target->GetName(),
-                                  " but has not been exported"));
+                                  " but has not been exported"_s));
         return false;
       }
       return true;

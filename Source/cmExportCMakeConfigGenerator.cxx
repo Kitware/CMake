@@ -130,11 +130,11 @@ void cmExportCMakeConfigGenerator::SetImportLinkInterface(
     lg->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(
-        "Target \"", target->GetName(),
+        "Target \""_s, target->GetName(),
         "\" has policy CMP0022 enabled, "
-        "but also has old-style LINK_INTERFACE_LIBRARIES properties "
+        "but also has old-style LINK_INTERFACE_LIBRARIES properties "_s
         "populated, but it was exported without the "
-        "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties"));
+        "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties"_s));
     return;
   }
 
@@ -388,7 +388,7 @@ void cmExportCMakeConfigGenerator::GenerateImportPropertyCode(
   os << ")\n"
         "set_target_properties("
      << targetName << " PROPERTIES\n";
-  std::string importedLocationProp = cmStrCat("IMPORTED_LOCATION", suffix);
+  std::string importedLocationProp = cmStrCat("IMPORTED_LOCATION"_s, suffix);
   for (auto const& property : properties) {
     if (importedXcFrameworkLocation.empty() ||
         property.first != importedLocationProp) {
@@ -726,7 +726,7 @@ std::string cmExportCMakeConfigGenerator::GetCxxModuleFile(
   }
 
   return cmStrCat(cmSystemTools::GetFilenamePath(this->MainImportFile), '/',
-                  cxxModuleDirname, "/cxx-modules-", name, ".cmake");
+                  cxxModuleDirname, "/cxx-modules-"_s, name, ".cmake"_s);
 }
 
 void cmExportCMakeConfigGenerator::GenerateCxxModuleInformation(

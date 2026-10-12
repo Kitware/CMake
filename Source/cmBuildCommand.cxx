@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmBuildCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
@@ -60,7 +62,7 @@ bool MainSignature(std::vector<std::string> const& args,
       doing = DoingNone;
       parallel = args[i];
     } else {
-      status.SetError(cmStrCat("unknown argument \"", args[i], '"'));
+      status.SetError(cmStrCat("unknown argument \""_s, args[i], '"'));
       return false;
     }
   }

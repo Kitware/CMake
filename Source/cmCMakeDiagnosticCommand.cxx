@@ -39,8 +39,9 @@ bool HandleAlterMode(std::vector<std::string> const& args,
   cm::optional<cmDiagnosticAction> const action =
     cmDiagnostics::GetDiagnosticAction(args[2]);
   if (!action) {
-    status.SetError(cmStrCat(
-      args[0], " given unrecognized diagnostic action \"", args[2], "\"."_s));
+    status.SetError(cmStrCat(args[0],
+                             " given unrecognized diagnostic action \""_s,
+                             args[2], "\"."_s));
     return false;
   }
 
@@ -48,7 +49,7 @@ bool HandleAlterMode(std::vector<std::string> const& args,
     cmDiagnostics::GetDiagnosticCategory(args[1]);
   if (!category) {
     status.SetError(cmStrCat(args[0],
-                             " given unrecognized diagnostic category \"",
+                             " given unrecognized diagnostic category \""_s,
                              args[1], "\"."_s));
     return false;
   }
@@ -72,7 +73,7 @@ bool HandleGetMode(std::vector<std::string> const& args,
     cmDiagnostics::GetDiagnosticCategory(args[1]);
   if (!category) {
     status.SetError(cmStrCat(args[0],
-                             " given unrecognized diagnostic category \"",
+                             " given unrecognized diagnostic category \""_s,
                              args[1], "\"."_s));
     return false;
   }
@@ -124,6 +125,6 @@ bool cmCMakeDiagnosticCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  status.SetError(cmStrCat("given unknown first argument \"", args[0], '"'));
+  status.SetError(cmStrCat("given unknown first argument \""_s, args[0], '"'));
   return false;
 }
