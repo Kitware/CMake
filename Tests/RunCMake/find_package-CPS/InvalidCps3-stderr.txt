@@ -4,6 +4,13 @@ Call Stack \(most recent call first\):
   InvalidCps3\.cmake:10 \(find_package\)
   CMakeLists\.txt:3 \(include\)
 +
+CMake Warning in cps/[Cc]orrupt.cps:
+  Component "Corrupt::badconfigs" attribute "configurations" is not an
+  object\.
+Call Stack \(most recent call first\):
+  InvalidCps3.cmake:10 \(find_package\)
+  CMakeLists\.txt:3 \(include\)
++
 CMake Warning in cps/[Cc]orrupt\.cps:
   Failed to set property "IMPLIB" on target "Corrupt::corrupt": attribute
   "link_location" is not a string\.
