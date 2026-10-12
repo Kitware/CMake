@@ -54,6 +54,10 @@ Modify cmFortranLexer.cxx:
 %s free_fmt fixed_fmt
 %x str_sq str_dq
 
+ /* Continuation splitting a token, possibly across comment lines.
+    Preprocessors may replace blank lines with line markers.  */
+SPLIT_CONT &[ \t]*(!.*)?\r?\n([ \t]*(!.*|#([ \t]*(line|LINE))?[ \t]*[0-9]+.*)?\r?\n)*[ \t]*&
+
 %%
 
 \"              {
@@ -132,12 +136,36 @@ $[ \t]*elif     { return F90PPR_ELIF; }
 $[ \t]*else     { return F90PPR_ELSE; }
 $[ \t]*endif    { return F90PPR_ENDIF; }
 
+ /* Rescan a token split by continuation as if written on one line.  */
+[a-zA-Z_][a-zA-Z_0-9]*({SPLIT_CONT}[a-zA-Z_0-9]+)+ {
+  char const* in = yytext;
+  char const* end = yytext + yyleng;
+  int len = 0;
+  while (in < end) {
+    if (*in == '&') {
+      /* Skip to the '&' resuming the token, past comments and markers.  */
+      do {
+        in = (char const*)memchr(in, '\n', end - in) + 1;
+        in += strspn(in, " \t");
+      } while (*in != '&');
+    } else {
+      yytext[len++] = *in;
+    }
+    ++in;
+  }
+  /* unput eats yytext from the end, so the shorter token stays intact.  */
+  while (len > 0) {
+    unput(yytext[--len]);
+  }
+}
+
  /* Line continuations, possible involving comments.  */
 &([ \t\r\n]*|!.*)*
 &([ \t\r\n]*|!.*)*&
 
 , { return COMMA; }
 
+:{SPLIT_CONT}: |
 :: { return DCOLON; }
 : { return COLON; }
 
