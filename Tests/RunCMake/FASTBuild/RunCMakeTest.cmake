@@ -20,3 +20,13 @@ run_cmake(ObjectAndSharedLibs)
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ObjectAndSharedLibs-build)
 set(RunCMake_TEST_NO_CLEAN 1)
 run_cmake_command(ObjectAndSharedLibs-build ${CMAKE_COMMAND} --build .)
+
+block()
+  set(RunCMake_TEST_BINARY_DIR
+    ${RunCMake_BINARY_DIR}/CustomCommandDependsArtifact-build)
+  unset(RunCMake_TEST_NO_CLEAN)
+  run_cmake(CustomCommandDependsArtifact)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(CustomCommandDependsArtifact-build
+    ${CMAKE_COMMAND} --build . --target consumer)
+endblock()
