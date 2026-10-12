@@ -91,6 +91,14 @@ html_theme_options = {
     'codebgcolor':      '#eeeeee',
     'codetextcolor':    '#333333',
 }
+if tags.has('qthelp'):
+    # The qthelp builder renders with the 'nonav' theme, which contributes no
+    # colors of its own, so link a stylesheet that supplies them.  Name it
+    # 'offline-simple.css' because Qt Creator serves the 'offline-dark.css'
+    # next to it instead when the Qt Creator theme is dark.
+    html_static_path.append('@conf_qthelp_static@')
+    html_css_files = ['offline-simple.css']
+
 html_title = 'CMake %s Documentation' % release
 html_short_title = '%s Documentation' % release
 html_favicon = '@conf_path@/static/cmake-favicon.ico'

@@ -78,6 +78,7 @@ endif()
 
 set(conf_docs "${CMake_SOURCE_DIR}/Help")
 set(conf_path "${CMAKE_CURRENT_SOURCE_DIR}")
+set(conf_qthelp_static "${CMAKE_CURRENT_BINARY_DIR}/static-qthelp")
 set(conf_version "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
 set(conf_release "${CMake_VERSION}")
 configure_file(conf.py.in conf.py @ONLY)
@@ -138,6 +139,11 @@ if(SPHINX_QTHELP)
     message(FATAL_ERROR "QHELPGENERATOR_EXECUTABLE (qhelpgenerator) not found!")
   endif()
   list(APPEND doc_formats qthelp)
+
+  # Generate the light and dark stylesheets, and tell `conf.py` to link them.
+  set(qthelp_css_outdir "${conf_qthelp_static}")
+  include("${CMAKE_CURRENT_SOURCE_DIR}/qthelp_css.cmake")
+  set(doc_qthelp_opts -t qthelp)
 
   set(qthelp_post_commands
     # Workaround for assistant prior to
