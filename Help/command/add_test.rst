@@ -119,6 +119,12 @@ directory the test is created in.
 
     Tests with missing build dependencies will not be run.
 
+  * .. versionchanged:: 4.5
+
+    A relative file path is interpreted with respect to the current source
+    directory if the file exists there, and otherwise with respect to the
+    current binary directory.
+
 ``COMMAND_EXPAND_LISTS``
   .. versionadded:: 3.16
 

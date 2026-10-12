@@ -4,7 +4,8 @@ foreach(name IN ITEMS
     TestDependencyPrereq
     TestDependencyFile
     TestDependencySubdirPrereq
-    TestDependencySubdirFile)
+    TestDependencySubdirFile
+    TestDependencySubdirRelative)
   set(candidates)
   list(APPEND candidates
     "${RunCMake_TEST_BINARY_DIR}/${name}-built.txt")

@@ -2489,12 +2489,50 @@ cmGeneratorTarget* cmGlobalGenerator::FindOutputOwningTarget(
   return nullptr;
 }
 
+bool cmGlobalGenerator::IsGeneratedByBuild(std::string const& file)
+{
+  // The output-to-source maps record every generated path regardless of
+  // which target, if any, builds it.  Index the full paths of all
+  // directories once rather than searching each directory per query.
+  if (!this->GeneratedByBuildIndexComputed) {
+    this->GeneratedByBuildIndex.clear();
+    for (auto const& lg : this->LocalGenerators) {
+      lg->AppendOutputsAndByproducts(this->GeneratedByBuildIndex);
+    }
+    this->GeneratedByBuildIndexComputed = true;
+  }
+
+  std::string const collapsed = cmSystemTools::CollapseFullPath(file);
+  if (this->GeneratedByBuildIndex.count(collapsed)) {
+    return true;
+  }
+  if (file == collapsed) {
+    return false;
+  }
+  if (cmSystemTools::FileIsFullPath(file)) {
+    return this->GeneratedByBuildIndex.count(file) > 0;
+  }
+
+  // A relative path may name an output by suffix, which only the linear
+  // search of each directory supports.
+  for (auto const& lg : this->LocalGenerators) {
+    cmSourcesWithOutput const so = lg->GetSourcesWithOutput(file);
+    if (so.Source || so.Target) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void cmGlobalGenerator::ClearGeneratorMembers()
 {
   this->BuildExportSets.clear();
 
   this->OutputOwnerIndex.clear();
   this->OutputOwnerIndexComputed = false;
+
+  this->GeneratedByBuildIndex.clear();
+  this->GeneratedByBuildIndexComputed = false;
 
   this->Makefiles.clear();
 
