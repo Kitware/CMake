@@ -6,11 +6,13 @@
 
 #include <iosfwd>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmInstallGenerator.h"
 
 class cmDiagnosticContext;
+class cmGeneratorTarget;
 class cmLocalGenerator;
 
 /** \class cmInstallFilesGenerator
@@ -23,17 +25,28 @@ public:
                           std::string const& dest, bool programs,
                           std::string filePermissions,
                           std::vector<std::string> const& configurations,
-                          std::string const& component, MessageLevel message,
-                          bool excludeFromAll, std::string rename,
-                          bool optional, cmDiagnosticContext context);
+                          std::string const& component,
+                          std::vector<std::string> buildDepends,
+                          MessageLevel message, bool excludeFromAll,
+                          std::string rename, bool optional,
+                          cmDiagnosticContext context);
   ~cmInstallFilesGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;
+
+  void GetInstallBuildDependencies(
+    std::string const& config,
+    std::vector<BuildDependency>& dependencies) const override;
 
   std::string GetDestination(std::string const& config) const;
   std::string GetRename(std::string const& config) const;
   std::vector<std::string> GetFiles(std::string const& config) const;
   bool GetOptional() const { return this->Optional; }
+
+  void SetOwningTarget(std::string targetName)
+  {
+    this->OwningTargetName = std::move(targetName);
+  }
 
 protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
@@ -47,6 +60,10 @@ protected:
   std::vector<std::string> const Files;
   std::string const FilePermissions;
   std::string const Rename;
+  std::vector<std::string> const BuildDepends;
+  BuildDependsEntries ResolvedBuildDepends;
+  std::string OwningTargetName;
+  cmGeneratorTarget const* OwningTarget = nullptr;
   bool const Programs;
   bool const Optional;
 };

@@ -57,6 +57,12 @@ bool cmInstallImportedRuntimeArtifactsGenerator::Compute(cmLocalGenerator* lg)
   return true;
 }
 
+void cmInstallImportedRuntimeArtifactsGenerator::GetInstallBuildDependencies(
+  std::string const&, std::vector<BuildDependency>& dependencies) const
+{
+  dependencies.push_back({ this->Target, BuildDependencyType::Normal });
+}
+
 std::string cmInstallImportedRuntimeArtifactsGenerator::GetDestination(
   std::string const& config) const
 {

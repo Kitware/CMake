@@ -43,6 +43,15 @@ bool cmInstallCxxModuleBmiGenerator::Compute(cmLocalGenerator* lg)
   return true;
 }
 
+void cmInstallCxxModuleBmiGenerator::GetInstallBuildDependencies(
+  std::string const& config, std::vector<BuildDependency>& dependencies) const
+{
+  if (this->Target && this->Target->HaveInterfaceCxx20ModuleSources() &&
+      !this->GetDestination(config).empty()) {
+    dependencies.push_back({ this->Target, BuildDependencyType::Normal });
+  }
+}
+
 std::string cmInstallCxxModuleBmiGenerator::GetScriptLocation(
   std::string const& config) const
 {

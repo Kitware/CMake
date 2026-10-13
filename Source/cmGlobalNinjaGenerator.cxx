@@ -647,6 +647,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->cmGlobalGenerator::Generate();
 
   this->WriteAssumedSourceDependencies();
+  this->WriteInstallPrepTargets();
   this->WriteTestPrepTargets();
   this->WriteTargetAliases(*this->GetCommonFileStream());
   this->WriteFolderTargets(*this->GetCommonFileStream());
@@ -1295,6 +1296,61 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
       /*uses_terminal*/ false,
       /*restat*/ true, std::string(), outputs, cmNinjaDeps(),
       std::move(orderOnlyDeps));
+  }
+}
+
+void cmGlobalNinjaGenerator::WriteInstallPrepTargets()
+{
+  if (!this->AreInstallPrepTargetsEnabled()) {
+    return;
+  }
+  this->CheckInstallPrepTargets();
+
+  auto writeConfig = [this](std::string const& config, std::ostream& os) {
+    auto writePrepTarget =
+      [this, &config,
+       &os](std::string const& name,
+            cmGlobalGenerator::InstallPrepTargets::TargetMap const& targets,
+            std::set<std::string> const& files) {
+        cmNinjaBuild build("phony");
+        build.Outputs.push_back(this->ConvertToNinjaPath(name));
+        for (std::string const& file : files) {
+          build.ExplicitDeps.push_back(this->ConvertToNinjaPath(file));
+        }
+        for (auto const& target : targets) {
+          if (target.second.Normal || target.second.InstallArtifact) {
+            this->AppendTargetOutputs(target.first, build.ExplicitDeps, config,
+                                      DependOnTargetArtifact);
+          }
+          for (std::string const& file : target.second.GeneratedFiles) {
+            build.ExplicitDeps.push_back(this->ConvertToNinjaPath(file));
+          }
+        }
+        std::sort(build.ExplicitDeps.begin(), build.ExplicitDeps.end());
+        build.ExplicitDeps.erase(
+          std::unique(build.ExplicitDeps.begin(), build.ExplicitDeps.end()),
+          build.ExplicitDeps.end());
+        this->WriteBuild(os, build);
+      };
+
+    InstallPrepTargets const prepTargets = this->GetInstallPrepTargets(config);
+    std::set<std::string> const noFiles;
+    for (auto const& component : prepTargets.Components) {
+      auto const it = prepTargets.ComponentFiles.find(component.first);
+      std::set<std::string> const& files =
+        it == prepTargets.ComponentFiles.end() ? noFiles : it->second;
+      writePrepTarget(cmStrCat("install_prep/", component.first),
+                      component.second, files);
+    }
+    writePrepTarget("install_prep/all", prepTargets.All, prepTargets.AllFiles);
+  };
+
+  if (this->IsMultiConfig()) {
+    for (std::string const& config : this->GetConfigNames()) {
+      writeConfig(config, *this->GetConfigFileStream(config));
+    }
+  } else {
+    writeConfig(this->GetConfigNames().front(), *this->GetCommonFileStream());
   }
 }
 

@@ -176,6 +176,19 @@ function (run_cxx_module_test_rebuild directory)
   run_cxx_module_test("${directory}" ${ARGN})
 endfunction ()
 
+function (run_cxx_module_install_prep_test kind)
+  set(test "install-prep-${kind}")
+  set(prefix "${RunCMake_BINARY_DIR}/${test}-install")
+  file(REMOVE_RECURSE "${prefix}")
+  set(RunCMake_CXXModules_INSTALL 0)
+  run_cxx_module_test_target("${test}" "install_prep/${kind}"
+    "${test}" "-DCMAKE_INSTALL_PREFIX=${prefix}")
+
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${test}-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command("${test}-install" "${CMAKE_COMMAND}" --install . --config Debug)
+endfunction ()
+
 if (RunCMake_GENERATOR MATCHES "Ninja")
   if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(ninja_cmp0154_target "CMakeFiles/ninja_cmp0154.dir/Debug/unrelated.cxx${CMAKE_CXX_OUTPUT_EXTENSION}")
@@ -379,6 +392,17 @@ endif ()
 
 # All of the following tests perform installation.
 set(RunCMake_CXXModules_INSTALL 1)
+
+if (RunCMake_GENERATOR MATCHES "Ninja" AND
+    NOT CMake_TEST_MODULE_VARIANT MATCHES "^Build")
+  if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+    run_cxx_module_install_prep_test(BMI)
+  endif ()
+  if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+    run_cxx_module_install_prep_test(Metadata)
+  endif ()
+  include("${CMAKE_CURRENT_LIST_DIR}/install-prep.cmake")
+endif ()
 
 # Tests which install BMIs
 if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)

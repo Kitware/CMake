@@ -1,0 +1,11 @@
+^CMake Warning \(author\) at GeneratedFilesByproduct\.cmake:[0-9]+ \(install\):
+  An install rule installs or depends on file
+
+    [^
+]*/GeneratedFilesByproduct-build/byproduct\.txt
+
+  which is generated but is not the unique output of a build target, so
+  "install_prep/" targets cannot build it with this generator\..*
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

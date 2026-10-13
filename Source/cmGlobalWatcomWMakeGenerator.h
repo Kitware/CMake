@@ -54,6 +54,8 @@ public:
 
   bool IsGNUMakeJobServerAware() const override { return false; }
 
+  bool TargetNamesAreCaseInsensitive() const override { return true; }
+
   std::string GetShortBinaryOutputDir() const override;
 
 protected:

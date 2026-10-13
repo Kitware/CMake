@@ -26,6 +26,8 @@ targets referenced by test command generator expressions, and explicit
 Tests whose names are not valid target names are excluded from this behavior.
 If multiple tests in different directories share the same name, their
 dependencies are merged into a single ``test_prep/<name>`` target.
+See the :manual:`cmake-buildsystem(7)` manual for more details on
+:ref:`Target Names`.
 
 With the :ref:`Makefile Generators`, a ``BUILD_DEPENDS`` file is built by
 building the target whose build produces it.  A generated file that is not the

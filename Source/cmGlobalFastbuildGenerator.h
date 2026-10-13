@@ -543,6 +543,7 @@ public:
   void WriteTargetClean();
 
   void AddTargetAll();
+  void WriteInstallPrepTargets();
   void WriteTestPrepTargets();
   void AddGlobCheckExec();
 

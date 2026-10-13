@@ -75,7 +75,8 @@ directory the test is created in.
       dependencies are merged into a single ``test_prep/<name>`` target.
 
       Tests with names that are not valid target names are excluded from this
-      behavior.
+      behavior. See the :manual:`cmake-buildsystem(7)` manual for more details
+      on :ref:`Target Names`.
 
       The ``BUILD_DEPENDS`` keyword can be used to add explicit build
       dependencies.

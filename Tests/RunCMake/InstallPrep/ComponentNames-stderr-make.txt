@@ -1,0 +1,45 @@
+^CMake Warning \(author\) at ComponentNames\.cmake:[0-9]+ \(install\):
+  The install component "Colon:Name" has build dependencies, but its name
+  cannot be used in a build target name with this generator\.  No
+  "install_prep/" target will be generated for it\.  Rename the component to
+  build its dependencies with an "install_prep/" target\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
++
+CMake Warning \(author\) at ComponentNames\.cmake:[0-9]+ \(install\):
+  The install component "Unsafe/\.\./Name" has build dependencies, but its name
+  cannot be used in a build target name with this generator\.  No
+  "install_prep/" target will be generated for it\.  Rename the component to
+  build its dependencies with an "install_prep/" target\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
++
+CMake Warning \(author\) at ComponentNames\.cmake:[0-9]+ \(install\):
+  The install component "Empty//Segment" has build dependencies, but its name
+  cannot be used in a build target name with this generator\.  No
+  "install_prep/" target will be generated for it\.  Rename the component to
+  build its dependencies with an "install_prep/" target\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
++
+CMake Warning \(author\) at ComponentNames\.cmake:[0-9]+ \(install\):
+  The install component "\./Dot" has build dependencies, but its name cannot
+  be used in a build target name with this generator\.  No "install_prep/"
+  target will be generated for it\.  Rename the component to build its
+  dependencies with an "install_prep/" target\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.
++
+CMake Warning \(author\) at ComponentNames\.cmake:[0-9]+ \(install\):
+  An install rule in the component named "all" uses EXCLUDE_FROM_ALL and has
+  build dependencies, but no install_prep/ target builds them:
+  install_prep/all omits EXCLUDE_FROM_ALL rules, and the "all" component has
+  no preparation target of its own\.  Rename the component or remove
+  EXCLUDE_FROM_ALL\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-author to suppress it\.$

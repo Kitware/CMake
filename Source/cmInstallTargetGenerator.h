@@ -62,6 +62,10 @@ public:
 
   bool Compute(cmLocalGenerator* lg) override;
 
+  void GetInstallBuildDependencies(
+    std::string const& config,
+    std::vector<BuildDependency>& dependencies) const override;
+
   cmGeneratorTarget* GetTarget() const { return this->Target; }
 
   bool IsImportLibrary() const { return this->ImportLibrary; }

@@ -29,6 +29,10 @@ public:
 
   bool Compute(cmLocalGenerator* lg) override;
 
+  void GetInstallBuildDependencies(
+    std::string const& config,
+    std::vector<BuildDependency>& dependencies) const override;
+
   std::string const& GetFilePermissions() const
   {
     return this->FilePermissions;

@@ -1,0 +1,12 @@
+set(bmi)
+foreach (ext IN ITEMS gcm ifc pcm)
+  set(path "${prefix}/lib/cxx/bmi/importable.${ext}")
+  if (EXISTS "${path}" AND NOT IS_DIRECTORY "${path}")
+    set(bmi "${path}")
+    break ()
+  endif ()
+endforeach ()
+
+if (NOT bmi)
+  list(APPEND RunCMake_TEST_FAILED "The prepared BMI was not installed.")
+endif ()

@@ -6,6 +6,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <vector>
 
 #include "cmInstallGenerator.h"
 #include "cmListFileCache.h"
@@ -21,10 +22,15 @@ public:
   cmInstallScriptGenerator(
     std::string script, bool code, std::string const& component,
     bool excludeFromAll, bool allComponents,
+    std::vector<std::string> buildDepends = {},
     cmListFileBacktrace backtrace = cmListFileBacktrace());
   ~cmInstallScriptGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;
+
+  void GetInstallBuildDependencies(
+    std::string const& config,
+    std::vector<BuildDependency>& dependencies) const override;
 
   bool IsCode() const { return this->Code; }
 
@@ -39,6 +45,8 @@ protected:
 
   std::string const Script;
   bool const Code;
+  std::vector<std::string> const BuildDepends;
+  BuildDependsEntries ResolvedBuildDepends;
   cmLocalGenerator* LocalGenerator;
   bool AllowGenex = false;
 };
