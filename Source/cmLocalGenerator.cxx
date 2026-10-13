@@ -2935,13 +2935,37 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
   std::vector<std::string> configsList =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
+  cmValue const pchExtension =
+    this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
+
+  auto* reuseTarget = target->GetPchReuseTarget();
+  bool const haveReuseTarget = reuseTarget && reuseTarget != target;
+
+  // Adding a source clears the target's source caches, which GetPchFile
+  // rebuilds.  Add the sources of all PCHs before computing any PCH file
+  // so the caches are rebuilt once rather than once per PCH.
+  struct PchInfo
+  {
+    std::string Config;
+    std::string Lang;
+    std::string Arch;
+    std::string Source;
+    std::string Header;
+    cmSourceFile* SourceFile;
+    cmSourceFile* HeaderFile;
+  };
+  std::vector<PchInfo> pchInfos;
+
+  // A PCH source is added for all configurations, so it is a source of its
+  // language in later configurations too.
+  std::set<std::string> pchSourceLangs;
+
   for (std::string const& config : configsList) {
     // FIXME: Refactor collection of sources to not evaluate object
     // libraries.
     std::vector<cmSourceFile*> sources;
     target->GetSourceFiles(sources, config);
 
-    std::string const configUpper = cmSystemTools::UpperCase(config);
     static std::array<std::string, 4> const langs = { { "C", "CXX", "OBJC",
                                                         "OBJCXX" } };
 
@@ -2964,7 +2988,8 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
             !((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
               sf->GetProperty("SKIP_PRECOMPILE_HEADERS"));
         });
-      if (langSources == 0) {
+      if (langSources == 0 &&
+          pchSourceLangs.find(lang) == pchSourceLangs.end()) {
         continue;
       }
 
@@ -3006,15 +3031,9 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           continue;
         }
 
-        cmValue pchExtension =
-          this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
-
         if (pchExtension.IsEmpty()) {
           continue;
         }
-
-        auto* reuseTarget = target->GetPchReuseTarget();
-        bool const haveReuseTarget = reuseTarget && reuseTarget != target;
 
         auto* pch_sf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
@@ -3026,109 +3045,114 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
         if (!this->GetGlobalGenerator()->IsXcode()) {
           if (!haveReuseTarget) {
-            target->AddSource(pchSource, true);
+            pchSourceLangs.insert(lang);
           }
-
-          std::string const pchFile = target->GetPchFile(config, lang, arch);
-
-          // Exclude the pch files from linking
-          if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
-            if (!haveReuseTarget) {
-              pch_sf->AppendProperty(
-                "OBJECT_OUTPUTS",
-                cmStrCat("$<$<CONFIG:", config, ">:", pchFile, '>'));
-            } else {
-              if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
-
-                std::string const compilerId =
-                  this->Makefile->GetSafeDefinition(
-                    cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
-
-                std::string const compilerVersion =
-                  this->Makefile->GetSafeDefinition(
-                    cmStrCat("CMAKE_", lang, "_COMPILER_VERSION"));
-
-                std::string const langFlags =
-                  this->Makefile->GetSafeDefinition(
-                    cmStrCat("CMAKE_", lang, "_FLAGS_", configUpper));
-
-                bool editAndContinueDebugInfo = false;
-                bool programDatabaseDebugInfo = false;
-                cm::optional<std::string> msvcDebugInformationFormat =
-                  this->GetMSVCDebugFormatName(config, target);
-                if (msvcDebugInformationFormat &&
-                    !msvcDebugInformationFormat->empty()) {
-                  editAndContinueDebugInfo =
-                    *msvcDebugInformationFormat == "EditAndContinue";
-                  programDatabaseDebugInfo =
-                    *msvcDebugInformationFormat == "ProgramDatabase";
-                } else {
-                  editAndContinueDebugInfo =
-                    langFlags.find("/ZI") != std::string::npos ||
-                    langFlags.find("-ZI") != std::string::npos;
-                  programDatabaseDebugInfo =
-                    langFlags.find("/Zi") != std::string::npos ||
-                    langFlags.find("-Zi") != std::string::npos;
-                }
-
-                if (editAndContinueDebugInfo) {
-                  this->CopyPchCompilePdb(config, lang, target, reuseTarget,
-                                          { ".pdb", ".idb" });
-                } else if (programDatabaseDebugInfo) {
-                  this->CopyPchCompilePdb(config, lang, target, reuseTarget,
-                                          { ".pdb" });
-                }
-              }
-
-              // Link to the pch object file
-              std::string pchSourceObj;
-              // Fastbuild will propagate pch.obj for us, no need to link to it
-              // explicitly.
-              if (!this->GetGlobalGenerator()->IsFastbuild()) {
-                pchSourceObj =
-                  reuseTarget->GetPchFileObject(config, lang, arch);
-              }
-
-              if (target->GetType() != cm::TargetType::OBJECT_LIBRARY) {
-                std::string linkerProperty = "LINK_FLAGS_";
-                if (target->GetType() == cm::TargetType::STATIC_LIBRARY) {
-                  linkerProperty = "STATIC_LIBRARY_FLAGS_";
-                }
-                target->Target->AppendProperty(
-                  cmStrCat(linkerProperty, configUpper),
-                  cmStrCat(' ',
-                           this->ConvertToOutputFormat(pchSourceObj, SHELL)),
-                  cm::nullopt, true);
-              } else if (reuseTarget->GetType() ==
-                         cm::TargetType::OBJECT_LIBRARY) {
-                target->Target->AppendProperty(
-                  "INTERFACE_LINK_LIBRARIES",
-                  cmStrCat("$<$<CONFIG:", config,
-                           ">:$<LINK_ONLY:", pchSourceObj, ">>"));
-              }
-            }
-          } else {
-            pch_sf->SetProperty("PCH_EXTENSION", pchExtension);
-          }
-
-          // Add pchHeader to source files, which will
-          // be grouped as "Precompile Header File"
-          auto* pchHeader_sf = this->Makefile->GetOrCreateSource(
-            pchHeader, false, cmSourceFileLocationKind::Known);
-          pchHeader_sf->SetSpecialSourceType(
-            cmSourceFile::SpecialSourceType::PchHeader);
-          std::string err;
-          pchHeader_sf->ResolveFullPath(&err);
-          if (!err.empty()) {
-            this->IssueMessage(
-              MessageType::FATAL_ERROR,
-              cmStrCat("Unable to resolve full path of PCH-header '",
-                       pchHeader, "' assigned to target ", target->GetName(),
-                       ", although its path is supposed to be known!"));
-          }
-          target->AddSource(pchHeader);
+          pchInfos.push_back(
+            { config, lang, arch, pchSource, pchHeader, pch_sf, nullptr });
         }
       }
+    }
+  }
+
+  for (PchInfo& pch : pchInfos) {
+    if (!haveReuseTarget) {
+      target->AddSource(pch.Source, true);
+    }
+
+    // Add pchHeader to source files, which will
+    // be grouped as "Precompile Header File"
+    pch.HeaderFile = this->Makefile->GetOrCreateSource(
+      pch.Header, false, cmSourceFileLocationKind::Known);
+    pch.HeaderFile->SetSpecialSourceType(
+      cmSourceFile::SpecialSourceType::PchHeader);
+    target->AddSource(pch.Header);
+  }
+
+  for (PchInfo const& pch : pchInfos) {
+    std::string const& config = pch.Config;
+    std::string const& lang = pch.Lang;
+    std::string const& arch = pch.Arch;
+    cmSourceFile* pch_sf = pch.SourceFile;
+
+    std::string const pchFile = target->GetPchFile(config, lang, arch);
+
+    // Exclude the pch files from linking
+    if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
+      if (!haveReuseTarget) {
+        pch_sf->AppendProperty(
+          "OBJECT_OUTPUTS",
+          cmStrCat("$<$<CONFIG:", config, ">:", pchFile, '>'));
+      } else {
+        std::string const configUpper = cmSystemTools::UpperCase(config);
+
+        if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
+          std::string const langFlags = this->Makefile->GetSafeDefinition(
+            cmStrCat("CMAKE_", lang, "_FLAGS_", configUpper));
+
+          bool editAndContinueDebugInfo = false;
+          bool programDatabaseDebugInfo = false;
+          cm::optional<std::string> msvcDebugInformationFormat =
+            this->GetMSVCDebugFormatName(config, target);
+          if (msvcDebugInformationFormat &&
+              !msvcDebugInformationFormat->empty()) {
+            editAndContinueDebugInfo =
+              *msvcDebugInformationFormat == "EditAndContinue";
+            programDatabaseDebugInfo =
+              *msvcDebugInformationFormat == "ProgramDatabase";
+          } else {
+            editAndContinueDebugInfo =
+              langFlags.find("/ZI") != std::string::npos ||
+              langFlags.find("-ZI") != std::string::npos;
+            programDatabaseDebugInfo =
+              langFlags.find("/Zi") != std::string::npos ||
+              langFlags.find("-Zi") != std::string::npos;
+          }
+
+          if (editAndContinueDebugInfo) {
+            this->CopyPchCompilePdb(config, lang, target, reuseTarget,
+                                    { ".pdb", ".idb" });
+          } else if (programDatabaseDebugInfo) {
+            this->CopyPchCompilePdb(config, lang, target, reuseTarget,
+                                    { ".pdb" });
+          }
+        }
+
+        // Link to the pch object file
+        std::string pchSourceObj;
+        // Fastbuild will propagate pch.obj for us, no need to link to it
+        // explicitly.
+        if (!this->GetGlobalGenerator()->IsFastbuild()) {
+          pchSourceObj = reuseTarget->GetPchFileObject(config, lang, arch);
+        }
+
+        if (target->GetType() != cm::TargetType::OBJECT_LIBRARY) {
+          std::string linkerProperty = "LINK_FLAGS_";
+          if (target->GetType() == cm::TargetType::STATIC_LIBRARY) {
+            linkerProperty = "STATIC_LIBRARY_FLAGS_";
+          }
+          target->Target->AppendProperty(
+            cmStrCat(linkerProperty, configUpper),
+            cmStrCat(' ', this->ConvertToOutputFormat(pchSourceObj, SHELL)),
+            cm::nullopt, true);
+        } else if (reuseTarget->GetType() == cm::TargetType::OBJECT_LIBRARY) {
+          target->Target->AppendProperty(
+            "INTERFACE_LINK_LIBRARIES",
+            cmStrCat("$<$<CONFIG:", config, ">:$<LINK_ONLY:", pchSourceObj,
+                     ">>"));
+        }
+      }
+    } else {
+      pch_sf->SetProperty("PCH_EXTENSION", pchExtension);
+    }
+
+    // With CMAKE_LINK_PCH, GetPchFile above writes a reused PCH header.
+    std::string err;
+    if (pch.HeaderFile->ResolveFullPath(&err).empty()) {
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Unable to resolve full path of PCH-header '", pch.Header,
+                 "' assigned to target ", target->GetName(),
+                 ", although its path is supposed to be known!"));
     }
   }
 }
