@@ -42,6 +42,8 @@ run_cmake(TIMESTAMP)
 
 run_cmake(REMOVE-empty)
 
+run_cmake_script(DIFFERENT)
+
 run_cmake_script(COPY_FILE-file-replace)
 run_cmake_script(COPY_FILE-dir-to-file-capture)
 run_cmake_script(COPY_FILE-dir-to-file-fail)
