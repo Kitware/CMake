@@ -339,6 +339,12 @@
     variables:
         CMAKE_CONFIGURATION: fedora44_ninja_clang
 
+.fedora44_ninja_dpclang:
+    extends: .fedora44
+
+    variables:
+        CMAKE_CONFIGURATION: fedora44_ninja_dpclang
+
 .fedora44_ninja_gcc_std_reloc:
     extends: .fedora44
 
