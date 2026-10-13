@@ -75,6 +75,7 @@ The following individuals and institutions are among the contributors:
 * `Sebastian Holtermann <mailto:sebholt@xwmw.org>`__
 * `Stephen Kelly <mailto:steveire@gmail.com>`__
 * `Sylvain Joubert <mailto:joubert.sy@gmail.com>`__
+* `The Khronos Group <https://www.Khronos.org/>`__
 * `The Qt Company Ltd. <https://www.qt.io/>`__
 * `Thomas Sondergaard <mailto:ts@medical-insight.com>`__
 * `Tobias Hunger <mailto:tobias.hunger@qt.io>`__
