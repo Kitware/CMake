@@ -13,8 +13,8 @@ SYCL compiler:
   such as ``generic``, ``omp.accelerated``,
   ``cuda.explicit-multipass:sm_80,sm_86``, and
   ``hip.explicit-multipass:gfx90a``.
-* IntelLLVM accepts SYCL target triples or architecture aliases, such as
-  ``spir64`` and ``intel_gpu_pvc``.
+* IntelLLVM and DPClang accept SYCL target triples or architecture aliases, such
+  as ``spir64`` and ``intel_gpu_pvc``.
 * Clang accepts offload target triples, such as ``spirv64-unknown-unknown``.
 
 The compiler installation must support the requested targets.  These values
@@ -32,7 +32,7 @@ For example:
    if(CMAKE_SYCL_COMPILER_ID STREQUAL "AdaptiveCpp")
      set_property(TARGET app PROPERTY SYCL_DEVICE_TARGETS
        cuda.explicit-multipass:sm_80)
-   elseif(CMAKE_SYCL_COMPILER_ID STREQUAL "IntelLLVM")
+   elseif(CMAKE_SYCL_COMPILER_ID MATCHES "^(DPClang|IntelLLVM)$")
      set_property(TARGET app PROPERTY SYCL_DEVICE_TARGETS intel_gpu_pvc)
    endif()
 

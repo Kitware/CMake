@@ -87,8 +87,9 @@ constexpr auto FASTBUILD_FORCE_RESPONSE_FILE =
 constexpr auto FASTBUILD_IDE_ARGS = "CMAKE_FASTBUILD_IDE_ARGS";
 
 static std::map<std::string, std::string> const compilerIdToFastbuildFamily = {
-  { "MSVC", "msvc" }, { "Clang", "clang" },      { "AppleClang", "clang" },
-  { "GNU", "gcc" },   { "NVIDIA", "cuda-nvcc" }, { "Clang-cl", "clang-cl" },
+  { "DPClang", "clang" },     { "MSVC", "msvc" }, { "Clang", "clang" },
+  { "AppleClang", "clang" },  { "GNU", "gcc" },   { "NVIDIA", "cuda-nvcc" },
+  { "Clang-cl", "clang-cl" },
 };
 
 static std::set<std::string> const supportedLanguages = { "C", "CXX", "CUDA",
@@ -999,7 +1000,8 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
   compilerDef.Executable = compilerLocation;
   compilerDef.CmakeCompilerID =
     mf->GetSafeDefinition(cmStrCat("CMAKE_", language, "_COMPILER_ID"));
-  if (compilerDef.CmakeCompilerID == "Clang" &&
+  if ((compilerDef.CmakeCompilerID == "Clang" ||
+       compilerDef.CmakeCompilerID == "DPClang") &&
       mf->GetSafeDefinition(cmStrCat(
         "CMAKE_", language, "_COMPILER_FRONTEND_VARIANT")) == "MSVC") {
     compilerDef.CmakeCompilerID = "Clang-cl";

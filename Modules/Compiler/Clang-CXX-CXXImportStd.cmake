@@ -35,7 +35,11 @@ function (_cmake_cxx_find_modules_json)
     set(CMAKE_CXX_STDLIB_MODULES_JSON "${CMAKE_CXX_STDLIB_MODULES_JSON}" PARENT_SCOPE)
   endif ()
 
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "18.1.2" AND
+  set(_clang_version "${CMAKE_CXX_COMPILER_VERSION}")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "DPClang")
+    set(_clang_version "${CMAKE_CXX_COMPILER_VERSION_INTERNAL}")
+  endif()
+  if (_clang_version VERSION_LESS "18.1.2" AND
       CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
     # The original PR had a key spelling mismatch internally. Do not support it
     # and instead require a release known to have the fix.

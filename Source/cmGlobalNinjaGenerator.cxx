@@ -76,7 +76,8 @@ namespace {
 bool DetectGCCOnWindows(cm::string_view compilerId, cm::string_view simulateId,
                         cm::string_view compilerFrontendVariant)
 {
-  return ((compilerId == "Clang"_s && compilerFrontendVariant == "GNU"_s) ||
+  return (((compilerId == "Clang"_s || compilerId == "DPClang"_s) &&
+           compilerFrontendVariant == "GNU"_s) ||
           (simulateId != "MSVC"_s &&
            (compilerId == "GNU"_s || compilerId == "QCC"_s ||
             cmHasLiteralSuffix(compilerId, "Clang"))));
