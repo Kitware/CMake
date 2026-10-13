@@ -25,6 +25,7 @@ public:
 
   std::string const& GetName() const { return this->Name; }
   std::string const& GetType() const { return this->Type; }
+  cm::FileSetMetadata::FileSetDomain GetDomain() const { return this->Domain; }
   cm::FileSetMetadata::Visibility GetVisibility() const
   {
     return this->Visibility;
@@ -95,6 +96,7 @@ private:
   cmTarget* Target;
   std::string Name;
   std::string Type;
+  cm::FileSetMetadata::FileSetDomain Domain;
   cm::FileSetMetadata::Visibility Visibility;
   std::vector<BT<std::string>> DirectoryEntries;
   std::vector<BT<std::string>> FileEntries;
