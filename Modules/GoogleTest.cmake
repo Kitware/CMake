@@ -42,6 +42,9 @@ usually considered as more beneficial.  By default, the CTest test name is the
 same as the Google Test name (i.e. ``suite.testcase``); see also
 ``TEST_PREFIX`` and ``TEST_SUFFIX``.
 
+Commands
+^^^^^^^^
+
 .. command:: gtest_add_tests
 
   Automatically add tests with CTest by scanning source code for Google Test
@@ -314,7 +317,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     dependencies.
 
     ``DISCOVERY_MODE`` defaults to the value of the
-    ``CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE`` variable if it is not
+    :variable:`CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE` variable if it is not
     passed when calling ``gtest_discover_tests()``. This provides a mechanism
     for globally selecting a preferred test discovery behavior without having
     to modify each call site.
@@ -332,6 +335,17 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     Empty values in the :prop_tgt:`TEST_LAUNCHER` and
     :prop_tgt:`CROSSCOMPILING_EMULATOR` target properties are preserved,
     see policy :policy:`CMP0178`.
+
+Variables
+^^^^^^^^^
+
+.. variable:: CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE
+
+  .. versionadded:: 3.18
+
+  Default value for the ``DISCOVERY_MODE`` option of
+  :command:`gtest_discover_tests`.  The value must be one of ``POST_BUILD``
+  or ``PRE_TEST``.  If this variable is not set, ``POST_BUILD`` is used.
 
 #]=======================================================================]
 
