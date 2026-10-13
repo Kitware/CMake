@@ -96,6 +96,14 @@ void cmGlobalUnixMakefileGenerator3::ComputeTargetObjectDirectory(
   gt->ObjectDirectory = dir;
 }
 
+bool cmGlobalUnixMakefileGenerator3::IsInstallPrepComponentRepresentable(
+  std::string const& component) const
+{
+  // A Makefile rule name cannot contain ':'.
+  return component.find(':') == std::string::npos &&
+    this->cmGlobalGenerator::IsInstallPrepComponentRepresentable(component);
+}
+
 bool cmGlobalUnixMakefileGenerator3::CanEscapeOctothorpe() const
 {
   // Make tools that use UNIX-style '/' paths also support '\' escaping.
@@ -118,9 +126,10 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->TestPrepTargets.clear();
   this->TestPrepEnabled = false;
 
-  // Compute the "test_prep/" targets before generating the local makefiles
-  // so they can be emitted in a single pass.
+  // Compute the "test_prep/" and "install_prep/" targets before generating the
+  // local makefiles so they can be emitted in a single pass.
   this->ComputeTestPrepTargets();
+  this->ComputeInstallPrepTargets();
 
   // first do superclass method
   this->cmGlobalGenerator::Generate();
@@ -246,8 +255,9 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
       cm::static_reference_cast<cmLocalUnixMakefileGenerator3>(localGen));
   }
 
-  // Write the internal test_prep/ rules.
+  // Write the internal test_prep/ and install_prep/ rules.
   this->WriteTestPrepRules(makefileStream, rootLG);
+  this->WriteInstallPrepRules(makefileStream, rootLG);
 
   // Write special bottom targets
   rootLG.WriteSpecialTargetsBottom(makefileStream);
@@ -726,8 +736,10 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
     }
   }
 
-  // Forward the test_prep/ convenience targets to CMakeFiles/Makefile2.
+  // Forward the test_prep/ and install_prep/ convenience targets to
+  // CMakeFiles/Makefile2.
   this->WriteTestPrepConvenienceRules(ruleFileStream);
+  this->WriteInstallPrepConvenienceRules(ruleFileStream);
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
@@ -1229,6 +1241,162 @@ void cmGlobalUnixMakefileGenerator3::WriteTestPrepConvenienceRules(
   commands.push_back(lg.GetRecursiveMakeCall(makefile2, "test_prep/all"));
   lg.WriteMakeRule(ruleFileStream, "Build the dependencies of a test.",
                    "test_prep/all", depends, commands, true);
+}
+
+void cmGlobalUnixMakefileGenerator3::ComputeInstallPrepTargets()
+{
+  this->InstallPrepComponentTargets.clear();
+  this->InstallPrepAllTargets.clear();
+  this->InstallPrepOrderedTargets.clear();
+  this->InstallPrepEnabled = false;
+  if (!this->AreInstallPrepTargetsEnabled()) {
+    return;
+  }
+  this->InstallPrepEnabled = true;
+  this->CheckInstallPrepTargets();
+
+  auto const& rootLG =
+    cm::static_reference_cast<cmLocalUnixMakefileGenerator3>(
+      this->LocalGenerators.front());
+  std::string const config = rootLG.GetConfigName();
+  InstallPrepTargets const prep = this->GetInstallPrepTargets(config);
+
+  std::set<std::string> unownedGeneratedFiles;
+  auto appendTargetRules =
+    [this, &config, &unownedGeneratedFiles](
+      std::vector<std::string>& rules, cmGeneratorTarget const* gt,
+      InstallPrepTargets::TargetRequirements requirements) {
+      auto* lg3 =
+        static_cast<cmLocalUnixMakefileGenerator3*>(gt->GetLocalGenerator());
+      std::string const targetDirectory = lg3->GetRelativeTargetDirectory(gt);
+      bool const needsRelink = gt->NeedRelinkBeforeInstall(config);
+      if (requirements.InstallArtifact && needsRelink) {
+        std::string const orderedRule =
+          cmStrCat(targetDirectory, "/install_prep");
+        this->InstallPrepOrderedTargets[orderedRule] = {
+          cmStrCat(targetDirectory, "/all"),
+          cmStrCat(targetDirectory, "/preinstall")
+        };
+        rules.push_back(orderedRule);
+        return;
+      }
+      // A top-level rule cannot build an individual custom command output, so
+      // build the whole target that owns it.  A generated file that is not
+      // the unique output of a target is attributed to its installing target.
+      for (std::string const& file : requirements.GeneratedFiles) {
+        this->CheckInstallPrepGeneratedFile(gt, file, unownedGeneratedFiles);
+      }
+      if (requirements.Normal ||
+          (!requirements.GeneratedFiles.empty() && gt->IsInBuildSystem())) {
+        rules.push_back(cmStrCat(targetDirectory, "/all"));
+      }
+      if (requirements.InstallArtifact) {
+        rules.push_back(
+          cmStrCat(targetDirectory, needsRelink ? "/preinstall" : "/all"));
+      }
+    };
+
+  for (auto const& target : prep.All) {
+    appendTargetRules(this->InstallPrepAllTargets, target.first,
+                      target.second);
+  }
+
+  for (auto const& entry : prep.Components) {
+    std::string const name = cmStrCat("install_prep/", entry.first);
+    // Merge targets whose names differ only in case where the make tool does
+    // not distinguish them, as for "test_prep/" targets.  Each of them then
+    // prepares a superset of what its installation needs.  Components are
+    // visited in order, so the first spelling names the target.
+    std::string const key = this->TargetNamesAreCaseInsensitive()
+      ? cmSystemTools::LowerCase(name)
+      : name;
+    std::vector<std::string>* rules = &this->InstallPrepAllTargets;
+    if (key != "install_prep/all") {
+      InstallPrepTarget& prepTarget = this->InstallPrepComponentTargets[key];
+      if (prepTarget.Name.empty()) {
+        prepTarget.Name = name;
+      }
+      rules = &prepTarget.Rules;
+    }
+    for (auto const& target : entry.second) {
+      appendTargetRules(*rules, target.first, target.second);
+    }
+  }
+
+  auto sortAndRemoveDuplicates = [](std::vector<std::string>& rules) {
+    std::sort(rules.begin(), rules.end());
+    rules.erase(std::unique(rules.begin(), rules.end()), rules.end());
+  };
+  sortAndRemoveDuplicates(this->InstallPrepAllTargets);
+  for (auto& entry : this->InstallPrepComponentTargets) {
+    sortAndRemoveDuplicates(entry.second.Rules);
+  }
+}
+
+void cmGlobalUnixMakefileGenerator3::WriteInstallPrepRules(
+  std::ostream& makefileStream, cmLocalUnixMakefileGenerator3& rootLG)
+{
+  if (!this->InstallPrepEnabled) {
+    return;
+  }
+
+  std::vector<std::string> noCommands;
+  std::string const makefile2 = "CMakeFiles/Makefile2";
+  for (auto const& ordered : this->InstallPrepOrderedTargets) {
+    std::vector<std::string> depends{ ordered.second.NormalRule };
+    std::vector<std::string> commands{ rootLG.GetRecursiveMakeCall(
+      makefile2, ordered.second.PreinstallRule) };
+    rootLG.WriteMakeRule(makefileStream, nullptr, ordered.first, depends,
+                         commands, true);
+  }
+
+  for (auto const& entry : this->InstallPrepComponentTargets) {
+    std::vector<std::string> depends = entry.second.Rules;
+    if (depends.empty() && !this->EmptyRuleHackDepends.empty()) {
+      depends.push_back(this->EmptyRuleHackDepends);
+    }
+    rootLG.WriteMakeRule(makefileStream, nullptr, entry.second.Name, depends,
+                         noCommands, true);
+  }
+
+  std::vector<std::string> allDepends = this->InstallPrepAllTargets;
+  if (allDepends.empty() && !this->EmptyRuleHackDepends.empty()) {
+    allDepends.push_back(this->EmptyRuleHackDepends);
+  }
+  rootLG.WriteMakeRule(makefileStream, nullptr, "install_prep/all", allDepends,
+                       noCommands, true);
+}
+
+void cmGlobalUnixMakefileGenerator3::WriteInstallPrepConvenienceRules(
+  std::ostream& ruleFileStream)
+{
+  if (!this->InstallPrepEnabled) {
+    return;
+  }
+
+  auto& lg = cm::static_reference_cast<cmLocalUnixMakefileGenerator3>(
+    this->LocalGenerators[0]);
+
+  bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
+  std::string const makefile2 = "CMakeFiles/Makefile2";
+
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  auto writeForward = [&](std::string const& prepName) {
+    depends.clear();
+    if (regenerate) {
+      depends.emplace_back("cmake_check_build_system");
+    }
+    commands.clear();
+    commands.push_back(lg.GetRecursiveMakeCall(makefile2, prepName));
+    lg.WriteMakeRule(ruleFileStream, nullptr, prepName, depends, commands,
+                     true);
+  };
+
+  for (auto const& entry : this->InstallPrepComponentTargets) {
+    writeForward(entry.second.Name);
+  }
+  writeForward("install_prep/all");
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteHelpRule(

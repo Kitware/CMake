@@ -32,6 +32,23 @@ be created, containing the following targets:
 
 .. versionadded:: 4.5
 
+  If the project has install rules, the top-level makefile additionally
+  provides the following targets, unless the
+  :variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` or
+  :variable:`CMAKE_SKIP_INSTALL_RULES` variable is enabled:
+
+  ``install_prep/<component>``
+    Builds all known build dependencies for the install component named
+    ``<component>`` added by :command:`install`. Components whose names cannot
+    be represented safely are excluded. See :ref:`Install Preparation Targets`
+    and :ref:`Target Names`.
+
+  ``install_prep/all``
+    Builds all known build dependencies needed for an installation that does
+    not select a component. See :ref:`Install Preparation Targets`.
+
+.. versionadded:: 4.5
+
   When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled, the
   top-level makefile additionally provides the following targets:
 
@@ -45,7 +62,8 @@ be created, containing the following targets:
     Tests whose names are not valid target names, and tests whose names
     contain a ``:`` character, are excluded.  If multiple tests in different
     directories share the same name, their dependencies are merged into one
-    ``test_prep/<test-name>`` target.
+    ``test_prep/<test-name>`` target.  See the :manual:`cmake-buildsystem(7)`
+    manual for more details on :ref:`Target Names`.
 
   ``test_prep/all``
     Depends on every generated ``test_prep/<test-name>`` target.

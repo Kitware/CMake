@@ -23,11 +23,16 @@ public:
     std::vector<std::string> const& dirs, std::string const& dest,
     std::string filePermissions, std::string dirPermissions,
     std::vector<std::string> const& configurations,
-    std::string const& component, MessageLevel message, bool excludeFromAll,
-    std::string literalArgs, bool optional, cmDiagnosticContext context);
+    std::string const& component, std::vector<std::string> buildDepends,
+    MessageLevel message, bool excludeFromAll, std::string literalArgs,
+    bool optional, cmDiagnosticContext context);
   ~cmInstallDirectoryGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;
+
+  void GetInstallBuildDependencies(
+    std::string const& config,
+    std::vector<BuildDependency>& dependencies) const override;
 
   std::string GetDestination(std::string const& config) const;
   std::vector<std::string> GetDirectories(std::string const& config) const;
@@ -46,5 +51,7 @@ protected:
   std::string const FilePermissions;
   std::string const DirPermissions;
   std::string const LiteralArguments;
+  std::vector<std::string> const BuildDepends;
+  BuildDependsEntries ResolvedBuildDepends;
   bool const Optional;
 };

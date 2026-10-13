@@ -539,6 +539,8 @@ Entry const kEntries[] = {
     "Do not include RPATHs in the build tree"_s },
   { "CMAKE_SKIP_INSTALL_ALL_DEPENDENCY"_s,
     "If true, install target does not depend on all target; installation proceeds independently of build status."_s },
+  { "CMAKE_SKIP_INSTALL_PREP_TARGETS"_s,
+    "Do not generate install_prep/<component> and install_prep/all build targets."_s },
   { "CMAKE_SKIP_INSTALL_RPATH"_s,
     "Do not include RPATHs in the install tree"_s },
   { "CMAKE_SKIP_LINTING"_s,

@@ -37,6 +37,47 @@ is defined as an executable formed by compiling and linking ``zipapp.cpp``.
 When linking the ``zipapp`` executable, the ``archive`` static library is
 linked in.
 
+.. _`Target Names`:
+
+Target Names
+------------
+
+Targets are addressed by name throughout the buildsystem.  A target name
+must be non-empty and contain only ASCII letters, digits, ``_``, ``.``, ``+``,
+and ``-``.  As a special case, ``ALIAS`` and :prop_tgt:`IMPORTED`
+targets may also contain ``:``.  By convention, a double colon (``::``) is used
+as a namespace separator, such as ``Upstream::lib1``, to distinguish
+``ALIAS`` and ``IMPORTED`` targets from targets of other types, and to reduce
+the likelihood of naming collisions.  See the :manual:`cmake-packages(7)`
+manual for more details.
+
+Target names must be globally unique.  Non-``GLOBAL`` :prop_tgt:`IMPORTED`
+targets are visible only in the directory that defines them and their
+subdirectories.
+
+CMake reserves some names for special targets created by the build tools and
+project-wide convenience targets.
+
+* The names ``all``, ``ALL_BUILD``, ``help``, ``install``, ``INSTALL``,
+  ``preinstall``, ``clean``, ``edit_cache``, ``rebuild_cache``, and
+  ``ZERO_CHECK`` are always reserved.
+* Some modules reserve additional names: e.g., ``test`` when :module:`CTest`
+  is enabled, and ``package`` when :module:`CPack` is enabled.
+* Generators may also create their own convenience targets, such as
+  ``install/parallel`` with the :ref:`Ninja Generators`.  See the
+  :manual:`cmake-generators(7)` manual for the target names documented by
+  each generator.
+
+Some convenience targets derive their names from other names in the project:
+
+* The ``test_prep/<name>`` targets use test names, which have their own
+  representability rules beyond those above.  See also :command:`add_test`
+  and :variable:`CMAKE_TEST_BUILD_DEPENDS`.
+* The ``install_prep/<component>`` targets use install component names.
+  A component name may contain the characters allowed in target names above,
+  plus ``:`` and ``/``.  The :ref:`Makefile Generators` do not allow ``:``.
+  See also :ref:`Install Preparation Targets`.
+
 .. _`Executables`:
 
 Executables
@@ -1737,3 +1778,120 @@ target properties with a limited set of names:
 * .. versionadded:: 3.11
     Properties named with a leading underscore (``_``)
     or lowercase ASCII character.
+
+Preparation Targets
+===================
+
+The :ref:`Ninja Generators`, :ref:`Makefile Generators`, and
+:generator:`FASTBuild` generator provide convenience targets that build only
+the prerequisites of a later step, such as running tests or installing.
+
+.. _`Install Preparation Targets`:
+
+Install Preparation Targets
+---------------------------
+
+.. versionadded:: 4.5
+
+If the project has install rules, the generators which support preparation
+targets provide convenience build targets that build the known prerequisites
+of an installation before running the installation, unless
+:variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` or
+:variable:`CMAKE_SKIP_INSTALL_RULES` is enabled:
+
+``install_prep/all``
+  Prepare for an installation that does not select a component, such as
+  :option:`cmake --install \<build-dir\> <cmake --install>` without
+  :cmake-install-option:`--component`.  This includes rules of every component,
+  but omits :command:`install` rules using the ``EXCLUDE_FROM_ALL`` option.
+
+``install_prep/<component>``
+  Prepare to install ``<component>``.  Rules for that component are included
+  even when they use the ``EXCLUDE_FROM_ALL`` option.
+
+Building ``install_prep/all`` does not necessarily prepare the installation
+of a particular component, because installing a component also runs that
+component's ``EXCLUDE_FROM_ALL`` rules.  Build the matching
+``install_prep/<component>`` target before installing a specific component.
+
+For example:
+
+.. code-block:: console
+
+  cmake --build <build-dir> --config Release --target install_prep/Runtime
+  cmake --install <build-dir> --config Release --component Runtime
+
+Only install rules active for the selected configuration contribute build
+dependencies.  For multi-config generators, the same configuration should
+be used for the preparation and installation steps.
+
+A component preparation target is generated only when its name can be
+represented safely by the native build tool, as described under
+:ref:`Target Names`.  CMake warns about a component that has build
+dependencies but whose name cannot be represented.
+
+.. note::
+  A component named ``all`` does not get its own target because its name would
+  conflict with ``install_prep/all``.  Its rules contribute to
+  ``install_prep/all`` only when they do not use the ``EXCLUDE_FROM_ALL``
+  option.
+
+CMake infers dependencies associated with installed target artifacts,
+imported runtime artifacts, runtime dependency sets, C++ module BMIs, and
+C++ module export metadata.  Preparing BMIs or module export metadata builds
+the targets that produce them.
+
+Installing files with the ``FILES`` or ``PROGRAMS`` signatures of the
+:command:`install` command, or a target's file sets or its
+:prop_tgt:`PUBLIC_HEADER`, :prop_tgt:`PRIVATE_HEADER`, or :prop_tgt:`RESOURCE`
+files, implies build dependencies only for files that the build produces,
+i.e., target output artifacts, and outputs and byproducts of custom commands
+and custom targets.  How such a file is prepared depends on how it is produced:
+
+* A target's output artifact, such as one named by :genex:`TARGET_FILE`, is
+  prepared by building that target.
+
+* A file that is the output of a custom command attached to exactly one
+  target is prepared by running that custom command.  The target which
+  installs the file (or the file set to which the file belongs), if any, is
+  not built.  The :ref:`Makefile Generators` cannot depend on individual
+  files, so they build the target owning the custom command instead.
+
+* Any other generated file, such as a byproduct or the output of a custom
+  command attached to more than one target, is prepared by depending on the
+  file itself, which runs whatever produces it.  The
+  :ref:`Makefile Generators` and :generator:`FASTBuild` cannot do so, so they
+  warn.  If a target installs the file (or the file set to which the file
+  belongs), they build that target instead, which must therefore depend on
+  the producer, e.g., through :command:`add_dependencies`.  Otherwise, they
+  do not prepare the file.
+
+For example:
+
+.. code-block:: cmake
+
+  # Preparation runs only the custom command, not the library build.
+  add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated.h"
+    COMMAND ...)
+  add_library(A a.c "${CMAKE_CURRENT_BINARY_DIR}/generated.h")
+  set_property(TARGET A PROPERTY PUBLIC_HEADER
+    "${CMAKE_CURRENT_BINARY_DIR}/generated.h")
+
+  # Preparation runs gen, or with some generators builds B instead, so B
+  # must depend on the producer of its byproduct.
+  add_custom_target(gen COMMAND ...
+    BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/byproduct.h")
+  add_library(B b.c)
+  add_dependencies(B gen)
+  set_property(TARGET B PROPERTY PUBLIC_HEADER
+    "${CMAKE_CURRENT_BINARY_DIR}/byproduct.h")
+
+The ``BUILD_DEPENDS`` option of the ``FILES``, ``PROGRAMS``, ``DIRECTORY``,
+``SCRIPT``, and ``CODE`` signatures of the :command:`install` command can
+be used to specify targets or files that CMake cannot infer.  ``DIRECTORY``,
+``SCRIPT``, and ``CODE`` rules do not imply build dependencies without
+``BUILD_DEPENDS``.  The deprecated :command:`install_targets` command does not
+contribute dependencies.
+
+Install rules below a directory added with :prop_dir:`EXCLUDE_FROM_ALL` are
+ignored, matching installation from the parent directory.

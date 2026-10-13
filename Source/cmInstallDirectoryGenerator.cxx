@@ -18,14 +18,16 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, std::string const& dest,
   std::string filePermissions, std::string dirPermissions,
   std::vector<std::string> const& configurations, std::string const& component,
-  MessageLevel message, bool excludeFromAll, std::string literalArgs,
-  bool optional, cmDiagnosticContext context)
+  std::vector<std::string> buildDepends, MessageLevel message,
+  bool excludeFromAll, std::string literalArgs, bool optional,
+  cmDiagnosticContext context)
   : cmInstallGenerator(dest, configurations, component, message,
                        excludeFromAll, false, std::move(context))
   , Directories(dirs)
   , FilePermissions(std::move(filePermissions))
   , DirPermissions(std::move(dirPermissions))
   , LiteralArguments(std::move(literalArgs))
+  , BuildDepends(std::move(buildDepends))
   , Optional(optional)
 {
   // We need per-config actions if destination have generator expressions.
@@ -49,7 +51,15 @@ cmInstallDirectoryGenerator::~cmInstallDirectoryGenerator() = default;
 bool cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
-  return true;
+  return this->ResolveBuildDepends(lg, "DIRECTORY", this->BuildDepends,
+                                   this->ResolvedBuildDepends);
+}
+
+void cmInstallDirectoryGenerator::GetInstallBuildDependencies(
+  std::string const& config, std::vector<BuildDependency>& dependencies) const
+{
+  AddBuildDependsDependencies(this->LocalGenerator, config,
+                              this->ResolvedBuildDepends, dependencies);
 }
 
 std::vector<std::string> cmInstallDirectoryGenerator::GetDirectories(

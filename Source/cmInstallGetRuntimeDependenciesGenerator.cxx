@@ -24,6 +24,8 @@
 #include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 
+class cmGeneratorTarget;
+
 namespace {
 template <typename T, typename F>
 void WriteMultiArgument(std::ostream& os, cm::string_view keyword,
@@ -111,6 +113,29 @@ bool cmInstallGetRuntimeDependenciesGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
   return true;
+}
+
+void cmInstallGetRuntimeDependenciesGenerator::GetInstallBuildDependencies(
+  std::string const&, std::vector<BuildDependency>& dependencies) const
+{
+  std::vector<cmGeneratorTarget const*> targets;
+  this->RuntimeDependencySet->GetInstallBuildDependencies(targets);
+  for (cmGeneratorTarget const* target : targets) {
+    dependencies.push_back({ target, BuildDependencyType::Normal });
+  }
+}
+
+void cmInstallGetRuntimeDependenciesGenerator::
+  GetInstallBuildDependencyComponents(
+    std::vector<std::string>& components) const
+{
+  if (!this->LibraryComponent.empty()) {
+    components.push_back(this->LibraryComponent);
+  }
+  if (!this->FrameworkComponent.empty() &&
+      this->FrameworkComponent != this->LibraryComponent) {
+    components.push_back(this->FrameworkComponent);
+  }
 }
 
 void cmInstallGetRuntimeDependenciesGenerator::GenerateScript(std::ostream& os)

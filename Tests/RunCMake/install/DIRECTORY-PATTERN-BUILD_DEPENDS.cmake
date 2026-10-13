@@ -1,0 +1,1 @@
+install(DIRECTORY src DESTINATION src PATTERN *.txt BUILD_DEPENDS dep)

@@ -42,6 +42,10 @@ public:
 
   bool Compute(cmLocalGenerator* lg) override;
 
+  void GetInstallBuildDependencies(
+    std::string const& config,
+    std::vector<BuildDependency>& dependencies) const override;
+
   cmLocalGenerator* GetLocalGenerator() const { return this->LocalGenerator; }
 
   std::string const& GetNamespace() const { return this->Namespace; }

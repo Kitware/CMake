@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <initializer_list>
 #include <iterator>
+#include <map>
 #include <queue>
 
 #include <cm/memory>
@@ -1588,6 +1589,67 @@ void cmGlobalFastbuildGenerator::AddTargetAll()
   this->AddTarget(std::move(allAliasNode));
 }
 
+void cmGlobalFastbuildGenerator::WriteInstallPrepTargets()
+{
+  if (!this->AreInstallPrepTargetsEnabled()) {
+    return;
+  }
+  this->CheckInstallPrepTargets();
+
+  cmGlobalGenerator::InstallPrepTargets prepTargets =
+    this->GetInstallPrepTargets(this->GetConfigNames().front());
+
+  // FASTBuild target names are case-insensitive, so merge preparation targets
+  // whose names differ only in case.  Each of them then prepares a superset of
+  // what its installation needs.
+  std::map<std::string, FastbuildAliasNode> aliases;
+  std::set<std::string> unownedGeneratedFiles;
+  auto addAlias =
+    [this, &aliases, &unownedGeneratedFiles](
+      std::string const& name,
+      cmGlobalGenerator::InstallPrepTargets::TargetMap const& targets) {
+      FastbuildAliasNode& alias = aliases[cmSystemTools::LowerCase(name)];
+      if (alias.Name.empty()) {
+        alias.Name = name;
+        alias.Hidden = false;
+      }
+      for (auto const& dependency : targets) {
+        cmGeneratorTarget const* target = dependency.first;
+        bool buildTarget =
+          dependency.second.Normal || dependency.second.InstallArtifact;
+        // FASTBuild has no node for a generated file that is not the unique
+        // output of a target, such as a byproduct, so build its installing
+        // target instead.
+        for (std::string const& file : dependency.second.GeneratedFiles) {
+          if (this->CheckInstallPrepGeneratedFile(target, file,
+                                                  unownedGeneratedFiles)) {
+            alias.PreBuildDependencies.emplace(
+              this->ConvertToFastbuildPath(file));
+          } else if (target->IsInBuildSystem()) {
+            buildTarget = true;
+          }
+        }
+        if (buildTarget) {
+          alias.PreBuildDependencies.emplace(target->GetName());
+        }
+      }
+    };
+
+  // Add install_prep/all first so that it keeps its spelling.
+  addAlias("install_prep/all", prepTargets.All);
+  for (auto const& component : prepTargets.Components) {
+    addAlias(cmStrCat("install_prep/", component.first), component.second);
+  }
+
+  for (auto& entry : aliases) {
+    FastbuildAliasNode& alias = entry.second;
+    if (alias.PreBuildDependencies.empty()) {
+      alias.PreBuildDependencies.emplace(FASTBUILD_NOOP_FILE_NAME);
+    }
+    this->WriteAlias(alias);
+  }
+}
+
 void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
 {
   if (!this->Makefiles.front()->IsOn("CMAKE_TEST_BUILD_DEPENDS")) {
@@ -1978,6 +2040,7 @@ void cmGlobalFastbuildGenerator::WriteTargets()
     *BuildFileStream << "}\n";
   }
 
+  WriteInstallPrepTargets();
   WriteTestPrepTargets();
 
   if (!this->GetCMakeInstance()->GetIsInTryCompile()) {

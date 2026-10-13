@@ -93,6 +93,21 @@ bool cmInstallFileSetGenerator::Compute(cmLocalGenerator* lg)
   return true;
 }
 
+void cmInstallFileSetGenerator::GetInstallBuildDependencies(
+  std::string const& config, std::vector<BuildDependency>& dependencies) const
+{
+  if (!this->FileSet) {
+    return;
+  }
+
+  std::vector<std::string> files;
+  for (auto const& dirEntry : this->CalculateFilesPerDir(config)) {
+    files.insert(files.end(), dirEntry.second.begin(), dirEntry.second.end());
+  }
+  AddGeneratedFileDependencies(this->LocalGenerator->GetGlobalGenerator(),
+                               config, this->Target, files, dependencies);
+}
+
 std::string cmInstallFileSetGenerator::GetDestination() const
 {
   this->CheckAbsoluteDestination(this->Destination, this->LocalGenerator);

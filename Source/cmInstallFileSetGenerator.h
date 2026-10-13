@@ -29,6 +29,10 @@ public:
 
   bool Compute(cmLocalGenerator* lg) override;
 
+  void GetInstallBuildDependencies(
+    std::string const& config,
+    std::vector<BuildDependency>& dependencies) const override;
+
   struct DestinationContext
   {
     std::string UnescapedDestination;
