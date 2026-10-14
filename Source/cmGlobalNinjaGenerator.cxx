@@ -1360,6 +1360,10 @@ void cmGlobalNinjaGenerator::WriteInstallPrepTargets()
 
 void cmGlobalNinjaGenerator::WriteTestPrepTargets()
 {
+  if (this->Makefiles.front()->IsOn("CMAKE_SKIP_TEST_PREP_TARGETS")) {
+    return;
+  }
+
   std::map<std::string, std::set<std::string>> configsByName;
   auto writeConfig = [this, &configsByName](std::string const& config) {
     struct TestPrepTarget
@@ -1444,9 +1448,6 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
     this->WritePerConfigPhony(config, build);
   };
 
-  if (!this->Makefiles.front()->IsOn("CMAKE_TEST_BUILD_DEPENDS")) {
-    return;
-  }
   if (this->IsMultiConfig()) {
     for (std::string const& config : this->GetConfigNames()) {
       writeConfig(config);

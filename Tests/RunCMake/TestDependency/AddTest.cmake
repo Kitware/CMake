@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 4.3)
 project(TestDependencyAddTest C)
 
 enable_testing()
-set(CMAKE_TEST_BUILD_DEPENDS ON)
 
 add_executable(fake_discovery fake_discovery.c)
 # Ensure the timestamp check uses the artifact path, not the target name.

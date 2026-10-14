@@ -71,8 +71,8 @@ project-wide convenience targets.
 Some convenience targets derive their names from other names in the project:
 
 * The ``test_prep/<name>`` targets use test names, which have their own
-  representability rules beyond those above.  See also :command:`add_test`
-  and :variable:`CMAKE_TEST_BUILD_DEPENDS`.
+  representability rules beyond those above.  The :ref:`Makefile Generators` do
+  not allow ``:``.  See also :ref:`Test Preparation Targets`.
 * The ``install_prep/<component>`` targets use install component names.
   A component name may contain the characters allowed in target names above,
   plus ``:`` and ``/``.  The :ref:`Makefile Generators` do not allow ``:``.
@@ -1786,6 +1786,53 @@ The :ref:`Ninja Generators`, :ref:`Makefile Generators`, and
 :generator:`FASTBuild` generator provide convenience targets that build only
 the prerequisites of a later step, such as running tests or installing.
 
+.. _`Test Preparation Targets`:
+
+Test Preparation Targets
+------------------------
+
+.. versionadded:: 4.4
+
+The generators which support preparation targets provide convenience build
+targets that build the known prerequisites of tests before running the tests,
+unless :variable:`CMAKE_SKIP_TEST_PREP_TARGETS` is enabled:
+
+``test_prep/all``
+  Prepare to run all tests.
+
+``test_prep/<name>``
+  Prepare to run the test ``<name>``.  If multiple tests in different
+  directories share the same name, their dependencies are merged into a single
+  ``test_prep/<name>`` target.
+
+Building a test preparation target ensures that the test executable is
+up-to-date before the test runs.
+
+A test preparation target is generated only when its name can be represented
+safely by the native build tool, as described under :ref:`Target Names`.
+CMake warns about a test that has build dependencies but whose name cannot be
+represented.
+
+CMake infers dependencies associated with tests from the test executable, as
+well as any targets referenced by the test command via generator expressions.
+The ``BUILD_DEPENDS`` option of the :command:`add_test` command can be used to
+add explicit build dependencies.
+
+How file dependencies are prepared depends on how the file is produced.  See
+:ref:`Preparation Target File Dependencies`.
+
+.. versionadded:: 4.5
+
+  Modules may also extend ``test_prep/all`` with directory-scoped dependencies
+  via the :prop_dir:`CMAKE_TEST_BUILD_DEPENDS` directory property.
+
+.. versionchanged:: 4.5
+
+  Test preparation targets are enabled by default.  :generator:`FASTBuild` and
+  the :ref:`Makefile Generators` gained support for test preparation targets.
+  Previously, test preparation targets were only enabled if the
+  :variable:`CMAKE_TEST_BUILD_DEPENDS` variable was enabled.
+
 .. _`Install Preparation Targets`:
 
 Install Preparation Targets
@@ -1846,44 +1893,68 @@ Installing files with the ``FILES`` or ``PROGRAMS`` signatures of the
 :prop_tgt:`PUBLIC_HEADER`, :prop_tgt:`PRIVATE_HEADER`, or :prop_tgt:`RESOURCE`
 files, implies build dependencies only for files that the build produces,
 i.e., target output artifacts, and outputs and byproducts of custom commands
-and custom targets.  How such a file is prepared depends on how it is produced:
+and custom targets.  How such a file is prepared depends on how it is produced.
+See :ref:`Preparation Target File Dependencies`.
+
+.. _`Preparation Target File Dependencies`:
+
+Preparation Target File Dependencies
+------------------------------------
+
+The manner in which a file dependency of a test or install preparation target
+is prepared depends on how it is produced:
 
 * A target's output artifact, such as one named by :genex:`TARGET_FILE`, is
   prepared by building that target.
 
 * A file that is the output of a custom command attached to exactly one
-  target is prepared by running that custom command.  The target which
-  installs the file (or the file set to which the file belongs), if any, is
-  not built.  The :ref:`Makefile Generators` cannot depend on individual
-  files, so they build the target owning the custom command instead.
+  target is prepared by running that custom command.  The
+  :ref:`Makefile Generators` cannot depend on individual files, so they build
+  the target owning the custom command instead.
+
+  The target which installs the file (or the file set to which the file
+  belongs), if any, is not built by installation preparation targets.
 
 * Any other generated file, such as a byproduct or the output of a custom
   command attached to more than one target, is prepared by depending on the
   file itself, which runs whatever produces it.  The
   :ref:`Makefile Generators` and :generator:`FASTBuild` cannot do so, so they
-  warn.  If a target installs the file (or the file set to which the file
-  belongs), they build that target instead, which must therefore depend on
-  the producer, e.g., through :command:`add_dependencies`.  Otherwise, they
-  do not prepare the file.
+  warn.
+
+  For install preparation targets, if a target installs the file (or the file
+  set to which the file belongs), the preparation target will build that target
+  instead, which must therefore depend on the producer, e.g., through
+  :command:`add_dependencies`.  Otherwise, the preparation target does not
+  prepare the file.
 
 For example:
 
 .. code-block:: cmake
 
-  # Preparation runs only the custom command, not the library build.
+  # Preparation which depends on `generated.h` runs only the custom command,
+  # not the library build.
   add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated.h"
     COMMAND ...)
   add_library(A a.c "${CMAKE_CURRENT_BINARY_DIR}/generated.h")
   set_property(TARGET A PROPERTY PUBLIC_HEADER
     "${CMAKE_CURRENT_BINARY_DIR}/generated.h")
 
-  # Preparation runs gen, or with some generators builds B instead, so B
-  # must depend on the producer of its byproduct.
+  # Preparation which depends on `byproduct.h` runs `gen`, or with some
+  # generators builds `B` instead, so `B` must depend on the producer of its
+  # byproduct.
   add_custom_target(gen COMMAND ...
     BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/byproduct.h")
   add_library(B b.c)
   add_dependencies(B gen)
+
+  # The preparation target for an install which installs `B` will implicitly
+  # depend on `byproduct.h` when it appears in an associated file set.
   set_property(TARGET B PROPERTY PUBLIC_HEADER
+    "${CMAKE_CURRENT_BINARY_DIR}/byproduct.h")
+
+  # A test depending on `byproduct.h` needs to express that dependency
+  # explicitly using `BUILD_DEPENDS`.
+  add_test(test_B COMMAND test_B BUILD_DEPENDS
     "${CMAKE_CURRENT_BINARY_DIR}/byproduct.h")
 
 The ``BUILD_DEPENDS`` option of the ``FILES``, ``PROGRAMS``, ``DIRECTORY``,

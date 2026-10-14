@@ -86,11 +86,18 @@ Generators
   :ref:`Install Preparation Targets`.
 
 * The :generator:`FASTBuild` generator and the :ref:`Makefile Generators`
-  now generate ``test_prep/<test-name>`` and ``test_prep/all`` convenience
-  build targets when the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is
-  enabled, matching the behavior of the :ref:`Ninja Generators`.  These
-  targets build the dependencies of tests added by :command:`add_test`,
-  including those listed with the ``BUILD_DEPENDS`` keyword.
+  now provide ``test_prep/<test-name>`` and ``test_prep/all`` convenience
+  build targets by default.  The :variable:`CMAKE_SKIP_TEST_PREP_TARGETS`
+  variable may be enabled to skip generating them.  These targets build the
+  dependencies of tests added by :command:`add_test`, including those listed
+  with the ``BUILD_DEPENDS`` keyword.  See :ref:`Test Preparation Targets`.
+
+* The :ref:`Ninja Generators` now provide ``test_prep/<test-name>`` and
+  ``test_prep/all`` convenience build targets build targets by default.  The
+  :variable:`CMAKE_SKIP_TEST_PREP_TARGETS` variable may be enabled to
+  skip generating them.  These targets were previously generated only if
+  :variable:`CMAKE_TEST_BUILD_DEPENDS` was enabled.  See
+  :ref:`Test Preparation Targets`.
 
 * :ref:`Makefile Generators` and :ref:`Ninja Generators` gained support
   for adding a linker launcher with ``CUDA`` and ``HIP``.
@@ -258,6 +265,11 @@ Variables
 
 * The :variable:`CMAKE_INSTALL_SBOM_FORMATS` variable was added
   to enable Software Bill of Materials (SBOM) generation.
+
+* The :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is no longer honored.
+  Test preparation targets are now enabled by default.  The
+  :variable:`CMAKE_SKIP_TEST_PREP_TARGETS` variable may be enabled to skip
+  generating them.
 
 Environment Variables
 ---------------------

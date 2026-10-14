@@ -103,11 +103,10 @@ the provided regular expression and replacement strings.
   current source directory if the file exists there, and otherwise with respect
   to the current binary directory.
 
-  When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled with the
-  :ref:`Ninja Generators`, :generator:`FASTBuild`, or :ref:`Makefile
-  Generators`, these dependencies are built by the ``test_prep/all`` target.
-  If ``COMMAND`` names an executable target created by
-  :command:`add_executable`, that target is also added automatically.
+  When :ref:`Test Preparation Targets` are not disabled, these dependencies are
+  built by the ``test_prep/all`` target.  If ``COMMAND`` names an executable
+  target created by :command:`add_executable`, that target is also added
+  automatically.
 
   Individual ``test_prep/<test-name>`` targets are not created for discovered
   tests because their names are not known at generation time.

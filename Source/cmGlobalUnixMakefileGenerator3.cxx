@@ -1022,7 +1022,7 @@ void cmGlobalUnixMakefileGenerator3::ComputeTestPrepTargets()
   this->TestPrepTargets.clear();
   this->TestPrepEnabled = false;
   if (this->Makefiles.empty() ||
-      !this->Makefiles.front()->IsOn("CMAKE_TEST_BUILD_DEPENDS")) {
+      this->Makefiles.front()->IsOn("CMAKE_SKIP_TEST_PREP_TARGETS")) {
     return;
   }
   this->TestPrepEnabled = true;

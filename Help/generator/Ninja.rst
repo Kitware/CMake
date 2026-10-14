@@ -3,8 +3,8 @@ Ninja
 
 Generates a ``build.ninja`` file into the build tree.
 
-Builtin Targets
-^^^^^^^^^^^^^^^
+Built-In Targets
+^^^^^^^^^^^^^^^^
 
 ``all``
 
@@ -56,7 +56,7 @@ Builtin Targets
 
   .. versionadded:: 4.4
 
-    Created only if the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is
+    Created unless the :variable:`CMAKE_SKIP_TEST_PREP_TARGETS` variable is
     enabled. Builds all known build dependencies for the named test, including
     the executable target invoked by the test, targets referenced by generator
     expressions in the test command, and explicit ``BUILD_DEPENDS`` entries.
@@ -67,12 +67,28 @@ Builtin Targets
     :manual:`cmake-buildsystem(7)` manual for more details on
     :ref:`Target Names`.
 
+    Individual ``test_prep/<test-name>`` targets are not created for tests
+    discovered at test time, because their names are not known during
+    generation.
+
+  .. versionchanged:: 4.5
+
+    These targets are created by default. In CMake 4.4, they were created only
+    if the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable was enabled.
+
 ``test_prep/all``
 
   .. versionadded:: 4.4
 
-    Created only if the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is
-    enabled. Depends on every generated ``test_prep/<test-name>`` target.
+    Created unless the :variable:`CMAKE_SKIP_TEST_PREP_TARGETS` variable is
+    enabled. Depends on every generated ``test_prep/<test-name>`` target. Also
+    builds dependencies recorded by the :prop_dir:`CMAKE_TEST_BUILD_DEPENDS`
+    directory property.
+
+  .. versionchanged:: 4.5
+
+    This target is created by default. In CMake 4.4, it was created only if
+    the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable was enabled.
 
 For each subdirectory ``sub/dir`` of the project, additional targets
 are generated:
