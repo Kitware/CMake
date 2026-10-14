@@ -27,6 +27,12 @@ class cmDebuggerAdapter;
 class cmMessenger
 {
 public:
+  enum class SuppressionHint
+  {
+    Show,
+    Hide,
+  };
+
   void IssueMessage(
     MessageType type, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace());
@@ -40,6 +46,12 @@ public:
                       cmListFileBacktrace const& backtrace);
 
   void SetTopSource(cm::optional<std::string> topSource);
+
+  // Whether author diagnostics end with a note on how to suppress them.
+  void SetSuppressionHint(SuppressionHint hint)
+  {
+    this->SuppressionHintMode = hint;
+  }
 
   // Print the top of a backtrace.
   void PrintBacktraceTitle(std::ostream& out,
@@ -67,6 +79,7 @@ public:
 
 private:
   cm::optional<std::string> TopSource;
+  SuppressionHint SuppressionHintMode = SuppressionHint::Show;
 
   std::vector<Message> DisplayedMessages;
 

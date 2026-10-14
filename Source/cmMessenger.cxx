@@ -82,9 +82,10 @@ void printMessageText(std::ostream& msg, std::string const& text)
 }
 
 void displayMessage(MessageType type, cmDiagnosticCategory category,
-                    std::ostringstream& msg)
+                    cmMessenger::SuppressionHint hint, std::ostringstream& msg)
 {
-  if (isAuthorDiagnostic(category)) {
+  if (hint == cmMessenger::SuppressionHint::Show &&
+      isAuthorDiagnostic(category)) {
     // Add a note about warning suppression.
     std::ostringstream text;
     if (type == MessageType::WARNING) {
@@ -245,7 +246,7 @@ void cmMessenger::DisplayMessage(MessageType type,
   // Add the rest of the context.
   PrintCallStack(msg, backtrace, this->TopSource);
 
-  displayMessage(type, category, msg);
+  displayMessage(type, category, this->SuppressionHintMode, msg);
 
   // Add message to logs
   this->DisplayedMessages.emplace_back(
