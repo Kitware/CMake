@@ -3448,7 +3448,9 @@ std::pair<cmFileSet*, bool> cmTarget::GetOrCreateFileSet(
     this->impl->FileSets.emplace(name, cmFileSet(mf, this, name, type, vis));
   if (result.second) {
     auto bt = this->impl->Makefile->GetBacktrace();
-    if (cm::contains(this->impl->FileSetTypes, type)) {
+    // if (cm::contains(this->impl->FileSetTypes, type)) {
+    if (result.first->second.GetDomain() ==
+        cm::FileSetMetadata::FileSetDomain::NATIVE) {
       this->impl->FileSetTypes.at(type).AddFileSet(name, vis, std::move(bt));
     } else {
       this->impl->FileSetRules[type].AddFileSet(name, vis, std::move(bt));
@@ -3483,16 +3485,8 @@ std::vector<std::string> cmTarget::GetAllFileSetNames(
 {
   std::vector<std::string> result;
 
-  bool const useNative =
-    domains.contains(cm::FileSetMetadata::FileSetDomain::NATIVE);
-  bool const useRule =
-    domains.contains(cm::FileSetMetadata::FileSetDomain::RULE);
-
   for (auto const& it : this->impl->FileSets) {
-    bool nativeType =
-      cm::contains(this->impl->FileSetTypes, it.second.GetType());
-
-    if ((useNative && nativeType) || (useRule && !nativeType)) {
+    if (domains.contains(it.second.GetDomain())) {
       result.push_back(it.first);
     }
   }
