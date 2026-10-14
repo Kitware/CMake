@@ -22,7 +22,7 @@ enable_testing ()
 foreach (test MinimalTgt MinimalVar)
   add_test (NAME Compile${test} COMMAND ${Java_JAVAC_EXECUTABLE}
     ${TestMinimal_SOURCE_DIR}/${test}.java)
-  add_test (NAME Remove${test} COMMAND ${CMAKE_COMMAND} -E remove
+  add_test (NAME Remove${test} COMMAND ${CMAKE_COMMAND} -E rm -f
     ${TestMinimal_SOURCE_DIR}/${test}.class)
 
   add_test (NAME ${test} COMMAND ${Java_JAVA_EXECUTABLE}

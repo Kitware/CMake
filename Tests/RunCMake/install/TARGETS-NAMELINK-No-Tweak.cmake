@@ -13,7 +13,7 @@ install(TARGETS foo DESTINATION lib)
 # This verifies that no install tweaks are added for the namelink.
 set(linker_script "INPUT($<TARGET_SONAME_FILE_NAME:foo>)")
 add_custom_command(TARGET foo POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E remove "$<TARGET_LINKER_FILE:foo>"
+  COMMAND "${CMAKE_COMMAND}" -E rm "$<TARGET_LINKER_FILE:foo>"
   COMMAND "${CMAKE_COMMAND}" -E echo "${linker_script}" > "$<TARGET_LINKER_FILE:foo>"
   COMMENT "Generating linker script: '${linker_script}' as file $<TARGET_LINKER_FILE:foo>"
   VERBATIM
