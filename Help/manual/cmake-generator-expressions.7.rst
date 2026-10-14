@@ -49,6 +49,14 @@ than 4.2.0.
   but not all.  Check a property's documentation for explicit mention
   of generator expressions before using them.
 
+.. note::
+
+  Property names specified as part of a generator expression must respect
+  the following regular expression: ``^[A-Za-z0-9_:]+$``.
+
+  .. versionchanged:: 4.5
+    The character ``:`` is now allowed.
+
 Whitespace And Quoting
 ======================
 
