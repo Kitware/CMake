@@ -28,6 +28,7 @@ Synopsis
     file(`STRINGS`_ <filename> <out-var> [...])
     file(`\<HASH\>`_ <filename> <out-var>)
     file(`TIMESTAMP`_ <filename> <out-var> [...])
+    file(`DIFFERENT`_ <out-var> FILES <file1> <file2>)
 
   `Writing`_
     file({`WRITE`_ | `APPEND`_} <filename> <content>...)
@@ -159,6 +160,16 @@ Reading
 
   See the :command:`string(TIMESTAMP)` command for documentation of
   the ``<format>`` and ``UTC`` options.
+
+.. signature::
+  file(DIFFERENT <variable> FILES <file1> <file2>)
+
+  Compare the contents of ``<file1>`` and ``<file2>`` byte for byte and
+  store true in ``<variable>`` if they differ, or false if they are the
+  same.  If either file does not exist, or an error occurs while comparing
+  the files, the files are considered different.  Relative paths are
+  evaluated with respect to the current working directory rather than the
+  current source directory, so absolute paths are recommended.
 
 Writing
 ^^^^^^^
