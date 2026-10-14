@@ -1543,7 +1543,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
               cmSystemTools::Error(
                 "File to remove does not exist and force is not set: " + arg);
             } else {
-              cmSystemTools::Error("File can't be removed and still exist: " +
+              cmSystemTools::Error("File can't be removed and still exists: " +
                                    arg);
             }
             return_value = 1;
