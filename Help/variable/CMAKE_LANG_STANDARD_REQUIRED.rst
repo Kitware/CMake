@@ -19,5 +19,4 @@ set when a target is created.
 
 For supported CMake versions see the respective pages.
 
-See the :manual:`cmake-compile-features(7)` manual for information on
-compile features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst

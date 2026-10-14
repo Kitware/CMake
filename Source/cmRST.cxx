@@ -438,9 +438,10 @@ void cmRST::ProcessDirectiveCodeBlock()
 
 void cmRST::ProcessDirectiveReplace()
 {
-  // Record markup lines as replacement text.
+  // Record markup lines as replacement text.  Documents processed
+  // together share one context, so a redefinition must override.
   std::string& replacement = this->Replace[0][this->ReplaceName];
-  replacement += cmJoin(this->MarkupLines, " ");
+  replacement = cmJoin(this->MarkupLines, " ");
   this->ReplaceName.clear();
 }
 

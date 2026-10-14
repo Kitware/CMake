@@ -10,7 +10,5 @@ This property is used to initialize the :prop_tgt:`COMPILE_OPTIONS` target
 property when a target is created, which is used by the generators to set
 the options for the compiler.
 
-Contents of ``COMPILE_OPTIONS`` may use "generator expressions" with the
-syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual
-for available expressions.  See the :manual:`cmake-buildsystem(7)` manual
-for more on defining buildsystem properties.
+.. |genex_subject| replace:: ``COMPILE_OPTIONS``
+.. include:: ../include/GENEX_NOTE.rst

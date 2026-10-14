@@ -9,5 +9,4 @@ INTERFACE_COMPILE_FEATURES
 .. |PROPERTY_LINK| replace:: :prop_tgt:`COMPILE_FEATURES`
 .. include:: include/INTERFACE_BUILD_PROPERTY.rst
 
-See the :manual:`cmake-compile-features(7)` manual for information on compile
-features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst

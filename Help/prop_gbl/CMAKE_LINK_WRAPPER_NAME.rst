@@ -20,10 +20,8 @@ The value is a :ref:`semicolon-separated list <CMake Language Lists>` of
 command line arguments.  Empty arguments are preserved, and a literal
 semicolon within an argument may be written as ``\;``.
 
-Contents of ``CMAKE_LINK_WRAPPER_<NAME>`` may use "generator expressions"
-with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |genex_subject| replace:: ``CMAKE_LINK_WRAPPER_<NAME>``
+.. include:: ../include/GENEX_NOTE.rst
 
 Example
 ^^^^^^^

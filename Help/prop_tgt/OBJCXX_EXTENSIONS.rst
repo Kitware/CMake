@@ -11,8 +11,7 @@ as ``-std=gnu++11`` instead of ``-std=c++11`` to the compile line.  This
 property is ``ON`` by default. The basic ObjC++ standard level is
 controlled by the :prop_tgt:`OBJCXX_STANDARD` target property.
 
-See the :manual:`cmake-compile-features(7)` manual for information on
-compile features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst
 
 If the property is not set, and the project has set the :prop_tgt:`CXX_EXTENSIONS`,
 the value of :prop_tgt:`CXX_EXTENSIONS` is set for ``OBJCXX_EXTENSIONS``.

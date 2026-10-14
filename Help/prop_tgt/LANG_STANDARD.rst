@@ -33,5 +33,4 @@ created.
 For supported values and CMake versions see the respective pages.
 To control compiler-specific extensions see :prop_tgt:`<LANG>_EXTENSIONS`.
 
-See the :manual:`cmake-compile-features(7)` manual for information on
-compile features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst

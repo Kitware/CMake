@@ -9,12 +9,8 @@ file builds.  The flags will be added after target-wide flags.
 
 Use :prop_sf:`COMPILE_DEFINITIONS` to pass additional preprocessor definitions.
 
-Contents of ``COMPILE_FLAGS`` may use "generator expressions"
-with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  However, :generator:`Xcode`
-does not support per-config per-source settings, so expressions
-that depend on the build configuration are not allowed with that
-generator.
+.. |genex_subject| replace:: ``COMPILE_FLAGS``
+.. include:: ../include/GENEX_NOTE_PER_SOURCE.rst
 
 .. note::
 

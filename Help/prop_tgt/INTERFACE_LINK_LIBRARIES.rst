@@ -19,10 +19,8 @@ property, are linked first, followed by indirect dependencies from the
 transitive closure of the direct dependencies'
 ``INTERFACE_LINK_LIBRARIES`` properties.  See policy :policy:`CMP0022`.
 
-Contents of ``INTERFACE_LINK_LIBRARIES`` may use "generator expressions"
-with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |genex_subject| replace:: ``INTERFACE_LINK_LIBRARIES``
+.. include:: ../include/GENEX_NOTE.rst
 
 .. include:: include/LINK_LIBRARIES_INDIRECTION.rst
 

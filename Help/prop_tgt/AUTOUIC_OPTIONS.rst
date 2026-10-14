@@ -17,9 +17,8 @@ created, or an empty string otherwise.
 The options set on the target may be overridden by :prop_sf:`AUTOUIC_OPTIONS`
 set on the ``.ui`` source file.
 
-This property may use "generator expressions" with the syntax ``$<...>``.
-See the :manual:`cmake-generator-expressions(7)` manual for available
-expressions.
+.. |genex_subject| replace:: ``AUTOUIC_OPTIONS``
+.. include:: ../include/GENEX_NOTE.rst
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
