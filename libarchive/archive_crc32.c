@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2009 Joerg  Sonnenberger
+ * Copyright (c) 2009 Joerg Sonnenberger
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,27 +23,98 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ARCHIVE_CRC32_H
-#define ARCHIVE_CRC32_H
+#include "archive_platform.h"
+#include "archive_private.h"
 
-#ifndef __LIBARCHIVE_BUILD
-#error This header is only to be used internally to libarchive.
+#if defined(HAVE_ZLIB_H)
+#include <zlib.h>
 #endif
 
-#include <stddef.h>
-
+#if (defined(__aarch64__) || defined(_M_ARM64)) && \
+    defined(__ARM_FEATURE_CRC32) && !defined(__ARM_BIG_ENDIAN) && \
+    !defined(__AARCH64EB__)
 /*
- * When zlib is unavailable, we should still be able to validate
- * uncompressed zip archives.  That requires us to be able to compute
- * the CRC32 check value.  This is a drop-in compatible replacement
- * for crc32() from zlib.  It's slower than the zlib implementation,
- * but still pretty fast: This runs about 300MB/s on my 3GHz P4
- * compared to about 800MB/s for the zlib implementation.
+ * Implementation 1: Hardware-accelerated CRC32 using ARMv8 ACLE instructions.
+ * Only use this when the compiler target guarantees CRC extension support.
+ * The extension is optional in ARMv8.0, so enabling it here without runtime
+ * detection would make generic AArch64 binaries unsafe on older CPUs.
  */
-static unsigned long
-crc32(unsigned long crc, const void *_p, size_t len)
+
+#if defined(_MSC_VER)
+#include <arm64_acle.h>
+#elif defined(__GNUC__) || defined(__clang__)
+#include <arm_acle.h>
+#endif
+#include <stdint.h>
+
+unsigned long
+__archive_crc32(unsigned long crc, const void *_p, size_t len)
 {
-	const unsigned char *p = _p;
+	const unsigned char *p = (const unsigned char *)_p;
+	uint32_t c = (uint32_t)crc ^ 0xffffffffU;
+
+	if (p == NULL)
+		return (0);
+
+	/* Align to 8 bytes */
+	while (len > 0 && ((uintptr_t)p & 7)) {
+		c = __crc32b(c, *p++);
+		len--;
+	}
+
+	/* 8-way unrolled 64-bit loop */
+	while (len >= 64) {
+		c = __crc32d(c, *(const uint64_t *)p); p += 8;
+		c = __crc32d(c, *(const uint64_t *)p); p += 8;
+		c = __crc32d(c, *(const uint64_t *)p); p += 8;
+		c = __crc32d(c, *(const uint64_t *)p); p += 8;
+		c = __crc32d(c, *(const uint64_t *)p); p += 8;
+		c = __crc32d(c, *(const uint64_t *)p); p += 8;
+		c = __crc32d(c, *(const uint64_t *)p); p += 8;
+		c = __crc32d(c, *(const uint64_t *)p); p += 8;
+		len -= 64;
+	}
+
+	while (len >= 8) {
+		c = __crc32d(c, *(const uint64_t *)p);
+		p += 8;
+		len -= 8;
+	}
+
+	/* Trailing bytes */
+	while (len > 0) {
+		c = __crc32b(c, *p++);
+		len--;
+	}
+
+	return (c ^ 0xffffffffU);
+}
+
+#elif defined(HAVE_ZLIB_H)
+/*
+ * Implementation 2: zlib crc32().
+ * zlib provides a highly-optimized CRC32 implementation across many platforms.
+ */
+
+unsigned long
+__archive_crc32(unsigned long crc, const void *_p, size_t len)
+{
+	if (_p == NULL)
+		return (0);
+	return crc32(crc, _p, (uInt)len);
+}
+
+#else
+/*
+ * Implementation 3: Portable 256-entry table fallback.
+ * Used when neither hardware CRC32 nor zlib is available.
+ * Key feature: Reasonably fast and requires no platform-specific support.
+ */
+
+unsigned long
+__archive_crc32(unsigned long crc, const void *_p, size_t len)
+{
+	const unsigned char *p = (const unsigned char *)_p;
 	static const unsigned long crc_tbl[256] = {
 		0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419,
 		0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4,
@@ -103,8 +174,6 @@ crc32(unsigned long crc, const void *_p, size_t len)
 		return (0);
 
 	crc = crc ^ 0xffffffffUL;
-	/* A use of this loop is about 20% - 30% faster than
-	 * no use version in any optimization option of gcc.  */
 	for (;len >= 8; len -= 8) {
 		crc = crc_tbl[(crc ^ *p++) & 0xff] ^ (crc >> 8);
 		crc = crc_tbl[(crc ^ *p++) & 0xff] ^ (crc >> 8);
