@@ -6,5 +6,4 @@ CMAKE_CXX_EXTENSIONS
 Default value for :prop_tgt:`CXX_EXTENSIONS` target property if set when a
 target is created.
 
-See the :manual:`cmake-compile-features(7)` manual for information on
-compile features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst

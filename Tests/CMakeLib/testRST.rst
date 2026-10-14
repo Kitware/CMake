@@ -195,3 +195,8 @@ Testing a |delayed substitution|.
 .. |header substitution| replace:: this text is a different length
 
 Substitutions in headers should cause the header line's length to be updated.
+
+.. |redefined substitution| replace:: first definition
+.. |redefined substitution| replace:: second definition
+
+A |redefined substitution| uses only the last definition.

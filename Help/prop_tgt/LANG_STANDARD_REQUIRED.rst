@@ -32,5 +32,4 @@ These properties are initialized by the value of the
 :variable:`CMAKE_<LANG>_STANDARD_REQUIRED` variable if it is set when a target
 is created.
 
-See the :manual:`cmake-compile-features(7)` manual for information on
-compile features and a list of supported compilers.
+.. include:: ../include/COMPILE_FEATURES_NOTE.rst

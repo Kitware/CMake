@@ -22,10 +22,8 @@ This property is supported only by :ref:`Makefile Generators` and
 supported only when the target's language is one of: ``C``, ``CXX``, ``CUDA``,
 ``OBJC``, ``OBJCXX``, ``Fortran``, ``HIP``.
 
-Contents of ``LINK_WRAPPERS`` may use "generator expressions" with the syntax
-``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for
-available expressions.  See the :manual:`cmake-buildsystem(7)` manual for more
-on defining buildsystem properties.
+.. |genex_subject| replace:: ``LINK_WRAPPERS``
+.. include:: ../include/GENEX_NOTE.rst
 
 Wrappers apply to the link command of executables, shared libraries, and
 module libraries. As with :prop_tgt:`<LANG>_LINKER_LAUNCHER`, they do not

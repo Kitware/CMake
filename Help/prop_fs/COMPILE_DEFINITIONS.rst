@@ -17,12 +17,8 @@ per-configuration definitions on source files.
 
 .. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.rst
 
-Contents of ``COMPILE_DEFINITIONS`` may use :manual:`cmake-generator-expressions(7)`
-with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  However, :generator:`Xcode`
-does not support per-config per-source settings, so expressions
-that depend on the build configuration are not allowed with that
-generator.
+.. |genex_subject| replace:: ``COMPILE_DEFINITIONS``
+.. include:: ../include/GENEX_NOTE_PER_SOURCE.rst
 
 Related properties:
 
