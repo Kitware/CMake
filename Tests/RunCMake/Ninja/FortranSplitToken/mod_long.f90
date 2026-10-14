@@ -1,0 +1,3 @@
+module split_token_module_with_a_long_name_that_flang_wraps_in_output
+  integer :: long_value = 2
+end module split_token_module_with_a_long_name_that_flang_wraps_in_output
