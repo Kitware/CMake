@@ -41,27 +41,6 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 
-#define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
-
-void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
-                         int timeout_ms);
-
-/* return how much time there is left to shutdown the connection at
- * sockindex. Returns 0 if there is no limit or shutdown has not started. */
-timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int8_t sockindex);
-
-/* return how much time there is left to shutdown the connection.
- * Returns 0 if there is no limit or shutdown has not started. */
-timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
-                                       struct connectdata *conn);
-
-void Curl_shutdown_clear(struct Curl_easy *data, int8_t sockindex);
-
-/* TRUE iff shutdown has been started */
-bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex);
-
 /*
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given Curl_easy.
@@ -109,6 +88,13 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
  */
 CURLcode Curl_conn_connect(struct Curl_easy *data, int8_t sockindex,
                            bool blocking, bool *done);
+
+/**
+ * The filter chain at `sockindex` failed to connect, e.g. the TLS handshake
+ * timed out. Let the filters that did connect, like the TCP socket, report
+ * their IP information and stats to the transfer.
+ */
+void Curl_conn_report_failed(struct Curl_easy *data, int8_t sockindex);
 
 /* Set conn to allow multiplexing. */
 void Curl_conn_set_multiplex(struct connectdata *conn);

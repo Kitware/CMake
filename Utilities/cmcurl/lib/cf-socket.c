@@ -177,9 +177,17 @@ static void tcpnodelay(struct Curl_cfilter *cf,
   (defined(_WIN32) && !defined(TCP_KEEPIDLE))
 /* Solaris < 11.4, DragonFlyBSD < 500702 and Windows < 10.0.16299
  * use millisecond units. */
-#define KEEPALIVE_FACTOR(x) ((x) *= 1000)
+static void alive_unit(int *x)
+{
+  /* make sure this doesn't wrap */
+  if(*x < (INT_MAX / 1000))
+    *x *= 1000;
+  else
+    /* this is still almost 25 days */
+    *x = INT_MAX;
+}
 #else
-#define KEEPALIVE_FACTOR(x)
+#define alive_unit(x)
 #endif
 #endif
 
@@ -250,10 +258,10 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
       DWORD dummy;
       vals.onoff = 1;
       optval = curlx_sltosi(data->set.tcp_keepidle);
-      KEEPALIVE_FACTOR(optval);
+      alive_unit(&optval);
       vals.keepalivetime = (u_long)optval;
       optval = curlx_sltosi(data->set.tcp_keepintvl);
-      KEEPALIVE_FACTOR(optval);
+      alive_unit(&optval);
       vals.keepaliveinterval = (u_long)optval;
       if(WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID)&vals, sizeof(vals),
                   NULL, 0, &dummy, NULL, NULL) != 0) {
@@ -264,7 +272,7 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
 #else /* !USE_WINSOCK */
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
-    KEEPALIVE_FACTOR(optval);
+    alive_unit(&optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
@@ -273,7 +281,7 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
 #elif defined(TCP_KEEPALIVE)
     /* macOS style */
     optval = curlx_sltosi(data->set.tcp_keepidle);
-    KEEPALIVE_FACTOR(optval);
+    alive_unit(&optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPALIVE on fd "
@@ -282,7 +290,7 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
 #elif defined(TCP_KEEPALIVE_THRESHOLD)
     /* Solaris <11.4 style */
     optval = curlx_sltosi(data->set.tcp_keepidle);
-    KEEPALIVE_FACTOR(optval);
+    alive_unit(&optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_THRESHOLD,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPALIVE_THRESHOLD on fd "
@@ -291,7 +299,7 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
 #endif
 #ifdef TCP_KEEPINTVL
     optval = curlx_sltosi(data->set.tcp_keepintvl);
-    KEEPALIVE_FACTOR(optval);
+    alive_unit(&optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPINTVL on fd "
@@ -318,7 +326,7 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
       else
         optval = keepcnt * keepintvl;
     }
-    KEEPALIVE_FACTOR(optval);
+    alive_unit(&optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_ABORT_THRESHOLD,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPALIVE_ABORT_THRESHOLD"
@@ -577,11 +585,13 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
  * len    [in]     - length of the input string.
  * dev    [in/out] - address where a pointer to newly allocated memory
  *                   holding the interface-or-host will be stored upon
- *                   completion.
+ *                   completion or NULL if the caller is not interested.
  * iface  [in/out] - address where a pointer to newly allocated memory
- *                   holding the interface will be stored upon completion.
+ *                   holding the interface will be stored upon completion
+ *                   or NULL if the caller is not interested.
  * host   [in/out] - address where a pointer to newly allocated memory
- *                   holding the host will be stored upon completion.
+ *                   holding the host will be stored upon completion
+ *                   or NULL if the caller is not interested.
  *
  * Returns CURLE_OK on success.
  */
@@ -593,27 +603,36 @@ CURLcode Curl_parse_interface(const char *input,
   static const char if_host_prefix[] = "ifhost!";
   size_t len;
 
-  DEBUGASSERT(dev);
-  DEBUGASSERT(iface);
-  DEBUGASSERT(host);
-
   len = strlen(input);
   if(len > 512)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(dev)
+    *dev = NULL;
+  if(iface)
+    *iface = NULL;
+  if(host)
+    *host = NULL;
 
   if(!strncmp(if_prefix, input, strlen(if_prefix))) {
     input += strlen(if_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *iface = curlx_memdup0(input, len - strlen(if_prefix));
-    return *iface ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    if(iface) {
+      *iface = curlx_memdup0(input, len - strlen(if_prefix));
+      return *iface ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    }
+    return CURLE_OK;
   }
   else if(!strncmp(host_prefix, input, strlen(host_prefix))) {
     input += strlen(host_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *host = curlx_memdup0(input, len - strlen(host_prefix));
-    return *host ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    if(host) {
+      *host = curlx_memdup0(input, len - strlen(host_prefix));
+      return *host ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    }
+    return CURLE_OK;
   }
   else if(!strncmp(if_host_prefix, input, strlen(if_host_prefix))) {
     const char *host_part;
@@ -622,22 +641,30 @@ CURLcode Curl_parse_interface(const char *input,
     host_part = memchr(input, '!', len);
     if(!host_part || !*(host_part + 1))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *iface = curlx_memdup0(input, host_part - input);
-    if(!*iface)
-      return CURLE_OUT_OF_MEMORY;
+    if(iface) {
+      *iface = curlx_memdup0(input, host_part - input);
+      if(!*iface)
+        return CURLE_OUT_OF_MEMORY;
+    }
     ++host_part;
-    *host = curlx_memdup0(host_part, len - (host_part - input));
-    if(!*host) {
-      curlx_safefree(*iface);
-      return CURLE_OUT_OF_MEMORY;
+    if(host) {
+      *host = curlx_memdup0(host_part, len - (host_part - input));
+      if(!*host) {
+        if(iface)
+          curlx_safefree(*iface);
+        return CURLE_OUT_OF_MEMORY;
+      }
     }
     return CURLE_OK;
   }
 
   if(!*input)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  *dev = curlx_memdup0(input, len);
-  return *dev ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+  if(dev) {
+    *dev = curlx_memdup0(input, len);
+    return *dev ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
 }
 
 #ifndef CURL_DISABLE_BINDLOCAL
@@ -652,34 +679,42 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 #ifdef USE_IPV6
   struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)&sa;
 #endif
-
   struct Curl_dns_entry *h = NULL;
   unsigned short port = data->set.localport; /* use this port number, 0 for
                                                 "random" */
   /* how many port numbers to try to bind to, increasing one at a time */
   int portnum = data->set.localportrange;
-  const char *dev = CURL_EASY_STR(data, STRING_DEVICE);
-  const char *iface_input = CURL_EASY_STR(data, STRING_INTERFACE);
-  const char *host_input = CURL_EASY_STR(data, STRING_BINDHOST);
-  const char *iface = iface_input ? iface_input : dev;
-  const char *host = host_input ? host_input : dev;
+  char *dev_in = NULL, *iface_in = NULL, *host_in = NULL;
+  const char *iface = NULL, *host = NULL;
   int sockerr;
 #ifdef IP_BIND_ADDRESS_NO_PORT
   int on = 1;
 #endif
+  CURLcode result = CURLE_OK;
+
 #ifndef USE_IPV6
   (void)scope;
 #endif
+  if(conn->interface_opts) {
+    /*************************************************************
+     * Select device to bind socket to
+     *************************************************************/
+    result = Curl_parse_interface(conn->interface_opts,
+                                  &dev_in, &iface_in, &host_in);
+    if(result)
+      goto out;
+    /* This is how we use the values */
+    iface = iface_in ? iface_in : dev_in;
+    host = host_in ? host_in : dev_in;
+  }
 
-  /*************************************************************
-   * Select device to bind socket to
-   *************************************************************/
   if(!iface && !host && !port)
-    /* no local kind of binding was requested */
-    return CURLE_OK;
-  else if(iface && (strlen(iface) >= 255))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
 
+  if(iface && (strlen(iface) >= 255)) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
+  }
   memset(&sa, 0, sizeof(struct Curl_sockaddr_storage));
 
   if(iface || host) {
@@ -688,32 +723,31 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     if2ip_result_t if2ip_result = IF2IP_NOT_FOUND;
 
 #ifdef SO_BINDTODEVICE
-    if(iface) {
-      /*
-       * This binds the local socket to a particular interface. This will
-       * force even requests to other local interfaces to go out the external
-       * interface. Only bind to the interface when specified as interface,
-       * not as a hostname or ip address.
-       *
-       * The interface might be a VRF, eg: vrf-blue, which means it cannot be
-       * converted to an IP address and would fail Curl_if2ip. Try to
-       * use it straight away.
-       */
-      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                    iface, (curl_socklen_t)strlen(iface) + 1) == 0) {
-        /* This is often "errno 1, error: Operation not permitted" if you are
-         * not running as root or another suitable privileged user. If it
-         * succeeds it means the parameter was a valid interface and not an IP
-         * address. Return immediately.
-         */
-        if(!host_input) {
-          infof(data, "socket successfully bound to interface '%s'", iface);
-          return CURLE_OK;
-        }
-      }
+    /*
+     * This binds the local socket to a particular interface. This will
+     * force even requests to other local interfaces to go out the external
+     * interface. Only bind to the interface when specified as interface,
+     * not as a hostname or ip address.
+     *
+     * The interface might be a VRF, eg: vrf-blue, which means it cannot be
+     * converted to an IP address and would fail Curl_if2ip. Try to
+     * use it straight away.
+     */
+    if(iface &&
+       setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                  iface, (curl_socklen_t)strlen(iface) + 1) == 0 &&
+       /* This is often "errno 1, error: Operation not permitted" if you are
+        * not running as root or another suitable privileged user. If it
+        * succeeds it means the parameter was a valid interface and not an IP
+        * address. Return immediately.
+        */
+       !host_in) {
+      infof(data, "socket successfully bound to interface '%s'", iface);
+      result = CURLE_OK;
+      goto out;
     }
 #endif
-    if(!host_input) {
+    if(!host_in) {
       /* Discover IP from input device, then bind to it */
       if2ip_result = Curl_if2ip(af,
 #ifdef USE_IPV6
@@ -723,18 +757,20 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     }
     switch(if2ip_result) {
     case IF2IP_NOT_FOUND:
-      if(iface_input && !host_input) {
+      if(iface_in && !host_in) {
         /* Do not fall back to treating it as a hostname */
         char buffer[STRERROR_LEN];
         data->state.os_errno = sockerr = SOCKERRNO;
         failf(data, "Could not bind to interface '%s' with errno %d: %s",
               iface, sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
-        return CURLE_INTERFACE_FAILED;
+        result = CURLE_INTERFACE_FAILED;
+        goto out;
       }
       break;
     case IF2IP_AF_NOT_SUPPORTED:
       /* Signal the caller to try another address family if available */
-      return CURLE_UNSUPPORTED_PROTOCOL;
+      result = CURLE_UNSUPPORTED_PROTOCOL;
+      goto out;
     case IF2IP_FOUND:
       /*
        * We now have the numerical IP address in the 'myhost' buffer
@@ -745,7 +781,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       done = 1;
       break;
     }
-    if(!iface_input || host_input) {
+    if(!iface_in || host_in) {
       /*
        * This was not an interface, resolve the name as a hostname
        * or IP number
@@ -772,7 +808,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
         if(af != h_af) {
           /* bad IP version combo, signal the caller to try another address
              family if available */
-          return CURLE_UNSUPPORTED_PROTOCOL;
+          result = CURLE_UNSUPPORTED_PROTOCOL;
+          goto out;
         }
         done = 1;
       }
@@ -805,8 +842,10 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
                if present, known to be numeric */
             curl_off_t scope_id;
             if(curlx_str_number((const char **)CURL_UNCONST(&scope_ptr),
-                                &scope_id, UINT_MAX))
-              return CURLE_UNSUPPORTED_PROTOCOL;
+                                &scope_id, UINT_MAX)) {
+              result = CURLE_UNSUPPORTED_PROTOCOL;
+              goto out;
+            }
             si6->sin6_scope_id = (unsigned int)scope_id;
           }
 #endif
@@ -833,7 +872,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       data->state.os_errno = sockerr = SOCKERRNO;
       failf(data, "Could not bind to '%s' with errno %d: %s", host,
             sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
-      return CURLE_INTERFACE_FAILED;
+      result = CURLE_INTERFACE_FAILED;
+      goto out;
     }
   }
   else {
@@ -860,7 +900,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       /* we succeeded to bind */
       infof(data, "Local port: %hu", port);
       conn->bits.bound = TRUE;
-      return CURLE_OK;
+      result = CURLE_OK;
+      goto out;
     }
 
     if(--portnum > 0) {
@@ -886,7 +927,13 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
           sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
   }
 
-  return CURLE_INTERFACE_FAILED;
+  result = CURLE_INTERFACE_FAILED;
+
+out:
+  curlx_free(dev_in);
+  curlx_free(iface_in);
+  curlx_free(host_in);
+  return result;
 }
 #endif
 
@@ -1183,7 +1230,13 @@ static void tcplocalhost(struct Curl_cfilter *cf,
     DWORD bytes = 0;
     memset(&rto, 0, sizeof(rto));
     rto.Rtt = TCP_INITIAL_RTO_DEFAULT_RTT;
-    rto.MaxSynRetransmissions = TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS;
+    /* Windows 10, version 1709 (10.0.16299) and later versions can set max
+       retransmissions to zero, earlier versions could only set 1 */
+    if(curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
+                                    VERSION_GREATER_THAN_EQUAL))
+      rto.MaxSynRetransmissions = TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS;
+    else
+      rto.MaxSynRetransmissions = 1;
     (void)WSAIoctl(sockfd, SIO_TCP_INITIAL_RTO, &rto, sizeof(rto),
                    NULL, 0, &bytes, NULL, NULL);
   }
@@ -1368,7 +1421,7 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* while connectx function is available since macOS 10.11 / iOS 9,
        it did not have the interface declared correctly until
        Xcode 9 / macOS SDK 10.13 */
-    if(__builtin_available(macOS 10.11, iOS 9.0, tvOS 9.0, watchOS 2.0, *)) {
+    if(__builtin_available(macOS 10.11, iOS 9, tvOS 9, watchOS 2, *)) {
       sa_endpoints_t endpoints;
       endpoints.sae_srcif = 0;
       endpoints.sae_srcaddr = NULL;

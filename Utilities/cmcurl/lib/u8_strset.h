@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_UINT_HASHSET_H
-#define HEADER_CURL_UINT_HASHSET_H
+#ifndef HEADER_CURL_U8_STRSET_H
+#define HEADER_CURL_U8_STRSET_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -53,6 +53,7 @@ struct u8_strset {
   uint8_t spsl[CURL_U8_STRSET_START_DIM];
   uint16_t count;
   uint8_t slotbits;
+  uint8_t slotmask;
 #ifdef DEBUGBUILD
   int32_t init;
 #endif
@@ -61,12 +62,13 @@ struct u8_strset {
 void Curl_u8_strset_init(struct u8_strset *set);
 void Curl_u8_strset_clear(struct u8_strset *set);
 
+#ifdef UNITTESTS
 uint16_t Curl_u8_strset_count(struct u8_strset *set);
+#endif
+
 const char *Curl_u8_strset_get(struct u8_strset *set, uint8_t id);
 
 /* Set string for id, makes a copy. */
-CURLcode Curl_u8_strset_set(struct u8_strset *set,
-                            uint8_t id, const char *str);
 CURLcode Curl_u8_strset_setx(struct u8_strset *set,
                              uint8_t id, const char *str, size_t slen);
 /* Set string for id, takes ownership of `str` even on failure. */
@@ -79,4 +81,4 @@ void Curl_u8_strset_unset0(struct u8_strset *set, uint8_t id);
 
 CURLcode Curl_u8_strset_copy(struct u8_strset *dest, struct u8_strset *src);
 
-#endif /* HEADER_CURL_UINT_HASHSET_H */
+#endif /* HEADER_CURL_U8_STRSET_H */

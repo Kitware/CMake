@@ -184,6 +184,7 @@ struct cf_h2_proxy_ctx {
   struct bufq inbufq;  /* network receive buffer */
   struct bufq outbufq; /* network send buffer */
 
+  struct Curl_peer *peer; /* proxy we talk to */
   struct Curl_peer *dest; /* where to tunnel to */
   struct tunnel_stream tunnel; /* our tunnel CONNECT stream */
   int32_t goaway_error;
@@ -208,6 +209,7 @@ static void cf_h2_proxy_ctx_clear(struct cf_h2_proxy_ctx *ctx)
   }
   Curl_bufq_free(&ctx->inbufq);
   Curl_bufq_free(&ctx->outbufq);
+  Curl_peer_unlink(&ctx->peer);
   Curl_peer_unlink(&ctx->dest);
   tunnel_stream_clear(&ctx->tunnel);
   memset(ctx, 0, sizeof(*ctx));
@@ -527,11 +529,8 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
     /* Only final status code signals the end of header */
     CURL_TRC_CF(data, cf, "[%d] got http status: %d",
                 stream_id, ctx->tunnel.resp->status);
-    if(!ctx->tunnel.has_final_response) {
-      if(ctx->tunnel.resp->status / 100 != 1) {
-        ctx->tunnel.has_final_response = TRUE;
-      }
-    }
+    if(!ctx->tunnel.has_final_response && ctx->tunnel.resp->status / 100 != 1)
+      ctx->tunnel.has_final_response = TRUE;
     break;
   case NGHTTP2_WINDOW_UPDATE:
     if(CURL_REQ_WANT_SEND(data)) {
@@ -581,7 +580,7 @@ static int proxy_h2_on_header(nghttp2_session *session,
 
   if(namelen == CURL_CSTRLEN(HTTP_PSEUDO_STATUS) &&
      !memcmp(HTTP_PSEUDO_STATUS, name, namelen)) {
-    int http_status;
+    int32_t http_status;
     struct http_resp *resp;
 
     /* status: always comes first, we might get more than one response,
@@ -726,7 +725,7 @@ static CURLcode proxy_h2_submit(
   CURLcode result;
 
   (void)cf;
-  Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
+  Curl_dynhds_init(&h2_headers, MAX_HTTP_RESP_HEADER_COUNT, DYN_HTTP_REQUEST);
   result = Curl_http_req_to_h2(&h2_headers, req, data);
   if(result)
     goto out;
@@ -773,7 +772,8 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_create_tunnel_request(&req, cf, data, ctx->dest,
+  result = Curl_http_proxy_create_tunnel_request(&req, cf, data,
+                                                 ctx->peer, ctx->dest,
                                                   PROXY_HTTP_V2,
                                                   (bool)ctx->udp_tunnel);
   if(result)
@@ -1487,6 +1487,7 @@ struct Curl_cftype Curl_cft_h2_proxy = {
 
 CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
+                                       struct Curl_peer *peer,
                                        struct Curl_peer *dest,
                                        bool udp_tunnel)
 {
@@ -1498,6 +1499,7 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
+  Curl_peer_link(&ctx->peer, peer);
   Curl_peer_link(&ctx->dest, dest);
   ctx->udp_tunnel = udp_tunnel;
 

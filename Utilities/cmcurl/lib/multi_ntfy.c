@@ -29,6 +29,11 @@
 #include "multiif.h"
 #include "multi_ntfy.h"
 
+#if CURLMNOTIFY_LAST > 31
+#error "notification types must fit below the curl_multi_ntfy high flag bit"
+#endif
+
+#define CURL_MNTFY_TYPE_FLAG(type)  ((uint32_t)1 << (type))
 
 struct mntfy_entry {
   uint32_t mid;
@@ -56,7 +61,7 @@ static void mnfty_chunk_destroy(struct mntfy_chunk *chunk)
 
 static void mnfty_chunk_reset(struct mntfy_chunk *chunk)
 {
-  memset(chunk, 0, sizeof(*chunk));
+  chunk->r_offset = chunk->w_offset = 0;
 }
 
 static bool mntfy_chunk_append(struct mntfy_chunk *chunk,
@@ -103,20 +108,19 @@ static void mntfy_chunk_dispatch_all(struct Curl_multi *multi,
   struct mntfy_entry *e;
   struct Curl_easy *data;
 
-  if(multi->ntfy.ntfy_cb) {
-    while((chunk->r_offset < chunk->w_offset) && !multi->ntfy.failure) {
-      e = &chunk->entries[chunk->r_offset];
-      data = e->mid ? Curl_multi_get_easy(multi, e->mid) : multi->admin;
-      /* only when notification has not been disabled in the meantime */
-      if(data && Curl_uint32_bset_contains(&multi->ntfy.enabled, e->type)) {
-        /* this may cause new notifications to be added! */
-        CURL_TRC_M(multi->admin, "[NTFY] dispatch %u to xfer %u",
-                   e->type, e->mid);
-        multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
-      }
-      /* once dispatched, safe to increment */
-      chunk->r_offset++;
+  while(multi->ntfy.ntfy_cb &&
+        (chunk->r_offset < chunk->w_offset) && !multi->ntfy.failure) {
+    e = &chunk->entries[chunk->r_offset];
+    data = e->mid ? Curl_multi_get_easy(multi, e->mid) : multi->admin;
+    /* only when notification has not been disabled in the meantime */
+    if(data && (multi->ntfy.flags & CURL_MNTFY_TYPE_FLAG(e->type))) {
+      /* this may cause new notifications to be added! */
+      CURL_TRC_M(multi->admin, "[NTFY] dispatch %u to xfer %u",
+                 e->type, e->mid);
+      multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
     }
+    /* once dispatched, safe to increment */
+    chunk->r_offset++;
   }
   mnfty_chunk_reset(chunk);
 }
@@ -124,14 +128,6 @@ static void mntfy_chunk_dispatch_all(struct Curl_multi *multi,
 void Curl_mntfy_init(struct Curl_multi *multi)
 {
   memset(&multi->ntfy, 0, sizeof(multi->ntfy));
-  Curl_uint32_bset_init(&multi->ntfy.enabled);
-}
-
-CURLMcode Curl_mntfy_resize(struct Curl_multi *multi)
-{
-  if(Curl_uint32_bset_resize(&multi->ntfy.enabled, CURLMNOTIFY_EASY_DONE + 1))
-    return CURLM_OUT_OF_MEMORY;
-  return CURLM_OK;
 }
 
 void Curl_mntfy_cleanup(struct Curl_multi *multi)
@@ -142,22 +138,21 @@ void Curl_mntfy_cleanup(struct Curl_multi *multi)
     mnfty_chunk_destroy(chunk);
   }
   multi->ntfy.tail = NULL;
-  Curl_uint32_bset_destroy(&multi->ntfy.enabled);
 }
 
 CURLMcode Curl_mntfy_enable(struct Curl_multi *multi, unsigned int type)
 {
-  if(type > CURLMNOTIFY_EASY_DONE)
+  if(type >= CURLMNOTIFY_LAST)
     return CURLM_UNKNOWN_OPTION;
-  Curl_uint32_bset_add(&multi->ntfy.enabled, type);
+  multi->ntfy.flags |= CURL_MNTFY_TYPE_FLAG(type);
   return CURLM_OK;
 }
 
 CURLMcode Curl_mntfy_disable(struct Curl_multi *multi, unsigned int type)
 {
-  if(type > CURLMNOTIFY_EASY_DONE)
+  if(type >= CURLMNOTIFY_LAST)
     return CURLM_UNKNOWN_OPTION;
-  Curl_uint32_bset_remove(&multi->ntfy.enabled, (uint32_t)type);
+  multi->ntfy.flags &= ~CURL_MNTFY_TYPE_FLAG(type);
   return CURLM_OK;
 }
 
@@ -165,7 +160,8 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
 {
   struct Curl_multi *multi = data ? data->multi : NULL;
   if(multi && multi->ntfy.ntfy_cb && !multi->ntfy.failure &&
-     Curl_uint32_bset_contains(&multi->ntfy.enabled, (uint32_t)type)) {
+     type < CURLMNOTIFY_LAST &&
+     (multi->ntfy.flags & CURL_MNTFY_TYPE_FLAG(type))) {
     /* append to list of outstanding notifications */
     struct mntfy_chunk *tail = mntfy_non_full_tail(&multi->ntfy);
     CURL_TRC_M(data, "[NTFY] add %u for xfer %u", type, data->mid);
@@ -173,7 +169,7 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
       mntfy_chunk_append(tail, data, (uint32_t)type);
     else
       multi->ntfy.failure = CURLM_OUT_OF_MEMORY;
-    multi->ntfy.has_entries = TRUE;
+    multi->ntfy.flags |= CURL_MNTFY_FLAG_HAS_ENTRIES;
   }
 }
 
@@ -208,6 +204,6 @@ CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi)
     return mresult;
   }
   else
-    multi->ntfy.has_entries = FALSE;
+    multi->ntfy.flags &= ~CURL_MNTFY_FLAG_HAS_ENTRIES;
   return CURLM_OK;
 }

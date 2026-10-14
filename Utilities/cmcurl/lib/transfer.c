@@ -147,21 +147,21 @@ static CURLcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
 {
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  return Curl_conn_shutdown(data, data->conn->recv_idx, done);
+  return Curl_cshutdn_try_once_idx(data, data->conn->recv_idx, done);
 }
 
 static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
   if(!data || !data->conn)
     return FALSE;
-  return Curl_shutdown_started(data->conn, data->conn->recv_idx);
+  return CURL_CONN_IN_SHUTDOWN(data->conn, data->conn->recv_idx);
 }
 
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
 {
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  return Curl_conn_shutdown(data, data->conn->send_idx, done);
+  return Curl_cshutdn_try_once_idx(data, data->conn->send_idx, done);
 }
 
 /**
@@ -503,6 +503,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
   curlx_safefree(data->info.wouldredirect);
+  curlx_safefree(data->info.effective_url);
   Curl_data_priority_clear_state(data);
   if(data->set.http_auto_referer)
     Curl_bufref_free(&data->state.referer);
@@ -564,6 +565,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
 #ifndef CURL_DISABLE_FTP
     data->state.wildcardmatch = data->set.wildcard_enabled;
+#ifdef DEBUGBUILD
+  if(getenv("CURL_DBG_FTP_WILDCARD"))
+    data->state.wildcardmatch = TRUE;
+#endif
     if(data->state.wildcardmatch) {
       struct WildcardData *wc;
       if(!data->wildcard) {
