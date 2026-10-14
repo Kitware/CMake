@@ -30,6 +30,8 @@ cmFileSet::cmFileSet(cmMakefile* makefile, cmTarget* target, std::string name,
   , Target(target)
   , Name(std::move(name))
   , Type(std::move(type))
+  , Domain(Metadata::IsKnownType(this->Type) ? Metadata::FileSetDomain::NATIVE
+                                             : Metadata::FileSetDomain::RULE)
   , Visibility(visibility)
 {
 }
@@ -269,14 +271,16 @@ void cmFileSet::SetProperty(std::string const& prop, cmValue value)
       this->InterfaceCompileDefinitions.emplace_back(value, lfbt);
     }
   } else if (prop == LANGUAGE) {
-    if (this->GetType() != cm::FileSetMetadata::SOURCES &&
-        this->GetType() != cm::FileSetMetadata::HEADERS) {
+    if (this->GetDomain() != Metadata::FileSetDomain::RULE &&
+        this->GetType() != Metadata::SOURCES &&
+        this->GetType() != Metadata::HEADERS) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        "LANGUAGE property may only be set on a SOURCES or HEADERS file set.");
+        "LANGUAGE property may only be set on a SOURCES, HEADERS, or custom "
+        "rule file set.");
       return;
     }
-    if (this->GetType() == cm::FileSetMetadata::HEADERS &&
+    if (this->GetType() == Metadata::HEADERS &&
         !cmExperimental::HasSupportEnabled(*this->Makefile,
                                            cmExperimental::Feature::SYCL)) {
       this->Makefile->IssueMessage(

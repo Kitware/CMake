@@ -19,3 +19,7 @@ different languages' compilers and compilation rules in different targets.
 The value must be a literal language name.  Generator expressions and
 appending values are not supported.  The named language must be enabled by a
 :command:`project` or :command:`enable_language` command.
+
+This property can also be specified for file sets of custom rules as defined by
+the :command:`add_custom_rule` command. In this case, the semantic attached to
+this property is defined by the custom rule.
