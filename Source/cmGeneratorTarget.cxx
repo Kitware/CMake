@@ -2776,11 +2776,11 @@ void cmGeneratorTarget::AddSYCLDeviceTargetFlags(cmBuildStep compileOrLink,
   if (!targets.empty() && !cmIsOff(targets)) {
     std::string option;
     if (acpp) {
-      option = "--acpp-targets=" + targets;
-    } else if (compiler == "IntelLLVM") {
-      option = "-fsycl-targets=" + cmJoin(cmList{ targets }, ",");
+      option = cmStrCat("--acpp-targets=", targets);
+    } else if (compiler == "IntelLLVM" || compiler == "DPClang") {
+      option = cmStrCat("-fsycl-targets=", cmJoin(cmList{ targets }, ","));
     } else if (compiler == "Clang") {
-      option = "--offload-targets=" + cmJoin(cmList{ targets }, ",");
+      option = cmStrCat("--offload-targets=", cmJoin(cmList{ targets }, ","));
     } else {
       this->LocalGenerator->IssueMessage(
         MessageType::FATAL_ERROR,

@@ -121,7 +121,8 @@ When activated, this experimental feature provides the following:
   SYCL for C++ sources that can reach it.
 
 The SYCL language is supported by Makefile, Ninja, FASTBuild, and Visual Studio
-generators with AdaptiveCpp, SYCL-capable Clang, or IntelLLVM compiler drivers.
+generators with AdaptiveCpp, SYCL-capable Clang, DPClang, or IntelLLVM compiler
+drivers.
 
 :prop_tgt:`SYCL_SEPARABLE_COMPILATION` controls separate compilation of device
 code.  :prop_tgt:`SYCL_RESOLVE_DEVICE_SYMBOLS` controls device linking, including

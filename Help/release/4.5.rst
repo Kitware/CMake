@@ -103,6 +103,15 @@ Languages
 * ``import std`` is now available for all C++ 20 and later code with
   :prop_tgt:`CXX_SCAN_FOR_MODULES` enabled.
 
+Compilers
+---------
+
+* The `open-source DPC++ compiler`_, version 7.0 and newer, is now supported
+  with :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``DPClang`` for
+  languages ``C`` and ``CXX``.
+
+.. _`open-source DPC++ compiler`: https://github.com/intel/llvm
+
 Command-Line
 ------------
 

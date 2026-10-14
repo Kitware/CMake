@@ -2346,7 +2346,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   }
 
   // Add VFS Overlay for Clang compilers
-  if (compilerId == "Clang") {
+  if (compilerId == "Clang" || compilerId == "DPClang") {
     if (cmValue vfsOverlay =
           this->Makefile->GetDefinition("CMAKE_CLANG_VFS_OVERLAY")) {
       if (compilerSimulateId == "MSVC") {

@@ -317,9 +317,12 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
   linkFlags += cmJoin({ rpath, frameworkPath, linkPath }, " ");
 
   cm::TargetType const targetType = this->GeneratorTarget->GetType();
-  // Add OS X version flags, if any.
+  std::string languageCompileFlags;
   if (targetType == cm::TargetType::SHARED_LIBRARY ||
       targetType == cm::TargetType::MODULE_LIBRARY) {
+    this->LocalCommonGenerator->AddLanguageFlagsForLinking(
+      languageCompileFlags, this->GeneratorTarget, linkLanguage, Config);
+    // Add OS X version flags, if any.
     this->AppendOSXVerFlag(linkFlags, linkLanguage, "COMPATIBILITY", true);
     this->AppendOSXVerFlag(linkFlags, linkLanguage, "CURRENT", false);
   }
@@ -394,7 +397,7 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
     FASTBUILD_DOLLAR_TAG "CompileDefineFlags" FASTBUILD_DOLLAR_TAG;
   vars.Flags = targetFlags.c_str();
   vars.LinkFlags = linkFlags.c_str();
-  vars.LanguageCompileFlags = "";
+  vars.LanguageCompileFlags = languageCompileFlags.c_str();
   std::string const linker = this->GeneratorTarget->GetLinkerTool(Config);
   vars.Linker = linker.c_str();
   std::string const targetSupportPath = this->ConvertToFastbuildPath(

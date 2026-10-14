@@ -45,6 +45,7 @@ function(compiler_id_detection outvar lang)
     list(APPEND ordered_compilers
       Intel
       IntelLLVM
+      DPClang
       PathScale
       Embarcadero
       Borland

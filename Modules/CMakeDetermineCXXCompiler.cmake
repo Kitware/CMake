@@ -63,7 +63,7 @@ else()
         # on Windows, first introduced by Intel oneAPI 2023.0.
         list(APPEND CMAKE_CXX_COMPILER_LIST icpx)
       endif()
-      list(APPEND CMAKE_CXX_COMPILER_LIST icx clang++)
+      list(APPEND CMAKE_CXX_COMPILER_LIST icx clang++ dpclang++)
     endif()
 
     _cmake_find_compiler(CXX)
@@ -137,6 +137,7 @@ else()
     # They pre-date our support for the GNU-like variant targeting the
     # MSVC ABI so we do not consider that here.
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
+      OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xDPClang"
       OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xIntelLLVM")
       if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
         set(CMAKE_CXX_COMPILER_FRONTEND_VARIANT "MSVC")
@@ -166,7 +167,7 @@ if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
   if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|QCC|LCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
-    if (COMPILER_BASENAME MATCHES "^(.+-)?(clang\\+\\+|[gc]\\+\\+|clang-cl)(-?[0-9]+(\\.[0-9]+)*)?(-[^.]+)?(\\.exe)?$")
+    if (COMPILER_BASENAME MATCHES "^(.+-)?(dpclang\\+\\+|dpclang-cl|clang\\+\\+|[gc]\\+\\+|clang-cl)(-?[0-9]+(\\.[0-9]+)*)?(-[^.]+)?(\\.exe)?$")
       set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
       set(_CMAKE_TOOLCHAIN_SUFFIX ${CMAKE_MATCH_3})
       set(_CMAKE_COMPILER_SUFFIX ${CMAKE_MATCH_5})
