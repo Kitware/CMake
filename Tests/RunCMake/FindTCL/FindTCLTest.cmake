@@ -3,13 +3,10 @@ set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
 set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH OFF)
 set(CMAKE_FIND_FRAMEWORK NEVER)
 
-# FIXME: Avoid unchecked construction of TCLTK_POSSIBLE_BIN_PATHS
-# and TCLTK_POSSIBLE_LIB_PATHS.  Fix FindTclsh and FindTCL later.
-set(CMAKE_IGNORE_PATH /bin /lib)
-
 function(check_layout name)
   cmake_parse_arguments(PARSE_ARGV 1 arg ""
-    "ARCH;TCL_LIBRARY;TK_LIBRARY;INCLUDE_PATH" "PREFIXES;SUFFIXES;FILES")
+    "ARCH;TCL_LIBRARY;TK_LIBRARY;INCLUDE_PATH"
+    "PREFIXES;SUFFIXES;FILES;PREFIX_PATH;SYSTEM_PREFIX_PATH")
 
   set(prefix "${CMAKE_CURRENT_BINARY_DIR}/${name}")
   file(REMOVE_RECURSE "${prefix}")
@@ -22,7 +19,17 @@ function(check_layout name)
   set(CMAKE_FIND_LIBRARY_PREFIXES "${arg_PREFIXES}")
   set(CMAKE_FIND_LIBRARY_SUFFIXES "${arg_SUFFIXES}")
   set(CMAKE_LIBRARY_ARCHITECTURE "${arg_ARCH}")
-  set(CMAKE_PREFIX_PATH "${prefix}")
+  if(arg_PREFIX_PATH OR arg_SYSTEM_PREFIX_PATH)
+    # The layout stands in for the whole filesystem, root-level /lib included
+    set(CMAKE_FIND_ROOT_PATH "${prefix}")
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+    set(CMAKE_PREFIX_PATH "${arg_PREFIX_PATH}")
+    set(CMAKE_SYSTEM_PREFIX_PATH "${arg_SYSTEM_PREFIX_PATH}")
+    set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH ON)
+  else()
+    set(CMAKE_PREFIX_PATH "${prefix}")
+  endif()
   # Empty skips the host tclsh/wish search, and FindTclsh running tclsh
   set(TCL_TCLSH "")
   set(TK_WISH "")
@@ -113,4 +120,25 @@ check_layout(Tk86-Tk9-debian
   TCL_LIBRARY lib/x86_64-linux-gnu/libtcl.so
   TK_LIBRARY lib/x86_64-linux-gnu/libtk.so
   INCLUDE_PATH include/tcl
+  )
+
+# Plain names in /lib and /include, which nothing found points to, lose.
+check_layout(Tk9-stray-root
+  PREFIXES lib SUFFIXES .so SYSTEM_PREFIX_PATH /usr
+  FILES include/tcl.h include/tk.h lib/libtcl.so lib/libtk.so
+        usr/include/tcl.h usr/include/tk.h
+        usr/lib/libtcl9.0.so usr/lib/libtcl9tk9.0.so
+  TCL_LIBRARY usr/lib/libtcl9.0.so TK_LIBRARY usr/lib/libtcl9tk9.0.so
+  INCLUDE_PATH usr/include
+  )
+
+# Libraries follow prefix order, like headers, not the newest name.
+check_layout(Tk86-Tk9-prefix-order
+  PREFIXES "" SUFFIXES .lib PREFIX_PATH /opt/tcl86 /opt/tcl90
+  FILES opt/tcl86/include/tcl.h opt/tcl86/include/tk.h
+        opt/tcl86/lib/tcl86t.lib opt/tcl86/lib/tk86t.lib
+        opt/tcl90/include/tcl.h opt/tcl90/include/tk.h
+        opt/tcl90/lib/tcl90.lib opt/tcl90/lib/tcl9tk90.lib
+  TCL_LIBRARY opt/tcl86/lib/tcl86t.lib TK_LIBRARY opt/tcl86/lib/tk86t.lib
+  INCLUDE_PATH opt/tcl86/include
   )
