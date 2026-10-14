@@ -792,6 +792,16 @@ endif()
 unset(out)
 unset(outfile)
 
+set(out ${RunCMake_BINARY_DIR}/remove_output)
+set(outfile ${out}/file_for_test.txt)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+file(WRITE ${outfile} "")
+run_cmake_command(E_remove ${CMAKE_COMMAND} -E remove ${outfile})
+
+unset(out)
+unset(outfile)
+
 set(out ${RunCMake_BINARY_DIR}/rm_tests)
 file(REMOVE_RECURSE "${out}")
 file(MAKE_DIRECTORY ${out})
