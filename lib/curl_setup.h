@@ -125,11 +125,6 @@
 #define SECURITY_WIN32  /* for <sspi.h> */
 #endif
 
-/* Compatibility */
-#ifdef ENABLE_IPV6
-#define USE_IPV6 1
-#endif
-
 /*
  * Include configuration script results or hand-crafted
  * configuration file for platforms which lack config tool.
@@ -221,54 +216,6 @@
 #endif
 
 /*
- * Disable other protocols when http is the only one desired.
- */
-#ifdef HTTP_ONLY
-#  ifndef CURL_DISABLE_DICT
-#  define CURL_DISABLE_DICT
-#  endif
-#  ifndef CURL_DISABLE_FILE
-#  define CURL_DISABLE_FILE
-#  endif
-#  ifndef CURL_DISABLE_FTP
-#  define CURL_DISABLE_FTP
-#  endif
-#  ifndef CURL_DISABLE_GOPHER
-#  define CURL_DISABLE_GOPHER
-#  endif
-#  ifndef CURL_DISABLE_IMAP
-#  define CURL_DISABLE_IMAP
-#  endif
-#  ifndef CURL_DISABLE_LDAP
-#  define CURL_DISABLE_LDAP
-#  endif
-#  ifndef CURL_DISABLE_LDAPS
-#  define CURL_DISABLE_LDAPS
-#  endif
-#  ifndef CURL_DISABLE_MQTT
-#  define CURL_DISABLE_MQTT
-#  endif
-#  ifndef CURL_DISABLE_POP3
-#  define CURL_DISABLE_POP3
-#  endif
-#  ifndef CURL_DISABLE_RTSP
-#  define CURL_DISABLE_RTSP
-#  endif
-#  ifndef CURL_DISABLE_SMTP
-#  define CURL_DISABLE_SMTP
-#  endif
-#  ifndef CURL_DISABLE_TELNET
-#  define CURL_DISABLE_TELNET
-#  endif
-#  ifndef CURL_DISABLE_TFTP
-#  define CURL_DISABLE_TFTP
-#  endif
-#  ifndef CURL_DISABLE_WEBSOCKETS
-#  define CURL_DISABLE_WEBSOCKETS
-#  endif
-#endif
-
-/*
  * When HTTP is disabled, disable HTTP-only features
  */
 #ifdef CURL_DISABLE_HTTP
@@ -340,6 +287,30 @@
 #endif
 
 #include <curl/system.h>
+
+#if !defined(HAVE_PIPE2) && \
+  ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+            __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+            __MAC_OS_X_VERSION_MIN_REQUIRED >= 270000) || \
+   (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+            __IPHONE_OS_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+            __IPHONE_OS_VERSION_MIN_REQUIRED >= 270000) || \
+   (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+            __TV_OS_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__TV_OS_VERSION_MIN_REQUIRED) && \
+            __TV_OS_VERSION_MIN_REQUIRED >= 270000) || \
+   (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+            __WATCH_OS_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__WATCH_OS_VERSION_MIN_REQUIRED) && \
+            __WATCH_OS_VERSION_MIN_REQUIRED >= 270000) || \
+   (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+            __VISION_OS_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__VISION_OS_VERSION_MIN_REQUIRED) && \
+            __VISION_OS_VERSION_MIN_REQUIRED >= 270000))
+#define HAVE_PIPE2
+#endif
 
 /* Helper macro to expand and concatenate two macros.
  * Direct macros concatenation does not work because macros
@@ -1107,7 +1078,7 @@ typedef unsigned int curl_bit;
 #define SOCKEISCONN       WSAEISCONN
 #define SOCKEMSGSIZE      WSAEMSGSIZE
 /* Use literal value to work around clang-tidy <=20 misreporting
-  'readability-uppercase-literal-suffix' with mingw-w64 headers */
+   'readability-uppercase-literal-suffix' with mingw-w64 headers */
 #define SOCKENOMEM        8L  /* WSA_NOT_ENOUGH_MEMORY */
 #define SOCKETIMEDOUT     WSAETIMEDOUT
 #define SOCKEWOULDBLOCK   WSAEWOULDBLOCK
@@ -1566,8 +1537,8 @@ typedef struct sockaddr_un {
 /* OpenSSL 3 marks these functions deprecated but we have no replacements (yet)
    so tell the compiler to not warn for them:
    - DES_* (for NTLM)
-   - EVP_PKEY_get1_RSA, MD5_*, RSA_flags, RSA_free (auto-skipped for OpenSSL
-     built with no-deprecated) */
+   - EVP_PKEY_get1_RSA, RSA_flags, RSA_free (auto-skipped for OpenSSL built
+     with no-deprecated) */
 #  define OPENSSL_SUPPRESS_DEPRECATED
 #  ifdef _WIN32
 /* Silence LibreSSL warnings about wincrypt.h collision. Works in 3.8.2+ */

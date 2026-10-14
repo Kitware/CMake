@@ -33,7 +33,7 @@ struct Curl_easy;
 #include "mime.h"
 #include "curlx/strdup.h"
 #include "bufref.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 
 
 #define HTTPPOST_PTRNAME     CURL_HTTPPOST_PTRNAME
@@ -256,22 +256,18 @@ static CURLFORMcode formadd_check(struct FormInfo *first_form,
       if(Curl_bufref_memdup0(&form->contenttype, type, strlen(type)))
         return CURL_FORMADD_MEMORY;
     }
-    if(name && form->namelength) {
-      if(memchr(name, 0, form->namelength))
-        return CURL_FORMADD_NULL;
-    }
-    if(!(form->flags & HTTPPOST_PTRNAME)) {
-      /* Note that there is small risk that form->name is NULL here if the app
-         passed in a bad combo, so we check for that. */
-      if(forminfo_copyfield(&form->name, form->namelength))
-        return CURL_FORMADD_MEMORY;
-    }
+    if(name && form->namelength && memchr(name, 0, form->namelength))
+      return CURL_FORMADD_NULL;
+    if(!(form->flags & HTTPPOST_PTRNAME) &&
+       /* Note that there is small risk that form->name is NULL here if the app
+          passed in a bad combo, so we check for that. */
+       forminfo_copyfield(&form->name, form->namelength))
+      return CURL_FORMADD_MEMORY;
     if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
                         HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
-                        HTTPPOST_CALLBACK))) {
-      if(forminfo_copyfield(&form->value, (size_t)form->contentslength))
-        return CURL_FORMADD_MEMORY;
-    }
+                        HTTPPOST_CALLBACK)) &&
+       forminfo_copyfield(&form->value, (size_t)form->contentslength))
+      return CURL_FORMADD_MEMORY;
     post = httppost_add(form, post, httppost, last_post);
 
     if(!post)
@@ -404,14 +400,25 @@ static CURLFORMcode formadd(struct curl_httppost **httppost,
           retval = CURL_FORMADD_NULL;
       }
       break;
-    case CURLFORM_CONTENTSLENGTH:
-      curr->contentslength = (curl_off_t)(size_t)form_int_arg(long);
+    case CURLFORM_CONTENTSLENGTH: {
+      long clen = form_int_arg(long);
+      if(clen < 0)
+        retval = CURL_FORMADD_INCOMPLETE;
+      else
+        curr->contentslength = (curl_off_t)clen;
       break;
+    }
 
-    case CURLFORM_CONTENTLEN:
-      curr->flags |= CURL_HTTPPOST_LARGE;
-      curr->contentslength = form_int_arg(curl_off_t);
+    case CURLFORM_CONTENTLEN: {
+      curl_off_t clen = form_int_arg(curl_off_t);
+      if(clen < 0)
+        retval = CURL_FORMADD_INCOMPLETE;
+      else {
+        curr->flags |= CURL_HTTPPOST_LARGE;
+        curr->contentslength = clen;
+      }
       break;
+    }
 
       /* Get contents from a given filename */
     case CURLFORM_FILECONTENT:
@@ -826,10 +833,10 @@ CURLcode Curl_getformdata(CURL *data,
       }
 
       /* Set fake filename. */
-      if(!result && post->showfilename)
-        if(post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
-                                         HTTPPOST_CALLBACK)))
-          result = curl_mime_filename(part, post->showfilename);
+      if(!result && post->showfilename &&
+         (post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
+                                        HTTPPOST_CALLBACK))))
+        result = curl_mime_filename(part, post->showfilename);
     }
   }
 

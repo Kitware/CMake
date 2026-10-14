@@ -1135,7 +1135,7 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 
 /* CURLOPT aliases that make no runtime difference */
 
-/* 'char *' argument to a string with a trailing zero */
+/* 'char *' argument to a string with a null-terminator */
 #define CURLOPTTYPE_STRINGPOINT CURLOPTTYPE_OBJECTPOINT
 
 /* 'struct curl_slist *' argument */
@@ -3042,8 +3042,9 @@ typedef enum {
 } curl_closepolicy;
 
 #define CURL_GLOBAL_SSL (1 << 0) /* no purpose since 7.57.0 */
-#define CURL_GLOBAL_WIN32 (1 << 1)
-#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL | CURL_GLOBAL_WIN32)
+#define CURL_GLOBAL_WINSOCK (1 << 1)
+#define CURL_GLOBAL_WIN32 CURL_GLOBAL_WINSOCK /* for compatibility */
+#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL | CURL_GLOBAL_WINSOCK)
 #define CURL_GLOBAL_NOTHING 0
 #define CURL_GLOBAL_DEFAULT CURL_GLOBAL_ALL
 #define CURL_GLOBAL_ACK_EINTR (1 << 2)

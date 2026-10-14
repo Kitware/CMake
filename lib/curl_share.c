@@ -379,10 +379,9 @@ CURLSHcode Curl_share_lock_share(struct Curl_share *share,
   if(!share)
     return CURLSHE_INVALID;
 
-  if(share->specifier & (unsigned int)(1 << type)) {
-    if(share->lockfunc) /* only call this if set! */
-      share->lockfunc(data, type, accesstype, share->clientdata);
-  }
+  if(share->specifier & (unsigned int)(1 << type) &&
+     share->lockfunc) /* only call this if set! */
+    share->lockfunc(data, type, accesstype, share->clientdata);
   /* else if we do not share this, pretend successful lock */
 
   return CURLSHE_OK;
@@ -401,10 +400,9 @@ CURLSHcode Curl_share_unlock_share(struct Curl_share *share,
   if(!share)
     return CURLSHE_INVALID;
 
-  if(share->specifier & (unsigned int)(1 << type)) {
-    if(share->unlockfunc) /* only call this if set! */
-      share->unlockfunc(data, type, share->clientdata);
-  }
+  if(share->specifier & (unsigned int)(1 << type) &&
+     share->unlockfunc) /* only call this if set! */
+    share->unlockfunc(data, type, share->clientdata);
 
   return CURLSHE_OK;
 }
@@ -426,7 +424,8 @@ CURLcode Curl_share_easy_unlink(struct Curl_easy *data)
     if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
       if(data->conn)
         Curl_detach_connection(data);
-      data->state.lastconnect_id = -1;
+      data->state.last_conn_id = -1;
+      data->state.last_cpid = UINT32_MAX;
     }
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
@@ -458,6 +457,12 @@ CURLcode Curl_share_easy_link(struct Curl_easy *data,
 
   if(share) {
     bool locked = share_lock_acquire(share, data);
+
+    /* Forget identifiers from the previously used connection cache. */
+    if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
+      data->state.last_conn_id = -1;
+      data->state.last_cpid = UINT32_MAX;
+    }
 
     share_ref_inc(share);
     data->share = share;

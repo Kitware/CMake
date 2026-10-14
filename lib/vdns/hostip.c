@@ -395,7 +395,7 @@ static struct Curl_resolv_async *hostip_async_new(struct Curl_easy *data,
     return NULL;
   }
 
-  /* struct size already includes the NUL for hostname */
+  /* struct size already includes the null-terminator for hostname */
   async = curlx_calloc(1, sizeof(*async));
   if(!async)
     return NULL;
@@ -950,8 +950,8 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    timediff_t elapsed_secs = curlx_ptimediff_ms(Curl_pgrs_now(data),
-                                                 &data->conn->created) / 1000;
+    timediff_t elapsed_secs =
+      Curl_cpool_conn_age_ms(data, data->conn, Curl_pgrs_now(data)) / 1000;
 
     /* the alarm period is counted in even number of seconds */
     unsigned long alarm_set = (unsigned long)(prev_alarm - elapsed_secs);

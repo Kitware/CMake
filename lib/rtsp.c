@@ -41,6 +41,7 @@
 #include "curlx/strdup.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
+#include "peer.h"
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_RTSP_EASY   "meta:proto:rtsp:easy"
@@ -85,7 +86,7 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
 
-static void rtsp_easy_dtor(void *key, size_t klen, void *entry)
+static void rtsp_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct RTSP *rtsp = entry;
   (void)key;
@@ -93,7 +94,7 @@ static void rtsp_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(rtsp);
 }
 
-static void rtsp_conn_dtor(void *key, size_t klen, void *entry)
+static void rtsp_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct rtsp_conn *rtspc = entry;
   (void)key;
@@ -410,16 +411,14 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
      data->state.use_range &&
      ((rtspreq == RTSPREQ_PLAY) ||
       (rtspreq == RTSPREQ_PAUSE) ||
-      (rtspreq == RTSPREQ_RECORD))) {
-
-    /* Check to see if there is a range set in the custom headers */
-    if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
-      result = rtsp_header_alloc("Range",
-                                 data->state.range,
-                                 &data->state.rangeline);
-      if(!result)
-        b->range = data->state.rangeline;
-    }
+      (rtspreq == RTSPREQ_RECORD)) &&
+     /* Check to see if there is a range set in the custom headers */
+     !Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
+    result = rtsp_header_alloc("Range",
+                               data->state.range,
+                               &data->state.rangeline);
+    if(!result)
+      b->range = data->state.rangeline;
   }
   return result;
 }
@@ -459,6 +458,12 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   result = rtsp_setup_request(data, &block,  rtspreq);
   if(result)
     goto out;
+
+  if(block.session_id && data->state.rtsp_session_origin &&
+     !data->set.allow_auth_to_other_hosts &&
+     !Curl_peer_equal(data->state.origin, data->state.rtsp_session_origin))
+    block.session_id = NULL;
+
   /*
    * Sanity check the custom headers
    */
@@ -935,12 +940,10 @@ static CURLcode rtsp_parse_transport(struct Curl_easy *data,
       if(!curlx_str_number(&p, &chan1, 255)) {
         unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
         chan2 = chan1;
-        if(!curlx_str_single(&p, '-')) {
-          if(curlx_str_number(&p, &chan2, 255)) {
-            infof(data, "Unable to read the interleaved parameter from "
-                  "Transport header: [%s]", transport);
-            chan2 = chan1;
-          }
+        if(!curlx_str_single(&p, '-') && curlx_str_number(&p, &chan2, 255)) {
+          infof(data, "Unable to read the interleaved parameter from "
+                "Transport header: [%s]", transport);
+          chan2 = chan1;
         }
         for(chan = chan1; chan <= chan2; chan++) {
           int idx = (int)chan / 8;
@@ -1018,6 +1021,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
       if(!mem ||
          CURL_EASY_STR_SETN(data, STRING_RTSP_SESSION_ID, mem))
         return CURLE_OUT_OF_MEMORY;
+      Curl_peer_link(&data->state.rtsp_session_origin, data->state.origin);
     }
   }
   else if(checkprefix("Transport:", header)) {

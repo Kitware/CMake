@@ -267,6 +267,9 @@ static bool time_to_start_baller2(struct Curl_cfilter *cf,
                   ctx->ballers[1].name);
       return TRUE;
     }
+    /* set the effective hard timeout again */
+    Curl_expire_set(data, EXPIRE_ALPN_EYEBALLS,
+                    ctx->hard_eyeballs_timeout_ms - elapsed_ms, pnow);
   }
   return FALSE;
 }
@@ -277,7 +280,7 @@ static bool cf_hc_may_h3(struct Curl_cfilter *cf,
   struct cf_hc_ctx *ctx = cf->ctx;
   if(!ctx->checked_h3) {
     ctx->check_h3_result =
-      Curl_conn_may_http3(data, cf->conn, ctx->def_transport);
+      Curl_conn_may_http3(data, cf->conn);
     ctx->checked_h3 = TRUE;
   }
   return !ctx->check_h3_result;
@@ -692,6 +695,7 @@ static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
   if(!cf->connected) {
     switch(event) {
     case CF_CTRL_REPORT_STATS:
+    case CF_CTRL_CONN_INFO_UPDATE:
       for(i = 0; i < ctx->baller_count; i++) {
         /* Make the first baller that connected at network level report */
         if(Curl_conn_cf_is_ip_connected(ctx->ballers[i].cf, data)) {
