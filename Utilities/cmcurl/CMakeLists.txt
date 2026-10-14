@@ -94,7 +94,6 @@ set(HAVE_SEND 1)
 set(HAVE_STDATOMIC_H 0)
 set(HAVE_STRCASECMP 0) # we do not vendor the code that uses this
 set(HAVE_WIN32_WINNT 0) # we do not need this info
-set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 set(PICKY_COMPILER OFF)
 set(SHARE_LIB_OBJECT OFF)
 set(USE_APPLE_IDN OFF)
