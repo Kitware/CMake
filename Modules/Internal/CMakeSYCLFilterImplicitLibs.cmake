@@ -3,7 +3,8 @@
 
 macro(cmake_sycl_filter_implicit_libs variable)
   foreach(library IN LISTS ${variable})
-    if(library MATCHES "^sycl([0-9]+d?|-devicelib-host)?([.]lib)?$")
+    get_filename_component(library_name "${library}" NAME)
+    if(library_name MATCHES "^(lib)?sycl([0-9]+d?|-devicelib-host)?([.]lib|[.]a|[.]so([.][0-9]+)*|[.]dylib)?$")
       list(APPEND CMAKE_SYCL_RUNTIME_LIBRARY_LINK_OPTIONS_DEFAULT "${library}")
       list(REMOVE_ITEM ${variable} "${library}")
     endif()

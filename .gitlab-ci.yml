@@ -430,6 +430,16 @@ t:fedora44-ninja-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:fedora44-ninja-dpclang:
+    extends:
+        - .fedora44_ninja_dpclang
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .rules
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:fedora44-ninja-gcc-std-reloc:
     extends:
         - .fedora44_ninja_gcc_std_reloc

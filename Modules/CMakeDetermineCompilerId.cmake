@@ -331,6 +331,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 
   set(_variant "")
   if("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang"
+    OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xDPClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xIntelLLVM")
     if("x${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "xMSVC")
       if(CMAKE_GENERATOR MATCHES "Visual Studio")
@@ -374,7 +375,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # for C++ and the GNU-frontend variant.
   set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "")
   if ("x${lang}" STREQUAL "xCXX" AND
-      "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang" AND
+      CMAKE_${lang}_COMPILER_ID MATCHES "^(Clang|DPClang)$" AND
       "x${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}"
@@ -398,6 +399,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   if ("x${lang}" STREQUAL "xCXX" AND
       EXISTS "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${lang}-DetectStdlib.h" AND
       ("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang") OR
+      ("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xDPClang") OR
       ("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xGNU"))
     # See #20851 for a proper abstraction for this.
 
@@ -419,7 +421,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     # Locate the standard library headers selected by Clang, including toolsets
     # discovered by the driver without a developer command prompt environment.
     set(_stdlib_trace_flags)
-    if (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_${lang}_COMPILER_ID MATCHES "^(Clang|DPClang)$")
       if (CMAKE_${lang}_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
         list(APPEND _stdlib_trace_flags -clang:-H)
       else ()

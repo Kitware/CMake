@@ -202,6 +202,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_GNU "-fopenmp")
     set(OMP_FLAG_LCC "-fopenmp")
     set(OMP_FLAG_Clang "-fopenmp=libomp" "-fopenmp=libiomp5" "-fopenmp" "-Xclang -fopenmp")
+    set(OMP_FLAG_DPClang "${OMP_FLAG_Clang}")
     set(OMP_FLAG_AppleClang "-Xclang -fopenmp")
     set(OMP_FLAG_HP "+Oopenmp")
     if(WIN32)
@@ -340,7 +341,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
     )
 
     if(OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG} AND
-       NOT "${CMAKE_${LANG}_COMPILER_ID};${CMAKE_${LANG}_SIMULATE_ID}" STREQUAL "Clang;MSVC")
+       NOT "${CMAKE_${LANG}_COMPILER_ID};${CMAKE_${LANG}_SIMULATE_ID}" MATCHES "^(Clang|DPClang);MSVC$")
       set("${OPENMP_FLAG_VAR}" "${OPENMP_FLAG}" PARENT_SCOPE)
 
       if(CMAKE_${LANG}_VERBOSE_FLAG)
@@ -421,7 +422,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
       break()
     elseif((CMAKE_${LANG}_COMPILER_ID STREQUAL "AppleClang"
       AND CMAKE_${LANG}_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0") OR
-      (CMAKE_${LANG}_COMPILER_ID STREQUAL "Clang" AND APPLE))
+      (CMAKE_${LANG}_COMPILER_ID MATCHES "^(Clang|DPClang)$" AND APPLE))
 
       # Check for separate OpenMP library on AppleClang 7+
       find_library(OpenMP_libomp_LIBRARY
@@ -497,7 +498,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           break()
         endif()
       endif()
-    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "Clang" AND WIN32)
+    elseif(CMAKE_${LANG}_COMPILER_ID MATCHES "^(Clang|DPClang)$" AND WIN32)
       # Check for separate OpenMP library for Clang on Windows
       find_library(OpenMP_libomp_LIBRARY
         NAMES libomp libgomp libiomp5

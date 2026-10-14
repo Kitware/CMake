@@ -7,7 +7,7 @@ __windows_compiler_clang(SYCL)
 if(CMAKE_SYCL_COMPILER_FRONTEND_VARIANT STREQUAL "GNU" AND
    CMAKE_SYCL_SIMULATE_ID STREQUAL "MSVC")
   unset(CMAKE_INCLUDE_SYSTEM_FLAG_SYCL_WARNING)
-  if(CMAKE_SYCL_COMPILER_ID MATCHES "^(Clang|IntelLLVM)$")
+  if(CMAKE_SYCL_COMPILER_ID MATCHES "^(Clang|DPClang|IntelLLVM)$")
     # Let the driver apply CRT defines to the host compilation only and select
     # the matching libsycl dependency, including the debug runtime.
     set(CMAKE_SYCL_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded -fms-runtime-lib=static)
