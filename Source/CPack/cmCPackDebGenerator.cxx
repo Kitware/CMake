@@ -55,6 +55,7 @@ private:
   std::string const OutputName;
   std::string const WorkDir;
   std::string CompressionSuffix;
+  std::string ControlCompressionSuffix;
   std::string const TopLevelDir;
   std::string const TemporaryDir;
   std::string const DebianArchiveType;
@@ -72,6 +73,7 @@ private:
   bool const PermissionStrictPolicy;
   std::vector<std::string> const PackageFiles;
   cmArchiveWrite::Compress TarCompressionType;
+  cmArchiveWrite::Compress ControlTarCompressionType;
   int CompressionLevel = 0;
 };
 
@@ -111,21 +113,35 @@ DebGenerator::DebGenerator(
   if (debianCompressionType == "lzma") {
     this->CompressionSuffix = ".lzma";
     this->TarCompressionType = cmArchiveWrite::CompressLZMA;
+    // deb(5) does not allow lzma for control.tar.
+    this->ControlCompressionSuffix = ".gz";
+    this->ControlTarCompressionType = cmArchiveWrite::CompressGZip;
   } else if (debianCompressionType == "xz") {
     this->CompressionSuffix = ".xz";
     this->TarCompressionType = cmArchiveWrite::CompressXZ;
+    this->ControlCompressionSuffix = this->CompressionSuffix;
+    this->ControlTarCompressionType = this->TarCompressionType;
   } else if (debianCompressionType == "bzip2") {
     this->CompressionSuffix = ".bz2";
     this->TarCompressionType = cmArchiveWrite::CompressBZip2;
+    // deb(5) does not allow bzip2 for control.tar.
+    this->ControlCompressionSuffix = ".gz";
+    this->ControlTarCompressionType = cmArchiveWrite::CompressGZip;
   } else if (debianCompressionType == "gzip") {
     this->CompressionSuffix = ".gz";
     this->TarCompressionType = cmArchiveWrite::CompressGZip;
+    this->ControlCompressionSuffix = this->CompressionSuffix;
+    this->ControlTarCompressionType = this->TarCompressionType;
   } else if (debianCompressionType == "zstd") {
     this->CompressionSuffix = ".zst";
     this->TarCompressionType = cmArchiveWrite::CompressZstd;
+    this->ControlCompressionSuffix = this->CompressionSuffix;
+    this->ControlTarCompressionType = this->TarCompressionType;
   } else if (debianCompressionType == "none") {
     this->CompressionSuffix.clear();
     this->TarCompressionType = cmArchiveWrite::CompressNone;
+    this->ControlCompressionSuffix.clear();
+    this->ControlTarCompressionType = cmArchiveWrite::CompressNone;
   } else {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error unrecognized compression type: "
@@ -333,7 +349,7 @@ std::string DebGenerator::generateMD5File() const
 bool DebGenerator::generateControlTar(std::string const& md5Filename) const
 {
   std::string filename_control_tar =
-    cmStrCat(this->WorkDir, "/control.tar", this->CompressionSuffix);
+    cmStrCat(this->WorkDir, "/control.tar", this->ControlCompressionSuffix);
 
   cmGeneratedFileStream fileStream_control_tar;
   fileStream_control_tar.Open(filename_control_tar, false, true);
@@ -343,9 +359,9 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
                     << filename_control_tar << "\" for writing" << std::endl);
     return false;
   }
-  cmArchiveWrite control_tar(fileStream_control_tar, this->TarCompressionType,
-                             this->DebianArchiveType, "UTF-8",
-                             this->CompressionLevel);
+  cmArchiveWrite control_tar(
+    fileStream_control_tar, this->ControlTarCompressionType,
+    this->DebianArchiveType, "UTF-8", this->CompressionLevel);
   if (!control_tar.Open()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error opening the archive \""
@@ -520,7 +536,7 @@ bool DebGenerator::generateDeb() const
   deb.SetUNAMEAndGNAME("root", "root");
 
   if (!deb.Add(tlDir + "debian-binary", tlDir.length()) ||
-      !deb.Add(cmStrCat(tlDir, "control.tar", this->CompressionSuffix),
+      !deb.Add(cmStrCat(tlDir, "control.tar", this->ControlCompressionSuffix),
                tlDir.length()) ||
       !deb.Add(cmStrCat(tlDir, "data.tar", this->CompressionSuffix),
                tlDir.length())) {
