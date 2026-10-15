@@ -279,6 +279,7 @@ private:
                                           cmGeneratorTarget* target);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, cmSourceFile* sf,
                                        cmGeneratorTarget* gtgt);
+  bool TargetHasPrefixHeader(cmGeneratorTarget* gtgt);
   void AddXCodeProjBuildRule(cmGeneratorTarget* target,
                              std::vector<cmSourceFile*>& sources) const;
   bool CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
@@ -394,4 +395,5 @@ private:
     CommandsVisited;
   std::map<cmSourceFile const*, std::set<cmGeneratorTarget const*>>
     CustomCommandRoots;
+  std::map<cmGeneratorTarget const*, bool> TargetPrefixHeaderMap;
 };

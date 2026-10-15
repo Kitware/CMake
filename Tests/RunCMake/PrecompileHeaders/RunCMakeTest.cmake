@@ -36,6 +36,16 @@ if(RunCMake_GENERATOR MATCHES "Make|Ninja")
     run_cmake(PchInstantiateTemplates)
   endif()
 endif()
+# Only the Xcode generator passes the precompiled header to Clang as a prefix
+# header, which the compiler honors only when its '-include' flag comes first.
+# The other generators use '-include-pch' instead and are unaffected, except
+# on multi-architecture Apple builds, where they have the same limitation.
+# Only Clang-based compilers take the '-Xclang -include<file>' spelling that
+# the Xcode generator uses to keep a force include out of the driver's way.
+if(RunCMake_GENERATOR STREQUAL "Xcode" AND
+    CMAKE_C_COMPILER_ID MATCHES "^(Clang|AppleClang|IntelLLVM)$")
+  run_test(PchForceInclude)
+endif()
 run_test(PchIncludedAllLanguages)
 run_test(PchIncludedOneLanguage)
 run_test(PchLibObjLibExe)
