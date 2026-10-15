@@ -50,10 +50,8 @@ enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
     if(!memcmp(name, "h3", 2))
       return ALPN_h3;
   }
-  else if(len == 8) {
-    if(!memcmp(name, "http/1.1", 8))
-      return ALPN_h1;
-  }
+  else if(len == 8 && !memcmp(name, "http/1.1", 8))
+    return ALPN_h1;
   return ALPN_none; /* unknown, probably rubbish input */
 }
 
@@ -75,8 +73,8 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
 
-  if(data->conn && Curl_shutdown_started(data->conn, FIRSTSOCKET))
-    return Curl_shutdown_timeleft(data, data->conn, FIRSTSOCKET);
+  if(data->conn && CURL_CONN_IN_SHUTDOWN(data->conn, FIRSTSOCKET))
+    return Curl_cshutdn_timeleft_ms(data, data->conn, FIRSTSOCKET);
   else if(Curl_is_connecting(data)) {
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
       data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
@@ -114,69 +112,6 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
   return timeleft_now_ms(data, pnow);
 }
 
-void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
-                         int timeout_ms)
-{
-  struct connectdata *conn = data->conn;
-  const struct curltime *pnow = Curl_pgrs_now(data);
-
-  DEBUGASSERT(conn);
-  conn->shutdown.start[sockindex] = *pnow;
-  conn->shutdown.timeout_ms = (timeout_ms > 0) ?
-    (timediff_t)timeout_ms :
-    ((data->set.shutdowntimeout > 0) ?
-     data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
-  /* Set a timer, unless we operate on the admin handle */
-  if(data->mid)
-    Curl_expire_set(data, EXPIRE_SHUTDOWN, conn->shutdown.timeout_ms, pnow);
-  CURL_TRC_M(data, "shutdown start on%s connection",
-             sockindex ? " secondary" : "");
-}
-
-timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int8_t sockindex)
-{
-  timediff_t left_ms;
-
-  if(!conn->shutdown.start[sockindex].tv_sec ||
-     (conn->shutdown.timeout_ms <= 0))
-    return 0; /* not started or no limits */
-
-  left_ms = conn->shutdown.timeout_ms -
-            curlx_ptimediff_ms(Curl_pgrs_now(data),
-                               &conn->shutdown.start[sockindex]);
-  return left_ms ? left_ms : -1;
-}
-
-timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
-                                       struct connectdata *conn)
-{
-  timediff_t left_ms = 0, ms;
-  int8_t i;
-
-  for(i = 0; conn->shutdown.timeout_ms && (i < 2); ++i) {
-    if(!conn->shutdown.start[i].tv_sec)
-      continue;
-    ms = Curl_shutdown_timeleft(data, conn, i);
-    if(ms && (!left_ms || ms < left_ms))
-      left_ms = ms;
-  }
-  return left_ms;
-}
-
-void Curl_shutdown_clear(struct Curl_easy *data, int8_t sockindex)
-{
-  struct curltime *pt = &data->conn->shutdown.start[sockindex];
-  memset(pt, 0, sizeof(*pt));
-}
-
-bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex)
-{
-  const struct curltime *pt = &conn->shutdown.start[sockindex];
-  return (pt->tv_sec > 0) || (pt->tv_usec > 0);
-}
-
 /*
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given Curl_easy.
@@ -186,31 +121,15 @@ bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex)
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp)
 {
-  DEBUGASSERT(data);
-
   /* this works for an easy handle:
    * - that has been used for curl_easy_perform()
    * - that is associated with a multi handle, and whose connection
    *   was detached with CURLOPT_CONNECT_ONLY
    */
-  if(data->state.lastconnect_id != -1) {
-    struct connectdata *conn;
-
-    conn = Curl_cpool_get_conn(data, data->state.lastconnect_id);
-    if(!conn) {
-      data->state.lastconnect_id = -1;
-      if(connp)
-        *connp = NULL;
-      return CURL_SOCKET_BAD;
-    }
-
-    if(connp)
-      *connp = conn;
-    return conn->sock[FIRSTSOCKET];
-  }
+  struct connectdata *conn = Curl_cpool_get_last_conn(data);
   if(connp)
-    *connp = NULL;
-  return CURL_SOCKET_BAD;
+    *connp = conn;
+  return conn ? conn->sock[FIRSTSOCKET] : CURL_SOCKET_BAD;
 }
 
 void Curl_conncontrol(struct connectdata *conn, int ctrl)
@@ -321,6 +240,18 @@ static void conn_report_stats(struct Curl_easy *data, int sockindex)
   }
 }
 
+void Curl_conn_report_failed(struct Curl_easy *data, int8_t sockindex)
+{
+  if(!data->conn || (sockindex != FIRSTSOCKET))
+    return;
+  /* Only filters connected at IP level have info to update. Filters
+   * still racing for a connection, like happy eyeballing, pass it on
+   * to a connected one only. */
+  (void)Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, TRUE,
+                           CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
+  conn_report_stats(data, sockindex);
+}
+
 CURLcode Curl_conn_connect(struct Curl_easy *data,
                            int8_t sockindex,
                            bool blocking,
@@ -381,7 +312,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
        * socket and ip related information. */
       Curl_conn_cntrl_update_info(data, data->conn);
       conn_report_stats(data, sockindex);
-      data->conn->lastupkeep = *Curl_pgrs_now(data);
+      Curl_cpool_conn_was_used(data, data->conn, Curl_pgrs_now(data));
       VERBOSE(result = conn_connect_trace(data, cf));
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
       Curl_conn_remove_setup_filters(data, sockindex);
@@ -392,7 +323,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
                   (int)result);
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "failed to connect"));
-      conn_report_stats(data, sockindex);
+      Curl_conn_report_failed(data, sockindex);
       goto out;
     }
 
@@ -426,7 +357,8 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
         goto out;
 
       rc = Curl_poll(cpfds.pfds, cpfds.n,
-                     CURLMIN(timeout_ms, (cpfds.n ? 1000 : 10)));
+                     CURLMIN(timeout_ms ? timeout_ms : 1000,
+                             (cpfds.n ? 1000 : 10)));
       CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), Curl_poll() -> %d",
                   rc);
       if(rc < 0) {

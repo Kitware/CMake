@@ -121,9 +121,8 @@ static int inet_pton6(const char *src, unsigned char *dst)
   endp = tp + IN6ADDRSZ;
   colonp = NULL;
   /* Leading :: requires some special handling. */
-  if(*src == ':')
-    if(*++src != ':')
-      return 0;
+  if(*src == ':' && *++src != ':')
+    return 0;
   curtok = src;
   saw_xdigit = 0;
   val = 0;
@@ -143,6 +142,8 @@ static int inet_pton6(const char *src, unsigned char *dst)
         colonp = tp;
         continue;
       }
+      if(!*src)
+        return 0;
       if(tp + INT16SZ > endp)
         return 0;
       *tp++ = (unsigned char)((val >> 8) & 0xff);

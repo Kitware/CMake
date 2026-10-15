@@ -92,7 +92,7 @@ static struct curl_trc_feat Curl_trc_feat_ids = {
 
 static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 {
-  curl_off_t cid = data->state.lastconnect_id;
+  curl_off_t cid = data->state.last_conn_id;
   if(data->id >= 0) {
     if(cid >= 0)
       return curl_msnprintf(buf, maxlen, CURL_TRC_FMT_IDSDC, data->id, cid);
@@ -109,7 +109,7 @@ static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 static size_t trc_end_buf(char *buf, size_t len, size_t maxlen, bool addnl)
 {
   /* make sure we end the trace line in `buf` properly. It needs
-   * to end with a terminating '\0' or '\n\0' */
+   * to end with a null-terminator '\0' or '\n\0' */
   if(len >= (maxlen - (addnl ? 2 : 1))) {
     len = maxlen - 5;
     buf[len++] = '.';
@@ -316,6 +316,7 @@ static const char * const Curl_trc_timer_names[] = {
   "FTP_ACCEPT",
   "ALPN_EYEBALLS",
   "SHUTDOWN",
+  "SERVER_RESPONSE",
 };
 
 static const char *trc_timer_name(int tid)

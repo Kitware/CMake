@@ -877,11 +877,8 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     result = Curl_mime_prepare_headers(data, postp, NULL,
                                        NULL, MIMESTRATEGY_MAIL);
 
-    if(!result)
-      if(!Curl_checkheaders(data, STRCONST("Mime-Version")))
-        result = Curl_mime_add_header(&postp->curlheaders,
-                                      "Mime-Version: 1.0");
-
+    if(!result && !Curl_checkheaders(data, STRCONST("Mime-Version")))
+      result = Curl_mime_add_header(&postp->curlheaders, "Mime-Version: 1.0");
     if(!result)
       result = Curl_creader_set_mime(data, postp);
     if(result)
@@ -931,12 +928,11 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     }
 
     for(i = 0; ulflag[i].bit; i++) {
-      if(data->set.upload_flags & ulflag[i].bit) {
-        if((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
-           curlx_dyn_add(&flags, "\\") ||
-           curlx_dyn_add(&flags, ulflag[i].flag))
-          goto cleanup;
-      }
+      if(data->set.upload_flags & ulflag[i].bit &&
+         ((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
+          curlx_dyn_add(&flags, "\\") ||
+          curlx_dyn_add(&flags, ulflag[i].flag)))
+        goto cleanup;
     }
 
     if(curlx_dyn_add(&flags, ")"))
@@ -1210,11 +1206,10 @@ static bool is_custom_fetch_listing(struct IMAP *imap)
     const char *p = imap->custom_params;
     return is_custom_fetch_listing_match(p);
   }
-  else if(curl_strequal(imap->custom, "UID") && imap->custom_params) {
-    if(curl_strnequal(imap->custom_params, " FETCH ", 7)) {
-      const char *p = imap->custom_params + 6;
-      return is_custom_fetch_listing_match(p);
-    }
+  else if(curl_strequal(imap->custom, "UID") && imap->custom_params &&
+          curl_strnequal(imap->custom_params, " FETCH ", 7)) {
+    const char *p = imap->custom_params + 6;
+    return is_custom_fetch_listing_match(p);
   }
   return FALSE;
 }
@@ -1276,7 +1271,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
           pp->nfinal = 0; /* done */
 
           /* Limit chunk to the literal size */
-          if(chunk > (size_t)size)
+          if((curl_off_t)chunk > size)
             chunk = (size_t)size;
 
           if(chunk) {
@@ -1444,7 +1439,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       curlx_dyn_tail(&pp->recvbuf, chunk);
       pp->nfinal = 0; /* done */
 
-      if(chunk > (size_t)size)
+      if((curl_off_t)chunk > size)
         /* The conversion from curl_off_t to size_t is always fine here */
         chunk = (size_t)size;
 
@@ -2007,15 +2002,13 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
   struct IMAP *imap = Curl_meta_get(data, CURL_META_IMAP_EASY);
 
-  (void)premature;
-
   if(!imapc)
     return CURLE_FAILED_INIT;
   if(!imap)
     return CURLE_OK;
 
-  if(status) {
-    CURL_TRC_M(data, "IMAP done with bad status");
+  if(status || premature) {
+    CURL_TRC_M(data, "IMAP done, not finalizing transfer");
     connclose(conn); /* marked for closure */
     result = status;         /* use the already set error code */
   }
@@ -2076,7 +2069,9 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   /* Determine if the requested mailbox (with the same UIDVALIDITY if set)
      has already been selected on this connection */
   if(imap->mailbox && imapc->mailbox &&
-     curl_strequal(imap->mailbox, imapc->mailbox) &&
+     (!strcmp(imap->mailbox, imapc->mailbox) ||
+      (curl_strequal(imap->mailbox, "INBOX") &&
+       curl_strequal(imapc->mailbox, "INBOX"))) &&
      (!imap->uidvalidity_set || !imapc->mb_uidvalidity_set ||
       (imap->uidvalidity == imapc->mb_uidvalidity)))
     selected = TRUE;
@@ -2206,17 +2201,16 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
 {
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
 
-  if(imapc) {
-    /* We cannot send quit unconditionally. If this connection is stale or
-       bad in any way (pingpong has pending data to send),
-       sending quit and waiting around here will make the
-       disconnect wait in vain and cause more problems than we need to. */
-    if(!dead_connection && conn->bits.protoconnstart &&
-       !Curl_pp_needs_flush(data, &imapc->pp)) {
-      if(!imap_perform_logout(data, imapc))
-        (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
-    }
-  }
+  if(imapc &&
+     /* We cannot send quit unconditionally. If this connection is stale or
+        bad in any way (pingpong has pending data to send),
+        sending quit and waiting around here will make the
+        disconnect wait in vain and cause more problems than we need to. */
+     !dead_connection && conn->bits.protoconnstart &&
+     !Curl_pp_needs_flush(data, &imapc->pp) &&
+     !imap_perform_logout(data, imapc))
+    (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
+
   return CURLE_OK;
 }
 
@@ -2241,7 +2235,7 @@ static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done)
   return result;
 }
 
-static void imap_easy_dtor(void *key, size_t klen, void *entry)
+static void imap_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct IMAP *imap = entry;
   (void)key;
@@ -2250,7 +2244,7 @@ static void imap_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(imap);
 }
 
-static void imap_conn_dtor(void *key, size_t klen, void *entry)
+static void imap_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct imap_conn *imapc = entry;
   (void)key;

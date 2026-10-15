@@ -29,11 +29,9 @@
 #define CURL_UINT32_TBL_MAGIC  0x62757473
 #endif
 
-void Curl_uint32_tbl_init(struct uint32_tbl *tbl,
-                          Curl_uint32_tbl_entry_dtor *entry_dtor)
+void Curl_uint32_tbl_init(struct uint32_tbl *tbl)
 {
   memset(tbl, 0, sizeof(*tbl));
-  tbl->entry_dtor = entry_dtor;
   tbl->last_key_added = UINT32_MAX;
 #ifdef DEBUGBUILD
   tbl->init = CURL_UINT32_TBL_MAGIC;
@@ -49,8 +47,6 @@ static void uint32_tbl_clear_rows(struct uint32_tbl *tbl,
   end = CURLMIN(upto_excluding, tbl->nrows);
   for(i = from; i < end; ++i) {
     if(tbl->rows[i]) {
-      if(tbl->entry_dtor)
-        tbl->entry_dtor(i, tbl->rows[i]);
       tbl->rows[i] = NULL;
       tbl->nentries--;
     }
@@ -153,7 +149,8 @@ bool Curl_uint32_tbl_add(struct uint32_tbl *tbl, void *entry, uint32_t *pkey)
 
 void Curl_uint32_tbl_remove(struct uint32_tbl *tbl, uint32_t key)
 {
-  uint32_tbl_clear_rows(tbl, key, key + 1);
+  if(key < tbl->nrows)
+    uint32_tbl_clear_rows(tbl, key, key + 1);
 }
 
 bool Curl_uint32_tbl_contains(struct uint32_tbl *tbl, uint32_t key)

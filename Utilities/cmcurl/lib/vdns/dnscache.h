@@ -27,6 +27,7 @@
 
 #include "hash.h"
 #include "curlx/timeval.h"
+#include "curlx/strparse.h"
 
 struct addrinfo;
 struct hostent;
@@ -46,18 +47,29 @@ struct Curl_dns_entry {
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo *hinfo;
 #endif
-  /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (does not time out) */
-  struct curltime timestamp;
-  size_t hostlen;
-  /* reference counter, entry is freed on reaching 0 */
-  uint32_t refcount;
-  /* hostname port number that resolved to addr. */
-  uint16_t port;
+  struct curltime added; /* time this entry was added to the cache */
+  uint32_t refcount; /* reference counter, entry is freed on reaching 0 */
+  uint16_t hostlen; /* length of hostname */
+  uint16_t port; /* host port */
   char type; /* CURL_DNST_ADDR or CURL_DNST_HTTPS */
   uint8_t dns_queries; /* CURL_DNSQ_* type of queries performed for this */
   uint8_t dns_responses; /* CURL_DNSQ_* type this entry has responses for */
+  BIT(permanent); /* entry is permanent, e.g. does not time out */
   /* hostname that resolved to addr. may be NULL (Unix domain sockets). */
   char hostname[1];
+};
+
+struct dnsc_id {
+  struct Curl_str name;
+  uint16_t port;
+  char type;
+};
+
+#define MAX_HOSTCACHE_LEN (255 + 3) /* max FQDN + type + port */
+
+struct dnsc_key {
+  uint8_t data[MAX_HOSTCACHE_LEN];
+  size_t len;
 };
 
 /*
@@ -101,7 +113,7 @@ void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size);
 void Curl_dnscache_destroy(struct Curl_dnscache *dns);
 
 /* prune old entries from the DNS cache */
-void Curl_dnscache_prune(struct Curl_easy *data);
+void Curl_dnscache_prune(struct Curl_easy *data, const struct curltime *pnow);
 
 /* clear the DNS cache */
 void Curl_dnscache_clear(struct Curl_easy *data);

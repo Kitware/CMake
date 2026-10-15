@@ -50,7 +50,8 @@
 
 #include "bufq.h"
 #include "curlx/dynbuf.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
+#include "connect.h"
 #include "cfilters.h"
 #include "vdns/cf-dns.h"
 #include "vquic/cf-ngtcp2.h"
@@ -564,9 +565,12 @@ static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 }
 #endif /* (HAVE_SENDMMSG || HAVE_SENDMSG) && !HAVE_APPLE_MSG_X */
 
+/* IP_RECVTOS was added in the macOS 10.13 SDK */
 #if (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG) || \
   defined(HAVE_APPLE_MSG_X)) && \
-  (defined(IP_RECVTOS) || defined(IP_TOS)) && defined(IPTOS_ECN_MASK)
+  ((defined(__APPLE__) && defined(IP_RECVTOS)) || \
+   (!defined(__APPLE__) && defined(IP_TOS))) && \
+  defined(IPTOS_ECN_MASK)
 static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 {
   struct cmsghdr *cmsg;
@@ -627,7 +631,8 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct cf_quic_ctx *qctx,
                                  size_t max_pkts,
-                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
+                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp,
+                                 size_t *pnread)
 {
 #if defined(__linux__) && defined(UDP_GRO)
 #define MMSG_NUM  16
@@ -729,6 +734,7 @@ out:
                 "vquic_recvmmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
+  *pnread = total_nread;
   return result;
 }
 
@@ -739,7 +745,7 @@ static CURLcode recvmsg_x_packets(struct Curl_cfilter *cf,
                                   struct cf_quic_ctx *qctx,
                                   size_t max_pkts,
                                   Curl_vquic_recv_pkts_cb *recv_cb,
-                                  void *userp)
+                                  void *userp, size_t *pnread)
 {
 #define MSG_X_NUM  64
 #define MSG_BUF_SIZE  (2048)
@@ -839,6 +845,7 @@ out:
                 "vquic_recvmsg_x(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
+  *pnread = total_nread;
   return result;
 }
 
@@ -847,7 +854,8 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 struct cf_quic_ctx *qctx,
                                 size_t max_pkts,
-                                Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
+                                Curl_vquic_recv_pkts_cb *recv_cb, void *userp,
+                                size_t *pnread)
 {
 #define CMSG_PER_MSG_SIZE    CMSG_SPACE(sizeof(int))
   struct iovec msg_iov;
@@ -925,6 +933,7 @@ out:
     CURL_TRC_CF(data, cf,
                 "vquic_recvmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
+  *pnread = total_nread;
   return result;
 }
 
@@ -933,7 +942,8 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct cf_quic_ctx *qctx,
                                  size_t max_pkts,
-                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
+                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp,
+                                 size_t *pnread)
 {
   uint8_t buf[64 * 1024];
   int bufsize = (int)sizeof(buf);
@@ -990,6 +1000,7 @@ out:
     CURL_TRC_CF(data, cf,
                 "vquic_recvfrom(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
+  *pnread = total_nread;
   return result;
 }
 #endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG */
@@ -1001,17 +1012,20 @@ CURLcode Curl_vquic_recv_packets(struct Curl_cfilter *cf,
                                  Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
 {
   CURLcode result;
+  size_t nread = 0;
 #ifdef HAVE_SENDMMSG
-  result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp, &nread);
 #elif defined(HAVE_APPLE_MSG_X)
-  result = recvmsg_x_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvmsg_x_packets(cf, data, qctx, max_pkts, recv_cb, userp,
+                             &nread);
 #elif defined(HAVE_SENDMSG)
-  result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp, &nread);
 #else
-  result = recvfrom_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvfrom_packets(cf, data, qctx, max_pkts, recv_cb, userp, &nread);
 #endif
   if(!result) {
-    if(!qctx->got_first_byte) {
+    /* EAGAIN is no error, only count actual packets as a reply */
+    if(!qctx->got_first_byte && nread) {
       qctx->got_first_byte = TRUE;
       qctx->first_byte_at = qctx->last_op;
     }
@@ -1054,9 +1068,10 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
     if(!result) {
       int qlogfd = curlx_open(curlx_dyn_ptr(&fname),
                               O_WRONLY | O_CREAT | CURL_O_BINARY,
-                              data->set.new_file_perms
 #ifdef _WIN32
-                              & (_S_IREAD | _S_IWRITE)
+                              data->set.new_file_perms & (_S_IREAD | _S_IWRITE)
+#else
+                              (mode_t)data->set.new_file_perms
 #endif
                               );
       if(qlogfd != -1)
@@ -1076,14 +1091,16 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
                                    struct Curl_peer *origin,
                                    struct Curl_peer *peer)
 {
+  struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
   (void)data; /* not used in all cases and compilers are stupid */
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  result = Curl_cf_ngtcp2_insert_after(cf_at, origin, peer);
+  result = Curl_cf_ngtcp2_insert_after(cf_at, origin, peer, &cf);
 #elif defined(USE_QUICHE)
-  result = Curl_cf_quiche_insert_after(cf_at, origin, peer);
+  result = Curl_cf_quiche_insert_after(cf_at, origin, peer, &cf);
 #else
+  (void)cf)
   (void)cf_at;
   (void)origin;
   (void)peer;
@@ -1093,12 +1110,9 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
 #if defined(USE_HTTPSRR) && defined(USE_ECH)
   /* When using ECH, kick off the HTTPS-RR resolve */
   if(!result && (origin->scheme->family == CURLPROTO_HTTP) &&
-     CURLECH_ENABLED(data) &&
-     Curl_ssl_supports(data, SSLSUPP_ECH) &&
-     (data->set.tls_ech != CURLECH_GREASE) &&
-     !CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
-    result = Curl_conn_dns_add_https_resolve(data, cf_at->conn,
-                                             cf_at->sockindex, origin);
+     Curl_ssl_need_httpsrr(cf)) {
+    result = Curl_conn_dns_add_https_resolve(data, cf->conn,
+                                             cf->sockindex, origin);
   }
 #endif /* USE_HTTPSRR && USE_ECH */
   return result;
@@ -1189,10 +1203,9 @@ CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
 #endif /* !CURL_DISABLE_PROXY && USE_PROXY_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
-                             const struct connectdata *conn,
-                             unsigned char transport)
+                             struct connectdata *conn)
 {
-  if(transport == TRNSPRT_UNIX) {
+  if(Curl_conn_get_first_peer(conn, FIRSTSOCKET)->unix_socket) {
     failf(data, "HTTP/3 cannot be used over UNIX domain sockets");
     return CURLE_QUIC_CONNECT_ERROR;
   }
@@ -1321,12 +1334,10 @@ struct nghttp3_mem *Curl_nghttp3_mem(void)
 #else /* CURL_DISABLE_HTTP || !USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
-                             const struct connectdata *conn,
-                             unsigned char transport)
+                             struct connectdata *conn)
 {
   (void)data;
   (void)conn;
-  (void)transport;
   DEBUGF(infof(data, "QUIC is not supported in this build"));
   return CURLE_NOT_BUILT_IN;
 }
