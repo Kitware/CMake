@@ -236,9 +236,8 @@ protected:
   void AppendCodegenTargetDepends(std::vector<std::string>& depends,
                                   cmGeneratorTarget* target);
 
-  // Compute the "test_prep/<name>" build targets requested via the
-  // CMAKE_TEST_BUILD_DEPENDS variable.  Each test's dependencies are
-  // resolved to the build-system targets that produce them so that the
+  // Compute the "test_prep/<name>" build targets.  Each test's dependencies
+  // are resolved to the build-system targets that produce them so that the
   // recursive Makefile graph can build them.
   void ComputeTestPrepTargets();
 
@@ -359,7 +358,7 @@ private:
   };
 
   // Ordered map of "test_prep/" target name -> its rules.  Populated by
-  // ComputeTestPrepTargets when CMAKE_TEST_BUILD_DEPENDS is enabled.
+  // ComputeTestPrepTargets when test preparation targets are enabled.
   std::map<std::string, TestPrepTarget> TestPrepTargets;
   TestPrepTarget& GetTestPrepTarget(std::string const& name);
   void AddDirectoryTestPrepTargets(cmLocalGenerator* lg);

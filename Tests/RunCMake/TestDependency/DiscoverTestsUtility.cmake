@@ -1,6 +1,5 @@
 project(TestDependencyDiscoverUtility C)
 enable_testing()
-set(CMAKE_TEST_BUILD_DEPENDS ON)
 
 add_executable(fake_discovery EXCLUDE_FROM_ALL fake_discovery.c)
 add_custom_target(discovery_utility

@@ -165,7 +165,6 @@ if(RunCMake_GENERATOR MATCHES "Ninja|FASTBuild|Makefiles")
 
     # "Failure" cases, do not generate test dependencies
     block()
-      run_testdependency_case(DEFAULT FALSE)
       run_testdependency_case(OFF FALSE)
       run_cmake(ON-invalid-test-name)
     endblock()
@@ -277,6 +276,7 @@ if(RunCMake_GENERATOR MATCHES "Ninja|FASTBuild|Makefiles")
       endblock()
 
       # Verify test_depends
+      run_testdependency_case(DEFAULT TRUE)
       run_testdependency_case(ON TRUE)
 
       # Verify test_depends + --out-of-date for add_test

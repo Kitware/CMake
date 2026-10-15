@@ -4,7 +4,6 @@ project(TestDependencyDiscoverPostBuild CXX)
 include(GoogleTest)
 
 enable_testing()
-set(CMAKE_TEST_BUILD_DEPENDS ON)
 
 add_executable(fake_gtest fake_gtest_post_build.cpp)
 
