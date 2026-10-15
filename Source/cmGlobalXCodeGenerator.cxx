@@ -368,6 +368,171 @@ cm::string_view cmXcodeBuildSystemString(cmGlobalXCodeGenerator::BuildSystem b)
   }
   return {};
 }
+
+// The languages affected by target-wide settings, such as preprocessor
+// definitions and the prefix header.
+char const* const TargetWideSettingLangs[] = { "CXX", "C", "OBJCXX", "OBJC" };
+
+// Choose a language to use for target-wide settings.
+std::string ChooseLangForTargetWideSettings(
+  cmGeneratorTarget* gtgt, std::string const& config,
+  std::set<std::string> const& languages)
+{
+  std::string const llang = gtgt->GetLinkerLanguage(config);
+  if (cm::contains(TargetWideSettingLangs, llang)) {
+    return llang;
+  }
+  for (char const* l : TargetWideSettingLangs) {
+    if (languages.count(l)) {
+      return l;
+    }
+  }
+  return {};
+}
+
+// Whether the rewrite performed by HideForceIncludeFromClangDriver below is
+// understood by the compiler.  Other compilers would reject '-Xclang'.
+bool CompilerUnderstandsXclang(cmMakefile* mf, std::string const& lang)
+{
+  std::string const& id =
+    mf->GetSafeDefinition(cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
+  return id == "Clang"_s || id == "AppleClang"_s || id == "IntelLLVM"_s;
+}
+
+// One argument of a flags string: the range it occupies in the string, and
+// its value with the shell quoting removed.
+struct FlagArgument
+{
+  std::string::size_type Begin;
+  std::string Value;
+};
+
+// Split a flags string the way a shell would, recording where each argument
+// starts so that the string can still be edited in place afterwards.
+std::vector<FlagArgument> SplitFlagArguments(std::string const& flags)
+{
+  std::vector<FlagArgument> args;
+  std::string::size_type i = 0;
+  while (i < flags.size()) {
+    if (flags[i] == ' ' || flags[i] == '\t') {
+      ++i;
+      continue;
+    }
+    FlagArgument arg;
+    arg.Begin = i;
+    char quote = '\0';
+    for (; i < flags.size(); ++i) {
+      char const c = flags[i];
+      if (quote != '\0') {
+        if (c == quote) {
+          quote = '\0';
+        } else if (c == '\\' && quote == '"' && i + 1 < flags.size()) {
+          arg.Value += flags[++i];
+        } else {
+          arg.Value += c;
+        }
+      } else if (c == '\'' || c == '"') {
+        quote = c;
+      } else if (c == '\\' && i + 1 < flags.size()) {
+        arg.Value += flags[++i];
+      } else if (c == ' ' || c == '\t') {
+        break;
+      } else {
+        arg.Value += c;
+      }
+    }
+    args.push_back(std::move(arg));
+  }
+  return args;
+}
+
+// Xcode adds the '-include' flag for 'GCC_PREFIX_HEADER' after the flags
+// from settings such as 'OTHER_CFLAGS', but Clang uses a precompiled prefix
+// header only when its '-include' flag is the first one.  Hide any
+// user-specified force-include flag from the Clang driver by passing it
+// straight to the compiler front end with '-Xclang', so that the prefix
+// header stays the first '-include' flag the driver sees.  The header is
+// still force-included: Xcode compiles the prefix header in a step of its
+// own, in which every force include, '-Xclang' or not, is processed before
+// the prefix header itself.
+//
+// The flag and its value must end up in a single argument because Xcode
+// moves any '-include <file>' pair out of 'OTHER_CFLAGS' and onto the command
+// line ahead of the prefix header.  Clang declares '-include' as
+// 'JoinedOrSeparate', so '-Xclang -include<file>' carries the same meaning.
+void HideForceIncludeFromClangDriver(std::string& flags)
+{
+  // The edits to make, in increasing position.  They are applied back to
+  // front at the end so that the recorded positions stay valid.
+  struct Edit
+  {
+    std::string::size_type Begin;
+    std::string::size_type End;
+    std::string Text;
+  };
+  std::vector<Edit> edits;
+
+  std::vector<FlagArgument> const args = SplitFlagArguments(flags);
+  for (std::size_t i = 0; i < args.size(); ++i) {
+    // Accept both the '-include' and the '--include' spelling.
+    cm::string_view spelling;
+    if (cmHasLiteralPrefix(args[i].Value, "--include")) {
+      spelling = "--include"_s;
+    } else if (cmHasLiteralPrefix(args[i].Value, "-include")) {
+      spelling = "-include"_s;
+    } else {
+      continue;
+    }
+
+    // A flag already handed to a sub-tool is not seen by the driver.
+    if (i > 0 &&
+        (args[i - 1].Value == "-Xclang"_s ||
+         args[i - 1].Value == "-Xpreprocessor"_s)) {
+      continue;
+    }
+
+    cm::string_view const rest =
+      cm::string_view(args[i].Value).substr(spelling.size());
+    if (rest.empty()) {
+      // The separate-argument spelling: the next argument is the file name.
+      // Leave a lone flag alone rather than consume an unrelated argument.
+      if (i + 1 == args.size() || cmHasPrefix(args[i + 1].Value, '-')) {
+        continue;
+      }
+      // Keep the file name as written, quoting and all, so that it joins the
+      // flag as a single argument.
+      edits.push_back(
+        { args[i].Begin, args[i + 1].Begin, "-Xclang -include" });
+      continue;
+    }
+
+    // A joined spelling.  Only '--include=<file>' uses a separator; after
+    // '-include' an '=' is part of the file name.
+    std::string rawSpelling(spelling);
+    if (spelling.size() == cmStrLen("--include") && rest[0] == '=') {
+      rawSpelling += '=';
+    }
+    // A flag holding a space is quoted as a whole, so step over an opening
+    // quote to leave the quoting intact.
+    std::string::size_type optBegin = args[i].Begin;
+    if (flags[optBegin] == '\'' || flags[optBegin] == '"') {
+      ++optBegin;
+    }
+    if (flags.compare(optBegin, rawSpelling.size(), rawSpelling) != 0) {
+      // Escaped in some way this does not account for; leave it alone.
+      continue;
+    }
+    edits.push_back({ args[i].Begin, optBegin + rawSpelling.size(),
+                      cmStrCat("-Xclang ",
+                               cm::string_view(flags).substr(
+                                 args[i].Begin, optBegin - args[i].Begin),
+                               "-include") });
+  }
+
+  for (auto edit = edits.rbegin(); edit != edits.rend(); ++edit) {
+    flags.replace(edit->Begin, edit->End - edit->Begin, edit->Text);
+  }
+}
 }
 
 bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
@@ -931,6 +1096,7 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
   this->ExternalLibRefs.clear();
   this->FileRefToBuildFileMap.clear();
   this->CommandsVisited.clear();
+  this->TargetPrefixHeaderMap.clear();
 }
 
 void cmGlobalXCodeGenerator::addObject(std::unique_ptr<cmXCodeObject> obj)
@@ -1091,6 +1257,28 @@ private:
   cmGeneratorTarget* Target = nullptr;
 };
 
+bool cmGlobalXCodeGenerator::TargetHasPrefixHeader(cmGeneratorTarget* gtgt)
+{
+  // Collecting the languages of a target walks all of its sources, so cache
+  // the answer rather than recompute it for every source of the target.
+  auto const inserted = this->TargetPrefixHeaderMap.emplace(gtgt, false);
+  if (inserted.second) {
+    // Per-file 'COMPILER_FLAGS' are not per-configuration, so a prefix header
+    // used by any configuration has to be accounted for in all of them.
+    for (std::string const& config : this->CurrentConfigurationTypes) {
+      std::set<std::string> languages;
+      gtgt->GetLanguages(languages, config);
+      std::string const lang =
+        ChooseLangForTargetWideSettings(gtgt, config, languages);
+      if (!gtgt->GetPchHeader(config, lang).empty()) {
+        inserted.first->second = true;
+        break;
+      }
+    }
+  }
+  return inserted.first->second;
+}
+
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   cmLocalGenerator* lg, cmSourceFile* sf, cmGeneratorTarget* gtgt)
 {
@@ -1140,6 +1328,14 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     if (!options.empty()) {
       lg->AppendCompileOptions(flags, cm::remove_BT(options));
     }
+  }
+
+  // 'GCC_PREFIX_HEADER' is a target-wide setting, so it affects this source
+  // even if the precompiled header was requested for another language.
+  if (this->TargetHasPrefixHeader(gtgt) &&
+      cm::contains(TargetWideSettingLangs, lang) &&
+      CompilerUnderstandsXclang(lg->GetMakefile(), lang)) {
+    HideForceIncludeFromClangDriver(flags);
   }
 
   // Add per-source definitions.
@@ -2662,18 +2858,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 
   // Choose a language to use for target-wide preprocessor definitions.
-  static char const* ppLangs[] = { "CXX", "C", "OBJCXX", "OBJC" };
-  std::string langForPreprocessorDefinitions;
-  if (cm::contains(ppLangs, llang)) {
-    langForPreprocessorDefinitions = llang;
-  } else {
-    for (char const* l : ppLangs) {
-      if (languages.count(l)) {
-        langForPreprocessorDefinitions = l;
-        break;
-      }
-    }
-  }
+  std::string const langForPreprocessorDefinitions =
+    ChooseLangForTargetWideSettings(gtgt, configName, languages);
+
+  // The prefix header is a target-wide setting, so it affects every language
+  // compiled in the target, not just the one it was requested for.
+  std::string const pchHeader =
+    gtgt->GetPchHeader(configName, langForPreprocessorDefinitions);
 
   if (gtgt->IsIPOEnabled(llang, configName)) {
     char const* ltoValue =
@@ -3196,6 +3387,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   for (auto const& language : languages) {
     std::string flags = cmStrCat(cflags[language], ' ', defFlags);
+    if (!pchHeader.empty() && cm::contains(TargetWideSettingLangs, language) &&
+        CompilerUnderstandsXclang(this->CurrentMakefile, language)) {
+      HideForceIncludeFromClangDriver(flags);
+    }
     if (language == "CXX"_s || language == "OBJCXX"_s) {
       if (language == "CXX"_s ||
           !buildSettings->GetAttribute("OTHER_CPLUSPLUSFLAGS")) {
@@ -3330,8 +3525,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 
   // Precompile Headers
-  std::string pchHeader =
-    gtgt->GetPchHeader(configName, langForPreprocessorDefinitions);
   if (!pchHeader.empty()) {
     buildSettings->AddAttribute("GCC_PREFIX_HEADER",
                                 this->CreateString(pchHeader));
