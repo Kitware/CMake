@@ -51,7 +51,7 @@
 
 CURLcode Curl_vquic_tls_peer_init(struct Curl_peer *origin,
                                   struct Curl_peer *peer,
-                                  struct ssl_primary_config *sslc,
+                                  struct ssl_filter_config *sslc,
                                   struct ssl_peer *ssl_peer)
 {
   char tls_id[80];
@@ -155,10 +155,10 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer)
 {
-  struct ssl_primary_config *conn_config;
+  struct ssl_filter_config *conn_config;
   CURLcode result = CURLE_OK;
 
-  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  conn_config = Curl_ssl_cf_get_filter_config(cf);
   if(!conn_config)
     return CURLE_FAILED_INIT;
 
@@ -169,8 +169,6 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
   result = Curl_gtls_verifyserver(
     cf, data, ctx->gtls.session, conn_config, &data->set.ssl, peer,
     CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY));
-  if(result)
-    return result;
 #elif defined(USE_WOLFSSL)
   (void)data;
   if(conn_config->verifyhost) {

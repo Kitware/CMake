@@ -834,7 +834,8 @@ static int myssh_in_AUTHLIST(struct Curl_easy *data,
   /* For public key auth we need either the private key or
      CURLSSH_AUTH_AGENT. */
   if((sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) &&
-     (sshc->priv_key || (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
+     ((sshc->priv_key && sshc->priv_key[0]) ||
+      (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
     myssh_to(data, sshc, SSH_AUTH_PKEY_INIT);
     infof(data, "Authentication using SSH public key file");
   }
@@ -864,8 +865,8 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
 
   /* Two choices, (1) private key was given on CMD,
    * (2) use the "default" keys. */
-  if(sshc->priv_key) {
-    if(sshc->pubkey && !data->set.ssl.primary.key_passwd) {
+  if(sshc->priv_key && sshc->priv_key[0]) {
+    if(sshc->pubkey && !sshc->passphrase) {
       rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
       if(rc == SSH_AUTH_AGAIN)
         return SSH_AGAIN;
@@ -877,7 +878,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
     }
 
     rc = ssh_pki_import_privkey_file(sshc->priv_key,
-                                     data->set.ssl.primary.key_passwd, NULL,
+                                     sshc->passphrase, NULL,
                                      NULL, &sshc->privkey);
     if(rc != SSH_OK) {
       failf(data, "Could not load private key file %s", sshc->priv_key);
@@ -889,7 +890,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
   }
   else {
     rc = ssh_userauth_publickey_auto(sshc->ssh_session, NULL,
-                                     data->set.ssl.primary.key_passwd);
+                                     sshc->passphrase);
     if(rc == SSH_AUTH_AGAIN)
       return SSH_AGAIN;
 
@@ -1916,6 +1917,7 @@ static void sshc_cleanup(struct ssh_conn *sshc)
       sshc->pubkey = NULL;
     }
 
+    curlx_safefree(sshc->passphrase);
     curlx_safefree(sshc->pub_key);
     curlx_safefree(sshc->priv_key);
     curlx_safefree(sshc->quote_path1);
@@ -2499,14 +2501,15 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
     if(block) {
       curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
-      (void)SOCKET_READABLE(fd_read, left_ms > 1000 ? 1000 : left_ms);
+      (void)SOCKET_READABLE(fd_read,
+                            (!left_ms || left_ms > 1000) ? 1000 : left_ms);
     }
   }
 
   return result;
 }
 
-static void myssh_easy_dtor(void *key, size_t klen, void *entry)
+static void myssh_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct SSHPROTO *sshp = entry;
   (void)key;
@@ -2515,7 +2518,7 @@ static void myssh_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(sshp);
 }
 
-static void myssh_conn_dtor(void *key, size_t klen, void *entry)
+static void myssh_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct ssh_conn *sshc = entry;
   (void)key;
@@ -2759,7 +2762,7 @@ static CURLcode myssh_done(struct Curl_easy *data,
   else
     result = status;
 
-  if(Curl_pgrsDone(data))
+  if(Curl_pgrsDone(data, Curl_pgrs_now(data)))
     return CURLE_ABORTED_BY_CALLBACK;
 
   CURL_REQ_CLEAR_IO(data);

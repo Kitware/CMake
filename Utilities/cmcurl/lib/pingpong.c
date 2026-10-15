@@ -80,8 +80,11 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     if(timeout_ms < interval_ms)
       interval_ms = timeout_ms;
   }
-  else
+  else {
     interval_ms = 0; /* immediate */
+    /* Wake the multi socket API even when the server sends no response. */
+    Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
+  }
 
   if(Curl_conn_data_pending(data, FIRSTSOCKET))
     rc = 1;
@@ -182,7 +185,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 
   Curl_debug(data, CURLINFO_HEADER_OUT, s, bytes_written);
 
-  if(bytes_written != write_len) {
+  if(bytes_written < write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
     pp->sendthis = s;
     pp->sendsize = write_len;
@@ -245,6 +248,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   size_t gotbytes;
   char buffer[900];
+  int maxloops = 10;
 
   *code = 0; /* 0 for errors or not done */
   *size = 0;
@@ -262,6 +266,9 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       pp->nfinal = 0; /* now gone */
     }
     if(!pp->overflow) {
+      if(!maxloops--) /* don't get stuck */
+        return CURLE_OK;
+
       result = pingpong_read(data, sockindex, buffer, sizeof(buffer),
                              &gotbytes);
       if(result == CURLE_AGAIN)
@@ -294,8 +301,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 
         if(memchr(line, 0, length)) {
           /* The response line is passed on as a "header" below, so reject an
-             embedded nul the same way verify_header() does for HTTP. */
-          failf(data, "Nul byte in server response line");
+             embedded NUL byte the same way verify_header() does for HTTP. */
+          failf(data, "NUL byte in server response line");
           return CURLE_WEIRD_SERVER_REPLY;
         }
 
@@ -382,7 +389,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   if(result)
     return result;
 
-  if(written != pp->sendleft) {
+  if(written < pp->sendleft) {
     /* only a fraction was sent */
     pp->sendleft -= written;
   }

@@ -27,7 +27,7 @@ LIB_CURLX_CFILES =      \
   curlx/base64.c        \
   curlx/basename.c      \
   curlx/dynbuf.c        \
-  curlx/fopen.c         \
+  curlx/win32-fopen.c   \
   curlx/inet_ntop.c     \
   curlx/inet_pton.c     \
   curlx/multibyte.c     \
@@ -48,7 +48,7 @@ LIB_CURLX_HFILES =      \
   curlx/base64.h        \
   curlx/basename.h      \
   curlx/dynbuf.h        \
-  curlx/fopen.h         \
+  curlx/win32-fopen.h   \
   curlx/inet_ntop.h     \
   curlx/inet_pton.h     \
   curlx/multibyte.h     \
@@ -265,6 +265,7 @@ LIB_CFILES =         \
   protocol.c         \
   proxy.c            \
   psl.c              \
+  ptrarray.c         \
   rand.c             \
   ratelimit.c        \
   request.c          \
@@ -274,7 +275,6 @@ LIB_CFILES =         \
   setopt.c           \
   sha256.c           \
   slist.c            \
-  smb.c              \
   smtp.c             \
   socketpair.c       \
   socks.c            \
@@ -284,15 +284,14 @@ LIB_CFILES =         \
   strcase.c          \
   strequal.c         \
   strerror.c         \
-  system_win32.c     \
   telnet.c           \
   tftp.c             \
   thrdpool.c         \
   thrdqueue.c        \
   transfer.c         \
+  u8_strset.c        \
+  u32_ptrset.c       \
   uint-bset.c        \
-  uint-hash.c        \
-  uint-hashset.c     \
   uint-spbset.c      \
   uint-table.c       \
   url.c              \
@@ -398,6 +397,7 @@ LIB_HFILES =         \
   protocol.h         \
   proxy.h            \
   psl.h              \
+  ptrarray.h         \
   rand.h             \
   ratelimit.h        \
   request.h          \
@@ -410,7 +410,6 @@ LIB_HFILES =         \
   setup-win32.h      \
   sigpipe.h          \
   slist.h            \
-  smb.h              \
   smtp.h             \
   sockaddr.h         \
   socketpair.h       \
@@ -418,15 +417,14 @@ LIB_HFILES =         \
   splay.h            \
   strcase.h          \
   strerror.h         \
-  system_win32.h     \
   telnet.h           \
   tftp.h             \
   thrdpool.h         \
   thrdqueue.h        \
   transfer.h         \
+  u8_strset.h        \
+  u32_ptrset.h       \
   uint-bset.h        \
-  uint-hash.h        \
-  uint-hashset.h     \
   uint-spbset.h      \
   uint-table.h       \
   url.h              \

@@ -53,7 +53,7 @@
 #include "parsedate.h" /* for the week day and month names */
 #include "multiif.h"
 #include "select.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "vssh/vssh.h"
 #include "curlx/strparse.h"
 #include "curlx/base64.h" /* for curlx_base64_encode() */
@@ -652,6 +652,12 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
      !CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256)) {
     struct libssh2_knownhost *store = NULL;
     struct connectdata *conn = data->conn;
+    /* key types already confirmed absent for this host, so repeat hashed
+       entries of the same type do not each force a fresh checkp() scan
+       of the whole known_hosts set. one slot per possible key type (indexed
+       by the type shifted down) so no entry ordering can overflow it */
+    bool absent_type[(LIBSSH2_KNOWNHOST_KEY_MASK >>
+                      LIBSSH2_KNOWNHOST_KEY_SHIFT) + 1] = { FALSE };
     /* lets try to find our host in the known hosts file */
     while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
       /* For non-standard ports, the name is enclosed in */
@@ -685,9 +691,25 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
             break;
           }
         }
-        else {
-          found = TRUE;
-          break;
+        else if(store->key) {
+          unsigned int type = (store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK)
+                              >> LIBSSH2_KNOWNHOST_KEY_SHIFT;
+          if(!absent_type[type]) {
+            int keycheck = libssh2_knownhost_checkp(
+              sshc->kh, conn->origin->hostname,
+              (conn->origin->port != PORT_SSH) ? conn->origin->port : -1,
+              store->key, strlen(store->key),
+              LIBSSH2_KNOWNHOST_TYPE_PLAIN |
+                LIBSSH2_KNOWNHOST_KEYENC_BASE64 |
+                (store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK),
+              NULL);
+            if(keycheck == LIBSSH2_KNOWNHOST_CHECK_MATCH) {
+              found = TRUE;
+              break;
+            }
+            else if(keycheck == LIBSSH2_KNOWNHOST_CHECK_NOTFOUND)
+              absent_type[type] = TRUE;
+          }
         }
       }
     }
@@ -1487,12 +1509,9 @@ static CURLcode ssh_state_auth_pkey(struct Curl_easy *data,
    */
   struct connectdata *conn = data->conn;
   const char *user = Curl_creds_user(conn->creds);
-  int rc =
-    libssh2_userauth_publickey_fromfile_ex(sshc->ssh_session,
-                                           user,
-                                           curlx_uztoui(strlen(user)),
-                                           sshc->pub_key,
-                                           sshc->priv_key, sshc->passphrase);
+  int rc = libssh2_userauth_publickey_fromfile_ex(
+    sshc->ssh_session, user, curlx_uztoui(strlen(user)),
+    sshc->pub_key, sshc->priv_key, sshc->passphrase ? sshc->passphrase : "");
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
@@ -2555,6 +2574,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
   DEBUGASSERT(!sshc->kh);
   DEBUGASSERT(!sshc->ssh_agent);
 
+  curlx_safefree(sshc->passphrase);
   curlx_safefree(sshc->pub_key);
   curlx_safefree(sshc->priv_key);
   curlx_safefree(sshc->quote_path1);
@@ -3219,14 +3239,14 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
         fd_write = sock;
       /* wait for the socket to become ready */
       (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
-                              left_ms > 1000 ? 1000 : left_ms);
+                              (!left_ms || left_ms > 1000) ? 1000 : left_ms);
     }
   }
 
   return result;
 }
 
-static void myssh_easy_dtor(void *key, size_t klen, void *entry)
+static void myssh_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct SSHPROTO *sshp = entry;
   (void)key;
@@ -3237,7 +3257,7 @@ static void myssh_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(sshp);
 }
 
-static void myssh_conn_dtor(void *key, size_t klen, void *entry)
+static void myssh_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct ssh_conn *sshc = entry;
   (void)key;
@@ -3600,7 +3620,7 @@ static CURLcode ssh_done(struct Curl_easy *data, CURLcode status)
   else
     result = status;
 
-  if(Curl_pgrsDone(data))
+  if(Curl_pgrsDone(data, Curl_pgrs_now(data)))
     return CURLE_ABORTED_BY_CALLBACK;
 
   CURL_REQ_CLEAR_IO(data);
