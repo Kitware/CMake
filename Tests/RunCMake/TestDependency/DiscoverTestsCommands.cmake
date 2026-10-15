@@ -1,6 +1,5 @@
 project(TestDependencyDiscoverCommands C)
 enable_testing()
-set(CMAKE_TEST_BUILD_DEPENDS ON)
 
 add_executable(command_genex EXCLUDE_FROM_ALL fake_discovery.c)
 add_executable(command_wrapper EXCLUDE_FROM_ALL fake_discovery.c)

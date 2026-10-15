@@ -1,6 +1,5 @@
 project(TestDependencyDirectoryGeneratedFile NONE)
 enable_testing()
-set(CMAKE_TEST_BUILD_DEPENDS ON)
 
 set(output "${CMAKE_CURRENT_BINARY_DIR}/directory-generated.txt")
 add_custom_command(OUTPUT "${output}"

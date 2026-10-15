@@ -143,7 +143,6 @@ Variables that Provide Information
    /variable/CMAKE_Swift_MODULE_DIRECTORY
    /variable/CMAKE_Swift_NUM_THREADS
    /variable/CMAKE_Swift_SEPARATE_MODULE_EMISSION
-   /variable/CMAKE_TEST_BUILD_DEPENDS
    /variable/CMAKE_TEST_LAUNCHER
    /variable/CMAKE_TOOLCHAIN_FILE
    /variable/CMAKE_TWEAK_VERSION
@@ -301,6 +300,7 @@ Variables that Change Behavior
    /variable/CMAKE_SKIP_INSTALL_ALL_DEPENDENCY
    /variable/CMAKE_SKIP_INSTALL_PREP_TARGETS
    /variable/CMAKE_SKIP_TEST_ALL_DEPENDENCY
+   /variable/CMAKE_SKIP_TEST_PREP_TARGETS
    /variable/CMAKE_STAGING_PREFIX
    /variable/CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS
    /variable/CMAKE_SUBLIME_TEXT_2_EXCLUDE_BUILD_TREE
@@ -895,6 +895,7 @@ Deprecated Variables that Change Behavior
    /variable/CMAKE_ERROR_DEPRECATED
    /variable/CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
    /variable/CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
+   /variable/CMAKE_TEST_BUILD_DEPENDS
    /variable/CMAKE_WARN_DEPRECATED
 
 Deprecated Variables that Describe the System

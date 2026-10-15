@@ -1,6 +1,5 @@
 project(TestDependencyDiscoverGeneratedFile C)
 enable_testing()
-set(CMAKE_TEST_BUILD_DEPENDS ON)
 
 add_executable(fake_discovery EXCLUDE_FROM_ALL fake_discovery.c)
 set(output "${CMAKE_CURRENT_BINARY_DIR}/generated.txt")

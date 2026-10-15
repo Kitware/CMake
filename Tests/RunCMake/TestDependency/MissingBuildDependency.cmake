@@ -1,5 +1,4 @@
 enable_testing()
-set(CMAKE_TEST_BUILD_DEPENDS ON)
 
 add_test(NAME Direct
   COMMAND "${CMAKE_COMMAND}" -E true

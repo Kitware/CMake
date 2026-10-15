@@ -32,34 +32,37 @@ This writes a FASTBuild configuration file named ``fbuild.bff`` into
 Built-in Targets
 ----------------
 
-.. versionadded:: 4.5
+``install_prep/<component>``
 
-  If the project has install rules, the generated build file provides the
-  following targets, unless :variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` or
-  :variable:`CMAKE_SKIP_INSTALL_RULES` is enabled:
+  .. versionadded:: 4.5
 
-  ``install_prep/<component>``
-    Builds all known build dependencies for the install component named
-    ``<component>`` added by :command:`install`. Components whose names cannot
-    be represented safely are excluded. See :ref:`Install Preparation Targets`
-    and :ref:`Target Names`.
+    Created if the project has install rules, unless the
+    :variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` or
+    :variable:`CMAKE_SKIP_INSTALL_RULES` variable is enabled. Builds all known
+    build dependencies for the named install component. Components whose
+    names cannot be represented safely are excluded. See
+    :ref:`Install Preparation Targets` and :ref:`Target Names`.
 
-  ``install_prep/all``
-    Builds all known build dependencies needed for an installation that does
-    not select a component. See :ref:`Install Preparation Targets`.
+``install_prep/all``
 
-.. versionadded:: 4.5
+  .. versionadded:: 4.5
 
-  When the :variable:`CMAKE_TEST_BUILD_DEPENDS` variable is enabled, the
-  generated build file provides the following targets:
+    Created if the project has install rules, unless the
+    :variable:`CMAKE_SKIP_INSTALL_PREP_TARGETS` or
+    :variable:`CMAKE_SKIP_INSTALL_RULES` variable is enabled. Builds all known
+    build dependencies for an installation that does not select a component.
+    See :ref:`Install Preparation Targets`.
 
-  ``test_prep/<test-name>``
-    Builds all known build dependencies for the test named ``<test-name>``
-    added by :command:`add_test`, including the executable target invoked by
-    the test, targets referenced by generator expressions in the test command,
-    and explicit ``BUILD_DEPENDS`` entries.
+``test_prep/<test-name>``
 
-    Tests whose names are not valid target names are excluded. If multiple
+  .. versionchanged:: 4.5
+
+    Created unless the :variable:`CMAKE_SKIP_TEST_PREP_TARGETS` variable is
+    enabled. Builds all known build dependencies for the named test, including
+    the executable target invoked by the test, targets referenced by generator
+    expressions in the test command, and explicit ``BUILD_DEPENDS`` entries.
+
+    Tests with names that are not valid target names are excluded. If multiple
     tests in different directories share the same name, their dependencies are
     merged into one ``test_prep/<test-name>`` target. See the
     :manual:`cmake-buildsystem(7)` manual for more details on
@@ -69,10 +72,14 @@ Built-in Targets
     discovered at test time, because their names are not known during
     generation.
 
-  ``test_prep/all``
-    Depends on every generated ``test_prep/<test-name>`` target. Also builds
-    dependencies recorded by the :prop_dir:`CMAKE_TEST_BUILD_DEPENDS` directory
-    property.
+``test_prep/all``
+
+  .. versionchanged:: 4.5
+
+    Created unless the :variable:`CMAKE_SKIP_TEST_PREP_TARGETS` variable is
+    enabled. Depends on every generated ``test_prep/<test-name>`` target. Also
+    builds dependencies recorded by the :prop_dir:`CMAKE_TEST_BUILD_DEPENDS`
+    directory property.
 
 Caching
 -------
@@ -115,7 +122,6 @@ The following variables can be used to configure this generator:
 * :variable:`CMAKE_FASTBUILD_IDE_ARGS`
 * :variable:`CMAKE_FASTBUILD_TRACK_BYPRODUCTS_AS_OUTPUT`
 * :variable:`CMAKE_FASTBUILD_VERBOSE_GENERATOR`
-* :variable:`CMAKE_TEST_BUILD_DEPENDS`
 
 Target Properties
 -----------------

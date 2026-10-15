@@ -1654,7 +1654,7 @@ void cmGlobalFastbuildGenerator::WriteInstallPrepTargets()
 
 void cmGlobalFastbuildGenerator::WriteTestPrepTargets()
 {
-  if (!this->Makefiles.front()->IsOn("CMAKE_TEST_BUILD_DEPENDS")) {
+  if (this->Makefiles.front()->IsOn("CMAKE_SKIP_TEST_PREP_TARGETS")) {
     return;
   }
 
