@@ -63,6 +63,24 @@
 
 namespace {
 
+bool IsValidPropertyName(std::string const& propertyName)
+{
+  static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_:]+$");
+
+  return propertyNameValidator.find(propertyName);
+}
+bool IsValidPropertyName(cm::GenEx::Evaluation* eval,
+                         GeneratorExpressionContent const* content,
+                         std::string const& propertyName)
+{
+  if (!IsValidPropertyName(propertyName)) {
+    reportError(eval, content->GetOriginalExpression(),
+                "Property name not supported.");
+    return false;
+  }
+  return true;
+}
+
 bool HasKnownObjectFileLocation(cm::GenEx::Evaluation* eval,
                                 GeneratorExpressionContent const* content,
                                 std::string const& genex,
@@ -4126,6 +4144,9 @@ static const struct GlobalPropertyNode : public cmGeneratorExpressionNode
                   "non-empty property name.");
       return std::string{};
     }
+    if (!IsValidPropertyName(eval, content, propertyName)) {
+      return std::string{};
+    }
     cmake* cm = eval->Context.LG->GetCMakeInstance();
     return cm->GetState()->GetGlobalProperty(propertyName);
   }
@@ -4158,6 +4179,9 @@ static const struct DirectoryPropertyNode : public cmGeneratorExpressionNode
         eval, content->GetOriginalExpression(),
         "$<DIRECTORY_PROPERTY:directory,property> expression requires a "
         "non-empty property name.");
+      return std::string{};
+    }
+    if (!IsValidPropertyName(eval, content, propertyName)) {
       return std::string{};
     }
 
@@ -4257,8 +4281,6 @@ static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
   {
-    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
-
     std::string const& fileSetName = parameters.front();
     std::string const& propertyName = parameters.back();
 
@@ -4282,9 +4304,7 @@ static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
         "non-empty property name.");
       return std::string{};
     }
-    if (!propertyNameValidator.find(propertyName)) {
-      reportError(eval, content->GetOriginalExpression(),
-                  "Property name not supported.");
+    if (!IsValidPropertyName(eval, content, propertyName)) {
       return std::string{};
     }
 
@@ -4446,8 +4466,6 @@ static const struct SourcePropertyNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
   {
-    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
-
     if (parameters.size() > 3) {
       reportError(eval, content->GetOriginalExpression(),
                   "$<SOURCE_PROPERTY:...> expression requires at most three "
@@ -4476,9 +4494,7 @@ static const struct SourcePropertyNode : public cmGeneratorExpressionNode
                   "non-empty property name.");
       return std::string{};
     }
-    if (!propertyNameValidator.find(propertyName)) {
-      reportError(eval, content->GetOriginalExpression(),
-                  "Property name not supported.");
+    if (!IsValidPropertyName(eval, content, propertyName)) {
       return std::string{};
     }
 
@@ -4550,8 +4566,6 @@ static const struct RulePropertyNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
   {
-    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
-
     std::string ruleName = parameters.front();
     std::string const& propertyName = parameters.back();
 
@@ -4573,9 +4587,7 @@ static const struct RulePropertyNode : public cmGeneratorExpressionNode
                   "non-empty property name.");
       return std::string{};
     }
-    if (!propertyNameValidator.find(propertyName)) {
-      reportError(eval, content->GetOriginalExpression(),
-                  "Property name not supported.");
+    if (!IsValidPropertyName(eval, content, propertyName)) {
       return std::string{};
     }
 
@@ -4686,7 +4698,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   static char const* GetErrorText(std::string const& targetName,
                                   std::string const& propertyName)
   {
-    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
     if (targetName.empty() && propertyName.empty()) {
       return "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
              "target name and property name.";
@@ -4696,7 +4707,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
              "target name.";
     }
     if (!cmGeneratorExpression::IsValidTargetName(targetName)) {
-      if (!propertyNameValidator.find(propertyName)) {
+      if (!IsValidPropertyName(propertyName)) {
         return "Target name and property name not supported.";
       }
       return "Target name not supported.";
@@ -4709,8 +4720,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
   {
-    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
-
     cmGeneratorTarget const* target = nullptr;
     std::string targetName;
     std::string propertyName;
@@ -4793,9 +4802,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    if (!propertyNameValidator.find(propertyName)) {
-      ::reportError(eval, content->GetOriginalExpression(),
-                    "Property name not supported.");
+    if (!IsValidPropertyName(eval, content, propertyName)) {
       return std::string();
     }
 
@@ -4964,7 +4971,6 @@ static const struct targetIntermediateDirNode
 
   static char const* GetErrorText(std::string const& targetName)
   {
-    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
     if (targetName.empty()) {
       return "$<TARGET_INTERMEDIATE_DIR:tgt> expression requires a non-empty "
              "target name.";
