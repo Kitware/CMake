@@ -1307,14 +1307,17 @@ void cmGlobalNinjaGenerator::WriteInstallPrepTargets()
   }
   this->CheckInstallPrepTargets();
 
-  auto writeConfig = [this](std::string const& config, std::ostream& os) {
+  std::map<std::string, std::set<std::string>> configsByName;
+  auto writeConfig = [this, &configsByName](std::string const& config) {
     auto writePrepTarget =
-      [this, &config,
-       &os](std::string const& name,
-            cmGlobalGenerator::InstallPrepTargets::TargetMap const& targets,
-            std::set<std::string> const& files) {
+      [this, &config, &configsByName](
+        std::string const& name,
+        cmGlobalGenerator::InstallPrepTargets::TargetMap const& targets,
+        std::set<std::string> const& files) {
+        std::string const prepName = this->ConvertToNinjaPath(name);
+        configsByName[prepName].insert(config);
         cmNinjaBuild build("phony");
-        build.Outputs.push_back(this->ConvertToNinjaPath(name));
+        build.Outputs.push_back(this->BuildAlias(prepName, config));
         for (std::string const& file : files) {
           build.ExplicitDeps.push_back(this->ConvertToNinjaPath(file));
         }
@@ -1331,7 +1334,7 @@ void cmGlobalNinjaGenerator::WriteInstallPrepTargets()
         build.ExplicitDeps.erase(
           std::unique(build.ExplicitDeps.begin(), build.ExplicitDeps.end()),
           build.ExplicitDeps.end());
-        this->WriteBuild(os, build);
+        this->WritePerConfigPhony(config, build);
       };
 
     InstallPrepTargets const prepTargets = this->GetInstallPrepTargets(config);
@@ -1348,16 +1351,18 @@ void cmGlobalNinjaGenerator::WriteInstallPrepTargets()
 
   if (this->IsMultiConfig()) {
     for (std::string const& config : this->GetConfigNames()) {
-      writeConfig(config, *this->GetConfigFileStream(config));
+      writeConfig(config);
     }
   } else {
-    writeConfig(this->GetConfigNames().front(), *this->GetCommonFileStream());
+    writeConfig(this->GetConfigNames().front());
   }
+  this->WritePerConfigPhonyAliases(configsByName);
 }
 
 void cmGlobalNinjaGenerator::WriteTestPrepTargets()
 {
-  auto writeConfig = [this](std::string const& config, std::ostream& os) {
+  std::map<std::string, std::set<std::string>> configsByName;
+  auto writeConfig = [this, &configsByName](std::string const& config) {
     struct TestPrepTarget
     {
       std::string Comment;
@@ -1415,9 +1420,10 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
 
     std::vector<std::string> allDeps;
     for (auto& prepTarget : testPrepTargets) {
+      configsByName[prepTarget.first].insert(config);
       cmNinjaBuild build("phony");
       build.Comment = prepTarget.second.Comment;
-      build.Outputs.push_back(prepTarget.first);
+      build.Outputs.push_back(this->BuildAlias(prepTarget.first, config));
 
       // Avoid duplicate dependencies when merging test_prep/ targets
       auto& explicitDeps = prepTarget.second.ExplicitDeps;
@@ -1426,16 +1432,17 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
                          explicitDeps.end());
       build.ExplicitDeps = std::move(explicitDeps);
 
-      allDeps.push_back(prepTarget.first);
-      this->WriteBuild(os, build);
+      allDeps.push_back(build.Outputs.front());
+      this->WritePerConfigPhony(config, build);
     }
 
+    std::string const allName = this->ConvertToNinjaPath("test_prep/all");
+    configsByName[allName].insert(config);
     cmNinjaBuild build("phony");
     build.Comment = "Build dependencies for all tests";
-    build.Outputs.push_back(this->ConvertToNinjaPath("test_prep/all"));
+    build.Outputs.push_back(this->BuildAlias(allName, config));
     build.ExplicitDeps = std::move(allDeps);
-    this->WriteBuild(os, build);
-    return true;
+    this->WritePerConfigPhony(config, build);
   };
 
   if (!this->Makefiles.front()->IsOn("CMAKE_TEST_BUILD_DEPENDS")) {
@@ -1443,13 +1450,71 @@ void cmGlobalNinjaGenerator::WriteTestPrepTargets()
   }
   if (this->IsMultiConfig()) {
     for (std::string const& config : this->GetConfigNames()) {
-      if (!writeConfig(config, *this->GetConfigFileStream(config))) {
-        return;
-      }
+      writeConfig(config);
     }
   } else {
-    writeConfig(this->Makefiles.front()->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                *this->GetCommonFileStream());
+    writeConfig(
+      this->Makefiles.front()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+  }
+  this->WritePerConfigPhonyAliases(configsByName);
+}
+
+void cmGlobalNinjaGenerator::WritePerConfigPhony(std::string const& config,
+                                                 cmNinjaBuild const& build)
+{
+  this->WriteBuild(this->EnableCrossConfigBuild() &&
+                       this->CrossConfigs.count(config)
+                     ? *this->GetCommonFileStream()
+                     : *this->GetImplFileStream(config),
+                   build);
+}
+
+void cmGlobalNinjaGenerator::WritePerConfigPhonyAliases(
+  std::map<std::string, std::set<std::string>> const& configsByName)
+{
+  if (!this->IsMultiConfig()) {
+    return;
+  }
+
+  cmNinjaBuild build("phony");
+  build.Outputs.emplace_back();
+  for (auto const& entry : configsByName) {
+    std::string const& name = entry.first;
+    std::set<std::string> const& configs = entry.second;
+
+    // Add shortcut target in each config's build file
+    build.Outputs.front() = name;
+    for (std::string const& config : configs) {
+      build.ExplicitDeps = { this->BuildAlias(name, config) };
+      this->WriteBuild(*this->GetConfigFileStream(config), build);
+    }
+
+    // Add shortcut target in the default build file
+    if (!this->DefaultConfigs.empty()) {
+      build.ExplicitDeps.clear();
+      for (std::string const& config : this->DefaultConfigs) {
+        if (configs.count(config)) {
+          build.ExplicitDeps.push_back(this->BuildAlias(name, config));
+        }
+      }
+      if (!build.ExplicitDeps.empty()) {
+        this->WriteBuild(*this->GetDefaultFileStream(), build);
+      }
+    }
+
+    // Add target for all configs
+    if (this->EnableCrossConfigBuild()) {
+      build.ExplicitDeps.clear();
+      for (std::string const& config : this->CrossConfigs) {
+        if (configs.count(config)) {
+          build.ExplicitDeps.push_back(this->BuildAlias(name, config));
+        }
+      }
+      if (!build.ExplicitDeps.empty()) {
+        build.Outputs.front() = this->BuildAlias(name, "all");
+        this->WriteBuild(*this->GetCommonFileStream(), build);
+      }
+    }
   }
 }
 
