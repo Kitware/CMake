@@ -509,7 +509,7 @@ bool RuleNeedsCMD(std::string const& cmd)
 std::string cmLocalNinjaGenerator::BuildCommandLine(
   std::vector<std::string> const& cmdLines, std::string const& outputConfig,
   std::string const& commandConfig, std::string const& customStep,
-  cmGeneratorTarget const* target) const
+  cmGeneratorTarget const* target, CommandLineContext context) const
 {
   // If we have no commands but we need to build a command anyway, use noop.
   // This happens when building a POST_BUILD value for link targets that
@@ -549,6 +549,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
 
   std::ostringstream cmd;
 #ifdef _WIN32
+  (void)context;
   cmGlobalNinjaGenerator const* gg = this->GetGlobalNinjaGenerator();
   bool const needCMD =
     cmdLines.size() > 1 || (customStep.empty() && RuleNeedsCMD(cmdLines[0]));
@@ -577,12 +578,16 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     cmd << *li;
   }
 #  ifndef CMAKE_BOOTSTRAP
-  if (this->GetCMakeInstance()->GetInstrumentation()->HasOption(
+  if (context == CommandLineContext::Build &&
+      this->GetCMakeInstance()->GetInstrumentation()->HasOption(
         cmInstrumentationQuery::Option::ProcessMetrics)) {
     // Prevent shell exec optimization from passing accumulated child resource
-    // usage to the final instrumentation wrapper.
+    // usage to the final instrumentation wrapper. Keep this build-only shell
+    // syntax out of compile_commands.json, for compiler tooling support
     cmd << " && :";
   }
+#  else
+  (void)context;
 #  endif
 #endif
   return cmd.str();
