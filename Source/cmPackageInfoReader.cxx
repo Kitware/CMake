@@ -917,7 +917,16 @@ cmTarget* cmPackageInfoReader::AddComponent(
   auto const& cfgData = data["configurations"];
   if (cfgData.isObject()) {
     for (auto ci = cfgData.begin(), ce = cfgData.end(); ci != ce; ++ci) {
-      this->SetTargetProperties(makefile, target, *ci, package, IterKey(ci));
+      cm::string_view const cfgName = IterKey(ci);
+      Json::Value const& cfgObj = *ci;
+      if (cfgObj.isObject()) {
+        this->SetTargetProperties(makefile, target, cfgObj, package, cfgName);
+      } else if (!cfgObj.isNull()) {
+        makefile->IssueMessage(MessageType::WARNING,
+                               cmStrCat("Component \""_s, name,
+                                        "\" configuration \""_s, cfgName,
+                                        "\" is not an object."_s));
+      }
     }
   } else if (!cfgData.isNull()) {
     makefile->IssueMessage(
@@ -1085,6 +1094,12 @@ bool cmPackageInfoReader::ImportTargetConfigurations(
     }
 
     // Read supplemental data for component.
+    if (!ci->isObject()) {
+      makefile->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat("Component \""_s, name, "\" is not an object."_s));
+      continue;
+    }
     this->SetTargetProperties(makefile, ti->second, *ci, package,
                               configuration);
   }
