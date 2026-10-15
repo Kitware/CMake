@@ -15,6 +15,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -109,6 +110,16 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
   bool skipItemAfterFramework = false;
+  auto const librariesBegin = linkLibraries.size();
+  cmMakefile const* mf = cli.GetTarget()->Makefile;
+  std::string const wholeArchive =
+    cmJoin(cmList(mf->GetSafeDefinition(cmStrCat(
+             "CMAKE_", this->Language, "_DEVICE_LINK_OPTIONS_WHOLE_ARCHIVE"))),
+           " ");
+  std::string const noWholeArchive = cmJoin(
+    cmList(mf->GetSafeDefinition(cmStrCat(
+      "CMAKE_", this->Language, "_DEVICE_LINK_OPTIONS_NO_WHOLE_ARCHIVE"))),
+    " ");
 
   for (auto const& item : items) {
     if (skipItemAfterFramework) {
@@ -161,7 +172,7 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
       linkLib.Value = item.Value.Value;
     }
 
-    if (emitted.insert(linkLib.Value).second) {
+    if (!linkLib.Value.empty() && emitted.insert(linkLib.Value).second) {
       linkLib.Value += " ";
 
       cmLinkImplementation const* linkImpl =
@@ -185,6 +196,12 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
 
   if (!stdLibString.empty()) {
     linkLibraries.emplace_back(cmStrCat(stdLibString, ' '));
+  }
+
+  if (linkLibraries.size() > librariesBegin && !wholeArchive.empty()) {
+    linkLibraries.insert(linkLibraries.begin() + librariesBegin,
+                         BT<std::string>(cmStrCat(wholeArchive, ' ')));
+    linkLibraries.emplace_back(cmStrCat(noWholeArchive, ' '));
   }
 }
 
