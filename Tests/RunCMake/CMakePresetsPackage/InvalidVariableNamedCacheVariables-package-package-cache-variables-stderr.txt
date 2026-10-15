@@ -1,0 +1,5 @@
+^CPack Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsPackage/InvalidVariableNamedCacheVariables:
+CMakePresets\.json:15: Invalid CMake variable "cacheVariables" for preset "package-cache-variables"
+        "cacheVariables": false
+                          \^$

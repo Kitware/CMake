@@ -1,0 +1,17 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "package-variables",
+      "configurePreset": "default",
+      "variables": []
+    }
+  ]
+}
