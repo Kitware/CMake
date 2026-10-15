@@ -537,6 +537,11 @@ private:
   void WriteInstallPrepTargets();
   void WriteTestPrepTargets();
 
+  void WritePerConfigPhony(std::string const& config,
+                           cmNinjaBuild const& build);
+  void WritePerConfigPhonyAliases(
+    std::map<std::string, std::set<std::string>> const& configsByName);
+
   void WriteTargetAliases(std::ostream& os);
   void WriteFolderTargets(std::ostream& os);
 
