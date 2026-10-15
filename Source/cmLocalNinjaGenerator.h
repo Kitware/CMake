@@ -65,11 +65,18 @@ public:
     cmStateEnums::IntermediateDirKind kind =
       cmStateEnums::IntermediateDirKind::ObjectFiles) const override;
 
+  enum class CommandLineContext
+  {
+    Build,
+    CompileCommands
+  };
+
   std::string BuildCommandLine(
     std::vector<std::string> const& cmdLines, std::string const& outputConfig,
     std::string const& commandConfig,
     std::string const& customStep = std::string(),
-    cmGeneratorTarget const* target = nullptr) const;
+    cmGeneratorTarget const* target = nullptr,
+    CommandLineContext context = CommandLineContext::Build) const;
 
   void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs,
                            std::string const& config);

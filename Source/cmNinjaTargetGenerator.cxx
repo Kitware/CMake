@@ -2682,7 +2682,8 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   }
 
   std::string cmdLine = this->GetLocalGenerator()->BuildCommandLine(
-    compileCmds, outputConfig, outputConfig);
+    compileCmds, outputConfig, outputConfig, {}, nullptr,
+    cmLocalNinjaGenerator::CommandLineContext::CompileCommands);
 
   this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine, sourceFileName,
                                                    objectFileName);
@@ -2755,7 +2756,8 @@ void cmNinjaTargetGenerator::ExportSwiftObjectCompileCommand(
     }
 
     std::string commandLine = this->GetLocalGenerator()->BuildCommandLine(
-      compileCmds, outputConfig, outputConfig);
+      compileCmds, outputConfig, outputConfig, {}, nullptr,
+      cmLocalNinjaGenerator::CommandLineContext::CompileCommands);
 
     this->GetGlobalGenerator()->AddCXXCompileCommand(
       commandLine, sourceFilename, objectFilename);
