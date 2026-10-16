@@ -32,22 +32,31 @@ public:
   /**
    * @brief Return true if this is older than ftm
    */
-  bool Older(cmFileTime ftm) const { return (this->Time - ftm.Time) < 0; }
+  constexpr bool Older(cmFileTime ftm) const
+  {
+    return (this->Time - ftm.Time) < 0;
+  }
 
   /**
    * @brief Return true if this is newer than ftm
    */
-  bool Newer(cmFileTime ftm) const { return (ftm.Time - this->Time) < 0; }
+  constexpr bool Newer(cmFileTime ftm) const
+  {
+    return (ftm.Time - this->Time) < 0;
+  }
 
   /**
    * @brief Return true if this is the same as ftm
    */
-  bool Equal(cmFileTime ftm) const { return this->Time == ftm.Time; }
+  constexpr bool Equal(cmFileTime ftm) const { return this->Time == ftm.Time; }
 
   /**
    * @brief Return true if this is not the same as ftm
    */
-  bool Differ(cmFileTime ftm) const { return this->Time != ftm.Time; }
+  constexpr bool Differ(cmFileTime ftm) const
+  {
+    return this->Time != ftm.Time;
+  }
 
   /**
    * @brief Compare file modification times.
@@ -67,7 +76,7 @@ public:
   /**
    * @brief Return true if this is at least a second older than ftm
    */
-  bool OlderS(cmFileTime ftm) const
+  constexpr bool OlderS(cmFileTime ftm) const
   {
     return (ftm.Time - this->Time) >= cmFileTime::UtPerS;
   }
@@ -75,7 +84,7 @@ public:
   /**
    * @brief Return true if this is at least a second newer than ftm
    */
-  bool NewerS(cmFileTime ftm) const
+  constexpr bool NewerS(cmFileTime ftm) const
   {
     return (this->Time - ftm.Time) >= cmFileTime::UtPerS;
   }
@@ -124,7 +133,7 @@ public:
   /**
    * @brief The file modification time in unit time per second
    */
-  TimeType GetTime() const { return this->Time; }
+  constexpr TimeType GetTime() const { return this->Time; }
 
 private:
   TimeType Time = 0;
