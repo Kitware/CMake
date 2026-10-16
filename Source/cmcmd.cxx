@@ -17,6 +17,7 @@
 
 #include "cmCommandLineArgument.h"
 #include "cmCryptoHash.h"
+#include "cmDiagnostics.h"
 #include "cmDuration.h"
 #include "cmEnvironment.h"
 #include "cmGeneratedFileStream.h"
@@ -24,6 +25,7 @@
 #include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessenger.h"
 #include "cmProcessOutput.h"
 #include "cmQtAutoMocUic.h"
 #include "cmQtAutoRcc.h"
@@ -996,6 +998,14 @@ bool Bin2C(std::ostream& sout, std::istream& sin,
   sout << Bin2CPrintChars(sin, printTrailingComma, printSigned, base, false);
   return true;
 }
+
+void IssueDeprecation(std::string const& text)
+{
+  // cmake -E mode does not accept -W options, so do not suggest them.
+  cmake cm(cmState::Role::Internal);
+  cm.GetMessenger()->SetSuppressionHint(cmMessenger::SuppressionHint::Hide);
+  cm.IssueDiagnostic(cmDiagnostics::CMD_DEPRECATED, text);
+}
 }
 
 // called when args[0] == "__run_co_compile"
@@ -1468,6 +1478,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 
     if (args[1] == "remove_directory" && args.size() > 2) {
+      IssueDeprecation(
+        "The 'cmake -E remove_directory' command has been superseded. "
+        "Use 'cmake -E rm' instead.");
+
       // If an error occurs, we want to continue removing directories.
       bool return_value = false;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
@@ -1482,6 +1496,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
     // Remove file
     if (args[1] == "remove" && args.size() > 2) {
+      IssueDeprecation("The 'cmake -E remove' command has been superseded. "
+                       "Use 'cmake -E rm' instead.");
+
       bool force = false;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
         if (arg == "\\-f" || arg == "-f") {
@@ -1543,7 +1560,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
               cmSystemTools::Error(
                 "File to remove does not exist and force is not set: " + arg);
             } else {
-              cmSystemTools::Error("File can't be removed and still exist: " +
+              cmSystemTools::Error("File can't be removed and still exists: " +
                                    arg);
             }
             return_value = 1;

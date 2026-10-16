@@ -1587,12 +1587,13 @@ Available commands are:
 
   .. deprecated:: 3.17
 
-  Remove the file(s). The planned behavior was that if any of the
-  listed files already do not exist, the command returns a non-zero exit code,
-  but no message is logged. The ``-f`` option changes the behavior to return a
-  zero exit code (i.e. success) in such situations instead.
-  ``remove`` does not follow symlinks. That means it remove only symlinks
-  and not files it point to.
+  Remove the file(s). The planned behavior was that if any of the listed files
+  already do not exist, the command returns a non-zero exit code. The ``-f``
+  option changes the behavior to return a zero exit code (i.e., success) in
+  such situations instead.
+
+  ``remove`` does not follow symlinks (i.e., it removes only a symlink, not
+  what it points to).
 
   The implementation was buggy and always returned 0. It cannot be fixed without
   breaking backwards compatibility. Use ``rm`` instead.

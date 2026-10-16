@@ -1,0 +1,3 @@
+^CMake Warning \(deprecated\):
+  The 'cmake -E remove_directory' command has been superseded\.  Use 'cmake -E
+  rm' instead\.$
