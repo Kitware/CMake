@@ -76,6 +76,8 @@ set(TCLTK_POSSIBLE_BIN_PATHS
   "${TK_LIBRARY_PATH_PARENT}/bin"
   "${TCL_TCLSH_PATH_PARENT}/bin"
   )
+# Entries built from a path not found yet are just /bin.
+list(FILTER TCLTK_POSSIBLE_BIN_PATHS EXCLUDE REGEX "^/bin$")
 
 if(WIN32)
   get_filename_component(
@@ -102,6 +104,7 @@ set(TK_WISH_NAMES
 
 find_program(TK_WISH
   NAMES ${TK_WISH_NAMES}
+  NAMES_PER_DIR
   HINTS ${TCLTK_POSSIBLE_BIN_PATHS}
   )
 

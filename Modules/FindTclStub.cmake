@@ -105,6 +105,8 @@ set(TCLTK_POSSIBLE_LIB_PATHS
   "${TCL_TCLSH_PATH_PARENT}/lib"
   "${TK_WISH_PATH_PARENT}/lib"
 )
+# Entries built from a path not found yet are just /lib.
+list(FILTER TCLTK_POSSIBLE_LIB_PATHS EXCLUDE REGEX "^/lib$")
 
 if(WIN32)
   get_filename_component(
@@ -131,6 +133,7 @@ find_library(TCL_STUB_LIBRARY
   tclstub83 tclstub8.3
   tclstub82 tclstub8.2
   tclstub80 tclstub8.0
+  NAMES_PER_DIR
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
 )
 
@@ -146,6 +149,7 @@ find_library(TK_STUB_LIBRARY
   tkstub83 tkstub8.3
   tkstub82 tkstub8.2
   tkstub80 tkstub8.0
+  NAMES_PER_DIR
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
 )
 
@@ -157,6 +161,7 @@ find_library(TTK_STUB_LIBRARY
   ttkstub90 ttkstub9.0
   ttkstub86 ttkstub8.6
   ttkstub85 ttkstub8.5
+  NAMES_PER_DIR
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
 )
 
