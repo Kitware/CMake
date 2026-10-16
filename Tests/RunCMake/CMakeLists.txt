@@ -1667,7 +1667,8 @@ add_RunCMake_test("CTestCommandExpandLists")
 
 add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMAKE_C_SIMULATE_ID=${CMAKE_C_SIMULATE_ID}
-  -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
+  -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
+  -DMSVC_VERSION=${MSVC_VERSION})
 add_RunCMake_test(PrecompileHeaders-Reuse -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 
 # This test can take a long time due to the number of test cases.

@@ -339,6 +339,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "DISABLE_PRECOMPILE_HEADERS"_s, IC::CanCompileSources },
   { "PCH_WARN_INVALID"_s, "ON"_s, IC::CanCompileSources },
   { "PCH_INSTANTIATE_TEMPLATES"_s, "ON"_s, IC::CanCompileSources },
+  { "PCH_WARNINGS"_s, IC::CanCompileSources },
   // -- Platforms
   // ---- Android
   { "ANDROID_API"_s, IC::CanCompileSources },

@@ -497,6 +497,8 @@ Entry const kEntries[] = {
     "Location or short name (e.g. macosx) of the macOS platform SDK passed to the compiler via -isysroot. Initialized from the SDKROOT environment variable; empty by default."_s },
   { "CMAKE_PCH_INSTANTIATE_TEMPLATES"_s,
     "Initializes the PCH_INSTANTIATE_TEMPLATES target property"_s },
+  { "CMAKE_PCH_WARNINGS"_s,
+    "Initializes the PCH_WARNINGS target property"_s },
   { "CMAKE_PCH_WARN_INVALID"_s,
     "Initializes the PCH_WARN_INVALID target property"_s },
   { "CMAKE_PDB_OUTPUT_DIRECTORY"_s,

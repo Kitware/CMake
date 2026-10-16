@@ -109,7 +109,7 @@ else()
 
     set(CMAKE_PCH_EXTENSION .pch)
     if (NOT CMAKE_GENERATOR MATCHES "Xcode")
-      set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+      set(CMAKE_PCH_SYSTEM_HEADER_PRAGMA "#pragma clang system_header")
     endif()
     if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.0 AND NOT __is_apple_clang)
       set(CMAKE_${lang}_COMPILE_OPTIONS_INSTANTIATE_TEMPLATES_PCH -fpch-instantiate-templates)

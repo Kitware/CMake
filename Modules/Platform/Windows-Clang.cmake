@@ -143,7 +143,7 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
 
   set(CMAKE_PCH_EXTENSION .pch)
-  set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+  set(CMAKE_PCH_SYSTEM_HEADER_PRAGMA "#pragma clang system_header")
   set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE> -Xclang -include -Xclang <PCH_HEADER>)
   set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER> -x ${__pch_header_${lang}})
 

@@ -126,6 +126,9 @@ See Also
 * To prevent precompile headers from being used when compiling a specific
   source file, see the :prop_sf:`SKIP_PRECOMPILE_HEADERS` source file property.
 
+* To get compiler warnings for the precompiled headers themselves, which are
+  suppressed by default, see the :prop_tgt:`PCH_WARNINGS` target property.
+
 * :command:`target_compile_definitions`
 * :command:`target_compile_features`
 * :command:`target_compile_options`

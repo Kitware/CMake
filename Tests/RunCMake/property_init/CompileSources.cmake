@@ -12,6 +12,7 @@ set(properties
   "DISABLE_PRECOMPILE_HEADERS"              "ON"                "<SAME>"
   "PCH_WARN_INVALID"                        "OFF"               "<SAME>"
   "PCH_INSTANTIATE_TEMPLATES"               "OFF"               "<SAME>"
+  "PCH_WARNINGS"                            "ON"                "<SAME>"
   ## Platforms
   ### Android
   "ANDROID_API"                             "9"                 "<SAME>"
