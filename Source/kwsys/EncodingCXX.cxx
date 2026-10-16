@@ -31,8 +31,89 @@
 // Windows API.
 #if defined(_WIN32)
 #  include <windows.h>
+#endif
 
-#  include <shellapi.h>
+#ifdef _WIN32
+namespace {
+// Split a command line into arguments using the same rules as
+// CommandLineToArgvW, which is in shell32.dll.  Loading shell32.dll
+// also loads user32.dll, gdi32.dll and others, and costs several
+// milliseconds at the start of every process that uses this class.
+std::vector<std::wstring> SplitCommandLine(wchar_t const* p)
+{
+  std::vector<std::wstring> args;
+  if (!*p) {
+    // An empty command line gives the path of the executable.
+    std::wstring path(MAX_PATH, L'\0');
+    DWORD n;
+    while ((n = GetModuleFileNameW(nullptr, &path[0],
+                                   static_cast<DWORD>(path.size()))) ==
+           path.size()) {
+      path.resize(path.size() * 2);
+    }
+    path.resize(n);
+    args.emplace_back(std::move(path));
+    return args;
+  }
+  // The program name is taken as is, up to the closing quote if it
+  // starts with one, or else up to the first space or tab.
+  std::wstring arg;
+  if (*p == L'"') {
+    for (++p; *p && *p != L'"'; ++p) {
+      arg += *p;
+    }
+    if (*p == L'"') {
+      ++p;
+    }
+  } else {
+    for (; *p && *p != L' ' && *p != L'\t'; ++p) {
+      arg += *p;
+    }
+  }
+  args.emplace_back(std::move(arg));
+  for (;;) {
+    while (*p == L' ' || *p == L'\t') {
+      ++p;
+    }
+    if (!*p) {
+      break;
+    }
+    arg.clear();
+    bool quoted = false;
+    for (;;) {
+      size_t backslashes = 0;
+      while (*p == L'\\') {
+        ++backslashes;
+        ++p;
+      }
+      if (*p == L'"') {
+        arg.append(backslashes / 2, L'\\');
+        if (backslashes % 2) {
+          arg += L'"';
+          ++p;
+        } else if (quoted && p[1] == L'"') {
+          // A doubled quote inside quotes is a literal quote, and ends
+          // the quoted part.
+          arg += L'"';
+          p += 2;
+          quoted = false;
+        } else {
+          quoted = !quoted;
+          ++p;
+        }
+        continue;
+      }
+      arg.append(backslashes, L'\\');
+      if (!*p || (!quoted && (*p == L' ' || *p == L'\t'))) {
+        break;
+      }
+      arg += *p++;
+    }
+    args.emplace_back(std::move(arg));
+  }
+  return args;
+}
+}
 #endif
 
 namespace KWSYS_NAMESPACE {
@@ -44,8 +125,8 @@ Encoding::CommandLineArguments Encoding::CommandLineArguments::Main(
   (void)argc;
   (void)argv;
 
-  int ac;
-  LPWSTR* w_av = CommandLineToArgvW(GetCommandLineW(), &ac);
+  std::vector<std::wstring> w_av = SplitCommandLine(GetCommandLineW());
+  int ac = static_cast<int>(w_av.size());
 
   std::vector<std::string> av1(ac);
   std::vector<char const*> av2(ac);
@@ -53,7 +134,6 @@ Encoding::CommandLineArguments Encoding::CommandLineArguments::Main(
     av1[i] = ToNarrow(w_av[i]);
     av2[i] = av1[i].c_str();
   }
-  LocalFree(w_av);
   return CommandLineArguments(ac, &av2[0]);
 #else
   return CommandLineArguments(argc, argv);
