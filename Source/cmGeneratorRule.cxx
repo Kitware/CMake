@@ -36,6 +36,8 @@ std::vector<cm::string_view> ReservedPatterns{ "RULE"_s,
                                                "BINARY_DIR"_s,
                                                "CURRENT_SOURCE_DIR"_s,
                                                "CURRENT_BINARY_DIR"_s,
+                                               "OUTPUT_CURRENT_SOURCE_DIR"_s,
+                                               "OUTPUT_CURRENT_BINARY_DIR"_s,
                                                "SOURCE"_s,
                                                "INPUT_DIR"_s,
                                                "FILE_NAME"_s,
@@ -107,6 +109,8 @@ cmGeneratorRule::cmGeneratorRule(cmRule const* rule, cmTarget const* target,
   values.insert({ "BINARY_DIR", this->GetMakefile().GetHomeOutputDirectory() });
   values.insert({ "CURRENT_SOURCE_DIR", this->GetMakefile().GetCurrentSourceDirectory() });
   values.insert({ "CURRENT_BINARY_DIR", this->GetMakefile().GetCurrentBinaryDirectory() });
+  values.insert({ "OUTPUT_CURRENT_SOURCE_DIR", outputFileSet->GetMakefile()->GetCurrentSourceDirectory() });
+  values.insert({ "OUTPUT_CURRENT_BINARY_DIR", outputFileSet->GetMakefile()->GetCurrentBinaryDirectory() });
   values.insert({ "SOURCE", file.GenericString() });
   values.insert({ "INPUT_DIR", file.GetParentPath().GenericString() });
   values.insert({ "FILE_NAME", file.GetFileName().GenericString() });
@@ -306,9 +310,6 @@ std::unique_ptr<cmCustomCommand> cmGeneratorRule::Generate(
   // populate file set with outputs from custom command
   for (auto const& output : cc->GetOutputs()) {
     outFileSet->AddFileEntry(BT<std::string>{ output });
-    // get the directory of the generated file
-    outFileSet->AddDirectoryEntry(
-      BT<std::string>{ cmStrCat("$<PATH:GET_PARENT_PATH,", output, '>') });
   }
 
   return cc;

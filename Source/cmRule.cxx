@@ -47,6 +47,8 @@ cm::string_view const INCLUDE_DIRECTORIES = "INCLUDE_DIRECTORIES"_s;
 cm::string_view const JOB_POOL_COMPILE = "JOB_POOL_COMPILE"_s;
 cm::string_view const JOB_SERVER_AWARE = "JOB_SERVER_AWARE"_s;
 cm::string_view const OUTPUT_FILE_SET = "OUTPUT_FILE_SET"_s;
+cm::string_view const OUTPUT_FILE_SET_BASE_DIRS =
+  "OUTPUT_FILE_SET_BASE_DIRS"_s;
 cm::string_view const PARENT_RULE = "PARENT_RULE"_s;
 cm::string_view const FILE_SET_CONFIGURATORS = "FILE_SET_CONFIGURATORS"_s;
 cm::string_view const SOURCE_CONFIGURATORS = "SOURCE_CONFIGURATORS"_s;
@@ -126,6 +128,7 @@ bool IsSettableProperty(cm::string_view prop, cmRule const* rule)
                    { JOB_POOL_COMPILE, { ROC::Generation } },
                    { JOB_SERVER_AWARE, { ROC::Generation } },
                    { OUTPUT_FILE_SET, { ROC::Generation } },
+                   { OUTPUT_FILE_SET_BASE_DIRS, { ROC::Generation } },
                    { PARENT_RULE, { ROC::All } },
                    { FILE_SET_CONFIGURATORS, { ROC::All } },
                    { SOURCE_CONFIGURATORS, { ROC::All } },
@@ -182,6 +185,7 @@ cmRule::cmRule(cmMakefile& makefile, std::string name, cm::RuleScope scope)
   this->SetProperty("COMMAND_EXPAND_LISTS", cmValue::True);
   this->SetProperty("OUTPUT_FILE_SET",
                     "__cmake_rule_<RULE>_<TARGET>_<FILE_SET>_outputs;SOURCES");
+  this->SetProperty("OUTPUT_FILE_SET_BASE_DIRS", "<CURRENT_BINARY_DIR>");
 }
 
 cmRule::cmRule(cmRule const& parent, cmMakefile& makefile, std::string name,
@@ -263,6 +267,27 @@ cmFileSet* cmRule::GetOutputFileSet(cmTarget* target,
                result.first->GetType(), "\" instead of \"", outputFileSet[1],
                "\", as specified by the rule \"", this->GetName(), "\"."));
     return nullptr;
+  }
+
+  if (result.first->GetDirectoryEntries().empty()) {
+    if (cmValue baseDirs =
+          this->GetProperty(std::string{ OUTPUT_FILE_SET_BASE_DIRS })) {
+      expander.Values["CURRENT_SOURCE_DIR"] =
+        fileSet->GetMakefile()->GetCurrentSourceDirectory();
+      expander.Values["CURRENT_BINARY_DIR"] =
+        fileSet->GetMakefile()->GetCurrentBinaryDirectory();
+      expander.Values["OUTPUT_CURRENT_SOURCE_DIR"] =
+        result.first->GetMakefile()->GetCurrentSourceDirectory();
+      expander.Values["OUTPUT_CURRENT_BINARY_DIR"] =
+        result.first->GetMakefile()->GetCurrentBinaryDirectory();
+      std::string dirs{ baseDirs };
+      expander.ExpandVariables(dirs);
+      result.first->AddDirectoryEntry(BT<std::string>{ dirs });
+    } else {
+      // Add default base directory if none are specified
+      result.first->AddDirectoryEntry(BT<std::string>{
+        fileSet->GetMakefile()->GetCurrentBinaryDirectory() });
+    }
   }
 
   return result.first;
