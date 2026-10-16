@@ -413,9 +413,9 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       set(_inc_opt -imsvc)
     endif ()
     if (_inc_opt)
-      foreach(_inc_path IN LISTS CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES)
-        list(APPEND _inc_dirs "${_inc_opt}" "${_inc_path}")
-      endforeach()
+      set(_inc_dirs "${CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}")
+      list(FILTER _inc_dirs EXCLUDE REGEX "^$")
+      list(TRANSFORM _inc_dirs PREPEND "${_inc_opt}")
     endif ()
 
     # Locate the standard library headers selected by Clang, including toolsets
