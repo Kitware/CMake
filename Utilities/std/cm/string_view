@@ -41,17 +41,18 @@ public:
   using size_type = std::string::size_type;
   using difference_type = std::string::difference_type;
 
-  static size_type const npos = static_cast<size_type>(-1);
+  static constexpr size_type const npos = static_cast<size_type>(-1);
 
-  string_view() noexcept = default;
-  string_view(string_view const&) noexcept = default;
+  constexpr string_view() noexcept = default;
+  constexpr string_view(string_view const&) noexcept = default;
 
-  string_view(char const* s, size_t count) noexcept
+  constexpr string_view(char const* s, size_t count) noexcept
     : data_(s)
     , size_(count)
   {
   }
 
+  // std::char_traits<char>::length() is constexpr only from C++17
   string_view(char const* s) noexcept
     : data_(s)
     , size_(traits_type::length(s))
@@ -62,6 +63,7 @@ public:
   // a conversion operator on std::string to create a string_view.
   // Since this implementation is used in C++11, std::string does
   // not have that conversion.
+  // std::string is constexpr only from C++20.
   string_view(std::string const& s) noexcept
     : data_(s.data())
     , size_(s.size())
@@ -72,15 +74,17 @@ public:
   // a constructor on std::string that can take a string_view.
   // Since this implementation is used in C++11, std::string does
   // not have that constructor.
+  // std::string is constexpr only from C++20.
   explicit operator std::string() const { return std::string(data_, size_); }
 
   string_view& operator=(string_view const&) = default;
 
-  const_iterator begin() const noexcept { return data_; }
-  const_iterator end() const noexcept { return data_ + size_; }
-  const_iterator cbegin() const noexcept { return begin(); }
-  const_iterator cend() const noexcept { return end(); }
+  constexpr const_iterator begin() const noexcept { return data_; }
+  constexpr const_iterator end() const noexcept { return data_ + size_; }
+  constexpr const_iterator cbegin() const noexcept { return begin(); }
+  constexpr const_iterator cend() const noexcept { return end(); }
 
+  // `std::reverse_iterator` is constexpr only from C++17
   const_reverse_iterator rbegin() const noexcept
   {
     return const_reverse_iterator(end());
@@ -92,19 +96,20 @@ public:
   const_reverse_iterator crbegin() const noexcept { return rbegin(); }
   const_reverse_iterator crend() const noexcept { return rend(); }
 
-  const_reference operator[](size_type pos) const noexcept
+  constexpr const_reference operator[](size_type pos) const noexcept
   {
     return data_[pos];
   }
+  // constexpr implementation should be inlined
   const_reference at(size_type pos) const;
-  const_reference front() const noexcept { return data_[0]; }
-  const_reference back() const noexcept { return data_[size_ - 1]; }
-  const_pointer data() const noexcept { return data_; }
+  constexpr const_reference front() const noexcept { return data_[0]; }
+  constexpr const_reference back() const noexcept { return data_[size_ - 1]; }
+  constexpr const_pointer data() const noexcept { return data_; }
 
-  size_type size() const noexcept { return size_; }
-  size_type length() const noexcept { return size_; }
-  size_type max_size() const noexcept { return npos - 1; }
-  bool empty() const noexcept { return size_ == 0; }
+  constexpr size_type size() const noexcept { return size_; }
+  constexpr size_type length() const noexcept { return size_; }
+  constexpr size_type max_size() const noexcept { return npos - 1; }
+  constexpr bool empty() const noexcept { return size_ == 0; }
 
   void remove_prefix(size_type n) noexcept
   {
@@ -119,9 +124,12 @@ public:
     *this = tmp;
   }
 
+  // std::char_traits<char>::copy() is constexpr only from C++20
   size_type copy(char* dest, size_type count, size_type pos = 0) const;
+  // constexpr implementation should be inlined
   string_view substr(size_type pos = 0, size_type count = npos) const;
 
+  // std::char_traits<char>::compare() is constexpr only from C++17
   int compare(string_view v) const noexcept;
   int compare(size_type pos1, size_type count1, string_view v) const;
   int compare(size_type pos1, size_type count1, string_view v, size_type pos2,
@@ -131,6 +139,8 @@ public:
   int compare(size_type pos1, size_type count1, char const* s,
               size_type count2) const;
 
+  // std::char_traits<char>::compare() is constexpr only from C++17
+  // std::char_traits<char>::find() is constexpr only from C++17
   size_type find(string_view v, size_type pos = 0) const noexcept;
   size_type find(char c, size_type pos = 0) const noexcept;
   size_type find(char const* s, size_type pos, size_type count) const;

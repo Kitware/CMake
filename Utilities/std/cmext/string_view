@@ -20,16 +20,18 @@ namespace cm {
  */
 class static_string_view : public string_view
 {
-  static_string_view(string_view v)
+  constexpr static_string_view(string_view v)
     : string_view(v)
   {
   }
 
-  friend static_string_view operator"" _s(char const* data, size_t size);
+  friend constexpr static_string_view operator"" _s(char const* data,
+                                                    size_t size);
 };
 
 /** Create a static_string_view using `""_s` literal syntax.  */
-inline static_string_view operator"" _s(char const* data, size_t size)
+inline constexpr static_string_view operator"" _s(char const* data,
+                                                  size_t size)
 {
   return string_view(data, size);
 }
