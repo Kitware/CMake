@@ -554,10 +554,10 @@ public:
     std::string const& name,
     std::vector<std::string> const& path = std::vector<std::string>());
 
-  /** Find the directory containing CMake executables.  */
-  static void FindCMakeResources(char const* argv0);
+  /** Initialize infrastructure common to CMake/CTest/CPack.  */
+  static void InitializeCMake(char const* argv0);
 
-  /** Get the CMake resource paths, after FindCMakeResources.  */
+  /** Get the CMake resource paths, after InitializeCMake.  */
   static std::string const& GetCTestCommand();
   static std::string const& GetCPackCommand();
   static std::string const& GetCMakeCommand();
@@ -651,9 +651,6 @@ public:
   /** Get the real path for a given path, removing all symlinks.  */
   static std::string GetRealPath(std::string const& path,
                                  std::string* errorMessage = nullptr);
-
-  /** Perform one-time initialization of libuv.  */
-  static void InitializeLibUV();
 
   /** Create a symbolic link if the platform supports it.  Returns whether
       creation succeeded. */
