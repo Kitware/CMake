@@ -4,11 +4,24 @@ Call Stack \(most recent call first\):
   InvalidCps3\.cmake:10 \(find_package\)
   CMakeLists\.txt:3 \(include\)
 +
-CMake Warning in cps/[Cc]orrupt.cps:
+CMake Warning in cps/[Cc]orrupt\.cps:
+  Component "Corrupt::array" is not an object\.
+Call Stack \(most recent call first\):
+  InvalidCps3\.cmake:10 \(find_package\)
+  CMakeLists\.txt:3 \(include\)
++
+CMake Warning in cps/[Cc]orrupt\.cps:
+  Component "Corrupt::bad_config_entries" configuration "release" is not an
+  object\.
+Call Stack \(most recent call first\):
+  InvalidCps3\.cmake:10 \(find_package\)
+  CMakeLists\.txt:3 \(include\)
++
+CMake Warning in cps/[Cc]orrupt\.cps:
   Component "Corrupt::badconfigs" attribute "configurations" is not an
   object\.
 Call Stack \(most recent call first\):
-  InvalidCps3.cmake:10 \(find_package\)
+  InvalidCps3\.cmake:10 \(find_package\)
   CMakeLists\.txt:3 \(include\)
 +
 CMake Warning in cps/[Cc]orrupt\.cps:
@@ -21,5 +34,18 @@ Call Stack \(most recent call first\):
 CMake Warning in cps/[Cc]orrupt\.cps:
   Component "Corrupt::invalid" is not an object\.
 Call Stack \(most recent call first\):
+  InvalidCps3\.cmake:10 \(find_package\)
+  CMakeLists\.txt:3 \(include\)
++
+CMake Warning in cps/[Cc]orrupt\.cps:
+  Component "Corrupt::string" is not an object\.
+Call Stack \(most recent call first\):
+  InvalidCps3\.cmake:10 \(find_package\)
+  CMakeLists\.txt:3 \(include\)
++
+CMake Warning in cps/[Cc]orrupt@release\.cps:
+  Component "corrupt" is not an object\.
+Call Stack \(most recent call first\):
+  cps/[Cc]orrupt\.cps
   InvalidCps3\.cmake:10 \(find_package\)
   CMakeLists\.txt:3 \(include\)

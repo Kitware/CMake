@@ -12,6 +12,14 @@
       "type": "interface",
       "configurations": [""]
     },
+    "bad_config_entries": {
+      "type": "interface",
+      "configurations": {
+        "release": []
+      }
+    },
+    "array": [ "" ],
+    "string": "",
     "invalid": "not-an-object"
   }
 }
