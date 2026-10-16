@@ -58,7 +58,15 @@ if(NOT can_build_cxx20_tutorial)
   return()
 endif()
 
-foreach(num RANGE 4 9)
+foreach(num RANGE 4 6)
+  run_tutorial_step(Step${num})
+endforeach()
+
+if(NOT can_build_sse2_tutorial)
+  return()
+endif()
+
+foreach(num RANGE 7 9)
   run_tutorial_step(Step${num})
 endforeach()
 
