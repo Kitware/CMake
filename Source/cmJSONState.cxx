@@ -95,8 +95,11 @@ std::string cmJSONState::key_after(std::string const& k)
 {
   for (auto it = this->parseStack.begin(); it != this->parseStack.end();
        ++it) {
-    if (it->first == k && (++it) != this->parseStack.end()) {
-      return it->first;
+    if (it->first == k) {
+      auto next = std::next(it);
+      if (next != this->parseStack.end()) {
+        return next->first;
+      }
     }
   }
   return "";
@@ -106,8 +109,11 @@ Json::Value const* cmJSONState::value_after(std::string const& k)
 {
   for (auto it = this->parseStack.begin(); it != this->parseStack.end();
        ++it) {
-    if (it->first == k && (++it) != this->parseStack.end()) {
-      return it->second;
+    if (it->first == k) {
+      auto next = std::next(it);
+      if (next != this->parseStack.end()) {
+        return next->second;
+      }
     }
   }
   return nullptr;

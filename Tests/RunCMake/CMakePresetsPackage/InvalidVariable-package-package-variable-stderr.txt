@@ -1,0 +1,5 @@
+^CPack Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsPackage/InvalidVariable:
+CMakePresets\.json:15: Invalid CMake variable "VAR" for preset "package-variable"
+        "VAR": \[\]
+               \^$

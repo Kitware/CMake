@@ -53,7 +53,11 @@ std::string getPresetName(cmJSONState* state)
 std::string getVariableName(cmJSONState* state)
 {
   std::string var = state->key_after("cacheVariables");
-  std::string errMsg = cmStrCat("variable \"", var, '"');
+  if (var.empty()) {
+    var = state->key_after("variables");
+  }
+  std::string errMsg =
+    var.empty() ? "variable" : cmStrCat("variable \"", var, '"');
   errMsg =
     cmStrCat(std::move(errMsg), " for preset \"", getPresetName(state), '"');
   return errMsg;
