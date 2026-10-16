@@ -1,1 +1,1 @@
-check_installed([[^empty1.txt;empty2.txt$]])
+check_installed([[^Unspecified.txt;empty1.txt;empty2.txt$]])
