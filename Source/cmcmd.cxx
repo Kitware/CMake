@@ -106,8 +106,6 @@ struct cmCommandLineHelpEntry
   char const* Help;
 };
 
-// ATTENTION If you add new commands, change here,
-// and in `cmakemain.cxx` in the options table
 std::vector<cmCommandLineHelpEntry> const AvailableCommands = {
   { "bin2c", "", "Turn a binary file into a C array" },
   { "capabilities", "",
@@ -1133,7 +1131,6 @@ namespace cmcmd {
 int ExecuteCMakeCommand(std::vector<std::string> const& args,
                         cm::optional<cm::StdIo::Console> console)
 {
-  // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1) {
     // Copy file, copy file if different, copy file if newer.
     if ((args[1] == "copy" || args[1] == "copy_if_different" ||
