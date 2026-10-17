@@ -213,7 +213,7 @@ std::vector<std::string> CommandLineHelpEntryNames(
   return names;
 }
 
-void CMakeCommandUsage(std::string const& program)
+int CMakeCommandUsage(std::string const& program)
 {
   /* clang-format off */
   std::string help_screen = cmStrCat(
@@ -235,6 +235,7 @@ void CMakeCommandUsage(std::string const& program)
   );
   /* clang-format on */
   cmSystemTools::Error(help_screen);
+  return 1;
 }
 
 bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
@@ -2579,8 +2580,7 @@ int ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
   }
 
-  CMakeCommandUsage(args[0]);
-  return 1;
+  return CMakeCommandUsage(args[0]);
 }
 
 }
