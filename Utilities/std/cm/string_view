@@ -21,6 +21,7 @@ using std::string_view;
 #  include <functional>
 #  include <iosfwd>
 #  include <iterator>
+#  include <stdexcept>
 #  include <string>
 
 #  include <cm/bits/constexpr.hxx>
@@ -102,8 +103,14 @@ public:
   {
     return data_[pos];
   }
-  // constexpr implementation should be inlined
-  const_reference at(size_type pos) const;
+
+  constexpr const_reference at(size_type pos) const
+  {
+    return data_[pos < size_ ? pos
+                             : throw std::out_of_range(
+                                 "Index out of range in string_view::at")];
+  }
+
   constexpr const_reference front() const noexcept { return data_[0]; }
   constexpr const_reference back() const noexcept { return data_[size_ - 1]; }
   constexpr const_pointer data() const noexcept { return data_; }
@@ -128,8 +135,15 @@ public:
 
   // std::char_traits<char>::copy() is constexpr only from C++20
   size_type copy(char* dest, size_type count, size_type pos = 0) const;
-  // constexpr implementation should be inlined
-  string_view substr(size_type pos = 0, size_type count = npos) const;
+  CONSTEXPR_CXX14 string_view substr(size_type pos = 0,
+                                     size_type count = npos) const
+  {
+    if (pos > size_) {
+      throw std::out_of_range("Index out of range in string_view::substr");
+    }
+    size_type const rcount = std::min(count, size_ - pos);
+    return string_view(data_ + pos, rcount);
+  }
 
   // std::char_traits<char>::compare() is constexpr only from C++17
   int compare(string_view v) const noexcept;
