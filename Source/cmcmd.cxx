@@ -1006,10 +1006,26 @@ void IssueDeprecation(std::string const& text)
   cm.GetMessenger()->SetSuppressionHint(cmMessenger::SuppressionHint::Hide);
   cm.IssueDiagnostic(cmDiagnostics::CMD_DEPRECATED, text);
 }
-}
+
+int HandleCoCompileCommands(std::vector<std::string> const& args);
+int HashSumFile(std::vector<std::string> const& args, cmCryptoHash::Algo algo);
+int SymlinkLibrary(std::vector<std::string> const& args);
+int SymlinkExecutable(std::vector<std::string> const& args);
+cmsys::Status SymlinkInternal(std::string const& file,
+                              std::string const& link);
+int ExecuteEchoColor(std::vector<std::string> const& args);
+int ExecuteLinkScript(std::vector<std::string> const& args);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+int WindowsCEEnvironment(char const* version, std::string const& name);
+#endif
+int RunPreprocessor(std::vector<std::string> const& command,
+                    std::string const& intermediate_file);
+int RunLLVMRC(std::vector<std::string> const& args);
+int VisualStudioLink(std::vector<std::string> const& args, int type,
+                     cm::optional<cm::StdIo::Console> console);
 
 // called when args[0] == "__run_co_compile"
-int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
+int HandleCoCompileCommands(std::vector<std::string> const& args)
 {
   std::vector<CoCompileJob> jobs;
   std::string sourceFile; // store --source=
@@ -1109,8 +1125,12 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
   return ret;
 }
 
-int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
-                               cm::optional<cm::StdIo::Console> console)
+}
+
+namespace cmcmd {
+
+int ExecuteCMakeCommand(std::vector<std::string> const& args,
+                        cm::optional<cm::StdIo::Console> console)
 {
   // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1) {
@@ -1356,7 +1376,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 #endif
     if (args[1] == "__run_co_compile") {
-      return cmcmd::HandleCoCompileCommands(args);
+      return HandleCoCompileCommands(args);
     }
 
     // Echo string
@@ -1831,12 +1851,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
     // Internal CMake shared library support.
     if (args[1] == "cmake_symlink_library" && args.size() == 5) {
-      return cmcmd::SymlinkLibrary(args);
+      return SymlinkLibrary(args);
     }
 
     // Internal CMake versioned executable support.
     if (args[1] == "cmake_symlink_executable" && args.size() == 4) {
-      return cmcmd::SymlinkExecutable(args);
+      return SymlinkExecutable(args);
     }
 
     // Internal CMake dependency scanning support.
@@ -1955,7 +1975,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
     // Internal CMake link script support.
     if (args[1] == "cmake_link_script" && args.size() >= 3) {
-      return cmcmd::ExecuteLinkScript(args);
+      return ExecuteLinkScript(args);
     }
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -1986,20 +2006,20 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 
     if (args[1] == "vs_link_exe") {
-      return cmcmd::VisualStudioLink(args, 1, std::move(console));
+      return VisualStudioLink(args, 1, std::move(console));
     }
 
     if (args[1] == "vs_link_dll") {
-      return cmcmd::VisualStudioLink(args, 2, std::move(console));
+      return VisualStudioLink(args, 2, std::move(console));
     }
 
     if (args[1] == "cmake_llvm_rc") {
-      return cmcmd::RunLLVMRC(args);
+      return RunLLVMRC(args);
     }
 
     // Internal CMake color makefile support.
     if (args[1] == "cmake_echo_color") {
-      return cmcmd::ExecuteEchoColor(args);
+      return ExecuteEchoColor(args);
     }
 
 #ifndef CMAKE_BOOTSTRAP
@@ -2485,11 +2505,11 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 
     if (args[1] == "env_vs8_wince" && args.size() == 3) {
-      return cmcmd::WindowsCEEnvironment("8.0", args[2]);
+      return WindowsCEEnvironment("8.0", args[2]);
     }
 
     if (args[1] == "env_vs9_wince" && args.size() == 3) {
-      return cmcmd::WindowsCEEnvironment("9.0", args[2]);
+      return WindowsCEEnvironment("9.0", args[2]);
     }
 #endif
 
@@ -2563,8 +2583,11 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
   return 1;
 }
 
-int cmcmd::HashSumFile(std::vector<std::string> const& args,
-                       cmCryptoHash::Algo algo)
+}
+
+namespace {
+
+int HashSumFile(std::vector<std::string> const& args, cmCryptoHash::Algo algo)
 {
   if (args.size() < 3) {
     return -1;
@@ -2604,7 +2627,7 @@ int cmcmd::HashSumFile(std::vector<std::string> const& args,
   return retval;
 }
 
-int cmcmd::SymlinkLibrary(std::vector<std::string> const& args)
+int SymlinkLibrary(std::vector<std::string> const& args)
 {
   int result = 0;
   std::string realName = args[2];
@@ -2614,7 +2637,7 @@ int cmcmd::SymlinkLibrary(std::vector<std::string> const& args)
   cmSystemTools::ConvertToUnixSlashes(soName);
   cmSystemTools::ConvertToUnixSlashes(name);
   if (soName != realName) {
-    cmsys::Status status = cmcmd::SymlinkInternal(realName, soName);
+    cmsys::Status status = SymlinkInternal(realName, soName);
     if (!status) {
       cmSystemTools::Error(
         cmStrCat("cmake_symlink_library: System Error: ", status.GetString()));
@@ -2622,7 +2645,7 @@ int cmcmd::SymlinkLibrary(std::vector<std::string> const& args)
     }
   }
   if (name != soName) {
-    cmsys::Status status = cmcmd::SymlinkInternal(soName, name);
+    cmsys::Status status = SymlinkInternal(soName, name);
     if (!status) {
       cmSystemTools::Error(
         cmStrCat("cmake_symlink_library: System Error: ", status.GetString()));
@@ -2632,13 +2655,13 @@ int cmcmd::SymlinkLibrary(std::vector<std::string> const& args)
   return result;
 }
 
-int cmcmd::SymlinkExecutable(std::vector<std::string> const& args)
+int SymlinkExecutable(std::vector<std::string> const& args)
 {
   int result = 0;
   std::string const& realName = args[2];
   std::string const& name = args[3];
   if (name != realName) {
-    cmsys::Status status = cmcmd::SymlinkInternal(realName, name);
+    cmsys::Status status = SymlinkInternal(realName, name);
     if (!status) {
       cmSystemTools::Error(cmStrCat("cmake_symlink_executable: System Error: ",
                                     status.GetString()));
@@ -2648,8 +2671,7 @@ int cmcmd::SymlinkExecutable(std::vector<std::string> const& args)
   return result;
 }
 
-cmsys::Status cmcmd::SymlinkInternal(std::string const& file,
-                                     std::string const& link)
+cmsys::Status SymlinkInternal(std::string const& file, std::string const& link)
 {
   if (cmSystemTools::PathExists(link)) {
     cmSystemTools::RemoveFile(link);
@@ -2672,7 +2694,7 @@ cmsys::Status cmcmd::SymlinkInternal(std::string const& file,
 #endif
 }
 
-static void cmcmdProgressReport(std::string const& dir, std::string const& num)
+void cmcmdProgressReport(std::string const& dir, std::string const& num)
 {
   std::string dirName = cmStrCat(dir, "/Progress");
   std::string fName;
@@ -2716,7 +2738,7 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
   }
 }
 
-int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
+int ExecuteEchoColor(std::vector<std::string> const& args)
 {
   // The arguments are
   //   args[0] == <cmake-executable>
@@ -2779,7 +2801,7 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
   return 0;
 }
 
-int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
+int ExecuteLinkScript(std::vector<std::string> const& args)
 {
   // The arguments are
   //   args[0] == <cmake-executable>
@@ -2860,9 +2882,10 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
   return result;
 }
 
-int cmcmd::WindowsCEEnvironment(char const* version, std::string const& name)
+#if defined(_WIN32) && !defined(__CYGWIN__)
+int WindowsCEEnvironment(char const* version, std::string const& name)
 {
-#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32) && !defined(__CYGWIN__)
+#  if !defined(CMAKE_BOOTSTRAP)
   cmVisualStudioWCEPlatformParser parser(name.c_str());
   parser.ParseVersion(version);
   if (parser.Found()) {
@@ -2875,16 +2898,17 @@ int cmcmd::WindowsCEEnvironment(char const* version, std::string const& name)
     /* clang-format on */
     return 0;
   }
-#else
+#  else
   (void)version;
-#endif
+#  endif
 
   std::cerr << "Could not find " << name;
   return -1;
 }
+#endif
 
-int cmcmd::RunPreprocessor(std::vector<std::string> const& command,
-                           std::string const& intermediate_file)
+int RunPreprocessor(std::vector<std::string> const& command,
+                    std::string const& intermediate_file)
 {
   cmUVProcessChainBuilder builder;
 
@@ -2917,7 +2941,7 @@ int cmcmd::RunPreprocessor(std::vector<std::string> const& command,
   return 0;
 }
 
-int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
+int RunLLVMRC(std::vector<std::string> const& args)
 {
   // The arguments are
   //   args[0] == <cmake-executable>
@@ -3078,8 +3102,8 @@ private:
 // For visual studio 2005 and newer manifest files need to be embedded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
-int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type,
-                            cm::optional<cm::StdIo::Console> console)
+int VisualStudioLink(std::vector<std::string> const& args, int type,
+                     cm::optional<cm::StdIo::Console> console)
 {
   // MSVC tools print output in the language specified by the VSLANG
   // environment variable, and encoded in the console output code page.
@@ -3131,8 +3155,8 @@ struct NumberFormatter
   {
   }
 };
-static std::ostream& operator<<(std::ostream& stream,
-                                NumberFormatter const& formatter)
+std::ostream& operator<<(std::ostream& stream,
+                         NumberFormatter const& formatter)
 {
   auto const& flags = stream.flags();
   if (formatter.Format == FORMAT_DECIMAL) {
@@ -3144,10 +3168,9 @@ static std::ostream& operator<<(std::ostream& stream,
   return stream;
 }
 
-static bool RunCommand(char const* comment,
-                       std::vector<std::string> const& command, bool verbose,
-                       NumberFormat exitFormat, int* retCodeOut = nullptr,
-                       bool (*retCodeOkay)(int) = nullptr)
+bool RunCommand(char const* comment, std::vector<std::string> const& command,
+                bool verbose, NumberFormat exitFormat,
+                int* retCodeOut = nullptr, bool (*retCodeOkay)(int) = nullptr)
 {
   // See comment in VisualStudioLink for why we suppress encoding conversion.
   cmProcessOutput::Encoding const encoding = cmProcessOutput::None;
@@ -3297,7 +3320,7 @@ int cmVSLink::Link()
   return this->LinkNonIncremental();
 }
 
-static bool mtRetIsUpdate(int mtRet)
+bool mtRetIsUpdate(int mtRet)
 {
   // 'mt /notify_update' returns a special value (differing between
   // Windows and POSIX hosts) when it updated the manifest file.
@@ -3491,4 +3514,6 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
     return -1;
   }
   return mtRet;
+}
+
 }
