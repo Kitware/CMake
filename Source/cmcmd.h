@@ -20,6 +20,6 @@ namespace cmcmd {
  * Execute commands during the build process. Supports options such
  * as echo, remove file etc.
  */
-int ExecuteCMakeCommand(std::vector<std::string> const&,
+int ExecuteCMakeCommand(std::vector<std::string> args,
                         cm::optional<cm::StdIo::Console> console);
 }

@@ -1128,7 +1128,7 @@ int HandleCoCompileCommands(std::vector<std::string> const& args)
 
 namespace cmcmd {
 
-int ExecuteCMakeCommand(std::vector<std::string> const& args,
+int ExecuteCMakeCommand(std::vector<std::string> args,
                         cm::optional<cm::StdIo::Console> console)
 {
   if (args.size() > 1) {
