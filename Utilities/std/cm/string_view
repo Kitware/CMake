@@ -46,6 +46,13 @@ public:
 
   static constexpr size_type const npos = static_cast<size_type>(-1);
 
+private:
+  static inline constexpr size_type cxx11_min(size_type a, size_type b)
+  {
+    return a > b ? b : a;
+  }
+
+public:
   constexpr string_view() noexcept = default;
   constexpr string_view(string_view const&) noexcept = default;
 
@@ -135,14 +142,13 @@ public:
 
   // std::char_traits<char>::copy() is constexpr only from C++20
   size_type copy(char* dest, size_type count, size_type pos = 0) const;
-  CONSTEXPR_CXX14 string_view substr(size_type pos = 0,
-                                     size_type count = npos) const
+
+  constexpr string_view substr(size_type pos = 0, size_type count = npos) const
   {
-    if (pos > size_) {
-      throw std::out_of_range("Index out of range in string_view::substr");
-    }
-    size_type const rcount = std::min(count, size_ - pos);
-    return string_view(data_ + pos, rcount);
+    return pos <= size_
+      ? string_view(data_ + pos, cxx11_min(count, size_ - pos))
+      : throw std::out_of_range("Index out of range in string_view::substr");
+    ;
   }
 
   // std::char_traits<char>::compare() is constexpr only from C++17
