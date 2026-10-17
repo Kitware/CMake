@@ -3021,13 +3021,14 @@ std::array<Command, 63> const Commands{ {
   cmake_E_write_regv,
 } };
 
-std::vector<std::string> CommandLineHelpEntryNames(
-  std::vector<cmCommandLineHelpEntry> const& entries)
+std::vector<std::string> CommandNames()
 {
   std::vector<std::string> names;
-  names.reserve(entries.size());
-  for (cmCommandLineHelpEntry const& entry : entries) {
-    names.emplace_back(entry.Name);
+  names.reserve(Commands.size());
+  for (Command const& c : Commands) {
+    if (c.Impl) {
+      names.emplace_back(c.Name);
+    }
   }
   return names;
 }
@@ -3094,26 +3095,14 @@ int ExecuteCMakeCommand(std::vector<std::string> args_,
       return i->Impl(std::move(args));
     }
 
-    std::vector<std::string> availableCommands =
-      CommandLineHelpEntryNames(AvailableCommands);
-#if defined(_WIN32) && !defined(__CYGWIN__)
-    cm::append(availableCommands,
-               CommandLineHelpEntryNames(AvailableWindowsCommands));
-#endif
-    // Some commands above only fall through to here when they were
-    // matched by name but had the wrong number/form of arguments; only
-    // offer a suggestion when the name itself is not recognized.
-    if (std::find(availableCommands.begin(), availableCommands.end(),
-                  args[1]) == availableCommands.end()) {
-      std::string error = cmStrCat("Unknown command \"", args[1], "\".");
-      std::string const suggestion =
-        cmFindClosestString(args[1], availableCommands);
-      if (!suggestion.empty()) {
-        error =
-          cmStrCat(std::move(error), " Did you mean \"", suggestion, "\"?");
-      }
-      cmSystemTools::Error(error);
+    std::string error = cmStrCat("Unknown command \"", args[1], "\".");
+    std::string const suggestion =
+      cmFindClosestString(args[1], CommandNames());
+    if (!suggestion.empty()) {
+      error =
+        cmStrCat(std::move(error), " Did you mean \"", suggestion, "\"?");
     }
+    cmSystemTools::Error(error);
   }
 
   return CMakeCommandUsage(args[0]);
