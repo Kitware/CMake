@@ -136,11 +136,14 @@ public:
   }
   static bool IsNOTFOUND(cm::string_view) noexcept;
 
-  static bool IsEmpty(char const* value) noexcept
+  static constexpr bool IsEmpty(char const* value) noexcept
   {
     return !value || *value == '\0';
   }
-  static bool IsEmpty(cm::string_view value) noexcept { return value.empty(); }
+  static constexpr bool IsEmpty(cm::string_view value) noexcept
+  {
+    return value.empty();
+  }
 
   /**
    * Does a string indicates that CMake/CPack/CTest internally
