@@ -23,6 +23,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmListFileCoverage.h"
+#endif
+
 namespace {
 
 // define the class for macro commands
@@ -41,6 +45,7 @@ public:
   cmPolicies::PolicyMap Policies;
   cmDiagnostics::DiagnosticMap Diagnostics;
   std::string FilePath;
+  long Line = 0;
 };
 
 bool cmMacroHelperCommand::operator()(
@@ -62,6 +67,12 @@ bool cmMacroHelperCommand::operator()(
     inStatus.SetError(errorMsg);
     return false;
   }
+
+#ifndef CMAKE_BOOTSTRAP
+  if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+    coverage->FunctionCalled(this->FilePath, this->Line);
+  }
+#endif
 
   // set the value of argc
   std::string argcDef = std::to_string(expandedArgs.size());
@@ -201,6 +212,7 @@ bool cmMacroFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
   f.Args = this->Args;
   f.Functions = std::move(functions);
   f.FilePath = this->GetStartingContext().FilePath;
+  f.Line = this->GetStartingContext().Line;
   mf.RecordPolicies(f.Policies);
   mf.RecordDiagnostics(f.Diagnostics);
   return mf.GetState()->AddScriptedCommand(

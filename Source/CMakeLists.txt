@@ -421,6 +421,10 @@ add_library(
   cmList.cxx
   cmListFileCache.cxx
   cmListFileCache.h
+  cmLcovTracefile.cxx
+  cmLcovTracefile.h
+  cmListFileCoverage.cxx
+  cmListFileCoverage.h
   cmLocalCommonGenerator.cxx
   cmLocalCommonGenerator.h
   cmLocalGenerator.cxx

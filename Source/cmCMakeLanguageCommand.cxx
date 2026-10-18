@@ -46,6 +46,10 @@
 #include "cmValue.h"
 #include "cmake.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmListFileCoverage.h"
+#endif
+
 namespace cm {
 enum class TargetType;
 }
@@ -135,6 +139,12 @@ bool cmCMakeLanguageCommandCALL(std::vector<cmListFileArgument> const& args,
     }
     return true;
   }
+#ifndef CMAKE_BOOTSTRAP
+  cm::optional<cmListFileCoverage::SyntheticCommandScope> syntheticScope;
+  if (cmListFileCoverage::Get()) {
+    syntheticScope.emplace(func);
+  }
+#endif
   return makefile.ExecuteCommand(func, status);
 }
 

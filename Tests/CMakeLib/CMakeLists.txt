@@ -20,6 +20,8 @@ set(CMakeLib_TESTS
   testGenExListPredicate.cxx
   testGenExListSortComparator.cxx
   testJSONHelpers.cxx
+  testLcovTracefile.cxx
+  testListFileCoverage.cxx
   testRST.cxx
   testRange.cxx
   testOptional.cxx

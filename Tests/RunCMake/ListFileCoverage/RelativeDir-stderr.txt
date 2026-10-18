@@ -1,0 +1,1 @@
+^CMake Error: CMAKE_LISTFILE_COVERAGE_DIR is not an absolute path: "relative/dir"$

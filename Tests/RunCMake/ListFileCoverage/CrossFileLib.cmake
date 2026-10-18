@@ -1,0 +1,6 @@
+function(lib_f)
+  set(f 1)
+endfunction()
+macro(lib_m)
+  set(m 1)
+endmacro()

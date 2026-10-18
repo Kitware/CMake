@@ -30,6 +30,10 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmListFileCoverage.h"
+#endif
+
 cm::string_view cmList::element_separator{ ";" };
 
 cmList cmList::sublist(size_type pos, size_type length) const
@@ -137,6 +141,12 @@ public:
     cmListFileFunction func{ this->FunctionName, context.Line, context.Line,
                              std::move(funcArgs) };
 
+#ifndef CMAKE_BOOTSTRAP
+    cm::optional<cmListFileCoverage::SyntheticCommandScope> syntheticScope;
+    if (cmListFileCoverage::Get()) {
+      syntheticScope.emplace(func);
+    }
+#endif
     cmExecutionStatus status(*this->Makefile);
     if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {
@@ -208,6 +218,12 @@ public:
     cmListFileFunction func{ this->FunctionName, context.Line, context.Line,
                              std::move(funcArgs) };
 
+#ifndef CMAKE_BOOTSTRAP
+    cm::optional<cmListFileCoverage::SyntheticCommandScope> syntheticScope;
+    if (cmListFileCoverage::Get()) {
+      syntheticScope.emplace(func);
+    }
+#endif
     cmExecutionStatus status(*this->Makefile);
     if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {
@@ -825,6 +841,12 @@ protected:
     cmListFileFunction func{ this->FunctionName, context.Line, context.Line,
                              std::move(funcArgs) };
 
+#ifndef CMAKE_BOOTSTRAP
+    cm::optional<cmListFileCoverage::SyntheticCommandScope> syntheticScope;
+    if (cmListFileCoverage::Get()) {
+      syntheticScope.emplace(func);
+    }
+#endif
     cmExecutionStatus status(*this->Makefile);
     if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {

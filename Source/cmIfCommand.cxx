@@ -22,6 +22,10 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmListFileCoverage.h"
+#endif
+
 static std::string cmIfCommandError(
   std::vector<cmExpandedCommandArgument> const& args)
 {
@@ -122,6 +126,12 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
           mf.PrintCommandTrace(func, elseifBT,
                                cmMakefile::CommandMissingFromStack::Yes);
         }
+#ifndef CMAKE_BOOTSTRAP
+        if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+          coverage->CommandRan(func, this->GetStartingContext().FilePath,
+                               func.Line());
+        }
+#endif
 
         std::string errorString;
 

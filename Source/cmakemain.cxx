@@ -49,6 +49,7 @@
 #  include "cmCMakePresetsArgs.h"
 #  include "cmCMakeSarifLogger.h"
 #  include "cmDocumentation.h"
+#  include "cmListFileCoverage.h"
 #endif
 
 #include "cmsys/Encoding.hxx"
@@ -275,6 +276,7 @@ int do_cmake(int ac, char const* const* av)
   bool view_only = false;
 #ifndef CMAKE_BOOTSTRAP
   cm::optional<std::string> sarif_output_path;
+  bool check_build_system = false;
 #endif
   cmState::Role role = cmState::Role::Project;
   std::vector<std::string> parsedArgs;
@@ -376,6 +378,12 @@ int do_cmake(int ac, char const* const* av)
     }
     if (!matched) {
       parsedArgs.emplace_back(av[i]);
+#ifndef CMAKE_BOOTSTRAP
+      if (arg == "--check-build-system") {
+        // cmake::Run starts coverage only if the build system re-runs.
+        check_build_system = true;
+      }
+#endif
     }
   }
 
@@ -396,6 +404,16 @@ int do_cmake(int ac, char const* const* av)
   cm.SetProgressCallback([&cm](std::string const& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
+
+#ifndef CMAKE_BOOTSTRAP
+  if (!check_build_system) {
+    std::string error;
+    if (!cmListFileCoverage::Start(error)) {
+      cmSystemTools::Error(error);
+      return 1;
+    }
+  }
+#endif
 
   int res = cm.Run(parsedArgs, view_only);
   if (list_cached || list_all_cached) {
@@ -1268,7 +1286,18 @@ int main(int ac, char const* const* av)
       return do_build(ac, av);
     }
     if (strcmp(av[1], "--install") == 0) {
+#ifndef CMAKE_BOOTSTRAP
+      std::string error;
+      if (!cmListFileCoverage::Start(error)) {
+        cmSystemTools::Error(error);
+        return 1;
+      }
+      int const ret = do_install(ac, av);
+      cmListFileCoverage::Finish();
+      return ret;
+#else
       return do_install(ac, av);
+#endif
     }
     if (strcmp(av[1], "--open") == 0) {
       return do_open(ac, av);
@@ -1278,6 +1307,9 @@ int main(int ac, char const* const* av)
     }
   }
   int ret = do_cmake(ac, av);
+#ifndef CMAKE_BOOTSTRAP
+  cmListFileCoverage::Finish();
+#endif
   if (uv_loop_t* loop = uv_default_loop()) {
     uv_loop_close(loop);
   }

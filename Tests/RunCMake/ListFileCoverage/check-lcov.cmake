@@ -1,0 +1,150 @@
+# Check the lcov tracefiles that a coverage run wrote.
+#
+# Inputs:
+#   cov_dir            the coverage directory
+#   expect_files       number of tracefiles, default 1, empty: not checked
+#   expect_lcov        optional: name of a file in this directory that holds
+#                      the full expected text of the records under
+#                      RunCMake_SOURCE_DIR, with that prefix written as <SRC>
+#   expect_lcov_regex  optional list: each must match that same text
+#   expect_sf_regex    optional list: each must match the SF path of some record
+#   forbid_sf_regex    optional list: none may match any SF path
+#
+# Records are split with string(FIND) and string(SUBSTRING), never with list
+# operations, because paths and function names can hold ";" and "[".
+
+function(check_lcov)
+  if(NOT DEFINED expect_files)
+    set(expect_files 1)
+  endif()
+  set(failed "")
+
+  file(GLOB entries LIST_DIRECTORIES true RELATIVE "${cov_dir}" "${cov_dir}/*")
+  list(LENGTH entries found)
+  set(info_files "")
+  # CMake regular expressions have no {8} quantifier.
+  string(REPEAT "[0-9a-f]" 8 token_regex)
+  foreach(entry IN LISTS entries)
+    if(entry MATCHES "^[0-9]+-${token_regex}\\.info$")
+      list(APPEND info_files "${entry}")
+    else()
+      string(APPEND failed "Unexpected entry in coverage directory: ${entry}\n")
+    endif()
+  endforeach()
+  if(NOT expect_files STREQUAL "" AND NOT found EQUAL expect_files)
+    string(APPEND failed
+      "expected ${expect_files} coverage file(s), found ${found}\n")
+  endif()
+
+  # Split the files into records.
+  set(n 0)
+  set(raw "")
+  foreach(name IN LISTS info_files)
+    file(READ "${cov_dir}/${name}" content)
+    string(APPEND raw "${content}")
+    while(1)
+      string(LENGTH "${content}" length)
+      if(length EQUAL 0)
+        break()
+      endif()
+      string(FIND "${content}" "end_of_record\n" pos)
+      if(pos EQUAL -1)
+        string(APPEND failed "${name}: text after the last end_of_record\n")
+        break()
+      endif()
+      math(EXPR end "${pos} + 14")
+      string(SUBSTRING "${content}" 0 ${end} record)
+      string(SUBSTRING "${content}" ${end} -1 content)
+      string(SUBSTRING "${record}" 0 3 head)
+      string(FIND "${record}" "\n" nl)
+      if(NOT head STREQUAL "SF:" OR nl LESS 3)
+        string(APPEND failed "${name}: record does not start with SF:\n")
+        break()
+      endif()
+      math(EXPR sf_length "${nl} - 3")
+      string(SUBSTRING "${record}" 3 ${sf_length} sf_${n})
+      set(record_${n} "${record}")
+      math(EXPR n "${n} + 1")
+    endwhile()
+  endforeach()
+  set(indexes "")
+  if(n GREATER 0)
+    math(EXPR last "${n} - 1")
+    foreach(i RANGE ${last})
+      list(APPEND indexes ${i})
+    endforeach()
+  endif()
+
+  foreach(regex IN LISTS expect_sf_regex)
+    set(matched FALSE)
+    foreach(i IN LISTS indexes)
+      if("${sf_${i}}" MATCHES "${regex}")
+        set(matched TRUE)
+      endif()
+    endforeach()
+    if(NOT matched)
+      string(APPEND failed "No SF path matches \"${regex}\"\n")
+    endif()
+  endforeach()
+  foreach(regex IN LISTS forbid_sf_regex)
+    foreach(i IN LISTS indexes)
+      if("${sf_${i}}" MATCHES "${regex}")
+        string(APPEND failed "SF path matches \"${regex}\": ${sf_${i}}\n")
+      endif()
+    endforeach()
+  endforeach()
+
+  # Keep the records under the source directory, with the prefix replaced.
+  set(prefix "${RunCMake_SOURCE_DIR}/")
+  string(LENGTH "${prefix}" prefix_length)
+  math(EXPR tail_start "${prefix_length} + 3")
+  set(kept "")
+  foreach(i IN LISTS indexes)
+    set(sf "${sf_${i}}")
+    set(match_prefix "${prefix}")
+    if(CMAKE_HOST_WIN32)
+      string(TOLOWER "${sf}" sf)
+      string(TOLOWER "${match_prefix}" match_prefix)
+    endif()
+    string(FIND "${sf}" "${match_prefix}" pos)
+    if(pos EQUAL 0)
+      string(SUBSTRING "${record_${i}}" ${tail_start} -1 tail)
+      set(record_${i} "SF:<SRC>/${tail}")
+      list(APPEND kept ${i})
+    endif()
+  endforeach()
+
+  # Sort the kept records by SF path and join them.
+  set(text "")
+  while(NOT "${kept}" STREQUAL "")
+    set(best "")
+    foreach(i IN LISTS kept)
+      if(best STREQUAL "" OR "${sf_${i}}" STRLESS "${sf_${best}}")
+        set(best ${i})
+      endif()
+    endforeach()
+    list(REMOVE_ITEM kept ${best})
+    string(APPEND text "${record_${best}}")
+  endwhile()
+
+  if(DEFINED expect_lcov)
+    file(READ "${RunCMake_SOURCE_DIR}/${expect_lcov}" expected)
+    string(REPLACE "\r\n" "\n" expected "${expected}")
+    if(NOT "${text}" STREQUAL "${expected}")
+      string(APPEND failed "Coverage does not match ${expect_lcov}.\n"
+        "Expected:\n${expected}Actual:\n${text}")
+    endif()
+  endif()
+  foreach(regex IN LISTS expect_lcov_regex)
+    if(NOT "${text}" MATCHES "${regex}")
+      string(APPEND failed "Coverage does not match \"${regex}\".\n")
+    endif()
+  endforeach()
+
+  if(NOT failed STREQUAL "")
+    string(APPEND failed "Coverage files:\n${raw}")
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}${failed}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+check_lcov()

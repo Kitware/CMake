@@ -70,6 +70,7 @@
 #include "cmake.h"
 
 #ifndef CMAKE_BOOTSTRAP
+#  include "cmListFileCoverage.h"
 #  include "cmMakefileProfilingData.h"
 #  include "cmVariableWatch.h"
 #endif
@@ -626,6 +627,11 @@ bool cmMakefile::ExecuteCommand(cmListFileFunction const& lff,
       if (this->GetCMakeInstance()->GetTrace()) {
         this->PrintCommandTrace(lff, this->Backtrace);
       }
+#ifndef CMAKE_BOOTSTRAP
+      if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+        coverage->CommandRan(lff, this->Backtrace.Top().FilePath, lff.Line());
+      }
+#endif
       // Try invoking the command.
       bool invokeSucceeded = command(lff.Arguments(), status);
       bool hadNestedError = status.GetNestedError();
@@ -773,6 +779,12 @@ bool cmMakefile::ReadDependentFile(std::string const& filename,
   }
 #endif
 
+#ifndef CMAKE_BOOTSTRAP
+  if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+    coverage->FileParsed(filenametoread, listFile.Functions);
+  }
+#endif
+
   this->RunListFile(listFile, filenametoread);
   if (cmSystemTools::GetFatalErrorOccurred()) {
     incScope.Quiet();
@@ -892,6 +904,12 @@ bool cmMakefile::ReadListFile(std::string const& filename)
     this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
     this->GetCMakeInstance()->GetDebugAdapter()->OnFileParsedSuccessfully(
       filenametoread, listFile.Functions);
+  }
+#endif
+
+#ifndef CMAKE_BOOTSTRAP
+  if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+    coverage->FileParsed(filenametoread, listFile.Functions);
   }
 #endif
 
@@ -1709,6 +1727,12 @@ void cmMakefile::Configure()
     this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
     this->GetCMakeInstance()->GetDebugAdapter()->OnFileParsedSuccessfully(
       currentStart, listFile.Functions);
+  }
+#endif
+
+#ifndef CMAKE_BOOTSTRAP
+  if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+    coverage->FileParsed(currentStart, listFile.Functions);
   }
 #endif
 
