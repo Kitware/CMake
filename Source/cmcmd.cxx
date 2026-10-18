@@ -209,64 +209,6 @@ std::vector<cmCommandLineHelpEntry> const AvailableWindowsCommands = {
 };
 #endif
 
-std::string FormatCommandLineHelp(
-  cm::string_view header, std::vector<cmCommandLineHelpEntry> const& entries)
-{
-  std::size_t const helpColumn = 28;
-  std::string result = cmStrCat(header, ":\n");
-  for (cmCommandLineHelpEntry const& entry : entries) {
-    std::string invocation = entry.Name;
-    if (*entry.Usage) {
-      invocation = cmStrCat(std::move(invocation), ' ', entry.Usage);
-    }
-    std::string line = cmStrCat("  ", invocation);
-    if (line.size() + 2 <= helpColumn) {
-      line.resize(helpColumn, ' ');
-      result = cmStrCat(std::move(result), line, "- ", entry.Help, '\n');
-    } else {
-      result = cmStrCat(std::move(result), line, '\n',
-                        std::string(helpColumn, ' '), "- ", entry.Help, '\n');
-    }
-  }
-  return result;
-}
-
-std::vector<std::string> CommandLineHelpEntryNames(
-  std::vector<cmCommandLineHelpEntry> const& entries)
-{
-  std::vector<std::string> names;
-  names.reserve(entries.size());
-  for (cmCommandLineHelpEntry const& entry : entries) {
-    names.emplace_back(entry.Name);
-  }
-  return names;
-}
-
-int CMakeCommandUsage(std::string const& program)
-{
-  /* clang-format off */
-  std::string help_screen = cmStrCat(
-#ifndef CMAKE_BOOTSTRAP
-    "cmake version "
-  , cmVersion::GetCMakeVersion()
-  , "\n"
-#else
-    "cmake bootstrap\n"
-#endif
-    "Usage: "
-  , program
-  , " -E <command> [arguments...]\n"
-  , FormatCommandLineHelp("Available commands", AvailableCommands)
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  , FormatCommandLineHelp("Available on Windows only",
-                          AvailableWindowsCommands)
-#endif
-  );
-  /* clang-format on */
-  cmSystemTools::Error(help_screen);
-  return 1;
-}
-
 bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
 {
   if (cmSystemTools::FileIsDirectory(file)) {
@@ -1038,6 +980,7 @@ void IssueDeprecation(std::string const& text)
 }
 
 int HandleCoCompileCommands(std::vector<std::string> const& args);
+int CMakeCommandUsage(std::string const& program);
 int HashSumFile(std::vector<std::string> const& args, cmCryptoHash::Algo algo);
 int SymlinkLibrary(std::vector<std::string> const& args);
 int SymlinkExecutable(std::vector<std::string> const& args);
@@ -3077,6 +3020,64 @@ std::array<Command, 63> const Commands{ {
   cmake_E_vs_link_exe,
   cmake_E_write_regv,
 } };
+
+std::vector<std::string> CommandLineHelpEntryNames(
+  std::vector<cmCommandLineHelpEntry> const& entries)
+{
+  std::vector<std::string> names;
+  names.reserve(entries.size());
+  for (cmCommandLineHelpEntry const& entry : entries) {
+    names.emplace_back(entry.Name);
+  }
+  return names;
+}
+
+std::string FormatCommandLineHelp(
+  cm::string_view header, std::vector<cmCommandLineHelpEntry> const& entries)
+{
+  std::size_t const helpColumn = 28;
+  std::string result = cmStrCat(header, ":\n");
+  for (cmCommandLineHelpEntry const& entry : entries) {
+    std::string invocation = entry.Name;
+    if (*entry.Usage) {
+      invocation = cmStrCat(std::move(invocation), ' ', entry.Usage);
+    }
+    std::string line = cmStrCat("  ", invocation);
+    if (line.size() + 2 <= helpColumn) {
+      line.resize(helpColumn, ' ');
+      result = cmStrCat(std::move(result), line, "- ", entry.Help, '\n');
+    } else {
+      result = cmStrCat(std::move(result), line, '\n',
+                        std::string(helpColumn, ' '), "- ", entry.Help, '\n');
+    }
+  }
+  return result;
+}
+
+int CMakeCommandUsage(std::string const& program)
+{
+  /* clang-format off */
+  std::string help_screen = cmStrCat(
+#ifndef CMAKE_BOOTSTRAP
+    "cmake version "
+  , cmVersion::GetCMakeVersion()
+  , "\n"
+#else
+    "cmake bootstrap\n"
+#endif
+    "Usage: "
+  , program
+  , " -E <command> [arguments...]\n"
+  , FormatCommandLineHelp("Available commands", AvailableCommands)
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  , FormatCommandLineHelp("Available on Windows only",
+                          AvailableWindowsCommands)
+#endif
+  );
+  /* clang-format on */
+  cmSystemTools::Error(help_screen);
+  return 1;
+}
 
 }
 
