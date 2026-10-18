@@ -3243,18 +3243,23 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     forward_info(transitiveInterfaceObjects, fmft["interface-objects"]);
   }
 
-  // Compute the set of modules actually imported by sources in this target.
+  // Compute the set of modules imported directly or transitively by sources in
+  // this target.
   std::set<std::string> usedModules;
   for (cmScanDepInfo const& object : objects) {
     for (auto const& r : object.Requires) {
       usedModules.insert(r.LogicalName);
+      auto usage = usages.Usage.find(r.LogicalName);
+      if (usage != usages.Usage.end()) {
+        usedModules.insert(usage->second.begin(), usage->second.end());
+      }
     }
   }
 
-  // Merge direct interface objects into the accumulated set.
-  // Direct objects are filtered: only keep those for modules that are
-  // actually imported by sources in this target. Transitive objects from
-  // linked targets were already filtered in their originating target.
+  // Merge interface objects into the accumulated set.
+  // Objects are filtered: only keep those for modules that are imported
+  // directly or transitively by sources in this target. Transitive objects
+  // from linked targets were already filtered in their originating target.
   if (cxx_interface_objects && cxx_interface_objects->isObject()) {
     Json::Value const& directObjects =
       (*cxx_interface_objects)["module-objects"];
