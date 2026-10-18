@@ -110,7 +110,7 @@ Generating Files
 
     Because CMake is not aware of the tool involved by the rule, there is
     no specific processing regarding this pattern. This is the user's
-    responsibility to format, using  :manual:`generator expressions
+    responsibility to format, using :manual:`generator expressions
     <cmake-generator-expressions(7)>`, the content of pattern to be compatible
     with the tool.
 
@@ -129,7 +129,7 @@ Generating Files
 
     Because CMake is not aware of the tool involved by the rule, there is
     no specific processing regarding this pattern. This is the user's
-    responsibility to format, using  :manual:`generator expressions
+    responsibility to format, using :manual:`generator expressions
     <cmake-generator-expressions(7)>`, the content of pattern to be compatible
     with the tool.
 
@@ -143,7 +143,7 @@ Generating Files
 
   ``<COMPILE_OPTIONS>``
     Content, in this order, of the :prop_rule:`COMPILE_OPTIONS` rule property,
-    :prop_sf:`COMPILE_OPTIONS` source property, and:prop_fs:`COMPILE_OPTIONS`
+    :prop_sf:`COMPILE_OPTIONS` source property, and :prop_fs:`COMPILE_OPTIONS`
     file set property.
 
   The options, which have the same semantics as those of the
@@ -192,10 +192,10 @@ Generating Files
 
       The ``patterns`` argument holds the name of the variable which can be
       used to enrich the list of patterns. The expected value is a
-      :ref:`semicolon-separated list <CMake Language Lists>` of  items having
+      :ref:`semicolon-separated list <CMake Language Lists>` of items having
       the syntax ``PATTERN=VALUE`` or ``PATTERN=``. More precisely, each item
       must match the regular expression ``(^[A-Z][A-Z0-9_]+)=(.*)$``. Items
-      which does not this regular expression will be ignored.
+      which do not match this regular expression will be ignored.
 
     ``FOR_SOURCE``
       The specified function will be called for each file of the file set.
@@ -209,10 +209,10 @@ Generating Files
 
       The ``patterns`` argument holds the name of the variable which can be
       used to enrich the list of patterns. The expected value is a
-      :ref:`semicolon-separated list <CMake Language Lists>` of  items having
+      :ref:`semicolon-separated list <CMake Language Lists>` of items having
       the syntax ``PATTERN=VALUE`` or ``PATTERN=``. More precisely, each item
       must match the regular expression ``(^[A-Z][A-Z0-9_]+)=(.*)$``. Items
-      which does not this regular expression will be ignored.
+      which do not match this regular expression will be ignored.
 
       .. note::
 
@@ -222,7 +222,7 @@ Generating Files
 
     .. note::
 
-      Any patterns specified through The :prop_fs:`RULE_PATTERNS` file set
+      Any patterns specified through the :prop_fs:`RULE_PATTERNS` file set
       and :prop_sf:`<RULE>_PATTERNS` source file properties will take
       precedence over, respectively, the file set and the source configurators.
 
@@ -360,7 +360,7 @@ Derived Rule
 Example
 =======
 
-By reusing the previous defined rule ``swig``, we can provide a more simple way
+By reusing the previously defined rule ``swig``, we can provide a simpler way
 to compile swig sources by creating a more specialized rule:
 
 
