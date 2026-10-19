@@ -214,9 +214,12 @@ The options are:
   .. versionadded:: 4.4
 
   Specify the ``<tool>`` used for collecting coverage during the running
-  of the tests.  If not specified the :variable:`CTEST_TEST_COVERAGE_TOOL`
-  variable will be checked.  See the CTest
-  :ref:`CoverageTool <ctest-CoverageTool>` setting for details.
+  of the tests: ``LLVM-COV`` or ``CMAKE``.  If not specified the
+  :variable:`CTEST_TEST_COVERAGE_TOOL` variable will be checked.  See the
+  CTest :ref:`CoverageTool <ctest-CoverageTool>` setting for details.
+
+  .. versionadded:: 4.6
+    The ``CMAKE`` tool.
 
 ``PRESET <preset>``
   .. versionadded:: 4.4

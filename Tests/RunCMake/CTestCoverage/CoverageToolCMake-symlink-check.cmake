@@ -1,0 +1,8 @@
+set(tree "${RunCMake_TEST_BINARY_DIR}")
+set(target "${RunCMake_BINARY_DIR}/CoverageToolCMake-symlink-target")
+if(NOT EXISTS "${target}/keep.txt")
+  string(APPEND RunCMake_TEST_FAILED "Missing ${target}/keep.txt\n")
+endif()
+if(NOT IS_SYMLINK "${tree}/linked_cmake-coverage")
+  string(APPEND RunCMake_TEST_FAILED "Missing link ${tree}/linked_cmake-coverage\n")
+endif()

@@ -5,13 +5,14 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
-#include <ostream>
 #include <utility>
 #include <vector>
 
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -110,6 +111,55 @@ void cmLcovTracefile::Merge(cmLcovTracefile const& other)
 {
   for (auto const& file : other.Files) {
     MergeSourceFile(this->Files[file.first], file.second);
+  }
+}
+
+bool cmLcovTracefile::MergeFiles(
+  std::vector<std::string> const& paths,
+  std::function<void(std::string const&)> const& warn)
+{
+  bool allMerged = true;
+  for (std::string const& path : paths) {
+    // Read into a fresh object, so that a bad file adds nothing.
+    cmLcovTracefile tracefile;
+    std::string error;
+    cmsys::ifstream fin(path.c_str());
+    if (!fin || !tracefile.Read(fin, error)) {
+      std::string warning =
+        cmStrCat("Skipping unreadable CMake listfile coverage file: ", path);
+      if (!error.empty()) {
+        warning = cmStrCat(std::move(warning), "\n  ", error);
+      }
+      warn(warning);
+      allMerged = false;
+      continue;
+    }
+    this->Merge(tracefile);
+  }
+  return allMerged;
+}
+
+void cmLcovTracefile::RemoveBuildTreeFiles(
+  std::string const& sourceDir, std::string const& buildDir,
+  std::function<void(std::string const&)> const& removed)
+{
+  if (buildDir.empty()) {
+    return;
+  }
+  std::string const build = cmSystemTools::CollapseFullPath(buildDir);
+  if (!sourceDir.empty() &&
+      cmSystemTools::ComparePath(cmSystemTools::CollapseFullPath(sourceDir),
+                                 build)) {
+    return;
+  }
+  for (auto it = this->Files.begin(); it != this->Files.end();) {
+    std::string const path = cmSystemTools::CollapseFullPath(it->first);
+    if (cmSystemTools::IsSubDirectory(path, build)) {
+      removed(path);
+      it = this->Files.erase(it);
+    } else {
+      ++it;
+    }
   }
 }
 

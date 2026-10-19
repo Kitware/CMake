@@ -4,9 +4,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <iosfwd>
 #include <map>
 #include <string>
+#include <vector>
 
 /** \brief Hit count of one function in an lcov tracefile.  */
 struct cmLcovFunction
@@ -50,6 +52,20 @@ public:
       and their hits added.  A function keeps its existing name.  The test
       name does not change.  */
   void Merge(cmLcovTracefile const& other);
+
+  /** Read the tracefiles at PATHS and merge them into this object.  Skip a
+      file that can not be read, and call WARN with a message for it.
+      Return false if a file was skipped.  */
+  bool MergeFiles(std::vector<std::string> const& paths,
+                  std::function<void(std::string const&)> const& warn);
+
+  /** Remove the files under BUILDDIR, such as generated files and
+      try_compile projects, and call REMOVED with the path of each one.
+      Remove nothing if BUILDDIR is empty or is SOURCEDIR, as in an
+      in-source build.  */
+  void RemoveBuildTreeFiles(
+    std::string const& sourceDir, std::string const& buildDir,
+    std::function<void(std::string const&)> const& removed);
 
   /** True if some file has a line or a function record.  */
   bool HasData() const;

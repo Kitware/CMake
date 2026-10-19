@@ -6,8 +6,12 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmLcovTracefile.h"
+#include "cmSystemTools.h"
 
 #include "testCommon.h"
 
@@ -231,6 +235,76 @@ bool testMerge()
   ASSERT_EQUAL(writeText(a), writeText(expected));
   return true;
 }
+
+bool testMergeFiles()
+{
+  std::string const good = "testLcovTracefile-good.info";
+  std::string const bad = "testLcovTracefile-bad.info";
+  {
+    cmsys::ofstream fout(good.c_str());
+    fout << "SF:/x\nDA:1,2\nend_of_record\n";
+  }
+  {
+    cmsys::ofstream fout(bad.c_str());
+    fout << "SF:/y\nDA:1,1\nend_of_record\nSF:/z\nDA:a,1\nend_of_record\n";
+  }
+
+  cmLcovTracefile t;
+  t.Files["/x"].Lines[1] = 1;
+  std::vector<std::string> warnings;
+  auto warn = [&warnings](std::string const& w) { warnings.push_back(w); };
+  ASSERT_TRUE(t.MergeFiles({ good }, warn));
+  ASSERT_TRUE(warnings.empty());
+  ASSERT_TRUE(!t.MergeFiles({ bad, "testLcovTracefile-missing.info" }, warn));
+  cmSystemTools::RemoveFile(good);
+  cmSystemTools::RemoveFile(bad);
+  ASSERT_EQUAL(warnings.size(), 2u);
+  ASSERT_EQUAL(warnings[0],
+               "Skipping unreadable CMake listfile coverage file: "
+               "testLcovTracefile-bad.info\n  line 5: malformed DA record "
+               "\"a,1\"");
+  ASSERT_EQUAL(warnings[1],
+               "Skipping unreadable CMake listfile coverage file: "
+               "testLcovTracefile-missing.info");
+
+  // The bad file adds nothing, not even its good first record.
+  ASSERT_EQUAL(writeText(t),
+               "SF:/x\nFNF:0\nFNH:0\nDA:1,3\nLF:1\nLH:1\nend_of_record\n");
+  return true;
+}
+
+bool testRemoveBuildTreeFiles()
+{
+  auto sample = []() {
+    cmLcovTracefile t;
+    for (char const* path :
+         { "/s/a.cmake", "/b/gen.cmake", "/b/sub/x.cmake", "/bb/y.cmake" }) {
+      t.Files[path].Lines[1] = 1;
+    }
+    return t;
+  };
+
+  std::vector<std::string> removed;
+  auto collect = [&removed](std::string const& path) {
+    removed.push_back(path);
+  };
+
+  cmLcovTracefile t = sample();
+  t.RemoveBuildTreeFiles("/s", "/b", collect);
+  ASSERT_EQUAL(removed.size(), 2u);
+  ASSERT_EQUAL(t.Files.size(), 2u);
+  ASSERT_EQUAL(t.Files.count("/s/a.cmake"), 1u);
+  ASSERT_EQUAL(t.Files.count("/bb/y.cmake"), 1u);
+
+  // An in-source build, or no build tree, keeps every file.
+  removed.clear();
+  t = sample();
+  t.RemoveBuildTreeFiles("/b", "/b/", collect);
+  t.RemoveBuildTreeFiles("/s", "", collect);
+  ASSERT_TRUE(removed.empty());
+  ASSERT_EQUAL(t.Files.size(), 4u);
+  return true;
+}
 }
 
 int testLcovTracefile(int /*unused*/, char* /*unused*/[])
@@ -239,6 +313,7 @@ int testLcovTracefile(int /*unused*/, char* /*unused*/[])
                     testReadIgnoresUnknown, testReadCrlfAndDrive,
                     testReadSameFileTwice, testReadStripsSuffix,
                     testReadErrors, testNameEncoding, testWriteSkipsEmptyFiles,
-                    testHasData, testMerge },
+                    testHasData, testMerge, testMergeFiles,
+                    testRemoveBuildTreeFiles },
                   false);
 }

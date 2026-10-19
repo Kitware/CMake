@@ -55,7 +55,9 @@ public:
 
   /** Register the executable lines and the function and macro definitions
       of a parsed file.  A second call for the same path adds new lines and
-      functions and keeps existing counts.  */
+      functions and keeps existing counts.  A relative path, as ctest uses
+      for its top CTestTestfile.cmake, is made absolute with the current
+      working directory, here and in CommandRan and FunctionCalled.  */
   void FileParsed(std::string const& path,
                   std::vector<cmListFileFunction> const& functions);
 
@@ -76,6 +78,9 @@ public:
 
 private:
   explicit cmListFileCoverage(std::string outputPath);
+
+  std::map<std::string, cmLcovSourceFile>::iterator FindFile(
+    std::string const& path);
 
   std::string OutputPath;
   std::map<std::string, cmLcovSourceFile> Files;

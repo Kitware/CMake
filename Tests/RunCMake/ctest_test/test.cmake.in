@@ -21,3 +21,4 @@ if("@CASE_NAME@" STREQUAL "TestChangingLabels")
 else()
   ctest_test(${ctest_test_args} @CASE_CTEST_TEST_RAW_ARGS@)
 endif()
+@CASE_TEST_SUFFIX_CODE@

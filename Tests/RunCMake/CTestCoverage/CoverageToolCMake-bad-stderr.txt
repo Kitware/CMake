@@ -1,0 +1,2 @@
+Skipping unreadable CMake listfile coverage file: [^
+]*bad\.info

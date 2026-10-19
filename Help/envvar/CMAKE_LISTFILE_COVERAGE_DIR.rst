@@ -36,6 +36,10 @@ These modes record coverage:
 * Script mode, :option:`cmake -P`.
 * Install scripts, :option:`cmake --install`.
 * A re-run of configure that the build system starts.
+* :manual:`ctest(1)`, for the CMake language code that it runs itself, such
+  as ``CTestTestfile.cmake`` files and :ref:`Dashboard Client` scripts.
+  To record coverage for each test instead, use the ``CMAKE`` value of the
+  CTest :ref:`CoverageTool <ctest-CoverageTool>` setting.
 
 These modes do not record coverage and do not check the directory:
 
@@ -74,10 +78,12 @@ path that CMake used to read it.  This includes files under
 :variable:`CMAKE_ROOT` and files that CMake generates in the build tree.
 Records can name generated files that CMake deletes later, such as the
 projects that :command:`try_compile` configures, so report tools may need
-to filter them out.  Files that CMake never reads do not appear.  A file
-with no line that can count and no function or macro, such as a file with
-only comments, gets no record, and a process that has no record writes no
-file.
+to filter them out.  The CTest ``CMAKE``
+:ref:`coverage tool <ctest-CoverageTool>` leaves out the files under the
+build tree when it merges the files of a test, except for an in-source
+build.  Files that CMake never reads do not appear.  A file with no line
+that can count and no function or macro, such as a file with only comments,
+gets no record, and a process that has no record writes no file.
 
 Lines:
 

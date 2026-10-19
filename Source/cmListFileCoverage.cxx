@@ -132,7 +132,10 @@ cmListFileCoverage::SyntheticCommandScope::~SyntheticCommandScope()
 void cmListFileCoverage::FileParsed(
   std::string const& path, std::vector<cmListFileFunction> const& functions)
 {
-  cmLcovSourceFile& file = this->Files[path];
+  cmLcovSourceFile& file =
+    this->Files[cmSystemTools::FileIsFullPath(path)
+                  ? path
+                  : cmSystemTools::CollapseFullPath(path)];
   for (long line : ExecutableLines(functions)) {
     file.Lines.emplace(line, 0);
   }
@@ -152,7 +155,7 @@ void cmListFileCoverage::CommandRan(cmListFileFunction const& lff,
   if (this->SyntheticCommands.count(&lff)) {
     return;
   }
-  auto file = this->Files.find(path);
+  auto file = this->FindFile(path);
   if (file == this->Files.end()) {
     return;
   }
@@ -165,7 +168,7 @@ void cmListFileCoverage::CommandRan(cmListFileFunction const& lff,
 void cmListFileCoverage::FunctionCalled(std::string const& path,
                                         long definitionLine)
 {
-  auto file = this->Files.find(path);
+  auto file = this->FindFile(path);
   if (file == this->Files.end()) {
     return;
   }
@@ -173,6 +176,15 @@ void cmListFileCoverage::FunctionCalled(std::string const& path,
   if (fn != file->second.Functions.end()) {
     ++fn->second.Hits;
   }
+}
+
+std::map<std::string, cmLcovSourceFile>::iterator cmListFileCoverage::FindFile(
+  std::string const& path)
+{
+  if (cmSystemTools::FileIsFullPath(path)) {
+    return this->Files.find(path);
+  }
+  return this->Files.find(cmSystemTools::CollapseFullPath(path));
 }
 
 cmLcovTracefile cmListFileCoverage::ToTracefile() const
