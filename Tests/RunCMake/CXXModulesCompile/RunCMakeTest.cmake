@@ -246,6 +246,7 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
       "import_std23" IN_LIST CMake_TEST_MODULE_COMPILATION)
     run_cxx_module_test(imp-std)
+    run_cxx_module_test(imp-std-compat)
     set(RunCMake_CXXModules_NO_TEST 1)
     run_cxx_module_test(imp-std-no-std-json)
     unset(RunCMake_CXXModules_NO_TEST)
