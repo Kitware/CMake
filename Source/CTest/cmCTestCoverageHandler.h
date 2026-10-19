@@ -33,6 +33,8 @@ public:
     std::map<std::string, SingleFileBranchCoverageVector>;
   TotalCoverageMap TotalCoverage;
   TotalBranchCoverageMap TotalBranchCoverage;
+  // File -> {tested, total} functions.
+  std::map<std::string, std::array<int, 2>> TotalFunctionCoverage;
   std::ostream* OFS;
   bool Quiet;
 };
@@ -84,8 +86,14 @@ private:
   //! Handle coverage for Clang with llvm function
   int HandleClangSourceCodeCoverage(cmCTestCoverageHandlerContainer* cont);
 
+  //! Parse lcov text.  Collect FN and FNDA counts if collectFunctions.
   void HandleClangSourceCodeCoverageFile(cmCTestCoverageHandlerContainer* cont,
-                                         std::string output);
+                                         std::string output,
+                                         bool collectFunctions = false);
+
+  //! Handle coverage of CMake listfiles from the CMAKE coverage tool
+  int HandleCMakeListFileCoverage(cmCTestCoverageHandlerContainer* cont);
+
   //! Handle coverage for Python with coverage.py
   int HandleCoberturaCoverage(cmCTestCoverageHandlerContainer* cont);
 

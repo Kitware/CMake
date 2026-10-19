@@ -7,3 +7,6 @@ listfile-coverage
 * :manual:`ctest(1)` gained a ``CMAKE`` value for its
   :ref:`CoverageTool <ctest-CoverageTool>` setting to record coverage of
   CMake language code for each test.
+
+* The :command:`ctest_coverage` command learned to read coverage of CMake
+  language code recorded by the ``CMAKE`` coverage tool.

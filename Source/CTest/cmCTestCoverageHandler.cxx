@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -20,6 +21,7 @@
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmLcovTracefile.h"
 #include "cmParseBlanketJSCoverage.h"
 #include "cmParseCacheCoverage.h"
 #include "cmParseCoberturaCoverage.h"
@@ -254,6 +256,11 @@ int cmCTestCoverageHandler::ProcessHandler()
   if (file_count < 0) {
     return error;
   }
+  file_count += this->HandleCMakeListFileCoverage(&cont);
+  error = cont.Error;
+  if (file_count < 0) {
+    return error;
+  }
   file_count += this->HandleTracePyCoverage(&cont);
   error = cont.Error;
   if (file_count < 0) {
@@ -465,6 +472,12 @@ int cmCTestCoverageHandler::ProcessHandler()
     covSumXML.Element("LOCUnTested", untested);
     covSumXML.Element("BranchesTested", branchestested);
     covSumXML.Element("BranchesUnTested", branchesuntested);
+    auto const fFunctionCov = cont.TotalFunctionCoverage.find(file.first);
+    if (fFunctionCov != cont.TotalFunctionCoverage.end()) {
+      covSumXML.Element("FunctionsTested", fFunctionCov->second[0]);
+      covSumXML.Element("FunctionsUnTested",
+                        fFunctionCov->second[1] - fFunctionCov->second[0]);
+    }
     covSumXML.Element("PercentCoverage", cper);
     covSumXML.Element("CoverageMetric", cmet);
     this->WriteXMLLabels(covSumXML, shortFileName);
@@ -1306,7 +1319,8 @@ int cmCTestCoverageHandler::HandleClangSourceCodeCoverage(
 }
 
 void cmCTestCoverageHandler::HandleClangSourceCodeCoverageFile(
-  cmCTestCoverageHandlerContainer* cont, std::string output)
+  cmCTestCoverageHandlerContainer* cont, std::string output,
+  bool collectFunctions)
 {
   int coveredLineIndex = 0;
   int coveredLineHits = 0;
@@ -1338,6 +1352,9 @@ void cmCTestCoverageHandler::HandleClangSourceCodeCoverageFile(
             vec.push_back(-1);
             branchVec.push_back({ { 0, 0 } });
           }
+          if (collectFunctions) {
+            cont->TotalFunctionCoverage[coveredFile] = { { 0, 0 } };
+          }
         }
       } else {
         // Dont parse repeat copies of data, skip all lines of coverage info
@@ -1352,7 +1369,16 @@ void cmCTestCoverageHandler::HandleClangSourceCodeCoverageFile(
       coveredLineIndex =
         std::atoi(line.substr(line.find(':') + 1, line.find(',')).c_str()) - 1;
       coveredLineHits = std::atoi(line.substr(line.find(',') + 1).c_str());
-      cont->TotalCoverage[coveredFile][coveredLineIndex] = coveredLineHits;
+      cmCTestCoverageHandlerContainer::SingleFileCoverageVector& vec =
+        cont->TotalCoverage[coveredFile];
+      if (coveredLineIndex < 0 ||
+          static_cast<std::size_t>(coveredLineIndex) >= vec.size()) {
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                           "Ignoring coverage of line ", coveredLineIndex + 1,
+                           " past the end of file: ", coveredFile, '\n');
+        continue;
+      }
+      vec[coveredLineIndex] = coveredLineHits;
     }
     // BRDA represents the line and number of Branch hits
     // BRDA:<LineNo>,<blockNo>,<BranchNo>,<NumHits>
@@ -1360,15 +1386,111 @@ void cmCTestCoverageHandler::HandleClangSourceCodeCoverageFile(
       // First increment count of branches for this line
       coveredLineIndex =
         std::atoi(line.substr(line.find(':') + 1, line.find(',')).c_str()) - 1;
-      cont->TotalBranchCoverage[coveredFile][coveredLineIndex][1]++;
+      cmCTestCoverageHandlerContainer::SingleFileBranchCoverageVector& vec =
+        cont->TotalBranchCoverage[coveredFile];
+      if (coveredLineIndex < 0 ||
+          static_cast<std::size_t>(coveredLineIndex) >= vec.size()) {
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                           "Ignoring coverage of line ", coveredLineIndex + 1,
+                           " past the end of file: ", coveredFile, '\n');
+        continue;
+      }
+      vec[coveredLineIndex][1]++;
       // If lines hit > 0, increment the first number to indicate the branch
       // was hit
       coveredLineHits = std::atoi(line.substr(line.rfind(',') + 1).c_str());
       if (coveredLineHits > 0) {
-        cont->TotalBranchCoverage[coveredFile][coveredLineIndex][0]++;
+        vec[coveredLineIndex][0]++;
+      }
+    }
+    // FN represents a function FN:<LineNo>,<Name>
+    else if (lineType == "FN" && collectFunctions && !pauseCollecting) {
+      cont->TotalFunctionCoverage[coveredFile][1]++;
+    }
+    // FNDA represents the hits of a function FNDA:<NumHits>,<Name>
+    else if (lineType == "FNDA" && collectFunctions && !pauseCollecting) {
+      if (std::atoi(line.substr(line.find(':') + 1).c_str()) > 0) {
+        cont->TotalFunctionCoverage[coveredFile][0]++;
       }
     }
   }
+}
+
+int cmCTestCoverageHandler::HandleCMakeListFileCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "Looking for CMake listfile coverage data: \n");
+  cmsys::Glob gl;
+  gl.RecurseOn();
+  gl.RecurseThroughSymlinksOff();
+  std::string const covGlob =
+    cmStrCat(this->CTest->GetBinaryDir(), "/*.cmake-coverage.info");
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                     "   looking for .cmake-coverage.info files in: ", covGlob,
+                     '\n');
+  gl.FindFiles(covGlob);
+  std::vector<std::string> files = gl.GetFiles();
+  if (files.empty()) {
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                       " Cannot find any CMake listfile coverage files.\n");
+    return 0;
+  }
+  std::sort(files.begin(), files.end());
+
+  // Problems are warnings.  An error would make ctest -S fail.
+  cmLcovTracefile merged;
+  auto const warn = [this](std::string const& warning) {
+    cmCTestLog(this->CTest, WARNING, warning, '\n');
+  };
+  merged.MergeFiles(files, warn);
+
+  // Leave out files in the build tree, unless it is the source tree.  The
+  // per-test merge uses the same build tree.
+  std::string const& binaryDir =
+    cont->BinaryDir.empty() ? this->CTest->GetBinaryDir() : cont->BinaryDir;
+  auto const logRemoved = [this](std::string const& path) {
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                       "Ignoring CMake listfile coverage of a file in "
+                       "the build tree: ",
+                       path, '\n');
+  };
+  merged.RemoveBuildTreeFiles(cont->SourceDir, binaryDir, logRemoved);
+
+  // Report only files in the source tree.  This keeps files of CMake itself,
+  // such as its modules, out of the report.
+  std::string sourceDir = cont->SourceDir;
+  if (!sourceDir.empty()) {
+    sourceDir = cmSystemTools::CollapseFullPath(sourceDir);
+  }
+  for (auto it = merged.Files.begin(); it != merged.Files.end();) {
+    std::string const path = cmSystemTools::CollapseFullPath(it->first);
+    if (!cmSystemTools::IsSubDirectory(path, sourceDir)) {
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+                         "Ignoring CMake listfile coverage of a file outside "
+                         "the source tree: ",
+                         path, '\n');
+      it = merged.Files.erase(it);
+    } else if (!cmSystemTools::FileExists(path, true)) {
+      // The report step would log an error for a missing file.
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
+        "Ignoring CMake listfile coverage of a missing file: ", path, '\n');
+      it = merged.Files.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  std::ostringstream text;
+  merged.Write(text);
+  this->HandleClangSourceCodeCoverageFile(cont, text.str(), true);
+  // Write leaves out the files with no data, so do not count them.
+  return static_cast<int>(std::count_if(
+    merged.Files.begin(), merged.Files.end(),
+    [](std::pair<std::string const, cmLcovSourceFile> const& file) {
+      return file.second.HasData();
+    }));
 }
 
 int cmCTestCoverageHandler::HandleLCovCoverage(
