@@ -6,6 +6,19 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC" OR
 endif()
 
 function (_cmake_cxx_find_modules_json)
+  set(_clang_version "${CMAKE_CXX_COMPILER_VERSION}")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "DPClang")
+    set(_clang_version "${CMAKE_CXX_COMPILER_VERSION_INTERNAL}")
+  endif()
+  if (_clang_version VERSION_LESS "18.1.2" AND
+      CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
+    # The original PR had a key spelling mismatch internally. Do not support it
+    # and instead require a release known to have the fix.
+    # https://github.com/llvm/llvm-project/pull/83036
+    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "LLVM 18.1.2 is required for 'import std' json format fix" PARENT_SCOPE)
+    return ()
+  endif ()
+
   if (NOT CMAKE_CXX_STDLIB_MODULES_JSON)
     if (CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
       set(_clang_modules_json_impl "libc++")
@@ -33,18 +46,5 @@ function (_cmake_cxx_find_modules_json)
     endif ()
     cmake_path(CONVERT "${_clang_libcxx_modules_json_file}" TO_CMAKE_PATH_LIST CMAKE_CXX_STDLIB_MODULES_JSON NORMALIZE)
     set(CMAKE_CXX_STDLIB_MODULES_JSON "${CMAKE_CXX_STDLIB_MODULES_JSON}" PARENT_SCOPE)
-  endif ()
-
-  set(_clang_version "${CMAKE_CXX_COMPILER_VERSION}")
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "DPClang")
-    set(_clang_version "${CMAKE_CXX_COMPILER_VERSION_INTERNAL}")
-  endif()
-  if (_clang_version VERSION_LESS "18.1.2" AND
-      CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
-    # The original PR had a key spelling mismatch internally. Do not support it
-    # and instead require a release known to have the fix.
-    # https://github.com/llvm/llvm-project/pull/83036
-    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "LLVM 18.1.2 is required for 'import std' json format fix" PARENT_SCOPE)
-    return ()
   endif ()
 endfunction ()
