@@ -1078,7 +1078,7 @@ bool HandleScriptMode(std::vector<std::string> const& args,
     }
 
     std::vector<Script> Scripts;
-    cm::optional<std::string> Component;
+    cm::optional<ArgumentParser::Maybe<std::string>> Component;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> BuildDepends;
     bool ExcludeFromAll = false;
     bool AllComponents = false;
