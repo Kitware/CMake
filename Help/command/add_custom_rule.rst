@@ -53,8 +53,10 @@ Generating Files
   custom command will be declared as part of a file set attached to
   the same target. The type of this file set, as well as its name, are
   controlled by the :prop_rule:`OUTPUT_FILE_SET` rule property. This output
-  file set will have the same scope (``PRIVATE``, ``PUBLIC``, or ``INTERFACE``)
-  as the input file set.
+  file set will be created in the same directory and will have the same scope
+  (``PRIVATE``, ``PUBLIC``, or ``INTERFACE``) as the input file set. The base
+  directories can be specified by the :prop_rule:`OUTPUT_FILE_SET_BASE_DIRS`
+  rule property.
 
   To parameterize the template, some patterns are defined which can be used as
   part of the ``add_custom_rule`` arguments as well as the :ref:`rule's
@@ -89,6 +91,12 @@ Generating Files
 
   ``<CURRENT_BINARY_DIR>``
     The path to the binary directory of the file set creation.
+
+  ``<OUTPUT_CURRENT_SOURCE_DIR>``
+    The path to the source directory of the output file set creation.
+
+  ``<OUTPUT_CURRENT_BINARY_DIR>``
+    The path to the binary directory of the output file set creation.
 
   ``<SOURCE>``
     The full path of the current source file being processed.
