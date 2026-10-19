@@ -1,0 +1,7 @@
+enable_language(C)
+cmake_policy(SET CMP0192 NEW)
+set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}")
+include(GNUInstallDirs)
+foreach(dir IN ITEMS LOCALSTATEDIR RUNSTATEDIR SYSCONFDIR)
+  message("CMAKE_INSTALL_FULL_${dir}='${CMAKE_INSTALL_FULL_${dir}}'")
+endforeach()
