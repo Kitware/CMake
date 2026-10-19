@@ -2097,6 +2097,10 @@ cmBTStringRange cmTarget::GetFileSetsEntries(cm::string_view type) const
   if (cm::contains(this->impl->FileSetTypes, type)) {
     return cmMakeRange(this->impl->FileSetTypes.at(type).SelfEntries.Entries);
   }
+  auto strType = std::string{ type };
+  if (cm::contains(this->impl->FileSetRules, strType)) {
+    return cmMakeRange(this->impl->FileSetRules.at(strType).SelfEntries);
+  }
   return cmMakeRange(EmptyEntries);
 }
 
@@ -2106,6 +2110,10 @@ cmBTStringRange cmTarget::GetInterfaceFileSetsEntries(
   if (cm::contains(this->impl->FileSetTypes, type)) {
     return cmMakeRange(
       this->impl->FileSetTypes.at(type).InterfaceEntries.Entries);
+  }
+  auto strType = std::string{ type };
+  if (cm::contains(this->impl->FileSetRules, strType)) {
+    return cmMakeRange(this->impl->FileSetRules.at(strType).InterfaceEntries);
   }
   return cmMakeRange(EmptyEntries);
 }
@@ -2944,6 +2952,12 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
       if (!fileSetType.second.SelfEntries.Entries.empty() ||
           !fileSetType.second.InterfaceEntries.Entries.empty()) {
         types.push_back(fileSetType.first);
+      }
+    }
+    for (auto const& fileSetRule : this->impl->FileSetRules) {
+      if (!fileSetRule.second.SelfEntries.empty() ||
+          !fileSetRule.second.InterfaceEntries.empty()) {
+        types.push_back(fileSetRule.first);
       }
     }
     std::sort(types.begin(), types.end());
