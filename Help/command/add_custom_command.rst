@@ -657,6 +657,10 @@ Build Events
   do for the :command:`add_custom_command(OUTPUT)` form of the command.
   At least one ``COMMAND`` must be given, see policy :policy:`CMP0175`.
 
+  If multiple custom commands are added to the same build event of the same
+  target, they are executed sequentially in the order of the calls to
+  ``add_custom_command``.
+
 .. note::
   Because generator expressions can be used in custom commands,
   it is possible to define ``COMMAND`` lines or whole custom commands
