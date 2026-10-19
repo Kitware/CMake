@@ -128,6 +128,10 @@ cm::optional<std::string> cmCurlPrintTLSVersion(int curl_tls_version)
 std::string cmCurlSetCAInfo(::CURL* curl, std::string const& cafile)
 {
   std::string e;
+  curl_version_info_data* curlVersion = curl_version_info(CURLVERSION_NOW);
+  if (!curlVersion || curlVersion->ssl_version == nullptr) {
+    return e;
+  }
   std::string env_ca;
   if (!cafile.empty()) {
     ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cafile.c_str());
