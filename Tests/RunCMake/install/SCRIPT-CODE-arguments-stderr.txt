@@ -23,14 +23,6 @@ Call Stack \(most recent call first\):
 
 
 CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
-  install CODE given invalid argument:
-
-    COMPONENT: missing required value
-Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)
-
-
-CMake Error at SCRIPT-CODE-arguments\.cmake:[0-9]+ \(install\):
   install CODE given unknown argument: "UNKNOWN"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
