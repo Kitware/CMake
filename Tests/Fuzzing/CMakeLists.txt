@@ -62,6 +62,9 @@ add_fuzzer(cmListFileParserFuzzer cmListFileParserFuzzer.cxx)
 # Generator expression fuzzer
 add_fuzzer(cmGeneratorExpressionFuzzer cmGeneratorExpressionFuzzer.cxx)
 
+# Generator expression evaluation fuzzer
+add_fuzzer(cmGeneratorExpressionEvalFuzzer cmGeneratorExpressionEvalFuzzer.cxx)
+
 # Math expression parser fuzzer
 add_fuzzer(cmExprParserFuzzer cmExprParserFuzzer.cxx)
 

@@ -1,0 +1,1 @@
+ÅA$<TARGET_FILE:fuzz_static>;$<TARGET_LINKER_FILE_NAME:Fuzz::shared>;$<TARGET_SONAME_FILE:Fuzz::shared>;$<TARGET_OBJECTS:fuzz_obj>;$<TARGET_FILE_DIR:fuzz_exe>

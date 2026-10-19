@@ -1,0 +1,1 @@
+C/opt/inj/include;$<BUILD_INTERFACE:/opt/inj/build>;$<INSTALL_INTERFACE:inc>
