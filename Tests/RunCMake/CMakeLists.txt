@@ -1424,9 +1424,12 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
     list(APPEND ToolchainWrappers_ARGS -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
   endif()
+  if(DEFINED CMake_TEST_Rust)
+    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_Rust=${CMake_TEST_Rust})
+  endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
-    PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL")
+    PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL" "Rust")
   add_RunCMake_test(LinkerLauncher)
   set_property(TEST RunCMake.LinkerLauncher APPEND
     PROPERTY LABELS "CUDA" "HIP" "Fortran" "SYCL")

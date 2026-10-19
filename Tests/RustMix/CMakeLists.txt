@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.2)
 
-set(CMAKE_EXPERIMENTAL_RUST "b6fdddce-bf66-41a5-bc5f-077f6fa4d2a1")
+set(CMAKE_EXPERIMENTAL_RUST "628f8f9f-d7dc-4a06-9aaf-d4ede4426ddf")
 
 project(RustMix LANGUAGES C CXX Rust)
 
