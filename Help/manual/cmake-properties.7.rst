@@ -131,6 +131,7 @@ Properties on Rules
    /prop_rule/NAME
    /prop_rule/OUTPUT
    /prop_rule/OUTPUT_FILE_SET
+   /prop_rule/OUTPUT_FILE_SET_BASE_DIRS
    /prop_rule/PARENT_RULE
    /prop_rule/SOURCE_CONFIGURATORS
    /prop_rule/USES_TERMINAL
