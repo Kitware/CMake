@@ -1241,6 +1241,22 @@ int main(int ac, char const* const* av)
   ac = args.argc();
   av = args.argv();
 
+  // Dispatch "cmake -E" and "--print-config-dir" before the start-up
+  // work below, which they do not need.  cmcmd does that work itself
+  // for the "-E" commands that do.
+  if (ac > 1) {
+    if (strcmp(av[1], "-E") == 0) {
+      return do_command(ac, av, std::move(console));
+    }
+    if (strcmp(av[1], "--print-config-dir") == 0) {
+      std::cout << cmSystemTools::ConvertToOutputPath(
+                     cmSystemTools::GetCMakeConfigDirectory().value_or(
+                       std::string()))
+                << std::endl;
+      return 0;
+    }
+  }
+
   cmSystemTools::InitializeCMake(av[0]);
   if (ac > 1) {
     if (strcmp(av[1], "--build") == 0) {
@@ -1254,16 +1270,6 @@ int main(int ac, char const* const* av)
     }
     if (strcmp(av[1], "--workflow") == 0) {
       return do_workflow(ac, av);
-    }
-    if (strcmp(av[1], "-E") == 0) {
-      return do_command(ac, av, std::move(console));
-    }
-    if (strcmp(av[1], "--print-config-dir") == 0) {
-      std::cout << cmSystemTools::ConvertToOutputPath(
-                     cmSystemTools::GetCMakeConfigDirectory().value_or(
-                       std::string()))
-                << std::endl;
-      return 0;
     }
   }
   int ret = do_cmake(ac, av);
