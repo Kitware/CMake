@@ -75,7 +75,8 @@ void cmInstallSbomGenerator::GenerateScript(std::ostream& os)
        this->LocalGenerator->GetMakefile()->GetGeneratorConfigs(
          cmMakefile::IncludeEmptyConfig)) {
     std::string configName =
-      cmStrCat(tempDir, '/', this->SbomFileName, '-', c, ".spdx.json");
+      cmStrCat(tempDir, '/', this->SbomFileName, '-',
+               c.empty() ? "noconfig" : c, ".spdx.json");
     cmGeneratedFileStream sbomStream(configName);
     this->TempSbomFiles.emplace(c, configName);
     if (!this->Builder->Generate(sbomStream, c)) {
