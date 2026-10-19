@@ -108,6 +108,13 @@ std::ostream& operator<<(
 }
 
 namespace {
+enum class Group
+{
+  Internal,
+  Common,
+  Windows,
+};
+
 struct Command
 {
   cm::string_view Name;
@@ -116,6 +123,9 @@ struct Command
   {
     return l.Name < r;
   }
+
+  cm::string_view Usage;
+  cm::string_view Help;
 
   struct Arguments : public std::vector<std::string>
   {
@@ -128,86 +138,9 @@ struct Command
     cm::optional<cm::StdIo::Console> Console;
   };
   int (*Impl)(Arguments);
-};
 
-struct cmCommandLineHelpEntry
-{
-  char const* Name;
-  char const* Usage;
-  char const* Help;
+  ::Group Group;
 };
-
-std::vector<cmCommandLineHelpEntry> const AvailableCommands = {
-  { "bin2c", "", "Turn a binary file into a C array" },
-  { "capabilities", "",
-    "Report capabilities built into cmake in JSON format" },
-  { "cat", "[--] <files>...",
-    "concat the files and print them to the standard output" },
-  { "chdir", "dir cmd [args...]", "run command in a given directory" },
-  { "compare_files", "[--ignore-eol] file1 file2",
-    "check if file1 is same as file2" },
-  { "copy", "<file>... destination | -t <destination> <file>...",
-    "copy files to destination (either file or directory)" },
-  { "copy_directory", "<dir>... destination | -t <destination> <dir>...",
-    "copy content of <dir>... directories to 'destination' directory" },
-  { "copy_directory_if_different",
-    "<dir>... destination | -t <destination> <dir>...",
-    "copy changed content of <dir>... directories to 'destination' "
-    "directory" },
-  { "copy_directory_if_newer",
-    "<dir>... destination | -t <destination> <dir>...",
-    "copy newer content of <dir>... directories to 'destination' "
-    "directory" },
-  { "copy_if_different", "<file>... destination | -t <destination> <file>...",
-    "copy files if source has changed" },
-  { "copy_if_newer", "<file>... destination | -t <destination> <file>...",
-    "copy files if source is newer than destination" },
-  { "echo", "[<string>...]", "displays arguments as text" },
-  { "echo_append", "[<string>...]",
-    "displays arguments as text but no new line" },
-  { "env", "[--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]",
-    "run command in a modified environment" },
-  { "environment", "", "display the current environment" },
-  { "make_directory", "<dir>...", "create parent and <dir> directories" },
-  { "md5sum", "<file>...", "create MD5 checksum of files" },
-  { "sha1sum", "<file>...", "create SHA1 checksum of files" },
-  { "sha224sum", "<file>...", "create SHA224 checksum of files" },
-  { "sha256sum", "<file>...", "create SHA256 checksum of files" },
-  { "sha384sum", "<file>...", "create SHA384 checksum of files" },
-  { "sha512sum", "<file>...", "create SHA512 checksum of files" },
-  { "remove", "[-f] <file>...",
-    "remove the file(s), use -f to force it (deprecated: use rm instead)" },
-  { "remove_directory", "<dir>...",
-    "remove directories and their contents (deprecated: use rm instead)" },
-  { "rename", "oldname newname",
-    "rename a file or directory (on one volume)" },
-  { "rm", "[-rRf] [--] <file/dir>...",
-    "remove files or directories, use -f to force it, r or R to remove "
-    "directories and their contents recursively" },
-  { "sleep", "<number>...", "sleep for given number of seconds" },
-  { "tar", "[cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]",
-    "create or extract a tar or zip archive" },
-  { "time", "command [args...]", "run command and display elapsed time" },
-  { "touch", "<file>...", "touch a <file>." },
-  { "touch_nocreate", "<file>...", "touch a <file> but do not create it." },
-  { "create_symlink", "old new", "create a symbolic link new -> old" },
-  { "create_hardlink", "old new", "create a hard link new -> old" },
-  { "true", "", "do nothing with an exit code of 0" },
-  { "false", "", "do nothing with an exit code of 1" },
-};
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-std::vector<cmCommandLineHelpEntry> const AvailableWindowsCommands = {
-  { "delete_regv", "key", "delete registry value" },
-  { "env_vs8_wince", "sdkname",
-    "displays a batch file which sets the environment for the provided "
-    "Windows CE SDK installed in VS2005" },
-  { "env_vs9_wince", "sdkname",
-    "displays a batch file which sets the environment for the provided "
-    "Windows CE SDK installed in VS2008" },
-  { "write_regv", "key value", "write registry value" },
-};
-#endif
 
 bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
 {
@@ -1181,15 +1114,24 @@ int _cmake_E_copy(Command::Arguments args)
 }
 Command constexpr cmake_E_copy{
   "copy"_s,
+  "<file>... destination | -t <destination> <file>..."_s,
+  "copy files to destination (either file or directory)"_s,
   _cmake_E_copy,
+  Group::Common,
 };
 Command constexpr cmake_E_copy_if_different{
   "copy_if_different"_s,
+  "<file>... destination | -t <destination> <file>..."_s,
+  "copy files if source has changed"_s,
   _cmake_E_copy,
+  Group::Common,
 };
 Command constexpr cmake_E_copy_if_newer{
   "copy_if_newer"_s,
+  "<file>... destination | -t <destination> <file>..."_s,
+  "copy files if source is newer than destination"_s,
   _cmake_E_copy,
+  Group::Common,
 };
 
 // Copy directory contents
@@ -1261,15 +1203,26 @@ int _cmake_E_copy_directory(Command::Arguments args)
 }
 Command constexpr cmake_E_copy_directory{
   "copy_directory"_s,
+  "<dir>... destination | -t <destination> <dir>..."_s,
+  "copy content of <dir>... directories to 'destination' directory"_s,
   _cmake_E_copy_directory,
+  Group::Common,
 };
 Command constexpr cmake_E_copy_directory_if_different{
   "copy_directory_if_different"_s,
+  "<dir>... destination | -t <destination> <dir>..."_s,
+  "copy changed content of <dir>... directories to 'destination' "
+  "directory"_s,
   _cmake_E_copy_directory,
+  Group::Common,
 };
 Command constexpr cmake_E_copy_directory_if_newer{
   "copy_directory_if_newer"_s,
+  "<dir>... destination | -t <destination> <dir>..."_s,
+  "copy newer content of <dir>... directories to 'destination' "
+  "directory"_s,
   _cmake_E_copy_directory,
+  Group::Common,
 };
 
 // Rename a file or directory
@@ -1288,7 +1241,10 @@ int _cmake_E_rename(Command::Arguments args)
 }
 Command constexpr cmake_E_rename{
   "rename"_s,
+  "oldname newname"_s,
+  "rename a file or directory (on one volume)"_s,
   _cmake_E_rename,
+  Group::Common,
 };
 
 // Compare files
@@ -1314,7 +1270,10 @@ int _cmake_E_compare_files(Command::Arguments args)
 }
 Command constexpr cmake_E_compare_files{
   "compare_files"_s,
+  "[--ignore-eol] file1 file2"_s,
+  "check if file1 is same as file2"_s,
   _cmake_E_compare_files,
+  Group::Common,
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -1386,8 +1345,7 @@ std::nullptr_t constexpr _cmake_E___create_def = nullptr;
 #endif
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 Command constexpr cmake_E___create_def{
-  "__create_def"_s,
-  _cmake_E___create_def,
+  "__create_def"_s, ""_s, ""_s, _cmake_E___create_def, Group::Internal,
 };
 
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
@@ -1397,8 +1355,7 @@ int _cmake_E___run_co_compile(Command::Arguments args)
 }
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 Command constexpr cmake_E___run_co_compile{
-  "__run_co_compile"_s,
-  _cmake_E___run_co_compile,
+  "__run_co_compile"_s, ""_s, ""_s, _cmake_E___run_co_compile, Group::Internal,
 };
 
 // Echo string
@@ -1408,8 +1365,8 @@ int _cmake_E_echo(Command::Arguments args)
   return 0;
 }
 Command constexpr cmake_E_echo{
-  "echo"_s,
-  _cmake_E_echo,
+  "echo"_s,      "[<string>...]"_s, "displays arguments as text"_s,
+  _cmake_E_echo, Group::Common,
 };
 
 // Echo string no new line
@@ -1420,7 +1377,10 @@ int _cmake_E_echo_append(Command::Arguments args)
 }
 Command constexpr cmake_E_echo_append{
   "echo_append"_s,
+  "[<string>...]"_s,
+  "displays arguments as text but no new line"_s,
   _cmake_E_echo_append,
+  Group::Common,
 };
 
 int _cmake_E_env(Command::Arguments args)
@@ -1508,7 +1468,10 @@ int _cmake_E_env(Command::Arguments args)
 }
 Command constexpr cmake_E_env{
   "env"_s,
+  "[--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]"_s,
+  "run command in a modified environment"_s,
   _cmake_E_env,
+  Group::Common,
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -1523,8 +1486,8 @@ int _cmake_E_environment(Command::Arguments)
 std::nullptr_t constexpr _cmake_E_environment = nullptr;
 #endif
 Command constexpr cmake_E_environment{
-  "environment"_s,
-  _cmake_E_environment,
+  "environment"_s,      ""_s,          "display the current environment"_s,
+  _cmake_E_environment, Group::Common,
 };
 
 int _cmake_E_make_directory(Command::Arguments args)
@@ -1546,7 +1509,10 @@ int _cmake_E_make_directory(Command::Arguments args)
 }
 Command constexpr cmake_E_make_directory{
   "make_directory"_s,
+  "<dir>..."_s,
+  "create parent and <dir> directories"_s,
   _cmake_E_make_directory,
+  Group::Common,
 };
 
 int _cmake_E_remove_directory(Command::Arguments args)
@@ -1572,7 +1538,10 @@ int _cmake_E_remove_directory(Command::Arguments args)
 }
 Command constexpr cmake_E_remove_directory{
   "remove_directory"_s,
+  "<dir>..."_s,
+  "remove directories and their contents (deprecated: use rm instead)"_s,
   _cmake_E_remove_directory,
+  Group::Common,
 };
 
 // Remove file
@@ -1602,7 +1571,10 @@ int _cmake_E_remove(Command::Arguments args)
 }
 Command constexpr cmake_E_remove{
   "remove"_s,
+  "[-f] <file>..."_s,
+  "remove the file(s), use -f to force it (deprecated: use rm instead)"_s,
   _cmake_E_remove,
+  Group::Common,
 };
 
 // Remove directories or files with rm
@@ -1669,7 +1641,11 @@ int _cmake_E_rm(Command::Arguments args)
 }
 Command constexpr cmake_E_rm{
   "rm"_s,
+  "[-rRf] [--] <file/dir>..."_s,
+  "remove files or directories, use -f to force it, r or R to remove "
+  "directories and their contents recursively"_s,
   _cmake_E_rm,
+  Group::Common,
 };
 
 // Touch file
@@ -1687,8 +1663,7 @@ int _cmake_E_touch(Command::Arguments args)
   return 0;
 }
 Command constexpr cmake_E_touch{
-  "touch"_s,
-  _cmake_E_touch,
+  "touch"_s, "<file>..."_s, "touch a <file>."_s, _cmake_E_touch, Group::Common,
 };
 
 // Touch file
@@ -1708,7 +1683,10 @@ int _cmake_E_touch_nocreate(Command::Arguments args)
 }
 Command constexpr cmake_E_touch_nocreate{
   "touch_nocreate"_s,
+  "<file>..."_s,
+  "touch a <file> but do not create it."_s,
   _cmake_E_touch_nocreate,
+  Group::Common,
 };
 
 // capabilities
@@ -1724,7 +1702,10 @@ int _cmake_E_capabilities(Command::Arguments args)
 }
 Command constexpr cmake_E_capabilities{
   "capabilities"_s,
+  ""_s,
+  "Report capabilities built into cmake in JSON format"_s,
   _cmake_E_capabilities,
+  Group::Common,
 };
 
 // Sleep command
@@ -1752,8 +1733,8 @@ int _cmake_E_sleep(Command::Arguments args)
   return 0;
 }
 Command constexpr cmake_E_sleep{
-  "sleep"_s,
-  _cmake_E_sleep,
+  "sleep"_s,      "<number>..."_s, "sleep for given number of seconds"_s,
+  _cmake_E_sleep, Group::Common,
 };
 
 // Clock command
@@ -1776,7 +1757,10 @@ int _cmake_E_time(Command::Arguments args)
 }
 Command constexpr cmake_E_time{
   "time"_s,
+  "command [args...]"_s,
+  "run command and display elapsed time"_s,
   _cmake_E_time,
+  Group::Common,
 };
 
 // Command to calculate the md5sum of a file
@@ -1788,8 +1772,8 @@ int _cmake_E_md5sum(Command::Arguments args)
   return HashSumFile(args, cmCryptoHash::AlgoMD5);
 }
 Command constexpr cmake_E_md5sum{
-  "md5sum"_s,
-  _cmake_E_md5sum,
+  "md5sum"_s,      "<file>..."_s, "create MD5 checksum of files"_s,
+  _cmake_E_md5sum, Group::Common,
 };
 
 // Command to calculate the sha1sum of a file
@@ -1801,8 +1785,8 @@ int _cmake_E_sha1sum(Command::Arguments args)
   return HashSumFile(args, cmCryptoHash::AlgoSHA1);
 }
 Command constexpr cmake_E_sha1sum{
-  "sha1sum"_s,
-  _cmake_E_sha1sum,
+  "sha1sum"_s,      "<file>..."_s, "create SHA1 checksum of files"_s,
+  _cmake_E_sha1sum, Group::Common,
 };
 
 int _cmake_E_sha224sum(Command::Arguments args)
@@ -1813,8 +1797,8 @@ int _cmake_E_sha224sum(Command::Arguments args)
   return HashSumFile(args, cmCryptoHash::AlgoSHA224);
 }
 Command constexpr cmake_E_sha224sum{
-  "sha224sum"_s,
-  _cmake_E_sha224sum,
+  "sha224sum"_s,      "<file>..."_s, "create SHA224 checksum of files"_s,
+  _cmake_E_sha224sum, Group::Common,
 };
 
 int _cmake_E_sha256sum(Command::Arguments args)
@@ -1825,8 +1809,8 @@ int _cmake_E_sha256sum(Command::Arguments args)
   return HashSumFile(args, cmCryptoHash::AlgoSHA256);
 }
 Command constexpr cmake_E_sha256sum{
-  "sha256sum"_s,
-  _cmake_E_sha256sum,
+  "sha256sum"_s,      "<file>..."_s, "create SHA256 checksum of files"_s,
+  _cmake_E_sha256sum, Group::Common,
 };
 
 int _cmake_E_sha384sum(Command::Arguments args)
@@ -1837,8 +1821,8 @@ int _cmake_E_sha384sum(Command::Arguments args)
   return HashSumFile(args, cmCryptoHash::AlgoSHA384);
 }
 Command constexpr cmake_E_sha384sum{
-  "sha384sum"_s,
-  _cmake_E_sha384sum,
+  "sha384sum"_s,      "<file>..."_s, "create SHA384 checksum of files"_s,
+  _cmake_E_sha384sum, Group::Common,
 };
 
 int _cmake_E_sha512sum(Command::Arguments args)
@@ -1849,8 +1833,8 @@ int _cmake_E_sha512sum(Command::Arguments args)
   return HashSumFile(args, cmCryptoHash::AlgoSHA512);
 }
 Command constexpr cmake_E_sha512sum{
-  "sha512sum"_s,
-  _cmake_E_sha512sum,
+  "sha512sum"_s,      "<file>..."_s, "create SHA512 checksum of files"_s,
+  _cmake_E_sha512sum, Group::Common,
 };
 
 // Command to concat files into one
@@ -1899,7 +1883,10 @@ int _cmake_E_cat(Command::Arguments args)
 }
 Command constexpr cmake_E_cat{
   "cat"_s,
+  "[--] <files>..."_s,
+  "concat the files and print them to the standard output"_s,
   _cmake_E_cat,
+  Group::Common,
 };
 
 // Command to change directory and run a program.
@@ -1926,8 +1913,8 @@ int _cmake_E_chdir(Command::Arguments args)
   return 1;
 }
 Command constexpr cmake_E_chdir{
-  "chdir"_s,
-  _cmake_E_chdir,
+  "chdir"_s,      "dir cmd [args...]"_s, "run command in a given directory"_s,
+  _cmake_E_chdir, Group::Common,
 };
 
 // Command to start progress for a build
@@ -1964,8 +1951,8 @@ int _cmake_E_cmake_progress_start(Command::Arguments args)
   return 0;
 }
 Command constexpr cmake_E_cmake_progress_start{
-  "cmake_progress_start"_s,
-  _cmake_E_cmake_progress_start,
+  "cmake_progress_start"_s, ""_s, ""_s, _cmake_E_cmake_progress_start,
+  Group::Internal,
 };
 
 // Command to report progress for a build
@@ -1980,8 +1967,8 @@ int _cmake_E_cmake_progress_report(Command::Arguments args)
   return 0;
 }
 Command constexpr cmake_E_cmake_progress_report{
-  "cmake_progress_report"_s,
-  _cmake_E_cmake_progress_report,
+  "cmake_progress_report"_s, ""_s, ""_s, _cmake_E_cmake_progress_report,
+  Group::Internal,
 };
 
 // Command to create a symbolic link.  Fails on platforms not
@@ -2006,7 +1993,10 @@ int _cmake_E_create_symlink(Command::Arguments args)
 }
 Command constexpr cmake_E_create_symlink{
   "create_symlink"_s,
+  "old new"_s,
+  "create a symbolic link new -> old"_s,
   _cmake_E_create_symlink,
+  Group::Common,
 };
 
 // Command to create a hard link.  Fails on platforms not
@@ -2039,8 +2029,8 @@ int _cmake_E_create_hardlink(Command::Arguments args)
   return 0;
 }
 Command constexpr cmake_E_create_hardlink{
-  "create_hardlink"_s,
-  _cmake_E_create_hardlink,
+  "create_hardlink"_s,      "old new"_s,   "create a hard link new -> old"_s,
+  _cmake_E_create_hardlink, Group::Common,
 };
 
 // Command to do nothing with an exit code of 0.
@@ -2049,8 +2039,8 @@ int _cmake_E_true(Command::Arguments)
   return 0;
 }
 Command constexpr cmake_E_true{
-  "true"_s,
-  _cmake_E_true,
+  "true"_s,      ""_s,          "do nothing with an exit code of 0"_s,
+  _cmake_E_true, Group::Common,
 };
 
 // Command to do nothing with an exit code of 1.
@@ -2059,8 +2049,8 @@ int _cmake_E_false(Command::Arguments)
   return 1;
 }
 Command constexpr cmake_E_false{
-  "false"_s,
-  _cmake_E_false,
+  "false"_s,      ""_s,          "do nothing with an exit code of 1"_s,
+  _cmake_E_false, Group::Common,
 };
 
 // Internal CMake shared library support.
@@ -2072,8 +2062,8 @@ int _cmake_E_cmake_symlink_library(Command::Arguments args)
   return SymlinkLibrary(args);
 }
 Command constexpr cmake_E_cmake_symlink_library{
-  "cmake_symlink_library"_s,
-  _cmake_E_cmake_symlink_library,
+  "cmake_symlink_library"_s, ""_s, ""_s, _cmake_E_cmake_symlink_library,
+  Group::Internal,
 };
 
 // Internal CMake versioned executable support.
@@ -2086,7 +2076,10 @@ int _cmake_E_cmake_symlink_executable(Command::Arguments args)
 }
 Command constexpr cmake_E_cmake_symlink_executable{
   "cmake_symlink_executable"_s,
+  ""_s,
+  ""_s,
   _cmake_E_cmake_symlink_executable,
+  Group::Internal,
 };
 
 // Internal CMake dependency scanning support.
@@ -2108,7 +2101,10 @@ int _cmake_E_cmake_fastbuild_check_depends(Command::Arguments args)
 }
 Command constexpr cmake_E_cmake_fastbuild_check_depends{
   "cmake_fastbuild_check_depends"_s,
+  ""_s,
+  ""_s,
   _cmake_E_cmake_fastbuild_check_depends,
+  Group::Internal,
 };
 
 int _cmake_E_cmake_depends(Command::Arguments args)
@@ -2208,8 +2204,7 @@ int _cmake_E_cmake_depends(Command::Arguments args)
   return 1;
 }
 Command constexpr cmake_E_cmake_depends{
-  "cmake_depends"_s,
-  _cmake_E_cmake_depends,
+  "cmake_depends"_s, ""_s, ""_s, _cmake_E_cmake_depends, Group::Internal,
 };
 
 #if !defined(CMAKE_BOOTSTRAP) || defined(CMAKE_BOOTSTRAP_MAKEFILES)
@@ -2223,7 +2218,10 @@ std::nullptr_t constexpr _cmake_E_cmake_cl_compile_depends = nullptr;
 #endif
 Command constexpr cmake_E_cmake_cl_compile_depends{
   "cmake_cl_compile_depends"_s,
+  ""_s,
+  ""_s,
   _cmake_E_cmake_cl_compile_depends,
+  Group::Internal,
 };
 
 // Internal CMake link script support.
@@ -2235,8 +2233,8 @@ int _cmake_E_cmake_link_script(Command::Arguments args)
   return ExecuteLinkScript(args);
 }
 Command constexpr cmake_E_cmake_link_script{
-  "cmake_link_script"_s,
-  _cmake_E_cmake_link_script,
+  "cmake_link_script"_s, ""_s, ""_s, _cmake_E_cmake_link_script,
+  Group::Internal,
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -2256,12 +2254,12 @@ std::nullptr_t constexpr _cmake_E_cmake_ninja_depends = nullptr;
 std::nullptr_t constexpr _cmake_E_cmake_ninja_dyndep = nullptr;
 #endif
 Command constexpr cmake_E_cmake_ninja_depends{
-  "cmake_ninja_depends"_s,
-  _cmake_E_cmake_ninja_depends,
+  "cmake_ninja_depends"_s, ""_s, ""_s, _cmake_E_cmake_ninja_depends,
+  Group::Internal,
 };
 Command constexpr cmake_E_cmake_ninja_dyndep{
-  "cmake_ninja_dyndep"_s,
-  _cmake_E_cmake_ninja_dyndep,
+  "cmake_ninja_dyndep"_s, ""_s, ""_s, _cmake_E_cmake_ninja_dyndep,
+  Group::Internal,
 };
 
 // Internal CMake C++ module compilation database support.
@@ -2271,7 +2269,10 @@ int _cmake_E_cmake_module_compile_db(Command::Arguments args)
 }
 Command constexpr cmake_E_cmake_module_compile_db{
   "cmake_module_compile_db"_s,
+  ""_s,
+  ""_s,
   _cmake_E_cmake_module_compile_db,
+  Group::Internal,
 };
 
 // Internal CMake unimplemented feature notification.
@@ -2286,7 +2287,10 @@ int _cmake_E_cmake_unimplemented_variable(Command::Arguments args)
 }
 Command constexpr cmake_E_cmake_unimplemented_variable{
   "cmake_unimplemented_variable"_s,
+  ""_s,
+  ""_s,
   _cmake_E_cmake_unimplemented_variable,
+  Group::Internal,
 };
 
 int _cmake_E_vs_link_exe(Command::Arguments args)
@@ -2294,8 +2298,7 @@ int _cmake_E_vs_link_exe(Command::Arguments args)
   return VisualStudioLink(args, 1, std::move(args.Console));
 }
 Command constexpr cmake_E_vs_link_exe{
-  "vs_link_exe"_s,
-  _cmake_E_vs_link_exe,
+  "vs_link_exe"_s, ""_s, ""_s, _cmake_E_vs_link_exe, Group::Internal,
 };
 
 int _cmake_E_vs_link_dll(Command::Arguments args)
@@ -2303,8 +2306,7 @@ int _cmake_E_vs_link_dll(Command::Arguments args)
   return VisualStudioLink(args, 2, std::move(args.Console));
 }
 Command constexpr cmake_E_vs_link_dll{
-  "vs_link_dll"_s,
-  _cmake_E_vs_link_dll,
+  "vs_link_dll"_s, ""_s, ""_s, _cmake_E_vs_link_dll, Group::Internal,
 };
 
 int _cmake_E_cmake_llvm_rc(Command::Arguments args)
@@ -2312,8 +2314,7 @@ int _cmake_E_cmake_llvm_rc(Command::Arguments args)
   return RunLLVMRC(args);
 }
 Command constexpr cmake_E_cmake_llvm_rc{
-  "cmake_llvm_rc"_s,
-  _cmake_E_cmake_llvm_rc,
+  "cmake_llvm_rc"_s, ""_s, ""_s, _cmake_E_cmake_llvm_rc, Group::Internal,
 };
 
 // Internal CMake color makefile support.
@@ -2322,8 +2323,7 @@ int _cmake_E_cmake_echo_color(Command::Arguments args)
   return ExecuteEchoColor(args);
 }
 Command constexpr cmake_E_cmake_echo_color{
-  "cmake_echo_color"_s,
-  _cmake_E_cmake_echo_color,
+  "cmake_echo_color"_s, ""_s, ""_s, _cmake_E_cmake_echo_color, Group::Internal,
 };
 
 #ifndef CMAKE_BOOTSTRAP
@@ -2356,12 +2356,10 @@ std::nullptr_t constexpr _cmake_E_cmake_autogen = nullptr;
 std::nullptr_t constexpr _cmake_E_cmake_autorcc = nullptr;
 #endif
 Command constexpr cmake_E_cmake_autogen{
-  "cmake_autogen"_s,
-  _cmake_E_cmake_autogen,
+  "cmake_autogen"_s, ""_s, ""_s, _cmake_E_cmake_autogen, Group::Internal,
 };
 Command constexpr cmake_E_cmake_autorcc{
-  "cmake_autorcc"_s,
-  _cmake_E_cmake_autorcc,
+  "cmake_autorcc"_s, ""_s, ""_s, _cmake_E_cmake_autorcc, Group::Internal,
 };
 
 // Tar files
@@ -2620,7 +2618,10 @@ int _cmake_E_tar(Command::Arguments args)
 }
 Command constexpr cmake_E_tar{
   "tar"_s,
+  "[cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]"_s,
+  "create or extract a tar or zip archive"_s,
   _cmake_E_tar,
+  Group::Common,
 };
 
 // bin2c
@@ -2798,8 +2799,8 @@ int _cmake_E_bin2c(Command::Arguments args)
   return 0;
 }
 Command constexpr cmake_E_bin2c{
-  "bin2c"_s,
-  _cmake_E_bin2c,
+  "bin2c"_s,      ""_s,          "Turn a binary file into a C array"_s,
+  _cmake_E_bin2c, Group::Common,
 };
 
 int _cmake_E_server(Command::Arguments)
@@ -2809,8 +2810,7 @@ int _cmake_E_server(Command::Arguments)
   return 1;
 }
 Command constexpr cmake_E_server{
-  "server"_s,
-  _cmake_E_server,
+  "server"_s, ""_s, ""_s, _cmake_E_server, Group::Internal,
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -2826,8 +2826,8 @@ int _cmake_E_cmake_copy_f90_mod(Command::Arguments args)
 std::nullptr_t constexpr _cmake_E_cmake_copy_f90_mod = nullptr;
 #endif
 Command constexpr cmake_E_cmake_copy_f90_mod{
-  "cmake_copy_f90_mod"_s,
-  _cmake_E_cmake_copy_f90_mod,
+  "cmake_copy_f90_mod"_s, ""_s, ""_s, _cmake_E_cmake_copy_f90_mod,
+  Group::Internal,
 };
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -2882,24 +2882,31 @@ std::nullptr_t constexpr _cmake_E_env_vs9_wince = nullptr;
 #endif
 
 Command constexpr cmake_E_write_regv{
-  "write_regv"_s,
-  _cmake_E_write_regv,
+  "write_regv"_s,      "key value"_s,  "write registry value"_s,
+  _cmake_E_write_regv, Group::Windows,
 };
 Command constexpr cmake_E_delete_regv{
-  "delete_regv"_s,
-  _cmake_E_delete_regv,
+  "delete_regv"_s,      "key"_s,        "delete registry value"_s,
+  _cmake_E_delete_regv, Group::Windows,
 };
 Command constexpr cmake_E_comspec{
-  "comspec"_s,
-  _cmake_E_comspec,
+  "comspec"_s, ""_s, ""_s, _cmake_E_comspec, Group::Internal,
 };
 Command constexpr cmake_E_env_vs8_wince{
   "env_vs8_wince"_s,
+  "sdkname"_s,
+  "displays a batch file which sets the environment for the provided "
+  "Windows CE SDK installed in VS2005"_s,
   _cmake_E_env_vs8_wince,
+  Group::Windows,
 };
 Command constexpr cmake_E_env_vs9_wince{
   "env_vs9_wince"_s,
+  "sdkname"_s,
+  "displays a batch file which sets the environment for the provided "
+  "Windows CE SDK installed in VS2008"_s,
   _cmake_E_env_vs9_wince,
+  Group::Windows,
 };
 
 // Internal depfile transformation
@@ -2951,7 +2958,10 @@ int _cmake_E_cmake_transform_depfile(Command::Arguments args)
 }
 Command constexpr cmake_E_cmake_transform_depfile{
   "cmake_transform_depfile"_s,
+  ""_s,
+  ""_s,
   _cmake_E_cmake_transform_depfile,
+  Group::Internal,
 };
 
 // Order by `LC_COLLATE=C sort` to search using `std::lower_bound`.
@@ -3033,14 +3043,16 @@ std::vector<std::string> CommandNames()
   return names;
 }
 
-std::string FormatCommandLineHelp(
-  cm::string_view header, std::vector<cmCommandLineHelpEntry> const& entries)
+std::string FormatCommandLineHelp(cm::string_view header, Group group)
 {
   std::size_t const helpColumn = 28;
   std::string result = cmStrCat(header, ":\n");
-  for (cmCommandLineHelpEntry const& entry : entries) {
-    std::string invocation = entry.Name;
-    if (*entry.Usage) {
+  for (Command const& entry : Commands) {
+    if (entry.Group != group || !entry.Impl) {
+      continue;
+    }
+    std::string invocation{ entry.Name };
+    if (!entry.Usage.empty()) {
       invocation = cmStrCat(std::move(invocation), ' ', entry.Usage);
     }
     std::string line = cmStrCat("  ", invocation);
@@ -3069,10 +3081,10 @@ int CMakeCommandUsage(std::string const& program)
     "Usage: "
   , program
   , " -E <command> [arguments...]\n"
-  , FormatCommandLineHelp("Available commands", AvailableCommands)
+  , FormatCommandLineHelp("Available commands", Group::Common)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   , FormatCommandLineHelp("Available on Windows only",
-                          AvailableWindowsCommands)
+                          Group::Windows)
 #endif
   );
   /* clang-format on */
