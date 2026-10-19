@@ -16,6 +16,9 @@ Finds Open Computing Language (OpenCL):
 OpenCL is a framework for writing programs that execute across heterogeneous
 platforms, such as CPUs, GPUs, and other accelerators.
 
+.. versionadded:: 4.5
+  Detection of OpenCL 3.1.
+
 .. versionadded:: 3.24
   Detection of OpenCL 3.0.
 
@@ -109,7 +112,7 @@ function(_FIND_OPENCL_VERSION)
 
   check_include_files(OpenCL/cl.h OpenCL_HAVE_OPENCL_CL_H)
 
-  foreach(VERSION "3_0" "2_2" "2_1" "2_0" "1_2" "1_1" "1_0")
+  foreach(VERSION "3_1" "3_0" "2_2" "2_1" "2_0" "1_2" "1_1" "1_0")
     if(OpenCL_HAVE_OPENCL_CL_H)
       check_symbol_exists(
         CL_VERSION_${VERSION}
