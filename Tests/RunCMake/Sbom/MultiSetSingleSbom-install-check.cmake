@@ -28,7 +28,9 @@ set(LIBB_EXPECTED [=[
 
 set(LIBB_LINKED_LIBRARIES_EXPECTED [=[
 {
-  "description" : "Linked Libraries",
+  "creationInfo": "_:Build#CreationInfo",
+  "spdxId": "urn:libb#StaticRelationship",
+  "description" : "Required Build-Time Libraries",
   "from" : "urn:libb#Package",
   "relationshipType" : "dependsOn",
   "to" :
@@ -39,11 +41,17 @@ set(LIBB_LINKED_LIBRARIES_EXPECTED [=[
 }
 ]=])
 
-expect_value("${content}" "https://spdx.org/rdf/3.0.1/spdx-context.jsonld" "@context")
-string(JSON SPDX_DOCUMENT GET "${content}" "@graph" "1")
+expect_value("${content}" https://spdx.org/rdf/3.0.1/spdx-context.jsonld @context)
+expect_array("${content}" 3 @graph)
+string(JSON SPDX_DOCUMENT GET "${content}" @graph 1)
 expect_object("${SPDX_DOCUMENT}" SPDX_DOCUMENT_EXPECTED)
-expect_array("${SPDX_DOCUMENT}" 2 "rootElement")
-expect_object("${SPDX_DOCUMENT}" LIBA_EXPECTED "rootElement")
-expect_object("${SPDX_DOCUMENT}" LIBB_EXPECTED "rootElement")
-string(JSON LINKED_LIBRARIES GET "${content}" "@graph" "2")
+expect_array("${SPDX_DOCUMENT}" 2 rootElement)
+expect_object("${SPDX_DOCUMENT}" LIBA_EXPECTED rootElement)
+expect_object("${SPDX_DOCUMENT}" LIBB_EXPECTED rootElement)
+string(JSON unused ERROR_VARIABLE error TYPE "${SPDX_DOCUMENT}" element)
+if(NOT error)
+  expect_array("${SPDX_DOCUMENT}" 0 element)
+endif()
+string(JSON LINKED_LIBRARIES GET "${content}" @graph 2)
 expect_object("${LINKED_LIBRARIES}" LIBB_LINKED_LIBRARIES_EXPECTED)
+expect_array("${LINKED_LIBRARIES}" 1 to)

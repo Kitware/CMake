@@ -55,10 +55,10 @@ set(DEPENDENCY_EXPECTED [=[
 set(BUILD_LINKED_LIBRARIES_EXPECTED [=[
 {
   "creationInfo" : "_:Build#CreationInfo",
-  "description" : "Linked Libraries",
+  "description" : "Required Build-Time Libraries",
   "from" : "urn:shared#Package",
   "relationshipType" : "dependsOn",
-  "spdxId" : "urn:Static#Relationship",
+  "spdxId" : "urn:shared#StaticRelationship",
   "to" :
   [
     "urn:foo:foo#Package"
@@ -72,13 +72,13 @@ set(LICENSE_EXPECTED [=[
   "creationInfo" : "_:Build#CreationInfo",
   "from" : "urn:foo:foo#Package",
   "relationshipType" : "hasDeclaredLicense",
-  "spdxId" : "urn:foo::foo#DeclaredLicenseRelationship",
+  "spdxId" : "urn:foo:foo#DeclaredLicenseRelationship",
   "to" :
   [
     {
       "creationInfo" : "_:Build#CreationInfo",
       "simplelicensing_licenseExpression" : "BSD-3-Clause",
-      "spdxId" : "urn:foo::foo#LicenseExpression",
+      "spdxId" : "urn:foo:foo#LicenseExpression",
       "type" : "simplelicensing_LicenseExpression"
     }
   ],
@@ -87,17 +87,20 @@ set(LICENSE_EXPECTED [=[
 ]=])
 
 
-expect_value("${content}" "https://spdx.org/rdf/3.0.1/spdx-context.jsonld" "@context")
-string(JSON CREATION_INFO GET "${content}" "@graph" "0")
+expect_value("${content}" https://spdx.org/rdf/3.0.1/spdx-context.jsonld @context)
+string(JSON CREATION_INFO GET "${content}" @graph 0)
 expect_object("${CREATION_INFO}" CREATION_INFO_EXPECTED)
 
-string(JSON SPDX_DOCUMENT GET "${content}" "@graph" "1")
+string(JSON SPDX_DOCUMENT GET "${content}" @graph 1)
 expect_object("${SPDX_DOCUMENT}" SPDX_DOCUMENT_EXPECTED)
-expect_object("${SPDX_DOCUMENT}" APPLICATION_EXPECTED "rootElement")
-expect_object("${SPDX_DOCUMENT}" DEPENDENCY_EXPECTED "element")
-string(JSON LINKED_LIBRARIES GET "${content}" "@graph" "3")
-expect_object("${LINKED_LIBRARIES}" BUILD_LINKED_LIBRARIES_EXPECTED)
+expect_object("${SPDX_DOCUMENT}" APPLICATION_EXPECTED rootElement)
+expect_object("${SPDX_DOCUMENT}" DEPENDENCY_EXPECTED element)
+expect_array("${SPDX_DOCUMENT}" 1 rootElement)
+expect_array("${SPDX_DOCUMENT}" 1 element)
+expect_array("${content}" 4 @graph)
+expect_object("${content}" BUILD_LINKED_LIBRARIES_EXPECTED @graph)
 
-# Check that default_license from the imported CPS package is reported
-string(JSON LICENSE_RELATIONSHIP GET "${content}" "@graph" "2")
-expect_object("${LICENSE_RELATIONSHIP}" LICENSE_EXPECTED)
+expect_object("${content}" LICENSE_EXPECTED @graph)
+foreach(index RANGE 2 3)
+  expect_array("${content}" 1 @graph ${index} to)
+endforeach()

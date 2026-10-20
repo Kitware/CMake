@@ -17,8 +17,13 @@ set(LIBA_EXPECTED [=[
 }
 ]=])
 
-string(JSON SPDX_DOCUMENT GET "${content}" "@graph" "1")
+string(JSON SPDX_DOCUMENT GET "${content}" @graph 1)
+expect_value("${content}" https://spdx.org/rdf/3.0.1/spdx-context.jsonld @context)
+expect_array("${content}" 2 @graph)
 expect_object("${SPDX_DOCUMENT}" SPDX_DOCUMENT_EXPECTED)
-# liba should only appear once.
-expect_array("${SPDX_DOCUMENT}" 1 "rootElement")
-expect_object("${SPDX_DOCUMENT}" LIBA_EXPECTED "rootElement")
+expect_array("${SPDX_DOCUMENT}" 1 rootElement)
+expect_object("${SPDX_DOCUMENT}" LIBA_EXPECTED rootElement)
+string(JSON unused ERROR_VARIABLE error TYPE "${SPDX_DOCUMENT}" element)
+if(NOT error)
+  expect_array("${SPDX_DOCUMENT}" 0 element)
+endif()

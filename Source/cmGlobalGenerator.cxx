@@ -37,6 +37,7 @@
 #include "cmCustomCommandTypes.h"
 #include "cmDiagnostics.h"
 #include "cmDuration.h"
+#include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
@@ -361,30 +362,30 @@ cmExportFileGenerator::ExportInfo cmGlobalGenerator::FindInstallExportInfo(
 }
 
 #ifndef CMAKE_BOOTSTRAP
-cmSbomBuilder::SbomInfo cmGlobalGenerator::FindBuildSbomInfo(
+std::vector<std::string> cmGlobalGenerator::FindBuildSbomPackages(
   cmGeneratorTarget const* target) const
 {
-  cmSbomBuilder::SbomInfo info;
+  std::vector<std::string> packages;
   for (cmBuildSbomGenerator const* g : this->BuildSbomGenerators) {
     if (g->CoversTarget(target)) {
-      info.Packages.push_back(g->GetPackageName());
+      packages.push_back(g->GetPackageName());
     }
   }
-  std::sort(info.Packages.begin(), info.Packages.end());
-  return info;
+  std::sort(packages.begin(), packages.end());
+  return packages;
 }
 
-cmSbomBuilder::SbomInfo cmGlobalGenerator::FindInstallSbomInfo(
+std::vector<std::string> cmGlobalGenerator::FindInstallSbomPackages(
   cmGeneratorTarget const* target) const
 {
-  cmSbomBuilder::SbomInfo info;
+  std::vector<std::string> packages;
   for (cmInstallSbomGenerator const* g : this->InstallSbomGenerators) {
     if (g->CoversTarget(target)) {
-      info.Packages.push_back(g->GetPackageName());
+      packages.push_back(g->GetPackageName());
     }
   }
-  std::sort(info.Packages.begin(), info.Packages.end());
-  return info;
+  std::sort(packages.begin(), packages.end());
+  return packages;
 }
 #endif
 
@@ -1834,7 +1835,7 @@ bool cmGlobalGenerator::Compute()
       return false;
     }
 
-    std::string projectName = this->LocalGenerators[0]->GetProjectName();
+    std::string const projectName = this->LocalGenerators[0]->GetProjectName();
     for (auto& exportSet : this->ExportSets) {
       bool isCovered =
         std::any_of(this->InstallSbomGenerators.cbegin(),
@@ -1850,14 +1851,20 @@ bool cmGlobalGenerator::Compute()
       args.Format = *sbomFormat;
       args.ProjectName = projectName;
       args.PackageName = exportSet.first;
+      cmExecutionStatus status(*this->Makefiles[0]);
+      if (!args.SetMetadataFromProject(status)) {
+        this->Makefiles[0]->IssueMessage(MessageType::FATAL_ERROR,
+                                         status.GetError());
+        return false;
+      }
       std::string dest = args.GetDefaultDestination(
         cm::InstallDirs::GetLibraryDirectory(this->Makefiles[0].get()));
 
       auto installGen = cm::make_unique<cmInstallSbomGenerator>(
-        std::vector<cmExportSet*>{ &exportSet.second }, dest, "",
+        std::vector<cmExportSet*>{ &exportSet.second }, std::move(dest), "",
         std::vector<std::string>(), "",
         cmInstallGenerator::SelectMessageLevel(this->Makefiles[0].get()),
-        false, std::move(args),
+        false, args,
         cmInstallGenerator::CaptureContext(this->Makefiles[0].get()));
 
       cmInstallSbomGenerator const* rawPtr = installGen.get();

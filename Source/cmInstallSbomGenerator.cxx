@@ -15,25 +15,24 @@
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSbomArguments.h"
 #include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmInstallSbomGenerator::cmInstallSbomGenerator(
-  std::vector<cmExportSet*> exportSets, std::string destination,
+  std::vector<cmExportSet*> const& exportSets, std::string destination,
   std::string filePermissions, std::vector<std::string> const& configurations,
   std::string component, MessageLevel message, bool excludeFromAll,
-  cmSbomArguments args, cmDiagnosticContext context)
+  cmSbomArguments const& args, cmDiagnosticContext context)
   : cmInstallGenerator(std::move(destination), configurations,
                        std::move(component), message, excludeFromAll, false,
                        std::move(context))
   , FilePermissions(std::move(filePermissions))
   , SbomFileName(args.GetPackageName())
   , SbomFilePath(cmStrCat(this->Destination, '/', this->SbomFileName))
-  , SbomFormat(args.GetFormat())
-  , Builder(cm::make_unique<cmInstallSbomBuilder>(std::move(args),
-                                                  std::move(exportSets)))
+  , Builder(cm::make_unique<cmInstallSbomBuilder>(args, exportSets))
 {
 }
 
@@ -42,8 +41,7 @@ cmInstallSbomGenerator::~cmInstallSbomGenerator() = default;
 bool cmInstallSbomGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
-  this->Builder->Compute(lg);
-  return true;
+  return this->Builder->Compute(lg);
 }
 
 bool cmInstallSbomGenerator::CoversTarget(
@@ -78,10 +76,15 @@ void cmInstallSbomGenerator::GenerateScript(std::ostream& os)
       cmStrCat(tempDir, '/', this->SbomFileName, '-',
                c.empty() ? "noconfig" : c, ".spdx.json");
     cmGeneratedFileStream sbomStream(configName);
-    this->TempSbomFiles.emplace(c, configName);
     if (!this->Builder->Generate(sbomStream, c)) {
-      break;
+      if (!cmSystemTools::GetErrorOccurredFlag()) {
+        this->LocalGenerator->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Could not write SBOM file: ", configName));
+      }
+      return;
     }
+    this->TempSbomFiles.emplace(c, std::move(configName));
   }
 
   // Emit the cmake_install.cmake script to copy the file at install time.

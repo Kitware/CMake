@@ -1,4 +1,3 @@
-# Disable built-in search paths.
 enable_language(C)
 
 set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH OFF)

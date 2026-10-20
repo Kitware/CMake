@@ -55,10 +55,10 @@ set(DEPENDENCY_EXPECTED [=[
 set(BUILD_LINKED_LIBRARIES_EXPECTED [=[
 {
   "creationInfo" : "_:Build#CreationInfo",
-  "description" : "Linked Libraries",
+  "description" : "Required Build-Time Libraries",
   "from" : "urn:interface#Package",
   "relationshipType" : "dependsOn",
-  "spdxId" : "urn:Static#Relationship",
+  "spdxId" : "urn:interface#StaticRelationship",
   "to" :
   [
     "urn:bar:bar#Package"
@@ -68,13 +68,17 @@ set(BUILD_LINKED_LIBRARIES_EXPECTED [=[
 ]=])
 
 
-expect_value("${content}" "https://spdx.org/rdf/3.0.1/spdx-context.jsonld" "@context")
-string(JSON CREATION_INFO GET "${content}" "@graph" "0")
+expect_value("${content}" https://spdx.org/rdf/3.0.1/spdx-context.jsonld @context)
+string(JSON CREATION_INFO GET "${content}" @graph 0)
 expect_object("${CREATION_INFO}" CREATION_INFO_EXPECTED)
 
-string(JSON SPDX_DOCUMENT GET "${content}" "@graph" "1")
+string(JSON SPDX_DOCUMENT GET "${content}" @graph 1)
 expect_object("${SPDX_DOCUMENT}" SPDX_DOCUMENT_EXPECTED)
-expect_object("${SPDX_DOCUMENT}" APPLICATION_EXPECTED "rootElement")
-expect_object("${SPDX_DOCUMENT}" DEPENDENCY_EXPECTED "element")
-string(JSON LINKED_LIBRARIES GET "${content}" "@graph" "2")
+expect_object("${SPDX_DOCUMENT}" APPLICATION_EXPECTED rootElement)
+expect_object("${SPDX_DOCUMENT}" DEPENDENCY_EXPECTED element)
+expect_array("${SPDX_DOCUMENT}" 1 rootElement)
+expect_array("${SPDX_DOCUMENT}" 1 element)
+string(JSON LINKED_LIBRARIES GET "${content}" @graph 2)
 expect_object("${LINKED_LIBRARIES}" BUILD_LINKED_LIBRARIES_EXPECTED)
+expect_array("${LINKED_LIBRARIES}" 1 to)
+expect_array("${content}" 3 @graph)
