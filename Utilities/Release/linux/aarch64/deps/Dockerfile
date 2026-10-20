@@ -121,10 +121,10 @@ COPY openssl-source.patch /opt/openssl/src/
 RUN : \
  && mkdir -p /opt/openssl/src \
  && cd /opt/openssl/src \
- && curl -OL https://github.com/openssl/openssl/releases/download/openssl-3.6.0/openssl-3.6.0.tar.gz \
- && sha256sum openssl-3.6.0.tar.gz | grep -q b6a5f44b7eb69e3fa35dbf15524405b44837a481d43d81daddde3ff21fcbb8e9 \
- && tar xzf openssl-3.6.0.tar.gz \
- && cd openssl-3.6.0 \
+ && curl -OL https://github.com/openssl/openssl/releases/download/openssl-3.6.5/openssl-3.6.5.tar.gz \
+ && sha256sum openssl-3.6.5.tar.gz | grep -q a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98 \
+ && tar xzf openssl-3.6.5.tar.gz \
+ && cd openssl-3.6.5 \
  && patch -p1 -i ../openssl-source.patch \
  && ./Configure --prefix=/opt/openssl linux-elf no-asm no-shared -D_POSIX_C_SOURCE=199506L -D_POSIX_SOURCE=1 -D_SVID_SOURCE=1 -D_BSD_SOURCE=1 \
  && make install_dev -j $(nproc) \
