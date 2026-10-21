@@ -1,0 +1,3 @@
+^CMAKE_INSTALL_FULL_LOCALSTATEDIR='/var/opt/Opt-RelativeSpecialDirs'
+CMAKE_INSTALL_FULL_RUNSTATEDIR='/var/run/opt/Opt-RelativeSpecialDirs'
+CMAKE_INSTALL_FULL_SYSCONFDIR='/etc/opt/Opt-RelativeSpecialDirs'$
