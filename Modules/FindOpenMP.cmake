@@ -67,9 +67,11 @@ The following variables may be set to influence this module's behavior:
 ``OpenMP_RUNTIME_MSVC``
   .. versionadded:: 3.30
 
-  Specify the `OpenMP Runtime <msvc-openmp_>`_ when compiling with MSVC.
-  If set to a non-empty value, such as ``experimental`` or ``llvm``, it
-  will be passed as the value of the ``-openmp:`` flag.
+  Specify the `OpenMP Runtime <msvc-openmp_>`_ when compiling with the
+  MSVC compiler (``cl``).  If set to a non-empty value, such as
+  ``experimental`` or ``llvm``, it will be passed as the value of the
+  ``-openmp:`` flag.  This has no effect with other compilers, including
+  ``clang-cl``.
 
 .. _`msvc-openmp`: https://learn.microsoft.com/en-us/cpp/build/reference/openmp-enable-openmp-2-0-support
 
@@ -180,6 +182,17 @@ should use the ``OpenMP_<lang>_INCLUDE_DIRS`` *output* variable if it needs
 to know what include directories are needed, or preferably the
 ``OpenMP::OpenMP_<lang>`` imported target.
 
+For Clang targeting the MSVC ABI, the module searches for the OpenMP runtime
+library, preferring the one shipped with the compiler.  A different library
+can be provided directly by setting the ``OpenMP_libomp_LIBRARY`` cache
+variable.  Programs linked with it need the matching runtime DLL, such as
+``libomp.dll``, next to them or on ``PATH`` when they run.
+
+.. versionchanged:: 4.6
+  In previous CMake versions, the first ``libomp`` found through the ``LIB``
+  environment variable was used, such as the one provided with MSVC for its
+  ``-openmp:llvm`` option.
+
 Examples
 ^^^^^^^^
 
@@ -201,7 +214,12 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
 
     set(OMP_FLAG_GNU "-fopenmp")
     set(OMP_FLAG_LCC "-fopenmp")
-    set(OMP_FLAG_Clang "-fopenmp=libomp" "-fopenmp=libiomp5" "-fopenmp" "-Xclang -fopenmp")
+    if("x${CMAKE_${LANG}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+      # clang-cl ignores the GNU-style spellings
+      set(OMP_FLAG_Clang "-Xclang -fopenmp")
+    else()
+      set(OMP_FLAG_Clang "-fopenmp=libomp" "-fopenmp=libiomp5" "-fopenmp" "-Xclang -fopenmp")
+    endif()
     set(OMP_FLAG_DPClang "${OMP_FLAG_Clang}")
     set(OMP_FLAG_AppleClang "-Xclang -fopenmp")
     set(OMP_FLAG_HP "+Oopenmp")
@@ -500,23 +518,52 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
       endif()
     elseif(CMAKE_${LANG}_COMPILER_ID MATCHES "^(Clang|DPClang)$" AND WIN32)
       # Check for separate OpenMP library for Clang on Windows
-      find_library(OpenMP_libomp_LIBRARY
-        NAMES libomp libgomp libiomp5
-        HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
-      )
-      mark_as_advanced(OpenMP_libomp_LIBRARY)
       if(OpenMP_libomp_LIBRARY)
+        set(_OpenMP_libomp_CANDIDATES "${OpenMP_libomp_LIBRARY}")
+      else()
+        if(CMAKE_${LANG}_SIMULATE_ID STREQUAL "MSVC")
+          # Preferring the runtime next to the compiler, as clang's driver does
+          get_filename_component(_OpenMP_COMPILER_DIR "${CMAKE_${LANG}_COMPILER}" DIRECTORY)
+          find_library(_OpenMP_libomp_COMPILER
+            NAMES libomp libgomp libiomp5
+            HINTS "${_OpenMP_COMPILER_DIR}/../lib"
+            NO_SYSTEM_ENVIRONMENT_PATH
+            NO_CMAKE_SYSTEM_PATH
+            NO_CACHE
+          )
+        endif()
+        find_library(_OpenMP_libomp_DEFAULT
+          NAMES libomp libgomp libiomp5
+          HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
+          NO_CACHE
+        )
+        set(_OpenMP_libomp_CANDIDATES ${_OpenMP_libomp_COMPILER} ${_OpenMP_libomp_DEFAULT})
+        list(FILTER _OpenMP_libomp_CANDIDATES EXCLUDE REGEX "-NOTFOUND$")
+        list(REMOVE_DUPLICATES _OpenMP_libomp_CANDIDATES)
+      endif()
+      # Taking the first that links, since the compiler's own may not suit a cross target
+      set(_OpenMP_libomp_WORKS "OpenMP_libomp_LIBRARY-NOTFOUND")
+      foreach(_OpenMP_libomp IN LISTS _OpenMP_libomp_CANDIDATES)
         try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
           SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
-          LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}'"
+          LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${_OpenMP_libomp}'"
           COMPILE_DEFINITIONS ${OPENMP_FLAG}
-          LINK_LIBRARIES ${OpenMP_libomp_LIBRARY}
+          LINK_LIBRARIES ${_OpenMP_libomp}
         )
         if(OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
-          set("${OPENMP_FLAG_VAR}" "${OPENMP_FLAG}" PARENT_SCOPE)
-          set("${OPENMP_LIB_NAMES_VAR}" "libomp" PARENT_SCOPE)
+          set(_OpenMP_libomp_WORKS "${_OpenMP_libomp}")
           break()
         endif()
+      endforeach()
+      if(NOT OpenMP_libomp_LIBRARY)
+        set(OpenMP_libomp_LIBRARY "${_OpenMP_libomp_WORKS}" CACHE FILEPATH
+          "Path to the libomp library for OpenMP" FORCE)
+      endif()
+      mark_as_advanced(OpenMP_libomp_LIBRARY)
+      if(_OpenMP_libomp_WORKS)
+        set("${OPENMP_FLAG_VAR}" "${OPENMP_FLAG}" PARENT_SCOPE)
+        set("${OPENMP_LIB_NAMES_VAR}" "libomp" PARENT_SCOPE)
+        break()
       endif()
     endif()
     set("${OPENMP_LIB_NAMES_VAR}" "NOTFOUND" PARENT_SCOPE)
