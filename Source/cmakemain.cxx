@@ -151,7 +151,7 @@ int do_command(int ac, char const* const* av,
   args.reserve(ac - 1);
   args.emplace_back(av[0]);
   cm::append(args, av + 2, av + ac);
-  return cmcmd::ExecuteCMakeCommand(args, std::move(console));
+  return cmcmd::ExecuteCMakeCommand(std::move(args), std::move(console));
 }
 
 cmMakefile* cmakemainGetMakefile(cmake* cm)
