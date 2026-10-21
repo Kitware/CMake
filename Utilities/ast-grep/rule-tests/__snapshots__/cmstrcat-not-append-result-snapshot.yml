@@ -8,7 +8,7 @@ snapshots:
       start: 0
       end: 15
   a += cmStrCat(b, c):
-    fixed: a = cmStrCat(std::move(a), b, c)
+    fixed: a = cmStrCat(a, b, c)
     labels:
     - source: a += cmStrCat(b, c)
       style: primary
@@ -29,7 +29,7 @@ snapshots:
       start: 0
       end: 20
   a.append(cmStrCat(b, c)):
-    fixed: a = cmStrCat(std::move(a), b, c)
+    fixed: a = cmStrCat(a, b, c)
     labels:
     - source: a.append(cmStrCat(b, c))
       style: primary
@@ -43,7 +43,7 @@ snapshots:
       start: 0
       end: 24
   cflags["Swift"] += cmStrCat(' ', defineString):
-    fixed: cflags["Swift"] = cmStrCat(std::move(cflags["Swift"]), ' ', defineString)
+    fixed: cflags["Swift"] = cmStrCat(cflags["Swift"], ' ', defineString)
     labels:
     - source: cflags["Swift"] += cmStrCat(' ', defineString)
       style: primary
@@ -57,7 +57,7 @@ snapshots:
       start: 0
       end: 46
   obj.field += cmStrCat(b, c);:
-    fixed: obj.field = cmStrCat(std::move(obj.field), b, c);
+    fixed: obj.field = cmStrCat(obj.field, b, c);
     labels:
     - source: obj.field += cmStrCat(b, c)
       style: primary
