@@ -348,6 +348,11 @@ A toolchain file may configure cross-compiling for Android by setting the
 :variable:`CMAKE_SYSTEM_NAME` variable to ``Android``.  Further configuration
 is specific to the Android development environment to be used.
 
+.. note::
+
+  This documentation may not reflect behavior of the CMake toolchain file
+  provided by the Android NDK, as it is maintained separately from CMake.
+
 For :ref:`Visual Studio Generators`, CMake expects :ref:`NVIDIA Nsight Tegra
 Visual Studio Edition <Cross Compiling for Android with NVIDIA Nsight Tegra
 Visual Studio Edition>` or the :ref:`Visual Studio tools for Android
