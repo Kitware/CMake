@@ -902,11 +902,17 @@ bool cmCTestRunTest::ForkProcess()
     diff.ApplyTo(env);
   }
 
+  // The ctest_test() COVERAGE_TOOL option, or the CTEST_TEST_COVERAGE_TOOL
+  // variable of a dashboard script, overrides the CTestTestCoverageTool
+  // setting.
+  std::string coverageTool = this->TestHandler->TestOptions.CoverageTool;
+  if (coverageTool.empty()) {
+    coverageTool = this->CTest->GetCTestConfiguration("CTestTestCoverageTool");
+  }
+
   // Inject LLVM Profile name :
   // https://clang.llvm.org/docs/SourceBasedCodeCoverage.html#running-the-instrumented-program
-  if (this->CTest->GetCTestConfiguration("CTestTestCoverageTool") ==
-        "LLVM-COV"_s ||
-      this->TestHandler->TestOptions.CoverageTool == "LLVM-COV"_s) {
+  if (coverageTool == "LLVM-COV"_s) {
 
     this->UseLLVMCov = true;
     // Isolate the test from any ambient LLVM_PROFILE_FILE

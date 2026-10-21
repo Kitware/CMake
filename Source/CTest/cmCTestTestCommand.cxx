@@ -215,6 +215,13 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
     }
   }
 
+  if (args.CoverageTool.empty()) {
+    cmValue coverageTool = mf.GetDefinition("CTEST_TEST_COVERAGE_TOOL");
+    if (cmNonempty(coverageTool)) {
+      args.CoverageTool = *coverageTool;
+    }
+  }
+
   // Apply explicitly specified ctest_test() options,
   // overriding any conflicting preset values.
   if (!args.Start.empty() || !args.End.empty() || !args.Stride.empty()) {

@@ -358,6 +358,16 @@ function(run_CTestTestCoverageTool)
 endfunction()
 run_CTestTestCoverageTool()
 
+function(run_CTestTestCoverageToolVar)
+  set(CASE_TEST_PREFIX_CODE [[
+unset(ENV{LLVM_PROFILE_FILE})
+set(CTEST_TEST_COVERAGE_TOOL "LLVM-COV")
+]])
+
+  run_ctest(TestCTestTestCoverageToolVar -VV)
+endfunction()
+run_CTestTestCoverageToolVar()
+
 # test for OUTPUT_JUNIT
 run_ctest_test(OutputJUnit OUTPUT_JUNIT junit.xml REPEAT UNTIL_FAIL:2)
 

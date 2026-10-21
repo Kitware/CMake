@@ -214,8 +214,9 @@ The options are:
   .. versionadded:: 4.4
 
   Specify the ``<tool>`` used for collecting coverage during the running
-  of the tests.  See the CTest :ref:`CoverageTool <ctest-CoverageTool>`
-  setting for details.
+  of the tests.  If not specified the :variable:`CTEST_TEST_COVERAGE_TOOL`
+  variable will be checked.  See the CTest
+  :ref:`CoverageTool <ctest-CoverageTool>` setting for details.
 
 ``PRESET <preset>``
   .. versionadded:: 4.4
