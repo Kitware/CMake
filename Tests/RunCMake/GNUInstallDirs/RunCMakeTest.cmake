@@ -41,6 +41,12 @@ run_cmake(GetAbs)
 run_cmake(NoArch)
 run_cmake(NoLanguages)
 run_cmake(NoSystem)
+run_cmake(Opt-CMP0192-OLD)
+run_cmake_with_options(Opt-RelativeSpecialDirs
+  -DCMAKE_INSTALL_LOCALSTATEDIR=var
+  -DCMAKE_INSTALL_RUNSTATEDIR=var/run
+  -DCMAKE_INSTALL_SYSCONFDIR=etc
+)
 
 foreach(case
     Opt
