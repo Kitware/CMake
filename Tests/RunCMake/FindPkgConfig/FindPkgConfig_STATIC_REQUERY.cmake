@@ -1,11 +1,11 @@
-if(WIN32)
-  set(PKG_CONFIG_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config-static-requery.bat")
-else()
-  set(PKG_CONFIG_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config-static-requery.sh")
-endif()
+set(PKG_CONFIG_EXECUTABLE "${CMAKE_COMMAND}")
+set(PKG_CONFIG_ARGN "-P;${CMAKE_CURRENT_SOURCE_DIR}/pkg-config-static-requery.cmake;--")
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(P REQUIRED good)
+if(NOT P_PREFIX STREQUAL "/fake;prefix")
+  message(FATAL_ERROR "Expected semicolon in prefix, got: ${P_PREFIX}")
+endif()
 if(NOT P_STATIC_LIBRARIES STREQUAL "good;dep")
   message(FATAL_ERROR
     "Expected static libraries from first query, got: ${P_STATIC_LIBRARIES}")

@@ -586,6 +586,18 @@ macro(_pkgconfig_set var value)
   set(${var} ${value} CACHE INTERNAL "")
 endmacro()
 
+# pkg-config <0.29.1 and pkgconf <1.5.1 leave surrounding quotes on variables
+macro(_pkgconfig_unquote _var)
+  if((PkgConfig_VERSION VERSION_LESS 0.29.1) OR
+      (PkgConfig_VERSION VERSION_GREATER_EQUAL 1.0 AND PkgConfig_VERSION VERSION_LESS 1.5.1))
+    if(${_var} MATCHES "^\"(.*)\"$")
+      set(${_var} "${CMAKE_MATCH_1}")
+    elseif(${_var} MATCHES "^'(.*)'$")
+      set(${_var} "${CMAKE_MATCH_1}")
+    endif()
+  endif()
+endmacro()
+
 # Invokes pkgconfig, cleans up the result and sets variables
 macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
   set(_pkgconfig_invoke_result)
@@ -606,16 +618,7 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
       string(REGEX REPLACE "${_regexp}" " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
     endif()
 
-    # pkg-config <0.29.1 and pkgconf <1.5.1 prints quoted variables without unquoting
-    # unquote only if quotes are first and last characters
-    if((PkgConfig_VERSION VERSION_LESS 0.29.1) OR
-        (PkgConfig_VERSION VERSION_GREATER_EQUAL 1.0 AND PkgConfig_VERSION VERSION_LESS 1.5.1))
-      if (_pkgconfig_invoke_result MATCHES "^\"(.*)\"$")
-        set(_pkgconfig_invoke_result "${CMAKE_MATCH_1}")
-      elseif(_pkgconfig_invoke_result MATCHES "^'(.*)'$")
-        set(_pkgconfig_invoke_result "${CMAKE_MATCH_1}")
-      endif()
-    endif()
+    _pkgconfig_unquote(_pkgconfig_invoke_result)
 
     # pkg-config can represent "spaces within an argument" by backslash-escaping the space.
     # UNIX_COMMAND mode treats backslash-escaped spaces as "not a space that delimits arguments".
@@ -1010,15 +1013,7 @@ endfunction()
 function(_pkgconfig_parse_flags _prefix _flags_output _is_libs _static)
   string(REGEX REPLACE "[\r\n]" " " _pkgconfig_pf_output "${_flags_output}")
 
-  # Unquote if needed (same logic as _pkgconfig_invoke)
-  if((PkgConfig_VERSION VERSION_LESS 0.29.1) OR
-      (PkgConfig_VERSION VERSION_GREATER_EQUAL 1.0 AND PkgConfig_VERSION VERSION_LESS 1.5.1))
-    if(_pkgconfig_pf_output MATCHES "^\"(.*)\"$")
-      set(_pkgconfig_pf_output "${CMAKE_MATCH_1}")
-    elseif(_pkgconfig_pf_output MATCHES "^'(.*)'$")
-      set(_pkgconfig_pf_output "${CMAKE_MATCH_1}")
-    endif()
-  endif()
+  _pkgconfig_unquote(_pkgconfig_pf_output)
 
   separate_arguments(_pkgconfig_pf_list UNIX_COMMAND "${_pkgconfig_pf_output}")
 
@@ -1205,10 +1200,10 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_INCLUDEDIR)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_LIBDIR)
 
-      # --modversion validates any version constraint and prints the module
-      # version. We can't combine with --variable, since FDO pkg-config treats
-      # these as incompatible output options.
-      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors --modversion)
+      # --modversion validates any version constraint and prints the module version.
+      # pkgconf also honors --variable=prefix and prints the prefix
+      # on a second line, but freedesktop.org pkg-config ignores it
+      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors --modversion --variable=prefix)
       if (_pkg_check_modules_pkg_op)
         list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name} ${_pkg_check_modules_pkg_op} ${_pkg_check_modules_pkg_ver}")
       else()
@@ -1232,6 +1227,23 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
 
         string(APPEND _pkg_check_modules_failed " - ${_pkg_check_modules_pkg}\n")
       else()
+        # An empty output means no version or prefix was printed. Otherwise,
+        # a second line contains the prefix when --variable=prefix was honored
+        string(REPLACE ";" "\\;" _pkgconfig_combined_list "${_pkgconfig_module_version}")
+        string(REGEX REPLACE "\n" ";" _pkgconfig_combined_list "${_pkgconfig_combined_list}")
+        list(LENGTH _pkgconfig_combined_list _pkgconfig_combined_len)
+        if(_pkgconfig_combined_len GREATER 0)
+          list(GET _pkgconfig_combined_list 0 _pkgconfig_module_version)
+        endif()
+        unset(_pkgconfig_${_pkg_check_modules_pkg_name}_PREFIX)
+        if(_pkgconfig_combined_len GREATER 1)
+          list(GET _pkgconfig_combined_list 1 _pkgconfig_module_prefix)
+          _pkgconfig_unquote(_pkgconfig_module_prefix)
+          separate_arguments(_pkgconfig_module_prefix UNIX_COMMAND "${_pkgconfig_module_prefix}")
+          # Keep a literal semicolon from becoming a backslash escape in the cache value
+          string(REPLACE "\\;" ";" _pkgconfig_module_prefix "${_pkgconfig_module_prefix}")
+          set(_pkgconfig_${_pkg_check_modules_pkg_name}_PREFIX "${_pkgconfig_module_prefix}")
+        endif()
         list(APPEND _pkg_check_modules_packages "${_pkg_check_modules_pkg_name}")
         set(_pkgconfig_${_pkg_check_modules_pkg_name}_VERSION "${_pkgconfig_module_version}")
       endif()
@@ -1259,7 +1271,11 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         endif()
 
         _pkgconfig_set(${_pkg_check_prefix}_VERSION "${_pkgconfig_${_pkg_check_modules_pkg}_VERSION}")
-        pkg_get_variable("${_pkg_check_prefix}_PREFIX" ${_pkg_check_modules_pkg} "prefix")
+        if(DEFINED _pkgconfig_${_pkg_check_modules_pkg}_PREFIX)
+          set("${_pkg_check_prefix}_PREFIX" "${_pkgconfig_${_pkg_check_modules_pkg}_PREFIX}")
+        else()
+          pkg_get_variable("${_pkg_check_prefix}_PREFIX" ${_pkg_check_modules_pkg} "prefix")
+        endif()
         pkg_get_variable("${_pkg_check_prefix}_INCLUDEDIR" ${_pkg_check_modules_pkg} "includedir")
         pkg_get_variable("${_pkg_check_prefix}_LIBDIR" ${_pkg_check_modules_pkg} "libdir")
         foreach (variable IN ITEMS PREFIX INCLUDEDIR LIBDIR)
