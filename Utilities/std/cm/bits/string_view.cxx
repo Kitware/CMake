@@ -13,14 +13,6 @@
 
 namespace cm {
 
-string_view::const_reference string_view::at(size_type pos) const
-{
-  if (pos >= size_) {
-    throw std::out_of_range("Index out of range in string_view::at");
-  }
-  return data_[pos];
-}
-
 string_view::size_type string_view::copy(char* dest, size_type count,
                                          size_type pos) const
 {
@@ -30,15 +22,6 @@ string_view::size_type string_view::copy(char* dest, size_type count,
   size_type const rcount = std::min(count, size_ - pos);
   traits_type::copy(dest, data_ + pos, rcount);
   return rcount;
-}
-
-string_view string_view::substr(size_type pos, size_type count) const
-{
-  if (pos > size_) {
-    throw std::out_of_range("Index out of range in string_view::substr");
-  }
-  size_type const rcount = std::min(count, size_ - pos);
-  return string_view(data_ + pos, rcount);
 }
 
 int string_view::compare(string_view v) const noexcept
