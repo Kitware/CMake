@@ -389,7 +389,7 @@ function(_GNUInstallDirs_special_absolute out_var original_path install_prefix)
   if(install_prefix MATCHES "^/usr/?$")
     set(${out_var} "/${original_path}")
   elseif(install_prefix MATCHES "^/opt/" AND NOT install_prefix MATCHES "^/opt/homebrew/")
-    set(${out_var} "/${original_path}/${install_prefix}")
+    set(${out_var} "/${original_path}${install_prefix}")
   endif()
 
   return(PROPAGATE ${out_var})
