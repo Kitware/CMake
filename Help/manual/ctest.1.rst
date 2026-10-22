@@ -869,6 +869,11 @@ a `CDash`_ server. The command-line signature used to submit to `CDash`_ is::
 
 .. _`CDash`: https://www.cdash.org
 
+The :ctest-option:`-D` option has two meanings.  If its value names a
+dashboard, such as ``Experimental`` or ``NightlyTest``, CTest runs that
+dashboard.  Otherwise, the value is treated as a variable definition;
+see :option:`-D \<var\>=\<value\> <ctest-dashboard -D>`.
+
 Options for Dashboard Client include:
 
 .. option:: -D <dashboard>, --dashboard <dashboard>
@@ -876,12 +881,27 @@ Options for Dashboard Client include:
  Execute dashboard test.
 
  This option tells CTest to act as a CDash client and perform a
- dashboard test.  All tests are ``<Mode><Test>``, where ``<Mode>`` can be
- ``Experimental``, ``Nightly``, and ``Continuous``, and ``<Test>`` can be
- ``Start``, ``Update``, ``Configure``, ``Build``, ``Test``,
- ``Coverage``, and ``Submit``.
+ dashboard test.  The ``<dashboard>`` value may be one of:
 
- If ``<dashboard>`` is not one of the recognized ``<Mode><Test>`` values,
+ ``<Mode>``
+   Run the steps enabled by default for the given mode, where ``<Mode>``
+   is one of the `Dashboard Client Modes`_: ``Experimental``, ``Nightly``,
+   or ``Continuous``.
+
+ ``<Mode><Test>``
+   Run a single step in the given mode, where ``<Test>`` is one of the
+   `Dashboard Client Steps`_: ``Start``, ``Update``, ``Configure``,
+   ``Build``, ``Test``, ``Coverage``, ``MemCheck``, or ``Submit``.
+
+ ``NightlyMemoryCheck``
+   Run the ``Start``, ``Update``, ``Configure``, ``Build``, ``MemCheck``,
+   ``Coverage``, and ``Submit`` steps in ``Nightly`` mode.
+
+ For compatibility, ``MemoryCheck`` is also accepted.  It runs the same
+ steps as ``NightlyMemoryCheck``, except ``Update``, in ``Experimental``
+ mode.  ``<Mode>Purify`` is accepted as an alias for ``<Mode>MemCheck``.
+
+ If ``<dashboard>`` is not one of the above values,
  this will be treated as a variable definition instead (see the
  :ref:`dashboard-options <Dashboard Options>` further below).
 
@@ -906,11 +926,11 @@ Options for Dashboard Client include:
 
  Execute a dashboard for a configuration.
 
- This option tells CTest to load in a configuration script which sets
- a number of parameters such as the binary and source directories.
- Then CTest will do what is required to create and run a dashboard.
- This option basically sets up a dashboard and then runs :option:`ctest -D`
- with the appropriate options.
+ This option tells CTest to run a :manual:`cmake-language(7)` script
+ in which the :ref:`CTest Commands` are available.  The script sets
+ the dashboard configuration, such as the source and binary directories,
+ and calls the commands to run each dashboard step explicitly.
+ See `Dashboard Client via CTest Script`_.
 
 .. option:: -SP <script>, --script-new-process <script>
 
@@ -1433,8 +1453,9 @@ Configuration settings include:
   ``BuildDirectory`` setting.
 
   * `CTest Script`_ variable: :variable:`CTEST_CONFIGURE_COMMAND`
-  * :module:`CTest` module variable: :variable:`CMAKE_COMMAND`
-    followed by :variable:`PROJECT_SOURCE_DIR`
+  * :module:`CTest` module variable: none, the module runs
+    :variable:`CMAKE_COMMAND` with :variable:`PROJECT_SOURCE_DIR`
+    as its only argument
 
 ``LabelsForSubprojects``
   Specify a semicolon-separated list of labels that will be treated as
