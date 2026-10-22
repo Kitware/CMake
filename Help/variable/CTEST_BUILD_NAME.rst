@@ -6,3 +6,6 @@ CTEST_BUILD_NAME
 Specify the CTest ``BuildName`` setting
 in a :manual:`ctest(1)` :ref:`Dashboard Client` script,
 or on the :program:`ctest` command line via the :ctest-dashboard-option:`-D` option.
+
+In a dashboard script, set this variable before calling :command:`ctest_start`,
+which initializes the ``BuildName`` setting from it.

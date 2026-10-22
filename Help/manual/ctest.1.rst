@@ -1180,6 +1180,25 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_SOURCE_DIRECTORY`
   * :module:`CTest` module variable: :variable:`PROJECT_SOURCE_DIR`
 
+``BuildName``
+  Describe the dashboard client platform with a short string.
+  (Operating system, compiler, etc.)
+  In a `CTest Script`_, :command:`ctest_start` initializes this setting
+  from :variable:`CTEST_BUILD_NAME`.
+
+  * `CTest Script`_ variable: :variable:`CTEST_BUILD_NAME`
+  * :module:`CTest` module variable: ``BUILDNAME``
+
+``Site``
+  Describe the dashboard client host site with a short string.
+  (Hostname, domain, etc.)
+  In a `CTest Script`_, :command:`ctest_start` initializes this setting
+  from :variable:`CTEST_SITE`.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SITE`
+  * :module:`CTest` module variable: ``SITE``,
+    initialized by the :command:`site_name` command
+
 ``CheckoutCommand``
   Command-line to run before the start step to initialize the source
   directory, e.g. to perform an initial checkout from version control.
@@ -1723,13 +1742,6 @@ Arguments to the command may specify some of the step settings.
 
 Configuration settings include:
 
-``BuildName``
-  Describe the dashboard client platform with a short string.
-  (Operating system, compiler, etc.)
-
-  * `CTest Script`_ variable: :variable:`CTEST_BUILD_NAME`
-  * :module:`CTest` module variable: ``BUILDNAME``
-
 ``CDashVersion``
   Legacy option.  Not used.
 
@@ -1826,14 +1838,6 @@ Configuration settings include:
 
   * `CTest Script`_ variable: :variable:`CTEST_SCP_COMMAND`
   * :module:`CTest` module variable: ``SCPCOMMAND``
-
-``Site``
-  Describe the dashboard client host site with a short string.
-  (Hostname, domain, etc.)
-
-  * `CTest Script`_ variable: :variable:`CTEST_SITE`
-  * :module:`CTest` module variable: ``SITE``,
-    initialized by the :command:`site_name` command
 
 ``SubmitURL``
   The ``http`` or ``https`` URL of the dashboard server to send the submission
