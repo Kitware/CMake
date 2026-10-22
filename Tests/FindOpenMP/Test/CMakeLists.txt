@@ -44,6 +44,16 @@ if(test_msvc_runtime)
   endif()
 endif()
 
+# Clang should use the OpenMP runtime next to it, not MSVC's from LIB.
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
+  get_filename_component(clang_lib_dir "${CMAKE_C_COMPILER}" DIRECTORY)
+  get_filename_component(clang_lib_dir "${clang_lib_dir}/../lib" ABSOLUTE)
+  get_filename_component(omp_lib_dir "${OpenMP_libomp_LIBRARY}" DIRECTORY)
+  if(EXISTS "${clang_lib_dir}/libomp.lib" AND NOT omp_lib_dir STREQUAL clang_lib_dir)
+    message(FATAL_ERROR "OpenMP_libomp_LIBRARY not from '${clang_lib_dir}': '${OpenMP_libomp_LIBRARY}'")
+  endif()
+endif()
+
 # FIXME(#26701) Needed to check target offload conditions
 foreach(c C CXX Fortran)
   if(NOT "${OpenMP_TEST_${c}}")
