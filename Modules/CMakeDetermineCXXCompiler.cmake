@@ -57,7 +57,7 @@ else()
 
     # finally list compilers to try
     if(NOT CMAKE_CXX_COMPILER_INIT)
-      set(CMAKE_CXX_COMPILER_LIST CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC)
+      set(CMAKE_CXX_COMPILER_LIST CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc64x bcc xlC)
       if(NOT CMAKE_HOST_WIN32)
         # FIXME(#24314): Add support for the GNU-like icpx compiler driver
         # on Windows, first introduced by Intel oneAPI 2023.0.

@@ -22,6 +22,7 @@ Value                           Name
 ``CrayClang``                   Cray Clang-based Compiler
 ``Diab``                        `Wind River Systems Diab Compiler`_
 ``DPClang``                     `Open-source DPC++ Compiler`_
+``EMBTClang``                   `Embarcadero`_ Clang-based Compiler
 ``Embarcadero``, ``Borland``    `Embarcadero`_
 ``Flang``                       `Classic Flang Fortran Compiler`_
 ``LLVMFlang``                   `LLVM Flang Fortran Compiler`_

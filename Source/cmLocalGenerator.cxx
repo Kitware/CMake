@@ -2318,6 +2318,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     (compilerId == "MSVC" || compilerSimulateId == "MSVC");
   bool const compilerTargetsWatcomABI =
     (compilerId == "OpenWatcom" || compilerSimulateId == "OpenWatcom");
+  bool const compilerTargetsEmbtABI = (compilerId == "EMBTClang");
 
   if (lang == "Swift") {
     target->AddSwiftTargetFlags(flags);
@@ -2415,6 +2416,62 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
           MessageType::FATAL_ERROR,
           cmStrCat("WATCOM_RUNTIME_LIBRARY value '", watcomRuntimeLibrary,
                    "' not known for this ", lang, " compiler."));
+      }
+    }
+  }
+
+  // Add Embarcadero (bcc64x) runtime library flags.  This is activated by the
+  // presence of a default selection whether or not it is overridden by a
+  // property, the same way as MSVC and Watcom above.
+  cmValue embtRuntimeLibraryDefault =
+    this->Makefile->GetDefinition("CMAKE_EMBT_RUNTIME_LIBRARY_DEFAULT");
+  if (cmNonempty(embtRuntimeLibraryDefault)) {
+    cmValue embtRuntimeLibraryValue =
+      target->GetProperty("EMBT_RUNTIME_LIBRARY");
+    if (!embtRuntimeLibraryValue) {
+      embtRuntimeLibraryValue = embtRuntimeLibraryDefault;
+    }
+    std::string const embtRuntimeLibrary = cmGeneratorExpression::Evaluate(
+      *embtRuntimeLibraryValue, this, config, target);
+    if (!embtRuntimeLibrary.empty()) {
+      if (cmValue embtRuntimeLibraryOptions = this->Makefile->GetDefinition(
+            cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_EMBT_RUNTIME_LIBRARY_",
+                     embtRuntimeLibrary))) {
+        this->AppendCompileOptions(flags, *embtRuntimeLibraryOptions);
+      } else if (compilerTargetsEmbtABI &&
+                 !cmSystemTools::GetErrorOccurredFlag()) {
+        // The compiler is EMBTClang so it needs a known runtime library.
+        this->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("EMBT_RUNTIME_LIBRARY value '", embtRuntimeLibrary,
+                   "' not known for this ", lang, " compiler."));
+      }
+    }
+  }
+
+  // Add Embarcadero (bcc64x) target-kind flags for shared and module libraries
+  // and the console/GUI subsystem, active only for the EMBTClang toolchain.
+  if (compilerId == "EMBTClang") {
+    // A shared or module library is a plain DLL: it is compiled with __DLL__
+    // for the RAD Studio headers (the platform module links it with -tD).
+    if (target->GetType() == cm::TargetType::SHARED_LIBRARY ||
+        target->GetType() == cm::TargetType::MODULE_LIBRARY) {
+      if (cmValue embtOptions = this->Makefile->GetDefinition(
+            cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_EMBT_DLL"))) {
+        this->AppendCompileOptions(flags, *embtOptions);
+      }
+    }
+    // -tC/-tW set the subsystem at link, and a console executable is also
+    // compiled with __CONSOLE__, which the RAD Studio headers branch on.
+    // WIN32_EXECUTABLE drives the switch only at link, so apply the matching
+    // compile options to an executable too, via dedicated compile-option
+    // variables (not the CREATE_{WIN32,CONSOLE}_EXE link rules, which may
+    // carry link-only syntax).
+    if (target->GetType() == cm::TargetType::EXECUTABLE) {
+      if (cmValue subsystem = this->Makefile->GetDefinition(
+            cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_EMBT_",
+                     target->IsWin32Executable(config) ? "GUI" : "CONSOLE"))) {
+        this->AppendCompileOptions(flags, *subsystem);
       }
     }
   }

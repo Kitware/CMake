@@ -113,6 +113,17 @@ foreach(lang IN ITEMS C CXX)
   endif()
 endforeach()
 
+# CMake's own sources are UTF-8.  The Embarcadero (EMBTClang) bcc64x compiler
+# defaults the narrow execution code page to the host ANSI code page, unlike
+# Clang and MSVC which preserve UTF-8, so non-ASCII narrow string literals such
+# as the localized regexes in Source/CTest/cmCTestBuildHandler.cxx are corrupted.
+# Select UTF-8 (code page 65001) when building CMake itself with EMBTClang.
+foreach(lang IN ITEMS C CXX)
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "EMBTClang")
+    string(APPEND CMAKE_${lang}_FLAGS " -fborland-exec-code-page=65001")
+  endif()
+endforeach()
+
 # use the ansi CXX compile flag for building cmake
 if (CMAKE_ANSI_CXXFLAGS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")

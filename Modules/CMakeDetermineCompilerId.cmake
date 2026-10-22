@@ -361,6 +361,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   elseif("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xGNU"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xAdaptiveCpp"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xAppleClang"
+    OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xEMBTClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xFujitsuClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xIBMClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xTIClang")
@@ -375,7 +376,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # for C++ and the GNU-frontend variant.
   set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "")
   if ("x${lang}" STREQUAL "xCXX" AND
-      CMAKE_${lang}_COMPILER_ID MATCHES "^(Clang|DPClang)$" AND
+      CMAKE_${lang}_COMPILER_ID MATCHES "^(Clang|DPClang|EMBTClang)$" AND
       "x${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}"
