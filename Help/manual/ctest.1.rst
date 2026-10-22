@@ -1536,21 +1536,21 @@ Configuration settings include:
   The CMake generator to use for the configure step when
   ``ConfigureCommand`` is not set.
 
-  * `CTest Script`_ variable: ``CTEST_CMAKE_GENERATOR``
+  * `CTest Script`_ variable: :variable:`CTEST_CMAKE_GENERATOR`
   * :module:`CTest` module variable: none
 
 ``CMakeGeneratorPlatform``
   The CMake generator platform to use for the configure step when
   ``ConfigureCommand`` is not set.
 
-  * `CTest Script`_ variable: ``CTEST_CMAKE_GENERATOR_PLATFORM``
+  * `CTest Script`_ variable: :variable:`CTEST_CMAKE_GENERATOR_PLATFORM`
   * :module:`CTest` module variable: none
 
 ``CMakeGeneratorToolset``
   The CMake generator toolset to use for the configure step when
   ``ConfigureCommand`` is not set.
 
-  * `CTest Script`_ variable: ``CTEST_CMAKE_GENERATOR_TOOLSET``
+  * `CTest Script`_ variable: :variable:`CTEST_CMAKE_GENERATOR_TOOLSET`
   * :module:`CTest` module variable: none
 
 .. _`CTest Build Step`:
@@ -1614,14 +1614,14 @@ Configuration settings include:
   Additional flags to pass to the build tool when building the project.
   Only used when ``MakeCommand`` is not set explicitly.
 
-  * `CTest Script`_ variable: ``CTEST_BUILD_FLAGS``
+  * `CTest Script`_ variable: :variable:`CTEST_BUILD_FLAGS`
   * :module:`CTest` module variable: none
 
 ``BuildTarget``
   Specify a specific target to build instead of the default target.
   Only used when ``MakeCommand`` is not set explicitly.
 
-  * `CTest Script`_ variable: ``CTEST_BUILD_TARGET``
+  * `CTest Script`_ variable: :variable:`CTEST_BUILD_TARGET`
   * :module:`CTest` module variable: none
 
 .. _`CTest Test Step`:
@@ -1987,7 +1987,7 @@ Configuration settings include:
   CTest will not start additional steps once the remaining time drops
   below two minutes.
 
-  * `CTest Script`_ variable: ``CTEST_TIME_LIMIT``
+  * `CTest Script`_ variable: :variable:`CTEST_TIME_LIMIT`
   * :module:`CTest` module variable: none
 
 ``TLSVersion``

@@ -54,7 +54,7 @@ The options are:
 
 ``FLAGS <flags>``
   Pass additional arguments to the underlying build command.
-  If not specified the ``CTEST_BUILD_FLAGS`` variable will be checked.
+  If not specified the :variable:`CTEST_BUILD_FLAGS` variable will be checked.
   This can, e.g., be used to trigger a parallel build using the
   ``-j`` option of ``make``. See the :module:`ProcessorCount` module
   for an example.
@@ -67,7 +67,7 @@ The options are:
 
 ``TARGET <target-name>``
   Specify the name of a target to build.  If not specified the
-  ``CTEST_BUILD_TARGET`` variable will be checked.  Otherwise the
+  :variable:`CTEST_BUILD_TARGET` variable will be checked.  Otherwise the
   default target will be built.  This is the "all" target
   (called ``ALL_BUILD`` in :ref:`Visual Studio Generators`).
 

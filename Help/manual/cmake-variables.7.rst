@@ -747,12 +747,17 @@ Variables for CTest
 
    /variable/CTEST_BINARY_DIRECTORY
    /variable/CTEST_BUILD_COMMAND
+   /variable/CTEST_BUILD_FLAGS
    /variable/CTEST_BUILD_NAME
    /variable/CTEST_BUILD_PRESET
+   /variable/CTEST_BUILD_TARGET
    /variable/CTEST_BZR_COMMAND
    /variable/CTEST_BZR_UPDATE_OPTIONS
    /variable/CTEST_CHANGE_ID
    /variable/CTEST_CHECKOUT_COMMAND
+   /variable/CTEST_CMAKE_GENERATOR
+   /variable/CTEST_CMAKE_GENERATOR_PLATFORM
+   /variable/CTEST_CMAKE_GENERATOR_TOOLSET
    /variable/CTEST_CONFIGURATION_TYPE
    /variable/CTEST_CONFIGURE_COMMAND
    /variable/CTEST_CONFIGURE_PRESET
@@ -823,6 +828,7 @@ Variables for CTest
    /variable/CTEST_TEST_PRESET
    /variable/CTEST_TEST_TIMEOUT
    /variable/CTEST_TEST_COVERAGE_TOOL
+   /variable/CTEST_TIME_LIMIT
    /variable/CTEST_TLS_VERIFY
    /variable/CTEST_TLS_VERSION
    /variable/CTEST_UPDATE_COMMAND
