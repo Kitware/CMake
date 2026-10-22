@@ -63,6 +63,9 @@ project-wide convenience targets.
   ``ZERO_CHECK`` are always reserved.
 * Some modules reserve additional names: e.g., ``test`` when :module:`CTest`
   is enabled, and ``package`` when :module:`CPack` is enabled.
+  The :module:`CTest` module also reserves the names of its
+  :ref:`dashboard targets <CTest Dashboard Targets>`, such as
+  ``Experimental`` and ``NightlyTest``.
 * Generators may also create their own convenience targets, such as
   ``install/parallel`` with the :ref:`Ninja Generators`.  See the
   :manual:`cmake-generators(7)` manual for the target names documented by
