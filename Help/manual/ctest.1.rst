@@ -892,7 +892,8 @@ CTest supports two workflows as a dashboard client:
 
 The `Dashboard Client Steps`_ and `Dashboard Client Modes`_ are common to
 both workflows.  The `Dashboard Client Configuration`_ section documents
-the settings for each step.
+the settings for each step.  See the :guide:`CTest Dashboard Client Guide`
+for an introduction with examples.
 
 Options for Dashboard Client include:
 
@@ -1251,6 +1252,8 @@ project and submits an ``Experimental`` dashboard is:
 The :command:`ctest_start` command reads the ``CTestConfig.cmake`` file
 from the source or binary directory, if one exists, to obtain settings
 such as :variable:`CTEST_SUBMIT_URL`.
+
+.. _`Dashboard Client Configuration`:
 
 Dashboard Client Configuration
 ==============================
