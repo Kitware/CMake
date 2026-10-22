@@ -630,8 +630,15 @@ The options for running tests are:
 View Help
 =========
 
-To print version details or selected pages from the CMake documentation,
-use one of the following options:
+.. program:: ctest
+
+To print selected pages from the CMake documentation, use
+
+.. code-block:: shell
+
+  ctest --help[-<topic>]
+
+with one of the following options:
 
 .. include:: include/OPTIONS_HELP.rst
 
