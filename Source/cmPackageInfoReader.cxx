@@ -790,6 +790,15 @@ void cmPackageInfoReader::SetTargetProperties(
     AddLinkFeature(makefile, target, configuration, def);
   }
 
+  // Add compile and link flags.
+  AppendLanguageProperties(
+    makefile, target, "COMPILE_OPTIONS"_s, configuration, data,
+    "compile_flags", [](std::string flag) -> std::string { return flag; });
+
+  for (std::string const& flag : ReadList(data, "link_flags")) {
+    AppendProperty(makefile, target, "LINK_OPTIONS"_s, configuration, flag);
+  }
+
   // Add compile definitions.
   Json::Value const& defs = data["definitions"];
   DefinitionsMap definitionsMap;
