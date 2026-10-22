@@ -1,5 +1,5 @@
 
-set(_compiler_id_pp_test "defined(__BORLANDC__)")
+set(_compiler_id_pp_test "defined(__BORLANDC__) && !defined(__clang__)")
 
 set(_compiler_id_version_compute "
   /* __BORLANDC__ = 0xVRR */
