@@ -155,6 +155,9 @@ protected:
   std::string GetDyndepFilePath(std::string const& lang,
                                 std::string const& config) const;
 
+  /// Whether a C++ module collation rule is generated for this configuration.
+  bool HasCxxModuleDyndep(std::string const& config) const;
+
   /// @return the target dependency scanner info file path
   std::string GetTargetDependInfoPath(std::string const& lang,
                                       std::string const& config) const;
