@@ -5619,13 +5619,32 @@ bool cmGeneratorTarget::ApplyCXXStdTarget()
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   bool needsStd = false;
+  std::vector<cm::string_view> stdConfigs;
   if (this->Target->IsImported()) {
     needsStd = this->HaveInterfaceCxx20ModuleSources();
   } else {
-    for (auto const& config : configs) {
-      if (this->NeedCxxDyndep(config) == CxxModuleSupport::Enabled) {
+    // Only configurations compiling sources that need C++ module scanning
+    // need the implicit standard library module dependency.
+    for (std::string const& config : configs) {
+      if (this->NeedCxxDyndep(config) != CxxModuleSupport::Enabled) {
+        continue;
+      }
+      std::vector<SourceAndKind> const& sources =
+        this->GetKindedSources(config).Sources;
+      bool const needsStdForConfig = std::any_of(
+        sources.begin(), sources.end(),
+        [this, &config](SourceAndKind const& s) {
+          if (s.Kind != SourceKindObjectSource &&
+              s.Kind != SourceKindCxxModuleSource) {
+            return false;
+          }
+          cmSourceFile const* sf = s.Source.Value;
+          std::string const lang = this->GetSourceFileLanguage(sf, config);
+          return lang == "CXX" && this->NeedDyndepForSource(lang, config, sf);
+        });
+      if (needsStdForConfig) {
         needsStd = true;
-        break;
+        stdConfigs.push_back(config);
       }
     }
   }
@@ -5645,8 +5664,13 @@ bool cmGeneratorTarget::ApplyCXXStdTarget()
     this->Target->AppendProperty("IMPORTED_CXX_MODULES_LINK_LIBRARIES",
                                  "@cmake_cxx_std");
   } else {
-    this->Target->AppendProperty("LINK_LIBRARIES",
-                                 "$<BUILD_LOCAL_INTERFACE:@cmake_cxx_std>");
+    std::string stdTarget = "@cmake_cxx_std";
+    if (stdConfigs.size() != configs.size()) {
+      stdTarget = cmStrCat("$<$<CONFIG:", cmJoin(stdConfigs, ","),
+                           ">:", std::move(stdTarget), '>');
+    }
+    this->Target->AppendProperty(
+      "LINK_LIBRARIES", cmStrCat("$<BUILD_LOCAL_INTERFACE:", stdTarget, '>'));
   }
 
   return true;
