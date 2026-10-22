@@ -1544,6 +1544,8 @@ void cmGlobalGenerator::Configure()
 
   this->ReserveGlobalTargetCodegen();
 
+  this->ConfigureRules();
+
   // update the cache entry for the number of local generators, this is used
   // for progress
   this->GetCMakeInstance()->AddCacheEntry(
@@ -1554,8 +1556,6 @@ void cmGlobalGenerator::Configure()
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
   this->CreateLocalGenerators();
-
-  this->CreateCustomCommandsFromRules();
 
   // Commit side effects only if we are actually generating
   if (targetTypes == TargetTypes::AllTargets) {
@@ -2333,58 +2333,6 @@ cmGlobalGenerator::CreateMSVC60LinkLineComputer(
 {
   return std::unique_ptr<cmLinkLineComputer>(
     cm::make_unique<cmMSVC60LinkLineComputer>(outputConverter, stateDir));
-}
-
-void cmGlobalGenerator::CreateCustomCommandsFromRules()
-{
-  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-    cmMakefile* mf = this->Makefiles[i].get();
-    cmLocalGenerator* lg = this->LocalGenerators[i].get();
-    for (auto& item : mf->GetTargets()) {
-      cmTarget& target = item.second;
-      for (auto const& fsName : target.GetAllFileSetNames(
-             cm::FileSetMetadata::FileSetDomain::RULE)) {
-        cmFileSet const* fileSet = target.GetFileSet(fsName);
-        cmRule const* rule =
-          fileSet->GetMakefile()->FindRuleToUse(fileSet->GetType());
-        if (!rule) {
-          continue;
-        }
-
-        // generated files by the custom command are stored in a file set
-        cmFileSet* outFileSet = rule->GetOutputFileSet(&target, fileSet);
-        if (!outFileSet) {
-          continue;
-        }
-
-        cmRule::PatternSet fileSetPatterns;
-        if (!rule->Instantiate(&target, fileSet, outFileSet,
-                               fileSetPatterns)) {
-          continue;
-        }
-
-        for (auto const& files : fileSet->GetFileEntries()) {
-          for (auto const& file :
-               cmList{ cm::remove_BT(files), cmList::EmptyElements::No }) {
-            cmSourceFile* source = mf->GetOrCreateSource(file);
-            source->ResolveFullPath();
-
-            cmRule::PatternSet sourcePatterns{ fileSetPatterns };
-            if (!rule->Instantiate(&target, fileSet, outFileSet, source,
-                                   sourcePatterns)) {
-              continue;
-            }
-
-            auto genRule = cm::make_unique<cmGeneratorRule>(
-              rule, &target, fileSet, outFileSet, source, sourcePatterns);
-            auto cc = genRule->Generate(outFileSet);
-            lg->AddGeneratorRule(std::move(genRule));
-            mf->AddCustomCommandToOutput(std::move(cc));
-          }
-        }
-      }
-    }
-  }
 }
 
 void cmGlobalGenerator::FinalizeTargetConfiguration()
@@ -3902,6 +3850,61 @@ void cmGlobalGenerator::ReserveGlobalTargetCodegen()
         tgt->GetBacktrace());
       cmSystemTools::SetFatalErrorOccurred();
       break;
+  }
+}
+
+void cmGlobalGenerator::ConfigureRules()
+{
+  for (auto const& mf : this->Makefiles) {
+    for (auto& item : mf->GetTargets()) {
+      cmTarget& target = item.second;
+      for (auto const& fsName : target.GetAllFileSetNames(
+             cm::FileSetMetadata::FileSetDomain::RULE)) {
+        cmFileSet const* fileSet = target.GetFileSet(fsName);
+        cmRule const* rule =
+          fileSet->GetMakefile()->FindRuleToUse(fileSet->GetType());
+        if (!rule) {
+          continue;
+        }
+
+        // generated files by the custom command are stored in a file set
+        cmFileSet* outFileSet = rule->GetOutputFileSet(&target, fileSet);
+        if (!outFileSet) {
+          continue;
+        }
+
+        cmRule::PatternSet fileSetPatterns;
+        if (!rule->Instantiate(&target, fileSet, outFileSet,
+                               fileSetPatterns)) {
+          continue;
+        }
+
+        for (auto const& files : fileSet->GetFileEntries()) {
+          for (auto const& file :
+               cmList{ cm::remove_BT(files), cmList::EmptyElements::No }) {
+            cmSourceFile* source = mf->GetOrCreateSource(file);
+            source->ResolveFullPath();
+
+            cmRule::PatternSet sourcePatterns{ fileSetPatterns };
+            if (!rule->Instantiate(&target, fileSet, outFileSet, source,
+                                   sourcePatterns)) {
+              continue;
+            }
+
+            mf->AddGeneratorAction(
+              [rule, &target, fileSet, outFileSet, source, sourcePatterns](
+                cmLocalGenerator& lg, cmListFileBacktrace const&) {
+                auto genRule = cm::make_unique<cmGeneratorRule>(
+                  rule, &target, fileSet, outFileSet, source, sourcePatterns);
+                auto cc = genRule->Generate(outFileSet);
+                lg.AddGeneratorRule(std::move(genRule));
+                detail::AddCustomCommandToOutput(
+                  lg, cmCommandOrigin::Generator, std::move(cc), false);
+              });
+          }
+        }
+      }
+    }
   }
 }
 

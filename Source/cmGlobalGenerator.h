@@ -227,9 +227,6 @@ public:
 
   virtual bool InspectConfigTypeVariables() { return true; }
 
-  // Produce custom commands for file sets attached to a custom rule
-  void CreateCustomCommandsFromRules();
-
   enum class CxxModuleSupportQuery
   {
     // Support is expected at the call site.
@@ -939,6 +936,10 @@ protected:
   void CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
 
   void ReserveGlobalTargetCodegen();
+
+  // Execute user's callbacks and produce custom commands for file sets
+  // attached to a custom rule
+  void ConfigureRules();
 
   std::string FindMakeProgramFile;
   std::string ConfiguredFilesPath;
