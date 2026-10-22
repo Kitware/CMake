@@ -17,6 +17,7 @@
 #  endif
 #  include <memory>
 
+#  include <cm/bits/constexpr.hxx>
 #  include <cm/utility>
 #endif
 
@@ -50,8 +51,8 @@ class optional
 public:
   using value_type = T;
 
-  optional() noexcept = default;
-  optional(nullopt_t) noexcept;
+  constexpr optional() noexcept = default;
+  constexpr optional(nullopt_t) noexcept;
   optional(optional const& other);
   optional(optional&& other) noexcept;
 
@@ -88,18 +89,18 @@ public:
     optional&>::type
   operator=(U&& v);
 
-  T const* operator->() const;
-  T* operator->();
-  T const& operator*() const&;
-  T& operator*() &;
+  constexpr T const* operator->() const;
+  CONSTEXPR_CXX14 T* operator->();
+  constexpr T const& operator*() const&;
+  CONSTEXPR_CXX14 T& operator*() &;
   T const&& operator*() const&&;
   T&& operator*() &&;
 
-  explicit operator bool() const noexcept;
-  bool has_value() const noexcept;
+  constexpr explicit operator bool() const noexcept;
+  constexpr bool has_value() const noexcept;
 
-  T& value() &;
-  T const& value() const&;
+  CONSTEXPR_CXX14 T& value() &;
+  constexpr T const& value() const&;
 
   T&& value() &&;
   T const&& value() const&&;
@@ -148,7 +149,7 @@ optional<T> make_optional(Args&&... args)
 }
 
 template <typename T>
-optional<T>::optional(nullopt_t) noexcept
+constexpr optional<T>::optional(nullopt_t) noexcept
   : optional()
 {
 }
@@ -454,25 +455,25 @@ bool operator>=(T const& value, optional<U> const& opt)
 }
 
 template <typename T>
-T const* optional<T>::operator->() const
+constexpr T const* optional<T>::operator->() const
 {
   return &**this;
 }
 
 template <typename T>
-T* optional<T>::operator->()
+CONSTEXPR_CXX14 T* optional<T>::operator->()
 {
   return &**this;
 }
 
 template <typename T>
-T const& optional<T>::operator*() const&
+constexpr T const& optional<T>::operator*() const&
 {
   return this->_mem.value;
 }
 
 template <typename T>
-T& optional<T>::operator*() &
+CONSTEXPR_CXX14 T& optional<T>::operator*() &
 {
   return this->_mem.value;
 }
@@ -490,19 +491,19 @@ T&& optional<T>::operator*() &&
 }
 
 template <typename T>
-bool optional<T>::has_value() const noexcept
+constexpr bool optional<T>::has_value() const noexcept
 {
   return this->_has_value;
 }
 
 template <typename T>
-optional<T>::operator bool() const noexcept
+constexpr optional<T>::operator bool() const noexcept
 {
   return this->has_value();
 }
 
 template <typename T>
-T& optional<T>::value() &
+CONSTEXPR_CXX14 T& optional<T>::value() &
 {
   if (!this->has_value()) {
     throw cm::bad_optional_access{};
@@ -511,12 +512,9 @@ T& optional<T>::value() &
 }
 
 template <typename T>
-T const& optional<T>::value() const&
+constexpr T const& optional<T>::value() const&
 {
-  if (!this->has_value()) {
-    throw cm::bad_optional_access{};
-  }
-  return **this;
+  return **(this->has_value() ? this : throw cm::bad_optional_access{});
 }
 
 template <typename T>
