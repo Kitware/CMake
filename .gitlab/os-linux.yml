@@ -11,7 +11,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
 .linux_release_x86_64:
-    image: "kitware/cmake:build-linux-x86_64-deps-2026-01-13@sha256:eae18d032e8d7be3caa97d2e5754ae2b7196d7a3d375b7b4d1ba9034f1229317"
+    image: "kitware/cmake:build-linux-x86_64-deps-2026-10-22@sha256:650889862a59c5a4053b01a54afce5006c7cbb2f64e9f1c34975477bee50cd52"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -19,7 +19,7 @@
         CMAKE_ARCH: x86_64
 
 .linux_release_aarch64:
-    image: "kitware/cmake:build-linux-aarch64-deps-2026-01-13@sha256:7373fe775ea571a3113251b3e8b5857ef321f6e9b5dfa5963f6e44d062349244"
+    image: "kitware/cmake:build-linux-aarch64-deps-2026-10-22@sha256:89b7eec9fc7272d5b54a588d24400c87e61d9414b544c63b20a95dfba8dd322c"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"

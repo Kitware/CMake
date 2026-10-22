@@ -101,15 +101,16 @@ RUN : \
 RUN : \
  && mkdir -p /opt/ncurses/src/ncurses-build \
  && cd /opt/ncurses/src \
- && curl -O https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.1.tar.gz \
- && sha512sum ncurses-6.1.tar.gz | grep -q e308af43f8b7e01e98a55f4f6c4ee4d1c39ce09d95399fa555b3f0cdf5fd0db0f4c4d820b4af78a63f6cf6d8627587114a40af48cfc066134b600520808a77ee \
- && tar xzf ncurses-6.1.tar.gz \
+ && curl -O https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz \
+ && sha512sum ncurses-6.6.tar.gz | grep -q 02647baae53abc844fbadee5b0a2187ad073125c4e8950df6d1c4feb781cb74ba64fb838cedfee2c246c39932187f6775b1df124f18b99a4233f0d98c72191de \
+ && tar xzf ncurses-6.6.tar.gz \
  && cd ncurses-build \
- && ../ncurses-6.1/configure \
+ && ../ncurses-6.6/configure \
       --prefix=/opt/ncurses \
       --with-terminfo-dirs=/etc/terminfo:/lib/terminfo:/usr/share/terminfo \
       --with-default-terminfo-dir=/usr/share/terminfo \
       --without-shared \
+      --enable-overwrite \
  && make -j $(nproc) \
  && make install.libs install.includes \
  && cd /opt \
