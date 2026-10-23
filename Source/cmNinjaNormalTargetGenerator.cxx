@@ -1389,8 +1389,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   vars["LINK_PATH"] = frameworkPath + linkPath;
   vars["CONFIG"] = config;
 
-  // Add interface objects response file to link flags if configured.
-  {
+  // Only add the interface objects response file when C++ collation generates
+  // it. Linking a module provider does not imply that this target scans C++.
+  if (this->HasCxxModuleDyndep(config)) {
     bool multiConfig = this->GetGlobalGenerator()->IsMultiConfig();
     std::string configDir = multiConfig ? cmStrCat('/', config) : "";
     bool hasInterfaceObjects = false;

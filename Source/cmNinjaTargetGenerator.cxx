@@ -533,6 +533,14 @@ std::string cmNinjaTargetGenerator::GetDyndepFilePath(
   return cmStrCat(this->GetObjectFileDir(config), '/', lang, ".dd");
 }
 
+bool cmNinjaTargetGenerator::HasCxxModuleDyndep(
+  std::string const& config) const
+{
+  auto const it = this->Configs.find(config);
+  return it != this->Configs.end() &&
+    it->second.ScanningInfo.count("CXX") != 0;
+}
+
 std::string cmNinjaTargetGenerator::GetTargetDependInfoPath(
   std::string const& lang, std::string const& config) const
 {
@@ -1316,8 +1324,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     build.Outputs.push_back(this->GetDyndepFilePath(language, config));
     build.ImplicitOuts.emplace_back(
       cmStrCat(this->GetObjectFileDir(config), '/', language, "Modules.json"));
-    // Add interface objects response file as implicit output if needed.
-    {
+    // Only C++ collation produces the interface objects response file.
+    if (language == "CXX") {
       bool multiConfig = this->GetGlobalGenerator()->IsMultiConfig();
       std::string configDir = multiConfig ? cmStrCat('/', config) : "";
       std::string rspPath =
@@ -2458,8 +2466,8 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
                                              config, cb);
 #endif
 
-  // Collect interface objects from tagged synthetics for the response file.
-  {
+  // Collect interface objects only for C++ collation.
+  if (lang == "CXX") {
     auto const& synthDeps = this->GeneratorTarget->GetSyntheticDeps(config);
     if (!synthDeps.empty()) {
       bool multiConfig = this->GetGlobalGenerator()->IsMultiConfig();
