@@ -20,9 +20,3 @@ Call Stack \(most recent call first\):
 CMake Error in CMakeLists\.txt:
   Erroneous execution of the CONFIGURATOR "configurator2", from the RULE
   "foo2", for the FILE_SET "fs2" of TARGET "foo"\.
-
-
-CMake Error at RuleProperties2\.cmake:[0-9]+ \(add_library\):
-  No SOURCES given to target: foo
-Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)
