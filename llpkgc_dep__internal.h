@@ -22,8 +22,12 @@ struct llpkgc_dep__internal_s {
   const char* error_pos;
   void* data;
   void* _current;
-  void* llpkgc_dep__settings;
-  uint8_t llpkgc_dep__state;
+  void* settings;
+  void* end;
+  void* callback_reason;
+  uint32_t finish;
+  uint8_t done;
+  uint8_t comparator;
 };
 
 int llpkgc_dep__internal_init(llpkgc_dep__internal_t* s);

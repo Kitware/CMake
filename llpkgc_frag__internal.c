@@ -39,77 +39,74 @@ typedef int (*llpkgc_frag__internal__span_cb)(
 
 enum llparse_state_e {
   s_error,
-  s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__frag_complete,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_consume_dq,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_sq,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_sq,
-  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_1,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_consume_sq,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_escaped_char,
-  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_3,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_skip_backslash,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted,
-  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_2,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_after_quote,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_dq,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special_skip,
-  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_4,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_dq_keep_backslash,
-  s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__lookahead_dq_backslash,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_dq,
-  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text,
-  s_n_llpkgc_frag__internal__n_pkgc_frag_start,
+  s_n_llpkgc_frag__internal__n_double_quote_end,
+  s_n_llpkgc_frag__internal__n_double_escaped_character,
+  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1,
+  s_n_llpkgc_frag__internal__n_double_escape,
+  s_n_llpkgc_frag__internal__n_double_escape_start,
+  s_n_llpkgc_frag__internal__n_double_quote,
+  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text,
+  s_n_llpkgc_frag__internal__n_single_quote_end,
+  s_n_llpkgc_frag__internal__n_single_quote,
+  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_2,
+  s_n_llpkgc_frag__internal__n_text,
+  s_n_llpkgc_frag__internal__n_escaped_character,
+  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_3,
+  s_n_llpkgc_frag__internal__n_escape_start,
+  s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_4,
+  s_n_llpkgc_frag__internal__n_token,
+  s_n_llpkgc_frag__internal__n_invoke_update_finish,
+  s_n_llpkgc_frag__internal__n_start,
 };
 typedef enum llparse_state_e llparse_state_t;
 
-int llpkgc_frag__fragment_text(
+int llpkgc_frag__on_fragment_text(
     llpkgc_frag__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_frag__internal__c_update_llpkgc_frag__state(
+int llpkgc_frag__internal__c_update_finish(
     llpkgc_frag__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_frag__state = 2;
+  state->finish = 1;
   return 0;
 }
 
-int llpkgc_frag__internal__c_update_llpkgc_frag__state_1(
-    llpkgc_frag__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_frag__state = 1;
-  return 0;
-}
-
-int llpkgc_frag__frag_complete(
+int llpkgc_frag__on_frag_complete(
     llpkgc_frag__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_frag__internal__c_update_llpkgc_frag__state_2(
+int llpkgc_frag__internal__c_update_finish_1(
     llpkgc_frag__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_frag__state = 0;
+  state->finish = 0;
   return 0;
 }
 
-int llpkgc_frag__internal__c_update_llpkgc_frag__state_3(
+int llpkgc_frag__internal__c_update_finish_2(
     llpkgc_frag__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_frag__state = 3;
+  state->finish = 2;
   return 0;
 }
 
-int llpkgc_frag__lookahead_dq_backslash(
+int llpkgc_frag__emit_mark(
     llpkgc_frag__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
+
+int llpkgc_frag__internal__c_update_finish_5(
+    llpkgc_frag__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->finish = 3;
+  return 0;
+}
 
 int llpkgc_frag__internal_init(llpkgc_frag__internal_t* state) {
   memset(state, 0, sizeof(*state));
-  state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_pkgc_frag_start;
+  state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_start;
   return 0;
 }
 
@@ -119,338 +116,292 @@ static llparse_state_t llpkgc_frag__internal__run(
     const unsigned char* endp) {
   int match;
   switch ((llparse_state_t) (intptr_t) state->_current) {
-    case s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__frag_complete:
-    s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__frag_complete: {
-      switch (llpkgc_frag__frag_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_2;
-        default:
-          goto s_n_llpkgc_frag__internal__n_error;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_consume_dq:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_consume_dq: {
+    case s_n_llpkgc_frag__internal__n_double_quote_end:
+    s_n_llpkgc_frag__internal__n_double_quote_end: {
       if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_consume_dq;
-      }
-      switch (*p) {
-        case '"': {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state;
-        }
-        default: {
-          goto s_n_llpkgc_frag__internal__n_error_1;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_sq:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_sq: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_sq;
-      }
-      switch (*p) {
-        case 39: {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_1;
-        }
-        default: {
-          goto s_n_llpkgc_frag__internal__n_error_1;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_sq:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_sq: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_sq;
-      }
-      switch (*p) {
-        case 39: {
-          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_1;
-        }
-        default: {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_sq;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_1:
-    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_1: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_1;
-      }
-      state->_span_pos0 = (void*) p;
-      goto s_n_llpkgc_frag__internal__n_pkgc_frag_sq;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_consume_sq:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_consume_sq: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_consume_sq;
-      }
-      switch (*p) {
-        case 39: {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_3;
-        }
-        default: {
-          goto s_n_llpkgc_frag__internal__n_error_1;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_escaped_char:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_escaped_char: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_escaped_char;
+        return s_n_llpkgc_frag__internal__n_double_quote_end;
       }
       p++;
-      goto s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted;
+      goto s_n_llpkgc_frag__internal__n_invoke_update_finish;
       UNREACHABLE;
     }
-    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_3:
-    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_3: {
+    case s_n_llpkgc_frag__internal__n_double_escaped_character:
+    s_n_llpkgc_frag__internal__n_double_escaped_character: {
       if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_3;
+        return s_n_llpkgc_frag__internal__n_double_escaped_character;
+      }
+      p++;
+      goto s_n_llpkgc_frag__internal__n_invoke_update_finish_3;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1:
+    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1;
       }
       state->_span_pos0 = (void*) p;
-      goto s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_escaped_char;
+      goto s_n_llpkgc_frag__internal__n_double_escaped_character;
       UNREACHABLE;
     }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_skip_backslash:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_skip_backslash: {
+    case s_n_llpkgc_frag__internal__n_double_escape:
+    s_n_llpkgc_frag__internal__n_double_escape: {
       if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_skip_backslash;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_3;
-        }
-        default: {
-          goto s_n_llpkgc_frag__internal__n_error_2;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted;
-      }
-      switch (*p) {
-        case 9: {
-          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_2;
-        }
-        case ' ': {
-          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_2;
-        }
-        case '"': {
-          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_3;
-        }
-        case 39: {
-          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_4;
-        }
-        case 92: {
-          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_5;
-        }
-        default: {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_2:
-    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_2: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_2;
-      }
-      state->_span_pos0 = (void*) p;
-      goto s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_after_quote:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_after_quote: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_after_quote;
-      }
-      switch (*p) {
-        case 9: {
-          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__frag_complete;
-        }
-        case ' ': {
-          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__frag_complete;
-        }
-        case '"': {
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_consume_dq;
-        }
-        case 39: {
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_consume_sq;
-        }
-        case 92: {
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_4;
-        }
-        default: {
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_4;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_dq:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_dq: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_dq;
+        return s_n_llpkgc_frag__internal__n_double_escape;
       }
       switch (*p) {
         case '"': {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_1;
-        }
-        default: {
-          goto s_n_llpkgc_frag__internal__n_error_1;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special_skip:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special_skip: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special_skip;
-      }
-      switch (*p) {
-        case '"': {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq;
+          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1;
         }
         case '$': {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq;
+          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1;
         }
         case 92: {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq;
+          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1;
         }
         case '`': {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq;
+          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1;
         }
         default: {
-          goto s_n_llpkgc_frag__internal__n_error_2;
+          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__emit_mark;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_4:
-    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_4: {
+    case s_n_llpkgc_frag__internal__n_double_escape_start:
+    s_n_llpkgc_frag__internal__n_double_escape_start: {
       if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_4;
+        return s_n_llpkgc_frag__internal__n_double_escape_start;
       }
-      state->_span_pos0 = (void*) p;
-      goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special_skip;
+      p++;
+      goto s_n_llpkgc_frag__internal__n_double_escape;
       UNREACHABLE;
     }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special: {
+    case s_n_llpkgc_frag__internal__n_double_quote:
+    s_n_llpkgc_frag__internal__n_double_quote: {
       if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_4;
-        }
-        default: {
-          goto s_n_llpkgc_frag__internal__n_error_2;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_dq_keep_backslash:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_dq_keep_backslash: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_dq_keep_backslash;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq;
-        }
-        default: {
-          goto s_n_llpkgc_frag__internal__n_error_2;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__lookahead_dq_backslash:
-    s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__lookahead_dq_backslash: {
-      switch (llpkgc_frag__lookahead_dq_backslash(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_6;
-        case 1:
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq_keep_backslash;
-        case 4:
-          goto s_n_llpkgc_frag__internal__n_pause;
-        default:
-          goto s_n_llpkgc_frag__internal__n_error_2;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_dq:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_dq: {
-      if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_dq;
+        return s_n_llpkgc_frag__internal__n_double_quote;
       }
       switch (*p) {
         case '"': {
-          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text;
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text;
         }
         case 92: {
-          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__lookahead_dq_backslash;
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_1;
         }
         default: {
           p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq;
+          goto s_n_llpkgc_frag__internal__n_double_quote;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text:
-    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text: {
+    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text:
+    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text: {
       if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text;
+        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text;
       }
       state->_span_pos0 = (void*) p;
-      goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq;
+      goto s_n_llpkgc_frag__internal__n_invoke_update_finish_2;
       UNREACHABLE;
     }
-    case s_n_llpkgc_frag__internal__n_pkgc_frag_start:
-    s_n_llpkgc_frag__internal__n_pkgc_frag_start: {
+    case s_n_llpkgc_frag__internal__n_single_quote_end:
+    s_n_llpkgc_frag__internal__n_single_quote_end: {
       if (p == endp) {
-        return s_n_llpkgc_frag__internal__n_pkgc_frag_start;
+        return s_n_llpkgc_frag__internal__n_single_quote_end;
+      }
+      p++;
+      goto s_n_llpkgc_frag__internal__n_invoke_update_finish;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_single_quote:
+    s_n_llpkgc_frag__internal__n_single_quote: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_single_quote;
+      }
+      switch (*p) {
+        case 39: {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_2;
+        }
+        default: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_single_quote;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_2:
+    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_2: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_2;
+      }
+      state->_span_pos0 = (void*) p;
+      goto s_n_llpkgc_frag__internal__n_invoke_update_finish_4;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_text:
+    s_n_llpkgc_frag__internal__n_text: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_text;
+      }
+      switch (*p) {
+        case 9: {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        case 10: {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        case 11: {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        case 12: {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        case 13: {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        case ' ': {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        case '"': {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        case 39: {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        case 92: {
+          goto s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3;
+        }
+        default: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_text;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_escaped_character:
+    s_n_llpkgc_frag__internal__n_escaped_character: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_escaped_character;
+      }
+      p++;
+      goto s_n_llpkgc_frag__internal__n_invoke_update_finish_6;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_3:
+    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_3: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_3;
+      }
+      state->_span_pos0 = (void*) p;
+      goto s_n_llpkgc_frag__internal__n_escaped_character;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_escape_start:
+    s_n_llpkgc_frag__internal__n_escape_start: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_escape_start;
+      }
+      p++;
+      goto s_n_llpkgc_frag__internal__n_invoke_update_finish_5;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_4:
+    s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_4: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_4;
+      }
+      state->_span_pos0 = (void*) p;
+      p++;
+      goto s_n_llpkgc_frag__internal__n_text;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_token:
+    s_n_llpkgc_frag__internal__n_token: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_token;
       }
       switch (*p) {
         case 9: {
           p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_start;
+          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__on_frag_complete;
+        }
+        case 10: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__on_frag_complete;
+        }
+        case 11: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__on_frag_complete;
+        }
+        case 12: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__on_frag_complete;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__on_frag_complete;
         }
         case ' ': {
           p++;
-          goto s_n_llpkgc_frag__internal__n_pkgc_frag_start;
+          goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__on_frag_complete;
         }
         case '"': {
           p++;
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state;
+          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text;
         }
         case 39: {
           p++;
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_3;
+          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_2;
+        }
+        case 92: {
+          goto s_n_llpkgc_frag__internal__n_escape_start;
         }
         default: {
-          goto s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_4;
+          goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_4;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_invoke_update_finish:
+    s_n_llpkgc_frag__internal__n_invoke_update_finish: {
+      switch (llpkgc_frag__internal__c_update_finish(state, p, endp)) {
+        default:
+          goto s_n_llpkgc_frag__internal__n_token;
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_frag__internal__n_start:
+    s_n_llpkgc_frag__internal__n_start: {
+      if (p == endp) {
+        return s_n_llpkgc_frag__internal__n_start;
+      }
+      switch (*p) {
+        case 9: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_start;
+        }
+        case 10: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_start;
+        }
+        case 11: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_start;
+        }
+        case 12: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_start;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_start;
+        }
+        case ' ': {
+          p++;
+          goto s_n_llpkgc_frag__internal__n_start;
+        }
+        default: {
+          goto s_n_llpkgc_frag__internal__n_invoke_update_finish;
         }
       }
       UNREACHABLE;
@@ -458,182 +409,163 @@ static llparse_state_t llpkgc_frag__internal__run(
     default:
       UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_2: {
-    switch (llpkgc_frag__internal__c_update_llpkgc_frag__state_2(state, p, endp)) {
+  s_n_llpkgc_frag__internal__n_invoke_update_finish_1: {
+    switch (llpkgc_frag__internal__c_update_finish_1(state, p, endp)) {
       default:
-        goto s_n_llpkgc_frag__internal__n_pkgc_frag_start;
+        goto s_n_llpkgc_frag__internal__n_start;
     }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_frag__internal__n_error: {
-    state->error = 0x1;
-    state->reason = "Fragment complete error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
     UNREACHABLE;
   }
   s_n_llpkgc_frag__internal__n_error_1: {
-    state->error = 0x1;
-    state->reason = "Fragment parse error";
+    state->error = 0x5;
+    state->reason = "Internal parser error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_1: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_frag__fragment_text(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_sq;
-      return s_error;
-    }
-    goto s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_sq;
+  s_n_llpkgc_frag__internal__n_error: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_3: {
-    switch (llpkgc_frag__internal__c_update_llpkgc_frag__state_3(state, p, endp)) {
+  s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__on_frag_complete: {
+    switch (llpkgc_frag__on_frag_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_frag__internal__n_invoke_update_finish_1;
+      case 5:
+        goto s_n_llpkgc_frag__internal__n_error_1;
       default:
-        goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_1;
+        goto s_n_llpkgc_frag__internal__n_error;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_2: {
+  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text: {
     const unsigned char* start;
     int err;
 
     start = state->_span_pos0;
     state->_span_pos0 = NULL;
-    err = llpkgc_frag__fragment_text(state, start, p);
+    err = llpkgc_frag__on_fragment_text(state, start, p);
     if (err != 0) {
       state->error = err;
       state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__frag_complete;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_double_quote_end;
       return s_error;
     }
-    goto s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__frag_complete;
+    goto s_n_llpkgc_frag__internal__n_double_quote_end;
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_3: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_frag__fragment_text(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_pkgc_frag_consume_dq;
-      return s_error;
+  s_n_llpkgc_frag__internal__n_invoke_update_finish_3: {
+    switch (llpkgc_frag__internal__c_update_finish_2(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_frag__internal__n_double_quote;
     }
-    goto s_n_llpkgc_frag__internal__n_pkgc_frag_consume_dq;
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_4: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_frag__fragment_text(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_pkgc_frag_consume_sq;
-      return s_error;
-    }
-    goto s_n_llpkgc_frag__internal__n_pkgc_frag_consume_sq;
+  s_n_llpkgc_frag__internal__n_error_3: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
     UNREACHABLE;
   }
   s_n_llpkgc_frag__internal__n_error_2: {
-    state->error = 0x3;
-    state->reason = "Lookahead error";
+    state->error = 0x2;
+    state->reason = "Callback error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_5: {
+  s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__emit_mark: {
+    switch (llpkgc_frag__emit_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_1;
+      case 5:
+        goto s_n_llpkgc_frag__internal__n_error_3;
+      default:
+        goto s_n_llpkgc_frag__internal__n_error_2;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_1: {
     const unsigned char* start;
     int err;
 
     start = state->_span_pos0;
     state->_span_pos0 = NULL;
-    err = llpkgc_frag__fragment_text(state, start, p);
+    err = llpkgc_frag__on_fragment_text(state, start, p);
     if (err != 0) {
       state->error = err;
       state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_skip_backslash;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_double_escape_start;
       return s_error;
     }
-    goto s_n_llpkgc_frag__internal__n_pkgc_frag_unquoted_skip_backslash;
+    goto s_n_llpkgc_frag__internal__n_double_escape_start;
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_4: {
-    switch (llpkgc_frag__internal__c_update_llpkgc_frag__state_1(state, p, endp)) {
+  s_n_llpkgc_frag__internal__n_invoke_update_finish_2: {
+    switch (llpkgc_frag__internal__c_update_finish_2(state, p, endp)) {
       default:
-        goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text_2;
+        goto s_n_llpkgc_frag__internal__n_double_quote;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state_1: {
-    switch (llpkgc_frag__internal__c_update_llpkgc_frag__state_1(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_frag__internal__n_pkgc_frag_after_quote;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text: {
+  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_2: {
     const unsigned char* start;
     int err;
 
     start = state->_span_pos0;
     state->_span_pos0 = NULL;
-    err = llpkgc_frag__fragment_text(state, start, p);
+    err = llpkgc_frag__on_fragment_text(state, start, p);
     if (err != 0) {
       state->error = err;
       state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_dq;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_single_quote_end;
       return s_error;
     }
-    goto s_n_llpkgc_frag__internal__n_pkgc_frag_consume_closing_dq;
+    goto s_n_llpkgc_frag__internal__n_single_quote_end;
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__fragment_text_6: {
+  s_n_llpkgc_frag__internal__n_invoke_update_finish_4: {
+    switch (llpkgc_frag__internal__c_update_finish_2(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_frag__internal__n_single_quote;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_frag__internal__n_span_end_llpkgc_frag__on_fragment_text_3: {
     const unsigned char* start;
     int err;
 
     start = state->_span_pos0;
     state->_span_pos0 = NULL;
-    err = llpkgc_frag__fragment_text(state, start, p);
+    err = llpkgc_frag__on_fragment_text(state, start, p);
     if (err != 0) {
       state->error = err;
       state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_invoke_update_finish;
       return s_error;
     }
-    goto s_n_llpkgc_frag__internal__n_pkgc_frag_dq_special;
+    goto s_n_llpkgc_frag__internal__n_invoke_update_finish;
     UNREACHABLE;
   }
-  s_n_llpkgc_frag__internal__n_pause: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_frag__internal__n_invoke_llpkgc_frag__lookahead_dq_backslash;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_frag__internal__n_invoke_update_llpkgc_frag__state: {
-    switch (llpkgc_frag__internal__c_update_llpkgc_frag__state(state, p, endp)) {
+  s_n_llpkgc_frag__internal__n_invoke_update_finish_6: {
+    switch (llpkgc_frag__internal__c_update_finish(state, p, endp)) {
       default:
-        goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__fragment_text;
+        goto s_n_llpkgc_frag__internal__n_text;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_frag__internal__n_invoke_update_finish_5: {
+    switch (llpkgc_frag__internal__c_update_finish_5(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_frag__internal__n_span_start_llpkgc_frag__on_fragment_text_3;
     }
     UNREACHABLE;
   }
@@ -662,7 +594,7 @@ int llpkgc_frag__internal_execute(llpkgc_frag__internal_t* state, const char* p,
   if (state->_span_pos0 != NULL) {
     int error;
 
-    error = llpkgc_frag__fragment_text(state, state->_span_pos0, (const char*) endp);
+    error = llpkgc_frag__on_fragment_text(state, state->_span_pos0, (const char*) endp);
     if (error != 0) {
       state->error = error;
       state->error_pos = endp;
@@ -672,3 +604,129 @@ int llpkgc_frag__internal_execute(llpkgc_frag__internal_t* state, const char* p,
 
   return 0;
 }
+#include <string.h>
+#include "llpkgc_frag.h"
+int llpkgc_frag__on_frag_complete(llpkgc_frag_t*, const unsigned char*, const unsigned char*);
+
+int llpkgc_frag__on_fraglist_complete(llpkgc_frag_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_frag_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_fraglist_complete == NULL) return 0;
+  err = settings->on_fraglist_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_fraglist_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFFE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_frag__on_fragment_text(llpkgc_frag_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_frag_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_fragment_text == NULL) return 0;
+  err = settings->on_fragment_text(s, (const char*) p, (size_t) (endp - p));
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_fragment_text";
+    s->callback_reason = (void*) s->reason;
+    return PFFE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_frag__on_frag_complete(llpkgc_frag_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_frag_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_frag_complete == NULL) return 0;
+  err = settings->on_frag_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_frag_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFFE_USER;
+  }
+  return 0;
+}
+
+void llpkgc_frag_init(llpkgc_frag_t* s, const llpkgc_frag_settings_t* settings) {
+  llpkgc_frag__internal_init(s);
+  s->settings = (void*) settings;
+}
+void llpkgc_frag_reset(llpkgc_frag_t* s) {
+  const llpkgc_frag_settings_t* settings = s->settings;
+  void* data = s->data;
+  llpkgc_frag_init(s, settings);
+  s->data = data;
+}
+void llpkgc_frag_settings_init(llpkgc_frag_settings_t* settings) {
+  memset(settings, 0, sizeof(*settings));
+}
+llpkgc_frag_errno_t llpkgc_frag_execute(llpkgc_frag_t* s, const char* data, size_t len) {
+  if (s->error != 0) return s->error;
+  if (s->done) {
+    s->reason = "Input after finish";
+    s->error_pos = data;
+    return s->error = PFFE_INVALID;
+  }
+
+  if (len == 0) return PFFE_OK;
+  s->end = (void*) (data + len);
+  {
+    int err = llpkgc_frag__internal_execute(s, data, data + len);
+    if (err == PFFE_USER && s->callback_reason != NULL)
+      s->reason = s->callback_reason;
+
+    return err;
+  }
+}
+llpkgc_frag_errno_t llpkgc_frag_finish(llpkgc_frag_t* s) {
+  int err;
+  if (s->error != 0) return s->error;
+  if (s->done) return PFFE_OK;
+  switch (s->finish) {
+    case 0:
+        err = llpkgc_frag__on_fraglist_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 1:
+        err = llpkgc_frag__on_frag_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_frag__on_fraglist_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 2: s->reason = "Unterminated quote at end of input";
+          s->error = PFFE_UNFINISHED; s->error_pos = s->end; return s->error;
+case 3: s->reason = "Unfinished escape at end of input";
+          s->error = PFFE_UNFINISHED; s->error_pos = s->end; return s->error;
+    default: s->reason = "Invalid finish action"; return s->error = PFFE_INTERNAL;
+  }
+  s->done = 1;
+  return PFFE_OK;
+}
+llpkgc_frag_errno_t llpkgc_frag_get_errno(const llpkgc_frag_t* s) { return s->error; }
+const char* llpkgc_frag_get_error_reason(const llpkgc_frag_t* s) { return s->reason; }
+void llpkgc_frag_set_error_reason(llpkgc_frag_t* s, const char* reason) { s->reason = reason; }
+const char* llpkgc_frag_get_error_pos(const llpkgc_frag_t* s) { return s->error_pos; }
+const char* llpkgc_frag_errno_name(llpkgc_frag_errno_t err) {
+  switch (err) {
+    case PFFE_OK: return "PFFE_OK";
+    case PFFE_USER: return "PFFE_USER";
+    case PFFE_UNFINISHED: return "PFFE_UNFINISHED";
+    case PFFE_INVALID: return "PFFE_INVALID";
+
+    default: return "PFFE_INTERNAL";
+  }
+}
+

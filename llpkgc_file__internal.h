@@ -17,19 +17,19 @@ struct llpkgc_file__internal_s {
   int32_t _index;
   void* _span_pos0;
   void* _span_cb0;
-  void* _span_pos1;
   int32_t error;
   const char* reason;
   const char* error_pos;
   void* data;
   void* _current;
-  void* llpkgc_file__settings;
-  uint8_t llpkgc_file__unfinished;
-  uint8_t llpkgc_file__lookahead;
-  uint8_t llpkgc_file__eof;
-  uint8_t llpkgc_file__value_resume;
-  uint8_t llpkgc_file__line_resume;
-  uint8_t llpkgc_file__text_resume;
+  void* settings;
+  void* end;
+  void* callback_reason;
+  uint32_t finish;
+  uint8_t done;
+  uint8_t mark;
+  void* whitespace_start;
+  void* whitespace_end;
 };
 
 int llpkgc_file__internal_init(llpkgc_file__internal_t* s);
