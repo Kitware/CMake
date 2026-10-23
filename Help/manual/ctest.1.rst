@@ -2329,7 +2329,7 @@ when the test finishes.
 
 For example, consider the ``Makefile``:
 
-.. literalinclude:: CTEST_EXAMPLE_MAKEFILE_JOB_SERVER.make
+.. literalinclude:: include/CTEST_EXAMPLE_MAKEFILE_JOB_SERVER.make
   :language: make
 
 When invoked via ``make -j 2 test``, CTest connects to the job server, acquires
