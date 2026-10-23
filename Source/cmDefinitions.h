@@ -34,7 +34,14 @@ public:
 
   static bool HasKey(std::string const& key, StackIter begin, StackIter end);
 
-  static std::vector<std::string> ClosureKeys(StackIter begin, StackIter end);
+  enum class UnsetKeys
+  {
+    Exclude,
+    Include,
+  };
+
+  static std::vector<std::string> ClosureKeys(
+    StackIter begin, StackIter end, UnsetKeys unsetKeys = UnsetKeys::Exclude);
 
   static cmDefinitions MakeClosure(StackIter begin, StackIter end);
 

@@ -1159,7 +1159,6 @@ void cmGlobalGenerator::EnableLanguage(
     cmStateSnapshot snapshot = mf->GetStateSnapshot();
     bool warnCMP0220 = false;
     for (std::string const& key : snapshot.LocalKeys()) {
-      // Should never need to propagate unsets
       if (!key.empty()) {
         if (mf->RaiseToRoot(key, snapshot.GetDefinition(key).GetCStr()) ==
             cmStateSnapshot::WarnCMP0220::Yes) {
