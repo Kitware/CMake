@@ -5,7 +5,7 @@ if test "$CMAKE_CI_NIGHTLY" = "true"; then
 fi
 
 # This job builds CMake as C++11.  Prevent C++17 headers from being used.
-if test "$CMAKE_CONFIGURATION" = "fedora44_ninja" -a "$CI_JOB_STAGE" = "build"; then
+if test "$CMAKE_CONFIGURATION" = "fedora45_ninja" -a "$CI_JOB_STAGE" = "build"; then
   for i in filesystem optional string_view; do
     sed -i -e '$a#error "Use <cm/'"$i"'> instead"' "/usr/include/c++/16/$i"
   done
