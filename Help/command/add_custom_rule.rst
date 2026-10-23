@@ -178,9 +178,9 @@ Generating Files
     usually emitted by the custom command itself.
 
   ``CONFIGURATOR``
-    Specify one or two CMake functions which will be called at the generation
-    step, in the context of the file set directory, before the effective
-    instantiation and custom commands definition.
+    Specify one or two CMake functions which will be called at the
+    configuration step, in the context of the file set directory, before the
+    effective instantiation and custom commands definition.
 
     .. note::
 
@@ -314,8 +314,9 @@ Derived Rule
     Specify the rule from which this new rule will inherit.
 
   ``CONFIGURATOR``
-    Specify one or two CMake functions which will be called at the generation
-    step before the effective instantiation and custom commands definition.
+    Specify one or two CMake functions which will be called at the
+    configuration step, in the context of the file set directory, before the
+    effective instantiation and custom commands definition.
 
     .. note::
 
