@@ -28,7 +28,6 @@ struct llpkgc_file_settings_s {
   llpkgc_file_data_cb on_value_literal;
   llpkgc_file_data_cb on_value_substitution;
 
-  llpkgc_file_cb on_line_begin;
   llpkgc_file_cb on_property_complete;
   llpkgc_file_cb on_variable_complete;
   llpkgc_file_cb on_barewords_complete;
@@ -39,12 +38,12 @@ struct llpkgc_file_settings_s {
 };
 
 enum llpkgc_file_errno {
-  PFCE_INTERNAL = -1,
   PFCE_OK = 0,
-  PFCE_PAUSED = 1,
+  PFCE_NEED_MORE = 1,
   PFCE_USER = 2,
   PFCE_UNFINISHED = 3,
-  PFCE_LOOKAHEAD = 4,
+  PFCE_INVALID = 4,
+  PFCE_INTERNAL = 5,
 };
 typedef enum llpkgc_file_errno llpkgc_file_errno_t;
 
@@ -58,6 +57,9 @@ void llpkgc_file_reset(llpkgc_file_t* parser);
 LLPKGC_FILE_EXPORT
 void llpkgc_file_settings_init(llpkgc_file_settings_t* settings);
 
+/* OK consumes and releases the supplied input; the next chunk may have
+ * independent storage/lifetime. NEED_MORE consumes input but retains the
+ * explicit range below. Callback spans must be copied or retained by callers. */
 LLPKGC_FILE_EXPORT
 llpkgc_file_errno_t llpkgc_file_execute(llpkgc_file_t* parser, const char* data,
     size_t len);
@@ -65,11 +67,13 @@ llpkgc_file_errno_t llpkgc_file_execute(llpkgc_file_t* parser, const char* data,
 LLPKGC_FILE_EXPORT
 llpkgc_file_errno_t llpkgc_file_finish(llpkgc_file_t* parser);
 
+/* On NEED_MORE only: keep this range alive and extend input contiguously, or
+ * call finish(). Bytes before this range may be released. No input replay. */
 LLPKGC_FILE_EXPORT
-void llpkgc_file_pause(llpkgc_file_t* parser);
+const char* llpkgc_file_get_retained_start(const llpkgc_file_t* parser);
 
 LLPKGC_FILE_EXPORT
-void llpkgc_file_resume(llpkgc_file_t* parser);
+size_t llpkgc_file_get_retained_length(const llpkgc_file_t* parser);
 
 LLPKGC_FILE_EXPORT
 llpkgc_file_errno_t llpkgc_file_get_errno(const llpkgc_file_t* parser);

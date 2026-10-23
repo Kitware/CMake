@@ -30,12 +30,11 @@ struct llpkgc_frag_settings_s {
 };
 
 enum llpkgc_frag_errno {
-  PFFE_INTERNAL = -1,
   PFFE_OK = 0,
-  PFFE_PAUSED = 1,
   PFFE_USER = 2,
   PFFE_UNFINISHED = 3,
-  PFFE_LOOKAHEAD = 4,
+  PFFE_INVALID = 4,
+  PFFE_INTERNAL = 5,
 };
 typedef enum llpkgc_frag_errno llpkgc_frag_errno_t;
 
@@ -49,18 +48,14 @@ void llpkgc_frag_reset(llpkgc_frag_t* parser);
 LLPKGC_FRAG_EXPORT
 void llpkgc_frag_settings_init(llpkgc_frag_settings_t* settings);
 
+/* Successful chunks are fully consumed and may be released immediately.
+ * Subsequent chunks need not be contiguous. Callback spans are borrowed. */
 LLPKGC_FRAG_EXPORT
 llpkgc_frag_errno_t llpkgc_frag_execute(llpkgc_frag_t* parser, const char* data,
     size_t len);
 
 LLPKGC_FRAG_EXPORT
 llpkgc_frag_errno_t llpkgc_frag_finish(llpkgc_frag_t* parser);
-
-LLPKGC_FRAG_EXPORT
-void llpkgc_frag_pause(llpkgc_frag_t* parser);
-
-LLPKGC_FRAG_EXPORT
-void llpkgc_frag_resume(llpkgc_frag_t* parser);
 
 LLPKGC_FRAG_EXPORT
 llpkgc_frag_errno_t llpkgc_frag_get_errno(const llpkgc_frag_t* parser);

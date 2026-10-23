@@ -37,316 +37,194 @@
 typedef int (*llpkgc_file__internal__span_cb)(
              llpkgc_file__internal_t*, const char*, const char*);
 
-static const unsigned char llparse_blob0[] = {
-  '\\', '\\'
-};
-static const unsigned char llparse_blob1[] = {
-  '$', '{'
-};
-static const unsigned char llparse_blob2[] = {
-  '\\', '\\'
-};
-static const unsigned char llparse_blob3[] = {
-  '\\', '\\'
-};
-
-enum llparse_match_status_e {
-  kMatchComplete,
-  kMatchPause,
-  kMatchMismatch
-};
-typedef enum llparse_match_status_e llparse_match_status_t;
-
-struct llparse_match_s {
-  llparse_match_status_t status;
-  const unsigned char* current;
-};
-typedef struct llparse_match_s llparse_match_t;
-
-static llparse_match_t llparse__match_sequence_id(
-    llpkgc_file__internal_t* s, const unsigned char* p,
-    const unsigned char* endp,
-    const unsigned char* seq, uint32_t seq_len) {
-  uint32_t index;
-  llparse_match_t res;
-
-  index = s->_index;
-  for (; p != endp; p++) {
-    unsigned char current;
-
-    current = *p;
-    if (current == seq[index]) {
-      if (++index == seq_len) {
-        res.status = kMatchComplete;
-        goto reset;
-      }
-    } else {
-      res.status = kMatchMismatch;
-      goto reset;
-    }
-  }
-  s->_index = index;
-  res.status = kMatchPause;
-  res.current = p;
-  return res;
-reset:
-  s->_index = 0;
-  res.current = p;
-  return res;
-}
-
 enum llparse_state_e {
   s_error,
-  s_n_llpkgc_file__internal__n_pkgc_file_comment,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__barewords_decl_complete,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_literal,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_1,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_cr,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_lf,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords_line_end,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords_continue_line,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_2,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords_escaped_comment,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords_double_backslash,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_eof,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_1,
-  s_n_llpkgc_file__internal__n_pkgc_file_barewords,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span,
-  s_n_llpkgc_file__internal__n_pkgc_file_expect_ident_escaped_comment,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_3,
-  s_n_llpkgc_file__internal__n_pkgc_file_start_barewords_backslash_eof,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_4,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_literal,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled_literal,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_1,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_2,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_eof,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_2,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_2,
-  s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_cr,
-  s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_lf,
-  s_n_llpkgc_file__internal__n_pkgc_file_line_end,
-  s_n_llpkgc_file__internal__n_pkgc_file_continue_line,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_3,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_escaped_comment,
-  s_n_llpkgc_file__internal__n_pkgc_file_double_backslash,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_4,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_3,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_backslash_eof,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_5,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_2,
-  s_n_llpkgc_file__internal__n_pkgc_file_value,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__sub_complete,
-  s_n_llpkgc_file__internal__n_pkgc_file_substitution,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__sub_span,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_substitution,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_1,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_4,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_5,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_eof,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_1,
-  s_n_llpkgc_file__internal__n_pkgc_file_backslash_literal,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_6,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_7,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_8,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_literal_backslash_eof,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_3,
-  s_n_llpkgc_file__internal__n_pkgc_file_value_literal,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_6,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_7,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_8,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_4,
-  s_n_llpkgc_file__internal__n_pkgc_file_expect_value,
-  s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator_backslash_literal,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_6,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_7,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_5,
-  s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_literal,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_cr,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_lf,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident_line_end,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident_continue_line,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_8,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident_escaped_comment,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident_double_backslash,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_eof,
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_6,
-  s_n_llpkgc_file__internal__n_pkgc_file_ident,
-  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5,
-  s_n_llpkgc_file__internal__n_pkgc_file_expect_ident,
+  s_n_llpkgc_file__internal__n_comment,
+  s_n_llpkgc_file__internal__n_start_lf,
+  s_n_llpkgc_file__internal__n_start_cr,
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_barewords_complete,
+  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1,
+  s_n_llpkgc_file__internal__n_bareword_lf,
+  s_n_llpkgc_file__internal__n_bareword_cr,
+  s_n_llpkgc_file__internal__n_bareword_escape,
+  s_n_llpkgc_file__internal__n_bareword_backslash,
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_1,
+  s_n_llpkgc_file__internal__n_bareword,
+  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident,
+  s_n_llpkgc_file__internal__n_start_escape,
+  s_n_llpkgc_file__internal__n_start_backslash,
+  s_n_llpkgc_file__internal__n_leading_lf,
+  s_n_llpkgc_file__internal__n_leading_cr,
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__clear_whitespace,
+  s_n_llpkgc_file__internal__n_whitespace_lf,
+  s_n_llpkgc_file__internal__n_whitespace_cr,
+  s_n_llpkgc_file__internal__n_whitespace_escape,
+  s_n_llpkgc_file__internal__n_whitespace_backslash,
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_3,
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_3,
+  s_n_llpkgc_file__internal__n_whitespace,
+  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace,
+  s_n_llpkgc_file__internal__n_substitution_end,
+  s_n_llpkgc_file__internal__n_substitution,
+  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_substitution,
+  s_n_llpkgc_file__internal__n_dollar,
+  s_n_llpkgc_file__internal__n_dollar_start,
+  s_n_llpkgc_file__internal__n_value_lf,
+  s_n_llpkgc_file__internal__n_value_cr,
+  s_n_llpkgc_file__internal__n_value_escape,
+  s_n_llpkgc_file__internal__n_value_backslash,
+  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal_1,
+  s_n_llpkgc_file__internal__n_value,
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete,
+  s_n_llpkgc_file__internal__n_text,
+  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal,
+  s_n_llpkgc_file__internal__n_leading_escape,
+  s_n_llpkgc_file__internal__n_leading_backslash,
+  s_n_llpkgc_file__internal__n_leading_whitespace,
+  s_n_llpkgc_file__internal__n_separator_lf,
+  s_n_llpkgc_file__internal__n_separator_cr,
+  s_n_llpkgc_file__internal__n_separator_escape,
+  s_n_llpkgc_file__internal__n_separator_backslash,
+  s_n_llpkgc_file__internal__n_separator,
+  s_n_llpkgc_file__internal__n_invoke_update_finish_9,
+  s_n_llpkgc_file__internal__n_identifier_lf,
+  s_n_llpkgc_file__internal__n_identifier_cr,
+  s_n_llpkgc_file__internal__n_identifier_escape,
+  s_n_llpkgc_file__internal__n_identifier_backslash,
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_7,
+  s_n_llpkgc_file__internal__n_identifier,
+  s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2,
+  s_n_llpkgc_file__internal__n_start,
 };
 typedef enum llparse_state_e llparse_state_t;
 
-int llpkgc_file__ident_span(
+int llpkgc_file__on_ident(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__sub_span(
+int llpkgc_file__on_value_literal(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__lit_span(
+int llpkgc_file__on_value_substitution(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__lookahead_backslash(
+int llpkgc_file__whitespace(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__internal__c_update_llpkgc_file__unfinished(
+int llpkgc_file__internal__c_update_finish(
     llpkgc_file__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_file__unfinished = 2;
+  state->finish = 0;
   return 0;
 }
 
-int llpkgc_file__barewords_decl_complete(
+int llpkgc_file__mark(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__val_complete(
+int llpkgc_file__internal__c_update_finish_1(
+    llpkgc_file__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->finish = 2;
+  return 0;
+}
+
+int llpkgc_file__internal__c_update_finish_4(
+    llpkgc_file__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->finish = 1;
+  return 0;
+}
+
+int llpkgc_file__on_barewords_complete(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__internal__c_update_llpkgc_file__unfinished_1(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__unfinished = 0;
-  return 0;
-}
-
-int llpkgc_file__internal__c_update_llpkgc_file__unfinished_4(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__unfinished = 1;
-  return 0;
-}
-
-int llpkgc_file__prop_decl_complete(
+int llpkgc_file__on_value_complete(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__internal__c_update_llpkgc_file__unfinished_5(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__unfinished = 3;
-  return 0;
-}
-
-int llpkgc_file__lookahead(
+int llpkgc_file__emit_ident_mark(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__internal__c_update_llpkgc_file__unfinished_6(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__unfinished = 5;
-  return 0;
-}
-
-int llpkgc_file__lit_complete(
+int llpkgc_file__on_property_complete(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__internal__c_update_llpkgc_file__unfinished_7(
+int llpkgc_file__internal__c_update_finish_10(
     llpkgc_file__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_file__unfinished = 6;
+  state->finish = 3;
   return 0;
 }
 
-int llpkgc_file__sub_complete(
+int llpkgc_file__internal__c_update_finish_11(
+    llpkgc_file__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->finish = 5;
+  return 0;
+}
+
+int llpkgc_file__internal__c_update_finish_15(
+    llpkgc_file__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->finish = 4;
+  return 0;
+}
+
+int llpkgc_file__on_value_literal_complete(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__internal__c_update_llpkgc_file__unfinished_8(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__unfinished = 4;
-  return 0;
-}
-
-int llpkgc_file__internal__c_update_llpkgc_file__value_resume(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__value_resume = 1;
-  return 0;
-}
-
-int llpkgc_file__internal__c_update_llpkgc_file__line_resume(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__line_resume = 1;
-  return 0;
-}
-
-int llpkgc_file__internal__c_load_llpkgc_file__line_resume(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  return state->llpkgc_file__line_resume;
-}
-
-int llpkgc_file__internal__c_load_llpkgc_file__value_resume(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  return state->llpkgc_file__value_resume;
-}
-
-int llpkgc_file__internal__c_update_llpkgc_file__text_resume(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__text_resume = 0;
-  return 0;
-}
-
-int llpkgc_file__internal__c_load_llpkgc_file__text_resume(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  return state->llpkgc_file__text_resume;
-}
-
-int llpkgc_file__internal__c_update_llpkgc_file__value_resume_2(
-    llpkgc_file__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
-  state->llpkgc_file__value_resume = 0;
-  return 0;
-}
-
-int llpkgc_file__var_decl_complete(
+int llpkgc_file__clear_whitespace(
     llpkgc_file__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_file__internal__c_update_llpkgc_file__line_resume_3(
+int llpkgc_file__flush_whitespace_all(
+    llpkgc_file__internal_t* s, const unsigned char* p,
+    const unsigned char* endp);
+
+int llpkgc_file__emit_literal_mark(
+    llpkgc_file__internal_t* s, const unsigned char* p,
+    const unsigned char* endp);
+
+int llpkgc_file__internal__c_update_finish_22(
     llpkgc_file__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_file__line_resume = 0;
+  state->finish = 6;
   return 0;
 }
+
+int llpkgc_file__internal__c_update_finish_23(
+    llpkgc_file__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->finish = 7;
+  return 0;
+}
+
+int llpkgc_file__on_value_substitution_complete(
+    llpkgc_file__internal_t* s, const unsigned char* p,
+    const unsigned char* endp);
+
+int llpkgc_file__on_variable_complete(
+    llpkgc_file__internal_t* s, const unsigned char* p,
+    const unsigned char* endp);
 
 int llpkgc_file__internal_init(llpkgc_file__internal_t* state) {
   memset(state, 0, sizeof(*state));
-  state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+  state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_start;
   return 0;
 }
 
@@ -356,668 +234,427 @@ static llparse_state_t llpkgc_file__internal__run(
     const unsigned char* endp) {
   int match;
   switch ((llparse_state_t) (intptr_t) state->_current) {
-    case s_n_llpkgc_file__internal__n_pkgc_file_comment:
-    s_n_llpkgc_file__internal__n_pkgc_file_comment: {
+    case s_n_llpkgc_file__internal__n_comment:
+    s_n_llpkgc_file__internal__n_comment: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_comment;
+        return s_n_llpkgc_file__internal__n_comment;
       }
       switch (*p) {
         case 10: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish;
         }
         case 13: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish;
         }
         default: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_comment;
+          goto s_n_llpkgc_file__internal__n_comment;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__barewords_decl_complete:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__barewords_decl_complete: {
-      switch (llpkgc_file__barewords_decl_complete(state, p, endp)) {
+    case s_n_llpkgc_file__internal__n_start_lf:
+    s_n_llpkgc_file__internal__n_start_lf: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_start_lf;
+      }
+      switch (*p) {
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_start_cr:
+    s_n_llpkgc_file__internal__n_start_cr: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_start_cr;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_barewords_complete:
+    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_barewords_complete: {
+      switch (llpkgc_file__on_barewords_complete(state, p, endp)) {
         case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_complete;
+        case 5:
+          goto s_n_llpkgc_file__internal__n_error_4;
         default:
           goto s_n_llpkgc_file__internal__n_error_1;
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_literal:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_literal: {
+    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1:
+    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_literal;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_1:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_1: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_1;
+        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
       }
       state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
+      state->_span_cb0 = llpkgc_file__on_ident;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_4;
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_cr:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_cr: {
+    case s_n_llpkgc_file__internal__n_bareword_lf:
+    s_n_llpkgc_file__internal__n_bareword_lf: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_cr;
+        return s_n_llpkgc_file__internal__n_bareword_lf;
       }
       switch (*p) {
         case 13: {
           p++;
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_1;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_1;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_lf:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_lf: {
+    case s_n_llpkgc_file__internal__n_bareword_cr:
+    s_n_llpkgc_file__internal__n_bareword_cr: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_lf;
+        return s_n_llpkgc_file__internal__n_bareword_cr;
       }
       switch (*p) {
         case 10: {
           p++;
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_1;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_1;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords_line_end:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords_line_end: {
+    case s_n_llpkgc_file__internal__n_bareword_escape:
+    s_n_llpkgc_file__internal__n_bareword_escape: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords_line_end;
+        return s_n_llpkgc_file__internal__n_bareword_escape;
       }
       switch (*p) {
         case 10: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_cr;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_6;
         }
         case 13: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_maybe_lf;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords_continue_line:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords_continue_line: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords_continue_line;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_line_end;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_2:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_2: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_2;
-      }
-      state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords_escaped_comment:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords_escaped_comment: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords_escaped_comment;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_2;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords_double_backslash:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords_double_backslash: {
-      llparse_match_t match_seq;
-
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords_double_backslash;
-      }
-      match_seq = llparse__match_sequence_id(state, p, endp, llparse_blob0, 2);
-      p = match_seq.current;
-      switch (match_seq.status) {
-        case kMatchComplete: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
-        }
-        case kMatchPause: {
-          return s_n_llpkgc_file__internal__n_pkgc_file_barewords_double_backslash;
-        }
-        case kMatchMismatch: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_eof:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_eof: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_eof;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_1:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_1: {
-      switch (llpkgc_file__lookahead_backslash(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_literal;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_1;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_2;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_double_backslash;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_backslash_eof;
-        case 5:
-          goto s_n_llpkgc_file__internal__n_pause;
-        default:
-          goto s_n_llpkgc_file__internal__n_error;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_barewords:
-    s_n_llpkgc_file__internal__n_pkgc_file_barewords: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_barewords;
-      }
-      switch (*p) {
-        case 10: {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span;
-        }
-        case 13: {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_7;
         }
         case '#': {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
         }
         case 92: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_1;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark;
         }
         default: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_1;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span: {
+    case s_n_llpkgc_file__internal__n_bareword_backslash:
+    s_n_llpkgc_file__internal__n_bareword_backslash: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span;
+        return s_n_llpkgc_file__internal__n_bareword_backslash;
       }
-      state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
       p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_5;
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_expect_ident_escaped_comment:
-    s_n_llpkgc_file__internal__n_pkgc_file_expect_ident_escaped_comment: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_expect_ident_escaped_comment;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_3:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_3: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_3;
-      }
-      state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_double_backslash;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_start_barewords_backslash_eof:
-    s_n_llpkgc_file__internal__n_pkgc_file_start_barewords_backslash_eof: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_start_barewords_backslash_eof;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_4:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_4: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_4;
-      }
-      state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_start_barewords_backslash_eof;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash: {
-      switch (llpkgc_file__lookahead_backslash(state, p, endp)) {
+    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_1:
+    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_1: {
+      switch (llpkgc_file__mark(state, p, endp)) {
         case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident_escaped_comment;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_2;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_3;
+          goto s_n_llpkgc_file__internal__n_bareword_backslash;
         case 5:
-          goto s_n_llpkgc_file__internal__n_pause_1;
+          goto s_n_llpkgc_file__internal__n_error_10;
         default:
-          goto s_n_llpkgc_file__internal__n_error;
+          goto s_n_llpkgc_file__internal__n_error_5;
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_4;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_literal:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_literal: {
+    case s_n_llpkgc_file__internal__n_bareword:
+    s_n_llpkgc_file__internal__n_bareword: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_literal;
-      }
-      switch (*p) {
-        case '$': {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled_literal:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled_literal: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled_literal;
-      }
-      switch (*p) {
-        case '$': {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_1:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_1: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_1;
-      }
-      state->_span_pos1 = (void*) p;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled_literal;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled;
-      }
-      switch (*p) {
-        case '$': {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_1;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_2:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_2: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_7;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_eof:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_eof: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_eof;
-      }
-      switch (*p) {
-        case '$': {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_2;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_2:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_2: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_2;
-      }
-      state->_span_pos1 = (void*) p;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_eof;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_2:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_2: {
-      switch (llpkgc_file__lookahead(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_6;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_substitution;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_9;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_pause_2;
-        default:
-          goto s_n_llpkgc_file__internal__n_error;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_cr:
-    s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_cr: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_cr;
-      }
-      switch (*p) {
-        case 13: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__line_resume;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__line_resume;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_lf:
-    s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_lf: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_lf;
+        return s_n_llpkgc_file__internal__n_bareword;
       }
       switch (*p) {
         case 10: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__line_resume;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__line_resume;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_line_end:
-    s_n_llpkgc_file__internal__n_pkgc_file_line_end: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_line_end;
-      }
-      switch (*p) {
-        case 10: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_cr;
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident;
         }
         case 13: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_line_maybe_lf;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_continue_line:
-    s_n_llpkgc_file__internal__n_pkgc_file_continue_line: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_continue_line;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_line_end;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_3:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_3: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_3;
-      }
-      state->_span_pos1 = (void*) p;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_escaped_comment:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_escaped_comment: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_escaped_comment;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_10;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_double_backslash:
-    s_n_llpkgc_file__internal__n_pkgc_file_double_backslash: {
-      llparse_match_t match_seq;
-
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_double_backslash;
-      }
-      match_seq = llparse__match_sequence_id(state, p, endp, llparse_blob2, 2);
-      p = match_seq.current;
-      switch (match_seq.status) {
-        case kMatchComplete: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__text_resume;
-        }
-        case kMatchPause: {
-          return s_n_llpkgc_file__internal__n_pkgc_file_double_backslash;
-        }
-        case kMatchMismatch: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_4:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_4: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_4;
-      }
-      state->_span_pos1 = (void*) p;
-      goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__text_resume;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_3:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_3: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_8;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_backslash_eof:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_backslash_eof: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_backslash_eof;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_3;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_5:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_5: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_5;
-      }
-      state->_span_pos1 = (void*) p;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_value_backslash_eof;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_2:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_2: {
-      switch (llpkgc_file__lookahead_backslash(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_6;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__value_resume;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_escaped_comment;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_4;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_11;
-        case 5:
-          goto s_n_llpkgc_file__internal__n_pause_3;
-        default:
-          goto s_n_llpkgc_file__internal__n_error;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value:
-    s_n_llpkgc_file__internal__n_pkgc_file_value: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value;
-      }
-      switch (*p) {
-        case 10: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
-        }
-        case 13: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident;
         }
         case '#': {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
-        }
-        case '$': {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_2;
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident;
         }
         case 92: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_2;
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident_1;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_10;
+          p++;
+          goto s_n_llpkgc_file__internal__n_bareword;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__sub_complete:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__sub_complete: {
-      switch (llpkgc_file__sub_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_8;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_6;
+    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident:
+    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
+      }
+      state->_span_pos0 = (void*) p;
+      state->_span_cb0 = llpkgc_file__on_ident;
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_4;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_start_escape:
+    s_n_llpkgc_file__internal__n_start_escape: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_start_escape;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_2;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_3;
+        }
+        case '#': {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
+        }
+        case 92: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_2;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_3;
+        }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_substitution:
-    s_n_llpkgc_file__internal__n_pkgc_file_substitution: {
+    case s_n_llpkgc_file__internal__n_start_backslash:
+    s_n_llpkgc_file__internal__n_start_backslash: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_start_backslash;
+      }
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_1;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_leading_lf:
+    s_n_llpkgc_file__internal__n_leading_lf: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_leading_lf;
+      }
+      switch (*p) {
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_13;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_13;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_leading_cr:
+    s_n_llpkgc_file__internal__n_leading_cr: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_leading_cr;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_13;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_13;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__clear_whitespace:
+    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__clear_whitespace: {
+      switch (llpkgc_file__clear_whitespace(state, p, endp)) {
+        case 0:
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_complete_1;
+        case 5:
+          goto s_n_llpkgc_file__internal__n_error_22;
+        default:
+          goto s_n_llpkgc_file__internal__n_error_19;
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_whitespace_lf:
+    s_n_llpkgc_file__internal__n_whitespace_lf: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_whitespace_lf;
+      }
+      switch (*p) {
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_whitespace_cr:
+    s_n_llpkgc_file__internal__n_whitespace_cr: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_whitespace_cr;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_whitespace_escape:
+    s_n_llpkgc_file__internal__n_whitespace_escape: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_whitespace_escape;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_20;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_21;
+        }
+        case '#': {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all;
+        }
+        case 92: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_1;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_2;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_whitespace_backslash:
+    s_n_llpkgc_file__internal__n_whitespace_backslash: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_whitespace_backslash;
+      }
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_19;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_3:
+    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_3: {
+      switch (llpkgc_file__mark(state, p, endp)) {
+        case 0:
+          goto s_n_llpkgc_file__internal__n_whitespace_backslash;
+        case 5:
+          goto s_n_llpkgc_file__internal__n_error_38;
+        default:
+          goto s_n_llpkgc_file__internal__n_error_23;
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_3:
+    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_3: {
+      switch (llpkgc_file__flush_whitespace_all(state, p, endp)) {
+        case 0:
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
+        case 5:
+          goto s_n_llpkgc_file__internal__n_error_40;
+        default:
+          goto s_n_llpkgc_file__internal__n_error_39;
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_whitespace:
+    s_n_llpkgc_file__internal__n_whitespace: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_whitespace;
+      }
+      switch (*p) {
+        case 9: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_whitespace;
+        }
+        case 10: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__whitespace;
+        }
+        case 11: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_whitespace;
+        }
+        case 12: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_whitespace;
+        }
+        case 13: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__whitespace;
+        }
+        case ' ': {
+          p++;
+          goto s_n_llpkgc_file__internal__n_whitespace;
+        }
+        case '#': {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__whitespace;
+        }
+        case 92: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__whitespace_1;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__whitespace_2;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace:
+    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+      }
+      state->_span_pos0 = (void*) p;
+      state->_span_cb0 = llpkgc_file__whitespace;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_17;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_substitution_end:
+    s_n_llpkgc_file__internal__n_substitution_end: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_substitution_end;
+      }
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_substitution_complete;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_substitution:
+    s_n_llpkgc_file__internal__n_substitution: {
       static uint8_t lookup_table[] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1037,605 +674,513 @@ static llparse_state_t llpkgc_file__internal__run(
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
       };
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_substitution;
+        return s_n_llpkgc_file__internal__n_substitution;
       }
       switch (lookup_table[(uint8_t) *p]) {
         case 1: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_substitution;
+          goto s_n_llpkgc_file__internal__n_substitution;
         }
         case 2: {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__sub_span;
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_substitution;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_error_9;
+          goto s_n_llpkgc_file__internal__n_error_48;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__sub_span:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__sub_span: {
+    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_substitution:
+    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_substitution: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__sub_span;
+        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_substitution;
       }
       state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__sub_span;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_substitution;
+      state->_span_cb0 = llpkgc_file__on_value_substitution;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_23;
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_substitution:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_substitution: {
-      llparse_match_t match_seq;
-
+    case s_n_llpkgc_file__internal__n_dollar:
+    s_n_llpkgc_file__internal__n_dollar: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_substitution;
-      }
-      match_seq = llparse__match_sequence_id(state, p, endp, llparse_blob1, 2);
-      p = match_seq.current;
-      switch (match_seq.status) {
-        case kMatchComplete: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_7;
-        }
-        case kMatchPause: {
-          return s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_substitution;
-        }
-        case kMatchMismatch: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_1:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_1: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_substitution;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_5;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_4:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_4: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_10;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_5:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_5: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_11;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_eof:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_eof: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_eof;
+        return s_n_llpkgc_file__internal__n_dollar;
       }
       switch (*p) {
         case '$': {
           p++;
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_5;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_2;
+        }
+        case '{': {
+          p++;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_substitution;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_error;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_3;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_1:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_1: {
-      switch (llpkgc_file__lookahead(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_literal;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_1;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_4;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal_dollar_eof;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_pause_4;
-        default:
-          goto s_n_llpkgc_file__internal__n_error;
+    case s_n_llpkgc_file__internal__n_dollar_start:
+    s_n_llpkgc_file__internal__n_dollar_start: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_dollar_start;
       }
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_22;
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_backslash_literal:
-    s_n_llpkgc_file__internal__n_pkgc_file_backslash_literal: {
+    case s_n_llpkgc_file__internal__n_value_lf:
+    s_n_llpkgc_file__internal__n_value_lf: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_backslash_literal;
+        return s_n_llpkgc_file__internal__n_value_lf;
       }
       switch (*p) {
-        case 92: {
+        case 13: {
           p++;
-          goto s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__text_resume;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_error;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_6:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_6: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__value_resume_1;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_12;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_7:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_7: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_escaped_comment;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_13;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_8:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_8: {
-      switch (llpkgc_file__lit_complete(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
-        default:
-          goto s_n_llpkgc_file__internal__n_error_14;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_literal_backslash_eof:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_literal_backslash_eof: {
+    case s_n_llpkgc_file__internal__n_value_cr:
+    s_n_llpkgc_file__internal__n_value_cr: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_literal_backslash_eof;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_8;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_3:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_3: {
-      switch (llpkgc_file__lookahead_backslash(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__text_resume_1;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_6;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_7;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__text_resume_2;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal_backslash_eof;
-        case 5:
-          goto s_n_llpkgc_file__internal__n_pause_5;
-        default:
-          goto s_n_llpkgc_file__internal__n_error;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_value_literal:
-    s_n_llpkgc_file__internal__n_pkgc_file_value_literal: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_value_literal;
+        return s_n_llpkgc_file__internal__n_value_cr;
       }
       switch (*p) {
         case 10: {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span;
-        }
-        case 13: {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span;
-        }
-        case '#': {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span;
-        }
-        case '$': {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_1;
-        }
-        case 92: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_3;
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
         }
         default: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span: {
+    case s_n_llpkgc_file__internal__n_value_escape:
+    s_n_llpkgc_file__internal__n_value_escape: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span;
-      }
-      state->_span_pos1 = (void*) p;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_6:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_6: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_6;
-      }
-      state->_span_pos1 = (void*) p;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_eof;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead: {
-      switch (llpkgc_file__lookahead(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_6;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_substitution;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_dollar_doubled;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_12;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_pause_6;
-        default:
-          goto s_n_llpkgc_file__internal__n_error;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_7:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_7: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_7;
-      }
-      state->_span_pos1 = (void*) p;
-      goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__text_resume_3;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_8:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_8: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_8;
-      }
-      state->_span_pos1 = (void*) p;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_value_backslash_eof;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_4:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_4: {
-      switch (llpkgc_file__lookahead_backslash(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_6;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__value_resume_2;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_value_escaped_comment;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_7;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_13;
-        case 5:
-          goto s_n_llpkgc_file__internal__n_pause_7;
-        default:
-          goto s_n_llpkgc_file__internal__n_error;
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_expect_value:
-    s_n_llpkgc_file__internal__n_pkgc_file_expect_value: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_expect_value;
+        return s_n_llpkgc_file__internal__n_value_escape;
       }
       switch (*p) {
         case 10: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_25;
         }
         case 13: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_26;
         }
         case '#': {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete;
-        }
-        case '$': {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal;
         }
         case 92: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_4;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_4;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_10;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_5;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator_backslash_literal:
-    s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator_backslash_literal: {
+    case s_n_llpkgc_file__internal__n_value_backslash:
+    s_n_llpkgc_file__internal__n_value_backslash: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator_backslash_literal;
+        return s_n_llpkgc_file__internal__n_value_backslash;
+      }
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_24;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal_1:
+    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal_1: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal_1;
+      }
+      state->_span_pos0 = (void*) p;
+      state->_span_cb0 = llpkgc_file__on_value_literal;
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_15;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_value:
+    s_n_llpkgc_file__internal__n_value: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_value;
       }
       switch (*p) {
+        case 9: {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+        }
+        case 10: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__clear_whitespace;
+        }
+        case 11: {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+        }
+        case 12: {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+        }
+        case 13: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__clear_whitespace;
+        }
+        case ' ': {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__whitespace;
+        }
+        case '#': {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__clear_whitespace;
+        }
+        case '$': {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_4;
+        }
         case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_5;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_error;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal_1;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_6:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_6: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_6;
-      }
-      state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_double_backslash;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_7:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_7: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_7;
-      }
-      state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_start_barewords_backslash_eof;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_5:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_5: {
-      switch (llpkgc_file__lookahead_backslash(state, p, endp)) {
+    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete:
+    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete: {
+      switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
         case 0:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator_backslash_literal;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__line_resume_3;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator_backslash_literal;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_14;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_15;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
         case 5:
-          goto s_n_llpkgc_file__internal__n_pause_8;
+          goto s_n_llpkgc_file__internal__n_error_64;
         default:
-          goto s_n_llpkgc_file__internal__n_error;
+          goto s_n_llpkgc_file__internal__n_error_18;
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator:
-    s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator: {
+    case s_n_llpkgc_file__internal__n_text:
+    s_n_llpkgc_file__internal__n_text: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator;
+        return s_n_llpkgc_file__internal__n_text;
+      }
+      switch (*p) {
+        case 9: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        case 10: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        case 11: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        case 12: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        case 13: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        case ' ': {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        case '#': {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        case '$': {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        case 92: {
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal;
+        }
+        default: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_text;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal:
+    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal;
+      }
+      state->_span_pos0 = (void*) p;
+      state->_span_cb0 = llpkgc_file__on_value_literal;
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_15;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_leading_escape:
+    s_n_llpkgc_file__internal__n_leading_escape: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_leading_escape;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_12;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_14;
+        }
+        case '#': {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal;
+        }
+        case 92: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_6;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_7;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_leading_backslash:
+    s_n_llpkgc_file__internal__n_leading_backslash: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_leading_backslash;
+      }
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_11;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_leading_whitespace:
+    s_n_llpkgc_file__internal__n_leading_whitespace: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_leading_whitespace;
       }
       switch (*p) {
         case 9: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator;
+          goto s_n_llpkgc_file__internal__n_leading_whitespace;
         }
-        case 10: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__barewords_decl_complete;
+        case 11: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_leading_whitespace;
         }
-        case 13: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__barewords_decl_complete;
+        case 12: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_leading_whitespace;
         }
         case ' ': {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator;
+          goto s_n_llpkgc_file__internal__n_leading_whitespace;
+        }
+        case 92: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_2;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_separator_lf:
+    s_n_llpkgc_file__internal__n_separator_lf: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_separator_lf;
+      }
+      switch (*p) {
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_9;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_9;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_separator_cr:
+    s_n_llpkgc_file__internal__n_separator_cr: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_separator_cr;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_9;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_9;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_separator_escape:
+    s_n_llpkgc_file__internal__n_separator_escape: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_separator_escape;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_29;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_30;
         }
         case '#': {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__barewords_decl_complete;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
+        }
+        case 92: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_4;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_5;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_separator_backslash:
+    s_n_llpkgc_file__internal__n_separator_backslash: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_separator_backslash;
+      }
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_28;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_separator:
+    s_n_llpkgc_file__internal__n_separator: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_separator;
+      }
+      switch (*p) {
+        case 9: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_separator;
+        }
+        case 10: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_barewords_complete;
+        }
+        case 11: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_separator;
+        }
+        case 12: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_separator;
+        }
+        case 13: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_barewords_complete;
+        }
+        case ' ': {
+          p++;
+          goto s_n_llpkgc_file__internal__n_separator;
+        }
+        case '#': {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_barewords_complete;
         }
         case ':': {
           p++;
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__prop_decl_complete;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_property_complete;
         }
         case '=': {
           p++;
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__var_decl_complete;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_variable_complete;
         }
         case 92: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_5;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_6;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_literal:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_literal: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_literal;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_cr:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_cr: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_cr;
-      }
-      switch (*p) {
-        case 13: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_lf:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_lf: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_lf;
-      }
-      switch (*p) {
-        case 10: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident_line_end:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident_line_end: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident_line_end;
-      }
-      switch (*p) {
-        case 10: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_cr;
-        }
-        case 13: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_ident_maybe_lf;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident_continue_line:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident_continue_line: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident_continue_line;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_ident_line_end;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_8:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_8: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_8;
-      }
-      state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
-      p++;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident_escaped_comment:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident_escaped_comment: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident_escaped_comment;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_8;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident_double_backslash:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident_double_backslash: {
-      llparse_match_t match_seq;
-
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident_double_backslash;
-      }
-      match_seq = llparse__match_sequence_id(state, p, endp, llparse_blob3, 2);
-      p = match_seq.current;
-      switch (match_seq.status) {
-        case kMatchComplete: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
-        }
-        case kMatchPause: {
-          return s_n_llpkgc_file__internal__n_pkgc_file_ident_double_backslash;
-        }
-        case kMatchMismatch: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_eof:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_eof: {
-      if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_eof;
-      }
-      switch (*p) {
-        case 92: {
-          p++;
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span;
-        }
-        default: {
-          goto s_n_llpkgc_file__internal__n_error;
-        }
-      }
-      UNREACHABLE;
-    }
-    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_6:
-    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_6: {
-      switch (llpkgc_file__lookahead_backslash(state, p, endp)) {
-        case 0:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_literal;
-        case 1:
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_4;
-        case 2:
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_5;
-        case 3:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_ident_double_backslash;
-        case 4:
-          goto s_n_llpkgc_file__internal__n_pkgc_file_ident_backslash_eof;
-        case 5:
-          goto s_n_llpkgc_file__internal__n_pause_9;
+    case s_n_llpkgc_file__internal__n_invoke_update_finish_9:
+    s_n_llpkgc_file__internal__n_invoke_update_finish_9: {
+      switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
         default:
-          goto s_n_llpkgc_file__internal__n_error;
+          goto s_n_llpkgc_file__internal__n_separator;
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_ident:
-    s_n_llpkgc_file__internal__n_pkgc_file_ident: {
+    case s_n_llpkgc_file__internal__n_identifier_lf:
+    s_n_llpkgc_file__internal__n_identifier_lf: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_identifier_lf;
+      }
+      switch (*p) {
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_identifier_cr:
+    s_n_llpkgc_file__internal__n_identifier_cr: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_identifier_cr;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_identifier_escape:
+    s_n_llpkgc_file__internal__n_identifier_escape: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_identifier_escape;
+      }
+      switch (*p) {
+        case 10: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_32;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_33;
+        }
+        case '#': {
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
+        }
+        case 92: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_6;
+        }
+        default: {
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_7;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_identifier_backslash:
+    s_n_llpkgc_file__internal__n_identifier_backslash: {
+      if (p == endp) {
+        return s_n_llpkgc_file__internal__n_identifier_backslash;
+      }
+      p++;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_31;
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_7:
+    s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_7: {
+      switch (llpkgc_file__mark(state, p, endp)) {
+        case 0:
+          goto s_n_llpkgc_file__internal__n_identifier_backslash;
+        case 5:
+          goto s_n_llpkgc_file__internal__n_error_88;
+        default:
+          goto s_n_llpkgc_file__internal__n_error_83;
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_file__internal__n_identifier:
+    s_n_llpkgc_file__internal__n_identifier: {
       static uint8_t lookup_table[] = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 2, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 1, 0, 0,
@@ -1653,69 +1198,77 @@ static llparse_state_t llpkgc_file__internal__run(
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
       };
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_ident;
+        return s_n_llpkgc_file__internal__n_identifier;
       }
       switch (lookup_table[(uint8_t) *p]) {
         case 1: {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_3;
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident_2;
         }
         case 2: {
-          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span;
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident;
         }
         case 3: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_ident;
+          goto s_n_llpkgc_file__internal__n_identifier;
         }
         case 4: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_6;
+          goto s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident_3;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_pkgc_file_barewords;
+          goto s_n_llpkgc_file__internal__n_invoke_update_finish_4;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5:
-    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5: {
+    case s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2:
+    s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5;
+        return s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2;
       }
       state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_file__ident_span;
-      goto s_n_llpkgc_file__internal__n_pkgc_file_ident;
+      state->_span_cb0 = llpkgc_file__on_ident;
+      goto s_n_llpkgc_file__internal__n_invoke_update_finish_8;
       UNREACHABLE;
     }
-    case s_n_llpkgc_file__internal__n_pkgc_file_expect_ident:
-    s_n_llpkgc_file__internal__n_pkgc_file_expect_ident: {
+    case s_n_llpkgc_file__internal__n_start:
+    s_n_llpkgc_file__internal__n_start: {
       if (p == endp) {
-        return s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+        return s_n_llpkgc_file__internal__n_start;
       }
       switch (*p) {
         case 9: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+          goto s_n_llpkgc_file__internal__n_start;
         }
         case 10: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+          goto s_n_llpkgc_file__internal__n_start;
+        }
+        case 11: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_start;
+        }
+        case 12: {
+          p++;
+          goto s_n_llpkgc_file__internal__n_start;
         }
         case 13: {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+          goto s_n_llpkgc_file__internal__n_start;
         }
         case ' ': {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+          goto s_n_llpkgc_file__internal__n_start;
         }
         case '#': {
           p++;
-          goto s_n_llpkgc_file__internal__n_pkgc_file_comment;
+          goto s_n_llpkgc_file__internal__n_comment;
         }
         case 92: {
-          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash;
+          goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark;
         }
         default: {
-          goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_4;
+          goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_2;
         }
       }
       UNREACHABLE;
@@ -1723,719 +1276,1497 @@ static llparse_state_t llpkgc_file__internal__run(
     default:
       UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_1: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_1(state, p, endp)) {
+  s_n_llpkgc_file__internal__n_invoke_update_finish: {
+    switch (llpkgc_file__internal__c_update_finish(state, p, endp)) {
       default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_expect_ident;
+        goto s_n_llpkgc_file__internal__n_start;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_error_2: {
-    state->error = 0xa;
-    state->reason = "Value complete error";
+  s_n_llpkgc_file__internal__n_invoke_update_finish_2: {
+    switch (llpkgc_file__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_start_lf;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_3: {
+    switch (llpkgc_file__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_start_cr;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_3: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__val_complete: {
-    switch (llpkgc_file__val_complete(state, p, endp)) {
+  s_n_llpkgc_file__internal__n_error_2: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_complete: {
+    switch (llpkgc_file__on_value_complete(state, p, endp)) {
       case 0:
-        goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_1;
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_3;
       default:
         goto s_n_llpkgc_file__internal__n_error_2;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_error_1: {
-    state->error = 0x9;
-    state->reason = "Barewords complete error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_file__ident_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__barewords_decl_complete;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__barewords_decl_complete;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_error: {
-    state->error = 0xe;
-    state->reason = "Lookahead error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_1: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_file__ident_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) (p + 1);
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_pkgc_file_barewords_continue_line;
-      return s_error;
-    }
-    p++;
-    goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_continue_line;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_2: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_file__ident_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) (p + 1);
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_pkgc_file_barewords_escaped_comment;
-      return s_error;
-    }
-    p++;
-    goto s_n_llpkgc_file__internal__n_pkgc_file_barewords_escaped_comment;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_1;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_2: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_3;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_3: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_4;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_1: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash;
-    return s_error;
-    UNREACHABLE;
-  }
   s_n_llpkgc_file__internal__n_error_4: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
+    state->error = 0x5;
+    state->reason = "Internal parser error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span: {
+  s_n_llpkgc_file__internal__n_error_1: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident: {
     const unsigned char* start;
     int err;
 
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_file__on_ident(state, start, p);
     if (err != 0) {
       state->error = err;
       state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_barewords_complete;
       return s_error;
     }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete;
+    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_barewords_complete;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_6: {
+    switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_bareword_lf;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_7: {
+    switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_bareword_cr;
+    }
     UNREACHABLE;
   }
   s_n_llpkgc_file__internal__n_error_7: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
+    state->error = 0x5;
+    state->reason = "Internal parser error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_2: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_2;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_2;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_9: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_6(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_2;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_2: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_2;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__value_resume: {
-    switch (llpkgc_file__internal__c_load_llpkgc_file__value_resume(state, p, endp)) {
-      case 0:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_expect_value;
-      case 1:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_value;
-      default:
-        goto s_n_llpkgc_file__internal__n_error;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__line_resume: {
-    switch (llpkgc_file__internal__c_load_llpkgc_file__line_resume(state, p, endp)) {
-      case 0:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator;
-      case 1:
-        goto s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__value_resume;
-      default:
-        goto s_n_llpkgc_file__internal__n_error;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__line_resume: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__line_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_continue_line;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__value_resume: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__value_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__line_resume;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_10: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_6(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_3;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_load_llpkgc_file__text_resume: {
-    switch (llpkgc_file__internal__c_load_llpkgc_file__text_resume(state, p, endp)) {
-      case 0:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_value_literal;
-      default:
-        goto s_n_llpkgc_file__internal__n_error;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__text_resume: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__text_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_double_backslash;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_error_8: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_3: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_3;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_3;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_11: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_6(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_5;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_3: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_2;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_8: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_8(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_value;
-    }
     UNREACHABLE;
   }
   s_n_llpkgc_file__internal__n_error_6: {
-    state->error = 0xc;
-    state->reason = "Value substitution complete error";
+    state->error = 0x2;
+    state->reason = "Callback error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__sub_span: {
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark: {
+    switch (llpkgc_file__emit_ident_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_7;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_6;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_9: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_8: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_1: {
+    switch (llpkgc_file__emit_ident_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_9;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_8;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_5: {
+    switch (llpkgc_file__internal__c_update_finish_1(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_bareword_escape;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_10: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_5: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident_1: {
     const unsigned char* start;
     int err;
 
     start = state->_span_pos0;
     state->_span_pos0 = NULL;
-    err = llpkgc_file__sub_span(state, start, p);
+    err = llpkgc_file__on_ident(state, start, p);
     if (err != 0) {
       state->error = err;
-      state->error_pos = (const char*) (p + 1);
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__sub_complete;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_1;
       return s_error;
     }
-    p++;
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__sub_complete;
+    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_1;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_error_9: {
-    state->error = 0xd;
+  s_n_llpkgc_file__internal__n_invoke_update_finish_4: {
+    switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_bareword;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_12: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_11: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_2: {
+    switch (llpkgc_file__emit_ident_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_12;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_11;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_14: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_13: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_3: {
+    switch (llpkgc_file__emit_ident_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_14;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_13;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_1: {
+    switch (llpkgc_file__internal__c_update_finish_1(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_start_escape;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_15: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark: {
+    switch (llpkgc_file__mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_start_backslash;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_15;
+      default:
+        goto s_n_llpkgc_file__internal__n_error;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_13: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_leading_whitespace;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_12: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_leading_lf;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_14: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_leading_cr;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_18: {
+    switch (llpkgc_file__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_start;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_21: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_20: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_complete_1: {
+    switch (llpkgc_file__on_value_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_18;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_21;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_20;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_22: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_19: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__whitespace: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_file__whitespace(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__clear_whitespace;
+      return s_error;
+    }
+    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__clear_whitespace;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_20: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_whitespace_lf;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_21: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_whitespace_cr;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_25: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_24: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all: {
+    switch (llpkgc_file__flush_whitespace_all(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_25;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_24;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_29: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_28: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_1: {
+    switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_29;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_28;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_30: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_27: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark: {
+    switch (llpkgc_file__emit_literal_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_1;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_30;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_27;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_31: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_26: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_1: {
+    switch (llpkgc_file__flush_whitespace_all(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_31;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_26;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_35: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_34: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_2: {
+    switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_35;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_34;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_36: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_33: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_1: {
+    switch (llpkgc_file__emit_literal_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_2;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_36;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_33;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_37: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_32: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_2: {
+    switch (llpkgc_file__flush_whitespace_all(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_1;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_37;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_32;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_19: {
+    switch (llpkgc_file__internal__c_update_finish_11(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_whitespace_escape;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_38: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_23: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__whitespace_1: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_file__whitespace(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_3;
+      return s_error;
+    }
+    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_3;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_40: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_39: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__whitespace_2: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_file__whitespace(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_3;
+      return s_error;
+    }
+    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__flush_whitespace_all_3;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_17: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_whitespace;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_44: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_43: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_3: {
+    switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_44;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_43;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_45: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_42: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_2: {
+    switch (llpkgc_file__emit_literal_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_3;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_45;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_42;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_47: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_46: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_substitution_complete: {
+    switch (llpkgc_file__on_value_substitution_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_47;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_46;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_substitution: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_file__on_value_substitution(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_substitution_end;
+      return s_error;
+    }
+    goto s_n_llpkgc_file__internal__n_substitution_end;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_48: {
+    state->error = 0x4;
     state->reason = "Invalid variable substitution character";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_7: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_7(state, p, endp)) {
+  s_n_llpkgc_file__internal__n_invoke_update_finish_23: {
+    switch (llpkgc_file__internal__c_update_finish_23(state, p, endp)) {
       default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__sub_span;
+        goto s_n_llpkgc_file__internal__n_substitution;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_error_5: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
+  s_n_llpkgc_file__internal__n_error_51: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_1: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_1;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_1;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_error_10: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
+  s_n_llpkgc_file__internal__n_error_50: {
+    state->error = 0x2;
+    state->reason = "Callback error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_4: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_4;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_4;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_error_11: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_5: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_5;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_5;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_4: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_1;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__text_resume_1: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__text_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_backslash_literal;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__line_resume_1: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__line_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_continue_line;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__value_resume_1: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__value_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__line_resume_1;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_error_12: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_6: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_6;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_6;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_error_13: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_7: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_7;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_7;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__text_resume_2: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__text_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_double_backslash;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_error_14: {
-    state->error = 0xb;
-    state->reason = "Value literal complete error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__lit_span_8: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos1;
-    state->_span_pos1 = NULL;
-    err = llpkgc_file__lit_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_8;
-      return s_error;
-    }
-    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lit_complete_8;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_5: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_3;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_6: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_6(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_12: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_6(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_6;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_6: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__line_resume_2: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__line_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_continue_line;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__value_resume_2: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__value_resume_2(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__line_resume_2;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__text_resume_3: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__text_resume(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_double_backslash;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_13: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_6(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__lit_span_8;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_7: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_4;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_5: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_5(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_expect_value;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_error_3: {
-    state->error = 0x7;
-    state->reason = "Property complete error";
-    state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_error;
-    return s_error;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__prop_decl_complete: {
-    switch (llpkgc_file__prop_decl_complete(state, p, endp)) {
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_4: {
+    switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
       case 0:
-        goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_5;
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_51;
       default:
-        goto s_n_llpkgc_file__internal__n_error_3;
+        goto s_n_llpkgc_file__internal__n_error_50;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_error_15: {
-    state->error = 0x8;
-    state->reason = "Variable complete error";
+  s_n_llpkgc_file__internal__n_error_52: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__var_decl_complete: {
-    switch (llpkgc_file__var_decl_complete(state, p, endp)) {
-      case 0:
-        goto s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_5;
-      default:
-        goto s_n_llpkgc_file__internal__n_error_15;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__line_resume_3: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__line_resume_3(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_pkgc_file_continue_line;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_14: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_6;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_15: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished(state, p, endp)) {
-      default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_7;
-    }
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_8: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
+  s_n_llpkgc_file__internal__n_error_49: {
+    state->error = 0x2;
+    state->reason = "Callback error";
     state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_5;
+    state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_3: {
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_3: {
+    switch (llpkgc_file__emit_literal_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_4;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_52;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_49;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_22: {
+    switch (llpkgc_file__internal__c_update_finish_22(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_dollar;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_53: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_41: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_4: {
+    switch (llpkgc_file__mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_dollar_start;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_53;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_41;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_25: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_value_lf;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_26: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_value_cr;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_57: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_56: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_5: {
+    switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_57;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_56;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_58: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_55: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_4: {
+    switch (llpkgc_file__emit_literal_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_5;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_58;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_55;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_61: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_60: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_6: {
+    switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_61;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_60;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_62: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_59: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_5: {
+    switch (llpkgc_file__emit_literal_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_6;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_62;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_59;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_24: {
+    switch (llpkgc_file__internal__c_update_finish_11(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_value_escape;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_63: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_54: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_5: {
+    switch (llpkgc_file__mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_value_backslash;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_63;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_54;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_16: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_value;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_64: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_18: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_value_literal: {
     const unsigned char* start;
     int err;
 
     start = state->_span_pos0;
     state->_span_pos0 = NULL;
-    err = llpkgc_file__ident_span(state, start, p);
+    err = llpkgc_file__on_value_literal(state, start, p);
     if (err != 0) {
       state->error = err;
       state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete;
       return s_error;
     }
-    goto s_n_llpkgc_file__internal__n_pkgc_file_maybe_separator;
+    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_4: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_file__ident_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) (p + 1);
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_pkgc_file_ident_continue_line;
-      return s_error;
+  s_n_llpkgc_file__internal__n_invoke_update_finish_15: {
+    switch (llpkgc_file__internal__c_update_finish_15(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_text;
     }
-    p++;
-    goto s_n_llpkgc_file__internal__n_pkgc_file_ident_continue_line;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__ident_span_5: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_file__ident_span(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) (p + 1);
-      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_pkgc_file_ident_escaped_comment;
-      return s_error;
-    }
-    p++;
-    goto s_n_llpkgc_file__internal__n_pkgc_file_ident_escaped_comment;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_file__internal__n_pause_9: {
-    state->error = 0x4;
-    state->reason = "Lookahead required";
+  s_n_llpkgc_file__internal__n_error_67: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
     state->error_pos = (const char*) p;
-    state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__lookahead_backslash_6;
+    state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_file__internal__n_invoke_update_llpkgc_file__unfinished_4: {
-    switch (llpkgc_file__internal__c_update_llpkgc_file__unfinished_4(state, p, endp)) {
+  s_n_llpkgc_file__internal__n_error_66: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_7: {
+    switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_value_literal;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_67;
       default:
-        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__ident_span_5;
+        goto s_n_llpkgc_file__internal__n_error_66;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_68: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_65: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_6: {
+    switch (llpkgc_file__emit_literal_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_7;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_68;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_65;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_71: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_70: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_8: {
+    switch (llpkgc_file__on_value_literal_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_16;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_71;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_70;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_72: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_69: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_literal_mark_7: {
+    switch (llpkgc_file__emit_literal_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_value_literal_complete_8;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_72;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_69;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_11: {
+    switch (llpkgc_file__internal__c_update_finish_11(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_leading_escape;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_73: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_17: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_2: {
+    switch (llpkgc_file__mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_leading_backslash;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_73;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_17;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_10: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_leading_whitespace;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_74: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_16: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_property_complete: {
+    switch (llpkgc_file__on_property_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_10;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_74;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_16;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_27: {
+    switch (llpkgc_file__internal__c_update_finish_10(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_leading_whitespace;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_76: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_75: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__on_variable_complete: {
+    switch (llpkgc_file__on_variable_complete(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_invoke_update_finish_27;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_76;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_75;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_29: {
+    switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_separator_lf;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_30: {
+    switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_separator_cr;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_79: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_78: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_4: {
+    switch (llpkgc_file__emit_ident_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_79;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_78;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_81: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_80: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_5: {
+    switch (llpkgc_file__emit_ident_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_81;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_80;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_28: {
+    switch (llpkgc_file__internal__c_update_finish_1(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_separator_escape;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_82: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_77: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_6: {
+    switch (llpkgc_file__mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_separator_backslash;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_82;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_77;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident_2: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_file__on_ident(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_update_finish_9;
+      return s_error;
+    }
+    goto s_n_llpkgc_file__internal__n_invoke_update_finish_9;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_32: {
+    switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_identifier_lf;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_33: {
+    switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_identifier_cr;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_85: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_84: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_6: {
+    switch (llpkgc_file__emit_ident_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_85;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_84;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_87: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_86: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_llpkgc_file__emit_ident_mark_7: {
+    switch (llpkgc_file__emit_ident_mark(state, p, endp)) {
+      case 0:
+        goto s_n_llpkgc_file__internal__n_span_start_llpkgc_file__on_ident_1;
+      case 5:
+        goto s_n_llpkgc_file__internal__n_error_87;
+      default:
+        goto s_n_llpkgc_file__internal__n_error_86;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_31: {
+    switch (llpkgc_file__internal__c_update_finish_1(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_identifier_escape;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_88: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_error_83: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_span_end_llpkgc_file__on_ident_3: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_file__on_ident(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_7;
+      return s_error;
+    }
+    goto s_n_llpkgc_file__internal__n_invoke_llpkgc_file__mark_7;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_file__internal__n_invoke_update_finish_8: {
+    switch (llpkgc_file__internal__c_update_finish_4(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_file__internal__n_identifier;
     }
     UNREACHABLE;
   }
@@ -2452,9 +2783,6 @@ int llpkgc_file__internal_execute(llpkgc_file__internal_t* state, const char* p,
   /* restart spans */
   if (state->_span_pos0 != NULL) {
     state->_span_pos0 = (void*) p;
-  }
-  if (state->_span_pos1 != NULL) {
-    state->_span_pos1 = (void*) p;
   }
 
   next = llpkgc_file__internal__run(state, (const unsigned char*) p, (const unsigned char*) endp);
@@ -2474,16 +2802,411 @@ int llpkgc_file__internal_execute(llpkgc_file__internal_t* state, const char* p,
       return error;
     }
   }
-  if (state->_span_pos1 != NULL) {
-    int error;
-
-    error = llpkgc_file__lit_span(state, state->_span_pos1, (const char*) endp);
-    if (error != 0) {
-      state->error = error;
-      state->error_pos = endp;
-      return error;
-    }
-  }
 
   return 0;
 }
+#include <string.h>
+#include "llpkgc_file.h"
+int llpkgc_file__on_barewords_complete(llpkgc_file_t*, const unsigned char*, const unsigned char*);
+int llpkgc_file__clear_whitespace(llpkgc_file_t*, const unsigned char*, const unsigned char*);
+int llpkgc_file__on_value_complete(llpkgc_file_t*, const unsigned char*, const unsigned char*);
+int llpkgc_file__emit_ident_mark(llpkgc_file_t*, const unsigned char*, const unsigned char*);
+int llpkgc_file__on_value_literal_complete(llpkgc_file_t*, const unsigned char*, const unsigned char*);
+int llpkgc_file__flush_whitespace_all(llpkgc_file_t*, const unsigned char*, const unsigned char*);
+int llpkgc_file__emit_literal_mark(llpkgc_file_t*, const unsigned char*, const unsigned char*);
+
+int llpkgc_file__on_pkgc_complete(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_pkgc_complete == NULL) return 0;
+  err = settings->on_pkgc_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_pkgc_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_ident(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_ident == NULL) return 0;
+  err = settings->on_ident(s, (const char*) p, (size_t) (endp - p));
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_ident";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_value_literal(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_value_literal == NULL) return 0;
+  err = settings->on_value_literal(s, (const char*) p, (size_t) (endp - p));
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_value_literal";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_value_substitution(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_value_substitution == NULL) return 0;
+  err = settings->on_value_substitution(s, (const char*) p, (size_t) (endp - p));
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_value_substitution";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_value_literal_complete(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_value_literal_complete == NULL) return 0;
+  err = settings->on_value_literal_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_value_literal_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_value_complete(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_value_complete == NULL) return 0;
+  err = settings->on_value_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_value_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_barewords_complete(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_barewords_complete == NULL) return 0;
+  err = settings->on_barewords_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_barewords_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_property_complete(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_property_complete == NULL) return 0;
+  err = settings->on_property_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_property_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_variable_complete(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_variable_complete == NULL) return 0;
+  err = settings->on_variable_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_variable_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+int llpkgc_file__on_value_substitution_complete(llpkgc_file_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_value_substitution_complete == NULL) return 0;
+  err = settings->on_value_substitution_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_value_substitution_complete";
+    s->callback_reason = (void*) s->reason;
+    return PFCE_USER;
+  }
+  return 0;
+}
+
+void llpkgc_file_init(llpkgc_file_t* s, const llpkgc_file_settings_t* settings) {
+  llpkgc_file__internal_init(s);
+  s->settings = (void*) settings;
+}
+void llpkgc_file_reset(llpkgc_file_t* s) {
+  const llpkgc_file_settings_t* settings = s->settings;
+  void* data = s->data;
+  llpkgc_file_init(s, settings);
+  s->data = data;
+}
+void llpkgc_file_settings_init(llpkgc_file_settings_t* settings) {
+  memset(settings, 0, sizeof(*settings));
+}
+llpkgc_file_errno_t llpkgc_file_execute(llpkgc_file_t* s, const char* data, size_t len) {
+  if (s->error != 0) return s->error;
+  if (s->done) {
+    s->reason = "Input after finish";
+    s->error_pos = data;
+    return s->error = PFCE_INVALID;
+  }
+  if (s->whitespace_start != NULL && data != s->end && len != 0) {
+    s->reason = "Retained input requires a contiguous extension";
+    s->error_pos = data;
+    return s->error = PFCE_INVALID;
+  }
+  if (len == 0) return s->whitespace_start != NULL ? PFCE_NEED_MORE : PFCE_OK;
+  s->end = (void*) (data + len);
+  {
+    int err = llpkgc_file__internal_execute(s, data, data + len);
+    if (err == PFCE_USER && s->callback_reason != NULL)
+      s->reason = s->callback_reason;
+    if (err == 0 && s->whitespace_start != NULL) return PFCE_NEED_MORE;
+    return err;
+  }
+}
+llpkgc_file_errno_t llpkgc_file_finish(llpkgc_file_t* s) {
+  int err;
+  if (s->error != 0) return s->error;
+  if (s->done) return PFCE_OK;
+  switch (s->finish) {
+    case 0:
+        err = llpkgc_file__on_pkgc_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 1:
+        err = llpkgc_file__on_barewords_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__clear_whitespace(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_value_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_pkgc_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 2:
+        err = llpkgc_file__emit_ident_mark(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_barewords_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__clear_whitespace(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_value_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_pkgc_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 3:
+        err = llpkgc_file__clear_whitespace(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_value_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_pkgc_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 4:
+        err = llpkgc_file__on_value_literal_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__clear_whitespace(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_value_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_pkgc_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 5:
+        err = llpkgc_file__flush_whitespace_all(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__emit_literal_mark(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_value_literal_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__clear_whitespace(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_value_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_pkgc_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 6:
+        err = llpkgc_file__emit_literal_mark(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_value_literal_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__clear_whitespace(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_value_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_file__on_pkgc_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 7: s->reason = "Invalid EOF state";
+          s->error = PFCE_UNFINISHED; s->error_pos = s->end; return s->error;
+    default: s->reason = "Invalid finish action"; return s->error = PFCE_INTERNAL;
+  }
+  s->done = 1;
+  return PFCE_OK;
+}
+llpkgc_file_errno_t llpkgc_file_get_errno(const llpkgc_file_t* s) { return s->error; }
+const char* llpkgc_file_get_error_reason(const llpkgc_file_t* s) { return s->reason; }
+void llpkgc_file_set_error_reason(llpkgc_file_t* s, const char* reason) { s->reason = reason; }
+const char* llpkgc_file_get_error_pos(const llpkgc_file_t* s) { return s->error_pos; }
+const char* llpkgc_file_errno_name(llpkgc_file_errno_t err) {
+  switch (err) {
+    case PFCE_OK: return "PFCE_OK";
+    case PFCE_USER: return "PFCE_USER";
+    case PFCE_UNFINISHED: return "PFCE_UNFINISHED";
+    case PFCE_INVALID: return "PFCE_INVALID";
+    case PFCE_NEED_MORE: return "PFCE_NEED_MORE";
+    default: return "PFCE_INTERNAL";
+  }
+}
+

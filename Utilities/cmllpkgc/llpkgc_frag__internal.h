@@ -21,10 +21,11 @@ struct llpkgc_frag__internal_s {
   const char* error_pos;
   void* data;
   void* _current;
-  void* llpkgc_frag__settings;
-  uint8_t llpkgc_frag__state;
-  uint8_t llpkgc_frag__eof;
-  uint8_t llpkgc_frag__lookahead;
+  void* settings;
+  void* end;
+  void* callback_reason;
+  uint32_t finish;
+  uint8_t done;
 };
 
 int llpkgc_frag__internal_init(llpkgc_frag__internal_t* s);
