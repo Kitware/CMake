@@ -3246,6 +3246,16 @@ std::string const& cmSystemTools::GetHTMLDoc()
 cm::optional<std::string> cmSystemTools::GetSystemConfigDirectory()
 {
 #if defined(_WIN32)
+  // Prefer %LOCALAPPDATA%, which Windows sets from the same known folder at
+  // logon.  SHGetKnownFolderPath loads shell32 and its dependencies, which
+  // costs several milliseconds in every process that looks up this directory.
+  if (cm::optional<std::string> env =
+        cmSystemTools::GetEnvVar("LOCALAPPDATA")) {
+    if (cmSystemTools::FileIsFullPath(*env)) {
+      cmSystemTools::ConvertToUnixSlashes(*env);
+      return env;
+    }
+  }
   LPWSTR lpwstr;
   if (FAILED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &lpwstr))) {
     return cm::nullopt;
