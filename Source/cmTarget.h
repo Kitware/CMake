@@ -325,6 +325,10 @@ public:
   bool CxxModuleNeedsInterfaceObjects() const;
   void SetCxxModuleNeedsInterfaceObjects(bool);
 
+  //! Internal options preserved when replacing synthetic compile options.
+  void AddCxxModuleSynthCompileOption(BT<std::string> option);
+  cmBTStringRange GetCxxModuleSynthCompileOptions() const;
+
   BTs<std::string> const* GetLanguageStandardProperty(
     std::string const& propertyName) const;
 

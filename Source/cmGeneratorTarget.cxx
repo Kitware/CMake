@@ -5602,6 +5602,9 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
   auto compilerId = makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
   if (compilerId == "MSVC") {
     stdlibTgt->SetCxxModuleNeedsInterfaceObjects(true);
+  } else if (cmHasLiteralSuffix(compilerId, "Clang")) {
+    stdlibTgt->AddCxxModuleSynthCompileOption(
+      BT<std::string>("-Wno-reserved-module-identifier"));
   }
 
   lg->AddImportedGeneratorTarget(gt.get());
@@ -5761,6 +5764,12 @@ cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
   // CopyUsageEffects now uses the consumer's full (own + transitive)
   // compile features and options.
   tgt->CopyUsageEffects(&bmiConsumer, config);
+
+  // These internal options belong to the provider, not the consumer, and must
+  // survive replacement of the provider's ordinary compile options.
+  for (auto const& option : model->GetCxxModuleSynthCompileOptions()) {
+    tgt->InsertCompileOption(option);
+  }
 
   auto const& preprocessorCompileOptions =
     this->GetCxxModuleUsageEffects(config).GetPreprocessorCompileOptions();
