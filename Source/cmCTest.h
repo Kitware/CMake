@@ -67,8 +67,10 @@ public:
   /** Process Command line arguments */
   int Run(std::vector<std::string> const& args);
 
-  /** Initialize a dashboard run in the given build tree. */
-  void Initialize(std::string const& binary_dir);
+  /** Initialize a dashboard run in the given build tree, writing output
+      files to the given output directory. */
+  void Initialize(std::string const& binary_dir,
+                  std::string const& output_dir);
 
   bool CreateNewTag(bool quiet);
   bool ReadExistingTag(bool quiet);
@@ -272,6 +274,26 @@ public:
   std::string GetStampDir();
 
   /**
+   * Get / set the path to the output directory.
+   * By default, this is the binary directory + "/Testing".
+   * The stored path is always absolute, uses forward slashes, and has no
+   * trailing slash, so callers must supply their own separator when
+   * appending to it.
+   * */
+  std::string GetOutputDir();
+  void SetOutputDir(std::string const& outdir);
+
+  /**
+   * Compute the output directory of a dashboard run.  An empty output_dir
+   * yields the default, binary_dir + "/Testing".  Otherwise a leading '~' is
+   * expanded, separators are normalized, any trailing slash is removed, and a
+   * relative path is resolved against binary_dir so that it means the same
+   * thing as the default.
+   */
+  static std::string ComputeOutputDir(std::string const& binary_dir,
+                                      std::string const& output_dir);
+
+  /**
    * Get the short path to the file.
    *
    * This means if the file is in binary or
@@ -464,6 +486,10 @@ private:
 
   /** apply CTEST_* variable definitions to the CTest configuration map */
   void ApplyDefinitionsToCTestConfig();
+
+  /** recompute the output directory from the requested value and the
+      binary directory, which may not be known until late in the run */
+  void UpdateOutputDir();
 
   /** set command line arguments read from a test preset */
   bool SetArgsFromPreset(cmCMakePresetsArgs const& args);

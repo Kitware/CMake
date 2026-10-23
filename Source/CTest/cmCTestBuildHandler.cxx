@@ -745,8 +745,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler)
   } else {
     // Compute a directory in which to store launcher fragments.
     std::string& launchDir = this->Handler->CTestLaunchDir;
-    launchDir =
-      cmStrCat(this->CTest->GetBinaryDir(), "/Testing/", tag, "/Build");
+    launchDir = cmStrCat(this->CTest->GetOutputDir(), '/', tag, "/Build");
 
     // Clean out any existing launcher fragments.
     cmSystemTools::RemoveADirectory(launchDir);

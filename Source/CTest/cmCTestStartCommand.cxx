@@ -94,6 +94,10 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir, quiet);
   this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir, quiet);
 
+  cmValue out_dir = mf.GetDefinition("CTEST_OUTPUT_DIRECTORY");
+  std::string outputDir =
+    cmCTest::ComputeOutputDir(binaryDir, out_dir ? *out_dir : std::string());
+
   if (smodel) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, quiet,
                        "Run dashboard with model ", smodel,
@@ -120,7 +124,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Log startup actions.
-  std::string startLogFile = binaryDir + "/Testing/Temporary/LastStart.log";
+  std::string startLogFile = outputDir + "/Temporary/LastStart.log";
   cmGeneratedFileStream ofs(startLogFile);
   if (!ofs) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -184,7 +188,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     &mf, "BuildName", "CTEST_BUILD_NAME", quiet);
 
-  this->CTest->Initialize(binaryDir);
+  this->CTest->Initialize(binaryDir, outputDir);
 
   cmCTestOptionalLog(
     this->CTest, OUTPUT, quiet,

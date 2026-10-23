@@ -2077,7 +2077,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformation(size_t numTests)
 void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
 {
 
-  std::string dirName = this->CTest->GetBinaryDir() + "/Testing/Temporary";
+  std::string dirName = this->CTest->GetOutputDir() + "/Temporary";
 
   cmsys::Directory directory;
   if (!directory.Load(dirName)) {
@@ -2109,7 +2109,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   }
 
   std::string lastTestsFailedLog =
-    cmStrCat(this->CTest->GetBinaryDir(), "/Testing/Temporary/", logName);
+    cmStrCat(this->CTest->GetOutputDir(), "/Temporary/", logName);
 
   if (!cmSystemTools::FileExists(lastTestsFailedLog)) {
     if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels()) {

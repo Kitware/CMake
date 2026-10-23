@@ -58,6 +58,10 @@ The parameters are as follows:
   in the first ``ctest_start()`` command, a warning will be issued, and the
   new model and group will be used.
 
+  .. versionadded:: 4.6
+    The ``TAG`` file is read from, and written to, the output directory
+    selected by :variable:`CTEST_OUTPUT_DIRECTORY`.
+
 ``QUIET``
   .. versionadded:: 3.3
 

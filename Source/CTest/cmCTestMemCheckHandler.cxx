@@ -550,7 +550,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     cmSystemTools::ParseArguments(memoryTesterOptions);
 
   this->MemoryTesterOutputFile =
-    this->CTest->GetBinaryDir() + "/Testing/Temporary/MemoryChecker.??.log";
+    this->CTest->GetOutputDir() + "/Temporary/MemoryChecker.??.log";
 
   switch (this->MemoryTesterStyle) {
     case cmCTestMemCheckHandler::VALGRIND: {
@@ -582,7 +582,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
     case cmCTestMemCheckHandler::DRMEMORY: {
       std::string tempDrMemoryDir =
-        this->CTest->GetBinaryDir() + "/Testing/Temporary/DrMemory";
+        this->CTest->GetOutputDir() + "/Temporary/DrMemory";
 
       if (!cm::contains(this->MemoryTesterOptions, "-quiet")) {
         this->MemoryTesterOptions.emplace_back("-quiet");
@@ -666,8 +666,8 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
     case cmCTestMemCheckHandler::BOUNDS_CHECKER: {
       this->BoundsCheckerXMLFile = this->MemoryTesterOutputFile;
-      std::string dpbdFile = this->CTest->GetBinaryDir() +
-        "/Testing/Temporary/MemoryChecker.??.DPbd";
+      std::string dpbdFile =
+        this->CTest->GetOutputDir() + "/Temporary/MemoryChecker.??.DPbd";
       this->BoundsCheckerDPBDFile = dpbdFile;
       this->MemoryTesterDynamicOptions.emplace_back("/B");
       this->MemoryTesterDynamicOptions.push_back(std::move(dpbdFile));

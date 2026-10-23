@@ -166,6 +166,8 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
     "CPU load threshold for starting new parallel tests." },
   { "--tomorrow-tag", "Nightly or experimental starts with next day tag." },
   { "--overwrite <option-name>", "Overwrite CTest configuration option." },
+  { "--output-dir <path>",
+    "Specify the directory in which to write output files." },
   { "--extra-submit <file>[;<file>]", "Submit extra files to the dashboard." },
   { "--http-header <header>", "Append HTTP header when submitting" },
   { "--schedule-random", "Use a random order for scheduling tests" },

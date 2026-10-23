@@ -182,6 +182,12 @@ struct cmCTest::Private
 
   std::string NotesFiles;
 
+  // Output directory as requested on the command line or by a script.  It
+  // may be empty or relative; OutputDir holds the resolved absolute path.
+  std::string OutputDirArg;
+
+  std::string OutputDir;
+
   // Default for the current mode; an explicit user choice takes precedence.
   bool InteractiveDebugMode = true;
   cm::optional<bool> InteractiveDebugModeCli;
@@ -303,7 +309,7 @@ std::string cmCTest::GetCostDataFile()
 {
   std::string fname = this->GetCTestConfiguration("CostDataFile");
   if (fname.empty()) {
-    fname = this->GetBinaryDir() + "/Testing/Temporary/CTestCostData.txt";
+    fname = this->GetOutputDir() + "/Temporary/CTestCostData.txt";
   }
   return fname;
 }
@@ -441,7 +447,8 @@ cmCTest::Part cmCTest::GetPartFromName(std::string const& name)
   return PartCount;
 }
 
-void cmCTest::Initialize(std::string const& binary_dir)
+void cmCTest::Initialize(std::string const& binary_dir,
+                         std::string const& output_dir)
 {
   this->Impl->BuildID = "";
   for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
@@ -456,11 +463,16 @@ void cmCTest::Initialize(std::string const& binary_dir)
 
   this->Impl->BinaryDir = binary_dir;
   cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
+
+  if (!output_dir.empty()) {
+    this->Impl->OutputDirArg = output_dir;
+  }
+  this->UpdateOutputDir();
 }
 
 bool cmCTest::CreateNewTag(bool quiet)
 {
-  std::string const testingDir = this->Impl->BinaryDir + "/Testing";
+  std::string const testingDir = this->Impl->OutputDir;
   std::string const tagfile = testingDir + "/TAG";
 
   auto const result = cmSystemTools::MakeDirectory(testingDir);
@@ -504,7 +516,7 @@ bool cmCTest::CreateNewTag(bool quiet)
 
 bool cmCTest::ReadExistingTag(bool quiet)
 {
-  std::string const testingDir = this->Impl->BinaryDir + "/Testing";
+  std::string const testingDir = this->Impl->OutputDir;
   std::string const tagfile = testingDir + "/TAG";
 
   std::string tag;
@@ -624,6 +636,9 @@ bool cmCTest::UpdateCTestConfiguration()
       cmSystemTools::SetLogicalWorkingDirectory(this->Impl->BinaryDir);
     }
   }
+  // The binary directory may have just changed, so resolve the output
+  // directory against its final value.
+  this->UpdateOutputDir();
   this->Impl->TimeOut =
     std::chrono::seconds(atoi(this->GetCTestConfiguration("TimeOut").c_str()));
   std::string const& testLoad = this->GetCTestConfiguration("TestLoad");
@@ -690,7 +705,7 @@ bool cmCTest::SetTest(std::string const& ttype, bool report)
 bool cmCTest::OpenOutputFile(std::string const& path, std::string const& name,
                              cmGeneratedFileStream& stream, bool compress)
 {
-  std::string testingDir = this->Impl->BinaryDir + "/Testing";
+  std::string testingDir = this->Impl->OutputDir;
   if (!path.empty()) {
     testingDir = cmStrCat(std::move(testingDir), '/', path);
   }
@@ -738,7 +753,7 @@ bool cmCTest::AddIfExists(Part part, std::string const& file)
 
 bool cmCTest::CTestFileExists(std::string const& filename)
 {
-  std::string testingDir = cmStrCat(this->Impl->BinaryDir, "/Testing/",
+  std::string testingDir = cmStrCat(this->Impl->OutputDir, '/',
                                     this->Impl->CurrentTag, '/', filename);
   return cmSystemTools::FileExists(testingDir);
 }
@@ -827,6 +842,9 @@ int cmCTest::ProcessSteps()
           std::string const binaryDir = resolveResult.Preset->BinaryDir;
           this->SetCTestConfiguration("BuildDirectory", binaryDir);
           this->Impl->BinaryDir = binaryDir;
+          // Resolve the output directory against the new binary directory.
+          // UpdateCTestConfiguration may return early without doing so.
+          this->UpdateOutputDir();
           cmSystemTools::SetLogicalWorkingDirectory(binaryDir);
           mf.AddDefinition("CTEST_BINARY_DIRECTORY", binaryDir);
           // Re-parse DartConfiguration.tcl since we changed BinaryDir.
@@ -927,7 +945,7 @@ int cmCTest::ProcessSteps()
       res |= cmCTest::MEMORY_ERRORS;
     }
   }
-  std::string notes_dir = this->Impl->BinaryDir + "/Testing/Notes";
+  std::string notes_dir = this->Impl->OutputDir + "/Notes";
   if (cmSystemTools::FileIsDirectory(notes_dir)) {
     cmsys::Directory d;
     d.Load(notes_dir);
@@ -2358,6 +2376,11 @@ int cmCTest::Run(std::vector<std::string> const& args)
                        this->Impl->OutputTestOutputOnTestFailure = true;
                        return true;
                      } },
+    CommandArgument{ "--output-dir", CommandArgument::Values::One,
+                     [this](std::string const& od) -> bool {
+                       this->Impl->OutputDirArg = od;
+                       return true;
+                     } },
     CommandArgument{
       "--test-output-size-passed", CommandArgument::Values::One,
       [this](std::string const& sz) -> bool {
@@ -2729,6 +2752,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return 1;
   }
   this->Impl->BinaryDir = workDir;
+  this->UpdateOutputDir();
 
   // -D, -T, and/or -M was specified
   if (processSteps) {
@@ -2832,7 +2856,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
     if (!this->Impl->OutputTestOutputOnTestFailure) {
       std::string const lastTestLog =
-        this->GetBinaryDir() + "/Testing/Temporary/LastTest.log";
+        this->GetOutputDir() + "/Temporary/LastTest.log";
       cmCTestLog(this, ERROR_MESSAGE,
                  "Output from these tests are in: ", lastTestLog, '\n');
       cmCTestLog(this, ERROR_MESSAGE,
@@ -3096,7 +3120,39 @@ std::string cmCTest::GetBinaryDir()
 
 std::string cmCTest::GetStampDir()
 {
-  return this->Impl->BinaryDir + "/Testing/Temporary/LastTestRun";
+  return this->Impl->OutputDir + "/Temporary/LastTestRun";
+}
+
+std::string cmCTest::ComputeOutputDir(std::string const& binary_dir,
+                                      std::string const& output_dir)
+{
+  if (output_dir.empty()) {
+    return cmStrCat(binary_dir, "/Testing");
+  }
+  // Expand a leading '~', normalize separators, collapse repeated slashes,
+  // and drop any trailing slash.
+  std::string dir = output_dir;
+  cmSystemTools::ConvertToUnixSlashes(dir);
+  // Resolve a relative path against the binary directory so that it means the
+  // same thing as the default value, "<binary-dir>/Testing".
+  return cmSystemTools::CollapseFullPath(dir, binary_dir);
+}
+
+void cmCTest::UpdateOutputDir()
+{
+  this->Impl->OutputDir =
+    cmCTest::ComputeOutputDir(this->Impl->BinaryDir, this->Impl->OutputDirArg);
+}
+
+std::string cmCTest::GetOutputDir()
+{
+  return this->Impl->OutputDir;
+}
+
+void cmCTest::SetOutputDir(std::string const& outdir)
+{
+  this->Impl->OutputDirArg = outdir;
+  this->UpdateOutputDir();
 }
 
 std::string const& cmCTest::GetConfigType()

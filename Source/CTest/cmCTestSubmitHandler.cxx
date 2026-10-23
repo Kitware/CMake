@@ -670,14 +670,7 @@ int cmCTestSubmitHandler::ProcessHandler()
                                        this->CDashUploadType);
   }
 
-  std::string const& buildDirectory =
-    this->CTest->GetCTestConfiguration("BuildDirectory");
-  if (buildDirectory.empty()) {
-    cmCTestLog(
-      this->CTest, ERROR_MESSAGE,
-      "Cannot find BuildDirectory  key in the DartConfiguration.tcl\n");
-    return -1;
-  }
+  std::string const outputDirectory = this->CTest->GetOutputDir();
 
   cmGeneratedFileStream ofs;
   this->StartLogFile("Submit", ofs);
@@ -735,7 +728,7 @@ int cmCTestSubmitHandler::ProcessHandler()
   if (this->CTest->AddIfExists(cmCTest::PartCoverage, "Coverage.xml")) {
     std::vector<std::string> gfiles;
     std::string gpath =
-      cmStrCat(buildDirectory, "/Testing/", this->CTest->GetCurrentTag());
+      cmStrCat(outputDirectory, '/', this->CTest->GetCurrentTag());
     std::string::size_type glen = gpath.size() + 1;
     gpath += "/CoverageLog*";
     cmCTestOptionalLog(this->CTest, DEBUG, this->Quiet,
@@ -804,8 +797,8 @@ int cmCTestSubmitHandler::ProcessHandler()
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->Quiet,
                      "   SubmitURL: ", url, '\n');
   if (!this->SubmitUsingHTTP(
-        cmStrCat(buildDirectory, "/Testing/", this->CTest->GetCurrentTag()),
-        files, prefix, url)) {
+        cmStrCat(outputDirectory, '/', this->CTest->GetCurrentTag()), files,
+        prefix, url)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "   Problems when submitting via HTTP\n");
     ofs << "   Problems when submitting via HTTP\n";

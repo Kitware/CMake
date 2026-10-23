@@ -10,7 +10,9 @@ if(NOT PROJECT_BINARY_DIR)
   message(FATAL_ERROR "Do not include(CTest) before calling project().")
 endif()
 
-# make directories in the binary tree
+# Make directories in the binary tree.  This is only the default output
+# directory: CTEST_OUTPUT_DIRECTORY and --output-dir are chosen per ctest
+# invocation and are not known here, so ctest creates those itself at run time.
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/Temporary)
 get_filename_component(CMAKE_HOST_PATH ${CMAKE_COMMAND} PATH)
 set(CMAKE_TARGET_PATH ${EXECUTABLE_OUTPUT_PATH})

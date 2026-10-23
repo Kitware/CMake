@@ -25,6 +25,7 @@ public:
   int Error;
   std::string SourceDir;
   std::string BinaryDir;
+  std::string OutputDir;
   using SingleFileCoverageVector = std::vector<int>;
   using SingleFileBranchCoverageVector = std::vector<std::array<int, 2>>;
   using TotalCoverageMap = std::map<std::string, SingleFileCoverageVector>;

@@ -1379,3 +1379,26 @@ run_TestMaxWidthShort(MaxWidthShort0 "--max-width 0")
 run_TestMaxWidthLong(MaxWidthLongUnset "")
 run_TestMaxWidthLong(MaxWidthLong70 "-W 70")
 run_TestMaxWidthLong(MaxWidthLong30 "-W 30")
+
+# Test --output-dir.  This project only calls enable_testing(), so nothing
+# creates the default "Testing" directory under the build tree.
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SetOutputDir-build)
+  set(OUTPUT_DIR "${RunCMake_TEST_BINARY_DIR}/CLIOutputDir")
+  run_cmake(SetOutputDir-cmake)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(SetOutputDir-ctest
+    ${CMAKE_CTEST_COMMAND} -C Debug --output-dir ${OUTPUT_DIR})
+endblock()
+
+# Test --output-dir.  This project calls include(CTest), which creates the
+# default "Testing" directory at configure time, so check that it is left
+# unused rather than absent.
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SetOutputDirConfigured-build)
+  set(OUTPUT_DIR "${RunCMake_TEST_BINARY_DIR}/CLIOutputDir")
+  run_cmake(SetOutputDirConfigured-cmake)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(SetOutputDirConfigured-ctest
+    ${CMAKE_CTEST_COMMAND} -C Debug --output-dir ${OUTPUT_DIR})
+endblock()

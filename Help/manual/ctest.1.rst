@@ -472,6 +472,27 @@ The options for running tests are:
  build directory. If not specified, the current directory is used.
  See also :ctest-dashboard-option:`--build-dir`.
 
+.. option:: --output-dir <path>
+
+ .. versionadded:: 4.6
+
+ Specify the directory in which to write output files.
+
+ CTest writes the files it produces during a run, such as the ``TAG`` file,
+ the logs under ``Temporary``, and the XML files submitted to a dashboard,
+ into a single output directory.  By default this is the ``Testing``
+ directory under the build tree.  This option writes them elsewhere; the
+ path may be outside the build tree, and a relative path is interpreted
+ with respect to the build directory.
+
+ This makes it possible to run more than one :program:`ctest` process
+ against the same build tree, for example to run different subsets of the
+ tests with :ctest-option:`--tests-from-file`, without the processes
+ overwriting each other's output.
+
+ When running a dashboard script, use the :variable:`CTEST_OUTPUT_DIRECTORY`
+ variable instead.
+
 .. option:: --test-output-size-passed <size>
 
  .. versionadded:: 3.4
