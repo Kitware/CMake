@@ -203,6 +203,13 @@ run_cxx_module_test(scan-with-pch)
 # Tests which use named modules.
 if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(simple)
+  if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_CXXModules_CONFIGS "Debug\\;Release")
+    set(RunCMake_CXXModules_TARGETS main@Release)
+  endif ()
+  run_cxx_module_test(no-cxx-scanning)
+  unset(RunCMake_CXXModules_CONFIGS)
+  unset(RunCMake_CXXModules_TARGETS)
   # FIXME(GCC): `g++ -c "with space.cpp" -M -fdeps-format=p1689r5` fails.
   if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     run_cxx_module_test(subdir)
