@@ -1543,11 +1543,11 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     if (!parsedCorrectly) {
       cmSystemTools::Error("Run 'cmake --help' for all supported options.");
       exit(1);
-    } else if (!matched && cmHasPrefix(arg, '-')) {
-      possibleUnknownArg = arg;
-    } else if (!matched) {
-      bool parsedDirectory = this->SetDirectoriesFromFile(arg);
-      if (!parsedDirectory) {
+    }
+    if (!matched) {
+      if (cmHasPrefix(arg, '-')) {
+        possibleUnknownArg = arg;
+      } else if (!this->SetDirectoriesFromFile(arg)) {
         extraProvidedPath = arg;
       }
     }
