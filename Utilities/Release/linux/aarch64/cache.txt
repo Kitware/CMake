@@ -14,9 +14,9 @@ OPENSSL_SSL_LIBRARY:FILEPATH=/opt/openssl/lib/libssl.a
 
 # Enable ccmake
 BUILD_CursesDialog:BOOL=ON
-CURSES_FORM_LIBRARY:FILEPATH=/opt/ncurses/lib/libform.a
+CURSES_FORM_LIBRARY:FILEPATH=/opt/ncurses/lib/libformw.a
 CURSES_INCLUDE_PATH:PATH=/opt/ncurses/include
-CURSES_NCURSES_LIBRARY:FILEPATH=/opt/ncurses/lib/libncurses.a
+CURSES_NCURSES_LIBRARY:FILEPATH=/opt/ncurses/lib/libncursesw.a
 
 # Enable cmake-gui with static qt plugins
 BUILD_QtDialog:BOOL=TRUE
