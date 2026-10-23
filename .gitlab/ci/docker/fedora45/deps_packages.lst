@@ -118,9 +118,10 @@ opensp-devel
 patch
 perl
 postgresql-server-devel
-protobuf-c-devel
-protobuf-devel
-protobuf-lite-devel
+# FIXME: Prefer protobuf-* packages when grpc-* no longer conflicts.
+protobuf3-c-devel
+protobuf3-devel
+protobuf3-lite-devel
 pypy2
 pypy2-devel
 pypy3

@@ -16,7 +16,7 @@ bash rvm-installer stable --ignore-dotfiles
 export rvm_silence_banner=1
 
 # keep version in sync with `env_fedora*_makefiles.cmake`
-/usr/local/rvm/bin/rvm install ruby-3.3.8 --no-docs --disable-binary
+/usr/local/rvm/bin/rvm install ruby-3.4.12 --no-docs --disable-binary
 
 for p in archives docs examples gem-cache log src; do
     touch /usr/local/rvm/${p}/.tar_exclude
