@@ -102,8 +102,7 @@ int main(int argc, char const* const* argv)
   inputArgs.reserve(argc - 1);
   cm::append(inputArgs, argv + 1, argv + argc);
 
-  cmSystemTools::InitializeLibUV();
-  cmSystemTools::FindCMakeResources(argv[0]);
+  cmSystemTools::InitializeCMake(argv[0]);
   cmCPackLog log;
 
   log.SetErrorPrefix("CPack Error: ");

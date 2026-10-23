@@ -1285,6 +1285,7 @@ int _cmake_E___create_def(Command::Arguments args)
                  "objlistfile [--nm=nm-path]\n";
     return 1;
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   cmsys::ifstream fin(args[3].c_str(), std::ios::in | std::ios::binary);
   if (!fin) {
     std::cerr << "could not open object list file: " << args[3] << '\n';
@@ -1351,6 +1352,7 @@ Command constexpr cmake_E___create_def{
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 int _cmake_E___run_co_compile(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return HandleCoCompileCommands(args);
 }
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
@@ -1385,6 +1387,7 @@ Command constexpr cmake_E_echo_append{
 
 int _cmake_E_env(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
 #ifndef CMAKE_BOOTSTRAP
   auto envdiff = cmEnvironmentModification{};
 #endif
@@ -1696,6 +1699,7 @@ int _cmake_E_capabilities(Command::Arguments args)
     std::cerr << "-E capabilities accepts no additional arguments\n";
     return 1;
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   cmake cm(cmState::Role::Internal);
   std::cout << cm.ReportCapabilities();
   return 0;
@@ -1743,6 +1747,7 @@ int _cmake_E_time(Command::Arguments args)
   if (args.size() <= 2) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   std::vector<std::string> command(args.begin() + 2, args.end());
 
   int ret = 0;
@@ -1895,6 +1900,7 @@ int _cmake_E_chdir(Command::Arguments args)
   if (args.size() < 4) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   std::string const& directory = args[2];
   if (!cmSystemTools::FileExists(directory)) {
     cmSystemTools::Error("Directory does not exist for chdir command: " +
@@ -1978,6 +1984,7 @@ int _cmake_E_create_symlink(Command::Arguments args)
   if (args.size() != 4) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   std::string const& destinationFileName = args[3];
   if (cmSystemTools::PathExists(destinationFileName) &&
       !cmSystemTools::RemoveFile(destinationFileName)) {
@@ -2006,6 +2013,7 @@ int _cmake_E_create_hardlink(Command::Arguments args)
   if (args.size() != 4) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   std::string const& sourceFileName = args[2];
   std::string const& destinationFileName = args[3];
 
@@ -2059,6 +2067,7 @@ int _cmake_E_cmake_symlink_library(Command::Arguments args)
   if (args.size() != 5) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return SymlinkLibrary(args);
 }
 Command constexpr cmake_E_cmake_symlink_library{
@@ -2072,6 +2081,7 @@ int _cmake_E_cmake_symlink_executable(Command::Arguments args)
   if (args.size() != 4) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return SymlinkExecutable(args);
 }
 Command constexpr cmake_E_cmake_symlink_executable{
@@ -2090,6 +2100,7 @@ int _cmake_E_cmake_fastbuild_check_depends(Command::Arguments args)
   if (args.size() < 3) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   auto const dummyFile = args[2];
   for (auto const& arg : cmMakeRange(args).advance(3)) {
     if (!cmSystemTools::FileExists(arg)) {
@@ -2112,6 +2123,7 @@ int _cmake_E_cmake_depends(Command::Arguments args)
   if (args.size() < 6) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   bool const verbose = isCMakeVerbose();
 
   // Create a cmake object instance to process dependencies.
@@ -2211,6 +2223,7 @@ Command constexpr cmake_E_cmake_depends{
 // Internal CMake compiler dependencies filtering
 int _cmake_E_cmake_cl_compile_depends(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return CLCompileAndDependencies(args);
 }
 #else
@@ -2230,6 +2243,7 @@ int _cmake_E_cmake_link_script(Command::Arguments args)
   if (args.size() < 3) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return ExecuteLinkScript(args);
 }
 Command constexpr cmake_E_cmake_link_script{
@@ -2241,12 +2255,14 @@ Command constexpr cmake_E_cmake_link_script{
 // Internal CMake ninja dependency scanning support.
 int _cmake_E_cmake_ninja_depends(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return cmcmd_cmake_ninja_depends(args.begin() + 2, args.end());
 }
 
 // Internal CMake ninja dyndep support.
 int _cmake_E_cmake_ninja_dyndep(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return cmcmd_cmake_ninja_dyndep(args.begin() + 2, args.end());
 }
 #else
@@ -2265,6 +2281,7 @@ Command constexpr cmake_E_cmake_ninja_dyndep{
 // Internal CMake C++ module compilation database support.
 int _cmake_E_cmake_module_compile_db(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return cmcmd_cmake_module_compile_db(args.begin() + 2, args.end());
 }
 Command constexpr cmake_E_cmake_module_compile_db{
@@ -2295,6 +2312,7 @@ Command constexpr cmake_E_cmake_unimplemented_variable{
 
 int _cmake_E_vs_link_exe(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return VisualStudioLink(args, 1, std::move(args.Console));
 }
 Command constexpr cmake_E_vs_link_exe{
@@ -2303,6 +2321,7 @@ Command constexpr cmake_E_vs_link_exe{
 
 int _cmake_E_vs_link_dll(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return VisualStudioLink(args, 2, std::move(args.Console));
 }
 Command constexpr cmake_E_vs_link_dll{
@@ -2311,6 +2330,7 @@ Command constexpr cmake_E_vs_link_dll{
 
 int _cmake_E_cmake_llvm_rc(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return RunLLVMRC(args);
 }
 Command constexpr cmake_E_cmake_llvm_rc{
@@ -2332,6 +2352,7 @@ int _cmake_E_cmake_autogen(Command::Arguments args)
   if (args.size() < 4) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   cm::string_view const infoFile = args[2];
   cm::string_view const config = args[3];
   cm::string_view const executableConfig =
@@ -2344,6 +2365,7 @@ int _cmake_E_cmake_autorcc(Command::Arguments args)
   if (args.size() < 3) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   cm::string_view const infoFile = args[2];
   cm::string_view const config =
     (args.size() > 3) ? cm::string_view(args[3]) : cm::string_view();
@@ -2368,6 +2390,7 @@ int _cmake_E_tar(Command::Arguments args)
   if (args.size() <= 3) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   char const* knownFormats[] = {
     "7zip", "gnutar", "pax", "paxr", "raw", "zip"
   };
@@ -2627,6 +2650,7 @@ Command constexpr cmake_E_tar{
 // bin2c
 int _cmake_E_bin2c(Command::Arguments args)
 {
+  cmSystemTools::InitializeCMake(args[0].c_str());
   auto const usage = []() {
     std::cerr << "bin2c Usage: -E bin2c "
                  "[<options>...] "
@@ -2820,6 +2844,7 @@ int _cmake_E_cmake_copy_f90_mod(Command::Arguments args)
   if (args.size() < 4) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return cmDependsFortran::CopyModule(args) ? 0 : 1;
 }
 #else
@@ -2837,6 +2862,7 @@ int _cmake_E_write_regv(Command::Arguments args)
   if (args.size() <= 3) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return cmSystemTools::WriteRegistryValue(args[2], args[3]) ? 0 : 1;
 }
 
@@ -2846,6 +2872,7 @@ int _cmake_E_delete_regv(Command::Arguments args)
   if (args.size() <= 2) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return cmSystemTools::DeleteRegistryValue(args[2]) ? 0 : 1;
 }
 
@@ -2863,6 +2890,7 @@ int _cmake_E_env_vs8_wince(Command::Arguments args)
   if (args.size() != 3) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return WindowsCEEnvironment("8.0", args[2]);
 }
 
@@ -2871,6 +2899,7 @@ int _cmake_E_env_vs9_wince(Command::Arguments args)
   if (args.size() != 3) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   return WindowsCEEnvironment("9.0", args[2]);
 }
 #else
@@ -2915,6 +2944,7 @@ int _cmake_E_cmake_transform_depfile(Command::Arguments args)
   if (args.size() != 10) {
     return CMakeCommandUsage(args[0]);
   }
+  cmSystemTools::InitializeCMake(args[0].c_str());
   auto format = cmDepfileFormat::GccDepfile;
   if (args[3] == "gccdepfile") {
     format = cmDepfileFormat::GccDepfile;

@@ -1402,25 +1402,6 @@ std::string cmSystemTools::GetRealPath(std::string const& path,
 #endif
 }
 
-void cmSystemTools::InitializeLibUV()
-{
-#if defined(_WIN32)
-  // Perform libuv one-time initialization now, and then un-do its
-  // global _fmode setting so that using libuv does not change the
-  // default file text/binary mode.  See libuv issue 840.
-  if (uv_loop_t* loop = uv_default_loop()) {
-    uv_loop_close(loop);
-  }
-#  ifdef _MSC_VER
-  _set_fmode(_O_TEXT);
-#  else
-  _fmode = _O_TEXT;
-#  endif
-  // Replace libuv's report handler with our own to suppress popups.
-  cmSystemTools::EnableMSVCDebugHook();
-#endif
-}
-
 #if defined(_WIN32)
 #  include <random>
 
@@ -3146,8 +3127,24 @@ void FindCMakeResourcesInBuildTree(std::string const& exe_dir)
 #endif
 }
 
-void cmSystemTools::FindCMakeResources(char const* argv0)
+void cmSystemTools::InitializeCMake(char const* argv0)
 {
+#if defined(_WIN32)
+  // Perform libuv one-time initialization now, and then un-do its
+  // global _fmode setting so that using libuv does not change the
+  // default file text/binary mode.  See libuv issue 840.
+  if (uv_loop_t* loop = uv_default_loop()) {
+    uv_loop_close(loop);
+  }
+#  ifdef _MSC_VER
+  _set_fmode(_O_TEXT);
+#  else
+  _fmode = _O_TEXT;
+#  endif
+  // Replace libuv's report handler with our own to suppress popups.
+  cmSystemTools::EnableMSVCDebugHook();
+#endif
+
   std::string exe = FindOwnExecutable(argv0);
 #ifdef CMAKE_BOOTSTRAP
   // The bootstrap cmake knows its resource locations.

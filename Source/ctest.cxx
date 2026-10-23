@@ -198,8 +198,7 @@ int main(int argc, char const* const* argv)
   argc = encoding_args.argc();
   argv = encoding_args.argv();
 
-  cmSystemTools::InitializeLibUV();
-  cmSystemTools::FindCMakeResources(argv[0]);
+  cmSystemTools::InitializeCMake(argv[0]);
 
   // Dispatch 'ctest --launch' mode directly.
   if (argc >= 2 && strcmp(argv[1], "--launch") == 0) {
