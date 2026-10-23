@@ -317,6 +317,7 @@ public:
   enum class NameType
   {
     Output, // The name that other build rules refer to, e.g. libfoo.so.
+    SOName, // The soname, e.g. libfoo.so.1.  Falls back to Real if empty.
     Real,   // The name of the real file, e.g. libfoo.so.1.2.3.
   };
 
@@ -1044,6 +1045,10 @@ public:
 
   /** Return whether this target is a shared library on AIX.  */
   bool IsArchivedAIXSharedLibrary() const;
+
+  /** Return whether this target is a plain AIX shared object with
+      VERSION/SOVERSION file names and symlinks.  */
+  bool IsAIXSharedLibraryWithSymlinks() const;
 
   /** Assembly types. The order of the values of this enum is relevant
       because of smaller/larger comparison operations! */

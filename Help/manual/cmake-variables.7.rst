@@ -413,6 +413,7 @@ Variables that Control the Build
    /variable/CMAKE_ADSP_ROOT
    /variable/CMAKE_AIX_EXPORT_ALL_SYMBOLS
    /variable/CMAKE_AIX_SHARED_LIBRARY_ARCHIVE
+   /variable/CMAKE_AIX_SHARED_LIBRARY_SYMLINKS
    /variable/CMAKE_ANDROID_ANT_ADDITIONAL_OPTIONS
    /variable/CMAKE_ANDROID_API
    /variable/CMAKE_ANDROID_API_MIN

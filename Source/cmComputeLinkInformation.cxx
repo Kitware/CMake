@@ -1185,10 +1185,16 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;
 
-      // Pass the full path to the target file.
+      // Pass the full path to the target file.  AIX shared objects have no
+      // builtin soname, so the consumer records the file name used to link.
+      // Link via the SOVERSION symlink so the consumer depends on it at
+      // runtime.
+      cmGeneratorTarget::NameType const nameType =
+        tgt->IsAIXSharedLibraryWithSymlinks()
+        ? cmGeneratorTarget::NameType::SOName
+        : cmGeneratorTarget::NameType::Real;
       BT<std::string> lib = BT<std::string>(
-        tgt->GetFullPath(config, artifact, cmGeneratorTarget::NameType::Real),
-        item.Backtrace);
+        tgt->GetFullPath(config, artifact, nameType), item.Backtrace);
       if (tgt->IsAIX() && cmHasLiteralSuffix(lib.Value, "-NOTFOUND") &&
           artifact == cmStateEnums::ImportLibraryArtifact) {
         // This is an imported executable on AIX that has ENABLE_EXPORTS
