@@ -663,6 +663,7 @@ public:
   bool IsForTryCompile = false;
   bool IsExportPassthrough = false;
   bool CxxModuleNeedsInterfaceObjects = false;
+  std::vector<BT<std::string>> CxxModuleSynthCompileOptions;
   cmTarget::Visibility TargetVisibility;
   std::string ForeignPackageName;
   cmTarget* ForeignTarget = nullptr;
@@ -1289,6 +1290,16 @@ bool cmTarget::CxxModuleNeedsInterfaceObjects() const
 void cmTarget::SetCxxModuleNeedsInterfaceObjects(bool v)
 {
   this->impl->CxxModuleNeedsInterfaceObjects = v;
+}
+
+void cmTarget::AddCxxModuleSynthCompileOption(BT<std::string> option)
+{
+  this->impl->CxxModuleSynthCompileOptions.push_back(std::move(option));
+}
+
+cmBTStringRange cmTarget::GetCxxModuleSynthCompileOptions() const
+{
+  return cmMakeRange(this->impl->CxxModuleSynthCompileOptions);
 }
 
 BTs<std::string> const* cmTarget::GetLanguageStandardProperty(
