@@ -32,10 +32,10 @@ Command-Line
   final product.  CMake will always emit a warning when the project file is
   anything other than ``CMakeLists.txt``.
 
-* The :option:`cmake --sarif-output` option was added to enable generation of a
-  `Static Analysis Results Interchange Format (SARIF)
-  <https://sarifweb.azurewebsites.net/>`_ log file recording diagnostic
-  messages from the run.
+* The :option:`cmake --sarif-output` option was added to enable
+  generation of a `Static Analysis Results Interchange Format (SARIF)
+  <https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html>`__
+  log file recording diagnostic messages from the run.
 
 Commands
 --------
