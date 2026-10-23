@@ -3,6 +3,10 @@
   "name": "Corrupt",
   "license": [],
   "cps_path": "@prefix@/cps",
+  "requires": {
+    "array": [ "" ],
+    "string": ""
+  },
   "components": {
     "corrupt": {
       "type": "archive",
