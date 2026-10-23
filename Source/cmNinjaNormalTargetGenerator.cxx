@@ -453,7 +453,8 @@ static void NinjaSafeComment(std::string& comment)
 void cmNinjaNormalTargetGenerator::WriteLinkRule(
   bool useResponseFile, std::string const& config,
   std::vector<std::string> const& preLinkComments,
-  std::vector<std::string> const& postBuildComments)
+  std::vector<std::string> const& postBuildComments, bool hasPreLink,
+  bool hasPostBuild)
 {
   cm::TargetType targetType = this->GetGeneratorTarget()->GetType();
 
@@ -608,8 +609,19 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     // If there is no ranlib the command will be ":".  Skip it.
     cm::erase_if(linkCmds, cmNinjaRemoveNoOpCommands());
 
-    linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
-    linkCmds.emplace_back("$POST_BUILD");
+    // The rule is specific to this target and configuration, so only
+    // reference $PRE_LINK and $POST_BUILD when the target has such steps.
+    // Otherwise they expand to a no-op that still forces a shell on Windows
+    // (cmd.exe /C), one more process for every link.  If the rule has no
+    // commands of its own, keep them: an empty rule would otherwise become
+    // the bare shell no-op, which is not a program on Windows.
+    bool const noLinkCmds = linkCmds.empty();
+    if (hasPreLink || noLinkCmds) {
+      linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
+    }
+    if (hasPostBuild || noLinkCmds) {
+      linkCmds.emplace_back("$POST_BUILD");
+    }
     rule.Command =
       this->GetLocalGenerator()->BuildCommandLine(linkCmds, config, config);
 
@@ -783,10 +795,27 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
     case cm::TargetType::STATIC_LIBRARY: {
       // We have archive link commands set. First, delete the existing archive.
       {
-        std::string cmakeCommand =
-          this->GetLocalGenerator()->ConvertToOutputFormat(
-            cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
-        linkCmds.push_back(cmakeCommand + " -E rm -f $TARGET_FILE");
+#ifdef _WIN32
+        // This rule always has more than one command, so it runs under
+        // cmd.exe: delete with its builtin instead of starting cmake.exe.
+        // A RULE_LAUNCH_LINK launcher runs each command itself, without
+        // cmd.exe, so keep using cmake.exe when there is one.
+        bool const useDel = this->GetLocalGenerator()
+                              ->GetRuleLauncher(this->GetGeneratorTarget(),
+                                                "RULE_LAUNCH_LINK", config)
+                              .empty();
+#else
+        bool const useDel = false;
+#endif
+        if (useDel) {
+          // Discard the message 'del' prints for a missing file.
+          linkCmds.emplace_back("del /f /q $TARGET_FILE 2>nul");
+        } else {
+          std::string cmakeCommand =
+            this->GetLocalGenerator()->ConvertToOutputFormat(
+              cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
+          linkCmds.push_back(cmakeCommand + " -E rm -f $TARGET_FILE");
+        }
       }
       // TODO: Use ARCHIVE_APPEND for archives over a certain size.
       {
@@ -1598,6 +1627,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   bool const symlinkNeeded =
     (targetOutput != targetOutputReal && !gt->IsFrameworkOnApple() &&
      !gt->IsArchivedAIXSharedLibrary());
+  // Whether the link rule needs $PRE_LINK / $POST_BUILD.  Decide from the
+  // target's commands, not from this statement's lines: the rule is shared
+  // by every statement for this target and config, and in a cross-config
+  // statement the commands above may have been skipped.
+  bool const hasPreLink = !gt->GetPreBuildCommands().empty() ||
+    !gt->GetPreLinkCommands().empty() || (mdi && mdi->DefFileGenerated);
+  bool const hasPostBuild =
+    !symlinkNeeded && !gt->GetPostBuildCommands().empty();
   if (!symlinkNeeded) {
     vars["POST_BUILD"] = postBuildCmdLine;
   } else {
@@ -1700,7 +1737,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   globalGen->WriteBuild(this->GetImplFileStream(fileConfig), linkBuild,
                         commandLineLengthLimit, &usedResponseFile);
   this->WriteLinkRule(usedResponseFile, config, preLinkComments,
-                      postBuildComments);
+                      postBuildComments, hasPreLink, hasPostBuild);
 
   if (symlinkNeeded) {
     if (targetType == cm::TargetType::EXECUTABLE) {
