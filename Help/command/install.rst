@@ -156,6 +156,17 @@ signatures that specify them.  The common options are:
   binary directory.  If this option is used multiple times in a single call,
   its list of dependencies accumulates.
 
+  .. versionchanged:: 4.6
+    Entries may be specified using
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
+    An entry containing a generator expression is evaluated for each build
+    configuration, and the rule depends on the union of the results.
+    Targets it references, as with ``$<TARGET_FILE:tgt>``, are target
+    dependencies, and an evaluated value naming an artifact of such a target
+    is built by that target dependency.  Any other evaluated value is a
+    target or file, as above.  An entry that evaluates to an empty string is
+    ignored.
+
 .. versionadded:: 3.1
   Command signatures that install files may print messages during
   installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable

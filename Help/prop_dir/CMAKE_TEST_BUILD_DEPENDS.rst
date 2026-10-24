@@ -15,3 +15,12 @@ there, and otherwise with respect to the current binary directory.
 Projects may append to this property directly with :command:`set_property` or
 :command:`set_directory_properties` to extend ``test_prep/all`` with
 directory-scoped build dependencies.
+
+.. versionchanged:: 4.6
+  The property value may contain
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  A value containing a generator expression is evaluated as a whole for each
+  configuration, and the result is the list of dependencies.  Targets
+  referenced by the expression, as with ``$<TARGET_FILE:tgt>``, are target
+  dependencies, and an evaluated entry naming an artifact of such a target is
+  built by that target dependency.  Empty entries are ignored.
