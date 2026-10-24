@@ -221,6 +221,42 @@ else()
 endif()
 
 ###############################################################################
+# Test importing of compile and link flags.
+
+find_package(Flags CONFIG REQUIRED)
+
+expect_property(
+  Flags::plain INTERFACE_COMPILE_OPTIONS
+  "compile flags" "-compile-flag;-second-compile-flag")
+expect_property(
+  Flags::plain INTERFACE_LINK_OPTIONS
+  "link flags" "-link-flag;-second-link-flag")
+expect_property(
+  Flags::configurations INTERFACE_COMPILE_OPTIONS
+  "configuration-specific compile flags"
+  "-base-compile;$<$<CONFIG:Debug>:-debug-compile>;$<$<CONFIG:Release>:-release-compile>")
+expect_property(
+  Flags::configurations INTERFACE_LINK_OPTIONS
+  "configuration-specific link flags"
+  "-base-link;$<$<CONFIG:Debug>:-debug-link>;$<$<CONFIG:Release>:-release-link>")
+expect_property(
+  Flags::configured_languages INTERFACE_COMPILE_OPTIONS
+  "configuration- and language-specific compile flags"
+  "$<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-debug-cxx>>")
+
+if(CMAKE_GENERATOR STREQUAL "Xcode" OR CMAKE_GENERATOR MATCHES "Visual Studio")
+  # VS/Xcode generators cannot represent different target-wide compile options
+  # for C and C++ sources in the same target, so split the test by language.
+  add_library(flags-test-c STATIC flags-test-c.c)
+  add_library(flags-test-cxx STATIC flags-test-cxx.cxx)
+  target_link_libraries(flags-test-c Flags::languages)
+  target_link_libraries(flags-test-cxx Flags::languages)
+else()
+  add_library(flags-test STATIC flags-test-c.c flags-test-cxx.cxx)
+  target_link_libraries(flags-test Flags::languages)
+endif()
+
+###############################################################################
 # Test importing and mangling of requirements (i.e. link libraries).
 
 find_package(RequiresTest CONFIG REQUIRED)
