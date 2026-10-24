@@ -37,7 +37,6 @@ done
 case "$mode:$pkg" in
   modversion:good|modversion:bad)
     echo "1.0"
-    echo "/fake-prefix"
     ;;
   variable:good|variable:bad)
     echo "/fake-$variable"

@@ -72,7 +72,6 @@ EXIT /B 1
 
 :VERSION
 ECHO 1.0
-ECHO /fake-prefix
 EXIT /B 0
 
 :VARIABLE
