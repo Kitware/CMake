@@ -79,7 +79,8 @@ cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
 }
 
 std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
-                                                    StackIter end)
+                                                    StackIter end,
+                                                    UnsetKeys unsetKeys)
 {
   std::vector<std::string> defined;
   std::unordered_set<cm::string_view> bound;
@@ -88,7 +89,8 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
     defined.reserve(defined.size() + it->Map.size());
     for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
-      if (bound.emplace(mi.first.view()).second && mi.second.Value) {
+      if (bound.emplace(mi.first.view()).second &&
+          (unsetKeys == UnsetKeys::Include || mi.second.Value)) {
         defined.push_back(*mi.first.str_if_stable());
       }
     }
