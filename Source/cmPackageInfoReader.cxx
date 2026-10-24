@@ -612,6 +612,9 @@ void cmPackageInfoReader::ReadRequirements()
 
   for (auto ri = requirementObjects.begin(), re = requirementObjects.end();
        ri != re; ++ri) {
+    if (!ri->isObject() && !ri->isNull()) {
+      continue;
+    }
     cmPackageRequirement r{ ri.name(),
                             ToString((*ri)["version"]),
                             ReadList(*ri, "components"),
