@@ -32,6 +32,7 @@ This may be used in either a :command:`macro` or a :command:`function`.
   ``ARGV#`` variables of the calling function.  The parsing starts with
   the ``<N>``-th argument, where ``<N>`` is an unsigned integer.
   This allows for the values to have special characters like ``;`` in them.
+  Arguments are numbered starting from 0.
 
 .. versionadded:: 4.4
   The ``PARSE_ARGN`` signature is only for use in a :command:`function`
