@@ -4429,9 +4429,12 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
   if (!this->GlobalGenerator->IsMasmEnabled()) {
     return true;
   }
-  return std::all_of(
-    this->Configurations.begin(), this->Configurations.end(),
-    [this](std::string const& c) { return this->ComputeMasmOptions(c); });
+  return std::all_of(this->Configurations.begin(), this->Configurations.end(),
+                     [this](std::string const& c) {
+                       return !this->GeneratorTarget->IsLanguageUsed(
+                                "ASM_MASM", c) ||
+                         this->ComputeMasmOptions(c);
+                     });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
@@ -4465,7 +4468,8 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
 void cmVisualStudio10TargetGenerator::WriteMasmOptions(
   Elem& e1, std::string const& configName)
 {
-  if (!this->MSTools || !this->GlobalGenerator->IsMasmEnabled()) {
+  if (!this->MSTools || !this->GlobalGenerator->IsMasmEnabled() ||
+      !this->GeneratorTarget->IsLanguageUsed("ASM_MASM", configName)) {
     return;
   }
   Elem e2(e1, "MASM");
