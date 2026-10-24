@@ -417,7 +417,8 @@ std::vector<std::string> cmStateSnapshot::ClosureKeys() const
 std::vector<std::string> cmStateSnapshot::LocalKeys() const
 {
   std::vector<std::string> keys = cmDefinitions::ClosureKeys(
-    this->Position->Vars, this->Position->ScopeParent->Vars);
+    this->Position->Vars, this->Position->ScopeParent->Vars,
+    cmDefinitions::UnsetKeys::Include);
 
   // Remove keys that are the same in the parent scope to avoid propagating
   // logic meant to restore variables back to their original value.

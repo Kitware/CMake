@@ -1,0 +1,5 @@
+foreach(var APPLE UNIX WIN32 CYGWIN MSYS BSD LINUX AIX)
+  if(DEFINED ${var})
+    message(SEND_ERROR "${var} is defined as '${${var}}' for a Generic system.")
+  endif()
+endforeach()
