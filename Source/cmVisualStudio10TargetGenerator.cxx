@@ -5255,6 +5255,16 @@ void cmVisualStudio10TargetGenerator::WriteMidlOptions(
     return;
   }
 
+  cmGeneratorTarget::KindedSources const& sourceFiles =
+    this->GeneratorTarget->GetKindedSources(configName);
+  auto isIdlFile = [](cmGeneratorTarget::SourceAndKind const& sourceAndKind) {
+    return sourceAndKind.Kind == cmGeneratorTarget::SourceKind::SourceKindIDL;
+  };
+  if (std::none_of(sourceFiles.Sources.begin(), sourceFiles.Sources.end(),
+                   isIdlFile)) {
+    return;
+  }
+
   // This processes *any* of the .idl files specified in the project's file
   // list (and passed as the item metadata %(Filename) expressing the rule
   // input filename) into output files at the per-config *build* dir
