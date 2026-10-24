@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -64,17 +65,20 @@ public:
   std::vector<BT<std::string>> GetIncludeDirectories(
     std::string const& config, std::string const& lang) const;
   std::vector<BT<std::string>> GetInterfaceIncludeDirectories(
-    std::string const& config, std::string const& lang) const;
+    std::string const& config, std::string const& lang,
+    cmGeneratorTarget const* consumer) const;
 
   std::vector<BT<std::string>> GetCompileOptions(
     std::string const& config, std::string const& language) const;
   std::vector<BT<std::string>> GetInterfaceCompileOptions(
-    std::string const& config, std::string const& language) const;
+    std::string const& config, std::string const& language,
+    cmGeneratorTarget const* consumer) const;
 
   std::vector<BT<std::string>> GetCompileDefinitions(
     std::string const& config, std::string const& language) const;
   std::vector<BT<std::string>> GetInterfaceCompileDefinitions(
-    std::string const& config, std::string const& language) const;
+    std::string const& config, std::string const& language,
+    cmGeneratorTarget const* consumer) const;
 
   std::vector<BT<std::string>> const& GetDirectoryEntries() const;
   std::vector<BT<std::string>> const& GetFileEntries() const;
@@ -151,10 +155,16 @@ private:
   using ConfigAndLanguage = std::pair<std::string, std::string>;
   using ConfigAndLanguageToBTStrings =
     std::map<ConfigAndLanguage, std::vector<BT<std::string>>>;
+  using ConsumerConfigAndLanguage =
+    std::tuple<cmGeneratorTarget const*, std::string, std::string>;
+  using ConsumerConfigAndLanguageToBTStrings =
+    std::map<ConsumerConfigAndLanguage, std::vector<BT<std::string>>>;
   mutable ConfigAndLanguageToBTStrings IncludeDirectoriesCache;
-  mutable ConfigAndLanguageToBTStrings InterfaceIncludeDirectoriesCache;
+  mutable ConsumerConfigAndLanguageToBTStrings
+    InterfaceIncludeDirectoriesCache;
   mutable ConfigAndLanguageToBTStrings CompileOptionsCache;
-  mutable ConfigAndLanguageToBTStrings InterfaceCompileOptionsCache;
+  mutable ConsumerConfigAndLanguageToBTStrings InterfaceCompileOptionsCache;
   mutable ConfigAndLanguageToBTStrings CompileDefinitionsCache;
-  mutable ConfigAndLanguageToBTStrings InterfaceCompileDefinitionsCache;
+  mutable ConsumerConfigAndLanguageToBTStrings
+    InterfaceCompileDefinitionsCache;
 };

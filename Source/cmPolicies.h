@@ -685,7 +685,10 @@ class cmMakefile;
          4, 5, 0, WARN)                                                       \
   SELECT(POLICY, CMP0227,                                                     \
          "AIX shared objects are named with VERSION and SOVERSION.", 4, 6, 0, \
-         WARN)
+         WARN)                                                                \
+  SELECT(POLICY, CMP0228,                                                     \
+         "File set usage requirements are evaluated for the consumer.", 4, 6, \
+         0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -746,7 +749,8 @@ class cmMakefile;
   F(CMP0215)                                                                  \
   F(CMP0216)                                                                  \
   F(CMP0226)                                                                  \
-  F(CMP0227)
+  F(CMP0227)                                                                  \
+  F(CMP0228)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

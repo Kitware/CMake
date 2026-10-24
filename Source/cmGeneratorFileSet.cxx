@@ -26,6 +26,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -169,6 +170,14 @@ std::vector<BT<std::string>> ProcessIncludes(
   }
   return includes;
 }
+
+// The target that interface usage requirements of a file set owned by
+// `owner` are evaluated for when compiling the sources of `consumer`.
+cmGeneratorTarget const* GetUsageRequirementTarget(
+  cmGeneratorTarget const* owner, cmGeneratorTarget const* consumer)
+{
+  return owner->GetPolicyStatusCMP0228() == cmPolicies::NEW ? consumer : owner;
+}
 }
 
 //
@@ -260,9 +269,10 @@ std::vector<BT<std::string>> cmGeneratorFileSet::GetIncludeDirectories(
 }
 std::vector<BT<std::string>>
 cmGeneratorFileSet::GetInterfaceIncludeDirectories(
-  std::string const& config, std::string const& lang) const
+  std::string const& config, std::string const& lang,
+  cmGeneratorTarget const* consumer) const
 {
-  ConfigAndLanguage cacheKey(config, lang);
+  ConsumerConfigAndLanguage cacheKey(consumer, config, lang);
   {
     auto it = this->InterfaceIncludeDirectoriesCache.find(cacheKey);
     if (it != this->InterfaceIncludeDirectoriesCache.end()) {
@@ -276,8 +286,9 @@ cmGeneratorFileSet::GetInterfaceIncludeDirectories(
   };
 
   cm::EvaluatedTargetPropertyEntries entries =
-    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
-                                      this->InterfaceIncludeDirectories);
+    cm::EvaluateTargetPropertyEntries(
+      GetUsageRequirementTarget(this->Target, consumer), context, &dagChecker,
+      this->InterfaceIncludeDirectories, this);
   auto includes = ProcessIncludes(this->Target, this->GetName(),
                                   "INTERFACE_INCLUDE_DIRECTORIES"_s, entries);
   this->InterfaceIncludeDirectoriesCache.emplace(cacheKey, includes);
@@ -311,9 +322,10 @@ std::vector<BT<std::string>> cmGeneratorFileSet::GetCompileOptions(
   return options;
 }
 std::vector<BT<std::string>> cmGeneratorFileSet::GetInterfaceCompileOptions(
-  std::string const& config, std::string const& language) const
+  std::string const& config, std::string const& language,
+  cmGeneratorTarget const* consumer) const
 {
-  ConfigAndLanguage cacheKey(config, language);
+  ConsumerConfigAndLanguage cacheKey(consumer, config, language);
   {
     auto it = this->InterfaceCompileOptionsCache.find(cacheKey);
     if (it != this->InterfaceCompileOptionsCache.end()) {
@@ -328,8 +340,9 @@ std::vector<BT<std::string>> cmGeneratorFileSet::GetInterfaceCompileOptions(
   };
 
   cm::EvaluatedTargetPropertyEntries entries =
-    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
-                                      this->InterfaceCompileOptions);
+    cm::EvaluateTargetPropertyEntries(
+      GetUsageRequirementTarget(this->Target, consumer), context, &dagChecker,
+      this->InterfaceCompileOptions, this);
   auto options = ProcessOptions(entries, OptionsParse::Shell);
   this->InterfaceCompileOptionsCache.emplace(cacheKey, options);
 
@@ -363,9 +376,10 @@ std::vector<BT<std::string>> cmGeneratorFileSet::GetCompileDefinitions(
 }
 std::vector<BT<std::string>>
 cmGeneratorFileSet::GetInterfaceCompileDefinitions(
-  std::string const& config, std::string const& language) const
+  std::string const& config, std::string const& language,
+  cmGeneratorTarget const* consumer) const
 {
-  ConfigAndLanguage cacheKey(config, language);
+  ConsumerConfigAndLanguage cacheKey(consumer, config, language);
   {
     auto it = this->InterfaceCompileDefinitionsCache.find(cacheKey);
     if (it != this->InterfaceCompileDefinitionsCache.end()) {
@@ -380,8 +394,9 @@ cmGeneratorFileSet::GetInterfaceCompileDefinitions(
   };
 
   cm::EvaluatedTargetPropertyEntries entries =
-    cm::EvaluateTargetPropertyEntries(this->Target, context, &dagChecker,
-                                      this->InterfaceCompileDefinitions);
+    cm::EvaluateTargetPropertyEntries(
+      GetUsageRequirementTarget(this->Target, consumer), context, &dagChecker,
+      this->InterfaceCompileDefinitions, this);
   auto defines = ProcessOptions(entries);
   this->InterfaceCompileDefinitionsCache.emplace(cacheKey, defines);
 

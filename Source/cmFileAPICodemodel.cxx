@@ -1530,7 +1530,8 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   if (fileSet) {
     for (BT<std::string> const& tmpOpt : fileSet->BelongsTo(this->GT)
            ? fileSet->GetCompileOptions(this->Config, fd.Language)
-           : fileSet->GetInterfaceCompileOptions(this->Config, fd.Language)) {
+           : fileSet->GetInterfaceCompileOptions(this->Config, fd.Language,
+                                                 this->GT)) {
       // We need to use the AppendCompileOptions method so we handle situations
       // where backtrace entries have list and properly escape flags.
       std::string tmp;
@@ -1583,8 +1584,8 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   if (fileSet) {
     for (BT<std::string> const& tmpInclude : fileSet->BelongsTo(this->GT)
            ? fileSet->GetIncludeDirectories(this->Config, fd.Language)
-           : fileSet->GetInterfaceIncludeDirectories(this->Config,
-                                                     fd.Language)) {
+           : fileSet->GetInterfaceIncludeDirectories(this->Config, fd.Language,
+                                                     this->GT)) {
       // We need to use the AppendIncludeDirectories method so we handle
       // situations where backtrace entries have lists.
       std::vector<std::string> tmp;
@@ -1653,8 +1654,8 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   if (fileSet) {
     for (BT<std::string> const& tmpDef : fileSet->BelongsTo(this->GT)
            ? fileSet->GetCompileDefinitions(this->Config, fd.Language)
-           : fileSet->GetInterfaceCompileDefinitions(this->Config,
-                                                     fd.Language)) {
+           : fileSet->GetInterfaceCompileDefinitions(this->Config, fd.Language,
+                                                     this->GT)) {
       // We need to use the AppendDefines method so we handle situations where
       // backtrace entries have lists.
       std::set<std::string> tmp;
