@@ -53,7 +53,6 @@ public:
 
   llpkgc_file_errno_t Parse(char const* input, std::size_t len);
   llpkgc_file_errno_t Finish();
-  void Resume();
 
   llpkgc_file_errno_t GetErrno() const;
   char const* ErrorReason() const;
@@ -68,7 +67,7 @@ private:
 
   void AppendValue(std::string text, bool isSubstitution);
 
-  int OnSpanNext(char const*, std::size_t len);
+  int OnSpanNext(char const* at, std::size_t len);
   static int OnSpanNextTr(llpkgc_file_t* parser, char const* at,
                           std::size_t len);
 
@@ -105,7 +104,6 @@ private:
     OnIdentTr,
     OnValueLiteralTr,
     OnValueSubstitutionTr,
-    nullptr, // on_line_begin
     OnPropertyCompleteTr,
     OnVariableCompleteTr,
     OnBarewordsCompleteTr,
@@ -115,8 +113,7 @@ private:
     nullptr, // on_pkgc_complete
   };
 
-  char const* Ptr_ = nullptr;
-  std::size_t Len_ = 0;
+  std::string CurrentValue_;
   std::string Ident_;
   std::vector<cmPkgConfigEntry> Data_;
 };
@@ -153,13 +150,13 @@ private:
 
 enum class cmPkgConfigDependencyOperation
 {
-  None,
-  LessThan,
-  LessThanEqual,
-  Equal,
-  NotEqual,
-  GreaterThan,
-  GreaterThanEqual,
+  None = LLPKGC_DEP_ANY,
+  LessThan = LLPKGC_DEP_LESS_THAN,
+  LessThanEqual = LLPKGC_DEP_LESS_THAN_EQUAL,
+  Equal = LLPKGC_DEP_EQUAL,
+  NotEqual = LLPKGC_DEP_NOT_EQUAL,
+  GreaterThan = LLPKGC_DEP_GREATER_THAN,
+  GreaterThanEqual = LLPKGC_DEP_GREATER_THAN_EQUAL,
 };
 
 struct cmPkgConfigDependencySpec
@@ -191,10 +188,6 @@ private:
   static int OnDependencyNameTr(llpkgc_dep_t* parser, char const* at,
                                 std::size_t len);
 
-  int OnDependencyOperator(char const* at, std::size_t len);
-  static int OnDependencyOperatorTr(llpkgc_dep_t* parser, char const* at,
-                                    std::size_t len);
-
   int OnDependencyVersion(char const* at, std::size_t len);
   static int OnDependencyVersionTr(llpkgc_dep_t* parser, char const* at,
                                    std::size_t len);
@@ -203,10 +196,7 @@ private:
   static int OnDependencyCompleteTr(llpkgc_dep_t* parser);
 
   llpkgc_dep_settings_t Settings_{
-    OnDependencyNameTr,
-    OnDependencyOperatorTr,
-    OnDependencyVersionTr,
-    OnDependencyCompleteTr,
+    OnDependencyNameTr, OnDependencyVersionTr, OnDependencyCompleteTr,
     nullptr, // on_dep_list_complete
   };
 
@@ -253,9 +243,6 @@ private:
 
   bool ResolveAndParse(std::string const& name,
                        cmPkgConfigResolvedValue& cache);
-
-  static bool IsFragmentProperty(std::string const& lower);
-  static bool IsDependencyProperty(std::string const& lower);
 
   cmPkgConfigFileParser File_;
   std::unordered_map<std::string, ValueItems> StoredVariables_;

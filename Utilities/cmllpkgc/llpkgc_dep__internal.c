@@ -39,80 +39,114 @@ typedef int (*llpkgc_dep__internal__span_cb)(
 
 enum llparse_state_e {
   s_error,
-  s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete,
-  s_n_llpkgc_dep__internal__n_pkgc_dep_dep_version,
-  s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_version,
-  s_n_llpkgc_dep__internal__n_pkgc_dep_after_op,
-  s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op,
-  s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_op,
-  s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1,
-  s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws,
-  s_n_llpkgc_dep__internal__n_pkgc_dep_dep_name,
-  s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name,
-  s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_name,
-  s_n_llpkgc_dep__internal__n_pkgc_dep_start,
+  s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__on_dep_complete,
+  s_n_llpkgc_dep__internal__n_version,
+  s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_version,
+  s_n_llpkgc_dep__internal__n_before_version,
+  s_n_llpkgc_dep__internal__n_unknown_operator,
+  s_n_llpkgc_dep__internal__n_operator_end,
+  s_n_llpkgc_dep__internal__n_not,
+  s_n_llpkgc_dep__internal__n_less_than,
+  s_n_llpkgc_dep__internal__n_greater_than,
+  s_n_llpkgc_dep__internal__n_operator,
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_2,
+  s_n_llpkgc_dep__internal__n_after_name,
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_1,
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_21,
+  s_n_llpkgc_dep__internal__n_name,
+  s_n_llpkgc_dep__internal__n_first_name_character,
+  s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_name,
+  s_n_llpkgc_dep__internal__n_start,
 };
 typedef enum llparse_state_e llparse_state_t;
 
-int llpkgc_dep__dep_name(
+int llpkgc_dep__on_dep_name(
     llpkgc_dep__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_dep__dep_op(
+int llpkgc_dep__on_dep_version(
     llpkgc_dep__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_dep__dep_version(
+int llpkgc_dep__internal__c_update_comparator(
+    llpkgc_dep__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->comparator = 0;
+  return 0;
+}
+
+int llpkgc_dep__internal__c_update_finish(
+    llpkgc_dep__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->finish = 1;
+  return 0;
+}
+
+int llpkgc_dep__on_dep_complete(
     llpkgc_dep__internal_t* s, const unsigned char* p,
     const unsigned char* endp);
 
-int llpkgc_dep__internal__c_update_llpkgc_dep__state(
+int llpkgc_dep__internal__c_update_finish_6(
     llpkgc_dep__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_dep__state = 1;
+  state->finish = 0;
   return 0;
 }
 
-int llpkgc_dep__internal__c_update_llpkgc_dep__state_1(
+int llpkgc_dep__internal__c_update_comparator_3(
     llpkgc_dep__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_dep__state = 2;
+  state->comparator = 4;
   return 0;
 }
 
-int llpkgc_dep__internal__c_update_llpkgc_dep__state_2(
+int llpkgc_dep__internal__c_update_comparator_5(
     llpkgc_dep__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_dep__state = 3;
+  state->comparator = 1;
   return 0;
 }
 
-int llpkgc_dep__dep_complete(
-    llpkgc_dep__internal_t* s, const unsigned char* p,
-    const unsigned char* endp);
-
-int llpkgc_dep__internal__c_update_llpkgc_dep__state_3(
+int llpkgc_dep__internal__c_update_comparator_7(
     llpkgc_dep__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_dep__state = 0;
+  state->comparator = 2;
   return 0;
 }
 
-int llpkgc_dep__internal__c_update_llpkgc_dep__state_4(
+int llpkgc_dep__internal__c_update_comparator_8(
     llpkgc_dep__internal_t* state,
     const unsigned char* p,
     const unsigned char* endp) {
-  state->llpkgc_dep__state = 4;
+  state->comparator = 3;
+  return 0;
+}
+
+int llpkgc_dep__internal__c_update_comparator_9(
+    llpkgc_dep__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->comparator = 5;
+  return 0;
+}
+
+int llpkgc_dep__internal__c_update_comparator_11(
+    llpkgc_dep__internal_t* state,
+    const unsigned char* p,
+    const unsigned char* endp) {
+  state->comparator = 6;
   return 0;
 }
 
 int llpkgc_dep__internal_init(llpkgc_dep__internal_t* state) {
   memset(state, 0, sizeof(*state));
-  state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_pkgc_dep_start;
+  state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_start;
   return 0;
 }
 
@@ -122,250 +156,469 @@ static llparse_state_t llpkgc_dep__internal__run(
     const unsigned char* endp) {
   int match;
   switch ((llparse_state_t) (intptr_t) state->_current) {
-    case s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete:
-    s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete: {
-      switch (llpkgc_dep__dep_complete(state, p, endp)) {
+    case s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__on_dep_complete:
+    s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__on_dep_complete: {
+      switch (llpkgc_dep__on_dep_complete(state, p, endp)) {
         case 0:
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_3;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_6;
+        case 5:
+          goto s_n_llpkgc_dep__internal__n_error_1;
         default:
           goto s_n_llpkgc_dep__internal__n_error;
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_pkgc_dep_dep_version:
-    s_n_llpkgc_dep__internal__n_pkgc_dep_dep_version: {
+    case s_n_llpkgc_dep__internal__n_version:
+    s_n_llpkgc_dep__internal__n_version: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_pkgc_dep_dep_version;
+        return s_n_llpkgc_dep__internal__n_version;
       }
       switch (*p) {
         case 9: {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_version;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_version;
+        }
+        case 10: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_version;
+        }
+        case 11: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_version;
+        }
+        case 12: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_version;
+        }
+        case 13: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_version;
         }
         case ' ': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_version;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_version;
         }
         case ',': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_version;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_version;
         }
         default: {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_version;
+          goto s_n_llpkgc_dep__internal__n_version;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_version:
-    s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_version: {
+    case s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_version:
+    s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_version: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_version;
+        return s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_version;
       }
       state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_dep__dep_version;
-      goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_version;
+      state->_span_cb0 = llpkgc_dep__on_dep_version;
+      goto s_n_llpkgc_dep__internal__n_invoke_update_finish_7;
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_pkgc_dep_after_op:
-    s_n_llpkgc_dep__internal__n_pkgc_dep_after_op: {
+    case s_n_llpkgc_dep__internal__n_before_version:
+    s_n_llpkgc_dep__internal__n_before_version: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_pkgc_dep_after_op;
+        return s_n_llpkgc_dep__internal__n_before_version;
       }
       switch (*p) {
         case 9: {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_after_op;
+          goto s_n_llpkgc_dep__internal__n_before_version;
+        }
+        case 10: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_before_version;
+        }
+        case 11: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_before_version;
+        }
+        case 12: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_before_version;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_before_version;
         }
         case ' ': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_after_op;
+          goto s_n_llpkgc_dep__internal__n_before_version;
         }
         case ',': {
-          goto s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete;
+          goto s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__on_dep_complete;
         }
         default: {
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_4;
+          goto s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_version;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op:
-    s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op: {
+    case s_n_llpkgc_dep__internal__n_unknown_operator:
+    s_n_llpkgc_dep__internal__n_unknown_operator: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op;
+        return s_n_llpkgc_dep__internal__n_unknown_operator;
       }
       switch (*p) {
         case '!': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op;
+          goto s_n_llpkgc_dep__internal__n_unknown_operator;
         }
         case '<': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op;
+          goto s_n_llpkgc_dep__internal__n_unknown_operator;
         }
         case '=': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op;
+          goto s_n_llpkgc_dep__internal__n_unknown_operator;
         }
         case '>': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op;
+          goto s_n_llpkgc_dep__internal__n_unknown_operator;
         }
         default: {
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_2;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_5;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_op:
-    s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_op: {
+    case s_n_llpkgc_dep__internal__n_operator_end:
+    s_n_llpkgc_dep__internal__n_operator_end: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_op;
+        return s_n_llpkgc_dep__internal__n_operator_end;
       }
-      state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_dep__dep_op;
-      goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_op;
+      switch (*p) {
+        case '!': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_4;
+        }
+        case '<': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_4;
+        }
+        case '=': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_4;
+        }
+        case '>': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_4;
+        }
+        default: {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_10;
+        }
+      }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1:
-    s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1: {
-      switch (llpkgc_dep__internal__c_update_llpkgc_dep__state_1(state, p, endp)) {
+    case s_n_llpkgc_dep__internal__n_not:
+    s_n_llpkgc_dep__internal__n_not: {
+      if (p == endp) {
+        return s_n_llpkgc_dep__internal__n_not;
+      }
+      switch (*p) {
+        case '!': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_2;
+        }
+        case '<': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_2;
+        }
+        case '=': {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_3;
+        }
+        case '>': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_2;
+        }
+        default: {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_11;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_dep__internal__n_less_than:
+    s_n_llpkgc_dep__internal__n_less_than: {
+      if (p == endp) {
+        return s_n_llpkgc_dep__internal__n_less_than;
+      }
+      switch (*p) {
+        case '!': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_6;
+        }
+        case '<': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_6;
+        }
+        case '=': {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_7;
+        }
+        case '>': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_6;
+        }
+        default: {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_15;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_dep__internal__n_greater_than:
+    s_n_llpkgc_dep__internal__n_greater_than: {
+      if (p == endp) {
+        return s_n_llpkgc_dep__internal__n_greater_than;
+      }
+      switch (*p) {
+        case '!': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_10;
+        }
+        case '<': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_10;
+        }
+        case '=': {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_11;
+        }
+        case '>': {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_10;
+        }
+        default: {
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_20;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_dep__internal__n_operator:
+    s_n_llpkgc_dep__internal__n_operator: {
+      if (p == endp) {
+        return s_n_llpkgc_dep__internal__n_operator;
+      }
+      switch (*p) {
+        case '!': {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_1;
+        }
+        case '<': {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_5;
+        }
+        case '=': {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_8;
+        }
+        case '>': {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator_9;
+        }
+        default: {
+          goto s_n_llpkgc_dep__internal__n_error_2;
+        }
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_dep__internal__n_invoke_update_finish_2:
+    s_n_llpkgc_dep__internal__n_invoke_update_finish_2: {
+      switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
         default:
-          goto s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_op;
+          goto s_n_llpkgc_dep__internal__n_operator;
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws:
-    s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws: {
+    case s_n_llpkgc_dep__internal__n_after_name:
+    s_n_llpkgc_dep__internal__n_after_name: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws;
+        return s_n_llpkgc_dep__internal__n_after_name;
       }
       switch (*p) {
         case 9: {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws;
+          goto s_n_llpkgc_dep__internal__n_after_name;
+        }
+        case 10: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_after_name;
+        }
+        case 11: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_after_name;
+        }
+        case 12: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_after_name;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_after_name;
         }
         case ' ': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws;
+          goto s_n_llpkgc_dep__internal__n_after_name;
         }
         case '!': {
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_2;
         }
         case '<': {
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_2;
         }
         case '=': {
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_2;
         }
         case '>': {
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_finish_2;
         }
         default: {
-          goto s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete;
+          goto s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__on_dep_complete;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_pkgc_dep_dep_name:
-    s_n_llpkgc_dep__internal__n_pkgc_dep_dep_name: {
+    case s_n_llpkgc_dep__internal__n_invoke_update_finish_1:
+    s_n_llpkgc_dep__internal__n_invoke_update_finish_1: {
+      switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+        default:
+          goto s_n_llpkgc_dep__internal__n_after_name;
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_dep__internal__n_invoke_update_finish_21:
+    s_n_llpkgc_dep__internal__n_invoke_update_finish_21: {
+      switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+        default:
+          goto s_n_llpkgc_dep__internal__n_after_name;
+      }
+      UNREACHABLE;
+    }
+    case s_n_llpkgc_dep__internal__n_name:
+    s_n_llpkgc_dep__internal__n_name: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_pkgc_dep_dep_name;
+        return s_n_llpkgc_dep__internal__n_name;
       }
       switch (*p) {
         case 9: {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_2;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_1;
+        }
+        case 10: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_1;
+        }
+        case 11: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_1;
+        }
+        case 12: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_1;
+        }
+        case 13: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_1;
         }
         case ' ': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_2;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_1;
         }
         case '!': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_3;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_2;
         }
         case ',': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_4;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_1;
         }
         case '<': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_3;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_2;
         }
         case '=': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_3;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_2;
         }
         case '>': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_3;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_2;
         }
         default: {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_name;
+          goto s_n_llpkgc_dep__internal__n_name;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name:
-    s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name: {
+    case s_n_llpkgc_dep__internal__n_first_name_character:
+    s_n_llpkgc_dep__internal__n_first_name_character: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name;
+        return s_n_llpkgc_dep__internal__n_first_name_character;
       }
       switch (*p) {
         case 9: {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name;
+        }
+        case 10: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name;
+        }
+        case 11: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name;
+        }
+        case 12: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name;
+        }
+        case 13: {
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name;
         }
         case ' ': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name;
         }
         case '!': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name;
+          goto s_n_llpkgc_dep__internal__n_first_name_character;
         }
         case ',': {
-          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_1;
+          goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name;
         }
         case '<': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name;
+          goto s_n_llpkgc_dep__internal__n_first_name_character;
         }
         case '=': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name;
+          goto s_n_llpkgc_dep__internal__n_first_name_character;
         }
         case '>': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name;
+          goto s_n_llpkgc_dep__internal__n_first_name_character;
         }
         default: {
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_5;
+          goto s_n_llpkgc_dep__internal__n_name;
         }
       }
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_name:
-    s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_name: {
+    case s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_name:
+    s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_name: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_name;
+        return s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_name;
       }
       state->_span_pos0 = (void*) p;
-      state->_span_cb0 = llpkgc_dep__dep_name;
-      goto s_n_llpkgc_dep__internal__n_pkgc_dep_first_dep_name;
+      state->_span_cb0 = llpkgc_dep__on_dep_name;
+      goto s_n_llpkgc_dep__internal__n_invoke_update_finish;
       UNREACHABLE;
     }
-    case s_n_llpkgc_dep__internal__n_pkgc_dep_start:
-    s_n_llpkgc_dep__internal__n_pkgc_dep_start: {
+    case s_n_llpkgc_dep__internal__n_start:
+    s_n_llpkgc_dep__internal__n_start: {
       if (p == endp) {
-        return s_n_llpkgc_dep__internal__n_pkgc_dep_start;
+        return s_n_llpkgc_dep__internal__n_start;
       }
       switch (*p) {
         case 9: {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_start;
+          goto s_n_llpkgc_dep__internal__n_start;
+        }
+        case 10: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_start;
+        }
+        case 11: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_start;
+        }
+        case 12: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_start;
+        }
+        case 13: {
+          p++;
+          goto s_n_llpkgc_dep__internal__n_start;
         }
         case ' ': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_start;
+          goto s_n_llpkgc_dep__internal__n_start;
         }
         case ',': {
           p++;
-          goto s_n_llpkgc_dep__internal__n_pkgc_dep_start;
+          goto s_n_llpkgc_dep__internal__n_start;
         }
         default: {
-          goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state;
+          goto s_n_llpkgc_dep__internal__n_invoke_update_comparator;
         }
       }
       UNREACHABLE;
@@ -373,158 +626,308 @@ static llparse_state_t llpkgc_dep__internal__run(
     default:
       UNREACHABLE;
   }
-  s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_3: {
-    switch (llpkgc_dep__internal__c_update_llpkgc_dep__state_3(state, p, endp)) {
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_6: {
+    switch (llpkgc_dep__internal__c_update_finish_6(state, p, endp)) {
       default:
-        goto s_n_llpkgc_dep__internal__n_pkgc_dep_start;
+        goto s_n_llpkgc_dep__internal__n_start;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_dep__internal__n_error: {
-    state->error = 0x1;
-    state->reason = "Dep complete error";
+  s_n_llpkgc_dep__internal__n_error_1: {
+    state->error = 0x5;
+    state->reason = "Internal parser error";
     state->error_pos = (const char*) p;
     state->_current = (void*) (intptr_t) s_error;
     return s_error;
     UNREACHABLE;
   }
-  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_version: {
+  s_n_llpkgc_dep__internal__n_error: {
+    state->error = 0x2;
+    state->reason = "Callback error";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_version: {
     const unsigned char* start;
     int err;
 
     start = state->_span_pos0;
     state->_span_pos0 = NULL;
-    err = llpkgc_dep__dep_version(state, start, p);
+    err = llpkgc_dep__on_dep_version(state, start, p);
     if (err != 0) {
       state->error = err;
       state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__on_dep_complete;
       return s_error;
     }
-    goto s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete;
+    goto s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__on_dep_complete;
     UNREACHABLE;
   }
-  s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_4: {
-    switch (llpkgc_dep__internal__c_update_llpkgc_dep__state_4(state, p, endp)) {
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_7: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
       default:
-        goto s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_version;
+        goto s_n_llpkgc_dep__internal__n_version;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_op: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_dep__dep_op(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_pkgc_dep_after_op;
-      return s_error;
-    }
-    goto s_n_llpkgc_dep__internal__n_pkgc_dep_after_op;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_2: {
-    switch (llpkgc_dep__internal__c_update_llpkgc_dep__state_2(state, p, endp)) {
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_5: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
       default:
-        goto s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_op;
+        goto s_n_llpkgc_dep__internal__n_before_version;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_dep__dep_name(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws;
-      return s_error;
-    }
-    goto s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_1: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_dep__dep_name(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete;
-      return s_error;
-    }
-    goto s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_2: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_dep__dep_name(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws;
-      return s_error;
-    }
-    goto s_n_llpkgc_dep__internal__n_pkgc_dep_name_ws;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_3: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_dep__dep_name(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1;
-      return s_error;
-    }
-    goto s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_1;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__dep_name_4: {
-    const unsigned char* start;
-    int err;
-
-    start = state->_span_pos0;
-    state->_span_pos0 = NULL;
-    err = llpkgc_dep__dep_name(state, start, p);
-    if (err != 0) {
-      state->error = err;
-      state->error_pos = (const char*) p;
-      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete;
-      return s_error;
-    }
-    goto s_n_llpkgc_dep__internal__n_invoke_llpkgc_dep__dep_complete;
-    UNREACHABLE;
-  }
-  s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state_5: {
-    switch (llpkgc_dep__internal__c_update_llpkgc_dep__state(state, p, endp)) {
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_4: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
       default:
-        goto s_n_llpkgc_dep__internal__n_pkgc_dep_dep_name;
+        goto s_n_llpkgc_dep__internal__n_unknown_operator;
     }
     UNREACHABLE;
   }
-  s_n_llpkgc_dep__internal__n_invoke_update_llpkgc_dep__state: {
-    switch (llpkgc_dep__internal__c_update_llpkgc_dep__state(state, p, endp)) {
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_2: {
+    switch (llpkgc_dep__internal__c_update_comparator(state, p, endp)) {
       default:
-        goto s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__dep_name;
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_4;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_9: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_unknown_operator;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_4: {
+    switch (llpkgc_dep__internal__c_update_comparator(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_9;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_10: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_before_version;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_8: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_operator_end;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_3: {
+    switch (llpkgc_dep__internal__c_update_comparator_3(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_8;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_11: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_before_version;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_3: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_not;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_1: {
+    switch (llpkgc_dep__internal__c_update_comparator(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_3;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_13: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_unknown_operator;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_6: {
+    switch (llpkgc_dep__internal__c_update_comparator(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_13;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_14: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_operator_end;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_7: {
+    switch (llpkgc_dep__internal__c_update_comparator_7(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_14;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_15: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_before_version;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_12: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_less_than;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_5: {
+    switch (llpkgc_dep__internal__c_update_comparator_5(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_12;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_16: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_operator_end;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_8: {
+    switch (llpkgc_dep__internal__c_update_comparator_8(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_16;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_18: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_unknown_operator;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_10: {
+    switch (llpkgc_dep__internal__c_update_comparator(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_18;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_19: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_operator_end;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_11: {
+    switch (llpkgc_dep__internal__c_update_comparator_11(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_19;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_20: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_before_version;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish_17: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_greater_than;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator_9: {
+    switch (llpkgc_dep__internal__c_update_comparator_9(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_invoke_update_finish_17;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_error_2: {
+    state->error = 0x4;
+    state->reason = "Invalid dependency operator";
+    state->error_pos = (const char*) p;
+    state->_current = (void*) (intptr_t) s_error;
+    return s_error;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_dep__on_dep_name(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_invoke_update_finish_1;
+      return s_error;
+    }
+    goto s_n_llpkgc_dep__internal__n_invoke_update_finish_1;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_1: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_dep__on_dep_name(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_invoke_update_finish_21;
+      return s_error;
+    }
+    goto s_n_llpkgc_dep__internal__n_invoke_update_finish_21;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_span_end_llpkgc_dep__on_dep_name_2: {
+    const unsigned char* start;
+    int err;
+
+    start = state->_span_pos0;
+    state->_span_pos0 = NULL;
+    err = llpkgc_dep__on_dep_name(state, start, p);
+    if (err != 0) {
+      state->error = err;
+      state->error_pos = (const char*) p;
+      state->_current = (void*) (intptr_t) s_n_llpkgc_dep__internal__n_invoke_update_finish_2;
+      return s_error;
+    }
+    goto s_n_llpkgc_dep__internal__n_invoke_update_finish_2;
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_finish: {
+    switch (llpkgc_dep__internal__c_update_finish(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_first_name_character;
+    }
+    UNREACHABLE;
+  }
+  s_n_llpkgc_dep__internal__n_invoke_update_comparator: {
+    switch (llpkgc_dep__internal__c_update_comparator(state, p, endp)) {
+      default:
+        goto s_n_llpkgc_dep__internal__n_span_start_llpkgc_dep__on_dep_name;
     }
     UNREACHABLE;
   }
@@ -563,3 +966,138 @@ int llpkgc_dep__internal_execute(llpkgc_dep__internal_t* state, const char* p, c
 
   return 0;
 }
+#include <string.h>
+#include "llpkgc_dep.h"
+int llpkgc_dep__on_dep_complete(llpkgc_dep_t*, const unsigned char*, const unsigned char*);
+
+int llpkgc_dep__on_dep_list_complete(llpkgc_dep_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_dep_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_dep_list_complete == NULL) return 0;
+  err = settings->on_dep_list_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_dep_list_complete";
+    s->callback_reason = (void*) s->reason;
+    return PDEP_USER;
+  }
+  return 0;
+}
+
+int llpkgc_dep__on_dep_name(llpkgc_dep_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_dep_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_dep_name == NULL) return 0;
+  err = settings->on_dep_name(s, (const char*) p, (size_t) (endp - p));
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_dep_name";
+    s->callback_reason = (void*) s->reason;
+    return PDEP_USER;
+  }
+  return 0;
+}
+
+int llpkgc_dep__on_dep_version(llpkgc_dep_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_dep_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_dep_version == NULL) return 0;
+  err = settings->on_dep_version(s, (const char*) p, (size_t) (endp - p));
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_dep_version";
+    s->callback_reason = (void*) s->reason;
+    return PDEP_USER;
+  }
+  return 0;
+}
+
+int llpkgc_dep__on_dep_complete(llpkgc_dep_t* s, const unsigned char* p, const unsigned char* endp) {
+  const llpkgc_dep_settings_t* settings = s->settings;
+  int err;
+  if (settings == NULL || settings->on_dep_complete == NULL) return 0;
+  err = settings->on_dep_complete(s);
+  if (err != 0) {
+    if (s->reason == NULL) s->reason = "User callback error in on_dep_complete";
+    s->callback_reason = (void*) s->reason;
+    return PDEP_USER;
+  }
+  return 0;
+}
+
+void llpkgc_dep_init(llpkgc_dep_t* s, const llpkgc_dep_settings_t* settings) {
+  llpkgc_dep__internal_init(s);
+  s->settings = (void*) settings;
+}
+void llpkgc_dep_reset(llpkgc_dep_t* s) {
+  const llpkgc_dep_settings_t* settings = s->settings;
+  void* data = s->data;
+  llpkgc_dep_init(s, settings);
+  s->data = data;
+}
+void llpkgc_dep_settings_init(llpkgc_dep_settings_t* settings) {
+  memset(settings, 0, sizeof(*settings));
+}
+llpkgc_dep_errno_t llpkgc_dep_execute(llpkgc_dep_t* s, const char* data, size_t len) {
+  if (s->error != 0) return s->error;
+  if (s->done) {
+    s->reason = "Input after finish";
+    s->error_pos = data;
+    return s->error = PDEP_INVALID;
+  }
+
+  if (len == 0) return PDEP_OK;
+  s->end = (void*) (data + len);
+  {
+    int err = llpkgc_dep__internal_execute(s, data, data + len);
+    if (err == PDEP_USER && s->callback_reason != NULL)
+      s->reason = s->callback_reason;
+
+    return err;
+  }
+}
+llpkgc_dep_errno_t llpkgc_dep_finish(llpkgc_dep_t* s) {
+  int err;
+  if (s->error != 0) return s->error;
+  if (s->done) return PDEP_OK;
+  switch (s->finish) {
+    case 0:
+        err = llpkgc_dep__on_dep_list_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+case 1:
+        err = llpkgc_dep__on_dep_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+
+        err = llpkgc_dep__on_dep_list_complete(s, s->end, s->end);
+        if (err != 0) {
+          s->error = err;
+          s->error_pos = s->end;
+          return s->error;
+        }
+       break;
+    default: s->reason = "Invalid finish action"; return s->error = PDEP_INTERNAL;
+  }
+  s->done = 1;
+  return PDEP_OK;
+}
+llpkgc_dep_errno_t llpkgc_dep_get_errno(const llpkgc_dep_t* s) { return s->error; }
+const char* llpkgc_dep_get_error_reason(const llpkgc_dep_t* s) { return s->reason; }
+void llpkgc_dep_set_error_reason(llpkgc_dep_t* s, const char* reason) { s->reason = reason; }
+const char* llpkgc_dep_get_error_pos(const llpkgc_dep_t* s) { return s->error_pos; }
+const char* llpkgc_dep_errno_name(llpkgc_dep_errno_t err) {
+  switch (err) {
+    case PDEP_OK: return "PDEP_OK";
+    case PDEP_USER: return "PDEP_USER";
+    case PDEP_UNFINISHED: return "PDEP_UNFINISHED";
+    case PDEP_INVALID: return "PDEP_INVALID";
+
+    default: return "PDEP_INTERNAL";
+  }
+}
+

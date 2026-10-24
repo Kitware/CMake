@@ -4,7 +4,6 @@
 #include "cmPkgConfigParser.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstddef>
 #include <set>
 #include <string>
@@ -12,36 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include <cm/string_view>
-
 #include <cmllpkgc/llpkgc.h>
-
-namespace {
-
-cmPkgConfigDependencyOperation LookupDependencyOperation(cm::string_view op)
-{
-  if (op == "<") {
-    return cmPkgConfigDependencyOperation::LessThan;
-  }
-  if (op == "<=") {
-    return cmPkgConfigDependencyOperation::LessThanEqual;
-  }
-  if (op == "=") {
-    return cmPkgConfigDependencyOperation::Equal;
-  }
-  if (op == "!=") {
-    return cmPkgConfigDependencyOperation::NotEqual;
-  }
-  if (op == ">") {
-    return cmPkgConfigDependencyOperation::GreaterThan;
-  }
-  if (op == ">=") {
-    return cmPkgConfigDependencyOperation::GreaterThanEqual;
-  }
-  return cmPkgConfigDependencyOperation::None;
-}
-
-} // namespace
 
 cmPkgConfigValueItem::cmPkgConfigValueItem(std::string text,
                                            bool isSubstitution)
@@ -84,8 +54,7 @@ cmPkgConfigFileParser& cmPkgConfigFileParser::operator=(
   if (this != &other) {
     this->ResetCallbacks();
     llpkgc_file_init(static_cast<llpkgc_file_t*>(this), &Settings_);
-    Ptr_ = nullptr;
-    Len_ = 0;
+    CurrentValue_.clear();
     Ident_ = other.Ident_;
     Data_ = other.Data_;
   }
@@ -98,8 +67,7 @@ cmPkgConfigFileParser& cmPkgConfigFileParser::operator=(
   if (this != &other) {
     this->ResetCallbacks();
     llpkgc_file_init(static_cast<llpkgc_file_t*>(this), &Settings_);
-    Ptr_ = nullptr;
-    Len_ = 0;
+    CurrentValue_.clear();
     Ident_ = std::move(other.Ident_);
     Data_ = std::move(other.Data_);
   }
@@ -111,7 +79,6 @@ void cmPkgConfigFileParser::ResetCallbacks()
   Settings_.on_ident = OnIdentTr;
   Settings_.on_value_literal = OnValueLiteralTr;
   Settings_.on_value_substitution = OnValueSubstitutionTr;
-  Settings_.on_line_begin = nullptr;
   Settings_.on_property_complete = OnPropertyCompleteTr;
   Settings_.on_variable_complete = OnVariableCompleteTr;
   Settings_.on_barewords_complete = OnBarewordsCompleteTr;
@@ -130,11 +97,6 @@ llpkgc_file_errno_t cmPkgConfigFileParser::Parse(char const* input,
 llpkgc_file_errno_t cmPkgConfigFileParser::Finish()
 {
   return llpkgc_file_finish(static_cast<llpkgc_file_t*>(this));
-}
-
-void cmPkgConfigFileParser::Resume()
-{
-  llpkgc_file_resume(static_cast<llpkgc_file_t*>(this));
 }
 
 llpkgc_file_errno_t cmPkgConfigFileParser::GetErrno() const
@@ -180,9 +142,9 @@ void cmPkgConfigFileParser::AppendValue(std::string text, bool isSubstitution)
   Data_.back().Value.emplace_back(std::move(text), isSubstitution);
 }
 
-int cmPkgConfigFileParser::OnSpanNext(char const*, std::size_t len)
+int cmPkgConfigFileParser::OnSpanNext(char const* at, std::size_t len)
 {
-  Len_ += len;
+  CurrentValue_.append(at, len);
   return 0;
 }
 
@@ -246,8 +208,7 @@ int cmPkgConfigFileParser::OnBarewordsCompleteTr(llpkgc_file_t* parser)
 
 int cmPkgConfigFileParser::OnValueLiteral(char const* at, std::size_t len)
 {
-  Ptr_ = at;
-  Len_ = len;
+  CurrentValue_.assign(at, len);
   Settings_.on_value_literal = OnSpanNextTr;
   return 0;
 }
@@ -261,7 +222,7 @@ int cmPkgConfigFileParser::OnValueLiteralTr(llpkgc_file_t* parser,
 int cmPkgConfigFileParser::OnValueLiteralComplete()
 {
   Settings_.on_value_literal = OnValueLiteralTr;
-  AppendValue(std::string{ Ptr_, Len_ }, false);
+  AppendValue(std::move(CurrentValue_), false);
   return 0;
 }
 
@@ -272,8 +233,7 @@ int cmPkgConfigFileParser::OnValueLiteralCompleteTr(llpkgc_file_t* parser)
 
 int cmPkgConfigFileParser::OnValueSubstitution(char const* at, std::size_t len)
 {
-  Ptr_ = at;
-  Len_ = len;
+  CurrentValue_.assign(at, len);
   Settings_.on_value_substitution = OnSpanNextTr;
   return 0;
 }
@@ -289,7 +249,7 @@ int cmPkgConfigFileParser::OnValueSubstitutionTr(llpkgc_file_t* parser,
 int cmPkgConfigFileParser::OnValueSubstitutionComplete()
 {
   Settings_.on_value_substitution = OnValueSubstitutionTr;
-  AppendValue(std::string{ Ptr_, Len_ }, true);
+  AppendValue(std::move(CurrentValue_), true);
   return 0;
 }
 
@@ -390,7 +350,7 @@ char const* cmPkgConfigDependencyParser::ErrorReason() const
 int cmPkgConfigDependencyParser::OnDependencyName(char const* at,
                                                   std::size_t len)
 {
-  Current_.Name.assign(at, len);
+  Current_.Name.append(at, len);
   return 0;
 }
 
@@ -402,25 +362,10 @@ int cmPkgConfigDependencyParser::OnDependencyNameTr(llpkgc_dep_t* parser,
     at, len);
 }
 
-int cmPkgConfigDependencyParser::OnDependencyOperator(char const* at,
-                                                      std::size_t len)
-{
-  Current_.Operation = LookupDependencyOperation(cm::string_view{ at, len });
-  return 0;
-}
-
-int cmPkgConfigDependencyParser::OnDependencyOperatorTr(llpkgc_dep_t* parser,
-                                                        char const* at,
-                                                        std::size_t len)
-{
-  return static_cast<cmPkgConfigDependencyParser*>(parser)
-    ->OnDependencyOperator(at, len);
-}
-
 int cmPkgConfigDependencyParser::OnDependencyVersion(char const* at,
                                                      std::size_t len)
 {
-  Current_.Version.assign(at, len);
+  Current_.Version.append(at, len);
   return 0;
 }
 
@@ -434,6 +379,8 @@ int cmPkgConfigDependencyParser::OnDependencyVersionTr(llpkgc_dep_t* parser,
 
 int cmPkgConfigDependencyParser::OnDependencyComplete()
 {
+  Current_.Operation = static_cast<cmPkgConfigDependencyOperation>(
+    llpkgc_dep_get_comparator(static_cast<llpkgc_dep_t*>(this)));
   Dependencies_.push_back(std::move(Current_));
   Current_ = cmPkgConfigDependencySpec{};
   return 0;
@@ -460,7 +407,7 @@ llpkgc_file_errno_t cmPkgConfigParser::Finish(char const* input,
                                               std::size_t len)
 {
   auto err = Parse(input, len);
-  if (err != PFCE_OK) {
+  if (err != PFCE_OK && err != PFCE_NEED_MORE) {
     return err;
   }
   return Finish();
@@ -591,6 +538,7 @@ std::string cmPkgConfigParser::ResolveValueImpl(
       if (it != StoredVariables_.end()) {
         resolving.insert(item.Text);
         result += ResolveValueImpl(it->second, resolving);
+        resolving.erase(item.Text);
       }
     } else {
       result += item.Text;
@@ -615,24 +563,16 @@ bool cmPkgConfigParser::ResolveAndParse(std::string const& name,
   }
 
   std::string resolved = ResolveValue(entry->Value);
-  auto start = resolved.find_first_not_of(" \t");
-  if (start != std::string::npos) {
-    resolved.erase(0, start);
-  }
   cache.Literal = resolved;
 
-  std::string lower = name;
-  for (auto& c : lower) {
-    c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-  }
-
-  if (IsFragmentProperty(lower)) {
+  auto kind = llpkgc_classify_field(name.data(), name.size());
+  if (kind == LLPKGC_VALUE_FRAGMENTS) {
     cmPkgConfigFragmentParser fragmentParser;
     auto err = fragmentParser.Parse(resolved.data(), resolved.size());
     if (err == PFFE_OK && fragmentParser.Finish() == PFFE_OK) {
       cache.Fragments = fragmentParser.Fragments();
     }
-  } else if (IsDependencyProperty(lower)) {
+  } else if (kind == LLPKGC_VALUE_DEPENDENCIES) {
     cmPkgConfigDependencyParser dependencyParser;
     auto err = dependencyParser.Parse(resolved.data(), resolved.size());
     if (err == PDEP_OK && dependencyParser.Finish() == PDEP_OK) {
@@ -642,18 +582,4 @@ bool cmPkgConfigParser::ResolveAndParse(std::string const& name,
 
   Cache_[name] = cache;
   return true;
-}
-
-bool cmPkgConfigParser::IsFragmentProperty(std::string const& lower)
-{
-  return lower == "cflags" || lower == "cflags.private" ||
-    lower == "cflags.shared" || lower == "libs" || lower == "libs.private" ||
-    lower == "libs.shared";
-}
-
-bool cmPkgConfigParser::IsDependencyProperty(std::string const& lower)
-{
-  return lower == "conflicts" || lower == "provides" || lower == "requires" ||
-    lower == "requires.private" || lower == "requires.internal" ||
-    lower == "requires.shared";
 }
