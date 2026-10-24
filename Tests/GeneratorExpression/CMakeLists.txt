@@ -412,6 +412,15 @@ if (CMAKE_GENERATOR MATCHES "Makefiles|Ninja|Watcom WMake|FASTBuild")
                PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}" $<$<COMPILE_LANGUAGE:C>:${CMAKE_CURRENT_BINARY_DIR}/sf_includes_COMPILE_LANGUAGE>)
 endif()
 
+# Evaluate source file properties separately for each target compiling a shared source.
+foreach (id IN ITEMS 1 2)
+  add_executable(srcgenex_shared_${id} srcgenex_shared.c)
+  set_property(TARGET srcgenex_shared_${id} PROPERTY SRCGENEX_SHARED_ID ${id})
+  target_compile_definitions(srcgenex_shared_${id} PRIVATE EXPECTED_ID=${id})
+endforeach()
+set_property(SOURCE srcgenex_shared.c
+             PROPERTY COMPILE_DEFINITIONS SHARED_ID=$<TARGET_PROPERTY:SRCGENEX_SHARED_ID>)
+
 #-----------------------------------------------------------------------------
 # Cover test properties with generator expressions.
 add_executable(echo echo.c)

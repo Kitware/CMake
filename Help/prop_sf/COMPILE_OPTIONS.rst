@@ -11,6 +11,7 @@ file builds.  The options will be added after target-wide options.
 
 .. |genex_subject| replace:: ``COMPILE_OPTIONS``
 .. include:: ../include/GENEX_NOTE_PER_SOURCE.rst
+.. include:: ../include/GENEX_NOTE_SOURCE_TARGET.rst
 
 Usage example:
 

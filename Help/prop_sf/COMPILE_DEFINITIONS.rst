@@ -23,6 +23,21 @@ definitions on source files.
 
 .. |genex_subject| replace:: ``COMPILE_DEFINITIONS``
 .. include:: ../include/GENEX_NOTE_PER_SOURCE.rst
+.. include:: ../include/GENEX_NOTE_SOURCE_TARGET.rst
+
+For example, ``foo.cpp`` is compiled with ``FOO=1`` in target ``A`` and with
+``FOO=2`` in target ``B``, while ``bar.cpp`` is compiled without ``FOO``:
+
+.. code-block:: cmake
+
+  add_library(A OBJECT foo.cpp bar.cpp)
+  add_library(B OBJECT foo.cpp bar.cpp)
+
+  set_property(TARGET A PROPERTY FOO_VALUE 1)
+  set_property(TARGET B PROPERTY FOO_VALUE 2)
+
+  set_property(SOURCE foo.cpp PROPERTY COMPILE_DEFINITIONS
+    "FOO=$<TARGET_PROPERTY:FOO_VALUE>")
 
 Prefer using generator expressions in :prop_sf:`!COMPILE_DEFINITIONS` over the
 deprecated :prop_sf:`COMPILE_DEFINITIONS_<CONFIG>` property.
