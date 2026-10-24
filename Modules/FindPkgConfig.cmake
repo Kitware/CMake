@@ -1206,8 +1206,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_LIBDIR)
 
       # --modversion validates any version constraint and prints the module
-      # version.  --variable=prefix prints the prefix on the following line
-      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors --modversion --variable=prefix)
+      # version. We can't combine with --variable, since FDO pkg-config treats
+      # these as incompatible output options.
+      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors --modversion)
       if (_pkg_check_modules_pkg_op)
         list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name} ${_pkg_check_modules_pkg_op} ${_pkg_check_modules_pkg_ver}")
       else()
@@ -1231,19 +1232,8 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
 
         string(APPEND _pkg_check_modules_failed " - ${_pkg_check_modules_pkg}\n")
       else()
-        # Expected output is version on the first line and prefix on the second
-        string(REGEX REPLACE "\n" ";" _pkgconfig_combined_list "${_pkgconfig_module_version}")
-        list(GET _pkgconfig_combined_list 0 _pkgconfig_module_version)
-        list(LENGTH _pkgconfig_combined_list _pkgconfig_combined_len)
-        if(_pkgconfig_combined_len GREATER 1)
-          list(GET _pkgconfig_combined_list 1 _pkgconfig_module_prefix)
-          separate_arguments(_pkgconfig_module_prefix UNIX_COMMAND "${_pkgconfig_module_prefix}")
-        else()
-          set(_pkgconfig_module_prefix "")
-        endif()
         list(APPEND _pkg_check_modules_packages "${_pkg_check_modules_pkg_name}")
         set(_pkgconfig_${_pkg_check_modules_pkg_name}_VERSION "${_pkgconfig_module_version}")
-        set(_pkgconfig_${_pkg_check_modules_pkg_name}_PREFIX "${_pkgconfig_module_prefix}")
       endif()
     endforeach()
 
@@ -1269,7 +1259,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         endif()
 
         _pkgconfig_set(${_pkg_check_prefix}_VERSION "${_pkgconfig_${_pkg_check_modules_pkg}_VERSION}")
-        _pkgconfig_set(${_pkg_check_prefix}_PREFIX "${_pkgconfig_${_pkg_check_modules_pkg}_PREFIX}")
+        pkg_get_variable("${_pkg_check_prefix}_PREFIX" ${_pkg_check_modules_pkg} "prefix")
         pkg_get_variable("${_pkg_check_prefix}_INCLUDEDIR" ${_pkg_check_modules_pkg} "includedir")
         pkg_get_variable("${_pkg_check_prefix}_LIBDIR" ${_pkg_check_modules_pkg} "libdir")
         foreach (variable IN ITEMS PREFIX INCLUDEDIR LIBDIR)
