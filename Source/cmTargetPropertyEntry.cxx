@@ -9,6 +9,7 @@
 #include <cm/memory>
 
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorFileSet.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 
@@ -29,7 +30,8 @@ public:
 
   std::string const& Evaluate(cm::GenEx::Context const&,
                               cmGeneratorTarget const*,
-                              cmGeneratorExpressionDAGChecker*) const override
+                              cmGeneratorExpressionDAGChecker*,
+                              cmGeneratorFileSet const*) const override
   {
     return this->PropertyValue.Value;
   }
@@ -57,11 +59,13 @@ public:
   {
   }
 
-  std::string const& Evaluate(
-    cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  std::string const& Evaluate(cm::GenEx::Context const& context,
+                              cmGeneratorTarget const* headTarget,
+                              cmGeneratorExpressionDAGChecker* dagChecker,
+                              cmGeneratorFileSet const* fileSet) const override
   {
-    return this->ge->Evaluate(context, dagChecker, headTarget);
+    return this->ge->Evaluate(context, dagChecker, headTarget,
+                              fileSet ? fileSet->GetTarget() : nullptr);
   }
 
   cmListFileBacktrace GetBacktrace() const override

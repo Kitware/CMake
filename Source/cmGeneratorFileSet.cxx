@@ -59,7 +59,8 @@ public:
 
   std::string const& Evaluate(
     cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
+    cmGeneratorExpressionDAGChecker* dagChecker,
+    cmGeneratorFileSet const* /*fileSet*/) const override
   {
     std::map<std::string, std::vector<std::string>> filesPerDir;
     this->FileSet->EvaluateFileEntry(this->BaseDirs, filesPerDir, this->Cge,

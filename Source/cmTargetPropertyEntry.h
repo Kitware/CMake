@@ -9,6 +9,7 @@
 
 class cmLinkItem;
 class cmake;
+class cmGeneratorFileSet;
 class cmGeneratorTarget;
 struct cmGeneratorExpressionDAGChecker;
 
@@ -32,7 +33,8 @@ public:
 
   virtual std::string const& Evaluate(
     cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
+    cmGeneratorExpressionDAGChecker* dagChecker,
+    cmGeneratorFileSet const* fileSet) const = 0;
 
   virtual cmListFileBacktrace GetBacktrace() const = 0;
   virtual std::string const& GetInput() const = 0;

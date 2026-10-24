@@ -25,10 +25,12 @@ EvaluatedTargetPropertyEntry::EvaluatedTargetPropertyEntry(
 
 EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
   cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
-  cmGeneratorExpressionDAGChecker* dagChecker, cm::TargetPropertyEntry& entry)
+  cmGeneratorExpressionDAGChecker* dagChecker, cm::TargetPropertyEntry& entry,
+  cmGeneratorFileSet const* fileSet)
 {
   EvaluatedTargetPropertyEntry ee(entry.LinkItem, entry.GetBacktrace());
-  cmExpandList(entry.Evaluate(context, thisTarget, dagChecker), ee.Values);
+  cmExpandList(entry.Evaluate(context, thisTarget, dagChecker, fileSet),
+               ee.Values);
   if (entry.GetHadContextSensitiveCondition()) {
     ee.ContextDependent = true;
   }
@@ -38,13 +40,14 @@ EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
 EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
   cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::unique_ptr<cm::TargetPropertyEntry>> const& in)
+  std::vector<std::unique_ptr<cm::TargetPropertyEntry>> const& in,
+  cmGeneratorFileSet const* fileSet)
 {
   EvaluatedTargetPropertyEntries out;
   out.Entries.reserve(in.size());
   for (auto const& entry : in) {
-    out.Entries.emplace_back(
-      EvaluateTargetPropertyEntry(thisTarget, context, dagChecker, *entry));
+    out.Entries.emplace_back(EvaluateTargetPropertyEntry(
+      thisTarget, context, dagChecker, *entry, fileSet));
   }
   return out;
 }

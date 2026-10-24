@@ -19,6 +19,7 @@ struct Context;
 }
 }
 
+class cmGeneratorFileSet;
 class cmLinkItem;
 struct cmGeneratorExpressionDAGChecker;
 
@@ -45,7 +46,8 @@ struct EvaluatedTargetPropertyEntry
 
 EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
   cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
-  cmGeneratorExpressionDAGChecker* dagChecker, cm::TargetPropertyEntry& entry);
+  cmGeneratorExpressionDAGChecker* dagChecker, cm::TargetPropertyEntry& entry,
+  cmGeneratorFileSet const* fileSet = nullptr);
 
 struct EvaluatedTargetPropertyEntries
 {
@@ -56,7 +58,8 @@ struct EvaluatedTargetPropertyEntries
 EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
   cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::unique_ptr<cm::TargetPropertyEntry>> const& in);
+  std::vector<std::unique_ptr<cm::TargetPropertyEntry>> const& in,
+  cmGeneratorFileSet const* fileSet = nullptr);
 
 // IncludeRuntimeInterface is used to break the cycle in computing
 // the necessary transitive dependencies of targets that can occur
