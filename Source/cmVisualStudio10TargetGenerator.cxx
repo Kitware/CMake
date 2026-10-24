@@ -4001,9 +4001,12 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
 {
-  return std::all_of(
-    this->Configurations.begin(), this->Configurations.end(),
-    [this](std::string const& c) { return this->ComputeRcOptions(c); });
+  return std::all_of(this->Configurations.begin(), this->Configurations.end(),
+                     [this](std::string const& c) {
+                       return !this->GeneratorTarget->IsLanguageUsed("RC",
+                                                                     c) ||
+                         this->ComputeRcOptions(c);
+                     });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
@@ -4036,7 +4039,8 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
 void cmVisualStudio10TargetGenerator::WriteRCOptions(
   Elem& e1, std::string const& configName)
 {
-  if (!this->MSTools) {
+  if (!this->MSTools ||
+      !this->GeneratorTarget->IsLanguageUsed("RC", configName)) {
     return;
   }
   Elem e2(e1, "ResourceCompile");
