@@ -20,6 +20,10 @@
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmListFileCoverage.h"
+#endif
+
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -89,6 +93,12 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
        (enforceError = /* enforce condition errors that evaluate to true */
         conditionEvaluator.IsTrue(expandArgs(this->Args, expandedArguments),
                                   errorString, messageType));) {
+#ifndef CMAKE_BOOTSTRAP
+    if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+      cmListFileContext const& context = this->GetStartingContext();
+      coverage->BranchTaken(context.FilePath, context.Line, 0);
+    }
+#endif
     // Invoke all the functions that were collected in the block.
     for (cmListFileFunction const& fn : functions) {
       cmExecutionStatus status(mf);
@@ -137,6 +147,15 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       }
     }
   }
+
+  // The condition is false, so the loop ends.  BranchTaken records nothing
+  // after a fatal condition error.
+#ifndef CMAKE_BOOTSTRAP
+  if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+    cmListFileContext const& context = this->GetStartingContext();
+    coverage->BranchTaken(context.FilePath, context.Line, 1);
+  }
+#endif
 
   return true;
 }

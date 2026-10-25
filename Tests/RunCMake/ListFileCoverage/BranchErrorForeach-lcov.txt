@@ -1,0 +1,11 @@
+SF:<SRC>/BranchErrorForeach.cmake
+FNF:0
+FNH:0
+BRDA:1,0,0,-
+BRDA:1,0,1,-
+BRF:2
+BRH:0
+DA:1,1
+LF:1
+LH:1
+end_of_record

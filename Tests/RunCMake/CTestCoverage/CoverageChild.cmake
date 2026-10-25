@@ -1,1 +1,5 @@
 set(child 1)
+if(side)
+  if(child)
+  endif()
+endif()

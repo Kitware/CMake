@@ -155,6 +155,13 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
           }
         }
 
+#ifndef CMAKE_BOOTSTRAP
+        if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+          coverage->BranchTaken(this->GetStartingContext().FilePath,
+                                func.Line(), isTrue ? 0 : 1);
+        }
+#endif
+
         if (isTrue) {
           this->IsBlocking = false;
           this->HasRun = true;
@@ -214,6 +221,13 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
     }
     makefile.IssueMessage(status, err);
   }
+
+#ifndef CMAKE_BOOTSTRAP
+  if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+    cmListFileContext const context = makefile.GetBacktrace().Top();
+    coverage->BranchTaken(context.FilePath, context.Line, isTrue ? 0 : 1);
+  }
+#endif
 
   {
     auto fb = std::make_unique<cmIfFunctionBlocker>();

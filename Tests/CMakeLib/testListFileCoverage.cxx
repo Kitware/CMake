@@ -1,6 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -118,6 +119,56 @@ bool testExecutableLines()
                                               "  2)\n"));
   std::vector<long> const expected = { 1, 2, 5, 7 };
   ASSERT_TRUE(lines == expected);
+  return true;
+}
+
+bool testDecisionLines()
+{
+  std::vector<long> const lines =
+    cmListFileCoverage::DecisionLines(parse("if(a)\n"
+                                            "elseif(b)\n"
+                                            "else()\n"
+                                            "endif()\n"
+                                            "while(c)\n"
+                                            "endwhile()\n"
+                                            "foreach(i 1)\n"
+                                            "endforeach()\n"
+                                            "WHILE(d)\n"
+                                            "set(x 1)\n"));
+  // The unclosed WHILE is a parse error, which sets the fatal error flag.
+  // Clear it, because BranchTaken records nothing after a fatal error.
+  cmSystemTools::ResetErrorOccurredFlag();
+  std::vector<long> const expected = { 1, 2, 5, 7, 9 };
+  ASSERT_TRUE(lines == expected);
+  return true;
+}
+
+bool testBranchTaken()
+{
+  TempDir dir;
+  ASSERT_TRUE(dir.Ok);
+  FinishGuard guard;
+  ASSERT_TRUE(startCoverageIn(dir.Path));
+  cmListFileCoverage* cov = cmListFileCoverage::Get();
+  ASSERT_TRUE(cov != nullptr);
+
+  std::string const source = "if(a)\nendif()\nwhile(b)\nendwhile()\n"
+                             "set(x 1)\n";
+  cov->FileParsed("/s/a.cmake", parse(source));
+  cov->BranchTaken("/s/a.cmake", 1, 0);
+  cov->BranchTaken("/s/a.cmake", 1, 0);
+  // Ignored: no decision on this line.
+  cov->BranchTaken("/s/a.cmake", 5, 0);
+  // Ignored: the file is not registered.
+  cov->BranchTaken("/s/other.cmake", 1, 0);
+  // A second parse keeps the counts.
+  cov->FileParsed("/s/a.cmake", parse(source));
+
+  cmLcovTracefile const tracefile = cov->ToTracefile();
+  ASSERT_TRUE(contains(writeText(tracefile),
+                       "FNH:0\nBRDA:1,0,0,2\nBRDA:1,0,1,0\n"
+                       "BRDA:3,0,0,-\nBRDA:3,0,1,-\nBRF:4\nBRH:1\nDA:1,0\n"));
+  ASSERT_TRUE(tracefile.Files.count("/s/other.cmake") == 0u);
   return true;
 }
 
@@ -242,9 +293,9 @@ bool testFinishWithNoExecutableLines()
 
 int testListFileCoverage(int /*unused*/, char* /*unused*/[])
 {
-  return runTests({ testExecutableLines, testRecording, testFileParsedTwice,
-                    testSyntheticCommand, testStartOffWhenUnset,
-                    testFinishWithNothingRegistered,
+  return runTests({ testExecutableLines, testDecisionLines, testBranchTaken,
+                    testRecording, testFileParsedTwice, testSyntheticCommand,
+                    testStartOffWhenUnset, testFinishWithNothingRegistered,
                     testFinishWithNoExecutableLines },
                   false);
 }

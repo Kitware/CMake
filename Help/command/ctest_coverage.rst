@@ -18,8 +18,8 @@ for submission with the :command:`ctest_submit` command.
 .. versionadded:: 4.6
   The command reads the ``*.cmake-coverage.info`` files that the ``CMAKE``
   :ref:`CoverageTool <ctest-CoverageTool>` writes for each test, and
-  reports coverage of CMake language code.  It sends the line counts and
-  the number of tested and untested functions of each file.  It reports
+  reports coverage of CMake language code.  It sends the line and branch counts
+  and the number of tested and untested functions of each file.  It reports
   only files in the source directory, and leaves out files in the build
   directory unless the two directories are the same.
 
