@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.6
 .. toctree::
    :maxdepth: 1
 
+   CMP0231: MSVC permissive mode is controlled by CXX_EXTENSIONS. </policy/CMP0231>
    CMP0230: CMakeAddFortranSubdirectory builds the MinGW project with the parent configuration. </policy/CMP0230>
    CMP0229: The CMAKE_SKIP_INSTALL_RPATH variable takes effect at target creation. </policy/CMP0229>
    CMP0228: File set usage requirements are evaluated for the consumer. </policy/CMP0228>

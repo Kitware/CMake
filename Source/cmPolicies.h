@@ -696,7 +696,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0230,                                                     \
          "CMakeAddFortranSubdirectory builds the MinGW project with the "     \
          "parent configuration.",                                             \
-         4, 6, 0, WARN)
+         4, 6, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0231,                                                     \
+         "MSVC permissive mode is controlled by CXX_EXTENSIONS.", 4, 6, 0,    \
+         WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

@@ -2303,14 +2303,24 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     std::string const& optionFlagDef =
       standardResolver.GetCompileOptionDef(target, lang, config);
     if (!optionFlagDef.empty()) {
-      cmValue opt =
-        target->Target->GetMakefile()->GetDefinition(optionFlagDef);
-      if (opt) {
-        cmList optList{ *opt };
+      auto const appendOptionList = [this, &flags](cm::string_view value) {
+        if (value.empty()) {
+          return;
+        }
+        cmList optList{ value };
         for (std::string const& i : optList) {
           this->AppendFlagEscape(flags, i);
         }
+      };
+      if (cmValue opt =
+            target->Target->GetMakefile()->GetDefinition(optionFlagDef)) {
+        appendOptionList(*opt);
       }
+      // CMP0231: when a permissive flag is required, it follows /std: so
+      // /permissive overrides the conformance mode that /std:c++20 and
+      // newer imply.  No flag is added when the mode already matches.
+      appendOptionList(
+        standardResolver.GetPermissiveCompileOption(optionFlagDef));
     }
   }
 
