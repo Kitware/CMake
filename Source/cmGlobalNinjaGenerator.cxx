@@ -1959,8 +1959,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
           build.ExplicitDeps.push_back(
             this->BuildAlias(buildDirCodegenTarget, config));
         }
-        build.Outputs.front() =
-          this->BuildAlias(buildDirCodegenTarget, "codegen");
+        build.Outputs.front() = this->BuildAlias(buildDirCodegenTarget, "all");
         this->WriteBuild(os, build);
       }
     }

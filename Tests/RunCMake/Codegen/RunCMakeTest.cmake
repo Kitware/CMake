@@ -32,10 +32,27 @@ run_codegen("add-dependencies-not-all")
 block()
   if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release")
+    if(RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
+      list(APPEND RunCMake_TEST_OPTIONS
+        -DCMAKE_CROSS_CONFIGS=all
+        -DCMAKE_DEFAULT_BUILD_TYPE=Release
+      )
+    endif()
   else()
     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
   endif()
   run_codegen("per-config")
+
+  if(RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/per-config-build)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(per-config-default-build ${CMAKE_COMMAND} --build . --target codegen)
+    file(REMOVE_RECURSE
+      ${RunCMake_TEST_BINARY_DIR}/Debug
+      ${RunCMake_TEST_BINARY_DIR}/Release
+    )
+    run_cmake_command(per-config-all-build ${CMAKE_COMMAND} --build . --target codegen:all)
+  endif()
 endblock()
 
 # Error handling
