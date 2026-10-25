@@ -1704,17 +1704,34 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
   outputs.insert(outs.begin(), outs.end());
 }
 
+void cmGlobalNinjaGenerator::AppendCodegenOutputs(
+  cmGeneratorTarget const* target, cmNinjaDeps& deps,
+  std::string const& config)
+{
+  std::vector<cmSourceFile const*> customCommandSources;
+  target->GetCustomCommands(customCommandSources, config);
+  for (cmSourceFile const* sf : customCommandSources) {
+    cmCustomCommand const* cc = sf->GetCustomCommand();
+    if (cc->GetCodegen()) {
+      std::vector<std::string> const& outputs = cc->GetOutputs();
+      std::transform(outputs.begin(), outputs.end(), std::back_inserter(deps),
+                     this->MapToNinjaPath());
+    }
+  }
+}
+
 void cmGlobalNinjaGenerator::AppendCodegenTargetDepends(
   cmGeneratorTarget const* target, cmNinjaDeps& deps,
-  std::string const& config) const
+  std::string const& config, std::set<cmGeneratorTarget const*>& visited)
 {
   std::set<std::string> const& codegenDeps = target->Target->GetCodegenDeps();
   for (cmTargetDepend const& targetDep :
        this->GetTargetDirectDepends(target)) {
     if (targetDep->IsInBuildSystem() &&
-        codegenDeps.count(targetDep->GetName())) {
-      this->AppendTargetOutputs(targetDep, deps, config,
-                                DependOnTargetArtifact);
+        codegenDeps.count(targetDep->GetName()) &&
+        visited.insert(targetDep).second) {
+      this->AppendCodegenOutputs(targetDep, deps, config);
+      this->AppendCodegenTargetDepends(targetDep, deps, config, visited);
     }
   }
 }
@@ -1884,25 +1901,18 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         build.Outputs.front() =
           this->BuildAlias(buildDirCodegenTarget, config);
 
+        std::set<cmGeneratorTarget const*> visited;
+
         for (DirectoryTarget::Target const& t : dt.Targets) {
           if (this->IsExcludedFromAllInConfig(t, config)) {
             continue;
           }
 
-          this->AppendCodegenTargetDepends(t.GT, build.ExplicitDeps, config);
-
-          std::vector<cmSourceFile const*> customCommandSources;
-          t.GT->GetCustomCommands(customCommandSources, config);
-          for (cmSourceFile const* sf : customCommandSources) {
-            cmCustomCommand const* cc = sf->GetCustomCommand();
-            if (cc->GetCodegen()) {
-              auto const& outputs = cc->GetOutputs();
-
-              std::transform(outputs.begin(), outputs.end(),
-                             std::back_inserter(build.ExplicitDeps),
-                             this->MapToNinjaPath());
-            }
+          if (visited.insert(t.GT).second) {
+            this->AppendCodegenOutputs(t.GT, build.ExplicitDeps, config);
           }
+          this->AppendCodegenTargetDepends(t.GT, build.ExplicitDeps, config,
+                                           visited);
         }
 
         for (DirectoryTarget::Dir const& d : dt.Children) {

@@ -12,6 +12,7 @@ endfunction()
 
 # Builds codegen target when there are no custom commands marked codegen
 run_codegen("no-codegen")
+run_codegen("no-codegen-2")
 
 # We don't want codegen to drive parts of the project that are EXCLUDE_FROM_ALL
 run_codegen("exclude-from-all")

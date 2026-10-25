@@ -254,7 +254,11 @@ Generating Files
     is set to ``NEW``.
 
     Like ``all``, the ``codegen`` target exists per directory and skips
-    targets and directories marked ``EXCLUDE_FROM_ALL``.
+    targets and directories marked ``EXCLUDE_FROM_ALL``.  It follows
+    :command:`add_dependencies`: the dependencies' ``CODEGEN`` commands are
+    also run, but their other commands are not, unless the depending target
+    has ``CODEGEN`` commands of its own, in which case the dependencies are
+    built in full first.
 
     This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
     It can only be set on the first call to ``add_custom_command(OUTPUT...)``
