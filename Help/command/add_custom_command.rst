@@ -253,6 +253,9 @@ Generating Files
     Furthermore, this option is allowed only if policy :policy:`CMP0171`
     is set to ``NEW``.
 
+    Like ``all``, the ``codegen`` target exists per directory and skips
+    targets and directories marked ``EXCLUDE_FROM_ALL``.
+
     This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
     It can only be set on the first call to ``add_custom_command(OUTPUT...)``
     for the output files.
@@ -270,7 +273,8 @@ Generating Files
 
     .. note::
 
-      This option cannot be specified at the same time as ``DEPFILE`` option.
+      This option cannot be specified at the same time as the ``DEPFILE`` or
+      ``CODEGEN`` options.
 
   ``JOB_POOL``
     .. versionadded:: 3.15
