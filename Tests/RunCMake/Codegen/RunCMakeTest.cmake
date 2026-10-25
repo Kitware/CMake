@@ -28,6 +28,16 @@ run_codegen("add-custom-command-depends")
 run_codegen("byproducts")
 run_codegen("add-dependencies-not-all")
 
+# Outputs that differ per configuration
+block()
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release")
+  else()
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  run_codegen("per-config")
+endblock()
+
 # Error handling
 run_cmake("implicit-depends")
 run_cmake("implicit-depends-append-codegen")

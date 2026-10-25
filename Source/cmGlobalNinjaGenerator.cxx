@@ -23,6 +23,7 @@
 #include "cmsys/String.h"
 
 #include "cmCustomCommand.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmCxxModuleMapper.h"
 #include "cmDiagnostics.h"
 #include "cmDyndepCollation.h"
@@ -1713,7 +1714,8 @@ void cmGlobalNinjaGenerator::AppendCodegenOutputs(
   for (cmSourceFile const* sf : customCommandSources) {
     cmCustomCommand const* cc = sf->GetCustomCommand();
     if (cc->GetCodegen()) {
-      std::vector<std::string> const& outputs = cc->GetOutputs();
+      cmCustomCommandGenerator ccg(*cc, config, target->GetLocalGenerator());
+      std::vector<std::string> const& outputs = ccg.GetOutputs();
       std::transform(outputs.begin(), outputs.end(), std::back_inserter(deps),
                      this->MapToNinjaPath());
     }

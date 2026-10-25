@@ -1,0 +1,11 @@
+set(filename "${RunCMake_TEST_BINARY_DIR}/Debug/generated.h")
+if (NOT EXISTS "${filename}")
+  set(RunCMake_TEST_FAILED "expected file NOT created:\n ${filename}")
+  return()
+endif()
+
+set(filename "${RunCMake_TEST_BINARY_DIR}/Release/generated.h")
+if (EXISTS "${filename}")
+  set(RunCMake_TEST_FAILED "unexpected file created:\n ${filename}")
+  return()
+endif()

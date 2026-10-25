@@ -264,6 +264,10 @@ Generating Files
     It can only be set on the first call to ``add_custom_command(OUTPUT...)``
     for the output files.
 
+    .. versionchanged:: 4.5
+      Arguments to ``OUTPUT`` may use
+      :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
   ``IMPLICIT_DEPENDS``
     Request scanning of implicit dependencies of an input file.
     The language given specifies the programming language whose
