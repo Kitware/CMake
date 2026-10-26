@@ -237,6 +237,12 @@ function(cmake_add_fortran_subdirectory subdir)
         "${CMAKE_CURRENT_BINARY_DIR}/${${dir_var}}" ABSOLUTE)
     endif()
   endforeach()
+  # list the import libraries produced by the external project so that
+  # generators like Ninja know which rule creates them
+  set(byproducts)
+  foreach(lib IN LISTS libraries)
+    list(APPEND byproducts "${library_dir}/lib${lib}.lib")
+  endforeach()
   # create build and configure wrapper scripts
   _setup_mingw_config_and_build("${source_dir}" "${build_dir}")
   # create the external project
@@ -248,6 +254,7 @@ function(cmake_add_fortran_subdirectory subdir)
     BUILD_COMMAND ${CMAKE_COMMAND}
     -P ${build_dir}/build_mingw.cmake
     BUILD_ALWAYS 1
+    BUILD_BYPRODUCTS ${byproducts}
     INSTALL_COMMAND ""
     )
   # create imported targets for all libraries

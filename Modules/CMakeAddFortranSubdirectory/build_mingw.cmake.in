@@ -1,2 +1,11 @@
 set(ENV{PATH} "@MINGW_PATH@\;$ENV{PATH}")
-execute_process(COMMAND "@CMAKE_COMMAND@" --build . )
+# rebuild from scratch if a byproduct was removed, e.g. by a clean of
+# the outer project, because the inner build would consider itself up to date
+set(byproducts "@byproducts@")
+set(clean_first "")
+foreach(byproduct IN LISTS byproducts)
+  if(NOT EXISTS "${byproduct}")
+    set(clean_first --clean-first)
+  endif()
+endforeach()
+execute_process(COMMAND "@CMAKE_COMMAND@" --build . ${clean_first})
