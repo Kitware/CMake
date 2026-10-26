@@ -526,9 +526,11 @@ private:
   void CloseRulesFileStream();
   void CleanMetaData();
 
+  void AppendCodegenOutputs(cmGeneratorTarget const* target, cmNinjaDeps& deps,
+                            std::string const& config);
   void AppendCodegenTargetDepends(cmGeneratorTarget const* target,
-                                  cmNinjaDeps& deps,
-                                  std::string const& config) const;
+                                  cmNinjaDeps& deps, std::string const& config,
+                                  std::set<cmGeneratorTarget const*>& visited);
 
   /// Write the common disclaimer text at the top of each build file.
   void WriteDisclaimer(std::ostream& os) const;

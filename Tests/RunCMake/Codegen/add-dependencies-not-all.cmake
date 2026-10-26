@@ -9,8 +9,17 @@ add_custom_command(
   CODEGEN
 )
 
+# Not marked CODEGEN, so codegen must not run it.
+add_custom_command(
+  OUTPUT not-codegen.h
+  COMMAND ${CMAKE_COMMAND} -E false
+)
+
 # N.B. h_creator is *not* added to ALL.
-add_custom_target(h_creator DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/generated.h)
+add_custom_target(h_creator DEPENDS
+  ${CMAKE_CURRENT_BINARY_DIR}/generated.h
+  ${CMAKE_CURRENT_BINARY_DIR}/not-codegen.h
+)
 
 # This test will fail if add_dependencies isn't accounted for in the
 # codegen build graph

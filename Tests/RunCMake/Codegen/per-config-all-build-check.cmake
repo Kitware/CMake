@@ -1,0 +1,6 @@
+foreach(config IN ITEMS Debug Release)
+  set(filename "${RunCMake_TEST_BINARY_DIR}/${config}/generated.h")
+  if (NOT EXISTS "${filename}")
+    string(APPEND RunCMake_TEST_FAILED "expected file NOT created:\n ${filename}\n")
+  endif()
+endforeach()

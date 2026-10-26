@@ -253,9 +253,20 @@ Generating Files
     Furthermore, this option is allowed only if policy :policy:`CMP0171`
     is set to ``NEW``.
 
+    Like ``all``, the ``codegen`` target exists per directory and skips
+    targets and directories marked ``EXCLUDE_FROM_ALL``.  It follows
+    :command:`add_dependencies`: the dependencies' ``CODEGEN`` commands are
+    also run, but their other commands are not, unless the depending target
+    has ``CODEGEN`` commands of its own, in which case the dependencies are
+    built in full first.
+
     This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
     It can only be set on the first call to ``add_custom_command(OUTPUT...)``
     for the output files.
+
+    .. versionchanged:: 4.5
+      Arguments to ``OUTPUT`` may use
+      :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
   ``IMPLICIT_DEPENDS``
     Request scanning of implicit dependencies of an input file.
@@ -270,7 +281,8 @@ Generating Files
 
     .. note::
 
-      This option cannot be specified at the same time as ``DEPFILE`` option.
+      This option cannot be specified at the same time as the ``DEPFILE`` or
+      ``CODEGEN`` options.
 
   ``JOB_POOL``
     .. versionadded:: 3.15

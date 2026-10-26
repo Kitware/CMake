@@ -13,6 +13,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCustomCommand.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -23,6 +24,7 @@
 #include "cmMakefileTargetGenerator.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
+#include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -1000,6 +1002,19 @@ void cmGlobalUnixMakefileGenerator3::AppendCodegenTargetDepends(
   std::set<std::string> const& codegen_depends =
     target->Target->GetCodegenDeps();
 
+  bool hasCodegenCommands = false;
+  {
+    std::vector<cmSourceFile const*> customCommands;
+    cmLocalUnixMakefileGenerator3* lg3 =
+      static_cast<cmLocalUnixMakefileGenerator3*>(target->GetLocalGenerator());
+    target->GetCustomCommands(customCommands, lg3->GetConfigName());
+    hasCodegenCommands =
+      std::any_of(customCommands.begin(), customCommands.end(),
+                  [](cmSourceFile const* sf) {
+                    return sf->GetCustomCommand()->GetCodegen();
+                  });
+  }
+
   for (cmTargetDepend const& i : this->GetTargetDirectDepends(target)) {
     // Create the target-level dependency.
     cmGeneratorTarget const* dep = i;
@@ -1009,10 +1024,12 @@ void cmGlobalUnixMakefileGenerator3::AppendCodegenTargetDepends(
     if (codegen_depends.find(dep->GetName()) != codegen_depends.end()) {
       cmLocalUnixMakefileGenerator3* lg3 =
         static_cast<cmLocalUnixMakefileGenerator3*>(dep->GetLocalGenerator());
-      std::string tgtName = cmStrCat(
-        lg3->GetRelativeTargetDirectory(const_cast<cmGeneratorTarget*>(dep)),
-        "/all");
-      depends.push_back(tgtName);
+      std::string const tgtDir =
+        lg3->GetRelativeTargetDirectory(const_cast<cmGeneratorTarget*>(dep));
+      depends.push_back(cmStrCat(tgtDir, "/codegen"));
+      if (hasCodegenCommands) {
+        depends.push_back(cmStrCat(tgtDir, "/all"));
+      }
     }
   }
 }
