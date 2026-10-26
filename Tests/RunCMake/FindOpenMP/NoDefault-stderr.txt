@@ -1,0 +1,4 @@
+^CMake Error at [^
+]*/FindOpenMP\.cmake:[0-9]+ \(message\):
+  OpenMP_C_OFFLOAD is enabled, but FindOpenMP has no default offload flags
+  for the [A-Za-z]+ compiler\.

@@ -59,6 +59,27 @@ This module provides the following :ref:`Imported Targets`:
 
   Target encapsulating the OpenMP usage requirements for language ``<lang>``.
 
+``OpenMP::OpenMP_<lang>_Offload``
+  .. versionadded:: 4.6
+
+  Target for code whose OpenMP ``target`` regions may be offloaded to a
+  device, for ``<lang>`` of ``C``, ``CXX``, or ``Fortran``.  It links
+  ``OpenMP::OpenMP_<lang>`` and, when offload is enabled with the
+  ``OpenMP_<lang>_OFFLOAD`` or ``OpenMP_<lang>_OFFLOAD_FLAGS`` variables,
+  adds the offload flags when compiling ``<lang>`` sources.  It also adds
+  them, together with the OpenMP flags, when the link is done by a compiler
+  with the same :variable:`CMAKE_<LANG>_COMPILER_ID`, because compilers
+  need both in order to link device code.  When offload is not enabled, it
+  is equivalent to ``OpenMP::OpenMP_<lang>``.
+
+  With NVHPC, an executable linked by NVHPC must also link the offload
+  target when it uses a shared library with offloaded code, for example
+  through ``$<LINK_ONLY:OpenMP::OpenMP_<lang>_Offload>`` in the library's
+  ``INTERFACE`` link libraries.
+
+  Linking through a separate linker, as with Visual Studio generators or
+  ``clang-cl``, is not supported.
+
 Input Variables
 ^^^^^^^^^^^^^^^
 
@@ -74,6 +95,49 @@ The following variables may be set to influence this module's behavior:
   ``clang-cl``.
 
 .. _`msvc-openmp`: https://learn.microsoft.com/en-us/cpp/build/reference/openmp-enable-openmp-2-0-support
+
+``OpenMP_<lang>_OFFLOAD``
+  .. versionadded:: 4.6
+
+  Enables OpenMP ``target`` offload for targets that link
+  ``OpenMP::OpenMP_<lang>_Offload``.  If not defined, offload is enabled
+  when ``OpenMP_<lang>_OFFLOAD_FLAGS`` is non-empty.  If defined, its
+  boolean value decides, so ``OFF`` disables offload even when flags are
+  set.
+
+  The offload flags are ``OpenMP_<lang>_OFFLOAD_FLAGS`` if non-empty, and
+  otherwise a default for the compiler:
+
+  * GNU: none.  GCC offloads to the devices whose offload compilers are
+    installed, such as ``gcc-offload-nvptx`` on Debian and Ubuntu.
+  * NVHPC: ``-mp=gpu``.
+  * IntelLLVM with a GNU-like command line (``icx``, ``icpx``, ``ifx``):
+    ``-fopenmp-targets=spir64``.
+  * Cray, CrayClang: none.  The device comes from the loaded
+    ``craype-accel-*`` module.
+
+  Other compilers, including Clang, have no default.  Enabling offload for
+  them without ``OpenMP_<lang>_OFFLOAD_FLAGS`` is an error, even if the
+  package is ``QUIET`` or the component is optional.
+
+  Targets linking only ``OpenMP::OpenMP_<lang>`` are not affected.
+  Projects using the result variables must add the device flags for
+  compiling and linking themselves.  Disabling offload only removes what
+  the offload target would add; it does not undo offload enabled by other
+  compiler flags or by the environment.  ``OpenMP_<lang>_FOUND`` and
+  ``OpenMP_<lang>_VERSION`` describe host OpenMP support only; the module
+  does not check that offload works.
+
+``OpenMP_<lang>_OFFLOAD_FLAGS``
+  .. versionadded:: 4.6
+
+  Compiler flags selecting the device(s) to offload OpenMP ``target``
+  regions to, replacing the compiler's default described above.  For
+  example, ``--offload-arch=sm_80`` for Clang, ``-foffload=nvptx-none`` for
+  GCC, or ``-mp=gpu -gpu=cc80`` for NVHPC.  The value is a command-line
+  string, split into arguments as by the ``SHELL:`` prefix of
+  :command:`target_compile_options`.  An empty or whitespace-only value
+  counts as not set.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -203,6 +267,19 @@ using the C language component:
 
   find_package(OpenMP)
   target_link_libraries(project_target PRIVATE OpenMP::OpenMP_C)
+
+Linking a library whose ``target`` regions may be offloaded to a GPU:
+
+.. code-block:: cmake
+
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(kernels PRIVATE OpenMP::OpenMP_CXX_Offload)
+
+and enabling offload when configuring the build, e.g. with Clang:
+
+.. code-block:: console
+
+  $ cmake -B build -DOpenMP_CXX_OFFLOAD_FLAGS=--offload-arch=sm_80
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -823,6 +900,69 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
       if(OpenMP_${LANG}_LIBRARIES)
         set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
           INTERFACE_LINK_LIBRARIES "${OpenMP_${LANG}_LIBRARIES}")
+      endif()
+
+      if(NOT LANG STREQUAL "CUDA")
+        if(NOT TARGET OpenMP::OpenMP_${LANG}_Offload)
+          add_library(OpenMP::OpenMP_${LANG}_Offload INTERFACE IMPORTED)
+          set_property(TARGET OpenMP::OpenMP_${LANG}_Offload PROPERTY
+            INTERFACE_LINK_LIBRARIES OpenMP::OpenMP_${LANG})
+        endif()
+        string(STRIP "${OpenMP_${LANG}_OFFLOAD_FLAGS}" _OpenMP_OFFLOAD_FLAGS)
+        if(DEFINED OpenMP_${LANG}_OFFLOAD)
+          set(_OpenMP_OFFLOAD "${OpenMP_${LANG}_OFFLOAD}")
+        elseif(NOT _OpenMP_OFFLOAD_FLAGS STREQUAL "")
+          set(_OpenMP_OFFLOAD ON)
+        else()
+          set(_OpenMP_OFFLOAD OFF)
+        endif()
+        # A repeated find_package() with different inputs replaces these
+        # options rather than adding to them.
+        set(_OpenMP_COMPILE_OPTIONS "")
+        set(_OpenMP_LINK_OPTIONS "")
+        if(_OpenMP_OFFLOAD)
+          # GCC and Cray need no default: GCC offloads to whichever offload
+          # compilers are installed, and Cray's wrappers take the device from
+          # the craype-accel module.
+          if(_OpenMP_OFFLOAD_FLAGS STREQUAL ""
+              AND NOT CMAKE_${LANG}_COMPILER_ID MATCHES "^(GNU|Cray|CrayClang)$")
+            if(CMAKE_${LANG}_COMPILER_ID STREQUAL "NVHPC")
+              set(_OpenMP_OFFLOAD_FLAGS "-mp=gpu")
+            elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "IntelLLVM"
+                AND NOT "x${CMAKE_${LANG}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+              set(_OpenMP_OFFLOAD_FLAGS "-fopenmp-targets=spir64")
+            else()
+              message(FATAL_ERROR
+                "OpenMP_${LANG}_OFFLOAD is enabled, but FindOpenMP has no default "
+                "offload flags for the ${CMAKE_${LANG}_COMPILER_ID} compiler.  "
+                "Set OpenMP_${LANG}_OFFLOAD_FLAGS to select the device, e.g. "
+                "--offload-arch=<arch> for Clang.")
+            endif()
+          endif()
+          # Links by the same compiler family, e.g. a C kernel library in a
+          # C++ executable, take these flags; another vendor's driver can't.
+          set(_OpenMP_LINK_DRIVER "$<OR:$<LINK_LANG_AND_ID:C,${CMAKE_${LANG}_COMPILER_ID}>,$<LINK_LANG_AND_ID:CXX,${CMAKE_${LANG}_COMPILER_ID}>,$<LINK_LANG_AND_ID:Fortran,${CMAKE_${LANG}_COMPILER_ID}>>")
+          # The compiler driver only runs the offload link step if it sees
+          # the OpenMP flags when linking.
+          string(STRIP "${OpenMP_${LANG}_FLAGS}" _OpenMP_FLAGS)
+          if(NOT _OpenMP_FLAGS STREQUAL "")
+            list(APPEND _OpenMP_LINK_OPTIONS "$<${_OpenMP_LINK_DRIVER}:SHELL:${_OpenMP_FLAGS}>")
+          endif()
+          if(NOT _OpenMP_OFFLOAD_FLAGS STREQUAL "")
+            list(APPEND _OpenMP_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:SHELL:${_OpenMP_OFFLOAD_FLAGS}>")
+            list(APPEND _OpenMP_LINK_OPTIONS "$<${_OpenMP_LINK_DRIVER}:SHELL:${_OpenMP_OFFLOAD_FLAGS}>")
+          endif()
+          unset(_OpenMP_FLAGS)
+          unset(_OpenMP_LINK_DRIVER)
+        endif()
+        set_property(TARGET OpenMP::OpenMP_${LANG}_Offload PROPERTY
+          INTERFACE_COMPILE_OPTIONS "${_OpenMP_COMPILE_OPTIONS}")
+        set_property(TARGET OpenMP::OpenMP_${LANG}_Offload PROPERTY
+          INTERFACE_LINK_OPTIONS "${_OpenMP_LINK_OPTIONS}")
+        unset(_OpenMP_COMPILE_OPTIONS)
+        unset(_OpenMP_LINK_OPTIONS)
+        unset(_OpenMP_OFFLOAD_FLAGS)
+        unset(_OpenMP_OFFLOAD)
       endif()
     endif()
   endif()

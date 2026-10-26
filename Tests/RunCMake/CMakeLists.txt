@@ -558,6 +558,11 @@ if(CMake_TEST_FindRuby)
     )
 endif()
 add_RunCMake_test(FindOpenGL)
+if(CMake_TEST_FindOpenMP_C AND CMake_TEST_FindOpenMP_CXX
+    AND CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$"
+    AND NOT WIN32 AND CMAKE_GENERATOR MATCHES "Make|Ninja")
+  add_RunCMake_test(FindOpenMP -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
+endif()
 add_RunCMake_test(FindTclStub)
 add_RunCMake_test(InitialFlags)
 if(CMake_TEST_FindOpenSSL)
