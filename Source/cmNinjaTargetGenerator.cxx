@@ -2532,6 +2532,7 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
 
   std::string const tdin = this->GetTargetDependInfoPath(lang, config);
   cmGeneratedFileStream tdif(tdin);
+  tdif.SetCopyIfDifferent(true);
   tdif << tdi;
 }
 
