@@ -998,7 +998,7 @@ public:
   bool GetImplibGNUtoMS(std::string const& config, std::string const& gnuName,
                         std::string& out, char const* newExt = nullptr) const;
 
-  /** Can only ever return true if GetSourceFilePaths() was called before.
+  /** Can only ever return true if GetKindedSources() was called before.
       Otherwise, this is indeterminate and false will be assumed/returned!  */
   bool HasContextDependentSources() const;
 
@@ -1477,7 +1477,7 @@ private:
     std::vector<BT<std::string>>& result, cm::string_view prefix,
     std::string const& language, bool joinItems) const;
 
-  std::vector<BT<std::string>> GetSourceFilePaths(
+  std::vector<BT<cmSourceFile*>> GatherSourcesToComputeKindedSources(
     std::string const& config) const;
   std::vector<BT<cmSourceFile*>> GetSourceFilesWithoutObjectLibraries(
     std::string const& config) const;
