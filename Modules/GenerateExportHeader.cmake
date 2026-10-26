@@ -68,6 +68,7 @@ Generating Export Header
       [PREFIX_NAME <prefix>]
       [CUSTOM_CONTENT_FROM_VARIABLE <variable>]
       [INCLUDE_GUARD_NAME <include-guard-name>]
+      [CXX_ATTRIBUTES]
     )
 
   By default, this command generates a header file named
@@ -189,6 +190,46 @@ Generating Export Header
       #define <include-guard-name>
       // ...
       #endif /* <include-guard-name> */
+
+  ``CXX_ATTRIBUTES``
+    .. versionadded:: 4.6
+
+    If specified, the export, no-export and deprecation macros expand to
+    C++11 attributes, such as ``[[gnu::visibility("default")]]``,
+    ``[[gnu::dllexport]]`` and ``[[gnu::deprecated]]``, which can be
+    combined with other C++11 attributes.  The generated header falls back
+    to the compiler-specific spellings, such as ``__attribute__`` and
+    ``__declspec``, if the consumer compiles C, compiles C++ older than
+    C++11, does not support the attribute, or is Qt's ``moc``.  The
+    fallback is decided by the preprocessor, so the header remains usable
+    by consumers using a different compiler.  The C++11 attributes are used
+    with GCC 5 and Clang 3.6 or newer.  This matters for GCC versions before
+    13, which reject the compiler-specific spellings combined with C++11
+    attributes, such as ``struct EXAMPLE_EXPORT [[nodiscard]] Struct``.
+
+    A C++11 attribute that follows a type applies to the type, not to the
+    declared symbol.  The macros must therefore be placed at the start of a
+    declaration or right after the class key.  Otherwise, compilers either
+    reject the declaration or ignore the attribute and do not export the
+    symbol:
+
+    .. code-block:: c++
+
+      class EXAMPLE_EXPORT Class
+      {
+      public:
+        EXAMPLE_NO_EXPORT int method_excluded() const;
+        EXAMPLE_EXPORT static int const data_exported;
+      };
+
+      EXAMPLE_EXPORT int function_exported();
+      EXAMPLE_DEPRECATED_EXPORT int function_deprecated();
+      EXAMPLE_EXPORT extern int const data_exported;
+
+      int EXAMPLE_EXPORT function_not_exported(); // wrong placement
+
+    The compiler-specific spellings accept the same placement, so the
+    declarations compile with either.
 
 Deprecated Command
 """"""""""""""""""
@@ -564,6 +605,10 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_EXPORT)
   set(DEFINE_IMPORT)
   set(DEFINE_NO_EXPORT)
+  set(CXX_ATTRIBUTE_DEPRECATED "gnu::deprecated")
+  set(CXX_ATTRIBUTE_EXPORT)
+  set(CXX_ATTRIBUTE_IMPORT)
+  set(CXX_ATTRIBUTE_NO_EXPORT)
 
   if (COMPILER_HAS_DEPRECATED_ATTR AND NOT WIN32)
     set(DEFINE_DEPRECATED "__attribute__ ((__deprecated__))")
@@ -577,17 +622,47 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
     if(WIN32 OR CYGWIN)
       set(DEFINE_EXPORT "__declspec(dllexport)")
       set(DEFINE_IMPORT "__declspec(dllimport)")
+      set(CXX_ATTRIBUTE_EXPORT "gnu::dllexport")
+      set(CXX_ATTRIBUTE_IMPORT "gnu::dllimport")
     elseif(COMPILER_HAS_HIDDEN_VISIBILITY)
       set(DEFINE_EXPORT "__attribute__((visibility(\"default\")))")
       set(DEFINE_IMPORT "__attribute__((visibility(\"default\")))")
       set(DEFINE_NO_EXPORT "__attribute__((visibility(\"hidden\")))")
+      set(CXX_ATTRIBUTE_EXPORT "gnu::visibility(\"default\")")
+      set(CXX_ATTRIBUTE_IMPORT "gnu::visibility(\"default\")")
+      set(CXX_ATTRIBUTE_NO_EXPORT "gnu::visibility(\"hidden\")")
     endif()
   endif()
 endmacro()
 
+# Sets <out> to the preprocessor lines indented by <indent> that define the
+# macro <name> as <value>.  Given a C++11 <attribute>, the lines prefer
+# [[<attribute>]] in consumers that support it and fall back to <value>
+# otherwise.  Qt's moc always sees <value> because older versions of moc skip
+# classes declared with C++11 attributes.
+function(_generate_export_header_definition out indent name value attribute)
+  if(NOT attribute)
+    set(${out} "#${indent}define ${name} ${value}" PARENT_SCOPE)
+    return()
+  endif()
+
+  string(REGEX REPLACE "\\(.*" "" token "${attribute}")
+  string(JOIN "\n" definition
+    "#${indent}if defined(__cplusplus) && __cplusplus >= 201103L && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)"
+    "#${indent}  if __has_cpp_attribute(${token})"
+    "#${indent}    define ${name} [[${attribute}]]"
+    "#${indent}  endif"
+    "#${indent}endif"
+    "#${indent}ifndef ${name}"
+    "#${indent}  define ${name} ${value}"
+    "#${indent}endif"
+  )
+  set(${out} "${definition}" PARENT_SCOPE)
+endfunction()
+
 function(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   # Option overrides
-  set(options DEFINE_NO_DEPRECATED)
+  set(options DEFINE_NO_DEPRECATED CXX_ATTRIBUTES)
   set(oneValueArgs PREFIX_NAME BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME
     DEPRECATED_MACRO_NAME NO_EXPORT_MACRO_NAME STATIC_DEFINE
     NO_DEPRECATED_MACRO_NAME CUSTOM_CONTENT_FROM_VARIABLE INCLUDE_GUARD_NAME)
@@ -674,6 +749,27 @@ function(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
       set(CUSTOM_CONTENT "")
     endif()
   endif()
+
+  if(NOT _GEH_CXX_ATTRIBUTES)
+    set(CXX_ATTRIBUTE_DEPRECATED)
+    set(CXX_ATTRIBUTE_EXPORT)
+    set(CXX_ATTRIBUTE_IMPORT)
+    set(CXX_ATTRIBUTE_NO_EXPORT)
+  endif()
+
+  _generate_export_header_definition(EXPORT_DEFINITION "      "
+    "${EXPORT_MACRO_NAME}" "${DEFINE_EXPORT}" "${CXX_ATTRIBUTE_EXPORT}")
+  _generate_export_header_definition(IMPORT_DEFINITION "      "
+    "${EXPORT_MACRO_NAME}" "${DEFINE_IMPORT}" "${CXX_ATTRIBUTE_IMPORT}")
+  _generate_export_header_definition(NO_EXPORT_DEFINITION "    "
+    "${NO_EXPORT_MACRO_NAME}" "${DEFINE_NO_EXPORT}"
+    "${CXX_ATTRIBUTE_NO_EXPORT}")
+  # The GNU spelling of deprecation shares the availability of the export
+  # attributes, so that the combined macros never mix C++11 attributes with
+  # the legacy spellings, which Clang rejects after __declspec.
+  _generate_export_header_definition(DEPRECATED_DEFINITION "  "
+    "${DEPRECATED_MACRO_NAME}" "${DEFINE_DEPRECATED}"
+    "${CXX_ATTRIBUTE_DEPRECATED}")
 
   configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/exportheader.cmake.in"
     "${EXPORT_FILE_NAME}" @ONLY)

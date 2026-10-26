@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 
+#include "libattributes.h"
 #include "libshared.h"
 #include "libstatic.h"
 
@@ -164,11 +165,46 @@ int main()
   use_int(libstatic::data_exported);
   use_int(libstatic::data_excluded);
 
+  {
+    libattributes::Class l;
+    // l.method(); LINK ERROR
+    l.method_exported();
+    l.method_deprecated_exported();
+    // l.method_excluded(); LINK ERROR
+
+    // use_int(l.data); LINK ERROR
+    use_int(l.data_exported);
+    // use_int(l.data_excluded); LINK ERROR
+  }
+
+  {
+    libattributes::ExportedClass l;
+    l.method();
+#if defined(_WIN32) || defined(__CYGWIN__)
+    l.method_excluded();
+#else
+// l.method_excluded(); LINK ERROR (NOT WIN32 AND NOT CYGWIN)
+#endif
+  }
+
+  // libattributes::function(); LINK ERROR
+  libattributes::function_exported();
+  libattributes::function_deprecated_exported();
+  // libattributes::function_excluded(); LINK ERROR
+
+  // use_int(libattributes::data); LINK ERROR
+  use_int(libattributes::data_exported);
+  // use_int(libattributes::data_excluded); LINK ERROR
+
+  libattributes_function_c();
+
 #if defined(SRC_DIR) && defined(BIN_DIR)
   compare(SRC_DIR "/libshared_export.h",
           BIN_DIR "/libshared/libshared_export.h");
   compare(SRC_DIR "/libstatic_export.h",
           BIN_DIR "/libstatic/libstatic_export.h");
+  compare(SRC_DIR "/libattributes_export.h",
+          BIN_DIR "/libattributes/libattributes_export.h");
 #endif
 
   return 0;
