@@ -48,7 +48,7 @@ static void extendResult(
   cmGeneratorExpressionParser::cmGeneratorExpressionEvaluatorVector& result,
   cmGeneratorExpressionParser::cmGeneratorExpressionEvaluatorVector&& contents)
 {
-  if (!result.empty() &&
+  if (!result.empty() && !contents.empty() &&
       (*(result.end() - 1))->GetType() ==
         cmGeneratorExpressionEvaluator::Text &&
       contents.front()->GetType() == cmGeneratorExpressionEvaluator::Text) {
@@ -101,28 +101,19 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     commaTokens;
   std::vector<cmGeneratorExpressionToken>::const_iterator colonToken;
 
-  bool emptyParamTermination = false;
-
   if (this->it != this->Tokens.end() &&
       this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator) {
     colonToken = this->it;
     parameters.resize(parameters.size() + 1);
     assert(this->it != this->Tokens.end());
     ++this->it;
-    if (this->it == this->Tokens.end()) {
-      emptyParamTermination = true;
-    }
 
-    auto handleCommaOrColon = [this, &commaTokens, &parameters,
-                               &emptyParamTermination]() -> void {
+    auto handleCommaOrColon = [this, &commaTokens, &parameters]() -> void {
       if (this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator) {
         commaTokens.push_back(this->it);
         parameters.resize(parameters.size() + 1);
         assert(this->it != this->Tokens.end());
         ++this->it;
-        if (this->it == this->Tokens.end()) {
-          emptyParamTermination = true;
-        }
       } else if (this->it->TokenType ==
                  cmGeneratorExpressionToken::ColonSeparator) {
         extendText(*(parameters.end() - 1), this->it);
@@ -172,9 +163,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
       auto commaIt = commaTokens.begin();
       assert(parameters.size() > commaTokens.size());
       for (; pit != pend; ++pit, ++commaIt) {
-        if (!pit->empty() && !emptyParamTermination) {
-          extendResult(result, std::move(*pit));
-        }
+        extendResult(result, std::move(*pit));
         if (commaIt != commaTokens.end()) {
           extendText(result, *commaIt);
         } else {
