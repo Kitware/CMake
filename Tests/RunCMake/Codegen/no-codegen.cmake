@@ -4,3 +4,5 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/generated.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/generated.hpp
 )
+
+add_custom_target(hpp_creator ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/generated.hpp)
