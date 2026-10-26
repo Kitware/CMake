@@ -1094,6 +1094,8 @@ public:
     cm::string_view prop, cm::GenEx::Context const& context,
     cmGeneratorExpressionDAGChecker const* dagChecker) const;
 
+  bool SkipInstallRPATH() const;
+
   bool HaveInstallTreeRPATH(std::string const& config) const;
 
   bool GetBuildRPATH(std::string const& config, std::string& rpath) const;

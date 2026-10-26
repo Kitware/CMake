@@ -105,6 +105,7 @@ set(properties
   "INSTALL_REMOVE_ENVIRONMENT_RPATH"        "ON"                "<SAME>"
   "INSTALL_RPATH"                           "@rpath/"           "<SAME>"
   "INSTALL_RPATH_USE_LINK_PATH"             "ON"                "<SAME>"
+  "SKIP_INSTALL_RPATH"                      "ON"                "<SAME>"
   ## Platforms
   ### Android
   "ANDROID_JAR_DIRECTORIES"                 "${dir}"            "<SAME>"

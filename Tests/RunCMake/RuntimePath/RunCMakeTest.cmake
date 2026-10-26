@@ -33,6 +33,18 @@ if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
     ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/Genex-build -P ${RunCMake_SOURCE_DIR}/GenexCheck.cmake)
 
   run_RuntimePath(SysrootSlash)
+
+  run_RuntimePath(SkipInstallRPATHVariable)
+  run_cmake_command(SkipInstallRPATHVariableCheck
+    ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/SkipInstallRPATHVariable-build -P ${RunCMake_SOURCE_DIR}/SkipInstallRPATHCheck.cmake)
+
+  run_RuntimePath(SkipInstallRPATHProperty)
+  run_cmake_command(SkipInstallRPATHPropertyCheck
+    ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/SkipInstallRPATHProperty-build -P ${RunCMake_SOURCE_DIR}/SkipInstallRPATHCheck.cmake)
+
+  run_RuntimePath(SkipInstallRPATHPropertyOld)
+  run_cmake_command(SkipInstallRPATHPropertyOldCheck
+    ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/SkipInstallRPATHPropertyOld-build -P ${RunCMake_SOURCE_DIR}/SkipInstallRPATHCheck.cmake)
 endif()
 
 block()

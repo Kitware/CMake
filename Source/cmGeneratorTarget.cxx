@@ -1703,7 +1703,7 @@ bool cmGeneratorTarget::CanGenerateInstallNameDir(
 
   bool skip = this->Makefile->IsOn("CMAKE_SKIP_RPATH");
   if (name_type == INSTALL_NAME_FOR_INSTALL) {
-    skip |= this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
+    skip |= this->SkipInstallRPATH();
   } else {
     skip |= this->GetPropertyAsBool("SKIP_BUILD_RPATH");
   }
@@ -5131,12 +5131,22 @@ bool cmGeneratorTarget::ComputePDBOutputDir(std::string const& kind,
   return true;
 }
 
+bool cmGeneratorTarget::SkipInstallRPATH() const
+{
+  if (cmValue skip = this->GetProperty("SKIP_INSTALL_RPATH")) {
+    return skip.IsOn();
+  }
+  if (this->GetPolicyStatusCMP0229() == cmPolicies::NEW) {
+    return false;
+  }
+  return this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
+}
+
 bool cmGeneratorTarget::HaveInstallTreeRPATH(std::string const& config) const
 {
   std::string install_rpath;
   this->GetInstallRPATH(config, install_rpath);
-  return !install_rpath.empty() &&
-    !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
+  return !install_rpath.empty() && !this->SkipInstallRPATH();
 }
 
 bool cmGeneratorTarget::GetBuildRPATH(std::string const& config,

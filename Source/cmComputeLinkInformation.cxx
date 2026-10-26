@@ -2228,7 +2228,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     (outputRuntime && this->Target->HaveBuildTreeRPATH(this->Config) &&
      !linking_for_install);
   bool use_link_rpath = outputRuntime && linking_for_install &&
-    !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH") &&
+    !this->Target->SkipInstallRPATH() &&
     this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
   // Select whether to use $ORIGIN in RPATHs for artifacts in the build tree.

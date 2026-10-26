@@ -1194,6 +1194,13 @@ cmTarget::cmTarget(std::string name, cm::TargetType type, Visibility vis,
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
   }
 
+  if (this->GetPolicyStatus(cmPolicies::CMP0229) == cmPolicies::NEW &&
+      metConditions.count(TargetProperty::InitCondition::CanCompileSources)) {
+    if (cmValue value = mf->GetDefinition("CMAKE_SKIP_INSTALL_RPATH")) {
+      this->SetProperty("SKIP_INSTALL_RPATH", value);
+    }
+  }
+
   // check for "CMAKE_VS_GLOBALS" variable and set up target properties
   // if any
   cmValue globals = mf->GetDefinition("CMAKE_VS_GLOBALS");

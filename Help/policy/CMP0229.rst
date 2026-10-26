@@ -1,0 +1,27 @@
+CMP0229
+-------
+
+.. versionadded:: 4.6
+
+The :variable:`CMAKE_SKIP_INSTALL_RPATH` variable takes effect at target creation.
+
+CMake 4.5 and below apply the :variable:`CMAKE_SKIP_INSTALL_RPATH` variable's
+value at the end of each directory to every target in that directory.  CMake
+4.6 and above instead prefer to initialize the :prop_tgt:`SKIP_INSTALL_RPATH`
+target property from the variable as each target is created.  This policy
+provides compatibility for projects expecting the prior behavior.
+
+The ``OLD`` behavior for this policy ignores the value of the
+:variable:`CMAKE_SKIP_INSTALL_RPATH` variable on target creation
+and use its value at the end of each directory.
+
+The ``NEW`` behavior for this policy uses the value of the
+:variable:`CMAKE_SKIP_INSTALL_RPATH` variable at target creation to
+initialize the :prop_tgt:`SKIP_INSTALL_RPATH` property.  After that
+the target property is used instead of the variable.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

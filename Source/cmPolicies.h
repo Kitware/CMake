@@ -688,7 +688,11 @@ class cmMakefile;
          WARN)                                                                \
   SELECT(POLICY, CMP0228,                                                     \
          "File set usage requirements are evaluated for the consumer.", 4, 6, \
-         0, WARN)
+         0, WARN)                                                             \
+  SELECT(POLICY, CMP0229,                                                     \
+         "The CMAKE_SKIP_INSTALL_RPATH variable takes effect at target "      \
+         "creation.",                                                         \
+         4, 6, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -750,7 +754,8 @@ class cmMakefile;
   F(CMP0216)                                                                  \
   F(CMP0226)                                                                  \
   F(CMP0227)                                                                  \
-  F(CMP0228)
+  F(CMP0228)                                                                  \
+  F(CMP0229)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \
