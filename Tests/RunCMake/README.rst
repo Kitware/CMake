@@ -249,6 +249,41 @@ runs CMake to configure the case's project.  The second step runs
 build tool's ``stderr`` into its ``stdout``.  Note that each call uses
 a unique case name so that expected results can be expressed individually.
 
+Inspecting the Toolchain
+========================
+
+A ``RunCMakeTest.cmake`` script runs in CMake script mode, so it does not
+have information about the toolchain, such as compiler IDs, versions,
+or platform-specific variables. When test case selection or expected
+results depend on such information, a conventional ``Inspect`` case can
+be used to obtain it::
+
+  run_cmake(Inspect)
+  include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
+
+where ``<Test>/Inspect.cmake`` enables the needed languages and writes
+the values of interest to an ``info.cmake`` file in its build tree::
+
+  enable_language(C)
+
+  set(info "")
+  foreach(var
+    CMAKE_C_COMPILER_ID
+    CMAKE_C_COMPILER_VERSION
+  )
+    if(DEFINED ${var})
+      string(APPEND info "set(${var} \"${${var}}\")\n")
+    endif()
+  endforeach()
+
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/info.cmake" "${info}")
+
+After the ``include()``, the ``RunCMakeTest.cmake`` script may use the
+forwarded variables to decide which cases to run or which expected
+results to use. Values computed in ``Inspect.cmake`` from other project
+state may be forwarded the same way. If the inspection needs extra
+configuration, use ``run_cmake_with_options(Inspect ...)`` instead.
+
 Running a Test
 ==============
 
