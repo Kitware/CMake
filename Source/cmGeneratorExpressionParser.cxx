@@ -224,6 +224,11 @@ void cmGeneratorExpressionParser::ParseContent(
     case cmGeneratorExpressionToken::BeginExpression:
       assert(this->it != this->Tokens.end());
       ++this->it;
+      if (this->it == this->Tokens.end()) {
+        // A '$<' at the end of the input is plain text.
+        extendText(result, this->it - 1);
+        return;
+      }
       this->ParseGeneratorExpression(result);
       return;
     case cmGeneratorExpressionToken::EndExpression:
