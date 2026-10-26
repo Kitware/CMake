@@ -1,10 +1,16 @@
 set(ENV{PATH} "@MINGW_PATH@\;$ENV{PATH}")
 set(CMAKE_COMMAND_LINE "@ARGS_CMAKE_COMMAND_LINE@")
+set(_build_type_arg "")
+if(DEFINED CONFIG) # policy CMP0230 is NEW
+  set(_build_type_arg "-DCMAKE_BUILD_TYPE:STRING=${CONFIG}")
+endif()
 execute_process(
   COMMAND "@CMAKE_COMMAND@" "-GMinGW Makefiles"
   -DCMAKE_Fortran_COMPILER:PATH=@MINGW_GFORTRAN@
   -DBUILD_SHARED_LIBS=ON
   -DCMAKE_GNUtoMS=ON
   ${CMAKE_COMMAND_LINE}
+  # after CMAKE_COMMAND_LINE so the build type always matches the parent
+  ${_build_type_arg}
   "@source_dir@"
   COMMAND_ERROR_IS_FATAL ANY)

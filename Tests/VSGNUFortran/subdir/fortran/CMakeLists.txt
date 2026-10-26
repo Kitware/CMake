@@ -58,3 +58,12 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES Fujitsu)
   target_link_libraries(world PRIVATE fj90i fj90f fjsrcinfo)
   target_link_libraries(hello PRIVATE fj90i fj90f fjsrcinfo)
 endif()
+
+# Record the build type so the parent can check that it was propagated.
+# A multi-config generator means we were added directly by add_subdirectory
+# and there is no single build type to check.
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(NOT _isMultiConfig)
+  set(FORTRAN_BUILD_TYPE_DEFINE "#define FORTRAN_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\"")
+endif()
+configure_file(FortranBuildType.h.in FortranBuildType.h @ONLY)

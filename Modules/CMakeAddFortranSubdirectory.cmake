@@ -56,6 +56,12 @@ This module provides the following command:
     Additionally, the :variable:`CMAKE_GNUtoMS` variable is set to ``ON`` to
     ensure that Microsoft-compatible ``.lib`` files are created.
 
+    .. versionchanged:: 4.6
+      If policy :policy:`CMP0230` is set to ``NEW``, the external project is
+      built with :variable:`CMAKE_BUILD_TYPE` set to the configuration being
+      built by the parent project.  Otherwise no build type is set, so no
+      configuration-specific flags are used.
+
   The options are:
 
   ``PROJECT``
@@ -245,13 +251,23 @@ function(cmake_add_fortran_subdirectory subdir)
   endforeach()
   # create build and configure wrapper scripts
   _setup_mingw_config_and_build("${source_dir}" "${build_dir}")
+  # pass the parent configuration to the wrapper scripts (policy CMP0230)
+  cmake_policy(GET CMP0230 _cmp0230
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  set(config_arg "")
+  if(_cmp0230 STREQUAL "NEW")
+    set(config_arg -DCONFIG=$<CONFIG>)
+  endif()
   # create the external project
   ExternalProject_Add(${project_name}_build
     SOURCE_DIR ${source_dir}
     BINARY_DIR ${build_dir}
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
+    ${config_arg}
     -P ${build_dir}/config_mingw.cmake
     BUILD_COMMAND ${CMAKE_COMMAND}
+    ${config_arg}
     -P ${build_dir}/build_mingw.cmake
     BUILD_ALWAYS 1
     BUILD_BYPRODUCTS ${byproducts}

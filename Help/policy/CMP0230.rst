@@ -1,0 +1,38 @@
+CMP0230
+-------
+
+.. versionadded:: 4.6
+
+:module:`CMakeAddFortranSubdirectory` builds the MinGW project with the
+parent configuration.
+
+When the parent project uses MSVC without a Fortran compiler, the
+:command:`cmake_add_fortran_subdirectory` command builds the Fortran project
+as an external project using a MinGW ``gfortran`` and a single-config
+:generator:`MinGW Makefiles` generator.  CMake 4.5 and below configure that
+project without :variable:`CMAKE_BUILD_TYPE`, so it is built without
+configuration-specific flags regardless of the parent's
+:variable:`CMAKE_BUILD_TYPE` or the configuration selected in a
+multi-config generator.
+
+CMake 4.6 and above prefer to set :variable:`CMAKE_BUILD_TYPE` in the
+MinGW project to the configuration being built by the parent project.
+With a multi-config parent, the MinGW build tree is shared by all
+configurations, so it is reconfigured when the configuration being built
+differs from the one it was last configured with.  A
+:variable:`CMAKE_BUILD_TYPE` given in the ``CMAKE_COMMAND_LINE`` option is
+overridden.
+
+The ``OLD`` behavior for this policy is to configure the MinGW project
+without setting :variable:`CMAKE_BUILD_TYPE`.  The ``NEW`` behavior is to
+set :variable:`CMAKE_BUILD_TYPE` to the parent project's configuration.
+
+This policy is checked when :command:`cmake_add_fortran_subdirectory` is
+called.  It has no effect when the Fortran project is added directly with
+:command:`add_subdirectory`.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

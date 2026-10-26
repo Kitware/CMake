@@ -1,4 +1,18 @@
 set(ENV{PATH} "@MINGW_PATH@\;$ENV{PATH}")
+# The MinGW build tree is single-config but may be shared by several
+# configurations of a multi-config parent.  Reconfigure on mismatch.
+# CONFIG is defined only if policy CMP0230 is NEW.
+if(DEFINED CONFIG)
+  set(_build_type "")
+  if(EXISTS CMakeCache.txt)
+    file(STRINGS CMakeCache.txt _build_type REGEX "^CMAKE_BUILD_TYPE:[^=]*=")
+    string(REGEX REPLACE "^CMAKE_BUILD_TYPE:[^=]*=" "" _build_type "${_build_type}")
+  endif()
+  if(NOT "${_build_type}" STREQUAL "${CONFIG}")
+    execute_process(COMMAND "@CMAKE_COMMAND@" "-DCMAKE_BUILD_TYPE:STRING=${CONFIG}" .
+      COMMAND_ERROR_IS_FATAL ANY)
+  endif()
+endif()
 # rebuild from scratch if a byproduct was removed, e.g. by a clean of
 # the outer project, because the inner build would consider itself up to date
 set(byproducts "@byproducts@")
