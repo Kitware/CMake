@@ -957,15 +957,17 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           }
         } break;
         case Arguments::SourceType::CxxModule: {
-          if (!in_file_set) {
-            file_set_name += 'a';
-            fprintf(fout,
-                    "  PRIVATE FILE_SET %s TYPE CXX_MODULES BASE_DIRS \"%s\" "
-                    "FILES\n",
-                    file_set_name.c_str(),
-                    this->Makefile->GetCurrentSourceDirectory().c_str());
-            in_file_set = true;
-          }
+          // Module sources may reside anywhere, including the scratch
+          // directory for copied sources. Each one gets its own file set
+          // whose base directory contains it.
+          std::string const baseDir = cmSystemTools::GetFilenamePath(
+            cmSystemTools::CollapseFullPath(si, this->BinaryDirectory));
+          file_set_name += 'a';
+          fprintf(fout,
+                  "  PRIVATE FILE_SET %s TYPE CXX_MODULES BASE_DIRS \"%s\" "
+                  "FILES\n",
+                  file_set_name.c_str(), baseDir.c_str());
+          in_file_set = true;
         } break;
         case Arguments::SourceType::Directory:
           /* Handled elsewhere. */
