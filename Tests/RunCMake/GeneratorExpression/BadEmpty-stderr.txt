@@ -1,0 +1,17 @@
+CMake Error at BadEmpty\.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<>
+
+  Expression did not evaluate to a known generator expression
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at BadEmpty\.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<:foo>
+
+  Expression did not evaluate to a known generator expression
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

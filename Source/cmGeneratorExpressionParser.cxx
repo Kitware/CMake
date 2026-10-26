@@ -82,9 +82,6 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
       break;
     }
   }
-  if (identifier.empty()) {
-    // ERROR
-  }
 
   if (this->it != this->Tokens.end() &&
       this->it->TokenType == cmGeneratorExpressionToken::EndExpression) {
