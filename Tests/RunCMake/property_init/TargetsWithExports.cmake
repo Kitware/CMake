@@ -20,9 +20,12 @@ set(properties
   "ENABLE_EXPORTS"                "OFF"     "<SAME>"
   )
 
-prepare_target_types(executable
+prepare_target_types(executable_target
            EXECUTABLE
   IMPORTED_EXECUTABLE)
+prepare_target_types(shared_library_target
+           SHARED
+  IMPORTED_SHARED)
 set(iteration "-ENABLE_EXPORTS")
 run_property_tests(executable_target properties)
 
