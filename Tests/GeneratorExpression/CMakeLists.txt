@@ -144,6 +144,11 @@ add_custom_target(check-part2 ALL
     -Dtest_incomplete_19=$<1:some,thing$<ANGLE-R>
     -Dtest_incomplete_20=$<CONFIGURATION$<ANGLE-R>
     -Dtest_incomplete_21=$<BOOL:something$<ANGLE-R>
+    -Dtest_incomplete_22=$<1:a>$<
+    -Dtest_incomplete_23=$<1:a>$<1:$<
+    -Dtest_incomplete_24=$<1:a>$<:x
+    -Dtest_incomplete_25=$<1:a>$<x:y,
+    -Dtest_incomplete_26=$<1:a>$<x:y,z,
     -Dtest_build_interface=$<BUILD_INTERFACE:build>
     -Dtest_install_interface=$<INSTALL_INTERFACE:install>
     -Dtest_target_name_1=$<TARGET_NAME:tgt,ok>
