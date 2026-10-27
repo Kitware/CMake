@@ -293,21 +293,15 @@ void InfoWriter::SetConfigArray(
 
 bool InfoWriter::Save(std::string const& filename)
 {
-  cmGeneratedFileStream fileStream;
-  fileStream.SetCopyIfDifferent(true);
-  fileStream.Open(filename, false, true);
-  if (!fileStream) {
-    return false;
-  }
-
+  std::ostringstream content;
   Json::StyledStreamWriter jsonWriter;
   try {
-    jsonWriter.write(fileStream, this->Value_);
+    jsonWriter.write(content, this->Value_);
   } catch (...) {
     return false;
   }
 
-  return fileStream.Close();
+  return cmGeneratedFileStream::WriteIfDifferent(filename, content.str());
 }
 
 cmQtAutoGen::ConfigStrings<std::vector<std::string>> generateListOptions(
@@ -1118,10 +1112,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
               }
               // We only accept not-GENERATED files that do exist.
               if (!sf->GetIsGenerated() &&
-                  !cmSystemTools::FileExists(fullPath)) {
+                  !this->GlobalInitializer->CachedFileExists(fullPath)) {
                 continue;
               }
-            } else if (cmSystemTools::FileExists(fullPath)) {
+            } else if (this->GlobalInitializer->CachedFileExists(fullPath)) {
               // Create a new source file for the existing file
               sf = this->Makefile->CreateSource(fullPath, false, locationKind);
             }
@@ -1338,6 +1332,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
                                         qrc.QrcName, '_', qrc.QrcPathChecksum);
       qrc.LockFile = cmStrCat(base, "_Lock.lock");
       qrc.InfoFile = cmStrCat(base, "_Info.json");
+      qrc.ListFileBase = cmStrCat(base, "_List");
       this->ConfigFileNames(qrc.SettingsFile, cmStrCat(base, "_Used"), ".txt");
     }
     // rcc options
@@ -1370,8 +1365,9 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             RccLister const lister(
               this->Rcc.Executable.Config[config],
               this->Rcc.ExecutableFeatures.Config[config]->ListOptions);
-            if (!lister.list(qrc.QrcFile, qrc.Resources.Config[config],
-                             error)) {
+            if (!lister.list(
+                  qrc.QrcFile, qrc.Resources.Config[config], error, false,
+                  cmStrCat(qrc.ListFileBase, '_', config, ".txt"))) {
               cmSystemTools::Error(error);
               return false;
             }
@@ -1380,7 +1376,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           RccLister const lister(
             this->Rcc.Executable.Default,
             this->Rcc.ExecutableFeatures.Default->ListOptions);
-          if (!lister.list(qrc.QrcFile, qrc.Resources.Default, error)) {
+          if (!lister.list(qrc.QrcFile, qrc.Resources.Default, error, false,
+                           cmStrCat(qrc.ListFileBase, ".txt"))) {
             cmSystemTools::Error(error);
             return false;
           }

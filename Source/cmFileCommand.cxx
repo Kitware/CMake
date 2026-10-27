@@ -1469,6 +1469,9 @@ bool HandleRename(std::vector<std::string> const& args,
     return false;
   }
 
+  // Cached knowledge of the old and new names becomes stale.
+  status.GetMakefile().GetCMakeInstance()->InvalidateFileSystemCaches();
+
   std::string err;
   switch (cmSystemTools::RenameFile(oldname, newname,
                                     arguments.NoReplace
@@ -1599,6 +1602,9 @@ bool HandleCopyFile(std::vector<std::string> const& args,
 bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
                       cmExecutionStatus& status)
 {
+  // Cached knowledge of the removed files becomes stale.
+  status.GetMakefile().GetCMakeInstance()->InvalidateFileSystemCaches();
+
   for (std::string const& arg :
        cmMakeRange(args).advance(1)) // Get rid of subcommand
   {

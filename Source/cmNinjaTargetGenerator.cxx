@@ -2812,15 +2812,15 @@ std::string cmNinjaTargetGenerator::GetSwiftModuleOutput(
 void cmNinjaTargetGenerator::EnsureDirectoryExists(
   std::string const& path) const
 {
+  cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
   if (cmSystemTools::FileIsFullPath(path)) {
-    cmSystemTools::MakeDirectory(path);
+    gg->EnsureDirectoryExists(path);
   } else {
-    cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
     std::string fullPath = gg->GetCMakeInstance()->GetHomeOutputDirectory();
     // Also ensures there is a trailing slash.
     gg->StripNinjaOutputPathPrefixAsSuffix(fullPath);
     fullPath += path;
-    cmSystemTools::MakeDirectory(fullPath);
+    gg->EnsureDirectoryExists(fullPath);
   }
 }
 

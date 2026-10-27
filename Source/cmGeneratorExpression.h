@@ -8,6 +8,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -26,7 +27,6 @@ class cmake;
 class cmCompiledGeneratorExpression;
 class cmGeneratorTarget;
 struct cmGeneratorExpressionDAGChecker;
-struct cmGeneratorExpressionEvaluator;
 
 /** \class cmGeneratorExpression
  * \brief Evaluate generate-time query expression syntax.
@@ -108,6 +108,40 @@ private:
   cmListFileBacktrace Backtrace;
 };
 
+/** \class cmGeneratorExpressionParseCache
+ * \brief Cache of parsed generator expressions, keyed by their input.
+ *
+ * Parsing depends only on the input string, so all
+ * cmCompiledGeneratorExpression instances compiled from the same input
+ * share one immutable parse tree.  Each cmCompiledGeneratorExpression
+ * keeps its own evaluation state.
+ */
+class cmGeneratorExpressionParseCache
+{
+public:
+  struct Entry;
+
+  cmGeneratorExpressionParseCache();
+  ~cmGeneratorExpressionParseCache();
+
+  cmGeneratorExpressionParseCache(cmGeneratorExpressionParseCache const&) =
+    delete;
+  cmGeneratorExpressionParseCache& operator=(
+    cmGeneratorExpressionParseCache const&) = delete;
+
+  /** Get the parse tree of the input, or nullptr if the input does not
+      contain any generator expression.  */
+  std::shared_ptr<Entry const> Get(std::string const& input);
+
+  /** Forget all parse trees.  Compiled expressions keep the parse trees
+      they use alive.  */
+  void Clear() { this->Entries.clear(); }
+
+private:
+  // Keys refer to the input owned by the entry, so it is not stored twice.
+  std::unordered_map<cm::string_view, std::shared_ptr<Entry const>> Entries;
+};
+
 class cmCompiledGeneratorExpression
 {
 public:
@@ -181,9 +215,9 @@ private:
   friend class cmGeneratorExpression;
 
   cmListFileBacktrace Backtrace;
-  std::vector<std::unique_ptr<cmGeneratorExpressionEvaluator>> Evaluators;
   std::string const Input;
-  bool NeedsEvaluation;
+  // Null if the input does not contain any generator expression.
+  std::shared_ptr<cmGeneratorExpressionParseCache::Entry const> Parsed;
   bool EvaluateForBuildsystem = false;
   bool Quiet = false;
 

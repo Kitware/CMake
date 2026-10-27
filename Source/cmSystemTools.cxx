@@ -1748,6 +1748,30 @@ cmsys::Status cmSystemTools::MoveFileIfDifferent(
   return res;
 }
 
+bool cmSystemTools::FileHasContent(std::string const& path,
+                                   cm::string_view content)
+{
+  // Compare sizes first to avoid opening the file when they differ.
+  // A missing file has length zero and is caught by opening it below.
+  if (FileLength(path) != content.size()) {
+    return false;
+  }
+  cmsys::ifstream fin(path.c_str(), std::ios::in | std::ios::binary);
+  if (!fin) {
+    return false;
+  }
+  char buffer[4096];
+  while (!content.empty()) {
+    std::size_t const n = std::min(content.size(), sizeof(buffer));
+    if (!fin.read(buffer, static_cast<std::streamsize>(n)) ||
+        content.compare(0, n, cm::string_view(buffer, n)) != 0) {
+      return false;
+    }
+    content.remove_prefix(n);
+  }
+  return true;
+}
+
 void cmSystemTools::Glob(std::string const& directory,
                          std::string const& regexp,
                          std::vector<std::string>& files)
@@ -2004,7 +2028,8 @@ std::string cmSystemTools::RelativeIfUnder(std::string const& top,
   return out;
 }
 
-std::string cmSystemTools::GetActualCaseForPath(std::string const& p)
+std::string cmSystemTools::GetActualCaseForPath(
+  std::string const& p, std::unordered_map<std::string, std::string>* cache)
 {
 #ifdef _WIN32
   std::string casePath;
@@ -2058,15 +2083,32 @@ std::string cmSystemTools::GetActualCaseForPath(std::string const& p)
         std::string test_str = casePath;
         test_str += path_components[idx];
 
-        WIN32_FIND_DATAW findData;
-        HANDLE hFind = ::FindFirstFileW(
-          cmsys::Encoding::ToWide(test_str).c_str(), &findData);
-        if (INVALID_HANDLE_VALUE != hFind) {
-          auto case_file_name = cmsys::Encoding::ToNarrow(findData.cFileName);
-          path_components[idx] = std::move(case_file_name);
-          ::FindClose(hFind);
+        // Only components found to exist are cached, so that a path
+        // created later is still converted.
+        std::string const* cached = nullptr;
+        if (cache) {
+          auto it = cache->find(test_str);
+          if (it != cache->end()) {
+            cached = &it->second;
+          }
+        }
+        if (cached) {
+          path_components[idx] = *cached;
         } else {
-          converting = false;
+          WIN32_FIND_DATAW findData;
+          HANDLE hFind = ::FindFirstFileW(
+            cmsys::Encoding::ToWide(test_str).c_str(), &findData);
+          if (INVALID_HANDLE_VALUE != hFind) {
+            auto case_file_name =
+              cmsys::Encoding::ToNarrow(findData.cFileName);
+            ::FindClose(hFind);
+            if (cache) {
+              cache->emplace(std::move(test_str), case_file_name);
+            }
+            path_components[idx] = std::move(case_file_name);
+          } else {
+            converting = false;
+          }
         }
       }
     }
@@ -2075,6 +2117,7 @@ std::string cmSystemTools::GetActualCaseForPath(std::string const& p)
   }
   return casePath;
 #else
+  static_cast<void>(cache);
   return p;
 #endif
 }

@@ -95,6 +95,31 @@ bool cmGeneratedFileStream::Close()
   return this->cmGeneratedFileStreamBase::Close();
 }
 
+bool cmGeneratedFileStream::WriteIfDifferent(std::string const& name,
+                                             cm::string_view content,
+                                             bool quiet, bool* written)
+{
+  if (written) {
+    *written = false;
+  }
+  if (cmSystemTools::FileHasContent(name, content)) {
+    return true;
+  }
+  cmGeneratedFileStream fout;
+  fout.Open(name, quiet, true);
+  if (!fout) {
+    return false;
+  }
+  fout.write(content.data(), static_cast<std::streamsize>(content.size()));
+  if (!fout.Close()) {
+    return false;
+  }
+  if (written) {
+    *written = true;
+  }
+  return true;
+}
+
 void cmGeneratedFileStream::SetCopyIfDifferent(bool copy_if_different)
 {
   this->CopyIfDifferent = copy_if_different;

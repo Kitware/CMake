@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <functional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <cm/optional>
@@ -230,6 +231,13 @@ public:
                                            std::string const& destination);
 
   /**
+   * Return true if the file exists and contains exactly the given bytes.
+   * Use this to avoid rewriting a file whose content would not change,
+   * without first writing the new content to a temporary file.
+   */
+  static bool FileHasContent(std::string const& path, cm::string_view content);
+
+  /**
    * According to the CreateProcessW documentation:
    *
    *   To run a batch file, you must start the command interpreter; set
@@ -426,7 +434,15 @@ public:
   static std::string RelativeIfUnder(std::string const& top,
                                      std::string const& in);
 
-  static std::string GetActualCaseForPath(std::string const& p);
+  /**
+   * Get the path with the actual case of all existing components on disk.
+   * If a cache is given, it is used to remember the actual case of
+   * components found to exist, to avoid querying the disk again for
+   * paths sharing the same directories.
+   */
+  static std::string GetActualCaseForPath(
+    std::string const& p,
+    std::unordered_map<std::string, std::string>* cache = nullptr);
 
   static cm::optional<std::string> GetEnvVar(std::string const& var);
   static std::vector<std::string> GetEnvPathNormalized(std::string const& var);

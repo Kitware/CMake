@@ -12,6 +12,7 @@
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 using Encoding = cmProcessOutput::Encoding;
 
@@ -97,6 +98,9 @@ bool cmExecProgramCommand(std::vector<std::string> const& args,
   if (!result) {
     retVal = -1;
   }
+
+  // The process may have removed or renamed files.
+  status.GetMakefile().GetCMakeInstance()->InvalidateFileSystemCaches();
 
   if (!output_variable.empty()) {
     std::string::size_type first = output.find_first_not_of(" \n\t\r");

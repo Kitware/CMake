@@ -40,6 +40,7 @@
 #include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
+#include "cmake.h"
 
 namespace {
 bool cmExecuteProcessCommandIsWhitespace(char c)
@@ -427,6 +428,9 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   if (timedOut) {
     chain.Terminate();
   }
+
+  // The processes may have removed or renamed files.
+  status.GetMakefile().GetCMakeInstance()->InvalidateFileSystemCaches();
   if (!arguments.OutputQuiet &&
       (arguments.OutputVariable.empty() || arguments.EchoOutputVariable)) {
     processOutput.DecodeText(std::string(), strdata, 1);

@@ -117,9 +117,11 @@ void cmSourceFileLocation::UpdateExtension(std::string const& name)
     // This is a known extension.  Use the given filename with extension.
     this->Name = cmSystemTools::GetFilenameName(name);
     this->AmbiguousExtension = false;
-  } else {
+  } else if (this->AmbiguousExtension || this->AmbiguousDirectory) {
     // This is not a known extension.  See if the file exists on disk as
-    // named.
+    // named.  This is not needed if neither the extension nor the
+    // directory is ambiguous, because finding the file would not change
+    // the location.
     std::string tryPath;
     if (this->AmbiguousDirectory) {
       // Check the source tree only because a file in the build tree should
@@ -132,7 +134,7 @@ void cmSourceFileLocation::UpdateExtension(std::string const& name)
       tryPath += "/";
     }
     tryPath += this->Name;
-    if (cmSystemTools::FileExists(tryPath, true)) {
+    if (gg->SourceFileExists(tryPath)) {
       // We found a source file named by the user on disk.  Trust it's
       // extension.
       this->Name = cmSystemTools::GetFilenameName(name);

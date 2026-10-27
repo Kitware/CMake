@@ -443,6 +443,9 @@ function(gtest_add_tests)
 
   set(gtest_case_name_regex ".*\\([ \r\n\t]*([A-Za-z_0-9]+)[ \r\n\t]*,[ \r\n\t]*([A-Za-z_0-9]+)[ \r\n\t]*\\).*")
   set(gtest_test_type_regex "(TYPED_TEST|TEST)_?[FP]?")
+  # Matches if the end of the accumulated lines may still be continued
+  # into a complete test definition by the lines that follow
+  set(gtest_test_incomplete_regex "${gtest_test_type_regex}[ \r\n\t]*(\\([A-Za-z_0-9 ,\r\n\t]*)?$")
   set(each_line_regex "([^\r\n]*[\r\n])")
 
   foreach(source IN LISTS arg_SOURCES)
@@ -456,6 +459,7 @@ function(gtest_add_tests)
     string(REPLACE ";" "\\;" contents "${contents}")
     # Split into lines
     string(REGEX MATCHALL "${each_line_regex}" content_lines "${contents}")
+    # Stores the number of the current line
     set(line "0")
     # Stores the line number of the start of a test definition
     set(accumulate_line "0")
@@ -464,6 +468,10 @@ function(gtest_add_tests)
     # Iterate over each line in the file so that we know the line number of a test definition
     foreach(line_str IN LISTS content_lines)
       math(EXPR line "${line}+1")
+      # Skip lines on which no test definition starts, unless accumulating
+      if(accumulated STREQUAL "" AND NOT line_str MATCHES "TEST")
+        continue()
+      endif()
       # Check if the current line is the start of a test definition
       string(REGEX MATCH "[ \t]*${gtest_test_type_regex}[ \t]*[\\(]*" accumulate_start_hit "${line_str}")
       if(accumulate_start_hit)
@@ -477,7 +485,12 @@ function(gtest_add_tests)
         # Reset accumulated for the next match
         set(accumulated "")
       else()
-        # Continue accumulating lines
+        # Continue accumulating lines as long as they may still complete a
+        # test definition.  Otherwise, a mention of TEST that is not a test
+        # definition would accumulate all the lines up to the next one.
+        if(NOT accumulated MATCHES "${gtest_test_incomplete_regex}")
+          set(accumulated "")
+        endif()
         continue()
       endif()
       # At this point, the start line of the test definition is known

@@ -432,6 +432,10 @@ public:
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
   void StripNinjaOutputPathPrefixAsSuffix(std::string& path);
 
+  /// Create a directory unless it was already created or found to exist
+  /// during this generation.
+  void EnsureDirectoryExists(std::string const& path);
+
   bool WriteDyndepFile(
     std::string const& dir_top_src, std::string const& dir_top_bld,
     std::string const& dir_cur_src, std::string const& dir_cur_bld,
@@ -582,6 +586,9 @@ private:
 
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
+
+  /// Directories known to exist, see EnsureDirectoryExists.
+  std::unordered_set<std::string> ExistingDirectories;
 
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string>> AssumedSourceDependencies;

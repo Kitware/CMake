@@ -1544,7 +1544,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   if (!stripImplicitDirs) {
     // Append implicit directories that were requested by the user only
     for (BT<std::string> const& udr : userDirs) {
-      if (cm::contains(implicitSet, cmSystemTools::GetRealPath(udr.Value))) {
+      if (cm::contains(implicitSet,
+                       this->GlobalGenerator->GetRealPath(udr.Value))) {
         emitBT(udr);
       }
     }

@@ -45,6 +45,7 @@
 #include "cmDuration.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileTimeCache.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobCacheEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
@@ -322,6 +323,8 @@ cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[15] = {
 cmake::cmake(cmState::Role role, cmState::TryCompile isTryCompile)
   : CMakeWorkingDirectory(cmSystemTools::GetLogicalWorkingDirectory())
   , FileTimeCache(cm::make_unique<cmFileTimeCache>())
+  , GeneratorExpressionParseCache(
+      cm::make_unique<cmGeneratorExpressionParseCache>())
 #ifndef CMAKE_BOOTSTRAP
   , VariableWatch(cm::make_unique<cmVariableWatch>())
 #endif
@@ -2572,10 +2575,27 @@ int cmake::Configure()
   return ret;
 }
 
+void cmake::InvalidateFileSystemCaches()
+{
+  this->ActualCaseCache.clear();
+  if (this->GlobalGenerator) {
+    this->GlobalGenerator->ClearSourceFileExistsCache();
+  }
+}
+
 int cmake::ActualConfigure()
 {
   // Construct right now our path conversion table before it's too late:
   this->CleanupCommandsAndMacros();
+
+  // The file system may have changed since a previous configure in the
+  // same process.
+  this->InvalidateFileSystemCaches();
+
+  // Do not keep the parse trees of a previous configure in the same
+  // process alive.  Compiled expressions still referring to them share
+  // their ownership.
+  this->GeneratorExpressionParseCache->Clear();
 
   cmSystemTools::RemoveADirectory(this->GetHomeOutputDirectory() +
                                   "/CMakeFiles/CMakeScratch");
@@ -3343,6 +3363,9 @@ int cmake::Generate()
   }
   this->GlobalGenerator->Generate();
 #endif
+  // Do not keep the parse trees alive after generation, e.g. while
+  // cmake-gui waits for the next configure.
+  this->GeneratorExpressionParseCache->Clear();
   auto endTime = std::chrono::steady_clock::now();
   {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(endTime -

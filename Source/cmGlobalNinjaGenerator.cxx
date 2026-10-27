@@ -639,6 +639,7 @@ void cmGlobalNinjaGenerator::Generate()
   for (auto& it : this->Configs) {
     it.second.TargetDependsClosures.clear();
   }
+  this->ExistingDirectories.clear();
 
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
@@ -2527,6 +2528,17 @@ std::string cmGlobalNinjaGenerator::NinjaOutputPath(
     return path;
   }
   return cmStrCat(this->OutputPathPrefix, path);
+}
+
+void cmGlobalNinjaGenerator::EnsureDirectoryExists(std::string const& path)
+{
+  // The same object and PDB directories are requested for every source.
+  if (this->ExistingDirectories.count(path)) {
+    return;
+  }
+  if (cmSystemTools::MakeDirectory(path)) {
+    this->ExistingDirectories.insert(path);
+  }
 }
 
 void cmGlobalNinjaGenerator::StripNinjaOutputPathPrefixAsSuffix(

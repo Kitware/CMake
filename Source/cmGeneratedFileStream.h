@@ -6,6 +6,8 @@
 
 #include <string>
 
+#include <cm/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cm_codecvt_Encoding.hxx"
@@ -157,4 +159,17 @@ public:
    * Afterward, the original encoding is restored.
    */
   void WriteAltEncoding(std::string const& data, codecvt_Encoding encoding);
+
+  /**
+   * Atomically replace the named file with the given content in binary
+   * mode, unless the file already has exactly this content.  Unlike
+   * copy-if-different, this compares the content with the file directly
+   * instead of writing a temporary file and reading it back, which is
+   * expensive with real-time virus scanners.  Return false if the file
+   * had to be written but could not be.  If written is given, it is set
+   * to whether the file was written.
+   */
+  static bool WriteIfDifferent(std::string const& name,
+                               cm::string_view content, bool quiet = false,
+                               bool* written = nullptr);
 };

@@ -11,6 +11,7 @@
 #include <set>
 #include <stack>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -56,6 +57,7 @@ class cmCMakePresetsWorkflowArgs;
 class cmFileAPI;
 class cmInstrumentation;
 class cmFileTimeCache;
+class cmGeneratorExpressionParseCache;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmMessenger;
@@ -470,6 +472,21 @@ public:
    */
   cmFileTimeCache* GetFileTimeCache() { return this->FileTimeCache.get(); }
 
+  cmGeneratorExpressionParseCache& GetGeneratorExpressionParseCache()
+  {
+    return *this->GeneratorExpressionParseCache;
+  }
+
+  //! Cache for cmSystemTools::GetActualCaseForPath.
+  std::unordered_map<std::string, std::string>* GetActualCaseCache()
+  {
+    return &this->ActualCaseCache;
+  }
+
+  //! Forget what is known about the file system, e.g. after files may
+  //! have been removed or renamed.
+  void InvalidateFileSystemCaches();
+
   bool WasLogLevelSetViaCLI() const { return this->LogLevelWasSetViaCLI; }
 
   //! Get the selected log level for `message()` commands during the cmake run.
@@ -818,6 +835,9 @@ private:
   bool InInitialCache = false;
   std::string CMakeListName;
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
+  std::unique_ptr<cmGeneratorExpressionParseCache>
+    GeneratorExpressionParseCache;
+  std::unordered_map<std::string, std::string> ActualCaseCache;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
 #ifndef CMAKE_BOOTSTRAP
