@@ -101,8 +101,9 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
         value =
           target->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
       } else {
-        value = target->GetFullPath(config,
-                                    cmStateEnums::RuntimeBinaryArtifact, true);
+        value =
+          target->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact,
+                              cmGeneratorTarget::NameType::Real);
       }
       properties[prop] = value;
     }
@@ -111,7 +112,8 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
     if (target->HasImportLibrary(config)) {
       std::string prop = cmStrCat("IMPORTED_IMPLIB", suffix);
       std::string value =
-        target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact, true);
+        target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact,
+                            cmGeneratorTarget::NameType::Real);
       if (mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
         target->GetImplibGNUtoMS(config, value, value,
                                  "${CMAKE_IMPORT_LIBRARY_SUFFIX}");

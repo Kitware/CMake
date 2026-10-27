@@ -2589,7 +2589,7 @@ bool cmLocalGenerator::GetRealDependency(std::string const& inName,
       case cm::TargetType::MODULE_LIBRARY:
       case cm::TargetType::UNKNOWN_LIBRARY:
         dep = target->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact,
-                                  /*realname=*/true);
+                                  cmGeneratorTarget::NameType::Real);
         return true;
       case cm::TargetType::OBJECT_LIBRARY:
         // An object library has no single file on which to depend.

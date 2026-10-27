@@ -1542,7 +1542,9 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
   // frameworks always appear versioned, and the build.ninja
   // will always attempt to manage symbolic links instead
   // of letting cmOSXBundleGenerator do it.
-  bool realname = target->IsFrameworkOnApple();
+  cmGeneratorTarget::NameType nameType = target->IsFrameworkOnApple()
+    ? cmGeneratorTarget::NameType::Real
+    : cmGeneratorTarget::NameType::Output;
 
   switch (target->GetType()) {
     case cm::TargetType::SHARED_LIBRARY:
@@ -1557,10 +1559,10 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
     case cm::TargetType::EXECUTABLE: {
       if (target->IsApple() && target->HasImportLibrary(config)) {
         outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
-          config, cmStateEnums::ImportLibraryArtifact, realname)));
+          config, cmStateEnums::ImportLibraryArtifact, nameType)));
       }
       outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
-        config, cmStateEnums::RuntimeBinaryArtifact, realname)));
+        config, cmStateEnums::RuntimeBinaryArtifact, nameType)));
       break;
     }
     case cm::TargetType::OBJECT_LIBRARY: {

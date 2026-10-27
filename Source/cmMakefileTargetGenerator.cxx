@@ -923,7 +923,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         this->GeneratorTarget->GetType() == cm::TargetType::SHARED_LIBRARY ||
         this->GeneratorTarget->GetType() == cm::TargetType::MODULE_LIBRARY) {
       targetFullPathReal = this->GeneratorTarget->GetFullPath(
-        this->GetConfigName(), cmStateEnums::RuntimeBinaryArtifact, true);
+        this->GetConfigName(), cmStateEnums::RuntimeBinaryArtifact,
+        cmGeneratorTarget::NameType::Real);
       targetFullPathPDB = cmStrCat(
         this->GeneratorTarget->GetPDBDirectory(this->GetConfigName()), '/',
         this->GeneratorTarget->GetPDBName(this->GetConfigName()));

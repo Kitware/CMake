@@ -781,7 +781,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
           std::string targetOutputReal =
             this->ConvertToNinjaPath(this->GetGeneratorTarget()->GetFullPath(
               config, cmStateEnums::RuntimeBinaryArtifact,
-              /*realname=*/true));
+              cmGeneratorTarget::NameType::Real));
           cmakeCommand =
             cmStrCat(std::move(cmakeCommand), " --source=", targetOutputReal);
           linkCmds.push_back(std::move(cmakeCommand));
@@ -1173,7 +1173,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   std::string targetOutput = this->ConvertToNinjaPath(gt->GetFullPath(config));
   std::string targetOutputReal = this->ConvertToNinjaPath(
     gt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact,
-                    /*realname=*/true));
+                    cmGeneratorTarget::NameType::Real));
   std::string targetOutputImplib = this->ConvertToNinjaPath(
     gt->GetFullPath(config, cmStateEnums::ImportLibraryArtifact));
 
@@ -1185,7 +1185,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     if (targetOutputReal ==
         this->ConvertToNinjaPath(
           gt->GetFullPath(fileConfig, cmStateEnums::RuntimeBinaryArtifact,
-                          /*realname=*/true))) {
+                          cmGeneratorTarget::NameType::Real))) {
       return;
     }
     if (!gt->GetFullName(config, cmStateEnums::ImportLibraryArtifact)

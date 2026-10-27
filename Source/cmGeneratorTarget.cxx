@@ -3915,17 +3915,17 @@ std::string cmGeneratorTarget::GetImportedLibName(
 
 std::string cmGeneratorTarget::GetFullPath(std::string const& config,
                                            cmStateEnums::ArtifactType artifact,
-                                           bool realname) const
+                                           NameType nameType) const
 {
   if (this->IsImported()) {
     return this->Target->ImportedGetFullPath(config, artifact);
   }
-  return this->NormalGetFullPath(config, artifact, realname);
+  return this->NormalGetFullPath(config, artifact, nameType);
 }
 
 std::string cmGeneratorTarget::NormalGetFullPath(
   std::string const& config, cmStateEnums::ArtifactType artifact,
-  bool realname) const
+  NameType nameType) const
 {
   std::string fpath = cmStrCat(this->GetDirectory(config, artifact), '/');
   if (this->IsAppBundleOnApple()) {
@@ -3936,7 +3936,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(
   // Add the full name of the target.
   switch (artifact) {
     case cmStateEnums::RuntimeBinaryArtifact:
-      if (realname) {
+      if (nameType == NameType::Real) {
         fpath += this->NormalGetRealName(config);
       } else {
         fpath +=
@@ -3944,7 +3944,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(
       }
       break;
     case cmStateEnums::ImportLibraryArtifact:
-      if (realname) {
+      if (nameType == NameType::Real) {
         fpath +=
           this->NormalGetRealName(config, cmStateEnums::ImportLibraryArtifact);
       } else {

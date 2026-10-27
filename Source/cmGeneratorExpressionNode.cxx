@@ -5827,7 +5827,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
                             GeneratorExpressionContent const* /*unused*/)
   {
     return target->GetFullPath(eval->Context.Config,
-                               cmStateEnums::RuntimeBinaryArtifact, true);
+                               cmStateEnums::RuntimeBinaryArtifact,
+                               cmGeneratorTarget::NameType::Real);
   }
 };
 
@@ -5840,7 +5841,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactImportTag>
   {
     if (target->HasImportLibrary(eval->Context.Config)) {
       return target->GetFullPath(eval->Context.Config,
-                                 cmStateEnums::ImportLibraryArtifact, true);
+                                 cmStateEnums::ImportLibraryArtifact,
+                                 cmGeneratorTarget::NameType::Real);
     }
     return std::string{};
   }
