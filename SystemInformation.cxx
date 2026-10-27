@@ -32,10 +32,12 @@
 #include KWSYS_HEADER(String.h)
 #include KWSYS_HEADER(SystemInformation.hxx)
 #include KWSYS_HEADER(Process.h)
+#include KWSYS_HEADER(Encoding.hxx)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
+#  include "Encoding.hxx.in"
 #  include "Process.h.in"
 #  include "String.h.in"
 #  include "SystemInformation.hxx.in"
@@ -4287,7 +4289,7 @@ std::string SystemInformationImplementation::GetProgramStack(int firstFrame,
       if (moduleBase &&
           GetModuleFileNameW(reinterpret_cast<HMODULE>(moduleBase), modulePath,
                              MAX_PATH) > 0) {
-        oss << " at " << modulePath << "+0x" << std::hex
+        oss << " at " << Encoding::ToNarrow(modulePath) << "+0x" << std::hex
             << (address - moduleBase) << std::dec;
       } else {
         oss << " at 0x" << std::hex << address << std::dec;
