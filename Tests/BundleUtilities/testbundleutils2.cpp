@@ -3,7 +3,7 @@
 #include "shared.h"
 #include "stdio.h"
 
-#if defined(WIN32)
+#if defined(_WIN32)
 #  include <windows.h>
 #else
 #  include "dlfcn.h"
@@ -14,7 +14,7 @@ int main(int, char**)
   framework();
   shared();
 
-#if defined(WIN32)
+#if defined(_WIN32)
   HANDLE lib = LoadLibraryA("module2.dll");
   if (!lib) {
     printf("Failed to open module2\n");

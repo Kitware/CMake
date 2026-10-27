@@ -2,7 +2,7 @@
 #ifndef framework_h
 #define framework_h
 
-#ifdef WIN32
+#ifdef _WIN32
 #  ifdef framework_EXPORTS
 #    define FRAMEWORK_EXPORT __declspec(dllexport)
 #  else
