@@ -2858,6 +2858,10 @@ These expressions look up the values of
   Note that for generator expressions in :ref:`Target Usage Requirements`
   this is the consuming target rather than the target specifying the
   requirement.
+  For generator expressions in
+  :ref:`source file properties <Source File Properties>`, this is the target
+  compiling the source file, so a source file shared by several targets can
+  be compiled differently by each.
 
 The expressions have special evaluation rules for some properties:
 

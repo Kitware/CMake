@@ -11,6 +11,7 @@ Use :prop_sf:`COMPILE_DEFINITIONS` to pass additional preprocessor definitions.
 
 .. |genex_subject| replace:: ``COMPILE_FLAGS``
 .. include:: ../include/GENEX_NOTE_PER_SOURCE.rst
+.. include:: ../include/GENEX_NOTE_SOURCE_TARGET.rst
 
 .. note::
 

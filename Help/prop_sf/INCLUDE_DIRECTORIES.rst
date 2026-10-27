@@ -15,3 +15,4 @@ Relative paths should not be added to this property directly.
 
 .. |genex_subject| replace:: ``INCLUDE_DIRECTORIES``
 .. include:: ../include/GENEX_NOTE_PER_SOURCE.rst
+.. include:: ../include/GENEX_NOTE_SOURCE_TARGET.rst
