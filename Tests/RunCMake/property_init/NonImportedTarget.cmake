@@ -1,6 +1,9 @@
 set(properties
   # property                      expected            alias
   # Compilation properties
+  ## Platforms
+  ### Windows
+  "VS_USE_DEBUG_LIBRARIES"        "OFF"               "<SAME>"
   ## Language
   ### CSharp
   "DOTNET_SDK"                    "Microsoft.NET.Sdk" "<SAME>"

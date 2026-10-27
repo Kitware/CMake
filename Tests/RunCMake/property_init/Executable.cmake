@@ -2,6 +2,9 @@ set(dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 set(properties
   # property                      expected  alias
+  # Debugger properties
+  "DEBUGGER_WORKING_DIRECTORY"    "${dir}"  "<SAME>"
+
   # Compilation properties
   ## Platforms
   ### Windows

@@ -1,7 +1,8 @@
 set(properties
-  # property                      expected  alias
+  # property                      expected            alias
   # Linking properties
-  "LINK_LIBRARIES_ONLY_TARGETS"   "OFF"     "<SAME>"
+  "LINK_LIBRARIES_ONLY_TARGETS"   "OFF"               "<SAME>"
+  "LINK_LIBRARIES_STRATEGY"       "REORDER_MINIMALLY" "<SAME>"
   )
 
 prepare_target_types(normal_non_imported
