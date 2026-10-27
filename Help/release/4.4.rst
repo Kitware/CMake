@@ -460,9 +460,9 @@ Changes made since CMake 4.4.0 include the following.
   to require policies :policy:`CMP0157` and :policy:`CMP0195` to also
   be set to ``NEW``.
 
-4.4.4
------
+4.4.4, 4.4.5
+------------
 
-* This version made no changes to documented features or interfaces.
+* These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
