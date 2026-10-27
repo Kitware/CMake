@@ -75,6 +75,15 @@ block()
     ${CMAKE_COMMAND} --install . --prefix ${RunCMake_TEST_BINARY_DIR}/prefix)
 endblock()
 
+# Package a project.  Only cpack records.
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CPack-build)
+  run_cmake(CPack)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_coverage(CPack-package COMMAND run_cmake_command CPack-package
+    ${CMAKE_CPACK_COMMAND} -G TGZ -C Debug)
+endblock()
+
 # Modes that do not record.  The variable is set only in the child, so no
 # driver process creates the directory.
 function(run_no_record case dir)

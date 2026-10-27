@@ -40,6 +40,8 @@ These modes record coverage:
   as ``CTestTestfile.cmake`` files and :ref:`Dashboard Client` scripts.
   To record coverage for each test instead, use the ``CMAKE`` value of the
   CTest :ref:`CoverageTool <ctest-CoverageTool>` setting.
+* :manual:`cpack(1)`, for the CPack configuration file, the CPack generator
+  modules and the install scripts that it runs to make a package.
 
 These modes do not record coverage and do not check the directory:
 
@@ -47,8 +49,9 @@ These modes do not record coverage and do not check the directory:
 * :option:`cmake --build` and the :option:`cmake -E` commands.  This
   includes ``cmake -E cmake_depends``, which reads files that CMake
   generates.
-* :option:`cmake --help`, :option:`cmake --version`, :option:`ctest --help`
-  and :option:`ctest --version`.
+* :option:`cmake --help`, :option:`cmake --version`, :option:`ctest --help`,
+  :option:`ctest --version`, :option:`cpack --help` and
+  :option:`cpack --version`.
 * ``cmake --system-information``.
 * ``cmake --check-build-system``, which the build system runs to check
   whether it must re-run configure.  If the check decides to re-run
