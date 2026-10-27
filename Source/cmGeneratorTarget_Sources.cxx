@@ -584,11 +584,12 @@ void cmGeneratorTarget::ComputeAllConfigCompileLanguages() const
     }
   }
   this->AllConfigCompileLanguages = languages;
+  this->AllConfigCompileLanguagesComputed = true;
 }
 
 std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const
 {
-  if (this->AllConfigCompileLanguages.empty()) {
+  if (!this->AllConfigCompileLanguagesComputed) {
     this->ComputeAllConfigCompileLanguages();
   }
   return this->AllConfigCompileLanguages;

@@ -1411,6 +1411,7 @@ private:
   void ComputeAllConfigSources() const;
 
   mutable std::set<std::string> AllConfigCompileLanguages;
+  mutable bool AllConfigCompileLanguagesComputed = false;
   void ComputeAllConfigCompileLanguages() const;
 
   mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;

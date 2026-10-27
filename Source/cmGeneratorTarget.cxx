@@ -544,6 +544,7 @@ void cmGeneratorTarget::ClearSourcesCache()
 {
   this->AllConfigSources.clear();
   this->AllConfigCompileLanguages.clear();
+  this->AllConfigCompileLanguagesComputed = false;
   this->KindedSourcesMap.clear();
   this->SourcesAreContextDependent = Tribool::Indeterminate;
   this->Objects.clear();
