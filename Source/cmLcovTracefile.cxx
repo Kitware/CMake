@@ -9,13 +9,13 @@
 #include <vector>
 
 #include <cm/string_view>
-#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUnreachable.h"
 
 cmLcovFunction::cmLcovFunction(std::string name, unsigned long long hits)
   : Name(std::move(name))
@@ -105,6 +105,66 @@ std::string StripLineSuffix(std::string const& name, long line)
   }
   return name;
 }
+
+// The lcov records that Read and Write know.
+enum class Record
+{
+  TestName,
+  SourceFile,
+  Function,
+  FunctionExecutionCount,
+  FunctionsFound,
+  FunctionsHit,
+  LineExecutionCount,
+  LinesFound,
+  LinesHit,
+  EndOfRecord,
+  Unknown,
+};
+
+struct RecordKey
+{
+  cm::string_view Key;
+  Record Type;
+};
+
+// Sorted by key, for std::lower_bound.
+constexpr std::array<RecordKey, 10> kRecords{ {
+  { "DA"_s, Record::LineExecutionCount },
+  { "FN"_s, Record::Function },
+  { "FNDA"_s, Record::FunctionExecutionCount },
+  { "FNF"_s, Record::FunctionsFound },
+  { "FNH"_s, Record::FunctionsHit },
+  { "LF"_s, Record::LinesFound },
+  { "LH"_s, Record::LinesHit },
+  { "SF"_s, Record::SourceFile },
+  { "TN"_s, Record::TestName },
+  { "end_of_record"_s, Record::EndOfRecord },
+} };
+
+Record ToRecord(cm::string_view key)
+{
+  RecordKey const* const begin = kRecords.data();
+  RecordKey const* const end = begin + kRecords.size();
+  RecordKey const* const it = std::lower_bound(
+    begin, end, key,
+    [](RecordKey const& record, cm::string_view k) { return record.Key < k; });
+  return it != end && it->Key == key ? it->Type : Record::Unknown;
+}
+
+cm::string_view ToKey(Record type)
+{
+  RecordKey const* const begin = kRecords.data();
+  RecordKey const* const end = begin + kRecords.size();
+  RecordKey const* const it =
+    std::find_if(begin, end, [type](RecordKey const& record) {
+      return record.Type == type;
+    });
+  if (it == end) {
+    CM_UNREACHABLE;
+  }
+  return it->Key;
+}
 }
 
 void cmLcovTracefile::Merge(cmLcovTracefile const& other)
@@ -175,7 +235,7 @@ bool cmLcovTracefile::HasData() const
 void cmLcovTracefile::Write(std::ostream& os) const
 {
   if (!this->TestName.empty()) {
-    os << "TN:" << this->TestName << '\n';
+    os << ToKey(Record::TestName) << ':' << this->TestName << '\n';
   }
   for (auto const& file : this->Files) {
     cmLcovSourceFile const& data = file.second;
@@ -183,7 +243,7 @@ void cmLcovTracefile::Write(std::ostream& os) const
     if (!data.HasData()) {
       continue;
     }
-    os << "SF:" << file.first << '\n';
+    os << ToKey(Record::SourceFile) << ':' << file.first << '\n';
 
     // Give each record a name that is unique in this block.
     std::map<std::string, unsigned int> nameCounts;
@@ -200,29 +260,33 @@ void cmLcovTracefile::Write(std::ostream& os) const
     }
 
     for (auto const& name : names) {
-      os << "FN:" << name.first << ',' << name.second << '\n';
+      os << ToKey(Record::Function) << ':' << name.first << ',' << name.second
+         << '\n';
     }
     std::size_t functionsHit = 0;
     for (auto const& name : names) {
       unsigned long long const hits = data.Functions.at(name.first).Hits;
-      os << "FNDA:" << hits << ',' << name.second << '\n';
+      os << ToKey(Record::FunctionExecutionCount) << ':' << hits << ','
+         << name.second << '\n';
       if (hits > 0) {
         ++functionsHit;
       }
     }
-    os << "FNF:" << data.Functions.size() << '\n';
-    os << "FNH:" << functionsHit << '\n';
+    os << ToKey(Record::FunctionsFound) << ':' << data.Functions.size()
+       << '\n';
+    os << ToKey(Record::FunctionsHit) << ':' << functionsHit << '\n';
 
     std::size_t linesHit = 0;
     for (auto const& line : data.Lines) {
-      os << "DA:" << line.first << ',' << line.second << '\n';
+      os << ToKey(Record::LineExecutionCount) << ':' << line.first << ','
+         << line.second << '\n';
       if (line.second > 0) {
         ++linesHit;
       }
     }
-    os << "LF:" << data.Lines.size() << '\n';
-    os << "LH:" << linesHit << '\n';
-    os << "end_of_record\n";
+    os << ToKey(Record::LinesFound) << ':' << data.Lines.size() << '\n';
+    os << ToKey(Record::LinesHit) << ':' << linesHit << '\n';
+    os << ToKey(Record::EndOfRecord) << '\n';
   }
 }
 
@@ -240,6 +304,11 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
   auto fail = [&](cm::string_view message) -> bool {
     error = cmStrCat("line ", lineNumber, ": ", message);
     return false;
+  };
+  auto failMalformed = [&fail](Record record,
+                               std::string const& value) -> bool {
+    return fail(
+      cmStrCat("malformed ", ToKey(record), " record \"", value, '"'));
   };
 
   while (cmSystemTools::GetLineFromStream(is, text)) {
@@ -261,79 +330,106 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
       value = text.substr(colon + 1);
     }
 
-    if (key == "TN") {
-      this->TestName = value;
-      continue;
-    }
-    if (key == "SF") {
-      if (inBlock) {
-        return fail("SF record before end_of_record");
-      }
-      inBlock = true;
-      sawFile = true;
-      path = value;
-      continue;
-    }
-
-    static constexpr std::array<cm::string_view, 8> blockRecords{
-      { "FN"_s, "FNDA"_s, "DA"_s, "FNF"_s, "FNH"_s, "LF"_s, "LH"_s,
-        "end_of_record"_s }
-    };
-    if (!cm::contains(blockRecords, key)) {
-      // Unknown records and the branch records BRDA, BRF and BRH.
-      continue;
+    Record const record = ToRecord(key);
+    switch (record) {
+      case Record::TestName:
+        this->TestName = value;
+        continue;
+      case Record::SourceFile:
+        if (inBlock) {
+          return fail(cmStrCat(ToKey(Record::SourceFile), " record before ",
+                               ToKey(Record::EndOfRecord)));
+        }
+        inBlock = true;
+        sawFile = true;
+        path = value;
+        continue;
+      case Record::Unknown:
+        // Unknown records and the branch records BRDA, BRF and BRH.
+        continue;
+      case Record::Function:
+      case Record::FunctionExecutionCount:
+      case Record::FunctionsFound:
+      case Record::FunctionsHit:
+      case Record::LineExecutionCount:
+      case Record::LinesFound:
+      case Record::LinesHit:
+      case Record::EndOfRecord:
+        break;
     }
     if (!inBlock) {
-      return fail(cmStrCat(key, " record before SF"));
+      return fail(cmStrCat(key, " record before ", ToKey(Record::SourceFile)));
     }
 
-    if (key == "FN") {
-      std::string lineText;
-      std::string name;
-      long line = 0;
-      if (!SplitPair(value, &lineText, &name) || !ParseLine(lineText, &line)) {
-        return fail(cmStrCat("malformed FN record \"", value, '"'));
+    switch (record) {
+      case Record::Function: {
+        std::string lineText;
+        std::string name;
+        long line = 0;
+        if (!SplitPair(value, &lineText, &name) ||
+            !ParseLine(lineText, &line)) {
+          return failMalformed(Record::Function, value);
+        }
+        nameToLine[name] = line;
+        block.Functions[line].Name = DecodeName(StripLineSuffix(name, line));
+        break;
       }
-      nameToLine[name] = line;
-      block.Functions[line].Name = DecodeName(StripLineSuffix(name, line));
-    } else if (key == "FNDA") {
-      std::string hitsText;
-      std::string name;
-      unsigned long long hits = 0;
-      if (!SplitPair(value, &hitsText, &name) ||
-          !cmStrToULongLong(hitsText, &hits)) {
-        return fail(cmStrCat("malformed FNDA record \"", value, '"'));
+      case Record::FunctionExecutionCount: {
+        std::string hitsText;
+        std::string name;
+        unsigned long long hits = 0;
+        if (!SplitPair(value, &hitsText, &name) ||
+            !cmStrToULongLong(hitsText, &hits)) {
+          return failMalformed(Record::FunctionExecutionCount, value);
+        }
+        auto it = nameToLine.find(name);
+        if (it == nameToLine.end()) {
+          return fail(cmStrCat(ToKey(Record::FunctionExecutionCount),
+                               " record for \"", name, "\" with no ",
+                               ToKey(Record::Function)));
+        }
+        block.Functions[it->second].Hits += hits;
+        break;
       }
-      auto it = nameToLine.find(name);
-      if (it == nameToLine.end()) {
-        return fail(cmStrCat("FNDA record for \"", name, "\" with no FN"));
+      case Record::LineExecutionCount: {
+        // A third field, the checksum, is ignored.
+        std::string lineText;
+        std::string rest;
+        long line = 0;
+        unsigned long long hits = 0;
+        if (!SplitPair(value, &lineText, &rest) ||
+            !ParseLine(lineText, &line) ||
+            !cmStrToULongLong(rest.substr(0, rest.find(',')), &hits)) {
+          return failMalformed(Record::LineExecutionCount, value);
+        }
+        block.Lines[line] += hits;
+        break;
       }
-      block.Functions[it->second].Hits += hits;
-    } else if (key == "DA") {
-      // A third field, the checksum, is ignored.
-      std::string lineText;
-      std::string rest;
-      long line = 0;
-      unsigned long long hits = 0;
-      if (!SplitPair(value, &lineText, &rest) || !ParseLine(lineText, &line) ||
-          !cmStrToULongLong(rest.substr(0, rest.find(',')), &hits)) {
-        return fail(cmStrCat("malformed DA record \"", value, '"'));
-      }
-      block.Lines[line] += hits;
-    } else if (key == "end_of_record") {
-      MergeSourceFile(this->Files[path], block);
-      block = cmLcovSourceFile();
-      nameToLine.clear();
-      inBlock = false;
+      case Record::EndOfRecord:
+        MergeSourceFile(this->Files[path], block);
+        block = cmLcovSourceFile();
+        nameToLine.clear();
+        inBlock = false;
+        break;
+      case Record::FunctionsFound:
+      case Record::FunctionsHit:
+      case Record::LinesFound:
+      case Record::LinesHit:
+        // Write computes these again.
+        break;
+      case Record::TestName:
+      case Record::SourceFile:
+      case Record::Unknown:
+        // The first switch continues the loop for these.
+        CM_UNREACHABLE;
     }
-    // FNF, FNH, LF and LH are computed again by Write.
   }
 
   if (inBlock) {
-    return fail("missing end_of_record");
+    return fail(cmStrCat("missing ", ToKey(Record::EndOfRecord)));
   }
   if (!sawFile) {
-    return fail("no SF record");
+    return fail(cmStrCat("no ", ToKey(Record::SourceFile), " record"));
   }
   return true;
 }
