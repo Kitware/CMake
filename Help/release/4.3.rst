@@ -310,9 +310,9 @@ Changes made since CMake 4.3.0 include the following.
   components, ``{ "major": 1, "minor": 0 }``.  Previously it was an integer
   with only the major version, ``1``.
 
-4.3.5
------
+4.3.5, 4.3.6
+------------
 
-* This version made no changes to documented features or interfaces.
+* These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
