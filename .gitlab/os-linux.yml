@@ -5,7 +5,7 @@
 ### Release
 
 .linux_prep_source:
-    image: "fedora:44"
+    image: "fedora:45"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -81,15 +81,15 @@
 
 ### Fedora
 
-.fedora44:
-    image: "kitware/cmake:ci-fedora44-x86_64-2026-10-05"
+.fedora45:
+    image: "kitware/cmake:ci-fedora45-x86_64-2026-10-23"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
         CMAKE_ARCH: x86_64
 
-.fedora44_hip:
-    image: "kitware/cmake:ci-fedora44-hip-x86_64-2026-04-30"
+.fedora45_hip:
+    image: "kitware/cmake:ci-fedora45-hip-x86_64-2026-10-23"
 
     variables:
         # FIXME(rocclr): device modules fail loading from binaries in paths with spaces
@@ -98,26 +98,26 @@
 
 #### Coverage builds
 
-.fedora44_gcc_gcov:
-    extends: .fedora44
+.fedora45_gcc_gcov:
+    extends: .fedora45
 
     variables:
         # See issue #20001
         CMAKE_GENERATOR: "Unix Makefiles"
-        CMAKE_CONFIGURATION: fedora44_gcc_gcov
+        CMAKE_CONFIGURATION: fedora45_gcc_gcov
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_BUILD_TYPE: Debug
         CMAKE_CI_TEST_TIMEOUT: "1500"
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora44_bullseye_coverage:
-    extends: .fedora44
+.fedora45_bullseye_coverage:
+    extends: .fedora45
     environment:
         name: bullseye-coverage
     variables:
         # See issue #20001
         CMAKE_GENERATOR: "Unix Makefiles"
-        CMAKE_CONFIGURATION: fedora44_bullseye_coverage
+        CMAKE_CONFIGURATION: fedora45_bullseye_coverage
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_BUILD_TYPE: Debug
         CMAKE_CI_TEST_TIMEOUT: "1500"
@@ -125,61 +125,61 @@
 
 #### Lint builds
 
-.fedora44_tidy:
-    extends: .fedora44
+.fedora45_tidy:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_tidy
+        CMAKE_CONFIGURATION: fedora45_tidy
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora44_pvs_studio:
-    extends: .fedora44
+.fedora45_pvs_studio:
+    extends: .fedora45
     environment:
         name: pvs-studio
     variables:
-        CMAKE_CONFIGURATION: fedora44_pvs_studio
+        CMAKE_CONFIGURATION: fedora45_pvs_studio
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora44_clang_analyzer:
-    extends: .fedora44
+.fedora45_clang_analyzer:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_clang_analyzer
+        CMAKE_CONFIGURATION: fedora45_clang_analyzer
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora44_clang_fuzzing:
-    extends: .fedora44
+.fedora45_clang_fuzzing:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_clang_fuzzing
+        CMAKE_CONFIGURATION: fedora45_clang_fuzzing
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora44_clazy:
-    extends: .fedora44
+.fedora45_clazy:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_clazy
+        CMAKE_CONFIGURATION: fedora45_clazy
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora44_sphinx:
-    extends: .fedora44
+.fedora45_sphinx:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_sphinx
+        CMAKE_CONFIGURATION: fedora45_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora44_sphinx_package:
-    extends: .fedora44
+.fedora45_sphinx_package:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_sphinx_package
+        CMAKE_CONFIGURATION: fedora45_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
@@ -235,53 +235,53 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora44_extdeps:
-    extends: .fedora44
+.fedora45_extdeps:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_extdeps
+        CMAKE_CONFIGURATION: fedora45_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora44_ninja:
-    extends: .fedora44
+.fedora45_ninja:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_ninja
+        CMAKE_CONFIGURATION: fedora45_ninja
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora44_makefiles:
-    extends: .fedora44
+.fedora45_makefiles:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_makefiles
+        CMAKE_CONFIGURATION: fedora45_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora44_makefiles_symlinked:
-    extends: .fedora44
+.fedora45_makefiles_symlinked:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_makefiles_symlinked
+        CMAKE_CONFIGURATION: fedora45_makefiles_symlinked
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
         CMAKE_CI_IN_SYMLINK_TREE: 1
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
-.fedora44_fastbuild:
-    extends: .fedora44
+.fedora45_fastbuild:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_fastbuild
+        CMAKE_CONFIGURATION: fedora45_fastbuild
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "FASTBuild"
 
-.fedora44_ninja_instrumentation:
-    extends: .fedora44
+.fedora45_ninja_instrumentation:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_ninja_instrumentation
+        CMAKE_CONFIGURATION: fedora45_ninja_instrumentation
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja"
 
@@ -300,63 +300,63 @@
     variables:
         CMAKE_CONFIGURATION: debian13_ninja_clang
 
-.fedora44_makefiles_clang:
-    extends: .fedora44
+.fedora45_makefiles_clang:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_makefiles_clang
+        CMAKE_CONFIGURATION: fedora45_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora44_makefiles_lfortran:
-    extends: .fedora44
+.fedora45_makefiles_lfortran:
+    extends: .fedora45
 
     variables:
         # FIXME(lfortran): -rpath flags with spaces not forwarded
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CONFIGURATION: fedora44_makefiles_lfortran
+        CMAKE_CONFIGURATION: fedora45_makefiles_lfortran
         CMAKE_GENERATOR: "Unix Makefiles"
         CTEST_LABELS: "Fortran"
 
-.fedora44_ninja_lfortran:
-    extends: .fedora44
+.fedora45_ninja_lfortran:
+    extends: .fedora45
 
     variables:
         # FIXME(lfortran): -rpath flags with spaces not forwarded
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CONFIGURATION: fedora44_ninja_lfortran
+        CMAKE_CONFIGURATION: fedora45_ninja_lfortran
         CTEST_LABELS: "Fortran"
 
-.fedora44_ninja_multi:
-    extends: .fedora44
+.fedora45_ninja_multi:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_ninja_multi
+        CMAKE_CONFIGURATION: fedora45_ninja_multi
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora44_ninja_clang:
-    extends: .fedora44
+.fedora45_ninja_clang:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_ninja_clang
+        CMAKE_CONFIGURATION: fedora45_ninja_clang
 
-.fedora44_ninja_dpclang:
-    extends: .fedora44
-
-    variables:
-        CMAKE_CONFIGURATION: fedora44_ninja_dpclang
-
-.fedora44_ninja_gcc_std_reloc:
-    extends: .fedora44
+.fedora45_ninja_dpclang:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_ninja_gcc_std_reloc
+        CMAKE_CONFIGURATION: fedora45_ninja_dpclang
+
+.fedora45_ninja_gcc_std_reloc:
+    extends: .fedora45
+
+    variables:
+        CMAKE_CONFIGURATION: fedora45_ninja_gcc_std_reloc
         CTEST_LABELS: "CXXModules"
 
-.fedora44_ninja_multi_clang:
-    extends: .fedora44
+.fedora45_ninja_multi_clang:
+    extends: .fedora45
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_ninja_multi_clang
+        CMAKE_CONFIGURATION: fedora45_ninja_multi_clang
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ### Sanitizers
@@ -379,23 +379,23 @@
         CTEST_MEMORYCHECK_TYPE: Valgrind
         CMAKE_CI_RUN_MEMCHECK: "true"
         CMAKE_CI_TEST_TIMEOUT: "1500"
-        CMAKE_VALGRIND_CONFIGURATION: fedora44
+        CMAKE_VALGRIND_CONFIGURATION: fedora45
 
-.fedora44_asan:
+.fedora45_asan:
     extends:
-        - .fedora44
+        - .fedora45
         - .fedora_asan_addon
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_asan
+        CMAKE_CONFIGURATION: fedora45_asan
 
-.fedora44_ninja_valgrind:
+.fedora45_ninja_valgrind:
     extends:
-        - .fedora44
+        - .fedora45
         - .fedora_valgrind_addon
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_ninja_valgrind
+        CMAKE_CONFIGURATION: fedora45_ninja_valgrind
 
 ### Intel Compiler
 
@@ -623,11 +623,11 @@
         CMAKE_CONFIGURATION: debian13_hip_radeon
         CTEST_LABELS: "HIP"
 
-.fedora44_hip_radeon:
-    extends: .fedora44_hip
+.fedora45_hip_radeon:
+    extends: .fedora45_hip
 
     variables:
-        CMAKE_CONFIGURATION: fedora44_hip_radeon
+        CMAKE_CONFIGURATION: fedora45_hip_radeon
         CTEST_LABELS: "HIP"
 
 .hip6.3_nvidia:
@@ -789,14 +789,14 @@
 
 .cmake_version_update_linux:
     stage: build
-    extends: .fedora44
+    extends: .fedora45
     script:
         - .gitlab/ci/cmake_version_update.sh
     interruptible: false # The job internally fetches and retries.
 
 .cmake_spellcheck_linux:
     stage: build
-    extends: .fedora44
+    extends: .fedora45
     script:
         - .gitlab/ci/codespell.bash
         - .gitlab/ci/typos.bash
@@ -804,7 +804,7 @@
 
 .cmake_ast_grep_linux:
     stage: build
-    extends: .fedora44
+    extends: .fedora45
     script:
         - source .gitlab/ci/ast-grep-env.sh
         - .gitlab/ci/ast-grep-scan.sh
@@ -975,7 +975,7 @@
 .cmake_org_help:
     stage: build
     extends:
-        - .fedora44
+        - .fedora45
         - .linux_x86_64_tags
         - .cmake_org_help_artifacts
     script:
@@ -996,5 +996,7 @@
 .cmake_test_devcontainer:
     stage: test
     script:
-        - dnf install -y --setopt=install_weak_deps=False podman
+        # Use podman from Fedora 44 due to:
+        #   https://github.com/podman-container-tools/buildah/issues/6910
+        - dnf install -y --setopt=install_weak_deps=False --releasever=44 podman
         - .gitlab/ci/devcontainer-run.sh

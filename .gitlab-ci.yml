@@ -65,7 +65,7 @@ p:source-package:
 
 p:doc-package:
     extends:
-        - .fedora44_sphinx_package
+        - .fedora45_sphinx_package
         - .cmake_prep_doc_linux
         - .linux_x86_64_tags
         - .cmake_doc_artifacts
@@ -139,9 +139,9 @@ l:iwyu-debian13:
         - .rules
     needs: []
 
-l:tidy-fedora44:
+l:tidy-fedora45:
     extends:
-        - .fedora44_tidy
+        - .fedora45_tidy
         - .cmake_build_linux
         - .cmake_tidy_artifacts
         - .linux_x86_64_tags
@@ -149,9 +149,9 @@ l:tidy-fedora44:
         - .rules
     needs: []
 
-l:pvs-studio-fedora44:
+l:pvs-studio-fedora45:
     extends:
-        - .fedora44_pvs_studio
+        - .fedora45_pvs_studio
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .cmake_cdash_artifacts
@@ -162,9 +162,9 @@ l:pvs-studio-fedora44:
         CMAKE_CI_JOB_NO_MR: "true"
     needs: []
 
-l:sphinx-fedora44:
+l:sphinx-fedora45:
     extends:
-        - .fedora44_sphinx
+        - .fedora45_sphinx
         - .cmake_build_linux
         - .cmake_sphinx_artifacts
         - .linux_x86_64_tags
@@ -174,9 +174,9 @@ l:sphinx-fedora44:
         CMAKE_CI_JOB_HELP: "true"
     needs: []
 
-l:clang-analyzer-fedora44:
+l:clang-analyzer-fedora45:
     extends:
-        - .fedora44_clang_analyzer
+        - .fedora45_clang_analyzer
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .rules
@@ -184,25 +184,25 @@ l:clang-analyzer-fedora44:
         CMAKE_CI_JOB_NIGHTLY: "true"
     needs: []
 
-l:clang-fuzzing-fedora44:
+l:clang-fuzzing-fedora45:
     extends:
-        - .fedora44_clang_fuzzing
+        - .fedora45_clang_fuzzing
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .rules
     needs: []
 
-l:clazy-fedora44:
+l:clazy-fedora45:
     extends:
-        - .fedora44_clazy
+        - .fedora45_clazy
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .rules
     needs: []
 
-t:devcontainer-fedora44:
+t:devcontainer-fedora45:
     extends:
-        - .fedora44
+        - .fedora45
         - .cmake_test_devcontainer
         - .linux_x86_64_priv_tags
         - .rules
@@ -212,9 +212,9 @@ t:devcontainer-fedora44:
 
 # Coverage builds
 
-b:fedora44-gcc-gcov:
+b:fedora45-gcc-gcov:
     extends:
-        - .fedora44_gcc_gcov
+        - .fedora45_gcc_gcov
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -224,9 +224,9 @@ b:fedora44-gcc-gcov:
         CMAKE_CI_JOB_RUN_MANUALLY: "true"
     needs: []
 
-t:fedora44-gcc-gcov:
+t:fedora45-gcc-gcov:
     extends:
-        - .fedora44_gcc_gcov
+        - .fedora45_gcc_gcov
         - .cmake_test_linux
         - .cmake_coverage_artifacts
         - .linux_x86_64_tags_x11
@@ -234,25 +234,25 @@ t:fedora44-gcc-gcov:
     # Run coverage analysis even if the tests fail.
     allow_failure: true
     needs:
-        - b:fedora44-gcc-gcov
+        - b:fedora45-gcc-gcov
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-a:fedora44-gcc-gcov:
+a:fedora45-gcc-gcov:
     extends:
-        - .fedora44_gcc_gcov
+        - .fedora45_gcc_gcov
         - .cmake_coverage_linux
         - .cmake_cdash_artifacts
         - .linux_x86_64_tags
         - .rules
     needs:
-        - t:fedora44-gcc-gcov
+        - t:fedora45-gcc-gcov
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora44-bullseye-coverage:
+b:fedora45-bullseye-coverage:
     extends:
-        - .fedora44_bullseye_coverage
+        - .fedora45_bullseye_coverage
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -263,9 +263,9 @@ b:fedora44-bullseye-coverage:
         CMAKE_CI_JOB_RUN_MANUALLY: "true"
     needs: []
 
-t:fedora44-bullseye-coverage:
+t:fedora45-bullseye-coverage:
     extends:
-        - .fedora44_bullseye_coverage
+        - .fedora45_bullseye_coverage
         - .cmake_test_linux
         - .cmake_coverage_artifacts
         - .linux_x86_64_tags_x11
@@ -273,20 +273,20 @@ t:fedora44-bullseye-coverage:
     # Run coverage analysis even if the tests fail.
     allow_failure: true
     needs:
-        - b:fedora44-bullseye-coverage
+        - b:fedora45-bullseye-coverage
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
         CMAKE_CI_JOB_NO_MR: "true"
 
-a:fedora44-bullseye-coverage:
+a:fedora45-bullseye-coverage:
     extends:
-        - .fedora44_bullseye_coverage
+        - .fedora45_bullseye_coverage
         - .cmake_coverage_linux
         - .cmake_cdash_artifacts
         - .linux_x86_64_tags
         - .rules
     needs:
-        - t:fedora44-bullseye-coverage
+        - t:fedora45-bullseye-coverage
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
         CMAKE_CI_JOB_NO_MR: "true"
@@ -382,9 +382,9 @@ t:debian13-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-hip-radeon:
+t:fedora45-hip-radeon:
     extends:
-        - .fedora44_hip_radeon
+        - .fedora45_hip_radeon
         - .cmake_test_linux_release
         - .linux_x86_64_tags_rocm6.2
         - .rules
@@ -392,9 +392,9 @@ t:fedora44-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-makefiles-lfortran:
+t:fedora45-makefiles-lfortran:
     extends:
-        - .fedora44_makefiles_lfortran
+        - .fedora45_makefiles_lfortran
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .rules
@@ -402,9 +402,9 @@ t:fedora44-makefiles-lfortran:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-ninja-lfortran:
+t:fedora45-ninja-lfortran:
     extends:
-        - .fedora44_ninja_lfortran
+        - .fedora45_ninja_lfortran
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .rules
@@ -412,27 +412,17 @@ t:fedora44-ninja-lfortran:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-ninja-multi:
+t:fedora45-ninja-multi:
     extends:
-        - .fedora44_ninja_multi
+        - .fedora45_ninja_multi
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .rules
         - .needs_centos7_x86_64
 
-t:fedora44-ninja-clang:
+t:fedora45-ninja-clang:
     extends:
-        - .fedora44_ninja_clang
-        - .cmake_test_linux_release
-        - .linux_x86_64_tags
-        - .rules
-        - .needs_centos7_x86_64
-    variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
-
-t:fedora44-ninja-dpclang:
-    extends:
-        - .fedora44_ninja_dpclang
+        - .fedora45_ninja_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .rules
@@ -440,9 +430,9 @@ t:fedora44-ninja-dpclang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-ninja-gcc-std-reloc:
+t:fedora45-ninja-dpclang:
     extends:
-        - .fedora44_ninja_gcc_std_reloc
+        - .fedora45_ninja_dpclang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .rules
@@ -450,9 +440,9 @@ t:fedora44-ninja-gcc-std-reloc:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-ninja-multi-clang:
+t:fedora45-ninja-gcc-std-reloc:
     extends:
-        - .fedora44_ninja_multi_clang
+        - .fedora45_ninja_gcc_std_reloc
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .rules
@@ -460,9 +450,9 @@ t:fedora44-ninja-multi-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-makefiles-clang:
+t:fedora45-ninja-multi-clang:
     extends:
-        - .fedora44_makefiles_clang
+        - .fedora45_ninja_multi_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .rules
@@ -470,17 +460,27 @@ t:fedora44-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-makefiles:
+t:fedora45-makefiles-clang:
     extends:
-        - .fedora44_makefiles
+        - .fedora45_makefiles_clang
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .rules
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:fedora45-makefiles:
+    extends:
+        - .fedora45_makefiles
         - .cmake_test_linux_release
         - .linux_x86_64_v3_tags
         - .rules
         - .needs_centos7_x86_64
 
-t:fedora44-makefiles-nospace:
+t:fedora45-makefiles-nospace:
     extends:
-        - .fedora44_makefiles
+        - .fedora45_makefiles
         - .cmake_test_linux_release
         - .linux_x86_64_v3_tags
         - .cmake_junit_artifacts
@@ -488,12 +488,12 @@ t:fedora44-makefiles-nospace:
         - .needs_centos7_x86_64
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CI_BUILD_NAME: fedora44_makefiles_nospace
+        CMAKE_CI_BUILD_NAME: fedora45_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-fastbuild:
+t:fedora45-fastbuild:
     extends:
-        - .fedora44_fastbuild
+        - .fedora45_fastbuild
         - .cmake_test_linux_release
         - .linux_x86_64_v3_tags
         - .rules
@@ -501,9 +501,9 @@ t:fedora44-fastbuild:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-instrumentation:
+t:fedora45-instrumentation:
     extends:
-        - .fedora44_ninja_instrumentation
+        - .fedora45_ninja_instrumentation
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .rules
@@ -731,9 +731,9 @@ t:debian10-legacy:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora44-ninja:
+b:fedora45-ninja:
     extends:
-        - .fedora44_ninja
+        - .fedora45_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -743,9 +743,9 @@ b:fedora44-ninja:
         CMAKE_CI_JOB_RUN_MANUALLY: "true"
     needs: []
 
-b:fedora44-makefiles-symlinked:
+b:fedora45-makefiles-symlinked:
     extends:
-        - .fedora44_makefiles_symlinked
+        - .fedora45_makefiles_symlinked
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -788,9 +788,9 @@ b:debian13-aarch64-extdeps:
         CMAKE_CI_JOB_RUN_MANUALLY: "true"
     needs: []
 
-b:fedora44-extdeps:
+b:fedora45-extdeps:
     extends:
-        - .fedora44_extdeps
+        - .fedora45_extdeps
         - .cmake_build_linux_standalone
         - .linux_x86_64_tags
         - .rules
@@ -799,27 +799,27 @@ b:fedora44-extdeps:
         CMAKE_CI_JOB_RUN_MANUALLY: "true"
     needs: []
 
-t:fedora44-ninja:
+t:fedora45-ninja:
     extends:
-        - .fedora44_ninja
+        - .fedora45_ninja
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .rules
     needs:
-        - b:fedora44-ninja
+        - b:fedora45-ninja
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-t:fedora44-makefiles-symlinked:
+t:fedora45-makefiles-symlinked:
     extends:
-        - .fedora44_makefiles_symlinked
+        - .fedora45_makefiles_symlinked
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .rules
     needs:
-        - b:fedora44-makefiles-symlinked
+        - b:fedora45-makefiles-symlinked
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1026,9 +1026,9 @@ u:sunos-sparc64-package:
 
 ## Sanitizer builds
 
-b:fedora44-asan:
+b:fedora45-asan:
     extends:
-        - .fedora44_asan
+        - .fedora45_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -1038,21 +1038,21 @@ b:fedora44-asan:
         CMAKE_CI_JOB_RUN_MANUALLY: "true"
     needs: []
 
-t:fedora44-asan:
+t:fedora45-asan:
     extends:
-        - .fedora44_asan
+        - .fedora45_asan
         - .cmake_memcheck_linux
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .rules
     needs:
-        - b:fedora44-asan
+        - b:fedora45-asan
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora44-ninja-valgrind:
+t:fedora45-ninja-valgrind:
     extends:
-        - .fedora44_ninja_valgrind
+        - .fedora45_ninja_valgrind
         - .cmake_test_linux_release
         # Use a fast CPU so that timeouts are less of a concern.
         - .linux_x86_64_tags_fast_x11
