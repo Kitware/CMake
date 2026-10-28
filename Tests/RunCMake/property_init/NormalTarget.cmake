@@ -1,7 +1,12 @@
 per_config(properties
   # property                      expected  alias
   # Usage requirement properties
-  "MAP_IMPORTED_CONFIG_"          "Release" "<UNSET>"
+  "MAP_IMPORTED_CONFIG_"          "Release" "<SAME>"
+  )
+list(APPEND properties
+  # property                      expected  alias
+  # Usage requirement properties
+  "EXPORT_FIND_PACKAGE_NAME"      "pkg"     "<SAME>"
   )
 
 prepare_target_types(normal

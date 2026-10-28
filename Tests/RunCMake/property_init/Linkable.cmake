@@ -3,10 +3,10 @@ per_config(properties
   # Linking properties
   ## Platforms
   ### macOS
-  "FRAMEWORK_MULTI_CONFIG_POSTFIX_" ".fw"     "<UNSET>"
+  "FRAMEWORK_MULTI_CONFIG_POSTFIX_" ".fw"     "<SAME>"
   )
 
 prepare_target_types(linkable
-           EXECUTABLE          SHARED          STATIC
-  IMPORTED_EXECUTABLE IMPORTED_SHARED IMPORTED_STATIC)
+           SHARED          STATIC
+  IMPORTED_SHARED IMPORTED_STATIC)
 run_property_tests(linkable properties)

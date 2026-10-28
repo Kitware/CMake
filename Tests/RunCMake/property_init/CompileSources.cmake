@@ -25,6 +25,7 @@ set(properties
   "OSX_ARCHITECTURES"                       "arm64"             "<SAME>"
   ### Windows
   "MSVC_DEBUG_INFORMATION_FORMAT"           "Embedded"          "<SAME>"
+  "MSVC_RUNTIME_CHECKS"                     "StackFrameErrorCheck" "<SAME>"
   "MSVC_RUNTIME_LIBRARY"                    "MultiThreaded"     "<SAME>"
   "VS_JUST_MY_CODE_DEBUGGING"               "ON"                "<SAME>"
   ### OpenWatcom
@@ -49,6 +50,12 @@ set(properties
   ### Swift
   "Swift_LANGUAGE_VERSION"                  "2.3"               "<SAME>"
   "Swift_MODULE_DIRECTORY"                  "${dir}"            "<SAME>"
+  "Swift_COMPILATION_MODE"                  "incremental"       "<SAME>"
+  "Swift_SEPARATE_MODULE_EMISSION"          "ON"                "<SAME>"
+  ### Rust
+  "Rust_COMPILER_LAUNCHER"                  "ccache"            "<SAME>"
+  "Rust_EDITION"                            "2021"              "<SAME>"
+  "Rust_MAIN_CRATE_ROOT"                    "main.rs"           "<SAME>"
   ### SYCL
   "SYCL_COMPILER_LAUNCHER"                   "ccache"            "<SAME>"
   "SYCL_CXX_STANDARD"                        "17"                "<SAME>"
@@ -57,9 +64,11 @@ set(properties
   "SYCL_VISIBILITY_PRESET"                   "hidden"            "<SAME>"
   "SYCL_SEPARABLE_COMPILATION"               "ON"                "<SAME>"
   "SYCL_EXTENSION_MODE"                      "REPLACE"           "<SAME>"
+  "SYCL_DEVICE_TARGETS"                      "spir64"            "<SAME>"
   ### moc
   "AUTOMOC"                                 "OFF"               "<SAME>"
   "AUTOMOC_COMPILER_PREDEFINES"             "OFF"               "<SAME>"
+  "AUTOMOC_INCLUDE_DIRECTORIES"             "${dir}"            "<SAME>"
   "AUTOMOC_MACRO_NAMES"                     "MOC_CLASS"         "<SAME>"
   "AUTOMOC_MOC_OPTIONS"                     "-v"                "<SAME>"
   "AUTOMOC_PATH_PREFIX"                     "moc_"              "<SAME>"
@@ -75,6 +84,8 @@ set(properties
   "AUTORCC_EXECUTABLE"                      "autorcc"           "<SAME>"
 
   # Linking properties
+  "LINKER_TYPE"                             "DEFAULT"           "<SAME>"
+  "LINK_WARNING_AS_ERROR"                   "OFF"               "<SAME>"
   "LINK_SEARCH_START_STATIC"                "-Bstatic"          "<SAME>"
   "LINK_SEARCH_END_STATIC"                  "-Bdynamic"         "<SAME>"
   ## Dependent library lookup
@@ -112,14 +123,18 @@ set(properties
   ### C++
   "CXX_LINKER_LAUNCHER"                     "ccache"            "<SAME>"
   ### CUDA
+  "CUDA_LINKER_LAUNCHER"                    "ccache"            "<SAME>"
   "CUDA_RESOLVE_DEVICE_SYMBOLS"             "ON"                "<SAME>"
   "CUDA_RUNTIME_LIBRARY"                    "Static"            "<SAME>"
   ### HIP
+  "HIP_LINKER_LAUNCHER"                     "ccache"            "<SAME>"
   "HIP_RUNTIME_LIBRARY"                     "SHARED"            "<SAME>"
   ### Objective C
   "OBJC_LINKER_LAUNCHER"                    "ccache"            "<SAME>"
   ### Objective C++
   "OBJCXX_LINKER_LAUNCHER"                  "ccache"            "<SAME>"
+  ### Fortran
+  "Fortran_LINKER_LAUNCHER"                 "ccache"            "<SAME>"
 
   ### SYCL
   "SYCL_LINKER_LAUNCHER"                     "ccache"            "<SAME>"
@@ -133,6 +148,7 @@ set(properties
   "C_CLANG_TIDY_EXPORT_FIXES_DIR"           "${dir}"            "<SAME>"
   "C_CPPLINT"                               "cpplint"           "<SAME>"
   "C_CPPCHECK"                              "cppcheck"          "<SAME>"
+  "C_ICSTAT"                                "icstat"            "<SAME>"
   "C_INCLUDE_WHAT_YOU_USE"                  "iwyu"              "<SAME>"
   "C_PVS_STUDIO"                            "pvs-studio-analyzer" "<SAME>"
   ## C++
@@ -140,6 +156,7 @@ set(properties
   "CXX_CLANG_TIDY_EXPORT_FIXES_DIR"         "${dir}"            "<SAME>"
   "CXX_CPPLINT"                             "cpplint"           "<SAME>"
   "CXX_CPPCHECK"                            "cppcheck"          "<SAME>"
+  "CXX_ICSTAT"                              "icstat"            "<SAME>"
   "CXX_INCLUDE_WHAT_YOU_USE"                "iwyu"              "<SAME>"
   "CXX_PVS_STUDIO"                          "pvs-studio-analyzer" "<SAME>"
   ## Objective C
@@ -157,12 +174,15 @@ set(properties
   "UNITY_BUILD_UNIQUE_ID"                   "unity"             "<SAME>"
   "UNITY_BUILD_BATCH_SIZE"                  "10"                "<SAME>"
   "UNITY_BUILD_MODE"                        "GROUP"             "<SAME>"
+  "UNITY_BUILD_RELOCATABLE"                 "ON"                "<SAME>"
   "OPTIMIZE_DEPENDENCIES"                   "ON"                "<SAME>"
   ## Android
   "ANDROID_ANT_ADDITIONAL_OPTIONS"          "-v"                "<SAME>"
   "ANDROID_PROCESS_MAX"                     "2"                 "<SAME>"
   "ANDROID_SKIP_ANT_STEP"                   "ON"                "<SAME>"
   ## Autogen
+  "AUTOGEN_BETTER_GRAPH_MULTI_CONFIG"       "ON"                "<SAME>"
+  "AUTOGEN_COMMAND_LINE_LENGTH_MAX"         "32000"             "<SAME>"
   "AUTOGEN_ORIGIN_DEPENDS"                  "OFF"               "<SAME>"
   "AUTOGEN_PARALLEL"                        "ON"                "<SAME>"
   "AUTOGEN_USE_SYSTEM_INCLUDE"              "ON"                "<SAME>"
