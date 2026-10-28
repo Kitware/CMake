@@ -1,0 +1,32 @@
+--- a/usr/lib/clang/23/include/cuda_wrappers/new
++++ b/usr/lib/clang/23/include/cuda_wrappers/new
+@@ -98,9 +98,9 @@
+ __device__ inline void *operator new[](__SIZE_TYPE__, void *__ptr) CUDA_NOEXCEPT {
+   return __ptr;
+ }
+-#endif
+ __device__ inline void operator delete(void *, void *) CUDA_NOEXCEPT {}
+ __device__ inline void operator delete[](void *, void *) CUDA_NOEXCEPT {}
++#endif
+
+ #pragma pop_macro("CUDA_NOEXCEPT")
+
+--- a/usr/include/hip/amd_detail/hip_fp16_math_fwd.h
++++ b/usr/include/hip/amd_detail/hip_fp16_math_fwd.h
+@@ -28,7 +28,6 @@
+ #if !defined(__HIPCC_RTC__)
+ #include "host_defines.h"
+ #endif
+-#ifndef __CLANG_HIP_RUNTIME_WRAPPER_INCLUDED__
+ extern "C" {
+ __device__ __attribute__((const)) _Float16 __ocml_ceil_f16(_Float16);
+ __device__ _Float16 __ocml_cos_f16(_Float16);
+@@ -82,7 +81,6 @@
+ __device__ __attribute__((const)) _Float16 __ocml_cvtrtp_f16_f32(float);
+ __device__ __attribute__((const)) _Float16 __ocml_cvtrtz_f16_f32(float);
+ }
+-#endif  // !__CLANG_HIP_RUNTIME_WRAPPER_INCLUDED__
+ // TODO: remove these after they get into clang header __clang_hip_libdevice_declares.h'
+ extern "C" {
+ __device__ __attribute__((const)) _Float16 __ocml_fmax_f16(_Float16, _Float16);
+---

@@ -58,6 +58,16 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_valgrind")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "^fedora45_makefiles")
+  #FIXME(#28215): FindHDF5 module and/or tests need updates for Fedora 45+.
+  list(APPEND test_exclusions
+    "^FindHDF5.Serial-Wrapper$"
+    "^FindHDF5.MPICH-Wrapper$"
+    "^FindHDF5.OpenMPI-Wrapper$"
+    "^FindHDF5.OpenMPI$"
+    )
+endif()
+
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "^macos_x86_64_")
   list(APPEND test_exclusions
     # FIXME(#27376): CMakeGUI's simpleConfigure:fail case hangs.

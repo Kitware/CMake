@@ -287,7 +287,8 @@ void cmConfigureLog::WriteLiteralTextBlock(cm::string_view key,
             this->Stream.put(text[i]);
             ++i;
             break;
-          } else if (c > 127) {
+          }
+          if (c > 127) {
             // Decode a UTF-8 sequence.
             unsigned int c32;
             auto const* const s = text.data() + i;

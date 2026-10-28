@@ -1,0 +1,31 @@
+set(CMake_TEST_GUI "ON" CACHE BOOL "")
+set(CMake_TEST_MATH_OVERFLOW ON CACHE BOOL "")
+set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database,import_std23" CACHE STRING "")
+set(CMake_TEST_TLS_VERIFY_URL "https://gitlab.kitware.com" CACHE STRING "")
+set(CMake_TEST_TLS_VERIFY_URL_BAD "https://badtls-expired.kitware.com" CACHE STRING "")
+set(CMake_TEST_TLS_VERSION "1.3" CACHE STRING "")
+set(CMake_TEST_TLS_VERSION_URL_BAD "https://badtls-v1-1.kitware.com:8011" CACHE STRING "")
+
+string(JOIN " " coverage_flags
+  "--coverage"
+  "-fprofile-abs-path"
+  # These files are committed generated sources and contain relative path
+  # `#line` directives. CI coverage then cannot find the source files reliably.
+  # See related issue #20001.
+  "-fprofile-exclude-files=cmExprParser[.].*\\;cmFortranParser[.].*"
+)
+string(JOIN " " link_flags
+  "--coverage"
+)
+
+set(CMAKE_C_FLAGS "${coverage_flags}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS "${coverage_flags}" CACHE STRING "")
+# Apply `LDFLAGS`.
+set(CMAKE_EXE_LINKER_FLAGS_INIT "${link_flags}" CACHE STRING "")
+set(CMAKE_SHARED_LINKER_FLAGS_INIT "${link_flags}" CACHE STRING "")
+set(CMAKE_MODULE_LINKER_FLAGS_INIT "${link_flags}" CACHE STRING "")
+
+# Do not bootstrap for the coverage test suite.
+set(CMake_TEST_BOOTSTRAP FALSE CACHE BOOL "")
+
+include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora45_common.cmake")

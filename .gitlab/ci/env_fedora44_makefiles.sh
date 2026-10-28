@@ -1,9 +1,0 @@
-if test "$CMAKE_CI_NIGHTLY" = "true"; then
-  source .gitlab/ci/acpp-env.sh
-  source .gitlab/ci/android-ndk-env.sh
-  source .gitlab/ci/android-sdk-env.sh
-  source .gitlab/ci/ispc-env.sh
-fi
-
-# Test in a Latin-1 locale.
-export LANG=en_US.ISO-8859-1

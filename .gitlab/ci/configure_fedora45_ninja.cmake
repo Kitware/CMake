@@ -1,0 +1,46 @@
+set(CMake_TEST_GUI "ON" CACHE BOOL "")
+if (NOT "$ENV{CMAKE_CI_NIGHTLY}" STREQUAL "")
+  set(CMake_TEST_CPACK_APPIMAGE "ON" CACHE STRING "")
+  set(CMake_TEST_CPACK_APPIMAGE_RUNTIME_FILE "$ENV{CI_PROJECT_DIR}/.gitlab/appimagetool/lib/appimagetool/runtime" CACHE FILEPATH "")
+  set(CMake_TEST_ISPC "ON" CACHE STRING "")
+  set(CMake_TEST_SYCL "ON" CACHE BOOL "")
+endif()
+set(CMake_TEST_LOCALE_CHARSET "UTF-8" CACHE STRING "")
+set(CMake_TEST_LOCALE_C_UTF8 ON CACHE BOOL "")
+set(CMake_TEST_MATH_OVERFLOW ON CACHE BOOL "")
+set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database,import_std23" CACHE STRING "")
+set(CMake_TEST_Rust "ON" CACHE STRING "")
+set(CMake_TEST_TLS_VERIFY_URL "https://gitlab.kitware.com" CACHE STRING "")
+set(CMake_TEST_TLS_VERIFY_URL_BAD "https://badtls-expired.kitware.com" CACHE STRING "")
+set(CMake_TEST_TLS_VERSION "1.3" CACHE STRING "")
+set(CMake_TEST_TLS_VERSION_URL_BAD "https://badtls-v1-1.kitware.com:8011" CACHE STRING "")
+
+string(JOIN " " flags
+  "-fdiagnostics-show-option"
+  "-Wall"
+  "-Wextra"
+  "-Wshadow"
+  "-Wpointer-arith"
+  "-Winvalid-pch"
+  "-Wcast-align"
+  "-Wdisabled-optimization"
+  "-Wwrite-strings"
+  "-fstack-protector-all"
+  "-Wconversion"
+  "-Wno-error=sign-conversion"
+  "-Wno-error=conversion"
+)
+
+set(CMAKE_C_FLAGS "${flags}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS "${flags} -Woverloaded-virtual -Wstrict-null-sentinel" CACHE STRING "")
+
+# "Release" flags without "-DNDEBUG" so we get assertions.
+set(CMAKE_C_FLAGS_RELEASE "-O3" CACHE STRING "")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3" CACHE STRING "")
+
+# Cover compilation with C++11 only and not higher standards.
+set(CMAKE_CXX_STANDARD "11" CACHE STRING "")
+# Qt 6 requires C++17, so use Qt 5.
+set(CMake_QT_MAJOR_VERSION "5" CACHE STRING "")
+
+include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora45_common.cmake")

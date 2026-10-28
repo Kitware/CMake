@@ -193,9 +193,8 @@ char const* cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
     case cm::TargetType::MODULE_LIBRARY:
       if (this->GetGeneratorTarget()->IsCFBundleOnApple()) {
         return "CFBundle shared module";
-      } else {
-        return "shared module";
       }
+      return "shared module";
     case cm::TargetType::EXECUTABLE:
       return "executable";
     default:
