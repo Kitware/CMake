@@ -30,6 +30,12 @@ cmCursesLongMessageForm::cmCursesLongMessageForm(
 
 cmCursesLongMessageForm::~cmCursesLongMessageForm()
 {
+  // The field cannot be freed while it is connected to the form
+  if (this->Form) {
+    unpost_form(this->Form);
+    free_form(this->Form);
+    this->Form = nullptr;
+  }
   if (this->Fields[0]) {
     free_field(this->Fields[0]);
   }
