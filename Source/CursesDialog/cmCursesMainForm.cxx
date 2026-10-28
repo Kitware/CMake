@@ -537,6 +537,7 @@ int cmCursesMainForm::Configure(int noconfigure)
     // If they typed the wrong source directory, we report
     // an error and exit
     if (retVal == -2) {
+      CurrentForm = this;
       return retVal;
     }
   }
@@ -590,6 +591,7 @@ int cmCursesMainForm::Generate()
     // If they typed the wrong source directory, we report
     // an error and exit
     if (retVal == -2) {
+      CurrentForm = this;
       return retVal;
     }
   }
