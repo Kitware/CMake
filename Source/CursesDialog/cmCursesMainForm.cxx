@@ -74,6 +74,13 @@ void cmCursesMainForm::InitializeUI()
   // Hide the cursor by default
   curs_set(0);
 
+  // Free the form before destroying the fields it references
+  if (this->Form) {
+    unpost_form(this->Form);
+    free_form(this->Form);
+    this->Form = nullptr;
+  }
+
   // Create a vector of cmCursesCacheEntryComposite's
   // which contain labels, entries and new entry markers
   std::vector<cmCursesCacheEntryComposite> newEntries;
@@ -620,6 +627,12 @@ void cmCursesMainForm::RemoveEntry(char const* value)
 
   if (removeIt != this->Entries.end()) {
     this->CMakeInstance->UnwatchUnusedCli(value);
+    // Free the form before destroying the fields it references
+    if (this->Form) {
+      unpost_form(this->Form);
+      free_form(this->Form);
+      this->Form = nullptr;
+    }
     this->Entries.erase(removeIt);
   }
 }
