@@ -27,7 +27,7 @@
 #include "archive_private.h"
 
 #if defined(HAVE_ZLIB_H)
-#include <zlib.h>
+#include <cm3p/zlib.h>
 #endif
 
 #if (defined(__aarch64__) || defined(_M_ARM64)) && \

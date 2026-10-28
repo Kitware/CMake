@@ -55,7 +55,7 @@
 #define ARCHIVE_XML_READER_XMLLITE 1
 #define ARCHIVE_XML_USE_XMLLITE 1
 #elif HAVE_EXPAT_H && HAVE_LIBEXPAT
-#include <expat.h>
+#include <cm3p/expat.h>
 #define ARCHIVE_XML_READ 1
 #define ARCHIVE_XML_READER_EXPAT 1
 #define ARCHIVE_XML_USE_EXPAT 1
