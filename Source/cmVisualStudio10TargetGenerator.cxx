@@ -4001,9 +4001,12 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
 {
-  return std::all_of(
-    this->Configurations.begin(), this->Configurations.end(),
-    [this](std::string const& c) { return this->ComputeRcOptions(c); });
+  return std::all_of(this->Configurations.begin(), this->Configurations.end(),
+                     [this](std::string const& c) {
+                       return !this->GeneratorTarget->IsLanguageUsed("RC",
+                                                                     c) ||
+                         this->ComputeRcOptions(c);
+                     });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
@@ -4036,7 +4039,8 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
 void cmVisualStudio10TargetGenerator::WriteRCOptions(
   Elem& e1, std::string const& configName)
 {
-  if (!this->MSTools) {
+  if (!this->MSTools ||
+      !this->GeneratorTarget->IsLanguageUsed("RC", configName)) {
     return;
   }
   Elem e2(e1, "ResourceCompile");
@@ -4429,9 +4433,12 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
   if (!this->GlobalGenerator->IsMasmEnabled()) {
     return true;
   }
-  return std::all_of(
-    this->Configurations.begin(), this->Configurations.end(),
-    [this](std::string const& c) { return this->ComputeMasmOptions(c); });
+  return std::all_of(this->Configurations.begin(), this->Configurations.end(),
+                     [this](std::string const& c) {
+                       return !this->GeneratorTarget->IsLanguageUsed(
+                                "ASM_MASM", c) ||
+                         this->ComputeMasmOptions(c);
+                     });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
@@ -4465,7 +4472,8 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
 void cmVisualStudio10TargetGenerator::WriteMasmOptions(
   Elem& e1, std::string const& configName)
 {
-  if (!this->MSTools || !this->GlobalGenerator->IsMasmEnabled()) {
+  if (!this->MSTools || !this->GlobalGenerator->IsMasmEnabled() ||
+      !this->GeneratorTarget->IsLanguageUsed("ASM_MASM", configName)) {
     return;
   }
   Elem e2(e1, "MASM");
@@ -5248,6 +5256,16 @@ void cmVisualStudio10TargetGenerator::WriteMidlOptions(
     return;
   }
   if (this->GeneratorTarget->GetType() > cm::TargetType::UTILITY) {
+    return;
+  }
+
+  cmGeneratorTarget::KindedSources const& sourceFiles =
+    this->GeneratorTarget->GetKindedSources(configName);
+  auto isIdlFile = [](cmGeneratorTarget::SourceAndKind const& sourceAndKind) {
+    return sourceAndKind.Kind == cmGeneratorTarget::SourceKind::SourceKindIDL;
+  };
+  if (std::none_of(sourceFiles.Sources.begin(), sourceFiles.Sources.end(),
+                   isIdlFile)) {
     return;
   }
 
