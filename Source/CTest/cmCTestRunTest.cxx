@@ -268,7 +268,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       testName.resize(maxTestNameWidth + 4, '.');
 
       output = cmStrCat(std::move(output), testName, outputStream.str());
-      outputStream.str("");
+      outputStream.str(""); //-V530
       outputStream.clear();
       outputStream << output;
       cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, '\n'); // flush
