@@ -313,7 +313,7 @@ An includer may test the following macros after inclusion:
 # endif
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 # define KWIML_INT_private_NO_SCN8
-#elif defined(__BORLANDC__)
+#elif defined(__BORLANDC__) && !defined(__clang__)
 # define KWIML_INT_private_NO_SCN8
 # define KWIML_INT_private_NO_SCN64
 #elif defined(_MSC_VER) && _MSC_VER < 1900
