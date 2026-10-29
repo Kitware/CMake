@@ -1,0 +1,5 @@
+CMake Error at target_link_libraries-cycle3\.cmake:[0-9]+ \(add_library\):
+  The link dependencies of "lib1" use a generator expression that depends on
+  the link dependencies themselves\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

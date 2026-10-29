@@ -347,7 +347,21 @@ cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
   // Lookup any existing information for this configuration.
   std::string key(cmSystemTools::UpperCase(config));
   auto i = this->LinkInformation.find(key);
-  if (i == this->LinkInformation.end()) {
+  if (i != this->LinkInformation.end()) {
+    if (cm::contains(this->LinkInformationInProgress, key)) {
+      this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The link dependencies of \"", this->GetName(),
+                 "\" use a generator expression that depends on the link "
+                 "dependencies themselves."),
+        this->GetBacktrace());
+    }
+  } else {
+    // Reserve the entry so that a recursive lookup while computing the
+    // information is diagnosed instead of re-entering the computation.
+    i = this->LinkInformation.emplace(key, nullptr).first;
+    this->LinkInformationInProgress.insert(key);
+
     // Compute information for this configuration.
     auto info = cm::make_unique<cmComputeLinkInformation>(this, config);
     if (info && !info->Compute()) {
@@ -355,7 +369,8 @@ cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
     }
 
     // Store the information for this configuration.
-    i = this->LinkInformation.emplace(key, std::move(info)).first;
+    this->LinkInformationInProgress.erase(key);
+    i->second = std::move(info);
 
     if (i->second) {
       this->CheckPropertyCompatibility(*i->second, config);
