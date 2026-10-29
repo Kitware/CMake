@@ -2039,6 +2039,7 @@ if(BUILD_TESTING)
   # Test static linking on toolchains known to support it.
   if((CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "LCC")
       AND NOT APPLE AND NOT WIN32 AND NOT CYGWIN
+      AND NOT CMAKE_SYSTEM_NAME STREQUAL "AIX"
       AND EXISTS "/usr/lib/libm.a")
     add_test(LinkStatic  ${CMAKE_CTEST_COMMAND}
       --build-and-test
