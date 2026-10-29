@@ -207,6 +207,16 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
   }
 }
 
+bool cmDocumentation::RequestsGenerators() const
+{
+  return std::any_of(this->RequestedHelpItems.begin(),
+                     this->RequestedHelpItems.end(),
+                     [this](RequestedHelpItem const& rhi) {
+                       return rhi.HelpType == ListGenerators ||
+                         (rhi.HelpType == Help && this->ShowGenerators);
+                     });
+}
+
 bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 {
   int count = 0;

@@ -237,7 +237,12 @@ int do_cmake(int ac, char const* const* av)
     std::vector<std::string> args(av, av + ac);
     hcm.SetCacheArgs(args);
 
-    auto generators = hcm.GetGeneratorsDocumentation();
+    // Finding the default generator can query Visual Studio instances,
+    // so do it only when the generator list will be printed.
+    std::vector<cmDocumentationEntry> generators;
+    if (doc.RequestsGenerators()) {
+      generators = hcm.GetGeneratorsDocumentation();
+    }
 
     doc.SetName("cmake");
     doc.SetSection("Name", cmDocumentationName);

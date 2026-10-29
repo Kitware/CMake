@@ -73,6 +73,9 @@ public:
 
   void SetShowGenerators(bool showGen) { this->ShowGenerators = showGen; }
 
+  /** Whether the requested documentation prints the generator list.  */
+  bool RequestsGenerators() const;
+
   /** Set the program name for standard document generation.  */
   void SetName(std::string const& name);
 

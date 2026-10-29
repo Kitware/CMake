@@ -463,6 +463,8 @@ function(run_EnvironmentGenerator)
   run_cmake_command(Envgen-ninja-multi-help ${CMAKE_COMMAND} --help)
   set(ENV{CMAKE_GENERATOR} "NoSuchGenerator")
   run_cmake_command(Envgen-bad-help ${CMAKE_COMMAND} --help)
+  # --version does not print generators, so it does not evaluate them
+  run_cmake_command(Envgen-bad-version ${CMAKE_COMMAND} --version)
   unset(ENV{CMAKE_GENERATOR})
 
   if(RunCMake_GENERATOR MATCHES "Visual Studio")
