@@ -76,6 +76,7 @@ endmacro()
 
 macro_add_test_library(libshared)
 macro_add_test_library(libstatic)
+macro_add_test_library(libattributes)
 
 add_subdirectory(nodeprecated)
 add_subdirectory(includeguard)
