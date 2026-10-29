@@ -356,7 +356,7 @@ And in the ABI header files:
     std::cout << "legacyPublicFunction() is deprecated" << std::endl;
   }
 
-  void internalLegacyFunction()
+  void legacyInternalFunction()
   {
     std::cout << "legacyInternalFunction() is deprecated" << std::endl;
   }
