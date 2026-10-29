@@ -103,6 +103,10 @@ std::map<std::string, std::string> cmInstrumentation::cdashSnippetsMap = {
 cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
                                      LoadQueriesAfter loadQueries)
 {
+  std::string envVal;
+  this->disabled =
+    cmSystemTools::GetEnv("CTEST_DISABLE_INSTRUMENTATION", envVal) &&
+    !cmIsOff(envVal);
   this->binaryDir = binary_dir;
   this->timingDirv1 = cmStrCat(this->binaryDir, "/.cmake/instrumentation/v1");
   this->cdashDir = cmStrCat(this->timingDirv1, "/cdash");
@@ -239,6 +243,9 @@ void cmInstrumentation::AddCustomContent(std::string const& name,
 void cmInstrumentation::WriteCMakeContent(
   std::unique_ptr<cmGlobalGenerator> const& gg)
 {
+  if (this->disabled) {
+    return;
+  }
   Json::Value root;
   root["targets"] = this->DumpTargets(gg);
   root["custom"] = this->customContent;
@@ -352,8 +359,9 @@ bool cmInstrumentation::HasHook(cmInstrumentationQuery::Hook hook) const
 
 int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 {
-  // Don't run collection if hook is disabled
-  if (hook != cmInstrumentationQuery::Hook::Manual && !this->HasHook(hook)) {
+  // Don't run collection if instrumentation or the hook is disabled.
+  if (this->disabled ||
+      (hook != cmInstrumentationQuery::Hook::Manual && !this->HasHook(hook))) {
     return 0;
   }
 
@@ -609,6 +617,9 @@ std::string cmInstrumentation::InstrumentTest(
   cm::optional<std::string> output,
   cm::optional<ProcessMetrics> processMetrics)
 {
+  if (this->disabled) {
+    return {};
+  }
   // Store command info
   Json::Value root(this->preTestStats);
   std::string command_str = cmStrCat(command, ' ', GetCommandStr(args));
@@ -648,6 +659,9 @@ std::string cmInstrumentation::InstrumentTest(
 
 void cmInstrumentation::GetPreTestStats()
 {
+  if (this->disabled) {
+    return;
+  }
   if (this->HasOption(
         cmInstrumentationQuery::Option::DynamicSystemInformation)) {
     this->InsertDynamicSystemInformation(this->preTestStats, "before");
@@ -661,9 +675,15 @@ int cmInstrumentation::InstrumentCommand(
   cm::optional<std::map<std::string, std::string>> arrayData,
   LoadQueriesAfter reloadQueriesAfterCommand)
 {
-
-  // Always begin gathering data for configure in case cmake_instrumentation
-  // command creates a query
+  if (this->disabled) {
+    int ret = callback().ExitCode;
+    if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
+      this->LoadQueries();
+    }
+    return ret;
+  }
+  // Unless instrumentation is disabled, begin gathering data for configure in
+  // case the cmake_instrumentation command creates a query.
   if (!this->hasQuery && reloadQueriesAfterCommand == LoadQueriesAfter::No) {
     return callback().ExitCode;
   }
@@ -928,6 +948,9 @@ bool cmInstrumentation::IsInstrumentableTargetType(cm::TargetType type)
  */
 int cmInstrumentation::SpawnBuildDaemon()
 {
+  if (this->disabled) {
+    return 0;
+  }
   // Do not inherit handles from the parent process, so that the daemon is
   // fully detached. This helps prevent deadlock between the two.
   uv_disable_stdio_inheritance();
@@ -972,6 +995,9 @@ bool cmInstrumentation::LockIndexing()
 bool cmInstrumentation::AcquireLock(std::string const& lock_file,
                                     cmFileLock& lock, unsigned long timeout)
 {
+  if (this->disabled) {
+    return false;
+  }
   std::string const lock_path = cmStrCat(this->timingDirv1, '/', lock_file);
   if (!cmSystemTools::FileExists(lock_path)) {
     cmSystemTools::Touch(lock_path, true);
@@ -987,6 +1013,9 @@ bool cmInstrumentation::AcquireLock(std::string const& lock_file,
  */
 int cmInstrumentation::CollectTimingAfterBuild(int ppid)
 {
+  if (this->disabled) {
+    return 0;
+  }
   // Check if another process is already instrumenting the build.
   // This lock will be released when the process exits at the end of the build.
   if (!this->LockBuildDaemon()) {

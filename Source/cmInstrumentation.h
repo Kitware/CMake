@@ -45,6 +45,7 @@ public:
                     LoadQueriesAfter loadQueries = LoadQueriesAfter::Yes);
   void LoadQueries();
   void CheckCDashVariable();
+  bool IsDisabled() const { return this->disabled; }
   struct TimeValue
   {
     long tv_sec;
@@ -180,6 +181,7 @@ private:
   static std::map<std::string, std::string> cdashSnippetsMap;
   Json::Value preTestStats;
   std::string errorMsg;
+  bool disabled = false;
   bool hasQuery = false;
   bool ranSystemChecks = false;
   bool ranOSCheck = false;

@@ -125,6 +125,7 @@ Environment Variables for CTest
    :maxdepth: 1
 
    /envvar/CMAKE_CONFIG_TYPE
+   /envvar/CTEST_DISABLE_INSTRUMENTATION
    /envvar/CTEST_INTERACTIVE_DEBUG_MODE
    /envvar/CTEST_NO_TESTS_ACTION
    /envvar/CTEST_OUTPUT_ON_FAILURE

@@ -33,6 +33,7 @@ function(instrument test)
     "PRESERVE_DATA"
     "NO_CONFIGURE"
     "DISABLE_TEST"
+    "DISABLE_AFTER_CONFIGURE"
     "FAIL"
     "BAD_QUERY"
   )
@@ -195,6 +196,17 @@ function(instrument test)
   endif()
   if (NOT ARGS_NO_CONFIGURE)
     run_cmake_with_options(${test} ${ARGS_CONFIGURE_ARGS} ${maybe_CMAKE_BUILD_TYPE})
+  endif()
+
+  if (ARGS_DISABLE_AFTER_CONFIGURE)
+    if(NOT EXISTS ${RunCMake_TEST_BINARY_DIR}/instrumentation-hook)
+      message(SEND_ERROR "Instrumentation hook did not run despite CTEST_DISABLE_INSTRUMENTATION being OFF")
+    endif()
+    set(ENV{CTEST_DISABLE_INSTRUMENTATION} ON)
+    file(REMOVE_RECURSE ${v1}/data ${v1}/cdash)
+    file(REMOVE ${v1}/.index.lock ${RunCMake_TEST_BINARY_DIR}/instrumentation-hook)
+    file(WRITE ${v1}/data/do-not-remove.json "{}\n")
+    file(WRITE ${v1}/data/test/do-not-remove.json "{}\n")
   endif()
 
   # Follow-up Commands
@@ -461,7 +473,27 @@ function(instrument test)
     unset(RunCMake-check-file)
     unset(RunCMake_CHECK_ONLY)
   endif()
+  if (ARGS_DISABLE_AFTER_CONFIGURE)
+    unset(ENV{CTEST_DISABLE_INSTRUMENTATION})
+  endif()
 endfunction()
+
+# Disable collection and hooks while continuing to generate and load queries.
+set(ENV{CTEST_DISABLE_INSTRUMENTATION} ON)
+set(ENV{CTEST_USE_INSTRUMENTATION} ON)
+set(ENV{CTEST_USE_VERBOSE_INSTRUMENTATION} ON)
+instrument(instrumentation-disabled BUILD INSTALL TEST MANUAL_HOOK
+  CHECK_SCRIPT check-disabled.cmake)
+unset(ENV{CTEST_DISABLE_INSTRUMENTATION})
+unset(ENV{CTEST_USE_INSTRUMENTATION})
+unset(ENV{CTEST_USE_VERBOSE_INSTRUMENTATION})
+
+# Also disable instrumentation in an already-configured build tree.
+set(ENV{CTEST_DISABLE_INSTRUMENTATION} OFF)
+instrument(instrumentation-disabled BUILD INSTALL TEST MANUAL_HOOK
+  DISABLE_AFTER_CONFIGURE
+  CHECK_SCRIPT check-disabled.cmake)
+unset(ENV{CTEST_DISABLE_INSTRUMENTATION})
 
 # Bad Queries
 instrument(bad-option BAD_QUERY

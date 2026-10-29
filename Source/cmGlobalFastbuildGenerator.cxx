@@ -285,10 +285,14 @@ void cmGlobalFastbuildGenerator::ProcessEnvironment()
     }
   }
 
-  // Empty strings are not allowed.
+  // Empty strings are not allowed. Instrumentation disabling is a build-time
+  // control, so do not freeze its configure-time value in the environment.
   LocalEnvironment.erase(
     std::remove_if(LocalEnvironment.begin(), LocalEnvironment.end(),
-                   [](std::string const& s) { return s.empty(); }),
+                   [](std::string const& s) {
+                     return s.empty() ||
+                       cmHasLiteralPrefix(s, "CTEST_DISABLE_INSTRUMENTATION=");
+                   }),
     LocalEnvironment.end());
 }
 
@@ -582,6 +586,12 @@ void cmGlobalFastbuildGenerator::WriteEnvironment()
 {
   if (!LocalEnvironment.empty()) {
     WriteArray(FASTBUILD_ENV_VAR_NAME, Wrap(LocalEnvironment), 0);
+    *this->BuildFileStream
+      << "#if exists(CTEST_DISABLE_INSTRUMENTATION)\n"
+         "  #import CTEST_DISABLE_INSTRUMENTATION\n"
+         "  ." FASTBUILD_ENV_VAR_NAME
+         " + 'CTEST_DISABLE_INSTRUMENTATION=$CTEST_DISABLE_INSTRUMENTATION$'\n"
+         "#endif\n";
   }
 }
 
