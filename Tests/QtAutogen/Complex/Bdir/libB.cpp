@@ -10,3 +10,8 @@ int LibB::foo()
 {
   return a.foo();
 }
+
+DeprecatedLibB::DeprecatedLibB(QObject* parent)
+  : QObject(parent)
+{
+}

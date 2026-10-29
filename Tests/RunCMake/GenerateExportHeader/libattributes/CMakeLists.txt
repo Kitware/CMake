@@ -25,13 +25,17 @@ if(CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
   target_link_libraries(libattributes_c PRIVATE libattributes)
 endif()
 
+# The C++11 consumer must not get the C++14 deprecation attribute, which
+# Clang rejects with -pedantic-errors although __has_cpp_attribute reports it.
 if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
-  add_executable(libattributes_cxx98 main.cpp)
-  set_target_properties(libattributes_cxx98 PROPERTIES
-    CXX_STANDARD 98
-    CXX_EXTENSIONS OFF
-  )
-  target_compile_options(libattributes_cxx98 PRIVATE
-    -pedantic-errors ${no_line_marker_errors})
-  target_link_libraries(libattributes_cxx98 PRIVATE libattributes)
+  foreach(standard IN ITEMS 98 11)
+    add_executable(libattributes_cxx${standard} main.cpp)
+    set_target_properties(libattributes_cxx${standard} PROPERTIES
+      CXX_STANDARD ${standard}
+      CXX_EXTENSIONS OFF
+    )
+    target_compile_options(libattributes_cxx${standard} PRIVATE
+      -pedantic-errors ${no_line_marker_errors})
+    target_link_libraries(libattributes_cxx${standard} PRIVATE libattributes)
+  endforeach()
 endif()

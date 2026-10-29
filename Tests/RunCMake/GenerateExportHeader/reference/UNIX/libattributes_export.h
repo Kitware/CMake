@@ -9,7 +9,7 @@
 #  ifndef LIBATTRIBUTES_EXPORT
 #    ifdef libattributes_EXPORTS
         /* We are building this library */
-#      if defined(__cplusplus) && __cplusplus >= 201103L && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
+#      if defined(__cplusplus) && __cplusplus >= 201103L && !defined(__SUNPRO_CC) && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
 #        if __has_cpp_attribute(gnu::visibility)
 #          define LIBATTRIBUTES_EXPORT [[gnu::visibility("default")]]
 #        endif
@@ -19,7 +19,7 @@
 #      endif
 #    else
         /* We are using this library */
-#      if defined(__cplusplus) && __cplusplus >= 201103L && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
+#      if defined(__cplusplus) && __cplusplus >= 201103L && !defined(__SUNPRO_CC) && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
 #        if __has_cpp_attribute(gnu::visibility)
 #          define LIBATTRIBUTES_EXPORT [[gnu::visibility("default")]]
 #        endif
@@ -31,7 +31,7 @@
 #  endif
 
 #  ifndef LIBATTRIBUTES_NO_EXPORT
-#    if defined(__cplusplus) && __cplusplus >= 201103L && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
+#    if defined(__cplusplus) && __cplusplus >= 201103L && !defined(__SUNPRO_CC) && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
 #      if __has_cpp_attribute(gnu::visibility)
 #        define LIBATTRIBUTES_NO_EXPORT [[gnu::visibility("hidden")]]
 #      endif
@@ -43,7 +43,12 @@
 #endif
 
 #ifndef LIBATTRIBUTES_DEPRECATED
-#  if defined(__cplusplus) && __cplusplus >= 201103L && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
+#  if (defined(__cplusplus) && __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L) && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
+#    if __has_cpp_attribute(deprecated) >= 201309L
+#      define LIBATTRIBUTES_DEPRECATED [[deprecated]]
+#    endif
+#  endif
+#  if defined(__cplusplus) && __cplusplus >= 201103L && !defined(__SUNPRO_CC) && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN) && !defined(LIBATTRIBUTES_DEPRECATED)
 #    if __has_cpp_attribute(gnu::deprecated)
 #      define LIBATTRIBUTES_DEPRECATED [[gnu::deprecated]]
 #    endif
@@ -53,12 +58,36 @@
 #  endif
 #endif
 
+#ifndef LIBATTRIBUTES_DEPRECATED_MSG
+#  if (defined(__cplusplus) && __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L) && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)
+#    if __has_cpp_attribute(deprecated) >= 201309L
+#      define LIBATTRIBUTES_DEPRECATED_MSG(msg) [[deprecated(msg)]]
+#    endif
+#  endif
+#  if defined(__cplusplus) && __cplusplus >= 201103L && !defined(__SUNPRO_CC) && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN) && !defined(LIBATTRIBUTES_DEPRECATED_MSG)
+#    if __has_cpp_attribute(gnu::deprecated)
+#      define LIBATTRIBUTES_DEPRECATED_MSG(msg) [[gnu::deprecated(msg)]]
+#    endif
+#  endif
+#  ifndef LIBATTRIBUTES_DEPRECATED_MSG
+#    define LIBATTRIBUTES_DEPRECATED_MSG(msg) __attribute__ ((__deprecated__(msg)))
+#  endif
+#endif
+
 #ifndef LIBATTRIBUTES_DEPRECATED_EXPORT
-#  define LIBATTRIBUTES_DEPRECATED_EXPORT LIBATTRIBUTES_EXPORT LIBATTRIBUTES_DEPRECATED
+#  define LIBATTRIBUTES_DEPRECATED_EXPORT LIBATTRIBUTES_DEPRECATED LIBATTRIBUTES_EXPORT
+#endif
+
+#ifndef LIBATTRIBUTES_DEPRECATED_EXPORT_MSG
+#  define LIBATTRIBUTES_DEPRECATED_EXPORT_MSG(msg) LIBATTRIBUTES_DEPRECATED_MSG(msg) LIBATTRIBUTES_EXPORT
 #endif
 
 #ifndef LIBATTRIBUTES_DEPRECATED_NO_EXPORT
-#  define LIBATTRIBUTES_DEPRECATED_NO_EXPORT LIBATTRIBUTES_NO_EXPORT LIBATTRIBUTES_DEPRECATED
+#  define LIBATTRIBUTES_DEPRECATED_NO_EXPORT LIBATTRIBUTES_DEPRECATED LIBATTRIBUTES_NO_EXPORT
+#endif
+
+#ifndef LIBATTRIBUTES_DEPRECATED_NO_EXPORT_MSG
+#  define LIBATTRIBUTES_DEPRECATED_NO_EXPORT_MSG(msg) LIBATTRIBUTES_DEPRECATED_MSG(msg) LIBATTRIBUTES_NO_EXPORT
 #endif
 
 /* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */

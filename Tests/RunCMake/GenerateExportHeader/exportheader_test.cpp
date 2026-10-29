@@ -17,6 +17,15 @@ static void rtrim(std::string& str, char byte)
   }
 }
 
+static void replace(std::string& str, std::string const& from,
+                    std::string const& to)
+{
+  std::string::size_type const pos = str.find(from);
+  if (pos != std::string::npos) {
+    str.replace(pos, from.size(), to);
+  }
+}
+
 void compare(char const* refName, char const* testName)
 {
   std::ifstream ref;
@@ -48,6 +57,11 @@ void compare(char const* refName, char const* testName)
     // on some platforms.
     rtrim(refLine, '\r');
     rtrim(testLine, '\r');
+#ifdef DEPRECATED_WITHOUT_MSG
+    // Compilers without deprecation messages get the spelling without one.
+    replace(refLine, "__deprecated__(msg)", "__deprecated__");
+    replace(refLine, "__declspec(deprecated(msg))", "__declspec(deprecated)");
+#endif
     if (refLine != testLine) {
       std::cout << "Ref and test are not the same:\n  Ref:  \"" << refLine
                 << "\"\n  Test: \"" << testLine << "\"\n";
@@ -110,6 +124,9 @@ int main()
   libshared::function_exported();
   // libshared::function_deprecated(); LINK ERROR
   libshared::function_deprecated_exported();
+  // libshared::function_deprecated_msg(); LINK ERROR
+  libshared::function_deprecated_exported_msg();
+  // libshared::function_deprecated_excluded_msg(); LINK ERROR
   // libshared::function_excluded(); LINK ERROR
 
   // use_int(libshared::data); LINK ERROR
@@ -159,6 +176,7 @@ int main()
   libstatic::function_exported();
   libstatic::function_deprecated();
   libstatic::function_deprecated_exported();
+  libstatic::function_deprecated_exported_msg();
   libstatic::function_excluded();
 
   use_int(libstatic::data);
@@ -191,6 +209,17 @@ int main()
   libattributes::function_exported();
   libattributes::function_deprecated_exported();
   // libattributes::function_excluded(); LINK ERROR
+  // libattributes::function_deprecated_msg(); LINK ERROR
+  libattributes::function_deprecated_exported_msg();
+  // libattributes::function_deprecated_excluded_msg(); LINK ERROR
+
+  // OrangeC cannot declare the deprecated class.
+#ifndef __ORANGEC__
+  {
+    libattributes::DeprecatedClass l;
+    l.method();
+  }
+#endif
 
   // use_int(libattributes::data); LINK ERROR
   use_int(libattributes::data_exported);

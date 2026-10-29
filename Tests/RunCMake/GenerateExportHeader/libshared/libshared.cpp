@@ -101,6 +101,21 @@ int libshared::function_deprecated_exported()
   return 0;
 }
 
+int libshared::function_deprecated_msg()
+{
+  return 0;
+}
+
+int libshared::function_deprecated_exported_msg()
+{
+  return 0;
+}
+
+int libshared::function_deprecated_excluded_msg()
+{
+  return 0;
+}
+
 int libshared::function_excluded()
 {
   return 0;

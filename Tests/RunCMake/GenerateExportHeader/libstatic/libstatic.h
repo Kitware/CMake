@@ -73,6 +73,9 @@ int LIBSTATIC_DEPRECATED function_deprecated();
 
 int LIBSTATIC_DEPRECATED_EXPORT function_deprecated_exported();
 
+int LIBSTATIC_DEPRECATED_EXPORT_MSG("use function_exported")
+  function_deprecated_exported_msg();
+
 int LIBSTATIC_NO_EXPORT function_excluded();
 
 extern int const data;
