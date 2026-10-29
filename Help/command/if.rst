@@ -178,8 +178,8 @@ Existence Checks
     need to be tested if you need to know whether a non-cache variable exists:
     ``if(DEFINED someName AND NOT DEFINED CACHE{someName})``.
 
- .. versionadded:: 3.14
-  Added support for ``CACHE{<name>}`` variables.
+  .. versionadded:: 3.14
+   Added support for ``CACHE{<name>}`` variables.
 
 .. signature:: if(<variable|string> IN_LIST <variable>)
   :target: IN_LIST
