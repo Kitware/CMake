@@ -549,6 +549,14 @@ if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython2_SABIModule OR CMake_TEST_Fin
   set_property(TEST RunCMake.FindPython.Various PROPERTY LABELS Python2 Python3)
 endif()
 add_RunCMake_test(FindBoost)
+if(CMake_TEST_FindBISON)
+  find_package(BISON QUIET)
+  if(BISON_FOUND)
+    add_RunCMake_test(FindBISON
+      -DBISON_EXECUTABLE=${BISON_EXECUTABLE}
+      )
+  endif()
+endif()
 add_RunCMake_test(FindLua)
 add_RunCMake_test(FindTCL)
 if(CMake_TEST_FindRuby)

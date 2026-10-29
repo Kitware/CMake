@@ -1,0 +1,5 @@
+function(check_var var expect)
+  if(NOT "${${var}}" STREQUAL "${expect}")
+    message(SEND_ERROR "${var} is:\n  \"${${var}}\"\nbut expected:\n  \"${expect}\"")
+  endif()
+endfunction()
