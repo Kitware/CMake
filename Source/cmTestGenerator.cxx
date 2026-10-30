@@ -132,21 +132,25 @@ bool cmTestGenerator::EvaluateBuildDependencies(
   }
 
   // Add dependencies from BUILD_DEPENDS keyword
-  for (std::string const& depName : buildDepends) {
-    if (depName.empty()) {
-      continue;
-    }
+  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+  auto addBuildDependency = [lg, gg, &dependencies,
+                             &info](std::string const& depName) {
     cmGeneratorTarget* depTarget = lg->FindGeneratorTargetToUse(depName);
     if (!depTarget) {
-      cmGlobalGenerator* gg = lg->GetGlobalGenerator();
       BuildDependencies::FileDependency file;
       file.Path = lg->GetRealFileDependency(depName);
       file.Owner = gg->FindOutputOwningTarget(file.Path);
       file.Generated = gg->IsGeneratedByBuild(file.Path);
       info.Files.push_back(std::move(file));
-      continue;
+      return;
     }
     dependencies.insert(depTarget);
+  };
+  for (std::string const& depName : buildDepends) {
+    if (depName.empty()) {
+      continue;
+    }
+    addBuildDependency(depName);
   }
 
   for (cmGeneratorTarget* gt : dependencies) {
