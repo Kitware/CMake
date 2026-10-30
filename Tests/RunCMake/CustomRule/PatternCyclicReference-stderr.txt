@@ -1,0 +1,15 @@
+CMake Error in CMakeLists.txt:
+  Error evaluating the pattern "OUTPUT_FILE" in the expression:
+
+    <OUTPUT_FILE>
+
+  Dependency loop found.
+
+
+CMake Error in CMakeLists.txt:
+  Pattern expression
+
+    <OUTPUT_FILE>
+
+  from rule "simple", used by the fileset "fs" of the target "foo", did not
+  expand correctly.

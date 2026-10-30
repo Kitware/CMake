@@ -12,6 +12,9 @@ run_cmake(OUTPUT_FILE_SET-BadPattern)
 run_cmake(OUTPUT_FILE_SET-BadType)
 run_cmake(OUTPUT_FILE_SET-TypeMismatch)
 
+run_cmake(PatternSelfReference)
+run_cmake(PatternCyclicReference)
+
 run_cmake(RuleProperties1)
 run_cmake(RuleProperties2)
 

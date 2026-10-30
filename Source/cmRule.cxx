@@ -22,8 +22,8 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPlaceholderExpander.h"
 #include "cmRange.h"
+#include "cmRuleHelper.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
@@ -153,26 +153,6 @@ bool IsSettableProperty(cm::string_view prop, cmRule const* rule)
 
   return true;
 }
-
-class FileSetNamePlaceholderExpander : public cmPlaceholderExpander
-{
-public:
-  using VariableMap = std::unordered_map<std::string, std::string>;
-  VariableMap Values;
-
-  bool InError = false;
-
-private:
-  std::string ExpandVariable(std::string const& variable) override
-  {
-    if (cm::contains(this->Values, variable)) {
-      return this->Values[variable];
-    }
-    this->InError = true;
-    // If there is no variable defined, mark unresolved variable by '<' and '>'
-    return cmStrCat('<', variable, '>');
-  }
-};
 }
 
 cmRule::cmRule(cmMakefile& makefile, std::string name, cm::RuleScope scope)
@@ -242,27 +222,31 @@ cmFileSet* cmRule::GetOutputFileSet(cmTarget* target,
                                     cmFileSet const* fileSet) const
 {
   cmList outputFileSet{ this->GetProperty(std::string{ OUTPUT_FILE_SET }) };
-  FileSetNamePlaceholderExpander expander;
-  expander.Values["RULE"] = this->GetName();
-  expander.Values["TARGET"] = target->GetName();
-  expander.Values["FILE_SET"] = fileSet->GetName();
+  cm::RulePatternSet patterns{
+    { "RULE", this->GetName() },
+    { "TARGET", target->GetName() },
+    { "FILE_SET", fileSet->GetName() },
+  };
 
-  std::string fsName{ outputFileSet[0] };
-  expander.ExpandVariables(fsName);
+  cm::RulePatternPlaceholderExpander expander{ this->GetMakefile(),
+                                               this->GetName(), patterns };
+
+  std::string const& fsName = outputFileSet[0];
+  std::string outputName = expander.ExpandPatterns(fsName);
   if (expander.InError) {
     this->GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Output File Set name, for rule \"", this->GetName(),
-               "\", did not expand correctly:\n  \"", fsName, "\"."));
+      cmStrCat("Output File Set name, for the rule \"", this->GetName(),
+               "\", did not expand correctly:\n  \"", outputName, "\"."));
     return nullptr;
   }
 
-  auto result = target->GetOrCreateFileSet(fsName, outputFileSet[1],
+  auto result = target->GetOrCreateFileSet(outputName, outputFileSet[1],
                                            fileSet->GetVisibility());
   if (!result.second && result.first->GetType() != outputFileSet[1]) {
     this->GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("The output file set \"", fsName, "\", for the target \"",
+      cmStrCat("The output file set \"", outputName, "\", for the target \"",
                target->GetName(), "\", has the type \"",
                result.first->GetType(), "\" instead of \"", outputFileSet[1],
                "\", as specified by the rule \"", this->GetName(), "\"."));
@@ -272,16 +256,23 @@ cmFileSet* cmRule::GetOutputFileSet(cmTarget* target,
   if (result.first->GetDirectoryEntries().empty()) {
     if (cmValue baseDirs =
           this->GetProperty(std::string{ OUTPUT_FILE_SET_BASE_DIRS })) {
-      expander.Values["CURRENT_SOURCE_DIR"] =
+      patterns["CURRENT_SOURCE_DIR"] =
         fileSet->GetMakefile()->GetCurrentSourceDirectory();
-      expander.Values["CURRENT_BINARY_DIR"] =
+      patterns["CURRENT_BINARY_DIR"] =
         fileSet->GetMakefile()->GetCurrentBinaryDirectory();
-      expander.Values["OUTPUT_CURRENT_SOURCE_DIR"] =
+      patterns["OUTPUT_CURRENT_SOURCE_DIR"] =
         result.first->GetMakefile()->GetCurrentSourceDirectory();
-      expander.Values["OUTPUT_CURRENT_BINARY_DIR"] =
+      patterns["OUTPUT_CURRENT_BINARY_DIR"] =
         result.first->GetMakefile()->GetCurrentBinaryDirectory();
-      std::string dirs{ baseDirs };
-      expander.ExpandVariables(dirs);
+
+      std::string dirs = expander.ExpandPatterns(*baseDirs);
+      if (expander.InError) {
+        this->GetMakefile().IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Base directories, for the rule \"", this->GetName(),
+                   "\", did not expand correctly."));
+        return nullptr;
+      }
       result.first->AddDirectoryEntry(BT<std::string>{ dirs });
     } else {
       // Add default base directory if none are specified
@@ -520,33 +511,30 @@ void cmRule::CheckProperty(std::string const& prop, cmMakefile& context) const
 }
 
 namespace {
-cmsys::RegularExpression PatternRegex{ "(^[A-Z][A-Z0-9_]+)=(.*)$" };
+cmsys::RegularExpression PatternRegex{ "(^[A-Z][A-Z0-9_]*)=(.*)$" };
 
-void UpdatePatterns(cmRule::PatternSet& patterns, cmList const& newPatterns)
+void UpdatePatterns(cm::RulePatternSet& patterns, cmList const& newPatterns)
 {
   for (auto const& pattern : newPatterns) {
     if (PatternRegex.find(pattern)) {
-      auto it = std::find_if(patterns.begin(), patterns.end(),
-                             [](cmRule::Pattern const& item) {
-                               return item.Name == PatternRegex.match(1);
-                             });
-      if (it == patterns.end()) {
-        patterns.emplace_back(PatternRegex.match(1), PatternRegex.match(2));
+      if (cm::contains(patterns, PatternRegex.match(1))) {
+        patterns[PatternRegex.match(1)] = PatternRegex.match(2);
       } else {
-        it->Value = PatternRegex.match(2);
+        patterns.emplace(PatternRegex.match(1), PatternRegex.match(2));
       }
     }
   }
 }
 
 bool ConfigureRule(cmRule::ConfiguratorSet const& configurators,
-                   cmMakefile* mf, cmRule::PatternSet& patterns,
+                   cmMakefile* mf, cm::RulePatternSet& patterns,
                    std::string const& rule, std::string const& target,
                    std::string const& fileSet,
                    std::string const& outputFileSet,
                    std::string const& source = {})
 {
   cm::string_view patternsVariable{ "_CMAKE_RULE_PATTERNS"_s };
+  cm::RulePatternPlaceholderExpander expander{ *mf, rule, patterns };
 
   for (auto const& item : configurators) {
     // The validator command will be executed in an isolated scope.
@@ -586,7 +574,7 @@ bool ConfigureRule(cmRule::ConfiguratorSet const& configurators,
 
 bool cmRule::Instantiate(cmTarget const* target, cmFileSet const* fileSet,
                          cmFileSet const* outputFileSet,
-                         PatternSet& patterns) const
+                         cm::RulePatternSet& patterns) const
 {
   this->SwitchMode();
 
@@ -608,7 +596,7 @@ bool cmRule::Instantiate(cmTarget const* target, cmFileSet const* fileSet,
 
 bool cmRule::Instantiate(cmTarget const* target, cmFileSet const* fileSet,
                          cmFileSet const* outputFileSet, cmSourceFile* source,
-                         PatternSet& patterns) const
+                         cm::RulePatternSet& patterns) const
 {
   // First, take patterns from <RULE>_PATTERNS source file property, if any
   if (cmValue sfPatterns =

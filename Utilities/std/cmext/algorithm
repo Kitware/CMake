@@ -9,6 +9,7 @@
 #include <iterator>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include <cm/ranges>
 #include <cm/type_traits>
@@ -18,7 +19,6 @@
 #if defined(__SUNPRO_CC) && defined(__sparc)
 #  include <list>
 #  include <string>
-#  include <vector>
 #endif
 
 namespace cm {

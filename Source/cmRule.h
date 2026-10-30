@@ -14,6 +14,7 @@
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmPropertyMap.h"
+#include "cmRuleHelper.h"
 #include "cmValue.h"
 
 class cmMakefile;
@@ -127,23 +128,12 @@ public:
 
   bool InGeneration() const { return this->Generation; }
 
-  struct Pattern
-  {
-    Pattern(std::string name, std::string value)
-      : Name(std::move(name))
-      , Value(std::move(value))
-    {
-    }
-
-    std::string Name;
-    std::string Value;
-  };
-  using PatternSet = std::vector<Pattern>;
   bool Instantiate(cmTarget const* target, cmFileSet const* fileSet,
-                   cmFileSet const* outputFileSet, PatternSet& patterns) const;
+                   cmFileSet const* outputFileSet,
+                   cm::RulePatternSet& patterns) const;
   bool Instantiate(cmTarget const* target, cmFileSet const* fileSet,
                    cmFileSet const* outputFileSet, cmSourceFile* source,
-                   PatternSet& patterns) const;
+                   cm::RulePatternSet& patterns) const;
 
 protected:
   cmRule(cmMakefile& makefile, std::string name, cm::RuleScope scope);

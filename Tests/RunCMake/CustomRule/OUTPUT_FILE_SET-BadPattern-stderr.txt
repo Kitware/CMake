@@ -1,4 +1,8 @@
 CMake Error in CMakeLists\.txt:
-  Output File Set name, for rule "foo", did not expand correctly:
+  The pattern "PATTERN" is not defined.
+
+
+CMake Error in CMakeLists\.txt:
+  Output File Set name, for the rule "foo", did not expand correctly:
 
     "bad_<PATTERN>_foo_bar_fs"

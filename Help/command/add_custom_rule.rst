@@ -68,6 +68,10 @@ Generating Files
     The instantiation of the patterns are done in the context of the directory
     where the file set was created.
 
+    .. versionchanged:: 4.6
+      The expansion of patterns is done recursively at generation time so the
+      value of a pattern can refer any other pattern.
+
     These patterns cannot be changed by the functions specified by the
     ``CONFIGURATOR`` option.
 
@@ -202,7 +206,7 @@ Generating Files
       used to enrich the list of patterns. The expected value is a
       :ref:`semicolon-separated list <CMake Language Lists>` of items having
       the syntax ``PATTERN=VALUE`` or ``PATTERN=``. More precisely, each item
-      must match the regular expression ``(^[A-Z][A-Z0-9_]+)=(.*)$``. Items
+      must match the regular expression ``(^[A-Z][A-Z0-9_]*)=(.*)$``. Items
       which do not match this regular expression will be ignored.
 
     ``FOR_SOURCE``
@@ -219,7 +223,7 @@ Generating Files
       used to enrich the list of patterns. The expected value is a
       :ref:`semicolon-separated list <CMake Language Lists>` of items having
       the syntax ``PATTERN=VALUE`` or ``PATTERN=``. More precisely, each item
-      must match the regular expression ``(^[A-Z][A-Z0-9_]+)=(.*)$``. Items
+      must match the regular expression ``(^[A-Z][A-Z0-9_]*)=(.*)$``. Items
       which do not match this regular expression will be ignored.
 
       .. note::
