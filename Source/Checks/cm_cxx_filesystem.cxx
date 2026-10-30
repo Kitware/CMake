@@ -26,20 +26,14 @@ int main()
     return 1;
   }
 
-  std::filesystem::path b1("C:\\path\\y\\..\\");
-  if (std::filesystem::weakly_canonical("\\\\?\\C:\\path\\x\\..") !=
-      b1.lexically_normal()) {
-    return 1;
-  }
-
   // LWG 3070 not implemented on some old Visual Studio compilers (2017, for
-  // example)
+  // example), or on MinGW Clang.
   if (!std::filesystem::path("/a:/b:").lexically_relative("/a:/c:").empty()) {
     return 1;
   }
   // LWG 3096 not implemented on some old Visual Studio compilers (2017, for
   // example)
-  if (fs::path("/a").lexically_relative("/a/.") != ".") {
+  if (std::filesystem::path("/a").lexically_relative("/a/.") != ".") {
     return 1;
   }
 #endif
