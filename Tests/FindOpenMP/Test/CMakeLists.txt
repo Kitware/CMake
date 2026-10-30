@@ -54,7 +54,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
   endif()
 endif()
 
-# FIXME(#26701) Needed to check target offload conditions
+# Cray needs the OpenMP flags at link time to use its offload linker
 foreach(c C CXX Fortran)
   if(NOT "${OpenMP_TEST_${c}}")
     continue()

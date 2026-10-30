@@ -1,0 +1,60 @@
+# Checks the verbose build output against these lists of targets:
+#   link_omp     - link line has the OpenMP flag
+#   link_mark    - link line has ${mark}
+#   compile_mark - compile line has ${mark}
+# Other targets lack them, and no other marker appears.
+
+string(REPLACE ";" "," out "${actual_stdout}")
+string(REPLACE "\n" ";" lines "${out}")
+
+function(check_line kind t line what pattern want)
+  list(FIND ${want} "${t}" i)
+  if(line MATCHES "${pattern}")
+    if(i EQUAL -1)
+      string(APPEND msg "${kind} line of '${t}' has ${what} but should not:\n  ${line}\n")
+    endif()
+  elseif(NOT i EQUAL -1)
+    string(APPEND msg "${kind} line of '${t}' lacks ${what}:\n  ${line}\n")
+  endif()
+  set(msg "${msg}" PARENT_SCOPE)
+endfunction()
+
+set(msg "")
+foreach(t IN ITEMS exe lib static mixed hostc host)
+  set(compile "")
+  set(link "")
+  foreach(l IN LISTS lines)
+    if(l MATCHES " -o CMakeFiles/${t}\\.dir/[^ ]+ -c ")
+      set(compile "${l}")
+    elseif(l MATCHES " -o ([^ ]*/)?${t}( |$)")
+      set(link "${l}")
+    endif()
+  endforeach()
+  if(compile STREQUAL "")
+    string(APPEND msg "No compile line for '${t}'.\n")
+  elseif(mark)
+    check_line(Compile ${t} "${compile}" "${mark}" "-D${mark}( |$)" compile_mark)
+  endif()
+  # The static library is archived, not linked.
+  if(t STREQUAL "lib")
+    continue()
+  endif()
+  if(link STREQUAL "")
+    string(APPEND msg "No link line for '${t}'.\n")
+    continue()
+  endif()
+  check_line(Link ${t} "${link}" "the OpenMP flag" "fopenmp" link_omp)
+  if(mark)
+    check_line(Link ${t} "${link}" "${mark}" "-D${mark}( |$)" link_mark)
+  endif()
+endforeach()
+
+foreach(m IN ITEMS MARK_A MARK_B)
+  if(NOT m STREQUAL "${mark}" AND actual_stdout MATCHES "-D${m}")
+    string(APPEND msg "Unexpected ${m} in the build output.\n")
+  endif()
+endforeach()
+
+if(msg)
+  set(RunCMake_TEST_FAILED "${msg}")
+endif()

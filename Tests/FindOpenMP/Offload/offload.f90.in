@@ -1,0 +1,15 @@
+      integer function offload_check()
+      @OpenMP_Fortran_INCLUDE_LINE@
+      integer :: i, s
+      logical :: on_host
+      on_host = .true.
+      s = 0
+!$omp target map(tofrom: on_host, s)
+      on_host = omp_is_initial_device()
+      do i = 1, 10
+        s = s + i
+      end do
+!$omp end target
+      offload_check = 0
+      if (on_host .or. s /= 55) offload_check = 1
+      end function offload_check
