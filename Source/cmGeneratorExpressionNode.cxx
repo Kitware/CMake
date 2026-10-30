@@ -3435,6 +3435,9 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
             return false;
           }
           cmLocalGenerator const* const lg = eval->Context.LG;
+          if (!eval->HeadTarget) {
+            return false;
+          }
           switch (eval->HeadTarget->GetPolicyStatusCMP0199()) {
             case cmPolicies::WARN:
               if (lg->GetMakefile()->PolicyOptionalWarningEnabled(
@@ -3455,7 +3458,6 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
           }
 
           CM_UNREACHABLE;
-          return false;
         }();
 
         if (oldPolicy) {
