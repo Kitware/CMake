@@ -1445,6 +1445,19 @@ add_executable(cpack CPack/cpack.cxx)
 target_link_libraries(cpack PRIVATE CPackLib ManifestLib)
 list(APPEND _tools cpack)
 
+if(MSVC)
+  # Many runs of these tools, such as most "cmake -E" commands, use none
+  # of these system libraries.  Load them on first use instead of at
+  # start-up.
+  foreach(tool IN ITEMS cmake ctest cpack)
+    foreach(dll IN ITEMS bcrypt crypt32 dbghelp iphlpapi ole32 oleaut32
+                         powrprof psapi secur32 shell32 user32 ws2_32)
+      target_link_options(${tool} PRIVATE "-DELAYLOAD:${dll}.dll")
+    endforeach()
+    target_link_libraries(${tool} PRIVATE delayimp)
+  endforeach()
+endif()
+
 # Curses GUI
 if(BUILD_CursesDialog)
   add_subdirectory(CursesDialog)
