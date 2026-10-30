@@ -57,5 +57,14 @@ foreach(f IN LISTS expectedList)
     endif()
 endforeach()
 
+# Tolerate output formats explicitly set to an empty value.
+set(DOXYGEN_OUTPUT_DIRECTORY emptyGenerate)
+set(DOXYGEN_GENERATE_LATEX "")
+doxygen_add_docs(docsEmptyGenerate main.cpp)
+unset(DOXYGEN_GENERATE_LATEX)
+if(NOT TARGET docsEmptyGenerate)
+    message(FATAL_ERROR "Target docsEmptyGenerate not created")
+endif()
+
 add_custom_target(allDocTargets)
-add_dependencies(allDocTargets docsNoArgs docsWithArgs)
+add_dependencies(allDocTargets docsNoArgs docsWithArgs docsEmptyGenerate)
