@@ -91,6 +91,7 @@ Reference Manuals
     /guide/using-dependencies/index
     /guide/importing-exporting/index
     /guide/ide-integration/index
+    /guide/ctest-dashboard-client/index
 
 .. only:: html or text
 
