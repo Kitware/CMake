@@ -183,6 +183,7 @@ if(CMake_SPHINX_CMAKE_ORG)
 
   list(APPEND html_pre_commands
     COMMAND ${CMAKE_COMMAND} -Dversion=${CMake_VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/tutorial_archive.cmake
+    COMMAND ${CMAKE_COMMAND} -Dversion=${CMake_VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/ctest_dashboard_archive.cmake
     )
 
   list(APPEND qthelp_post_commands
