@@ -63,3 +63,44 @@ set_property(TARGET nosla_CMP0182 PROPERTY AIX_SHARED_LIBRARY_ARCHIVE OFF)
 add_custom_command(TARGET nosla_CMP0182 POST_BUILD VERBATIM
   COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dnosla=$<TARGET_FILE:nosla_CMP0182> -Dname=nosla_CMP0182 -P${CMAKE_CURRENT_SOURCE_DIR}/nosla-check.cmake
   )
+
+add_library(nosla_symlinks SHARED sla.c)
+set_target_properties(nosla_symlinks PROPERTIES
+  AIX_SHARED_LIBRARY_ARCHIVE OFF
+  AIX_SHARED_LIBRARY_SYMLINKS ON
+  VERSION 1.2.3
+  SOVERSION 1
+  )
+add_custom_command(TARGET nosla_symlinks POST_BUILD VERBATIM
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dnosla=$<TARGET_FILE:nosla_symlinks> -Dname=nosla_symlinks -Dversion=1.2.3 -Dsoversion=1 -P${CMAKE_CURRENT_SOURCE_DIR}/nosla-symlinks-check.cmake
+  )
+
+add_executable(UseNoSLA_symlinks use_sla.c)
+target_link_libraries(UseNoSLA_symlinks PRIVATE nosla_symlinks)
+add_custom_command(TARGET UseNoSLA_symlinks POST_BUILD VERBATIM
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dexe=$<TARGET_FILE:UseNoSLA_symlinks> -Dexpected=libnosla_symlinks.so.1 -P${CMAKE_CURRENT_SOURCE_DIR}/nosla-symlinks-link-check.cmake
+  )
+
+# Without SOVERSION, dependents link to the VERSION name.
+add_library(nosla_version SHARED sla.c)
+set_target_properties(nosla_version PROPERTIES
+  AIX_SHARED_LIBRARY_ARCHIVE OFF
+  AIX_SHARED_LIBRARY_SYMLINKS ON
+  VERSION 1.2.3
+  )
+add_executable(UseNoSLA_version use_sla.c)
+target_link_libraries(UseNoSLA_version PRIVATE nosla_version)
+add_custom_command(TARGET UseNoSLA_version POST_BUILD VERBATIM
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dexe=$<TARGET_FILE:UseNoSLA_version> -Dexpected=libnosla_version.so.1.2.3 -P${CMAKE_CURRENT_SOURCE_DIR}/nosla-symlinks-link-check.cmake
+  )
+
+cmake_policy(SET CMP0227 NEW)
+add_library(nosla_CMP0227 SHARED sla.c)
+set_target_properties(nosla_CMP0227 PROPERTIES
+  AIX_SHARED_LIBRARY_ARCHIVE OFF
+  VERSION 1.2.3
+  SOVERSION 1
+  )
+add_custom_command(TARGET nosla_CMP0227 POST_BUILD VERBATIM
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dnosla=$<TARGET_FILE:nosla_CMP0227> -Dname=nosla_CMP0227 -Dversion=1.2.3 -Dsoversion=1 -P${CMAKE_CURRENT_SOURCE_DIR}/nosla-symlinks-check.cmake
+  )

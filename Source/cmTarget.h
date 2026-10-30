@@ -281,6 +281,10 @@ public:
   //! Return whether to archive shared library or not on AIX.
   bool IsArchivedAIXSharedLibrary() const;
 
+  //! Return whether a plain AIX shared object gets VERSION/SOVERSION
+  //! file names and symlinks.
+  bool IsAIXSharedLibraryWithSymlinks() const;
+
   //! Return whether this target is an executable Bundle on Apple.
   bool IsAppBundleOnApple() const;
 

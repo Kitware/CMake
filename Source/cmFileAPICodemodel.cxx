@@ -2362,7 +2362,8 @@ Json::Value Target::DumpArtifacts()
       }
     } else {
       fullPath = this->GT->NormalGetFullPath(
-        this->Config, cmStateEnums::ImportLibraryArtifact, false);
+        this->Config, cmStateEnums::ImportLibraryArtifact,
+        cmGeneratorTarget::NameType::Output);
     }
     if (!fullPath.empty()) {
       Json::Value artifact = Json::objectValue;

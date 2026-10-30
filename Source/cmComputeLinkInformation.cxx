@@ -1151,7 +1151,8 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
       cmStateEnums::ArtifactType artifact = tgt->HasImportLibrary(config)
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;
-      std::string exe = tgt->GetFullPath(config, artifact, true);
+      std::string exe =
+        tgt->GetFullPath(config, artifact, cmGeneratorTarget::NameType::Real);
       this->Items.emplace_back(
         BT<std::string>(exe, item.Backtrace), ItemIsPath::Yes, tgt, nullptr,
         this->FindLibraryFeature(entry.Feature == DEFAULT
@@ -1184,9 +1185,16 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;
 
-      // Pass the full path to the target file.
+      // Pass the full path to the target file.  AIX shared objects have no
+      // builtin soname, so the consumer records the file name used to link.
+      // Link via the SOVERSION symlink so the consumer depends on it at
+      // runtime.
+      cmGeneratorTarget::NameType const nameType =
+        tgt->IsAIXSharedLibraryWithSymlinks()
+        ? cmGeneratorTarget::NameType::SOName
+        : cmGeneratorTarget::NameType::Real;
       BT<std::string> lib = BT<std::string>(
-        tgt->GetFullPath(config, artifact, true), item.Backtrace);
+        tgt->GetFullPath(config, artifact, nameType), item.Backtrace);
       if (tgt->IsAIX() && cmHasLiteralSuffix(lib.Value, "-NOTFOUND") &&
           artifact == cmStateEnums::ImportLibraryArtifact) {
         // This is an imported executable on AIX that has ENABLE_EXPORTS
@@ -1207,7 +1215,8 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
       if (tgt->IsApple() && tgt->HasImportLibrary(config)) {
         // Use the library rather than the tbd file for runpath computation
         this->AddLibraryRuntimeInfo(
-          tgt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact, true),
+          tgt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact,
+                           cmGeneratorTarget::NameType::Real),
           tgt);
       } else {
         this->AddLibraryRuntimeInfo(lib.Value, tgt);
@@ -1336,7 +1345,7 @@ void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
       // Use the library rather than the tbd file for runpath computation
       this->AddLibraryRuntimeInfo(
         tgt->GetFullPath(this->Config, cmStateEnums::RuntimeBinaryArtifact,
-                         true),
+                         cmGeneratorTarget::NameType::Real),
         tgt);
     } else {
       this->AddLibraryRuntimeInfo(lib, tgt);

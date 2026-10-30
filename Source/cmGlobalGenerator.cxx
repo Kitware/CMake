@@ -2498,10 +2498,12 @@ cmGeneratorTarget* cmGlobalGenerator::FindArtifactOwningTarget(
             continue;
         }
         std::set<std::string> artifacts;
-        artifacts.insert(cmSystemTools::CollapseFullPath(gt->GetFullPath(
-          config, cmStateEnums::RuntimeBinaryArtifact, /*realname=*/false)));
-        artifacts.insert(cmSystemTools::CollapseFullPath(gt->GetFullPath(
-          config, cmStateEnums::RuntimeBinaryArtifact, /*realname=*/true)));
+        artifacts.insert(cmSystemTools::CollapseFullPath(
+          gt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact,
+                          cmGeneratorTarget::NameType::Output)));
+        artifacts.insert(cmSystemTools::CollapseFullPath(
+          gt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact,
+                          cmGeneratorTarget::NameType::Real)));
         if (gt->HasImportLibrary(config)) {
           artifacts.insert(cmSystemTools::CollapseFullPath(
             gt->GetFullPath(config, cmStateEnums::ImportLibraryArtifact)));

@@ -682,7 +682,10 @@ class cmMakefile;
          "default configure command.",                                        \
          4, 5, 0, WARN)                                                       \
   SELECT(POLICY, CMP0226, "Respect Swift_MODULE_NAME with Xcode Generator",   \
-         4, 5, 0, WARN)
+         4, 5, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0227,                                                     \
+         "AIX shared objects are named with VERSION and SOVERSION.", 4, 6, 0, \
+         WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -742,7 +745,8 @@ class cmMakefile;
   F(CMP0214)                                                                  \
   F(CMP0215)                                                                  \
   F(CMP0216)                                                                  \
-  F(CMP0226)
+  F(CMP0226)                                                                  \
+  F(CMP0227)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

@@ -94,6 +94,14 @@ Supported Policies
 
 The following policies are supported.
 
+Policies Introduced by CMake 4.6
+--------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0227: AIX shared objects are named with VERSION and SOVERSION. </policy/CMP0227>
+
 Policies Introduced by CMake 4.5
 --------------------------------
 

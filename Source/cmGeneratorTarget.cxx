@@ -3915,17 +3915,29 @@ std::string cmGeneratorTarget::GetImportedLibName(
 
 std::string cmGeneratorTarget::GetFullPath(std::string const& config,
                                            cmStateEnums::ArtifactType artifact,
-                                           bool realname) const
+                                           NameType nameType) const
 {
   if (this->IsImported()) {
-    return this->Target->ImportedGetFullPath(config, artifact);
+    std::string path = this->Target->ImportedGetFullPath(config, artifact);
+    if (nameType == NameType::SOName &&
+        artifact == cmStateEnums::RuntimeBinaryArtifact && !path.empty() &&
+        !cmHasLiteralSuffix(path, "-NOTFOUND")) {
+      std::string soName = this->GetSOName(config, artifact);
+      if (!soName.empty()) {
+        // The soname names a file in the directory of the location.
+        std::string::size_type const slash = path.rfind('/');
+        path = cmStrCat(
+          slash == std::string::npos ? "" : path.substr(0, slash + 1), soName);
+      }
+    }
+    return path;
   }
-  return this->NormalGetFullPath(config, artifact, realname);
+  return this->NormalGetFullPath(config, artifact, nameType);
 }
 
 std::string cmGeneratorTarget::NormalGetFullPath(
   std::string const& config, cmStateEnums::ArtifactType artifact,
-  bool realname) const
+  NameType nameType) const
 {
   std::string fpath = cmStrCat(this->GetDirectory(config, artifact), '/');
   if (this->IsAppBundleOnApple()) {
@@ -3933,10 +3945,19 @@ std::string cmGeneratorTarget::NormalGetFullPath(
       cmStrCat(this->BuildBundleDirectory(fpath, config, FullLevel), '/');
   }
 
+  if (nameType == NameType::SOName) {
+    std::string soName = this->GetSOName(config, artifact);
+    if (!soName.empty()) {
+      return cmStrCat(fpath, soName);
+    }
+    // There is no soname, so fall back to the real name.
+    nameType = NameType::Real;
+  }
+
   // Add the full name of the target.
   switch (artifact) {
     case cmStateEnums::RuntimeBinaryArtifact:
-      if (realname) {
+      if (nameType == NameType::Real) {
         fpath += this->NormalGetRealName(config);
       } else {
         fpath +=
@@ -3944,7 +3965,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(
       }
       break;
     case cmStateEnums::ImportLibraryArtifact:
-      if (realname) {
+      if (nameType == NameType::Real) {
         fpath +=
           this->NormalGetRealName(config, cmStateEnums::ImportLibraryArtifact);
       } else {
@@ -3994,11 +4015,12 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   // Check for library version properties.
   cmValue version = this->GetProperty("VERSION");
   cmValue soversion = this->GetProperty("SOVERSION");
-  if (!this->HasSOName(config) ||
+  if ((!this->HasSOName(config) && !this->IsAIXSharedLibraryWithSymlinks()) ||
       this->Makefile->IsOn("CMAKE_PLATFORM_NO_VERSIONED_SONAME") ||
       this->IsFrameworkOnApple()) {
     // Versioning is supported only for shared libraries and modules,
-    // and then only when the platform supports an soname flag.
+    // and then only when the platform supports an soname flag,
+    // or on AIX when explicitly requested by AIX_SHARED_LIBRARY_SYMLINKS.
     version = nullptr;
     soversion = nullptr;
   }
@@ -6076,6 +6098,11 @@ bool cmGeneratorTarget::IsFrameworkOnApple() const
 bool cmGeneratorTarget::IsArchivedAIXSharedLibrary() const
 {
   return this->Target->IsArchivedAIXSharedLibrary();
+}
+
+bool cmGeneratorTarget::IsAIXSharedLibraryWithSymlinks() const
+{
+  return this->Target->IsAIXSharedLibraryWithSymlinks();
 }
 
 bool cmGeneratorTarget::IsImportedFrameworkFolderOnApple(

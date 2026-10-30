@@ -63,6 +63,8 @@ Entry const kEntries[] = {
     "Default value for AIX_EXPORT_ALL_SYMBOLS target property"_s },
   { "CMAKE_AIX_SHARED_LIBRARY_ARCHIVE"_s,
     "Enable or disable creation of shared library archives"_s },
+  { "CMAKE_AIX_SHARED_LIBRARY_SYMLINKS"_s,
+    "Enable or disable VERSION/SOVERSION names for AIX shared objects"_s },
   { "CMAKE_ANDROID_ANT_ADDITIONAL_OPTIONS"_s,
     "Default value for ANDROID_ANT_ADDITIONAL_OPTIONS target property"_s },
   { "CMAKE_ANDROID_API"_s,

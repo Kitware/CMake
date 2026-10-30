@@ -1,0 +1,13 @@
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+  # $<TARGET_FILE:...> is the unversioned name, so inspect the directory.
+  get_filename_component(dir "${nosla}" DIRECTORY)
+  set(real "${dir}/lib${name}.so.${version}")
+  if(NOT EXISTS "${real}" OR IS_SYMLINK "${real}")
+    message(FATAL_ERROR "nosla library real file missing or a symlink:\n ${real}")
+  endif()
+  foreach(link IN ITEMS "lib${name}.so.${soversion}" "lib${name}.so")
+    if(NOT IS_SYMLINK "${dir}/${link}")
+      message(FATAL_ERROR "nosla library symlink missing:\n ${dir}/${link}")
+    endif()
+  endforeach()
+endif()

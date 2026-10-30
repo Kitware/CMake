@@ -313,15 +313,23 @@ public:
   /** Get the library name for an imported interface library.  */
   std::string GetImportedLibName(std::string const& config) const;
 
+  /** Which file name to use for the last component of a target's path.  */
+  enum class NameType
+  {
+    Output, // The name that other build rules refer to, e.g. libfoo.so.
+    SOName, // The soname, e.g. libfoo.so.1.  Falls back to Real if empty.
+    Real,   // The name of the real file, e.g. libfoo.so.1.2.3.
+  };
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(
     std::string const& config,
     cmStateEnums::ArtifactType artifact = cmStateEnums::RuntimeBinaryArtifact,
-    bool realname = false) const;
+    NameType nameType = NameType::Output) const;
   std::string NormalGetFullPath(std::string const& config,
                                 cmStateEnums::ArtifactType artifact,
-                                bool realname) const;
+                                NameType nameType) const;
   std::string NormalGetRealName(std::string const& config,
                                 cmStateEnums::ArtifactType artifact =
                                   cmStateEnums::RuntimeBinaryArtifact) const;
@@ -1037,6 +1045,10 @@ public:
 
   /** Return whether this target is a shared library on AIX.  */
   bool IsArchivedAIXSharedLibrary() const;
+
+  /** Return whether this target is a plain AIX shared object with
+      VERSION/SOVERSION file names and symlinks.  */
+  bool IsAIXSharedLibraryWithSymlinks() const;
 
   /** Assembly types. The order of the values of this enum is relevant
       because of smaller/larger comparison operations! */

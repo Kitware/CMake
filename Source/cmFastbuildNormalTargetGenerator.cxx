@@ -443,7 +443,7 @@ void cmFastbuildNormalTargetGenerator::ApplyLWYUToLinkerCommand(
       std::move(args), " --source=",
       this->ConvertToFastbuildPath(this->GetGeneratorTarget()->GetFullPath(
         Config, cmStateEnums::RuntimeBinaryArtifact,
-        /*realname=*/true)));
+        cmGeneratorTarget::NameType::Real)));
 
     LogMessage("LWUY args: " + args);
     linkerNode.LinkerStampExe = cmSystemTools::GetCMakeCommand();
@@ -1880,8 +1880,9 @@ std::string cmFastbuildNormalTargetGenerator::GetImportedLoc(
     ? cmStateEnums::ImportLibraryArtifact
     : cmStateEnums::RuntimeBinaryArtifact;
 
-  std::string importedLoc = this->ConvertToFastbuildPath(
-    item.Target->GetFullPath(Config, artifact, true));
+  std::string importedLoc =
+    this->ConvertToFastbuildPath(item.Target->GetFullPath(
+      Config, artifact, cmGeneratorTarget::NameType::Real));
   LogMessage("ImportedGetLocation: " + importedLoc);
   return importedLoc;
 }
@@ -2359,7 +2360,7 @@ void cmFastbuildNormalTargetGenerator::GenerateLink(
       ConvertToFastbuildPath(GeneratorTarget->GetFullPath(Config));
     std::string targetOutputReal = ConvertToFastbuildPath(
       GeneratorTarget->GetFullPath(Config, cmStateEnums::RuntimeBinaryArtifact,
-                                   /*realname=*/true));
+                                   cmGeneratorTarget::NameType::Real));
     LogMessage("targetOutput: " + targetOutput);
     LogMessage("targetOutputReal: " + targetOutputReal);
 
@@ -2464,7 +2465,7 @@ cmFastbuildNormalTargetGenerator::GetSymlinkExecs() const
     ConvertToFastbuildPath(GeneratorTarget->GetFullPath(Config));
   std::string const targetOutputReal = ConvertToFastbuildPath(
     GeneratorTarget->GetFullPath(Config, cmStateEnums::RuntimeBinaryArtifact,
-                                 /*realname=*/true));
+                                 cmGeneratorTarget::NameType::Real));
   LogMessage("targetOutput: " + targetOutput);
 
   LogMessage("targetOutputReal: " + targetOutputReal);

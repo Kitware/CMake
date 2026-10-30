@@ -1,0 +1,31 @@
+CMP0227
+-------
+
+.. versionadded:: 4.6
+
+AIX shared objects are named with ``VERSION`` and ``SOVERSION``.
+
+On AIX, when :prop_tgt:`AIX_SHARED_LIBRARY_ARCHIVE` is disabled, a
+``SHARED`` library target is built as a plain shared object ``.so`` file.
+CMake 4.5 and below ignore the :prop_tgt:`VERSION` and :prop_tgt:`SOVERSION`
+target properties for such files because AIX shared objects have no
+builtin soname, so only a single ``lib<name>.so`` file is produced.
+CMake 4.6 added the :prop_tgt:`AIX_SHARED_LIBRARY_SYMLINKS` target property
+to name the shared object with :prop_tgt:`VERSION` and create
+:prop_tgt:`SOVERSION` and unversioned symlinks to it, as on other UNIX
+platforms.
+
+CMake 4.6 and above prefer, when :prop_tgt:`AIX_SHARED_LIBRARY_SYMLINKS`
+is not set, to enable versioned names and symlinks by default.
+This policy provides compatibility for projects that have not been updated.
+
+The ``OLD`` behavior for this policy is to disable versioned names and
+symlinks when :prop_tgt:`AIX_SHARED_LIBRARY_SYMLINKS` is not set.
+The ``NEW`` behavior for this policy is to enable versioned names and
+symlinks when :prop_tgt:`AIX_SHARED_LIBRARY_SYMLINKS` is not set.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

@@ -16,8 +16,10 @@ set(properties
   # Linking properties
   ## Platforms
   ### AIX
-  # Imported targets must set `AIX_SHARED_LIBRARY_ARCHIVE` explicitly.
+  # Imported targets must set `AIX_SHARED_LIBRARY_ARCHIVE` and
+  # `AIX_SHARED_LIBRARY_SYMLINKS`    explicitly.
   "AIX_SHARED_LIBRARY_ARCHIVE"    "OFF"     "<SAME>"
+  "AIX_SHARED_LIBRARY_SYMLINKS"   "OFF"      "<SAME>"
   )
 
 prepare_target_types(non_imported_shared_library
