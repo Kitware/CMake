@@ -184,7 +184,32 @@ int cmCPackAppImageGenerator::PackageFiles()
   }
 
   std::string const appRunFile = this->toplevel + "/AppRun";
-  if (cmSystemTools::PathExists(appRunFile)) {
+  if (cmValue const customAppRun =
+        this->GetOption("CPACK_APPIMAGE_APPRUN_FILE")) {
+    // User provided an AppRun file outside of the installed tree
+    if (!cmSystemTools::FileExists(*customAppRun, true)) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "CPACK_APPIMAGE_APPRUN_FILE does not point to a file: \""
+                      << *customAppRun << '"' << std::endl);
+      return 0;
+    }
+    if (cmSystemTools::PathExists(appRunFile)) {
+      cmCPackLogger(cmCPackLog::LOG_WARNING,
+                    "CPACK_APPIMAGE_APPRUN_FILE overrides the installed "
+                    "AppRun file: \""
+                      << appRunFile << '"' << std::endl);
+    }
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                  cmStrCat("Using AppRun file: \"", *customAppRun, '"')
+                    << std::endl);
+    auto status = cmSystemTools::CopyFileAlways(*customAppRun, appRunFile);
+    if (!status.IsSuccess()) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error copying AppRun file: " << status.GetString()
+                                                  << std::endl);
+      return 0;
+    }
+  } else if (cmSystemTools::PathExists(appRunFile)) {
     // User provided an AppRun file
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   cmStrCat("Found AppRun file: \"", appRunFile, '"')
@@ -312,7 +337,10 @@ cm::optional<std::string> cmCPackAppImageGenerator::FindFile(
   std::string const& filename) const
 {
   for (std::string const& file : this->files) {
-    if (cmSystemTools::GetFilenameName(file) == filename) {
+    // The list of files also contains directories, which could share the
+    // name we are looking for (e.g. "include/app" and "bin/app")
+    if (cmSystemTools::GetFilenameName(file) == filename &&
+        !cmSystemTools::FileIsDirectory(file)) {
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found file:" << file << std::endl);
       return file;
     }

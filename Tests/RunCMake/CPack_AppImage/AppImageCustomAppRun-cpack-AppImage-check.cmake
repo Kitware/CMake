@@ -1,0 +1,13 @@
+if(NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/GeneratorTest-1.2.3-Linux.AppImage")
+  set(RunCMake_TEST_FAILED "AppImage package not generated")
+  return()
+endif()
+
+set(appRun "${RunCMake_TEST_BINARY_DIR}/_CPack_Packages/Linux/AppImage/GeneratorTest-1.2.3-Linux/AppRun")
+file(READ "${appRun}" actual)
+file(READ "${RunCMake_SOURCE_DIR}/../RunCPack/AppImageUsrPrefix/AppRun" expected)
+if(NOT actual STREQUAL expected)
+  set(RunCMake_TEST_FAILED "AppRun does not match CPACK_APPIMAGE_APPRUN_FILE:\n${actual}")
+elseif(NOT IS_EXECUTABLE "${appRun}")
+  set(RunCMake_TEST_FAILED "AppRun is not executable")
+endif()
