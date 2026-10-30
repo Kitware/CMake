@@ -186,8 +186,8 @@ int main(int argc, char const* const* argv)
   clear();
   touchwin(stdscr);
   endwin();
-  delete cmCursesForm::CurrentForm;
   cmCursesForm::CurrentForm = nullptr;
+  delete myform;
 
   std::cout << std::endl << std::endl;
 

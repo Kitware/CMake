@@ -74,6 +74,13 @@ void cmCursesMainForm::InitializeUI()
   // Hide the cursor by default
   curs_set(0);
 
+  // Free the form before destroying the fields it references
+  if (this->Form) {
+    unpost_form(this->Form);
+    free_form(this->Form);
+    this->Form = nullptr;
+  }
+
   // Create a vector of cmCursesCacheEntryComposite's
   // which contain labels, entries and new entry markers
   std::vector<cmCursesCacheEntryComposite> newEntries;
@@ -519,14 +526,15 @@ int cmCursesMainForm::Configure(int noconfigure)
     if (cmSystemTools::GetErrorOccurredFlag()) {
       title = "Configure failed with the following output";
     }
-    cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
+    cmCursesLongMessageForm msgs(
       this->Outputs, title,
       cmCursesLongMessageForm::ScrollBehavior::ScrollDown);
     // reset error condition
     cmSystemTools::ResetErrorOccurredFlag();
-    CurrentForm = msgs;
-    msgs->Render(1, 1, xx, yy);
-    msgs->HandleInput();
+    CurrentForm = &msgs;
+    msgs.Render(1, 1, xx, yy);
+    msgs.HandleInput();
+    CurrentForm = this;
     // If they typed the wrong source directory, we report
     // an error and exit
     if (retVal == -2) {
@@ -574,12 +582,13 @@ int cmCursesMainForm::Generate()
     if (cmSystemTools::GetErrorOccurredFlag()) {
       title = "Generate failed with the following output";
     }
-    cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
+    cmCursesLongMessageForm msgs(
       this->Outputs, title,
       cmCursesLongMessageForm::ScrollBehavior::ScrollDown);
-    CurrentForm = msgs;
-    msgs->Render(1, 1, xx, yy);
-    msgs->HandleInput();
+    CurrentForm = &msgs;
+    msgs.Render(1, 1, xx, yy);
+    msgs.HandleInput();
+    CurrentForm = this;
     // If they typed the wrong source directory, we report
     // an error and exit
     if (retVal == -2) {
@@ -620,6 +629,12 @@ void cmCursesMainForm::RemoveEntry(char const* value)
 
   if (removeIt != this->Entries.end()) {
     this->CMakeInstance->UnwatchUnusedCli(value);
+    // Free the form before destroying the fields it references
+    if (this->Form) {
+      unpost_form(this->Form);
+      free_form(this->Form);
+      this->Form = nullptr;
+    }
     this->Entries.erase(removeIt);
   }
 }
@@ -861,12 +876,12 @@ void cmCursesMainForm::HandleInput()
           this->HelpMessage[1] = "";
         }
 
-        cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
+        cmCursesLongMessageForm msgs(
           this->HelpMessage, "Help",
           cmCursesLongMessageForm::ScrollBehavior::NoScroll);
-        CurrentForm = msgs;
-        msgs->Render(1, 1, x, y);
-        msgs->HandleInput();
+        CurrentForm = &msgs;
+        msgs.Render(1, 1, x, y);
+        msgs.HandleInput();
         CurrentForm = this;
         this->Render(1, 1, x, y);
         set_current_field(this->Form, cur);
@@ -874,12 +889,12 @@ void cmCursesMainForm::HandleInput()
       // display last errors
       else if (key == 'l') {
         getmaxyx(stdscr, y, x);
-        cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
+        cmCursesLongMessageForm msgs(
           this->Outputs, "CMake produced the following output",
           cmCursesLongMessageForm::ScrollBehavior::NoScroll);
-        CurrentForm = msgs;
-        msgs->Render(1, 1, x, y);
-        msgs->HandleInput();
+        CurrentForm = &msgs;
+        msgs.Render(1, 1, x, y);
+        msgs.HandleInput();
         CurrentForm = this;
         this->Render(1, 1, x, y);
       } else if (key == '/') {
