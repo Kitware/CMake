@@ -37,6 +37,7 @@ run_cmake(VersionLimit1)
 run_cmake(VersionLimit2)
 run_cmake(TransitiveVersion)
 run_cmake(CustomVersion)
+run_cmake(InvalidVersion)
 
 # Metadata Tests
 run_cmake(License)

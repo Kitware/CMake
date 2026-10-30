@@ -15,6 +15,7 @@
 #include <cm3p/json/version.h>
 
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 
 #include "cmCxxModuleMetadata.h"
 #include "cmExecutionStatus.h"
@@ -437,11 +438,10 @@ cm::optional<cmPackageInfoReader::Pep440Version> ParseSimpleVersion(
     }
 
     // Extract the part as a number.
-    cm::string_view const part = remnant.substr(0, n);
-    std::string::size_type const l = part.size();
-    std::string::size_type p;
-    unsigned long const value = std::stoul(std::string{ part }, &p);
-    if (p != l || value > std::numeric_limits<unsigned>::max()) {
+    unsigned long value;
+    std::string const part = std::string{ remnant.substr(0, n) };
+    if (!cmsysString_isdigit(part[0]) || !cmStrToULong(part, &value) ||
+        value > std::numeric_limits<unsigned>::max()) {
       // The part was not a valid number or is too big.
       return cm::nullopt;
     }
