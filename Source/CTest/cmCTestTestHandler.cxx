@@ -2777,7 +2777,7 @@ bool cmCTestTestHandler::WriteJUnitXML()
   cmTimestamp cmts;
   xml.Attribute("timestamp",
                 cmts.CreateTimestampFromTimeT(start_test_time_t,
-                                              "%Y-%m-%dT%H:%M:%S", false));
+                                              "%Y-%m-%dT%H:%M:%SZ", true));
 
   // Write <testcase> elements.
   for (cmCTestTestResult const& result : resultsSet) {
