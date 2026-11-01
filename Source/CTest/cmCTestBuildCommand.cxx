@@ -139,7 +139,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       presetsGraph.ResolvePreset(effectivePreset, presetsGraph.BuildPresets);
     auto resolveError = cmCMakePresetsGraph::FormatPresetError<BuildPreset>(
       resolveResult.StatusCode, resolveResult.ErrorPresetName,
-      sourceDirectory);
+      resolveResult.Suggestion, sourceDirectory);
     if (resolveError) {
       status.SetError(*resolveError);
       return nullptr;

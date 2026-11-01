@@ -313,9 +313,9 @@ int main(int argc, char const* const* argv)
     auto resolveResult = presetsGraph.ResolvePreset(
       presetsArgs.PresetName, presetsGraph.PackagePresets);
     auto resolveError = cmCMakePresetsGraph::FormatPresetError<
-      cmCMakePresetsGraph::PackagePreset>(resolveResult.StatusCode,
-                                          resolveResult.ErrorPresetName,
-                                          workingDirectory);
+      cmCMakePresetsGraph::PackagePreset>(
+      resolveResult.StatusCode, resolveResult.ErrorPresetName,
+      resolveResult.Suggestion, workingDirectory);
     if (resolveError) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR, *resolveError << "\n");
       presetsGraph.PrintPackagePresetList(

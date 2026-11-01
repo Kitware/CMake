@@ -833,7 +833,7 @@ int cmCTest::ProcessSteps()
           cmCMakePresetsGraph::FormatPresetError<
             cmCMakePresetsGraph::ConfigurePreset>(
             resolveResult.StatusCode, resolveResult.ErrorPresetName,
-            sourceDir);
+            resolveResult.Suggestion, sourceDir);
         if (resolveError) {
           cmCTestLog(this, ERROR_MESSAGE, *resolveError, '\n');
           return 12;
@@ -1660,7 +1660,7 @@ bool cmCTest::SetArgsFromPreset(cmCMakePresetsArgs const& args)
   auto resolveError =
     cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::TestPreset>(
       resolveResult.StatusCode, resolveResult.ErrorPresetName,
-      workingDirectory);
+      resolveResult.Suggestion, workingDirectory);
   if (resolveError) {
     cmSystemTools::Error(*resolveError);
     cmake cm(cmState::Role::CTest);

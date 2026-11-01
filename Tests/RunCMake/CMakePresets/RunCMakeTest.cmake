@@ -350,6 +350,9 @@ endif()
 
 # Test bad command line arguments
 run_cmake_presets(NoSuchPreset)
+set(CMakePresets_NO_PRESET 1)
+run_cmake_presets(NoSuchPresetDidYouMean --preset=GoodNoArg)
+unset(CMakePresets_NO_PRESET)
 run_cmake_presets(NoPresetArgument --preset)
 run_cmake_presets(NoPresetArgumentEq --preset= -DA=B)
 run_cmake_presets(UseHiddenPreset)
