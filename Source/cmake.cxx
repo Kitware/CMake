@@ -4462,39 +4462,18 @@ int cmake::Workflow(cmCMakePresetsWorkflowArgs const& args)
     return 0;
   }
 
-  auto presetPair = settingsFile.WorkflowPresets.find(args.PresetName);
-  if (presetPair == settingsFile.WorkflowPresets.end()) {
-    cmSystemTools::Error(cmStrCat("No such workflow preset in ",
-                                  this->GetHomeDirectory(), ": \"",
-                                  args.PresetName, '"'));
+  auto resolveResult =
+    settingsFile.ResolvePreset(args.PresetName, settingsFile.WorkflowPresets);
+  auto resolveError = cmCMakePresetsGraph::FormatPresetError<
+    cmCMakePresetsGraph::WorkflowPreset>(resolveResult.StatusCode,
+                                         resolveResult.ErrorPresetName,
+                                         this->GetHomeDirectory());
+  if (resolveError) {
+    cmSystemTools::Error(*resolveError);
     settingsFile.PrintWorkflowPresetList();
     return 1;
   }
-
-  if (presetPair->second.Unexpanded.Hidden) {
-    cmSystemTools::Error(cmStrCat("Cannot use hidden workflow preset in ",
-                                  this->GetHomeDirectory(), ": \"",
-                                  args.PresetName, '"'));
-    settingsFile.PrintWorkflowPresetList();
-    return 1;
-  }
-
-  auto const& expandedPreset = presetPair->second.Expanded;
-  if (!expandedPreset) {
-    cmSystemTools::Error(cmStrCat("Could not evaluate workflow preset \"",
-                                  args.PresetName,
-                                  "\": Invalid macro expansion"));
-    settingsFile.PrintWorkflowPresetList();
-    return 1;
-  }
-
-  if (!expandedPreset->ConditionResult) {
-    cmSystemTools::Error(cmStrCat("Cannot use disabled workflow preset in ",
-                                  this->GetHomeDirectory(), ": \"",
-                                  args.PresetName, '"'));
-    settingsFile.PrintWorkflowPresetList();
-    return 1;
-  }
+  auto const* expandedPreset = resolveResult.Preset;
 
   struct CalculatedStep
   {

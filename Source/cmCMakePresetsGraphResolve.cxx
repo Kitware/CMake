@@ -72,6 +72,13 @@ cmCMakePresetsGraph::ResolvePreset(
   std::map<std::string, PresetPair<cmCMakePresetsGraph::PackagePreset>> const&)
   const;
 
+template cmCMakePresetsGraph::PresetResolveResult<
+  cmCMakePresetsGraph::WorkflowPreset>
+cmCMakePresetsGraph::ResolvePreset(
+  std::string const&,
+  std::map<std::string,
+           PresetPair<cmCMakePresetsGraph::WorkflowPreset>> const&) const;
+
 template <class T>
 cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError(
   PresetResolveStatus status, std::string const& errorPresetName,
@@ -113,4 +120,8 @@ cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::TestPreset>(
 
 template cm::optional<std::string>
 cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::PackagePreset>(
+  PresetResolveStatus, std::string const&, std::string const&);
+
+template cm::optional<std::string>
+cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::WorkflowPreset>(
   PresetResolveStatus, std::string const&, std::string const&);
