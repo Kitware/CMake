@@ -7,6 +7,7 @@ run_cmake(EmptyInsert-1)
 
 run_cmake(NoArguments)
 run_cmake(InvalidSubcommand)
+run_cmake(InvalidSubcommandDidYouMean)
 
 run_cmake(FILTER-REGEX-InvalidRegex)
 run_cmake(GET-InvalidIndex)
