@@ -1150,6 +1150,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     vars.insert("CMAKE_SYCL_DEVICE_TARGETS");
     vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_WATCOM_RUNTIME_LIBRARY"_s);
+    vars.emplace("CMAKE_EMBT_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_MSVC_DEBUG_INFORMATION_FORMAT"_s);
     vars.emplace("CMAKE_MSVC_RUNTIME_CHECKS"_s);
     vars.emplace("CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS"_s);

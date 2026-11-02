@@ -51,6 +51,7 @@ add_custom_target(testbundleutils1_test  ALL
   "-DMODULE=$<TARGET_FILE:module1>"
   "-DINPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
   "-DOUTPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/testdir1"
+  "-DCMAKE_OBJDUMP=${CMAKE_OBJDUMP}"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/bundleutils.cmake"
   DEPENDS testbundleutils1 module1
   )
@@ -82,6 +83,7 @@ add_custom_target(testbundleutils2_test  ALL
   "-DMODULE=$<TARGET_FILE:module2>"
   "-DINPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
   "-DOUTPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/testdir2"
+  "-DCMAKE_OBJDUMP=${CMAKE_OBJDUMP}"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/bundleutils.cmake"
   DEPENDS testbundleutils1 module2
   )

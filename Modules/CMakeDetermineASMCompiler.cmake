@@ -43,9 +43,9 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
       else()
         # List all default C and CXX compilers
         set(CMAKE_ASM_COMPILER_LIST
-             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc xlc
+             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc bcc64x xlc
              ${_CMAKE_ASM_MAYBE_CL}
-          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ xlC)
+          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ bcc64x xlC)
         unset(_CMAKE_ASM_MAYBE_CL)
         unset(_CMAKE_ASM_REGEX_CL)
         unset(_CMAKE_ASM_REGEX_MSVC)

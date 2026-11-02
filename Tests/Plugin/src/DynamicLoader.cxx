@@ -111,7 +111,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
   DynamicLoader::LibraryHandle lib, std::string const& sym)
 {
   void* result;
-#  if defined(__BORLANDC__) || defined(__WATCOMC__)
+#  if (defined(__BORLANDC__) && !defined(_WIN64)) || defined(__WATCOMC__)
   // Need to prepend symbols with '_'
   std::string ssym = '_' + sym;
   char const* rsym = ssym.c_str();

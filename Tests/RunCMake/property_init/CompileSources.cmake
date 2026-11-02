@@ -30,6 +30,8 @@ set(properties
   "VS_JUST_MY_CODE_DEBUGGING"               "ON"                "<SAME>"
   ### OpenWatcom
   "WATCOM_RUNTIME_LIBRARY"                  "MultiThreaded"     "<SAME>"
+  ### Embarcadero
+  "EMBT_RUNTIME_LIBRARY"                    "Dynamic"           "<SAME>"
   ## Language
   ### CUDA
   "CUDA_SEPARABLE_COMPILATION"              "ON"                "<SAME>"

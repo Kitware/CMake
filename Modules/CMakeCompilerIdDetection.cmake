@@ -47,6 +47,7 @@ function(compiler_id_detection outvar lang)
       IntelLLVM
       DPClang
       PathScale
+      EMBTClang
       Embarcadero
       Borland
       Watcom

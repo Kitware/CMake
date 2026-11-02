@@ -2143,6 +2143,10 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(WatcomRuntimeLibrary)
   endif()
 
+  if(CMAKE_C_COMPILER_ID MATCHES "EMBTClang" AND WIN32)
+    ADD_TEST_MACRO(EMBTRuntimeLibrary)
+  endif()
+
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
   if("${CMAKE_GENERATOR}" MATCHES "^Ninja$|Makefile|FASTBuild")

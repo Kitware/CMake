@@ -1,5 +1,5 @@
 
-set(_compiler_id_pp_test "defined(__BORLANDC__) && defined(__CODEGEARC_VERSION__)")
+set(_compiler_id_pp_test "defined(__BORLANDC__) && defined(__CODEGEARC_VERSION__) && !defined(__MINGW64__)")
 
 set(_compiler_id_version_compute "
 # define @PREFIX@COMPILER_VERSION_MAJOR @MACRO_HEX@(__CODEGEARC_VERSION__>>24 & 0x00FF)

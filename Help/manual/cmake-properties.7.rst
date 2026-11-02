@@ -254,6 +254,7 @@ Properties on Targets
    /prop_tgt/DOTNET_SDK
    /prop_tgt/DOTNET_TARGET_FRAMEWORK
    /prop_tgt/DOTNET_TARGET_FRAMEWORK_VERSION
+   /prop_tgt/EMBT_RUNTIME_LIBRARY
    /prop_tgt/EchoString
    /prop_tgt/ENABLE_EXPORTS
    /prop_tgt/EXCLUDE_FROM_ALL
