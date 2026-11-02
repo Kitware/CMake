@@ -225,12 +225,16 @@ if(CMAKE_BINARY_DIR)
   # if a toolchain file is used, it needs to be included in the configured file,
   # so settings done there are also available if they don't go in the cache and in try_compile()
   set(INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED)
-  if(CMAKE_TOOLCHAIN_FILE)
+  if(DEFINED CMAKE_TOOLCHAIN_FILE)
     string(CONCAT INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED
       "set(_CMAKE_INPUT_TOOLCHAIN_FILE [==[${_CMAKE_INPUT_TOOLCHAIN_FILE}]==])\n"
-      "set(_CMAKE_SYSTEM_TOOLCHAIN_FILE \"${CMAKE_TOOLCHAIN_FILE}\")\n"
-      "include(\"\${_CMAKE_SYSTEM_TOOLCHAIN_FILE}\")"
     )
+    if(_INCLUDED_TOOLCHAIN_FILE)
+      string(APPEND INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED
+        "set(_CMAKE_SYSTEM_TOOLCHAIN_FILE \"${CMAKE_TOOLCHAIN_FILE}\")\n"
+        "include(\"\${_CMAKE_SYSTEM_TOOLCHAIN_FILE}\")"
+      )
+    endif()
   endif()
 
   # configure variables set in this file for fast reload, the template file is defined at the top of this file

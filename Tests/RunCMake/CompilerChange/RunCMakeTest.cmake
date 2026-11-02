@@ -45,6 +45,17 @@ if(UNIX AND "${RunCMake_GENERATOR}" MATCHES "Unix Makefiles|Ninja|FASTBuild")
   endblock()
 endif()
 
+# Running with empty toolchain argument does not trigger reconfigure
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ToolchainEmpty-build)
+  set(RunCMake-stdout-file
+    ${RunCMake_SOURCE_DIR}/ToolchainEmpty-stdout.txt
+  )
+  run_cmake_with_options(ToolchainEmpty-step1 "-DCMAKE_TOOLCHAIN_FILE=")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake(ToolchainEmpty-step2)
+endblock()
+
 # Set up "toolchain" files
 file(WRITE "${RunCMake_BINARY_DIR}/foo.cmake" "set(toolchain_var foo)\n")
 file(WRITE "${RunCMake_BINARY_DIR}/bar.cmake" "set(toolchain_var bar)\n")
