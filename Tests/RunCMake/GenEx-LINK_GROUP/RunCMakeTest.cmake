@@ -29,6 +29,7 @@ run_cmake(nested-incompatible-features2)
 run_cmake(circular-dependencies1)
 run_cmake(circular-dependencies2)
 run_cmake(only-targets)
+run_cmake(concatenated-group-begin)
 
 # usage of LINK_LIBRARY with LINK_GROUP
 run_cmake(incompatible-library-features1)
