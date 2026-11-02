@@ -58,7 +58,7 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_valgrind")
     )
 endif()
 
-if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "^fedora45_makefiles")
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "^fedora45_(makefiles|listfile_coverage)")
   #FIXME(#28215): FindHDF5 module and/or tests need updates for Fedora 45+.
   list(APPEND test_exclusions
     "^FindHDF5.Serial-Wrapper$"

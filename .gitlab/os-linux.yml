@@ -110,6 +110,17 @@
         CMAKE_CI_TEST_TIMEOUT: "1500"
         CMAKE_CI_NO_INSTALL: 1
 
+.fedora45_listfile_coverage:
+    extends: .fedora45
+
+    variables:
+        # Build like the Makefiles job, whose tests run here.
+        CMAKE_GENERATOR: "Unix Makefiles"
+        CMAKE_CONFIGURATION: fedora45_listfile_coverage
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_TEST_TIMEOUT: "1500"
+        CMAKE_CI_NO_INSTALL: 1
+
 .fedora45_bullseye_coverage:
     extends: .fedora45
     environment:
@@ -834,7 +845,7 @@
     script:
         - *before_script_linux
         - .gitlab/ci/pre_test.sh
-        - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake"
+        - "$LAUNCHER ${CMAKE_CI_CTEST_COMMAND:-ctest} --output-on-failure -V -S .gitlab/ci/ctest_test.cmake"
 
     interruptible: true
 
@@ -852,7 +863,7 @@
 
     script:
         - *before_script_linux
-        - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_coverage.cmake"
+        - "$LAUNCHER ${CMAKE_CI_CTEST_COMMAND:-ctest} --output-on-failure -V -S .gitlab/ci/ctest_coverage.cmake"
     coverage: '/Percentage Coverage: \d+.\d+%/'
 
     interruptible: true
