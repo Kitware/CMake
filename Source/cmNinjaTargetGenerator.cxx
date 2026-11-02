@@ -614,6 +614,11 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(
 
     this->EnsureParentDirectoryExists(pdbPath);
     this->EnsureParentDirectoryExists(compilePdbPath);
+    // A trailing separator makes /Fd a directory, whose full path is needed.
+    if (!compilePdbPath.empty() &&
+        (compilePdbPath.back() == '/' || compilePdbPath.back() == '\\')) {
+      this->EnsureDirectoryExists(compilePdbPath);
+    }
     return true;
   }
   return false;
