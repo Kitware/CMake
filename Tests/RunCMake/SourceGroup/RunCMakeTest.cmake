@@ -2,6 +2,7 @@
 include(RunCMake)
 
 run_cmake(MixedSignatures)
+run_cmake(EmptyTREE)
 run_cmake(WrongRegex)
 run_cmake(IgnoredKeywords)
 run_cmake(MissingFILE_SETS)

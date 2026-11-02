@@ -133,7 +133,7 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
     cm::optional<std::string> Regex;
     cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>>
       FileSets;
-    cm::optional<ArgumentParser::NonEmpty<std::string>> Tree;
+    cm::optional<ArgumentParser::MaybeEmpty<std::string>> Tree;
     cm::optional<ArgumentParser::MaybeEmpty<std::string>> Prefix;
 
     std::map<std::string, std::set<std::string>> FileSetsPerTarget;
