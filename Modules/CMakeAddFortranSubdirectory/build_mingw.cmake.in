@@ -8,4 +8,6 @@ foreach(byproduct IN LISTS byproducts)
     set(clean_first --clean-first)
   endif()
 endforeach()
-execute_process(COMMAND "@CMAKE_COMMAND@" --build . ${clean_first})
+execute_process(
+  COMMAND "@CMAKE_COMMAND@" --build . ${clean_first}
+  COMMAND_ERROR_IS_FATAL ANY)

@@ -6,4 +6,5 @@ execute_process(
   -DBUILD_SHARED_LIBS=ON
   -DCMAKE_GNUtoMS=ON
   ${CMAKE_COMMAND_LINE}
-  "@source_dir@")
+  "@source_dir@"
+  COMMAND_ERROR_IS_FATAL ANY)
