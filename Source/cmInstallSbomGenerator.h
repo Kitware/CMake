@@ -11,30 +11,29 @@
 #include <vector>
 
 #include "cmInstallGenerator.h"
-#include "cmSbomArguments.h"
 
 class cmDiagnosticContext;
 class cmExportSet;
 class cmGeneratorTarget;
 class cmInstallSbomBuilder;
 class cmLocalGenerator;
+class cmSbomArguments;
 
 /** \class cmInstallSbomGenerator
  * \brief Generate installation rules for SBOM files.
  *
- * Thin cmInstallGenerator subclass that owns a cmInstallSbomBuilder.
- * At generate time it writes the SBOM into a temporary file in the build tree;
+ * At generate time it builds each configuration's SBOM in a temporary file;
  * the cmake_install.cmake script then copies that file to the install
  * destination.
  */
 class cmInstallSbomGenerator : public cmInstallGenerator
 {
 public:
-  cmInstallSbomGenerator(std::vector<cmExportSet*> exportSets,
+  cmInstallSbomGenerator(std::vector<cmExportSet*> const& exportSets,
                          std::string destination, std::string filePermissions,
                          std::vector<std::string> const& configurations,
                          std::string component, MessageLevel message,
-                         bool excludeFromAll, cmSbomArguments args,
+                         bool excludeFromAll, cmSbomArguments const& args,
                          cmDiagnosticContext context);
   cmInstallSbomGenerator(cmInstallSbomGenerator const&) = delete;
   ~cmInstallSbomGenerator() override;
@@ -64,7 +63,6 @@ private:
   std::string const FilePermissions;
   std::string const SbomFileName;
   std::string const SbomFilePath;
-  cmSbomArguments::SbomFormat SbomFormat;
-  cmLocalGenerator* LocalGenerator = nullptr;
+  cmLocalGenerator const* LocalGenerator = nullptr;
   std::unique_ptr<cmInstallSbomBuilder> Builder;
 };

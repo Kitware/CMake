@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmBuildSbomGenerator.h"
 
+#include "cmBuildSbomBuilder.h"
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 
@@ -15,5 +16,5 @@ bool cmBuildSbomGenerator::GenerateForBuild(std::string const& config)
   cmGeneratedFileStream os(cmStrCat(this->OutputFile, '-',
                                     config.empty() ? "noconfig" : config,
                                     ".spdx.json"));
-  return this->Builder->Generate(os, config);
+  return this->GenerateForBuild(os, config);
 }

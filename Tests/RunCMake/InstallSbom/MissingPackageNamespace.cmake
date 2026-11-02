@@ -1,7 +1,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/../Sbom/MissingPackageNamespace.cmake)
 
 install(SBOM test_targets
-  VERSION "1.0.2"
+  VERSION 1.0.2
   EXPORTS test_targets
   DESTINATION .
 )

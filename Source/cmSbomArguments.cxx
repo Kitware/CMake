@@ -8,41 +8,21 @@
 #include "cmGeneratorExpression.h"
 #include "cmStringAlgorithms.h"
 
-struct SbomFormatPattern
+namespace {
+
+struct SbomFormatEntry
 {
   cm::string_view Name;
-  cm::string_view Alias;
-  cmSbomArguments::SbomFormat Id;
+  cmSbomArguments::SbomFormat Format;
 };
 
-static SbomFormatPattern SbomPatterns[] = {
-  { "spdx-3.0+json", "spdx", cmSbomArguments::SbomFormat::SPDX_3_0_JSON },
+SbomFormatEntry const SbomFormats[] = {
+  { "spdx"_s, cmSbomArguments::SbomFormat::SPDX_3_0_JSON },
+  { "spdx-3.0+json"_s, cmSbomArguments::SbomFormat::SPDX_3_0_JSON },
+  { "spdx-3.0.1+json"_s, cmSbomArguments::SbomFormat::SPDX_3_0_JSON },
 };
 
-cmSbomArguments::SbomFormat ParseSbomFormat(std::string const& input)
-{
-  if (input.empty()) {
-    return cmSbomArguments::SbomFormat::SPDX_3_0_JSON;
-  }
-
-  cm::string_view s(input);
-  for (auto const& p : SbomPatterns) {
-    if (s == p.Name || (!p.Alias.empty() && s == p.Alias)) {
-      return p.Id;
-    }
-  }
-  return cmSbomArguments::SbomFormat::NONE;
-}
-
-std::string GetSbomFileExtension(cmSbomArguments::SbomFormat id)
-{
-  switch (id) {
-    case cmSbomArguments::SbomFormat::SPDX_3_0_JSON:
-      return ".spdx.json";
-    default:
-      return "";
-  }
-}
+} // namespace
 
 template void cmSbomArguments::Bind<void>(cmArgumentParser<void>&,
                                           cmSbomArguments*);
@@ -58,12 +38,10 @@ bool cmSbomArguments::Check(cmExecutionStatus& status) const
     }
   }
 
-  if (!this->Format.empty()) {
-    if (this->GetFormat() == SbomFormat::NONE) {
-      status.SetError(
-        cmStrCat(R"(SBOM given invalid format ")"_s, this->Format, R"(".)"_s));
-      return false;
-    }
+  if (this->GetFormat() == SbomFormat::NONE) {
+    status.SetError(
+      cmStrCat(R"(SBOM given invalid format ")"_s, this->Format, R"(".)"_s));
+    return false;
   }
 
   if (!this->License.empty()) {
@@ -91,6 +69,11 @@ std::string cmSbomArguments::GetPackageName() const
   return this->PackageName;
 }
 
+std::string const& cmSbomArguments::GetDataLicense() const
+{
+  return this->DataLicense.empty() ? this->License : this->DataLicense;
+}
+
 std::string cmSbomArguments::GetDefaultDestination(
   std::string const& root) const
 {
@@ -105,5 +88,11 @@ cmSbomArguments::SbomFormat cmSbomArguments::GetFormat() const
   if (this->Format.empty()) {
     return SbomFormat::SPDX_3_0_JSON;
   }
-  return ParseSbomFormat(this->Format);
+
+  for (auto const& entry : SbomFormats) {
+    if (this->Format == entry.Name) {
+      return entry.Format;
+    }
+  }
+  return SbomFormat::NONE;
 }

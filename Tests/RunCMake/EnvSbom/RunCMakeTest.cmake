@@ -1,13 +1,13 @@
 include(RunCMake)
 
 set(common_test_options
-  "-DCMAKE_INSTALL_SBOM_FORMATS:STRING=spdx"
-  "-DCMAKE_INSTALL_LIBDIR=lib"
+  -DCMAKE_INSTALL_SBOM_FORMATS:STRING=spdx
+  -DCMAKE_INSTALL_LIBDIR=lib
 )
 
 function(run_cmake_error test)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
-  set(RunCMake_TEST_OPTIONS ${common_test_options})
+  set(RunCMake_TEST_OPTIONS ${common_test_options} ${ARGN})
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
   endif()
@@ -17,7 +17,7 @@ endfunction()
 function(run_cmake_install test)
   set(extra_options ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
-  set(RunCMake_TEST_INSTALL_DIR ${RunCMake_BINARY_DIR}/${test}-install)
+  set(RunCMake_TEST_INSTALL_DIR ${RunCMake_TEST_BINARY_DIR}/${test}-install)
   set(RunCMake_TEST_OPTIONS ${common_test_options} ${extra_options})
   list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_INSTALL_PREFIX=${RunCMake_TEST_INSTALL_DIR})
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -32,26 +32,50 @@ function(run_cmake_install test)
   run_cmake_command(${test}-install ${CMAKE_COMMAND} --install . --config Debug)
 endfunction()
 
-function(run_cmake_configure test)
+function(run_cmake_configure test config other_config)
   set(extra_options ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
   set(RunCMake_TEST_OPTIONS ${common_test_options} ${extra_options})
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    list(APPEND RunCMake_TEST_OPTIONS
+      "-DCMAKE_CONFIGURATION_TYPES=${config}\\;${other_config}")
+  else()
+    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=${config})
+  endif()
   run_cmake(${test})
 endfunction()
 
 
+run_cmake_install(ProjectLicense)
 run_cmake_install(ApplicationTarget)
+run_cmake_install(InstallExportPlusSbomSameSet)
 run_cmake_install(InterfaceTarget)
 run_cmake_install(SharedTarget)
+run_cmake_install(Requirements)
+run_cmake_install(SbomNamespaceFallback)
+run_cmake_install(MultiSetSingleSbom)
+run_cmake_install(TargetInMultipleSets)
+run_cmake_install(EmptyNamespaceFallback -Wauthor)
 
+run_cmake_install(IgnoresInterfaceDirs)
 run_cmake_install(MissingPackageNamespace)
 run_cmake_install(ProjectMetadata)
+run_cmake_install(DefaultLicense)
+run_cmake_install(UnknownDependencies)
+run_cmake_install(NoProjectMetadata)
+run_cmake_install(UninstalledStaticLibrary)
 run_cmake_install(PartialCoverage)
+run_cmake_install(TransitiveDependencies)
+run_cmake_install(PrivateStaticDependency)
+run_cmake_install(PrivateBareLibrary)
 
-run_cmake_error(ReferencesNonExportedTarget)
+run_cmake_error(MultiNamespaceAmbiguity)
+run_cmake_error(MultiSetAmbiguity)
+run_cmake_error(DuplicateSbom)
 
-run_cmake_configure(Config)
-run_cmake_configure(ExplicitFormat -DCMAKE_INSTALL_SBOM_FORMATS=spdx-3.0+json)
-run_cmake_configure(InvalidFormat -DCMAKE_INSTALL_SBOM_FORMATS=JSON)
-run_cmake_configure(Genex)
-run_cmake_configure(ForbiddenGenex)
+run_cmake_configure(Config Debug Release)
+run_cmake_configure(ExplicitFormat Debug Release -DCMAKE_INSTALL_SBOM_FORMATS=spdx-3.0+json)
+run_cmake_configure(Genex BarConfig BazConfig)
+
+run_cmake_error(InvalidFormat -DCMAKE_INSTALL_SBOM_FORMATS=JSON)
+run_cmake_error(ForbiddenGenex)

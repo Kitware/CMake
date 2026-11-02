@@ -30,7 +30,7 @@ set(LIBB_BUILD_REQUIRES_EXPECTED [=[
   "description" : "Required Build-Time Libraries",
   "from" : "urn:libb#Package",
   "relationshipType" : "dependsOn",
-  "spdxId" : "urn:Shared#Relationship",
+  "spdxId" : "urn:libb#StaticRelationship",
   "to" :
   [
     "urn:liba#Package"
@@ -39,10 +39,13 @@ set(LIBB_BUILD_REQUIRES_EXPECTED [=[
 }
 ]=])
 
-string(JSON SPDX_DOCUMENT GET "${content}" "@graph" "1")
+string(JSON SPDX_DOCUMENT GET "${content}" @graph 1)
 expect_object("${SPDX_DOCUMENT}" SPDX_DOCUMENT_EXPECTED)
-expect_array("${SPDX_DOCUMENT}" 1 "rootElement")
-expect_object("${SPDX_DOCUMENT}" LIBB_EXPECTED "rootElement")
-expect_object("${SPDX_DOCUMENT}" LIBA_BARE_EXPECTED "element")
-string(JSON BUILD_REQUIRES GET "${content}" "@graph" "2")
+expect_array("${SPDX_DOCUMENT}" 1 rootElement)
+expect_object("${SPDX_DOCUMENT}" LIBB_EXPECTED rootElement)
+expect_object("${SPDX_DOCUMENT}" LIBA_BARE_EXPECTED element)
+expect_array("${SPDX_DOCUMENT}" 1 element)
+string(JSON BUILD_REQUIRES GET "${content}" @graph 2)
 expect_object("${BUILD_REQUIRES}" LIBB_BUILD_REQUIRES_EXPECTED)
+expect_array("${BUILD_REQUIRES}" 1 to)
+expect_array("${content}" 3 @graph)

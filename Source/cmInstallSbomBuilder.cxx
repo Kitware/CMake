@@ -2,27 +2,20 @@
    file LICENSE.rst or https://cmake.org/licensing for details. */
 #include "cmInstallSbomBuilder.h"
 
-#include <utility>
-
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
-#include "cmSbomArguments.h"
 
 cmInstallSbomBuilder::cmInstallSbomBuilder(
-  cmSbomArguments args, std::vector<cmExportSet*> exportSets,
-  cmLocalGenerator* lg)
-  : cmSbomBuilder(std::move(args), std::move(exportSets), lg)
+  cmSbomArguments const& args, std::vector<cmExportSet*> const& exportSets)
+  : cmSbomBuilder(args, exportSets)
 {
 }
 
 bool cmInstallSbomBuilder::Generate(std::ostream& os,
                                     std::string const& config)
 {
-  if (!this->LocalGenerator) {
-    return false;
-  }
   return this->GenerateForTargets(os, config,
                                   cmGeneratorExpression::InstallInterface);
 }
@@ -35,10 +28,10 @@ cmExportFileGenerator::ExportInfo cmInstallSbomBuilder::FindExportInfoFor(
     ->FindInstallExportInfo(target);
 }
 
-cmSbomBuilder::SbomInfo cmInstallSbomBuilder::FindSbomInfoFor(
+std::vector<std::string> cmInstallSbomBuilder::FindSbomPackagesFor(
   cmGeneratorTarget const* target) const
 {
   return target->GetLocalGenerator()
     ->GetGlobalGenerator()
-    ->FindInstallSbomInfo(target);
+    ->FindInstallSbomPackages(target);
 }

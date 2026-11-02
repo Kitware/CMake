@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <cm/type_traits>
@@ -265,6 +266,10 @@ private:
 template <typename T, typename U = cm::decay_t<T>>
 U* insert_back(std::vector<cmSbomObject>& vec, T&& obj) noexcept
 {
+  // Returned pointers must survive reallocation of the containing vector.
+  static_assert(
+    std::is_same<ObjectStorage::Model<U>, ObjectStorage::Heap<U>>::value,
+    "insert_back requires heap storage for stable addresses");
   vec.emplace_back(std::forward<U>(obj));
   return std::addressof(vec.back().CastUnchecked<U>());
 }

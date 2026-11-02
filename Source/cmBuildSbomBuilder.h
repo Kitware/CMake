@@ -12,7 +12,6 @@
 #include "cmSbomBuilder.h"
 
 class cmExportSet;
-class cmLocalGenerator;
 class cmSbomArguments;
 
 /** Build-tree SBOM (`export(SBOM ...)`).  Covers the targets in the
@@ -20,14 +19,14 @@ class cmSbomArguments;
 class cmBuildSbomBuilder final : public cmSbomBuilder
 {
 public:
-  cmBuildSbomBuilder(cmSbomArguments args,
-                     std::vector<cmExportSet*> exportSets,
-                     cmLocalGenerator* lg = nullptr);
+  cmBuildSbomBuilder(cmSbomArguments const& args,
+                     std::vector<cmExportSet*> const& exportSets);
 
   bool Generate(std::ostream& os, std::string const& config) override;
 
 protected:
   cmExportFileGenerator::ExportInfo FindExportInfoFor(
     cmGeneratorTarget const* target) const override;
-  SbomInfo FindSbomInfoFor(cmGeneratorTarget const* target) const override;
+  std::vector<std::string> FindSbomPackagesFor(
+    cmGeneratorTarget const* target) const override;
 };

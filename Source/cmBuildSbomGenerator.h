@@ -10,28 +10,27 @@
 #include <cm/memory>
 
 #include "cmBuildSbomBuilder.h"
-#include "cmSbomArguments.h"
+
 class cmExportSet;
 class cmGeneratorTarget;
 class cmLocalGenerator;
+class cmSbomArguments;
 
 /** \class cmBuildSbomGenerator
- * \brief Thin wrapper around cmBuildSbomBuilder for the build-tree SBOM case.
+ * \brief Generate build-tree SBOM files, one document per configuration.
  *
  * Stored on cmMakefile at configure time.  At generate time,
  * ComputeBuildFileGenerators() calls Compute(lg) to resolve export set
- * targets and supply the local generator - mirroring
- * cmExportBuildFileGenerator.
+ * targets for peer SBOM lookups before any documents are generated.
  */
 class cmBuildSbomGenerator
 {
 public:
-  cmBuildSbomGenerator(cmSbomArguments args,
-                       std::vector<cmExportSet*> exportSets,
+  cmBuildSbomGenerator(cmSbomArguments const& args,
+                       std::vector<cmExportSet*> const& exportSets,
                        std::string outputFile)
     : OutputFile(std::move(outputFile))
-    , Builder(cm::make_unique<cmBuildSbomBuilder>(std::move(args),
-                                                  std::move(exportSets)))
+    , Builder(cm::make_unique<cmBuildSbomBuilder>(args, exportSets))
   {
   }
 
@@ -60,6 +59,6 @@ public:
   bool GenerateForBuild(std::string const& config);
 
 private:
-  std::string OutputFile;
+  std::string const OutputFile;
   std::unique_ptr<cmBuildSbomBuilder> Builder;
 };

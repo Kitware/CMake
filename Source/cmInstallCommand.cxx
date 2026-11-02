@@ -2898,8 +2898,8 @@ bool HandleSbomMode(std::vector<std::string> const& args,
 
   // Create the SBOM install generator.
   auto sbomGen = cm::make_unique<cmInstallSbomGenerator>(
-    std::move(sets), dest, ica.GetPermissions(), ica.GetConfigurations(),
-    ica.GetComponent(), message, ica.GetExcludeFromAll(), std::move(arguments),
+    sets, std::move(dest), ica.GetPermissions(), ica.GetConfigurations(),
+    ica.GetComponent(), message, ica.GetExcludeFromAll(), arguments,
     helper.CaptureContext());
   cmInstallSbomGenerator const* rawPtr = sbomGen.get();
   helper.Makefile->AddInstallGenerator(std::move(sbomGen));
