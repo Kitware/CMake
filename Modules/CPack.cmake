@@ -930,6 +930,19 @@ elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
   _cpack_set_default(CPACK_INNOSETUP_ARCHITECTURE "x64")
 endif()
 
+# AppImage specific variables
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64)$")
+    _cpack_set_default(CPACK_APPIMAGE_ARCH "x86_64")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i386|i686|x86)$")
+    _cpack_set_default(CPACK_APPIMAGE_ARCH "i686")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+    _cpack_set_default(CPACK_APPIMAGE_ARCH "aarch64")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
+    _cpack_set_default(CPACK_APPIMAGE_ARCH "armhf")
+  endif()
+endif()
+
 # WiX specific variables
 _cpack_set_default(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
 if(NOT DEFINED CPACK_WIX_INSTALL_SCOPE)

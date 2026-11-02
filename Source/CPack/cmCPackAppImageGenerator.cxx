@@ -62,26 +62,6 @@ int cmCPackAppImageGenerator::InitializeInternal()
     this->SetOptionIfNotSet("CPACK_APPIMAGE_VERSION", packageVersion);
   }
 
-  if (!this->IsSet("CPACK_APPIMAGE_ARCH")) {
-    if (cmValue systemProcessor = this->GetOption("CMAKE_SYSTEM_PROCESSOR")) {
-      if (systemProcessor == "x86_64" || systemProcessor == "amd64") {
-        this->SetOption("CPACK_APPIMAGE_ARCH", "x86_64");
-      } else if (systemProcessor == "i386" || systemProcessor == "i686" ||
-                 systemProcessor == "x86") {
-        this->SetOption("CPACK_APPIMAGE_ARCH", "i686");
-      } else if (systemProcessor == "aarch64" || systemProcessor == "arm64") {
-        this->SetOption("CPACK_APPIMAGE_ARCH", "aarch64");
-      } else if (cmSystemTools::StringStartsWith(systemProcessor, "arm")) {
-        this->SetOption("CPACK_APPIMAGE_ARCH", "armhf");
-      } else {
-        cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                      "Could not transform CMAKE_SYSTEM_PROCESSOR, counting "
-                      "on appimagetool architecture detection."
-                        << std::endl);
-      }
-    }
-  }
-
   return Superclass::InitializeInternal();
 }
 

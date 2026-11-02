@@ -190,13 +190,19 @@ Variables Specific to CPack AppImage Generator
 
   .. versionadded:: 4.6
 
-  Needs to be set whenever :variable:`CMAKE_SYSTEM_PROCESSOR` is not transformed
-  to a proper architecture and ``appimagetool`` cannot automatically determine the
-  architecture of the binaries inside the AppDir to choose a suitable runtime
-  (e.g., when binaries for multiple architectures or just shell scripts are
-  contained in there).
+  Architecture of the AppImage, passed to ``appimagetool`` in the ``ARCH``
+  environment variable.  The :module:`CPack` module derives it from the
+  :variable:`CMAKE_SYSTEM_PROCESSOR` of the project, so it matches the target
+  when cross-compiling.  The supported values are ``x86_64``, ``i686``,
+  ``aarch64``, and ``armhf``.
 
-  :Default: CMAKE_SYSTEM_PROCESSOR
+  It needs to be set when the processor cannot be mapped to one of those
+  values and ``appimagetool`` cannot automatically determine the architecture
+  of the binaries inside the AppDir to choose a suitable runtime (e.g., when
+  binaries for multiple architectures or just shell scripts are contained in
+  there).
+
+  :Default: Derived from :variable:`CMAKE_SYSTEM_PROCESSOR` on Linux
 
 .. variable:: CPACK_APPIMAGE_VERSION
 
