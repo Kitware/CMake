@@ -55,7 +55,7 @@ Modify cmDependsJavaLexer.cxx:
 
 \" { BEGIN(string); }
 <string>\" { BEGIN(INITIAL); return jp_STRINGLITERAL; }
-<string>. {}
+<string>.|\n {}
 
 abstract { KEYWORD; return jp_ABSTRACT; }
 assert { KEYWORD; return jp_ASSERT; }
