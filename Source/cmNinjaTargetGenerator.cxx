@@ -766,7 +766,8 @@ std::string cmNinjaTargetGenerator::GetCompileTemplateVar(
   std::string const& lang) const
 {
   std::string cmdVar = cmStrCat("CMAKE_", lang, "_COMPILE_OBJECT");
-  if (!this->GetGeneratorTarget()->IsNormal()) {
+  if (!this->GetGeneratorTarget()->IsNormal() &&
+      !this->GeneratorTarget->Target->CxxModuleNeedsInterfaceObjects()) {
     std::string bmiCmdVar = cmStrCat("CMAKE_", lang, "_COMPILE_BMI");
     if (!this->GetMakefile()->GetDefinition(bmiCmdVar).IsEmpty()) {
       cmdVar = std::move(bmiCmdVar);
@@ -785,7 +786,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()).c_str();
   vars.Language = lang.c_str();
   vars.Source = "$in";
-  vars.Object = "$out";
+  vars.Object = this->GeneratorTarget->Target->CxxModuleNeedsInterfaceObjects()
+    ? "$OBJ_FILE"
+    : "$out";
   vars.Defines = "$DEFINES";
   vars.Includes = "$INCLUDES";
   vars.TargetPDB = "$TARGET_PDB";
@@ -1938,6 +1941,10 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
   std::string const bmiFileName =
     this->ConvertToNinjaPath(this->GetBmiFilePath(source, config));
   std::string const bmiFileDir = cmSystemTools::GetFilenamePath(bmiFileName);
+  std::string const modIntfObj =
+    this->GeneratorTarget->Target->CxxModuleNeedsInterfaceObjects()
+    ? this->ConvertToNinjaPath(this->GetObjectFilePath(source, config))
+    : std::string{};
 
   int const commandLineLengthLimit = this->ForceResponseFile() ? -1 : 0;
 
@@ -1986,10 +1993,15 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
       language, sourceFilePath, bmiDir, targetSupportDir, bmiFileName,
       bmiFileDir, vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
       vars["TARGET_COMPILE_PDB"], vars["TARGET_PDB"], config,
-      WithScanning::Yes);
+      WithScanning::Yes, modIntfObj);
   }
 
   bmiBuild.Outputs.push_back(bmiFileName);
+  if (!modIntfObj.empty()) {
+    bmiBuild.ImplicitOuts.push_back(modIntfObj);
+    vars["OBJ_FILE"] = this->ConvertToOutputFormatForShell(modIntfObj);
+    this->EnsureParentDirectoryExists(modIntfObj);
+  }
   bmiBuild.ExplicitDeps.push_back(sourceFilePath);
 
   std::vector<std::string> depList;
@@ -2585,11 +2597,11 @@ void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
 void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string const& language, std::string const& sourceFileName,
   std::string const& objectDir, std::string const& targetSupportDir,
-  std::string const& objectFileName, std::string const& objectFileDir,
+  std::string const& primaryOutput, std::string const& primaryOutputDir,
   std::string const& flags, std::string const& defines,
   std::string const& includes, std::string const& targetCompilePdb,
   std::string const& targetPdb, std::string const& outputConfig,
-  WithScanning withScanning)
+  WithScanning withScanning, std::string const& modIntfObj)
 {
   if (!this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS")) {
     return;
@@ -2625,19 +2637,21 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
       // `cmNinjaTargetGenerator::WriteObjectBuildStatement` to expect the
       // corresponding file path.
       cmSystemTools::ReplaceString(modmapFlags, "<MODULE_MAP_FILE>",
-                                   cmStrCat(objectFileName, ".modmap"));
+                                   cmStrCat(primaryOutput, ".modmap"));
       fullFlags = cmStrCat(std::move(fullFlags), ' ', modmapFlags);
     }
   }
 
   compileObjectVars.Source = escapedSourceFileName.c_str();
-  std::string escapedObjectFileName =
-    this->LocalGenerator->ConvertToOutputFormat(objectFileName,
+  std::string const& compileOutput =
+    modIntfObj.empty() ? primaryOutput : modIntfObj;
+  std::string escapedCompileOutput =
+    this->LocalGenerator->ConvertToOutputFormat(compileOutput,
                                                 cmOutputConverter::SHELL);
-  compileObjectVars.Object = escapedObjectFileName.c_str();
+  compileObjectVars.Object = escapedCompileOutput.c_str();
   compileObjectVars.ObjectDir = objectDir.c_str();
   compileObjectVars.TargetSupportDir = targetSupportDir.c_str();
-  compileObjectVars.ObjectFileDir = objectFileDir.c_str();
+  compileObjectVars.ObjectFileDir = primaryOutputDir.c_str();
   compileObjectVars.Flags = fullFlags.c_str();
   compileObjectVars.Defines = defines.c_str();
   compileObjectVars.Includes = includes.c_str();
@@ -2695,7 +2709,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     cmLocalNinjaGenerator::CommandLineContext::CompileCommands);
 
   this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine, sourceFileName,
-                                                   objectFileName);
+                                                   primaryOutput);
 }
 
 void cmNinjaTargetGenerator::ExportSwiftObjectCompileCommand(

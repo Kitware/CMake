@@ -714,6 +714,14 @@ void cmGeneratorTarget::GetObjectSources(
     this->Objects[it];
   }
 
+  if (this->Target->CxxModuleNeedsInterfaceObjects()) {
+    std::vector<cmSourceFile const*> bmiOnlySources;
+    this->GetCxxModuleSources(bmiOnlySources, config);
+    for (cmSourceFile const* sf : bmiOnlySources) {
+      this->Objects[sf];
+    }
+  }
+
   this->LocalGenerator->ComputeObjectFilenames(this->Objects, config, this);
   this->VisitedConfigsForObjects.insert(config);
 }
