@@ -106,6 +106,19 @@ bool cmCacheManager::LoadCache(std::string const& path, bool internal,
           }
           if (!this->ReadPropertyEntry(entryKey, e)) {
             e.Initialized = true;
+            // INTERNAL entries serialize persistent properties before the
+            // value.  Preserve properties from the uninitialized stub that
+            // those preceding property entries created.
+            auto const existing = this->Cache.find(entryKey);
+            if (existing != this->Cache.end() &&
+                !existing->second.Initialized) {
+              for (std::string const& prop :
+                   existing->second.GetPropertyList()) {
+                if (cmValue value = existing->second.GetProperty(prop)) {
+                  e.SetProperty(prop, *value);
+                }
+              }
+            }
             this->Cache[entryKey] = e;
           }
         }
