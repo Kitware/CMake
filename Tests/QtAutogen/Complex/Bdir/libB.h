@@ -19,4 +19,13 @@ private:
   LibA a;
 };
 
+// moc processes a class marked with a deprecation message only if the
+// generated export header shows it the compiler-specific spelling.
+class LIBB_DEPRECATED_EXPORT_MSG("use LibB") DeprecatedLibB : public QObject
+{
+  Q_OBJECT
+public:
+  explicit DeprecatedLibB(QObject* parent = 0);
+};
+
 #endif

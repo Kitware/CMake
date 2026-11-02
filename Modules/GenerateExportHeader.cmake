@@ -96,6 +96,22 @@ Generating Export Header
   * ``<MACRO>_DEPRECATED_NO_EXPORT``: Marks a deprecated symbol that should
     not be exported (internal and deprecated).
 
+  * ``<MACRO>_DEPRECATED_MSG(<message>)``,
+    ``<MACRO>_DEPRECATED_EXPORT_MSG(<message>)`` and
+    ``<MACRO>_DEPRECATED_NO_EXPORT_MSG(<message>)``:
+
+    .. versionadded:: 4.6
+
+    Act like the three deprecation macros above.  The compiler warning also
+    shows the string literal ``<message>``, which typically names the
+    replacement.  Compilers that support deprecation only without a message
+    ignore ``<message>``:
+
+    .. code-block:: c++
+
+      EXAMPLE_DEPRECATED_EXPORT_MSG("use doSomething() instead")
+      void legacyPublicFunction();
+
   * ``<MACRO>_NO_DEPRECATED``: A macro that can be used in source code to
     conditionally exclude deprecated code parts from the build via
     preprocessor logic.
@@ -143,9 +159,13 @@ Generating Export Header
       export markers)
     * ``<deprecated-macro-name>_NO_EXPORT`` (macro for deprecated symbols
       with no-export markers)
+    * ``<deprecated-macro-name>_MSG``,
+      ``<deprecated-macro-name>_EXPORT_MSG`` and
+      ``<deprecated-macro-name>_NO_EXPORT_MSG`` (the above macros with a
+      deprecation message)
 
     instead of the default names in format of
-    ``<MACRO>_DEPRECATED{,_EXPORT,_NO_EXPORT}``.
+    ``<MACRO>_DEPRECATED{,_EXPORT,_NO_EXPORT}{,_MSG}``.
 
   ``DEFINE_NO_DEPRECATED``
     If specified, this will define a macro named ``<MACRO>_NO_DEPRECATED``.
@@ -196,8 +216,10 @@ Generating Export Header
 
     If specified, the export, no-export and deprecation macros expand to
     C++11 attributes, such as ``[[gnu::visibility("default")]]``,
-    ``[[gnu::dllexport]]`` and ``[[gnu::deprecated]]``, which can be
-    combined with other C++11 attributes.  The generated header falls back
+    ``[[gnu::dllexport]]`` and ``[[deprecated]]``, which can be combined
+    with other C++11 attributes.  Deprecation uses the standard
+    ``[[deprecated]]`` as of C++14 and ``[[gnu::deprecated]]`` in C++11.
+    The generated header falls back
     to the compiler-specific spellings, such as ``__attribute__`` and
     ``__declspec``, if the consumer compiles C, compiles C++ older than
     C++11, does not support the attribute, or is Qt's ``moc``.  The
@@ -356,7 +378,7 @@ And in the ABI header files:
     std::cout << "legacyPublicFunction() is deprecated" << std::endl;
   }
 
-  void internalLegacyFunction()
+  void legacyInternalFunction()
   {
     std::cout << "legacyInternalFunction() is deprecated" << std::endl;
   }
@@ -602,18 +624,51 @@ endmacro()
 
 macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_DEPRECATED)
+  set(DEFINE_DEPRECATED_MSG)
   set(DEFINE_EXPORT)
   set(DEFINE_IMPORT)
   set(DEFINE_NO_EXPORT)
-  set(CXX_ATTRIBUTE_DEPRECATED "gnu::deprecated")
+  # Values of __cplusplus for the language levels of C++11 attributes
+  set(cplusplus11 201103L)
+  set(cplusplus14 201402L)
+  # Values of __has_cpp_attribute for any support of a vendor attribute and
+  # for the standard deprecation attribute
+  set(has_attribute 1)
+  set(has_deprecated 201309L)
+  # GCC and Clang report the standard deprecation attribute in C++11 too, but
+  # Clang rejects it there with -pedantic-errors as a C++14 extension.  The
+  # standard attribute therefore requires C++14, and its GNU spelling covers
+  # C++11.
+  set(CXX_ATTRIBUTE_DEPRECATED
+    "deprecated" ${cplusplus14} ${has_deprecated}
+    "gnu::deprecated" ${cplusplus11} ${has_attribute}
+  )
   set(CXX_ATTRIBUTE_EXPORT)
   set(CXX_ATTRIBUTE_IMPORT)
   set(CXX_ATTRIBUTE_NO_EXPORT)
 
   if (COMPILER_HAS_DEPRECATED_ATTR AND NOT WIN32)
     set(DEFINE_DEPRECATED "__attribute__ ((__deprecated__))")
+    set(DEFINE_DEPRECATED_MSG "__attribute__ ((__deprecated__(msg)))")
   elseif(COMPILER_HAS_DEPRECATED)
     set(DEFINE_DEPRECATED "__declspec(deprecated)")
+    set(DEFINE_DEPRECATED_MSG "__declspec(deprecated(msg))")
+  endif()
+  # Older compilers, such as GCC before 4.5, accept the deprecation attribute
+  # only without a message.
+  if(DEFINE_DEPRECATED_MSG)
+    string(REPLACE "(msg)" "(\"msg\")" deprecated_msg_probe
+      "${DEFINE_DEPRECATED_MSG}")
+    if(CMAKE_CXX_COMPILER_LOADED)
+      _check_cxx_compiler_attribute("${deprecated_msg_probe}"
+        COMPILER_HAS_DEPRECATED_MSG)
+    else()
+      _check_c_compiler_attribute("${deprecated_msg_probe}"
+        COMPILER_HAS_DEPRECATED_MSG)
+    endif()
+    if(NOT COMPILER_HAS_DEPRECATED_MSG)
+      set(DEFINE_DEPRECATED_MSG "${DEFINE_DEPRECATED}")
+    endif()
   endif()
 
   get_property(type TARGET ${TARGET_LIBRARY} PROPERTY TYPE)
@@ -622,39 +677,72 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
     if(WIN32 OR CYGWIN)
       set(DEFINE_EXPORT "__declspec(dllexport)")
       set(DEFINE_IMPORT "__declspec(dllimport)")
-      set(CXX_ATTRIBUTE_EXPORT "gnu::dllexport")
-      set(CXX_ATTRIBUTE_IMPORT "gnu::dllimport")
+      set(CXX_ATTRIBUTE_EXPORT "gnu::dllexport"
+        ${cplusplus11} ${has_attribute})
+      set(CXX_ATTRIBUTE_IMPORT "gnu::dllimport"
+        ${cplusplus11} ${has_attribute})
     elseif(COMPILER_HAS_HIDDEN_VISIBILITY)
       set(DEFINE_EXPORT "__attribute__((visibility(\"default\")))")
       set(DEFINE_IMPORT "__attribute__((visibility(\"default\")))")
       set(DEFINE_NO_EXPORT "__attribute__((visibility(\"hidden\")))")
-      set(CXX_ATTRIBUTE_EXPORT "gnu::visibility(\"default\")")
-      set(CXX_ATTRIBUTE_IMPORT "gnu::visibility(\"default\")")
-      set(CXX_ATTRIBUTE_NO_EXPORT "gnu::visibility(\"hidden\")")
+      set(CXX_ATTRIBUTE_EXPORT "gnu::visibility(\"default\")"
+        ${cplusplus11} ${has_attribute})
+      set(CXX_ATTRIBUTE_IMPORT "gnu::visibility(\"default\")"
+        ${cplusplus11} ${has_attribute})
+      set(CXX_ATTRIBUTE_NO_EXPORT "gnu::visibility(\"hidden\")"
+        ${cplusplus11} ${has_attribute})
     endif()
   endif()
 endmacro()
 
 # Sets <out> to the preprocessor lines indented by <indent> that define the
-# macro <name> as <value>.  Given a C++11 <attribute>, the lines prefer
-# [[<attribute>]] in consumers that support it and fall back to <value>
-# otherwise.  Qt's moc always sees <value> because older versions of moc skip
-# classes declared with C++11 attributes.
-function(_generate_export_header_definition out indent name value attribute)
-  if(NOT attribute)
+# macro <name>, which may include a parameter list, as <value>.  The remaining
+# arguments are triples of a C++11 attribute, the minimum value of __cplusplus
+# it requires and the minimum value of __has_cpp_attribute for it.  The lines
+# prefer [[<attribute>]] of the first triple the consumer supports and fall
+# back to <value> otherwise.  Qt's moc always
+# sees <value> because older versions of moc skip classes declared with C++11
+# attributes.
+function(_generate_export_header_definition out indent name value)
+  if(NOT ARGN)
     set(${out} "#${indent}define ${name} ${value}" PARENT_SCOPE)
     return()
   endif()
 
-  string(REGEX REPLACE "\\(.*" "" token "${attribute}")
-  string(JOIN "\n" definition
-    "#${indent}if defined(__cplusplus) && __cplusplus >= 201103L && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)"
-    "#${indent}  if __has_cpp_attribute(${token})"
-    "#${indent}    define ${name} [[${attribute}]]"
-    "#${indent}  endif"
-    "#${indent}endif"
-    "#${indent}ifndef ${name}"
-    "#${indent}  define ${name} ${value}"
+  string(REGEX REPLACE "\\(.*" "" macro "${name}")
+  set(definition "")
+  set(undefined "")
+  # Take one candidate triple at a time, keeping each attribute next to its
+  # requirements instead of in parallel lists.
+  while(ARGN)
+    list(POP_FRONT ARGN attribute cplusplus minimum)
+    string(REGEX REPLACE "\\(.*" "" token "${attribute}")
+    # Any positive value indicates support, so a minimum of 1 needs no
+    # comparison.
+    set(supported "__has_cpp_attribute(${token})")
+    if(NOT minimum STREQUAL "1")
+      string(APPEND supported " >= ${minimum}")
+    endif()
+    if(token MATCHES "::")
+      # Intel C++ for Windows reports GNU attributes it ignores, and Oracle
+      # Developer Studio cannot parse scoped attribute names.
+      set(language "defined(__cplusplus) && __cplusplus >= ${cplusplus} && !defined(__SUNPRO_CC)")
+    else()
+      # MSVC keeps __cplusplus at C++98 by default.
+      set(language "(defined(__cplusplus) && __cplusplus >= ${cplusplus} || defined(_MSVC_LANG) && _MSVC_LANG >= ${cplusplus})")
+    endif()
+    string(APPEND definition
+      "#${indent}if ${language} && defined(__has_cpp_attribute) && !defined(Q_MOC_RUN)${undefined}\n"
+      "#${indent}  if ${supported}\n"
+      "#${indent}    define ${name} [[${attribute}]]\n"
+      "#${indent}  endif\n"
+      "#${indent}endif\n"
+    )
+    set(undefined " && !defined(${macro})")
+  endwhile()
+  string(APPEND definition
+    "#${indent}ifndef ${macro}\n"
+    "#${indent}  define ${name} ${value}\n"
     "#${indent}endif"
   )
   set(${out} "${definition}" PARENT_SCOPE)
@@ -756,20 +844,39 @@ function(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
     set(CXX_ATTRIBUTE_IMPORT)
     set(CXX_ATTRIBUTE_NO_EXPORT)
   endif()
+  # Append the message parameter to the attributes but not to their minimum
+  # values, which start with a digit.
+  list(TRANSFORM CXX_ATTRIBUTE_DEPRECATED APPEND "(msg)" REGEX "^[^0-9]"
+    OUTPUT_VARIABLE CXX_ATTRIBUTE_DEPRECATED_MSG)
 
   _generate_export_header_definition(EXPORT_DEFINITION "      "
-    "${EXPORT_MACRO_NAME}" "${DEFINE_EXPORT}" "${CXX_ATTRIBUTE_EXPORT}")
+    "${EXPORT_MACRO_NAME}" "${DEFINE_EXPORT}" ${CXX_ATTRIBUTE_EXPORT})
   _generate_export_header_definition(IMPORT_DEFINITION "      "
-    "${EXPORT_MACRO_NAME}" "${DEFINE_IMPORT}" "${CXX_ATTRIBUTE_IMPORT}")
+    "${EXPORT_MACRO_NAME}" "${DEFINE_IMPORT}" ${CXX_ATTRIBUTE_IMPORT})
   _generate_export_header_definition(NO_EXPORT_DEFINITION "    "
     "${NO_EXPORT_MACRO_NAME}" "${DEFINE_NO_EXPORT}"
-    "${CXX_ATTRIBUTE_NO_EXPORT}")
-  # The GNU spelling of deprecation shares the availability of the export
-  # attributes, so that the combined macros never mix C++11 attributes with
-  # the legacy spellings, which Clang rejects after __declspec.
+    ${CXX_ATTRIBUTE_NO_EXPORT})
   _generate_export_header_definition(DEPRECATED_DEFINITION "  "
     "${DEPRECATED_MACRO_NAME}" "${DEFINE_DEPRECATED}"
-    "${CXX_ATTRIBUTE_DEPRECATED}")
+    ${CXX_ATTRIBUTE_DEPRECATED})
+  _generate_export_header_definition(DEPRECATED_MSG_DEFINITION "  "
+    "${DEPRECATED_MACRO_NAME}_MSG(msg)" "${DEFINE_DEPRECATED_MSG}"
+    ${CXX_ATTRIBUTE_DEPRECATED_MSG})
+
+  # A C++11 attribute must precede __declspec in a declaration, so the
+  # combined macros place the deprecation first if it can expand to one.
+  foreach(visibility IN ITEMS EXPORT NO_EXPORT)
+    set(marker "${${visibility}_MACRO_NAME}")
+    if(_GEH_CXX_ATTRIBUTES)
+      set(DEPRECATED_${visibility} "${DEPRECATED_MACRO_NAME} ${marker}")
+      set(DEPRECATED_${visibility}_MSG
+        "${DEPRECATED_MACRO_NAME}_MSG(msg) ${marker}")
+    else()
+      set(DEPRECATED_${visibility} "${marker} ${DEPRECATED_MACRO_NAME}")
+      set(DEPRECATED_${visibility}_MSG
+        "${marker} ${DEPRECATED_MACRO_NAME}_MSG(msg)")
+    endif()
+  endforeach()
 
   configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/exportheader.cmake.in"
     "${EXPORT_FILE_NAME}" @ONLY)

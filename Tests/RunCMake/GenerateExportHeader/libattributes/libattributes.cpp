@@ -36,6 +36,14 @@ int libattributes::ExportedClass::method_excluded() const
   return 0;
 }
 
+// OrangeC cannot declare the deprecated class.
+#ifndef __ORANGEC__
+int libattributes::DeprecatedClass::method() const
+{
+  return 0;
+}
+#endif
+
 int libattributes::function()
 {
   return 0;
@@ -52,6 +60,21 @@ int libattributes::function_deprecated_exported()
 }
 
 int libattributes::function_excluded()
+{
+  return 0;
+}
+
+int libattributes::function_deprecated_msg()
+{
+  return 0;
+}
+
+int libattributes::function_deprecated_exported_msg()
+{
+  return 0;
+}
+
+int libattributes::function_deprecated_excluded_msg()
 {
   return 0;
 }

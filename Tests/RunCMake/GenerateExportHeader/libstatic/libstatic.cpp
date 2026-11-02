@@ -113,6 +113,11 @@ int libstatic::function_deprecated_exported()
   return 0;
 }
 
+int libstatic::function_deprecated_exported_msg()
+{
+  return 0;
+}
+
 int libstatic::function_excluded()
 {
   return 0;

@@ -67,6 +67,15 @@ int LIBSHARED_DEPRECATED function_deprecated();
 
 int LIBSHARED_DEPRECATED_EXPORT function_deprecated_exported();
 
+int LIBSHARED_DEPRECATED_MSG("libshared DEPRECATED_MSG")
+  function_deprecated_msg();
+
+int LIBSHARED_DEPRECATED_EXPORT_MSG("libshared DEPRECATED_EXPORT_MSG")
+  function_deprecated_exported_msg();
+
+int LIBSHARED_DEPRECATED_NO_EXPORT_MSG("libshared DEPRECATED_NO_EXPORT_MSG")
+  function_deprecated_excluded_msg();
+
 int LIBSHARED_NO_EXPORT function_excluded();
 
 extern int const data;

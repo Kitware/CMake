@@ -79,6 +79,7 @@ macro_add_test_library(libstatic)
 macro_add_test_library(libattributes)
 
 add_subdirectory(nodeprecated)
+add_subdirectory(deprecated_msg)
 add_subdirectory(includeguard)
 if(NOT BORLAND)
   add_subdirectory(c_identifier)
@@ -122,5 +123,8 @@ target_compile_definitions(GenerateExportHeader
     "SRC_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/reference/${_platform}\""
     "BIN_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\""
 )
+if(COMPILER_HAS_DEPRECATED AND NOT COMPILER_HAS_DEPRECATED_MSG)
+  target_compile_definitions(GenerateExportHeader PRIVATE DEPRECATED_WITHOUT_MSG)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/GEH-failures.cmake)

@@ -24,6 +24,19 @@ function(run_GEH)
       --config Debug
       --target ${failure_test_target})
   endforeach()
+
+  file(STRINGS "${RunCMake_TEST_BINARY_DIR}/deprecated_msg_targets"
+    deprecated_msg_targets)
+
+  # Generators print compiler warnings to either stream.
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  foreach(deprecated_msg_target ${deprecated_msg_targets})
+    run_cmake_command(GEH-deprecated-msg ${CMAKE_COMMAND}
+      --build .
+      --config Debug
+      --target ${deprecated_msg_target})
+  endforeach()
+  unset(RunCMake_TEST_OUTPUT_MERGE)
 endfunction()
 
 # remove these flags from the environment if they have been set
@@ -32,6 +45,8 @@ set(env_cxx_flags $ENV{CXXFLAGS})
 if(env_cxx_flags)
   string(REPLACE "-fvisibility=hidden" "" env_cxx_flags "${env_cxx_flags}")
   string(REPLACE "-fvisibility-inlines-hidden" "" env_cxx_flags "${env_cxx_flags}")
+  # The deprecation message checks need warnings.
+  string(REGEX REPLACE "(^| )-w( |$)" " " env_cxx_flags "${env_cxx_flags}")
   set(ENV{CXXFLAGS} "${env_cxx_flags}")
 endif()
 run_GEH()

@@ -80,6 +80,7 @@ int main(int argv, char** args)
   yaf.doYaf();
 
   LibC lc;
+  DeprecatedLibB dlb;
   lc.foo();
 
   ResourceTester rt;
