@@ -5177,8 +5177,8 @@ bool cmGeneratorTarget::GetRPATH(std::string const& config,
     return false;
   }
 
-  rpath =
-    cmGeneratorExpression::Evaluate(*value, this->LocalGenerator, config);
+  rpath = cmGeneratorExpression::Evaluate(*value, this->LocalGenerator, config,
+                                          this);
 
   return true;
 }

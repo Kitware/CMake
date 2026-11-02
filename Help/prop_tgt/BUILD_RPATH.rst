@@ -21,6 +21,11 @@ This property is initialized by the value of the variable
 This property supports
 :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
+.. versionadded:: 4.6
+  Generator expressions that refer to the current target, such as
+  :genex:`$<TARGET_PROPERTY:prop>`, may be used.  They refer to the
+  target on which this property is set.
+
 Other settings that affect the build-tree runtime path include:
 
 * The :variable:`CMAKE_SKIP_RPATH` variable completely disables runtime
