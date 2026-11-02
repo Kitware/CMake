@@ -17,5 +17,10 @@ set when a target is created.
   Contents of ``PDB_OUTPUT_DIRECTORY_<CONFIG>`` may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
+.. versionadded:: 4.6
+
+  The property value may use generator expressions that refer to the
+  target on which it is set, such as :genex:`$<TARGET_PROPERTY:prop>`.
+
 .. |COMPILE_PDB_XXX| replace:: :prop_tgt:`COMPILE_PDB_OUTPUT_DIRECTORY_<CONFIG>`
 .. include:: include/PDB_NOTE.rst

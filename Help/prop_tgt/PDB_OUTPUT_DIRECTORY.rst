@@ -15,6 +15,11 @@ will be placed by the linker.
   subdirectory to the specified directory unless a generator expression
   is used.
 
+.. versionadded:: 4.6
+
+  The property value may use generator expressions that refer to the
+  target on which it is set, such as :genex:`$<TARGET_PROPERTY:prop>`.
+
 This property is initialized by the value of the
 :variable:`CMAKE_PDB_OUTPUT_DIRECTORY` variable if it is
 set when a target is created.

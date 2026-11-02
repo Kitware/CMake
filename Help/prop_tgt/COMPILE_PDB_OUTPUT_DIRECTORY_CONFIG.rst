@@ -20,6 +20,11 @@ if it is set when a target is created.
   Contents of ``COMPILE_PDB_OUTPUT_DIRECTORY_<CONFIG>`` may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
+.. versionadded:: 4.6
+
+  The property value may use generator expressions that refer to the
+  target on which it is set, such as :genex:`$<TARGET_PROPERTY:prop>`.
+
 If the :prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM` target is set, this property
 is ignored and the reusage target's value of this property is used instead.
 

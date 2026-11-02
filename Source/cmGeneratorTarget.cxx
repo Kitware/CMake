@@ -5096,16 +5096,16 @@ bool cmGeneratorTarget::ComputePDBOutputDir(std::string const& kind,
 
   // Select an output directory.
   if (cmValue config_outdir = this->GetProperty(configProp)) {
-    // Use the user-specified per-configuration output directory.
+    // Evaluate the user-specified per-configuration directory for this target.
     out = cmGeneratorExpression::Evaluate(*config_outdir, this->LocalGenerator,
-                                          config);
+                                          config, this);
 
     // Skip per-configuration subdirectory.
     conf.clear();
   } else if (cmValue outdir = this->GetProperty(propertyName)) {
-    // Use the user-specified output directory.
-    out =
-      cmGeneratorExpression::Evaluate(*outdir, this->LocalGenerator, config);
+    // Evaluate the user-specified directory for this target.
+    out = cmGeneratorExpression::Evaluate(*outdir, this->LocalGenerator,
+                                          config, this);
 
     // Skip per-configuration subdirectory if the value contained a
     // generator expression.
