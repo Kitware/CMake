@@ -28,7 +28,6 @@
 #include "cmExportSet.h"
 #include "cmInstallGenerator.h"
 #include "cmLocalGenerator.h"
-#include "cmSbomBuilder.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -740,11 +739,11 @@ public:
     cmGeneratorTarget const* target) const;
 
   /** Scan all build-tree SBOMs and report which of them cover `target`. */
-  cmSbomBuilder::SbomInfo FindBuildSbomInfo(
+  std::vector<std::string> FindBuildSbomPackages(
     cmGeneratorTarget const* target) const;
 
-  /** Same as FindBuildSbomInfo, but searches install-tree SBOMs. */
-  cmSbomBuilder::SbomInfo FindInstallSbomInfo(
+  /** Same as FindBuildSbomPackages, but searches install-tree SBOMs. */
+  std::vector<std::string> FindInstallSbomPackages(
     cmGeneratorTarget const* target) const;
   void AddBuildExportSet(cmExportBuildFileGenerator* gen);
   void AddBuildExportExportSet(cmExportBuildFileGenerator* gen);

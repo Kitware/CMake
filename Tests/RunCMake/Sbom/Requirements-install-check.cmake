@@ -124,13 +124,13 @@ set(TEST_LIBA_LINKED_LICENSE_EXPECTED [=[
   "creationInfo" : "_:Build#CreationInfo",
   "from" : "urn:test:liba#Package",
   "relationshipType" : "hasDeclaredLicense",
-  "spdxId" : "urn:test::liba#DeclaredLicenseRelationship",
+  "spdxId" : "urn:test:liba#DeclaredLicenseRelationship",
   "to" :
   [
     {
       "creationInfo" : "_:Build#CreationInfo",
       "simplelicensing_licenseExpression" : "license-for-test-liba",
-      "spdxId" : "urn:test::liba#LicenseExpression",
+      "spdxId" : "urn:test:liba#LicenseExpression",
       "type" : "simplelicensing_LicenseExpression"
     }
   ],
@@ -151,21 +151,47 @@ set(CREATION_INFO_EXPECTED [=[
 }
 ]=])
 
-expect_value("${FOO_CONTENT}" "https://spdx.org/rdf/3.0.1/spdx-context.jsonld" "@context")
-string(JSON FOO_CREATION_INFO GET "${FOO_CONTENT}" "@graph" "0")
-string(JSON FOO_SPDX_DOCUMENT GET "${FOO_CONTENT}" "@graph" "1")
+expect_value("${FOO_CONTENT}" https://spdx.org/rdf/3.0.1/spdx-context.jsonld @context)
+expect_array("${FOO_CONTENT}" 2 @graph)
+string(JSON FOO_CREATION_INFO GET "${FOO_CONTENT}" @graph 0)
+expect_object("${FOO_CREATION_INFO}" CREATION_INFO_EXPECTED)
+string(JSON FOO_SPDX_DOCUMENT GET "${FOO_CONTENT}" @graph 1)
 expect_object("${FOO_SPDX_DOCUMENT}" FOO_SPDX_DOCUMENT_EXPECTED)
-expect_object("${FOO_SPDX_DOCUMENT}" FOO_LIBB "rootElement")
+expect_object("${FOO_SPDX_DOCUMENT}" FOO_LIBB rootElement)
+expect_array("${FOO_SPDX_DOCUMENT}" 1 rootElement)
 
-expect_value("${BAR_CONTENT}" "https://spdx.org/rdf/3.0.1/spdx-context.jsonld" "@context")
-string(JSON BAR_CREATION_INFO GET "${BAR_CONTENT}" "@graph" "0")
-string(JSON BAR_SPDX_DOCUMENT GET "${BAR_CONTENT}" "@graph" "1")
+expect_value("${BAR_CONTENT}" https://spdx.org/rdf/3.0.1/spdx-context.jsonld @context)
+expect_array("${BAR_CONTENT}" 4 @graph)
+string(JSON BAR_CREATION_INFO GET "${BAR_CONTENT}" @graph 0)
+expect_object("${BAR_CREATION_INFO}" CREATION_INFO_EXPECTED)
+string(JSON BAR_SPDX_DOCUMENT GET "${BAR_CONTENT}" @graph 1)
 expect_object("${BAR_SPDX_DOCUMENT}" BAR_SPDX_DOCUMENT_EXPECTED)
-expect_object("${BAR_SPDX_DOCUMENT}" BAR_LIBC "rootElement")
-expect_object("${BAR_SPDX_DOCUMENT}" BAR_LIBD "rootElement")
-expect_object("${BAR_SPDX_DOCUMENT}" BAR_DEPENDENCY_TEST "element")
-expect_object("${BAR_SPDX_DOCUMENT}" BAR_DEPENDENCY_FOO "element")
+expect_object("${BAR_SPDX_DOCUMENT}" BAR_LIBC rootElement)
+expect_object("${BAR_SPDX_DOCUMENT}" BAR_LIBD rootElement)
+expect_object("${BAR_SPDX_DOCUMENT}" BAR_DEPENDENCY_TEST element)
+expect_object("${BAR_SPDX_DOCUMENT}" BAR_DEPENDENCY_FOO element)
+expect_array("${BAR_SPDX_DOCUMENT}" 2 rootElement)
+expect_array("${BAR_SPDX_DOCUMENT}" 2 element)
 
-# Check that the license target property imported from cmake config is reported
-string(JSON LICENSE_RELATIONSHIP GET "${BAR_CONTENT}" "@graph" "2")
-expect_object("${LICENSE_RELATIONSHIP}" TEST_LIBA_LINKED_LICENSE_EXPECTED)
+expect_object("${BAR_CONTENT}" TEST_LIBA_LINKED_LICENSE_EXPECTED @graph)
+
+set(BAR_LINKED_LIBRARIES_EXPECTED [=[
+{
+  "spdxId": "urn:libd#StaticRelationship",
+  "type": "Relationship",
+  "creationInfo": "_:Build#CreationInfo",
+  "description": "Required Build-Time Libraries",
+  "from": "urn:libd#Package",
+  "relationshipType": "dependsOn",
+  "to": ["urn:libc#Package", "urn:foo:libb#Package", "urn:test:liba#Package"]
+}
+]=])
+expect_object("${BAR_CONTENT}" BAR_LINKED_LIBRARIES_EXPECTED @graph)
+foreach(index RANGE 2 3)
+  string(JSON relationship_type GET "${BAR_CONTENT}" @graph ${index} relationshipType)
+  if(relationship_type STREQUAL "dependsOn")
+    expect_array("${BAR_CONTENT}" 3 @graph ${index} to)
+  else()
+    expect_array("${BAR_CONTENT}" 1 @graph ${index} to)
+  endif()
+endforeach()

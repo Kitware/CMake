@@ -442,7 +442,7 @@ static bool HandleSbomMode(std::vector<std::string> const& args,
 
   std::string const dir =
     arguments.GetDefaultDestination(mf.GetCurrentBinaryDirectory());
-  std::string const fpath = cmStrCat(dir, '/', arguments.GetPackageName());
+  std::string fpath = cmStrCat(dir, '/', arguments.GetPackageName());
 
   if (gg->IsBuildSbomFile(fpath)) {
     status.SetError(cmStrCat("SBOM command already specified for the file "_s,
@@ -461,7 +461,8 @@ static bool HandleSbomMode(std::vector<std::string> const& args,
     sets.push_back(*exportSet);
   }
 
-  auto builder = cm::make_unique<cmBuildSbomGenerator>(arguments, sets, fpath);
+  auto builder =
+    cm::make_unique<cmBuildSbomGenerator>(arguments, sets, std::move(fpath));
   cmBuildSbomGenerator* rawPtr = builder.get();
   mf.AddBuildSbomGenerator(std::move(builder));
   gg->AddBuildSbomGenerator(rawPtr);

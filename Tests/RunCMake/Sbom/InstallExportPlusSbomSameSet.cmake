@@ -1,8 +1,6 @@
 include(${CMAKE_CURRENT_LIST_DIR}/Setup.cmake)
 include(GNUInstallDirs)
 
-# Guards against the issue described here:
-# https://gitlab.kitware.com/cmake/cmake/-/work_items/27721
 
 add_library(liba INTERFACE)
 add_library(libb INTERFACE)

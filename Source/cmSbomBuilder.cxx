@@ -2,9 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSbomBuilder.h"
 
-#include <algorithm>
-#include <array>
-#include <functional>
+#include <cstddef>
+#include <initializer_list>
 #include <map>
 #include <memory>
 #include <set>
@@ -14,23 +13,26 @@
 
 #include <cm/optional>
 #include <cmext/algorithm>
-#include <cmext/string_view>
 
 #include "cmArgumentParserTypes.h"
 #include "cmDiagnostics.h"
-#include "cmExportFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmFindPackageStack.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
+#include "cmLinkItem.h"
 #include "cmList.h"
-#include "cmLocalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmSbomArguments.h"
 #include "cmSbomObject.h"
 #include "cmSpdx.h"
 #include "cmSpdxSerializer.h"
+#include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -38,7 +40,7 @@
 #include "cmTargetTypes.h"
 #include "cmValue.h"
 
-cmSpdxPackage::PurposeId GetPurpose(cm::TargetType type)
+cmSpdxPackage::PurposeId GetPurpose(cm::TargetType const type)
 {
   switch (type) {
     case cm::TargetType::EXECUTABLE:
@@ -58,49 +60,43 @@ cmSpdxPackage::PurposeId GetPurpose(cm::TargetType type)
   }
 }
 
-cmSbomBuilder::cmSbomBuilder(cmSbomArguments args,
-                             std::vector<cmExportSet*> exportSets,
-                             cmLocalGenerator* lg)
-  : LocalGenerator(lg)
-  , ExportSets(std::move(exportSets))
-  , PackageName(std::move(args.PackageName))
-  , Namespace(cmStrCat(this->PackageName, "::"_s))
-  , PackageVersion(std::move(args.Version))
-  , PackageDescription(std::move(args.Description))
-  , PackageWebsite(std::move(args.Website))
-  , PackageUrl(std::move(args.PackageUrl))
-  , DataLicense(std::move(args.DataLicense))
-  , DefaultLicense(std::move(args.DefaultLicense))
+cmSbomBuilder::cmSbomBuilder(cmSbomArguments const& args,
+                             std::vector<cmExportSet*> const& exportSets)
+  : PackageName(args.GetPackageName())
+  , PackageVersion(args.Version)
+  , PackageDescription(args.Description)
+  , PackageWebsite(args.Website)
+  , PackageUrl(args.PackageUrl)
+  , DataLicense(args.GetDataLicense())
+  , DefaultLicense(args.DefaultLicense)
+  , NoProjectDefaults(args.NoProjectDefaults)
   , PackageFormat(args.GetFormat())
+  , ExportSets(exportSets)
 {
+}
+
+bool cmSbomBuilder::Compute(cmLocalGenerator* lg)
+{
+  this->LocalGenerator = lg;
+  this->SbomTargets.clear();
+  for (cmExportSet* exportSet : this->ExportSets) {
+    if (!exportSet->Compute(lg)) {
+      return false;
+    }
+  }
+  this->SbomTargets = this->CollectTargets();
+  return true;
 }
 
 std::set<cmGeneratorTarget const*> cmSbomBuilder::CollectTargets() const
 {
   std::set<cmGeneratorTarget const*> targets;
-  for (cmExportSet* exportSet : this->ExportSets) {
+  for (cmExportSet const* exportSet : this->ExportSets) {
     for (auto const& te : exportSet->GetTargetExports()) {
-      if (cmGeneratorTarget const* gt =
-            this->LocalGenerator->FindGeneratorTargetToUse(te->TargetName)) {
-        targets.emplace(gt);
-      }
+      targets.emplace(te->Target);
     }
   }
   return targets;
-}
-
-void cmSbomBuilder::Compute(cmLocalGenerator* lg)
-{
-  this->LocalGenerator = lg;
-  if (!lg) {
-    return;
-  }
-  for (cmExportSet* es : this->ExportSets) {
-    es->Compute(lg);
-  }
-  // Populate the cache now (rather than at Generate time) so peer SBOMs can
-  // query CoversTarget() during their own NoteLinkedTarget walks.
-  this->SbomTargets = this->CollectTargets();
 }
 
 bool cmSbomBuilder::CoversTarget(cmGeneratorTarget const* target) const
@@ -110,56 +106,59 @@ bool cmSbomBuilder::CoversTarget(cmGeneratorTarget const* target) const
 
 bool cmSbomBuilder::CoversExportSet(cmExportSet const* set) const
 {
-  return std::find(this->ExportSets.cbegin(), this->ExportSets.cend(), set) !=
-    this->ExportSets.cend();
+  return cm::contains(this->ExportSets, set);
 }
 
 bool cmSbomBuilder::GenerateForTargets(
   std::ostream& os, std::string const& config,
-  cmGeneratorExpression::PreprocessContext preprocessContext)
+  cmGeneratorExpression::PreprocessContext const preprocessContext)
 {
-  cmSbomDocument doc;
-  doc.Graph.reserve(512);
+  if (!this->LocalGenerator) {
+    return false;
+  }
 
-  cmSpdxCreationInfo const* ci =
-    insert_back(doc.Graph, this->GenerateCreationInfo());
-  cmSpdxDocument* project = insert_back(doc.Graph, this->GenerateSbom(ci));
-  std::vector<TargetProperties> targetProps;
-  targetProps.reserve(this->SbomTargets.size());
+  this->Relationships.clear();
+  this->Pending.clear();
+  this->LocalPackages.clear();
+  this->LinkedPackages.clear();
+  this->LinkTargets.clear();
+  this->Requirements.clear();
+  this->CreationInfo = this->GenerateCreationInfo();
+  this->Project = this->GenerateSbom();
 
+  this->Pending.reserve(this->SbomTargets.size());
   for (cmGeneratorTarget const* target : this->SbomTargets) {
-    ImportPropertyMap properties;
-    this->PopulateLinkLibrariesProperty(target, preprocessContext, properties);
-    this->PopulateInterfaceLinkLibrariesProperty(target, preprocessContext,
-                                                 properties);
-    targetProps.push_back(TargetProperties{
-      insert_back(project->RootElements,
-                  this->GenerateImportTarget(ci, target)),
-      target,
-      std::move(properties),
-    });
+    this->GetOrCreateLocalPackage(target);
   }
 
   bool status = true;
-  for (TargetProperties const& target : targetProps) {
-    status &=
-      this->GenerateProperties(doc, project, ci, target, targetProps, config);
+  // GenerateTarget can append to Pending while this loop is running.
+  // NOLINTNEXTLINE(modernize-loop-convert)
+  for (std::size_t i = 0; i < this->Pending.size(); ++i) {
+    auto const* const target = this->Pending[i];
+    status &= this->GenerateTarget(target, config, preprocessContext);
   }
-  if (status) {
-    this->WriteSbom(doc, os);
-  }
-  return status;
+  return status && this->WriteSbom(os);
 }
 
-void cmSbomBuilder::WriteSbom(cmSbomDocument& doc, std::ostream& os) const
+bool cmSbomBuilder::WriteSbom(std::ostream& os) const
 {
+  cmSbomDocument document;
+  document.Graph.reserve(2 + this->Relationships.size());
+  document.Graph.emplace_back(this->CreationInfo);
+  document.Graph.emplace_back(this->Project);
+  for (auto const& relationship : this->Relationships) {
+    document.Graph.emplace_back(relationship);
+  }
+
   switch (this->PackageFormat) {
     case cmSbomArguments::SbomFormat::SPDX_3_0_JSON:
-      cmSpdxSerializer{}.WriteSbom(os, cmSbomObject(doc));
-      break;
+      return cmSpdxSerializer{}.WriteSbom(os,
+                                          cmSbomObject(std::move(document)));
     case cmSbomArguments::SbomFormat::NONE:
       break;
   }
+  return false;
 }
 
 bool cmSbomBuilder::AddPackageInformation(
@@ -196,6 +195,7 @@ bool cmSbomBuilder::AddPackageInformation(
   cmSpdxExternalRef externalRef;
   externalRef.Locator = cmStrCat("cmake:find_package(", name, ')');
   externalRef.ExternalRefType = "buildSystem";
+  artifact.ExternalRef.emplace_back(std::move(externalRef));
   return true;
 }
 
@@ -210,37 +210,38 @@ cmSpdxCreationInfo cmSbomBuilder::GenerateCreationInfo() const
   return ci;
 }
 
-cmSpdxDocument cmSbomBuilder::GenerateSbom(cmSpdxCreationInfo const* ci) const
+cmSpdxDocument cmSbomBuilder::GenerateSbom() const
 {
   cmSpdxDocument proj;
-  proj.Name = PackageName;
-  proj.SpdxId = cmStrCat("urn:", PackageName, "#SPDXDocument");
+  proj.Name = this->PackageName;
+  proj.SpdxId = cmStrCat("urn:", this->PackageName, "#SPDXDocument");
   proj.ProfileConformance = { "core", "software" };
-  proj.CreationInfo = ci;
+  proj.CreationInfo = &this->CreationInfo;
 
   if (!this->PackageDescription.empty()) {
     proj.Description = this->PackageDescription;
   }
 
   if (!this->DataLicense.empty()) {
-    cmSpdxLicenseExpression license;
-    license.SpdxId = cmStrCat("urn:", PackageName, "#LicenseExpression");
-    license.CreationInfo = ci;
-    license.LicenseExpression = this->DataLicense;
-    proj.DataLicense = license;
+    cmSpdxLicenseExpression licenseObject;
+    licenseObject.SpdxId =
+      cmStrCat("urn:", this->PackageName, "#DataLicenseExpression");
+    licenseObject.CreationInfo = &this->CreationInfo;
+    licenseObject.LicenseExpression = this->DataLicense;
+    proj.DataLicense = std::move(licenseObject);
   }
 
   return proj;
 }
 
-cmSpdxPackage cmSbomBuilder::GenerateImportTarget(
-  cmSpdxCreationInfo const* ci, cmGeneratorTarget const* target) const
+cmSpdxPackage cmSbomBuilder::GenerateLocalPackage(
+  cmGeneratorTarget const* target) const
 {
   cmSpdxPackage package;
   package.SpdxId = cmStrCat("urn:", target->GetName(), "#Package");
   package.Name = target->GetName();
   package.PrimaryPurpose = GetPurpose(target->GetType());
-  package.CreationInfo = ci;
+  package.CreationInfo = &this->CreationInfo;
 
   if (!this->PackageVersion.empty()) {
     package.PackageVersion = this->PackageVersion;
@@ -257,259 +258,245 @@ cmSpdxPackage cmSbomBuilder::GenerateImportTarget(
   return package;
 }
 
-bool cmSbomBuilder::GenerateLinkProperties(
-  cmSbomDocument& doc, cmSpdxDocument* project, cmSpdxCreationInfo const* ci,
-  std::string const& libraries, TargetProperties const& current,
-  std::vector<TargetProperties> const& allTargets,
-  std::string const& config) const
+cmSpdxPackage const* cmSbomBuilder::GetOrCreateLocalPackage(
+  cmGeneratorTarget const* target)
 {
-  auto itProp = current.Properties.find(libraries);
-  if (itProp == current.Properties.end()) {
+  auto const it = this->LocalPackages.find(target);
+  if (it != this->LocalPackages.end()) {
+    return it->second;
+  }
+
+  auto& elements = cm::contains(this->SbomTargets, target)
+    ? this->Project.RootElements
+    : this->Project.Elements;
+  auto const* package =
+    insert_back(elements, this->GenerateLocalPackage(target));
+  this->LocalPackages.emplace(target, package);
+  this->Pending.push_back(target);
+  return package;
+}
+
+cmSpdxPackage const* cmSbomBuilder::GetOrCreateLinkedPackage(
+  cmGeneratorTarget const* source, cmLinkItem const& item)
+{
+  LinkInfo const* info = nullptr;
+  if (item.Target) {
+    auto link = this->LinkTargets.find(item.Target);
+    if (link == this->LinkTargets.end()) {
+      link =
+        this->LinkTargets
+          .emplace(item.Target, this->NoteLinkedTarget(source, item.Target))
+          .first;
+    }
+    info = &link->second;
+  }
+  if (info && info->Local) {
+    return this->GetOrCreateLocalPackage(item.Target);
+  }
+
+  // An empty package name identifies a dependency without provenance.
+  auto const& name = item.AsStr();
+  auto key = std::make_pair(info ? info->Package : std::string{},
+                            info ? info->Component : name);
+  auto const it = this->LinkedPackages.find(key);
+  if (it != this->LinkedPackages.end()) {
+    return it->second;
+  }
+
+  std::string const packageName = info && !info->Package.empty()
+    ? cmStrCat(info->Package, ':', info->Component)
+    : name;
+  cmSpdxPackage package;
+  package.Name = packageName;
+  package.SpdxId = cmStrCat("urn:", packageName, "#Package");
+  package.CreationInfo = &this->CreationInfo;
+  if (info) {
+    auto const requirement = this->Requirements.find(info->Package);
+    if (requirement != this->Requirements.end()) {
+      this->AddPackageInformation(package, info->Package, requirement->second);
+    }
+  }
+
+  auto const* result = insert_back(this->Project.Elements, std::move(package));
+  this->LinkedPackages.emplace(std::move(key), result);
+  if (item.Target) {
+    this->GenerateDeclaredLicense(
+      result, item.Target->GetSafeProperty("SPDX_LICENSE"));
+  }
+  return result;
+}
+
+bool cmSbomBuilder::EvaluateLinkProperty(
+  cmGeneratorTarget const* target, std::string const& property,
+  std::string const& config,
+  cmGeneratorExpression::PreprocessContext preprocessContext,
+  std::vector<cmLinkItem>& dependencies) const
+{
+  cmValue const input = target->GetProperty(property);
+  if (!input) {
+    return true;
+  }
+  auto const preprocessed =
+    cmGeneratorExpression::Preprocess(*input, preprocessContext);
+  if (preprocessed.empty()) {
     return true;
   }
 
-  cmGeneratorExpression ge(*current.Target->Makefile->GetCMakeInstance());
-  std::unique_ptr<cmCompiledGeneratorExpression> cge =
-    ge.Parse(itProp->second);
-  std::string evaluatedLibraries =
-    cge->Evaluate(current.Target->GetLocalGenerator(), config, current.Target);
-
-  if (cge->GetHadHeadSensitiveCondition()) {
-    current.Target->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("Property \"", libraries, "\" of target \"",
-               current.Target->GetName(),
-               "\" contains a generator expression that is not allowed for "
-               "SBOM generation."));
-    return false;
-  }
-
-  auto makeRel = [&](char const* id, char const* desc) {
-    cmSpdxRelationship r;
-    r.SpdxId = cmStrCat("urn:", id, "#Relationship");
-    r.RelationshipType = cmSpdxRelationship::RelationshipTypeId::DEPENDS_ON;
-    r.Description = desc;
-    r.From = current.Package;
-    r.CreationInfo = ci;
-    return r;
-  };
-
-  auto linkLibraries = makeRel("Static", "Linked Libraries");
-  auto linkRequires = makeRel("Dynamic", "Required Runtime Libraries");
-  auto buildRequires = makeRel("Shared", "Required Build-Time Libraries");
-
-  auto addArtifact =
-    [&](std::string const& name) -> std::pair<bool, cmSpdxPackage const*> {
-    auto it = this->LinkTargets.find(name);
-    if (it != this->LinkTargets.end()) {
-      LinkInfo const& linkInfo = it->second;
-      if (linkInfo.Package.empty()) {
-        for (auto const& t : allTargets) {
-          if (t.Target->GetName() == linkInfo.Component) {
-            return { true, t.Package };
-          }
-        }
+  cmGeneratorExpression const ge(*target->Makefile->GetCMakeInstance());
+  auto const cge = ge.Parse(preprocessed);
+  cm::GenEx::Context const context(target->GetLocalGenerator(), config);
+  for (auto const usage :
+       { cmGeneratorTarget::UseTo::Compile, cmGeneratorTarget::UseTo::Link }) {
+    cmGeneratorExpressionDAGChecker dagChecker{ target, property, nullptr,
+                                                nullptr, context };
+    if (usage == cmGeneratorTarget::UseTo::Compile) {
+      dagChecker.SetTransitivePropertiesOnly();
+      if (property != "LINK_LIBRARIES" ||
+          target->GetPolicyStatusCMP0131() == cmPolicies::NEW) {
+        dagChecker.SetTransitivePropertiesOnlyCMP0131();
       }
-      std::string pkgName =
-        cmStrCat(linkInfo.Package, ':', linkInfo.Component);
-      cmSpdxPackage pkg;
-      pkg.Name = pkgName;
-      pkg.SpdxId = cmStrCat("urn:", pkgName, "#Package");
-      pkg.CreationInfo = ci;
-      if (!linkInfo.Package.empty()) {
-        auto const& pkgIt = this->Requirements.find(linkInfo.Package);
-        if (pkgIt != this->Requirements.end() &&
-            pkgIt->second.Components.count(linkInfo.Component) > 0) {
-          this->AddPackageInformation(pkg, pkgIt->first, pkgIt->second);
-        }
-      }
-
-      cmSpdxPackage const* pkgPtr =
-        insert_back(project->Elements, std::move(pkg));
-      if (!linkInfo.License.empty() &&
-          !cm::contains(this->GeneratedLinkLicenses, name)) {
-        this->GeneratedLinkLicenses.emplace(name);
-
-        cmSpdxLicenseExpression license;
-        license.SpdxId = cmStrCat("urn:", name, "#LicenseExpression");
-        license.CreationInfo = ci;
-        license.LicenseExpression = linkInfo.License;
-
-        cmSpdxRelationship relHasLicense;
-        relHasLicense.SpdxId =
-          cmStrCat("urn:", name, "#DeclaredLicenseRelationship");
-        relHasLicense.CreationInfo = ci;
-        relHasLicense.RelationshipType =
-          cmSpdxRelationship::HAS_DECLARED_LICENSE;
-        relHasLicense.From = pkgPtr;
-        relHasLicense.To.emplace_back(std::move(license));
-
-        insert_back(doc.Graph, std::move(relHasLicense));
-      }
-
-      return { true, pkgPtr };
+    }
+    cmList const items{ cge->Evaluate(context, &dagChecker, target) };
+    if (cge->GetHadHeadSensitiveCondition()) {
+      target->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Property \"", property, "\" of target \"", target->GetName(),
+                 "\" contains a generator expression that is not allowed for "
+                 "SBOM generation."));
+      return false;
     }
 
-    cmSpdxPackage pkg;
-    pkg.SpdxId = cmStrCat("urn:", name, "#Package");
-    pkg.Name = name;
-    pkg.CreationInfo = ci;
-    return { false, insert_back(project->Elements, std::move(pkg)) };
-  };
-
-  cmList names{ evaluatedLibraries };
-  names.sort();
-  names.remove_duplicates();
-  for (std::string const& n : names) {
-    auto res = addArtifact(n);
-    if (!res.second) {
-      continue;
+    cmLocalGenerator const* scope = target->GetLocalGenerator();
+    auto feature = cmLinkItem::DEFAULT;
+    for (auto const& item : items) {
+      if (auto linkFeature = ParseLinkFeature(item)) {
+        feature = std::move(*linkFeature);
+        continue;
+      }
+      if ((cmHasPrefix(item, "<LINK_GROUP:") ||
+           cmHasPrefix(item, "</LINK_GROUP:")) &&
+          cmHasSuffix(item, '>')) {
+        continue;
+      }
+      if (item.empty() || target->IsLinkLookupScope(item, scope)) {
+        continue;
+      }
+      dependencies.emplace_back(target->ResolveLinkItem(
+        BT<std::string>(item, cmListFileBacktrace{}), scope, feature));
     }
-
-    if (res.first) {
-      linkLibraries.To.push_back(res.second);
-    } else {
-      buildRequires.To.push_back(res.second);
-    }
-  }
-
-  if (!linkLibraries.To.empty()) {
-    insert_back(doc.Graph, std::move(linkLibraries));
-  }
-  if (!linkRequires.To.empty()) {
-    insert_back(doc.Graph, std::move(linkRequires));
-  }
-  if (!buildRequires.To.empty()) {
-    insert_back(doc.Graph, std::move(buildRequires));
   }
   return true;
 }
 
-bool cmSbomBuilder::GenerateProperties(
-  cmSbomDocument& doc, cmSpdxDocument* proj, cmSpdxCreationInfo const* ci,
-  TargetProperties const& current,
-  std::vector<TargetProperties> const& allTargets,
-  std::string const& config) const
+bool cmSbomBuilder::GenerateTarget(
+  cmGeneratorTarget const* target, std::string const& config,
+  cmGeneratorExpression::PreprocessContext preprocessContext)
 {
-  bool status = true;
-  status &= this->GenerateLinkProperties(doc, proj, ci, "LINK_LIBRARIES",
-                                         current, allTargets, config);
-  status &= this->GenerateLinkProperties(
-    doc, proj, ci, "INTERFACE_LINK_LIBRARIES", current, allTargets, config);
-  status &= this->GenerateMetaProperties(doc, proj, ci, current);
+  auto const* package = this->LocalPackages.at(target);
+  std::vector<cmLinkItem> dependencies;
+  bool status = this->EvaluateLinkProperty(target, "LINK_LIBRARIES", config,
+                                           preprocessContext, dependencies);
+  status &=
+    this->EvaluateLinkProperty(target, "INTERFACE_LINK_LIBRARIES", config,
+                               preprocessContext, dependencies);
+
+  cmSpdxRelationship staticLibraries;
+  cmSpdxRelationship sharedLibraries;
+  std::set<cmSpdxPackage const*> seen;
+  for (auto const& item : dependencies) {
+    auto const* dependency = this->GetOrCreateLinkedPackage(target, item);
+    if (!seen.insert(dependency).second) {
+      continue;
+    }
+    auto const type =
+      item.Target ? item.Target->GetType() : cm::TargetType::UNKNOWN_LIBRARY;
+    switch (type) {
+      case cm::TargetType::INTERFACE_LIBRARY:
+      case cm::TargetType::STATIC_LIBRARY:
+        staticLibraries.To.emplace_back(dependency);
+        break;
+      case cm::TargetType::SHARED_LIBRARY:
+      case cm::TargetType::MODULE_LIBRARY:
+        sharedLibraries.To.emplace_back(dependency);
+        break;
+      default:
+        break;
+    }
+  }
+
+  auto const addRelationship = [&](cmSpdxRelationship& relationship,
+                                   char const* id, char const* description) {
+    if (relationship.To.empty()) {
+      return;
+    }
+    relationship.SpdxId =
+      cmStrCat("urn:", *package->Name, '#', id, "Relationship");
+    relationship.RelationshipType = cmSpdxRelationship::DEPENDS_ON;
+    relationship.Description = description;
+    relationship.From = package;
+    relationship.CreationInfo = &this->CreationInfo;
+    this->Relationships.emplace_back(std::move(relationship));
+  };
+
+  addRelationship(staticLibraries, "Static", "Required Build-Time Libraries");
+  addRelationship(sharedLibraries, "Shared", "Required Run-Time Libraries");
+
+  cmValue license = target->GetProperty("SPDX_LICENSE");
+  if (!license && !this->DefaultLicense.empty()) {
+    license = cmValue(this->DefaultLicense);
+  }
+  if (!license && !this->NoProjectDefaults) {
+    cmMakefile const* mf = target->Target->GetMakefile();
+    std::string const projectName = mf->GetStateSnapshot().GetProjectName();
+    license = mf->GetDefinition(cmStrCat(projectName, "_SPDX_LICENSE"));
+  }
+
+  this->GenerateDeclaredLicense(package, *license);
   return status;
 }
 
-bool cmSbomBuilder::GenerateMetaProperties(
-  cmSbomDocument& doc, cmSpdxDocument* /*project*/,
-  cmSpdxCreationInfo const* ci, TargetProperties const& current) const
+void cmSbomBuilder::GenerateDeclaredLicense(cmSpdxPackage const* package,
+                                            std::string const& license)
 {
-  std::string licenseExpr = this->DefaultLicense;
-  cmValue licenseExprProp = current.Target->GetProperty("SPDX_LICENSE");
-  if (licenseExprProp) {
-    licenseExpr = licenseExprProp;
+  if (license.empty()) {
+    return;
   }
-  if (!licenseExpr.empty()) {
-    auto const& tgtName = current.Target->GetName();
+  cmSpdxLicenseExpression expression;
+  expression.SpdxId = cmStrCat("urn:", *package->Name, "#LicenseExpression");
+  expression.CreationInfo = &this->CreationInfo;
+  expression.LicenseExpression = license;
 
-    cmSpdxLicenseExpression license;
-    license.SpdxId = cmStrCat("urn:", tgtName, "#LicenseExpression");
-    license.CreationInfo = ci;
-    license.LicenseExpression = std::move(licenseExpr);
-
-    cmSpdxRelationship relHasLicense;
-    relHasLicense.SpdxId =
-      cmStrCat("urn:", tgtName, "#DeclaredLicenseRelationship");
-    relHasLicense.CreationInfo = ci;
-    relHasLicense.RelationshipType = cmSpdxRelationship::HAS_DECLARED_LICENSE;
-    relHasLicense.From = current.Package;
-    relHasLicense.To.emplace_back(std::move(license));
-
-    insert_back(doc.Graph, std::move(relHasLicense));
-  }
-  return true;
+  cmSpdxRelationship relationship;
+  relationship.SpdxId =
+    cmStrCat("urn:", *package->Name, "#DeclaredLicenseRelationship");
+  relationship.CreationInfo = &this->CreationInfo;
+  relationship.RelationshipType = cmSpdxRelationship::HAS_DECLARED_LICENSE;
+  relationship.From = package;
+  relationship.To.emplace_back(std::move(expression));
+  this->Relationships.emplace_back(std::move(relationship));
 }
 
-bool cmSbomBuilder::PopulateLinkLibrariesProperty(
-  cmGeneratorTarget const* target,
-  cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties)
+cmSbomBuilder::LinkInfo cmSbomBuilder::NoteLinkedTarget(
+  cmGeneratorTarget const* target, cmGeneratorTarget const* linkedTarget)
 {
-  static std::array<std::string, 3> const linkIfaceProps = { {
-    "LINK_LIBRARIES",
-    "LINK_LIBRARIES_DIRECT",
-    "LINK_LIBRARIES_DIRECT_EXCLUDE",
-  } };
-  bool hadLINK_LIBRARIES = false;
-  for (std::string const& linkIfaceProp : linkIfaceProps) {
-    if (cmValue input = target->GetProperty(linkIfaceProp)) {
-      std::string prepro =
-        cmGeneratorExpression::Preprocess(*input, preprocessRule);
-      if (!prepro.empty()) {
-        this->ResolveTargetsInGeneratorExpressions(prepro, target);
-        properties[linkIfaceProp] = prepro;
-        hadLINK_LIBRARIES = true;
-      }
-    }
-  }
-  return hadLINK_LIBRARIES;
-}
-
-bool cmSbomBuilder::AddTargetNamespace(std::string& input,
-                                       cmGeneratorTarget const* target,
-                                       cmLocalGenerator const* lg)
-{
-  cmGeneratorTarget::TargetOrString resolved =
-    target->ResolveTargetReference(input, lg);
-
-  cmGeneratorTarget* tgt = resolved.Target;
-  if (!tgt) {
-    input = resolved.String;
-    return false;
-  }
-
-  if (tgt->IsImported()) {
-    input = tgt->GetName();
-    return this->NoteLinkedTarget(target, input, tgt);
-  }
-
-  if (this->SbomTargets.find(tgt) != this->SbomTargets.end()) {
-    input = this->Namespace + tgt->GetExportName();
-  } else {
-    input = tgt->GetName();
-  }
-
-  return this->NoteLinkedTarget(target, input, tgt);
-}
-
-bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
-                                     std::string const& linkedName,
-                                     cmGeneratorTarget const* linkedTarget)
-{
-  auto linkedLicense = linkedTarget->GetSafeProperty("SPDX_LICENSE");
-
+  auto const& linkedName = linkedTarget->GetName();
   if (cm::contains(this->SbomTargets, linkedTarget)) {
-    this->LinkTargets.emplace(
-      linkedName,
-      LinkInfo{ "", linkedTarget->GetExportName(), linkedLicense });
-    return true;
+    return { "", linkedTarget->GetExportName(), true };
   }
 
   if (linkedTarget->IsImported()) {
     using Package = cm::optional<std::pair<std::string, cmPackageInformation>>;
-    auto pkgInfo = [](cmTarget* t) -> Package {
-      cmFindPackageStack pkgStack = t->GetFindPackageStack();
+    auto pkgInfo = [](cmTarget const* t) -> Package {
+      cmFindPackageStack const& pkgStack = t->GetFindPackageStack();
       if (!pkgStack.Empty()) {
         return std::make_pair(pkgStack.Top().Name,
                               *pkgStack.Top().PackageInfo);
       }
-      std::string const pkgName =
-        t->GetSafeProperty("EXPORT_FIND_PACKAGE_NAME");
+      std::string pkgName = t->GetSafeProperty("EXPORT_FIND_PACKAGE_NAME");
       if (pkgName.empty()) {
         return cm::nullopt;
       }
-      cmPackageInformation package;
-      return std::make_pair(pkgName, package);
+      return std::make_pair(std::move(pkgName), cmPackageInformation{});
     }(linkedTarget->Target);
 
     if (!pkgInfo) {
@@ -518,28 +505,23 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
         cmStrCat("Target \"", target->GetName(),
                  "\" references imported target \"", linkedName,
                  "\" which does not come from any known package."));
-      return false;
+      return { "", linkedName };
     }
 
     std::string const& pkgName = pkgInfo->first;
-    auto const& prefix = cmStrCat(pkgName, "::");
-    std::string component;
-    if (!cmHasPrefix(linkedName, prefix)) {
-      component = linkedName;
-    } else {
-      component = linkedName.substr(prefix.length());
-    }
-    this->LinkTargets.emplace(linkedName,
-                              LinkInfo{ pkgName, component, linkedLicense });
+    auto const prefix = cmStrCat(pkgName, "::");
+    std::string component = cmHasPrefix(linkedName, prefix)
+      ? linkedName.substr(prefix.length())
+      : linkedName;
+    LinkInfo info{ pkgName, component };
     cmPackageInformation& req =
       this->Requirements.insert(std::move(*pkgInfo)).first->second;
     req.Components.emplace(std::move(component));
-    return true;
+    return info;
   }
 
-  // Target belongs to another export from this build or install.
-  // The leaf class chooses which export map to consult.
-  auto const& exportInfo = this->FindExportInfoFor(linkedTarget);
+  // The leaf class selects build or install export provenance.
+  auto const exportInfo = this->FindExportInfoFor(linkedTarget);
   if (exportInfo.Namespaces.size() == 1 && exportInfo.Sets.size() == 1) {
     auto const& linkNamespace = *exportInfo.Namespaces.begin();
     if (!cmHasSuffix(linkNamespace, "::")) {
@@ -550,44 +532,26 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
                  "\", whose export does not use the standard namespace "
                  "separator.  The dependency will be recorded by its bare "
                  "target name without provenance."));
-      return false;
+      return { "", linkedName };
     }
 
     std::string pkgName{ linkNamespace.data(), linkNamespace.size() - 2 };
     std::string component = linkedTarget->GetExportName();
-    if (pkgName == this->GetPackageName()) {
-      this->LinkTargets.emplace(linkedName,
-                                LinkInfo{ "", component, linkedLicense });
-    } else {
-      this->LinkTargets.emplace(linkedName,
-                                LinkInfo{ pkgName, component, linkedLicense });
-      this->Requirements[pkgName].Components.emplace(std::move(component));
+    if (pkgName == this->PackageName) {
+      return { "", std::move(component), true };
     }
-    return true;
+    this->Requirements[pkgName].Components.emplace(component);
+    return { std::move(pkgName), std::move(component) };
   }
 
   if (exportInfo.Sets.empty()) {
-    // install(export) provenance is unavailable.  Fall back to SBOM-level
-    // attribution: any peer SBOM (of the same build/install mode) that
-    // covers this target lends its package name.  install(export) wins
-    // when both are available; only reached here when install(export) is
-    // absent.
-    auto const& sbomInfo = this->FindSbomInfoFor(linkedTarget);
-    if (sbomInfo.Packages.empty()) {
-      target->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Target \"", target->GetName(), "\" references target \"",
-                 linkedName,
-                 "\" which has no install(EXPORT)/export(EXPORT) namespace "
-                 "and is not covered by any SBOM.  An SBOM cannot attribute "
-                 "this dependency.  Give \"",
-                 linkedTarget->GetName(),
-                 "\" an install(EXPORT)/export(EXPORT) with a NAMESPACE, or "
-                 "include it in an install(SBOM)/export(SBOM)."));
-      return false;
+    // A peer SBOM supplies provenance when no export namespace is available.
+    auto const sbomPackages = this->FindSbomPackagesFor(linkedTarget);
+    if (sbomPackages.empty()) {
+      return { "", linkedName, true };
     }
-    std::string const& pkgName = sbomInfo.Packages.front();
-    if (sbomInfo.Packages.size() > 1) {
+    auto const& pkgName = sbomPackages.front();
+    if (sbomPackages.size() > 1) {
       target->Makefile->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
         cmStrCat(
@@ -595,14 +559,12 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
           linkedName,
           "\" which has no install(EXPORT)/export(EXPORT) namespace and is "
           "covered by multiple SBOMs: ",
-          cmJoin(sbomInfo.Packages, ", "), ".  Attributing to \"", pkgName,
+          cmJoin(sbomPackages, ", "), ".  Attributing to \"", pkgName,
           "\" (first alphabetically)."));
     }
     std::string component = linkedTarget->GetExportName();
-    this->LinkTargets.emplace(linkedName,
-                              LinkInfo{ pkgName, component, linkedLicense });
-    this->Requirements[pkgName].Components.emplace(std::move(component));
-    return true;
+    this->Requirements[pkgName].Components.emplace(component);
+    return { pkgName, std::move(component) };
   }
 
   target->Makefile->IssueMessage(
@@ -619,68 +581,5 @@ bool cmSbomBuilder::NoteLinkedTarget(cmGeneratorTarget const* target,
              "export set or with more than one namespace.  Consider "
              "consolidating the exports of the \"",
              linkedTarget->GetName(), "\" target to a single export."));
-  return false;
-}
-
-void cmSbomBuilder::ResolveTargetsInGeneratorExpression(
-  std::string& input, cmGeneratorTarget const* target,
-  cmLocalGenerator const* lg)
-{
-  auto err = cmResolveTargetsInGeneratorExpression(
-    input, [this, target, lg](std::string& name) {
-      return this->AddTargetNamespace(name, target, lg);
-    });
-  if (err) {
-    target->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR, *err);
-  }
-}
-
-void cmSbomBuilder::ResolveTargetsInGeneratorExpressions(
-  std::string& input, cmGeneratorTarget const* target)
-{
-  cmLocalGenerator const* lg = target->GetLocalGenerator();
-  std::vector<std::string> parts;
-  cmGeneratorExpression::Split(input, parts);
-
-  std::string sep;
-  input.clear();
-  for (std::string& li : parts) {
-    if (target->IsLinkLookupScope(li, lg)) {
-      continue;
-    }
-    if (cmGeneratorExpression::Find(li) == std::string::npos) {
-      this->AddTargetNamespace(li, target, lg);
-    } else {
-      this->ResolveTargetsInGeneratorExpression(li, target, lg);
-    }
-    input = cmStrCat(std::move(input), sep, li);
-    sep = ";";
-  }
-}
-
-bool cmSbomBuilder::PopulateInterfaceLinkLibrariesProperty(
-  cmGeneratorTarget const* target,
-  cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties)
-{
-  if (!target->IsLinkable()) {
-    return false;
-  }
-  static std::array<std::string, 3> const linkIfaceProps = {
-    { "INTERFACE_LINK_LIBRARIES", "INTERFACE_LINK_LIBRARIES_DIRECT",
-      "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE" }
-  };
-  bool hadINTERFACE_LINK_LIBRARIES = false;
-  for (std::string const& linkIfaceProp : linkIfaceProps) {
-    if (cmValue input = target->GetProperty(linkIfaceProp)) {
-      std::string prepro =
-        cmGeneratorExpression::Preprocess(*input, preprocessRule);
-      if (!prepro.empty()) {
-        this->ResolveTargetsInGeneratorExpressions(prepro, target);
-        properties[linkIfaceProp] = prepro;
-        hadINTERFACE_LINK_LIBRARIES = true;
-      }
-    }
-  }
-  return hadINTERFACE_LINK_LIBRARIES;
+  return { "", linkedName };
 }

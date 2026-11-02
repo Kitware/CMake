@@ -36,6 +36,9 @@ public:
   bool Check(cmExecutionStatus& status) const override;
   std::string GetNamespace() const;
   std::string GetPackageName() const;
+  /** Explicit data license, or the license inherited from the selected
+   * project. */
+  std::string const& GetDataLicense() const;
   std::string GetDefaultDestination(std::string const& root = {}) const;
   SbomFormat GetFormat() const;
 
