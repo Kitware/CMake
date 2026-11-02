@@ -36,18 +36,17 @@
 
 /* Implementation of unordered map */
 
-typedef int32_t nghttp2_map_key_type;
-
-typedef struct nghttp2_map_bucket {
-  uint32_t psl;
-  nghttp2_map_key_type key;
-  void *data;
-} nghttp2_map_bucket;
+typedef uint64_t nghttp2_map_key_type;
 
 typedef struct nghttp2_map {
-  nghttp2_map_bucket *table;
+  nghttp2_map_key_type *keys;
+  /* psl is the Probe Sequence Length.  0 has special meaning that the
+     element is not stored at i-th position if psl[i] == 0.  Because
+     of this, the actual psl value is psl[i] - 1 if psl[i] > 0. */
+  size_t *psl;
+  void **data;
   nghttp2_mem *mem;
-  uint32_t seed;
+  uint64_t seed;
   size_t size;
   size_t hashbits;
 } nghttp2_map;
@@ -55,7 +54,7 @@ typedef struct nghttp2_map {
 /*
  * nghttp2_map_init initializes the map |map|.
  */
-void nghttp2_map_init(nghttp2_map *map, uint32_t seed, nghttp2_mem *mem);
+void nghttp2_map_init(nghttp2_map *map, uint64_t seed, nghttp2_mem *mem);
 
 /*
  * nghttp2_map_free deallocates any resources allocated for |map|.
