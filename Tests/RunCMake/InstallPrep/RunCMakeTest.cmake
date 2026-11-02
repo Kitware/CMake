@@ -179,6 +179,16 @@ endfunction()
 run_configured_install_prep(ConfigurationsDebug Debug)
 run_configured_install_prep(ConfigurationsRelease Release)
 
+# The rule depends on the union of the entries evaluated for each
+# configuration, which BuildDependsUnion-prep-check.cmake verifies.
+block()
+  configure_install_prep(BuildDependsUnion Debug)
+  run_cmake_command(BuildDependsUnion-prep ${CMAKE_COMMAND}
+    --build . --config Debug --target install_prep/Union)
+  run_cmake_command(BuildDependsUnion-install ${CMAKE_COMMAND}
+    --install . --config Debug --component Union)
+endblock()
+
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
   block()
     configure_install_prep(ConfigurationsMulti Debug)

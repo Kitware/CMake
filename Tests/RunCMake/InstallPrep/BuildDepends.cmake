@@ -74,3 +74,31 @@ install(CODE "
 )
 
 add_library(unit_tests STATIC neverbuild.c)
+
+# BUILD_DEPENDS entries may contain generator expressions, evaluated for each
+# configuration.  A target referenced by an expression is a dependency, so the
+# artifact the expression evaluates to is prepared by building it.  An entry
+# evaluating to a target name names that target, and one evaluating to
+# nothing adds no dependency.
+add_library(depends_genex STATIC EXCLUDE_FROM_ALL lib.c)
+set_property(TARGET depends_genex
+  PROPERTY ARCHIVE_OUTPUT_DIRECTORY "$<1:${artifact_dir}>")
+set(genex_payload "${CMAKE_CURRENT_BINARY_DIR}/genex-payload.txt")
+add_custom_target(generate_genex_payload
+  COMMAND ${CMAKE_COMMAND} -E touch "${genex_payload}"
+  BYPRODUCTS "${genex_payload}"
+)
+install(CODE "
+  if(NOT EXISTS \"$<TARGET_FILE:depends_genex>\")
+    message(FATAL_ERROR \"Preparation did not build depends_genex\")
+  endif()
+  if(NOT EXISTS \"${genex_payload}\")
+    message(FATAL_ERROR \"Preparation did not generate genex-payload.txt\")
+  endif()
+  "
+  COMPONENT Payload
+  BUILD_DEPENDS
+    "$<TARGET_FILE:depends_genex>"
+    "$<$<BOOL:ON>:generate_genex_payload>"
+    "$<$<BOOL:OFF>:${CMAKE_CURRENT_BINARY_DIR}/never-generated.txt>"
+)

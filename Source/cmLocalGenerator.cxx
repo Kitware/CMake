@@ -269,16 +269,23 @@ bool cmLocalGenerator::GetDirectoryTestPrepTarget(DirectoryTestPrepTarget& out,
     out.Dependencies = discovery->second;
   }
 
-  cmList buildDepends;
+  std::vector<std::string> buildDepends;
   if (directoryTestPrepDependencies) {
-    buildDepends.assign(
-      cmList{ *directoryTestPrepDependencies, cmList::EmptyElements::Yes });
+    if (cmGeneratorExpression::Find(*directoryTestPrepDependencies) !=
+        std::string::npos) {
+      // Evaluate the value as a whole, so that a generator expression may
+      // produce a list.  The evaluated list is the list of dependencies.
+      buildDepends.push_back(*directoryTestPrepDependencies);
+    } else {
+      cmList const list{ *directoryTestPrepDependencies,
+                         cmList::EmptyElements::Yes };
+      buildDepends.assign(list.begin(), list.end());
+    }
   }
   cmTestGenerator::BuildDependencies deps;
   cmTestGenerator::EvaluateBuildDependencies(
     this, config, this->Makefile->GetBacktrace(), "directory_test_prep", {},
-    std::vector<std::string>(buildDepends.begin(), buildDepends.end()), deps,
-    this->Makefile);
+    buildDepends, deps, this->Makefile);
   for (cmGeneratorTarget* target : deps.Targets) {
     out.Dependencies.push_back({ target->GetName(), target });
   }

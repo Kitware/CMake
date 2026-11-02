@@ -241,7 +241,7 @@ if(RunCMake_GENERATOR MATCHES "Ninja|FASTBuild|Makefiles")
     # Verify successful behavior
     block()
       foreach(case IN ITEMS DiscoverTestsUtility DiscoverTestsCommands
-          DiscoverTestsGeneratedFile DirectoryGeneratedFile)
+          DiscoverTestsGeneratedFile DirectoryGeneratedFile BuildDependsGenex)
         set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
         run_cmake(${case})
         set(RunCMake_TEST_NO_CLEAN 1)

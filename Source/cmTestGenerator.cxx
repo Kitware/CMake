@@ -132,21 +132,50 @@ bool cmTestGenerator::EvaluateBuildDependencies(
   }
 
   // Add dependencies from BUILD_DEPENDS keyword
-  for (std::string const& depName : buildDepends) {
-    if (depName.empty()) {
-      continue;
-    }
+  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+  auto addBuildDependency = [lg, gg, &dependencies,
+                             &info](std::string const& depName) {
     cmGeneratorTarget* depTarget = lg->FindGeneratorTargetToUse(depName);
     if (!depTarget) {
-      cmGlobalGenerator* gg = lg->GetGlobalGenerator();
       BuildDependencies::FileDependency file;
       file.Path = lg->GetRealFileDependency(depName);
       file.Owner = gg->FindOutputOwningTarget(file.Path);
       file.Generated = gg->IsGeneratedByBuild(file.Path);
       info.Files.push_back(std::move(file));
-      continue;
+      return;
     }
     dependencies.insert(depTarget);
+  };
+  for (std::string const& depName : buildDepends) {
+    if (depName.empty()) {
+      continue;
+    }
+    if (cmGeneratorExpression::Find(depName) == std::string::npos) {
+      addBuildDependency(depName);
+      continue;
+    }
+    // An entry containing generator expressions is evaluated for the
+    // configuration.  Targets it references are dependencies, as are those
+    // referenced by the test command.  An evaluated value naming an artifact
+    // of such a target is built by that target dependency, and any other
+    // value is a target or file, like an entry without generator expressions.
+    auto parsed = ge.Parse(depName);
+    cmList const evaluated{ parsed->Evaluate(lg, config) };
+    std::set<cmGeneratorTarget*> referenced;
+    for (cmGeneratorTarget* dep : parsed->GetTargets()) {
+      if (dep && !dep->IsImported()) {
+        dependencies.insert(dep);
+        referenced.insert(dep);
+      }
+    }
+    for (std::string const& value : evaluated) {
+      if (value.empty() ||
+          (cmSystemTools::FileIsFullPath(value) &&
+           referenced.count(gg->FindArtifactOwningTarget(value, config)))) {
+        continue;
+      }
+      addBuildDependency(value);
+    }
   }
 
   for (cmGeneratorTarget* gt : dependencies) {

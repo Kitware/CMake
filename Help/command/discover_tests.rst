@@ -117,6 +117,11 @@ the provided regular expression and replacement strings.
 
   Tests with missing build dependencies will not be run.
 
+  .. versionchanged:: 4.6
+    Entries may be specified using
+    :manual:`generator expressions <cmake-generator-expressions(7)>`,
+    evaluated as for the ``BUILD_DEPENDS`` option of :command:`add_test`.
+
 CTest executes the discovery step to obtain the list of tests and then runs
 each discovered test using the command-line produced by ``COMMAND`` together
 with ``TEST_ARGS``.  The pass/fail behavior of each discovered test follows
