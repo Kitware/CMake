@@ -449,6 +449,17 @@ unsigned int parseVersion(std::string const& version, unsigned int& major,
     version.c_str(), "%u.%u.%u.%u", &major, &minor, &patch, &tweak));
 }
 
+// Diagnostic details for CPS locations which are only conforming on specific
+// platforms.
+#ifndef _WIN32
+cm::string_view const kCpsWindowsOnlyLocation =
+  "its directory is only CPS-conforming on Windows platforms"_s;
+#endif
+#ifndef __APPLE__
+cm::string_view const kCpsAppleOnlyLocation =
+  "its directory is only CPS-conforming on Apple platforms"_s;
+#endif
+
 } // anonymous namespace
 
 class cmFindPackageCommand::FlushDebugBufferOnExit
@@ -1976,15 +1987,18 @@ bool cmFindPackageCommand::FindConfig()
     }
   }
 
-  // Store the entry in the cache so it can be set by the user.
-  std::string init;
-  if (found) {
-    init = cmSystemTools::GetFilenamePath(this->FileFound);
-  } else {
-    init = this->Variable + "-NOTFOUND";
+  // If no file location error occurred, store the entry in the cache so it can
+  // be set by the user.
+  if (!this->FileLocationError) {
+    std::string init;
+    if (found) {
+      init = cmSystemTools::GetFilenamePath(this->FileFound);
+    } else {
+      init = this->Variable + "-NOTFOUND";
+    }
+    // We force the value since we do not get here if it was already set.
+    this->SetConfigDirCacheVariable(init);
   }
-  // We force the value since we do not get here if it was already set.
-  this->SetConfigDirCacheVariable(init);
 
   return found;
 }
@@ -2000,6 +2014,26 @@ void cmFindPackageCommand::SetConfigDirCacheVariable(std::string const& value)
         cmPolicies::NEW &&
       this->Makefile->IsNormalDefinitionSet(this->Variable)) {
     this->Makefile->AddDefinition(this->Variable, value);
+  }
+}
+
+void cmFindPackageCommand::IssueCpsLocationDiagnostic(cm::string_view detail)
+{
+  if (detail.empty()) {
+    detail = "its directory is not listed in the CPS specification for "
+             "package searching"_s;
+  }
+  constexpr auto category = cmDiagnostics::CMD_CPS_NON_CONFORMING_LOCATION;
+  this->Makefile->IssueDiagnostic(
+    category,
+    cmStrCat("find_package("_s, this->Name, ") accepted\n  \""_s,
+             this->FileFound, "\"\nbut "_s, detail, '.'));
+
+  // If the diagnostic is treated as an error, mark the file location as
+  // erroneous.
+  if (this->Makefile->GetDiagnosticAction(category) >=
+      cmDiagnostics::SendError) {
+    this->FileLocationError = true;
   }
 }
 
@@ -3333,28 +3367,43 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix)
 
   // PREFIX/(Foo|foo|FOO)/(cps|CPS)/
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, cpsPkgDirGen, iCpsGen)) {
+#ifndef _WIN32
+    this->IssueCpsLocationDiagnostic(kCpsWindowsOnlyLocation);
+#endif
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO)/*/(cps|CPS)/
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, cpsPkgDirGen, iCpsGen,
                         anyDirGen)) {
+#ifndef _WIN32
+    this->IssueCpsLocationDiagnostic(kCpsWindowsOnlyLocation);
+#endif
     return true;
   }
 
   // PREFIX/(cps|CPS)/(Foo|foo|FOO)/
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, iCpsGen, cpsPkgDirGen)) {
+#ifndef _WIN32
+    this->IssueCpsLocationDiagnostic(kCpsWindowsOnlyLocation);
+#endif
     return true;
   }
 
   // PREFIX/(cps|CPS)/(Foo|foo|FOO)/*/
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, iCpsGen, cpsPkgDirGen,
                         anyDirGen)) {
+#ifndef _WIN32
+    this->IssueCpsLocationDiagnostic(kCpsWindowsOnlyLocation);
+#endif
     return true;
   }
 
   // PREFIX/(cps|CPS)/ (useful on windows or in build trees)
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, iCpsGen)) {
+    // This location does not contain the package name and was removed from the
+    // CPS specification.
+    this->IssueCpsLocationDiagnostic();
     return true;
   }
 
@@ -3426,6 +3475,9 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix)
 
   // PREFIX/(lib/ARCH|lib*|share)/cps/
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, commonGen, cpsGen)) {
+    // These locations do not contain the package name and were removed from
+    // the CPS specification.
+    this->IssueCpsLocationDiagnostic();
     return true;
   }
 
@@ -3485,11 +3537,19 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix)
   // <prefix>/Foo.framework/Versions/*/Resources/CPS/
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, fwGen, vGen, anyGen, rGen,
                         iCpsGen)) {
+#ifndef __APPLE__
+    // Warn if reading CPS from a framework directory on non-Apple platforms.
+    this->IssueCpsLocationDiagnostic(kCpsAppleOnlyLocation);
+#endif
     return true;
   }
 
   // <prefix>/Foo.framework/Resources/CPS/
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, fwGen, rGen, iCpsGen)) {
+#ifndef __APPLE__
+    // Warn if reading CPS from a framework directory on non-Apple platforms.
+    this->IssueCpsLocationDiagnostic(kCpsAppleOnlyLocation);
+#endif
     return true;
   }
 
@@ -3530,6 +3590,10 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix)
   // <prefix>/Foo.app/Contents/Resources/CPS/
   if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, appGen, crGen,
                         cmCaseInsensitiveDirectoryListGenerator{ "cps"_s })) {
+#ifndef __APPLE__
+    // Warn if reading CPS from an app bundle on non-Apple platforms.
+    this->IssueCpsLocationDiagnostic(kCpsAppleOnlyLocation);
+#endif
     return true;
   }
 

@@ -1,0 +1,11 @@
+^CMake Warning \(cps-non-conforming-location\) at NonConformingLocation\.cmake:[0-9]+ \(find_package\):
+  find_package\(Trivial\) accepted
+
+    "[^"]*/Tests/RunCMake/find_package-CPS/cps/[Tt]rivial\.cps"
+
+  but its directory is not listed in the CPS specification for package
+  searching\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-author or
+-Wno-cps-non-conforming-location to suppress it\.$

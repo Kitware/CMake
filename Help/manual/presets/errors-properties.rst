@@ -10,6 +10,15 @@
   :cmake-option:`-Wno-error=author` on the command line.
   This may not be set to ``true`` if ``warnings.author`` is set to ``false``.
 
+.. _`CMakePresets.configurePresets.errors.cpsNonConformingLocation`:
+
+``cpsNonConformingLocation``
+  .. presets-versionadded:: 14
+
+  An optional boolean. Equivalent to passing :cmake-option:`-Werror=cps-non-conforming-location` or
+  :cmake-option:`-Wno-error=cps-non-conforming-location` on the command line.
+  This may not be set to ``true`` if ``warnings.cpsNonConformingLocation`` is set to ``false``.
+
 .. _`CMakePresets.configurePresets.errors.deprecated`:
 
 ``deprecated``

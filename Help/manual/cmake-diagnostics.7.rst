@@ -87,6 +87,7 @@ The following categories are defined:
    :maxdepth: 1
 
    /diagnostic/CMD_AUTHOR
+   /diagnostic/CMD_CPS_NON_CONFORMING_LOCATION
    /diagnostic/CMD_DEPRECATED
    /diagnostic/CMD_EXPERIMENTAL
    /diagnostic/CMD_INSTALL_ABSOLUTE_DESTINATION

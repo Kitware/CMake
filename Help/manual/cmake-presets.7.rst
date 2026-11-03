@@ -529,6 +529,15 @@ they were added and a summary of the new features and changes is given below.
 
       * The ``${configurePresetName}`` macro was added.
 
+  ``14``
+    .. versionadded:: 4.6
+
+    * Changes to `Configure Presets <Configure Preset_>`_:
+
+      * The ``cpsNonConformingLocation`` field was added to
+        :preset:`configurePresets.warnings` and
+        :preset:`configurePresets.errors`.
+
 Schema
 ======
 
