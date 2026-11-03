@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=App
+Exec=app %u
+Icon=ApplicationIcon
+Type=Application
+Categories=System

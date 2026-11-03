@@ -41,9 +41,12 @@ application links to and copy them to the install location.
   ]])
 
 The CPack AppImage generator will generate a default `AppRun`_ based on the
-provided ``.desktop`` entry.  Alternatively, if a custom ``AppRun`` is
-installed, e.g., via the :command:`install` command, it will be used instead
-of the generated one.
+provided ``.desktop`` entry.  Alternatively, a custom ``AppRun`` can be
+provided by setting :variable:`CPACK_APPIMAGE_APPRUN_FILE`, or by installing
+it to the top level of the AppDir, e.g., via the :command:`install` command.
+In both cases it will be used instead of the generated one.  The variable
+is preferred because it does not depend on
+:variable:`CPACK_PACKAGING_INSTALL_PREFIX`.
 
 .. _`AppRun`: https://docs.appimage.org/introduction/software-overview.html#apprun
 
@@ -82,6 +85,16 @@ Variables Specific to CPack AppImage Generator
   must include an ``Icon`` entry that matches :variable:`CPACK_PACKAGE_ICON`
   without the file extension.  The actual installed location of the icon
   should follow the freedesktop.org specification.
+
+  :Default: Unset
+
+.. variable:: CPACK_APPIMAGE_APPRUN_FILE
+
+  .. versionadded:: 4.6
+
+  Absolute path to a custom ``AppRun`` file.  The file is copied to the top
+  level of the AppDir and made executable, taking precedence over both the
+  generated ``AppRun`` and an ``AppRun`` installed by the project.
 
   :Default: Unset
 
