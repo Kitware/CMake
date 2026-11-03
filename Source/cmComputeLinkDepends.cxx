@@ -1076,7 +1076,11 @@ void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
     size_t dependee_index;
 
     if (cmHasPrefix(item.AsStr(), LG_END) && cmHasSuffix(item.AsStr(), '>')) {
-      assert(group);
+      if (!group) {
+        // The matching group start was not recognized, e.g., because
+        // other text was concatenated to it. Ignore the stray end.
+        continue;
+      }
       dependee_index = group->first;
       if (group->second) {
         this->GroupItems.emplace(group->first, std::move(groupItems));
