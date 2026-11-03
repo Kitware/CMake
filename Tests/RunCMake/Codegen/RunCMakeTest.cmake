@@ -1,5 +1,12 @@
 include(RunCMake)
 
+if(RunCMake_GENERATOR STREQUAL "Borland Makefiles" OR
+   RunCMake_GENERATOR STREQUAL "Watcom WMake")
+  set(fs_delay 3)
+else()
+  set(fs_delay 1.125)
+endif()
+
 function(run_codegen case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
 
@@ -65,10 +72,11 @@ block()
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(rebuild-build1 ${CMAKE_COMMAND} --build . --target codegen --config Debug)
   # Make the output newer than its input but with different content.
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay})
   file(WRITE ${RunCMake_TEST_BINARY_DIR}/generated.h "stale")
   run_cmake_command(rebuild-build2 ${CMAKE_COMMAND} --build . --target codegen --config Debug)
   # Ensure the input is newer than the output.
-  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay})
   file(WRITE ${RunCMake_TEST_BINARY_DIR}/input.txt "2")
   run_cmake_command(rebuild-build3 ${CMAKE_COMMAND} --build . --target codegen --config Debug)
 endblock()
