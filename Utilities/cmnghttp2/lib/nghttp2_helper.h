@@ -61,7 +61,15 @@ nghttp2_min_def(uint32, uint32_t)
 nghttp2_min_def(uint64, uint64_t)
 nghttp2_min_def(size, size_t)
 
-#define lstreq(A, B, N) ((sizeof((A)) - 1) == (N) && memcmp((A), (B), (N)) == 0)
+/*
+ * nghttp2_strlen_lit returns the length of string literal |S|.  This
+ * macro assumes |S| is NULL-terminated string literal.  It must not
+ * be used with pointers.
+ */
+#define nghttp2_strlen_lit(S) (sizeof(S) - 1)
+
+#define lstreq(A, B, N)                                                        \
+  (nghttp2_strlen_lit((A)) == (N) && memcmp((A), (B), (N)) == 0)
 
 #define nghttp2_struct_of(ptr, type, member)                                   \
   ((type *)(void *)((char *)(ptr) - offsetof(type, member)))
@@ -91,6 +99,16 @@ uint16_t nghttp2_get_uint16(const uint8_t *data);
 uint32_t nghttp2_get_uint32(const uint8_t *data);
 
 void nghttp2_downcase(uint8_t *s, size_t len);
+
+extern const uint8_t nghttp2_downcase_tbl[];
+
+/*
+ * nghttp2_downcase_byte returns the lower case version of |c| if 'A'
+ * <= |c| && |c| <= 'Z'.  Otherwise, it returns |c|.
+ */
+static inline uint8_t nghttp2_downcase_byte(uint8_t c) {
+  return nghttp2_downcase_tbl[c];
+}
 
 /*
  * Adjusts |*local_window_size_ptr|, |*recv_window_size_ptr|,
@@ -141,5 +159,13 @@ int nghttp2_should_send_window_update(int32_t local_window_size,
  * . Returns dest + len.
  */
 uint8_t *nghttp2_cpymem(uint8_t *dest, const void *src, size_t len);
+
+/*
+ * nghttp2_check_nonempty_header_name validates regular header name
+ * pointed by |name| of length |len|.  |len| must be greater than
+ * zero.  This function returns 1 if it succeeds, or 2 if the name
+ * contains a character in [A-Z], otherwise 0.
+ */
+int nghttp2_check_nonempty_header_name(const uint8_t *name, size_t len);
 
 #endif /* !defined(NGHTTP2_HELPER_H) */
