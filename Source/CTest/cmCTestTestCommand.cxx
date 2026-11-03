@@ -95,7 +95,7 @@ cmCTestTestCommand::ResolveTestPreset(cmMakefile& mf,
     resolved.EffectivePreset, resolved.PresetsGraph->TestPresets);
   auto resolveError = cmCMakePresetsGraph::FormatPresetError<TestPreset>(
     resolveResult.StatusCode, resolveResult.ErrorPresetName,
-    resolved.SourceDirectory);
+    resolveResult.Suggestion, resolved.SourceDirectory);
   if (resolveError) {
     status.SetError(*resolveError);
     return cm::nullopt;

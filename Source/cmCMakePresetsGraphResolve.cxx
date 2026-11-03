@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include <map>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include <cm/optional>
 
@@ -21,6 +23,13 @@ cmCMakePresetsGraph::PresetResolveResult<T> cmCMakePresetsGraph::ResolvePreset(
   if (presetPair == presets.end()) {
     result.StatusCode = Result::Status::NotFound;
     result.ErrorPresetName = presetName;
+    std::vector<std::string> candidates;
+    for (auto const& pair : presets) {
+      if (!pair.second.Unexpanded.Hidden) {
+        candidates.push_back(pair.first);
+      }
+    }
+    result.Suggestion = cmFindClosestString(presetName, candidates);
     return result;
   }
   if (presetPair->second.Unexpanded.Hidden) {
@@ -72,16 +81,29 @@ cmCMakePresetsGraph::ResolvePreset(
   std::map<std::string, PresetPair<cmCMakePresetsGraph::PackagePreset>> const&)
   const;
 
+template cmCMakePresetsGraph::PresetResolveResult<
+  cmCMakePresetsGraph::WorkflowPreset>
+cmCMakePresetsGraph::ResolvePreset(
+  std::string const&,
+  std::map<std::string,
+           PresetPair<cmCMakePresetsGraph::WorkflowPreset>> const&) const;
+
 template <class T>
 cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError(
   PresetResolveStatus status, std::string const& errorPresetName,
-  std::string const& directory)
+  std::string const& suggestion, std::string const& directory)
 {
   using Status = PresetResolveStatus;
   switch (status) {
-    case Status::NotFound:
-      return cmStrCat("No such ", T::kind(), " preset in ", directory, ": \"",
-                      errorPresetName, '"');
+    case Status::NotFound: {
+      std::string error = cmStrCat("No such ", T::kind(), " preset in ",
+                                   directory, ": \"", errorPresetName, '"');
+      if (!suggestion.empty()) {
+        error =
+          cmStrCat(std::move(error), ". Did you mean: \"", suggestion, "\"?");
+      }
+      return error;
+    }
     case Status::Hidden:
       return cmStrCat("Cannot use hidden ", T::kind(), " preset in ",
                       directory, ": \"", errorPresetName, '"');
@@ -101,16 +123,21 @@ cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError(
 // Explicit template instantiations for FormatPresetError
 template cm::optional<std::string>
 cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::ConfigurePreset>(
-  PresetResolveStatus, std::string const&, std::string const&);
+  PresetResolveStatus, std::string const&, std::string const&,
+  std::string const&);
 
-template cm::optional<std::string>
-cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::BuildPreset>(
-  PresetResolveStatus, std::string const&, std::string const&);
+template cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError<
+  cmCMakePresetsGraph::BuildPreset>(PresetResolveStatus, std::string const&,
+                                    std::string const&, std::string const&);
 
-template cm::optional<std::string>
-cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::TestPreset>(
-  PresetResolveStatus, std::string const&, std::string const&);
+template cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError<
+  cmCMakePresetsGraph::TestPreset>(PresetResolveStatus, std::string const&,
+                                   std::string const&, std::string const&);
 
-template cm::optional<std::string>
-cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::PackagePreset>(
-  PresetResolveStatus, std::string const&, std::string const&);
+template cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError<
+  cmCMakePresetsGraph::PackagePreset>(PresetResolveStatus, std::string const&,
+                                      std::string const&, std::string const&);
+
+template cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError<
+  cmCMakePresetsGraph::WorkflowPreset>(PresetResolveStatus, std::string const&,
+                                       std::string const&, std::string const&);

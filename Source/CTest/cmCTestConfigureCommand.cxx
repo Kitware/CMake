@@ -75,7 +75,7 @@ bool ConstructConfigureCommand(
     auto resolveError =
       cmCMakePresetsGraph::FormatPresetError<ConfigurePreset>(
         resolveResult.StatusCode, resolveResult.ErrorPresetName,
-        sourceDirectory);
+        resolveResult.Suggestion, sourceDirectory);
     if (resolveError) {
       status.SetError(*resolveError);
       return false;

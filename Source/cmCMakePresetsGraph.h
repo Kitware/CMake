@@ -426,6 +426,7 @@ public:
 
     Status StatusCode = Status::Success;
     std::string ErrorPresetName;
+    std::string Suggestion;
     T const* Preset = nullptr;
   };
 
@@ -439,7 +440,7 @@ public:
   template <class T>
   static cm::optional<std::string> FormatPresetError(
     PresetResolveStatus status, std::string const& errorPresetName,
-    std::string const& directory);
+    std::string const& suggestion, std::string const& directory);
 
   template <class T>
   bool ResolveDependentPresets(std::map<std::string, PresetPair<T>>& presets);
@@ -562,22 +563,35 @@ cmCMakePresetsGraph::ResolvePreset(
            cmCMakePresetsGraph::PresetPair<
              cmCMakePresetsGraph::PackagePreset>> const&) const;
 
+extern template cmCMakePresetsGraph::PresetResolveResult<
+  cmCMakePresetsGraph::WorkflowPreset>
+cmCMakePresetsGraph::ResolvePreset(
+  std::string const&,
+  std::map<std::string,
+           cmCMakePresetsGraph::PresetPair<
+             cmCMakePresetsGraph::WorkflowPreset>> const&) const;
+
 extern template cm::optional<std::string>
 cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::ConfigurePreset>(
   cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
-  std::string const&);
+  std::string const&, std::string const&);
 
 extern template cm::optional<std::string>
 cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::BuildPreset>(
   cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
-  std::string const&);
+  std::string const&, std::string const&);
 
 extern template cm::optional<std::string>
 cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::TestPreset>(
   cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
-  std::string const&);
+  std::string const&, std::string const&);
 
 extern template cm::optional<std::string>
 cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::PackagePreset>(
   cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
-  std::string const&);
+  std::string const&, std::string const&);
+
+extern template cm::optional<std::string>
+cmCMakePresetsGraph::FormatPresetError<cmCMakePresetsGraph::WorkflowPreset>(
+  cmCMakePresetsGraph::PresetResolveStatus, std::string const&,
+  std::string const&, std::string const&);
