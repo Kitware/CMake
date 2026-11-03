@@ -2597,17 +2597,25 @@ int cmCTest::Run(std::vector<std::string> const& args)
                      } },
   };
 
+  // Parse `arg` using the first entry of `table` that matches it. Returns
+  // nothing if no entry matches, or the result of parsing otherwise.
+  auto const tryParse = [&args](std::vector<CommandArgument> const& table,
+                                std::string const& arg,
+                                size_t& i) -> cm::optional<bool> {
+    for (auto const& m : table) {
+      if (m.matches(arg)) {
+        return m.parse(arg, i, args);
+      }
+    }
+    return cm::nullopt;
+  };
+
   // Process command line arguments for presets first, since other arguments
   // can override those settings.
   for (size_t i = 1; i < args.size(); ++i) {
-    std::string const& arg = args[i];
-    for (auto const& m : presetArguments) {
-      if (m.matches(arg)) {
-        if (!m.parse(arg, i, args)) {
-          return 1;
-        }
-        break;
-      }
+    cm::optional<bool> const parsed = tryParse(presetArguments, args[i], i);
+    if (parsed && !parsed.value()) {
+      return 1;
     }
   }
 
@@ -2636,16 +2644,11 @@ int cmCTest::Run(std::vector<std::string> const& args)
       break;
     }
 
-    bool matched = false;
-    for (auto const& m : arguments) {
-      if (m.matches(arg)) {
-        matched = true;
-        if (!m.parse(arg, i, args)) {
-          return 1;
-        }
-        break;
-      }
+    cm::optional<bool> const parsed = tryParse(arguments, arg, i);
+    if (parsed && !parsed.value()) {
+      return 1;
     }
+    bool matched = parsed.has_value();
     if (!matched && arg == "--build-options"_s) {
       matched = true;
       while (i + 1 < args.size() && args[i + 1] != "--build-target"_s &&
