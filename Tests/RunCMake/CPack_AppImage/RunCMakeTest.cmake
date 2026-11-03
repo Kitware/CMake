@@ -13,3 +13,8 @@ block()
   list(APPEND RunCMake_TEST_OPTIONS -DCUSTOM_APPRUN=ON)
   run_cpack(AppImageCustomAppRun SAMPLE AppImageUsrPrefix BUILD)
 endblock()
+
+block()
+  list(APPEND RunCMake_TEST_OPTIONS "-DCPACK_APPIMAGE_VERSION=4.5.6-test")
+  run_cpack(AppImageVersion SAMPLE AppImageTestApp BUILD)
+endblock()

@@ -58,6 +58,10 @@ int cmCPackAppImageGenerator::InitializeInternal()
     return 0;
   }
 
+  if (cmValue packageVersion = this->GetOption("CPACK_PACKAGE_VERSION")) {
+    this->SetOptionIfNotSet("CPACK_APPIMAGE_VERSION", packageVersion);
+  }
+
   return Superclass::InitializeInternal();
 }
 
@@ -298,6 +302,13 @@ int cmCPackAppImageGenerator::PackageFiles()
     }
   };
 
+  auto addEnvOption = [this](std::string const& op, std::string envName) {
+    auto opt = this->GetOption(op);
+    if (opt) {
+      cmSystemTools::PutEnv(cmStrCat(envName, '=', *opt));
+    }
+  };
+
   addOption("CPACK_APPIMAGE_UPDATE_INFORMATION", "--updateinformation");
 
   addOptionFlag("CPACK_APPIMAGE_GUESS_UPDATE_INFORMATION", "--guess");
@@ -315,6 +326,13 @@ int cmCPackAppImageGenerator::PackageFiles()
   addOptionFlag("CPACK_APPIMAGE_SIGN", "--sign");
 
   addOption("CPACK_APPIMAGE_SIGN_KEY", "--sign-key");
+
+  addEnvOption("CPACK_APPIMAGE_ARCH", "ARCH");
+
+  addEnvOption("CPACK_APPIMAGE_SIGN_PASSPHRASE",
+               "APPIMAGETOOL_SIGN_PASSPHRASE");
+
+  addEnvOption("CPACK_APPIMAGE_VERSION", "VERSION");
 
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                 "Running AppImageTool: "
