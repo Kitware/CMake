@@ -136,6 +136,7 @@ private:
   std::string GenerateLLVMPath(std::string fileString);
   std::string GetTestMetricsFile() const;
   void CollectLLVMCoverage();
+  void CollectCMakeCoverage();
   void SetupResourcesEnvironment(cmEnvironment& env);
 
   // Returns "completed/total Test #Index: "
@@ -168,6 +169,9 @@ private:
   int RunCount = 1;  // how many runs it may be given
   bool RunAgain = false;
   bool UseLLVMCov = false;
+  bool UseCMakeCov = false;
+  // Whether this run of the test has a CMake listfile coverage folder.
+  bool CMakeCovScratchOk = false;
   size_t TotalNumberOfTests;
 };
 

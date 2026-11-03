@@ -655,6 +655,7 @@ endif()
 
 add_RunCMake_test(LinkItemValidation)
 add_RunCMake_test(LinkStatic)
+add_RunCMake_test(ListFileCoverage)
 add_RunCMake_test(ARCHIVER-prefix -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|Fujitsu|FujitsuClang)$")
   add_RunCMake_test(MetaCompileFeatures)
@@ -1311,9 +1312,7 @@ endif()
 add_RunCMake_test(ExternalProject-CMP0225)
 add_RunCMake_test(FetchContent)
 add_RunCMake_test(FetchContent_find_package)
-if(CMake_TEST_CLANG_COVERAGE)
-  add_RunCMake_test(CTestCoverage -DCMake_TEST_CLANG_COVERAGE=${CMake_TEST_CLANG_COVERAGE})
-endif()
+add_RunCMake_test(CTestCoverage -DCMake_TEST_CLANG_COVERAGE=${CMake_TEST_CLANG_COVERAGE})
 set(CTestCommandLine_ARGS
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}

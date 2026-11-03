@@ -1,0 +1,37 @@
+# Read Coverage.xml and CoverageLog-0.xml of the dashboard tag in the
+# test binary directory.
+file(STRINGS "${RunCMake_TEST_BINARY_DIR}/Testing/TAG" tag LIMIT_COUNT 1)
+set(tag_dir "${RunCMake_TEST_BINARY_DIR}/Testing/${tag}")
+foreach(f IN ITEMS Coverage.xml CoverageLog-0.xml)
+  if(NOT EXISTS "${tag_dir}/${f}")
+    string(APPEND RunCMake_TEST_FAILED "${f} not found in\n  ${tag_dir}\n")
+  endif()
+endforeach()
+if(RunCMake_TEST_FAILED)
+  return()
+endif()
+file(READ "${tag_dir}/Coverage.xml" coverage_xml)
+file(READ "${tag_dir}/CoverageLog-0.xml" coverage_log_xml)
+
+# Set out to the File element named name in xml, or to "" if none.
+function(get_file_element out xml name)
+  set(elem "")
+  string(FIND "${xml}" "<File Name=\"${name}\"" start)
+  if(NOT start EQUAL -1)
+    string(SUBSTRING "${xml}" ${start} -1 elem)
+    string(FIND "${elem}" "</File>" end)
+    string(SUBSTRING "${elem}" 0 ${end} elem)
+  endif()
+  set(${out} "${elem}" PARENT_SCOPE)
+endfunction()
+
+# Fail if a File element named name exists in either file.
+function(expect_no_file name)
+  foreach(f IN ITEMS coverage_xml coverage_log_xml)
+    get_file_element(elem "${${f}}" "${name}")
+    if(elem)
+      string(APPEND RunCMake_TEST_FAILED "Unexpected File for ${name}:\n${elem}\n")
+    endif()
+  endforeach()
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+endfunction()

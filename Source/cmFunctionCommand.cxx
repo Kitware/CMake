@@ -23,6 +23,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmListFileCoverage.h"
+#endif
+
 namespace {
 std::string const ARGC = "ARGC";
 std::string const ARGNC = "ARGNC";
@@ -74,6 +78,12 @@ bool cmFunctionHelperCommand::operator()(
     inStatus.SetError(errorMsg);
     return false;
   }
+
+#ifndef CMAKE_BOOTSTRAP
+  if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+    coverage->FunctionCalled(this->FilePath, this->Line);
+  }
+#endif
 
   cmMakefile::FunctionPushPop functionScope(&makefile, this->FilePath,
                                             this->Policies, this->Diagnostics);

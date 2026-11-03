@@ -7,6 +7,7 @@
 #include <cstddef> // IWYU pragma: keep
 #include <cstdint>
 #include <cstdio>
+#include <functional>
 #include <ratio>
 #include <sstream>
 #include <utility>
@@ -18,18 +19,22 @@
 
 #include <cm3p/json/value.h>
 
+#include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmDuration.h"
 #include "cmEnvironment.h"
+#include "cmGeneratedFileStream.h"
 #include "cmInstrumentation.h"
 #include "cmInstrumentationQuery.h"
 #include "cmJSONState.h"
+#include "cmLcovTracefile.h"
 #include "cmList.h"
 #include "cmProcess.h"
 #include "cmStringAlgorithms.h"
@@ -940,6 +945,40 @@ bool cmCTestRunTest::ForkProcess()
     cmSystemTools::RemoveFile(profDataPath);
   };
 
+  // Give the test its own folder for CMake listfile coverage.
+  if (coverageTool == "CMAKE"_s) {
+    this->UseCMakeCov = true;
+    // Isolate the test from any ambient CMAKE_LISTFILE_COVERAGE_DIR
+    env.UnPutEnv("CMAKE_LISTFILE_COVERAGE_DIR");
+
+    // Remove the data of an earlier run.  Never remove a regular file or a
+    // symbolic link at the folder path.  A symbolic link blocks the folder,
+    // because ctest would record into the link target and delete its content.
+    std::string const scratch = this->GenerateLLVMPath("_cmake-coverage");
+    bool cleared = true;
+    if (cmSystemTools::FileIsSymlink(scratch)) {
+      cleared = false;
+    } else if (cmSystemTools::FileIsDirectory(scratch)) {
+      cleared = static_cast<bool>(cmSystemTools::RemoveADirectory(scratch));
+    }
+    cmSystemTools::RemoveFile(this->GenerateLLVMPath(".cmake-coverage.info"));
+
+    this->CMakeCovScratchOk =
+      cleared && static_cast<bool>(cmSystemTools::MakeDirectory(scratch));
+    if (this->CMakeCovScratchOk) {
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_VERBOSE_OUTPUT, this->TestHandler->GetQuiet(),
+        this->Index,
+        ": Using environment variable CMAKE_LISTFILE_COVERAGE_DIR="_s, scratch,
+        '\n');
+      env.PutEnv(cmStrCat("CMAKE_LISTFILE_COVERAGE_DIR="_s, scratch));
+    } else {
+      cmCTestLog(this->CTest, WARNING,
+                 "Cannot create CMake listfile coverage folder: ", scratch,
+                 '\n');
+    }
+  }
+
   if (this->UseAllocatedResources) {
     this->SetupResourcesEnvironment(env);
   } else {
@@ -1150,11 +1189,103 @@ void cmCTestRunTest::CollectLLVMCoverage()
   cmSystemTools::RemoveFile(profManifestPath);
 }
 
+void cmCTestRunTest::CollectCMakeCoverage()
+{
+  if (!this->CMakeCovScratchOk) {
+    return;
+  }
+  this->CMakeCovScratchOk = false;
+
+  // Coverage problems are warnings.  An error would make ctest -S fail.
+  std::string const& testName = this->TestProperties->Name;
+  if (this->TestProcess->GetProcessStatus() == cmProcess::State::Expired) {
+    cmCTestLog(this->CTest, WARNING, "CMake listfile coverage of test ",
+               testName, " is incomplete because the test timed out.\n");
+  }
+
+  // List the files with cmsys::Directory, because a glob pattern would
+  // treat "[" and "]" in the test name as special.
+  std::string const scratch = this->GenerateLLVMPath("_cmake-coverage");
+  std::vector<std::string> inputs;
+  {
+    cmsys::Directory dir;
+    if (dir.Load(scratch)) {
+      for (unsigned long i = 0; i < dir.GetNumberOfFiles(); ++i) {
+        std::string const& name = dir.GetFileName(i);
+        if (cmHasLiteralSuffix(name, ".info") && !dir.FileIsDirectory(i)) {
+          inputs.push_back(cmStrCat(scratch, '/', name));
+        }
+      }
+    }
+  }
+  std::sort(inputs.begin(), inputs.end());
+
+  cmLcovTracefile merged;
+  auto const warn = [this](std::string const& warning) {
+    cmCTestLog(this->CTest, WARNING, warning, '\n');
+  };
+  bool keepScratch = !merged.MergeFiles(inputs, warn);
+
+  // Leave out the files in the build tree, such as generated files and
+  // try_compile projects, unless the build tree is the source tree.
+  std::string const sourceDir =
+    this->CTest->GetCTestConfiguration("SourceDirectory");
+  std::string buildDir = this->CTest->GetCTestConfiguration("BuildDirectory");
+  if (buildDir.empty()) {
+    buildDir = this->CTest->GetBinaryDir();
+  }
+  auto const logRemoved = [this](std::string const& path) {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(),
+               ": Ignoring CMake listfile coverage of a file in the build "
+               "tree: ",
+               path, '\n');
+  };
+  merged.RemoveBuildTreeFiles(sourceDir, buildDir, logRemoved);
+
+  // A test that runs no CMake code, or only code in the build tree or in
+  // files with no lines and no functions, has no data.  That is not a
+  // problem.
+  if (merged.HasData()) {
+    // lcov accepts only letters, digits and "_" in a test name.
+    merged.TestName = testName;
+    for (char& c : merged.TestName) {
+      if (!cmsysString_isalnum(c) && c != '_') {
+        c = '_';
+      }
+    }
+
+    // Close() does not report a failed rename, so check the result too.
+    std::string const output = this->GenerateLLVMPath(".cmake-coverage.info");
+    bool written = false;
+    {
+      cmGeneratedFileStream fout(output, true);
+      merged.Write(fout);
+      written = static_cast<bool>(fout) && fout.Close() &&
+        cmSystemTools::FileExists(output, true);
+    }
+    if (!written) {
+      cmCTestLog(this->CTest, WARNING,
+                 "Cannot write CMake listfile coverage file: ", output, '\n');
+      keepScratch = true;
+    }
+  }
+
+  // Never remove through a symbolic link.
+  if (!keepScratch && !cmSystemTools::FileIsSymlink(scratch)) {
+    cmSystemTools::RemoveADirectory(scratch);
+  }
+}
+
 void cmCTestRunTest::FinalizeTest(bool started)
 {
   // Collect known LLVM coverage files into binary form
   if (this->UseLLVMCov) {
     this->CollectLLVMCoverage();
+  }
+
+  // Merge the CMake listfile coverage files of the test
+  if (this->UseCMakeCov) {
+    this->CollectCMakeCoverage();
   }
 
   if (started && this->CTest->GetInstrumentation().HasQuery()) {

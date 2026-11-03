@@ -109,3 +109,41 @@ the test suite and build test binaries.  One may then run tests normally:
 Note that the configuration with which one drives tests in the second
 build tree is independent of the configuration with which CMake was
 built in the first.
+
+Measuring Coverage of CMake Code
+================================
+
+To see which lines of CMake language code, such as the files in
+``Modules/``, the tests run, use the ``CMAKE`` coverage tool of ``ctest``:
+
+1. Configure the CMake build with ``-DCTEST_TEST_COVERAGE_TOOL=CMAKE``
+   using ``cmake`` version 4.4 or newer.  A plain ``ctest`` run in the
+   build tree is then configured to collect coverage data.
+
+2. Run the tests with the ``ctest`` that the build produced, for example:
+
+   .. code-block:: console
+
+     $ bin/ctest -R '^RunCMake\.Example$'
+
+   For each test, ``ctest`` writes an lcov tracefile named
+   ``<test-name>.cmake-coverage.info`` into the directory of the build
+   tree that holds the test, here ``Tests/RunCMake``.  The tracefile
+   leaves out the files in the build tree, such as the build trees of the
+   test cases.
+
+3. Keep only the records of files in the CMake source tree.  The
+   tracefile can also name files outside both trees, such as the package
+   configuration files that ``find_package()`` reads.  With ``lcov``,
+   where ``<source>`` is the absolute path of the CMake source tree:
+
+   .. code-block:: console
+
+     $ lcov --extract Tests/RunCMake/RunCMake.Example.cmake-coverage.info \
+         '<source>/*' -o example.info
+
+4. Make an HTML report with ``genhtml`` from lcov:
+
+   .. code-block:: console
+
+     $ genhtml -o coverage example.info

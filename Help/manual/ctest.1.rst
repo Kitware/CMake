@@ -1697,6 +1697,56 @@ Configuration settings include:
     are removed before running the test.  Any existing ``LLVM_PROFILE_FILE``
     environment variable is ignored.
 
+  ``CMAKE``
+    .. versionadded:: 4.6
+
+    This value records coverage of the CMake language code that each test
+    runs, for example the :option:`cmake -P` scripts and the projects that
+    the test configures.  See the :envvar:`CMAKE_LISTFILE_COVERAGE_DIR`
+    environment variable for what gets recorded.
+
+    Before each test, CTest removes any
+    ``<directory>/<test-name>.cmake-coverage.info`` file and
+    ``<directory>/<test-name>_cmake-coverage`` folder that an earlier run
+    left, and creates that folder again, empty.  ``<directory>``
+    is the absolute path to the directory where the ``CTestTestfile.cmake``
+    that describes the test is located.  CTest runs the test with the
+    :envvar:`CMAKE_LISTFILE_COVERAGE_DIR` environment variable set to the
+    folder, so each :program:`cmake` and :program:`ctest` process of the
+    test records into it.  Any existing value of the variable is ignored.
+
+    After the test, CTest merges the lcov tracefiles in the folder into
+    ``<directory>/<test-name>.cmake-coverage.info`` and removes the folder.
+    The merge adds the hit counts of each line and each function.  The
+    merged file leaves out the files under the ``BuildDirectory`` setting,
+    such as files that CMake generates and the projects that
+    :command:`try_compile` configures, unless that setting is the same as
+    the ``SourceDirectory`` setting.  The merged file has one ``TN:``
+    record that holds the test name, with each character other than a
+    letter, a digit or ``_`` replaced by ``_``.  The file name keeps the
+    real test name.  A test that runs no CMake language code, or only code
+    under the build tree, gets no file.
+
+    Coverage problems do not change the result of a test.  CTest reports
+    them as warnings:
+
+    * If CTest cannot create the folder, it runs the test without the
+      variable, and the test gets no file.
+    * If a file in the folder cannot be read, CTest skips it and merges
+      the others.  It keeps the folder for inspection.
+    * If CTest cannot write the merged file, it keeps the folder.
+    * If a test times out, CTest stops its processes, and their data is
+      lost.  CTest reports that the coverage of the test is incomplete.
+
+    As with ``LLVM-COV``, a test name that contains ``/`` gives nested
+    folders, and with :option:`ctest --repeat`, only the data of the last
+    run of a test is kept.
+
+    The variable set for a test applies only to the test.  CTest records
+    coverage of the CMake language code that it runs itself, such as
+    ``CTestTestfile.cmake`` files and :ref:`Dashboard Client` scripts, only
+    if :envvar:`CMAKE_LISTFILE_COVERAGE_DIR` is set when CTest starts.
+
   If no value is specified, no work is done and nothing is added to the
   environment.
 

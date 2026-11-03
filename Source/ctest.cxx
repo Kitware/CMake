@@ -13,6 +13,7 @@
 #include "cmDocumentationEntry.h"
 #include "cmInstrumentation.h"
 #include "cmInstrumentationQuery.h"
+#include "cmListFileCoverage.h"
 #include "cmStdIoConsole.h"
 #include "cmSystemTools.h"
 
@@ -267,6 +268,15 @@ int main(int argc, char const* const* argv)
   // copy the args to a vector
   auto args = std::vector<std::string>(argv, argv + argc);
 
+  // Record coverage of the CMake code that ctest runs itself.
+  std::string error;
+  if (!cmListFileCoverage::Start(error)) {
+    cmSystemTools::Error(error);
+    return 1;
+  }
+
   // run ctest
-  return cmCTest{}.Run(args);
+  int const ret = cmCTest{}.Run(args);
+  cmListFileCoverage::Finish();
+  return ret;
 }

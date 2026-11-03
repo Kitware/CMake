@@ -90,6 +90,7 @@
 #  include "cmInstrumentation.h"
 #  include "cmInstrumentationInterrupt.h"
 #  include "cmInstrumentationQuery.h"
+#  include "cmListFileCoverage.h"
 #  include "cmMakefileProfilingData.h"
 #  include "cmVariableWatch.h"
 #endif
@@ -3262,6 +3263,25 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
     cmSystemTools::PutEnv("MAKEFLAGS=");
   }
 
+  // After generating fbuild.bff, FastBuild sees rebuild-bff as outdated since
+  // it hasn’t built the target yet. To make it a no-op for future runs, we
+  // trigger a dummy fbuild invocation that creates this marker file and runs
+  // CMake, marking rebuild-bff as up-to-date.  That run only touches a file,
+  // so check for it before PreLoad.cmake, and run no CMake code.
+  std::string const FBuildRestatFile =
+    cmStrCat(this->GetHomeOutputDirectory(), '/', FASTBUILD_RESTAT_FILE);
+  if (!noconfigure && cmSystemTools::FileExists(FBuildRestatFile)) {
+    cmsys::ifstream restat(FBuildRestatFile.c_str(),
+                           std::ios::in | std::ios::binary);
+    std::string const file((std::istreambuf_iterator<char>(restat)),
+                           std::istreambuf_iterator<char>());
+    // On Windows can not delete file if it's still opened.
+    restat.close();
+    cmSystemTools::Touch(file, true);
+    cmSystemTools::RemoveFile(FBuildRestatFile);
+    return 0;
+  }
+
   this->PreLoadCMakeFiles();
 
   if (noconfigure) {
@@ -3273,23 +3293,17 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
   if (!this->CheckBuildSystem()) {
     return 0;
   }
-  // After generating fbuild.bff, FastBuild sees rebuild-bff as outdated since
-  // it hasn’t built the target yet. To make it a no-op for future runs, we
-  // trigger a dummy fbuild invocation that creates this marker file and runs
-  // CMake, marking rebuild-bff as up-to-date.
-  std::string const FBuildRestatFile =
-    cmStrCat(this->GetHomeOutputDirectory(), '/', FASTBUILD_RESTAT_FILE);
-  if (cmSystemTools::FileExists(FBuildRestatFile)) {
-    cmsys::ifstream restat(FBuildRestatFile.c_str(),
-                           std::ios::in | std::ios::binary);
-    std::string const file((std::istreambuf_iterator<char>(restat)),
-                           std::istreambuf_iterator<char>());
-    // On Windows can not delete file if it's still opened.
-    restat.close();
-    cmSystemTools::Touch(file, true);
-    cmSystemTools::RemoveFile(FBuildRestatFile);
-    return 0;
+
+#if !defined(CMAKE_BOOTSTRAP)
+  // A --check-build-system run records coverage only if it re-runs.
+  if (!this->CheckBuildSystemArgument.empty()) {
+    std::string error;
+    if (!cmListFileCoverage::Start(error)) {
+      cmSystemTools::Error(error);
+      return -1;
+    }
   }
+#endif
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (!this->StartDebuggerIfEnabled()) {

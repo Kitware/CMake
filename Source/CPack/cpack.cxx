@@ -29,6 +29,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmJSONState.h"
 #include "cmList.h"
+#include "cmListFileCoverage.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -86,6 +87,11 @@ std::vector<cmDocumentationEntry> makeGeneratorDocs(
   return docs;
 }
 
+// Write the CMake listfile coverage of this process on every return.
+struct ListFileCoverageFinisher
+{
+  ~ListFileCoverageFinisher() { cmListFileCoverage::Finish(); }
+};
 } // namespace
 
 // this is CPack.
@@ -444,7 +450,16 @@ int main(int argc, char const* const* argv)
   // This part is used for cpack documentation lookup as well.
   cminst.AddCMakePaths();
 
+  ListFileCoverageFinisher const coverageFinisher{};
   if (parsed && !help) {
+    // Record coverage of the CMake code that cpack runs, such as the CPack
+    // generator modules and the install scripts of the project.
+    std::string error;
+    if (!cmListFileCoverage::Start(error)) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR, error << '\n');
+      return 1;
+    }
+
     // find out which system cpack is running on, so it can setup the search
     // paths, so FIND_XXX() commands can be used in scripts
     std::string systemFile =

@@ -368,6 +368,32 @@ set(CTEST_TEST_COVERAGE_TOOL "LLVM-COV")
 endfunction()
 run_CTestTestCoverageToolVar()
 
+function(run_CTestTestCoverageToolCMake)
+  set(CASE_CTEST_TEST_ARGS "COVERAGE_TOOL" "CMAKE")
+  run_ctest(TestCTestTestCoverageToolCMake -VV)
+endfunction()
+run_CTestTestCoverageToolCMake()
+
+# A coverage problem is a warning, so the dashboard script does not fail.
+function(run_TestCoverageToolCMakeNoScratch)
+  set(CASE_CTEST_TEST_ARGS "COVERAGE_TOOL" "CMAKE")
+  set(CASE_CTEST_TEST_RAW_ARGS "RETURN_VALUE ret")
+  set(CASE_CMAKELISTS_SUFFIX_CODE "
+add_test(NAME blocked COMMAND \"\${CMAKE_COMMAND}\" -P \"${RunCMake_SOURCE_DIR}/../CTestCoverage/CoverageBlocked.cmake\")
+")
+  # A regular file blocks the scratch folder.
+  set(CASE_TEST_PREFIX_CODE [[
+file(WRITE "${CTEST_SCRIPT_DIRECTORY}-build/blocked_cmake-coverage" "")
+]])
+  set(CASE_TEST_SUFFIX_CODE [[
+if(NOT ret EQUAL 0)
+  message(FATAL_ERROR "ctest_test returned ${ret}")
+endif()
+]])
+  run_ctest(TestCoverageToolCMakeNoScratch)
+endfunction()
+run_TestCoverageToolCMakeNoScratch()
+
 # test for OUTPUT_JUNIT
 run_ctest_test(OutputJUnit OUTPUT_JUNIT junit.xml REPEAT UNTIL_FAIL:2)
 

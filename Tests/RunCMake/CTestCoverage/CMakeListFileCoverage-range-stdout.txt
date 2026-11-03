@@ -1,0 +1,2 @@
+Ignoring coverage of line 10 past the end of file: [^
+]*/three\.cmake
