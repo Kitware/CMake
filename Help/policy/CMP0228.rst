@@ -1,0 +1,31 @@
+CMP0228
+-------
+
+.. versionadded:: 4.6
+
+File set usage requirements are evaluated for the consumer.
+
+The :prop_fs:`INTERFACE_COMPILE_DEFINITIONS`,
+:prop_fs:`INTERFACE_COMPILE_OPTIONS`, and
+:prop_fs:`INTERFACE_INCLUDE_DIRECTORIES` file set properties specify usage
+requirements for compiling the sources of a file set in a consuming target.
+In CMake 4.5 and below, generator expressions in these properties are
+evaluated for the target that owns the file set, so that
+:genex:`TARGET_PROPERTY:prop` reads ``prop`` from the owner rather than from
+the consumer.
+
+CMake 4.6 and above prefer to evaluate these properties for the consumer, as
+for other :ref:`usage requirements <Target Usage Requirements>`.  This policy
+provides compatibility with projects that have not been updated to expect the
+new behavior.  Its setting is recorded by each target as it is created, and
+affects the file sets owned by that target.
+
+The ``OLD`` behavior for this policy is to evaluate the properties for the
+target that owns the file set.  The ``NEW`` behavior is to evaluate them for
+the consumer.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

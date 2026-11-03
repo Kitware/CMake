@@ -519,15 +519,18 @@ void cmGhsMultiTargetGenerator::WriteFileSetProperty(
   if (propName == "COMPILE_OPTIONS"_s) {
     entries = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileOptions(this->ConfigName, lang)
-      : fileSet->GetInterfaceCompileOptions(this->ConfigName, lang);
+      : fileSet->GetInterfaceCompileOptions(this->ConfigName, lang,
+                                            this->GeneratorTarget);
   } else if (propName == "COMPILE_DEFINITIONS"_s) {
     entries = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileDefinitions(this->ConfigName, lang)
-      : fileSet->GetInterfaceCompileDefinitions(this->ConfigName, lang);
+      : fileSet->GetInterfaceCompileDefinitions(this->ConfigName, lang,
+                                                this->GeneratorTarget);
   } else if (propName == "INCLUDE_DIRECTORIES"_s) {
     entries = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetIncludeDirectories(this->ConfigName, lang)
-      : fileSet->GetInterfaceIncludeDirectories(this->ConfigName, lang);
+      : fileSet->GetInterfaceIncludeDirectories(this->ConfigName, lang,
+                                                this->GeneratorTarget);
   }
 
   for (auto const& entry : entries) {

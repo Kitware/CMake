@@ -1324,7 +1324,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   if (fileSet) {
     auto options = fileSet->BelongsTo(gtgt)
       ? fileSet->GetCompileOptions(config, lang)
-      : fileSet->GetInterfaceCompileOptions(config, lang);
+      : fileSet->GetInterfaceCompileOptions(config, lang, gtgt);
     if (!options.empty()) {
       lg->AppendCompileOptions(flags, cm::remove_BT(options));
     }
@@ -1351,7 +1351,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   if (fileSet) {
     auto fsDefines = fileSet->BelongsTo(gtgt)
       ? fileSet->GetCompileDefinitions(config, lang)
-      : fileSet->GetInterfaceCompileDefinitions(config, lang);
+      : fileSet->GetInterfaceCompileDefinitions(config, lang, gtgt);
     if (!fsDefines.empty()) {
       this->AppendDefines(flagsBuild, cm::remove_BT(fsDefines), true);
     }
@@ -1374,7 +1374,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   if (fileSet) {
     auto fsIncludes = fileSet->BelongsTo(gtgt)
       ? fileSet->GetIncludeDirectories(config, lang)
-      : fileSet->GetInterfaceIncludeDirectories(config, lang);
+      : fileSet->GetInterfaceIncludeDirectories(config, lang, gtgt);
     if (!fsIncludes.empty()) {
       lg->AppendIncludeDirectories(includes, cm::remove_BT(fsIncludes), *sf);
     }

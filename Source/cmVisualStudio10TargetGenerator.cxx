@@ -3036,18 +3036,18 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
 
     if (fileSet) {
       fileSetBelongsToTarget = fileSet->BelongsTo(this->GeneratorTarget);
-      fsOptions =
-        cm::remove_BT(fileSetBelongsToTarget
-                        ? fileSet->GetCompileOptions(config, lang)
-                        : fileSet->GetInterfaceCompileOptions(config, lang));
+      fsOptions = cm::remove_BT(fileSetBelongsToTarget
+                                  ? fileSet->GetCompileOptions(config, lang)
+                                  : fileSet->GetInterfaceCompileOptions(
+                                      config, lang, this->GeneratorTarget));
       fsDefines = cm::remove_BT(
-        fileSetBelongsToTarget
-          ? fileSet->GetCompileDefinitions(config, lang)
-          : fileSet->GetInterfaceCompileDefinitions(config, lang));
+        fileSetBelongsToTarget ? fileSet->GetCompileDefinitions(config, lang)
+                               : fileSet->GetInterfaceCompileDefinitions(
+                                   config, lang, this->GeneratorTarget));
       fsIncludes = cm::remove_BT(
-        fileSetBelongsToTarget
-          ? fileSet->GetIncludeDirectories(config, lang)
-          : fileSet->GetInterfaceIncludeDirectories(config, lang));
+        fileSetBelongsToTarget ? fileSet->GetIncludeDirectories(config, lang)
+                               : fileSet->GetInterfaceIncludeDirectories(
+                                   config, lang, this->GeneratorTarget));
     }
 
     bool const shouldScanForModules = lang == "CXX"_s &&

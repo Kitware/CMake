@@ -784,7 +784,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   if (fileSet) {
     auto options = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileOptions(config, lang)
-      : fileSet->GetInterfaceCompileOptions(config, lang);
+      : fileSet->GetInterfaceCompileOptions(config, lang,
+                                            this->GeneratorTarget);
     if (!options.empty()) {
       this->LocalGenerator->AppendCompileOptions(flags,
                                                  cm::remove_BT(options));
@@ -825,7 +826,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   if (fileSet) {
     auto fsIncludes = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetIncludeDirectories(config, lang)
-      : fileSet->GetInterfaceIncludeDirectories(config, lang);
+      : fileSet->GetInterfaceIncludeDirectories(config, lang,
+                                                this->GeneratorTarget);
     if (!fsIncludes.empty()) {
       this->LocalGenerator->AppendIncludeDirectories(
         includes, cm::remove_BT(fsIncludes), source);
@@ -878,7 +880,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   if (fileSet) {
     auto fsDefines = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileDefinitions(config, lang)
-      : fileSet->GetInterfaceCompileDefinitions(config, lang);
+      : fileSet->GetInterfaceCompileDefinitions(config, lang,
+                                                this->GeneratorTarget);
     if (!fsDefines.empty()) {
       this->LocalGenerator->AppendDefines(defines, fsDefines);
       *this->FlagFileStream << "# Custom defines (File Set '"

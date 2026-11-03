@@ -1528,7 +1528,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     if (fileSet) {
       auto options = fileSet->BelongsTo(gt)
         ? fileSet->GetCompileOptions(config, lang)
-        : fileSet->GetInterfaceCompileOptions(config, lang);
+        : fileSet->GetInterfaceCompileOptions(config, lang, gt);
       if (!options.empty()) {
         lg->AppendCompileOptions(fc.CompileFlags, cm::remove_BT(options));
       }
@@ -1595,7 +1595,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     if (fileSet) {
       auto defines = fileSet->BelongsTo(gt)
         ? fileSet->GetCompileDefinitions(config, lang)
-        : fileSet->GetInterfaceCompileDefinitions(config, lang);
+        : fileSet->GetInterfaceCompileDefinitions(config, lang, gt);
       if (!defines.empty()) {
         if (!fc.CompileDefs.empty()) {
           fc.CompileDefs += ';';
@@ -1609,7 +1609,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     if (fileSet) {
       auto includes = fileSet->BelongsTo(gt)
         ? fileSet->GetIncludeDirectories(config, lang)
-        : fileSet->GetInterfaceIncludeDirectories(config, lang);
+        : fileSet->GetInterfaceIncludeDirectories(config, lang, gt);
       if (!includes.empty()) {
         fc.IncludeDirs = cmList::to_string(includes);
         needfc = true;

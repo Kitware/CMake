@@ -2300,7 +2300,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     {
       auto fsIncludes = fileSet->BelongsTo(this)
         ? fileSet->GetIncludeDirectories(config, lang)
-        : fileSet->GetInterfaceIncludeDirectories(config, lang);
+        : fileSet->GetInterfaceIncludeDirectories(config, lang, this);
       if (!fsIncludes.empty()) {
         std::vector<std::string> includes;
         lg->AppendIncludeDirectories(includes, cm::remove_BT(fsIncludes), *sf);
@@ -2431,7 +2431,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     {
       auto fsDefines = fileSet->BelongsTo(this)
         ? fileSet->GetCompileDefinitions(config, lang)
-        : fileSet->GetInterfaceCompileDefinitions(config, lang);
+        : fileSet->GetInterfaceCompileDefinitions(config, lang, this);
       if (!fsDefines.empty()) {
         std::set<std::string> defines;
         lg->AppendDefines(defines, fsDefines);
@@ -2450,7 +2450,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     {
       auto options = fileSet->BelongsTo(this)
         ? fileSet->GetCompileOptions(config, lang)
-        : fileSet->GetInterfaceCompileOptions(config, lang);
+        : fileSet->GetInterfaceCompileOptions(config, lang, this);
       if (!options.empty()) {
         std::string compileFlags;
         lg->AppendCompileOptions(compileFlags, cm::remove_BT(options));

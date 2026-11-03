@@ -158,7 +158,8 @@ std::string cmFastbuildNormalTargetGenerator::DetectCompilerFlags(
   if (fileSet) {
     auto fsIncludes = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetIncludeDirectories(this->Config, language)
-      : fileSet->GetInterfaceIncludeDirectories(this->Config, language);
+      : fileSet->GetInterfaceIncludeDirectories(this->Config, language,
+                                                this->GeneratorTarget);
     if (!fsIncludes.empty()) {
       this->LocalGenerator->AppendIncludeDirectories(
         sourceIncludesVec, cm::remove_BT(fsIncludes), srcFile);
@@ -191,7 +192,8 @@ std::string cmFastbuildNormalTargetGenerator::DetectCompilerFlags(
   if (fileSet) {
     auto options = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileOptions(this->Config, language)
-      : fileSet->GetInterfaceCompileOptions(this->Config, language);
+      : fileSet->GetInterfaceCompileOptions(this->Config, language,
+                                            this->GeneratorTarget);
     if (!options.empty()) {
       this->LocalGenerator->AppendCompileOptions(compileFlags,
                                                  cm::remove_BT(options));
@@ -478,7 +480,8 @@ std::string cmFastbuildNormalTargetGenerator::ComputeDefines(
           this->Config, &srcFile)) {
     auto fsDefines = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileDefinitions(this->Config, language)
-      : fileSet->GetInterfaceCompileDefinitions(this->Config, language);
+      : fileSet->GetInterfaceCompileDefinitions(this->Config, language,
+                                                this->GeneratorTarget);
     if (!fsDefines.empty()) {
       this->LocalGenerator->AppendDefines(defines, fsDefines);
     }

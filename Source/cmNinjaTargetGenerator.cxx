@@ -247,7 +247,8 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   if (fileSet) {
     auto options = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileOptions(config, language)
-      : fileSet->GetInterfaceCompileOptions(config, language);
+      : fileSet->GetInterfaceCompileOptions(config, language,
+                                            this->GeneratorTarget);
     if (!options.empty()) {
       this->LocalGenerator->AppendCompileOptions(flags,
                                                  cm::remove_BT(options));
@@ -354,7 +355,8 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
           config, source)) {
     auto fsDefines = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetCompileDefinitions(config, language)
-      : fileSet->GetInterfaceCompileDefinitions(config, language);
+      : fileSet->GetInterfaceCompileDefinitions(config, language,
+                                                this->GeneratorTarget);
     if (!fsDefines.empty()) {
       this->LocalGenerator->AppendDefines(defines, fsDefines);
     }
@@ -377,7 +379,8 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
           config, source)) {
     auto fsIncludes = fileSet->BelongsTo(this->GeneratorTarget)
       ? fileSet->GetIncludeDirectories(config, language)
-      : fileSet->GetInterfaceIncludeDirectories(config, language);
+      : fileSet->GetInterfaceIncludeDirectories(config, language,
+                                                this->GeneratorTarget);
     if (!fsIncludes.empty()) {
       this->LocalGenerator->AppendIncludeDirectories(
         includes, cm::remove_BT(fsIncludes), *source);
