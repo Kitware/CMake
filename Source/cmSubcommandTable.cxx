@@ -26,6 +26,17 @@ bool cmSubcommandTable::operator()(cm::string_view key,
   if (it != this->Impl.end() && it->first == key) {
     return it->second(args, status);
   }
-  status.SetError(cmStrCat("does not recognize sub-command ", key));
+  std::string error = cmStrCat("does not recognize sub-command ", key);
+  std::vector<std::string> candidates;
+  candidates.reserve(this->Impl.size());
+  for (Elem const& elem : this->Impl) {
+    candidates.emplace_back(elem.first);
+  }
+  std::string const suggestion = cmFindClosestString(key, candidates);
+  if (!suggestion.empty()) {
+    error =
+      cmStrCat(std::move(error), ". Did you mean: \"", suggestion, "\"?");
+  }
+  status.SetError(error);
   return false;
 }

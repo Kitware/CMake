@@ -1,0 +1,4 @@
+^CMake Error at InvalidSubcommandDidYouMean\.cmake:1 \(list\):
+  list does not recognize sub-command APEND\.  Did you mean: "APPEND"\?
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$
