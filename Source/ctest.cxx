@@ -43,11 +43,9 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
     "if the test should fail." },
   { "--stop-on-failure", "Stop running the tests after one has failed." },
   { "--test-output-size-passed <size>",
-    "Limit the output for passed tests "
-    "to <size> bytes" },
+    "Limit the output for passed tests to <size> bytes" },
   { "--test-output-size-failed <size>",
-    "Limit the output for failed tests "
-    "to <size> bytes" },
+    "Limit the output for failed tests to <size> bytes" },
   { "--test-output-truncation <mode>",
     "Truncate 'tail' (default), 'middle' or 'head' of test output once "
     "maximum output size is reached" },
@@ -68,36 +66,27 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
     "With multiple -L, run tests where each "
     "regular expression matches at least one label." },
   { "-R <regex>, --tests-regex <regex>",
-    "Run tests matching regular "
-    "expression." },
+    "Run tests matching regular expression." },
   { "-E <regex>, --exclude-regex <regex>",
-    "Exclude tests matching regular "
-    "expression." },
+    "Exclude tests matching regular expression." },
   { "-LE <regex>, --label-exclude <regex>",
     "Exclude tests with labels matching regular expression. "
     "With multiple -LE, exclude tests where each "
     "regular expression matches at least one label." },
   { "-FA <regex>, --fixture-exclude-any <regex>",
-    "Do not automatically "
-    "add any tests for "
-    "fixtures matching "
+    "Do not automatically add any tests for fixtures matching "
     "regular expression." },
   { "-FS <regex>, --fixture-exclude-setup <regex>",
-    "Do not automatically "
-    "add setup tests for "
-    "fixtures matching "
+    "Do not automatically add setup tests for fixtures matching "
     "regular expression." },
   { "-FC <regex>, --fixture-exclude-cleanup <regex>",
-    "Do not automatically "
-    "add cleanup tests for "
-    "fixtures matching "
+    "Do not automatically add cleanup tests for fixtures matching "
     "regular expression." },
   { "-D <dashboard>, --dashboard <dashboard>", "Execute dashboard test" },
   { "-D <var>:<type>=<value>", "Define a variable for script mode" },
   { "-M <model>, --test-model <model>", "Sets the model for a dashboard" },
   { "-T <action>, --test-action <action>",
-    "Sets the dashboard action to "
-    "perform" },
+    "Sets the dashboard action to perform" },
   { "--source-dir <path-to-source>",
     "Specify the project source directory.  When combined with "
     "-T Configure, this allows CTest to perform an initial configure "
@@ -109,11 +98,9 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
     "Specify what build group on the dashboard you'd like to "
     "submit results to." },
   { "-S <script>, --script <script>",
-    "Execute a dashboard for a "
-    "configuration" },
+    "Execute a dashboard for a configuration" },
   { "-SP <script>, --script-new-process <script>",
-    "Execute a dashboard for a "
-    "configuration" },
+    "Execute a dashboard for a configuration" },
   { "-A <file>, --add-notes <file>", "Add a notes file with submission" },
   { "-I [Start,End,Stride,test#,test#|Test file], --tests-information",
     "Run a specific number of tests by number." },
@@ -135,8 +122,7 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
   { "--resource-spec-file <file>", "Set the resource spec file to use." },
   { "--no-label-summary", "Disable timing summary information for labels." },
   { "--no-subproject-summary",
-    "Disable timing summary information for "
-    "subprojects." },
+    "Disable timing summary information for subprojects." },
   { "--test-dir <path-to-build>",
     "Specify the directory in which to look for tests." },
   { "--build-and-test <path-to-source> <path-to-build>",
