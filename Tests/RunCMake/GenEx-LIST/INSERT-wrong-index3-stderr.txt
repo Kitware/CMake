@@ -1,0 +1,8 @@
+CMake Error at INSERT-wrong-index3\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:INSERT,a;b;c,34337407431768211457,d>
+
+  index: "34337407431768211457" is not a valid index
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

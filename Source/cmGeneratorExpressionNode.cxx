@@ -973,6 +973,8 @@ bool GetNumericArgument(std::string const& arg, IndexType& value)
     }
   } catch (std::invalid_argument const&) {
     return false;
+  } catch (std::out_of_range const&) {
+    return false;
   }
 
   return true;
