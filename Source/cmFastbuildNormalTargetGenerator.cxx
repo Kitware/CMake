@@ -1443,7 +1443,7 @@ void cmFastbuildNormalTargetGenerator::GenerateDeviceLink(
     deviceLinkNode.LinkerOutput = this->ConvertToFastbuildPath(cmStrCat(
       FASTBUILD_DOLLAR_TAG "TargetOutDi"
                            "r" FASTBUILD_DOLLAR_TAG "/cmake_device_link",
-      (args.empty() ? "" : "_" + arch),
+      (arch.empty() ? "" : "_" + arch),
       this->Makefile->GetSafeDefinition(
         cmStrCat("CMAKE_", language, "_OUTPUT_EXTENSION"))));
 
@@ -1468,7 +1468,7 @@ void cmFastbuildNormalTargetGenerator::GenerateDeviceLink(
     }
     this->GetGlobalGenerator()->AddFileToClean(
       cmStrCat(this->GeneratorTarget->GetObjectDirectory(this->Config),
-               "cmake_device_link", (args.empty() ? "" : "_" + arch),
+               "cmake_device_link", (arch.empty() ? "" : "_" + arch),
                this->Makefile->GetSafeDefinition(
                  cmStrCat("CMAKE_", language, "_OUTPUT_EXTENSION"))));
     target.DeviceLinkNodes.emplace_back(std::move(deviceLinkNode));
