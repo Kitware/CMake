@@ -132,7 +132,9 @@ bool cmListFileParser::ParseFile()
   cmListFileLexer_BOM bom;
   if (!cmListFileLexer_SetFileName(this->Lexer.get(), filename->c_str(),
                                    &bom)) {
-    this->IssueFileOpenError("cmListFileCache: error can not open file.");
+    this->IssueFileOpenError(
+      cmStrCat("Cannot open file \"", this->FileName,
+               "\": ", cmSystemTools::GetLastSystemError()));
     return false;
   }
 
