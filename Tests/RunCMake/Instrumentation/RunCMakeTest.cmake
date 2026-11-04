@@ -15,6 +15,7 @@ function(instrument test)
     "INSTALL_PARALLEL"
     "INSTALL_SEAM"
     "INSTALL_INTERRUPT"
+    "INSTALL_MISSING_SCRIPT"
     "TEST"
     "CTEST_SEAM"
     "CTEST_INTERRUPT"
@@ -287,6 +288,11 @@ function(instrument test)
   endif()
   if (ARGS_INSTALL)
     run_cmake_command(${test}-install ${CMAKE_COMMAND} --install . --prefix install --config Debug)
+  endif()
+  if (ARGS_INSTALL_MISSING_SCRIPT)
+    file(REMOVE ${RunCMake_TEST_BINARY_DIR}/cmake_install.cmake)
+    run_cmake_command(${test}-install
+      ${CMAKE_COMMAND} --install . --prefix install --config Debug)
   endif()
   if (ARGS_INSTALL_SEAM)
     # Drive the cmakeInstall interrupt path deterministically via the test-only
@@ -702,6 +708,10 @@ instrument(interrupt-install BUILD INSTALL_SEAM
 )
 instrument(interrupt-test BUILD CTEST_SEAM
   CHECK_SCRIPT check-test-interrupted.cmake
+)
+
+instrument(install-missing-script INSTALL_MISSING_SCRIPT
+  CHECK_SCRIPT check-install-missing-script.cmake
 )
 
 # Test make/ninja hooks
