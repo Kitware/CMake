@@ -153,7 +153,7 @@ bool cmListFileParser::ParseString(cm::string_view str)
 {
   if (!cmListFileLexer_SetString(this->Lexer.get(), str.data(),
                                  str.length())) {
-    this->IssueFileOpenError("cmListFileCache: cannot allocate buffer.");
+    this->IssueFileOpenError("Out of memory while reading code to parse.");
     return false;
   }
 
