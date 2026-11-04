@@ -1996,18 +1996,6 @@ int cmCTest::Run(std::vector<std::string> const& args)
     this->SetConfigType(config);
     return true;
   };
-  auto const dashGroup = [this](std::string const& group) -> bool {
-    this->Impl->SpecificGroup = group;
-    return true;
-  };
-  auto const dashQ = [this](std::string const&) -> bool {
-    this->Impl->Quiet = true;
-    return true;
-  };
-  auto const dashV = [this](std::string const&) -> bool {
-    this->Impl->Verbose = true;
-    return true;
-  };
   auto const dashVV = [this](std::string const&) -> bool {
     this->Impl->ExtraVerbose = true;
     this->Impl->Verbose = true;
@@ -2027,42 +2015,40 @@ int cmCTest::Run(std::vector<std::string> const& args)
     this->SetNotesFiles(notes);
     return true;
   };
-  auto const dashI = [this](std::string const& tests) -> bool {
-    this->Impl->TestOptions.TestsToRunInformation = tests;
-    return true;
+
+  // Helpers to build handlers for arguments that simply store their value.
+  auto const assign = [](std::string& field) {
+    return [&field](std::string const& value) -> bool {
+      field = value;
+      return true;
+    };
   };
-  auto const dashU = [this](std::string const&) -> bool {
-    this->Impl->TestOptions.UseUnion = true;
-    return true;
+  auto const append = [](std::vector<std::string>& field) {
+    return [&field](std::string const& value) -> bool {
+      field.push_back(value);
+      return true;
+    };
   };
-  auto const dashR = [this](std::string const& expr) -> bool {
-    this->Impl->TestOptions.IncludeRegularExpression = expr;
-    return true;
+  auto const setFlag = [](bool& field) {
+    return [&field](std::string const&) -> bool {
+      field = true;
+      return true;
+    };
   };
-  auto const dashE = [this](std::string const& expr) -> bool {
-    this->Impl->TestOptions.ExcludeRegularExpression = expr;
-    return true;
-  };
-  auto const dashL = [this](std::string const& expr) -> bool {
-    this->Impl->TestOptions.LabelRegularExpression.push_back(expr);
-    return true;
-  };
-  auto const dashLE = [this](std::string const& expr) -> bool {
-    this->Impl->TestOptions.ExcludeLabelRegularExpression.push_back(expr);
-    return true;
-  };
-  auto const dashFA = [this](std::string const& expr) -> bool {
-    this->Impl->TestOptions.ExcludeFixtureRegularExpression = expr;
-    return true;
-  };
-  auto const dashFS = [this](std::string const& expr) -> bool {
-    this->Impl->TestOptions.ExcludeFixtureSetupRegularExpression = expr;
-    return true;
-  };
-  auto const dashFC = [this](std::string const& expr) -> bool {
-    this->Impl->TestOptions.ExcludeFixtureCleanupRegularExpression = expr;
-    return true;
-  };
+  cmCTestTestOptions& testOptions = this->Impl->TestOptions;
+  auto const dashGroup = assign(this->Impl->SpecificGroup);
+  auto const dashQ = setFlag(this->Impl->Quiet);
+  auto const dashV = setFlag(this->Impl->Verbose);
+  auto const dashI = assign(testOptions.TestsToRunInformation);
+  auto const dashU = setFlag(testOptions.UseUnion);
+  auto const dashR = assign(testOptions.IncludeRegularExpression);
+  auto const dashE = assign(testOptions.ExcludeRegularExpression);
+  auto const dashL = append(testOptions.LabelRegularExpression);
+  auto const dashLE = append(testOptions.ExcludeLabelRegularExpression);
+  auto const dashFA = assign(testOptions.ExcludeFixtureRegularExpression);
+  auto const dashFS = assign(testOptions.ExcludeFixtureSetupRegularExpression);
+  auto const dashFC =
+    assign(testOptions.ExcludeFixtureCleanupRegularExpression);
 
   using CommandArgument =
     cmCommandLineArgument<bool(std::string const& value)>;
@@ -2597,17 +2583,25 @@ int cmCTest::Run(std::vector<std::string> const& args)
                      } },
   };
 
+  // Parse `arg` using the first entry of `table` that matches it. Returns
+  // nothing if no entry matches, or the result of parsing otherwise.
+  auto const tryParse = [&args](std::vector<CommandArgument> const& table,
+                                std::string const& arg,
+                                size_t& i) -> cm::optional<bool> {
+    for (auto const& m : table) {
+      if (m.matches(arg)) {
+        return m.parse(arg, i, args);
+      }
+    }
+    return cm::nullopt;
+  };
+
   // Process command line arguments for presets first, since other arguments
   // can override those settings.
   for (size_t i = 1; i < args.size(); ++i) {
-    std::string const& arg = args[i];
-    for (auto const& m : presetArguments) {
-      if (m.matches(arg)) {
-        if (!m.parse(arg, i, args)) {
-          return 1;
-        }
-        break;
-      }
+    cm::optional<bool> const parsed = tryParse(presetArguments, args[i], i);
+    if (parsed && !parsed.value()) {
+      return 1;
     }
   }
 
@@ -2636,16 +2630,11 @@ int cmCTest::Run(std::vector<std::string> const& args)
       break;
     }
 
-    bool matched = false;
-    for (auto const& m : arguments) {
-      if (m.matches(arg)) {
-        matched = true;
-        if (!m.parse(arg, i, args)) {
-          return 1;
-        }
-        break;
-      }
+    cm::optional<bool> const parsed = tryParse(arguments, arg, i);
+    if (parsed && !parsed.value()) {
+      return 1;
     }
+    bool matched = parsed.has_value();
     if (!matched && arg == "--build-options"_s) {
       matched = true;
       while (i + 1 < args.size() && args[i + 1] != "--build-target"_s &&
