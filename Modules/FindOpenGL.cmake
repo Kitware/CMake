@@ -901,3 +901,8 @@ set(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
 mark_as_advanced(${_OpenGL_CACHE_VARS})
 unset(_OpenGL_CACHE_VARS)
+
+foreach(component ${OpenGL_FIND_COMPONENTS})
+  string(TOUPPER ${component} _COMPONENT)
+  unset(OPENGL_USE_${_COMPONENT})
+endforeach()
