@@ -1184,7 +1184,7 @@ void cmCTestRunTest::FinalizeTest(bool started)
       processMetrics = metrics;
     }
     std::string data_file = this->CTest->GetInstrumentation().InstrumentTest(
-      this->TestProperties->Name, this->InstrumentationCommand,
+      this->TestProperties->Name, this->Index, this->InstrumentationCommand,
       this->InstrumentationArguments, this->TestProcess->GetExitValue(),
       this->TestProcess->GetStartTime(),
       this->TestProcess->GetSystemStartTime(),

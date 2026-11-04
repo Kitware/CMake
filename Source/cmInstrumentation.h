@@ -84,7 +84,7 @@ public:
       cm::nullopt,
     LoadQueriesAfter reloadQueriesAfterCommand = LoadQueriesAfter::No);
   std::string InstrumentTest(
-    std::string const& name, std::string const& command,
+    std::string const& name, int index, std::string const& command,
     std::vector<std::string> const& args, int64_t result,
     std::chrono::steady_clock::time_point steadyStart,
     std::chrono::system_clock::time_point systemStart, std::string config,
