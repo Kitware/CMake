@@ -94,16 +94,20 @@ option selects the mode and each :option:`ctest -T` option adds a step:
 Results are recorded under the tag created by the most recent ``Start``
 step, and later invocations add to it.  By default, the ``Submit`` step
 sends every result recorded under that tag, including results from
-earlier invocations.  Set :variable:`CTEST_SUBMIT_PARTS` to submit only
-some of them.  For example, to rerun the tests and submit only the new
-test results:
+earlier invocations.
 
-.. code-block:: shell
+.. versionadded:: 4.4
+  Set :variable:`CTEST_SUBMIT_PARTS` to submit only some of them.  For
+  example, to rerun the tests and submit only the new test results:
 
-  ctest -M Experimental -T Test -T Submit -D CTEST_SUBMIT_PARTS=Test
+  .. code-block:: shell
+
+    ctest -M Experimental -T Test -T Submit -D CTEST_SUBMIT_PARTS=Test
 
 Overriding Settings
 -------------------
+
+.. versionadded:: 4.4
 
 Settings in the configuration file can be overridden for one run with the
 :option:`-D \<var\>=\<value\> <ctest-dashboard -D>` option.  For example,
@@ -206,6 +210,10 @@ a variable before the script runs:
 
 Variables whose names do not begin with ``CTEST_`` must be given with a
 type, such as ``-D dashboard_model:STRING=Nightly``.
+
+.. versionchanged:: 4.4
+  Variables whose names begin with ``CTEST_`` may be given without a type.
+  Previously, every variable had to be given with a type.
 
 Continuous Dashboards
 ---------------------
