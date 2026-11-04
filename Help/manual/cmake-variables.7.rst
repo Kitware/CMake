@@ -818,6 +818,7 @@ Variables for CTest
    /variable/CTEST_RESOURCE_SPEC_FILE
    /variable/CTEST_RUN_CURRENT_SCRIPT
    /variable/CTEST_SCRIPT_DIRECTORY
+   /variable/CTEST_SCRIPT_NAME
    /variable/CTEST_SITE
    /variable/CTEST_SOURCE_DIRECTORY
    /variable/CTEST_SUBMIT_INACTIVITY_TIMEOUT
