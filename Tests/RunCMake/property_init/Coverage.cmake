@@ -37,6 +37,7 @@ set(not_in_table
   # property                  reason
   "notset"                    "Never initialized, checks the harness itself"
   "SYSTEM"                    "Initialized separately for non-normal targets"
+  "SKIP_INSTALL_RPATH"        "Initialized separately, conditional on CMP0229"
   )
 
 # Extract the property names from a "property reason" table.

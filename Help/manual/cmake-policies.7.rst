@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.6
 .. toctree::
    :maxdepth: 1
 
+   CMP0229: The CMAKE_SKIP_INSTALL_RPATH variable takes effect at target creation. </policy/CMP0229>
    CMP0228: File set usage requirements are evaluated for the consumer. </policy/CMP0228>
    CMP0227: AIX shared objects are named with VERSION and SOVERSION. </policy/CMP0227>
 
