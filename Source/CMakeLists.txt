@@ -163,6 +163,8 @@ add_library(
   cmCryptoHash.h
   cmCurl.cxx
   cmCurl.h
+  cmRuleHelper.cxx
+  cmRuleHelper.h
   cmRule.cxx
   cmRule.h
   cmCustomRule.cxx

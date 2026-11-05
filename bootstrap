@@ -464,6 +464,7 @@ CMAKE_CXX_SOURCES="\
   cmPlaceholderExpander \
   cmPlistParser \
   cmRule \
+  cmRuleHelper \
   cmRulePlaceholderExpander \
   cmRuntimeDependencyArchive \
   cmScriptGenerator \

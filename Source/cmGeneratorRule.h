@@ -6,11 +6,10 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 
-#include "cmPlaceholderExpander.h"
 #include "cmPropertyMap.h"
 #include "cmRule.h"
+#include "cmRuleHelper.h"
 #include "cmValue.h"
 
 class cmMakefile;
@@ -25,7 +24,7 @@ public:
   cmGeneratorRule(cmRule const* rule, cmTarget const* target,
                   cmFileSet const* fileSet, cmFileSet const* outputFileSet,
                   cmSourceFile const* source,
-                  cmRule::PatternSet const& patterns);
+                  cm::RulePatternSet const& patterns);
 
   cmGeneratorRule(cmGeneratorRule const&) = delete;
   cmGeneratorRule& operator=(cmGeneratorRule const&) = delete;
@@ -45,7 +44,7 @@ public:
   std::unique_ptr<cmCustomCommand> Generate(cmFileSet* outFileSet) const;
 
 private:
-  void UpdateRuleExpander(cmRule::PatternSet const& patterns);
+  void UpdateRuleExpander(cm::RulePatternSet const& patterns);
 
   std::unique_ptr<cmCustomCommand> CreateCustomCommand() const;
 
@@ -58,24 +57,8 @@ private:
   cmMakefile& Makefile;
   mutable cmPropertyMap Properties;
 
-  class RulePlaceholderExpander : public cmPlaceholderExpander
-  {
-  public:
-    using VariableMap = std::unordered_map<std::string, std::string>;
-    VariableMap Values;
+  static cm::RulePatternSet const DefaultProperties;
 
-    std::string ExpandVariables(std::string const& string)
-    {
-      std::string value{ string };
-      return cmPlaceholderExpander::ExpandVariables(
-        value, cmPlaceholderExpander::HandleGenex::Yes);
-    }
-
-  private:
-    std::string ExpandVariable(std::string const& variable) override;
-  };
-
-  static RulePlaceholderExpander::VariableMap const DefaultProperties;
-
-  mutable RulePlaceholderExpander RuleExpander;
+  cm::RulePatternSet Patterns;
+  mutable cm::RulePatternPlaceholderExpander RuleExpander;
 };

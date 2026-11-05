@@ -64,6 +64,7 @@
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmRule.h"
+#include "cmRuleHelper.h"
 #include "cmSbomArguments.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -3883,7 +3884,7 @@ void cmGlobalGenerator::ConfigureRules()
           continue;
         }
 
-        cmRule::PatternSet fileSetPatterns;
+        cm::RulePatternSet fileSetPatterns;
         if (!rule->Instantiate(&target, fileSet, outFileSet,
                                fileSetPatterns)) {
           continue;
@@ -3895,7 +3896,7 @@ void cmGlobalGenerator::ConfigureRules()
             cmSourceFile* source = mf->GetOrCreateSource(file);
             source->ResolveFullPath();
 
-            cmRule::PatternSet sourcePatterns{ fileSetPatterns };
+            cm::RulePatternSet sourcePatterns{ fileSetPatterns };
             if (!rule->Instantiate(&target, fileSet, outFileSet, source,
                                    sourcePatterns)) {
               continue;
@@ -3907,9 +3908,11 @@ void cmGlobalGenerator::ConfigureRules()
                 auto genRule = cm::make_unique<cmGeneratorRule>(
                   rule, &target, fileSet, outFileSet, source, sourcePatterns);
                 auto cc = genRule->Generate(outFileSet);
-                lg.AddGeneratorRule(std::move(genRule));
-                detail::AddCustomCommandToOutput(
-                  lg, cmCommandOrigin::Generator, std::move(cc), false);
+                if (cc) {
+                  lg.AddGeneratorRule(std::move(genRule));
+                  detail::AddCustomCommandToOutput(
+                    lg, cmCommandOrigin::Generator, std::move(cc), false);
+                }
               });
           }
         }
