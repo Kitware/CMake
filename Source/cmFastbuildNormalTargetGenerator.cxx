@@ -1730,12 +1730,15 @@ cmFastbuildNormalTargetGenerator::GenerateUnity(
     // Process groups.
     auto groupedNode = GenerateGroupedUnityNode(
       obj.CompilerInputFiles, sourcesWithGroups, unityGroupNumber);
+    std::string singleGroupedSource;
     // We have at least 2 sources in the group.
     if (groupedNode.UnityInputFiles.size() > 1) {
       groupedNode.UnityOutputPath = obj.CompilerOutputPath;
       obj.CompilerInputUnity.emplace_back(groupedNode.Name);
       groupedNode.UnityOutputPattern = cmStrCat(groupedNode.Name, ext);
       result.emplace_back(std::move(groupedNode));
+    } else if (groupedNode.UnityInputFiles.size() == 1) {
+      singleGroupedSource = std::move(groupedNode.UnityInputFiles[0]);
     }
     // General unity batching of the remaining (non-grouped) sources.
     while (!obj.CompilerInputFiles.empty()) {
@@ -1746,13 +1749,11 @@ cmFastbuildNormalTargetGenerator::GenerateUnity(
       node.UnityOutputPattern = cmStrCat(node.Name, ext);
 
       // Unity group of size 1 doesn't make sense - just exclude the source.
-      if (groupedNode.UnityInputFiles.size() == 1) {
-        node.UnityInputExcludedFiles.emplace_back(
-          groupedNode.UnityInputFiles[0]);
-        node.UnityInputFiles.emplace_back(
-          std::move(groupedNode.UnityInputFiles[0]));
+      if (!singleGroupedSource.empty()) {
+        node.UnityInputExcludedFiles.emplace_back(singleGroupedSource);
+        node.UnityInputFiles.emplace_back(std::move(singleGroupedSource));
         // Clear so we don't enter here on the next iteration.
-        groupedNode.UnityInputFiles.clear();
+        singleGroupedSource.clear();
       }
 
       // We've got only 1 file left. No need to create a Unity node for it,
