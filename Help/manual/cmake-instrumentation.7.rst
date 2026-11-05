@@ -108,6 +108,13 @@ for all CMake projects configured and built by a user. In all cases, a "query"
 represents a request for instrumentation behavior. See the `v1 Query Files`_
 for details on configuring this feature.
 
+.. versionadded:: 4.6
+
+  To disable all instrumentation data collection, indexing hooks, and callbacks,
+  set the :envvar:`CTEST_DISABLE_INSTRUMENTATION` environment variable to a
+  true value.  This overrides all methods of enabling instrumentation,
+  including in already-configured build trees.
+
 Enabling Instrumentation at the Project-Level
 ---------------------------------------------
 

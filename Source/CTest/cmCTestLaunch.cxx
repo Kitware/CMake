@@ -338,13 +338,15 @@ void cmCTestLaunch::RunChild()
 
 int cmCTestLaunch::Run()
 {
+  auto instrumentation = cmInstrumentation(this->Reporter.OptionBuildDir);
   if (this->Operation == Op::InstrumentTest) {
     this->RunChild();
-    this->WriteMetricsFile();
+    if (!instrumentation.IsDisabled()) {
+      this->WriteMetricsFile();
+    }
     return this->Reporter.ExitCode;
   }
 
-  auto instrumentation = cmInstrumentation(this->Reporter.OptionBuildDir);
   bool const captureOutput =
     instrumentation.HasOption(cmInstrumentationQuery::Option::CaptureOutput);
   bool const processMetrics =

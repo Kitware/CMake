@@ -739,7 +739,8 @@ void cmCTestRunTest::ComputeArguments()
   this->InstrumentationCommand = this->ActualCommand;
   this->InstrumentationArguments = this->Arguments;
 
-  if (this->CTest->GetInstrumentation().HasOption(
+  if (!this->CTest->GetInstrumentation().IsDisabled() &&
+      this->CTest->GetInstrumentation().HasOption(
         cmInstrumentationQuery::Option::ProcessMetrics)) {
     std::string const realCommand = this->ActualCommand;
     std::vector<std::string> realArguments = this->Arguments;
@@ -1288,7 +1289,8 @@ void cmCTestRunTest::FinalizeTest(bool started)
     this->CollectCMakeCoverage();
   }
 
-  if (started && this->CTest->GetInstrumentation().HasQuery()) {
+  if (started && !this->CTest->GetInstrumentation().IsDisabled() &&
+      this->CTest->GetInstrumentation().HasQuery()) {
     if (this->CTest->GetInstrumentation().HasOption(
           cmInstrumentationQuery::Option::ProcessMetrics)) {
       std::string metricsFile = GetTestMetricsFile();
