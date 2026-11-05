@@ -2667,7 +2667,7 @@ int _cmake_E_bin2c(Command::Arguments args)
 
   std::string inputFile = "-";
   std::string outputFile = "-";
-  cm::optional<cm::string_view> templateFilename;
+  cm::optional<std::string> templateFilename;
   cm::optional<cm::string_view> templateArrayPlaceholder;
   cm::optional<cm::string_view> templateLengthPlaceholder;
   bool printTrailingComma = false;
@@ -2763,7 +2763,7 @@ int _cmake_E_bin2c(Command::Arguments args)
   cm::optional<Bin2CTemplateFile> templateFile;
   cmsys::ifstream templateStream;
   if (templateFilename) {
-    templateStream.open(templateFilename->data());
+    templateStream.open(templateFilename->c_str());
     if (!templateStream) {
       std::cerr << "Could not open template file for reading: \""
                 << *templateFilename << "\"\n";
