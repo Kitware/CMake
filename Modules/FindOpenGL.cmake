@@ -870,8 +870,15 @@ if(OpenGL_FOUND)
       set_target_properties(OpenGL::GLU PROPERTIES
         IMPORTED_LIBNAME "${OPENGL_glu_LIBRARY}")
     endif()
-    set_target_properties(OpenGL::GLU PROPERTIES
-      INTERFACE_LINK_LIBRARIES OpenGL::GL)
+
+    if(TARGET OpenGL::OpenGL)
+      set_target_properties(OpenGL::GLU PROPERTIES
+        INTERFACE_LINK_LIBRARIES OpenGL::OpenGL)
+    else()
+      set_target_properties(OpenGL::GLU PROPERTIES
+        INTERFACE_LINK_LIBRARIES OpenGL::GL)
+    endif()
+
     # Note that GLU's include directory may be different from OpenGL's!
     set_target_properties(OpenGL::GLU PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
                           "${OPENGL_GLU_INCLUDE_DIR}")
