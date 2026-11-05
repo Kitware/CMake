@@ -104,6 +104,12 @@ public:
     std::vector<DirectoryTestPrepDependency> Dependencies;
   };
 
+  enum class FortranFixed
+  {
+    No,
+    Yes,
+  };
+
   cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile);
   ~cmLocalGenerator() override;
 
@@ -834,11 +840,13 @@ private:
   };
 
   UnitySource WriteUnitySource(
-    cmGeneratorTarget* target, std::vector<std::string> const& configs,
+    cmGeneratorTarget* target, std::string const& lang,
+    std::vector<std::string> const& configs,
     cmRange<std::vector<UnityBatchedSource>::const_iterator> sources,
     cmValue beforeInclude, cmValue afterInclude, std::string filename,
     std::string const& unityFileDirectory, UnityPathMode pathMode) const;
   void WriteUnitySourceInclude(std::ostream& unity_file,
+                               std::string const& lang,
                                cm::optional<std::string> const& cond,
                                std::string const& sf_full_path,
                                cmValue beforeInclude, cmValue afterInclude,
@@ -849,14 +857,15 @@ private:
     std::vector<std::string> const& configs,
     std::vector<UnityBatchedSource> const& filtered_sources,
     cmValue beforeInclude, cmValue afterInclude,
-    std::string const& filename_base, UnityPathMode pathMode,
-    size_t batchSize);
+    std::string const& filename_base, UnityPathMode pathMode, size_t batchSize,
+    FortranFixed fortranFixed = FortranFixed::No);
   std::vector<UnitySource> AddUnityFilesModeGroup(
     cmGeneratorTarget* target, std::string const& lang,
     std::vector<std::string> const& configs,
     std::vector<UnityBatchedSource> const& filtered_sources,
     cmValue beforeInclude, cmValue afterInclude,
-    std::string const& filename_base, UnityPathMode pathMode);
+    std::string const& filename_base, UnityPathMode pathMode,
+    FortranFixed fortranFixed = FortranFixed::No);
 };
 
 namespace detail {

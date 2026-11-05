@@ -47,6 +47,19 @@ Unity builds are supported for the following languages:
 ``OBJCXX``
   .. versionadded:: 3.29
 
+``Fortran``
+  .. versionadded:: 4.6
+
+  Fixed-form and free-form sources are batched separately.  Generated unity
+  sources use a preprocessed extension (``.F`` for fixed form, ``.F90`` for
+  free form) and include batched sources with the C preprocessor ``#include``
+  directive.
+
+  Fortran ``module`` procedures sharing one translation unit must appear in
+  dependency order.  Use :prop_sf:`SKIP_UNITY_BUILD_INCLUSION` or
+  :prop_tgt:`UNITY_BUILD_MODE` ``GROUP`` for module providers when they end up
+  in a different batch than their consumers.
+
 For targets that mix source files from more than one language, CMake
 separates the languages such that each generated unity source file only
 contains sources for a single language.
