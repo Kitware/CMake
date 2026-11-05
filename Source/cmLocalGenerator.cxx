@@ -3652,41 +3652,9 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
     ? UnityPathMode::Relative
     : UnityPathMode::Absolute;
 
-  for (std::string lang : { "C", "CXX", "OBJC", "OBJCXX", "CUDA" }) {
-    std::vector<UnityBatchedSource> filtered_sources;
-    std::copy_if(
-      unitySources.begin(), unitySources.end(),
-      std::back_inserter(filtered_sources),
-      [&](UnityBatchedSource const& ubs) -> bool {
-        cmSourceFile* sf = ubs.Source;
-        if (sf->GetLanguage() != lang) {
-          return false;
-        }
-        for (auto idx : ubs.Configs) {
-          cmGeneratorFileSet const* fileSet =
-            target->GetFileSetForSource(configs[idx], sf);
-          if (fileSet &&
-              (fileSet->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn() ||
-               fileSet->GetProperty(fileSet->BelongsTo(target)
-                                      ? "COMPILE_OPTIONS"
-                                      : "INTERFACE_COMPILE_OPTIONS") ||
-               fileSet->GetProperty(fileSet->BelongsTo(target)
-                                      ? "COMPILE_DEFINITIONS"
-                                      : "INTERFACE_COMPILE_DEFINITIONS") ||
-               fileSet->GetProperty(fileSet->BelongsTo(target)
-                                      ? "INCLUDE_DIRECTORIES"
-                                      : "INTERFACE_INCLUDE_DIRECTORIES"))) {
-            return false;
-          }
-        }
-        return !sf->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION") &&
-          !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-          !sf->GetProperty("COMPILE_OPTIONS") &&
-          !sf->GetProperty("COMPILE_DEFINITIONS") &&
-          !sf->GetProperty("COMPILE_FLAGS") &&
-          !sf->GetProperty("INCLUDE_DIRECTORIES");
-      });
-
+  auto addUnitySources = [&](
+                           std::string const& lang,
+                           std::vector<UnityBatchedSource> filtered_sources) {
     std::vector<UnitySource> unity_files;
     if (!unityMode || *unityMode == "BATCH") {
       unity_files = AddUnityFilesModeAuto(
@@ -3722,6 +3690,47 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
                               this->GetSourceDirectory(), false);
       }
     }
+  };
+
+  auto filterSources = [&](std::string const& lang) {
+    std::vector<UnityBatchedSource> filtered_sources;
+    std::copy_if(
+      unitySources.begin(), unitySources.end(),
+      std::back_inserter(filtered_sources),
+      [&](UnityBatchedSource const& ubs) -> bool {
+        cmSourceFile* sf = ubs.Source;
+        if (sf->GetLanguage() != lang) {
+          return false;
+        }
+        for (auto idx : ubs.Configs) {
+          cmGeneratorFileSet const* fileSet =
+            target->GetFileSetForSource(configs[idx], sf);
+          if (fileSet &&
+              (fileSet->GetProperty("SKIP_UNITY_BUILD_INCLUSION").IsOn() ||
+               fileSet->GetProperty(fileSet->BelongsTo(target)
+                                      ? "COMPILE_OPTIONS"
+                                      : "INTERFACE_COMPILE_OPTIONS") ||
+               fileSet->GetProperty(fileSet->BelongsTo(target)
+                                      ? "COMPILE_DEFINITIONS"
+                                      : "INTERFACE_COMPILE_DEFINITIONS") ||
+               fileSet->GetProperty(fileSet->BelongsTo(target)
+                                      ? "INCLUDE_DIRECTORIES"
+                                      : "INTERFACE_INCLUDE_DIRECTORIES"))) {
+            return false;
+          }
+        }
+        return !sf->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION") &&
+          !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+          !sf->GetProperty("COMPILE_OPTIONS") &&
+          !sf->GetProperty("COMPILE_DEFINITIONS") &&
+          !sf->GetProperty("COMPILE_FLAGS") &&
+          !sf->GetProperty("INCLUDE_DIRECTORIES");
+      });
+    return filtered_sources;
+  };
+
+  for (std::string lang : { "C", "CXX", "OBJC", "OBJCXX", "CUDA" }) {
+    addUnitySources(lang, filterSources(lang));
   }
 }
 
