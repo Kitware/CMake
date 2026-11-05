@@ -49,7 +49,9 @@ sudo
 alsa-utils
 aspell
 aspell-en
+bison
 doxygen graphviz
+flex
 freeglut3-dev
 gnutls-dev
 libarchive-dev

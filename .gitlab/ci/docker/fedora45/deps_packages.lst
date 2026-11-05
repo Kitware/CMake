@@ -70,6 +70,7 @@ alsa-lib-devel
 aspell
 aspell-devel
 aspell-en
+bison
 blas-devel
 boost-devel
 boost-python3-devel
@@ -78,6 +79,7 @@ cups-devel
 DevIL-devel
 doxygen
 expat-devel
+flex
 fontconfig-devel
 freeglut-devel
 freetype-devel
