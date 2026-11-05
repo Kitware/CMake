@@ -26,11 +26,147 @@
 #  include "cmCryptoHash.h"
 #  include "cmDebuggerWindowsPipeConnection.h"
 #else
+#  include <cerrno>
+#  include <cstdlib>
+#  include <cstring>
+
+#  include <unistd.h>
+
+#  include <sys/stat.h>
+#  include <sys/types.h>
+#  include <sys/wait.h>
+
 #  include "cmDebuggerPosixPipeConnection.h"
+#  include "cmSystemTools.h"
 #endif
 
 #include "testCommon.h"
 #include "testDebugger.h"
+
+#ifndef _WIN32
+bool testPipePermissions()
+{
+  std::string const namedPipe = "CMakeDebuggerPipePermissions";
+  auto connection =
+    std::make_shared<cmDebugger::cmDebuggerPipeConnection>(namedPipe);
+  std::string errorMessage;
+  mode_t const previousMask = umask(0);
+  bool const listening = connection->StartListening(errorMessage);
+  mode_t const actualMask = umask(previousMask);
+
+  struct stat info;
+  bool const permissionsSet = listening &&
+    lstat(namedPipe.c_str(), &info) == 0 && S_ISSOCK(info.st_mode) &&
+    (info.st_mode & 0777) == 0600;
+  connection->close();
+
+  if (!listening) {
+    std::cerr << errorMessage << '\n';
+  }
+  ASSERT_TRUE(listening);
+  ASSERT_TRUE(permissionsSet);
+  ASSERT_TRUE(actualMask == 0);
+  return true;
+}
+
+bool testPipeUmaskRestoredOnBindFailure()
+{
+  std::string directory = "CMakeDebuggerPipeBindFailure-XXXXXX";
+  ASSERT_TRUE(cmSystemTools::MakeTempDirectory(directory));
+  auto connection = std::make_shared<cmDebugger::cmDebuggerPipeConnection>(
+    directory + "/missing/socket");
+  std::string errorMessage;
+  mode_t const previousMask = umask(0027);
+  bool const listening = connection->StartListening(errorMessage);
+  mode_t const actualMask = umask(previousMask);
+  connection->close();
+  int const removed = rmdir(directory.c_str());
+
+  ASSERT_TRUE(!listening);
+  ASSERT_TRUE(actualMask == 0027);
+  ASSERT_TRUE(errorMessage.find(std::strerror(ENOENT)) != std::string::npos);
+  ASSERT_TRUE(removed == 0);
+  return true;
+}
+
+bool testPipePermissionsRejectDifferentUser()
+{
+  if (geteuid() != 0) {
+    std::cout << "Skipping cross-user pipe test: requires root.\n";
+    return true;
+  }
+
+  std::string directory = "/tmp/CMakeDebuggerPipe-XXXXXX";
+  ASSERT_TRUE(cmSystemTools::MakeTempDirectory(directory));
+  std::string const namedPipe = directory + "/socket";
+  auto connection =
+    std::make_shared<cmDebugger::cmDebuggerPipeConnection>(namedPipe);
+  std::string errorMessage;
+  bool const listening = connection->StartListening(errorMessage);
+  if (!listening) {
+    rmdir(directory.c_str());
+    std::cerr << errorMessage << '\n';
+    return false;
+  }
+
+  // Allow directory traversal so the socket permissions enforce rejection.
+  bool const permissionsSet = chmod(directory.c_str(), 0711) == 0;
+  if (!permissionsSet) {
+    connection->close();
+    rmdir(directory.c_str());
+    return false;
+  }
+
+  pid_t const child = fork();
+  if (child == 0) {
+    alarm(10);
+    bool rejected = false;
+    if (seteuid(65534) == 0) {
+      try {
+        cmDebugger::cmDebuggerPipeClient client(namedPipe);
+        client.WaitForConnection();
+        client.write("x", 1);
+      } catch (std::runtime_error const&) {
+        rejected = true;
+      }
+    }
+
+    if (seteuid(0) != 0) {
+      _exit(1);
+    }
+    try {
+      cmDebugger::cmDebuggerPipeClient client(namedPipe);
+      client.WaitForConnection();
+      _exit(client.write(rejected ? "a" : "x", 1) ? 0 : 1);
+    } catch (std::runtime_error const&) {
+      _exit(1);
+    }
+  }
+  if (child < 0) {
+    connection->close();
+    rmdir(directory.c_str());
+    return false;
+  }
+
+  connection->WaitForConnection();
+  char buffer = '\0';
+  size_t const count = connection->read(&buffer, 1);
+  connection->close();
+
+  int status = 0;
+  pid_t waited;
+  do {
+    waited = waitpid(child, &status, 0);
+  } while (waited < 0 && errno == EINTR);
+  int const removed = rmdir(directory.c_str());
+
+  ASSERT_TRUE(waited == child);
+  ASSERT_TRUE(WIFEXITED(status) && WEXITSTATUS(status) == 0);
+  ASSERT_TRUE(count == 1 && buffer == 'a');
+  ASSERT_TRUE(removed == 0);
+  return true;
+}
+#endif
 
 bool testProtocolWithPipes()
 {
@@ -325,6 +461,10 @@ bool testProtocolWithPipesAbruptDisconnect()
 
 int testDebuggerAdapterPipe(int, char*[])
 {
-  return runTests(
-    { testProtocolWithPipes, testProtocolWithPipesAbruptDisconnect });
+  return runTests({
+#ifndef _WIN32
+    testPipePermissions, testPipeUmaskRestoredOnBindFailure,
+    testPipePermissionsRejectDifferentUser,
+#endif
+    testProtocolWithPipes, testProtocolWithPipesAbruptDisconnect });
 }

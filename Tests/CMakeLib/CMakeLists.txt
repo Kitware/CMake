@@ -102,6 +102,10 @@ foreach(testfile ${CMakeLib_TESTS})
   add_test(NAME CMakeLib.${test} COMMAND CMakeLibTests ${test} ${${test}_ARGS})
 endforeach()
 
+if(CMake_ENABLE_DEBUGGER AND NOT WIN32)
+  set_property(TEST CMakeLib.testDebuggerAdapterPipe PROPERTY TIMEOUT 180)
+endif()
+
 if(TEST_CompileCommandOutput)
   add_executable(runcompilecommands run_compile_commands.cxx)
   target_link_libraries(runcompilecommands CMakeLib)

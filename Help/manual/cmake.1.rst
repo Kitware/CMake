@@ -804,6 +804,9 @@ Options
   Name of the pipe (on Windows) or domain socket (on Unix) to use for
   debugger communication.
 
+  On Unix, the domain socket is created with read and write permissions for
+  its owner only.
+
 .. option:: --debugger-dap-log <log path>, --debugger-dap-log=<log path>
 
   Logs all debugger communication to the specified file.
