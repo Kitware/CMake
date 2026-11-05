@@ -1,0 +1,13 @@
+^CMake Error at [^
+]*/Modules/FindFLEX\.cmake:[0-9]+ \(message\):
+  Flex target `NoScanner' does not exist\.
+Call Stack \(most recent call first\):
+  FlexBisonDependency-Missing\.cmake:2 \(add_flex_bison_dependency\)
+  CMakeLists\.txt:3 \(include\)
++
+CMake Error at [^
+]*/Modules/FindFLEX\.cmake:[0-9]+ \(message\):
+  Bison target `NoParser' does not exist\.
+Call Stack \(most recent call first\):
+  FlexBisonDependency-Missing\.cmake:2 \(add_flex_bison_dependency\)
+  CMakeLists\.txt:3 \(include\)
