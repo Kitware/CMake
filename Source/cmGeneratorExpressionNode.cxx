@@ -5188,7 +5188,8 @@ struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
 {
   std::vector<std::string> CollectDlls(
     std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
-    GeneratorExpressionContent const* content) const
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const
   {
     std::string const& tgtName = parameters.front();
     cmGeneratorTarget* gt =
@@ -5208,6 +5209,14 @@ struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
         cmStrCat("Objects of target \"", tgtName,
                  "\" referenced but is not one of the allowed target types "
                  "(EXECUTABLE, SHARED, MODULE)."));
+      return std::vector<std::string>();
+    }
+    if (dagChecker &&
+        (dagChecker->EvaluatingLinkLibraries(gt) ||
+         (dagChecker->EvaluatingSources() && gt == dagChecker->TopTarget()))) {
+      ::reportError(eval, content->GetOriginalExpression(),
+                    "Expressions which require the runtime DLLs may not "
+                    "be used while evaluating sources or link libraries");
       return std::vector<std::string>();
     }
 
@@ -5239,9 +5248,10 @@ static const struct TargetRuntimeDllsNode : public TargetRuntimeDllsBaseNode
   std::string Evaluate(
     std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
     GeneratorExpressionContent const* content,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
-    std::vector<std::string> dlls = CollectDlls(parameters, eval, content);
+    std::vector<std::string> dlls =
+      CollectDlls(parameters, eval, content, dagChecker);
     return cmList::to_string(dlls);
   }
 } targetRuntimeDllsNode;
@@ -5253,9 +5263,10 @@ static const struct TargetRuntimeDllDirsNode : public TargetRuntimeDllsBaseNode
   std::string Evaluate(
     std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
     GeneratorExpressionContent const* content,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
-    std::vector<std::string> dlls = CollectDlls(parameters, eval, content);
+    std::vector<std::string> dlls =
+      CollectDlls(parameters, eval, content, dagChecker);
     std::vector<std::string> dllDirs;
     for (std::string const& dll : dlls) {
       std::string directory = cmSystemTools::GetFilenamePath(dll);
