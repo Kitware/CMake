@@ -80,8 +80,6 @@ void cmExtraCodeBlocksGenerator::CreateProjectFile(
   std::string projectName = lgs[0]->GetProjectName();
 
   std::string filename = cmStrCat(outputDir, '/', projectName, ".cbp");
-  std::string sessionFilename =
-    cmStrCat(outputDir, '/', projectName, ".layout");
 
   this->CreateNewProjectFile(lgs, filename);
 }

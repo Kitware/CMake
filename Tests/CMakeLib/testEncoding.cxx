@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
     std::cout << "Usage: testEncoding <encoding> <file>" << std::endl;
     return 1;
   }
-  std::string const encoding(argv[1]);
 #ifdef _WIN32
+  std::string const encoding(argv[1]);
   unsigned int codePage = 0;
   if ((encoding == "UTF8") || (encoding == "UTF-8")) {
     codePage = CP_UTF8;

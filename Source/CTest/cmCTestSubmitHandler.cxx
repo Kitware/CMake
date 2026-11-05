@@ -582,7 +582,6 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
                      "Request upload response: [", response, "]\n");
   Json::Value json;
-  std::istringstream iss(response);
   cmJSONState parseState(response, &json, cmJSONState::StrictMode::Relaxed);
   if (!internalTest && !parseState.errors.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error parsing json string [",

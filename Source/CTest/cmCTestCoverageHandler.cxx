@@ -2125,7 +2125,6 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   xml.Element("StartDateTime", coverage_start_time);
   xml.Element("StartTime", std::chrono::system_clock::now());
   std::string stdline;
-  std::string errline;
   // expected output:
   // first line is:
   // "Source","Function Coverage","out of","%","C/D Coverage","out of","%"

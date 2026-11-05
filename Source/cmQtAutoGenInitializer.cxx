@@ -456,7 +456,6 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   }
 
   // Common directories
-  std::string relativeBuildDir;
   {
     // Collapsed current binary directory
     std::string const cbd = cmSystemTools::CollapseFullPath(

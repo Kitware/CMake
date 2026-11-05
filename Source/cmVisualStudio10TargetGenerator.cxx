@@ -1371,7 +1371,6 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup(Elem& e0)
   if (!this->XamlObjs.empty()) {
     Elem e1(e0, "ItemGroup");
     for (cmSourceFile const* oi : this->XamlObjs) {
-      std::string obj = oi->GetFullPath();
       std::string xamlType;
       cmValue xamlTypeProperty = oi->GetProperty("VS_XAML_TYPE");
       if (xamlTypeProperty) {
@@ -2288,7 +2287,6 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(
   char const* tool = "None";
   std::string settingsGenerator;
   std::string settingsLastGenOutput;
-  std::string sourceLink;
   std::string subType;
   std::string copyToOutDir;
   std::string includeInVsix;
