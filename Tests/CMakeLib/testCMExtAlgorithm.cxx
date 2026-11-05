@@ -98,6 +98,7 @@ void testAppend()
 
     cm::append(v1, std::move(v2));
 
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     if (v1.size() == 6 && v2.empty()) {
       for (int i = 0; i < 6; i++) {
         if (*v1[i] != i + 1) {

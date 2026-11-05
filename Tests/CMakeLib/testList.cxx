@@ -117,6 +117,7 @@ bool testConstructors()
     if (list.size() != 5 || list.to_string() != "aa;bb;cc;dd;ee") {
       result = false;
     }
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     if (!values.empty()) {
       result = false;
     }
@@ -153,6 +154,7 @@ bool testAssign()
     cmList list2{ "cc", "dd" };
 
     list2 = std::move(list1);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     if (!list1.empty() || list2.size() != 2) {
       result = false;
     }
@@ -165,6 +167,7 @@ bool testAssign()
     cmList list{ "cc", "dd" };
 
     list = std::move(v);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     if (!v.empty() || list.size() != 2) {
       result = false;
     }
@@ -387,6 +390,7 @@ bool testModifiers()
       result = false;
     }
 
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     if (!v.empty()) {
       result = false;
     }
@@ -463,6 +467,7 @@ bool testModifiers()
       result = false;
     }
 
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     if (!v.empty()) {
       result = false;
     }
