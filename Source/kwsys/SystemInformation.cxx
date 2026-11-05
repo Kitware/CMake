@@ -5395,6 +5395,8 @@ bool SystemInformationImplementation::QueryBSDMemory()
 #  if defined(HW_PHYSMEM64)
   int64_t k;
   ctrl[1] = HW_PHYSMEM64;
+#  elif defined(__FreeBSD__) || defined(__DragonFly__)
+  unsigned long k;
 #  else
   int k;
 #  endif
@@ -5405,6 +5407,21 @@ bool SystemInformationImplementation::QueryBSDMemory()
   }
 
   this->TotalPhysicalMemory = k >> 10 >> 10;
+
+#  if defined(__FreeBSD__)
+  u_int freeCount;
+  u_int pageSize;
+  sz = sizeof(freeCount);
+  if (sysctlbyname("vm.stats.vm.v_free_count", &freeCount, &sz, nullptr, 0) ==
+      0) {
+    sz = sizeof(pageSize);
+    if (sysctlbyname("vm.stats.vm.v_page_size", &pageSize, &sz, nullptr, 0) ==
+        0) {
+      this->AvailablePhysicalMemory =
+        (static_cast<uint64_t>(freeCount) * pageSize) >> 10 >> 10;
+    }
+  }
+#  endif
 
   return true;
 #else
