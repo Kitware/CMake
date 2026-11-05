@@ -132,7 +132,9 @@ bool cmListFileParser::ParseFile()
   cmListFileLexer_BOM bom;
   if (!cmListFileLexer_SetFileName(this->Lexer.get(), filename->c_str(),
                                    &bom)) {
-    this->IssueFileOpenError("cmListFileCache: error can not open file.");
+    this->IssueFileOpenError(
+      cmStrCat("Cannot open file \"", this->FileName,
+               "\": ", cmSystemTools::GetLastSystemError()));
     return false;
   }
 
@@ -151,7 +153,7 @@ bool cmListFileParser::ParseString(cm::string_view str)
 {
   if (!cmListFileLexer_SetString(this->Lexer.get(), str.data(),
                                  str.length())) {
-    this->IssueFileOpenError("cmListFileCache: cannot allocate buffer.");
+    this->IssueFileOpenError("Out of memory while reading code to parse.");
     return false;
   }
 

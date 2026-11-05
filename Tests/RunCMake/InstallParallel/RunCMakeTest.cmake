@@ -116,3 +116,18 @@ function(reconfigure_parallel_test test)
   unset(RunCMake-check-file)
 endfunction()
 reconfigure_parallel_test(out-of-date-json-reconfigure)
+
+# A parallel install does not leave a partial installation behind after a
+# missing install script is reported.
+function(missing_script_test test)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
+  set(RunCMake_TEST_OPTIONS -DINSTALL_PARALLEL=ON -DCMAKE_INSTALL_PREFIX=install)
+  if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  run_cmake(install)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE ${RunCMake_TEST_BINARY_DIR}/subdir-1/cmake_install.cmake)
+  run_cmake_command(${test} ${CMAKE_COMMAND} --install . -j 4)
+endfunction()
+missing_script_test(parallel-missing-script)

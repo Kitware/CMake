@@ -1032,6 +1032,13 @@ int do_install(int ac, char const* const* av)
   }
 
   auto doInstall = [&handler, &verbose, &jobs, &instrumentation]() -> int {
+    for (auto const& script : handler.GetScripts()) {
+      if (!cmSystemTools::FileExists(script.path, true)) {
+        cmSystemTools::Error(
+          cmStrCat("Install script does not exist:\n  ", script.path));
+        return 1;
+      }
+    }
     int ret_ = 0;
     if (handler.IsParallel()) {
       ret_ = handler.Install(jobs, instrumentation);

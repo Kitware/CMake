@@ -1,1 +1,3 @@
-^CMake Error: Not a file:
+^CMake Error: Install script does not exist:
+  [^
+]*/dir-does-not-exist/cmake_install\.cmake$
