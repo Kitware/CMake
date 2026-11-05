@@ -5211,7 +5211,11 @@ struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
       return std::vector<std::string>();
     }
 
-    if (auto* cli = gt->GetLinkInformation(eval->Context.Config)) {
+    auto forGenex = [content]() -> std::string {
+      return content->GetOriginalExpression();
+    };
+    if (cmComputeLinkInformation* cli =
+          gt->GetLinkInformation(eval->Context.Config, forGenex)) {
       std::vector<std::string> dllPaths;
       auto const& dlls = cli->GetRuntimeDLLs();
 

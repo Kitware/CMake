@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
@@ -342,41 +343,40 @@ cmGeneratorTarget::GetLinkImplementationClosure(std::string const& config,
 }
 
 cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
-  std::string const& config) const
+  std::string const& config, std::function<std::string()> forGenex) const
 {
   // Lookup any existing information for this configuration.
   std::string key(cmSystemTools::UpperCase(config));
-  auto i = this->LinkInformation.find(key);
-  if (i != this->LinkInformation.end()) {
-    if (cm::contains(this->LinkInformationInProgress, key)) {
+  auto i = this->LinkInformationMap.find(key);
+  if (i != this->LinkInformationMap.end()) {
+    if (forGenex && !i->second.Done) {
       this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("The link dependencies of \"", this->GetName(),
-                 "\" use a generator expression that depends on the link "
-                 "dependencies themselves."),
+        cmStrCat("The LINK_LIBRARIES of \"", this->GetName(),
+                 "\" use a generator expression that depends on the "
+                 "LINK_LIBRARIES themselves:\n  ",
+                 forGenex(), '\n'),
         this->GetBacktrace());
     }
-  } else {
-    // Reserve the entry so that a recursive lookup while computing the
-    // information is diagnosed instead of re-entering the computation.
-    i = this->LinkInformation.emplace(key, nullptr).first;
-    this->LinkInformationInProgress.insert(key);
-
-    // Compute information for this configuration.
-    auto info = cm::make_unique<cmComputeLinkInformation>(this, config);
-    if (info && !info->Compute()) {
-      info.reset();
-    }
-
-    // Store the information for this configuration.
-    this->LinkInformationInProgress.erase(key);
-    i->second = std::move(info);
-
-    if (i->second) {
-      this->CheckPropertyCompatibility(*i->second, config);
-    }
+    return i->second.get();
   }
-  return i->second.get();
+
+  // Add an entry to the map for this configuration.
+  LinkInformationEntry& info = this->LinkInformationMap[key];
+  this->ComputeLinkInformation(info, config);
+  info.Done = true;
+  return info.get();
+}
+
+void cmGeneratorTarget::ComputeLinkInformation(
+  std::unique_ptr<cmComputeLinkInformation>& info,
+  std::string const& config) const
+{
+  auto pcli = cm::make_unique<cmComputeLinkInformation>(this, config);
+  if (pcli && pcli->Compute()) {
+    info = std::move(pcli);
+    this->CheckPropertyCompatibility(*info, config);
+  }
 }
 
 void cmGeneratorTarget::CheckLinkLibraries() const
