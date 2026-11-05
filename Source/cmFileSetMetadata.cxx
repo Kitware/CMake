@@ -181,7 +181,7 @@ bool IsKnownType(cm::string_view type)
 bool IsValidName(cm::string_view name)
 {
   cmsys::RegularExpressionMatch match;
-  return ValidNameRegex.find(name.data(), match);
+  return ValidNameRegex.find(name.data(), name.size(), match);
 }
 }
 }

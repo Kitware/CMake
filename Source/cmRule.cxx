@@ -136,8 +136,8 @@ bool IsSettableProperty(cm::string_view prop, cmRule const* rule)
                    { VERBATIM, { ROC::Generation } },
                    { WORKING_DIRECTORY, { ROC::Generation } } };
 
-  auto it =
-    readOnlyProps.find(commandIndex.find(prop.data()) ? COMMAND : prop);
+  auto it = readOnlyProps.find(
+    commandIndex.find(prop.data(), prop.size(), 0, 0) ? COMMAND : prop);
 
   if (it != readOnlyProps.end()) {
     return !(it->second.IsReadOnly(prop, rule));

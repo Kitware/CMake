@@ -35,7 +35,7 @@ bool cmStringReplaceHelper::Replace(cm::string_view input, std::string& output)
   auto& re = this->RegularExpression;
   std::string::size_type base = 0;
   unsigned optNonEmpty = 0;
-  while (re.find(input.data(), base, optAnchor | optNonEmpty)) {
+  while (re.find(input.data(), input.size(), base, optAnchor | optNonEmpty)) {
     if (this->Makefile) {
       this->Makefile->ClearMatches();
       this->Makefile->StoreMatches(re);
