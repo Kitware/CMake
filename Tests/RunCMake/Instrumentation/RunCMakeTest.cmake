@@ -501,6 +501,12 @@ instrument(hooks-no-callbacks MANUAL_HOOK
 )
 
 # Check data file contents for optional query data
+set(ENV{CTEST_PARALLEL_LEVEL} 2)
+instrument(test-snippet-collision BUILD TEST
+  CONFIGURE_ARGS "-DDUPLICATE_TEST_COMMAND=ON"
+  CHECK_SCRIPT check-test-snippet-collision.cmake
+)
+unset(ENV{CTEST_PARALLEL_LEVEL})
 instrument(no-query
   BUILD INSTALL TEST
   CHECK_SCRIPT check-data-dir.cmake

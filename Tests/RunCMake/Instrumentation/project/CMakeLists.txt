@@ -75,6 +75,9 @@ add_custom_target(customTarget ALL
           $<$<BOOL:${PROCESS_METRICS_QUERY}>:process_metrics_cpu_custom.stamp>
 )
 add_test(NAME test COMMAND $<TARGET_FILE:main>)
+if(DUPLICATE_TEST_COMMAND)
+  add_test(NAME test-duplicate COMMAND $<TARGET_FILE:main>)
+endif()
 if (PROCESS_METRICS_QUERY)
   add_test(NAME process_metrics_memory_test
     COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/process_metrics_memory.py
