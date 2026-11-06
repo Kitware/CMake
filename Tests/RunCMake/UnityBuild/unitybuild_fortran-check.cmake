@@ -1,0 +1,7 @@
+foreach(f unity_0_fortran_f.F unity_0_fortran.F90)
+  set(unitybuild_src "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/Unity/${f}")
+  if(NOT EXISTS "${unitybuild_src}")
+    set(RunCMake_TEST_FAILED "Generated unity source file ${unitybuild_src} does not exist.")
+    return()
+  endif()
+endforeach()

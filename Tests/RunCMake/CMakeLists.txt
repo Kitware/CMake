@@ -1685,9 +1685,17 @@ if(DEFINED CMake_TEST_PrecompileHeaders_TIMEOUT)
   set_property(TEST RunCMake.PrecompileHeaders PROPERTY TIMEOUT ${CMake_TEST_PrecompileHeaders_TIMEOUT})
 endif()
 
-add_RunCMake_test(UnityBuild -DCMake_TEST_OBJC=${CMake_TEST_OBJC} -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+if (CMAKE_Fortran_COMPILER)
+  list(APPEND UnityBuild_ARGS
+    -DCMake_TEST_Fortran=1
+  )
+endif()
+add_RunCMake_test(UnityBuild
+  -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
+  -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+)
 set_property(TEST RunCMake.UnityBuild APPEND
-  PROPERTY LABELS "CUDA")
+  PROPERTY LABELS "CUDA;Fortran")
 
 add_RunCMake_test(CMakePresets
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
