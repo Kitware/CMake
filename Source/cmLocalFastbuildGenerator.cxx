@@ -36,9 +36,9 @@ void cmLocalFastbuildGenerator::Generate()
     if (!target->IsInBuildSystem()) {
       continue;
     }
-    for (std::string config : this->GetConfigNames()) {
+    for (std::string const& config : this->GetConfigNames()) {
       cmFastbuildTargetGenerator* tg =
-        cmFastbuildTargetGenerator::New(target.get(), std::move(config));
+        cmFastbuildTargetGenerator::New(target.get(), config);
       if (tg) {
         tg->Generate();
         delete tg;

@@ -125,12 +125,14 @@ static bool testCrossAssignment()
     pipe.init(Loop, 0);
 
     cm::uv_stream_ptr stream = std::move(pipe);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     if (pipe) {
       std::cerr << "Move should be sure to invalidate the previous ptr"
                 << std::endl;
       return false;
     }
     cm::uv_handle_ptr handle = std::move(stream);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     if (stream) {
       std::cerr << "Move should be sure to invalidate the previous ptr"
                 << std::endl;

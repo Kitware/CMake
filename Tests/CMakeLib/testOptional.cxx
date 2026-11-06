@@ -351,6 +351,7 @@ static bool testCopyAssign(std::vector<Event>& expected)
     { Event::VALUE_CONSTRUCT, v5, nullptr, 1 },
     { Event::VALUE_CONSTRUCT, v6, nullptr, 2 },
     { Event::COPY_ASSIGN, v5, v6, 2 },
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     { Event::VALUE_CONSTRUCT, &e7, nullptr, 3 },
     { Event::COPY_ASSIGN, v5, &e7, 3 },
     { Event::DESTRUCT, &e7, nullptr, 3 },

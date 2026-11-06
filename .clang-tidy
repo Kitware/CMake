@@ -24,7 +24,6 @@ Checks: >
   -bugprone-unhandled-code-paths,
   -bugprone-unused-local-non-trivial-variable,
   -bugprone-unused-return-value,
-  -bugprone-use-after-move,
   misc-*,
   -misc-const-correctness,
   -misc-explicit-constructor,
