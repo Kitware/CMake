@@ -55,6 +55,9 @@ add_custom_target(customTarget ALL
   DEPENDS output1 output3 shell_redirect.out
 )
 add_test(NAME test COMMAND $<TARGET_FILE:main>)
+if(DUPLICATE_TEST_COMMAND)
+  add_test(NAME test-duplicate COMMAND $<TARGET_FILE:main>)
+endif()
 if(DISABLE_TEST)
   set_tests_properties(test PROPERTIES DISABLED TRUE)
 endif()

@@ -55,7 +55,7 @@ public:
     cm::optional<std::map<std::string, std::string>> arrayOptions =
       cm::nullopt,
     LoadQueriesAfter reloadQueriesAfterCommand = LoadQueriesAfter::No);
-  std::string InstrumentTest(std::string const& name,
+  std::string InstrumentTest(std::string const& name, int index,
                              std::string const& command,
                              std::vector<std::string> const& args,
                              int64_t result,
