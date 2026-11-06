@@ -4321,9 +4321,6 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
   };
 
 #if !defined(CMAKE_BOOTSTRAP)
-  // Block the instrumentation build daemon from spawning during this build.
-  // This lock will be released when the process exits at the end of the build.
-  instrumentation.LockBuildDaemon();
   // Run the build under an interrupt handler so that a user interrupt (e.g.
   // Ctrl+C) still writes the overall `cmakeBuild` snippet before we exit.
   cmInstrumentationInterrupt::InterruptOutcome buildOutcome =

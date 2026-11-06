@@ -125,7 +125,6 @@ public:
   void ClearGeneratedQueries();
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
   int SpawnBuildDaemon();
-  bool LockBuildDaemon();
   bool LockIndexing();
   int CollectTimingAfterBuild(int ppid);
   void AddHook(cmInstrumentationQuery::Hook hook);
@@ -143,6 +142,9 @@ public:
                                  std::string const& exclude = "");
 
 private:
+  bool LockBuildDaemon();
+  std::string WriteBuildID();
+  std::string GetBuildID();
   Json::Value ReadJsonSnippet(std::string const& file_name);
   bool AcquireLock(std::string const& lock_file, cmFileLock& lock,
                    unsigned long timeout);
@@ -195,6 +197,7 @@ private:
   std::vector<Callback> callbacks;
   Json::Value preTestStats;
   std::string errorMsg;
+  std::string ctestID;
   bool disabled = false;
   bool hasQuery = false;
   bool ranSystemChecks = false;
