@@ -610,7 +610,7 @@ void cmInstrumentation::WriteInstrumentationJson(
 }
 
 std::string cmInstrumentation::InstrumentTest(
-  std::string const& name, std::string const& command,
+  std::string const& name, int index, std::string const& command,
   std::vector<std::string> const& args, int64_t result,
   std::chrono::steady_clock::time_point steadyStart,
   std::chrono::system_clock::time_point systemStart, std::string config,
@@ -651,8 +651,8 @@ std::string cmInstrumentation::InstrumentTest(
     systemStart + std::chrono::milliseconds(root["duration"].asUInt64());
   std::string file_name = cmStrCat(
     "test-",
-    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())), '-',
-    this->ComputeSuffixTime(endTime), ".json");
+    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId(), index)),
+    '-', this->ComputeSuffixTime(endTime), ".json");
   this->WriteInstrumentationJson(latestDataVersion, root, "data", file_name);
   return file_name;
 }
