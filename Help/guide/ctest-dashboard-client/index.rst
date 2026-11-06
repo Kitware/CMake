@@ -18,6 +18,10 @@ to submit results from an existing build tree, and how to write a script
 that runs a dashboard on a schedule.  See the :manual:`ctest(1)` manual
 for a complete reference.
 
+The :ref:`CTest Dashboard Examples` at the end of this guide expand on
+each topic, one step at a time, with complete scripts that can be run
+standalone.
+
 .. _`CDash`: https://www.cdash.org
 
 Preparing a Project
@@ -94,16 +98,22 @@ option selects the mode and each :option:`ctest -T` option adds a step:
 Results are recorded under the tag created by the most recent ``Start``
 step, and later invocations add to it.  By default, the ``Submit`` step
 sends every result recorded under that tag, including results from
-earlier invocations.  Set :variable:`CTEST_SUBMIT_PARTS` to submit only
-some of them.  For example, to rerun the tests and submit only the new
-test results:
+earlier invocations.
 
-.. code-block:: shell
+.. versionadded:: 4.4
+  Set :variable:`CTEST_SUBMIT_PARTS` to submit only some of them.  For
+  example, to rerun the tests and submit only the new test results:
 
-  ctest -M Experimental -T Test -T Submit -D CTEST_SUBMIT_PARTS=Test
+  .. code-block:: shell
+
+    ctest -M Experimental -T Test -T Submit -D CTEST_SUBMIT_PARTS=Test
+
+See :ref:`CTest Dashboard Step 9` for a complete dashboard run this way.
 
 Overriding Settings
 -------------------
+
+.. versionadded:: 4.4
 
 Settings in the configuration file can be overridden for one run with the
 :option:`-D \<var\>=\<value\> <ctest-dashboard -D>` option.  For example,
@@ -166,6 +176,7 @@ Run the script from any directory outside the build tree:
   ctest -S nightly.cmake -V
 
 The :option:`ctest -V` option shows the progress of each step.
+See :ref:`CTest Dashboard Step 1` for a complete script.
 
 Notes on the script:
 
@@ -206,6 +217,10 @@ a variable before the script runs:
 
 Variables whose names do not begin with ``CTEST_`` must be given with a
 type, such as ``-D dashboard_model:STRING=Nightly``.
+
+.. versionchanged:: 4.4
+  Variables whose names begin with ``CTEST_`` may be given without a type.
+  Previously, every variable had to be given with a type.
 
 Continuous Dashboards
 ---------------------
@@ -281,6 +296,7 @@ name for the configure, build, and test steps, or set
 
 Settings from the script, such as :variable:`CTEST_BINARY_DIRECTORY`,
 take priority over the corresponding settings from the preset.
+See :ref:`CTest Dashboard Step 8` for a complete example.
 
 From the command line, the :ctest-dashboard-option:`--source-dir` option
 lets the ``Configure`` step create a new build tree from a preset.  If
@@ -315,7 +331,8 @@ after :command:`ctest_test`:
   ctest_coverage()
   ctest_submit()
 
-See the :ref:`CTest Coverage Step` for the supported tools.
+See the :ref:`CTest Coverage Step` for the supported tools, and
+:ref:`CTest Dashboard Step 3` for a complete example.
 
 Memory Checking
 ---------------
@@ -336,7 +353,9 @@ instead of, or in addition to, :command:`ctest_test`.  The
   ctest_submit()
 
 See the :ref:`CTest MemCheck Step` for the supported tools, including
-the sanitizers supported by Clang and GCC.
+the sanitizers supported by Clang and GCC.  See
+:ref:`CTest Dashboard Step 4` for complete examples that use
+AddressSanitizer and Valgrind.
 
 Detailed Build Reports
 ----------------------
@@ -351,6 +370,7 @@ that produces a warning or error:
   set(CTEST_USE_LAUNCHERS 1)
 
 This works with the :ref:`Makefile Generators` and :ref:`Ninja Generators`.
+See :ref:`CTest Dashboard Step 2` for a complete example.
 
 Notes and Extra Files
 ---------------------
@@ -364,6 +384,37 @@ calling :command:`ctest_submit`:
   set(CTEST_NOTES_FILES "${CMAKE_CURRENT_LIST_FILE}")
 
 From the command line, use the :ctest-dashboard-option:`--add-notes` option.
+
+To attach other files, such as logs or reports, use the
+:command:`ctest_upload` command.  See :ref:`CTest Dashboard Step 6` for an
+example.
+
+.. _`CTest Dashboard Examples`:
+
+Step-by-Step Examples
+=====================
+
+.. include:: include/source.rst
+
+The following steps show complete dashboard scripts, one topic at a time.
+|ctest_dashboard_source|
+The examples submit to the ``sandbox`` project on `my.cdash.org <https://my.cdash.org/projects>`__.
+
+The examples need a C++ compiler and access to a CDash server.  Some
+steps have additional requirements, which are listed in each step.
+
+.. toctree::
+  :maxdepth: 1
+
+  A Basic Dashboard Script
+  Using CTest Launchers
+  Collecting Coverage
+  Dynamic Analysis
+  Instrumentation
+  Uploading Files
+  Authenticated Submissions
+  Using CMake Presets
+  Using the Command Line
 
 Next Steps
 ==========

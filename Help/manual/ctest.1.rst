@@ -984,6 +984,12 @@ The available ``<dashboard-options>`` are the following:
  corresponding setting from the `Dashboard Client Configuration`_ file
  (e.g., ``DartConfiguration.tcl``) when using :ctest-option:`-T`.
 
+ .. versionchanged:: 4.4
+   The ``<var>=<value>`` form was added, and definitions override
+   `Dashboard Client Configuration`_ settings when using
+   :ctest-option:`-T`.  Previously, definitions were only passed to
+   :ctest-option:`-S` scripts.
+
  .. note::
    These definitions set CTest script variables
    (e.g., :variable:`CTEST_BUILD_NAME`), not CMake cache variables.

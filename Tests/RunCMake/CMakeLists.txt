@@ -733,6 +733,14 @@ add_RunCMake_test(ToolchainSkipsChecks
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   set(Tutorial_ARGS TEST_DIR Tutorial -DTutorial_SOURCE_DIR=${CMake_SOURCE_DIR}/Help/guide/tutorial)
   add_RunCMake_test(Tutorial ${Tutorial_ARGS})
+  if(Python_EXECUTABLE AND Python_VERSION VERSION_GREATER_EQUAL 3.7)
+    add_RunCMake_test(CTestDashboardGuide
+      -DGuide_SOURCE_DIR=${CMake_SOURCE_DIR}/Help/guide/ctest-dashboard-client
+      -DPython_EXECUTABLE=${Python_EXECUTABLE}
+      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    )
+  endif()
 endif()
 
 add_RunCMake_test(find_dependency)
