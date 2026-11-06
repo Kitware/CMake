@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 
 namespace cmDebugger {
@@ -42,11 +43,15 @@ bool cmDebuggerPipeConnection_POSIX::StartListening(std::string& errorMessage)
   addr.sun_family = AF_UNIX;
   strncpy(addr.sun_path, PipeName.c_str(), sizeof(addr.sun_path));
   addr.sun_path[sizeof(addr.sun_path) - 1] = '\0';
-  if (bind(listen_fd, (sockaddr*)&addr, sizeof(addr)) == -1) {
+  mode_t const previousMask = umask(0177);
+  int const bindResult = bind(listen_fd, (sockaddr*)&addr, sizeof(addr));
+  int const bindError = errno;
+  umask(previousMask);
+  if (bindResult == -1) {
     errorMessage = "Failed to bind name '";
     errorMessage += addr.sun_path;
     errorMessage += "' to socket: ";
-    errorMessage += strerror(errno);
+    errorMessage += strerror(bindError);
     close_listen();
     return false;
   }
@@ -96,9 +101,9 @@ void cmDebuggerPipeConnection_POSIX::close_listen()
 
 void cmDebuggerPipeConnection_POSIX::WaitForConnection()
 {
-  sockaddr_un laddr;
-  socklen_t len = sizeof(laddr);
-  rw_pipe = accept(listen_fd, (sockaddr*)&laddr, &len);
+  do {
+    rw_pipe = accept(listen_fd, nullptr, nullptr);
+  } while (rw_pipe < 0 && errno == EINTR);
   if (rw_pipe < 0) {
     close();
     return;
