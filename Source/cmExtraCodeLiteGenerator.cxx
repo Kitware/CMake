@@ -433,7 +433,7 @@ void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
 
   xml.StartElement("Configuration");
   xml.Attribute("Name", this->ConfigName);
-  xml.Attribute("CompilerType", this->GetCodeLiteCompilerName(mf));
+  xml.Attribute("CompilerType", codeliteCompilerName);
   xml.Attribute("DebuggerType", "GNU gdb debugger");
   xml.Attribute("Type", projectType);
   xml.Attribute("BuildCmpWithGlobalSettings", "append");

@@ -22,7 +22,6 @@ Checks: >
   -bugprone-unchecked-optional-access,
   -bugprone-unchecked-string-to-number-conversion,
   -bugprone-unhandled-code-paths,
-  -bugprone-unused-local-non-trivial-variable,
   -bugprone-unused-return-value,
   misc-*,
   -misc-const-correctness,

@@ -68,7 +68,6 @@ void cmNinjaNormalTargetGenerator::Generate(std::string const& config)
 {
   if (this->GetGeneratorTarget()->GetType() !=
       cm::TargetType::INTERFACE_LIBRARY) {
-    std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
     if (this->TargetLinkLanguage(config).empty()) {
       cmSystemTools::Error(
         cmStrCat("CMake can not determine linker language for target: ",
@@ -1059,8 +1058,6 @@ void cmNinjaNormalTargetGenerator::WriteDriverDeviceLinkStatement(
   std::string frameworkPath;
   std::string linkPath;
 
-  std::string createRule =
-    genTarget->GetCreateRuleVariable(this->TargetLinkLanguage(config), config);
   cmLocalNinjaGenerator& localGen = *this->GetLocalGenerator();
 
   vars["TARGET_FILE"] =

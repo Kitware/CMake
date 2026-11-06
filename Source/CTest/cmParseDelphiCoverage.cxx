@@ -86,7 +86,6 @@ public:
   {
     std::string line = file;
     std::string lineresult;
-    std::string lastroutine;
     std::string filename;
     std::string filelineoffset;
     size_t afterLineNum = 0;

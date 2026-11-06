@@ -45,7 +45,6 @@ public:
     std::string filename;
     bool foundFile = false;
     bool inSource = false;
-    std::string covResult;
     std::string line;
 
     cmsys::ifstream in(file.c_str());

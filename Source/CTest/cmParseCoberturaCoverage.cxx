@@ -46,7 +46,6 @@ protected:
 
   void StartElement(std::string const& name, char const** atts) override
   {
-    std::string FoundSource;
     std::string finalpath;
     if (name == "source") {
       this->InSource = true;

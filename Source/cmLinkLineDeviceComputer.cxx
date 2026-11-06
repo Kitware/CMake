@@ -108,7 +108,6 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
   std::set<std::string> emitted;
   using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& items = cli.GetItems();
-  std::string config = cli.GetConfig();
   bool skipItemAfterFramework = false;
   auto const librariesBegin = linkLibraries.size();
   cmMakefile const* mf = cli.GetTarget()->Makefile;

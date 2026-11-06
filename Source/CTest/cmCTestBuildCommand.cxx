@@ -199,7 +199,6 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
         cmakeBuildConfiguration = "Debug";
       }
 
-      std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
       std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
         cmakeBuildTarget, cmakeBuildConfiguration, args.ParallelLevel,
         cmakeBuildAdditionalFlags, false);

@@ -3443,10 +3443,6 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     }
   }
   std::string const native_target_dir = tdi["native-target-dir"].asString();
-  std::string const compilerId = tdi["compiler-id"].asString();
-  std::string const simulateId = tdi["compiler-simulate-id"].asString();
-  std::string const compilerFrontendVariant =
-    tdi["compiler-frontend-variant"].asString();
 
   auto export_info = cmDyndepCollation::ParseExportInfo(tdi);
 
@@ -3465,6 +3461,10 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   cmGlobalNinjaGenerator& gg =
     cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd);
 #  ifdef _WIN32
+  std::string const compilerId = tdi["compiler-id"].asString();
+  std::string const simulateId = tdi["compiler-simulate-id"].asString();
+  std::string const compilerFrontendVariant =
+    tdi["compiler-frontend-variant"].asString();
   if (DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant)) {
     gg.MarkAsGCCOnWindows();
   }

@@ -1700,7 +1700,6 @@ void cmLocalGenerator::GetTargetFlags(
   std::vector<BT<std::string>>& linkFlags, std::string& frameworkPath,
   std::vector<BT<std::string>>& linkPath, cmGeneratorTarget* target)
 {
-  std::string const configUpper = cmSystemTools::UpperCase(config);
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
 
   std::string const linkLanguage =

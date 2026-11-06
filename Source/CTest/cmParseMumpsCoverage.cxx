@@ -34,7 +34,6 @@ bool cmParseMumpsCoverage::ReadCoverageFile(char const* file)
   std::string line;
   while (cmSystemTools::GetLineFromStream(in, line)) {
     std::string::size_type pos = line.find(':', 0);
-    std::string packages;
     if (pos != std::string::npos) {
       std::string type = line.substr(0, pos);
       std::string path = line.substr(pos + 1);

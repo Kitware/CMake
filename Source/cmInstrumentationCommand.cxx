@@ -192,7 +192,6 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
       status.SetError("CUSTOM_CONTENT expected 3 arguments");
       return false;
     }
-    std::string const label = content[0];
     std::string const type = content[1];
     std::string const contentString = content[2];
     Json::Value value;

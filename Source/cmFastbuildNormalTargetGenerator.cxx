@@ -1161,7 +1161,6 @@ void cmFastbuildNormalTargetGenerator::CollapseAllExecsIntoOneScriptfile(
     return;
   }
   LogMessage("Writing collapsed Execs to " + scriptFileName);
-  auto const shell = cmGlobalFastbuildGenerator::GetExternalShellExecutable();
   char const* suffix = "\n";
 #if !defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
   cmInstrumentation* instrumentation =
@@ -1183,6 +1182,8 @@ void cmFastbuildNormalTargetGenerator::CollapseAllExecsIntoOneScriptfile(
                  << cmSystemTools::ConvertToWindowsOutputPath(exec.ScriptFile)
                  << suffix;
 #else
+      std::string const shell =
+        cmGlobalFastbuildGenerator::GetExternalShellExecutable();
       scriptFile << cmSystemTools::ConvertToOutputPath(shell) << " "
                  << cmSystemTools::ConvertToOutputPath(exec.ScriptFile)
                  << suffix;
@@ -2368,8 +2369,6 @@ void cmFastbuildNormalTargetGenerator::GenerateLink(
     LogMessage("targetOutput: " + targetOutput);
     LogMessage("targetOutputReal: " + targetOutputReal);
 
-    std::string const output =
-      cmSystemTools::GetFilenameName(targetNames.Output);
     std::string const outputReal =
       cmSystemTools::GetFilenameName(targetNames.Real);
     // Generate "Copy" nodes for copying Framework / Bundle resources.
