@@ -807,7 +807,8 @@
     extends: .fedora45
     script:
         - source .gitlab/ci/ast-grep-env.sh
-        - .gitlab/ci/ast-grep-scan.sh
+        - ast-grep test
+        - ast-grep scan --error
     interruptible: true
 
 .cmake_build_linux:
