@@ -77,7 +77,7 @@ void QCMakeThread::run()
 {
   this->CMakeInstance = cm::make_unique<QCMake>();
   // emit that this cmake thread is ready for use
-  emit this->cmakeInitialized();
+  Q_EMIT this->cmakeInitialized();
   this->exec();
   this->CMakeInstance.reset();
 }
@@ -1213,10 +1213,10 @@ void CMakeSetupDialog::removeSelectedCacheEntries()
 {
   QModelIndexList idxs = this->CacheValues->selectionModel()->selectedRows();
   QList<QPersistentModelIndex> pidxs;
-  foreach (QModelIndex const& i, idxs) {
+  Q_FOREACH (QModelIndex const& i, idxs) {
     pidxs.append(i);
   }
-  foreach (QPersistentModelIndex const& pi, pidxs) {
+  Q_FOREACH (QPersistentModelIndex const& pi, pidxs) {
     this->CacheValues->model()->removeRow(pi.row(), pi.parent());
   }
 }
@@ -1432,7 +1432,7 @@ void CMakeSetupDialog::showUserChanges()
   QString command;
   QString cache;
 
-  foreach (QCMakeProperty const& prop, changes) {
+  Q_FOREACH (QCMakeProperty const& prop, changes) {
     QString type;
     switch (prop.Type) {
       case QCMakeProperty::BOOL:

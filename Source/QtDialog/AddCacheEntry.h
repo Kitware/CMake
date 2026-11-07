@@ -24,7 +24,7 @@ public:
   QCMakeProperty::PropertyType type() const;
   QString typeString() const;
 
-private slots:
+private Q_SLOTS:
   void onCompletionActivated(QString const& text);
 
 private:

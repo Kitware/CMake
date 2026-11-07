@@ -69,11 +69,11 @@ void QCMakeFilePathEditor::chooseFile()
     title = tr("Select File for %1");
     title = title.arg(this->Variable);
   }
-  emit this->fileDialogExists(true);
+  Q_EMIT this->fileDialogExists(true);
   path =
     QFileDialog::getOpenFileName(this, title, info.absolutePath(), QString(),
                                  nullptr, QFileDialog::DontResolveSymlinks);
-  emit this->fileDialogExists(false);
+  Q_EMIT this->fileDialogExists(false);
 
   if (!path.isEmpty()) {
     this->setText(QDir::fromNativeSeparators(path));
@@ -91,11 +91,11 @@ void QCMakePathEditor::chooseFile()
     title = tr("Select Path for %1");
     title = title.arg(this->Variable);
   }
-  emit this->fileDialogExists(true);
+  Q_EMIT this->fileDialogExists(true);
   path = QFileDialog::getExistingDirectory(this, title, this->text(),
                                            QFileDialog::ShowDirsOnly |
                                              QFileDialog::DontResolveSymlinks);
-  emit this->fileDialogExists(false);
+  Q_EMIT this->fileDialogExists(false);
   if (!path.isEmpty()) {
     this->setText(QDir::fromNativeSeparators(path));
   }

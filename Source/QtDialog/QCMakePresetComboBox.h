@@ -20,11 +20,11 @@ public:
   QVector<QCMakePreset> const& presets() const;
   QString presetName() const;
 
-public slots:
+public Q_SLOTS:
   void setPresets(QVector<QCMakePreset> const& presets);
   void setPresetName(QString const& name);
 
-signals:
+Q_SIGNALS:
   void presetChanged(QString const& name);
 
 private:

@@ -48,7 +48,7 @@ protected:
     }
 
     // check all strings for a match
-    foreach (QString const& str, strs) {
+    Q_FOREACH (QString const& str, strs) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
       if (str.contains(this->filterRegularExpression())) {
 #else
@@ -259,12 +259,12 @@ void QCMakeCacheModel::setProperties(QCMakePropertyList const& props)
     qSort(newP2);
 #endif
     int row_count = 0;
-    foreach (QCMakeProperty const& p, newP) {
+    Q_FOREACH (QCMakeProperty const& p, newP) {
       this->insertRow(row_count);
       this->setPropertyData(this->index(row_count, 0), p, true);
       row_count++;
     }
-    foreach (QCMakeProperty const& p, newP2) {
+    Q_FOREACH (QCMakeProperty const& p, newP2) {
       this->insertRow(row_count);
       this->setPropertyData(this->index(row_count, 0), p, false);
       row_count++;
@@ -433,7 +433,7 @@ void QCMakeCacheModel::breakProperties(
 {
   QMap<QString, QCMakePropertyList> tmp;
   // return a map of properties grouped by prefixes, and sorted
-  foreach (QCMakeProperty const& p, props) {
+  Q_FOREACH (QCMakeProperty const& p, props) {
     QString prefix = QCMakeCacheModel::prefix(p.Key);
     tmp[prefix].append(p);
   }

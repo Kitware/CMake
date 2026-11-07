@@ -56,10 +56,10 @@ public:
 
   int nextId() const;
 
-signals:
+Q_SIGNALS:
   void selectionChanged();
 
-protected slots:
+protected Q_SLOTS:
   void onSelectionChanged(bool);
   void onGeneratorChanged(int index);
 

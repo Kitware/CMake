@@ -58,7 +58,7 @@ void QCMakePresetComboBox::setPresetName(QString const& name)
 void QCMakePresetComboBox::emitPresetChanged()
 {
   if (this->presetName() != this->m_lastPreset) {
-    emit this->presetChanged(this->presetName());
+    Q_EMIT this->presetChanged(this->presetName());
     this->m_lastPreset = this->presetName();
   }
 }

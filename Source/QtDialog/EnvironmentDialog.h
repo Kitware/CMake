@@ -22,7 +22,7 @@ public:
 
   QModelIndex buddy(QModelIndex const& index) const override;
 
-public slots:
+public Q_SLOTS:
   void appendVariable(QString const& key, QString const& value);
   void insertVariable(int row, QString const& key, QString const& value);
 };
@@ -48,7 +48,7 @@ public:
 
   QProcessEnvironment environment() const;
 
-protected slots:
+protected Q_SLOTS:
   void addEntry();
   void removeSelectedEntries();
   void selectionChanged();
