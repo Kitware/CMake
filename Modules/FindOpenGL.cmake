@@ -240,9 +240,11 @@ This module accepts the following variables:
       correspond to GLVND libraries).
 
   ``LEGACY``
-    Prefer to use the legacy libGL library, if available. This makes
-    ``OPENGL_opengl_LIBRARY`` and ``OPENGL_glx_LIBRARY``
-    point to ``OPENGL_gl_LIBRARY``.
+    Prefer to use the legacy libGL library, if available.
+
+    .. versionchanged:: 4.4
+      This makes ``OPENGL_opengl_LIBRARY`` and ``OPENGL_glx_LIBRARY`` point to
+      ``OPENGL_gl_LIBRARY``.
 
 .. _`Linux Specific`:
 
