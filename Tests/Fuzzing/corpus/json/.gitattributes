@@ -1,2 +1,3 @@
 array.json -text -whitespace
 bom.json -text -whitespace
+double-bom.json binary -whitespace
