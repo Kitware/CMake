@@ -358,13 +358,15 @@ int cmCTestLaunch::Run()
   options["source"] = this->Reporter.OptionSource;
   options["language"] = this->Reporter.OptionLanguage;
   options["targetType"] = this->Reporter.OptionTargetType;
-  options["role"] = this->Reporter.OptionRole;
   options["config"] = this->Reporter.OptionConfig;
   std::map<std::string, std::string> arrayOptions;
   arrayOptions["outputs"] = this->Reporter.OptionOutput;
   arrayOptions["targetLabels"] = this->Reporter.OptionTargetLabels;
+  std::string const& commandType = this->Reporter.OptionRole.empty()
+    ? this->Reporter.OptionCommandType
+    : this->Reporter.OptionRole;
   instrumentation.InstrumentCommand(
-    this->Reporter.OptionCommandType, this->RealArgV,
+    commandType, this->RealArgV,
     [this, captureOutput,
      processMetrics]() -> cmInstrumentation::CommandResult {
       this->RunChild();
