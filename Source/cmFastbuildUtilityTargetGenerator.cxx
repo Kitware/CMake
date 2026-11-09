@@ -130,19 +130,28 @@ void cmFastbuildUtilityTargetGenerator::Generate()
   if (fastbuildTarget.PreBuildDependencies.empty()) {
     std::vector<cmSourceFile*> sources;
     this->GetGeneratorTarget()->GetSourceFiles(sources, this->Config);
-    if (sources.empty()) {
+    for (cmSourceFile const* source : sources) {
+      // A custom command without command lines, such as the one
+      // add_custom_target() creates for DEPENDS without a COMMAND, has no
+      // Exec node, and is attached to a rule file and produces a symbolic
+      // output.  Neither file is ever written, so do not depend on them.
+      // Tested in "RunCMake.add_custom_target" test.
+      if (source->GetPropertyAsBool("__CMAKE_RULE") ||
+          source->GetPropertyAsBool("SYMBOLIC")) {
+        LogMessage("Skipping unwritten source: " + source->GetFullPath());
+        continue;
+      }
+      FastbuildTargetDep dep{
+        this->GetGlobalGenerator()->ConvertToFastbuildPath(
+          source->GetFullPath())
+      };
+      dep.Type = FastbuildTargetDepType::ARTIFACT;
+      fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
+    }
+    if (fastbuildTarget.PreBuildDependencies.empty()) {
       FastbuildTargetDep dep{ FASTBUILD_NOOP_FILE_NAME };
       dep.Type = FastbuildTargetDepType::ORDER_ONLY;
       fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
-    } else {
-      for (cmSourceFile const* source : sources) {
-        FastbuildTargetDep dep{
-          this->GetGlobalGenerator()->ConvertToFastbuildPath(
-            source->GetFullPath())
-        };
-        dep.Type = FastbuildTargetDepType::ARTIFACT;
-        fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
-      }
     }
   }
 
