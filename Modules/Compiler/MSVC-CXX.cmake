@@ -105,3 +105,26 @@ if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.34")
   set(CMAKE_CXX_MODULE_MAP_FLAG "@<MODULE_MAP_FILE>")
   set(CMAKE_CXX_MODULE_BMI_ONLY_FLAG "-ifcOnly;-ifcOutput;<OBJECT>")
 endif ()
+
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.10)
+  # /std:c++14 and earlier, and /std:c++17, stay permissive until
+  # /permissive- is passed.  /std:c++latest implies /permissive- since
+  # VS 2019 16.8 (19.28), and /std:c++20 and later do so as well.
+  set(_msvc_permissive_std_opt_default_nonstrict 98 11 14 17)
+
+  # Keep this list in sync with the standards set above.
+  foreach(_msvc_permissive_std IN ITEMS 98 11 14 17 20 23 26)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.28 OR
+        _msvc_permissive_std IN_LIST _msvc_permissive_std_opt_default_nonstrict)
+      if(DEFINED CMAKE_CXX${_msvc_permissive_std}_STANDARD_COMPILE_OPTION)
+        set(CMAKE_CXX${_msvc_permissive_std}_STANDARD_COMPILE_OPTION_PERMISSIVE
+          "-permissive-")
+      endif()
+    elseif(DEFINED CMAKE_CXX${_msvc_permissive_std}_EXTENSION_COMPILE_OPTION)
+      set(CMAKE_CXX${_msvc_permissive_std}_EXTENSION_COMPILE_OPTION_PERMISSIVE
+        "-permissive")
+    endif()
+  endforeach()
+  unset(_msvc_permissive_std)
+  unset(_msvc_permissive_std_opt_default_nonstrict)
+endif()

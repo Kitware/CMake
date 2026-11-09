@@ -140,6 +140,11 @@ in user code or in the headers of third-party dependencies.
 
 :prop_tgt:`<LANG>_EXTENSIONS` used to default to ``ON``. See :policy:`CMP0128`.
 
+For the ``MSVC`` compiler, :prop_tgt:`CXX_EXTENSIONS` controls the permissive
+mode.  ``OFF`` adds ``/permissive-`` when the selected standard does not
+already imply it.  ``ON`` adds ``/permissive`` when the selected standard
+implies ``/permissive-``. See :policy:`CMP0231`.
+
 Optional Compile Features
 =========================
 

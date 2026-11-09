@@ -777,6 +777,11 @@ if((CMAKE_C_COMPILER_ID MATCHES "AppleClang|MSVC"
   add_RunCMake_test(LinkWarningAsError)
 endif()
 add_RunCMake_test(CompileFeatures -DCMake_NO_C_STANDARD=${CMake_NO_C_STANDARD} -DCMake_NO_CXX_STANDARD=${CMake_NO_CXX_STANDARD})
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  add_RunCMake_test(CMP0231
+    -DCMAKE_CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}
+    -DCMAKE_CXX_STANDARD_DEFAULT=${CMAKE_CXX_STANDARD_DEFAULT})
+endif()
 add_RunCMake_test(Policy)
 add_RunCMake_test(PolicyScope)
 add_RunCMake_test(Diagnostics)

@@ -3914,6 +3914,26 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
+  // The v142 CL schema writes ConformanceMode before LanguageStandard, and
+  // that order is fixed by the toolset rather than the .vcxproj.  cl then
+  // lets /std:c++20 and /std:c++latest imply /permissive- after an earlier
+  // /permissive.  AdditionalOptions is appended after those properties, so
+  // keep the switch there for every v142 project.  Later toolset schemas
+  // already emit LanguageStandard first.
+  if (this->GlobalGenerator->GetPlatformToolsetString() == "v142"_s) {
+    char const* mode = clOptions.GetFlag("ConformanceMode");
+    if (mode != nullptr) {
+      cm::string_view const modeView(mode);
+      if (modeView == "true"_s) {
+        clOptions.AppendFlagString("AdditionalOptions", "/permissive-");
+      } else if (modeView == "false"_s) {
+        clOptions.AppendFlagString("AdditionalOptions", "/permissive");
+      }
+
+      clOptions.RemoveFlag("ConformanceMode");
+    }
+  }
+
   this->ClOptions[configName] = std::move(pOptions);
   return true;
 }

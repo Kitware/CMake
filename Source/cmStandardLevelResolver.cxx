@@ -186,6 +186,24 @@ struct StandardLevelComputer
 
     std::string const type{ ext ? "EXTENSION" : "STANDARD" };
 
+    // CMP0128 omits the language-standard flag when the request matches the
+    // compiler default.  MSVC stays permissive for that default until
+    // /permissive- is passed.  When CMP0231 is NEW and extensions are off,
+    // pass that flag on its own.  The companion variable is unset when the
+    // standard already implies /permissive-.
+    auto const strictPermissiveOption = [&](std::string const& stdNum) {
+      if (ext ||
+          makefile->GetPolicyStatus(cmPolicies::CMP0231) != cmPolicies::NEW) {
+        return std::string{};
+      }
+      std::string option = cmStrCat("CMAKE_", this->Language, stdNum,
+                                    "_STANDARD_COMPILE_OPTION_PERMISSIVE");
+      if (makefile->GetDefinition(option).IsEmpty()) {
+        return std::string{};
+      }
+      return option;
+    };
+
     cmValue standardProp = target->GetLanguageStandard(this->Language, config);
     if (!standardProp) {
       if (cmp0128 == cmPolicies::NEW) {
@@ -222,6 +240,9 @@ struct StandardLevelComputer
                           "_EXTENSION_COMPILE_OPTION");
         }
       }
+      if (cmp0128 == cmPolicies::NEW) {
+        return strictPermissiveOption(*defaultStd);
+      }
       return std::string{};
     }
 
@@ -250,7 +271,7 @@ struct StandardLevelComputer
     // anything.
     if (*standardProp == *defaultStd && ext == defaultExt) {
       if (cmp0128 == cmPolicies::NEW) {
-        return std::string{};
+        return strictPermissiveOption(*standardProp);
       }
 
       if (cmp0128 == cmPolicies::WARN &&
@@ -616,6 +637,18 @@ std::string cmStandardLevelResolver::GetCompileOptionDef(
   }
 
   return mapping->second.GetCompileOptionDef(this->Makefile, target, config);
+}
+
+std::string cmStandardLevelResolver::GetPermissiveCompileOption(
+  std::string const& optionFlagDef) const
+{
+  if (optionFlagDef.empty() ||
+      this->Makefile->GetPolicyStatus(cmPolicies::CMP0231) !=
+        cmPolicies::NEW) {
+    return {};
+  }
+  return this->Makefile->GetSafeDefinition(
+    cmStrCat(optionFlagDef, "_PERMISSIVE"));
 }
 
 std::string cmStandardLevelResolver::GetEffectiveStandard(

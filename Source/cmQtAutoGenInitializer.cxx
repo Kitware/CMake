@@ -2194,10 +2194,22 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     auto const CompileOptionFlag =
       resolver.GetCompileOptionDef(this->GenTarget, "CXX", "");
 
-    auto const CompileOptionValue =
+    std::string CompileOptionValue =
       this->GenTarget->Makefile->GetSafeDefinition(CompileOptionFlag);
+    std::string const permissiveOption =
+      resolver.GetPermissiveCompileOption(CompileOptionFlag);
 
+    std::vector<std::string> compileOptions;
     if (!CompileOptionValue.empty()) {
+      compileOptions.push_back(std::move(CompileOptionValue));
+    }
+    if (!permissiveOption.empty()) {
+      cmList permissiveOptions{ permissiveOption };
+      compileOptions.insert(compileOptions.end(), permissiveOptions.begin(),
+                            permissiveOptions.end());
+    }
+
+    if (!compileOptions.empty()) {
       // Determine where to insert the compile option (e.g., -std=gnu++23).
       // CMAKE_CXX_COMPILER_PREDEFINES_COMMAND is built as:
       //   [CMAKE_CXX_COMPILER, CMAKE_CXX_COMPILER_ARG1, predefs_flags...]
@@ -2214,7 +2226,8 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
 
       if (this->Moc.PredefsCmd.size() > compilerElements) {
         this->Moc.PredefsCmd.insert(
-          this->Moc.PredefsCmd.begin() + compilerElements, CompileOptionValue);
+          this->Moc.PredefsCmd.begin() + compilerElements,
+          compileOptions.begin(), compileOptions.end());
       }
     }
     info.SetArray("MOC_PREDEFS_CMD", this->Moc.PredefsCmd);

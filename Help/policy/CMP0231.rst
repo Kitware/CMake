@@ -1,0 +1,39 @@
+CMP0231
+-------
+
+.. versionadded:: 4.6
+
+MSVC permissive mode is controlled by :prop_tgt:`CXX_EXTENSIONS`.
+
+The :prop_tgt:`CXX_EXTENSIONS` target property selects whether
+compiler-specific language extensions are enabled.
+In CMake 4.5 and below, this had no influence on MSVC permissive mode.
+CMake 4.6 and above prefer to treat MSVC permissive mode as part of
+the compiler extensions for C++.  This policy provides compatibility
+for projects that have not been updated to expect the behavior.
+
+The ``OLD`` behavior for this policy does not add ``/permissive`` or
+``/permissive-`` for :prop_tgt:`CXX_EXTENSIONS`.  The ``NEW`` behavior for
+the ``MSVC`` compiler keeps the compiler's default permissive mode unless
+the request needs a different one:
+
+* :prop_tgt:`CXX_EXTENSIONS` ``OFF`` adds ``/permissive-`` when the
+  selected standard leaves the compiler permissive. ``/std:c++98``,
+  ``/std:c++11``, ``/std:c++14`` and ``/std:c++17`` stay permissive until
+  this flag is passed.
+* :prop_tgt:`CXX_EXTENSIONS` ``ON`` adds ``/permissive`` when the selected
+  standard implies ``/permissive-``.  ``/std:c++latest`` implies it since
+  Visual Studio 2019 version 16.8, and ``/std:c++20`` and later standard
+  modes do so as well.  The flag is placed after the ``/std:`` flag so it
+  overrides that implication.
+
+No permissive flag is added when the compiler mode already matches.
+Compilers older than Visual Studio 2017 have neither flag.
+
+This policy has no effect on C or on compilers whose id is not ``MSVC``.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst
