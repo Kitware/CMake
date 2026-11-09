@@ -192,8 +192,7 @@ struct StandardLevelComputer
     // pass that flag on its own.  The companion variable is unset when the
     // standard already implies /permissive-.
     auto const strictPermissiveOption = [&](std::string const& stdNum) {
-      if (ext ||
-          makefile->GetPolicyStatus(cmPolicies::CMP0231) != cmPolicies::NEW) {
+      if (ext || target->GetPolicyStatusCMP0231() != cmPolicies::NEW) {
         return std::string{};
       }
       std::string option = cmStrCat("CMAKE_", this->Language, stdNum,
@@ -640,11 +639,10 @@ std::string cmStandardLevelResolver::GetCompileOptionDef(
 }
 
 std::string cmStandardLevelResolver::GetPermissiveCompileOption(
-  std::string const& optionFlagDef) const
+  cmGeneratorTarget const* target, std::string const& optionFlagDef) const
 {
   if (optionFlagDef.empty() ||
-      this->Makefile->GetPolicyStatus(cmPolicies::CMP0231) !=
-        cmPolicies::NEW) {
+      target->GetPolicyStatusCMP0231() != cmPolicies::NEW) {
     return {};
   }
   return this->Makefile->GetSafeDefinition(

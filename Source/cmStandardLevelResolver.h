@@ -28,7 +28,7 @@ public:
                                   std::string const& lang,
                                   std::string const& config) const;
   std::string GetPermissiveCompileOption(
-    std::string const& optionFlagDef) const;
+    cmGeneratorTarget const* target, std::string const& optionFlagDef) const;
   std::string GetEffectiveStandard(cmGeneratorTarget const* target,
                                    std::string const& lang,
                                    std::string const& config) const;

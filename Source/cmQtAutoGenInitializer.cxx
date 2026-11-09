@@ -2197,7 +2197,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     std::string CompileOptionValue =
       this->GenTarget->Makefile->GetSafeDefinition(CompileOptionFlag);
     std::string const permissiveOption =
-      resolver.GetPermissiveCompileOption(CompileOptionFlag);
+      resolver.GetPermissiveCompileOption(this->GenTarget, CompileOptionFlag);
 
     std::vector<std::string> compileOptions;
     if (!CompileOptionValue.empty()) {

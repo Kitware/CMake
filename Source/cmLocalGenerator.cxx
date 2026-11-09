@@ -2320,7 +2320,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       // /permissive overrides the conformance mode that /std:c++20 and
       // newer imply.  No flag is added when the mode already matches.
       appendOptionList(
-        standardResolver.GetPermissiveCompileOption(optionFlagDef));
+        standardResolver.GetPermissiveCompileOption(target, optionFlagDef));
     }
   }
 

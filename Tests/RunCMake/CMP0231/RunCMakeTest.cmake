@@ -13,11 +13,14 @@ endif()
 #   <std>     CXX_STANDARD value, or empty for the compiler default
 #   <ext>     CXX_EXTENSIONS value
 #   <mode>    expected compiler mode: PERMISSIVE or NON_PERMISSIVE
+# Extra arguments are passed to the configure step.
 function(run_cmp0231 name policy std ext mode)
   set(RunCMake_TEST_OPTIONS
+    -DCMP0231_POLICY=${policy}
     -DCMP0231_STANDARD=${std}
     -DCMP0231_EXTENSIONS=${ext}
-    -DCMP0231_EXPECT=${mode})
+    -DCMP0231_EXPECT=${mode}
+    ${ARGN})
   if(policy)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0231=${policy})
   endif()
@@ -44,6 +47,13 @@ run_cmp0231(CMP0231-OLD-ext-off-std17 "OLD" 17 OFF PERMISSIVE)
 run_cmp0231(CMP0231-WARN-ext-off-std17 "" 17 OFF PERMISSIVE)
 run_cmp0231(CMP0231-NEW-ext-off-std17 "NEW" 17 OFF NON_PERMISSIVE)
 run_cmp0231(CMP0231-NEW-ext-on-std17 "NEW" 17 ON PERMISSIVE)
+
+# The policy is per target: a change after a target is created does not
+# affect that target, only the ones created later.
+run_cmp0231(CMP0231-per-target-NEW-then-OLD "NEW" 17 OFF NON_PERMISSIVE
+  -DCMP0231_LATE_POLICY=OLD -DCMP0231_LATE_EXPECT=PERMISSIVE)
+run_cmp0231(CMP0231-per-target-OLD-then-NEW "OLD" 17 OFF PERMISSIVE
+  -DCMP0231_LATE_POLICY=NEW -DCMP0231_LATE_EXPECT=NON_PERMISSIVE)
 
 # Visual Studio 2017 15.5 (19.12) is the first to have a C++20 option.
 # /std:c++latest implies /permissive- since Visual Studio 2019 16.8 (19.28).

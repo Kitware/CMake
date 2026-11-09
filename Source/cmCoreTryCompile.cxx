@@ -710,6 +710,13 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       fprintf(fout, "cmake_policy(SET CMP0210 OLD)\n");
     }
 
+    /* Set MSVC permissive mode policy to match outer project.  */
+    fprintf(fout, "cmake_policy(SET CMP0231 %s)\n",
+            this->Makefile->GetPolicyStatus(cmPolicies::CMP0231) ==
+                cmPolicies::NEW
+              ? "NEW"
+              : "OLD");
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs = cmStrCat(std::move(projectLangs), ' ', li);
