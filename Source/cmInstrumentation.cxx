@@ -1257,27 +1257,31 @@ void cmInstrumentation::CollectCompileTraceFile(Json::Value& root,
 void cmInstrumentation::WriteTraceFile(Json::Value const& index,
                                        std::string const& trace_name)
 {
-  std::vector<std::string> snippets = std::vector<std::string>();
+  struct Snippet
+  {
+    std::string File;
+    std::string Timestamp;
+  };
+  std::vector<Snippet> snippets;
+  snippets.reserve(index["snippets"].size());
+  static cmsys::RegularExpression const snippetTimeRegex(
+    "[A-Za-z]+-[A-Za-z0-9]+-([0-9T\\-]+)\\.json");
+
   for (auto const& f : index["snippets"]) {
-    snippets.push_back(f.asString());
+    std::string file = f.asString();
+    std::string timestamp;
+    cmsys::RegularExpressionMatch match;
+    if (snippetTimeRegex.find(file.c_str(), match)) {
+      timestamp = match.match(1);
+    }
+    snippets.push_back({ std::move(file), std::move(timestamp) });
   }
   // Reverse-sort snippets by timeEnd (timeStart + duration) as a
   // prerequisite for AssignTargetToTraceThread().
-  auto extractSnippetTimestamp = [](std::string file) -> std::string {
-    cmsys::RegularExpression snippetTimeRegex(
-      "[A-Za-z]+-[A-Za-z0-9]+-([0-9T\\-]+)\\.json");
-    cmsys::RegularExpressionMatch matchA;
-    if (snippetTimeRegex.find(file.c_str(), matchA)) {
-      return matchA.match(1);
-    }
-    return "";
-  };
-  std::sort(
-    snippets.begin(), snippets.end(),
-    [extractSnippetTimestamp](std::string snippetA, std::string snippetB) {
-      return extractSnippetTimestamp(snippetA) >
-        extractSnippetTimestamp(snippetB);
-    });
+  std::sort(snippets.begin(), snippets.end(),
+            [](Snippet const& snippetA, Snippet const& snippetB) {
+              return snippetA.Timestamp > snippetB.Timestamp;
+            });
 
   std::string traceDir = cmStrCat(this->timingDirv1, "/data/trace/");
   std::string traceFile = cmStrCat(traceDir, trace_name);
@@ -1300,7 +1304,7 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
   Json::Value traceEvent;
   Json::Value snippetData;
   for (size_t i = 0; i < snippets.size(); i++) {
-    snippetData = this->ReadJsonSnippet(snippets[i]);
+    snippetData = this->ReadJsonSnippet(snippets[i].File);
     traceEvent = this->BuildTraceEvent(workers, snippetData);
     try {
       if (i > 0) {
