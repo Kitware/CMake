@@ -15,7 +15,9 @@ function(run_install_test case)
   run_cmake_command(${case}-build ${CMAKE_COMMAND} --build . --config Debug)
   unset(RunCMake_TEST_OUTPUT_MERGE)
   # Check "all" components.
-  set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-all)
+  if(NOT CMAKE_INSTALL_PREFIX)
+    set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-all)
+  endif()
   run_cmake_command(${case}-all ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DBUILD_TYPE=Debug -P cmake_install.cmake)
 
   if(run_install_test_components)
@@ -146,6 +148,12 @@ if(CMake_TEST_ISPC)
 endif()
 
 run_install_test(FILES-DESTINATION-dot)
+if(NOT WIN32)
+  block()
+    set(CMAKE_INSTALL_PREFIX /)
+    run_install_test(FILES-DESTINATION-dot-root)
+  endblock()
+endif()
 
 run_install_test(TARGETS-InstallFromSubDir)
 run_install_test(TARGETS-OPTIONAL)
