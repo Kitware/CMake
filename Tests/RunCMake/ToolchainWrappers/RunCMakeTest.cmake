@@ -95,7 +95,9 @@ endif()
 # link-command path and link wrappers/launcher *do* apply.
 if(NOT CMAKE_C_COMPILER_ID STREQUAL "OrangeC" AND
    NOT (WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM"))
-  set(RunCMake_TEST_NOT_EXPECT_stdout "(LW|LL)_")
+  # Match only the 'env' markers (e.g. 'env LW_OUTER=1'), not arbitrary text
+  # such as '-D_ALL_SOURCE' in compiler flags.
+  set(RunCMake_TEST_NOT_EXPECT_stdout "env (LW|LL)_")
 endif()
 run_toolchain_wrappers(StaticLibrary)
 unset(RunCMake_TEST_NOT_EXPECT_stdout)
