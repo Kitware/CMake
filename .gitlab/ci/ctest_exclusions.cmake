@@ -93,8 +93,6 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows_clang_fastbuild")
     "^BuildDepends$"
     "^ExportImport$"
     "^Module.CheckIPOSupported-C$"
-    "^RunCMake.PrecompileHeaders$"
-    "^RunCMake.PrecompileHeaders-Reuse$"
     )
 endif()
 
