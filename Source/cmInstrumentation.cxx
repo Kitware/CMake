@@ -577,6 +577,20 @@ void cmInstrumentation::WriteInstrumentationJson(
   cmSystemTools::MakeDirectory(directory);
   std::string const file_path = cmStrCat(directory, '/', file_name);
 
+  auto writeJson = [&root, &JsonWriter, atomic](cmsys::ofstream& stream) {
+    try {
+      JsonWriter->write(root, &stream);
+      stream << "\n";
+      if (atomic == Atomic::No) {
+        stream.close();
+      }
+    } catch (std::ios_base::failure& fail) {
+      cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
+    } catch (...) {
+      cmSystemTools::Error("Error writing JSON output for instrumentation.");
+    }
+  };
+
   if (atomic == Atomic::Yes) {
     // Write to a temporary file and atomically rename it into place, so that
     // an interrupt during the write cannot leave a truncated snippet.
@@ -584,15 +598,8 @@ void cmInstrumentation::WriteInstrumentationJson(
     if (!ftmp) {
       throw std::runtime_error(std::string("Unable to open: ") + file_name);
     }
-    try {
-      JsonWriter->write(root, &ftmp);
-      ftmp << "\n";
-      // The atomic rename happens when the stream is closed/destroyed.
-    } catch (std::ios_base::failure& fail) {
-      cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
-    } catch (...) {
-      cmSystemTools::Error("Error writing JSON output for instrumentation.");
-    }
+    writeJson(ftmp);
+    // The atomic rename happens when the stream is closed/destroyed.
     return;
   }
 
@@ -601,15 +608,7 @@ void cmInstrumentation::WriteInstrumentationJson(
     throw std::runtime_error(std::string("Unable to open: ") + file_name);
   }
 
-  try {
-    JsonWriter->write(root, &ftmp);
-    ftmp << "\n";
-    ftmp.close();
-  } catch (std::ios_base::failure& fail) {
-    cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
-  } catch (...) {
-    cmSystemTools::Error("Error writing JSON output for instrumentation.");
-  }
+  writeJson(ftmp);
 }
 
 std::string cmInstrumentation::InstrumentTest(
