@@ -19,6 +19,7 @@
 #include <cm/string_view>
 
 #include "cmAlgorithms.h"
+#include "cmComputeLinkInformation.h"
 #include "cmCxxModuleUsageEffects.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
@@ -40,7 +41,6 @@ struct Evaluation;
 }
 
 enum class cmBuildStep;
-class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmGeneratorFileSets;
 class cmGeneratorFileSet;
@@ -107,7 +107,11 @@ public:
   std::string const& GetLocationForBuild() const;
 
   cmComputeLinkInformation* GetLinkInformation(
-    std::string const& config) const;
+    std::string const& config,
+    std::function<std::string()> forGenex = {}) const;
+
+  void ComputeLinkInformation(std::unique_ptr<cmComputeLinkInformation>& info,
+                              std::string const& config) const;
 
   // Perform validation checks on memoized link structures.
   // Call this after generation is complete.
@@ -1313,10 +1317,12 @@ private:
   };
   mutable std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
 
-  using cmTargetLinkInformationMap =
-    std::map<std::string, std::unique_ptr<cmComputeLinkInformation>>;
-  mutable cmTargetLinkInformationMap LinkInformation;
-  mutable std::set<std::string> LinkInformationInProgress;
+  struct LinkInformationEntry
+    : public std::unique_ptr<cmComputeLinkInformation>
+  {
+    bool Done = false;
+  };
+  mutable std::map<std::string, LinkInformationEntry> LinkInformationMap;
 
   void CheckPropertyCompatibility(cmComputeLinkInformation& info,
                                   std::string const& config) const;
