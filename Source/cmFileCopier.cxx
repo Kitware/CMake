@@ -25,6 +25,17 @@
 
 #include <utility>
 
+namespace {
+void PathEnsureTrailingSlash(std::string& p)
+{
+  if (cmHasLiteralSuffix(p, "/.")) {
+    p.pop_back();
+  } else {
+    p.push_back('/');
+  }
+}
+}
+
 using namespace cmFSPermissions;
 
 cmFileCopier::cmFileCopier(cmExecutionStatus& status, char const* name)
@@ -401,12 +412,14 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     if (!this->FilesFromDir.empty()) {
       std::string dir = cmSystemTools::GetFilenamePath(f);
       if (!dir.empty()) {
-        toFile = cmStrCat(std::move(toFile), '/', dir);
+        PathEnsureTrailingSlash(toFile);
+        toFile = cmStrCat(std::move(toFile), dir);
       }
     }
     std::string const& toName = this->ToName(fromName);
     if (!toName.empty()) {
-      toFile = cmStrCat(std::move(toFile), '/', toName);
+      PathEnsureTrailingSlash(toFile);
+      toFile = cmStrCat(std::move(toFile), toName);
     }
 
     // Construct the full path to the source file.  The file name may
