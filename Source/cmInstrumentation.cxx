@@ -14,6 +14,7 @@
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/json/version.h>
 #include <cm3p/json/writer.h>
@@ -51,54 +52,58 @@ namespace {
 cmInstrumentationQuery::Version latestDataVersion =
   cmInstrumentationQuery::LatestDataVersion();
 
+using SnippetType = cmInstrumentation::SnippetType;
+enum class CDashSnippetType
+{
+  Skip,
+  Configure,
+  Build,
+  Test,
+};
+
+struct SnippetTypeInfo
+{
+  SnippetType type;
+  cm::string_view name;
+  CDashSnippetType cdashType;
+};
+
+constexpr SnippetTypeInfo snippetTypes[] = {
+  { SnippetType::Configure, "configure"_s, CDashSnippetType::Configure },
+  { SnippetType::Generate, "generate"_s, CDashSnippetType::Configure },
+  { SnippetType::Compile, "compile"_s, CDashSnippetType::Build },
+  { SnippetType::Link, "link"_s, CDashSnippetType::Build },
+  { SnippetType::Custom, "custom"_s, CDashSnippetType::Build },
+  { SnippetType::Test, "test"_s, CDashSnippetType::Test },
+  { SnippetType::Install, "install"_s, CDashSnippetType::Build },
+  { SnippetType::Build, "build"_s, CDashSnippetType::Skip },
+  { SnippetType::CMakeBuild, "cmakeBuild"_s, CDashSnippetType::Build },
+  { SnippetType::CTest, "ctest"_s, CDashSnippetType::Build },
+  { SnippetType::CMakeInstall, "cmakeInstall"_s, CDashSnippetType::Build },
+};
+
 }
 
-std::map<std::string, std::string> cmInstrumentation::cdashSnippetsMap = {
-  {
-    "configure",
-    "configure",
-  },
-  {
-    "generate",
-    "configure",
-  },
-  {
-    "compile",
-    "build",
-  },
-  {
-    "link",
-    "build",
-  },
-  {
-    "custom",
-    "build",
-  },
-  {
-    "build",
-    "skip",
-  },
-  {
-    "cmakeBuild",
-    "build",
-  },
-  {
-    "cmakeInstall",
-    "build",
-  },
-  {
-    "install",
-    "build",
-  },
-  {
-    "ctest",
-    "build",
-  },
-  {
-    "test",
-    "test",
+char const* cmInstrumentation::SnippetTypeToString(SnippetType type)
+{
+  for (SnippetTypeInfo const& snippetType : snippetTypes) {
+    if (type == snippetType.type) {
+      return snippetType.name.data();
+    }
   }
-};
+  return "";
+}
+
+cm::optional<cmInstrumentation::SnippetType>
+cmInstrumentation::SnippetTypeFromString(std::string const& name)
+{
+  for (SnippetTypeInfo const& snippetType : snippetTypes) {
+    if (name == snippetType.name) {
+      return snippetType.type;
+    }
+  }
+  return cm::nullopt;
+}
 
 cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
                                      LoadQueriesAfter loadQueries)
@@ -624,7 +629,7 @@ std::string cmInstrumentation::InstrumentTest(
   Json::Value root(this->preTestStats);
   std::string command_str = cmStrCat(command, ' ', GetCommandStr(args));
   root["command"] = command_str;
-  root["role"] = "test";
+  root["role"] = SnippetTypeToString(SnippetType::Test);
   root["testName"] = name;
   root["result"] = static_cast<Json::Value::Int64>(result);
   root["config"] = config;
@@ -650,7 +655,7 @@ std::string cmInstrumentation::InstrumentTest(
   std::chrono::system_clock::time_point endTime =
     systemStart + std::chrono::milliseconds(root["duration"].asUInt64());
   std::string file_name = cmStrCat(
-    "test-",
+    SnippetTypeToString(SnippetType::Test), '-',
     this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId(), index)),
     '-', this->ComputeSuffixTime(endTime), ".json");
   this->WriteInstrumentationJson(latestDataVersion, root, "data", file_name);
@@ -669,7 +674,7 @@ void cmInstrumentation::GetPreTestStats()
 }
 
 int cmInstrumentation::InstrumentCommand(
-  std::string command_type, std::vector<std::string> const& command,
+  SnippetType command_type, std::vector<std::string> const& command,
   std::function<cmInstrumentation::CommandResult()> const& callback,
   cm::optional<std::map<std::string, std::string>> data,
   cm::optional<std::map<std::string, std::string>> arrayData,
@@ -696,7 +701,7 @@ int cmInstrumentation::InstrumentCommand(
   if (!command_str.empty()) {
     root["command"] = command_str;
   }
-  root["role"] = command_type;
+  root["role"] = SnippetTypeToString(command_type);
   root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
 
   if (data.has_value()) {
@@ -720,15 +725,17 @@ int cmInstrumentation::InstrumentCommand(
   }
   // Create empty config entry if config not found
   if (!root.isMember("config") &&
-      (command_type == "compile" || command_type == "link" ||
-       command_type == "custom" || command_type == "install")) {
+      (command_type == SnippetType::Compile ||
+       command_type == SnippetType::Link ||
+       command_type == SnippetType::Custom ||
+       command_type == SnippetType::Install)) {
     root["config"] = "";
   }
 
   // Check existing compile trace json to check for modifications
   std::string compileTraceFile;
   if (this->HasOption(cmInstrumentationQuery::Option::CompileTrace) &&
-      command_type == "compile") {
+      command_type == SnippetType::Compile) {
     compileTraceFile = this->GetCompileTraceFile(
       command, root["outputs"], root["workingDir"].asString());
   }
@@ -760,9 +767,9 @@ int cmInstrumentation::InstrumentCommand(
       root["stderr"] = *callbackResult.StdErr;
     }
   }
-  bool const supportsProcessMetrics = command_type == "compile" ||
-    command_type == "link" || command_type == "custom" ||
-    command_type == "install" || command_type == "test";
+  bool const supportsProcessMetrics = command_type == SnippetType::Compile ||
+    command_type == SnippetType::Link || command_type == SnippetType::Custom ||
+    command_type == SnippetType::Install || command_type == SnippetType::Test;
   if (this->HasOption(cmInstrumentationQuery::Option::ProcessMetrics) &&
       supportsProcessMetrics) {
     root["processMetrics"] = callbackResult.ChildResourceUsage
@@ -795,7 +802,7 @@ int cmInstrumentation::InstrumentCommand(
   }
 
   // See SpawnBuildDaemon(); this data is currently meaningless for build.
-  root["result"] = command_type == "build" ? Json::nullValue : ret;
+  root["result"] = command_type == SnippetType::Build ? Json::nullValue : ret;
 
   // If the command was interrupted (e.g. by Ctrl+C), record the signal number
   // that stopped it, so consumers can distinguish an interrupted command from
@@ -824,7 +831,7 @@ int cmInstrumentation::InstrumentCommand(
     }
   };
   // Don't insert path to CMake content until generate time
-  if (command_type != "configure") {
+  if (command_type != SnippetType::Configure) {
     addCMakeContent(root);
   }
 
@@ -838,7 +845,7 @@ int cmInstrumentation::InstrumentCommand(
 
   // Compile Trace
   if (this->HasOption(cmInstrumentationQuery::Option::CompileTrace) &&
-      command_type == "compile") {
+      command_type == SnippetType::Compile) {
     this->CollectCompileTraceFile(root, compileTraceFile,
                                   oldCompileTraceTimestamp, commandHash,
                                   suffixTime);
@@ -846,15 +853,16 @@ int cmInstrumentation::InstrumentCommand(
 
   // Write JSON
   std::string const& file_name =
-    cmStrCat(command_type, '-', commandHash, '-', suffixTime, ".json");
+    cmStrCat(SnippetTypeToString(command_type), '-', commandHash, '-',
+             suffixTime, ".json");
 
   // Don't write configure snippet until generate time
-  if (command_type == "configure") {
+  if (command_type == SnippetType::Configure) {
     this->configureSnippetData[file_name] = root;
   } else {
     // Add reference to CMake content and write out configure snippet after
     // generate
-    if (command_type == "generate") {
+    if (command_type == SnippetType::Generate) {
       for (auto it = this->configureSnippetData.begin();
            it != this->configureSnippetData.end(); ++it) {
         if (std::next(it) != this->configureSnippetData.end()) {
@@ -872,8 +880,9 @@ int cmInstrumentation::InstrumentCommand(
     // interrupt, where a second Ctrl+C could otherwise truncate it mid-write;
     // the atomic write guarantees it is either absent or complete.  Per-step
     // snippets are never flushed under interrupt and are left non-atomic.
-    bool const atomicEnvelope = command_type == "cmakeBuild" ||
-      command_type == "cmakeInstall" || command_type == "ctest";
+    bool const atomicEnvelope = command_type == SnippetType::CMakeBuild ||
+      command_type == SnippetType::CMakeInstall ||
+      command_type == SnippetType::CTest;
     this->WriteInstrumentationJson(latestDataVersion, root, "data", file_name,
                                    atomicEnvelope ? Atomic::Yes : Atomic::No);
   }
@@ -1027,7 +1036,7 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
     return 0;
   };
   int ret = this->InstrumentCommand(
-    "build", {},
+    SnippetType::Build, {},
     [waitForBuild]() -> cmInstrumentation::CommandResult {
       return { waitForBuild(), cm::nullopt, cm::nullopt, cm::nullopt };
     },
@@ -1118,19 +1127,23 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
     }
 
     std::string snippet_role = snippet_root["role"].asString();
-    auto map_element = this->cdashSnippetsMap.find(snippet_role);
-    if (map_element == this->cdashSnippetsMap.end()) {
+    auto const* snippet_type =
+      std::find_if(std::begin(snippetTypes), std::end(snippetTypes),
+                   [&snippet_role](SnippetTypeInfo const& info) {
+                     return info.name == snippet_role;
+                   });
+    if (snippet_type == std::end(snippetTypes)) {
       std::string message =
         "Unexpected snippet type encountered: " + snippet_role;
       cmSystemTools::Message(message, "Warning");
       continue;
     }
 
-    if (map_element->second == "skip") {
+    if (snippet_type->cdashType == CDashSnippetType::Skip) {
       continue;
     }
 
-    if (map_element->second == "build") {
+    if (snippet_type->cdashType == CDashSnippetType::Build) {
       // We organize snippets on a per-target basis (when possible)
       // for Build.xml.
       if (snippet_root.isMember("target")) {
@@ -1141,7 +1154,10 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
         dst_dir = cmStrCat(this->cdashDir, "/build/commands");
       }
     } else {
-      dst_dir = cmStrCat(this->cdashDir, '/', map_element->second);
+      dst_dir = cmStrCat(this->cdashDir,
+                         snippet_type->cdashType == CDashSnippetType::Configure
+                           ? "/configure"
+                           : "/test");
     }
 
     std::string dst = cmStrCat(dst_dir, '/', snippet_str);
@@ -1313,16 +1329,18 @@ Json::Value cmInstrumentation::BuildTraceEvent(std::vector<uint64_t>& workers,
   // Provide a useful trace event name depending on what data is available
   // from the snippet.
   std::string nameSuffix;
-  if (snippetData["role"] == "compile") {
+  cm::optional<SnippetType> const snippetType =
+    SnippetTypeFromString(snippetData["role"].asString());
+  if (snippetType == SnippetType::Compile) {
     nameSuffix = snippetData["source"].asString();
-  } else if (snippetData["role"] == "link") {
+  } else if (snippetType == SnippetType::Link) {
     nameSuffix = snippetData["target"].asString();
-  } else if (snippetData["role"] == "install") {
+  } else if (snippetType == SnippetType::Install) {
     cmCMakePath workingDir(snippetData["workingDir"].asCString());
     nameSuffix = workingDir.GetFileName().String();
-  } else if (snippetData["role"] == "custom") {
+  } else if (snippetType == SnippetType::Custom) {
     nameSuffix = snippetData["command"].asString();
-  } else if (snippetData["role"] == "test") {
+  } else if (snippetType == SnippetType::Test) {
     nameSuffix = snippetData["testName"].asString();
   }
   if (!nameSuffix.empty()) {
@@ -1346,9 +1364,10 @@ Json::Value cmInstrumentation::BuildTraceEvent(std::vector<uint64_t>& workers,
   snippetTraceEvent["pid"] = 0;
   // Assign TID of 0 for snippets which will have other snippet data
   // visualized "underneath" them. (For others, start from 1.)
-  if (snippetData["role"] == "build" || snippetData["role"] == "cmakeBuild" ||
-      snippetData["role"] == "ctest" ||
-      snippetData["role"] == "cmakeInstall") {
+  if (snippetType == SnippetType::Build ||
+      snippetType == SnippetType::CMakeBuild ||
+      snippetType == SnippetType::CTest ||
+      snippetType == SnippetType::CMakeInstall) {
     snippetTraceEvent["tid"] = 0;
   } else {
     snippetTraceEvent["tid"] = static_cast<Json::Value::UInt64>(
