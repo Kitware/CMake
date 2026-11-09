@@ -163,7 +163,6 @@ private:
   void InsertTimingData(Json::Value& root,
                         std::chrono::steady_clock::time_point steadyStart,
                         std::chrono::system_clock::time_point systemStart);
-  bool HasQueryFile(std::string const& file);
   static std::string GetCommandStr(std::vector<std::string> const& args);
   static std::string ComputeSuffixHash(std::string const& command_str);
   static std::string ComputeSuffixTime(
@@ -179,7 +178,6 @@ private:
                                long int oldTimestamp,
                                std::string const& commandHash,
                                std::string const& suffixTime);
-  void RemoveCompileTraceFile(Json::Value const& snippetData);
   void RemoveOldFiles(std::string const& dataSubdir);
   void WriteTraceFile(Json::Value const& index, std::string const& trace_name);
   Json::Value BuildTraceEvent(std::vector<uint64_t>& workers,
@@ -195,7 +193,6 @@ private:
   std::set<cmInstrumentationQuery::Option> options;
   std::set<cmInstrumentationQuery::Hook> hooks;
   std::vector<Callback> callbacks;
-  std::vector<std::string> queryFiles;
   Json::Value preTestStats;
   std::string errorMsg;
   bool disabled = false;

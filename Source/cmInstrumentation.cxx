@@ -146,7 +146,6 @@ void cmInstrumentation::ResetQueries()
   this->options.clear();
   this->hooks.clear();
   this->callbacks.clear();
-  this->queryFiles.clear();
   this->errorMsg.clear();
 }
 
@@ -462,7 +461,6 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 void cmInstrumentation::InsertDynamicSystemInformation(
   Json::Value& root, std::string const& prefix)
 {
-  Json::Value data;
   double memory;
   double load;
   this->GetDynamicSystemInformation(memory, load);
@@ -695,7 +693,6 @@ int cmInstrumentation::InstrumentCommand(
 
   // Store command info
   Json::Value root(Json::objectValue);
-  Json::Value commandInfo(Json::objectValue);
   std::string command_str = GetCommandStr(command);
 
   if (!command_str.empty()) {
