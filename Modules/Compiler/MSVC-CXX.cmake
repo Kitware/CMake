@@ -106,6 +106,12 @@ if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.34")
   set(CMAKE_CXX_MODULE_BMI_ONLY_FLAG "-ifcOnly;-ifcOutput;<OBJECT>")
 endif ()
 
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.14)
+  # VS 2017 15.7 and above can report the selected C++ standard in the
+  # __cplusplus macro instead of 199711L.  See policy CMP0232.
+  set(CMAKE_CXX_COMPILE_OPTIONS_MSVC_CPLUSPLUS_MACRO "-Zc:__cplusplus")
+endif()
+
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.10)
   # /std:c++14 and earlier, and /std:c++17, stay permissive until
   # /permissive- is passed.  /std:c++latest implies /permissive- since

@@ -1,0 +1,42 @@
+CMP0232
+-------
+
+.. versionadded:: 4.6
+
+MSVC flag ``/Zc:__cplusplus`` is passed for C++ targets.
+
+By default, the MSVC compiler always defines the ``__cplusplus``
+preprocessor macro as ``199711L``, regardless of the C++ standard selected
+by its ``/std:`` flag.  Visual Studio 2017 version 15.7 and above offer the
+``/Zc:__cplusplus`` flag to make ``__cplusplus`` report the value of the
+selected C++ standard, as other compilers do.
+
+In CMake 4.5 and below, ``/Zc:__cplusplus`` is not passed, so sources that
+check ``__cplusplus`` see ``199711L`` unless the project adds the flag
+itself.  CMake 4.6 and above prefer to always pass ``/Zc:__cplusplus`` when
+compiling C++ sources with a ``MSVC`` compiler that supports it.  This
+policy provides compatibility for projects that have not been updated to
+expect the behavior.
+
+The ``OLD`` behavior for this policy does not add ``/Zc:__cplusplus``.
+The ``NEW`` behavior adds ``/Zc:__cplusplus`` when compiling the C++ sources
+of a target with the ``MSVC`` compiler from Visual Studio 2017 version 15.7
+or above.  The flag is not part of
+:variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>`, so it is passed regardless
+of that variable's value.  It is placed before the target's
+:prop_tgt:`COMPILE_OPTIONS`, so a target that needs the original value of
+the macro under the ``NEW`` behavior may add ``/Zc:__cplusplus-`` to its
+compile options.
+
+The policy setting is recorded by each target when it is created.  It is
+also propagated to the test projects of the :command:`try_compile` and
+:command:`try_run` commands.
+
+This policy has no effect on other languages, on compilers whose id is not
+``MSVC``, or on versions of it that do not support the flag.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst
