@@ -187,17 +187,14 @@ struct StandardLevelComputer
 
     std::string const type{ ext ? "EXTENSION" : "STANDARD" };
 
-    // CMP0128 omits the language-standard flag when the request matches the
-    // compiler default.  MSVC stays permissive for that default until
-    // /permissive- is passed.  When CMP0231 is NEW and extensions are off,
-    // pass that flag on its own.  The companion variable is unset when the
-    // standard already implies /permissive-.
     auto const strictPermissiveOption = [&](std::string const& stdNum) {
-      if (ext || target->GetPolicyStatusCMP0231() != cmPolicies::NEW) {
+      if (target->GetPolicyStatusCMP0231() != cmPolicies::NEW) {
         return std::string{};
       }
-      std::string option = cmStrCat("CMAKE_"_s, this->Language, stdNum,
-                                    "_STANDARD_COMPILE_OPTION_PERMISSIVE"_s);
+      std::string option =
+        cmStrCat("CMAKE_"_s, this->Language, stdNum,
+                 ext ? "_EXTENSION_COMPILE_OPTION_PERMISSIVE"_s
+                     : "_STANDARD_COMPILE_OPTION_PERMISSIVE"_s);
       if (makefile->GetDefinition(option).IsEmpty()) {
         return std::string{};
       }

@@ -2,6 +2,19 @@ include(Compiler/Clang)
 __compiler_clang(CXX)
 __compiler_clang_cxx_standards(CXX)
 
+if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC"
+    AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+  # clang-cl 13 and above support /permissive and /permissive-.
+  # See policy CMP0231.
+  foreach(_clang_permissive_std IN ITEMS 98 11 14 17 20 23 26)
+    if(DEFINED CMAKE_CXX${_clang_permissive_std}_EXTENSION_COMPILE_OPTION)
+      set(CMAKE_CXX${_clang_permissive_std}_EXTENSION_COMPILE_OPTION_PERMISSIVE
+        "-permissive")
+    endif()
+  endforeach()
+  unset(_clang_permissive_std)
+endif()
+
 if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
   if((NOT DEFINED CMAKE_DEPENDS_USE_COMPILER OR CMAKE_DEPENDS_USE_COMPILER)
       AND CMAKE_GENERATOR MATCHES "Makefiles|WMake"

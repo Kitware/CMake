@@ -8,7 +8,7 @@ Boolean specifying whether compiler specific extensions are requested.
 This property specifies whether compiler specific extensions should be
 used.  For some compilers, this results in adding a flag such
 as ``-std=gnu++11`` instead of ``-std=c++11`` to the compile line.  For
-MSVC, ``/permissive-`` is added when this property is ``OFF`` and the
+MSVC and ``clang-cl``, ``/permissive-`` is added when this property is ``OFF`` and the
 selected standard does not already imply it, and ``/permissive`` is added
 when it is ``ON`` and the selected standard implies ``/permissive-``
 (see :policy:`CMP0231`).  This property is ``ON`` by default. The basic C++
