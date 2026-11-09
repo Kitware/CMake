@@ -1,0 +1,3 @@
+^CMake Warning \(deprecated\) at CMP0088-OLD\.cmake:1 \(cmake_policy\):
+  The OLD behavior for policy CMP0088 will be removed from a future version
+  of CMake\.
