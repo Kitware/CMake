@@ -763,16 +763,6 @@ struct is_pathable_iterator<
 {
 };
 
-#if defined(__SUNPRO_CC) && defined(__sparc)
-// Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
-// the full 'is_pathable' check.  We use it only to improve error messages
-// via 'enable_if' when calling methods with incorrect types.  Just
-// pretend all types are allowed so we can at least compile valid code.
-template <typename T>
-struct is_pathable : std::true_type
-{
-};
-#else
 template <typename T>
 struct is_pathable
   : bool_constant<is_pathable_string<T>::value ||
@@ -780,7 +770,6 @@ struct is_pathable
                   is_pathable_iterator<T>::value>
 {
 };
-#endif
 
 template <typename In, typename Out>
 struct source_converter

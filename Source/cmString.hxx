@@ -852,13 +852,6 @@ struct StringOpPlus
 {
   L l;
   R r;
-#if defined(__SUNPRO_CC)
-  StringOpPlus(L in_l, R in_r)
-    : l(in_l)
-    , r(in_r)
-  {
-  }
-#endif
   operator std::string() const;
   std::string::size_type size() const
   {

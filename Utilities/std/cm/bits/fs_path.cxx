@@ -65,13 +65,7 @@ namespace internals {
 
 class path_parser
 {
-#  if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler generates wrong code if enum size
-  // is different than the default.
-  using enum_size = int;
-#  else
   using enum_size = unsigned char;
-#  endif
 
   enum class state : enum_size
   {

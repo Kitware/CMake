@@ -20,10 +20,8 @@
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
-#if !defined(__SUNPRO_CC)
 #pragma pack(push)
 #pragma pack()
-#endif
 
 namespace Json {
 
@@ -361,9 +359,7 @@ JSON_API OStream& operator<<(OStream&, const Value& root);
 
 } // namespace Json
 
-#if !defined(__SUNPRO_CC)
 #pragma pack(pop)
-#endif
 
 #if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 #pragma warning(pop)

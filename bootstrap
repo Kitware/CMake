@@ -1353,8 +1353,8 @@ echo '
 #error "On AIX with GNU we need the -pthread flag."
 #endif
 
-#if defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
-#error "SunPro <= 5.13 mode not supported due to bug in move semantics."
+#if defined(__SUNPRO_CC)
+#error "SunPro not supported."
 #endif
 
 #if defined(__hpux) && !(defined(__GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 409)
