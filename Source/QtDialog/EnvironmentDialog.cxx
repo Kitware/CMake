@@ -188,10 +188,10 @@ void EnvironmentDialog::removeSelectedEntries()
 {
   QModelIndexList idxs = this->Environment->selectionModel()->selectedRows();
   QList<QPersistentModelIndex> pidxs;
-  foreach (QModelIndex const& i, idxs) {
+  Q_FOREACH (QModelIndex const& i, idxs) {
     pidxs.append(i);
   }
-  foreach (QPersistentModelIndex const& pi, pidxs) {
+  Q_FOREACH (QPersistentModelIndex const& pi, pidxs) {
     this->Environment->model()->removeRow(pi.row(), pi.parent());
   }
 }

@@ -217,7 +217,7 @@ bool StartCompilerSetup::crossCompilerSetup() const
 void StartCompilerSetup::onSelectionChanged(bool on)
 {
   if (on) {
-    emit selectionChanged();
+    Q_EMIT selectionChanged();
   }
 }
 

@@ -35,7 +35,7 @@ public:
 
   int presetNameToRow(QString const& name) const;
 
-public slots:
+public Q_SLOTS:
   void setPresets(QVector<QCMakePreset> const& presets);
 
 private:

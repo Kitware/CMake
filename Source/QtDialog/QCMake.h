@@ -72,7 +72,7 @@ class QCMake : public QObject
 public:
   QCMake(QObject* p = nullptr);
   ~QCMake();
-public slots:
+public Q_SLOTS:
   /// load the cache file in a directory
   void loadCache(QString const& dir);
   /// set the source directory containing the source
@@ -136,7 +136,7 @@ public:
   /// get diagnostic action
   cmDiagnosticAction getDiagnosticAction(cmDiagnosticCategory) const;
 
-signals:
+Q_SIGNALS:
   /// signal when properties change (during read from disk or configure
   /// process)
   void propertiesChanged(QCMakePropertyList const& vars);

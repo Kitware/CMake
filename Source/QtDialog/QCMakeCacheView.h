@@ -34,7 +34,7 @@ public:
   // be filtered out
   bool setSearchFilter(QString const&);
 
-public slots:
+public Q_SLOTS:
   // set whether to show advanced entries
   void setShowAdvanced(bool);
 
@@ -71,7 +71,7 @@ public:
     GroupView
   };
 
-public slots:
+public Q_SLOTS:
   // set a list of properties.  This list will be sorted and grouped according
   // to prefix.  Any property that existed already and which is found in this
   // list of properties to set will become an old property.  All others will
@@ -155,7 +155,7 @@ public:
   QSet<QCMakeProperty> changes() const;
   void clearChanges();
 
-protected slots:
+protected Q_SLOTS:
   void setFileDialogFlag(bool);
 
 protected:

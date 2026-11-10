@@ -21,7 +21,7 @@ class RegexExplorer
 public:
   RegexExplorer(QWidget* p);
 
-private slots:
+private Q_SLOTS:
   void on_regularExpression_textChanged(QString const& text);
   void on_inputText_textChanged();
   void on_matchNumber_currentIndexChanged(int index);

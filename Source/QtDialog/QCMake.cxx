@@ -108,7 +108,7 @@ void QCMake::setSourceDirectory(QString const& _dir)
   QString dir = sanitizedDirPath(_dir);
   if (this->SourceDirectory != dir) {
     this->SourceDirectory = QDir::fromNativeSeparators(dir);
-    emit this->sourceDirChanged(this->SourceDirectory);
+    Q_EMIT this->sourceDirChanged(this->SourceDirectory);
     this->loadPresets();
     this->setPreset(QString{});
     if (!this->MaybeRelativeBinaryDirectory.isEmpty() &&
@@ -138,7 +138,7 @@ void QCMake::setBinaryDirectory(QString const& _dir)
       this->MaybeRelativeBinaryDirectory != dir) {
     this->MaybeRelativeBinaryDirectory = QDir::fromNativeSeparators(dir);
     this->BinaryDirectory = QDir::fromNativeSeparators(absDir);
-    emit this->binaryDirChanged(this->MaybeRelativeBinaryDirectory);
+    Q_EMIT this->binaryDirChanged(this->MaybeRelativeBinaryDirectory);
     cmState* state = this->CMakeInstance->GetState();
     this->setGenerator(QString());
     this->setToolset(QString());
@@ -156,7 +156,7 @@ void QCMake::setBinaryDirectory(QString const& _dir)
 
     QCMakePropertyList props = this->properties();
     if (!this->ApplyingPreset) {
-      emit this->propertiesChanged(props);
+      Q_EMIT this->propertiesChanged(props);
     }
     cmValue homeDir = state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
     if (homeDir) {
@@ -191,7 +191,7 @@ void QCMake::setPreset(QString const& name, bool setBinary)
   if (this->PresetName != name) {
     this->PresetName = name;
     if (!this->ApplyingPreset) {
-      emit this->presetChanged(this->PresetName);
+      Q_EMIT this->presetChanged(this->PresetName);
     }
 
     if (!name.isNull()) {
@@ -216,7 +216,7 @@ void QCMake::setPreset(QString const& name, bool setBinary)
       }
     }
     if (!this->ApplyingPreset) {
-      emit this->propertiesChanged(this->properties());
+      Q_EMIT this->propertiesChanged(this->properties());
     }
   }
 }
@@ -230,14 +230,14 @@ void QCMake::applyPreset(QString const& name, bool setBinary,
     ScopedFlag applying(this->ApplyingPreset);
     this->setPreset(name, setBinary);
   }
-  emit this->presetApplied(requestId, this->PresetName, this->properties());
+  Q_EMIT this->presetApplied(requestId, this->PresetName, this->properties());
 }
 
 void QCMake::setGenerator(QString const& gen)
 {
   if (this->Generator != gen) {
     this->Generator = gen;
-    emit this->generatorChanged(this->Generator);
+    Q_EMIT this->generatorChanged(this->Generator);
   }
 }
 
@@ -245,7 +245,7 @@ void QCMake::setPlatform(QString const& platform)
 {
   if (this->Platform != platform) {
     this->Platform = platform;
-    emit this->platformChanged(this->Platform);
+    Q_EMIT this->platformChanged(this->Platform);
   }
 }
 
@@ -253,7 +253,7 @@ void QCMake::setToolset(QString const& toolset)
 {
   if (this->Toolset != toolset) {
     this->Toolset = toolset;
-    emit this->toolsetChanged(this->Toolset);
+    Q_EMIT this->toolsetChanged(this->Toolset);
   }
 }
 
@@ -298,8 +298,8 @@ void QCMake::configure()
 #endif
   }
 
-  emit this->propertiesChanged(this->properties());
-  emit this->configureDone(err);
+  Q_EMIT this->propertiesChanged(this->properties());
+  Q_EMIT this->configureDone(err);
 }
 
 void QCMake::generate()
@@ -323,7 +323,7 @@ void QCMake::generate()
 #endif
   }
 
-  emit this->generateDone(err);
+  Q_EMIT this->generateDone(err);
   checkOpenPossible();
 }
 
@@ -343,7 +343,7 @@ void QCMake::open()
   SetErrorMode(lastErrorMode);
 #endif
 
-  emit this->openDone(successful);
+  Q_EMIT this->openDone(successful);
 }
 
 void QCMake::setProperties(QCMakePropertyList const& newProps)
@@ -383,14 +383,14 @@ void QCMake::setProperties(QCMakePropertyList const& newProps)
   }
 
   // remove some properties
-  foreach (QString const& s, toremove) {
+  Q_FOREACH (QString const& s, toremove) {
     this->CMakeInstance->UnwatchUnusedCli(s.toStdString());
 
     state->RemoveCacheEntry(s.toStdString());
   }
 
   // add some new properties
-  foreach (QCMakeProperty const& s, props) {
+  Q_FOREACH (QCMakeProperty const& s, props) {
     this->CMakeInstance->WatchUnusedCli(s.Key.toStdString());
 
     if (s.Type == QCMakeProperty::BOOL) {
@@ -557,28 +557,28 @@ bool QCMake::interruptCallback()
 void QCMake::progressCallback(std::string const& msg, float percent)
 {
   if (percent >= 0) {
-    emit this->progressChanged(QString::fromStdString(msg), percent);
+    Q_EMIT this->progressChanged(QString::fromStdString(msg), percent);
   } else {
-    emit this->outputMessage(QString::fromStdString(msg));
+    Q_EMIT this->outputMessage(QString::fromStdString(msg));
   }
   QCoreApplication::processEvents();
 }
 
 void QCMake::messageCallback(std::string const& msg, char const* /*title*/)
 {
-  emit this->errorMessage(QString::fromStdString(msg));
+  Q_EMIT this->errorMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
 }
 
 void QCMake::stdoutCallback(std::string const& msg)
 {
-  emit this->outputMessage(QString::fromStdString(msg));
+  Q_EMIT this->outputMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
 }
 
 void QCMake::stderrCallback(std::string const& msg)
 {
-  emit this->outputMessage(QString::fromStdString(msg));
+  Q_EMIT this->outputMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
 }
 
@@ -600,7 +600,7 @@ void QCMake::loadPresets()
     this->SourceDirectory.toStdString(), "",
     cmCMakePresetsGraph::ReadOption::AllowNoFiles);
   if (!result) {
-    emit this->presetLoadError(
+    Q_EMIT this->presetLoadError(
       this->SourceDirectory,
       QString::fromStdString(
         this->CMakePresetsGraph.parseState.GetErrorMessage(false)));
@@ -634,7 +634,7 @@ void QCMake::loadPresets()
                     }) != this->AvailableGenerators.end());
     presets.push_back(preset);
   }
-  emit this->presetsChanged(presets);
+  Q_EMIT this->presetsChanged(presets);
 }
 
 QString QCMake::binaryDirectory() const
@@ -677,26 +677,26 @@ void QCMake::deleteCache()
   this->setGenerator(QString());
   this->setToolset(QString());
   QCMakePropertyList props = this->properties();
-  emit this->propertiesChanged(props);
+  Q_EMIT this->propertiesChanged(props);
 }
 
 void QCMake::reloadCache()
 {
   // emit that the cache was cleaned out
   QCMakePropertyList props;
-  emit this->propertiesChanged(props);
+  Q_EMIT this->propertiesChanged(props);
   // reload
   this->CMakeInstance->LoadCache(this->BinaryDirectory.toStdString());
   // emit new cache properties
   props = this->properties();
-  emit this->propertiesChanged(props);
+  Q_EMIT this->propertiesChanged(props);
 }
 
 void QCMake::setDebugOutput(bool flag)
 {
   if (flag != this->CMakeInstance->GetDebugOutput()) {
     this->CMakeInstance->SetDebugOutputOn(flag);
-    emit this->debugOutputChanged(flag);
+    Q_EMIT this->debugOutputChanged(flag);
   }
 }
 
@@ -722,5 +722,5 @@ void QCMake::checkOpenPossible()
 {
   std::string data = this->BinaryDirectory.toStdString();
   auto possible = this->CMakeInstance->Open(data, cmake::DryRun::Yes);
-  emit openPossible(possible);
+  Q_EMIT openPossible(possible);
 }

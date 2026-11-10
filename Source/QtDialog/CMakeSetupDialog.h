@@ -33,13 +33,13 @@ public:
   CMakeSetupDialog();
   ~CMakeSetupDialog();
 
-public slots:
+public Q_SLOTS:
   void setBinaryDirectory(QString const& dir);
   void setSourceDirectory(QString const& dir);
   void setDeferredPreset(QString const& preset);
   void setStartupBinaryDirectory(bool startup);
 
-protected slots:
+protected Q_SLOTS:
   void initialize();
   void doConfigure();
   void doGenerate();
@@ -158,7 +158,7 @@ public:
   QCMakeThread(QObject* p);
   QCMake* cmakeInstance() const;
 
-signals:
+Q_SIGNALS:
   void cmakeInitialized();
 
 protected:

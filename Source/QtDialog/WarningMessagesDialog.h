@@ -25,7 +25,7 @@ class WarningMessagesDialog
 public:
   WarningMessagesDialog(QWidget* prnt, QCMake* instance);
 
-private slots:
+private Q_SLOTS:
   /**
    * Handler for the accept event of the ok/cancel button box.
    */
