@@ -539,16 +539,12 @@ QCMakePropertyList QCMake::properties() const
 
 void QCMake::interrupt()
 {
-  this->InterruptFlag.ref();
+  ++this->InterruptFlag;
 }
 
 bool QCMake::interruptCallback()
 {
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-  return this->InterruptFlag.load();
-#else
-  return this->InterruptFlag.loadRelaxed();
-#endif
+  return this->InterruptFlag.load(std::memory_order_relaxed) != 0;
 }
 
 void QCMake::progressCallback(std::string const& msg, float percent)
