@@ -591,6 +591,8 @@ void cmFindPackageCommand::AppendSearchPathGroups()
 
 void cmFindPackageCommand::InheritOptions(cmFindPackageCommand* other)
 {
+  this->ProviderCommand = other->ProviderCommand;
+
   this->RequiredCMakeVersion = other->RequiredCMakeVersion;
   this->LibraryArchitecture = other->LibraryArchitecture;
   this->UseLib32Paths = other->UseLib32Paths;
@@ -1078,6 +1080,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->VersionMaxPatch, this->VersionMaxTweak);
   }
 
+  this->ProviderCommand =
+    this->Makefile->GetState()->GetDependencyProviderCommand(
+      cmDependencyProvider::Method::FindPackage);
+
   bool result = this->FindPackage(
     this->BypassProvider ? std::vector<std::string>{} : args);
 
@@ -1166,14 +1172,12 @@ bool cmFindPackageCommand::FindPackage(
   // We do this before modifying the package root path stack because a
   // provider might use methods that ignore that.
   cmState* const state = this->Makefile->GetState();
-  cmState::Command const providerCommand = state->GetDependencyProviderCommand(
-    cmDependencyProvider::Method::FindPackage);
   if (argsForProvider.empty()) {
-    if (this->DebugModeEnabled() && providerCommand) {
+    if (this->DebugModeEnabled() && this->ProviderCommand) {
       this->DebugMessage(
         "BYPASS_PROVIDER given, skipping dependency provider");
     }
-  } else if (providerCommand) {
+  } else if (this->ProviderCommand) {
     if (this->DebugModeEnabled()) {
       this->DebugMessage(cmStrCat("Trying dependency provider command: "_s,
                                   state->GetDependencyProvider()->GetCommand(),
@@ -1187,7 +1191,7 @@ bool cmFindPackageCommand::FindPackage(
                      return cmListFileArgument(arg,
                                                cmListFileArgument::Bracket, 0);
                    });
-    if (!providerCommand(listFileArgs, this->Status)) {
+    if (!this->ProviderCommand(listFileArgs, this->Status)) {
       return false;
     }
     std::string providerName;

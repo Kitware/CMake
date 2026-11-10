@@ -17,6 +17,7 @@
 
 #include <cm3p/kwiml/int.h>
 
+#include "cmCommandTypes.h"
 #include "cmFindCommon.h"
 #include "cmPackageInfoReader.h"
 #include "cmPolicies.h"
@@ -263,6 +264,7 @@ private:
   unsigned int VersionFoundTweak = 0;
   unsigned int VersionFoundCount = 0;
   KWIML_INT_uint64_t RequiredCMakeVersion = 0;
+  cm::Command ProviderCommand;
   bool BypassProvider = false;
   bool Quiet = false;
   RequiredStatus Required = RequiredStatus::Optional;
