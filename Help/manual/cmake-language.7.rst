@@ -733,8 +733,7 @@ The following characters have special meaning in regular expressions:
 ``|``
   Matches a pattern on either side of the ``|``
 ``()``
-  Saves a matched subexpression, which can be referenced
-  in the ``REGEX REPLACE`` operation.
+  Groups a subexpression and captures the text it matches.
 
   .. versionadded:: 3.9
     All regular expression-related commands, including e.g.
