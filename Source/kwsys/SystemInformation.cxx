@@ -1386,7 +1386,9 @@ public:
   // is found in.
   void SetBinary(char const* binary) { this->Binary = safes(binary); }
 
+#  if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
   std::string GetBinary() const;
+#  endif
 
   // Description:
   // Set the name of the function that the symbol is found in.
@@ -1492,10 +1494,11 @@ std::string SymbolProperties::GetFileName(std::string const& path) const
   return file;
 }
 
+#  if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
 std::string SymbolProperties::GetBinary() const
 {
 // only linux has proc fs
-#  if defined(__linux__)
+#    if defined(__linux__)
   if (this->Binary == "/proc/self/exe") {
     std::string binary;
     char buf[1024] = { '\0' };
@@ -1508,9 +1511,10 @@ std::string SymbolProperties::GetBinary() const
     }
     return this->GetFileName(binary);
   }
-#  endif
+#    endif
   return this->GetFileName(this->Binary);
 }
+#  endif
 
 std::string SymbolProperties::Demangle(char const* symbol) const
 {
