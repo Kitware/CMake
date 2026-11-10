@@ -749,6 +749,14 @@ expression ``^(ab|cd)$`` matches ``ab`` but not ``abd``.
 
 .. noqa: spellcheck on
 
+Escaping
+--------
+
+When a regex is written in CMake code, CMake parses the argument before
+the regex engine sees it.  In particular, regex backslashes must be doubled
+in a :ref:`Quoted Argument`, while a :ref:`Bracket Argument` preserves them
+literally.
+
 CMake language :ref:`Escape Sequences` such as ``\t``, ``\r``, ``\n``,
 and ``\\`` may be used to construct literal tabs, carriage returns,
 newlines, and backslashes (respectively) to pass in a regex.  For example:
