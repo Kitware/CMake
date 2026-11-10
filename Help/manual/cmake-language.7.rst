@@ -749,6 +749,16 @@ expression ``^(ab|cd)$`` matches ``ab`` but not ``abd``.
 
 .. noqa: spellcheck on
 
+Character Classes
+-----------------
+
+Backslashes are literal inside brackets and do not escape the following
+character.  Furthermore, regex escapes do not provide shorthand character
+classes such as ``\d``, ``\w``, or ``\s``, or word boundaries such as ``\b``.
+For example, ``\d+`` matches one or more literal ``d`` characters, not digits.
+POSIX character classes such as ``[[:alpha:]]`` are also not supported.  Use
+explicit ranges such as ``[A-Za-z]`` or ``[0-9]`` instead.
+
 Escaping
 --------
 
