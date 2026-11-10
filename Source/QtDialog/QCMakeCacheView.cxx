@@ -282,17 +282,10 @@ void QCMakeCacheModel::setProperties(QCMakePropertyList const& props)
       parentItems.append(
         new QStandardItem(key.isEmpty() ? tr("Ungrouped Entries") : key));
       parentItems.append(new QStandardItem());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
       parentItems[0]->setData(QBrush(QColor(255, 100, 100)),
                               Qt::BackgroundRole);
       parentItems[1]->setData(QBrush(QColor(255, 100, 100)),
                               Qt::BackgroundRole);
-#else
-      parentItems[0]->setData(QBrush(QColor(255, 100, 100)),
-                              Qt::BackgroundColorRole);
-      parentItems[1]->setData(QBrush(QColor(255, 100, 100)),
-                              Qt::BackgroundColorRole);
-#endif
       parentItems[0]->setData(1, GroupRole);
       parentItems[1]->setData(1, GroupRole);
       root->appendRow(parentItems);
@@ -382,15 +375,8 @@ void QCMakeCacheModel::setPropertyData(QModelIndex const& idx1,
   }
 
   if (isNew) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
     this->setData(idx1, QBrush(QColor(255, 100, 100)), Qt::BackgroundRole);
     this->setData(idx2, QBrush(QColor(255, 100, 100)), Qt::BackgroundRole);
-#else
-    this->setData(idx1, QBrush(QColor(255, 100, 100)),
-                  Qt::BackgroundColorRole);
-    this->setData(idx2, QBrush(QColor(255, 100, 100)),
-                  Qt::BackgroundColorRole);
-#endif
   }
 }
 
