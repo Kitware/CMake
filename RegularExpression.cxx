@@ -69,13 +69,13 @@ RegularExpression& RegularExpression::operator=(RegularExpression const& rxp)
   if (this == &rxp) {
     return *this;
   }
+  delete[] this->program;
   if (!rxp.program) {
     this->program = nullptr;
     return *this;
   }
   int ind;
-  this->progsize = rxp.progsize; // Copy regular expression size
-  delete[] this->program;
+  this->progsize = rxp.progsize;            // Copy regular expression size
   this->program = new char[this->progsize]; // Allocate storage
   for (ind = this->progsize; ind-- != 0;)   // Copy regular expression
     this->program[ind] = rxp.program[ind];

@@ -153,6 +153,49 @@ bool ExpectNumGroups(char const* pattern, int expected)
   return true;
 }
 
+// Check the start/end offsets of capture group 'n'. A group that did not
+// participate in the match reports std::string::npos for both.
+bool ExpectGroupSpan(char const* pattern, char const* input, int n,
+                     std::string::size_type expectedStart,
+                     std::string::size_type expectedEnd,
+                     std::string::size_type offset = 0, unsigned options = 0)
+{
+  kwsys::RegularExpression re;
+  if (!re.compile(pattern)) {
+    std::cerr << "Could not compile pattern '" << pattern << "'\n";
+    return false;
+  }
+
+  kwsys::RegularExpressionMatch match;
+  if (!re.find(input, match, offset, options)) {
+    std::cerr << "Expected a match for pattern '" << pattern << "' against '"
+              << input << "'\n";
+    return false;
+  }
+
+  if (match.start(n) != expectedStart || match.end(n) != expectedEnd) {
+    std::cerr << "Unexpected span for group " << n << " of pattern '"
+              << pattern << "' against input '" << input << "'\n"
+              << "  got:    start=" << match.start(n)
+              << " end=" << match.end(n) << "\n"
+              << "  expect: start=" << expectedStart << " end=" << expectedEnd
+              << "\n";
+    return false;
+  }
+
+  return true;
+}
+
+// Every byte value except NUL, in increasing order.
+std::string AllNonNulBytes()
+{
+  std::string s;
+  for (int c = 1; c <= 255; ++c) {
+    s += static_cast<char>(c);
+  }
+  return s;
+}
+
 } // namespace
 
 int testRegularExpression(int, char*[])
@@ -320,6 +363,308 @@ int testRegularExpression(int, char*[])
   run("offset.at_string_end_empty_match", ExpectMatch("a*", "b", "", 1, 1, 1));
 
   // -------------------------------------------------------------------------
+  // Escapes: '\<c>' always matches the literal byte <c>. None of the escape
+  // sequences other engines give special meaning to are special here.
+  // -------------------------------------------------------------------------
+
+  run("escape.w_is_literal", ExpectMatch("\\w", "a_w", "w", 2, 3));
+  run("escape.s_is_literal", ExpectMatch("\\s", "a s", "s", 2, 3));
+  run("escape.s_no_whitespace_class", ExpectFind("\\s", " \t\n", false));
+  run("escape.b_is_literal", ExpectMatch("a\\b", "a ab", "ab", 2, 4));
+  run("escape.B_is_literal", ExpectMatch("\\B", "bB", "B", 1, 2));
+  run("escape.n_is_literal", ExpectMatch("\\n", "\nn", "n", 1, 2));
+  run("escape.n_not_newline", ExpectFind("\\n", "\n", false));
+  run("escape.t_is_literal", ExpectMatch("\\t", "\tt", "t", 1, 2));
+  run("escape.digit_1_is_literal", ExpectMatch("\\1", "a1", "1", 1, 2));
+  run("escape.digit_0_is_literal", ExpectMatch("\\0", "a0", "0", 1, 2));
+  run("escape.x_hex_is_literal", ExpectMatch("\\x41", "Ax41", "x41", 1, 4));
+  run("escape.x_hex_not_byte", ExpectFind("\\x41", "A", false));
+  run("escape.u_hex_is_literal",
+      ExpectMatch("\\u0041", "Au0041", "u0041", 1, 6));
+  run("escape.open_brace", ExpectMatch("\\{", "a{", "{", 1, 2));
+  run("escape.close_bracket", ExpectMatch("\\]", "a]", "]", 1, 2));
+  run("escape.open_bracket", ExpectMatch("\\[", "a[", "[", 1, 2));
+  run("escape.backslash", ExpectMatch("\\\\", "a\\b", "\\", 1, 2));
+  run("escape.star", ExpectMatch("a\\*", "aa*", "a*", 1, 3));
+  run("escape.plus", ExpectMatch("a\\+", "aa+", "a+", 1, 3));
+  run("escape.question", ExpectMatch("a\\?", "aa?", "a?", 1, 3));
+  run("escape.pipe", ExpectMatch("a\\|b", "a|b", "a|b", 0, 3));
+  run("escape.caret", ExpectMatch("a\\^", "a^", "a^", 0, 2));
+  run("escape.dollar", ExpectMatch("\\$a", "x$a", "$a", 1, 3));
+  run("escape.close_paren", ExpectMatch("\\)", "a)", ")", 1, 2));
+  // An escaped character is a single atom, so a quantifier binds to it.
+  run("escape.quantified_atom", ExpectMatch("x\\d+", "xddd", "xddd", 0, 4));
+
+  // -------------------------------------------------------------------------
+  // Bracket expressions.
+  // -------------------------------------------------------------------------
+
+  run("charclass.negated_close_bracket_first",
+      ExpectMatch("[^]a]+", "]ab-", "b-", 2, 4));
+  run("charclass.negated_dash_first", ExpectMatch("[^-]+", "--x-", "x", 2, 3));
+
+  // Backslash is an ordinary member inside brackets, so '[/\]' is a complete
+  // set of '/' and '\'.
+  run("charclass.backslash_is_member",
+      ExpectMatch("[/\\]+", "a/\\b", "/\\", 1, 3));
+  // '[\]]' is the set {'\'} followed by a literal ']'.
+  run("charclass.backslash_then_close",
+      ExpectMatch("[\\]]", "]\\]", "\\]", 1, 3));
+  run("charclass.backslash_does_not_escape_close",
+      ExpectFind("[\\]]", "]", false));
+
+  // There are no POSIX classes.
+  run("charclass.no_posix_class.match",
+      ExpectMatch("[[:alpha:]]", "x]a]", "a]", 2, 4));
+  run("charclass.no_posix_class.no_letter_class",
+      ExpectFind("[[:alpha:]]", "b]", false));
+  run("charclass.no_posix_class.colon_member",
+      ExpectMatch("[[:alpha:]]", ":]", ":]", 0, 2));
+
+  // A range following another range starts just past the previous range's
+  // end, so '[a-c-e]' is '[a-e]' and does not contain '-'.
+  run("charclass.chained_range",
+      ExpectMatch("[a-c-e]+", "-abcde-", "abcde", 1, 6));
+  run("charclass.chained_range_no_dash", ExpectFind("[a-c-e]", "-", false));
+
+  // A dash right before the closing bracket is literal, even after a member.
+  run("charclass.dash_before_close", ExpectMatch("[a-]]", "a-]", "-]", 1, 3));
+
+  // Ranges compare unsigned byte values, so they work above 0x7F.
+  run("charclass.high_byte_range",
+      ExpectMatch("[\x80-\xff]+",
+                  "a\xc3\xa9"
+                  "b",
+                  "\xc3\xa9", 1, 3));
+  run("charclass.high_byte_range_excludes_ascii",
+      ExpectFind("[\x80-\xff]", "abc", false));
+  run("charclass.high_byte_range_upper_bound",
+      ExpectFind("[\x80-\x90]", "\xa0", false));
+  run("charclass.high_byte_reverse_range",
+      ExpectCompile("[\xff-\x80]", false));
+  {
+    std::string const all = AllNonNulBytes();
+    run("charclass.full_byte_range",
+        ExpectMatch("^[\x01-\xff]+$", all.c_str(), all, 0, 255));
+
+    // Every non-NUL byte listed explicitly: ']' first, '-' last.
+    std::string members;
+    for (char c : all) {
+      if (c != ']' && c != '-') {
+        members += c;
+      }
+    }
+    std::string const every = "[]" + members + "-]";
+    run("charclass.every_byte_listed",
+        ExpectMatch(("^" + every + "+$").c_str(), all.c_str(), all, 0, 255));
+    std::string const none = "[^]" + members + "-]";
+    run("charclass.every_byte_negated",
+        ExpectFind(none.c_str(), all.c_str(), false));
+  }
+
+  // -------------------------------------------------------------------------
+  // '.' matches any byte, including line terminators, but not the end.
+  // -------------------------------------------------------------------------
+
+  run("anychar.matches_cr", ExpectMatch("a.b", "a\rb", "a\rb", 0, 3));
+  run("anychar.matches_high_byte",
+      ExpectMatch("a.b",
+                  "a\xff"
+                  "b",
+                  "a\xff"
+                  "b",
+                  0, 3));
+  run("anychar.not_at_end", ExpectFind("a.", "a", false));
+
+  // -------------------------------------------------------------------------
+  // Anchors: '^' and '$' refer to the whole input, never to lines, and may
+  // appear anywhere in a pattern.
+  // -------------------------------------------------------------------------
+
+  run("anchor.in_alternation.middle",
+      ExpectMatch("(^|;)x(;|$)", "a;x", ";x", 1, 3));
+  run("anchor.in_alternation.middle_groups",
+      ExpectGroups("(^|;)x(;|$)", "a;x", ";", ""));
+  run("anchor.in_alternation.start",
+      ExpectMatch("(^|;)x(;|$)", "x;b", "x;", 0, 2));
+  run("anchor.in_alternation.end_group_span",
+      ExpectGroupSpan("(^|;)x(;|$)", "a;x", 2, 3, 3));
+  run("anchor.caret_mid_pattern_never_matches",
+      ExpectFind("a^b", "a^b", false));
+  run("anchor.dollar_mid_pattern_never_matches",
+      ExpectFind("a$b", "a$b", false));
+  run("anchor.dollar_caret_empty_input", ExpectMatch("$^", "", "", 0, 0));
+  run("anchor.caret_not_after_newline", ExpectFind("^b", "a\nb", false));
+  run("anchor.dollar_not_before_newline", ExpectFind("a$", "a\n", false));
+
+  // -------------------------------------------------------------------------
+  // Quantifiers.
+  // -------------------------------------------------------------------------
+
+  // '*' and '+' may not apply to an operand that can match empty, but '?'
+  // may.
+  run("quantifier.optional_empty_capable_group", ExpectCompile("(a*)?", true));
+  run("quantifier.optional_anchor_group", ExpectCompile("(^)?", true));
+  run("quantifier.optional_empty_branch_group", ExpectCompile("(a|)?", true));
+  run("quantifier.optional_empty_capable_group_span",
+      ExpectGroupSpan("(a*)?", "", 1, 0, 0));
+
+  // Priority: earlier alternatives win, quantifiers are greedy, and the
+  // matcher backtracks into a quantifier when the rest fails.
+  run("priority.first_alternative", ExpectMatch("ab|abc", "abc", "ab", 0, 2));
+  run("priority.backtrack_through_groups.match",
+      ExpectMatch("(a|ab)(c|bcd)(d*)", "abcd", "abcd", 0, 4));
+  run("priority.backtrack_through_groups.group1",
+      ExpectGroupN("(a|ab)(c|bcd)(d*)", "abcd", 1, "a"));
+  run("priority.backtrack_through_groups.group2",
+      ExpectGroupN("(a|ab)(c|bcd)(d*)", "abcd", 2, "bcd"));
+  run("priority.backtrack_through_groups.group3",
+      ExpectGroupSpan("(a|ab)(c|bcd)(d*)", "abcd", 3, 4, 4));
+  run("priority.greedy_then_backtrack",
+      ExpectMatch("a*ab", "aaab", "aaab", 0, 4));
+
+  // -------------------------------------------------------------------------
+  // Literal braces in patterns.
+  // -------------------------------------------------------------------------
+
+  run("dialect.literal_braces.variable_reference",
+      ExpectMatch("\\${[A-Za-z_0-9]*}", "x${FOO}y", "${FOO}", 1, 7));
+  run("dialect.literal_braces.cmake_named_curly",
+      ExpectMatch("^[A-Za-z0-9/_.+-]+{", "a/b{x", "a/b{", 0, 4));
+
+  // -------------------------------------------------------------------------
+  // Capture groups.
+  // -------------------------------------------------------------------------
+
+  // A group reports its last participating iteration, and groups nested in
+  // a repeated group are not reset by later iterations that skip them.
+  run("groups.repeated.match", ExpectMatch("((a)|b)*", "ab", "ab", 0, 2));
+  run("groups.repeated.no_reset", ExpectGroups("((a)|b)*", "ab", "b", "a"));
+  run("groups.repeated.last_iteration",
+      ExpectGroupSpan("((a)|b)*", "ab", 1, 1, 2));
+
+  // A group that did not participate has no position.
+  run("groups.nonparticipating.span",
+      ExpectGroupSpan("(a)|b", "b", 1, std::string::npos, std::string::npos));
+  run("groups.nonparticipating.string", ExpectGroupN("(a)|b", "b", 1, ""));
+
+  // An empty group participates with an empty span.
+  run("groups.empty.span", ExpectGroupSpan("()", "x", 1, 0, 0));
+  run("groups.empty.after_char", ExpectGroupSpan("x()", "ax", 1, 2, 2));
+
+  {
+    std::string pattern;
+    std::string input;
+    for (int i = 0; i < 31; ++i) {
+      pattern += "(a)";
+      input += "a";
+    }
+    run("groups.max.num_groups", ExpectNumGroups(pattern.c_str(), 31));
+    run("groups.max.last_group",
+        ExpectGroupSpan(pattern.c_str(), input.c_str(), 31, 30, 31));
+  }
+
+  // -------------------------------------------------------------------------
+  // Offsets and options.
+  // -------------------------------------------------------------------------
+
+  unsigned const bol = kwsys::RegularExpression::BOL_AT_OFFSET;
+  unsigned const nonEmpty = kwsys::RegularExpression::NONEMPTY_AT_OFFSET;
+
+  // NONEMPTY_AT_OFFSET rejects an empty match at the offset but still tries
+  // the remaining alternatives at that same position.
+  run("options.empty_alternative_default", ExpectMatch("(|a)", "a", "", 0, 0));
+  run("options.nonempty_tries_next_alternative",
+      ExpectMatch("(|a)", "a", "a", 0, 1, 0, nonEmpty));
+  run("options.nonempty_tries_next_alternative_group",
+      ExpectGroupSpan("(|a)", "a", 1, 0, 1, 0, nonEmpty));
+  // Only an empty match at the offset itself is rejected.
+  run("options.nonempty_allows_later_empty",
+      ExpectMatch("a*", "bb", "", 1, 1, 0, nonEmpty));
+  run("options.nonempty_at_end_no_match",
+      ExpectFind("a*", "b", false, 1, nonEmpty));
+
+  // All four option combinations for '^a*' at an offset.
+  run("options.caret.none", ExpectFind("^a*", "xab", false, 1));
+  run("options.caret.bol", ExpectMatch("^a*", "xb", "", 1, 1, 1, bol));
+  run("options.caret.nonempty", ExpectFind("^a*", "xab", false, 1, nonEmpty));
+  run("options.caret.bol_nonempty",
+      ExpectMatch("^a*", "xab", "a", 1, 2, 1, bol | nonEmpty));
+  run("options.caret.bol_nonempty_no_match",
+      ExpectFind("^a*", "xb", false, 1, bol | nonEmpty));
+
+  // Offset equal to the input length.
+  run("offset.at_end_dollar", ExpectMatch("$", "abc", "", 3, 3, 3));
+  run("offset.at_end_caret_bol", ExpectMatch("^", "abc", "", 3, 3, 3, bol));
+  run("offset.at_end_empty_pattern", ExpectMatch("", "abc", "", 3, 3, 3));
+
+  // -------------------------------------------------------------------------
+  // The input is treated as a NUL-terminated string.
+  // -------------------------------------------------------------------------
+
+  run("nul.stops_matching", [] {
+    kwsys::RegularExpression re("c");
+    std::string const input("ab\0cd", 5);
+    return !re.find(input);
+  }());
+  run("nul.dollar_matches_at_nul", [] {
+    kwsys::RegularExpression re("b$");
+    std::string const input("ab\0cd", 5);
+    return re.find(input) && re.start() == 1 && re.end() == 2;
+  }());
+
+  // -------------------------------------------------------------------------
+  // Compile errors.
+  // -------------------------------------------------------------------------
+
+  run("error.unmatched_open_paren", ExpectCompile("(", false));
+  run("error.unmatched_close_paren", ExpectCompile("a)", false));
+  run("error.unmatched_bracket", ExpectCompile("[abc", false));
+  run("error.invalid_range", ExpectCompile("[b-a]", false));
+  run("error.trailing_backslash", ExpectCompile("a\\", false));
+  run("error.too_many_parens", [] {
+    std::string pattern;
+    for (int i = 0; i < 32; ++i) {
+      pattern += "(a)";
+    }
+    return ExpectCompile(pattern.c_str(), false);
+  }());
+
+  // Quantifier errors.
+  run("error.leading_star", ExpectCompile("*a", false));
+  run("error.leading_plus", ExpectCompile("+a", false));
+  run("error.leading_question", ExpectCompile("?a", false));
+  run("error.star_after_pipe", ExpectCompile("a|*", false));
+  run("error.star_after_open_paren", ExpectCompile("(*)", false));
+  run("error.star_star", ExpectCompile("a**", false));
+  run("error.lazy_star", ExpectCompile("a*?", false));
+  run("error.lazy_plus", ExpectCompile("a+?", false));
+  run("error.lazy_question", ExpectCompile("a??", false));
+  run("error.possessive_star", ExpectCompile("a*+", false));
+  run("error.star_on_caret", ExpectCompile("^*", false));
+  run("error.star_on_star_group", ExpectCompile("(a*)*", false));
+  run("error.plus_on_optional_group", ExpectCompile("(a?)+", false));
+  run("error.star_on_empty_group", ExpectCompile("()*", false));
+  run("error.plus_on_empty_branch_group", ExpectCompile("(|a)+", false));
+  run("error.star_on_anchor_group", ExpectCompile("(^)*", false));
+
+  // The compiled program must be smaller than 64 KiB.
+  run("error.expression_too_big", [] {
+    std::string pattern;
+    for (int i = 0; i < 300; ++i) {
+      pattern += "[\x01-\xff]";
+    }
+    return ExpectCompile(pattern.c_str(), false);
+  }());
+  run("compile.large_expression_ok", [] {
+    std::string pattern;
+    for (int i = 0; i < 200; ++i) {
+      pattern += "[\x01-\xff]";
+    }
+    return ExpectCompile(pattern.c_str(), true);
+  }());
+
+  // -------------------------------------------------------------------------
   // API surface beyond compile() and find().
   // -------------------------------------------------------------------------
 
@@ -373,6 +718,82 @@ int testRegularExpression(int, char*[])
       return false;
     }
     return re1.deep_equal(re2); // Same pattern, same match position.
+  }());
+
+  run("api.find_on_invalid", [] {
+    kwsys::RegularExpression empty;
+    if (empty.is_valid() || empty.find("abc")) {
+      return false;
+    }
+    kwsys::RegularExpression re("a");
+    re.set_invalid();
+    kwsys::RegularExpressionMatch match;
+    return !re.find("abc", match) && !match.isValid();
+  }());
+
+  run("api.copy_invalid", [] {
+    kwsys::RegularExpression invalid;
+    kwsys::RegularExpression copy(invalid);
+    if (copy.is_valid()) {
+      return false;
+    }
+    kwsys::RegularExpression assigned;
+    assigned = invalid;
+    return !assigned.is_valid();
+  }());
+
+  run("api.assign_invalid_over_valid", [] {
+    kwsys::RegularExpression invalid;
+    kwsys::RegularExpression re("abc");
+    if (!re.find("xabc")) {
+      return false;
+    }
+    re = invalid;
+    return !re.is_valid() && !re.find("abc");
+  }());
+
+  run("api.copy_keeps_last_match", [] {
+    kwsys::RegularExpression re("(b+)");
+    if (!re.find("abbc")) {
+      return false;
+    }
+    kwsys::RegularExpression copy(re);
+    return copy.match(1) == "bb" && copy.start(1) == 1 && copy.end(1) == 3;
+  }());
+
+  run("api.equal_when_compiled_separately", [] {
+    kwsys::RegularExpression re1("(a|b)*c");
+    kwsys::RegularExpression re2("(a|b)*c");
+    return re1 == re2 && !(re1 != re2);
+  }());
+
+  run("api.regmatch", [] {
+    kwsys::RegularExpression re("(b)(c)?");
+    if (!re.find("abd")) {
+      return false;
+    }
+    kwsys::RegularExpressionMatch const& m = re.regMatch();
+    return m.isValid() && m.start() == re.start() && m.end() == re.end() &&
+      m.match(1) == "b" && m.start(2) == std::string::npos;
+  }());
+
+  run("api.match_object_clear", [] {
+    kwsys::RegularExpression re("b");
+    kwsys::RegularExpressionMatch match;
+    if (!re.find("abc", match) || !match.isValid()) {
+      return false;
+    }
+    match.clear();
+    return !match.isValid() && match.start() == std::string::npos;
+  }());
+
+  run("api.failed_find_invalidates_match", [] {
+    kwsys::RegularExpression re("b");
+    kwsys::RegularExpressionMatch match;
+    if (!re.find("abc", match)) {
+      return false;
+    }
+    return !re.find("xyz", match) && !match.isValid();
   }());
 
   if (failed) {
