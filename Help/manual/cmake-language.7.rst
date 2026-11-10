@@ -714,10 +714,10 @@ The following characters have special meaning in regular expressions:
   or ``\\`` for a literal backslash ``\``.  Escaping a non-special
   character is unnecessary but allowed, e.g. ``\a`` matches ``a``.
 ``[ ]``
-  Matches any character(s) inside the brackets.
+  Matches any single character inside the brackets.
   To match a literal ``]``, make it the first character, e.g., ``[]ab]``.
 ``[^ ]``
-  Matches any character(s) not inside the brackets.
+  Matches any single character not inside the brackets.
   To not match a literal ``]``, make it the first character, e.g., ``[^]ab]``.
 ``-``
   Inside brackets, specifies an inclusive range between characters on
