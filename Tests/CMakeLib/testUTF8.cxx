@@ -65,7 +65,7 @@ static void report_good(bool passed, test_utf8_char c)
 {
   printf("%s: decoding good ", passed ? "pass" : "FAIL");
   byte_array_print(c);
-  printf(" (%s) ", c.data());
+  printf(" (%.*s) ", static_cast<int>(c.size()), c.data());
 }
 
 static void report_bad(bool passed, test_utf8_char c)
@@ -119,7 +119,7 @@ static void report_valid(bool passed, test_utf8_char s)
 {
   printf("%s: validity good ", passed ? "pass" : "FAIL");
   byte_array_print(s);
-  printf(" (%s) ", s.data());
+  printf(" (%.*s) ", static_cast<int>(s.size()), s.data());
 }
 
 static void report_invalid(bool passed, test_utf8_char s)
