@@ -782,3 +782,16 @@ newlines, and backslashes (respectively) to pass in a regex.  For example:
   as just ``\``, so the regex itself is actually ``\(\a\+\b\)``.  This
   can alternatively be specified in a :ref:`bracket argument` without
   having to escape the backslashes, e.g. ``[[\(\a\+\b\)]]``.
+
+Other Regex Syntaxes
+--------------------
+
+Backreferences such as ``\1`` through ``\9`` are supported in the replacement
+expression of :command:`string(REGEX REPLACE)`, but not in regex patterns.
+For example, ``(a)\1`` matches ``a1``, not ``aa``.
+
+CMake's regex syntax does not support counted repetition such as ``{2}``.
+For example, ``a{2}`` matches the literal text ``a{2}``, rather than ``aa``.
+
+Lazy or possessive repetition, such as ``*?`` or ``*+``, and special group
+forms, such as ``(?:...)`` or ``(?=...)``, are not supported.
