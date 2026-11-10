@@ -98,22 +98,23 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         // Don't process target
         continue;
       }
-      std::set<std::string> const& languages =
-        target->GetAllConfigCompileLanguages();
-      // cmGeneratorTarget::GetAllConfigCompileLanguages caches the target's
-      // sources. Clear it so that OBJECT library targets that are AUTOGEN
-      // initialized after this target get their added mocs_compilation.cpp
-      // source acknowledged by this target.
-      target->ClearSourcesCache();
-      if (languages.count("CSharp")) {
-        // Don't process target if it's a CSharp target
-        continue;
-      }
 
       bool const moc = target->GetPropertyAsBool(this->kw().AUTOMOC);
       bool const uic = target->GetPropertyAsBool(this->kw().AUTOUIC);
       bool const rcc = target->GetPropertyAsBool(this->kw().AUTORCC);
       if (moc || uic || rcc) {
+        std::set<std::string> const& languages =
+          target->GetAllConfigCompileLanguages();
+        // cmGeneratorTarget::GetAllConfigCompileLanguages caches the target's
+        // sources. Clear it so that OBJECT library targets that are AUTOGEN
+        // initialized after this target get their added mocs_compilation.cpp
+        // source acknowledged by this target.
+        target->ClearSourcesCache();
+        if (languages.count("CSharp")) {
+          // Don't process target if it's a CSharp target
+          continue;
+        }
+
         std::string const& mocExec =
           target->GetSafeProperty(this->kw().AUTOMOC_EXECUTABLE);
         std::string const& uicExec =
