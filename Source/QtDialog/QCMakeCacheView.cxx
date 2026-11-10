@@ -251,13 +251,8 @@ void QCMakeCacheModel::setProperties(QCMakePropertyList const& props)
   if (View == FlatView) {
     QCMakePropertyList newP = newProps.values();
     QCMakePropertyList newP2 = newProps2.values();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
     std::sort(newP.begin(), newP.end());
     std::sort(newP2.begin(), newP2.end());
-#else
-    qSort(newP);
-    qSort(newP2);
-#endif
     int row_count = 0;
     Q_FOREACH (QCMakeProperty const& p, newP) {
       this->insertRow(row_count);
@@ -445,11 +440,7 @@ void QCMakeCacheModel::breakProperties(
       reorgProps.append((*iter)[0]);
       iter = tmp.erase(iter);
     } else {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
       std::sort(iter->begin(), iter->end());
-#else
-      qSort(*iter);
-#endif
       ++iter;
     }
   }
