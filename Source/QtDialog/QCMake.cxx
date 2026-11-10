@@ -368,11 +368,7 @@ void QCMake::setProperties(QCMakePropertyList const& newProps)
       toremove.append(QString::fromStdString(key));
     } else {
       prop = props[idx];
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-      bool const isBool = prop.Value.type() == QVariant::Bool;
-#else
-      bool const isBool = prop.Value.metaType() == QMetaType::fromType<bool>();
-#endif
+      bool const isBool = prop.Value.userType() == QMetaType::Bool;
       if (isBool) {
         state->SetCacheEntryValue(key, prop.Value.toBool() ? "ON" : "OFF");
       } else {
