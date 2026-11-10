@@ -16,7 +16,6 @@ Checks: >
   -bugprone-narrowing-conversions,
   -bugprone-return-const-ref-from-parameter,
   -bugprone-signed-bitwise,
-  -bugprone-suspicious-stringview-data-usage,
   -bugprone-switch-missing-default-case,
   -bugprone-throwing-static-initialization,
   -bugprone-unchecked-optional-access,
