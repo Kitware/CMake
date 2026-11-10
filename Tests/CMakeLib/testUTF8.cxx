@@ -131,7 +131,7 @@ static void report_invalid(bool passed, test_utf8_char s)
 
 static bool is_valid(test_utf8_char s)
 {
-  bool valid = cm_utf8_is_valid(s.data()) != 0;
+  bool valid = cm_utf8_is_valid(s.data(), s.size()) != 0;
   if (!valid) {
     report_valid(false, s);
     printf("expected valid, reported as invalid\n");
@@ -144,7 +144,7 @@ static bool is_valid(test_utf8_char s)
 
 static bool is_invalid(test_utf8_char s)
 {
-  bool valid = cm_utf8_is_valid(s.data()) != 0;
+  bool valid = cm_utf8_is_valid(s.data(), s.size()) != 0;
   if (valid) {
     report_invalid(false, s);
     printf("expected invalid, reported as valid\n");
@@ -183,6 +183,18 @@ int testUTF8(int /*unused*/, char* /*unused*/[])
     if (!is_invalid(*s)) {
       result = 1;
     }
+  }
+  // Validate only the supplied bytes, including bytes after an embedded null.
+  char const bounded[] = { '\xC2', '\xA9', '\x80' };
+  if (!is_valid(test_utf8_char(bounded, 2)) ||
+      !is_invalid(test_utf8_char(bounded, 1)) ||
+      !is_invalid(test_utf8_char(bounded, 3))) {
+    result = 1;
+  }
+  char const embedded_null[] = { 'a', '\0', '\x80' };
+  if (!is_valid(test_utf8_char(embedded_null, 2)) ||
+      !is_invalid(test_utf8_char(embedded_null, 3))) {
+    result = 1;
   }
   return result;
 }

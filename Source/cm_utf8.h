@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,9 +16,10 @@ extern unsigned char const cm_utf8_ones[256];
 char const* cm_utf8_decode_character(char const* first, char const* last,
                                      unsigned int* pc);
 
-/** Returns whether a C string is a sequence of valid UTF-8 encoded Unicode
-    codepoints.  Returns non-zero on success. */
-int cm_utf8_is_valid(char const* s);
+/** Returns whether size bytes form a sequence of valid UTF-8 encoded Unicode
+    codepoints.  The input need not be null-terminated and may contain null
+    bytes.  Returns non-zero on success, or zero for invalid or null input. */
+int cm_utf8_is_valid(char const* s, size_t size);
 
 #ifdef __cplusplus
 } /* extern "C" */
