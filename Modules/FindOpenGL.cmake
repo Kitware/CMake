@@ -707,7 +707,7 @@ unset(FPHSA_NAME_MISMATCHED)
 unset(_OpenGL_REQUIRED_VARS)
 
 # OpenGL:: targets
-if(OpenGL_FOUND)
+if(OpenGL_FOUND OR OpenGL_OpenGL_FOUND)
   set(OPENGL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
 
   # ::OpenGL is a GLVND library, and thus Linux-only: we don't bother checking
