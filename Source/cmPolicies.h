@@ -762,7 +762,8 @@ class cmMakefile;
   F(CMP0226)                                                                  \
   F(CMP0227)                                                                  \
   F(CMP0228)                                                                  \
-  F(CMP0229)
+  F(CMP0229)                                                                  \
+  F(CMP0231)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \
