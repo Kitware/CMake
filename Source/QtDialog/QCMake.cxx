@@ -422,6 +422,7 @@ QCMakeProperty cache_to_property(T const& v)
   QCMakeProperty prop;
   prop.Key = QString::fromStdString(v.first);
   prop.Value = QString::fromStdString(v.second->Value);
+  prop.Advanced = false;
   prop.Type = QCMakeProperty::STRING;
   if (!v.second->Type.empty()) {
     auto type = cmState::StringToCacheEntryType(v.second->Type);
