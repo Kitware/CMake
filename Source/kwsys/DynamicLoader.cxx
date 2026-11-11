@@ -15,6 +15,7 @@
 #if 0
 #  include "Configure.hxx.in"
 #  include "DynamicLoader.hxx.in"
+#  include "String.h"
 #endif
 
 // This file actually contains several different implementations:
@@ -214,9 +215,35 @@ char const* DynamicLoader::LastError()
 
 #elif defined(_WIN32) && !defined(__CYGWIN__)
 // Implementation for Windows win32 code but not cygwin
+#  include KWSYS_HEADER(String.h)
 #  include <windows.h>
 
 #  include <stdio.h>
+
+namespace {
+
+bool IsAbsolutePath(std::string const& path)
+{
+  auto isSlash = [](char c) { return c == '/' || c == '\\'; };
+  if (path.size() < 3) {
+    return false;
+  }
+
+  // A drive root must include a separator (C:/).
+  if (kwsysString_isalpha(path[0]) && path[1] == ':') {
+    return isSlash(path[2]);
+  }
+
+  // A UNC root starts with exactly two separators and a server name.
+  if (!isSlash(path[0]) || !isSlash(path[1]) || isSlash(path[2])) {
+    return false;
+  }
+
+  // The server name must be followed by a root directory separator.
+  return path.find_first_of("/\\", 3) != std::string::npos;
+}
+
+} // namespace
 
 namespace KWSYS_NAMESPACE {
 
@@ -230,8 +257,14 @@ DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
     llFlags |= LOAD_WITH_ALTERED_SEARCH_PATH;
   }
 
-  return LoadLibraryExW(Encoding::ToWindowsExtendedPath(libname).c_str(),
-                        nullptr, llFlags);
+  // Keep names and relative paths intact for the Windows DLL search order.
+  // The altered search path requires an absolute path for dependency lookup.
+  bool const useExtendedPath =
+    (flags & SearchBesideLibrary) || IsAbsolutePath(libname);
+  std::wstring const path = useExtendedPath
+    ? Encoding::ToWindowsExtendedPath(libname)
+    : Encoding::ToWide(libname);
+  return LoadLibraryExW(path.c_str(), nullptr, llFlags);
 }
 
 int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
