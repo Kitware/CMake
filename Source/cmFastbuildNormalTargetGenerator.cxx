@@ -584,8 +584,16 @@ void cmFastbuildNormalTargetGenerator::ComputePCH(
 
   // Reuse compiler options for PCH options.
   node.PCHOptions += origCompileOptions;
-  if (this->Makefile->GetSafeDefinition(
-        cmStrCat("CMAKE_", language, "_COMPILER_ID")) == "MSVC") {
+  // For the MSVC-like compiler families (MSVC and clang-cl), FASTBuild takes
+  // the object file of the PCH compile from its object output option, which
+  // must name %3: %2 is the PCH itself, which an object written there would
+  // overwrite.
+  auto const& compilers = this->GetGlobalGenerator()->Compilers;
+  auto const compilerIter =
+    compilers.find(FASTBUILD_COMPILER_PREFIX + language);
+  if (compilerIter != compilers.end() &&
+      (compilerIter->second.CompilerFamily == "msvc" ||
+       compilerIter->second.CompilerFamily == "clang-cl")) {
     cmSystemTools::ReplaceString(node.PCHOptions,
                                  FASTBUILD_2_INPUT_PLACEHOLDER,
                                  FASTBUILD_3_INPUT_PLACEHOLDER);
