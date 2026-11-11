@@ -71,7 +71,8 @@ public:
   {
     // Search for dependent libraries beside the library being loaded.
     //
-    // This is currently only supported on Windows.
+    // This is currently only supported on Windows. Relative paths are resolved
+    // against the current working directory before loading.
     SearchBesideLibrary = 0x00000001,
 
     // Make loaded symbols visible globally
@@ -84,7 +85,10 @@ public:
 
   /** Load a dynamic library into the current process.
    * The returned LibraryHandle can be used to access the symbols in the
-   * library. The optional second argument is a set of flags to use when
+   * library. On Windows, library names and relative paths use the native
+   * DLL search order. Absolute paths support extended-length paths. Relative
+   * Windows paths should use backslashes.
+   * The optional second argument is a set of flags to use when
    * opening the library. If unrecognized or unsupported flags are specified,
    * the library is not opened. */
   static LibraryHandle OpenLibrary(std::string const&);

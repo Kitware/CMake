@@ -154,6 +154,9 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 endif()
 
 # Enforce component dependencies.
+if(KWSYS_USE_DynamicLoader AND WIN32 AND NOT CYGWIN)
+  set(KWSYS_USE_String 1)
+endif()
 if(KWSYS_USE_SystemTools)
   set(KWSYS_USE_Directory 1)
   set(KWSYS_USE_FStream 1)
@@ -983,6 +986,45 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         set_property(TARGET ${KWSYS_NAMESPACE}TestDynloadUse PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dynloaddir")
         add_dependencies(${KWSYS_NAMESPACE}TestDynloadUse ${KWSYS_TARGET_INTERFACE})
         target_link_libraries(${KWSYS_NAMESPACE}TestDynloadUse PRIVATE ${KWSYS_NAMESPACE}TestDynloadImpl)
+
+        get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+        set(_dynloadRelativeDir "dynloaddir")
+        if(_isMultiConfig)
+          string(APPEND _dynloadRelativeDir "\\$<CONFIG>")
+        endif()
+
+        add_test(NAME kwsys.testDynamicLoader.WindowsSearchOrder.Executable
+          COMMAND ${KWSYS_NAMESPACE}TestsCxx testDynamicLoader
+            $<TARGET_FILE_NAME:${KWSYS_NAMESPACE}TestDynload>
+            TestDynamicLoaderData)
+        add_test(NAME kwsys.testDynamicLoader.WindowsSearchOrder.PATH
+          COMMAND ${CMAKE_COMMAND} -E env
+            "PATH=$<TARGET_FILE_DIR:${KWSYS_NAMESPACE}TestDynloadImpl>;$ENV{PATH}"
+            $<TARGET_FILE:${KWSYS_NAMESPACE}TestsCxx> testDynamicLoader
+            $<TARGET_FILE_NAME:${KWSYS_NAMESPACE}TestDynloadImpl>
+            TestDynamicLoaderImplData)
+        add_test(NAME kwsys.testDynamicLoader.WindowsSearchOrder.Relative
+          COMMAND ${CMAKE_COMMAND} -E env
+            "PATH=${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}"
+            $<TARGET_FILE:${KWSYS_NAMESPACE}TestsCxx> testDynamicLoader
+            "${_dynloadRelativeDir}\\$<TARGET_FILE_NAME:${KWSYS_NAMESPACE}TestDynloadImpl>"
+            TestDynamicLoaderImplData)
+        set_tests_properties(
+          kwsys.testDynamicLoader.WindowsSearchOrder.Executable
+          kwsys.testDynamicLoader.WindowsSearchOrder.PATH
+          kwsys.testDynamicLoader.WindowsSearchOrder.Relative
+          PROPERTIES
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+            LABELS "${KWSYS_LABELS_TEST}")
+        add_test(NAME kwsys.testDynamicLoader.SearchBesideLibrary.Relative
+          COMMAND ${KWSYS_NAMESPACE}TestsCxx testDynamicLoader
+            "${_dynloadRelativeDir}\\$<TARGET_FILE_NAME:${KWSYS_NAMESPACE}TestDynloadUse>"
+            TestLoad SearchBesideLibrary)
+        set_tests_properties(
+          kwsys.testDynamicLoader.SearchBesideLibrary.Relative
+          PROPERTIES
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+            LABELS "${KWSYS_LABELS_TEST}")
       endif ()
     endif()
     create_test_sourcelist(

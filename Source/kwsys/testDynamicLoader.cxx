@@ -111,9 +111,11 @@ int testDynamicLoader(int argc, char* argv[])
   disable_debugger(1);
 #endif
   int res = 0;
-  if (argc == 3) {
+  if (argc == 3 ||
+      (argc == 4 && std::string(argv[3]) == "SearchBesideLibrary")) {
     // User specify a libname and symbol to check.
-    res = TestDynamicLoader(argv[1], argv[2], 1, 1, 1);
+    int flags = argc == 4 ? kwsys::DynamicLoader::SearchBesideLibrary : 0;
+    res = TestDynamicLoader(argv[1], argv[2], 1, 1, 1, flags);
     return res;
   }
 
