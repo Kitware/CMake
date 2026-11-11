@@ -146,7 +146,6 @@ void cmInstrumentation::ResetQueries()
   this->options.clear();
   this->hooks.clear();
   this->callbacks.clear();
-  this->queryFiles.clear();
   this->errorMsg.clear();
 }
 
@@ -462,7 +461,6 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 void cmInstrumentation::InsertDynamicSystemInformation(
   Json::Value& root, std::string const& prefix)
 {
-  Json::Value data;
   double memory;
   double load;
   this->GetDynamicSystemInformation(memory, load);
@@ -579,6 +577,20 @@ void cmInstrumentation::WriteInstrumentationJson(
   cmSystemTools::MakeDirectory(directory);
   std::string const file_path = cmStrCat(directory, '/', file_name);
 
+  auto writeJson = [&root, &JsonWriter, atomic](cmsys::ofstream& stream) {
+    try {
+      JsonWriter->write(root, &stream);
+      stream << "\n";
+      if (atomic == Atomic::No) {
+        stream.close();
+      }
+    } catch (std::ios_base::failure& fail) {
+      cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
+    } catch (...) {
+      cmSystemTools::Error("Error writing JSON output for instrumentation.");
+    }
+  };
+
   if (atomic == Atomic::Yes) {
     // Write to a temporary file and atomically rename it into place, so that
     // an interrupt during the write cannot leave a truncated snippet.
@@ -586,15 +598,8 @@ void cmInstrumentation::WriteInstrumentationJson(
     if (!ftmp) {
       throw std::runtime_error(std::string("Unable to open: ") + file_name);
     }
-    try {
-      JsonWriter->write(root, &ftmp);
-      ftmp << "\n";
-      // The atomic rename happens when the stream is closed/destroyed.
-    } catch (std::ios_base::failure& fail) {
-      cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
-    } catch (...) {
-      cmSystemTools::Error("Error writing JSON output for instrumentation.");
-    }
+    writeJson(ftmp);
+    // The atomic rename happens when the stream is closed/destroyed.
     return;
   }
 
@@ -603,15 +608,7 @@ void cmInstrumentation::WriteInstrumentationJson(
     throw std::runtime_error(std::string("Unable to open: ") + file_name);
   }
 
-  try {
-    JsonWriter->write(root, &ftmp);
-    ftmp << "\n";
-    ftmp.close();
-  } catch (std::ios_base::failure& fail) {
-    cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
-  } catch (...) {
-    cmSystemTools::Error("Error writing JSON output for instrumentation.");
-  }
+  writeJson(ftmp);
 }
 
 std::string cmInstrumentation::InstrumentTest(
@@ -695,7 +692,6 @@ int cmInstrumentation::InstrumentCommand(
 
   // Store command info
   Json::Value root(Json::objectValue);
-  Json::Value commandInfo(Json::objectValue);
   std::string command_str = GetCommandStr(command);
 
   if (!command_str.empty()) {
@@ -1260,27 +1256,31 @@ void cmInstrumentation::CollectCompileTraceFile(Json::Value& root,
 void cmInstrumentation::WriteTraceFile(Json::Value const& index,
                                        std::string const& trace_name)
 {
-  std::vector<std::string> snippets = std::vector<std::string>();
+  struct Snippet
+  {
+    std::string File;
+    std::string Timestamp;
+  };
+  std::vector<Snippet> snippets;
+  snippets.reserve(index["snippets"].size());
+  static cmsys::RegularExpression const snippetTimeRegex(
+    "[A-Za-z]+-[A-Za-z0-9]+-([0-9T\\-]+)\\.json");
+
   for (auto const& f : index["snippets"]) {
-    snippets.push_back(f.asString());
+    std::string file = f.asString();
+    std::string timestamp;
+    cmsys::RegularExpressionMatch match;
+    if (snippetTimeRegex.find(file.c_str(), match)) {
+      timestamp = match.match(1);
+    }
+    snippets.push_back({ std::move(file), std::move(timestamp) });
   }
   // Reverse-sort snippets by timeEnd (timeStart + duration) as a
   // prerequisite for AssignTargetToTraceThread().
-  auto extractSnippetTimestamp = [](std::string file) -> std::string {
-    cmsys::RegularExpression snippetTimeRegex(
-      "[A-Za-z]+-[A-Za-z0-9]+-([0-9T\\-]+)\\.json");
-    cmsys::RegularExpressionMatch matchA;
-    if (snippetTimeRegex.find(file.c_str(), matchA)) {
-      return matchA.match(1);
-    }
-    return "";
-  };
-  std::sort(
-    snippets.begin(), snippets.end(),
-    [extractSnippetTimestamp](std::string snippetA, std::string snippetB) {
-      return extractSnippetTimestamp(snippetA) >
-        extractSnippetTimestamp(snippetB);
-    });
+  std::sort(snippets.begin(), snippets.end(),
+            [](Snippet const& snippetA, Snippet const& snippetB) {
+              return snippetA.Timestamp > snippetB.Timestamp;
+            });
 
   std::string traceDir = cmStrCat(this->timingDirv1, "/data/trace/");
   std::string traceFile = cmStrCat(traceDir, trace_name);
@@ -1303,7 +1303,7 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
   Json::Value traceEvent;
   Json::Value snippetData;
   for (size_t i = 0; i < snippets.size(); i++) {
-    snippetData = this->ReadJsonSnippet(snippets[i]);
+    snippetData = this->ReadJsonSnippet(snippets[i].File);
     traceEvent = this->BuildTraceEvent(workers, snippetData);
     try {
       if (i > 0) {
