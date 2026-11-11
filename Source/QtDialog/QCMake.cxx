@@ -6,7 +6,6 @@
 
 #include <cm/memory>
 
-#include <QCoreApplication>
 #include <QDir>
 #include <QString>
 #include <QVector>
@@ -562,25 +561,21 @@ void QCMake::progressCallback(std::string const& msg, float percent)
   } else {
     Q_EMIT this->outputMessage(QString::fromStdString(msg));
   }
-  QCoreApplication::processEvents();
 }
 
 void QCMake::messageCallback(std::string const& msg, char const* /*title*/)
 {
   Q_EMIT this->errorMessage(QString::fromStdString(msg));
-  QCoreApplication::processEvents();
 }
 
 void QCMake::stdoutCallback(std::string const& msg)
 {
   Q_EMIT this->outputMessage(QString::fromStdString(msg));
-  QCoreApplication::processEvents();
 }
 
 void QCMake::stderrCallback(std::string const& msg)
 {
   Q_EMIT this->outputMessage(QString::fromStdString(msg));
-  QCoreApplication::processEvents();
 }
 
 void QCMake::setUpEnvironment() const

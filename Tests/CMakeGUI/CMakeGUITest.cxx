@@ -638,6 +638,34 @@ void CMakeGUITest::presetApplyStartup_data()
   QTest::newRow("unavailable") << "doesNotExist" << false;
 }
 
+void CMakeGUITest::newlineValue()
+{
+  this->m_window->SourceDirectory->setText(CMakeGUITest_BINARY_DIR
+                                           "/newlineValue/src");
+  this->m_window->BinaryDirectory->setCurrentText(CMakeGUITest_BINARY_DIR
+                                                  "/newlineValue/build");
+
+  // Wait a bit for everything to update
+  loopSleep();
+
+  // Saving a value with a newline issues a truncation warning while the
+  // cache is written.  That must not run the queued Configure early.
+  auto* model = this->m_window->CacheValues->cacheModel();
+  auto props = model->properties();
+  bool found = false;
+  for (auto& prop : props) {
+    if (prop.Key == "NEWLINE_VALUE") {
+      prop.Value = QString("first\nsecond");
+      found = true;
+    }
+  }
+  QVERIFY(found);
+  model->setProperties(props);
+
+  this->tryConfigure();
+  QCOMPARE(modelValue(model, "NEWLINE_VALUE"), QString("first"));
+}
+
 void SetupDefaultQSettings()
 {
   QSettings::setDefaultFormat(QSettings::IniFormat);
