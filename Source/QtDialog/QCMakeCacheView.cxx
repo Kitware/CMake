@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "QCMakeCacheView.h"
 
+#include <algorithm>
+
 #include <QApplication>
 #include <QEvent>
 #include <QHBoxLayout>
@@ -48,17 +50,14 @@ protected:
     }
 
     // check all strings for a match
-    Q_FOREACH (QString const& str, strs) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-      if (str.contains(this->filterRegularExpression())) {
+    auto const filter = this->filterRegularExpression();
 #else
-      if (str.contains(this->filterRegExp())) {
+    auto const filter = this->filterRegExp();
 #endif
-        return true;
-      }
-    }
-
-    return false;
+    return std::any_of(
+      strs.cbegin(), strs.cend(),
+      [&filter](QString const& str) { return str.contains(filter); });
   }
 };
 
@@ -254,12 +253,12 @@ void QCMakeCacheModel::setProperties(QCMakePropertyList const& props)
     std::sort(newP.begin(), newP.end());
     std::sort(newP2.begin(), newP2.end());
     int row_count = 0;
-    Q_FOREACH (QCMakeProperty const& p, newP) {
+    for (QCMakeProperty const& p : newP) {
       this->insertRow(row_count);
       this->setPropertyData(this->index(row_count, 0), p, true);
       row_count++;
     }
-    Q_FOREACH (QCMakeProperty const& p, newP2) {
+    for (QCMakeProperty const& p : newP2) {
       this->insertRow(row_count);
       this->setPropertyData(this->index(row_count, 0), p, false);
       row_count++;
@@ -414,7 +413,7 @@ void QCMakeCacheModel::breakProperties(
 {
   QMap<QString, QCMakePropertyList> tmp;
   // return a map of properties grouped by prefixes, and sorted
-  Q_FOREACH (QCMakeProperty const& p, props) {
+  for (QCMakeProperty const& p : props) {
     QString prefix = QCMakeCacheModel::prefix(p.Key);
     tmp[prefix].append(p);
   }

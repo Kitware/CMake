@@ -1211,12 +1211,13 @@ void CMakeSetupDialog::setCacheModified()
 
 void CMakeSetupDialog::removeSelectedCacheEntries()
 {
-  QModelIndexList idxs = this->CacheValues->selectionModel()->selectedRows();
+  QModelIndexList const idxs =
+    this->CacheValues->selectionModel()->selectedRows();
   QList<QPersistentModelIndex> pidxs;
-  Q_FOREACH (QModelIndex const& i, idxs) {
+  for (QModelIndex const& i : idxs) {
     pidxs.append(i);
   }
-  Q_FOREACH (QPersistentModelIndex const& pi, pidxs) {
+  for (QPersistentModelIndex const& pi : pidxs) {
     this->CacheValues->model()->removeRow(pi.row(), pi.parent());
   }
 }
@@ -1412,7 +1413,7 @@ void CMakeSetupDialog::setAdvancedView(bool v)
 
 void CMakeSetupDialog::showUserChanges()
 {
-  QSet<QCMakeProperty> changes =
+  QSet<QCMakeProperty> const changes =
     qobject_cast<QCMakeCacheModelDelegate*>(this->CacheValues->itemDelegate())
       ->changes();
 
@@ -1432,7 +1433,7 @@ void CMakeSetupDialog::showUserChanges()
   QString command;
   QString cache;
 
-  Q_FOREACH (QCMakeProperty const& prop, changes) {
+  for (QCMakeProperty const& prop : changes) {
     QString type;
     switch (prop.Type) {
       case QCMakeProperty::BOOL:

@@ -379,14 +379,15 @@ void QCMake::setProperties(QCMakePropertyList const& newProps)
   }
 
   // remove some properties
-  Q_FOREACH (QString const& s, toremove) {
+  for (QString const& s : toremove) {
     this->CMakeInstance->UnwatchUnusedCli(s.toStdString());
 
     state->RemoveCacheEntry(s.toStdString());
   }
 
   // add some new properties
-  Q_FOREACH (QCMakeProperty const& s, props) {
+  QCMakePropertyList const& addedProps = props;
+  for (QCMakeProperty const& s : addedProps) {
     this->CMakeInstance->WatchUnusedCli(s.Key.toStdString());
 
     if (s.Type == QCMakeProperty::BOOL) {
