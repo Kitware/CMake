@@ -94,6 +94,14 @@ Then build with the ``-cache`` flag:
 
    cmake --build <path-to-build> -- -cache
 
+or set :variable:`CMAKE_FASTBUILD_CACHE_MODE` in the cache to have
+:option:`cmake --build` pass it.
+
+.. versionadded:: 4.6
+  To store the cache elsewhere than in a directory, name a FASTBuild cache
+  plugin with :variable:`CMAKE_FASTBUILD_CACHE_PLUGIN`, and its configuration
+  with :variable:`CMAKE_FASTBUILD_CACHE_PLUGIN_CONFIG`.
+
 Compiler Behavior Variables
 ---------------------------
 
@@ -116,7 +124,10 @@ Configuration Variables
 
 The following variables can be used to configure this generator:
 
+* :variable:`CMAKE_FASTBUILD_CACHE_MODE`
 * :variable:`CMAKE_FASTBUILD_CACHE_PATH`
+* :variable:`CMAKE_FASTBUILD_CACHE_PLUGIN`
+* :variable:`CMAKE_FASTBUILD_CACHE_PLUGIN_CONFIG`
 * :variable:`CMAKE_FASTBUILD_CAPTURE_SYSTEM_ENV`
 * :variable:`CMAKE_FASTBUILD_ENV_OVERRIDES`
 * :variable:`CMAKE_FASTBUILD_IDE_ARGS`
