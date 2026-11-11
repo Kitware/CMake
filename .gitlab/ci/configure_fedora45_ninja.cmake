@@ -38,8 +38,8 @@ set(CMAKE_CXX_FLAGS "${flags} -Woverloaded-virtual -Wstrict-null-sentinel" CACHE
 set(CMAKE_C_FLAGS_RELEASE "-O3" CACHE STRING "")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3" CACHE STRING "")
 
-# Cover compilation with C++11 only and not higher standards.
-set(CMAKE_CXX_STANDARD "11" CACHE STRING "")
+# Cover compilation with C++14 only and not higher standards.
+set(CMAKE_CXX_STANDARD "14" CACHE STRING "")
 # Qt 6 requires C++17, so use Qt 5.
 set(CMake_QT_MAJOR_VERSION "5" CACHE STRING "")
 

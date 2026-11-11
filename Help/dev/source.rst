@@ -56,7 +56,7 @@ follow (which are not enforced by other tooling):
 C++ Subset Permitted
 ====================
 
-CMake requires compiling as C++11 in order to support building on older
+CMake requires compiling as C++14 in order to support building on older
 toolchains.  However, to facilitate development, some standard library
 features from more recent C++ standards are supported through a compatibility
 layer.  These features are defined under the namespace ``cm`` and headers
