@@ -2866,7 +2866,7 @@ int cmake::ActualConfigure()
     return 0;
   };
   int ret = this->Instrumentation->InstrumentCommand(
-    "configure", this->cmdArgs,
+    cmInstrumentation::SnippetType::Configure, this->cmdArgs,
     [doConfigure]() -> cmInstrumentation::CommandResult {
       return { doConfigure(), cm::nullopt, cm::nullopt, cm::nullopt };
     },
@@ -2934,17 +2934,26 @@ int cmake::ActualConfigure()
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_COMPILE",
       cmStrCat(
-        launcher, "--command-type compile", common_args,
+        launcher, "--command-type ",
+        cmInstrumentation::SnippetTypeToString(
+          cmInstrumentation::SnippetType::Compile),
+        common_args,
         "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_LINK",
       cmStrCat(
-        launcher, "--command-type link", common_args,
+        launcher, "--command-type ",
+        cmInstrumentation::SnippetTypeToString(
+          cmInstrumentation::SnippetType::Link),
+        common_args,
         "--output <TARGET> --config <CONFIG> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_CUSTOM",
       cmStrCat(
-        launcher, "--command-type custom", common_args,
+        launcher, "--command-type ",
+        cmInstrumentation::SnippetTypeToString(
+          cmInstrumentation::SnippetType::Custom),
+        common_args,
         "--output-as-file-name \"<OUTPUT_STORE_TO_FILE>\" --role <ROLE> -- "));
   }
 #endif
@@ -3365,7 +3374,7 @@ int cmake::Generate()
   };
 
   int ret = this->Instrumentation->InstrumentCommand(
-    "generate", this->cmdArgs,
+    cmInstrumentation::SnippetType::Generate, this->cmdArgs,
     [doGenerate]() -> cmInstrumentation::CommandResult {
       return { doGenerate(), cm::nullopt, cm::nullopt, cm::nullopt };
     });
@@ -4317,7 +4326,7 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
       instrumentation.HasQuery(),
       [&instrumentation, &args, &doBuild]() -> int {
         return instrumentation.InstrumentCommand(
-          "cmakeBuild", args,
+          cmInstrumentation::SnippetType::CMakeBuild, args,
           [&doBuild]() -> cmInstrumentation::CommandResult {
             return { doBuild(), cm::nullopt, cm::nullopt, cm::nullopt };
           });

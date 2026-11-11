@@ -358,29 +358,36 @@ int cmCTestLaunch::Run()
   options["source"] = this->Reporter.OptionSource;
   options["language"] = this->Reporter.OptionLanguage;
   options["targetType"] = this->Reporter.OptionTargetType;
-  options["role"] = this->Reporter.OptionRole;
   options["config"] = this->Reporter.OptionConfig;
   std::map<std::string, std::string> arrayOptions;
   arrayOptions["outputs"] = this->Reporter.OptionOutput;
   arrayOptions["targetLabels"] = this->Reporter.OptionTargetLabels;
-  instrumentation.InstrumentCommand(
-    this->Reporter.OptionCommandType, this->RealArgV,
-    [this, captureOutput,
-     processMetrics]() -> cmInstrumentation::CommandResult {
-      this->RunChild();
-      cmInstrumentation::CommandResult result;
-      result.ExitCode = this->Reporter.ExitCode;
-      if (captureOutput) {
-        result.StdOut = this->CapturedStdOut;
-        result.StdErr = this->CapturedStdErr;
-      }
-      if (processMetrics && this->ChildResourceUsage) {
-        result.ChildResourceUsage =
-          cmInstrumentation::ProcessMetrics(*this->ChildResourceUsage);
-      }
-      return result;
-    },
-    options, arrayOptions);
+  cm::optional<cmInstrumentation::SnippetType> commandType =
+    cmInstrumentation::SnippetTypeFromString(
+      this->Reporter.OptionRole.empty() ? this->Reporter.OptionCommandType
+                                        : this->Reporter.OptionRole);
+  if (!commandType) {
+    this->RunChild();
+  } else {
+    instrumentation.InstrumentCommand(
+      *commandType, this->RealArgV,
+      [this, captureOutput,
+       processMetrics]() -> cmInstrumentation::CommandResult {
+        this->RunChild();
+        cmInstrumentation::CommandResult result;
+        result.ExitCode = this->Reporter.ExitCode;
+        if (captureOutput) {
+          result.StdOut = this->CapturedStdOut;
+          result.StdErr = this->CapturedStdErr;
+        }
+        if (processMetrics && this->ChildResourceUsage) {
+          result.ChildResourceUsage =
+            cmInstrumentation::ProcessMetrics(*this->ChildResourceUsage);
+        }
+        return result;
+      },
+      options, arrayOptions);
+  }
 
   if (this->Operation == Op::Normal) {
 

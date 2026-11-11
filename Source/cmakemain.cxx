@@ -1087,7 +1087,7 @@ int do_install(int ac, char const* const* av)
       instrumentation.HasQuery(),
       [&instrumentation, &cmd, &doInstall]() -> int {
         return instrumentation.InstrumentCommand(
-          "cmakeInstall", cmd,
+          cmInstrumentation::SnippetType::CMakeInstall, cmd,
           [&doInstall]() -> cmInstrumentation::CommandResult {
             return { doInstall(), cm::nullopt, cm::nullopt, cm::nullopt };
           });

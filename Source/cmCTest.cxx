@@ -2813,7 +2813,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
       instrumentation.HasQuery(),
       [&instrumentation, &args, &processHandler, &data]() -> int {
         return instrumentation.InstrumentCommand(
-          "ctest", args,
+          cmInstrumentation::SnippetType::CTest, args,
           [&processHandler]() -> cmInstrumentation::CommandResult {
             return { processHandler(), cm::nullopt, cm::nullopt, cm::nullopt };
           },
