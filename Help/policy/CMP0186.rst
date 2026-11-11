@@ -12,7 +12,7 @@ searches:
 * :command:`string(REGEX REPLACE)`
 * :command:`list(TRANSFORM REPLACE)`
 
-and the generator expression :genex:`$<LIST:TRANSFORM,list,REPLACE>`.
+and the generator expression :genex:`$<LIST:TRANSFORM,list,REPLACE> <LIST:TRANSFORM>`.
 
 CMake 4.0 and below match the ``^`` anchor at the start of every
 successive search, leading to multiple matches:
