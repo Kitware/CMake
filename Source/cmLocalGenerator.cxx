@@ -361,12 +361,11 @@ static void MoveSystemIncludesToEnd(std::vector<std::string>& includeDirs,
     return;
   }
 
-  std::stable_sort(
-    includeDirs.begin(), includeDirs.end(),
-    [&target, &config, &lang](std::string const& a, std::string const& b) {
-      return !target->IsSystemIncludeDirectory(a, config, lang) &&
-        target->IsSystemIncludeDirectory(b, config, lang);
-    });
+  std::stable_partition(includeDirs.begin(), includeDirs.end(),
+                        [&target, &config, &lang](std::string const& dir) {
+                          return !target->IsSystemIncludeDirectory(dir, config,
+                                                                   lang);
+                        });
 }
 
 static void MoveSystemIncludesToEnd(std::vector<BT<std::string>>& includeDirs,
@@ -378,13 +377,11 @@ static void MoveSystemIncludesToEnd(std::vector<BT<std::string>>& includeDirs,
     return;
   }
 
-  std::stable_sort(includeDirs.begin(), includeDirs.end(),
-                   [target, &config, &lang](BT<std::string> const& a,
-                                            BT<std::string> const& b) {
-                     return !target->IsSystemIncludeDirectory(a.Value, config,
-                                                              lang) &&
-                       target->IsSystemIncludeDirectory(b.Value, config, lang);
-                   });
+  std::stable_partition(includeDirs.begin(), includeDirs.end(),
+                        [target, &config, &lang](BT<std::string> const& dir) {
+                          return !target->IsSystemIncludeDirectory(
+                            dir.Value, config, lang);
+                        });
 }
 
 void cmLocalGenerator::TraceDependencies() const

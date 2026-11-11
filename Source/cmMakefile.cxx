@@ -2620,11 +2620,20 @@ size_t cmMakefile::GetRecursionDepthLimit() const
     if (cmStrToULong(depthStr.GetCStr(), &depthUL)) {
       depth = depthUL;
     }
-  } else if (cm::optional<std::string> depthEnv =
-               cmSystemTools::GetEnvVar("CMAKE_MAXIMUM_RECURSION_DEPTH")) {
-    unsigned long depthUL;
-    if (cmStrToULong(*depthEnv, &depthUL)) {
-      depth = depthUL;
+  } else {
+    // Reading the environment is expensive, so read it only once.
+    static cm::optional<size_t> const envDepth = []() -> cm::optional<size_t> {
+      if (cm::optional<std::string> depthEnv =
+            cmSystemTools::GetEnvVar("CMAKE_MAXIMUM_RECURSION_DEPTH")) {
+        unsigned long depthUL;
+        if (cmStrToULong(*depthEnv, &depthUL)) {
+          return depthUL;
+        }
+      }
+      return cm::nullopt;
+    }();
+    if (envDepth) {
+      depth = *envDepth;
     }
   }
   return depth;

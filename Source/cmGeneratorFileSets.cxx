@@ -209,6 +209,10 @@ cm::optional<std::string> cmGeneratorFileSets::GetLanguageForSource(
 {
   this->BuildInfoCache(config);
   auto const& languages = this->Configs[config].LanguageCache;
+  // Avoid hashing the path if map is empty.
+  if (languages.empty()) {
+    return cm::nullopt;
+  }
   auto const language = languages.find(sf->GetFullPath());
   if (language == languages.end()) {
     return cm::nullopt;

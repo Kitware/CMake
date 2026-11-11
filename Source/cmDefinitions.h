@@ -6,6 +6,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -26,6 +27,21 @@ class cmDefinitions
   using StackIter = cmLinkedTree<cmDefinitions>::iterator;
 
 public:
+  cmDefinitions() = default;
+  cmDefinitions(cmDefinitions const&) = default;
+  cmDefinitions& operator=(cmDefinitions const&) = default;
+  cmDefinitions& operator=(cmDefinitions&&) = default;
+
+  // The map's move constructor is noexcept for all cases except MSVC,
+  // which makes the vector in cmLinkedTree copy instead of move when it grows.
+  // MSVC only throws out of memory exceptions if we cannot allocate a small
+  // sentinel node, at which point it will be near impossible to recover
+  // already. Therefore this can be tagged as "essentially noexcept".
+  cmDefinitions(cmDefinitions&& other) noexcept
+    : Map(std::move(other.Map))
+  {
+  }
+
   // -- Static member functions
 
   static cmValue Get(std::string const& key, StackIter begin, StackIter end);

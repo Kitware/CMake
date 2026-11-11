@@ -102,7 +102,7 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
 
 bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
                     cm::EvaluatedTargetPropertyEntries& entries,
-                    std::vector<BT<std::string>>& srcs,
+                    std::vector<BT<cmSourceFile*>>& srcs,
                     std::unordered_set<std::string>& uniqueSrcs,
                     bool debugSources,
                     std::function<void(cmSourceFile*)> postProcess = {})
@@ -119,8 +119,11 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
     cmLinkItem const& item = entry.LinkItem;
     std::string const& targetName = item.AsStr();
 
+    std::vector<cmSourceFile*> entrySfs;
+    entrySfs.reserve(entry.Values.size());
     for (std::string& src : entry.Values) {
       cmSourceFile* sf = mf->GetOrCreateSource(src);
+      entrySfs.push_back(sf);
       std::string e;
       std::string w;
       std::string fullPath = sf->ResolveFullPath(&e, &w);
@@ -158,9 +161,10 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
       }
     }
     std::string usedSources;
-    for (std::string const& src : entry.Values) {
+    for (size_t i = 0; i < entry.Values.size(); ++i) {
+      std::string const& src = entry.Values[i];
       if (uniqueSrcs.insert(src).second) {
-        srcs.emplace_back(src, entry.Backtrace);
+        srcs.emplace_back(entrySfs[i], entry.Backtrace);
         if (debugSources) {
           usedSources = cmStrCat(std::move(usedSources), " * ", src, '\n');
         }
@@ -213,10 +217,11 @@ bool processSources(cmGeneratorTarget const* tgt, std::string const& config,
 }
 }
 
-std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
+std::vector<BT<cmSourceFile*>>
+cmGeneratorTarget::GatherSourcesToComputeKindedSources(
   std::string const& config) const
 {
-  std::vector<BT<std::string>> files;
+  std::vector<BT<cmSourceFile*>> files;
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };
@@ -399,8 +404,8 @@ cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
 void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
                                              std::string const& config) const
 {
-  // Get the source file paths by string.
-  std::vector<BT<std::string>> srcs = this->GetSourceFilePaths(config);
+  std::vector<BT<cmSourceFile*>> srcs =
+    this->GatherSourcesToComputeKindedSources(config);
 
   cmsys::RegularExpression header_regex(CM_HEADER_REGEX);
   std::vector<cmSourceFile*> badObjLib;
@@ -412,9 +417,9 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     : nullptr;
 
   std::set<cmSourceFile*> emitted;
-  for (BT<std::string> const& s : srcs) {
+  for (BT<cmSourceFile*> const& s : srcs) {
+    cmSourceFile* sf = s.Value;
     // Create each source at most once.
-    cmSourceFile* sf = this->Makefile->GetOrCreateSource(s.Value);
     if (!emitted.insert(sf).second) {
       continue;
     }
@@ -579,11 +584,12 @@ void cmGeneratorTarget::ComputeAllConfigCompileLanguages() const
     }
   }
   this->AllConfigCompileLanguages = languages;
+  this->AllConfigCompileLanguagesComputed = true;
 }
 
 std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const
 {
-  if (this->AllConfigCompileLanguages.empty()) {
+  if (!this->AllConfigCompileLanguagesComputed) {
     this->ComputeAllConfigCompileLanguages();
   }
   return this->AllConfigCompileLanguages;
