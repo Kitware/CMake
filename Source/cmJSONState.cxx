@@ -54,7 +54,8 @@ void cmJSONState::AddErrorAtValue(std::string const& errMsg,
 void cmJSONState::AddErrorAtOffset(std::string const& errMsg,
                                    std::ptrdiff_t offset)
 {
-  if (doc.empty()) {
+  if (doc.empty() || offset < 0 ||
+      static_cast<std::size_t>(offset) > doc.size()) {
     this->AddError(errMsg);
   } else {
     Location loc = LocateInDocument(offset);
@@ -149,6 +150,9 @@ void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root,
   if (strictMode == StrictMode::Strict) {
     Json::CharReaderBuilder::strictMode(&builder.settings_);
   }
+  // ReadBOM already removed the BOM. Skipping another one would accept an
+  // invalid document and make jsoncpp's offsets relative to a different start.
+  builder["skipBom"] = false;
   std::string errMsg;
 
 #if JSONCPP_VERSION_HEXA >= 0x01090600

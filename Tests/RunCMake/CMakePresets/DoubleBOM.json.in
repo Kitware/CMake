@@ -1,0 +1,10 @@
+﻿﻿{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "DoubleBOM",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}
