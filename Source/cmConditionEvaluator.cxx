@@ -137,17 +137,6 @@ bool IsPrefixCMP0223(cmCMakePath const& prefix, cmMakefile& mf)
 }
 } // anonymous namespace
 
-#if defined(__SUNPRO_CC)
-#  define CM_INHERIT_CTOR(Class, Base, Tpl)                                   \
-    template <typename... Args>                                               \
-    Class(Args&&... args)                                                     \
-      : Base Tpl(std::forward<Args>(args)...)                                 \
-    {                                                                         \
-    }
-#else
-#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base
-#endif
-
 // BEGIN cmConditionEvaluator::cmArgumentList
 class cmConditionEvaluator::cmArgumentList
   : public std::list<cmExpandedCommandArgument>
@@ -155,7 +144,7 @@ class cmConditionEvaluator::cmArgumentList
   using base_t = std::list<cmExpandedCommandArgument>;
 
 public:
-  CM_INHERIT_CTOR(cmArgumentList, list, <cmExpandedCommandArgument>);
+  using list<cmExpandedCommandArgument>::list;
 
   class CurrentAndNextIter
   {

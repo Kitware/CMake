@@ -11,23 +11,6 @@
 
 #include <cm3p/uv.h>
 
-#if defined(__SUNPRO_CC)
-
-#  include <utility>
-
-#  define CM_INHERIT_CTOR(Class, Base, Tpl)                                   \
-    template <typename... Args>                                               \
-    Class(Args&&... args)                                                     \
-      : Base Tpl(std::forward<Args>(args)...)                                 \
-    {                                                                         \
-    }
-
-#else
-
-#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base
-
-#endif
-
 namespace cm {
 
 /** Whether to call uv_update_time before starting a timer.
@@ -146,15 +129,7 @@ public:
   uv_handle_ptr_base_(std::nullptr_t) {}
   ~uv_handle_ptr_base_() { this->reset(); }
 
-#if defined(__SUNPRO_CC)
-  // The Oracle Studio compiler recognizes 'explicit operator bool()' in
-  // 'if(foo)' but not 'if(foo && ...)'.  The purpose of 'explicit' here
-  // is to avoid accidental conversion in non-boolean contexts.  Just
-  // leave it out on this compiler so we can compile valid code.
-  operator bool() const;
-#else
   explicit operator bool() const;
-#endif
 
   /**
    * Properly close the handle if needed and sets the inner handle to nullptr
@@ -190,7 +165,7 @@ class uv_handle_ptr_ : public uv_handle_ptr_base_<T>
   friend class uv_handle_ptr_;
 
 public:
-  CM_INHERIT_CTOR(uv_handle_ptr_, uv_handle_ptr_base_, <T>);
+  using uv_handle_ptr_base_<T>::uv_handle_ptr_base_;
 
   /***
    * Allow less verbose calling of uv_<T> functions
@@ -207,13 +182,13 @@ template <>
 class uv_handle_ptr_<uv_handle_t> : public uv_handle_ptr_base_<uv_handle_t>
 {
 public:
-  CM_INHERIT_CTOR(uv_handle_ptr_, uv_handle_ptr_base_, <uv_handle_t>);
+  using uv_handle_ptr_base_<uv_handle_t>::uv_handle_ptr_base_;
 };
 
 class uv_async_ptr : public uv_handle_ptr_<uv_async_t>
 {
 public:
-  CM_INHERIT_CTOR(uv_async_ptr, uv_handle_ptr_, <uv_async_t>);
+  using uv_handle_ptr_<uv_async_t>::uv_handle_ptr_;
 
   int init(uv_loop_t& loop, uv_async_cb async_cb, void* data = nullptr);
 
@@ -222,7 +197,7 @@ public:
 
 struct uv_idle_ptr : public uv_handle_ptr_<uv_idle_t>
 {
-  CM_INHERIT_CTOR(uv_idle_ptr, uv_handle_ptr_, <uv_idle_t>);
+  using uv_handle_ptr_<uv_idle_t>::uv_handle_ptr_;
 
   int init(uv_loop_t& loop, void* data = nullptr);
 
@@ -233,7 +208,7 @@ struct uv_idle_ptr : public uv_handle_ptr_<uv_idle_t>
 
 struct uv_signal_ptr : public uv_handle_ptr_<uv_signal_t>
 {
-  CM_INHERIT_CTOR(uv_signal_ptr, uv_handle_ptr_, <uv_signal_t>);
+  using uv_handle_ptr_<uv_signal_t>::uv_handle_ptr_;
 
   int init(uv_loop_t& loop, void* data = nullptr);
 
@@ -244,7 +219,7 @@ struct uv_signal_ptr : public uv_handle_ptr_<uv_signal_t>
 
 struct uv_pipe_ptr : public uv_handle_ptr_<uv_pipe_t>
 {
-  CM_INHERIT_CTOR(uv_pipe_ptr, uv_handle_ptr_, <uv_pipe_t>);
+  using uv_handle_ptr_<uv_pipe_t>::uv_handle_ptr_;
 
   operator uv_stream_t*() const;
 
@@ -253,7 +228,7 @@ struct uv_pipe_ptr : public uv_handle_ptr_<uv_pipe_t>
 
 struct uv_process_ptr : public uv_handle_ptr_<uv_process_t>
 {
-  CM_INHERIT_CTOR(uv_process_ptr, uv_handle_ptr_, <uv_process_t>);
+  using uv_handle_ptr_<uv_process_t>::uv_handle_ptr_;
 
   int spawn(uv_loop_t& loop, uv_process_options_t const& options,
             void* data = nullptr);
@@ -261,7 +236,7 @@ struct uv_process_ptr : public uv_handle_ptr_<uv_process_t>
 
 struct uv_timer_ptr : public uv_handle_ptr_<uv_timer_t>
 {
-  CM_INHERIT_CTOR(uv_timer_ptr, uv_handle_ptr_, <uv_timer_t>);
+  using uv_handle_ptr_<uv_timer_t>::uv_handle_ptr_;
 
   int init(uv_loop_t& loop, void* data = nullptr);
 
@@ -273,7 +248,7 @@ struct uv_timer_ptr : public uv_handle_ptr_<uv_timer_t>
 
 struct uv_tty_ptr : public uv_handle_ptr_<uv_tty_t>
 {
-  CM_INHERIT_CTOR(uv_tty_ptr, uv_handle_ptr_, <uv_tty_t>);
+  using uv_handle_ptr_<uv_tty_t>::uv_handle_ptr_;
 
   operator uv_stream_t*() const;
 

@@ -18,23 +18,6 @@ class static_string_view;
 }
 
 namespace detail {
-#if defined(__SUNPRO_CC) && defined(__sparc)
-// Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
-// the full 'is_pathable' and 'is_move_pathable' checks.  We use it only to
-// improve error messages via 'enable_if' when calling methods with incorrect
-// types. Just pretend all types are allowed so we can at least compile valid
-// code.
-template <typename T>
-struct is_pathable : std::true_type
-{
-};
-
-template <typename T>
-struct is_move_pathable : std::true_type
-{
-};
-
-#else
 template <typename T, typename = void>
 struct is_pathable : std::false_type
 {
@@ -78,7 +61,6 @@ template <>
 struct is_move_pathable<std::string> : std::true_type
 {
 };
-#endif
 }
 
 class cmCMakePath
@@ -130,25 +112,11 @@ public:
     : Path(FormatPath(cm::string_view{ source }, fmt))
   {
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath(std::string const& source, format fmt = generic_format)
-    : Path(FormatPath(source, fmt))
-  {
-  }
-  cmCMakePath(std::string&& source, format fmt = generic_format)
-    : Path(FormatPath(std::move(source), fmt))
-  {
-  }
-#else
   template <typename Source, typename = enable_if_move_pathable<Source>>
   cmCMakePath(Source source, format fmt = generic_format)
     : Path(FormatPath(std::move(source), fmt))
   {
   }
-#endif
 
   template <typename Source, typename = enable_if_move_pathable<Source>>
   cmCMakePath& Assign(Source&& source)
@@ -177,41 +145,6 @@ public:
     }
     return *this;
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath& operator=(cm::filesystem::path&& source)
-  {
-    this->Assign(std::forward<cm::filesystem::path>(source));
-    return *this;
-  }
-  cmCMakePath& operator=(std::string&& source)
-  {
-    this->Assign(std::forward<std::string>(source));
-    return *this;
-  }
-  cmCMakePath& operator=(cm::filesystem::path const& source)
-  {
-    this->Assign(source);
-    return *this;
-  }
-  cmCMakePath& operator=(std::string const& source)
-  {
-    this->Assign(source);
-    return *this;
-  }
-  cmCMakePath& operator=(cm::string_view const source)
-  {
-    this->Assign(source);
-    return *this;
-  }
-  cmCMakePath& operator=(char const* source)
-  {
-    this->Assign(cm::string_view{ source });
-    return *this;
-  }
-#else
   template <typename Source, typename = enable_if_move_pathable<Source>>
   cmCMakePath& operator=(Source&& source)
   {
@@ -224,7 +157,6 @@ public:
     this->Assign(source);
     return *this;
   }
-#endif
 
   // Concatenation
   cmCMakePath& Append(cmCMakePath const& path)
@@ -239,29 +171,11 @@ public:
     this->Path = this->Path.generic_string();
     return *this;
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath& Append(std::string const& source)
-  {
-    return this->Append(cm::filesystem::path(source));
-  }
-  cmCMakePath& Append(cm::string_view source)
-  {
-    return this->Append(cm::filesystem::path(source));
-  }
-  cmCMakePath& Append(char const* source)
-  {
-    return this->Append(cm::filesystem::path(cm::string_view{ source }));
-  }
-#else
   template <typename Source, typename = enable_if_pathable<Source>>
   cmCMakePath& Append(Source const& source)
   {
     return this->Append(cm::filesystem::path(source));
   }
-#endif
 
   cmCMakePath& operator/=(cmCMakePath const& path)
   {
@@ -283,33 +197,12 @@ public:
     this->Path.operator+=(std::string(source));
     return *this;
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath& Concat(cm::filesystem::path const& source)
-  {
-    this->Path.operator+=(source);
-    return *this;
-  }
-  cmCMakePath& Concat(std::string const& source)
-  {
-    this->Path.operator+=(source);
-    return *this;
-  }
-  cmCMakePath& Concat(char const* source)
-  {
-    this->Path.operator+=(source);
-    return *this;
-  }
-#else
   template <typename Source, typename = enable_if_pathable<Source>>
   cmCMakePath& Concat(Source const& source)
   {
     this->Path.operator+=(source);
     return *this;
   }
-#endif
 
   cmCMakePath& operator+=(cmCMakePath const& path)
   {
@@ -337,32 +230,6 @@ public:
     }
     return *this;
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath& ReplaceFileName(cm::filesystem::path const& filename)
-  {
-    if (this->Path.has_filename()) {
-      this->Path.replace_filename(filename);
-    }
-    return *this;
-  }
-  cmCMakePath& ReplaceFileName(std::string const& filename)
-  {
-    if (this->Path.has_filename()) {
-      this->Path.replace_filename(filename);
-    }
-    return *this;
-  }
-  cmCMakePath& ReplaceFileName(cm::string_view filename)
-  {
-    if (this->Path.has_filename()) {
-      this->Path.replace_filename(filename);
-    }
-    return *this;
-  }
-#else
   template <typename Source, typename = enable_if_pathable<Source>>
   cmCMakePath& ReplaceFileName(Source const& filename)
   {
@@ -371,40 +238,18 @@ public:
     }
     return *this;
   }
-#endif
 
   cmCMakePath& ReplaceExtension(cmCMakePath const& extension = cmCMakePath())
   {
     this->Path.replace_extension(extension.Path);
     return *this;
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath& ReplaceExtension(cm::filesystem::path const& extension)
-  {
-    this->Path.replace_extension(extension);
-    return *this;
-  }
-  cmCMakePath& ReplaceExtension(std::string const& extension)
-  {
-    this->Path.replace_extension(extension);
-    return *this;
-  }
-  cmCMakePath& ReplaceExtension(cm::string_view const extension)
-  {
-    this->Path.replace_extension(extension);
-    return *this;
-  }
-#else
   template <typename Source, typename = enable_if_pathable<Source>>
   cmCMakePath& ReplaceExtension(Source const& extension)
   {
     this->Path.replace_extension(extension);
     return *this;
   }
-#endif
 
   cmCMakePath& ReplaceWideExtension(
     cmCMakePath const& extension = cmCMakePath())
@@ -417,21 +262,11 @@ public:
     return this->ReplaceWideExtension(
       static_cast<cm::string_view>(extension.string()));
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath& ReplaceWideExtension(std::string const& extension)
-  {
-    return this->ReplaceWideExtension(cm::string_view{ extension });
-  }
-#else
   template <typename Source, typename = enable_if_pathable<Source>>
   cmCMakePath& ReplaceWideExtension(Source const& extension)
   {
     return this->ReplaceWideExtension(extension);
   }
-#endif
   cmCMakePath& ReplaceWideExtension(cm::string_view extension);
 
   cmCMakePath& RemoveExtension()
@@ -513,25 +348,11 @@ public:
     // Windows) so convert back to '/'
     return path.generic_string();
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath Relative(std::string const& base) const
-  {
-    return this->Relative(cm::filesystem::path(base));
-  }
-  cmCMakePath Relative(cm::string_view base) const
-  {
-    return this->Relative(cm::filesystem::path(base));
-  }
-#else
   template <typename Source, typename = enable_if_pathable<Source>>
   cmCMakePath Relative(Source const& base) const
   {
     return this->Relative(cm::filesystem::path(base));
   }
-#endif
   cmCMakePath Proximate(cmCMakePath const& base) const
   {
     return this->Proximate(base.Path);
@@ -543,49 +364,21 @@ public:
     // Windows) so convert back to '/'
     return path.generic_string();
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath Proximate(std::string const& base) const
-  {
-    return this->Proximate(cm::filesystem::path(base));
-  }
-  cmCMakePath Proximate(cm::string_view base) const
-  {
-    return this->Proximate(cm::filesystem::path(base));
-  }
-#else
   template <typename Source, typename = enable_if_pathable<Source>>
   cmCMakePath Proximate(Source const& base) const
   {
     return this->Proximate(cm::filesystem::path(base));
   }
-#endif
 
   cmCMakePath Absolute(cmCMakePath const& base) const
   {
     return this->Absolute(base.Path);
   }
-#if defined(__SUNPRO_CC) && defined(__sparc)
-  // Oracle DeveloperStudio C++ compiler on Solaris/Sparc is confused when
-  // standard methods and templates use the same name. The template is selected
-  // rather than the standard one regardless the arguments of the method.
-  cmCMakePath Absolute(std::string const& base) const
-  {
-    return this->Absolute(cm::filesystem::path(base));
-  }
-  cmCMakePath Absolute(cm::string_view base) const
-  {
-    return this->Absolute(cm::filesystem::path(base));
-  }
-#else
   template <typename Source, typename = enable_if_pathable<Source>>
   cmCMakePath Absolute(Source const& base) const
   {
     return this->Absolute(cm::filesystem::path(base));
   }
-#endif
   cmCMakePath Absolute(cm::filesystem::path const& base) const;
 
   // Comparison

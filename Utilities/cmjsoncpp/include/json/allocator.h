@@ -9,10 +9,8 @@
 #include <cstring>
 #include <memory>
 
-#if !defined(__SUNPRO_CC)
 #pragma pack(push)
 #pragma pack()
-#endif
 
 namespace Json {
 template <typename T> class SecureAllocator {
@@ -88,8 +86,6 @@ bool operator!=(const SecureAllocator<T>&, const SecureAllocator<U>&) {
 
 } // namespace Json
 
-#if !defined(__SUNPRO_CC)
 #pragma pack(pop)
-#endif
 
 #endif // JSON_ALLOCATOR_H_INCLUDED

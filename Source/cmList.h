@@ -1369,25 +1369,6 @@ inline void erase_if(cmList& list, Predicate pred)
 // Provide a special implementation of cm::append because, in this case,
 // expansion must not be applied to the inserted elements
 //
-#if defined(__SUNPRO_CC) && defined(__sparc)
-// Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
-// templates with constraints.
-// So, on this platform, use only simple templates.
-template <typename InputIt,
-          cm::enable_if_t<cm::is_input_iterator<InputIt>::value, int> = 0>
-void append(cmList& v, InputIt first, InputIt last)
-{
-  v.append(first, last, cmList::ExpandElements::No);
-}
-
-template <typename Range,
-          cm::enable_if_t<cm::is_input_range<Range>::value, int> = 0>
-void append(cmList& v, Range const& r)
-{
-  v.append(r.begin(), r.end(), cmList::ExpandElements::No);
-}
-
-#else
 
 template <
   typename InputIt,
@@ -1410,7 +1391,6 @@ void append(cmList& v, Range const& r)
 {
   v.append(r.begin(), r.end(), cmList::ExpandElements::No);
 }
-#endif
 
 } // namespace cm
 

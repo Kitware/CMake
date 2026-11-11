@@ -518,17 +518,6 @@ struct LogicalPath
   static constexpr Options::Symlinks Symlinks = Options::Symlinks::Lazy;
   static constexpr Options::Existence Existence = Options::Existence::Agnostic;
 };
-
-#if defined(__SUNPRO_CC)
-constexpr Options::Symlinks NaivePath::Symlinks;
-constexpr Options::Existence NaivePath::Existence;
-constexpr Options::Symlinks CasePath::Symlinks;
-constexpr Options::Existence CasePath::Existence;
-constexpr Options::Symlinks RealPath::Symlinks;
-constexpr Options::Existence RealPath::Existence;
-constexpr Options::Symlinks LogicalPath::Symlinks;
-constexpr Options::Existence LogicalPath::Existence;
-#endif
 }
 
 template <class Policy>
