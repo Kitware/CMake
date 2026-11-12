@@ -50,6 +50,8 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_valgrind")
     "^RunCMake.CTestCommandLine$"
     "^RunCMake.ctest_test$"
     "^RunCMake.CXXModules$"
+    "^RunCMake.CXXModulesCompileBuildImportExport$"
+    "^RunCMake.CXXModulesCompileInstall$"
     "^RunCMake.GoogleTest$"
     "^RunCMake.Instrumentation$"
     "^RunCMake.NinjaMultiConfig$"
