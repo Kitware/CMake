@@ -4,8 +4,10 @@
 # BEGIN imports
 
 import os
+import posixpath
 import re
 from dataclasses import dataclass
+from html import escape
 from typing import Any, List, Tuple, Type, cast
 
 import sphinx
@@ -21,6 +23,7 @@ if sphinx.version_info >= (2,):
 
     from sphinx import addnodes
     from sphinx.directives import ObjectDescription, nl_escape_re
+    from sphinx.directives.other import TocTree
     from sphinx.domains import Domain, ObjType
     from sphinx.domains.changeset import VersionChange
     from sphinx.domains.changeset import versionlabels, versionlabel_classes
@@ -904,8 +907,83 @@ class CMakeDomain(Domain):
             yield (refname, refname, obj.objtype, obj.docname, obj.node_id, 1)
 
 
+class CMakeTocTree(TocTree):
+    """Add optional compatibility fragment IDs to individual toctree links.
+
+    Append ``{#fragment-id}`` to a toctree entry to assign the ID to its
+    rendered HTML link. The suffix is removed before Sphinx parses the entry.
+    """
+
+    def run(self):
+        self.compat_anchors = {}
+        result = super().run()
+        if self.compat_anchors:
+            result[0]['cmake_compat_anchors'] = self.compat_anchors
+        return result
+
+    def parse_content(self, toctree):
+        original_content = self.content
+        self.content = []
+        anchors = {}
+        for entry in original_content:
+            entry_anchors = []
+            while True:
+                match = re.search(r'\s+\{#([^{}]+)\}$', entry)
+                if not match:
+                    break
+                entry = entry[:match.start()]
+                entry_anchors.append(match.group(1))
+            if entry_anchors:
+                ref = entry.rsplit('<', 1)[-1].rstrip('>') if '<' in entry else entry
+                ref = ref.strip()
+                if ref.startswith('/'):
+                    ref = ref[1:]
+                anchors[ref] = entry_anchors
+            self.content.append(entry)
+
+        super().parse_content(toctree)
+        for title, ref in toctree['entries']:
+            if ref in anchors:
+                self.compat_anchors[posixpath.normpath(ref)] = anchors[ref]
+
+
+def add_toc_compatibility_anchors(app, pagename, templatename, context, doctree):
+    if app.builder.name != 'html' or doctree is None:
+        return
+
+    for wrapper in doctree.findall(nodes.Element):
+        anchors = wrapper.get('cmake_compat_anchors')
+        if not anchors:
+            continue
+
+        for target, compat_anchors in anchors.items():
+            uri = escape(app.builder.get_relative_uri(pagename, target), quote=True)
+            link = re.compile(
+                r'(<li\b[^>]*class="[^\"]*\btoctree-l1\b[^\"]*"[^>]*>'
+                r'\s*<a\b[^>]*\bhref="' + re.escape(uri) + r'"[^>]*)>'
+            )
+            match = link.search(context['body'])
+            if match:
+                before_link = ''.join(
+                    f'<span id="{escape(anchor, quote=True)}"></span>'
+                    for anchor in compat_anchors[1:]
+                )
+                tagged_link = (
+                    f'{match.group(1)} '
+                    f'id="{escape(compat_anchors[0], quote=True)}">'
+                )
+                context['body'] = (
+                    context['body'][:match.start()]
+                    + before_link
+                    + tagged_link
+                    + context['body'][match.end():]
+                )
+
+
 def setup(app):
     app.add_directive('cmake-module', CMakeModule)
+    app.add_directive('toctree', CMakeTocTree, override=True)
+    app.connect('html-page-context', add_toc_compatibility_anchors)
     app.add_transform(CMakeTransform)
     app.add_transform(CMakeXRefTransform)
     app.add_domain(CMakeDomain)
