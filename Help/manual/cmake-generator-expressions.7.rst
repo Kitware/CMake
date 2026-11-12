@@ -210,9 +210,9 @@ Two forms of conditional generator expressions are supported:
 .. toctree::
    :maxdepth: 1
 
-   /genex/CONDITION
-   /genex/IF
-   /genex/BOOL
+   /genex/CONDITION {#genex:condition}
+   /genex/IF {#genex:IF}
+   /genex/BOOL {#genex:BOOL}
 
 Typically, the ``condition`` is itself a generator expression.  For instance,
 the following expression expands to ``DEBUG_MODE`` when the ``Debug``
@@ -244,9 +244,9 @@ The common boolean logic operators are supported:
 .. toctree::
    :maxdepth: 1
 
-   /genex/AND
-   /genex/OR
-   /genex/NOT
+   /genex/AND {#genex:AND}
+   /genex/OR {#genex:OR}
+   /genex/NOT {#genex:NOT}
 
 .. versionadded:: 3.28
 
@@ -270,7 +270,7 @@ Numeric Comparisons
 .. toctree::
    :maxdepth: 1
 
-   /genex/EQUAL
+   /genex/EQUAL {#genex:EQUAL}
 
 Version Comparisons
 ^^^^^^^^^^^^^^^^^^^
@@ -279,11 +279,11 @@ Version Comparisons
 .. toctree::
    :maxdepth: 1
 
-   /genex/VERSION_LESS
-   /genex/VERSION_GREATER
-   /genex/VERSION_EQUAL
-   /genex/VERSION_LESS_EQUAL
-   /genex/VERSION_GREATER_EQUAL
+   /genex/VERSION_LESS {#genex:VERSION_LESS}
+   /genex/VERSION_GREATER {#genex:VERSION_GREATER}
+   /genex/VERSION_EQUAL {#genex:VERSION_EQUAL}
+   /genex/VERSION_LESS_EQUAL {#genex:VERSION_LESS_EQUAL}
+   /genex/VERSION_GREATER_EQUAL {#genex:VERSION_GREATER_EQUAL}
 
 String Expressions
 ------------------
@@ -321,11 +321,11 @@ evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
 .. toctree::
    :maxdepth: 1
 
-   /genex/STREQUAL
-   /genex/STRLESS
-   /genex/STRGREATER
-   /genex/STRLESS_EQUAL
-   /genex/STRGREATER_EQUAL
+   /genex/STREQUAL {#genex:STREQUAL}
+   /genex/STRLESS {#genex:STRLESS}
+   /genex/STRGREATER {#genex:STRGREATER}
+   /genex/STRLESS_EQUAL {#genex:STRLESS_EQUAL}
+   /genex/STRGREATER_EQUAL {#genex:STRGREATER_EQUAL}
 
 .. _`String Queries Generator Expressions`:
 
@@ -336,7 +336,7 @@ String Queries
 .. toctree::
    :maxdepth: 1
 
-   /genex/STRING-LENGTH
+   /genex/STRING-LENGTH {#genex:STRING}
    /genex/STRING-SUBSTRING
    /genex/STRING-FIND
    /genex/STRING-MATCH
@@ -375,9 +375,9 @@ String Transformations
    /genex/STRING-HEX
    /genex/STRING-HASH
    /genex/STRING-MAKE_C_IDENTIFIER
-   /genex/LOWER_CASE
-   /genex/UPPER_CASE
-   /genex/MAKE_C_IDENTIFIER
+   /genex/LOWER_CASE {#genex:LOWER_CASE}
+   /genex/UPPER_CASE {#genex:UPPER_CASE}
+   /genex/MAKE_C_IDENTIFIER {#genex:MAKE_C_IDENTIFIER}
 
 List Expressions
 ----------------
@@ -404,7 +404,7 @@ List Comparisons
 .. toctree::
    :maxdepth: 1
 
-   /genex/IN_LIST
+   /genex/IN_LIST {#genex:IN_LIST}
 
 .. _GenEx List Queries:
 
@@ -415,7 +415,7 @@ List Queries
 .. toctree::
    :maxdepth: 1
 
-   /genex/LIST-LENGTH
+   /genex/LIST-LENGTH {#genex:LIST}
    /genex/LIST-GET
    /genex/LIST-SUBLIST
    /genex/LIST-FIND
@@ -442,9 +442,9 @@ List Transformations
    /genex/LIST-REMOVE_DUPLICATES
    /genex/LIST-FILTER
    /genex/LIST-TRANSFORM
-   /genex/JOIN
-   /genex/REMOVE_DUPLICATES
-   /genex/FILTER
+   /genex/JOIN {#genex:JOIN}
+   /genex/REMOVE_DUPLICATES {#genex:REMOVE_DUPLICATES}
+   /genex/FILTER {#genex:FILTER}
 
 .. _GenEx LIST-REMOVE_DUPLICATES:
 
@@ -471,8 +471,8 @@ Bound Operands
 .. toctree::
    :maxdepth: 1
 
-   /genex/_0
-   /genex/_1
+   /genex/_0 {#genex:_0}
+   /genex/_1 {#genex:_1}
 
 Path Expressions
 ----------------
@@ -495,7 +495,7 @@ Path Comparisons
 .. toctree::
    :maxdepth: 1
 
-   /genex/PATH_EQUAL
+   /genex/PATH_EQUAL {#genex:PATH_EQUAL}
 
 .. _GenEx Path Queries:
 
@@ -510,7 +510,7 @@ All paths are expected to be in cmake-style format.
 .. toctree::
    :maxdepth: 1
 
-   /genex/PATH-HAS_
+   /genex/PATH-HAS_ {#genex:PATH}
    /genex/PATH-IS_ABSOLUTE
    /genex/PATH-IS_RELATIVE
    /genex/PATH-IS_PREFIX
@@ -569,7 +569,7 @@ Shell Paths
 .. toctree::
    :maxdepth: 1
 
-   /genex/SHELL_PATH
+   /genex/SHELL_PATH {#genex:SHELL_PATH}
 
 Configuration Expressions
 -------------------------
@@ -578,9 +578,9 @@ Configuration Expressions
 .. toctree::
    :maxdepth: 1
 
-   /genex/CONFIG
-   /genex/OUTPUT_CONFIG
-   /genex/COMMAND_CONFIG
+   /genex/CONFIG {#genex:CONFIG}
+   /genex/OUTPUT_CONFIG {#genex:OUTPUT_CONFIG}
+   /genex/COMMAND_CONFIG {#genex:COMMAND_CONFIG}
 
 Global Expressions
 ------------------
@@ -592,7 +592,7 @@ Global Properties
 .. toctree::
    :maxdepth: 1
 
-   /genex/GLOBAL_PROPERTY
+   /genex/GLOBAL_PROPERTY {#genex:GLOBAL_PROPERTY}
 
 Directory-dependent Expressions
 -------------------------------
@@ -604,7 +604,7 @@ Directory Properties
 .. toctree::
    :maxdepth: 1
 
-   /genex/DIRECTORY_PROPERTY
+   /genex/DIRECTORY_PROPERTY {#genex:DIRECTORY_PROPERTY}
 
 Rule-Dependent Expressions
 --------------------------
@@ -618,7 +618,7 @@ These expressions look up the values of rule properties.
 .. toctree::
    :maxdepth: 1
 
-   /genex/RULE_PROPERTY
+   /genex/RULE_PROPERTY {#genex:RULE_PROPERTY}
 
 Toolchain And Language Expressions
 ----------------------------------
@@ -630,7 +630,7 @@ Platform
 .. toctree::
    :maxdepth: 1
 
-   /genex/PLATFORM_ID
+   /genex/PLATFORM_ID {#genex:PLATFORM_ID}
 
 Compiler Version
 ^^^^^^^^^^^^^^^^
@@ -642,14 +642,14 @@ closely related to the expressions in this sub-section.
 .. toctree::
    :maxdepth: 1
 
-   /genex/C_COMPILER_VERSION
-   /genex/CXX_COMPILER_VERSION
-   /genex/CUDA_COMPILER_VERSION
-   /genex/OBJC_COMPILER_VERSION
-   /genex/OBJCXX_COMPILER_VERSION
-   /genex/FORTRAN_COMPILER_VERSION
-   /genex/HIP_COMPILER_VERSION
-   /genex/ISPC_COMPILER_VERSION
+   /genex/C_COMPILER_VERSION {#genex:C_COMPILER_VERSION}
+   /genex/CXX_COMPILER_VERSION {#genex:CXX_COMPILER_VERSION}
+   /genex/CUDA_COMPILER_VERSION {#genex:CUDA_COMPILER_VERSION}
+   /genex/OBJC_COMPILER_VERSION {#genex:OBJC_COMPILER_VERSION}
+   /genex/OBJCXX_COMPILER_VERSION {#genex:OBJCXX_COMPILER_VERSION}
+   /genex/FORTRAN_COMPILER_VERSION {#genex:Fortran_COMPILER_VERSION}
+   /genex/HIP_COMPILER_VERSION {#genex:HIP_COMPILER_VERSION}
+   /genex/ISPC_COMPILER_VERSION {#genex:ISPC_COMPILER_VERSION}
 
 Compiler Language, ID, and Frontend-Variant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -662,24 +662,24 @@ related to most of the expressions in this sub-section.
 .. toctree::
    :maxdepth: 1
 
-   /genex/C_COMPILER_ID
-   /genex/CXX_COMPILER_ID
-   /genex/CUDA_COMPILER_ID
-   /genex/OBJC_COMPILER_ID
-   /genex/OBJCXX_COMPILER_ID
-   /genex/FORTRAN_COMPILER_ID
-   /genex/HIP_COMPILER_ID
-   /genex/ISPC_COMPILER_ID
-   /genex/C_COMPILER_FRONTEND_VARIANT
-   /genex/CXX_COMPILER_FRONTEND_VARIANT
-   /genex/CUDA_COMPILER_FRONTEND_VARIANT
-   /genex/OBJC_COMPILER_FRONTEND_VARIANT
-   /genex/OBJCXX_COMPILER_FRONTEND_VARIANT
-   /genex/FORTRAN_COMPILER_FRONTEND_VARIANT
-   /genex/HIP_COMPILER_FRONTEND_VARIANT
-   /genex/ISPC_COMPILER_FRONTEND_VARIANT
-   /genex/COMPILE_LANGUAGE
-   /genex/COMPILE_LANG_AND_ID
+   /genex/C_COMPILER_ID {#genex:C_COMPILER_ID}
+   /genex/CXX_COMPILER_ID {#genex:CXX_COMPILER_ID}
+   /genex/CUDA_COMPILER_ID {#genex:CUDA_COMPILER_ID}
+   /genex/OBJC_COMPILER_ID {#genex:OBJC_COMPILER_ID}
+   /genex/OBJCXX_COMPILER_ID {#genex:OBJCXX_COMPILER_ID}
+   /genex/FORTRAN_COMPILER_ID {#genex:Fortran_COMPILER_ID}
+   /genex/HIP_COMPILER_ID {#genex:HIP_COMPILER_ID}
+   /genex/ISPC_COMPILER_ID {#genex:ISPC_COMPILER_ID}
+   /genex/C_COMPILER_FRONTEND_VARIANT {#genex:C_COMPILER_FRONTEND_VARIANT}
+   /genex/CXX_COMPILER_FRONTEND_VARIANT {#genex:CXX_COMPILER_FRONTEND_VARIANT}
+   /genex/CUDA_COMPILER_FRONTEND_VARIANT {#genex:CUDA_COMPILER_FRONTEND_VARIANT}
+   /genex/OBJC_COMPILER_FRONTEND_VARIANT {#genex:OBJC_COMPILER_FRONTEND_VARIANT}
+   /genex/OBJCXX_COMPILER_FRONTEND_VARIANT {#genex:OBJCXX_COMPILER_FRONTEND_VARIANT}
+   /genex/FORTRAN_COMPILER_FRONTEND_VARIANT {#genex:Fortran_COMPILER_FRONTEND_VARIANT}
+   /genex/HIP_COMPILER_FRONTEND_VARIANT {#genex:HIP_COMPILER_FRONTEND_VARIANT}
+   /genex/ISPC_COMPILER_FRONTEND_VARIANT {#genex:ISPC_COMPILER_FRONTEND_VARIANT}
+   /genex/COMPILE_LANGUAGE {#genex:COMPILE_LANGUAGE} {#genex:COMPILE_LANGUAGE:languages}
+   /genex/COMPILE_LANG_AND_ID {#genex:COMPILE_LANG_AND_ID}
 
 Compile Features
 ^^^^^^^^^^^^^^^^
@@ -688,7 +688,7 @@ Compile Features
 .. toctree::
    :maxdepth: 1
 
-   /genex/COMPILE_FEATURES
+   /genex/COMPILE_FEATURES {#genex:COMPILE_FEATURES}
 
 Compile Context
 ^^^^^^^^^^^^^^^
@@ -697,7 +697,7 @@ Compile Context
 .. toctree::
    :maxdepth: 1
 
-   /genex/COMPILE_ONLY
+   /genex/COMPILE_ONLY {#genex:COMPILE_ONLY}
 
 Link Language and ID
 ^^^^^^^^^^^^^^^^^^^^
@@ -706,8 +706,8 @@ Link Language and ID
 .. toctree::
    :maxdepth: 1
 
-   /genex/LINK_LANGUAGE
-   /genex/LINK_LANG_AND_ID
+   /genex/LINK_LANGUAGE {#genex:LINK_LANGUAGE}
+   /genex/LINK_LANG_AND_ID {#genex:LINK_LANG_AND_ID}
 
 .. _`Boolean LINK_LANGUAGE Generator Expression`:
 
@@ -718,8 +718,8 @@ Link Features
 .. toctree::
    :maxdepth: 1
 
-   /genex/LINK_LIBRARY
-   /genex/LINK_GROUP
+   /genex/LINK_LIBRARY {#genex:LINK_LIBRARY}
+   /genex/LINK_GROUP {#genex:LINK_GROUP}
 
 Link Context
 ^^^^^^^^^^^^
@@ -728,9 +728,9 @@ Link Context
 .. toctree::
    :maxdepth: 1
 
-   /genex/LINK_ONLY
-   /genex/DEVICE_LINK
-   /genex/HOST_LINK
+   /genex/LINK_ONLY {#genex:LINK_ONLY}
+   /genex/DEVICE_LINK {#genex:DEVICE_LINK}
+   /genex/HOST_LINK {#genex:HOST_LINK}
 
 Linker ID and Frontend-Variant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -743,22 +743,22 @@ closely related to most of the expressions in this sub-section.
 .. toctree::
    :maxdepth: 1
 
-   /genex/C_COMPILER_LINKER_ID
-   /genex/CXX_COMPILER_LINKER_ID
-   /genex/CUDA_COMPILER_LINKER_ID
-   /genex/OBJC_COMPILER_LINKER_ID
-   /genex/OBJCXX_COMPILER_LINKER_ID
-   /genex/FORTRAN_COMPILER_LINKER_ID
-   /genex/HIP_COMPILER_LINKER_ID
-   /genex/SYCL_COMPILER_LINKER_ID
-   /genex/C_COMPILER_LINKER_FRONTEND_VARIANT
-   /genex/CXX_COMPILER_LINKER_FRONTEND_VARIANT
-   /genex/CUDA_COMPILER_LINKER_FRONTEND_VARIANT
-   /genex/OBJC_COMPILER_LINKER_FRONTEND_VARIANT
-   /genex/OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT
-   /genex/FORTRAN_COMPILER_LINKER_FRONTEND_VARIANT
-   /genex/HIP_COMPILER_LINKER_FRONTEND_VARIANT
-   /genex/SYCL_COMPILER_LINKER_FRONTEND_VARIANT
+   /genex/C_COMPILER_LINKER_ID {#genex:C_COMPILER_LINKER_ID}
+   /genex/CXX_COMPILER_LINKER_ID {#genex:CXX_COMPILER_LINKER_ID}
+   /genex/CUDA_COMPILER_LINKER_ID {#genex:CUDA_COMPILER_LINKER_ID}
+   /genex/OBJC_COMPILER_LINKER_ID {#genex:OBJC_COMPILER_LINKER_ID}
+   /genex/OBJCXX_COMPILER_LINKER_ID {#genex:OBJCXX_COMPILER_LINKER_ID}
+   /genex/FORTRAN_COMPILER_LINKER_ID {#genex:Fortran_COMPILER_LINKER_ID}
+   /genex/HIP_COMPILER_LINKER_ID {#genex:HIP_COMPILER_LINKER_ID}
+   /genex/SYCL_COMPILER_LINKER_ID {#genex:SYCL_COMPILER_LINKER_ID}
+   /genex/C_COMPILER_LINKER_FRONTEND_VARIANT {#genex:C_COMPILER_LINKER_FRONTEND_VARIANT}
+   /genex/CXX_COMPILER_LINKER_FRONTEND_VARIANT {#genex:CXX_COMPILER_LINKER_FRONTEND_VARIANT}
+   /genex/CUDA_COMPILER_LINKER_FRONTEND_VARIANT {#genex:CUDA_COMPILER_LINKER_FRONTEND_VARIANT}
+   /genex/OBJC_COMPILER_LINKER_FRONTEND_VARIANT {#genex:OBJC_COMPILER_LINKER_FRONTEND_VARIANT}
+   /genex/OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT {#genex:OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT}
+   /genex/FORTRAN_COMPILER_LINKER_FRONTEND_VARIANT {#genex:Fortran_COMPILER_LINKER_FRONTEND_VARIANT}
+   /genex/HIP_COMPILER_LINKER_FRONTEND_VARIANT {#genex:HIP_COMPILER_LINKER_FRONTEND_VARIANT}
+   /genex/SYCL_COMPILER_LINKER_FRONTEND_VARIANT {#genex:SYCL_COMPILER_LINKER_FRONTEND_VARIANT}
 
 .. _`Source-Dependent Expressions`:
 
@@ -804,7 +804,7 @@ These expressions look up information about a source file.
 .. toctree::
    :maxdepth: 1
 
-   /genex/SOURCE_EXISTS
+   /genex/SOURCE_EXISTS {#genex:SOURCE_EXISTS}
 
 Source Properties
 ^^^^^^^^^^^^^^^^^
@@ -816,7 +816,7 @@ These expressions look up the values of
 .. toctree::
    :maxdepth: 1
 
-   /genex/SOURCE_PROPERTY
+   /genex/SOURCE_PROPERTY {#genex:SOURCE_PROPERTY}
 
 .. _`FileSet-Dependent Expressions`:
 
@@ -832,7 +832,7 @@ These expressions look up information about a file set.
 .. toctree::
    :maxdepth: 1
 
-   /genex/FILE_SET_EXISTS
+   /genex/FILE_SET_EXISTS {#genex:FILE_SET_EXISTS}
 
 FileSet Properties
 ^^^^^^^^^^^^^^^^^^
@@ -843,7 +843,7 @@ These expressions look up the values of file set properties.
 .. toctree::
    :maxdepth: 1
 
-   /genex/FILE_SET_PROPERTY
+   /genex/FILE_SET_PROPERTY {#genex:FILE_SET_PROPERTY}
 
 .. _`Target-Dependent Expressions`:
 
@@ -859,10 +859,10 @@ These expressions look up information about a target.
 .. toctree::
    :maxdepth: 1
 
-   /genex/TARGET_EXISTS
-   /genex/TARGET_NAME_IF_EXISTS
-   /genex/TARGET_NAME
-   /genex/TARGET_POLICY
+   /genex/TARGET_EXISTS {#genex:TARGET_EXISTS}
+   /genex/TARGET_NAME_IF_EXISTS {#genex:TARGET_NAME_IF_EXISTS}
+   /genex/TARGET_NAME {#genex:TARGET_NAME}
+   /genex/TARGET_POLICY {#genex:TARGET_POLICY}
 
 Target Properties
 ^^^^^^^^^^^^^^^^^
@@ -874,7 +874,7 @@ These expressions look up the values of
 .. toctree::
    :maxdepth: 1
 
-   /genex/TARGET_PROPERTY
+   /genex/TARGET_PROPERTY {#genex:TARGET_PROPERTY} {#genex:TARGET_PROPERTY:prop}
 
 The expressions have special evaluation rules for some properties:
 
@@ -1005,53 +1005,53 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 .. toctree::
    :maxdepth: 1
 
-   /genex/TARGET_FILE
-   /genex/TARGET_FILE_BASE_NAME
-   /genex/TARGET_FILE_PREFIX
-   /genex/TARGET_FILE_SUFFIX
-   /genex/TARGET_FILE_NAME
-   /genex/TARGET_FILE_DIR
-   /genex/TARGET_IMPORT_FILE
-   /genex/TARGET_IMPORT_FILE_BASE_NAME
-   /genex/TARGET_IMPORT_FILE_PREFIX
-   /genex/TARGET_IMPORT_FILE_SUFFIX
-   /genex/TARGET_IMPORT_FILE_NAME
-   /genex/TARGET_IMPORT_FILE_DIR
-   /genex/TARGET_LINKER_FILE
-   /genex/TARGET_LINKER_FILE_BASE_NAME
-   /genex/TARGET_LINKER_FILE_PREFIX
-   /genex/TARGET_LINKER_FILE_SUFFIX
-   /genex/TARGET_LINKER_FILE_NAME
-   /genex/TARGET_LINKER_FILE_DIR
-   /genex/TARGET_LINKER_LIBRARY_FILE
-   /genex/TARGET_LINKER_LIBRARY_FILE_BASE_NAME
-   /genex/TARGET_LINKER_LIBRARY_FILE_PREFIX
-   /genex/TARGET_LINKER_LIBRARY_FILE_SUFFIX
-   /genex/TARGET_LINKER_LIBRARY_FILE_NAME
-   /genex/TARGET_LINKER_LIBRARY_FILE_DIR
-   /genex/TARGET_LINKER_IMPORT_FILE
-   /genex/TARGET_LINKER_IMPORT_FILE_BASE_NAME
-   /genex/TARGET_LINKER_IMPORT_FILE_PREFIX
-   /genex/TARGET_LINKER_IMPORT_FILE_SUFFIX
-   /genex/TARGET_LINKER_IMPORT_FILE_NAME
-   /genex/TARGET_LINKER_IMPORT_FILE_DIR
-   /genex/TARGET_SONAME_FILE
-   /genex/TARGET_SONAME_FILE_NAME
-   /genex/TARGET_SONAME_FILE_DIR
-   /genex/TARGET_SONAME_IMPORT_FILE
-   /genex/TARGET_SONAME_IMPORT_FILE_NAME
-   /genex/TARGET_SONAME_IMPORT_FILE_DIR
-   /genex/TARGET_PDB_FILE
-   /genex/TARGET_PDB_FILE_BASE_NAME
-   /genex/TARGET_PDB_FILE_NAME
-   /genex/TARGET_PDB_FILE_DIR
-   /genex/TARGET_BUNDLE_DIR
-   /genex/TARGET_BUNDLE_DIR_NAME
-   /genex/TARGET_BUNDLE_CONTENT_DIR
-   /genex/TARGET_OBJECTS
-   /genex/TARGET_RUNTIME_DLLS
-   /genex/TARGET_RUNTIME_DLL_DIRS
-   /genex/TARGET_INTERMEDIATE_DIR
+   /genex/TARGET_FILE {#genex:TARGET_FILE}
+   /genex/TARGET_FILE_BASE_NAME {#genex:TARGET_FILE_BASE_NAME}
+   /genex/TARGET_FILE_PREFIX {#genex:TARGET_FILE_PREFIX}
+   /genex/TARGET_FILE_SUFFIX {#genex:TARGET_FILE_SUFFIX}
+   /genex/TARGET_FILE_NAME {#genex:TARGET_FILE_NAME}
+   /genex/TARGET_FILE_DIR {#genex:TARGET_FILE_DIR}
+   /genex/TARGET_IMPORT_FILE {#genex:TARGET_IMPORT_FILE}
+   /genex/TARGET_IMPORT_FILE_BASE_NAME {#genex:TARGET_IMPORT_FILE_BASE_NAME}
+   /genex/TARGET_IMPORT_FILE_PREFIX {#genex:TARGET_IMPORT_FILE_PREFIX}
+   /genex/TARGET_IMPORT_FILE_SUFFIX {#genex:TARGET_IMPORT_FILE_SUFFIX}
+   /genex/TARGET_IMPORT_FILE_NAME {#genex:TARGET_IMPORT_FILE_NAME}
+   /genex/TARGET_IMPORT_FILE_DIR {#genex:TARGET_IMPORT_FILE_DIR}
+   /genex/TARGET_LINKER_FILE {#genex:TARGET_LINKER_FILE}
+   /genex/TARGET_LINKER_FILE_BASE_NAME {#genex:TARGET_LINKER_FILE_BASE_NAME}
+   /genex/TARGET_LINKER_FILE_PREFIX {#genex:TARGET_LINKER_FILE_PREFIX}
+   /genex/TARGET_LINKER_FILE_SUFFIX {#genex:TARGET_LINKER_FILE_SUFFIX}
+   /genex/TARGET_LINKER_FILE_NAME {#genex:TARGET_LINKER_FILE_NAME}
+   /genex/TARGET_LINKER_FILE_DIR {#genex:TARGET_LINKER_FILE_DIR}
+   /genex/TARGET_LINKER_LIBRARY_FILE {#genex:TARGET_LINKER_LIBRARY_FILE}
+   /genex/TARGET_LINKER_LIBRARY_FILE_BASE_NAME {#genex:TARGET_LINKER_LIBRARY_FILE_BASE_NAME}
+   /genex/TARGET_LINKER_LIBRARY_FILE_PREFIX {#genex:TARGET_LINKER_LIBRARY_FILE_PREFIX}
+   /genex/TARGET_LINKER_LIBRARY_FILE_SUFFIX {#genex:TARGET_LINKER_LIBRARY_FILE_SUFFIX}
+   /genex/TARGET_LINKER_LIBRARY_FILE_NAME {#genex:TARGET_LINKER_LIBRARY_FILE_NAME}
+   /genex/TARGET_LINKER_LIBRARY_FILE_DIR {#genex:TARGET_LINKER_LIBRARY_FILE_DIR}
+   /genex/TARGET_LINKER_IMPORT_FILE {#genex:TARGET_LINKER_IMPORT_FILE}
+   /genex/TARGET_LINKER_IMPORT_FILE_BASE_NAME {#genex:TARGET_LINKER_IMPORT_FILE_BASE_NAME}
+   /genex/TARGET_LINKER_IMPORT_FILE_PREFIX {#genex:TARGET_LINKER_IMPORT_FILE_PREFIX}
+   /genex/TARGET_LINKER_IMPORT_FILE_SUFFIX {#genex:TARGET_LINKER_IMPORT_FILE_SUFFIX}
+   /genex/TARGET_LINKER_IMPORT_FILE_NAME {#genex:TARGET_LINKER_IMPORT_FILE_NAME}
+   /genex/TARGET_LINKER_IMPORT_FILE_DIR {#genex:TARGET_LINKER_IMPORT_FILE_DIR}
+   /genex/TARGET_SONAME_FILE {#genex:TARGET_SONAME_FILE}
+   /genex/TARGET_SONAME_FILE_NAME {#genex:TARGET_SONAME_FILE_NAME}
+   /genex/TARGET_SONAME_FILE_DIR {#genex:TARGET_SONAME_FILE_DIR}
+   /genex/TARGET_SONAME_IMPORT_FILE {#genex:TARGET_SONAME_IMPORT_FILE}
+   /genex/TARGET_SONAME_IMPORT_FILE_NAME {#genex:TARGET_SONAME_IMPORT_FILE_NAME}
+   /genex/TARGET_SONAME_IMPORT_FILE_DIR {#genex:TARGET_SONAME_IMPORT_FILE_DIR}
+   /genex/TARGET_PDB_FILE {#genex:TARGET_PDB_FILE}
+   /genex/TARGET_PDB_FILE_BASE_NAME {#genex:TARGET_PDB_FILE_BASE_NAME}
+   /genex/TARGET_PDB_FILE_NAME {#genex:TARGET_PDB_FILE_NAME}
+   /genex/TARGET_PDB_FILE_DIR {#genex:TARGET_PDB_FILE_DIR}
+   /genex/TARGET_BUNDLE_DIR {#genex:TARGET_BUNDLE_DIR}
+   /genex/TARGET_BUNDLE_DIR_NAME {#genex:TARGET_BUNDLE_DIR_NAME}
+   /genex/TARGET_BUNDLE_CONTENT_DIR {#genex:TARGET_BUNDLE_CONTENT_DIR}
+   /genex/TARGET_OBJECTS {#genex:TARGET_OBJECTS}
+   /genex/TARGET_RUNTIME_DLLS {#genex:TARGET_RUNTIME_DLLS}
+   /genex/TARGET_RUNTIME_DLL_DIRS {#genex:TARGET_RUNTIME_DLL_DIRS}
+   /genex/TARGET_INTERMEDIATE_DIR {#genex:TARGET_INTERMEDIATE_DIR}
 
 Export And Install Expressions
 ------------------------------
@@ -1060,10 +1060,10 @@ Export And Install Expressions
 .. toctree::
    :maxdepth: 1
 
-   /genex/INSTALL_INTERFACE
-   /genex/BUILD_INTERFACE
-   /genex/BUILD_LOCAL_INTERFACE
-   /genex/INSTALL_PREFIX
+   /genex/INSTALL_INTERFACE {#genex:INSTALL_INTERFACE}
+   /genex/BUILD_INTERFACE {#genex:BUILD_INTERFACE}
+   /genex/BUILD_LOCAL_INTERFACE {#genex:BUILD_LOCAL_INTERFACE}
+   /genex/INSTALL_PREFIX {#genex:INSTALL_PREFIX}
 
 Multi-level Expression Evaluation
 ---------------------------------
@@ -1072,8 +1072,8 @@ Multi-level Expression Evaluation
 .. toctree::
    :maxdepth: 1
 
-   /genex/GENEX_EVAL
-   /genex/TARGET_GENEX_EVAL
+   /genex/GENEX_EVAL {#genex:GENEX_EVAL}
+   /genex/TARGET_GENEX_EVAL {#genex:TARGET_GENEX_EVAL}
 
 Support Expressions
 -------------------
@@ -1085,7 +1085,7 @@ Conversions
 .. toctree::
    :maxdepth: 1
 
-   /genex/ARGS
+   /genex/ARGS {#genex:ARGS}
 
 Escaped Characters
 ^^^^^^^^^^^^^^^^^^
@@ -1098,10 +1098,10 @@ special meaning.
 .. toctree::
    :maxdepth: 1
 
-   /genex/ANGLE-R
-   /genex/COMMA
-   /genex/SEMICOLON
-   /genex/QUOTE
+   /genex/ANGLE-R {#genex:ANGLE-R}
+   /genex/COMMA {#genex:COMMA}
+   /genex/SEMICOLON {#genex:SEMICOLON}
+   /genex/QUOTE {#genex:QUOTE}
 
 Deprecated Expressions
 ----------------------
@@ -1110,4 +1110,4 @@ Deprecated Expressions
 .. toctree::
    :maxdepth: 1
 
-   /genex/CONFIGURATION
+   /genex/CONFIGURATION {#genex:CONFIGURATION}
