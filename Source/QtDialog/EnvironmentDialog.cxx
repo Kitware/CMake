@@ -186,12 +186,13 @@ void EnvironmentDialog::addEntry()
 
 void EnvironmentDialog::removeSelectedEntries()
 {
-  QModelIndexList idxs = this->Environment->selectionModel()->selectedRows();
+  QModelIndexList const idxs =
+    this->Environment->selectionModel()->selectedRows();
   QList<QPersistentModelIndex> pidxs;
-  Q_FOREACH (QModelIndex const& i, idxs) {
+  for (QModelIndex const& i : idxs) {
     pidxs.append(i);
   }
-  Q_FOREACH (QPersistentModelIndex const& pi, pidxs) {
+  for (QPersistentModelIndex const& pi : pidxs) {
     this->Environment->model()->removeRow(pi.row(), pi.parent());
   }
 }

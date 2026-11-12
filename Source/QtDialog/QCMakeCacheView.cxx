@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "QCMakeCacheView.h"
 
+#include <algorithm>
+
 #include <QApplication>
 #include <QEvent>
 #include <QHBoxLayout>
@@ -48,17 +50,14 @@ protected:
     }
 
     // check all strings for a match
-    Q_FOREACH (QString const& str, strs) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-      if (str.contains(this->filterRegularExpression())) {
+    auto const filter = this->filterRegularExpression();
 #else
-      if (str.contains(this->filterRegExp())) {
+    auto const filter = this->filterRegExp();
 #endif
-        return true;
-      }
-    }
-
-    return false;
+    return std::any_of(
+      strs.cbegin(), strs.cend(),
+      [&filter](QString const& str) { return str.contains(filter); });
   }
 };
 
@@ -251,20 +250,15 @@ void QCMakeCacheModel::setProperties(QCMakePropertyList const& props)
   if (View == FlatView) {
     QCMakePropertyList newP = newProps.values();
     QCMakePropertyList newP2 = newProps2.values();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
     std::sort(newP.begin(), newP.end());
     std::sort(newP2.begin(), newP2.end());
-#else
-    qSort(newP);
-    qSort(newP2);
-#endif
     int row_count = 0;
-    Q_FOREACH (QCMakeProperty const& p, newP) {
+    for (QCMakeProperty const& p : newP) {
       this->insertRow(row_count);
       this->setPropertyData(this->index(row_count, 0), p, true);
       row_count++;
     }
-    Q_FOREACH (QCMakeProperty const& p, newP2) {
+    for (QCMakeProperty const& p : newP2) {
       this->insertRow(row_count);
       this->setPropertyData(this->index(row_count, 0), p, false);
       row_count++;
@@ -287,17 +281,10 @@ void QCMakeCacheModel::setProperties(QCMakePropertyList const& props)
       parentItems.append(
         new QStandardItem(key.isEmpty() ? tr("Ungrouped Entries") : key));
       parentItems.append(new QStandardItem());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
       parentItems[0]->setData(QBrush(QColor(255, 100, 100)),
                               Qt::BackgroundRole);
       parentItems[1]->setData(QBrush(QColor(255, 100, 100)),
                               Qt::BackgroundRole);
-#else
-      parentItems[0]->setData(QBrush(QColor(255, 100, 100)),
-                              Qt::BackgroundColorRole);
-      parentItems[1]->setData(QBrush(QColor(255, 100, 100)),
-                              Qt::BackgroundColorRole);
-#endif
       parentItems[0]->setData(1, GroupRole);
       parentItems[1]->setData(1, GroupRole);
       root->appendRow(parentItems);
@@ -387,15 +374,8 @@ void QCMakeCacheModel::setPropertyData(QModelIndex const& idx1,
   }
 
   if (isNew) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
     this->setData(idx1, QBrush(QColor(255, 100, 100)), Qt::BackgroundRole);
     this->setData(idx2, QBrush(QColor(255, 100, 100)), Qt::BackgroundRole);
-#else
-    this->setData(idx1, QBrush(QColor(255, 100, 100)),
-                  Qt::BackgroundColorRole);
-    this->setData(idx2, QBrush(QColor(255, 100, 100)),
-                  Qt::BackgroundColorRole);
-#endif
   }
 }
 
@@ -433,7 +413,7 @@ void QCMakeCacheModel::breakProperties(
 {
   QMap<QString, QCMakePropertyList> tmp;
   // return a map of properties grouped by prefixes, and sorted
-  Q_FOREACH (QCMakeProperty const& p, props) {
+  for (QCMakeProperty const& p : props) {
     QString prefix = QCMakeCacheModel::prefix(p.Key);
     tmp[prefix].append(p);
   }
@@ -445,11 +425,7 @@ void QCMakeCacheModel::breakProperties(
       reorgProps.append((*iter)[0]);
       iter = tmp.erase(iter);
     } else {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
       std::sort(iter->begin(), iter->end());
-#else
-      qSort(*iter);
-#endif
       ++iter;
     }
   }
@@ -486,11 +462,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
 
       // go to the next in the tree
       while (!idxs.isEmpty() &&
-             (
-#if QT_VERSION < QT_VERSION_CHECK(5, 1, 0)
-               (idxs.last().row() + 1) >= rowCount(idxs.last().parent()) ||
-#endif
-               !idxs.last().sibling(idxs.last().row() + 1, 0).isValid())) {
+             !idxs.last().sibling(idxs.last().row() + 1, 0).isValid()) {
         idxs.remove(idxs.size() - 1);
       }
       if (!idxs.isEmpty()) {

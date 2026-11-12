@@ -108,8 +108,7 @@ int main(int argc, char** argv)
 
 // HighDpiScaling is always enabled starting with Qt6, but will still issue a
 // deprecation warning if you try to set the attribute for it
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) &&                               \
-     QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 

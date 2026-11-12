@@ -178,11 +178,10 @@ CMakeSetupDialog::CMakeSetupDialog()
                    &CMakeSetupDialog::doOutputErrorNext);
   a->setShortcut(QKeySequence(Qt::Key_F8));
   auto* s = new QShortcut(this);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  s->setKey(QKeySequence(Qt::CTRL + Qt::Key_Period));
-#else
+  // Qt 5 has no operator| for a modifier and a key, so clang-tidy sees two
+  // different enum types there.  Qt 6 builds a QKeyCombination instead.
+  // NOLINTNEXTLINE(bugprone-suspicious-enum-usage)
   s->setKey(QKeySequence(Qt::CTRL | Qt::Key_Period));
-#endif
   QObject::connect(s, &QShortcut::activated, this,
                    &CMakeSetupDialog::doOutputErrorNext); // in Eclipse
 
@@ -1211,12 +1210,13 @@ void CMakeSetupDialog::setCacheModified()
 
 void CMakeSetupDialog::removeSelectedCacheEntries()
 {
-  QModelIndexList idxs = this->CacheValues->selectionModel()->selectedRows();
+  QModelIndexList const idxs =
+    this->CacheValues->selectionModel()->selectedRows();
   QList<QPersistentModelIndex> pidxs;
-  Q_FOREACH (QModelIndex const& i, idxs) {
+  for (QModelIndex const& i : idxs) {
     pidxs.append(i);
   }
-  Q_FOREACH (QPersistentModelIndex const& pi, pidxs) {
+  for (QPersistentModelIndex const& pi : pidxs) {
     this->CacheValues->model()->removeRow(pi.row(), pi.parent());
   }
 }
@@ -1412,7 +1412,7 @@ void CMakeSetupDialog::setAdvancedView(bool v)
 
 void CMakeSetupDialog::showUserChanges()
 {
-  QSet<QCMakeProperty> changes =
+  QSet<QCMakeProperty> const changes =
     qobject_cast<QCMakeCacheModelDelegate*>(this->CacheValues->itemDelegate())
       ->changes();
 
@@ -1432,7 +1432,7 @@ void CMakeSetupDialog::showUserChanges()
   QString command;
   QString cache;
 
-  Q_FOREACH (QCMakeProperty const& prop, changes) {
+  for (QCMakeProperty const& prop : changes) {
     QString type;
     switch (prop.Type) {
       case QCMakeProperty::BOOL:

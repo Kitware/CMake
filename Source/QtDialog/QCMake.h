@@ -13,10 +13,10 @@
 #  pragma warning(disable : 4512)
 #endif
 
+#include <atomic>
 #include <memory>
 #include <vector>
 
-#include <QAtomicInt>
 #include <QList>
 #include <QMetaType>
 #include <QObject>
@@ -197,7 +197,7 @@ protected:
   cmCMakePresetsGraph CMakePresetsGraph;
   QString PresetName;
   QString CMakeExecutable;
-  QAtomicInt InterruptFlag;
+  std::atomic<int> InterruptFlag{ 0 };
   QProcessEnvironment StartEnvironment;
   QProcessEnvironment Environment;
   bool ApplyingPreset = false;

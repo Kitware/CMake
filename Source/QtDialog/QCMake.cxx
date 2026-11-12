@@ -368,11 +368,7 @@ void QCMake::setProperties(QCMakePropertyList const& newProps)
       toremove.append(QString::fromStdString(key));
     } else {
       prop = props[idx];
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-      bool const isBool = prop.Value.type() == QVariant::Bool;
-#else
-      bool const isBool = prop.Value.metaType() == QMetaType::fromType<bool>();
-#endif
+      bool const isBool = prop.Value.userType() == QMetaType::Bool;
       if (isBool) {
         state->SetCacheEntryValue(key, prop.Value.toBool() ? "ON" : "OFF");
       } else {
@@ -383,14 +379,15 @@ void QCMake::setProperties(QCMakePropertyList const& newProps)
   }
 
   // remove some properties
-  Q_FOREACH (QString const& s, toremove) {
+  for (QString const& s : toremove) {
     this->CMakeInstance->UnwatchUnusedCli(s.toStdString());
 
     state->RemoveCacheEntry(s.toStdString());
   }
 
   // add some new properties
-  Q_FOREACH (QCMakeProperty const& s, props) {
+  QCMakePropertyList const& addedProps = props;
+  for (QCMakeProperty const& s : addedProps) {
     this->CMakeInstance->WatchUnusedCli(s.Key.toStdString());
 
     if (s.Type == QCMakeProperty::BOOL) {
@@ -543,16 +540,12 @@ QCMakePropertyList QCMake::properties() const
 
 void QCMake::interrupt()
 {
-  this->InterruptFlag.ref();
+  ++this->InterruptFlag;
 }
 
 bool QCMake::interruptCallback()
 {
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-  return this->InterruptFlag.load();
-#else
-  return this->InterruptFlag.loadRelaxed();
-#endif
+  return this->InterruptFlag.load(std::memory_order_relaxed) != 0;
 }
 
 void QCMake::progressCallback(std::string const& msg, float percent)
