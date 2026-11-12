@@ -1345,8 +1345,8 @@ echo '
 #include <memory>
 #include <unordered_map>
 
-#if __cplusplus < 201103L
-#error "Compiler is not in a mode aware of C++11."
+#if __cplusplus <= 201103L
+#error "Compiler is not in a mode aware of C++14."
 #endif
 
 #if defined(_AIX) && defined(__GNUC__) && !defined(_THREAD_SAFE)
@@ -1361,7 +1361,6 @@ echo '
 #error "On HP-UX we need GCC 4.9 or higher."
 #endif
 
-#if __cplusplus > 201103L
 #include <iterator>
 int check_cxx14()
 {
@@ -1373,12 +1372,6 @@ int check_cxx14()
 
   return *ai + *(bi - 1);
 }
-#else
-int check_cxx14()
-{
-  return 0;
-}
-#endif
 
 #if (__cplusplus >= 201703L || defined(__INTEL_COMPILER) && defined(__cpp_deduction_guides))
 #include <optional>
@@ -1418,7 +1411,7 @@ int main()
   return 0;
 }
 ' > "${TMPFILE}.cxx"
-  for std in 17 14 11; do
+  for std in 17 14; do
     std_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" CXX \"${std}\"`"
     for std_flag in '' $std_flags; do
       for thread_flag in '' $test_thread_flags; do
@@ -1448,7 +1441,7 @@ else
 fi
 
 if test -z "${cmake_cxx_compiler}"; then
-cmake_error 7 "Cannot find a C++ compiler that supports both C++11 and the specified C++ flags.
+cmake_error 7 "Cannot find a C++ compiler that supports both C++14 and the specified C++ flags.
 Please specify one using environment variable CXX.
 The C++ flags are \"$cmake_cxx_flags\".
 They can be changed using the environment variable CXXFLAGS.
