@@ -1531,6 +1531,13 @@ Configuration settings include:
     :variable:`CMAKE_COMMAND` with :variable:`PROJECT_SOURCE_DIR`
     as its only argument
 
+``ConfigureOptions``
+  A semicolon-separated list of command-line options to pass to CMake
+  when ``ConfigureCommand`` is not set.
+
+  * `CTest Script`_ variable: :variable:`CTEST_CONFIGURE_OPTIONS`
+  * :module:`CTest` module variable: none
+
 ``LabelsForSubprojects``
   Specify a semicolon-separated list of labels that will be treated as
   subprojects. This mapping will be passed on to CDash when configure, test or

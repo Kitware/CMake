@@ -3426,6 +3426,7 @@ CTestVarConfigEntry const kCTestVarConfigMap[] = {
   { "CTEST_P4_OPTIONS",                    "P4Options"                   },
   // Configure step
   { "CTEST_CONFIGURE_COMMAND",             "ConfigureCommand"            },
+  { "CTEST_CONFIGURE_OPTIONS",             "ConfigureOptions"            },
   { "CTEST_LABELS_FOR_SUBPROJECTS",        "LabelsForSubprojects"        },
   { "CTEST_CMAKE_GENERATOR",               "CMakeGenerator"              },
   { "CTEST_CMAKE_GENERATOR_PLATFORM",      "CMakeGeneratorPlatform"      },

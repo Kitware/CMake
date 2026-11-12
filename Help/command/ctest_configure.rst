@@ -36,6 +36,8 @@ The options are:
   Specify a :ref:`semicolon-separated list <CMake Language Lists>` of
   command-line arguments to pass to the configuration tool.
   This option is ignored when :variable:`CTEST_CONFIGURE_COMMAND` is used.
+  Takes precedence over the :variable:`CTEST_CONFIGURE_OPTIONS` variable
+  if both are set.
 
 ``PRESET <preset>``
   .. versionadded:: 4.4

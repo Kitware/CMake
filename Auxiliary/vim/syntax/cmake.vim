@@ -2185,6 +2185,7 @@ syn keyword cmakeVariable contained
             \ CTEST_CHECKOUT_COMMAND
             \ CTEST_CONFIGURATION_TYPE
             \ CTEST_CONFIGURE_COMMAND
+            \ CTEST_CONFIGURE_OPTIONS
             \ CTEST_COVERAGE_COMMAND
             \ CTEST_COVERAGE_EXTRA_FLAGS
             \ CTEST_CURL_OPTIONS

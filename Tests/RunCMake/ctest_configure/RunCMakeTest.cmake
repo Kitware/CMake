@@ -9,6 +9,14 @@ endfunction()
 
 run_ctest_configure(ConfigureQuiet QUIET)
 
+set(CASE_TEST_PREFIX_CODE [[set(CTEST_CONFIGURE_OPTIONS "-DMY_VAR_A:STRING=from-var;-DMY_VAR_B:STRING=from-var")]])
+run_ctest(ConfigureOptionsVar)
+unset(CASE_TEST_PREFIX_CODE)
+
+set(CASE_TEST_PREFIX_CODE [[set(CTEST_CONFIGURE_OPTIONS "-DMY_VAR_A:STRING=from-var")]])
+run_ctest_configure(ConfigureOptionsVarPrecedence OPTIONS -DMY_VAR_B:STRING=from-options)
+unset(CASE_TEST_PREFIX_CODE)
+
 set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/ConfigurePreset")
 configure_file(
   "${RunCMake_SOURCE_DIR}/CMakePresets.json.in"

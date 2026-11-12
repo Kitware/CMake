@@ -228,6 +228,13 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     ? ""
     : cmSystemTools::CollapseFullPath(rawPresetsFile, sourceDirectory);
 
+  // Command-line options are set according to the following priority order:
+  // 1) The OPTIONS option to ctest_configure()
+  // 2) CTEST_CONFIGURE_OPTIONS script variable
+  std::string const options = !args.Options.empty()
+    ? args.Options
+    : mf.GetSafeDefinition("CTEST_CONFIGURE_OPTIONS");
+
   // Skip checking CTEST_CONFIGURE_COMMAND when a preset is specified.
   // We do this to avoid using a stale ConfigureCommand from a previous cmake
   // run that would cause us to silently ignore the requested preset.
@@ -241,7 +248,7 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   }
   if (configureCommand.empty() &&
       !ConstructConfigureCommand(status, mf, sourceDirectory, buildDirectory,
-                                 this->CTest->GetOutputDir(), args.Options,
+                                 this->CTest->GetOutputDir(), options,
                                  presetName, presetsFile, configureCommand)) {
     return false;
   }
