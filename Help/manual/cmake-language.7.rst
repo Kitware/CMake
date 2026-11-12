@@ -714,10 +714,10 @@ The following characters have special meaning in regular expressions:
   or ``\\`` for a literal backslash ``\``.  Escaping a non-special
   character is unnecessary but allowed, e.g. ``\a`` matches ``a``.
 ``[ ]``
-  Matches any character(s) inside the brackets.
+  Matches any single character inside the brackets.
   To match a literal ``]``, make it the first character, e.g., ``[]ab]``.
 ``[^ ]``
-  Matches any character(s) not inside the brackets.
+  Matches any single character not inside the brackets.
   To not match a literal ``]``, make it the first character, e.g., ``[^]ab]``.
 ``-``
   Inside brackets, specifies an inclusive range between characters on
@@ -733,8 +733,7 @@ The following characters have special meaning in regular expressions:
 ``|``
   Matches a pattern on either side of the ``|``
 ``()``
-  Saves a matched subexpression, which can be referenced
-  in the ``REGEX REPLACE`` operation.
+  Groups a subexpression and captures the text it matches.
 
   .. versionadded:: 3.9
     All regular expression-related commands, including e.g.
@@ -749,6 +748,24 @@ expression ``^ab+d$`` matches ``abbd`` but not ``ababd``, and the regular
 expression ``^(ab|cd)$`` matches ``ab`` but not ``abd``.
 
 .. noqa: spellcheck on
+
+Character Classes
+-----------------
+
+Backslashes are literal inside brackets and do not escape the following
+character.  Furthermore, regex escapes do not provide shorthand character
+classes such as ``\d``, ``\w``, or ``\s``, or word boundaries such as ``\b``.
+For example, ``\d+`` matches one or more literal ``d`` characters, not digits.
+POSIX character classes such as ``[[:alpha:]]`` are also not supported.  Use
+explicit ranges such as ``[A-Za-z]`` or ``[0-9]`` instead.
+
+Escaping
+--------
+
+When a regex is written in CMake code, CMake parses the argument before
+the regex engine sees it.  In particular, regex backslashes must be doubled
+in a :ref:`Quoted Argument`, while a :ref:`Bracket Argument` preserves them
+literally.
 
 CMake language :ref:`Escape Sequences` such as ``\t``, ``\r``, ``\n``,
 and ``\\`` may be used to construct literal tabs, carriage returns,
@@ -765,3 +782,16 @@ newlines, and backslashes (respectively) to pass in a regex.  For example:
   as just ``\``, so the regex itself is actually ``\(\a\+\b\)``.  This
   can alternatively be specified in a :ref:`bracket argument` without
   having to escape the backslashes, e.g. ``[[\(\a\+\b\)]]``.
+
+Other Regex Syntaxes
+--------------------
+
+Backreferences such as ``\1`` through ``\9`` are supported in the replacement
+expression of :command:`string(REGEX REPLACE)`, but not in regex patterns.
+For example, ``(a)\1`` matches ``a1``, not ``aa``.
+
+CMake's regex syntax does not support counted repetition such as ``{2}``.
+For example, ``a{2}`` matches the literal text ``a{2}``, rather than ``aa``.
+
+Lazy or possessive repetition, such as ``*?`` or ``*+``, and special group
+forms, such as ``(?:...)`` or ``(?=...)``, are not supported.
