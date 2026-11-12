@@ -1,6 +1,11 @@
 LINK_GROUP
 ----------
 
+.. |genex-family| replace::
+   :ref:`genex-family-boolean-link-language-generator-expression`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

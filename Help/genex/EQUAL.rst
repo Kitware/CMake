@@ -1,6 +1,10 @@
 EQUAL
 -----
 
+.. |genex-family| replace:: :ref:`genex-family-comparison-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

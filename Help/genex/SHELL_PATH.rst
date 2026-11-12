@@ -1,6 +1,10 @@
 SHELL_PATH
 ----------
 
+.. |genex-family| replace:: :ref:`genex-family-path-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

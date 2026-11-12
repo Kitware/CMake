@@ -1,6 +1,11 @@
 COMPILE_ONLY
 ------------
 
+.. |genex-family| replace::
+   :ref:`genex-family-toolchain-and-language-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

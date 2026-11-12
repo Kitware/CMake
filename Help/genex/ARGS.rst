@@ -1,6 +1,10 @@
 ARGS
 ----
 
+.. |genex-family| replace:: :ref:`genex-family-support-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

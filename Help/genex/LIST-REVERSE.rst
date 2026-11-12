@@ -1,6 +1,10 @@
 LIST:REVERSE
 ------------
 
+.. |genex-family| replace:: :ref:`genex-family-genex-list-ordering`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

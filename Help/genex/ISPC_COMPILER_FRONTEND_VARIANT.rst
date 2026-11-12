@@ -1,6 +1,11 @@
 ISPC_COMPILER_FRONTEND_VARIANT
 ------------------------------
 
+.. |genex-family| replace::
+   :ref:`genex-family-compiler-language-id-and-frontend-variant`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

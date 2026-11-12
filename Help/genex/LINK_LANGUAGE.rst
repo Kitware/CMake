@@ -1,6 +1,10 @@
 LINK_LANGUAGE
 -------------
 
+.. |genex-family| replace:: :ref:`genex-family-link-language-and-id`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

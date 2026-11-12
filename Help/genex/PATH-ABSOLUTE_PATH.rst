@@ -1,6 +1,10 @@
 PATH:ABSOLUTE_PATH
 ------------------
 
+.. |genex-family| replace:: :ref:`genex-family-genex-path-transformations`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

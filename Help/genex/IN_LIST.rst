@@ -1,6 +1,10 @@
 IN_LIST
 -------
 
+.. |genex-family| replace:: :ref:`genex-family-list-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

@@ -1,6 +1,11 @@
 condition
 ---------
 
+.. |genex-family| replace::
+   :ref:`genex-family-conditional-generator-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

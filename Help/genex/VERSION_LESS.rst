@@ -1,6 +1,10 @@
 VERSION_LESS
 ------------
 
+.. |genex-family| replace:: :ref:`genex-family-version-comparisons`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

@@ -1,6 +1,10 @@
 OBJCXX_COMPILER_VERSION
 -----------------------
 
+.. |genex-family| replace:: :ref:`genex-family-compiler-version`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

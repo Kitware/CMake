@@ -1,6 +1,10 @@
 LIST:SUBLIST
 ------------
 
+.. |genex-family| replace:: :ref:`genex-family-genex-list-queries`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

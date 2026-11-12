@@ -1,6 +1,10 @@
 NOT
 ---
 
+.. |genex-family| replace:: :ref:`genex-family-boolean-generator-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

@@ -1,6 +1,10 @@
 CONFIG
 ------
 
+.. |genex-family| replace:: :ref:`genex-family-configuration-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

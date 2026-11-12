@@ -1,6 +1,10 @@
 TARGET_IMPORT_FILE_SUFFIX
 -------------------------
 
+.. |genex-family| replace:: :ref:`genex-family-target-artifacts`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

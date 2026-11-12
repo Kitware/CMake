@@ -1,6 +1,10 @@
 $<_0>
 -----
 
+.. |genex-family| replace:: :ref:`genex-family-genex-bound-operands`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

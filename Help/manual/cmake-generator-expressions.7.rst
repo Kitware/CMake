@@ -188,6 +188,8 @@ Another way is to write debug messages to a file with :command:`file(GENERATE)`:
 
   file(GENERATE OUTPUT filename CONTENT "$<...>")
 
+.. _genex-family-generator-expression-reference:
+
 Generator Expression Reference
 ==============================
 
@@ -199,6 +201,8 @@ Generator Expression Reference
   placeholders to be misinterpreted as generator expressions.
 
 .. _`Conditional Generator Expressions`:
+
+.. _genex-family-conditional-generator-expressions:
 
 Conditional Expressions
 -----------------------
@@ -235,6 +239,8 @@ is provided by a CMake variable:
 
 .. _`Boolean Generator Expressions`:
 
+.. _genex-family-boolean-generator-expressions:
+
 Logical Operators
 -----------------
 
@@ -255,6 +261,8 @@ The common boolean logic operators are supported:
 
 .. _`Comparison Expressions`:
 
+.. _genex-family-comparison-expressions:
+
 Primary Comparison Expressions
 ------------------------------
 
@@ -271,6 +279,8 @@ Numeric Comparisons
    :maxdepth: 1
 
    /genex/EQUAL {#genex:EQUAL}
+
+.. _genex-family-version-comparisons:
 
 Version Comparisons
 ^^^^^^^^^^^^^^^^^^^
@@ -305,6 +315,8 @@ expressions.
 
 .. _`String Comparisons Generator Expressions`:
 
+.. _genex-family-string-comparisons-generator-expressions:
+
 String Comparisons
 ^^^^^^^^^^^^^^^^^^
 
@@ -329,6 +341,8 @@ evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
 
 .. _`String Queries Generator Expressions`:
 
+.. _genex-family-string-queries-generator-expressions:
+
 String Queries
 ^^^^^^^^^^^^^^
 
@@ -342,6 +356,8 @@ String Queries
    /genex/STRING-MATCH
 
 .. _`String Generating Generator Expressions`:
+
+.. _genex-family-string-generating-generator-expressions:
 
 String Generations
 ^^^^^^^^^^^^^^^^^^
@@ -357,6 +373,8 @@ String Generations
    /genex/STRING-UUID
 
 .. _`String Transforming Generator Expressions`:
+
+.. _genex-family-string-transforming-generator-expressions:
 
 String Transformations
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -378,6 +396,8 @@ String Transformations
    /genex/LOWER_CASE {#genex:LOWER_CASE}
    /genex/UPPER_CASE {#genex:UPPER_CASE}
    /genex/MAKE_C_IDENTIFIER {#genex:MAKE_C_IDENTIFIER}
+
+.. _genex-family-list-expressions:
 
 List Expressions
 ----------------
@@ -408,6 +428,8 @@ List Comparisons
 
 .. _GenEx List Queries:
 
+.. _genex-family-genex-list-queries:
+
 List Queries
 ^^^^^^^^^^^^
 
@@ -421,6 +443,8 @@ List Queries
    /genex/LIST-FIND
 
 .. _GenEx List Transformations:
+
+.. _genex-family-genex-list-transformations:
 
 List Transformations
 ^^^^^^^^^^^^^^^^^^^^
@@ -452,6 +476,8 @@ List Transformations
 
 .. _GenEx List Ordering:
 
+.. _genex-family-genex-list-ordering:
+
 List Ordering
 ^^^^^^^^^^^^^
 
@@ -464,6 +490,8 @@ List Ordering
 
 .. _GenEx Bound Operands:
 
+.. _genex-family-genex-bound-operands:
+
 Bound Operands
 ^^^^^^^^^^^^^^
 
@@ -473,6 +501,8 @@ Bound Operands
 
    /genex/_0 {#genex:_0}
    /genex/_1 {#genex:_1}
+
+.. _genex-family-path-expressions:
 
 Path Expressions
 ----------------
@@ -498,6 +528,8 @@ Path Comparisons
    /genex/PATH_EQUAL {#genex:PATH_EQUAL}
 
 .. _GenEx Path Queries:
+
+.. _genex-family-genex-path-queries:
 
 Path Queries
 ^^^^^^^^^^^^
@@ -531,6 +563,8 @@ command.  All paths are expected to be in cmake-style format.
    /genex/PATH-GET_
 
 .. _GenEx Path Transformations:
+
+.. _genex-family-genex-path-transformations:
 
 Path Transformations
 ^^^^^^^^^^^^^^^^^^^^
@@ -570,6 +604,8 @@ Shell Paths
    :maxdepth: 1
 
    /genex/SHELL_PATH {#genex:SHELL_PATH}
+
+.. _genex-family-configuration-expressions:
 
 Configuration Expressions
 -------------------------
@@ -620,6 +656,8 @@ These expressions look up the values of rule properties.
 
    /genex/RULE_PROPERTY {#genex:RULE_PROPERTY}
 
+.. _genex-family-toolchain-and-language-expressions:
+
 Toolchain And Language Expressions
 ----------------------------------
 
@@ -631,6 +669,8 @@ Platform
    :maxdepth: 1
 
    /genex/PLATFORM_ID {#genex:PLATFORM_ID}
+
+.. _genex-family-compiler-version:
 
 Compiler Version
 ^^^^^^^^^^^^^^^^
@@ -650,6 +690,8 @@ closely related to the expressions in this sub-section.
    /genex/FORTRAN_COMPILER_VERSION {#genex:Fortran_COMPILER_VERSION}
    /genex/HIP_COMPILER_VERSION {#genex:HIP_COMPILER_VERSION}
    /genex/ISPC_COMPILER_VERSION {#genex:ISPC_COMPILER_VERSION}
+
+.. _genex-family-compiler-language-id-and-frontend-variant:
 
 Compiler Language, ID, and Frontend-Variant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -699,6 +741,8 @@ Compile Context
 
    /genex/COMPILE_ONLY {#genex:COMPILE_ONLY}
 
+.. _genex-family-link-language-and-id:
+
 Link Language and ID
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -711,6 +755,8 @@ Link Language and ID
 
 .. _`Boolean LINK_LANGUAGE Generator Expression`:
 
+.. _genex-family-boolean-link-language-generator-expression:
+
 Link Features
 ^^^^^^^^^^^^^
 
@@ -720,6 +766,8 @@ Link Features
 
    /genex/LINK_LIBRARY {#genex:LINK_LIBRARY}
    /genex/LINK_GROUP {#genex:LINK_GROUP}
+
+.. _genex-family-link-context:
 
 Link Context
 ^^^^^^^^^^^^
@@ -731,6 +779,8 @@ Link Context
    /genex/LINK_ONLY {#genex:LINK_ONLY}
    /genex/DEVICE_LINK {#genex:DEVICE_LINK}
    /genex/HOST_LINK {#genex:HOST_LINK}
+
+.. _genex-family-linker-id-and-frontend-variant:
 
 Linker ID and Frontend-Variant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -761,6 +811,8 @@ closely related to most of the expressions in this sub-section.
    /genex/SYCL_COMPILER_LINKER_FRONTEND_VARIANT {#genex:SYCL_COMPILER_LINKER_FRONTEND_VARIANT}
 
 .. _`Source-Dependent Expressions`:
+
+.. _genex-family-source-dependent-expressions:
 
 Source-Dependent Expressions
 ----------------------------
@@ -820,6 +872,8 @@ These expressions look up the values of
 
 .. _`FileSet-Dependent Expressions`:
 
+.. _genex-family-fileset-dependent-expressions:
+
 FileSet-Dependent Expressions
 -----------------------------
 
@@ -847,8 +901,12 @@ These expressions look up the values of file set properties.
 
 .. _`Target-Dependent Expressions`:
 
+.. _genex-family-target-dependent-expressions:
+
 Target-Dependent Expressions
 ----------------------------
+
+.. _genex-family-target-meta-data:
 
 Target Meta-Data
 ^^^^^^^^^^^^^^^^
@@ -985,6 +1043,8 @@ The expressions have special evaluation rules for some properties:
   defining it.
 
 
+.. _genex-family-target-artifacts:
+
 Target Artifacts
 ^^^^^^^^^^^^^^^^
 
@@ -1053,6 +1113,8 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
    /genex/TARGET_RUNTIME_DLL_DIRS {#genex:TARGET_RUNTIME_DLL_DIRS}
    /genex/TARGET_INTERMEDIATE_DIR {#genex:TARGET_INTERMEDIATE_DIR}
 
+.. _genex-family-export-and-install-expressions:
+
 Export And Install Expressions
 ------------------------------
 
@@ -1065,6 +1127,8 @@ Export And Install Expressions
    /genex/BUILD_LOCAL_INTERFACE {#genex:BUILD_LOCAL_INTERFACE}
    /genex/INSTALL_PREFIX {#genex:INSTALL_PREFIX}
 
+.. _genex-family-multi-level-expression-evaluation:
+
 Multi-level Expression Evaluation
 ---------------------------------
 
@@ -1074,6 +1138,8 @@ Multi-level Expression Evaluation
 
    /genex/GENEX_EVAL {#genex:GENEX_EVAL}
    /genex/TARGET_GENEX_EVAL {#genex:TARGET_GENEX_EVAL}
+
+.. _genex-family-support-expressions:
 
 Support Expressions
 -------------------
@@ -1086,6 +1152,8 @@ Conversions
    :maxdepth: 1
 
    /genex/ARGS {#genex:ARGS}
+
+.. _genex-family-escaped-characters:
 
 Escaped Characters
 ^^^^^^^^^^^^^^^^^^

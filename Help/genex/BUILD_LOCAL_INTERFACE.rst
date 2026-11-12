@@ -1,6 +1,10 @@
 BUILD_LOCAL_INTERFACE
 ---------------------
 
+.. |genex-family| replace:: :ref:`genex-family-export-and-install-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

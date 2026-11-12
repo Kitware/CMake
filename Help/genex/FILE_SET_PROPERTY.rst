@@ -1,6 +1,10 @@
 FILE_SET_PROPERTY
 -----------------
 
+.. |genex-family| replace:: :ref:`genex-family-fileset-dependent-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

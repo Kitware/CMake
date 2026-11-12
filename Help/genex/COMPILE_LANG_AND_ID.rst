@@ -1,6 +1,11 @@
 COMPILE_LANG_AND_ID
 -------------------
 
+.. |genex-family| replace::
+   :ref:`genex-family-compiler-language-id-and-frontend-variant`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

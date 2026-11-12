@@ -1,6 +1,10 @@
 CXX_COMPILER_LINKER_ID
 ----------------------
 
+.. |genex-family| replace:: :ref:`genex-family-linker-id-and-frontend-variant`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

@@ -1,6 +1,11 @@
 TARGET_GENEX_EVAL
 -----------------
 
+.. |genex-family| replace::
+   :ref:`genex-family-multi-level-expression-evaluation`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

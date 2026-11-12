@@ -1,6 +1,10 @@
 HOST_LINK
 ---------
 
+.. |genex-family| replace:: :ref:`genex-family-link-context`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

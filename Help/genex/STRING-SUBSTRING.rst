@@ -1,6 +1,11 @@
 STRING:SUBSTRING
 ----------------
 
+.. |genex-family| replace::
+   :ref:`genex-family-string-queries-generator-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

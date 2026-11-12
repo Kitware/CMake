@@ -1,6 +1,10 @@
 SEMICOLON
 ---------
 
+.. |genex-family| replace:: :ref:`genex-family-escaped-characters`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

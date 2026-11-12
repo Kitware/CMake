@@ -1,6 +1,11 @@
 STRGREATER_EQUAL
 ----------------
 
+.. |genex-family| replace::
+   :ref:`genex-family-string-comparisons-generator-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

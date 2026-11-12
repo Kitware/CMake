@@ -1,6 +1,10 @@
 PATH:IS_RELATIVE
 ----------------
 
+.. |genex-family| replace:: :ref:`genex-family-genex-path-queries`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

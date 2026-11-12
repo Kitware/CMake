@@ -1,6 +1,10 @@
 TARGET_NAME_IF_EXISTS
 ---------------------
 
+.. |genex-family| replace:: :ref:`genex-family-target-meta-data`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

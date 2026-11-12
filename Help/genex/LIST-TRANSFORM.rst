@@ -4,6 +4,10 @@ LIST:TRANSFORM
 .. genex:: $<LIST:TRANSFORM,list,ACTION[,SELECTOR]>
    :target: LIST
 
+.. |genex-family| replace:: :ref:`genex-family-genex-list-transformations`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

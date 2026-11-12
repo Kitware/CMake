@@ -4,6 +4,10 @@ TARGET_PROPERTY
 .. genex:: $<TARGET_PROPERTY:prop>
    :target: TARGET_PROPERTY:prop
 
+.. |genex-family| replace:: :ref:`genex-family-target-dependent-expressions`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

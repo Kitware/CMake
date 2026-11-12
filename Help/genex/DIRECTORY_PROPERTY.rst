@@ -1,6 +1,10 @@
 DIRECTORY_PROPERTY
 ------------------
 
+.. |genex-family| replace:: :ref:`genex-family-generator-expression-reference`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

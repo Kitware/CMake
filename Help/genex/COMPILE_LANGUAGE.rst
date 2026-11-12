@@ -4,6 +4,11 @@ COMPILE_LANGUAGE
 .. genex:: $<COMPILE_LANGUAGE:languages>
    :target: COMPILE_LANGUAGE:languages
 
+.. |genex-family| replace::
+   :ref:`genex-family-compiler-language-id-and-frontend-variant`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

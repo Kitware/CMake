@@ -4,6 +4,10 @@ PATH:HAS_*
 .. genex:: $<PATH:HAS_*,path>
    :target: PATH
 
+.. |genex-family| replace:: :ref:`genex-family-genex-path-queries`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 

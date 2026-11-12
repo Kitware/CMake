@@ -1,6 +1,10 @@
 LIST:REMOVE_ITEM
 ----------------
 
+.. |genex-family| replace:: :ref:`genex-family-genex-list-transformations`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
 Syntax
 ^^^^^^
 
