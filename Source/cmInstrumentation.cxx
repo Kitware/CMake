@@ -769,6 +769,10 @@ int cmInstrumentation::InstrumentCommand(
       this->ctestID = NewInvocationID();
       root["ctestID"] = this->ctestID;
       break;
+    case SnippetType::CMakeInstall:
+      this->installID = NewInvocationID();
+      root["installID"] = this->installID;
+      break;
     default:
       break;
   }
@@ -800,8 +804,15 @@ int cmInstrumentation::InstrumentCommand(
   // Execute Command
   cmInstrumentation::CommandResult callbackResult = callback();
   int ret = callbackResult.ExitCode;
-  if (command_type == SnippetType::CTest) {
-    this->ctestID.clear();
+  switch (command_type) {
+    case SnippetType::CTest:
+      this->ctestID.clear();
+      break;
+    case SnippetType::CMakeInstall:
+      this->installID.clear();
+      break;
+    default:
+      break;
   }
   if (this->HasOption(cmInstrumentationQuery::Option::CaptureOutput)) {
     if (callbackResult.StdOut) {

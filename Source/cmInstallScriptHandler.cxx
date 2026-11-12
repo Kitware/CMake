@@ -140,6 +140,11 @@ int cmInstallScriptHandler::Install(unsigned int j,
                       "--config",
                       "",
                       "--" };
+    std::string const& installID = instrumentation.GetInstallID();
+    if (!installID.empty()) {
+      instrumentArg.insert(instrumentArg.end() - 1,
+                           { "--install-id", installID });
+    }
   }
 
   for (auto& script : this->Scripts) {

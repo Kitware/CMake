@@ -82,6 +82,7 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
     DoingCount,
     DoingFilterPrefix,
     DoingConfig,
+    DoingInstallID,
     DoingObjectDir,
     DoingMetricsFile,
   };
@@ -117,6 +118,8 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       doing = DoingFilterPrefix;
     } else if (strcmp(arg, "--config") == 0) {
       doing = DoingConfig;
+    } else if (strcmp(arg, "--install-id") == 0) {
+      doing = DoingInstallID;
     } else if (strcmp(arg, "--object-dir") == 0) {
       doing = DoingObjectDir;
     } else if (strcmp(arg, "--metrics-file") == 0) {
@@ -172,6 +175,9 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       doing = DoingNone;
     } else if (doing == DoingConfig) {
       this->Reporter.OptionConfig = arg;
+      doing = DoingNone;
+    } else if (doing == DoingInstallID) {
+      this->Reporter.OptionInstallID = arg;
       doing = DoingNone;
     } else if (doing == DoingObjectDir) {
       this->Reporter.OptionObjectDir = arg;
@@ -360,6 +366,7 @@ int cmCTestLaunch::Run()
   options["language"] = this->Reporter.OptionLanguage;
   options["targetType"] = this->Reporter.OptionTargetType;
   options["config"] = this->Reporter.OptionConfig;
+  options["installID"] = this->Reporter.OptionInstallID;
   std::map<std::string, std::string> arrayOptions;
   arrayOptions["outputs"] = this->Reporter.OptionOutput;
   arrayOptions["targetLabels"] = this->Reporter.OptionTargetLabels;

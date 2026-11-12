@@ -253,6 +253,11 @@
         "description": "UUID identifying a ctest invocation. test snippets share the ctestID of their parent invocation.",
         "minLength": 1
       },
+      "installID": {
+        "type": "string",
+        "description": "UUID identifying a cmakeInstall invocation. install snippets share the installID of their parent invocation.",
+        "minLength": 1
+      },
       "workingDir": {
         "type": "string",
         "description": "The working directory in which the command was executed.",
@@ -790,6 +795,9 @@
         },
         "ctestID": {
           "$ref": "#/definitions/fields/ctestID"
+        },
+        "installID": {
+          "$ref": "#/definitions/fields/installID"
         }
       },
       "additionalProperties": false,
@@ -814,6 +822,20 @@
           "then": {
             "required": [
               "buildID"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "cmakeInstall"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "installID"
             ]
           }
         }

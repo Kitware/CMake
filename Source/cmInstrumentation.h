@@ -64,6 +64,7 @@ public:
   void LoadQueries();
   void CheckCDashVariable();
   bool IsDisabled() const { return this->disabled; }
+  std::string const& GetInstallID() const { return this->installID; }
   struct TimeValue
   {
     long tv_sec;
@@ -198,6 +199,7 @@ private:
   Json::Value preTestStats;
   std::string errorMsg;
   std::string ctestID;
+  std::string installID;
   bool disabled = false;
   bool hasQuery = false;
   bool ranSystemChecks = false;
