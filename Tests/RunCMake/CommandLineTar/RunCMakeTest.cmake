@@ -164,3 +164,7 @@ if(Python_EXECUTABLE)
   run_cmake_script(path-absolute -DPython_EXECUTABLE=${Python_EXECUTABLE})
   run_cmake_script(path-traversal -DPython_EXECUTABLE=${Python_EXECUTABLE})
 endif()
+
+# Security: an external decompression filter program must not be taken from
+# the directory being extracted into.
+run_cmake_script(filter-program-search)
