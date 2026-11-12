@@ -699,6 +699,9 @@ class cmMakefile;
          4, 6, 0, WARN)                                                       \
   SELECT(POLICY, CMP0231,                                                     \
          "MSVC permissive mode is controlled by CXX_EXTENSIONS.", 4, 6, 0,    \
+         WARN)                                                                \
+  SELECT(POLICY, CMP0232,                                                     \
+         "MSVC flag /Zc:__cplusplus is passed for C++ targets.", 4, 6, 0,     \
          WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -763,7 +766,8 @@ class cmMakefile;
   F(CMP0227)                                                                  \
   F(CMP0228)                                                                  \
   F(CMP0229)                                                                  \
-  F(CMP0231)
+  F(CMP0231)                                                                  \
+  F(CMP0232)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

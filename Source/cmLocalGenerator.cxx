@@ -2321,6 +2321,17 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   }
 
+  // Add the MSVC flag that makes __cplusplus report the selected C++
+  // standard if CMP0232 is NEW.  The variable is defined only for
+  // compilers that support the flag.
+  if (compileOrLink == cmBuildStep::Compile && lang == "CXX"_s &&
+      target->GetPolicyStatusCMP0232() == cmPolicies::NEW) {
+    if (cmValue cplusplusMacroOptions = this->Makefile->GetDefinition(
+          "CMAKE_CXX_COMPILE_OPTIONS_MSVC_CPLUSPLUS_MACRO")) {
+      this->AppendCompileOptions(flags, *cplusplusMacroOptions);
+    }
+  }
+
   std::string compilerId = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
 

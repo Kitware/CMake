@@ -63,6 +63,7 @@
    \* CMP0228
    \* CMP0229
    \* CMP0231
+   \* CMP0232
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

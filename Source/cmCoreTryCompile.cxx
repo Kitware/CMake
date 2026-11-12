@@ -717,6 +717,13 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               ? "NEW"
               : "OLD");
 
+    /* Set MSVC __cplusplus macro policy to match outer project.  */
+    fprintf(fout, "cmake_policy(SET CMP0232 %s)\n",
+            this->Makefile->GetPolicyStatus(cmPolicies::CMP0232) ==
+                cmPolicies::NEW
+              ? "NEW"
+              : "OLD");
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs = cmStrCat(std::move(projectLangs), ' ', li);
