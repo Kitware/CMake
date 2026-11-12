@@ -3,5 +3,4 @@
 #pragma once
 
 /* Whether CMake is using its own STL implementation.  */
-#cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
 #cmakedefine CMake_HAVE_CXX_FILESYSTEM
