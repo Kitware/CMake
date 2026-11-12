@@ -275,6 +275,12 @@ module does not currently support that; contributions welcome.
 ``OPENGL_egl_LIBRARY`` and ``OPENGL_EGL_INCLUDE_DIRS`` are defined in the case of
 GLVND.  For non-GLVND Linux and other systems these are left undefined.
 
+For backwards compatibility, when no components are requested and "libGLX" is
+not installed ``OpenGL_FOUND`` will be set to ``FALSE``.
+
+.. versionchanged:: 4.6
+  GLVND without "libGL" and "libGLX" is fully supported.
+
 macOS-Specific
 ^^^^^^^^^^^^^^
 
