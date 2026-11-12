@@ -28,6 +28,7 @@
 #  include "RegularExpression.hxx.in"
 #endif
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 
@@ -853,6 +854,7 @@ class RegExpFind
 public:
   char const* reginput;   // String-input pointer.
   char const* regbol;     // Beginning of input, for ^ check.
+  char const* regend;     // End of input, for bounds and $ checks.
   char const** regstartp; // Pointer to startp array.
   char const** regendp;   // Ditto for endp.
   char const* regreject; // Reject matches ending here, for NONEMPTY_AT_OFFSET.
@@ -869,12 +871,25 @@ bool RegularExpression::find(char const* string,
                              std::string::size_type offset,
                              unsigned options) const
 {
+  return this->find(string, strlen(string), rmatch, offset, options);
+}
+
+bool RegularExpression::find(char const* string, std::string::size_type size,
+                             RegularExpressionMatch& rmatch,
+                             std::string::size_type offset,
+                             unsigned options) const
+{
   char const* s;
 
   rmatch.clear();
+  // An empty string view may have a null data pointer.
+  if (!string) {
+    string = "";
+  }
+  size = std::find(string, string + size, '\0') - string;
   rmatch.searchstring = string;
 
-  if (!this->program) {
+  if (!this->program || offset > size) {
     return false;
   }
 
@@ -886,20 +901,18 @@ bool RegularExpression::find(char const* string,
     return false;
   }
 
+  char const* const end = string + size;
+
   // If there is a "must appear" string, look for it.
-  if (this->regmust) {
-    s = string + offset;
-    while ((s = strchr(s, this->regmust[0]))) {
-      if (strncmp(s, this->regmust, this->regmlen) == 0)
-        break; // Found it.
-      s++;
-    }
-    if (!s) // Not present.
-      return false;
+  if (this->regmust &&
+      std::search(string + offset, end, this->regmust,
+                  this->regmust + this->regmlen) == end) {
+    return false;
   }
 
   RegExpFind regFind;
   s = string + offset;
+  regFind.regend = end;
 
   // Mark beginning of line for ^ .
   regFind.regbol = (options & BOL_AT_OFFSET) ? s : string;
@@ -912,17 +925,20 @@ bool RegularExpression::find(char const* string,
   // Messy cases:  unanchored match.
   if (this->regstart != '\0')
     // We know what char it must start with.
-    while ((s = strchr(s, this->regstart))) {
+    while ((s = std::find(s, end, this->regstart)) != end) {
       if (regFind.regtry(s, rmatch.startp, rmatch.endp, this->program))
         return true;
       s++;
     }
   else
     // We don't -- general case.
-    do {
+    for (;;) {
       if (regFind.regtry(s, rmatch.startp, rmatch.endp, this->program))
         return true;
-    } while (*s++ != '\0');
+      if (s == end)
+        break;
+      ++s;
+    }
 
   // Failure.
   return false;
@@ -985,11 +1001,11 @@ int RegExpFind::regmatch(char const* prog)
           return (0);
         break;
       case EOL:
-        if (*reginput != '\0')
+        if (reginput != regend)
           return (0);
         break;
       case ANY:
-        if (*reginput == '\0')
+        if (reginput == regend)
           return (0);
         reginput++;
         break;
@@ -999,20 +1015,21 @@ int RegExpFind::regmatch(char const* prog)
 
         opnd = OPERAND(scan);
         // Inline the first character, for speed.
-        if (*opnd != *reginput)
+        if (reginput == regend || *opnd != *reginput)
           return (0);
         len = strlen(opnd);
-        if (len > 1 && strncmp(opnd, reginput, len) != 0)
+        if (len > static_cast<size_t>(regend - reginput) ||
+            (len > 1 && strncmp(opnd, reginput, len) != 0))
           return (0);
         reginput += len;
       } break;
       case ANYOF:
-        if (*reginput == '\0' || !strchr(OPERAND(scan), *reginput))
+        if (reginput == regend || !strchr(OPERAND(scan), *reginput))
           return (0);
         reginput++;
         break;
       case ANYBUT:
-        if (*reginput == '\0' || strchr(OPERAND(scan), *reginput))
+        if (reginput == regend || strchr(OPERAND(scan), *reginput))
           return (0);
         reginput++;
         break;
@@ -1159,7 +1176,7 @@ int RegExpFind::regmatch(char const* prog)
         no = regrepeat(OPERAND(scan));
         while (no >= min_no) {
           // If it could work, try it.
-          if (nextch == '\0' || *reginput == nextch)
+          if (nextch == '\0' || (reginput != regend && *reginput == nextch))
             if (regmatch(next))
               return (1);
           // Couldn't or didn't -- back up.
@@ -1205,23 +1222,23 @@ int RegExpFind::regrepeat(char const* p)
   opnd = OPERAND(p);
   switch (OP(p)) {
     case ANY:
-      count = int(strlen(scan));
+      count = int(regend - scan);
       scan += count;
       break;
     case EXACTLY:
-      while (*opnd == *scan) {
+      while (scan != regend && *opnd == *scan) {
         count++;
         scan++;
       }
       break;
     case ANYOF:
-      while (*scan != '\0' && strchr(opnd, *scan)) {
+      while (scan != regend && strchr(opnd, *scan)) {
         count++;
         scan++;
       }
       break;
     case ANYBUT:
-      while (*scan != '\0' && !strchr(opnd, *scan)) {
+      while (scan != regend && !strchr(opnd, *scan)) {
         count++;
         scan++;
       }
