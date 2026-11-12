@@ -225,6 +225,7 @@ foreach(format IN LISTS doc_formats)
   set(build_comment_tail " ...")
   if(sphinx_use_build_log)
     set(doc_format_log "build-${format}.log")
+    set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${doc_format_log}")
     set(build_comment_tail ": see Utilities/Sphinx/${doc_format_log}")
     list(INSERT doc_format_log 0 ">")
   endif()
@@ -233,6 +234,9 @@ foreach(format IN LISTS doc_formats)
   else()
     set(doctrees "doctrees")
   endif()
+  set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES
+    "${format}" "${doctrees}"
+    )
   if(format STREQUAL "latexpdf")
     # This format does not use builder (-b) but make_mode (-M) which expects
     # arguments in peculiar order
