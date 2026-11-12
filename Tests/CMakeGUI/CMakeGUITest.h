@@ -32,4 +32,5 @@ private slots:
   void presetApplyOrdering_data();
   void presetApplyStartup();
   void presetApplyStartup_data();
+  void newlineValue();
 };

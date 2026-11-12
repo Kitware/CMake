@@ -219,6 +219,13 @@ run_cmake_gui_test(presetApplyStartup:unavailable
     -S "${CMakeGUITest_BINARY_DIR}/presetApplyStartup-unavailable/src"
     "--preset=doesNotExist"
   )
+# Use Qt's own event dispatcher as on macOS and Windows.  The GLib one does
+# not dispatch queued events recursively and would hide this problem.
+set(ENV{QT_NO_GLIB} 1)
+run_cmake_gui_test(newlineValue
+  DO_CONFIGURE
+  )
+unset(ENV{QT_NO_GLIB})
 
 if("${CMakeGUITest_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   run_cmake_gui_test(instrumentation)

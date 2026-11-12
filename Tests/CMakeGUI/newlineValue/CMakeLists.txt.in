@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.18)
+project(newlineValue NONE)
+
+set(NEWLINE_VALUE "" CACHE STRING "Value that gets a newline")
