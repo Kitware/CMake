@@ -208,6 +208,30 @@ int testRegularExpression(int, char*[])
     }
   };
 
+  // Search a non-terminated buffer without looking past its supplied size.
+  run("api.bounded_find", [] {
+    char const input[] = { 'x', 'a', 'b', 'c', 'z' };
+    kwsys::RegularExpressionMatch match;
+    for (char const* pattern : { "abc$", ".*abc$", "x(a[b-c]c)$" }) {
+      kwsys::RegularExpression re(pattern);
+      if (!re.find(input, 4, match) || match.end() != 4 ||
+          !re.find(input, 4, 0, 0) || re.end() != 4 ||
+          re.find(input, 3, match) || match.isValid()) {
+        return false;
+      }
+    }
+    kwsys::RegularExpression re("^abc$");
+    if (re.find(input, 4, match, 1) ||
+        !re.find(input, 4, match, 1,
+                 kwsys::RegularExpression::BOL_AT_OFFSET) ||
+        match.start() != 1 || match.match() != "abc") {
+      return false;
+    }
+    kwsys::RegularExpression empty("^$");
+    return empty.find(nullptr, 0, match) && match.start() == 0 &&
+      match.end() == 0;
+  }());
+
   // Basic matching and capture groups.
   run("basic.match",
       ExpectMatch("([A-Za-z]+)-([0-9]+)", "id abc-42 tail", "abc-42", 3, 9));
