@@ -338,6 +338,15 @@ public:
             std::string::size_type offset = 0, unsigned options = 0) const;
 
   /**
+   * Like find(string, match, offset, options), but search at most size bytes.
+   * The buffer need not be null-terminated.  A null byte ends the search.
+   * Returns true if found, and sets start and end indexes in the
+   * RegularExpressionMatch instance accordingly.
+   */
+  bool find(char const*, std::string::size_type size, RegularExpressionMatch&,
+            std::string::size_type offset = 0, unsigned options = 0) const;
+
+  /**
    * Matches the regular expression to the given string.
    * Returns true if found, and sets start and end indexes accordingly.
    */
@@ -350,6 +359,14 @@ public:
    */
   inline bool find(std::string const&, std::string::size_type offset = 0,
                    unsigned options = 0);
+
+  /**
+   * Like find(string, offset, options), but search at most size bytes.
+   * The buffer need not be null-terminated.  A null byte ends the search.
+   * Returns true if found, and sets start and end indexes accordingly.
+   */
+  inline bool find(char const*, std::string::size_type size,
+                   std::string::size_type offset, unsigned options);
 
   /**
    * Match indices
@@ -485,6 +502,13 @@ inline bool RegularExpression::find(char const* s,
                                     unsigned options)
 {
   return this->find(s, this->regmatch, offset, options);
+}
+
+inline bool RegularExpression::find(char const* s, std::string::size_type size,
+                                    std::string::size_type offset,
+                                    unsigned options)
+{
+  return this->find(s, size, this->regmatch, offset, options);
 }
 
 /**
