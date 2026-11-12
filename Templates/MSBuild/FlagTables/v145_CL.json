@@ -610,6 +610,13 @@
   },
   {
     "name": "LanguageStandard",
+    "switch": "std:c++23",
+    "comment": "ISO C++23 Standard",
+    "value": "stdcpp23",
+    "flags": []
+  },
+  {
+    "name": "LanguageStandard",
     "switch": "std:c++23preview",
     "comment": "Preview - ISO C++23 Standard",
     "value": "stdcpp23",
