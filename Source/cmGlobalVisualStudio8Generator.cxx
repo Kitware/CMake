@@ -10,6 +10,7 @@
 #include <cm/memory>
 #include <cmext/algorithm>
 #include <cmext/memory>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -124,14 +125,14 @@ bool cmGlobalVisualStudio8Generator::ParseGeneratorPlatform(
       mf->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("Generator\n"
-                 "  ",
+                 "  "_s,
                  this->GetName(),
                  "\n"
                  "given platform specification\n"
-                 "  ",
+                 "  "_s,
                  p,
                  "\n"
-                 "that contains a field after the first ',' with no '='."));
+                 "that contains a field after the first ',' with no '='."_s));
       return false;
     }
     std::string const key = fi->substr(0, pos);
@@ -139,29 +140,29 @@ bool cmGlobalVisualStudio8Generator::ParseGeneratorPlatform(
     if (!handled.insert(key).second) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        cmStrCat("Generator\n"
-                                "  ",
+                                "  "_s,
                                 this->GetName(),
                                 "\n"
                                 "given platform specification\n"
-                                "  ",
+                                "  "_s,
                                 p,
                                 "\n"
-                                "that contains duplicate field key '",
-                                key, "'."));
+                                "that contains duplicate field key '"_s,
+                                key, "'."_s));
       return false;
     }
     if (!this->ProcessGeneratorPlatformField(key, value)) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        cmStrCat("Generator\n"
-                                "  ",
+                                "  "_s,
                                 this->GetName(),
                                 "\n"
                                 "given platform specification\n"
-                                "  ",
+                                "  "_s,
                                 p,
                                 "\n"
-                                "that contains invalid field '",
-                                *fi, "'."));
+                                "that contains invalid field '"_s,
+                                *fi, "'."_s));
       return false;
     }
   }
@@ -242,7 +243,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
   std::string stampList = cmStrCat(
-    "CMakeFiles/", cmGlobalVisualStudio8Generator::GetGenerateStampList());
+    "CMakeFiles/"_s, cmGlobalVisualStudio8Generator::GetGenerateStampList());
   {
     std::string stampListFile =
       cmStrCat(generators[0]->GetMakefile()->GetCurrentBinaryDirectory(), '/',
@@ -251,7 +252,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     cmGeneratedFileStream fout(stampListFile);
     for (auto const& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
-                           "/CMakeFiles/generate.stamp");
+                           "/CMakeFiles/generate.stamp"_s);
       fout << stampFile << '\n';
       stamps.push_back(stampFile);
     }
@@ -286,8 +287,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     }
 
     // Create a rule to re-run CMake.
-    std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
-    std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
+    std::string argS = cmStrCat("-S"_s, lg.GetSourceDirectory());
+    std::string argB = cmStrCat("-B"_s, lg.GetBinaryDirectory());
     std::string const sln =
       this->GetSLNFile(lg.GetBinaryDirectory(), lg.GetProjectName());
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
@@ -315,7 +316,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
           lg.AddCustomCommandToOutput(std::move(cc), true)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
-      cmSystemTools::Error(cmStrCat("Error adding rule for ", stamps[0]));
+      cmSystemTools::Error(cmStrCat("Error adding rule for "_s, stamps[0]));
     }
   }
 

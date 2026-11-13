@@ -164,10 +164,10 @@ bool cmExportPackageInfoGenerator::CheckDefaultTargets() const
   for (auto const& name : this->DefaultTargets) {
     if (!cm::contains(exportedTargetNames, name)) {
       this->ReportError(
-        cmStrCat("Package \"", this->GetPackageName(),
-                 "\" specifies DEFAULT_TARGETS \"", name,
-                 "\", which is not a target in the export set \"",
-                 this->GetExportSet()->GetName(), "\"."));
+        cmStrCat("Package \""_s, this->GetPackageName(),
+                 "\" specifies DEFAULT_TARGETS \""_s, name,
+                 "\", which is not a target in the export set \""_s,
+                 this->GetExportSet()->GetName(), "\"."_s));
       result = false;
     }
   }
@@ -381,9 +381,9 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
       if (record.first->second.Domains != domains) {
         target->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("Package \"", this->GetPackageName(),
-                   "\" requires package \"", name,
-                   "\" in multiple domain sets. This is not supported."));
+          cmStrCat("Package \""_s, this->GetPackageName(),
+                   "\" requires package \""_s, name,
+                   "\" in multiple domain sets. This is not supported."_s));
         return nullptr;
       }
     }
@@ -433,23 +433,23 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
 
       target->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Target \"", target->GetName(),
-                 "\" references imported target \"", linkedName,
-                 "\" which does not come from any known package."));
+        cmStrCat("Target \""_s, target->GetName(),
+                 "\" references imported target \""_s, linkedName,
+                 "\" which does not come from any known package."_s));
       return false;
     }
 
     std::string const& pkgName = pkgInfo->first;
 
-    auto const& prefix = cmStrCat(pkgName, "::");
+    auto const& prefix = cmStrCat(pkgName, "::"_s);
     if (!cmHasPrefix(linkedName, prefix)) {
       target->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Target \"", target->GetName(), "\" references target \"",
-                 linkedName, "\", which comes from the \"", pkgName,
+        cmStrCat("Target \""_s, target->GetName(), "\" references target \""_s,
+                 linkedName, "\", which comes from the \""_s, pkgName,
                  "\" package, but does not belong to the package's "
-                 "canonical namespace (\"",
-                 prefix, "\"). This is not allowed."));
+                 "canonical namespace (\""_s,
+                 prefix, "\"). This is not allowed."_s));
       return false;
     }
 
@@ -471,10 +471,10 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     if (!cmHasSuffix(linkNamespace, "::")) {
       target->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Target \"", target->GetName(), "\" references target \"",
+        cmStrCat("Target \""_s, target->GetName(), "\" references target \""_s,
                  linkedName,
                  "\", which does not use the standard namespace separator. "
-                 "This is not allowed."));
+                 "This is not allowed."_s));
       return false;
     }
 
@@ -581,7 +581,7 @@ void cmExportPackageInfoGenerator::GenerateInterfaceCompileFeatures(
       features.emplace(cmStrCat('c', suffix));
     } else if (cmHasLiteralPrefix(value, "cxx_std_")) {
       auto suffix = cm::string_view{ value }.substr(8, 2);
-      features.emplace(cmStrCat("c++", suffix));
+      features.emplace(cmStrCat("c++"_s, suffix));
     }
   }
 
@@ -624,7 +624,7 @@ void cmExportPackageInfoGenerator::GenerateInterfaceListProperty(
   std::string const& outName, cm::string_view inName,
   ImportPropertyMap const& properties) const
 {
-  auto const& prop = cmStrCat("INTERFACE_", inName);
+  auto const& prop = cmStrCat("INTERFACE_"_s, inName);
   auto const& iter = properties.find(prop);
   if (iter == properties.end()) {
     return;
@@ -722,9 +722,9 @@ std::string cmExportPackageInfoGenerator::GenerateCxxModules(
     return manifestPath;
   }
 
-  manifestPath =
-    cmStrCat(cxxModulesDirName, "/target-", target->GetFilesystemExportName(),
-             '-', config.empty() ? "noconfig" : config, ".modules.json");
+  manifestPath = cmStrCat(
+    cxxModulesDirName, "/target-"_s, target->GetFilesystemExportName(), '-',
+    config.empty() ? "noconfig" : config, ".modules.json"_s);
 
   component["cpp_module_metadata"] = cmStrCat(packagePath, '/', manifestPath);
   return manifestPath;

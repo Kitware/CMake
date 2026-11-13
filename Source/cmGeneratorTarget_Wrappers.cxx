@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 /* clang-format off */
 #include "cmGeneratorTarget.h"
+
+#include <cmext/string_view>
 /* clang-format on */
 
 #include <algorithm>
@@ -58,15 +60,16 @@ void ProcessWrappers(cmGeneratorTarget const* tgt,
         wrappers.emplace_back(entryOption, entry.Backtrace);
         if (debugWrapper) {
           usedOptions =
-            cmStrCat(std::move(usedOptions), " * ", entryOption, '\n');
+            cmStrCat(std::move(usedOptions), " * "_s, entryOption, '\n');
         }
       }
     }
     if (!usedOptions.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        cmStrCat("Used ", WrapperTypeToString(wrapperType),
-                 " wrappers for target ", tgt->GetName(), ":\n", usedOptions),
+        cmStrCat("Used "_s, WrapperTypeToString(wrapperType),
+                 " wrappers for target "_s, tgt->GetName(), ":\n"_s,
+                 usedOptions),
         entry.Backtrace);
     }
   }

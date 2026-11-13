@@ -38,7 +38,7 @@ static void sendCommands(std::shared_ptr<dap::ReaderWriter> const& debugger,
 {
   for (auto const& command : initCommands) {
     std::string contentLength =
-      cmStrCat("Content-Length:", command.size(), "\r\n\r\n");
+      cmStrCat("Content-Length:"_s, command.size(), "\r\n\r\n"_s);
     debugger->write(contentLength.c_str(), contentLength.size());
     if (!debugger->write(command.c_str(), command.size())) {
       std::cout << "debugger write error" << std::endl;

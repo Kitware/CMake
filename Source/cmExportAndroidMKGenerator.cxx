@@ -85,7 +85,7 @@ void cmExportAndroidMKGenerator::GenerateInterfaceProperties(
               ldlibs = cmStrCat(std::move(ldlibs), ' ', lib);
               // if it is not a path and does not have a -l then add -l
             } else if (!lib.empty()) {
-              ldlibs = cmStrCat(std::move(ldlibs), " -l", lib);
+              ldlibs = cmStrCat(std::move(ldlibs), " -l"_s, lib);
             }
           }
         }

@@ -75,7 +75,7 @@ bool ProcessTree(Args const& args, cmExecutionStatus& status)
     cmCMakePath file{ *it };
     if (!root.IsPrefix(file)) {
       status.SetError(cmStrCat('"', root.GenericString(),
-                               "\" is not a prefix of file \"",
+                               "\" is not a prefix of file \""_s,
                                file.GenericString(), '"'));
       return false;
     }
@@ -90,7 +90,7 @@ bool ProcessTree(Args const& args, cmExecutionStatus& status)
 
     auto* sg = mf.GetOrCreateSourceGroup(tokenizedSG);
     if (!sg) {
-      status.SetError(cmStrCat("could not create source group for file \"",
+      status.SetError(cmStrCat("could not create source group for file \""_s,
                                file.GenericString(), '"'));
       return false;
     }
@@ -144,7 +144,7 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
           cm::string_view /*value */) -> ArgumentParser::Continue {
     mf.IssueDiagnostic(
       cmDiagnostics::CMD_AUTHOR,
-      cmStrCat("keyword \"", key, "\" will be ignored in this context."));
+      cmStrCat("keyword \""_s, key, "\" will be ignored in this context."_s));
     return ArgumentParser::Continue::Yes;
   };
   // to distinguish REGULAR_EXPRESSION without values from with an empty string
@@ -159,7 +159,7 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
                          cm::string_view value) -> ArgumentParser::Continue {
     if (!result.FileSets) {
       result.AddKeywordError(
-        "TARGET", cmStrCat("FILE_SETS is required for TARGET ", value, '.'));
+        "TARGET", cmStrCat("FILE_SETS is required for TARGET "_s, value, '.'));
       return ArgumentParser::Continue::No;
     }
     if (!result.FileSets->empty()) {
@@ -205,7 +205,7 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
     return false;
   }
   if (!parsedArgs.Tree && parsedArgs.FileSets) {
-    status.SetError(cmStrCat("TARGET is required for FILE_SETS ",
+    status.SetError(cmStrCat("TARGET is required for FILE_SETS "_s,
                              cmJoin(*parsedArgs.FileSets, ", "), '.'));
     return false;
   }
@@ -231,8 +231,8 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
 
     if (parsedArgs.Regex) {
       if (!sg->SetGroupRegex(*parsedArgs.Regex)) {
-        status.SetError(cmStrCat("regular expression \"", *parsedArgs.Regex,
-                                 "\" is invalid"));
+        status.SetError(cmStrCat("regular expression \""_s, *parsedArgs.Regex,
+                                 "\" is invalid"_s));
         return false;
       }
     }
@@ -250,8 +250,8 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
         mf.IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
           cmStrCat(
-            "TARGET \"", item.first,
-            "\" is not defined in this directory. It will be ignored."));
+            "TARGET \""_s, item.first,
+            "\" is not defined in this directory. It will be ignored."_s));
         continue;
       }
 
@@ -259,9 +259,9 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
       for (auto it2 = item.second.begin(); it2 != item.second.end();) {
         if (!target.GetFileSet(*it2)) {
           mf.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
-                             cmStrCat("FILE_SET \"", *it2,
-                                      "\" is not known for TARGET \"",
-                                      item.first, "\". It will ignored."));
+                             cmStrCat("FILE_SET \""_s, *it2,
+                                      "\" is not known for TARGET \""_s,
+                                      item.first, "\". It will ignored."_s));
           it2 = item.second.erase(it2);
         } else {
           ++it2;

@@ -11,6 +11,7 @@
 #include <utility>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -128,9 +129,9 @@ std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
     case 1:
       return std::string(lst[0]);
     case 2:
-      return cmStrCat(lst[0], " and ", lst[1]);
+      return cmStrCat(lst[0], " and "_s, lst[1]);
     case 3:
-      return cmStrCat(lst[0], ", ", lst[1], " and ", lst[2]);
+      return cmStrCat(lst[0], ", "_s, lst[1], " and "_s, lst[2]);
     default:
       break;
   }
@@ -307,7 +308,7 @@ static bool RccListParseOutput(std::string const& rccStdOut,
 
         std::string::size_type pos = eline.find(searchString);
         if (pos == std::string::npos) {
-          error = cmStrCat("rcc lists unparsable output:\n",
+          error = cmStrCat("rcc lists unparsable output:\n"_s,
                            cmQtAutoGen::Quoted(eline), '\n');
           return false;
         }
@@ -335,11 +336,11 @@ static std::string RccListCacheHeader(std::string const& rccExecutable,
     return std::string();
   }
   cmCryptoHash sha256(cmCryptoHash::AlgoSHA256);
-  return cmStrCat(
-    "rcc=", rccExecutable, "\nrcc_time=", std::to_string(rccTime.GetTime()),
-    "\nrcc_size=", std::to_string(cmSystemTools::FileLength(rccExecutable)),
-    "\noptions=", cmJoin(options, ";"), "\nqrc=", qrcFile,
-    "\nqrc_sha256=", sha256.HashString(qrcContent), '\n');
+  return cmStrCat("rcc="_s, rccExecutable, "\nrcc_time="_s,
+                  std::to_string(rccTime.GetTime()), "\nrcc_size="_s,
+                  std::to_string(cmSystemTools::FileLength(rccExecutable)),
+                  "\noptions="_s, cmJoin(options, ";"), "\nqrc="_s, qrcFile,
+                  "\nqrc_sha256="_s, sha256.HashString(qrcContent), '\n');
 }
 
 static bool RccListReadCache(std::string const& cacheFile,
@@ -430,7 +431,7 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
 
   if (!cmSystemTools::FileExists(qrcFile, true)) {
     error =
-      cmStrCat("The resource file ", Quoted(qrcFile), " does not exist.");
+      cmStrCat("The resource file "_s, Quoted(qrcFile), " does not exist."_s);
     return false;
   }
 
@@ -471,7 +472,7 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
       // Log command
       if (verbose) {
         cmSystemTools::Stdout(
-          cmStrCat("Running command:\n", QuotedCommand(cmd), '\n'));
+          cmStrCat("Running command:\n"_s, QuotedCommand(cmd), '\n'));
       }
 
       result = cmSystemTools::RunSingleCommand(
@@ -480,7 +481,7 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
     }
     if (!result || retVal) {
       error =
-        cmStrCat("The rcc list process failed for ", Quoted(qrcFile), '\n');
+        cmStrCat("The rcc list process failed for "_s, Quoted(qrcFile), '\n');
       if (!rccStdOut.empty()) {
         error = cmStrCat(std::move(error), rccStdOut, '\n');
       }
@@ -496,8 +497,8 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
     // We can't use rcc for the file listing.
     // Read the qrc file content into string and parse it.
     if (!RccListReadQrc(qrcFile, files)) {
-      error =
-        cmStrCat("The resource file ", Quoted(qrcFile), " is not readable\n");
+      error = cmStrCat("The resource file "_s, Quoted(qrcFile),
+                       " is not readable\n"_s);
       return false;
     }
   }

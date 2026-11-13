@@ -7,6 +7,8 @@
 #include <ostream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #ifdef _WIN32
 #  include <cmsys/Encoding.hxx>
 #endif
@@ -132,9 +134,9 @@ bool cmListFileParser::ParseFile()
   cmListFileLexer_BOM bom;
   if (!cmListFileLexer_SetFileName(this->Lexer.get(), filename->c_str(),
                                    &bom)) {
-    this->IssueFileOpenError(
-      cmStrCat("Cannot open file \"", this->FileName,
-               "\": ", cmSystemTools::GetLastSystemError()));
+    this->IssueFileOpenError(cmStrCat("Cannot open file \""_s, this->FileName,
+                                      "\": "_s,
+                                      cmSystemTools::GetLastSystemError()));
     return false;
   }
 
@@ -185,17 +187,19 @@ bool cmListFileParser::Parse()
         }
       } else {
         auto error = cmStrCat(
-          "Parse error.  Expected a newline, got ",
+          "Parse error.  Expected a newline, got "_s,
           cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
-          " with text \"", cm::string_view(token->text, token->length), "\".");
+          " with text \""_s, cm::string_view(token->text, token->length),
+          "\"."_s);
         this->IssueError(error);
         return false;
       }
     } else {
       auto error = cmStrCat(
-        "Parse error.  Expected a command name, got ",
+        "Parse error.  Expected a command name, got "_s,
         cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
-        " with text \"", cm::string_view(token->text, token->length), "\".");
+        " with text \""_s, cm::string_view(token->text, token->length),
+        "\"."_s);
       this->IssueError(error);
       return false;
     }
@@ -234,9 +238,9 @@ bool cmListFileParser::ParseFunction(cm::string_view name, long line)
   }
   if (token->type != cmListFileLexer_Token_ParenLeft) {
     auto error = cmStrCat(
-      "Parse error.  Expected \"(\", got ",
+      "Parse error.  Expected \"(\", got "_s,
       cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
-      " with text \"", cm::string_view(token->text, token->length), "\".");
+      " with text \""_s, cm::string_view(token->text, token->length), "\"."_s);
     this->IssueError(error);
     return false;
   }
@@ -289,9 +293,10 @@ bool cmListFileParser::ParseFunction(cm::string_view name, long line)
       // Error.
       auto error = cmStrCat(
         "Parse error.  Function missing ending \")\".  "
-        "Instead found ",
+        "Instead found "_s,
         cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
-        " with text \"", cm::string_view(token->text, token->length), "\".");
+        " with text \""_s, cm::string_view(token->text, token->length),
+        "\"."_s);
       this->IssueError(error);
       return false;
     }
@@ -328,10 +333,10 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
   auto msg =
-    cmStrCat("Syntax ", (isError ? "Error" : "Warning"),
-             " in cmake code at column ", token->column,
+    cmStrCat("Syntax "_s, (isError ? "Error" : "Warning"),
+             " in cmake code at column "_s, token->column,
              "\n"
-             "Argument not separated from preceding token by whitespace.");
+             "Argument not separated from preceding token by whitespace."_s);
   if (isError) {
     if (this->Makefile) {
       this->Makefile->GetCMakeInstance()->IssueMessage(

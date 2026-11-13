@@ -10,6 +10,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
@@ -567,7 +568,7 @@ std::string cmGraphVizWriter::ItemNameWithAliases(
 
   auto nameWithAliases = itemName;
   for(auto const& item : items) {
-    nameWithAliases = cmStrCat(std::move(nameWithAliases), "\\n(" , item , ')');
+    nameWithAliases = cmStrCat(std::move(nameWithAliases), "\\n("_s , item , ')');
   }
 
   return nameWithAliases;
@@ -578,10 +579,10 @@ std::string cmGraphVizWriter::GetEdgeStyle(DependencyType dt)
   std::string style;
   switch (dt) {
     case DependencyType::LinkPrivate:
-      style = cmStrCat("[ style = ", GRAPHVIZ_EDGE_STYLE_PRIVATE, " ]");
+      style = cmStrCat("[ style = "_s, GRAPHVIZ_EDGE_STYLE_PRIVATE, " ]"_s);
       break;
     case DependencyType::LinkInterface:
-      style = cmStrCat("[ style = ", GRAPHVIZ_EDGE_STYLE_INTERFACE, " ]");
+      style = cmStrCat("[ style = "_s, GRAPHVIZ_EDGE_STYLE_INTERFACE, " ]"_s);
       break;
     default:
       break;

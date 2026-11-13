@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 
@@ -74,11 +76,11 @@ bool cmParseGTMCoverage::ReadMCovFile(char const* file)
         this->Coverage.TotalCoverage[lastpath][lastoffset + linenumber] +=
           count;
       } else {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Can not find mumps file : ", lastroutine,
+        cmCTestLog(this->CTest, ERROR_MESSAGE, "Can not find mumps file : "_s,
+                   lastroutine,
                    "  referenced in this line of mcov data:\n"
-                   "[",
-                   line, "]\n");
+                   "["_s,
+                   line, "]\n"_s);
       }
       continue;
     }
@@ -105,11 +107,11 @@ bool cmParseGTMCoverage::ReadMCovFile(char const* file)
         lastoffset = lineoffset;
       }
     } else {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Can not find mumps file : ", routine,
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Can not find mumps file : "_s,
+                 routine,
                  "  referenced in this line of mcov data:\n"
-                 "[",
-                 line, "]\n");
+                 "["_s,
+                 line, "]\n"_s);
     }
     lastfunction = function;
     lastroutine = routine;
@@ -148,9 +150,8 @@ bool cmParseGTMCoverage::FindFunctionInMumpsFile(std::string const& filepath,
     linenum++; // move to next line count
   }
   lineoffset = 0;
-  cmCTestLog(this->CTest, ERROR_MESSAGE,
-             "Could not find entry point : ", function, " in ", filepath,
-             '\n');
+  cmCTestLog(this->CTest, ERROR_MESSAGE, "Could not find entry point : "_s,
+             function, " in "_s, filepath, '\n');
   return false;
 }
 
@@ -226,8 +227,8 @@ bool cmParseGTMCoverage::ParseMCOVLine(std::string const& line,
   }
   // less then two arguments is an error
   if (args.size() < 2) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error parsing mcov line: [", line,
-               "]\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error parsing mcov line: ["_s,
+               line, "]\n"_s);
     return false;
   }
   routine = args[0];  // the routine is the first argument

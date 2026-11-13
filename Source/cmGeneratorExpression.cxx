@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -252,7 +253,8 @@ static std::string extractAllGeneratorExpressions(
     }
     std::string::size_type const traversed = (c - cStart) + 1;
     if (!*c) {
-      result = cmStrCat(std::move(result), "$<", input.substr(pos, traversed));
+      result =
+        cmStrCat(std::move(result), "$<"_s, input.substr(pos, traversed));
     }
     pos += traversed;
     lastPos = pos;
@@ -360,15 +362,15 @@ static std::string stripExportInterface(
       switch (foundGenex) {
         case FoundGenex::BuildInterface:
           result =
-            cmStrCat(std::move(result), "$<BUILD_INTERFACE:", remaining);
+            cmStrCat(std::move(result), "$<BUILD_INTERFACE:"_s, remaining);
           break;
         case FoundGenex::InstallInterface:
           result =
-            cmStrCat(std::move(result), "$<INSTALL_INTERFACE:", remaining);
+            cmStrCat(std::move(result), "$<INSTALL_INTERFACE:"_s, remaining);
           break;
         case FoundGenex::BuildLocalInterface:
-          result =
-            cmStrCat(std::move(result), "$<BUILD_LOCAL_INTERFACE:", remaining);
+          result = cmStrCat(std::move(result), "$<BUILD_LOCAL_INTERFACE:"_s,
+                            remaining);
           break;
       }
     }
@@ -428,7 +430,7 @@ void cmGeneratorExpression::Split(std::string const& input,
       }
     }
     std::string::size_type const traversed = (c - cStart) + 1;
-    output.push_back(cmStrCat(preGenex, "$<", input.substr(pos, traversed)));
+    output.push_back(cmStrCat(preGenex, "$<"_s, input.substr(pos, traversed)));
     pos += traversed;
     lastPos = pos;
   }
@@ -480,9 +482,9 @@ bool cmGeneratorExpression::ForbidGeneratorExpressions(
       allowList.size() > initialAllowedGenExps) {
     target->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Property \"", propertyName, "\" of target \"",
+      cmStrCat("Property \""_s, propertyName, "\" of target \""_s,
                target->GetName(),
-               "\" contains a generator expression. This is not allowed."));
+               "\" contains a generator expression. This is not allowed."_s));
     return false;
   }
 
@@ -492,10 +494,10 @@ bool cmGeneratorExpression::ForbidGeneratorExpressions(
       if (value.find("$<") != std::string::npos) {
         target->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("$<", genexp.first, ":...> expression in \"", propertyName,
-                   "\" of target \"", target->GetName(),
+          cmStrCat("$<"_s, genexp.first, ":...> expression in \""_s,
+                   propertyName, "\" of target \""_s, target->GetName(),
                    "\" contains a generator expression. This is not "
-                   "allowed."));
+                   "allowed."_s));
         return false;
       }
     }

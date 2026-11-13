@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmsys/String.h"
 
@@ -82,13 +83,13 @@ std::string cmPkgConfigResolver::VersionReqString(
     case cmPkgConfigDependencyOperation::LessThan:
       return cmStrCat('<', spec.Version);
     case cmPkgConfigDependencyOperation::LessThanEqual:
-      return cmStrCat("<=", spec.Version);
+      return cmStrCat("<="_s, spec.Version);
     case cmPkgConfigDependencyOperation::Equal:
       return cmStrCat('=', spec.Version);
     case cmPkgConfigDependencyOperation::NotEqual:
-      return cmStrCat("!=", spec.Version);
+      return cmStrCat("!="_s, spec.Version);
     case cmPkgConfigDependencyOperation::GreaterThanEqual:
-      return cmStrCat(">=", spec.Version);
+      return cmStrCat(">="_s, spec.Version);
     case cmPkgConfigDependencyOperation::GreaterThan:
       return cmStrCat('>', spec.Version);
   }

@@ -31,7 +31,7 @@ bool cmReturnCommand(std::vector<std::string> const& args,
     }
     if (args[0] != "PROPAGATE"_s) {
       status.SetError(
-        cmStrCat("called with unsupported argument \"", args[0], '"'));
+        cmStrCat("called with unsupported argument \""_s, args[0], '"'));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }

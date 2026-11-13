@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmWorkingDirectory.h"
 
+#include <cmext/string_view>
+
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -23,8 +25,8 @@ bool cmWorkingDirectory::SetDirectory(std::string const& newdir)
     this->Error.clear();
     return true;
   }
-  this->Error = cmStrCat("Failed to change working directory to \"", newdir,
-                         "\": ", status.GetString());
+  this->Error = cmStrCat("Failed to change working directory to \""_s, newdir,
+                         "\": "_s, status.GetString());
   return false;
 }
 

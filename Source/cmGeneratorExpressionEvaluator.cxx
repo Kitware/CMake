@@ -44,8 +44,8 @@ std::string GeneratorExpressionContent::ProcessArbitraryContent(
       if (node->RequiresLiteralInput()) {
         if (pExprEval->GetType() != cmGeneratorExpressionEvaluator::Text) {
           reportError(eval, this->GetOriginalExpression(),
-                      cmStrCat("$<", identifier,
-                               "> expression requires literal input."));
+                      cmStrCat("$<"_s, identifier,
+                               "> expression requires literal input."_s));
           return std::string();
         }
       }
@@ -99,9 +99,9 @@ std::string GeneratorExpressionContent::Evaluate(
     if (node->NumExpectedParameters() == 1 &&
         node->AcceptsArbitraryContentParameter()) {
       if (this->ParamChildren.empty()) {
-        reportError(
-          eval, this->GetOriginalExpression(),
-          cmStrCat("$<", identifier, "> expression requires a parameter."));
+        reportError(eval, this->GetOriginalExpression(),
+                    cmStrCat("$<"_s, identifier,
+                             "> expression requires a parameter."_s));
       }
     } else {
       std::vector<std::string> parameters;
@@ -197,19 +197,19 @@ std::string GeneratorExpressionContent::EvaluateParameters(
   if ((numExpected > cmGeneratorExpressionNode::DynamicParameters &&
        static_cast<unsigned int>(numExpected) != parameters.size())) {
     if (numExpected == 0) {
-      reportError(
-        eval, this->GetOriginalExpression(),
-        cmStrCat("$<", identifier, "> expression requires no parameters."));
+      reportError(eval, this->GetOriginalExpression(),
+                  cmStrCat("$<"_s, identifier,
+                           "> expression requires no parameters."_s));
     } else if (numExpected == 1) {
       reportError(eval, this->GetOriginalExpression(),
-                  cmStrCat("$<", identifier,
+                  cmStrCat("$<"_s, identifier,
                            "> expression requires "
-                           "exactly one parameter."));
+                           "exactly one parameter."_s));
     } else {
       std::string e =
-        cmStrCat("$<", identifier, "> expression requires ", numExpected,
-                 " comma separated parameters, but got ", parameters.size(),
-                 " instead.");
+        cmStrCat("$<"_s, identifier, "> expression requires "_s, numExpected,
+                 " comma separated parameters, but got "_s, parameters.size(),
+                 " instead."_s);
       reportError(eval, this->GetOriginalExpression(), e);
     }
     return std::string();
@@ -218,18 +218,18 @@ std::string GeneratorExpressionContent::EvaluateParameters(
   if (numExpected == cmGeneratorExpressionNode::OneOrMoreParameters &&
       parameters.empty()) {
     reportError(eval, this->GetOriginalExpression(),
-                cmStrCat("$<", identifier,
-                         "> expression requires at least one parameter."));
+                cmStrCat("$<"_s, identifier,
+                         "> expression requires at least one parameter."_s));
   } else if (numExpected == cmGeneratorExpressionNode::TwoOrMoreParameters &&
              parameters.size() < 2) {
     reportError(eval, this->GetOriginalExpression(),
-                cmStrCat("$<", identifier,
-                         "> expression requires at least two parameters."));
+                cmStrCat("$<"_s, identifier,
+                         "> expression requires at least two parameters."_s));
   } else if (numExpected == cmGeneratorExpressionNode::OneOrZeroParameters &&
              parameters.size() > 1) {
     reportError(eval, this->GetOriginalExpression(),
-                cmStrCat("$<", identifier,
-                         "> expression requires one or zero parameters."));
+                cmStrCat("$<"_s, identifier,
+                         "> expression requires one or zero parameters."_s));
   }
   return std::string();
 }

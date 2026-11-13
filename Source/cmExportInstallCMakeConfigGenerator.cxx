@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmExportFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmGenExContext.h"
@@ -37,7 +39,7 @@ cmExportInstallCMakeConfigGenerator::cmExportInstallCMakeConfigGenerator(
 std::string cmExportInstallCMakeConfigGenerator::GetConfigImportFileGlob()
   const
 {
-  std::string glob = cmStrCat(this->FileBase, "-*", this->FileExt);
+  std::string glob = cmStrCat(this->FileBase, "-*"_s, this->FileExt);
   return glob;
 }
 
@@ -289,12 +291,12 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetDirectories(
     std::string dest = cmOutputConverter::EscapeForCMake(
       result.UnescapedDestination, cmOutputConverter::WrapQuotes::NoWrap);
     if (!cmSystemTools::FileIsFullPath(result.UnescapedDestination)) {
-      dest = cmStrCat("${_IMPORT_PREFIX}/", std::move(dest));
+      dest = cmStrCat("${_IMPORT_PREFIX}/"_s, std::move(dest));
     }
 
     if (result.HadContextSensitiveCondition && configs.size() != 1) {
       resultVector.push_back(
-        cmStrCat("\"$<$<CONFIG:", config, ">:", dest, ">\""));
+        cmStrCat("\"$<$<CONFIG:"_s, config, ">:"_s, dest, ">\""_s));
     } else {
       resultVector.emplace_back(cmStrCat('"', dest, '"'));
       break;
@@ -327,7 +329,7 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetFiles(
                  unescapedDest, cmOutputConverter::WrapQuotes::NoWrap),
                '/');
     if (!cmSystemTools::FileIsFullPath(unescapedDest)) {
-      dest = cmStrCat("${_IMPORT_PREFIX}/", std::move(dest));
+      dest = cmStrCat("${_IMPORT_PREFIX}/"_s, std::move(dest));
     }
 
     bool const contextSensitive =
@@ -343,7 +345,7 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetFiles(
                      relFile, cmOutputConverter::WrapQuotes::NoWrap));
         if (contextSensitive && configs.size() != 1) {
           resultVector.push_back(
-            cmStrCat("\"$<$<CONFIG:", config, ">:", escapedFile, ">\""));
+            cmStrCat("\"$<$<CONFIG:"_s, config, ">:"_s, escapedFile, ">\""_s));
         } else {
           resultVector.emplace_back(cmStrCat('"', escapedFile, '"'));
         }
@@ -395,13 +397,13 @@ bool cmExportInstallCMakeConfigGenerator::
   std::string const dest =
     cmStrCat(this->FileDir, '/', cxx_modules_dirname, '/');
   std::string fileName =
-    cmStrCat(dest, "cxx-modules-", name, '-', filename_config, ".cmake");
+    cmStrCat(dest, "cxx-modules-"_s, name, '-', filename_config, ".cmake"_s);
 
   cmGeneratedFileStream os(fileName, true);
   if (!os) {
     std::string se = cmSystemTools::GetLastSystemError();
     cmSystemTools::Error(
-      cmStrCat("cannot write to file \"", fileName, "\": ", se));
+      cmStrCat("cannot write to file \""_s, fileName, "\": "_s, se));
     return false;
   }
   os.SetCopyIfDifferent(true);
@@ -417,8 +419,8 @@ bool cmExportInstallCMakeConfigGenerator::
       continue;
     }
 
-    auto prop_filename = cmStrCat("target-", tgt->GetFilesystemExportName(),
-                                  '-', filename_config, ".cmake");
+    auto prop_filename = cmStrCat("target-"_s, tgt->GetFilesystemExportName(),
+                                  '-', filename_config, ".cmake"_s);
     prop_files.emplace_back(cmStrCat(dest, prop_filename));
     os << "include(\"${CMAKE_CURRENT_LIST_DIR}/" << prop_filename << "\")\n";
   }

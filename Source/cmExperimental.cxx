@@ -7,6 +7,8 @@
 #include <cstddef>
 #include <string>
 
+#include <cmext/string_view>
+
 #include "cmDiagnostics.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -108,13 +110,13 @@ bool cmExperimental::HasSupportEnabled(cmMakefile const& mf, Feature f)
         mf.IssueDiagnostic(
           cmDiagnostics::CMD_EXPERIMENTAL,
           cmStrCat(
-            data.Variable, " is set to incorrect value\n  ", value,
+            data.Variable, " is set to incorrect value\n  "_s, value,
             "\n"
             "See 'Help/dev/experimental.rst' in the source tree of this "
             "version of CMake for documentation of the experimental feature "
             "and the corresponding activation value.  This project's code "
             "may require changes to work with this CMake's version of the "
-            "feature."));
+            "feature."_s));
       }
     }
   }

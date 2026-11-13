@@ -92,7 +92,7 @@ void cmLocalVisualStudio10Generator::ReadAndStoreExternalGUID(
     return;
   }
 
-  std::string guidStoreName = cmStrCat(name, "_GUID_CMAKE");
+  std::string guidStoreName = cmStrCat(name, "_GUID_CMAKE"_s);
   // save the GUID in the cache
   this->GlobalGenerator->GetCMakeInstance()->AddCacheEntry(
     guidStoreName, parser.GUID, "Stored GUID", cmStateEnums::INTERNAL);

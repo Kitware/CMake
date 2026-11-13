@@ -175,7 +175,7 @@ bool HandleGetCommand(std::vector<std::string> const& args,
 
   if (actions.find(action) == actions.end()) {
     status.SetError(
-      cmStrCat("GET called with an unknown action: ", action, '.'));
+      cmStrCat("GET called with an unknown action: "_s, action, '.'));
     return false;
   }
 
@@ -505,7 +505,7 @@ bool HandleTransformPathCommand(
   }
 
   if (!parser.GetInputs().empty()) {
-    status.SetError(cmStrCat(args[0], " called with unexpected arguments."));
+    status.SetError(cmStrCat(args[0], " called with unexpected arguments."_s));
     return false;
   }
 
@@ -610,7 +610,7 @@ bool HandleConvertCommand(std::vector<std::string> const& args,
 
   if (action != cmakePath && action != nativePath) {
     status.SetError(
-      cmStrCat("CONVERT called with an unknown action: ", action, '.'));
+      cmStrCat("CONVERT called with an unknown action: "_s, action, '.'));
     return false;
   }
 
@@ -680,7 +680,7 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
   auto const op = operators.find(args[2]);
   if (op == operators.end()) {
     status.SetError(cmStrCat(
-      "COMPARE called with an unknown comparison operator: ", args[2], '.'));
+      "COMPARE called with an unknown comparison operator: "_s, args[2], '.'));
     return false;
   }
 
@@ -704,7 +704,7 @@ bool HandleHasItemCommand(
 {
   if (args.size() != 3) {
     status.SetError(
-      cmStrCat(args.front(), " must be called with two arguments."));
+      cmStrCat(args.front(), " must be called with two arguments."_s));
     return false;
   }
 

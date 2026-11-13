@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <cmext/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -45,8 +47,8 @@ bool cmSetTargetPropertiesCommand(std::vector<std::string> const& args,
         // Better error message for alias properties set on an alias target.
         if (*k == "ALIASED_TARGET" || *k == "ALIAS_GLOBAL") {
           if (mf.IsAlias(tname)) {
-            status.SetError(cmStrCat("can not set property ", *k,
-                                     " on an ALIAS target: ", tname));
+            status.SetError(cmStrCat("can not set property "_s, *k,
+                                     " on an ALIAS target: "_s, tname));
             return false;
           }
         }
@@ -55,7 +57,7 @@ bool cmSetTargetPropertiesCommand(std::vector<std::string> const& args,
       }
     } else {
       status.SetError(
-        cmStrCat("Can not find target to add properties to: ", tname));
+        cmStrCat("Can not find target to add properties to: "_s, tname));
       return false;
     }
   }

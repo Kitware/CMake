@@ -10,6 +10,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorFileSet.h"
@@ -124,7 +126,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
   if (!exportFileStream) {
     std::string se = cmSystemTools::GetLastSystemError();
     cmSystemTools::Error(
-      cmStrCat("cannot write to file \"", fileName, "\": ", se));
+      cmStrCat("cannot write to file \""_s, fileName, "\": "_s, se));
     return false;
   }
   exportFileStream.SetCopyIfDifferent(true);
@@ -164,7 +166,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
 
   if (itgen->IsImportLibrary()) {
     // Construct the property name.
-    std::string prop = cmStrCat("IMPORTED_IMPLIB", suffix);
+    std::string prop = cmStrCat("IMPORTED_IMPLIB"_s, suffix);
 
     // Append the installed file name.
     value += cmInstallTargetGenerator::GetInstallFilename(
@@ -175,7 +177,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     importedLocations.insert(prop);
   } else if (itgen->GetTarget()->GetType() == cm::TargetType::OBJECT_LIBRARY) {
     // Construct the property name.
-    std::string prop = cmStrCat("IMPORTED_OBJECTS", suffix);
+    std::string prop = cmStrCat("IMPORTED_OBJECTS"_s, suffix);
 
     // Compute all the object files inside this target and setup
     // IMPORTED_OBJECTS as a list of object files
@@ -191,7 +193,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
   } else {
     if (target->IsFrameworkOnApple() && target->HasImportLibrary(config)) {
       // store as well IMPLIB value
-      auto importProp = cmStrCat("IMPORTED_IMPLIB", suffix);
+      auto importProp = cmStrCat("IMPORTED_IMPLIB"_s, suffix);
       auto importValue =
         cmStrCat(value,
                  cmInstallTargetGenerator::GetInstallFilename(
@@ -203,7 +205,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     }
 
     // Construct the property name.
-    std::string prop = cmStrCat("IMPORTED_LOCATION", suffix);
+    std::string prop = cmStrCat("IMPORTED_LOCATION"_s, suffix);
 
     // Append the installed file name.
     if (target->IsAppBundleOnApple()) {
@@ -302,10 +304,10 @@ void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
 void cmExportInstallFileGenerator::ComplainAboutDuplicateTarget(
   std::string const& targetName) const
 {
-  this->ReportError(cmStrCat("install(", this->IEGen->InstallSubcommand(),
-                             " \"", this->GetExportName(),
-                             "\" ...) includes target \"", targetName,
-                             "\" more than once in the export set."));
+  this->ReportError(cmStrCat("install("_s, this->IEGen->InstallSubcommand(),
+                             " \""_s, this->GetExportName(),
+                             "\" ...) includes target \""_s, targetName,
+                             "\" more than once in the export set."_s));
 }
 
 void cmExportInstallFileGenerator::IssueMessage(
@@ -446,9 +448,9 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
     if (!cmSystemTools::FileIsFullPath(li)) {
       target->GetLocalGenerator()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Target \"", target->GetName(), "\" ", prop,
+        cmStrCat("Target \""_s, target->GetName(), "\" "_s, prop,
                  " property contains relative path:\n"
-                 "  \"",
+                 "  \""_s,
                  li, '"'));
     }
     bool inBinary = isSubDirectory(li, topBinaryDir);
@@ -466,19 +468,19 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
     if (inBinary) {
       target->GetLocalGenerator()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Target \"", target->GetName(), "\" ", prop,
+        cmStrCat("Target \""_s, target->GetName(), "\" "_s, prop,
                  " property contains path:\n"
-                 "  \"",
-                 li, "\"\nwhich is prefixed in the build directory."));
+                 "  \""_s,
+                 li, "\"\nwhich is prefixed in the build directory."_s));
     }
     if (!inSourceBuild) {
       if (inSource) {
         target->GetLocalGenerator()->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("Target \"", target->GetName(), "\" ", prop,
+          cmStrCat("Target \""_s, target->GetName(), "\" "_s, prop,
                    " property contains path:\n"
-                   "  \"",
-                   li, "\"\nwhich is prefixed in the source directory."));
+                   "  \""_s,
+                   li, "\"\nwhich is prefixed in the source directory."_s));
       }
     }
   }
@@ -575,12 +577,12 @@ void cmExportInstallFileGenerator::PopulateIncludeDirectoriesInterface(
     cmLocalGenerator* lg = target->GetLocalGenerator();
     lg->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Target \"", target->GetName(),
+      cmStrCat("Target \""_s, target->GetName(),
                "\" is installed with "
                "INCLUDES DESTINATION set to a context sensitive path.  Paths "
                "which depend on the configuration, policy values or the link "
                "interface are not supported.  Consider using "
-               "target_include_directories instead."));
+               "target_include_directories instead."_s));
     return;
   }
 

@@ -206,7 +206,7 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
 
   if (!errorString.empty()) {
     std::string err =
-      cmStrCat("if ", cmIfCommandError(expandedArguments), errorString);
+      cmStrCat("if "_s, cmIfCommandError(expandedArguments), errorString);
     if (status == MessageType::FATAL_ERROR) {
       makefile.IssueMessage(MessageType::FATAL_ERROR, err);
       cmSystemTools::SetFatalErrorOccurred();

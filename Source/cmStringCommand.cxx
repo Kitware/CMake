@@ -51,7 +51,7 @@ bool HandleHashCommand(std::vector<std::string> const& args,
 {
   if (args.size() != 3) {
     status.SetError(
-      cmStrCat(args[0], " requires an output variable and an input string"));
+      cmStrCat(args[0], " requires an output variable and an input string"_s));
     return false;
   }
 
@@ -159,7 +159,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     } else if (args[i] == "ESCAPE_QUOTES") {
       escapeQuotes = true;
     } else {
-      status.SetError(cmStrCat("Unrecognized argument \"", args[i], '"'));
+      status.SetError(cmStrCat("Unrecognized argument \""_s, args[i], '"'));
       return false;
     }
   }
@@ -237,7 +237,7 @@ bool RegexMatch(std::vector<std::string> const& args,
     return true;
   } catch (std::exception const& e) {
     status.SetError(
-      cmStrCat("sub-command REGEX, mode MATCH: ", e.what(), '.'));
+      cmStrCat("sub-command REGEX, mode MATCH: "_s, e.what(), '.'));
     return false;
   }
 }
@@ -259,7 +259,7 @@ bool RegexMatchAll(std::vector<std::string> const& args,
     return true;
   } catch (std::exception const& e) {
     status.SetError(
-      cmStrCat("sub-command REGEX, mode MATCHALL: ", e.what(), '.'));
+      cmStrCat("sub-command REGEX, mode MATCHALL: "_s, e.what(), '.'));
     return false;
   }
 }
@@ -283,7 +283,7 @@ bool RegexReplace(std::vector<std::string> const& args,
     return true;
   } catch (std::exception const& e) {
     status.SetError(
-      cmStrCat("sub-command REGEX, mode REPLACE: ", e.what(), '.'));
+      cmStrCat("sub-command REGEX, mode REPLACE: "_s, e.what(), '.'));
     return false;
   }
 }
@@ -303,7 +303,7 @@ bool RegexQuote(std::vector<std::string> const& args,
     return true;
   } catch (std::exception const& e) {
     status.SetError(
-      cmStrCat("sub-command REGEX, mode QUOTE: ", e.what(), '.'));
+      cmStrCat("sub-command REGEX, mode QUOTE: "_s, e.what(), '.'));
     return false;
   }
 }
@@ -367,8 +367,8 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
       (mode == "GREATER_EQUAL")) {
     if (args.size() < 5) {
       std::string e =
-        cmStrCat("sub-command COMPARE, mode ", mode,
-                 " needs at least 5 arguments total to command.");
+        cmStrCat("sub-command COMPARE, mode "_s, mode,
+                 " needs at least 5 arguments total to command."_s);
       status.SetError(e);
       return false;
     }
@@ -418,7 +418,7 @@ bool HandleReplaceCommand(std::vector<std::string> const& args,
     status.GetMakefile().AddDefinition(variableName, data);
     return true;
   } catch (std::exception const& e) {
-    status.SetError(cmStrCat("sub-command REPLACE: ", e.what(), '.'));
+    status.SetError(cmStrCat("sub-command REPLACE: "_s, e.what(), '.'));
     return false;
   }
 }
@@ -668,7 +668,7 @@ bool HandleRandomCommand(std::vector<std::string> const& args,
     status.GetMakefile().AddDefinition(variableName, data);
     return true;
   } catch (std::exception const& e) {
-    status.SetError(cmStrCat("sub-command RANDOM: ", e.what(), '.'));
+    status.SetError(cmStrCat("sub-command RANDOM: "_s, e.what(), '.'));
     return false;
   }
 }
@@ -700,7 +700,7 @@ bool HandleTimestampCommand(std::vector<std::string> const& args,
       utcFlag = cm::CMakeString::UTC::Yes;
     } else {
       std::string e =
-        cmStrCat(" TIMESTAMP sub-command does not recognize option ",
+        cmStrCat(" TIMESTAMP sub-command does not recognize option "_s,
                  args[argsIndex], '.');
       status.SetError(e);
       return false;
@@ -759,8 +759,8 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
       } else if (args[argsIndex] == "SHA1") {
         uuidType = cm::CMakeString::UUIDType::SHA1;
       } else {
-        status.SetError(
-          cmStrCat("UUID sub-command, unknown TYPE '", args[argsIndex], "'."));
+        status.SetError(cmStrCat("UUID sub-command, unknown TYPE '"_s,
+                                 args[argsIndex], "'."_s));
         return false;
       }
       argsIndex++;
@@ -768,7 +768,7 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
       ++argsIndex;
       uuidCase = cm::CMakeString::Case::Upper;
     } else {
-      std::string e = cmStrCat("UUID sub-command does not recognize option ",
+      std::string e = cmStrCat("UUID sub-command does not recognize option "_s,
                                args[argsIndex], '.');
       status.SetError(e);
       return false;
@@ -782,7 +782,7 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
     status.GetMakefile().AddDefinition(outputVariable, data);
     return true;
   } catch (std::exception const& e) {
-    status.SetError(cmStrCat("UUID sub-command, ", e.what(), '.'));
+    status.SetError(cmStrCat("UUID sub-command, "_s, e.what(), '.'));
     return false;
   }
 #else

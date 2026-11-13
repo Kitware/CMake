@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmFileTime.h"
@@ -83,7 +85,7 @@ void cmDepends::Clear(std::string const& file) const
   // Print verbose output.
   if (this->Verbose) {
     cmSystemTools::Stdout(
-      cmStrCat("Clearing dependencies in \"", file, "\".\n"));
+      cmStrCat("Clearing dependencies in \""_s, file, "\".\n"_s));
   }
 
   // Write an empty dependency file.
@@ -171,9 +173,9 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 
       // Print verbose output.
       if (this->Verbose) {
-        cmSystemTools::Stdout(cmStrCat("Dependee \"", dependee,
-                                       "\" does not exist for depender \"",
-                                       depender, "\".\n"));
+        cmSystemTools::Stdout(cmStrCat("Dependee \""_s, dependee,
+                                       "\" does not exist for depender \""_s,
+                                       depender, "\".\n"_s));
       }
     } else if (dependerExists) {
       // The dependee and depender both exist.  Compare file times.
@@ -183,9 +185,9 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 
         // Print verbose output.
         if (this->Verbose) {
-          cmSystemTools::Stdout(cmStrCat("Dependee \"", dependee,
-                                         "\" is newer than depender \"",
-                                         depender, "\".\n"));
+          cmSystemTools::Stdout(cmStrCat("Dependee \""_s, dependee,
+                                         "\" is newer than depender \""_s,
+                                         depender, "\".\n"_s));
         }
       }
     } else {
@@ -197,9 +199,9 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 
         // Print verbose output.
         if (this->Verbose) {
-          cmSystemTools::Stdout(cmStrCat("Dependee \"", dependee,
-                                         "\" is newer than depends file \"",
-                                         internalDependsFileName, "\".\n"));
+          cmSystemTools::Stdout(cmStrCat("Dependee \""_s, dependee,
+                                         "\" is newer than depends file \""_s,
+                                         internalDependsFileName, "\".\n"_s));
         }
       }
     }
@@ -231,14 +233,14 @@ void cmDepends::SetIncludePathFromLanguage(std::string const& lang)
 {
   // Look for the new per "TARGET_" variant first:
   std::string includePathVar =
-    cmStrCat("CMAKE_", lang, "_TARGET_INCLUDE_PATH");
+    cmStrCat("CMAKE_"_s, lang, "_TARGET_INCLUDE_PATH"_s);
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   cmValue includePath = mf->GetDefinition(includePathVar);
   if (includePath) {
     cmExpandList(*includePath, this->IncludePath);
   } else {
     // Fallback to the old directory level variable if no per-target var:
-    includePathVar = cmStrCat("CMAKE_", lang, "_INCLUDE_PATH");
+    includePathVar = cmStrCat("CMAKE_"_s, lang, "_INCLUDE_PATH"_s);
     includePath = mf->GetDefinition(includePathVar);
     if (includePath) {
       cmExpandList(*includePath, this->IncludePath);

@@ -7,6 +7,7 @@
 #include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -43,7 +44,7 @@ bool cmQTWrapCPPCommand(std::vector<std::string> const& args,
       std::string srcName =
         cmSystemTools::GetFilenameWithoutLastExtension(arg);
       std::string newName =
-        cmStrCat(mf.GetCurrentBinaryDirectory(), "/moc_", srcName, ".cxx");
+        cmStrCat(mf.GetCurrentBinaryDirectory(), "/moc_"_s, srcName, ".cxx"_s);
       cmSourceFile* sf = mf.GetOrCreateSource(newName, true);
       sf->SetSpecialSourceType(
         cmSourceFile::SpecialSourceType::QtWrapCppSource);

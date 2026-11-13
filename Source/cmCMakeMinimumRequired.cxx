@@ -1,8 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
+
 #include "cmCMakeMinimumRequired.h"
 
 #include <cstdio>
+
+#include <cmext/string_view>
 
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
@@ -61,8 +64,8 @@ bool cmCMakeMinimumRequired(std::vector<std::string> const& args,
   if (dd != std::string::npos &&
       (version_min.empty() || version_max.empty())) {
     status.SetError(
-      cmStrCat("VERSION \"", version_string,
-               R"(" does not have a version on both sides of "...".)"));
+      cmStrCat("VERSION \""_s, version_string,
+               R"(" does not have a version on both sides of "...".)"_s));
     return false;
   }
 
@@ -85,7 +88,7 @@ bool cmCMakeMinimumRequired(std::vector<std::string> const& args,
   if (sscanf(version_min.c_str(), "%u.%u.%u.%u", &required_major,
              &required_minor, &required_patch, &required_tweak) < 2) {
     status.SetError(
-      cmStrCat("could not parse VERSION \"", version_min, "\"."));
+      cmStrCat("could not parse VERSION \""_s, version_min, "\"."_s));
     return false;
   }
 
@@ -99,8 +102,8 @@ bool cmCMakeMinimumRequired(std::vector<std::string> const& args,
     // The current version is too low.
     status.GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("CMake ", version_min,
-               " or higher is required.  You are running version ",
+      cmStrCat("CMake "_s, version_min,
+               " or higher is required.  You are running version "_s,
                cmVersion::GetCMakeVersion()));
     cmSystemTools::SetFatalErrorOccurred();
     return true;
@@ -156,8 +159,8 @@ bool EnforceUnknownArguments(std::string const& version_max,
     }
   }
 
-  status.SetError(
-    cmStrCat("called with unknown argument \"", unknown_arguments[0], "\"."));
+  status.SetError(cmStrCat("called with unknown argument \""_s,
+                           unknown_arguments[0], "\"."_s));
   return false;
 }
 }

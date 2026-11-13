@@ -7,6 +7,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -103,7 +105,7 @@ static void cmScriptGeneratorEncodeConfig(std::string const& config,
 std::string cmScriptGenerator::CreateConfigTest(std::string const& configVar,
                                                 std::string const& config)
 {
-  std::string result = cmStrCat(configVar, " MATCHES \"^(");
+  std::string result = cmStrCat(configVar, " MATCHES \"^("_s);
   if (!config.empty()) {
     cmScriptGeneratorEncodeConfig(config, result);
   }
@@ -114,7 +116,7 @@ std::string cmScriptGenerator::CreateConfigTest(std::string const& configVar,
 std::string cmScriptGenerator::CreateConfigTest(
   std::string const& configVar, std::vector<std::string> const& configs)
 {
-  std::string result = cmStrCat(configVar, " MATCHES \"^(");
+  std::string result = cmStrCat(configVar, " MATCHES \"^("_s);
   char const* sep = "";
   for (std::string const& config : configs) {
     result += sep;

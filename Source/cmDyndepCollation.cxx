@@ -74,8 +74,8 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
       if (full_path.empty()) {
         gt->Makefile->IssueMessage(
           MessageType::INTERNAL_ERROR,
-          cmStrCat("Target \"", tgt->GetName(),
-                   "\" has a full path-less source file."));
+          cmStrCat("Target \""_s, tgt->GetName(),
+                   "\" has a full path-less source file."_s));
         return;
       }
       sf_map[full_path] = std::make_pair(sf, type);
@@ -128,12 +128,12 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
         auto lookup = sf_map.find(full_file);
         if (lookup == sf_map.end()) {
           gt->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                     cmStrCat("Target \"", tgt->GetName(),
-                                              "\" has source file\n  ", file,
-                                              "\nin a \"FILE_SET TYPE ",
+                                     cmStrCat("Target \""_s, tgt->GetName(),
+                                              "\" has source file\n  "_s, file,
+                                              "\nin a \"FILE_SET TYPE "_s,
                                               cm::FileSetMetadata::CXX_MODULES,
                                               "\" but it is not "
-                                              "scheduled for compilation."));
+                                              "scheduled for compilation."_s));
           continue;
         }
 
@@ -145,8 +145,8 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
         if (!sf) {
           gt->Makefile->IssueMessage(
             MessageType::INTERNAL_ERROR,
-            cmStrCat("Target \"", tgt->GetName(), "\" has source file \"",
-                     file, "\" which has not been tracked properly."));
+            cmStrCat("Target \""_s, tgt->GetName(), "\" has source file \""_s,
+                     file, "\" which has not been tracked properly."_s));
           continue;
         }
 
@@ -222,7 +222,7 @@ Json::Value CollationInformationDatabaseInfo(cmGeneratorTarget const* gt,
 
   auto db_path = gt->BuildDatabasePath("CXX", config);
   if (!db_path.empty()) {
-    db_info["template-path"] = cmStrCat(db_path, ".in");
+    db_info["template-path"] = cmStrCat(db_path, ".in"_s);
     db_info["output"] = db_path;
   }
 
@@ -588,7 +588,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
       build_database_lookup = module_database->GenerateLookupTable();
     } else {
       cmSystemTools::Error(
-        cmStrCat("Failed to read the template build database ",
+        cmStrCat("Failed to read the template build database "_s,
                  export_info.DatabaseInfo->TemplatePath));
       result = false;
     }
@@ -610,7 +610,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
       return std::make_pair(true, cmEscape(dest));
     }
     return std::make_pair(false,
-                          cmStrCat("${_IMPORT_PREFIX}/", cmEscape(dest)));
+                          cmStrCat("${_IMPORT_PREFIX}/"_s, cmEscape(dest)));
   };
 
   // public/private requirement tracking.
@@ -637,7 +637,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         }
       } else if (export_info.DatabaseInfo) {
         cmSystemTools::Error(
-          cmStrCat("Failed to find module database entry for ", sourcePath));
+          cmStrCat("Failed to find module database entry for "_s, sourcePath));
         result = false;
       }
     }
@@ -652,9 +652,9 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         // Take the first module provided to provide context.
         auto const& provides = object.Provides[0];
         cmSystemTools::Error(
-          cmStrCat("Output ", object.PrimaryOutput, " provides the `",
+          cmStrCat("Output "_s, object.PrimaryOutput, " provides the `"_s,
                    provides.LogicalName,
-                   "` module but it is not found in a `FILE_SET` of type `",
+                   "` module but it is not found in a `FILE_SET` of type `"_s,
                    cm::FileSetMetadata::CXX_MODULES, '`'));
         result = false;
       }
@@ -679,8 +679,8 @@ bool cmDyndepCollation::WriteDyndepMetadata(
           if (bmiName) {
             bdb_entry->second->Provides[prov.LogicalName] = *bmiName;
           } else {
-            cmSystemTools::Error(
-              cmStrCat("Failed to find BMI location for ", prov.LogicalName));
+            cmSystemTools::Error(cmStrCat("Failed to find BMI location for "_s,
+                                          prov.LogicalName));
             result = false;
           }
         }
@@ -689,7 +689,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         }
       } else if (export_info.DatabaseInfo) {
         cmSystemTools::Error(cmStrCat(
-          "Failed to find module database entry for ", file_set.SourcePath));
+          "Failed to find module database entry for "_s, file_set.SourcePath));
         result = false;
       }
     }
@@ -697,11 +697,11 @@ bool cmDyndepCollation::WriteDyndepMetadata(
     // Verify the fileset type for the object.
     if (file_set.Type == cm::FileSetMetadata::CXX_MODULES) {
       if (!has_provides) {
-        cmSystemTools::Error(cmStrCat("Output ", object.PrimaryOutput,
-                                      " is of type `",
+        cmSystemTools::Error(cmStrCat("Output "_s, object.PrimaryOutput,
+                                      " is of type `"_s,
                                       cm::FileSetMetadata::CXX_MODULES,
                                       "` but does not provide a module "
-                                      "interface unit or partition"));
+                                      "interface unit or partition"_s));
         result = false;
         continue;
       }
@@ -711,9 +711,9 @@ bool cmDyndepCollation::WriteDyndepMetadata(
       if (has_provides) {
         auto const& provides = object.Provides[0];
         cmSystemTools::Error(
-          cmStrCat("Source ", file_set.SourcePath, " provides the `",
-                   provides.LogicalName, "` C++ module but is of type `",
-                   file_set.Type, "` module but must be of type `",
+          cmStrCat("Source "_s, file_set.SourcePath, " provides the `"_s,
+                   provides.LogicalName, "` C++ module but is of type `"_s,
+                   file_set.Type, "` module but must be of type `"_s,
                    cm::FileSetMetadata::CXX_MODULES, '`'));
         result = false;
       }
@@ -872,8 +872,8 @@ bool cmDyndepCollation::WriteDyndepMetadata(
     for (auto const& req : pub_reqs.second) {
       if (private_modules.count(req)) {
         cmSystemTools::Error(cmStrCat(
-          "Public C++ module source `", pub_reqs.first, "` requires the `",
-          req, "` C++ module which is provided by a private source"));
+          "Public C++ module source `"_s, pub_reqs.first, "` requires the `"_s,
+          req, "` C++ module which is provided by a private source"_s));
         result = false;
       }
     }

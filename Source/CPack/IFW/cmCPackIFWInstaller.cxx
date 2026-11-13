@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmCPackIFWCommon.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmCPackIFWPackage.h"
@@ -25,8 +27,8 @@ void cmCPackIFWInstaller::printSkippedOptionWarning(
   std::string const& optionName, std::string const& optionValue)
 {
   cmCPackIFWLogger(
-    WARNING, "Option ", optionName, " contains the value \"", optionValue,
-    "\" but will be skipped because the specified file does not exist.\n");
+    WARNING, "Option "_s, optionName, " contains the value \""_s, optionValue,
+    "\" but will be skipped because the specified file does not exist.\n"_s);
 }
 
 void cmCPackIFWInstaller::ConfigureFromOptions()
@@ -145,8 +147,9 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     if (this->WizardStyle != "Modern" && this->WizardStyle != "Aero" &&
         this->WizardStyle != "Mac" && this->WizardStyle != "Classic") {
       cmCPackIFWLogger(
-        WARNING, "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \"",
-        option, "\". Expected values are: Modern, Aero, Mac, Classic.\n");
+        WARNING,
+        "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \""_s, option,
+        "\". Expected values are: Modern, Aero, Mac, Classic.\n"_s);
     }
   }
 
@@ -192,10 +195,11 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         currentVersionMsg = "an older QtIFW version";
       }
       cmCPackIFWLogger(
-        WARNING, "Option CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST is set to \"",
+        WARNING,
+        "Option CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST is set to \""_s,
         option,
         "\", but it is only supported with QtIFW version 4.0 or later. "
-        "It is being ignored because you are using ",
+        "It is being ignored because you are using "_s,
         currentVersionMsg, '\n');
     }
   }
@@ -220,7 +224,7 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
   } else if (cmValue optPACKAGE_INSTALL_DIRECTORY =
                this->GetOption("CPACK_PACKAGE_INSTALL_DIRECTORY")) {
     this->TargetDir =
-      cmStrCat("@ApplicationsDir@/", optPACKAGE_INSTALL_DIRECTORY);
+      cmStrCat("@ApplicationsDir@/"_s, optPACKAGE_INSTALL_DIRECTORY);
   } else {
     this->TargetDir = "@RootDir@/usr/local";
   }
@@ -325,10 +329,10 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         cmCPackIFWLogger(
           WARNING,
           "Option \"CPACK_IFW_PACKAGE_PRODUCT_IMAGE_URLS\" will be skipped "
-          "because it contains ",
+          "because it contains "_s,
           this->ProductImageUrls.size(),
-          " elements while \"CPACK_IFW_PACKAGE_PRODUCT_IMAGES\" contains ",
-          this->ProductImages.size(), " elements.\n");
+          " elements while \"CPACK_IFW_PACKAGE_PRODUCT_IMAGES\" contains "_s,
+          this->ProductImages.size(), " elements.\n"_s);
         this->ProductImageUrls.clear();
       }
     }
@@ -446,7 +450,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     std::string srcName = cmSystemTools::GetFilenameName(this->Logo);
     std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
     std::string name = "cm_logo" + suffix;
-    std::string path = cmStrCat(this->Directory, "/config/", name);
+    std::string path = cmStrCat(this->Directory, "/config/"_s, name);
     cmsys::SystemTools::CopyFileIfDifferent(this->Logo, path);
     xout.Element("Logo", name);
   }
@@ -454,7 +458,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Banner
   if (!this->Banner.empty()) {
     std::string name = cmSystemTools::GetFilenameName(this->Banner);
-    std::string path = cmStrCat(this->Directory, "/config/", name);
+    std::string path = cmStrCat(this->Directory, "/config/"_s, name);
     cmsys::SystemTools::CopyFileIfDifferent(this->Banner, path);
     xout.Element("Banner", name);
   }
@@ -462,7 +466,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Watermark
   if (!this->Watermark.empty()) {
     std::string name = cmSystemTools::GetFilenameName(this->Watermark);
-    std::string path = cmStrCat(this->Directory, "/config/", name);
+    std::string path = cmStrCat(this->Directory, "/config/"_s, name);
     cmsys::SystemTools::CopyFileIfDifferent(this->Watermark, path);
     xout.Element("Watermark", name);
   }
@@ -470,7 +474,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Background
   if (!this->Background.empty()) {
     std::string name = cmSystemTools::GetFilenameName(this->Background);
-    std::string path = cmStrCat(this->Directory, "/config/", name);
+    std::string path = cmStrCat(this->Directory, "/config/"_s, name);
     cmsys::SystemTools::CopyFileIfDifferent(this->Background, path);
     xout.Element("Background", name);
   }
@@ -483,7 +487,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
         cmSystemTools::GetFilenameName(this->InstallerApplicationIcon);
       std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
       std::string name = "cm_appicon" + suffix;
-      std::string path = cmStrCat(this->Directory, "/config/", name);
+      std::string path = cmStrCat(this->Directory, "/config/"_s, name);
       cmsys::SystemTools::CopyFileIfDifferent(this->InstallerApplicationIcon,
                                               path);
       // The actual file is looked up by attaching a '.icns' (macOS),
@@ -498,7 +502,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
         cmSystemTools::GetFilenameName(this->InstallerWindowIcon);
       std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
       std::string name = "cm_winicon" + suffix;
-      std::string path = cmStrCat(this->Directory, "/config/", name);
+      std::string path = cmStrCat(this->Directory, "/config/"_s, name);
       cmsys::SystemTools::CopyFileIfDifferent(this->InstallerWindowIcon, path);
       xout.Element("InstallerWindowIcon", name);
     }
@@ -541,7 +545,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     // Control script (copy to config dir)
     if (!this->ControlScript.empty()) {
       std::string name = cmSystemTools::GetFilenameName(this->ControlScript);
-      std::string path = cmStrCat(this->Directory, "/config/", name);
+      std::string path = cmStrCat(this->Directory, "/config/"_s, name);
       cmsys::SystemTools::CopyFileIfDifferent(this->ControlScript, path);
       xout.Element("ControlScript", name);
     }
@@ -581,7 +585,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     // Stylesheet (copy to config dir)
     if (!this->StyleSheet.empty()) {
       std::string name = cmSystemTools::GetFilenameName(this->StyleSheet);
-      std::string path = cmStrCat(this->Directory, "/config/", name);
+      std::string path = cmStrCat(this->Directory, "/config/"_s, name);
       cmsys::SystemTools::CopyFileIfDifferent(this->StyleSheet, path);
       xout.Element("StyleSheet", name);
     }
@@ -637,7 +641,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
       xout.StartElement("ProductImage");
       auto const& srcImg = this->ProductImages[i];
       std::string name = cmSystemTools::GetFilenameName(srcImg);
-      std::string dstImg = cmStrCat(this->Directory, "/config/", name);
+      std::string dstImg = cmStrCat(this->Directory, "/config/"_s, name);
       cmsys::SystemTools::CopyFileIfDifferent(srcImg, dstImg);
       xout.Element("Image", name);
       if (hasProductImageUrl) {
@@ -655,13 +659,13 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     for (size_t i = 0; i < this->Resources.size(); i++) {
       if (parser.ParseResource(i)) {
         std::string name = cmSystemTools::GetFilenameName(this->Resources[i]);
-        std::string path = cmStrCat(this->Directory, "/resources/", name);
+        std::string path = cmStrCat(this->Directory, "/resources/"_s, name);
         cmsys::SystemTools::CopyFileIfDifferent(this->Resources[i], path);
         resources.push_back(std::move(name));
       } else {
-        cmCPackIFWLogger(WARNING, "Can't copy resources from \"",
+        cmCPackIFWLogger(WARNING, "Can't copy resources from \""_s,
                          this->Resources[i],
-                         "\". Resource will be skipped.\n");
+                         "\". Resource will be skipped.\n"_s);
       }
     }
     this->Resources = resources;
@@ -682,8 +686,8 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
     if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_GROUP")) {
       package.ConfigureFromGroup(*option);
       std::string forcedOption = cmStrCat(
-        "CPACK_IFW_COMPONENT_GROUP_", cmsys::SystemTools::UpperCase(*option),
-        "_FORCED_INSTALLATION");
+        "CPACK_IFW_COMPONENT_GROUP_"_s, cmsys::SystemTools::UpperCase(*option),
+        "_FORCED_INSTALLATION"_s);
       if (!this->GetOption(forcedOption)) {
         package.ForcedInstallation = "true";
       }

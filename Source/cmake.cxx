@@ -214,7 +214,7 @@ bool cmakeCheckStampFile(std::string const& stampName)
   // conjunction with cmLocalVisualStudio7Generator to avoid
   // repeatedly re-running CMake when the user rebuilds the entire
   // solution.
-  std::string stampDepends = cmStrCat(stampName, ".depend");
+  std::string stampDepends = cmStrCat(stampName, ".depend"_s);
 #if defined(_WIN32) || defined(__CYGWIN__)
   cmsys::ifstream fin(stampDepends.c_str(), std::ios::in | std::ios::binary);
 #else
@@ -253,7 +253,7 @@ bool cmakeCheckStampFile(std::string const& stampName)
   // The build system is up to date.  The stamp file has been removed
   // by the VS IDE due to a "rebuild" request.  Restore it atomically.
   std::string stampTemp =
-    cmStrCat(stampName, ".tmp", cmSystemTools::RandomNumber());
+    cmStrCat(stampName, ".tmp"_s, cmSystemTools::RandomNumber());
   {
     // TODO: Teach cmGeneratedFileStream to use a random temp file (with
     // multiple tries in unlikely case of conflict) and use that here.
@@ -269,7 +269,7 @@ bool cmakeCheckStampFile(std::string const& stampName)
   }
   cmSystemTools::RemoveFile(stampTemp);
   cmSystemTools::Error(
-    cmStrCat("Cannot restore timestamp \"", stampName, "\": ", err));
+    cmStrCat("Cannot restore timestamp \""_s, stampName, "\": "_s, err));
   return false;
 }
 
@@ -637,8 +637,9 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
 #endif
       state->ProcessCacheArg(var, value, type);
     } else {
-      cmSystemTools::Error(cmStrCat("Parse error in command line argument: ",
-                                    entry, "\n Should be: VAR:type=value\n"));
+      cmSystemTools::Error(cmStrCat("Parse error in command line argument: "_s,
+                                    entry,
+                                    "\n Should be: VAR:type=value\n"_s));
       return false;
     }
     return true;
@@ -675,7 +676,7 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
         cmDiagnostics::GetDiagnosticCategory(normalizeCliWarningName(cname));
       if (!category) {
         cmSystemTools::Error(
-          cmStrCat("The warning category \""_s, cname, "\" is not known."));
+          cmStrCat("The warning category \""_s, cname, "\" is not known."_s));
         return false;
       }
     }
@@ -783,7 +784,7 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
         }
         state->SetInInitialCache(true);
         cmSystemTools::Stdout(
-          cmStrCat("loading initial cache file ", value, '\n'));
+          cmStrCat("loading initial cache file "_s, value, '\n'));
         // Resolve script path specified on command line
         // relative to $PWD.
         auto path = cmSystemTools::ToNormalizedPathOnDisk(value);
@@ -1015,8 +1016,8 @@ void cmake::LoadEnvironmentPresets()
         key = varValue;
       } else if (!this->GetIsInTryCompile()) {
         std::string message =
-          cmStrCat("Warning: Environment variable ", name,
-                   " will be ignored, because CMAKE_GENERATOR is not set.");
+          cmStrCat("Warning: Environment variable "_s, name,
+                   " will be ignored, because CMAKE_GENERATOR is not set."_s);
         cmSystemTools::Message(message, "Warning");
       }
     }
@@ -1560,17 +1561,19 @@ void cmake::SetArgs(std::vector<std::string> const& args)
 
   if (!extraProvidedPath.empty() &&
       this->State->GetRole() == cmState::Role::Project) {
-    this->IssueMessage(MessageType::WARNING,
-                       cmStrCat("Ignoring extra path from command line:\n \"",
-                                extraProvidedPath, '"'));
+    this->IssueMessage(
+      MessageType::WARNING,
+      cmStrCat("Ignoring extra path from command line:\n \""_s,
+               extraProvidedPath, '"'));
   }
   if (!possibleUnknownArg.empty() &&
       this->State->GetRole() != cmState::Role::Script) {
-    std::string error = cmStrCat("Unknown argument ", possibleUnknownArg);
+    std::string error = cmStrCat("Unknown argument "_s, possibleUnknownArg);
     std::string const suggestion =
       findClosestOption(possibleUnknownArg, arguments);
     if (!suggestion.empty()) {
-      error = cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
+      error =
+        cmStrCat(std::move(error), ". Did you mean: "_s, suggestion, '?');
     }
     cmSystemTools::Error(error);
     cmSystemTools::Error("Run 'cmake --help' for all supported options.");
@@ -1601,7 +1604,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
           cm::make_unique<cmMakefileProfilingData>(profilingOutput);
       } catch (std::runtime_error& e) {
         cmSystemTools::Error(
-          cmStrCat("Could not start profiling: ", e.what()));
+          cmStrCat("Could not start profiling: "_s, e.what()));
         return;
       }
     } else {
@@ -1728,7 +1731,7 @@ void cmake::SetTraceFile(std::string const& file)
   this->TraceFile.close();
   this->TraceFile.open(file.c_str());
   if (!this->TraceFile) {
-    cmSystemTools::Error(cmStrCat("Error opening trace file ", file, ": ",
+    cmSystemTools::Error(cmStrCat("Error opening trace file "_s, file, ": "_s,
                                   cmSystemTools::GetLastSystemError()));
     return;
   }
@@ -1798,7 +1801,7 @@ bool cmake::SetDirectoriesFromFile(std::string const& arg)
   bool is_empty_directory = false;
   if (cmSystemTools::FileIsDirectory(arg)) {
     std::string path = cmSystemTools::ToNormalizedPathOnDisk(arg);
-    std::string cacheFile = cmStrCat(path, "/CMakeCache.txt");
+    std::string cacheFile = cmStrCat(path, "/CMakeCache.txt"_s);
     std::string listFile = this->GetCMakeListFile(path);
 
     is_empty_directory = true;
@@ -1915,7 +1918,7 @@ int cmake::AddCMakePaths()
     cmSystemTools::Error(
       cmStrCat("Could not find CMAKE_ROOT !!!\n"
                "CMake has most likely not been installed correctly.\n"
-               "Modules directory not found in\n",
+               "Modules directory not found in\n"_s,
                cmSystemTools::GetCMakeRoot()));
     return 0;
   }
@@ -2047,8 +2050,8 @@ bool cmake::CreateAndSetGlobalGenerator(std::string const& name)
                 "supported in CMakePresets.json.";
     }
 
-    cmSystemTools::Error(
-      cmStrCat("Could not create named generator ", name, kdevError, vsError));
+    cmSystemTools::Error(cmStrCat("Could not create named generator "_s, name,
+                                  kdevError, vsError));
     this->PrintGeneratorList();
     return false;
   }
@@ -2068,8 +2071,8 @@ bool cmake::SetArgsFromPreset(cmCMakePresetsConfigureArgs const& args,
                                                 args.PresetsFile);
   if (result != true) {
     std::string errorMsg =
-      cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ":\n",
-               presetsGraph.parseState.GetErrorMessage());
+      cmStrCat("Could not read presets from "_s, this->GetHomeDirectory(),
+               ":\n"_s, presetsGraph.parseState.GetErrorMessage());
     cmSystemTools::Error(errorMsg);
     return false;
   }
@@ -2242,7 +2245,8 @@ cmake::CreateConfigurePresetUsabilityCheck() const
         generatorNames.count(preset.Generator) != 0) {
       return cm::nullopt;
     }
-    return cmStrCat("generator \"", preset.Generator, "\" is not available");
+    return cmStrCat("generator \""_s, preset.Generator,
+                    "\" is not available"_s);
   };
 }
 
@@ -2265,7 +2269,8 @@ void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
       this->State->GetRole() == cmState::Role::Project) {
     this->IssueMessage(
       MessageType::WARNING,
-      cmStrCat("Ignoring extra path from command line:\n \"", prev_path, '"'));
+      cmStrCat("Ignoring extra path from command line:\n \""_s, prev_path,
+               '"'));
   }
   this->SetHomeDirectory(path);
 }
@@ -2308,10 +2313,10 @@ std::string cmake::FindCacheFile(std::string const& binaryDir)
 {
   std::string cachePath = binaryDir;
   cmSystemTools::ConvertToUnixSlashes(cachePath);
-  std::string cacheFile = cmStrCat(cachePath, "/CMakeCache.txt");
+  std::string cacheFile = cmStrCat(cachePath, "/CMakeCache.txt"_s);
   if (!cmSystemTools::FileExists(cacheFile)) {
     // search in parent directories for cache
-    std::string cmakeFiles = cmStrCat(cachePath, "/CMakeFiles");
+    std::string cmakeFiles = cmStrCat(cachePath, "/CMakeFiles"_s);
     if (cmSystemTools::FileExists(cmakeFiles)) {
       std::string cachePathFound =
         cmSystemTools::FileExistsInParentDirectories("CMakeCache.txt",
@@ -2372,15 +2377,15 @@ int cmake::DoPreConfigureChecks()
   if (!cmSystemTools::FileExists(srcList)) {
     std::string err;
     if (cmSystemTools::FileIsDirectory(this->GetHomeDirectory())) {
-      err =
-        cmStrCat("The source directory \"", this->GetHomeDirectory(),
-                 "\" does not appear to contain ", this->CMakeListName, ".\n");
+      err = cmStrCat("The source directory \""_s, this->GetHomeDirectory(),
+                     "\" does not appear to contain "_s, this->CMakeListName,
+                     ".\n"_s);
     } else if (cmSystemTools::FileExists(this->GetHomeDirectory())) {
-      err = cmStrCat("The source directory \"", this->GetHomeDirectory(),
-                     "\" is a file, not a directory.\n");
+      err = cmStrCat("The source directory \""_s, this->GetHomeDirectory(),
+                     "\" is a file, not a directory.\n"_s);
     } else {
-      err = cmStrCat("The source directory \"", this->GetHomeDirectory(),
-                     "\" does not exist.\n");
+      err = cmStrCat("The source directory \""_s, this->GetHomeDirectory(),
+                     "\" does not exist.\n"_s);
     }
     err += "Specify --help for usage, or press the help button on the CMake "
            "GUI.";
@@ -2394,10 +2399,10 @@ int cmake::DoPreConfigureChecks()
     std::string cacheStart = cmStrCat(*dir, '/', this->CMakeListName);
     if (!cmSystemTools::SameFile(cacheStart, srcList)) {
       std::string message =
-        cmStrCat("The source \"", srcList, "\" does not match the source \"",
-                 cacheStart,
+        cmStrCat("The source \""_s, srcList,
+                 "\" does not match the source \""_s, cacheStart,
                  "\" used to generate cache.  Re-run cmake with a different "
-                 "source directory.");
+                 "source directory."_s);
       cmSystemTools::Error(message);
       return -2;
     }
@@ -2431,7 +2436,7 @@ int cmake::HandleDeleteCacheVariables(
     SaveCacheEntry save;
     save.key = var.first;
     save.value = var.second;
-    warning = cmStrCat(std::move(warning), save.key, "= ", save.value, '\n');
+    warning = cmStrCat(std::move(warning), save.key, "= "_s, save.value, '\n');
     cmValue existingValue = this->State->GetCacheEntryValue(save.key);
     if (existingValue) {
       save.type = this->State->GetCacheEntryType(save.key);
@@ -2607,10 +2612,10 @@ int cmake::ActualConfigure()
   if (!cmlNameCache.empty() && !this->CMakeListName.empty() &&
       cmlNameCache != this->CMakeListName) {
     std::string message =
-      cmStrCat("CMakeLists filename : \"", this->CMakeListName,
-               "\"\nDoes not match the previous: \"", cmlNameCache,
+      cmStrCat("CMakeLists filename : \""_s, this->CMakeListName,
+               "\"\nDoes not match the previous: \""_s, cmlNameCache,
                "\"\nEither remove the CMakeCache.txt file and CMakeFiles "
-               "directory or choose a different binary directory.");
+               "directory or choose a different binary directory."_s);
     cmSystemTools::Error(message);
     return -2;
   }
@@ -2645,19 +2650,19 @@ int cmake::ActualConfigure()
   // but not before pre-configure checks have passed. This ensures we get
   // errors about inappropriate source/binary directories first.
   auto const redirectsDir =
-    cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles/pkgRedirects");
+    cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles/pkgRedirects"_s);
   cmSystemTools::RemoveADirectory(redirectsDir);
   if (!cmSystemTools::MakeDirectory(redirectsDir)) {
-    cmSystemTools::Error(
-      cmStrCat("Unable to (re)create the private pkgRedirects directory:\n  ",
-               redirectsDir,
-               "\n"
-               "This may be caused by not having read/write access to "
-               "the build directory.\n"
-               "Try specifying a location with read/write access like:\n"
-               "  cmake -B build\n"
-               "If using a CMake presets file, ensure that preset parameter\n"
-               "'binaryDir' expands to a writable directory.\n"));
+    cmSystemTools::Error(cmStrCat(
+      "Unable to (re)create the private pkgRedirects directory:\n  "_s,
+      redirectsDir,
+      "\n"
+      "This may be caused by not having read/write access to "
+      "the build directory.\n"
+      "Try specifying a location with read/write access like:\n"
+      "  cmake -B build\n"
+      "If using a CMake presets file, ensure that preset parameter\n"
+      "'binaryDir' expands to a writable directory.\n"_s));
     return -1;
   }
   this->AddCacheEntry("CMAKE_FIND_PACKAGE_REDIRECTS_DIR", redirectsDir,
@@ -2693,13 +2698,13 @@ int cmake::ActualConfigure()
   if (genName) {
     if (!this->GlobalGenerator->MatchesGeneratorName(*genName)) {
       std::string message =
-        cmStrCat("Error: generator : ", this->GlobalGenerator->GetName(),
+        cmStrCat("Error: generator : "_s, this->GlobalGenerator->GetName(),
                  "\n"
-                 "Does not match the generator used previously: ",
+                 "Does not match the generator used previously: "_s,
                  *genName,
                  "\n"
                  "Either remove the CMakeCache.txt file and CMakeFiles "
-                 "directory or choose a different binary directory.");
+                 "directory or choose a different binary directory."_s);
       cmSystemTools::Error(message);
       return -2;
     }
@@ -2726,13 +2731,13 @@ int cmake::ActualConfigure()
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_INSTANCE")) {
     if (this->GeneratorInstanceSet && this->GeneratorInstance != *instance) {
       std::string message =
-        cmStrCat("Error: generator instance: ", this->GeneratorInstance,
+        cmStrCat("Error: generator instance: "_s, this->GeneratorInstance,
                  "\n"
-                 "Does not match the instance used previously: ",
+                 "Does not match the instance used previously: "_s,
                  *instance,
                  "\n"
                  "Either remove the CMakeCache.txt file and CMakeFiles "
-                 "directory or choose a different binary directory.");
+                 "directory or choose a different binary directory."_s);
       cmSystemTools::Error(message);
       return -2;
     }
@@ -2747,13 +2752,13 @@ int cmake::ActualConfigure()
     if (this->GeneratorPlatformSet &&
         this->GeneratorPlatform != *platformName) {
       std::string message =
-        cmStrCat("Error: generator platform: ", this->GeneratorPlatform,
+        cmStrCat("Error: generator platform: "_s, this->GeneratorPlatform,
                  "\n"
-                 "Does not match the platform used previously: ",
+                 "Does not match the platform used previously: "_s,
                  *platformName,
                  "\n"
                  "Either remove the CMakeCache.txt file and CMakeFiles "
-                 "directory or choose a different binary directory.");
+                 "directory or choose a different binary directory."_s);
       cmSystemTools::Error(message);
       return -2;
     }
@@ -2766,13 +2771,13 @@ int cmake::ActualConfigure()
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET")) {
     if (this->GeneratorToolsetSet && this->GeneratorToolset != *tsName) {
       std::string message =
-        cmStrCat("Error: generator toolset: ", this->GeneratorToolset,
+        cmStrCat("Error: generator toolset: "_s, this->GeneratorToolset,
                  "\n"
-                 "Does not match the toolset used previously: ",
+                 "Does not match the toolset used previously: "_s,
                  *tsName,
                  "\n"
                  "Either remove the CMakeCache.txt file and CMakeFiles "
-                 "directory or choose a different binary directory.");
+                 "directory or choose a different binary directory."_s);
       cmSystemTools::Error(message);
       return -2;
     }
@@ -2923,38 +2928,38 @@ int cmake::ActualConfigure()
       launcher = cmStrCat('"', cmSystemTools::GetCTestCommand(),
                           "\" --launch "
                           "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> "
-                          "--object-dir <TARGET_SUPPORT_DIR> ");
+                          "--object-dir <TARGET_SUPPORT_DIR> "_s);
     } else {
       launcher =
-        cmStrCat('"', cmSystemTools::GetCTestCommand(), "\" --instrument ");
+        cmStrCat('"', cmSystemTools::GetCTestCommand(), "\" --instrument "_s);
     }
-    std::string common_args =
-      cmStrCat(" --target-name <TARGET_NAME> --config <CONFIG> --build-dir \"",
-               this->State->GetBinaryDirectory(), "\" ");
+    std::string common_args = cmStrCat(
+      " --target-name <TARGET_NAME> --config <CONFIG> --build-dir \""_s,
+      this->State->GetBinaryDirectory(), "\" "_s);
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_COMPILE",
       cmStrCat(
-        launcher, "--command-type ",
+        launcher, "--command-type "_s,
         cmInstrumentation::SnippetTypeToString(
           cmInstrumentation::SnippetType::Compile),
         common_args,
-        "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "));
+        "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "_s));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_LINK",
       cmStrCat(
-        launcher, "--command-type ",
+        launcher, "--command-type "_s,
         cmInstrumentation::SnippetTypeToString(
           cmInstrumentation::SnippetType::Link),
         common_args,
-        "--output <TARGET> --config <CONFIG> --language <LANGUAGE> -- "));
+        "--output <TARGET> --config <CONFIG> --language <LANGUAGE> -- "_s));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_CUSTOM",
       cmStrCat(
-        launcher, "--command-type ",
+        launcher, "--command-type "_s,
         cmInstrumentation::SnippetTypeToString(
           cmInstrumentation::SnippetType::Custom),
         common_args,
-        "--output-as-file-name \"<OUTPUT_STORE_TO_FILE>\" --role <ROLE> -- "));
+        "--output-as-file-name \"<OUTPUT_STORE_TO_FILE>\" --role <ROLE> -- "_s));
   }
 #endif
 
@@ -3125,7 +3130,7 @@ int cmake::HandleDifferentSystemEnvironmentId(std::string envId,
     } else {
       this->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Unsupported ", actionEnvName, " '", actionEnv, '\''));
+        cmStrCat("Unsupported "_s, actionEnvName, " '"_s, actionEnv, '\''));
       return -1;
     }
   }
@@ -3134,20 +3139,20 @@ int cmake::HandleDifferentSystemEnvironmentId(std::string envId,
       break;
     case Action::Warn: {
       std::string msg = cmStrCat(
-        "CMAKE_SYSTEM_ENVIRONMENT_ID: ", envId,
-        "\nDoes not match the previous value: ", cachedId,
+        "CMAKE_SYSTEM_ENVIRONMENT_ID: "_s, envId,
+        "\nDoes not match the previous value: "_s, cachedId,
         "\nThe configure results are probably outdated. Consider running"
         " cmake with --fresh, removing the CMakeCache.txt file and"
         " CMakeFiles directory, or choosing a different binary"
-        " directory.");
+        " directory."_s);
       this->IssueMessage(MessageType::WARNING, msg);
       break;
     }
     case Action::Refresh: {
       std::string msg =
-        cmStrCat("CMAKE_SYSTEM_ENVIRONMENT_ID: ", envId,
-                 "\nDoes not match the previous value: ", cachedId,
-                 "\nThe cache will be refreshed automatically.");
+        cmStrCat("CMAKE_SYSTEM_ENVIRONMENT_ID: "_s, envId,
+                 "\nDoes not match the previous value: "_s, cachedId,
+                 "\nThe cache will be refreshed automatically."_s);
       this->IssueMessage(MessageType::MESSAGE, msg);
       this->DeleteCache(this->GetHomeOutputDirectory());
       if (this->LoadCache() < 0) {
@@ -3346,7 +3351,7 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
                            "Build files cannot be regenerated correctly.");
     return ret;
   }
-  std::string message = cmStrCat("Build files have been written to: ",
+  std::string message = cmStrCat("Build files have been written to: "_s,
                                  this->GetHomeOutputDirectory());
   this->UpdateProgress(message, -1);
   return ret;
@@ -3562,7 +3567,7 @@ int cmake::LoadCache()
   if (!this->LoadCache(this->GetHomeOutputDirectory())) {
     // if it does exist, but isn't readable then warn the user
     std::string cacheFile =
-      cmStrCat(this->GetHomeOutputDirectory(), "/CMakeCache.txt");
+      cmStrCat(this->GetHomeOutputDirectory(), "/CMakeCache.txt"_s);
     if (cmSystemTools::FileExists(cacheFile)) {
       cmSystemTools::Error(
         "There is a CMakeCache.txt file for the current binary tree but "
@@ -3709,8 +3714,8 @@ int cmake::CheckBuildSystem()
   // If the file provided does not exist, we have to rerun.
   if (!cmSystemTools::FileExists(this->CheckBuildSystemArgument)) {
     if (verbose) {
-      std::string msg = cmStrCat(
-        "Re-run cmake missing file: ", this->CheckBuildSystemArgument, '\n');
+      std::string msg = cmStrCat("Re-run cmake missing file: "_s,
+                                 this->CheckBuildSystemArgument, '\n');
       cmSystemTools::Stdout(msg);
     }
     return 1;
@@ -3726,8 +3731,8 @@ int cmake::CheckBuildSystem()
   if (!mf.ReadListFile(this->CheckBuildSystemArgument) ||
       cmSystemTools::GetErrorOccurredFlag()) {
     if (verbose) {
-      std::string msg = cmStrCat(
-        "Re-run cmake error reading : ", this->CheckBuildSystemArgument, '\n');
+      std::string msg = cmStrCat("Re-run cmake error reading : "_s,
+                                 this->CheckBuildSystemArgument, '\n');
       cmSystemTools::Stdout(msg);
     }
     // There was an error reading the file.  Just rerun.
@@ -3758,7 +3763,7 @@ int cmake::CheckBuildSystem()
     if (!cmSystemTools::PathExists(p)) {
       if (verbose) {
         cmSystemTools::Stdout(
-          cmStrCat("Re-run cmake, missing byproduct: ", p, '\n'));
+          cmStrCat("Re-run cmake, missing byproduct: "_s, p, '\n'));
       }
       return 1;
     }
@@ -3821,8 +3826,8 @@ int cmake::CheckBuildSystem()
     if (!this->FileTimeCache->Compare(out_oldest, dep_newest, &result) ||
         result < 0) {
       if (verbose) {
-        std::string msg = cmStrCat("Re-run cmake file: ", out_oldest,
-                                   " older than: ", dep_newest, '\n');
+        std::string msg = cmStrCat("Re-run cmake file: "_s, out_oldest,
+                                   " older than: "_s, dep_newest, '\n');
         cmSystemTools::Stdout(msg);
       }
       return 1;
@@ -3863,9 +3868,9 @@ void cmake::GenerateGraphViz(std::string const& fileName) const
   cmGraphVizWriter gvWriter(fileName, this->GetGlobalGenerator());
 
   std::string settingsFile =
-    cmStrCat(this->GetHomeOutputDirectory(), "/CMakeGraphVizOptions.cmake");
+    cmStrCat(this->GetHomeOutputDirectory(), "/CMakeGraphVizOptions.cmake"_s);
   std::string fallbackSettingsFile =
-    cmStrCat(this->GetHomeDirectory(), "/CMakeGraphVizOptions.cmake");
+    cmStrCat(this->GetHomeDirectory(), "/CMakeGraphVizOptions.cmake"_s);
 
   gvWriter.ReadSettings(settingsFile, fallbackSettingsFile);
 
@@ -3969,9 +3974,9 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   // we have to find the module directory, so we can copy the files
   this->AddCMakePaths();
   std::string modulesPath =
-    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules");
-  std::string inFile = cmStrCat(modulesPath, "/SystemInformation.cmake");
-  std::string outFile = cmStrCat(destPath, "/CMakeLists.txt");
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules"_s);
+  std::string inFile = cmStrCat(modulesPath, "/SystemInformation.cmake"_s);
+  std::string outFile = cmStrCat(destPath, "/CMakeLists.txt"_s);
 
   // Copy file
   if (!cmsys::SystemTools::CopyFileAlways(inFile, outFile)) {
@@ -3982,7 +3987,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
 
   // do we write to a file or to stdout?
   if (resultFile.empty()) {
-    resultFile = cmStrCat(cwd, "/__cmake_systeminformation/results.txt");
+    resultFile = cmStrCat(cwd, "/__cmake_systeminformation/results.txt"_s);
   }
 
   {
@@ -4087,8 +4092,8 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
                                                   presetsArgs.PresetsFile);
     if (result != true) {
       cmSystemTools::Error(
-        cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
-                 ":\n", settingsFile.parseState.GetErrorMessage()));
+        cmStrCat("Could not read presets from "_s, this->GetHomeDirectory(),
+                 ":\n"_s, settingsFile.parseState.GetErrorMessage()));
       return 1;
     }
 
@@ -4116,16 +4121,16 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
     auto configurePresetPair =
       settingsFile.ConfigurePresets.find(expandedPreset->ConfigurePreset);
     if (configurePresetPair == settingsFile.ConfigurePresets.end()) {
-      cmSystemTools::Error(cmStrCat("No such configure preset in ",
-                                    this->GetHomeDirectory(), ": \"",
+      cmSystemTools::Error(cmStrCat("No such configure preset in "_s,
+                                    this->GetHomeDirectory(), ": \""_s,
                                     expandedPreset->ConfigurePreset, '"'));
       this->PrintPresetList(settingsFile);
       return 1;
     }
 
     if (configurePresetPair->second.Unexpanded.Hidden) {
-      cmSystemTools::Error(cmStrCat("Cannot use hidden configure preset in ",
-                                    this->GetHomeDirectory(), ": \"",
+      cmSystemTools::Error(cmStrCat("Cannot use hidden configure preset in "_s,
+                                    this->GetHomeDirectory(), ": \""_s,
                                     expandedPreset->ConfigurePreset, '"'));
       this->PrintPresetList(settingsFile);
       return 1;
@@ -4133,9 +4138,9 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
 
     auto const& expandedConfigurePreset = configurePresetPair->second.Expanded;
     if (!expandedConfigurePreset) {
-      cmSystemTools::Error(cmStrCat("Could not evaluate configure preset \"",
+      cmSystemTools::Error(cmStrCat("Could not evaluate configure preset \""_s,
                                     expandedPreset->ConfigurePreset,
-                                    "\": Invalid macro expansion"));
+                                    "\": Invalid macro expansion"_s));
       return 1;
     }
 
@@ -4256,7 +4261,7 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
   // itself, there is the risk of building an out-of-date solution file due
   // to limitations of the underlying build system.
   std::string const stampList =
-    cmStrCat(cachePath, "/CMakeFiles/",
+    cmStrCat(cachePath, "/CMakeFiles/"_s,
              cmGlobalVisualStudioVersionedGenerator::GetGenerateStampList());
 
   // Note that the stampList file only exists for VS generators.
@@ -4283,7 +4288,7 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
                              "Build files cannot be regenerated correctly.");
       return ret;
     }
-    std::string message = cmStrCat("Build files have been written to: ",
+    std::string message = cmStrCat("Build files have been written to: "_s,
                                    this->GetHomeOutputDirectory());
     this->UpdateProgress(message, -1);
   }
@@ -4401,7 +4406,7 @@ namespace {
 std::string WorkflowStepLabel(cm::static_string_view type,
                               std::string const& name)
 {
-  return cmStrCat("of type \"", type, "\" named \"", name, '"');
+  return cmStrCat("of type \""_s, type, "\" named \""_s, name, '"');
 }
 }
 
@@ -4414,29 +4419,29 @@ T const* cmake::FindPresetForWorkflow(
   std::string const stepLabel = WorkflowStepLabel(type, step.PresetName);
   auto it = presets.find(step.PresetName);
   if (it == presets.end()) {
-    cmSystemTools::Error(cmStrCat("No such preset for workflow step ",
-                                  stepLabel, " in ",
+    cmSystemTools::Error(cmStrCat("No such preset for workflow step "_s,
+                                  stepLabel, " in "_s,
                                   this->GetHomeDirectory()));
     return nullptr;
   }
 
   if (it->second.Unexpanded.Hidden) {
     cmSystemTools::Error(
-      cmStrCat("Cannot use hidden preset for workflow step ", stepLabel,
-               " in ", this->GetHomeDirectory()));
+      cmStrCat("Cannot use hidden preset for workflow step "_s, stepLabel,
+               " in "_s, this->GetHomeDirectory()));
     return nullptr;
   }
 
   if (!it->second.Expanded) {
-    cmSystemTools::Error(cmStrCat("Could not evaluate workflow step ",
-                                  stepLabel, ": Invalid macro expansion"));
+    cmSystemTools::Error(cmStrCat("Could not evaluate workflow step "_s,
+                                  stepLabel, ": Invalid macro expansion"_s));
     return nullptr;
   }
 
   if (!it->second.Expanded->ConditionResult) {
     cmSystemTools::Error(
-      cmStrCat("Cannot use disabled preset for workflow step ", stepLabel,
-               " in ", this->GetHomeDirectory()));
+      cmStrCat("Cannot use disabled preset for workflow step "_s, stepLabel,
+               " in "_s, this->GetHomeDirectory()));
     return nullptr;
   }
 
@@ -4473,8 +4478,8 @@ int cmake::Workflow(cmCMakePresetsWorkflowArgs const& args)
   auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory(),
                                                 args.PresetsFile);
   if (result != true) {
-    cmSystemTools::Error(cmStrCat("Could not read presets from ",
-                                  this->GetHomeDirectory(), ":\n",
+    cmSystemTools::Error(cmStrCat("Could not read presets from "_s,
+                                  this->GetHomeDirectory(), ":\n"_s,
                                   settingsFile.parseState.GetErrorMessage()));
     return 1;
   }
@@ -4596,16 +4601,16 @@ int cmake::Workflow(cmCMakePresetsWorkflowArgs const& args)
     cmUVProcessChain::Status const status = step.Action();
     if (status.ExitStatus != 0) {
       cmSystemTools::Error(
-        cmStrCat("Workflow step ", WorkflowStepLabel(step.Type, step.Name),
-                 " failed with exit code ", status.ExitStatus));
+        cmStrCat("Workflow step "_s, WorkflowStepLabel(step.Type, step.Name),
+                 " failed with exit code "_s, status.ExitStatus));
       exitStatus = static_cast<int>(status.ExitStatus);
       break;
     }
     auto const codeReasonPair = status.GetException();
     if (codeReasonPair.first != cmUVProcessChain::ExceptionCode::None) {
       cmSystemTools::Error(
-        cmStrCat("Workflow step ", WorkflowStepLabel(step.Type, step.Name),
-                 " command ended abnormally: ", codeReasonPair.second));
+        cmStrCat("Workflow step "_s, WorkflowStepLabel(step.Type, step.Name),
+                 " command ended abnormally: "_s, codeReasonPair.second));
       exitStatus =
         status.SpawnResult != 0 ? status.SpawnResult : status.TermSignal;
       break;
@@ -4652,7 +4657,7 @@ void cmake::RunCheckForUnusedVariables()
     for (auto const& it : this->UsedCliVariables) {
       if (!it.second) {
         haveUnused = true;
-        msg = cmStrCat(std::move(msg), "\n  ", it.first);
+        msg = cmStrCat(std::move(msg), "\n  "_s, it.first);
       }
     }
     if (haveUnused) {
@@ -4711,7 +4716,7 @@ std::string cmake::GetCMakeListFile(std::string const& dir) const
     listFile = cmStrCat(dir, slash, this->CMakeListName);
   }
   if (listFile.empty() || !cmSystemTools::FileExists(listFile, true)) {
-    listFile = cmStrCat(dir, slash, "CMakeLists.txt");
+    listFile = cmStrCat(dir, slash, "CMakeLists.txt"_s);
   }
   return listFile;
 }

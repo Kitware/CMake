@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmStringAlgorithms.h"
@@ -103,7 +105,7 @@ private:
   void ExpectOrDie(char c, std::string const& message)
   {
     if (!this->Expect(c)) {
-      this->ErrorExit(cmStrCat('\'', c, "' expected ", message, '.'));
+      this->ErrorExit(cmStrCat('\'', c, "' expected "_s, message, '.'));
     }
   }
 

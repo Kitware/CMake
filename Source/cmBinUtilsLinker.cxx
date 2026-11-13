@@ -5,6 +5,8 @@
 
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmCMakePath.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
@@ -35,8 +37,8 @@ void cmBinUtilsLinker::NormalizePath(std::string& path) const
   if (policy == cmPolicies::WARN) {
     this->Archive->GetMakefile()->IssuePolicyWarning(
       cmPolicies::CMP0207, {},
-      cmStrCat("Path\n  \"", path, "\"\nwould be converted to\n  \"",
-               normalizedPath, "\"\n"));
+      cmStrCat("Path\n  \""_s, path, "\"\nwould be converted to\n  \""_s,
+               normalizedPath, "\"\n"_s));
   } else if (policy == cmPolicies::NEW) {
     path = std::move(normalizedPath);
   }

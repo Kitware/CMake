@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
@@ -73,7 +75,7 @@ void cmMakefileProfilingData::StartEntry(std::string const& category,
     this->JsonWriter->write(v, &this->ProfileStream);
   } catch (std::ios_base::failure& fail) {
     cmSystemTools::Error(
-      cmStrCat("Failed to write to profiling output: ", fail.what()));
+      cmStrCat("Failed to write to profiling output: "_s, fail.what()));
   } catch (...) {
     cmSystemTools::Error("Error writing profiling output!");
   }
@@ -100,7 +102,7 @@ void cmMakefileProfilingData::StopEntry()
     this->JsonWriter->write(v, &this->ProfileStream);
   } catch (std::ios_base::failure& fail) {
     cmSystemTools::Error(
-      cmStrCat("Failed to write to profiling output:", fail.what()));
+      cmStrCat("Failed to write to profiling output:"_s, fail.what()));
   } catch (...) {
     cmSystemTools::Error("Error writing profiling output!");
   }

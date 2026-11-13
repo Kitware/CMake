@@ -2,4 +2,9 @@
 id: cmstrcat-call
 language: Cpp
 rule:
-  pattern: cmStrCat($$$)
+  any:
+  - pattern: cmStrCat($$$)
+  - pattern: cmCTestLog($$$)
+  - pattern: cmCTestOptionalLog($$$)
+  - pattern: cmCTestColorLog($$$)
+  - pattern: cmCPackIFWLogger($$$)

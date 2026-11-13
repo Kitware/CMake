@@ -6,6 +6,8 @@
 #include <ios>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmExecutionStatus.h"
@@ -36,7 +38,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
       if (cnt >= args.size() || args[cnt] == "APPEND" ||
           args[cnt] == "QUIET") {
         status.SetError(
-          cmStrCat(args[cnt - 1], " argument missing group name"));
+          cmStrCat(args[cnt - 1], " argument missing group name"_s));
         return false;
       }
       this->CTest->SetSpecificGroup(args[cnt].c_str());
@@ -100,27 +102,27 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   if (smodel) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, quiet,
-                       "Run dashboard with model ", smodel,
+                       "Run dashboard with model "_s, smodel,
                        "\n"
-                       "   Source directory: ",
+                       "   Source directory: "_s,
                        *src_dir,
                        "\n"
-                       "   Build directory: ",
+                       "   Build directory: "_s,
                        *bld_dir, '\n');
   } else {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, quiet,
                        "Run dashboard with "
                        "to-be-determined model\n"
-                       "   Source directory: ",
+                       "   Source directory: "_s,
                        *src_dir,
                        "\n"
-                       "   Build directory: ",
+                       "   Build directory: "_s,
                        *bld_dir, '\n');
   }
   char const* group = this->CTest->GetSpecificGroup();
   if (group) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, quiet, "   Group: ", group,
-                       '\n');
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, quiet, "   Group: "_s,
+                       group, '\n');
   }
 
   // Log startup actions.
@@ -128,7 +130,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   cmGeneratedFileStream ofs(startLogFile);
   if (!ofs) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot create log file: LastStart.log\n");
+               "Cannot create log file: LastStart.log\n"_s);
     return false;
   }
 
@@ -137,13 +139,13 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
   if (!cmSystemTools::FileIsDirectory(sourceDir)) {
-    status.SetError(
-      cmStrCat("given source path\n"
-               "  ",
-               sourceDir,
-               "\n"
-               "which is not an existing directory.  "
-               "Set CTEST_CHECKOUT_COMMAND to a command line to create it."));
+    status.SetError(cmStrCat(
+      "given source path\n"
+      "  "_s,
+      sourceDir,
+      "\n"
+      "which is not an existing directory.  "
+      "Set CTEST_CHECKOUT_COMMAND to a command line to create it."_s));
     return false;
   }
 
@@ -158,10 +160,10 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string fname;
 
-  std::string src_dir_fname = cmStrCat(sourceDir, "/CTestConfig.cmake");
+  std::string src_dir_fname = cmStrCat(sourceDir, "/CTestConfig.cmake"_s);
   cmSystemTools::ConvertToUnixSlashes(src_dir_fname);
 
-  std::string bld_dir_fname = cmStrCat(binaryDir, "/CTestConfig.cmake");
+  std::string bld_dir_fname = cmStrCat(binaryDir, "/CTestConfig.cmake"_s);
   cmSystemTools::ConvertToUnixSlashes(bld_dir_fname);
 
   if (cmSystemTools::FileExists(bld_dir_fname)) {
@@ -172,10 +174,10 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   if (!fname.empty()) {
     cmCTestOptionalLog(this->CTest, OUTPUT, quiet,
-                       "   Reading ctest configuration file: ", fname, '\n');
+                       "   Reading ctest configuration file: "_s, fname, '\n');
     bool readit = mf.ReadDependentFile(fname);
     if (!readit) {
-      std::string m = cmStrCat("Could not find include file: ", fname);
+      std::string m = cmStrCat("Could not find include file: "_s, fname);
       status.SetError(m);
       return false;
     }
@@ -191,9 +193,10 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->Initialize(binaryDir, outputDir);
 
   cmCTestOptionalLog(
-    this->CTest, OUTPUT, quiet,
-    "   Site: ", this->CTest->GetCTestConfiguration("Site"), '\n',
-    "   Build name: ",
+    this->CTest, OUTPUT, quiet, "   Site: "_s,
+    this->CTest->GetCTestConfiguration("Site"),
+    "\n"
+    "   Build name: "_s,
     cmCTest::SafeBuildIdField(this->CTest->GetCTestConfiguration("BuildName")),
     '\n');
 
@@ -202,7 +205,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     cmCTestOptionalLog(
       this->CTest, WARNING, quiet,
       "WARNING: No nightly start time found please set in CTestConfig.cmake"
-      " or DartConfig.cmake\n");
+      " or DartConfig.cmake\n"_s);
     return false;
   }
 
@@ -218,9 +221,9 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  cmCTestOptionalLog(this->CTest, OUTPUT, quiet, "   Use ",
-                     this->CTest->GetTestGroupString(),
-                     " tag: ", this->CTest->GetCurrentTag(), '\n');
+  cmCTestOptionalLog(this->CTest, OUTPUT, quiet, "   Use "_s,
+                     this->CTest->GetTestGroupString(), " tag: "_s,
+                     this->CTest->GetCurrentTag(), '\n');
   return true;
 }
 

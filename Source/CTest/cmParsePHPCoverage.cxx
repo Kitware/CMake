@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -50,16 +51,17 @@ bool cmParsePHPCoverage::ReadCoverageArray(std::istream& in,
   buf[3] = 0;
   if (strcmp(buf, ";a:") != 0) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "failed to read start of coverage array, found : ", buf, '\n');
+               "failed to read start of coverage array, found : "_s, buf,
+               '\n');
     return false;
   }
   int size = 0;
   if (!this->ReadInt(in, size)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read size ");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read size "_s);
     return false;
   }
   if (!in.get(c) && c == '{') {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read open {\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read open {\n"_s);
     return false;
   }
   for (int i = 0; i < size; i++) {
@@ -136,7 +138,7 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
   buf[2] = 0;
   if (strcmp(buf, "s:") != 0) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "failed to read start of file info found: [", buf, "]\n");
+               "failed to read start of file info found: ["_s, buf, "]\n"_s);
     return false;
   }
   char c;
@@ -154,13 +156,15 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
     std::string fileName = s.get();
     // read close quote
     if (in.get(c) && c != '"') {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read close quote\n",
-                 "read [", c, "]\n");
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "failed to read close quote\n"
+                 "read ["_s,
+                 c, "]\n"_s);
       return false;
     }
     if (!this->ReadCoverageArray(in, fileName)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "failed to read coverage array for file: ", fileName, "\n");
+                 "failed to read coverage array for file: "_s, fileName, '\n');
       return false;
     }
     return true;
@@ -179,17 +183,18 @@ bool cmParsePHPCoverage::ReadPHPData(char const* file)
   char c = 0;
   in.get(c);
   if (c != '{') {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read open array\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read open array\n"_s);
     return false;
   }
   for (int i = 0; i < size; i++) {
     if (!this->ReadFileInformation(in)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "Failed to read file #", i, "\n");
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Failed to read file #"_s, i,
+                 '\n');
       return false;
     }
     in.get(c);
     if (c != '}') {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read close array\n");
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read close array\n"_s);
       return false;
     }
   }

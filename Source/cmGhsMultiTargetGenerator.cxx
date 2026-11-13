@@ -79,8 +79,8 @@ void cmGhsMultiTargetGenerator::Generate()
       break;
     }
     case cm::TargetType::SHARED_LIBRARY: {
-      std::string msg =
-        cmStrCat("add_library(<name> SHARED ...) not supported: ", this->Name);
+      std::string msg = cmStrCat(
+        "add_library(<name> SHARED ...) not supported: "_s, this->Name);
       cmSystemTools::Message(msg);
       return;
     }
@@ -91,8 +91,8 @@ void cmGhsMultiTargetGenerator::Generate()
       break;
     }
     case cm::TargetType::MODULE_LIBRARY: {
-      std::string msg =
-        cmStrCat("add_library(<name> MODULE ...) not supported: ", this->Name);
+      std::string msg = cmStrCat(
+        "add_library(<name> MODULE ...) not supported: "_s, this->Name);
       cmSystemTools::Message(msg);
       return;
     }
@@ -128,9 +128,9 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
          .empty()) {
     // Green Hill MULTI does not support this feature.
     cmSystemTools::Message(
-      cmStrCat("'LINKER_TYPE' property, specified on target '",
+      cmStrCat("'LINKER_TYPE' property, specified on target '"_s,
                this->GeneratorTarget->GetName(),
-               "', is not supported by this generator."));
+               "', is not supported by this generator."_s));
   }
 
   // Open the target file in copy-if-different mode.
@@ -430,7 +430,7 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
   if (cm::optional<std::string> comment = ccg.GetComment()) {
     std::string escapedComment = this->LocalGenerator->EscapeForShell(
       *comment, ccg.GetCC().GetEscapeAllowMakeVars());
-    std::string echocmd = cmStrCat("echo ", escapedComment);
+    std::string echocmd = cmStrCat("echo "_s, escapedComment);
     cmdLines.push_back(std::move(echocmd));
   }
 
@@ -476,12 +476,12 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
         // This command was specified as a path to a file in the
         // current directory.  Add a leading "./" so it can run
         // without the current directory being in the search path.
-        cmd = cmStrCat("./", std::move(cmd));
+        cmd = cmStrCat("./"_s, std::move(cmd));
       }
       cmd = this->LocalGenerator->ConvertToOutputFormat(
         cmd, cmOutputConverter::SHELL);
       if (useCall) {
-        cmd = cmStrCat("call ", std::move(cmd));
+        cmd = cmStrCat("call "_s, std::move(cmd));
       }
       ccg.AppendArguments(c, cmd);
       cmdLines.push_back(std::move(cmd));
@@ -705,8 +705,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       std::vector<cmSourceFile const*> customCommands;
       if (this->ComputeCustomCommandOrder(customCommands)) {
         std::string message =
-          cmStrCat("The custom commands for target [",
-                   this->GeneratorTarget->GetName(), "] had a cycle.\n");
+          cmStrCat("The custom commands for target ["_s,
+                   this->GeneratorTarget->GetName(), "] had a cycle.\n"_s);
         cmSystemTools::Error(message);
       } else {
         /* Custom targets do not have a dependency on SOURCES files.
@@ -735,7 +735,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           // Open the filestream for this custom command
           std::string fname = cmStrCat(
             this->GeneratorTarget->GetSupportDirectory(), '/', this->Name,
-            "_cc", cmdcount++, '_', (sf->GetLocation()).GetName(), fext);
+            "_cc"_s, cmdcount++, '_', (sf->GetLocation()).GetName(), fext);
 
           cmGeneratedFileStream f(fname);
           f.SetCopyIfDifferent(true);
@@ -788,7 +788,7 @@ std::string cmGhsMultiTargetGenerator::WriteObjectLangOverride(
   std::string ret;
   cmValue rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (rawLangProp) {
-    ret = cmStrCat(" [", *rawLangProp, ']');
+    ret = cmStrCat(" ["_s, *rawLangProp, ']');
   }
 
   return ret;

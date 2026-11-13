@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGetTargetPropertyCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -34,8 +36,8 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
   if (result == cmGetTargetPropertyResult::TargetNotFound) {
     mf.IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("get_target_property() called with non-existent target \"",
-               targetName, "\"."));
+      cmStrCat("get_target_property() called with non-existent target \""_s,
+               targetName, "\"."_s));
   }
   return false;
 }

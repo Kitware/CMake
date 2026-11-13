@@ -145,16 +145,16 @@ std::string CxxModuleMapContentClang(CxxModuleLocations const& loc,
       // extension.
       mm = cmStrCat(std::move(mm),
                     "-x c++-module\n"
-                    "-fmodule-output=\"",
-                    bmi_loc.Location(), "\"\n");
+                    "-fmodule-output=\""_s,
+                    bmi_loc.Location(), "\"\n"_s);
       break;
     }
   }
 
   auto all_usages = GetTransitiveUsages(loc, obj.Requires, usages);
   for (auto const& usage : all_usages) {
-    mm = cmStrCat(std::move(mm), "-fmodule-file=\"", usage.LogicalName, '=',
-                  usage.Location, "\"\n");
+    mm = cmStrCat(std::move(mm), "-fmodule-file=\""_s, usage.LogicalName, '=',
+                  usage.Location, "\"\n"_s);
   }
 
   return mm;
@@ -171,7 +171,7 @@ std::string CxxModuleMapContentGcc(CxxModuleLocations const& loc,
   // generate any).
 
   // Write the root directory to use for module paths.
-  std::string mm = cmStrCat("$root ", loc.RootDirectory, '\n');
+  std::string mm = cmStrCat("$root "_s, loc.RootDirectory, '\n');
 
   for (auto const& p : obj.Provides) {
     auto bmi_loc = loc.BmiGeneratorPathForModule(p.LogicalName);
@@ -226,8 +226,8 @@ std::string CxxModuleMapContentMsvc(CxxModuleLocations const& loc,
 
     auto bmi_loc = loc.BmiGeneratorPathForModule(p.LogicalName);
     if (bmi_loc.IsKnown()) {
-      mm =
-        cmStrCat(std::move(mm), "-ifcOutput \"", bmi_loc.Location(), "\"\n");
+      mm = cmStrCat(std::move(mm), "-ifcOutput \""_s, bmi_loc.Location(),
+                    "\"\n"_s);
     }
   }
 
@@ -235,8 +235,8 @@ std::string CxxModuleMapContentMsvc(CxxModuleLocations const& loc,
   for (auto const& usage : all_usages) {
     auto flag = flag_for_method(usage.Method);
 
-    mm = cmStrCat(std::move(mm), flag, " \"", usage.LogicalName, '=',
-                  usage.Location, "\"\n");
+    mm = cmStrCat(std::move(mm), flag, " \""_s, usage.LogicalName, '=',
+                  usage.Location, "\"\n"_s);
   }
 
   return mm;
@@ -267,14 +267,14 @@ bool CxxModuleUsage::AddReference(std::string const& logical,
       return ""_s;
     };
 
-    cmSystemTools::Error(cmStrCat("Disagreement of the location of the '",
-                                  logical,
-                                  "' module. "
-                                  "Location A: '",
-                                  ref.Path, "' via ", method_name(ref.Method),
-                                  "; "
-                                  "Location B: '",
-                                  loc, "' via ", method_name(method), '.'));
+    cmSystemTools::Error(
+      cmStrCat("Disagreement of the location of the '"_s, logical,
+               "' module. "
+               "Location A: '"_s,
+               ref.Path, "' via "_s, method_name(ref.Method),
+               "; "
+               "Location B: '"_s,
+               loc, "' via "_s, method_name(method), '.'));
     return false;
   }
 
@@ -330,9 +330,9 @@ std::set<std::string> CxxModuleUsageSeed(
       auto bmi_loc = loc.BmiGeneratorPathForModule(r.LogicalName);
       if (bmi_loc.IsPrivate()) {
         cmSystemTools::Error(
-          cmStrCat("Unable to use module '", r.LogicalName,
+          cmStrCat("Unable to use module '"_s, r.LogicalName,
                    "' as it is 'PRIVATE' and therefore not accessible outside "
-                   "of its owning target."));
+                   "of its owning target."_s));
         private_usage_found = true;
         continue;
       }

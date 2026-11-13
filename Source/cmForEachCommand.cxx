@@ -360,7 +360,7 @@ bool HandleInMode(std::vector<std::string> const& args,
 
     } else {
       makefile.IssueMessage(MessageType::FATAL_ERROR,
-                            cmStrCat("Unknown argument:\n  ", arg, '\n'));
+                            cmStrCat("Unknown argument:\n  "_s, arg, '\n'));
       return true;
     }
   }
@@ -370,8 +370,8 @@ bool HandleInMode(std::vector<std::string> const& args,
   if (doing == DoingZipLists && varsCount > 1u &&
       (2u * varsCount) != fb->Args.size()) {
     makefile.IssueMessage(MessageType::FATAL_ERROR,
-                          cmStrCat("Expected ", varsCount,
-                                   " list variables, but given ",
+                          cmStrCat("Expected "_s, varsCount,
+                                   " list variables, but given "_s,
                                    fb->Args.size() - varsCount));
     return true;
   }
@@ -386,11 +386,11 @@ bool TryParseInteger(cmExecutionStatus& status, std::string const& str, int& i)
   try {
     i = std::stoi(str);
   } catch (std::invalid_argument const&) {
-    status.SetError(cmStrCat("Invalid integer: '", str, '\''));
+    status.SetError(cmStrCat("Invalid integer: '"_s, str, '\''));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   } catch (std::out_of_range const&) {
-    status.SetError(cmStrCat("Integer out of range: '", str, '\''));
+    status.SetError(cmStrCat("Integer out of range: '"_s, str, '\''));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -453,8 +453,8 @@ bool cmForEachCommand(std::vector<std::string> const& args,
       if ((start > stop && step > 0) || (start < stop && step < 0) ||
           step == 0) {
         status.SetError(
-          cmStrCat("called with incorrect range specification: start ", start,
-                   ", stop ", stop, ", step ", step));
+          cmStrCat("called with incorrect range specification: start "_s,
+                   start, ", stop "_s, stop, ", step "_s, step));
         cmSystemTools::SetFatalErrorOccurred();
         return false;
       }

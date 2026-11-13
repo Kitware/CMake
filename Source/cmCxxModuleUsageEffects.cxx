@@ -311,13 +311,13 @@ cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(cmGeneratorTarget const* gt,
       langStd = gt->Makefile->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
     }
     AppendUsage(usageHashInput,
-                cmStrCat("CXX_STANDARD:", langStd ? *langStd : "20"));
+                cmStrCat("CXX_STANDARD:"_s, langStd ? *langStd : "20"));
     AppendUsage(
       usageHashInput,
-      cmStrCat("CXX_EXTENSIONS:", *gt->GetLanguageExtensions("CXX")));
+      cmStrCat("CXX_EXTENSIONS:"_s, *gt->GetLanguageExtensions("CXX")));
     AppendUsage(
       usageHashInput,
-      cmStrCat("CXX_STANDARD_REQUIRED:",
+      cmStrCat("CXX_STANDARD_REQUIRED:"_s,
                gt->GetLanguageStandardRequired("CXX") ? "TRUE" : "FALSE"));
   }
 
@@ -329,7 +329,7 @@ cmCxxModuleUsageEffects::cmCxxModuleUsageEffects(cmGeneratorTarget const* gt,
       cmGeneratorExpression::Evaluate(runtime ? *runtime : *runtimeDefault,
                                       gt->GetLocalGenerator(), config, gt);
     AppendUsage(usageHashInput,
-                cmStrCat("MSVC_RUNTIME_LIBRARY:", this->MsvcRuntimeLibrary));
+                cmStrCat("MSVC_RUNTIME_LIBRARY:"_s, this->MsvcRuntimeLibrary));
   }
 
   cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);

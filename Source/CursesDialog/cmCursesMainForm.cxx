@@ -8,6 +8,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmCursesCacheEntryComposite.h"
 #include "cmCursesDummyWidget.h"
@@ -45,7 +46,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
 
   // create the arguments for the cmake object
   std::string whereCMake =
-    cmStrCat(cmSystemTools::GetProgramPath(this->Args[0]), "/cmake");
+    cmStrCat(cmSystemTools::GetProgramPath(this->Args[0]), "/cmake"_s);
   this->Args[0] = whereCMake;
   this->CMakeInstance->SetArgs(this->Args);
 }
@@ -464,10 +465,10 @@ void cmCursesMainForm::UpdateProgress(std::string const& msg, float prog)
     this->LastProgress = (percentCompleted < 100 ? " " : "");
     this->LastProgress += (percentCompleted < 10 ? " " : "");
     this->LastProgress =
-      cmStrCat(this->LastProgress, std::to_string(percentCompleted), "% [");
+      cmStrCat(this->LastProgress, std::to_string(percentCompleted), "% ["_s);
     this->LastProgress.append(progressBarCompleted, '#');
     this->LastProgress.append(progressBarWidth - progressBarCompleted, ' ');
-    this->LastProgress = cmStrCat(this->LastProgress, "] ", msg, "...");
+    this->LastProgress = cmStrCat(this->LastProgress, "] "_s, msg, "..."_s);
     this->DisplayOutputs(std::string());
   } else {
     this->Outputs.emplace_back(msg);
@@ -868,9 +869,9 @@ void cmCursesMainForm::HandleInput()
             curField, "HELPSTRING");
         }
         if (helpString) {
-          this->HelpMessage[1] = cmStrCat("Current option is: ", curField,
+          this->HelpMessage[1] = cmStrCat("Current option is: "_s, curField,
                                           "\n"
-                                          "Help string for this option is: ",
+                                          "Help string for this option is: "_s,
                                           *helpString, '\n');
         } else {
           this->HelpMessage[1] = "";

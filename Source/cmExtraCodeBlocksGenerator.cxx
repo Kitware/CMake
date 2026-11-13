@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
@@ -79,7 +80,7 @@ void cmExtraCodeBlocksGenerator::CreateProjectFile(
   std::string outputDir = lgs[0]->GetCurrentBinaryDirectory();
   std::string projectName = lgs[0]->GetProjectName();
 
-  std::string filename = cmStrCat(outputDir, '/', projectName, ".cbp");
+  std::string filename = cmStrCat(outputDir, '/', projectName, ".cbp"_s);
 
   this->CreateNewProjectFile(lgs, filename);
 }
@@ -152,8 +153,8 @@ void Tree::BuildVirtualFolder(cmXMLWriter& xml) const
 void Tree::BuildVirtualFolderImpl(std::string& virtualFolders,
                                   std::string const& prefix) const
 {
-  virtualFolders = cmStrCat(std::move(virtualFolders), "CMake Files\\", prefix,
-                            this->path, "\\;");
+  virtualFolders = cmStrCat(std::move(virtualFolders), "CMake Files\\"_s,
+                            prefix, this->path, "\\;"_s);
   for (Tree const& folder : this->folders) {
     folder.BuildVirtualFolderImpl(virtualFolders,
                                   cmStrCat(prefix, this->path, '\\'));
@@ -188,7 +189,7 @@ void Tree::BuildUnitImpl(cmXMLWriter& xml,
     xml.StartElement("Option");
     xml.Attribute(
       "virtualFolder",
-      cmStrCat("CMake Files\\", virtualFolderPath, this->path, '\\'));
+      cmStrCat("CMake Files\\"_s, virtualFolderPath, this->path, '\\'));
     xml.EndElement();
 
     xml.EndElement();
@@ -323,7 +324,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
           cmGeneratorTarget* gt = target.get();
           this->AppendTarget(xml, targetName, gt, make, lg, compiler,
                              makeArgs);
-          std::string fastTarget = cmStrCat(targetName, "/fast");
+          std::string fastTarget = cmStrCat(targetName, "/fast"_s);
           this->AppendTarget(xml, fastTarget, gt, make, lg, compiler,
                              makeArgs);
         } break;
@@ -466,8 +467,8 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
   // this file doesn't seem to be used by C::B in custom makefile mode,
   // but we generate a unique file for each OBJECT library so in case
   // C::B uses it in some way, the targets don't interfere with each other.
-  std::string filename =
-    cmStrCat(target->GetSupportDirectory(), '/', target->GetName(), ".objlib");
+  std::string filename = cmStrCat(target->GetSupportDirectory(), '/',
+                                  target->GetName(), ".objlib"_s);
   cmGeneratedFileStream fout(filename);
   if (fout) {
     /* clang-format off */
@@ -488,7 +489,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
 {
   cmMakefile const* makefile = lg->GetMakefile();
   std::string makefileName =
-    cmStrCat(lg->GetCurrentBinaryDirectory(), "/Makefile");
+    cmStrCat(lg->GetCurrentBinaryDirectory(), "/Makefile"_s);
 
   xml.StartElement("Target");
   xml.Attribute("title", targetName);
@@ -731,20 +732,20 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     // These need to be escaped, see
     // https://gitlab.kitware.com/cmake/cmake/-/issues/13952
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command = cmStrCat(std::move(command), " /NOLOGO /f ", makefileName,
-                       " VERBOSE=1 ", target);
+    command = cmStrCat(std::move(command), " /NOLOGO /f "_s, makefileName,
+                       " VERBOSE=1 "_s, target);
   } else if (generator == "MinGW Makefiles") {
     // no escaping of spaces in this case, see
     // https://gitlab.kitware.com/cmake/cmake/-/issues/10014
     std::string const& makefileName = makefile;
-    command = cmStrCat(std::move(command), " -f \"", makefileName,
-                       "\" VERBOSE=1 ", target);
+    command = cmStrCat(std::move(command), " -f \""_s, makefileName,
+                       "\" VERBOSE=1 "_s, target);
   } else if (generator == "Ninja") {
-    command = cmStrCat(std::move(command), " -v ", target);
+    command = cmStrCat(std::move(command), " -v "_s, target);
   } else {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command = cmStrCat(std::move(command), " -f \"", makefileName,
-                       "\" VERBOSE=1 ", target);
+    command = cmStrCat(std::move(command), " -f \""_s, makefileName,
+                       "\" VERBOSE=1 "_s, target);
   }
   return command;
 }

@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -43,7 +44,7 @@ bool cmAddTestCommand(std::vector<std::string> const& args,
   if (endOfCommandIter != args.end()) {
     auto cmp0178Iter = endOfCommandIter + 1;
     if (cmp0178Iter == args.end()) {
-      status.SetError(cmStrCat(keywordCMP0178, " keyword missing value"));
+      status.SetError(cmStrCat(keywordCMP0178, " keyword missing value"_s));
       return false;
     }
     if (*cmp0178Iter == "NEW") {
@@ -67,8 +68,9 @@ bool cmAddTestCommand(std::vector<std::string> const& args,
     // If the test was already added by a new-style signature do not
     // allow it to be duplicated.
     if (!test->GetOldStyle()) {
-      status.SetError(cmStrCat(" given test name \"", args[0],
-                               "\" which already exists in this directory."));
+      status.SetError(
+        cmStrCat(" given test name \""_s, args[0],
+                 "\" which already exists in this directory."_s));
       return false;
     }
   } else {
@@ -159,7 +161,8 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
       }
       doing = DoingNone;
     } else {
-      status.SetError(cmStrCat(" given unknown argument:\n  ", args[i], '\n'));
+      status.SetError(
+        cmStrCat(" given unknown argument:\n  "_s, args[i], '\n'));
       return false;
     }
   }
@@ -178,8 +181,8 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
 
   // Require a unique test name within the directory.
   if (mf.GetTest(name)) {
-    status.SetError(cmStrCat(" given test NAME \"", name,
-                             "\" which already exists in this directory."));
+    status.SetError(cmStrCat(" given test NAME \""_s, name,
+                             "\" which already exists in this directory."_s));
     return false;
   }
 
@@ -195,8 +198,9 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
   if (!buildDepends.empty()) {
     if (!cmGeneratorExpression::IsValidTargetName(name)) {
       status.SetError(cmStrCat("Cannot set build dependencies for a test with"
-                               " NAME \"",
-                               name, "\" which is not a valid target name."));
+                               " NAME \""_s,
+                               name,
+                               "\" which is not a valid target name."_s));
       return false;
     }
     test->SetBuildDependencies(buildDepends);

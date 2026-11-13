@@ -84,15 +84,15 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
     return false;
   }
   if (!cmGeneratorExpression::IsValidTargetName(ruleName)) {
-    status.SetError(cmStrCat("invalid name for RULE: ", ruleName, '.'));
+    status.SetError(cmStrCat("invalid name for RULE: "_s, ruleName, '.'));
     return false;
   }
 
   // Make sure the rule does not already exist.
   if (mf.FindRuleToUse(ruleName)) {
-    status.SetError(
-      cmStrCat("cannot create RULE \"", ruleName,
-               "\" because another RULE with the same name already exists."));
+    status.SetError(cmStrCat(
+      "cannot create RULE \""_s, ruleName,
+      "\" because another RULE with the same name already exists."_s));
     return false;
   }
 
@@ -185,9 +185,9 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
 
       if (!parsedConfigurators.ForFileSet && !parsedConfigurators.ForSource) {
         status.SetError(
-          cmStrCat("cannot create RULE \"", ruleName,
+          cmStrCat("cannot create RULE \""_s, ruleName,
                    "\" because the options \"FOR_FILE_SET\" or \"FOR_SOURCE\" "
-                   "are expected for the \"CONFIGURATOR\" option."));
+                   "are expected for the \"CONFIGURATOR\" option."_s));
         cmSystemTools::SetFatalErrorOccurred();
         return false;
       }
@@ -218,25 +218,25 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
         cm::optional<cmStateEnums::CommandType> commandType =
           mf.GetState()->GetCommandType(ca.Configurator);
         if (!commandType) {
-          status.SetError(cmStrCat("command specified for \"", type,
-                                   "\" does not exist: ", ca.Configurator,
+          status.SetError(cmStrCat("command specified for \""_s, type,
+                                   "\" does not exist: "_s, ca.Configurator,
                                    '.'));
           cmSystemTools::SetFatalErrorOccurred();
           return false;
         }
         if (*commandType != cmStateEnums::CommandType::Function) {
-          status.SetError(cmStrCat("command specified for \"", type,
-                                   "\" is not a function: ", ca.Configurator,
+          status.SetError(cmStrCat("command specified for \""_s, type,
+                                   "\" is not a function: "_s, ca.Configurator,
                                    '.'));
           cmSystemTools::SetFatalErrorOccurred();
           return false;
         }
         if (ca.Chain && ca.Override) {
-          status.SetError(cmStrCat("cannot create RULE \"", ruleName,
+          status.SetError(cmStrCat("cannot create RULE \""_s, ruleName,
                                    "\" because the \"CHAIN\" and \"OVERRIDE\" "
-                                   "options of CONFIGURATOR \"",
+                                   "options of CONFIGURATOR \""_s,
                                    ca.Configurator,
-                                   "\" are mutually exclusive."));
+                                   "\" are mutually exclusive."_s));
           cmSystemTools::SetFatalErrorOccurred();
           return false;
         }
@@ -256,9 +256,9 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
 
     cmRule const* rule = mf.FindRuleToUse(parsedArgs.FromRule);
     if (!rule) {
-      status.SetError(cmStrCat("cannot create RULE \"", ruleName,
-                               "\" because the RULE \"", parsedArgs.FromRule,
-                               "\" does not exist or is not accessible."));
+      status.SetError(cmStrCat("cannot create RULE \""_s, ruleName,
+                               "\" because the RULE \""_s, parsedArgs.FromRule,
+                               "\" does not exist or is not accessible."_s));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
@@ -322,9 +322,9 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
 
   if (parsedArgs.Commands.empty() || parsedArgs.Output.empty()) {
     status.SetError(cmStrCat(
-      "cannot create RULE \"", ruleName,
+      "cannot create RULE \""_s, ruleName,
       "\" because the mandatory options \"COMMAND\" or \"OUTPUT\" are "
-      "missing."));
+      "missing."_s));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -379,9 +379,9 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
 
     if (!parsedConfigurators.ForFileSet && !parsedConfigurators.ForSource) {
       status.SetError(cmStrCat(
-        "cannot create RULE \"", ruleName,
+        "cannot create RULE \""_s, ruleName,
         "\" because the options \"FOR_FILE_SET\" or \"FOR_SOURCE\" are "
-        "expected for the \"CONFIGURATOR\" option."));
+        "expected for the \"CONFIGURATOR\" option."_s));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
@@ -395,14 +395,14 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
 
       auto commandType = mf.GetState()->GetCommandType(*configurator);
       if (!commandType) {
-        status.SetError(cmStrCat("command specified for \"", type,
-                                 "\" does not exist: ", *configurator, '.'));
+        status.SetError(cmStrCat("command specified for \""_s, type,
+                                 "\" does not exist: "_s, *configurator, '.'));
         cmSystemTools::SetFatalErrorOccurred();
         return false;
       }
       if (*commandType != cmStateEnums::CommandType::Function) {
-        status.SetError(cmStrCat("command specified for \"", type,
-                                 "\" is not a function: ", *configurator,
+        status.SetError(cmStrCat("command specified for \""_s, type,
+                                 "\" is not a function: "_s, *configurator,
                                  '.'));
         cmSystemTools::SetFatalErrorOccurred();
         return false;

@@ -44,12 +44,12 @@ bool HandleReadMachoCommand(std::vector<std::string> const& args,
   }
   if (!cmSystemTools::FileExists(fileNameArg, true)) {
     if (arguments.Error.empty()) {
-      status.SetError(cmStrCat("READ_MACHO given FILE \"", fileNameArg,
-                               "\" that does not exist."));
+      status.SetError(cmStrCat("READ_MACHO given FILE \""_s, fileNameArg,
+                               "\" that does not exist."_s));
       return false;
     }
     status.GetMakefile().AddDefinition(
-      arguments.Error, cmStrCat(fileNameArg, " does not exist"));
+      arguments.Error, cmStrCat(fileNameArg, " does not exist"_s));
     return true;
   }
 
@@ -57,24 +57,25 @@ bool HandleReadMachoCommand(std::vector<std::string> const& args,
   cmMachO macho(fileNameArg.c_str());
   if (!macho) {
     if (arguments.Error.empty()) {
-      status.SetError(cmStrCat("READ_MACHO given FILE:\n  ", fileNameArg,
-                               "\nthat is not a valid Macho-O file."));
-      return false;
-    }
-    status.GetMakefile().AddDefinition(
-      arguments.Error, cmStrCat(fileNameArg, " is not a valid Macho-O file"));
-    return true;
-  } else if (!macho.GetErrorMessage().empty()) {
-    if (arguments.Error.empty()) {
-      status.SetError(cmStrCat(
-        "READ_MACHO given FILE:\n  ", fileNameArg,
-        "\nthat is not a supported Macho-O file: ", macho.GetErrorMessage()));
+      status.SetError(cmStrCat("READ_MACHO given FILE:\n  "_s, fileNameArg,
+                               "\nthat is not a valid Macho-O file."_s));
       return false;
     }
     status.GetMakefile().AddDefinition(
       arguments.Error,
-      cmStrCat(fileNameArg,
-               " is not a supported Macho-O file: ", macho.GetErrorMessage()));
+      cmStrCat(fileNameArg, " is not a valid Macho-O file"_s));
+    return true;
+  } else if (!macho.GetErrorMessage().empty()) {
+    if (arguments.Error.empty()) {
+      status.SetError(cmStrCat("READ_MACHO given FILE:\n  "_s, fileNameArg,
+                               "\nthat is not a supported Macho-O file: "_s,
+                               macho.GetErrorMessage()));
+      return false;
+    }
+    status.GetMakefile().AddDefinition(
+      arguments.Error,
+      cmStrCat(fileNameArg, " is not a supported Macho-O file: "_s,
+               macho.GetErrorMessage()));
     return true;
   }
 

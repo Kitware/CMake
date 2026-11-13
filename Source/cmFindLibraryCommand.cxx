@@ -10,6 +10,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
@@ -92,8 +93,9 @@ void cmFindLibraryCommand::AddArchitecturePaths(char const* suffix)
     this->AddArchitecturePath(o, 0, suffix);
     if (this->DebugModeEnabled()) {
       std::string msg = cmStrCat(
-        "find_library(", this->VariableName, ") removed original suffix ", o,
-        " from PATH_SUFFIXES while adding architecture paths for suffix '",
+        "find_library("_s, this->VariableName, ") removed original suffix "_s,
+        o,
+        " from PATH_SUFFIXES while adding architecture paths for suffix '"_s,
         suffix, '\'');
       this->DebugMessage(msg);
     }
@@ -160,8 +162,8 @@ void cmFindLibraryCommand::AddArchitecturePath(
       dirX += "/";
       if (this->DebugModeEnabled()) {
         std::string msg = cmStrCat(
-          "find_library(", this->VariableName, ") added replacement path ",
-          dirX, " to PATH_SUFFIXES for architecture suffix '", suffix, '\'');
+          "find_library("_s, this->VariableName, ") added replacement path "_s,
+          dirX, " to PATH_SUFFIXES for architecture suffix '"_s, suffix, '\'');
         this->DebugMessage(msg);
       }
       this->SearchPaths.push_back(std::move(dirX));
@@ -171,8 +173,8 @@ void cmFindLibraryCommand::AddArchitecturePath(
       this->SearchPaths.push_back(dir);
       if (this->DebugModeEnabled()) {
         std::string msg = cmStrCat(
-          "find_library(", this->VariableName, ") added replacement path ",
-          dir, " to PATH_SUFFIXES for architecture suffix '", suffix, '\'');
+          "find_library("_s, this->VariableName, ") added replacement path "_s,
+          dir, " to PATH_SUFFIXES for architecture suffix '"_s, suffix, '\'');
         this->DebugMessage(msg);
       }
     }
@@ -590,7 +592,7 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
   // Search for all names in each search path.
   for (std::string const& d : this->SearchPaths) {
     for (std::string const& n : this->Names) {
-      fwPath = cmStrCat(d, n, ".xcframework");
+      fwPath = cmStrCat(d, n, ".xcframework"_s);
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         auto finalPath = cmSystemTools::ToNormalizedPathOnDisk(fwPath);
         if (this->Validate(finalPath)) {
@@ -598,7 +600,7 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
         }
       }
 
-      fwPath = cmStrCat(d, n, ".framework");
+      fwPath = cmStrCat(d, n, ".framework"_s);
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         auto finalPath = cmSystemTools::ToNormalizedPathOnDisk(fwPath);
         if (this->Validate(finalPath)) {
@@ -618,7 +620,7 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
   // Search for each name in all search paths.
   for (std::string const& n : this->Names) {
     for (std::string const& d : this->SearchPaths) {
-      fwPath = cmStrCat(d, n, ".xcframework");
+      fwPath = cmStrCat(d, n, ".xcframework"_s);
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         auto finalPath = cmSystemTools::ToNormalizedPathOnDisk(fwPath);
         if (this->Validate(finalPath)) {
@@ -626,7 +628,7 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
         }
       }
 
-      fwPath = cmStrCat(d, n, ".framework");
+      fwPath = cmStrCat(d, n, ".framework"_s);
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         auto finalPath = cmSystemTools::ToNormalizedPathOnDisk(fwPath);
         if (this->Validate(finalPath)) {

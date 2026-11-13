@@ -95,13 +95,13 @@ static bool ValidateExportableTarget(std::string const& name,
 {
   cmTarget const* target = gg->FindTarget(name);
   if (!target) {
-    status.SetError(cmStrCat("given target \"", name,
-                             "\" which is not built by this project."));
+    status.SetError(cmStrCat("given target \""_s, name,
+                             "\" which is not built by this project."_s));
     return false;
   }
   if (target->GetType() == cm::TargetType::UTILITY) {
-    status.SetError(cmStrCat("given custom target \"", name,
-                             "\" which may not be exported."));
+    status.SetError(cmStrCat("given custom target \""_s, name,
+                             "\" which may not be exported."_s));
     return false;
   }
   return true;
@@ -138,7 +138,7 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
 
   if (!unknownArgs.empty()) {
     status.SetError(
-      cmStrCat("Unknown argument: \"", unknownArgs.front(), "\"."));
+      cmStrCat("Unknown argument: \""_s, unknownArgs.front(), "\"."_s));
     return false;
   }
 
@@ -153,8 +153,8 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
     // Make sure the file has a .cmake extension.
     if (!cmHasSuffix(arguments.Filename, ".cmake"_s)) {
       status.SetError(
-        cmStrCat("FILE option given filename \"", arguments.Filename,
-                 "\" which does not have an extension of \".cmake\".\n"));
+        cmStrCat("FILE option given filename \""_s, arguments.Filename,
+                 "\" which does not have an extension of \".cmake\".\n"_s));
       return false;
     }
     fname = arguments.Filename;
@@ -165,8 +165,8 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
   // Get the file to write.
   if (cmSystemTools::FileIsFullPath(fname)) {
     if (!mf.CanIWriteThisFile(fname)) {
-      status.SetError(cmStrCat("FILE option given filename \"", fname,
-                               "\" which is in the source tree.\n"));
+      status.SetError(cmStrCat("FILE option given filename \""_s, fname,
+                               "\" which is in the source tree.\n"_s));
       return false;
     }
   } else {
@@ -199,15 +199,15 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
       case cmPolicies::WARN:
         mf.IssuePolicyWarning(
           cmPolicies::CMP0103, {},
-          cmStrCat("export() command already specified for the file\n  ",
-                   arguments.Filename, "\nDid you miss 'APPEND' keyword?"));
+          cmStrCat("export() command already specified for the file\n  "_s,
+                   arguments.Filename, "\nDid you miss 'APPEND' keyword?"_s));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       default:
-        status.SetError(cmStrCat("command already specified for the file\n  ",
-                                 arguments.Filename,
-                                 "\nDid you miss 'APPEND' keyword?"));
+        status.SetError(
+          cmStrCat("command already specified for the file\n  "_s,
+                   arguments.Filename, "\nDid you miss 'APPEND' keyword?"_s));
         return false;
     }
   }
@@ -295,8 +295,8 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   } else {
     if (!cmHasSuffix(arguments.Filename, ".cmake"_s)) {
       status.SetError(
-        cmStrCat("FILE option given filename \"", arguments.Filename,
-                 "\" which does not have an extension of \".cmake\".\n"));
+        cmStrCat("FILE option given filename \""_s, arguments.Filename,
+                 "\" which does not have an extension of \".cmake\".\n"_s));
       return false;
     }
     fname = arguments.Filename;
@@ -304,8 +304,8 @@ static bool HandleExportMode(std::vector<std::string> const& args,
 
   if (cmSystemTools::FileIsFullPath(fname)) {
     if (!mf.CanIWriteThisFile(fname)) {
-      status.SetError(cmStrCat("FILE option given filename \"", fname,
-                               "\" which is in the source tree.\n"));
+      status.SetError(cmStrCat("FILE option given filename \""_s, fname,
+                               "\" which is in the source tree.\n"_s));
       return false;
     }
   } else {
@@ -360,7 +360,7 @@ static bool HandleSpecialExportMode(std::vector<std::string> const& args,
   }
 
   if (arguments.ExportSetName.empty()) {
-    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+    status.SetError(cmStrCat(args[0], " missing EXPORT."_s));
     return false;
   }
 
@@ -429,7 +429,7 @@ static bool HandleSbomMode(std::vector<std::string> const& args,
   }
 
   if (arguments.ExportSetNames.empty()) {
-    status.SetError(cmStrCat(args[0], " missing EXPORTS."));
+    status.SetError(cmStrCat(args[0], " missing EXPORTS."_s));
     return false;
   }
 
@@ -496,8 +496,8 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
   SetupArguments arguments = parser.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
-    status.SetError(cmStrCat("SETUP given unknown argument: \"",
-                             unknownArgs.front(), "\"."));
+    status.SetError(cmStrCat("SETUP given unknown argument: \""_s,
+                             unknownArgs.front(), "\"."_s));
     return false;
   }
 
@@ -527,8 +527,9 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
         cmMakeRange(packageDependencyArgs).advance(1), &unknownArgs);
 
     if (!unknownArgs.empty()) {
-      status.SetError(cmStrCat("PACKAGE_DEPENDENCY given unknown argument: \"",
-                               unknownArgs.front(), "\"."));
+      status.SetError(
+        cmStrCat("PACKAGE_DEPENDENCY given unknown argument: \""_s,
+                 unknownArgs.front(), "\"."_s));
       return false;
     }
     auto& packageDependency =
@@ -545,7 +546,7 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
           cmExportSet::PackageDependencyExportEnabled::On;
       } else {
         status.SetError(
-          cmStrCat("Invalid enable setting for package dependency: \"",
+          cmStrCat("Invalid enable setting for package dependency: \""_s,
                    packageDependencyArguments.Enabled, '"'));
         return false;
       }
@@ -570,8 +571,8 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
       targetParser.Parse(cmMakeRange(targetArgs).advance(1), &unknownArgs);
 
     if (!unknownArgs.empty()) {
-      status.SetError(cmStrCat("TARGET given unknown argument: \"",
-                               unknownArgs.front(), "\"."));
+      status.SetError(cmStrCat("TARGET given unknown argument: \""_s,
+                               unknownArgs.front(), "\"."_s));
       return false;
     }
     exportSet.SetXcFrameworkLocation(targetArgs.front(),
@@ -609,9 +610,9 @@ static bool HandlePackageMode(std::vector<std::string> const& args,
   char const* packageExpr = "^[A-Za-z0-9_.-]+$";
   cmsys::RegularExpression packageRegex(packageExpr);
   if (!packageRegex.find(package)) {
-    status.SetError(cmStrCat("PACKAGE given invalid package name \"", package,
-                             "\".  Package names must match \"", packageExpr,
-                             "\"."));
+    status.SetError(cmStrCat("PACKAGE given invalid package name \""_s,
+                             package, "\".  Package names must match \""_s,
+                             packageExpr, "\"."_s));
     return false;
   }
 
@@ -651,12 +652,12 @@ static bool HandlePackageMode(std::vector<std::string> const& args,
 static void ReportRegistryError(cmMakefile& mf, std::string const& msg,
                                 std::string const& key, long err)
 {
-  std::string e = cmStrCat(msg, "\n  HKEY_CURRENT_USER\\", key, '\n');
+  std::string e = cmStrCat(msg, "\n  HKEY_CURRENT_USER\\"_s, key, '\n');
   wchar_t winmsg[1024];
   if (FormatMessageW(
         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, err,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), winmsg, 1024, 0) > 0) {
-    e = cmStrCat(std::move(e), "Windows reported:\n  ",
+    e = cmStrCat(std::move(e), "Windows reported:\n  "_s,
                  cmsys::Encoding::ToNarrow(winmsg));
   }
   mf.IssueMessage(MessageType::WARNING, e);
@@ -665,7 +666,8 @@ static void ReportRegistryError(cmMakefile& mf, std::string const& msg,
 static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
                                  char const* content, char const* hash)
 {
-  std::string key = cmStrCat("Software\\Kitware\\CMake\\Packages\\", package);
+  std::string key =
+    cmStrCat("Software\\Kitware\\CMake\\Packages\\"_s, package);
   HKEY hKey;
   LONG err =
     RegCreateKeyExW(HKEY_CURRENT_USER, cmsys::Encoding::ToWide(key).c_str(), 0,
@@ -683,8 +685,8 @@ static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
   RegCloseKey(hKey);
   if (err != ERROR_SUCCESS) {
     ReportRegistryError(
-      mf, cmStrCat("Cannot set registry value \"", hash, "\" under key"), key,
-      err);
+      mf, cmStrCat("Cannot set registry value \""_s, hash, "\" under key"_s),
+      key, err);
     return;
   }
 }
@@ -698,7 +700,7 @@ static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
       B_OK) {
     return;
   }
-  std::string fname = cmStrCat(dir, "/cmake/packages/", package);
+  std::string fname = cmStrCat(dir, "/cmake/packages/"_s, package);
 #  else
   std::string fname;
   if (!cmSystemTools::GetEnv("HOME", fname)) {
@@ -718,7 +720,7 @@ static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
     } else {
       mf.IssueMessage(MessageType::WARNING,
                       cmStrCat("Cannot create package registry file:\n"
-                               "  ",
+                               "  "_s,
                                fname, '\n',
                                cmSystemTools::GetLastSystemError(), '\n'));
     }

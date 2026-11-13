@@ -137,8 +137,8 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
 
   if (arguments.RunWorkingDirectory) {
     if (!cmSystemTools::MakeDirectory(*arguments.RunWorkingDirectory)) {
-      cmSystemTools::Error(cmStrCat("Error creating working directory \"",
-                                    *arguments.RunWorkingDirectory, "\"."));
+      cmSystemTools::Error(cmStrCat("Error creating working directory \""_s,
+                                    *arguments.RunWorkingDirectory, "\"."_s));
       return false;
     }
   }
@@ -314,16 +314,16 @@ void TryRunCommandImpl::DoNotRunExecutable(
   // removed at the end of try_run() and the user can run it manually
   // on the target platform.
   std::string copyDest =
-    cmStrCat(this->Makefile->GetHomeOutputDirectory(), "/CMakeFiles/",
+    cmStrCat(this->Makefile->GetHomeOutputDirectory(), "/CMakeFiles/"_s,
              cmSystemTools::GetFilenameWithoutExtension(this->OutputFile), '-',
              this->RunResultVariable,
              cmSystemTools::GetFilenameExtension(this->OutputFile));
   cmSystemTools::CopyFileAlways(this->OutputFile, copyDest);
 
-  std::string resultFileName =
-    cmStrCat(this->Makefile->GetHomeOutputDirectory(), "/TryRunResults.cmake");
+  std::string resultFileName = cmStrCat(
+    this->Makefile->GetHomeOutputDirectory(), "/TryRunResults.cmake"_s);
 
-  std::string detailsString = cmStrCat("For details see ", resultFileName);
+  std::string detailsString = cmStrCat("For details see "_s, resultFileName);
 
   std::string internalRunOutputName =
     this->RunResultVariable + "__TRYRUN_OUTPUT";
@@ -338,7 +338,7 @@ void TryRunCommandImpl::DoNotRunExecutable(
     // and mark it as advanced
     std::string comment =
       cmStrCat("Run result of try_run(), indicates whether the executable "
-               "would have been able to run on its target platform.\n",
+               "would have been able to run on its target platform.\n"_s,
                detailsString);
     this->Makefile->AddCacheDefinition(this->RunResultVariable,
                                        "PLEASE_FILL_OUT-FAILED_TO_RUN",
@@ -360,7 +360,7 @@ void TryRunCommandImpl::DoNotRunExecutable(
       // and mark it as advanced
       std::string comment = cmStrCat(
         "Output of try_run(), contains the text, which the executable "
-        "would have printed on stdout on its target platform.\n",
+        "would have printed on stdout on its target platform.\n"_s,
         detailsString);
 
       this->Makefile->AddCacheDefinition(internalRunOutputStdOutName,
@@ -382,7 +382,7 @@ void TryRunCommandImpl::DoNotRunExecutable(
       // and mark it as advanced
       std::string comment = cmStrCat(
         "Output of try_run(), contains the text, which the executable "
-        "would have printed on stderr on its target platform.\n",
+        "would have printed on stderr on its target platform.\n"_s,
         detailsString);
 
       this->Makefile->AddCacheDefinition(internalRunOutputStdErrName,
@@ -404,7 +404,7 @@ void TryRunCommandImpl::DoNotRunExecutable(
       // and mark it as advanced
       std::string comment = cmStrCat(
         "Output of try_run(), contains the text, which the executable "
-        "would have printed on stdout and stderr on its target platform.\n",
+        "would have printed on stdout and stderr on its target platform.\n"_s,
         detailsString);
 
       this->Makefile->AddCacheDefinition(internalRunOutputName,
@@ -441,65 +441,65 @@ void TryRunCommandImpl::DoNotRunExecutable(
         cmStrCat('\n', this->RunResultVariable,
                  "\n   indicates whether the executable would have been able "
                  "to run on its\n"
-                 "   target platform. If so, set ",
+                 "   target platform. If so, set "_s,
                  this->RunResultVariable,
                  " to\n"
                  "   the exit code (in many cases 0 for success), otherwise "
-                 "enter \"FAILED_TO_RUN\".\n");
+                 "enter \"FAILED_TO_RUN\".\n"_s);
       if (stdOut || stdErr) {
         if (stdOut) {
           comment = cmStrCat(
             std::move(comment), internalRunOutputStdOutName,
             "\n   contains the text the executable would have printed on "
             "stdout.\n"
-            "   If the executable would not have been able to run, set ",
+            "   If the executable would not have been able to run, set "_s,
             internalRunOutputStdOutName,
             " empty.\n"
             "   Otherwise check if the output is evaluated by the "
             "calling CMake code. If so,\n"
             "   check what the source file would have printed when "
-            "called with the given arguments.\n");
+            "called with the given arguments.\n"_s);
         }
         if (stdErr) {
           comment = cmStrCat(
             std::move(comment), internalRunOutputStdErrName,
             "\n   contains the text the executable would have printed on "
             "stderr.\n"
-            "   If the executable would not have been able to run, set ",
+            "   If the executable would not have been able to run, set "_s,
             internalRunOutputStdErrName,
             " empty.\n"
             "   Otherwise check if the output is evaluated by the "
             "calling CMake code. If so,\n"
             "   check what the source file would have printed when "
-            "called with the given arguments.\n");
+            "called with the given arguments.\n"_s);
         }
       } else if (out) {
         comment = cmStrCat(
           std::move(comment), internalRunOutputName,
           "\n   contains the text the executable would have printed on stdout "
           "and stderr.\n"
-          "   If the executable would not have been able to run, set ",
+          "   If the executable would not have been able to run, set "_s,
           internalRunOutputName,
           " empty.\n"
           "   Otherwise check if the output is evaluated by the "
           "calling CMake code. If so,\n"
           "   check what the source file would have printed when "
-          "called with the given arguments.\n");
+          "called with the given arguments.\n"_s);
       }
 
       comment =
-        cmStrCat(std::move(comment), "The ", compileResultVariable,
-                 " variable holds the build result for this try_run().\n\n");
+        cmStrCat(std::move(comment), "The "_s, compileResultVariable,
+                 " variable holds the build result for this try_run().\n\n"_s);
       if (srcFile) {
         comment =
-          cmStrCat(std::move(comment), "Source file   : ", *srcFile, '\n');
+          cmStrCat(std::move(comment), "Source file   : "_s, *srcFile, '\n');
       }
-      comment = cmStrCat(std::move(comment), "Executable    : ", copyDest,
+      comment = cmStrCat(std::move(comment), "Executable    : "_s, copyDest,
                          "\n"
-                         "Run arguments : ",
+                         "Run arguments : "_s,
                          runArgs,
                          "\n"
-                         "   Called from: ",
+                         "   Called from: "_s,
                          this->Makefile->FormatListFileStack());
       cmsys::SystemTools::ReplaceString(comment, "\n", "\n# ");
       file << comment << "\n\n";
@@ -520,11 +520,11 @@ void TryRunCommandImpl::DoNotRunExecutable(
     std::string errorMessage =
       cmStrCat("try_run() invoked in cross-compiling mode, "
                "please set the following cache variables "
-               "appropriately:\n   ",
-               this->RunResultVariable, " (advanced)\n");
+               "appropriately:\n   "_s,
+               this->RunResultVariable, " (advanced)\n"_s);
     if (out) {
-      errorMessage = cmStrCat(std::move(errorMessage), "   ",
-                              internalRunOutputName, " (advanced)\n");
+      errorMessage = cmStrCat(std::move(errorMessage), "   "_s,
+                              internalRunOutputName, " (advanced)\n"_s);
     }
     errorMessage += detailsString;
     cmSystemTools::Error(errorMessage);

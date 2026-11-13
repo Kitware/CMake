@@ -148,9 +148,9 @@ int cmCPackDragNDropGenerator::InitializeInternal()
     }
     for (auto const& language : languages) {
       std::string license =
-        cmStrCat(slaDirectory, '/', language, ".license.txt");
+        cmStrCat(slaDirectory, '/', language, ".license.txt"_s);
       std::string license_rtf =
-        cmStrCat(slaDirectory, '/', language, ".license.rtf");
+        cmStrCat(slaDirectory, '/', language, ".license.rtf"_s);
       if (!singleLicense) {
         if (!cmSystemTools::FileExists(license) &&
             !cmSystemTools::FileExists(license_rtf)) {
@@ -161,7 +161,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
           return 0;
         }
       }
-      std::string menu = cmStrCat(slaDirectory, '/', language, ".menu.txt");
+      std::string menu = cmStrCat(slaDirectory, '/', language, ".menu.txt"_s);
       if (!cmSystemTools::FileExists(menu)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Missing menu file " << language << ".menu.txt"
@@ -331,7 +331,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
   // Add a symlink to /Applications so users can drag-and-drop the bundle
   // into it unless this behavior was disabled
   if (!cpack_dmg_disable_applications_symlink) {
-    std::string const application_link = cmStrCat(staging, "/Applications");
+    std::string const application_link = cmStrCat(staging, "/Applications"_s);
     cmSystemTools::CreateSymlink("/Applications", application_link);
   }
 
@@ -340,7 +340,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
     std::string const& package_icon_source = cpack_package_icon;
 
     std::string const package_icon_destination =
-      cmStrCat(staging, "/.VolumeIcon.icns");
+      cmStrCat(staging, "/.VolumeIcon.icns"_s);
 
     if (!this->CopyFile(package_icon_source, package_icon_destination)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -358,7 +358,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
     std::string const& package_settings_source = cpack_dmg_ds_store;
 
     std::string const package_settings_destination =
-      cmStrCat(staging, "/.DS_Store");
+      cmStrCat(staging, "/.DS_Store"_s);
 
     if (!this->CopyFile(package_settings_source,
                         package_settings_destination)) {
@@ -380,7 +380,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
     std::string const& package_background_source = cpack_dmg_background_image;
 
     std::string const package_background_destination =
-      cmStrCat(staging, "/.background/background", std::move(extension));
+      cmStrCat(staging, "/.background/background"_s, std::move(extension));
 
     if (!this->CopyFile(package_background_source,
                         package_background_destination)) {
@@ -402,7 +402,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
   // image, so we have enough space for storing changes ...
   if (remount_image) {
     std::string const dummy_padding =
-      cmStrCat(staging, "/.dummy-padding-file");
+      cmStrCat(staging, "/.dummy-padding-file"_s);
     if (!this->CreateEmptyFile(dummy_padding, 1048576)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error creating dummy padding file." << std::endl);
@@ -414,7 +414,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
 
   // Create a temporary read-write disk image ...
   std::string temp_image =
-    cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/temp.dmg");
+    cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/temp.dmg"_s);
 
   // Finish filesystem operations before writing disk image.
   std::string sync_command = this->GetOption("CPACK_COMMAND_SYNC");
@@ -431,17 +431,17 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
     cmStrCat(this->GetOption("CPACK_COMMAND_HDIUTIL"),
              " create"
              " -ov"
-             " -srcfolder \"",
+             " -srcfolder \""_s,
              staging,
              "\""
-             " -volname \"",
+             " -volname \""_s,
              cpack_dmg_volume_name,
              "\""
-             " -fs \"",
+             " -fs \""_s,
              cpack_dmg_filesystem,
              "\""
-             " -format ",
-             temp_image_format, " \"", temp_image, '"');
+             " -format "_s,
+             temp_image_format, " \""_s, temp_image, '"');
 
   if (!this->RunCommand(temp_image_command, &create_error)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -459,7 +459,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
 
     auto attach_command = cmStrCat(this->GetOption("CPACK_COMMAND_HDIUTIL"),
                                    " attach"
-                                   " \"",
+                                   " \""_s,
                                    temp_image, '"');
 
     std::string attach_output;
@@ -478,7 +478,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
 
     // Remove dummy padding file so we have enough space on RW image ...
     std::string const dummy_padding =
-      cmStrCat(temp_mount, "/.dummy-padding-file");
+      cmStrCat(temp_mount, "/.dummy-padding-file"_s);
     if (!cmSystemTools::RemoveFile(dummy_padding)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error removing dummy padding file." << std::endl);
@@ -491,7 +491,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
       std::string error;
       auto setfile_command = cmStrCat(this->GetOption("CPACK_COMMAND_SETFILE"),
                                       " -a C"
-                                      " \"",
+                                      " \""_s,
                                       temp_mount, '"');
 
       if (!this->RunCommand(setfile_command, &error)) {
@@ -508,10 +508,10 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
     // the .DS_Store for the volume folder ...
     if (!had_error && !cpack_dmg_ds_store_setup_script->empty()) {
       auto setup_script_command = cmStrCat("osascript"
-                                           " \"",
+                                           " \""_s,
                                            cpack_dmg_ds_store_setup_script,
                                            "\""
-                                           " \"",
+                                           " \""_s,
                                            temp_mount_name, '"');
       std::string error;
       if (!this->RunCommand(setup_script_command, &error)) {
@@ -526,7 +526,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
 
     auto detach_command = cmStrCat(this->GetOption("CPACK_COMMAND_HDIUTIL"),
                                    " detach"
-                                   " \"",
+                                   " \""_s,
                                    temp_mount, '\"');
 
     if (!this->RunCommand(detach_command)) {
@@ -543,13 +543,13 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
 
   // Create the final compressed read-only disk image ...
   auto final_image_command = cmStrCat(this->GetOption("CPACK_COMMAND_HDIUTIL"),
-                                      " convert \"", temp_image,
+                                      " convert \""_s, temp_image,
                                       "\""
-                                      " -format ",
+                                      " -format "_s,
                                       cpack_dmg_format,
                                       " -imagekey"
                                       " zlib-level=9"
-                                      " -o \"",
+                                      " -o \""_s,
                                       output_file, '"');
 
   std::string convert_error;
@@ -567,7 +567,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
     // Use old hardcoded style if sla_dir is not set
     bool oldStyle = slaDirectory.empty();
     std::string sla_xml =
-      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/sla.xml");
+      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/sla.xml"_s);
 
     cmList languages;
     if (!oldStyle) {
@@ -697,11 +697,11 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
     auto embed_sla_command = cmStrCat(this->GetOption("CPACK_COMMAND_HDIUTIL"),
                                       " udifrez"
                                       " -xml"
-                                      " \"",
+                                      " \""_s,
                                       sla_xml,
                                       "\""
                                       " FIXME_WHY_IS_THIS_ARGUMENT_NEEDED"
-                                      " \"",
+                                      " \""_s,
                                       output_file, '"');
     std::string embed_error;
     if (!this->RunCommand(embed_sla_command, &embed_error)) {
@@ -742,8 +742,9 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallSuffix(
   if (this->componentPackageMethod == ONE_PACKAGE_PER_GROUP) {
     // We have to find the name of the COMPONENT GROUP
     // the current COMPONENT belongs to.
-    std::string groupVar = cmStrCat(
-      "CPACK_COMPONENT_", cmSystemTools::UpperCase(componentName), "_GROUP");
+    std::string groupVar =
+      cmStrCat("CPACK_COMPONENT_"_s, cmSystemTools::UpperCase(componentName),
+               "_GROUP"_s);
     cmValue _groupName = this->GetOption(groupVar);
     if (_groupName) {
       std::string groupName = _groupName;
@@ -755,7 +756,7 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallSuffix(
   }
 
   std::string componentFileName = cmStrCat(
-    "CPACK_DMG_", cmSystemTools::UpperCase(componentName), "_FILE_NAME");
+    "CPACK_DMG_"_s, cmSystemTools::UpperCase(componentName), "_FILE_NAME"_s);
   if (cmValue v = this->GetOptionIfSet(componentFileName)) {
     return *v;
   }
@@ -846,12 +847,12 @@ bool cmCPackDragNDropGenerator::WriteLicense(RezDoc& rez, size_t licenseNumber,
     actual_license = licenseFile;
   } else {
     std::string license_wo_ext =
-      cmStrCat(slaDirectory, '/', licenseLanguage, ".license");
-    if (cmSystemTools::FileExists(cmStrCat(license_wo_ext, ".txt"))) {
-      actual_license = cmStrCat(license_wo_ext, ".txt");
+      cmStrCat(slaDirectory, '/', licenseLanguage, ".license"_s);
+    if (cmSystemTools::FileExists(cmStrCat(license_wo_ext, ".txt"_s))) {
+      actual_license = cmStrCat(license_wo_ext, ".txt"_s);
     } else {
       licenseArray = &rez.RTF;
-      actual_license = cmStrCat(license_wo_ext, ".rtf");
+      actual_license = cmStrCat(license_wo_ext, ".rtf"_s);
     }
   }
 
@@ -874,7 +875,7 @@ bool cmCPackDragNDropGenerator::WriteLicense(RezDoc& rez, size_t licenseNumber,
     } else {
       std::vector<std::string> lines;
       std::string actual_menu =
-        cmStrCat(slaDirectory, '/', licenseLanguage, ".menu.txt");
+        cmStrCat(slaDirectory, '/', licenseLanguage, ".menu.txt"_s);
       if (!this->ReadFile(actual_menu, lines, error)) {
         return false;
       }

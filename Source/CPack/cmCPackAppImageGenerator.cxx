@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include <fcntl.h>
 
 #include <sys/types.h>
@@ -204,7 +206,7 @@ int cmCPackAppImageGenerator::PackageFiles()
                       << appRunFile << '"' << std::endl);
     }
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                  cmStrCat("Using AppRun file: \"", *customAppRun, '"')
+                  cmStrCat("Using AppRun file: \""_s, *customAppRun, '"')
                     << std::endl);
     auto status = cmSystemTools::CopyFileAlways(*customAppRun, appRunFile);
     if (!status.IsSuccess()) {
@@ -216,13 +218,13 @@ int cmCPackAppImageGenerator::PackageFiles()
   } else if (cmSystemTools::PathExists(appRunFile)) {
     // User provided an AppRun file
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                  cmStrCat("Found AppRun file: \"", appRunFile, '"')
+                  cmStrCat("Found AppRun file: \""_s, appRunFile, '"')
                     << std::endl);
   } else {
     // Generate a default AppRun script that will run our application
     cmCPackLogger(
       cmCPackLog::LOG_OUTPUT,
-      cmStrCat("No AppRun found, generating a default one that will run: \"",
+      cmStrCat("No AppRun found, generating a default one that will run: \""_s,
                application, '"')
         << std::endl);
     cmGeneratedFileStream appRun(appRunFile);
@@ -269,7 +271,7 @@ int cmCPackAppImageGenerator::PackageFiles()
     this->AppimagetoolPath,
     this->toplevel,
   };
-  command.emplace_back(cmStrCat("../",
+  command.emplace_back(cmStrCat("../"_s,
                                 *this->GetOption("CPACK_PACKAGE_FILE_NAME"),
                                 this->GetOutputExtension()));
 

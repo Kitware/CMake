@@ -134,7 +134,8 @@ bool HandleGetCommand(std::vector<std::string> const& args,
   for (std::size_t cc = 2; cc < args.size() - 1; cc++) {
     int index;
     if (!GetIndexArg(args[cc], &index, status.GetMakefile())) {
-      status.SetError(cmStrCat("index: ", args[cc], " is not a valid index"));
+      status.SetError(
+        cmStrCat("index: "_s, args[cc], " is not a valid index"_s));
       return false;
     }
     indexes.push_back(index);
@@ -328,7 +329,7 @@ bool HandleInsertCommand(std::vector<std::string> const& args,
   // expand the variable
   int index;
   if (!GetIndexArg(args[2], &index, status.GetMakefile())) {
-    status.SetError(cmStrCat("index: ", args[2], " is not a valid index"));
+    status.SetError(cmStrCat("index: "_s, args[2], " is not a valid index"_s));
     return false;
   }
   auto list = GetList(listName, status.GetMakefile());
@@ -351,8 +352,8 @@ bool HandleJoinCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
 {
   if (args.size() != 4) {
-    status.SetError(cmStrCat("sub-command JOIN requires three arguments (",
-                             args.size() - 1, " found)."));
+    status.SetError(cmStrCat("sub-command JOIN requires three arguments ("_s,
+                             args.size() - 1, " found)."_s));
     return false;
   }
 
@@ -494,17 +495,17 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
   auto descriptor = descriptors.find(args[index]);
 
   if (descriptor == descriptors.end()) {
-    status.SetError(
-      cmStrCat(" sub-command TRANSFORM, ", args[index], " invalid action."));
+    status.SetError(cmStrCat(" sub-command TRANSFORM, "_s, args[index],
+                             " invalid action."_s));
     return false;
   }
 
   // Action arguments
   index += 1;
   if (args.size() < index + descriptor->Arity) {
-    status.SetError(cmStrCat("sub-command TRANSFORM, action ",
-                             descriptor->Name, " expects ", descriptor->Arity,
-                             " argument(s)."));
+    status.SetError(cmStrCat("sub-command TRANSFORM, action "_s,
+                             descriptor->Name, " expects "_s,
+                             descriptor->Arity, " argument(s)."_s));
     return false;
   }
 
@@ -530,8 +531,8 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
            args[index] == PREDICATE) &&
           selector) {
         status.SetError(
-          cmStrCat("sub-command TRANSFORM, selector already specified (",
-                   selector->GetTag(), ")."));
+          cmStrCat("sub-command TRANSFORM, selector already specified ("_s,
+                   selector->GetTag(), ")."_s));
 
         return false;
       }
@@ -680,9 +681,9 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
         continue;
       }
 
-      status.SetError(cmStrCat("sub-command TRANSFORM, '",
+      status.SetError(cmStrCat("sub-command TRANSFORM, '"_s,
                                cmJoin(cmMakeRange(args).advance(index), " "),
-                               "': unexpected argument(s)."));
+                               "': unexpected argument(s)."_s));
       return false;
     }
 
@@ -735,12 +736,13 @@ bool HandleSortCommand(std::vector<std::string> const& args,
       if (hasComparator) {
         status.SetError(cmStrCat(messageHint,
                                  "option \"COMPARE\" is incompatible "
-                                 "with \"COMPARATOR\"."));
+                                 "with \"COMPARATOR\"."_s));
         return false;
       }
       if (sortConfig.Compare != SortConfig::CompareMethod::DEFAULT) {
-        std::string error = cmStrCat(messageHint, "option \"", option,
-                                     "\" has been specified multiple times.");
+        std::string error =
+          cmStrCat(messageHint, "option \""_s, option,
+                   "\" has been specified multiple times."_s);
         status.SetError(error);
         return false;
       }
@@ -754,20 +756,20 @@ bool HandleSortCommand(std::vector<std::string> const& args,
           sortConfig.Compare = SortConfig::CompareMethod::NATURAL;
         } else {
           std::string error =
-            cmStrCat(messageHint, "value \"", argument, "\" for option \"",
-                     option, "\" is invalid.");
+            cmStrCat(messageHint, "value \""_s, argument, "\" for option \""_s,
+                     option, "\" is invalid."_s);
           status.SetError(error);
           return false;
         }
       } else {
-        status.SetError(cmStrCat(messageHint, "missing argument for option \"",
-                                 option, "\"."));
+        status.SetError(cmStrCat(
+          messageHint, "missing argument for option \""_s, option, "\"."_s));
         return false;
       }
     } else if (option == "CASE") {
       if (sortConfig.Case != SortConfig::CaseSensitivity::DEFAULT) {
-        status.SetError(cmStrCat(messageHint, "option \"", option,
-                                 "\" has been specified multiple times."));
+        status.SetError(cmStrCat(messageHint, "option \""_s, option,
+                                 "\" has been specified multiple times."_s));
         return false;
       }
       if (argumentIndex < args.size()) {
@@ -777,21 +779,21 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         } else if (argument == "INSENSITIVE") {
           sortConfig.Case = SortConfig::CaseSensitivity::INSENSITIVE;
         } else {
-          status.SetError(cmStrCat(messageHint, "value \"", argument,
-                                   "\" for option \"", option,
-                                   "\" is invalid."));
+          status.SetError(cmStrCat(messageHint, "value \""_s, argument,
+                                   "\" for option \""_s, option,
+                                   "\" is invalid."_s));
           return false;
         }
       } else {
-        status.SetError(cmStrCat(messageHint, "missing argument for option \"",
-                                 option, "\"."));
+        status.SetError(cmStrCat(
+          messageHint, "missing argument for option \""_s, option, "\"."_s));
         return false;
       }
     } else if (option == "ORDER") {
 
       if (sortConfig.Order != SortConfig::OrderMode::DEFAULT) {
-        status.SetError(cmStrCat(messageHint, "option \"", option,
-                                 "\" has been specified multiple times."));
+        status.SetError(cmStrCat(messageHint, "option \""_s, option,
+                                 "\" has been specified multiple times."_s));
         return false;
       }
       if (argumentIndex < args.size()) {
@@ -801,26 +803,26 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         } else if (argument == "DESCENDING") {
           sortConfig.Order = SortConfig::OrderMode::DESCENDING;
         } else {
-          status.SetError(cmStrCat(messageHint, "value \"", argument,
-                                   "\" for option \"", option,
-                                   "\" is invalid."));
+          status.SetError(cmStrCat(messageHint, "value \""_s, argument,
+                                   "\" for option \""_s, option,
+                                   "\" is invalid."_s));
           return false;
         }
       } else {
-        status.SetError(cmStrCat(messageHint, "missing argument for option \"",
-                                 option, "\"."));
+        status.SetError(cmStrCat(
+          messageHint, "missing argument for option \""_s, option, "\"."_s));
         return false;
       }
     } else if (option == "COMPARATOR") {
       if (hasComparator) {
-        status.SetError(cmStrCat(messageHint, "option \"", option,
-                                 "\" has been specified multiple times."));
+        status.SetError(cmStrCat(messageHint, "option \""_s, option,
+                                 "\" has been specified multiple times."_s));
         return false;
       }
       if (sortConfig.Compare != SortConfig::CompareMethod::DEFAULT) {
         status.SetError(cmStrCat(messageHint,
                                  "option \"COMPARATOR\" is incompatible "
-                                 "with \"COMPARE\"."));
+                                 "with \"COMPARE\"."_s));
         return false;
       }
       if (argumentIndex < args.size()) {
@@ -828,13 +830,13 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         sortConfig.Compare = SortConfig::CompareMethod::COMPARATOR;
         hasComparator = true;
       } else {
-        status.SetError(cmStrCat(messageHint, "missing argument for option \"",
-                                 option, "\"."));
+        status.SetError(cmStrCat(
+          messageHint, "missing argument for option \""_s, option, "\"."_s));
         return false;
       }
     } else {
       status.SetError(
-        cmStrCat(messageHint, "option \"", option, "\" is unknown."));
+        cmStrCat(messageHint, "option \""_s, option, "\" is unknown."_s));
       return false;
     }
   }
@@ -867,8 +869,8 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
                           cmExecutionStatus& status)
 {
   if (args.size() != 5) {
-    status.SetError(cmStrCat("sub-command SUBLIST requires four arguments (",
-                             args.size() - 1, " found)."));
+    status.SetError(cmStrCat("sub-command SUBLIST requires four arguments ("_s,
+                             args.size() - 1, " found)."_s));
     return false;
   }
 
@@ -886,21 +888,22 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
   int start;
   int length;
   if (!GetIndexArg(args[2], &start, status.GetMakefile())) {
-    status.SetError(cmStrCat("index: ", args[2], " is not a valid index"));
+    status.SetError(cmStrCat("index: "_s, args[2], " is not a valid index"_s));
     return false;
   }
   if (!GetIndexArg(args[3], &length, status.GetMakefile())) {
-    status.SetError(cmStrCat("index: ", args[3], " is not a valid index"));
+    status.SetError(cmStrCat("index: "_s, args[3], " is not a valid index"_s));
     return false;
   }
 
   if (start < 0) {
-    status.SetError(cmStrCat("begin index: ", start, " is out of range 0 - ",
-                             list->size() - 1));
+    status.SetError(cmStrCat("begin index: "_s, start,
+                             " is out of range 0 - "_s, list->size() - 1));
     return false;
   }
   if (length < -1) {
-    status.SetError(cmStrCat("length: ", length, " should be -1 or greater"));
+    status.SetError(
+      cmStrCat("length: "_s, length, " should be -1 or greater"_s));
     return false;
   }
 
@@ -949,7 +952,8 @@ bool HandleRemoveAtCommand(std::vector<std::string> const& args,
   for (cc = 2; cc < args.size(); ++cc) {
     int index;
     if (!GetIndexArg(args[cc], &index, status.GetMakefile())) {
-      status.SetError(cmStrCat("index: ", args[cc], " is not a valid index"));
+      status.SetError(
+        cmStrCat("index: "_s, args[cc], " is not a valid index"_s));
       return false;
     }
     removed.push_back(index);

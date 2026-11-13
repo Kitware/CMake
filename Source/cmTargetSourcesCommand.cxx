@@ -71,8 +71,8 @@ private:
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Cannot specify sources for target \"", name,
-               "\" which is not built by this project."));
+      cmStrCat("Cannot specify sources for target \""_s, name,
+               "\" which is not built by this project."_s));
   }
 
   bool HandleDirectContent(cmTarget* tgt,
@@ -205,7 +205,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
 
   if (!unparsed.empty()) {
     this->SetError(
-      cmStrCat("Unrecognized keyword: \"", unparsed.front(), "\"."));
+      cmStrCat("Unrecognized keyword: \""_s, unparsed.front(), "\"."_s));
     return false;
   }
 
@@ -218,17 +218,17 @@ bool TargetSourcesImpl::HandleOneFileSet(
       // rule must be known from the target directory
       !this->Makefile->FindRuleToUse(args.Type)) {
     this->SetError(
-      cmStrCat("File set TYPE may only be one of the built-in types \"",
+      cmStrCat("File set TYPE may only be one of the built-in types \""_s,
                cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""),
-               "\" or a RULE visible from the current directory."));
+               "\" or a RULE visible from the current directory."_s));
     return false;
   }
   if (args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
       !cm::FileSetMetadata::IsKnownType(args.FileSet)) {
-    this->SetError(
-      cmStrCat("FILE_SET names starting with a capital letter are reserved "
-               "for built-in file sets and may only be \"",
-               cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""), "\"."));
+    this->SetError(cmStrCat(
+      "FILE_SET names starting with a capital letter are reserved "
+      "for built-in file sets and may only be \""_s,
+      cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""), "\"."_s));
     return false;
   }
   auto const fileSetDescriptor =
@@ -238,8 +238,8 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (!args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
       args.Type != args.FileSet && !isCanonicalAlias) {
     this->SetError(cmStrCat("FILE_SET name starting with a capital letter "
-                            "must match the TYPE name \"",
-                            args.Type, "\"."));
+                            "must match the TYPE name \""_s,
+                            args.Type, "\"."_s));
     return false;
   }
 
@@ -259,9 +259,9 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (isSycl &&
       !cmExperimental::HasSupportEnabled(*this->Makefile,
                                          cmExperimental::Feature::SYCL)) {
-    this->SetError(cmStrCat("File set TYPE \"", requestedType,
+    this->SetError(cmStrCat("File set TYPE \""_s, requestedType,
                             "\" is experimental and must be enabled by "
-                            "the CMAKE_EXPERIMENTAL_SYCL gate."));
+                            "the CMAKE_EXPERIMENTAL_SYCL gate."_s));
     return false;
   }
 
@@ -273,9 +273,9 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (cm::FileSetMetadata::IsKnownType(type) &&
       this->Target->GetType() == cm::TargetType::UTILITY) {
     this->SetError(
-      cmStrCat("FILE_SETs of type \"",
+      cmStrCat("FILE_SETs of type \""_s,
                cmJoin(cm::FileSetMetadata::GetKnownTypes(), "\", \""),
-               "\" may not be added to custom targets."));
+               "\" may not be added to custom targets."_s));
     return false;
   }
 
@@ -284,8 +284,8 @@ bool TargetSourcesImpl::HandleOneFileSet(
 
   if (this->Target->IsFrameworkOnApple() &&
       !cm::FileSetMetadata::IsFrameworkSupported(type)) {
-    this->SetError(cmStrCat(R"(FILE_SETs, of type ")", type,
-                            R"(", may not be added to FRAMEWORK targets.)"));
+    this->SetError(cmStrCat(R"(FILE_SETs, of type ")"_s, type,
+                            R"(", may not be added to FRAMEWORK targets.)"_s));
     return false;
   }
 
@@ -302,9 +302,9 @@ bool TargetSourcesImpl::HandleOneFileSet(
         !this->Target->IsImported()) {
       if (type == cm::FileSetMetadata::CXX_MODULES) {
         this->SetError(
-          cmStrCat(R"(File set TYPE ")", cm::FileSetMetadata::CXX_MODULES,
+          cmStrCat(R"(File set TYPE ")"_s, cm::FileSetMetadata::CXX_MODULES,
                    R"(" may not have "PUBLIC" )"
-                   R"(or "PRIVATE" scope on INTERFACE libraries.)"));
+                   R"(or "PRIVATE" scope on INTERFACE libraries.)"_s));
         return false;
       }
     }
@@ -315,9 +315,9 @@ bool TargetSourcesImpl::HandleOneFileSet(
         !cm::FileSetMetadata::VisibilityIsForSelf(visibility) &&
         !this->Target->IsImported()) {
       if (type == cm::FileSetMetadata::CXX_MODULES) {
-        this->SetError(cmStrCat(R"(File set TYPE ")",
+        this->SetError(cmStrCat(R"(File set TYPE ")"_s,
                                 cm::FileSetMetadata::CXX_MODULES,
-                                R"(" may not have "INTERFACE" scope.)"));
+                                R"(" may not have "INTERFACE" scope.)"_s));
         return false;
       }
     }
@@ -326,9 +326,9 @@ bool TargetSourcesImpl::HandleOneFileSet(
         this->Target->GetType() == cm::TargetType::INTERFACE_LIBRARY &&
         type == cm::FileSetMetadata::SOURCES) {
       this->SetError(
-        cmStrCat(R"(File set TYPE ")", cm::FileSetMetadata::SOURCES,
+        cmStrCat(R"(File set TYPE ")"_s, cm::FileSetMetadata::SOURCES,
                  R"(" may not have "PUBLIC" )"
-                 R"(or "PRIVATE" scope on INTERFACE libraries.)"));
+                 R"(or "PRIVATE" scope on INTERFACE libraries.)"_s));
       return false;
     }
 
@@ -343,16 +343,17 @@ bool TargetSourcesImpl::HandleOneFileSet(
       specifiedType = std::string{ descriptor->Type };
     }
     if (!args.Type.empty() && specifiedType != type) {
-      this->SetError(cmStrCat(
-        "Type \"", args.Type, "\" for file set \"", fileSet.first->GetName(),
-        "\" does not match original type \"", type, "\"."));
+      this->SetError(cmStrCat("Type \""_s, args.Type, "\" for file set \""_s,
+                              fileSet.first->GetName(),
+                              "\" does not match original type \""_s, type,
+                              "\"."_s));
       return false;
     }
 
     if (visibility != fileSet.first->GetVisibility()) {
       this->SetError(cmStrCat(
-        "Scope ", scope, " for file set \"", args.FileSet,
-        "\" does not match original scope ",
+        "Scope "_s, scope, " for file set \""_s, args.FileSet,
+        "\" does not match original scope "_s,
         cm::FileSetMetadata::VisibilityToName(fileSet.first->GetVisibility()),
         '.'));
       return false;
@@ -378,7 +379,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
     if (type == cm::FileSetMetadata::HEADERS) {
       for (auto const& dir : cmList{ baseDirectories }) {
         auto interfaceDirectoriesGenex =
-          cmStrCat("$<BUILD_INTERFACE:", dir, '>');
+          cmStrCat("$<BUILD_INTERFACE:"_s, dir, '>');
         if (cm::FileSetMetadata::VisibilityIsForSelf(visibility)) {
           this->Target->AppendProperty("INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex,

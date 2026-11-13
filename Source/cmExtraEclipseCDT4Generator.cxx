@@ -248,7 +248,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
   std::string envVarValue;
   bool const envVarSet = cmSystemTools::GetEnv(envVar, envVarValue);
 
-  std::string cacheEntryName = cmStrCat("CMAKE_ECLIPSE_ENVVAR_", envVar);
+  std::string cacheEntryName = cmStrCat("CMAKE_ECLIPSE_ENVVAR_"_s, envVar);
   cmValue cacheValue = lg.GetState()->GetInitializedCacheValue(cacheEntryName);
 
   // now we have both, decide which one to use
@@ -565,7 +565,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
         !cmSystemTools::IsSubDirectory(baseDir, linkSourceDirectory)) {
-      std::string linkName = cmStrCat("[Subprojects]/", it.first);
+      std::string linkName = cmStrCat("[Subprojects]/"_s, it.first);
       cmExtraEclipseCDT4Generator::AppendLinkedResource(
         xml, linkName,
         cmExtraEclipseCDT4Generator::GetEclipsePath(linkSourceDirectory),
@@ -741,7 +741,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
           cmStrCat(this->HomeOutputDirectory, '/', p))) {
-      excludeFromOut = cmStrCat(std::move(excludeFromOut), p, "/|");
+      excludeFromOut = cmStrCat(std::move(excludeFromOut), p, "/|"_s);
     }
   }
 
@@ -958,21 +958,21 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                                                              : "[lib] ");
           cmExtraEclipseCDT4Generator::AppendTarget(xml, targetName, make,
                                                     makeArgs, subdir, prefix);
-          std::string fastTarget = cmStrCat(targetName, "/fast");
+          std::string fastTarget = cmStrCat(targetName, "/fast"_s);
           cmExtraEclipseCDT4Generator::AppendTarget(xml, fastTarget, make,
                                                     makeArgs, subdir, prefix);
 
           // Add Build and Clean targets in the virtual folder of targets:
           if (this->SupportsVirtualFolders) {
-            std::string virtDir = cmStrCat("[Targets]/", prefix, targetName);
-            std::string buildArgs =
-              cmStrCat("-C \"", lgen->GetBinaryDirectory(), "\" ", makeArgs);
+            std::string virtDir = cmStrCat("[Targets]/"_s, prefix, targetName);
+            std::string buildArgs = cmStrCat(
+              "-C \""_s, lgen->GetBinaryDirectory(), "\" "_s, makeArgs);
             cmExtraEclipseCDT4Generator::AppendTarget(
               xml, "Build", make, buildArgs, virtDir, "", targetName.c_str());
 
             std::string cleanArgs =
-              cmStrCat("-E chdir \"", lgen->GetObjectOutputRoot(), "\" \"",
-                       cmSystemTools::GetCMakeCommand(), "\" -P \"");
+              cmStrCat("-E chdir \""_s, lgen->GetObjectOutputRoot(), "\" \""_s,
+                       cmSystemTools::GetCMakeCommand(), "\" -P \""_s);
             cleanArgs += lgen->GetTargetDirectory(
               target.get(), cmStateEnums::IntermediateDirKind::ObjectFiles);
             cleanArgs += "/cmake_clean.cmake\"";

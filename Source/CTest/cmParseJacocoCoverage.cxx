@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmext/string_view>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
@@ -37,23 +39,22 @@ protected:
 
       if (this->PackagePath.empty()) {
         if (!this->FindPackagePath(fileName)) {
-          cmCTestLog(this->CTest, ERROR_MESSAGE,
-                     "Cannot find file: ", this->PackageName, '/', fileName,
-                     '\n');
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find file: "_s,
+                     this->PackageName, '/', fileName, '\n');
           this->Coverage.Error++;
           return;
         }
       }
 
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         this->Coverage.Quiet, "Reading file: ", fileName,
+                         this->Coverage.Quiet, "Reading file: "_s, fileName,
                          '\n');
 
       this->FilePath = cmStrCat(this->PackagePath, '/', fileName);
       cmsys::ifstream fin(this->FilePath.c_str());
       if (!fin) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Jacoco Coverage: Error opening ", this->FilePath, '\n');
+                   "Jacoco Coverage: Error opening "_s, this->FilePath, '\n');
       }
       std::string line;
       FileLinesType& curFileLines =
@@ -122,7 +123,7 @@ protected:
         if (cmHasSuffix(dir, this->PackageName)) {
           cmCTestOptionalLog(
             this->CTest, HANDLER_VERBOSE_OUTPUT, this->Coverage.Quiet,
-            "Found package directory for ", fileName, ": ", dir, '\n');
+            "Found package directory for "_s, fileName, ": "_s, dir, '\n');
           this->PackagePath = dir;
           return true;
         }
@@ -159,7 +160,8 @@ bool cmParseJacocoCoverage::LoadCoverageData(
     path = files[i];
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       this->Coverage.Quiet, "Reading XML File ", path, '\n');
+                       this->Coverage.Quiet, "Reading XML File "_s, path,
+                       '\n');
     if (cmSystemTools::GetFilenameLastExtension(path) == ".xml") {
       if (!this->ReadJacocoXML(path.c_str())) {
         return false;

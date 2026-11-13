@@ -44,9 +44,9 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
       if (cm::contains(tgts, this->GeneratorTarget)) {
         this->GeneratorTarget->LocalGenerator->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("Evaluation output file\n  \"", sf->ResolveFullPath(),
+          cmStrCat("Evaluation output file\n  \""_s, sf->ResolveFullPath(),
                    "\"\ndepends on the sources of a target it is used in.  "
-                   "This is a dependency loop and is not allowed."));
+                   "This is a dependency loop and is not allowed."_s));
         return;
       }
       if (emitted.insert(sf).second && this->SourcesQueued.insert(sf).second) {

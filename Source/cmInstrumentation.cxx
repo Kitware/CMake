@@ -113,12 +113,14 @@ cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
     cmSystemTools::GetEnv("CTEST_DISABLE_INSTRUMENTATION", envVal) &&
     !cmIsOff(envVal);
   this->binaryDir = binary_dir;
-  this->timingDirv1 = cmStrCat(this->binaryDir, "/.cmake/instrumentation/v1");
-  this->cdashDir = cmStrCat(this->timingDirv1, "/cdash");
-  this->dataDir = cmStrCat(this->timingDirv1, "/data");
+  this->timingDirv1 =
+    cmStrCat(this->binaryDir, "/.cmake/instrumentation/v1"_s);
+  this->cdashDir = cmStrCat(this->timingDirv1, "/cdash"_s);
+  this->dataDir = cmStrCat(this->timingDirv1, "/data"_s);
   if (cm::optional<std::string> configDir =
         cmSystemTools::GetCMakeConfigDirectory()) {
-    this->userTimingDirv1 = cmStrCat(configDir.value(), "/instrumentation/v1");
+    this->userTimingDirv1 =
+      cmStrCat(configDir.value(), "/instrumentation/v1"_s);
   }
   if (loadQueries == LoadQueriesAfter::Yes) {
     this->LoadQueries();
@@ -133,10 +135,10 @@ void cmInstrumentation::LoadQueries()
       this->hasQuery = true;
     }
   };
-  readJSONQueries(cmStrCat(this->timingDirv1, "/query"));
-  readJSONQueries(cmStrCat(this->timingDirv1, "/query/generated"));
+  readJSONQueries(cmStrCat(this->timingDirv1, "/query"_s));
+  readJSONQueries(cmStrCat(this->timingDirv1, "/query/generated"_s));
   if (!this->userTimingDirv1.empty()) {
-    readJSONQueries(cmStrCat(this->userTimingDirv1, "/query"));
+    readJSONQueries(cmStrCat(this->userTimingDirv1, "/query"_s));
   }
 }
 
@@ -204,8 +206,8 @@ void cmInstrumentation::ReadJSONQuery(std::string const& file)
   }
   if (!this->errorMsg.empty()) {
     cmSystemTools::Error(cmStrCat(
-      "Could not load instrumentation queries from ",
-      cmSystemTools::GetParentDirectory(file), ":\n", this->errorMsg));
+      "Could not load instrumentation queries from "_s,
+      cmSystemTools::GetParentDirectory(file), ":\n"_s, this->errorMsg));
   }
 }
 
@@ -235,7 +237,7 @@ void cmInstrumentation::WriteJSONQuery(
   }
   this->WriteInstrumentationJson(
     dataVersion, root, "query/generated",
-    cmStrCat("query-", this->writtenJsonQueries++, ".json"));
+    cmStrCat("query-"_s, this->writtenJsonQueries++, ".json"_s));
 }
 
 void cmInstrumentation::AddCustomContent(std::string const& name,
@@ -257,7 +259,7 @@ void cmInstrumentation::WriteCMakeContent(
     gg->GetCMakeInstance()->GetCacheDefinition("CMAKE_PROJECT_NAME").GetCStr();
   this->WriteInstrumentationJson(
     latestDataVersion, root, "data/content",
-    cmStrCat("cmake-", this->ComputeSuffixTime(), ".json"));
+    cmStrCat("cmake-"_s, this->ComputeSuffixTime(), ".json"_s));
 }
 
 Json::Value cmInstrumentation::DumpTargets(
@@ -312,7 +314,7 @@ void cmInstrumentation::RemoveOldFiles(std::string const& dataSubdir)
   std::string oldIndex =
     this->GetFileByTimestamp(LatestOrOldest::Oldest, "index");
   if (!oldIndex.empty()) {
-    oldIndex = cmStrCat(this->dataDir, "/index/", std::move(oldIndex));
+    oldIndex = cmStrCat(this->dataDir, "/index/"_s, std::move(oldIndex));
   }
   if (cmSystemTools::FileExists(dataSubdirPath)) {
     std::string latestFile =
@@ -339,7 +341,7 @@ void cmInstrumentation::RemoveOldFiles(std::string const& dataSubdir)
 
 void cmInstrumentation::ClearGeneratedQueries()
 {
-  std::string dir = cmStrCat(this->timingDirv1, "/query/generated");
+  std::string dir = cmStrCat(this->timingDirv1, "/query/generated"_s);
   if (cmSystemTools::FileIsDirectory(dir)) {
     cmSystemTools::RemoveADirectory(dir);
   }
@@ -373,8 +375,8 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 
   // Touch index file immediately to claim snippets
   std::string suffix_time = ComputeSuffixTime();
-  std::string const& index_name = cmStrCat("index-", suffix_time, ".json");
-  std::string index_path = cmStrCat(this->dataDir, "/index/", index_name);
+  std::string const& index_name = cmStrCat("index-"_s, suffix_time, ".json"_s);
+  std::string index_path = cmStrCat(this->dataDir, "/index/"_s, index_name);
   cmSystemTools::Touch(index_path, true);
 
   // Gather Snippets
@@ -384,7 +386,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   std::string last_index_name =
     this->GetFileByTimestamp(LatestOrOldest::Latest, "index", index_name);
   std::string last_index_path =
-    cmStrCat(this->dataDir, "/index/", last_index_name);
+    cmStrCat(this->dataDir, "/index/"_s, last_index_name);
   if (d.Load(this->dataDir)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
@@ -421,9 +423,9 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 
   // Parse snippets into the Google trace file
   if (this->HasOption(cmInstrumentationQuery::Option::Trace)) {
-    std::string trace_name = cmStrCat("trace-", suffix_time, ".json");
+    std::string trace_name = cmStrCat("trace-"_s, suffix_time, ".json"_s);
     this->WriteTraceFile(index, trace_name);
-    index["trace"] = cmStrCat("trace/", trace_name);
+    index["trace"] = cmStrCat("trace/"_s, trace_name);
   }
 
   // Write index file
@@ -433,8 +435,8 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   // Execute callbacks
   for (auto const& cb : this->callbacks) {
     cmSystemTools::RunSingleCommand(
-      cmStrCat(cb.Command, " \"", index_path, '"'), nullptr, nullptr, nullptr,
-      nullptr, cmSystemTools::OUTPUT_PASSTHROUGH);
+      cmStrCat(cb.Command, " \""_s, index_path, '"'), nullptr, nullptr,
+      nullptr, nullptr, cmSystemTools::OUTPUT_PASSTHROUGH);
   }
 
   // Special case for CDash collation
@@ -467,9 +469,9 @@ void cmInstrumentation::InsertDynamicSystemInformation(
   if (!root.isMember("dynamicSystemInformation")) {
     root["dynamicSystemInformation"] = Json::objectValue;
   }
-  root["dynamicSystemInformation"][cmStrCat(prefix, "HostMemoryUsed")] =
+  root["dynamicSystemInformation"][cmStrCat(prefix, "HostMemoryUsed"_s)] =
     memory;
-  root["dynamicSystemInformation"][cmStrCat(prefix, "CPULoadAverage")] =
+  root["dynamicSystemInformation"][cmStrCat(prefix, "CPULoadAverage"_s)] =
     load > 0 ? Json::Value(load) : Json::nullValue;
 }
 
@@ -549,7 +551,7 @@ void cmInstrumentation::InsertTimingData(
 Json::Value cmInstrumentation::ReadJsonSnippet(std::string const& file_name)
 {
   Json::Value snippetData;
-  std::string snippetPath = cmStrCat(this->timingDirv1, "/data/", file_name);
+  std::string snippetPath = cmStrCat(this->timingDirv1, "/data/"_s, file_name);
   cmJSONState parseState(snippetPath, &snippetData);
   if (!parseState.errors.empty()) {
 #if JSONCPP_VERSION_HEXA < 0x01070300
@@ -585,7 +587,7 @@ void cmInstrumentation::WriteInstrumentationJson(
         stream.close();
       }
     } catch (std::ios_base::failure& fail) {
-      cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
+      cmSystemTools::Error(cmStrCat("Failed to write JSON: "_s, fail.what()));
     } catch (...) {
       cmSystemTools::Error("Error writing JSON output for instrumentation.");
     }
@@ -654,7 +656,7 @@ std::string cmInstrumentation::InstrumentTest(
   std::string file_name = cmStrCat(
     SnippetTypeToString(SnippetType::Test), '-',
     this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId(), index)),
-    '-', this->ComputeSuffixTime(endTime), ".json");
+    '-', this->ComputeSuffixTime(endTime), ".json"_s);
   this->WriteInstrumentationJson(latestDataVersion, root, "data", file_name);
   return file_name;
 }
@@ -834,7 +836,7 @@ int cmInstrumentation::InstrumentCommand(
     std::string contentFile =
       this->GetFileByTimestamp(LatestOrOldest::Latest, "content");
     if (!contentFile.empty()) {
-      root_["cmakeContent"] = cmStrCat("content/", contentFile);
+      root_["cmakeContent"] = cmStrCat("content/"_s, contentFile);
     }
   };
   // Don't insert path to CMake content until generate time
@@ -861,7 +863,7 @@ int cmInstrumentation::InstrumentCommand(
   // Write JSON
   std::string const& file_name =
     cmStrCat(SnippetTypeToString(command_type), '-', commandHash, '-',
-             suffixTime, ".json");
+             suffixTime, ".json"_s);
 
   // Don't write configure snippet until generate time
   if (command_type == SnippetType::Configure) {
@@ -909,7 +911,7 @@ std::string cmInstrumentation::GetCommandStr(
   std::string command_str;
   for (std::string const& arg : args) {
     if (arg.find(' ') != std::string::npos) {
-      command_str = cmStrCat(std::move(command_str), '"', arg, "\" ");
+      command_str = cmStrCat(std::move(command_str), '"', arg, "\" "_s);
     } else {
       command_str = cmStrCat(std::move(command_str), arg, ' ');
     }
@@ -1087,11 +1089,11 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
                                             std::string const& index_path)
 {
   cmSystemTools::MakeDirectory(this->cdashDir);
-  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/configure"));
-  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build"));
-  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build/commands"));
-  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build/targets"));
-  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/test"));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/configure"_s));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build"_s));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build/commands"_s));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build/targets"_s));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/test"_s));
 
   Json::Value root;
   std::string error_msg;
@@ -1102,15 +1104,15 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
   }
 
   if (!root.isObject()) {
-    error_msg =
-      cmStrCat("Expected index file ", index_path, " to contain an object");
+    error_msg = cmStrCat("Expected index file "_s, index_path,
+                         " to contain an object"_s);
     cmSystemTools::Error(error_msg);
     return;
   }
 
   if (!root.isMember("snippets")) {
-    error_msg = cmStrCat("Expected index file ", index_path,
-                         " to have a key 'snippets'");
+    error_msg = cmStrCat("Expected index file "_s, index_path,
+                         " to have a key 'snippets'"_s);
     cmSystemTools::Error(error_msg);
     return;
   }
@@ -1128,14 +1130,14 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
       continue;
     }
     if (!snippet_root.isObject()) {
-      error_msg = cmStrCat("Expected snippet file ", snippet_path,
-                           " to contain an object");
+      error_msg = cmStrCat("Expected snippet file "_s, snippet_path,
+                           " to contain an object"_s);
       cmSystemTools::Error(error_msg);
       continue;
     }
     if (!snippet_root.isMember("role")) {
-      error_msg = cmStrCat("Expected snippet file ", snippet_path,
-                           " to have a key 'role'");
+      error_msg = cmStrCat("Expected snippet file "_s, snippet_path,
+                           " to have a key 'role'"_s);
       cmSystemTools::Error(error_msg);
       continue;
     }
@@ -1157,20 +1159,20 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
       case CDashSnippetType::Skip:
         continue;
       case CDashSnippetType::Configure:
-        dst_dir = cmStrCat(this->cdashDir, "/configure");
+        dst_dir = cmStrCat(this->cdashDir, "/configure"_s);
         break;
       case CDashSnippetType::Test:
-        dst_dir = cmStrCat(this->cdashDir, "/test");
+        dst_dir = cmStrCat(this->cdashDir, "/test"_s);
         break;
       case CDashSnippetType::Build: {
         // We organize snippets on a per-target basis (when possible)
         // for Build.xml.
         if (snippet_root.isMember("target")) {
-          dst_dir = cmStrCat(this->cdashDir, "/build/targets/",
+          dst_dir = cmStrCat(this->cdashDir, "/build/targets/"_s,
                              snippet_root["target"].asString());
           cmSystemTools::MakeDirectory(dst_dir);
         } else {
-          dst_dir = cmStrCat(this->cdashDir, "/build/commands");
+          dst_dir = cmStrCat(this->cdashDir, "/build/commands"_s);
         }
         break;
       }
@@ -1178,7 +1180,7 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
 
     std::string dst = cmStrCat(dst_dir, '/', snippet_str);
     if (!cmSystemTools::CopyFileAlways(snippet_path, dst)) {
-      error_msg = cmStrCat("Failed to copy ", snippet_path, " to ", dst);
+      error_msg = cmStrCat("Failed to copy "_s, snippet_path, " to "_s, dst);
       cmSystemTools::Error(error_msg);
     }
   }
@@ -1204,7 +1206,7 @@ std::string cmInstrumentation::GetCompileTraceFile(
       cmSystemTools::GetFilenameLastExtensionView(outputPath);
     if (!outputPath.empty() && !ext.empty()) {
       traceFile = cmStrCat(
-        outputPath.substr(0, outputPath.size() - ext.size()), ".json");
+        outputPath.substr(0, outputPath.size() - ext.size()), ".json"_s);
     }
   }
 
@@ -1242,12 +1244,12 @@ void cmInstrumentation::CollectCompileTraceFile(Json::Value& root,
   std::string copiedName =
     cmStrCat(candidateName.substr(0, candidateName.size() - ext.size()), '-',
              commandHash, '-', suffixTime, ext);
-  std::string const copiedFile = cmStrCat("compile-trace/", copiedName);
+  std::string const copiedFile = cmStrCat("compile-trace/"_s, copiedName);
   std::string const destination = cmStrCat(this->dataDir, '/', copiedFile);
   cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(destination));
   if (!cmSystemTools::CopyFileAlways(traceFile, destination)) {
-    cmSystemTools::Error(cmStrCat("Failed to copy compile trace file ",
-                                  traceFile, " to ", destination));
+    cmSystemTools::Error(cmStrCat("Failed to copy compile trace file "_s,
+                                  traceFile, " to "_s, destination));
     return;
   }
   root["traceFile"] = copiedFile;
@@ -1282,7 +1284,7 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
               return snippetA.Timestamp > snippetB.Timestamp;
             });
 
-  std::string traceDir = cmStrCat(this->timingDirv1, "/data/trace/");
+  std::string traceDir = cmStrCat(this->timingDirv1, "/data/trace/"_s);
   std::string traceFile = cmStrCat(traceDir, trace_name);
   cmSystemTools::MakeDirectory(traceDir);
   cmsys::ofstream traceStream;
@@ -1316,7 +1318,7 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
       }
     } catch (std::ios_base::failure& fail) {
       cmSystemTools::Error(
-        cmStrCat("Failed to write to Google trace file: ", fail.what()));
+        cmStrCat("Failed to write to Google trace file: "_s, fail.what()));
     } catch (...) {
       cmSystemTools::Error("Error writing Google trace output.");
     }
@@ -1382,7 +1384,7 @@ Json::Value cmInstrumentation::BuildTraceEvent(std::vector<uint64_t>& workers,
   }
   if (!nameSuffix.empty()) {
     snippetTraceEvent["name"] =
-      cmStrCat(snippetData["role"].asString(), ": ", nameSuffix);
+      cmStrCat(snippetData["role"].asString(), ": "_s, nameSuffix);
   } else {
     snippetTraceEvent["name"] = snippetData["role"].asString();
   }

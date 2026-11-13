@@ -13,6 +13,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmArgumentParserTypes.h"
 #include "cmCMakePresetsGraph.h"
@@ -72,8 +73,8 @@ cmCTestTestCommand::ResolveTestPreset(cmMakefile& mf,
       if (presetCheck == PresetCheckResult::Found) {
         resolved.EffectivePreset = *v;
       } else {
-        cmCTestLog(this->CTest, WARNING, "No test preset named \"", *v,
-                   "\" found, ignoring CTEST_PRESET.\n");
+        cmCTestLog(this->CTest, WARNING, "No test preset named \""_s, *v,
+                   "\" found, ignoring CTEST_PRESET.\n"_s);
       }
     }
   }
@@ -85,9 +86,9 @@ cmCTestTestCommand::ResolveTestPreset(cmMakefile& mf,
   resolved.PresetsGraph = cm::make_unique<cmCMakePresetsGraph>();
   if (!resolved.PresetsGraph->ReadProjectPresets(resolved.SourceDirectory,
                                                  resolved.PresetsFile)) {
-    status.SetError(
-      cmStrCat("\n Could not read presets from \"", resolved.SourceDirectory,
-               "\":\n ", resolved.PresetsGraph->parseState.GetErrorMessage()));
+    status.SetError(cmStrCat(
+      "\n Could not read presets from \""_s, resolved.SourceDirectory,
+      "\":\n "_s, resolved.PresetsGraph->parseState.GetErrorMessage()));
     return cm::nullopt;
   }
 
@@ -289,14 +290,14 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
   if (!args.TestLoad.empty()) {
     if (!cmStrToULong(args.TestLoad, &testLoad)) {
       testLoad = 0;
-      cmCTestLog(this->CTest, WARNING,
-                 "Invalid value for 'TEST_LOAD' : ", args.TestLoad, '\n');
+      cmCTestLog(this->CTest, WARNING, "Invalid value for 'TEST_LOAD' : "_s,
+                 args.TestLoad, '\n');
     }
   } else if (cmNonempty(ctestTestLoad)) {
     if (!cmStrToULong(*ctestTestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
-                 "Invalid value for 'CTEST_TEST_LOAD' : ", *ctestTestLoad,
+                 "Invalid value for 'CTEST_TEST_LOAD' : "_s, *ctestTestLoad,
                  '\n');
     }
   } else {

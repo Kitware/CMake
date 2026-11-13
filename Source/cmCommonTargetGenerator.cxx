@@ -350,7 +350,7 @@ std::string cmCommonTargetGenerator::ComputeTargetCompilePDB(
     if (this->GeneratorTarget->GetType() == cm::TargetType::STATIC_LIBRARY) {
       // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
       compilePdbPath = cmStrCat(std::move(compilePdbPath),
-                                this->GeneratorTarget->GetName(), ".pdb");
+                                this->GeneratorTarget->GetName(), ".pdb"_s);
     }
   }
 
@@ -367,7 +367,7 @@ std::string cmCommonTargetGenerator::GetManifests(std::string const& config)
 
   std::string const lang = this->GeneratorTarget->GetLinkerLanguage(config);
   std::string const manifestFlag = this->Makefile->GetDefinition(
-    cmStrCat("CMAKE_", lang, "_LINKER_MANIFEST_FLAG"));
+    cmStrCat("CMAKE_"_s, lang, "_LINKER_MANIFEST_FLAG"_s));
   for (cmSourceFile const* manifest_src : manifest_srcs) {
     manifests.push_back(manifestFlag +
                         this->LocalCommonGenerator->ConvertToOutputFormat(
@@ -399,7 +399,7 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
 {
   // Lookup the flag to specify the version.
   std::string const fvar =
-    cmStrCat("CMAKE_", lang, "_OSX_", name, "_VERSION_FLAG");
+    cmStrCat("CMAKE_"_s, lang, "_OSX_"_s, name, "_VERSION_FLAG"_s);
   cmValue flag = this->Makefile->GetDefinition(fvar);
 
   // Skip if no such flag.
@@ -411,7 +411,7 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
   int major;
   int minor;
   int patch;
-  std::string const prop = cmStrCat("MACHO_", name, "_VERSION");
+  std::string const prop = cmStrCat("MACHO_"_s, name, "_VERSION"_s);
   std::string const fallbackProp = so ? "SOVERSION" : "VERSION";
   this->GeneratorTarget->GetTargetVersionFallback(prop, fallbackProp, major,
                                                   minor, patch);
@@ -444,7 +444,7 @@ std::vector<std::string> cmCommonTargetGenerator::GetCompilerLauncher(
         this->GeneratorTarget->GetName(), config, lang);
     }
 
-    std::string const propName = cmStrCat(lang, "_COMPILER_LAUNCHER");
+    std::string const propName = cmStrCat(lang, "_COMPILER_LAUNCHER"_s);
     cmValue cLauncherValue = this->GeneratorTarget->GetProperty(propName);
     std::string const evaluatedCLauncher = cmGeneratorExpression::Evaluate(
       *cLauncherValue, this->GeneratorTarget->GetLocalGenerator(), config,
@@ -481,23 +481,23 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
       this->GeneratorTarget, nullptr, this->GeneratorTarget, lang);
     return evaluatedProp;
   };
-  std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
+  std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY"_s);
   tidy = evaluateProp(tidy_prop);
 
   if (lang == "C" || lang == "CXX") {
-    std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
+    std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE"_s);
     iwyu = evaluateProp(iwyu_prop);
 
-    std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
+    std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT"_s);
     cpplint = evaluateProp(cpplint_prop);
 
-    std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
+    std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK"_s);
     cppcheck = evaluateProp(cppcheck_prop);
 
-    std::string const icstat_prop = cmStrCat(lang, "_ICSTAT");
+    std::string const icstat_prop = cmStrCat(lang, "_ICSTAT"_s);
     icstat = evaluateProp(icstat_prop);
 
-    std::string const pvs_prop = cmStrCat(lang, "_PVS_STUDIO");
+    std::string const pvs_prop = cmStrCat(lang, "_PVS_STUDIO"_s);
     pvs = evaluateProp(pvs_prop);
   }
 
@@ -511,7 +511,7 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
         cmSystemTools::ReplaceString(arg, ";", "\\;");
       }
       code_check =
-        cmStrCat(std::move(code_check), " --launcher=",
+        cmStrCat(std::move(code_check), " --launcher="_s,
                  this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
                    cmJoin(compilerLauncher, ";")));
       compilerLauncher.clear();
@@ -521,7 +521,7 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
       // it unconditionally might override a user-specified driver-mode
       if (iwyu.find("--driver-mode=") == std::string::npos) {
         cmValue const p = this->Makefile->GetDefinition(
-          cmStrCat("CMAKE_", lang, "_INCLUDE_WHAT_YOU_USE_DRIVER_MODE"));
+          cmStrCat("CMAKE_"_s, lang, "_INCLUDE_WHAT_YOU_USE_DRIVER_MODE"_s));
         std::string driverMode;
 
         if (cmNonempty(p)) {
@@ -531,19 +531,19 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
         }
 
         code_check =
-          cmStrCat(std::move(code_check), " --iwyu=",
+          cmStrCat(std::move(code_check), " --iwyu="_s,
                    this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-                     cmStrCat(iwyu, ";--driver-mode=", driverMode)));
+                     cmStrCat(iwyu, ";--driver-mode="_s, driverMode)));
       } else {
         code_check = cmStrCat(
-          std::move(code_check), " --iwyu=",
+          std::move(code_check), " --iwyu="_s,
           this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(iwyu));
       }
     }
     if (cmNonempty(tidy)) {
       code_check += " --tidy=";
       cmValue const p = this->Makefile->GetDefinition(
-        cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
+        cmStrCat("CMAKE_"_s, lang, "_CLANG_TIDY_DRIVER_MODE"_s));
       std::string driverMode;
       if (cmNonempty(p)) {
         driverMode = *p;
@@ -571,11 +571,11 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
             cmSystemTools::GetFilenamePath(fixesFile));
           fixesFile = this->GeneratorTarget->GetLocalGenerator()
                         ->MaybeRelativeToCurBinDir(fixesFile);
-          exportFixes = cmStrCat(";--export-fixes=", fixesFile);
+          exportFixes = cmStrCat(";--export-fixes="_s, fixesFile);
         }
         code_check +=
           this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-            cmStrCat(tidy, ";--extra-arg-before=--driver-mode=", driverMode,
+            cmStrCat(tidy, ";--extra-arg-before=--driver-mode="_s, driverMode,
                      exportFixes));
       } else if (generatorName.find("Ninja") != std::string::npos ||
                  generatorName.find("FASTBuild") != std::string::npos) {
@@ -586,11 +586,11 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
           if (pathConverter) {
             fixesFile = pathConverter(fixesFile);
           }
-          exportFixes = cmStrCat(";--export-fixes=", fixesFile);
+          exportFixes = cmStrCat(";--export-fixes="_s, fixesFile);
         }
         code_check +=
           this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-            cmStrCat(tidy, ";--extra-arg-before=--driver-mode=", driverMode,
+            cmStrCat(tidy, ";--extra-arg-before=--driver-mode="_s, driverMode,
                      exportFixes));
       }
     }
@@ -600,17 +600,17 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
       std::string extraPvsArgs;
       if (lang == "CXX") {
         extraPvsArgs =
-          cmStrCat(";--cxx;", mf->GetDefinition("CMAKE_CXX_COMPILER"));
+          cmStrCat(";--cxx;"_s, mf->GetDefinition("CMAKE_CXX_COMPILER"));
       } else if (lang == "C") {
         extraPvsArgs =
-          cmStrCat(";--cc;", mf->GetDefinition("CMAKE_C_COMPILER"));
+          cmStrCat(";--cc;"_s, mf->GetDefinition("CMAKE_C_COMPILER"));
       }
       // cocompile args
       code_check = cmStrCat(
-        std::move(code_check), " --pvs-studio=",
+        std::move(code_check), " --pvs-studio="_s,
         this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
           cmStrCat(pvs, extraPvsArgs)),
-        " --object=",
+        " --object="_s,
         this->GeneratorTarget->GetLocalGenerator()->ConvertToOutputFormat(
           cmSystemTools::CollapseFullPath(
             cmStrCat(this->GeneratorTarget->GetObjectDirectory(config), '/',
@@ -619,12 +619,12 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
     }
     if (cmNonempty(cpplint)) {
       code_check = cmStrCat(
-        std::move(code_check), " --cpplint=",
+        std::move(code_check), " --cpplint="_s,
         this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(cpplint));
     }
     if (cmNonempty(cppcheck)) {
       code_check = cmStrCat(
-        std::move(code_check), " --cppcheck=",
+        std::move(code_check), " --cppcheck="_s,
         this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(cppcheck));
     }
     if (cmNonempty(icstat)) {
@@ -634,23 +634,23 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
       std::string checksParam{};
       if (icstat.find("--checks=") == std::string::npos) {
         std::string const checksFile{ "cstat_sel_checks.txt" };
-        checksParam = cmStrCat(";--checks=", checksFile);
+        checksParam = cmStrCat(";--checks="_s, checksFile);
       }
       std::string dbParam{};
       if (icstat.find("--db=") == std::string::npos) {
         std::string const dbFile{ "cstat.db" };
-        dbParam = cmStrCat(";--db=", dbFile);
+        dbParam = cmStrCat(";--db="_s, dbFile);
       }
       cm::string_view const analyzeCmd{ ";analyze" };
       code_check =
-        cmStrCat(std::move(code_check), " --icstat=",
+        cmStrCat(std::move(code_check), " --icstat="_s,
                  this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
                    cmStrCat(icstat, checksParam, dbParam, analyzeCmd)));
     }
     if (cmNonempty(tidy) || (cmNonempty(cpplint)) || (cmNonempty(cppcheck)) ||
         cmNonempty(pvs) || cmNonempty(icstat)) {
       code_check = cmStrCat(
-        std::move(code_check), " --source=",
+        std::move(code_check), " --source="_s,
         this->GeneratorTarget->GetLocalGenerator()->ConvertToOutputFormat(
           source.GetFullPath(), cmOutputConverter::SHELL));
     }
@@ -680,7 +680,7 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkerLauncher(
                           this->GeneratorTarget->GetName(), config, lang);
   }
 
-  std::string const propName = cmStrCat(lang, "_LINKER_LAUNCHER");
+  std::string const propName = cmStrCat(lang, "_LINKER_LAUNCHER"_s);
   cmValue launcherProp = this->GeneratorTarget->GetProperty(propName);
   if (cmNonempty(launcherProp)) {
     cm::GenEx::Context context(this->LocalCommonGenerator, config, lang);
@@ -731,11 +731,11 @@ bool cmCommonTargetGenerator::HaveRequiredLanguages(
     if (!valid) {
       makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("The language ", lang,
+        cmStrCat("The language "_s, lang,
                  " was requested for compilation but was not enabled."
                  " To enable a language it needs to be specified in a"
                  " 'project' or 'enable_language' command in the root"
-                 " CMakeLists.txt"));
+                 " CMakeLists.txt"_s));
     }
     return valid;
   };
@@ -755,12 +755,13 @@ void cmCommonTargetGenerator::ComputeRustFlagsForObjects(
       // common usage in Rust.
       std::string objStem = objPath.stem().string();
       objStem = objStem.substr(3, objStem.length() - 6);
-      linkCrates = cmStrCat(std::move(linkCrates), " --extern=", objStem, '=',
-                            this->LocalCommonGenerator->ConvertToOutputFormat(
-                              obj, cmOutputConverter::SHELL));
+      linkCrates =
+        cmStrCat(std::move(linkCrates), " --extern="_s, objStem, '=',
+                 this->LocalCommonGenerator->ConvertToOutputFormat(
+                   obj, cmOutputConverter::SHELL));
     } else {
       nativeObjects =
-        cmStrCat(std::move(nativeObjects), " -Clink-arg=",
+        cmStrCat(std::move(nativeObjects), " -Clink-arg="_s,
                  this->LocalCommonGenerator->ConvertToOutputFormat(
                    obj, cmOutputConverter::SHELL));
     }
@@ -789,9 +790,9 @@ std::vector<std::string> cmCommonTargetGenerator::ParseWrappers(
     if (!globalPropValue.IsSet()) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Specified wrapper \'", wrapper.Value, "\' for target \'",
-                 targetName, "\' does not exist. Set the GLOBAL property \'",
-                 wrapperPropName, "\'."),
+        cmStrCat("Specified wrapper \'"_s, wrapper.Value, "\' for target \'"_s,
+                 targetName, "\' does not exist. Set the GLOBAL property \'"_s,
+                 wrapperPropName, "\'."_s),
         wrapper.Backtrace);
       return {};
     }

@@ -305,10 +305,10 @@ void cmMakefile::IssueInvalidTargetNameError(
 {
   this->IssueMessage(
     MessageType::FATAL_ERROR,
-    cmStrCat("The target name \"", targetName,
+    cmStrCat("The target name \""_s, targetName,
              "\" is reserved or not valid for certain "
              "CMake features, such as generator expressions, and may result "
-             "in undefined behavior."));
+             "in undefined behavior."_s));
 }
 
 void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
@@ -318,12 +318,12 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
   if ((rootDef || rootEnv) && this->WarnedCMP0074.insert(rootVar).second) {
     std::string e;
     if (rootDef) {
-      e = cmStrCat(std::move(e), "CMake variable ", rootVar, " is set to:\n  ",
-                   *rootDef, '\n');
+      e = cmStrCat(std::move(e), "CMake variable "_s, rootVar,
+                   " is set to:\n  "_s, *rootDef, '\n');
     }
     if (rootEnv) {
-      e = cmStrCat(std::move(e), "Environment variable ", rootVar,
-                   " is set to:\n  ", *rootEnv, '\n');
+      e = cmStrCat(std::move(e), "Environment variable "_s, rootVar,
+                   " is set to:\n  "_s, *rootEnv, '\n');
     }
     e += "For compatibility, CMake is ignoring the variable.";
     this->IssuePolicyWarning(cmPolicies::CMP0074, {}, e);
@@ -337,12 +337,12 @@ void cmMakefile::MaybeWarnCMP0144(std::string const& rootVar, cmValue rootDef,
   if ((rootDef || rootEnv) && this->WarnedCMP0144.insert(rootVar).second) {
     std::string e;
     if (rootDef) {
-      e = cmStrCat(std::move(e), "CMake variable ", rootVar, " is set to:\n  ",
-                   *rootDef, '\n');
+      e = cmStrCat(std::move(e), "CMake variable "_s, rootVar,
+                   " is set to:\n  "_s, *rootDef, '\n');
     }
     if (rootEnv) {
-      e = cmStrCat(std::move(e), "Environment variable ", rootVar,
-                   " is set to:\n  ", *rootEnv, '\n');
+      e = cmStrCat(std::move(e), "Environment variable "_s, rootVar,
+                   " is set to:\n  "_s, *rootEnv, '\n');
     }
     e += "For compatibility, find_package is ignoring the variable, but "
          "code in a .cmake module might still use it.";
@@ -613,7 +613,7 @@ bool cmMakefile::ExecuteCommand(cmListFileFunction const& lff,
   if (this->RecursionDepth > depthLimit) {
     this->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Maximum recursion depth of ", depthLimit, " exceeded"));
+      cmStrCat("Maximum recursion depth of "_s, depthLimit, " exceeded"_s));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -658,12 +658,12 @@ bool cmMakefile::ExecuteCommand(cmListFileFunction const& lff,
   } else {
     if (!cmSystemTools::GetFatalErrorOccurred()) {
       std::string error =
-        cmStrCat("Unknown CMake command \"", lff.OriginalName(), "\".");
+        cmStrCat("Unknown CMake command \""_s, lff.OriginalName(), "\"."_s);
       std::string const suggestion = findClosestCommand(
         lff.OriginalName(), this->GetState()->GetCommandNames());
       if (!suggestion.empty()) {
-        error =
-          cmStrCat(std::move(error), " Did you mean: \"", suggestion, "\"?");
+        error = cmStrCat(std::move(error), " Did you mean: \""_s, suggestion,
+                         "\"?"_s);
       }
       this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
@@ -1009,14 +1009,14 @@ void cmMakefile::EnforceDirectoryLevelRules() const
     std::string e =
       cmStrCat("No cmake_minimum_required command is present.  "
                "A line of code such as\n"
-               "  cmake_minimum_required(VERSION ",
+               "  cmake_minimum_required(VERSION "_s,
                cmVersion::GetMajorVersion(), '.', cmVersion::GetMinorVersion(),
                ")\n"
                "should be added at the top of the file.  "
                "The version specified may be lower if you wish to "
                "support older CMake versions for this project.  "
                "For more information run "
-               "\"cmake --help-policy CMP0000\".");
+               "\"cmake --help-policy CMP0000\"."_s);
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
                                            this->Backtrace);
     cmSystemTools::SetFatalErrorOccurred();
@@ -1181,7 +1181,8 @@ bool cmMakefile::ValidateCustomCommand(
   if (it != commandLines.end()) {
     this->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("COMMAND may not contain literal quotes:\n  ", (*it)[0], '\n'));
+      cmStrCat("COMMAND may not contain literal quotes:\n  "_s, (*it)[0],
+               '\n'));
     return false;
   }
   return true;
@@ -1204,15 +1205,15 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
     std::string e;
     if (cmTarget const* t = this->FindTargetToUse(target)) {
       if (t->IsImported()) {
-        e = cmStrCat(std::move(e), "TARGET '", target,
-                     "' is IMPORTED and does not build here.");
+        e = cmStrCat(std::move(e), "TARGET '"_s, target,
+                     "' is IMPORTED and does not build here."_s);
       } else {
-        e = cmStrCat(std::move(e), "TARGET '", target,
-                     "' was not created in this directory.");
+        e = cmStrCat(std::move(e), "TARGET '"_s, target,
+                     "' was not created in this directory."_s);
       }
     } else {
-      e = cmStrCat(std::move(e), "No TARGET '", target,
-                   "' has been created in this directory.");
+      e = cmStrCat(std::move(e), "No TARGET '"_s, target,
+                   "' has been created in this directory."_s);
     }
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e, lfbt);
     return nullptr;
@@ -1222,17 +1223,17 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
   if (objLibCommands == cmObjectLibraryCommands::Reject &&
       t->GetType() == cm::TargetType::OBJECT_LIBRARY) {
     auto e = cmStrCat(
-      "Target \"", target,
+      "Target \""_s, target,
       "\" is an OBJECT library "
-      "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.");
+      "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands."_s);
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e, lfbt);
     return nullptr;
   }
   if (t->GetType() == cm::TargetType::INTERFACE_LIBRARY) {
     auto e = cmStrCat(
-      "Target \"", target,
+      "Target \""_s, target,
       "\" is an INTERFACE library "
-      "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.");
+      "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands."_s);
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e, lfbt);
     return nullptr;
   }
@@ -1682,7 +1683,7 @@ void cmMakefile::Configure()
 
   // make sure the CMakeFiles dir is there
   std::string filesDir = cmStrCat(
-    this->StateSnapshot.GetDirectory().GetCurrentBinary(), "/CMakeFiles");
+    this->StateSnapshot.GetDirectory().GetCurrentBinary(), "/CMakeFiles"_s);
   cmSystemTools::MakeDirectory(filesDir);
 
   assert(cmSystemTools::FileExists(currentStart, true));
@@ -1835,7 +1836,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
   mf->InitializeFromParent(this);
   std::string currentStart = mf->GetCurrentSourceDirectory();
   if (this->GetCMakeInstance()->GetDebugOutput()) {
-    std::string msg = cmStrCat("   Entering             ", currentStart);
+    std::string msg = cmStrCat("   Entering             "_s, currentStart);
     cmSystemTools::Message(msg);
   }
 
@@ -1843,17 +1844,17 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
     this->GetCMakeInstance()->GetCMakeListFile(currentStart);
   if (!cmSystemTools::FileExists(currentStartFile, true)) {
     this->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("The source directory\n  ", currentStart,
+                       cmStrCat("The source directory\n  "_s, currentStart,
                                 "\n"
-                                "does not contain a CMakeLists.txt file."));
+                                "does not contain a CMakeLists.txt file."_s));
     return;
   }
   // finally configure the subdir
   mf->Configure();
 
   if (this->GetCMakeInstance()->GetDebugOutput()) {
-    auto msg =
-      cmStrCat("   Returning to         ", this->GetCurrentSourceDirectory());
+    auto msg = cmStrCat("   Returning to         "_s,
+                        this->GetCurrentSourceDirectory());
     cmSystemTools::Message(msg);
   }
 }
@@ -2065,7 +2066,7 @@ void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
         (sourceFilename && this->IsProjectFile(sourceFilename))) {
       this->IssueDiagnostic(
         cmDiagnostics::CMD_UNINITIALIZED,
-        cmStrCat("uninitialized variable '", variable, '\''));
+        cmStrCat("uninitialized variable '"_s, variable, '\''));
     }
   }
 }
@@ -2758,7 +2759,7 @@ void cmMakefile::IssueCMP0219Warning(
     if (!oldArgs.empty()) {
       oldArgs += '\n';
     }
-    oldArgs = cmStrCat(std::move(oldArgs), " \"", arg, '"');
+    oldArgs = cmStrCat(std::move(oldArgs), " \""_s, arg, '"');
   }
 
   std::string newArgs = oldArgs;
@@ -2768,17 +2769,17 @@ void cmMakefile::IssueCMP0219Warning(
     cmDiagnostics::CMD_POLICY,
     cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0219),
              "\n"
-             "Command \"",
+             "Command \""_s,
              calleeName,
              "\" called with arguments containing backslashes.\n"
-             "Since the policy is not set, backslashes in the arguments:\n",
+             "Since the policy is not set, backslashes in the arguments:\n"_s,
              oldArgs,
              "\n"
              "will be interpreted as escape sequences for compatibility.\n"
-             "Set the policy to NEW to instead pass\n",
+             "Set the policy to NEW to instead pass\n"_s,
              newArgs,
              "\n"
-             "so that argument parsing will preserve the original values."));
+             "so that argument parsing will preserve the original values."_s));
 }
 
 void cmMakefile::IssueCMP0219Warning(
@@ -2888,10 +2889,10 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
             lookup.domain = CACHE;
           } else {
             if (this->cmNamedCurly.find(next)) {
-              errorstr = cmStrCat("Syntax $",
+              errorstr = cmStrCat("Syntax $"_s,
                                   std::string(next, this->cmNamedCurly.end()),
                                   "{} is not supported.  Only ${}, $ENV{}, "
-                                  "and $CACHE{} are allowed.");
+                                  "and $CACHE{} are allowed."_s);
               mtype = MessageType::FATAL_ERROR;
               error = true;
             }
@@ -2995,10 +2996,11 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
             !(cmsysString_isalnum(inc) || inc == '_' || inc == '/' ||
               inc == '.' || inc == '+' || inc == '-')) {
           errorstr =
-            cmStrCat(std::move(errorstr), "Invalid character ('", inc);
+            cmStrCat(std::move(errorstr), "Invalid character ('"_s, inc);
           result.append(last, in - last);
-          errorstr = cmStrCat(std::move(errorstr), "') in a variable name: '",
-                              result.substr(openstack.back().loc), '\'');
+          errorstr =
+            cmStrCat(std::move(errorstr), "') in a variable name: '"_s,
+                     result.substr(openstack.back().loc), '\'');
           mtype = MessageType::FATAL_ERROR;
           error = true;
         }
@@ -3020,9 +3022,9 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
       // This filename and line number may be more specific than the
       // command context because one command invocation can have
       // arguments on multiple lines.
-      e = cmStrCat(std::move(e), "at\n  ", filename, ':', line, '\n');
+      e = cmStrCat(std::move(e), "at\n  "_s, filename, ':', line, '\n');
     }
-    errorstr = cmStrCat(e, "when parsing string\n  ", source, '\n',
+    errorstr = cmStrCat(e, "when parsing string\n  "_s, source, '\n',
                         std::move(errorstr));
     mtype = MessageType::FATAL_ERROR;
   } else {
@@ -3276,7 +3278,7 @@ void cmMakefile::SetArgcArgv(std::vector<std::string> const& args)
   this->AddDefinition("CMAKE_ARGC", std::to_string(args.size()));
 
   for (auto i = 0u; i < args.size(); ++i) {
-    this->AddDefinition(cmStrCat("CMAKE_ARGV", i), args[i]);
+    this->AddDefinition(cmStrCat("CMAKE_ARGV"_s, i), args[i]);
   }
 }
 
@@ -3402,8 +3404,8 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& languages,
       this->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
         cmStrCat("Languages to be enabled may not be specified more "
-                 "than once at the same time. The following language",
-                 quantity, " been specified multiple times: ",
+                 "than once at the same time. The following language"_s,
+                 quantity, " been specified multiple times: "_s,
                  cmJoin(duplicate_languages, ", ")));
     }
   }
@@ -3469,9 +3471,9 @@ int cmMakefile::TryCompile(std::string const& srcdir,
   auto gg = cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
   if (!gg) {
     this->IssueMessage(MessageType::INTERNAL_ERROR,
-                       cmStrCat("Global generator '",
+                       cmStrCat("Global generator '"_s,
                                 this->GetGlobalGenerator()->GetName(),
-                                "' could not be created."));
+                                "' could not be created."_s));
     cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
@@ -3644,19 +3646,19 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
         break;
       }
       if (debug) {
-        debugBuffer = cmStrCat(std::move(debugBuffer), "  ", itempl, '\n');
+        debugBuffer = cmStrCat(std::move(debugBuffer), "  "_s, itempl, '\n');
       }
     }
   }
 
   // Always search in the standard modules location.
   moduleInCMakeRoot =
-    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/", filename);
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/"_s, filename);
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
   if (!cmSystemTools::FileExists(moduleInCMakeRoot)) {
     if (debug) {
       debugBuffer =
-        cmStrCat(std::move(debugBuffer), "  ", moduleInCMakeRoot, '\n');
+        cmStrCat(std::move(debugBuffer), "  "_s, moduleInCMakeRoot, '\n');
     }
     moduleInCMakeRoot.clear();
   }
@@ -3666,7 +3668,7 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
   // prefer results from CMAKE_ROOT depending on the policy setting.
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty()) {
     cmValue currentFile = this->GetDefinition(kCMAKE_CURRENT_LIST_FILE);
-    std::string mods = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/");
+    std::string mods = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/"_s);
     if (currentFile && cmSystemTools::IsSubDirectory(*currentFile, mods)) {
       system = true;
       result = moduleInCMakeRoot;
@@ -3692,15 +3694,15 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
     if (status && actualName != requestedName) {
       this->IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("The module name\n  ", requestedName,
+        cmStrCat("The module name\n  "_s, requestedName,
                  "\n"
                  "does not match the case of the module file name on disk\n"
-                 "  ",
+                 "  "_s,
                  cmSystemTools::GetFilenamePath(result), '/', actualName,
                  "\n"
                  "This may fail on case-sensitive file systems.  "
-                 "Use the module name\n  ",
-                 actualName, "\ninstead."));
+                 "Use the module name\n  "_s,
+                 actualName, "\ninstead."_s));
     }
   }
 #endif
@@ -3734,9 +3736,9 @@ void cmMakefile::ConfigureString(std::string const& input, std::string& output,
       cmValue def = this->GetDefinition(this->cmDefineRegex.match(2));
       if (!def.IsOff()) {
         std::string const indentation = this->cmDefineRegex.match(1);
-        cmSystemTools::ReplaceString(line,
-                                     cmStrCat('#', indentation, "cmakedefine"),
-                                     cmStrCat('#', indentation, "define"));
+        cmSystemTools::ReplaceString(
+          line, cmStrCat('#', indentation, "cmakedefine"_s),
+          cmStrCat('#', indentation, "define"_s));
         output += line;
       } else {
         output += "/* #undef ";
@@ -3746,9 +3748,9 @@ void cmMakefile::ConfigureString(std::string const& input, std::string& output,
     } else if (this->cmDefine01Regex.find(line)) {
       std::string const indentation = this->cmDefine01Regex.match(1);
       cmValue def = this->GetDefinition(this->cmDefine01Regex.match(2));
-      cmSystemTools::ReplaceString(line,
-                                   cmStrCat('#', indentation, "cmakedefine01"),
-                                   cmStrCat('#', indentation, "define"));
+      cmSystemTools::ReplaceString(
+        line, cmStrCat('#', indentation, "cmakedefine01"_s),
+        cmStrCat('#', indentation, "define"_s));
       output += line;
       if (!def.IsOff()) {
         output += " 1";
@@ -3786,12 +3788,12 @@ int cmMakefile::ConfigureFile(std::string const& infile,
 {
   int res = 1;
   if (!this->CanIWriteThisFile(outfile)) {
-    cmSystemTools::Error(cmStrCat("Attempt to write file: ", outfile,
-                                  " into a source directory."));
+    cmSystemTools::Error(cmStrCat("Attempt to write file: "_s, outfile,
+                                  " into a source directory."_s));
     return 0;
   }
   if (!cmSystemTools::FileExists(infile)) {
-    cmSystemTools::Error(cmStrCat("File ", infile, " does not exist."));
+    cmSystemTools::Error(cmStrCat("File "_s, infile, " does not exist."_s));
     return 0;
   }
   std::string soutfile = outfile;
@@ -3820,11 +3822,11 @@ int cmMakefile::ConfigureFile(std::string const& infile,
     if (!copy_status) {
       this->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Fail to copy ",
+        cmStrCat("Fail to copy "_s,
                  copy_status.Path == cmsys::SystemTools::CopyStatus::SourcePath
                    ? "source"
                    : "destination",
-                 "file: ", copy_status.GetString()));
+                 "file: "_s, copy_status.GetString()));
       res = 0;
     } else {
       auto const status = cmSystemTools::SetPermissions(soutfile, permissions);
@@ -3851,7 +3853,7 @@ int cmMakefile::ConfigureFile(std::string const& infile,
   if (bom != cmsys::FStream::BOM_None && bom != cmsys::FStream::BOM_UTF8) {
     this->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("File starts with a Byte-Order-Mark that is not UTF-8:\n  ",
+      cmStrCat("File starts with a Byte-Order-Mark that is not UTF-8:\n  "_s,
                sinfile));
     return 0;
   }
@@ -3879,7 +3881,7 @@ int cmMakefile::ConfigureFile(std::string const& infile,
 
   // Avoid writing a temporary file just to find out nothing changed.
   if (!cmSystemTools::FileHasContent(soutfile, content)) {
-    std::string tempOutputFile = cmStrCat(soutfile, ".tmp");
+    std::string tempOutputFile = cmStrCat(soutfile, ".tmp"_s);
     cmsys::ofstream fout(tempOutputFile.c_str(),
                          std::ios::out | std::ios::trunc | std::ios::binary);
     if (!fout) {
@@ -4030,7 +4032,7 @@ std::string cmMakefile::FormatListFileStack() const
   auto depth = 1;
   std::transform(listFiles.begin(), listFiles.end(), listFiles.begin(),
                  [&depth](std::string const& file) {
-                   return cmStrCat('[', depth++, "]\t", file);
+                   return cmStrCat('[', depth++, "]\t"_s, file);
                  });
 
   return cmJoinStrings(cmMakeRange(listFiles.rbegin(), listFiles.rend()),
@@ -4068,7 +4070,7 @@ void cmMakefile::RaiseScope(std::string const& var, char const* varDef)
   if (!this->StateSnapshot.RaiseScope(var, varDef)) {
     this->IssueDiagnostic(
       cmDiagnostics::CMD_AUTHOR,
-      cmStrCat("Cannot set \"", var, "\": current scope has no parent."));
+      cmStrCat("Cannot set \""_s, var, "\": current scope has no parent."_s));
     return;
   }
 
@@ -4134,7 +4136,7 @@ cmTarget* cmMakefile::AddImportedTarget(std::string const& name,
 cmTarget* cmMakefile::AddForeignTarget(std::string const& origin,
                                        std::string const& name)
 {
-  auto foreign_name = cmStrCat("@foreign_", origin, "::", name);
+  auto foreign_name = cmStrCat("@foreign_"_s, origin, "::"_s, name);
   auto target = cm::make_unique<cmTarget>(
     foreign_name, cm::TargetType::INTERFACE_LIBRARY,
     cmTarget::Visibility::Foreign, this, cmTarget::PerConfig::Yes);
@@ -4150,7 +4152,7 @@ cmTarget* cmMakefile::AddForeignTarget(std::string const& origin,
 cmTarget* cmMakefile::FindForeignTarget(std::string const& origin,
                                         std::string const& name) const
 {
-  return this->FindTargetToUse(cmStrCat("@foreign_", origin, "::", name),
+  return this->FindTargetToUse(cmStrCat("@foreign_"_s, origin, "::"_s, name),
                                cm::TargetDomain::FOREIGN);
 }
 
@@ -4201,8 +4203,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
                                    bool isCustom) const
 {
   if (this->IsAlias(name)) {
-    msg = cmStrCat("cannot create target \"", name,
-                   "\" because an alias with the same name already exists.");
+    msg = cmStrCat("cannot create target \""_s, name,
+                   "\" because an alias with the same name already exists."_s);
     return false;
   }
   if (cmTarget* existing = this->FindTargetToUse(name)) {
@@ -4212,8 +4214,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       // Imported targets were not supported in previous versions.
       // This is new code, so we can make it an error.
       msg = cmStrCat(
-        "cannot create target \"", name,
-        "\" because an imported target with the same name already exists.");
+        "cannot create target \""_s, name,
+        "\" because an imported target with the same name already exists."_s);
       return false;
     }
 
@@ -4275,15 +4277,15 @@ bool cmMakefile::EnforceUniqueDir(std::string const& srcPath,
   }
   this->IssueMessage(MessageType::FATAL_ERROR,
                      cmStrCat("The binary directory\n"
-                              "  ",
+                              "  "_s,
                               binPath,
                               "\n"
                               "is already used to build a source directory.  "
                               "It cannot be used to build source directory\n"
-                              "  ",
+                              "  "_s,
                               srcPath,
                               "\n"
-                              "Specify a unique binary directory name."));
+                              "Specify a unique binary directory name."_s));
 
   return false;
 }
@@ -4361,7 +4363,8 @@ bool cmMakefile::SetPolicy(char const* id, cmPolicies::PolicyStatus status)
   if (!cmPolicies::GetPolicyID(id, /* out */ pid)) {
     this->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Policy \"", id, "\" is not known to this version of CMake."));
+      cmStrCat("Policy \""_s, id,
+               "\" is not known to this version of CMake."_s));
     return false;
   }
   return this->SetPolicy(pid, status);

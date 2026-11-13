@@ -3,6 +3,7 @@
 #include "cmTryCompileCommand.h"
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmConfigureLog.h"
 #include "cmCoreTryCompile.h"
@@ -64,12 +65,12 @@ bool cmTryCompileCommand(std::vector<std::string> const& args,
     } else {
       mf.IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Invalid value '", *tt,
-                 "' for CMAKE_TRY_COMPILE_TARGET_TYPE.  Only '",
+        cmStrCat("Invalid value '"_s, *tt,
+                 "' for CMAKE_TRY_COMPILE_TARGET_TYPE.  Only '"_s,
                  cmState::GetTargetTypeName(cm::TargetType::EXECUTABLE),
-                 "' and '",
+                 "' and '"_s,
                  cmState::GetTargetTypeName(cm::TargetType::STATIC_LIBRARY),
-                 "' are allowed."));
+                 "' are allowed."_s));
       return false;
     }
   }

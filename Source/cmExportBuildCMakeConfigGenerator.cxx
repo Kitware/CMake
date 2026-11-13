@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCryptoHash.h"
 #include "cmDiagnosticContext.h"
 #include "cmExportSet.h"
@@ -184,7 +186,7 @@ std::string cmExportBuildCMakeConfigGenerator::GetFileSetDirectories(
 
       if (contextSensitive && configs.size() != 1) {
         resultVector.push_back(
-          cmStrCat("\"$<$<CONFIG:", config, ">:", dest, ">\""));
+          cmStrCat("\"$<$<CONFIG:"_s, config, ">:"_s, dest, ">\""_s));
       } else {
         resultVector.emplace_back(cmStrCat('"', dest, '"'));
       }
@@ -215,7 +217,7 @@ std::string cmExportBuildCMakeConfigGenerator::GetFileSetFiles(
           filename, cmOutputConverter::WrapQuotes::NoWrap);
         if (contextSensitive && configs.size() != 1) {
           resultVector.push_back(
-            cmStrCat("\"$<$<CONFIG:", config, ">:", escapedFile, ">\""));
+            cmStrCat("\"$<$<CONFIG:"_s, config, ">:"_s, escapedFile, ">\""_s));
         } else {
           resultVector.emplace_back(cmStrCat('"', escapedFile, '"'));
         }
@@ -263,14 +265,14 @@ bool cmExportBuildCMakeConfigGenerator::
   }
 
   std::string fileName =
-    cmStrCat(this->FileDir, '/', cxx_modules_dirname, "/cxx-modules-", name,
-             '-', config, ".cmake");
+    cmStrCat(this->FileDir, '/', cxx_modules_dirname, "/cxx-modules-"_s, name,
+             '-', config, ".cmake"_s);
 
   cmGeneratedFileStream os(fileName, true);
   if (!os) {
     std::string se = cmSystemTools::GetLastSystemError();
     cmSystemTools::Error(
-      cmStrCat("cannot write to file \"", fileName, "\": ", se));
+      cmStrCat("cannot write to file \""_s, fileName, "\": "_s, se));
     return false;
   }
   os.SetCopyIfDifferent(true);

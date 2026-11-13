@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmGeneratorExpression.h"
@@ -84,7 +86,7 @@ void cmInstallImportedRuntimeArtifactsGenerator::GenerateScriptForConfig(
         if (BundleRegularExpression.find(location.c_str(), match)) {
           auto bundleDir = match.match(1);
           auto bundleName = match.match(2);
-          auto bundlePath = cmStrCat(bundleDir, bundleName, ".app");
+          auto bundlePath = cmStrCat(bundleDir, bundleName, ".app"_s);
           this->AddInstallRule(os, this->GetDestination(config),
                                cmInstallType_DIRECTORY, { bundlePath },
                                this->Optional, nullptr,
@@ -105,7 +107,7 @@ void cmInstallImportedRuntimeArtifactsGenerator::GenerateScriptForConfig(
           auto frameworkDir = match.match(1);
           auto frameworkName = match.match(2);
           auto frameworkPath =
-            cmStrCat(frameworkDir, frameworkName, ".framework");
+            cmStrCat(frameworkDir, frameworkName, ".framework"_s);
           this->AddInstallRule(os, this->GetDestination(config),
                                cmInstallType_DIRECTORY, { frameworkPath },
                                this->Optional, nullptr,
@@ -134,7 +136,7 @@ void cmInstallImportedRuntimeArtifactsGenerator::GenerateScriptForConfig(
         if (CFBundleRegularExpression.find(location.c_str(), match)) {
           auto bundleDir = match.match(1);
           auto bundleName = match.match(2);
-          auto bundlePath = cmStrCat(bundleDir, bundleName, ".bundle");
+          auto bundlePath = cmStrCat(bundleDir, bundleName, ".bundle"_s);
           this->AddInstallRule(os, this->GetDestination(config),
                                cmInstallType_DIRECTORY, { bundlePath },
                                this->Optional, nullptr,

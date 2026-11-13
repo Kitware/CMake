@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -547,8 +548,8 @@ bool cmState::AddScriptedCommand(std::string const& name,
   if (this->FlowControlCommands.count(sName)) {
     mf.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Built-in flow control command \"", sName,
-               "\" cannot be overridden."),
+      cmStrCat("Built-in flow control command \""_s, sName,
+               "\" cannot be overridden."_s),
       command.Backtrace);
     cmSystemTools::SetFatalErrorOccurred();
     return false;

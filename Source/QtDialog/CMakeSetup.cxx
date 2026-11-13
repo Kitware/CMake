@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include <iostream>
 
+#include <cmext/string_view>
+
 #include <QApplication>
 #include <QDir>
 #include <QLocale>
@@ -218,7 +220,7 @@ int main(int argc, char** argv)
         cmSystemTools::ToNormalizedPathOnDisk(args[1].toStdString());
 
       // check if argument is a directory containing CMakeCache.txt
-      std::string buildFilePath = cmStrCat(filePath, "/CMakeCache.txt");
+      std::string buildFilePath = cmStrCat(filePath, "/CMakeCache.txt"_s);
 
       // check if argument is a CMakeCache.txt file
       if (cmSystemTools::GetFilenameName(filePath) == "CMakeCache.txt" &&
@@ -227,7 +229,7 @@ int main(int argc, char** argv)
       }
 
       // check if argument is a directory containing CMakeLists.txt
-      std::string srcFilePath = cmStrCat(filePath, "/CMakeLists.txt");
+      std::string srcFilePath = cmStrCat(filePath, "/CMakeLists.txt"_s);
 
       if (cmSystemTools::FileExists(buildFilePath.c_str())) {
         dialog.setBinaryDirectory(QString::fromStdString(

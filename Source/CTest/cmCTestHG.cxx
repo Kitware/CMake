@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -110,7 +111,7 @@ bool cmCTestHG::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Old revision of repository is: ", this->OldRevision, '\n');
+             "   Old revision of repository is: "_s, this->OldRevision, '\n');
   this->PriorRev.Rev = this->OldRevision;
   return true;
 }
@@ -119,7 +120,7 @@ bool cmCTestHG::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   New revision of repository is: ", this->NewRevision, '\n');
+             "   New revision of repository is: "_s, this->NewRevision, '\n');
   return true;
 }
 

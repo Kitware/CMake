@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/String.h"
 
 #include "cmCPackComponentGroup.h"
@@ -146,10 +148,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         std::transform(component.begin(), component.end(), component.begin(),
                        cmsysString_toupper);
 
-        if (this->IsOn(
-              cmStrCat("CPACK_RPM_", compIt->first, "_DEBUGINFO_PACKAGE")) ||
+        if (this->IsOn(cmStrCat("CPACK_RPM_"_s, compIt->first,
+                                "_DEBUGINFO_PACKAGE"_s)) ||
             this->IsOn(
-              cmStrCat("CPACK_RPM_", component, "_DEBUGINFO_PACKAGE"))) {
+              cmStrCat("CPACK_RPM_"_s, component, "_DEBUGINFO_PACKAGE"_s))) {
           shouldSet = false;
           break;
         }
@@ -162,10 +164,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         std::transform(component.begin(), component.end(), component.begin(),
                        cmsysString_toupper);
 
-        if (this->IsOn(
-              cmStrCat("CPACK_RPM_", compGIt->first, "_DEBUGINFO_PACKAGE")) ||
+        if (this->IsOn(cmStrCat("CPACK_RPM_"_s, compGIt->first,
+                                "_DEBUGINFO_PACKAGE"_s)) ||
             this->IsOn(
-              cmStrCat("CPACK_RPM_", component, "_DEBUGINFO_PACKAGE"))) {
+              cmStrCat("CPACK_RPM_"_s, component, "_DEBUGINFO_PACKAGE"_s))) {
           shouldSet = false;
           break;
         }
@@ -181,10 +183,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
             std::transform(component.begin(), component.end(),
                            component.begin(), cmsysString_toupper);
 
-            if (this->IsOn(cmStrCat("CPACK_RPM_", compIt->first,
-                                    "_DEBUGINFO_PACKAGE")) ||
-                this->IsOn(
-                  cmStrCat("CPACK_RPM_", component, "_DEBUGINFO_PACKAGE"))) {
+            if (this->IsOn(cmStrCat("CPACK_RPM_"_s, compIt->first,
+                                    "_DEBUGINFO_PACKAGE"_s)) ||
+                this->IsOn(cmStrCat("CPACK_RPM_"_s, component,
+                                    "_DEBUGINFO_PACKAGE"_s))) {
               shouldSet = false;
               break;
             }
@@ -463,7 +465,7 @@ std::string cmCPackRPMGenerator::GetComponentInstallSuffix(
   // We have to find the name of the COMPONENT GROUP
   // the current COMPONENT belongs to.
   std::string groupVar = cmStrCat(
-    "CPACK_COMPONENT_", cmSystemTools::UpperCase(componentName), "_GROUP");
+    "CPACK_COMPONENT_"_s, cmSystemTools::UpperCase(componentName), "_GROUP"_s);
   if (cmValue v = this->GetOption(groupVar)) {
     return *v;
   }

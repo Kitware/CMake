@@ -67,7 +67,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
         status.GetMakefile().IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
           cmStrCat("Only the first value argument is used when setting "
-                   "an environment variable.  Argument '",
+                   "an environment variable.  Argument '"_s,
                    args[2] + "' and later are unused."));
       }
       return true;
@@ -117,7 +117,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
     auto parsedArgs = optionsParser.Parse(
       cmMakeRange(args.cbegin() + 1, valueArg), &unrecognizedArguments);
     if (!unrecognizedArguments.empty()) {
-      status.SetError(cmStrCat("Called with unsupported argument(s): ",
+      status.SetError(cmStrCat("Called with unsupported argument(s): "_s,
                                cmJoin(unrecognizedArguments, ",  "_s), '.'));
       return false;
     }
@@ -230,10 +230,10 @@ bool cmSetCommand(std::vector<std::string> const& args,
   if (cache) {
     std::string::size_type cacheStart = args.size() - 3 - (force ? 1 : 0);
     if (!cmState::StringToCacheEntryType(args[cacheStart + 1], type)) {
-      status.GetMakefile().IssueDiagnostic(cmDiagnostics::CMD_AUTHOR,
-                                           cmStrCat("implicitly converting '",
-                                                    args[cacheStart + 1],
-                                                    "' to 'STRING' type."));
+      status.GetMakefile().IssueDiagnostic(
+        cmDiagnostics::CMD_AUTHOR,
+        cmStrCat("implicitly converting '"_s, args[cacheStart + 1],
+                 "' to 'STRING' type."_s));
       // Setting this may not be required, since it's
       // initialized as a string. Keeping this here to
       // ensure that the type is actually converting to a string.

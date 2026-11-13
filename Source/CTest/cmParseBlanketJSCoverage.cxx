@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmCTest.h"
@@ -115,12 +117,12 @@ bool cmParseBlanketJSCoverage::LoadCoverageData(
   std::vector<std::string> const& files)
 {
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Coverage.Quiet,
-                     "Found ", files.size(), " Files\n");
+                     "Found "_s, files.size(), " Files\n"_s);
   return std::all_of(files.begin(), files.end(),
                      [this](std::string const& file) {
                        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                                           this->Coverage.Quiet,
-                                          "Reading JSON File ", file, '\n');
+                                          "Reading JSON File "_s, file, '\n');
                        return this->ReadJSONFile(file);
                      });
 }
@@ -129,7 +131,7 @@ bool cmParseBlanketJSCoverage::ReadJSONFile(std::string const& file)
 {
   cmParseBlanketJSCoverage::JSONParser parser(this->Coverage);
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Coverage.Quiet,
-                     "Parsing ", file, '\n');
+                     "Parsing "_s, file, '\n');
   parser.ParseFile(file);
   return true;
 }

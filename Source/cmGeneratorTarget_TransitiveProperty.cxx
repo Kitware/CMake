@@ -126,7 +126,8 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
       dagChecker.ReportError(
-        eval, cmStrCat("$<TARGET_PROPERTY:", this->GetName(), ',', prop, '>'));
+        eval,
+        cmStrCat("$<TARGET_PROPERTY:"_s, this->GetName(), ',', prop, '>'));
       return result;
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.

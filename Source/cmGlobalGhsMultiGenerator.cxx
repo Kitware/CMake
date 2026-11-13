@@ -14,6 +14,7 @@
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/memory>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -104,13 +105,13 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   /* check if the toolset changed from last generate */
   if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, *prevTool)) {
     std::string const& e =
-      cmStrCat("toolset build tool: ", gbuild,
+      cmStrCat("toolset build tool: "_s, gbuild,
                "\n"
-               "Does not match the previously used build tool: ",
+               "Does not match the previously used build tool: "_s,
                *prevTool,
                "\n"
                "Either remove the CMakeCache.txt file and CMakeFiles "
-               "directory or choose a different binary directory.");
+               "directory or choose a different binary directory."_s);
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
@@ -136,7 +137,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
       arch = p;
     }
     cmValue platform = mf->GetDefinition("GHS_TARGET_PLATFORM");
-    std::string tgt = cmStrCat(arch, '_', platform, ".tgt");
+    std::string tgt = cmStrCat(arch, '_', platform, ".tgt"_s);
 
     /* update the primary target name*/
     mf->AddDefinition("GHS_PRIMARY_TARGET", tgt);
@@ -177,8 +178,8 @@ void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsp,
 
     // Make sure root exists...
     if (!cmSystemTools::PathExists(root)) {
-      std::string msg =
-        cmStrCat("GHS_TOOLSET_ROOT directory \"", root, "\" does not exist.");
+      std::string msg = cmStrCat("GHS_TOOLSET_ROOT directory \""_s, root,
+                                 "\" does not exist."_s);
       mf->IssueMessage(MessageType::FATAL_ERROR, msg);
       tsp = "";
       return;
@@ -194,8 +195,8 @@ void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsp,
 
     if (output.empty()) {
       // No compiler directories found
-      std::string msg =
-        cmStrCat("No GHS toolsets found in GHS_TOOLSET_ROOT \"", root, "\".");
+      std::string msg = cmStrCat(
+        "No GHS toolsets found in GHS_TOOLSET_ROOT \""_s, root, "\"."_s);
       mf->IssueMessage(MessageType::FATAL_ERROR, msg);
       tsp = "";
     } else {
@@ -212,7 +213,7 @@ void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsp,
     tryPath = cmSystemTools::CollapseFullPath(ts, root);
     if (!cmSystemTools::FileExists(tryPath)) {
       std::string msg =
-        cmStrCat("GHS toolset \"", tryPath, "\" does not exist.");
+        cmStrCat("GHS toolset \""_s, tryPath, "\" does not exist."_s);
       mf->IssueMessage(MessageType::FATAL_ERROR, msg);
       tsp = "";
     } else {
@@ -345,7 +346,7 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(std::ostream& fout,
       predefinedTargets.find(target->GetName()) != predefinedTargets.end();
     if ((filterPredefined && predefinedTarget) ||
         (!filterPredefined && !predefinedTarget)) {
-      fout << cmStrCat(target->GetName(), ".tgt", FILE_EXTENSION)
+      fout << cmStrCat(target->GetName(), ".tgt"_s, FILE_EXTENSION)
            << " [Project]\n";
     }
   }
@@ -383,7 +384,7 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
     }
 
     // create target build file
-    std::string name = cmStrCat(target->GetName(), ".tgt", FILE_EXTENSION);
+    std::string name = cmStrCat(target->GetName(), ".tgt"_s, FILE_EXTENSION);
     std::string fname = cmStrCat(rootBinaryDir, '/', name);
     cmGeneratedFileStream fbld(fname);
     fbld.SetCopyIfDifferent(true);
@@ -392,8 +393,8 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
     std::vector<cmGeneratorTarget const*> build;
     if (this->ComputeTargetBuildOrder(target, build)) {
       cmSystemTools::Error(
-        cmStrCat("The inter-target dependency graph for target [",
-                 target->GetName(), "] had a cycle.\n"));
+        cmStrCat("The inter-target dependency graph for target ["_s,
+                 target->GetName(), "] had a cycle.\n"_s));
     } else {
       for (auto& tgt : build) {
         this->WriteProjectLine(fbld, tgt, rootBinaryDir);
@@ -459,7 +460,7 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
    * the same name as the executable target.
    */
   fname = cmStrCat(root->GetCurrentBinaryDirectory(), '/',
-                   root->GetProjectName(), ".top", FILE_EXTENSION);
+                   root->GetProjectName(), ".top"_s, FILE_EXTENSION);
 
   cmGeneratedFileStream top(fname);
   top.SetCopyIfDifferent(true);
@@ -491,7 +492,7 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   }
 
   /* determine the top-project file in the project directory */
-  std::string proj = cmStrCat(projectName, ".top", FILE_EXTENSION);
+  std::string proj = cmStrCat(projectName, ".top"_s, FILE_EXTENSION);
   std::vector<std::string> files;
   cmSystemTools::Glob(projectDir, ".*\\.top\\.gpj", files);
   if (!files.empty()) {
@@ -520,7 +521,7 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
 
   if (build_all) {
     /* transform name to default build */;
-    std::string all = cmStrCat(this->GetAllTargetName(), ".tgt.gpj");
+    std::string all = cmStrCat(this->GetAllTargetName(), ".tgt.gpj"_s);
     makeCommand.Add(all);
   }
 
@@ -663,7 +664,7 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
     cm::static_reference_cast<cmLocalGhsMultiGenerator>(generators[0]);
 
   // The name of the output file for the custom command.
-  this->StampFile = cmStrCat(lg.GetBinaryDirectory(), "/CMakeFiles/",
+  this->StampFile = cmStrCat(lg.GetBinaryDirectory(), "/CMakeFiles/"_s,
                              CHECK_BUILD_SYSTEM_TARGET);
 
   // Add a custom rule to re-run CMake if any input files changed.
@@ -676,8 +677,9 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
     }
 
     // Add the cache file.
-    listFiles.emplace_back(cmStrCat(
-      this->GetCMakeInstance()->GetHomeOutputDirectory(), "/CMakeCache.txt"));
+    listFiles.emplace_back(
+      cmStrCat(this->GetCMakeInstance()->GetHomeOutputDirectory(),
+               "/CMakeCache.txt"_s));
 
     // Print not implemented warning.
     if (this->GetCMakeInstance()->DoWriteGlobVerifyTarget()) {
@@ -697,8 +699,8 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
     commandLines.emplace_back(
       cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E", "rm", "-f",
                           this->StampFile }));
-    std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
-    std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
+    std::string argS = cmStrCat("-S"_s, lg.GetSourceDirectory());
+    std::string argB = cmStrCat("-B"_s, lg.GetBinaryDirectory());
     commandLines.emplace_back(
       cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB }));
     commandLines.emplace_back(cmMakeCommandLine(

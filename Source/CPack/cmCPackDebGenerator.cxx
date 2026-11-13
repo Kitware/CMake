@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/Glob.hxx"
 
 #include "cm_sys_stat.h"
@@ -218,7 +220,7 @@ void DebGenerator::generateControlFile() const
 bool DebGenerator::generateDataTar() const
 {
   std::string filename_data_tar =
-    cmStrCat(this->WorkDir, "/data.tar", this->CompressionSuffix);
+    cmStrCat(this->WorkDir, "/data.tar"_s, this->CompressionSuffix);
   cmGeneratedFileStream fileStream_data_tar;
   fileStream_data_tar.Open(filename_data_tar, false, true);
   if (!fileStream_data_tar) {
@@ -333,7 +335,7 @@ std::string DebGenerator::generateMD5File() const
                     "Problem computing the md5 of " << file << std::endl);
     }
 
-    output = cmStrCat(std::move(output), "  ", file, '\n');
+    output = cmStrCat(std::move(output), "  "_s, file, '\n');
     // debian md5sums entries are like this:
     // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
     // thus strip the full path (with the trailing slash)
@@ -349,7 +351,7 @@ std::string DebGenerator::generateMD5File() const
 bool DebGenerator::generateControlTar(std::string const& md5Filename) const
 {
   std::string filename_control_tar =
-    cmStrCat(this->WorkDir, "/control.tar", this->ControlCompressionSuffix);
+    cmStrCat(this->WorkDir, "/control.tar"_s, this->ControlCompressionSuffix);
 
   cmGeneratedFileStream fileStream_control_tar;
   fileStream_control_tar.Open(filename_control_tar, false, true);
@@ -536,9 +538,10 @@ bool DebGenerator::generateDeb() const
   deb.SetUNAMEAndGNAME("root", "root");
 
   if (!deb.Add(tlDir + "debian-binary", tlDir.length()) ||
-      !deb.Add(cmStrCat(tlDir, "control.tar", this->ControlCompressionSuffix),
-               tlDir.length()) ||
-      !deb.Add(cmStrCat(tlDir, "data.tar", this->CompressionSuffix),
+      !deb.Add(
+        cmStrCat(tlDir, "control.tar"_s, this->ControlCompressionSuffix),
+        tlDir.length()) ||
+      !deb.Add(cmStrCat(tlDir, "data.tar"_s, this->CompressionSuffix),
                tlDir.length())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error creating debian package:\n"
@@ -936,8 +939,8 @@ bool cmCPackDebGenerator::createDbgsymDDeb()
   controlValues["Version"] = *debian_pkg_version;
   controlValues["Auto-Built-Package"] = "debug-symbols";
   controlValues["Depends"] =
-    cmStrCat(*this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_NAME"),
-             " (= ", *debian_pkg_version, ')');
+    cmStrCat(*this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_NAME"), " (= "_s,
+             *debian_pkg_version, ')');
   controlValues["Section"] = "debug";
   controlValues["Priority"] = "optional";
   controlValues["Architecture"] =
@@ -991,7 +994,7 @@ std::string cmCPackDebGenerator::GetComponentInstallSuffix(
   // We have to find the name of the COMPONENT GROUP
   // the current COMPONENT belongs to.
   std::string groupVar = cmStrCat(
-    "CPACK_COMPONENT_", cmSystemTools::UpperCase(componentName), "_GROUP");
+    "CPACK_COMPONENT_"_s, cmSystemTools::UpperCase(componentName), "_GROUP"_s);
   if (cmValue v = this->GetOption(groupVar)) {
     return *v;
   }

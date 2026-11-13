@@ -466,7 +466,7 @@ std::string cmCustomCommandGenerator::GetInternalDepfileName(
       extension = ".AdditionalInputs";
       break;
   }
-  return cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/d/",
+  return cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/d/"_s,
                   hash.HashString(depfile), extension);
 }
 
@@ -530,7 +530,7 @@ std::string cmCustomCommandGenerator::StoreContentToFile(
   cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
 
   std::string fileDir =
-    cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/c");
+    cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/c"_s);
   if (!cmSystemTools::MakeDirectory(fileDir)) {
     return "";
   }

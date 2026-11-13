@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiTargetGenerator.h"
@@ -28,7 +29,7 @@ std::string cmLocalGhsMultiGenerator::GetTargetDirectory(
   cmGeneratorTarget const* target,
   cmStateEnums::IntermediateDirKind /*kind*/) const
 {
-  std::string dir = cmStrCat(target->GetName(), ".dir");
+  std::string dir = cmStrCat(target->GetName(), ".dir"_s);
   return dir;
 }
 

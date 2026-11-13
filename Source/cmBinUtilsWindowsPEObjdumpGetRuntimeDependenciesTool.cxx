@@ -6,6 +6,8 @@
 #include <istream> // IWYU pragma: keep
 #include <vector>
 
+#include <cmext/string_view>
+
 #include <cmsys/RegularExpression.hxx>
 
 #include "cmRuntimeDependencyArchive.h"
@@ -38,7 +40,8 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
 
   auto process = builder.Start();
   if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
-    this->SetError(cmStrCat("Failed to start objdump process for:\n  ", file));
+    this->SetError(
+      cmStrCat("Failed to start objdump process for:\n  "_s, file));
     return false;
   }
 
@@ -55,11 +58,11 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
 
   if (!process.Wait()) {
     this->SetError(
-      cmStrCat("Failed to wait on objdump process for:\n  ", file));
+      cmStrCat("Failed to wait on objdump process for:\n  "_s, file));
     return false;
   }
   if (process.GetStatus(0).ExitStatus != 0) {
-    this->SetError(cmStrCat("Failed to run objdump on:\n  ", file));
+    this->SetError(cmStrCat("Failed to run objdump on:\n  "_s, file));
     return false;
   }
 

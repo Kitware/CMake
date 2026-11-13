@@ -6,6 +6,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -32,9 +33,10 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
 
   // Check the target name.
   if (targetName.find_first_of("/\\") != std::string::npos) {
-    status.SetError(cmStrCat("called with invalid target name \"", targetName,
+    status.SetError(cmStrCat("called with invalid target name \""_s,
+                             targetName,
                              "\".  Target names may not contain a slash.  "
-                             "Use ADD_CUSTOM_COMMAND to generate files."));
+                             "Use ADD_CUSTOM_COMMAND to generate files."_s));
     return false;
   }
 

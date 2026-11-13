@@ -15,6 +15,7 @@
 
 #include <cm/optional>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/Encoding.hxx"
 
@@ -268,12 +269,12 @@ int main(int argc, char const* const* argv)
       }
     }
     if (!matched && cmHasPrefix(arg, '-')) {
-      std::string error = cmStrCat("Unknown argument: ", arg);
+      std::string error = cmStrCat("Unknown argument: "_s, arg);
       std::string const suggestion =
         cmFindClosestCommandLineArgument(arg, arguments);
       if (!suggestion.empty()) {
         error =
-          cmStrCat(std::move(error), ". Did you mean: ", suggestion, '?');
+          cmStrCat(std::move(error), ". Did you mean: "_s, suggestion, '?');
       }
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR, error << '\n');
       parsed = false;
@@ -434,7 +435,7 @@ int main(int argc, char const* const* argv)
     cpackConfigFile = cmSystemTools::ToNormalizedPathOnDisk(cpackConfigFile);
   } else {
     cpackConfigFile = cmStrCat(cmSystemTools::GetLogicalWorkingDirectory(),
-                               "/CPackConfig.cmake");
+                               "/CPackConfig.cmake"_s);
     cpackConfigFileSpecified = false;
   }
 

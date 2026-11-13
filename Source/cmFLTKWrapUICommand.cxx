@@ -7,6 +7,7 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -31,10 +32,10 @@ static void FinalAction(cmMakefile& makefile, std::string const& name,
   cmTarget* target = makefile.FindLocalNonAliasTarget(name);
   if (!target) {
     std::string msg = cmStrCat(
-      "FLTK_WRAP_UI was called with a target that was never created: ", name,
-      ".  The problem was found while processing the source directory: ",
+      "FLTK_WRAP_UI was called with a target that was never created: "_s, name,
+      ".  The problem was found while processing the source directory: "_s,
       makefile.GetCurrentSourceDirectory(),
-      ".  This FLTK_WRAP_UI call will be ignored.");
+      ".  This FLTK_WRAP_UI call will be ignored."_s);
     makefile.IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, msg, lfbt);
   }
 }
@@ -78,13 +79,13 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE")) {
       std::string outName = cmStrCat(
         outputDirectory, '/', cmSystemTools::GetFilenameWithoutExtension(arg));
-      std::string hname = cmStrCat(outName, ".h");
+      std::string hname = cmStrCat(outName, ".h"_s);
       std::string origname = cmStrCat(cdir, '/', arg);
       // add starting depends
       std::vector<std::string> depends;
       depends.push_back(origname);
       depends.push_back(fluid_exe);
-      std::string cxxres = cmStrCat(outName, ".cxx");
+      std::string cxxres = cmStrCat(outName, ".cxx"_s);
 
       cmCustomCommandLines commandLines = cmMakeSingleCommandLine({
         fluid_exe,

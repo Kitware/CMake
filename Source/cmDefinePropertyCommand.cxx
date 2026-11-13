@@ -43,9 +43,9 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
   } else if (scope_arg == "CACHED_VARIABLE") {
     scope = cmProperty::CACHED_VARIABLE;
   } else {
-    status.SetError(cmStrCat("given invalid scope ", scope_arg,
+    status.SetError(cmStrCat("given invalid scope "_s, scope_arg,
                              ".  Valid scopes are GLOBAL, DIRECTORY, TARGET, "
-                             "SOURCE, TEST, VARIABLE, CACHED_VARIABLE."));
+                             "SOURCE, TEST, VARIABLE, CACHED_VARIABLE."_s));
     return false;
   }
 
@@ -67,7 +67,7 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
   parser.Parse(cmMakeRange(args).advance(1), &invalidArgs);
   if (!invalidArgs.empty()) {
     status.SetError(
-      cmStrCat("given invalid argument \"", invalidArgs.front(), "\"."));
+      cmStrCat("given invalid argument \""_s, invalidArgs.front(), "\"."_s));
     return false;
   }
 
@@ -87,15 +87,15 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
 
     // Make sure the variable has the property name as a suffix.
     if (!cmHasSuffix(initializeFromVariable, PropertyName)) {
-      status.SetError(cmStrCat("Variable name \"", initializeFromVariable,
-                               "\" does not end with property name \"",
+      status.SetError(cmStrCat("Variable name \""_s, initializeFromVariable,
+                               "\" does not end with property name \""_s,
                                PropertyName, '"'));
       return false;
     }
     if (PropertyName.find('_') == std::string::npos) {
-      status.SetError(cmStrCat("Property name \"", PropertyName,
+      status.SetError(cmStrCat("Property name \""_s, PropertyName,
                                "\" defined with INITIALIZE_FROM_VARIABLE does "
-                               "not contain underscore"));
+                               "not contain underscore"_s));
       return false;
     }
 
@@ -108,8 +108,8 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
                     [&initializeFromVariable](char const* prefix) {
                       return cmHasPrefix(initializeFromVariable, prefix);
                     })) {
-      status.SetError(cmStrCat("variable name \"", initializeFromVariable,
-                               "\" is reserved"));
+      status.SetError(cmStrCat("variable name \""_s, initializeFromVariable,
+                               "\" is reserved"_s));
       return false;
     }
   }

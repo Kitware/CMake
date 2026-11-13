@@ -10,6 +10,7 @@
 
 #include <cm/memory>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -468,11 +469,11 @@ void cmOrderDirectories::FindImplicitConflicts()
   // Warn about the conflicts.
   this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
     MessageType::WARNING,
-    cmStrCat("Cannot generate a safe ", this->Purpose, " for target ",
+    cmStrCat("Cannot generate a safe "_s, this->Purpose, " for target "_s,
              this->Target->GetName(),
              " because files in some directories may "
-             "conflict with  libraries in implicit directories:\n",
-             text, "Some of these libraries may not be found correctly."),
+             "conflict with  libraries in implicit directories:\n"_s,
+             text, "Some of these libraries may not be found correctly."_s),
     this->Target->GetBacktrace());
 }
 

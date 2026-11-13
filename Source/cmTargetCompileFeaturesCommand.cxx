@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileFeaturesCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -21,8 +23,8 @@ private:
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Cannot specify compile features for target \"", name,
-               "\" which is not built by this project."));
+      cmStrCat("Cannot specify compile features for target \""_s, name,
+               "\" which is not built by this project."_s));
   }
 
   bool HandleDirectContent(cmTarget* tgt,

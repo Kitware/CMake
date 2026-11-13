@@ -13,6 +13,7 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -156,7 +157,7 @@ bool VisitPreset(
     if (parent == presets.end()) {
       cmCMakePresetsErrors::INVALID_PRESET_NAMED(
         preset.Name, preset.kind(), &graph.parseState,
-        cmStrCat("Could not find inherited preset \"", i, '"'));
+        cmStrCat("Could not find inherited preset \""_s, i, '"'));
       return false;
     }
 
@@ -550,7 +551,7 @@ void PrintPresets(std::vector<PresetListEntry> const& presets)
   for (auto entryIt = presets.begin(); entryIt != presets.end(); ++entryIt) {
     auto const& entry = *entryIt;
     auto const* preset = entry.Preset;
-    std::string name = cmStrCat("  \"", preset->Name, '"');
+    std::string name = cmStrCat("  \""_s, preset->Name, '"');
     if (!preset->DisplayName.empty()) {
       int const width = static_cast<int>(longestLength + name.length() -
                                          preset->Name.length());
@@ -582,10 +583,10 @@ cm::optional<std::string> GetUnavailableReason(
   }
   if (!preset.Expanded->ConditionResult) {
     auto const& condition = preset.Expanded->ConditionEvaluator;
-    return cmStrCat("condition evaluated to false",
+    return cmStrCat("condition evaluated to false"_s,
                     !condition || condition->ConditionJson.empty()
                       ? ""
-                      : cmStrCat(": ", condition->ConditionJson));
+                      : cmStrCat(": "_s, condition->ConditionJson));
   }
   return cm::nullopt;
 }
@@ -597,14 +598,14 @@ cm::optional<std::string> GetUnavailableReason(
 {
   auto const preset = presets.find(name);
   if (preset == presets.end()) {
-    return cmStrCat(PresetType::kind(), " preset \"", name,
-                    "\" does not exist");
+    return cmStrCat(PresetType::kind(), " preset \""_s, name,
+                    "\" does not exist"_s);
   }
   auto reason = GetUnavailableReason(preset->second);
   if (!reason) {
     return cm::nullopt;
   }
-  return cmStrCat(PresetType::kind(), " preset \"", name, "\": ", *reason);
+  return cmStrCat(PresetType::kind(), " preset \""_s, name, "\": "_s, *reason);
 }
 
 cm::optional<std::string> GetUnavailableReason(
@@ -615,7 +616,7 @@ cm::optional<std::string> GetUnavailableReason(
 {
   auto const preset = presets.find(name);
   if (preset == presets.end()) {
-    return cmStrCat("configure preset \"", name, "\" does not exist");
+    return cmStrCat("configure preset \""_s, name, "\" does not exist"_s);
   }
   auto reason = GetUnavailableReason(preset->second);
   if (!reason && additionalUsabilityCheck) {
@@ -625,7 +626,7 @@ cm::optional<std::string> GetUnavailableReason(
   if (!reason) {
     return cm::nullopt;
   }
-  return cmStrCat("configure preset \"", name, "\": ", *reason);
+  return cmStrCat("configure preset \""_s, name, "\": "_s, *reason);
 }
 
 template <typename PresetType, typename UsabilityCheck>
@@ -1048,9 +1049,9 @@ bool cmCMakePresetsGraph::ConfigurePreset::VisitPresetAfterInherit(
             version < 12 && w.first == cmDiagnostics::CMD_AUTHOR
             ? cm::string_view{ "dev" }
             : cmCMakePresetsGraphInternal::GetDiagnosticJSONName(w.first);
-          this->ErrorDetail = cmStrCat("\"errors.", diagnostic,
-                                       "\" is enabled while \"warnings.",
-                                       diagnostic, "\" is disabled");
+          this->ErrorDetail = cmStrCat("\"errors."_s, diagnostic,
+                                       "\" is enabled while \"warnings."_s,
+                                       diagnostic, "\" is disabled"_s);
           return false;
         }
       }
@@ -1261,12 +1262,12 @@ bool cmCMakePresetsGraph::WorkflowPreset::VisitPresetAfterInherit(
 
 std::string cmCMakePresetsGraph::GetFilename(std::string const& sourceDir)
 {
-  return cmStrCat(sourceDir, "/CMakePresets.json");
+  return cmStrCat(sourceDir, "/CMakePresets.json"_s);
 }
 
 std::string cmCMakePresetsGraph::GetUserFilename(std::string const& sourceDir)
 {
-  return cmStrCat(sourceDir, "/CMakeUserPresets.json");
+  return cmStrCat(sourceDir, "/CMakeUserPresets.json"_s);
 }
 
 bool cmCMakePresetsGraph::ReadProjectPresets(std::string const& sourceDir,
@@ -1626,7 +1627,7 @@ cm::optional<std::string> cmCMakePresetsGraph::GetWorkflowUnavailableReason(
         break;
     }
     if (reason) {
-      return cmStrCat("step ", stepNumber, ": ", *reason);
+      return cmStrCat("step "_s, stepNumber, ": "_s, *reason);
     }
   }
   return cm::nullopt;

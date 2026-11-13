@@ -36,14 +36,14 @@ bool validateVersion(std::string const& key, std::string const& versionString,
 {
   if (!std::all_of(versionString.begin(), versionString.end(),
                    cmsysString_isdigit)) {
-    status.SetError(cmStrCat("given a non-integer ", key, '.'));
+    status.SetError(cmStrCat("given a non-integer "_s, key, '.'));
     return false;
   }
   version = std::atoi(versionString.c_str());
   if (version != 1) {
     status.SetError(
-      cmStrCat("given an unsupported ", key, " \"", versionString,
-               "\" (the only currently supported version is 1)."));
+      cmStrCat("given an unsupported "_s, key, " \""_s, versionString,
+               "\" (the only currently supported version is 1)."_s));
     return false;
   }
   return true;
@@ -57,8 +57,8 @@ bool validateDataVersion(std::string const& versionString, Version& version,
         return cmsysString_isdigit(c) || c == '.';
       })) {
     status.SetError(
-      cmStrCat("given a malformed DATA_VERSION \"", versionString,
-               "\". A numeric major or major.minor version is required."));
+      cmStrCat("given a malformed DATA_VERSION \""_s, versionString,
+               "\". A numeric major or major.minor version is required."_s));
 
     return false;
   }
@@ -73,15 +73,15 @@ bool validateDataVersion(std::string const& versionString, Version& version,
 
   if (version.Major < 1 || version.Minor < 0) {
     status.SetError(
-      cmStrCat("given a malformed DATA_VERSION \"", versionString,
-               "\". A numeric major or major.minor version is required."));
+      cmStrCat("given a malformed DATA_VERSION \""_s, versionString,
+               "\". A numeric major or major.minor version is required."_s));
     return false;
   }
 
   if (!cmInstrumentationQuery::ValidDataVersion(version)) {
     status.SetError(
-      cmStrCat("given an unsupported DATA_VERSION \"", versionString,
-               "\" (the maximum currently supported version is 1.2)."));
+      cmStrCat("given an unsupported DATA_VERSION \""_s, versionString,
+               "\" (the maximum currently supported version is 1.2)."_s));
     return false;
   }
 
@@ -146,8 +146,8 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     return true;
   }
   if (!unparsedArguments.empty()) {
-    status.SetError(
-      cmStrCat("given unknown argument \"", unparsedArguments.front(), "\"."));
+    status.SetError(cmStrCat("given unknown argument \""_s,
+                             unparsedArguments.front(), "\"."_s));
     return false;
   }
   int apiVersion;
@@ -165,7 +165,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     cmInstrumentationQuery::Option option;
     if (!optionParser(arg, option)) {
       status.SetError(
-        cmStrCat("given invalid argument to OPTIONS \"", arg, '"'));
+        cmStrCat("given invalid argument to OPTIONS \""_s, arg, '"'));
       return false;
     }
     options.insert(option);
@@ -178,7 +178,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     cmInstrumentationQuery::Hook hook;
     if (!hookParser(arg, hook)) {
       status.SetError(
-        cmStrCat("given invalid argument to HOOKS \"", arg, '"'));
+        cmStrCat("given invalid argument to HOOKS \""_s, arg, '"'));
       return false;
     }
     hooks.insert(hook);
@@ -208,13 +208,14 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
       std::istringstream iss(contentString);
       cmJSONState parseState(iss, &value, cmJSONState::StrictMode::Relaxed);
       if (!parseState.errors.empty()) {
-        status.SetError(cmStrCat("failed to parse custom content as JSON:\n ",
-                                 parseState.GetErrorMessage()));
+        status.SetError(
+          cmStrCat("failed to parse custom content as JSON:\n "_s,
+                   parseState.GetErrorMessage()));
         return false;
       }
     } else {
       status.SetError(
-        cmStrCat("got an invalid type for CUSTOM_CONTENT: ", type));
+        cmStrCat("got an invalid type for CUSTOM_CONTENT: "_s, type));
       return false;
     }
     instrumentation->AddCustomContent(content.front(), value);

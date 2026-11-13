@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include <cm3p/uv.h>
 
@@ -35,7 +36,7 @@ struct JobServerSemaphore
   HANDLE Handle = nullptr;
 
   JobServerSemaphore(LONG initialCount, LONG maximumCount)
-    : Name(cmStrCat("cmake_test_jobserver_", GetCurrentProcessId(), '_',
+    : Name(cmStrCat("cmake_test_jobserver_"_s, GetCurrentProcessId(), '_',
                     ++NextSemaphoreId))
   {
     SetLastError(ERROR_SUCCESS);
@@ -85,7 +86,7 @@ struct MakeFlagsGuard
   ~MakeFlagsGuard()
   {
     if (this->Original) {
-      cmSystemTools::PutEnv(cmStrCat("MAKEFLAGS=", *this->Original));
+      cmSystemTools::PutEnv(cmStrCat("MAKEFLAGS="_s, *this->Original));
     } else {
       cmSystemTools::UnsetEnv("MAKEFLAGS");
     }
@@ -97,8 +98,8 @@ void SetJobServer(JobServerSemaphore const& jobServer)
   cmSystemTools::PutEnv(cmStrCat("MAKEFLAGS=--flags-before"
                                  " --jobserver-auth=bogus"
                                  " --flags-between"
-                                 " --jobserver-auth=",
-                                 jobServer.Name, " --flags-after"));
+                                 " --jobserver-auth="_s,
+                                 jobServer.Name, " --flags-after"_s));
 }
 
 bool CheckTokenCount(JobServerSemaphore const& jobServer, std::size_t expected)
@@ -255,9 +256,9 @@ bool testJobServer()
   cmSystemTools::PutEnv(cmStrCat("MAKEFLAGS=--flags-before"
                                  " --jobserver-auth=bogus"
                                  " --flags-between"
-                                 " --jobserver-fds=",
+                                 " --jobserver-fds="_s,
                                  jobServerPipe[0], ',', jobServerPipe[1],
-                                 " --flags-after"));
+                                 " --flags-after"_s));
 #endif
 
   bool passed;
@@ -274,7 +275,7 @@ bool testJobServer()
 #ifdef _WIN32
 bool ConnectsWithMakeFlags(std::string const& makeFlags)
 {
-  cmSystemTools::PutEnv(cmStrCat("MAKEFLAGS=", makeFlags));
+  cmSystemTools::PutEnv(cmStrCat("MAKEFLAGS="_s, makeFlags));
   cm::uv_loop_ptr loop;
   if (loop.init(nullptr) != 0) {
     return false;
@@ -294,15 +295,16 @@ bool testJobServerParsing()
 
   bool passed = true;
   passed =
-    ConnectsWithMakeFlags(cmStrCat("--jobserver-auth=", jobServer.Name)) &&
+    ConnectsWithMakeFlags(cmStrCat("--jobserver-auth="_s, jobServer.Name)) &&
     passed;
   passed = ConnectsWithMakeFlags(cmStrCat("--jobserver-auth=bogus "
                                           "--jobserver-fds=1,2 "
-                                          "--jobserver-auth=",
+                                          "--jobserver-auth="_s,
                                           jobServer.Name)) &&
     passed;
-  passed = !ConnectsWithMakeFlags(cmStrCat("--jobserver-auth=", jobServer.Name,
-                                           " --jobserver-fds=1,2")) &&
+  passed =
+    !ConnectsWithMakeFlags(cmStrCat("--jobserver-auth="_s, jobServer.Name,
+                                    " --jobserver-fds=1,2"_s)) &&
     passed;
   passed = !ConnectsWithMakeFlags("--jobserver-auth=fifo:somewhere") && passed;
   passed = !ConnectsWithMakeFlags("--jobserver-auth=") && passed;

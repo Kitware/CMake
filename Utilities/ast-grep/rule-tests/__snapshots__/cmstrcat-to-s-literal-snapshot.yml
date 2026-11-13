@@ -1,0 +1,163 @@
+id: cmstrcat-to-s-literal
+snapshots:
+  cmCTestLog(self, HANDLER, "literal", other):
+    fixed: cmCTestLog(self, HANDLER, "literal"_s, other)
+    labels:
+    - source: '"literal"'
+      style: primary
+      start: 26
+      end: 35
+    - source: ','
+      style: secondary
+      start: 24
+      end: 25
+    - source: ','
+      style: secondary
+      start: 35
+      end: 36
+    - source: cmCTestLog(self, HANDLER, "literal", other)
+      style: secondary
+      start: 0
+      end: 43
+  ? |
+    cmStrCat(
+      "literal",
+      other)
+  : fixed: |
+      cmStrCat(
+        "literal"_s,
+        other)
+    labels:
+    - source: '"literal"'
+      style: primary
+      start: 12
+      end: 21
+    - source: (
+      style: secondary
+      start: 8
+      end: 9
+    - source: ','
+      style: secondary
+      start: 21
+      end: 22
+    - source: |-
+        cmStrCat(
+          "literal",
+          other)
+      style: secondary
+      start: 0
+      end: 31
+  cmStrCat("literal", other):
+    fixed: cmStrCat("literal"_s, other)
+    labels:
+    - source: '"literal"'
+      style: primary
+      start: 9
+      end: 18
+    - source: (
+      style: secondary
+      start: 8
+      end: 9
+    - source: ','
+      style: secondary
+      start: 18
+      end: 19
+    - source: cmStrCat("literal", other)
+      style: secondary
+      start: 0
+      end: 26
+  cmStrCat(other, ""):
+    fixed: cmStrCat(other, ""_s)
+    labels:
+    - source: '""'
+      style: primary
+      start: 16
+      end: 18
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+    - source: )
+      style: secondary
+      start: 18
+      end: 19
+    - source: cmStrCat(other, "")
+      style: secondary
+      start: 0
+      end: 19
+  cmStrCat(other, "a" "b"):
+    fixed: cmStrCat(other, "a" "b"_s)
+    labels:
+    - source: '"a" "b"'
+      style: primary
+      start: 16
+      end: 23
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+    - source: )
+      style: secondary
+      start: 23
+      end: 24
+    - source: cmStrCat(other, "a" "b")
+      style: secondary
+      start: 0
+      end: 24
+  cmStrCat(other, "literal"):
+    fixed: cmStrCat(other, "literal"_s)
+    labels:
+    - source: '"literal"'
+      style: primary
+      start: 16
+      end: 25
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+    - source: )
+      style: secondary
+      start: 25
+      end: 26
+    - source: cmStrCat(other, "literal")
+      style: secondary
+      start: 0
+      end: 26
+  cmStrCat(other, "literal", other):
+    fixed: cmStrCat(other, "literal"_s, other)
+    labels:
+    - source: '"literal"'
+      style: primary
+      start: 16
+      end: 25
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+    - source: ','
+      style: secondary
+      start: 25
+      end: 26
+    - source: cmStrCat(other, "literal", other)
+      style: secondary
+      start: 0
+      end: 33
+  cmStrCat(other, R"(raw)"):
+    fixed: cmStrCat(other, R"(raw)"_s)
+    labels:
+    - source: R"(raw)"
+      style: primary
+      start: 16
+      end: 24
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+    - source: )
+      style: secondary
+      start: 24
+      end: 25
+    - source: cmStrCat(other, R"(raw)")
+      style: secondary
+      start: 0
+      end: 25

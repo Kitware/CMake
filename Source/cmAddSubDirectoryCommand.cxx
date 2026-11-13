@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -60,8 +61,8 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
     srcPath = cmStrCat(mf.GetCurrentSourceDirectory(), '/', srcArg);
   }
   if (!cmSystemTools::FileIsDirectory(srcPath)) {
-    std::string error = cmStrCat("given source \"", srcArg,
-                                 "\" which is not an existing directory.");
+    std::string error = cmStrCat("given source \""_s, srcArg,
+                                 "\" which is not an existing directory."_s);
     status.SetError(error);
     return false;
   }
@@ -78,12 +79,12 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
                                        mf.GetCurrentSourceDirectory())) {
       status.SetError(
         cmStrCat("not given a binary directory but the given source "
-                 "directory \"",
-                 srcPath, "\" is not a subdirectory of \"",
+                 "directory \""_s,
+                 srcPath, "\" is not a subdirectory of \""_s,
                  mf.GetCurrentSourceDirectory(),
                  "\".  When specifying an "
                  "out-of-tree source a binary directory must be explicitly "
-                 "specified."));
+                 "specified."_s));
       return false;
     }
 

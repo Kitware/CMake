@@ -12,6 +12,7 @@
 #include <utility>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
@@ -187,8 +188,8 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       !this->Reporter.OptionCurrentBuildDir.empty() &&
       !this->Reporter.OptionTargetName.empty()) {
     this->Reporter.OptionObjectDir =
-      cmStrCat(this->Reporter.OptionCurrentBuildDir, "/CMakeFiles/",
-               this->Reporter.OptionTargetName, ".dir");
+      cmStrCat(this->Reporter.OptionCurrentBuildDir, "/CMakeFiles/"_s,
+               this->Reporter.OptionTargetName, ".dir"_s);
   }
   if (!this->Reporter.OptionObjectDir.empty() &&
       !cmCMakePath(this->Reporter.OptionObjectDir).IsAbsolute() &&
@@ -463,7 +464,7 @@ void cmCTestLaunch::LoadScrapeRules(
   char const* purpose, std::vector<cmsys::RegularExpression>& regexps) const
 {
   std::string fname =
-    cmStrCat(this->Reporter.LogDir, "Custom", purpose, ".txt");
+    cmStrCat(this->Reporter.LogDir, "Custom"_s, purpose, ".txt"_s);
   cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   std::string line;
   cmsys::RegularExpression rex;
@@ -513,7 +514,7 @@ void cmCTestLaunch::LoadConfig()
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
   std::string fname =
-    cmStrCat(this->Reporter.LogDir, "CTestLaunchConfig.cmake");
+    cmStrCat(this->Reporter.LogDir, "CTestLaunchConfig.cmake"_s);
   if (cmSystemTools::FileExists(fname) && mf.ReadListFile(fname)) {
     this->Reporter.SourceDir = mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
     cmSystemTools::ConvertToUnixSlashes(this->Reporter.SourceDir);

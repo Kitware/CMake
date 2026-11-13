@@ -130,7 +130,7 @@ std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase(char const* version)
 {
-  return cmStrCat(R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\)",
+  return cmStrCat(R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\)"_s,
                   version);
 }
 
@@ -220,9 +220,9 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
     int res;
     if (!cmSystemTools::FileTimeCompare(src, dst, &res) || res > 0) {
       if (!cmSystemTools::CopyFileAlways(src, dst)) {
-        cmSystemTools::Message(cmStrCat("Could not copy from: ", src,
+        cmSystemTools::Message(cmStrCat("Could not copy from: "_s, src,
                                         "\n"
-                                        "                 to: ",
+                                        "                 to: "_s,
                                         dst, '\n'),
                                "Warning");
       }
@@ -303,8 +303,8 @@ std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
     root->GetMakefile()->IssueDiagnostic(
       cmDiagnostics::CMD_AUTHOR,
       cmStrCat("Directory property VS_STARTUP_PROJECT specifies target "
-               "'",
-               startup, "' that does not exist.  Ignoring."));
+               "'"_s,
+               startup, "' that does not exist.  Ignoring."_s));
   }
 
   // default, if not specified
@@ -330,7 +330,7 @@ bool IsVisualStudioMacrosFileRegistered(std::string const& macrosFile,
   LONG result = ERROR_SUCCESS;
   DWORD index = 0;
 
-  keyname = cmStrCat(regKeyBase, "\\OtherProjects7");
+  keyname = cmStrCat(regKeyBase, "\\OtherProjects7"_s);
   hkey = nullptr;
   result =
     RegOpenKeyExW(HKEY_CURRENT_USER, cmsys::Encoding::ToWide(keyname).c_str(),
@@ -422,7 +422,7 @@ bool IsVisualStudioMacrosFileRegistered(std::string const& macrosFile,
   // as the name of the next subkey.
   nextAvailableSubKeyName = std::to_string(index);
 
-  keyname = cmStrCat(regKeyBase, "\\RecordingProject7");
+  keyname = cmStrCat(regKeyBase, "\\RecordingProject7"_s);
   hkey = nullptr;
   result =
     RegOpenKeyExW(HKEY_CURRENT_USER, cmsys::Encoding::ToWide(keyname).c_str(),
@@ -468,7 +468,7 @@ void WriteVSMacrosFileRegistryEntry(std::string const& nextAvailableSubKeyName,
                                     std::string const& macrosFile,
                                     std::string const& regKeyBase)
 {
-  std::string keyname = cmStrCat(regKeyBase, "\\OtherProjects7");
+  std::string keyname = cmStrCat(regKeyBase, "\\OtherProjects7"_s);
   HKEY hkey = nullptr;
   LONG result =
     RegOpenKeyExW(HKEY_CURRENT_USER, cmsys::Encoding::ToWide(keyname).c_str(),
@@ -689,10 +689,10 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   cmSystemTools::ReplaceString(obj_dir_expanded, this->GetCMakeCFGIntDir(),
                                configName.c_str());
   cmSystemTools::MakeDirectory(obj_dir_expanded);
-  std::string const objs_file = cmStrCat(obj_dir_expanded, "/objects.txt");
+  std::string const objs_file = cmStrCat(obj_dir_expanded, "/objects.txt"_s);
   cmGeneratedFileStream fout(objs_file.c_str());
   if (!fout) {
-    cmSystemTools::Error(cmStrCat("could not open ", objs_file));
+    cmSystemTools::Error(cmStrCat("could not open "_s, objs_file));
     return;
   }
 
@@ -737,7 +737,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   cmValue const nmExecutable =
     gt->Target->GetMakefile()->GetDefinition("CMAKE_NM");
   if (!cmIsOff(nmExecutable) && this->IsClangClToolset()) {
-    commandLines[0].emplace_back(cmStrCat("--nm=", *nmExecutable));
+    commandLines[0].emplace_back(cmStrCat("--nm="_s, *nmExecutable));
   }
   cmCustomCommand command;
   command.SetOutputs(outputs);
@@ -845,7 +845,7 @@ std::set<std::string> cmGlobalVisualStudioGenerator::IsPartOfDefaultBuild(
       // check if target <t> is part of default build
       if (target->GetName() == t) {
         std::string const propertyName =
-          cmStrCat("CMAKE_VS_INCLUDE_", t, "_TO_DEFAULT_BUILD");
+          cmStrCat("CMAKE_VS_INCLUDE_"_s, t, "_TO_DEFAULT_BUILD"_s);
         // inspect CMAKE_VS_INCLUDE_<t>_TO_DEFAULT_BUILD properties
         for (std::string const& i : configs) {
           cmValue propertyValue =
@@ -876,7 +876,7 @@ std::set<std::string> cmGlobalVisualStudioGenerator::IsPartOfDefaultBuild(
 std::string cmGlobalVisualStudioGenerator::GetGUID(
   std::string const& name) const
 {
-  std::string const& guidStoreName = cmStrCat(name, "_GUID_CMAKE");
+  std::string const& guidStoreName = cmStrCat(name, "_GUID_CMAKE"_s);
   if (cmValue storedGUID =
         this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
     return *storedGUID;
@@ -983,7 +983,7 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
       }
       for (std::string const& config : solution.Configs) {
         cmList mapConfig{ gt->GetProperty(cmStrCat(
-          "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(config))) };
+          "MAP_IMPORTED_CONFIG_"_s, cmSystemTools::UpperCase(config))) };
         addProjectConfig(config, !mapConfig.empty() ? mapConfig[0] : config);
       }
       cmValue platformMapping = gt->GetProperty("VS_PLATFORM_MAPPING");
@@ -1124,7 +1124,7 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
       solution.PropertyGroups.emplace_back(pgExtensibilityGlobals);
     }
     std::string const solutionGuid =
-      this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
+      this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"_s));
     pgExtensibilityGlobals->Map.emplace("SolutionGuid",
                                         cmStrCat('{', solutionGuid, '}'));
 
@@ -1154,7 +1154,7 @@ std::string cmGlobalVisualStudioGenerator::GetSLNFile(
   if (!slnFile.empty()) {
     slnFile.push_back('/');
   }
-  slnFile = cmStrCat(std::move(slnFile), projectName, ".sln");
+  slnFile = cmStrCat(std::move(slnFile), projectName, ".sln"_s);
   if (this->Version >= cm::VS::Version::VS18) {
     slnFile += "x";
   }

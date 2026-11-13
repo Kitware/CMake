@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
@@ -72,8 +74,10 @@ void cmCTestLaunchReporter::ComputeFileNames()
   this->LogHash = md5.FinalizeHex();
 
   // We store stdout and stderr in temporary log files.
-  this->LogOut = cmStrCat(this->LogDir, "launch-", this->LogHash, "-out.txt");
-  this->LogErr = cmStrCat(this->LogDir, "launch-", this->LogHash, "-err.txt");
+  this->LogOut =
+    cmStrCat(this->LogDir, "launch-"_s, this->LogHash, "-out.txt"_s);
+  this->LogErr =
+    cmStrCat(this->LogDir, "launch-"_s, this->LogHash, "-err.txt"_s);
 }
 
 void cmCTestLaunchReporter::LoadLabels()
@@ -83,7 +87,7 @@ void cmCTestLaunchReporter::LoadLabels()
   }
 
   // Labels are listed in per-target files.
-  std::string fname = cmStrCat(this->OptionObjectDir, "/Labels.txt");
+  std::string fname = cmStrCat(this->OptionObjectDir, "/Labels.txt"_s);
 
   // We are interested in per-target labels for this source file.
   std::string source = this->OptionSource;
@@ -139,7 +143,7 @@ void cmCTestLaunchReporter::WriteXML()
   // Name the xml file.
   std::string logXML =
     cmStrCat(this->LogDir, this->IsError() ? "error-" : "warning-",
-             this->LogHash, ".xml");
+             this->LogHash, ".xml"_s);
 
   // Use cmGeneratedFileStream to atomically create the report file.
   cmGeneratedFileStream fxml(logXML);
@@ -278,9 +282,9 @@ void cmCTestLaunchReporter::DumpFileToXML(cmXMLElement& e3, char const* tag,
       continue;
     }
     if (this->Match(line, this->RegexWarningSuppress)) {
-      line = cmStrCat("[CTest: warning suppressed] ", std::move(line));
+      line = cmStrCat("[CTest: warning suppressed] "_s, std::move(line));
     } else if (this->Match(line, this->RegexWarning)) {
-      line = cmStrCat("[CTest: warning matched] ", std::move(line));
+      line = cmStrCat("[CTest: warning matched] "_s, std::move(line));
     }
     e4.Content(sep);
     e4.Content(line);

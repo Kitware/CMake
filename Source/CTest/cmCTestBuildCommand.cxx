@@ -108,8 +108,8 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       if (presetCheck == PresetCheckResult::Found) {
         effectivePreset = *v;
       } else {
-        cmCTestLog(this->CTest, WARNING, "No build preset named \"", *v,
-                   "\" found, ignoring CTEST_PRESET.\n");
+        cmCTestLog(this->CTest, WARNING, "No build preset named \""_s, *v,
+                   "\" found, ignoring CTEST_PRESET.\n"_s);
       }
     }
   }
@@ -124,13 +124,13 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
   } else if (!effectivePreset.empty()) {
     if (cmNonempty(ctestBuildCommand)) {
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-                         "Ignoring CTEST_BUILD_COMMAND because preset \"",
-                         effectivePreset, "\" is in use.\n");
+                         "Ignoring CTEST_BUILD_COMMAND because preset \""_s,
+                         effectivePreset, "\" is in use.\n"_s);
     }
     cmCMakePresetsGraph presetsGraph;
     if (!presetsGraph.ReadProjectPresets(sourceDirectory, presetsFile)) {
-      status.SetError(cmStrCat("\n Could not read presets from \"",
-                               sourceDirectory, "\":\n ",
+      status.SetError(cmStrCat("\n Could not read presets from \""_s,
+                               sourceDirectory, "\":\n "_s,
                                presetsGraph.parseState.GetErrorMessage()));
       return nullptr;
     }
@@ -147,35 +147,35 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
 
     std::string buildCommand =
       cmStrCat('"', cmSystemTools::GetCMakeCommand(),
-               "\" --build . --preset \"", effectivePreset, '"');
+               "\" --build . --preset \""_s, effectivePreset, '"');
 
     if (!presetsFile.empty()) {
-      buildCommand = cmStrCat(std::move(buildCommand), " --presets-file \"",
+      buildCommand = cmStrCat(std::move(buildCommand), " --presets-file \""_s,
                               presetsFile, '"');
     }
 
     if (!cmakeBuildConfiguration.empty()) {
-      buildCommand = cmStrCat(std::move(buildCommand), " --config \"",
+      buildCommand = cmStrCat(std::move(buildCommand), " --config \""_s,
                               cmakeBuildConfiguration, '"');
     }
 
     if (!cmakeBuildTarget.empty()) {
-      buildCommand = cmStrCat(std::move(buildCommand), " --target \"",
+      buildCommand = cmStrCat(std::move(buildCommand), " --target \""_s,
                               cmakeBuildTarget, '"');
     }
 
     if (!args.ParallelLevel.empty()) {
-      buildCommand =
-        cmStrCat(std::move(buildCommand), " --parallel ", args.ParallelLevel);
+      buildCommand = cmStrCat(std::move(buildCommand), " --parallel "_s,
+                              args.ParallelLevel);
     }
 
     if (!cmakeBuildAdditionalFlags.empty()) {
       buildCommand =
-        cmStrCat(std::move(buildCommand), " -- ", cmakeBuildAdditionalFlags);
+        cmStrCat(std::move(buildCommand), " -- "_s, cmakeBuildAdditionalFlags);
     }
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-                       "SetMakeCommand:", buildCommand, '\n');
+                       "SetMakeCommand:"_s, buildCommand, '\n');
     this->CTest->SetCTestConfiguration("MakeCommand", buildCommand,
                                        args.Quiet);
   } else {
@@ -190,7 +190,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
         mf.GetCMakeInstance()->CreateGlobalGenerator(*cmakeGeneratorName);
       if (!globalGenerator) {
         mf.IssueMessage(MessageType::FATAL_ERROR,
-                        cmStrCat("could not create generator named \"",
+                        cmStrCat("could not create generator named \""_s,
                                  *cmakeGeneratorName, '"'));
         cmSystemTools::SetFatalErrorOccurred();
         return nullptr;
@@ -203,7 +203,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
         cmakeBuildTarget, cmakeBuildConfiguration, args.ParallelLevel,
         cmakeBuildAdditionalFlags, false);
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, args.Quiet,
-                         "SetMakeCommand:", buildCommand, '\n');
+                         "SetMakeCommand:"_s, buildCommand, '\n');
       this->CTest->SetCTestConfiguration("MakeCommand", buildCommand,
                                          args.Quiet);
     } else {

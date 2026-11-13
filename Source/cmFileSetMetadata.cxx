@@ -42,7 +42,7 @@ Visibility VisibilityFromName(cm::string_view name, cmMakefile* mf)
   if (name == "PRIVATE"_s) {
     return Visibility::Private;
   }
-  auto msg = cmStrCat("File set visibility \"", name, "\" is not valid.");
+  auto msg = cmStrCat("File set visibility \""_s, name, "\" is not valid."_s);
   if (mf) {
     mf->IssueMessage(MessageType::FATAL_ERROR, msg);
   } else {

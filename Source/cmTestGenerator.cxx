@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -40,8 +42,8 @@ bool needToQuoteTestName(cmMakefile const& mf, std::string const& name)
         mf.IssuePolicyWarning(
           cmPolicies::CMP0110, {},
           cmStrCat("The following name given to add_test() is invalid if "
-                   "CMP0110 is not set or set to OLD:\n  `",
-                   name, "´\n"));
+                   "CMP0110 is not set or set to OLD:\n  `"_s,
+                   name, "´\n"_s));
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
@@ -257,11 +259,11 @@ void cmTestGenerator::GenerateCommand(std::ostream& os,
           if (launcherWithArgs != argsWithEmptyValuesPreserved) {
             this->LG->GetMakefile()->IssuePolicyWarning(
               cmPolicies::CMP0178,
-              cmStrCat("The ", propertyName, " property of target '",
+              cmStrCat("The "_s, propertyName, " property of target '"_s,
                        target->GetName(),
                        "' contains empty list items. Those empty items are "
                        "being silently discarded to preserve backward "
-                       "compatibility."));
+                       "compatibility."_s));
           }
         }
         std::string launcherExe(launcherWithArgs[0]);

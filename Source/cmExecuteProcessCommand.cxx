@@ -135,8 +135,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     return true;
   }
   if (!unparsedArguments.empty()) {
-    status.SetError(cmStrCat(" given unknown argument \"",
-                             unparsedArguments.front(), "\"."));
+    status.SetError(cmStrCat(" given unknown argument \""_s,
+                             unparsedArguments.front(), "\"."_s));
     return false;
   }
 
@@ -159,8 +159,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   }
 
   if (!status.GetMakefile().CanIWriteThisFile(outputFilename)) {
-    status.SetError(cmStrCat("attempted to output into a file: ",
-                             outputFilename, " into a source directory."));
+    status.SetError(cmStrCat("attempted to output into a file: "_s,
+                             outputFilename, " into a source directory."_s));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -203,8 +203,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     }
     status.SetError(cmStrCat(
       "Using CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL with invalid value "
-      "\"",
-      commandErrorIsFatal, "\". This variable can be ANY, LAST or NONE"));
+      "\""_s,
+      commandErrorIsFatal, "\". This variable can be ANY, LAST or NONE"_s));
     return false;
   }
   // Create a process instance.
@@ -311,7 +311,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
         error = " called with '";
       }
       error = cmStrCat(std::move(error), std::move(echo_output),
-                       "' expected STDERR|STDOUT|NONE");
+                       "' expected STDERR|STDOUT|NONE"_s);
       if (!echo_output_from_variable) {
         error += " for COMMAND_ECHO.";
       }
@@ -322,7 +322,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   if (echo_stdout || echo_stderr) {
     std::string command;
     for (auto const& cmd : arguments.Commands) {
-      command = cmStrCat(std::move(command), '\'', cmJoin(cmd, "' '"), "'\n");
+      command =
+        cmStrCat(std::move(command), '\'', cmJoin(cmd, "' '"), "'\n"_s);
     }
     if (echo_stdout) {
       std::cout << command;
@@ -370,8 +371,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     } else {
       status.GetMakefile().IssueDiagnostic(
         cmDiagnostics::CMD_AUTHOR,
-        cmStrCat("ENCODING option given unknown value \"", *arguments.Encoding,
-                 "\".  Ignoring."));
+        cmStrCat("ENCODING option given unknown value \""_s,
+                 *arguments.Encoding, "\".  Ignoring."_s));
     }
   }
   cmProcessOutput processOutput(encoding);
@@ -511,11 +512,11 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     auto exception = processStatus.GetException();
     if (exception.first == cmUVProcessChain::ExceptionCode::None) {
       if (processStatus.ExitStatus) {
-        return cmStrCat("Child return code: ", processStatus.ExitStatus);
+        return cmStrCat("Child return code: "_s, processStatus.ExitStatus);
       }
       return "";
     }
-    return cmStrCat("Abnormal exit with child return code: ",
+    return cmStrCat("Abnormal exit with child return code: "_s,
                     exception.second);
   };
 
@@ -536,8 +537,8 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
       if (!failureIndices.empty()) {
         std::string oss = "failed command indexes:\n";
         for (auto const& e : failureIndices) {
-          oss = cmStrCat(std::move(oss), "  ", e.first + 1, ": \"", e.second,
-                         "\"\n");
+          oss = cmStrCat(std::move(oss), "  "_s, e.first + 1, ": \""_s,
+                         e.second, "\"\n"_s);
         }
         status.SetError(oss);
         ret = false;
@@ -559,7 +560,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
       auto const& lastStatus = chain.GetStatus(arguments.Commands.size() - 1);
       auto exception = lastStatus.GetException();
       if (exception.first != cmUVProcessChain::ExceptionCode::None) {
-        status.SetError(cmStrCat("Abnormal exit: ", exception.second));
+        status.SetError(cmStrCat("Abnormal exit: "_s, exception.second));
         ret = false;
       } else {
         int lastIndex = static_cast<int>(arguments.Commands.size() - 1);

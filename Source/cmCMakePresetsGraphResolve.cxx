@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmCMakePresetsGraph.h"
 #include "cmStringAlgorithms.h"
@@ -96,23 +97,23 @@ cm::optional<std::string> cmCMakePresetsGraph::FormatPresetError(
   using Status = PresetResolveStatus;
   switch (status) {
     case Status::NotFound: {
-      std::string error = cmStrCat("No such ", T::kind(), " preset in ",
-                                   directory, ": \"", errorPresetName, '"');
+      std::string error = cmStrCat("No such "_s, T::kind(), " preset in "_s,
+                                   directory, ": \""_s, errorPresetName, '"');
       if (!suggestion.empty()) {
-        error =
-          cmStrCat(std::move(error), ". Did you mean: \"", suggestion, "\"?");
+        error = cmStrCat(std::move(error), ". Did you mean: \""_s, suggestion,
+                         "\"?"_s);
       }
       return error;
     }
     case Status::Hidden:
-      return cmStrCat("Cannot use hidden ", T::kind(), " preset in ",
-                      directory, ": \"", errorPresetName, '"');
+      return cmStrCat("Cannot use hidden "_s, T::kind(), " preset in "_s,
+                      directory, ": \""_s, errorPresetName, '"');
     case Status::InvalidMacroExpansion:
-      return cmStrCat("Could not evaluate ", T::kind(), " preset \"",
-                      errorPresetName, "\": Invalid macro expansion");
+      return cmStrCat("Could not evaluate "_s, T::kind(), " preset \""_s,
+                      errorPresetName, "\": Invalid macro expansion"_s);
     case Status::Disabled:
-      return cmStrCat("Cannot use disabled ", T::kind(), " preset in ",
-                      directory, ": \"", errorPresetName, '"');
+      return cmStrCat("Cannot use disabled "_s, T::kind(), " preset in "_s,
+                      directory, ": \""_s, errorPresetName, '"');
     case Status::Success:
       return cm::nullopt;
   }

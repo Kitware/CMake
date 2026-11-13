@@ -1,0 +1,34 @@
+---
+id: cmstrcat-to-s-literal
+language: Cpp
+severity: warning
+message: String literals passed to `cmStrCat` should use the `_s` literal
+ignores:
+  - Utilities/ClangTidyModule/Tests/**
+rule:
+  all:
+    - any:
+        - kind: string_literal
+        - kind: raw_string_literal
+        - kind: concatenated_string
+    - pattern: $ARG
+    - follows:
+        regex: '(,|[(])'
+    - precedes:
+        regex: '(,|[)])'
+    - inside:
+        matches: cmstrcat-call
+        stopBy:
+          kind: call_expression
+    - not:
+        regex: '^"(.|\\.)"$'
+constraints:
+  ARG:
+    regex: '^("|R")'
+transform:
+  ARG_OUT:
+    replace:
+      source: $ARG
+      replace: '"$'
+      by: '"_s'
+fix: $ARG_OUT

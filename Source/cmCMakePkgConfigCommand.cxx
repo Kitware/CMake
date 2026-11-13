@@ -325,9 +325,9 @@ struct CommonArguments : ArgumentParser::ParseResult
     } else if (strictness == "BEST_EFFORT"_s) {
       Strictness = STRICTNESS_BEST_EFFORT;
     } else {
-      StrictnessError =
-        cmStrCat("Invalid 'STRICTNESS' '", strictness,
-                 "'; must be one of 'STRICT', 'PERMISSIVE', or 'BEST_EFFORT'");
+      StrictnessError = cmStrCat(
+        "Invalid 'STRICTNESS' '"_s, strictness,
+        "'; must be one of 'STRICT', 'PERMISSIVE', or 'BEST_EFFORT'"_s);
     }
     return ArgumentParser::Continue::Yes;
   }
@@ -352,8 +352,8 @@ struct CommonArguments : ArgumentParser::ParseResult
       EnvMode = ENVMODE_IGNORE;
     } else {
       EnvModeError =
-        cmStrCat("Invalid 'ENV_MODE' '", envMode,
-                 "'; must be one of 'FDO', 'PKGCONF', or 'IGNORE'");
+        cmStrCat("Invalid 'ENV_MODE' '"_s, envMode,
+                 "'; must be one of 'FDO', 'PKGCONF', or 'IGNORE'"_s);
     }
     return ArgumentParser::Continue::Yes;
   }
@@ -546,7 +546,7 @@ cm::optional<cmPkgConfigResolver> ReadPackage(std::string const& package,
   cmsys::ifstream ifs(path.string().c_str(), std::ios::binary);
 
   if (!ifs) {
-    warn_or_error(cmStrCat("Could not open file '", path.string(), '\''),
+    warn_or_error(cmStrCat("Could not open file '"_s, path.string(), '\''),
                   imEnv, state);
     return result;
   }
@@ -556,8 +556,9 @@ cm::optional<cmPkgConfigResolver> ReadPackage(std::string const& package,
 
   // Shouldn't have hit eof on previous read, should hit eof now
   if (ifs.fail() || ifs.eof() || ifs.get() != EOF) {
-    warn_or_error(cmStrCat("Error while reading file '", path.string(), '\''),
-                  imEnv, state);
+    warn_or_error(
+      cmStrCat("Error while reading file '"_s, path.string(), '\''), imEnv,
+      state);
     return result;
   }
 
@@ -568,7 +569,7 @@ cm::optional<cmPkgConfigResolver> ReadPackage(std::string const& package,
 
   if (imEnv.strictness != StrictnessType::STRICTNESS_BEST_EFFORT &&
       err != PFCE_OK) {
-    warn_or_error(cmStrCat("Parsing failed for file '", path.string(), '\''),
+    warn_or_error(cmStrCat("Parsing failed for file '"_s, path.string(), '\''),
                   imEnv, state);
     return result;
   }
@@ -589,7 +590,7 @@ cm::optional<cmPkgConfigResolver> ReadPackage(std::string const& package,
 
   if (!result) {
     warn_or_error(
-      cmStrCat("Resolution failed for file '", path.string(), '\''), imEnv,
+      cmStrCat("Resolution failed for file '"_s, path.string(), '\''), imEnv,
       state);
   }
 
@@ -604,7 +605,7 @@ cm::optional<cmPkgConfigResolver> ImportPackage(
 
   if (!result) {
     if (!state.err) {
-      warn_or_error(cmStrCat("Could not find pkg-config: '", package, '\''),
+      warn_or_error(cmStrCat("Could not find pkg-config: '"_s, package, '\''),
                     imEnv, state);
     }
     return result;
@@ -617,7 +618,7 @@ cm::optional<cmPkgConfigResolver> ImportPackage(
       auto req = MakeVersionRequirement(*version);
       if (!req) {
         warn_or_error(
-          cmStrCat("Invalid version requirement '", *version, '\''), imEnv,
+          cmStrCat("Invalid version requirement '"_s, *version, '\''), imEnv,
           state);
         return {};
       }
@@ -626,8 +627,8 @@ cm::optional<cmPkgConfigResolver> ImportPackage(
 
     if (ver != result->Version()) {
       warn_or_error(
-        cmStrCat("Package '", package, "' version '", result->Version(),
-                 "' does not meet exact version requirement '", ver, '\''),
+        cmStrCat("Package '"_s, package, "' version '"_s, result->Version(),
+                 "' does not meet exact version requirement '"_s, ver, '\''),
         imEnv, state);
       return {};
     }
@@ -635,14 +636,15 @@ cm::optional<cmPkgConfigResolver> ImportPackage(
   } else if (version) {
     auto req = MakeVersionRequirement(*version);
     if (!req) {
-      warn_or_error(cmStrCat("Invalid version requirement '", *version, '\''),
-                    imEnv, state);
+      warn_or_error(
+        cmStrCat("Invalid version requirement '"_s, *version, '\''), imEnv,
+        state);
       return {};
     }
     if (!cmPkgConfigResolver::CheckVersion(*req, result->Version())) {
       warn_or_error(
-        cmStrCat("Package '", package, "' version '", result->Version(),
-                 "' does not meet version requirement '", *version, '\''),
+        cmStrCat("Package '"_s, package, "' version '"_s, result->Version(),
+                 "' does not meet version requirement '"_s, *version, '\''),
         imEnv, state);
       return {};
     }
@@ -667,10 +669,10 @@ cm::optional<cmPkgConfigResolver> ImportPackage(
     if (!state.err) {
       std::string req_str = cmStrCat('\'', reqs.begin()->parent, '\'');
       for (auto it = reqs.begin() + 1; it != reqs.end(); ++it) {
-        req_str = cmStrCat(std::move(req_str), ", '", it->parent, '\'');
+        req_str = cmStrCat(std::move(req_str), ", '"_s, it->parent, '\'');
       }
-      warn_or_error(cmStrCat("Could not find pkg-config: '", package,
-                             "' required by: ", req_str),
+      warn_or_error(cmStrCat("Could not find pkg-config: '"_s, package,
+                             "' required by: "_s, req_str),
                     imEnv, state);
     }
     return result;
@@ -681,10 +683,10 @@ cm::optional<cmPkgConfigResolver> ImportPackage(
 
     if (!cmPkgConfigResolver::CheckVersion(req.Dependency, ver)) {
       warn_or_error(
-        cmStrCat("Package '", package, "' version '", ver,
-                 "' does not meet version requirement '",
+        cmStrCat("Package '"_s, package, "' version '"_s, ver,
+                 "' does not meet version requirement '"_s,
                  cmPkgConfigResolver::VersionReqString(req.Dependency),
-                 "' of '", req.parent, '\''),
+                 "' of '"_s, req.parent, '\''),
         imEnv, state);
       return {};
     }
@@ -889,7 +891,7 @@ cmTarget* CreateCMakeTarget(std::string const& name, std::string const& prefix,
     }
 
     tgt->AppendProperty("INTERFACE_LINK_LIBRARIES",
-                        cmStrCat("@foreign_pkgcfg::", prefix, dep.Name));
+                        cmStrCat("@foreign_pkgcfg::"_s, prefix, dep.Name));
   }
   return tgt;
 }
@@ -907,15 +909,15 @@ bool CheckPackageDependencies(
     }
 
     auto* tgt = state.status.GetMakefile().FindTargetToUse(
-      cmStrCat("@foreign_pkgcfg::", prefix, dep.Name),
+      cmStrCat("@foreign_pkgcfg::"_s, prefix, dep.Name),
       cm::TargetDomain::FOREIGN);
     if (tgt) {
       auto ver = tgt->GetProperty("VERSION");
       if (!cmPkgConfigResolver::CheckVersion(dep, *ver)) {
-        warn_or_error(cmStrCat("Package '", dep.Name, "' version '", *ver,
-                               "' does not meet version requirement '",
+        warn_or_error(cmStrCat("Package '"_s, dep.Name, "' version '"_s, *ver,
+                               "' does not meet version requirement '"_s,
                                cmPkgConfigResolver::VersionReqString(dep),
-                               "' of '", name, '\''),
+                               "' of '"_s, name, '\''),
                       imEnv, state);
         return false;
       }
@@ -926,10 +928,10 @@ bool CheckPackageDependencies(
     if (it != outStack.end()) {
       auto ver = it->second.Version();
       if (!cmPkgConfigResolver::CheckVersion(dep, ver)) {
-        warn_or_error(cmStrCat("Package '", dep.Name, "' version '", ver,
-                               "' does not meet version requirement '",
+        warn_or_error(cmStrCat("Package '"_s, dep.Name, "' version '"_s, ver,
+                               "' does not meet version requirement '"_s,
                                cmPkgConfigResolver::VersionReqString(dep),
-                               "' of '", name, '\''),
+                               "' of '"_s, name, '\''),
                       imEnv, state);
         return false;
       }
@@ -983,8 +985,9 @@ std::pair<bool, bool> PopulatePCTarget(PopulateArguments& args,
         providers.emplace(provider_str.substr(0, assignment),
                           provider_str.substr(assignment + 1));
       } else {
-        state.status.SetError(cmStrCat(
-          "No '=' found in BIND_PC_REQUIRES argument '", provider_str, '\''));
+        state.status.SetError(
+          cmStrCat("No '=' found in BIND_PC_REQUIRES argument '"_s,
+                   provider_str, '\''));
         cmSystemTools::SetFatalErrorOccurred();
         return { false, false };
       }
@@ -1040,8 +1043,8 @@ bool HandlePopulateCommand(std::vector<std::string> const& args,
     parsedArgs.Prefix ? cmStrCat(*parsedArgs.Prefix, "_"_s) : "";
 
   auto foreign_name =
-    cmStrCat("@foreign_pkgcfg::", prefix, *parsedArgs.Package);
-  auto found_var = cmStrCat("PKGCONFIG_", *parsedArgs.Package, "_FOUND");
+    cmStrCat("@foreign_pkgcfg::"_s, prefix, *parsedArgs.Package);
+  auto found_var = cmStrCat("PKGCONFIG_"_s, *parsedArgs.Package, "_FOUND"_s);
 
   auto& mf = status.GetMakefile();
 
@@ -1073,10 +1076,10 @@ bool HandleImportCommand(std::vector<std::string> const& args,
     parsedArgs.Prefix ? cmStrCat(*parsedArgs.Prefix, "_"_s) : "";
 
   auto foreign_name =
-    cmStrCat("@foreign_pkgcfg::", prefix, *parsedArgs.Package);
+    cmStrCat("@foreign_pkgcfg::"_s, prefix, *parsedArgs.Package);
   auto local_name =
-    cmStrCat("PkgConfig::", parsedArgs.Name.value_or(*parsedArgs.Package));
-  auto found_var = cmStrCat("PKGCONFIG_", *parsedArgs.Package, "_FOUND");
+    cmStrCat("PkgConfig::"_s, parsedArgs.Name.value_or(*parsedArgs.Package));
+  auto found_var = cmStrCat("PKGCONFIG_"_s, *parsedArgs.Package, "_FOUND"_s);
 
   auto& mf = status.GetMakefile();
 
@@ -1112,7 +1115,7 @@ bool PkgConfigImportPackageImpl(cmMakefile& mf, cmExecutionStatus& status,
   // A pkg-config package is referenced in CPS as "<name>:<name>" and linked
   // directly as the foreign target which provides it, so there is no
   // interface target to create here.
-  auto const foreignName = cmStrCat("@foreign_pkgcfg::", prefix, name);
+  auto const foreignName = cmStrCat("@foreign_pkgcfg::"_s, prefix, name);
   if (mf.FindTargetToUse(foreignName, cm::TargetDomain::FOREIGN)) {
     return true;
   }

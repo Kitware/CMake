@@ -73,7 +73,7 @@ bool cmFunctionHelperCommand::operator()(
   // required by the signature
   if (expandedArgs.size() < this->Args.size() - 1) {
     auto const errorMsg = cmStrCat(
-      "Function invoked with incorrect arguments for function named: ",
+      "Function invoked with incorrect arguments for function named: "_s,
       this->Args.front());
     inStatus.SetError(errorMsg);
     return false;

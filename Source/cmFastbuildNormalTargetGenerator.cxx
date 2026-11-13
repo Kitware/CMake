@@ -120,7 +120,7 @@ cmFastbuildNormalTargetGenerator::cmFastbuildNormalTargetGenerator(
   , CudaCompileMode(this->GetCudaCompileMode())
 {
 
-  LogMessage(cmStrCat("objectOutDir: ", ObjectOutDir));
+  LogMessage(cmStrCat("objectOutDir: "_s, ObjectOutDir));
   this->OSXBundleGenerator = cm::make_unique<cmOSXBundleGenerator>(gt);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 
@@ -129,7 +129,7 @@ cmFastbuildNormalTargetGenerator::cmFastbuildNormalTargetGenerator(
     "\"" FASTBUILD_DOLLAR_TAG "TargetOutputImplib" FASTBUILD_DOLLAR_TAG "\"");
   for (auto const& lang : Languages) {
     TargetIncludesByLanguage[lang] = this->GetIncludes(lang, Config);
-    LogMessage(cmStrCat("targetIncludes for lang ", lang, " = ",
+    LogMessage(cmStrCat("targetIncludes for lang "_s, lang, " = "_s,
                         TargetIncludesByLanguage[lang]));
 
     for (auto const& arch : this->GetArches()) {
@@ -137,7 +137,7 @@ cmFastbuildNormalTargetGenerator::cmFastbuildNormalTargetGenerator(
       this->LocalCommonGenerator->GetTargetCompileFlags(
         this->GeneratorTarget, Config, lang, flags, arch);
       LogMessage(
-        cmStrCat("Lang: ", lang, ", arch: ", arch, ", flags: ", flags));
+        cmStrCat("Lang: "_s, lang, ", arch: "_s, arch, ", flags: "_s, flags));
     }
   }
 }
@@ -172,7 +172,7 @@ std::string cmFastbuildNormalTargetGenerator::DetectCompilerFlags(
   }
   std::string sourceIncludesStr = this->LocalGenerator->GetIncludeFlags(
     sourceIncludesVec, this->GeneratorTarget, language, Config, false);
-  LogMessage(cmStrCat("sourceIncludes = ", sourceIncludesStr));
+  LogMessage(cmStrCat("sourceIncludes = "_s, sourceIncludesStr));
 
   std::string compileFlags =
     CompileFlagsByLangAndArch[std::make_pair(language, arch)];
@@ -210,7 +210,7 @@ std::string cmFastbuildNormalTargetGenerator::DetectCompilerFlags(
     this->AppendFortranPreprocessFlags(compileFlags, srcFile);
   }
 
-  LogMessage(cmStrCat("compileFlags = ", compileFlags));
+  LogMessage(cmStrCat("compileFlags = "_s, compileFlags));
   return compileFlags;
 }
 
@@ -347,9 +347,9 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
   vars.Manifests = manifests.c_str();
 
   std::string const stdLibString = this->Makefile->GetSafeDefinition(
-    cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LIBRARIES"));
+    cmStrCat("CMAKE_"_s, linkLanguage, "_STANDARD_LIBRARIES"_s));
 
-  LogMessage(cmStrCat("Target type: ",
+  LogMessage(cmStrCat("Target type: "_s,
                       static_cast<int>(this->GeneratorTarget->GetType())));
   if (this->GeneratorTarget->GetType() == cm::TargetType::EXECUTABLE ||
       this->GeneratorTarget->GetType() == cm::TargetType::SHARED_LIBRARY ||
@@ -416,7 +416,7 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
     linkRule, vars);
 
   command = std::move(linkRule);
-  LogMessage(cmStrCat("Expanded link command: ", command));
+  LogMessage(cmStrCat("Expanded link command: "_s, command));
   return true;
 }
 
@@ -442,7 +442,7 @@ void cmFastbuildNormalTargetGenerator::ApplyLWYUToLinkerCommand(
     args += this->GetLocalGenerator()->EscapeForShell(*lwyuCheck);
 
     args = cmStrCat(
-      std::move(args), " --source=",
+      std::move(args), " --source="_s,
       this->ConvertToFastbuildPath(this->GetGeneratorTarget()->GetFullPath(
         Config, cmStateEnums::RuntimeBinaryArtifact,
         cmGeneratorTarget::NameType::Real)));
@@ -488,10 +488,10 @@ std::string cmFastbuildNormalTargetGenerator::ComputeDefines(
   }
 
   std::string definesString = this->GetDefines(language, Config);
-  LogMessage(cmStrCat("TARGET DEFINES = ", definesString));
+  LogMessage(cmStrCat("TARGET DEFINES = "_s, definesString));
   this->GetLocalGenerator()->JoinDefines(defines, definesString, language);
 
-  LogMessage(cmStrCat("DEFINES = ", definesString));
+  LogMessage(cmStrCat("DEFINES = "_s, definesString));
   return definesString;
 }
 
@@ -546,7 +546,7 @@ void cmFastbuildNormalTargetGenerator::ComputePCH(
   // Tell the ObjectList how to use PCH.
   std::string const pchUseOption =
     this->GeneratorTarget->GetPchUseCompileOptions(Config, language);
-  LogMessage(cmStrCat("pchUseOption: ", pchUseOption));
+  LogMessage(cmStrCat("pchUseOption: "_s, pchUseOption));
 
   std::string origCompileOptions = node.CompilerOptions;
   for (auto const& opt :
@@ -563,8 +563,8 @@ void cmFastbuildNormalTargetGenerator::ComputePCH(
   // Short circuit if the PCH has already been created by another target.
   if (!this->GeneratorTarget->GetSafeProperty("PRECOMPILE_HEADERS_REUSE_FROM")
          .empty()) {
-    LogMessage(cmStrCat("PCH: ", node.PCHOutputFile,
-                        " already created by another target"));
+    LogMessage(cmStrCat("PCH: "_s, node.PCHOutputFile,
+                        " already created by another target"_s));
     return;
   }
 
@@ -573,7 +573,7 @@ void cmFastbuildNormalTargetGenerator::ComputePCH(
 
   std::string const pchCreateOptions =
     this->GeneratorTarget->GetPchCreateCompileOptions(Config, language);
-  LogMessage(cmStrCat("pchCreateOptions: ", pchCreateOptions));
+  LogMessage(cmStrCat("pchCreateOptions: "_s, pchCreateOptions));
   char const* sep = "";
   for (auto const& opt : cmList{
          genexInterpreter.Evaluate(pchCreateOptions, COMPILE_OPTIONS) }) {
@@ -653,7 +653,7 @@ void cmFastbuildNormalTargetGenerator::GenerateModuleDefinitionInfo(
     execNode.Name = target.Name + "-def-files";
     execNode.ExecExecutable = cmSystemTools::GetCMakeCommand();
     execNode.ExecArguments =
-      cmStrCat("-E __create_def ", FASTBUILD_2_INPUT_PLACEHOLDER, ' ',
+      cmStrCat("-E __create_def "_s, FASTBUILD_2_INPUT_PLACEHOLDER, ' ',
                FASTBUILD_1_INPUT_PLACEHOLDER);
     std::string const obj_list_file = mdi->DefFile + ".objs";
 
@@ -801,8 +801,8 @@ std::string cmFastbuildNormalTargetGenerator::GetCudaCompileMode() const
   };
   bool useNormalCompileMode = true;
   for (cm::string_view mode : compileModes) {
-    auto propName = cmStrCat("CUDA_", mode, "_COMPILATION");
-    auto defName = cmStrCat("_CMAKE_CUDA_", mode, "_FLAG");
+    auto propName = cmStrCat("CUDA_"_s, mode, "_COMPILATION"_s);
+    auto defName = cmStrCat("_CMAKE_CUDA_"_s, mode, "_FLAG"_s);
     if (this->GeneratorTarget->GetPropertyAsBool(propName)) {
       std::string const& flag = this->Makefile->GetRequiredDefinition(defName);
       cudaCompileMode = cmStrCat(std::move(cudaCompileMode), flag);
@@ -827,10 +827,10 @@ std::string cmFastbuildNormalTargetGenerator::GetLinkCommand() const
   if (res.empty() &&
       this->GeneratorTarget->GetType() == cm::TargetType::STATIC_LIBRARY) {
     linkCmdVar = linkCmdVar =
-      cmStrCat("CMAKE_", linkLanguage, "_ARCHIVE_CREATE");
+      cmStrCat("CMAKE_"_s, linkLanguage, "_ARCHIVE_CREATE"_s);
     res = this->Makefile->GetSafeDefinition(linkCmdVar);
   }
-  LogMessage("Link rule: " + cmStrCat(linkCmdVar, " = ", res));
+  LogMessage("Link rule: " + cmStrCat(linkCmdVar, " = "_s, res));
   return res;
 }
 
@@ -1118,7 +1118,7 @@ void cmFastbuildNormalTargetGenerator::AddStampExeIfApplicable(
   // the compilation.
   if (!fastbuildTarget.PostBuildExecNodes.Nodes.empty()) {
     std::string const AllPostBuildExecsScriptFile =
-      cmStrCat(this->Makefile->GetHomeOutputDirectory(), "/CMakeFiles/",
+      cmStrCat(this->Makefile->GetHomeOutputDirectory(), "/CMakeFiles/"_s,
                fastbuildTarget.Name,
                "-all-postbuild-commands" FASTBUILD_SCRIPT_FILE_EXTENSION);
 
@@ -1220,7 +1220,7 @@ std::string cmFastbuildNormalTargetGenerator::ComputeCodeCheckOptions(
   std::vector<std::string> compilerLauncher;
   std::string staticCheckRule = this->GenerateCodeCheckRules(
     srcFile, compilerLauncher, "", Config, nullptr);
-  LogMessage(cmStrCat("CodeCheck: ", staticCheckRule));
+  LogMessage(cmStrCat("CodeCheck: "_s, staticCheckRule));
   return staticCheckRule;
 }
 
@@ -1274,8 +1274,8 @@ void cmFastbuildNormalTargetGenerator::ComputeCompilerAndOptions(
     outObjectList.Compiler = "." + compilerIter->first;
     outObjectList.CompilerOptions = compilerOptions;
   }
-  LogMessage(cmStrCat(".Compiler = ", outObjectList.Compiler));
-  LogMessage(cmStrCat(".CompilerOptions = ", outObjectList.CompilerOptions));
+  LogMessage(cmStrCat(".Compiler = "_s, outObjectList.Compiler));
+  LogMessage(cmStrCat(".CompilerOptions = "_s, outObjectList.CompilerOptions));
 }
 
 cmRulePlaceholderExpander::RuleVariables
@@ -1367,7 +1367,8 @@ std::string cmFastbuildNormalTargetGenerator::GetCompileOptions(
   std::string options;
   if (!cmSystemTools::SplitProgramFromArgs(rule, compilerExecutable,
                                            options)) {
-    cmSystemTools::Error(cmStrCat("Failed to split compiler options: ", rule));
+    cmSystemTools::Error(
+      cmStrCat("Failed to split compiler options: "_s, rule));
   }
   LogMessage("Expanded compile options = " + options);
   LogMessage("Compiler executable = " + compilerExecutable);
@@ -1391,7 +1392,7 @@ void cmFastbuildNormalTargetGenerator::GetDeviceLinkLinkerAndArgs(
   this->GeneratorTarget->GetLinkInformation(this->Config);
   cmGeneratorTarget::DeviceLinkSetter deviceLink(*this->GeneratorTarget);
   std::string linkCmd = this->GetMakefile()->GetSafeDefinition(
-    cmStrCat("CMAKE_", language, "_DEVICE_LINK_LIBRARY"));
+    cmStrCat("CMAKE_"_s, language, "_DEVICE_LINK_LIBRARY"_s));
   auto vars = ComputeRuleVariables();
   vars.Language = language.c_str();
   // Libraries2 tracks archive changes; the computed link line already contains
@@ -1444,7 +1445,7 @@ void cmFastbuildNormalTargetGenerator::GenerateDeviceLink(
     GetDeviceLinkLinkerAndArgs(language, linker, args);
 
     FastbuildLinkerNode deviceLinkNode;
-    deviceLinkNode.Name = cmStrCat(target.Name, "_device_link");
+    deviceLinkNode.Name = cmStrCat(target.Name, "_device_link"_s);
     deviceLinkNode.Type = FastbuildLinkerNode::SHARED_LIBRARY;
     deviceLinkNode.Linker = std::move(linker);
     deviceLinkNode.LinkerOptions = std::move(args);
@@ -1454,7 +1455,7 @@ void cmFastbuildNormalTargetGenerator::GenerateDeviceLink(
                            "r" FASTBUILD_DOLLAR_TAG "/cmake_device_link",
       (arch.empty() ? "" : "_" + arch),
       this->Makefile->GetSafeDefinition(
-        cmStrCat("CMAKE_", language, "_OUTPUT_EXTENSION"))));
+        cmStrCat("CMAKE_"_s, language, "_OUTPUT_EXTENSION"_s))));
 
     // Input
     for (auto const& objList : target.ObjectListNodes) {
@@ -1477,9 +1478,9 @@ void cmFastbuildNormalTargetGenerator::GenerateDeviceLink(
     }
     this->GetGlobalGenerator()->AddFileToClean(
       cmStrCat(this->GeneratorTarget->GetObjectDirectory(this->Config),
-               "cmake_device_link", (arch.empty() ? "" : "_" + arch),
+               "cmake_device_link"_s, (arch.empty() ? "" : "_" + arch),
                this->Makefile->GetSafeDefinition(
-                 cmStrCat("CMAKE_", language, "_OUTPUT_EXTENSION"))));
+                 cmStrCat("CMAKE_"_s, language, "_OUTPUT_EXTENSION"_s))));
     target.DeviceLinkNodes.emplace_back(std::move(deviceLinkNode));
   }
   LogMessage("GenerateDeviceLink end");
@@ -1546,7 +1547,7 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
     }
 
     LogMessage(
-      cmStrCat("Source file: ", this->ConvertToFastbuildPath(pathToFile)));
+      cmStrCat("Source file: "_s, this->ConvertToFastbuildPath(pathToFile)));
     LogMessage("Language: " + language);
 
     std::string const staticCheckOptions = ComputeCodeCheckOptions(srcFile);
@@ -1614,13 +1615,15 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
       }
 
       objectListNode.CompilerOutputPath = objOutDirWithPossibleSubdir;
-      LogMessage(cmStrCat("Output path: ", objectListNode.CompilerOutputPath));
+      LogMessage(
+        cmStrCat("Output path: "_s, objectListNode.CompilerOutputPath));
 
       ComputeCompilerAndOptions(compileOptions, staticCheckOptions, language,
                                 objectListNode);
       ComputePCH(*source, objectListNode, createdPCH);
 
-      objectListNode.Name = cmStrCat(this->GetName(), '_', language, "_Objs");
+      objectListNode.Name =
+        cmStrCat(this->GetName(), '_', language, "_Objs"_s);
       // TODO: Ask cmake the output objects and group by extension instead
       // of doing this
       if (language == "RC") {
@@ -1635,7 +1638,7 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
 
         objectListNode.CompilerOutputExtension +=
           this->GetMakefile()->GetSafeDefinition(
-            cmStrCat("CMAKE_", language, "_OUTPUT_EXTENSION"));
+            cmStrCat("CMAKE_"_s, language, "_OUTPUT_EXTENSION"_s));
         // Tested in "CudaOnly.ExportPTX" test.
         if (customExt) {
           objectListNode.CompilerOutputExtension += customExt;
@@ -1649,7 +1652,7 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
   for (auto& val : nodesPermutations) {
     auto& objectListNode = val.second;
     objectListNode.Name = cmStrCat(objectListNode.Name, '_', ++groupNameCount);
-    LogMessage(cmStrCat("ObjectList name: ", objectListNode.Name));
+    LogMessage(cmStrCat("ObjectList name: "_s, objectListNode.Name));
   }
   std::vector<FastbuildObjectListNode>& objects = target.ObjectListNodes;
   objects.reserve(nodesPermutations.size());
@@ -1753,7 +1756,7 @@ cmFastbuildNormalTargetGenerator::GenerateUnity(
     while (!obj.CompilerInputFiles.empty()) {
       FastbuildUnityNode node =
         GetOneUnity(excludedSources, obj.CompilerInputFiles, unitySize);
-      node.Name = cmStrCat(this->GetName(), "_Unity_", ++unityNumber);
+      node.Name = cmStrCat(this->GetName(), "_Unity_"_s, ++unityNumber);
       node.UnityOutputPath = obj.CompilerOutputPath;
       node.UnityOutputPattern = cmStrCat(node.Name, ext);
 
@@ -1798,7 +1801,7 @@ FastbuildUnityNode cmFastbuildNormalTargetGenerator::GenerateGroupedUnityNode(
         continue;
       }
       node.Name =
-        cmStrCat(this->GetName(), "_Unity_Group_", group, '_', ++groupId);
+        cmStrCat(this->GetName(), "_Unity_Group_"_s, group, '_', ++groupId);
       node.UnityInputFiles.emplace_back(source);
 
       // Remove from the general batching.
@@ -1856,7 +1859,7 @@ void cmFastbuildNormalTargetGenerator::AppendExternalObject(
     else if (target) {
       if (!linkedDeps.emplace(objLibName + FASTBUILD_OBJECTS_ALIAS_POSTFIX)
              .second) {
-        LogMessage(cmStrCat("Object Target: ", objLibName,
+        LogMessage(cmStrCat("Object Target: "_s, objLibName,
                             FASTBUILD_OBJECTS_ALIAS_POSTFIX
                             " already linked"));
         continue;
@@ -1924,8 +1927,8 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
       // Tested in "RunCMake.Framework - ImportedFrameworkConsumption".
       std::string const decorated =
         item.GetFormattedItem(item.Value.Value).Value;
-      LogMessage(
-        cmStrCat("Adding framework dep <", decorated, "> to command line"));
+      LogMessage(cmStrCat("Adding framework dep <"_s, decorated,
+                          "> to command line"_s));
       linkerNode.LinkerOptions += (" " + decorated);
       return;
     }
@@ -1947,8 +1950,8 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
     // Skip exported objects.
     // Tested in "ExportImport" test.
     if (depType == cm::TargetType::OBJECT_LIBRARY) {
-      LogMessage(cmStrCat("target : ", item.Target->GetName(),
-                          " already linked... Skipping"));
+      LogMessage(cmStrCat("target : "_s, item.Target->GetName(),
+                          " already linked... Skipping"_s));
       return;
     }
     if (UsingCommandLine || feature != "DEFAULT") {
@@ -1967,8 +1970,8 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
       // be re-built if the shared lib has changed.
       // Tested in "BuildDepends" test.
       LogMessage(
-        cmStrCat("LINK_DEPENDS_NO_SHARED is set on the target, adding dep",
-                 item.Value.Value, " as is"));
+        cmStrCat("LINK_DEPENDS_NO_SHARED is set on the target, adding dep"_s,
+                 item.Value.Value, " as is"_s));
       linkerNode.LinkerOptions +=
         (" " + cmGlobalFastbuildGenerator::QuoteIfHasSpaces(item.Value.Value));
       return;
@@ -2006,7 +2009,7 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
     // inject any properties in between). Tested in
     // "RunCMake.target_link_libraries-LINK_LIBRARY" test.
     if (isFeature) {
-      LogMessage(cmStrCat("AppendTargetDep: ", dep, " as prebuild"));
+      LogMessage(cmStrCat("AppendTargetDep: "_s, dep, " as prebuild"_s));
       linkerNode.PreBuildDependencies.emplace(dep);
       return;
     }
@@ -2047,7 +2050,7 @@ void cmFastbuildNormalTargetGenerator::AppendPrebuildDeps(
       linkerNode.PreBuildDependencies.insert(std::move(fastbuildTargetName));
     } else {
       if (!cmIsNOTFOUND(linkDep)) {
-        LogMessage(cmStrCat("Adding dep ", linkDep, " for sorting"));
+        LogMessage(cmStrCat("Adding dep "_s, linkDep, " for sorting"_s));
         linkerNode.PreBuildDependencies.insert(linkDep);
       }
     }
@@ -2096,7 +2099,7 @@ void cmFastbuildNormalTargetGenerator::AppendCommandLineDep(
   formatted = this->ConvertToFastbuildPath(formatted);
 
   LogMessage(
-    cmStrCat("Unknown link dep: ", formatted, ", adding to command line"));
+    cmStrCat("Unknown link dep: "_s, formatted, ", adding to command line"_s));
 
   // Only add real artifacts to .Libraries2, otherwise Fastbuild will always
   // consider the target out-of-date (since its input doesn't exist).
@@ -2122,7 +2125,7 @@ void cmFastbuildNormalTargetGenerator::AppendToLibraries2IfApplicable(
   // target out-of-date (since it never exists).
   if (this->GeneratorTarget->IsApple() &&
       cmSystemTools::StringStartsWith(dep, "-framework")) {
-    LogMessage(cmStrCat("Not adding framework: ", dep, " to .Libraries2"));
+    LogMessage(cmStrCat("Not adding framework: "_s, dep, " to .Libraries2"_s));
     return;
   }
 
@@ -2132,13 +2135,13 @@ void cmFastbuildNormalTargetGenerator::AppendToLibraries2IfApplicable(
   if (this->GeneratorTarget->IsApple() && target &&
       !target->LinkerNode.empty() &&
       target->LinkerNode[0].Type == FastbuildLinkerNode::EXECUTABLE) {
-    LogMessage(cmStrCat("Not adding DLL/Executable(", linkerNode.Name,
-                        " to .Libraries2"));
+    LogMessage(cmStrCat("Not adding DLL/Executable("_s, linkerNode.Name,
+                        " to .Libraries2"_s));
     return;
   }
 
   // Adding to .Libraries2 for tracking.
-  LogMessage(cmStrCat("Adding ", dep, " .Libraries2"));
+  LogMessage(cmStrCat("Adding "_s, dep, " .Libraries2"_s));
   linkerNode.Libraries2.emplace_back(std::move(dep));
 }
 
@@ -2162,8 +2165,8 @@ void cmFastbuildNormalTargetGenerator::AppendLINK_DEPENDS(
 void cmFastbuildNormalTargetGenerator::AppendLinkDep(
   FastbuildLinkerNode& linkerNode, std::string dep) const
 {
-  LogMessage(cmStrCat("AppendLinkDep: ", dep,
-                      " to .LibrarianAdditionalInputs/.Libraries"));
+  LogMessage(cmStrCat("AppendLinkDep: "_s, dep,
+                      " to .LibrarianAdditionalInputs/.Libraries"_s));
   linkerNode.LibrarianAdditionalInputs.emplace_back(std::move(dep));
 }
 
@@ -2229,7 +2232,7 @@ void cmFastbuildNormalTargetGenerator::AppendLinkDeps(
   // target_link_libraries.
   cmComputeLinkInformation::ItemVector const items = linkInfo->GetItems();
 
-  LogMessage(cmStrCat("Link items size: ", items.size()));
+  LogMessage(cmStrCat("Link items size: "_s, items.size()));
   for (cmComputeLinkInformation::Item const& item : items) {
     std::string const feature = item.GetFeatureName();
     LogMessage("GetFeatureName: " + feature);
@@ -2257,17 +2260,17 @@ void cmFastbuildNormalTargetGenerator::AppendLinkDeps(
         // Add direct path to the object for imported target
         // since such targets are not defined in fbuild.bff file.
         if (importedTarget) {
-          LogMessage(
-            cmStrCat("Adding ", formatted, " to LibrarianAdditionalInputs"));
+          LogMessage(cmStrCat("Adding "_s, formatted,
+                              " to LibrarianAdditionalInputs"_s));
           linkerNode.LibrarianAdditionalInputs.emplace_back(formatted);
         } else {
           LogMessage(
-            cmStrCat("Adding ", dep, " to LibrarianAdditionalInputs"));
+            cmStrCat("Adding "_s, dep, " to LibrarianAdditionalInputs"_s));
           linkerNode.LibrarianAdditionalInputs.emplace_back(std::move(dep));
         }
       }
     } else if (linkerNode.Type == FastbuildLinkerNode::STATIC_LIBRARY) {
-      LogMessage(cmStrCat("Skipping linking to STATIC_LIBRARY (",
+      LogMessage(cmStrCat("Skipping linking to STATIC_LIBRARY ("_s,
                           linkerNode.Name, ')'));
       continue;
     }
@@ -2306,7 +2309,7 @@ void cmFastbuildNormalTargetGenerator::AddLipoCommand(FastbuildTarget& target)
     exec.ExecInput.emplace_back(ArchSpecificTarget.LinkerOutput);
   }
   exec.ExecArguments =
-    cmStrCat(std::move(exec.ExecArguments), "-create -output ",
+    cmStrCat(std::move(exec.ExecArguments), "-create -output "_s,
              target.RealOutput, ' ', cmJoin(exec.ExecInput, " "));
   target.PostBuildExecNodes.Alias.PreBuildDependencies.emplace(
     exec.ExecOutput);
@@ -2488,14 +2491,14 @@ cmFastbuildNormalTargetGenerator::GetSymlinkExecs() const
       if (from.empty() || to.empty() || from == to) {
         return;
       }
-      LogMessage(cmStrCat("Symlinking ", from, " -> ", to));
+      LogMessage(cmStrCat("Symlinking "_s, from, " -> "_s, to));
       FastbuildExecNode postBuildExecNode;
       postBuildExecNode.Name = "cmake_symlink_" + to;
       postBuildExecNode.ExecOutput =
         cmJoin({ GeneratorTarget->GetDirectory(Config), to }, "/");
       postBuildExecNode.ExecExecutable = cmSystemTools::GetCMakeCommand();
       postBuildExecNode.ExecArguments = cmStrCat(
-        "-E cmake_symlink_executable ",
+        "-E cmake_symlink_executable "_s,
         cmGlobalFastbuildGenerator::QuoteIfHasSpaces(from), ' ',
         cmGlobalFastbuildGenerator::QuoteIfHasSpaces(
           this->ConvertToFastbuildPath(postBuildExecNode.ExecOutput)));

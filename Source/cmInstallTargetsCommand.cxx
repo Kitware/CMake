@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
@@ -51,7 +53,7 @@ bool cmInstallTargetsCommand(std::vector<std::string> const& args,
         ti->second.SetHaveInstallRule(true);
       } else {
         status.SetError(
-          cmStrCat("Cannot find target: \"", *s, "\" to install."));
+          cmStrCat("Cannot find target: \""_s, *s, "\" to install."_s));
         return false;
       }
     }

@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
@@ -123,7 +125,7 @@ static int doWrite(int argc, char const* const* argv)
           expectedResources.insert(it.ResourceType);
         }
 
-        std::string prefix = cmStrCat("CTEST_RESOURCE_GROUP_", i);
+        std::string prefix = cmStrCat("CTEST_RESOURCE_GROUP_"_s, i);
         char const* actualResourcesCStr = cmSystemTools::GetEnv(prefix);
         if (!actualResourcesCStr) {
           std::cout << prefix << " should be defined" << std::endl;

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include <cm3p/json/value.h>
 #include <cm3p/uv.h>
@@ -44,7 +45,7 @@ cmInstallScriptHandler::cmInstallScriptHandler(
   }
 
   std::string const& file =
-    cmStrCat(this->BinaryDir, "/CMakeFiles/InstallScripts.json");
+    cmStrCat(this->BinaryDir, "/CMakeFiles/InstallScripts.json"_s);
   this->Parallel = false;
 
   auto addScript = [this, &args](std::string script, std::string component,
@@ -53,12 +54,12 @@ cmInstallScriptHandler::cmInstallScriptHandler(
     if (!component.empty()) {
       this->Scripts.back().command.insert(
         this->Scripts.back().command.end() - 1,
-        cmStrCat("-DCMAKE_INSTALL_COMPONENT=", component));
+        cmStrCat("-DCMAKE_INSTALL_COMPONENT="_s, component));
     }
     if (!config.empty()) {
       this->Scripts.back().command.insert(
         this->Scripts.back().command.end() - 1,
-        cmStrCat("-DCMAKE_INSTALL_CONFIG_NAME=", config));
+        cmStrCat("-DCMAKE_INSTALL_CONFIG_NAME="_s, config));
     }
     this->Scripts.back().command.emplace_back(script);
     this->Directories.push_back(cmSystemTools::GetFilenamePath(script));
@@ -74,7 +75,7 @@ cmInstallScriptHandler::cmInstallScriptHandler(
   bool indexIsFresh = false;
   if (cmSystemTools::FileExists(file)) {
     long int const cacheTime = cmSystemTools::ModifiedTime(
-      cmStrCat(this->BinaryDir, "/CMakeFiles/cmake.check_cache"));
+      cmStrCat(this->BinaryDir, "/CMakeFiles/cmake.check_cache"_s));
     indexIsFresh = cacheTime <= cmSystemTools::ModifiedTime(file);
   }
   if (indexIsFresh) {
@@ -103,7 +104,7 @@ cmInstallScriptHandler::cmInstallScriptHandler(
     }
   } else {
     for (auto const& component : Components) {
-      addScript(cmStrCat(this->BinaryDir, "/cmake_install.cmake"), component,
+      addScript(cmStrCat(this->BinaryDir, "/cmake_install.cmake"_s), component,
                 installConfig);
     }
   }
@@ -212,19 +213,20 @@ int cmInstallScriptHandler::Install(unsigned int j,
         cmsys::RegularExpression regEntry;
         if (regEntry.compile("^[a-zA-Z0-9_.+-]+$") &&
             regEntry.find(component)) {
-          installManifest = cmStrCat("install_manifest_", component, ".txt");
+          installManifest =
+            cmStrCat("install_manifest_"_s, component, ".txt"_s);
         } else {
           cmCryptoHash md5(cmCryptoHash::AlgoMD5);
           md5.Initialize();
-          installManifest =
-            cmStrCat("install_manifest_", md5.HashString(component), ".txt");
+          installManifest = cmStrCat("install_manifest_"_s,
+                                     md5.HashString(component), ".txt"_s);
         }
       }
       cmGeneratedFileStream fout(
         cmStrCat(this->BinaryDir, '/', installManifest));
       fout.SetCopyIfDifferent(true);
       for (auto const& dir : this->Directories) {
-        auto localManifest = cmStrCat(dir, "/install_local_manifest.txt");
+        auto localManifest = cmStrCat(dir, "/install_local_manifest.txt"_s);
         if (cmSystemTools::FileExists(localManifest)) {
           cmsys::ifstream fin(localManifest.c_str());
           std::string line;
@@ -270,7 +272,8 @@ bool InstallScriptRunner::start(cm::uv_loop_ptr& loop,
 
 void InstallScriptRunner::printResult(std::size_t n, std::size_t total)
 {
-  cmSystemTools::Stdout(cmStrCat('[', n, '/', total, "] ", this->Name, '\n'));
+  cmSystemTools::Stdout(
+    cmStrCat('[', n, '/', total, "] "_s, this->Name, '\n'));
   for (auto const& line : this->Output) {
     cmSystemTools::Stdout(line);
   }
@@ -297,17 +300,17 @@ void InstallScriptRunner::printFailure()
     auto exception = status.GetException();
     switch (exception.first) {
       case cmUVProcessChain::ExceptionCode::None:
-        detail = cmStrCat("exited with code ", status.ExitStatus);
+        detail = cmStrCat("exited with code "_s, status.ExitStatus);
         break;
       case cmUVProcessChain::ExceptionCode::Spawn:
         // Prepared, but the process could not be executed.
-        detail = cmStrCat("failed to start: ", exception.second);
+        detail = cmStrCat("failed to start: "_s, exception.second);
         break;
       default:
         detail = exception.second;
         break;
     }
   }
-  cmSystemTools::Stderr(
-    cmStrCat("CMake Error: install script '", this->Name, "' ", detail, '\n'));
+  cmSystemTools::Stderr(cmStrCat("CMake Error: install script '"_s, this->Name,
+                                 "' "_s, detail, '\n'));
 }

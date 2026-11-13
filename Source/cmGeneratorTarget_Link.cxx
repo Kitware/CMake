@@ -180,10 +180,10 @@ public:
       cm->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat(
-          "Target ", this->Target->GetName(),
-          " contains multiple languages with the highest linker preference (",
-          this->Preference, "):\n", cmWrap("  ", this->Preferred, "\n", ""),
-          "Set the LINKER_LANGUAGE property for this target."),
+          "Target "_s, this->Target->GetName(),
+          " contains multiple languages with the highest linker preference ("_s,
+          this->Preference, "):\n"_s, cmWrap("  ", this->Preferred, "\n", ""),
+          "Set the LINKER_LANGUAGE property for this target."_s),
         this->Target->GetBacktrace());
     }
     return *this->Preferred.begin();
@@ -226,7 +226,7 @@ bool cmGeneratorTarget::ComputeLinkClosure(std::string const& config,
     // Now consider languages that propagate from linked targets.
     for (std::string const& lang : languages) {
       std::string propagates =
-        cmStrCat("CMAKE_", lang, "_LINKER_PREFERENCE_PROPAGATES");
+        cmStrCat("CMAKE_"_s, lang, "_LINKER_PREFERENCE_PROPAGATES"_s);
       if (this->Makefile->IsOn(propagates)) {
         tsl.Consider(lang);
       }
@@ -270,9 +270,9 @@ void cmGeneratorTarget::ComputeLinkClosure(std::string const& config,
     if (this->LinkerLanguage != lc.LinkerLanguage) {
       cmSystemTools::Error(cmStrCat(
         "Evaluation of $<LINK_LANGUAGE:...> or $<LINK_LAND_AND_ID:...> "
-        "changes\nthe linker language for target \"",
-        this->GetName(), "\" (from '", this->LinkerLanguage, "' to '",
-        lc.LinkerLanguage, "') which is invalid."));
+        "changes\nthe linker language for target \""_s,
+        this->GetName(), "\" (from '"_s, this->LinkerLanguage, "' to '"_s,
+        lc.LinkerLanguage, "') which is invalid."_s));
     }
   }
 }
@@ -352,9 +352,9 @@ cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
     if (forGenex && !i->second.Done) {
       this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("The LINK_LIBRARIES of \"", this->GetName(),
+        cmStrCat("The LINK_LIBRARIES of \""_s, this->GetName(),
                  "\" use a generator expression that depends on the "
-                 "LINK_LIBRARIES themselves:\n  ",
+                 "LINK_LIBRARIES themselves:\n  "_s,
                  forGenex(), '\n'),
         this->GetBacktrace());
     }
@@ -457,13 +457,14 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
   }
   std::string e;
   if (role == LinkItemRole::Implementation) {
-    e = cmStrCat(std::move(e), "Target \"", this->GetName(), "\" links to");
+    e =
+      cmStrCat(std::move(e), "Target \""_s, this->GetName(), "\" links to"_s);
   } else {
-    e = cmStrCat(std::move(e), "The link interface of target \"",
-                 this->GetName(), "\" contains");
+    e = cmStrCat(std::move(e), "The link interface of target \""_s,
+                 this->GetName(), "\" contains"_s);
   }
-  e = cmStrCat(std::move(e), ":\n  ", item.AsStr(),
-               "\nbut the target was not found.  ",
+  e = cmStrCat(std::move(e), ":\n  "_s, item.AsStr(),
+               "\nbut the target was not found.  "_s,
                missingTargetPossibleReasons);
   cmListFileBacktrace backtrace = item.Backtrace;
   if (backtrace.Empty()) {
@@ -489,13 +490,13 @@ bool cmGeneratorTarget::VerifyLinkItemIsTarget(LinkItemRole role,
     return true;
   }
 
-  std::string e = cmStrCat("Target \"", this->GetName(),
-                           "\" has LINK_LIBRARIES_ONLY_TARGETS enabled, but ",
-                           role == LinkItemRole::Implementation
-                             ? "it links to"
-                             : "its link interface contains",
-                           ":\n  ", item.AsStr(), "\nwhich is not a target.  ",
-                           missingTargetPossibleReasons);
+  std::string e = cmStrCat(
+    "Target \""_s, this->GetName(),
+    "\" has LINK_LIBRARIES_ONLY_TARGETS enabled, but "_s,
+    role == LinkItemRole::Implementation ? "it links to"
+                                         : "its link interface contains",
+    ":\n  "_s, item.AsStr(), "\nwhich is not a target.  "_s,
+    missingTargetPossibleReasons);
   cmListFileBacktrace backtrace = item.Backtrace;
   if (backtrace.Empty()) {
     backtrace = this->GetBacktrace();
@@ -736,7 +737,7 @@ void cmGeneratorTarget::ComputeLinkInterface(std::string const& config,
 
     // How many repetitions are needed if this library has cyclic
     // dependencies?
-    std::string propName = cmStrCat("LINK_INTERFACE_MULTIPLICITY", suffix);
+    std::string propName = cmStrCat("LINK_INTERFACE_MULTIPLICITY"_s, suffix);
     if (cmValue config_reps = this->GetProperty(propName)) {
       sscanf(config_reps->c_str(), "%u", &iface.Multiplicity);
     } else if (cmValue reps =
@@ -836,7 +837,7 @@ std::vector<cmLinkItem> cmGeneratorTarget::ComputeImplicitLanguageTargets(
   std::string const& runtimeLibrary =
     this->GetRuntimeLinkLibrary(lang, config);
   if (cmValue runtimeLinkOptions = this->Makefile->GetDefinition(
-        cmStrCat("CMAKE_", lang, "_RUNTIME_LIBRARIES_", runtimeLibrary))) {
+        cmStrCat("CMAKE_"_s, lang, "_RUNTIME_LIBRARIES_"_s, runtimeLibrary))) {
     cmList libsList{ *runtimeLinkOptions };
     result.reserve(libsList.size());
 
@@ -1194,7 +1195,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         if (name == this->GetName()) {
           this->LocalGenerator->GetCMakeInstance()->IssueMessage(
             MessageType::FATAL_ERROR,
-            cmStrCat("Target \"", this->GetName(), "\" links to itself."),
+            cmStrCat("Target \""_s, this->GetName(), "\" links to itself."_s),
             this->GetBacktrace());
           return;
         }
@@ -1306,10 +1307,10 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(
   if (resolved.Target->IsDeprecated()) {
     this->LocalGenerator->IssueDiagnostic(
       cmDiagnostics::CMD_AUTHOR,
-      cmStrCat("The library that is being linked to, ",
+      cmStrCat("The library that is being linked to, "_s,
                resolved.Target->GetName(),
                ", is marked as being deprecated by the owner.  The message "
-               "provided by the developer is: \n",
+               "provided by the developer is: \n"_s,
                resolved.Target->GetDeprecation(), '\n'),
       bt);
   }

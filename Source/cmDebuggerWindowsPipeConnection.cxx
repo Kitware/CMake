@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmStringAlgorithms.h"
 
 namespace cmDebugger {
@@ -133,8 +135,8 @@ std::string cmDebuggerPipeConnection_WIN32::GetErrorMessage(DWORD errorCode)
       FORMAT_MESSAGE_IGNORE_INSERTS,
     nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
     (LPSTR)&message, 0, nullptr);
-  std::string errorMessage = cmStrCat("Internal Error with ", this->PipeName,
-                                      ": ", std::string(message, size));
+  std::string errorMessage = cmStrCat("Internal Error with "_s, this->PipeName,
+                                      ": "_s, std::string(message, size));
   LocalFree(message);
   return errorMessage;
 }
@@ -240,7 +242,7 @@ std::string cmDebuggerPipeClient_WIN32::GetErrorMessage(DWORD errorCode)
     nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
     (LPSTR)&message, 0, nullptr);
   std::string errorMessage =
-    cmStrCat(this->PipeName, ": ", std::string(message, size));
+    cmStrCat(this->PipeName, ": "_s, std::string(message, size));
   LocalFree(message);
   return errorMessage;
 }

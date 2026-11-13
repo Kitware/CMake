@@ -146,13 +146,13 @@ bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
 {
   if (cmSystemTools::FileIsDirectory(file)) {
     cmSystemTools::Error(
-      cmStrCat("-E tar --files-from= file '", file, "' is a directory"));
+      cmStrCat("-E tar --files-from= file '"_s, file, "' is a directory"_s));
     return false;
   }
   cmsys::ifstream fin(file.c_str());
   if (!fin) {
     cmSystemTools::Error(
-      cmStrCat("-E tar --files-from= file '", file, "' not found"));
+      cmStrCat("-E tar --files-from= file '"_s, file, "' not found"_s));
     return false;
   }
   std::string line;
@@ -163,8 +163,8 @@ bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
     if (cmHasLiteralPrefix(line, "--add-file=")) {
       files.push_back(line.substr(11));
     } else if (cmHasPrefix(line, '-')) {
-      cmSystemTools::Error(cmStrCat("-E tar --files-from='", file,
-                                    "' file invalid line:\n", line, '\n'));
+      cmSystemTools::Error(cmStrCat("-E tar --files-from='"_s, file,
+                                    "' file invalid line:\n"_s, line, '\n'));
       return false;
     } else {
       files.push_back(line);
@@ -397,8 +397,8 @@ int HandlePVSStudio(std::string const& runCmd, std::string const& sourceFile,
                     std::vector<std::string> const& orig_cmd)
 {
   cmList pvsCmd{ runCmd, cmList::EmptyElements::Yes };
-  std::string logFile = cmStrCat(objectFile, "-pvs.log");
-  std::string errFile = cmStrCat(objectFile, "-pvs.err");
+  std::string logFile = cmStrCat(objectFile, "-pvs.log"_s);
+  std::string errFile = cmStrCat(objectFile, "-pvs.err"_s);
   pvsCmd.reserve(pvsCmd.size() + 5 + orig_cmd.size());
   pvsCmd.emplace_back("--source-file");
   pvsCmd.emplace_back(sourceFile);
@@ -602,7 +602,7 @@ int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
   if (!cmSystemTools::FileExists("cstat_sel_checks.txt")) {
     std::vector<std::string> ichecks_cmd;
     ichecks_cmd.emplace_back(
-      cmStrCat(cmSystemTools::GetFilenamePath(orig_cmd[0]), "/ichecks"));
+      cmStrCat(cmSystemTools::GetFilenamePath(orig_cmd[0]), "/ichecks"_s));
     ichecks_cmd.emplace_back("--default=stdchecks");
 
     if (!cmSystemTools::RunSingleCommand(ichecks_cmd, &stdOut, &stdErr, &ret,
@@ -630,8 +630,8 @@ int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
     if (stdOut.find("Analyzing") == std::string::npos) {
       std::string prepend;
       prepend =
-        cmStrCat("Analyzing ", cmSystemTools::GetFilenameName(sourceFile),
-                 " (cached)\n");
+        cmStrCat("Analyzing "_s, cmSystemTools::GetFilenameName(sourceFile),
+                 " (cached)\n"_s);
       stdOut.insert(0, prepend);
     }
 
@@ -1331,7 +1331,7 @@ int _cmake_E___create_def(Command::Arguments args)
     }
   }
   if (!deffile.AddDefinitionFile(defFiles) ||
-      !deffile.AddObjectFile(objFiles, cmStrCat(args[3], ".rsp"))) {
+      !deffile.AddObjectFile(objFiles, cmStrCat(args[3], ".rsp"_s))) {
     return 1;
   }
   if (!deffile.WriteFile(fout)) {
@@ -1439,7 +1439,7 @@ int _cmake_E_env(Command::Arguments args)
       auto const pos = a.find('=');
       std::string const& name = a.substr(0, pos);
       std::string const& value = a.substr(pos + 1);
-      envdiff.Add(cmStrCat(name, "=set:", value));
+      envdiff.Add(cmStrCat(name, "=set:"_s, value));
 #endif
     } else {
       // This is the beginning of the command.
@@ -1930,7 +1930,7 @@ int _cmake_E_cmake_progress_start(Command::Arguments args)
     return CMakeCommandUsage(args[0]);
   }
   // basically remove the directory
-  std::string dirName = cmStrCat(args[2], "/Progress");
+  std::string dirName = cmStrCat(args[2], "/Progress"_s);
   cmSystemTools::RemoveADirectory(dirName);
 
   // is the last argument a filename that exists?
@@ -1947,7 +1947,7 @@ int _cmake_E_cmake_progress_start(Command::Arguments args)
   if (count) {
     cmSystemTools::MakeDirectory(dirName);
     // write the count into the directory
-    std::string fName = cmStrCat(dirName, "/count.txt");
+    std::string fName = cmStrCat(dirName, "/count.txt"_s);
     FILE* progFile = cmsys::SystemTools::Fopen(fName, "w");
     if (progFile) {
       fprintf(progFile, "%i\n", count);
@@ -2425,20 +2425,23 @@ int _cmake_E_tar(Command::Arguments args)
         std::string const& numThreadsStr = arg.substr(20);
         long numThreadsLong = 0;
         if (!cmStrToLong(numThreadsStr, &numThreadsLong)) {
-          cmSystemTools::Error(cmStrCat("Invalid --cmake-tar-threads value: '",
-                                        numThreadsStr, "' - not a number"));
+          cmSystemTools::Error(
+            cmStrCat("Invalid --cmake-tar-threads value: '"_s, numThreadsStr,
+                     "' - not a number"_s));
           return 1;
         }
         if (numThreadsLong >
             std::numeric_limits<decltype(numThreads)>::max()) {
-          cmSystemTools::Error(cmStrCat("Invalid --cmake-tar-threads value: '",
-                                        numThreadsStr, "' - too large"));
+          cmSystemTools::Error(
+            cmStrCat("Invalid --cmake-tar-threads value: '"_s, numThreadsStr,
+                     "' - too large"_s));
           return 1;
         }
         if (numThreadsLong <
             std::numeric_limits<decltype(numThreads)>::min()) {
-          cmSystemTools::Error(cmStrCat("Invalid --cmake-tar-threads value: '",
-                                        numThreadsStr, "' - too small"));
+          cmSystemTools::Error(
+            cmStrCat("Invalid --cmake-tar-threads value: '"_s, numThreadsStr,
+                     "' - too small"_s));
           return 1;
         }
 
@@ -2455,22 +2458,22 @@ int _cmake_E_tar(Command::Arguments args)
         long compressionLevelLong = 0;
         if (!cmStrToLong(compressionLevelStr, &compressionLevelLong)) {
           cmSystemTools::Error(
-            cmStrCat("Invalid --cmake-tar-compression-level value: '",
-                     compressionLevelStr, "' - not a number"));
+            cmStrCat("Invalid --cmake-tar-compression-level value: '"_s,
+                     compressionLevelStr, "' - not a number"_s));
           return 1;
         }
         if (compressionLevelLong >
             std::numeric_limits<decltype(compressionLevel)>::max()) {
           cmSystemTools::Error(
-            cmStrCat("Invalid --cmake-tar-compression-level value: '",
-                     compressionLevelStr, "' - too large"));
+            cmStrCat("Invalid --cmake-tar-compression-level value: '"_s,
+                     compressionLevelStr, "' - too large"_s));
           return 1;
         }
         if (compressionLevelLong <
             std::numeric_limits<decltype(compressionLevel)>::min()) {
           cmSystemTools::Error(
-            cmStrCat("Invalid --cmake-tar-compression-level value: '",
-                     compressionLevelStr, "' - too small"));
+            cmStrCat("Invalid --cmake-tar-compression-level value: '"_s,
+                     compressionLevelStr, "' - too small"_s));
           return 1;
         }
 
@@ -2505,7 +2508,7 @@ int _cmake_E_tar(Command::Arguments args)
           ++nCompress;
         } else {
           cmSystemTools::Error(
-            cmStrCat("Unknown --cmake-tar-compression-method value: '",
+            cmStrCat("Unknown --cmake-tar-compression-method value: '"_s,
                      compressionMethodStr, '\''));
           return 1;
         }
@@ -2588,9 +2591,9 @@ int _cmake_E_tar(Command::Arguments args)
 
     if (compressionLevel < minCompressionLevel ||
         compressionLevel > maxCompressionLevel) {
-      cmSystemTools::Error(
-        cmStrCat("Compression level must be between ", minCompressionLevel,
-                 " and ", maxCompressionLevel, ". Got ", compressionLevel));
+      cmSystemTools::Error(cmStrCat(
+        "Compression level must be between "_s, minCompressionLevel, " and "_s,
+        maxCompressionLevel, ". Got "_s, compressionLevel));
       return 1;
     }
   }
@@ -2607,13 +2610,13 @@ int _cmake_E_tar(Command::Arguments args)
     if (!cmSystemTools::CreateTar(outFile, files, {}, {}, compress, encoding,
                                   verbose, mtime, format, compressionLevel,
                                   numThreads)) {
-      cmSystemTools::Error(cmStrCat("Problem creating tar:\n  ", outFile));
+      cmSystemTools::Error(cmStrCat("Problem creating tar:\n  "_s, outFile));
       return 1;
     }
   } else if (action == cmSystemTools::TarActionExtract) {
     if (!cmSystemTools::ExtractTar(outFile, files, {}, extractTimestamps,
                                    encoding, verbose)) {
-      cmSystemTools::Error(cmStrCat("Problem extracting tar:\n  ", outFile));
+      cmSystemTools::Error(cmStrCat("Problem extracting tar:\n  "_s, outFile));
       return 1;
     }
 #ifdef _WIN32
@@ -3076,7 +3079,7 @@ std::vector<std::string> CommandNames()
 std::string FormatCommandLineHelp(cm::string_view header, Group group)
 {
   std::size_t const helpColumn = 28;
-  std::string result = cmStrCat(header, ":\n");
+  std::string result = cmStrCat(header, ":\n"_s);
   for (Command const& entry : Commands) {
     if (entry.Group != group || !entry.Impl) {
       continue;
@@ -3085,13 +3088,14 @@ std::string FormatCommandLineHelp(cm::string_view header, Group group)
     if (!entry.Usage.empty()) {
       invocation = cmStrCat(std::move(invocation), ' ', entry.Usage);
     }
-    std::string line = cmStrCat("  ", invocation);
+    std::string line = cmStrCat("  "_s, invocation);
     if (line.size() + 2 <= helpColumn) {
       line.resize(helpColumn, ' ');
-      result = cmStrCat(std::move(result), line, "- ", entry.Help, '\n');
+      result = cmStrCat(std::move(result), line, "- "_s, entry.Help, '\n');
     } else {
-      result = cmStrCat(std::move(result), line, '\n',
-                        std::string(helpColumn, ' '), "- ", entry.Help, '\n');
+      result =
+        cmStrCat(std::move(result), line, '\n', std::string(helpColumn, ' '),
+                 "- "_s, entry.Help, '\n');
     }
   }
   return result;
@@ -3110,7 +3114,7 @@ int CMakeCommandUsage(std::string const& program)
 #endif
     "Usage: "
   , program
-  , " -E <command> [arguments...]\n"
+  , " -E <command> [arguments...]\n"_s
   , FormatCommandLineHelp("Available commands", Group::Common)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   , FormatCommandLineHelp("Available on Windows only",
@@ -3137,12 +3141,12 @@ int ExecuteCMakeCommand(std::vector<std::string> args_,
       return i->Impl(std::move(args));
     }
 
-    std::string error = cmStrCat("Unknown command \"", args[1], "\".");
+    std::string error = cmStrCat("Unknown command \""_s, args[1], "\"."_s);
     std::string const suggestion =
       cmFindClosestString(args[1], CommandNames());
     if (!suggestion.empty()) {
       error =
-        cmStrCat(std::move(error), " Did you mean \"", suggestion, "\"?");
+        cmStrCat(std::move(error), " Did you mean \""_s, suggestion, "\"?"_s);
     }
     cmSystemTools::Error(error);
   }
@@ -3206,16 +3210,16 @@ int SymlinkLibrary(std::vector<std::string> const& args)
   if (soName != realName) {
     cmsys::Status status = SymlinkInternal(realName, soName);
     if (!status) {
-      cmSystemTools::Error(
-        cmStrCat("cmake_symlink_library: System Error: ", status.GetString()));
+      cmSystemTools::Error(cmStrCat("cmake_symlink_library: System Error: "_s,
+                                    status.GetString()));
       result = 1;
     }
   }
   if (name != soName) {
     cmsys::Status status = SymlinkInternal(soName, name);
     if (!status) {
-      cmSystemTools::Error(
-        cmStrCat("cmake_symlink_library: System Error: ", status.GetString()));
+      cmSystemTools::Error(cmStrCat("cmake_symlink_library: System Error: "_s,
+                                    status.GetString()));
       result = 1;
     }
   }
@@ -3230,8 +3234,8 @@ int SymlinkExecutable(std::vector<std::string> const& args)
   if (name != realName) {
     cmsys::Status status = SymlinkInternal(realName, name);
     if (!status) {
-      cmSystemTools::Error(cmStrCat("cmake_symlink_executable: System Error: ",
-                                    status.GetString()));
+      cmSystemTools::Error(cmStrCat(
+        "cmake_symlink_executable: System Error: "_s, status.GetString()));
       result = 1;
     }
   }
@@ -3252,8 +3256,8 @@ cmsys::Status SymlinkInternal(std::string const& file, std::string const& link)
   if (status.GetWindows() == ERROR_PRIVILEGE_NOT_HELD) {
     status = cmSystemTools::CopyFileAlways(file, link);
   } else if (!status) {
-    cmSystemTools::Error(cmStrCat("failed to create symbolic link '", link,
-                                  "': ", status.GetString()));
+    cmSystemTools::Error(cmStrCat("failed to create symbolic link '"_s, link,
+                                  "': "_s, status.GetString()));
   }
   return status;
 #else
@@ -3263,12 +3267,12 @@ cmsys::Status SymlinkInternal(std::string const& file, std::string const& link)
 
 void cmcmdProgressReport(std::string const& dir, std::string const& num)
 {
-  std::string dirName = cmStrCat(dir, "/Progress");
+  std::string dirName = cmStrCat(dir, "/Progress"_s);
   std::string fName;
   FILE* progFile;
 
   // read the count
-  fName = cmStrCat(dirName, "/count.txt");
+  fName = cmStrCat(dirName, "/count.txt"_s);
   progFile = cmsys::SystemTools::Fopen(fName, "r");
   int count = 0;
   if (!progFile) {
@@ -4009,7 +4013,7 @@ int cmVSLink::LinkNonIncremental()
     }
 
     // Run the manifest tool to embed the final manifest in the binary.
-    std::string mtOut = cmStrCat("/outputresource:", this->TargetFile,
+    std::string mtOut = cmStrCat("/outputresource:"_s, this->TargetFile,
                                  (this->Type == 1 ? ";#1" : ";#2"));
     return this->RunMT(mtOut, false);
   }
@@ -4031,7 +4035,7 @@ int cmVSLink::LinkNonIncremental()
     } else {
       path = rcDir;
     }
-    cmSystemTools::PutEnv(cmStrCat("PATH=", *path));
+    cmSystemTools::PutEnv(cmStrCat("PATH="_s, *path));
   }
 
   // Sort out any manifests.

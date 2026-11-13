@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMarkAsAdvancedCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -63,11 +65,11 @@ bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
     // First see if we should issue a message about CMP0102
     if (issueMessage) {
       std::string err = cmStrCat(
-        "Policy CMP0102 is not set: The variable named \"", variable,
+        "Policy CMP0102 is not set: The variable named \""_s, variable,
         "\" is not in the cache. This results in an empty cache entry which "
         "is no longer created when policy CMP0102 is set to NEW. Run \"cmake "
         "--help-policy CMP0102\" for policy details. Use the cmake_policy "
-        "command to set the policy and suppress this warning.");
+        "command to set the policy and suppress this warning."_s);
       mf.IssueDiagnostic(cmDiagnostics::CMD_POLICY, err);
     }
 

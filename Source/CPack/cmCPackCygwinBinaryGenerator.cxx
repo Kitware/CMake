@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCPackCygwinBinaryGenerator.h"
 
+#include <cmext/string_view>
+
 #include "cmsys/SystemTools.hxx"
 
 #include "cmCPackLog.h"
@@ -32,7 +34,8 @@ int cmCPackCygwinBinaryGenerator::PackageFiles()
     cmStrCat(this->GetOption("CPACK_PACKAGE_NAME"), '-',
              this->GetOption("CPACK_PACKAGE_VERSION"));
   packageName = cmsys::SystemTools::LowerCase(packageName);
-  std::string manifest = cmStrCat("/usr/share/doc/", packageName, "/MANIFEST");
+  std::string manifest =
+    cmStrCat("/usr/share/doc/"_s, packageName, "/MANIFEST"_s);
   std::string manifestFile = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   // Create a MANIFEST file that contains all of the files in
   // the tar file

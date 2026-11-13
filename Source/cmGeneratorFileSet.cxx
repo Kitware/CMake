@@ -157,9 +157,9 @@ std::vector<BT<std::string>> ProcessIncludes(
       if (!cmSystemTools::FileIsFullPath(include)) {
         target->GetLocalGenerator()->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("File set \"", fileSetName, "\" from the target \"",
-                   target->GetName(), "\" contains relative path in its ",
-                   property, ":\n  \"", include, '"'));
+          cmStrCat("File set \""_s, fileSetName, "\" from the target \""_s,
+                   target->GetName(), "\" contains relative path in its "_s,
+                   property, ":\n  \""_s, include, '"'));
         return includes;
       }
 
@@ -503,8 +503,8 @@ std::vector<std::string> cmGeneratorFileSet::EvaluateDirectoryEntries(
             MessageType::FATAL_ERROR,
             cmStrCat(
               "Base directories in file set cannot be subdirectories of each "
-              "other:\n  ",
-              priorDir, "\n  ", dir),
+              "other:\n  "_s,
+              priorDir, "\n  "_s, dir),
             cge->GetBacktrace());
           return {};
         }
@@ -541,8 +541,8 @@ void cmGeneratorFileSet::EvaluateFileEntry(
     if (baseDir.empty()) {
       context.LG->GetCMakeInstance()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("File:\n  ", file,
-                 "\nmust be in one of the file set's base directories:",
+        cmStrCat("File:\n  "_s, file,
+                 "\nmust be in one of the file set's base directories:"_s,
                  cmWrap("\n  ", dirs, "", "")),
         cge->GetBacktrace());
       return;

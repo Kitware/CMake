@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 /* clang-format off */
 #include "cmGeneratorTarget.h"
+
+#include <cmext/string_view>
 /* clang-format on */
 
 #include "cmConfigure.h"
@@ -53,9 +55,9 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-      dagChecker.ReportError(
-        nullptr,
-        cmStrCat("$<TARGET_PROPERTY:", target->GetName(), ",propertyName"));
+      dagChecker.ReportError(nullptr,
+                             cmStrCat("$<TARGET_PROPERTY:"_s,
+                                      target->GetName(), ",propertyName"_s));
       CM_FALLTHROUGH;
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
@@ -156,15 +158,15 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
         tgt->GetLocalGenerator()->IssueMessage(
           MessageType::FATAL_ERROR,
           cmStrCat(
-            "Imported target \"", targetName,
-            "\" includes non-existent path\n  \"", entryInclude,
+            "Imported target \""_s, targetName,
+            "\" includes non-existent path\n  \""_s, entryInclude,
             "\"\nin its INTERFACE_INCLUDE_DIRECTORIES. Possible reasons "
             "include:\n"
             "* The path was deleted, renamed, or moved to another location.\n"
             "* An install or uninstall procedure did not complete "
             "successfully.\n"
             "* The installation package was faulty and references files it "
-            "does not provide.\n"));
+            "does not provide.\n"_s));
         return;
       }
 
@@ -173,17 +175,17 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
         if (!targetName.empty()) {
           tgt->GetLocalGenerator()->IssueMessage(
             messageType,
-            cmStrCat("Target \"", targetName,
+            cmStrCat("Target \""_s, targetName,
                      "\" contains relative path in its "
                      "INTERFACE_INCLUDE_DIRECTORIES:\n"
-                     "  \"",
+                     "  \""_s,
                      entryInclude, '"'));
         } else {
           tgt->GetLocalGenerator()->IssueMessage(
             messageType,
             cmStrCat("Found relative path while evaluating include "
-                     "directories of \"",
-                     tgt->GetName(), "\":\n  \"", entryInclude, "\"\n"));
+                     "directories of \""_s,
+                     tgt->GetName(), "\":\n  \""_s, entryInclude, "\"\n"_s));
         }
         if (messageType == MessageType::FATAL_ERROR) {
           return;
@@ -198,14 +200,14 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
         includes.emplace_back(entryInclude, entry.Backtrace);
         if (debugIncludes) {
           usedIncludes =
-            cmStrCat(std::move(usedIncludes), " * ", entryInclude, '\n');
+            cmStrCat(std::move(usedIncludes), " * "_s, entryInclude, '\n');
         }
       }
     }
     if (!usedIncludes.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        cmStrCat("Used includes for target ", tgt->GetName(), ":\n",
+        cmStrCat("Used includes for target "_s, tgt->GetName(), ":\n"_s,
                  usedIncludes),
         entry.Backtrace);
     }

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmCryptoHash.h"
 #include "cmDiagnosticContext.h"
@@ -66,7 +67,7 @@ void cmInstallSbomGenerator::GenerateScript(std::ostream& os)
   cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
   std::string const tempDir =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(),
-             "/CMakeFiles/sbom/", hasher.HashString(this->Destination));
+             "/CMakeFiles/sbom/"_s, hasher.HashString(this->Destination));
   cmSystemTools::MakeDirectory(tempDir);
 
   for (std::string const& c :
@@ -74,13 +75,13 @@ void cmInstallSbomGenerator::GenerateScript(std::ostream& os)
          cmMakefile::IncludeEmptyConfig)) {
     std::string configName =
       cmStrCat(tempDir, '/', this->SbomFileName, '-',
-               c.empty() ? "noconfig" : c, ".spdx.json");
+               c.empty() ? "noconfig" : c, ".spdx.json"_s);
     cmGeneratedFileStream sbomStream(configName);
     if (!this->Builder->Generate(sbomStream, c)) {
       if (!cmSystemTools::GetErrorOccurredFlag()) {
         this->LocalGenerator->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("Could not write SBOM file: ", configName));
+          cmStrCat("Could not write SBOM file: "_s, configName));
       }
       return;
     }

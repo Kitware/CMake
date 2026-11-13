@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 /* clang-format off */
 #include "cmGeneratorTarget.h"
+
+#include <cmext/string_view>
 /* clang-format on */
 
 #include <map>
@@ -44,9 +46,9 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
         if (!targetName.empty()) {
           tgt->GetLocalGenerator()->IssueMessage(
             MessageType::FATAL_ERROR,
-            cmStrCat("Target \"", targetName,
+            cmStrCat("Target \""_s, targetName,
                      "\" contains relative path"
-                     " in its INTERFACE_LINK_DIRECTORIES:\n  \"",
+                     " in its INTERFACE_LINK_DIRECTORIES:\n  \""_s,
                      entryDirectory, '"'));
           return;
         }
@@ -55,8 +57,9 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
             tgt->GetLocalGenerator()->IssuePolicyWarning(
               cmPolicies::CMP0081, {},
               cmStrCat("Found relative path while evaluating"
-                       " link directories of \"",
-                       tgt->GetName(), "\":\n  \"", entryDirectory, "\"\n"));
+                       " link directories of \""_s,
+                       tgt->GetName(), "\":\n  \""_s, entryDirectory,
+                       "\"\n"_s));
             break;
           case cmPolicies::OLD:
             break;
@@ -64,8 +67,9 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
             tgt->GetLocalGenerator()->IssueMessage(
               MessageType::FATAL_ERROR,
               cmStrCat("Found relative path while evaluating"
-                       " link directories of \"",
-                       tgt->GetName(), "\":\n  \"", entryDirectory, "\"\n"));
+                       " link directories of \""_s,
+                       tgt->GetName(), "\":\n  \""_s, entryDirectory,
+                       "\"\n"_s));
             return;
         }
       }
@@ -76,16 +80,16 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
       if (uniqueDirectories.insert(entryDirectory).second) {
         directories.emplace_back(entryDirectory, entry.Backtrace);
         if (debugDirectories) {
-          usedDirectories =
-            cmStrCat(std::move(usedDirectories), " * ", entryDirectory, '\n');
+          usedDirectories = cmStrCat(std::move(usedDirectories), " * "_s,
+                                     entryDirectory, '\n');
         }
       }
     }
     if (!usedDirectories.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        cmStrCat("Used link directories for target ", tgt->GetName(), ":\n",
-                 usedDirectories),
+        cmStrCat("Used link directories for target "_s, tgt->GetName(),
+                 ":\n"_s, usedDirectories),
         entry.Backtrace);
     }
   }

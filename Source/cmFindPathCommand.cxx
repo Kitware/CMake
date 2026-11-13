@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmsys/Glob.hxx"
 
@@ -90,8 +91,8 @@ std::string cmFindPathCommand::FindHeaderInFramework(
       frameWorkName.clear();
     }
     if (!frameWorkName.empty()) {
-      std::string fpath = cmStrCat(dir, frameWorkName, ".framework");
-      std::string intPath = cmStrCat(fpath, "/Headers/", fileName);
+      std::string fpath = cmStrCat(dir, frameWorkName, ".framework"_s);
+      std::string intPath = cmStrCat(fpath, "/Headers/"_s, fileName);
       if (cmSystemTools::FileExists(intPath) &&
           this->Validate(this->IncludeFileInPath ? intPath : fpath)) {
         if (this->DebugState) {
@@ -109,7 +110,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(
   }
   // if it is not found yet or not a framework header, then do a glob search
   // for all frameworks in the directory: dir/*.framework/Headers/<file>
-  std::string glob = cmStrCat(dir, "*.framework/Headers/", file);
+  std::string glob = cmStrCat(dir, "*.framework/Headers/"_s, file);
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();

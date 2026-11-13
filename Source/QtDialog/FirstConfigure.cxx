@@ -1,6 +1,8 @@
 
 #include "FirstConfigure.h"
 
+#include <cmext/string_view>
+
 #include <QComboBox>
 #include <QRadioButton>
 #include <QSettings>
@@ -230,7 +232,7 @@ void StartCompilerSetup::onGeneratorChanged(int index)
 
     // Change the label title to include the default platform
     std::string label =
-      cmStrCat("Optional platform for generator(if empty, generator uses: ",
+      cmStrCat("Optional platform for generator(if empty, generator uses: "_s,
                this->GeneratorDefaultPlatform[name].toStdString(), ')');
     this->PlatformLabel->setText(tr(label.c_str()));
 

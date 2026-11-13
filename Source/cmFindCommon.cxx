@@ -157,7 +157,7 @@ void cmFindCommon::SelectDefaultRootPathMode()
 {
   // Check the policy variable for this find command type.
   std::string findRootPathVar =
-    cmStrCat("CMAKE_FIND_ROOT_PATH_MODE_", this->CMakePathName);
+    cmStrCat("CMAKE_FIND_ROOT_PATH_MODE_"_s, this->CMakePathName);
   std::string rootPathMode =
     this->Makefile->GetSafeDefinition(findRootPathVar);
   if (rootPathMode == "NEVER") {
@@ -254,7 +254,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
 
   if (this->DebugModeEnabled() && debugBuffer) {
     *debugBuffer = cmStrCat(
-      *debugBuffer, "Prepending the following roots to each prefix:\n");
+      *debugBuffer, "Prepending the following roots to each prefix:\n"_s);
   }
 
   auto debugRoot = [this, debugBuffer](std::string const& name,
@@ -263,10 +263,10 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
       *debugBuffer = cmStrCat(*debugBuffer, name, '\n');
       cmList roots{ value };
       if (roots.empty()) {
-        *debugBuffer = cmStrCat(*debugBuffer, "  none\n");
+        *debugBuffer = cmStrCat(*debugBuffer, "  none\n"_s);
       }
       for (auto const& root : roots) {
-        *debugBuffer = cmStrCat(*debugBuffer, "  ", root, '\n');
+        *debugBuffer = cmStrCat(*debugBuffer, "  "_s, root, '\n');
       }
     }
   };
@@ -569,7 +569,7 @@ void cmFindCommonDebugState::WriteSearchVariables(cmConfigureLog& log,
     if (auto value = cmSystemTools::GetEnvVar(name)) {
       auto values = cmSystemTools::SplitEnvPath(*value);
       if (!values.empty()) {
-        log.WriteValue(cmStrCat("ENV{", name, '}'), values);
+        log.WriteValue(cmStrCat("ENV{"_s, name, '}'), values);
       }
     }
   };
@@ -596,7 +596,7 @@ void cmFindCommonDebugState::WriteSearchVariables(cmConfigureLog& log,
       log.EndObject();
     }
   }
-  auto cmakePathVar = cmStrCat("CMAKE_", fc->CMakePathName, "_PATH");
+  auto cmakePathVar = cmStrCat("CMAKE_"_s, fc->CMakePathName, "_PATH"_s);
   WriteCMakeList(cmakePathVar);
   WriteCMakeList("CMAKE_PREFIX_PATH");
   if (fc->CMakePathName == "PROGRAM"_s) {
@@ -616,7 +616,8 @@ void cmFindCommonDebugState::WriteSearchVariables(cmConfigureLog& log,
   WriteString("CMAKE_INSTALL_PREFIX");
   WriteString("CMAKE_STAGING_PREFIX");
   WriteCMakeList("CMAKE_SYSTEM_PREFIX_PATH");
-  auto systemPathVar = cmStrCat("CMAKE_SYSTEM_", fc->CMakePathName, "_PATH");
+  auto systemPathVar =
+    cmStrCat("CMAKE_SYSTEM_"_s, fc->CMakePathName, "_PATH"_s);
   WriteCMakeList(systemPathVar);
   // Sysroot paths.
   WriteString("CMAKE_SYSROOT");

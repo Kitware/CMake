@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cmsys/Glob.hxx>
 
@@ -136,7 +137,7 @@ void cmGlobalCommonGenerator::RemoveUnknownClangTidyExportFixesFiles() const
     cmsys::Glob g;
     g.SetRecurse(true);
     g.SetListDirs(false);
-    g.FindFiles(cmStrCat(dir, "/*.yaml"));
+    g.FindFiles(cmStrCat(dir, "/*.yaml"_s));
     for (auto const& file : g.GetFiles()) {
       if (!this->ClangTidyExportFixesFiles.count(file) &&
           !std::any_of(this->ClangTidyExportFixesFiles.begin(),

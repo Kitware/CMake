@@ -3,6 +3,8 @@
 
 #include "cmTargetPropertyComputer.h"
 
+#include <cmext/string_view>
+
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 
@@ -12,8 +14,8 @@ void cmTargetPropertyComputer::IssueLocationPropertyError(
   mf.IssueMessage(
     MessageType::FATAL_ERROR,
     cmStrCat(
-      "The LOCATION property may not be read from target \"", tgtName,
+      "The LOCATION property may not be read from target \""_s, tgtName,
       "\".  Use the target name directly with "
       "add_custom_command, or use the generator expression $<TARGET_FILE>, "
-      "as appropriate.\n"));
+      "as appropriate.\n"_s));
 }

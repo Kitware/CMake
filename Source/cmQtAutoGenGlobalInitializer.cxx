@@ -8,6 +8,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
 
@@ -145,11 +146,11 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
           cmAlphaNum component = uicDisabled ? "Widgets" : "Core";
 
           std::string const msg = cmStrCat(
-            "AUTOGEN: No valid Qt version found for target ",
-            target->GetName(), ".  ",
+            "AUTOGEN: No valid Qt version found for target "_s,
+            target->GetName(), ".  "_s,
             cmQtAutoGen::Tools(mocDisabled, uicDisabled, rccDisabled),
-            " disabled.  Consider adding:\n  find_package(Qt", version,
-            " COMPONENTS ", component, ")\nto your CMakeLists.txt file.");
+            " disabled.  Consider adding:\n  find_package(Qt"_s, version,
+            " COMPONENTS "_s, component, ")\nto your CMakeLists.txt file."_s);
           target->Makefile->IssueDiagnostic(cmDiagnostics::CMD_AUTHOR, msg);
         }
         if (mocIsValid || uicIsValid || rccIsValid) {
@@ -280,8 +281,8 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
 
       // Check if the executable exists
       if (!cmSystemTools::FileExists(exe, true)) {
-        error = cmStrCat("The \"", generator, "\" executable ",
-                         cmQtAutoGen::Quoted(exe), " does not exist.");
+        error = cmStrCat("The \""_s, generator, "\" executable "_s,
+                         cmQtAutoGen::Quoted(exe), " does not exist."_s);
         res.Config[config.first] = {};
         continue;
       }
@@ -299,8 +300,8 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
           cmSystemTools::OUTPUT_NONE, cmDuration::zero(),
           cmProcessOutput::Auto);
         if (!runResult) {
-          error = cmStrCat("Test run of \"", generator, "\" executable ",
-                           cmQtAutoGen::Quoted(exe), " failed.\n",
+          error = cmStrCat("Test run of \""_s, generator, "\" executable "_s,
+                           cmQtAutoGen::Quoted(exe), " failed.\n"_s,
                            cmQtAutoGen::QuotedCommand(command), '\n', stdOut,
                            '\n', stdErr);
           res.Config[config.first] = {};
@@ -332,8 +333,8 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
   // Check if the executable exists
   if (!cmSystemTools::FileExists(executable.Default, true)) {
     error =
-      cmStrCat("The \"", generator, "\" executable ",
-               cmQtAutoGen::Quoted(executable.Default), " does not exist.");
+      cmStrCat("The \""_s, generator, "\" executable "_s,
+               cmQtAutoGen::Quoted(executable.Default), " does not exist."_s);
     return cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle>();
   }
 
@@ -349,8 +350,8 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
       command, &stdOut, &stdErr, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
       cmDuration::zero(), cmProcessOutput::Auto);
     if (!runResult) {
-      error = cmStrCat("Test run of \"", generator, "\" executable ",
-                       cmQtAutoGen::Quoted(executable.Default), " failed.\n",
+      error = cmStrCat("Test run of \""_s, generator, "\" executable "_s,
+                       cmQtAutoGen::Quoted(executable.Default), " failed.\n"_s,
                        cmQtAutoGen::QuotedCommand(command), '\n', stdOut, '\n',
                        stdErr);
       return cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle>();

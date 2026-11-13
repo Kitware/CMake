@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAddDependenciesCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -31,13 +33,13 @@ bool cmAddDependenciesCommand(std::vector<std::string> const& args,
       MessageType::FATAL_ERROR,
       cmStrCat(
         "Cannot add target-level dependencies to non-existent "
-        "target \"",
+        "target \""_s,
         target_name,
         "\".\nThe add_dependencies works for "
         "top-level logical targets created by the add_executable, "
         "add_library, or add_custom_target commands.  If you want to add "
         "file-level dependencies see the DEPENDS option of the "
-        "add_custom_target and add_custom_command commands."));
+        "add_custom_target and add_custom_command commands."_s));
   }
 
   return true;

@@ -557,20 +557,20 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   if (!this->GeneratorInstanceVersion.empty()) {
     std::string const majorStr = VSVersionToMajorString(this->Version);
     cmsys::RegularExpression versionRegex(
-      cmStrCat('^', majorStr, R"(\.[0-9]+\.[0-9]+\.[0-9]+$)"));
+      cmStrCat('^', majorStr, R"(\.[0-9]+\.[0-9]+\.[0-9]+$)"_s));
     if (!versionRegex.find(this->GeneratorInstanceVersion)) {
       mf->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("Generator\n"
-                 "  ",
+                 "  "_s,
                  this->GetName(),
                  "\n"
                  "given instance specification\n"
-                 "  ",
+                 "  "_s,
                  i,
                  "\n"
                  "but the version field is not 4 integer components"
-                 " starting in ",
+                 " starting in "_s,
                  majorStr, '.'));
       return false;
     }
@@ -585,11 +585,11 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
         MessageType::FATAL_ERROR,
         cmStrCat(
           "Generator\n"
-          "  ",
+          "  "_s,
           this->GetName(),
           "\n"
           "could not find specified instance of Visual Studio:\n"
-          "  ",
+          "  "_s,
           i,
           (!this->GeneratorInstance.empty() &&
            this->GeneratorInstanceVersion.empty() &&
@@ -604,10 +604,10 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
     mf->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("Generator\n"
-               "  ",
+               "  "_s,
                this->GetName(),
                "\n"
-               "could not find any instance of Visual Studio.\n"));
+               "could not find any instance of Visual Studio.\n"_s));
     return false;
   }
 
@@ -657,14 +657,14 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
       mf->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("Generator\n"
-                 "  ",
+                 "  "_s,
                  this->GetName(),
                  "\n"
                  "given instance specification\n"
-                 "  ",
+                 "  "_s,
                  is,
                  "\n"
-                 "that contains a field after the first ',' with no '='."));
+                 "that contains a field after the first ',' with no '='."_s));
       return false;
     }
     std::string const key = fi->substr(0, pos);
@@ -672,29 +672,29 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
     if (!handled.insert(key).second) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        cmStrCat("Generator\n"
-                                "  ",
+                                "  "_s,
                                 this->GetName(),
                                 "\n"
                                 "given instance specification\n"
-                                "  ",
+                                "  "_s,
                                 is,
                                 "\n"
-                                "that contains duplicate field key '",
-                                key, "'."));
+                                "that contains duplicate field key '"_s,
+                                key, "'."_s));
       return false;
     }
     if (!this->ProcessGeneratorInstanceField(key, value)) {
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        cmStrCat("Generator\n"
-                                "  ",
+                                "  "_s,
                                 this->GetName(),
                                 "\n"
                                 "given instance specification\n"
-                                "  ",
+                                "  "_s,
                                 is,
                                 "\n"
-                                "that contains invalid field '",
-                                *fi, "'."));
+                                "that contains invalid field '"_s,
+                                *fi, "'."_s));
       return false;
     }
   }
@@ -974,7 +974,7 @@ bool cmGlobalVisualStudioVersionedGenerator::IsWin81SDKInstalled() const
         "Windows Kits\\Installed Roots;KitsRoot81",
         win81Root, cmSystemTools::KeyWOW64_32)) {
     return cmSystemTools::FileExists(
-      cmStrCat(win81Root, "/include/um/windows.h"), true);
+      cmStrCat(win81Root, "/include/um/windows.h"_s), true);
   }
   return false;
 }
@@ -1007,29 +1007,29 @@ std::string cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommand()
     if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS17) {
       if (VSIsArm64Host()) {
         if (VSHasDotNETFrameworkArm64()) {
-          msbuild = cmStrCat(vs, "/MSBuild/Current/Bin/arm64/MSBuild.exe");
+          msbuild = cmStrCat(vs, "/MSBuild/Current/Bin/arm64/MSBuild.exe"_s);
           if (cmSystemTools::FileExists(msbuild)) {
             return msbuild;
           }
         }
         if (VSIsWindows11OrGreater()) {
-          msbuild = cmStrCat(vs, "/MSBuild/Current/Bin/amd64/MSBuild.exe");
+          msbuild = cmStrCat(vs, "/MSBuild/Current/Bin/amd64/MSBuild.exe"_s);
           if (cmSystemTools::FileExists(msbuild)) {
             return msbuild;
           }
         }
       } else {
-        msbuild = cmStrCat(vs, "/MSBuild/Current/Bin/amd64/MSBuild.exe");
+        msbuild = cmStrCat(vs, "/MSBuild/Current/Bin/amd64/MSBuild.exe"_s);
         if (cmSystemTools::FileExists(msbuild)) {
           return msbuild;
         }
       }
     }
-    msbuild = cmStrCat(vs, "/MSBuild/Current/Bin/MSBuild.exe");
+    msbuild = cmStrCat(vs, "/MSBuild/Current/Bin/MSBuild.exe"_s);
     if (cmSystemTools::FileExists(msbuild)) {
       return msbuild;
     }
-    msbuild = cmStrCat(vs, "/MSBuild/15.0/Bin/MSBuild.exe");
+    msbuild = cmStrCat(vs, "/MSBuild/15.0/Bin/MSBuild.exe"_s);
     if (cmSystemTools::FileExists(msbuild)) {
       return msbuild;
     }
@@ -1046,7 +1046,7 @@ std::string cmGlobalVisualStudioVersionedGenerator::FindDevEnvCommand()
   // Ask Visual Studio Installer tool.
   std::string vs;
   if (vsSetupAPIHelper.GetVSInstanceInfo(vs)) {
-    devenv = cmStrCat(vs, "/Common7/IDE/devenv.com");
+    devenv = cmStrCat(vs, "/Common7/IDE/devenv.com"_s);
     if (cmSystemTools::FileExists(devenv)) {
       return devenv;
     }

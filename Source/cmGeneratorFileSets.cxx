@@ -13,6 +13,7 @@
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/enum_set>
+#include <cmext/string_view>
 
 #include "cmFileSet.h"
 #include "cmGenExContext.h"
@@ -43,10 +44,10 @@ cmGeneratorFileSets::cmGeneratorFileSets(cmGeneratorTarget* target,
   auto issueMessage = [&target](cmFileSet const* fileSet) {
     target->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat(R"(The file set ")", fileSet->GetName(), R"(",  of type ")",
+      cmStrCat(R"(The file set ")"_s, fileSet->GetName(), R"(",  of type ")"_s,
                fileSet->GetType(),
-               R"(", is incompatible with the "FRAMEWORK" target ")",
-               target->GetName(), R"(".)"));
+               R"(", is incompatible with the "FRAMEWORK" target ")"_s,
+               target->GetName(), R"(".)"_s));
   };
 
   for (auto domain : cm::FileSetMetadata::AllFileSetDomains) {
@@ -301,7 +302,7 @@ bool cmGeneratorFileSets::MaybeHaveInterfaceProperty(
   cm::GenEx::Evaluation* eval) const
 {
   std::string const key =
-    cmStrCat(type, "::", prop, '@', eval->Context.Config);
+    cmStrCat(type, "::"_s, prop, '@', eval->Context.Config);
   auto i = this->MaybeInterfacePropertyExists.find(key);
   if (i == this->MaybeInterfacePropertyExists.end()) {
     // Insert an entry now in case there is a cycle.
@@ -362,10 +363,10 @@ std::string cmGeneratorFileSets::EvaluateInterfaceProperty(
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-      dagChecker.ReportError(
-        eval,
-        cmStrCat("$<FILE_SET_PROPERTY:*,TARGET:", this->Target->GetName(), ',',
-                 prop, '>'));
+      dagChecker.ReportError(eval,
+                             cmStrCat("$<FILE_SET_PROPERTY:*,TARGET:"_s,
+                                      this->Target->GetName(), ',', prop,
+                                      '>'));
       return std::string{};
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
@@ -559,9 +560,9 @@ void cmGeneratorFileSets::BuildInfoCache(std::string const& config) const
           if (!inserted.second && inserted.first->second != *language) {
             this->LocalGenerator->IssueMessage(
               MessageType::FATAL_ERROR,
-              cmStrCat("Source file\n  ", file.first,
+              cmStrCat("Source file\n  "_s, file.first,
                        "\nbelongs to multiple SOURCES file sets with "
-                       "conflicting LANGUAGE properties."));
+                       "conflicting LANGUAGE properties."_s));
           }
         }
       }

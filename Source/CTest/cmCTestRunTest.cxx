@@ -54,8 +54,8 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler,
 
 void cmCTestRunTest::CheckOutput(std::string const& line)
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(), ": ", line,
-             '\n');
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(), ": "_s,
+             line, '\n');
 
   // Check for special CTest XML tags in this line of output.
   // If any are found, this line is excluded from ProcessOutput.
@@ -65,9 +65,9 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
       ctest_tag_found = true;
       this->TestResult.CustomCompletionStatus =
         this->TestHandler->CustomCompletionStatusRegex.match(1);
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(), ": ",
-                 "Test Details changed to '",
-                 this->TestResult.CustomCompletionStatus, "'\n");
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(),
+                 ": Test Details changed to '"_s,
+                 this->TestResult.CustomCompletionStatus, "'\n"_s);
     } else if (this->TestHandler->CustomLabelRegex.find(line)) {
       ctest_tag_found = true;
       auto label = this->TestHandler->CustomLabelRegex.match(1);
@@ -75,8 +75,8 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
       if (std::find(labels.begin(), labels.end(), label) == labels.end()) {
         labels.push_back(label);
         std::sort(labels.begin(), labels.end());
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(), ": ",
-                   "Test Label added: '", label, "'\n");
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(),
+                   ": Test Label added: '"_s, label, "'\n"_s);
       }
     }
     if (ctest_tag_found) {
@@ -90,8 +90,8 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   if (!this->TestProperties->TimeoutRegularExpressions.empty()) {
     for (auto& reg : this->TestProperties->TimeoutRegularExpressions) {
       if (reg.first.find(this->ProcessOutput)) {
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(), ": ",
-                   "Test timeout changed to ",
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(),
+                   ": Test timeout changed to "_s,
                    std::chrono::duration_cast<std::chrono::seconds>(
                      this->TestProperties->AlternateTimeout)
                      .count(),
@@ -126,7 +126,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
     for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
       if (pass.first.find(this->ProcessOutput)) {
         found = true;
-        reason = cmStrCat("Required regular expression found. Regex=[",
+        reason = cmStrCat("Required regular expression found. Regex=["_s,
                           pass.second, ']');
         break;
       }
@@ -144,8 +144,9 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       this->FailedDependencies.empty()) {
     for (auto& fail : this->TestProperties->ErrorRegularExpressions) {
       if (fail.first.find(this->ProcessOutput)) {
-        reason = cmStrCat("Error regular expression found in output. Regex=[",
-                          fail.second, ']');
+        reason =
+          cmStrCat("Error regular expression found in output. Regex=["_s,
+                   fail.second, ']');
         forceFail = true;
         break;
       }
@@ -155,7 +156,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       this->FailedDependencies.empty()) {
     for (auto& skip : this->TestProperties->SkipRegularExpressions) {
       if (skip.first.find(this->ProcessOutput)) {
-        reason = cmStrCat("Skip regular expression found in output. Regex=[",
+        reason = cmStrCat("Skip regular expression found in output. Regex=["_s,
                           skip.second, ']');
         forceSkip = true;
         break;
@@ -270,7 +271,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       outputStream.str("");
       outputStream.clear();
       outputStream << output;
-      cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, "\n"); // flush
+      cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, '\n'); // flush
     }
     if (completed == total) {
       std::string testName = cmStrCat(this->GetTestPrefix(completed, total),
@@ -290,7 +291,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
     cmCTestLog(this->CTest, ERROR_MESSAGE, resourceSpecParseError, '\n');
   } else if (!this->TestProperties->GeneratedResourceSpecFile.empty()) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-               "Using generated resource spec file ",
+               "Using generated resource spec file "_s,
                this->TestProperties->GeneratedResourceSpecFile, '\n');
   }
 
@@ -466,10 +467,10 @@ void cmCTestRunTest::MemCheckPostProcess()
   if (!this->TestHandler->MemCheck) {
     return;
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     this->TestHandler->GetQuiet(), this->Index,
-                     ": process test output now: ", this->TestProperties->Name,
-                     ' ', this->TestResult.Name, '\n');
+  cmCTestOptionalLog(
+    this->CTest, HANDLER_VERBOSE_OUTPUT, this->TestHandler->GetQuiet(),
+    this->Index, ": process test output now: "_s, this->TestProperties->Name,
+    ' ', this->TestResult.Name, '\n');
   cmCTestMemCheckHandler* handler =
     static_cast<cmCTestMemCheckHandler*>(this->TestHandler);
   handler->PostProcessTest(this->TestResult, this->Index);
@@ -497,7 +498,7 @@ void cmCTestRunTest::StartFailure(size_t total, std::string const& output,
                cmPadToWidth(2 * getNumWidth(total) + 8, "Start "),
                cmPadToWidth(getNumWidth(this->TestHandler->GetMaxIndex()),
                             std::to_string(this->TestProperties->Index)),
-               ": ", this->TestProperties->Name, '\n');
+               ": "_s, this->TestProperties->Name, '\n');
   }
 
   this->ProcessOutput.clear();
@@ -523,7 +524,7 @@ void cmCTestRunTest::StartFailure(size_t total, std::string const& output,
 std::string cmCTestRunTest::GetTestPrefix(size_t completed, size_t total) const
 {
   int const numWidth = getNumWidth(total);
-  std::string indexStr = cmStrCat(" #", this->Index, ':');
+  std::string indexStr = cmStrCat(" #"_s, this->Index, ':');
   return cmStrCat(
     cmPadToWidth(numWidth, std::to_string(completed)), '/',
     cmPadToWidth(numWidth, std::to_string(total)), ' ',
@@ -553,14 +554,14 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
   std::string runIterationSuffix;
   if (this->RunCount > 1) {
     runIterationSuffix =
-      cmStrCat(" (run ", this->RunNumber, '/', this->RunCount, ')');
+      cmStrCat(" (run "_s, this->RunNumber, '/', this->RunCount, ')');
   }
   if (!this->CTest->GetTestProgressOutput()) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                cmPadToWidth(2 * getNumWidth(total) + 8, "Start "),
                cmPadToWidth(getNumWidth(this->TestHandler->GetMaxIndex()),
                             std::to_string(this->TestProperties->Index)),
-               ": ", this->TestProperties->Name, runIterationSuffix, '\n');
+               ": "_s, this->TestProperties->Name, runIterationSuffix, '\n');
   } else {
     std::string testName = cmStrCat(this->GetTestPrefix(completed, total),
                                     this->TestProperties->Name, '\n');
@@ -630,8 +631,8 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
       msg = "Test not available without configuration.  (Missing \"-C "
             "<config>\"?)";
     } else {
-      msg = cmStrCat("Test not available in configuration \"",
-                     this->CTest->GetConfigType(), "\".");
+      msg = cmStrCat("Test not available in configuration \""_s,
+                     this->CTest->GetConfigType(), "\"."_s);
     }
     *this->TestHandler->LogFile << msg << std::endl;
     cmCTestLog(this->CTest, ERROR_MESSAGE, msg, '\n');
@@ -650,7 +651,7 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
       *this->TestHandler->LogFile << "Unable to find required file: " << file
                                   << std::endl;
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Unable to find required file: ", file, '\n');
+                 "Unable to find required file: "_s, file, '\n');
       this->TestResult.Output = "Unable to find required file: " + file;
       this->TestResult.FullCommandLine.clear();
       this->TestResult.Environment.clear();
@@ -665,8 +666,8 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
     // that has that information
     *this->TestHandler->LogFile << "Unable to find executable: " << args[1]
                                 << std::endl;
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Unable to find executable: ", args[1], '\n');
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to find executable: "_s,
+               args[1], '\n');
     this->TestResult.Output = "Unable to find executable: " + args[1];
     this->TestResult.FullCommandLine.clear();
     this->TestResult.Environment.clear();
@@ -722,17 +723,17 @@ void cmCTestRunTest::ComputeArguments()
   // Prepends memcheck args to our command string
   this->TestHandler->GenerateTestCommand(this->Arguments, this->Index);
   for (std::string const& arg : this->Arguments) {
-    testCommand = cmStrCat(std::move(testCommand), " \"", arg, '"');
+    testCommand = cmStrCat(std::move(testCommand), " \""_s, arg, '"');
   }
 
   for (; j != this->TestProperties->Args.end(); ++j) {
-    testCommand = cmStrCat(std::move(testCommand), " \"", *j, '"');
+    testCommand = cmStrCat(std::move(testCommand), " \""_s, *j, '"');
     this->Arguments.push_back(*j);
   }
   // Append passthrough arguments from ctest command line (after --)
   for (std::string const& arg :
        this->TestHandler->TestOptions.TestPassthroughArguments) {
-    testCommand = cmStrCat(std::move(testCommand), " \"", arg, '"');
+    testCommand = cmStrCat(std::move(testCommand), " \""_s, arg, '"');
     this->Arguments.push_back(arg);
   }
 
@@ -762,33 +763,34 @@ void cmCTestRunTest::ComputeArguments()
   this->TestResult.FullCommandLine = testCommand;
 
   // Print the test command in verbose mode
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, '\n', this->Index, ": ",
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, '\n', this->Index, ": "_s,
              (this->TestHandler->MemCheck ? "MemCheck" : "Test"),
-             " command: ", testCommand, '\n');
+             " command: "_s, testCommand, '\n');
 
   // Print any test-specific env vars in verbose mode
   if (!this->TestProperties->Directory.empty()) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ": ",
-               "Working Directory: ", this->TestProperties->Directory, '\n');
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index,
+               ": Working Directory: "_s, this->TestProperties->Directory,
+               '\n');
   }
 
   // Print any test-specific env vars in verbose mode
   if (!this->TestProperties->Environment.empty()) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ": ",
-               "Environment variables: \n");
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index,
+               ": Environment variables: \n"_s);
   }
   for (std::string const& env : this->TestProperties->Environment) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ":  ", env,
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ":  "_s, env,
                '\n');
   }
   if (!this->TestProperties->EnvironmentModification.empty()) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ": ",
-               "Environment variable modifications: \n");
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index,
+               ": Environment variable modifications: \n"_s);
   }
   for (std::string const& envmod :
        this->TestProperties->EnvironmentModification) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ":  ", envmod,
-               '\n');
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index, ":  "_s,
+               envmod, '\n');
   }
 }
 
@@ -883,15 +885,15 @@ bool cmCTestRunTest::ForkProcess()
 
   if (timeout) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       this->TestHandler->GetQuiet(), this->Index, ": ",
-                       "Test timeout computed to be: ",
+                       this->TestHandler->GetQuiet(), this->Index,
+                       ": Test timeout computed to be: "_s,
                        cmDurationTo<unsigned int>(*timeout), '\n');
 
     this->TestProcess->SetTimeout(*timeout);
   } else {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       this->TestHandler->GetQuiet(), this->Index, ": ",
-                       "Test timeout suppressed by TIMEOUT property.\n");
+                       this->TestHandler->GetQuiet(), this->Index,
+                       ": Test timeout suppressed by TIMEOUT property.\n"_s);
   }
 
   // Record the original environment before modifying it
@@ -929,7 +931,7 @@ bool cmCTestRunTest::ForkProcess()
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        this->TestHandler->GetQuiet(), this->Index,
                        ": Using environment variable LLVM_PROFILE_FILE="_s,
-                       profRawPath, " \n");
+                       profRawPath, " \n"_s);
     env.PutEnv(cmStrCat("LLVM_PROFILE_FILE="_s, profRawPath));
     // ProcessID -> * to allow for glob to find all
     // files generated by the test
@@ -975,7 +977,7 @@ bool cmCTestRunTest::ForkProcess()
       env.PutEnv(cmStrCat("CMAKE_LISTFILE_COVERAGE_DIR="_s, scratch));
     } else {
       cmCTestLog(this->CTest, WARNING,
-                 "Cannot create CMake listfile coverage folder: ", scratch,
+                 "Cannot create CMake listfile coverage folder: "_s, scratch,
                  '\n');
     }
   }
@@ -994,12 +996,12 @@ bool cmCTestRunTest::ForkProcess()
 
 void cmCTestRunTest::SetupResourcesEnvironment(cmEnvironment& env)
 {
-  env.PutEnv(
-    cmStrCat("CTEST_RESOURCE_GROUP_COUNT=", this->AllocatedResources.size()));
+  env.PutEnv(cmStrCat("CTEST_RESOURCE_GROUP_COUNT="_s,
+                      this->AllocatedResources.size()));
 
   std::size_t i = 0;
   for (auto const& process : this->AllocatedResources) {
-    std::string prefix = cmStrCat("CTEST_RESOURCE_GROUP_", i);
+    std::string prefix = cmStrCat("CTEST_RESOURCE_GROUP_"_s, i);
     std::string resourceList = cmStrCat(prefix, '=');
     prefix += '_';
     bool firstType = true;
@@ -1018,7 +1020,8 @@ void cmCTestRunTest::SetupResourcesEnvironment(cmEnvironment& env)
           var += ';';
         }
         firstName = false;
-        var = cmStrCat(std::move(var), "id:", it2.Id, ",slots:", it2.Slots);
+        var =
+          cmStrCat(std::move(var), "id:"_s, it2.Id, ",slots:"_s, it2.Slots);
       }
       env.PutEnv(var);
     }
@@ -1060,7 +1063,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
     countField = cmPadToWidth(2 * numWidth + 2, " ");
   }
 
-  std::string indexStr = cmStrCat(" #", this->Index, ':');
+  std::string indexStr = cmStrCat(" #"_s, this->Index, ':');
   std::string output = cmStrCat(
     std::move(countField), (this->TestHandler->MemCheck ? "MemCheck" : "Test"),
     cmPadToWidth(3 + getNumWidth(this->TestHandler->GetMaxIndex()),
@@ -1103,8 +1106,8 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
     cmCTestLog(this->CTest, HANDLER_OUTPUT, output);
   }
 
-  cmCTestLog(this->CTest, DEBUG, "Testing ", this->TestProperties->Name,
-             " ... ");
+  cmCTestLog(this->CTest, DEBUG, "Testing "_s, this->TestProperties->Name,
+             " ... "_s);
 }
 
 std::string cmCTestRunTest::GenerateLLVMPath(std::string fileString)
@@ -1120,7 +1123,7 @@ std::string cmCTestRunTest::GetTestMetricsFile() const
   cmSystemTools::ReplaceString(safeName, "/", "_");
   cmSystemTools::ReplaceString(safeName, "\\", "_");
   return cmStrCat(this->CTest->GetInstrumentation().GetDataDir(),
-                  "/test/test-", safeName, '-', this->Index, ".json");
+                  "/test/test-"_s, safeName, '-', this->Index, ".json"_s);
 }
 
 void cmCTestRunTest::CollectLLVMCoverage()
@@ -1129,16 +1132,16 @@ void cmCTestRunTest::CollectLLVMCoverage()
   cmsys::Glob gl;
   std::vector<std::string> profRawFiles;
   std::string profRawPath = this->GenerateLLVMPath("_*.profraw");
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     this->TestHandler->Quiet,
-                     "   looking for .profraw files in: ", profRawPath, '\n');
+  cmCTestOptionalLog(
+    this->CTest, HANDLER_VERBOSE_OUTPUT, this->TestHandler->Quiet,
+    "   looking for .profraw files in: "_s, profRawPath, '\n');
   gl.FindFiles(profRawPath);
   // Keep a list of all profraw files
   profRawFiles = gl.GetFiles();
   if (profRawFiles.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        this->TestHandler->Quiet,
-                       " Cannot find any profraw coverage files.\n");
+                       " Cannot find any profraw coverage files.\n"_s);
     // No coverage files is a valid thing, so the exit code is 0
     return;
   }
@@ -1167,7 +1170,7 @@ void cmCTestRunTest::CollectLLVMCoverage()
   covargs.push_back(mergeExecutable);
   covargs.push_back("merge");
   covargs.push_back("-sparse");
-  covargs.push_back(cmStrCat("--input-files=", profManifestPath));
+  covargs.push_back(cmStrCat("--input-files="_s, profManifestPath));
   covargs.push_back("-o");
   covargs.push_back(profDataPath);
   covargs.push_back("--failure-mode=all");
@@ -1181,7 +1184,7 @@ void cmCTestRunTest::CollectLLVMCoverage()
 
   if (!cmSystemTools::FileExists(profDataPath)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Something went wrong while merging .profraw data.\n");
+               "Something went wrong while merging .profraw data.\n"_s);
     return;
   }
   for (std::string const& f : profRawFiles) {
@@ -1200,8 +1203,8 @@ void cmCTestRunTest::CollectCMakeCoverage()
   // Coverage problems are warnings.  An error would make ctest -S fail.
   std::string const& testName = this->TestProperties->Name;
   if (this->TestProcess->GetProcessStatus() == cmProcess::State::Expired) {
-    cmCTestLog(this->CTest, WARNING, "CMake listfile coverage of test ",
-               testName, " is incomplete because the test timed out.\n");
+    cmCTestLog(this->CTest, WARNING, "CMake listfile coverage of test "_s,
+               testName, " is incomplete because the test timed out.\n"_s);
   }
 
   // List the files with cmsys::Directory, because a glob pattern would
@@ -1238,7 +1241,7 @@ void cmCTestRunTest::CollectCMakeCoverage()
   auto const logRemoved = [this](std::string const& path) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex(),
                ": Ignoring CMake listfile coverage of a file in the build "
-               "tree: ",
+               "tree: "_s,
                path, '\n');
   };
   merged.RemoveBuildTreeFiles(sourceDir, buildDir, logRemoved);
@@ -1266,7 +1269,8 @@ void cmCTestRunTest::CollectCMakeCoverage()
     }
     if (!written) {
       cmCTestLog(this->CTest, WARNING,
-                 "Cannot write CMake listfile coverage file: ", output, '\n');
+                 "Cannot write CMake listfile coverage file: "_s, output,
+                 '\n');
       keepScratch = true;
     }
   }

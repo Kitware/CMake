@@ -341,17 +341,17 @@ void WriteSlnxProject(cmXMLElement& xmlParent, Solution const& solution,
   for (std::size_t i = 0; i < solution.Configs.size(); ++i) {
     if (project.Configs[i].Config != solution.Configs[i]) {
       cmXMLElement(xmlProject, "BuildType")
-        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"))
+        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"_s))
         .Attribute("Project", project.Configs[i].Config);
     }
     if (!project.Configs[i].Build) {
       cmXMLElement(xmlProject, "Build")
-        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"))
+        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"_s))
         .Attribute("Project", "false");
     }
     if (project.Configs[i].Deploy) {
       cmXMLElement(xmlProject, "Deploy")
-        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"));
+        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"_s));
     }
   }
   if (project.Platform != solution.Platform ||

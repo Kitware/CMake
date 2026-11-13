@@ -85,10 +85,10 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     mf.IssueDiagnostic(
       cmDiagnostics::CMD_AUTHOR,
       cmStrCat(
-        "project() called with '", projectName,
+        "project() called with '"_s, projectName,
         "' as first argument. The first parameter should be the project name, "
-        "not a keyword argument. See the cmake-commands(7) manual for correct "
-        "usage of the project() command."));
+        "not a keyword argument. See the cmake-commands(7) manual for correct "_s
+        "usage of the project() command."_s));
   }
 
   parser.Parse(cmMakeRange(args).advance(1), &unparsedArgs, 1);
@@ -107,7 +107,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   }
 
   if (!IncludeByVariable(
-        status, cmStrCat("CMAKE_PROJECT_", projectName, "_INCLUDE_BEFORE"))) {
+        status,
+        cmStrCat("CMAKE_PROJECT_"_s, projectName, "_INCLUDE_BEFORE"_s))) {
     return false;
   }
 
@@ -152,7 +153,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   for (cm::string_view keyword : parsedKeywords) {
     if (seenKeywords.find(keyword) != seenKeywords.end()) {
       mf.IssueMessage(MessageType::FATAL_ERROR,
-                      cmStrCat(keyword, " may be specified at most once."));
+                      cmStrCat(keyword, " may be specified at most once."_s));
       cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
@@ -160,10 +161,11 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   }
 
   for (cm::string_view keyword : missingValueKeywords) {
-    mf.IssueMessage(MessageType::WARNING,
-                    cmStrCat(keyword,
-                             " keyword not followed by a value or was "
-                             "followed by a value that expanded to nothing."));
+    mf.IssueMessage(
+      MessageType::WARNING,
+      cmStrCat(keyword,
+               " keyword not followed by a value or was "
+               "followed by a value that expanded to nothing."_s));
   }
 
   if (!unparsedArgs.empty()) {
@@ -171,7 +173,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
       mf.IssueMessage(
         MessageType::WARNING,
         cmStrCat("the following parameters must be specified after LANGUAGES "
-                 "keyword: ",
+                 "keyword: "_s,
                  cmJoin(unparsedArgs, ", "), '.'));
     } else if (prArgs.Version || prArgs.Description || prArgs.HomepageURL) {
       mf.IssueMessage(MessageType::FATAL_ERROR,
@@ -202,7 +204,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   if (prArgs.Version) {
     if (!vx.find(*prArgs.Version)) {
       std::string e =
-        cmStrCat(R"(VERSION ")", *prArgs.Version, R"(" format invalid.)");
+        cmStrCat(R"(VERSION ")"_s, *prArgs.Version, R"(" format invalid.)"_s);
       mf.IssueMessage(MessageType::FATAL_ERROR, e);
       cmSystemTools::SetFatalErrorOccurred();
       return true;
@@ -242,8 +244,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   if (prArgs.CompatVersion) {
     if (!vx.find(*prArgs.CompatVersion)) {
-      std::string e = cmStrCat(R"(COMPAT_VERSION ")", *prArgs.CompatVersion,
-                               R"(" format invalid.)");
+      std::string e = cmStrCat(R"(COMPAT_VERSION ")"_s, *prArgs.CompatVersion,
+                               R"(" format invalid.)"_s);
       mf.IssueMessage(MessageType::FATAL_ERROR, e);
       cmSystemTools::SetFatalErrorOccurred();
       return true;
@@ -320,7 +322,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   }
 
   if (!IncludeByVariable(
-        status, cmStrCat("CMAKE_PROJECT_", projectName, "_INCLUDE"))) {
+        status, cmStrCat("CMAKE_PROJECT_"_s, projectName, "_INCLUDE"_s))) {
     return false;
   }
 
@@ -344,10 +346,10 @@ bool IncludeByVariable(cmExecutionStatus& status, std::string const& variable)
     // Otherwise default to checking relative path w.r.t. source directory
     if (!cmSystemTools::FileIsFullPath(filePath) &&
         !cmHasLiteralSuffix(filePath, ".cmake")) {
-      std::string mfile = mf.GetModulesFile(cmStrCat(filePath, ".cmake"));
+      std::string mfile = mf.GetModulesFile(cmStrCat(filePath, ".cmake"_s));
       if (mfile.empty()) {
         status.SetError(
-          cmStrCat("could not find requested module:\n  ", filePath));
+          cmStrCat("could not find requested module:\n  "_s, filePath));
         failed = true;
         continue;
       }
@@ -357,13 +359,13 @@ bool IncludeByVariable(cmExecutionStatus& status, std::string const& variable)
       filePath, mf.GetCurrentSourceDirectory());
     if (!cmSystemTools::FileExists(includeFile)) {
       status.SetError(
-        cmStrCat("could not find requested file:\n  ", filePath));
+        cmStrCat("could not find requested file:\n  "_s, filePath));
       failed = true;
       continue;
     }
     if (cmSystemTools::FileIsDirectory(includeFile)) {
       status.SetError(
-        cmStrCat("requested file is a directory:\n  ", filePath));
+        cmStrCat("requested file is a directory:\n  "_s, filePath));
       failed = true;
       continue;
     }
@@ -379,7 +381,8 @@ bool IncludeByVariable(cmExecutionStatus& status, std::string const& variable)
       continue;
     }
 
-    status.SetError(cmStrCat("could not load requested file:\n  ", filePath));
+    status.SetError(
+      cmStrCat("could not load requested file:\n  "_s, filePath));
     failed = true;
   }
   // At this point all files were processed

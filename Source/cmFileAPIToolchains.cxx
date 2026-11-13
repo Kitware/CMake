@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include <cm3p/json/value.h>
 
 #include "cmFileAPI.h"
@@ -127,7 +129,7 @@ void Toolchains::DumpToolchainVariable(cmMakefile const* mf,
                                        ToolchainVariable const& variable)
 {
   std::string const variableName =
-    cmStrCat("CMAKE_", lang, '_', variable.VariableSuffix);
+    cmStrCat("CMAKE_"_s, lang, '_', variable.VariableSuffix);
 
   if (variable.IsList) {
     cmValue data = mf->GetDefinition(variableName);

@@ -159,7 +159,7 @@ bool cmBlockCommand(std::vector<std::string> const& args,
   auto parsedArgs = parser.Parse(args, &unrecognizedArguments);
 
   if (!unrecognizedArguments.empty()) {
-    status.SetError(cmStrCat("called with unsupported argument \"",
+    status.SetError(cmStrCat("called with unsupported argument \""_s,
                              unrecognizedArguments[0], '"'));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
@@ -186,7 +186,8 @@ bool cmBlockCommand(std::vector<std::string> const& args,
         scopes.insert(ScopeType::DIAGNOSTICS);
         continue;
       }
-      status.SetError(cmStrCat("SCOPE_FOR unsupported scope \"", scope, '"'));
+      status.SetError(
+        cmStrCat("SCOPE_FOR unsupported scope \""_s, scope, '"'));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }

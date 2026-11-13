@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmsys/Directory.hxx"
 
 #include "cmDiagnostics.h"
@@ -64,7 +66,7 @@ bool EmptyBinaryDirectory(std::string const& sname, std::string& err)
   }
 
   // try to avoid deleting directories that we shouldn't
-  std::string check = cmStrCat(sname, "/CMakeCache.txt");
+  std::string check = cmStrCat(sname, "/CMakeCache.txt"_s);
 
   if (!cmSystemTools::FileExists(check)) {
     err = "path does not contain an existing CMakeCache.txt file";
@@ -99,8 +101,8 @@ bool cmCTestEmptyBinaryDirectoryCommand(std::vector<std::string> const& args,
     cmMakefile& mf = status.GetMakefile();
     mf.GetMessenger()->DisplayMessage(
       MessageType::FATAL_ERROR, cmDiagnostics::CMD_NONE,
-      cmStrCat("Did not remove the binary directory:\n ", args[0],
-               "\nbecause:\n ", err),
+      cmStrCat("Did not remove the binary directory:\n "_s, args[0],
+               "\nbecause:\n "_s, err),
       mf.GetBacktrace());
     return true;
   }

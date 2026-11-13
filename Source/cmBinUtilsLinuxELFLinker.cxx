@@ -9,6 +9,7 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -62,7 +63,7 @@ bool cmBinUtilsLinuxELFLinker::Prepare()
         this->Archive);
   } else {
     this->SetError(cmStrCat(
-      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: ", tool));
+      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: "_s, tool));
     return false;
   }
 
@@ -79,7 +80,7 @@ bool cmBinUtilsLinuxELFLinker::Prepare()
     }
   } else {
     this->SetError(
-      cmStrCat("Invalid value for CMAKE_LDCONFIG_TOOL: ", ldConfigTool));
+      cmStrCat("Invalid value for CMAKE_LDCONFIG_TOOL: "_s, ldConfigTool));
     return false;
   }
 
@@ -213,10 +214,10 @@ bool cmBinUtilsLinuxELFLinker::ResolveDependency(
         FileHasArchitecture(path.c_str(), this->Machine)) {
       this->Archive->GetMakefile()->IssueMessage(
         MessageType::WARNING,
-        cmStrCat("Dependency ", name, " found in search directory:\n  ",
+        cmStrCat("Dependency "_s, name, " found in search directory:\n  "_s,
                  searchPath,
                  "\nSee file(GET_RUNTIME_DEPENDENCIES) documentation for more "
-                 "information."));
+                 "information."_s));
       resolved = true;
       return true;
     }

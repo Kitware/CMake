@@ -180,9 +180,10 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
   // Line to check for error between commands.
   std::string check_error;
   if (useLocal) {
-    check_error = cmStrCat(newline_text, "if %errorlevel% neq 0 goto :cmEnd");
+    check_error =
+      cmStrCat(newline_text, "if %errorlevel% neq 0 goto :cmEnd"_s);
   } else {
-    check_error = cmStrCat(newline_text, "if errorlevel 1 goto ",
+    check_error = cmStrCat(newline_text, "if errorlevel 1 goto "_s,
                            this->GetReportErrorLabel());
   }
 
@@ -191,13 +192,13 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
 
   // Open a local context.
   if (useLocal) {
-    script = cmStrCat(newline, "setlocal");
+    script = cmStrCat(newline, "setlocal"_s);
     newline = newline_text;
   }
 
   if (!workingDirectory.empty()) {
     // Change the working directory.
-    script = cmStrCat(std::move(script), newline, "cd ",
+    script = cmStrCat(std::move(script), newline, "cd "_s,
                       this->ConvertToOutputFormat(workingDirectory, SHELL),
                       check_error);
     newline = newline_text;
@@ -216,8 +217,8 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     cmValue extraPath =
       this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
     if (extraPath) {
-      script = cmStrCat(std::move(script), newline, "set PATH=", *extraPath,
-                        ";%PATH%");
+      script = cmStrCat(std::move(script), newline, "set PATH="_s, *extraPath,
+                        ";%PATH%"_s);
       newline = newline_text;
     }
   }
@@ -267,17 +268,17 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     script = cmStrCat(
         std::move(script)
       , newline
-      , ":cmEnd"
+      , ":cmEnd"_s
       , newline
-      , "endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone"
+      , "endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone"_s
       , newline
-      , ":cmErrorLevel"
+      , ":cmErrorLevel"_s
       , newline
-      , "exit /b %1"
+      , "exit /b %1"_s
       , newline
-      , ":cmDone"
+      , ":cmDone"_s
       , newline
-      , "if %errorlevel% neq 0 goto ", this->GetReportErrorLabel()
+      , "if %errorlevel% neq 0 goto "_s, this->GetReportErrorLabel()
       );
     // clang-format on
   }

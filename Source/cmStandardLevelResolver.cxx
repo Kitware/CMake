@@ -162,7 +162,7 @@ struct StandardLevelComputer
     auto const& stdsStrings = this->LevelsAsStrings;
 
     cmValue defaultStd = makefile->GetDefinition(
-      cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
+      cmStrCat("CMAKE_"_s, this->Language, "_STANDARD_DEFAULT"_s));
     if (!cmNonempty(defaultStd)) {
       // this compiler has no notion of language standard levels
       return std::string{};
@@ -171,8 +171,9 @@ struct StandardLevelComputer
     cmPolicies::PolicyStatus const cmp0128{ makefile->GetPolicyStatus(
       cmPolicies::CMP0128) };
     bool const defaultExt{ makefile
-                             ->GetDefinition(cmStrCat("CMAKE_", this->Language,
-                                                      "_EXTENSIONS_DEFAULT"))
+                             ->GetDefinition(cmStrCat("CMAKE_"_s,
+                                                      this->Language,
+                                                      "_EXTENSIONS_DEFAULT"_s))
                              .IsOn() };
     bool ext = true;
 
@@ -195,8 +196,8 @@ struct StandardLevelComputer
       if (ext || target->GetPolicyStatusCMP0231() != cmPolicies::NEW) {
         return std::string{};
       }
-      std::string option = cmStrCat("CMAKE_", this->Language, stdNum,
-                                    "_STANDARD_COMPILE_OPTION_PERMISSIVE");
+      std::string option = cmStrCat("CMAKE_"_s, this->Language, stdNum,
+                                    "_STANDARD_COMPILE_OPTION_PERMISSIVE"_s);
       if (makefile->GetDefinition(option).IsEmpty()) {
         return std::string{};
       }
@@ -208,8 +209,8 @@ struct StandardLevelComputer
       if (cmp0128 == cmPolicies::NEW) {
         // Add extension flag if compiler's default doesn't match.
         if (ext != defaultExt) {
-          return cmStrCat("CMAKE_", this->Language, *defaultStd, '_', type,
-                          "_COMPILE_OPTION");
+          return cmStrCat("CMAKE_"_s, this->Language, *defaultStd, '_', type,
+                          "_COMPILE_OPTION"_s);
         }
       } else {
         if (cmp0128 == cmPolicies::WARN &&
@@ -218,8 +219,9 @@ struct StandardLevelComputer
             ext != defaultExt) {
           char const* state{};
           if (ext) {
-            if (!makefile->GetDefinition(cmStrCat(
-                  "CMAKE_", this->Language, "_EXTENSION_COMPILE_OPTION"))) {
+            if (!makefile->GetDefinition(
+                  cmStrCat("CMAKE_"_s, this->Language,
+                           "_EXTENSION_COMPILE_OPTION"_s))) {
               state = "enabled";
             }
           } else {
@@ -235,8 +237,8 @@ struct StandardLevelComputer
         }
 
         if (ext) {
-          return cmStrCat("CMAKE_", this->Language,
-                          "_EXTENSION_COMPILE_OPTION");
+          return cmStrCat("CMAKE_"_s, this->Language,
+                          "_EXTENSION_COMPILE_OPTION"_s);
         }
       }
       if (cmp0128 == cmPolicies::NEW) {
@@ -246,22 +248,23 @@ struct StandardLevelComputer
     }
 
     if (target->GetLanguageStandardRequired(this->Language)) {
-      std::string option_flag = cmStrCat(
-        "CMAKE_", this->Language, *standardProp, '_', type, "_COMPILE_OPTION");
+      std::string option_flag =
+        cmStrCat("CMAKE_"_s, this->Language, *standardProp, '_', type,
+                 "_COMPILE_OPTION"_s);
 
       cmValue opt = target->Target->GetMakefile()->GetDefinition(option_flag);
       if (!opt) {
         makefile->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("Target \"", target->GetName(),
-                   "\" requires the language dialect \"", this->Language,
-                   *standardProp, "\" ",
+          cmStrCat("Target \""_s, target->GetName(),
+                   "\" requires the language dialect \""_s, this->Language,
+                   *standardProp, "\" "_s,
                    ext ? "(with compiler extensions)" : "",
-                   ". But the current compiler \"",
+                   ". But the current compiler \""_s,
                    makefile->GetSafeDefinition(
-                     cmStrCat("CMAKE_", this->Language, "_COMPILER_ID")),
+                     cmStrCat("CMAKE_"_s, this->Language, "_COMPILER_ID"_s)),
                    "\" does not support this, or "
-                   "CMake does not know the flags to enable it."));
+                   "CMake does not know the flags to enable it."_s));
       }
       return option_flag;
     }
@@ -293,7 +296,7 @@ struct StandardLevelComputer
     if (stdIt == cm::cend(stds)) {
       std::string e = cmStrCat(
         cmStandardLevelResolver::GetStandardPropertyName(this->Language),
-        " is set to invalid value '", standardStr, '\'');
+        " is set to invalid value '"_s, standardStr, '\'');
       makefile->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
                                                  target->GetBacktrace());
       return std::string{};
@@ -302,8 +305,8 @@ struct StandardLevelComputer
     auto defaultStdIt =
       std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(*defaultStd));
     if (defaultStdIt == cm::cend(stds)) {
-      std::string e = cmStrCat("CMAKE_", this->Language,
-                               "_STANDARD_DEFAULT is set to invalid value '",
+      std::string e = cmStrCat("CMAKE_"_s, this->Language,
+                               "_STANDARD_DEFAULT is set to invalid value '"_s,
                                *defaultStd, '\'');
       makefile->IssueMessage(MessageType::INTERNAL_ERROR, e);
       return std::string{};
@@ -315,8 +318,8 @@ struct StandardLevelComputer
         (cmp0128 == cmPolicies::NEW &&
          (stdIt < defaultStdIt || ext != defaultExt))) {
       auto offset = std::distance(cm::cbegin(stds), stdIt);
-      return cmStrCat("CMAKE_", this->Language, stdsStrings[offset], '_', type,
-                      "_COMPILE_OPTION");
+      return cmStrCat("CMAKE_"_s, this->Language, stdsStrings[offset], '_',
+                      type, "_COMPILE_OPTION"_s);
     }
 
     // The compiler's default is at least as new as the requested standard,
@@ -325,8 +328,8 @@ struct StandardLevelComputer
     for (; defaultStdIt < stdIt; --stdIt) {
       auto offset = std::distance(cm::cbegin(stds), stdIt);
       std::string option_flag =
-        cmStrCat("CMAKE_", this->Language, stdsStrings[offset], '_', type,
-                 "_COMPILE_OPTION");
+        cmStrCat("CMAKE_"_s, this->Language, stdsStrings[offset], '_', type,
+                 "_COMPILE_OPTION"_s);
       if (target->Target->GetMakefile()->GetDefinition(option_flag)) {
         return option_flag;
       }
@@ -343,7 +346,7 @@ struct StandardLevelComputer
     auto const& stdsStrings = this->LevelsAsStrings;
 
     cmValue defaultStd = makefile->GetDefinition(
-      cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
+      cmStrCat("CMAKE_"_s, this->Language, "_STANDARD_DEFAULT"_s));
     if (!cmNonempty(defaultStd)) {
       // this compiler has no notion of language standard levels
       return std::string{};
@@ -352,8 +355,9 @@ struct StandardLevelComputer
     cmPolicies::PolicyStatus const cmp0128{ makefile->GetPolicyStatus(
       cmPolicies::CMP0128) };
     bool const defaultExt{ makefile
-                             ->GetDefinition(cmStrCat("CMAKE_", this->Language,
-                                                      "_EXTENSIONS_DEFAULT"))
+                             ->GetDefinition(cmStrCat("CMAKE_"_s,
+                                                      this->Language,
+                                                      "_EXTENSIONS_DEFAULT"_s))
                              .IsOn() };
     bool ext = true;
 
@@ -426,8 +430,8 @@ struct StandardLevelComputer
     for (; defaultStdIt < stdIt; --stdIt) {
       auto offset = std::distance(cm::cbegin(stds), stdIt);
       std::string option_flag =
-        cmStrCat("CMAKE_", this->Language, stdsStrings[offset], '_', type,
-                 "_COMPILE_OPTION");
+        cmStrCat("CMAKE_"_s, this->Language, stdsStrings[offset], '_', type,
+                 "_COMPILE_OPTION"_s);
       if (target->Target->GetMakefile()->GetDefinition(option_flag)) {
         return stdsStrings[offset];
       }
@@ -452,7 +456,7 @@ struct StandardLevelComputer
     cmValue existingStandard = currentLangStandardValue;
     if (!existingStandard) {
       cmValue defaultStandard = makefile->GetDefinition(
-        cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
+        cmStrCat("CMAKE_"_s, this->Language, "_STANDARD_DEFAULT"_s));
       if (cmNonempty(defaultStandard)) {
         existingStandard = defaultStandard;
       }
@@ -465,10 +469,10 @@ struct StandardLevelComputer
                   ParseStd(*existingStandard));
       if (existingLevelIter == cm::cend(this->Levels)) {
         std::string const e = cmStrCat(
-          "The ",
+          "The "_s,
           cmStandardLevelResolver::GetStandardPropertyName(this->Language),
-          " property on target \"", targetName,
-          "\" contained an invalid value: \"", *existingStandard, "\".");
+          " property on target \""_s, targetName,
+          "\" contained an invalid value: \""_s, *existingStandard, "\"."_s);
         if (error) {
           *error = e;
         } else {
@@ -496,23 +500,23 @@ struct StandardLevelComputer
                              std::string const& feature) const
   {
     cmValue defaultStandard = makefile->GetDefinition(
-      cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
+      cmStrCat("CMAKE_"_s, this->Language, "_STANDARD_DEFAULT"_s));
     if (!defaultStandard) {
       makefile->IssueMessage(
         MessageType::INTERNAL_ERROR,
-        cmStrCat("CMAKE_", this->Language,
+        cmStrCat("CMAKE_"_s, this->Language,
                  "_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
-                 "not fully configured for this compiler."));
+                 "not fully configured for this compiler."_s));
       // Return true so the caller does not try to lookup the default standard.
       return true;
     }
     // convert defaultStandard to an integer
     if (std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
                   ParseStd(*defaultStandard)) == cm::cend(this->Levels)) {
-      std::string const e = cmStrCat("The CMAKE_", this->Language,
+      std::string const e = cmStrCat("The CMAKE_"_s, this->Language,
                                      "_STANDARD_DEFAULT variable contains an "
-                                     "invalid value: \"",
-                                     *defaultStandard, "\".");
+                                     "invalid value: \""_s,
+                                     *defaultStandard, "\"."_s);
       makefile->IssueMessage(MessageType::INTERNAL_ERROR, e);
       return false;
     }
@@ -528,10 +532,10 @@ struct StandardLevelComputer
                 ParseStd(*existingStandard));
     if (existingLevelIter == cm::cend(this->Levels)) {
       std::string const e = cmStrCat(
-        "The ",
+        "The "_s,
         cmStandardLevelResolver::GetStandardPropertyName(this->Language),
-        " property on target \"", target->GetName(),
-        "\" contained an invalid value: \"", *existingStandard, "\".");
+        " property on target \""_s, target->GetName(),
+        "\" contained an invalid value: \""_s, *existingStandard, "\"."_s);
       makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       return false;
     }
@@ -546,11 +550,11 @@ struct StandardLevelComputer
   cm::optional<cmStandardLevel> CompileFeatureStandardLevel(
     cmMakefile* makefile, std::string const& feature) const
   {
-    std::string prefix = cmStrCat("CMAKE_", this->Language);
+    std::string prefix = cmStrCat("CMAKE_"_s, this->Language);
     cm::optional<cmStandardLevel> maxLevel;
     for (size_t i = 0; i < this->Levels.size(); ++i) {
-      if (cmValue prop = makefile->GetDefinition(
-            cmStrCat(prefix, this->LevelsAsStrings[i], "_COMPILE_FEATURES"))) {
+      if (cmValue prop = makefile->GetDefinition(cmStrCat(
+            prefix, this->LevelsAsStrings[i], "_COMPILE_FEATURES"_s))) {
         cmList props{ *prop };
         if (cm::contains(props, feature)) {
           maxLevel = cmStandardLevel(i);
@@ -623,7 +627,7 @@ std::unordered_map<std::string,
 std::string cmStandardLevelResolver::GetStandardPropertyName(
   std::string const& lang)
 {
-  return lang == "SYCL" ? "SYCL_CXX_STANDARD" : cmStrCat(lang, "_STANDARD");
+  return lang == "SYCL" ? "SYCL_CXX_STANDARD" : cmStrCat(lang, "_STANDARD"_s);
 }
 
 std::string cmStandardLevelResolver::GetCompileOptionDef(
@@ -646,7 +650,7 @@ std::string cmStandardLevelResolver::GetPermissiveCompileOption(
     return {};
   }
   return this->Makefile->GetSafeDefinition(
-    cmStrCat(optionFlagDef, "_PERMISSIVE"));
+    cmStrCat(optionFlagDef, "_PERMISSIVE"_s));
 }
 
 std::string cmStandardLevelResolver::GetEffectiveStandard(
@@ -730,13 +734,13 @@ bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
 
   cmList availableFeatures{ features };
   if (!cm::contains(availableFeatures, feature)) {
-    std::string e = cmStrCat("The compiler feature \"", feature,
-                             "\" is not known to ", lang, " compiler\n\"",
+    std::string e = cmStrCat("The compiler feature \""_s, feature,
+                             "\" is not known to "_s, lang, " compiler\n\""_s,
                              this->Makefile->GetSafeDefinition(
-                               cmStrCat("CMAKE_", lang, "_COMPILER_ID")),
-                             "\"\nversion ",
-                             this->Makefile->GetSafeDefinition(
-                               cmStrCat("CMAKE_", lang, "_COMPILER_VERSION")),
+                               cmStrCat("CMAKE_"_s, lang, "_COMPILER_ID"_s)),
+                             "\"\nversion "_s,
+                             this->Makefile->GetSafeDefinition(cmStrCat(
+                               "CMAKE_"_s, lang, "_COMPILER_VERSION"_s)),
                              '.');
     if (error) {
       *error = std::move(e);
@@ -793,8 +797,8 @@ bool cmStandardLevelResolver::CompileFeatureKnown(
     return true;
   }
   std::string e =
-    cmStrCat(error ? "specified" : "Specified", " unknown feature \"", feature,
-             "\" for target \"", targetName, "\".");
+    cmStrCat(error ? "specified" : "Specified", " unknown feature \""_s,
+             feature, "\" for target \""_s, targetName, "\"."_s);
   if (error) {
     *error = std::move(e);
   } else {
@@ -828,8 +832,9 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
   std::string const& lang, std::string* error) const
 {
   if (!this->Makefile->GetGlobalGenerator()->GetLanguageEnabled(lang)) {
-    std::string e = cmStrCat(error ? "cannot"_s : "Cannot"_s,
-                             " use features from non-enabled language ", lang);
+    std::string e =
+      cmStrCat(error ? "cannot"_s : "Cannot"_s,
+               " use features from non-enabled language "_s, lang);
     if (error) {
       *error = std::move(e);
     } else {
@@ -839,16 +844,16 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
   }
 
   cmValue featuresKnown = this->Makefile->GetDefinition(
-    cmStrCat("CMAKE_", lang, "_COMPILE_FEATURES"));
+    cmStrCat("CMAKE_"_s, lang, "_COMPILE_FEATURES"_s));
 
   if (!cmNonempty(featuresKnown)) {
-    std::string e = cmStrCat(error ? "no"_s : "No"_s, " known features for ",
-                             lang, " compiler\n\"",
+    std::string e = cmStrCat(error ? "no"_s : "No"_s, " known features for "_s,
+                             lang, " compiler\n\""_s,
                              this->Makefile->GetSafeDefinition(
-                               cmStrCat("CMAKE_", lang, "_COMPILER_ID")),
-                             "\"\nversion ",
-                             this->Makefile->GetSafeDefinition(
-                               cmStrCat("CMAKE_", lang, "_COMPILER_VERSION")),
+                               cmStrCat("CMAKE_"_s, lang, "_COMPILER_ID"_s)),
+                             "\"\nversion "_s,
+                             this->Makefile->GetSafeDefinition(cmStrCat(
+                               "CMAKE_"_s, lang, "_COMPILER_VERSION"_s)),
                              '.');
     if (error) {
       *error = std::move(e);

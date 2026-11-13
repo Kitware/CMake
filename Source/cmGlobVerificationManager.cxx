@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmGeneratedFileStream.h"
@@ -23,7 +25,7 @@ bool cmGlobVerificationManager::SaveVerificationScript(std::string const& path,
     return true;
   }
 
-  std::string scriptFile = cmStrCat(path, "/CMakeFiles");
+  std::string scriptFile = cmStrCat(path, "/CMakeFiles"_s);
   std::string stampFile = scriptFile;
   cmSystemTools::MakeDirectory(scriptFile);
   scriptFile += "/VerifyGlobs.cmake";

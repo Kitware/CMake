@@ -6,6 +6,7 @@
 #include <cstdlib>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmCMakePresetsGraph.h"
 #include "cmCTest.h"
@@ -89,13 +90,13 @@ bool cmCTestHandlerCommand::InvokeImpl(
     auto const it = std::adjacent_find(args.ParsedKeywords.begin(),
                                        args.ParsedKeywords.end());
     if (it != args.ParsedKeywords.end()) {
-      status.SetError(cmStrCat("called with more than one value for ", *it));
+      status.SetError(cmStrCat("called with more than one value for "_s, *it));
       return false;
     }
 
     if (!unparsed.empty()) {
-      status.SetError(
-        cmStrCat("called with unknown argument \"", unparsed.front(), "\"."));
+      status.SetError(cmStrCat("called with unknown argument \""_s,
+                               unparsed.front(), "\"."_s));
       return false;
     }
 
@@ -145,11 +146,11 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
         "BuildDirectory", cmSystemTools::CollapseFullPath(bdir), args.Quiet);
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "CTEST_BINARY_DIRECTORY not set\n");
+                 "CTEST_BINARY_DIRECTORY not set\n"_s);
     }
   }
   if (!args.Source.empty()) {
-    cmCTestLog(this->CTest, DEBUG, "Set source directory to: ", args.Source,
+    cmCTestLog(this->CTest, DEBUG, "Set source directory to: "_s, args.Source,
                '\n');
     this->CTest->SetCTestConfiguration(
       "SourceDirectory", cmSystemTools::CollapseFullPath(args.Source),
@@ -166,11 +167,11 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
     this->CTest->SetCTestConfiguration("ChangeId", *changeId, args.Quiet);
   }
 
-  cmCTestLog(this->CTest, DEBUG, "Initialize handler\n");
+  cmCTestLog(this->CTest, DEBUG, "Initialize handler\n"_s);
   auto handler = this->InitializeHandler(args, status);
   if (!handler) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot instantiate test handler ",
-               this->GetName(), '\n');
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot instantiate test handler "_s, this->GetName(), '\n');
     return false;
   }
 
@@ -231,8 +232,8 @@ cmCTestHandlerCommand::PresetCheckResult PresetExistsInGraph(
 {
   using Result = cmCTestHandlerCommand::PresetCheckResult;
   if (!graph.ReadProjectPresets(sourceDir, presetsFile)) {
-    errorMessage = cmStrCat("Could not read presets from \"", sourceDir,
-                            "\":\n  ", graph.parseState.GetErrorMessage());
+    errorMessage = cmStrCat("Could not read presets from \""_s, sourceDir,
+                            "\":\n  "_s, graph.parseState.GetErrorMessage());
     return Result::ReadError;
   }
   using Status = cmCMakePresetsGraph::PresetResolveStatus;

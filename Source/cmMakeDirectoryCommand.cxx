@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMakeDirectoryCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -23,8 +25,8 @@ bool cmMakeDirectoryCommand(std::vector<std::string> const& args,
     return false;
   }
   if (!mf.CanIWriteThisFile(args[0])) {
-    std::string e = cmStrCat("attempted to create a directory: ", args[0],
-                             " into a source directory.");
+    std::string e = cmStrCat("attempted to create a directory: "_s, args[0],
+                             " into a source directory."_s);
     status.SetError(e);
     cmSystemTools::SetFatalErrorOccurred();
     return false;

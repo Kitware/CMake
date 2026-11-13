@@ -9,6 +9,7 @@
 #include <cm/string_view>
 #include <cm/vector>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -167,7 +168,7 @@ bool cmEnvironmentModification::Add(std::string const& envmod)
   auto const eq_loc = envmod.find_first_of('=');
   if (eq_loc == std::string::npos) {
     cmSystemTools::Error(cmStrCat(
-      "Error: Missing `=` after the variable name in: ", envmod, '\n'));
+      "Error: Missing `=` after the variable name in: "_s, envmod, '\n'));
     return false;
   }
 
@@ -176,7 +177,7 @@ bool cmEnvironmentModification::Add(std::string const& envmod)
   auto const colon_loc = envmod.find_first_of(':', op_value_start);
   if (colon_loc == std::string::npos) {
     cmSystemTools::Error(
-      cmStrCat("Error: Missing `:` after the operation in: ", envmod, '\n'));
+      cmStrCat("Error: Missing `:` after the operation in: "_s, envmod, '\n'));
     return false;
   }
 
@@ -192,9 +193,9 @@ bool cmEnvironmentModification::Add(std::string const& envmod)
   }
 
   if (!cm::contains(ValidOperators, entry.Op)) {
-    cmSystemTools::Error(cmStrCat(
-      "Error: Unrecognized environment manipulation argument: ", entry.Op,
-      '\n'));
+    cmSystemTools::Error(
+      cmStrCat("Error: Unrecognized environment manipulation argument: "_s,
+               entry.Op, '\n'));
     return false;
   }
 

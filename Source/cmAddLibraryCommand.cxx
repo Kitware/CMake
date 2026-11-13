@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAddLibraryCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -182,25 +184,25 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       // Make sure the target does not already exist.
       if (mf.FindTargetToUse(libName)) {
         status.SetError(cmStrCat(
-          "cannot create ALIAS target \"", libName,
-          "\" because another target with the same name already exists."));
+          "cannot create ALIAS target \""_s, libName,
+          "\" because another target with the same name already exists."_s));
         return false;
       }
     }
 
     std::string const& aliasedName = *s;
     if (mf.IsAlias(aliasedName)) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", libName,
-                               "\" because target \"", aliasedName,
-                               "\" is itself an ALIAS."));
+      status.SetError(cmStrCat("cannot create ALIAS target \""_s, libName,
+                               "\" because target \""_s, aliasedName,
+                               "\" is itself an ALIAS."_s));
       return false;
     }
     cmTarget* aliasedTarget =
       mf.FindTargetToUse(aliasedName, { cm::TargetDomain::NATIVE });
     if (!aliasedTarget) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", libName,
-                               "\" because target \"", aliasedName,
-                               "\" does not already exist."));
+      status.SetError(cmStrCat("cannot create ALIAS target \""_s, libName,
+                               "\" because target \""_s, aliasedName,
+                               "\" does not already exist."_s));
       return false;
     }
     cm::TargetType aliasedType = aliasedTarget->GetType();
@@ -211,9 +213,9 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
         aliasedType != cm::TargetType::INTERFACE_LIBRARY &&
         !(aliasedType == cm::TargetType::UNKNOWN_LIBRARY &&
           aliasedTarget->IsImported())) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", libName,
-                               "\" because target \"", aliasedName,
-                               "\" is not a library."));
+      status.SetError(cmStrCat("cannot create ALIAS target \""_s, libName,
+                               "\" because target \""_s, aliasedName,
+                               "\" is not a library."_s));
       return false;
     }
     mf.AddAlias(libName, aliasedName,
@@ -239,11 +241,11 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
         mf.IssueDiagnostic(
           cmDiagnostics::CMD_AUTHOR,
           cmStrCat(
-            "ADD_LIBRARY called with ",
+            "ADD_LIBRARY called with "_s,
             (type == cm::TargetType::SHARED_LIBRARY ? "SHARED" : "MODULE"),
             " option but the target platform does not support dynamic "
             "linking. "
-            "Building a STATIC library instead. This may lead to problems."));
+            "Building a STATIC library instead. This may lead to problems."_s));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         type = cm::TargetType::STATIC_LIBRARY;
@@ -252,10 +254,10 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
         mf.IssueMessage(
           MessageType::FATAL_ERROR,
           cmStrCat(
-            "ADD_LIBRARY called with ",
+            "ADD_LIBRARY called with "_s,
             (type == cm::TargetType::SHARED_LIBRARY ? "SHARED" : "MODULE"),
             " option but the target platform does not support dynamic "
-            "linking."));
+            "linking."_s));
         cmSystemTools::SetFatalErrorOccurred();
         return false;
       default:
@@ -273,7 +275,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     if (type == cm::TargetType::INTERFACE_LIBRARY) {
       if (!cmGeneratorExpression::IsValidTargetName(libName)) {
         status.SetError(cmStrCat(
-          "Invalid name for IMPORTED INTERFACE library target: ", libName));
+          "Invalid name for IMPORTED INTERFACE library target: "_s, libName));
         return false;
       }
     }
@@ -281,8 +283,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     // Make sure the target does not already exist.
     if (mf.FindTargetToUse(libName)) {
       status.SetError(cmStrCat(
-        "cannot create imported target \"", libName,
-        "\" because another target with the same name already exists."));
+        "cannot create imported target \""_s, libName,
+        "\" because another target with the same name already exists."_s));
       return false;
     }
 
@@ -316,7 +318,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     if (!cmGeneratorExpression::IsValidTargetName(libName) ||
         libName.find("::") != std::string::npos) {
       status.SetError(
-        cmStrCat("Invalid name for INTERFACE library target: ", libName));
+        cmStrCat("Invalid name for INTERFACE library target: "_s, libName));
       return false;
     }
   }

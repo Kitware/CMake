@@ -11,6 +11,7 @@
 
 #include <cm/filesystem>
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
@@ -94,7 +95,7 @@ bool cmBinUtilsWindowsPELinker::Prepare()
         this->Archive);
   } else {
     this->SetError(cmStrCat(
-      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: ", tool));
+      "Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: "_s, tool));
     return false;
   }
 

@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSubdirCommand.h"
 
+#include <cmext/string_view>
+
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -48,8 +50,8 @@ bool cmSubdirCommand(std::vector<std::string> const& args,
                                      cmSystemTools::GetFilenameName(i));
       mf.AddSubDirectory(i, binPath, excludeFromAll, false, false);
     } else {
-      status.SetError(cmStrCat("Incorrect SUBDIRS command. Directory: ", i,
-                               " does not exist."));
+      status.SetError(cmStrCat("Incorrect SUBDIRS command. Directory: "_s, i,
+                               " does not exist."_s));
       res = false;
     }
   }

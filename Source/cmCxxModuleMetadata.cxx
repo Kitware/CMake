@@ -244,9 +244,9 @@ bool ParseRoot(Json::Value& root, cmCxxModuleMetadata& meta,
   }
 
   if (meta.Version != 1) {
-    state->AddErrorAtValue(cmStrCat("Module manifest version number, '",
+    state->AddErrorAtValue(cmStrCat("Module manifest version number, '"_s,
                                     meta.Version, '.', meta.Revision,
-                                    "' is newer than max supported (1.1)"),
+                                    "' is newer than max supported (1.1)"_s),
                            &root);
     return false;
   }

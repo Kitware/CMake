@@ -115,9 +115,9 @@ bool cmFileInstaller::InstallFile(std::string const& fromFile,
                                                match_properties);
       } else {
         // We cannot meet user's expectation (REL_SYMLINK)
-        auto e = cmStrCat(this->Name,
-                          " cannot determine relative path for symlink to \"",
-                          newFromFile, "\" at \"", toFile, "\".");
+        auto e = cmStrCat(
+          this->Name, " cannot determine relative path for symlink to \""_s,
+          newFromFile, "\" at \""_s, toFile, "\"."_s);
         this->Status.SetError(e);
         return false;
       }
@@ -158,9 +158,9 @@ bool cmFileInstaller::InstallFile(std::string const& fromFile,
                                                match_properties);
       }
 
-      auto e = cmStrCat(this->Name, " cannot create symlink to \"",
-                        newFromFile, "\" at \"", toFile,
-                        "\": ", cmSystemTools::GetLastSystemError(), "\".");
+      auto e = cmStrCat(this->Name, " cannot create symlink to \""_s,
+                        newFromFile, "\" at \""_s, toFile, "\": "_s,
+                        cmSystemTools::GetLastSystemError(), "\"."_s);
       this->Status.SetError(e);
       return false;
     }
@@ -246,8 +246,8 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
     if (it != install_mode_dict.end()) {
       this->InstallMode = it->second;
     } else {
-      auto e = cmStrCat("Unrecognized value '", install_mode,
-                        "' for environment variable CMAKE_INSTALL_MODE");
+      auto e = cmStrCat("Unrecognized value '"_s, install_mode,
+                        "' for environment variable CMAKE_INSTALL_MODE"_s);
       this->Status.SetError(e);
       return false;
     }
@@ -323,10 +323,10 @@ bool cmFileInstaller::CheckKeyword(std::string const& arg)
   } else if (arg == "COMPONENTS" || arg == "CONFIGURATIONS" ||
              arg == "PROPERTIES") {
     this->Status.SetError(
-      cmStrCat("INSTALL called with old-style ", arg,
+      cmStrCat("INSTALL called with old-style "_s, arg,
                " argument.  "
                "This script was generated with an older version of CMake.  "
-               "Re-run this cmake version on your build tree."));
+               "Re-run this cmake version on your build tree."_s));
     this->Doing = DoingError;
   } else {
     return this->cmFileCopier::CheckKeyword(arg);
@@ -369,7 +369,7 @@ bool cmFileInstaller::GetTargetTypeFromString(std::string const& stype)
     this->InstallType = cmInstallType_DIRECTORY;
   } else {
     this->Status.SetError(
-      cmStrCat("Option TYPE given unknown value \"", stype, "\"."));
+      cmStrCat("Option TYPE given unknown value \""_s, stype, "\"."_s));
     return false;
   }
   return true;
@@ -425,7 +425,7 @@ bool cmFileInstaller::HandleInstallDestination()
           cmStrCat("called with network path DESTINATION. This "
                    "does not make sense when using DESTDIR. Specify local "
                    "absolute path or remove DESTDIR environment variable."
-                   "\nDESTINATION=\n",
+                   "\nDESTINATION=\n"_s,
                    destination);
         this->Status.SetError(message);
         return false;
@@ -446,15 +446,15 @@ bool cmFileInstaller::HandleInstallDestination()
     if (!cmSystemTools::FileExists(destination)) {
       if (!cmSystemTools::MakeDirectory(destination, default_dir_mode)) {
         std::string errstring =
-          cmStrCat("cannot create directory: ", destination,
-                   ". Maybe need administrative privileges.");
+          cmStrCat("cannot create directory: "_s, destination,
+                   ". Maybe need administrative privileges."_s);
         this->Status.SetError(errstring);
         return false;
       }
     }
     if (!cmSystemTools::FileIsDirectory(destination)) {
-      std::string errstring =
-        cmStrCat("INSTALL destination: ", destination, " is not a directory.");
+      std::string errstring = cmStrCat("INSTALL destination: "_s, destination,
+                                       " is not a directory."_s);
       this->Status.SetError(errstring);
       return false;
     }

@@ -1,0 +1,28 @@
+---
+id: cmstrcat-to-s-literal
+valid:
+  - 'cmStrCat(other, "literal"_s)'
+  - 'cmStrCat(other, ""_s)'
+  - 'cmStrCat(other, R"(raw)"_s)'
+  - 'cmStrCat(other, "a" "b"_s)'
+  - 'cmStrCat(other, variable)'
+  - "cmStrCat(other, 'c')"
+  - 'cmStrCat(other, "n")'
+  - 'cmStrCat(other, "\n")'
+  - 'cmStrCat(someFunc("literal"), other)'
+  - 'cmStrCat(cond ? "literal" : other, x)'
+  - 'cmStrCat("pre" + variable, other)'
+  - 'cmStrCat(other, u8"literal")'
+  - 'cmStrCat(other, L"literal")'
+invalid:
+  - 'cmStrCat("literal", other)'
+  - 'cmStrCat(other, "literal", other)'
+  - 'cmStrCat(other, "literal")'
+  - 'cmStrCat(other, "")'
+  - 'cmStrCat(other, R"(raw)")'
+  - 'cmStrCat(other, "a" "b")'
+  - 'cmCTestLog(self, HANDLER, "literal", other)'
+  - |
+    cmStrCat(
+      "literal",
+      other)

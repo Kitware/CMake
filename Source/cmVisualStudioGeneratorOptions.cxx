@@ -254,7 +254,7 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
     //  "rtSingleThreadedDebug", "5", /dbglibs /libs:static
     //  "rtSingleThreadedDebugDLL", "11", /dbglibs /libs:dll
     std::string rl =
-      cmStrCat("rtMultiThreaded", this->FortranRuntimeDebug ? "Debug" : "",
+      cmStrCat("rtMultiThreaded"_s, this->FortranRuntimeDebug ? "Debug" : "",
                this->FortranRuntimeDLL ? "DLL" : "");
     this->FlagMap["RuntimeLibrary"] = rl;
   }
@@ -282,7 +282,7 @@ void cmVisualStudioGeneratorOptions::PrependInheritedString(
     return;
   }
   std::string& value = i->second[0];
-  value = cmStrCat("%(", key, ") ", std::move(value));
+  value = cmStrCat("%("_s, key, ") "_s, std::move(value));
 }
 
 void cmVisualStudioGeneratorOptions::Reparse(std::string const& key)

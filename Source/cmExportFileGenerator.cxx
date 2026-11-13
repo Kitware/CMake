@@ -71,8 +71,8 @@ bool cmExportFileGenerator::GenerateImportFile()
   }
   if (!foutPtr || !*foutPtr) {
     std::string se = cmSystemTools::GetLastSystemError();
-    cmSystemTools::Error(
-      cmStrCat("cannot write to file \"", this->MainImportFile, "\": ", se));
+    cmSystemTools::Error(cmStrCat("cannot write to file \""_s,
+                                  this->MainImportFile, "\": "_s, se));
     return false;
   }
 
@@ -294,9 +294,9 @@ void getCompatibleInterfaceProperties(cmGeneratorTarget const* target,
     cmLocalGenerator* lg = target->GetLocalGenerator();
     lg->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("Exporting the target \"", target->GetName(),
+      cmStrCat("Exporting the target \""_s, target->GetName(),
                "\" is not allowed since its linker language cannot be "
-               "determined"));
+               "determined"_s));
     return;
   }
 
@@ -628,7 +628,7 @@ void cmExportFileGenerator::SetImportDetailProperties(
 
     if (iface->Multiplicity > 0) {
       std::string prop =
-        cmStrCat("IMPORTED_LINK_INTERFACE_MULTIPLICITY", suffix);
+        cmStrCat("IMPORTED_LINK_INTERFACE_MULTIPLICITY"_s, suffix);
       properties[prop] = std::to_string(iface->Multiplicity);
     }
   }
@@ -636,7 +636,7 @@ void cmExportFileGenerator::SetImportDetailProperties(
   // Add information if this target is a managed target
   if (target->GetManagedType(config) !=
       cmGeneratorTarget::ManagedType::Native) {
-    std::string prop = cmStrCat("IMPORTED_COMMON_LANGUAGE_RUNTIME", suffix);
+    std::string prop = cmStrCat("IMPORTED_COMMON_LANGUAGE_RUNTIME"_s, suffix);
     std::string propval;
     if (cmValue p = target->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
       propval = *p;
@@ -790,7 +790,7 @@ bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
     }
     if (prop) {
       auto const exportedPropName =
-        cmStrCat("IMPORTED_CXX_MODULES_", propEntry.Name);
+        cmStrCat("IMPORTED_CXX_MODULES_"_s, propEntry.Name);
       properties[exportedPropName] =
         cmGeneratorExpression::Preprocess(*prop, ctx);
       if (ctx == cmGeneratorExpression::InstallInterface &&
@@ -820,7 +820,7 @@ bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
     }
     if (prop) {
       auto const exportedPropName =
-        cmStrCat("IMPORTED_CXX_MODULES_", propName);
+        cmStrCat("IMPORTED_CXX_MODULES_"_s, propName);
       auto value = cmGeneratorExpression::Preprocess(*prop, ctx);
       this->ResolveTargetsInGeneratorExpressions(value, gte,
                                                  ReplaceFreeTargets);
@@ -842,10 +842,11 @@ bool cmExportFileGenerator::PopulateExportProperties(
       /* Black list reserved properties */
       if (cmHasLiteralPrefix(prop, "IMPORTED_") ||
           cmHasLiteralPrefix(prop, "INTERFACE_")) {
-        errorMessage = cmStrCat(
-          "Target \"", gte->Target->GetName(), "\" contains property \"", prop,
-          "\" in EXPORT_PROPERTIES but IMPORTED_* and INTERFACE_* "
-          "properties are reserved.");
+        errorMessage =
+          cmStrCat("Target \""_s, gte->Target->GetName(),
+                   "\" contains property \""_s, prop,
+                   "\" in EXPORT_PROPERTIES but IMPORTED_* and INTERFACE_* "
+                   "properties are reserved."_s);
         return false;
       }
       cmValue propertyValue = targetProperties.GetPropertyValue(prop);
@@ -857,10 +858,11 @@ bool cmExportFileGenerator::PopulateExportProperties(
       std::string evaluatedValue = cmGeneratorExpression::Preprocess(
         *propertyValue, cmGeneratorExpression::StripAllGeneratorExpressions);
       if (evaluatedValue != *propertyValue) {
-        errorMessage = cmStrCat(
-          "Target \"", gte->Target->GetName(), "\" contains property \"", prop,
-          "\" in EXPORT_PROPERTIES but this property contains a "
-          "generator expression. This is not allowed.");
+        errorMessage =
+          cmStrCat("Target \""_s, gte->Target->GetName(),
+                   "\" contains property \""_s, prop,
+                   "\" in EXPORT_PROPERTIES but this property contains a "
+                   "generator expression. This is not allowed."_s);
         return false;
       }
       properties[prop] = *propertyValue;

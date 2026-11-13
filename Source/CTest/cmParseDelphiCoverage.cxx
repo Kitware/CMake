@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 
@@ -111,7 +113,7 @@ public:
       if (lastoffset == std::string::npos) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            this->Coverage.Quiet, endnamepos,
-                           "File not found  ", lastoffset, '\n');
+                           "File not found  "_s, lastoffset, '\n');
         return false;
       }
       endnamepos = line.find(')', lastoffset);
@@ -119,7 +121,7 @@ public:
       if (filename.find(".pas") != std::string::npos) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            this->Coverage.Quiet,
-                           "Coverage found for file:  ", filename, '\n');
+                           "Coverage found for file:  "_s, filename, '\n');
         break;
       }
       pos = lastoffset + 1;
@@ -131,7 +133,7 @@ public:
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.RecurseThroughSymlinksOff();
-    std::string glob = cmStrCat(this->Coverage.SourceDir, "*/", filename);
+    std::string glob = cmStrCat(this->Coverage.SourceDir, "*/"_s, filename);
     gl.FindFiles(glob);
     std::vector<std::string> const& files = gl.GetFiles();
     if (files.empty()) {
@@ -140,8 +142,8 @@ public:
        *  return a failure.
        */
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         this->Coverage.Quiet, "Unable to find file matching",
-                         glob, '\n');
+                         this->Coverage.Quiet,
+                         "Unable to find file matching"_s, glob, '\n');
       return false;
     }
     FileLinesType& coverageVector = this->Coverage.TotalCoverage[files[0]];
@@ -211,7 +213,8 @@ bool cmParseDelphiCoverage::LoadCoverageData(
     path = files[i];
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       this->Coverage.Quiet, "Reading HTML File ", path, '\n');
+                       this->Coverage.Quiet, "Reading HTML File "_s, path,
+                       '\n');
     if (cmSystemTools::GetFilenameLastExtension(path) == ".html") {
       if (!this->ReadDelphiHTML(path.c_str())) {
         return false;

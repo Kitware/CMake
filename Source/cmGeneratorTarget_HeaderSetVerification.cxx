@@ -117,11 +117,11 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
     if (!verifySet.empty()) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Property ", headerSetsProperty, " of target \"",
+        cmStrCat("Property "_s, headerSetsProperty, " of target \""_s,
                  this->GetName(),
                  "\" contained the following header sets that are nonexistent "
-                 "or not ",
-                 isInterface ? "INTERFACE" : "PRIVATE", ":\n  ",
+                 "or not "_s,
+                 isInterface ? "INTERFACE" : "PRIVATE", ":\n  "_s,
                  cmJoin(verifySet, "\n  ")));
       return false;
     }
@@ -176,8 +176,8 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             std::string filename = *filenameOpt;
 
             if (fileCgesContextSensitive) {
-              filename = cmStrCat("$<$<CONFIG:", config,
-                                  ">:", std::move(filename), '>');
+              filename = cmStrCat("$<$<CONFIG:"_s, config, ">:"_s,
+                                  std::move(filename), '>');
             }
             stubSources.emplace_back(std::move(filename));
           }
