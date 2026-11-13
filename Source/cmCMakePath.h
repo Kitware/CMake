@@ -41,10 +41,8 @@ struct is_pathable<cm::static_string_view> : std::true_type
 };
 template <typename T>
 struct is_pathable<
-  T,
-  cm::enable_if_t<std::is_same<char*, typename std::decay<T>::type>::value,
-                  void>>
-  : cm::bool_constant<std::is_same<char*, typename std::decay<T>::type>::value>
+  T, std::enable_if_t<std::is_same<char*, std::decay_t<T>>::value, void>>
+  : cm::bool_constant<std::is_same<char*, std::decay_t<T>>::value>
 {
 };
 
@@ -68,11 +66,11 @@ class cmCMakePath
 private:
   template <typename Source>
   using enable_if_move_pathable =
-    cm::enable_if_t<detail::is_move_pathable<Source>::value, cmCMakePath&>;
+    std::enable_if_t<detail::is_move_pathable<Source>::value, cmCMakePath&>;
 
   template <typename Source>
   using enable_if_pathable =
-    cm::enable_if_t<detail::is_pathable<Source>::value, cmCMakePath&>;
+    std::enable_if_t<detail::is_pathable<Source>::value, cmCMakePath&>;
 
 public:
   using value_type = cm::filesystem::path::value_type;

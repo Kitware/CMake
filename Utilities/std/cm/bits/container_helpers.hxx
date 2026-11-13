@@ -273,12 +273,10 @@ inline auto ssize(C const& c)
 #  else
 inline constexpr auto ssize(C const& c)
 #  endif
-  -> typename std::common_type<
-    std::ptrdiff_t, typename std::make_signed<decltype(c.size())>::type>::type
+  -> std::common_type_t<std::ptrdiff_t, std::make_signed_t<decltype(c.size())>>
 {
-  using signed_type = typename std::make_signed<decltype(c.size())>::type;
-  using result_type =
-    typename std::common_type<std::ptrdiff_t, signed_type>::type;
+  using signed_type = std::make_signed_t<decltype(c.size())>;
+  using result_type = std::common_type_t<std::ptrdiff_t, signed_type>;
 
   return static_cast<result_type>(c.size());
 }

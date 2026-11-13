@@ -113,8 +113,7 @@ public:
    * and clean up after it without caring about the exact type.
    */
   template <typename S,
-            typename = typename std::enable_if<
-              std::is_rvalue_reference<S&&>::value>::type>
+            typename = std::enable_if_t<std::is_rvalue_reference<S&&>::value>>
   uv_handle_ptr_base_(S&& rhs)
   {
     // This will force a compiler error if rhs doesn't have a casting

@@ -115,10 +115,6 @@ Available features are:
   * ``<cm/shared_mutex>``:
     ``cm::shared_lock``
 
-  * ``<cm/type_traits>``:
-    ``cm::conditional_t``, ``cm::decay_t``, ``cm::enable_if_t``,
-    ``cm::remove_cv_t``, ``cm::remove_reference_t``
-
   * ``<cm/unordered_map>``:
     ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
     ``cm::crbegin``, ``cm::crend``

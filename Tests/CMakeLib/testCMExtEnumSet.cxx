@@ -121,8 +121,7 @@ void testDeclaration()
 
     if (testSet1.size() != 0 ||
         testSet1.max_size() !=
-          std::numeric_limits<
-            typename std::underlying_type<Test>::type>::digits) {
+          std::numeric_limits<std::underlying_type_t<Test>>::digits) {
       ++failed;
     }
     if (testSet2.size() != 0 || testSet2.max_size() != 5) {

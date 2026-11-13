@@ -8,12 +8,12 @@
 #include <initializer_list>
 #include <map>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include <cm/optional>
 #include <cm/string_view>
-#include <cm/type_traits>
 #include <cmext/string_view>
 
 #if !defined(_WIN32)
@@ -49,7 +49,7 @@ std::string const DELIM[2] = { {}, ";" };
 
 // BEGIN Private functions
 template <typename T>
-cm::enable_if_t<std::is_arithmetic<T>::value, std::string> ValueToString(
+std::enable_if_t<std::is_arithmetic<T>::value, std::string> ValueToString(
   T const& value)
 {
   return std::to_string(value);

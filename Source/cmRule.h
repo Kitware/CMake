@@ -33,8 +33,8 @@ enum class RuleScope
 template <typename E>
 struct enum_hash
 {
-  typename std::enable_if<std::is_enum<E>::value, std::size_t>::type
-  operator()(E const key) const
+  std::enable_if_t<std::is_enum<E>::value, std::size_t> operator()(
+    E const key) const
   {
     return static_cast<std::size_t>(key);
   }

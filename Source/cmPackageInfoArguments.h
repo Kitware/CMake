@@ -5,10 +5,10 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <cm/string_view>
-#include <cm/type_traits>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h" // IWYU pragma: keep
@@ -27,7 +27,7 @@ class cmPackageInfoArguments : public cmProjectInfoArguments
 {
 public:
   template <typename T,
-            typename = cm::enable_if_t<
+            typename = std::enable_if_t<
               std::is_base_of<cmPackageInfoArguments, T>::value>>
   static void Bind(cmArgumentParser<T>& parser)
   {

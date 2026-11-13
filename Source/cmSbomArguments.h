@@ -5,9 +5,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <type_traits>
 
 #include <cm/string_view>
-#include <cm/type_traits>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h" // IWYU pragma: keep
@@ -25,7 +25,7 @@ public:
 
   template <
     typename T,
-    typename = cm::enable_if_t<std::is_base_of<cmSbomArguments, T>::value>>
+    typename = std::enable_if_t<std::is_base_of<cmSbomArguments, T>::value>>
   static void Bind(cmArgumentParser<T>& parser)
   {
     cmSbomArguments* const self = nullptr;

@@ -15,9 +15,9 @@
 #  include <algorithm>
 #  include <iterator>
 #  include <tuple>
+#  include <type_traits>
 #  include <vector>
 
-#  include <cm/type_traits>
 #  include <cmext/type_traits>
 #endif
 
@@ -34,9 +34,9 @@ using std::ranges::views::values;
 // associative containers
 template <
   typename Range,
-  cm::enable_if_t<cm::is_associative_container<Range>::value ||
-                    cm::is_unordered_associative_container<Range>::value,
-                  int> = 0>
+  std::enable_if_t<cm::is_associative_container<Range>::value ||
+                     cm::is_unordered_associative_container<Range>::value,
+                   int> = 0>
 std::vector<typename Range::key_type> keys(Range const& range)
 {
   using key_type = typename Range::key_type;
@@ -55,9 +55,9 @@ std::vector<typename Range::key_type> keys(Range const& range)
 
 template <
   typename Range,
-  cm::enable_if_t<cm::is_associative_container<Range>::value ||
-                    cm::is_unordered_associative_container<Range>::value,
-                  int> = 0>
+  std::enable_if_t<cm::is_associative_container<Range>::value ||
+                     cm::is_unordered_associative_container<Range>::value,
+                   int> = 0>
 std::vector<typename Range::mapped_type> values(Range const& range)
 {
   using value_type = typename Range::mapped_type;
@@ -75,10 +75,11 @@ std::vector<typename Range::mapped_type> values(Range const& range)
 }
 
 // sequence containers with std::pair<> or std::tuple<> as elements
-template <typename Range,
-          cm::enable_if_t<cm::is_sequence_container<Range>::value &&
-                            cm::is_tuple<1, typename Range::value_type>::value,
-                          int> = 0>
+template <
+  typename Range,
+  std::enable_if_t<cm::is_sequence_container<Range>::value &&
+                     cm::is_tuple<1, typename Range::value_type>::value,
+                   int> = 0>
 std::vector<typename std::tuple_element<0, typename Range::value_type>::type>
 keys(Range const& range)
 {
@@ -97,10 +98,11 @@ keys(Range const& range)
   return keys;
 }
 
-template <typename Range,
-          cm::enable_if_t<cm::is_sequence_container<Range>::value &&
-                            cm::is_tuple<2, typename Range::value_type>::value,
-                          int> = 0>
+template <
+  typename Range,
+  std::enable_if_t<cm::is_sequence_container<Range>::value &&
+                     cm::is_tuple<2, typename Range::value_type>::value,
+                   int> = 0>
 std::vector<typename std::tuple_element<1, typename Range::value_type>::type>
 values(Range const& range)
 {

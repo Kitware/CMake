@@ -59,13 +59,11 @@ public:
   template <typename... Args>
   explicit optional(cm::in_place_t, Args&&... args);
 
-  template <
-    typename U = T,
-    typename = typename std::enable_if<
-      std::is_constructible<T, U&&>::value &&
-      !std::is_same<typename std::decay<U>::type, cm::in_place_t>::value &&
-      !std::is_same<typename std::decay<U>::type,
-                    cm::optional<T>>::value>::type>
+  template <typename U = T,
+            typename = std::enable_if_t<
+              std::is_constructible<T, U&&>::value &&
+              !std::is_same<std::decay_t<U>, cm::in_place_t>::value &&
+              !std::is_same<std::decay_t<U>, cm::optional<T>>::value>>
   optional(U&& v);
 
   ~optional();
@@ -74,19 +72,18 @@ public:
   optional& operator=(optional const& other);
 
   template <typename U = T>
-  typename std::enable_if<std::is_constructible<T, U&&>::value &&
-                            std::is_assignable<T&, U&&>::value,
-                          optional&>::type
+  std::enable_if_t<std::is_constructible<T, U&&>::value &&
+                     std::is_assignable<T&, U&&>::value,
+                   optional&>
   operator=(optional<U>&& other) noexcept;
 
   template <typename U = T>
-  typename std::enable_if<
-    !std::is_same<typename std::decay<U>::type, cm::optional<T>>::value &&
-      std::is_constructible<T, U&&>::value &&
-      std::is_assignable<T&, U&&>::value &&
-      (!std::is_scalar<T>::value ||
-       !std::is_same<typename std::decay<U>::type, T>::value),
-    optional&>::type
+  std::enable_if_t<!std::is_same<std::decay_t<U>, cm::optional<T>>::value &&
+                     std::is_constructible<T, U&&>::value &&
+                     std::is_assignable<T&, U&&>::value &&
+                     (!std::is_scalar<T>::value ||
+                      !std::is_same<std::decay_t<U>, T>::value),
+                   optional&>
   operator=(U&& v);
 
   constexpr T const* operator->() const;
@@ -137,9 +134,9 @@ private:
 };
 
 template <typename T>
-optional<typename std::decay<T>::type> make_optional(T&& value)
+optional<std::decay_t<T>> make_optional(T&& value)
 {
-  return optional<typename std::decay<T>::type>(std::forward<T>(value));
+  return optional<std::decay_t<T>>(std::forward<T>(value));
 }
 
 template <typename T, class... Args>
@@ -214,9 +211,9 @@ optional<T>& optional<T>::operator=(optional const& other)
 
 template <typename T>
 template <typename U>
-typename std::enable_if<std::is_constructible<T, U&&>::value &&
-                          std::is_assignable<T&, U&&>::value,
-                        optional<T>&>::type
+std::enable_if_t<std::is_constructible<T, U&&>::value &&
+                   std::is_assignable<T&, U&&>::value,
+                 optional<T>&>
 optional<T>::operator=(optional<U>&& other) noexcept
 {
   if (other.has_value()) {
@@ -233,13 +230,12 @@ optional<T>::operator=(optional<U>&& other) noexcept
 
 template <typename T>
 template <typename U>
-typename std::enable_if<
-  !std::is_same<typename std::decay<U>::type, cm::optional<T>>::value &&
-    std::is_constructible<T, U&&>::value &&
-    std::is_assignable<T&, U&&>::value &&
-    (!std::is_scalar<T>::value ||
-     !std::is_same<typename std::decay<U>::type, T>::value),
-  optional<T>&>::type
+std::enable_if_t<!std::is_same<std::decay_t<U>, cm::optional<T>>::value &&
+                   std::is_constructible<T, U&&>::value &&
+                   std::is_assignable<T&, U&&>::value &&
+                   (!std::is_scalar<T>::value ||
+                    !std::is_same<std::decay_t<U>, T>::value),
+                 optional<T>&>
 optional<T>::operator=(U&& v)
 {
   if (this->has_value()) {

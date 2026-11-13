@@ -124,12 +124,10 @@ private:
 
 template <
   typename Enum,
-  std::size_t Size =
-    std::numeric_limits<typename std::underlying_type<Enum>::type>::digits,
-  typename cm::enable_if_t<
-    cm::is_scoped_enum<Enum>::value &&
-      std::is_unsigned<typename std::underlying_type<Enum>::type>::value,
-    int> = 0>
+  std::size_t Size = std::numeric_limits<std::underlying_type_t<Enum>>::digits,
+  std::enable_if_t<cm::is_scoped_enum<Enum>::value &&
+                     std::is_unsigned<std::underlying_type_t<Enum>>::value,
+                   int> = 0>
 class enum_set
 {
 public:
@@ -137,7 +135,7 @@ public:
 
   using key_type = Enum;
   using value_type = Enum;
-  using size_type = typename std::underlying_type<Enum>::type;
+  using size_type = std::underlying_type_t<Enum>;
   using difference_type = size_type;
   using reference = Enum;
   using const_reference = Enum;
@@ -153,7 +151,7 @@ public:
   enum_set(key_type e) { this->insert(e); }
   enum_set(enum_set const& other) noexcept { this->insert(other); }
   template <typename E,
-            typename cm::enable_if_t<std::is_same<Enum, E>::value, int> = 0>
+            std::enable_if_t<std::is_same<Enum, E>::value, int> = 0>
   enum_set(enum_set<E> const& other) noexcept
   {
     static_assert(Size < enum_set<E>::set_size, "Incompatible sizes");
@@ -599,14 +597,14 @@ struct is_enum_set<Enum, cm::void_t<typename cm_enum_set_traits<Enum>::type>>
   };
 
 template <typename Enum,
-          typename cm::enable_if_t<cm::is_enum_set<Enum>::value, int> = 0>
+          std::enable_if_t<cm::is_enum_set<Enum>::value, int> = 0>
 inline typename cm_enum_set_traits<Enum>::type operator+(Enum lhs, Enum rhs)
 {
   return { lhs, rhs };
 }
 // Alternate syntax
 template <typename Enum,
-          typename cm::enable_if_t<cm::is_enum_set<Enum>::value, int> = 0>
+          std::enable_if_t<cm::is_enum_set<Enum>::value, int> = 0>
 inline typename cm_enum_set_traits<Enum>::type operator|(Enum lhs, Enum rhs)
 {
   return { lhs, rhs };

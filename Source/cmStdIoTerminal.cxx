@@ -57,7 +57,7 @@ WORD ConsoleAttrs(WORD consoleAttrs, TermAttrSet const& attrs)
   consoleAttrs =
     attrs.contains(TermAttr::Normal) ? consoleAttrs & kConsoleAttrMask : 0;
   for (TermAttr attr : attrs) {
-    auto index = static_cast<std::underlying_type<TermAttr>::type>(attr);
+    auto index = static_cast<std::underlying_type_t<TermAttr>>(attr);
     consoleAttrs |= kConsoleAttrs[index];
   }
   return consoleAttrs;
@@ -96,7 +96,7 @@ std::array<cm::string_view, kTermAttrCount> const kVT100Codes{ {
 void SetVT100Attrs(std::ostream& os, TermAttrSet const& attrs)
 {
   for (TermAttr attr : attrs) {
-    auto index = static_cast<std::underlying_type<TermAttr>::type>(attr);
+    auto index = static_cast<std::underlying_type_t<TermAttr>>(attr);
     os << kVT100Codes[index];
   }
 }

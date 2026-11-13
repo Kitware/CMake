@@ -5,16 +5,15 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <type_traits>
 #include <typeinfo>
-
-#include <cm/type_traits>
 
 namespace cm {
 
 template <
   typename T, typename O,
-  cm::enable_if_t<std::is_pointer<decltype(std::declval<O>().get())>::value,
-                  int> = 0>
+  std::enable_if_t<std::is_pointer<decltype(std::declval<O>().get())>::value,
+                   int> = 0>
 T& static_reference_cast(O& item)
 {
   return *(static_cast<T*>(item.get()));
@@ -22,8 +21,8 @@ T& static_reference_cast(O& item)
 
 template <
   typename T, typename O,
-  cm::enable_if_t<std::is_pointer<decltype(std::declval<O>().get())>::value,
-                  int> = 0>
+  std::enable_if_t<std::is_pointer<decltype(std::declval<O>().get())>::value,
+                   int> = 0>
 T& dynamic_reference_cast(O& item)
 {
   auto p = dynamic_cast<T*>(item.get());

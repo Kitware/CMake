@@ -227,8 +227,7 @@ public:
   String() = default;
 
   /** Construct from any type implementing the IntoString trait.  */
-  template <typename T,
-            typename = typename std::enable_if<IntoString<T>::value>::type>
+  template <typename T, typename = std::enable_if_t<IntoString<T>::value>>
   String(T&& s)
     : String(IntoString<T>::into_string(std::forward<T>(s)), Private())
   {
@@ -333,9 +332,8 @@ public:
 
   /** Assign from any type implementing the IntoString trait.  */
   template <typename T>
-  typename // NOLINT(*)
-    std::enable_if<IntoString<T>::value, String&>::type
-    operator=(T&& s)
+  // NOLINTNEXTLINE(misc-unconventional-assign-operator)
+  std::enable_if_t<IntoString<T>::value, String&> operator=(T&& s)
   {
     *this = String(std::forward<T>(s));
     return *this;
@@ -417,8 +415,7 @@ public:
   /** Append to the string using any type that implements the
       AsStringView trait.  */
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, String&>::type operator+=(
-    T&& s)
+  std::enable_if_t<AsStringView<T>::value, String&> operator+=(T&& s)
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     std::string r;
@@ -428,7 +425,7 @@ public:
     return *this = std::move(r);
   }
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, String&>::type append(T&& s)
+  std::enable_if_t<AsStringView<T>::value, String&> append(T&& s)
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     std::string r;
@@ -447,8 +444,8 @@ public:
   /** Insert into the string using any type that implements the
       AsStringView trait.  */
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, String&>::type insert(
-    size_type index, T&& s)
+  std::enable_if_t<AsStringView<T>::value, String&> insert(size_type index,
+                                                           T&& s)
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     std::string r;
@@ -473,8 +470,9 @@ public:
   void pop_back() { *this = String(*this, 0, this->size() - 1); }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, String&>::type replace(
-    size_type pos, size_type count, T&& s)
+  std::enable_if_t<AsStringView<T>::value, String&> replace(size_type pos,
+                                                            size_type count,
+                                                            T&& s)
   {
     const_iterator first = this->begin() + pos;
     const_iterator last = first + count;
@@ -493,7 +491,7 @@ public:
   }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, String&>::type replace(
+  std::enable_if_t<AsStringView<T>::value, String&> replace(
     const_iterator first, const_iterator last, T&& s)
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
@@ -507,7 +505,7 @@ public:
   }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, String&>::type replace(
+  std::enable_if_t<AsStringView<T>::value, String&> replace(
     size_type pos, size_type count, T&& s, size_type pos2,
     size_type count2 = npos)
   {
@@ -563,8 +561,7 @@ public:
   String substr(size_type pos = 0, size_type count = npos) const;
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, int>::type compare(
-    T&& s) const
+  std::enable_if_t<AsStringView<T>::value, int> compare(T&& s) const
   {
     return this->view_.compare(AsStringView<T>::view(std::forward<T>(s)));
   }
@@ -592,7 +589,7 @@ public:
   }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, size_type>::type find(
+  std::enable_if_t<AsStringView<T>::value, size_type> find(
     T&& s, size_type pos = 0) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
@@ -605,7 +602,7 @@ public:
   }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, size_type>::type rfind(
+  std::enable_if_t<AsStringView<T>::value, size_type> rfind(
     T&& s, size_type pos = npos) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
@@ -618,8 +615,8 @@ public:
   }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, size_type>::type
-  find_first_of(T&& s, size_type pos = 0) const
+  std::enable_if_t<AsStringView<T>::value, size_type> find_first_of(
+    T&& s, size_type pos = 0) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     return this->view_.find_first_of(v, pos);
@@ -631,8 +628,8 @@ public:
   }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, size_type>::type
-  find_first_not_of(T&& s, size_type pos = 0) const
+  std::enable_if_t<AsStringView<T>::value, size_type> find_first_not_of(
+    T&& s, size_type pos = 0) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     return this->view_.find_first_not_of(v, pos);
@@ -645,8 +642,8 @@ public:
   }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, size_type>::type
-  find_last_of(T&& s, size_type pos = npos) const
+  std::enable_if_t<AsStringView<T>::value, size_type> find_last_of(
+    T&& s, size_type pos = npos) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     return this->view_.find_last_of(v, pos);
@@ -658,8 +655,8 @@ public:
   }
 
   template <typename T>
-  typename std::enable_if<AsStringView<T>::value, size_type>::type
-  find_last_not_of(T&& s, size_type pos = npos) const
+  std::enable_if_t<AsStringView<T>::value, size_type> find_last_not_of(
+    T&& s, size_type pos = npos) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     return this->view_.find_last_not_of(v, pos);
@@ -747,14 +744,14 @@ inline bool operator==(String const& l, String const& r)
   return l.view() == r.view();
 }
 template <typename L>
-typename std::enable_if<IsComparable<L>::value, bool>::type operator==(
-  L&& l, String const& r)
+std::enable_if_t<IsComparable<L>::value, bool> operator==(L&& l,
+                                                          String const& r)
 {
   return AsStringView<L>::view(std::forward<L>(l)) == r.view();
 }
 template <typename R>
-typename std::enable_if<IsComparable<R>::value, bool>::type operator==(
-  String const& l, R&& r)
+std::enable_if_t<IsComparable<R>::value, bool> operator==(String const& l,
+                                                          R&& r)
 {
   return l.view() == AsStringView<R>::view(std::forward<R>(r));
 }
@@ -764,14 +761,14 @@ inline bool operator!=(String const& l, String const& r)
   return l.view() != r.view();
 }
 template <typename L>
-typename std::enable_if<IsComparable<L>::value, bool>::type operator!=(
-  L&& l, String const& r)
+std::enable_if_t<IsComparable<L>::value, bool> operator!=(L&& l,
+                                                          String const& r)
 {
   return AsStringView<L>::view(std::forward<L>(l)) != r.view();
 }
 template <typename R>
-typename std::enable_if<IsComparable<R>::value, bool>::type operator!=(
-  String const& l, R&& r)
+std::enable_if_t<IsComparable<R>::value, bool> operator!=(String const& l,
+                                                          R&& r)
 {
   return l.view() != AsStringView<R>::view(std::forward<R>(r));
 }
@@ -781,14 +778,14 @@ inline bool operator<(String const& l, String const& r)
   return l.view() < r.view();
 }
 template <typename L>
-typename std::enable_if<IsComparable<L>::value, bool>::type operator<(
-  L&& l, String const& r)
+std::enable_if_t<IsComparable<L>::value, bool> operator<(L&& l,
+                                                         String const& r)
 {
   return AsStringView<L>::view(std::forward<L>(l)) < r.view();
 }
 template <typename R>
-typename std::enable_if<IsComparable<R>::value, bool>::type operator<(
-  String const& l, R&& r)
+std::enable_if_t<IsComparable<R>::value, bool> operator<(String const& l,
+                                                         R&& r)
 {
   return l.view() < AsStringView<R>::view(std::forward<R>(r));
 }
@@ -798,14 +795,14 @@ inline bool operator<=(String const& l, String const& r)
   return l.view() <= r.view();
 }
 template <typename L>
-typename std::enable_if<IsComparable<L>::value, bool>::type operator<=(
-  L&& l, String const& r)
+std::enable_if_t<IsComparable<L>::value, bool> operator<=(L&& l,
+                                                          String const& r)
 {
   return AsStringView<L>::view(std::forward<L>(l)) <= r.view();
 }
 template <typename R>
-typename std::enable_if<IsComparable<R>::value, bool>::type operator<=(
-  String const& l, R&& r)
+std::enable_if_t<IsComparable<R>::value, bool> operator<=(String const& l,
+                                                          R&& r)
 {
   return l.view() <= AsStringView<R>::view(std::forward<R>(r));
 }
@@ -815,14 +812,14 @@ inline bool operator>(String const& l, String const& r)
   return l.view() > r.view();
 }
 template <typename L>
-typename std::enable_if<IsComparable<L>::value, bool>::type operator>(
-  L&& l, String const& r)
+std::enable_if_t<IsComparable<L>::value, bool> operator>(L&& l,
+                                                         String const& r)
 {
   return AsStringView<L>::view(std::forward<L>(l)) > r.view();
 }
 template <typename R>
-typename std::enable_if<IsComparable<R>::value, bool>::type operator>(
-  String const& l, R&& r)
+std::enable_if_t<IsComparable<R>::value, bool> operator>(String const& l,
+                                                         R&& r)
 {
   return l.view() > AsStringView<R>::view(std::forward<R>(r));
 }
@@ -832,14 +829,14 @@ inline bool operator>=(String const& l, String const& r)
   return l.view() >= r.view();
 }
 template <typename L>
-typename std::enable_if<IsComparable<L>::value, bool>::type operator>=(
-  L&& l, String const& r)
+std::enable_if_t<IsComparable<L>::value, bool> operator>=(L&& l,
+                                                          String const& r)
 {
   return AsStringView<L>::view(std::forward<L>(l)) >= r.view();
 }
 template <typename R>
-typename std::enable_if<IsComparable<R>::value, bool>::type operator>=(
-  String const& l, R&& r)
+std::enable_if_t<IsComparable<R>::value, bool> operator>=(String const& l,
+                                                          R&& r)
 {
   return l.view() >= AsStringView<R>::view(std::forward<R>(r));
 }
@@ -921,9 +918,9 @@ struct IntoString<StringOpPlus<L, R>> : std::true_type
 };
 
 template <typename L, typename R>
-typename std::enable_if<StringAdd<L>::value && StringAdd<R>::value,
-                        StringOpPlus<typename StringAdd<L>::temp_type,
-                                     typename StringAdd<R>::temp_type>>::type
+std::enable_if_t<StringAdd<L>::value && StringAdd<R>::value,
+                 StringOpPlus<typename StringAdd<L>::temp_type,
+                              typename StringAdd<R>::temp_type>>
 operator+(L&& l, R&& r)
 {
   return { StringAdd<L>::temp(std::forward<L>(l)),
@@ -931,14 +928,14 @@ operator+(L&& l, R&& r)
 }
 
 template <typename LL, typename LR, typename R>
-typename std::enable_if<AsStringView<R>::value, bool>::type operator==(
+std::enable_if_t<AsStringView<R>::value, bool> operator==(
   StringOpPlus<LL, LR> const& l, R&& r)
 {
   return std::string(l) == AsStringView<R>::view(std::forward<R>(r));
 }
 
 template <typename L, typename RL, typename RR>
-typename std::enable_if<AsStringView<L>::value, bool>::type operator==(
+std::enable_if_t<AsStringView<L>::value, bool> operator==(
   L&& l, StringOpPlus<RL, RR> const& r)
 {
   return AsStringView<L>::view(std::forward<L>(l)) == std::string(r);
