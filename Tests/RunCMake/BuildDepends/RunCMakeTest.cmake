@@ -209,6 +209,17 @@ endif()
 run_BuildDepends(CustomCommandUnityBuild)
 unset(run_BuildDepends_skip_step_2)
 
+# Older MSVC keeps the CMP0235 OLD layout, which these tests show is broken.
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND NOT MSVC_VERSION LESS 1916)
+  unset(run_BuildDepends_skip_step_3)
+  run_BuildDepends(PchReusePdb)
+  set(run_BuildDepends_skip_step_3 1)
+  run_BuildDepends(PchReusePdbMixedLang)
+  if(CMake_TEST_CUDA)
+    run_BuildDepends(PchReusePdbCuda)
+  endif()
+endif()
+
 if (RunCMake_GENERATOR MATCHES "Make|Ninja")
   set(run_BuildDepends_skip_step_2 1)
   run_BuildDepends(LinkDependsCheck)

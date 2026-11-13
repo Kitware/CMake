@@ -920,7 +920,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     std::string targetFullPathReal;
     std::string targetFullPathPDB;
     std::string targetFullPathCompilePDB =
-      this->ComputeTargetCompilePDB(this->GetConfigName());
+      this->ComputeTargetCompilePDB(this->GetConfigName(), &source);
     if (this->GeneratorTarget->GetType() == cm::TargetType::EXECUTABLE ||
         this->GeneratorTarget->GetType() == cm::TargetType::STATIC_LIBRARY ||
         this->GeneratorTarget->GetType() == cm::TargetType::SHARED_LIBRARY ||

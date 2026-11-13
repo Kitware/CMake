@@ -25,8 +25,9 @@ if it is set when a target is created.
   The property value may use generator expressions that refer to the
   target on which it is set, such as :genex:`$<TARGET_PROPERTY:prop>`.
 
-If the :prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM` target is set, this property
-is ignored and the reusage target's value of this property is used instead.
+If the :prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM` target is set, the copy of
+that target's compiler ``.pdb`` file used with the precompiled header is also
+placed in this directory.
 
 .. |PDB_XXX| replace:: :prop_tgt:`PDB_OUTPUT_DIRECTORY_<CONFIG>`
 .. include:: include/COMPILE_PDB_NOTE.rst

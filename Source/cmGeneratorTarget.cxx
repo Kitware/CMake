@@ -561,6 +561,7 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->CustomTransitiveBuildPropertiesMap.clear();
   this->CustomTransitiveInterfacePropertiesMap.clear();
   this->PrecompileHeadersCache.clear();
+  this->PchReuseLanguages.clear();
   this->LinkOptionsCache.clear();
   this->LinkDirectoriesCache.clear();
   this->RuntimeBinaryFullNameCache.clear();
@@ -1374,37 +1375,34 @@ bool cmGeneratorTarget::GetPropertyAsBool(std::string const& prop) const
 std::string cmGeneratorTarget::GetCompilePDBName(
   std::string const& config) const
 {
-  if (cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget()) {
-    if (reuseTarget != this) {
-      return reuseTarget->GetCompilePDBName(config);
-    }
+  cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+  bool const hasReuse = reuseTarget && reuseTarget != this;
+  if (hasReuse && !this->UsePchReuseOwnCompilePDB()) {
+    return reuseTarget->GetCompilePDBName(config);
   }
 
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(config);
   std::string configProp = cmStrCat("COMPILE_PDB_NAME_"_s, configUpper);
-  cmValue config_name = this->GetProperty(configProp);
-  if (cmNonempty(config_name)) {
-    std::string pdbName = cmGeneratorExpression::Evaluate(
-      *config_name, this->LocalGenerator, config, this);
-    NameComponents const& components = GetFullNameInternalComponents(
-      config, cmStateEnums::RuntimeBinaryArtifact);
-    return cmStrCat(components.prefix, pdbName, ".pdb"_s);
+  cmValue name = this->GetProperty(configProp);
+  if (!cmNonempty(name)) {
+    name = this->GetProperty("COMPILE_PDB_NAME");
   }
-
-  cmValue name = this->GetProperty("COMPILE_PDB_NAME");
   if (cmNonempty(name)) {
     std::string pdbName = cmGeneratorExpression::Evaluate(
       *name, this->LocalGenerator, config, this);
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
-    return cmStrCat(components.prefix, pdbName, ".pdb"_s);
+    pdbName = cmStrCat(components.prefix, std::move(pdbName), ".pdb"_s);
+    // CMake 3.16 to 4.1 required the reused target's name here.  That name
+    // is the copy's, so the default name is used instead.
+    if (!hasReuse || pdbName != reuseTarget->GetCompilePDBName(config)) {
+      return pdbName;
+    }
   }
 
   // If the target is PCH-reused or PCH-reuses, we need a stable name for the
   // PDB file so that reusing targets can construct a stable name for it.
-  cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
-  bool const hasReuse = reuseTarget && reuseTarget != this;
   if (this->PchReused || hasReuse) {
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
@@ -1414,9 +1412,17 @@ std::string cmGeneratorTarget::GetCompilePDBName(
   return std::string{};
 }
 
-std::string cmGeneratorTarget::GetCompilePDBPath(
-  std::string const& config) const
+std::string cmGeneratorTarget::GetCompilePDBPath(std::string const& config,
+                                                 cmSourceFile const* sf) const
 {
+  if (sf && this->GetPchReuseTarget()) {
+    std::string pdb = this->GetPchReuseCompilePDBPath(
+      config, this->GetSourcePchLanguage(sf, config));
+    if (!pdb.empty()) {
+      return pdb;
+    }
+  }
+
   std::string dir = this->GetCompilePDBDirectory(config);
   std::string name = this->GetCompilePDBName(config);
   if (dir.empty() && !name.empty() && this->HaveWellDefinedOutputFiles()) {
@@ -1426,6 +1432,73 @@ std::string cmGeneratorTarget::GetCompilePDBPath(
     dir += '/';
   }
   return dir + name;
+}
+
+std::string cmGeneratorTarget::GetPchReuseCompilePDBPath(
+  std::string const& config, std::string const& language) const
+{
+  cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+  if (!reuseTarget || reuseTarget == this ||
+      !this->UsePchReuseOwnCompilePDB() ||
+      this->GetPchSource(config, language).empty()) {
+    return std::string();
+  }
+
+  auto langs = this->PchReuseLanguages.find(config);
+  if (langs == this->PchReuseLanguages.end()) {
+    std::set<std::string> pchLangs;
+    std::vector<cmSourceFile*> sources;
+    this->GetSourceFiles(sources, config);
+    for (cmSourceFile const* sf : sources) {
+      std::string lang = this->GetSourcePchLanguage(sf, config);
+      if (!lang.empty()) {
+        pchLangs.insert(std::move(lang));
+      }
+    }
+    langs = this->PchReuseLanguages.emplace(config, std::move(pchLangs)).first;
+  }
+
+  // Each language's PCH is rebuilt on its own, so each gets its own copy.
+  std::string name = reuseTarget->GetCompilePDBName(config);
+  if (langs->second.size() > 1) {
+    name = cmStrCat(cmSystemTools::GetFilenameWithoutLastExtension(name), '.',
+                    cmSystemTools::LowerCase(language), ".pdb"_s);
+  }
+  return cmStrCat(this->GetCompilePDBDirectory(config), '/', name);
+}
+
+bool cmGeneratorTarget::UsePchReuseOwnCompilePDB() const
+{
+  if (this->GetPolicyStatusCMP0235() != cmPolicies::NEW) {
+    return false;
+  }
+  // cl before 19.16 only accepts a PCH with the PDB file name it was
+  // created with, which the per-language copies change.
+  auto const olderMsvc = [this](cm::string_view lang) -> bool {
+    return this->Makefile->GetSafeDefinition(
+             cmStrCat("CMAKE_"_s, lang, "_COMPILER_ID"_s)) == "MSVC" &&
+      cmSystemTools::VersionCompare(
+             cmSystemTools::OP_LESS,
+             this->Makefile->GetSafeDefinition(
+               cmStrCat("CMAKE_"_s, lang, "_COMPILER_VERSION"_s)),
+             "19.16");
+  };
+  return !olderMsvc("C"_s) && !olderMsvc("CXX"_s);
+}
+
+std::string cmGeneratorTarget::GetSourcePchLanguage(
+  cmSourceFile const* sf, std::string const& config) const
+{
+  cmGeneratorFileSet const* fileSet = this->GetFileSetForSource(config, sf);
+  if ((fileSet && fileSet->GetProperty("SKIP_PRECOMPILE_HEADERS")) ||
+      sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    return std::string();
+  }
+  std::string lang = this->GetSourceFileLanguage(sf, config);
+  if (this->GetPchSource(config, lang).empty()) {
+    return std::string();
+  }
+  return lang;
 }
 
 bool cmGeneratorTarget::HasSOName(std::string const& config) const
@@ -2633,7 +2706,7 @@ cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
       std::string pdbPath;
       std::string compilePdbPath;
       if (targetType <= cm::TargetType::OBJECT_LIBRARY) {
-        compilePdbPath = this->GetCompilePDBPath(config);
+        compilePdbPath = this->GetCompilePDBPath(config, sf);
         if (compilePdbPath.empty()) {
           // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
           // A trailing slash tells the toolchain to add its default file name.

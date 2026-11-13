@@ -331,14 +331,14 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories(
 }
 
 std::string cmCommonTargetGenerator::ComputeTargetCompilePDB(
-  std::string const& config) const
+  std::string const& config, cmSourceFile const* source) const
 {
   std::string compilePdbPath;
   if (this->GeneratorTarget->GetType() > cm::TargetType::OBJECT_LIBRARY) {
     return compilePdbPath;
   }
 
-  compilePdbPath = this->GeneratorTarget->GetCompilePDBPath(config);
+  compilePdbPath = this->GeneratorTarget->GetCompilePDBPath(config, source);
   if (compilePdbPath.empty()) {
     // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
     // A trailing slash tells the toolchain to add its default file name.

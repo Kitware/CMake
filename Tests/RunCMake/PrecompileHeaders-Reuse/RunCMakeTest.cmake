@@ -38,3 +38,6 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode" AND
   run_cmake(PchReuseMissingLanguage)
 endif()
 run_cmake(PchReuseMissingLanguageUnused)
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+  run_build_verbose(PchReuseSplitPdb)
+endif()

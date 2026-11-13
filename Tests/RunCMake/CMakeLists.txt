@@ -386,6 +386,7 @@ add_RunCMake_test(BuildDepends
   -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMAKE_C_LINK_DEPENDS_USE_COMPILER=${CMAKE_C_LINK_DEPENDS_USE_COMPILER}
   -DCMake_TEST_BuildDepends_GNU_AS=${CMake_TEST_BuildDepends_GNU_AS}
+  -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
   )
 set_property(TEST RunCMake.BuildDepends APPEND PROPERTY LABELS "Fortran")
 add_RunCMake_test(BuiltinTargets)
@@ -1742,7 +1743,8 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMAKE_C_SIMULATE_ID=${CMAKE_C_SIMULATE_ID}
   -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
   -DMSVC_VERSION=${MSVC_VERSION})
-add_RunCMake_test(PrecompileHeaders-Reuse -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
+add_RunCMake_test(PrecompileHeaders-Reuse -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+  -DMSVC_VERSION=${MSVC_VERSION})
 
 # This test can take a long time due to the number of test cases.
 # Provide an option to customize it.

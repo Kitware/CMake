@@ -87,7 +87,8 @@ protected:
 
   LinkedTargetDirs GetLinkedTargetDirectories(std::string const& lang,
                                               std::string const& config) const;
-  std::string ComputeTargetCompilePDB(std::string const& config) const;
+  std::string ComputeTargetCompilePDB(
+    std::string const& config, cmSourceFile const* source = nullptr) const;
 
   std::vector<std::string> GetLinkerLauncher(std::string const& config);
 

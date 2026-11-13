@@ -584,7 +584,8 @@ std::string cmNinjaTargetGenerator::ConvertToOutputFormatForShell(
 }
 
 bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(
-  cmNinjaVars& vars, std::string const& config) const
+  cmNinjaVars& vars, std::string const& config,
+  cmSourceFile const* source) const
 {
   cmMakefile* mf = this->GetMakefile();
   bool supportsPDB = mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
@@ -598,7 +599,7 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(
   }
   if (supportsPDB) {
     std::string pdbPath;
-    std::string compilePdbPath = this->ComputeTargetCompilePDB(config);
+    std::string compilePdbPath = this->ComputeTargetCompilePDB(config, source);
     if (this->GeneratorTarget->GetType() == cm::TargetType::EXECUTABLE ||
         this->GeneratorTarget->GetType() == cm::TargetType::STATIC_LIBRARY ||
         this->GeneratorTarget->GetType() == cm::TargetType::SHARED_LIBRARY ||
@@ -1644,7 +1645,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
                  : cmStrCat(objectFileName, ".d"_s));
   }
 
-  this->SetMsvcTargetPdbVariable(vars, config);
+  this->SetMsvcTargetPdbVariable(vars, config, source);
 
   if (firstForConfig) {
     this->ExportObjectCompileCommand(
@@ -1998,7 +1999,7 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
     vars["CLANG_TIDY_EXPORT_FIXES"] = fixesFile;
   }
 
-  this->SetMsvcTargetPdbVariable(vars, config);
+  this->SetMsvcTargetPdbVariable(vars, config, source);
 
   if (firstForConfig) {
     this->ExportObjectCompileCommand(

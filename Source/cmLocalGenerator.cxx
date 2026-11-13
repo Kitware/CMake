@@ -3202,6 +3202,9 @@ bool cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
     target->AddSource(pch.Header);
   }
 
+  // With the old layout all languages share one copy, so only one step
+  // makes it.
+  std::set<std::string> pdbCopyConfigs;
   for (PchInfo const& pch : pchInfos) {
     std::string const& config = pch.Config;
     std::string const& lang = pch.Lang;
@@ -3219,7 +3222,9 @@ bool cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
       } else {
         std::string const configUpper = cmSystemTools::UpperCase(config);
 
-        if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
+        if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB") &&
+            (target->UsePchReuseOwnCompilePDB() ||
+             pdbCopyConfigs.insert(config).second)) {
           std::string const langFlags = this->Makefile->GetSafeDefinition(
             cmStrCat("CMAKE_"_s, lang, "_FLAGS_"_s, configUpper));
 
@@ -3296,8 +3301,22 @@ void cmLocalGenerator::CopyPchCompilePdb(
   cmGeneratorTarget* target, cmGeneratorTarget* reuseTarget,
   std::vector<std::string> const& extensions)
 {
-  std::string const copy_script = cmStrCat(
-    target->GetSupportDirectory(), "/copy_idb_pdb_"_s, config, ".cmake"_s);
+  std::string const copy_script =
+    cmStrCat(target->GetSupportDirectory(), "/copy_idb_pdb_"_s, language, '_',
+             config, ".cmake"_s);
+  // Multiple targets reusing the same PCH may share a compiler PDB
+  // directory, in which case they copy to the same destination.  Use a
+  // per-target stamp file as the rule output to avoid duplicate rules.
+  std::string const stamp_file =
+    cmStrCat(target->GetSupportDirectory(), "/copy_idb_pdb_"_s, language, '_',
+             config, ".stamp"_s);
+  std::string const pch_file = reuseTarget->GetPchFile(config, language);
+  std::string pdb_file = target->GetPchReuseCompilePDBPath(config, language);
+  if (pdb_file.empty()) {
+    // With the old layout, the copy is the target's compiler PDB.
+    pdb_file = target->GetCompilePDBPath(config);
+  }
+
   cmGeneratedFileStream file(copy_script);
   file.SetCopyIfDifferent(true);
 
@@ -3306,6 +3325,9 @@ void cmLocalGenerator::CopyPchCompilePdb(
   file << "# The compiler generated pdb file needs to be written to disk\n"
        << "# by mspdbsrv. The foreach retry loop is needed to make sure\n"
        << "# the pdb file is ready to be copied.\n\n";
+
+  // A failed copy leaves no stamp, so the next build retries it.
+  file << "file(REMOVE \"" << stamp_file << "\")\n";
 
   auto configGenex = [&](cm::string_view expr) -> std::string {
     if (this->GetGlobalGenerator()->IsMultiConfig()) {
@@ -3327,37 +3349,33 @@ void cmLocalGenerator::CopyPchCompilePdb(
   for (auto const& extension : extensions) {
     std::string const from_file =
       replaceExtension(reuseTarget->GetCompilePDBPath(config), extension);
-    std::string const to_dir = target->GetCompilePDBDirectory(config);
-    std::string const to_file =
-      replaceExtension(reuseTarget->GetCompilePDBName(config), extension);
-    std::string const dest_file = cmStrCat(to_dir, '/', to_file);
+    std::string const dest_file = replaceExtension(pdb_file, extension);
+    std::string const to_dir = cmSystemTools::GetFilenamePath(dest_file);
 
-    file << "foreach(retry RANGE 1 30)\n";
-    file << "  if (EXISTS \"" << from_file << "\" AND (NOT EXISTS \""
-         << dest_file << "\" OR NOT \"" << dest_file << "\" IS_NEWER_THAN \""
-         << from_file << "\"))\n";
-    file << "    file(MAKE_DIRECTORY \"" << to_dir << "\")\n";
-    file << "    execute_process(COMMAND ${CMAKE_COMMAND} -E copy";
-    file << " \"" << from_file << "\"" << " \"" << to_dir
-         << "\" RESULT_VARIABLE result " << " ERROR_QUIET)\n";
-    file << "    if (NOT result EQUAL 0)\n"
-         << "      execute_process(COMMAND ${CMAKE_COMMAND}"
-         << " -E sleep 1)\n"
-         << "    else()\n";
-    file << "      break()\n"
-         << "    endif()\n";
-    file << "  elseif(NOT EXISTS \"" << from_file << "\")\n"
-         << "    execute_process(COMMAND ${CMAKE_COMMAND}" << " -E sleep 1)\n"
-         << "  endif()\n";
-    file << "endforeach()\n";
+    // The copy is replaced only for a new PCH, not on every creator change.
+    file << "if(NOT EXISTS \"" << dest_file << "\" OR NOT \"" << dest_file
+         << "\" IS_NEWER_THAN \"" << pch_file << "\")\n"
+         << "  set(result 1)\n"
+         << "  foreach(retry RANGE 1 30)\n"
+         << "    if(EXISTS \"" << from_file << "\")\n"
+         << "      file(MAKE_DIRECTORY \"" << to_dir << "\")\n"
+         << "      execute_process(COMMAND ${CMAKE_COMMAND} -E copy \""
+         << from_file << "\" \"" << dest_file
+         << "\" RESULT_VARIABLE result ERROR_QUIET)\n"
+         << "      if(result EQUAL 0)\n"
+         << "        break()\n"
+         << "      endif()\n"
+         << "    endif()\n"
+         << "    execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1)\n"
+         << "  endforeach()\n"
+         << "  if(EXISTS \"" << from_file << "\" AND NOT result EQUAL 0)\n"
+         << "    message(FATAL_ERROR \"Cannot copy\\n  " << from_file
+         << "\\nto\\n  " << dest_file << "\")\n"
+         << "  endif()\n"
+         << "endif()\n";
     byproducts.push_back(configGenex(dest_file));
   }
 
-  // Multiple targets reusing the same PCH may share a compiler PDB
-  // directory, in which case they copy to the same destination.  Use a
-  // per-target stamp file as the rule output to avoid duplicate rules.
-  std::string const stamp_file = cmStrCat(
-    target->GetSupportDirectory(), "/copy_idb_pdb_"_s, config, ".stamp"_s);
   file << "file(TOUCH \"" << stamp_file << "\")\n";
 
   cmCustomCommandLines commandLines =
@@ -3373,8 +3391,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
   cc->SetCommandLines(commandLines);
   cc->SetComment(comment);
   cc->SetStdPipesUTF8(true);
-  cc->AppendDepends(
-    { reuseTarget->GetPchFile(config, language), copy_script });
+  cc->AppendDepends({ pch_file, copy_script });
   // Fastbuild needs to know that this custom command actually depends on a
   // target that produces PCH, so it can sort by dependencies correctly.
   if (this->GetGlobalGenerator()->IsFastbuild()) {

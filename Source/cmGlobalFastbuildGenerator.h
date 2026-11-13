@@ -208,6 +208,7 @@ struct FastbuildObjectListNode : public FastbuildTargetBase
   std::string CompilerOptions;
   std::string CompilerOutputPath;
   std::string CompilerOutputExtension;
+  std::string CompilerPDB;
   std::vector<std::string> CompilerInputUnity;
   std::string PCHInputFile;
   std::string PCHOutputFile;
