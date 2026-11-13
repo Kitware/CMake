@@ -768,6 +768,15 @@ public:
     std::string const& config, std::string const& language) const;
 
   void MarkAsPchReused() { this->PchReused = true; }
+  void AddPchLanguage(std::string const& config, std::string const& language)
+  {
+    this->PchLanguages.emplace(config, language);
+  }
+  bool HasPchLanguage(std::string const& config,
+                      std::string const& language) const
+  {
+    return this->PchLanguages.count({ config, language }) != 0;
+  }
   cmGeneratorTarget const* GetPchReuseTarget() const;
   cmGeneratorTarget* GetPchReuseTarget();
   std::vector<std::string> GetPchArchs(std::string const& config,
@@ -1439,6 +1448,7 @@ private:
   mutable std::map<std::string, std::string> PchFiles;
   mutable std::map<std::string, std::string> PchCreateCompileOptions;
   mutable std::map<std::string, std::string> PchUseCompileOptions;
+  std::set<std::pair<std::string, std::string>> PchLanguages;
 
   std::unordered_set<std::string> UnityBatchedSourceFiles;
 

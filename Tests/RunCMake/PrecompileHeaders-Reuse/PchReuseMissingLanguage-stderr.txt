@@ -1,0 +1,16 @@
+^CMake Error at PchReuseMissingLanguage\.cmake:[0-9]+ \(add_executable\):
+  Target "main_cxx" reuses precompiled headers from target "pch_c", but
+  "pch_c" does not build a precompiled header for language CXX\.  Make "pch_c"
+  build one, or set SKIP_PRECOMPILE_HEADERS on the CXX sources of "main_cxx"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at PchReuseMissingLanguage\.cmake:[0-9]+ \(add_executable\):
+  Target "main_c" reuses precompiled headers from target "pch_cxx", but
+  "pch_cxx" does not build a precompiled header for language C\.  Make
+  "pch_cxx" build one, or set SKIP_PRECOMPILE_HEADERS on the C sources of
+  "main_c"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

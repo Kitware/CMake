@@ -2308,16 +2308,21 @@ bool cmGlobalGenerator::AddAutomaticSources()
       lg->AddXCConfigSources(gt.get());
     }
   }
+  bool pchReuseOk = true;
   for (auto const& lg : this->LocalGenerators) {
     for (auto const& gt : lg->GetGeneratorTargets()) {
       if (!gt->CanCompileSources()) {
         continue;
       }
       // Handle targets that reuse a PCH from an above-handled target.
-      if (gt->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
-        lg->AddPchDependencies(gt.get());
+      if (gt->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM") &&
+          !lg->AddPchDependencies(gt.get())) {
+        pchReuseOk = false;
       }
     }
+  }
+  if (!pchReuseOk) {
+    return false;
   }
   // The above transformations may have changed the classification of sources,
   // e.g., sources that go into unity builds become SourceKindUnityBatched.
