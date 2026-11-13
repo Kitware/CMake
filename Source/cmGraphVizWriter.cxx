@@ -9,7 +9,6 @@
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -149,7 +148,7 @@ std::unique_ptr<cmGeneratedFileStream> cmGraphVizWriter::CreateTargetFile(
   auto const perTargetFileName =
     cmStrCat(this->FileName, '.', pathSafeItemName, fileNameSuffix);
   auto perTargetFileStream =
-    cm::make_unique<cmGeneratedFileStream>(perTargetFileName);
+    std::make_unique<cmGeneratedFileStream>(perTargetFileName);
 
   this->WriteHeader(*perTargetFileStream, item.AsStr());
   this->WriteNode(*perTargetFileStream, item);

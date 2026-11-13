@@ -5,11 +5,11 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/enum_set>
@@ -59,7 +59,7 @@ cmGeneratorFileSets::cmGeneratorFileSets(cmGeneratorTarget* target,
         continue;
       }
       auto entry = this->FileSets.emplace(
-        name, cm::make_unique<cmGeneratorFileSet>(target, fileSet, domain));
+        name, std::make_unique<cmGeneratorFileSet>(target, fileSet, domain));
       auto const* genFileSet = entry.first->second.get();
       this->AllFileSets.push_back(genFileSet);
       this->SelfFileSets[genFileSet->GetType()].push_back(genFileSet);
@@ -75,7 +75,7 @@ cmGeneratorFileSets::cmGeneratorFileSets(cmGeneratorTarget* target,
           continue;
         }
         auto entry = this->FileSets.emplace(
-          name, cm::make_unique<cmGeneratorFileSet>(target, fileSet, domain));
+          name, std::make_unique<cmGeneratorFileSet>(target, fileSet, domain));
         genFileSet = entry.first->second.get();
         this->AllFileSets.push_back(genFileSet);
       } else {

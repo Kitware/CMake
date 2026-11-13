@@ -6,6 +6,7 @@
 #include <cassert>
 #include <iostream>
 #include <map>
+#include <memory>
 
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -77,7 +78,7 @@ T* GetEntry(std::map<cm::string_view, std::unique_ptr<T>>& entryMap,
 {
   auto i = entryMap.find(name);
   if (i == entryMap.end()) {
-    auto p = cm::make_unique<T>();
+    auto p = std::make_unique<T>();
     p->Name = std::string{ name };
     i = entryMap.emplace(p->Name, std::move(p)).first;
   }

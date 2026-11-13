@@ -3,11 +3,10 @@
 #pragma once
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <cm/memory>
 
 #include "cmBuildSbomBuilder.h"
 
@@ -30,7 +29,7 @@ public:
                        std::vector<cmExportSet*> const& exportSets,
                        std::string outputFile)
     : OutputFile(std::move(outputFile))
-    , Builder(cm::make_unique<cmBuildSbomBuilder>(args, exportSets))
+    , Builder(std::make_unique<cmBuildSbomBuilder>(args, exportSets))
   {
   }
 

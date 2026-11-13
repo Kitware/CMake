@@ -5,9 +5,9 @@
 #include <array>
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -60,12 +60,12 @@ bool cmExportFileGenerator::GenerateImportFile()
   if (this->AppendMode) {
     // Open for append.
     auto openmodeApp = std::ios::app;
-    foutPtr = cm::make_unique<cmsys::ofstream>(this->MainImportFile.c_str(),
-                                               openmodeApp);
+    foutPtr = std::make_unique<cmsys::ofstream>(this->MainImportFile.c_str(),
+                                                openmodeApp);
   } else {
     // Generate atomically and with copy-if-different.
     auto ap =
-      cm::make_unique<cmGeneratedFileStream>(this->MainImportFile, true);
+      std::make_unique<cmGeneratedFileStream>(this->MainImportFile, true);
     ap->SetCopyIfDifferent(true);
     foutPtr = std::move(ap);
   }

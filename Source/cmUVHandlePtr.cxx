@@ -5,10 +5,9 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <memory>
 #include <mutex>
 #include <utility>
-
-#include <cm/memory>
 
 #include <cm3p/uv.h>
 
@@ -336,7 +335,7 @@ void write_req_cb(uv_write_t* req, int status)
 int uv_write(uv_stream_t* handle, uv_buf_t const bufs[], unsigned int nbufs,
              std::weak_ptr<std::function<void(int)>> cb)
 {
-  auto req = cm::make_unique<write_req>(std::move(cb));
+  auto req = std::make_unique<write_req>(std::move(cb));
   int status = uv_write(req.get(), handle, bufs, nbufs, write_req_cb);
   if (status == 0) {
     // Ownership has been transferred to the event loop.

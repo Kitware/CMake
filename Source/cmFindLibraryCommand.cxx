@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 
@@ -47,7 +47,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   this->FullDebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
   if (this->FullDebugMode || !this->ComputeIfImplicitDebugModeSuppressed()) {
-    this->DebugState = cm::make_unique<cmFindBaseDebugState>(this);
+    this->DebugState = std::make_unique<cmFindBaseDebugState>(this);
   }
 
   if (this->IsFound()) {

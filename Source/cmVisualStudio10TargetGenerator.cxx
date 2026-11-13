@@ -6,10 +6,10 @@
 #include <cstdio>
 #include <cstring>
 #include <iterator>
+#include <memory>
 #include <set>
 #include <sstream>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cm/vector>
@@ -1828,8 +1828,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
   std::unique_ptr<Elem> spe1;
   std::unique_ptr<Elem> spe2;
   if (this->ProjectType != VsProjectType::csproj) {
-    spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
-    spe2 = cm::make_unique<Elem>(*spe1, "CustomBuild");
+    spe1 = std::make_unique<Elem>(e0, "ItemGroup");
+    spe2 = std::make_unique<Elem>(*spe1, "CustomBuild");
     this->WriteSource(*spe2, source);
     spe2->SetHasElements();
     if (command.GetStdPipesUTF8()) {
@@ -2899,8 +2899,8 @@ void cmVisualStudio10TargetGenerator::ComputeSYCLOptions()
     if (!this->GeneratorTarget->IsLanguageUsed("SYCL", config)) {
       continue;
     }
-    auto options = cm::make_unique<Options>(this->LocalGenerator,
-                                            Options::Compiler, nullptr);
+    auto options = std::make_unique<Options>(this->LocalGenerator,
+                                             Options::Compiler, nullptr);
     std::string flags;
     this->LocalGenerator->GetTargetCompileFlags(this->GeneratorTarget, config,
                                                 "SYCL", flags, "");
@@ -3554,13 +3554,13 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::unique_ptr<Options> pOptions;
   switch (this->ProjectType) {
     case VsProjectType::vcxproj:
-      pOptions = cm::make_unique<Options>(
+      pOptions = std::make_unique<Options>(
         this->LocalGenerator, Options::Compiler, gg->GetClFlagTable());
       break;
     case VsProjectType::csproj:
-      pOptions =
-        cm::make_unique<Options>(this->LocalGenerator, Options::CSharpCompiler,
-                                 gg->GetCSharpFlagTable());
+      pOptions = std::make_unique<Options>(this->LocalGenerator,
+                                           Options::CSharpCompiler,
+                                           gg->GetCSharpFlagTable());
       break;
     default:
       break;
@@ -4035,7 +4035,7 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
   std::string const& configName)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions = cm::make_unique<Options>(
+  auto pOptions = std::make_unique<Options>(
     this->LocalGenerator, Options::ResourceCompiler, gg->GetRcFlagTable());
   Options& rcOptions = *pOptions;
 
@@ -4091,7 +4091,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   std::string const& configName)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions = cm::make_unique<Options>(
+  auto pOptions = std::make_unique<Options>(
     this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable());
   Options& cudaOptions = *pOptions;
 
@@ -4295,7 +4295,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   std::string const& configName)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions = cm::make_unique<Options>(
+  auto pOptions = std::make_unique<Options>(
     this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable());
   Options& cudaLinkOptions = *pOptions;
 
@@ -4413,7 +4413,7 @@ bool cmVisualStudio10TargetGenerator::ComputeMarmasmOptions(
   std::string const& configName)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions = cm::make_unique<Options>(
+  auto pOptions = std::make_unique<Options>(
     this->LocalGenerator, Options::MarmasmCompiler, gg->GetMarmasmFlagTable());
   Options& marmasmOptions = *pOptions;
 
@@ -4468,7 +4468,7 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
   std::string const& configName)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions = cm::make_unique<Options>(
+  auto pOptions = std::make_unique<Options>(
     this->LocalGenerator, Options::MasmCompiler, gg->GetMasmFlagTable());
   Options& masmOptions = *pOptions;
 
@@ -4525,7 +4525,7 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
   std::string const& configName)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions = cm::make_unique<Options>(
+  auto pOptions = std::make_unique<Options>(
     this->LocalGenerator, Options::NasmCompiler, gg->GetNasmFlagTable());
   Options& nasmOptions = *pOptions;
 
@@ -4758,8 +4758,8 @@ bool cmVisualStudio10TargetGenerator::ComputeSYCLLinkOptions(
   if (!cli) {
     return false;
   }
-  auto options = cm::make_unique<Options>(this->LocalGenerator,
-                                          Options::Linker, nullptr, this);
+  auto options = std::make_unique<Options>(this->LocalGenerator,
+                                           Options::Linker, nullptr, this);
 
   std::vector<std::string> libraries;
   std::vector<std::string> targetsFiles;
@@ -4903,7 +4903,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     return this->ComputeSYCLLinkOptions(config);
   }
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions = cm::make_unique<Options>(
+  auto pOptions = std::make_unique<Options>(
     this->LocalGenerator, Options::Linker, gg->GetLinkFlagTable(), this);
   Options& linkOptions = *pOptions;
 
@@ -5594,7 +5594,7 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
   if (cmValue vsSDKReferences =
         this->GeneratorTarget->GetProperty("VS_SDK_REFERENCES")) {
     sdkReferences.assign(*vsSDKReferences);
-    spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
+    spe1 = std::make_unique<Elem>(e0, "ItemGroup");
     for (auto const& ri : sdkReferences) {
       Elem(*spe1, "SDKReference").Attribute("Include", ri);
     }
@@ -5613,7 +5613,7 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
     if (desktopExtensionsVersion || mobileExtensionsVersion ||
         iotExtensionsVersion) {
       if (!spe1) {
-        spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
+        spe1 = std::make_unique<Elem>(e0, "ItemGroup");
       }
       if (desktopExtensionsVersion) {
         this->WriteSingleSDKReference(*spe1, "WindowsDesktop",
@@ -5654,7 +5654,7 @@ std::string ComputeCertificateThumbprint(std::string const& source)
   if (certFile != INVALID_HANDLE_VALUE && certFile) {
     DWORD fileSize = GetFileSize(certFile, nullptr);
     if (fileSize != INVALID_FILE_SIZE) {
-      auto certData = cm::make_unique<BYTE[]>(fileSize);
+      auto certData = std::make_unique<BYTE[]>(fileSize);
       if (certData) {
         DWORD dwRead = 0;
         if (ReadFile(certFile, certData.get(), fileSize, &dwRead, nullptr)) {

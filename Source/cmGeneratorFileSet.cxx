@@ -4,12 +4,12 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -54,7 +54,7 @@ public:
     std::unique_ptr<cmCompiledGeneratorExpression> const& cge,
     cmGeneratorFileSet const* fileSet, cmLinkItem const& item = NoLinkItem)
   {
-    return cm::make_unique<FileSetPropertyEntry>(
+    return std::make_unique<FileSetPropertyEntry>(
       std::move(dirs), contextSensitiveDirs, cge, fileSet, item);
   }
 

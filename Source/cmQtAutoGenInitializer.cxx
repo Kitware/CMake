@@ -9,6 +9,7 @@
 #include <initializer_list>
 #include <limits>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream> // for basic_ios, istringstream
 #include <string>
@@ -18,7 +19,6 @@
 
 #include <cm/algorithm>
 #include <cm/iterator>
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -975,7 +975,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   auto makeMUFile = [this, &kw](cmSourceFile* sf, std::string const& fullPath,
                                 std::vector<size_t> const& configs,
                                 bool muIt) -> MUFileHandle {
-    MUFileHandle muf = cm::make_unique<MUFile>();
+    MUFileHandle muf = std::make_unique<MUFile>();
     muf->FullPath = fullPath;
     muf->SF = sf;
     if (!configs.empty() && configs.size() != this->ConfigsList.size()) {
@@ -1606,7 +1606,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
       // Add a rule file to cause the target to build if a dependency has
       // changed, which will trigger the pre-build command to run autogen
-      auto cc = cm::make_unique<cmCustomCommand>();
+      auto cc = std::make_unique<cmCustomCommand>();
       cc->SetOutputs(timestampFileGenex);
       cc->SetDepends(uicDependencies);
       cc->SetComment("");
@@ -1687,15 +1687,15 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         auto const timestampTargetName =
           cmStrCat(this->GenTarget->GetName(), "_autogen_timestamp_deps"_s);
 
-        auto cc = cm::make_unique<cmCustomCommand>();
+        auto cc = std::make_unique<cmCustomCommand>();
         cc->SetWorkingDirectory(this->Dir.Work);
         cc->SetDepends(dependencies);
         cc->SetEscapeOldStyle(false);
         timestampTarget = this->LocalGen->AddUtilityCommand(
           timestampTargetName, true, std::move(cc));
 
-        this->LocalGen->AddGeneratorTarget(
-          cm::make_unique<cmGeneratorTarget>(timestampTarget, this->LocalGen));
+        this->LocalGen->AddGeneratorTarget(std::make_unique<cmGeneratorTarget>(
+          timestampTarget, this->LocalGen));
 
         // Set FOLDER property on the timestamp target, so it appears in the
         // appropriate folder in an IDE or in the file api.
@@ -1754,7 +1754,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
           { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
         this->AddGeneratedSource(outputFile, this->Moc);
       }
-      auto cc = cm::make_unique<cmCustomCommand>();
+      auto cc = std::make_unique<cmCustomCommand>();
       cc->SetOutputs(outputFile);
       cc->SetByproducts(timestampByproducts);
       cc->SetDepends(dependencies);
@@ -1779,7 +1779,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       }
     } else {
       // Create autogen target
-      auto cc = cm::make_unique<cmCustomCommand>();
+      auto cc = std::make_unique<cmCustomCommand>();
       cc->SetWorkingDirectory(this->Dir.Work);
       cc->SetByproducts(autogenByproducts);
       cc->SetDepends(dependencies);
@@ -1790,7 +1790,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         this->AutogenTarget.Name, true, std::move(cc));
       // Create autogen generator target
       this->LocalGen->AddGeneratorTarget(
-        cm::make_unique<cmGeneratorTarget>(autogenTarget, this->LocalGen));
+        std::make_unique<cmGeneratorTarget>(autogenTarget, this->LocalGen));
 
       // Order the autogen target(s) just before the original target.
       cmTarget* orderTarget =
@@ -1894,7 +1894,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
       cmStrCat("Automatic RCC for "_s,
                FileProjectRelativePath(this->Makefile, qrc.QrcFile));
 
-    auto cc = cm::make_unique<cmCustomCommand>();
+    auto cc = std::make_unique<cmCustomCommand>();
     cc->SetWorkingDirectory(this->Dir.Work);
     cc->SetCommandLines(commandLines);
     cc->SetComment(ccComment);
@@ -1917,7 +1917,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
 
         // Create autogen generator target
         this->LocalGen->AddGeneratorTarget(
-          cm::make_unique<cmGeneratorTarget>(autoRccTarget, this->LocalGen));
+          std::make_unique<cmGeneratorTarget>(autoRccTarget, this->LocalGen));
 
         // Set FOLDER property in autogen target
         if (!this->TargetsFolder.empty()) {

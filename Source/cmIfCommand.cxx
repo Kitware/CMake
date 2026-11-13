@@ -2,10 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmIfCommand.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -216,7 +216,7 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
   }
 
   {
-    auto fb = cm::make_unique<cmIfFunctionBlocker>();
+    auto fb = std::make_unique<cmIfFunctionBlocker>();
     // if is isn't true block the commands
     fb->IsBlocking = !isTrue;
     if (isTrue) {

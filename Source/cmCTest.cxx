@@ -13,12 +13,12 @@
 #include <initializer_list>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <ratio>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -331,7 +331,7 @@ std::string cmCTest::DecodeURL(std::string const& in)
 }
 
 cmCTest::cmCTest()
-  : Impl(cm::make_unique<Private>(this))
+  : Impl(std::make_unique<Private>(this))
 {
   std::string envValue;
   if (cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE", envValue)) {
@@ -2761,7 +2761,7 @@ int cmCTest::RunScripts(
     cmCTestLog(this, OUTPUT, "* Extra verbosity turned on\n"_s);
   }
 
-  auto ch = cm::make_unique<cmCTestScriptHandler>(this);
+  auto ch = std::make_unique<cmCTestScriptHandler>(this);
   for (auto const& script : scripts) {
     ch->AddConfigurationScript(script.first, script.second);
   }
@@ -3638,7 +3638,7 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
 void cmCTest::SetOutputLogFileName(std::string const& name)
 {
   if (!name.empty()) {
-    this->Impl->OutputLogFile = cm::make_unique<cmGeneratedFileStream>(name);
+    this->Impl->OutputLogFile = std::make_unique<cmGeneratedFileStream>(name);
   } else {
     this->Impl->OutputLogFile.reset();
   }
@@ -3899,7 +3899,7 @@ cmInstrumentation& cmCTest::GetInstrumentation()
 {
   if (!this->Impl->Instrumentation) {
     this->Impl->Instrumentation =
-      cm::make_unique<cmInstrumentation>(this->GetBinaryDir());
+      std::make_unique<cmInstrumentation>(this->GetBinaryDir());
   }
   return *this->Impl->Instrumentation;
 }

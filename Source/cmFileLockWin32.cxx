@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
-#include <cm/memory>
+#include <memory>
 
 #include <windows.h>
 
@@ -10,7 +10,7 @@
 static unsigned long const LOCK_LEN = static_cast<unsigned long>(-1);
 
 cmFileLock::cmFileLock()
-  : Overlapped(cm::make_unique<OVERLAPPED>())
+  : Overlapped(std::make_unique<OVERLAPPED>())
 {
   ZeroMemory(this->Overlapped.get(), sizeof(*this->Overlapped));
 }

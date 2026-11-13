@@ -4,12 +4,12 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/vector>
 #include <cmext/string_view>
@@ -59,7 +59,7 @@ cmNinjaNormalTargetGenerator::cmNinjaNormalTargetGenerator(
     }
   }
 
-  this->OSXBundleGenerator = cm::make_unique<cmOSXBundleGenerator>(target);
+  this->OSXBundleGenerator = std::make_unique<cmOSXBundleGenerator>(target);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 

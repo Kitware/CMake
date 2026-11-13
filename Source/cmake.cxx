@@ -12,11 +12,11 @@
 #include <initializer_list>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
@@ -323,14 +323,14 @@ cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[15] = {
 
 cmake::cmake(cmState::Role role, cmState::TryCompile isTryCompile)
   : CMakeWorkingDirectory(cmSystemTools::GetLogicalWorkingDirectory())
-  , FileTimeCache(cm::make_unique<cmFileTimeCache>())
+  , FileTimeCache(std::make_unique<cmFileTimeCache>())
   , GeneratorExpressionParseCache(
-      cm::make_unique<cmGeneratorExpressionParseCache>())
+      std::make_unique<cmGeneratorExpressionParseCache>())
 #ifndef CMAKE_BOOTSTRAP
-  , VariableWatch(cm::make_unique<cmVariableWatch>())
+  , VariableWatch(std::make_unique<cmVariableWatch>())
 #endif
-  , State(cm::make_unique<cmState>(role, isTryCompile))
-  , Messenger(cm::make_unique<cmMessenger>())
+  , State(std::make_unique<cmState>(role, isTryCompile))
+  , Messenger(std::make_unique<cmMessenger>())
 {
   this->TraceFile.close();
   this->CurrentSnapshot = this->State->CreateBaseSnapshot();
@@ -881,7 +881,7 @@ void cmake::ReadListFile(std::vector<std::string> const& args,
   // if a generator was not specified use a generic one
   std::unique_ptr<cmGlobalGenerator> gen;
   if (!gg) {
-    gen = cm::make_unique<cmGlobalGenerator>(this);
+    gen = std::make_unique<cmGlobalGenerator>(this);
     gg = gen.get();
   }
 
@@ -912,7 +912,7 @@ bool cmake::FindPackage(std::vector<std::string> const& args)
   this->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
   this->SetHomeOutputDirectory(cmSystemTools::GetLogicalWorkingDirectory());
 
-  this->SetGlobalGenerator(cm::make_unique<cmGlobalGenerator>(this));
+  this->SetGlobalGenerator(std::make_unique<cmGlobalGenerator>(this));
 
   cmStateSnapshot snapshot = this->GetCurrentSnapshot();
   snapshot.GetDirectory().SetCurrentBinary(
@@ -921,7 +921,8 @@ bool cmake::FindPackage(std::vector<std::string> const& args)
     cmSystemTools::GetLogicalWorkingDirectory());
   // read in the list file to fill the cache
   snapshot.SetDefaultDefinitions();
-  auto mfu = cm::make_unique<cmMakefile>(this->GetGlobalGenerator(), snapshot);
+  auto mfu =
+    std::make_unique<cmMakefile>(this->GetGlobalGenerator(), snapshot);
   cmMakefile* mf = mfu.get();
   this->GlobalGenerator->AddMakefile(std::move(mfu));
 
@@ -1601,7 +1602,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     if (profilingFormat == "google-trace"_s) {
       try {
         this->ProfilingOutput =
-          cm::make_unique<cmMakefileProfilingData>(profilingOutput);
+          std::make_unique<cmMakefileProfilingData>(profilingOutput);
       } catch (std::runtime_error& e) {
         cmSystemTools::Error(
           cmStrCat("Could not start profiling: "_s, e.what()));
@@ -2852,7 +2853,7 @@ int cmake::ActualConfigure()
 
   if (!this->GetIsInTryCompile()) {
     this->TruncateOutputLog("CMakeConfigureLog.yaml");
-    this->ConfigureLog = cm::make_unique<cmConfigureLog>(
+    this->ConfigureLog = std::make_unique<cmConfigureLog>(
       cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
       this->FileAPI->GetConfigureLogVersions());
     this->Instrumentation->ClearGeneratedQueries();
@@ -3001,15 +3002,15 @@ std::unique_ptr<cmGlobalGenerator> cmake::EvaluateDefaultGlobalGenerator()
   }
   auto gen = this->CreateGlobalGenerator(found);
   if (!gen) {
-    gen = cm::make_unique<cmGlobalNMakeMakefileGenerator>(this);
+    gen = std::make_unique<cmGlobalNMakeMakefileGenerator>(this);
   }
   return std::unique_ptr<cmGlobalGenerator>(std::move(gen));
 #elif defined(CMAKE_BOOTSTRAP_NINJA)
   return std::unique_ptr<cmGlobalGenerator>(
-    cm::make_unique<cmGlobalNinjaGenerator>(this));
+    std::make_unique<cmGlobalNinjaGenerator>(this));
 #else
   return std::unique_ptr<cmGlobalGenerator>(
-    cm::make_unique<cmGlobalUnixMakefileGenerator3>(this));
+    std::make_unique<cmGlobalUnixMakefileGenerator3>(this));
 #endif
 }
 
@@ -3092,7 +3093,7 @@ void cmake::InitializeFileAPI()
 {
 #ifndef CMAKE_BOOTSTRAP
   if (!this->FileAPI) {
-    this->FileAPI = cm::make_unique<cmFileAPI>(this);
+    this->FileAPI = std::make_unique<cmFileAPI>(this);
   }
 #endif
 }
@@ -3101,7 +3102,7 @@ void cmake::InitializeInstrumentation()
 {
 #ifndef CMAKE_BOOTSTRAP
   if (!this->Instrumentation) {
-    this->Instrumentation = cm::make_unique<cmInstrumentation>(
+    this->Instrumentation = std::make_unique<cmInstrumentation>(
       this->State->GetBinaryDirectory(),
       cmInstrumentation::LoadQueriesAfter::No);
   }

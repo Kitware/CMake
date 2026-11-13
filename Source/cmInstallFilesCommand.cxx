@@ -2,7 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallFilesCommand.h"
 
-#include <cm/memory>
+#include <memory>
 
 #include "cmDiagnostics.h"
 #include "cmExecutionStatus.h"
@@ -129,7 +129,7 @@ static void CreateInstallGenerator(cmMakefile& makefile,
   std::vector<std::string> no_configurations;
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(&makefile);
-  makefile.AddInstallGenerator(cm::make_unique<cmInstallFilesGenerator>(
+  makefile.AddInstallGenerator(std::make_unique<cmInstallFilesGenerator>(
     files, destination, false, no_permissions, no_configurations, no_component,
     std::vector<std::string>(), message, no_exclude_from_all, no_rename, false,
     cmInstallGenerator::CaptureContext(makefile)));

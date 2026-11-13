@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include <cm3p/json/value.h>
@@ -254,7 +253,7 @@ bool InstallScriptRunner::start(cm::uv_loop_ptr& loop,
   builder.AddCommand(this->Command)
     .SetExternalLoop(*loop)
     .SetMergedBuiltinStreams();
-  this->Chain = cm::make_unique<cmUVProcessChain>(builder.Start());
+  this->Chain = std::make_unique<cmUVProcessChain>(builder.Start());
   if (!this->Chain->Valid()) {
     return false;
   }

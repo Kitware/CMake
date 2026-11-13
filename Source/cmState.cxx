@@ -6,9 +6,9 @@
 #include <array>
 #include <cassert>
 #include <cstdlib>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -39,8 +39,9 @@ cmState::cmState(Role role, TryCompile isTryCompile)
   : StateRole(role)
   , IsTryCompile(isTryCompile)
 {
-  this->CacheManager = cm::make_unique<cmCacheManager>();
-  this->GlobVerificationManager = cm::make_unique<cmGlobVerificationManager>();
+  this->CacheManager = std::make_unique<cmCacheManager>();
+  this->GlobVerificationManager =
+    std::make_unique<cmGlobVerificationManager>();
 }
 
 cmState::~cmState() = default;

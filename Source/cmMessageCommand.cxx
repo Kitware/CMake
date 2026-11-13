@@ -3,9 +3,9 @@
 #include "cmMessageCommand.h"
 
 #include <cassert>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -177,11 +177,11 @@ bool cmMessageCommand(std::vector<std::string> const& args,
 
       if (cmp0218 != cmPolicies::OLD) {
         // Suppress warnings about using old variables.
-        ps = cm::make_unique<cmMakefile::PolicyPushPop>(&mf);
+        ps = std::make_unique<cmMakefile::PolicyPushPop>(&mf);
         mf.SetPolicy(cmPolicies::CMP0218, cmPolicies::OLD);
       }
 
-      ds = cm::make_unique<cmMakefile::DiagnosticPushPop>(&mf);
+      ds = std::make_unique<cmMakefile::DiagnosticPushPop>(&mf);
 
       // Use old variables to determine diagnostic action.
       if (mf.IsOn("CMAKE_ERROR_DEPRECATED")) {

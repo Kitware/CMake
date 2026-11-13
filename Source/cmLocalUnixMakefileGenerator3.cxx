@@ -7,9 +7,9 @@
 #include <cstdio>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cm/vector>
@@ -1716,15 +1716,16 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
         lang == "OBJC" || lang == "OBJCXX" || lang == "CUDA" ||
         lang == "HIP" || lang == "ISPC" || lang == "SYCL") {
       // TODO: Handle RC (resource files) dependencies correctly.
-      scanner = cm::make_unique<cmDependsC>(this, targetDir, lang, &validDeps);
+      scanner =
+        std::make_unique<cmDependsC>(this, targetDir, lang, &validDeps);
     }
 #ifndef CMAKE_BOOTSTRAP
     else if (lang == "Fortran") {
       ruleFileStream << "# Note that incremental build could trigger "
                         "a call to cmake_copy_f90_mod on each re-build\n";
-      scanner = cm::make_unique<cmDependsFortran>(this);
+      scanner = std::make_unique<cmDependsFortran>(this);
     } else if (lang == "Java") {
-      scanner = cm::make_unique<cmDependsJava>();
+      scanner = std::make_unique<cmDependsJava>();
     }
 #endif
 

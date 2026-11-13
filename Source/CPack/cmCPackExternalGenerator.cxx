@@ -3,10 +3,9 @@
 #include "cmCPackExternalGenerator.h"
 
 #include <map>
+#include <memory>
 #include <utility>
 #include <vector>
-
-#include <cm/memory>
 
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
@@ -33,7 +32,7 @@ int cmCPackExternalGenerator::InitializeInternal()
 
   std::string major = this->GetOption("CPACK_EXTERNAL_SELECTED_MAJOR");
   if (major == "1") {
-    this->Generator = cm::make_unique<cmCPackExternalVersion1Generator>(this);
+    this->Generator = std::make_unique<cmCPackExternalVersion1Generator>(this);
   }
 
   return this->Superclass::InitializeInternal();

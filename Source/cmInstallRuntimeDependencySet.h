@@ -3,11 +3,11 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -96,45 +96,45 @@ public:
 
   void AddExecutable(cmInstallTargetGenerator* executable)
   {
-    this->AddExecutable(cm::make_unique<TargetItem>(executable));
+    this->AddExecutable(std::make_unique<TargetItem>(executable));
   }
 
   void AddLibrary(cmInstallTargetGenerator* library)
   {
-    this->AddLibrary(cm::make_unique<TargetItem>(library));
+    this->AddLibrary(std::make_unique<TargetItem>(library));
   }
 
   void AddModule(cmInstallTargetGenerator* module)
   {
-    this->AddModule(cm::make_unique<TargetItem>(module));
+    this->AddModule(std::make_unique<TargetItem>(module));
   }
 
   bool AddBundleExecutable(cmInstallTargetGenerator* bundleExecutable)
   {
     return this->AddBundleExecutable(
-      cm::make_unique<TargetItem>(bundleExecutable));
+      std::make_unique<TargetItem>(bundleExecutable));
   }
 
   void AddExecutable(cmInstallImportedRuntimeArtifactsGenerator* executable)
   {
-    this->AddExecutable(cm::make_unique<ImportedTargetItem>(executable));
+    this->AddExecutable(std::make_unique<ImportedTargetItem>(executable));
   }
 
   void AddLibrary(cmInstallImportedRuntimeArtifactsGenerator* library)
   {
-    this->AddLibrary(cm::make_unique<ImportedTargetItem>(library));
+    this->AddLibrary(std::make_unique<ImportedTargetItem>(library));
   }
 
   void AddModule(cmInstallImportedRuntimeArtifactsGenerator* module)
   {
-    this->AddModule(cm::make_unique<ImportedTargetItem>(module));
+    this->AddModule(std::make_unique<ImportedTargetItem>(module));
   }
 
   bool AddBundleExecutable(
     cmInstallImportedRuntimeArtifactsGenerator* bundleExecutable)
   {
     return this->AddBundleExecutable(
-      cm::make_unique<ImportedTargetItem>(bundleExecutable));
+      std::make_unique<ImportedTargetItem>(bundleExecutable));
   }
 
   std::vector<std::unique_ptr<Item>> const& GetExecutables() const

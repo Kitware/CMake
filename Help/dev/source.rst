@@ -41,7 +41,7 @@ follow (which are not enforced by other tooling):
 
   .. code-block:: c++
 
-    auto y = cm::make_unique<T>();
+    auto y = std::make_unique<T>();
     auto z = []() -> T {...}();
 
   Exceptions:
@@ -62,7 +62,7 @@ features from more recent C++ standards are supported through a compatibility
 layer.  These features are defined under the namespace ``cm`` and headers
 are accessible under the ``cm/`` directory.  The headers under ``cm/`` can
 be used in place of the standard ones when extended features are needed.
-For example ``<cm/memory>`` can be used in place of ``<memory>``.
+For example ``<cm/optional>`` can be used in place of ``<optional>``.
 
 The class ``cm::filesystem::path``, from the ``<cm/filesystem>`` header, is
 fully compatible with the class ``std::filesystem::path`` regarding the API but
@@ -99,9 +99,6 @@ Available features are:
   * ``<cm/map>``:
     ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
     ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/memory>``:
-    ``cm::make_unique``
 
   * ``<cm/set>``:
     ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,

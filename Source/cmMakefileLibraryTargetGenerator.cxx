@@ -3,11 +3,11 @@
 #include "cmMakefileLibraryTargetGenerator.h"
 
 #include <cstddef>
+#include <memory>
 #include <set>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -43,7 +43,7 @@ cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator(
       this->GeneratorTarget->GetLibraryNames(this->GetConfigName());
   }
 
-  this->OSXBundleGenerator = cm::make_unique<cmOSXBundleGenerator>(target);
+  this->OSXBundleGenerator = std::make_unique<cmOSXBundleGenerator>(target);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 

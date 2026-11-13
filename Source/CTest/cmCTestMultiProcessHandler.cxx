@@ -13,6 +13,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stack>
@@ -21,7 +22,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cm/vector>
@@ -459,7 +459,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
                      "test "_s, test, '\n');
 
-  auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
+  auto testRun = std::make_unique<cmCTestRunTest>(*this, test);
 
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     auto const gi = this->RepeatGroupOfTest.find(test);

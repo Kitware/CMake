@@ -5,9 +5,9 @@
 #include <cstdlib>
 #include <functional>
 #include <map>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
@@ -154,18 +154,18 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
 void cmCTestScriptHandler::CreateCMake()
 {
   // create a cmake instance to read the configuration script
-  this->CMake = cm::make_unique<cmake>(cmState::Role::CTest);
+  this->CMake = std::make_unique<cmake>(cmState::Role::CTest);
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
   this->CMake->AddCMakePaths();
   this->GlobalGenerator =
-    cm::make_unique<cmGlobalGenerator>(this->CMake.get());
+    std::make_unique<cmGlobalGenerator>(this->CMake.get());
 
   cmStateSnapshot snapshot = this->CMake->GetCurrentSnapshot();
   std::string cwd = cmSystemTools::GetLogicalWorkingDirectory();
   snapshot.GetDirectory().SetCurrentSource(cwd);
   snapshot.GetDirectory().SetCurrentBinary(cwd);
   this->Makefile =
-    cm::make_unique<cmMakefile>(this->GlobalGenerator.get(), snapshot);
+    std::make_unique<cmMakefile>(this->GlobalGenerator.get(), snapshot);
   if (this->ParentMakefile) {
     this->Makefile->SetRecursionDepth(
       this->ParentMakefile->GetRecursionDepth());
@@ -320,7 +320,7 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
                                      std::string const& sname, bool InProcess,
                                      int* returnValue)
 {
-  auto sh = cm::make_unique<cmCTestScriptHandler>(ctest);
+  auto sh = std::make_unique<cmCTestScriptHandler>(ctest);
   sh->ParentMakefile = mf;
   sh->AddConfigurationScript(sname, InProcess);
   int res = sh->ProcessHandler();

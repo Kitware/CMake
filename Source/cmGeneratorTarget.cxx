@@ -8,12 +8,12 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -95,7 +95,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   , Makefile(t->GetMakefile())
   , LocalGenerator(lg)
   , GlobalGenerator(lg->GetGlobalGenerator())
-  , FileSets(cm::make_unique<cmGeneratorFileSets>(this, lg))
+  , FileSets(std::make_unique<cmGeneratorFileSets>(this, lg))
 {
   this->GlobalGenerator->ComputeTargetObjectDirectory(this);
 
@@ -5614,7 +5614,7 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
       stdlibTgt->SetProperty("CXX_IMPORT_ERROR_MESSAGE", *errorMessage);
       stdlibTgt->SetProperty("CXX_IMPORT_ERROR_MODULES", "std;std.compat");
 
-      auto gt = cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
+      auto gt = std::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
       lg->AddImportedGeneratorTarget(gt.get());
       lg->AddOwnedImportedGeneratorTarget(std::move(gt));
       return true;
@@ -5631,7 +5631,7 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
         R"(CMAKE_CXX_STDLIB_MODULES_JSON set to empty string)");
       stdlibTgt->SetProperty("CXX_IMPORT_ERROR_MODULES", "std;std.compat");
 
-      auto gt = cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
+      auto gt = std::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
       lg->AddImportedGeneratorTarget(gt.get());
       lg->AddOwnedImportedGeneratorTarget(std::move(gt));
       return true;
@@ -5656,7 +5656,7 @@ bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
   cmCxxModuleMetadata::PopulateTarget(*stdlibTgt, *metadata, configs);
   cmStandardLevelResolver standardResolver(makefile);
   standardResolver.AddRequiredTargetFeature(stdlibTgt, "cxx_std_20");
-  auto gt = cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
+  auto gt = std::make_unique<cmGeneratorTarget>(stdlibTgt, lg);
   for (auto const& config : configs) {
     gt->ComputeCompileFeatures(config);
   }
@@ -5852,7 +5852,7 @@ cmGeneratorTarget const* cmGeneratorTarget::GetCxxSyntheticTarget(
                       GENERAL_LibraryType);
 
   // Create the generator target and attach it to the local generator.
-  auto gtp = cm::make_unique<cmGeneratorTarget>(tgt, lg);
+  auto gtp = std::make_unique<cmGeneratorTarget>(tgt, lg);
   auto* syntheticTarget = gtp.get();
 
   // See `localGen->ComputeTargetCompileFeatures()` call in

@@ -2,9 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallCMakeConfigExportGenerator.h"
 
+#include <memory>
 #include <utility>
-
-#include <cm/memory>
 
 #include "cmDiagnosticContext.h"
 #include "cmExportInstallCMakeConfigGenerator.h"
@@ -26,7 +25,7 @@ cmInstallCMakeConfigExportGenerator::cmInstallCMakeConfigExportGenerator(
   , ExportOld(exportOld)
   , ExportPackageDependencies(exportPackageDependencies)
 {
-  this->EFGen = cm::make_unique<cmExportInstallCMakeConfigGenerator>(this);
+  this->EFGen = std::make_unique<cmExportInstallCMakeConfigGenerator>(this);
 }
 
 cmInstallCMakeConfigExportGenerator::~cmInstallCMakeConfigExportGenerator() =

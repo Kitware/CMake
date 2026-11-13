@@ -3,8 +3,8 @@
 #include "cmCPackWIXGenerator.h"
 
 #include <algorithm>
+#include <memory>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -48,7 +48,7 @@ cmCPackWIXGenerator::~cmCPackWIXGenerator() = default;
 int cmCPackWIXGenerator::InitializeInternal()
 {
   componentPackageMethod = ONE_PACKAGE;
-  this->Patch = cm::make_unique<cmWIXPatch>(this->Logger);
+  this->Patch = std::make_unique<cmWIXPatch>(this->Logger);
 
   return this->Superclass::InitializeInternal();
 }

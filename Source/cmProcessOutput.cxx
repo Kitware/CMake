@@ -4,7 +4,7 @@
 #include "cmProcessOutput.h"
 
 #if defined(_WIN32)
-#  include <cm/memory>
+#  include <memory>
 
 #  include <windows.h>
 
@@ -146,7 +146,7 @@ bool cmProcessOutput::DoDecodeText(std::string raw, std::string& decoded,
   bool success = false;
   int const wlength =
     MultiByteToWideChar(codepage, 0, raw.c_str(), int(raw.size()), nullptr, 0);
-  auto wdata = cm::make_unique<wchar_t[]>(wlength);
+  auto wdata = std::make_unique<wchar_t[]>(wlength);
   int r = MultiByteToWideChar(codepage, 0, raw.c_str(), int(raw.size()),
                               wdata.get(), wlength);
   if (r > 0) {
@@ -159,7 +159,7 @@ bool cmProcessOutput::DoDecodeText(std::string raw, std::string& decoded,
     }
     int length = WideCharToMultiByte(defaultCodepage, 0, wdata.get(), wlength,
                                      nullptr, 0, nullptr, nullptr);
-    auto data = cm::make_unique<char[]>(length);
+    auto data = std::make_unique<char[]>(length);
     r = WideCharToMultiByte(defaultCodepage, 0, wdata.get(), wlength,
                             data.get(), length, nullptr, nullptr);
     if (r > 0) {

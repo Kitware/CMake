@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <functional>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -16,7 +17,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -372,7 +372,7 @@ void cmGeneratorTarget::ComputeLinkInformation(
   std::unique_ptr<cmComputeLinkInformation>& info,
   std::string const& config) const
 {
-  auto pcli = cm::make_unique<cmComputeLinkInformation>(this, config);
+  auto pcli = std::make_unique<cmComputeLinkInformation>(this, config);
   if (pcli && pcli->Compute()) {
     info = std::move(pcli);
     this->CheckPropertyCompatibility(*info, config);

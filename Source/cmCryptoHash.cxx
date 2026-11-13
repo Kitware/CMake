@@ -2,7 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCryptoHash.h"
 
-#include <cm/memory>
+#include <memory>
 
 #include <cm3p/kwiml/int.h>
 #include <cm3p/rhash.h>
@@ -50,34 +50,34 @@ cmCryptoHash::~cmCryptoHash()
 std::unique_ptr<cmCryptoHash> cmCryptoHash::New(cm::string_view algo)
 {
   if (algo == "MD5") {
-    return cm::make_unique<cmCryptoHash>(AlgoMD5);
+    return std::make_unique<cmCryptoHash>(AlgoMD5);
   }
   if (algo == "SHA1") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA1);
+    return std::make_unique<cmCryptoHash>(AlgoSHA1);
   }
   if (algo == "SHA224") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA224);
+    return std::make_unique<cmCryptoHash>(AlgoSHA224);
   }
   if (algo == "SHA256") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA256);
+    return std::make_unique<cmCryptoHash>(AlgoSHA256);
   }
   if (algo == "SHA384") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA384);
+    return std::make_unique<cmCryptoHash>(AlgoSHA384);
   }
   if (algo == "SHA512") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA512);
+    return std::make_unique<cmCryptoHash>(AlgoSHA512);
   }
   if (algo == "SHA3_224") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA3_224);
+    return std::make_unique<cmCryptoHash>(AlgoSHA3_224);
   }
   if (algo == "SHA3_256") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA3_256);
+    return std::make_unique<cmCryptoHash>(AlgoSHA3_256);
   }
   if (algo == "SHA3_384") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA3_384);
+    return std::make_unique<cmCryptoHash>(AlgoSHA3_384);
   }
   if (algo == "SHA3_512") {
-    return cm::make_unique<cmCryptoHash>(AlgoSHA3_512);
+    return std::make_unique<cmCryptoHash>(AlgoSHA3_512);
   }
   return std::unique_ptr<cmCryptoHash>();
 }

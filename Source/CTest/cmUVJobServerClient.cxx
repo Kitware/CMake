@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cstdio>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,7 +18,6 @@
 #  include <windows.h>
 #endif
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 
@@ -712,14 +712,14 @@ cm::optional<cmUVJobServerClient> cmUVJobServerClient::Connect(
   std::function<void(int)> onDisconnect)
 {
 #if defined(_WIN32)
-  auto impl = cm::make_unique<ImplWin32>(loop);
+  auto impl = std::make_unique<ImplWin32>(loop);
   if (impl && impl->IsConnected()) {
     impl->OnToken = std::move(onToken);
     impl->OnDisconnect = std::move(onDisconnect);
     return cmUVJobServerClient(std::move(impl));
   }
 #else
-  auto impl = cm::make_unique<ImplPosix>(loop);
+  auto impl = std::make_unique<ImplPosix>(loop);
   if (impl && impl->IsConnected()) {
     impl->OnToken = std::move(onToken);
     impl->OnDisconnect = std::move(onDisconnect);

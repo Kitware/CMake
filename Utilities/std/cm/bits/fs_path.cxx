@@ -10,6 +10,7 @@
 #  include <cstddef>
 #  include <cstdlib>
 #  include <functional>
+#  include <memory>
 #  include <string>
 #  include <utility>
 #  include <vector>
@@ -20,7 +21,6 @@
 #    include <iterator>
 #  endif
 
-#  include <cm/memory>
 #  include <cm/string_view>
 #  include <cmext/string_view>
 
@@ -915,13 +915,13 @@ path::iterator::iterator(iterator const& other)
 {
   this->path_ = other.path_;
   if (other.parser_) {
-    this->parser_ = cm::make_unique<internals::path_parser>(*other.parser_);
+    this->parser_ = std::make_unique<internals::path_parser>(*other.parser_);
     this->path_element_ = path(**this->parser_);
   }
 }
 path::iterator::iterator(path const* p, bool at_end)
   : path_(p)
-  , parser_(cm::make_unique<internals::path_parser>(p->path_, at_end))
+  , parser_(std::make_unique<internals::path_parser>(p->path_, at_end))
 {
   if (!at_end) {
     ++(*this->parser_);
@@ -935,7 +935,7 @@ path::iterator& path::iterator::operator=(iterator const& other)
 {
   this->path_ = other.path_;
   if (other.parser_) {
-    this->parser_ = cm::make_unique<internals::path_parser>(*other.parser_);
+    this->parser_ = std::make_unique<internals::path_parser>(*other.parser_);
     this->path_element_ = path(**this->parser_);
   }
 

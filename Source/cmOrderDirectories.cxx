@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -285,16 +285,16 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
 
       if (this->IsImplicitDirectory(dir)) {
         this->ImplicitDirEntries.push_back(
-          cm::make_unique<cmOrderDirectoriesConstraintSOName>(this, fullPath,
-                                                              soname));
+          std::make_unique<cmOrderDirectoriesConstraintSOName>(this, fullPath,
+                                                               soname));
         return;
       }
     }
 
     // Construct the runtime information entry for this library.
     this->ConstraintEntries.push_back(
-      cm::make_unique<cmOrderDirectoriesConstraintSOName>(this, fullPath,
-                                                          soname));
+      std::make_unique<cmOrderDirectoriesConstraintSOName>(this, fullPath,
+                                                           soname));
   } else {
     // This can happen if the same library is linked multiple times.
     // In that case the runtime information check need be done only
@@ -315,15 +315,15 @@ void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
       std::string dir = cmSystemTools::GetFilenamePath(fullPath);
       if (this->IsImplicitDirectory(dir)) {
         this->ImplicitDirEntries.push_back(
-          cm::make_unique<cmOrderDirectoriesConstraintLibrary>(this,
-                                                               fullPath));
+          std::make_unique<cmOrderDirectoriesConstraintLibrary>(this,
+                                                                fullPath));
         return;
       }
     }
 
     // Construct the link library entry.
     this->ConstraintEntries.push_back(
-      cm::make_unique<cmOrderDirectoriesConstraintLibrary>(this, fullPath));
+      std::make_unique<cmOrderDirectoriesConstraintLibrary>(this, fullPath));
   }
 }
 

@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmQTWrapCPPCommand.h"
 
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -80,7 +80,7 @@ bool cmQTWrapCPPCommand(std::vector<std::string> const& args,
       depends.push_back(moc_exe);
       depends.push_back(hname);
 
-      auto cc = cm::make_unique<cmCustomCommand>();
+      auto cc = std::make_unique<cmCustomCommand>();
       cc->SetOutputs(newName);
       cc->SetDepends(depends);
       cc->SetCommandLines(commandLines);

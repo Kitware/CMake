@@ -7,11 +7,11 @@
 #include <cstddef>
 #include <cstdio>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <unordered_map>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -722,7 +722,7 @@ cmComputeLinkDepends::Compute()
   // the BFS.  This should preserve the original order when no
   // constraints disallow it.
   this->CCG =
-    cm::make_unique<cmComputeComponentGraph>(this->EntryConstraintGraph);
+    std::make_unique<cmComputeComponentGraph>(this->EntryConstraintGraph);
   this->CCG->Compute();
 
   if (!this->CheckCircularDependencies()) {

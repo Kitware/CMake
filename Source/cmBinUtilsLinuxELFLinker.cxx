@@ -3,11 +3,11 @@
 
 #include "cmBinUtilsLinuxELFLinker.h"
 
+#include <memory>
 #include <queue>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -59,7 +59,7 @@ bool cmBinUtilsLinuxELFLinker::Prepare()
   }
   if (tool == "objdump") {
     this->Tool =
-      cm::make_unique<cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool>(
+      std::make_unique<cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool>(
         this->Archive);
   } else {
     this->SetError(cmStrCat(
@@ -74,7 +74,7 @@ bool cmBinUtilsLinuxELFLinker::Prepare()
   }
   if (ldConfigTool == "ldconfig") {
     this->LDConfigTool =
-      cm::make_unique<cmLDConfigLDConfigTool>(this->Archive);
+      std::make_unique<cmLDConfigLDConfigTool>(this->Archive);
     if (!this->LDConfigTool->GetLDConfigPaths(this->LDConfigPaths)) {
       return false;
     }

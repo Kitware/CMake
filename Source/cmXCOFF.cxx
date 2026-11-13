@@ -4,8 +4,8 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <memory>
 
-#include <cm/memory>
 #include <cm/string_view>
 
 #include "cmsys/FStream.hxx"
@@ -393,7 +393,7 @@ cmXCOFF::cmXCOFF(char const* fname, Mode mode)
   if (mode == Mode::ReadWrite) {
     fmode |= std::ios::out;
   }
-  auto f = cm::make_unique<cmsys::fstream>(fname, fmode);
+  auto f = std::make_unique<cmsys::fstream>(fname, fmode);
 
   // Quit now if the file could not be opened.
   if (!f || !*f) {
@@ -460,10 +460,10 @@ cmXCOFF::cmXCOFF(char const* fname, Mode mode)
 
   // Check the XCOFF type.
   if (magic[0] == xcoff32_magic[0] && magic[1] == xcoff32_magic[1]) {
-    this->Internal = cm::make_unique<Impl<XCOFF32>>(
+    this->Internal = std::make_unique<Impl<XCOFF32>>(
       this, std::move(f), mode, check_if_big_archive(fname), nextEvenByte);
   } else if (magic[0] == xcoff64_magic[0] && magic[1] == xcoff64_magic[1]) {
-    this->Internal = cm::make_unique<Impl<XCOFF64>>(
+    this->Internal = std::make_unique<Impl<XCOFF64>>(
       this, std::move(f), mode, check_if_big_archive(fname), nextEvenByte);
   } else {
     this->ErrorMessage = "File is not a XCOFF32 or XCOFF64 binary.";

@@ -7,12 +7,12 @@
 #include <functional>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -1034,8 +1034,8 @@ std::pair<bool, cmValue> UsageRequirementProperty::Read(
 
 cmTarget::cmTarget(std::string name, cm::TargetType type, Visibility vis,
                    cmMakefile* mf, PerConfig perConfig)
-  : impl(cm::make_unique<cmTargetInternals>(std::move(name), type, vis, mf,
-                                            perConfig))
+  : impl(std::make_unique<cmTargetInternals>(std::move(name), type, vis, mf,
+                                             perConfig))
 {
   if (this->IsNormal()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value

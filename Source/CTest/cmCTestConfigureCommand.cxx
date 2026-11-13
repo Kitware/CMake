@@ -4,12 +4,12 @@
 
 #include <chrono>
 #include <cstdlib>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 

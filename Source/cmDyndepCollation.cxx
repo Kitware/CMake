@@ -5,12 +5,12 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <set>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -567,7 +567,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
                exp.FilesystemName, '-', export_info.Config, ".modules.json"_s);
 
     exp_helper.File =
-      cm::make_unique<cmGeneratedFileStream>(property_file_path);
+      std::make_unique<cmGeneratedFileStream>(property_file_path);
 
     // Set up the preamble.
     *exp_helper.File << "set_property(TARGET \"" << exp.Namespace << exp.Name
@@ -596,7 +596,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
 
   std::unique_ptr<cmGeneratedFileStream> bmi_install_script;
   if (export_info.BmiInstallation) {
-    bmi_install_script = cm::make_unique<cmGeneratedFileStream>(
+    bmi_install_script = std::make_unique<cmGeneratedFileStream>(
       export_info.BmiInstallation->ScriptLocation);
   }
 

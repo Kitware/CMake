@@ -9,12 +9,12 @@
 #include <cstdlib>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -1998,7 +1998,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
         status.SetError("DOWNLOAD missing sum value for EXPECTED_MD5.");
         return false;
       }
-      hash = cm::make_unique<cmCryptoHash>(cmCryptoHash::AlgoMD5);
+      hash = std::make_unique<cmCryptoHash>(cmCryptoHash::AlgoMD5);
       hashMatchMSG = "MD5 sum";
       expectedHash = cmSystemTools::LowerCase(*i);
     } else if (*i == "SHOW_PROGRESS") {

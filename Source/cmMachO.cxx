@@ -3,9 +3,8 @@
 #include "cmMachO.h"
 
 #include <cstddef>
+#include <memory>
 #include <string>
-
-#include <cm/memory>
 
 #include "cmsys/FStream.hxx"
 
@@ -293,14 +292,14 @@ bool cmMachOInternal::read_mach_o(uint32_t file_offset)
     if (magic == MH_CIGAM) {
       swap = true;
     }
-    f = cm::make_unique<cmMachOHeaderAndLoadCommandsImpl<mach_header>>(swap);
+    f = std::make_unique<cmMachOHeaderAndLoadCommandsImpl<mach_header>>(swap);
   } else if (magic == MH_CIGAM_64 || magic == MH_MAGIC_64) {
     bool swap = false;
     if (magic == MH_CIGAM_64) {
       swap = true;
     }
     f =
-      cm::make_unique<cmMachOHeaderAndLoadCommandsImpl<mach_header_64>>(swap);
+      std::make_unique<cmMachOHeaderAndLoadCommandsImpl<mach_header_64>>(swap);
   }
 
   if (f && f->read_mach_o(this->Fin)) {
@@ -317,7 +316,7 @@ bool cmMachOInternal::read_mach_o(uint32_t file_offset)
 // External class implementation.
 
 cmMachO::cmMachO(char const* fname)
-  : Internal(cm::make_unique<cmMachOInternal>(fname))
+  : Internal(std::make_unique<cmMachOInternal>(fname))
 {
   for (auto const& m : this->Internal->MachOList) {
     Headers.push_back(m->mach_header());

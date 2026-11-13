@@ -2,10 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmWhileCommand.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -152,7 +152,7 @@ bool cmWhileCommand(std::vector<cmListFileArgument> const& args,
   // create a function blocker
   auto& makefile = status.GetMakefile();
   makefile.AddFunctionBlocker(
-    cm::make_unique<cmWhileFunctionBlocker>(&makefile, args));
+    std::make_unique<cmWhileFunctionBlocker>(&makefile, args));
 
   return true;
 }

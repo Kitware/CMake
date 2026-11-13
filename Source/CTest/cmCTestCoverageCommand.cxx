@@ -2,10 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestCoverageCommand.h"
 
+#include <memory>
 #include <set>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
@@ -26,7 +26,7 @@ cmCTestCoverageCommand::InitializeHandler(HandlerArguments& arguments,
     &mf, "CoverageCommand", "CTEST_COVERAGE_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     &mf, "CoverageExtraFlags", "CTEST_COVERAGE_EXTRA_FLAGS", args.Quiet);
-  auto handler = cm::make_unique<cmCTestCoverageHandler>(this->CTest);
+  auto handler = std::make_unique<cmCTestCoverageHandler>(this->CTest);
 
   // If a LABELS option was given, select only files with the labels.
   if (args.Labels) {

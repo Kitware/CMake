@@ -550,7 +550,6 @@ CMAKE_C_SOURCES="\
 
 CMAKE_STD_CXX_HEADERS="\
   filesystem \
-  memory \
   optional \
   shared_mutex \
   string_view \

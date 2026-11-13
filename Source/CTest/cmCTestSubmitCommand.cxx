@@ -2,10 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestSubmitCommand.h"
 
+#include <memory>
 #include <set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/vector>
 #include <cmext/string_view>
 
@@ -105,7 +105,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
     }
   }
 
-  auto handler = cm::make_unique<cmCTestSubmitHandler>(this->CTest);
+  auto handler = std::make_unique<cmCTestSubmitHandler>(this->CTest);
 
   // If no FILES or PARTS given, *all* PARTS are submitted by default.
   //

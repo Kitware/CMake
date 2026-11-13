@@ -6,12 +6,12 @@
 #include <chrono>
 #include <cstdlib>
 #include <map>
+#include <memory>
 #include <ratio>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 
@@ -83,7 +83,7 @@ cmCTestTestCommand::ResolveTestPreset(cmMakefile& mf,
     return cm::optional<ResolvedTestPreset>(std::move(resolved));
   }
 
-  resolved.PresetsGraph = cm::make_unique<cmCMakePresetsGraph>();
+  resolved.PresetsGraph = std::make_unique<cmCMakePresetsGraph>();
   if (!resolved.PresetsGraph->ReadProjectPresets(resolved.SourceDirectory,
                                                  resolved.PresetsFile)) {
     status.SetError(cmStrCat(
@@ -323,7 +323,7 @@ std::unique_ptr<cmCTestTestHandler>
 cmCTestTestCommand::InitializeActualHandler(HandlerArguments&,
                                             cmExecutionStatus&) const
 {
-  return cm::make_unique<cmCTestTestHandler>(this->CTest);
+  return std::make_unique<cmCTestTestHandler>(this->CTest);
 }
 
 bool cmCTestTestCommand::InitialPass(std::vector<std::string> const& args,

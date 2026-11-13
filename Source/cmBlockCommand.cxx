@@ -4,9 +4,9 @@
 #include "cmBlockCommand.h"
 
 #include <cstdint>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/enum_set>
@@ -48,13 +48,14 @@ private:
 BlockScopePushPop::BlockScopePushPop(cmMakefile* mf, ScopeSet const& scopes)
 {
   if (scopes.contains(ScopeType::VARIABLES)) {
-    this->VariableScope = cm::make_unique<cmMakefile::VariablePushPop>(mf);
+    this->VariableScope = std::make_unique<cmMakefile::VariablePushPop>(mf);
   }
   if (scopes.contains(ScopeType::POLICIES)) {
-    this->PolicyScope = cm::make_unique<cmMakefile::PolicyPushPop>(mf);
+    this->PolicyScope = std::make_unique<cmMakefile::PolicyPushPop>(mf);
   }
   if (scopes.contains(ScopeType::DIAGNOSTICS)) {
-    this->DiagnosticScope = cm::make_unique<cmMakefile::DiagnosticPushPop>(mf);
+    this->DiagnosticScope =
+      std::make_unique<cmMakefile::DiagnosticPushPop>(mf);
   }
 }
 
@@ -204,7 +205,7 @@ bool cmBlockCommand(std::vector<std::string> const& args,
   }
 
   // create a function blocker
-  auto fb = cm::make_unique<cmBlockFunctionBlocker>(
+  auto fb = std::make_unique<cmBlockFunctionBlocker>(
     &status.GetMakefile(), scopes, parsedArgs.Propagate);
   status.GetMakefile().AddFunctionBlocker(std::move(fb));
 

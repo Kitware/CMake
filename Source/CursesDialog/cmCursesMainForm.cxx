@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmCursesCacheEntryComposite.h"
@@ -40,7 +40,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
     "Welcome to ccmake, curses based user interface for CMake.");
   this->HelpMessage.emplace_back();
   this->HelpMessage.emplace_back(s_ConstHelpMessage);
-  this->CMakeInstance = cm::make_unique<cmake>(cmState::Role::Project);
+  this->CMakeInstance = std::make_unique<cmake>(cmState::Role::Project);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeCursesCommand());
 
@@ -106,9 +106,9 @@ void cmCursesMainForm::InitializeUI()
   // Add a label to display when cache is empty
   // dummy entry widget (does not respond to input)
   this->EmptyCacheEntry =
-    cm::make_unique<cmCursesCacheEntryComposite>("EMPTY CACHE", 30, 30);
+    std::make_unique<cmCursesCacheEntryComposite>("EMPTY CACHE", 30, 30);
   this->EmptyCacheEntry->Entry =
-    cm::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
+    std::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
 
   if (count > 0) {
     // Create the composites.

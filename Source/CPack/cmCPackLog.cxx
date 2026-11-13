@@ -3,8 +3,7 @@
 #include "cmCPackLog.h"
 
 #include <iostream>
-
-#include <cm/memory>
+#include <memory>
 
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
@@ -27,7 +26,7 @@ bool cmCPackLog::SetLogOutputFile(char const* fname)
 {
   this->LogOutputStream.reset();
   if (fname) {
-    this->LogOutputStream = cm::make_unique<cmGeneratedFileStream>(fname);
+    this->LogOutputStream = std::make_unique<cmGeneratedFileStream>(fname);
   }
   if (this->LogOutputStream && !*this->LogOutputStream) {
     this->LogOutputStream.reset();

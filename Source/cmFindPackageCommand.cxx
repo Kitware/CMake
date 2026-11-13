@@ -8,11 +8,11 @@
 #include <deque>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -746,7 +746,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   cmMakefile::DebugFindPkgRAII debugFindPkgRAII(this->Makefile, this->Name);
   this->FullDebugMode = this->ComputeIfDebugModeWanted();
   if (this->FullDebugMode || !this->ComputeIfImplicitDebugModeSuppressed()) {
-    this->DebugState = cm::make_unique<cmFindPackageDebugState>(this);
+    this->DebugState = std::make_unique<cmFindPackageDebugState>(this);
   }
 
   // Parse the arguments.

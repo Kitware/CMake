@@ -3,12 +3,11 @@
 #include <cstdio>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <cm/memory>
 
 #include <cm3p/uv.h>
 
@@ -219,7 +218,7 @@ static bool checkExecution(cmUVProcessChainBuilder& builder,
 
   std::vector<cmUVProcessChain::Status const*> status;
 
-  chain = cm::make_unique<cmUVProcessChain>(builder.Start());
+  chain = std::make_unique<cmUVProcessChain>(builder.Start());
   if (!chain->Valid()) {
     std::cout << "Valid() returned false, should be true" << std::endl;
     return false;

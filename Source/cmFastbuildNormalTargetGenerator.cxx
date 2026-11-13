@@ -9,12 +9,12 @@
 #include <functional>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -121,7 +121,7 @@ cmFastbuildNormalTargetGenerator::cmFastbuildNormalTargetGenerator(
 {
 
   LogMessage(cmStrCat("objectOutDir: "_s, ObjectOutDir));
-  this->OSXBundleGenerator = cm::make_unique<cmOSXBundleGenerator>(gt);
+  this->OSXBundleGenerator = std::make_unique<cmOSXBundleGenerator>(gt);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 
   // Quotes to account for potential spaces.

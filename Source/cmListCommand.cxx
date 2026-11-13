@@ -5,13 +5,13 @@
 #include <cassert>
 #include <cstdio>
 #include <functional>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>

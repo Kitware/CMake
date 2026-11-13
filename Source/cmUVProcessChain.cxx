@@ -6,9 +6,8 @@
 #include <csignal>
 #include <cstdio>
 #include <istream> // IWYU pragma: keep
+#include <memory>
 #include <utility>
-
-#include <cm/memory>
 
 #include <cm3p/uv.h>
 
@@ -324,7 +323,7 @@ bool cmUVProcessChain::InternalData::Prepare(
 
   bool first = true;
   for (std::size_t i = 0; i < this->Builder->Processes.size(); i++) {
-    this->Processes.emplace_back(cm::make_unique<ProcessData>());
+    this->Processes.emplace_back(std::make_unique<ProcessData>());
     auto& process = *this->Processes.back();
     process.Data = this;
     process.ProcessStatus.Finished = false;
@@ -470,7 +469,7 @@ void cmUVProcessChain::InternalData::Terminate()
 }
 
 cmUVProcessChain::cmUVProcessChain()
-  : Data(cm::make_unique<InternalData>())
+  : Data(std::make_unique<InternalData>())
 {
 }
 

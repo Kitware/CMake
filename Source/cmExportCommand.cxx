@@ -3,10 +3,10 @@
 #include "cmExportCommand.h"
 
 #include <map>
+#include <memory>
 #include <ostream>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -216,13 +216,13 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
   std::unique_ptr<cmExportBuildFileGenerator> ebfg = nullptr;
   if (android) {
     auto ebag =
-      cm::make_unique<cmExportBuildAndroidMKGenerator>(std::move(context));
+      std::make_unique<cmExportBuildAndroidMKGenerator>(std::move(context));
     ebag->SetNamespace(arguments.Namespace);
     ebag->SetAppendMode(arguments.Append);
     ebfg = std::move(ebag);
   } else {
     auto ebcg =
-      cm::make_unique<cmExportBuildCMakeConfigGenerator>(std::move(context));
+      std::make_unique<cmExportBuildCMakeConfigGenerator>(std::move(context));
     ebcg->SetNamespace(arguments.Namespace);
     ebcg->SetAppendMode(arguments.Append);
     ebcg->SetExportOld(arguments.ExportOld);
@@ -321,7 +321,7 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   }
 
   // Set up export file generation.
-  auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>(
+  auto ebcg = std::make_unique<cmExportBuildCMakeConfigGenerator>(
     cmExportBuildFileGenerator::CaptureContext(mf));
   ebcg->SetNamespace(arguments.Namespace);
   ebcg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
@@ -389,7 +389,7 @@ static bool HandleSpecialExportMode(std::vector<std::string> const& args,
   }
 
   // Create the export build generator
-  auto ebpg = cm::make_unique<GeneratorType>(
+  auto ebpg = std::make_unique<GeneratorType>(
     arguments, cmExportBuildFileGenerator::CaptureContext(mf));
   AddExportGenerator(mf, gg, std::move(ebpg), fname, *exportSet,
                      arguments.CxxModulesDirectory);
@@ -462,7 +462,7 @@ static bool HandleSbomMode(std::vector<std::string> const& args,
   }
 
   auto builder =
-    cm::make_unique<cmBuildSbomGenerator>(arguments, sets, std::move(fpath));
+    std::make_unique<cmBuildSbomGenerator>(arguments, sets, std::move(fpath));
   cmBuildSbomGenerator* rawPtr = builder.get();
   mf.AddBuildSbomGenerator(std::move(builder));
   gg->AddBuildSbomGenerator(rawPtr);

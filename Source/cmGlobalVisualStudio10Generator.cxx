@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include <cm3p/json/value.h>
@@ -635,7 +635,7 @@ std::unique_ptr<cmLocalGenerator>
 cmGlobalVisualStudio10Generator::CreateLocalGenerator(cmMakefile* mf)
 {
   return std::unique_ptr<cmLocalGenerator>(
-    cm::make_unique<cmLocalVisualStudio10Generator>(this, mf));
+    std::make_unique<cmLocalVisualStudio10Generator>(this, mf));
 }
 
 void cmGlobalVisualStudio10Generator::Generate()

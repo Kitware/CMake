@@ -2,12 +2,12 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMakefileUtilityTargetGenerator.h"
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmGeneratedFileStream.h"
@@ -24,7 +24,7 @@ cmMakefileUtilityTargetGenerator::cmMakefileUtilityTargetGenerator(
   : cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnUtility;
-  this->OSXBundleGenerator = cm::make_unique<cmOSXBundleGenerator>(target);
+  this->OSXBundleGenerator = std::make_unique<cmOSXBundleGenerator>(target);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 

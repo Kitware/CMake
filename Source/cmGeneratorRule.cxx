@@ -5,12 +5,12 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -231,7 +231,7 @@ std::unique_ptr<cmCustomCommand> cmGeneratorRule::CreateCustomCommand() const
   };
 
   try {
-    auto cc = cm::make_unique<cmCustomCommand>();
+    auto cc = std::make_unique<cmCustomCommand>();
 
     cmCustomCommandLines commandLines;
     for (cmRule::CustomCommand const& line : this->Rule->GetCommands()) {

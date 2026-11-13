@@ -2,10 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGlobalBorlandMakefileGenerator.h"
 
+#include <memory>
 #include <ostream>
 #include <utility>
-
-#include <cm/memory>
 
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
@@ -53,7 +52,7 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(
 std::unique_ptr<cmLocalGenerator>
 cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
-  auto lg = cm::make_unique<cmLocalUnixMakefileGenerator3>(this, mf);
+  auto lg = std::make_unique<cmLocalUnixMakefileGenerator3>(this, mf);
   lg->SetMakefileVariableSize(32);
   lg->SetMakeCommandEscapeTargetTwice(true);
   lg->SetBorlandMakeCurlyHack(true);

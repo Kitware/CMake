@@ -8,12 +8,12 @@
 #include <cstdio>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -85,7 +85,7 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
       break;
   }
   this->MacOSXContentGenerator =
-    cm::make_unique<MacOSXContentGeneratorType>(this);
+    std::make_unique<MacOSXContentGeneratorType>(this);
 }
 
 cmMakefileTargetGenerator::~cmMakefileTargetGenerator() = default;
@@ -97,17 +97,17 @@ std::unique_ptr<cmMakefileTargetGenerator> cmMakefileTargetGenerator::New(
 
   switch (tgt->GetType()) {
     case cm::TargetType::EXECUTABLE:
-      result = cm::make_unique<cmMakefileExecutableTargetGenerator>(tgt);
+      result = std::make_unique<cmMakefileExecutableTargetGenerator>(tgt);
       break;
     case cm::TargetType::STATIC_LIBRARY:
     case cm::TargetType::SHARED_LIBRARY:
     case cm::TargetType::MODULE_LIBRARY:
     case cm::TargetType::OBJECT_LIBRARY:
-      result = cm::make_unique<cmMakefileLibraryTargetGenerator>(tgt);
+      result = std::make_unique<cmMakefileLibraryTargetGenerator>(tgt);
       break;
     case cm::TargetType::INTERFACE_LIBRARY:
     case cm::TargetType::UTILITY:
-      result = cm::make_unique<cmMakefileUtilityTargetGenerator>(tgt);
+      result = std::make_unique<cmMakefileUtilityTargetGenerator>(tgt);
       break;
     default:
       return result;
@@ -186,7 +186,7 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
-  this->BuildFileStream = cm::make_unique<cmGeneratedFileStream>(
+  this->BuildFileStream = std::make_unique<cmGeneratedFileStream>(
     this->BuildFileNameFull, false,
     this->GlobalGenerator->GetMakefileEncoding());
   if (!this->BuildFileStream) {
@@ -490,7 +490,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   // rules may depend on this file itself.
   this->FlagFileNameFull =
     cmStrCat(this->TargetBuildDirectoryFull, "/flags.make"_s);
-  this->FlagFileStream = cm::make_unique<cmGeneratedFileStream>(
+  this->FlagFileStream = std::make_unique<cmGeneratedFileStream>(
     this->FlagFileNameFull, false,
     this->GlobalGenerator->GetMakefileEncoding());
   if (!this->FlagFileStream) {
@@ -1470,7 +1470,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   this->InfoFileNameFull =
     cmStrCat(this->TargetBuildDirectoryFull, "/DependInfo.cmake"_s);
   this->InfoFileStream =
-    cm::make_unique<cmGeneratedFileStream>(this->InfoFileNameFull);
+    std::make_unique<cmGeneratedFileStream>(this->InfoFileNameFull);
   if (!this->InfoFileStream) {
     return;
   }

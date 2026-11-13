@@ -7,7 +7,6 @@ set(CMAKE_CXX_EXTENSIONS FALSE)
 set(SRCS cm/bits/fs_path.cxx
          cm/bits/string_view.cxx
          cm/filesystem
-         cm/memory
          cm/optional
          cm/shared_mutex
          cm/string_view

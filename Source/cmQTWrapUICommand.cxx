@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmQTWrapUICommand.h"
 
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -90,14 +90,14 @@ bool cmQTWrapUICommand(std::vector<std::string> const& args,
 
       std::vector<std::string> depends;
       depends.push_back(uiName);
-      auto cc = cm::make_unique<cmCustomCommand>();
+      auto cc = std::make_unique<cmCustomCommand>();
       cc->SetOutputs(hName);
       cc->SetDepends(depends);
       cc->SetCommandLines(hCommandLines);
       mf.AddCustomCommandToOutput(std::move(cc));
 
       depends.push_back(hName);
-      cc = cm::make_unique<cmCustomCommand>();
+      cc = std::make_unique<cmCustomCommand>();
       cc->SetOutputs(cxxName);
       cc->SetDepends(depends);
       cc->SetCommandLines(cxxCommandLines);
@@ -105,7 +105,7 @@ bool cmQTWrapUICommand(std::vector<std::string> const& args,
 
       depends.clear();
       depends.push_back(hName);
-      cc = cm::make_unique<cmCustomCommand>();
+      cc = std::make_unique<cmCustomCommand>();
       cc->SetOutputs(mocName);
       cc->SetDepends(depends);
       cc->SetCommandLines(mocCommandLines);
