@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 class cmMakefile;
 
 /** \class cmVariableWatch
@@ -52,6 +54,8 @@ public:
    */
   bool VariableAccessed(std::string const& variable, AccessType accessType,
                         char const* newValue, cmMakefile const* mf) const;
+  bool VariableAccessed(std::string const& variable, AccessType accessType,
+                        cm::string_view newValue, cmMakefile const* mf) const;
 
   /**
    * Return the access as string

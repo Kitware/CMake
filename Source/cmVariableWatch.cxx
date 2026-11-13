@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/algorithm>
+
 std::string const& cmVariableWatch::GetAccessAsString(AccessType accessType)
 {
   static std::array<std::string, 6> const cmVariableWatchAccessStrings = {
@@ -84,4 +86,17 @@ bool cmVariableWatch::VariableAccessed(std::string const& variable,
     return true;
   }
   return false;
+}
+
+bool cmVariableWatch::VariableAccessed(std::string const& variable,
+                                       AccessType accessType,
+                                       cm::string_view newValue,
+                                       cmMakefile const* mf) const
+{
+  // Avoid copying the value unless a watch needs a null-terminated string.
+  if (!cm::contains(this->WatchMap, variable)) {
+    return false;
+  }
+  std::string const value(newValue);
+  return this->VariableAccessed(variable, accessType, value.c_str(), mf);
 }

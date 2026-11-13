@@ -549,7 +549,7 @@ static bool testMethod_view()
   ASSERT_TRUE(str.view().size() == sizeof(charArray) - 1);
   str = std::string("abc");
   ASSERT_TRUE(str.view().size() == 3);
-  ASSERT_TRUE(strncmp(str.view().data(), "abc", 3) == 0);
+  ASSERT_TRUE(strncmp(str.view().data(), "abc", str.view().size()) == 0);
   return true;
 }
 

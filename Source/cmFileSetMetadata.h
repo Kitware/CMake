@@ -116,7 +116,7 @@ std::vector<cm::string_view> const& GetKnownTypes();
 bool IsKnownType(cm::string_view type);
 
 // check validity of a user's file set name
-bool IsValidName(cm::string_view type);
+bool IsValidName(cm::string_view name);
 }
 }
 

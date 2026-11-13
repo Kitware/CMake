@@ -2,8 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cm_utf8.h"
 
-#include <string.h>
-
 /*
   RFC 3629
   07-bit: 0xxxxxxx
@@ -93,13 +91,13 @@ char const* cm_utf8_decode_character(char const* first, char const* last,
   }
 }
 
-int cm_utf8_is_valid(char const* s)
+int cm_utf8_is_valid(char const* s, size_t size)
 {
   if (!s) {
     return 0;
   }
 
-  char const* last = s + strlen(s);
+  char const* last = s + size;
   char const* pos = s;
   unsigned int pc;
 

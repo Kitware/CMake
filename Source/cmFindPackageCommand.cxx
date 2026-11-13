@@ -195,7 +195,7 @@ public:
       if (isDirentryToIgnore(fname)) {
         continue;
       }
-      if (cmsysString_strcasecmp(fname.c_str(), this->DirName.data()) == 0) {
+      if (cmsysString_strcasecmp(fname.c_str(), this->DirName.c_str()) == 0) {
         auto candidate = cmStrCat(parent, fname, '/');
         if (cmSystemTools::FileIsDirectory(candidate)) {
           return candidate;
@@ -209,7 +209,7 @@ public:
 
 private:
   cmsys::Directory DirectoryLister;
-  cm::string_view const DirName;
+  std::string const DirName;
   unsigned long CurrentIdx = 0ul;
   bool Loaded = false;
 };

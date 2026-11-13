@@ -1979,7 +1979,7 @@ void cmMakefile::AddDefinition(std::string const& name, cm::string_view value)
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv) {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
-                         value.data(), this);
+                         value, this);
   }
 #endif
 }
