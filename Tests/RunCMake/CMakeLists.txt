@@ -828,7 +828,10 @@ if(COVERAGE_COMMAND)
   add_RunCMake_test(ctest_coverage -DCOVERAGE_COMMAND=${COVERAGE_COMMAND})
 endif()
 add_RunCMake_test(ctest_start)
-add_RunCMake_test(ctest_submit)
+add_RunCMake_test(ctest_submit
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
+  -DPython_VERSION=${Python_VERSION}
+)
 add_RunCMake_test(ctest_test
   -DIMAGE_DIR=${CMAKE_SOURCE_DIR}/Utilities/Sphinx/static
 )
