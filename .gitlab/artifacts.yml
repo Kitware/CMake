@@ -212,6 +212,31 @@
             - ${CMAKE_CI_BUILD_DIR}/CTestCustom.cmake
             - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
 
+.cmake_listfile_coverage_artifacts:
+    artifacts:
+        expire_in: 1d
+        # External testing can be useful even if test jobs fail.
+        when: always
+        reports:
+            junit:
+                - ${CMAKE_CI_BUILD_DIR}/junit.xml
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
+        paths:
+            # The coverage step runs the ctest that was built.
+            - ${CMAKE_CI_BUILD_DIR}/bin/ctest
+            # Allow CTest to find CMAKE_ROOT.
+            - ${CMAKE_CI_BUILD_DIR}/CMakeFiles/CMakeSourceDir.txt
+
+            # CTest coverage files.
+            - ${CMAKE_CI_BUILD_DIR}/**/*.cmake-coverage.info
+
+            # CTest/CDash information.
+            - ${CMAKE_CI_BUILD_DIR}/Testing/
+            - ${CMAKE_CI_BUILD_DIR}/DartConfiguration.tcl
+            - ${CMAKE_CI_BUILD_DIR}/CTestCustom.cmake
+            - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
+
 .cmake_doc_artifacts:
     artifacts:
         expire_in: 1d

@@ -250,6 +250,50 @@ a:fedora45-gcc-gcov:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+b:fedora45-listfile-coverage:
+    extends:
+        - .fedora45_listfile_coverage
+        - .cmake_build_linux
+        - .cmake_build_artifacts
+        - .linux_x86_64_tags
+        - .rules
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_RUN_MANUALLY: "true"
+    needs: []
+
+t:fedora45-listfile-coverage:
+    extends:
+        - .fedora45_listfile_coverage
+        - .cmake_test_linux
+        - .cmake_listfile_coverage_artifacts
+        # FindMPI tests need x86_64-v3 or newer for libfabric, GUI tests need X11.
+        - .linux_x86_64_tags_fast_x11
+        - .rules
+    # Run coverage analysis even if the tests fail.
+    allow_failure: true
+    needs:
+        - b:fedora45-listfile-coverage
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+        # The CMAKE coverage tool is new, so use the ctest that was built.
+        CMAKE_CI_CTEST_COMMAND: "${CMAKE_CI_BUILD_DIR}/bin/ctest"
+
+a:fedora45-listfile-coverage:
+    extends:
+        - .fedora45_listfile_coverage
+        - .cmake_coverage_linux
+        - .cmake_cdash_artifacts
+        - .linux_x86_64_tags
+        - .rules
+    needs:
+        - t:fedora45-listfile-coverage
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+        # The CMake listfile coverage handler is new, so use the ctest that
+        # was built.
+        CMAKE_CI_CTEST_COMMAND: "${CMAKE_CI_BUILD_DIR}/bin/ctest"
+
 b:fedora45-bullseye-coverage:
     extends:
         - .fedora45_bullseye_coverage

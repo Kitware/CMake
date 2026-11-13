@@ -28,13 +28,23 @@ if ("$ENV{CI_RUNNER_TAGS}" MATCHES "\"tart\"")
   set(test_load "0")
 endif ()
 
+# Read the settings of this configuration.
+include("${CMAKE_CURRENT_LIST_DIR}/ctest_test_$ENV{CMAKE_CONFIGURATION}.cmake" OPTIONAL)
+
+set(ctest_test_args)
+if (CTEST_TEST_COVERAGE_TOOL)
+  list(APPEND ctest_test_args
+    COVERAGE_TOOL "${CTEST_TEST_COVERAGE_TOOL}")
+endif ()
+
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_exclusions.cmake")
 ctest_test(
   PARALLEL_LEVEL "${nproc}"
   TEST_LOAD "${test_load}"
   OUTPUT_JUNIT "${CTEST_BINARY_DIRECTORY}/junit.xml"
   RETURN_VALUE test_result
-  EXCLUDE "${test_exclusions}")
+  EXCLUDE "${test_exclusions}"
+  ${ctest_test_args})
 ctest_submit(PARTS Test)
 
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_annotation.cmake")
