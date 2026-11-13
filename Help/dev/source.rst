@@ -71,62 +71,6 @@ to ensure a behavior independent of the current locale.
 
 Available features are:
 
-* From ``C++14``:
-
-  * ``<cm/array>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/deque>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/forward_list>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/iomanip>``:
-    ``cm::quoted``
-
-  * ``<cm/iterator>``:
-    ``cm::make_reverse_iterator``, ``cm::cbegin``, ``cm::cend``,
-    ``cm::rbegin``, ``cm::rend``, ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/list>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/map>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/set>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/string>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/string_view>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/shared_mutex>``:
-    ``cm::shared_lock``
-
-  * ``<cm/unordered_map>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/unordered_set>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/vector>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
 * From ``C++17``:
 
   * ``<cm/algorithm>``:
@@ -143,6 +87,9 @@ Available features are:
 
   * ``<cm/forward_list>``:
     ``cm::size``, ``cm::empty``, ``cm::data``
+
+  * ``<cm/iomanip>``:
+    ``cm::quoted`` for ``cm::string_view``
 
   * ``<cm/iterator>``:
     ``cm::size``, ``cm::empty``, ``cm::data``

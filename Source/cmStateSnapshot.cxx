@@ -6,11 +6,11 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <iterator>
 #include <set>
 #include <string>
 #include <unordered_map>
 
-#include <cm/iterator>
 #include <cmext/algorithm>
 
 #include "cmDefinitions.h"
@@ -505,7 +505,7 @@ void InitializeContentFromParent(T& parentContent, T& thisContent,
 {
   auto parentEnd = parentContent.end();
 
-  auto parentRbegin = cm::make_reverse_iterator(parentEnd);
+  auto parentRbegin = std::make_reverse_iterator(parentEnd);
   auto parentRend = parentContent.rend();
   parentRbegin =
     std::find(parentRbegin, parentRend, cmStateDetail::PropertySentinel);

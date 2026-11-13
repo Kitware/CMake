@@ -3665,7 +3665,8 @@ void cmGlobalNinjaMultiGenerator::GetQtAutoGenConfigs(
   std::vector<std::string>& configs) const
 {
   std::vector<std::string> const& allConfigs = this->GetConfigNames();
-  configs.insert(configs.end(), cm::cbegin(allConfigs), cm::cend(allConfigs));
+  configs.insert(configs.end(), std::cbegin(allConfigs),
+                 std::cend(allConfigs));
 }
 
 bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
