@@ -190,8 +190,9 @@ Notes on the script:
 
 * The :command:`ctest_configure` command runs :manual:`cmake(1)` with the
   generator given by :variable:`CTEST_CMAKE_GENERATOR`.  To pass more
-  options to CMake, set :variable:`CTEST_CONFIGURE_COMMAND` or use the
-  ``OPTIONS`` argument of the command.
+  options to CMake, set :variable:`CTEST_CONFIGURE_OPTIONS` or use the
+  ``OPTIONS`` argument of the command.  To set a different configure command,
+  use :variable:`CTEST_CONFIGURE_COMMAND`.
 
 * The :command:`ctest_empty_binary_directory` command does nothing if the
   build tree does not exist yet.  To avoid removing an unrelated directory
