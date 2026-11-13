@@ -2992,6 +2992,8 @@ std::string InitLogicalWorkingDirectory()
       cmSystemTools::FileIsFullPath(pwd)) {
     std::string const pwd_real = cmSystemTools::GetRealPath(pwd);
     if (pwd_real == cwd) {
+      // Although cmSystemToolsLogicalWorkingDirectory is not yet initialized,
+      // ToNormalizedPathOnDisk does not use it when given an absolute path.
       cwd = cmSystemTools::ToNormalizedPathOnDisk(std::move(pwd));
     }
   }
