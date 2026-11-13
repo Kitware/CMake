@@ -47,8 +47,11 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_valgrind")
     # Tests that timeout under valgrind.
     "^RunCMake.Autogen_Qt6_1$"
     "^RunCMake.CommandLine$"
+    "^RunCMake.CTestCommandLine$"
     "^RunCMake.ctest_test$"
     "^RunCMake.CXXModules$"
+    "^RunCMake.CXXModulesCompileBuildImportExport$"
+    "^RunCMake.CXXModulesCompileInstall$"
     "^RunCMake.GoogleTest$"
     "^RunCMake.Instrumentation$"
     "^RunCMake.NinjaMultiConfig$"
