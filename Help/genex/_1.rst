@@ -1,0 +1,25 @@
+$<_1>
+-----
+
+.. |genex-family| replace:: :ref:`genex-family-genex-bound-operands`
+
+.. include:: ../manual/include/GENEX_FAMILY.rst
+
+Syntax
+^^^^^^
+
+.. code-block:: cmake
+
+  $<_1>
+
+.. versionadded:: 4.5
+
+The second *bound operand* of a *binding operation* that binds at least two
+operands, expanding to the second supplied value.
+
+For example, :genex:`$<LIST:SORT,...,COMPARATOR,body> <LIST:SORT>` evaluates
+``body`` once per comparison with :genex:`$<_0>` and ``$<_1>`` bound to the two
+items being compared.
+
+``$<_1>`` is only valid inside the body of a binding operation that binds at
+least two operands.  Using it anywhere else is an error.
