@@ -6,5 +6,6 @@ enum class cmWIXInstallScope
 {
   NONE,
   PER_MACHINE,
-  PER_USER
+  PER_USER,
+  PER_USER_OR_MACHINE
 };

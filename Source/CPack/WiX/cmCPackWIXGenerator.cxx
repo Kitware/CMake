@@ -3,6 +3,7 @@
 #include "cmCPackWIXGenerator.h"
 
 #include <algorithm>
+#include <array>
 #include <memory>
 
 #include <cm/string_view>
@@ -49,6 +50,33 @@ int cmCPackWIXGenerator::InitializeInternal()
 {
   componentPackageMethod = ONE_PACKAGE;
   this->Patch = std::make_unique<cmWIXPatch>(this->Logger);
+
+  // A per-machine install into these would land in the installing admin's
+  // profile.  Only Program Files is redirected per-user.
+  static std::array<cm::string_view, 9> const profileFolders{ {
+    "AppDataFolder"_s,
+    "FavoritesFolder"_s,
+    "LocalAppDataFolder"_s,
+    "MyPicturesFolder"_s,
+    "NetHoodFolder"_s,
+    "PersonalFolder"_s,
+    "PrintHoodFolder"_s,
+    "RecentFolder"_s,
+    "SendToFolder"_s,
+  } };
+  cmValue rootFolderId = GetOption("CPACK_WIX_ROOT_FOLDER_ID");
+  if (GetOption("CPACK_WIX_INSTALL_SCOPE") == "perUserOrMachine"_s &&
+      !GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER").IsOn() && rootFolderId &&
+      cm::contains(profileFolders, *rootFolderId)) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "CPACK_WIX_ROOT_FOLDER_ID '"
+                    << *rootFolderId
+                    << "' is a per-user folder and cannot be used with "
+                       "CPACK_WIX_INSTALL_SCOPE perUserOrMachine.  "
+                       "Use perUser instead."
+                    << std::endl);
+    return 0;
+  }
 
   return this->Superclass::InitializeInternal();
 }
@@ -144,6 +172,12 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
   cmValue const cultures = GetOption("CPACK_WIX_CULTURES");
   if (cultures) {
     command << " -cultures:" << cultures;
+  }
+
+  // ICE57 flags the HKMU key paths of shortcut components because ICEs
+  // ignore ALLUSERS.  At install time the shortcut folders follow it too.
+  if (GetInstallScope() == cmWIXInstallScope::PER_USER_OR_MACHINE) {
+    command << " -sice:ICE57";
   }
 
   AddCustomFlags("CPACK_WIX_LIGHT_EXTRA_FLAGS", command);
@@ -600,6 +634,24 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.BeginElement("Fragment");
 
+  // A per-machine install of a perUser package would land in the installing
+  // admin's profile.
+  if (installScope == cmWIXInstallScope::PER_USER) {
+    std::string const message =
+      "[ProductName] can only be installed for the current user.";
+    if (this->WixVersion >= 4) {
+      featureDefinitions.BeginElement("Launch");
+      featureDefinitions.AddAttribute("Condition", "NOT ALLUSERS");
+      featureDefinitions.AddAttribute("Message", message);
+      featureDefinitions.EndElement("Launch");
+    } else {
+      featureDefinitions.BeginElement("Condition");
+      featureDefinitions.AddAttribute("Message", message);
+      featureDefinitions.AddTextNode("NOT ALLUSERS");
+      featureDefinitions.EndElement("Condition");
+    }
+  }
+
   featureDefinitions.BeginElement("Feature");
   featureDefinitions.AddAttribute("Id", "ProductFeature");
   featureDefinitions.AddAttribute("Display", "expand");
@@ -629,7 +681,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   cmValue package = GetOption("CPACK_WIX_CMAKE_PACKAGE_REGISTRY");
   if (package) {
     featureDefinitions.CreateCMakePackageRegistryEntry(
-      *package, GetOption("CPACK_WIX_UPGRADE_GUID"));
+      *package, GetOption("CPACK_WIX_UPGRADE_GUID"), installScope);
   }
 
   if (removeFolderComponentId.has_value()) {
@@ -1410,6 +1462,9 @@ cmWIXInstallScope cmCPackWIXGenerator::GetInstallScope() const
   }
   if (value == "perMachine"_s) {
     return cmWIXInstallScope::PER_MACHINE;
+  }
+  if (value == "perUserOrMachine"_s) {
+    return cmWIXInstallScope::PER_USER_OR_MACHINE;
   }
   if (value == "NONE"_s) {
     return cmWIXInstallScope::NONE;

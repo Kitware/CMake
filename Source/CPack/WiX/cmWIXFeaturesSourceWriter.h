@@ -3,6 +3,7 @@
 #pragma once
 
 #include "cmCPackGenerator.h"
+#include "cmWIXInstallScope.h"
 #include "cmWIXPatch.h"
 #include "cmWIXSourceWriter.h"
 
@@ -17,7 +18,8 @@ public:
                             GuidType componentGuidType);
 
   void CreateCMakePackageRegistryEntry(std::string const& package,
-                                       std::string const& upgradeGuid);
+                                       std::string const& upgradeGuid,
+                                       cmWIXInstallScope installScope);
 
   void EmitFeatureForComponentGroup(cmCPackComponentGroup const& group,
                                     cmWIXPatch& patch);

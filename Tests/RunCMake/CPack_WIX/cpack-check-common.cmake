@@ -1,6 +1,10 @@
 file(GLOB wix_log_file RELATIVE "${RunCMake_TEST_BINARY_DIR}" "${RunCMake_TEST_BINARY_DIR}/_CPack_Packages/*/WIX/wix.log")
 if(wix_log_file)
   file(READ "${RunCMake_TEST_BINARY_DIR}/${wix_log_file}" wix_log)
+  # LGHT1105 means light skipped validation, which would hide ICE errors.
+  if(CMake_TEST_CPACK_WIX_VALIDATE AND wix_log MATCHES "LGHT1105")
+    string(APPEND RunCMake_TEST_FAILED "light could not run ICE validation.\n")
+  endif()
   string(REPLACE "\n" "\n wix-log> " wix_log " wix-log> ${wix_log}")
   set(RunCMake_TEST_FAILURE_MESSAGE "${wix_log_file}:\n${wix_log}")
 endif()

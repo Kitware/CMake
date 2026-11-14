@@ -14,7 +14,8 @@ cmWIXFeaturesSourceWriter::cmWIXFeaturesSourceWriter(
 }
 
 void cmWIXFeaturesSourceWriter::CreateCMakePackageRegistryEntry(
-  std::string const& package, std::string const& upgradeGuid)
+  std::string const& package, std::string const& upgradeGuid,
+  cmWIXInstallScope installScope)
 {
   BeginElement("Component");
   AddAttribute("Id", "CM_PACKAGE_REGISTRY");
@@ -24,8 +25,15 @@ void cmWIXFeaturesSourceWriter::CreateCMakePackageRegistryEntry(
   std::string registryKey =
     cmStrCat(R"(Software\Kitware\CMake\Packages\)"_s, package);
 
+  std::string root = "HKLM";
+  if (installScope == cmWIXInstallScope::PER_USER) {
+    root = "HKCU";
+  } else if (installScope == cmWIXInstallScope::PER_USER_OR_MACHINE) {
+    root = "HKMU";
+  }
+
   BeginElement("RegistryValue");
-  AddAttribute("Root", "HKLM");
+  AddAttribute("Root", root);
   AddAttribute("Key", registryKey);
   AddAttribute("Name", upgradeGuid);
   AddAttribute("Type", "string");

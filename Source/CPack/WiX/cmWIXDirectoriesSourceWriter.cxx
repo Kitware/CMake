@@ -18,6 +18,7 @@ cmWIXDirectoriesSourceWriter::cmWIXDirectoriesSourceWriter(
       this->PerUserInstall = true;
       break;
     case cmWIXInstallScope::PER_MACHINE:
+    case cmWIXInstallScope::PER_USER_OR_MACHINE:
     case cmWIXInstallScope::NONE:
       this->PerUserInstall = false;
       break;
