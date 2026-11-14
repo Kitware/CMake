@@ -85,6 +85,14 @@ else()
 
     set(CMAKE_C_STANDARD_LATEST 23)
   endif()
+
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1)
+    # /Zc:__STDC__ disables the MSVC and UCRT extensions in C11 and later
+    # modes.  It is passed when extensions are off.  See policy CMP0233.
+    set(CMAKE_C11_STANDARD_COMPILE_OPTION_MSVC_STDC "-Zc:__STDC__")
+    set(CMAKE_C17_STANDARD_COMPILE_OPTION_MSVC_STDC "-Zc:__STDC__")
+    set(CMAKE_C23_STANDARD_COMPILE_OPTION_MSVC_STDC "-Zc:__STDC__")
+  endif()
 endif()
 
 if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 2.1)

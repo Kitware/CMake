@@ -650,6 +650,44 @@ std::string cmStandardLevelResolver::GetPermissiveCompileOption(
     cmStrCat(optionFlagDef, "_PERMISSIVE"_s));
 }
 
+std::string cmStandardLevelResolver::GetMsvcStdcCompileOption(
+  cmGeneratorTarget const* target, std::string const& lang,
+  std::string const& config) const
+{
+  // CMP0233: the compiler modules define a companion of the C standard
+  // option variable for the standards that support /Zc:__STDC__.  Only the
+  // STANDARD (not EXTENSION) variables have one, so it is found only when
+  // extensions are off.
+  if (target->GetPolicyStatusCMP0233() != cmPolicies::NEW) {
+    return {};
+  }
+  bool const isC = lang == "C"_s;
+  if (!isC) {
+    if (lang != "CXX"_s) {
+      return {};
+    }
+    // The Visual Studio generators compile the C and C++ sources of a
+    // target with one set of options, so pass the flag with the C++
+    // sources of targets that have C sources too in every generator.
+    if (!target->IsLanguageUsed("C", config)) {
+      return {};
+    }
+  }
+  std::string const cOptionDef =
+    this->GetCompileOptionDef(target, "C", config);
+  if (cOptionDef.empty() ||
+      this->Makefile->GetDefinition(cmStrCat(cOptionDef, "_MSVC_STDC"_s))
+        .IsEmpty()) {
+    return {};
+  }
+  if (isC) {
+    return this->Makefile->GetSafeDefinition(
+      cmStrCat(cOptionDef, "_MSVC_STDC"_s));
+  }
+  return this->Makefile->GetSafeDefinition(
+    "CMAKE_CXX_COMPILE_OPTION_MSVC_STDC");
+}
+
 std::string cmStandardLevelResolver::GetEffectiveStandard(
   cmGeneratorTarget const* target, std::string const& lang,
   std::string const& config) const

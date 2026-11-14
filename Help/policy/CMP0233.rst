@@ -1,0 +1,51 @@
+CMP0233
+-------
+
+.. versionadded:: 4.6
+
+MSVC C and UCRT extensions are controlled by
+:prop_tgt:`C_EXTENSIONS`.
+
+The :prop_tgt:`C_EXTENSIONS` target property selects whether
+compiler-specific language extensions are enabled.  The ``MSVC`` compiler
+selects the C standard with ``/std:c11`` or later regardless of that
+property, so C sources still see the Microsoft and UCRT extensions, and the
+``__STDC__`` preprocessor macro is not defined.  Visual Studio 2022 version
+17.2 and above offer the ``/Zc:__STDC__`` flag to define ``__STDC__`` as
+``1`` and to hide those extensions, which makes C sources build in a mode
+that conforms to the selected standard.  ``clang-cl`` offers the same flag
+since LLVM 19.1.
+
+In CMake 4.5 and below, :prop_tgt:`C_EXTENSIONS` had no influence on this
+mode.  CMake 4.6 and above prefer to pass ``/Zc:__STDC__`` when compiler
+extensions are disabled for C.  This policy provides compatibility for
+projects that have not been updated to expect the behavior.
+
+The ``OLD`` behavior for this policy does not add ``/Zc:__STDC__``.
+The ``NEW`` behavior adds ``/Zc:__STDC__`` for a target whose
+:prop_tgt:`C_EXTENSIONS` is ``OFF`` and whose effective C standard is
+C11 or later, the standards with which the compiler supports the flag.  The
+flag has no opposite form, so a target cannot remove it through its
+:prop_tgt:`COMPILE_OPTIONS`; set :prop_tgt:`C_EXTENSIONS` to ``ON`` or the
+policy to ``OLD`` instead.
+
+The :ref:`Visual Studio Generators` compile the C and C++ sources of a
+target with one set of options, so a flag is passed
+to its C++ sources as well.  For consistent behavior across generators, the
+``NEW`` behavior also adds ``/Zc:__STDC__`` when compiling the C++ sources of
+a target that has C sources meeting the conditions above.  The flag does not
+affect C++ code.
+
+The policy setting is recorded by each target when it is created.  It is
+also propagated to the test projects of the :command:`try_compile` and
+:command:`try_run` commands.
+
+This policy has no effect on other languages, on compilers other than
+``MSVC`` and ``clang-cl``, or on versions of them that do not support the
+flag.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

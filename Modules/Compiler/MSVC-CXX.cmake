@@ -116,6 +116,13 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.14)
   set(CMAKE_CXX_COMPILE_OPTIONS_MSVC_CPLUSPLUS_MACRO "-Zc:__cplusplus")
 endif()
 
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.32)
+  # VS 2022 17.2 and above have /Zc:__STDC__.  It has no effect on C++, but
+  # is passed with the C++ sources of targets that also have C sources
+  # compiled with it, as the Visual Studio generators do.  See policy CMP0233.
+  set(CMAKE_CXX_COMPILE_OPTION_MSVC_STDC "-Zc:__STDC__")
+endif()
+
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.10)
   # /std:c++14 and earlier, and /std:c++17, stay permissive until
   # /permissive- is passed.  /std:c++latest implies /permissive- since

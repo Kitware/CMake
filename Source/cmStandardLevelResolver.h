@@ -29,6 +29,9 @@ public:
                                   std::string const& config) const;
   std::string GetPermissiveCompileOption(
     cmGeneratorTarget const* target, std::string const& optionFlagDef) const;
+  std::string GetMsvcStdcCompileOption(cmGeneratorTarget const* target,
+                                       std::string const& lang,
+                                       std::string const& config) const;
   std::string GetEffectiveStandard(cmGeneratorTarget const* target,
                                    std::string const& lang,
                                    std::string const& config) const;

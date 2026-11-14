@@ -31,6 +31,13 @@ endif()
 if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
   set(CMAKE_CXX_CLANG_TIDY_DRIVER_MODE "cl")
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_DRIVER_MODE "cl")
+
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1)
+    # Passed with the C++ sources of targets that also have C sources
+    # compiled with /Zc:__STDC__, as the Visual Studio generators do.
+    # See policy CMP0233.
+    set(CMAKE_CXX_COMPILE_OPTION_MSVC_STDC "-Zc:__STDC__")
+  endif()
 endif()
 
 if((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0 AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU") OR
