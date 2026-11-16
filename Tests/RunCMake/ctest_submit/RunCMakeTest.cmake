@@ -59,6 +59,30 @@ function(run_ctest_CDashUploadFTP)
 endfunction()
 run_ctest_CDashUploadFTP()
 
+# Test JSON responses from a local CDash server.
+if(Python_EXECUTABLE AND Python_VERSION VERSION_GREATER_EQUAL 3.7)
+  function(run_ctest_upload_response case)
+    set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${case}-build")
+    configure_file("${RunCMake_SOURCE_DIR}/CDashUpload-test.cmake.in"
+      "${RunCMake_BINARY_DIR}/${case}.cmake" @ONLY)
+    if(case MATCHES "Invalid")
+      set(RunCMake_TEST_EXPECT_stdout "submit result: -1")
+      set(RunCMake_TEST_EXPECT_stderr "error parsing json string")
+    else()
+      set(RunCMake_TEST_EXPECT_stdout "submit result: 0")
+    endif()
+    run_cmake_command(${case}
+      "${Python_EXECUTABLE}" "${RunCMake_SOURCE_DIR}/CDashUpload-server.py"
+      "${case}"
+      "${CMAKE_CTEST_COMMAND}" -S "${RunCMake_BINARY_DIR}/${case}.cmake" -V
+    )
+  endfunction()
+  run_ctest_upload_response(CDashUploadSuccess)
+  run_ctest_upload_response(CDashUploadExists)
+  run_ctest_upload_response(CDashUploadInvalidRequest)
+  run_ctest_upload_response(CDashUploadInvalidResponse)
+endif()
+
 #-----------------------------------------------------------------------------
 # Test failed drops by various protocols
 

@@ -583,7 +583,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Quiet,
                      "Request upload response: ["_s, response, "]\n"_s);
   Json::Value json;
-  cmJSONState parseState(response, &json, cmJSONState::StrictMode::Relaxed);
+  std::istringstream iss(response);
+  cmJSONState parseState(iss, &json, cmJSONState::StrictMode::Relaxed);
   if (!internalTest && !parseState.errors.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error parsing json string ["_s,
                response, "]\n"_s, parseState.GetErrorMessage(), '\n');
@@ -652,7 +653,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                file, ' ', url, ' ', fstr.str());
     return -1;
   }
-  parseState = cmJSONState(response, &json, cmJSONState::StrictMode::Relaxed);
+  iss = std::istringstream(response);
+  parseState = cmJSONState(iss, &json, cmJSONState::StrictMode::Relaxed);
   if (!parseState.errors.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error parsing json string ["_s,
                response, "]\n"_s, parseState.GetErrorMessage(), '\n');
