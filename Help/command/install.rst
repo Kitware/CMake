@@ -461,7 +461,7 @@ Signatures
     This option specifies a list of directories which will be added to the
     :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property of the
     ``<targets>`` when exported by the :command:`install(EXPORT)` command.
-    If a relative path is specified, it is treated as relative to the
+    If a relative path is specified, it is treated as relative to
     :genex:`$<INSTALL_PREFIX>`.
 
     Unlike other ``DESTINATION`` arguments for the various ``install()``
