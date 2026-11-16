@@ -11,7 +11,7 @@ TARGET_LINKER_IMPORT_FILE_BASE_NAME
 
   $<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
-.. versionadded:: 4.2
+.. versionchanged:: 4.2
   The ``POSTFIX`` option can be used to control the inclusion or not
   of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
   base name. The default is ``POSTFIX:INCLUDE``.

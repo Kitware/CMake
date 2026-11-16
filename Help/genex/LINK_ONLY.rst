@@ -19,6 +19,6 @@ the :command:`target_link_libraries` command, to specify private link
 dependencies without other usage requirements such as include directories or
 compile options.
 
-.. versionadded:: 3.24
+.. versionchanged:: 3.24
   ``LINK_ONLY`` may also be used in a :prop_tgt:`LINK_LIBRARIES` target
   property.  See policy :policy:`CMP0131`.

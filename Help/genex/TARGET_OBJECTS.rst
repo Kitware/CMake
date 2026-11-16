@@ -18,7 +18,7 @@ Additional arguments:
 
 ``SOURCE_FILES:source_file[;source_file]...``
 
-  .. versionadded:: 4.4
+  .. versionchanged:: 4.4
 
   An optional list of one or more source files for the target. Only the
   object files built from those source files will be returned (but not

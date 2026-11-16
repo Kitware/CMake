@@ -14,7 +14,7 @@ TARGET_PDB_FILE_BASE_NAME
 Base name of the linker generated program database file (.pdb) where ``tgt`` is
 the name of a target.
 
-.. versionadded:: 4.2
+.. versionchanged:: 4.2
   The ``POSTFIX`` option can be used to control the inclusion or not
   of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
   base name. The default is ``POSTFIX:INCLUDE``.

@@ -15,7 +15,7 @@ A list of items from the ``list`` which match (``INCLUDE``) or do not match
 (``EXCLUDE``) the regular expression ``regex``.  The result is the same as
 :genex:`$<FILTER:list,INCLUDE|EXCLUDE,regex>`.
 
-.. versionadded:: 4.5
+.. versionchanged:: 4.5
 
   The regular expression may be introduced explicitly with a ``REGEX``
   keyword, and a ``PREDICATE`` keyword selects items using a generator
