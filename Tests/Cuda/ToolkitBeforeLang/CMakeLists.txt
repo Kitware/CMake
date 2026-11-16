@@ -19,4 +19,4 @@ if( NOT CUDAToolkit_NVCC_EXECUTABLE STREQUAL CMAKE_CUDA_COMPILER)
 endif()
 
 add_executable(ToolkitBeforeLang main.cpp)
-target_link_libraries(ToolkitBeforeLang PRIVATE CUDAToolkit::toolkit)
+target_link_libraries(ToolkitBeforeLang PRIVATE CUDA::toolkit)
