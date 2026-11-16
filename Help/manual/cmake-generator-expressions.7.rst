@@ -246,7 +246,6 @@ Logical Operators
 
 The common boolean logic operators are supported:
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -274,7 +273,6 @@ sections further below.
 Numeric Comparisons
 ^^^^^^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -284,7 +282,6 @@ Numeric Comparisons
 
 Version Comparisons
 ^^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -329,7 +326,6 @@ evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
 
     $<STREQUAL:$<STRING:TOUPPER,${foo}>,BAR>
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -346,7 +342,6 @@ evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
 String Queries
 ^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -361,7 +356,6 @@ String Queries
 
 String Generations
 ^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -378,7 +372,6 @@ String Generations
 
 String Transformations
 ^^^^^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -420,7 +413,6 @@ expressions only.
 List Comparisons
 ^^^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -432,7 +424,6 @@ List Comparisons
 
 List Queries
 ^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -450,7 +441,6 @@ List Transformations
 ^^^^^^^^^^^^^^^^^^^^
 
 .. _GenEx LIST-JOIN:
-
 
 .. toctree::
    :maxdepth: 1
@@ -481,7 +471,6 @@ List Transformations
 List Ordering
 ^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -494,7 +483,6 @@ List Ordering
 
 Bound Operands
 ^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -521,7 +509,6 @@ one.
 Path Comparisons
 ^^^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -537,7 +524,6 @@ Path Queries
 These expressions provide the generation-time capabilities equivalent to the
 :ref:`Query <Path Query>` options of the :command:`cmake_path` command.
 All paths are expected to be in cmake-style format.
-
 
 .. toctree::
    :maxdepth: 1
@@ -555,7 +541,6 @@ Path Decomposition
 These expressions provide the generation-time capabilities equivalent to the
 :ref:`Decomposition <Path Decomposition>` options of the :command:`cmake_path`
 command.  All paths are expected to be in cmake-style format.
-
 
 .. toctree::
    :maxdepth: 1
@@ -578,9 +563,7 @@ in cmake-style format.
   All operations now accept a list of paths as argument. When a list of paths
   is specified, the operation will be applied to each path.
 
-
 .. _GenEx PATH-CMAKE_PATH:
-
 
 .. toctree::
    :maxdepth: 1
@@ -599,7 +582,6 @@ in cmake-style format.
 Shell Paths
 ^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -609,7 +591,6 @@ Shell Paths
 
 Configuration Expressions
 -------------------------
-
 
 .. toctree::
    :maxdepth: 1
@@ -624,7 +605,6 @@ Global Expressions
 Global Properties
 ^^^^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -635,7 +615,6 @@ Directory-dependent Expressions
 
 Directory Properties
 ^^^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -664,7 +643,6 @@ Toolchain And Language Expressions
 Platform
 ^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -677,7 +655,6 @@ Compiler Version
 
 See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable, which is
 closely related to the expressions in this sub-section.
-
 
 .. toctree::
    :maxdepth: 1
@@ -699,7 +676,6 @@ Compiler Language, ID, and Frontend-Variant
 See also the :variable:`CMAKE_<LANG>_COMPILER_ID` and
 :variable:`CMAKE_<LANG>_COMPILER_FRONTEND_VARIANT` variables, which are closely
 related to most of the expressions in this sub-section.
-
 
 .. toctree::
    :maxdepth: 1
@@ -726,7 +702,6 @@ related to most of the expressions in this sub-section.
 Compile Features
 ^^^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -734,7 +709,6 @@ Compile Features
 
 Compile Context
 ^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -745,7 +719,6 @@ Compile Context
 
 Link Language and ID
 ^^^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -760,7 +733,6 @@ Link Language and ID
 Link Features
 ^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -771,7 +743,6 @@ Link Features
 
 Link Context
 ^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -882,7 +853,6 @@ FileSet Meta-Data
 
 These expressions look up information about a file set.
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -892,7 +862,6 @@ FileSet Properties
 ^^^^^^^^^^^^^^^^^^
 
 These expressions look up the values of file set properties.
-
 
 .. toctree::
    :maxdepth: 1
@@ -913,7 +882,6 @@ Target Meta-Data
 
 These expressions look up information about a target.
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -927,7 +895,6 @@ Target Properties
 
 These expressions look up the values of
 :ref:`target properties <Target Properties>`.
-
 
 .. toctree::
    :maxdepth: 1
@@ -1042,7 +1009,6 @@ The expressions have special evaluation rules for some properties:
   of compatibility required by the ``COMPATIBLE_INTERFACE_*`` property
   defining it.
 
-
 .. _genex-family-target-artifacts:
 
 Target Artifacts
@@ -1060,7 +1026,6 @@ runtime artifact, namely:
 In the following, the phrase "the ``tgt`` filename" means the name of the
 ``tgt`` binary file. This has to be distinguished from the phrase
 "the target name", which is just the string ``tgt``.
-
 
 .. toctree::
    :maxdepth: 1
@@ -1118,7 +1083,6 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 Export And Install Expressions
 ------------------------------
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -1131,7 +1095,6 @@ Export And Install Expressions
 
 Multi-level Expression Evaluation
 ---------------------------------
-
 
 .. toctree::
    :maxdepth: 1
@@ -1147,7 +1110,6 @@ Support Expressions
 Conversions
 ^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -1162,7 +1124,6 @@ These expressions evaluate to specific string literals. Use them in place of
 the actual string literal where you need to prevent them from having their
 special meaning.
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -1173,7 +1134,6 @@ special meaning.
 
 Deprecated Expressions
 ----------------------
-
 
 .. toctree::
    :maxdepth: 1
