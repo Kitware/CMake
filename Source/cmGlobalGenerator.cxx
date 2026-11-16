@@ -10,10 +10,10 @@
 #include <functional>
 #include <initializer_list>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -692,7 +692,7 @@ void cmGlobalGenerator::EnableLanguage(
   // Variable scope to capture enable_language variables to be raised to root.
   std::unique_ptr<cmMakefile::VariablePushPop> variableScope;
   if (propagate) {
-    variableScope = cm::make_unique<cmMakefile::VariablePushPop>(mf);
+    variableScope = std::make_unique<cmMakefile::VariablePushPop>(mf);
   }
 
   bool fatalError = false;
@@ -1516,7 +1516,7 @@ void cmGlobalGenerator::Configure()
   snapshot.GetDirectory().SetCurrentBinary(
     this->CMakeInstance->GetHomeOutputDirectory());
 
-  auto dirMfu = cm::make_unique<cmMakefile>(this, snapshot);
+  auto dirMfu = std::make_unique<cmMakefile>(this, snapshot);
   auto* dirMf = dirMfu.get();
   this->Makefiles.push_back(std::move(dirMfu));
   dirMf->SetRecursionDepth(this->RecursionDepth);
@@ -1760,7 +1760,7 @@ bool cmGlobalGenerator::Compute()
 
 #ifndef CMAKE_BOOTSTRAP
   this->QtAutoGen =
-    cm::make_unique<cmQtAutoGenGlobalInitializer>(this->LocalGenerators);
+    std::make_unique<cmQtAutoGenGlobalInitializer>(this->LocalGenerators);
   if (!this->QtAutoGen->InitializeCustomTargets()) {
     return false;
   }
@@ -1869,7 +1869,7 @@ bool cmGlobalGenerator::Compute()
       std::string dest = args.GetDefaultDestination(
         cm::InstallDirs::GetLibraryDirectory(this->Makefiles[0].get()));
 
-      auto installGen = cm::make_unique<cmInstallSbomGenerator>(
+      auto installGen = std::make_unique<cmInstallSbomGenerator>(
         std::vector<cmExportSet*>{ &exportSet.second }, std::move(dest), "",
         std::vector<std::string>(), "",
         cmInstallGenerator::SelectMessageLevel(this->Makefiles[0].get()),
@@ -2256,15 +2256,15 @@ bool cmGlobalGenerator::AddHeaderSetVerification()
       "all_verify_interface_header_sets", { cm::TargetDomain::NATIVE });
   if (allVerifyInterfaceTarget) {
     this->LocalGenerators.front()->AddGeneratorTarget(
-      cm::make_unique<cmGeneratorTarget>(allVerifyInterfaceTarget,
-                                         this->LocalGenerators.front().get()));
+      std::make_unique<cmGeneratorTarget>(
+        allVerifyInterfaceTarget, this->LocalGenerators.front().get()));
   }
   cmTarget* allVerifyPrivateTarget = this->Makefiles.front()->FindTargetToUse(
     "all_verify_private_header_sets", { cm::TargetDomain::NATIVE });
   if (allVerifyPrivateTarget) {
     this->LocalGenerators.front()->AddGeneratorTarget(
-      cm::make_unique<cmGeneratorTarget>(allVerifyPrivateTarget,
-                                         this->LocalGenerators.front().get()));
+      std::make_unique<cmGeneratorTarget>(
+        allVerifyPrivateTarget, this->LocalGenerators.front().get()));
   }
 
   if (allVerifyInterfaceTarget || allVerifyPrivateTarget) {
@@ -2272,8 +2272,8 @@ bool cmGlobalGenerator::AddHeaderSetVerification()
       this->GetMakefiles().front()->AddNewUtilityTarget(
         "all_verify_header_sets", true);
     this->LocalGenerators.front()->AddGeneratorTarget(
-      cm::make_unique<cmGeneratorTarget>(allVerifyTarget,
-                                         this->LocalGenerators.front().get()));
+      std::make_unique<cmGeneratorTarget>(
+        allVerifyTarget, this->LocalGenerators.front().get()));
     if (allVerifyInterfaceTarget) {
       allVerifyTarget->AddUtility(allVerifyInterfaceTarget->GetName(), false);
     }
@@ -2339,7 +2339,7 @@ bool cmGlobalGenerator::AddAutomaticSources()
 std::unique_ptr<cmLinkLineComputer> cmGlobalGenerator::CreateLinkLineComputer(
   cmOutputConverter* outputConverter, cmStateDirectory const& stateDir) const
 {
-  return cm::make_unique<cmLinkLineComputer>(outputConverter, stateDir);
+  return std::make_unique<cmLinkLineComputer>(outputConverter, stateDir);
 }
 
 std::unique_ptr<cmLinkLineComputer>
@@ -2347,7 +2347,7 @@ cmGlobalGenerator::CreateMSVC60LinkLineComputer(
   cmOutputConverter* outputConverter, cmStateDirectory const& stateDir) const
 {
   return std::unique_ptr<cmLinkLineComputer>(
-    cm::make_unique<cmMSVC60LinkLineComputer>(outputConverter, stateDir));
+    std::make_unique<cmMSVC60LinkLineComputer>(outputConverter, stateDir));
 }
 
 void cmGlobalGenerator::FinalizeTargetConfiguration()
@@ -2386,7 +2386,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(
 {
   if (targetTypes == AllTargets) {
     for (cmTarget* target : mf->GetOrderedTargets()) {
-      lg->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(target, lg));
+      lg->AddGeneratorTarget(std::make_unique<cmGeneratorTarget>(target, lg));
     }
   }
 
@@ -2402,7 +2402,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
     auto& mf = this->Makefiles[i];
     for (auto const& ownedImpTgt : mf->GetOwnedImportedTargets()) {
       cmLocalGenerator* lg = this->LocalGenerators[i].get();
-      auto gt = cm::make_unique<cmGeneratorTarget>(ownedImpTgt.get(), lg);
+      auto gt = std::make_unique<cmGeneratorTarget>(ownedImpTgt.get(), lg);
       importedMap[ownedImpTgt.get()] = gt.get();
       lg->AddOwnedImportedGeneratorTarget(std::move(gt));
     }
@@ -3005,7 +3005,7 @@ void cmGlobalGenerator::EnableInstallTarget()
 std::unique_ptr<cmLocalGenerator> cmGlobalGenerator::CreateLocalGenerator(
   cmMakefile* mf)
 {
-  return cm::make_unique<cmLocalGenerator>(this, mf);
+  return std::make_unique<cmLocalGenerator>(this, mf);
 }
 
 void cmGlobalGenerator::SetupTryCompile(cmGlobalGenerator* gen, cmMakefile* mf)
@@ -3915,7 +3915,7 @@ void cmGlobalGenerator::ConfigureRules()
             mf->AddGeneratorAction(
               [rule, &target, fileSet, outFileSet, source, sourcePatterns](
                 cmLocalGenerator& lg, cmListFileBacktrace const&) {
-                auto genRule = cm::make_unique<cmGeneratorRule>(
+                auto genRule = std::make_unique<cmGeneratorRule>(
                   rule, &target, fileSet, outFileSet, source, sourcePatterns);
                 auto cc = genRule->Generate(outFileSet);
                 if (cc) {
@@ -4242,7 +4242,7 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
       {
         ModuleCompilationDatabaseCommandAction action{ output,
                                                        std::move(inputs) };
-        auto cc = cm::make_unique<cmCustomCommand>();
+        auto cc = std::make_unique<cmCustomCommand>();
         cc->SetComment(comment);
         mf->AddGeneratorAction(
           std::move(cc), action,
@@ -4253,7 +4253,7 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
       {
         cmTarget* target = mf->AddNewUtilityTarget(name, true);
         ModuleCompilationDatabaseTargetAction action{ output, target };
-        auto cc = cm::make_unique<cmCustomCommand>();
+        auto cc = std::make_unique<cmCustomCommand>();
         mf->AddGeneratorAction(std::move(cc), action);
       }
     };
@@ -4905,7 +4905,7 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
 cmInstallRuntimeDependencySet*
 cmGlobalGenerator::CreateAnonymousRuntimeDependencySet()
 {
-  auto set = cm::make_unique<cmInstallRuntimeDependencySet>();
+  auto set = std::make_unique<cmInstallRuntimeDependencySet>();
   auto* retval = set.get();
   this->RuntimeDependencySets.push_back(std::move(set));
   return retval;
@@ -4916,7 +4916,7 @@ cmInstallRuntimeDependencySet* cmGlobalGenerator::GetNamedRuntimeDependencySet(
 {
   auto it = this->RuntimeDependencySetsByName.find(name);
   if (it == this->RuntimeDependencySetsByName.end()) {
-    auto set = cm::make_unique<cmInstallRuntimeDependencySet>(name);
+    auto set = std::make_unique<cmInstallRuntimeDependencySet>(name);
     it =
       this->RuntimeDependencySetsByName.insert(std::make_pair(name, set.get()))
         .first;

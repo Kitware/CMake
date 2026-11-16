@@ -3,9 +3,9 @@
 #include "cmComputeLinkInformation.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -265,9 +265,9 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     "FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 
   // Allocate internals.
-  this->OrderLinkerSearchPath = cm::make_unique<cmOrderDirectories>(
+  this->OrderLinkerSearchPath = std::make_unique<cmOrderDirectories>(
     this->GlobalGenerator, target, "linker search path");
-  this->OrderRuntimeSearchPath = cm::make_unique<cmOrderDirectories>(
+  this->OrderRuntimeSearchPath = std::make_unique<cmOrderDirectories>(
     this->GlobalGenerator, target, "runtime search path");
 
   // Get the language used for linking this target.
@@ -404,7 +404,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->SharedDependencyMode = SharedDepModeLibDir;
   } else if (!this->RPathLinkFlag.empty()) {
     this->SharedDependencyMode = SharedDepModeDir;
-    this->OrderDependentRPath = cm::make_unique<cmOrderDirectories>(
+    this->OrderDependentRPath = std::make_unique<cmOrderDirectories>(
       this->GlobalGenerator, target, "dependent library path");
   }
 

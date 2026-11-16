@@ -19,9 +19,8 @@
 #  include <cstring>
 #  include <exception>
 #  include <iterator>
+#  include <memory>
 #  include <vector>
-
-#  include <cm/memory>
 
 #  include <windows.h>
 
@@ -218,7 +217,7 @@ std::wstring KeyHandler::ToWide(cm::string_view str)
     MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
                         int(str.size()), nullptr, 0);
   if (wlength > 0) {
-    auto wdata = cm::make_unique<wchar_t[]>(wlength);
+    auto wdata = std::make_unique<wchar_t[]>(wlength);
     auto const r =
       MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
                           int(str.size()), wdata.get(), wlength);
@@ -246,7 +245,7 @@ std::string KeyHandler::ToNarrow(wchar_t const* wstr, int size)
     WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, wstr, size,
                         nullptr, 0, nullptr, nullptr);
   if (length > 0) {
-    auto data = cm::make_unique<char[]>(length);
+    auto data = std::make_unique<char[]>(length);
     auto const r =
       WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, wstr, size,
                           data.get(), length, nullptr, nullptr);
@@ -278,7 +277,7 @@ std::string KeyHandler::ReadValue(cm::string_view name,
                                  &size, nullptr, nullptr)) != ERROR_SUCCESS) {
     throw registry_error(this->FormatSystemError(status));
   }
-  auto data = cm::make_unique<BYTE[]>(size);
+  auto data = std::make_unique<BYTE[]>(size);
   DWORD type;
   auto valueName = this->ToWide(name);
   if ((status = RegQueryValueExW(this->Handler, valueName.c_str(), nullptr,
@@ -298,7 +297,7 @@ std::string KeyHandler::ReadValue(cm::string_view name,
     case REG_EXPAND_SZ: {
       auto expandSize = ExpandEnvironmentStringsW(
         reinterpret_cast<wchar_t*>(data.get()), nullptr, 0);
-      auto expandData = cm::make_unique<wchar_t[]>(expandSize + 1);
+      auto expandData = std::make_unique<wchar_t[]>(expandSize + 1);
       if (ExpandEnvironmentStringsW(reinterpret_cast<wchar_t*>(data.get()),
                                     expandData.get(), expandSize + 1) == 0) {
         throw registry_error(this->FormatSystemError(GetLastError()));
@@ -337,7 +336,7 @@ std::vector<std::string> KeyHandler::GetValueNames()
     throw registry_error(this->FormatSystemError(status));
   }
   // increment size for final null
-  auto data = cm::make_unique<wchar_t[]>(++maxSize);
+  auto data = std::make_unique<wchar_t[]>(++maxSize);
   DWORD index = 0;
   DWORD size = maxSize;
 
@@ -370,7 +369,7 @@ std::vector<std::string> KeyHandler::GetSubKeys()
     throw registry_error(this->FormatSystemError(status));
   }
   // increment size for final null
-  auto data = cm::make_unique<wchar_t[]>(++size);
+  auto data = std::make_unique<wchar_t[]>(++size);
   DWORD index = 0;
   std::vector<std::string> subKeys;
 

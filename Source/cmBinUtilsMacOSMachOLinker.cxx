@@ -3,11 +3,11 @@
 
 #include "cmBinUtilsMacOSMachOLinker.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h"
@@ -42,7 +42,7 @@ bool cmBinUtilsMacOSMachOLinker::Prepare()
   }
   if (tool == "otool") {
     this->Tool =
-      cm::make_unique<cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool>(
+      std::make_unique<cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool>(
         this->Archive);
   } else {
     this->SetError(cmStrCat(

@@ -8,7 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmFastbuildTargetGenerator.h"

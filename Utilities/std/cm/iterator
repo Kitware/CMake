@@ -8,19 +8,3 @@
 #include <iterator> // IWYU pragma: export
 
 #include <cm/bits/container_helpers.hxx> // IWYU pragma: export
-
-namespace cm {
-
-#if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
-using std::make_reverse_iterator;
-
-#else
-template <class Iter>
-std::reverse_iterator<Iter> make_reverse_iterator(Iter it)
-{
-  return std::reverse_iterator<Iter>(it);
-}
-
-#endif
-
-} // namespace cm

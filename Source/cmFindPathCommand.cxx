@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFindPathCommand.h"
 
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmsys/Glob.hxx"
@@ -41,7 +41,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   this->FullDebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
   if (this->FullDebugMode || !this->ComputeIfImplicitDebugModeSuppressed()) {
-    this->DebugState = cm::make_unique<cmFindBaseDebugState>(this);
+    this->DebugState = std::make_unique<cmFindBaseDebugState>(this);
   }
 
   if (this->IsFound()) {

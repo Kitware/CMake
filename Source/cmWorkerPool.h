@@ -5,11 +5,10 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <cm/memory>
 
 // -- Types
 class cmWorkerPoolInternal;
@@ -213,7 +212,7 @@ public:
   template <class T, typename... Args>
   bool EmplaceJob(Args&&... args)
   {
-    return this->PushJob(cm::make_unique<T>(std::forward<Args>(args)...));
+    return this->PushJob(std::make_unique<T>(std::forward<Args>(args)...));
   }
 
 private:

@@ -4,10 +4,10 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -81,7 +81,7 @@ cmFastbuildTargetGenerator::cmFastbuildTargetGenerator(
   , Config(std::move(configParam))
 {
   this->MacOSXContentGenerator =
-    cm::make_unique<MacOSXContentGeneratorType>(this, Config);
+    std::make_unique<MacOSXContentGeneratorType>(this, Config);
 }
 
 void cmFastbuildTargetGenerator::LogMessage(std::string const& m) const

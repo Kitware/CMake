@@ -4,11 +4,11 @@
 
 #include <cstddef>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -199,7 +199,7 @@ bool cmDiscoverTestsCommand(std::vector<std::string> const& args,
     arguments.TestProperties.emplace_back("AROUND_EACH_REPEAT");
   }
 
-  mf.AddTestGenerator(cm::make_unique<DiscoveryGenerator>(std::move(arguments),
-                                                          mf.GetBacktrace()));
+  mf.AddTestGenerator(std::make_unique<DiscoveryGenerator>(
+    std::move(arguments), mf.GetBacktrace()));
   return true;
 }

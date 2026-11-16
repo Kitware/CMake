@@ -14,12 +14,12 @@
 #include <cstring>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/algorithm>
 
 #include "cmComputeLinkInformation.h"
@@ -601,7 +601,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   std::unique_ptr<cmGeneratorExpressionInterpreter> genexInterpreter;
   if (p == "POSITION_INDEPENDENT_CODE") {
     // Corresponds to EvaluatingPICExpression.
-    genexInterpreter = cm::make_unique<cmGeneratorExpressionInterpreter>(
+    genexInterpreter = std::make_unique<cmGeneratorExpressionInterpreter>(
       tgt->GetLocalGenerator(), config, tgt);
   }
 

@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildCommand.h"
 
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 
@@ -50,7 +50,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
 {
   cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<BuildArguments&>(arguments);
-  auto handler = cm::make_unique<cmCTestBuildHandler>(this->CTest);
+  auto handler = std::make_unique<cmCTestBuildHandler>(this->CTest);
 
   // Build configuration is set according to the following priority order:
   // 1) The CONFIGURATION option to ctest_build()

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef> // IWYU pragma: keep
+#include <memory>
 // NOTE The declaration of `std::abs` has moved to `cmath` since C++17
 // See https://en.cppreference.com/w/cpp/numeric/math/abs
 // ALERT But IWYU used to lint `#include`s do not "understand"
@@ -15,7 +16,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -294,7 +294,7 @@ bool HandleInMode(std::vector<std::string> const& args,
 {
   assert("A valid iterator expected" && kwInIter != args.end());
 
-  auto fb = cm::make_unique<cmForEachFunctionBlocker>(&makefile);
+  auto fb = std::make_unique<cmForEachFunctionBlocker>(&makefile);
 
   // Copy iteration variable names first
   std::copy(args.begin(), kwInIter, std::back_inserter(fb->Args));
@@ -413,7 +413,7 @@ bool cmForEachCommand(std::vector<std::string> const& args,
   }
 
   // create a function blocker
-  auto fb = cm::make_unique<cmForEachFunctionBlocker>(&status.GetMakefile());
+  auto fb = std::make_unique<cmForEachFunctionBlocker>(&status.GetMakefile());
   if (args.size() > 1) {
     if (args[1] == "RANGE") {
       int start = 0;

@@ -9,10 +9,10 @@
 #include <cstddef>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 
@@ -782,8 +782,8 @@ public:
     : TransformAction(selector)
     // Makefile is legitimately null when cmList is used directly from C++;
     // cmStringReplaceHelper handles that.
-    , ReplaceHelper(cm::make_unique<cmStringReplaceHelper>(regex, replace,
-                                                           selector.Makefile))
+    , ReplaceHelper(std::make_unique<cmStringReplaceHelper>(regex, replace,
+                                                            selector.Makefile))
   {
     if (!this->ReplaceHelper->IsRegularExpressionValid()) {
       throw transform_error(
@@ -931,7 +931,7 @@ ActionDescriptor const& TransformConfigure(
                                    descriptor->Arity, " argument(s)."_s));
   }
   if (!selector) {
-    selector = cm::make_unique<TransformNoSelector>();
+    selector = std::make_unique<TransformNoSelector>();
   }
 
   return *descriptor;
@@ -945,20 +945,20 @@ std::unique_ptr<TransformAction> MakeTransformAction(
 {
   switch (descriptor.Action) {
     case cmList::TransformAction::APPEND:
-      return cm::make_unique<TransformActionAppend>(selector, args[0]);
+      return std::make_unique<TransformActionAppend>(selector, args[0]);
     case cmList::TransformAction::PREPEND:
-      return cm::make_unique<TransformActionPrepend>(selector, args[0]);
+      return std::make_unique<TransformActionPrepend>(selector, args[0]);
     case cmList::TransformAction::TOUPPER:
-      return cm::make_unique<TransformActionToUpper>(selector);
+      return std::make_unique<TransformActionToUpper>(selector);
     case cmList::TransformAction::TOLOWER:
-      return cm::make_unique<TransformActionToLower>(selector);
+      return std::make_unique<TransformActionToLower>(selector);
     case cmList::TransformAction::STRIP:
-      return cm::make_unique<TransformActionStrip>(selector);
+      return std::make_unique<TransformActionStrip>(selector);
     case cmList::TransformAction::GENEX_STRIP:
-      return cm::make_unique<TransformActionGenexStrip>(selector);
+      return std::make_unique<TransformActionGenexStrip>(selector);
     case cmList::TransformAction::REPLACE:
-      return cm::make_unique<TransformActionReplace>(selector, args[0],
-                                                     args[1]);
+      return std::make_unique<TransformActionReplace>(selector, args[0],
+                                                      args[1]);
     case cmList::TransformAction::APPLY:
       // APPLY needs a cmMakefile, which this factory does not receive; only
       // the cmMakefile overload of cmList::transform can build it.
@@ -989,25 +989,25 @@ void TransformValues(cmList::container_type& values,
 
 std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::New()
 {
-  return cm::make_unique<TransformNoSelector>();
+  return std::make_unique<TransformNoSelector>();
 }
 
 std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewAT(
   std::initializer_list<index_type> indexes)
 {
-  return cm::make_unique<TransformSelectorAt>(
+  return std::make_unique<TransformSelectorAt>(
     std::vector<index_type>{ indexes.begin(), indexes.end() });
   ;
 }
 std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewAT(
   std::vector<index_type> const& indexes)
 {
-  return cm::make_unique<TransformSelectorAt>(indexes);
+  return std::make_unique<TransformSelectorAt>(indexes);
 }
 std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewAT(
   std::vector<index_type>&& indexes)
 {
-  return cm::make_unique<TransformSelectorAt>(std::move(indexes));
+  return std::make_unique<TransformSelectorAt>(std::move(indexes));
 }
 
 std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewFOR(
@@ -1022,7 +1022,7 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewFOR(
                           "positive numeric value for <step>.");
   }
 
-  return cm::make_unique<TransformSelectorFor>(
+  return std::make_unique<TransformSelectorFor>(
     *indexes.begin(), *(indexes.begin() + 1),
     indexes.size() == 3 ? *(indexes.begin() + 2) : 1);
 }
@@ -1038,7 +1038,7 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewFOR(
                           "positive numeric value for <step>.");
   }
 
-  return cm::make_unique<TransformSelectorFor>(
+  return std::make_unique<TransformSelectorFor>(
     indexes[0], indexes[1], indexes.size() == 3 ? indexes[2] : 1);
 }
 std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewFOR(
@@ -1053,7 +1053,7 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewFOR(
                           "positive numeric value for <step>.");
   }
 
-  return cm::make_unique<TransformSelectorFor>(
+  return std::make_unique<TransformSelectorFor>(
     indexes[0], indexes[1], indexes.size() == 3 ? indexes[2] : 1);
 }
 
@@ -1061,7 +1061,7 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewREGEX(
   std::string const& regex)
 {
   std::unique_ptr<::TransformSelector> selector =
-    cm::make_unique<TransformSelectorRegex>(regex);
+    std::make_unique<TransformSelectorRegex>(regex);
   if (!selector->Validate()) {
     throw transform_error(
       cmStrCat("sub-command TRANSFORM, selector REGEX failed to compile "
@@ -1075,7 +1075,7 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewREGEX(
   std::string&& regex)
 {
   std::unique_ptr<::TransformSelector> selector =
-    cm::make_unique<TransformSelectorRegex>(std::move(regex));
+    std::make_unique<TransformSelectorRegex>(std::move(regex));
   if (!selector->Validate()) {
     throw transform_error(
       cmStrCat("sub-command TRANSFORM, selector REGEX failed to compile "

@@ -3,10 +3,10 @@
 #include "cmQtAutoGenGlobalInitializer.h"
 
 #include <algorithm>
+#include <memory>
 #include <set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 
@@ -156,7 +156,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         if (mocIsValid || uicIsValid || rccIsValid) {
           // Create autogen target initializer
           this->Initializers_.emplace_back(
-            cm::make_unique<cmQtAutoGenInitializer>(
+            std::make_unique<cmQtAutoGenInitializer>(
               this, target.get(), qtVersion.first, mocIsValid, uicIsValid,
               rccIsValid, globalAutoGenTarget, globalAutoRccTarget));
         }
@@ -216,13 +216,13 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
     cmMakefile const* makefile = localGen->GetMakefile();
 
     // Create utility target
-    auto cc = cm::make_unique<cmCustomCommand>();
+    auto cc = std::make_unique<cmCustomCommand>();
     cc->SetWorkingDirectory(makefile->GetHomeOutputDirectory());
     cc->SetEscapeOldStyle(false);
     cc->SetComment(comment);
     cmTarget* target = localGen->AddUtilityCommand(name, true, std::move(cc));
     localGen->AddGeneratorTarget(
-      cm::make_unique<cmGeneratorTarget>(target, localGen));
+      std::make_unique<cmGeneratorTarget>(target, localGen));
 
     // Set FOLDER property in the target
     {

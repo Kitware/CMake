@@ -9,9 +9,9 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -465,10 +465,10 @@ bool ExpandMacros(cmCMakePresetsGraph* graph, T const& preset,
 
   MacroExpanderVector macroExpanders{};
 
-  macroExpanders.push_back(cm::make_unique<BaseMacroExpander>(*graph));
+  macroExpanders.push_back(std::make_unique<BaseMacroExpander>(*graph));
   macroExpanders.push_back(
-    cm::make_unique<PresetMacroExpander<T>>(*graph, preset));
-  macroExpanders.push_back(cm::make_unique<EnvironmentMacroExpander<T>>(
+    std::make_unique<PresetMacroExpander<T>>(*graph, preset));
+  macroExpanders.push_back(std::make_unique<EnvironmentMacroExpander<T>>(
     macroExpanders, out, envCycles));
 
   for (auto& v : out->Environment) {
@@ -671,7 +671,8 @@ template <typename T>
 bool cmCMakePresetsGraphInternal::ExpandImmediateMacros(T& preset)
 {
   MacroExpanderVector macroExpanders{};
-  macroExpanders.push_back(cm::make_unique<ImmediateMacroExpander<T>>(preset));
+  macroExpanders.push_back(
+    std::make_unique<ImmediateMacroExpander<T>>(preset));
   cm::optional<T> out = preset;
   bool result = CheckExpandMacros(preset, out, macroExpanders);
   if (out.has_value()) {

@@ -8,12 +8,12 @@
 #include <functional>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -68,17 +68,17 @@ std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
     case cm::TargetType::STATIC_LIBRARY:
     case cm::TargetType::MODULE_LIBRARY:
     case cm::TargetType::OBJECT_LIBRARY:
-      return cm::make_unique<cmNinjaNormalTargetGenerator>(target);
+      return std::make_unique<cmNinjaNormalTargetGenerator>(target);
 
     case cm::TargetType::INTERFACE_LIBRARY:
       if (target->HaveCxx20ModuleSources()) {
-        return cm::make_unique<cmNinjaNormalTargetGenerator>(target);
+        return std::make_unique<cmNinjaNormalTargetGenerator>(target);
       }
       CM_FALLTHROUGH;
 
     case cm::TargetType::UTILITY:
     case cm::TargetType::GLOBAL_TARGET:
-      return cm::make_unique<cmNinjaUtilityTargetGenerator>(target);
+      return std::make_unique<cmNinjaUtilityTargetGenerator>(target);
 
     default:
       return std::unique_ptr<cmNinjaTargetGenerator>();
@@ -93,7 +93,7 @@ cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
 {
   for (auto const& fileConfig : this->LocalGenerator->GetConfigNames()) {
     this->Configs[fileConfig].MacOSXContentGenerator =
-      cm::make_unique<MacOSXContentGeneratorType>(this, fileConfig);
+      std::make_unique<MacOSXContentGeneratorType>(this, fileConfig);
   }
 }
 

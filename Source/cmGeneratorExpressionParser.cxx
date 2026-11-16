@@ -4,9 +4,9 @@
 
 #include <cassert>
 #include <cstddef>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/algorithm>
 #include <cmext/memory>
 
@@ -39,7 +39,7 @@ static void extendText(
     cm::static_reference_cast<TextContent>(*(result.end() - 1))
       .Extend(it->Length);
   } else {
-    auto textContent = cm::make_unique<TextContent>(it->Content, it->Length);
+    auto textContent = std::make_unique<TextContent>(it->Content, it->Length);
     result.push_back(std::move(textContent));
   }
 }
@@ -85,7 +85,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
 
   if (this->it != this->Tokens.end() &&
       this->it->TokenType == cmGeneratorExpressionToken::EndExpression) {
-    auto content = cm::make_unique<GeneratorExpressionContent>(
+    auto content = std::make_unique<GeneratorExpressionContent>(
       startToken->Content,
       this->it->Content - startToken->Content + this->it->Length);
     assert(this->it != this->Tokens.end());
@@ -176,7 +176,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
 
   size_t contentLength =
     ((this->it - 1)->Content - startToken->Content) + (this->it - 1)->Length;
-  auto content = cm::make_unique<GeneratorExpressionContent>(
+  auto content = std::make_unique<GeneratorExpressionContent>(
     startToken->Content, contentLength);
   content->SetIdentifier(std::move(identifier));
   content->SetParameters(std::move(parameters));
@@ -204,7 +204,7 @@ void cmGeneratorExpressionParser::ParseContent(
         }
       }
       auto n =
-        cm::make_unique<TextContent>(this->it->Content, this->it->Length);
+        std::make_unique<TextContent>(this->it->Content, this->it->Length);
       result.push_back(std::move(n));
       assert(this->it != this->Tokens.end());
       ++this->it;

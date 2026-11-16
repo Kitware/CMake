@@ -2,11 +2,11 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallSbomGenerator.h"
 
+#include <memory>
 #include <ostream>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmCryptoHash.h"
@@ -33,7 +33,7 @@ cmInstallSbomGenerator::cmInstallSbomGenerator(
   , FilePermissions(std::move(filePermissions))
   , SbomFileName(args.GetPackageName())
   , SbomFilePath(cmStrCat(this->Destination, '/', this->SbomFileName))
-  , Builder(cm::make_unique<cmInstallSbomBuilder>(args, exportSets))
+  , Builder(std::make_unique<cmInstallSbomBuilder>(args, exportSets))
 {
 }
 

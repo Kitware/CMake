@@ -10,11 +10,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 #include <sstream>
 #include <utility>
 
 #include <cm/iterator>
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/type_traits> // IWYU pragma: keep
 #include <cm/vector>
@@ -217,7 +217,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
   this->ObjectLibrariesSourceGroupIndex = this->SourceGroups.size();
   this->SourceGroups.emplace_back(
-    cm::make_unique<cmSourceGroup>("Object Libraries", "^MATCH_NO_SOURCES$"));
+    std::make_unique<cmSourceGroup>("Object Libraries", "^MATCH_NO_SOURCES$"));
 #endif
 }
 
@@ -1030,7 +1030,7 @@ void cmMakefile::AddEvaluationFile(
   std::string const& newLineCharacter, mode_t permissions, bool inputIsContent)
 {
   this->EvaluationFiles.push_back(
-    cm::make_unique<cmGeneratorExpressionEvaluationFile>(
+    std::make_unique<cmGeneratorExpressionEvaluationFile>(
       inputFile, targetName, std::move(outputName), std::move(condition),
       inputIsContent, newLineCharacter, permissions,
       this->GetPolicyStatus(cmPolicies::CMP0070),
@@ -1811,7 +1811,7 @@ void cmMakefile::Configure()
     }
   }
 
-  this->Defer = cm::make_unique<DeferCommands>();
+  this->Defer = std::make_unique<DeferCommands>();
   this->RunListFile(listFile, currentStart, this->Defer.get());
   this->Defer.reset();
   if (cmSystemTools::GetFatalErrorOccurred()) {
@@ -1885,7 +1885,7 @@ void cmMakefile::AddSubDirectory(std::string const& srcPath,
   cmSystemTools::MakeDirectory(binPath);
 
   auto subMfu =
-    cm::make_unique<cmMakefile>(this->GlobalGenerator, newSnapshot);
+    std::make_unique<cmMakefile>(this->GlobalGenerator, newSnapshot);
   auto* subMf = subMfu.get();
   this->GetGlobalGenerator()->AddMakefile(std::move(subMfu));
 
@@ -1902,7 +1902,7 @@ void cmMakefile::AddSubDirectory(std::string const& srcPath,
     this->UnConfiguredDirectories.push_back(subMf);
   }
 
-  this->AddInstallGenerator(cm::make_unique<cmInstallSubdirectoryGenerator>(
+  this->AddInstallGenerator(std::make_unique<cmInstallSubdirectoryGenerator>(
     subMf, binPath, this->GetBacktrace()));
 }
 
@@ -2285,7 +2285,7 @@ void cmMakefile::AddSourceGroup(std::vector<std::string> const& name,
     // group does not exist nor belong to any existing group
     // add its first component
     this->SourceGroups.emplace_back(
-      cm::make_unique<cmSourceGroup>(name[0], regex));
+      std::make_unique<cmSourceGroup>(name[0], regex));
     sg = this->GetSourceGroup(currentName);
     i = 0; // last component found
   }
@@ -2295,8 +2295,8 @@ void cmMakefile::AddSourceGroup(std::vector<std::string> const& name,
   }
   // build the whole source group path
   for (++i; i <= lastElement; ++i) {
-    sg->AddChild(cm::make_unique<cmSourceGroup>(name[i], cm::string_view{},
-                                                sg->GetFullName()));
+    sg->AddChild(std::make_unique<cmSourceGroup>(name[i], cm::string_view{},
+                                                 sg->GetFullName()));
     sg = sg->LookupChild(name[i]);
   }
 
@@ -3313,7 +3313,7 @@ cmSourceFile* cmMakefile::CreateSource(std::string const& sourceName,
                                        bool generated,
                                        cmSourceFileLocationKind kind)
 {
-  auto sf = cm::make_unique<cmSourceFile>(this, sourceName, generated, kind);
+  auto sf = std::make_unique<cmSourceFile>(this, sourceName, generated, kind);
   auto name =
     this->GetCMakeInstance()->StripExtension(sf->GetLocation().GetName());
 #if defined(_WIN32) || defined(__APPLE__)
@@ -3975,7 +3975,7 @@ cmTest* cmMakefile::CreateTest(std::string const& testName)
   if (test) {
     return test;
   }
-  auto newTest = cm::make_unique<cmTest>(this);
+  auto newTest = std::make_unique<cmTest>(this);
   test = newTest.get();
   newTest->SetName(testName);
   this->Tests[testName] = std::move(newTest);
@@ -4120,8 +4120,8 @@ cmTarget* cmMakefile::AddImportedTarget(std::string const& name,
 {
   // Create the target.
   auto target =
-    cm::make_unique<cmTarget>(name, type, cmTarget::ImportedVisibility(scope),
-                              this, cmTarget::PerConfig::Yes);
+    std::make_unique<cmTarget>(name, type, cmTarget::ImportedVisibility(scope),
+                               this, cmTarget::PerConfig::Yes);
 
   // Add to the set of available imported targets.
   this->ImportedTargets[name] = target.get();
@@ -4137,7 +4137,7 @@ cmTarget* cmMakefile::AddForeignTarget(std::string const& origin,
                                        std::string const& name)
 {
   auto foreign_name = cmStrCat("@foreign_"_s, origin, "::"_s, name);
-  auto target = cm::make_unique<cmTarget>(
+  auto target = std::make_unique<cmTarget>(
     foreign_name, cm::TargetType::INTERFACE_LIBRARY,
     cmTarget::Visibility::Foreign, this, cmTarget::PerConfig::Yes);
 
@@ -4398,11 +4398,11 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     if (cmp0218 != cmPolicies::NEW) {
       if (cmp0218 != cmPolicies::OLD) {
         // Suppress warnings about using old variables.
-        ps = cm::make_unique<PolicyPushPop>(this);
+        ps = std::make_unique<PolicyPushPop>(this);
         this->SetPolicy(cmPolicies::CMP0218, cmPolicies::OLD);
       }
 
-      ds = cm::make_unique<DiagnosticPushPop>(this);
+      ds = std::make_unique<DiagnosticPushPop>(this);
 
       // Use old variables to determine diagnostic action.
       cmValue const warn = this->GetDefinition("CMAKE_WARN_DEPRECATED");

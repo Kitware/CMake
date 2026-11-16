@@ -5,9 +5,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <type_traits>
 
 #include <cm/string_view>
-#include <cm/type_traits>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h" // IWYU pragma: keep
@@ -72,9 +72,9 @@ protected:
   template <
     typename Self, typename T, typename U,
     typename =
-      cm::enable_if_t<std::is_base_of<cmProjectInfoArguments, Self>::value>,
+      std::enable_if_t<std::is_base_of<cmProjectInfoArguments, Self>::value>,
     typename =
-      cm::enable_if_t<std::is_base_of<cmProjectInfoArguments, T>::value>>
+      std::enable_if_t<std::is_base_of<cmProjectInfoArguments, T>::value>>
   static void Bind(Self*, cmArgumentParser<T>& parser,
                    cm::static_string_view name, U Self::*member)
   {
@@ -84,9 +84,9 @@ protected:
   template <
     typename Self, typename T, typename U,
     typename =
-      cm::enable_if_t<std::is_base_of<cmProjectInfoArguments, Self>::value>,
+      std::enable_if_t<std::is_base_of<cmProjectInfoArguments, Self>::value>,
     typename =
-      cm::enable_if_t<std::is_base_of<cmProjectInfoArguments, T>::value>>
+      std::enable_if_t<std::is_base_of<cmProjectInfoArguments, T>::value>>
   static void Bind(Self* self, cmArgumentParser<void>& parser,
                    cm::static_string_view name, U T::*member)
   {

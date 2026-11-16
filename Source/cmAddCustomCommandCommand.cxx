@@ -4,11 +4,11 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <set>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 
@@ -472,7 +472,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   }
 
   // Choose which mode of the command to use.
-  auto cc = cm::make_unique<cmCustomCommand>();
+  auto cc = std::make_unique<cmCustomCommand>();
   cc->SetByproducts(byproducts);
   cc->SetCommandLines(commandLines);
   cc->SetComment(comment);

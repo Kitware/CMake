@@ -3,10 +3,9 @@
 
 #include "cmTargetPropertyEntry.h"
 
+#include <memory>
 #include <string>
 #include <utility>
-
-#include <cm/memory>
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorFileSet.h"
@@ -94,11 +93,11 @@ std::unique_ptr<TargetPropertyEntry> TargetPropertyEntry::Create(
       ge.Parse(propertyValue.Value);
     cge->SetEvaluateForBuildsystem(evaluateForBuildsystem);
     return std::unique_ptr<TargetPropertyEntry>(
-      cm::make_unique<TargetPropertyEntryGenex>(std::move(cge)));
+      std::make_unique<TargetPropertyEntryGenex>(std::move(cge)));
   }
 
   return std::unique_ptr<TargetPropertyEntry>(
-    cm::make_unique<TargetPropertyEntryString>(propertyValue));
+    std::make_unique<TargetPropertyEntryString>(propertyValue));
 }
 
 TargetPropertyEntry::TargetPropertyEntry(cmLinkItem const& item)

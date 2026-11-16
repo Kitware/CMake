@@ -3,9 +3,9 @@
 #include "cmFLTKWrapUICommand.h"
 
 #include <cstddef>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -99,10 +99,10 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
 
       // Add command for generating the .h and .cxx files
 
-      auto hcc = cm::make_unique<cmCustomCommand>();
+      auto hcc = std::make_unique<cmCustomCommand>();
       hcc->SetDepends(depends);
       hcc->SetCommandLines(commandLines);
-      auto ccc = cm::make_unique<cmCustomCommand>(*hcc);
+      auto ccc = std::make_unique<cmCustomCommand>(*hcc);
 
       hcc->SetOutputs(cxxres);
       mf.AddCustomCommandToOutput(std::move(hcc));

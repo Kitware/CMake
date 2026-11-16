@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAddCustomTargetCommand.h"
 
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 
@@ -209,7 +209,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   }
 
   // Add the utility target to the makefile.
-  auto cc = cm::make_unique<cmCustomCommand>();
+  auto cc = std::make_unique<cmCustomCommand>();
   cc->SetWorkingDirectory(working_directory);
   cc->SetByproducts(byproducts);
   cc->SetDepends(depends);

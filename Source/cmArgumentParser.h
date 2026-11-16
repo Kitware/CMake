@@ -10,12 +10,12 @@
 #include <map>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include <cm/optional>
 #include <cm/string_view>
-#include <cm/type_traits>
 #include <cmext/string_view>
 #include <cmext/type_traits>
 
@@ -60,16 +60,14 @@ public:
 };
 
 template <typename Result>
-typename std::enable_if<std::is_base_of<ParseResult, Result>::value,
-                        ParseResult*>::type
+std::enable_if_t<std::is_base_of<ParseResult, Result>::value, ParseResult*>
 AsParseResultPtr(Result& result)
 {
   return &result;
 }
 
 template <typename Result>
-typename std::enable_if<!std::is_base_of<ParseResult, Result>::value,
-                        ParseResult*>::type
+std::enable_if_t<!std::is_base_of<ParseResult, Result>::value, ParseResult*>
 AsParseResultPtr(Result&)
 {
   return nullptr;
@@ -318,8 +316,8 @@ public:
   // compiled as C++20.  This would allow building a parser at compile time.
   template <typename T, typename cT = cm::member_pointer_class_t<T>,
             typename mT = cm::remove_member_pointer_t<T>,
-            typename = cm::enable_if_t<std::is_base_of<cT, Result>::value>,
-            typename = cm::enable_if_t<!std::is_function<mT>::value>>
+            typename = std::enable_if_t<std::is_base_of<cT, Result>::value>,
+            typename = std::enable_if_t<!std::is_function<mT>::value>>
   cmArgumentParser& Bind(cm::static_string_view name, T member)
   {
     this->Base::Bind(name, [member](Instance& instance) {
@@ -428,8 +426,8 @@ public:
 
   template <typename T, typename cT = cm::member_pointer_class_t<T>,
             typename mT = cm::remove_member_pointer_t<T>,
-            typename = cm::enable_if_t<std::is_base_of<cT, Result>::value>,
-            typename = cm::enable_if_t<!std::is_function<mT>::value>>
+            typename = std::enable_if_t<std::is_base_of<cT, Result>::value>,
+            typename = std::enable_if_t<!std::is_function<mT>::value>>
   cmArgumentParser& BindTrailingArgs(T member)
   {
     this->Base::BindTrailingArgs([member](Instance& instance) {

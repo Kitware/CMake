@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <limits>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -14,7 +15,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -889,7 +889,7 @@ void cmQtAutoMocUicT::JobMocPredefsT::Process()
   // (Re)generate moc_predefs.h on demand
   std::unique_ptr<std::string> reason;
   if (this->Log().Verbose()) {
-    reason = cm::make_unique<std::string>();
+    reason = std::make_unique<std::string>();
   }
   if (!this->Update(reason.get())) {
     return;
@@ -1869,7 +1869,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Generate(MappingHandleT const& mapping,
 {
   std::unique_ptr<std::string> reason;
   if (this->Log().Verbose()) {
-    reason = cm::make_unique<std::string>();
+    reason = std::make_unique<std::string>();
   }
   if (this->Probe(*mapping, reason.get())) {
     // Register the parent directory for creation
@@ -2027,7 +2027,7 @@ void cmQtAutoMocUicT::JobProbeDepsUicT::Process()
     MappingHandleT const& mapping = pair.second;
     std::unique_ptr<std::string> reason;
     if (this->Log().Verbose()) {
-      reason = cm::make_unique<std::string>();
+      reason = std::make_unique<std::string>();
     }
     if (!this->Probe(*mapping, reason.get())) {
       continue;

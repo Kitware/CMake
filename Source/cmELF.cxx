@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -694,7 +693,7 @@ long const cmELF::TagMipsRldMapRel = DT_MIPS_RLD_MAP_REL;
 cmELF::cmELF(char const* fname)
 {
   // Try to open the file.
-  auto fin = cm::make_unique<cmsys::ifstream>(fname, std::ios::binary);
+  auto fin = std::make_unique<cmsys::ifstream>(fname, std::ios::binary);
 
   // Quit now if the file could not be opened.
   if (!fin || !*fin) {
@@ -737,11 +736,11 @@ cmELF::cmELF(char const* fname)
   // parser implementation.
   if (ident[EI_CLASS] == ELFCLASS32) {
     // 32-bit ELF
-    this->Internal = cm::make_unique<cmELFInternalImpl<cmELFTypes32>>(
+    this->Internal = std::make_unique<cmELFInternalImpl<cmELFTypes32>>(
       this, std::move(fin), order);
   } else if (ident[EI_CLASS] == ELFCLASS64) {
     // 64-bit ELF
-    this->Internal = cm::make_unique<cmELFInternalImpl<cmELFTypes64>>(
+    this->Internal = std::make_unique<cmELFInternalImpl<cmELFTypes64>>(
       this, std::move(fin), order);
   } else {
     this->ErrorMessage = "ELF file class is not 32-bit or 64-bit.";

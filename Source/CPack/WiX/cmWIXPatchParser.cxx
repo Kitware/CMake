@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmWIXPatchParser.h"
 
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include <cm3p/expat.h>
@@ -59,7 +59,7 @@ void cmWIXPatchParser::StartElement(std::string const& name, char const** atts)
   } else if (State == INSIDE_FRAGMENT) {
     cmWIXPatchElement& parent = *ElementStack.back();
 
-    auto element = cm::make_unique<cmWIXPatchElement>();
+    auto element = std::make_unique<cmWIXPatchElement>();
 
     element->name = name;
 
@@ -134,7 +134,7 @@ void cmWIXPatchParser::CharacterDataHandler(char const* data, int length)
     std::string::size_type last = text.find_last_not_of(whitespace);
 
     if (first != std::string::npos && last != std::string::npos) {
-      auto text_node = cm::make_unique<cmWIXPatchText>();
+      auto text_node = std::make_unique<cmWIXPatchText>();
       text_node->text = text.substr(first, last - first + 1);
 
       parent.children.push_back(std::move(text_node));

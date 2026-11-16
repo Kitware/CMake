@@ -8,10 +8,10 @@
 #include <cstddef>
 #include <deque>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <thread>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include <cm3p/uv.h>
@@ -444,7 +444,7 @@ bool cmWorkerPoolWorker::RunProcess(cmWorkerPool::ProcessResultT& result,
   // Create process instance
   {
     std::lock_guard<std::mutex> lock(this->Proc_.Mutex);
-    this->Proc_.ROP = cm::make_unique<cmUVReadOnlyProcess>();
+    this->Proc_.ROP = std::make_unique<cmUVReadOnlyProcess>();
     this->Proc_.ROP->setup(&result, mergedOutput, std::move(command),
                            workingDirectory);
   }
@@ -568,7 +568,7 @@ cmWorkerPoolInternal::cmWorkerPoolInternal(cmWorkerPool* pool)
 {
   // Initialize libuv loop
   uv_disable_stdio_inheritance();
-  this->UVLoop = cm::make_unique<uv_loop_t>();
+  this->UVLoop = std::make_unique<uv_loop_t>();
   uv_loop_init(this->UVLoop.get());
 }
 
@@ -635,7 +635,7 @@ void cmWorkerPoolInternal::UVSlotBegin(uv_async_t* handle)
     gint.Workers.reserve(num);
     for (unsigned int ii = 0; ii != num; ++ii) {
       gint.Workers.emplace_back(
-        cm::make_unique<cmWorkerPoolWorker>(*gint.UVLoop));
+        std::make_unique<cmWorkerPoolWorker>(*gint.UVLoop));
     }
     // Start worker threads
     for (unsigned int ii = 0; ii != num; ++ii) {
@@ -749,7 +749,7 @@ bool cmWorkerPool::JobT::RunProcess(ProcessResultT& result,
 }
 
 cmWorkerPool::cmWorkerPool()
-  : Int_(cm::make_unique<cmWorkerPoolInternal>(this))
+  : Int_(std::make_unique<cmWorkerPoolInternal>(this))
 {
 }
 

@@ -4,9 +4,9 @@
 
 #include <chrono>
 #include <iosfwd>
+#include <memory>
 #include <string>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
@@ -126,13 +126,13 @@ std::unique_ptr<cmCTestVC> MakeVC(int type, cmCTest* ctest, cmMakefile* mf,
 {
   // clang-format off
   switch (type) {
-    case e_CVS: return cm::make_unique<cmCTestCVS>(ctest, mf, os);
-    case e_SVN: return cm::make_unique<cmCTestSVN>(ctest, mf, os);
-    case e_BZR: return cm::make_unique<cmCTestBZR>(ctest, mf, os);
-    case e_GIT: return cm::make_unique<cmCTestGIT>(ctest, mf, os);
-    case e_HG:  return cm::make_unique<cmCTestHG> (ctest, mf, os);
-    case e_P4:  return cm::make_unique<cmCTestP4> (ctest, mf, os);
-    default:    return cm::make_unique<cmCTestVC> (ctest, mf, os);
+    case e_CVS: return std::make_unique<cmCTestCVS>(ctest, mf, os);
+    case e_SVN: return std::make_unique<cmCTestSVN>(ctest, mf, os);
+    case e_BZR: return std::make_unique<cmCTestBZR>(ctest, mf, os);
+    case e_GIT: return std::make_unique<cmCTestGIT>(ctest, mf, os);
+    case e_HG:  return std::make_unique<cmCTestHG> (ctest, mf, os);
+    case e_P4:  return std::make_unique<cmCTestP4> (ctest, mf, os);
+    default:    return std::make_unique<cmCTestVC> (ctest, mf, os);
   }
   // clang-format on
 }

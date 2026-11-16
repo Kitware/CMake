@@ -1,9 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include <iostream>
+#include <memory>
 #include <string>
-
-#include <cm/memory>
 
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -24,11 +23,11 @@ struct GenExFixture
 
   GenExFixture()
   {
-    this->GG = cm::make_unique<cmGlobalGenerator>(&this->CMake);
+    this->GG = std::make_unique<cmGlobalGenerator>(&this->CMake);
     cmStateSnapshot snapshot = this->CMake.GetCurrentSnapshot();
     snapshot.GetDirectory().SetCurrentBinary(".");
     snapshot.GetDirectory().SetCurrentSource(".");
-    this->MF = cm::make_unique<cmMakefile>(this->GG.get(), snapshot);
+    this->MF = std::make_unique<cmMakefile>(this->GG.get(), snapshot);
     this->LG = this->GG->CreateLocalGenerator(this->MF.get());
   }
 

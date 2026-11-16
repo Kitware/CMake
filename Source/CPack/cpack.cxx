@@ -82,7 +82,7 @@ std::vector<cmDocumentationEntry> makeGeneratorDocs(
 
   std::transform(
     generators.cbegin(), generators.cend(), std::back_inserter(docs),
-    [](std::decay<decltype(generators)>::type::value_type const& gen) {
+    [](std::decay_t<decltype(generators)>::value_type const& gen) {
       return cmDocumentationEntry{ gen.first, gen.second };
     });
   return docs;

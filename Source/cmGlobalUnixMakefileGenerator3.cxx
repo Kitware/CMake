@@ -4,10 +4,10 @@
 
 #include <algorithm>
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/algorithm>
 #include <cmext/memory>
 #include <cmext/string_view>
@@ -77,7 +77,7 @@ std::unique_ptr<cmLocalGenerator>
 cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(cmMakefile* mf)
 {
   return std::unique_ptr<cmLocalGenerator>(
-    cm::make_unique<cmLocalUnixMakefileGenerator3>(this, mf));
+    std::make_unique<cmLocalUnixMakefileGenerator3>(this, mf));
 }
 
 cmDocumentationEntry cmGlobalUnixMakefileGenerator3::GetDocumentation()
@@ -182,7 +182,7 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
       this->GetCMakeInstance()->GetHomeOutputDirectory() +
       "/compile_commands.json";
     this->CommandDatabase =
-      cm::make_unique<cmGeneratedFileStream>(commandDatabaseName);
+      std::make_unique<cmGeneratedFileStream>(commandDatabaseName);
     *this->CommandDatabase << "[\n";
   } else {
     *this->CommandDatabase << ",\n";

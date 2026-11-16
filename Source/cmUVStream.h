@@ -5,8 +5,7 @@
 #include <cassert>
 #include <functional>
 #include <istream>
-
-#include <cm/memory>
+#include <memory>
 
 #include <cm3p/uv.h>
 
@@ -80,7 +79,7 @@ std::unique_ptr<cmUVStreamReadHandle> cmUVStreamRead(uv_stream_t* stream,
                                                      ReadCallback onRead,
                                                      FinishCallback onFinish)
 {
-  auto handle = cm::make_unique<cmUVStreamReadHandle>();
+  auto handle = std::make_unique<cmUVStreamReadHandle>();
   handle->OnRead = std::move(onRead);
   handle->OnFinish = std::move(onFinish);
 

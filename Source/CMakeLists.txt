@@ -1110,7 +1110,7 @@ if(CMake_BUILD_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<iostream$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<sstream$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<iomanip$<ANGLE-R>>"
-    "$<$<COMPILE_LANGUAGE:CXX>:<cm/memory$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<memory$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<cm3p/cppdap/protocol.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:cmMakefile.h>"
     "$<$<COMPILE_LANGUAGE:CXX>:cmGlobalGenerator.h>"

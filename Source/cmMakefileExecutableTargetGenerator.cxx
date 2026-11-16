@@ -2,12 +2,12 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMakefileExecutableTargetGenerator.h"
 
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -40,7 +40,7 @@ cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator(
   this->TargetNames =
     this->GeneratorTarget->GetExecutableNames(this->GetConfigName());
 
-  this->OSXBundleGenerator = cm::make_unique<cmOSXBundleGenerator>(target);
+  this->OSXBundleGenerator = std::make_unique<cmOSXBundleGenerator>(target);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 

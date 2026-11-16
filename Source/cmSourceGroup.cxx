@@ -2,9 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSourceGroup.h"
 
+#include <memory>
 #include <utility>
-
-#include <cm/memory>
 
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
@@ -20,7 +19,7 @@ cmSourceGroup::cmSourceGroup(std::string name, cm::string_view regex,
                              cm::string_view parentName)
   : Name(std::move(name))
 {
-  this->Internal = cm::make_unique<cmSourceGroupInternals>();
+  this->Internal = std::make_unique<cmSourceGroupInternals>();
   this->SetGroupRegex(regex);
   if (parentName.empty()) {
     this->FullName = this->Name;

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <type_traits>
@@ -13,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 
 #include <assert.h>
@@ -502,7 +502,7 @@ public:
     std::vector<FastbuildTargetPtrT> tmp;
     tmp.reserve(nodes.size());
     for (auto& node : nodes) {
-      tmp.emplace_back(cm::make_unique<T>(std::move(node)));
+      tmp.emplace_back(std::make_unique<T>(std::move(node)));
     }
     nodes.clear();
     TopologicalSort(tmp);
@@ -562,7 +562,7 @@ public:
     // still some CCs intersection between different targets.
     auto val = AllGeneratedCommands.emplace(target.Name);
     if (val.second) {
-      FastbuildTargets.emplace_back(cm::make_unique<T>(std::move(target)));
+      FastbuildTargets.emplace_back(std::make_unique<T>(std::move(target)));
     }
     // Get the intersection of CC's deps. Just mimicking what
     // cmLocalNinjaGenerator::WriteCustomCommandBuildStatement does. (I don't

@@ -2,8 +2,8 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
@@ -145,7 +145,7 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
   int size = 0;
   if (this->ReadInt(in, size)) {
     size++; // add one for null termination
-    auto s = cm::make_unique<char[]>(size + 1);
+    auto s = std::make_unique<char[]>(size + 1);
     // read open quote
     if (in.get(c) && c != '"') {
       return false;

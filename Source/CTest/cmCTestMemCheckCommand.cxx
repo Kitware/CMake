@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestMemCheckCommand.h"
 
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
@@ -19,7 +19,7 @@ cmCTestMemCheckCommand::InitializeActualHandler(
   HandlerArguments& args, cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
-  auto handler = cm::make_unique<cmCTestMemCheckHandler>(this->CTest);
+  auto handler = std::make_unique<cmCTestMemCheckHandler>(this->CTest);
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     &mf, "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE", args.Quiet);

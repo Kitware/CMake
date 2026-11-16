@@ -8,13 +8,13 @@
 #include <array>
 #include <initializer_list>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -297,7 +297,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
     allVerifyTarget->AddUtility(verifyTargetName, false);
 
     this->LocalGenerator->AddGeneratorTarget(
-      cm::make_unique<cmGeneratorTarget>(verifyTarget, this->LocalGenerator));
+      std::make_unique<cmGeneratorTarget>(verifyTarget, this->LocalGenerator));
   }
   return true;
 }

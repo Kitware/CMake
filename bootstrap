@@ -550,7 +550,6 @@ CMAKE_C_SOURCES="\
 
 CMAKE_STD_CXX_HEADERS="\
   filesystem \
-  memory \
   optional \
   shared_mutex \
   string_view \
@@ -1452,7 +1451,7 @@ echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
 #-----------------------------------------------------------------------------
 # Test CXX features
 
-cmake_cxx_features="make_unique filesystem"
+cmake_cxx_features="filesystem"
 
 for feature in ${cmake_cxx_features}; do
   eval "cmake_have_cxx_${feature}=0"

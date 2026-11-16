@@ -7,11 +7,11 @@
 #include <chrono>
 #include <functional>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 
 #include <cm3p/json/value.h>

@@ -3,9 +3,9 @@
 #include "cmFindProgramCommand.h"
 
 #include <algorithm>
+#include <memory>
 #include <string>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmFindCommon.h"
@@ -192,7 +192,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   this->FullDebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
   if (this->FullDebugMode || !this->ComputeIfImplicitDebugModeSuppressed()) {
-    this->DebugState = cm::make_unique<cmFindBaseDebugState>(this);
+    this->DebugState = std::make_unique<cmFindBaseDebugState>(this);
   }
 
   if (this->IsFound()) {

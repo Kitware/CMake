@@ -2,9 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFileTimes.h"
 
+#include <memory>
 #include <utility>
-
-#include <cm/memory>
 
 #include "cmsys/Status.hxx"
 
@@ -77,7 +76,7 @@ cmsys::Status cmFileTimes::Load(std::string const& fileName)
     // Invalidate this and reuse times
     ptr.swap(this->times);
   } else {
-    ptr = cm::make_unique<Times>();
+    ptr = std::make_unique<Times>();
   }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)

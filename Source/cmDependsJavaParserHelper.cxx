@@ -6,9 +6,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 
 #include "cmsys/FStream.hxx"
@@ -170,7 +170,7 @@ void cmDependsJavaParserHelper::AllocateParserType(
     return;
   }
   this->UnionsAvailable++;
-  auto up = cm::make_unique<char[]>(len + 1);
+  auto up = std::make_unique<char[]>(len + 1);
   pt->str = up.get();
   strncpy(pt->str, str, len);
   pt->str[len] = 0;

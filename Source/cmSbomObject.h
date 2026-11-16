@@ -8,8 +8,6 @@
 #include <type_traits>
 #include <vector>
 
-#include <cm/type_traits>
-
 #include "cmSbomSerializer.h"
 
 class cmSbomObject;
@@ -72,7 +70,7 @@ struct Storage
 template <typename T>
 struct Storage<T, StorageKind::Stack> : ObjectInterface
 {
-  using ValueType = cm::decay_t<T>;
+  using ValueType = std::decay_t<T>;
 
   explicit Storage(T x)
     : Value(std::move(x))
@@ -96,7 +94,7 @@ private:
 template <typename T>
 struct Storage<T, StorageKind::Heap> : ObjectInterface
 {
-  using ValueType = cm::decay_t<T>;
+  using ValueType = std::decay_t<T>;
 
   explicit Storage(T x)
     : Ptr(new T(std::move(x)))
@@ -155,9 +153,9 @@ struct ObjectStorage
   };
 
   template <typename Concrete>
-  using Model = cm::conditional_t<sizeof(Stack<Concrete>) <= Size &&
-                                    alignof(Stack<Concrete>) <= Align,
-                                  Stack<Concrete>, Heap<Concrete>>;
+  using Model = std::conditional_t<sizeof(Stack<Concrete>) <= Size &&
+                                     alignof(Stack<Concrete>) <= Align,
+                                   Stack<Concrete>, Heap<Concrete>>;
 };
 
 class cmSbomObject
@@ -193,8 +191,9 @@ public:
   }
 
   template <
-    typename T, typename Decayed = cm::remove_cv_t<cm::remove_reference_t<T>>,
-    typename = cm::enable_if_t<!std::is_same<Decayed, cmSbomObject>::value>>
+    typename T,
+    typename Decayed = std::remove_cv_t<std::remove_reference_t<T>>,
+    typename = std::enable_if_t<!std::is_same<Decayed, cmSbomObject>::value>>
   cmSbomObject(T&& x)
   {
     ::new (Storage()) Instance<Decayed>(std::forward<T>(x));
@@ -263,7 +262,7 @@ private:
   ObjectStorage::Buffer Data{};
 };
 
-template <typename T, typename U = cm::decay_t<T>>
+template <typename T, typename U = std::decay_t<T>>
 U* insert_back(std::vector<cmSbomObject>& vec, T&& obj) noexcept
 {
   // Returned pointers must survive reallocation of the containing vector.

@@ -7,12 +7,12 @@
 #include <cassert>
 #include <future>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <system_error>
 #include <utility>
 
 #include <cm/iterator>
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include <windows.h>
@@ -144,14 +144,14 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
     if (!gen.empty()) {
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
-      auto cc = cm::make_unique<cmCustomCommand>();
+      auto cc = std::make_unique<cmCustomCommand>();
       cc->SetEscapeOldStyle(false);
       cc->SetComment("Build all projects");
       cmTarget* allBuild =
         gen[0]->AddUtilityCommand("ALL_BUILD", true, std::move(cc));
 
       gen[0]->AddGeneratorTarget(
-        cm::make_unique<cmGeneratorTarget>(allBuild, gen[0]));
+        std::make_unique<cmGeneratorTarget>(allBuild, gen[0]));
 
       //
       // Organize in the "predefined targets" folder:

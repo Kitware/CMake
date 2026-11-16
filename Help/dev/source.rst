@@ -41,7 +41,7 @@ follow (which are not enforced by other tooling):
 
   .. code-block:: c++
 
-    auto y = cm::make_unique<T>();
+    auto y = std::make_unique<T>();
     auto z = []() -> T {...}();
 
   Exceptions:
@@ -62,7 +62,7 @@ features from more recent C++ standards are supported through a compatibility
 layer.  These features are defined under the namespace ``cm`` and headers
 are accessible under the ``cm/`` directory.  The headers under ``cm/`` can
 be used in place of the standard ones when extended features are needed.
-For example ``<cm/memory>`` can be used in place of ``<memory>``.
+For example ``<cm/optional>`` can be used in place of ``<optional>``.
 
 The class ``cm::filesystem::path``, from the ``<cm/filesystem>`` header, is
 fully compatible with the class ``std::filesystem::path`` regarding the API but
@@ -70,69 +70,6 @@ is a specific implementation (derived from the ``std::filesystem::path`` class)
 to ensure a behavior independent of the current locale.
 
 Available features are:
-
-* From ``C++14``:
-
-  * ``<cm/array>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/deque>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/forward_list>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/iomanip>``:
-    ``cm::quoted``
-
-  * ``<cm/iterator>``:
-    ``cm::make_reverse_iterator``, ``cm::cbegin``, ``cm::cend``,
-    ``cm::rbegin``, ``cm::rend``, ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/list>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/map>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/memory>``:
-    ``cm::make_unique``
-
-  * ``<cm/set>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/string>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/string_view>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/shared_mutex>``:
-    ``cm::shared_lock``
-
-  * ``<cm/type_traits>``:
-    ``cm::conditional_t``, ``cm::decay_t``, ``cm::enable_if_t``,
-    ``cm::remove_cv_t``, ``cm::remove_reference_t``
-
-  * ``<cm/unordered_map>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/unordered_set>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
-
-  * ``<cm/vector>``:
-    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
-    ``cm::crbegin``, ``cm::crend``
 
 * From ``C++17``:
 
@@ -150,6 +87,9 @@ Available features are:
 
   * ``<cm/forward_list>``:
     ``cm::size``, ``cm::empty``, ``cm::data``
+
+  * ``<cm/iomanip>``:
+    ``cm::quoted`` for ``cm::string_view``
 
   * ``<cm/iterator>``:
     ``cm::size``, ``cm::empty``, ``cm::data``

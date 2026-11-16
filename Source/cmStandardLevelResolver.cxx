@@ -6,13 +6,13 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <iterator>
 #include <set>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include <cm/iterator>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -289,8 +289,8 @@ struct StandardLevelComputer
     }
 
     auto stdIt =
-      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(standardStr));
-    if (stdIt == cm::cend(stds)) {
+      std::find(std::cbegin(stds), std::cend(stds), ParseStd(standardStr));
+    if (stdIt == std::cend(stds)) {
       std::string e = cmStrCat(
         cmStandardLevelResolver::GetStandardPropertyName(this->Language),
         " is set to invalid value '"_s, standardStr, '\'');
@@ -300,8 +300,8 @@ struct StandardLevelComputer
     }
 
     auto defaultStdIt =
-      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(*defaultStd));
-    if (defaultStdIt == cm::cend(stds)) {
+      std::find(std::cbegin(stds), std::cend(stds), ParseStd(*defaultStd));
+    if (defaultStdIt == std::cend(stds)) {
       std::string e = cmStrCat("CMAKE_"_s, this->Language,
                                "_STANDARD_DEFAULT is set to invalid value '"_s,
                                *defaultStd, '\'');
@@ -314,7 +314,7 @@ struct StandardLevelComputer
     if ((cmp0128 != cmPolicies::NEW && stdIt <= defaultStdIt) ||
         (cmp0128 == cmPolicies::NEW &&
          (stdIt < defaultStdIt || ext != defaultExt))) {
-      auto offset = std::distance(cm::cbegin(stds), stdIt);
+      auto offset = std::distance(std::cbegin(stds), stdIt);
       return cmStrCat("CMAKE_"_s, this->Language, stdsStrings[offset], '_',
                       type, "_COMPILE_OPTION"_s);
     }
@@ -323,7 +323,7 @@ struct StandardLevelComputer
     // and the requested standard is not required.  Decay to the newest
     // standard for which a flag is defined.
     for (; defaultStdIt < stdIt; --stdIt) {
-      auto offset = std::distance(cm::cbegin(stds), stdIt);
+      auto offset = std::distance(std::cbegin(stds), stdIt);
       std::string option_flag =
         cmStrCat("CMAKE_"_s, this->Language, stdsStrings[offset], '_', type,
                  "_COMPILE_OPTION"_s);
@@ -401,14 +401,14 @@ struct StandardLevelComputer
     }
 
     auto stdIt =
-      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(standardStr));
-    if (stdIt == cm::cend(stds)) {
+      std::find(std::cbegin(stds), std::cend(stds), ParseStd(standardStr));
+    if (stdIt == std::cend(stds)) {
       return std::string{};
     }
 
     auto defaultStdIt =
-      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(*defaultStd));
-    if (defaultStdIt == cm::cend(stds)) {
+      std::find(std::cbegin(stds), std::cend(stds), ParseStd(*defaultStd));
+    if (defaultStdIt == std::cend(stds)) {
       return std::string{};
     }
 
@@ -417,7 +417,7 @@ struct StandardLevelComputer
     if ((cmp0128 != cmPolicies::NEW && stdIt <= defaultStdIt) ||
         (cmp0128 == cmPolicies::NEW &&
          (stdIt < defaultStdIt || ext != defaultExt))) {
-      auto offset = std::distance(cm::cbegin(stds), stdIt);
+      auto offset = std::distance(std::cbegin(stds), stdIt);
       return stdsStrings[offset];
     }
 
@@ -425,7 +425,7 @@ struct StandardLevelComputer
     // and the requested standard is not required.  Decay to the newest
     // standard for which a flag is defined.
     for (; defaultStdIt < stdIt; --stdIt) {
-      auto offset = std::distance(cm::cbegin(stds), stdIt);
+      auto offset = std::distance(std::cbegin(stds), stdIt);
       std::string option_flag =
         cmStrCat("CMAKE_"_s, this->Language, stdsStrings[offset], '_', type,
                  "_COMPILE_OPTION"_s);
@@ -459,12 +459,12 @@ struct StandardLevelComputer
       }
     }
 
-    auto existingLevelIter = cm::cend(this->Levels);
+    auto existingLevelIter = std::cend(this->Levels);
     if (existingStandard) {
       existingLevelIter =
-        std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
+        std::find(std::cbegin(this->Levels), std::cend(this->Levels),
                   ParseStd(*existingStandard));
-      if (existingLevelIter == cm::cend(this->Levels)) {
+      if (existingLevelIter == std::cend(this->Levels)) {
         std::string const e = cmStrCat(
           "The "_s,
           cmStandardLevelResolver::GetStandardPropertyName(this->Language),
@@ -482,7 +482,7 @@ struct StandardLevelComputer
     if (featureLevel) {
       // Ensure the C++ language level is high enough to support
       // the needed C++ features.
-      if (existingLevelIter == cm::cend(this->Levels) ||
+      if (existingLevelIter == std::cend(this->Levels) ||
           existingLevelIter < this->Levels.begin() + featureLevel->Index()) {
         newRequiredStandard = this->LevelsAsStrings[featureLevel->Index()];
       }
@@ -508,8 +508,8 @@ struct StandardLevelComputer
       return true;
     }
     // convert defaultStandard to an integer
-    if (std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
-                  ParseStd(*defaultStandard)) == cm::cend(this->Levels)) {
+    if (std::find(std::cbegin(this->Levels), std::cend(this->Levels),
+                  ParseStd(*defaultStandard)) == std::cend(this->Levels)) {
       std::string const e = cmStrCat("The CMAKE_"_s, this->Language,
                                      "_STANDARD_DEFAULT variable contains an "
                                      "invalid value: \""_s,
@@ -525,9 +525,9 @@ struct StandardLevelComputer
     }
 
     auto existingLevelIter =
-      std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
+      std::find(std::cbegin(this->Levels), std::cend(this->Levels),
                 ParseStd(*existingStandard));
-    if (existingLevelIter == cm::cend(this->Levels)) {
+    if (existingLevelIter == std::cend(this->Levels)) {
       std::string const e = cmStrCat(
         "The "_s,
         cmStandardLevelResolver::GetStandardPropertyName(this->Language),
@@ -567,9 +567,9 @@ struct StandardLevelComputer
     cm::optional<cmStandardLevel> langLevel;
     auto const& stds = this->Levels;
     auto stdIt =
-      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(standardStr));
-    if (stdIt != cm::cend(stds)) {
-      langLevel = cmStandardLevel(std::distance(cm::cbegin(stds), stdIt));
+      std::find(std::cbegin(stds), std::cend(stds), ParseStd(standardStr));
+    if (stdIt != std::cend(stds)) {
+      langLevel = cmStandardLevel(std::distance(std::cbegin(stds), stdIt));
     }
     return langLevel;
   }
@@ -577,10 +577,10 @@ struct StandardLevelComputer
   bool IsLaterStandard(int lhs, int rhs) const
   {
     auto rhsIt =
-      std::find(cm::cbegin(this->Levels), cm::cend(this->Levels), rhs);
+      std::find(std::cbegin(this->Levels), std::cend(this->Levels), rhs);
 
-    return std::find(rhsIt, cm::cend(this->Levels), lhs) !=
-      cm::cend(this->Levels);
+    return std::find(rhsIt, std::cend(this->Levels), lhs) !=
+      std::cend(this->Levels);
   }
 
   std::string Language;
@@ -632,7 +632,7 @@ std::string cmStandardLevelResolver::GetCompileOptionDef(
   std::string const& config) const
 {
   auto const& mapping = StandardComputerMapping.find(lang);
-  if (mapping == cm::cend(StandardComputerMapping)) {
+  if (mapping == std::cend(StandardComputerMapping)) {
     return std::string{};
   }
 
@@ -655,7 +655,7 @@ std::string cmStandardLevelResolver::GetEffectiveStandard(
   std::string const& config) const
 {
   auto const& mapping = StandardComputerMapping.find(lang);
-  if (mapping == cm::cend(StandardComputerMapping)) {
+  if (mapping == std::cend(StandardComputerMapping)) {
     return std::string{};
   }
 
@@ -757,18 +757,18 @@ bool cmStandardLevelResolver::CompileFeatureKnown(
   assert(cmGeneratorExpression::Find(feature) == std::string::npos);
 
   bool isCFeature =
-    std::find_if(cm::cbegin(C_FEATURES) + 1, cm::cend(C_FEATURES),
-                 cmStrCmp(feature)) != cm::cend(C_FEATURES);
+    std::find_if(std::cbegin(C_FEATURES) + 1, std::cend(C_FEATURES),
+                 cmStrCmp(feature)) != std::cend(C_FEATURES);
   if (isCFeature) {
     lang = "C";
     return true;
   }
   bool isCxxFeature =
-    std::find_if(cm::cbegin(CXX_FEATURES) + 1, cm::cend(CXX_FEATURES),
-                 cmStrCmp(feature)) != cm::cend(CXX_FEATURES);
+    std::find_if(std::cbegin(CXX_FEATURES) + 1, std::cend(CXX_FEATURES),
+                 cmStrCmp(feature)) != std::cend(CXX_FEATURES);
   bool isSYCLFeature =
-    std::find_if(cm::cbegin(SYCL_FEATURES) + 1, cm::cend(SYCL_FEATURES),
-                 cmStrCmp(feature)) != cm::cend(SYCL_FEATURES);
+    std::find_if(std::cbegin(SYCL_FEATURES) + 1, std::cend(SYCL_FEATURES),
+                 cmStrCmp(feature)) != std::cend(SYCL_FEATURES);
   if (isSYCLFeature &&
       (!isCxxFeature ||
        TargetUsesSYCLCompileFeatures(this->Makefile, targetName))) {
@@ -780,15 +780,15 @@ bool cmStandardLevelResolver::CompileFeatureKnown(
     return true;
   }
   bool isCudaFeature =
-    std::find_if(cm::cbegin(CUDA_FEATURES) + 1, cm::cend(CUDA_FEATURES),
-                 cmStrCmp(feature)) != cm::cend(CUDA_FEATURES);
+    std::find_if(std::cbegin(CUDA_FEATURES) + 1, std::cend(CUDA_FEATURES),
+                 cmStrCmp(feature)) != std::cend(CUDA_FEATURES);
   if (isCudaFeature) {
     lang = "CUDA";
     return true;
   }
   bool isHIPFeature =
-    std::find_if(cm::cbegin(HIP_FEATURES) + 1, cm::cend(HIP_FEATURES),
-                 cmStrCmp(feature)) != cm::cend(HIP_FEATURES);
+    std::find_if(std::cbegin(HIP_FEATURES) + 1, std::cend(HIP_FEATURES),
+                 cmStrCmp(feature)) != std::cend(HIP_FEATURES);
   if (isHIPFeature) {
     lang = "HIP";
     return true;
@@ -809,7 +809,7 @@ cmStandardLevelResolver::CompileFeatureStandardLevel(
   std::string const& lang, std::string const& feature) const
 {
   auto mapping = StandardComputerMapping.find(lang);
-  if (mapping == cm::cend(StandardComputerMapping)) {
+  if (mapping == std::cend(StandardComputerMapping)) {
     return cm::nullopt;
   }
   return mapping->second.CompileFeatureStandardLevel(this->Makefile, feature);
@@ -819,7 +819,7 @@ cm::optional<cmStandardLevel> cmStandardLevelResolver::LanguageStandardLevel(
   std::string const& lang, std::string const& standardStr) const
 {
   auto mapping = StandardComputerMapping.find(lang);
-  if (mapping == cm::cend(StandardComputerMapping)) {
+  if (mapping == std::cend(StandardComputerMapping)) {
     return cm::nullopt;
   }
   return mapping->second.LanguageStandardLevel(standardStr);
@@ -876,7 +876,7 @@ bool cmStandardLevelResolver::GetNewRequiredStandard(
   featureLevel = this->CompileFeatureStandardLevel(lang, feature);
 
   auto mapping = StandardComputerMapping.find(lang);
-  if (mapping != cm::cend(StandardComputerMapping)) {
+  if (mapping != std::cend(StandardComputerMapping)) {
     return mapping->second.GetNewRequiredStandard(
       this->Makefile, targetName, featureLevel, currentLangStandardValue,
       newRequiredStandard, error);
@@ -889,7 +889,7 @@ bool cmStandardLevelResolver::HaveStandardAvailable(
   std::string const& config, std::string const& feature) const
 {
   auto mapping = StandardComputerMapping.find(lang);
-  if (mapping != cm::cend(StandardComputerMapping)) {
+  if (mapping != std::cend(StandardComputerMapping)) {
     return mapping->second.HaveStandardAvailable(this->Makefile, target,
                                                  config, feature);
   }
@@ -901,7 +901,7 @@ bool cmStandardLevelResolver::IsLaterStandard(std::string const& lang,
                                               std::string const& rhs) const
 {
   auto mapping = StandardComputerMapping.find(lang);
-  if (mapping != cm::cend(StandardComputerMapping)) {
+  if (mapping != std::cend(StandardComputerMapping)) {
     return mapping->second.IsLaterStandard(std::stoi(lhs), std::stoi(rhs));
   }
   return false;

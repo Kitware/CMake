@@ -4,12 +4,12 @@
 #include <cstddef>
 #include <functional>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/string_view>
 
@@ -67,7 +67,7 @@ struct RootPresets
 std::unique_ptr<cmCMakePresetsGraphInternal::NotCondition> InvertCondition(
   std::unique_ptr<cmCMakePresetsGraph::Condition> condition)
 {
-  auto retval = cm::make_unique<cmCMakePresetsGraphInternal::NotCondition>();
+  auto retval = std::make_unique<cmCMakePresetsGraphInternal::NotCondition>();
   retval->SubCondition = std::move(condition);
   return retval;
 }
@@ -144,14 +144,14 @@ bool ConditionHelper(std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
   }
 
   if (value->isBool()) {
-    auto c = cm::make_unique<cmCMakePresetsGraphInternal::ConstCondition>();
+    auto c = std::make_unique<cmCMakePresetsGraphInternal::ConstCondition>();
     c->Value = value->asBool();
     out = std::move(c);
     return true;
   }
 
   if (value->isNull()) {
-    out = cm::make_unique<cmCMakePresetsGraphInternal::NullCondition>();
+    out = std::make_unique<cmCMakePresetsGraphInternal::NullCondition>();
     return true;
   }
 
@@ -168,14 +168,15 @@ bool ConditionHelper(std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
     auto type = (*value)["type"].asString();
 
     if (type == "const") {
-      auto c = cm::make_unique<cmCMakePresetsGraphInternal::ConstCondition>();
+      auto c = std::make_unique<cmCMakePresetsGraphInternal::ConstCondition>();
       CHECK_OK(ConstConditionHelper(*c, value, state));
       out = std::move(c);
       return true;
     }
 
     if (type == "equals" || type == "notEquals") {
-      auto c = cm::make_unique<cmCMakePresetsGraphInternal::EqualsCondition>();
+      auto c =
+        std::make_unique<cmCMakePresetsGraphInternal::EqualsCondition>();
       CHECK_OK(EqualsConditionHelper(*c, value, state));
       out = std::move(c);
       if (type == "notEquals") {
@@ -185,7 +186,8 @@ bool ConditionHelper(std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
     }
 
     if (type == "inList" || type == "notInList") {
-      auto c = cm::make_unique<cmCMakePresetsGraphInternal::InListCondition>();
+      auto c =
+        std::make_unique<cmCMakePresetsGraphInternal::InListCondition>();
       CHECK_OK(InListConditionHelper(*c, value, state));
       out = std::move(c);
       if (type == "notInList") {
@@ -196,7 +198,7 @@ bool ConditionHelper(std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
 
     if (type == "matches" || type == "notMatches") {
       auto c =
-        cm::make_unique<cmCMakePresetsGraphInternal::MatchesCondition>();
+        std::make_unique<cmCMakePresetsGraphInternal::MatchesCondition>();
       CHECK_OK(MatchesConditionHelper(*c, value, state));
       out = std::move(c);
       if (type == "notMatches") {
@@ -207,7 +209,7 @@ bool ConditionHelper(std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
 
     if (type == "anyOf" || type == "allOf") {
       auto c =
-        cm::make_unique<cmCMakePresetsGraphInternal::AnyAllOfCondition>();
+        std::make_unique<cmCMakePresetsGraphInternal::AnyAllOfCondition>();
       c->StopValue = (type == "anyOf");
       CHECK_OK(AnyAllOfConditionHelper(*c, value, state));
       out = std::move(c);
@@ -215,7 +217,7 @@ bool ConditionHelper(std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
     }
 
     if (type == "not") {
-      auto c = cm::make_unique<cmCMakePresetsGraphInternal::NotCondition>();
+      auto c = std::make_unique<cmCMakePresetsGraphInternal::NotCondition>();
       CHECK_OK(NotConditionHelper(*c, value, state));
       out = std::move(c);
       return true;
@@ -620,7 +622,7 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
     }
   }
 
-  auto filePtr = cm::make_unique<File>();
+  auto filePtr = std::make_unique<File>();
   file = filePtr.get();
   this->Files.emplace_back(std::move(filePtr));
   inProgressFiles.emplace_back(file);
@@ -769,9 +771,9 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
 
   if (v >= 9) {
     macroExpanders.push_back(
-      cm::make_unique<BaseMacroExpander>(*this, filename));
+      std::make_unique<BaseMacroExpander>(*this, filename));
   }
-  macroExpanders.push_back(cm::make_unique<EnvironmentMacroExpander>());
+  macroExpanders.push_back(std::make_unique<EnvironmentMacroExpander>());
 
   for (Json::ArrayIndex i = 0; i < presets.Include.size(); ++i) {
     auto include = presets.Include[i];

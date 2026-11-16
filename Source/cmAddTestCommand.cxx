@@ -3,8 +3,8 @@
 #include "cmAddTestCommand.h"
 
 #include <algorithm>
+#include <memory>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
@@ -77,7 +77,7 @@ bool cmAddTestCommand(std::vector<std::string> const& args,
     test = mf.CreateTest(args[0]);
     test->SetOldStyle(true);
     test->SetCMP0178(cmp0178);
-    mf.AddTestGenerator(cm::make_unique<cmTestGenerator>(test));
+    mf.AddTestGenerator(std::make_unique<cmTestGenerator>(test));
   }
   test->SetCommand(command);
 
@@ -205,7 +205,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
     }
     test->SetBuildDependencies(buildDepends);
   }
-  mf.AddTestGenerator(cm::make_unique<cmTestGenerator>(test, configurations));
+  mf.AddTestGenerator(std::make_unique<cmTestGenerator>(test, configurations));
 
   return true;
 }

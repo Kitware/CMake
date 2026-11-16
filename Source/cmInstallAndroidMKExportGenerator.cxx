@@ -2,9 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallAndroidMKExportGenerator.h"
 
+#include <memory>
 #include <utility>
-
-#include <cm/memory>
 
 #include "cmDiagnosticContext.h"
 #include "cmExportInstallAndroidMKGenerator.h"
@@ -23,7 +22,7 @@ cmInstallAndroidMKExportGenerator::cmInstallAndroidMKExportGenerator(
                              std::move(filename), std::move(targetNamespace),
                              std::string{}, std::move(context))
 {
-  this->EFGen = cm::make_unique<cmExportInstallAndroidMKGenerator>(this);
+  this->EFGen = std::make_unique<cmExportInstallAndroidMKGenerator>(this);
 }
 
 cmInstallAndroidMKExportGenerator::~cmInstallAndroidMKExportGenerator() =

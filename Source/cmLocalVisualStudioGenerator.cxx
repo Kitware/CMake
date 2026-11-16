@@ -2,9 +2,9 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudioGenerator.h"
 
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "windows.h"
@@ -150,7 +150,7 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
   // Add a pre-build event to create the directory.
   cmCustomCommandLines commands = cmMakeSingleCommandLine(
     { cmSystemTools::GetCMakeCommand(), "-E", "make_directory", impDir });
-  pcc = cm::make_unique<cmCustomCommand>();
+  pcc = std::make_unique<cmCustomCommand>();
   pcc->SetCommandLines(commands);
   pcc->SetStdPipesUTF8(true);
   pcc->SetEscapeOldStyle(false);

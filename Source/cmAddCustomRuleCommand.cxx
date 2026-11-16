@@ -3,9 +3,9 @@
 #include "cmAddCustomRuleCommand.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -263,8 +263,8 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
       return false;
     }
 
-    auto newRule = cm::make_unique<cmSpecializedRule>(mf, ruleName, *rule,
-                                                      parsedArgs.GetScope());
+    auto newRule = std::make_unique<cmSpecializedRule>(mf, ruleName, *rule,
+                                                       parsedArgs.GetScope());
 
     if (parsedArgs.Configurators) {
       if (parsedConfigurators.ForFileSet) {
@@ -417,8 +417,8 @@ bool cmAddCustomRuleCommand(std::vector<std::string> const& args,
   }
 
   auto rule =
-    cm::make_unique<cmCustomRule>(mf, ruleName, parsedArgs.Commands,
-                                  parsedArgs.Output, parsedArgs.GetScope());
+    std::make_unique<cmCustomRule>(mf, ruleName, parsedArgs.Commands,
+                                   parsedArgs.Output, parsedArgs.GetScope());
   if (parsedArgs.Byproducts) {
     rule->SetByproducts(std::move(*parsedArgs.Byproducts));
   }

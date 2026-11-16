@@ -9,12 +9,12 @@
 #include <cstdlib>
 #include <initializer_list>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -236,7 +236,7 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
 std::unique_ptr<cmRulePlaceholderExpander>
 cmLocalGenerator::CreateRulePlaceholderExpander(cmBuildStep buildStep) const
 {
-  return cm::make_unique<cmRulePlaceholderExpander>(
+  return std::make_unique<cmRulePlaceholderExpander>(
     buildStep, this->Compilers, this->VariableMappings, this->CompilerSysroot,
     this->LinkerSysroot,
     this->GetState()->UseWatcomWMake() || this->GetState()->UseBorlandMake()
@@ -3322,7 +3322,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
              " for "_s, target->GetName());
   ;
 
-  auto cc = cm::make_unique<cmCustomCommand>();
+  auto cc = std::make_unique<cmCustomCommand>();
   cc->SetCommandLines(commandLines);
   cc->SetComment(comment);
   cc->SetStdPipesUTF8(true);

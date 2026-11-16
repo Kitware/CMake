@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -80,7 +80,7 @@ extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator(
   cmGlobalGenerator* gg, cmMakefile* mf)
   : cmLocalVisualStudioGenerator(gg, mf)
-  , Internal(cm::make_unique<cmLocalVisualStudio7GeneratorInternals>(this))
+  , Internal(std::make_unique<cmLocalVisualStudio7GeneratorInternals>(this))
 {
 }
 
@@ -142,7 +142,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
             this->Makefile->GetOrCreateGeneratedSource(force)) {
         sf->SetProperty("SYMBOLIC", "1");
       }
-      auto cc = cm::make_unique<cmCustomCommand>();
+      auto cc = std::make_unique<cmCustomCommand>();
       cc->SetOutputs(force);
       cc->SetCommandLines(force_commands);
       cc->SetComment(" ");
@@ -268,7 +268,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     commandLines[0].emplace_back("--link-no-warning-as-error");
   }
   std::string comment = cmStrCat("Building Custom Rule "_s, makefileIn);
-  auto cc = cm::make_unique<cmCustomCommand>();
+  auto cc = std::make_unique<cmCustomCommand>();
   cc->SetOutputs(stampName);
   cc->SetMainDependency(makefileIn);
   cc->SetDepends(listFiles);

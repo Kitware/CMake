@@ -6,10 +6,10 @@
 #include <cstddef>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -278,7 +278,7 @@ std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
   target.SetHaveInstallRule(true);
   std::string const& component =
     namelink ? args.GetNamelinkComponent() : args.GetComponent();
-  auto g = cm::make_unique<cmInstallTargetGenerator>(
+  auto g = std::make_unique<cmInstallTargetGenerator>(
     target.GetName(), destination, impLib, args.GetPermissions(),
     SelectConfigurations(args, configurations), component, message,
     args.GetExcludeFromAll(), args.GetOptional() || forceOpt,
@@ -305,7 +305,7 @@ std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(mf);
-  return cm::make_unique<cmInstallFilesGenerator>(
+  return std::make_unique<cmInstallFilesGenerator>(
     absFiles, destination, programs, args.GetPermissions(),
     SelectConfigurations(args, configurations), args.GetComponent(),
     buildDepends, message, args.GetExcludeFromAll(), args.GetRename(),
@@ -319,7 +319,7 @@ std::unique_ptr<cmInstallFileSetGenerator> CreateInstallFileSetGenerator(
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);
-  return cm::make_unique<cmInstallFileSetGenerator>(
+  return std::make_unique<cmInstallFileSetGenerator>(
     target.GetName(), args.GetFileSet(), args.GetDestination(),
     args.GetPermissions(), SelectConfigurations(args, configurations),
     args.GetComponent(), message, args.GetExcludeFromAll(), args.GetOptional(),
@@ -350,7 +350,7 @@ void AddInstallRuntimeDependenciesGenerator(
 
   // Create file(GET_RUNTIME_DEPENDENCIES) generator.
   auto getRuntimeDependenciesGenerator =
-    cm::make_unique<cmInstallGetRuntimeDependenciesGenerator>(
+    std::make_unique<cmInstallGetRuntimeDependenciesGenerator>(
       runtimeDependencySet, std::move(runtimeDependenciesArgs.Directories),
       std::move(runtimeDependenciesArgs.PreIncludeRegexes),
       std::move(runtimeDependenciesArgs.PreExcludeRegexes),
@@ -371,7 +371,7 @@ void AddInstallRuntimeDependenciesGenerator(
 
   // Create the library dependencies generator.
   auto libraryRuntimeDependenciesGenerator =
-    cm::make_unique<cmInstallRuntimeDependencySetGenerator>(
+    std::make_unique<cmInstallRuntimeDependencySetGenerator>(
       cmInstallRuntimeDependencySetGenerator::DependencyType::Library,
       runtimeDependencySet, std::vector<std::string>{}, true, std::string{},
       true, "_CMAKE_DEPS", "_CMAKE_RPATH", "_CMAKE_TMP",
@@ -393,7 +393,7 @@ void AddInstallRuntimeDependenciesGenerator(
   if (apple) {
     // Create the framework dependencies generator.
     auto frameworkRuntimeDependenciesGenerator =
-      cm::make_unique<cmInstallRuntimeDependencySetGenerator>(
+      std::make_unique<cmInstallRuntimeDependencySetGenerator>(
         cmInstallRuntimeDependencySetGenerator::DependencyType::Framework,
         runtimeDependencySet, std::vector<std::string>{}, true, std::string{},
         true, "_CMAKE_DEPS", "_CMAKE_RPATH", "_CMAKE_TMP",
@@ -547,7 +547,7 @@ bool CreateInstallGeneratorsForTarget(
                              "file sets are installed"_s));
       }
 
-      auto te = cm::make_unique<cmTargetExport>();
+      auto te = std::make_unique<cmTargetExport>();
       te->TargetName = target.GetName();
       te->ArchiveGenerator = archiveGenerator.get();
       te->BundleGenerator = bundleGenerator.get();
@@ -937,7 +937,7 @@ bool CreateInstallGeneratorsForTarget(
 
   if (runtimeOnly == RuntimeOnly::No &&
       !cxxModuleBmiArgs.GetDestination().empty()) {
-    cxxModuleBmiGenerator = cm::make_unique<cmInstallCxxModuleBmiGenerator>(
+    cxxModuleBmiGenerator = std::make_unique<cmInstallCxxModuleBmiGenerator>(
       target.GetName(), helper.GetCxxModulesBmiDestination(&cxxModuleBmiArgs),
       cxxModuleBmiArgs.GetPermissions(),
       SelectConfigurations(cxxModuleBmiArgs, configurations),
@@ -1125,7 +1125,7 @@ bool HandleScriptMode(std::vector<std::string> const& args,
 
   for (Arguments::Script& script : arguments.Scripts) {
     helper.Makefile->AddInstallGenerator(
-      cm::make_unique<cmInstallScriptGenerator>(
+      std::make_unique<cmInstallScriptGenerator>(
         std::move(script.Value), script.IsCode, component,
         arguments.ExcludeFromAll, arguments.AllComponents,
         arguments.BuildDepends, helper.Makefile->GetBacktrace()));
@@ -1480,27 +1480,27 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
   auto ctx = std::make_shared<InstallContext>();
   ctx->GenericArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(genericArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(genericArgs));
   ctx->ArchiveArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(archiveArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(archiveArgs));
   ctx->LibraryArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(libraryArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(libraryArgs));
   ctx->RuntimeArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(runtimeArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(runtimeArgs));
   ctx->ObjectArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(objectArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(objectArgs));
   ctx->FrameworkArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(frameworkArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(frameworkArgs));
   ctx->BundleArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(bundleArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(bundleArgs));
   ctx->PrivateHeaderArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(privateHeaderArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(privateHeaderArgs));
   ctx->PublicHeaderArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(publicHeaderArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(publicHeaderArgs));
   ctx->ResourceArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(resourceArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(resourceArgs));
   ctx->CxxModuleBmiArgs =
-    cm::make_unique<cmInstallCommandArguments>(std::move(cxxModuleBmiArgs));
+    std::make_unique<cmInstallCommandArguments>(std::move(cxxModuleBmiArgs));
   ctx->IncludesArgs = std::move(includesArgs);
   ctx->FileSetArgs = std::move(fileSetArgs);
   ctx->NamelinkMode = namelinkMode;
@@ -1706,7 +1706,7 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
     [helper](cmTarget& target, cmInstallCommandArguments const& typeArgs,
              std::string const& destination)
     -> std::unique_ptr<cmInstallImportedRuntimeArtifactsGenerator> {
-    return cm::make_unique<cmInstallImportedRuntimeArtifactsGenerator>(
+    return std::make_unique<cmInstallImportedRuntimeArtifactsGenerator>(
       target.GetName(), destination, typeArgs.GetPermissions(),
       typeArgs.GetConfigurations(), typeArgs.GetComponent(),
       cmInstallGenerator::SelectMessageLevel(helper.Makefile),
@@ -2235,7 +2235,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
 
   // Create the directory install generator.
   helper.Makefile->AddInstallGenerator(
-    cm::make_unique<cmInstallDirectoryGenerator>(
+    std::make_unique<cmInstallDirectoryGenerator>(
       dirs, *destination, permissionsFile, permissionsDir, configurations,
       component, std::move(buildDepends), message, excludeFromAll, literalArgs,
       optional, helper.CaptureContext()));
@@ -2334,7 +2334,7 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
-    cm::make_unique<cmInstallAndroidMKExportGenerator>(
+    std::make_unique<cmInstallAndroidMKExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
       ica.GetExcludeFromAll(), std::move(fname), std::move(exportNamespace),
@@ -2486,7 +2486,7 @@ bool HandleMappedPackageInfo(
 
   // Create the package info generator.
   helper.Makefile->AddInstallGenerator(
-    cm::make_unique<cmInstallPackageInfoExportGenerator>(
+    std::make_unique<cmInstallPackageInfoExportGenerator>(
       &exportSet, dest, installCommandArgs.GetPermissions(),
       installCommandArgs.GetConfigurations(),
       installCommandArgs.GetComponent(), message,
@@ -2620,7 +2620,7 @@ bool HandleExportMode(std::vector<std::string> const& args,
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
-    cm::make_unique<cmInstallCMakeConfigExportGenerator>(
+    std::make_unique<cmInstallCMakeConfigExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
       ica.GetExcludeFromAll(), std::move(fname), std::move(exportNamespace),
@@ -2694,7 +2694,7 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
-    cm::make_unique<cmInstallPackageInfoExportGenerator>(
+    std::make_unique<cmInstallPackageInfoExportGenerator>(
       &exportSet, dest, ica.GetPermissions(), ica.GetConfigurations(),
       ica.GetComponent(), message, ica.GetExcludeFromAll(),
       std::move(arguments), std::move(cxxModulesDirectory),
@@ -2898,7 +2898,7 @@ bool HandleSbomMode(std::vector<std::string> const& args,
     ica.GetComponent());
 
   // Create the SBOM install generator.
-  auto sbomGen = cm::make_unique<cmInstallSbomGenerator>(
+  auto sbomGen = std::make_unique<cmInstallSbomGenerator>(
     sets, std::move(dest), ica.GetPermissions(), ica.GetConfigurations(),
     ica.GetComponent(), message, ica.GetExcludeFromAll(), arguments,
     helper.CaptureContext());

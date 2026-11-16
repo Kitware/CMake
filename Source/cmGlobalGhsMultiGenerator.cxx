@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <functional>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string>
 #include <cm/string_view>
@@ -59,7 +59,7 @@ std::unique_ptr<cmLocalGenerator>
 cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
   return std::unique_ptr<cmLocalGenerator>(
-    cm::make_unique<cmLocalGhsMultiGenerator>(this, mf));
+    std::make_unique<cmLocalGhsMultiGenerator>(this, mf));
 }
 
 cmDocumentationEntry cmGlobalGhsMultiGenerator::GetDocumentation()
@@ -711,15 +711,15 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
      * The build tool, currently, does not support rereading the project files
      * if they get updated. So do not run this target as part of ALL_BUILD.
      */
-    auto cc = cm::make_unique<cmCustomCommand>();
+    auto cc = std::make_unique<cmCustomCommand>();
     cmTarget* tgt =
       lg.AddUtilityCommand(CHECK_BUILD_SYSTEM_TARGET, true, std::move(cc));
-    auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
+    auto ptr = std::make_unique<cmGeneratorTarget>(tgt, &lg);
     auto* gt = ptr.get();
     lg.AddGeneratorTarget(std::move(ptr));
 
     // Add the rule.
-    cc = cm::make_unique<cmCustomCommand>();
+    cc = std::make_unique<cmCustomCommand>();
     cc->SetOutputs(this->StampFile);
     cc->SetDepends(listFiles);
     cc->SetCommandLines(commandLines);
@@ -752,14 +752,14 @@ void cmGlobalGhsMultiGenerator::AddAllTarget()
     if (!gen.empty()) {
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
-      auto cc = cm::make_unique<cmCustomCommand>();
+      auto cc = std::make_unique<cmCustomCommand>();
       cc->SetEscapeOldStyle(false);
       cc->SetComment("Build all projects");
       cmTarget* allBuild = gen[0]->AddUtilityCommand(this->GetAllTargetName(),
                                                      true, std::move(cc));
 
       gen[0]->AddGeneratorTarget(
-        cm::make_unique<cmGeneratorTarget>(allBuild, gen[0]));
+        std::make_unique<cmGeneratorTarget>(allBuild, gen[0]));
 
       // Organize in the "predefined targets" folder:
       if (this->UseFolderProperty()) {

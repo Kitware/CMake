@@ -3,9 +3,9 @@
 #include "cmMacroCommand.h"
 
 #include <functional>
+#include <memory>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -233,7 +233,7 @@ bool cmMacroCommand(std::vector<std::string> const& args,
 
   // create a function blocker
   {
-    auto fb = cm::make_unique<cmMacroFunctionBlocker>();
+    auto fb = std::make_unique<cmMacroFunctionBlocker>();
     cm::append(fb->Args, args);
     status.GetMakefile().AddFunctionBlocker(std::move(fb));
   }

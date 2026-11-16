@@ -6,11 +6,10 @@
 #  include <cstddef>
 #  include <cstdlib>
 #  include <ios>
+#  include <memory>
 #  include <streambuf>
 #  include <utility>
 #  include <vector>
-
-#  include <cm/memory>
 
 #  include <windows.h>
 
@@ -290,7 +289,7 @@ Console::Impl::RAII::RAII(IStream& is)
       GetConsoleCP() != CP_UTF8) {
     // The input stream reads from a console whose input code page is not
     // UTF-8.  Use a ConsoleBufRead to read wide-character encoding.
-    this->ConsoleBuf_ = cm::make_unique<ConsoleBufRead>(is.Console(), mode);
+    this->ConsoleBuf_ = std::make_unique<ConsoleBufRead>(is.Console(), mode);
   }
   this->Init();
 }
@@ -303,7 +302,7 @@ Console::Impl::RAII::RAII(OStream& os)
       GetConsoleOutputCP() != CP_UTF8) {
     // The output stream writes to a console whose output code page is not
     // UTF-8.  Use a ConsoleBufWrite to write wide-character encoding.
-    this->ConsoleBuf_ = cm::make_unique<ConsoleBufWrite>(os.Console());
+    this->ConsoleBuf_ = std::make_unique<ConsoleBufWrite>(os.Console());
   }
   this->Init();
 }
@@ -345,7 +344,7 @@ Console::Impl::Impl()
 Console::Impl::~Impl() = default;
 
 Console::Console()
-  : Impl_(cm::make_unique<Impl>())
+  : Impl_(std::make_unique<Impl>())
 {
 }
 #else

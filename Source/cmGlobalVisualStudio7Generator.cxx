@@ -4,11 +4,11 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <memory>
 #include <ostream>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/string_view>
 
 #include <windows.h>
@@ -199,7 +199,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
 std::unique_ptr<cmLocalGenerator>
 cmGlobalVisualStudio7Generator::CreateLocalGenerator(cmMakefile* mf)
 {
-  auto lg = cm::make_unique<cmLocalVisualStudio7Generator>(this, mf);
+  auto lg = std::make_unique<cmLocalVisualStudio7Generator>(this, mf);
   return std::unique_ptr<cmLocalGenerator>(std::move(lg));
 }
 

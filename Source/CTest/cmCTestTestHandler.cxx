@@ -12,6 +12,7 @@
 #include <functional>
 #include <iomanip>
 #include <iterator>
+#include <memory>
 #include <ratio>
 #include <set>
 #include <sstream>
@@ -22,7 +23,6 @@
 #  include <csignal>
 #endif
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -1448,7 +1448,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   auto elapsed_time_start = std::chrono::steady_clock::now();
 
   auto parallel =
-    cm::make_unique<cmCTestMultiProcessHandler>(this->CTest, this);
+    std::make_unique<cmCTestMultiProcessHandler>(this->CTest, this);
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     parallel->SetRepeatMode(this->RepeatMode, this->RepeatCount);
@@ -2215,9 +2215,9 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
                                   | std::ios::binary
 #endif
             );
-            auto file_buffer = cm::make_unique<unsigned char[]>(len + 1);
+            auto file_buffer = std::make_unique<unsigned char[]>(len + 1);
             ifs.read(reinterpret_cast<char*>(file_buffer.get()), len);
-            auto encoded_buffer = cm::make_unique<unsigned char[]>(
+            auto encoded_buffer = std::make_unique<unsigned char[]>(
               static_cast<int>(static_cast<double>(len) * 1.5 + 5.0));
 
             size_t rlen = cmsysBase64_Encode(file_buffer.get(), len,
@@ -2254,7 +2254,7 @@ void cmCTestTestHandler::SetTestsToRunInformation(std::string const& in)
   if (cmSystemTools::FileExists(in)) {
     cmsys::ifstream fin(in.c_str());
     unsigned long filelen = cmSystemTools::FileLength(in);
-    auto buff = cm::make_unique<char[]>(filelen + 1);
+    auto buff = std::make_unique<char[]>(filelen + 1);
     fin.getline(buff.get(), filelen);
     buff[fin.gcount()] = 0;
     this->TestsToRunString = buff.get();

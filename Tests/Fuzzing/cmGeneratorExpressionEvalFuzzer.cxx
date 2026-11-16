@@ -42,8 +42,6 @@
 #include <string>
 #include <utility>
 
-#include <cm/memory>
-
 #include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -268,7 +266,7 @@ struct Fixture
     this->CMake.SetHomeDirectory(g_srcDir);
     this->CMake.SetHomeOutputDirectory(g_binDir);
     this->CMake.SetGlobalGenerator(
-      cm::make_unique<cmGlobalGenerator>(&this->CMake));
+      std::make_unique<cmGlobalGenerator>(&this->CMake));
     this->GG = this->CMake.GetGlobalGenerator();
 
     cmStateSnapshot snapshot = this->CMake.GetCurrentSnapshot();
@@ -276,7 +274,7 @@ struct Fixture
     snapshot.GetDirectory().SetCurrentBinary(g_binDir);
     snapshot.SetDefaultDefinitions();
 
-    auto mf = cm::make_unique<cmMakefile>(this->GG, snapshot);
+    auto mf = std::make_unique<cmMakefile>(this->GG, snapshot);
     this->MF = mf.get();
     this->GG->AddMakefile(std::move(mf));
 

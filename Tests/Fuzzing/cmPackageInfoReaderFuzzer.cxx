@@ -39,7 +39,6 @@
 #include <memory>
 #include <string>
 
-#include <cm/memory>
 #include <cm/optional>
 
 #include "cmExecutionStatus.h"
@@ -95,11 +94,11 @@ struct Fixture
   {
     this->CMake.SetHomeDirectory(g_prefixDir);
     this->CMake.SetHomeOutputDirectory(g_prefixDir);
-    this->GG = cm::make_unique<cmGlobalGenerator>(&this->CMake);
+    this->GG = std::make_unique<cmGlobalGenerator>(&this->CMake);
     cmStateSnapshot snapshot = this->CMake.GetCurrentSnapshot();
     snapshot.GetDirectory().SetCurrentBinary(g_prefixDir);
     snapshot.GetDirectory().SetCurrentSource(g_prefixDir);
-    this->MF = cm::make_unique<cmMakefile>(this->GG.get(), snapshot);
+    this->MF = std::make_unique<cmMakefile>(this->GG.get(), snapshot);
   }
 };
 

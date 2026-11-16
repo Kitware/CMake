@@ -3,10 +3,10 @@
 #include "cmBuildDatabase.h"
 
 #include <cstdlib>
+#include <memory>
 #include <set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -196,7 +196,7 @@ std::unique_ptr<cmBuildDatabase> cmBuildDatabase::Load(std::string const& path)
     return {};
   }
 
-  auto db = cm::make_unique<cmBuildDatabase>();
+  auto db = std::make_unique<cmBuildDatabase>();
 
   Json::Value const& sets = mcdb["sets"];
   if (sets.isArray()) {

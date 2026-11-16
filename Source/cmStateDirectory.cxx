@@ -5,9 +5,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iterator>
 #include <vector>
 
-#include <cm/iterator>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -64,7 +64,7 @@ cmBTStringRange GetPropertyContent(T const& content, U contentEndPosition)
 {
   auto end = content.begin() + contentEndPosition;
 
-  auto rbegin = cm::make_reverse_iterator(end);
+  auto rbegin = std::make_reverse_iterator(end);
   rbegin = std::find(rbegin, content.rend(), cmStateDetail::PropertySentinel);
 
   return cmMakeRange(rbegin.base(), end);
@@ -128,7 +128,7 @@ void cmStateDirectory::PrependIncludeDirectoriesEntry(
     this->Snapshot_.Position->IncludeDirectoryPosition;
 
   auto rend = this->DirectoryState->IncludeDirectories.rend();
-  auto rbegin = cm::make_reverse_iterator(entryEnd);
+  auto rbegin = std::make_reverse_iterator(entryEnd);
   rbegin = std::find(rbegin, rend, cmStateDetail::PropertySentinel);
 
   auto entryIt = rbegin.base();
@@ -242,7 +242,7 @@ void cmStateDirectory::PrependLinkDirectoriesEntry(const BT<std::string>& vec)
     this->Snapshot_.Position->LinkDirectoriesPosition;
 
   auto rend = this->DirectoryState->LinkDirectories.rend();
-  auto rbegin = cm::make_reverse_iterator(entryEnd);
+  auto rbegin = std::make_reverse_iterator(entryEnd);
   rbegin = std::find(rbegin, rend, cmStateDetail::PropertySentinel);
 
   auto entryIt = rbegin.base();

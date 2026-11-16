@@ -2,7 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "CMakeSetupDialog.h"
 
-#include <cm/memory>
+#include <memory>
 
 #include <QCloseEvent>
 #include <QCoreApplication>
@@ -75,7 +75,7 @@ QCMake* QCMakeThread::cmakeInstance() const
 
 void QCMakeThread::run()
 {
-  this->CMakeInstance = cm::make_unique<QCMake>();
+  this->CMakeInstance = std::make_unique<QCMake>();
   // emit that this cmake thread is ready for use
   Q_EMIT this->cmakeInitialized();
   this->exec();

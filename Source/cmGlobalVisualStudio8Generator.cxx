@@ -4,10 +4,10 @@
 
 #include <algorithm>
 #include <functional>
+#include <memory>
 #include <ostream>
 #include <utility>
 
-#include <cm/memory>
 #include <cmext/algorithm>
 #include <cmext/memory>
 #include <cmext/string_view>
@@ -215,7 +215,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   auto& lg =
     cm::static_reference_cast<cmLocalVisualStudio7Generator>(generators[0]);
 
-  auto cc = cm::make_unique<cmCustomCommand>();
+  auto cc = std::make_unique<cmCustomCommand>();
   cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                                        std::move(cc));
 
@@ -230,7 +230,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   auto new_end = std::unique(listFiles.begin(), listFiles.end());
   listFiles.erase(new_end, listFiles.end());
 
-  auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
+  auto ptr = std::make_unique<cmGeneratorTarget>(tgt, &lg);
   auto* gt = ptr.get();
   lg.AddGeneratorTarget(std::move(ptr));
 
@@ -271,7 +271,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
-      cc = cm::make_unique<cmCustomCommand>();
+      cc = std::make_unique<cmCustomCommand>();
       cc->SetByproducts(byproducts);
       cc->SetCommandLines(verifyCommandLines);
       cc->SetComment("Checking File Globs");
@@ -305,7 +305,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // file as the main dependency because it would get
     // overwritten by the CreateVCProjBuildRule.
     // (this could be avoided with per-target source files)
-    cc = cm::make_unique<cmCustomCommand>();
+    cc = std::make_unique<cmCustomCommand>();
     cc->SetOutputs(stamps);
     cc->SetDepends(listFiles);
     cc->SetCommandLines(commandLines);

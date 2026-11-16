@@ -9,10 +9,9 @@
 
 // TODO The following headers are parts of the `cmGlobalGeneratorFactory`
 // public API, so could be defined as export to IWYU
+#include <memory>
 #include <string>
 #include <vector>
-
-#include <cm/memory>
 
 class cmake;
 
@@ -60,7 +59,7 @@ public:
     if (name != T::GetActualName()) {
       return std::unique_ptr<cmGlobalGenerator>();
     }
-    return std::unique_ptr<cmGlobalGenerator>(cm::make_unique<T>(cm));
+    return std::unique_ptr<cmGlobalGenerator>(std::make_unique<T>(cm));
   }
 
   /** Get the documentation entry for this factory */

@@ -4,11 +4,11 @@
 #include "cmRuntimeDependencyArchive.h"
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmBinUtilsLinuxELFLinker.h"
@@ -159,11 +159,11 @@ bool cmRuntimeDependencyArchive::Prepare()
     }
   }
   if (platform == "linux+elf" || platform == "freebsd+elf") {
-    this->Linker = cm::make_unique<cmBinUtilsLinuxELFLinker>(this);
+    this->Linker = std::make_unique<cmBinUtilsLinuxELFLinker>(this);
   } else if (platform == "windows+pe") {
-    this->Linker = cm::make_unique<cmBinUtilsWindowsPELinker>(this);
+    this->Linker = std::make_unique<cmBinUtilsWindowsPELinker>(this);
   } else if (platform == "macos+macho") {
-    this->Linker = cm::make_unique<cmBinUtilsMacOSMachOLinker>(this);
+    this->Linker = std::make_unique<cmBinUtilsMacOSMachOLinker>(this);
   } else {
     this->SetError(
       cmStrCat("Invalid value for CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM: "_s,

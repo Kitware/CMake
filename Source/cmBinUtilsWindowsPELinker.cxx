@@ -6,11 +6,11 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <memory>
 #include <utility>
 #include <vector>
 
 #include <cm/filesystem>
-#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
@@ -87,11 +87,11 @@ bool cmBinUtilsWindowsPELinker::Prepare()
   }
   if (tool == "dumpbin") {
     this->Tool =
-      cm::make_unique<cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool>(
+      std::make_unique<cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool>(
         this->Archive);
   } else if (tool == "objdump") {
     this->Tool =
-      cm::make_unique<cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool>(
+      std::make_unique<cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool>(
         this->Archive);
   } else {
     this->SetError(cmStrCat(

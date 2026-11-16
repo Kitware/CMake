@@ -13,11 +13,11 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include <cm/string_view>
-#include <cm/type_traits>
 #include <cmext/iterator>
 
 #include "cmValue.h"
@@ -1160,7 +1160,7 @@ public:
   }
 
   template <typename Range,
-            cm::enable_if_t<cm::is_range<Range>::value, int> = 0>
+            std::enable_if_t<cm::is_range<Range>::value, int> = 0>
   static std::string to_string(Range const& r)
   {
     return cmList::Join(r, cmList::element_separator);
@@ -1372,7 +1372,7 @@ inline void erase_if(cmList& list, Predicate pred)
 
 template <
   typename InputIt,
-  cm::enable_if_t<
+  std::enable_if_t<
     cm::is_input_iterator<InputIt>::value &&
       std::is_convertible<typename std::iterator_traits<InputIt>::value_type,
                           cmList::value_type>::value,
@@ -1383,10 +1383,10 @@ void append(cmList& v, InputIt first, InputIt last)
 }
 
 template <typename Range,
-          cm::enable_if_t<cm::is_input_range<Range>::value &&
-                            std::is_convertible<typename Range::value_type,
-                                                cmList::value_type>::value,
-                          int> = 0>
+          std::enable_if_t<cm::is_input_range<Range>::value &&
+                             std::is_convertible<typename Range::value_type,
+                                                 cmList::value_type>::value,
+                           int> = 0>
 void append(cmList& v, Range const& r)
 {
   v.append(r.begin(), r.end(), cmList::ExpandElements::No);

@@ -2,9 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallPackageInfoExportGenerator.h"
 
+#include <memory>
 #include <utility>
-
-#include <cm/memory>
 
 #include "cmDiagnosticContext.h"
 #include "cmExportInstallFileGenerator.h"
@@ -24,7 +23,7 @@ cmInstallPackageInfoExportGenerator::cmInstallPackageInfoExportGenerator(
       arguments.GetPackageFileName(), arguments.GetNamespace(),
       std::move(cxxModulesDirectory), std::move(context))
 {
-  this->EFGen = cm::make_unique<cmExportInstallPackageInfoGenerator>(
+  this->EFGen = std::make_unique<cmExportInstallPackageInfoGenerator>(
     this, std::move(arguments));
 }
 

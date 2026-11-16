@@ -5,12 +5,12 @@
 /* clang-format on */
 
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -232,7 +232,7 @@ cmGeneratorTarget::IsTransitiveProperty(
 cmGeneratorTarget::CustomTransitiveProperty::CustomTransitiveProperty(
   std::string interfaceName, UseTo usage)
   : CustomTransitiveProperty(
-      cm::make_unique<std::string>(std::move(interfaceName)), usage)
+      std::make_unique<std::string>(std::move(interfaceName)), usage)
 {
 }
 cmGeneratorTarget::CustomTransitiveProperty::CustomTransitiveProperty(

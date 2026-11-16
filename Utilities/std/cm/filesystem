@@ -107,7 +107,7 @@ class unicode
 };
 
 template <typename Char>
-class unicode<Char, typename std::enable_if<(sizeof(Char) == 4)>::type>
+class unicode<Char, std::enable_if_t<(sizeof(Char) == 4)>>
   : public unicode_helper
 {
 public:
@@ -187,7 +187,7 @@ public:
 };
 
 template <typename Char>
-class unicode<Char, typename std::enable_if<(sizeof(Char) == 2)>::type>
+class unicode<Char, std::enable_if_t<(sizeof(Char) == 2)>>
   : public unicode_helper
 {
 public:
@@ -677,7 +677,7 @@ struct source_traits<T[N]>
 template <typename T>
 struct source_traits<T*>
 {
-  using value_type = cm::decay_t<T>;
+  using value_type = std::decay_t<T>;
 };
 
 template <typename Char, typename Traits, typename Alloc>
@@ -695,10 +695,10 @@ struct source_traits<cm::string_view>
 
 #if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
 template <typename T>
-struct source_traits<T, cm::enable_if_t<cm::is_iterator<T>::value, void>>
+struct source_traits<T, std::enable_if_t<cm::is_iterator<T>::value, void>>
 {
   using value_type =
-    typename std::iterator_traits<typename std::decay<T>::type>::value_type;
+    typename std::iterator_traits<std::decay_t<T>>::value_type;
 };
 #endif
 
@@ -728,12 +728,11 @@ struct is_pathable_char_array : std::false_type
 template <typename T>
 struct is_pathable_char_array<
   T,
-  cm::enable_if_t<
-    std::is_same<char*, typename std::decay<T>::type>::value ||
-      std::is_same<wchar_t*, typename std::decay<T>::type>::value,
-    void>>
-  : bool_constant<std::is_same<char*, typename std::decay<T>::type>::value ||
-                  std::is_same<wchar_t*, typename std::decay<T>::type>::value>
+  std::enable_if_t<std::is_same<char*, std::decay_t<T>>::value ||
+                     std::is_same<wchar_t*, std::decay_t<T>>::value,
+                   void>>
+  : bool_constant<std::is_same<char*, std::decay_t<T>>::value ||
+                  std::is_same<wchar_t*, std::decay_t<T>>::value>
 {
 };
 
@@ -744,22 +743,21 @@ struct is_pathable_iterator : std::false_type
 template <typename T>
 struct is_pathable_iterator<
   T,
-  cm::enable_if_t<
-    is_input_iterator<T>::value &&
-      (std::is_same<char,
-                    typename std::iterator_traits<
-                      typename std::decay<T>::type>::value_type>::value ||
-       std::is_same<wchar_t,
-                    typename std::iterator_traits<
-                      typename std::decay<T>::type>::value_type>::value),
-    void>>
+  std::enable_if_t<is_input_iterator<T>::value &&
+                     (std::is_same<char,
+                                   typename std::iterator_traits<
+                                     std::decay_t<T>>::value_type>::value ||
+                      std::is_same<wchar_t,
+                                   typename std::iterator_traits<
+                                     std::decay_t<T>>::value_type>::value),
+                   void>>
   : bool_constant<
-      std::is_same<char,
-                   typename std::iterator_traits<
-                     typename std::decay<T>::type>::value_type>::value ||
-      std::is_same<wchar_t,
-                   typename std::iterator_traits<
-                     typename std::decay<T>::type>::value_type>::value>
+      std::is_same<
+        char,
+        typename std::iterator_traits<std::decay_t<T>>::value_type>::value ||
+      std::is_same<
+        wchar_t,
+        typename std::iterator_traits<std::decay_t<T>>::value_type>::value>
 {
 };
 
@@ -1071,7 +1069,7 @@ private:
 
   template <typename Source>
   using enable_if_pathable =
-    enable_if_t<filesystem::internals::is_pathable<Source>::value, path&>;
+    std::enable_if_t<filesystem::internals::is_pathable<Source>::value, path&>;
 
   template <typename Source, typename Target = target_type>
   using string_converter = filesystem::internals::source_converter<
@@ -1467,7 +1465,7 @@ protected:
 
   template <typename Source>
   using enable_if_pathable =
-    enable_if_t<internals::is_pathable<Source>::value, path&>;
+    std::enable_if_t<internals::is_pathable<Source>::value, path&>;
 
   enum class filename_fragment : unsigned char
   {
@@ -1723,14 +1721,14 @@ public:
   value_type const* c_str() const noexcept { return this->native().c_str(); }
   operator string_type() const { return this->native(); }
 
-  template <
-    typename Char, typename Traits = std::char_traits<Char>,
-    typename Alloc = std::allocator<Char>,
-    cm::enable_if_t<(std::is_same<Char, char>::value &&
-                     std::is_same<Traits, std::char_traits<char>>::value) ||
-                      (std::is_same<Char, wchar_t>::value &&
-                       std::is_same<Traits, std::char_traits<wchar_t>>::value),
-                    int> = 1>
+  template <typename Char, typename Traits = std::char_traits<Char>,
+            typename Alloc = std::allocator<Char>,
+            std::enable_if_t<
+              (std::is_same<Char, char>::value &&
+               std::is_same<Traits, std::char_traits<char>>::value) ||
+                (std::is_same<Char, wchar_t>::value &&
+                 std::is_same<Traits, std::char_traits<wchar_t>>::value),
+              int> = 1>
   std::basic_string<Char, Traits, Alloc> string(Alloc const& a = Alloc()) const
   {
     return internals::string_converter<path_type::value_type>::to<Char, Traits,
@@ -1745,14 +1743,14 @@ public:
   }
   std::string u8string() const { return this->path_; }
 
-  template <
-    typename Char, typename Traits = std::char_traits<Char>,
-    typename Alloc = std::allocator<Char>,
-    cm::enable_if_t<(std::is_same<Char, char>::value &&
-                     std::is_same<Traits, std::char_traits<char>>::value) ||
-                      (std::is_same<Char, wchar_t>::value &&
-                       std::is_same<Traits, std::char_traits<wchar_t>>::value),
-                    int> = 1>
+  template <typename Char, typename Traits = std::char_traits<Char>,
+            typename Alloc = std::allocator<Char>,
+            std::enable_if_t<
+              (std::is_same<Char, char>::value &&
+               std::is_same<Traits, std::char_traits<char>>::value) ||
+                (std::is_same<Char, wchar_t>::value &&
+                 std::is_same<Traits, std::char_traits<wchar_t>>::value),
+              int> = 1>
   std::basic_string<Char, Traits, Alloc> generic_string(
     Alloc const& a = Alloc()) const
   {
@@ -1909,7 +1907,7 @@ public:
   }
 
   template <typename Char, typename Traits>
-  friend inline cm::enable_if_t<
+  friend inline std::enable_if_t<
     (std::is_same<Char, path::value_type>::value &&
      std::is_same<Traits, std::char_traits<path::value_type>>::value) ||
       (std::is_same<Char, path::path_type::value_type>::value &&
@@ -1923,7 +1921,7 @@ public:
   }
 
   template <typename Char, typename Traits>
-  friend inline cm::enable_if_t<
+  friend inline std::enable_if_t<
     (std::is_same<Char, path::value_type>::value &&
      std::is_same<Traits, std::char_traits<path::value_type>>::value) ||
       (std::is_same<Char, path::path_type::value_type>::value &&

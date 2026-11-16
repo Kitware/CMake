@@ -11,10 +11,10 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 
 #include <cm3p/cppdap/io.h> // IWYU pragma: keep
@@ -110,10 +110,10 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   cm::optional<std::shared_ptr<dap::Writer>> logger)
   : Connection(std::move(connection))
   , SessionActive(true)
-  , DisconnectEvent(cm::make_unique<SyncEvent>())
-  , ConfigurationDoneEvent(cm::make_unique<SyncEvent>())
-  , ContinueSem(cm::make_unique<Semaphore>())
-  , ThreadManager(cm::make_unique<cmDebuggerThreadManager>())
+  , DisconnectEvent(std::make_unique<SyncEvent>())
+  , ConfigurationDoneEvent(std::make_unique<SyncEvent>())
+  , ContinueSem(std::make_unique<Semaphore>())
+  , ThreadManager(std::make_unique<cmDebuggerThreadManager>())
 {
   if (logger.has_value()) {
     SessionLog = std::move(logger.value());
@@ -122,9 +122,9 @@ cmDebuggerAdapter::cmDebuggerAdapter(
 
   Session = dap::Session::create();
   BreakpointManager =
-    cm::make_unique<cmDebuggerBreakpointManager>(Session.get());
+    std::make_unique<cmDebuggerBreakpointManager>(Session.get());
   ExceptionManager =
-    cm::make_unique<cmDebuggerExceptionManager>(Session.get());
+    std::make_unique<cmDebuggerExceptionManager>(Session.get());
 
   // Handle errors reported by the Session. These errors include protocol
   // parsing errors and receiving messages with no handler.

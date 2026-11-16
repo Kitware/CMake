@@ -8,11 +8,11 @@
 #include <cstring>
 #include <functional>
 #include <iomanip>
+#include <memory>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -257,13 +257,13 @@ cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(std::string const& name,
   }
 
   return std::unique_ptr<cmGlobalGenerator>(
-    cm::make_unique<cmGlobalXCodeGenerator>(cm, version_string,
-                                            version_number));
+    std::make_unique<cmGlobalXCodeGenerator>(cm, version_string,
+                                             version_number));
 #else
   std::cerr << "CMake should be built with cmake to use Xcode, "
                "default to Xcode 1.5\n";
   return std::unique_ptr<cmGlobalGenerator>(
-    cm::make_unique<cmGlobalXCodeGenerator>(cm));
+    std::make_unique<cmGlobalXCodeGenerator>(cm));
 #endif
 }
 
@@ -844,7 +844,7 @@ std::unique_ptr<cmLocalGenerator> cmGlobalXCodeGenerator::CreateLocalGenerator(
   cmMakefile* mf)
 {
   std::unique_ptr<cmLocalGenerator> lg(
-    cm::make_unique<cmLocalXCodeGenerator>(this, mf));
+    std::make_unique<cmLocalXCodeGenerator>(this, mf));
   if (this->XcodeBuildSystem >= BuildSystem::Twelve) {
     // For this build system variant we generate custom commands as
     // shell scripts directly rather than inside Makefiles.
@@ -921,7 +921,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*>& gens)
 {
   // Add ALL_BUILD
-  auto cc = cm::make_unique<cmCustomCommand>();
+  auto cc = std::make_unique<cmCustomCommand>();
   cc->SetCommandLines(
     cmMakeSingleCommandLine({ "echo", "Build all projects" }));
   cmTarget* allbuild =
@@ -939,7 +939,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     }
   }
 
-  root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(allbuild, root));
+  root->AddGeneratorTarget(
+    std::make_unique<cmGeneratorTarget>(allbuild, root));
 
   // Add XCODE depend helper
   std::string legacyDependHelperDir = root->GetCurrentBinaryDirectory();
@@ -963,12 +964,12 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     std::string file =
       cmSystemTools::ConvertToOutputPath(this->CurrentReRunCMakeMakefile);
     cmSystemTools::ReplaceString(file, "\\ ", " ");
-    cc = cm::make_unique<cmCustomCommand>();
+    cc = std::make_unique<cmCustomCommand>();
     cc->SetCommandLines(cmMakeSingleCommandLine({ "make", "-f", file }));
     cmTarget* check = root->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET,
                                               true, std::move(cc));
 
-    root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(check, root));
+    root->AddGeneratorTarget(std::make_unique<cmGeneratorTarget>(check, root));
   }
 
   // now make the allbuild depend on all the non-utility targets
@@ -992,7 +993,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
           target->GetType() == cm::TargetType::OBJECT_LIBRARY) {
         legacyDependHelperCommandLines.front().back() = // fill placeholder
           this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
-        cc = cm::make_unique<cmCustomCommand>();
+        cc = std::make_unique<cmCustomCommand>();
         cc->SetCommandLines(legacyDependHelperCommandLines);
         cc->SetComment("Depend check for xcode");
         cc->SetWorkingDirectory(legacyDependHelperDir);
@@ -1121,8 +1122,8 @@ void cmGlobalXCodeGenerator::addObject(std::unique_ptr<cmXCodeObject> obj)
 cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(
   cmXCodeObject::PBXType ptype, cm::string_view key)
 {
-  auto obj = cm::make_unique<cmXCode21Object>(ptype, cmXCodeObject::OBJECT,
-                                              this->GetObjectId(ptype, key));
+  auto obj = std::make_unique<cmXCode21Object>(ptype, cmXCodeObject::OBJECT,
+                                               this->GetObjectId(ptype, key));
   auto* ptr = obj.get();
   this->addObject(std::move(obj));
   return ptr;
@@ -1130,7 +1131,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
 {
-  auto obj = cm::make_unique<cmXCodeObject>(
+  auto obj = std::make_unique<cmXCodeObject>(
     cmXCodeObject::None, type,
     "Temporary cmake object, should not be referred to in Xcode file");
   auto* ptr = obj.get();

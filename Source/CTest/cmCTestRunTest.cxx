@@ -8,11 +8,11 @@
 #include <cstdint>
 #include <cstdio>
 #include <functional>
+#include <memory>
 #include <ratio>
 #include <sstream>
 #include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -412,7 +412,7 @@ bool cmCTestRunTest::StartAgain(std::unique_ptr<cmCTestRunTest> runner,
     return false;
   }
   testRun->RunAgain = false; // reset
-  testRun->TestProcess = cm::make_unique<cmProcess>(std::move(runner));
+  testRun->TestProcess = std::make_unique<cmProcess>(std::move(runner));
   // change to tests directory
   cmWorkingDirectory workdir(testRun->TestProperties->Directory);
   if (workdir.Failed()) {
@@ -482,7 +482,7 @@ void cmCTestRunTest::StartFailure(std::unique_ptr<cmCTestRunTest> runner,
 {
   auto* testRun = runner.get();
 
-  testRun->TestProcess = cm::make_unique<cmProcess>(std::move(runner));
+  testRun->TestProcess = std::make_unique<cmProcess>(std::move(runner));
   testRun->StartFailure(total, output, detail);
 
   testRun->FinalizeTest(false);
@@ -539,7 +539,7 @@ void cmCTestRunTest::StartTest(std::unique_ptr<cmCTestRunTest> runner,
 {
   auto* testRun = runner.get();
 
-  testRun->TestProcess = cm::make_unique<cmProcess>(std::move(runner));
+  testRun->TestProcess = std::make_unique<cmProcess>(std::move(runner));
 
   if (!testRun->StartTest(completed, total)) {
     testRun->FinalizeTest(false);
