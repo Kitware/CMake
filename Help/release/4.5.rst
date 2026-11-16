@@ -313,7 +313,7 @@ Properties
 * The :prop_dir:`TEST_INCLUDE_FILES` and :prop_dir:`TEST_INCLUDE_FILE`
   directory properties now support :manual:`generator expressions
   <cmake-generator-expressions(7)>` in the include path.  On multi-config
-  generators a ``$<CONFIG>``-parameterized path can select a different script
+  generators a :genex:`$<CONFIG>`-parameterized path can select a different script
   per configuration.
 
 * The :prop_tgt:`XCODE_EMBED_<type>` target property now supports
@@ -367,17 +367,17 @@ Generator Expressions
 
 * The :genex:`LIST` generator expression's ``FILTER`` and ``TRANSFORM``
   operations gained a ``PREDICATE`` keyword that selects items by evaluating an
-  arbitrary generator expression once per item, with ``$<_0>`` referring to the
+  arbitrary generator expression once per item, with :genex:`$<_0>` referring to the
   current item.  ``FILTER`` also gained an explicit ``REGEX`` keyword.
 
 * The :genex:`LIST` generator expression's ``SORT`` operation gained a
   ``COMPARATOR`` option that orders items using an arbitrary generator
-  expression evaluated once per comparison, with ``$<_0>`` and ``$<_1>``
+  expression evaluated once per comparison, with :genex:`$<_0>` and :genex:`$<_1>`
   referring to the two items being compared.
 
 * The :genex:`LIST` generator expression's ``TRANSFORM`` operation gained an
   ``APPLY`` action that evaluates an arbitrary generator expression for each
-  element, with ``$<_0>`` referring to the current element.
+  element, with :genex:`$<_0>` referring to the current element.
 
 * The :genex:`$<LINK_LIBRARY:NEEDED_LIBRARY,...>` generator expression feature
   is now supported on Linux with GNU-compatible linkers (GNU ld, gold, LLD,

@@ -16,7 +16,7 @@ TARGET_FILE_BASE_NAME
   of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
   base name. The default is ``POSTFIX:INCLUDE``.
 
-Base name of ``tgt``, i.e. ``$<TARGET_FILE_NAME:tgt>`` without prefix and suffix
+Base name of ``tgt``, i.e. :genex:`$<TARGET_FILE_NAME:tgt>` without prefix and suffix
 and, optionally, postfix. For example, if the ``tgt`` filename is
 ``libbase_postfix.so``, the base name is:
 

@@ -21,6 +21,6 @@ directory-scoped build dependencies.
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
   A value containing a generator expression is evaluated as a whole for each
   configuration, and the result is the list of dependencies.  Targets
-  referenced by the expression, as with ``$<TARGET_FILE:tgt>``, are target
+  referenced by the expression, as with :genex:`$<TARGET_FILE:tgt>`, are target
   dependencies, and an evaluated entry naming an artifact of such a target is
   built by that target dependency.  Empty entries are ignored.

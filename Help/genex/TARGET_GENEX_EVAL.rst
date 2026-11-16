@@ -36,7 +36,7 @@ because ``CUSTOM_KEYS`` target property is not evaluated and the content is
 passed as is (i.e. ``$<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>``).
 
 To have the expected result (i.e. ``FOO_EXTRA_THINGS`` if config is ``Debug``),
-it is required to evaluate the output of ``$<TARGET_PROPERTY:foo,CUSTOM_KEYS>``:
+it is required to evaluate the output of :genex:`$<TARGET_PROPERTY:foo,CUSTOM_KEYS>`:
 
 .. code-block:: cmake
 

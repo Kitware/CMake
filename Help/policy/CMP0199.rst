@@ -28,7 +28,7 @@ CMake 4.2 and above prefer to consider *only* the configuration of the
 consuming target and (when applicable) the selected configuration of the
 imported target; that is, (2) and (1) in the above list.  Unfortunately,
 because users rely on both of these, this policy is not able to fully prevent
-multiple unique ``$<CONFIG:cfg>`` expressions from matching concurrently.
+multiple unique :genex:`$<CONFIG:cfg>` expressions from matching concurrently.
 
 This policy provides compatibility with projects that rely on the historical
 behavior.  The ``OLD`` behavior for this policy is to retain the historic
@@ -80,15 +80,15 @@ Consider the following imported libraries:
 
 Assume that the consuming project is built in the ``Release`` configuration.
 A consumer of ``test1`` will see both ``DEBUG`` and ``RELEASE`` defined,
-regardless of the policy setting; ``$<CONFIG:debug>`` evaluates to ``1``
+regardless of the policy setting; :genex:`$<CONFIG:debug>` evaluates to ``1``
 because the selected configuration of ``test1`` is ``DEBUG``, and
-``$<CONFIG:release>`` evaluates to ``1`` because the consumer's configuration
+:genex:`$<CONFIG:release>` evaluates to ``1`` because the consumer's configuration
 is ``Release`` (keeping in mind that configuration matching is
 case-insensitive).
 
 Under the ``OLD`` policy, a consumer of ``test2`` would see all of ``DEBUG``,
-``EXAMPLE`` and ``TEST`` defined; ``$<CONFIG:debug>``, ``$<CONFIG:example>``
-and ``$<CONFIG:test>`` all evaluate to ``1`` because all of these
+``EXAMPLE`` and ``TEST`` defined; :genex:`$<CONFIG:debug>`, :genex:`$<CONFIG:example>`
+and :genex:`$<CONFIG:test>` all evaluate to ``1`` because all of these
 configurations appear in ``MAP_IMPORTED_CONFIG_RELEASE``.
 
 Under the ``NEW`` policy, a consumer of ``test2`` will see only ``TEST``

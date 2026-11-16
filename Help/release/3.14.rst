@@ -276,10 +276,10 @@ Modules
 Generator Expressions
 ---------------------
 
-* The ``$<Fortran_COMPILER_ID:...>`` and ``$<Fortran_COMPILER_VERSION:...>``
+* The :genex:`$<Fortran_COMPILER_ID:...>` and :genex:`$<Fortran_COMPILER_VERSION:...>`
   :manual:`generator expressions <cmake-generator-expressions(7)>` were added.
 
-* The ``$<IN_LIST:...>`` generator expression now correctly handles an
+* The :genex:`$<IN_LIST:...>` generator expression now correctly handles an
   empty argument. See :policy:`CMP0085` for details.
 
 Autogen

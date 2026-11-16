@@ -24,8 +24,8 @@ Supported values are:
   requirements.
 
 This property does not change generator-expression language contexts.  For a
-SYCL compilation, ``$<COMPILE_LANGUAGE:SYCL>`` is true and
-``$<COMPILE_LANGUAGE:CXX>`` is false.  For a target linked with the SYCL
-driver, ``$<LINK_LANGUAGE:SYCL>`` is true and ``$<LINK_LANGUAGE:CXX>`` is
+SYCL compilation, :genex:`$<COMPILE_LANGUAGE:SYCL>` is true and
+:genex:`$<COMPILE_LANGUAGE:CXX>` is false.  For a target linked with the SYCL
+driver, :genex:`$<LINK_LANGUAGE:SYCL>` is true and :genex:`$<LINK_LANGUAGE:CXX>` is
 false.  Properties and usage requirements are not evaluated a second time in a
 C++ context.

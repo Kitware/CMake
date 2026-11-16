@@ -27,9 +27,9 @@ Without Arguments
   $<COMPILE_LANGUAGE>
 
 The compile language of source files when evaluating compile options. See the
-related boolean expression :genex:`$<COMPILE_LANGUAGE:languages>
-<COMPILE_LANGUAGE:languages>` for notes about the portability of this generator
-expression.
+related boolean expression
+`$<COMPILE_LANGUAGE:languages> <With Arguments_>`_ for notes about the
+portability of this generator expression.
 
 With Arguments
 ^^^^^^^^^^^^^^

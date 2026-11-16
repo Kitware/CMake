@@ -161,7 +161,7 @@ signatures that specify them.  The common options are:
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
     An entry containing a generator expression is evaluated for each build
     configuration, and the rule depends on the union of the results.
-    Targets it references, as with ``$<TARGET_FILE:tgt>``, are target
+    Targets it references, as with :genex:`$<TARGET_FILE:tgt>`, are target
     dependencies, and an evaluated value naming an artifact of such a target
     is built by that target dependency.  Any other evaluated value is a
     target or file, as above.  An entry that evaluates to an empty string is

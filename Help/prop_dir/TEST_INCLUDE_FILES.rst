@@ -18,7 +18,7 @@ accessible at test phase.
   Include paths may use :manual:`generator expressions
   <cmake-generator-expressions(7)>`.  This is most useful with
   :prop_gbl:`multi-config generators <GENERATOR_IS_MULTI_CONFIG>`, where a
-  ``$<CONFIG>``-parameterized path selects a different script per
+  :genex:`$<CONFIG>`-parameterized path selects a different script per
   configuration.  On multi-config generators, an entry whose evaluated result
   varies by configuration is emitted under a per-configuration guard, so it is
   included only for the matching ``ctest -C <config>`` run.  A path whose result

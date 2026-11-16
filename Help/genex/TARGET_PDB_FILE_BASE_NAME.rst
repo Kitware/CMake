@@ -26,9 +26,9 @@ the name of a target.
   ``EXCLUDE``.  See the policy :policy:`CMP0202`.
 
 The base name corresponds to the target PDB file name (see
-``$<TARGET_PDB_FILE_NAME:tgt>``) without prefix and suffix, and, optionally,
-postfix.  For example, if the target file name is ``base_postfix.pdb``, the base
-name is
+:genex:`$<TARGET_PDB_FILE_NAME:tgt>`) without prefix and suffix, and,
+optionally, postfix.  For example, if the target file name is
+``base_postfix.pdb``, the base name is
 
   * ``base_postfix`` for ``$<TARGET_PDB_FILE_BASE_NAME:tgt>`` or
     ``$<TARGET_PDB_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.

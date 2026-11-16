@@ -227,9 +227,9 @@ configuration is used, and the empty string for all other configurations:
   $<$<CONFIG:Debug>:DEBUG_MODE>
 
 Boolean-like ``condition`` values other than ``1`` or ``0`` can be handled
-by wrapping them with the ``$<BOOL:...>`` generator expression:
+by wrapping them with the :genex:`$<BOOL:...>` generator expression:
 
-The ``$<BOOL:...>`` generator expression is often used when a ``condition``
+The :genex:`$<BOOL:...>` generator expression is often used when a ``condition``
 is provided by a CMake variable:
 
 .. code-block:: cmake
