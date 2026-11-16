@@ -7,6 +7,8 @@ PATH:CMAKE_PATH
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
+.. _GenEx PATH-CMAKE_PATH:
+
 .. code-block:: cmake
 
   $<PATH:CMAKE_PATH[,NORMALIZE],path...>

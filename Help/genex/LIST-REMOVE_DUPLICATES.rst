@@ -7,6 +7,8 @@ LIST:REMOVE_DUPLICATES
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
+.. _GenEx LIST-REMOVE_DUPLICATES:
+
 .. code-block:: cmake
 
   $<LIST:REMOVE_DUPLICATES,list>

@@ -7,6 +7,8 @@ LIST:JOIN
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
+.. _GenEx LIST-JOIN:
+
 .. code-block:: cmake
 
   $<LIST:JOIN,list,glue>

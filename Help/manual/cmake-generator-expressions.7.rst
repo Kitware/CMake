@@ -440,8 +440,6 @@ List Queries
 List Transformations
 ^^^^^^^^^^^^^^^^^^^^
 
-.. _GenEx LIST-JOIN:
-
 .. toctree::
    :maxdepth: 1
 
@@ -459,10 +457,6 @@ List Transformations
    /genex/JOIN {#genex:JOIN}
    /genex/REMOVE_DUPLICATES {#genex:REMOVE_DUPLICATES}
    /genex/FILTER {#genex:FILTER}
-
-.. _GenEx LIST-REMOVE_DUPLICATES:
-
-.. _GenEx LIST-FILTER:
 
 .. _GenEx List Ordering:
 
@@ -562,8 +556,6 @@ in cmake-style format.
 .. versionchanged:: 3.27
   All operations now accept a list of paths as argument. When a list of paths
   is specified, the operation will be applied to each path.
-
-.. _GenEx PATH-CMAKE_PATH:
 
 .. toctree::
    :maxdepth: 1
