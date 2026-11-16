@@ -1,6 +1,8 @@
 STRING:TIMESTAMP
 ----------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-generating-generator-expressions`
 
@@ -9,8 +11,6 @@ STRING:TIMESTAMP
 .. code-block:: cmake
 
   $<STRING:TIMESTAMP[,(UTC|format)]...>
-
-.. versionadded:: 4.3
 
 Produce a string representation of the current date and/or time.
 

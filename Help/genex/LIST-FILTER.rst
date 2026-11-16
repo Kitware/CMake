@@ -1,6 +1,8 @@
 LIST:FILTER
 -----------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-genex-list-transformations`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ LIST:FILTER
 .. code-block:: cmake
 
   $<LIST:FILTER,list,INCLUDE|EXCLUDE,regex>
-
-.. versionadded:: 3.27
 
 A list of items from the ``list`` which match (``INCLUDE``) or do not match
 (``EXCLUDE``) the regular expression ``regex``.  The result is the same as

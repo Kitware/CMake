@@ -1,6 +1,8 @@
 PATH:IS_PREFIX
 --------------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace:: :ref:`genex-family-genex-path-queries`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:IS_PREFIX
 .. code-block:: cmake
 
   $<PATH:IS_PREFIX[,NORMALIZE],path,input>
-
-.. versionadded:: 3.24
 
 Returns ``1`` if ``path`` is the prefix of ``input``, ``0`` otherwise.
 

@@ -1,6 +1,8 @@
 COMPILE_ONLY
 ------------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace::
    :ref:`genex-family-toolchain-and-language-expressions`
 
@@ -9,8 +11,6 @@ COMPILE_ONLY
 .. code-block:: cmake
 
   $<COMPILE_ONLY:...>
-
-.. versionadded:: 3.27
 
 Content of ``...``, when collecting :ref:`transitive compile properties
 <Transitive Compile Properties>`, otherwise it is the empty string.  This is

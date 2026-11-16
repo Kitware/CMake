@@ -1,6 +1,8 @@
 PATH:CMAKE_PATH
 ---------------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace:: :ref:`genex-family-genex-path-transformations`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:CMAKE_PATH
 .. code-block:: cmake
 
   $<PATH:CMAKE_PATH[,NORMALIZE],path...>
-
-.. versionadded:: 3.24
 
 Returns ``path``. If ``path`` is a native path, it is converted into a
 cmake-style path with forward-slashes (``/``). On Windows, the long filename

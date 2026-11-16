@@ -1,6 +1,8 @@
 STRING:RANDOM
 -------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-generating-generator-expressions`
 
@@ -9,8 +11,6 @@ STRING:RANDOM
 .. code-block:: cmake
 
   $<STRING:RANDOM[,(LENGTH:length|ALPHABET:alphabet|RANDOM_SEED:seed)]...>
-
-.. versionadded:: 4.3
 
 Produce a random string of ASCII characters. The possible options are:
 

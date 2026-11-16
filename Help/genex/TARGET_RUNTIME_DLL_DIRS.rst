@@ -1,6 +1,8 @@
 TARGET_RUNTIME_DLL_DIRS
 -----------------------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_RUNTIME_DLL_DIRS
 .. code-block:: cmake
 
   $<TARGET_RUNTIME_DLL_DIRS:tgt>
-
-.. versionadded:: 3.27
 
 List of the directories which contain the DLLs that the target depends on at
 runtime (see :genex:`TARGET_RUNTIME_DLLS`). This is determined by the locations

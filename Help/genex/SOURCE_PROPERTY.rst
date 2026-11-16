@@ -1,6 +1,8 @@
 SOURCE_PROPERTY
 ---------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace:: :ref:`genex-family-source-dependent-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ SOURCE_PROPERTY
 .. code-block:: cmake
 
   $<SOURCE_PROPERTY:src[,(DIRECTORY:dir|TARGET_DIRECTORY:target)],prop>
-
-.. versionadded:: 4.3
 
 Value of the property ``prop`` on the source file ``src``, or empty if the
 property is not set. An error will be raised if the source file is not known by

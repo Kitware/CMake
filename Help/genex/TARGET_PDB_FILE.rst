@@ -1,6 +1,8 @@
 TARGET_PDB_FILE
 ---------------
 
+.. versionadded:: 3.1
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_PDB_FILE
 .. code-block:: cmake
 
   $<TARGET_PDB_FILE:tgt>
-
-.. versionadded:: 3.1
 
 Full path to the linker generated program database file (.pdb) where ``tgt`` is
 the name of a target.

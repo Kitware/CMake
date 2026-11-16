@@ -1,6 +1,8 @@
 OBJCXX_COMPILER_FRONTEND_VARIANT
 --------------------------------
 
+.. versionadded:: 3.30
+
 .. |genex-family| replace::
    :ref:`genex-family-compiler-language-id-and-frontend-variant`
 
@@ -21,8 +23,6 @@ Without Arguments
 
   $<OBJCXX_COMPILER_FRONTEND_VARIANT>
 
-.. versionadded:: 3.30
-
 CMake's compiler frontend variant of the Objective-C++ compiler used.
 
 With Arguments
@@ -31,8 +31,6 @@ With Arguments
 .. code-block:: cmake
 
   $<OBJCXX_COMPILER_FRONTEND_VARIANT:compiler_ids>
-
-.. versionadded:: 3.30
 
 where ``compiler_ids`` is a comma-separated list. ``1`` if CMake's compiler
 frontend variant of the Objective-C++ compiler matches any one of the entries in

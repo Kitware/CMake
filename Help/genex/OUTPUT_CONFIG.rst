@@ -1,6 +1,8 @@
 OUTPUT_CONFIG
 -------------
 
+.. versionadded:: 3.20
+
 .. |genex-family| replace:: :ref:`genex-family-configuration-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ OUTPUT_CONFIG
 .. code-block:: cmake
 
   $<OUTPUT_CONFIG:...>
-
-.. versionadded:: 3.20
 
 Only valid in :command:`add_custom_command` and :command:`add_custom_target` as
 the outer-most generator expression in an argument. With the :generator:`Ninja

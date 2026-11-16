@@ -1,6 +1,8 @@
 TARGET_OBJECTS
 --------------
 
+.. versionadded:: 3.1
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_OBJECTS
 .. code-block:: cmake
 
   $<TARGET_OBJECTS:tgt[,SOURCE_FILES:source_file[;source_file]...]>
-
-.. versionadded:: 3.1
 
 List of objects resulting from building ``tgt``.  This would typically be used
 on :ref:`object library <Object Libraries>` targets.

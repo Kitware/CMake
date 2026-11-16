@@ -1,6 +1,8 @@
 TARGET_FILE_SUFFIX
 ------------------
 
+.. versionadded:: 3.15
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_FILE_SUFFIX
 .. code-block:: cmake
 
   $<TARGET_FILE_SUFFIX:tgt>
-
-.. versionadded:: 3.15
 
 Suffix of the ``tgt`` filename (extension such as ``.so`` or ``.exe``).
 

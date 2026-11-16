@@ -1,6 +1,8 @@
 PATH:REMOVE_EXTENSION
 ---------------------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace:: :ref:`genex-family-genex-path-transformations`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:REMOVE_EXTENSION
 .. code-block:: cmake
 
   $<PATH:REMOVE_EXTENSION[,LAST_ONLY],path...>
-
-.. versionadded:: 3.24
 
 Returns ``path`` with the :ref:`extension <EXTENSION_DEF>` removed, if any.
 

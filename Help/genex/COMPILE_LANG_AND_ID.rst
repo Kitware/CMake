@@ -1,6 +1,8 @@
 COMPILE_LANG_AND_ID
 -------------------
 
+.. versionadded:: 3.15
+
 .. |genex-family| replace::
    :ref:`genex-family-compiler-language-id-and-frontend-variant`
 
@@ -9,8 +11,6 @@ COMPILE_LANG_AND_ID
 .. code-block:: cmake
 
   $<COMPILE_LANG_AND_ID:language,compiler_ids>
-
-.. versionadded:: 3.15
 
 ``1`` when the language used for compilation unit matches ``language`` and
 CMake's compiler id of the ``language`` compiler matches any one of the

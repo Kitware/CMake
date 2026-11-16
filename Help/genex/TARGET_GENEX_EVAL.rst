@@ -1,6 +1,8 @@
 TARGET_GENEX_EVAL
 -----------------
 
+.. versionadded:: 3.12
+
 .. |genex-family| replace::
    :ref:`genex-family-multi-level-expression-evaluation`
 
@@ -9,8 +11,6 @@ TARGET_GENEX_EVAL
 .. code-block:: cmake
 
   $<TARGET_GENEX_EVAL:tgt,expr>
-
-.. versionadded:: 3.12
 
 Content of ``expr`` evaluated as a generator expression in the context of
 ``tgt`` target. This enables consumption of custom target properties that

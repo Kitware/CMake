@@ -1,6 +1,8 @@
 PATH:GET_*
 ----------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace:: :ref:`genex-family-path-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:GET_*
 .. code-block:: cmake
 
   $<PATH:GET_*,...>
-
-.. versionadded:: 3.24
 
 The following operations retrieve a different component or group of components
 from a path. See :ref:`Path Structure And Terminology` for the meaning of each

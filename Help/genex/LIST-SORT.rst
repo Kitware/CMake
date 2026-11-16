@@ -1,6 +1,8 @@
 LIST:SORT
 ---------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-genex-list-ordering`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -19,8 +21,6 @@ Built-in Options
 .. code-block:: cmake
 
   $<LIST:SORT,list[,(COMPARE:option|CASE:option|ORDER:option)]...>
-
-.. versionadded:: 3.27
 
 The ``list`` sorted according to the specified options.
 

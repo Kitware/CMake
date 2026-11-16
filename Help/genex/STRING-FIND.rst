@@ -1,6 +1,8 @@
 STRING:FIND
 -----------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-queries-generator-expressions`
 
@@ -9,8 +11,6 @@ STRING:FIND
 .. code-block:: cmake
 
   $<STRING:FIND,string[,FROM:(BEGIN|END)],substring>
-
-.. versionadded:: 4.3
 
 The position where the given ``substring`` was found in the supplied ``string``.
 If the ``substring`` is not found, a position of -1 is returned.

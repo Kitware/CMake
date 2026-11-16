@@ -1,6 +1,8 @@
 TARGET_NAME_IF_EXISTS
 ---------------------
 
+.. versionadded:: 3.12
+
 .. |genex-family| replace:: :ref:`genex-family-target-meta-data`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_NAME_IF_EXISTS
 .. code-block:: cmake
 
   $<TARGET_NAME_IF_EXISTS:tgt>
-
-.. versionadded:: 3.12
 
 The target name ``tgt`` if the target exists, an empty string otherwise.
 

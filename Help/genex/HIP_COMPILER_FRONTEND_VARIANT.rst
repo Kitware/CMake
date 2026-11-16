@@ -1,6 +1,8 @@
 HIP_COMPILER_FRONTEND_VARIANT
 -----------------------------
 
+.. versionadded:: 3.30
+
 .. |genex-family| replace::
    :ref:`genex-family-compiler-language-id-and-frontend-variant`
 
@@ -21,8 +23,6 @@ Without Arguments
 
   $<HIP_COMPILER_FRONTEND_VARIANT>
 
-.. versionadded:: 3.30
-
 CMake's compiler id of the HIP compiler used.
 
 With Arguments
@@ -31,8 +31,6 @@ With Arguments
 .. code-block:: cmake
 
   $<HIP_COMPILER_FRONTEND_VARIANT:compiler_ids>
-
-.. versionadded:: 3.30
 
 where ``compiler_ids`` is a comma-separated list. ``1`` if CMake's compiler
 frontend variant of the HIP compiler matches any one of the entries in

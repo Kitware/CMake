@@ -1,6 +1,8 @@
 FILE_SET_EXISTS
 ---------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace:: :ref:`genex-family-fileset-dependent-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ FILE_SET_EXISTS
 .. code-block:: cmake
 
   $<FILE_SET_EXISTS:fileset,TARGET:target>
-
-.. versionadded:: 4.3
 
 ``1`` if the ``fileset`` exists as a CMake file set attached to the ``target``,
 else ``0``.

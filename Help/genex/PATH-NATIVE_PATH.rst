@@ -1,6 +1,8 @@
 PATH:NATIVE_PATH
 ----------------
 
+.. versionadded:: 4.0
+
 .. |genex-family| replace:: :ref:`genex-family-genex-path-transformations`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:NATIVE_PATH
 .. code-block:: cmake
 
   $<PATH:NATIVE_PATH[,NORMALIZE],path...>
-
-.. versionadded:: 4.0
 
 Returns ``path`` converted into a native format with platform-specific slashes
 (``\`` on Windows hosts and ``/`` elsewhere).

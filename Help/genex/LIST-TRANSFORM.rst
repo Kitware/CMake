@@ -1,6 +1,8 @@
 LIST:TRANSFORM
 --------------
 
+.. versionadded:: 3.27
+
 .. genex:: $<LIST:TRANSFORM,list,ACTION[,SELECTOR]>
    :target: LIST
 
@@ -11,8 +13,6 @@ LIST:TRANSFORM
 .. code-block:: cmake
 
   $<LIST:TRANSFORM,list,ACTION[,SELECTOR]>
-
-.. versionadded:: 3.27
 
 The ``list`` transformed by applying an ``ACTION`` to all or, by specifying a
 ``SELECTOR``, to the selected list items.

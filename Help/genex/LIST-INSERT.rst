@@ -1,6 +1,8 @@
 LIST:INSERT
 -----------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-genex-list-transformations`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ LIST:INSERT
 .. code-block:: cmake
 
   $<LIST:INSERT,list,index,item,...>
-
-.. versionadded:: 3.27
 
 The ``list`` with the ``item`` (or multiple items) inserted at the specified
 ``index``.  Multiple items should be separated by commas.

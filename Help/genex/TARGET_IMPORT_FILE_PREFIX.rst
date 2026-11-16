@@ -1,6 +1,8 @@
 TARGET_IMPORT_FILE_PREFIX
 -------------------------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_IMPORT_FILE_PREFIX
 .. code-block:: cmake
 
   $<TARGET_IMPORT_FILE_PREFIX:tgt>
-
-.. versionadded:: 3.27
 
 Prefix of the import file of the target ``tgt``.
 

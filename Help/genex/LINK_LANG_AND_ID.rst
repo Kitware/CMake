@@ -1,6 +1,8 @@
 LINK_LANG_AND_ID
 ----------------
 
+.. versionadded:: 3.18
+
 .. |genex-family| replace:: :ref:`genex-family-link-language-and-id`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ LINK_LANG_AND_ID
 .. code-block:: cmake
 
   $<LINK_LANG_AND_ID:language,compiler_ids>
-
-.. versionadded:: 3.18
 
 ``1`` when the language used for link step matches ``language`` and the CMake's
 compiler id of the language linker matches any one of the comma-separated

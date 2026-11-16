@@ -1,6 +1,8 @@
 HOST_LINK
 ---------
 
+.. versionadded:: 3.18
+
 .. |genex-family| replace:: :ref:`genex-family-link-context`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ HOST_LINK
 .. code-block:: cmake
 
   $<HOST_LINK:list>
-
-.. versionadded:: 3.18
 
 Returns the list if it is the normal link step, an empty list otherwise. This
 expression is mainly useful when a device link step is also involved (see

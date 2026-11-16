@@ -1,6 +1,8 @@
 GENEX_EVAL
 ----------
 
+.. versionadded:: 3.12
+
 .. |genex-family| replace::
    :ref:`genex-family-multi-level-expression-evaluation`
 
@@ -9,8 +11,6 @@ GENEX_EVAL
 .. code-block:: cmake
 
   $<GENEX_EVAL:expr>
-
-.. versionadded:: 3.12
 
 Content of ``expr`` evaluated as a generator expression in the current context.
 This enables consumption of generator expressions whose evaluation results

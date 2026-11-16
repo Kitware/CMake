@@ -1,5 +1,8 @@
 IF
 --
+
+.. versionadded:: 3.8
+
 .. |genex-family| replace::
    :ref:`genex-family-conditional-generator-expressions`
 
@@ -8,8 +11,6 @@ IF
 .. code-block:: cmake
 
   $<IF:condition,true_string,false_string>
-
-.. versionadded:: 3.8
 
 Evaluates to ``true_string`` if ``condition`` is ``1``, or ``false_string`` if
 ``condition`` is ``0``.  Any other value for ``condition`` results in an error.

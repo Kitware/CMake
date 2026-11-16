@@ -1,6 +1,8 @@
 RULE_PROPERTY
 -------------
 
+.. versionadded:: 4.5
+
 .. |genex-family| replace:: :ref:`genex-family-generator-expression-reference`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ RULE_PROPERTY
 .. code-block:: cmake
 
   $<RULE_PROPERTY:rule,prop>
-
-.. versionadded:: 4.5
 
 Value of the property ``prop`` on the rule ``rule``, or empty if the property is
 not set. An error will be raised if the rule is not known by CMake.

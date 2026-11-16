@@ -1,6 +1,8 @@
 LINK_LIBRARY
 ------------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace::
    :ref:`genex-family-boolean-link-language-generator-expression`
 
@@ -19,8 +21,6 @@ Syntax
 .. code-block:: cmake
 
   $<LINK_LIBRARY:feature,library-list>
-
-.. versionadded:: 3.24
 
 Specify a set of libraries to link to a target, along with a ``feature`` which
 provides details about *how* they should be linked.  For example:

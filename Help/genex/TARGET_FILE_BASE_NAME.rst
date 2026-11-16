@@ -1,6 +1,8 @@
 TARGET_FILE_BASE_NAME
 ---------------------
 
+.. versionadded:: 3.15
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_FILE_BASE_NAME
 .. code-block:: cmake
 
   $<TARGET_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
-
-.. versionadded:: 3.15
 
 .. versionadded:: 4.2
   The ``POSTFIX`` option can be used to control the inclusion or not

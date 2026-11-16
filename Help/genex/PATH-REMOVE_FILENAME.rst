@@ -1,6 +1,8 @@
 PATH:REMOVE_FILENAME
 --------------------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace:: :ref:`genex-family-genex-path-transformations`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:REMOVE_FILENAME
 .. code-block:: cmake
 
   $<PATH:REMOVE_FILENAME,path...>
-
-.. versionadded:: 3.24
 
 Returns ``path`` with filename component (as returned by
 ``$<PATH:GET_FILENAME>``) removed. After removal, any trailing

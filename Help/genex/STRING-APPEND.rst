@@ -1,6 +1,8 @@
 STRING:APPEND
 -------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-transforming-generator-expressions`
 
@@ -9,7 +11,5 @@ STRING:APPEND
 .. code-block:: cmake
 
   $<STRING:APPEND,string,input[,input]...>
-
-.. versionadded:: 4.3
 
 Append all the ``input`` arguments to the ``string``.

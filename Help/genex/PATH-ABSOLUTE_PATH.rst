@@ -1,6 +1,8 @@
 PATH:ABSOLUTE_PATH
 ------------------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace:: :ref:`genex-family-genex-path-transformations`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:ABSOLUTE_PATH
 .. code-block:: cmake
 
   $<PATH:ABSOLUTE_PATH[,NORMALIZE],path...,base_directory>
-
-.. versionadded:: 3.24
 
 Returns ``path`` as absolute. If ``path`` is a relative path
 (``$<PATH:IS_RELATIVE>`` returns ``1``), it is evaluated relative to the given

@@ -1,6 +1,8 @@
 STRING:HEX
 ----------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-transforming-generator-expressions`
 
@@ -9,8 +11,6 @@ STRING:HEX
 .. code-block:: cmake
 
   $<STRING:HEX,string>
-
-.. versionadded:: 4.3
 
 Convert each byte in the ``string`` to its hexadecimal representation. Letters
 in the result (a through f) are in lowercase.

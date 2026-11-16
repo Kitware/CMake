@@ -1,6 +1,8 @@
 LINK_ONLY
 ---------
 
+.. versionadded:: 3.1
+
 .. |genex-family| replace:: :ref:`genex-family-link-context`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ LINK_ONLY
 .. code-block:: cmake
 
   $<LINK_ONLY:...>
-
-.. versionadded:: 3.1
 
 Content of ``...``, except while collecting usage requirements from
 :ref:`transitive compile properties <Transitive Compile Properties>`, in which

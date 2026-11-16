@@ -1,6 +1,8 @@
 ISPC_COMPILER_ID
 ----------------
 
+.. versionadded:: 3.19
+
 .. |genex-family| replace::
    :ref:`genex-family-compiler-language-id-and-frontend-variant`
 
@@ -21,8 +23,6 @@ Without Arguments
 
   $<ISPC_COMPILER_ID>
 
-.. versionadded:: 3.19
-
 CMake's compiler id of the ISPC compiler used.
 
 With Arguments
@@ -31,8 +31,6 @@ With Arguments
 .. code-block:: cmake
 
   $<ISPC_COMPILER_ID:compiler_ids>
-
-.. versionadded:: 3.19
 
 where ``compiler_ids`` is a comma-separated list. ``1`` if CMake's compiler id
 of the ISPC compiler matches any one of the entries in ``compiler_ids``,

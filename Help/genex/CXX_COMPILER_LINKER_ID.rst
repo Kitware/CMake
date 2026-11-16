@@ -1,6 +1,8 @@
 CXX_COMPILER_LINKER_ID
 ----------------------
 
+.. versionadded:: 4.2
+
 .. |genex-family| replace:: :ref:`genex-family-linker-id-and-frontend-variant`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -20,8 +22,6 @@ Without Arguments
 
   $<CXX_COMPILER_LINKER_ID>
 
-.. versionadded:: 4.2
-
 CMake's linker id of the C++ linker used.
 
 With Arguments
@@ -30,8 +30,6 @@ With Arguments
 .. code-block:: cmake
 
   $<CXX_COMPILER_LINKER_ID:linker_ids>
-
-.. versionadded:: 4.2
 
 where ``linker_ids`` is a comma-separated list. ``1`` if CMake's linker id of
 the C++ linker matches any one of the entries in ``linker_ids``, otherwise

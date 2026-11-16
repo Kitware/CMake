@@ -1,6 +1,8 @@
 LINK_GROUP
 ----------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace::
    :ref:`genex-family-boolean-link-language-generator-expression`
 
@@ -9,8 +11,6 @@ LINK_GROUP
 .. code-block:: cmake
 
   $<LINK_GROUP:feature,library-list>
-
-.. versionadded:: 3.24
 
 Specify a group of libraries to link to a target, along with a ``feature`` which
 defines how that group should be linked.  For example:

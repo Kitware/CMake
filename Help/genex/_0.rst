@@ -1,6 +1,8 @@
 $<_0>
 -----
 
+.. versionadded:: 4.5
+
 .. |genex-family| replace:: :ref:`genex-family-genex-bound-operands`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ $<_0>
 .. code-block:: cmake
 
   $<_0>
-
-.. versionadded:: 4.5
 
 ``$<_0>`` is the *bound operand* of the enclosing *binding operation*: a
 generator expression that evaluates a ``<body>`` once for each value it

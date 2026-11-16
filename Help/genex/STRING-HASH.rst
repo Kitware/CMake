@@ -1,6 +1,8 @@
 STRING:HASH
 -----------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-transforming-generator-expressions`
 
@@ -9,8 +11,6 @@ STRING:HASH
 .. code-block:: cmake
 
   $<STRING:HASH,string,ALGORITHM:algorithm>
-
-.. versionadded:: 4.3
 
 Compute a cryptographic hash of the ``string``. The supported algorithm names,
 as specified by the ``ALGORITHM:`` option are:

@@ -1,6 +1,8 @@
 TARGET_IMPORT_FILE
 ------------------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_IMPORT_FILE
 .. code-block:: cmake
 
   $<TARGET_IMPORT_FILE:tgt>
-
-.. versionadded:: 3.27
 
 Full path to the linker import file. On DLL platforms, it would be the ``.lib``
 file. For executables on AIX, and for shared libraries on macOS, it could be,

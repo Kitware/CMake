@@ -1,6 +1,8 @@
 $<_1>
 -----
 
+.. versionadded:: 4.5
+
 .. |genex-family| replace:: :ref:`genex-family-genex-bound-operands`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ $<_1>
 .. code-block:: cmake
 
   $<_1>
-
-.. versionadded:: 4.5
 
 The second *bound operand* of a *binding operation* that binds at least two
 operands, expanding to the second supplied value.

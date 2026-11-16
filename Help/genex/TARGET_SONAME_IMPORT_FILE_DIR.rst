@@ -1,6 +1,8 @@
 TARGET_SONAME_IMPORT_FILE_DIR
 -----------------------------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ TARGET_SONAME_IMPORT_FILE_DIR
 .. code-block:: cmake
 
   $<TARGET_SONAME_IMPORT_FILE_DIR:tgt>
-
-.. versionadded:: 3.27
 
 Directory of the import file with soname (``.3.tbd``).
 

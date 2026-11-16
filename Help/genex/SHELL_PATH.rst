@@ -1,6 +1,8 @@
 SHELL_PATH
 ----------
 
+.. versionadded:: 3.4
+
 .. |genex-family| replace:: :ref:`genex-family-path-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ SHELL_PATH
 .. code-block:: cmake
 
   $<SHELL_PATH:...>
-
-.. versionadded:: 3.4
 
 Content of ``...`` converted to shell path style. For example, slashes are
 converted to backslashes in Windows shells and drive letters are converted to

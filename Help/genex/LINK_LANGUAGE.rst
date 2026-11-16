@@ -1,6 +1,8 @@
 LINK_LANGUAGE
 -------------
 
+.. versionadded:: 3.18
+
 .. |genex-family| replace:: :ref:`genex-family-link-language-and-id`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -20,8 +22,6 @@ Without Arguments
 
   $<LINK_LANGUAGE>
 
-.. versionadded:: 3.18
-
 The link language of the target when evaluating link options. See :ref:`the
 related boolean expression <Boolean LINK_LANGUAGE Generator Expression>`
 ``$<LINK_LANGUAGE:languages>`` for notes about the portability of this generator
@@ -39,8 +39,6 @@ With Arguments
 .. code-block:: cmake
 
   $<LINK_LANGUAGE:languages>
-
-.. versionadded:: 3.18
 
 ``1`` when the language used for link step matches any of the comma-separated
 entries in ``languages``, otherwise ``0``.  This expression may be used to

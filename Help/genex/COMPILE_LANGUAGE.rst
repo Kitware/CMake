@@ -1,6 +1,8 @@
 COMPILE_LANGUAGE
 ----------------
 
+.. versionadded:: 3.3
+
 .. genex:: $<COMPILE_LANGUAGE:languages>
    :target: COMPILE_LANGUAGE:languages
 
@@ -24,8 +26,6 @@ Without Arguments
 
   $<COMPILE_LANGUAGE>
 
-.. versionadded:: 3.3
-
 The compile language of source files when evaluating compile options. See the
 related boolean expression :genex:`$<COMPILE_LANGUAGE:languages>
 <COMPILE_LANGUAGE:languages>` for notes about the portability of this generator
@@ -37,8 +37,6 @@ With Arguments
 .. code-block:: cmake
 
   $<COMPILE_LANGUAGE:languages>
-
-.. versionadded:: 3.3
 
 .. versionchanged:: 3.15
   Multiple languages can be specified for ``languages``.

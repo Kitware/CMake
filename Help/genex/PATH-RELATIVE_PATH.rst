@@ -1,6 +1,8 @@
 PATH:RELATIVE_PATH
 ------------------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace:: :ref:`genex-family-genex-path-transformations`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:RELATIVE_PATH
 .. code-block:: cmake
 
   $<PATH:RELATIVE_PATH,path...,base_directory>
-
-.. versionadded:: 3.24
 
 Returns ``path``, modified to make it relative to the ``base_directory``
 argument.

@@ -1,6 +1,8 @@
 PATH:HAS_*
 ----------
 
+.. versionadded:: 3.24
+
 .. |genex-family| replace:: :ref:`genex-family-genex-path-queries`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
@@ -8,8 +10,6 @@ PATH:HAS_*
 .. code-block:: cmake
 
   $<PATH:HAS_*,path>
-
-.. versionadded:: 3.24
 
 The following operations return ``1`` if the particular path component is
 present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
