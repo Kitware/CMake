@@ -12,8 +12,9 @@ PATH:ABSOLUTE_PATH
   $<PATH:ABSOLUTE_PATH[,NORMALIZE],path...,base_directory>
 
 Returns ``path`` as absolute. If ``path`` is a relative path
-(``$<PATH:IS_RELATIVE>`` returns ``1``), it is evaluated relative to the given
-base directory specified by ``base_directory`` argument.
+(:genex:`$<PATH:IS_RELATIVE> <PATH:IS_RELATIVE>` returns ``1``), it is
+evaluated relative to the given base directory specified by ``base_directory``
+argument.
 
 When the ``NORMALIZE`` option is specified, the path is :ref:`normalized
 <Normalization>` after the path computation.

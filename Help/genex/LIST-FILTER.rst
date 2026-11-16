@@ -7,8 +7,6 @@ LIST:FILTER
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-.. _GenEx LIST-FILTER:
-
 .. code-block:: cmake
 
   $<LIST:FILTER,list,INCLUDE|EXCLUDE,regex>

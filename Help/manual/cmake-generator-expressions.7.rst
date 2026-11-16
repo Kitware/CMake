@@ -302,13 +302,13 @@ the form of a generator expression.
 In each of the following string-related generator expressions, the ``string``
 must not contain any commas if that generator expression expects something to
 be provided after the ``string``.  For example, the expression
-``$<STRING:FIND,string,value>`` requires a ``value`` after the ``string``.
-Since a comma is used to separate the ``string`` and the ``value``, the
-``string`` cannot itself contain a comma.  This restriction does not apply to
-the :command:`string` command, it is specific to the string-handling generator
-expressions only. The :genex:`$<COMMA>` generator expression can be used to
-specify a comma as part of the arguments of the string-related generator
-expressions.
+:genex:`$<STRING:FIND,string,value> <STRING:FIND>` requires a ``value``
+after the ``string``. Since a comma is used to separate the ``string`` and the
+``value``, the ``string`` cannot itself contain a comma.  This restriction
+does not apply to the :command:`string` command, it is specific to the
+string-handling generator expressions only. The :genex:`$<COMMA>` generator
+expression can be used to specify a comma as part of the arguments of the
+string-related generator expressions.
 
 .. _`String Comparisons Generator Expressions`:
 
@@ -402,11 +402,11 @@ the form of a generator expression.
 In each of the following list-related generator expressions, the ``list``
 must not contain any commas if that generator expression expects something to
 be provided after the ``list``.  For example, the expression
-``$<LIST:FIND,list,value>`` requires a ``value`` after the ``list``.
-Since a comma is used to separate the ``list`` and the ``value``, the ``list``
-cannot itself contain a comma.  This restriction does not apply to the
-:command:`list` command, it is specific to the list-handling generator
-expressions only.
+:genex:`$<LIST:FIND,list,value> <LIST:FIND>` requires a ``value`` after
+the ``list``. Since a comma is used to separate the ``list`` and the
+``value``, the ``list`` cannot itself contain a comma.  This restriction does
+not apply to the :command:`list` command, it is specific to the list-handling
+generator expressions only.
 
 .. _GenEx List Comparisons:
 
@@ -494,7 +494,7 @@ Most of the expressions in this section are closely associated with the
 the form of a generator expression.
 
 For all generator expressions in this section, paths are expected to be in
-cmake-style format. The :cref:`$\<PATH:CMAKE_PATH\> <GenEx PATH-CMAKE_PATH>`
+cmake-style format. The :genex:`$<PATH:CMAKE_PATH> <PATH:CMAKE_PATH>`
 generator expression can be used to convert a native path to a cmake-style
 one.
 

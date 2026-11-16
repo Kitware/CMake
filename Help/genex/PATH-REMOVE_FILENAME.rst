@@ -12,7 +12,7 @@ PATH:REMOVE_FILENAME
   $<PATH:REMOVE_FILENAME,path...>
 
 Returns ``path`` with filename component (as returned by
-``$<PATH:GET_FILENAME>``) removed. After removal, any trailing
-``directory-separator`` is left alone, if present.
+:genex:`$<PATH:GET_FILENAME> <PATH:GET_FILENAME>`) removed. After
+removal, any trailing ``directory-separator`` is left alone, if present.
 
 See :command:`cmake_path(REMOVE_FILENAME)` for more details.
