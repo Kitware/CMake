@@ -3019,6 +3019,8 @@ std::string InitLogicalWorkingDirectory()
       cmSystemTools::FileIsFullPath(pwd)) {
     std::string const pwd_real = cmSystemTools::GetRealPath(pwd);
     if (pwd_real == cwd) {
+      // Although cmSystemToolsLogicalWorkingDirectory is not yet initialized,
+      // ToNormalizedPathOnDisk does not use it when given an absolute path.
       cwd = cmSystemTools::ToNormalizedPathOnDisk(std::move(pwd));
     }
   }
@@ -3346,11 +3348,15 @@ std::string const& cmSystemTools::GetLogicalWorkingDirectory()
   return cmSystemToolsLogicalWorkingDirectory;
 }
 
-cmsys::Status cmSystemTools::SetLogicalWorkingDirectory(std::string const& lwd)
+cmsys::Status cmSystemTools::SetLogicalWorkingDirectory(std::string lwd)
 {
   cmsys::Status status = cmSystemTools::ChangeDirectory(lwd);
   if (status) {
-    cmSystemToolsLogicalWorkingDirectory = lwd;
+    // Although the process working directory has already changed,
+    // ToNormalizedPathOnDisk uses cmSystemToolsLogicalWorkingDirectory.
+    // Resolve a relative LWD with respect to the previous LWD.
+    cmSystemToolsLogicalWorkingDirectory =
+      cmSystemTools::ToNormalizedPathOnDisk(std::move(lwd));
   }
   return status;
 }
