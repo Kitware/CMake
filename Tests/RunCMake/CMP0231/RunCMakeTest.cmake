@@ -1,8 +1,14 @@
 include(RunCMake)
 
-# The policy only affects the MSVC compiler, which the test is only added for.
-# Compilers older than Visual Studio 2017 (19.10) have no permissive flags.
-if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
+# The policy only affects the MSVC compiler and clang-cl, which the test is
+# only added for.  Compilers older than Visual Studio 2017 (19.10) and
+# clang-cl older than 13 have no permissive flags.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(is_clang_cl 1)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13.0)
+    return()
+  endif()
+elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
   return()
 endif()
 
@@ -24,12 +30,38 @@ function(run_cmp0231 name policy std ext mode)
   if(policy)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0231=${policy})
   endif()
+  if(CMAKE_CXX_COMPILER)
+    list(APPEND RunCMake_TEST_OPTIONS
+      "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+  endif()
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${name}-build")
   run_cmake(${name})
 
   set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
   run_cmake_command(${name}-build ${CMAKE_COMMAND} --build . --config Debug)
 endfunction()
+
+# clang-cl keeps operator keywords enabled unless /permissive is passed.
+# CXX_EXTENSIONS OFF matches that default.  CXX_EXTENSIONS ON adds
+# -permissive.  The per-target cases use extensions ON so the two policies
+# select different modes.
+if(is_clang_cl)
+  if(CMAKE_CXX_STANDARD_DEFAULT)
+    run_cmp0231(CMP0231-NEW-ext-off-default "NEW" ${CMAKE_CXX_STANDARD_DEFAULT} OFF NON_PERMISSIVE)
+  endif()
+  run_cmp0231(CMP0231-OLD-ext-off-std17 "OLD" 17 OFF NON_PERMISSIVE)
+  run_cmp0231(CMP0231-WARN-ext-off-std17 "" 17 OFF NON_PERMISSIVE)
+  run_cmp0231(CMP0231-NEW-ext-off-std17 "NEW" 17 OFF NON_PERMISSIVE)
+  run_cmp0231(CMP0231-NEW-ext-on-std17 "NEW" 17 ON PERMISSIVE)
+  run_cmp0231(CMP0231-per-target-NEW-then-OLD "NEW" 17 ON PERMISSIVE
+    -DCMP0231_LATE_POLICY=OLD -DCMP0231_LATE_EXPECT=NON_PERMISSIVE)
+  run_cmp0231(CMP0231-per-target-OLD-then-NEW "OLD" 17 ON NON_PERMISSIVE
+    -DCMP0231_LATE_POLICY=NEW -DCMP0231_LATE_EXPECT=PERMISSIVE)
+  run_cmp0231(CMP0231-NEW-ext-off-std20 "NEW" 20 OFF NON_PERMISSIVE)
+  run_cmp0231(CMP0231-NEW-ext-on-std20 "NEW" 20 ON PERMISSIVE)
+  return()
+endif()
 
 # Compiler default standard (C++14 for MSVC).  CMP0128 leaves out its /std:
 # flag, so /permissive- has to be added on its own.

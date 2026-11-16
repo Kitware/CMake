@@ -1,15 +1,10 @@
 #if defined(EXPECT_PERMISSIVE)
-// Compiles only in permissive mode: /permissive- rejects binding
-// a temporary to a non-const lvalue reference.
-struct S
-{
-};
-
-S& temporary = S();
-
+// Compiles only in permissive mode: /permissive- makes the alternative
+// tokens keywords, so they cannot be used as identifiers.
 int main()
 {
-  return 0;
+  int and = 0;
+  return and;
 }
 #elif defined(EXPECT_NON_PERMISSIVE)
 // Compiles only in non-permissive mode: /permissive- makes the alternative

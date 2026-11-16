@@ -27,10 +27,16 @@ the request needs a different one:
   modes do so as well.  The flag is placed after the ``/std:`` flag so it
   overrides that implication.
 
-No permissive flag is added when the compiler mode already matches.
-Compilers older than Visual Studio 2017 have neither flag.
+For ``clang-cl`` 13 and above, every standard is non-permissive by default, so
+:prop_tgt:`CXX_EXTENSIONS` ``ON`` adds ``-permissive`` and ``OFF`` adds
+no flag.
 
-This policy has no effect on C or on compilers whose id is not ``MSVC``.
+No permissive flag is added when the compiler mode already matches.
+Compilers older than Visual Studio 2017 and ``clang-cl`` older than 13 have
+neither flag.
+
+This policy has no effect on C or on compilers other than ``MSVC`` and
+``clang-cl``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
