@@ -569,9 +569,8 @@ public:
 
   static std::string const& GetLogicalWorkingDirectory();
 
-  /** The logical working directory may contain symlinks but must not
-      contain any '../' path components.  */
-  static cmsys::Status SetLogicalWorkingDirectory(std::string const& lwd);
+  /** The logical working directory preserves symlinks.  */
+  static cmsys::Status SetLogicalWorkingDirectory(std::string lwd);
 
   /** Try to guess the soname of a shared library.  */
   static bool GuessLibrarySOName(std::string const& fullPath,
