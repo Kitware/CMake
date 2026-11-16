@@ -11,6 +11,5 @@ PATH:HAS_STEM
 
   $<PATH:HAS_STEM,path>
 
-The following operations return ``1`` if the particular path component is
-present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
-meaning of each path component.
+Returns ``1`` if ``path`` has a stem, ``0`` otherwise.  The stem is the part
+of the filename before its extension.

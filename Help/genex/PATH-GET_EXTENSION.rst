@@ -11,9 +11,11 @@ PATH:GET_EXTENSION
 
   $<PATH:GET_EXTENSION[,LAST_ONLY],path...>
 
-The following operations retrieve a different component or group of components
-from a path. See :ref:`Path Structure And Terminology` for the meaning of each
-path component.
+Returns the extension of the filename in ``path``. By default, the extension
+starts at the left-most period and includes that period. With ``LAST_ONLY``,
+it starts at the right-most period. A leading period is ignored, and ``.``
+and ``..`` have no extension. If there is no extension, an empty string is
+returned.
 
 .. versionchanged:: 3.27
   CMake now accepts a list of paths as argument. When a list of paths is

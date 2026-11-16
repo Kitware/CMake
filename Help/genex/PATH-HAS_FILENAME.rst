@@ -11,6 +11,6 @@ PATH:HAS_FILENAME
 
   $<PATH:HAS_FILENAME,path>
 
-The following operations return ``1`` if the particular path component is
-present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
-meaning of each path component.
+Returns ``1`` if ``path`` has a filename, ``0`` otherwise. A path has a
+filename when it does not end in a directory separator; the filename is its
+last item name.

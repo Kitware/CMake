@@ -11,6 +11,5 @@ PATH:HAS_RELATIVE_PART
 
   $<PATH:HAS_RELATIVE_PART,path>
 
-The following operations return ``1`` if the particular path component is
-present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
-meaning of each path component.
+Returns ``1`` if ``path`` has a relative part, ``0`` otherwise. The relative
+part is the path with its root path removed.

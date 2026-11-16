@@ -11,6 +11,6 @@ PATH:HAS_ROOT_NAME
 
   $<PATH:HAS_ROOT_NAME,path>
 
-The following operations return ``1`` if the particular path component is
-present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
-meaning of each path component.
+Returns ``1`` if ``path`` has a root name, ``0`` otherwise. A root name
+identifies the filesystem root when a filesystem has multiple roots, such as
+``C:`` or ``//myserver``.

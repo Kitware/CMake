@@ -11,6 +11,6 @@ PATH:HAS_ROOT_DIRECTORY
 
   $<PATH:HAS_ROOT_DIRECTORY,path>
 
-The following operations return ``1`` if the particular path component is
-present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
-meaning of each path component.
+Returns ``1`` if ``path`` has a root directory, ``0`` otherwise. A root
+directory is the separator at the beginning of a path that indicates an
+absolute path.

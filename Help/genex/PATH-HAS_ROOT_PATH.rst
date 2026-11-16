@@ -11,9 +11,9 @@ PATH:HAS_ROOT_PATH
 
   $<PATH:HAS_ROOT_PATH,path>
 
-The following operations return ``1`` if the particular path component is
-present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
-meaning of each path component.
+Returns ``1`` if ``path`` has a root path, ``0`` otherwise. The root path is
+the root name followed by the root directory separator; either component may
+be empty.
 
 The result is true only if at least one of the root name or root directory
 separator is present.

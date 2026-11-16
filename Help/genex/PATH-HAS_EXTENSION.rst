@@ -11,6 +11,6 @@ PATH:HAS_EXTENSION
 
   $<PATH:HAS_EXTENSION,path>
 
-The following operations return ``1`` if the particular path component is
-present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
-meaning of each path component.
+Returns ``1`` if ``path`` has an extension, ``0`` otherwise. An extension
+starts at the left-most period in the filename and includes that period. A
+leading period is ignored, and ``.`` and ``..`` have no extension.

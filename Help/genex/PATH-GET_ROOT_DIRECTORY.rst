@@ -11,9 +11,9 @@ PATH:GET_ROOT_DIRECTORY
 
   $<PATH:GET_ROOT_DIRECTORY,path...>
 
-The following operations retrieve a different component or group of components
-from a path. See :ref:`Path Structure And Terminology` for the meaning of each
-path component.
+Returns the root directory separator of ``path``. This separator occurs at
+the beginning of an absolute path, after any root name. If ``path`` has no
+root directory separator, an empty string is returned.
 
 .. versionchanged:: 3.27
   CMake now accepts a list of paths as argument. When a list of paths is

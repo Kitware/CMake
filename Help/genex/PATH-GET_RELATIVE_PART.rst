@@ -11,9 +11,8 @@ PATH:GET_RELATIVE_PART
 
   $<PATH:GET_RELATIVE_PART,path...>
 
-The following operations retrieve a different component or group of components
-from a path. See :ref:`Path Structure And Terminology` for the meaning of each
-path component.
+Returns the relative part of ``path``, which is the path with its root path
+removed. If the path has no relative part, an empty string is returned.
 
 .. versionchanged:: 3.27
   CMake now accepts a list of paths as argument. When a list of paths is

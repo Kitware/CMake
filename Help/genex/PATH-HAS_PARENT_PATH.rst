@@ -11,9 +11,8 @@ PATH:HAS_PARENT_PATH
 
   $<PATH:HAS_PARENT_PATH,path>
 
-The following operations return ``1`` if the particular path component is
-present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
-meaning of each path component.
+Returns ``1`` if ``path`` has a parent path, ``0`` otherwise. The parent path
+is the path with its filename removed.
 
 Note that the root directory is also considered to have a parent, which will
 be itself.  The result is true except if the path consists of just a

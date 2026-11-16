@@ -11,9 +11,9 @@ PATH:GET_ROOT_NAME
 
   $<PATH:GET_ROOT_NAME,path...>
 
-The following operations retrieve a different component or group of components
-from a path. See :ref:`Path Structure And Terminology` for the meaning of each
-path component.
+Returns the root name of ``path``. A root name identifies the filesystem root
+on filesystems with multiple roots, such as ``C:`` or ``//myserver``. If the
+path has no root name, an empty string is returned.
 
 .. versionchanged:: 3.27
   CMake now accepts a list of paths as argument. When a list of paths is

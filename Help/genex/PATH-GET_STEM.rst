@@ -11,9 +11,10 @@ PATH:GET_STEM
 
   $<PATH:GET_STEM,path...>
 
-The following operations retrieve a different component or group of components
-from a path. See :ref:`Path Structure And Terminology` for the meaning of each
-path component.
+Returns the stem of the filename in ``path``. The stem is the part of the
+filename before its extension. With ``LAST_ONLY``, the extension is taken to
+start at the right-most period instead of the left-most. If the path has no
+filename, an empty string is returned.
 
 .. versionchanged:: 3.27
   CMake now accepts a list of paths as argument. When a list of paths is
