@@ -515,6 +515,9 @@ Path Comparisons
 Path Queries
 ^^^^^^^^^^^^
 
+.. genex:: $<PATH:*>
+   :target: PATH
+
 These expressions provide the generation-time capabilities equivalent to the
 :ref:`Query <Path Query>` options of the :command:`cmake_path` command.
 All paths are expected to be in cmake-style format.
@@ -522,7 +525,14 @@ All paths are expected to be in cmake-style format.
 .. toctree::
    :maxdepth: 1
 
-   /genex/PATH-HAS_ {#genex:PATH}
+   /genex/PATH-HAS_EXTENSION
+   /genex/PATH-HAS_FILENAME
+   /genex/PATH-HAS_PARENT_PATH
+   /genex/PATH-HAS_RELATIVE_PART
+   /genex/PATH-HAS_ROOT_DIRECTORY
+   /genex/PATH-HAS_ROOT_NAME
+   /genex/PATH-HAS_ROOT_PATH
+   /genex/PATH-HAS_STEM
    /genex/PATH-IS_ABSOLUTE
    /genex/PATH-IS_RELATIVE
    /genex/PATH-IS_PREFIX
@@ -536,10 +546,21 @@ These expressions provide the generation-time capabilities equivalent to the
 :ref:`Decomposition <Path Decomposition>` options of the :command:`cmake_path`
 command.  All paths are expected to be in cmake-style format.
 
+The following operations retrieve a different component or group of components
+from a path. See :ref:`Path Structure And Terminology` for the meaning of each
+path component.
+
 .. toctree::
    :maxdepth: 1
 
-   /genex/PATH-GET_
+   /genex/PATH-GET_EXTENSION
+   /genex/PATH-GET_FILENAME
+   /genex/PATH-GET_PARENT_PATH
+   /genex/PATH-GET_RELATIVE_PART
+   /genex/PATH-GET_ROOT_DIRECTORY
+   /genex/PATH-GET_ROOT_NAME
+   /genex/PATH-GET_ROOT_PATH
+   /genex/PATH-GET_STEM
 
 .. _GenEx Path Transformations:
 
