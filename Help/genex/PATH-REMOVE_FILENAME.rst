@@ -16,3 +16,7 @@ Returns ``path`` with filename component (as returned by
 removal, any trailing ``directory-separator`` is left alone, if present.
 
 See :command:`cmake_path(REMOVE_FILENAME)` for more details.
+
+.. versionchanged:: 3.27
+  CMake now accepts a list of paths as argument. When a list of paths is
+   specified, the operation will be applied to each path.

@@ -15,3 +15,7 @@ Returns ``path``, modified to make it relative to the ``base_directory``
 argument.
 
 See :command:`cmake_path(RELATIVE_PATH)` for more details.
+
+.. versionchanged:: 3.27
+  CMake now accepts a list of paths as argument. When a list of paths is
+   specified, the operation will be applied to each path.

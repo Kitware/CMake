@@ -14,3 +14,7 @@ PATH:REMOVE_EXTENSION
 Returns ``path`` with the :ref:`extension <EXTENSION_DEF>` removed, if any.
 
 See :command:`cmake_path(REMOVE_EXTENSION)` for more details.
+
+.. versionchanged:: 3.27
+  CMake now accepts a list of paths as argument. When a list of paths is
+   specified, the operation will be applied to each path.

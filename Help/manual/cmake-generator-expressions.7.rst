@@ -574,10 +574,6 @@ These expressions provide the generation-time capabilities equivalent to the
 options of the :command:`cmake_path` command.  All paths are expected to be
 in cmake-style format.
 
-.. versionchanged:: 3.27
-  All operations now accept a list of paths as argument. When a list of paths
-  is specified, the operation will be applied to each path.
-
 .. toctree::
    :maxdepth: 1
 

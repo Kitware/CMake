@@ -13,3 +13,7 @@ PATH:NORMAL_PATH
 
 Returns ``path`` normalized according to the steps described in
 :ref:`Normalization`.
+
+.. versionchanged:: 3.27
+  CMake now accepts a list of paths as argument. When a list of paths is
+   specified, the operation will be applied to each path.

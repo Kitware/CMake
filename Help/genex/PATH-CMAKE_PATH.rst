@@ -17,3 +17,7 @@ marker is taken into account.
 
 When the ``NORMALIZE`` option is specified, the path is :ref:`normalized
 <Normalization>` after the conversion.
+
+.. versionchanged:: 3.27
+  CMake now accepts a list of paths as argument. When a list of paths is
+   specified, the operation will be applied to each path.

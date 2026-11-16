@@ -16,3 +16,7 @@ Returns all the ``input`` arguments appended to ``path`` using ``/`` as the
 be discarded.
 
 See :command:`cmake_path(APPEND)` for more details.
+
+.. versionchanged:: 3.27
+  CMake now accepts a list of paths as argument. When a list of paths is
+   specified, the operation will be applied to each path.
