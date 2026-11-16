@@ -545,6 +545,12 @@ instrument(test-snippet-collision BUILD TEST
   CHECK_SCRIPT check-test-snippet-collision.cmake
 )
 unset(ENV{CTEST_PARALLEL_LEVEL})
+instrument(invocation-ids BUILD INSTALL INSTALL_PARALLEL TEST
+  CHECK_SCRIPT check-data-dir.cmake
+)
+instrument(invocation-ids BUILD INSTALL INSTALL_PARALLEL TEST PRESERVE_DATA
+  CHECK_SCRIPT check-invocation-ids.cmake
+)
 instrument(no-query
   BUILD INSTALL TEST
   CHECK_SCRIPT check-data-dir.cmake

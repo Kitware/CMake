@@ -43,6 +43,7 @@
 #include "cmTargetTypes.h"
 #include "cmTimestamp.h"
 #include "cmUVProcessChain.h"
+#include "cmUuid.h"
 #include "cmValue.h"
 #include "cmake.h"
 
@@ -81,6 +82,14 @@ constexpr SnippetTypeInfo snippetTypes[] = {
   { SnippetType::CTest, "ctest"_s, CDashSnippetType::Build },
   { SnippetType::CMakeInstall, "cmakeInstall"_s, CDashSnippetType::Build },
 };
+
+std::string NewInvocationID()
+{
+  cmUuid uuid;
+  return uuid.FromSha1(
+    std::vector<unsigned char>(16, 0),
+    cmStrCat(uv_hrtime(), '-', cmSystemTools::RandomNumber()));
+}
 
 }
 
@@ -629,6 +638,9 @@ std::string cmInstrumentation::InstrumentTest(
   std::string command_str = cmStrCat(command, ' ', GetCommandStr(args));
   root["command"] = command_str;
   root["role"] = SnippetTypeToString(SnippetType::Test);
+  if (!this->ctestID.empty()) {
+    root["ctestID"] = this->ctestID;
+  }
   root["testName"] = name;
   root["result"] = static_cast<Json::Value::Int64>(result);
   root["config"] = config;
@@ -735,6 +747,36 @@ int cmInstrumentation::InstrumentCommand(
       break;
   }
 
+  switch (command_type) {
+    case SnippetType::CMakeBuild:
+      // Block the instrumentation build daemon from spawning during this
+      // build. This lock will be released when the process exits at the end
+      // of the build.
+      root["buildID"] = Json::nullValue;
+      if (this->LockBuildDaemon()) {
+        root["buildID"] = this->WriteBuildID();
+      }
+      break;
+    case SnippetType::Compile:
+    case SnippetType::Link:
+    case SnippetType::Custom: {
+      std::string id = this->GetBuildID();
+      root["buildID"] =
+        id.empty() ? Json::Value(Json::nullValue) : Json::Value(id);
+      break;
+    }
+    case SnippetType::CTest:
+      this->ctestID = NewInvocationID();
+      root["ctestID"] = this->ctestID;
+      break;
+    case SnippetType::CMakeInstall:
+      this->installID = NewInvocationID();
+      root["installID"] = this->installID;
+      break;
+    default:
+      break;
+  }
+
   // Check existing compile trace json to check for modifications
   std::string compileTraceFile;
   if (this->HasOption(cmInstrumentationQuery::Option::CompileTrace) &&
@@ -762,6 +804,16 @@ int cmInstrumentation::InstrumentCommand(
   // Execute Command
   cmInstrumentation::CommandResult callbackResult = callback();
   int ret = callbackResult.ExitCode;
+  switch (command_type) {
+    case SnippetType::CTest:
+      this->ctestID.clear();
+      break;
+    case SnippetType::CMakeInstall:
+      this->installID.clear();
+      break;
+    default:
+      break;
+  }
   if (this->HasOption(cmInstrumentationQuery::Option::CaptureOutput)) {
     if (callbackResult.StdOut) {
       root["stdout"] = *callbackResult.StdOut;
@@ -978,11 +1030,13 @@ int cmInstrumentation::SpawnBuildDaemon()
   uv_disable_stdio_inheritance();
 
   // preBuild Hook
-  if (this->LockBuildDaemon()) {
-    // Release lock before spawning the build daemon, to prevent blocking it.
-    this->buildLock.Release();
-    this->CollectTimingData(cmInstrumentationQuery::Hook::PreBuild);
+  if (!this->LockBuildDaemon()) {
+    return 0;
   }
+  this->WriteBuildID();
+  // Release lock before spawning the build daemon, to prevent blocking it.
+  this->buildLock.Release();
+  this->CollectTimingData(cmInstrumentationQuery::Hook::PreBuild);
 
   // postBuild Hook
   auto ppid = uv_os_getppid();
@@ -1004,6 +1058,23 @@ bool cmInstrumentation::LockBuildDaemon()
 {
   // 0 = non-blocking, 0s timeout
   return this->AcquireLock(".build.lock", this->buildLock, 0);
+}
+
+std::string cmInstrumentation::WriteBuildID()
+{
+  std::string id = NewInvocationID();
+  cmGeneratedFileStream stream(cmStrCat(this->timingDirv1, "/.build.id"_s));
+  stream << id << '\n';
+  return id;
+}
+
+std::string cmInstrumentation::GetBuildID()
+{
+  std::string path = cmStrCat(this->timingDirv1, "/.build.id"_s);
+  cmsys::ifstream stream(path.c_str());
+  std::string id;
+  std::getline(stream, id);
+  return id;
 }
 
 // Prevent multiple index processes from claiming snippets simultaneously
@@ -1056,7 +1127,8 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
     [waitForBuild]() -> cmInstrumentation::CommandResult {
       return { waitForBuild(), cm::nullopt, cm::nullopt, cm::nullopt };
     },
-    cm::nullopt, cm::nullopt, LoadQueriesAfter::Yes);
+    std::map<std::string, std::string>{ { "buildID", this->GetBuildID() } },
+    cm::nullopt, LoadQueriesAfter::Yes);
   this->buildLock.Release();
   this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
   return ret;

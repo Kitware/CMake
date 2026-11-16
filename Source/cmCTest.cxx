@@ -2803,7 +2803,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
 
   handler.SetVerbose(this->Impl->Verbose);
 
-  cmInstrumentation instrumentation(this->GetBinaryDir());
+  cmInstrumentation& instrumentation = this->GetInstrumentation();
   auto processHandler = [&handler]() -> int {
     return handler.ProcessHandler() != 0 ? cmCTest::TEST_ERRORS : 0;
   };
