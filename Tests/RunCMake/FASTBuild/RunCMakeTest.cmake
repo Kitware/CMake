@@ -13,6 +13,20 @@ run_cmake(UnitySubdirs)
 run_cmake(UnitySubdirsIsolate)
 run_cmake(DisableCaching)
 run_cmake(DisableDistribution)
+run_cmake(CachePlugin)
+run_cmake(CacheModeInvalid)
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CacheMode-build)
+  # FASTBuild does not cache objects compiled by MSVC with /Zi,
+  # which the default Debug configuration uses.
+  set(RunCMake_TEST_OPTIONS
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_FASTBUILD_CACHE_MODE=rw
+    "-DCMAKE_FASTBUILD_CACHE_PATH=${RunCMake_TEST_BINARY_DIR}/cache")
+  run_cmake(CacheMode)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(CacheMode-build ${CMAKE_COMMAND} --build .)
+endblock()
 run_cmake(SetCompilerProps)
 run_cmake(ImportedObjectLib)
 run_cmake(InterfaceWithPrivateSource)

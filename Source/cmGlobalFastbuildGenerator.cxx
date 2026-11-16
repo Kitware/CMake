@@ -67,6 +67,10 @@ constexpr auto FASTBUILD_ENV_OVERRIDES = "CMAKE_FASTBUILD_ENV_OVERRIDES";
 constexpr auto FASTBUILD_VERBOSE_GENERATOR =
   "CMAKE_FASTBUILD_VERBOSE_GENERATOR";
 constexpr auto FASTBUILD_CACHE_PATH = "CMAKE_FASTBUILD_CACHE_PATH";
+constexpr auto FASTBUILD_CACHE_PLUGIN = "CMAKE_FASTBUILD_CACHE_PLUGIN";
+constexpr auto FASTBUILD_CACHE_PLUGIN_CONFIG =
+  "CMAKE_FASTBUILD_CACHE_PLUGIN_CONFIG";
+constexpr auto FASTBUILD_CACHE_MODE = "CMAKE_FASTBUILD_CACHE_MODE";
 // Compiler settings.
 constexpr auto FASTBUILD_COMPILER_EXTRA_FILES =
   "CMAKE_FASTBUILD_COMPILER_EXTRA_FILES";
@@ -95,6 +99,46 @@ static std::map<std::string, std::string> const compilerIdToFastbuildFamily = {
 
 static std::set<std::string> const supportedLanguages = { "C", "CXX", "CUDA",
                                                           "OBJC", "OBJCXX" };
+
+namespace {
+// The values of CMAKE_FASTBUILD_CACHE_MODE, those of FASTBuild's
+// FASTBUILD_CACHE_MODE environment variable.
+enum class FastbuildCacheMode
+{
+  Read,
+  Write,
+  ReadWrite,
+};
+
+cm::optional<FastbuildCacheMode> ParseFastbuildCacheMode(
+  std::string const& value)
+{
+  if (value == "r") {
+    return FastbuildCacheMode::Read;
+  }
+  if (value == "w") {
+    return FastbuildCacheMode::Write;
+  }
+  if (value == "rw") {
+    return FastbuildCacheMode::ReadWrite;
+  }
+  return cm::nullopt;
+}
+
+// The FASTBuild command-line flag that uses the cache in a mode.
+char const* FastbuildCacheModeFlag(FastbuildCacheMode mode)
+{
+  switch (mode) {
+    case FastbuildCacheMode::Read:
+      return "-cacheread";
+    case FastbuildCacheMode::Write:
+      return "-cachewrite";
+    case FastbuildCacheMode::ReadWrite:
+      return "-cache";
+  }
+  return "";
+}
+}
 
 template <class T>
 FastbuildAliasNode generateAlias(std::string const& name, char const* postfix,
@@ -372,6 +416,18 @@ cmGlobalFastbuildGenerator::GenerateBuildCommand(
   // Push in the make options
   makeCommand.Add(makeOptions.begin(), makeOptions.end());
 
+  // Use the cache as CMAKE_FASTBUILD_CACHE_MODE says.  A build runs without
+  // the project's makefiles, so read it from the cache.
+  if (isInTryCompile == BuildTryCompile::No) {
+    if (cmValue const value =
+          this->GetCMakeInstance()->GetCacheDefinition(FASTBUILD_CACHE_MODE)) {
+      if (cm::optional<FastbuildCacheMode> const mode =
+            ParseFastbuildCacheMode(*value)) {
+        makeCommand.Add(FastbuildCacheModeFlag(*mode));
+      }
+    }
+  }
+
   if (!configFile.empty()) {
     makeCommand.Add("-config", configFile);
   }
@@ -565,10 +621,32 @@ void cmGlobalFastbuildGenerator::WriteSettings()
   WriteDivider();
   *this->BuildFileStream << "// Settings\n\n";
 
+  std::string cachePlugin = this->GetSafeGlobalSetting(FASTBUILD_CACHE_PLUGIN);
+  if (!cachePlugin.empty()) {
+    cmSystemTools::ConvertToOutputSlashes(cachePlugin);
+  }
+  std::string const cachePluginConfig =
+    this->GetSafeGlobalSetting(FASTBUILD_CACHE_PLUGIN_CONFIG);
+
+  std::string const cacheMode =
+    this->GetSafeGlobalSetting(FASTBUILD_CACHE_MODE);
+  if (!cacheMode.empty() && !ParseFastbuildCacheMode(cacheMode)) {
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(FASTBUILD_CACHE_MODE, R"( is ")"_s, cacheMode,
+               R"(", but must be one of "r", "w" or "rw".)"_s));
+  }
+
   WriteCommand("Settings");
   *this->BuildFileStream << "{\n";
   if (!cacheDir.empty()) {
     WriteVariable("CachePath", Quote(cacheDir), 1);
+  }
+  if (!cachePlugin.empty()) {
+    WriteVariable("CachePluginDLL", Quote(cachePlugin), 1);
+    if (!cachePluginConfig.empty()) {
+      WriteVariable("CachePluginDLLConfig", Quote(cachePluginConfig), 1);
+    }
   }
   // Concurrency groups.
   WriteStruct(

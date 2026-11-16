@@ -1,0 +1,1 @@
+CMAKE_FASTBUILD_CACHE_MODE is "x", but must be one of "r", "w" or "rw"\.
