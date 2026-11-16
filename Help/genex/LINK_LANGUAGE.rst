@@ -74,12 +74,12 @@ language.
   To determine the link language of a target, it is required to collect,
   transitively, all the targets which will be linked to it. So, for link
   libraries properties, a double evaluation will be done. During the first
-  evaluation, ``$<LINK_LANGUAGE:..>`` expressions will always return ``0``.
+  evaluation, ``$<LINK_LANGUAGE:...>`` expressions will always return ``0``.
   The link language computed after this first pass will be used to do the
   second pass. To avoid inconsistency, it is required that the second pass
   do not change the link language. Moreover, to avoid unexpected
   side-effects, it is required to specify complete entities as part of the
-  ``$<LINK_LANGUAGE:..>`` expression. For example:
+  ``$<LINK_LANGUAGE:...>`` expression. For example:
 
   .. code-block:: cmake
 

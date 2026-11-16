@@ -3965,7 +3965,7 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
     auto const LL_BEGIN = cmStrCat("<LINK_LIBRARY:"_s, feature, '>');
     auto const LL_END = cmStrCat("</LINK_LIBRARY:"_s, feature, '>');
 
-    // filter out $<LINK_LIBRARY:..> tags with same feature
+    // filter out $<LINK_LIBRARY:...> tags with same feature
     // and raise an error for any different feature
     cm::erase_if(list, [&](std::string const& item) -> bool {
       return item == LL_BEGIN || item == LL_END;
@@ -4032,7 +4032,7 @@ static const struct LinkGroupNode : public cmGeneratorExpressionNode
         "$<LINK_GROUP:...> expects a feature name as first argument.");
       return std::string();
     }
-    // $<LINK_GROUP:..> cannot be nested
+    // $<LINK_GROUP:...> cannot be nested
     if (std::find_if(list.cbegin(), list.cend(),
                      [](std::string const& item) -> bool {
                        return cmHasPrefix(item, "<LINK_GROUP"_s);
