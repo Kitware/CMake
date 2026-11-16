@@ -76,3 +76,8 @@ run_cmake_with_options(Recurse
   -D "provider_command=recurse_FetchContent"
   -D "provider_methods=FETCHCONTENT_MAKEAVAILABLE_SERIAL"
 )
+run_cmake_with_options(TransitiveCps
+  -D "CMAKE_PROJECT_TOP_LEVEL_INCLUDES=set_provider.cmake"
+  -D "provider_command=skip_transitive_find_package"
+  -D "provider_methods=FIND_PACKAGE"
+)

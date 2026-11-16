@@ -101,6 +101,7 @@ private:
   };
 
   void InheritOptions(cmFindPackageCommand* other);
+  std::vector<std::string> BuildProviderArgs() const;
 
   bool IsFound() const override;
   bool IsDefined() const override;
@@ -108,7 +109,7 @@ private:
   // Try to find a package, assuming most state has already been set up. This
   // is used for recursive dependency solving, particularly when importing
   // packages via CPS. Bypasses providers if argsForProvider is empty.
-  bool FindPackage(std::vector<std::string> const& argsForProvider = {});
+  bool FindPackage(std::vector<std::string> const& argsForProvider);
 
   bool FindPackageUsingModuleMode();
   bool FindPackageUsingConfigMode();
