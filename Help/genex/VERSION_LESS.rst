@@ -5,9 +5,6 @@ VERSION_LESS
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<VERSION_LESS:v1,v2>

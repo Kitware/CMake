@@ -5,9 +5,6 @@ LIST:LENGTH
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<LIST:LENGTH,list>

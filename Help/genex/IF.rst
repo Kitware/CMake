@@ -5,9 +5,6 @@ IF
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<IF:condition,true_string,false_string>

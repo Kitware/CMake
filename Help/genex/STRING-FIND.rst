@@ -6,9 +6,6 @@ STRING:FIND
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:FIND,string[,FROM:(BEGIN|END)],substring>

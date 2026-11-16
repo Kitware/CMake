@@ -6,9 +6,6 @@ STRING:PREPEND
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:PREPEND,string,input[,input]...>

@@ -5,9 +5,6 @@ BUILD_LOCAL_INTERFACE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<BUILD_LOCAL_INTERFACE:...>

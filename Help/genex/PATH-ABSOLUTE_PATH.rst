@@ -5,9 +5,6 @@ PATH:ABSOLUTE_PATH
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<PATH:ABSOLUTE_PATH[,NORMALIZE],path...,base_directory>

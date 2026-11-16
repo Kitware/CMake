@@ -5,8 +5,16 @@ LIST:SORT
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<LIST:SORT,list[,(COMPARE:option|CASE:option|ORDER:option)]...> <Built-in Options_>`_
+  `$<LIST:SORT,list,COMPARATOR,body[,ORDER:ASCENDING|DESCENDING][,CASE:SENSITIVE|INSENSITIVE]> <Comparator_>`_
+
+Built-in Options
+^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -59,6 +67,9 @@ option multiple times.
 .. code-block:: cmake
 
   $<LIST:SORT,list,CASE:SENSITIVE,COMPARE:STRING,ORDER:DESCENDING>
+
+Comparator
+^^^^^^^^^^
 
 .. versionadded:: 4.5
 

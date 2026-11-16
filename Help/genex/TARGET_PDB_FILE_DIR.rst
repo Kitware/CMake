@@ -5,9 +5,6 @@ TARGET_PDB_FILE_DIR
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_PDB_FILE_DIR:tgt>

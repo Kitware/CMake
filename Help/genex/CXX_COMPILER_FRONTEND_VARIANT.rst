@@ -6,8 +6,16 @@ CXX_COMPILER_FRONTEND_VARIANT
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<CXX_COMPILER_FRONTEND_VARIANT> <Without Arguments_>`_
+  `$<CXX_COMPILER_FRONTEND_VARIANT:compiler_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -17,8 +25,8 @@ Syntax
 
 CMake's compiler frontend variant of the C++ compiler used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

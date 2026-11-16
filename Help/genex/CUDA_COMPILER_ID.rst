@@ -6,8 +6,16 @@ CUDA_COMPILER_ID
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<CUDA_COMPILER_ID> <Without Arguments_>`_
+  `$<CUDA_COMPILER_ID:compiler_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -17,8 +25,8 @@ Syntax
 
 CMake's compiler id of the CUDA compiler used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

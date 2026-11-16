@@ -6,9 +6,6 @@ STRING:MATCH
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:MATCH,string[,SEEK:(ONCE|ALL)],regular_expression>

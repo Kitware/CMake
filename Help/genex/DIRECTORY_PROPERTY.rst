@@ -5,9 +5,6 @@ DIRECTORY_PROPERTY
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<DIRECTORY_PROPERTY:dir,prop>

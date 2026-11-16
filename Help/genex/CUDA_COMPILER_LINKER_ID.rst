@@ -5,8 +5,16 @@ CUDA_COMPILER_LINKER_ID
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<CUDA_COMPILER_LINKER_ID> <Without Arguments_>`_
+  `$<CUDA_COMPILER_LINKER_ID:linker_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -16,8 +24,8 @@ Syntax
 
 CMake's linker id of the CUDA linker used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

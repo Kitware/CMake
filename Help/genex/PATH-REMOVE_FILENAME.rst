@@ -5,9 +5,6 @@ PATH:REMOVE_FILENAME
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<PATH:REMOVE_FILENAME,path...>

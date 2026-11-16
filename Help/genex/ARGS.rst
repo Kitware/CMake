@@ -5,9 +5,6 @@ ARGS
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<ARGS:cmake-list>

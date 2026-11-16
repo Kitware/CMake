@@ -5,9 +5,6 @@ TARGET_SONAME_FILE_NAME
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_SONAME_FILE_NAME:tgt>

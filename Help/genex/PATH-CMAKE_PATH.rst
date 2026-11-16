@@ -5,9 +5,6 @@ PATH:CMAKE_PATH
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<PATH:CMAKE_PATH[,NORMALIZE],path...>

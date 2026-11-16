@@ -6,9 +6,6 @@ LOWER_CASE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<LOWER_CASE:string>

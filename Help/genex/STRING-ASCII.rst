@@ -6,9 +6,6 @@ STRING:ASCII
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:ASCII,number[,number]...>

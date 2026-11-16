@@ -6,9 +6,6 @@ LINK_GROUP
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<LINK_GROUP:feature,library-list>

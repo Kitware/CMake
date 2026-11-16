@@ -6,9 +6,6 @@ STRGREATER_EQUAL
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRGREATER_EQUAL:string1,string2>

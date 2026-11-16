@@ -6,9 +6,6 @@ STRGREATER
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRGREATER:string1,string2>

@@ -5,9 +5,6 @@ TARGET_LINKER_IMPORT_FILE_SUFFIX
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_LINKER_IMPORT_FILE_SUFFIX:tgt>

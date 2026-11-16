@@ -5,9 +5,6 @@ PATH:RELATIVE_PATH
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<PATH:RELATIVE_PATH,path...,base_directory>

@@ -5,9 +5,6 @@ IN_LIST
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<IN_LIST:string,list>

@@ -5,9 +5,6 @@ PATH:REPLACE_FILENAME
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<PATH:REPLACE_FILENAME,path...,input>

@@ -5,9 +5,6 @@ PATH:REPLACE_EXTENSION
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<PATH:REPLACE_EXTENSION[,LAST_ONLY],path...,input>

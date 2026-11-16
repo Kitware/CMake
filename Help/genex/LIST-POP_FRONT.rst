@@ -5,9 +5,6 @@ LIST:POP_FRONT
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<LIST:POP_FRONT,list>

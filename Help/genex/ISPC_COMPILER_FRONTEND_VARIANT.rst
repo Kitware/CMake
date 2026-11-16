@@ -6,8 +6,16 @@ ISPC_COMPILER_FRONTEND_VARIANT
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<ISPC_COMPILER_FRONTEND_VARIANT> <Without Arguments_>`_
+  `$<ISPC_COMPILER_FRONTEND_VARIANT:compiler_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -17,8 +25,8 @@ Syntax
 
 CMake's compiler id of the ISPC compiler used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

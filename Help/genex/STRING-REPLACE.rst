@@ -6,9 +6,6 @@ STRING:REPLACE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:REPLACE[,(STRING|REGEX)],string,match_string,replace_string>

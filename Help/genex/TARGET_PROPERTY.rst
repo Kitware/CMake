@@ -8,8 +8,17 @@ TARGET_PROPERTY
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<TARGET_PROPERTY:tgt,prop> <Explicit Target_>`_
+  `$<TARGET_PROPERTY:prop> <Implicit Target_>`_
+
+Explicit Target
+^^^^^^^^^^^^^^^
+
 
 .. code-block:: cmake
 
@@ -28,8 +37,8 @@ evaluated on.
   rather than the directory of the consuming target for which the
   expression is being evaluated.
 
-Syntax
-^^^^^^
+Implicit Target
+^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

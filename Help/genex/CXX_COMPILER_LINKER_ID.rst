@@ -5,8 +5,16 @@ CXX_COMPILER_LINKER_ID
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<CXX_COMPILER_LINKER_ID> <Without Arguments_>`_
+  `$<CXX_COMPILER_LINKER_ID:linker_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -16,8 +24,8 @@ Syntax
 
 CMake's linker id of the C++ linker used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

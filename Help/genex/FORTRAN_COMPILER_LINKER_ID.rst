@@ -5,8 +5,16 @@ Fortran_COMPILER_LINKER_ID
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<Fortran_COMPILER_LINKER_ID> <Without Arguments_>`_
+  `$<Fortran_COMPILER_LINKER_ID:linker_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -16,8 +24,8 @@ Syntax
 
 CMake's linker id of the Fortran linker used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

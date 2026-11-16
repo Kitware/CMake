@@ -5,9 +5,6 @@ RULE_PROPERTY
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<RULE_PROPERTY:rule,prop>

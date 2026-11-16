@@ -5,9 +5,6 @@ PATH:IS_ABSOLUTE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<PATH:IS_ABSOLUTE,path>

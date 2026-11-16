@@ -5,9 +5,6 @@ DEVICE_LINK
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<DEVICE_LINK:list>

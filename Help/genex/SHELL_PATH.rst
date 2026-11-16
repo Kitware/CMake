@@ -5,9 +5,6 @@ SHELL_PATH
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<SHELL_PATH:...>

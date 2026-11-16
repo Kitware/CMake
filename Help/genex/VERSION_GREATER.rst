@@ -5,9 +5,6 @@ VERSION_GREATER
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<VERSION_GREATER:v1,v2>

@@ -5,9 +5,6 @@ PATH:HAS_*
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<PATH:HAS_*,path>

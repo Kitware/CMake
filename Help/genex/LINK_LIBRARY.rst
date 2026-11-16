@@ -6,6 +6,13 @@ LINK_LIBRARY
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<LINK_LIBRARY:feature,library-list> <Syntax_>`_
+
 Syntax
 ^^^^^^
 

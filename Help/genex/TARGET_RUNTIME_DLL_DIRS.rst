@@ -5,9 +5,6 @@ TARGET_RUNTIME_DLL_DIRS
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_RUNTIME_DLL_DIRS:tgt>

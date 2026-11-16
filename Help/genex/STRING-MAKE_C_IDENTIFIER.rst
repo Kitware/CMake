@@ -6,9 +6,6 @@ STRING:MAKE_C_IDENTIFIER
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:MAKE_C_IDENTIFIER,string>

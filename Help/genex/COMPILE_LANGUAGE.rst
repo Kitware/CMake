@@ -9,8 +9,16 @@ COMPILE_LANGUAGE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<COMPILE_LANGUAGE> <Without Arguments_>`_
+  `$<COMPILE_LANGUAGE:languages> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -23,8 +31,8 @@ related boolean expression :genex:`$<COMPILE_LANGUAGE:languages>
 <COMPILE_LANGUAGE:languages>` for notes about the portability of this generator
 expression.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

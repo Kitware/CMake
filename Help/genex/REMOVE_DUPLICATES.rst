@@ -5,9 +5,6 @@ REMOVE_DUPLICATES
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<REMOVE_DUPLICATES:list>

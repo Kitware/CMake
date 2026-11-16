@@ -6,9 +6,6 @@ STRING:TIMESTAMP
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:TIMESTAMP[,(UTC|format)]...>

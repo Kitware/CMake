@@ -5,9 +5,6 @@ LIST:REVERSE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<LIST:REVERSE,list>

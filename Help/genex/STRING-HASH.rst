@@ -6,9 +6,6 @@ STRING:HASH
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:HASH,string,ALGORITHM:algorithm>

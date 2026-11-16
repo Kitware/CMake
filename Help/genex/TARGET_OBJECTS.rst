@@ -5,9 +5,6 @@ TARGET_OBJECTS
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_OBJECTS:tgt[,SOURCE_FILES:source_file[;source_file]...]>

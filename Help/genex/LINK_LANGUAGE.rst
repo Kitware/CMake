@@ -5,8 +5,16 @@ LINK_LANGUAGE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<LINK_LANGUAGE> <Without Arguments_>`_
+  `$<LINK_LANGUAGE:languages> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -25,8 +33,8 @@ expression.
   properties to avoid side-effects due to the double evaluation of
   these properties.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

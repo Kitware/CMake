@@ -6,9 +6,6 @@ STRLESS_EQUAL
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRLESS_EQUAL:string1,string2>

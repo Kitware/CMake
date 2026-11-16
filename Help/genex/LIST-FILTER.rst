@@ -5,9 +5,6 @@ LIST:FILTER
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<LIST:FILTER,list,INCLUDE|EXCLUDE,regex>

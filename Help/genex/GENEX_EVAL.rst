@@ -6,9 +6,6 @@ GENEX_EVAL
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<GENEX_EVAL:expr>

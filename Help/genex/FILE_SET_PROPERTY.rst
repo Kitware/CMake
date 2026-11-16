@@ -5,9 +5,6 @@ FILE_SET_PROPERTY
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<FILE_SET_PROPERTY:fileset,TARGET:target,prop>

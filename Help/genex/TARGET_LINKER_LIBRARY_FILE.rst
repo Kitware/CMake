@@ -5,9 +5,6 @@ TARGET_LINKER_LIBRARY_FILE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_LINKER_LIBRARY_FILE:tgt>

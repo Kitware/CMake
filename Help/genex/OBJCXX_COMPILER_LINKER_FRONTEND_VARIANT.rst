@@ -5,8 +5,16 @@ OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT> <Without Arguments_>`_
+  `$<OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -16,8 +24,8 @@ Syntax
 
 CMake's linker frontend variant of the Objective-C++ linker used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

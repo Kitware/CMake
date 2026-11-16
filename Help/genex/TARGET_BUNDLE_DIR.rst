@@ -5,9 +5,6 @@ TARGET_BUNDLE_DIR
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_BUNDLE_DIR:tgt>

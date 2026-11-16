@@ -6,9 +6,6 @@ STRING:APPEND
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:APPEND,string,input[,input]...>
