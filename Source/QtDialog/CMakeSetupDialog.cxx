@@ -178,10 +178,8 @@ CMakeSetupDialog::CMakeSetupDialog()
                    &CMakeSetupDialog::doOutputErrorNext);
   a->setShortcut(QKeySequence(Qt::Key_F8));
   auto* s = new QShortcut(this);
-  // Qt 5 has no operator| for a modifier and a key, so clang-tidy sees two
-  // different enum types there.  Qt 6 builds a QKeyCombination instead.
-  // NOLINTNEXTLINE(bugprone-suspicious-enum-usage)
-  s->setKey(QKeySequence(Qt::CTRL | Qt::Key_Period));
+  s->setKey(QKeySequence(static_cast<int>(Qt::CTRL) |
+                         static_cast<int>(Qt::Key_Period)));
   QObject::connect(s, &QShortcut::activated, this,
                    &CMakeSetupDialog::doOutputErrorNext); // in Eclipse
 
