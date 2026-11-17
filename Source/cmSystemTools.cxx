@@ -2623,6 +2623,200 @@ struct ArchiveMatchDeleter
   void operator()(struct archive* a) const { archive_match_free(a); }
 };
 
+// Signatures that formats handled by an external filter program are
+// recognized by.  Each is what libarchive's own bidder requires, except
+// that bzip2, lzip and lrzip check a following byte whose value varies and
+// so bid here on the magic alone.  The ""_s suffix carries each literal's
+// own length, so the embedded NUL bytes are part of the signature.
+cm::string_view const kArchiveSignatureBzip2 = "BZh"_s;
+cm::string_view const kArchiveSignatureGzip = "\x1f\x8b\x08"_s;
+cm::string_view const kArchiveSignatureXz = "\xfd"
+                                            "7zXZ\0"_s;
+cm::string_view const kArchiveSignatureLzip = "LZIP"_s;
+cm::string_view const kArchiveSignatureZstd = "\x28\xb5\x2f\xfd"_s;
+cm::string_view const kArchiveSignatureLrzip = "LRZI"_s;
+cm::string_view const kArchiveSignatureLzop = "\x89"
+                                              "LZO\0\r\n\x1a\n"_s;
+cm::string_view const kArchiveSignatureGrzip = "GRZipII\0\x02\x04:)"_s;
+cm::string_view const kArchiveSignatureLz4 = "\x04\x22\x4d\x18"_s;
+cm::string_view const kArchiveSignatureLz4Legacy = "\x02\x21\x4c\x18"_s;
+
+// Collect the entries of PATH that may be used to locate an external filter
+// program.  A relative entry, including an empty one, is resolved against
+// the current working directory, which during extraction is a directory the
+// archive is being unpacked into, so such entries are dropped.  A quoted
+// entry is dropped for the same reason it is not used by the operating
+// system itself.
+std::vector<std::string> GetArchiveFilterSearchPath()
+{
+  std::vector<std::string> envPath;
+  cmSystemTools::GetPath(envPath);
+  std::vector<std::string> searchPath;
+  searchPath.reserve(envPath.size());
+  for (std::string const& dir : envPath) {
+    if (!dir.empty() && cmSystemTools::FileIsFullPath(dir)) {
+      searchPath.push_back(dir);
+    }
+  }
+  return searchPath;
+}
+
+// Build the command libarchive should run for an external filter program, or
+// an empty string if no such program is installed.
+//
+// cmSystemTools::FindProgram() is deliberately not used: it tries the name
+// relative to the current working directory before searching PATH, which
+// would resolve a file left in the directory being extracted into.
+//
+// The resolved path is quoted and its backslashes are doubled, because
+// libarchive's command-line parser treats a backslash as an escape character
+// both inside and outside quotation marks and splits unquoted arguments at
+// spaces.
+std::string GetArchiveFilterProgramCommand(
+  std::vector<std::string> const& searchPath, std::string const& name,
+  char const* arguments)
+{
+  std::string found;
+  for (std::string const& dir : searchPath) {
+    std::string const base = cmStrCat(dir, '/', name);
+#  if defined(_WIN32)
+    // Require the ".exe" extension, which is the only one libarchive's own
+    // lookup appends.  A process can be started from a file without an
+    // extension, but cmSystemTools::FileIsExecutable() accepts any existing
+    // file on Windows, so a bare name could select an unrelated file that
+    // happens to sit in a directory named by PATH.
+    std::string const candidate = cmStrCat(base, ".exe"_s);
+    if (cmSystemTools::FileIsExecutable(candidate)) {
+      found = candidate;
+    }
+#  else
+    if (cmSystemTools::FileIsExecutable(base)) {
+      found = base;
+    }
+#  endif
+    if (!found.empty()) {
+      found = cmSystemTools::CollapseFullPath(found);
+      break;
+    }
+  }
+  if (found.empty()) {
+    return found;
+  }
+
+  std::string command = "\"";
+  for (char c : found) {
+    if (c == '\\' || c == '"') {
+      command += '\\';
+    }
+    command += c;
+  }
+  command += '"';
+  command += arguments;
+  return command;
+}
+
+// Enable decompression filters without letting archive content choose a
+// program to run from the directory being extracted into.
+//
+// libarchive satisfies some filters by spawning an external program rather
+// than decoding in-process, and selects which filter to use by bidding on
+// the archive's content, so the program name comes from the archive rather
+// than from CMake.  libarchive then looks that name up in the process search
+// path, which on Windows includes the current working directory ahead of the
+// system directories unless safe process search mode is enabled; that mode
+// is off by default, and even when it is enabled the working directory is
+// still searched before PATH.  For 'cmake -E tar' the working directory is
+// inherited from the caller, and for file(ARCHIVE_EXTRACT) it is the
+// DESTINATION, so a file left in the directory being unpacked into can
+// satisfy the lookup.  An empty or relative entry in PATH has the same
+// effect on any platform.
+//
+// The archive_read_support_filter_* functions return ARCHIVE_OK when the
+// filter is implemented in the library and ARCHIVE_WARN when only the
+// external-program implementation is available, but they register their
+// bidder either way, so probe a throwaway archive to learn which is which.
+// Filters implemented in the library are enabled as before.  For the rest,
+// resolve the program here and register it by absolute path together with
+// the signature its format is recognized by, so the program that runs is an
+// installed one rather than a file that came out of an archive.  Where no
+// such program is installed the filter is not enabled and the format is
+// reported as unrecognized.
+bool cm_archive_read_support_filters(struct archive* a)
+{
+  std::unique_ptr<struct archive, ArchiveReadDeleter> probe_owner(
+    archive_read_new());
+  struct archive* probe = probe_owner.get();
+  if (!probe) {
+    return false;
+  }
+
+  std::vector<std::string> const searchPath = GetArchiveFilterSearchPath();
+
+  // These are always implemented in the library.
+  archive_read_support_filter_compress(a);
+  archive_read_support_filter_uu(a);
+  archive_read_support_filter_rpm(a);
+
+  using ArchiveFilterSupport = int (*)(struct archive*);
+
+  // Enable one filter in-process if the library implements it, and otherwise
+  // through the installed program it needs, bidding on the signatures the
+  // format is recognized by.
+  auto enableFilter =
+    [a, probe, &searchPath](ArchiveFilterSupport support, char const* program,
+                            char const* arguments, cm::string_view signature,
+                            cm::string_view altSignature = cm::string_view()) {
+      if (support(probe) == ARCHIVE_OK) {
+        support(a);
+        return;
+      }
+      std::string const command =
+        GetArchiveFilterProgramCommand(searchPath, program, arguments);
+      if (command.empty()) {
+        return;
+      }
+      archive_read_support_filter_program_signature(
+        a, command.c_str(), signature.data(), signature.size());
+      if (!altSignature.empty()) {
+        archive_read_support_filter_program_signature(
+          a, command.c_str(), altSignature.data(), altSignature.size());
+      }
+    };
+
+  enableFilter(archive_read_support_filter_bzip2, "bzip2", " -d",
+               kArchiveSignatureBzip2);
+  enableFilter(archive_read_support_filter_gzip, "gzip", " -d",
+               kArchiveSignatureGzip);
+  enableFilter(archive_read_support_filter_xz, "xz", " -d -qq",
+               kArchiveSignatureXz);
+  enableFilter(archive_read_support_filter_lzip, "lzip", " -d -q",
+               kArchiveSignatureLzip);
+  enableFilter(archive_read_support_filter_zstd, "zstd", " -d -qq",
+               kArchiveSignatureZstd);
+  enableFilter(archive_read_support_filter_lrzip, "lrzip", " -d -q",
+               kArchiveSignatureLrzip);
+  enableFilter(archive_read_support_filter_lzop, "lzop", " -d",
+               kArchiveSignatureLzop);
+  enableFilter(archive_read_support_filter_grzip, "grzip", " -d",
+               kArchiveSignatureGrzip);
+
+  // The lz4 format has two frame layouts with different magic numbers, both
+  // handled by the same program.  A stream that begins with a skippable
+  // frame is not recognized through the program-based path, because
+  // libarchive's own bidder walks those frames.
+  enableFilter(archive_read_support_filter_lz4, "lz4", " -d -q",
+               kArchiveSignatureLz4, kArchiveSignatureLz4Legacy);
+
+  // The lzma format has no signature strong enough to bid on; libarchive
+  // uses a heuristic that a fixed signature cannot reproduce.  Enable it
+  // only when the library implements it.
+  if (archive_read_support_filter_lzma(probe) == ARCHIVE_OK) {
+    archive_read_support_filter_lzma(a);
+  }
+
+  return true;
+}
+
 bool extract_tar(std::string const& arFileName,
                  std::vector<std::string> const& files,
                  std::vector<std::string> const& excludeFiles,
@@ -2647,7 +2841,10 @@ bool extract_tar(std::string const& arFileName,
       return false;
     }
   }
-  archive_read_support_filter_all(a);
+  if (!cm_archive_read_support_filters(a)) {
+    cmSystemTools::Error("Out of memory");
+    return false;
+  }
   archive_read_support_format_all(a);
 
   if (encoding != "OEM") {
