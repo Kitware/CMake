@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
+#include <algorithm>
 #include <functional>
 #include <map>
 #include <memory>
@@ -81,12 +82,19 @@ bool ProcessTree(Args const& args, cmExecutionStatus& status)
     }
 
     // source groups generation
-    cmCMakePath sourceGroup = prefix / file.Relative(root);
+    cmCMakePath sourceGroup =
+      prefix.IsEmpty() ? file.Relative(root) : prefix / file.Relative(root);
+
+    std::vector<std::string> tokenizedSG;
     if (sourceGroup.HasParentPath()) {
       sourceGroup = sourceGroup.GetParentPath();
+      std::for_each(sourceGroup.begin(), sourceGroup.end(),
+                    [&tokenizedSG](cmCMakePath const& item) {
+                      tokenizedSG.push_back(item.GenericString());
+                    });
+    } else {
+      tokenizedSG.emplace_back();
     }
-    std::vector<std::string> tokenizedSG =
-      cmTokenize(sourceGroup.GenericString(), '/', cmTokenizerMode::New);
 
     auto* sg = mf.GetOrCreateSourceGroup(tokenizedSG);
     if (!sg) {
