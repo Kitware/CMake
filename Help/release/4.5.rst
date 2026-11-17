@@ -333,10 +333,6 @@ Modules
   A caller-supplied prefix still takes precedence.
   See policy :policy:`CMP0225`.
 
-* The :module:`FindCUDAToolkit` module now creates ``CUDAToolkit::``
-  namespace targets and changes the existing ``CUDA::`` namespace targets
-  to be alias targets.
-
 * The :module:`FindDoxygen` module :command:`doxygen_add_docs` command
   gained a ``USES_TERMINAL`` option to give the Doxygen command direct
   access to the terminal during the build.
@@ -508,3 +504,15 @@ Other Changes
 
 .. _CPS: https://cps-org.github.io/cps/
 .. |CPS| replace:: Common Package Specification
+
+Updates
+=======
+
+Changes made since CMake 4.5.0 include the following.
+
+.. 4.5.1
+
+  * The :module:`FindCUDAToolkit` module in 4.5.0 created ``CUDAToolkit::``
+    namespace targets and changed the existing ``CUDA::`` namespace targets
+    to be alias targets.  This has been reverted because the compatibility
+    aliases did not extend to exports for consumers using CMake 4.4 and below.

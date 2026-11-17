@@ -112,13 +112,8 @@ Imported Targets
 
 An :ref:`imported target <Imported targets>` named ``CUDA::toolkit`` is provided.
 
-This module provides :ref:`Imported Targets` in the ``CUDA::`` namespace
-for each of the following libraries that are part of the CUDAToolkit.
-
-.. versionadded:: 4.5
-
-  Corresponding imported targets in the ``CUDAToolkit::`` namespace are also
-  provided for each target that is created.
+This module provides :ref:`Imported Targets` for each
+of the following libraries that are part of the CUDAToolkit:
 
 - `CUDA Runtime Library`_
 - `CUDA Driver Library`_
@@ -1272,18 +1267,6 @@ endif()
 # Construct import targets
 if(CUDAToolkit_FOUND)
 
-  function(_CUDAToolkit_add_cuda_library_alias lib_name)
-    if(TARGET CUDAToolkit::${lib_name} AND NOT TARGET CUDA::${lib_name})
-      add_library(CUDA::${lib_name} ALIAS CUDAToolkit::${lib_name})
-    endif()
-  endfunction()
-
-  function(_CUDAToolkit_add_cuda_executable_alias executable_name)
-    if(TARGET CUDAToolkit::${executable_name} AND NOT TARGET CUDA::${executable_name})
-      add_executable(CUDA::${executable_name} ALIAS CUDAToolkit::${executable_name})
-    endif()
-  endfunction()
-
   function(_CUDAToolkit_find_and_add_import_lib lib_name)
     cmake_parse_arguments(arg "" "" "ALT;DEPS;EXTRA_PATH_SUFFIXES;EXTRA_INCLUDE_DIRS;ONLY_SEARCH_FOR;LIBRARY_SEARCH_DIRS" ${ARGN})
 
@@ -1332,43 +1315,41 @@ if(CUDAToolkit_FOUND)
 
     mark_as_advanced(CUDA_${lib_name}_LIBRARY)
 
-    if (NOT TARGET CUDAToolkit::${lib_name} AND CUDA_${lib_name}_LIBRARY)
-      add_library(CUDAToolkit::${lib_name} ${CUDA_IMPORT_TYPE} IMPORTED)
-      target_include_directories(CUDAToolkit::${lib_name} SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
+    if (NOT TARGET CUDA::${lib_name} AND CUDA_${lib_name}_LIBRARY)
+      add_library(CUDA::${lib_name} ${CUDA_IMPORT_TYPE} IMPORTED)
+      target_include_directories(CUDA::${lib_name} SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
       if(DEFINED CUDAToolkit_MATH_INCLUDE_DIR)
         string(FIND ${CUDA_${lib_name}_LIBRARY} "math_libs" math_libs)
         if(NOT ${math_libs} EQUAL -1)
-          target_include_directories(CUDAToolkit::${lib_name} SYSTEM INTERFACE "${CUDAToolkit_MATH_INCLUDE_DIR}")
+          target_include_directories(CUDA::${lib_name} SYSTEM INTERFACE "${CUDAToolkit_MATH_INCLUDE_DIR}")
         endif()
       endif()
-      set_property(TARGET CUDAToolkit::${lib_name} PROPERTY ${CUDA_IMPORT_PROPERTY} "${CUDA_${lib_name}_LIBRARY}")
+      set_property(TARGET CUDA::${lib_name} PROPERTY ${CUDA_IMPORT_PROPERTY} "${CUDA_${lib_name}_LIBRARY}")
       foreach(dep ${arg_DEPS})
-        if(TARGET CUDAToolkit::${dep})
-          target_link_libraries(CUDAToolkit::${lib_name} INTERFACE CUDAToolkit::${dep})
+        if(TARGET CUDA::${dep})
+          target_link_libraries(CUDA::${lib_name} INTERFACE CUDA::${dep})
         endif()
       endforeach()
       if(arg_EXTRA_INCLUDE_DIRS)
-        target_include_directories(CUDAToolkit::${lib_name} SYSTEM INTERFACE "${arg_EXTRA_INCLUDE_DIRS}")
+        target_include_directories(CUDA::${lib_name} SYSTEM INTERFACE "${arg_EXTRA_INCLUDE_DIRS}")
       endif()
     endif()
-    _CUDAToolkit_add_cuda_library_alias(${lib_name})
   endfunction()
 
-  if(NOT TARGET CUDAToolkit::toolkit)
-    add_library(CUDAToolkit::toolkit IMPORTED INTERFACE)
-    target_include_directories(CUDAToolkit::toolkit SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
-    target_link_directories(CUDAToolkit::toolkit INTERFACE "${CUDAToolkit_LIBRARY_DIR}")
+  if(NOT TARGET CUDA::toolkit)
+    add_library(CUDA::toolkit IMPORTED INTERFACE)
+    target_include_directories(CUDA::toolkit SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
+    target_link_directories(CUDA::toolkit INTERFACE "${CUDAToolkit_LIBRARY_DIR}")
   endif()
-  _CUDAToolkit_add_cuda_library_alias(toolkit)
 
   # setup dependencies that are required for cudart/cudart_static when building
   # on linux. These are generally only required when using the CUDA toolkit
   # when CUDA language is disabled
-  if(NOT TARGET CUDAToolkit::cudart_static_deps)
-    add_library(CUDAToolkit::cudart_static_deps IMPORTED INTERFACE)
+  if(NOT TARGET CUDA::cudart_static_deps)
+    add_library(CUDA::cudart_static_deps IMPORTED INTERFACE)
     if(UNIX AND (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED))
       find_package(Threads REQUIRED)
-      target_link_libraries(CUDAToolkit::cudart_static_deps INTERFACE Threads::Threads ${CMAKE_DL_LIBS})
+      target_link_libraries(CUDA::cudart_static_deps INTERFACE Threads::Threads ${CMAKE_DL_LIBS})
     endif()
 
     if(UNIX AND NOT APPLE AND NOT (CMAKE_SYSTEM_NAME STREQUAL "QNX"))
@@ -1376,13 +1357,12 @@ if(CUDAToolkit_FOUND)
       find_library(CUDAToolkit_rt_LIBRARY rt)
       mark_as_advanced(CUDAToolkit_rt_LIBRARY)
       if(NOT CUDAToolkit_rt_LIBRARY)
-        message(WARNING "Could not find librt library, needed by CUDAToolkit::cudart_static")
+        message(WARNING "Could not find librt library, needed by CUDA::cudart_static")
       else()
-        target_link_libraries(CUDAToolkit::cudart_static_deps INTERFACE ${CUDAToolkit_rt_LIBRARY})
+        target_link_libraries(CUDA::cudart_static_deps INTERFACE ${CUDAToolkit_rt_LIBRARY})
       endif()
     endif()
   endif()
-  _CUDAToolkit_add_cuda_library_alias(cudart_static_deps)
 
   _CUDAToolkit_find_and_add_import_lib(cuda_driver ALT cuda DEPS cudart_static_deps)
   _CUDAToolkit_find_and_add_import_lib(cudart DEPS cudart_static_deps)
@@ -1512,51 +1492,46 @@ if(CUDAToolkit_FOUND)
   endif()
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.1.0)
-    if(NOT TARGET CUDAToolkit::nvptxcompiler_static)
+    if(NOT TARGET CUDA::nvptxcompiler_static)
       _CUDAToolkit_find_and_add_import_lib(nvptxcompiler_static)
-      if(TARGET CUDAToolkit::nvptxcompiler_static)
-        target_link_libraries(CUDAToolkit::nvptxcompiler_static INTERFACE CUDAToolkit::cudart_static_deps)
+      if(TARGET CUDA::nvptxcompiler_static)
+        target_link_libraries(CUDA::nvptxcompiler_static INTERFACE CUDA::cudart_static_deps)
       endif()
     endif()
-    _CUDAToolkit_add_cuda_library_alias(nvptxcompiler_static)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins ALT nvrtc-builtins)
   _CUDAToolkit_find_and_add_import_lib(nvrtc)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.5.0)
     _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins_static ALT nvrtc-builtins_static)
-    if(NOT TARGET CUDAToolkit::nvrtc_static)
+    if(NOT TARGET CUDA::nvrtc_static)
       _CUDAToolkit_find_and_add_import_lib(nvrtc_static DEPS nvrtc_builtins_static nvptxcompiler_static)
-      if(TARGET CUDAToolkit::nvrtc_static AND WIN32 AND NOT (BORLAND OR MINGW OR CYGWIN))
-        target_link_libraries(CUDAToolkit::nvrtc_static INTERFACE Ws2_32.lib)
+      if(TARGET CUDA::nvrtc_static AND WIN32 AND NOT (BORLAND OR MINGW OR CYGWIN))
+        target_link_libraries(CUDA::nvrtc_static INTERFACE Ws2_32.lib)
       endif()
     endif()
-    _CUDAToolkit_add_cuda_library_alias(nvrtc_static)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
-  if(NOT TARGET CUDAToolkit::nvml_static)
+  if(NOT TARGET CUDA::nvml_static)
     _CUDAToolkit_find_and_add_import_lib(nvml_static ONLY_SEARCH_FOR libnvidia-ml.a libnvml.a)
-    if(TARGET CUDAToolkit::nvml_static)
-      target_link_libraries(CUDAToolkit::nvml_static INTERFACE ${CMAKE_DL_LIBS})
+    if(TARGET CUDA::nvml_static)
+      target_link_libraries(CUDA::nvml_static INTERFACE ${CMAKE_DL_LIBS})
     endif()
   endif()
-  _CUDAToolkit_add_cuda_library_alias(nvml_static)
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
     # Header-only variant. Uses dlopen().
-    if(NOT TARGET CUDAToolkit::nvtx3)
-      add_library(CUDAToolkit::nvtx3 INTERFACE IMPORTED)
-      target_include_directories(CUDAToolkit::nvtx3 SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
-      target_link_libraries(CUDAToolkit::nvtx3 INTERFACE ${CMAKE_DL_LIBS})
+    if(NOT TARGET CUDA::nvtx3)
+      add_library(CUDA::nvtx3 INTERFACE IMPORTED)
+      target_include_directories(CUDA::nvtx3 SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
+      target_link_libraries(CUDA::nvtx3 INTERFACE ${CMAKE_DL_LIBS})
     endif()
-    _CUDAToolkit_add_cuda_library_alias(nvtx3)
   endif()
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.9)
-    if(NOT TARGET CUDAToolkit::nvtx3_interop)
+    if(NOT TARGET CUDA::nvtx3_interop)
       _CUDAToolkit_find_and_add_import_lib(nvtx3_interop ALT nvtx3interop)
     endif()
-    _CUDAToolkit_add_cuda_library_alias(nvtx3_interop)
   endif()
 
   # nvToolsExt is removed starting in 12.9
@@ -1577,8 +1552,8 @@ if(CUDAToolkit_FOUND)
     if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
       # nvToolsExt is deprecated since nvtx3 introduction.
       # Warn only if the project requires a sufficiently new CMake to make migration possible.
-      if(TARGET CUDAToolkit::nvToolsExt AND CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
-        set_property(TARGET CUDAToolkit::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDAToolkit::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
+      if(TARGET CUDA::nvToolsExt AND CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
+        set_property(TARGET CUDA::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDA::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
       endif()
     endif()
   endif()
@@ -1594,13 +1569,12 @@ if(CUDAToolkit_FOUND)
     HINTS ${CUDAToolkit_BIN_DIR}
     NO_DEFAULT_PATH
   )
-  if(NOT TARGET CUDAToolkit::bin2c AND CUDA_bin2c_EXECUTABLE)
-    add_executable(CUDAToolkit::bin2c IMPORTED)
-    set_property(TARGET CUDAToolkit::bin2c PROPERTY IMPORTED_LOCATION "${CUDA_bin2c_EXECUTABLE}")
+  if(NOT TARGET CUDA::bin2c AND CUDA_bin2c_EXECUTABLE)
+    add_executable(CUDA::bin2c IMPORTED)
+    set_property(TARGET CUDA::bin2c PROPERTY IMPORTED_LOCATION "${CUDA_bin2c_EXECUTABLE}")
   endif()
-  _CUDAToolkit_add_cuda_executable_alias(bin2c)
 
-  if(NOT TARGET CUDAToolkit::sanitizer)
+  if(NOT TARGET CUDA::sanitizer)
     _CUDAToolkit_find_and_add_import_lib(
       sanitizer
       ONLY_SEARCH_FOR sanitizer-public
@@ -1613,13 +1587,12 @@ if(CUDAToolkit_FOUND)
         "../../../extras/Sanitizer"
       EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}"
     )
-    if(TARGET CUDAToolkit::sanitizer)
-      get_property(loc TARGET CUDAToolkit::sanitizer PROPERTY IMPORTED_LOCATION)
+    if(TARGET CUDA::sanitizer)
+      get_property(loc TARGET CUDA::sanitizer PROPERTY IMPORTED_LOCATION)
       get_filename_component(sanitizer_dir "${loc}" DIRECTORY)
-      target_include_directories(CUDAToolkit::sanitizer INTERFACE "${sanitizer_dir}/include")
+      target_include_directories(CUDA::sanitizer INTERFACE "${sanitizer_dir}/include")
     endif()
   endif()
-  _CUDAToolkit_add_cuda_library_alias(sanitizer)
 endif()
 
 if(_CUDAToolkit_Pop_ROOT_PATH)
