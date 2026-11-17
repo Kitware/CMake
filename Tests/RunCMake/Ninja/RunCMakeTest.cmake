@@ -21,6 +21,8 @@ endif()
 # Sanitize NINJA_STATUS since we expect default behavior.
 unset(ENV{NINJA_STATUS})
 
+include("${CMAKE_CURRENT_LIST_DIR}/AliasOutputPathPrefixDriver.cmake")
+
 if(CMAKE_HOST_WIN32)
   run_cmake(SelectCompilerWindows)
 else()

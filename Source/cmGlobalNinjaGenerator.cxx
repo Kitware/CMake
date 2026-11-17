@@ -1748,7 +1748,7 @@ void cmGlobalNinjaGenerator::AddTargetAlias(std::string const& alias,
                                             cmGeneratorTarget* target,
                                             std::string const& config)
 {
-  std::string outputPath = this->NinjaOutputPath(alias);
+  std::string outputPath = this->ConvertToNinjaPath(alias);
   std::string buildAlias = this->BuildAlias(outputPath, config);
   cmNinjaDeps outputs;
   if (config != "all") {

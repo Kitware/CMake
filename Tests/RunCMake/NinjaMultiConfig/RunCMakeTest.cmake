@@ -397,6 +397,8 @@ run_cmake(CustomCommandDepfileAsByproduct)
 
 else()
 
+include("${CMAKE_CURRENT_LIST_DIR}/../Ninja/AliasOutputPathPrefixDriver.cmake")
+
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
 run_cmake(PerConfigSources)
 unset(RunCMake_TEST_OPTIONS)
