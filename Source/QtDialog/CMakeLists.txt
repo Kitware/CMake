@@ -59,6 +59,9 @@ if(MSVC)
 endif()
 
 add_compile_definitions(QT_NO_KEYWORDS)
+# Opt in to the stricter Qt API checks up to Qt 6.12.  Qt versions older
+# than 6.8 ignore this.  Raise the version after checking newer Qt releases.
+add_compile_definitions(QT_ENABLE_STRICT_MODE_UP_TO=0x060C00)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt${CMake_QT_MAJOR_VERSION}Widgets_EXECUTABLE_COMPILE_FLAGS}")
 

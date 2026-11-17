@@ -113,7 +113,7 @@ EnvironmentDialog::EnvironmentDialog(QProcessEnvironment const& environment,
   QObject::connect(this->RemoveEntry, &QAbstractButton::clicked, this,
                    &EnvironmentDialog::removeSelectedEntries);
   QObject::connect(
-    this->Search, &QLineEdit::textChanged, [this](QString const& text) {
+    this->Search, &QLineEdit::textChanged, this, [this](QString const& text) {
       bool const valid = QtCMake::setSearchFilter(this->m_filter, text);
       QtCMake::setSearchFilterColor(this->Search, valid);
     });

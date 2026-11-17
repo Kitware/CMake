@@ -187,9 +187,13 @@ QCMakeCacheModel::QCMakeCacheModel(QObject* p)
 
 QCMakeCacheModel::~QCMakeCacheModel() = default;
 
-static size_t qHash(QCMakeProperty const& p)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+static size_t qHash(QCMakeProperty const& p, size_t seed = 0)
+#else
+static uint qHash(QCMakeProperty const& p, uint seed = 0)
+#endif
 {
-  return qHash(p.Key);
+  return qHash(p.Key, seed);
 }
 
 void QCMakeCacheModel::setShowNewProperties(bool f)
