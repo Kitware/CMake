@@ -3016,7 +3016,7 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
   }
 }
 
-void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
+bool cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 {
   std::vector<std::string> configsList =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
@@ -3045,6 +3045,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
   // A PCH source is added for all configurations, so it is a source of its
   // language in later configurations too.
   std::set<std::string> pchSourceLangs;
+  std::set<std::string> missingLangs;
 
   for (std::string const& config : configsList) {
     // FIXME: Refactor collection of sources to not evaluate object
@@ -3122,6 +3123,26 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           continue;
         }
 
+        // The reused target has a PCH only for languages it compiles with
+        // its headers.
+        if (haveReuseTarget && !this->GetGlobalGenerator()->IsXcode() &&
+            !reuseTarget->HasPchLanguage(config, lang)) {
+          if (missingLangs.insert(lang).second) {
+            this->GetCMakeInstance()->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat(
+                "Target \""_s, target->GetName(),
+                "\" reuses precompiled headers from target \""_s,
+                reuseTarget->GetName(), "\", but \""_s, reuseTarget->GetName(),
+                "\" does not build a precompiled header for language "_s, lang,
+                ".  Make \""_s, reuseTarget->GetName(),
+                "\" build one, or set SKIP_PRECOMPILE_HEADERS on the "_s, lang,
+                " sources of \""_s, target->GetName(), "\"."_s),
+              target->GetBacktrace());
+          }
+          continue;
+        }
+
         auto* pch_sf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
         pch_sf->SetSpecialSourceType(
@@ -3133,12 +3154,17 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         if (!this->GetGlobalGenerator()->IsXcode()) {
           if (!haveReuseTarget) {
             pchSourceLangs.insert(lang);
+            target->AddPchLanguage(config, lang);
           }
           pchInfos.push_back(
             { config, lang, arch, pchSource, pchHeader, pch_sf, nullptr });
         }
       }
     }
+  }
+
+  if (!missingLangs.empty()) {
+    return false;
   }
 
   for (PchInfo& pch : pchInfos) {
@@ -3232,7 +3258,6 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
       pch_sf->SetProperty("PCH_EXTENSION", pchExtension);
     }
 
-    // With CMAKE_LINK_PCH, GetPchFile above writes a reused PCH header.
     std::string err;
     if (pch.HeaderFile->ResolveFullPath(&err).empty()) {
       this->IssueMessage(
@@ -3242,6 +3267,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                  ", although its path is supposed to be known!"_s));
     }
   }
+  return true;
 }
 
 void cmLocalGenerator::CopyPchCompilePdb(

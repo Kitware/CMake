@@ -110,6 +110,11 @@ on ``<other_target>``.  CMake will halt with an error if the
 :prop_tgt:`PRECOMPILE_HEADERS` property of ``<target>`` is already set when
 the ``REUSE_FROM`` form is used.
 
+``<other_target>`` must build a precompiled header for each language in
+which ``<target>`` compiles sources with one.  It builds one for each language
+of its sources that are not marked :prop_sf:`SKIP_PRECOMPILE_HEADERS`, when
+its precompiled headers apply to that language.
+
 .. note::
 
   The ``REUSE_FROM`` form requires the same set of compiler options,

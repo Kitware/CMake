@@ -32,3 +32,9 @@ run_build_verbose(PchReuseAppend)
 run_build_verbose(PchReuseDeclarationOrder)
 run_test(PchReuseFromObjLib)
 run_test(PchReuseFromMultilanguage)
+# Xcode compiles the PCH of each reusing target itself.
+if(NOT RunCMake_GENERATOR STREQUAL "Xcode" AND
+    CMAKE_C_COMPILER_ID MATCHES "^(AppleClang|Clang|GNU|Intel|IntelLLVM|LCC|MSVC)$")
+  run_cmake(PchReuseMissingLanguage)
+endif()
+run_cmake(PchReuseMissingLanguageUnused)

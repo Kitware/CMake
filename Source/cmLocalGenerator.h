@@ -223,7 +223,7 @@ public:
                    std::string const& name, cmGeneratorTarget const* target,
                    cmBuildStep compileOrLink, std::string const& lang);
   void AddISPCDependencies(cmGeneratorTarget* target);
-  void AddPchDependencies(cmGeneratorTarget* target);
+  bool AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);
   virtual void AddXCConfigSources(cmGeneratorTarget* /* target */) {}
   void AddPerLanguageLinkFlags(std::string& flags,
