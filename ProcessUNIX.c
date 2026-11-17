@@ -970,9 +970,11 @@ void kwsysProcess_Execute(kwsysProcess* cp)
         /* Create a pipe to sit between the children.  */
         int p[2] = { -1, -1 };
         if (pipe(p KWSYSPE_VMS_NONBLOCK) < 0) {
+          int err = errno;
           if (nextStdIn != cp->PipeChildStd[0]) {
             kwsysProcessCleanupDescriptor(&nextStdIn);
           }
+          errno = err;
           kwsysProcessCleanup(cp, 1);
           return;
         }
@@ -980,11 +982,13 @@ void kwsysProcess_Execute(kwsysProcess* cp)
         /* Set close-on-exec flag on the pipe's ends.  */
         if ((fcntl(p[0], F_SETFD, FD_CLOEXEC) < 0) ||
             (fcntl(p[1], F_SETFD, FD_CLOEXEC) < 0)) {
+          int err = errno;
           close(p[0]);
           close(p[1]);
           if (nextStdIn != cp->PipeChildStd[0]) {
             kwsysProcessCleanupDescriptor(&nextStdIn);
           }
+          errno = err;
           kwsysProcessCleanup(cp, 1);
           return;
         }
@@ -995,6 +999,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
       {
         int res = kwsysProcessCreate(cp, i, &si);
+        int err = errno;
 
         /* Close our copies of pipes used between children.  */
         if (si.StdIn != cp->PipeChildStd[0]) {
@@ -1013,6 +1018,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
           if (nextStdIn != cp->PipeChildStd[0]) {
             kwsysProcessCleanupDescriptor(&nextStdIn);
           }
+          errno = err;
           kwsysProcessCleanup(cp, 1);
           return;
         }
@@ -1724,18 +1730,22 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
   /* Create a pipe for detecting that the child process has created a process
      group and session.  */
   if (pipe(pgidPipe) < 0) {
+    int err = errno;
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
+    errno = err;
     return 0;
   }
 
   /* Set close-on-exec flag on the pipe's write end.  */
   if (fcntl(si->ErrorPipe[1], F_SETFD, FD_CLOEXEC) < 0 ||
       fcntl(pgidPipe[1], F_SETFD, FD_CLOEXEC) < 0) {
+    int err = errno;
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
     kwsysProcessCleanupDescriptor(&pgidPipe[0]);
     kwsysProcessCleanupDescriptor(&pgidPipe[1]);
+    errno = err;
     return 0;
   }
 
@@ -1746,10 +1756,12 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
   sigaddset(&mask, SIGINT);
   sigaddset(&mask, SIGTERM);
   if (sigprocmask(SIG_BLOCK, &mask, &old_mask) < 0) {
+    int err = errno;
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
     kwsysProcessCleanupDescriptor(&pgidPipe[0]);
     kwsysProcessCleanupDescriptor(&pgidPipe[1]);
+    errno = err;
     return 0;
   }
 
@@ -1764,11 +1776,13 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
   cp->ForkPIDs[prIndex] = kwsysProcessFork(cp, si);
 #endif
   if (cp->ForkPIDs[prIndex] < 0) {
+    int err = errno;
     sigprocmask(SIG_SETMASK, &old_mask, 0);
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
     kwsysProcessCleanupDescriptor(&pgidPipe[0]);
     kwsysProcessCleanupDescriptor(&pgidPipe[1]);
+    errno = err;
     return 0;
   }
 
@@ -1843,16 +1857,20 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
          (readRes < 0 && errno == EINTR)) {
   }
   if (readRes < 0) {
+    int err = errno;
     sigprocmask(SIG_SETMASK, &old_mask, 0);
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
     kwsysProcessCleanupDescriptor(&pgidPipe[0]);
+    errno = err;
     return 0;
   }
   kwsysProcessCleanupDescriptor(&pgidPipe[0]);
 
   /* Unmask signals.  */
   if (sigprocmask(SIG_SETMASK, &old_mask, 0) < 0) {
+    int err = errno;
     kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
+    errno = err;
     return 0;
   }
 
@@ -1954,7 +1972,9 @@ static int kwsysProcessSetupOutputPipeFile(int* p, char const* name)
 
   /* Set close-on-exec flag on the pipe's end.  */
   if (fcntl(fout, F_SETFD, FD_CLOEXEC) < 0) {
+    int err = errno;
     close(fout);
+    errno = err;
     return 0;
   }
 
