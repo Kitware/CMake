@@ -1018,6 +1018,11 @@ enum class NamedBlockResult
   Empty,   // every requested property was skipped; header suppressed
 };
 
+#if defined(__CYGWIN__) && defined(__GNUC__) && !defined(__clang__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 // Emit one block of user-specified properties for a head target (`targets[0]`)
 // and optionally any reachable dependencies (`targets[1]` and on).
 NamedBlockResult EmitNamedPropertiesBlock(
@@ -1125,6 +1130,10 @@ bool PrintPropertiesConfigureTime(
   }
   return true;
 }
+
+#if defined(__CYGWIN__) && defined(__GNUC__) && !defined(__clang__)
+#  pragma GCC diagnostic pop
+#endif
 
 bool PrintTargetPropertiesDeferred(
   std::vector<std::string> targetNames,
