@@ -18,7 +18,7 @@ target_compile_features(CudaOnlyFatbin PRIVATE cuda_std_11)
 target_compile_definitions(CudaOnlyFatbin PRIVATE "FATBIN_FILE_PATHS=\"$<JOIN:$<TARGET_OBJECTS:CudaFATBIN>,~_~>\"")
 
 find_package(CUDAToolkit REQUIRED)
-target_link_libraries(CudaOnlyFatbin PRIVATE CUDAToolkit::cuda_driver)
+target_link_libraries(CudaOnlyFatbin PRIVATE CUDA::cuda_driver)
 
 if(APPLE)
   # Help the static cuda runtime find the driver (libcuda.dyllib) at runtime.

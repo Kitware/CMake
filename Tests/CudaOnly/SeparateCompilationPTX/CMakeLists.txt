@@ -56,7 +56,7 @@ add_executable(CudaOnlySeparateCompilationPTX main.cu ${output_file})
 target_compile_features(CudaOnlySeparateCompilationPTX PRIVATE cuda_std_11)
 target_include_directories(CudaOnlySeparateCompilationPTX PRIVATE
                            ${CMAKE_CURRENT_BINARY_DIR} )
-target_link_libraries(CudaOnlySeparateCompilationPTX PRIVATE CUDAToolkit::cuda_driver)
+target_link_libraries(CudaOnlySeparateCompilationPTX PRIVATE CUDA::cuda_driver)
 if(APPLE)
   # Help the static cuda runtime find the driver (libcuda.dyllib) at runtime.
   set_property(TARGET CudaOnlySeparateCompilationPTX PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
