@@ -227,10 +227,9 @@ std::string cmCatViews(
 
   std::string result;
   std::string::size_type initialLen = 0;
-  if (rvalueString && rvalueString->capacity() >= totalSize) {
+  if (rvalueString) {
+    // Reuse the largest allocation.
     result = std::move(*rvalueString);
-  } else {
-    rvalueString = nullptr;
   }
   result.resize(totalSize);
   if (rvalueString && rvalueStringOffset > 0) {
