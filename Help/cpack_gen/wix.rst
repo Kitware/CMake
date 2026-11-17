@@ -347,6 +347,12 @@ Windows using WiX.
  allow other CMake projects to find your package with
  the :command:`find_package` command.
 
+ .. versionchanged:: 4.6
+
+   The entry is created under ``HKEY_CURRENT_USER`` if
+   :variable:`CPACK_WIX_INSTALL_SCOPE` is ``perUser``, and under the root
+   matching the installation if it is ``perUserOrMachine``.
+
 .. variable:: CPACK_WIX_PROPERTY_<PROPERTY>
 
  .. versionadded:: 3.1
@@ -476,6 +482,36 @@ Windows using WiX.
    .. versionchanged:: 4.3
 
      Before CMake 4.3, this value was reserved for future use and not supported.
+
+   .. versionchanged:: 4.6
+
+     The installer refuses to install for all users, which would put the
+     files into the installing administrator's profile.
+
+ ``perUserOrMachine``
+   .. versionadded:: 4.6
+
+   Create a dual-purpose installer that installs for the current user by
+   default, and for all users when run with administrative privileges and
+   ``ALLUSERS=2 MSIINSTALLPERUSER=""``
+   (see https://learn.microsoft.com/en-us/windows/win32/msi/single-package-authoring).
+   The default user interface does not offer this choice.
+
+   Files are installed below the ``ProgramFiles`` folder, which Windows
+   Installer redirects to ``%LOCALAPPDATA%\Programs`` for per-user
+   installations.  Roots chosen with :variable:`CPACK_WIX_ROOT_FOLDER_ID`
+   or :variable:`CPACK_WIX_SKIP_PROGRAM_FOLDER` are not redirected, and
+   folders in the user's profile, such as ``LocalAppDataFolder``, are
+   rejected.
+
+   The registry entries that serve as key paths for shortcuts are created
+   under ``HKEY_LOCAL_MACHINE`` or ``HKEY_CURRENT_USER`` to match the
+   installation.  ICE57 reports these as errors, so CPack passes
+   ``-sice:ICE57`` to WiX 3 ``light``.  Pass ``-sice ICE57`` when validating
+   the package with ``wix msi validate``.
+
+   An upgrade must be installed in the same context, per-user or
+   per-machine, as the version it replaces.
 
  ``NONE``
    Create an installer without any ``InstallScope`` attribute.

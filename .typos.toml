@@ -44,6 +44,8 @@ Spectre = "Spectre"
 gti = "gti"
 # StrCpy in NSIS input.
 Cpy = "Cpy"
+# The WiX option to suppress an ICE.
+sice = "sice"
 
 [files]
 ignore-hidden = false

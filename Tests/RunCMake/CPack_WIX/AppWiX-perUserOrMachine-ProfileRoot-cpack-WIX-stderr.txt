@@ -1,0 +1,2 @@
+^CPack Error: CPACK_WIX_ROOT_FOLDER_ID 'LocalAppDataFolder' is a per-user folder and cannot be used with CPACK_WIX_INSTALL_SCOPE perUserOrMachine\.  Use perUser instead\.
+CPack Error: Cannot initialize the generator WIX

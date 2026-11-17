@@ -30,6 +30,11 @@ cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(
     case cmWIXInstallScope::PER_USER:
       this->PerUserInstall = true;
       break;
+    case cmWIXInstallScope::PER_USER_OR_MACHINE:
+      // HKMU follows ALLUSERS to HKLM or HKCU, as the shortcut folders do.
+      this->PerUserInstall = false;
+      this->RegistryRoot = "HKMU";
+      break;
     case cmWIXInstallScope::PER_MACHINE:
     case cmWIXInstallScope::NONE:
       this->PerUserInstall = false;
@@ -85,7 +90,7 @@ void cmWIXFilesSourceWriter::EmitInstallRegistryValue(
   valueName += suffix;
 
   BeginElement("RegistryValue");
-  AddAttribute("Root", "HKCU");
+  AddAttribute("Root", this->RegistryRoot);
   AddAttribute("Key", registryKey);
   AddAttribute("Name", valueName);
   AddAttribute("Type", "integer");

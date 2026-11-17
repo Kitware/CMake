@@ -45,5 +45,6 @@ public:
 
 private:
   bool PerUserInstall = false;
+  std::string RegistryRoot = "HKCU";
   std::string ComponentKeysRegistryPath;
 };

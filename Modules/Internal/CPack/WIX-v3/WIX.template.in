@@ -15,6 +15,10 @@
 
         <?if $(var.CPACK_WIX_INSTALL_SCOPE) = "NONE" ?>
         <Package InstallerVersion="301" Compressed="yes"/>
+        <?elseif $(var.CPACK_WIX_INSTALL_SCOPE) = "perUserOrMachine" ?>
+        <Package InstallerVersion="500" Compressed="yes"/>
+        <Property Id="ALLUSERS" Value="2"/>
+        <Property Id="MSIINSTALLPERUSER" Value="1"/>
         <?else?>
         <Package InstallerVersion="301" Compressed="yes" InstallScope="$(var.CPACK_WIX_INSTALL_SCOPE)"/>
         <?endif?>
