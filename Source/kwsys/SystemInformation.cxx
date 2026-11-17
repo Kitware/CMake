@@ -4465,7 +4465,9 @@ bool SystemInformationImplementation::QueryLinuxMemory()
   struct utsname unameInfo;
   int errorFlag = uname(&unameInfo);
   if (errorFlag != 0) {
-    std::cerr << "Problem calling uname(): " << strerror(errno) << "\n";
+    // Read the errno before c++ io potentially messes it up.
+    auto errstr = strerror(errno);
+    std::cerr << "Problem calling uname(): " << errstr << "\n";
     return false;
   }
 

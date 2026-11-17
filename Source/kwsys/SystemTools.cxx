@@ -2401,6 +2401,7 @@ SystemTools::CopyStatus SystemTools::CopyFileContentBlockwise(
   // Copy the file a block at a time and detect short reads/writes.
   while (status.IsSuccess()) {
     auto bytesRead = fread(buffer, 1, bufferSize, fin);
+    auto read_err = errno;
     if (bytesRead > 0 && fwrite(buffer, 1, bytesRead, fout) != bytesRead) {
       status = Status::POSIX_errno();
       path = CopyStatus::DestPath;
@@ -2409,7 +2410,7 @@ SystemTools::CopyStatus SystemTools::CopyFileContentBlockwise(
 
     if (bytesRead < bufferSize) {
       if (ferror(fin)) {
-        status = Status::POSIX_errno();
+        status = Status::POSIX(read_err);
         path = CopyStatus::SourcePath;
       }
       break;
@@ -2611,7 +2612,7 @@ SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
       break;
   }
   // Should not reach here
-  return CopyStatus{ Status::POSIX_errno(), CopyStatus::NoPath };
+  return CopyStatus{ Status::POSIX(EINVAL), CopyStatus::NoPath };
 }
 
 SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
