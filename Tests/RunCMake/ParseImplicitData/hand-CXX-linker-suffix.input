@@ -1,0 +1,4 @@
+CMAKE_LANG=CXX
+CMAKE_LINKER=/usr/bin/ld.lld-15
+CMAKE_CXX_COMPILER_ID=Clang
+ "/usr/bin/ld.lld-15" -m elf_x86_64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib -lstdc++ -lm -lc

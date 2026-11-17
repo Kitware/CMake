@@ -24,6 +24,8 @@ set(targets
   freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0 freebsd-Fortran-GNU-4.6.4
   hand-C-empty hand-CXX-empty
   hand-C-relative hand-CXX-relative
+  hand-CXX-linker-suffix
+  hand-CXX-linker-suffix-nonnumeric
   hand-CXX-shared-libraries
   linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
   linux-C-GNU-10.2.1-static-libgcc

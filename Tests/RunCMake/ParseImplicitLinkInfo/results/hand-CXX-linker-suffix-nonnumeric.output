@@ -1,0 +1,4 @@
+libs=stdc\+\+;m;c
+dirs=/usr/lib/x86_64-linux-gnu;/usr/lib
+library_arch=
+linker_tool=NOTFOUND
