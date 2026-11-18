@@ -150,6 +150,12 @@ For the ``MSVC`` and ``clang-cl`` compilers, :prop_tgt:`C_EXTENSIONS` ``OFF``
 adds ``/Zc:__STDC__`` for the C11 and C17 standards, which disables the
 Microsoft and UCRT extensions. See :policy:`CMP0233`.
 
+For the ``MSVC`` compiler from Visual Studio 2019 version 16.5 or above,
+:prop_tgt:`C_EXTENSIONS` or :prop_tgt:`CXX_EXTENSIONS` ``OFF`` adds
+``/Zc:preprocessor`` to select the conformant preprocessor.  A target that
+uses both languages gets the flag for both if either disables extensions.
+See :policy:`CMP0234`.
+
 Optional Compile Features
 =========================
 

@@ -11,7 +11,8 @@ as ``-std=gnu++11`` instead of ``-std=c++11`` to the compile line.  For
 MSVC and ``clang-cl``, ``/permissive-`` is added when this property is ``OFF`` and the
 selected standard does not already imply it, and ``/permissive`` is added
 when it is ``ON`` and the selected standard implies ``/permissive-``
-(see :policy:`CMP0231`).  This property is ``ON`` by default. The basic C++
+(see :policy:`CMP0231`).  For MSVC, ``/Zc:preprocessor`` is also added when it
+is ``OFF`` (see :policy:`CMP0234`).  This property is ``ON`` by default. The basic C++
 standard level is controlled by the
 :prop_tgt:`CXX_STANDARD` target property.
 

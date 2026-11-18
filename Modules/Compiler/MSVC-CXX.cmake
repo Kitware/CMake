@@ -116,6 +116,15 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.14)
   set(CMAKE_CXX_COMPILE_OPTIONS_MSVC_CPLUSPLUS_MACRO "-Zc:__cplusplus")
 endif()
 
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.25)
+  # VS 2019 16.5 and above have the conformant preprocessor.  It is passed
+  # when extensions are off for C or C++.  See policy CMP0234.
+  set(CMAKE_CXX_COMPILE_OPTION_MSVC_PREPROCESSOR "-Zc:preprocessor")
+  # Passed with C++ sources of targets whose C sources need it, as the Visual
+  # Studio generators compile both with one set of options.
+  set(CMAKE_CXX_COMPILE_OPTION_MSVC_TRADITIONAL_PREPROCESSOR "-Zc:preprocessor-")
+endif()
+
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.32)
   # VS 2022 17.2 and above have /Zc:__STDC__.  It has no effect on C++, but
   # is passed with the C++ sources of targets that also have C sources

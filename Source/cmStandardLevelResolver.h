@@ -32,6 +32,9 @@ public:
   std::string GetMsvcStdcCompileOption(cmGeneratorTarget const* target,
                                        std::string const& lang,
                                        std::string const& config) const;
+  std::string GetMsvcPreprocessorCompileOption(
+    cmGeneratorTarget const* target, std::string const& lang,
+    std::string const& config) const;
   std::string GetEffectiveStandard(cmGeneratorTarget const* target,
                                    std::string const& lang,
                                    std::string const& config) const;

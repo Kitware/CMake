@@ -6,6 +6,19 @@ __compiler_msvc(C)
 
 include(Compiler/CMakeCommonCompilerMacros)
 
+if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.25)
+  # VS 2019 16.5 and above have the conformant preprocessor.  It is passed
+  # when extensions are off for C or C++.  See policy CMP0234.
+  set(CMAKE_C_COMPILE_OPTION_MSVC_PREPROCESSOR "-Zc:preprocessor")
+endif()
+if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.28)
+  # /std:c11 and later imply /Zc:preprocessor.  With extensions on, the
+  # traditional preprocessor is selected back with /Zc:preprocessor-.
+  # See policy CMP0234.
+  set(CMAKE_C_STANDARD_IMPLIES_MSVC_PREPROCESSOR ON)
+  set(CMAKE_C_COMPILE_OPTION_MSVC_TRADITIONAL_PREPROCESSOR "-Zc:preprocessor-")
+endif()
+
 if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.27)
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "")
   set(CMAKE_C90_EXTENSION_COMPILE_OPTION "")

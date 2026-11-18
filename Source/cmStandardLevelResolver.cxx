@@ -688,6 +688,71 @@ std::string cmStandardLevelResolver::GetMsvcStdcCompileOption(
     "CMAKE_CXX_COMPILE_OPTION_MSVC_STDC");
 }
 
+std::string cmStandardLevelResolver::GetMsvcPreprocessorCompileOption(
+  cmGeneratorTarget const* target, std::string const& lang,
+  std::string const& config) const
+{
+  // CMP0234: the compiler modules define CMAKE_<LANG>_COMPILE_OPTION_
+  // MSVC_PREPROCESSOR only for compilers that support the flag.
+  if (target->GetPolicyStatusCMP0234() != cmPolicies::NEW ||
+      (lang != "C"_s && lang != "CXX"_s)) {
+    return {};
+  }
+  std::string option = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_"_s, lang, "_COMPILE_OPTION_MSVC_PREPROCESSOR"_s));
+  if (option.empty()) {
+    return {};
+  }
+
+  // Extensions are enabled unless the target or, with CMP0128 NEW, the
+  // compiler default disables them.  This matches the standard option
+  // selection.
+  auto const extensionsOff = [this, target](std::string const& l) {
+    bool ext = true;
+    if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0128) ==
+        cmPolicies::NEW) {
+      ext = this->Makefile
+              ->GetDefinition(cmStrCat("CMAKE_"_s, l, "_EXTENSIONS_DEFAULT"_s))
+              .IsOn();
+    }
+    if (cmValue extPropValue = target->GetLanguageExtensions(l)) {
+      ext = extPropValue.IsOn();
+    }
+    return !ext;
+  };
+
+  // The Visual Studio generators compile the C and C++ sources of a target
+  // with one set of options, so the conformant preprocessor is used for
+  // both languages if either one disables extensions, in every generator.
+  std::string const otherLang = lang == "C"_s ? "CXX" : "C";
+  bool const conformant = extensionsOff(lang) ||
+    (target->IsLanguageUsed(otherLang, config) && extensionsOff(otherLang));
+
+  // The C standard options /std:c11 and later imply the conformant
+  // preprocessor for C sources.
+  bool const cStandardImpliesConformant =
+    this->Makefile->GetDefinition("CMAKE_C_STANDARD_IMPLIES_MSVC_PREPROCESSOR")
+      .IsOn() &&
+    (lang == "C"_s || target->IsLanguageUsed("C", config)) &&
+    !this->Makefile
+       ->GetSafeDefinition(this->GetCompileOptionDef(target, "C", config))
+       .empty();
+
+  if (conformant) {
+    // No flag is needed for C sources that already imply it.
+    return lang == "C"_s && cStandardImpliesConformant ? std::string{}
+                                                       : option;
+  }
+  if (cStandardImpliesConformant) {
+    // Keep the traditional preprocessor with /Zc:preprocessor-.  The Visual
+    // Studio generators use the C++ options of a target that has C++ sources
+    // for the C sources too, so the flag is passed with them as well.
+    return this->Makefile->GetSafeDefinition(cmStrCat(
+      "CMAKE_"_s, lang, "_COMPILE_OPTION_MSVC_TRADITIONAL_PREPROCESSOR"_s));
+  }
+  return {};
+}
+
 std::string cmStandardLevelResolver::GetEffectiveStandard(
   cmGeneratorTarget const* target, std::string const& lang,
   std::string const& config) const

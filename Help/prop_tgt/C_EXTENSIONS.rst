@@ -10,6 +10,8 @@ used.  For some compilers, this results in adding a flag such
 as ``-std=gnu11`` instead of ``-std=c11`` to the compile line.  For
 MSVC and ``clang-cl``, ``/Zc:__STDC__`` is added when this property is
 ``OFF`` and the selected standard is C11 or later (see :policy:`CMP0233`).
+For MSVC, ``/Zc:preprocessor`` is also added when it is ``OFF``
+(see :policy:`CMP0234`).
 This property is ``ON`` by default. The basic C standard level is
 controlled by the :prop_tgt:`C_STANDARD` target property.
 
