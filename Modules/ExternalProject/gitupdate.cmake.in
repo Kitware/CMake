@@ -39,6 +39,32 @@ function(get_hash_for_ref ref out_var err_var)
   set(${err_var} "${error_msg}" PARENT_SCOPE)
 endfunction()
 
+# A shallow clone only fetches the branch tips and tags, so do_fetch() won't
+# find a commit hash that is neither. Fetch that commit by itself. Servers
+# that refuse to send an unadvertised commit make this fail, and the
+# checkout then reports the error.
+function(fetch_missing_shallow_commit)
+  set(git_tag "@git_tag@")
+  string(LENGTH "${git_tag}" git_tag_length)
+  if(NOT EXISTS "@work_dir@/.git/shallow" OR
+     NOT git_tag MATCHES "^[0-9a-fA-F]+$" OR
+     NOT (git_tag_length EQUAL 40 OR git_tag_length EQUAL 64))
+    return()
+  endif()
+
+  get_hash_for_ref("${git_tag}" tag_sha error_msg)
+  if(NOT tag_sha STREQUAL "")
+    return()
+  endif()
+
+  message(VERBOSE "Fetching commit ${git_tag} from the remote @git_remote_name@")
+  execute_process(
+    COMMAND "@git_EXECUTABLE@" --git-dir=.git fetch --depth 1 "@git_remote_name@" "${git_tag}"
+    WORKING_DIRECTORY "@work_dir@"
+    ${maybe_show_command}
+  )
+endfunction()
+
 get_hash_for_ref(HEAD head_sha error_msg)
 if(head_sha STREQUAL "")
   message(FATAL_ERROR "Failed to get the hash for HEAD:\n${error_msg}")
@@ -114,6 +140,7 @@ else()
       message(DEBUG "${error_msg}")
     endif()
     do_fetch()
+    fetch_missing_shallow_commit()
     set(checkout_name "@git_tag@")
 
   else()

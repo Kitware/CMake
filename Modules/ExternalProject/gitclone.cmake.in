@@ -55,6 +55,31 @@ if(error_code)
   message(FATAL_ERROR "Failed to clone repository:\n  '@git_repository@'")
 endif()
 
+# A shallow clone has only the branch tips and tags, so it lacks a commit
+# hash that is neither. Fetch that commit by itself. Servers that refuse to
+# send an unadvertised commit make this fail, and the checkout below then
+# reports the error.
+set(git_shallow "@git_shallow@")
+set(git_tag "@git_tag@")
+string(LENGTH "${git_tag}" git_tag_length)
+if(git_shallow AND git_tag MATCHES "^[0-9a-fA-F]+$" AND
+   (git_tag_length EQUAL 40 OR git_tag_length EQUAL 64))
+  execute_process(
+    COMMAND "@git_EXECUTABLE@" rev-parse --verify --quiet "${git_tag}^0"
+    WORKING_DIRECTORY "@work_dir@/@src_name@"
+    RESULT_VARIABLE error_code
+    OUTPUT_QUIET
+    ERROR_QUIET
+  )
+  if(error_code)
+    execute_process(
+      COMMAND "@git_EXECUTABLE@" fetch --depth 1 "@git_remote_name@" "${git_tag}"
+      WORKING_DIRECTORY "@work_dir@/@src_name@"
+      ${maybe_show_command}
+    )
+  endif()
+endif()
+
 execute_process(
   COMMAND "@git_EXECUTABLE@"
           checkout "@git_tag@" @git_checkout_explicit--@
