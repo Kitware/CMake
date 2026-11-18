@@ -11,18 +11,19 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
 .linux_release_x86_64:
-    image: "kitware/cmake:build-linux-x86_64-deps-2026-10-22@sha256:650889862a59c5a4053b01a54afce5006c7cbb2f64e9f1c34975477bee50cd52"
+    image: "kitware/cmake:build-linux-x86_64-deps-2026-11-20@sha256:9c22a41a4082e47659623823ab80d575aa2ea95c9d625c91e53debc7dd9df2f8"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        LAUNCHER: "scl enable devtoolset-7 --"
+        LAUNCHER: "scl enable devtoolset-11 --"
         CMAKE_ARCH: x86_64
 
 .linux_release_aarch64:
-    image: "kitware/cmake:build-linux-aarch64-deps-2026-10-22@sha256:89b7eec9fc7272d5b54a588d24400c87e61d9414b544c63b20a95dfba8dd322c"
+    image: "kitware/cmake:build-linux-aarch64-deps-2026-11-20@sha256:a3c949f132550a3818b03eba7e7cf3509d9db478169e0db9bbc6eac0d99d8d69"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        LAUNCHER: "scl enable gcc-toolset-11 --"
         CMAKE_ARCH: aarch64
 
 .linux_package:

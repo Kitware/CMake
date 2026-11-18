@@ -6,8 +6,8 @@
 # The resulting image will have an '/out' directory containing the package.
 
 # Keep this in sync with the `.gitlab/os-linux.yml` `.linux_release_aarch64` image.
-ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-aarch64-deps-2026-10-22
-ARG FROM_IMAGE_DIGEST=@sha256:89b7eec9fc7272d5b54a588d24400c87e61d9414b544c63b20a95dfba8dd322c
+ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-aarch64-deps-2026-11-20
+ARG FROM_IMAGE_DIGEST=@sha256:a3c949f132550a3818b03eba7e7cf3509d9db478169e0db9bbc6eac0d99d8d69
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
 FROM $FROM_IMAGE
 
@@ -19,6 +19,7 @@ RUN : \
  && mkdir -p /opt/cmake/src/cmake-build \
  && cd /opt/cmake/src/cmake-build \
  && cp ../cmake/Utilities/Release/linux/aarch64/cache.txt CMakeCache.txt \
+ && source /opt/rh/gcc-toolset-11/enable \
  && set -x \
  && ../cmake/bootstrap --parallel=$(nproc) --docdir=doc/cmake \
  && nice make -j $(nproc) \

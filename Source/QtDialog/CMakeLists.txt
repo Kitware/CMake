@@ -252,6 +252,9 @@ target_link_libraries(cmake-gui
     ManifestLib
     Qt${CMake_QT_MAJOR_VERSION}::Core
   )
+if(CMake_QT_STATIC_QXcbIntegrationPlugin)
+  qt_import_plugins(cmake-gui INCLUDE Qt${CMake_QT_MAJOR_VERSION}::QXcbIntegrationPlugin)
+endif()
 
 if(WIN32)
   target_sources(CMakeGUIMainLib INTERFACE CMakeSetup.rc)

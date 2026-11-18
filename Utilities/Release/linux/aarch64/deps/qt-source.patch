@@ -1,0 +1,14 @@
+# restore compatibility with freetype 2.8
+--- qtbase-everywhere-src-6.8.5/src/gui/text/freetype/qfontengine_ft.cpp.orig
++++ qtbase-everywhere-src-6.8.5/src/gui/text/freetype/qfontengine_ft.cpp
+@@ -54,6 +54,10 @@
+ #  define QT_MAX_CACHED_GLYPH_SIZE 64
+ #endif
+
++#if (FREETYPE_MAJOR*10000 + FREETYPE_MINOR*100 + FREETYPE_PATCH) < 20900
++#  define FT_Done_MM_Var(library, var) free(var)
++#endif
++
+ QT_BEGIN_NAMESPACE
+
+ Q_DECLARE_LOGGING_CATEGORY(lcFontMatch)
