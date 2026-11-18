@@ -2334,6 +2334,18 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   }
 
+  // Add the MSVC flag that disables the MSVC and UCRT extensions for C
+  // sources when C_EXTENSIONS is OFF if CMP0233 is NEW.  It is also added
+  // for the C++ sources of targets with such C sources.
+  if (compileOrLink == cmBuildStep::Compile) {
+    std::string const stdcOptions =
+      cmStandardLevelResolver(this->Makefile)
+        .GetMsvcStdcCompileOption(target, lang, config);
+    if (!stdcOptions.empty()) {
+      this->AppendCompileOptions(flags, stdcOptions);
+    }
+  }
+
   std::string compilerId = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_"_s, lang, "_COMPILER_ID"_s));
 

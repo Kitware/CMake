@@ -146,6 +146,10 @@ mode.  ``OFF`` adds ``/permissive-`` when the selected standard does not
 already imply it.  ``ON`` adds ``/permissive`` when the selected standard
 implies ``/permissive-``. See :policy:`CMP0231`.
 
+For the ``MSVC`` and ``clang-cl`` compilers, :prop_tgt:`C_EXTENSIONS` ``OFF``
+adds ``/Zc:__STDC__`` for the C11 and C17 standards, which disables the
+Microsoft and UCRT extensions. See :policy:`CMP0233`.
+
 Optional Compile Features
 =========================
 

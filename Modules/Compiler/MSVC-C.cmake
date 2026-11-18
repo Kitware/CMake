@@ -43,6 +43,19 @@ if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.27)
     endif()
   endif()
 
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.32)
+    # VS 2022 17.2 and above can disable the MSVC and UCRT extensions with
+    # /Zc:__STDC__ in C11 and later modes.  It is passed when extensions are
+    # off.  See policy CMP0233.
+    foreach(_msvc_stdc_std IN ITEMS 11 17 23)
+      if(DEFINED CMAKE_C${_msvc_stdc_std}_STANDARD_COMPILE_OPTION)
+        set(CMAKE_C${_msvc_stdc_std}_STANDARD_COMPILE_OPTION_MSVC_STDC
+          "-Zc:__STDC__")
+      endif()
+    endforeach()
+    unset(_msvc_stdc_std)
+  endif()
+
   __compiler_check_default_language_standard(C 19.27 99)
 else()
   # MSVC has no specific options to set C language standards, but set them as
