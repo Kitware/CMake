@@ -45,6 +45,17 @@ namespace {
 constexpr std::size_t MocUnderscoreLength = 4; // Length of "moc_"
 constexpr std::size_t UiUnderscoreLength = 3;  // Length of "ui_"
 
+// Apple's ranlib and libtool warn about archive members without global
+// symbols.  A weak hidden symbol avoids duplicate definitions across archives
+// and is not exported from linked binaries.
+constexpr char MocPlaceholderContent[] =
+  "enum some_compilers { need_more_than_nothing };\n"
+  "#if defined(__APPLE__) && defined(__GNUC__)\n"
+  "__attribute__((__weak__, __visibility__(\"hidden\")))\n"
+  "void cmake_automoc_silence_linker_warning();\n"
+  "void cmake_automoc_silence_linker_warning() {}\n"
+  "#endif\n";
+
 /** \class cmQtAutoMocUicT
  * \brief AUTOMOC and AUTOUIC generator
  */
@@ -1250,8 +1261,7 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::EvalHeader(SourceFileHandleT source)
     // registered moc output to exist; an empty TU is valid and scans clean.
     std::string const outputFile =
       this->Gen()->AbsoluteIncludePath(sourceFile.BuildPath);
-    std::string const placeholder =
-      "enum some_compilers { need_more_than_nothing };\n";
+    std::string const placeholder = MocPlaceholderContent;
     if (cmQtAutoGenerator::FileDiffers(outputFile, placeholder)) {
       if (!cmQtAutoGenerator::FileWrite(outputFile, placeholder)) {
         this->LogError(GenT::MOC,
@@ -2301,8 +2311,8 @@ void cmQtAutoMocUicT::JobMocsCompilationT::Process()
   if (this->MocEval().CompFiles.empty()) {
     // Placeholder content
     content += "// No files found that require moc or the moc files are "
-               "included\n"
-               "enum some_compilers { need_more_than_nothing };\n";
+               "included\n";
+    content += MocPlaceholderContent;
   } else {
     // Valid content
     bool const mc = this->BaseConst().MultiConfig;

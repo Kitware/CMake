@@ -3,6 +3,7 @@ enable_language(CXX)
 set(info "")
 foreach(var
     CMAKE_CXX_COMPILE_FEATURES
+    CMAKE_CXX_COMPILER_ID
     CMAKE_MAKE_PROGRAM
     )
   if(DEFINED ${var})
