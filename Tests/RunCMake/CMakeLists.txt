@@ -1471,12 +1471,16 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   if(DEFINED CMake_TEST_Rust)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_Rust=${CMake_TEST_Rust})
   endif()
+  if(DEFINED CMake_TEST_Swift)
+    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_Swift=${CMake_TEST_Swift})
+    list(APPEND LinkerLauncher_ARGS -DCMake_TEST_Swift=${CMake_TEST_Swift})
+  endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
-    PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL" "Rust")
+    PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL" "Rust" "Swift")
   add_RunCMake_test(LinkerLauncher)
   set_property(TEST RunCMake.LinkerLauncher APPEND
-    PROPERTY LABELS "CUDA" "HIP" "Fortran" "SYCL")
+    PROPERTY LABELS "CUDA" "HIP" "Fortran" "SYCL" "Swift")
   # FIXME(#27402,#28110): FASTBuild doesn't currently support this feature, but
   # it should.
   if (NOT "${CMAKE_GENERATOR}" STREQUAL "FASTBuild")

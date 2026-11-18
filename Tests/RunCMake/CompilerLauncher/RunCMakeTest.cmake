@@ -52,6 +52,10 @@ endif()
 if(CMake_TEST_Rust)
   list(APPEND langs Rust)
 endif()
+if(CMake_TEST_Swift AND RunCMake_GENERATOR MATCHES "^Ninja")
+  # FIXME(#19283): Swift is not supported by the Makefile generator yet
+  list(APPEND langs Swift)
+endif()
 
 foreach(lang ${langs})
   run_compiler_launcher(${lang})

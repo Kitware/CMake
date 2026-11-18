@@ -2237,6 +2237,14 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     commonVariables.emplace("CONFIG", config);
     commonVariables.emplace("restat", "1");
 
+    std::vector<std::string> compilerLauncher =
+      this->GetCompilerLauncher(language, config);
+    if (!compilerLauncher.empty()) {
+      commonVariables.emplace(
+        "LAUNCHER",
+        cmStrCat(this->ConvertLauncherToShell(compilerLauncher), ' '));
+    }
+
     for (cmSourceFile const* sf : sources) {
       std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(sf);
       commonExplicitDeps.push_back(sourceFilePath);
