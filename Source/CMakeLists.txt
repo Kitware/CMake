@@ -143,6 +143,7 @@ add_library(
   cmCMakeString.hxx
   cmCMakeString.cxx
   cmCommandLineArgument.h
+  cmCommandTypes.h
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
   cmComputeComponentGraph.cxx

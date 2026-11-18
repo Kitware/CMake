@@ -1,0 +1,11 @@
+-- Intercepted find_package\(Transitive\)
+-- Provider invoked in context ''
+-- Forwarding to find_package\(Transitive\)
+-- Intercepted find_package\(Transitive\)
+-- Provider invoked in context 'Transitive'
+-- Leaving provider
+-- Intercepted find_package\(UsesProvider\)
+-- Provider invoked in context 'Transitive'
+-- Marking UsesProvider as FOUND
+-- Leaving provider
+-- Leaving provider

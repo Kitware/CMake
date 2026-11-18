@@ -16,6 +16,7 @@
 
 #include <cm/optional>
 
+#include "cmCommandTypes.h"
 #include "cmDefinitions.h"
 #include "cmDependencyProvider.h"
 #include "cmLinkedTree.h"
@@ -32,10 +33,8 @@ class cmGlobVerificationManager;
 class cmMakefile;
 class cmStateSnapshot;
 class cmMessenger;
-class cmExecutionStatus;
 class cmListFileBacktrace;
 struct cmGlobCacheEntry;
-struct cmListFileArgument;
 
 template <typename T>
 class BT;
@@ -168,10 +167,8 @@ public:
   bool GetIsGeneratorMultiConfig() const;
   void SetIsGeneratorMultiConfig(bool b);
 
-  using Command = std::function<bool(std::vector<cmListFileArgument> const&,
-                                     cmExecutionStatus&)>;
-  using BuiltinCommand = bool (*)(std::vector<std::string> const&,
-                                  cmExecutionStatus&);
+  using Command = cm::Command;
+  using BuiltinCommand = cm::BuiltinCommand;
 
   // Returns a command from its name, case insensitive, or nullptr
   Command GetCommand(std::string const& name) const;

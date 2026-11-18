@@ -17,6 +17,7 @@
 
 #include <cm3p/kwiml/int.h>
 
+#include "cmCommandTypes.h"
 #include "cmFindCommon.h"
 #include "cmPackageInfoReader.h"
 #include "cmPolicies.h"
@@ -100,6 +101,7 @@ private:
   };
 
   void InheritOptions(cmFindPackageCommand* other);
+  std::vector<std::string> BuildProviderArgs() const;
 
   bool IsFound() const override;
   bool IsDefined() const override;
@@ -107,7 +109,7 @@ private:
   // Try to find a package, assuming most state has already been set up. This
   // is used for recursive dependency solving, particularly when importing
   // packages via CPS. Bypasses providers if argsForProvider is empty.
-  bool FindPackage(std::vector<std::string> const& argsForProvider = {});
+  bool FindPackage(std::vector<std::string> const& argsForProvider);
 
   bool FindPackageUsingModuleMode();
   bool FindPackageUsingConfigMode();
@@ -263,6 +265,7 @@ private:
   unsigned int VersionFoundTweak = 0;
   unsigned int VersionFoundCount = 0;
   KWIML_INT_uint64_t RequiredCMakeVersion = 0;
+  cm::Command ProviderCommand;
   bool BypassProvider = false;
   bool Quiet = false;
   RequiredStatus Required = RequiredStatus::Optional;

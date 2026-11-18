@@ -591,6 +591,9 @@ void cmFindPackageCommand::AppendSearchPathGroups()
 
 void cmFindPackageCommand::InheritOptions(cmFindPackageCommand* other)
 {
+  this->ProviderCommand = other->ProviderCommand;
+  this->BypassProvider = other->BypassProvider;
+
   this->RequiredCMakeVersion = other->RequiredCMakeVersion;
   this->LibraryArchitecture = other->LibraryArchitecture;
   this->UseLib32Paths = other->UseLib32Paths;
@@ -604,6 +607,7 @@ void cmFindPackageCommand::InheritOptions(cmFindPackageCommand* other)
 
   this->GlobalScope = other->GlobalScope;
   this->RegistryView = other->RegistryView;
+  this->RegistryViewDefined = other->RegistryViewDefined;
   this->NoDefaultPath = other->NoDefaultPath;
   this->NoPackageRootPath = other->NoPackageRootPath;
   this->NoCMakePath = other->NoCMakePath;
@@ -622,6 +626,99 @@ void cmFindPackageCommand::InheritOptions(cmFindPackageCommand* other)
   this->SearchPathSuffixes = other->SearchPathSuffixes;
 
   this->Quiet = other->Quiet;
+}
+
+std::vector<std::string> cmFindPackageCommand::BuildProviderArgs() const
+{
+  if (this->BypassProvider || !this->ProviderCommand) {
+    // Don't bother unless we have an allowed dependency provider.
+    return {};
+  }
+
+  std::vector<std::string> args = { this->Name };
+  auto argFlag = [&](cm::static_string_view arg, bool cond) {
+    if (cond) {
+      args.emplace_back(arg);
+    }
+  };
+  auto argList = [&](cm::static_string_view arg, auto const& list) {
+    if (!list.empty()) {
+      args.emplace_back(arg);
+      cm::append(args, list);
+    }
+  };
+
+  // Add common and positional arguments.
+  if (!this->VersionComplete.empty()) {
+    args.emplace_back(this->VersionComplete);
+    if (this->VersionExact && this->VersionRange.empty()) {
+      args.emplace_back("EXACT"_s);
+    }
+  }
+  argFlag("REQUIRED"_s, this->Required == RequiredStatus::RequiredExplicit);
+  argFlag("OPTIONAL"_s, this->Required == RequiredStatus::OptionalExplicit);
+  argFlag("GLOBAL"_s, this->GlobalScope);
+  argFlag("QUIET"_s, this->Quiet);
+
+  argFlag("NO_POLICY_SCOPE"_s, !this->PolicyScope);
+  argFlag("UNWIND_INCLUDE"_s, this->ScopeUnwind);
+
+  if (this->RegistryViewDefined) {
+    args.emplace_back("REGISTRY_VIEW");
+    args.emplace_back(cmWindowsRegistry::FromView(this->RegistryView));
+  }
+
+  if (this->UseFindModules) {
+    argFlag("MODULE"_s, !this->UseConfigFiles);
+  } else if (this->UseConfigFiles) {
+    args.emplace_back("NO_MODULE"_s);
+    argList("NAMES"_s, this->Names);
+    if (!this->Configs.empty()) {
+      // This function is intended to be called before FindPackage, meaning,
+      // before the logic to add the default config names has executed. Thus,
+      // if the list of configs is non-empty, we assume it contains only
+      // user-specified configs which are necessarily CMake (not CPS) names.
+      args.emplace_back("CONFIGS"_s);
+      for (ConfigName const& c : this->Configs) {
+        assert(c.Type == PackageDescriptionType::CMake);
+        args.emplace_back(c.Name);
+      }
+    }
+
+    argList("HINTS"_s, this->UserHintsArgs);
+    argList("PATHS"_s, this->UserGuessArgs);
+    argList("PATH_SUFFIXES"_s, this->SearchPathSuffixes);
+
+    argFlag("NO_CMAKE_PACKAGE_REGISTRY"_s, this->NoUserRegistry);
+    argFlag("NO_CMAKE_SYSTEM_PACKAGE_REGISTRY"_s, this->NoSystemRegistry);
+
+    argFlag("NO_DEFAULT_PATH"_s, this->NoDefaultPath);
+    argFlag("NO_PACKAGE_ROOT_PATH"_s, this->NoPackageRootPath);
+    argFlag("NO_CMAKE_PATH"_s, this->NoCMakePath);
+    argFlag("NO_CMAKE_ENVIRONMENT_PATH"_s, this->NoCMakeEnvironmentPath);
+    argFlag("NO_SYSTEM_ENVIRONMENT_PATH"_s, this->NoSystemEnvironmentPath);
+    argFlag("NO_CMAKE_SYSTEM_PATH"_s, this->NoCMakeSystemPath);
+    argFlag("NO_CMAKE_INSTALL_PREFIX"_s, this->NoCMakeInstallPath);
+
+    switch (this->FindRootPathMode) {
+      case RootPathModeNever:
+        args.emplace_back("NO_CMAKE_FIND_ROOT_PATH"_s);
+        break;
+      case RootPathModeOnly:
+        args.emplace_back("ONLY_CMAKE_FIND_ROOT_PATH"_s);
+        break;
+      case RootPathModeBoth:
+        args.emplace_back("CMAKE_FIND_ROOT_PATH_BOTH"_s);
+        break;
+    }
+  }
+
+  // Build component list. Because this function is intended to be called by
+  // FindPackageDependencies, it assumes that a) the component list is the set
+  // of required targets, and that b) there are no optional components.
+  argList("COMPONENTS"_s, this->RequiredTargets);
+
+  return args;
 }
 
 bool cmFindPackageCommand::IsFound() const
@@ -1078,6 +1175,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->VersionMaxPatch, this->VersionMaxTweak);
   }
 
+  this->ProviderCommand =
+    this->Makefile->GetState()->GetDependencyProviderCommand(
+      cmDependencyProvider::Method::FindPackage);
+
   bool result = this->FindPackage(
     this->BypassProvider ? std::vector<std::string>{} : args);
 
@@ -1166,14 +1267,12 @@ bool cmFindPackageCommand::FindPackage(
   // We do this before modifying the package root path stack because a
   // provider might use methods that ignore that.
   cmState* const state = this->Makefile->GetState();
-  cmState::Command const providerCommand = state->GetDependencyProviderCommand(
-    cmDependencyProvider::Method::FindPackage);
   if (argsForProvider.empty()) {
-    if (this->DebugModeEnabled() && providerCommand) {
+    if (this->DebugModeEnabled() && this->ProviderCommand) {
       this->DebugMessage(
         "BYPASS_PROVIDER given, skipping dependency provider");
     }
-  } else if (providerCommand) {
+  } else if (this->ProviderCommand) {
     if (this->DebugModeEnabled()) {
       this->DebugMessage(cmStrCat("Trying dependency provider command: "_s,
                                   state->GetDependencyProvider()->GetCommand(),
@@ -1187,7 +1286,7 @@ bool cmFindPackageCommand::FindPackage(
                      return cmListFileArgument(arg,
                                                cmListFileArgument::Bracket, 0);
                    });
-    if (!providerCommand(listFileArgs, this->Status)) {
+    if (!this->ProviderCommand(listFileArgs, this->Status)) {
       return false;
     }
     std::string providerName;
@@ -2268,7 +2367,7 @@ bool cmFindPackageCommand::FindPackageDependencies(
     // TODO set hints
 
     // Try to find the requirement; fail if we can't.
-    if (!fp.FindPackage() || fp.FileFound.empty()) {
+    if (!fp.FindPackage(fp.BuildProviderArgs()) || fp.FileFound.empty()) {
       this->SetError(cmStrCat("could not find "_s, dep.Name,
                               ", required by "_s, this->Name, '.'));
       return false;
