@@ -52,31 +52,6 @@ Each ``<os>/<arch>/`` directory contains the following:
     $ docker cp cmake-build:/out .
     $ ls out/cmake-*-linux-x86_64.*
 
-* ``<os>/<arch>/test/Dockerfile``:
-  Produces a base image with a test environment for packaged CMake binaries.
-  For example, on Linux ``x86_64``, one may build the test base image:
-
-  .. code-block:: console
-
-    $ docker build --tag=cmake:test-base \
-        cmake-src/Utilities/Release/linux/x86_64/test
-
-  Then create a local ``test/Dockerfile`` to prepare an image with both the
-  CMake source tree and the above-built package::
-
-    FROM cmake:test-base
-    COPY cmake-src /opt/cmake/src/cmake
-    ADD out/cmake-<ver>-linux-x86_64.tar.gz /opt/
-    ENV PATH=/opt/cmake-<ver>-linux-x86_64/bin:$PATH
-
-  Build the test image and run it to drive testing:
-
-  .. code-block:: console
-
-    $ docker build --tag cmake:test --network none -f test/Dockerfile .
-    $ docker run --network none cmake:test bash test-make.bash
-    $ docker run --network none cmake:test bash test-ninja.bash
-
 .. _`kitware/cmake Docker Hub Repository`: https://hub.docker.com/r/kitware/cmake
 
 SunOS
