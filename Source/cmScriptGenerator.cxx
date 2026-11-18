@@ -42,7 +42,14 @@ std::ostream& operator<<(std::ostream& os, cmScriptGeneratorQuoted const& self)
     return os << '"' << self.Value << '"';
   }
   auto const sep = std::string(self.BracketLength, '=');
-  return os << '[' << sep << '[' << self.Value << ']' << sep << ']';
+  os << '[' << sep << '[';
+  // The reader drops one newline right after the opening bracket.
+  // It also converts CRLF to LF before that.
+  if (cmHasPrefix(self.Value, '\n') ||
+      cmHasLiteralPrefix(self.Value, "\r\n")) {
+    os << '\n';
+  }
+  return os << self.Value << ']' << sep << ']';
 }
 
 std::string cmScriptGeneratorQuoted::str() const
