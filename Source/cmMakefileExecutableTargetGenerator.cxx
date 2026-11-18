@@ -73,6 +73,9 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
   this->WriteTargetLinkDependRules();
 
+  // Write the compile-only driver rule.
+  this->WriteTargetCompileDriverRule();
+
   // Write clean target
   this->WriteTargetCleanRules();
 

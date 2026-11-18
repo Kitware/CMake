@@ -2015,6 +2015,42 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
                                       no_commands, true);
 }
 
+void cmMakefileTargetGenerator::WriteTargetCompileDriverRule()
+{
+  // Driver that builds the object files (compilation) without requiring
+  // the linked dependencies to have finished linking.
+  std::string dir =
+    this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
+  std::string compileTargetRuleName = cmStrCat(std::move(dir), "/compile"_s);
+  compileTargetRuleName =
+    this->LocalGenerator->MaybeRelativeToTopBinDir(compileTargetRuleName);
+
+  std::vector<std::string> depends;
+  // Only the target's own objects: ExternalObjects are built by other
+  // targets' build.make files (no rule here).  Depending on them would
+  // fail when .../compile runs before the owning target is built;
+  // the .../all → dep/all ordering still guarantees they exist
+  // before linking.  This mirrors Ninja, where the link edge (not the
+  // compile edge) consumes object-library outputs.
+  std::string const& relPath =
+    this->LocalGenerator->GetHomeRelativeOutputPath();
+  depends.reserve(this->Objects.size());
+  for (std::string const& obj : this->Objects) {
+    depends.push_back(cmStrCat(relPath, obj));
+  }
+  this->LocalGenerator->AppendRuleDepend(depends,
+                                         this->BuildFileNameFull.c_str());
+  if (this->CustomCommandDriver == OnBuild) {
+    this->DriveCustomCommands(depends);
+  }
+  cm::append(depends, this->ExtraFiles);
+
+  std::vector<std::string> no_commands;
+  this->LocalGenerator->WriteMakeRule(
+    *this->BuildFileStream, "Rule to compile all sources for this target.",
+    compileTargetRuleName, depends, no_commands, true);
+}
+
 void cmMakefileTargetGenerator::AppendTargetDepends(
   std::vector<std::string>& depends, bool ignoreType)
 {
@@ -2044,6 +2080,8 @@ void cmMakefileTargetGenerator::AppendObjectDepends(
   // Add dependencies on the compiled object files.
   std::string const& relPath =
     this->LocalGenerator->GetHomeRelativeOutputPath();
+  depends.reserve(depends.size() + this->Objects.size() +
+                  this->ExternalObjects.size() + 1);
   for (std::string const& obj : this->Objects) {
     std::string objTarget = cmStrCat(relPath, obj);
     depends.push_back(std::move(objTarget));

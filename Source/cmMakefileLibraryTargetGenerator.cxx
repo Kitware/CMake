@@ -98,6 +98,9 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
       break;
   }
 
+  // Write the compile-only driver rule.
+  this->WriteTargetCompileDriverRule();
+
   // Write clean target
   this->WriteTargetCleanRules();
 

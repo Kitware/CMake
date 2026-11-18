@@ -233,6 +233,9 @@ protected:
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmGeneratorTarget* target);
 
+  void AppendGlobalTargetCompileDepends(std::vector<std::string>& depends,
+                                        cmGeneratorTarget* target);
+
   void AppendCodegenTargetDepends(std::vector<std::string>& depends,
                                   cmGeneratorTarget* target);
 
