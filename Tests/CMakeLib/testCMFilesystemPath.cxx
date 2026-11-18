@@ -35,6 +35,20 @@ bool testConstructors()
     }
   }
   {
+    // "/ï18n"
+    char const utf8[] = {
+      '/', static_cast<char>(0xC3), static_cast<char>(0xAF), '1', '8', 'n', 0,
+    };
+    char const iso8849[] = {
+      '/', static_cast<char>(0xEF), '1', '8', 'n', 0,
+    };
+    fs::path p_utf8(utf8);
+    fs::path p_iso8849(iso8849);
+    if (p_utf8.string() != utf8 || p_iso8849.empty()) {
+      result = false;
+    }
+  }
+  {
     fs::path p1("/a/b/c");
     fs::path p2("/a/b/c");
     if (p1 != p2) {

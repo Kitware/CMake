@@ -1060,12 +1060,7 @@ class path : public std::filesystem::path
 {
 private:
   using base = std::filesystem::path;
-  // define the char type to convert to
-#  if defined(__cpp_char8_t) && defined(_WIN32) && !defined(__CYGWIN__)
-  using target_type = char8_t;
-#  else
   using target_type = base::value_type;
-#  endif
 
   template <typename Source>
   using enable_if_pathable =
