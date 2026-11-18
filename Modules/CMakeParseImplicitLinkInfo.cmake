@@ -96,7 +96,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   endif()
   # Construct a regex to match linker lines.  It must match both the
   # whole line and just the command (argv[0]).
-  set(linker_regex "^( *|.*[/\\])(${linker}|${startfile}|([^/\\]+-)?ld|collect2)(\\.exe)?\"?( |$)")
+  set(linker_regex "^( *|.*[/\\])(${linker}|${startfile}|([^/\\]+-)?ld|collect2)[^/\\]*( |$)")
   set(linker_exclude_regex "collect2 version |^[A-Za-z0-9_]+=|/ldfe ")
 
   # Skip FASTBuild's output mangling, like:
