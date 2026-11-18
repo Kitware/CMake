@@ -1,18 +1,15 @@
 TARGET_LINKER_IMPORT_FILE_SUFFIX
 --------------------------------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_LINKER_IMPORT_FILE_SUFFIX:tgt>
-
-.. versionadded:: 3.27
 
 Suffix of the import file used to link target ``tgt``.
 

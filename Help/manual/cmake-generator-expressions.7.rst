@@ -227,9 +227,9 @@ configuration is used, and the empty string for all other configurations:
   $<$<CONFIG:Debug>:DEBUG_MODE>
 
 Boolean-like ``condition`` values other than ``1`` or ``0`` can be handled
-by wrapping them with the ``$<BOOL:...>`` generator expression:
+by wrapping them with the :genex:`$<BOOL:...>` generator expression:
 
-The ``$<BOOL:...>`` generator expression is often used when a ``condition``
+The :genex:`$<BOOL:...>` generator expression is often used when a ``condition``
 is provided by a CMake variable:
 
 .. code-block:: cmake
@@ -245,7 +245,6 @@ Logical Operators
 -----------------
 
 The common boolean logic operators are supported:
-
 
 .. toctree::
    :maxdepth: 1
@@ -274,7 +273,6 @@ sections further below.
 Numeric Comparisons
 ^^^^^^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -284,7 +282,6 @@ Numeric Comparisons
 
 Version Comparisons
 ^^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -305,13 +302,13 @@ the form of a generator expression.
 In each of the following string-related generator expressions, the ``string``
 must not contain any commas if that generator expression expects something to
 be provided after the ``string``.  For example, the expression
-``$<STRING:FIND,string,value>`` requires a ``value`` after the ``string``.
-Since a comma is used to separate the ``string`` and the ``value``, the
-``string`` cannot itself contain a comma.  This restriction does not apply to
-the :command:`string` command, it is specific to the string-handling generator
-expressions only. The :genex:`$<COMMA>` generator expression can be used to
-specify a comma as part of the arguments of the string-related generator
-expressions.
+:genex:`$<STRING:FIND,string,value> <STRING:FIND>` requires a ``value``
+after the ``string``. Since a comma is used to separate the ``string`` and the
+``value``, the ``string`` cannot itself contain a comma.  This restriction
+does not apply to the :command:`string` command, it is specific to the
+string-handling generator expressions only. The :genex:`$<COMMA>` generator
+expression can be used to specify a comma as part of the arguments of the
+string-related generator expressions.
 
 .. _`String Comparisons Generator Expressions`:
 
@@ -329,7 +326,6 @@ evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
 
     $<STREQUAL:$<STRING:TOUPPER,${foo}>,BAR>
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -346,7 +342,6 @@ evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
 String Queries
 ^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -361,7 +356,6 @@ String Queries
 
 String Generations
 ^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -378,7 +372,6 @@ String Generations
 
 String Transformations
 ^^^^^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -409,17 +402,16 @@ the form of a generator expression.
 In each of the following list-related generator expressions, the ``list``
 must not contain any commas if that generator expression expects something to
 be provided after the ``list``.  For example, the expression
-``$<LIST:FIND,list,value>`` requires a ``value`` after the ``list``.
-Since a comma is used to separate the ``list`` and the ``value``, the ``list``
-cannot itself contain a comma.  This restriction does not apply to the
-:command:`list` command, it is specific to the list-handling generator
-expressions only.
+:genex:`$<LIST:FIND,list,value> <LIST:FIND>` requires a ``value`` after
+the ``list``. Since a comma is used to separate the ``list`` and the
+``value``, the ``list`` cannot itself contain a comma.  This restriction does
+not apply to the :command:`list` command, it is specific to the list-handling
+generator expressions only.
 
 .. _GenEx List Comparisons:
 
 List Comparisons
 ^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -432,7 +424,6 @@ List Comparisons
 
 List Queries
 ^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -448,9 +439,6 @@ List Queries
 
 List Transformations
 ^^^^^^^^^^^^^^^^^^^^
-
-.. _GenEx LIST-JOIN:
-
 
 .. toctree::
    :maxdepth: 1
@@ -470,17 +458,12 @@ List Transformations
    /genex/REMOVE_DUPLICATES {#genex:REMOVE_DUPLICATES}
    /genex/FILTER {#genex:FILTER}
 
-.. _GenEx LIST-REMOVE_DUPLICATES:
-
-.. _GenEx LIST-FILTER:
-
 .. _GenEx List Ordering:
 
 .. _genex-family-genex-list-ordering:
 
 List Ordering
 ^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -494,7 +477,6 @@ List Ordering
 
 Bound Operands
 ^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -512,7 +494,7 @@ Most of the expressions in this section are closely associated with the
 the form of a generator expression.
 
 For all generator expressions in this section, paths are expected to be in
-cmake-style format. The :cref:`$\<PATH:CMAKE_PATH\> <GenEx PATH-CMAKE_PATH>`
+cmake-style format. The :genex:`$<PATH:CMAKE_PATH> <PATH:CMAKE_PATH>`
 generator expression can be used to convert a native path to a cmake-style
 one.
 
@@ -520,7 +502,6 @@ one.
 
 Path Comparisons
 ^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -534,15 +515,24 @@ Path Comparisons
 Path Queries
 ^^^^^^^^^^^^
 
+.. genex:: $<PATH:*>
+   :target: PATH
+
 These expressions provide the generation-time capabilities equivalent to the
 :ref:`Query <Path Query>` options of the :command:`cmake_path` command.
 All paths are expected to be in cmake-style format.
 
-
 .. toctree::
    :maxdepth: 1
 
-   /genex/PATH-HAS_ {#genex:PATH}
+   /genex/PATH-HAS_EXTENSION
+   /genex/PATH-HAS_FILENAME
+   /genex/PATH-HAS_PARENT_PATH
+   /genex/PATH-HAS_RELATIVE_PART
+   /genex/PATH-HAS_ROOT_DIRECTORY
+   /genex/PATH-HAS_ROOT_NAME
+   /genex/PATH-HAS_ROOT_PATH
+   /genex/PATH-HAS_STEM
    /genex/PATH-IS_ABSOLUTE
    /genex/PATH-IS_RELATIVE
    /genex/PATH-IS_PREFIX
@@ -556,11 +546,21 @@ These expressions provide the generation-time capabilities equivalent to the
 :ref:`Decomposition <Path Decomposition>` options of the :command:`cmake_path`
 command.  All paths are expected to be in cmake-style format.
 
+The following operations retrieve a different component or group of components
+from a path. See :ref:`Path Structure And Terminology` for the meaning of each
+path component.
 
 .. toctree::
    :maxdepth: 1
 
-   /genex/PATH-GET_
+   /genex/PATH-GET_EXTENSION
+   /genex/PATH-GET_FILENAME
+   /genex/PATH-GET_PARENT_PATH
+   /genex/PATH-GET_RELATIVE_PART
+   /genex/PATH-GET_ROOT_DIRECTORY
+   /genex/PATH-GET_ROOT_NAME
+   /genex/PATH-GET_ROOT_PATH
+   /genex/PATH-GET_STEM
 
 .. _GenEx Path Transformations:
 
@@ -573,14 +573,6 @@ These expressions provide the generation-time capabilities equivalent to the
 :ref:`Modification <Path Modification>` and :ref:`Generation <Path Generation>`
 options of the :command:`cmake_path` command.  All paths are expected to be
 in cmake-style format.
-
-.. versionchanged:: 3.27
-  All operations now accept a list of paths as argument. When a list of paths
-  is specified, the operation will be applied to each path.
-
-
-.. _GenEx PATH-CMAKE_PATH:
-
 
 .. toctree::
    :maxdepth: 1
@@ -599,7 +591,6 @@ in cmake-style format.
 Shell Paths
 ^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -609,7 +600,6 @@ Shell Paths
 
 Configuration Expressions
 -------------------------
-
 
 .. toctree::
    :maxdepth: 1
@@ -624,7 +614,6 @@ Global Expressions
 Global Properties
 ^^^^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -635,7 +624,6 @@ Directory-dependent Expressions
 
 Directory Properties
 ^^^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -664,7 +652,6 @@ Toolchain And Language Expressions
 Platform
 ^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -677,7 +664,6 @@ Compiler Version
 
 See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable, which is
 closely related to the expressions in this sub-section.
-
 
 .. toctree::
    :maxdepth: 1
@@ -699,7 +685,6 @@ Compiler Language, ID, and Frontend-Variant
 See also the :variable:`CMAKE_<LANG>_COMPILER_ID` and
 :variable:`CMAKE_<LANG>_COMPILER_FRONTEND_VARIANT` variables, which are closely
 related to most of the expressions in this sub-section.
-
 
 .. toctree::
    :maxdepth: 1
@@ -726,7 +711,6 @@ related to most of the expressions in this sub-section.
 Compile Features
 ^^^^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -734,7 +718,6 @@ Compile Features
 
 Compile Context
 ^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -745,7 +728,6 @@ Compile Context
 
 Link Language and ID
 ^^^^^^^^^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -760,7 +742,6 @@ Link Language and ID
 Link Features
 ^^^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -771,7 +752,6 @@ Link Features
 
 Link Context
 ^^^^^^^^^^^^
-
 
 .. toctree::
    :maxdepth: 1
@@ -882,7 +862,6 @@ FileSet Meta-Data
 
 These expressions look up information about a file set.
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -892,7 +871,6 @@ FileSet Properties
 ^^^^^^^^^^^^^^^^^^
 
 These expressions look up the values of file set properties.
-
 
 .. toctree::
    :maxdepth: 1
@@ -913,7 +891,6 @@ Target Meta-Data
 
 These expressions look up information about a target.
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -927,7 +904,6 @@ Target Properties
 
 These expressions look up the values of
 :ref:`target properties <Target Properties>`.
-
 
 .. toctree::
    :maxdepth: 1
@@ -1042,7 +1018,6 @@ The expressions have special evaluation rules for some properties:
   of compatibility required by the ``COMPATIBLE_INTERFACE_*`` property
   defining it.
 
-
 .. _genex-family-target-artifacts:
 
 Target Artifacts
@@ -1060,7 +1035,6 @@ runtime artifact, namely:
 In the following, the phrase "the ``tgt`` filename" means the name of the
 ``tgt`` binary file. This has to be distinguished from the phrase
 "the target name", which is just the string ``tgt``.
-
 
 .. toctree::
    :maxdepth: 1
@@ -1118,7 +1092,6 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 Export And Install Expressions
 ------------------------------
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -1131,7 +1104,6 @@ Export And Install Expressions
 
 Multi-level Expression Evaluation
 ---------------------------------
-
 
 .. toctree::
    :maxdepth: 1
@@ -1147,7 +1119,6 @@ Support Expressions
 Conversions
 ^^^^^^^^^^^
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -1162,7 +1133,6 @@ These expressions evaluate to specific string literals. Use them in place of
 the actual string literal where you need to prevent them from having their
 special meaning.
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -1173,7 +1143,6 @@ special meaning.
 
 Deprecated Expressions
 ----------------------
-
 
 .. toctree::
    :maxdepth: 1

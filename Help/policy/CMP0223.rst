@@ -5,7 +5,7 @@ CMP0223
 
 An empty path is not a prefix of any path.
 
-:command:`cmake_path(IS_PREFIX)` and the ``$<PATH:IS_PREFIX>`` generator
+:command:`cmake_path(IS_PREFIX)` and the :genex:`$<PATH:IS_PREFIX>` generator
 expression treat an empty path as a prefix of every path, including
 another empty path.  A prefix that is empty because a variable was set to
 an empty value, or because a generator expression argument expanded to

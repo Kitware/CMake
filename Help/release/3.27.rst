@@ -146,13 +146,13 @@ Generator Expressions
 * The :genex:`COMPILE_ONLY` generator expression was added to specify
   compilation usage requirements without any linking requirements.
 
-* ``$<LIST:...>`` generator expressions were added for
+* :genex:`$<LIST:...>` generator expressions were added for
   :ref:`query <GenEx List Queries>`,
   :ref:`transformation <GenEx List Transformations>`, and
   :ref:`ordering <GenEx List Ordering>` operations on
   :ref:`lists <CMake Language Lists>`.
 
-* ``$<PATH:...>`` generator expressions for
+* :genex:`$<PATH:...>` generator expressions for
   :ref:`decomposition <GenEx Path Decomposition>` and
   :ref:`transformation <GenEx Path Transformations>` operations learned
   to process :ref:`lists <CMake Language Lists>` of paths element-wise.

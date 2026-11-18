@@ -1,19 +1,16 @@
 COMPILE_FEATURES
 ----------------
 
+.. versionadded:: 3.1
+
 .. |genex-family| replace::
    :ref:`genex-family-toolchain-and-language-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<COMPILE_FEATURES:features>
-
-.. versionadded:: 3.1
 
 where ``features`` is a comma-separated list. Evaluates to ``1`` if all of the
 ``features`` are available for the 'head' target, and ``0`` otherwise. If this

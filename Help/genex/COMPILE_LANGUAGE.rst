@@ -1,6 +1,8 @@
 COMPILE_LANGUAGE
 ----------------
 
+.. versionadded:: 3.3
+
 .. genex:: $<COMPILE_LANGUAGE:languages>
    :target: COMPILE_LANGUAGE:languages
 
@@ -9,28 +11,32 @@ COMPILE_LANGUAGE
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<COMPILE_LANGUAGE> <Without Arguments_>`_
+  `$<COMPILE_LANGUAGE:languages> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
   $<COMPILE_LANGUAGE>
 
-.. versionadded:: 3.3
-
 The compile language of source files when evaluating compile options. See the
-related boolean expression :genex:`$<COMPILE_LANGUAGE:languages>
-<COMPILE_LANGUAGE:languages>` for notes about the portability of this generator
-expression.
+related boolean expression
+`$<COMPILE_LANGUAGE:languages> <With Arguments_>`_ for notes about the
+portability of this generator expression.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
   $<COMPILE_LANGUAGE:languages>
-
-.. versionadded:: 3.3
 
 .. versionchanged:: 3.15
   Multiple languages can be specified for ``languages``.

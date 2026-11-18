@@ -1,19 +1,16 @@
 STRING:MATCH
 ------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-queries-generator-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:MATCH,string[,SEEK:(ONCE|ALL)],regular_expression>
-
-.. versionadded:: 4.3
 
 Match, in the ``string``, the ``regular_expression``.
 

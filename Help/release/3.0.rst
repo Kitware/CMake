@@ -252,20 +252,20 @@ Modules
 Generator Expressions
 ---------------------
 
-* New ``$<PLATFORM_ID>`` and ``$<PLATFORM_ID:...>``
+* New :genex:`$<PLATFORM_ID>` and :genex:`$<PLATFORM_ID:...>`
   :manual:`generator expressions <cmake-generator-expressions(7)>`
   have been added.
 
-* The ``$<CONFIG>``
+* The :genex:`$<CONFIG>`
   :manual:`generator expression <cmake-generator-expressions(7)>` now has
   a variant which takes no argument.  This is equivalent to the
-  ``$<CONFIGURATION>`` expression.
+  :genex:`$<CONFIGURATION>` expression.
 
-* New ``$<UPPER_CASE:...>`` and ``$<LOWER_CASE:...>``
+* New :genex:`$<UPPER_CASE:...>` and :genex:`$<LOWER_CASE:...>`
   :manual:`generator expressions <cmake-generator-expressions(7)>`
   generator expressions have been added.
 
-* A new ``$<MAKE_C_IDENTIFIER:...>``
+* A new :genex:`$<MAKE_C_IDENTIFIER:...>`
   :manual:`generator expression <cmake-generator-expressions(7)>` has
   been added.
 
@@ -376,13 +376,13 @@ Deprecated and Removed Features
   deprecated.  Instead set the corresponding :prop_dir:`COMPILE_DEFINITIONS`
   directory property or :prop_tgt:`COMPILE_DEFINITIONS` target property and
   use :manual:`generator expressions <cmake-generator-expressions(7)>` like
-  ``$<CONFIG:...>`` to specify per-configuration definitions.
+  :genex:`$<CONFIG:...>` to specify per-configuration definitions.
   See policy :policy:`CMP0043`.
 
 * The :prop_tgt:`LOCATION` target property should no longer be read from
   non-IMPORTED targets.  It does not make sense in multi-configuration
   generators since the build configuration is not known while configuring
-  the project.  It has been superseded by the ``$<TARGET_FILE>`` generator
+  the project.  It has been superseded by the :genex:`$<TARGET_FILE>` generator
   expression.  See policy :policy:`CMP0026`.
 
 * The :prop_tgt:`COMPILE_FLAGS` target property is now documented
@@ -447,7 +447,7 @@ Other Changes
   and stderr pipes with the native build tool by default.
   The ``--use-stderr`` option that once activated this is now ignored.
 
-* The ``$<C_COMPILER_ID:...>`` and ``$<CXX_COMPILER_ID:...>``
+* The :genex:`$<C_COMPILER_ID:...>` and :genex:`$<CXX_COMPILER_ID:...>`
   :manual:`generator expressions <cmake-generator-expressions(7)>`
   used to perform case-insensitive comparison but have now been
   corrected to perform case-sensitive comparison.

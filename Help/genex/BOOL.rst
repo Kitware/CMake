@@ -6,9 +6,6 @@ BOOL
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<BOOL:string>

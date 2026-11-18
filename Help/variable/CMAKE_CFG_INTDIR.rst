@@ -5,7 +5,7 @@ CMAKE_CFG_INTDIR
 
   This variable has poor support on :generator:`Ninja Multi-Config`, and
   predates the existence of the :genex:`$<CONFIG>` generator expression. Use
-  ``$<CONFIG>`` instead.
+  :genex:`$<CONFIG>` instead.
 
 Build-time reference to per-configuration output subdirectory.
 

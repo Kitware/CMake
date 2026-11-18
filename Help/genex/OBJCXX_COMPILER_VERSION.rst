@@ -1,29 +1,35 @@
 OBJCXX_COMPILER_VERSION
 -----------------------
 
+.. versionadded:: 3.16
+
 .. |genex-family| replace:: :ref:`genex-family-compiler-version`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<OBJCXX_COMPILER_VERSION> <Without Arguments_>`_
+  `$<OBJCXX_COMPILER_VERSION:version> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
   $<OBJCXX_COMPILER_VERSION>
 
-.. versionadded:: 3.16
-
 The version of the Objective-C++ compiler used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
   $<OBJCXX_COMPILER_VERSION:version>
-
-.. versionadded:: 3.16
 
 ``1`` if the version of the Objective-C++ compiler matches ``version``,
 otherwise ``0``.

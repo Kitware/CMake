@@ -1,25 +1,22 @@
 TARGET_FILE_BASE_NAME
 ---------------------
 
+.. versionadded:: 3.15
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
-
-Syntax
-^^^^^^
 
 .. code-block:: cmake
 
   $<TARGET_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
-.. versionadded:: 3.15
-
-.. versionadded:: 4.2
+.. versionchanged:: 4.2
   The ``POSTFIX`` option can be used to control the inclusion or not
   of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
   base name. The default is ``POSTFIX:INCLUDE``.
 
-Base name of ``tgt``, i.e. ``$<TARGET_FILE_NAME:tgt>`` without prefix and suffix
+Base name of ``tgt``, i.e. :genex:`$<TARGET_FILE_NAME:tgt>` without prefix and suffix
 and, optionally, postfix. For example, if the ``tgt`` filename is
 ``libbase_postfix.so``, the base name is:
 

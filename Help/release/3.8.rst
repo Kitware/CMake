@@ -345,7 +345,7 @@ Other
 
 * CMake functionality using cryptographic hashes now supports SHA-3 algorithms.
 
-* A new generator expression ``$<IF:cond,true-value,false-value>`` was added.
+* A new generator expression :genex:`$<IF:cond,true-value,false-value>` was added.
   It resolves to the true-value if the condition is ``1`` and resolves to
   the false-value if the condition is ``0``.
 

@@ -283,7 +283,7 @@ See :ref:`Linking Object Libraries`.
 Object libraries may not be used as the ``TARGET`` in a use of the
 :command:`add_custom_command(TARGET)` command signature.  However,
 the list of objects can be used by :command:`add_custom_command(OUTPUT)`
-or :command:`file(GENERATE)` by using ``$<TARGET_OBJECTS:objlib>``.
+or :command:`file(GENERATE)` by using :genex:`$<TARGET_OBJECTS:objlib>`.
 
 Build Specification and Usage Requirements
 ==========================================

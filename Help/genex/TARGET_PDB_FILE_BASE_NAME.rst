@@ -1,23 +1,20 @@
 TARGET_PDB_FILE_BASE_NAME
 -------------------------
 
+.. versionadded:: 3.15
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
-
-Syntax
-^^^^^^
 
 .. code-block:: cmake
 
   $<TARGET_PDB_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
-.. versionadded:: 3.15
-
 Base name of the linker generated program database file (.pdb) where ``tgt`` is
 the name of a target.
 
-.. versionadded:: 4.2
+.. versionchanged:: 4.2
   The ``POSTFIX`` option can be used to control the inclusion or not
   of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
   base name. The default is ``POSTFIX:INCLUDE``.
@@ -29,9 +26,9 @@ the name of a target.
   ``EXCLUDE``.  See the policy :policy:`CMP0202`.
 
 The base name corresponds to the target PDB file name (see
-``$<TARGET_PDB_FILE_NAME:tgt>``) without prefix and suffix, and, optionally,
-postfix.  For example, if the target file name is ``base_postfix.pdb``, the base
-name is
+:genex:`$<TARGET_PDB_FILE_NAME:tgt>`) without prefix and suffix, and,
+optionally, postfix.  For example, if the target file name is
+``base_postfix.pdb``, the base name is
 
   * ``base_postfix`` for ``$<TARGET_PDB_FILE_BASE_NAME:tgt>`` or
     ``$<TARGET_PDB_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.

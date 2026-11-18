@@ -1,19 +1,16 @@
 STRING:QUOTE
 ------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-transforming-generator-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:QUOTE,REGEX,string>
-
-.. versionadded:: 4.3
 
 Escape the specified elements of the ``string``. The possible options are:
 

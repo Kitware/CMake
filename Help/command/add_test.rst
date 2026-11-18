@@ -106,7 +106,7 @@ directory the test is created in.
     Entries may be specified using
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
     An entry containing a generator expression is evaluated for the
-    configuration.  Targets it references, as with ``$<TARGET_FILE:tgt>``,
+    configuration.  Targets it references, as with :genex:`$<TARGET_FILE:tgt>`,
     are target dependencies, as they are when referenced in the test
     ``COMMAND``, and an evaluated value naming an artifact of such a target
     is built by that target dependency.  Any other evaluated value is a

@@ -1,24 +1,21 @@
 COMPILE_LANG_AND_ID
 -------------------
 
+.. versionadded:: 3.15
+
 .. |genex-family| replace::
    :ref:`genex-family-compiler-language-id-and-frontend-variant`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<COMPILE_LANG_AND_ID:language,compiler_ids>
 
-.. versionadded:: 3.15
-
 ``1`` when the language used for compilation unit matches ``language`` and
 CMake's compiler id of the ``language`` compiler matches any one of the
 comma-separated entries in ``compiler_ids``, otherwise ``0``. This expression is
-a short form for the combination of ``$<COMPILE_LANGUAGE:language>`` and
+a short form for the combination of :genex:`$<COMPILE_LANGUAGE:language>` and
 ``$<LANG_COMPILER_ID:compiler_ids>``. This expression may be used to specify
 compile options, compile definitions, and include directories for source files
 of a particular language and compiler combination in a target. For example:

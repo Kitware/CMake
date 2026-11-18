@@ -1,19 +1,16 @@
 STRING:UUID
 -----------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-generating-generator-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:UUID,NAMESPACE:namespace,TYPE:(MD5|SHA1)[,NAME:name][,CASE:(LOWER|UPPER)]>
-
-.. versionadded:: 4.3
 
 Create a universally unique identifier (aka GUID) as per RFC4122. A UUID has the
 format ``xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`` where each ``x`` represents an

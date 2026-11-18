@@ -1,19 +1,16 @@
 TARGET_GENEX_EVAL
 -----------------
 
+.. versionadded:: 3.12
+
 .. |genex-family| replace::
    :ref:`genex-family-multi-level-expression-evaluation`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_GENEX_EVAL:tgt,expr>
-
-.. versionadded:: 3.12
 
 Content of ``expr`` evaluated as a generator expression in the context of
 ``tgt`` target. This enables consumption of custom target properties that
@@ -39,7 +36,7 @@ because ``CUSTOM_KEYS`` target property is not evaluated and the content is
 passed as is (i.e. ``$<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>``).
 
 To have the expected result (i.e. ``FOO_EXTRA_THINGS`` if config is ``Debug``),
-it is required to evaluate the output of ``$<TARGET_PROPERTY:foo,CUSTOM_KEYS>``:
+it is required to evaluate the output of :genex:`$<TARGET_PROPERTY:foo,CUSTOM_KEYS>`:
 
 .. code-block:: cmake
 

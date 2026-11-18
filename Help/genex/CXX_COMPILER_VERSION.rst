@@ -5,8 +5,16 @@ CXX_COMPILER_VERSION
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<CXX_COMPILER_VERSION> <Without Arguments_>`_
+  `$<CXX_COMPILER_VERSION:version> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -14,8 +22,8 @@ Syntax
 
 The version of the CXX compiler used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

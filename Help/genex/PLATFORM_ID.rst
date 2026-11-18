@@ -6,8 +6,16 @@ PLATFORM_ID
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<PLATFORM_ID> <Without Arguments_>`_
+  `$<PLATFORM_ID:platform_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -16,8 +24,8 @@ Syntax
 The current system's CMake platform id. See also the
 :variable:`CMAKE_SYSTEM_NAME` variable.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

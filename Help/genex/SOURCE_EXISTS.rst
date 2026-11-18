@@ -1,18 +1,15 @@
 SOURCE_EXISTS
 -------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace:: :ref:`genex-family-source-dependent-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<SOURCE_EXISTS:src[,(DIRECTORY:dir|TARGET_DIRECTORY:tgt)]>
-
-.. versionadded:: 4.3
 
 ``1`` if ``src`` exists as a CMake source file, else ``0``. By default, the
 source file is searched in the scope of the current source directory or the

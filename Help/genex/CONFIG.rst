@@ -5,8 +5,16 @@ CONFIG
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<CONFIG> <Without Arguments_>`_
+  `$<CONFIG:cfgs> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -15,8 +23,8 @@ Syntax
 Configuration name. Use this instead of the deprecated :genex:`CONFIGURATION`
 generator expression.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 

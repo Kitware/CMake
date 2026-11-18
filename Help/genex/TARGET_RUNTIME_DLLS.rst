@@ -1,18 +1,15 @@
 TARGET_RUNTIME_DLLS
 -------------------
 
+.. versionadded:: 3.21
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_RUNTIME_DLLS:tgt>
-
-.. versionadded:: 3.21
 
 List of DLLs that the target depends on at runtime. This is determined by the
 locations of all the ``SHARED`` targets in the target's transitive dependencies.

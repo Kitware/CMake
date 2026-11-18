@@ -5,5 +5,5 @@ build-depends-genex
   :command:`discover_tests` and :command:`install` commands, and the
   :prop_dir:`CMAKE_TEST_BUILD_DEPENDS` directory property, now support
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
-  Targets referenced by an expression, such as ``$<TARGET_FILE:tgt>``,
+  Targets referenced by an expression, such as :genex:`$<TARGET_FILE:tgt>`,
   become dependencies, and entries evaluating to an empty string are ignored.

@@ -1,29 +1,35 @@
 Fortran_COMPILER_LINKER_FRONTEND_VARIANT
 ----------------------------------------
 
+.. versionadded:: 4.2
+
 .. |genex-family| replace:: :ref:`genex-family-linker-id-and-frontend-variant`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<Fortran_COMPILER_LINKER_FRONTEND_VARIANT> <Without Arguments_>`_
+  `$<Fortran_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
   $<Fortran_COMPILER_LINKER_FRONTEND_VARIANT>
 
-.. versionadded:: 4.2
-
 CMake's linker frontend variant of the Fortran linker used.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
   $<Fortran_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
-
-.. versionadded:: 4.2
 
 where ``variant_ids`` is a comma-separated list. ``1`` if CMake's linker
 frontend variant of the Fortran linker matches any one of the entries in

@@ -161,7 +161,7 @@ signatures that specify them.  The common options are:
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
     An entry containing a generator expression is evaluated for each build
     configuration, and the rule depends on the union of the results.
-    Targets it references, as with ``$<TARGET_FILE:tgt>``, are target
+    Targets it references, as with :genex:`$<TARGET_FILE:tgt>`, are target
     dependencies, and an evaluated value naming an artifact of such a target
     is built by that target dependency.  Any other evaluated value is a
     target or file, as above.  An entry that evaluates to an empty string is
@@ -461,7 +461,7 @@ Signatures
     This option specifies a list of directories which will be added to the
     :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property of the
     ``<targets>`` when exported by the :command:`install(EXPORT)` command.
-    If a relative path is specified, it is treated as relative to the
+    If a relative path is specified, it is treated as relative to
     :genex:`$<INSTALL_PREFIX>`.
 
     Unlike other ``DESTINATION`` arguments for the various ``install()``

@@ -470,8 +470,8 @@ Path Comparisons
   :policy:`CMP0223`.
 
   Equivalent to :command:`cmake_path(IS_PREFIX)` and
-  ``$<PATH:IS_PREFIX>`` without their ``NORMALIZE`` option.  See
-  :command:`cmake_path(IS_PREFIX)` for more details.
+  :genex:`$<PATH:IS_PREFIX> <PATH:IS_PREFIX>` without their ``NORMALIZE``
+  option.  See :command:`cmake_path(IS_PREFIX)` for more details.
 
 Variable Expansion
 ^^^^^^^^^^^^^^^^^^

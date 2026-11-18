@@ -371,7 +371,7 @@ using only its own object file.  ``use_static3.c`` is compiled *without*
 ``-DOBJ3`` because the usage requirement is not transitive through
 the private dependency of ``static3``.  However, the link dependencies
 of ``static3`` are propagated, including the ``iface_obj3`` reference
-to ``$<TARGET_OBJECTS:obj3>``.  The ``use_static3`` executable is
+to :genex:`$<TARGET_OBJECTS:obj3>`.  The ``use_static3`` executable is
 created with object files from ``use_static3.c`` and ``obj3.c``, and
 linked to library ``libstatic3.a``.
 

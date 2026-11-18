@@ -91,7 +91,7 @@ link library feature attributes:
 ``OVERRIDE=DEFAULT``
   The ``DEFAULT`` feature will be overridden by the ``WHOLE_ARCHIVE`` feature
   because they are compatible and enhance the user's experience: standard
-  library specification and ``$<LINK_LIBRARY:WHOLE_ARCHIVE>`` can be used
+  library specification and :genex:`$<LINK_LIBRARY:WHOLE_ARCHIVE>` can be used
   freely.
 ``DEDUPLICATION=YES``
   When this feature is used, the linker loads all symbols from the static

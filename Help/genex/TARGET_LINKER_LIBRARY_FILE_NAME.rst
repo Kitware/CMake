@@ -1,18 +1,15 @@
 TARGET_LINKER_LIBRARY_FILE_NAME
 -------------------------------
 
+.. versionadded:: 3.27
+
 .. |genex-family| replace:: :ref:`genex-family-target-artifacts`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<TARGET_LINKER_LIBRARY_FILE_NAME:tgt>
-
-.. versionadded:: 3.27
 
 Name of the library file used to link target ``tgt``.
 

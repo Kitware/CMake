@@ -1,19 +1,16 @@
 STRING:REPLACE
 --------------
 
+.. versionadded:: 4.3
+
 .. |genex-family| replace::
    :ref:`genex-family-string-transforming-generator-expressions`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
-
 .. code-block:: cmake
 
   $<STRING:REPLACE[,(STRING|REGEX)],string,match_string,replace_string>
-
-.. versionadded:: 4.3
 
 Replace all occurrences of ``match_string`` in the ``string`` with
 ``replace_string``.

@@ -1,18 +1,26 @@
 LINK_LANGUAGE
 -------------
 
+.. versionadded:: 3.18
+
 .. |genex-family| replace:: :ref:`genex-family-link-language-and-id`
 
 .. include:: ../manual/include/GENEX_FAMILY.rst
 
-Syntax
-^^^^^^
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `$<LINK_LANGUAGE> <Without Arguments_>`_
+  `$<LINK_LANGUAGE:languages> <With Arguments_>`_
+
+Without Arguments
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
   $<LINK_LANGUAGE>
-
-.. versionadded:: 3.18
 
 The link language of the target when evaluating link options. See :ref:`the
 related boolean expression <Boolean LINK_LANGUAGE Generator Expression>`
@@ -25,14 +33,12 @@ expression.
   properties to avoid side-effects due to the double evaluation of
   these properties.
 
-Syntax
-^^^^^^
+With Arguments
+^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
   $<LINK_LANGUAGE:languages>
-
-.. versionadded:: 3.18
 
 ``1`` when the language used for link step matches any of the comma-separated
 entries in ``languages``, otherwise ``0``.  This expression may be used to
@@ -68,12 +74,12 @@ language.
   To determine the link language of a target, it is required to collect,
   transitively, all the targets which will be linked to it. So, for link
   libraries properties, a double evaluation will be done. During the first
-  evaluation, ``$<LINK_LANGUAGE:..>`` expressions will always return ``0``.
+  evaluation, ``$<LINK_LANGUAGE:...>`` expressions will always return ``0``.
   The link language computed after this first pass will be used to do the
   second pass. To avoid inconsistency, it is required that the second pass
   do not change the link language. Moreover, to avoid unexpected
   side-effects, it is required to specify complete entities as part of the
-  ``$<LINK_LANGUAGE:..>`` expression. For example:
+  ``$<LINK_LANGUAGE:...>`` expression. For example:
 
   .. code-block:: cmake
 

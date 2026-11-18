@@ -67,7 +67,7 @@ on ``X``'s dependents:
 
     target_link_libraries(X PRIVATE Y)
 
-  then ``$<LINK_ONLY:Y>`` is placed in ``X``'s
+  then :genex:`$<LINK_ONLY:Y>` is placed in ``X``'s
   :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  ``Y``'s linking requirements,
   including ``INTERFACE_LINK_LIBRARIES_DIRECT``,
   ``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE``, and the transitive link

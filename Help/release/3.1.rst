@@ -141,7 +141,7 @@ Properties
   file location (``link /pdb``).
 
 * The :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property now supports
-  a ``$<LINK_ONLY:...>``
+  a :genex:`$<LINK_ONLY:...>`
   :manual:`generator expression <cmake-generator-expressions(7)>`.
 
 * A new :prop_tgt:`INTERFACE_SOURCES` target property was introduced. This is

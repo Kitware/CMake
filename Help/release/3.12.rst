@@ -201,20 +201,20 @@ Modules
 Generator Expressions
 ---------------------
 
-* A new ``$<GENEX_EVAL:...>`` and ``$<TARGET_GENEX_EVAL:target,...>``
+* A new :genex:`$<GENEX_EVAL:...>` and :genex:`$<TARGET_GENEX_EVAL:target,...>`
   :manual:`generator expression <cmake-generator-expressions(7)>`
   has been added to enable consumption of generator expressions whose
   evaluation results itself in generator expressions.
 
-* A new ``$<IN_LIST:...>``
+* A new :genex:`$<IN_LIST:...>`
   :manual:`generator expression <cmake-generator-expressions(7)>`
   has been added.
 
-* A new ``$<TARGET_EXISTS:...>``
+* A new :genex:`$<TARGET_EXISTS:...>`
   :manual:`generator expression <cmake-generator-expressions(7)>`
   has been added.
 
-* A new ``$<TARGET_NAME_IF_EXISTS:...>``
+* A new :genex:`$<TARGET_NAME_IF_EXISTS:...>`
   :manual:`generator expression <cmake-generator-expressions(7)>`
   has been added.
 
