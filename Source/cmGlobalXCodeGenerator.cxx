@@ -4476,7 +4476,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 
       // Add toolchain specified language link directories
       std::string const& linkDirsString =
-        this->Makefiles.front()->GetSafeDefinition(cmStrCat(
+        gt->Makefile->GetSafeDefinition(cmStrCat(
           "CMAKE_"_s, cli->GetLinkLanguage(), "_STANDARD_LINK_DIRECTORIES"_s));
 
       for (auto const& libDir : cmList(linkDirsString)) {

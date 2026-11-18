@@ -28,6 +28,17 @@ endfunction()
 DeterministicProductIds()
 
 run_cmake_with_options(SearchPaths -DCMAKE_CONFIGURATION_TYPES=Debug)
+
+function(XcodeStandardLinkDirectoriesSubdir)
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/XcodeStandardLinkDirectoriesSubdir-build")
+  run_cmake_with_options(XcodeStandardLinkDirectoriesSubdir -DCMAKE_CONFIGURATION_TYPES=Debug)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(XcodeStandardLinkDirectoriesSubdir-build
+    ${CMAKE_COMMAND} --build . --config Debug --target standard_link_child --parallel 2)
+  run_cmake_command(XcodeStandardLinkDirectoriesSubdir-run
+    "${RunCMake_TEST_BINARY_DIR}/bin/Debug/standard_link_child")
+endfunction()
+XcodeStandardLinkDirectoriesSubdir()
 run_cmake_with_options(InheritedParameters -DCMake_TEST_Swift=${CMake_TEST_Swift})
 
 run_cmake(XcodeFileType)

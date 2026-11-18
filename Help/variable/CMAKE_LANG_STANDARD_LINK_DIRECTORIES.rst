@@ -6,6 +6,8 @@ CMAKE_<LANG>_STANDARD_LINK_DIRECTORIES
 Link directories specified for every executable and library linked
 for language ``<LANG>``.  This is meant for specification of system
 link directories needed by the language for the current platform.
+The value visible in the directory where a target is created is used
+for that target.
 
 This variable should not be set by project code.  It is meant to be set by
 CMake's platform information modules for the current toolchain, or by a

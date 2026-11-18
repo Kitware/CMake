@@ -1,0 +1,8 @@
+set(project "${RunCMake_TEST_BINARY_DIR}/XcodeStandardLinkDirectoriesSubdir.xcodeproj/project.pbxproj")
+file(STRINGS "${project}" search_paths REGEX "LIBRARY_SEARCH_PATHS")
+if(NOT search_paths MATCHES "/child-only")
+  string(APPEND RunCMake_TEST_FAILED "Missing child standard link directory: ${search_paths}\n")
+endif()
+if(search_paths MATCHES "/parent-only")
+  string(APPEND RunCMake_TEST_FAILED "Unexpected parent standard link directory: ${search_paths}\n")
+endif()
