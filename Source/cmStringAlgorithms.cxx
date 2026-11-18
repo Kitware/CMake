@@ -226,11 +226,9 @@ std::string cmCatViews(
   }
 
   std::string result;
-  std::string::size_type initialLen = 0;
-  if (rvalueString && rvalueString->capacity() >= totalSize) {
+  if (rvalueString) {
+    // Reuse the largest allocation.
     result = std::move(*rvalueString);
-  } else {
-    rvalueString = nullptr;
   }
   result.resize(totalSize);
   if (rvalueString && rvalueStringOffset > 0) {
@@ -238,7 +236,7 @@ std::string cmCatViews(
                        result.begin() + rvalueStringOffset +
                          rvalueStringLength);
   }
-  std::string::iterator sit = result.begin() + initialLen;
+  std::string::iterator sit = result.begin();
   for (auto const& view : views) {
     if (rvalueString && view.second == rvalueString) {
       sit += rvalueStringLength;
