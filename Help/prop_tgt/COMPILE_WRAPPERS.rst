@@ -20,7 +20,10 @@ of names, where each item is a ``<NAME>`` keyed to the
 This property is supported only by :ref:`Makefile Generators` and
 :ref:`Ninja Generators`, and is ignored by other generators. Further, it is
 supported only when the target's language is one of: ``C``, ``CXX``, ``CUDA``,
-``Fortran``, ``HIP``, ``ISPC``, ``OBJC``, ``OBJCXX``.
+``Fortran``, ``HIP``, ``ISPC``, ``OBJC``, ``OBJCXX``, ``Swift``.
+
+.. versionadded:: 4.6
+  Support for the ``Swift`` language was added.
 
 .. |genex_subject| replace:: ``COMPILE_WRAPPERS``
 .. include:: ../include/GENEX_NOTE.rst

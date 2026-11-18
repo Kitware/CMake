@@ -38,6 +38,10 @@ endif()
 if(CMake_TEST_OBJC)
   list(APPEND langs OBJC OBJCXX)
 endif()
+if(CMake_TEST_Swift AND RunCMake_GENERATOR MATCHES "^Ninja")
+  # FIXME(#19283): Swift is not supported by the Makefile generator yet
+  list(APPEND langs Swift)
+endif()
 
 foreach(lang ${langs})
   run_toolchain_wrappers(${lang})

@@ -1472,8 +1472,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_Rust=${CMake_TEST_Rust})
   endif()
   if(DEFINED CMake_TEST_Swift)
-    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_Swift=${CMake_TEST_Swift})
-    list(APPEND LinkerLauncher_ARGS -DCMake_TEST_Swift=${CMake_TEST_Swift})
+    list(APPEND LauncherCommon_ARGS -DCMake_TEST_Swift=${CMake_TEST_Swift})
   endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
@@ -1486,7 +1485,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   if (NOT "${CMAKE_GENERATOR}" STREQUAL "FASTBuild")
     add_RunCMake_test(ToolchainWrappers)
     set_property(TEST RunCMake.ToolchainWrappers APPEND
-      PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL")
+      PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran" "SYCL" "Swift")
   endif()
 endif()
 
