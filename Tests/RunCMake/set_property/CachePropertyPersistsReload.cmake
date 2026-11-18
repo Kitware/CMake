@@ -1,0 +1,67 @@
+# MODIFIED is an internal property that set_property cannot set.  The driver
+# inserts its serialized entries between configurations to cover it too.
+if(CachePropReloadStage STREQUAL "initialize")
+  set(CachePropInternal "internal value" CACHE INTERNAL "internal help")
+  set(CachePropString "string value" CACHE STRING "string help")
+  set(CachePropBool ON CACHE BOOL "bool help")
+  foreach(name IN ITEMS CachePropInternal CachePropString CachePropBool)
+    set_property(CACHE ${name} PROPERTY ADVANCED 1)
+    set_property(CACHE ${name} PROPERTY STRINGS "a;b;c")
+  endforeach()
+
+  set(CachePropEmpty "empty properties" CACHE INTERNAL "empty help")
+  set_property(CACHE CachePropEmpty PROPERTY ADVANCED 0)
+  set_property(CACHE CachePropEmpty PROPERTY STRINGS "")
+
+  # This value has no property stub when it is reloaded.
+  set(CachePropPlain "plain value" CACHE INTERNAL "plain help")
+elseif(NOT CachePropReloadStage STREQUAL "check")
+  message(FATAL_ERROR "Unknown configure stage '${CachePropReloadStage}'")
+endif()
+
+function(check_cache_property name property expected)
+  get_property(is_set CACHE ${name} PROPERTY ${property} SET)
+  get_property(actual CACHE ${name} PROPERTY ${property})
+  if(NOT is_set OR NOT actual STREQUAL "${expected}")
+    message(SEND_ERROR
+      "${CachePropReloadStage}: ${name} ${property}: expected "
+      "'${expected}', got '${actual}' (set: ${is_set})")
+  endif()
+endfunction()
+
+foreach(name IN ITEMS CachePropInternal CachePropString CachePropBool)
+  check_cache_property(${name} ADVANCED 1)
+  if(CachePropReloadStage STREQUAL "check")
+    check_cache_property(${name} MODIFIED 1)
+  endif()
+  check_cache_property(${name} STRINGS "a;b;c")
+endforeach()
+check_cache_property(CachePropEmpty ADVANCED 0)
+if(CachePropReloadStage STREQUAL "check")
+  check_cache_property(CachePropEmpty MODIFIED 0)
+endif()
+check_cache_property(CachePropEmpty STRINGS "")
+
+# Reload must retain values, types and help strings too.  Ordinary STRING and
+# BOOL entries exercise the opposite serialization order (value first).
+check_cache_property(CachePropInternal VALUE "internal value")
+check_cache_property(CachePropInternal TYPE INTERNAL)
+check_cache_property(CachePropInternal HELPSTRING "internal help")
+check_cache_property(CachePropString VALUE "string value")
+check_cache_property(CachePropString TYPE STRING)
+check_cache_property(CachePropString HELPSTRING "string help")
+check_cache_property(CachePropBool VALUE ON)
+check_cache_property(CachePropBool TYPE BOOL)
+check_cache_property(CachePropBool HELPSTRING "bool help")
+check_cache_property(CachePropEmpty VALUE "empty properties")
+check_cache_property(CachePropEmpty TYPE INTERNAL)
+check_cache_property(CachePropEmpty HELPSTRING "empty help")
+check_cache_property(CachePropPlain VALUE "plain value")
+check_cache_property(CachePropPlain TYPE INTERNAL)
+check_cache_property(CachePropPlain HELPSTRING "plain help")
+foreach(property IN ITEMS ADVANCED MODIFIED STRINGS)
+  get_property(is_set CACHE CachePropPlain PROPERTY ${property} SET)
+  if(is_set)
+    message(SEND_ERROR "${CachePropReloadStage}: plain entry gained ${property}")
+  endif()
+endforeach()
