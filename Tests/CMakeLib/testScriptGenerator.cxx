@@ -22,6 +22,11 @@ bool quote()
   TEST_QUOTE("$]=", "[[$]=]]");
   TEST_QUOTE("$]=]", "[==[$]=]]==]");
   TEST_QUOTE("$]==]", "[=[$]==]]=]");
+  // The reader drops one newline after the opening bracket.
+  TEST_QUOTE("\n$", "[[\n\n$]]");
+  TEST_QUOTE("\r\n$", "[[\n\r\n$]]");
+  TEST_QUOTE("\n$]", "[=[\n\n$]]=]");
+  TEST_QUOTE("$\n", "[[$\n]]");
   return true;
 }
 
