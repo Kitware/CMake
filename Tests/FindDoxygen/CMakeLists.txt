@@ -38,6 +38,16 @@ add_test(NAME FindDoxygen.CleanTarget COMMAND
   --test-command ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
 )
 
+add_test(NAME FindDoxygen.PathTest COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/FindDoxygen/PathTest"
+  "${CMake_BINARY_DIR}/Tests/FindDoxygen/PathTest"
+  ${build_generator_args}
+  --build-options ${build_options}
+  --test-command ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
+)
+
 add_test(NAME FindDoxygen.StampFile COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
   --build-and-test

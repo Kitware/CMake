@@ -1212,6 +1212,8 @@ function(_doxygen_resolve_output_dirs parentDir childDirs outputDirs)
                        NORMALIZE
                        OUTPUT_VARIABLE _doxygen_resolved_dir)
             list(APPEND _doxygen_output_dirs "${_doxygen_resolved_dir}")
+        else()
+            list(APPEND _doxygen_output_dirs "${_dir}")
         endif()
     endforeach()
     set(${outputDirs} "${_doxygen_output_dirs}" PARENT_SCOPE)
