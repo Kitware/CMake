@@ -1072,7 +1072,7 @@ private:
     std::enable_if_t<filesystem::internals::is_pathable<Source>::value, path&>;
 
   template <typename Source, typename Target = target_type>
-  using string_converter = filesystem::internals::source_converter<
+  using source_converter = filesystem::internals::source_converter<
     typename filesystem::internals::source_traits<Source>::value_type, Target>;
   template <typename Iterator, typename Target = target_type>
   using range_converter = filesystem::internals::source_converter<
@@ -1094,12 +1094,12 @@ public:
   {
   }
   path(string_type&& source, format fmt = format::auto_format)
-    : base(string_converter<string_type>::from(std::move(source)), fmt)
+    : base(source_converter<string_type>::from(std::move(source)), fmt)
   {
   }
   template <typename Source, typename = enable_if_pathable<Source>>
   path(Source const& source, format fmt = format::auto_format)
-    : base(string_converter<Source>::from(source), fmt)
+    : base(source_converter<Source>::from(source), fmt)
   {
   }
   template <typename Iterator, typename = enable_if_pathable<Iterator>>
@@ -1139,13 +1139,13 @@ public:
 
   path& assign(string_type&& source)
   {
-    this->base::assign(string_converter<string_type>::from(std::move(source)));
+    this->base::assign(source_converter<string_type>::from(std::move(source)));
     return *this;
   }
   template <typename Source, typename = enable_if_pathable<Source>>
   path& assign(Source const& source)
   {
-    this->base::assign(string_converter<Source>::from(source));
+    this->base::assign(source_converter<Source>::from(source));
     return *this;
   }
   template <typename Iterator, typename = enable_if_pathable<Iterator>>
@@ -1170,7 +1170,7 @@ public:
   template <typename Source, typename = enable_if_pathable<Source>>
   path& append(Source const& source)
   {
-    this->base::append(string_converter<Source>::from(source));
+    this->base::append(source_converter<Source>::from(source));
     return *this;
   }
   template <typename Iterator, typename = enable_if_pathable<Iterator>>
@@ -1204,7 +1204,7 @@ public:
   template <typename Source, typename = enable_if_pathable<Source>>
   path& concat(Source const& source)
   {
-    this->base::concat(string_converter<Source>::from(source));
+    this->base::concat(source_converter<Source>::from(source));
     return *this;
   }
   template <typename Iterator, typename = enable_if_pathable<Iterator>>
@@ -1232,10 +1232,10 @@ public:
   {
 #  if defined(_WIN32) && !defined(__CYGWIN__)
 #    if defined(__cpp_char8_t)
-    return string_converter<std::u8string, std::string::value_type>::from(
+    return source_converter<std::u8string, std::string::value_type>::from(
       this->base::u8string());
 #    else
-    return string_converter<std::wstring, std::string::value_type>::from(
+    return source_converter<std::wstring, std::string::value_type>::from(
       this->base::wstring());
 #    endif
 #  else
@@ -1250,7 +1250,7 @@ public:
 #  endif
   {
 #  if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__cpp_char8_t)
-    return string_converter<std::wstring, std::string::value_type>::from(
+    return source_converter<std::wstring, std::string::value_type>::from(
       this->base::wstring());
 #  else
     return this->base::u8string();
@@ -1261,10 +1261,10 @@ public:
   {
 #  if defined(_WIN32) && !defined(__CYGWIN__)
 #    if defined(__cpp_char8_t)
-    return string_converter<std::u8string, std::string::value_type>::from(
+    return source_converter<std::u8string, std::string::value_type>::from(
       this->base::generic_u8string());
 #    else
-    return string_converter<std::wstring, std::string::value_type>::from(
+    return source_converter<std::wstring, std::string::value_type>::from(
       this->base::generic_wstring());
 #    endif
 #  else
@@ -1282,7 +1282,7 @@ public:
 #  endif
   {
 #  if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__cpp_char8_t)
-    return string_converter<std::wstring, std::string::value_type>::from(
+    return source_converter<std::wstring, std::string::value_type>::from(
       this->base::generic_wstring());
 #  else
     return this->base::generic_u8string();
