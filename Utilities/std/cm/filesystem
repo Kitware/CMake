@@ -1226,13 +1226,8 @@ public:
   std::string string() const
   {
 #  if defined(_WIN32) && !defined(__CYGWIN__)
-#    if defined(__cpp_char8_t)
-    return source_converter<std::u8string, std::string::value_type>::from(
-      this->base::u8string());
-#    else
     return source_converter<std::wstring, std::string::value_type>::from(
       this->base::wstring());
-#    endif
 #  else
     return this->base::string();
 #  endif
@@ -1244,9 +1239,14 @@ public:
   std::string u8string() const
 #  endif
   {
-#  if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__cpp_char8_t)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+#    if defined(__cpp_char8_t)
+    return source_converter<std::wstring, char8_t>::from(
+      this->base::wstring());
+#    else
     return source_converter<std::wstring, std::string::value_type>::from(
       this->base::wstring());
+#    endif
 #  else
     return this->base::u8string();
 #  endif
@@ -1255,13 +1255,8 @@ public:
   std::string generic_string() const
   {
 #  if defined(_WIN32) && !defined(__CYGWIN__)
-#    if defined(__cpp_char8_t)
-    return source_converter<std::u8string, std::string::value_type>::from(
-      this->base::generic_u8string());
-#    else
     return source_converter<std::wstring, std::string::value_type>::from(
       this->base::generic_wstring());
-#    endif
 #  else
     return this->base::generic_string();
 #  endif
@@ -1276,9 +1271,14 @@ public:
   std::string generic_u8string() const
 #  endif
   {
-#  if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__cpp_char8_t)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+#    if defined(__cpp_char8_t)
+    return source_converter<std::wstring, char8_t>::from(
+      this->base::generic_wstring());
+#    else
     return source_converter<std::wstring, std::string::value_type>::from(
       this->base::generic_wstring());
+#    endif
 #  else
     return this->base::generic_u8string();
 #  endif

@@ -278,6 +278,18 @@ bool testObservers()
   bool result = true;
 
   {
+    // UTF-16 high surrogate with no matching low surrogate.
+    fs::path p(L"\xD800");
+    std::string replacement("\xEF\xBF\xBD");
+    decltype(p.u8string()) replacement_u8(replacement.begin(),
+                                          replacement.end());
+    if (p.string() != replacement || p.generic_string() != replacement ||
+        p.u8string() != replacement_u8 ||
+        p.generic_u8string() != replacement_u8) {
+      result = false;
+    }
+  }
+  {
     std::string s("a/b/c");
     fs::path p(s);
     fs::path::string_type st;
