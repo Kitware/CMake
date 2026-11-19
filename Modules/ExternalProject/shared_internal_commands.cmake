@@ -435,9 +435,9 @@ function(_ep_write_gitclone_script
   foreach(config IN LISTS git_config)
     list(APPEND git_clone_options --config \"${config}\")
   endforeach()
-  if(NOT ${git_remote_name} STREQUAL "origin")
-    list(APPEND git_clone_options --origin \"${git_remote_name}\")
-  endif()
+  # Name the remote even if it is "origin", which the update step fetches
+  # from: git's clone.defaultRemoteName setting may name it otherwise.
+  list(APPEND git_clone_options --origin \"${git_remote_name}\")
 
   # The clone config option is sticky, it will apply to all subsequent git
   # update operations. The submodules config option is not sticky, because
