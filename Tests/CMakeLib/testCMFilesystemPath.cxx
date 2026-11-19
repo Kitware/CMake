@@ -135,6 +135,19 @@ bool testConcatenation()
   bool result = true;
 
   {
+    fs::path p("a");
+    p += fs::path::value_type('b');
+    if (p.string() != "ab") {
+      result = false;
+    }
+#if defined(__cpp_char8_t)
+    if (fs::internals::unicode_converter<char, char8_t>()('x') != u8"x" ||
+        fs::internals::unicode_converter<char8_t, char>()(u8'x') != "x") {
+      result = false;
+    }
+#endif
+  }
+  {
     fs::path p("/a/b");
     p /= "c";
     if (!(p.string() == "/a/b/c" || p.string() == "/a/b\\c")) {

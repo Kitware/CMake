@@ -377,7 +377,7 @@ public:
   }
   std::u8string operator()(char in)
   {
-    return std::u8string{ 1, static_cast<char8_t>(in) };
+    return std::u8string(1, static_cast<char8_t>(in));
   }
 };
 template <>
@@ -398,7 +398,7 @@ public:
   }
   std::string operator()(char8_t in)
   {
-    return std::string{ 1, static_cast<char>(in) };
+    return std::string(1, static_cast<char>(in));
   }
 };
 template <>
@@ -1189,7 +1189,7 @@ public:
   path& operator+=(value_type const* str) { return this->concat(str); }
   path& operator+=(value_type const c)
   {
-    return this->concat(string_type{ 1, c });
+    return this->concat(string_type(1, c));
   }
   template <typename Source>
   path& operator+=(Source const& source)
