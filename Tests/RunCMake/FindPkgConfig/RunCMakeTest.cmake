@@ -61,6 +61,7 @@ Libs: -L\${libdir}
   run_cmake(FindPkgConfig_VERSION_OPERATORS)
   run_cmake(FindPkgConfig_GET_MATCHING_MODULE_NAME)
   run_cmake(FindPkgConfig_empty_target)
+  run_cmake(FindPkgConfig_shadowing_normal_variables)
   if(NOT PKG_CONFIG_DONT_SUPPORT_SPACES_IN_PATH)
     run_cmake(FindPkgConfig_SYSTEM_PATH)
   endif()
