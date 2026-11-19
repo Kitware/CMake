@@ -257,6 +257,10 @@ if(GIT_EXECUTABLE)
   if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 2.31)
     run_cmake(FetchGitRemoteName)
   endif()
+  # git checkout <tree-ish> -- needs git 1.8.5 or later.
+  if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.8.5)
+    run_cmake(FetchGitUpdatePath)
+  endif()
   unset(RunCMake_TEST_OUTPUT_MERGE)
 
   run_cmake(TLSVersionBadArg)
