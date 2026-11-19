@@ -510,9 +510,10 @@ Updates
 
 Changes made since CMake 4.5.0 include the following.
 
-.. 4.5.1
+4.5.1
+-----
 
-  * The :module:`FindCUDAToolkit` module in 4.5.0 created ``CUDAToolkit::``
-    namespace targets and changed the existing ``CUDA::`` namespace targets
-    to be alias targets.  This has been reverted because the compatibility
-    aliases did not extend to exports for consumers using CMake 4.4 and below.
+* The :module:`FindCUDAToolkit` module in 4.5.0 created ``CUDAToolkit::``
+  namespace targets and changed the existing ``CUDA::`` namespace targets
+  to be alias targets.  This has been reverted because the compatibility
+  aliases did not extend to exports for consumers using CMake 4.4 and below.
