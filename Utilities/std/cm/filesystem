@@ -1385,7 +1385,7 @@ public:
   {
     iterator it(*this);
     this->operator++();
-    return *this;
+    return it;
   }
 
   iterator& operator--()

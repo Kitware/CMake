@@ -899,6 +899,18 @@ bool testIterators()
   bool result = true;
 
   {
+    fs::path p("a/b");
+    auto i = p.begin();
+    auto previous = i++;
+    if (previous->string() != "a" || i->string() != "b") {
+      result = false;
+    }
+    auto next = i--;
+    if (next->string() != "b" || i->string() != "a") {
+      result = false;
+    }
+  }
+  {
     fs::path p("/a/b/");
 #if defined(_WIN32)
     std::vector<fs::path::string_type> ref{ L"/", L"a", L"b", L"" };
