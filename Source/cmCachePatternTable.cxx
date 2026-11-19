@@ -152,7 +152,7 @@ Entry const kPatterns[] = {
 
   // === 1-placeholder, (24-literal-char bucket) ===
   { "CMAKE_<LANG>_COMPILER_LAUNCHER"_s,
-    "Default value for the <LANG>_COMPILER_LAUNCHER target property; launcher tool prepended to every <LANG> compile command. Applies only when <LANG> is C, CXX, Fortran, HIP, ISPC, OBJC, OBJCXX, or CUDA."_s },
+    "Default value for the <LANG>_COMPILER_LAUNCHER target property; launcher tool prepended to every <LANG> compile command."_s },
   { "CMAKE_<LANG>_STANDARD_REQUIRED"_s,
     "Default value for the <LANG>_STANDARD_REQUIRED target property when a target is created. If TRUE, the requested language standard must be supported by the compiler."_s },
   { "CMAKE_<LANG>_VISIBILITY_PRESET"_s,
@@ -170,7 +170,7 @@ Entry const kPatterns[] = {
 
   // === 1-placeholder, (22-literal-char bucket) ===
   { "CMAKE_<LANG>_LINKER_LAUNCHER"_s,
-    "Default value for the <LANG>_LINKER_LAUNCHER target property; names a launcher tool prepended to every <LANG> link command. Applies only when <LANG> is C, CXX, CUDA, OBJC, OBJCXX, Fortran, or HIP."_s },
+    "Default value for the <LANG>_LINKER_LAUNCHER target property; names a launcher tool prepended to every <LANG> link command."_s },
   { "CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE"_s,
     "Path to a CMake language file included as the last step of any project() command call matching <PROJECT-NAME>. Intended for injecting custom code without modifying the project source."_s },
   { "CMAKE_XCODE_ATTRIBUTE_<an-attribute>"_s,
