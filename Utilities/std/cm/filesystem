@@ -1211,15 +1211,7 @@ public:
 
   // Format observers
   // ================
-  string_type const& native() const noexcept
-  {
-#  if defined(_WIN32) && !defined(__CYGWIN__)
-    this->native_path_ = this->wstring();
-    return this->native_path_;
-#  else
-    return this->base::native();
-#  endif
-  }
+  string_type const& native() const noexcept { return this->base::native(); }
   value_type const* c_str() const noexcept { return this->native().c_str(); }
   operator string_type() const { return this->native(); }
 
@@ -1336,7 +1328,6 @@ private:
     : base(std::move(p))
   {
   }
-  mutable string_type native_path_;
 };
 
 class path::iterator
