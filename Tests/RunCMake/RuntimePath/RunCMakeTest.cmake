@@ -47,6 +47,19 @@ if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
     ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/SkipInstallRPATHPropertyOld-build -P ${RunCMake_SOURCE_DIR}/SkipInstallRPATHCheck.cmake)
 endif()
 
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  block()
+    run_RuntimePath(GenexHeadTarget)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GenexHeadTarget-build)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(GenexHeadTarget-install ${CMAKE_COMMAND} --install .
+      --config Debug --prefix ${RunCMake_TEST_BINARY_DIR}/install)
+    run_cmake_command(GenexHeadTarget-check ${CMAKE_COMMAND}
+      -Ddir=${RunCMake_TEST_BINARY_DIR} -Dconfig=Debug
+      -P ${RunCMake_SOURCE_DIR}/GenexHeadTargetCheck.cmake)
+  endblock()
+endif()
+
 block()
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Stub-build)
   if(RunCMake_GENERATOR_IS_MULTI_CONFIG)

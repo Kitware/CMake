@@ -32,5 +32,10 @@ the contents of ``INSTALL_RPATH`` are properly escaped in the
 This property supports
 :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
+.. versionadded:: 4.6
+  Generator expressions that refer to the current target, such as
+  :genex:`$<TARGET_PROPERTY:prop>`, may be used.  They refer to the
+  target on which this property is set.
+
 On Apple platforms, refer to the :prop_tgt:`INSTALL_NAME_DIR` target property.
 Under Windows, the :genex:`TARGET_RUNTIME_DLLS` generator expression is related.
