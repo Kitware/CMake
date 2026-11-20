@@ -184,6 +184,16 @@ if(CMAKE_Swift_COMPILATION_MODE_DEFAULT)
     set(CMAKE_Swift_ARCHIVE_FINISH "")
   endif()
   unset(CMAKE_Swift_PARALLEL_FLAGS)
+
+  if(NOT CMAKE_Swift_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_Swift_COMPILER_LAUNCHER})
+    set(CMAKE_Swift_COMPILER_LAUNCHER "$ENV{CMAKE_Swift_COMPILER_LAUNCHER}"
+      CACHE STRING "Compiler launcher for Swift.")
+  endif()
+
+  if(NOT CMAKE_Swift_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_Swift_LINKER_LAUNCHER})
+    set(CMAKE_Swift_LINKER_LAUNCHER "$ENV{CMAKE_Swift_LINKER_LAUNCHER}"
+      CACHE STRING "Linker launcher for Swift.")
+  endif()
 else()
   # NOTE(compnerd) we do not have an object compile rule since we build the objects as part of the link step
   if(NOT CMAKE_Swift_COMPILE_OBJECT)

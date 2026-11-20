@@ -413,6 +413,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "Swift_MODULE_DIRECTORY"_s, IC::CanCompileSources },
   { "Swift_COMPILATION_MODE"_s, IC::CanCompileSources },
   { "Swift_SEPARATE_MODULE_EMISSION"_s, IC::CanCompileSources },
+  { "Swift_COMPILER_LAUNCHER"_s, IC::CanCompileSources },
   // ---- Rust
   { "Rust_EDITION"_s, IC::CanCompileSources },
   { "Rust_COMPILER_LAUNCHER"_s, IC::CanCompileSources },
@@ -504,6 +505,8 @@ TargetProperty const StaticTargetProperties[] = {
   { "OBJCXX_LINKER_LAUNCHER"_s, IC::CanCompileSources },
   // ---- Fortran
   { "Fortran_LINKER_LAUNCHER"_s, IC::CanCompileSources },
+  // ---- Swift
+  { "Swift_LINKER_LAUNCHER"_s, IC::CanCompileSources },
 
   // Static analysis
   { "SKIP_LINTING"_s, IC::CanCompileSources },

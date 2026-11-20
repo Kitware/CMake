@@ -16,6 +16,10 @@ value of this property.
 This property is supported only by :ref:`Makefile Generators` and
 :ref:`Ninja Generators`, and is ignored by other generators.
 
+.. versionadded:: 4.6
+  Wrappers are supported for ``Swift``.
+  See :prop_tgt:`LINK_WRAPPERS` for the full list of supported languages.
+
 The value is a :ref:`semicolon-separated list <CMake Language Lists>` of
 command line arguments.  Empty arguments are preserved, and a literal
 semicolon within an argument may be written as ``\;``.

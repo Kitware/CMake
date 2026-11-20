@@ -54,6 +54,7 @@ set(properties
   "Swift_MODULE_DIRECTORY"                  "${dir}"            "<SAME>"
   "Swift_COMPILATION_MODE"                  "incremental"       "<SAME>"
   "Swift_SEPARATE_MODULE_EMISSION"          "ON"                "<SAME>"
+  "Swift_COMPILER_LAUNCHER"                 "ccache"            "<SAME>"
   ### Rust
   "Rust_COMPILER_LAUNCHER"                  "ccache"            "<SAME>"
   "Rust_EDITION"                            "2021"              "<SAME>"
@@ -138,6 +139,8 @@ set(properties
   "OBJCXX_LINKER_LAUNCHER"                  "ccache"            "<SAME>"
   ### Fortran
   "Fortran_LINKER_LAUNCHER"                 "ccache"            "<SAME>"
+  ### Swift
+  "Swift_LINKER_LAUNCHER"                   "ccache"            "<SAME>"
 
   ### SYCL
   "SYCL_LINKER_LAUNCHER"                     "ccache"            "<SAME>"

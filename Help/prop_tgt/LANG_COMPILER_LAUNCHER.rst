@@ -4,8 +4,8 @@
 .. versionadded:: 3.4
 
 This property is implemented only when ``<LANG>`` is ``C``, ``CXX``,
-``Fortran``, ``HIP``, ``ISPC``, ``OBJC``, ``OBJCXX``, ``CUDA``, ``SYCL``, or
-``Rust``.
+``Fortran``, ``HIP``, ``ISPC``, ``OBJC``, ``OBJCXX``, ``CUDA``, ``SYCL``,
+``Rust``, or ``Swift``.
 
 .. versionchanged:: 4.5
   Added support for ``SYCL``.
@@ -18,6 +18,14 @@ This property is implemented only when ``<LANG>`` is ``C``, ``CXX``,
 
   .. note::
     Rust support is experimental and gated by ``CMAKE_EXPERIMENTAL_RUST``.
+
+.. versionchanged:: 4.6
+  Added support for ``Swift``.
+
+  .. note::
+    Setting the compiler launcher for ``Swift`` is only supported when
+    :policy:`CMP0157` is set to use the ``NEW`` behavior. This property has no
+    effect when the policy is set to the ``OLD`` behavior.
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command line
 for a compiler launching tool. The :ref:`Makefile Generators` and the

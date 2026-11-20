@@ -34,5 +34,9 @@ This is done only when ``<LANG>`` is one of:
   .. note::
     Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
 
+* ``Swift``
+
+  .. versionadded:: 4.6
+
 This variable is initialized to the :envvar:`CMAKE_<LANG>_LINKER_LAUNCHER`
 environment variable if it is set.

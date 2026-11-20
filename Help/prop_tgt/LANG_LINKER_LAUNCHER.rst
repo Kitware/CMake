@@ -32,6 +32,16 @@ This property is implemented only when ``<LANG>`` is one of:
   .. note::
     Experimental. Gated by ``CMAKE_EXPERIMENTAL_SYCL``.
 
+* ``Swift``
+
+  .. versionadded:: 4.6
+
+  .. note::
+
+    Setting the linker launcher for ``Swift`` is only supported when
+    :policy:`CMP0157` is set to use the ``NEW`` behavior. This property has no
+    effect when the policy is set to the ``OLD`` behavior.
+
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a
 command line for a linker launching tool. The :ref:`Makefile Generators` and the
 :generator:`Ninja` generator will run this tool and pass the linker and its
