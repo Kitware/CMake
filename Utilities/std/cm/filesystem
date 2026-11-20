@@ -38,12 +38,6 @@
 namespace cm {
 namespace filesystem {
 
-#if !defined(CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR)
-// Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
-// the source_traits for iterator check.  So disable it for now.
-#  define CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR 0
-#endif
-
 namespace internals {
 
 class unicode_helper
@@ -693,14 +687,15 @@ struct source_traits<cm::string_view>
   using value_type = cm::string_view::value_type;
 };
 
-#if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
 template <typename T>
-struct source_traits<T, std::enable_if_t<cm::is_iterator<T>::value, void>>
+struct source_traits<
+  T,
+  std::enable_if_t<cm::is_iterator<T>::value && !std::is_pointer<T>::value,
+                   void>>
 {
   using value_type =
     typename std::iterator_traits<std::decay_t<T>>::value_type;
 };
-#endif
 
 template <typename T>
 struct is_pathable_string : std::false_type
