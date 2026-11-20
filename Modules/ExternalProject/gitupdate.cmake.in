@@ -51,6 +51,7 @@ endif()
 execute_process(
   COMMAND "@git_EXECUTABLE@" --git-dir=.git show-ref "@git_tag@"
   WORKING_DIRECTORY "@work_dir@"
+  RESULT_VARIABLE show_ref_result # Fails if no ref matches, as for a hash.
   OUTPUT_VARIABLE show_ref_output
 )
 if(show_ref_output MATCHES "^[a-z0-9]+[ \\t]+refs/remotes/")
@@ -144,6 +145,7 @@ if(git_update_strategy MATCHES "^REBASE(_CHECKOUT)?$")
     OUTPUT_STRIP_TRAILING_WHITESPACE
     # Don't test for an error. If this isn't a branch, we get a non-zero error
     # code but empty output.
+    RESULT_VARIABLE symbolic_ref_result
   )
 
   if(current_branch STREQUAL "")
@@ -218,6 +220,7 @@ else()
     execute_process(
       COMMAND "@git_EXECUTABLE@" --git-dir=.git rebase --abort
       WORKING_DIRECTORY "@work_dir@"
+      RESULT_VARIABLE abort_result
       ${maybe_show_command}
     )
 
@@ -227,6 +230,7 @@ else()
         execute_process(
           COMMAND "@git_EXECUTABLE@" --git-dir=.git stash pop --index --quiet
           WORKING_DIRECTORY "@work_dir@"
+          RESULT_VARIABLE pop_result
           ${maybe_show_command}
           )
       endif()
@@ -278,6 +282,7 @@ if(need_stash)
     execute_process(
       COMMAND "@git_EXECUTABLE@" --git-dir=.git reset --hard --quiet
       WORKING_DIRECTORY "@work_dir@"
+      RESULT_VARIABLE reset_result
       ${maybe_show_command}
     )
     execute_process(
@@ -291,11 +296,13 @@ if(need_stash)
       execute_process(
         COMMAND "@git_EXECUTABLE@" --git-dir=.git reset --hard --quiet ${head_sha}
         WORKING_DIRECTORY "@work_dir@"
+        RESULT_VARIABLE reset_result
         ${maybe_show_command}
       )
       execute_process(
         COMMAND "@git_EXECUTABLE@" --git-dir=.git stash pop --index --quiet
         WORKING_DIRECTORY "@work_dir@"
+        RESULT_VARIABLE pop_result
         ${maybe_show_command}
       )
       message(FATAL_ERROR "\nFailed to unstash changes in: '@work_dir@'."
