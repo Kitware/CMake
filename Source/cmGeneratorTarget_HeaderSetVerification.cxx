@@ -331,12 +331,12 @@ cm::optional<std::string> cmGeneratorTarget::ResolveHeaderLanguage(
   cmSourceFile& source,
   cm::optional<cm::optional<std::string>>& defaultLanguage) const
 {
-  static std::array<cm::string_view, 5> const supportedLangs{ {
-    "C",
-    "CXX",
-    "OBJC",
-    "OBJCXX",
-    "SYCL",
+  static constexpr std::array<cm::static_string_view, 5> supportedLangs{ {
+    "C"_s,
+    "CXX"_s,
+    "OBJC"_s,
+    "OBJCXX"_s,
+    "SYCL"_s,
   } };
   auto isSupported = [](cm::string_view lang) -> bool {
     return std::find(supportedLangs.begin(), supportedLangs.end(), lang) !=

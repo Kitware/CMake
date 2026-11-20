@@ -796,7 +796,7 @@ std::string cmFastbuildNormalTargetGenerator::GetCudaCompileMode() const
       this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
     cudaCompileMode = cmStrCat(std::move(cudaCompileMode), rdcFlag, ' ');
   }
-  static std::array<cm::string_view, 4> const compileModes{
+  static constexpr std::array<cm::static_string_view, 4> compileModes{
     { "PTX"_s, "CUBIN"_s, "FATBIN"_s, "OPTIX"_s }
   };
   bool useNormalCompileMode = true;

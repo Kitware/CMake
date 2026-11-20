@@ -40,7 +40,7 @@
 namespace {
 constexpr char const* unique_binary_directory = "CMAKE_BINARY_DIR_USE_MKDTEMP";
 
-std::array<cm::string_view, 10> const kLanguageNames{ {
+constexpr std::array<cm::static_string_view, 10> kLanguageNames{ {
   "C"_s,
   "CUDA"_s,
   "CXX"_s,
@@ -1049,7 +1049,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       static std::array<std::string, 7> const possibleLangs{
         { "C", "CXX", "CUDA", "HIP", "OBJC", "OBJCXX", "SYCL" }
       };
-      static std::array<cm::string_view, 3> const langPropSuffixes{
+      static constexpr std::array<cm::static_string_view, 3> langPropSuffixes{
         { "_STANDARD"_s, "_STANDARD_REQUIRED"_s, "_EXTENSIONS"_s }
       };
       for (std::string const& lang : possibleLangs) {
