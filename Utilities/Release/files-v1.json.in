@@ -36,14 +36,14 @@
       "architecture": ["arm64", "x86_64"],
       "class": "volume",
       "name": "cmake-@version@-macos-universal.dmg",
-      "macOSmin": "10.13"
+      "macOSmin": "11.0"
     },
     {
       "os": ["macos", "macOS"],
       "architecture": ["arm64", "x86_64"],
       "class": "archive",
       "name": "cmake-@version@-macos-universal.tar.gz",
-      "macOSmin": "10.13"
+      "macOSmin": "11.0"
     },
     {
       "os": ["macos10.10", "macOS10.10"],
