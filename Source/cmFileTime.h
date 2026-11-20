@@ -6,8 +6,6 @@
 
 #include <string>
 
-#include <cm/bits/constexpr.hxx>
-
 /** \class cmFileTime
  * \brief Abstract file modification time with support for comparison with
  *        other file modification times.
@@ -64,7 +62,7 @@ public:
    * @brief Compare file modification times.
    * @return -1, 0, +1 for this older, same, or newer than ftm.
    */
-  CONSTEXPR_CXX14 int Compare(cmFileTime ftm) const
+  constexpr int Compare(cmFileTime ftm) const
   {
     TimeType const diff = this->Time - ftm.Time;
     if (diff == 0) {
@@ -94,7 +92,7 @@ public:
   /**
    * @brief Return true if this is within the same second as ftm
    */
-  CONSTEXPR_CXX14 bool EqualS(cmFileTime ftm) const
+  constexpr bool EqualS(cmFileTime ftm) const
   {
     TimeType diff = this->Time - ftm.Time;
     if (diff < 0) {
@@ -106,7 +104,7 @@ public:
   /**
    * @brief Return true if this is older or newer than ftm by at least a second
    */
-  CONSTEXPR_CXX14 bool DifferS(cmFileTime ftm) const
+  constexpr bool DifferS(cmFileTime ftm) const
   {
     TimeType diff = this->Time - ftm.Time;
     if (diff < 0) {
@@ -120,7 +118,7 @@ public:
    * @return -1: this at least a second older, 0: this within the same second
    *         as ftm, +1: this at least a second newer than ftm.
    */
-  CONSTEXPR_CXX14 int CompareS(cmFileTime ftm) const
+  constexpr int CompareS(cmFileTime ftm) const
   {
     TimeType const diff = this->Time - ftm.Time;
     if (diff <= -cmFileTime::UtPerS) {

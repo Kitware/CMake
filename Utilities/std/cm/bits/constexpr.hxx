@@ -19,14 +19,6 @@
 #  define CMAKE_CXX_STD __cplusplus
 #endif
 
-#ifndef CONSTEXPR_CXX14
-#  if CMAKE_CXX_STD >= CMAKE_CXX_STD_14
-#    define CONSTEXPR_CXX14 constexpr
-#  else
-#    define CONSTEXPR_CXX14
-#  endif
-#endif
-
 #ifndef CONSTEXPR_CXX17
 #  if CMAKE_CXX_STD >= CMAKE_CXX_STD_17
 #    define CONSTEXPR_CXX17 constexpr

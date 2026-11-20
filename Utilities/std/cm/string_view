@@ -46,13 +46,6 @@ public:
 
   static constexpr size_type const npos = static_cast<size_type>(-1);
 
-private:
-  static inline constexpr size_type cxx11_min(size_type a, size_type b)
-  {
-    return a > b ? b : a;
-  }
-
-public:
   constexpr string_view() noexcept = default;
   constexpr string_view(string_view const&) noexcept = default;
 
@@ -87,7 +80,7 @@ public:
   // std::string is constexpr only from C++20.
   explicit operator std::string() const { return std::string(data_, size_); }
 
-  CONSTEXPR_CXX14 string_view& operator=(string_view const&) = default;
+  constexpr string_view& operator=(string_view const&) = default;
 
   constexpr const_iterator begin() const noexcept { return data_; }
   constexpr const_iterator end() const noexcept { return data_ + size_; }
@@ -127,13 +120,13 @@ public:
   constexpr size_type max_size() const noexcept { return npos - 1; }
   constexpr bool empty() const noexcept { return size_ == 0; }
 
-  CONSTEXPR_CXX14 void remove_prefix(size_type n) noexcept
+  constexpr void remove_prefix(size_type n) noexcept
   {
     data_ += n;
     size_ -= n;
   }
-  CONSTEXPR_CXX14 void remove_suffix(size_type n) noexcept { size_ -= n; }
-  CONSTEXPR_CXX14 void swap(string_view& v) noexcept
+  constexpr void remove_suffix(size_type n) noexcept { size_ -= n; }
+  constexpr void swap(string_view& v) noexcept
   {
     string_view tmp = v;
     v = *this;
@@ -146,7 +139,7 @@ public:
   constexpr string_view substr(size_type pos = 0, size_type count = npos) const
   {
     return pos <= size_
-      ? string_view(data_ + pos, cxx11_min(count, size_ - pos))
+      ? string_view(data_ + pos, std::min(count, size_ - pos))
       : throw std::out_of_range("Index out of range in string_view::substr");
     ;
   }
