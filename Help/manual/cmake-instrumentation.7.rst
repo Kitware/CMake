@@ -671,6 +671,29 @@ Snippet files have a filename with the syntax
 
     If the data could not be collected, this object is ``null``.
 
+    .. note::
+
+      The metrics are collected by the instrumentation wrapper that launches
+      the command, and cover the process it launches plus descendants that
+      the platform attributes to it:
+
+      * On POSIX platforms, the values come from ``getrusage(RUSAGE_CHILDREN)``
+        and include every descendant process that terminated and was waited
+        for. ``userTime`` and ``systemTime`` are summed across those
+        processes, while ``maxRSS`` is the peak of the single largest one.
+
+      * On Windows, the wrapper runs the command inside a job object.
+        ``userTime`` and ``systemTime`` are summed across all processes in
+        the job. ``maxRSS`` is the larger of the launched process's peak
+        working set and the peak committed memory of any process in the job.
+
+      Processes that leave the launched process tree are not counted. For
+      example, a POSIX process that daemonizes, or a Windows process created
+      with ``CREATE_BREAKAWAY_FROM_JOB`` or by a broker outside the job.
+      Windows app execution aliases, such as the ``python.exe`` installed
+      under ``%LOCALAPPDATA%\Microsoft\WindowsApps``, start the real program
+      this way, so only the alias launcher's usage is reported.
+
     Only available as of data version ``1.2``.
 
   ``cmakeContent``

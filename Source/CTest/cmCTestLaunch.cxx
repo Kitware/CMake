@@ -40,6 +40,8 @@
 #ifdef _WIN32
 #  include <cstdio> // for std{out,err} and fileno
 
+#  include <windows.h>
+
 #  include <fcntl.h> // for _O_BINARY
 #  include <io.h>    // for _setmode
 #endif
@@ -59,7 +61,40 @@ cmCTestLaunch::cmCTestLaunch(int argc, char const* const* argv, Op operation)
   this->Operation = operation;
 }
 
+#ifdef _WIN32
+cmCTestLaunch::~cmCTestLaunch()
+{
+  if (this->ProcessTreeJob) {
+    CloseHandle(static_cast<HANDLE>(this->ProcessTreeJob));
+  }
+}
+#else
 cmCTestLaunch::~cmCTestLaunch() = default;
+#endif
+
+void cmCTestLaunch::TrackProcessTree()
+{
+#ifdef _WIN32
+  // Call before the first uv_spawn so libuv's kill-on-close job nests in ours,
+  // tracking descendants without killing them when this process exits.
+  if (this->ProcessTreeJob) {
+    return;
+  }
+  HANDLE job = CreateJobObjectW(nullptr, nullptr);
+  if (!job) {
+    return;
+  }
+  JOBOBJECT_EXTENDED_LIMIT_INFORMATION info{};
+  info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_BREAKAWAY_OK;
+  if (SetInformationJobObject(job, JobObjectExtendedLimitInformation, &info,
+                              sizeof(info)) &&
+      AssignProcessToJobObject(job, GetCurrentProcess())) {
+    this->ProcessTreeJob = job;
+  } else {
+    CloseHandle(job);
+  }
+#endif
+}
 
 bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
 {
@@ -338,7 +373,7 @@ void cmCTestLaunch::RunChild()
 
   cmsys::SystemInformation::ProcessResourceUsage processUsage{};
   if (cmsys::SystemInformation::GetProcessResourceUsage(
-        processUsage, chain.GetNativeProcessHandle(0))) {
+        processUsage, chain.GetNativeProcessHandle(0), this->ProcessTreeJob)) {
     this->ChildResourceUsage = processUsage;
   }
 }
@@ -347,6 +382,9 @@ int cmCTestLaunch::Run()
 {
   auto instrumentation = cmInstrumentation(this->Reporter.OptionBuildDir);
   if (this->Operation == Op::InstrumentTest) {
+    if (!instrumentation.IsDisabled() && !this->MetricsFile.empty()) {
+      this->TrackProcessTree();
+    }
     this->RunChild();
     if (!instrumentation.IsDisabled()) {
       this->WriteMetricsFile();
@@ -377,6 +415,9 @@ int cmCTestLaunch::Run()
   if (!commandType) {
     this->RunChild();
   } else {
+    if (processMetrics) {
+      this->TrackProcessTree();
+    }
     instrumentation.InstrumentCommand(
       *commandType, this->RealArgV,
       [this, captureOutput,

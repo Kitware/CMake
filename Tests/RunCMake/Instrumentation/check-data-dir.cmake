@@ -77,6 +77,10 @@ foreach(snippet IN LISTS snippets)
       elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "SunOS")
         # MaxRSS does not seem to be populated.
         set(minMaxRSS 0)
+      elseif(filename MATCHES "^test-" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows"
+          AND CMAKE_HOST_SYSTEM_VERSION VERSION_LESS 6.2)
+        # Windows 7 cannot nest jobs, so ctest's job hides the test's children.
+        set(minMaxRSS 0)
       else()
         set(minMaxRSS 32768)
       endif()
@@ -190,7 +194,7 @@ foreach(snippet IN LISTS snippets)
       endif()
       json_missing_key("${snippet}" "${contents}" target)
     # unrecognized outputs
-    elseif (NOT outputs MATCHES "shell_redirect\\.out|output3|process_metrics_(cpu_)?custom\\.stamp")
+    elseif (NOT outputs MATCHES "shell_redirect\\.out|output3|process_metrics_(cpu_|linger_)?custom\\.stamp")
       json_error("${snippet}" "Custom command has unexpected outputs\n${outputs}")
     endif()
   endif()
@@ -269,6 +273,21 @@ if (ARGS_PROCESS_METRICS_QUERY AND ARGS_BUILD AND NOT CMAKE_HOST_SYSTEM_NAME STR
     add_error("Missing process metrics for one or both chained commands")
   elseif (process_metrics_chain_head_rss EQUAL process_metrics_chain_tail_rss)
     add_error("Chained commands reported identical maxRSS: ${process_metrics_chain_tail_rss} KiB")
+  endif()
+endif()
+
+# A process left running by a wrapped command must not be killed when the
+# instrumentation wrapper exits.
+if (ARGS_PROCESS_METRICS_QUERY AND ARGS_BUILD AND PROCESS_METRICS_LINGER)
+  set(linger_survived "${RunCMake_TEST_BINARY_DIR}/process_metrics_linger.survived")
+  foreach(i RANGE 60)
+    if (EXISTS "${linger_survived}")
+      break()
+    endif()
+    execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 0.5)
+  endforeach()
+  if (NOT EXISTS "${linger_survived}")
+    add_error("Process left running by a wrapped command did not survive")
   endif()
 endif()
 

@@ -42,6 +42,16 @@ if (PROCESS_METRICS_QUERY)
     VERBATIM
   )
 endif()
+if (PROCESS_METRICS_LINGER)
+  add_custom_command(
+    OUTPUT process_metrics_linger_custom.stamp
+    COMMAND ${Python_EXECUTABLE}
+            ${CMAKE_CURRENT_LIST_DIR}/process_metrics_linger.py
+            ${CMAKE_CURRENT_BINARY_DIR}/process_metrics_linger_custom.stamp
+            ${CMAKE_CURRENT_BINARY_DIR}/process_metrics_linger.survived
+    VERBATIM
+  )
+endif()
 add_custom_command(
   COMMAND $<TARGET_FILE:main>
   OUTPUT output3
@@ -73,6 +83,7 @@ add_custom_target(customTarget ALL
   DEPENDS output1 output3 shell_redirect.out
           $<$<BOOL:${PROCESS_METRICS_QUERY}>:process_metrics_custom.stamp>
           $<$<BOOL:${PROCESS_METRICS_QUERY}>:process_metrics_cpu_custom.stamp>
+          $<$<BOOL:${PROCESS_METRICS_LINGER}>:process_metrics_linger_custom.stamp>
 )
 add_test(NAME test COMMAND $<TARGET_FILE:main>)
 if(DUPLICATE_TEST_COMMAND)
