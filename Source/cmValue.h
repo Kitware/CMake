@@ -8,6 +8,7 @@
 #include <iosfwd>
 #include <string>
 
+#include <cm/bits/constexpr.hxx>
 #include <cm/string_view>
 
 class cmValue
@@ -16,27 +17,27 @@ public:
   static cmValue True;
   static cmValue False;
 
-  cmValue() noexcept = default;
-  cmValue(std::nullptr_t) noexcept {}
-  explicit cmValue(std::string const* value) noexcept
+  constexpr cmValue() noexcept = default;
+  constexpr cmValue(std::nullptr_t) noexcept {}
+  constexpr explicit cmValue(std::string const* value) noexcept
     : Value(value)
   {
   }
-  explicit cmValue(std::string const& value) noexcept
+  constexpr explicit cmValue(std::string const& value) noexcept
     : Value(&value)
   {
   }
-  cmValue(cmValue const& other) noexcept = default;
+  constexpr cmValue(cmValue const& other) noexcept = default;
 
-  cmValue& operator=(cmValue const& other) noexcept = default;
-  cmValue& operator=(std::nullptr_t) noexcept
+  constexpr cmValue& operator=(cmValue const& other) noexcept = default;
+  constexpr cmValue& operator=(std::nullptr_t) noexcept
   {
     this->Value = nullptr;
     return *this;
   }
 
-  std::string const* Get() const noexcept { return this->Value; }
-  char const* GetCStr() const noexcept
+  constexpr std::string const* Get() const noexcept { return this->Value; }
+  CONSTEXPR_CXX20 char const* GetCStr() const noexcept
   {
     return this->Value ? this->Value->c_str() : nullptr;
   }
@@ -50,7 +51,10 @@ public:
     return this->Value ? *this->Value : cmValue::Empty;
   }
 
-  explicit operator bool() const noexcept { return this->Value != nullptr; }
+  constexpr explicit operator bool() const noexcept
+  {
+    return this->Value != nullptr;
+  }
   operator std::string const&() const noexcept { return this->operator*(); }
   explicit operator cm::string_view() const noexcept
   {
@@ -80,7 +84,7 @@ public:
   {
     return this->Value && cmValue::IsNOTFOUND(cm::string_view(*this->Value));
   }
-  bool IsEmpty() const noexcept
+  CONSTEXPR_CXX20 bool IsEmpty() const noexcept
   {
     return !this->Value || this->Value->empty();
   }
@@ -285,15 +289,15 @@ inline bool cmIsNOTFOUND(cmValue val)
 }
 
 /** Check for non-empty Property/Variable value.  */
-inline bool cmNonempty(cm::string_view val)
+constexpr bool cmNonempty(cm::string_view val)
 {
   return !cmValue::IsEmpty(val);
 }
-inline bool cmNonempty(char const* val)
+constexpr bool cmNonempty(char const* val)
 {
   return !cmValue::IsEmpty(val);
 }
-inline bool cmNonempty(cmValue val)
+inline CONSTEXPR_CXX20 bool cmNonempty(cmValue val)
 {
   return !val.IsEmpty();
 }
