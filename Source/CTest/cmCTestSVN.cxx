@@ -248,7 +248,11 @@ bool cmCTestSVN::UpdateImpl()
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
-    args.push_back(cmStrCat("-r{"_s, this->GetNightlyTime(), " +0000}"_s));
+    std::string date = this->GetNightlyTime();
+    if (date.empty()) {
+      return false;
+    }
+    args.push_back(cmStrCat("-r{"_s, date, " +0000}"_s));
   }
 
   std::vector<std::string> svn_update;

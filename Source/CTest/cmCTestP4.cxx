@@ -495,6 +495,9 @@ bool cmCTestP4::UpdateImpl()
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
     std::string date = this->GetNightlyTime();
+    if (date.empty()) {
+      return false;
+    }
     // CTest reports the date as YYYY-MM-DD, Perforce needs it as YYYY/MM/DD
     std::replace(date.begin(), date.end(), '-', '/');
 
