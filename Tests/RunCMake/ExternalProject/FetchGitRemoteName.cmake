@@ -65,7 +65,7 @@ unset(ENV{GIT_CONFIG_COUNT})
 unset(ENV{GIT_CONFIG_KEY_0})
 unset(ENV{GIT_CONFIG_VALUE_0})
 
-# Look only at the clone's own configuration: the user's may add remotes.
+# Look only at the clone's own configuration: the users may add remotes.
 execute_process(
   WORKING_DIRECTORY ${binDir}/fetcher-prefix/src/fetcher
   COMMAND ${GIT_EXECUTABLE} config --local --get remote.origin.url
