@@ -1,1 +1,1 @@
-check_tag_contents("^[0-9-]+\nNightly\nNightly\n$")
+check_tag_contents("^[0-9]+-0100\nNightly\nNightly\n$")
