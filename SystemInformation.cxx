@@ -914,7 +914,8 @@ long long SystemInformation::GetProcessId()
 }
 
 bool SystemInformation::GetProcessResourceUsage(
-  SystemInformation::ProcessResourceUsage& usage, void* processHandle)
+  SystemInformation::ProcessResourceUsage& usage, void* processHandle,
+  void* jobHandle)
 {
 #if defined(_WIN32)
 #  if defined(KWSYS_SYS_HAS_PSAPI)
@@ -937,12 +938,48 @@ bool SystemInformation::GetProcessResourceUsage(
     return false;
   }
 
-  usage = SystemInformation::ProcessResourceUsage{};
-  usage.ru_maxrss =
-    static_cast<decltype(usage.ru_maxrss)>(pmc.PeakWorkingSetSize / 1024);
+  SIZE_T peakBytes = pmc.PeakWorkingSetSize;
+  unsigned __int64 user100ns = fileTimeToUInt64(userTime);
+  unsigned __int64 kernel100ns = fileTimeToUInt64(kernelTime);
 
-  unsigned __int64 const user100ns = fileTimeToUInt64(userTime);
-  unsigned __int64 const kernel100ns = fileTimeToUInt64(kernelTime);
+  // Prefer whole-tree accounting from the job object, if provided.
+  HANDLE hJob = static_cast<HANDLE>(jobHandle);
+  if (hJob && hJob != INVALID_HANDLE_VALUE) {
+    JOBOBJECT_BASIC_AND_IO_ACCOUNTING_INFORMATION acct;
+    JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits;
+    if (QueryInformationJobObject(hJob,
+                                  JobObjectBasicAndIoAccountingInformation,
+                                  &acct, sizeof(acct), nullptr) &&
+        QueryInformationJobObject(hJob, JobObjectExtendedLimitInformation,
+                                  &limits, sizeof(limits), nullptr)) {
+      unsigned __int64 jobUser100ns =
+        static_cast<unsigned __int64>(acct.BasicInfo.TotalUserTime.QuadPart);
+      unsigned __int64 jobKernel100ns =
+        static_cast<unsigned __int64>(acct.BasicInfo.TotalKernelTime.QuadPart);
+      // Exclude the calling process if it is part of the job.
+      BOOL selfInJob = FALSE;
+      FILETIME selfCreation;
+      FILETIME selfExit;
+      FILETIME selfKernel;
+      FILETIME selfUser;
+      if (IsProcessInJob(GetCurrentProcess(), hJob, &selfInJob) && selfInJob &&
+          GetProcessTimes(GetCurrentProcess(), &selfCreation, &selfExit,
+                          &selfKernel, &selfUser)) {
+        jobUser100ns -= (std::min)(jobUser100ns, fileTimeToUInt64(selfUser));
+        jobKernel100ns -=
+          (std::min)(jobKernel100ns, fileTimeToUInt64(selfKernel));
+      }
+      user100ns = (std::max)(user100ns, jobUser100ns);
+      kernel100ns = (std::max)(kernel100ns, jobKernel100ns);
+      if (limits.PeakProcessMemoryUsed > peakBytes) {
+        peakBytes = limits.PeakProcessMemoryUsed;
+      }
+    }
+  }
+
+  usage = SystemInformation::ProcessResourceUsage{};
+  usage.ru_maxrss = static_cast<decltype(usage.ru_maxrss)>(peakBytes / 1024);
+
   unsigned __int64 const userUSec = user100ns / 10ULL;
   unsigned __int64 const kernelUSec = kernel100ns / 10ULL;
 
@@ -954,10 +991,12 @@ bool SystemInformation::GetProcessResourceUsage(
 #  else // !defined(KWSYS_SYS_HAS_PSAPI)
   static_cast<void>(usage);
   static_cast<void>(processHandle);
+  static_cast<void>(jobHandle);
   return false;
 #  endif
 #else // !defined(_WIN32)
   static_cast<void>(processHandle);
+  static_cast<void>(jobHandle);
   struct rusage rusage;
   if (getrusage(RUSAGE_CHILDREN, &rusage) != 0) {
     return false;
