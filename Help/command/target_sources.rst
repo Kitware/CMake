@@ -60,6 +60,16 @@ expressions to ensure the sources are correctly assigned to the target.
   # CORRECT: absolute path used inside the generator expression
   target_sources(MyTarget PRIVATE "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/dbgsrc.cpp>")
 
+.. note::
+
+  The :generator:`Xcode` generator does not support per-configuration sources.
+  A source whose path depends on the configuration via a generator expression,
+  such as ``mymain-$<CONFIG>.cpp``, will result in a generation error.
+  See :ref:`Xcode Generator Limitations <Xcode Generator Limitations>`.
+  Instead, use a single source file and select the per-configuration
+  source through preprocessor conditional inclusion driven by
+  per-configuration :command:`target_compile_definitions`.
+
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 

@@ -45,6 +45,8 @@ When using the ``Xcode`` generator with Xcode 6.1 or higher,
 one may enable the ``Swift`` language with the :command:`enable_language`
 command or the :command:`project`.
 
+.. _`Xcode Generator Limitations`:
+
 Limitations
 ^^^^^^^^^^^
 
