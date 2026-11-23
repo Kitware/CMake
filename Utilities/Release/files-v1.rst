@@ -104,7 +104,7 @@ The members are:
   ``macOSmin``
     Optional member that is present on package files for macOS.
     The value is a JSON string specifying the minimum version of macOS
-    required to run the binary, e.g. ``"10.13"``.
+    required to run the binary, e.g. ``"11.0"``.
 
   ``deprecated``
     Optional member that is present when the package file is deprecated
