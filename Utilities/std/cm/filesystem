@@ -38,12 +38,6 @@
 namespace cm {
 namespace filesystem {
 
-#if !defined(CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR)
-// Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
-// the source_traits for iterator check.  So disable it for now.
-#  define CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR 0
-#endif
-
 namespace internals {
 
 class unicode_helper
@@ -377,7 +371,7 @@ public:
   }
   std::u8string operator()(char in)
   {
-    return std::u8string{ 1, static_cast<char8_t>(in) };
+    return std::u8string(1, static_cast<char8_t>(in));
   }
 };
 template <>
@@ -398,7 +392,7 @@ public:
   }
   std::string operator()(char8_t in)
   {
-    return std::string{ 1, static_cast<char>(in) };
+    return std::string(1, static_cast<char>(in));
   }
 };
 template <>
@@ -693,14 +687,15 @@ struct source_traits<cm::string_view>
   using value_type = cm::string_view::value_type;
 };
 
-#if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
 template <typename T>
-struct source_traits<T, std::enable_if_t<cm::is_iterator<T>::value, void>>
+struct source_traits<
+  T,
+  std::enable_if_t<cm::is_iterator<T>::value && !std::is_pointer<T>::value,
+                   void>>
 {
   using value_type =
     typename std::iterator_traits<std::decay_t<T>>::value_type;
 };
-#endif
 
 template <typename T>
 struct is_pathable_string : std::false_type
@@ -1189,7 +1184,7 @@ public:
   path& operator+=(value_type const* str) { return this->concat(str); }
   path& operator+=(value_type const c)
   {
-    return this->concat(string_type{ 1, c });
+    return this->concat(string_type(1, c));
   }
   template <typename Source>
   path& operator+=(Source const& source)
@@ -1211,15 +1206,7 @@ public:
 
   // Format observers
   // ================
-  string_type const& native() const noexcept
-  {
-#  if defined(_WIN32) && !defined(__CYGWIN__)
-    this->native_path_ = this->wstring();
-    return this->native_path_;
-#  else
-    return this->base::native();
-#  endif
-  }
+  string_type const& native() const noexcept { return this->base::native(); }
   value_type const* c_str() const noexcept { return this->native().c_str(); }
   operator string_type() const { return this->native(); }
 
@@ -1336,7 +1323,6 @@ private:
     : base(std::move(p))
   {
   }
-  mutable string_type native_path_;
 };
 
 class path::iterator
@@ -1385,7 +1371,7 @@ public:
   {
     iterator it(*this);
     this->operator++();
-    return *this;
+    return it;
   }
 
   iterator& operator--()

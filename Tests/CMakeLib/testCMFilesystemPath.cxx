@@ -71,14 +71,12 @@ bool testConstructors()
     if (p1.string() != s || p2.string() != s) {
       result = false;
     }
-#if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
     std::string s2(s);
     s2 += '\0';
     fs::path p3(s2.begin());
     if (p1 != p3 || p3.string() != s) {
       result = false;
     }
-#endif
   }
   {
     std::wstring s(L"/a/b/c");
@@ -90,14 +88,12 @@ bool testConstructors()
     if (p1.wstring() != s || p2.wstring() != s) {
       result = false;
     }
-#if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
     std::wstring s2(s);
     s2 += L'\0';
     fs::path p3(s2.begin());
     if (p1 != p3 || p3.wstring() != s) {
       result = false;
     }
-#endif
   }
   {
     std::string s("/a/b/c");
@@ -113,14 +109,12 @@ bool testConstructors()
     if (p1.native() != ws || p2.native() != ws) {
       result = false;
     }
-#if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
     fs::path::string_type ws2(ws);
     ws2 += fs::path::value_type('\0');
     fs::path p3(ws2.begin());
     if (p1 != p3 || p3.native() != ws) {
       result = false;
     }
-#endif
   }
 
   checkResult(result);
@@ -134,6 +128,19 @@ bool testConcatenation()
 
   bool result = true;
 
+  {
+    fs::path p("a");
+    p += fs::path::value_type('b');
+    if (p.string() != "ab") {
+      result = false;
+    }
+#if defined(__cpp_char8_t)
+    if (fs::internals::unicode_converter<char, char8_t>()('x') != u8"x" ||
+        fs::internals::unicode_converter<char8_t, char>()(u8'x') != "x") {
+      result = false;
+    }
+#endif
+  }
   {
     fs::path p("/a/b");
     p /= "c";
@@ -885,6 +892,18 @@ bool testIterators()
 
   bool result = true;
 
+  {
+    fs::path p("a/b");
+    auto i = p.begin();
+    auto previous = i++;
+    if (previous->string() != "a" || i->string() != "b") {
+      result = false;
+    }
+    auto next = i--;
+    if (next->string() != "b" || i->string() != "a") {
+      result = false;
+    }
+  }
   {
     fs::path p("/a/b/");
 #if defined(_WIN32)
