@@ -705,7 +705,11 @@ class cmMakefile;
          WARN)                                                                \
   SELECT(POLICY, CMP0233,                                                     \
          "MSVC C and UCRT extensions are controlled by C_EXTENSIONS.", 4, 6,  \
-         0, WARN)
+         0, WARN)                                                             \
+  SELECT(POLICY, CMP0234,                                                     \
+         "MSVC conformant preprocessor is controlled by C_EXTENSIONS and "    \
+         "CXX_EXTENSIONS.",                                                   \
+         4, 6, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -771,7 +775,8 @@ class cmMakefile;
   F(CMP0229)                                                                  \
   F(CMP0231)                                                                  \
   F(CMP0232)                                                                  \
-  F(CMP0233)
+  F(CMP0233)                                                                  \
+  F(CMP0234)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

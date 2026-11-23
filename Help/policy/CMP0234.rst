@@ -1,0 +1,44 @@
+CMP0234
+-------
+
+.. versionadded:: 4.6
+
+MSVC conformant preprocessor is controlled by :prop_tgt:`C_EXTENSIONS` and
+:prop_tgt:`CXX_EXTENSIONS`.
+
+The :prop_tgt:`C_EXTENSIONS` and :prop_tgt:`CXX_EXTENSIONS` target properties
+select whether compiler-specific language extensions are enabled.  The
+``MSVC`` compiler uses its traditional preprocessor by default, regardless of
+those properties.  Visual Studio 2019 version 16.5 and above offer the
+``/Zc:preprocessor`` flag to select the standard-conforming preprocessor, and
+``/Zc:preprocessor-`` to select the traditional one.
+
+In CMake 4.5 and below, :prop_tgt:`C_EXTENSIONS` and
+:prop_tgt:`CXX_EXTENSIONS` had no influence on the preprocessor.  CMake 4.6
+and above prefer to pass ``/Zc:preprocessor`` when compiler extensions are
+disabled.  This policy provides compatibility for projects that have not been
+updated to expect the behavior.
+
+The ``OLD`` behavior for this policy does not add ``/Zc:preprocessor``.
+The ``NEW`` behavior adds ``/Zc:preprocessor`` or ``/Zc:preprocessor-`` where
+appropriate for the extensions settings of the target.  The flags are placed
+before the target's :prop_tgt:`COMPILE_OPTIONS`.  The :ref:`Visual Studio
+Generators` compile the C and C++ sources of a target with one set of
+options, so for consistent behavior across generators a target that uses both
+languages is handled as a whole.  If :prop_tgt:`C_EXTENSIONS` and
+:prop_tgt:`CXX_EXTENSIONS` differ for such a target, the conformant
+preprocessor is used for both languages, as if the extensions were disabled
+for both.
+
+The policy setting is recorded by each target when it is created.  It is
+also propagated to the test projects of the :command:`try_compile` and
+:command:`try_run` commands.
+
+This policy has no effect on other languages, on compilers other than
+``MSVC``, or on versions of it that do not support the flag.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

@@ -2344,6 +2344,15 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     if (!stdcOptions.empty()) {
       this->AppendCompileOptions(flags, stdcOptions);
     }
+
+    // Add the MSVC conformant preprocessor flag when extensions are off for
+    // C or C++ if CMP0234 is NEW.  A mixed target gets it for both languages.
+    std::string const preprocessorOptions =
+      cmStandardLevelResolver(this->Makefile)
+        .GetMsvcPreprocessorCompileOption(target, lang, config);
+    if (!preprocessorOptions.empty()) {
+      this->AppendCompileOptions(flags, preprocessorOptions);
+    }
   }
 
   std::string compilerId = this->Makefile->GetSafeDefinition(
