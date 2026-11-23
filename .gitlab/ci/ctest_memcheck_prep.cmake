@@ -30,6 +30,8 @@ if (CTEST_MEMORYCHECK_TYPE STREQUAL "Valgrind")
     */Tests/CTestTest2/kwsysBin/*
     */Tests/CTestTestCrash/Crash
     */Tests/Qt*Autogen/*
+    */Tests/RunCMake/CommandLineTar/*
+    */Tests/Rust*/*
     # Ignore ISPC files which may contain unimplemented instructions.
     */build/Tests/ISPC/TryCompile/ISPCTryCompile
     # Ignore anything CI downloads.

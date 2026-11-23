@@ -22,10 +22,17 @@ endif ()
 
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_memcheck_prep.cmake")
 
+if(CTEST_MEMORYCHECK_TYPE STREQUAL "Valgrind")
+  math(EXPR parallel_level "(${nproc} * 3 + 1) / 4")
+else()
+  set(parallel_level "${nproc}")
+endif()
+set(test_load "${nproc}")
+
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_exclusions.cmake")
 ctest_memcheck(
-  PARALLEL_LEVEL "${nproc}"
-  TEST_LOAD "${nproc}"
+  PARALLEL_LEVEL "${parallel_level}"
+  TEST_LOAD "${test_load}"
   OUTPUT_JUNIT "${CTEST_BINARY_DIRECTORY}/junit.xml"
   RETURN_VALUE test_result
   EXCLUDE "${test_exclusions}"
