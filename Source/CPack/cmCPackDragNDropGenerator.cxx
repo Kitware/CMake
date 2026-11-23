@@ -620,9 +620,9 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
                            sizeof(iso_language_cstr) - 1,
                            kCFStringEncodingMacRoman);
         CFRelease(iso_language);
+#if HAVE_CoreServices
         LangCode lang = 0;
         RegionCode region = 0;
-#if HAVE_CoreServices
         OSStatus err =
           LocaleStringToLangAndRegionCodes(iso_language_cstr, &lang, &region);
         if (err != noErr)
