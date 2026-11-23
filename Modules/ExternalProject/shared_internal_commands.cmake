@@ -514,6 +514,13 @@ function(_ep_write_gitupdate_script
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
+  if(NOT Git_VERSION VERSION_LESS 1.8.5)
+    # Use `git checkout <tree-ish> --` as the download step does, so that a
+    # tag that isn't a ref is an error, not a path whose files are restored.
+    set(git_checkout_explicit-- "--")
+  else()
+    set(git_checkout_explicit-- "")
+  endif()
   set(git_stash_save_options --quiet)
   if(Git_VERSION VERSION_GREATER_EQUAL 1.7.7)
     # This avoids stashing files covered by .gitignore

@@ -202,11 +202,24 @@ endif()
 
 if(git_update_strategy STREQUAL "CHECKOUT")
   execute_process(
-    COMMAND "@git_EXECUTABLE@" --git-dir=.git checkout "${checkout_name}"
+    COMMAND "@git_EXECUTABLE@" --git-dir=.git checkout "${checkout_name}" @git_checkout_explicit--@
     WORKING_DIRECTORY "@work_dir@"
-    COMMAND_ERROR_IS_FATAL ANY
+    RESULT_VARIABLE error_code
     ${maybe_show_command}
   )
+  if(error_code)
+    # The checkout left the working tree as it was, so put back any changes
+    # stashed above, rather than leave them in the stash.
+    if(need_stash)
+      execute_process(
+        COMMAND "@git_EXECUTABLE@" --git-dir=.git stash pop --index --quiet
+        WORKING_DIRECTORY "@work_dir@"
+        RESULT_VARIABLE pop_result
+        ${maybe_show_command}
+      )
+    endif()
+    message(FATAL_ERROR "Failed to checkout: '${checkout_name}'")
+  endif()
 else()
   execute_process(
     COMMAND "@git_EXECUTABLE@" --git-dir=.git rebase "${checkout_name}"
@@ -261,7 +274,7 @@ else()
     )
 
     execute_process(
-      COMMAND "@git_EXECUTABLE@" --git-dir=.git checkout "${checkout_name}"
+      COMMAND "@git_EXECUTABLE@" --git-dir=.git checkout "${checkout_name}" @git_checkout_explicit--@
       WORKING_DIRECTORY "@work_dir@"
       COMMAND_ERROR_IS_FATAL ANY
       ${maybe_show_command}
