@@ -153,9 +153,11 @@ public:
 
   // Retrieve resource usage for a finished child process. On Unix, this
   // queries RUSAGE_CHILDREN for the current process. On Windows, the caller
-  // provides the child process handle to query.
+  // provides the child process handle to query, and optionally a job handle
+  // whose processes, other than the caller, are included.
   static bool GetProcessResourceUsage(ProcessResourceUsage& usage,
-                                      void* processHandle = nullptr);
+                                      void* processHandle = nullptr,
+                                      void* jobHandle = nullptr);
 
   // Return the load average of the machine or -0.0 if it cannot
   // be determined.
