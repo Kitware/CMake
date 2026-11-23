@@ -253,6 +253,10 @@ if(GIT_EXECUTABLE)
   # on some platforms. It may go to stdout or stderr, so force it to be merged.
   set(RunCMake_TEST_OUTPUT_MERGE TRUE)
   run_cmake(FetchGitRefs)
+  # GIT_CONFIG_COUNT needs git 2.31 or later.
+  if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 2.31)
+    run_cmake(FetchGitRemoteName)
+  endif()
   unset(RunCMake_TEST_OUTPUT_MERGE)
 
   run_cmake(TLSVersionBadArg)
