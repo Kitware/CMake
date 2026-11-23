@@ -118,11 +118,14 @@ if (_FLAG_DETECTION_UNUSABLE)
         " HINT: Is it configured to report errors in a language other"
         " than English?"
     )
-    set(FLAG_WSTRICT_ALIASING FALSE)
+    set(FLAG_NO_STRICT_ALIASING FALSE)
     set(FLAG_WIMPLICIT_FALLTHROUGH FALSE)
     set(FLAG_VISIBILITY FALSE)
 else()
-    check_c_compiler_flag("-Wstrict-aliasing=3" FLAG_WSTRICT_ALIASING)
+    # Argument `-Wstrict-aliasing=3` is documented to not be able to catch all
+    # violations of strict aliasing, so we apply `-fno-strict-aliasing`
+    # for security.
+    check_c_compiler_flag("-fno-strict-aliasing" FLAG_NO_STRICT_ALIASING)
     check_c_compiler_flag("-Wimplicit-fallthrough" FLAG_WIMPLICIT_FALLTHROUGH)
     check_c_compiler_flag("-fvisibility=hidden" FLAG_VISIBILITY)
 endif()
