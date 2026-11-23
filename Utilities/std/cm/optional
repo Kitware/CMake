@@ -87,16 +87,16 @@ public:
   operator=(U&& v);
 
   constexpr T const* operator->() const;
-  CONSTEXPR_CXX14 T* operator->();
+  constexpr T* operator->();
   constexpr T const& operator*() const&;
-  CONSTEXPR_CXX14 T& operator*() &;
+  constexpr T& operator*() &;
   T const&& operator*() const&&;
   T&& operator*() &&;
 
   constexpr explicit operator bool() const noexcept;
   constexpr bool has_value() const noexcept;
 
-  CONSTEXPR_CXX14 T& value() &;
+  constexpr T& value() &;
   constexpr T const& value() const&;
 
   T&& value() &&;
@@ -457,7 +457,7 @@ constexpr T const* optional<T>::operator->() const
 }
 
 template <typename T>
-CONSTEXPR_CXX14 T* optional<T>::operator->()
+constexpr T* optional<T>::operator->()
 {
   return &**this;
 }
@@ -469,7 +469,7 @@ constexpr T const& optional<T>::operator*() const&
 }
 
 template <typename T>
-CONSTEXPR_CXX14 T& optional<T>::operator*() &
+constexpr T& optional<T>::operator*() &
 {
   return this->_mem.value;
 }
@@ -499,7 +499,7 @@ constexpr optional<T>::operator bool() const noexcept
 }
 
 template <typename T>
-CONSTEXPR_CXX14 T& optional<T>::value() &
+constexpr T& optional<T>::value() &
 {
   if (!this->has_value()) {
     throw cm::bad_optional_access{};
