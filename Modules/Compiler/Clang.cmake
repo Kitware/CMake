@@ -34,6 +34,10 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_SYCL_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   macro(__compiler_clang lang)
+    # Clang's GNU-like frontend can also target the MSVC ABI.
+    if(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
+      __compiler_clang_color_diagnostics(${lang})
+    endif()
   endmacro()
 else()
   include(Compiler/GNU)
