@@ -726,19 +726,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       lg.WriteDivider(ruleFileStream);
       ruleFileStream << "# Target rules for target " << localName << "\n\n";
 
-      commands.clear();
-      makeTargetName = cmStrCat(localName, "/depend"_s);
-      commands.push_back(
-        lg.GetRecursiveMakeCall(makefileName, makeTargetName));
-
-      makeTargetName = cmStrCat(localName, "/build"_s);
-      commands.push_back(
-        lg.GetRecursiveMakeCall(makefileName, makeTargetName));
-
-      // Write the rule.
-      localName += "/all";
-      depends.clear();
-
       cmLocalUnixMakefileGenerator3::EchoProgress progress;
       progress.Dir = cmStrCat(lg.GetBinaryDirectory(), "/CMakeFiles"_s);
       {
@@ -752,14 +739,79 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         targetMessages = tgtMsg.IsOn();
       }
 
-      if (targetMessages) {
-        lg.AppendEcho(commands, "Built target " + name,
-                      cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
-      }
+      bool const splitCompileAndLink = gtarget->CanCompileSources();
 
-      this->AppendGlobalTargetDepends(depends, gtarget.get());
-      rootLG.WriteMakeRule(ruleFileStream, "All Build rule for target.",
-                           localName, depends, commands, true);
+      if (splitCompileAndLink) {
+        // Depend phase: build own custom-command outputs.  Ordering (Util)
+        // deps are fully built first; link-only deps contribute their own
+        // custom-command outputs (via their .../depend rules) so that
+        // generated headers exist without waiting for the dependency to
+        // link.  This is the Makefile equivalent of Ninja's order-only
+        // dependencies on all of the dependency's custom command outputs
+        // (issue #15555), and covers plain add_custom_command() outputs,
+        // not just CODEGEN ones.
+        std::vector<std::string> dependDepends;
+        this->AppendGlobalTargetCompileDepends(dependDepends, gtarget.get());
+        std::vector<std::string> dependCommands;
+        makeTargetName = cmStrCat(localName, "/depend"_s);
+        dependCommands.push_back(
+          lg.GetRecursiveMakeCall(makefileName, makeTargetName));
+        rootLG.WriteMakeRule(ruleFileStream, "Depend rule for target.",
+                             makeTargetName, dependDepends, dependCommands,
+                             true);
+
+        // Compile phase: build own objects.  Prerequisites guarantee the
+        // depend step above (hence all needed generated inputs) ran first.
+        std::vector<std::string> compileCommands;
+        makeTargetName = cmStrCat(localName, "/compile"_s);
+        compileCommands.push_back(
+          lg.GetRecursiveMakeCall(makefileName, makeTargetName));
+        std::vector<std::string> compileDepends;
+        compileDepends.push_back(
+          cmStrCat(lg.GetRelativeTargetDirectory(gtarget.get()), "/depend"_s));
+        rootLG.WriteMakeRule(ruleFileStream, "Compile rule for target.",
+                             makeTargetName, compileDepends, compileCommands,
+                             true);
+
+        // Link phase: wait for own objects plus full dependency targets.
+        commands.clear();
+        makeTargetName = cmStrCat(localName, "/build"_s);
+        commands.push_back(
+          lg.GetRecursiveMakeCall(makefileName, makeTargetName));
+        if (targetMessages) {
+          lg.AppendEcho(commands, "Built target " + name,
+                        cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
+        }
+        localName += "/all";
+        depends.clear();
+        depends.push_back(cmStrCat(
+          lg.GetRelativeTargetDirectory(gtarget.get()), "/compile"_s));
+        this->AppendGlobalTargetDepends(depends, gtarget.get());
+        rootLG.WriteMakeRule(ruleFileStream, "All Build rule for target.",
+                             localName, depends, commands, true);
+      } else {
+        commands.clear();
+        makeTargetName = cmStrCat(localName, "/depend"_s);
+        commands.push_back(
+          lg.GetRecursiveMakeCall(makefileName, makeTargetName));
+
+        makeTargetName = cmStrCat(localName, "/build"_s);
+        commands.push_back(
+          lg.GetRecursiveMakeCall(makefileName, makeTargetName));
+
+        // Write the rule.
+        localName += "/all";
+        depends.clear();
+
+        if (targetMessages) {
+          lg.AppendEcho(commands, "Built target " + name,
+                        cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
+        }
+
+        this->AppendGlobalTargetDepends(depends, gtarget.get());
+        rootLG.WriteMakeRule(ruleFileStream, "All Build rule for target.",
+                             localName, depends, commands, true);
+      }
 
       // Write the rule.
       commands.clear();
@@ -947,6 +999,58 @@ void cmGlobalUnixMakefileGenerator3::AppendGlobalTargetDepends(
       lg3->GetRelativeTargetDirectory(const_cast<cmGeneratorTarget*>(dep)),
       "/all"_s);
     depends.push_back(tgtName);
+  }
+}
+
+void cmGlobalUnixMakefileGenerator3::AppendGlobalTargetCompileDepends(
+  std::vector<std::string>& depends, cmGeneratorTarget* target)
+{
+  auto* tlg3 =
+    static_cast<cmLocalUnixMakefileGenerator3*>(target->GetLocalGenerator());
+  std::string const& config = tlg3->GetConfigName();
+  // Languages whose compilation emits files consumed at compile time by
+  // other targets (Fortran .mod files, ISPC generated headers).  Unlike
+  // custom-command outputs, these are produced by compiling the
+  // dependency, so no ordering weaker than the full target build is safe.
+  // (C++ modules would qualify too, but that language feature is rejected
+  // on Makefile generators already; Swift is only supported by the Ninja
+  // and Xcode generators.)
+  auto usesModuleLanguage = [&config](cmGeneratorTarget const* t) {
+    return t->IsLanguageUsed("Fortran", config) ||
+      t->IsLanguageUsed("ISPC", config);
+  };
+  bool const targetUsesModules = usesModuleLanguage(target);
+  for (cmTargetDepend const& i : this->GetTargetDirectDepends(target)) {
+    cmGeneratorTarget const* dep = i;
+    if (!dep->IsInBuildSystem()) {
+      continue;
+    }
+    cmLocalUnixMakefileGenerator3* lg3 =
+      static_cast<cmLocalUnixMakefileGenerator3*>(dep->GetLocalGenerator());
+    std::string const tgtDir =
+      lg3->GetRelativeTargetDirectory(const_cast<cmGeneratorTarget*>(dep));
+    // Mirror cmGlobalNinjaGenerator order-only dependencies on all of the
+    // dependency's custom command outputs (commit adf60b28, issue #15555):
+    // link-only library/object deps contribute their .../depend rule, which
+    // builds their custom-command outputs (including plain
+    // add_custom_command() outputs, not just CODEGEN ones) without waiting
+    // for the dependency to link.  Ordering (Util) deps and executables
+    // (e.g. code generators) still need the full artifact before compiling,
+    // as do edges touching module languages.
+    bool const weakLink = i.IsLink() && !i.IsUtil() && !targetUsesModules &&
+      !usesModuleLanguage(dep) &&
+      (dep->GetType() == cm::TargetType::STATIC_LIBRARY ||
+       dep->GetType() == cm::TargetType::SHARED_LIBRARY ||
+       dep->GetType() == cm::TargetType::MODULE_LIBRARY ||
+       dep->GetType() == cm::TargetType::OBJECT_LIBRARY);
+    if (weakLink) {
+      // Custom-command outputs of the dependency are built first.
+      // Linking still waits for the full dependency via the .../all
+      // rule below.
+      depends.push_back(cmStrCat(tgtDir, "/depend"_s));
+    } else {
+      depends.push_back(cmStrCat(tgtDir, "/all"_s));
+    }
   }
 }
 

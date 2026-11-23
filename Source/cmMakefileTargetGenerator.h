@@ -135,6 +135,9 @@ protected:
   // write the driver rule to build target outputs
   void WriteTargetDriverRule(std::string const& main_output, bool relink);
 
+  // write the driver rule to build only the compiled objects
+  void WriteTargetCompileDriverRule();
+
   void DriveCustomCommands(std::vector<std::string>& depends);
 
   // append intertarget dependencies
