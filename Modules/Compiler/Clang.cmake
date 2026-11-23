@@ -15,6 +15,19 @@ set(__pch_header_CXX "c++-header")
 set(__pch_header_OBJC "objective-c-header")
 set(__pch_header_OBJCXX "objective-c++-header")
 
+macro(__compiler_clang_color_diagnostics lang)
+  # '-fcolor-diagnostics' introduced since Clang 2.6
+  if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 2.6)
+    # -fansi-escape-codes mentioned at https://releases.llvm.org/3.7.0/tools/clang/docs/UsersManual.html
+    if(CMAKE_HOST_WIN32 AND CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 3.7)
+      set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS -fansi-escape-codes -fcolor-diagnostics)
+    else()
+      set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS -fcolor-diagnostics)
+    endif()
+    set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF -fno-color-diagnostics)
+  endif()
+endmacro()
+
 if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC"
@@ -123,17 +136,7 @@ else()
       set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER> -x ${__pch_header_${lang}})
     endif()
 
-    # '-fcolor-diagnostics' introduced since Clang 2.6
-    if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 2.6)
-      # -fansi-escape-codes mentioned at https://releases.llvm.org/3.7.0/tools/clang/docs/UsersManual.html
-      if (CMAKE_HOST_WIN32 AND CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 3.7)
-        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS -fansi-escape-codes -fcolor-diagnostics)
-        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF -fno-color-diagnostics)
-      else()
-        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS -fcolor-diagnostics)
-        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF -fno-color-diagnostics)
-      endif()
-    endif()
+    __compiler_clang_color_diagnostics(${lang})
   endmacro()
 endif()
 
