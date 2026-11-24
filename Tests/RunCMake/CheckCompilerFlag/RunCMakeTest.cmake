@@ -33,7 +33,7 @@ if(CMake_TEST_HIP)
   run_cmake(CheckCompilerFlagHIP)
 endif()
 
-if(APPLE)
+if(APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang")
   run_cmake(HeaderpadWorkaround)
 endif()
 
