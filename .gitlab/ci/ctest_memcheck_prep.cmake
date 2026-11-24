@@ -37,14 +37,14 @@ if (CTEST_MEMORYCHECK_TYPE STREQUAL "Valgrind")
   list(JOIN valgrind_skip "," valgrind_skip)
   string(CONCAT valgrind_options
     "--gen-suppressions=all "
+    "--read-inline-info=no "
+    "--read-var-info=no "
     "--child-silent-after-fork=yes "
     "--trace-children=yes "
     "--trace-children-skip=${valgrind_skip} "
-    "--track-origins=yes "
     "-q "
     "--leak-check=yes "
     "--show-reachable=yes "
-    "--num-callers=50 "
     "-v ")
   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "${valgrind_options}")
 endif ()
