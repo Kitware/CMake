@@ -8,9 +8,6 @@ set(configure_no_sccache 1)
 # Do not bootstrap for the coverage test suite.
 set(CMake_TEST_BOOTSTRAP FALSE CACHE BOOL "")
 
-# Shrink stress tests when running with Bullseye.
-set(ENV{KWSYS_TEST_PROCESS_1_COUNT} 11)
-
 set(CMake_TEST_GUI "ON" CACHE BOOL "")
 set(CMake_TEST_MATH_OVERFLOW ON CACHE BOOL "")
 set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database,import_std23" CACHE STRING "")
