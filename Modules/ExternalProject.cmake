@@ -357,7 +357,14 @@ is used.
     traceability and repeatability.
 
   If ``GIT_SHALLOW`` is enabled then ``GIT_TAG`` works only with
-  branch names and tags.  A commit hash is not allowed.
+  branch names, tags, and full commit hashes.  An abbreviated commit hash
+  is not allowed.
+
+  .. versionchanged:: 4.6
+    A full commit hash may be used with ``GIT_SHALLOW``.  A shallow clone
+    contains only the branch tips and tags, so a commit that is neither is
+    then fetched by itself.  This requires a server that sends commits it
+    does not advertise, as servers using Git protocol version 2 do.
 
   Note that if not provided, ``GIT_TAG`` defaults to ``master``, not the
   default Git branch name.
