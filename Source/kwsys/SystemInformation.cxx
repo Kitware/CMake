@@ -5723,86 +5723,125 @@ bool SystemInformationImplementation::QueryOSInformation()
     std::to_string(osvi.dwMinorVersion) + '.' +
     std::to_string(osvi.dwBuildNumber & 0xFFFF);
 
-  struct VersionNames
-  {
-    char const* workstation;
-    char const* server;
-  };
-
-  std::map<std::pair<DWORD, DWORD>, VersionNames> const products = {
-    // clang-format off
-    { { 10,  0 }, { "10",    "2016"    } },
-    { {  6,  3 }, { "8.1",   "2012 R2" } },
-    { {  6,  2 }, { "8",     "2012"    } },
-    { {  6,  1 }, { "7",     "2008 R2" } },
-    { {  6,  0 }, { "Vista", "2008"    } },
-    { {  5,  2 }, { "XP",    "2003"    } },
-    { {  5,  1 }, { "XP",    ".NET"    } },
-    { {  5,  0 }, { "2000",  "2000"    } },
-    { {  4, 90 }, { "Me",    ""        } },
-    { {  4, 10 }, { "98",    ""        } },
-    { {  4,  0 }, { "95",    "NT 4.0"  } },
-    { {  3, 51 }, {   "",    "NT 3.51" } },
-    { {  3, 10 }, { "3.1",   ""        } },
-    { {  3,  0 }, { "3.0",   ""        } },
-    { {  2,  0 }, { "2.0",   ""        } },
-    // clang-format on
-  };
-
-  this->OSVersion = "Windows ";
-  if (osvi.wProductType == VER_NT_SERVER) {
-    this->OSVersion += "Server ";
+  HKEY versionKey = nullptr;
+  if (osvi.dwMajorVersion >= 6 &&
+      RegOpenKeyExW(
+        HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+        0, KEY_QUERY_VALUE | KEY_WOW64_64KEY, &versionKey) == ERROR_SUCCESS) {
+    DWORD revision = 0;
+    DWORD type = 0;
+    DWORD size = sizeof(revision);
+    if (RegQueryValueExW(versionKey, L"UBR", nullptr, &type,
+                         reinterpret_cast<BYTE*>(&revision),
+                         &size) == ERROR_SUCCESS &&
+        type == REG_DWORD && size == sizeof(revision)) {
+      this->OSRelease += '.' + std::to_string(revision);
+    }
+    wchar_t name[256] = {};
+    size = sizeof(name) - sizeof(name[0]);
+    if (RegQueryValueExW(versionKey, L"ProductName", nullptr, &type,
+                         reinterpret_cast<BYTE*>(name),
+                         &size) == ERROR_SUCCESS &&
+        type == REG_SZ && size % sizeof(name[0]) == 0) {
+      this->OSVersion = Encoding::ToNarrow(name);
+    }
+    RegCloseKey(versionKey);
   }
 
-  auto const it = products.find({ osvi.dwMajorVersion, osvi.dwMinorVersion });
-  if (it != products.end()) {
-    bool const useServer =
-      (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT &&
-       (osvi.dwMajorVersion <= 4 || osvi.wProductType != VER_NT_WORKSTATION));
-    this->OSVersion += useServer ? it->second.server : it->second.workstation;
+  if (!this->OSVersion.empty()) {
+    // Windows 11 can retain the Windows 10 product name in the registry.
+    bool const windows11 = osvi.wProductType == VER_NT_WORKSTATION &&
+      osvi.dwMajorVersion == 10 && osvi.dwMinorVersion == 0 &&
+      osvi.dwBuildNumber >= 22000;
+    std::string const prefix = "Windows 10";
+    if (windows11 && this->OSVersion.compare(0, prefix.size(), prefix) == 0 &&
+        (this->OSVersion.size() == prefix.size() ||
+         this->OSVersion[prefix.size()] == ' '))
+      this->OSVersion.replace(0, prefix.size(), "Windows 11");
   } else {
-    this->OSVersion += "Unknown Version";
-  }
+    struct VersionNames
+    {
+      char const* workstation;
+      char const* server;
+    };
 
-  if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2) {
-    // special case for Windows XP x64
-    if (osvi.wProductType == VER_NT_WORKSTATION) {
-      this->OSVersion += " x64";
+    std::map<std::pair<DWORD, DWORD>, VersionNames> const products = {
+      // clang-format off
+      { { 10,  0 }, { "10",    "2016"    } },
+      { {  6,  3 }, { "8.1",   "2012 R2" } },
+      { {  6,  2 }, { "8",     "2012"    } },
+      { {  6,  1 }, { "7",     "2008 R2" } },
+      { {  6,  0 }, { "Vista", "2008"    } },
+      { {  5,  2 }, { "XP",    "2003"    } },
+      { {  5,  1 }, { "XP",    ".NET"    } },
+      { {  5,  0 }, { "2000",  "2000"    } },
+      { {  4, 90 }, { "Me",    ""        } },
+      { {  4, 10 }, { "98",    ""        } },
+      { {  4,  0 }, { "95",    "NT 4.0"  } },
+      { {  3, 51 }, {   "",    "NT 3.51" } },
+      { {  3, 10 }, { "3.1",   ""        } },
+      { {  3,  0 }, { "3.0",   ""        } },
+      { {  2,  0 }, { "2.0",   ""        } },
+      // clang-format on
+    };
+
+    this->OSVersion = "Windows ";
+    if (osvi.wProductType == VER_NT_SERVER) {
+      this->OSVersion += "Server ";
     }
 
-    // special case for Windows Server 2003 R2
-    else if (GetSystemMetrics(SM_SERVERR2) != 0) {
-      this->OSVersion += " R2";
+    auto const it =
+      products.find({ osvi.dwMajorVersion, osvi.dwMinorVersion });
+    if (it != products.end()) {
+      bool const useServer = (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT &&
+                              (osvi.dwMajorVersion <= 4 ||
+                               osvi.wProductType != VER_NT_WORKSTATION));
+      this->OSVersion +=
+        useServer ? it->second.server : it->second.workstation;
+    } else {
+      this->OSVersion += "Unknown Version";
     }
-  }
 
-  // special case for Windows 98 SE
-  else if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
-    if (osvi.szCSDVersion[1] == 'A') {
-      this->OSVersion += " SE";
+    if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2) {
+      // special case for Windows XP x64
+      if (osvi.wProductType == VER_NT_WORKSTATION) {
+        this->OSVersion += " x64";
+      }
+
+      // special case for Windows Server 2003 R2
+      else if (GetSystemMetrics(SM_SERVERR2) != 0) {
+        this->OSVersion += " R2";
+      }
     }
-  }
 
-  // special case for Windows 95 OSR 2
-  else if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0) {
-    if (osvi.szCSDVersion[1] == 'C') {
-      this->OSVersion += " OSR 2.5";
-    } else if (osvi.szCSDVersion[1] == 'B') {
-      this->OSVersion += " OSR 2";
+    // special case for Windows 98 SE
+    else if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
+      if (osvi.szCSDVersion[1] == 'A') {
+        this->OSVersion += " SE";
+      }
     }
-  }
 
-  if (osvi.wSuiteMask & VER_SUITE_DATACENTER) {
-    this->OSVersion += " DataCenter";
-  } else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE) {
-    this->OSVersion += " Enterprise";
-  }
+    // special case for Windows 95 OSR 2
+    else if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0) {
+      if (osvi.szCSDVersion[1] == 'C') {
+        this->OSVersion += " OSR 2.5";
+      } else if (osvi.szCSDVersion[1] == 'B') {
+        this->OSVersion += " OSR 2";
+      }
+    }
 
-  // append service pack (if any)
-  if (osvi.szCSDVersion[0] != 0 && osvi.szCSDVersion[0] != ' ') {
-    char buffer[256];
-    snprintf(buffer, sizeof(buffer), " %ls", osvi.szCSDVersion);
-    this->OSVersion += buffer;
+    if (osvi.wSuiteMask & VER_SUITE_DATACENTER) {
+      this->OSVersion += " DataCenter";
+    } else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE) {
+      this->OSVersion += " Enterprise";
+    }
+
+    // append service pack (if any)
+    if (osvi.szCSDVersion[0] != 0 && osvi.szCSDVersion[0] != ' ') {
+      char buffer[256];
+      snprintf(buffer, sizeof(buffer), " %ls", osvi.szCSDVersion);
+      this->OSVersion += buffer;
+    }
   }
 
   // Get the hostname
