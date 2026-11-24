@@ -375,7 +375,13 @@ static inline void Realpath(std::string const& path,
 #  include <unistd.h>
 static inline int Mkdir(std::string const& dir, mode_t const* mode)
 {
-  return mkdir(dir.c_str(), mode ? *mode : 00777);
+  int ret = mkdir(dir.c_str(), mode ? *mode : 00777);
+  if (ret == 0 && mode) {
+    // mkdir(2) is subject to the process umask, but callers that ask for
+    // an explicit mode expect that mode to be applied exactly.
+    KWSYS_NAMESPACE::SystemTools::SetPermissions(dir, *mode);
+  }
+  return ret;
 }
 static inline int Rmdir(std::string const& dir)
 {
