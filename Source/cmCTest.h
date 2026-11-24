@@ -15,6 +15,7 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
@@ -78,7 +79,7 @@ public:
   int ProcessSteps();
 
   /**
-   * A utility function that returns the nightly time
+   * Return the nightly time, or nullptr if parsing fails.
    */
   struct tm* GetNightlyTime(std::string const& str, bool tomorrowtag);
 

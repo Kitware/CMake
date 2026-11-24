@@ -231,10 +231,15 @@ struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
   // will be opened on the date of the current client machine.
   // As such, this time may be in the past or in the future.
   char buf[1024];
-  std::snprintf(buf, sizeof(buf), "%d%02d%02d %s", lctime->tm_year + 1900,
+  std::snprintf(buf, sizeof(buf), "%d-%02d-%02d %s", lctime->tm_year + 1900,
                 lctime->tm_mon + 1, lctime->tm_mday, str.c_str());
   time_t ntime = cm_parse_date(tctime, buf);
-  cmCTestLog(this, DEBUG, "   Get the nightly start time: ", ntime, '\n');
+  if (ntime == -1) {
+    cmCTestLog(this, ERROR_MESSAGE, "Invalid nightly start time: "_s, str,
+               '\n');
+    return nullptr;
+  }
+  cmCTestLog(this, DEBUG, "   Get the nightly start time: "_s, ntime, '\n');
   tctime = time(nullptr);
   cmCTestLog(this, DEBUG, "   Get the current time: ", tctime, '\n');
 
@@ -487,6 +492,10 @@ bool cmCTest::CreateNewTag(bool quiet)
     }
     return gmtime(&tctime);
   }();
+
+  if (!lctime) {
+    return false;
+  }
 
   char datestring[100];
   snprintf(datestring, sizeof(datestring), "%04d%02d%02d-%02d%02d",

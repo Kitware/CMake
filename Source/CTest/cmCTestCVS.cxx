@@ -6,6 +6,7 @@
 
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -87,7 +88,11 @@ bool cmCTestCVS::UpdateImpl()
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
-    args.push_back(cmStrCat("-D", this->GetNightlyTime(), " UTC"));
+    std::string date = this->GetNightlyTime();
+    if (date.empty()) {
+      return false;
+    }
+    args.push_back(cmStrCat("-D"_s, date, " UTC"_s));
   }
 
   // Run "cvs update" to update the work tree.
