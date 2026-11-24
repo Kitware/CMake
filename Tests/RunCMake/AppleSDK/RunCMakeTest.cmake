@@ -5,6 +5,12 @@ unset(ENV{CMAKE_OSX_ARCHITECTURES})
 unset(ENV{CMAKE_OSX_DEPLOYMENT_TARGET})
 unset(ENV{SDKROOT})
 
+# Cross-compiling with an explicit SDK skips both `sw_vers` and the default
+# SDK path query.
+set(ENV{MACOSX_DEPLOYMENT_TARGET} "10.15")
+run_cmake_with_options(DeploymentTargetCross -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_OSX_SYSROOT=macosx)
+unset(ENV{MACOSX_DEPLOYMENT_TARGET})
+
 function(run_xcode_cc)
   set(RunCMake_TEST_VARIANT_DESCRIPTION "-xcode")
   if(EXISTS "/usr/include/AvailabilityMacros.h")
