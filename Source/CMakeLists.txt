@@ -1425,11 +1425,11 @@ if(APPLE)
   check_include_file("CoreServices/CoreServices.h" HAVE_CoreServices)
   if(HAVE_CoreServices)
     target_link_libraries(CPackLib PUBLIC "-framework CoreServices")
-  else()
+  elseif(NOT CMake_NO_WARN_CoreServices)
     message(WARNING "This compiler does not appear to support\n"
       "  #include <CoreServices/CoreServices.h>\n"
       "Some CPack functionality may be limited.\n"
-      "See CMakeFiles/CMakeError.log for details of the failure.")
+      "See CMakeFiles/CMakeConfigureLog.yaml for details of the failure.")
   endif()
 endif()
 
