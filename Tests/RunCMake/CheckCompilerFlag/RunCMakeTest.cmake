@@ -8,7 +8,7 @@ run_cmake(CheckCXXCompilerFlag)
 run_cmake(CheckCompilerFlagC)
 run_cmake(CheckCompilerFlagCXX)
 
-if (APPLE)
+if (CMake_TEST_OBJC)
   run_cmake(CheckCompilerFlagOBJC)
   run_cmake(CheckCompilerFlagOBJCXX)
 endif()

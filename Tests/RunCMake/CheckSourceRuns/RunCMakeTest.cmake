@@ -12,7 +12,7 @@ run_cmake(CheckCXXSourceRuns)
 run_cmake(CheckSourceRunsC)
 run_cmake(CheckSourceRunsCXX)
 
-if (APPLE)
+if (CMake_TEST_OBJC)
   run_cmake(CheckOBJCSourceRuns)
   run_cmake(CheckOBJCXXSourceRuns)
   run_cmake(CheckSourceRunsOBJC)
