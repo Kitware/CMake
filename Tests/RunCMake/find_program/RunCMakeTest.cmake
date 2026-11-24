@@ -35,6 +35,7 @@ else()
 endif()
 
 if(APPLE)
+  run_cmake(AppBundleValidator)
   run_cmake(BundleSpaceInName)
   run_cmake(BundleRepeat)
 endif()
