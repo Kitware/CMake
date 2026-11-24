@@ -418,14 +418,14 @@ public:
     auto result = this->RegistryFormat.find(this->Expression);
 
     if (result) {
-      auto separator = cm::string_view{
-        this->Expression.data() + this->RegistryFormat.start(1),
-        this->RegistryFormat.end(1) - this->RegistryFormat.start(1)
-      };
-      if (separator.empty()) {
-        separator = this->Separator;
-      } else {
-        separator = separator.substr(1, separator.length() - 2);
+      auto separator = this->Separator;
+      // the separator group is optional and has no position when unmatched
+      if (this->RegistryFormat.start(1) != std::string::npos) {
+        // strip the surrounding braces
+        separator = cm::string_view{
+          this->Expression.data() + this->RegistryFormat.start(1) + 1,
+          this->RegistryFormat.end(1) - this->RegistryFormat.start(1) - 2
+        };
       }
 
       this->RootKey = cm::string_view{
