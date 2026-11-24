@@ -111,7 +111,7 @@ private:
   cmsys::RegularExpression TocTreeLink;
   cmsys::RegularExpression Header;
 
-  std::string::size_type LastLength;
+  std::string::size_type LastLength = 0;
   std::vector<std::string> MarkupLines;
   std::vector<ContentLine> OutputLines;
   std::string DocDir;
