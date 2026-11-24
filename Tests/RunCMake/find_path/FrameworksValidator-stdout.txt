@@ -1,0 +1,3 @@
+-- DIR='DIR-NOTFOUND'
+-- DIR='[^']*/Frameworks/Bar\.framework/Headers'
+-- FILE='[^']*/Frameworks/Bar\.framework/Headers/Val\.h'
