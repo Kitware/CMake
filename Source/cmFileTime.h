@@ -30,6 +30,11 @@ public:
   bool Load(std::string const& fileName);
 
   /**
+   * @brief Return the current time on the same scale as file times
+   */
+  static cmFileTime Now();
+
+  /**
    * @brief Return true if this is older than ftm
    */
   constexpr bool Older(cmFileTime ftm) const

@@ -26,6 +26,7 @@
 #include "cmDuration.h"
 #include "cmExportFileGenerator.h"
 #include "cmExportSet.h"
+#include "cmFileTime.h"
 #include "cmInstallGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmStateSnapshot.h"
@@ -1139,7 +1140,9 @@ private:
   // Cache directory content and target files to be built.
   struct DirectoryContent
   {
-    long LastDiskTime = -1;
+    // Directory modification time when All was loaded from disk,
+    // or empty if All must be reloaded on next access.
+    cm::optional<cmFileTime> LastDiskTime;
     std::set<std::string> All;
     std::set<std::string> Generated;
   };

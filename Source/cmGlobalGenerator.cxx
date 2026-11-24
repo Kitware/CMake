@@ -4570,14 +4570,18 @@ std::set<std::string> const& cmGlobalGenerator::GetDirectoryContent(
 {
   DirectoryContent& dc = this->DirectoryContentMap[dir];
   if (needDisk) {
-    long mt = cmSystemTools::ModifiedTime(dir);
-    if (mt != dc.LastDiskTime) {
+    // A missing directory keeps a zero time.
+    cmFileTime mt;
+    bool const haveTime = mt.Load(dir);
+    if (!dc.LastDiskTime || mt.Differ(*dc.LastDiskTime)) {
       // Reset to non-loaded directory content.
       dc.All = dc.Generated;
 
       // Load the directory content from disk.
+      cmFileTime const loadTime = cmFileTime::Now();
       cmsys::Directory d;
-      if (d.Load(dir)) {
+      bool const loaded = d.Load(dir).IsSuccess();
+      if (loaded) {
         unsigned long n = d.GetNumberOfFiles();
         for (unsigned long i = 0; i < n; ++i) {
           std::string const& f = d.GetFileName(i);
@@ -4586,7 +4590,17 @@ std::set<std::string> const& cmGlobalGenerator::GetDirectoryContent(
           }
         }
       }
-      dc.LastDiskTime = mt;
+      // Filesystems record times with limited granularity (up to 2s on
+      // FAT), so a change made soon after loading may not change the time.
+      // Trust the listing only if the directory is older than that, with
+      // a margin for the filesystem clock lagging ours.  Do not trust a
+      // listing of a directory whose time we could not read.
+      if ((haveTime || !loaded) &&
+          loadTime.GetTime() - mt.GetTime() >= 3 * cmFileTime::UtPerS) {
+        dc.LastDiskTime = mt;
+      } else {
+        dc.LastDiskTime = cm::nullopt;
+      }
     }
   }
   return dc.All;
