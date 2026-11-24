@@ -132,7 +132,7 @@ add_executable(topexe_weak macos/topexe.c)
 add_library(toplib SHARED macos/toplib.c)
 add_library(topmod MODULE macos/toplib.c)
 target_link_libraries(topexe PRIVATE testlib)
-target_link_libraries(topexe_weak PRIVATE "-weak_library" testlib)
+target_link_libraries(topexe_weak PRIVATE "$<LINK_LIBRARY:WEAK_LIBRARY,testlib>")
 target_link_libraries(toplib PRIVATE testlib)
 target_link_libraries(topmod PRIVATE testlib)
 
