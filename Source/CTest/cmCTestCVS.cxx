@@ -88,7 +88,11 @@ bool cmCTestCVS::UpdateImpl()
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
-    args.push_back(cmStrCat("-D"_s, this->GetNightlyTime(), " UTC"_s));
+    std::string date = this->GetNightlyTime();
+    if (date.empty()) {
+      return false;
+    }
+    args.push_back(cmStrCat("-D"_s, date, " UTC"_s));
   }
 
   // Run "cvs update" to update the work tree.

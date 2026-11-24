@@ -108,10 +108,13 @@ bool cmCTestVC::RunUpdateCommand(std::vector<std::string> const& cmd,
 
 std::string cmCTestVC::GetNightlyTime()
 {
-  // Get the nightly start time corresponding to the current dau.
+  // Get the nightly start time corresponding to the current day.
   struct tm* t = this->CTest->GetNightlyTime(
     this->Makefile->GetSafeDefinition("CTEST_NIGHTLY_START_TIME"),
     this->CTest->GetTomorrowTag());
+  if (!t) {
+    return {};
+  }
   char current_time[1024];
   snprintf(current_time, sizeof(current_time), "%04d-%02d-%02d %02d:%02d:%02d",
            t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min,
