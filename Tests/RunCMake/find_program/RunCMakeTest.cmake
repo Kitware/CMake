@@ -36,6 +36,7 @@ endif()
 
 if(APPLE)
   run_cmake(BundleSpaceInName)
+  run_cmake(BundleRepeat)
 endif()
 
 run_cmake_with_options(EnvAndHintsDebugVar --debug-find-var=PROG)
