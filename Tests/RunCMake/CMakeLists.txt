@@ -1223,6 +1223,7 @@ add_RunCMake_test(target_link_libraries-LINK_LIBRARY -DCMAKE_SYSTEM_NAME=${CMAKE
                                                      -DMSVC_VERSION=${MSVC_VERSION}
                                                      -DXCODE=${XCODE}
                                                      -DXCODE_VERSION=${XCODE_VERSION}
+                                                     -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
                                                      -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
                                                      -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX}
                                                      -DCMAKE_IMPORT_LIBRARY_PREFIX=${CMAKE_IMPORT_LIBRARY_PREFIX}
@@ -1261,21 +1262,25 @@ add_RunCMake_test(target_compile_options
   )
 add_RunCMake_test(target_include_directories)
 add_RunCMake_test(target_sources)
-add_RunCMake_test(CheckCompilerFlag   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+add_RunCMake_test(CheckCompilerFlag   -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                      -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
                                       -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
                                       -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
                                       -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+                                      -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
                                       -DCMake_TEST_HIP=${CMake_TEST_HIP}
                                       -DCMake_TEST_Swift=${CMake_TEST_Swift})
 add_RunCMake_test(CheckSourceCompiles -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
                                       -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
                                       -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
                                       -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+                                      -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
                                       -DCMake_TEST_HIP=${CMake_TEST_HIP}
                                       -DCMake_TEST_Swift=${CMake_TEST_Swift})
 add_RunCMake_test(CheckSourceRuns     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
                                       -DCMake_TEST_SYCL=${CMake_TEST_SYCL}
                                       -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+                                      -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
                                       -DCMake_TEST_HIP=${CMake_TEST_HIP})
 set_property(TEST RunCMake.CheckCompilerFlag
                   RunCMake.CheckSourceCompiles

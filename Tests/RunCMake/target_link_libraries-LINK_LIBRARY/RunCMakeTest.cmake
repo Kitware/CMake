@@ -85,7 +85,7 @@ if ((RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode"
 endif()
 
 # Apple framework features
-if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
+if(CMake_TEST_OBJC AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
   run_cmake(apple_framework)
   run_cmake_target(apple_framework framework main-framework)
   run_cmake_target(apple_framework reexport_framework main-reexport_framework)
@@ -100,15 +100,15 @@ if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES 
     run_cmake_target(apple_framework target-reexport_framework-postfix main-target-reexport_framework-postfix)
     run_cmake_target(apple_framework target-weak_framework-postfix main-target-weak_framework-postfix)
   endif()
-endif()
 
-if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION GREATER_EQUAL "12")
-  run_cmake_target(apple_framework needed_framework main-needed_framework)
+  if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION GREATER_EQUAL "12")
+    run_cmake_target(apple_framework needed_framework main-needed_framework)
 
-  run_cmake_target(apple_framework target-needed_framework main-target-needed_framework)
+    run_cmake_target(apple_framework target-needed_framework main-target-needed_framework)
 
-  if(RunCMake_GENERATOR_IS_MULTI_CONFIG AND (NOT XCODE OR XCODE_VERSION GREATER_EQUAL 13))
-    run_cmake_target(apple_framework target-needed_framework-postfix main-target-needed_framework-postfix)
+    if(RunCMake_GENERATOR_IS_MULTI_CONFIG AND (NOT XCODE OR XCODE_VERSION GREATER_EQUAL 13))
+      run_cmake_target(apple_framework target-needed_framework-postfix main-target-needed_framework-postfix)
+    endif()
   endif()
 endif()
 

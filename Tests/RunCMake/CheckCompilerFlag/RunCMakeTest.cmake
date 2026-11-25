@@ -8,7 +8,7 @@ run_cmake(CheckCXXCompilerFlag)
 run_cmake(CheckCompilerFlagC)
 run_cmake(CheckCompilerFlagCXX)
 
-if (APPLE)
+if (CMake_TEST_OBJC)
   run_cmake(CheckCompilerFlagOBJC)
   run_cmake(CheckCompilerFlagOBJCXX)
 endif()
@@ -33,7 +33,7 @@ if(CMake_TEST_HIP)
   run_cmake(CheckCompilerFlagHIP)
 endif()
 
-if(APPLE)
+if(APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang")
   run_cmake(HeaderpadWorkaround)
 endif()
 
