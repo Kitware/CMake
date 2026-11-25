@@ -139,11 +139,23 @@ To see which lines of CMake language code, such as the files in
 
    .. code-block:: console
 
-     $ lcov --extract Tests/RunCMake/RunCMake.Example.cmake-coverage.info \
+     $ lcov --branch-coverage \
+         --extract Tests/RunCMake/RunCMake.Example.cmake-coverage.info \
          '<source>/*' -o example.info
+
+   The tracefile has branch records.  ``lcov`` drops them unless branch
+   coverage is on, and the option depends on the version.  The example is
+   for ``lcov`` 2.x.  ``lcov`` 2.x rejects the ``lcov`` 1.x option as
+   deprecated.  With ``lcov`` 1.x, use ``--rc lcov_branch_coverage=1`` in
+   place of ``--branch-coverage``.
+
+   With ``lcov`` 2.x, also add ``--ignore-errors inconsistent`` to this
+   command and to the ``genhtml`` command of step 4.  The RunCMake error
+   cases have lines whose condition failed, and ``lcov`` 2.x reports those
+   lines as inconsistent.
 
 4. Make an HTML report with ``genhtml`` from lcov:
 
    .. code-block:: console
 
-     $ genhtml -o coverage example.info
+     $ genhtml --branch-coverage -o coverage example.info

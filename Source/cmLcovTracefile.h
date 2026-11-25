@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
 /** \brief Hit count of one function in an lcov tracefile.  */
 struct cmLcovFunction
 {
@@ -22,7 +24,19 @@ struct cmLcovFunction
   unsigned long long Hits;
 };
 
-/** \brief Line and function hit counts of one source file.  */
+/** \brief Identity of one BRDA record.  */
+struct cmLcovBranchId
+{
+  // No constructor and no default member initializers, so that this stays a
+  // C++11 aggregate and brace init such as { 5, 0, 0 } works.
+  long Line;
+  unsigned int Block;  // always 0: a line has one decision
+  unsigned int Branch; // 0 is true or enter, 1 is false or leave
+
+  bool operator<(cmLcovBranchId other) const;
+};
+
+/** \brief Line, function and branch counts of one source file.  */
 struct cmLcovSourceFile
 {
   /** True if the file has a line or a function record.  */
@@ -32,13 +46,15 @@ struct cmLcovSourceFile
   std::map<long, unsigned long long> Lines;
   // FN records: definition line -> data.
   std::map<long, cmLcovFunction> Functions;
+  // BRDA records.  cm::nullopt is "-": the decision was never evaluated.
+  std::map<cmLcovBranchId, cm::optional<unsigned long long>> Branches;
 };
 
 /** \class cmLcovTracefile
  * \brief Read, merge and write lcov tracefiles.
  *
- * The model holds the line and function records of the lcov tracefile
- * format.  Branch records are not kept.
+ * The model holds the line, function and branch records of the lcov
+ * tracefile format.
  */
 class cmLcovTracefile
 {
@@ -48,9 +64,9 @@ public:
   // SF path -> data.
   std::map<std::string, cmLcovSourceFile> Files;
 
-  /** Add the counts of another tracefile.  Lines and functions are united
-      and their hits added.  A function keeps its existing name.  The test
-      name does not change.  */
+  /** Add the counts of another tracefile.  Lines, functions and branches are
+      united and their counts added.  A function keeps its existing name.  The
+      test name does not change.  */
   void Merge(cmLcovTracefile const& other);
 
   /** Read the tracefiles at PATHS and merge them into this object.  Skip a

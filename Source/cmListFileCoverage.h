@@ -14,7 +14,8 @@
 class cmListFileFunction;
 
 /** \class cmListFileCoverage
- * \brief Record line hits and function calls of CMake listfiles.
+ * \brief Record line hits, function calls and branch counts of CMake
+ * listfiles.
  *
  * The environment variable CMAKE_LISTFILE_COVERAGE_DIR turns the collector
  * on.  One collector exists per process.  At exit it writes one lcov
@@ -53,17 +54,25 @@ public:
     cmListFileFunction const* Command = nullptr;
   };
 
-  /** Register the executable lines and the function and macro definitions
-      of a parsed file.  A second call for the same path adds new lines and
-      functions and keeps existing counts.  A relative path, as ctest uses
-      for its top CTestTestfile.cmake, is made absolute with the current
-      working directory, here and in CommandRan and FunctionCalled.  */
+  /** Register the executable lines, the decision lines and the function and
+      macro definitions of a parsed file.  A second call for the same path
+      adds new lines and functions and keeps existing counts.  A relative
+      path, as ctest uses for its top CTestTestfile.cmake, is made absolute
+      with the current working directory, here and in CommandRan and
+      FunctionCalled.  */
   void FileParsed(std::string const& path,
                   std::vector<cmListFileFunction> const& functions);
 
   /** Count a hit on a line of a registered file.  */
   void CommandRan(cmListFileFunction const& lff, std::string const& path,
                   long line);
+
+  /** Count one outcome of the decision on a line of a registered file.
+      Add one to BRANCH (0: true or enter, 1: false or leave) of block 0,
+      and turn a "-" on the other branch of the pair into 0.  Ignored for
+      a path that is not registered or a line with no decision.  Records
+      nothing after a fatal error.  */
+  void BranchTaken(std::string const& path, long line, unsigned int branch);
 
   /** Count a call of the function or macro defined on a line of a
       registered file.  */
@@ -74,6 +83,11 @@ public:
 
   /** The sorted, unique start lines of the commands that count.  */
   static std::vector<long> ExecutableLines(
+    std::vector<cmListFileFunction> const& functions);
+
+  /** The sorted, unique start lines of the if, elseif, while and foreach
+      commands.  */
+  static std::vector<long> DecisionLines(
     std::vector<cmListFileFunction> const& functions);
 
 private:

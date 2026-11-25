@@ -4,10 +4,13 @@
 
 #include <algorithm>
 #include <array>
+#include <climits>
 #include <cstdio>
+#include <tuple>
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -23,12 +26,27 @@ cmLcovFunction::cmLcovFunction(std::string name, unsigned long long hits)
 {
 }
 
+bool cmLcovBranchId::operator<(cmLcovBranchId other) const
+{
+  return std::tie(this->Line, this->Block, this->Branch) <
+    std::tie(other.Line, other.Block, other.Branch);
+}
+
 bool cmLcovSourceFile::HasData() const
 {
   return !this->Lines.empty() || !this->Functions.empty();
 }
 
 namespace {
+
+// Add a branch count into another.  "-" plus a count is the count.
+void AddCount(cm::optional<unsigned long long>& into,
+              cm::optional<unsigned long long> from)
+{
+  if (from) {
+    into = into ? *into + *from : *from;
+  }
+}
 
 void MergeSourceFile(cmLcovSourceFile& into, cmLcovSourceFile const& from)
 {
@@ -42,6 +60,9 @@ void MergeSourceFile(cmLcovSourceFile& into, cmLcovSourceFile const& from)
     } else {
       it->second.Hits += fn.second.Hits;
     }
+  }
+  for (auto const& branch : from.Branches) {
+    AddCount(into.Branches[branch.first], branch.second);
   }
 }
 
@@ -115,6 +136,9 @@ enum class Record
   FunctionExecutionCount,
   FunctionsFound,
   FunctionsHit,
+  BranchExecutionCount,
+  BranchesFound,
+  BranchesHit,
   LineExecutionCount,
   LinesFound,
   LinesHit,
@@ -129,7 +153,10 @@ struct RecordKey
 };
 
 // Sorted by key, for std::lower_bound.
-constexpr std::array<RecordKey, 10> kRecords{ {
+constexpr std::array<RecordKey, 13> kRecords{ {
+  { "BRDA"_s, Record::BranchExecutionCount },
+  { "BRF"_s, Record::BranchesFound },
+  { "BRH"_s, Record::BranchesHit },
   { "DA"_s, Record::LineExecutionCount },
   { "FN"_s, Record::Function },
   { "FNDA"_s, Record::FunctionExecutionCount },
@@ -276,6 +303,26 @@ void cmLcovTracefile::Write(std::ostream& os) const
        << '\n';
     os << ToKey(Record::FunctionsHit) << ':' << functionsHit << '\n';
 
+    if (!data.Branches.empty()) {
+      std::size_t branchesHit = 0;
+      for (auto const& branch : data.Branches) {
+        os << ToKey(Record::BranchExecutionCount) << ':' << branch.first.Line
+           << ',' << branch.first.Block << ',' << branch.first.Branch << ',';
+        if (branch.second) {
+          os << *branch.second;
+          if (*branch.second > 0) {
+            ++branchesHit;
+          }
+        } else {
+          os << '-';
+        }
+        os << '\n';
+      }
+      os << ToKey(Record::BranchesFound) << ':' << data.Branches.size()
+         << '\n';
+      os << ToKey(Record::BranchesHit) << ':' << branchesHit << '\n';
+    }
+
     std::size_t linesHit = 0;
     for (auto const& line : data.Lines) {
       os << ToKey(Record::LineExecutionCount) << ':' << line.first << ','
@@ -345,12 +392,14 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
         path = value;
         continue;
       case Record::Unknown:
-        // Unknown records and the branch records BRDA, BRF and BRH.
         continue;
       case Record::Function:
       case Record::FunctionExecutionCount:
       case Record::FunctionsFound:
       case Record::FunctionsHit:
+      case Record::BranchExecutionCount:
+      case Record::BranchesFound:
+      case Record::BranchesHit:
       case Record::LineExecutionCount:
       case Record::LinesFound:
       case Record::LinesHit:
@@ -406,6 +455,33 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
         block.Lines[line] += hits;
         break;
       }
+      case Record::BranchExecutionCount: {
+        std::vector<std::string> const fields = cmTokenize(value, ',');
+        // cmTokenize drops empty fields, so check the comma count too.
+        long line = 0;
+        unsigned long long blockId = 0;
+        unsigned long long branchId = 0;
+        if (fields.size() != 4 ||
+            std::count(value.begin(), value.end(), ',') != 3 ||
+            !ParseLine(fields[0], &line) ||
+            !cmStrToULongLong(fields[1], &blockId) ||
+            !cmStrToULongLong(fields[2], &branchId) || blockId > UINT_MAX ||
+            branchId > UINT_MAX) {
+          return failMalformed(Record::BranchExecutionCount, value);
+        }
+        cm::optional<unsigned long long> taken;
+        if (fields[3] != "-") {
+          unsigned long long count = 0;
+          if (!cmStrToULongLong(fields[3], &count)) {
+            return failMalformed(Record::BranchExecutionCount, value);
+          }
+          taken = count;
+        }
+        AddCount(block.Branches[{ line, static_cast<unsigned int>(blockId),
+                                  static_cast<unsigned int>(branchId) }],
+                 taken);
+        break;
+      }
       case Record::EndOfRecord:
         MergeSourceFile(this->Files[path], block);
         block = cmLcovSourceFile();
@@ -414,6 +490,8 @@ bool cmLcovTracefile::Read(std::istream& is, std::string& error)
         break;
       case Record::FunctionsFound:
       case Record::FunctionsHit:
+      case Record::BranchesFound:
+      case Record::BranchesHit:
       case Record::LinesFound:
       case Record::LinesHit:
         // Write computes these again.

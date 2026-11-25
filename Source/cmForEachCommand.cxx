@@ -32,6 +32,10 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmListFileCoverage.h"
+#endif
+
 namespace {
 class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
@@ -101,6 +105,12 @@ bool cmForEachFunctionBlocker::Replay(
   std::vector<cmListFileFunction> functions, cmExecutionStatus& inStatus)
 {
   if (this->Args.size() == this->IterationVarsCount) {
+#ifndef CMAKE_BOOTSTRAP
+    if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+      cmListFileContext const& context = this->GetStartingContext();
+      coverage->BranchTaken(context.FilePath, context.Line, 1);
+    }
+#endif
     return true;
   }
   return this->ZipLists ? this->ReplayZipLists(functions, inStatus)
@@ -126,6 +136,7 @@ bool cmForEachFunctionBlocker::ReplayItems(
   }
 
   auto restore = false;
+  bool broke = false;
   for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
     // Set the variable to the loop value
     mf.AddDefinition(this->Args.front(), arg);
@@ -133,8 +144,17 @@ bool cmForEachFunctionBlocker::ReplayItems(
     auto r = this->invoke(functions, inStatus, mf);
     restore = r.Restore;
     if (r.Break) {
+      broke = true;
       break;
     }
+  }
+  if (!broke) {
+#ifndef CMAKE_BOOTSTRAP
+    if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+      cmListFileContext const& context = this->GetStartingContext();
+      coverage->BranchTaken(context.FilePath, context.Line, 1);
+    }
+#endif
   }
 
   if (restore) {
@@ -219,6 +239,7 @@ bool cmForEachFunctionBlocker::ReplayZipLists(
   assert("Sanity check" && positions.size() == values.size());
 
   auto restore = false;
+  bool broke = false;
   // Iterate over all the lists simulateneously
   for (auto i = 0u; i < maxItems; ++i) {
     // Declare iteration variables
@@ -236,8 +257,17 @@ bool cmForEachFunctionBlocker::ReplayZipLists(
     auto r = this->invoke(functions, inStatus, mf);
     restore = r.Restore;
     if (r.Break) {
+      broke = true;
       break;
     }
+  }
+  if (!broke) {
+#ifndef CMAKE_BOOTSTRAP
+    if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+      cmListFileContext const& context = this->GetStartingContext();
+      coverage->BranchTaken(context.FilePath, context.Line, 1);
+    }
+#endif
   }
 
   // Restore the variables to its prior value
@@ -257,6 +287,12 @@ auto cmForEachFunctionBlocker::invoke(
   std::vector<cmListFileFunction> const& functions,
   cmExecutionStatus& inStatus, cmMakefile& mf) -> InvokeResult
 {
+#ifndef CMAKE_BOOTSTRAP
+  if (cmListFileCoverage* coverage = cmListFileCoverage::Get()) {
+    cmListFileContext const& context = this->GetStartingContext();
+    coverage->BranchTaken(context.FilePath, context.Line, 0);
+  }
+#endif
   InvokeResult result = { true, false };
   // Invoke all the functions that were collected in the block.
   for (cmListFileFunction const& func : functions) {

@@ -41,9 +41,17 @@ if(EXISTS "${info}")
 SF:<SRC>/CoverageChild.cmake
 FNF:0
 FNH:0
+BRDA:2,0,0,0
+BRDA:2,0,1,1
+BRDA:3,0,0,-
+BRDA:3,0,1,-
+BRF:4
+BRH:1
 DA:1,1
-LF:1
-LH:1
+DA:2,1
+DA:3,0
+LF:3
+LH:2
 end_of_record
 ")
   if(NOT actual STREQUAL expected)

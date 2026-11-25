@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmLcovTracefile.h"
@@ -72,7 +74,7 @@ bool testReadRoundTrip()
 bool testReadIgnoresUnknown()
 {
   cmLcovTracefile t;
-  ASSERT_TRUE(readText("VER:1\nSF:/x\nBRDA:1,0,0,1\nBRF:1\nBRH:1\nDA:1,3,abc\n"
+  ASSERT_TRUE(readText("VER:1\nSF:/x\nDA:1,3,abc\n"
                        "end_of_record\n",
                        t));
   ASSERT_EQUAL(writeText(t),
@@ -117,12 +119,19 @@ bool testReadStripsSuffix()
 
 bool testReadErrors()
 {
-  std::array<char const*, 5> const inputs{ {
+  std::array<char const*, 12> const inputs{ {
     "",
     "DA:1,1\n",
     "SF:/x\nDA:a,1\nend_of_record\n",
     "SF:/x\nFNDA:1,f\nFN:1,f\nend_of_record\n",
     "SF:/x\nDA:1,1\n",
+    "SF:/x\nBRDA:1,0,0\nend_of_record\n",
+    "SF:/x\nBRDA:1,0,0,1,\nend_of_record\n",
+    "SF:/x\nBRDA:1,0,0,x\nend_of_record\n",
+    "SF:/x\nBRDA:0,0,0,1\nend_of_record\n",
+    "BRF:1\nSF:/x\nDA:1,1\nend_of_record\n",
+    "SF:/x\nBRDA:1,4294967296,0,1\nend_of_record\n",
+    "SF:/x\nBRDA:1,0,4294967296,1\nend_of_record\n",
   } };
   for (char const* input : inputs) {
     cmLcovTracefile t;
@@ -305,6 +314,66 @@ bool testRemoveBuildTreeFiles()
   ASSERT_EQUAL(t.Files.size(), 4u);
   return true;
 }
+
+bool testWriteBranches()
+{
+  cmLcovTracefile t;
+  cmLcovSourceFile& f = t.Files["/x"];
+  f.Lines = { { 5, 1 } };
+  f.Branches[{ 7, 0, 1 }] = cm::nullopt;
+  f.Branches[{ 5, 1, 1 }] = 0;
+  f.Branches[{ 5, 0, 1 }] = 0;
+  f.Branches[{ 5, 1, 0 }] = 1;
+  f.Branches[{ 5, 0, 0 }] = 2;
+  f.Branches[{ 7, 0, 0 }] = cm::nullopt;
+  ASSERT_EQUAL(writeText(t),
+               "SF:/x\nFNF:0\nFNH:0\n"
+               "BRDA:5,0,0,2\nBRDA:5,0,1,0\nBRDA:5,1,0,1\nBRDA:5,1,1,0\n"
+               "BRDA:7,0,0,-\nBRDA:7,0,1,-\nBRF:6\nBRH:2\n"
+               "DA:5,1\nLF:1\nLH:1\nend_of_record\n");
+  return true;
+}
+
+bool testReadBranches()
+{
+  cmLcovTracefile t;
+  ASSERT_TRUE(readText("SF:/x\nBRDA:5,0,0,2\nBRDA:5,0,1,-\nBRDA:5,0,0,1\n"
+                       "BRF:9\nBRH:9\nDA:5,1\nend_of_record\n",
+                       t));
+  ASSERT_TRUE(
+    writeText(t).find("BRDA:5,0,0,3\nBRDA:5,0,1,-\nBRF:2\nBRH:1\n") !=
+    std::string::npos);
+  return true;
+}
+
+bool testMergeBranches()
+{
+  cmLcovTracefile a;
+  cmLcovSourceFile& fa = a.Files["/x"];
+  fa.Lines = { { 5, 1 } };
+  fa.Branches[{ 5, 0, 0 }] = 1;
+  fa.Branches[{ 5, 0, 1 }] = cm::nullopt;
+  fa.Branches[{ 6, 0, 0 }] = cm::nullopt;
+  fa.Branches[{ 6, 0, 1 }] = cm::nullopt;
+  fa.Branches[{ 7, 0, 0 }] = 3;
+  fa.Branches[{ 7, 0, 1 }] = 0;
+  cmLcovTracefile b;
+  cmLcovSourceFile& fb = b.Files["/x"];
+  fb.Lines = { { 5, 1 } };
+  fb.Branches[{ 5, 0, 0 }] = 2;
+  fb.Branches[{ 5, 0, 1 }] = 0;
+  fb.Branches[{ 6, 0, 0 }] = cm::nullopt;
+  fb.Branches[{ 6, 0, 1 }] = cm::nullopt;
+  fb.Branches[{ 7, 0, 0 }] = cm::nullopt;
+  fb.Branches[{ 7, 0, 1 }] = cm::nullopt;
+  fb.Branches[{ 8, 1, 0 }] = 4;
+  a.Merge(b);
+  ASSERT_TRUE(writeText(a).find("BRDA:5,0,0,3\nBRDA:5,0,1,0\nBRDA:6,0,0,-\n"
+                                "BRDA:6,0,1,-\nBRDA:7,0,0,3\nBRDA:7,0,1,0\n"
+                                "BRDA:8,1,0,4\nBRF:7\nBRH:3\n") !=
+              std::string::npos);
+  return true;
+}
 }
 
 int testLcovTracefile(int /*unused*/, char* /*unused*/[])
@@ -314,6 +383,7 @@ int testLcovTracefile(int /*unused*/, char* /*unused*/[])
                     testReadSameFileTwice, testReadStripsSuffix,
                     testReadErrors, testNameEncoding, testWriteSkipsEmptyFiles,
                     testHasData, testMerge, testMergeFiles,
-                    testRemoveBuildTreeFiles },
+                    testRemoveBuildTreeFiles, testWriteBranches,
+                    testReadBranches, testMergeBranches },
                   false);
 }

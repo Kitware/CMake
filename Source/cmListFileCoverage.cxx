@@ -141,6 +141,10 @@ void cmListFileCoverage::FileParsed(
   for (long line : ExecutableLines(functions)) {
     file.Lines.emplace(line, 0);
   }
+  for (long line : DecisionLines(functions)) {
+    file.Branches.emplace(cmLcovBranchId{ line, 0, 0 }, cm::nullopt);
+    file.Branches.emplace(cmLcovBranchId{ line, 0, 1 }, cm::nullopt);
+  }
   for (cmListFileFunction const& lff : functions) {
     std::string const& name = lff.LowerCaseName();
     if (lff.Line() > 0 && (name == "function"_s || name == "macro"_s) &&
@@ -180,6 +184,28 @@ void cmListFileCoverage::FunctionCalled(std::string const& path,
   }
 }
 
+void cmListFileCoverage::BranchTaken(std::string const& path, long line,
+                                     unsigned int branch)
+{
+  if (cmSystemTools::GetFatalErrorOccurred()) {
+    return;
+  }
+  auto file = this->FindFile(path);
+  if (file == this->Files.end()) {
+    return;
+  }
+  auto taken = file->second.Branches.find({ line, 0, branch });
+  auto other = file->second.Branches.find({ line, 0, branch ^ 1u });
+  if (taken == file->second.Branches.end() ||
+      other == file->second.Branches.end()) {
+    return;
+  }
+  taken->second = taken->second.value_or(0) + 1;
+  if (!other->second) {
+    other->second = 0;
+  }
+}
+
 std::map<std::string, cmLcovSourceFile>::iterator cmListFileCoverage::FindFile(
   std::string const& path)
 {
@@ -202,6 +228,23 @@ std::vector<long> cmListFileCoverage::ExecutableLines(
   std::vector<long> lines;
   for (cmListFileFunction const& lff : functions) {
     if (IsExecutable(lff)) {
+      lines.push_back(lff.Line());
+    }
+  }
+  std::sort(lines.begin(), lines.end());
+  lines.erase(std::unique(lines.begin(), lines.end()), lines.end());
+  return lines;
+}
+
+std::vector<long> cmListFileCoverage::DecisionLines(
+  std::vector<cmListFileFunction> const& functions)
+{
+  std::vector<long> lines;
+  for (cmListFileFunction const& lff : functions) {
+    std::string const& name = lff.LowerCaseName();
+    if (lff.Line() > 0 &&
+        (name == "if"_s || name == "elseif"_s || name == "while"_s ||
+         name == "foreach"_s)) {
       lines.push_back(lff.Line());
     }
   }

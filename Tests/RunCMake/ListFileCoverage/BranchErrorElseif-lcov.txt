@@ -1,0 +1,14 @@
+SF:<SRC>/BranchErrorElseif.cmake
+FNF:0
+FNH:0
+BRDA:1,0,0,0
+BRDA:1,0,1,1
+BRDA:2,0,0,-
+BRDA:2,0,1,-
+BRF:4
+BRH:1
+DA:1,1
+DA:2,1
+LF:2
+LH:2
+end_of_record

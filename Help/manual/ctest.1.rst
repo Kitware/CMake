@@ -1730,8 +1730,8 @@ Configuration settings include:
 
     After the test, CTest merges the lcov tracefiles in the folder into
     ``<directory>/<test-name>.cmake-coverage.info`` and removes the folder.
-    The merge adds the hit counts of each line and each function.  The
-    merged file leaves out the files under the ``BuildDirectory`` setting,
+    The merge adds the hit counts of each line, each function and each branch.
+    The merged file leaves out the files under the ``BuildDirectory`` setting,
     such as files that CMake generates and the projects that
     :command:`try_compile` configures, unless that setting is the same as
     the ``SourceDirectory`` setting.  The merged file has one ``TN:``

@@ -2,7 +2,7 @@ set(CTEST_TEST_COVERAGE_TOOL "CMAKE")
 include(CTest)
 
 # Two tests run the same file, so its counts must be merged.
-add_test(NAME Shared1 COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Shared.cmake)
+add_test(NAME Shared1 COMMAND ${CMAKE_COMMAND} -Dside=1 -P ${CMAKE_CURRENT_SOURCE_DIR}/Shared.cmake)
 add_test(NAME Shared2 COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Shared.cmake)
 
 # A file in the build tree must not be reported.
