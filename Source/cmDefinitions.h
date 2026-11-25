@@ -44,11 +44,11 @@ public:
 
   // -- Static member functions
 
-  static cmValue Get(std::string const& key, StackIter begin, StackIter end);
+  static cmValue Get(cm::string_view key, StackIter begin, StackIter end);
 
-  static void Lower(std::string const& key, StackIter begin, StackIter end);
+  static void Lower(cm::string_view key, StackIter begin, StackIter end);
 
-  static bool HasKey(std::string const& key, StackIter begin, StackIter end);
+  static bool HasKey(cm::string_view key, StackIter begin, StackIter end);
 
   enum class UnsetKeys
   {
@@ -64,10 +64,10 @@ public:
   // -- Member functions
 
   /** Set a value associated with a key.  */
-  void Set(std::string const& key, cm::string_view value);
+  void Set(cm::string_view key, cm::string_view value);
 
   /** Unset a definition.  */
-  void Unset(std::string const& key);
+  void Unset(cm::string_view key);
 
 private:
   struct Def

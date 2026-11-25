@@ -54,21 +54,18 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(cm::string_view key,
   return parentDef;
 }
 
-cmValue cmDefinitions::Get(std::string const& key, StackIter begin,
-                           StackIter end)
+cmValue cmDefinitions::Get(cm::string_view key, StackIter begin, StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, Lowering::No);
   return def.Value ? cmValue(def.Value.get()) : nullptr;
 }
 
-void cmDefinitions::Lower(std::string const& key, StackIter begin,
-                          StackIter end)
+void cmDefinitions::Lower(cm::string_view key, StackIter begin, StackIter end)
 {
   cmDefinitions::GetInternal(key, begin, end, Lowering::Yes);
 }
 
-bool cmDefinitions::HasKey(std::string const& key, StackIter begin,
-                           StackIter end)
+bool cmDefinitions::HasKey(cm::string_view key, StackIter begin, StackIter end)
 {
   for (StackIter it = begin; it != end; ++it) {
     if (it->Map.find(key) != it->Map.end()) {
@@ -120,12 +117,12 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
   return defined;
 }
 
-void cmDefinitions::Set(std::string const& key, cm::string_view value)
+void cmDefinitions::Set(cm::string_view key, cm::string_view value)
 {
   this->SetInternal(key, std::make_shared<std::string const>(value));
 }
 
-void cmDefinitions::Unset(std::string const& key)
+void cmDefinitions::Unset(cm::string_view key)
 {
   this->SetInternal(key, {});
 }
