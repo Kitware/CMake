@@ -63,10 +63,10 @@ public:
 
   // -- Member functions
 
-  /** Set a value associated with a key.  */
-  void Set(cm::string_view key, cm::string_view value);
+  /** Bind a key to the given value.  Stores the value as an owned string.  */
+  void Set(cm::string_view key, std::string value);
 
-  /** Unset a definition.  */
+  /** Bind a key to no value.  */
   void Unset(cm::string_view key);
 
 private:

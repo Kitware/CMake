@@ -400,7 +400,7 @@ bool cmStateSnapshot::IsInitialized(std::string const& name) const
 void cmStateSnapshot::SetDefinition(std::string const& name,
                                     cm::string_view value)
 {
-  this->Position->Vars->Set(name, value);
+  this->Position->Vars->Set(name, std::string(value));
 }
 
 void cmStateSnapshot::RemoveDefinition(std::string const& name)

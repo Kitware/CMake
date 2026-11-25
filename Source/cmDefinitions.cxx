@@ -117,9 +117,10 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
   return defined;
 }
 
-void cmDefinitions::Set(cm::string_view key, cm::string_view value)
+void cmDefinitions::Set(cm::string_view key, std::string value)
 {
-  this->SetInternal(key, std::make_shared<std::string const>(value));
+  this->SetInternal(key,
+                    std::make_shared<std::string const>(std::move(value)));
 }
 
 void cmDefinitions::Unset(cm::string_view key)
