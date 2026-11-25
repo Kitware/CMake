@@ -5,15 +5,6 @@ if (NOT "$ENV{CMAKE_CI_NIGHTLY}" STREQUAL "")
   set(CMake_TEST_ISPC "ON" CACHE STRING "")
   set(CMake_TEST_SYCL "ON" CACHE BOOL "")
 endif()
-set(CMake_TEST_LOCALE_CHARSET "UTF-8" CACHE STRING "")
-set(CMake_TEST_LOCALE_C_UTF8 ON CACHE BOOL "")
-set(CMake_TEST_MATH_OVERFLOW ON CACHE BOOL "")
-set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database,import_std23" CACHE STRING "")
-set(CMake_TEST_Rust "ON" CACHE STRING "")
-set(CMake_TEST_TLS_VERIFY_URL "https://gitlab.kitware.com" CACHE STRING "")
-set(CMake_TEST_TLS_VERIFY_URL_BAD "https://badtls-expired.kitware.com" CACHE STRING "")
-set(CMake_TEST_TLS_VERSION "1.3" CACHE STRING "")
-set(CMake_TEST_TLS_VERSION_URL_BAD "https://badtls-v1-1.kitware.com:8011" CACHE STRING "")
 
 string(JOIN " " flags
   "-fdiagnostics-show-option"
@@ -43,4 +34,4 @@ set(CMAKE_CXX_STANDARD "14" CACHE STRING "")
 # Qt 6 requires C++17, so use Qt 5.
 set(CMake_QT_MAJOR_VERSION "5" CACHE STRING "")
 
-include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora45_common.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora45_ninja_common.cmake")

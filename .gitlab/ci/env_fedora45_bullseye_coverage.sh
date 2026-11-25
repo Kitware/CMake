@@ -8,3 +8,6 @@ export COVFILE="$COVAPPDATADIR/CMake.cov"
 
 # Suppress the Bullseye startup banner on compilation.
 export COVCOPT="--no-banner"
+
+# Shrink stress tests when running with Bullseye.
+export KWSYS_TEST_PROCESS_1_COUNT=11

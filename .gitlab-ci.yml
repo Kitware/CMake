@@ -1094,15 +1094,28 @@ t:fedora45-asan:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora45-ninja-valgrind:
+b:fedora45-valgrind:
     extends:
-        - .fedora45_ninja_valgrind
-        - .cmake_test_linux_release
+        - .fedora45_valgrind
+        - .cmake_build_linux
+        - .cmake_build_artifacts
+        - .linux_x86_64_tags
+        - .rules
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_RUN_MANUALLY: "true"
+    needs: []
+
+t:fedora45-valgrind:
+    extends:
+        - .fedora45_valgrind
+        - .cmake_memcheck_linux
         # Use a fast CPU so that timeouts are less of a concern.
         - .linux_x86_64_tags_fast_x11
         - .cmake_valgrind_artifacts
         - .rules
-        - .needs_centos7_x86_64
+    needs:
+        - b:fedora45-valgrind
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
     timeout: 2 hours

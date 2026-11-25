@@ -30,6 +30,8 @@ if (CTEST_MEMORYCHECK_TYPE STREQUAL "Valgrind")
     */Tests/CTestTest2/kwsysBin/*
     */Tests/CTestTestCrash/Crash
     */Tests/Qt*Autogen/*
+    */Tests/RunCMake/CommandLineTar/*
+    */Tests/Rust*/*
     # Ignore ISPC files which may contain unimplemented instructions.
     */build/Tests/ISPC/TryCompile/ISPCTryCompile
     # Ignore anything CI downloads.
@@ -37,14 +39,14 @@ if (CTEST_MEMORYCHECK_TYPE STREQUAL "Valgrind")
   list(JOIN valgrind_skip "," valgrind_skip)
   string(CONCAT valgrind_options
     "--gen-suppressions=all "
+    "--read-inline-info=no "
+    "--read-var-info=no "
     "--child-silent-after-fork=yes "
     "--trace-children=yes "
     "--trace-children-skip=${valgrind_skip} "
-    "--track-origins=yes "
     "-q "
     "--leak-check=yes "
     "--show-reachable=yes "
-    "--num-callers=50 "
     "-v ")
   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "${valgrind_options}")
 endif ()

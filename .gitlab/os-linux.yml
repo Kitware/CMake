@@ -400,13 +400,14 @@
     variables:
         CMAKE_CONFIGURATION: fedora45_asan
 
-.fedora45_ninja_valgrind:
+.fedora45_valgrind:
     extends:
         - .fedora45
         - .fedora_valgrind_addon
 
     variables:
-        CMAKE_CONFIGURATION: fedora45_ninja_valgrind
+        CMAKE_CONFIGURATION: fedora45_valgrind
+        CMAKE_CI_NO_INSTALL: 1
 
 ### Intel Compiler
 

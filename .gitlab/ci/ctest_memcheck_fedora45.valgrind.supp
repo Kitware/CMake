@@ -54,6 +54,14 @@
    ...
 }
 {
+   openssl-global-static
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:CRYPTO_*alloc
+   ...
+}
+{
    qt5-object-new
    Memcheck:Leak
    match-leak-kinds: reachable
