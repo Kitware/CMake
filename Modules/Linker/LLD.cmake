@@ -8,6 +8,10 @@ macro(__linker_lld lang)
     include(Linker/MSVC)
 
     __linker_msvc(${lang})
+  elseif(CMAKE_EFFECTIVE_SYSTEM_NAME STREQUAL "Apple")
+    include(Linker/AppleClang)
+
+    __linker_appleclang(${lang})
   else()
     include(Linker/GNU)
 
