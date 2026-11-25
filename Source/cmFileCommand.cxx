@@ -235,7 +235,7 @@ bool HandleReadCommand(std::vector<std::string> const& args,
     char c;
     while ((sizeLimit > 0) && (file.get(c))) {
       char hex[4];
-      snprintf(hex, sizeof(hex), "%.2x", c & 0xFFu);
+      snprintf(hex, sizeof(hex), "%.2x", static_cast<unsigned char>(c));
       output += hex;
       sizeLimit--;
     }
