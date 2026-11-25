@@ -127,7 +127,6 @@ private:
     unsigned int major, unsigned int minor, unsigned int patch,
     unsigned int tweak);
   void SetModuleVariables();
-  bool FindModule(bool& found);
   void AddFindDefinition(std::string const& var, cm::string_view value);
   void RestoreFindDefinitions();
 
