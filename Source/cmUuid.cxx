@@ -144,7 +144,7 @@ bool cmUuid::StringToBinaryImpl(cm::string_view input,
       return false;
     }
 
-    output.push_back(static_cast<char>(c1 << 4 | c2));
+    output.push_back(static_cast<unsigned char>(c1 << 4 | c2));
   }
 
   return true;
