@@ -42,6 +42,7 @@ XcodeStandardLinkDirectoriesSubdir()
 run_cmake_with_options(InheritedParameters -DCMake_TEST_Swift=${CMake_TEST_Swift})
 
 run_cmake(XcodeFileType)
+run_cmake(XcodeProductFileType)
 run_cmake(XcodeAttributeLocation)
 run_cmake(XcodeAttributeGenex)
 run_cmake(XcodeAttributeGenexError)
