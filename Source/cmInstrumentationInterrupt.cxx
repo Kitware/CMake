@@ -101,7 +101,7 @@ void InstallInterruptHandler()
   sigemptyset(&sa.sa_mask);
   // One-shot: after the first interrupt the default disposition is restored,
   // so a second Ctrl+C terminates immediately even while we are mid-flush.
-  sa.sa_flags = SA_RESETHAND;
+  sa.sa_flags = static_cast<int>(SA_RESETHAND);
   sigaction(SIGINT, &sa, &savedSigIntAction);
 #endif
 }
