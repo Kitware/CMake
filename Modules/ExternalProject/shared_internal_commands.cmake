@@ -1354,6 +1354,11 @@ hash=${hash}
     endif()
   endif()
 
+  if(arg_SCRIPT_FILE)
+    # FetchContent tracks the generated script it runs for this step.
+    set(cmd "")
+  endif()
+
   # We use configure_file() to write the repo_info_file so that the file's
   # timestamp is not updated if we don't change the contents
 
@@ -1671,7 +1676,10 @@ Update to Mercurial >= 2.1.1.
 
   # We use configure_file() to write the update_info_file so that the file's
   # timestamp is not updated if we don't change the contents
-  if(NOT DEFINED cmd_disconnected)
+  if(arg_SCRIPT_FILE)
+    set(cmd "")
+    set(cmd_disconnected "")
+  elseif(NOT DEFINED cmd_disconnected)
     set(cmd_disconnected "${cmd}")
   endif()
   set(update_info_file ${stamp_dir}/${name}-update-info.txt)
