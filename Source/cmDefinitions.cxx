@@ -8,9 +8,19 @@
 
 #include <cm/string_view>
 
-cmDefinitions::Def cmDefinitions::NoDef;
+void cmDefinitions::SetInternal(cm::string_view key,
+                                std::shared_ptr<std::string const> value)
+{
+  auto i = this->Map.find(key);
+  if (i != this->Map.end()) {
+    i->second.Value = std::move(value);
+    return;
+  }
+  Def def{ std::make_shared<std::string const>(key), std::move(value) };
+  this->Map.emplace(*def.Key, std::move(def));
+}
 
-cmDefinitions::Def const& cmDefinitions::GetInternal(std::string const& key,
+cmDefinitions::Def const& cmDefinitions::GetInternal(cm::string_view key,
                                                      StackIter begin,
                                                      StackIter end,
                                                      Lowering lowering)
@@ -18,7 +28,7 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(std::string const& key,
   assert(begin != end);
   // Look for a binding in the current scope.
   {
-    auto it = begin->Map.find(cm::String::borrow(key));
+    auto it = begin->Map.find(key);
     if (it != begin->Map.end()) {
       return it->second;
     }
@@ -28,13 +38,17 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(std::string const& key,
   ++it;
   if (it == end) {
     // No parent scope.  This binding does not exist.
-    return cmDefinitions::NoDef;
+    static Def const noDef{};
+    return noDef;
   }
   // Look for a binding in the parent scope.
   Def const& parentDef = cmDefinitions::GetInternal(key, it, end, lowering);
   if (lowering == Lowering::Yes) {
     // Lower the binding to the current scope explicitly, even if unset.
-    return begin->Map.emplace(key, parentDef).first->second;
+    Def def{ parentDef.Key ? parentDef.Key
+                           : std::make_shared<std::string const>(key),
+             parentDef.Value };
+    return begin->Map.emplace(*def.Key, std::move(def)).first->second;
   }
   // Return the binding from the parent scope.
   return parentDef;
@@ -44,7 +58,7 @@ cmValue cmDefinitions::Get(std::string const& key, StackIter begin,
                            StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, Lowering::No);
-  return def.Value ? cmValue(def.Value.str_if_stable()) : nullptr;
+  return def.Value ? cmValue(def.Value.get()) : nullptr;
 }
 
 void cmDefinitions::Lower(std::string const& key, StackIter begin,
@@ -57,7 +71,7 @@ bool cmDefinitions::HasKey(std::string const& key, StackIter begin,
                            StackIter end)
 {
   for (StackIter it = begin; it != end; ++it) {
-    if (it->Map.find(cm::String::borrow(key)) != it->Map.end()) {
+    if (it->Map.find(key) != it->Map.end()) {
       return true;
     }
   }
@@ -73,11 +87,11 @@ cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
     for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
       if (closure.Map.find(mi.first) == closure.Map.end() &&
-          undefined.find(mi.first.view()) == undefined.end()) {
+          undefined.find(mi.first) == undefined.end()) {
         if (mi.second.Value) {
           closure.Map.insert(mi);
         } else {
-          undefined.emplace(mi.first.view());
+          undefined.emplace(mi.first);
         }
       }
     }
@@ -96,9 +110,9 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
     defined.reserve(defined.size() + it->Map.size());
     for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
-      if (bound.emplace(mi.first.view()).second &&
+      if (bound.emplace(mi.first).second &&
           (unsetKeys == UnsetKeys::Include || mi.second.Value)) {
-        defined.push_back(*mi.first.str_if_stable());
+        defined.emplace_back(*mi.second.Key);
       }
     }
   }
@@ -108,10 +122,10 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
 
 void cmDefinitions::Set(std::string const& key, cm::string_view value)
 {
-  this->Map[key] = Def(value);
+  this->SetInternal(key, std::make_shared<std::string const>(value));
 }
 
 void cmDefinitions::Unset(std::string const& key)
 {
-  this->Map[key] = Def();
+  this->SetInternal(key, {});
 }

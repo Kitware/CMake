@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -12,7 +13,6 @@
 #include <cm/string_view>
 
 #include "cmLinkedTree.h"
-#include "cmString.hxx"
 #include "cmValue.h"
 
 /** \class cmDefinitions
@@ -70,20 +70,17 @@ public:
   void Unset(std::string const& key);
 
 private:
-  /** String with existence boolean.  */
   struct Def
   {
-  public:
-    Def() = default;
-    Def(cm::string_view value)
-      : Value(value)
-    {
-    }
-    cm::String Value;
+    std::shared_ptr<std::string const> Key;
+    std::shared_ptr<std::string const> Value;
   };
-  static Def NoDef;
 
-  std::unordered_map<cm::String, Def> Map;
+  // Index the definitions by views into their own key allocation.
+  std::unordered_map<cm::string_view, Def> Map;
+
+  void SetInternal(cm::string_view key,
+                   std::shared_ptr<std::string const> value);
 
   enum class Lowering
   {
@@ -91,6 +88,6 @@ private:
     Yes,
   };
 
-  static Def const& GetInternal(std::string const& key, StackIter begin,
+  static Def const& GetInternal(cm::string_view key, StackIter begin,
                                 StackIter end, Lowering lowering);
 };
