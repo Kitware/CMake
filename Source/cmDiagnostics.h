@@ -108,7 +108,7 @@ public:
   /** Represent a set of diagnostic category actions.  */
   struct DiagnosticMap : public std::array<DiagnosticAction, CategoryCount>
   {
-    DiagnosticMap()
+    constexpr DiagnosticMap()
       : array{} {};
   };
 };

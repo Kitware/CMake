@@ -90,8 +90,8 @@ public:
   constexpr T* operator->();
   constexpr T const& operator*() const&;
   constexpr T& operator*() &;
-  T const&& operator*() const&&;
-  T&& operator*() &&;
+  constexpr T const&& operator*() const&&;
+  constexpr T&& operator*() &&;
 
   constexpr explicit operator bool() const noexcept;
   constexpr bool has_value() const noexcept;
@@ -99,8 +99,8 @@ public:
   constexpr T& value() &;
   constexpr T const& value() const&;
 
-  T&& value() &&;
-  T const&& value() const&&;
+  constexpr T&& value() &&;
+  constexpr T const&& value() const&&;
 
   template <typename U>
   T value_or(U&& default_value) const&;
@@ -475,13 +475,13 @@ constexpr T& optional<T>::operator*() &
 }
 
 template <typename T>
-T const&& optional<T>::operator*() const&&
+constexpr T const&& optional<T>::operator*() const&&
 {
   return std::move(**this);
 }
 
 template <typename T>
-T&& optional<T>::operator*() &&
+constexpr T&& optional<T>::operator*() &&
 {
   return std::move(**this);
 }

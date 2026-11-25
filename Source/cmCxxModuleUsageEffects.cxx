@@ -3,7 +3,7 @@
 #include "cmCxxModuleUsageEffects.h"
 
 #include <algorithm>
-#include <set>
+#include <array>
 #include <utility>
 #include <vector>
 
@@ -64,12 +64,16 @@ bool IsGNUWarning(cm::string_view flag)
     flag.remove_prefix(1);
   }
 
-  static std::set<cm::string_view> const long_names{
-    "pedantic", "pedantic-errors", "all-warnings", "extra-warnings",
-    "no-warnings"
-  };
+  static constexpr std::array<cm::static_string_view, 5> LONG_NAMES{ {
+    "all-warnings"_s,
+    "extra-warnings"_s,
+    "no-warnings"_s,
+    "pedantic-errors"_s,
+    "pedantic"_s,
+  } };
 
-  return long_names.find(flag) != long_names.end();
+  return std::find(LONG_NAMES.begin(), LONG_NAMES.end(), flag) !=
+    LONG_NAMES.end();
 }
 
 void AppendUsage(std::string& usageHashInput, std::string const& entry)
