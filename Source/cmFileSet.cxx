@@ -443,8 +443,8 @@ cmValue cmFileSet::GetProperty(std::string const& prop) const
     return cmValue{ this->GetType() };
   }
   if (prop == "SCOPE"_s) {
-    static std::string scope =
-      std::string{ Metadata::VisibilityToName(this->GetVisibility()) };
+    static std::string scope;
+    scope = std::string{ Metadata::VisibilityToName(this->GetVisibility()) };
     return cmValue{ scope };
   }
 
