@@ -543,6 +543,7 @@ public:
     Hygon,
     Zhaoxin,
     Apple,
+    Microsoft,
     UnknownManufacturer
   };
 
@@ -1660,6 +1661,85 @@ SystemInformationImplementation::SystemInformationImplementation()
   this->OSIs64Bit = (sizeof(void*) == 8);
 }
 
+#if defined(_WIN32)
+namespace {
+
+/** Owns a read-only key under HKEY_LOCAL_MACHINE. */
+class WindowsRegistryKey
+{
+public:
+  /** Open a key for querying, optionally selecting a registry view. */
+  explicit WindowsRegistryKey(wchar_t const* path, REGSAM view = 0)
+  {
+    HKEY key = nullptr;
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_QUERY_VALUE | view,
+                      &key) == ERROR_SUCCESS) {
+      this->Key = key;
+    }
+  }
+
+  /** Close the key if it was opened. */
+  ~WindowsRegistryKey()
+  {
+    if (this->Key) {
+      RegCloseKey(this->Key);
+    }
+  }
+
+  WindowsRegistryKey(WindowsRegistryKey const&) = delete;
+  WindowsRegistryKey& operator=(WindowsRegistryKey const&) = delete;
+
+  /** Return whether the key was opened. */
+  explicit operator bool() const { return this->Key != nullptr; }
+
+  /** Read a REG_SZ value, returning an empty string on failure. */
+  std::string ReadString(wchar_t const* value) const
+  {
+    DWORD type = 0;
+    DWORD size = 0;
+    if (!this->Key ||
+        RegQueryValueExW(this->Key, value, nullptr, &type, nullptr, &size) !=
+          ERROR_SUCCESS ||
+        type != REG_SZ || size % sizeof(wchar_t) != 0) {
+      return {};
+    }
+
+    // RegQueryValueExW can return string data without a terminating null.
+    std::vector<wchar_t> buffer(size / sizeof(wchar_t) + 1);
+    if (RegQueryValueExW(this->Key, value, nullptr, &type,
+                         reinterpret_cast<BYTE*>(buffer.data()),
+                         &size) != ERROR_SUCCESS ||
+        type != REG_SZ || size % sizeof(wchar_t) != 0) {
+      return {};
+    }
+
+    return Encoding::ToNarrow(buffer.data());
+  }
+
+  /** Read a REG_DWORD value, assigning the result only on success. */
+  bool ReadDword(wchar_t const* value, DWORD& result) const
+  {
+    DWORD type = 0;
+    DWORD data = 0;
+    DWORD size = sizeof(data);
+    if (!this->Key ||
+        RegQueryValueExW(this->Key, value, nullptr, &type,
+                         reinterpret_cast<BYTE*>(&data),
+                         &size) != ERROR_SUCCESS ||
+        type != REG_DWORD || size != sizeof(data)) {
+      return false;
+    }
+    result = data;
+    return true;
+  }
+
+private:
+  HKEY Key = nullptr;
+};
+
+} // namespace
+#endif
+
 void SystemInformationImplementation::RunCPUCheck()
 {
 #ifdef _WIN32
@@ -1671,6 +1751,15 @@ void SystemInformationImplementation::RunCPUCheck()
     RetrieveCPUIdentity();
     this->FindManufacturer();
     RetrieveCPUFeatures();
+  } else {
+    WindowsRegistryKey key(
+      L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0");
+    if (key) {
+      this->ChipID.ProcessorName = key.ReadString(L"ProcessorNameString");
+      this->ChipID.ModelName = this->ChipID.ProcessorName;
+      this->ChipID.Vendor = key.ReadString(L"VendorIdentifier");
+      this->FindManufacturer();
+    }
   }
 
   // These two may be called without support for the CPUID instruction.
@@ -1682,9 +1771,12 @@ void SystemInformationImplementation::RunCPUCheck()
     RetrieveClassicalCPUClockSpeed();
   }
 
+  this->CPUCountWindows();
+
   if (supportsCPUID) {
-    // Retrieve cache information.
-    if (!RetrieveCPUCacheDetails()) {
+    // Fall back to CPUID if Windows did not report any usable cache sizes.
+    if (this->Features.L1CacheSize == -1 && this->Features.L2CacheSize == -1 &&
+        this->Features.L3CacheSize == -1 && !RetrieveCPUCacheDetails()) {
       RetrieveClassicalCPUCacheDetails();
     }
 
@@ -1699,8 +1791,6 @@ void SystemInformationImplementation::RunCPUCheck()
     // Now attempt to retrieve the serial number (if possible).
     RetrieveProcessorSerialNumber();
   }
-
-  this->CPUCountWindows();
 
 #elif defined(__APPLE__)
   this->ParseSysCtl();
@@ -1950,6 +2040,8 @@ char const* SystemInformationImplementation::GetVendorID()
       return "Shanghai Zhaoxin Semiconductor Co., Ltd.";
     case Apple:
       return "Apple";
+    case Microsoft:
+      return "Microsoft Corporation";
     case UnknownManufacturer:
     default:
       return "Unknown Manufacturer";
@@ -2337,6 +2429,8 @@ void SystemInformationImplementation::FindManufacturer(
     this->ChipManufacturer = HP; // Hewlett-Packard
   else if (this->ChipID.Vendor == "Apple")
     this->ChipManufacturer = Apple; // Apple
+  else if (this->ChipID.Vendor == "MICROSOFT CORPORATION")
+    this->ChipManufacturer = Microsoft; // Microsoft Corporation
   else
     this->ChipManufacturer = UnknownManufacturer; // Unknown manufacturer
 }
@@ -2832,27 +2926,12 @@ bool SystemInformationImplementation::RetrieveCPUClockSpeed()
   // If RDTSC is not supported, we fallback to trying to read this value
   // from the registry:
   if (!retrieved) {
-    HKEY hKey = nullptr;
-    LONG err =
-      RegOpenKeyExW(HKEY_LOCAL_MACHINE,
-                    L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0,
-                    KEY_READ, &hKey);
-
-    if (ERROR_SUCCESS == err) {
-      DWORD dwType = 0;
-      DWORD data = 0;
-      DWORD dwSize = sizeof(DWORD);
-
-      err =
-        RegQueryValueExW(hKey, L"~MHz", 0, &dwType, (LPBYTE)&data, &dwSize);
-
-      if (ERROR_SUCCESS == err) {
-        this->CPUSpeedInMHz = (float)data;
-        retrieved = true;
-      }
-
-      RegCloseKey(hKey);
-      hKey = nullptr;
+    WindowsRegistryKey key(
+      L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0");
+    DWORD data = 0;
+    if (key.ReadDword(L"~MHz", data)) {
+      this->CPUSpeedInMHz = static_cast<float>(data);
+      retrieved = true;
     }
   }
 #endif
@@ -4806,12 +4885,15 @@ unsigned char SystemInformationImplementation::GetAPICId()
   return static_cast<unsigned char>((Regs[1] & INITIAL_APIC_ID_BITS) >> 24);
 }
 
-/** Count the number of CPUs. Works only on windows. */
+/** Count Windows CPUs and read caches from the same topology data. */
 void SystemInformationImplementation::CPUCountWindows()
 {
 #if defined(_WIN32)
   this->NumberOfPhysicalCPU = 0;
   this->NumberOfLogicalCPU = 0;
+  this->Features.L1CacheSize = -1;
+  this->Features.L2CacheSize = -1;
+  this->Features.L3CacheSize = -1;
 
   using GetLogicalProcessorInformationType =
     BOOL(WINAPI*)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
@@ -4843,6 +4925,7 @@ void SystemInformationImplementation::CPUCountWindows()
     (void)rc; // Silence unused variable warning
   }
 
+  DWORD_PTR processorMask = 0;
   for (SYSTEM_LOGICAL_PROCESSOR_INFORMATION const& PInfo : ProcInfo) {
     if (PInfo.Relationship != RelationProcessorCore) {
       continue;
@@ -4857,9 +4940,38 @@ void SystemInformationImplementation::CPUCountWindows()
     this->NumberOfPhysicalCPU++;
     this->NumberOfLogicalCPU += (unsigned int)count;
     this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical = count;
+    processorMask |= PInfo.ProcessorMask;
   }
   this->NumberOfPhysicalCPU = std::max(1u, this->NumberOfPhysicalCPU);
   this->NumberOfLogicalCPU = std::max(1u, this->NumberOfLogicalCPU);
+
+  // Report caches visible to the lowest-numbered processor.
+  DWORD_PTR const lowestProcessor = processorMask & (0 - processorMask);
+  DWORD unified[3] = {};
+  DWORD instruction = 0;
+  DWORD data = 0;
+  for (SYSTEM_LOGICAL_PROCESSOR_INFORMATION const& info : ProcInfo) {
+    if (info.Relationship != RelationCache ||
+        (info.ProcessorMask & lowestProcessor) == 0) {
+      continue;
+    }
+    CACHE_DESCRIPTOR const& cache = info.Cache;
+    if (cache.Type == CacheUnified && cache.Level >= 1 && cache.Level <= 3) {
+      DWORD& size = unified[cache.Level - 1];
+      size = std::max(size, cache.Size);
+    } else if (cache.Level == 1 && cache.Type == CacheInstruction) {
+      instruction = std::max(instruction, cache.Size);
+    } else if (cache.Level == 1 && cache.Type == CacheData) {
+      data = std::max(data, cache.Size);
+    }
+  }
+  DWORD const splitL1 = instruction + data;
+  DWORD const l1 = (unified[0] ? unified[0] : splitL1) / 1024;
+  DWORD const l2 = unified[1] / 1024;
+  DWORD const l3 = unified[2] / 1024;
+  this->Features.L1CacheSize = l1 ? static_cast<int>(l1) : -1;
+  this->Features.L2CacheSize = l2 ? static_cast<int>(l2) : -1;
+  this->Features.L3CacheSize = l3 ? static_cast<int>(l3) : -1;
 #else
 #endif
 }
@@ -5723,29 +5835,14 @@ bool SystemInformationImplementation::QueryOSInformation()
     std::to_string(osvi.dwMinorVersion) + '.' +
     std::to_string(osvi.dwBuildNumber & 0xFFFF);
 
-  HKEY versionKey = nullptr;
-  if (osvi.dwMajorVersion >= 6 &&
-      RegOpenKeyExW(
-        HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
-        0, KEY_QUERY_VALUE | KEY_WOW64_64KEY, &versionKey) == ERROR_SUCCESS) {
+  if (osvi.dwMajorVersion >= 6) {
+    WindowsRegistryKey key(L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+                           KEY_WOW64_64KEY);
     DWORD revision = 0;
-    DWORD type = 0;
-    DWORD size = sizeof(revision);
-    if (RegQueryValueExW(versionKey, L"UBR", nullptr, &type,
-                         reinterpret_cast<BYTE*>(&revision),
-                         &size) == ERROR_SUCCESS &&
-        type == REG_DWORD && size == sizeof(revision)) {
+    if (key.ReadDword(L"UBR", revision)) {
       this->OSRelease += '.' + std::to_string(revision);
     }
-    wchar_t name[256] = {};
-    size = sizeof(name) - sizeof(name[0]);
-    if (RegQueryValueExW(versionKey, L"ProductName", nullptr, &type,
-                         reinterpret_cast<BYTE*>(name),
-                         &size) == ERROR_SUCCESS &&
-        type == REG_SZ && size % sizeof(name[0]) == 0) {
-      this->OSVersion = Encoding::ToNarrow(name);
-    }
-    RegCloseKey(versionKey);
+    this->OSVersion = key.ReadString(L"ProductName");
   }
 
   if (!this->OSVersion.empty()) {
