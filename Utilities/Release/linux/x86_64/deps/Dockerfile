@@ -4,31 +4,52 @@
 # Produce an image with custom-built dependencies for portable CMake binaries.
 # Build using the directory containing this file as its own build context.
 
-ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-base-2026-01-13
-ARG FROM_IMAGE_DIGEST=@sha256:66bbc699da90b66fbfe5ee6161026587b78bcd01b903740b1287f80c40adfc95
+ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-base-2026-11-20
+ARG FROM_IMAGE_DIGEST=@sha256:7edc78e6a6b966877fa5f3eb07b44c633d8e901e16757397b7091cb50ac13797
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
-FROM $FROM_IMAGE
 
 # Qt
-# Version 5.12.0 was the last to bundle xkbcommon.
-COPY qt-install.patch /opt/qt/src/
+FROM $FROM_IMAGE AS qt
+RUN : \
+ && curl -OL https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip \
+ && sha256sum ninja-linux.zip | \
+    grep -q 6f98805688d19672bd699fbbfa2c2cf0fc054ac3df1f0e6a47664d963d530255 \
+ && unzip ninja-linux.zip \
+ && rm ninja-linux.zip \
+ && chmod +x ninja \
+ && mkdir -p /opt/ninja/bin \
+ && mv ninja /opt/ninja/bin \
+ && :
+RUN : \
+ && curl -OL https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-x86_64.tar.gz \
+ && sha256sum cmake-3.31.12-linux-x86_64.tar.gz | \
+    grep -q 0dc2e9a6860f06bf10bd8fadc03e35d9eeb4df46e33763a7e480e987758f385c \
+ && tar xzf cmake-3.31.12-linux-x86_64.tar.gz \
+ && mv cmake-3.31.12-linux-x86_64 /opt/cmake \
+ && rm cmake-3.31.12-linux-x86_64.tar.gz \
+ && :
+COPY qt-source.patch /opt/qt/src/
 RUN : \
  && mkdir -p /opt/qt/src/qt-build \
  && cd /opt/qt/src \
- && curl -OL https://download.qt.io/archive/qt/5.12/5.12.0/single/qt-everywhere-src-5.12.0.tar.xz \
- && sha512sum qt-everywhere-src-5.12.0.tar.xz | grep -q 0dd03d2645fb6dac5b58c8caf92b4a0a6900131f1ccfb02443a0df4702b5da0458f4c45e758d1b929ec709b0f4b36900df2fd60a058af9cc8c1a0748b6d57aae \
- && tar xJf qt-everywhere-src-5.12.0.tar.xz \
+ && curl -OL https://download.qt.io/archive/qt/6.8/6.8.5/submodules/qtbase-everywhere-opensource-src-6.8.5.tar.xz \
+ && sha256sum qtbase-everywhere-opensource-src-6.8.5.tar.xz | \
+    grep -q fc95010e94d8b1ec342eda9281fd278d5f096cf9ad8f1a0adfba9575438b0abc \
+ && tar xJf qtbase-everywhere-opensource-src-6.8.5.tar.xz \
+ && patch -p0 -i qt-source.patch \
  && cd qt-build \
- && source /opt/rh/devtoolset-7/enable \
- && ../qt-everywhere-src-5.12.0/configure \
+ && source /opt/rh/devtoolset-11/enable \
+ && export PATH=/opt/ninja/bin:$PATH \
+ && export PATH=/opt/cmake/bin:$PATH \
+ && ../qtbase-everywhere-src-6.8.5/configure \
       -prefix /opt/qt \
       -static \
       -release \
-      -c++std c++11 \
-      -opensource -confirm-license \
       -gui \
       -widgets \
       -xcb \
+      -xkbcommon \
+      -bundled-xcb-xinput \
       -fontconfig \
       -sql-sqlite \
       -qt-doubleconversion \
@@ -36,12 +57,9 @@ RUN : \
       -qt-libpng \
       -qt-pcre \
       -qt-sqlite \
-      -qt-xcb \
-      -qt-xkbcommon \
       -qt-zlib \
       -system-freetype \
       -no-accessibility \
-      -no-compile-examples \
       -no-cups \
       -no-dbus \
       -no-directfb \
@@ -53,60 +71,37 @@ RUN : \
       -no-glib \
       -no-gtk \
       -no-harfbuzz \
-      -no-iconv \
       -no-icu \
       -no-journald \
-      -no-kms \
       -no-libinput \
       -no-libproxy \
       -no-linuxfb \
       -no-ltcg \
-      -no-mirclient \
       -no-mtdev \
       -no-opengl \
       -no-openssl \
-      -no-pch \
       -no-sql-mysql \
       -no-sql-psql \
-      -no-sql-sqlite2 \
       -no-syslog \
       -no-system-proxies \
       -no-tslib \
-      -no-use-gold-linker \
-      -skip declarative \
-      -skip multimedia \
-      -skip qtcanvas3d \
-      -skip qtconnectivity \
-      -skip qtdeclarative \
-      -skip qtlocation \
-      -skip qtmultimedia \
-      -skip qtsensors \
-      -skip qtserialport \
-      -skip qtsvg \
-      -skip qtwayland \
-      -skip qtwebchannel \
-      -skip qtwebengine \
-      -skip qtwebsockets \
-      -skip qtwinextras \
-      -skip qtxmlpatterns \
-      -nomake examples \
-      -nomake tests \
- && make install \
- && cd /opt/qt \
- && patch -p1 -i src/qt-install.patch \
+ && ninja install \
  && cd /opt \
- && rm -rf /opt/qt/src \
+ && rm -rf qt/src \
+ && tar cf /root/qt.tar qt \
  && :
 
 # Curses
+FROM $FROM_IMAGE AS ncurses
 RUN : \
  && mkdir -p /opt/ncurses/src/ncurses-build \
  && cd /opt/ncurses/src \
  && curl -O https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz \
- && sha512sum ncurses-6.6.tar.gz | grep -q 02647baae53abc844fbadee5b0a2187ad073125c4e8950df6d1c4feb781cb74ba64fb838cedfee2c246c39932187f6775b1df124f18b99a4233f0d98c72191de \
+ && sha256sum ncurses-6.6.tar.gz | \
+    grep -q 355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11 \
  && tar xzf ncurses-6.6.tar.gz \
  && cd ncurses-build \
- && source /opt/rh/devtoolset-7/enable \
+ && source /opt/rh/devtoolset-11/enable \
  && ../ncurses-6.6/configure \
       --prefix=/opt/ncurses \
       --with-terminfo-dirs=/etc/terminfo:/lib/terminfo:/usr/share/terminfo \
@@ -116,22 +111,39 @@ RUN : \
  && make -j $(nproc) \
  && make install.libs install.includes \
  && cd /opt \
- && rm -rf /opt/ncurses/src \
+ && rm -rf ncurses/src \
+ && tar cf /root/ncurses.tar ncurses \
  && :
 
 # OpenSSL
+FROM $FROM_IMAGE AS openssl
 COPY openssl-source.patch /opt/openssl/src/
 RUN : \
  && mkdir -p /opt/openssl/src \
  && cd /opt/openssl/src \
- && curl -OL https://github.com/openssl/openssl/releases/download/openssl-3.6.5/openssl-3.6.5.tar.gz \
- && sha256sum openssl-3.6.5.tar.gz | grep -q a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98 \
- && tar xzf openssl-3.6.5.tar.gz \
- && cd openssl-3.6.5 \
+ && curl -OL https://github.com/openssl/openssl/releases/download/openssl-4.1.0/openssl-4.1.0.tar.gz \
+ && sha256sum openssl-4.1.0.tar.gz | \
+    grep -q 50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd \
+ && tar xzf openssl-4.1.0.tar.gz \
+ && cd openssl-4.1.0 \
  && patch -p1 -i ../openssl-source.patch \
- && source /opt/rh/devtoolset-7/enable \
+ && source /opt/rh/devtoolset-11/enable \
  && ./Configure --prefix=/opt/openssl linux-elf no-asm no-shared -D_POSIX_C_SOURCE=199506L -D_POSIX_SOURCE=1 -D_SVID_SOURCE=1 -D_BSD_SOURCE=1 \
  && make install_dev -j $(nproc) \
  && cd /opt \
- && rm -rf /opt/openssl/src \
+ && rm -rf openssl/src \
+ && tar cf /root/openssl.tar openssl \
  && :
+
+# CMake build environment
+FROM $FROM_IMAGE
+LABEL maintainer="Brad King <brad.king@kitware.com>"
+
+RUN --mount=type=bind,from=qt,source=/root,target=/root \
+    tar -C /opt -xf /root/qt.tar
+
+RUN --mount=type=bind,from=ncurses,source=/root,target=/root \
+    tar -C /opt -xf /root/ncurses.tar
+
+RUN --mount=type=bind,from=openssl,source=/root,target=/root \
+    tar -C /opt -xf /root/openssl.tar
