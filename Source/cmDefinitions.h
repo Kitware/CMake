@@ -46,7 +46,7 @@ public:
 
   static cmValue Get(std::string const& key, StackIter begin, StackIter end);
 
-  static void Raise(std::string const& key, StackIter begin, StackIter end);
+  static void Lower(std::string const& key, StackIter begin, StackIter end);
 
   static bool HasKey(std::string const& key, StackIter begin, StackIter end);
 
@@ -85,6 +85,12 @@ private:
 
   std::unordered_map<cm::String, Def> Map;
 
+  enum class Lowering
+  {
+    No,
+    Yes,
+  };
+
   static Def const& GetInternal(std::string const& key, StackIter begin,
-                                StackIter end, bool raise);
+                                StackIter end, Lowering lowering);
 };

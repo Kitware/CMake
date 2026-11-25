@@ -454,7 +454,7 @@ bool cmStateSnapshot::RaiseScope(std::string const& var, char const* varDef)
     return true;
   }
   // First localize the definition in the current scope.
-  cmDefinitions::Raise(var, this->Position->Vars, this->Position->Root);
+  cmDefinitions::Lower(var, this->Position->Vars, this->Position->Root);
 
   // Now update the definition in the parent scope.
   if (varDef) {

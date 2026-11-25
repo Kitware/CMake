@@ -12,38 +12,45 @@ cmDefinitions::Def cmDefinitions::NoDef;
 
 cmDefinitions::Def const& cmDefinitions::GetInternal(std::string const& key,
                                                      StackIter begin,
-                                                     StackIter end, bool raise)
+                                                     StackIter end,
+                                                     Lowering lowering)
 {
   assert(begin != end);
+  // Look for a binding in the current scope.
   {
     auto it = begin->Map.find(cm::String::borrow(key));
     if (it != begin->Map.end()) {
       return it->second;
     }
   }
+  // No binding in the current scope.  Try the parent scope.
   StackIter it = begin;
   ++it;
   if (it == end) {
+    // No parent scope.  This binding does not exist.
     return cmDefinitions::NoDef;
   }
-  Def const& def = cmDefinitions::GetInternal(key, it, end, raise);
-  if (!raise) {
-    return def;
+  // Look for a binding in the parent scope.
+  Def const& parentDef = cmDefinitions::GetInternal(key, it, end, lowering);
+  if (lowering == Lowering::Yes) {
+    // Lower the binding to the current scope explicitly, even if unset.
+    return begin->Map.emplace(key, parentDef).first->second;
   }
-  return begin->Map.emplace(key, def).first->second;
+  // Return the binding from the parent scope.
+  return parentDef;
 }
 
 cmValue cmDefinitions::Get(std::string const& key, StackIter begin,
                            StackIter end)
 {
-  Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
+  Def const& def = cmDefinitions::GetInternal(key, begin, end, Lowering::No);
   return def.Value ? cmValue(def.Value.str_if_stable()) : nullptr;
 }
 
-void cmDefinitions::Raise(std::string const& key, StackIter begin,
+void cmDefinitions::Lower(std::string const& key, StackIter begin,
                           StackIter end)
 {
-  cmDefinitions::GetInternal(key, begin, end, true);
+  cmDefinitions::GetInternal(key, begin, end, Lowering::Yes);
 }
 
 bool cmDefinitions::HasKey(std::string const& key, StackIter begin,
