@@ -1094,6 +1094,30 @@ t:fedora45-asan:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+b:fedora45-ubsan:
+    extends:
+        - .fedora45_ubsan
+        - .cmake_build_linux
+        - .cmake_build_artifacts
+        - .linux_x86_64_tags
+        - .rules
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_RUN_MANUALLY: "true"
+    needs: []
+
+t:fedora45-ubsan:
+    extends:
+        - .fedora45_ubsan
+        - .cmake_memcheck_linux
+        - .linux_x86_64_tags
+        - .cmake_junit_artifacts
+        - .rules
+    needs:
+        - b:fedora45-ubsan
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 b:fedora45-valgrind:
     extends:
         - .fedora45_valgrind

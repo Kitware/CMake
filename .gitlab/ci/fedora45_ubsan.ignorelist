@@ -1,0 +1,10 @@
+# Code that UndefinedBehaviorSanitizer does not instrument.
+
+# Vendored third-party libraries.
+src:*/Utilities/cm*/*
+
+# Third-party MD5 implementation in KWSys.
+src:*/Source/kwsys/MD5.c
+
+# C++ standard library headers, whose hash and random number code wraps.
+src:*/c++/*

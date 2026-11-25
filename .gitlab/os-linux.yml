@@ -384,6 +384,13 @@
         CTEST_MEMORYCHECK_TYPE: AddressSanitizer
         CTEST_MEMORYCHECK_SANITIZER_OPTIONS: ""
 
+.fedora_ubsan_addon:
+    extends: .fedora_memcheck
+
+    variables:
+        CTEST_MEMORYCHECK_TYPE: UndefinedBehaviorSanitizer
+        CTEST_MEMORYCHECK_SANITIZER_OPTIONS: "print_stacktrace=1:report_error_type=1"
+
 .fedora_valgrind_addon:
     extends: .fedora_memcheck
 
@@ -400,6 +407,14 @@
 
     variables:
         CMAKE_CONFIGURATION: fedora45_asan
+
+.fedora45_ubsan:
+    extends:
+        - .fedora45
+        - .fedora_ubsan_addon
+
+    variables:
+        CMAKE_CONFIGURATION: fedora45_ubsan
 
 .fedora45_valgrind:
     extends:
