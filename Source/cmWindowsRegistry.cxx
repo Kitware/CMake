@@ -37,7 +37,7 @@ int Strucmp(cm::string_view l, cm::string_view r)
     return 0;
   }
   if (l.empty() || r.empty()) {
-    return static_cast<int>(l.size() - r.size());
+    return l.empty() ? -1 : 1;
   }
 
   int lc;
@@ -50,7 +50,13 @@ int Strucmp(cm::string_view l, cm::string_view r)
     rc = cmsysString_tolower(r[ri++]);
   } while (lc == rc && li < l.size() && ri < r.size());
 
-  return lc == rc ? static_cast<int>(l.size() - r.size()) : lc - rc;
+  if (lc != rc) {
+    return lc - rc;
+  }
+  if (l.size() == r.size()) {
+    return 0;
+  }
+  return l.size() < r.size() ? -1 : 1;
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
