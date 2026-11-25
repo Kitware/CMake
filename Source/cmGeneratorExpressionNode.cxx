@@ -5097,14 +5097,16 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     for (auto const& arg : cmMakeRange(parameters).advance(1)) {
       if (cmHasLiteralPrefix(arg, "SOURCE_FILES:")) {
         cm::string_view listView{ arg.c_str() + cmStrLen("SOURCE_FILES:") };
-        std::size_t semicolon;
         std::size_t start = 0;
-        do {
-          semicolon = listView.find(';', start);
+        for (;;) {
+          std::size_t const semicolon = listView.find(';', start);
           sourceFilePaths.push_back(
             std::string{ listView.substr(start, semicolon - start) });
+          if (semicolon == cm::string_view::npos) {
+            break;
+          }
           start = semicolon + 1;
-        } while (semicolon != cm::string_view::npos);
+        }
       } else {
         reportError(eval, content->GetOriginalExpression(),
                     cmStrCat("Unrecognized argument:\n  "_s, arg));
