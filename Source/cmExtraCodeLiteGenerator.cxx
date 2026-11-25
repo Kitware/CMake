@@ -614,10 +614,8 @@ std::string cmExtraCodeLiteGenerator::GetCodeLiteCompilerName(
 std::string cmExtraCodeLiteGenerator::GetConfigurationName(
   cmMakefile const* mf) const
 {
-  std::string confName = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  // Trim the configuration name from whitespaces (left and right)
-  confName.erase(0, confName.find_first_not_of(" \t\r\v\n"));
-  confName.erase(confName.find_last_not_of(" \t\r\v\n") + 1);
+  std::string confName =
+    cmTrimWhitespace(mf->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   if (confName.empty()) {
     confName = "NoConfig";
   }
