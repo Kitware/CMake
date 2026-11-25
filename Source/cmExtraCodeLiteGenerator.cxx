@@ -351,9 +351,9 @@ void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
 
       // delete "old" subfolders
       if (tmp_path.size() > i - sizeOfSkip) {
-        numOfEndEl = tmp_path.size() - i + sizeOfSkip;
+        numOfEndEl = tmp_path.size() - (i - sizeOfSkip);
         tmp_path.erase(tmp_path.end() - numOfEndEl, tmp_path.end());
-        for (; numOfEndEl--;) {
+        for (; numOfEndEl > 0; --numOfEndEl) {
           xml.EndElement();
         }
       }
@@ -365,10 +365,10 @@ void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
     }
 
     // delete "old" subfolders
-    numOfEndEl = tmp_path.size() - components.size() + sizeOfSkip;
+    numOfEndEl = tmp_path.size() - (components.size() - sizeOfSkip);
     if (numOfEndEl) {
       tmp_path.erase(tmp_path.end() - numOfEndEl, tmp_path.end());
-      for (; numOfEndEl--;) {
+      for (; numOfEndEl > 0; --numOfEndEl) {
         xml.EndElement();
       }
     }
@@ -381,7 +381,7 @@ void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
 
   // end of folders
   numOfEndEl = tmp_path.size();
-  for (; numOfEndEl--;) {
+  for (; numOfEndEl > 0; --numOfEndEl) {
     xml.EndElement();
   }
 }
