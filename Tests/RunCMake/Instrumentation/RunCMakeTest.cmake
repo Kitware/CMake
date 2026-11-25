@@ -154,6 +154,7 @@ function(instrument test)
     if (Python_EXECUTABLE)
       list(APPEND ARGS_CONFIGURE_ARGS "-DPython_EXECUTABLE=${Python_EXECUTABLE}")
     endif()
+    list(APPEND ARGS_CONFIGURE_ARGS "-DPROCESS_METRICS_LINGER=${PROCESS_METRICS_LINGER}")
   endif()
   if (ARGS_DISABLE_TEST)
     list(APPEND ARGS_CONFIGURE_ARGS "-DDISABLE_TEST=ON")
@@ -677,8 +678,18 @@ instrument(cmake-command-capture-output
   CHECK_SCRIPT check-data-dir.cmake
 )
 
-# Test process metrics
-if (Python_EXECUTABLE)
+# Python < 3.3 lacks subprocess.DEVNULL, and Python < 3.7 on Windows
+# cannot detach the child process pipes
+if (Python_VERSION VERSION_LESS 3.3 OR
+    (CMAKE_HOST_WIN32 AND Python_VERSION VERSION_LESS 3.7))
+  set(PROCESS_METRICS_LINGER OFF)
+else()
+  set(PROCESS_METRICS_LINGER ON)
+endif()
+
+# Test process metrics.  Windows app execution aliases start the real
+# interpreter outside the launched process tree, so its usage is not counted.
+if (Python_EXECUTABLE AND NOT Python_EXECUTABLE MATCHES "[/\\]WindowsApps[/\\]")
   instrument(cmake-command-process-metrics
     BUILD INSTALL INSTALL_PARALLEL TEST PROCESS_METRICS_QUERY
     CHECK_SCRIPT check-data-dir.cmake

@@ -64,6 +64,9 @@ private:
 
   cm::optional<cmsys::SystemInformation::ProcessResourceUsage>
     ChildResourceUsage;
+  // On Windows, a job object containing this process and the child's tree.
+  void* ProcessTreeJob = nullptr;
+  void TrackProcessTree();
   void WriteMetricsFile() const;
 
   // Whether or not any data have been written to stdout or stderr.
