@@ -30,11 +30,13 @@ elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows")
   set(qt_subdir "qt-extract")
   set(qt_tar_workdir ".gitlab/${qt_subdir}")
 elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "macos")
-  if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "macos10.10_package")
-    set(qt_url_root "https://cmake.org/files/dependencies/qt")
-    set(qt_url_path "")
-    list(APPEND qt_files "qt-5.9.9-macosx10.10-x86_64-arm64.tar.xz")
-    set(qt_subdir "qt-5.9.9-macosx10.10-x86_64-arm64")
+  if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "macos10.14_package")
+    # This URL is only visible inside of Kitware's network.
+    # Please use your own Qt Account to obtain these files.
+    set(qt_url_root "https://www.paraview.org/files/dependencies/internal/qt")
+    set(qt_url_path "mac_x64/desktop/qt6_624/qt.qt6.624.clang_64")
+    list(APPEND qt_files "6.2.4-0-202203140927qtbase-MacOS-MacOS_12-Clang-MacOS-MacOS_12-X86_64-ARM64.7z")
+    set(qt_subdir "6.2.4/macos")
   else ()
     # This URL is only visible inside of Kitware's network.
     # Please use your own Qt Account to obtain these files.

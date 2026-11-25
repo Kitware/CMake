@@ -46,18 +46,18 @@
       "macOSmin": "11.0"
     },
     {
-      "os": ["macos10.10", "macOS10.10"],
+      "os": ["macos10.14", "macOS10.14"],
       "architecture": ["arm64", "x86_64"],
       "class": "volume",
-      "name": "cmake-@version@-macos10.10-universal.dmg",
-      "macOSmin": "10.10"
+      "name": "cmake-@version@-macos10.14-universal.dmg",
+      "macOSmin": "10.14"
     },
     {
-      "os": ["macos10.10", "macOS10.10"],
+      "os": ["macos10.14", "macOS10.14"],
       "architecture": ["arm64", "x86_64"],
       "class": "archive",
-      "name": "cmake-@version@-macos10.10-universal.tar.gz",
-      "macOSmin": "10.10"
+      "name": "cmake-@version@-macos10.14-universal.tar.gz",
+      "macOSmin": "10.14"
     },
     {
       "os": ["sunos", "SunOS"],

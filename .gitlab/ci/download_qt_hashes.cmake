@@ -2,7 +2,7 @@
 #
 #   sha256sum $files | awk '{ print "set(\"" $2 "_hash\" " $1 ")" }' >> $thisfile
 
-set("qt-5.9.9-macosx10.10-x86_64-arm64.tar.xz_hash" d4449771afa0bc6a809c14f1e6d939e7732494cf059503ae451e2bfe8fc60cc1)
+set("6.2.4-0-202203140927qtbase-MacOS-MacOS_12-Clang-MacOS-MacOS_12-X86_64-ARM64.7z_hash" 314e0c7d23a32c10d6131d64b1ac07d8648a4a86aca14a672b1c8d3857e2f47b)
 set("6.9.3-0-202509261207qtbase-MacOS-MacOS_15-Clang-MacOS-MacOS_15-X86_64-ARM64.7z_hash" 805144e619b7c7b0e9c985d929e1f290241d88b884218db3ad7d56bd579d6b4a)
 
 set("6.9.3-0-202509261208qtbase-Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64.7z_hash" 94f8a097d3078661943446c9ecfee3fb4375d9b992a91a1a2d1856379c749d8d)

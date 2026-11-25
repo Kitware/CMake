@@ -11,8 +11,8 @@
 "cmake-@version@-linux-x86_64\.tar\.gz"
 "cmake-@version@-macos-universal\.dmg"
 "cmake-@version@-macos-universal\.tar\.gz"
-"cmake-@version@-macos10\.10-universal\.dmg"
-"cmake-@version@-macos10\.10-universal\.tar\.gz"
+"cmake-@version@-macos10\.14-universal\.dmg"
+"cmake-@version@-macos10\.14-universal\.tar\.gz"
 "cmake-@version@-sunos-x86_64\.sh"
 "cmake-@version@-sunos-x86_64\.tar\.gz"
 "cmake-@version@-sunos-sparc64\.sh"
@@ -30,8 +30,8 @@
 "cmake-@version@\.zip"
 -- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "macOS"\) and \(\.class == "volume"\)\) \| \.name
 "cmake-@version@-macos-universal\.dmg"
--- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "macos10\.10"\) and \(\.class == "archive"\)\) \| \.name
-"cmake-@version@-macos10\.10-universal\.tar\.gz"
+-- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "macos10\.14"\) and \(\.class == "archive"\)\) \| \.name
+"cmake-@version@-macos10\.14-universal\.tar\.gz"
 -- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "sunos"\) and \(\.architecture\[\] \| \. == "sparc64"\) and \(\.class == "archive"\)\) \| \.name
 "cmake-@version@-sunos-sparc64\.tar\.gz"
 -- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "windows"\) and \(\.architecture\[\] \| \. == "i386"\) and \(\.class == "installer"\)\) \| \.name
@@ -41,14 +41,14 @@
 "cmake-@version@-linux-x86_64\.tar\.gz"
 "cmake-@version@-macos-universal\.dmg"
 "cmake-@version@-macos-universal\.tar\.gz"
-"cmake-@version@-macos10\.10-universal\.dmg"
-"cmake-@version@-macos10\.10-universal\.tar\.gz"
+"cmake-@version@-macos10\.14-universal\.dmg"
+"cmake-@version@-macos10\.14-universal\.tar\.gz"
 "cmake-@version@-sunos-x86_64\.sh"
 "cmake-@version@-sunos-x86_64\.tar\.gz"
 "cmake-@version@-windows-x86_64\.msi"
 "cmake-@version@-windows-x86_64\.zip"
--- query: \.files\[\] \| select\(\[\.macOSmin\] \| inside\(\["10\.10", "10\.11", "10\.12"\]\)\) \| \.name
-"cmake-@version@-macos10\.10-universal\.dmg"
-"cmake-@version@-macos10\.10-universal\.tar\.gz"
+-- query: \.files\[\] \| select\(\[\.macOSmin\] \| inside\(\["10\.14", "10\.15"\]\)\) \| \.name
+"cmake-@version@-macos10\.14-universal\.dmg"
+"cmake-@version@-macos10\.14-universal\.tar\.gz"
 -- query: \.hashFiles\[\] \| select\(\.algorithm\[\] \| \. == "SHA-256"\) \| \.name
 "cmake-@version@-SHA-256\.txt"$

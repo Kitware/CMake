@@ -84,13 +84,13 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.macos10.10_package:
+.macos10.14_package:
     extends: .macos_tart_build
     # Xcode 26.6 is the last whose libc++ supports macOS versions prior to 11.
     image: "registry.hub.docker.com/kitware/macos-ci-images:macos-26-xcode-26.6-20260724"
 
     variables:
-        CMAKE_CONFIGURATION: macos10.10_package
+        CMAKE_CONFIGURATION: macos10.14_package
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
