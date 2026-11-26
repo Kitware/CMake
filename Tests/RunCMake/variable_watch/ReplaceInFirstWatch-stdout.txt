@@ -1,0 +1,3 @@
+-- r READ_ACCESS /original/value/long/enough/to/live/on/the/heap
+-- p MODIFIED_ACCESS /replacement/value/long/enough/to/live/on/the/heap
+-- p MODIFIED_ACCESS /original/value/long/enough/to/live/on/the/heap
