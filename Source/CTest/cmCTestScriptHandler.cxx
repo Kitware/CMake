@@ -153,6 +153,10 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
 
 void cmCTestScriptHandler::CreateCMake()
 {
+  // Destroy the objects of a previous script in reverse creation order.
+  this->Makefile.reset();
+  this->GlobalGenerator.reset();
+
   // create a cmake instance to read the configuration script
   this->CMake = std::make_unique<cmake>(cmState::Role::CTest);
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
