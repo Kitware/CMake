@@ -165,3 +165,17 @@ if(CMake_TEST_Fortran)
 endif()
 
 run_cmake(InstallNameDir)
+
+function(run_Comspec variant comspec expect_shell)
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-${variant}")
+  set(ENV{COMSPEC} "${comspec}")
+  run_cmake(Comspec)
+endfunction()
+
+if(CMAKE_HOST_WIN32 AND RunCMake_GENERATOR MATCHES "^(Borland|MinGW|NMake|Watcom)")
+  # Nothing gets built here, so the fake COMSPEC paths never run.
+  set(_backup_comspec "$ENV{COMSPEC}")
+  run_Comspec(absolute "C:\\comspec\\cmd.exe" "C:\\comspec\\cmd.exe")
+  run_Comspec(space "C:\\Program Files\\comspec\\cmd.exe" "cmd.exe")
+  set(ENV{COMSPEC} "${_backup_comspec}")
+endif()
