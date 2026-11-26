@@ -1621,6 +1621,15 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
       ComputeCompilerAndOptions(compileOptions, staticCheckOptions, language,
                                 objectListNode);
       ComputePCH(*source, objectListNode, createdPCH);
+      if (!objectListNode.PCHOutputFile.empty()) {
+        std::string const pdb =
+          this->GeneratorTarget->GetPchReuseCompilePDBPath(Config, language);
+        if (!pdb.empty()) {
+          this->EnsureParentDirectoryExists(pdb);
+          objectListNode.CompilerPDB = cmSystemTools::ConvertToOutputPath(
+            this->ConvertToFastbuildPath(pdb));
+        }
+      }
 
       objectListNode.Name =
         cmStrCat(this->GetName(), '_', language, "_Objs"_s);

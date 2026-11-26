@@ -12,6 +12,11 @@ If not set, the default is unspecified.
 If the :prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM` target is set, this property
 is ignored and the reusage target's value of this property is used instead.
 
+.. versionchanged:: 4.6
+  With policy :policy:`CMP0235` set to ``NEW``, this property names the
+  ``.pdb`` file of the sources not compiled with the reused precompiled
+  header.
+
 .. versionadded:: 4.1
 
   Contents of ``COMPILE_PDB_NAME`` may use

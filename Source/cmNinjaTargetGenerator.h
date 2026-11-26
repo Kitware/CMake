@@ -50,7 +50,8 @@ public:
   void RemoveDepfileBinding(cmNinjaVars& vars) const;
 
 protected:
-  bool SetMsvcTargetPdbVariable(cmNinjaVars&, std::string const& config) const;
+  bool SetMsvcTargetPdbVariable(cmNinjaVars&, std::string const& config,
+                                cmSourceFile const* source = nullptr) const;
 
   cmGeneratedFileStream& GetImplFileStream(std::string const& config) const;
   cmGeneratedFileStream& GetCommonFileStream() const;

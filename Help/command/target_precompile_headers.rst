@@ -115,6 +115,15 @@ which ``<target>`` compiles sources with one.  It builds one for each language
 of its sources that are not marked :prop_sf:`SKIP_PRECOMPILE_HEADERS`, when
 its precompiled headers apply to that language.
 
+With MSVC and a separate program database (``/Zi`` or ``/ZI``, see
+:prop_tgt:`MSVC_DEBUG_INFORMATION_FORMAT`), sources of ``<target>`` compiled
+with the precompiled header write their debug information to a copy of the
+compiler ``.pdb`` file of ``<other_target>``.  Policy :policy:`CMP0235`
+decides where its other sources, such as those with
+:prop_sf:`SKIP_PRECOMPILE_HEADERS`, write theirs.  The ``Embedded`` format
+(``/Z7``) needs no compiler ``.pdb`` files and is recommended with
+``REUSE_FROM``.
+
 .. note::
 
   The ``REUSE_FROM`` form requires the same set of compiler options,

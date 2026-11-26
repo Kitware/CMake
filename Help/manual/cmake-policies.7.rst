@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.6
 .. toctree::
    :maxdepth: 1
 
+   CMP0235: Targets reusing a precompiled header have their own compiler PDB. </policy/CMP0235>
    CMP0234: MSVC conformant preprocessor is controlled by C_EXTENSIONS and CXX_EXTENSIONS. </policy/CMP0234>
    CMP0233: MSVC C and UCRT extensions are controlled by C_EXTENSIONS. </policy/CMP0233>
    CMP0232: MSVC flag /Zc:__cplusplus is passed for C++ targets. </policy/CMP0232>

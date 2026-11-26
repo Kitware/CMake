@@ -709,6 +709,9 @@ class cmMakefile;
   SELECT(POLICY, CMP0234,                                                     \
          "MSVC conformant preprocessor is controlled by C_EXTENSIONS and "    \
          "CXX_EXTENSIONS.",                                                   \
+         4, 6, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0235,                                                     \
+         "Targets reusing a precompiled header have their own compiler PDB.", \
          4, 6, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -776,7 +779,8 @@ class cmMakefile;
   F(CMP0231)                                                                  \
   F(CMP0232)                                                                  \
   F(CMP0233)                                                                  \
-  F(CMP0234)
+  F(CMP0234)                                                                  \
+  F(CMP0235)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

@@ -1,0 +1,47 @@
+CMP0235
+-------
+
+.. versionadded:: 4.6
+
+Targets reusing a precompiled header have their own compiler PDB.
+
+With MSVC and a separate program database (``/Zi`` or ``/ZI``, see
+:prop_tgt:`MSVC_DEBUG_INFORMATION_FORMAT`), a target using
+:prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM` compiles against a copy of the
+compiler ``.pdb`` file of the target it reuses the precompiled header from.
+The copy is replaced when the precompiled header is rebuilt.
+In CMake 4.5 and below, all sources of the target wrote their debug
+information to that copy, and its :prop_tgt:`COMPILE_PDB_NAME` was ignored.
+Sources not rebuilt with the precompiled header, such as those with
+:prop_sf:`SKIP_PRECOMPILE_HEADERS`, then lost their debug information.
+CMake 4.6 and above prefer to keep those sources off the copy.  This policy
+provides compatibility for projects that have not been updated to expect the
+behavior, for example ones installing the compiler ``.pdb`` file of a static
+library.
+
+The ``OLD`` behavior for this policy writes the debug information of all
+sources of the target to one copy, which keeps the name of the reused
+target's compiler ``.pdb`` file.  The ``NEW`` behavior writes:
+
+* Sources compiled with the precompiled header to a copy for their language.
+  The copy keeps the name of the reused target's compiler ``.pdb`` file, with
+  the language added (``<name>.c.pdb``, ``<name>.cxx.pdb``) if the target
+  uses the precompiled header from more than one language.
+
+* Its other sources to the target's own compiler ``.pdb`` file, named by
+  :prop_tgt:`COMPILE_PDB_NAME`, or after the target.  CMake 3.16 to 4.1
+  required :prop_tgt:`COMPILE_PDB_NAME` to be the reused target's name,
+  which names the copy, so that value is ignored.
+
+With MSVC compilers older than version 19.16 (VS 2017 15.9), which accept a
+precompiled header only with the ``.pdb`` file name it was created with, the
+``NEW`` behavior is the same as the ``OLD`` behavior.
+
+The ``Embedded`` format (``/Z7``) needs no compiler ``.pdb`` files and is
+recommended with :prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM`.
+
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.6
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: include/STANDARD_ADVICE.rst
+
+.. include:: include/DEPRECATED.rst

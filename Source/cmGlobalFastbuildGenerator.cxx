@@ -1326,6 +1326,10 @@ void cmGlobalFastbuildGenerator::WriteObjectList(
                  2);
     }
     WriteVariable("Compiler", ObjectList.Compiler, 2);
+    // Overrides the target's value in the options that follow.
+    if (!ObjectList.CompilerPDB.empty()) {
+      WriteVariable("CompilerPDB", Quote(ObjectList.CompilerPDB), 2);
+    }
     // If only PCH output is present - this node reuses existing PCH.
     if (!ObjectList.PCHOutputFile.empty()) {
       WriteVariable("PCHOutputFile", Quote(ObjectList.PCHOutputFile), 2);

@@ -3178,6 +3178,14 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
           clOptions.AddFlag("PrecompiledHeaderOutputFile", pchFile);
           clOptions.AddFlag("ForcedIncludeFiles", pchHeader);
         }
+        if (!skipPCH) {
+          std::string pdb =
+            this->GeneratorTarget->GetPchReuseCompilePDBPath(config, lang);
+          if (!pdb.empty()) {
+            ConvertToWindowsSlash(pdb);
+            clOptions.AddFlag("ProgramDataBaseFileName", pdb);
+          }
+        }
       }
 
       std::string expandedOptions;
