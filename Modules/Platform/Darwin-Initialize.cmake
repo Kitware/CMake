@@ -293,16 +293,17 @@ if(NOT CMAKE_CROSSCOMPILING)
   execute_process(COMMAND sw_vers -productVersion
     OUTPUT_VARIABLE _CMAKE_HOST_OSX_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
-    RESULT_VARIABLE _result)
+    RESULT_VARIABLE _sw_vers_result)
 endif()
 
-if(_result EQUAL 0 AND CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
   set(_CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT "$ENV{MACOSX_DEPLOYMENT_TARGET}")
 
   # Xcode chooses a default macOS deployment target based on the macOS SDK
   # version, which may be too new for binaries to run on the host.
   if(NOT _CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT
       AND CMAKE_GENERATOR STREQUAL "Xcode" AND NOT CMAKE_CROSSCOMPILING
+      AND _sw_vers_result EQUAL 0
       AND _CMAKE_HOST_OSX_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
     set(_macos_version "${CMAKE_MATCH_1}")
     if(CMAKE_OSX_SYSROOT)
@@ -331,3 +332,4 @@ if(_result EQUAL 0 AND CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT DEFINED CMAKE
     "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
   unset(_CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT)
 endif()
+unset(_sw_vers_result)
