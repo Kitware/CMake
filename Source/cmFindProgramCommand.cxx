@@ -319,17 +319,23 @@ std::string cmFindProgramCommand::GetBundleExecutable(
   // Make a bundle instance using the URLRef.
   CFBundleRef appBundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
 
-  // returned executableURL is relative to <appbundle>/Contents/MacOS/
+  // The returned executableURL is relative to <appbundle>/Contents/MacOS/
+  // for a new bundle, but absolute for a bundle CoreFoundation has cached.
+  // Take only its file name so the given bundle path is kept as is.
   CFURLRef executableURL = CFBundleCopyExecutableURL(appBundle);
 
   if (executableURL) {
+    CFStringRef executableName = CFURLCopyLastPathComponent(executableURL);
     int const MAX_OSX_PATH_SIZE = 1024;
-    UInt8 buffer[MAX_OSX_PATH_SIZE];
+    char buffer[MAX_OSX_PATH_SIZE];
 
-    if (CFURLGetFileSystemRepresentation(executableURL, false, buffer,
-                                         MAX_OSX_PATH_SIZE)) {
-      executable = cmStrCat(bundlePath, "/Contents/MacOS/"_s,
-                            reinterpret_cast<char const*>(buffer));
+    if (executableName &&
+        CFStringGetFileSystemRepresentation(executableName, buffer,
+                                            MAX_OSX_PATH_SIZE)) {
+      executable = cmStrCat(bundlePath, "/Contents/MacOS/"_s, buffer);
+    }
+    if (executableName) {
+      CFRelease(executableName);
     }
     // Only release CFURLRef if it's not null
     CFRelease(executableURL);
