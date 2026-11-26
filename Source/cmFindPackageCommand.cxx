@@ -1460,15 +1460,6 @@ bool cmFindPackageCommand::FindPackage(
   return loadedPackage;
 }
 
-bool cmFindPackageCommand::FindPackageUsingModuleMode()
-{
-  bool foundModule = false;
-  if (!this->FindModule(foundModule)) {
-    return false;
-  }
-  return foundModule;
-}
-
 bool cmFindPackageCommand::FindPackageUsingConfigMode()
 {
   this->Variable = cmStrCat(this->Name, "_DIR"_s);
@@ -1652,7 +1643,7 @@ void cmFindPackageCommand::RestoreFindDefinitions()
   }
 }
 
-bool cmFindPackageCommand::FindModule(bool& found)
+bool cmFindPackageCommand::FindPackageUsingModuleMode()
 {
   std::string moduleFileName = cmStrCat("Find"_s, this->Name, ".cmake"_s);
 
@@ -1673,66 +1664,66 @@ bool cmFindPackageCommand::FindModule(bool& found)
     this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 
-  if (!mfile.empty()) {
-    if (system) {
-      auto const it = this->DeprecatedFindModules.find(this->Name);
-      if (it != this->DeprecatedFindModules.end()) {
-        cmPolicies::PolicyStatus status =
-          this->Makefile->GetPolicyStatus(it->second);
-        switch (status) {
-          case cmPolicies::WARN: {
-            this->Makefile->IssuePolicyWarning(it->second);
-            CM_FALLTHROUGH;
-          }
-          case cmPolicies::OLD:
-            break;
-          case cmPolicies::NEW:
-            return true;
-        }
-      }
-    }
-
-    // Load the module we found, and set "<name>_FIND_MODULE" to true
-    // while inside it.
-    found = true;
-    std::string const var = cmStrCat(this->Name, "_FIND_MODULE"_s);
-    this->Makefile->AddDefinition(var, "1");
-    bool result = this->ReadListFile(mfile, cm::PolicyScope::Local);
-    this->Makefile->RemoveDefinition(var);
-
-    std::string const foundVar = cmStrCat(this->Name, "_FOUND"_s);
-    if (this->Makefile->IsDefinitionSet(foundVar) &&
-        !this->Makefile->IsOn(foundVar)) {
-
-      if (this->DebugModeEnabled()) {
-        this->DebugBuffer = cmStrCat(
-          this->DebugBuffer, "The module is considered not found due to "_s,
-          foundVar, " being FALSE."_s);
-      }
-
-      this->ConsideredPaths.emplace_back(mfile, FoundPackageMode::Module,
-                                         SearchResult::NotFound);
-      std::string const notFoundMessageVar =
-        cmStrCat(this->Name, "_NOT_FOUND_MESSAGE"_s);
-      if (cmValue notFoundMessage =
-            this->Makefile->GetDefinition(notFoundMessageVar)) {
-
-        this->ConsideredPaths.back().Message = *notFoundMessage;
-      }
-    } else {
-      if (this->DebugState) {
-        this->DebugState->FoundAt(mfile);
-      }
-      this->FileFound = mfile;
-      this->FileFoundMode = FoundPackageMode::Module;
-      std::string const versionVar = cmStrCat(this->Name, "_VERSION"_s);
-      if (cmValue version = this->Makefile->GetDefinition(versionVar)) {
-        this->VersionFound = *version;
-      }
-    }
-    return result;
+  if (mfile.empty()) {
+    return false;
   }
-  return true;
+
+  if (system) {
+    auto const it = this->DeprecatedFindModules.find(this->Name);
+    if (it != this->DeprecatedFindModules.end()) {
+      cmPolicies::PolicyStatus status =
+        this->Makefile->GetPolicyStatus(it->second);
+      switch (status) {
+        case cmPolicies::WARN: {
+          this->Makefile->IssuePolicyWarning(it->second);
+          CM_FALLTHROUGH;
+        }
+        case cmPolicies::OLD:
+          break;
+        case cmPolicies::NEW:
+          return false;
+      }
+    }
+  }
+
+  // Load the module we found, and set "<name>_FIND_MODULE" to true
+  // while inside it.
+  std::string const var = cmStrCat(this->Name, "_FIND_MODULE"_s);
+  this->Makefile->AddDefinition(var, "1");
+  bool result = this->ReadListFile(mfile, cm::PolicyScope::Local);
+  this->Makefile->RemoveDefinition(var);
+
+  std::string const foundVar = cmStrCat(this->Name, "_FOUND"_s);
+  if (this->Makefile->IsDefinitionSet(foundVar) &&
+      !this->Makefile->IsOn(foundVar)) {
+
+    if (this->DebugModeEnabled()) {
+      this->DebugBuffer = cmStrCat(
+        this->DebugBuffer, "The module is considered not found due to "_s,
+        foundVar, " being FALSE."_s);
+    }
+
+    this->ConsideredPaths.emplace_back(mfile, FoundPackageMode::Module,
+                                       SearchResult::NotFound);
+    std::string const notFoundMessageVar =
+      cmStrCat(this->Name, "_NOT_FOUND_MESSAGE"_s);
+    if (cmValue notFoundMessage =
+          this->Makefile->GetDefinition(notFoundMessageVar)) {
+
+      this->ConsideredPaths.back().Message = *notFoundMessage;
+    }
+  } else {
+    if (this->DebugState) {
+      this->DebugState->FoundAt(mfile);
+    }
+    this->FileFound = mfile;
+    this->FileFoundMode = FoundPackageMode::Module;
+    std::string const versionVar = cmStrCat(this->Name, "_VERSION"_s);
+    if (cmValue version = this->Makefile->GetDefinition(versionVar)) {
+      this->VersionFound = *version;
+    }
+  }
+  return result;
 }
 
 bool cmFindPackageCommand::HandlePackageMode(
