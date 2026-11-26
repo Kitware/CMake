@@ -241,7 +241,7 @@ CMakeString& CMakeString::ToHexadecimal(cm::string_view str)
   std::string::size_type hexIndex = 0;
 
   for (auto const& c : str) {
-    std::snprintf(&output[hexIndex], 3, "%.2x", c & 0xFFu);
+    std::snprintf(&output[hexIndex], 3, "%.2x", static_cast<unsigned char>(c));
     hexIndex += 2;
   }
   this->String_ = output;

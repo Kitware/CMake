@@ -4,6 +4,17 @@
 
 #include <utility>
 
+#if defined(__has_cpp_attribute)
+#  if __has_cpp_attribute(clang::no_sanitize)
+#    define CM_NO_SANITIZE(check) [[clang::no_sanitize(check)]]
+#  endif
+#endif
+#ifndef CM_NO_SANITIZE
+#  define CM_NO_SANITIZE(check)
+#endif
+
+// The hash relies on unsigned wraparound.
+CM_NO_SANITIZE("unsigned-integer-overflow")
 cmPathLabel::cmPathLabel(std::string label)
   : Label(std::move(label))
   , Hash(0)

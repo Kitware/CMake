@@ -37,7 +37,7 @@ int Strucmp(cm::string_view l, cm::string_view r)
     return 0;
   }
   if (l.empty() || r.empty()) {
-    return static_cast<int>(l.size() - r.size());
+    return l.empty() ? -1 : 1;
   }
 
   int lc;
@@ -50,7 +50,13 @@ int Strucmp(cm::string_view l, cm::string_view r)
     rc = cmsysString_tolower(r[ri++]);
   } while (lc == rc && li < l.size() && ri < r.size());
 
-  return lc == rc ? static_cast<int>(l.size() - r.size()) : lc - rc;
+  if (lc != rc) {
+    return lc - rc;
+  }
+  if (l.size() == r.size()) {
+    return 0;
+  }
+  return l.size() < r.size() ? -1 : 1;
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -412,14 +418,14 @@ public:
     auto result = this->RegistryFormat.find(this->Expression);
 
     if (result) {
-      auto separator = cm::string_view{
-        this->Expression.data() + this->RegistryFormat.start(1),
-        this->RegistryFormat.end(1) - this->RegistryFormat.start(1)
-      };
-      if (separator.empty()) {
-        separator = this->Separator;
-      } else {
-        separator = separator.substr(1, separator.length() - 2);
+      auto separator = this->Separator;
+      // the separator group is optional and has no position when unmatched
+      if (this->RegistryFormat.start(1) != std::string::npos) {
+        // strip the surrounding braces
+        separator = cm::string_view{
+          this->Expression.data() + this->RegistryFormat.start(1) + 1,
+          this->RegistryFormat.end(1) - this->RegistryFormat.start(1) - 2
+        };
       }
 
       this->RootKey = cm::string_view{

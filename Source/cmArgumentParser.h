@@ -283,10 +283,10 @@ public:
 
   std::size_t FindKeywordOwnerLevel(cm::string_view arg) const
   {
-    for (std::size_t i = Stack.size(); i--;) {
-      if (this->Stack[i].Bindings.Keywords.Find(arg) !=
-          this->Stack[i].Bindings.Keywords.end()) {
-        return (this->Stack.size() - 1) - i;
+    for (std::size_t i = this->Stack.size(); i > 0; --i) {
+      if (this->Stack[i - 1].Bindings.Keywords.Find(arg) !=
+          this->Stack[i - 1].Bindings.Keywords.end()) {
+        return this->Stack.size() - i;
       }
     }
     return 0;

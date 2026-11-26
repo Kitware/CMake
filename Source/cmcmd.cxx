@@ -735,7 +735,7 @@ inline void Bin2CPrintCharToBuffer(bool printSigned, Bin2CBase base,
   bool neg = false;
   if (printSigned && byte & 0x80) {
     neg = true;
-    byte = ~byte + 1;
+    byte = static_cast<unsigned char>(~byte + 1);
   }
   switch (base) {
     case Bin2CBase::Hex:

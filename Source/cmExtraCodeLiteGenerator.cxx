@@ -351,9 +351,9 @@ void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
 
       // delete "old" subfolders
       if (tmp_path.size() > i - sizeOfSkip) {
-        numOfEndEl = tmp_path.size() - i + sizeOfSkip;
+        numOfEndEl = tmp_path.size() - (i - sizeOfSkip);
         tmp_path.erase(tmp_path.end() - numOfEndEl, tmp_path.end());
-        for (; numOfEndEl--;) {
+        for (; numOfEndEl > 0; --numOfEndEl) {
           xml.EndElement();
         }
       }
@@ -365,10 +365,10 @@ void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
     }
 
     // delete "old" subfolders
-    numOfEndEl = tmp_path.size() - components.size() + sizeOfSkip;
+    numOfEndEl = tmp_path.size() - (components.size() - sizeOfSkip);
     if (numOfEndEl) {
       tmp_path.erase(tmp_path.end() - numOfEndEl, tmp_path.end());
-      for (; numOfEndEl--;) {
+      for (; numOfEndEl > 0; --numOfEndEl) {
         xml.EndElement();
       }
     }
@@ -381,7 +381,7 @@ void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
 
   // end of folders
   numOfEndEl = tmp_path.size();
-  for (; numOfEndEl--;) {
+  for (; numOfEndEl > 0; --numOfEndEl) {
     xml.EndElement();
   }
 }
@@ -614,10 +614,8 @@ std::string cmExtraCodeLiteGenerator::GetCodeLiteCompilerName(
 std::string cmExtraCodeLiteGenerator::GetConfigurationName(
   cmMakefile const* mf) const
 {
-  std::string confName = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  // Trim the configuration name from whitespaces (left and right)
-  confName.erase(0, confName.find_first_not_of(" \t\r\v\n"));
-  confName.erase(confName.find_last_not_of(" \t\r\v\n") + 1);
+  std::string confName =
+    cmTrimWhitespace(mf->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   if (confName.empty()) {
     confName = "NoConfig";
   }
