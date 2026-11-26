@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFileTime.h"
 
+#include <chrono>
 #include <ctime>
 #include <string>
 
@@ -48,4 +49,23 @@ bool cmFileTime::Load(std::string const& fileName)
     fdata.ftLastWriteTime.dwLowDateTime);
 #endif
   return true;
+}
+
+cmFileTime cmFileTime::Now()
+{
+  cmFileTime now;
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  // Nanoseconds since the Unix epoch, matching stat times.
+  now.Time = std::chrono::duration_cast<std::chrono::nanoseconds>(
+               std::chrono::system_clock::now().time_since_epoch())
+               .count();
+#else
+  // 100-nanosecond intervals since 1601, matching file times.
+  FILETIME ft;
+  GetSystemTimeAsFileTime(&ft);
+  using uint64 = unsigned long long;
+  now.Time = static_cast<TimeType>((uint64(ft.dwHighDateTime) << 32) +
+                                   ft.dwLowDateTime);
+#endif
+  return now;
 }
