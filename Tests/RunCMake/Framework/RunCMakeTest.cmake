@@ -2,6 +2,10 @@ include(RunCMake)
 
 run_cmake(InstallBeforeFramework)
 
+if(RunCMake_GENERATOR MATCHES "Make|Ninja|FASTBuild")
+  run_cmake(FrameworkCompileLanguage)
+endif()
+
 function(framework_layout_test Name Toolchain Type)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${Toolchain}${Type}FrameworkLayout-build)
   set(RunCMake_TEST_NO_CLEAN 1)

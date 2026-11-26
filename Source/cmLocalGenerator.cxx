@@ -1952,7 +1952,7 @@ std::string cmLocalGenerator::GetFrameworkFlags(std::string const& lang,
 #endif
   std::vector<std::string> includes;
 
-  lg->GetIncludeDirectories(includes, target, "C", config);
+  lg->GetIncludeDirectories(includes, target, lang, config);
   // check all include directories for frameworks as this
   // will already have added a -F for the framework
   for (std::string const& include : includes) {
