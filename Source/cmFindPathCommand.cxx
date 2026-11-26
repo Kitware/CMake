@@ -114,19 +114,25 @@ std::string cmFindPathCommand::FindHeaderInFramework(
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
-  if (!files.empty()) {
-    std::string fheader = cmSystemTools::ToNormalizedPathOnDisk(files[0]);
+  for (std::string const& f : files) {
+    std::string fheader = cmSystemTools::ToNormalizedPathOnDisk(f);
+    std::string fdir = fheader.substr(0, fheader.size() - file.size());
+    if (!this->Validate(this->IncludeFileInPath ? fheader : fdir)) {
+      if (this->DebugState) {
+        this->DebugState->FailedAt(fheader);
+      }
+      continue;
+    }
     if (this->DebugState) {
       this->DebugState->FoundAt(fheader);
     }
     if (this->IncludeFileInPath) {
       return fheader;
     }
-    fheader.resize(fheader.size() - file.size());
-    return fheader;
+    return fdir;
   }
 
-  // No frameworks matched the glob, so nothing more to add to debug.FailedAt()
+  // No framework header matched the glob and passed validation
   return "";
 }
 

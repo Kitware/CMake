@@ -21,6 +21,7 @@ endif()
 
 if(APPLE)
   run_cmake(FrameworksWithSubdirs)
+  run_cmake(FrameworksValidator)
 endif()
 
 run_cmake_with_options(FromPATHEnvDebugVar --debug-find-var=PATH_IN_ENV_PATH)
