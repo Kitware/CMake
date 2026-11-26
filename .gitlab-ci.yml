@@ -1345,9 +1345,9 @@ u:macos-package:
     needs:
         - k:macos-package
 
-b:macos10.10-package:
+b:macos10.14-package:
     extends:
-        - .macos10.10_package
+        - .macos10.14_package
         - .cmake_build_macos
         - .cmake_release_artifacts
         - .macos_arm64_tags
@@ -1357,7 +1357,7 @@ b:macos10.10-package:
     variables:
         CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
-k:macos10.10-package:
+k:macos10.14-package:
     extends:
         - .macos_sign
         - .cmake_sign_macos
@@ -1365,12 +1365,12 @@ k:macos10.10-package:
         - .macos_sign_tags
         - .rules
     needs:
-        - b:macos10.10-package
+        - b:macos10.14-package
     variables:
-        CMAKE_CI_ARTIFACTS_NAME: "artifacts-macos10.10-universal"
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-macos10.14-universal"
         CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
-u:macos10.10-package:
+u:macos10.14-package:
     extends:
         - .rsync_upload_package
         - .rules
@@ -1378,7 +1378,7 @@ u:macos10.10-package:
         CMAKE_CI_JOB_PACKAGE_ONLY: "true"
         CMAKE_CI_JOB_NO_MR: "true"
     needs:
-        - k:macos10.10-package
+        - k:macos10.14-package
 
 # Windows x86_64 jobs
 

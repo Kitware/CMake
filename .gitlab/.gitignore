@@ -1,4 +1,5 @@
 # Ignore files known to be downloaded by CI jobs.
+/6.2.4-0-202203140927*
 /6.9.3-0-202509261208*
 /6.9.3-0-202509261207*
 /android-ndk
