@@ -58,6 +58,11 @@ public:
                         cm::string_view newValue, cmMakefile const* mf) const;
 
   /**
+   * Return whether the variable has a watch
+   */
+  bool IsWatched(std::string const& variable) const;
+
+  /**
    * Return the access as string
    */
   static std::string const& GetAccessAsString(AccessType accessType);

@@ -64,6 +64,11 @@ void cmVariableWatch::RemoveWatch(std::string const& variable,
   }
 }
 
+bool cmVariableWatch::IsWatched(std::string const& variable) const
+{
+  return cm::contains(this->WatchMap, variable);
+}
+
 bool cmVariableWatch::VariableAccessed(std::string const& variable,
                                        AccessType accessType,
                                        char const* newValue,
