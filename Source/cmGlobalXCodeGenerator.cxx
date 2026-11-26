@@ -3766,8 +3766,22 @@ char const* cmGlobalXCodeGenerator::GetTargetFileType(
       return (target->GetPropertyAsBool("FRAMEWORK")
                 ? "wrapper.framework"
                 : "compiled.mach-o.dylib");
-    case cm::TargetType::EXECUTABLE:
-      return "compiled.mach-o.executable";
+    case cm::TargetType::EXECUTABLE: {
+      // MACOSX_BUNDLE is also used to build bundles that are not applications,
+      // such as app extensions and XPC services, by customizing the product
+      // type and/or the bundle extension.
+      // TODO: Use the specific file types of these bundles as well, based on
+      // the product type.
+      cm::string_view const productType = this->GetTargetProductType(target);
+      cmValue const ext = target->GetProperty("BUNDLE_EXTENSION");
+      bool const isApplication =
+        (productType == "com.apple.product-type.application"_s ||
+         cmHasLiteralPrefix(productType,
+                            "com.apple.product-type.application.")) &&
+        (!ext || *ext == "app"_s);
+      return isApplication ? "wrapper.application"
+                           : "compiled.mach-o.executable";
+    }
     default:
       break;
   }
