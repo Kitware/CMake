@@ -23,6 +23,14 @@ if (DEFINED with_qt_version)
     run_cmake_command(MocPredefs-build ${CMAKE_COMMAND} --build . --config Debug)
   endblock()
 
+  block()
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AutogenPlaceholderSymbol-build)
+    run_cmake(AutogenPlaceholderSymbol)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    set(RunCMake_TEST_OUTPUT_MERGE 1)
+    run_cmake_command(AutogenPlaceholderSymbol-build ${CMAKE_COMMAND} --build . --config Debug)
+  endblock()
+
   # Detect information from the toolchain:
   # - CMAKE_INCLUDE_FLAG_CXX
   # - CMAKE_INCLUDE_SYSTEM_FLAG_CXX

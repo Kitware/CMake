@@ -68,6 +68,21 @@ if (DEFINED with_qt_version)
     endblock()
   endif ()
 
+  # A module unit without a meta-object macro gets a placeholder moc output
+  # that is compiled into its own object.  In a static library, Apple's
+  # libtool must not warn about that object having no symbols.  GCC is
+  # skipped as in the CxxModules test (QTBUG-142513).
+  if (automoc_modules_supported AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    block()
+      set(RunCMake_TEST_SOURCE_DIR "${RunCMake_SOURCE_DIR}/cxx_modules_static")
+      set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/CxxModulesStaticLib-build")
+      run_cmake_with_options(CxxModulesStaticLib ${RunCMake_TEST_OPTIONS})
+      set(RunCMake_TEST_NO_CLEAN 1)
+      set(RunCMake_TEST_OUTPUT_MERGE 1)
+      run_cmake_command(CxxModulesStaticLib-build ${CMAKE_COMMAND} --build . --config Debug)
+    endblock()
+  endif ()
+
   # A header that imports a module is moc'd into mocs_compilation.cpp, which
   # includes the header and therefore the import.  That aggregated
   # translation unit has to be scanned for module dependencies like any
