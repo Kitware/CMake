@@ -694,8 +694,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
                       "!ENDIF\n";
   }
   if (this->IsWindowsShell()) {
-    makefileStream << "SHELL = cmd.exe\n"
-                      "\n";
+    makefileStream << "SHELL = " << gg->GetComspec() << "\n\n";
   } else {
 #if !defined(__VMS)
     makefileStream << "# The shell in which to execute make rules.\n"

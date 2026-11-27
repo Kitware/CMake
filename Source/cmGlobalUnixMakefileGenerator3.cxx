@@ -53,6 +53,15 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
   this->DefineWindowsNULL = false;
   this->PassMakeflags = false;
   this->UnixCD = true;
+
+#ifdef _WIN32
+  // GNU Make breaks on a space, '#' or '$' in SHELL, so stick with
+  // plain cmd.exe for those.
+  std::string comspec = cmSystemTools::GetComspec();
+  if (comspec.find_first_of(" #$") == std::string::npos) {
+    this->Comspec = std::move(comspec);
+  }
+#endif
 }
 
 cmGlobalUnixMakefileGenerator3::~cmGlobalUnixMakefileGenerator3() = default;

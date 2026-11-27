@@ -207,6 +207,8 @@ public:
   bool SupportsShortObjectNames() const override;
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
+  std::string const& GetComspec() const { return this->Comspec; }
+
   std::string IncludeDirective;
   std::string LineContinueDirective;
   bool DefineWindowsNULL;
@@ -334,6 +336,9 @@ protected:
 
 private:
   char const* GetBuildIgnoreErrorsFlag() const override { return "-i"; }
+
+  // Windows Command shell.
+  std::string Comspec = "cmd.exe";
 
   std::map<cmStateSnapshot, std::set<cmGeneratorTarget const*>,
            cmStateSnapshot::StrictWeakOrder>
