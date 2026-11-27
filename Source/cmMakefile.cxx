@@ -1974,10 +1974,20 @@ void cmMakefile::AddSystemIncludeDirectories(std::set<std::string> const& incs)
 
 void cmMakefile::AddDefinition(std::string const& name, cm::string_view value)
 {
+#ifndef CMAKE_BOOTSTRAP
+  // The value may refer to the old definition, which SetDefinition frees.
+  // Copy it first if a watch will read it.
+  std::string watchedValue;
+  cmVariableWatch* vv = this->GetVariableWatch();
+  if (vv && vv->IsWatched(name)) {
+    watchedValue = std::string(value);
+    value = watchedValue;
+  }
+#endif
+
   this->StateSnapshot.SetDefinition(name, value);
 
 #ifndef CMAKE_BOOTSTRAP
-  cmVariableWatch* vv = this->GetVariableWatch();
   if (vv) {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
                          value, this);

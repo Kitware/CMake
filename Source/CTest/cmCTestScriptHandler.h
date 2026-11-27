@@ -61,8 +61,9 @@ private:
   std::vector<std::string> ConfigurationScripts;
   std::vector<bool> ScriptProcessScope;
 
+  // Declared in creation order so that destruction runs in reverse.
+  std::unique_ptr<cmake> CMake;
+  std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
   std::unique_ptr<cmMakefile> Makefile;
   cmMakefile* ParentMakefile = nullptr;
-  std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
-  std::unique_ptr<cmake> CMake;
 };

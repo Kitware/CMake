@@ -64,6 +64,11 @@ void cmVariableWatch::RemoveWatch(std::string const& variable,
   }
 }
 
+bool cmVariableWatch::IsWatched(std::string const& variable) const
+{
+  return cm::contains(this->WatchMap, variable);
+}
+
 bool cmVariableWatch::VariableAccessed(std::string const& variable,
                                        AccessType accessType,
                                        char const* newValue,
@@ -75,12 +80,16 @@ bool cmVariableWatch::VariableAccessed(std::string const& variable,
     // new callbacks that existing ones may add.
     std::vector<std::weak_ptr<Pair>> vp(mit->second.begin(),
                                         mit->second.end());
+    // The value may refer to the variable, which a callback may change.
+    // Copy it so that every callback gets the value of this access.
+    std::string const valueCopy = newValue ? newValue : "";
+    char const* const value = newValue ? valueCopy.c_str() : nullptr;
     for (auto& weak_it : vp) {
       // In the case where a callback was removed, the weak_ptr will not be
       // lockable, and so this ensures we don't attempt to call into freed
       // memory
       if (auto it = weak_it.lock()) {
-        it->Method(variable, accessType, it->ClientData, newValue, mf);
+        it->Method(variable, accessType, it->ClientData, value, mf);
       }
     }
     return true;
