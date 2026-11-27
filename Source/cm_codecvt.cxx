@@ -15,6 +15,27 @@
 
 #include "cm_codecvt_Encoding.hxx"
 
+#if defined(_WIN32)
+namespace {
+UINT cmGetACP()
+{
+  if (GetACP() == CP_UTF8) {
+    // Detect the ANSI code page used by applications
+    // without an activeCodePage UTF-8 manifest entry.
+    DWORD dwACP;
+    if (GetLocaleInfoEx(LOCALE_NAME_SYSTEM_DEFAULT,
+                        LOCALE_IDEFAULTANSICODEPAGE | LOCALE_RETURN_NUMBER,
+                        reinterpret_cast<LPWSTR>(&dwACP),
+                        sizeof(dwACP) / sizeof(WCHAR)) > 0 &&
+        dwACP != CP_UTF8) {
+      return static_cast<UINT>(dwACP);
+    }
+  }
+  return CP_ACP;
+}
+}
+#endif
+
 codecvt::codecvt(codecvt_Encoding e)
 #if defined(_WIN32)
   : m_codepage(0)
@@ -30,7 +51,7 @@ codecvt::codecvt(codecvt_Encoding e)
     case codecvt_Encoding::ANSI:
 #if defined(_WIN32)
       m_noconv = false;
-      m_codepage = CP_ACP;
+      m_codepage = cmGetACP();
       break;
 #endif
     // We don't know which ANSI encoding to use for other platforms than
