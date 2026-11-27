@@ -232,6 +232,20 @@ int testRegularExpression(int, char*[])
       match.end() == 0;
   }());
 
+  // A NUL within the supplied bound still ends the search.
+  {
+    char const input[] = { 'a', '\0', 'b', 'c' };
+    kwsys::RegularExpressionMatch match;
+    kwsys::RegularExpression const repeat(".*$");
+    kwsys::RegularExpression const literal("a*bc");
+    run("api.bounded_find.repeat_stops_at_nul",
+        repeat.find(input, sizeof(input), match) && match.end() == 1);
+    run("api.bounded_find.literal_past_nul",
+        !literal.find(input, sizeof(input), match));
+    run("api.bounded_find.offset_past_bound",
+        !repeat.find(input, 1, match, 2) && !match.isValid());
+  }
+
   // Basic matching and capture groups.
   run("basic.match",
       ExpectMatch("([A-Za-z]+)-([0-9]+)", "id abc-42 tail", "abc-42", 3, 9));
