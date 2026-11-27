@@ -127,12 +127,13 @@ run_cmake_command(ScriptMode-direct
 
 run_cmake(DisableSourceChanges)
 
-# Direct population runs the steps in the caller's scope, where errors of
-# execute_process() may be made fatal.
 find_package(Git QUIET)
 if(GIT_EXECUTABLE)
   block(SCOPE_FOR VARIABLES)
     set(RunCMake_TEST_OUTPUT_MERGE TRUE)
+    run_cmake_script(CMakeCommandPath)
+    # Direct population runs the steps in the caller's scope, where errors of
+    # execute_process() may be made fatal.
     run_cmake_with_options(GitErrorIsFatal -D CMP0168=NEW)
   endblock()
 endif()
