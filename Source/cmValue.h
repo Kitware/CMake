@@ -297,6 +297,7 @@ constexpr bool cmNonempty(char const* val)
 {
   return !cmValue::IsEmpty(val);
 }
+// NOLINTNEXTLINE(readability-redundant-inline-specifier)
 inline CONSTEXPR_CXX20 bool cmNonempty(cmValue val)
 {
   return !val.IsEmpty();

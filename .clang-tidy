@@ -42,10 +42,15 @@ Checks: >
   -modernize-return-braced-init-list,
   -modernize-type-traits,
   -modernize-unary-static-assert,
+  -modernize-use-constraints,
+  -modernize-use-designated-initializers,
   -modernize-use-emplace,
+  -modernize-use-integer-sign-comparison,
   -modernize-use-nodiscard,
   -modernize-use-noexcept,
+  -modernize-use-ranges,
   -modernize-use-scoped-lock,
+  -modernize-use-starts-ends-with,
   -modernize-use-string-view,
   -modernize-use-structured-binding,
   -modernize-use-trailing-return-type,
@@ -61,6 +66,7 @@ Checks: >
   readability-*,
   -readability-avoid-nested-conditional-operator,
   -readability-avoid-unconditional-preprocessor-if,
+  -readability-container-contains,
   -readability-convert-member-functions-to-static,
   -readability-enum-initial-value,
   -readability-function-cognitive-complexity,
@@ -98,6 +104,8 @@ CheckOptions:
     value: '0'
   - key:   modernize-use-auto.MinTypeNameLength
     value: '80'
+  - key:   modernize-loop-convert.UseCxx20ReverseRanges
+    value: '0'
   - key:   readability-identifier-naming.ClassCase
     value: 'CamelCase'
   - key:   readability-identifier-naming.ClassIgnoredRegexp

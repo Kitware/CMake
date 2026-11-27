@@ -6,12 +6,13 @@
 #pragma once
 
 #if __cplusplus >= 202002L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
-#  define CMake_HAVE_CXX_RANGES
+#  include <ranges>
+#  if defined(__cpp_lib_ranges) && __cpp_lib_ranges >= 201911L
+#    define CMake_HAVE_CXX_RANGES
+#  endif
 #endif
 
-#if defined(CMake_HAVE_CXX_RANGES)
-#  include <ranges>
-#else
+#if !defined(CMake_HAVE_CXX_RANGES)
 #  include <algorithm>
 #  include <iterator>
 #  include <tuple>

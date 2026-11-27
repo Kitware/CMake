@@ -3,5 +3,6 @@ set(CMake_IWYU_OPTIONS "-DCMAKE_IWYU_FORWARD_STD_HASH" CACHE STRING "")
 # Uncomment to diagnose IWYU problems as needed.
 #set(CMake_IWYU_VERBOSE ON CACHE BOOL "")
 set(IWYU_COMMAND "/usr/bin/include-what-you-use-19" CACHE FILEPATH "")
+set(CMAKE_CXX_STANDARD "17" CACHE STRING "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/configure_common.cmake")
