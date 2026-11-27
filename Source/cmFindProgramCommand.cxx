@@ -280,15 +280,37 @@ std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
 std::string cmFindProgramCommand::FindAppBundle()
 {
   for (std::string const& name : this->Names) {
+    std::string const appName = cmStrCat(name, ".app"_s);
 
-    std::string appName = name + std::string(".app");
-    std::string appPath =
-      cmSystemTools::FindDirectory(appName, this->SearchPaths, true);
-
-    if (!appPath.empty()) {
-      std::string executable = this->GetBundleExecutable(appPath);
-      if (!executable.empty()) {
-        return cmSystemTools::CollapseFullPath(executable);
+    // Search every directory.  The first entry with this name that is
+    // not a usable bundle ends the search for this name, but a bundle
+    // rejected by the validator does not.
+    for (std::string const& sp : this->SearchPaths) {
+      std::string appPath = sp;
+      if (appPath.empty() || appPath.back() != '/') {
+        appPath += '/';
+      }
+      appPath += appName;
+      if (!cmSystemTools::FileExists(appPath)) {
+        continue;
+      }
+      if (!cmSystemTools::FileIsDirectory(appPath)) {
+        break;
+      }
+      std::string executable =
+        this->GetBundleExecutable(cmSystemTools::CollapseFullPath(appPath));
+      if (executable.empty()) {
+        break;
+      }
+      executable = cmSystemTools::CollapseFullPath(executable);
+      if (this->Validate(executable)) {
+        if (this->DebugState) {
+          this->DebugState->FoundAt(executable);
+        }
+        return executable;
+      }
+      if (this->DebugState) {
+        this->DebugState->FailedAt(executable);
       }
     }
   }

@@ -1,0 +1,3 @@
+-- PROG='[^']*/AppBundleValidator-build/B/MyApp\.app/Contents/MacOS/MyApp'
+-- PROG_FILE='[^']*/AppBundleValidator-build/FileNext/Other\.app/Contents/MacOS/Other'
+-- PROG_NOEXE='[^']*/AppBundleValidator-build/NoExeNext/Other\.app/Contents/MacOS/Other'
