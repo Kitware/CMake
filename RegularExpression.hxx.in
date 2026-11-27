@@ -419,6 +419,9 @@ public:
   inline int num_groups();
 
 private:
+  bool findInternal(char const*, char const* limit, RegularExpressionMatch&,
+                    std::string::size_type offset, unsigned options) const;
+
   RegularExpressionMatch regmatch;
   char regstart;                  // Internal use only
   char reganch;                   // Internal use only
