@@ -92,9 +92,10 @@ cmList CMakeString::Match(std::string const& matchExpression,
       cmStrCat("Failed to compile regex \""_s, matchExpression, '"'));
   }
 
+  auto const input = this->String_.view();
   cmList output;
   if (matchItems == MatchItems::Once) {
-    if (re.find(this->String_.data())) {
+    if (re.find(input.data(), input.size(), 0, 0)) {
       if (makefile) {
         makefile->StoreMatches(re);
       }
@@ -110,7 +111,8 @@ cmList CMakeString::Match(std::string const& matchExpression,
     // Scan through the input for all matches.
     std::string::size_type base = 0;
     unsigned optNonEmpty = 0;
-    while (re.find(this->String_.data(), base, optAnchor | optNonEmpty)) {
+    while (
+      re.find(input.data(), input.size(), base, optAnchor | optNonEmpty)) {
       if (makefile) {
         makefile->ClearMatches();
         makefile->StoreMatches(re);
