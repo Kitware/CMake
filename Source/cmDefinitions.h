@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -12,7 +13,6 @@
 #include <cm/string_view>
 
 #include "cmLinkedTree.h"
-#include "cmString.hxx"
 #include "cmValue.h"
 
 /** \class cmDefinitions
@@ -44,11 +44,11 @@ public:
 
   // -- Static member functions
 
-  static cmValue Get(std::string const& key, StackIter begin, StackIter end);
+  static cmValue Get(cm::string_view key, StackIter begin, StackIter end);
 
-  static void Raise(std::string const& key, StackIter begin, StackIter end);
+  static void Lower(cm::string_view key, StackIter begin, StackIter end);
 
-  static bool HasKey(std::string const& key, StackIter begin, StackIter end);
+  static bool HasKey(cm::string_view key, StackIter begin, StackIter end);
 
   enum class UnsetKeys
   {
@@ -63,28 +63,31 @@ public:
 
   // -- Member functions
 
-  /** Set a value associated with a key.  */
-  void Set(std::string const& key, cm::string_view value);
+  /** Bind a key to the given value.  Stores the value as an owned string.  */
+  void Set(cm::string_view key, std::string value);
 
-  /** Unset a definition.  */
-  void Unset(std::string const& key);
+  /** Bind a key to no value.  */
+  void Unset(cm::string_view key);
 
 private:
-  /** String with existence boolean.  */
   struct Def
   {
-  public:
-    Def() = default;
-    Def(cm::string_view value)
-      : Value(value)
-    {
-    }
-    cm::String Value;
+    std::shared_ptr<std::string const> Key;
+    std::shared_ptr<std::string const> Value;
   };
-  static Def NoDef;
 
-  std::unordered_map<cm::String, Def> Map;
+  // Index the definitions by views into their own key allocation.
+  std::unordered_map<cm::string_view, Def> Map;
 
-  static Def const& GetInternal(std::string const& key, StackIter begin,
-                                StackIter end, bool raise);
+  void SetInternal(cm::string_view key,
+                   std::shared_ptr<std::string const> value);
+
+  enum class Lowering
+  {
+    No,
+    Yes,
+  };
+
+  static Def const& GetInternal(cm::string_view key, StackIter begin,
+                                StackIter end, Lowering lowering);
 };

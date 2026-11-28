@@ -400,7 +400,7 @@ bool cmStateSnapshot::IsInitialized(std::string const& name) const
 void cmStateSnapshot::SetDefinition(std::string const& name,
                                     cm::string_view value)
 {
-  this->Position->Vars->Set(name, value);
+  this->Position->Vars->Set(name, std::string(value));
 }
 
 void cmStateSnapshot::RemoveDefinition(std::string const& name)
@@ -454,7 +454,7 @@ bool cmStateSnapshot::RaiseScope(std::string const& var, char const* varDef)
     return true;
   }
   // First localize the definition in the current scope.
-  cmDefinitions::Raise(var, this->Position->Vars, this->Position->Root);
+  cmDefinitions::Lower(var, this->Position->Vars, this->Position->Root);
 
   // Now update the definition in the parent scope.
   if (varDef) {

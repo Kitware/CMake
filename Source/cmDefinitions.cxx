@@ -8,49 +8,67 @@
 
 #include <cm/string_view>
 
-cmDefinitions::Def cmDefinitions::NoDef;
+void cmDefinitions::SetInternal(cm::string_view key,
+                                std::shared_ptr<std::string const> value)
+{
+  auto i = this->Map.find(key);
+  if (i != this->Map.end()) {
+    i->second.Value = std::move(value);
+    return;
+  }
+  Def def{ std::make_shared<std::string const>(key), std::move(value) };
+  this->Map.emplace(*def.Key, std::move(def));
+}
 
-cmDefinitions::Def const& cmDefinitions::GetInternal(std::string const& key,
+cmDefinitions::Def const& cmDefinitions::GetInternal(cm::string_view key,
                                                      StackIter begin,
-                                                     StackIter end, bool raise)
+                                                     StackIter end,
+                                                     Lowering lowering)
 {
   assert(begin != end);
+  // Look for a binding in the current scope.
   {
-    auto it = begin->Map.find(cm::String::borrow(key));
+    auto it = begin->Map.find(key);
     if (it != begin->Map.end()) {
       return it->second;
     }
   }
+  // No binding in the current scope.  Try the parent scope.
   StackIter it = begin;
   ++it;
   if (it == end) {
-    return cmDefinitions::NoDef;
+    // No parent scope.  This binding does not exist.
+    static Def const noDef{};
+    return noDef;
   }
-  Def const& def = cmDefinitions::GetInternal(key, it, end, raise);
-  if (!raise) {
-    return def;
+  // Look for a binding in the parent scope.
+  Def const& parentDef = cmDefinitions::GetInternal(key, it, end, lowering);
+  if (lowering == Lowering::Yes) {
+    // Lower the binding to the current scope explicitly, even if unset.
+    Def def{ parentDef.Key ? parentDef.Key
+                           : std::make_shared<std::string const>(key),
+             parentDef.Value };
+    return begin->Map.emplace(*def.Key, std::move(def)).first->second;
   }
-  return begin->Map.emplace(key, def).first->second;
+  // Return the binding from the parent scope.
+  return parentDef;
 }
 
-cmValue cmDefinitions::Get(std::string const& key, StackIter begin,
-                           StackIter end)
+cmValue cmDefinitions::Get(cm::string_view key, StackIter begin, StackIter end)
 {
-  Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
-  return def.Value ? cmValue(def.Value.str_if_stable()) : nullptr;
+  Def const& def = cmDefinitions::GetInternal(key, begin, end, Lowering::No);
+  return def.Value ? cmValue(def.Value.get()) : nullptr;
 }
 
-void cmDefinitions::Raise(std::string const& key, StackIter begin,
-                          StackIter end)
+void cmDefinitions::Lower(cm::string_view key, StackIter begin, StackIter end)
 {
-  cmDefinitions::GetInternal(key, begin, end, true);
+  cmDefinitions::GetInternal(key, begin, end, Lowering::Yes);
 }
 
-bool cmDefinitions::HasKey(std::string const& key, StackIter begin,
-                           StackIter end)
+bool cmDefinitions::HasKey(cm::string_view key, StackIter begin, StackIter end)
 {
   for (StackIter it = begin; it != end; ++it) {
-    if (it->Map.find(cm::String::borrow(key)) != it->Map.end()) {
+    if (it->Map.find(key) != it->Map.end()) {
       return true;
     }
   }
@@ -66,11 +84,11 @@ cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
     for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
       if (closure.Map.find(mi.first) == closure.Map.end() &&
-          undefined.find(mi.first.view()) == undefined.end()) {
+          undefined.find(mi.first) == undefined.end()) {
         if (mi.second.Value) {
           closure.Map.insert(mi);
         } else {
-          undefined.emplace(mi.first.view());
+          undefined.emplace(mi.first);
         }
       }
     }
@@ -89,9 +107,9 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
     defined.reserve(defined.size() + it->Map.size());
     for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
-      if (bound.emplace(mi.first.view()).second &&
+      if (bound.emplace(mi.first).second &&
           (unsetKeys == UnsetKeys::Include || mi.second.Value)) {
-        defined.push_back(*mi.first.str_if_stable());
+        defined.emplace_back(*mi.second.Key);
       }
     }
   }
@@ -99,12 +117,13 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
   return defined;
 }
 
-void cmDefinitions::Set(std::string const& key, cm::string_view value)
+void cmDefinitions::Set(cm::string_view key, std::string value)
 {
-  this->Map[key] = Def(value);
+  this->SetInternal(key,
+                    std::make_shared<std::string const>(std::move(value)));
 }
 
-void cmDefinitions::Unset(std::string const& key)
+void cmDefinitions::Unset(cm::string_view key)
 {
-  this->Map[key] = Def();
+  this->SetInternal(key, {});
 }
