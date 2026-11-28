@@ -13,10 +13,17 @@ if (CTEST_CMAKE_GENERATOR MATCHES "Visual Studio")
     "^ExternalProjectUpdateSetup$")
 endif ()
 
-if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_asan")
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_(asan|ubsan)$")
   list(APPEND test_exclusions
     CTestTest2 # crashes on purpose
-    BootstrapTest # no need to cover this for asan
+    BootstrapTest # no need to cover this for sanitizers
+    )
+endif()
+
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_ubsan$")
+  list(APPEND test_exclusions
+    # The ASan runtime of its example also reads our UBSAN_OPTIONS log_path.
+    "^RunCMake.CTestDashboardGuide$"
     )
 endif()
 
